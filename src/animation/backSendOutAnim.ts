@@ -378,6 +378,91 @@ export const BACK_SHRINK_GROW_VIBRATE_OUTSIDE_FACTORY_SPECIES: readonly string[]
   BACK_SHRINK_GROW_VIBRATE_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by `BACK_ANIM_JOLT_RIGHT`. */
+export const BACK_JOLT_RIGHT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_JOLT_RIGHT")
+    .map(([species]) => species),
+);
+
+/** All JoltRight selector mappings are reachable through Factory rentals. */
+export const BACK_JOLT_RIGHT_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_JOLT_RIGHT_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** This bounded JoltRight source row has no non-Factory selector mappings. */
+export const BACK_JOLT_RIGHT_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_JOLT_RIGHT_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
+/** Every species selected by `BACK_ANIM_SHAKE_FLASH_YELLOW`. */
+export const BACK_SHAKE_FLASH_YELLOW_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_SHAKE_FLASH_YELLOW")
+    .map(([species]) => species),
+);
+
+/** The complete yellow-flash row is reachable through Factory rentals. */
+export const BACK_SHAKE_FLASH_YELLOW_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_FLASH_YELLOW_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** This bounded row has no species outside the Factory corpus. */
+export const BACK_SHAKE_FLASH_YELLOW_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_FLASH_YELLOW_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
+/** Every species selected by `BACK_ANIM_SHAKE_GLOW_RED`. */
+export const BACK_SHAKE_GLOW_RED_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_SHAKE_GLOW_RED")
+    .map(([species]) => species),
+);
+
+/** The thirteen red-glow mappings reachable through Factory rentals. */
+export const BACK_SHAKE_GLOW_RED_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_GLOW_RED_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** HO_OH and GROUDON are the source row's two outside-Factory mappings. */
+export const BACK_SHAKE_GLOW_RED_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_GLOW_RED_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
+/** Every species selected by `BACK_ANIM_SHAKE_GLOW_GREEN`. */
+export const BACK_SHAKE_GLOW_GREEN_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_SHAKE_GLOW_GREEN")
+    .map(([species]) => species),
+);
+
+/** Roselia is this source row's only Factory-reachable species. */
+export const BACK_SHAKE_GLOW_GREEN_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_GLOW_GREEN_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** Celebi is the source row's only outside-Factory species. */
+export const BACK_SHAKE_GLOW_GREEN_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_GLOW_GREEN_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
+/** Every species selected by `BACK_ANIM_SHAKE_GLOW_BLUE`. */
+export const BACK_SHAKE_GLOW_BLUE_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_SHAKE_GLOW_BLUE")
+    .map(([species]) => species),
+);
+
+/** The eleven blue-glow mappings reachable through Factory rentals. */
+export const BACK_SHAKE_GLOW_BLUE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_GLOW_BLUE_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** Lugia and Kyogre are the source row's two outside-Factory mappings. */
+export const BACK_SHAKE_GLOW_BLUE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_GLOW_BLUE_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -967,6 +1052,156 @@ export const BACK_SHRINK_GROW_VIBRATE_VARIANTS = Object.freeze({
 } as const);
 
 /**
+ * `BACK_ANIM_JOLT_RIGHT` chooses one unguarded affine initializer, then
+ * transfers through the shared JoltRight state callbacks. The initializer
+ * differs only in the signed first travel step, left limit, oscillation
+ * count/amplitude, and initial return acceleration.
+ */
+export const BACK_JOLT_RIGHT_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_JOLT_RIGHT_FAST",
+    callback: "Anim_JoltRight_Fast",
+    sourceId: 136,
+    natureMod: 0,
+    initialStep: 2,
+    travelLimit: 12,
+    oscillationCount: 16,
+    oscillationDelta: 4,
+    initialReturnStep: 4,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_JOLT_RIGHT",
+    callback: "Anim_JoltRight",
+    sourceId: 137,
+    natureMod: 1,
+    initialStep: 1,
+    travelLimit: 8,
+    oscillationCount: 12,
+    oscillationDelta: 2,
+    initialReturnStep: 2,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_JOLT_RIGHT_SLOW",
+    callback: "Anim_JoltRight_Slow",
+    sourceId: 138,
+    natureMod: 2,
+    initialStep: 1,
+    travelLimit: 6,
+    oscillationCount: 6,
+    oscillationDelta: 2,
+    initialReturnStep: 0,
+    accepted: true,
+  }),
+} as const);
+
+export const SHAKE_YELLOW_FLASH_TABLES = Object.freeze([
+  Object.freeze([
+    [false, 1], [true, 2], [false, 15], [true, 1], [false, 15], [true, 1],
+    [false, 15], [true, 1], [false, 1], [true, 1], [false, 1], [true, 1],
+    [false, 1], [true, 1], [false, 1], [true, 1], [false, 1], [true, 1],
+    [false, 1], [false, 0xff],
+  ] as const),
+  Object.freeze([
+    [false, 5], [true, 1], [false, 15], [true, 4], [false, 2], [true, 2],
+    [false, 2], [true, 2], [false, 2], [true, 2], [false, 2], [true, 2],
+    [false, 2], [false, 0xff],
+  ] as const),
+  Object.freeze([
+    [false, 1], [true, 1], [false, 20], [true, 1], [false, 20], [true, 1],
+    [false, 20], [true, 1], [false, 1], [false, 0xff],
+  ] as const),
+] as const);
+
+/** The three source callbacks differ only in their table selector. */
+export const BACK_SHAKE_FLASH_YELLOW_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_SHAKE_FLASH_YELLOW_FAST", callback: "Anim_ShakeFlashYellow_Fast",
+    sourceId: 139, natureMod: 0, tableIndex: 0, tableName: "sShakeYellowFlashData_Fast",
+    terminalTick: 81, accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_SHAKE_FLASH_YELLOW", callback: "Anim_ShakeFlashYellow",
+    sourceId: 140, natureMod: 1, tableIndex: 1, tableName: "sShakeYellowFlashData_Normal",
+    terminalTick: 56, accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_SHAKE_FLASH_YELLOW_SLOW", callback: "Anim_ShakeFlashYellow_Slow",
+    sourceId: 141, natureMod: 2, tableIndex: 2, tableName: "sShakeYellowFlashData_Slow",
+    terminalTick: 75, accepted: true,
+  }),
+} as const);
+
+/**
+ * The three red ShakeGlow initializers share the same blend/movement helpers;
+ * only the movement period and number of passes differ by nature modifier.
+ */
+export const BACK_SHAKE_GLOW_RED_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_RED_FAST", callback: "Anim_ShakeGlowRed_Fast",
+    sourceId: 142, natureMod: 0, period: 10, passes: 2, movementThreshold: 54,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_RED", callback: "Anim_ShakeGlowRed",
+    sourceId: 143, natureMod: 1, period: 20, passes: 1, movementThreshold: 54,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_RED_SLOW", callback: "Anim_ShakeGlowRed_Slow",
+    sourceId: 144, natureMod: 2, period: 80, passes: 1, movementThreshold: 24,
+    accepted: true,
+  }),
+} as const);
+
+/**
+ * The green callbacks reuse ShakeGlow_Blend/ShakeGlow_Move exactly. Unlike
+ * red, SHAKEGLOW_GREEN is enum value one, retaining the task's `sDontFlip`
+ * alias through both source TryFlipX calls.
+ */
+export const BACK_SHAKE_GLOW_GREEN_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_GREEN_FAST", callback: "Anim_ShakeGlowGreen_Fast",
+    sourceId: 145, natureMod: 0, period: 10, passes: 2, movementThreshold: 54,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_GREEN", callback: "Anim_ShakeGlowGreen",
+    sourceId: 146, natureMod: 1, period: 20, passes: 1, movementThreshold: 54,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_GREEN_SLOW", callback: "Anim_ShakeGlowGreen_Slow",
+    sourceId: 147, natureMod: 2, period: 80, passes: 1, movementThreshold: 24,
+    accepted: true,
+  }),
+} as const);
+
+/**
+ * The blue callbacks reuse ShakeGlow_Blend/ShakeGlow_Move exactly.
+ * SHAKEGLOW_BLUE is enum value two, so data[1]/sDontFlip remains truthy and
+ * both source TryFlipX calls are no-ops.
+ */
+export const BACK_SHAKE_GLOW_BLUE_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_BLUE_FAST", callback: "Anim_ShakeGlowBlue_Fast",
+    sourceId: 148, natureMod: 0, period: 10, passes: 2, movementThreshold: 54,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_BLUE", callback: "Anim_ShakeGlowBlue",
+    sourceId: 149, natureMod: 1, period: 20, passes: 1, movementThreshold: 54,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_BLUE_SLOW", callback: "Anim_ShakeGlowBlue_Slow",
+    sourceId: 150, natureMod: 2, period: 80, passes: 1, movementThreshold: 24,
+    accepted: true,
+  }),
+} as const);
+
+/**
  * `BACK_ANIM_V_SHAKE_H_SLIDE` selects three standalone source callbacks.
  * Unlike the preceding shake triples, each callback stays installed directly
  * after the task dispatches it; the source does not use a shared helper or a
@@ -1193,6 +1428,37 @@ type BackShrinkGrowVibrateCallback = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[ke
 type BackShrinkGrowVibrateSourceId = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["sourceId"];
 type BackShrinkGrowVibrateCycle = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["cycle"];
 type BackShrinkGrowVibrateDuration = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["duration"];
+type BackJoltRightSelector = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["selector"];
+type BackJoltRightCallback = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["callback"];
+type BackJoltRightSourceId = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["sourceId"];
+type BackJoltRightInitialStep = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["initialStep"];
+type BackJoltRightTravelLimit = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["travelLimit"];
+type BackJoltRightOscillationCount = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["oscillationCount"];
+type BackJoltRightOscillationDelta = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["oscillationDelta"];
+type BackJoltRightInitialReturnStep = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["initialReturnStep"];
+type BackShakeFlashYellowVariant = typeof BACK_SHAKE_FLASH_YELLOW_VARIANTS[keyof typeof BACK_SHAKE_FLASH_YELLOW_VARIANTS];
+type BackShakeFlashYellowSelector = BackShakeFlashYellowVariant["selector"];
+type BackShakeFlashYellowCallback = BackShakeFlashYellowVariant["callback"];
+type BackShakeFlashYellowSourceId = BackShakeFlashYellowVariant["sourceId"];
+type BackShakeFlashYellowTableIndex = BackShakeFlashYellowVariant["tableIndex"];
+type BackShakeGlowRedVariant = typeof BACK_SHAKE_GLOW_RED_VARIANTS[keyof typeof BACK_SHAKE_GLOW_RED_VARIANTS];
+type BackShakeGlowRedSelector = BackShakeGlowRedVariant["selector"];
+type BackShakeGlowRedCallback = BackShakeGlowRedVariant["callback"];
+type BackShakeGlowRedSourceId = BackShakeGlowRedVariant["sourceId"];
+type BackShakeGlowRedPeriod = BackShakeGlowRedVariant["period"];
+type BackShakeGlowRedPasses = BackShakeGlowRedVariant["passes"];
+type BackShakeGlowGreenVariant = typeof BACK_SHAKE_GLOW_GREEN_VARIANTS[keyof typeof BACK_SHAKE_GLOW_GREEN_VARIANTS];
+type BackShakeGlowGreenSelector = BackShakeGlowGreenVariant["selector"];
+type BackShakeGlowGreenCallback = BackShakeGlowGreenVariant["callback"];
+type BackShakeGlowGreenSourceId = BackShakeGlowGreenVariant["sourceId"];
+type BackShakeGlowGreenPeriod = BackShakeGlowGreenVariant["period"];
+type BackShakeGlowGreenPasses = BackShakeGlowGreenVariant["passes"];
+type BackShakeGlowBlueVariant = typeof BACK_SHAKE_GLOW_BLUE_VARIANTS[keyof typeof BACK_SHAKE_GLOW_BLUE_VARIANTS];
+type BackShakeGlowBlueSelector = BackShakeGlowBlueVariant["selector"];
+type BackShakeGlowBlueCallback = BackShakeGlowBlueVariant["callback"];
+type BackShakeGlowBlueSourceId = BackShakeGlowBlueVariant["sourceId"];
+type BackShakeGlowBluePeriod = BackShakeGlowBlueVariant["period"];
+type BackShakeGlowBluePasses = BackShakeGlowBlueVariant["passes"];
 type BackVShakeHSlideSelector = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["selector"];
 type BackVShakeHSlideCallback = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["callback"];
 type BackVShakeHSlideSourceId = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["sourceId"];
@@ -1529,6 +1795,50 @@ function shrinkGrowVibrateVariant(selector: string): {
   readonly duration: BackShrinkGrowVibrateDuration;
 } | null {
   for (const variant of Object.values(BACK_SHRINK_GROW_VIBRATE_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function joltRightVariant(selector: string): {
+  readonly selector: BackJoltRightSelector;
+  readonly callback: BackJoltRightCallback;
+  readonly sourceId: BackJoltRightSourceId;
+  readonly initialStep: BackJoltRightInitialStep;
+  readonly travelLimit: BackJoltRightTravelLimit;
+  readonly oscillationCount: BackJoltRightOscillationCount;
+  readonly oscillationDelta: BackJoltRightOscillationDelta;
+  readonly initialReturnStep: BackJoltRightInitialReturnStep;
+} | null {
+  for (const variant of Object.values(BACK_JOLT_RIGHT_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function shakeFlashYellowVariant(selector: string): BackShakeFlashYellowVariant | null {
+  for (const variant of Object.values(BACK_SHAKE_FLASH_YELLOW_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function shakeGlowRedVariant(selector: string): BackShakeGlowRedVariant | null {
+  for (const variant of Object.values(BACK_SHAKE_GLOW_RED_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function shakeGlowGreenVariant(selector: string): BackShakeGlowGreenVariant | null {
+  for (const variant of Object.values(BACK_SHAKE_GLOW_GREEN_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function shakeGlowBlueVariant(selector: string): BackShakeGlowBlueVariant | null {
+  for (const variant of Object.values(BACK_SHAKE_GLOW_BLUE_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -3870,6 +4180,676 @@ export function backShrinkGrowVibrateTerminalSpriteData(
   const variant = shrinkGrowVibrateVariant(selection.selector);
   if (variant === null) throw new Error(`unexpected shrink/grow/vibrate selector ${selection.selector}`);
   return [toS16(battlerId), 0, toS16(speciesId), 0, 256, 256, variant.cycle, variant.duration];
+}
+
+type BackJoltRightPhase = "initializer" | "JoltRight" | "JoltRight_0" | "JoltRight_1" | "JoltRight_2" | "JoltRight_3";
+type BackJoltRightInstalledCallback = "JoltRight" | "JoltRight_0" | "JoltRight_1" | "JoltRight_2" | "JoltRight_3" | "WaitAnimEnd";
+
+export interface BackJoltRightFrame {
+  readonly x2: number;
+  readonly y2: 0;
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  readonly data2: BackJoltRightInitialStep;
+  /** JoltRight_2's completed oscillation count. */
+  readonly data3: number;
+  /** JoltRight_2's signed, alternating horizontal delta. */
+  readonly data4: number;
+  readonly data5: BackJoltRightOscillationCount;
+  readonly data6: BackJoltRightTravelLimit;
+  /** JoltRight_0/JoltRight_1's accelerating return-step register. */
+  readonly data7: number;
+  readonly phase: BackJoltRightPhase;
+  readonly callbackBefore: BackJoltRightCallback | BackJoltRightInstalledCallback;
+  readonly selector: BackJoltRightSelector;
+  readonly sourceId: BackJoltRightSourceId;
+  readonly initialStep: BackJoltRightInitialStep;
+  readonly travelLimit: BackJoltRightTravelLimit;
+  readonly oscillationCount: BackJoltRightOscillationCount;
+  readonly oscillationDelta: BackJoltRightOscillationDelta;
+  readonly initialReturnStep: BackJoltRightInitialReturnStep;
+  readonly initializerCalled: boolean;
+  readonly handleStartAffineAnimCalls: 0 | 1;
+  /** Each of the five shared phases executes a leading and trailing call. */
+  readonly tryFlipXCalls: 0 | 2;
+  /** The back task makes both calls no-ops by setting `sDontFlip = TRUE`. */
+  readonly normalBackDontFlip: true;
+  readonly flipApplied: false;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly affineWriteCount: 0;
+  readonly affineMode: "double" | "normal";
+  readonly callback: BackJoltRightInstalledCallback;
+}
+
+/**
+ * Source-order reducer for `BACK_ANIM_JOLT_RIGHT`. Tick zero invokes the
+ * selected unguarded initializer after Task_HandleMonAnimation has zeroed
+ * data[2..7]. It installs JoltRight, then the source moves left, accelerates
+ * right through `_0`/`_1`, oscillates in `_2`, and returns to zero in `_3`.
+ * Every shared phase retains its two `TryFlipX` calls; the player-back task's
+ * `sDontFlip` makes them observable no-ops rather than omitting them.
+ */
+export function backJoltRightFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackJoltRightFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_JOLT_RIGHT") return null;
+  const variant = joltRightVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected JoltRight selector ${selection.selector}`);
+
+  let x2 = 0;
+  let data2 = 0;
+  let data3 = 0;
+  let data4 = 0;
+  let data5 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let callback: BackJoltRightCallback | BackJoltRightInstalledCallback = variant.callback;
+  let affineMode: "double" | "normal" = "normal";
+  let terminal = false;
+  let result: BackJoltRightFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    const callbackBefore = callback;
+    let phase: BackJoltRightPhase = "initializer";
+    let initializerCalled = false;
+    let handleStartAffineAnimCalls: 0 | 1 = 0;
+    let tryFlipXCalls: 0 | 2 = 0;
+    let resetSpriteAfterAnim = false;
+
+    if (callback === variant.callback) {
+      initializerCalled = true;
+      handleStartAffineAnimCalls = 1;
+      affineMode = "double";
+      data7 = variant.initialReturnStep;
+      data6 = variant.travelLimit;
+      data5 = variant.oscillationCount;
+      data4 = variant.oscillationDelta;
+      data3 = 0;
+      data2 = variant.initialStep;
+      callback = "JoltRight";
+    } else {
+      tryFlipXCalls = 2;
+      switch (callback) {
+        case "JoltRight":
+          phase = "JoltRight";
+          x2 = toS16(x2 - data2);
+          if (x2 <= -data6) {
+            x2 = -data6;
+            data7 = 2;
+            callback = "JoltRight_0";
+          }
+          break;
+        case "JoltRight_0":
+          phase = "JoltRight_0";
+          x2 = toS16(x2 + data7);
+          data7 = toS16(data7 + 1);
+          if (x2 >= 0) callback = "JoltRight_1";
+          break;
+        case "JoltRight_1":
+          phase = "JoltRight_1";
+          x2 = toS16(x2 + data7);
+          data7 = toS16(data7 + 1);
+          if (x2 > data6) {
+            x2 = data6;
+            callback = "JoltRight_2";
+          }
+          break;
+        case "JoltRight_2":
+          phase = "JoltRight_2";
+          if (data3 >= data5) {
+            callback = "JoltRight_3";
+          } else {
+            x2 = toS16(x2 + data4);
+            data4 = toS16(data4 * -1);
+            data3 = toS16(data3 + 1);
+          }
+          break;
+        case "JoltRight_3":
+          phase = "JoltRight_3";
+          x2 = toS16(x2 - 2);
+          if (x2 <= 0) {
+            x2 = 0;
+            resetSpriteAfterAnim = true;
+            affineMode = "normal";
+            callback = "WaitAnimEnd";
+            terminal = true;
+          }
+          break;
+        case "WaitAnimEnd":
+          throw new Error("JoltRight reducer must retain its terminal WaitAnimEnd snapshot");
+      }
+    }
+
+    result = Object.freeze({
+      x2,
+      y2: 0 as const,
+      data0: 0 as const,
+      data1: toS16(preservedData1),
+      data2: data2 as BackJoltRightInitialStep,
+      data3,
+      data4,
+      data5: data5 as BackJoltRightOscillationCount,
+      data6: data6 as BackJoltRightTravelLimit,
+      data7,
+      phase,
+      callbackBefore,
+      selector: variant.selector,
+      sourceId: variant.sourceId,
+      initialStep: variant.initialStep,
+      travelLimit: variant.travelLimit,
+      oscillationCount: variant.oscillationCount,
+      oscillationDelta: variant.oscillationDelta,
+      initialReturnStep: variant.initialReturnStep,
+      initializerCalled,
+      handleStartAffineAnimCalls,
+      tryFlipXCalls,
+      normalBackDontFlip: true as const,
+      flipApplied: false as const,
+      resetSpriteAfterAnim,
+      affineWriteCount: 0 as const,
+      affineMode,
+      callback: callback as BackJoltRightInstalledCallback,
+    });
+  }
+  return result;
+}
+
+/** Source WaitAnimEnd transition after JoltRight's reset OAM reports completion. */
+export function backJoltRightWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/** Task_HandleMonAnimation restores only data[0], data[1], and data[2]. */
+export function backJoltRightTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+): readonly [number, 0, number, number, number, BackJoltRightOscillationCount, BackJoltRightTravelLimit, number] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const terminal = backJoltRightFrameAtTick(species, natureId, Number.MAX_SAFE_INTEGER);
+  if (terminal === null) return null;
+  return [
+    toS16(battlerId),
+    0,
+    toS16(speciesId),
+    terminal.data3,
+    terminal.data4,
+    terminal.data5,
+    terminal.data6,
+    terminal.data7,
+  ];
+}
+
+export interface BackShakeFlashYellowFrame {
+  readonly x2: number;
+  readonly y2: 0;
+  readonly data0: number;
+  readonly data1: number;
+  readonly data2: number;
+  readonly data3: BackShakeFlashYellowTableIndex;
+  readonly data4: number;
+  readonly data5: number;
+  readonly data6: number;
+  readonly data7: number;
+  readonly selector: BackShakeFlashYellowSelector;
+  readonly sourceId: BackShakeFlashYellowSourceId;
+  readonly callbackBefore: BackShakeFlashYellowCallback;
+  readonly callback: BackShakeFlashYellowCallback | "WaitAnimEnd";
+  readonly initializerCalled: boolean;
+  readonly setShakeFlashYellowPosCalls: 1;
+  readonly tableEntryIsYellow: boolean;
+  readonly tableEntryTimeU8: number;
+  readonly blendCoefficient: 0 | 16 | null;
+  readonly blendColor: "RGB_YELLOW" | null;
+  readonly paletteBase: number;
+  readonly terminal: boolean;
+}
+
+/**
+ * Source-order reducer for the complete yellow-flash family. The selected
+ * callback stays installed and pre-increments data[2] on every invocation;
+ * only its first invocation initializes the table selector and OBJ palette
+ * base. `ShakeFlashYellow` then executes position cadence, u8-sentinel,
+ * palette blend, and data[4]/[5]/[6] advancement in that exact order.
+ */
+export function backShakeFlashYellowFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+  paletteBase = 0x100,
+): BackShakeFlashYellowFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0
+      || !Number.isInteger(preservedData1) || !Number.isInteger(paletteBase)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_SHAKE_FLASH_YELLOW") return null;
+  const variant = shakeFlashYellowVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected ShakeFlashYellow selector ${selection.selector}`);
+  const table = SHAKE_YELLOW_FLASH_TABLES[variant.tableIndex] as readonly (readonly [boolean, number])[];
+
+  let x2 = 0;
+  let data0 = 0;
+  let data1 = toS16(preservedData1);
+  let data2 = 0;
+  let data3 = 0 as BackShakeFlashYellowTableIndex;
+  let data4 = 0;
+  let data5 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let result: BackShakeFlashYellowFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    data2 = toS16(data2 + 1); // `++sprite->data[2]` happens before the guard.
+    const initializerCalled = data2 === 1;
+    if (initializerCalled) {
+      data7 = toS16(paletteBase); // OBJ_PLTT_ID(sprite->oam.paletteNum)
+      data6 = 0;
+      data5 = 0;
+      data4 = 0;
+      data3 = variant.tableIndex;
+    }
+
+    // SetShakeFlashYellowPos: assign before cadence/sign advancement.
+    x2 = data1;
+    if (data0 > 1) {
+      data1 = toS16(data1 * -1);
+      data0 = 0;
+    } else {
+      data0 = toS16(data0 + 1);
+    }
+
+    const entry = table[data6];
+    if (entry === undefined) throw new Error(`yellow-flash table overrun at ${data6}`);
+    const [tableEntryIsYellow, tableEntryTimeU8] = entry;
+    let blendCoefficient: 0 | 16 | null = null;
+    let callback: BackShakeFlashYellowCallback | "WaitAnimEnd" = variant.callback;
+    let terminal = false;
+
+    // The C field is u8, so the signed `-1` initializer is observed as 255.
+    if (tableEntryTimeU8 === 0xff) {
+      x2 = 0;
+      callback = "WaitAnimEnd";
+      terminal = true;
+    } else {
+      if (data4 === 1) {
+        blendCoefficient = tableEntryIsYellow ? 16 : 0;
+        data4 = 0;
+      }
+      if (tableEntryTimeU8 === data5) {
+        data4 = 1;
+        data5 = 0;
+        data6 = toS16(data6 + 1);
+      } else {
+        data5 = toS16(data5 + 1);
+      }
+    }
+
+    result = Object.freeze({
+      x2, y2: 0 as const, data0, data1, data2, data3, data4, data5, data6, data7,
+      selector: variant.selector, sourceId: variant.sourceId,
+      callbackBefore: variant.callback, callback, initializerCalled,
+      setShakeFlashYellowPosCalls: 1 as const,
+      tableEntryIsYellow, tableEntryTimeU8, blendCoefficient,
+      blendColor: blendCoefficient === null ? null : "RGB_YELLOW" as const,
+      paletteBase: data7, terminal,
+    });
+    if (terminal) break;
+  }
+  return result;
+}
+
+export function backShakeFlashYellowWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/** Task_HandleMonAnimation restores data[0..2] and preserves data[3..7]. */
+export function backShakeFlashYellowTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+  paletteBase = 0x100,
+): readonly [number, 0, number, BackShakeFlashYellowTableIndex, number, number, number, number] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const terminal = backShakeFlashYellowFrameAtTick(
+    species, natureId, Number.MAX_SAFE_INTEGER, 0, paletteBase,
+  );
+  if (terminal === null) return null;
+  return [
+    toS16(battlerId), 0, toS16(speciesId), terminal.data3,
+    terminal.data4, terminal.data5, terminal.data6, terminal.data7,
+  ];
+}
+
+type BackShakeGlowColor = "RGB_RED" | "RGB_GREEN" | "RGB_BLUE";
+type BackShakeGlowVariant = BackShakeGlowRedVariant | BackShakeGlowGreenVariant | BackShakeGlowBlueVariant;
+
+interface BackShakeGlowFrameBase {
+  readonly x2: number;
+  readonly y2: 0;
+  readonly data0: number;
+  readonly data1: 0 | 1 | 2;
+  readonly data2: number;
+  readonly data3: number;
+  readonly data4: number;
+  readonly data5: number;
+  readonly data6: number;
+  readonly data7: number;
+  readonly selector: string;
+  readonly sourceId: number;
+  readonly callbackBefore: string;
+  readonly callback: string | "WaitAnimEnd";
+  readonly initializerCalled: boolean;
+  readonly blendCalled: boolean;
+  readonly blendCoefficient: number | null;
+  readonly blendColor: BackShakeGlowColor | null;
+  readonly paletteRestored: boolean;
+  readonly movementThreshold: number;
+  readonly moveCalled: boolean;
+  readonly movementPhase: number;
+  readonly movementIndex: number | null;
+  readonly movementSign: 1 | -1 | null;
+  readonly tryFlipXCalls: 0 | 2;
+  readonly dontFlipAfterColorSelector: boolean;
+  readonly flipApplied: boolean;
+  readonly terminal: boolean;
+}
+
+export interface BackShakeGlowRedFrame extends BackShakeGlowFrameBase {
+  readonly data0: BackShakeGlowRedPeriod;
+  /** SHAKEGLOW_RED is enum value zero and overwrites the preserved task slot. */
+  readonly data1: 0;
+  readonly data4: BackShakeGlowRedPasses;
+  readonly selector: BackShakeGlowRedSelector;
+  readonly sourceId: BackShakeGlowRedSourceId;
+  readonly callbackBefore: BackShakeGlowRedCallback;
+  readonly callback: BackShakeGlowRedCallback | "WaitAnimEnd";
+  readonly blendColor: "RGB_RED" | null;
+  /** SHAKEGLOW_RED overwrites the `sDontFlip` data[1] alias with FALSE. */
+  readonly dontFlipAfterColorSelector: false;
+}
+
+export interface BackShakeGlowGreenFrame extends BackShakeGlowFrameBase {
+  readonly data0: BackShakeGlowGreenPeriod;
+  /** SHAKEGLOW_GREEN is enum value one and retains the task's sDontFlip flag. */
+  readonly data1: 1;
+  readonly data4: BackShakeGlowGreenPasses;
+  readonly selector: BackShakeGlowGreenSelector;
+  readonly sourceId: BackShakeGlowGreenSourceId;
+  readonly callbackBefore: BackShakeGlowGreenCallback;
+  readonly callback: BackShakeGlowGreenCallback | "WaitAnimEnd";
+  /** The shared terminal restore still calls BlendPalette with RGB_RED. */
+  readonly blendColor: "RGB_GREEN" | "RGB_RED" | null;
+  readonly dontFlipAfterColorSelector: true;
+}
+
+export interface BackShakeGlowBlueFrame extends BackShakeGlowFrameBase {
+  readonly data0: BackShakeGlowBluePeriod;
+  /** SHAKEGLOW_BLUE is enum value two and keeps sDontFlip truthy. */
+  readonly data1: 2;
+  readonly data4: BackShakeGlowBluePasses;
+  readonly selector: BackShakeGlowBlueSelector;
+  readonly sourceId: BackShakeGlowBlueSourceId;
+  readonly callbackBefore: BackShakeGlowBlueCallback;
+  readonly callback: BackShakeGlowBlueCallback | "WaitAnimEnd";
+  /** The shared terminal restore still calls BlendPalette with RGB_RED. */
+  readonly blendColor: "RGB_BLUE" | "RGB_RED" | null;
+  readonly dontFlipAfterColorSelector: true;
+}
+
+type BackShakeGlowReducerConfig = {
+  readonly backAnimSet: "BACK_ANIM_SHAKE_GLOW_RED" | "BACK_ANIM_SHAKE_GLOW_GREEN" | "BACK_ANIM_SHAKE_GLOW_BLUE";
+  readonly colorSelector: 0 | 1 | 2;
+  readonly glowColor: BackShakeGlowColor;
+  readonly variantForSelector: (selector: string) => BackShakeGlowVariant | null;
+};
+
+const SHAKE_GLOW_RED_REDUCER_CONFIG: BackShakeGlowReducerConfig = Object.freeze({
+  backAnimSet: "BACK_ANIM_SHAKE_GLOW_RED",
+  colorSelector: 0,
+  glowColor: "RGB_RED",
+  variantForSelector: shakeGlowRedVariant,
+});
+
+const SHAKE_GLOW_GREEN_REDUCER_CONFIG: BackShakeGlowReducerConfig = Object.freeze({
+  backAnimSet: "BACK_ANIM_SHAKE_GLOW_GREEN",
+  colorSelector: 1,
+  glowColor: "RGB_GREEN",
+  variantForSelector: shakeGlowGreenVariant,
+});
+
+const SHAKE_GLOW_BLUE_REDUCER_CONFIG: BackShakeGlowReducerConfig = Object.freeze({
+  backAnimSet: "BACK_ANIM_SHAKE_GLOW_BLUE",
+  colorSelector: 2,
+  glowColor: "RGB_BLUE",
+  variantForSelector: shakeGlowBlueVariant,
+});
+
+/**
+ * Shared source-order reducer for the red/green/blue ShakeGlow triples. Tick zero
+ * is the selected initializer callback after Task_HandleMonAnimation has
+ * zeroed data[2..7]. Even callbacks run ShakeGlow_Blend before the movement
+ * threshold check; each initializer performs its trailing data[2] increment,
+ * including the callback that installs WaitAnimEnd after the RGB_RED restore.
+ */
+function backShakeGlowFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  paletteBase = 0x100,
+  config: BackShakeGlowReducerConfig,
+): BackShakeGlowFrameBase | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(paletteBase)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== config.backAnimSet) return null;
+  const variant = config.variantForSelector(selection.selector);
+  if (variant === null) throw new Error(`unexpected ${config.backAnimSet} selector ${selection.selector}`);
+
+  let x2 = 0;
+  let data2 = 0;
+  let data3 = 0;
+  let data5 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let result: BackShakeGlowFrameBase | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const initializerCalled = data2 === 0;
+    if (initializerCalled) {
+      data7 = toS16(paletteBase); // OBJ_PLTT_ID(sprite->oam.paletteNum)
+      data5 = 0;
+      data3 = 0;
+    }
+
+    const blendCalled = data2 % 2 === 0;
+    let blendCoefficient: number | null = null;
+    let paletteRestored = false;
+    let callback: string | "WaitAnimEnd" = variant.callback;
+    if (blendCalled) {
+      if (data2 > 127) {
+        blendCoefficient = 0;
+        paletteRestored = true;
+        callback = "WaitAnimEnd";
+      } else {
+        data6 = gbaSin(data2, 12);
+        blendCoefficient = data6;
+      }
+    }
+
+    const moveCalled = data2 >= variant.movementThreshold && data3 < variant.passes;
+    let movementIndex: number | null = null;
+    let movementSign: 1 | -1 | null = null;
+    let tryFlipXCalls: 0 | 2 = 0;
+    const movementPhase = data3;
+    if (moveCalled) {
+      tryFlipXCalls = 2;
+      if (data5 > variant.period) {
+        data3 = toS16(data3 + 1);
+        if (data3 < variant.passes) data5 = 0;
+        x2 = 0;
+      } else {
+        movementSign = data3 % 2 === 0 ? 1 : -1;
+        movementIndex = Math.trunc((data5 * 384) / variant.period) % 256;
+        // The first TryFlipX applies to the previous x2; the helper assigns
+        // the sine result and its trailing TryFlipX only negates it when the
+        // color selector has cleared the data[1]/sDontFlip alias (red).
+        const sine = movementSign * gbaSin(movementIndex, 6);
+        x2 = toS16(config.colorSelector === 0 ? -sine : sine);
+        data5 = toS16(data5 + 1);
+      }
+    }
+
+    data2 = toS16(data2 + 1);
+    const terminal = callback === "WaitAnimEnd";
+    result = Object.freeze({
+      x2, y2: 0 as const,
+      data0: variant.period, data2, data3,
+      data4: variant.passes, data5, data6, data7,
+      selector: variant.selector, sourceId: variant.sourceId,
+      callbackBefore: variant.callback, callback, initializerCalled,
+      blendCalled, blendCoefficient,
+      blendColor: blendCoefficient === null
+        ? null
+        : (paletteRestored ? "RGB_RED" : config.glowColor),
+      paletteRestored, movementThreshold: variant.movementThreshold,
+      moveCalled, movementPhase, movementIndex, movementSign, tryFlipXCalls,
+      data1: config.colorSelector,
+      dontFlipAfterColorSelector: config.colorSelector !== 0,
+      flipApplied: tryFlipXCalls === 2 && config.colorSelector === 0,
+      terminal,
+    });
+    if (terminal) break;
+  }
+  return result;
+}
+
+/** Source-order reducer for the red SHAKEGLOW_RED == 0 selector triple. */
+export function backShakeGlowRedFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  paletteBase = 0x100,
+): BackShakeGlowRedFrame | null {
+  return backShakeGlowFrameAtTick(
+    species, natureId, ticksSinceStart, paletteBase, SHAKE_GLOW_RED_REDUCER_CONFIG,
+  ) as BackShakeGlowRedFrame | null;
+}
+
+/** Source-order reducer for the green SHAKEGLOW_GREEN == 1 selector triple. */
+export function backShakeGlowGreenFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  paletteBase = 0x100,
+): BackShakeGlowGreenFrame | null {
+  return backShakeGlowFrameAtTick(
+    species, natureId, ticksSinceStart, paletteBase, SHAKE_GLOW_GREEN_REDUCER_CONFIG,
+  ) as BackShakeGlowGreenFrame | null;
+}
+
+/** Source-order reducer for the blue SHAKEGLOW_BLUE == 2 selector triple. */
+export function backShakeGlowBlueFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  paletteBase = 0x100,
+): BackShakeGlowBlueFrame | null {
+  return backShakeGlowFrameAtTick(
+    species, natureId, ticksSinceStart, paletteBase, SHAKE_GLOW_BLUE_REDUCER_CONFIG,
+  ) as BackShakeGlowBlueFrame | null;
+}
+
+export function backShakeGlowRedWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/** Task_HandleMonAnimation restores data[0..2] and preserves data[3..7]. */
+export function backShakeGlowRedTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+  paletteBase = 0x100,
+): readonly [number, 0, number, number, BackShakeGlowRedPasses, number, number, number] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const terminal = backShakeGlowRedFrameAtTick(
+    species, natureId, Number.MAX_SAFE_INTEGER, paletteBase,
+  );
+  if (terminal === null) return null;
+  return [
+    toS16(battlerId), 0, toS16(speciesId), terminal.data3,
+    terminal.data4, terminal.data5, terminal.data6, terminal.data7,
+  ];
+}
+
+export function backShakeGlowGreenWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return backShakeGlowRedWaitAnimEndCallback(animEnded);
+}
+
+/** Task_HandleMonAnimation restores data[0..2] and preserves data[3..7]. */
+export function backShakeGlowGreenTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+  paletteBase = 0x100,
+): readonly [number, 0, number, number, BackShakeGlowGreenPasses, number, number, number] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const terminal = backShakeGlowGreenFrameAtTick(
+    species, natureId, Number.MAX_SAFE_INTEGER, paletteBase,
+  );
+  if (terminal === null) return null;
+  return [
+    toS16(battlerId), 0, toS16(speciesId), terminal.data3,
+    terminal.data4, terminal.data5, terminal.data6, terminal.data7,
+  ];
+}
+
+export function backShakeGlowBlueWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return backShakeGlowRedWaitAnimEndCallback(animEnded);
+}
+
+/** Task_HandleMonAnimation restores data[0..2] and preserves data[3..7]. */
+export function backShakeGlowBlueTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+  paletteBase = 0x100,
+): readonly [number, 0, number, number, BackShakeGlowBluePasses, number, number, number] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const terminal = backShakeGlowBlueFrameAtTick(
+    species, natureId, Number.MAX_SAFE_INTEGER, paletteBase,
+  );
+  if (terminal === null) return null;
+  return [
+    toS16(battlerId), 0, toS16(speciesId), terminal.data3,
+    terminal.data4, terminal.data5, terminal.data6, terminal.data7,
+  ];
 }
 
 export interface BackConvexDoubleArcFrame {
