@@ -1,3 +1,72 @@
+
+---
+## 902 — [bounded MAIN worker, 2026-08-03 ~23:15] #72 batch 5: 11 more REACHABLE printstring STRINGIDs landed
+
+- **State:** master `072b9066`. Full `npm test` green (**685 files / 6,706
+  passed / 1 skipped**, 0 failures), `npm run build` green (`tsc -b && vite
+  build`), `compare:differential -- battle-command-generated-off.json --base
+  4d75ccdd --summary`: **PASS — 128/128 byte-identical**.
+- **Did:** Continued ISSUES #72's ranked REACHABLE list from
+  `STRINGID_PKMNFREEDFROM` (per the step brief, skipping the hard trio/
+  TRACED/SXBLOCKSY2 already excluded by starting there) and landed 11:
+  `STRINGID_PKMNFREEDFROM`/`STRINGID_PKMNGOTFREE` (Bind/Wrap-family
+  end-of-turn release + Rapid Spin's own free, both sharing the
+  already-landed `STRINGID_PKMNHURTBY`'s `wrappedMove` substitution — staged
+  with a real 3-turn Bind-expiry repro and a real Bind-then-Rapid-Spin
+  repro), `STRINGID_PKMNDREAMEATEN`/`STRINGID_PKMNWASNTAFFECTED` (Dream
+  Eater's status-gated pair), `STRINGID_TARGETCANTESCAPENOW` (Mean Look
+  family), `STRINGID_PKMNGOTENCORE` (Encore, staged via the `lastMove`
+  config field), `STRINGID_PKMNIDENTIFIED` (Foresight), and three ids
+  reusing the existing "move's-own-target's-ability" substitution bucket
+  (`STRINGID_PKMNRESTOREDHPUSING`'s family) with zero new plumbing:
+  `STRINGID_PKMNSXINFATUATEDY` (Cute Charm, real 1/3 contact-proc repro,
+  opposite genders staged via `personality`), `STRINGID_PKMNHURTSWITH`
+  (Rough Skin, deterministic), `STRINGID_PKMNCOPIEDFOE` (Role Play).
+  `STRINGID_PKMNKNOCKEDOFF` (Knock Off) also landed, reading `heldItems`
+  directly (the typed removeitem controller receipt that would advance it
+  comes after the print). All 11 are the plain Taunt-pair idiom or direct
+  extensions of already-established substitution buckets — no new
+  event-payload fields, no new engine phases. Two ability display names
+  (`ROUGH SKIN`/`CUTE CHARM`) added to the existing lookup table. Staged in
+  `tests/presentationStringIssue72Batch5.test.ts` (11 tests, `mechanicLab`-
+  shape full-turn config, no injected transient state beyond the same
+  `status1`/`lastMove` config fields prior batches already used), all
+  red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
+  src/engine/factoryBattleScriptFullTurnDecision.ts` (each threw the exact
+  pre-fix completeness-guard/placeholder error). Census: **78→67
+  UNRESOLVED** (exact -11, no generic-fallback-resolvable exceptions this
+  batch). ISSUES #72 REACHABLE trimmed to **28** (39−11, arithmetic-checked
+  against the list body's own unique-id count). Commit `072b9066`.
+- **Skipped, not new-plumbing-blocked (just ran out of step budget):**
+  `STRINGID_PKMNSXCUREDYPROBLEM` (Shed Skin — needs a small
+  `battleTextBuff1Status`-style pre-clear capture added to
+  `runShedSkinTick`, same field the `HOLD_EFFECT_CURE_STATUS` branch already
+  populates), `STRINGID_PKMNSXWHIPPEDUPSANDSTORM`, `STRINGID_PKMNTOOKFOE`
+  (Destiny Bond — `tryfaintmon`'s dual attacker/target operand needs its own
+  role investigation), `STRINGID_PKMNWISHCAMETRUE`,
+  `STRINGID_PKMNSAFEGUARDEXPIRED`, `STRINGID_PKMNUSEDSAFEGUARD`,
+  `STRINGID_PKMNSXRESTOREDHPALITTLE2`, `STRINGID_PKMNMOVEISDISABLED`/
+  `MOVEWASDISABLED`, `STRINGID_PKMNTOOKATTACK`,
+  `STRINGID_PKMNPERISHCOUNTFELL`, `STRINGID_PKMNMOVEBOUNCED`,
+  `STRINGID_PKMNRAISEDSPEED`, `STRINGID_PKMNSHROUDEDITSELF`,
+  `STRINGID_STATSWONTDECREASE2`, `STRINGID_MAGNITUDESTRENGTH`. One genuine
+  new-plumbing case found: `STRINGID_PKMNCHANGEDTYPEWITH` (Color Change)
+  needs a new `battleTextBuff1Type` message substitution wired into
+  `prepareMessage` — the rules-context field already exists
+  (`battleScriptTypeChangeOpcode.ts`) but isn't surfaced to messages yet.
+  `STRINGID_PKMNFELLINTONIGHTMARE`/`LOSTPPGRUDGE`/`REDUCEDPP`/
+  `SITEMRESTOREDPP`/`HEALEDPARALYSIS`/`STOLEITEM` also unattempted.
+- **Next:** #72 batch 6 (continue the REACHABLE-28 list from
+  `STRINGID_PKMNSXCUREDYPROBLEM`). The hard trio
+  (`HUNGONWITHX`/`PROTECTEDBY`/`REGAINEDHEALTH`) dedicated step. `TRACED`
+  (nickname wiring). `SXBLOCKSY2` (Perish Song loop). `CANCELER_TORMENTED`
+  engine gap. Loss-side terminal-seam increment (`VARIOUS` 19/20 + a fresh
+  oracle trace, per entry 901). typeref slices 4-8. #71 Slice D.
+- **Notes:** No PAPERCUT this step. Full suite took ~10 min wall clock
+  (`npm test` backgrounded past the Bash tool's 120s auto-background
+  threshold; polled its output file to a foreground completion marker
+  rather than treating the background move as a wait-for-notification
+  pattern).
 ---
 ## 901 — [bounded MAIN worker, 2026-08-03 ~22:15] Terminal-seam increments (i)+(ii) landed: win-side text is now real, resolved, and player-visible
 

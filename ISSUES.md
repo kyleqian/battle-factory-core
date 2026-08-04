@@ -347,22 +347,82 @@ move-name capture pair). `STRINGID_PKMNSTOLEITEM` (Thief/Covet — needs an
 item-name capture, likely easy next pick following `STRINGID_PKMNKNOCKEDOFF`'s
 own `heldItems` precedent).
 
-**REACHABLE (15), ordered by carrier-weight proxy for likely-hit-first —
+**Batch 7 landed** (`tests/presentationStringIssue72Batch7.test.ts`, all 5
+`it`s red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
+src/engine/factoryBattleScriptFullTurnDecision.ts
+src/engine/battleEndTurnOrchestration.ts src/engine/battleScriptEvents.ts`):
+`STRINGID_PKMNCHANGEDTYPEWITH` (Color Change — the permitted plumbing
+extension landed: `battleTextBuff1Type` [already captured by
+`battleScriptMoveEndOpcode.ts:497`, pinned directly by
+`tests/battleScriptMoveEndOpcode.test.ts`/`battleScriptTypeChangeOpcode.test.ts`]
+wired into `prepareMessage`, resolving through `TYPE_DISPLAY_NAMES`
+(`fightSubmenuText.ts`'s own `gTypeNames` abbreviation table — real source's
+{B_BUFF1} reads that identical table, `battle_message.c:2802`); `STRINGID_
+PKMNREDUCEDPP` (Spite — `battleTextBuff1Move`/`battleTextBuff2ByteNumber` were
+already captured by `battleScriptTryspiteppreduceOpcode.ts:81-82`, only the
+`prepareMessage`→`Cmd_printstring` wiring was missing); `STRINGID_
+PKMNSITEMRESTOREDPP` (Leppa Berry end-turn tick — `runItemsTick`'s
+`HOLD_EFFECT_RESTORE_PP` branch now also sets `scriptingBattler`/
+`battleTextBuff1Move`, pinned directly in `tests/battleEndTurnOrchestration.test.ts`);
+`STRINGID_PKMNSTOLEITEM` (Thief/Covet — `MOVE_EFFECT_STEAL_ITEM`'s own
+same-transition `set-battler-item` pair means `heldItems[attacker]`, not
+`heldItems[defender]`, already holds the transferred item by print time,
+unlike Knock Off); `STRINGID_PKMNTRACED` (real Porygon switch-in — new
+`monNickBattler` message-event field [`battleScriptEvents.ts`], since the
+traced-from battler's name-with-prefix needs `field`, unavailable inside
+`prepareMessage`'s rules-only scope; `battleTextBuff1MonNick`'s own
+rules-context capture was already pinned directly by
+`tests/battleScriptSwitchinOpcode.test.ts`). Census: **54→49 UNRESOLVED**
+(exact −5). ISSUES #72 REACHABLE trimmed to **10** (15−5, arithmetic-checked).
+
+**`STRINGID_PKMNSXWHIPPEDUPSANDSTORM` investigated, not landed — genuinely
+new plumbing found, not just staging cost.** The switch-in repro (Tyranitar,
+same `trainerBenchOverride` shape as batch 2's Intimidate loop) reaches
+`BattleScript_SandstreamActivates` and its `STRINGID_PKMNSXWHIPPEDUPSANDSTORM`
+print fires correctly, but the script then halts at its own `end3`
+(`playanimation BS_BATTLER_0, B_ANIM_SANDSTORM_CONTINUES` / `call
+BattleScript_WeatherFormChanges` / `end3`), surfacing as a `machine-barrier`
+(`opcodeName: "B_SCR_OP_END3"`) instead of resuming the switch-in flow —
+`battleScriptSwitchinOpcode.ts`'s `callSwitchinScript` enters the ability
+script via a real interpreter `"call-current"` transition (unlike Trace/
+Intimidate's own `switchineffects` branches, which only flip a status bit and
+defer actual script execution to `battleScriptFaintedActionsOrchestration.ts`'s
+separate entry-hook resolution, never touching the interpreter's own call/
+end3 machinery at all), and nothing drives the machine past that `end3` back
+into the switch-in's own continuation. `battleScriptCallbackStack.ts`'s own
+header confirms this is a known, currently-`"UNWIRED DESIGN-SCOUT PROTOTYPE"`
+gap (`docs/end3-design.md`) — `Cmd_end3`/`BattleScriptPushCursorAndCallback`
+push/pop control flow is designed but not wired into the live full-turn
+reducer. Drizzle/Drought (`BattleScript_DrizzleActivates`/`DroughtActivates`)
+share the exact same `playanimation`+`call`+`end3` shape and would likely hit
+the identical wall if exercised through a full-turn switch-in test (not
+confirmed here — no existing test drives either through completion via
+`callSwitchinScript`). A small unrelated sub-barrier was found and fixed en
+route and then reverted since it's moot without landing the id: `Cmd_
+playanimation`'s `B_ANIM_SANDSTORM_CONTINUES` case is unregistered in
+`battleScriptStatbuffchangeOpcode.ts`'s `PLAYANIMATION_ANIM_TYPES` map
+(RAIN_CONTINUES/SUN_CONTINUES are registered, SANDSTORM_CONTINUES is not) —
+adding `["B_ANIM_SANDSTORM_CONTINUES", { argExpression: "NULL", animationId:
+"SANDSTORM_CONTINUES", readsAnimArg1: false }]` (same shape as its two
+siblings) is a one-line fix, but doesn't unblock the id alone; the real fix is
+wiring `end3`'s push/pop resumption for `call-current`-entered ability
+scripts, which is bigger than this step's remaining budget and plausibly
+worth its own step (would also unblock Drizzle/Drought's own full-turn
+switch-in testability, not just Sand Stream).
+
+**REACHABLE (10), ordered by carrier-weight proxy for likely-hit-first —
 name a batch, use the Taunt-pair idiom** (`messageId === "STRINGID_X"` branch
 in `messageLines`, `requireMoveDefender`/`actionSnapshot`-sourced battler,
 staged full-turn repro test, red-verify via `git stash`):
 `STRINGID_PKMNHUNGONWITHX`,
 `STRINGID_PKMNREGAINEDHEALTH`,
 `STRINGID_PKMNPROTECTEDBY`,
-`STRINGID_PKMNTRACED`,
 `STRINGID_PKMNSXBLOCKSY2`,
 `STRINGID_PKMNSXWHIPPEDUPSANDSTORM`, `STRINGID_PKMNTOOKFOE`,
 `STRINGID_PKMNSAFEGUARDEXPIRED`,
 `STRINGID_PKMNTOOKATTACK`,
-`STRINGID_MAGNITUDESTRENGTH`, `STRINGID_PKMNCHANGEDTYPEWITH`,
-`STRINGID_PKMNLOSTPPGRUDGE`,
-`STRINGID_PKMNREDUCEDPP`, `STRINGID_PKMNSITEMRESTOREDPP`,
-`STRINGID_PKMNSTOLEITEM`.
+`STRINGID_MAGNITUDESTRENGTH`,
+`STRINGID_PKMNLOSTPPGRUDGE`.
 
 **MANUAL — all settled 2026-08-03 (side-lane settlement pass; full evidence
 in the triage doc's "MANUAL settlement" appendix):**
