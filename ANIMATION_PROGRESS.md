@@ -30,8 +30,10 @@
   accepted sets 1–24 sum to **365**, not the previously carried 366 (+1
   arithmetic error); corrected cumulative figures are set20 **310**, set21
   **343**, set22 **351**, set23 **364**, set24 **365**. Per-row censuses were
-  already correct and are unchanged. No boundary/unsupported widening or
-  coverage-ledger mutation.
+  already correct and are unchanged. Focused red/green/blue plus both
+  ratchets: **8 files / 45 tests**; typecheck, smoke **7/347**, full **710
+  files / 6,847 passed / 1 skipped**, build, and coverage are green. No
+  boundary/unsupported widening or coverage-ledger mutation.
 
 ## Back `BACK_ANIM_SHAKE_GLOW_GREEN` triple accepted (2026-08-04)
 
