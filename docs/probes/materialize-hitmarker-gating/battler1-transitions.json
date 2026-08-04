@@ -1,0 +1,866 @@
+[
+  {
+    "frame": 0,
+    "callbackSymbol": "SpriteCB_Pokeball",
+    "x2": 0,
+    "y2": 0
+  },
+  {
+    "frame": 5,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0
+  },
+  {
+    "frame": 58,
+    "callbackSymbol": "SpriteCB_Pokeball",
+    "x2": 0,
+    "y2": 0
+  },
+  {
+    "frame": 419,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0
+  },
+  {
+    "frame": 423,
+    "callbackSymbol": "MovementType_Player",
+    "x2": 0,
+    "y2": 0
+  },
+  {
+    "frame": 629,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0
+  },
+  {
+    "frame": 633,
+    "callbackSymbol": "MovementType_Player",
+    "x2": 0,
+    "y2": 0
+  },
+  {
+    "frame": 1177,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0
+  },
+  {
+    "frame": 1207,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -240,
+    "y2": 0
+  },
+  {
+    "frame": 1240,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -238,
+    "y2": 0
+  },
+  {
+    "frame": 1241,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -236,
+    "y2": 0
+  },
+  {
+    "frame": 1242,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -234,
+    "y2": 0
+  },
+  {
+    "frame": 1243,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -232,
+    "y2": 0
+  },
+  {
+    "frame": 1244,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -230,
+    "y2": 0
+  },
+  {
+    "frame": 1245,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -228,
+    "y2": 0
+  },
+  {
+    "frame": 1246,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -226,
+    "y2": 0
+  },
+  {
+    "frame": 1247,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -224,
+    "y2": 0
+  },
+  {
+    "frame": 1248,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -222,
+    "y2": 0
+  },
+  {
+    "frame": 1249,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -220,
+    "y2": 0
+  },
+  {
+    "frame": 1250,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -218,
+    "y2": 0
+  },
+  {
+    "frame": 1251,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -216,
+    "y2": 0
+  },
+  {
+    "frame": 1252,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -214,
+    "y2": 0
+  },
+  {
+    "frame": 1253,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -212,
+    "y2": 0
+  },
+  {
+    "frame": 1254,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -210,
+    "y2": 0
+  },
+  {
+    "frame": 1255,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -208,
+    "y2": 0
+  },
+  {
+    "frame": 1256,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -206,
+    "y2": 0
+  },
+  {
+    "frame": 1257,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -204,
+    "y2": 0
+  },
+  {
+    "frame": 1258,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -202,
+    "y2": 0
+  },
+  {
+    "frame": 1259,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -200,
+    "y2": 0
+  },
+  {
+    "frame": 1260,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -198,
+    "y2": 0
+  },
+  {
+    "frame": 1261,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -196,
+    "y2": 0
+  },
+  {
+    "frame": 1262,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -194,
+    "y2": 0
+  },
+  {
+    "frame": 1263,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -192,
+    "y2": 0
+  },
+  {
+    "frame": 1264,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -190,
+    "y2": 0
+  },
+  {
+    "frame": 1265,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -188,
+    "y2": 0
+  },
+  {
+    "frame": 1266,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -186,
+    "y2": 0
+  },
+  {
+    "frame": 1267,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -184,
+    "y2": 0
+  },
+  {
+    "frame": 1268,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -182,
+    "y2": 0
+  },
+  {
+    "frame": 1269,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -180,
+    "y2": 0
+  },
+  {
+    "frame": 1270,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -178,
+    "y2": 0
+  },
+  {
+    "frame": 1271,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -176,
+    "y2": 0
+  },
+  {
+    "frame": 1272,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -174,
+    "y2": 0
+  },
+  {
+    "frame": 1273,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -172,
+    "y2": 0
+  },
+  {
+    "frame": 1274,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -170,
+    "y2": 0
+  },
+  {
+    "frame": 1275,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -168,
+    "y2": 0
+  },
+  {
+    "frame": 1276,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -166,
+    "y2": 0
+  },
+  {
+    "frame": 1277,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -164,
+    "y2": 0
+  },
+  {
+    "frame": 1278,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -162,
+    "y2": 0
+  },
+  {
+    "frame": 1279,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -160,
+    "y2": 0
+  },
+  {
+    "frame": 1280,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -158,
+    "y2": 0
+  },
+  {
+    "frame": 1281,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -156,
+    "y2": 0
+  },
+  {
+    "frame": 1282,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -154,
+    "y2": 0
+  },
+  {
+    "frame": 1283,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -152,
+    "y2": 0
+  },
+  {
+    "frame": 1284,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -150,
+    "y2": 0
+  },
+  {
+    "frame": 1285,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -148,
+    "y2": 0
+  },
+  {
+    "frame": 1286,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -146,
+    "y2": 0
+  },
+  {
+    "frame": 1287,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -144,
+    "y2": 0
+  },
+  {
+    "frame": 1288,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -142,
+    "y2": 0
+  },
+  {
+    "frame": 1289,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -140,
+    "y2": 0
+  },
+  {
+    "frame": 1290,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -138,
+    "y2": 0
+  },
+  {
+    "frame": 1291,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -136,
+    "y2": 0
+  },
+  {
+    "frame": 1292,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -134,
+    "y2": 0
+  },
+  {
+    "frame": 1293,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -132,
+    "y2": 0
+  },
+  {
+    "frame": 1294,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -130,
+    "y2": 0
+  },
+  {
+    "frame": 1295,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -128,
+    "y2": 0
+  },
+  {
+    "frame": 1296,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -126,
+    "y2": 0
+  },
+  {
+    "frame": 1297,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -124,
+    "y2": 0
+  },
+  {
+    "frame": 1298,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -122,
+    "y2": 0
+  },
+  {
+    "frame": 1299,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -120,
+    "y2": 0
+  },
+  {
+    "frame": 1300,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -118,
+    "y2": 0
+  },
+  {
+    "frame": 1301,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -116,
+    "y2": 0
+  },
+  {
+    "frame": 1302,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -114,
+    "y2": 0
+  },
+  {
+    "frame": 1303,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -112,
+    "y2": 0
+  },
+  {
+    "frame": 1304,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -110,
+    "y2": 0
+  },
+  {
+    "frame": 1305,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -108,
+    "y2": 0
+  },
+  {
+    "frame": 1306,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -106,
+    "y2": 0
+  },
+  {
+    "frame": 1307,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -104,
+    "y2": 0
+  },
+  {
+    "frame": 1308,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -102,
+    "y2": 0
+  },
+  {
+    "frame": 1309,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -100,
+    "y2": 0
+  },
+  {
+    "frame": 1310,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -98,
+    "y2": 0
+  },
+  {
+    "frame": 1311,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -96,
+    "y2": 0
+  },
+  {
+    "frame": 1312,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -94,
+    "y2": 0
+  },
+  {
+    "frame": 1313,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -92,
+    "y2": 0
+  },
+  {
+    "frame": 1314,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -90,
+    "y2": 0
+  },
+  {
+    "frame": 1315,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -88,
+    "y2": 0
+  },
+  {
+    "frame": 1316,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -86,
+    "y2": 0
+  },
+  {
+    "frame": 1317,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -84,
+    "y2": 0
+  },
+  {
+    "frame": 1318,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -82,
+    "y2": 0
+  },
+  {
+    "frame": 1319,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -80,
+    "y2": 0
+  },
+  {
+    "frame": 1320,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -78,
+    "y2": 0
+  },
+  {
+    "frame": 1321,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -76,
+    "y2": 0
+  },
+  {
+    "frame": 1322,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -74,
+    "y2": 0
+  },
+  {
+    "frame": 1323,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -72,
+    "y2": 0
+  },
+  {
+    "frame": 1324,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -70,
+    "y2": 0
+  },
+  {
+    "frame": 1325,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -68,
+    "y2": 0
+  },
+  {
+    "frame": 1326,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -66,
+    "y2": 0
+  },
+  {
+    "frame": 1327,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -64,
+    "y2": 0
+  },
+  {
+    "frame": 1328,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -62,
+    "y2": 0
+  },
+  {
+    "frame": 1329,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -60,
+    "y2": 0
+  },
+  {
+    "frame": 1330,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -58,
+    "y2": 0
+  },
+  {
+    "frame": 1331,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -56,
+    "y2": 0
+  },
+  {
+    "frame": 1332,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -54,
+    "y2": 0
+  },
+  {
+    "frame": 1333,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -52,
+    "y2": 0
+  },
+  {
+    "frame": 1334,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -50,
+    "y2": 0
+  },
+  {
+    "frame": 1335,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -48,
+    "y2": 0
+  },
+  {
+    "frame": 1336,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -46,
+    "y2": 0
+  },
+  {
+    "frame": 1337,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -44,
+    "y2": 0
+  },
+  {
+    "frame": 1338,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -42,
+    "y2": 0
+  },
+  {
+    "frame": 1339,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -40,
+    "y2": 0
+  },
+  {
+    "frame": 1340,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -38,
+    "y2": 0
+  },
+  {
+    "frame": 1341,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -36,
+    "y2": 0
+  },
+  {
+    "frame": 1342,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -34,
+    "y2": 0
+  },
+  {
+    "frame": 1343,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -32,
+    "y2": 0
+  },
+  {
+    "frame": 1344,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -30,
+    "y2": 0
+  },
+  {
+    "frame": 1345,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -28,
+    "y2": 0
+  },
+  {
+    "frame": 1346,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -26,
+    "y2": 0
+  },
+  {
+    "frame": 1347,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -24,
+    "y2": 0
+  },
+  {
+    "frame": 1348,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -22,
+    "y2": 0
+  },
+  {
+    "frame": 1349,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -20,
+    "y2": 0
+  },
+  {
+    "frame": 1350,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -18,
+    "y2": 0
+  },
+  {
+    "frame": 1351,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -16,
+    "y2": 0
+  },
+  {
+    "frame": 1352,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -14,
+    "y2": 0
+  },
+  {
+    "frame": 1353,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -12,
+    "y2": 0
+  },
+  {
+    "frame": 1354,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -10,
+    "y2": 0
+  },
+  {
+    "frame": 1355,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -8,
+    "y2": 0
+  },
+  {
+    "frame": 1356,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -6,
+    "y2": 0
+  },
+  {
+    "frame": 1357,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -4,
+    "y2": 0
+  },
+  {
+    "frame": 1358,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": -2,
+    "y2": 0
+  },
+  {
+    "frame": 1359,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0
+  },
+  {
+    "frame": 1586,
+    "callbackSymbol": "SpriteCB_OpponentMonFromBall",
+    "x2": 0,
+    "y2": 0
+  },
+  {
+    "frame": 1587,
+    "callbackSymbol": "SpriteCB_OpponentMonFromBall",
+    "x2": 0,
+    "y2": 14
+  },
+  {
+    "frame": 1588,
+    "callbackSymbol": "SpriteCB_OpponentMonFromBall",
+    "x2": 0,
+    "y2": 13
+  },
+  {
+    "frame": 1589,
+    "callbackSymbol": "SpriteCB_OpponentMonFromBall",
+    "x2": 0,
+    "y2": 12
+  },
+  {
+    "frame": 1590,
+    "callbackSymbol": "SpriteCB_OpponentMonFromBall",
+    "x2": 0,
+    "y2": 11
+  },
+  {
+    "frame": 1591,
+    "callbackSymbol": "SpriteCB_OpponentMonFromBall",
+    "x2": 0,
+    "y2": 10
+  },
+  {
+    "frame": 1592,
+    "callbackSymbol": "SpriteCB_OpponentMonFromBall",
+    "x2": 0,
+    "y2": 9
+  },
+  {
+    "frame": 1593,
+    "callbackSymbol": "SpriteCB_OpponentMonFromBall",
+    "x2": 0,
+    "y2": 8
+  },
+  {
+    "frame": 1594,
+    "callbackSymbol": "SpriteCB_OpponentMonFromBall",
+    "x2": 0,
+    "y2": 7
+  },
+  {
+    "frame": 1595,
+    "callbackSymbol": "SpriteCB_OpponentMonFromBall",
+    "x2": 0,
+    "y2": 5
+  },
+  {
+    "frame": 1596,
+    "callbackSymbol": "SpriteCB_OpponentMonFromBall",
+    "x2": 0,
+    "y2": 4
+  },
+  {
+    "frame": 1597,
+    "callbackSymbol": "SpriteCB_OpponentMonFromBall",
+    "x2": 0,
+    "y2": 3
+  },
+  {
+    "frame": 1598,
+    "callbackSymbol": "SpriteCB_OpponentMonFromBall",
+    "x2": 0,
+    "y2": 2
+  },
+  {
+    "frame": 1599,
+    "callbackSymbol": "SpriteCB_OpponentMonFromBall",
+    "x2": 0,
+    "y2": 0
+  },
+  {
+    "frame": 1602,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0
+  }
+]

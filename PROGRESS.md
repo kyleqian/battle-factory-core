@@ -4,6 +4,53 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 922 — [bounded MAIN worker, 2026-08-04 ~17:45] R5 MAIN: STOPPED before wiring — ISSUES #74's back-dispatcher premise FAILS its own step-1 check; docs-only, no src edits
+
+- **State:** master at this docs commit only (no `src/` changes). `npm
+  test`/`npm run build` verified green (see commit message for exact
+  numbers). Nothing to differential/oracle-compare — no render code touched.
+- **Did:** the R5 brief's step 1 required verifying, at source, that the
+  back-sprite materialize path is NOT gated by Scene OFF (unlike front's
+  `SKIP_FRONT_ANIM`) before wiring `backSendOutFrameAtTick` into
+  `drawGeneratedPlayerMaterialize`'s settle path, with an explicit
+  instruction to STOP if it IS gated. It is: `BattleAnimateBackSprite`
+  (`pokemon.c:6886-6897`) checks the identical `HITMARKER_NO_ANIMATIONS`
+  gate as the front path, reached via the identical unconditional
+  `BATTLER_AFFINE_EMERGE` ball-emerge handoff on both sides — no asymmetry
+  in source. Went beyond a source read: RAM-probed `gHitMarker`/
+  `gBattleTypeFlags`/both battlers' sprite state across the full banked
+  KADABRA scenario (reused from `docs/probes/kadabra-materialize-settle/`)
+  and confirmed live that the gate's condition holds throughout. Also found
+  the "KADABRA descent 14→0" evidence entry 894/895's Slice-D bisect
+  attributed to a per-species back-anim family is actually the
+  species-agnostic, unconditional `BATTLER_AFFINE_EMERGE` collapse —
+  reproduced byte-identically on the FRONT sprite of a different species in
+  the same trace, and complete before either sprite's callback leaves its
+  `...MonFromBall` state (i.e. before the per-species-gated
+  `BattleAnimate{Front,Back}Sprite` call even runs) — already banked in this
+  codebase as `MATERIALIZE_Y2_TABLE`/`drawPlayerSideAffineMaterialize`
+  (`battleScene.ts:4900-5011`, doc'd species-independent) and already
+  consumed by `drawGeneratedPlayerMaterialize`'s first phase. Full evidence
+  + citations: `docs/probes/materialize-hitmarker-gating/README.md` (raw RAM
+  transition dumps banked alongside it). ISSUES #74 addended with the
+  correction (not closed — still open, re-scope needed); #71 untouched
+  pending that re-scope.
+- **Next:** #74 needs re-scoping, not the R5 brief's original wiring plan.
+  Whoever picks it up next should probe the actual committed
+  `factory-arbitrary-intro-{yoshi,magneton}-off` traces directly (not the
+  standalone KADABRA scenario) to determine whether the regressed frames
+  640/621 fall inside the already-modeled affine-emerge window (a clock/
+  alignment bug) or the later settle window (where flat `y2=0` for every
+  species, ONIX included, is likely the source-correct draw under Scene
+  OFF — not a species-keyed dispatcher call). `playerMaterializeSettleY2`'s
+  own doc comment already flags its ONIX table as Scene-ON-derived, applied
+  at a Scene-OFF seam — worth revisiting whether even the ONIX-only partial
+  application (ticks 1664-1669) is itself a latent bug.
+- **Notes:** no PAPERCUT. This step never reached the src-edit/test/
+  acceptance stages (2-7) of its own brief since step 1's own stop condition
+  fired; `npm test`/`npm run build` run anyway per the finish requirement.
+
+---
 ## 921 — [bounded MAIN worker, 2026-08-04 ~17:00] R4 MAIN: OFF-seam rest-offset landmine REMOVED (ISSUES #71 Slice-D follow-up); NEW pre-existing #74 filed, unrelated to this step
 
 - **State:** master at this docs commit (3 commits since 920:
@@ -90,57 +137,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   dispatcher stays correct-and-consumed on the animation lane's own terms
   (Scene ON); no main-lane consumer exists by real-game design.
 
----
-## 919 — [bounded MAIN worker, 2026-08-04 ~15:25] ISSUES #71 Slice D found NOT APPLICABLE to the main lane's oracle — no src edits landed, docs-only
-
-- **State:** master `519b6bf8` unchanged + this docs commit. No production
-  code touched — the step's own premise didn't survive first contact with
-  the oracle, so nothing was landed rather than a fitted/regressing wiring.
-  `npm test`/`npm run build` unaffected by this commit (docs only); ran both
-  anyway per the finish requirement (see commit message for exact numbers).
-- **Did:** before writing render code (per the brief's own instruction to
-  validate the anchor first), checked whether Battle Scene OFF — this lane's
-  oracle — plays the front send-out per-tick animation at all. It does not.
-  Four independent sources converge: (1) `bin/oracle info`'s own bootstrap
-  description states outright *"Move/effect and species front-sprite
-  entrance animations are skipped by the real game"* under
-  `battle-scene-off` (contrast `--profile battle-scene-on`: *"front-sprite
-  entrance animations play"*); (2) source
-  (`reference/pokeemerald/src/pokemon.c:6803-6852`,
-  `DoMonFrontSpriteAnimation`'s `HITMARKER_NO_ANIMATIONS`/`SKIP_FRONT_ANIM`
-  branch) never launches the movement task under Scene OFF, set once at
-  battle init and never cleared; (3) `drawGeneratedOpponentRelease`'s own
-  pre-existing doc comment already says so verbatim ("Battle Scene OFF skips
-  the later species front-animation callback"); (4) ISSUES #56's closure
-  audit found **zero** front-sprite-movement residual in the two committed
-  generated-route Scene-OFF dense windows (YOSHI 700/751, MAGNETON 703/751)
-  despite YOSHI/COMBUSKEN's real `ANIM_V_JUMPS_H_JUMPS` family — every
-  residual frame there is unrelated (display-tail + idle-menu-bounce).
-  Wiring `frontSendOutFrameAtTick`/`frontSendOutSpriteFrameAtTick` into the
-  OFF-oracle-compared generated seam would therefore *introduce* mismatches,
-  not fix any. A speculative implementation was written to sanity-check this
-  live (type widening for the front-pic `frame2` asset + the per-tick call
-  site), then reverted (`git checkout`) once the evidence closed — tree was
-  never left dirty at a bad commit. `PAPERCUTS.md`'s existing "mechanicLab
-  send-out fast-forward silently inert under battle-scene-off" entry asserts
-  the opposite ("Real OFF-profile battles DO play send-out anims") and is
-  wrong per all four sources above; flagged for a solo session to correct
-  since supervised workers don't edit `PAPERCUTS.md`. ISSUES #71 rewritten:
-  Slice D closed as not-applicable (full reasoning + citations in place of
-  the old "gated on the dispatcher" framing), §1e patch-site retirement +
-  the coordinated hand-fit retirements are the only main-lane share left.
-- **Next:** #71's main-lane share is down to the §1e 56/58 move-window
-  patch-site retirement (separate pair-guard-refactor effort) and the
-  coordinated KABUTO/MAGBY/ONIX hand-fit retirement (needs the animation
-  lane, not solo). Worth a supervisor look: Slice A (already-landed, applies
-  `speciesFrontIdleRestOffset`'s static terminal offset at the generated
-  route's `coeff===0`) rests on the same `SKIP_FRONT_ANIM` mechanism this
-  entry found — flagged, not touched, since it's a separate already-merged
-  decision outside this step's scope.
-- **Notes:** the cross-lane ask (`frontSendOutFrameAtTick` +
-  `frontSendOutSpriteFrameAtTick`) is real, correct, tested work on the
-  animation lane's own terms — it simply has no valid consumer in the main
-  lane's OFF-oracle render seams, all of which this same real-game mechanism
-  gates off. PAPERCUT: the incorrect PAPERCUTS.md claim cost ~15min to
-  chase down and rule out via source+oracle-doc+audit cross-checking before
-  the (correct) reversal.

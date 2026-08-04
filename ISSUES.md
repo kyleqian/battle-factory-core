@@ -428,6 +428,61 @@ back dispatcher (`backSendOutFrameAtTick(species, nature, tick)`) at the
 generated player materialize settle so every species draws its real
 descent; expected to restore YOSHI 700/751 + MAGNETON 703/751 or better.
 
+**PREMISE CHECK FAILED (2026-08-04, R5 MAIN worker) — STOPPED before
+wiring, per the R5 brief's own step-1 instruction. Full evidence:
+`docs/probes/materialize-hitmarker-gating/`.** Step 1 asked to verify "the
+back path is NOT gated by Scene OFF, unlike front" at source before wiring
+anything, and to stop if it IS gated. It is — symmetrically with front, not
+asymmetrically as the bisect verdict above assumed:
+
+- **Source**: `BattleAnimateBackSprite` (`pokemon.c:6886-6897`) checks the
+  identical `gHitMarker & HITMARKER_NO_ANIMATIONS && !(gBattleTypeFlags &
+  (BATTLE_TYPE_LINK|BATTLE_TYPE_RECORDED_LINK))` gate as
+  `BattleAnimateFrontSprite`/`DoMonFrontSpriteAnimation`'s `SKIP_FRONT_ANIM`
+  branch (`:6803-6856`), reached via the identical unconditional
+  `StartSpriteAffineAnim(..., BATTLER_AFFINE_EMERGE)` ball-emerge handoff on
+  both sides (`pokeball.c:815-820`). No asymmetry exists in the C source
+  Slice-D's own citations (`pokemon.c:6803-6852`) never actually covered —
+  they cite only the front function.
+- **Live RAM probe** (not just a source read): reused the banked KADABRA
+  scenario (`docs/probes/kadabra-materialize-settle/scenario.json`) with
+  every frame captured, reading `gHitMarker`/`gBattleTypeFlags`/both
+  battlers' sprite `y2`/callback directly. `HITMARKER_NO_ANIMATIONS` is set
+  for the entire materialize window; `gBattleTypeFlags` never carries
+  `BATTLE_TYPE_LINK`/`BATTLE_TYPE_RECORDED_LINK`. The gate's condition is
+  true on both sides.
+- **The actual mechanism**: the "KADABRA descent 14→0 over 13 ticks" the
+  Slice-D bisect (and entry 894 before it) attributed to a per-species
+  back-anim family is reproduced **byte-identically on the front sprite of a
+  different species in the same trace**, and completes *before* either
+  sprite's callback leaves `SpriteCB_{Player,Opponent}MonFromBall` (i.e.
+  before `affineAnimEnded`/`BattleAnimate{Front,Back}Sprite` even run) —
+  it's the species-agnostic, unconditional `BATTLER_AFFINE_EMERGE` collapse,
+  already banked in this codebase as `MATERIALIZE_Y2_TABLE`
+  (`battleScene.ts:4900`, doc'd "Species-independent player-side
+  ReleaseMonFromBall affine collapse") and already consumed by
+  `drawGeneratedPlayerMaterialize`'s first phase — not the per-species
+  `GetSpeciesBackAnimSet`/`LaunchAnimationTaskForBackSprite` family the rung-3
+  back dispatcher models. Separately, `battleMenu.ts`'s own
+  `PLAYER_SETTLE_WOBBLE_Y2_TABLE` doc comment (`:700-729`, pre-existing,
+  predates this session) already documents that its ONIX `BACK_ANIM_V_SHAKE`
+  source trace *did* take the un-gated branch — i.e. it's a Scene-ON-derived
+  table applied to a Scene-OFF seam — and says outright "the older ONIX
+  window's later bob belongs to Scene ON," which entry 894's own comment
+  (`battleScene.ts:4530-4531`) already echoed without fully acting on it.
+- **Consequence**: wiring `backSendOutFrameAtTick` at this seam per the R5
+  brief would consume the wrong dispatcher (the per-species idle-family one,
+  proven never to launch under Scene OFF) and would only coincidentally
+  reproduce KADABRA's numbers (equal to the universal table by chance at the
+  probed ticks), with no source-justified reason to hold for YOSHI/MAGNETON.
+  **Not implemented.** No `src/` changes landed this session.
+- **Left open for the next session**: whether frame 640/621 land in
+  mechanism 1 (already modeled — a clock/alignment bug, not a missing
+  table) or mechanism 2 (in which case flat `y2=0` for every species,
+  including ONIX, is probably the source-correct draw at this Scene-OFF seam
+  — not a species-keyed dispatcher call at all) needs probing the actual
+  committed `factory-arbitrary-intro-{yoshi,magneton}-off` traces directly.
+
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
 **Symptom:** `generateInitialFactoryRentals`'s `constructionRngValue`

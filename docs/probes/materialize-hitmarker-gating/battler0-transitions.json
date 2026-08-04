@@ -1,0 +1,1514 @@
+[
+  {
+    "frame": 0,
+    "hitMarkerNoAnimations": false,
+    "callbackSymbol": "SpriteCB_Pokeball",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 5,
+    "hitMarkerNoAnimations": false,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 58,
+    "hitMarkerNoAnimations": false,
+    "callbackSymbol": "SpriteCB_Pokeball",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 419,
+    "hitMarkerNoAnimations": false,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 423,
+    "hitMarkerNoAnimations": false,
+    "callbackSymbol": "MovementType_Player",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 629,
+    "hitMarkerNoAnimations": false,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 633,
+    "hitMarkerNoAnimations": false,
+    "callbackSymbol": "MovementType_Player",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1177,
+    "hitMarkerNoAnimations": false,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1199,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1207,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 240,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1240,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 238,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1241,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 236,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1242,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 234,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1243,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 232,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1244,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 230,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1245,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 228,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1246,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 226,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1247,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 224,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1248,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 222,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1249,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 220,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1250,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 218,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1251,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 216,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1252,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 214,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1253,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 212,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1254,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 210,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1255,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 208,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1256,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 206,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1257,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 204,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1258,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 202,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1259,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 200,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1260,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 198,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1261,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 196,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1262,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 194,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1263,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 192,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1264,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 190,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1265,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 188,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1266,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 186,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1267,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 184,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1268,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 182,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1269,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 180,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1270,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 178,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1271,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 176,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1272,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 174,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1273,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 172,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1274,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 170,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1275,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 168,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1276,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 166,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1277,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 164,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1278,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 162,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1279,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 160,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1280,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 158,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1281,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 156,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1282,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 154,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1283,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 152,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1284,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 150,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1285,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 148,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1286,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 146,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1287,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 144,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1288,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 142,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1289,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 140,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1290,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 138,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1291,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 136,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1292,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 134,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1293,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 132,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1294,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 130,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1295,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 128,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1296,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 126,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1297,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 124,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1298,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 122,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1299,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 120,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1300,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 118,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1301,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 116,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1302,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 114,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1303,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 112,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1304,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 110,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1305,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 108,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1306,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 106,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1307,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 104,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1308,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 102,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1309,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 100,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1310,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 98,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1311,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 96,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1312,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 94,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1313,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 92,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1314,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 90,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1315,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 88,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1316,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 86,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1317,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 84,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1318,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 82,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1319,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 80,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1320,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 78,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1321,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 76,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1322,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 74,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1323,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 72,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1324,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 70,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1325,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 68,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1326,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 66,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1327,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 64,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1328,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 62,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1329,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 60,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1330,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 58,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1331,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 56,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1332,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 54,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1333,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 52,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1334,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 50,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1335,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 48,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1336,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 46,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1337,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 44,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1338,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 42,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1339,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 40,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1340,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 38,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1341,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 36,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1342,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 34,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1343,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 32,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1344,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 30,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1345,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 28,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1346,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 26,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1347,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 24,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1348,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 22,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1349,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 20,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1350,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 18,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1351,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 16,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1352,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 14,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1353,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 12,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1354,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 10,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1355,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 8,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1356,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 6,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1357,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 4,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1358,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_TrainerSlideIn",
+    "x2": 2,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1359,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1650,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -2,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1651,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -4,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1652,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -7,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1653,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -9,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1654,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -12,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1655,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -14,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1656,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -16,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1657,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -19,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1658,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -21,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1659,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -24,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1660,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -26,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1661,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -28,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1662,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -31,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1663,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -33,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1664,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -36,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1665,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -38,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1666,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -40,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1667,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -43,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1668,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -45,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1669,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -48,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1670,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -50,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1671,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -52,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1672,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -55,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1673,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -57,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1674,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -60,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1675,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -62,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1676,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -64,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1677,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -67,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1678,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -69,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1679,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -72,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1680,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "AnimTranslateLinear_WithFollowup",
+    "x2": -74,
+    "y2": 0,
+    "animNum": 1
+  },
+  {
+    "frame": 1681,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1728,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_PlayerMonFromBall",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1729,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_PlayerMonFromBall",
+    "x2": 0,
+    "y2": 14,
+    "animNum": 0
+  },
+  {
+    "frame": 1730,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_PlayerMonFromBall",
+    "x2": 0,
+    "y2": 13,
+    "animNum": 0
+  },
+  {
+    "frame": 1731,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_PlayerMonFromBall",
+    "x2": 0,
+    "y2": 12,
+    "animNum": 0
+  },
+  {
+    "frame": 1732,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_PlayerMonFromBall",
+    "x2": 0,
+    "y2": 11,
+    "animNum": 0
+  },
+  {
+    "frame": 1733,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_PlayerMonFromBall",
+    "x2": 0,
+    "y2": 10,
+    "animNum": 0
+  },
+  {
+    "frame": 1734,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_PlayerMonFromBall",
+    "x2": 0,
+    "y2": 9,
+    "animNum": 0
+  },
+  {
+    "frame": 1735,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_PlayerMonFromBall",
+    "x2": 0,
+    "y2": 8,
+    "animNum": 0
+  },
+  {
+    "frame": 1736,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_PlayerMonFromBall",
+    "x2": 0,
+    "y2": 7,
+    "animNum": 0
+  },
+  {
+    "frame": 1737,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_PlayerMonFromBall",
+    "x2": 0,
+    "y2": 5,
+    "animNum": 0
+  },
+  {
+    "frame": 1738,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_PlayerMonFromBall",
+    "x2": 0,
+    "y2": 4,
+    "animNum": 0
+  },
+  {
+    "frame": 1739,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_PlayerMonFromBall",
+    "x2": 0,
+    "y2": 3,
+    "animNum": 0
+  },
+  {
+    "frame": 1740,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_PlayerMonFromBall",
+    "x2": 0,
+    "y2": 2,
+    "animNum": 0
+  },
+  {
+    "frame": 1741,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCB_PlayerMonFromBall",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1744,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1841,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 1,
+    "animNum": 0
+  },
+  {
+    "frame": 1859,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1877,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 1,
+    "animNum": 0
+  },
+  {
+    "frame": 1896,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1914,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 1,
+    "animNum": 0
+  },
+  {
+    "frame": 1932,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1950,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 1,
+    "animNum": 0
+  },
+  {
+    "frame": 1959,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 2,
+    "animNum": 0
+  },
+  {
+    "frame": 1960,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 1,
+    "animNum": 0
+  },
+  {
+    "frame": 1969,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  },
+  {
+    "frame": 1987,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 1,
+    "animNum": 0
+  },
+  {
+    "frame": 2005,
+    "hitMarkerNoAnimations": true,
+    "callbackSymbol": "SpriteCallbackDummy",
+    "x2": 0,
+    "y2": 0,
+    "animNum": 0
+  }
+]

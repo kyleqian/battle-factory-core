@@ -1,0 +1,672 @@
+{
+  "distinctBattleTypeFlags": [
+    "0x00000000",
+    "0x00080008",
+    "0x0008000c"
+  ],
+  "dense_1700_1750": [
+    {
+      "frame": 1700,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1701,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1702,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1703,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1704,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1705,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1706,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1707,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1708,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1709,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1710,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1711,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1712,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1713,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1714,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1715,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1716,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1717,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1718,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1719,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1720,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1721,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1722,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1723,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1724,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1725,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1726,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1727,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1728,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1729,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 14,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1730,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 13,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1731,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 12,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1732,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 11,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1733,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 10,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1734,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 9,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1735,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 8,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1736,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 7,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1737,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 5,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1738,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 4,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1739,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 3,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1740,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 2,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1741,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1742,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1743,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCB_PlayerMonFromBall"
+      }
+    },
+    {
+      "frame": 1744,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1745,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1746,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1747,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1748,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1749,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    },
+    {
+      "frame": 1750,
+      "hitMarkerNoAnimations": true,
+      "battleTypeFlags": "0x0008000c",
+      "battleTypeLink": false,
+      "battleTypeRecordedLink": false,
+      "battler0": {
+        "x2": 0,
+        "y2": 0,
+        "animNum": 0,
+        "callbackSymbol": "SpriteCallbackDummy"
+      }
+    }
+  ]
+}

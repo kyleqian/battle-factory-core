@@ -1,3 +1,58 @@
+## 919 — [bounded MAIN worker, 2026-08-04 ~15:25] ISSUES #71 Slice D found NOT APPLICABLE to the main lane's oracle — no src edits landed, docs-only
+
+- **State:** master `519b6bf8` unchanged + this docs commit. No production
+  code touched — the step's own premise didn't survive first contact with
+  the oracle, so nothing was landed rather than a fitted/regressing wiring.
+  `npm test`/`npm run build` unaffected by this commit (docs only); ran both
+  anyway per the finish requirement (see commit message for exact numbers).
+- **Did:** before writing render code (per the brief's own instruction to
+  validate the anchor first), checked whether Battle Scene OFF — this lane's
+  oracle — plays the front send-out per-tick animation at all. It does not.
+  Four independent sources converge: (1) `bin/oracle info`'s own bootstrap
+  description states outright *"Move/effect and species front-sprite
+  entrance animations are skipped by the real game"* under
+  `battle-scene-off` (contrast `--profile battle-scene-on`: *"front-sprite
+  entrance animations play"*); (2) source
+  (`reference/pokeemerald/src/pokemon.c:6803-6852`,
+  `DoMonFrontSpriteAnimation`'s `HITMARKER_NO_ANIMATIONS`/`SKIP_FRONT_ANIM`
+  branch) never launches the movement task under Scene OFF, set once at
+  battle init and never cleared; (3) `drawGeneratedOpponentRelease`'s own
+  pre-existing doc comment already says so verbatim ("Battle Scene OFF skips
+  the later species front-animation callback"); (4) ISSUES #56's closure
+  audit found **zero** front-sprite-movement residual in the two committed
+  generated-route Scene-OFF dense windows (YOSHI 700/751, MAGNETON 703/751)
+  despite YOSHI/COMBUSKEN's real `ANIM_V_JUMPS_H_JUMPS` family — every
+  residual frame there is unrelated (display-tail + idle-menu-bounce).
+  Wiring `frontSendOutFrameAtTick`/`frontSendOutSpriteFrameAtTick` into the
+  OFF-oracle-compared generated seam would therefore *introduce* mismatches,
+  not fix any. A speculative implementation was written to sanity-check this
+  live (type widening for the front-pic `frame2` asset + the per-tick call
+  site), then reverted (`git checkout`) once the evidence closed — tree was
+  never left dirty at a bad commit. `PAPERCUTS.md`'s existing "mechanicLab
+  send-out fast-forward silently inert under battle-scene-off" entry asserts
+  the opposite ("Real OFF-profile battles DO play send-out anims") and is
+  wrong per all four sources above; flagged for a solo session to correct
+  since supervised workers don't edit `PAPERCUTS.md`. ISSUES #71 rewritten:
+  Slice D closed as not-applicable (full reasoning + citations in place of
+  the old "gated on the dispatcher" framing), §1e patch-site retirement +
+  the coordinated hand-fit retirements are the only main-lane share left.
+- **Next:** #71's main-lane share is down to the §1e 56/58 move-window
+  patch-site retirement (separate pair-guard-refactor effort) and the
+  coordinated KABUTO/MAGBY/ONIX hand-fit retirement (needs the animation
+  lane, not solo). Worth a supervisor look: Slice A (already-landed, applies
+  `speciesFrontIdleRestOffset`'s static terminal offset at the generated
+  route's `coeff===0`) rests on the same `SKIP_FRONT_ANIM` mechanism this
+  entry found — flagged, not touched, since it's a separate already-merged
+  decision outside this step's scope.
+- **Notes:** the cross-lane ask (`frontSendOutFrameAtTick` +
+  `frontSendOutSpriteFrameAtTick`) is real, correct, tested work on the
+  animation lane's own terms — it simply has no valid consumer in the main
+  lane's OFF-oracle render seams, all of which this same real-game mechanism
+  gates off. PAPERCUT: the incorrect PAPERCUTS.md claim cost ~15min to
+  chase down and rule out via source+oracle-doc+audit cross-checking before
+  the (correct) reversal.
+
+---
 ## 918 — [supervisor, 2026-08-04 ~15:15] R2 landed both lanes; rung-3 dispatcher FOLDED (union 721/6,925 green) → #71 Slice D unblocked and R3 launched (Slice D MAIN + #73 scaffold residuals SIDE)
 
 - **State:** master `519b6bf8` + this docs commit. Post-fold union: full
