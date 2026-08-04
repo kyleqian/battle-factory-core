@@ -413,6 +413,10 @@ import {
   type PoisonTailState,
 } from "./poisonTail.ts";
 import {
+  steelWingAtAge,
+  type SteelWingState,
+} from "./steelWing.ts";
+import {
   toxicEffectAtAge,
   type ToxicSprite,
 } from "./toxic.ts";
@@ -618,6 +622,7 @@ export interface SceneOnPresentationBattler {
     | "GLOOM"
     | "TOGETIC"
     | "MACHOKE"
+    | "WINGULL"
     | "TAILLOW"
     | "EEVEE"
     | "ZIGZAGOON"
@@ -1715,6 +1720,13 @@ export interface SceneOnPoisonTailConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSteelWingConfig {
+  readonly move: "STEEL_WING";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnToxicConfig {
   readonly move: "TOXIC";
   readonly attacker: SceneOnPresentationBattler;
@@ -1906,6 +1918,7 @@ export type SceneOnMoveConfig =
   | SceneOnAstonishConfig
   | SceneOnRazorLeafConfig
   | SceneOnPoisonTailConfig
+  | SceneOnSteelWingConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
@@ -2350,6 +2363,12 @@ export interface SceneOnRazorLeafView extends RazorLeafState {
 }
 
 export interface SceneOnPoisonTailView extends PoisonTailState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSteelWingView extends SteelWingState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4809,6 +4828,26 @@ export function sceneOnPoisonTailView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...poisonTailAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the MetallicShine initializer's first displayed frame. */
+export function sceneOnSteelWingView(
+  state: SceneOnMovePresentationState,
+): SceneOnSteelWingView {
+  if (state.config.move !== "STEEL_WING") {
+    throw new Error(`expected STEEL_WING presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...steelWingAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,

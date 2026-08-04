@@ -6,6 +6,24 @@ import {
   steelWingGustAtTick,
   steelWingGustPaletteRotationAtTick,
 } from "../../src/animation/steelWing.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnSteelWingView,
+} from "../../src/animation/sceneOnPresentation.ts";
+import { renderSceneOnMovePresentation } from "../../src/engine/battleScene.ts";
+
+const playerStage = () => createSceneOnMovePresentation({
+  move: "STEEL_WING" as const,
+  attacker: { species: "WINGULL" as const, geometry: {
+    side: "player" as const, spriteCorner: { x: 40, y: 62 },
+    animationCenter: { x: 72, y: 94 }, battlePositionCenter: { x: 72, y: 80 },
+  } },
+  target: { species: "ONIX" as const, geometry: {
+    side: "opponent" as const, spriteCorner: { x: 144, y: 10 },
+    animationCenter: { x: 176, y: 42 }, battlePositionCenter: { x: 176, y: 40 },
+  } },
+  fieldProfile: { playerHp: 100, playerMaxHp: 100, opponentHp: 110, opponentMaxHp: 110 },
+});
 
 describe("MOVE_STEEL_WING source reducer", () => {
   it("ports the elliptical u8 phase loop and terminal restoration", () => {
@@ -45,5 +63,18 @@ describe("MOVE_STEEL_WING source reducer", () => {
     expect(run.stderr).toBe("");
     expect(run.status).toBe(0);
     expect(run.stdout).toContain("Wing Attack/Razor Wind remain no-credit");
+  });
+
+  it("exposes the reducer through the typed Scene-ON seam", () => {
+    const view = sceneOnSteelWingView({ ...playerStage(), age: 141 });
+    expect(view).toMatchObject({ age: 141, monbg: true, alpha: true });
+    expect(view.hitsplats).toHaveLength(2);
+  });
+
+  it("composites source assets through the production renderer", () => {
+    const fb = new Uint8Array(240 * 160 * 4);
+    renderSceneOnMovePresentation(fb, { ...playerStage(), age: 120 });
+    expect(fb.every((value, index) => index % 4 !== 3 || value === 255)).toBe(true);
+    expect(fb.some((value, index) => index % 4 !== 3 && value !== 0)).toBe(true);
   });
 });

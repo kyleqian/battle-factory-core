@@ -605,6 +605,7 @@ import explosionAsset from "../animation/assets/explosion.json" with { type: "js
 import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
 import razorLeafAsset from "../animation/assets/razorLeaf.json" with { type: "json" };
 import poisonTailAsset from "../animation/assets/poisonTail.json" with { type: "json" };
+import steelWingAsset from "../animation/assets/steel-wing.json" with { type: "json" };
 import toxicAsset from "../animation/assets/toxic.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
 import calmMindAsset from "../animation/assets/calm-mind.json" with { type: "json" };
@@ -961,6 +962,7 @@ import {
   sceneOnDynamicPunchView,
   sceneOnRazorLeafView,
   sceneOnPoisonTailView,
+  sceneOnSteelWingView,
   sceneOnToxicView,
   sceneOnEarthquakeView,
   sceneOnHardenView,
@@ -1629,6 +1631,13 @@ const poisonTailArt = poisonTailAsset as {
   poisonBubble: { tileset: Tileset; palette: RgbColor[] };
   seviperBack: { tileset: Tileset; palette: RgbColor[] };
   seviperFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const steelWingArt = steelWingAsset as {
+  metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
+  gust: { tileset: Tileset; palette: RgbColor[] };
+  impact: { tileset: Tileset; palette: RgbColor[] };
+  wingullBack: { tileset: Tileset; palette: RgbColor[] };
+  wingullFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const toxicArt = toxicAsset as {
   toxicBubble: { tileset: Tileset; palette: RgbColor[] };
@@ -23200,6 +23209,98 @@ export function renderSceneOnMovePresentation(
       "POISON TAIL!",
       99,
     );
+    return;
+  }
+
+  if (state.config.move === "STEEL_WING") {
+    const view = sceneOnSteelWingView(state);
+    // RunTasks/BuildOamBuffer and palette DMA expose callback writes on the
+    // following display, matching the other source-relative Scene-ON cases.
+    const displayed = sceneOnSteelWingView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "WINGULL"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "WINGULL"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged STEEL_WING pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? steelWingArt.wingullBack : steelWingArt.wingullFront;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : { ...attackerSource, tileset: { columns: 8, rows: 8,
+          tiles: attackerSource.tileset.tiles.slice(0, 64) } };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const rotatedGustPalette = steelWingArt.gust.palette.slice();
+    for (let rotation = 0; rotation < displayed.gustPaletteRotation % 8; rotation += 1) {
+      const last = rotatedGustPalette[8]!;
+      for (let index = 8; index > 1; index -= 1) {
+        rotatedGustPalette[index] = rotatedGustPalette[index - 1]!;
+      }
+      rotatedGustPalette[1] = last;
+    }
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb, targetSprite.tileset, targetSprite.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const target2Backdrop = fb.slice();
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      state.age >= 2 && displayed.metallic.attackerGrayscale
+        ? grayscalePalette(attackerSprite.palette) : attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerX2,
+      view.attacker.geometry.spriteCorner.y + displayed.attackerY2,
+    );
+    if (state.age >= 2 && displayed.metallic.metalBgLoaded) {
+      drawMetallicShineMasked(
+        fb, attackerSprite, view.attacker.geometry.spriteCorner,
+        displayed.metallic.bg1X, displayed.metallic.bg1Y, steelWingArt.metal,
+      );
+    }
+    for (const gust of displayed.gusts) {
+      drawSpriteSheetAffineRotate(
+        fb, steelWingArt.gust.tileset, rotatedGustPalette,
+        gust.x, gust.y, Math.trunc(0x10000 / gust.xScale), 0, 0, 256,
+        undefined, false,
+      );
+    }
+    for (const hit of displayed.hitsplats) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb, steelWingArt.impact.tileset, steelWingArt.impact.palette,
+        hit.x - 16, hit.y - 16, 372, 372, 12, 8, false, target2Backdrop,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "WINGULL";
+    const playerSpecies = playerToOpponent ? "WINGULL" : "ONIX";
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies, level: 50,
+      gender: state.config.fieldProfile.opponentGender ?? "male",
+      hpFraction: state.config.fieldProfile.opponentHp / state.config.fieldProfile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies, level: 50,
+      gender: state.config.fieldProfile.playerGender ?? "male",
+      hpFraction: state.config.fieldProfile.playerHp / state.config.fieldProfile.playerMaxHp,
+      status: "none", currentHp: state.config.fieldProfile.playerHp,
+      maxHp: state.config.fieldProfile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb, playerToOpponent ? "WINGULL used" : "Foe WINGULL used", "STEEL WING!", 99);
     return;
   }
 
