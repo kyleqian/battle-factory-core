@@ -4,6 +4,72 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 907 — [bounded MAIN worker, 2026-08-04 ~02:30] Corrective: fixed the backwards BS_ATTACKER trainer-slide-in mapping entry 906 flagged
+
+- **State:** master `0fd3367d`. Full `npm test` green (**688 files / 6,727
+  passed / 1 skipped**, 0 failures), `npm run build` green,
+  `compare:differential -- battle-command-generated-off.json --base bb39b434
+  --summary`: **PASS — 128/128 byte-identical** (confirms zero visible
+  change, as expected — no renderer consumes this field yet).
+- **Did:** Fixed entry 906's flagged-but-unfixed bug: source-verified both
+  `Cmd_trainerslidein`/`Cmd_trainerslideout` (`battle_script_commands.c:
+  5301-5308,10319-10326`) — both do `gActiveBattler =
+  GetBattlerAtPosition(gBattlescriptCurrInstr[1])`, no hardcoding, the
+  compiled operand byte genuinely selects the position (confirmed
+  `resolveBattlerAtPosition`/`resolveSingleBattlePosition` is this opcode's
+  *only* call site, `battleScriptSourceCommands.ts`'s
+  `emitTrainerSlideControllerEvent`). `BS_ATTACKER`
+  (`battle_script_commands.h:305`) compiles to **1**, matching
+  `B_POSITION_OPPONENT_LEFT` (`include/constants/battle.h:29`, also 1) — NOT
+  `B_POSITION_PLAYER_LEFT` (`battle.h:28`, value 0) as the prior mapping and
+  its comment both incorrectly asserted. So `trainerslidein BS_ATTACKER`
+  (both the WIN script `BattleScript_FrontierTrainerBattleWon_LoseTexts` and
+  the LOSS/DREW script `BattleScript_LocalBattleLostPrintTrainersWinText`,
+  `data/battle_scripts_1.s:2927,2966`) always resolves the **opponent**'s
+  battler (1), matching the oracle trace where DESTIN visibly slides in on
+  both outcomes. Fixed `resolveSingleBattlePosition`
+  (`battleScriptBattlerPositions.ts`) — moved `BS_ATTACKER` to the same
+  value (1) as `B_POSITION_OPPONENT_LEFT`, rewrote the module's doc comment
+  with the corrected citations. Audited every other entry in
+  `SINGLE_BATTLE_POSITIONS` against the header (only `B_POSITION_PLAYER_LEFT`
+  and `B_POSITION_OPPONENT_LEFT` remain, both already correct raw-position
+  mappings; `BS_FAINTED` is never reached in Factory singles — its only
+  script use is behind a `BATTLE_TYPE_TWO_OPPONENTS` branch Factory never
+  takes — so it correctly stays unmapped/null, unchanged). Blast radius
+  (`rg` for `resolveBattlerAtPosition`/`resolveSingleBattlePosition`/
+  `trainer-slide-in` across `src/`+`tests/`): only two call sites actually
+  exercise `BS_ATTACKER` through this resolver and needed flips — both
+  red-verified (stash/revert → old-mapping pins pass, new pins fail;
+  restore → new pins pass, confirmed via actual test runs, not inferred):
+  (1) `battleScriptFaintedActionsOrchestration.test.ts`'s own hand-rolled
+  `resolveBattlerAtPosition` port mock (doesn't import the production
+  function) — fixed the mock plus its 3 pins (WIN kill-shot, LOSS
+  compactSequence, DREW) from `battler: 0`/`"slide-in:0"` to `1`; (2)
+  `factoryBattleScriptFullTurnDecision.test.ts`'s staged-LOSS
+  `compactSequence` pin, which routes through the real production
+  `resolveSingleBattlePosition` via `factoryBattleScriptFullTurnDecision.ts`
+  — flipped `"slide-in:0"` to `"slide-in:1"`. Every other file importing
+  `resolveSingleBattlePosition` (`factoryBattleStart.ts`,
+  `factoryBattleScriptDecision.ts`, `factoryBattleScriptTerminalDecision.ts`,
+  `battleEndTurnOrchestration.test.ts`, `battleScriptFutureAttack.test.ts`)
+  either never exercises `BS_ATTACKER` through it or has no matching
+  `trainer-slide-in` battler pin — confirmed unaffected by running their
+  suites green. `battleScriptSwitchinOpcode.ts`'s VARIOUS case 19/20 comment
+  (a *different* opcode, `Cmd_various`, which genuinely discards its
+  `BS_ATTACKER` operand and hardcodes `gActiveBattler`) makes no numeric
+  claim about `BS_ATTACKER`'s value, so it needed no correction.
+- **Next:** #73 item 1 (increment (iii), the win/loss trainer-slide-in
+  presentation phase, now backed by source-true event data). #73 item 2
+  (oracle-level pixel coverage, both outcomes). #72's remaining REACHABLE-10
+  list (`STRINGID_PKMNHUNGONWITHX` next by rank). The `Cmd_end3`/
+  `call-current` resumption gap (`SXWHIPPEDUPSANDSTORM`). #71 Slice D (gated
+  on the animation lane's rung-3 dispatcher).
+- **Notes:** No PAPERCUT. Scope stayed exactly the corrective as briefed —
+  resolver + its comments + the pins it drives, nothing in `battleScene.ts`
+  or any other #72/#73 item touched. `npm test`/`npm run build`/the
+  differential all ran to real foreground completion.
+
+---
 ## 906 — [bounded MAIN worker, 2026-08-04 ~02:00] terminal-seam increment (i) LOSS half landed: LOST/DREW run BattleScript_LocalBattleLost as a second VM pass
 
 - **State:** master `1eb9d1e6`. Full `npm test` green (**688 files / 6,727
@@ -62,36 +128,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   cover the loss window too).
 - **Surprise found, not fixed (flagged, out of scope):** while tracing
   `trainerslidein BS_ATTACKER`'s battler resolution to confirm the LOSS
-  script's event sequence, direct source reading
-  (`include/constants/battle_script_commands.h:305`: `BS_ATTACKER` = **1**,
-  not 0; `B_POSITION_PLAYER_LEFT` = 0, `B_POSITION_OPPONENT_LEFT` = 1) shows
-  `battleScriptBattlerPositions.ts`'s existing `resolveSingleBattlePosition`
-  comment/mapping is backwards: it maps `"BS_ATTACKER"` to battler 0
-  (`B_POSITION_PLAYER_LEFT`), but `Cmd_trainerslidein` reads its operand as a
-  raw `GetBattlerAtPosition` argument and the compiled byte for `BS_ATTACKER`
-  is 1, so the real resolution is `GetBattlerAtPosition(1)` = battler 1 (the
-  **opponent**) — matching the loss doc's own observation that DESTIN (the
-  opponent trainer), not the player, visibly slides in on both the win and
-  loss quote screens. This is a real, pre-existing bug from the win-side
-  landing (`5f1b3d80`/`2bb9b3bc`), silently harmless today only because no
-  renderer consumes `trainer-slide-in`'s `battler` field yet (#73 item 1,
-  formerly item 2). Left untouched deliberately: fixing it would flip the
-  already-pinned win-side test's own `battler: 0` expectation
-  (`battleScriptFaintedActionsOrchestration.test.ts` "mid-turn KO" pin),
-  breaking the "win-side pins untouched-green" requirement for this step,
-  and the LOSS side's own new pins intentionally inherit the same
-  (consistent, bug-carrying) resolver rather than diverging from the WIN
-  side's established convention. Needs its own scoped fix (touches both the
-  resolver and both win/loss pins' `battler` expectations) — flagging here
-  since it's genuinely load-bearing for #73 item 1's future renderer work,
-  not just a doc typo.
+  script's event sequence, direct source reading showed
+  `battleScriptBattlerPositions.ts`'s `resolveSingleBattlePosition` mapping
+  was backwards (`BS_ATTACKER` mapped to battler 0/player instead of the
+  real battler 1/opponent). **Fixed in entry 907**, the very next step.
 - **Next:** #73 item 1 (increment (iii), the win/loss trainer-slide-in
-  presentation phase — now also the right place to fix the `BS_ATTACKER`
-  resolver bug above, since that item is what will finally consume the
-  `battler` field). #73 item 2 (oracle-level pixel coverage, both outcomes).
-  #72's remaining REACHABLE-10 list (`STRINGID_PKMNHUNGONWITHX` next by rank).
-  The `Cmd_end3`/`call-current` resumption gap (`SXWHIPPEDUPSANDSTORM`).
-  #71 Slice D (gated on the animation lane's rung-3 dispatcher).
+  presentation phase, now backed by source-true event data per entry 907).
+  #73 item 2 (oracle-level pixel coverage, both outcomes). #72's remaining
+  REACHABLE-10 list (`STRINGID_PKMNHUNGONWITHX` next by rank). The
+  `Cmd_end3`/`call-current` resumption gap (`SXWHIPPEDUPSANDSTORM`). #71
+  Slice D (gated on the animation lane's rung-3 dispatcher).
 - **Notes:** No PAPERCUT — the `git stash`/red-verify cycle and the
   `submitFactoryFullTurnDecision` event-shape discovery (top-level `events`
   are `{sequence, payload, provenance}`-wrapped, not flat — a one-line fix
@@ -178,69 +224,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   foreground completion via the background-output file rather than treating
   the auto-background as a wait-for-notification shortcut.
 
----
-## 904 — [bounded MAIN worker, 2026-08-04 ~00:10] #72 batch 6: 13 more REACHABLE printstring STRINGIDs landed
-
-- **State:** master (this docs commit follows the engine commit). Full
-  `npm test` green (**686 files / 6,717 passed / 1 skipped**, 0 failures),
-  `npm run build` green (`tsc -b && vite build`).
-- **Did:** Continued ISSUES #72's ranked REACHABLE-28 list from
-  `STRINGID_PKMNSXCUREDYPROBLEM` (skipping the hard trio/`TRACED`/`SXBLOCKSY2`
-  per the step brief) and landed 13 across 11 staged `it`s in
-  `tests/presentationStringIssue72Batch6.test.ts`: the end-turn ability-tick
-  trio Shed Skin/Rain Dish/Speed Boost (`SXCUREDYPROBLEM`/`SXRESTOREDHPALITTLE2`/
-  `RAISEDSPEED` — Shed Skin's tick gained a small `battleTextBuff1Status`
-  pre-clear capture mirroring `HOLD_EFFECT_CURE_STATUS`'s own branch, Speed
-  Boost's tick gained an explicit `scriptingBattler` write mirroring
-  `battle_util.c:2649`, Rain Dish needed neither — its own print reads
-  `B_ATK_*`, already supplied generically by `enterTickBattlerContext`); Wish's
-  delayed heal `WISHCAMETRUE` (real 2-turn cast-then-resolve repro); the
-  Disable attack-canceler pair `MOVEWASDISABLED`/`MOVEISDISABLED` (real
-  same-turn cast-then-blocked-reselect, the second sharing Taunt's exact
-  idiom); Perish Song's `PERISHCOUNTFELL` (real same-turn cast-then-tick,
-  reusing Stockpile's `battleTextBuff1ByteNumber` substitution); the Magic
-  Coat pair `SHROUDEDITSELF`/`MOVEBOUNCED` (real same-turn cast-then-bounced-
-  GROWL); `USEDSAFEGUARD` (real same-turn Safeguard-then-blocked Thunder
-  Wave); and three zero-new-plumbing defender-only ids
-  (`STATSWONTDECREASE2`/`FELLINTONIGHTMARE`/`HEALEDPARALYSIS`). Three ability
-  display names added (`RAIN DISH`/`SPEED BOOST`/`SHED SKIN`). All 11 `it`s
-  red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
-  src/engine/factoryBattleScriptFullTurnDecision.ts
-  src/engine/battleEndTurnOrchestration.ts` (each threw the exact pre-fix
-  completeness-guard error). Census: **67→54 UNRESOLVED** (exact −13). ISSUES
-  #72 REACHABLE trimmed to **15** (28−13, arithmetic-checked).
-- **Skipped, with reasons (not just budget):** `STRINGID_PKMNTOOKFOE`
-  (Destiny Bond) and `STRINGID_PKMNLOSTPPGRUDGE` (Grudge) both route through
-  `tryfaintmon`'s dual `BS_ATTACKER`/`BS_TARGET` operand
-  (`battleScriptHitChainOpcode.ts:4270-4340`) — the single-hit case resolves
-  to the plain idiom, but proving that holds across every reachable
-  `tryfaintmon` call site is its own investigation, not this step's scope.
-  `STRINGID_PKMNSXWHIPPEDUPSANDSTORM` (Sand Stream — mechanism fully
-  understood, needs a genuine mid-battle switch with a 2nd party slot),
-  `STRINGID_PKMNSAFEGUARDEXPIRED` (mechanism understood, needs a real 5-turn
-  expiry repro, no `sideTimers` config shortcut), `STRINGID_PKMNTOOKATTACK`
-  (Future Sight — mechanism understood, needs a real 3-turn delayed-hit
-  repro) all ran out of step budget on staging cost alone.
-  `STRINGID_MAGNITUDESTRENGTH` needs a new RNG-roll capture field (genuine new
-  plumbing). `STRINGID_PKMNCHANGEDTYPEWITH` (the one permitted plumbing
-  extension) not attempted, ran out of budget. `STRINGID_PKMNREDUCEDPP`/
-  `STRINGID_PKMNSITEMRESTOREDPP`/`STRINGID_PKMNSTOLEITEM` each need a small
-  new substitution-capture pair, not attempted.
-- **Next:** #72 batch 7 (REACHABLE-15 list: `SXWHIPPEDUPSANDSTORM` next in
-  order, or cherry-pick `STOLEITEM`/`CHANGEDTYPEWITH` first — both cheap per
-  this session's own research). The hard trio, `TRACED`, `SXBLOCKSY2`,
-  `TOOKFOE`/`LOSTPPGRUDGE`'s tryfaintmon investigation. typeref slices 4-8.
-  #71 Slice D.
-- **Notes:** No PAPERCUT. Full suite + build ran in the foreground per this
-  step's execution-discipline brief (an earlier attempt to background them
-  was caught and corrected mid-step before either notification landed).
-- **[supervisor addendum, 2026-08-04 ~00:25]** Typeref slice 7b merged on top
-  of this entry (`88ddf84e`): battleScene.ts census **41→0**, −272 net lines,
-  8,199/8,199 differential captures byte-identical, union smoke + both pin
-  suites green post-merge. Slice-8 audit ran supervisor-side (no dead test
-  fixtures; adapter-owned types are legitimately retained) — **the §4.1
-  typeref retirement program is CLOSED**, recorded in ISSUES #39 and the
-  design doc header. Entry 904's "typeref slices 4-8" Next-item is thereby
-  retired; #71 Slice D remains gated on the animation lane's rung-3
-  dispatcher (not landed as of this session's orient). Side lane currently
-  running the loss-path terminal ground-truth scout (docs+traces only).

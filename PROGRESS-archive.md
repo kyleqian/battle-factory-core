@@ -1,5 +1,72 @@
 
 ---
+## 904 — [bounded MAIN worker, 2026-08-04 ~00:10] #72 batch 6: 13 more REACHABLE printstring STRINGIDs landed
+
+- **State:** master (this docs commit follows the engine commit). Full
+  `npm test` green (**686 files / 6,717 passed / 1 skipped**, 0 failures),
+  `npm run build` green (`tsc -b && vite build`).
+- **Did:** Continued ISSUES #72's ranked REACHABLE-28 list from
+  `STRINGID_PKMNSXCUREDYPROBLEM` (skipping the hard trio/`TRACED`/`SXBLOCKSY2`
+  per the step brief) and landed 13 across 11 staged `it`s in
+  `tests/presentationStringIssue72Batch6.test.ts`: the end-turn ability-tick
+  trio Shed Skin/Rain Dish/Speed Boost (`SXCUREDYPROBLEM`/`SXRESTOREDHPALITTLE2`/
+  `RAISEDSPEED` — Shed Skin's tick gained a small `battleTextBuff1Status`
+  pre-clear capture mirroring `HOLD_EFFECT_CURE_STATUS`'s own branch, Speed
+  Boost's tick gained an explicit `scriptingBattler` write mirroring
+  `battle_util.c:2649`, Rain Dish needed neither — its own print reads
+  `B_ATK_*`, already supplied generically by `enterTickBattlerContext`); Wish's
+  delayed heal `WISHCAMETRUE` (real 2-turn cast-then-resolve repro); the
+  Disable attack-canceler pair `MOVEWASDISABLED`/`MOVEISDISABLED` (real
+  same-turn cast-then-blocked-reselect, the second sharing Taunt's exact
+  idiom); Perish Song's `PERISHCOUNTFELL` (real same-turn cast-then-tick,
+  reusing Stockpile's `battleTextBuff1ByteNumber` substitution); the Magic
+  Coat pair `SHROUDEDITSELF`/`MOVEBOUNCED` (real same-turn cast-then-bounced-
+  GROWL); `USEDSAFEGUARD` (real same-turn Safeguard-then-blocked Thunder
+  Wave); and three zero-new-plumbing defender-only ids
+  (`STATSWONTDECREASE2`/`FELLINTONIGHTMARE`/`HEALEDPARALYSIS`). Three ability
+  display names added (`RAIN DISH`/`SPEED BOOST`/`SHED SKIN`). All 11 `it`s
+  red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
+  src/engine/factoryBattleScriptFullTurnDecision.ts
+  src/engine/battleEndTurnOrchestration.ts` (each threw the exact pre-fix
+  completeness-guard error). Census: **67→54 UNRESOLVED** (exact −13). ISSUES
+  #72 REACHABLE trimmed to **15** (28−13, arithmetic-checked).
+- **Skipped, with reasons (not just budget):** `STRINGID_PKMNTOOKFOE`
+  (Destiny Bond) and `STRINGID_PKMNLOSTPPGRUDGE` (Grudge) both route through
+  `tryfaintmon`'s dual `BS_ATTACKER`/`BS_TARGET` operand
+  (`battleScriptHitChainOpcode.ts:4270-4340`) — the single-hit case resolves
+  to the plain idiom, but proving that holds across every reachable
+  `tryfaintmon` call site is its own investigation, not this step's scope.
+  `STRINGID_PKMNSXWHIPPEDUPSANDSTORM` (Sand Stream — mechanism fully
+  understood, needs a genuine mid-battle switch with a 2nd party slot),
+  `STRINGID_PKMNSAFEGUARDEXPIRED` (mechanism understood, needs a real 5-turn
+  expiry repro, no `sideTimers` config shortcut), `STRINGID_PKMNTOOKATTACK`
+  (Future Sight — mechanism understood, needs a real 3-turn delayed-hit
+  repro) all ran out of step budget on staging cost alone.
+  `STRINGID_MAGNITUDESTRENGTH` needs a new RNG-roll capture field (genuine new
+  plumbing). `STRINGID_PKMNCHANGEDTYPEWITH` (the one permitted plumbing
+  extension) not attempted, ran out of budget. `STRINGID_PKMNREDUCEDPP`/
+  `STRINGID_PKMNSITEMRESTOREDPP`/`STRINGID_PKMNSTOLEITEM` each need a small
+  new substitution-capture pair, not attempted.
+- **Next:** #72 batch 7 (REACHABLE-15 list: `SXWHIPPEDUPSANDSTORM` next in
+  order, or cherry-pick `STOLEITEM`/`CHANGEDTYPEWITH` first — both cheap per
+  this session's own research). The hard trio, `TRACED`, `SXBLOCKSY2`,
+  `TOOKFOE`/`LOSTPPGRUDGE`'s tryfaintmon investigation. typeref slices 4-8.
+  #71 Slice D.
+- **Notes:** No PAPERCUT. Full suite + build ran in the foreground per this
+  step's execution-discipline brief (an earlier attempt to background them
+  was caught and corrected mid-step before either notification landed).
+- **[supervisor addendum, 2026-08-04 ~00:25]** Typeref slice 7b merged on top
+  of this entry (`88ddf84e`): battleScene.ts census **41→0**, −272 net lines,
+  8,199/8,199 differential captures byte-identical, union smoke + both pin
+  suites green post-merge. Slice-8 audit ran supervisor-side (no dead test
+  fixtures; adapter-owned types are legitimately retained) — **the §4.1
+  typeref retirement program is CLOSED**, recorded in ISSUES #39 and the
+  design doc header. Entry 904's "typeref slices 4-8" Next-item is thereby
+  retired; #71 Slice D remains gated on the animation lane's rung-3
+  dispatcher (not landed as of this session's orient). Side lane currently
+  running the loss-path terminal ground-truth scout (docs+traces only).
+
+---
 ## 903 — [bounded MAIN worker, 2026-08-03 ~23:45] CANCELER_TORMENTED step BLOCKED: assigned premise was factually wrong, corrected docs, no engine/presentation change
 
 - **State:** master `6eaae2c5` (unchanged — docs-only commit follows). Full
