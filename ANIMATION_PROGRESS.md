@@ -27,8 +27,11 @@
   Lanturn **1839..1916 / 78 / 82,728 B /
   `5518bbe2a4ad1817190863e43e2ce70b2e9f3e0ae6f5153cbb78ef204d9a314c`**.
   Palette transfer is one-frame-lagged except Raichu frame 1844's observed
-  same-frame restoration transfer. No boundary/unsupported widening or move
-  promotion.
+  same-frame restoration transfer. Focused source/census/routing/reducer/
+  palette evidence plus both ratchets: **4 files / 23 tests**; typecheck,
+  smoke **7/347**, full **704 files / 6,811 passed / 1 skipped**, build
+  (**554 modules**), and coverage are green. No boundary/unsupported widening
+  or move promotion.
 
 ## Back `BACK_ANIM_JOLT_RIGHT` triple accepted (2026-08-04)
 
