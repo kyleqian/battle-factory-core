@@ -855,38 +855,16 @@ import {
   resolveTurn5SwitchInAdapter,
 } from "./turn5ResolutionAdapter.ts";
 import {
-  isTurn1NextCommandHandoffReady,
-  isTurn1NextCommandLifecycleActive,
-  turn1CompletedResolutionNextCommandHandoffFromLatest,
-  turn1PresentationEpochElapsedSinceReset,
-  type Turn1CompletedResolutionNextCommandHandoff,
-} from "./turn1ResolutionAdapter.ts";
-import {
   isTurn2LatestCompletedCommandLifecycleActive,
-  isTurn2NextCommandHandoffReady,
-  isTurn2NextCommandLifecycleActive,
-  turn2CompletedResolutionNextCommandHandoffFromLatest,
   turn2FightCommandPresentationFromLatest,
-  turn2PresentationEpochElapsedSinceReset,
-  type Turn2CompletedResolutionNextCommandHandoff,
 } from "./turn2ResolutionAdapter.ts";
 import {
   isTurn3LatestCompletedCommandLifecycleActive,
-  isTurn3NextCommandHandoffReady,
-  isTurn3NextCommandLifecycleActive,
-  turn3CompletedResolutionNextCommandHandoffFromLatest,
   turn3FightCommandPresentationFromLatest,
-  turn3PresentationEpochElapsedSinceReset,
-  type Turn3CompletedResolutionNextCommandHandoff,
 } from "./turn3ResolutionAdapter.ts";
 import {
   isTurn4LatestCompletedCommandLifecycleActive,
-  isTurn4NextCommandHandoffReady,
-  isTurn4NextCommandLifecycleActive,
-  turn4CompletedResolutionNextCommandHandoffFromLatest,
   turn4FightCommandPresentationFromLatest,
-  turn4PresentationEpochElapsedSinceReset,
-  type Turn4CompletedResolutionNextCommandHandoff,
 } from "./turn4ResolutionAdapter.ts";
 import { TURN1_CHOOSE_ACTION_RESET_AFTER_CONFIRM } from "./turn1ChooseActionReset.ts";
 import { TURN9_QUICKATTACK_HP } from "./turn9ResolutionAdapter.ts";
@@ -7449,58 +7427,22 @@ function drawTwoStateBounceRect(fb: Uint8Array, asset: MenuIdleBounceTwoStateAss
  * exactly the ordering constraint S7 slice E2b-2 already found for this
  * same overlay.
  */
-function drawMenuIdleBaseWithOpponentHp(
+/**
+ * Generic sibling of the retired `drawMenuIdleBaseWithOpponentHp` (typeref-
+ * retirement slice 7b, `docs/battlescene-turnN-typeref-retirement-design.md`
+ * §4.1 row 7). `latest` only ever carries ONE turn's content at a time, so
+ * its own `.content.field.opponent.hp.current` already IS whichever of
+ * turn 1-4's own opponent HP is current - the legacy turn4-then-3-then-2-
+ * then-1 readiness cascade was reconstructing this exact single fact from
+ * `latest` one call frame up (§2.3), never a second independent source.
+ */
+function drawMenuIdleBaseWithOpponentHpFromLatest(
   fb: Uint8Array,
-  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null = null,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null = null,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null = null,
+  latest: LatestCompletedCommandHandoff | null,
 ): void {
   drawRect(fb, menuIdleBase);
-  const hp = isTurn4NextCommandHandoffReady(turn4NextCommandHandoff)
-    ? turn4NextCommandHandoff.hp.opponent
-    : isTurn3NextCommandHandoffReady(turn3NextCommandHandoff)
-      ? turn3NextCommandHandoff.hp.opponent
-      : isTurn2NextCommandHandoffReady(turn2NextCommandHandoff)
-        ? turn2NextCommandHandoff.hp.opponent
-        : isTurn1NextCommandHandoffReady(turn1NextCommandHandoff)
-          ? turn1NextCommandHandoff.hp.opponent
-          : null;
+  const hp = latest?.content?.field.opponent.hp.current ?? null;
   if (hp !== null) drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(hp));
-}
-
-function drawActionMenuIdleContent(
-  fb: Uint8Array,
-  bounceTick: number,
-  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null = null,
-  playerHp: number | undefined = undefined,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null = null,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null = null,
-): void {
-  const resolvedPlayerHp = playerHp
-    ?? (isTurn3NextCommandHandoffReady(turn3NextCommandHandoff)
-      ? turn3NextCommandHandoff.hp.player
-      : isTurn2NextCommandHandoffReady(turn2NextCommandHandoff)
-        ? turn2NextCommandHandoff.hp.player
-        : anchorPlayerAfterTurnHp);
-  drawMenuIdleBaseWithOpponentHp(fb, turn1NextCommandHandoff, turn2NextCommandHandoff, turn3NextCommandHandoff, turn4NextCommandHandoff);
-  const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick);
-  drawTwoStateBounceRect(fb, menuIdleOnixBounce, onixY2);
-  drawTwoStateBounceRect(fb, menuIdleHealthboxBounce, healthboxY2);
-  // S7 slice F: Onix's own HP overlay (117->101, ENDEAVOR's own settle) is
-  // stale in `menuIdleBase`'s flat harvest just like Grovyle's bar - applied
-  // AFTER the bounce patches above so it isn't overdrawn by the healthbox's
-  // own static bounce asset (same ordering `drawDragonBreathTurnEndSettled
-  // Menu` already established for this exact overlay, S7 slice E2b-2).
-  // S7 slice G: `playerHp` (default `anchorPlayerAfterTurnHp`, every
-  // pre-existing caller unaffected) lets turn 3's own still-draining Onix hp
-  // (101->88, `endeavorHp`) reach this same overlay while its fallback
-  // idle-content path is active (past `ENDEAVOR_SQUISH_TABLE`'s own window
-  // but before the HP drain settles) - see `drawTurn3EndeavorText`.
-  if (isTurn3NextCommandHandoffReady(turn3NextCommandHandoff) || isTurn2NextCommandHandoffReady(turn2NextCommandHandoff)) {
-    drawPlayerHealthboxHpOverlay(fb, resolvedPlayerHp, healthboxY2);
-  }
 }
 
 /**
@@ -7508,13 +7450,13 @@ function drawActionMenuIdleContent(
  * handoff of their own (typeref-retirement slice 3,
  * `docs/battlescene-turnN-typeref-retirement-design.md` §4.1 row 3). Reads
  * `latest.content.field.opponent/player.hp.current` directly - the same
- * single source `drawMenuIdleBaseWithOpponentHp`'s turn4-then-3-then-2-
- * then-1 cascade and `drawActionMenuIdleContent`'s own `playerHp` fallback
- * both already reconstruct from `latest` one call frame up (§2.3). The
- * HP-overlay guard below is copied verbatim from `drawActionMenuIdleContent`
- * (fires only when `latest` carries turn-2 or turn-3 content, never turn-1
- * or turn-4) - not re-derived, and pinned by `tests/battleSceneFight
- * CommandPresentationTurn1Through4.test.ts`'s own "slice 3" describe block.
+ * single source `drawMenuIdleBaseWithOpponentHpFromLatest` and this
+ * function's own `playerHp` fallback both read from `latest` (§2.3). The
+ * HP-overlay guard below is copied verbatim from the retired
+ * `drawActionMenuIdleContent` (fires only when `latest` carries turn-2 or
+ * turn-3 content, never turn-1 or turn-4) - not re-derived, and pinned by
+ * `tests/battleSceneFight CommandPresentationTurn1Through4.test.ts`'s own
+ * "slice 3" describe block.
  */
 function drawActionMenuIdleContentFromLatest(
   fb: Uint8Array,
@@ -7522,9 +7464,7 @@ function drawActionMenuIdleContentFromLatest(
   latest: LatestCompletedCommandHandoff | null,
   playerHpOverride?: number,
 ): void {
-  drawRect(fb, menuIdleBase);
-  const opponentHp = latest?.content?.field.opponent.hp.current ?? null;
-  if (opponentHp !== null) drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(opponentHp));
+  drawMenuIdleBaseWithOpponentHpFromLatest(fb, latest);
   const resolvedPlayerHp = playerHpOverride
     ?? latest?.content?.field.player.hp.current
     ?? anchorPlayerAfterTurnHp;
@@ -7537,118 +7477,50 @@ function drawActionMenuIdleContentFromLatest(
 }
 
 /**
- * The production Turn-1 boundary lives in the generic owner.  The returned
- * positional view exists solely while turns 2-4 still expose their staged
- * renderer ABI; generic semantic content always wins over a test-only legacy
- * argument.
+ * Generic sibling of the retired `currentPresentationEpochAge` (typeref-
+ * retirement slice 7b). Every cross-command bounce clock consumes the
+ * source reset's semantic age directly off `latest` - production never had
+ * a real positional-only fallback (§2.3: the legacy positional argument was
+ * always itself reconstructed from `latest` one call frame up), so the
+ * throw below is the same "no semantic epoch content" guard the legacy
+ * function's own unreachable-fallback branch guarded.
  */
-function currentEpochCompatibilityHandoff(
-  positional: Turn1CompletedResolutionNextCommandHandoff | null,
-  latest: LatestCompletedCommandHandoff | null,
-): Turn1CompletedResolutionNextCommandHandoff | null {
-  return turn1CompletedResolutionNextCommandHandoffFromLatest(latest) ?? positional;
-}
-
-/**
- * Slice 7 keeps the positional parameter only as a direct-renderer test ABI.
- * Live state derives this view from turn 2's generic content, including its
- * material slot-2 PP tuple and epoch.
- */
-function turn2CompatibilityHandoff(
-  positional: Turn2CompletedResolutionNextCommandHandoff | null,
-  latest: LatestCompletedCommandHandoff | null,
-): Turn2CompletedResolutionNextCommandHandoff | null {
-  return turn2CompletedResolutionNextCommandHandoffFromLatest(latest) ?? positional;
-}
-
-/**
- * Slice 8 keeps the positional parameter only as a direct-renderer test ABI.
- * Live state derives this view from turn 3's generic content, including its
- * material field HP and epoch.
- */
-function turn3CompatibilityHandoff(
-  positional: Turn3CompletedResolutionNextCommandHandoff | null,
-  latest: LatestCompletedCommandHandoff | null,
-): Turn3CompletedResolutionNextCommandHandoff | null {
-  return turn3CompletedResolutionNextCommandHandoffFromLatest(latest) ?? positional;
-}
-
-/**
- * Slice 9 keeps the positional parameter only as a direct-renderer test ABI.
- * Live state derives this view from turn 4's generic content, including its
- * material field HP and epoch.
- */
-function turn4CompatibilityHandoff(
-  positional: Turn4CompletedResolutionNextCommandHandoff | null,
-  latest: LatestCompletedCommandHandoff | null,
-): Turn4CompletedResolutionNextCommandHandoff | null {
-  return turn4CompletedResolutionNextCommandHandoffFromLatest(latest) ?? positional;
-}
-
-/** The source reset is identified by typed epoch content, never by a turn key. */
-function isCurrentEpochLifecycleActive(
-  positional: Turn1CompletedResolutionNextCommandHandoff | null,
-  latest: LatestCompletedCommandHandoff | null,
-  openElapsed: number | null,
-): boolean {
-  return (currentEpochCompatibilityHandoff(positional, latest) !== null
-      && isLatestCompletedCommandLifecycleActive(latest, openElapsed))
-    || isTurn1NextCommandLifecycleActive(positional, openElapsed);
-}
-
-/**
- * Every cross-command bounce clock consumes the source reset's semantic age.
- * The legacy view is only a compatibility fallback for direct positional ABI
- * tests; live BattleSceneState always reaches the first branch.
- */
-function currentPresentationEpochAge(
-  positional: Turn1CompletedResolutionNextCommandHandoff | null,
+function currentEpochPresentationAgeFromLatest(
   latest: LatestCompletedCommandHandoff | null,
   currentElapsed: number,
 ): number {
-  const genericAge = latestCompletedCommandPresentationEpochElapsedSinceReset(
-    latest,
-    currentElapsed,
-  );
-  if (genericAge !== null) return genericAge;
-  if (isTurn1NextCommandHandoffReady(positional)) {
-    return turn1PresentationEpochElapsedSinceReset(positional, currentElapsed);
+  const age = latestCompletedCommandPresentationEpochElapsedSinceReset(latest, currentElapsed);
+  if (age === null) {
+    throw new Error("current command bounce requires semantic presentation epoch content");
   }
-  throw new Error("current command bounce requires semantic presentation epoch content");
+  return age;
 }
 
+/**
+ * Generic sibling of the retired `drawActionMenuIdleWindow` (typeref-
+ * retirement slice 7b). Every one of the legacy turn1-4 handoff parameters
+ * was already reconstructed from `latestCompletedCommandHandoff` at both of
+ * this function's own call sites (§2.3) - `genericTurn2/3/4Content`
+ * (already `latest`-derived) select the same active window the legacy
+ * readiness cascade did. The legacy positional-fallback branches inside the
+ * old turn3/4/5CommandHandoff ternaries were provably unreachable under that
+ * same always-`latest`-derived production traffic (each fallback's own
+ * condition, `isTurnNNextCommandLifecycleActive` over an already-`latest`-
+ * derived handoff, reduces field-for-field to the exact boolean its
+ * preceding branch already tested) - dropped here, not carried forward.
+ */
 function drawActionMenuIdleWindow(
   fb: Uint8Array,
   t: number,
-  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null = null,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null = null,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null = null,
   reopenedFromClose: boolean = false,
-  turn5ReopenPressTick?: number,
+  turn5ReopenPressTick: number | undefined = undefined,
   turn1CommandOpenElapsed: number | null = null,
   latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null,
 ): void {
-  const currentEpochHandoff = currentEpochCompatibilityHandoff(
-    turn1NextCommandHandoff,
-    latestCompletedCommandHandoff,
-  );
-  const currentTurn2Handoff = turn2CompatibilityHandoff(
-    turn2NextCommandHandoff,
-    latestCompletedCommandHandoff,
-  );
   const genericTurn2Content = turn2FightCommandPresentationFromLatest(
     latestCompletedCommandHandoff,
   );
-  const currentTurn3Handoff = turn3CompatibilityHandoff(
-    turn3NextCommandHandoff,
-    latestCompletedCommandHandoff,
-  );
   const genericTurn3Content = turn3FightCommandPresentationFromLatest(
-    latestCompletedCommandHandoff,
-  );
-  const currentTurn4Handoff = turn4CompatibilityHandoff(
-    turn4NextCommandHandoff,
     latestCompletedCommandHandoff,
   );
   const genericTurn4Content = turn4FightCommandPresentationFromLatest(
@@ -7667,21 +7539,22 @@ function drawActionMenuIdleWindow(
     // shift, only the reveal steps to the next one" pattern the original
     // open/close events already established (see
     // `FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT`'s own doc).
-    drawActionMenuIdleContent(fb, t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT, currentEpochHandoff, currentTurn2Handoff, undefined, currentTurn3Handoff, currentTurn4Handoff);
+    drawActionMenuIdleContentFromLatest(fb, t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT, latestCompletedCommandHandoff);
     // Slice 9: once turn 4's own source-owned reset has evicted turn 3's
-    // shape from the shared slot (`currentTurn3Handoff === null`), the
+    // shape from the shared slot (`genericTurn3Content === null`), the
     // internal fallback above can no longer reach Onix's own HP - draw it
     // explicitly from the completed-turn-4 receipt instead (same 88 turn 3
     // already established; `turn4SettledWindowActive`'s own eviction-class
     // doc in `drawFightSubmenuWindow`).
-    if (
-      isTurn4NextCommandHandoffReady(currentTurn4Handoff)
-      && !isTurn3NextCommandHandoffReady(currentTurn3Handoff)
-      && !isTurn2NextCommandHandoffReady(currentTurn2Handoff)
-    ) {
+    const reopenOverlayPlayerHp = genericTurn4Content !== null
+        && genericTurn3Content === null
+        && genericTurn2Content === null
+      ? genericTurn4Content.field.player.hp.current
+      : null;
+    if (reopenOverlayPlayerHp !== null) {
       drawPlayerHealthboxHpOverlay(
         fb,
-        currentTurn4Handoff.hp.player,
+        reopenOverlayPlayerHp,
         menuIdleBounce(t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT).healthboxY2,
       );
     }
@@ -7709,89 +7582,62 @@ function drawActionMenuIdleWindow(
   // (verified against `turn2-endeavor-drain.json`/`turn2-dragonbreath.json`,
   // ticks 2902-2905 identical either way).
   // S7 slice I: turn 4's own reopen needs the same treatment one epoch
-  // further (`turn4SubmenuBounceTick`, reset at turn 3's own ROCK_SLIDE
-  // redraw) - same "reopening FIGHT doesn't reset the bounce task" rule.
+  // further (`turn4SubmenuBounceTickFromLatest`, reset at turn 3's own
+  // ROCK_SLIDE redraw) - same "reopening FIGHT doesn't reset the bounce
+  // task" rule.
   // S7 slice J: turn 5's own reopen is the same shape yet another epoch
-  // further (`turn5SubmenuBounceTick`, reset at turn 4's own ROCK_SLIDE redraw).
+  // further (`turn5SubmenuBounceTickFromLatest`, reset at turn 4's own
+  // ROCK_SLIDE redraw).
   // PROGRESS #183/cleanup (docs/turn3-residual-probe-notes.md "The extremum
-  // class, probed", tick 5927): hardware doesn't apply turn5SubmenuBounceTick's
-  // own -2-tick phase correction until the tick AFTER the reopen press
-  // registers - `t === turn5ReopenPressTick` is the press's own registering
-  // tick itself, so it alone still uses the unshifted formula.
-  const turn2CommandHandoff = isCurrentEpochLifecycleActive(
-    currentEpochHandoff,
+  // class, probed", tick 5927): hardware doesn't apply
+  // turn5SubmenuBounceTickFromLatest's own -2-tick phase correction until
+  // the tick AFTER the reopen press registers - `t === turn5ReopenPressTick`
+  // is the press's own registering tick itself, so it alone still uses the
+  // unshifted formula.
+  const turn2Active = isLatestCompletedCommandLifecycleActive(
     latestCompletedCommandHandoff,
     turn1CommandOpenElapsed,
-  )
-    ? currentEpochHandoff
-    : null;
-  const turn3CommandHandoff = genericTurn2Content !== null
-      && isTurn2LatestCompletedCommandLifecycleActive(
-        latestCompletedCommandHandoff,
-        turn1CommandOpenElapsed,
-      )
-    ? currentTurn2Handoff
-    : isTurn2NextCommandLifecycleActive(turn2NextCommandHandoff, turn1CommandOpenElapsed)
-      ? turn2NextCommandHandoff
-      : null;
-  const turn4CommandHandoff = genericTurn3Content !== null
-      && isTurn3LatestCompletedCommandLifecycleActive(
-        latestCompletedCommandHandoff,
-        turn1CommandOpenElapsed,
-      )
-    ? currentTurn3Handoff
-    : isTurn3NextCommandLifecycleActive(turn3NextCommandHandoff, turn1CommandOpenElapsed)
-      ? turn3NextCommandHandoff
-      : null;
-  const turn5CommandHandoff = genericTurn4Content !== null
-      && isTurn4LatestCompletedCommandLifecycleActive(
-        latestCompletedCommandHandoff,
-        turn1CommandOpenElapsed,
-      )
-    ? currentTurn4Handoff
-    : isTurn4NextCommandLifecycleActive(turn4NextCommandHandoff, turn1CommandOpenElapsed)
-      ? turn4NextCommandHandoff
-      : null;
-  const bounceTick = turn5CommandHandoff !== null
+  );
+  const turn3Active = isTurn2LatestCompletedCommandLifecycleActive(
+    latestCompletedCommandHandoff,
+    turn1CommandOpenElapsed,
+  );
+  const turn4Active = isTurn3LatestCompletedCommandLifecycleActive(
+    latestCompletedCommandHandoff,
+    turn1CommandOpenElapsed,
+  );
+  const turn5Active = isTurn4LatestCompletedCommandLifecycleActive(
+    latestCompletedCommandHandoff,
+    turn1CommandOpenElapsed,
+  );
+  const bounceTick = turn5Active
     ? t === turn5ReopenPressTick
-      ? turn5LegacyResettledBounceTick(t, turn5CommandHandoff)
-      : turn5SubmenuBounceTick(t, turn5CommandHandoff)
-    : turn4CommandHandoff !== null
-      ? turn4SubmenuBounceTick(t, turn4CommandHandoff)
-      : turn3CommandHandoff !== null
-        && genericTurn2Content !== null
-        && isTurn2LatestCompletedCommandLifecycleActive(
-          latestCompletedCommandHandoff,
-          turn1CommandOpenElapsed,
-        )
+      ? turn5LegacyResettledBounceTickFromLatest(t, latestCompletedCommandHandoff)
+      : turn5SubmenuBounceTickFromLatest(t, latestCompletedCommandHandoff)
+    : turn4Active
+      ? turn4SubmenuBounceTickFromLatest(t, latestCompletedCommandHandoff)
+      : genericTurn2Content !== null && turn3Active
         ? fightCommandSubmenuBounceEpochTick(genericTurn2Content, t - TICK0)
-        : turn3CommandHandoff !== null
-        ? turn3SubmenuBounceTickFromPresentationEpochAge(
-            turn2PresentationEpochElapsedSinceReset(
-              turn3CommandHandoff,
-              t - TICK0,
-            ),
-          )
-        : turn2CommandHandoff !== null
+        : turn2Active
           ? turn2SubmenuBounceTickFromPresentationEpochAge(
-              currentPresentationEpochAge(
-                currentEpochHandoff,
+              currentEpochPresentationAgeFromLatest(
                 latestCompletedCommandHandoff,
                 t - TICK0,
               ),
             )
           : t;
-  drawActionMenuIdleContent(fb, bounceTick, currentEpochHandoff, currentTurn2Handoff, undefined, currentTurn3Handoff, currentTurn4Handoff);
+  drawActionMenuIdleContentFromLatest(fb, bounceTick, latestCompletedCommandHandoff);
   // Slice 9: same eviction-class gap as the `reopenedFromClose` branch above
   // - once turn 4's own reset has evicted turn 3's shape, Onix's own HP
   // (still 88, per turn 3's own established anchor) must come from the
   // completed-turn-4 receipt instead.
-  if (
-    isTurn4NextCommandHandoffReady(currentTurn4Handoff)
-    && !isTurn3NextCommandHandoffReady(currentTurn3Handoff)
-    && !isTurn2NextCommandHandoffReady(currentTurn2Handoff)
-  ) {
-    drawPlayerHealthboxHpOverlay(fb, currentTurn4Handoff.hp.player, menuIdleBounce(bounceTick).healthboxY2);
+  const overlayPlayerHp = genericTurn4Content !== null
+      && genericTurn3Content === null
+      && genericTurn2Content === null
+    ? genericTurn4Content.field.player.hp.current
+    : null;
+  if (overlayPlayerHp !== null) {
+    drawPlayerHealthboxHpOverlay(fb, overlayPlayerHp, menuIdleBounce(bounceTick).healthboxY2);
   }
 }
 
@@ -7901,80 +7747,48 @@ function drawFightSubmenuWindow(
   resolutionOwner: BattleSceneResolutionOwner | null = null,
   trainerPresentation?: FactoryTrainerPresentation,
 ): void {
-  const currentEpochHandoff = currentEpochCompatibilityHandoff(
-    null,
-    latestCompletedCommandHandoff,
-  );
-  const currentTurn2Handoff = turn2CompatibilityHandoff(
-    null,
-    latestCompletedCommandHandoff,
-  );
   const genericTurn2Content = turn2FightCommandPresentationFromLatest(
-    latestCompletedCommandHandoff,
-  );
-  const currentTurn3Handoff = turn3CompatibilityHandoff(
-    null,
     latestCompletedCommandHandoff,
   );
   const genericTurn3Content = turn3FightCommandPresentationFromLatest(
     latestCompletedCommandHandoff,
   );
-  const currentTurn4Handoff = turn4CompatibilityHandoff(
-    null,
-    latestCompletedCommandHandoff,
-  );
   const genericTurn4Content = turn4FightCommandPresentationFromLatest(
     latestCompletedCommandHandoff,
   );
-  const turn2CommandHandoff = isCurrentEpochLifecycleActive(
-    currentEpochHandoff,
+  const turn2Active = isLatestCompletedCommandLifecycleActive(
     latestCompletedCommandHandoff,
     sm.openElapsed,
-  )
-    ? currentEpochHandoff
-    : null;
-  const turn3CommandHandoff = genericTurn2Content !== null
-      && isTurn2LatestCompletedCommandLifecycleActive(
-        latestCompletedCommandHandoff,
-        sm.openElapsed,
-      )
-    ? currentTurn2Handoff
-    : null;
-  const turn4CommandHandoff = genericTurn3Content !== null
-      && isTurn3LatestCompletedCommandLifecycleActive(
-        latestCompletedCommandHandoff,
-        sm.openElapsed,
-      )
-    ? currentTurn3Handoff
-    : null;
+  );
+  const turn3Active = isTurn2LatestCompletedCommandLifecycleActive(
+    latestCompletedCommandHandoff,
+    sm.openElapsed,
+  );
+  const turn4Active = isTurn3LatestCompletedCommandLifecycleActive(
+    latestCompletedCommandHandoff,
+    sm.openElapsed,
+  );
   // Turn 3's own source-owned reset publishes directly into the shared
-  // generic slot, which is exactly what `turn3CommandHandoff` above narrows
-  // FROM (turn 2's content) - so that publish evicts the very shape
-  // `turn3CommandHandoff` depends on for the remainder of turn 3's own
-  // window (kickoff text is long past `genericTurn2Content`'s own need by
-  // the time this reset fires, but the render dispatch below still needs a
-  // "we're still inside turn 3's window" flag through its settled menu).
-  // `turn4CommandHandoff === null` keeps this OFF once turn 4's own FIGHT
-  // reopen supersedes it.
-  const turn3SettledWindowActive = turn4CommandHandoff === null
-    && isTurn3NextCommandHandoffReady(currentTurn3Handoff);
-  const turn5CommandHandoff = genericTurn4Content !== null
-      && isTurn4LatestCompletedCommandLifecycleActive(
-        latestCompletedCommandHandoff,
-        sm.openElapsed,
-      )
-    ? currentTurn4Handoff
-    : null;
+  // generic slot, which is exactly what `turn3Active` above narrows FROM
+  // (turn 2's content) - so that publish evicts the very shape `turn3Active`
+  // depends on for the remainder of turn 3's own window (kickoff text is
+  // long past `genericTurn2Content`'s own need by the time this reset
+  // fires, but the render dispatch below still needs a "we're still inside
+  // turn 3's window" flag through its settled menu). `!turn4Active` keeps
+  // this OFF once turn 4's own FIGHT reopen supersedes it.
+  const turn3SettledWindowActive = !turn4Active && genericTurn3Content !== null;
+  const turn5Active = isTurn4LatestCompletedCommandLifecycleActive(
+    latestCompletedCommandHandoff,
+    sm.openElapsed,
+  );
   // Turn 4's own source-owned reset publishes directly into the shared
-  // generic slot, evicting the turn-3 shape `turn4CommandHandoff` above
-  // narrows FROM - so that publish happens WHILE we're still deep inside
-  // turn 4's own settled-menu display (`drawTurn4RockSlideWindow`'s own
-  // redrawTick branch), exactly the eviction-class trap slice 8 already hit
-  // one turn earlier (`turn3SettledWindowActive`'s own doc). `turn5Command
-  // Handoff === null` keeps this OFF once turn 5's own FIGHT reopen
-  // supersedes it.
-  const turn4SettledWindowActive = turn5CommandHandoff === null
-    && isTurn4NextCommandHandoffReady(currentTurn4Handoff);
+  // generic slot, evicting the turn-3 shape `turn4Active` above narrows
+  // FROM - so that publish happens WHILE we're still deep inside turn 4's
+  // own settled-menu display (`drawTurn4RockSlideWindow`'s own redrawTick
+  // branch), exactly the eviction-class trap slice 8 already hit one turn
+  // earlier (`turn3SettledWindowActive`'s own doc). `!turn5Active` keeps
+  // this OFF once turn 5's own FIGHT reopen supersedes it.
+  const turn4SettledWindowActive = !turn5Active && genericTurn4Content !== null;
   if (
     isLatestCompletedCommandHandoffReady(latestCompletedCommandHandoff)
     && latestCompletedCommandPresentationEpoch(latestCompletedCommandHandoff) === null
@@ -7991,7 +7805,7 @@ function drawFightSubmenuWindow(
     return;
   }
   if (sm.openElapsed === null) {
-    drawActionMenuIdleWindow(fb, t, currentEpochHandoff, currentTurn2Handoff, currentTurn3Handoff, currentTurn4Handoff, false, undefined, null, latestCompletedCommandHandoff);
+    drawActionMenuIdleWindow(fb, t, false, undefined, null, latestCompletedCommandHandoff);
     return;
   }
   const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
@@ -8001,13 +7815,13 @@ function drawFightSubmenuWindow(
     // finding 1's "5-tick hold" turns out to need no special-casing at all:
     // it's just this same bounce cycle naturally dwelling on one phase for
     // that span, pixel-confirmed exact with a plain, unshifted `t`).
-    drawActionMenuIdleWindow(fb, t, currentEpochHandoff, currentTurn2Handoff, currentTurn3Handoff, currentTurn4Handoff, sm.reopenedFromClose, TICK0 + sm.openElapsed, sm.openElapsed, latestCompletedCommandHandoff);
+    drawActionMenuIdleWindow(fb, t, sm.reopenedFromClose, TICK0 + sm.openElapsed, sm.openElapsed, latestCompletedCommandHandoff);
     return;
   }
   if (sm.closeElapsed !== null) {
     const closeRevealTick = TICK0 + sm.closeElapsed + FIGHT_SUBMENU_CLOSE_DELAY;
     if (t >= closeRevealTick) {
-      drawActionMenuIdleContent(fb, t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT, currentEpochHandoff, currentTurn2Handoff, undefined, currentTurn3Handoff, currentTurn4Handoff);
+      drawActionMenuIdleContentFromLatest(fb, t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT, latestCompletedCommandHandoff);
       return;
     }
   }
@@ -8019,8 +7833,8 @@ function drawFightSubmenuWindow(
     // distinguished from turn 1's own cursor-0 confirm by the active
     // completed-turn-2 command lifecycle. Turn 4 needs DOUBLE_TEAM-family
     // timing despite retaining that older receipt, so it stays excluded.
-    const inTurn4DoubleTeamWindow = turn4CommandHandoff !== null && turn5CommandHandoff === null;
-    const textStart = (sm.cursor === 2 || turn3CommandHandoff !== null) && !inTurn4DoubleTeamWindow ? turn2KickoffTextStartTick(pressTick) : turnKickoffTextStartTick(pressTick);
+    const inTurn4DoubleTeamWindow = turn4Active && !turn5Active;
+    const textStart = (sm.cursor === 2 || turn3Active) && !inTurn4DoubleTeamWindow ? turn2KickoffTextStartTick(pressTick) : turnKickoffTextStartTick(pressTick);
     if (t >= textStart) {
       // S7 slice E1: turn 2's confirm (cursor 2, DRAGON_BREATH) kicks off
       // Grovyle's ENDEAVOR instead of turn 1's DOUBLE_TEAM - this slice only
@@ -8031,7 +7845,7 @@ function drawFightSubmenuWindow(
         drawTurn2KickoffText(fb, t, pressTick, latestCompletedCommandHandoff);
         return;
       }
-      if (turn5CommandHandoff !== null) {
+      if (turn5Active) {
         // S7 slice J (docs/battle-turn-notes.md §13/§23): turn 5's own
         // confirm (cursor 0, ROCK_SLIDE again) kicks off Grovyle's ENDEAVOR
         // once more - distinguished from turn 3's own ENDEAVOR confirm by
@@ -8045,14 +7859,14 @@ function drawFightSubmenuWindow(
         );
         return;
       }
-      if (turn4CommandHandoff !== null || turn4SettledWindowActive) {
+      if (turn4Active || turn4SettledWindowActive) {
         // S7 slice I (docs/battle-turn-notes.md §13/§22): turn 4's own
         // confirm (cursor 0, ROCK_SLIDE again) kicks off Grovyle's
         // DOUBLE_TEAM first - same move as turn 1's own, distinguished by
         // the completed-turn-3 receipt's later command lifecycle. Slice 9:
         // `turn4SettledWindowActive` keeps this branch selected through
         // turn 4's own settled menu even after its reset has evicted
-        // `turn4CommandHandoff`'s own turn-3 view from the shared slot.
+        // `turn4Active`'s own turn-3 view from the shared slot.
         drawTurn4KickoffText(
           fb,
           t,
@@ -8061,7 +7875,7 @@ function drawFightSubmenuWindow(
         );
         return;
       }
-      if (turn3CommandHandoff !== null || turn3SettledWindowActive) {
+      if (turn3Active || turn3SettledWindowActive) {
         // S7 slice G (docs/battle-turn-notes.md §20): turn 3's own ENDEAVOR
         // half - stops holding the kickoff text once printed, deliberately
         // NOT dispatching onward into ROCK_SLIDE's own kickoff (out of
@@ -8069,7 +7883,7 @@ function drawFightSubmenuWindow(
         // safe boundary this function's own doc names). Slice 8:
         // `turn3SettledWindowActive` keeps this branch selected through
         // turn 3's own settled menu even after its reset has evicted
-        // `turn3CommandHandoff`'s own turn-2 view from the shared slot.
+        // `turn3Active`'s own turn-2 view from the shared slot.
         drawTurn3EndeavorText(fb, t, pressTick, latestCompletedCommandHandoff, genericTurn2Content);
         return;
       }
@@ -8095,7 +7909,7 @@ function drawFightSubmenuWindow(
     // onix/healthbox bounce overlay is already frozen (battleMenu.ts's new
     // Slice 7 doc comment: `DoBounceEffect` stops being polled the instant
     // the A-press hands off, not merely once the text becomes visible).
-    drawMenuIdleBaseWithOpponentHp(fb, currentEpochHandoff, currentTurn2Handoff, currentTurn3Handoff, currentTurn4Handoff);
+    drawMenuIdleBaseWithOpponentHpFromLatest(fb, latestCompletedCommandHandoff);
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latestCompletedCommandHandoff);
     // S7 slice G: turn 3's own confirm-wait window now uses the same
     // freeze-then-hold shape turns 1/2 already established
@@ -8105,41 +7919,45 @@ function drawFightSubmenuWindow(
     // pixel-confirmed unchanged for every tick slice F already covers (the
     // live/frozen values coincide there, see `TURN3_KICKOFF_FROZEN_BOUNCE_TICK`'s
     // own doc). S7 slice I: turn 4's own confirm-wait window is the same
-    // shape one epoch further (`turn4KickoffBounceTick`). S7 slice J: turn
-    // 5's own confirm-wait window is the same shape yet another epoch
-    // further (`turn5KickoffBounceTick`).
-    const confirmWaitBounceTick = turn5CommandHandoff !== null
-      ? turn5KickoffBounceTick(t, pressTick, turn5CommandHandoff)
-      : turn4CommandHandoff !== null
-        ? turn4KickoffBounceTick(t, pressTick, turn4CommandHandoff)
-        : turn3CommandHandoff !== null && genericTurn2Content !== null
+    // shape one epoch further (`turn4KickoffBounceTickFromLatest`). S7
+    // slice J: turn 5's own confirm-wait window is the same shape yet
+    // another epoch further (`turn5KickoffBounceTickFromLatest`).
+    const confirmWaitBounceTick = turn5Active
+      ? turn5KickoffBounceTickFromLatest(t, pressTick, latestCompletedCommandHandoff)
+      : turn4Active
+        ? turn4KickoffBounceTickFromLatest(t, pressTick, latestCompletedCommandHandoff)
+        : genericTurn2Content !== null && turn3Active
           ? turn3KickoffBounceTick(
               t - TICK0,
               sm.confirmElapsed,
               genericTurn2Content,
             )
-          : turn2CommandHandoff !== null
+          : turn2Active
             ? turn2KickoffBounceTick(
                 t - TICK0,
                 sm.confirmElapsed,
-                currentPresentationEpochAge(
-                  currentEpochHandoff,
+                currentEpochPresentationAgeFromLatest(
                   latestCompletedCommandHandoff,
                   t - TICK0,
                 ),
               )
             : turnKickoffBounceTick(t, pressTick);
     drawMenuIdleBounceOverlay(fb, confirmWaitBounceTick);
-    // S7 slice F: same overlay-after-bounce ordering as `drawActionMenuIdleContent`'s
-    // own (turn 3's reopen isn't reachable through this specific branch yet -
-    // it needs a fresh confirm of its own first - but kept consistent so a
-    // future turn-3-confirm slice doesn't rediscover the ordering bug).
-    if (isTurn4NextCommandHandoffReady(currentTurn4Handoff)) drawPlayerHealthboxHpOverlay(fb, currentTurn4Handoff.hp.player, menuIdleBounce(confirmWaitBounceTick).healthboxY2);
-    else if (isTurn3NextCommandHandoffReady(currentTurn3Handoff)) drawPlayerHealthboxHpOverlay(fb, currentTurn3Handoff.hp.player, menuIdleBounce(confirmWaitBounceTick).healthboxY2);
-    else if (isTurn2NextCommandHandoffReady(currentTurn2Handoff)) drawPlayerHealthboxHpOverlay(fb, currentTurn2Handoff.hp.player, menuIdleBounce(confirmWaitBounceTick).healthboxY2);
+    // S7 slice F: same overlay-after-bounce ordering as
+    // `drawActionMenuIdleContentFromLatest`'s own (turn 3's reopen isn't
+    // reachable through this specific branch yet - it needs a fresh confirm
+    // of its own first - but kept consistent so a future turn-3-confirm
+    // slice doesn't rediscover the ordering bug).
+    const confirmWaitOverlayPlayerHp = genericTurn4Content?.field.player.hp.current
+      ?? genericTurn3Content?.field.player.hp.current
+      ?? genericTurn2Content?.field.player.hp.current
+      ?? null;
+    if (confirmWaitOverlayPlayerHp !== null) {
+      drawPlayerHealthboxHpOverlay(fb, confirmWaitOverlayPlayerHp, menuIdleBounce(confirmWaitBounceTick).healthboxY2);
+    }
     return;
   }
-  drawMenuIdleBaseWithOpponentHp(fb, currentEpochHandoff, currentTurn2Handoff, currentTurn3Handoff, currentTurn4Handoff);
+  drawMenuIdleBaseWithOpponentHpFromLatest(fb, latestCompletedCommandHandoff);
   drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latestCompletedCommandHandoff);
   // S7 slice E1: turn 2's own reopened submenu inherits the resettled menu's
   // bounce phase, not the plain absolute-`t` mapping turn 1's first open
@@ -8153,28 +7971,15 @@ function drawFightSubmenuWindow(
   // own doc), checked ahead of the plain-`t` fallback since it's otherwise
   // indistinguishable from turn 1's first open until receipt lifecycle state
   // is considered.
-  const idleWaitBounceTick = turn5CommandHandoff !== null
-    ? turn5SubmenuBounceTick(t, turn5CommandHandoff)
-    : turn4CommandHandoff !== null
-      ? turn4SubmenuBounceTick(t, turn4CommandHandoff)
-      : turn3CommandHandoff !== null
-        && genericTurn2Content !== null
-        && isTurn2LatestCompletedCommandLifecycleActive(
-          latestCompletedCommandHandoff,
-          sm.openElapsed,
-        )
+  const idleWaitBounceTick = turn5Active
+    ? turn5SubmenuBounceTickFromLatest(t, latestCompletedCommandHandoff)
+    : turn4Active
+      ? turn4SubmenuBounceTickFromLatest(t, latestCompletedCommandHandoff)
+      : genericTurn2Content !== null && turn3Active
         ? fightCommandSubmenuBounceEpochTick(genericTurn2Content, t - TICK0)
-        : turn3CommandHandoff !== null
-        ? turn3SubmenuBounceTickFromPresentationEpochAge(
-            turn2PresentationEpochElapsedSinceReset(
-              turn3CommandHandoff,
-              t - TICK0,
-            ),
-          )
-        : turn2CommandHandoff !== null
+        : turn2Active
           ? turn2SubmenuBounceTickFromPresentationEpochAge(
-              currentPresentationEpochAge(
-                currentEpochHandoff,
+              currentEpochPresentationAgeFromLatest(
                 latestCompletedCommandHandoff,
                 t - TICK0,
               ),
@@ -8192,9 +7997,13 @@ function drawFightSubmenuWindow(
   // ALSO resolved. S7 slice J: turn 5's own reopened submenu needs the SAME
   // 88 (Onix untouched by turn 4's own DOUBLE_TEAM) - no further anchor swap
   // needed; the completed-turn-3 receipt selects it directly.
-  if (isTurn4NextCommandHandoffReady(currentTurn4Handoff)) drawPlayerHealthboxHpOverlay(fb, currentTurn4Handoff.hp.player, menuIdleBounce(idleWaitBounceTick).healthboxY2);
-  else if (isTurn3NextCommandHandoffReady(currentTurn3Handoff)) drawPlayerHealthboxHpOverlay(fb, currentTurn3Handoff.hp.player, menuIdleBounce(idleWaitBounceTick).healthboxY2);
-  else if (isTurn2NextCommandHandoffReady(currentTurn2Handoff)) drawPlayerHealthboxHpOverlay(fb, currentTurn2Handoff.hp.player, menuIdleBounce(idleWaitBounceTick).healthboxY2);
+  const idleWaitOverlayPlayerHp = genericTurn4Content?.field.player.hp.current
+    ?? genericTurn3Content?.field.player.hp.current
+    ?? genericTurn2Content?.field.player.hp.current
+    ?? null;
+  if (idleWaitOverlayPlayerHp !== null) {
+    drawPlayerHealthboxHpOverlay(fb, idleWaitOverlayPlayerHp, menuIdleBounce(idleWaitBounceTick).healthboxY2);
+  }
 }
 
 /**
@@ -9539,20 +9348,6 @@ function drawTurn3RockSlideAttack(
 }
 
 /**
- * The completed-turn-3 receipt supplies the same source-owned reset epoch
- * used by prior completed turns. Both the settled turn-3 menu and the later
- * turn-4 submenu consume it; neither derives a second epoch from a redraw
- * delay.
- */
-function turn3RockSlideResettledBounceTick(
-  t: number,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff,
-): number {
-  return MENU_IDLE_BLANK_END_TICK + 1
-    + turn3PresentationEpochElapsedSinceReset(turn3NextCommandHandoff, t - TICK0);
-}
-
-/**
  * S7 slice H: turn 3's own turn-end resettled action menu - same shape as
  * `drawDragonBreathTurnEndSettledMenu` (turn 2's own analogue): reuse
  * `drawActionMenuIdleContent`'s flat harvest for everything but the
@@ -9631,60 +9426,38 @@ function drawTurn3RockSlideWindow(
 const TURN4_CONFIRM_PRESS_TICK = 4925;
 
 /**
- * Turn 4's reopened submenu composes turn 3's receipt-owned resettled epoch
- * with `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`. Reopening FIGHT does not reset the
- * underlying bounce task.
- */
-function turn4SubmenuBounceTick(
-  t: number,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff,
-): number {
-  return turn3RockSlideResettledBounceTick(t, turn3NextCommandHandoff) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-}
-
-/**
- * ISSUES #39 rank-6 slice 4: same "frozen plateau needs its own fresh
- * pixel-fit, not assumed to reuse another turn's own anchor" caveat slice 3
- * flagged (this session's own lesson (b)) - turn 4's own case does NOT
- * match slice 3's own `pressTick+9` finding (tried first and rejected: a
- * flat 2360px Onix+healthbox residual the whole freeze window, byte-for-
- * byte the same magnitude the ON-era doc's own `d=0` citation named for
- * exactly this failure mode). Grid-searched directly against a real oracle
- * frame (`npm run compare` on a single-tick scratch trace at 4930, deep in
- * the frozen window): candidates `turn4SubmenuBounceTick(pressTick - d,
- * redrawDelay)` for `d` in `[7..15]` are ALL exact 0-diff (a 9-tick-wide
- * plateau, the same shape §11's own `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` doc
- * describes), `d` outside that range diverges (`d=6`: 769px; `d=16`:
- * 1591px; `d=25`: back to the same 2360px failure) - `d=11` picked as the
- * plateau's center, matching `FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`'s own doc
- * convention.
- */
-function turn4KickoffBounceTick(
-  t: number,
-  pressTick: number,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff,
-): number {
-  const freezeTick = pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY;
-  if (t < freezeTick) return turn4SubmenuBounceTick(t, turn3NextCommandHandoff);
-  return turn4SubmenuBounceTick(pressTick - 11, turn3NextCommandHandoff);
-}
-
-/**
- * Generic sibling of `turn4KickoffBounceTick` for callers with no legacy-
- * typed turn-3 predecessor handoff of their own (typeref-retirement slice 6,
- * `docs/battlescene-turnN-typeref-retirement-design.md` §4.1). Same freeze-
- * then-hold formula and the same `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` offset
- * `turn4SubmenuBounceTick`/`turn3RockSlideResettledBounceTick` compose -
+ * Generic sibling of the retired `turn4SubmenuBounceTick` (typeref-
+ * retirement slice 7b, `docs/battlescene-turnN-typeref-retirement-design.md`
+ * §4.1). Turn 4's reopened submenu composes turn 3's receipt-owned
+ * resettled epoch with `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`; reopening FIGHT
+ * does not reset the underlying bounce task. The legacy formula's own
  * `turn3PresentationEpochElapsedSinceReset(turn3NextCommandHandoff, elapsed)`
- * reads the same `presentationEpoch.elapsed` field
- * `latestCompletedCommandPresentationEpochElapsedSinceReset` reads off
- * `latest.content` directly (verified field-for-field, not a renamed but
- * differently-anchored fact - `TURN3_IDLE_BOUNCE_EPOCH_TICK` equals
- * `MENU_IDLE_BLANK_END_TICK + 1`, and `actionMenuRedrawTick` is always
- * `presentationEpoch.elapsed`). `turn4KickoffBounceTick`/
- * `turn4SubmenuBounceTick`/`turn3RockSlideResettledBounceTick` themselves
- * stay legacy-typed - `drawFightSubmenuWindow`/`drawActionMenuIdleWindow`
- * (Family Q, slice 7) still call them with a real reconstructed handoff.
+ * read `turn3NextCommandHandoff.presentationEpoch.elapsed`, the exact same
+ * fact `latestCompletedCommandPresentationEpochElapsedSinceReset` reads off
+ * `latest.content.presentationEpoch.elapsed` (verified field-for-field, same
+ * as `turn4KickoffBounceTickFromLatest`'s own doc one branch below).
+ */
+function turn4SubmenuBounceTickFromLatest(
+  t: number,
+  latest: LatestCompletedCommandHandoff | null,
+): number {
+  const epochAge = latestCompletedCommandPresentationEpochElapsedSinceReset(latest, t - TICK0);
+  if (epochAge === null) {
+    throw new Error("turn-4 submenu bounce requires semantic turn-3 presentation epoch content");
+  }
+  return MENU_IDLE_BLANK_END_TICK + 1 + epochAge - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+}
+
+/**
+ * Generic sibling of the retired `turn4KickoffBounceTick` (typeref-
+ * retirement slice 6/7b, `docs/battlescene-turnN-typeref-retirement-design.md`
+ * §4.1). Same freeze-then-hold formula and the same
+ * `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` offset `turn4SubmenuBounceTickFromLatest`
+ * composes - `latestCompletedCommandPresentationEpochElapsedSinceReset` reads
+ * `latest.content.presentationEpoch.elapsed` directly (ISSUES #39 rank-6
+ * slice 4's own grid-search picked `d=11`/`pressTick - 11` as the frozen
+ * plateau's center; that same freeze/hold shape is preserved verbatim here,
+ * only the epoch source changed).
  */
 function turn4KickoffBounceTickFromLatest(
   t: number,
@@ -9833,19 +9606,6 @@ function drawTurn4RockSlideAttack(
   drawMenuIdleBounceOverlay(fb, turn4KickoffBounceTickFromLatest(t, TURN4_CONFIRM_PRESS_TICK, latestCompletedCommandHandoff));
 }
 
-/**
- * The completed-turn-4 receipt supplies the source-owned reset epoch for
- * both the settled turn-4 menu and the later turn-5 submenu. Neither derives
- * a second epoch from a redraw delay.
- */
-function turn4RockSlideResettledBounceTick(
-  t: number,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff,
-): number {
-  return MENU_IDLE_BLANK_END_TICK + 1
-    + turn4PresentationEpochElapsedSinceReset(turn4NextCommandHandoff, t - TICK0);
-}
-
 /** S7 slice I: turn 4's own turn-end resettled action menu - same shape as `drawTurn3RockSlideTurnEndSettledMenu`, keyed off Grovyle's real settled HP (1, a 1-HP survival, now the staged `TURN4_ROCKSLIDE_HP.to`) and Onix's own (unchanged this turn, 88). */
 function drawTurn4RockSlideTurnEndSettledMenu(
   fb: Uint8Array,
@@ -9945,57 +9705,32 @@ const TURN5_CONFIRM_PRESS_TICK = 5959;
  */
 const TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG = 234;
 
-function turn5LegacyResettledBounceTick(
-  t: number,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff,
-): number {
-  return turn4RockSlideResettledBounceTick(t, turn4NextCommandHandoff)
-    - TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG;
-}
-
-function turn5SubmenuBounceTick(
-  t: number,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff,
-): number {
-  return turn5LegacyResettledBounceTick(t, turn4NextCommandHandoff)
-    - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-}
-
 /**
- * S7 slice J: same "frozen plateau needs a pixel-fit, not the naive live-
- * formula-at-freeze-tick reading" caveat `TURN1/2_KICKOFF_FROZEN_BOUNCE_
- * TICK`'s own docs (and, one epoch earlier, `turn4KickoffBounceTick`'s own
- * live-recomputed plateau, ISSUES #39 rank-6 slice 4) already flag. Grid-
- * searched directly against a real oracle frame (`npm run compare` on a
- * single-tick scratch trace at
- * `TURN5_CONFIRM_PRESS_TICK+FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`=5962):
- * candidates `turn5SubmenuBounceTick(TURN5_CONFIRM_PRESS_TICK - d)` for `d`
- * in `[-4..4]` are ALL exact 0-diff (a 9-tick-wide plateau, the same shape
- * turn 4's own plateau one epoch earlier), `d` outside that range diverges (`d=-5`/`d=5`:
- * 769px isolated to the Onix silhouette; `d>=14`: 2360px, both Onix+
- * healthbox) - `d=0` picked as the plateau's center (i.e. the live formula
- * evaluated AT the freeze moment itself happens to be correct here, the
- * same coincidence turn 3's own case had).
+ * Generic sibling of the retired `turn5LegacyResettledBounceTick` (typeref-
+ * retirement slice 7b, `docs/battlescene-turnN-typeref-retirement-design.md`
+ * §4.1). The legacy formula's own `turn4RockSlideResettledBounceTick` read
+ * `turn4NextCommandHandoff.presentationEpoch.elapsed`, the exact same fact
+ * `latestCompletedCommandPresentationEpochElapsedSinceReset` reads off
+ * `latest.content.presentationEpoch.elapsed` (verified field-for-field, same
+ * as `turn4KickoffBounceTickFromLatest`'s own doc one turn earlier).
  */
-function turn5KickoffBounceTick(
+function turn5LegacyResettledBounceTickFromLatest(
   t: number,
-  pressTick: number,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null = null,
+  latest: LatestCompletedCommandHandoff | null,
 ): number {
-  if (turn4NextCommandHandoff === null) {
-    const historicalResettledTick = (value: number) => value
-      - (TURN4_CONFIRM_PRESS_TICK + TURN4_ROCKSLIDE_MENU_REDRAW_DELAY)
-      + (MENU_IDLE_BLANK_END_TICK + 1);
-    if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) {
-      return historicalResettledTick(t) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-    }
-    return historicalResettledTick(TURN5_CONFIRM_PRESS_TICK)
-      - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  const epochAge = latestCompletedCommandPresentationEpochElapsedSinceReset(latest, t - TICK0);
+  if (epochAge === null) {
+    throw new Error("turn-5 resettled bounce requires semantic turn-4 presentation epoch content");
   }
-  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) {
-    return turn5SubmenuBounceTick(t, turn4NextCommandHandoff);
-  }
-  return turn5SubmenuBounceTick(pressTick, turn4NextCommandHandoff);
+  return MENU_IDLE_BLANK_END_TICK + 1 + epochAge - TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG;
+}
+
+/** Generic sibling of the retired `turn5SubmenuBounceTick` (typeref-retirement slice 7b) - same `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` offset over `turn5LegacyResettledBounceTickFromLatest`'s own epoch. */
+function turn5SubmenuBounceTickFromLatest(
+  t: number,
+  latest: LatestCompletedCommandHandoff | null,
+): number {
+  return turn5LegacyResettledBounceTickFromLatest(t, latest) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
 }
 
 /**
@@ -10009,20 +9744,13 @@ function turn5KickoffBounceTick(
  * with no handoff of its own) is copied verbatim, unchanged - it is a fixed
  * formula over `t`/`pressTick`/constants only and never reads the handoff,
  * so there is nothing to generalize there. The non-null branch composes the
- * same `turn5SubmenuBounceTick`/`turn5LegacyResettledBounceTick`/
- * `turn4RockSlideResettledBounceTick` chain off
- * `latestCompletedCommandPresentationEpochElapsedSinceReset` instead of a
- * reconstructed Turn4 handoff - verified field-for-field:
- * `turn4RockSlideResettledBounceTick` reads
- * `turn4NextCommandHandoff.presentationEpoch.elapsed` via
- * `turn4PresentationEpochElapsedSinceReset`, the exact same fact
- * `latestCompletedCommandPresentationEpochElapsedSinceReset` reads off
- * `latest.content.presentationEpoch.elapsed` (already confirmed equal at the
- * publish boundary for turn 4's content, `turn4KickoffBounceTickFromLatest`'s
- * own doc). `turn5KickoffBounceTick`/`turn5SubmenuBounceTick`/
- * `turn5LegacyResettledBounceTick`/`turn4RockSlideResettledBounceTick`
- * themselves stay legacy-typed - `drawFightSubmenuWindow` (Family Q, slice
- * 7b) still calls them directly with a real reconstructed handoff.
+ * same `turn5SubmenuBounceTickFromLatest`/`turn5LegacyResettledBounceTickFromLatest`
+ * chain off `latestCompletedCommandPresentationEpochElapsedSinceReset`
+ * directly - the legacy `turn5KickoffBounceTick`/`turn5SubmenuBounceTick`/
+ * `turn5LegacyResettledBounceTick`/`turn4RockSlideResettledBounceTick` chain
+ * this sibling replaces has fully retired (typeref-retirement slice 7b) -
+ * `drawFightSubmenuWindow`/`drawActionMenuIdleWindow` now call this sibling
+ * directly with `latestCompletedCommandHandoff`.
  */
 function turn5KickoffBounceTickFromLatest(
   t: number,
