@@ -4,6 +4,37 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## Back `BACK_ANIM_TRIANGLE_DOWN` triple accepted (2026-08-03)
+
+- **State:** exact for the fifteenth bounded player-back set: **15/25 back
+  sets, 45/75 selector variants, 180/376 Factory mappings**. Generated census
+  is **26 mappings / 26 Factory species / 0 outside / 45 Factory records**;
+  move coverage is unchanged at **107/276 exact, 0 partial, 0 staged, 169
+  unsupported** and `ANIMATION_COVERAGE.json` remains SHA-256
+  `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+- **Did:** ported IDs **106/105/104** `ANIM_TRIANGLE_DOWN_TWICE` / normal /
+  slow, `Anim_TriangleDown_Fast` / normal / slow, and the complete signed
+  `{1,1,12}`, `{-2,0,12}`, `{1,-1,12}`, `{0,0,0}` reducer. It preserves
+  source s16/C division, terminal/repeat (`data[6]`), active vs terminal
+  `TryFlipX` timing under `sDontFlip`, visible non-affine OAM, and task
+  zero/preserve/restore. Legal representatives are SNORUNT index **76**
+  Brave/mod-0, TYROGUE index **15** Docile/mod-1, PIDGEY index **33**
+  Lonely/mod-2; all 26 siblings route through every nature selector.
+- **Next:** source-ranked unsupported player-back set
+  **`BACK_ANIM_CONCAVE_ARC_LARGE` (set 16): 18 mappings / 18 Factory / 0
+  outside / 33 Factory records**.
+- **Notes:** paired dense Scene-ON initializer→dummy receipts (framebuffers +
+  player RAM/OAM/affine state): Snorunt **1839..1878 / 40 / 19,048 B /
+  `b25d3fc6025f394cd908152bb7ea5e7533148ef7b765c74fe11179518b767361`**;
+  Tyrogue **1839..1859 / 21 / 10,324 B /
+  `2913a35d25f8cb9006290d5aeaa48911b98dedf8ae7ce1798a3cec69857e057c`**;
+  Pidgey **1838..1876 / 39 / 18,597 B /
+  `0d05595383b582de9272e7032c98cd8f35fd547b8aa5f351a1711dd40ecd53b1`**.
+  Focused source/census/routing/reducer/evidence + both ratchets: **4 files /
+  18 tests**; typecheck, smoke **7/346**, full `npm test` **685 files /
+  6,702 passed / 1 skipped**, build **553 modules**, and coverage green. No
+  unsupported-branch/boundary widening and no main-program finding.
+
 ## Back `BACK_ANIM_V_SHAKE_LOW` triple accepted (2026-08-03)
 
 **State:** exact for the fourteenth bounded player-back set: **14/25 back

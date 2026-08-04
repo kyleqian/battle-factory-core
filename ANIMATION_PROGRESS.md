@@ -1,5 +1,38 @@
 # Animation coverage
 
+## Back `BACK_ANIM_CONCAVE_ARC_SMALL` triple accepted (2026-08-04)
+
+- **State:** exact for the eighteenth bounded player-back set: **18/25 back
+  sets, 54/75 selector variants, 250/376 Factory mappings**. Generated set
+  census: **27 mappings / 26 Factory species / 1 outside (MEW) / 36 Factory
+  records**. Move coverage stays **107/276 exact, 0 partial, 0 staged, 169
+  unsupported**; `ANIMATION_COVERAGE.json` remains SHA-256
+  `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+- **Did:** ported source IDs **129/128/127**
+  `ANIM_CONCAVE_ARC_SMALL_TWICE` / normal / slow, guarded
+  initializer-first callbacks, and the source `ConcaveArc` lifecycle with
+  steps **8/6/4**, x/y amplitudes **4/6**, runs **2/1/1**, signed GBA `Sin`,
+  strict `data[7] > 255`, C modulo-256 restart, decrement, reflected-y plus
+  offset, terminal x2/y2 cleanup, `WaitAnimEnd`→dummy, non-affine OAM, and
+  task restoration. WYNAUT/Jolly record **35** is twice/mod-0; PICHU/Rash
+  **10** normal/mod-1; MARILL/Gentle **28** slow/mod-2; routing batch-checks
+  all 27 source siblings.
+- **Next:** source-ranked unsupported player-back set
+  **`BACK_ANIM_DIP_RIGHT_SIDE` (set 19): 38 mappings / 38 Factory / 0 outside
+  / 68 Factory records**.
+- **Notes:** fresh paired byte-identical dense Scene-ON initializer→dummy
+  receipts retain every framebuffer hash and player RAM/OAM/affine state:
+  Wynaut **1838..1905 / 68 / 32,878 B /
+  `b7e049dc55d79371ef383dd730fc777552969bda60017993cf133cae7a1ed4a6`**;
+  Pichu **1837..1882 / 46 / 22,191 B /
+  `ec53936c5fd61e982bd6427b259f423a067220ee97c151a385362c1fe84e3542`**;
+  Marill **1838..1904 / 67 / 32,341 B /
+  `f8e2fda9c1bd1cabad9da3eb53a2d1d90bbc1cf350cb6556bbcf99cbc09c9cea`**.
+  Focused source/census/routing/reducer/evidence plus both ratchets: **4
+  files / 18 tests**; typecheck, smoke **7/346**, full **691 files / 6,729
+  passed / 1 skipped**, build (**553 modules**), and coverage are green. No
+  boundary or unsupported-branch widening and no move promotion.
+
 ## Back `BACK_ANIM_CONVEX_DOUBLE_ARC` triple accepted (2026-08-03)
 
 - **State:** exact for the seventeenth bounded player-back set: **17/25 back
@@ -69,34 +102,3 @@
   are green. No boundary/unsupported-branch widening or move promotion.
   Main-program finding: Emerald's internal IDs for Azurill/Treecko are
   **350/277**, not their National Dex IDs; this affects probe staging only.
-
-## Back `BACK_ANIM_TRIANGLE_DOWN` triple accepted (2026-08-03)
-
-- **State:** exact for the fifteenth bounded player-back set: **15/25 back
-  sets, 45/75 selector variants, 180/376 Factory mappings**. Generated census
-  is **26 mappings / 26 Factory species / 0 outside / 45 Factory records**;
-  move coverage is unchanged at **107/276 exact, 0 partial, 0 staged, 169
-  unsupported** and `ANIMATION_COVERAGE.json` remains SHA-256
-  `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
-- **Did:** ported IDs **106/105/104** `ANIM_TRIANGLE_DOWN_TWICE` / normal /
-  slow, `Anim_TriangleDown_Fast` / normal / slow, and the complete signed
-  `{1,1,12}`, `{-2,0,12}`, `{1,-1,12}`, `{0,0,0}` reducer. It preserves
-  source s16/C division, terminal/repeat (`data[6]`), active vs terminal
-  `TryFlipX` timing under `sDontFlip`, visible non-affine OAM, and task
-  zero/preserve/restore. Legal representatives are SNORUNT index **76**
-  Brave/mod-0, TYROGUE index **15** Docile/mod-1, PIDGEY index **33**
-  Lonely/mod-2; all 26 siblings route through every nature selector.
-- **Next:** source-ranked unsupported player-back set
-  **`BACK_ANIM_CONCAVE_ARC_LARGE` (set 16): 18 mappings / 18 Factory / 0
-  outside / 33 Factory records**.
-- **Notes:** paired dense Scene-ON initializer→dummy receipts (framebuffers +
-  player RAM/OAM/affine state): Snorunt **1839..1878 / 40 / 19,048 B /
-  `b25d3fc6025f394cd908152bb7ea5e7533148ef7b765c74fe11179518b767361`**;
-  Tyrogue **1839..1859 / 21 / 10,324 B /
-  `2913a35d25f8cb9006290d5aeaa48911b98dedf8ae7ce1798a3cec69857e057c`**;
-  Pidgey **1838..1876 / 39 / 18,597 B /
-  `0d05595383b582de9272e7032c98cd8f35fd547b8aa5f351a1711dd40ecd53b1`**.
-  Focused source/census/routing/reducer/evidence + both ratchets: **4 files /
-  18 tests**; typecheck, smoke **7/346**, full `npm test` **685 files /
-  6,702 passed / 1 skipped**, build **553 modules**, and coverage green. No
-  unsupported-branch/boundary widening and no main-program finding.

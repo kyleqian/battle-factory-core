@@ -327,6 +327,23 @@ export const BACK_CONVEX_DOUBLE_ARC_OUTSIDE_FACTORY_SPECIES: readonly string[] =
   BACK_CONVEX_DOUBLE_ARC_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_CONCAVE_ARC_SMALL` row. */
+export const BACK_CONCAVE_ARC_SMALL_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_CONCAVE_ARC_SMALL")
+    .map(([species]) => species),
+);
+
+/** All but MEW's source mapping have real Battle Factory rental records. */
+export const BACK_CONCAVE_ARC_SMALL_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_CONCAVE_ARC_SMALL_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** MEW is the one source selector mapping outside the Factory corpus. */
+export const BACK_CONCAVE_ARC_SMALL_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_CONCAVE_ARC_SMALL_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -796,6 +813,48 @@ export const BACK_CONVEX_DOUBLE_ARC_VARIANTS = Object.freeze({
 } as const);
 
 /**
+ * `BACK_ANIM_CONCAVE_ARC_SMALL` keeps each selected guarded initializer as
+ * its active callback while it invokes the source's shared `ConcaveArc`
+ * helper. It differs from the accepted large-arc route only in the source
+ * initializer constants: amplitude 4×6 rather than 12×12.
+ */
+export const BACK_CONCAVE_ARC_SMALL_VARIANTS = Object.freeze({
+  twice: Object.freeze({
+    selector: "ANIM_CONCAVE_ARC_SMALL_TWICE",
+    callback: "Anim_ConcaveArcSmall_Twice",
+    sourceId: 129,
+    natureMod: 0,
+    step: 8,
+    xAmplitude: 4,
+    yAmplitude: 6,
+    runs: 2,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_CONCAVE_ARC_SMALL",
+    callback: "Anim_ConcaveArcSmall",
+    sourceId: 128,
+    natureMod: 1,
+    step: 6,
+    xAmplitude: 4,
+    yAmplitude: 6,
+    runs: 1,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_CONCAVE_ARC_SMALL_SLOW",
+    callback: "Anim_ConcaveArcSmall_Slow",
+    sourceId: 127,
+    natureMod: 2,
+    step: 4,
+    xAmplitude: 4,
+    yAmplitude: 6,
+    runs: 1,
+    accepted: true,
+  }),
+} as const);
+
+/**
  * `BACK_ANIM_V_SHAKE_H_SLIDE` selects three standalone source callbacks.
  * Unlike the preceding shake triples, each callback stays installed directly
  * after the task dispatches it; the source does not use a shared helper or a
@@ -1005,6 +1064,11 @@ type BackConvexDoubleArcCallback = typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS[keyof 
 type BackConvexDoubleArcSourceId = typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS[keyof typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS]["sourceId"];
 type BackConvexDoubleArcStep = typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS[keyof typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS]["step"];
 type BackConvexDoubleArcTerminalArcCount = typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS[keyof typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS]["terminalArcCount"];
+type BackConcaveArcSmallSelector = typeof BACK_CONCAVE_ARC_SMALL_VARIANTS[keyof typeof BACK_CONCAVE_ARC_SMALL_VARIANTS]["selector"];
+type BackConcaveArcSmallCallback = typeof BACK_CONCAVE_ARC_SMALL_VARIANTS[keyof typeof BACK_CONCAVE_ARC_SMALL_VARIANTS]["callback"];
+type BackConcaveArcSmallSourceId = typeof BACK_CONCAVE_ARC_SMALL_VARIANTS[keyof typeof BACK_CONCAVE_ARC_SMALL_VARIANTS]["sourceId"];
+type BackConcaveArcSmallStep = typeof BACK_CONCAVE_ARC_SMALL_VARIANTS[keyof typeof BACK_CONCAVE_ARC_SMALL_VARIANTS]["step"];
+type BackConcaveArcSmallRuns = typeof BACK_CONCAVE_ARC_SMALL_VARIANTS[keyof typeof BACK_CONCAVE_ARC_SMALL_VARIANTS]["runs"];
 type BackVShakeHSlideSelector = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["selector"];
 type BackVShakeHSlideCallback = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["callback"];
 type BackVShakeHSlideSourceId = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["sourceId"];
@@ -1298,6 +1362,21 @@ function convexDoubleArcVariant(selector: string): {
   readonly terminalArcCount: BackConvexDoubleArcTerminalArcCount;
 } | null {
   for (const variant of Object.values(BACK_CONVEX_DOUBLE_ARC_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function concaveArcSmallVariant(selector: string): {
+  readonly selector: BackConcaveArcSmallSelector;
+  readonly callback: BackConcaveArcSmallCallback;
+  readonly sourceId: BackConcaveArcSmallSourceId;
+  readonly step: BackConcaveArcSmallStep;
+  readonly xAmplitude: 4;
+  readonly yAmplitude: 6;
+  readonly runs: BackConcaveArcSmallRuns;
+} | null {
+  for (const variant of Object.values(BACK_CONCAVE_ARC_SMALL_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -3106,6 +3185,173 @@ export function backConcaveArcLargeTerminalSpriteData(
   let finalPhase = 0;
   while (finalPhase <= 255) finalPhase = toS16(finalPhase + variant.step);
   return [toS16(battlerId), 0, toS16(speciesId), variant.step, 12, 12, 1, finalPhase];
+}
+
+export interface BackConcaveArcSmallFrame {
+  readonly x2: number;
+  readonly y2: number;
+  /** The shared player-back task owns this register and leaves it zeroed. */
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** The initializer guard has run and stays latched for the whole callback. */
+  readonly data2: 1;
+  /** Source per-frame phase increment. */
+  readonly data3: BackConcaveArcSmallStep;
+  /** Source Y amplitude; it is also the reflection and vertical offset. */
+  readonly data4: 6;
+  /** Source X sine amplitude. */
+  readonly data5: 4;
+  /** Remaining full concave-arc runs after this callback. */
+  readonly data6: 1 | 2;
+  /** Phase before/after the source callback's strict-overflow branch. */
+  readonly data7Before: number;
+  readonly data7: number;
+  /** The branch is deliberately strict: phase 255 is still an active arc. */
+  readonly strictOverflow: boolean;
+  /** A nonfinal strict overflow restarts at C's positive modulo-256 result. */
+  readonly repeatWillRestart: boolean;
+  readonly sineIndex: number | null;
+  readonly reflectedY: boolean;
+  readonly selector: BackConcaveArcSmallSelector;
+  readonly sourceId: BackConcaveArcSmallSourceId;
+  readonly step: BackConcaveArcSmallStep;
+  readonly xAmplitude: 4;
+  readonly yAmplitude: 6;
+  readonly runs: BackConcaveArcSmallRuns;
+  /** The selected initializer calls ConcaveArc before returning. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  /** ConcaveArc is a helper, never an installed active sprite callback. */
+  readonly helperInvokedByInitializer: true;
+  /** No source TryFlipX call occurs in this callback family. */
+  readonly tryFlipXCalls: 0;
+  readonly normalBackDontFlip: true;
+  readonly affineWriteCount: 0;
+  readonly affineMode: "normal";
+  readonly oamVisible: true;
+  readonly resetSpriteAfterAnim: false;
+  readonly callback: BackConcaveArcSmallCallback | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for `BACK_ANIM_CONCAVE_ARC_SMALL`. It uses the same
+ * source `ConcaveArc` helper as set 16, but records the independently
+ * selected small-arc initializer constants rather than aliasing set 16.
+ */
+export function backConcaveArcSmallFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackConcaveArcSmallFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_CONCAVE_ARC_SMALL") return null;
+  const variant = concaveArcSmallVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected small concave-arc selector ${selection.selector}`);
+
+  let x2 = 0;
+  let y2 = 0;
+  let data6: 1 | 2 = variant.runs;
+  let data7 = 0;
+  let terminal = false;
+  let result: BackConcaveArcSmallFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    const data7Before = data7;
+    const strictOverflow = data7 > 255;
+    let sineIndex: number | null = null;
+    let reflectedY = false;
+    let callback: BackConcaveArcSmallCallback | "WaitAnimEnd" = variant.callback;
+    let repeatWillRestart = false;
+
+    if (strictOverflow) {
+      if (data6 <= 1) {
+        callback = "WaitAnimEnd";
+        x2 = 0;
+        y2 = 0;
+        terminal = true;
+      } else {
+        data7 %= 256;
+        data6 = toS16(data6 - 1) as 1 | 2;
+        repeatWillRestart = true;
+      }
+    } else {
+      sineIndex = data7 & 0xff;
+      x2 = toS16(-gbaSin(sineIndex, variant.xAmplitude));
+      y2 = gbaSin((sineIndex + 192) % 256, variant.yAmplitude);
+      if (y2 > 0) {
+        y2 = toS16(-y2);
+        reflectedY = true;
+      }
+      y2 = toS16(y2 + variant.yAmplitude);
+      data7 = toS16(data7 + variant.step);
+    }
+
+    result = Object.freeze({
+      x2,
+      y2,
+      data0: 0 as const,
+      data1: toS16(preservedData1),
+      data2: 1 as const,
+      data3: variant.step,
+      data4: 6 as const,
+      data5: 4 as const,
+      data6,
+      data7Before: toS16(data7Before),
+      data7: toS16(data7),
+      strictOverflow,
+      repeatWillRestart,
+      sineIndex,
+      reflectedY,
+      selector: variant.selector,
+      sourceId: variant.sourceId,
+      step: variant.step,
+      xAmplitude: 4 as const,
+      yAmplitude: 6 as const,
+      runs: variant.runs,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      helperInvokedByInitializer: true as const,
+      tryFlipXCalls: 0 as const,
+      normalBackDontFlip: true as const,
+      affineWriteCount: 0 as const,
+      affineMode: "normal" as const,
+      oamVisible: true as const,
+      resetSpriteAfterAnim: false as const,
+      callback,
+    });
+  }
+  return result;
+}
+
+/** Source WaitAnimEnd lifecycle after the static back OAM reports animEnded. */
+export function backConcaveArcSmallWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/**
+ * Task_HandleMonAnimation restores battler/data[0], species/data[2], and
+ * clears data[1] without disturbing the source callback's final phase state.
+ */
+export function backConcaveArcSmallTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+): readonly [number, 0, number, BackConcaveArcSmallStep, 6, 4, 1, number] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_CONCAVE_ARC_SMALL") return null;
+  const variant = concaveArcSmallVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected small concave-arc selector ${selection.selector}`);
+  let finalPhase = 0;
+  while (finalPhase <= 255) finalPhase = toS16(finalPhase + variant.step);
+  return [toS16(battlerId), 0, toS16(speciesId), variant.step, 6, 4, 1, finalPhase];
 }
 
 export interface BackConvexDoubleArcFrame {
