@@ -259,6 +259,23 @@ export const BACK_GROW_STUTTER_OUTSIDE_FACTORY_SPECIES: readonly string[] = Obje
   BACK_GROW_STUTTER_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_V_SHAKE_LOW` row. */
+export const BACK_V_SHAKE_LOW_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_V_SHAKE_LOW")
+    .map(([species]) => species),
+);
+
+/** All low vertical-shake mappings have real Factory rental records. */
+export const BACK_V_SHAKE_LOW_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_V_SHAKE_LOW_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** This bounded back set has no non-Factory selector mappings. */
+export const BACK_V_SHAKE_LOW_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_V_SHAKE_LOW_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -576,6 +593,42 @@ export const BACK_V_SHAKE_VARIANTS = Object.freeze({
 } as const);
 
 /**
+ * `BACK_ANIM_V_SHAKE_LOW` selects three initializers around
+ * `VerticalShakeLowTwice`.  The helper walks the source's three pulse/gap/
+ * pulse rows in `sVerticalShakeData`; all three variants differ only in the
+ * increment and maximum amplitude stored by their initializer.
+ */
+export const BACK_V_SHAKE_LOW_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_V_SHAKE_LOW_TWICE_FAST",
+    callback: "Anim_VerticalShakeLowTwice_Fast",
+    sourceId: 99,
+    natureMod: 0,
+    step: 56,
+    amplitude: 9,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_V_SHAKE_LOW_TWICE",
+    callback: "Anim_VerticalShakeLowTwice",
+    sourceId: 92,
+    natureMod: 1,
+    step: 40,
+    amplitude: 6,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_V_SHAKE_LOW_TWICE_SLOW",
+    callback: "Anim_VerticalShakeLowTwice_Slow",
+    sourceId: 98,
+    natureMod: 2,
+    step: 24,
+    amplitude: 6,
+    accepted: true,
+  }),
+} as const);
+
+/**
  * `BACK_ANIM_V_SHAKE_H_SLIDE` selects three standalone source callbacks.
  * Unlike the preceding shake triples, each callback stays installed directly
  * after the task dispatches it; the source does not use a shared helper or a
@@ -765,6 +818,11 @@ type BackVShakeCallback = typeof BACK_V_SHAKE_VARIANTS[keyof typeof BACK_V_SHAKE
 type BackVShakeSourceId = typeof BACK_V_SHAKE_VARIANTS[keyof typeof BACK_V_SHAKE_VARIANTS]["sourceId"];
 type BackVShakeStep = typeof BACK_V_SHAKE_VARIANTS[keyof typeof BACK_V_SHAKE_VARIANTS]["step"];
 type BackVShakeAmplitude = typeof BACK_V_SHAKE_VARIANTS[keyof typeof BACK_V_SHAKE_VARIANTS]["amplitude"];
+type BackVShakeLowSelector = typeof BACK_V_SHAKE_LOW_VARIANTS[keyof typeof BACK_V_SHAKE_LOW_VARIANTS]["selector"];
+type BackVShakeLowCallback = typeof BACK_V_SHAKE_LOW_VARIANTS[keyof typeof BACK_V_SHAKE_LOW_VARIANTS]["callback"];
+type BackVShakeLowSourceId = typeof BACK_V_SHAKE_LOW_VARIANTS[keyof typeof BACK_V_SHAKE_LOW_VARIANTS]["sourceId"];
+type BackVShakeLowStep = typeof BACK_V_SHAKE_LOW_VARIANTS[keyof typeof BACK_V_SHAKE_LOW_VARIANTS]["step"];
+type BackVShakeLowAmplitude = typeof BACK_V_SHAKE_LOW_VARIANTS[keyof typeof BACK_V_SHAKE_LOW_VARIANTS]["amplitude"];
 type BackVShakeHSlideSelector = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["selector"];
 type BackVShakeHSlideCallback = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["callback"];
 type BackVShakeHSlideSourceId = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["sourceId"];
@@ -1003,6 +1061,19 @@ function vShakeVariant(selector: string): {
   readonly amplitude: BackVShakeAmplitude;
 } | null {
   for (const variant of Object.values(BACK_V_SHAKE_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function vShakeLowVariant(selector: string): {
+  readonly selector: BackVShakeLowSelector;
+  readonly callback: BackVShakeLowCallback;
+  readonly sourceId: BackVShakeLowSourceId;
+  readonly step: BackVShakeLowStep;
+  readonly amplitude: BackVShakeLowAmplitude;
+} | null {
+  for (const variant of Object.values(BACK_V_SHAKE_LOW_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -2304,6 +2375,160 @@ export function backVerticalShakeFrameAtTick(
 
 /** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
 export function backVerticalShakeWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+const VERTICAL_SHAKE_LOW_PHASES = Object.freeze([
+  Object.freeze({ sourceMultiplier: 6, duration: 30 }),
+  Object.freeze({ sourceMultiplier: -2, duration: 15 }),
+  Object.freeze({ sourceMultiplier: 6, duration: 30 }),
+] as const);
+
+export interface BackVerticalShakeLowFrame {
+  readonly x2: 0;
+  readonly y2: number;
+  readonly data0: BackVShakeLowStep;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** The phase-row cursor into source `sVerticalShakeData`. */
+  readonly data5: 0 | 1 | 2 | 3;
+  /** Progress in the current pulse/gap row, reset at each source boundary. */
+  readonly data6: number;
+  readonly data7: BackVShakeLowAmplitude;
+  /** `u8 var8 = sprite->data[2]` before the shared helper call. */
+  readonly data2Before: number;
+  readonly data2: number;
+  readonly sourceRowMultiplier: 6 | -2 | -1;
+  readonly sourceRowDuration: 30 | 15 | 0;
+  /** Source `var7`: the damped signed GBA sine amplitude for this callback. */
+  readonly effectiveAmplitude: number;
+  readonly sineIndex: number | null;
+  readonly phaseBoundary: boolean;
+  readonly selector: BackVShakeLowSelector;
+  readonly sourceId: BackVShakeLowSourceId;
+  readonly step: BackVShakeLowStep;
+  readonly amplitude: BackVShakeLowAmplitude;
+  /** Tick zero calls the selected initializer before it installs the helper. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  readonly normalBackDontFlip: true;
+  /** This source family has no TryFlipX or affine operations. */
+  readonly tryFlipXCalls: 0;
+  readonly affineWriteCount: 0;
+  readonly affineMode: "normal";
+  readonly resetSpriteAfterAnim: false;
+  readonly callback: "VerticalShakeLowTwice" | "WaitAnimEnd";
+}
+
+/**
+ * Exact source-order reducer for `BACK_ANIM_V_SHAKE_LOW`.  Its terminating
+ * `{-1, 0}` row does not advance any state: it clears y2 and hands off to
+ * WaitAnimEnd on the callback after the second pulse's duration boundary.
+ * The middle `{-2, 15}` row intentionally forces amplitude zero while still
+ * advancing the u8-derived sine counter on all but its boundary callback.
+ */
+export function backVerticalShakeLowFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackVerticalShakeLowFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_V_SHAKE_LOW") return null;
+  const variant = vShakeLowVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected V-shake-low selector ${selection.selector}`);
+
+  let data2 = 0;
+  let data5 = 0 as 0 | 1 | 2 | 3;
+  let data6 = 0;
+  let terminal = false;
+  let result: BackVerticalShakeLowFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    const data2Before = data2;
+    if (data5 === 3) {
+      result = Object.freeze({
+        x2: 0 as const,
+        y2: 0,
+        data0: variant.step,
+        data1: toS16(preservedData1),
+        data5,
+        data6,
+        data7: variant.amplitude,
+        data2Before: toS16(data2Before),
+        data2: toS16(data2),
+        sourceRowMultiplier: -1 as const,
+        sourceRowDuration: 0 as const,
+        effectiveAmplitude: 0,
+        sineIndex: null,
+        phaseBoundary: false,
+        selector: variant.selector,
+        sourceId: variant.sourceId,
+        step: variant.step,
+        amplitude: variant.amplitude,
+        initializerCallBeforeCallbackInstall: tick === 0,
+        normalBackDontFlip: true as const,
+        tryFlipXCalls: 0 as const,
+        affineWriteCount: 0 as const,
+        affineMode: "normal" as const,
+        resetSpriteAfterAnim: false as const,
+        callback: "WaitAnimEnd" as const,
+      });
+      terminal = true;
+      continue;
+    }
+
+    const phase = VERTICAL_SHAKE_LOW_PHASES[data5]!;
+    const effectiveAmplitude = phase.sourceMultiplier === -2
+      ? 0
+      : Math.trunc(((phase.duration - data6) * variant.amplitude) / phase.duration);
+    const sineIndex = ((data2Before & 0xff) + 192) & 0xff;
+    const phaseBoundary = data6 === phase.duration;
+    if (phaseBoundary) {
+      data5 = (data5 + 1) as 0 | 1 | 2 | 3;
+      data6 = 0;
+    } else {
+      data2 = toS16(data2 + variant.step);
+      data6 += 1;
+    }
+    result = Object.freeze({
+      x2: 0 as const,
+      y2: gbaSin(sineIndex, effectiveAmplitude) + effectiveAmplitude,
+      data0: variant.step,
+      data1: toS16(preservedData1),
+      data5,
+      data6,
+      data7: variant.amplitude,
+      data2Before: toS16(data2Before),
+      data2: toS16(data2),
+      sourceRowMultiplier: phase.sourceMultiplier,
+      sourceRowDuration: phase.duration,
+      effectiveAmplitude,
+      sineIndex,
+      phaseBoundary,
+      selector: variant.selector,
+      sourceId: variant.sourceId,
+      step: variant.step,
+      amplitude: variant.amplitude,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      normalBackDontFlip: true as const,
+      tryFlipXCalls: 0 as const,
+      affineWriteCount: 0 as const,
+      affineMode: "normal" as const,
+      resetSpriteAfterAnim: false as const,
+      callback: "VerticalShakeLowTwice" as const,
+    });
+  }
+  return result;
+}
+
+/** Source WaitAnimEnd lifecycle after the static back OAM reports animEnded. */
+export function backVerticalShakeLowWaitAnimEndCallback(
   animEnded: boolean,
 ): "WaitAnimEnd" | "SpriteCallbackDummy" {
   return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
