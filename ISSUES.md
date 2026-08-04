@@ -548,8 +548,9 @@ the old values (53, `offscreenX2: 106`) before updating to the new ones (38,
 green at this fix; `compare:differential -- battle-command-generated-off.json
 --base a7bbed0b --summary` stayed 128/128.
 
-**2026-08-04 LOSS-half closed: 235/236 (reproduced twice byte-identical);
-one itemized remaining class, not this window's scaffold.** The compare
+**2026-08-04 LOSS-half: all three diagnosed classes fixed; small residual
+classes remain (1/236 frames fully match — the original entry inverted this
+as "235/236"; supervisor-corrected).** The compare
 wiring landed that morning (`29e5cb3d`, `tools/compare/appTrace.ts`'s
 `loss-terminal-window-off` stage) at a reproducible 0/236 baseline with
 three diagnosed mismatch classes. This session fixed all three:
@@ -591,15 +592,21 @@ three diagnosed mismatch classes. This session fixed all three:
   visibility hides the player sprite+healthbox as a side effect, so no
   separate synthetic event was needed for (C).
 - **Result:** `npm run compare -- loss-terminal-window-off --summary`:
-  **235/236 frames matched**, reproduced byte-identical across two
-  independent runs (same single frame, 3231, matches both times; same
-  single remaining mismatch class both times).
+  **1/236 frames fully matched** (frame 3231, both times), the other 235
+  reduced from the ~7,700-8,300px baseline to the residual classes below,
+  byte-identical across two independent runs plus a third supervisor rerun
+  post-animation-fold (run-2026-08-04-17-32-22Z-58459).
 
-**One remaining class, itemized (not guess-fit):** every mismatched frame
-(2996–3230, all 235) differs only in a small fixed region — pixel bbox
-around `(61–71, 140–149)`, 37px (0.10%), drifting a few pixels per frame as
-the message box height settles then holding fixed once the win-text is
-fully typed. Root cause, pixel-confirmed via
+**Remaining classes, itemized (not guess-fit):** 232 of the 235 mismatched
+frames (2996–3230) differ only in a small region — pixel bbox around
+`(61–71, 140–149)`, exactly 37px (0.10%) on 212 static frames, 56–139px on
+~20 frames as the glyph animates/the message box height settles. The other
+**3 frames (3034–3036, ~587–589px) are a distinct micro-class the original
+itemization missed** (supervisor-measured, run-2026-08-04-17-32-22Z-58459):
+the antecedent "MURKROW fainted!♥" → quote text-swap edge, where the held
+antecedent line differs for 3 ticks — re-inspect it during the same source
+read below (it may be the same cursor/hold mechanism at the swap boundary,
+or its own timing edge). Root cause, pixel-confirmed via
 `tools/compare/out/*/diff-03100.png`: the generic wait-cursor (heart glyph,
 `battleScene.ts:34009–34017`, `drawCursor` at
 `CURSOR_Y_OFFSETS[Math.floor(view.waitCursor.age / 9) % N]`) draws

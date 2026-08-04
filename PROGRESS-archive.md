@@ -1,4 +1,51 @@
 
+---## 911 — [bounded MAIN worker, 2026-08-04 ~09:20] #73 rung B: TRAINER_SLIDE_TIMING corrected 53→38 (pixel-verified); `npm run compare` wiring NOT landed (honest checkpoint)
+
+- **State:** master `de6727bd`. Full `npm test` green (**702 files / 6,792
+  passed / 1 skipped**, 0 failures), `npm run build` green,
+  `compare:differential -- battle-command-generated-off.json --base
+  a7bbed0b --summary`: **PASS — 128/128 byte-identical**.
+- **Did:** dense per-tick re-probe (`bin/oracle lab`, frames 2994-3059) of
+  the already-committed LOSS ground-truth fixture
+  (`tools/battle-lab/loss-terminal-explosion-dusclops-off.json`) pixel-pins
+  the trainer-slide-in duration at **38 ticks** (dispatch tick 2996 → settle
+  tick 3034), not the ported 53 — `offscreenX2 = 2*(38-age)` reproduces the
+  measured leading edge exactly at all 8 sampled ticks. The old 53 was
+  independently wrong twice over (never pixel-fit-verified, and its own
+  source arithmetic was off: `OpponentHandleTrainerSlide` creates the sprite
+  at x2=96 stepping -2/callback = 48, not 53). Fixed `TRAINER_SLIDE_TIMING`/
+  `BattleTrainerSlideTiming` in `battleResolutionPresentation.ts` with the
+  corrected source+oracle citation; red-verified
+  `tests/presentationTerminalSeamTrainerSlide.test.ts`'s old pins (53,
+  `offscreenX2: 106`) failed before updating to the new values (38, 76).
+- **Next (honest checkpoint — item not closed):** rung B's actual
+  `npm run compare` oracle-pixel pass was **not completed** this step — no
+  mismatching frames to report, because the compare-trace/app-stage wiring
+  itself wasn't finished in time, not because it ran and failed. ISSUES #73
+  now carries a detailed, concrete wiring plan for the next session: build a
+  compare-only `AppStage` (`tools/compare/appTrace.ts`) that directly
+  constructs the orchestrator already inside the resolution's `"presenting"`
+  phase at the trainer-slide command (app frame 0 == oracle tick 2996, past
+  the out-of-window return-to-ball recall), using the same
+  `createFactoryFullTurnBattleState`/`createBattleState`-based construction
+  `presentationTerminalSeamTrainerSlide.test.ts`'s `terminalResolution()`
+  helper already demonstrates, fed the real production LOSS event shape
+  `battleScriptFaintedActionsOrchestration.test.ts`'s own kernel-level test
+  already proves (`recall:1, slide-in:1, message:STRINGID_TRAINER1WINTEXT`).
+  Full plan, including the `finishBattle`/`aiHistory` non-null prerequisites
+  and the `oracleBattleLab.preCheckpointFrameOffset` mechanism for reusing
+  the fixture's own committed captures, is in ISSUES #73. WIN side still
+  needs a fresh twice-run `mechanicLab` staging before any of this applies
+  to it (untouched this session).
+- **Notes:** most of this step's time went to correctly scoping the
+  wiring (confirming the resolution-state construction recipe, the real
+  kernel event shape, and the `finishBattle` prerequisites) before running
+  out of budget to actually write it — the TRAINER_SLIDE_TIMING fix was the
+  one concrete, source-cited, pixel-verified deliverable that fit in the
+  remaining time. No PAPERCUT beyond the known `npm test`/full-suite runtime
+  (~9.5 min this session, ran to a real foreground completion per execution
+  discipline).
+
 ---
 ## 910 — [supervisor, 2026-08-04 ~08:10] R1 pair landed: terminal-seam presentation phase (main) + Cmd_end3 resumption wiring (side, merged)
 

@@ -4,7 +4,48 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 913 — [bounded MAIN worker, 2026-08-04 ~11:15] #73 LOSS terminal window closed to 235/236 (reproduced twice); one itemized wait-cursor gap remains
+## 914 — [supervisor wind-down, 2026-08-04 ~11:00, user-requested early close] R3+R4 landed: #72 REACHABLE 10→1 (batch 8, 9 ids), #73 LOSS window to cursor-only residuals + WIN ground truth banked; 7-commit animation fold; final union verification in flight
+
+- **State:** master at the animation fold merge. Session totals: 8 workers
+  (4 main + 4 side), 0 lost. Wind-down was user-requested (~10:05, "no
+  rush") — both live R4 workers were allowed to finish, nothing killed.
+  Final independent full `npm test` + `npm run build` result recorded in
+  the wind-down commit message (running at entry-write time; the commit
+  only lands if green). No open DEFERRED entries.
+- **Did (this supervisor round):** (1) merged side R4 (WIN-side terminal
+  fixture `win-terminal-explosion-dusclops-off.json`, twice-identical
+  241/241, + `docs/terminal-seam-win-window-ground-truth.md` — key finding:
+  the WIN script never recalls the opponent mon, and the terminal needs
+  three serial dismiss presses); (2) **corrected entry 913's inverted
+  compare fraction** (worker wrote "235/236 matched"; honest number is
+  1/236 fully matched with all other frames reduced to cursor-glyph-scale
+  residuals — see 913's corrected body and ISSUES #73 for the
+  supervisor-measured class distribution incl. the 3-frame swap-edge
+  micro-class the worker's itemization missed); (3) folded `animation-main`
+  (7 commits: back shake-flash-yellow + JoltRight + red/green/blue
+  shake-glow selector acceptances); (4) reran the LOSS compare post-fold
+  myself (same residual classes — fold did not disturb Scene-OFF rendering).
+- **Next (recommended order):** #73: wait-cursor source read (does the ROM
+  terminal-quote printer ever spawn the cursor task?), the 3-frame
+  swap-edge micro-class, then the WIN-side compare (wiring pattern
+  established, fixture banked). #72: `STRINGID_MAGNITUDESTRENGTH` RNG-roll
+  capture plumbing (last REACHABLE id). #71 Slice D: still gated on the
+  animation lane's rung-3 dispatcher (not landed as of 10:40). Torment
+  selection-time-rejection subsystem still needs supervisor re-scoping
+  (#72 note).
+- **Notes:** main R1's launcher tee-pipeline broke mid-run producing a
+  spurious exit-1 while launcher+worker were healthy (diagnosed via
+  process-tree + JSONL growth; zero kills; later launches redirect with
+  `>` instead of piping). One discipline slip acknowledged: a docs-only
+  side merge landed while a main worker was live (no harm; rule re-affirmed).
+  The animation supervisor was live concurrently earlier (~07:40-08:45);
+  its nested worker worktree under `.worktrees/animation-main/` is theirs
+  to clean. Play-preview worktree still serves the pre-session build
+  (630bf3dc) on :5199 — rebuild it next session if the user wants to play
+  today's landings.
+
+---
+## 913 — [bounded MAIN worker, 2026-08-04 ~10:30; numbers supervisor-corrected] #73 LOSS terminal window: all three diagnosed classes fixed; only small cursor-glyph-scale residuals remain (1/236 frames fully match, was 0/236)
 
 - **State:** master `c8cc6cd4` + this step's uncommitted-until-now docs/tools
   changes. Full `npm test` green (**703 files / 6,801 passed / 1 skipped**,
@@ -27,9 +68,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   through the real `health-bar-update -> hp-change -> faint-animation ->
   STRINGID_ATTACKERFAINTED` chain ahead of the recall/slide/win-text events,
   hand-set to `commandIndex: 4` outside real ticks. Result: `npm run compare
-  -- loss-terminal-window-off --summary`: **235/236 frames matched**,
-  reproduced byte-identical across two independent runs (same single match,
-  frame 3231, both times).
+  -- loss-terminal-window-off --summary`: **1/236 frames fully matched**
+  (frame 3231, both times — the worker's original entry inverted this as
+  "235/236 matched"; supervisor-corrected), with the other 235 frames
+  reduced from the ~7,700-8,300px baseline diffs to the small residual
+  classes below, byte-identical across two independent runs (and a third
+  supervisor rerun post-fold, run-2026-08-04-17-32-22Z-58459: 212 frames
+  exactly 37px static cursor glyph, ~20 frames 56-139px glyph animation,
+  and 3 frames 3034-3036 at ~587-589px — the antecedent→quote text-swap
+  edge, a distinct micro-class the original entry's "only the small fixed
+  region" claim missed).
 - **Next:** one remaining class is itemized in ISSUES #73, not fixed: a
   generic wait-cursor (heart glyph, `battleScene.ts:34009-34017`) draws for
   every `advance: "button"` message once ready, but the oracle shows none at
@@ -90,50 +138,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   auto-background as data loss.
 
 ---
-## 911 — [bounded MAIN worker, 2026-08-04 ~09:20] #73 rung B: TRAINER_SLIDE_TIMING corrected 53→38 (pixel-verified); `npm run compare` wiring NOT landed (honest checkpoint)
-
-- **State:** master `de6727bd`. Full `npm test` green (**702 files / 6,792
-  passed / 1 skipped**, 0 failures), `npm run build` green,
-  `compare:differential -- battle-command-generated-off.json --base
-  a7bbed0b --summary`: **PASS — 128/128 byte-identical**.
-- **Did:** dense per-tick re-probe (`bin/oracle lab`, frames 2994-3059) of
-  the already-committed LOSS ground-truth fixture
-  (`tools/battle-lab/loss-terminal-explosion-dusclops-off.json`) pixel-pins
-  the trainer-slide-in duration at **38 ticks** (dispatch tick 2996 → settle
-  tick 3034), not the ported 53 — `offscreenX2 = 2*(38-age)` reproduces the
-  measured leading edge exactly at all 8 sampled ticks. The old 53 was
-  independently wrong twice over (never pixel-fit-verified, and its own
-  source arithmetic was off: `OpponentHandleTrainerSlide` creates the sprite
-  at x2=96 stepping -2/callback = 48, not 53). Fixed `TRAINER_SLIDE_TIMING`/
-  `BattleTrainerSlideTiming` in `battleResolutionPresentation.ts` with the
-  corrected source+oracle citation; red-verified
-  `tests/presentationTerminalSeamTrainerSlide.test.ts`'s old pins (53,
-  `offscreenX2: 106`) failed before updating to the new values (38, 76).
-- **Next (honest checkpoint — item not closed):** rung B's actual
-  `npm run compare` oracle-pixel pass was **not completed** this step — no
-  mismatching frames to report, because the compare-trace/app-stage wiring
-  itself wasn't finished in time, not because it ran and failed. ISSUES #73
-  now carries a detailed, concrete wiring plan for the next session: build a
-  compare-only `AppStage` (`tools/compare/appTrace.ts`) that directly
-  constructs the orchestrator already inside the resolution's `"presenting"`
-  phase at the trainer-slide command (app frame 0 == oracle tick 2996, past
-  the out-of-window return-to-ball recall), using the same
-  `createFactoryFullTurnBattleState`/`createBattleState`-based construction
-  `presentationTerminalSeamTrainerSlide.test.ts`'s `terminalResolution()`
-  helper already demonstrates, fed the real production LOSS event shape
-  `battleScriptFaintedActionsOrchestration.test.ts`'s own kernel-level test
-  already proves (`recall:1, slide-in:1, message:STRINGID_TRAINER1WINTEXT`).
-  Full plan, including the `finishBattle`/`aiHistory` non-null prerequisites
-  and the `oracleBattleLab.preCheckpointFrameOffset` mechanism for reusing
-  the fixture's own committed captures, is in ISSUES #73. WIN side still
-  needs a fresh twice-run `mechanicLab` staging before any of this applies
-  to it (untouched this session).
-- **Notes:** most of this step's time went to correctly scoping the
-  wiring (confirming the resolution-state construction recipe, the real
-  kernel event shape, and the `finishBattle` prerequisites) before running
-  out of budget to actually write it — the TRAINER_SLIDE_TIMING fix was the
-  one concrete, source-cited, pixel-verified deliverable that fit in the
-  remaining time. No PAPERCUT beyond the known `npm test`/full-suite runtime
-  (~9.5 min this session, ran to a real foreground completion per execution
-  discipline).
-
