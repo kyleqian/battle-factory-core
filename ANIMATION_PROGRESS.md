@@ -1,5 +1,50 @@
 # Animation coverage
 
+## Rung-3 FRONT send-out ANCHOR pinned live (RAM probe, all three flights) (2026-08-04)
+
+- **State:** ISSUES #71 rung-3 item 1's "define the anchor explicitly"
+  follow-up complete and green. Move coverage unchanged: **107/276 exact, 1
+  partial, 0 staged, 168 unsupported**; `ANIMATION_COVERAGE.json` untouched.
+  The only production edit is the `frontSendOutFrameAtTick` doc comment
+  (`sendOutDispatcher.ts`); `sendOutSpriteFrame.ts` needed no change ((iv)
+  confirms its anchor). No engine edits, no boundary/unsupported widening.
+- **Did:** `tools/compare/frontSendOutFlightProbe.py` captures the Scene-ON
+  opponent front send-out flight inside `BattleLab.prepare()`'s fast-forward
+  (`preCheckpointCaptureAllFrames` set on the scenario dict, never the
+  committed scenarios), reading `gBattlerSpriteIds[1]` plus both
+  `Task_HandleMonAnimation` and `Task_AnimateAfterDelay` task scans. Anchor =
+  first battler1 animNum 0→1 after the `SpriteCB_OpponentMonFromBall` emerge
+  installs (naive flip detection is noise — the slot points at rental-screen
+  sprites pre-battle). Six fixtures committed under
+  `tools/compare/fixtures/front-send-out-flight-<species>-run-{a,b}.json`,
+  twice fresh and byte-identical: GROVYLE `84829e36…`, PIDGEOTTO
+  `32414807…`, RATTATA `8d9d36f3…`. Evidence test
+  `tests/animation/sendOutDispatcherAnchorEvidence.test.ts` (11 tests)
+  validates the dispatcher per tick at alignment A = −1 over every flight row
+  from t_move through t_end (no skips).
+- **Next:** rung-3 remaining item — the back variant
+  (`species, nature, ticksSinceStart`) in the same contract shape.
+- **Notes:** measured anchor table: GROVYLE (V_STRETCH, delay 0)
+  t_anchor=t_move=1616, t_end=1658, gap 0; PIDGEOTTO (V_STRETCH, delay 25)
+  t_anchor=1618, t_move=1642, t_end=1684, gap 24 (SpriteCallbackDummy_2 holds
+  1618..1641 while the delay task counts 24→0); RATTATA (RAPID_H_HOPS, delay
+  0) t_anchor=t_move=1616, t_end=1703, gap 0, settled {x2:1, y2:0}. Validated
+  per-tick rows: GROVYLE 42, PIDGEOTTO 42, RATTATA 87 (incl. the clamp).
+  Alignment A = −1 — the callback's OAM write latches one display frame late
+  (KABUTO hand-fit precedent); at t_move the row holds the pre-flight {0,0}
+  (install frame, callback not yet run) and the test asserts that boundary
+  explicitly. **Brief deviation to flag:** the brief expected PIDGEOTTO gap =
+  delay-0 gap + 25, but the ROM measures **24** — `Task_AnimateAfterDelay`'s
+  `--sAnimDelay == 0` pre-decrement consumes the creation frame, so the Anim_*
+  install is `delay − 1` frames after the affineAnimEnded handoff. The doc
+  records the measured formula and the test asserts `gap = delay − 1` with
+  delay read from the selector tables (not hardcoded). GROVYLE animCmdIndex
+  matches the index-1 program's cumulative durations with **latch offset 0**
+  (the program is visible on the anchor frame, undelayed). Focused 4 files /
+  26 tests, typecheck, smoke **7/347**, full **718 files / 6,905 passed / 1
+  skipped**, build green. Committed `7d4e2020` (probe+fixtures) then
+  `4d5c0c22` (evidence test + doc); tree clean at commit.
+
 ## Rung-3 send-out sprite-frame (OAM/anim-frame) half landed (2026-08-04)
 
 - **State:** ISSUES #71 rung-3 item 2, the species-generic sprite ANIMCMD

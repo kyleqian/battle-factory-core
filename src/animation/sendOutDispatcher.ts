@@ -250,11 +250,18 @@ const generatedFrontAnimIds = selectorTables.frontAnimIds.species as Readonly<Re
  * `sMonAnimationDelayTable[species-1] != 0` (src/pokemon.c,
  * `Task_AnimateAfterDelay` branch; extracted as
  * `selectorTables.animationDelay.species`), the movement animation is deferred
- * by that many further ticks, so the engine-side anchor is
- * affineAnimEnded-tick + animationDelay[species]. The exact live RAM-probe
- * pin of this anchor is a separate follow-up acceptance step; this module's
- * contract is reducer-relative and matches the tick contract every accepted
- * front reducer already uses.
+ * by that many further ticks. Measured live against the ROM
+ * (`tools/compare/fixtures/front-send-out-flight-*.json`, twice-fresh
+ * byte-identical): the Anim_* callback installs on the affineAnimEnded tick
+ * itself for delay-0 species (GROVYLE/RATTATA, measured gap 0) and
+ * `animationDelay[species] - 1` ticks later for delayed species (PIDGEOTTO
+ * delay 25, install 24 ticks after the handoff) — `Task_AnimateAfterDelay`'s
+ * `--sAnimDelay == 0` pre-decrement consumes the creation frame. The OAM
+ * x2/y2 for reducer tick N appears one display frame after that install frame
+ * (the write latches one frame late, matching the KABUTO hand-fit,
+ * `src/engine/kabutoSendOut.ts:66-69`), so
+ * `frontSendOutFrameAtTick(species, frame - t_move - 1)` reproduced every
+ * probed flight tick of GROVYLE/PIDGEOTTO/RATTATA (alignment A = -1).
  *
  * Ticks past the family's terminal tick clamp to the terminal tick (the
  * settled residual `{ x2, y2 }` the sprite freezes for the rest of the
