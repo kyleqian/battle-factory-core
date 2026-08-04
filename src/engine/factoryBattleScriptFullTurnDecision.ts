@@ -208,6 +208,18 @@ const ABILITY_DISPLAY_NAME_BY_ID: Readonly<Record<number, string>> = Object.free
   12: "OBLIVIOUS",
   20: "OWN TEMPO",
   29: "CLEAR BODY",
+  // ISSUES #72 batch 2 (docs/issue72-reachability-triage.md): Damp, Volt
+  // Absorb/Water Absorb, Suction Cups, Intimidate + its three blockers,
+  // Inner Focus, Keen Eye/Hyper Cutter.
+  6: "DAMP",
+  10: "VOLT ABSORB",
+  11: "WATER ABSORB",
+  21: "SUCTION CUPS",
+  22: "INTIMIDATE",
+  39: "INNER FOCUS",
+  51: "KEEN EYE",
+  52: "HYPER CUTTER",
+  73: "WHITE SMOKE",
 });
 function abilityDisplayName(ability: number): string {
   const name = ABILITY_DISPLAY_NAME_BY_ID[ability];
@@ -231,6 +243,7 @@ const STATUS1_PARALYSIS = 1 << 6;
 const ABILITY_SHADOW_TAG = 23;
 const ABILITY_LEVITATE = 26;
 const ABILITY_MAGNET_PULL = 42;
+const ABILITY_KEEN_EYE = 51;
 const ABILITY_RUN_AWAY = 50;
 const ABILITY_ARENA_TRAP = 71;
 /** include/constants/battle.h: STATUS2_ESCAPE_PREVENTION. */
@@ -827,10 +840,24 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
             // shape (advancePastAccuracyCheck, battleScriptHitChainOpcode.ts:
             // 908-925 -- Flash Fire is still gBattlerTarget's ability at the
             // print, roles unchanged since the AVOIDEDDAMAGE/GROUNDMISS case).
+            // ISSUES #72 batch 2: STRINGID_PKMNANCHORSITSELFWITH (Suction
+            // Cups, BattleScript_AbilityPreventsPhasingOut's own generic
+            // jumpifability BS_TARGET), STRINGID_PKMNPREVENTSUSAGE (Damp,
+            // Cmd_tryexplosion's own dampBattler re-point of
+            // selectorRoles.target, battleScriptExplosionOpcode.ts),
+            // STRINGID_PKMNRESTOREDHPUSING/STRINGID_PKMNSXMADEYUSELESS
+            // (Volt Absorb/Water Absorb, advancePastAccuracyCheck,
+            // battleScriptHitChainOpcode.ts:873-905 -- selectorRoles.target
+            // unchanged from the move's own real target) all share this
+            // exact B_TXT_DEF_ABILITY shape.
             : operand.expression === "STRINGID_AVOIDEDDAMAGE"
               || operand.expression === "STRINGID_PKMNMAKESGROUNDMISS"
               || operand.expression === "STRINGID_PKMNRAISEDFIREPOWERWITH"
               || operand.expression === "STRINGID_PKMNSXMADEYINEFFECTIVE"
+              || operand.expression === "STRINGID_PKMNANCHORSITSELFWITH"
+              || operand.expression === "STRINGID_PKMNPREVENTSUSAGE"
+              || operand.expression === "STRINGID_PKMNRESTOREDHPUSING"
+              || operand.expression === "STRINGID_PKMNSXMADEYUSELESS"
               ? (rules.selectorRoles.target === null
                 ? []
                 : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
@@ -880,9 +907,16 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                     // ability-holding target regardless of which of the three
                     // status types fired -- both {B_DEF_ABILITY}/{B_EFF_ABILITY}
                     // template variants read that same battler's ability.
+                    // ISSUES #72 batch 2: STRINGID_PKMNSXPREVENTSFLINCHING
+                    // (Inner Focus) shares this exact shape --
+                    // applyFlinchMoveEffect's own effectBattler param (the
+                    // move's own target for the certain-flinch, non-affectsUser
+                    // case Fake Out is) is applySetMoveEffect's same
+                    // selectorRoles.effectBattler write (battleScriptHitChainOpcode.ts:2841-2848,3590-3608).
                     : operand.expression === "STRINGID_PKMNPREVENTSPOISONINGWITH"
                       || operand.expression === "STRINGID_PKMNSXPREVENTSBURNS"
                       || operand.expression === "STRINGID_PKMNPREVENTSPARALYSISWITH"
+                      || operand.expression === "STRINGID_PKMNSXPREVENTSFLINCHING"
                       ? (rules.selectorRoles.effectBattler === null
                         ? []
                         : [abilityDisplayName(rules.battlers[rules.selectorRoles.effectBattler].ability)])
@@ -951,7 +985,56 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                     ? (rules.selectorRoles.target === null
                                       ? []
                                       : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
-                                    : [];
+                                    // ISSUES #72 batch 2: BattleScript_AbilityNoSpecificStatLoss's
+                                    // {B_SCR_ACTIVE_ABILITY}/{B_BUFF1} -- the
+                                    // real C source calls the unconditional
+                                    // PREPARE_STAT_BUFFER(gBattleTextBuff1,
+                                    // statId) before either ability branch
+                                    // (battle_script_commands.c:6958), so the
+                                    // stat name is 1:1 derivable from which
+                                    // ability matched which statId (Keen Eye
+                                    // only ever blocks STAT_ACC, Hyper Cutter
+                                    // only ever blocks STAT_ATK,
+                                    // battleScriptStatBuffs.ts:272-277).
+                                    : operand.expression === "STRINGID_PKMNSXPREVENTSYLOSS"
+                                      ? [
+                                          abilityDisplayName(rules.battlers[rules.scriptingBattler].ability),
+                                          rules.battlers[rules.scriptingBattler].ability === ABILITY_KEEN_EYE
+                                            ? "accuracy"
+                                            : "ATTACK",
+                                        ]
+                                      // IntimidateActivatesLoop's own
+                                      // {B_SCR_ACTIVE_ABILITY} -- scriptingBattler
+                                      // is the switching-in Intimidate holder
+                                      // for the whole loop (factoryBattleStart.ts/
+                                      // battleScriptFaintedActionsOrchestration.ts
+                                      // both freeze it before entering
+                                      // BattleScript_IntimidateActivatesEnd3).
+                                      : operand.expression === "STRINGID_PKMNCUTSATTACKWITH"
+                                        ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
+                                        // BattleScript_IntimidatePrevented's own
+                                        // {B_DEF_ABILITY} -- BS_TARGET at this
+                                        // print is whichever of Clear Body/
+                                        // Hyper Cutter/White Smoke's
+                                        // jumpifability matched.
+                                        : operand.expression === "STRINGID_PREVENTEDFROMWORKING"
+                                          ? (rules.selectorRoles.target === null
+                                            ? []
+                                            : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
+                                          // BattleScript_SideStatusWoreOff's
+                                          // {B_BUFF1} -- real source's
+                                          // PREPARE_MOVE_BUFFER(gBattleTextBuff1,
+                                          // MOVE_REFLECT/MOVE_LIGHT_SCREEN/
+                                          // MOVE_MIST) call
+                                          // (battle_util.c:1224,1256,1273) is
+                                          // ported as battleEndTurnOrchestration.ts's
+                                          // own battleTextBuff1Move write
+                                          // right before firing this label.
+                                          : operand.expression === "STRINGID_PKMNSXWOREOFF"
+                                            ? (rules.battleTextBuff1Move === null
+                                              ? []
+                                              : [resolveMoveName(rules.battleTextBuff1Move)])
+                                            : [];
       return Object.freeze({
         kind: "message" as const,
         messageId: operand.expression,
@@ -988,8 +1071,21 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
           || operand.expression === "STRINGID_PKMNSXPREVENTSBURNS"
           || operand.expression === "STRINGID_PKMNPREVENTSPARALYSISWITH"
           || operand.expression === "STRINGID_PKMNSXHADNOEFFECTONY"
+          || operand.expression === "STRINGID_PKMNSXPREVENTSFLINCHING"
         ) && rules.selectorRoles.effectBattler !== null
           ? { effectBattler: rules.selectorRoles.effectBattler }
+          : {}),
+        // Source gBattlerTarget at print time -- ISSUES #72 batch 2's
+        // Intimidate pair (STRINGID_PKMNCUTSATTACKWITH/PREVENTEDFROMWORKING),
+        // whose own IntimidateActivatesLoop cycles BS_TARGET across every
+        // opposing battler via trygetintimidatetarget, independent of any
+        // move's real defender. Scoped to just these 2 ids for the same
+        // reason effectBattler above is scoped.
+        ...((
+          operand.expression === "STRINGID_PKMNCUTSATTACKWITH"
+          || operand.expression === "STRINGID_PREVENTEDFROMWORKING"
+        ) && rules.selectorRoles.target !== null
+          ? { targetBattler: rules.selectorRoles.target }
           : {}),
       });
     },

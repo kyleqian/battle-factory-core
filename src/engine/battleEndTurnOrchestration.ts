@@ -108,6 +108,10 @@ const PERISH_SONG_TAKES_LIFE_LABEL = "BattleScript_PerishSongTakesLife";
 const PERISH_SONG_COUNT_GOES_DOWN_LABEL = "BattleScript_PerishSongCountGoesDown";
 const SIDE_STATUS_FUTUREATTACK = 1 << 6;
 const MOVE_FUTURE_SIGHT = 248;
+/** include/constants/moves.h -- STRINGID_PKMNSXWOREOFF's {B_BUFF1} move-name source (ISSUES #72 batch 2). */
+const MOVE_REFLECT = 115;
+const MOVE_LIGHT_SCREEN = 113;
+const MOVE_MIST = 54;
 /** `ItemBattleEffects(ITEMEFFECT_NORMAL, ...)`'s ten `BattleScriptExecute`+`end2` labels this registration wires (docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4). */
 const ITEM_HEAL_HP_END2_LABEL = "BattleScript_ItemHealHP_End2";
 const WHITE_HERB_END2_LABEL = "BattleScript_WhiteHerbEnd2";
@@ -1662,6 +1666,7 @@ function runScreenFieldCase(
   patchDecrement: (nextTimer: number) => Partial<BattleScriptSideTimerState>,
   battlerIdOf: (timers: BattleScriptSideTimerState) => BattleScriptBattlerId,
   expiryLabel: string,
+  wornOffMoveId: number,
 ): FieldCaseOutcome {
   const rc = state.rulesContext;
   if ((rc.sideStatuses[side] & bit) === 0) return Object.freeze({ kind: "advance", state });
@@ -1673,7 +1678,11 @@ function runScreenFieldCase(
   }
   const cleared = withSideStatusClear(decremented, side, bit);
   const battler = battlerIdOf(timers);
-  const run = runTickScript(program, handlers, state, cleared, battler, expiryLabel);
+  // ISSUES #72 batch 2 (STRINGID_PKMNSXWOREOFF): PREPARE_MOVE_BUFFER(gBattleTextBuff1,
+  // MOVE_REFLECT/MOVE_LIGHT_SCREEN) (battle_util.c:1224,1256) runs before
+  // BattleScriptExecute's later interpreter pass ever prints the string.
+  const withWornOffMove = Object.freeze({ ...cleared, battleTextBuff1Move: wornOffMoveId });
+  const run = runTickScript(program, handlers, state, withWornOffMove, battler, expiryLabel);
   if (run.kind === "opcode-barrier") return run;
   return Object.freeze({ kind: "fired", state: run.state });
 }
@@ -1703,7 +1712,9 @@ function runMistFieldCase(
   }
   const cleared = withSideStatusClear(decremented, side, SIDE_STATUS_MIST);
   const battler = rc.sideTimers[side].mistBattlerId;
-  const run = runTickScript(program, handlers, state, cleared, battler, SIDE_STATUS_WORE_OFF_LABEL);
+  // ISSUES #72 batch 2 (STRINGID_PKMNSXWOREOFF): PREPARE_MOVE_BUFFER(gBattleTextBuff1, MOVE_MIST) (battle_util.c:1276).
+  const withWornOffMove = Object.freeze({ ...cleared, battleTextBuff1Move: MOVE_MIST });
+  const run = runTickScript(program, handlers, state, withWornOffMove, battler, SIDE_STATUS_WORE_OFF_LABEL);
   if (run.kind === "opcode-barrier") return run;
   return Object.freeze({ kind: "fired", state: run.state });
 }
@@ -1831,7 +1842,7 @@ function runDoFieldEndTurnEffects(
     const reflect = runScreenFieldCase(
       program, handlers, state, side, SIDE_STATUS_REFLECT,
       (t) => t.reflectTimer, (nextTimer) => ({ reflectTimer: nextTimer }),
-      (t) => t.reflectBattlerId, SIDE_STATUS_WORE_OFF_LABEL,
+      (t) => t.reflectBattlerId, SIDE_STATUS_WORE_OFF_LABEL, MOVE_REFLECT,
     );
     if (reflect.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: reflect.state, instruction: reflect.instruction });
     state = reflect.state;
@@ -1840,7 +1851,7 @@ function runDoFieldEndTurnEffects(
     const lightscreen = runScreenFieldCase(
       program, handlers, state, side, SIDE_STATUS_LIGHTSCREEN,
       (t) => t.lightscreenTimer, (nextTimer) => ({ lightscreenTimer: nextTimer }),
-      (t) => t.lightscreenBattlerId, SIDE_STATUS_WORE_OFF_LABEL,
+      (t) => t.lightscreenBattlerId, SIDE_STATUS_WORE_OFF_LABEL, MOVE_LIGHT_SCREEN,
     );
     if (lightscreen.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: lightscreen.state, instruction: lightscreen.instruction });
     state = lightscreen.state;
@@ -1854,7 +1865,10 @@ function runDoFieldEndTurnEffects(
     const safeguard = runScreenFieldCase(
       program, handlers, state, side, SIDE_STATUS_SAFEGUARD,
       (t) => t.safeguardTimer, (nextTimer) => ({ safeguardTimer: nextTimer }),
-      (t) => t.safeguardBattlerId, SAFEGUARD_ENDS_LABEL,
+      // BattleScript_SafeguardEnds's own STRINGID_PKMNSAFEGUARDEXPIRED never
+      // reads {B_BUFF1} (battle_util.c:1295-1317 has no PREPARE_MOVE_BUFFER
+      // call, unlike the Reflect/Light Screen/Mist cases above) -- unused.
+      (t) => t.safeguardBattlerId, SAFEGUARD_ENDS_LABEL, 0,
     );
     if (safeguard.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: safeguard.state, instruction: safeguard.instruction });
     state = safeguard.state;

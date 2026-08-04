@@ -27,7 +27,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_OBLIVIOUS | engine-referenced | 33 (16) | 33 | ON_DAMAGE, IMMUNITY | 3 | 0 | 6 |
 | ABILITY_SYNCHRONIZE | engine-referenced | 30 (8) | 30 | SYNCHRONIZE, ATK_SYNCHRONIZE | 0 | 0 | 3 |
 | ABILITY_EARLY_BIRD | engine-referenced | 29 (4) | 29 | — | 2 | 0 | 3 |
-| ABILITY_KEEN_EYE | engine-referenced | 29 (16) | 29 | — | 2 | 0 | 6 |
+| ABILITY_KEEN_EYE | engine-referenced | 29 (16) | 29 | — | 2 | 0 | 8 |
 | ABILITY_STATIC | engine-referenced | 27 (17) | 27 | ON_DAMAGE | 0 | 0 | 5 |
 | ABILITY_WATER_ABSORB | engine-referenced | 25 (4) | 25 | ABSORBING | 0 | 1 | 3 |
 | ABILITY_FLASH_FIRE | engine-referenced | 25 (9) | 25 | ABSORBING | 0 | 1 | 4 |

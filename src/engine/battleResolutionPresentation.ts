@@ -789,6 +789,187 @@ function messageLines(
       B_DEF_ABILITY: () => ability,
     });
   }
+  // ISSUES #72 batch 2 (docs/issue72-reachability-triage.md, ranked rows
+  // 14-25 starting from STRINGID_PKMNSXWOREOFF): the Taunt-pair idiom
+  // continued -- EFFECT_ROAR's Ingrain/Suction Cups pair, the trainer-battle
+  // force-out tail, the Intimidate switch-in loop, Damp/Volt Absorb/Water
+  // Absorb/Inner Focus's ability-blocks-the-move's-own-effect shapes, Keen
+  // Eye/Hyper Cutter's specific-stat-loss block, and Reflect/Light Screen/
+  // Mist's end-of-turn wear-off.
+  if (messageId === "STRINGID_PKMNANCHOREDITSELF") {
+    // BattleScript_PrintMonIsRooted: EffectRoar's own `jumpifstatus3
+    // BS_TARGET, STATUS3_ROOTED` -- a purely generic opcode (zero TS
+    // references), so BS_TARGET is still the move's own target.
+    const defender = requireMoveDefender(lastMoveAttacker, "anchored-itself message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNANCHORSITSELFWITH") {
+    // BattleScript_AbilityPreventsPhasingOut: EffectRoar's own `jumpifability
+    // BS_TARGET, ABILITY_SUCTION_CUPS` -- same purely generic shape as
+    // ANCHOREDITSELF above, plus the ability substitution engine-supplied
+    // via prepareMessage keyed on rules.selectorRoles.target.
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no ability substitution`);
+    }
+    const defender = requireMoveDefender(lastMoveAttacker, "anchors-itself-with message");
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_DEF_ABILITY: () => ability,
+    });
+  }
+  if (messageId === "STRINGID_PKMNWASDRAGGEDOUT") {
+    // BattleScript_TrainerBattleForceOut's unconditional printstring, reached
+    // from EffectRoar's forcerandomswitch success tail -- the move's own
+    // (still-current) target, the battler that got switched out.
+    const defender = requireMoveDefender(lastMoveAttacker, "dragged-out message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNCUTSATTACKWITH") {
+    // BattleScript_IntimidateActivatesLoop: scriptingBattler is the
+    // switching-in Intimidate holder (frozen before the loop starts,
+    // factoryBattleStart.ts/battleScriptFaintedActionsOrchestration.ts);
+    // targetBattler is the loop's own BS_TARGET, cycled per opposing battler
+    // by trygetintimidatetarget -- NOT the generic requireMoveDefender
+    // shape, since this isn't a move's own target relationship.
+    if (
+      event.payload.scriptingBattler === undefined
+      || event.payload.targetBattler === undefined
+      || event.payload.substitutions.length === 0
+    ) {
+      throw new Error(`battle resolution ${messageId} message has no scripting/target-battler or ability substitution`);
+    }
+    const scriptingBattler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const targetBattler = singlesBattler(event.payload.targetBattler, `${messageId} target battler`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, scriptingBattler),
+      B_SCR_ACTIVE_ABILITY: () => ability,
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, targetBattler),
+    });
+  }
+  if (messageId === "STRINGID_PREVENTEDFROMWORKING") {
+    // BattleScript_IntimidatePrevented: BS_TARGET at this print is whichever
+    // battler's Clear Body/Hyper Cutter/White Smoke just blocked the loop's
+    // current Intimidate application; scriptingBattler is still the
+    // Intimidate holder. {B_BUFF1} is fixed -- this label is only ever
+    // reached from the Intimidate loop.
+    if (
+      event.payload.scriptingBattler === undefined
+      || event.payload.targetBattler === undefined
+      || event.payload.substitutions.length === 0
+    ) {
+      throw new Error(`battle resolution ${messageId} message has no scripting/target-battler or ability substitution`);
+    }
+    const scriptingBattler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const targetBattler = singlesBattler(event.payload.targetBattler, `${messageId} target battler`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, targetBattler),
+      B_DEF_ABILITY: () => ability,
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, scriptingBattler),
+      B_BUFF1: () => "INTIMIDATE",
+    });
+  }
+  if (messageId === "STRINGID_PKMNSXPREVENTSFLINCHING") {
+    // BattleScript_FlinchPrevention: applyFlinchMoveEffect's own
+    // effectBattler param (Fake Out's real target for the certain-flinch,
+    // non-affectsUser case) is applySetMoveEffect's selectorRoles.effectBattler
+    // write, same field the ability-prevention family above already reads.
+    if (event.payload.effectBattler === undefined || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no effect-battler/ability substitution`);
+    }
+    const effectBattler = singlesBattler(event.payload.effectBattler, `${messageId} effect battler`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_EFF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, effectBattler),
+      B_EFF_ABILITY: () => ability,
+    });
+  }
+  if (messageId === "STRINGID_PKMNSXPREVENTSYLOSS") {
+    // BattleScript_AbilityNoSpecificStatLoss: ChangeStatBuffs's blockedMessage
+    // freezes scriptingBattler to the battler about to lose the stat (Keen
+    // Eye/Hyper Cutter's own holder), same shape STRINGID_PKMNPREVENTSSTATLOSSWITH
+    // (batch 1) already uses.
+    if (event.payload.scriptingBattler === undefined || event.payload.substitutions.length < 2) {
+      throw new Error(`battle resolution ${messageId} message has no scripting-battler/ability/stat substitution`);
+    }
+    const battler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const ability = event.payload.substitutions[0]!;
+    const statName = event.payload.substitutions[1]!;
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      B_SCR_ACTIVE_ABILITY: () => ability,
+      B_BUFF1: () => statName,
+    });
+  }
+  if (messageId === "STRINGID_PKMNPREVENTSUSAGE") {
+    // BattleScript_DampStopsExplosion: Cmd_tryexplosion re-points
+    // selectorRoles.target to the Damp holder before jumping here (the
+    // common case: the move's own opposing-singles-battler, same relationship
+    // requireMoveDefender resolves); {B_CURRENT_MOVE} is the actionSnapshot's
+    // own currentMove, same idiom STRINGID_PKMNCANTUSEMOVETAUNT uses.
+    if (actionSnapshot === null || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot/ability substitution`);
+    }
+    const attacker = requireMoveAttacker(lastMoveAttacker, "prevents-usage message");
+    const defender = requireMoveDefender(lastMoveAttacker, "prevents-usage message");
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_DEF_ABILITY: () => ability,
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
+    });
+  }
+  if (messageId === "STRINGID_PKMNRESTOREDHPUSING") {
+    // BattleScript_MoveHPDrain: Volt Absorb/Water Absorb below-full-HP branch
+    // -- selectorRoles.target unchanged from the move's own real target.
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no ability substitution`);
+    }
+    const defender = requireMoveDefender(lastMoveAttacker, "restored-hp message");
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_DEF_ABILITY: () => ability,
+    });
+  }
+  if (messageId === "STRINGID_PKMNSXMADEYUSELESS") {
+    // BattleScript_MonMadeMoveUseless: same Volt Absorb/Water Absorb branch
+    // at full HP; {B_CURRENT_MOVE} is the actionSnapshot's own currentMove.
+    if (actionSnapshot === null || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot/ability substitution`);
+    }
+    const defender = requireMoveDefender(lastMoveAttacker, "made-useless message");
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_DEF_ABILITY: () => ability,
+      B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
+    });
+  }
+  if (messageId === "STRINGID_PKMNSXWOREOFF") {
+    // BattleScript_SideStatusWoreOff: runTickScript's own enterTickBattlerContext
+    // sets selectorRoles.attacker to the affected side's own representative
+    // battler (reflectBattlerId/lightscreenBattlerId/mistBattlerId), matching
+    // real source's `gActiveBattler = gBattlerAttacker = gSideTimers[side].*BattlerId`
+    // (battle_util.c:1224/1256/1276) -- {B_ATK_PREFIX1} is that battler's own
+    // side ("Ally"/"Foe", battle_message.c:2649-2653), not a nickname.
+    if (actionSnapshot === null || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot/move substitution`);
+    }
+    const battler = singlesBattler(actionSnapshot.attacker, `${messageId} action snapshot`);
+    const moveName = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_ATK_PREFIX1: () => (battler === 0 ? "Ally" : "Foe"),
+      B_BUFF1: () => moveName,
+    });
+  }
   if (
     messageId === "STRINGID_AVOIDEDDAMAGE"
     || messageId === "STRINGID_PKMNMAKESGROUNDMISS"
