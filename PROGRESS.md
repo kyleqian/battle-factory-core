@@ -57,6 +57,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   single-call ceiling meant the run had to be polled to completion rather
   than awaited in one blocking call. No functional papercut, just budget
   awareness for future concurrent multi-lane sessions.
+- **[supervisor final addendum, ~19:10]** Bonus-round close on top of this
+  entry: typeref **slice 4 landed partial and merged** (`9a87786c`, worker
+  `d481cda2`): `turn3KickoffBounceTick`'s legacy param retired, census
+  **68→67**, differential 2,059 captures byte-identical, full suite green
+  in-worktree. **Honest-partial finding:** the row's other 7 bounce-tick
+  helpers form a tight internal delegation chain (not 8 independent
+  1-ref cuts) — the §4.1 slice-4 row needs a mini re-scope before the
+  remainder lands; next session's brief should start from the worker's
+  final message (side-lane log 20260803-182951). Union after both merges:
+  smoke green, targeted 10/10, build green (incremental). Entry 899's
+  session totals supersede to: **13 workers (5 main + 8 side), 1 lost**;
+  #72 census now **80 UNRESOLVED / 39 REACHABLE remaining**; typeref
+  **67** refs. Play-preview rebuilt at this addendum's own commit (final
+  master at close), serving :5199 nohup-detached. All worker worktrees
+  removed; `animation-main` fully folded at close (recheck at next orient
+  — its supervisor ran until 20:42).
 
 ---
 ## 899 — [supervisor wind-down, 2026-08-03 ~18:30] Session close: #72 triage + 26 ids fixed (3 batches), #71 latent bug fixed, typeref slices 2+3 landed after re-scope, terminal-seam scout banked; two animation folds; final union green
