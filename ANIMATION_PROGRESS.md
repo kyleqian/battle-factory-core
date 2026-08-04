@@ -19,6 +19,10 @@
   `2f44c811...b69`; opponent frames **81-277** `7af04b35...659` /
   `25c8e06b...e1`. Receipts retain script state, tasks, software/hardware OAM,
   matrices, palettes/tags, registers/blend, audio/pan, and stable battlers.
+  Focused source/reducer/seam/evidence tests and both ratchets, typecheck,
+  smoke **7 files / 347 tests**, final full **712 files / 6,856 passed / 1
+  skipped**, build (**556 modules**), and coverage are green. No boundary or
+  unsupported-branch widening.
 
 ## Back `BACK_ANIM_SHAKE_GLOW_BLUE` triple accepted (2026-08-04)
 
