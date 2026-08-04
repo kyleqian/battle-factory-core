@@ -8,6 +8,7 @@
 # gpt-5.6-sol/high and may choose Terra/max, Luna/max, or Sol/high). Pass
 # --hybrid for the mixed profile:
 # a Claude Fable supervisor with the same tiered Codex worker routing. Pass
+# -D for the temporary Claude Fable + DeepSeek V4 Flash/OpenCode profile. Pass
 # --max-mode for the all-Sol profile: a Sol/ultra supervisor with Sol/xhigh
 # workers.
 #
@@ -27,6 +28,7 @@
 #   ./run-supervisor.sh --headless    # unattended, stream view like run-agent.sh
 #   ./run-supervisor.sh --provider codex  # Sol/high supervisor + tiered Codex workers
 #   ./run-supervisor.sh -H            # Fable supervisor + tiered Codex workers
+#   ./run-supervisor.sh -D            # Fable supervisor + DeepSeek V4 Flash workers
 #   ./run-supervisor.sh --max-mode    # Sol/ultra supervisor + Sol/xhigh workers
 #   ./run-supervisor.sh -m NAME       # override the selected profile's model
 #   ./run-supervisor.sh -e EFFORT     # Codex reasoning effort override
@@ -34,6 +36,7 @@
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 source tools/codex-model-policy.sh
+source tools/deepseek-worker-policy.sh
 
 # Recursion guard: supervisors aren't nested, and workers never spawn agents.
 if [[ -n "${POKEBENCH_ROLE:-}" ]]; then
@@ -55,9 +58,15 @@ Usage: ./run-supervisor.sh [options]
   -p, --provider NAME   claude (default) or codex
   -H, --hybrid          Claude Fable supervisor with tiered Codex workers;
                         shorthand for --provider claude --worker-provider codex
+  -D, --deepseek-workers
+                        temporary profile: Claude Fable supervisor with fixed
+                        DeepSeek V4 Flash workers launched through OpenCode.
+                        Conflicts with --provider, --worker-provider, --hybrid,
+                        and --max-mode.
       --worker-provider NAME
-                        claude (default for Claude) or codex. Codex workers may
-                        be routed per step with run-subagent.sh --model/--effort.
+                        claude (default for Claude) or codex. DeepSeek workers
+                        are selected through -D. Codex workers may be routed
+                        per step with run-subagent.sh --model/--effort.
   -M, --max-mode        Codex all-Sol profile: Sol/ultra supervisor and
                         Sol/xhigh workers (also selects --provider codex)
   -m, --model NAME      supervisor model (provider default)
@@ -67,8 +76,9 @@ Usage: ./run-supervisor.sh [options]
       --print-config    print the resolved profile without launching
   -h, --help            show this help
 Environment overrides: SUPERVISOR_PROVIDER, SUPERVISOR_MODEL,
-SUPERVISOR_REASONING_EFFORT, SUPERVISOR_HYBRID, SUPERVISOR_MAX_MODE,
-WORKER_PROVIDER. Legacy MODEL remains supported.
+SUPERVISOR_REASONING_EFFORT, SUPERVISOR_HYBRID,
+SUPERVISOR_DEEPSEEK_WORKERS, SUPERVISOR_MAX_MODE, WORKER_PROVIDER,
+OPENCODE_BIN. Legacy MODEL remains supported.
 Exit 6 means the lane's deferred file (DEFERRED.md for main,
 ANIMATION_DEFERRED.md for animation) has an unresolved question that must be
 resolved before another supervisor session can start in that lane.
@@ -83,12 +93,14 @@ MODEL="${SUPERVISOR_MODEL:-${MODEL:-}}"
 REASONING_EFFORT="${SUPERVISOR_REASONING_EFFORT:-}"
 MAX_MODE="${SUPERVISOR_MAX_MODE:-0}"
 HYBRID="${SUPERVISOR_HYBRID:-0}"
+DEEPSEEK_WORKERS="${SUPERVISOR_DEEPSEEK_WORKERS:-0}"
 WORKER_PROVIDER="${WORKER_PROVIDER:-}"
 SUPERVISOR_LOG="${SUPERVISOR_LOG:-}"
 PRINT_CONFIG=0
 PROVIDER_FLAG_SET=0
 MODEL_FLAG_SET=0
 EFFORT_FLAG_SET=0
+WORKER_PROVIDER_FLAG_SET=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -100,8 +112,9 @@ while [[ $# -gt 0 ]]; do
     -p|--provider)    PROVIDER="${2:?--provider needs a name}"; PROVIDER_FLAG_SET=1; shift 2 ;;
     --provider=*)     PROVIDER="${1#*=}"; PROVIDER_FLAG_SET=1; shift ;;
     -H|--hybrid)      HYBRID=1; shift ;;
-    --worker-provider) WORKER_PROVIDER="${2:?--worker-provider needs a name}"; shift 2 ;;
-    --worker-provider=*) WORKER_PROVIDER="${1#*=}"; shift ;;
+    -D|--deepseek-workers) DEEPSEEK_WORKERS=1; shift ;;
+    --worker-provider) WORKER_PROVIDER="${2:?--worker-provider needs a name}"; WORKER_PROVIDER_FLAG_SET=1; shift 2 ;;
+    --worker-provider=*) WORKER_PROVIDER="${1#*=}"; WORKER_PROVIDER_FLAG_SET=1; shift ;;
     -M|--max-mode)    MAX_MODE=1; shift ;;
     -m|--model)       MODEL="${2:?--model needs a model name}"; MODEL_FLAG_SET=1; shift 2 ;;
     --model=*)        MODEL="${1#*=}"; MODEL_FLAG_SET=1; shift ;;
@@ -122,6 +135,39 @@ fi
 if [[ ! "$HYBRID" =~ ^(0|1)$ ]]; then
   echo "run-supervisor: SUPERVISOR_HYBRID must be 0 or 1 (got '$HYBRID')" >&2
   exit 2
+fi
+if [[ ! "$DEEPSEEK_WORKERS" =~ ^(0|1)$ ]]; then
+  echo "run-supervisor: SUPERVISOR_DEEPSEEK_WORKERS must be 0 or 1 (got '$DEEPSEEK_WORKERS')" >&2
+  exit 2
+fi
+if [[ "$DEEPSEEK_WORKERS" == "1" ]]; then
+  if [[ "$PROVIDER_FLAG_SET" == "1" ]]; then
+    echo "run-supervisor: -D/--deepseek-workers conflicts with --provider" >&2
+    exit 2
+  fi
+  if [[ "$WORKER_PROVIDER_FLAG_SET" == "1" ]]; then
+    echo "run-supervisor: -D/--deepseek-workers conflicts with --worker-provider" >&2
+    exit 2
+  fi
+  if [[ "$HYBRID" == "1" ]]; then
+    echo "run-supervisor: -D/--deepseek-workers conflicts with --hybrid" >&2
+    exit 2
+  fi
+  if [[ "$MAX_MODE" == "1" ]]; then
+    echo "run-supervisor: -D/--deepseek-workers conflicts with --max-mode" >&2
+    exit 2
+  fi
+  if [[ "$MODEL_FLAG_SET" == "1" && "$MODEL" != "claude-fable-5" ]]; then
+    echo "run-supervisor: -D/--deepseek-workers fixes the supervisor model at claude-fable-5 (got '$MODEL')" >&2
+    exit 2
+  fi
+  if [[ "$EFFORT_FLAG_SET" == "1" ]]; then
+    echo "run-supervisor: -D/--deepseek-workers uses a Claude supervisor and cannot use --effort" >&2
+    exit 2
+  fi
+  PROVIDER=claude
+  MODEL=claude-fable-5
+  WORKER_PROVIDER=deepseek
 fi
 if [[ "$MAX_MODE" == "1" && "$HYBRID" == "1" ]]; then
   echo "run-supervisor: --hybrid and --max-mode are different profiles and cannot be combined" >&2
@@ -167,6 +213,10 @@ WORKER_PROVIDER="${WORKER_PROVIDER:-$PROVIDER}"
 if [[ "$PROVIDER" == "claude" && "$WORKER_PROVIDER" == "codex" ]]; then
   HYBRID=1
 fi
+if [[ "$WORKER_PROVIDER" == "deepseek" && "$DEEPSEEK_WORKERS" != "1" ]]; then
+  echo "run-supervisor: DeepSeek workers are selected only through -D/--deepseek-workers" >&2
+  exit 2
+fi
 
 if [[ ! "$CAP_HOURS" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
   echo "run-supervisor: --cap-hours must be a positive number (got '$CAP_HOURS')" >&2
@@ -176,8 +226,8 @@ if [[ ! "$PROVIDER" =~ ^(claude|codex)$ ]]; then
   echo "run-supervisor: unsupported provider '$PROVIDER' (expected claude or codex)" >&2
   exit 2
 fi
-if [[ ! "$WORKER_PROVIDER" =~ ^(claude|codex)$ ]]; then
-  echo "run-supervisor: unsupported worker provider '$WORKER_PROVIDER' (expected claude or codex)" >&2
+if [[ ! "$WORKER_PROVIDER" =~ ^(claude|codex|deepseek)$ ]]; then
+  echo "run-supervisor: unsupported worker provider '$WORKER_PROVIDER' (expected claude, codex, or deepseek)" >&2
   exit 2
 fi
 if [[ ! "$LANE" =~ ^(main|animation)$ ]]; then
@@ -261,7 +311,13 @@ if [[ "$PROVIDER" == "claude" ]]; then
   SUPERVISOR_SHELL_CWD_POLICY=project-root-reset
 fi
 
-if [[ "$WORKER_PROVIDER" != "$PROVIDER" ]]; then
+if [[ "$WORKER_PROVIDER" == "deepseek" ]]; then
+  if ! OPENCODE_BIN_RESOLVED="$(pokebench_resolve_opencode_bin)"; then
+    echo "run-supervisor: OpenCode CLI not found (set OPENCODE_BIN or install it at ~/.opencode/bin/opencode)" >&2
+    exit 127
+  fi
+  export OPENCODE_BIN="$OPENCODE_BIN_RESOLVED"
+elif [[ "$WORKER_PROVIDER" != "$PROVIDER" ]]; then
   command -v "$WORKER_PROVIDER" >/dev/null 2>&1 \
     || { echo "run-supervisor: $WORKER_PROVIDER worker CLI not found on PATH" >&2; exit 127; }
 fi
@@ -305,6 +361,17 @@ elif [[ "$WORKER_PROVIDER" == "codex" ]]; then
     exit 2
   fi
   export WORKER_MODEL WORKER_REASONING_EFFORT
+elif [[ "$WORKER_PROVIDER" == "deepseek" ]]; then
+  WORKER_MODEL="${WORKER_MODEL:-$POKEBENCH_DEEPSEEK_WORKER_MODEL}"
+  if [[ "$WORKER_MODEL" != "$POKEBENCH_DEEPSEEK_WORKER_MODEL" ]]; then
+    echo "run-supervisor: DeepSeek workers are fixed at $POKEBENCH_DEEPSEEK_WORKER_MODEL (got '$WORKER_MODEL')" >&2
+    exit 2
+  fi
+  if [[ -n "${WORKER_REASONING_EFFORT:-}" ]]; then
+    echo "run-supervisor: DeepSeek workers do not accept WORKER_REASONING_EFFORT" >&2
+    exit 2
+  fi
+  export WORKER_MODEL
 fi
 if [[ "$PRINT_CONFIG" == "1" ]]; then
   if [[ "$PROVIDER" == "claude" ]]; then
@@ -316,6 +383,8 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then
     WORKER_ROUTING=locked-sol
   elif [[ "$WORKER_PROVIDER" == "codex" ]]; then
     WORKER_ROUTING=tiered
+  elif [[ "$WORKER_PROVIDER" == "deepseek" ]]; then
+    WORKER_ROUTING=fixed-deepseek
   else
     WORKER_ROUTING=fixed
   fi
@@ -325,6 +394,7 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then
   echo "supervisor_effort=${REASONING_EFFORT:-n/a}"
   echo "supervisor_shell_cwd=$SUPERVISOR_SHELL_CWD_POLICY"
   echo "hybrid=$HYBRID"
+  echo "deepseek_workers=$DEEPSEEK_WORKERS"
   echo "max_mode=$MAX_MODE"
   echo "worker_provider=$WORKER_PROVIDER"
   echo "worker_launch_mode=$WORKER_LAUNCH_MODE"
@@ -332,6 +402,12 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then
   if [[ "$WORKER_PROVIDER" == "codex" ]]; then
     echo "worker_model=${WORKER_MODEL:-gpt-5.6-sol}"
     echo "worker_effort=${WORKER_REASONING_EFFORT:-high}"
+  elif [[ "$WORKER_PROVIDER" == "deepseek" ]]; then
+    echo "worker_model=$WORKER_MODEL"
+    echo "worker_effort=n/a"
+    echo "worker_runtime=opencode"
+    echo "worker_headless=1"
+    echo "worker_permissions=auto"
   else
     echo "worker_model=${WORKER_MODEL:-claude-sonnet-5}"
     echo "worker_effort=n/a"
@@ -391,6 +467,8 @@ if [[ "$WORKER_PROVIDER" == "codex" ]]; then
   else
     WORKER_ROUTING_NOTE="Ordinary Codex workers must use one exact pair: gpt-5.6-terra/max, gpt-5.6-luna/max, or gpt-5.6-sol/high. The launcher defaults to Sol/high and rejects every other model/effort pairing."
   fi
+elif [[ "$WORKER_PROVIDER" == "deepseek" ]]; then
+  WORKER_ROUTING_NOTE="DeepSeek worker mode is active: every worker is fixed at $POKEBENCH_DEEPSEEK_WORKER_MODEL through OpenCode. Invoke run-subagent.sh without --provider, --model, or --effort overrides."
 else
   WORKER_ROUTING_NOTE="Workers are Claude on the launcher's default claude-sonnet-5 profile unless a step explicitly overrides the worker model."
 fi
@@ -398,6 +476,9 @@ if [[ "$PROVIDER" == "codex" ]]; then
   WORKER_LAUNCH_NOTE="Invoke each ./tools/run-subagent.sh call directly in its own execution-tool session without shell backgrounding, '&', or nohup. A yielded call is still running; retain its handle and wait on it."
 else
   WORKER_LAUNCH_NOTE="Start each ./tools/run-subagent.sh launcher as a background shell job because the Claude supervisor's shell call can time out before a worker finishes; retain its PID and output path, poll until that launcher exits, and do not treat the initial shell return as worker completion."
+fi
+if [[ "$WORKER_PROVIDER" == "deepseek" ]]; then
+  WORKER_LAUNCH_NOTE+=" When invoking the launcher from Claude's Bash tool, disable that tool's host sandbox so OpenCode can read its credential store; OpenCode itself runs headlessly with --auto inside the selected worker lane/worktree."
 fi
 
 if [[ "$LANE" == "animation" ]]; then

@@ -18,12 +18,14 @@ const PROFILE_ENV_KEYS = [
   "SUPERVISOR_MODEL",
   "SUPERVISOR_REASONING_EFFORT",
   "SUPERVISOR_HYBRID",
+  "SUPERVISOR_DEEPSEEK_WORKERS",
   "SUPERVISOR_MAX_MODE",
   "WORKER_PROVIDER",
   "WORKER_MODEL",
   "WORKER_REASONING_EFFORT",
   "POKEBENCH_WORKER_PROVIDER",
   "POKEBENCH_CODEX_MAX_MODE",
+  "OPENCODE_BIN",
   "POKEBENCH_ROLE",
 ] as const;
 
@@ -62,7 +64,7 @@ function configFrom(stdout: string): Record<string, string> {
 
 beforeAll(() => {
   fakeBin = mkdtempSync(join(tmpdir(), "codex-launcher-profile-"));
-  for (const command of ["codex", "claude"]) {
+  for (const command of ["codex", "claude", "opencode"]) {
     const path = join(fakeBin, command);
     writeFileSync(path, "#!/usr/bin/env bash\nexit 0\n");
     chmodSync(path, 0o755);
@@ -163,6 +165,73 @@ describe("Supervisor and worker launcher profiles", () => {
       worker_provider: "codex",
       worker_launch_mode: "background",
       worker_routing: "tiered",
+    });
+  });
+
+  it.each([
+    ["short flag", ["-D"]],
+    ["long flag", ["--deepseek-workers"]],
+  ])(
+    "%s selects a Fable supervisor with fixed DeepSeek V4 Flash/OpenCode workers",
+    (_name, profileArgs) => {
+      const result = runLauncher("run-supervisor.sh", [
+        ...profileArgs,
+        "--print-config",
+      ]);
+
+      expect(result.status).toBe(0);
+      expect(configFrom(result.stdout)).toMatchObject({
+        supervisor_provider: "claude",
+        supervisor_model: "claude-fable-5",
+        supervisor_effort: "n/a",
+        supervisor_shell_cwd: "project-root-reset",
+        hybrid: "0",
+        deepseek_workers: "1",
+        max_mode: "0",
+        worker_provider: "deepseek",
+        worker_launch_mode: "background",
+        worker_routing: "fixed-deepseek",
+        worker_model: "deepseek/deepseek-v4-flash",
+        worker_effort: "n/a",
+        worker_runtime: "opencode",
+        worker_headless: "1",
+        worker_permissions: "auto",
+      });
+    },
+  );
+
+  it("supports the DeepSeek worker profile through environment configuration", () => {
+    const result = runLauncher(
+      "run-supervisor.sh",
+      ["--print-config"],
+      { SUPERVISOR_DEEPSEEK_WORKERS: "1" },
+    );
+
+    expect(result.status).toBe(0);
+    expect(configFrom(result.stdout)).toMatchObject({
+      supervisor_provider: "claude",
+      deepseek_workers: "1",
+      worker_provider: "deepseek",
+      worker_model: "deepseek/deepseek-v4-flash",
+      worker_runtime: "opencode",
+    });
+  });
+
+  it("configures direct DeepSeek workers as headless OpenCode V4 Flash runs", () => {
+    const result = runLauncher("tools/run-subagent.sh", [
+      "--provider",
+      "deepseek",
+      "--print-config",
+    ]);
+
+    expect(result.status).toBe(0);
+    expect(configFrom(result.stdout)).toMatchObject({
+      worker_provider: "deepseek",
+      worker_model: "deepseek/deepseek-v4-flash",
+      worker_effort: "n/a",
+      worker_runtime: "opencode",
+      worker_headless: "1",
+      worker_permissions: "auto",
     });
   });
 
@@ -487,5 +556,64 @@ describe("Supervisor and worker launcher profiles", () => {
     expect(claudeWorkers.stderr).toContain(
       "--hybrid requires Codex workers",
     );
+  });
+
+  it("rejects DeepSeek worker mode combined with provider-oriented profiles", () => {
+    const explicitProvider = runLauncher("run-supervisor.sh", [
+      "-D",
+      "--provider",
+      "claude",
+      "--print-config",
+    ]);
+    const explicitWorkerProvider = runLauncher("run-supervisor.sh", [
+      "-D",
+      "--worker-provider",
+      "deepseek",
+      "--print-config",
+    ]);
+    const hybrid = runLauncher("run-supervisor.sh", [
+      "-D",
+      "--hybrid",
+      "--print-config",
+    ]);
+    const maxMode = runLauncher("run-supervisor.sh", [
+      "-D",
+      "--max-mode",
+      "--print-config",
+    ]);
+
+    for (const result of [explicitProvider, explicitWorkerProvider, hybrid, maxMode]) {
+      expect(result.status).toBe(2);
+      expect(result.stderr).toContain("-D/--deepseek-workers conflicts");
+    }
+  });
+
+  it("keeps DeepSeek workers fixed at V4 Flash without an effort override", () => {
+    const directModel = runLauncher("tools/run-subagent.sh", [
+      "--provider",
+      "deepseek",
+      "--model",
+      "deepseek/deepseek-reasoner",
+      "--print-config",
+    ]);
+    const directEffort = runLauncher("tools/run-subagent.sh", [
+      "--provider",
+      "deepseek",
+      "--effort",
+      "high",
+      "--print-config",
+    ]);
+    const inheritedModel = runLauncher(
+      "run-supervisor.sh",
+      ["-D", "--print-config"],
+      { WORKER_MODEL: "deepseek/deepseek-reasoner" },
+    );
+
+    expect(directModel.status).toBe(2);
+    expect(directModel.stderr).toContain("fixed at deepseek/deepseek-v4-flash");
+    expect(directEffort.status).toBe(2);
+    expect(directEffort.stderr).toContain("--effort applies only to the codex provider");
+    expect(inheritedModel.status).toBe(2);
+    expect(inheritedModel.stderr).toContain("fixed at deepseek/deepseek-v4-flash");
   });
 });

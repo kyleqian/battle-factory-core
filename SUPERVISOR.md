@@ -12,20 +12,28 @@ result, and decides what happens next. You are not the implementer — workers
 via `tools/run-subagent.sh` do the on-the-ground work and should burn most of
 the session's compute. You run rarely and think hard when you do.
 
-The launcher supports three first-class profiles:
+The launcher supports four first-class profiles:
 
 - `./run-supervisor.sh` — Claude Fable supervisor with Claude Sonnet workers;
 - `./run-supervisor.sh --provider codex` — Codex Sol/high supervisor with
   tiered Codex workers;
 - `./run-supervisor.sh -H` (`--hybrid`) — Claude Fable supervisor, available through
   Claude Remote Control in interactive mode, with the same tiered Codex
-  workers as the ordinary Codex workflow.
+  workers as the ordinary Codex workflow;
+- `./run-supervisor.sh -D` (`--deepseek-workers`) — Claude Fable supervisor
+  with workers fixed at `deepseek/deepseek-v4-flash` through headless
+  OpenCode `--auto` runs.
 
 `-H` / `--hybrid` is shorthand for
 `--provider claude --worker-provider codex`.
 Worker provider and worker tier are independent of the supervisor model:
 the hybrid Fable supervisor chooses Terra/max, Luna/max, or Sol/high for each
 brief and passes that exact pair to `tools/run-subagent.sh`.
+
+`-D` is intentionally a temporary worker-only profile, not a supervisor
+provider. It fixes the supervisor at Claude Fable and the worker model at
+DeepSeek V4 Flash. It conflicts with `--provider`, `--worker-provider`,
+`--hybrid`, and `--max-mode`; do not pass worker model or effort overrides.
 
 Read `AGENTS.md`, the authoritative reset at the start of ROADMAP Stage 8, and
 S10's **Executable-frontier reset** (the current stage's ordered next steps and
@@ -97,6 +105,11 @@ edit.
    workers default to xhigh (the worker ceiling) while permitting high.
    Max mode rejects both the hybrid profile and every non-Sol worker override.
 
+   **DeepSeek worker mode is fixed-route.** Under `-D`, do not apply the Codex
+   routing rubric and do not pass `--provider`, `--model`, or `--effort` to
+   `tools/run-subagent.sh`; the inherited profile always launches
+   `deepseek/deepseek-v4-flash` through OpenCode.
+
    **Which pair — the routing rubric.** The three pairs are legal; choosing
    between them is a real decision you make per brief, not a formality that
    defaults to the launcher's Sol. Sol is for *uncertainty*, not for
@@ -141,19 +154,22 @@ edit.
    drift this ordering exists to stop.
 3. **Delegate.** `./tools/run-subagent.sh "<brief>"` (`--help` lists
    configuration flags). Provider-specific launch mechanics are load-bearing:
-   - **Claude supervisor (including hybrid):** launch it in the background; a
+   - **Claude supervisor (including hybrid and DeepSeek worker mode):** launch it in the background; a
      foreground Bash call times out long before a worker finishes. Retain the
      launcher's PID and output path and poll until it exits. The initial shell
-     return only means the launcher was started, not that its Claude or Codex
-     worker finished.
+     return only means the launcher was started, not that its worker finished.
+     For DeepSeek workers, disable the Claude Bash tool's host sandbox on the
+     launcher call so OpenCode can read its credential store; OpenCode still
+     runs headlessly inside the selected lane/worktree with `--auto`.
    - **Codex supervisor:** invoke it directly in the execution tool with no
      shell `&`, `nohup`, or detached wrapper. The tool yields a managed
      cell/session while the launcher runs; retain that handle and wait on it.
      A yielded first call means the worker is running, not that launch failed.
    The launcher starts a fresh, bounded worker with unattended full-workspace
    permissions and the run's selected configuration. Its stdout is a compact
-   digest; the full event stream is in the log it names. Codex event JSONL and
-   CLI stderr are separate sibling logs so the JSONL remains machine-parseable.
+   digest; the full event stream is in the log it names. Codex and OpenCode
+   event JSONL and CLI stderr are separate sibling logs so the JSONL remains
+   machine-parseable.
    In hybrid mode the launcher already inherits `WORKER_PROVIDER=codex`; use
    `--model` and `--effort` per step, for example:
 
@@ -162,6 +178,10 @@ edit.
    ./tools/run-subagent.sh --model gpt-5.6-luna --effort max --brief-file /tmp/alternate.txt
    ./tools/run-subagent.sh --model gpt-5.6-sol --effort high --brief-file /tmp/implementation.txt
    ```
+
+   In DeepSeek worker mode the launcher instead inherits
+   `WORKER_PROVIDER=deepseek` and the fixed V4 Flash model; invoke the same
+   commands without model or effort flags.
 
    Wait for it to finish before launching another into
    the same tree — two workers in one working tree fight over it, and the
@@ -334,9 +354,9 @@ keep their precise technical voice.
 
 - Workers start with **fresh context** every time. All they inherit is git
   history and `PROGRESS.md` — your brief plus those must be self-sufficient.
-- Worker transcripts: each run prints its JSONL log path. Codex also prints a
-  sibling stderr-log path. `grep`/`tail` those during review instead of
-  guessing what happened.
+- Worker transcripts: each run prints its JSONL log path. Codex and OpenCode
+  also print a sibling stderr-log path. `grep`/`tail` those during review
+  instead of guessing what happened.
 - The launcher owns execution, authentication, permissions, and session
   isolation. Treat every worker as disposable: durable project
   state belongs in git and `PROGRESS.md`, with the raw JSONL log retained for

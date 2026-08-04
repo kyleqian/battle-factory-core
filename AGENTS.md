@@ -28,7 +28,9 @@ steps. Use `./run-supervisor.sh --hybrid` for a Claude Fable supervisor
 (interactive sessions are available through Claude Remote Control) routing
 each step to an appropriate Codex Terra, Luna, or Sol worker (the supervisor
 guides carry the routing rubric); it otherwise follows
-the same supervised contract. Configuration options live in the launchers
+the same supervised contract. The temporary `./run-supervisor.sh -D` profile
+keeps the Claude Fable supervisor but fixes every worker at DeepSeek V4 Flash
+through headless OpenCode. Configuration options live in the launchers
 (`--help` lists them). If your prompt says you're a bounded worker session,
 you are one of those workers: this guide applies to you in full, plus the step
 brief in your prompt — and `SUPERVISOR.md` is *not* for you. **No agent
