@@ -18,9 +18,10 @@ history.
   the #67 worker's auto-backgrounded suite led it to pkill its own vitest
   workers before recovering with an explicit 600 s timeout (~4 min lost +
   a false "failed" notification).
-- **Hits:** 3 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
+- **Hits:** 4 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
   contention from concurrent side/animation runs — auto-backgrounded; worker
-  recovered by pid-polling, ~5 min lost).
+  recovered by pid-polling, ~5 min lost. 2026-08-03: terminal-seam scout,
+  ~6 min of foreground-poll waiting).
 - **Possible durable fix:** teach the worker preamble (or the brief
   template) to pass an explicit long timeout for the final full-suite call
   (the tool accepts up to 10 min per call; the suite may soon exceed even
@@ -579,3 +580,32 @@ Per entry:
   a warning note in `tools/probe/dump-onix-front-idle-anim.py`'s module
   doc (done 2026-08-03 by the Slice-C step) and/or a mechanicLab README
   line.
+
+
+## `BattleScriptPartyMemberInput.moves` override silently defaults PP to 0 (Struggle fallback)
+
+- **What:** the bench-party `moves` override defaults each slot's `pp` to 0
+  when `pp` is omitted, unlike `FactoryFullTurnBattlerConfig`'s own
+  16-per-nonzero-move default for the two active battlers — a staged bench
+  mon with `moves: [FAKE_OUT,0,0,0]` and no `pp` silently selects
+  MOVE_STRUGGLE instead of erroring. Flagged by the 2026-08-03 #72 batch-2
+  worker (diagnosed via raw event dump).
+- **Hits:** 1.
+- **Cost each:** ~10 min.
+- **Possible durable fix:** default bench-override PP the way the
+  active-battler path does, or throw when a nonzero move slot carries zero
+  PP.
+
+## zsh: unquoted `$VAR` does not word-split — multi-arg lists silently collapse
+
+- **What:** passing an N-item trace list to a CLI via unquoted `$ARGS`
+  in zsh passes ONE giant argument (zsh doesn't word-split unquoted
+  parameters, unlike bash); `compare:differential` then reported
+  "(1 trace)" with a nonsense combined filename instead of erroring.
+  Flagged by the 2026-08-03 typeref slice-2 worker; same zsh trap class
+  as the 2026-08-01 session's word-splitting note.
+- **Hits:** 1 (as a worker-facing papercut; the trap class itself is
+  previously known).
+- **Cost each:** ~5 min.
+- **Workaround:** `${=ARGS}` for explicit splitting, or arrays
+  (`"${traces[@]}"`), or pass files via xargs.
