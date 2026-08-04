@@ -92,6 +92,7 @@ export type BattleFaintTiming =
 export type BattleSwitchInTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleSpriteVisibilityTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleTurnEndTiming = Readonly<{ minimumFrames: 8 }>;
+export type BattleTrainerSlideTiming = Readonly<{ minimumFrames: 53 }>;
 
 export type BattleResolutionPresentationCommand =
   | Readonly<{
@@ -181,6 +182,14 @@ export type BattleResolutionPresentationCommand =
   | Readonly<{
       type: "turn-end";
       timing: BattleTurnEndTiming;
+    }>
+  | Readonly<{
+      /** `Cmd_trainerslidein`/`Cmd_trainerslideout` -- generic across any trainer/outcome, see `TRAINER_SLIDE_TIMING`. */
+      type: "trainer-slide";
+      eventSequence: number;
+      battler: 0 | 1;
+      direction: "in" | "out";
+      timing: BattleTrainerSlideTiming;
     }>;
 
 export type BattleResolutionDisplayedField = Readonly<{
@@ -294,12 +303,19 @@ export type BattleResolutionConfirmHandoff = Readonly<{
  * production caller (`factoryTrainerPresentationForOpponent`'s return value)
  * always supplies it. LOSS-side terminal seam,
  * `docs/terminal-seam-loss-path-ground-truth.md` §5 item 3.
+ *
+ * `trainerPic` is the extracted Frontier trainer-picture symbol
+ * (`FactoryTrainerPresentation.trainerPic`, resolvable via
+ * `resolveFrontierTrainerPic`) the terminal-seam trainer-slide visual draws
+ * -- optional for the same reason as `speechWin`: only real production
+ * callers need it, synthetic non-terminal fixtures don't.
  */
 export type BattleResolutionOpponentTrainer = Readonly<{
   className: string;
   name: string;
   speechLose: readonly [string, string];
   speechWin?: readonly [string, string];
+  trainerPic?: string;
 }>;
 
 export type BattleResolutionPresentationState = Readonly<{
@@ -394,6 +410,30 @@ const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
 const STATUS_ICON_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const SWITCH_IN_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
+/**
+ * Ported from `battleScene.ts`'s `TURN17_TRAINER_SLIDE_SETTLE_DELAY` doc:
+ * `OpponentHandleTrainerSlide` creates the trainer sprite at x2=96 and the
+ * shared `SpriteCB_TrainerSlideIn` callback subtracts 2 per callback until
+ * x2=0 -- 53 callbacks total, independent of which trainer or outcome. Any
+ * `trainerslidein`/`trainerslideout` opcode uses this same source callback
+ * (`battle_controller_opponent.c`'s `sSpriteCallbacks`), so the duration is
+ * not DESTIN-specific.
+ */
+export const TRAINER_SLIDE_TIMING = Object.freeze({ minimumFrames: 53 } as const);
+/**
+ * The three terminal win/loss-text STRINGIDs are printed by
+ * `BattleScript_FrontierTrainerBattleWon(_LoseTexts)`/
+ * `BattleScript_LocalBattleLost(PrintTrainersWinText)`, each followed by a
+ * real `PAUSE_UNTIL_PRESS`-gated wait for input (oracle-confirmed dismiss:
+ * `docs/terminal-seam-loss-path-ground-truth.md` §2 frame ~3230, the same
+ * "A" dismiss shape already modeled for `STRINGID_TARGETFAINTED`/
+ * `STRINGID_ATTACKERFAINTED`).
+ */
+const TERMINAL_SEAM_BUTTON_MESSAGE_IDS: ReadonlySet<string> = new Set([
+  "STRINGID_PLAYERDEFEATEDTRAINER1",
+  "STRINGID_TRAINER1LOSETEXT",
+  "STRINGID_TRAINER1WINTEXT",
+]);
 
 /**
  * `{B_BUFF1}`'s real source for every stat-change message, oracle-confirmed
@@ -2309,6 +2349,7 @@ export function projectBattleResolutionCommands(
         advance:
           payload.messageId === "STRINGID_TARGETFAINTED"
           || payload.messageId === "STRINGID_ATTACKERFAINTED"
+          || TERMINAL_SEAM_BUTTON_MESSAGE_IDS.has(payload.messageId)
             ? "button"
             : "automatic",
         timing: STAT_CHANGE_MESSAGE_IDS.has(payload.messageId)
@@ -2317,6 +2358,16 @@ export function projectBattleResolutionCommands(
       }));
       pendingStatusMessageBattler = null;
       pendingHeldItemEffectBattler = null;
+      continue;
+    }
+    if (payload.kind === "trainer-slide-in" || payload.kind === "trainer-slide-out") {
+      commands.push(Object.freeze({
+        type: "trainer-slide",
+        eventSequence: event.sequence,
+        battler: singlesBattler(payload.battler, "trainer slide"),
+        direction: payload.kind === "trainer-slide-in" ? "in" as const : "out" as const,
+        timing: TRAINER_SLIDE_TIMING,
+      }));
       continue;
     }
     if (

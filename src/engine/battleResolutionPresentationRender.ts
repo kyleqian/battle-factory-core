@@ -125,6 +125,19 @@ export type BattleResolutionPresentationRenderView = Readonly<{
     battler: 0 | 1;
     states: readonly import("./battleResolutionPresentation.ts").PartyBallState[];
   }> | null;
+  /**
+   * The terminal win/loss-text trainer slide-in/out, generic across any
+   * trainer/outcome (`docs/terminal-seam-round-flow-scout.md` §3(iii)).
+   * `offscreenX2` is the ported `SpriteCB_TrainerSlideIn` step (see
+   * `TRAINER_SLIDE_TIMING`'s doc): 0 once fully settled on screen, positive
+   * while still sliding off the right edge. The renderer owns the absolute
+   * screen position; this view only exposes the relative offset.
+   */
+  trainerSlide: Readonly<{
+    battler: 0 | 1;
+    picSymbol: string | null;
+    offscreenX2: number;
+  }> | null;
 }>;
 
 export type BattleResolutionPresentationRenderAssets = Readonly<{
@@ -214,6 +227,7 @@ function applyCompletedCommand(
     || command.type === "party-summary"
     || command.type === "sprite-visibility"
     || command.type === "turn-end"
+    || command.type === "trainer-slide"
   ) return field;
   if (command.type === "switch-in") {
     return replaceFieldBattler(field, command.battler, command.incoming);
@@ -284,6 +298,8 @@ export function battleResolutionCommandDuration(
       return 1;
     case "turn-end":
       return command.timing.minimumFrames;
+    case "trainer-slide":
+      return command.timing.minimumFrames;
   }
 }
 
@@ -351,6 +367,7 @@ export function createBattleResolutionPresentationRenderView(
   let partySummary: BattleResolutionPresentationRenderView["partySummary"] = null;
   const fainted = new Set<0 | 1>();
   const spriteVisibility = new Map<0 | 1, boolean>([[0, true], [1, true]]);
+  let settledTrainer: Readonly<{ battler: 0 | 1 }> | null = null;
   // Visibility receipts are controller-owned persistent state. A later
   // automatic locked-action segment starts from the finished prior segment,
   // not from an invented visible baseline.
@@ -358,6 +375,11 @@ export function createBattleResolutionPresentationRenderView(
     for (const completed of state.segments[segmentIndex]!.commands) {
       if (completed.type === "sprite-visibility") {
         spriteVisibility.set(completed.battler, completed.visible);
+      }
+      if (completed.type === "trainer-slide") {
+        settledTrainer = completed.direction === "in"
+          ? Object.freeze({ battler: completed.battler })
+          : null;
       }
     }
   }
@@ -426,6 +448,11 @@ export function createBattleResolutionPresentationRenderView(
         ? Object.freeze({ battler: completed.battler, states: completed.states })
         : null;
     }
+    if (completed.type === "trainer-slide") {
+      settledTrainer = completed.direction === "in"
+        ? Object.freeze({ battler: completed.battler })
+        : null;
+    }
   }
 
   const command = segment.commands[state.commandIndex] ?? null;
@@ -437,6 +464,7 @@ export function createBattleResolutionPresentationRenderView(
       : partySendOutGoTextVisibleChars(switchIn.elapsed);
   let hpTarget: Readonly<{ battler: 0 | 1; to: number }> | null = null;
   let waitCursor: Readonly<{ age: number }> | null = null;
+  let activeTrainerSlide: Readonly<{ battler: 0 | 1; offscreenX2: number }> | null = null;
 
   if (
     (
@@ -557,6 +585,14 @@ export function createBattleResolutionPresentationRenderView(
       fainted.delete(command.battler);
     } else if (command.type === "sprite-visibility") {
       spriteVisibility.set(command.battler, command.visible);
+    } else if (command.type === "trainer-slide") {
+      const age = Math.min(state.lifecycle.phaseElapsed, command.timing.minimumFrames);
+      activeTrainerSlide = Object.freeze({
+        battler: command.battler,
+        offscreenX2: command.direction === "in"
+          ? 2 * (command.timing.minimumFrames - age)
+          : 2 * age,
+      });
     }
   } else if (
     state.lifecycle.phase !== "confirm-handoff"
@@ -643,6 +679,19 @@ export function createBattleResolutionPresentationRenderView(
     confirmHandoff,
     switchIn,
     partySummary,
+    trainerSlide: activeTrainerSlide !== null
+      ? Object.freeze({
+          battler: activeTrainerSlide.battler,
+          picSymbol: state.opponentTrainer?.trainerPic ?? null,
+          offscreenX2: activeTrainerSlide.offscreenX2,
+        })
+      : settledTrainer !== null
+        ? Object.freeze({
+            battler: settledTrainer.battler,
+            picSymbol: state.opponentTrainer?.trainerPic ?? null,
+            offscreenX2: 0,
+          })
+        : null,
   });
 }
 

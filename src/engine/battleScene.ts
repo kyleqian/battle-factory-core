@@ -33948,6 +33948,22 @@ export function renderBattleResolutionSceneOffView(
       view.partySummary.states,
     );
   }
+  if (view.trainerSlide !== null && view.trainerSlide.picSymbol !== null) {
+    // Generic terminal-seam trainer slide-in/out (any trainer, any outcome
+    // -- docs/terminal-seam-round-flow-scout.md §3(iii)). 176 is
+    // SpriteCB_TrainerSlideIn's settled screen X, ported from
+    // turn17TrainerLossState's `176 + 2 * (53 - slideAge)`; offscreenX2
+    // (battleResolutionPresentationRender.ts) carries the remaining slide
+    // distance generically, not DESTIN-hardcoded.
+    const trainerPic = resolveFrontierTrainerPic(view.trainerSlide.picSymbol);
+    drawSpriteSheet(
+      fb,
+      trainerPic.tileset,
+      trainerPic.palette,
+      176 + view.trainerSlide.offscreenX2,
+      OPPONENT_CORNER.y,
+    );
+  }
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 
   if (view.effect?.type === "stat") {
