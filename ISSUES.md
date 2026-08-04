@@ -133,13 +133,13 @@ UNRESOLVED (would hit the completeness guard).
 **Reachability triage done** (`docs/issue72-reachability-triage.md`,
 following #70's own per-id method — trace each id's emitting script label(s)
 to their trigger, check static gates, cross-reference Factory L50 singles
-carrier data): 66 REACHABLE, 37 DEAD, 4 MANUAL of the original 107 (the list
-below actually enumerated 67 distinct ids pre-batch — a pre-existing
-off-by-one against the triage doc's own count, not introduced or chased down
-this batch); 11 of the REACHABLE ids are now fixed (batch 1 below), leaving
-**55 REACHABLE**. DEAD ids (facility gates, no-EXP rentals, zero-carrier
-moves, unimplemented mechanics) are not reopened here; see the triage doc for
-their gate citations.
+carrier data): **66 REACHABLE, 41 DEAD, 0 MANUAL** of the original 107 (the
+4 originally-MANUAL ids all settled DEAD on 2026-08-03 — see the triage
+doc's "MANUAL settlement" appendix). 22 of the REACHABLE ids are now fixed
+(batches 1-2 below), leaving **44 REACHABLE**. DEAD ids (facility gates,
+no-EXP rentals, zero-carrier moves, the sub-110 draft-floor class the
+settlement pass found, unimplemented mechanics) are not reopened here; see
+the triage doc for their gate citations.
 
 **Batch 1 landed** (`tests/presentationStringIssue72Batch1.test.ts`, all 11
 red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
@@ -210,28 +210,22 @@ staged full-turn repro test, red-verify via `git stash`):
 `STRINGID_PKMNCOPIEDFOE`, `STRINGID_PKMNHEALEDPARALYSIS`,
 `STRINGID_PKMNSTOLEITEM`.
 
-**MANUAL (4) — not statically decidable, need a settling experiment before a
-verdict, let alone a fix:**
-- `STRINGID_PKMNCANTUSEMOVESEALED` (Imprison attack-canceler print): engine
-  wiring is real (`battleScriptActionAdmission.ts:2588`), but the sole
-  Imprison carrier (`FRONTIER_MON_RALTS`, raw catalog index 5, inside the
-  0-849 L50 boundary) is contradicted by `battle-script-topology.json`'s
-  `level50FactoryReachableEffects`, which lists zero L50 carriers for
-  EFFECT_IMPRISON. Settle with a `factoryLegal`/`mechanicLab` battle-lab
-  trace forcing that exact rental into a draft, or re-run
-  `tools/extract/extract-factory-animation-inventory.ts` with tracing to see
-  why it dropped Imprison.
-- `STRINGID_PLAYERDEFEATEDTRAINER1`, `STRINGID_TRAINER1LOSETEXT`,
-  `STRINGID_TRAINER1WINTEXT` (the Factory win/loss trainer-text triplet):
-  real-source always prints these on an ordinary Factory win/loss, but this
-  engine's `finalizeOrchestration` (`factoryBattleScriptTerminalDecision.ts:
-  612-621`) short-circuits to a coarse `{kind:"terminal",outcome:...}` the
-  instant `battleOutcome` is decided and never resumes the script interpreter
-  at these labels — a real, fixable gap (port the `HandleEndTurn_BattleWon`/
-  `_BattleLost` continuation), not a game-mode dead-end. Settle by porting
-  that continuation and re-censusing, or by an oracle trace of a real
-  Factory win/loss's final tick to confirm the exact text the ROM emits at
-  that boundary before porting.
+**MANUAL — all settled 2026-08-03 (side-lane settlement pass; full evidence
+in the triage doc's "MANUAL settlement" appendix):**
+- `STRINGID_PKMNCANTUSEMOVESEALED` → **DEAD**: Imprison's sole carrier
+  (`FRONTIER_MON_RALTS`, raw index 5) sits below `FRONTIER_MON_GRIMER = 110`,
+  the lower bound of every L50 draft range (`sInitialRentalMonRanges`) — the
+  original check verified only the ≤849 upper bound. The topology artifact
+  was right all along; batch-1 carriers reproduce 6/6 through it.
+- `STRINGID_PLAYERDEFEATEDTRAINER1`/`TRAINER1LOSETEXT`/`TRAINER1WINTEXT` →
+  **DEAD today, by the terminal-boundary architecture** (deliberate Gate-3
+  decision; nothing resumes the interpreter at those labels). The reopening
+  path is now scouted end-to-end: `docs/terminal-seam-round-flow-scout.md`
+  (2026-08-03) maps the win/loss label sequences, the orchestrator's
+  zero-presentation gap, and the increment order — its increment (i) (second
+  VM run at the win/loss labels, mirroring the `HandleFaintedMon` two-stage
+  redispatch; zero new opcodes on the WIN branch) is the recommended next
+  round-flow step and would flip these three to REACHABLE.
 
 **Also found, tracked separately:** `STRINGID_PKMNCANTUSEMOVETORMENT` is
 DEAD *today* but not by a game-design gate — this engine's attack-canceler

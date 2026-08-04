@@ -54,6 +54,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `CANCELER_TORMENTED` engine-gap fix (separate step, not a messageLines
   fix). The 4 MANUAL settling experiments. #71 Slice D. typeref slice-2
   re-scope (#39).
+- **[supervisor merges, ~17:45]** three verified side branches folded on
+  top of batch 2: typeref slice 3 (`53691c36` — idle-content shim + 8
+  HP-overlay pin tests, census 80→80 as predicted, differential 797/797);
+  #72 MANUAL settlement (`5c7d6e90` — all 4 settled DEAD; found the
+  sub-110 draft-floor blind spot in hand-checked carrier citations, batch-1
+  carriers reproduce 6/6 via the topology artifact; ISSUES #72 updated,
+  partition now 66/41/0); terminal-seam scout (`19d7c3f9` —
+  `docs/terminal-seam-round-flow-scout.md`: win/loss label sequences, the
+  orchestrator's zero-presentation gap, increment (i) = second VM run at
+  the win/loss labels with zero new WIN-branch opcodes — **recommended
+  next-session headline**, feeds ROADMAP S8's round-flow remainder).
+  Also corrected ISSUES #72's resurrected "67 ids" claim (was 66) and its
+  stale "leaving 55" line (now 44).
 - **Notes:** PAPERCUT: `BattleScriptPartyMemberInput`'s `moves` override
   field defaults `pp` to 0 per slot when `pp` is omitted (unlike
   `FactoryFullTurnBattlerConfig`'s own "16-per-nonzero-move" default for the
