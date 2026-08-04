@@ -2714,7 +2714,7 @@ export interface BackTriangleDownFrame {
   /** Source amplitude and signed `timer / data[5]` divisor. */
   readonly data5: BackTriangleDownAmplitude;
   /** Source repeat count after the callback's terminal-row decrement. */
-  readonly data6: 1 | 2;
+  readonly data6: 0 | 1 | 2;
   /** Shared task register; TriangleDown leaves it zeroed. */
   readonly data7: 0;
   readonly sourceRowIndex: 0 | 1 | 2 | 3;
@@ -2769,7 +2769,7 @@ export function backTriangleDownFrameAtTick(
   let y2 = 0;
   let data2 = 0;
   let data3 = 0 as 0 | 1 | 2 | 3;
-  let data6: 1 | 2 = variant.runs;
+  let data6: 0 | 1 | 2 = variant.runs;
   let terminal = false;
   let result: BackTriangleDownFrame | null = null;
 
@@ -2882,7 +2882,7 @@ export interface BackConcaveArcLargeFrame {
   /** Source X sine amplitude. */
   readonly data5: 12;
   /** Remaining full concave-arc runs after this callback. */
-  readonly data6: 0 | 1 | 2;
+  readonly data6: 1 | 2;
   /** Phase before/after the source callback's strict-overflow branch. */
   readonly data7Before: number;
   readonly data7: number;
@@ -2933,7 +2933,7 @@ export function backConcaveArcLargeFrameAtTick(
 
   let x2 = 0;
   let y2 = 0;
-  let data6: 0 | 1 | 2 = variant.runs;
+  let data6: 1 | 2 = variant.runs;
   let data7 = 0;
   let terminal = false;
   let result: BackConcaveArcLargeFrame | null = null;
