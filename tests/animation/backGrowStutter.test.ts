@@ -117,6 +117,14 @@ describe("BACK_ANIM_GROW_STUTTER back send-out reducer", () => {
       affineMode: "double", affineWriteCount: 1, tryFlipXCalls: 0,
       resetSpriteAfterAnim: false, callback: "Anim_GrowStutter_Twice",
     });
+    const midStutter = backGrowStutterFrameAtTick("QWILFISH", 3, 5, -1)!;
+    expect(midStutter.xScale).not.toBe(midStutter.yScale);
+    expect(midStutter.affineWrites).toEqual([{
+      xScale: midStutter.xScale,
+      yScale: midStutter.yScale,
+      rotationSigned: 0,
+      rotationU16: 0,
+    }]);
     expect(backGrowStutterFrameAtTick("QWILFISH", 3, 21, -1)).toMatchObject({
       data4: 1, data5: 0, data7: 0, xScale: 256, yScale: 256,
       affineWriteCount: 1, affineMode: "double", callback: "Anim_GrowStutter_Twice",

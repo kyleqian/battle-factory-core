@@ -1644,10 +1644,10 @@ export interface BackGrowFrame {
   readonly callback: BackGrowCallback | "WaitAnimEnd";
 }
 
-function growAffineWrite(scale: number): BackGrowAffineWrite {
+function growAffineWrite(xScale: number, yScale = xScale): BackGrowAffineWrite {
   return Object.freeze({
-    xScale: scale,
-    yScale: scale,
+    xScale,
+    yScale,
     rotationSigned: 0 as const,
     rotationU16: 0 as const,
   });
@@ -1976,7 +1976,7 @@ export function backGrowStutterFrameAtTick(
     const yJitter = gbaSin(index1, Math.trunc(data3 / 5));
     xScale = 256 - xJitter - bodyScale;
     yScale = 256 - yJitter - bodyScale;
-    writes = [growAffineWrite(xScale)];
+    writes = [growAffineWrite(xScale, yScale)];
     // The C helper increments data[5] after the affine write.
     data5 += 1;
   }
