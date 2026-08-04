@@ -276,6 +276,108 @@ export const BACK_V_SHAKE_LOW_OUTSIDE_FACTORY_SPECIES: readonly string[] = Objec
   BACK_V_SHAKE_LOW_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_TRIANGLE_DOWN` row. */
+export const BACK_TRIANGLE_DOWN_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_TRIANGLE_DOWN")
+    .map(([species]) => species),
+);
+
+/** All triangle-down mappings have real Factory rental records. */
+export const BACK_TRIANGLE_DOWN_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_TRIANGLE_DOWN_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** This bounded back set has no non-Factory selector mappings. */
+export const BACK_TRIANGLE_DOWN_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_TRIANGLE_DOWN_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
+/** Every species selected by the generated `BACK_ANIM_CONCAVE_ARC_LARGE` row. */
+export const BACK_CONCAVE_ARC_LARGE_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_CONCAVE_ARC_LARGE")
+    .map(([species]) => species),
+);
+
+/** All large-concave-arc mappings have real Factory rental records. */
+export const BACK_CONCAVE_ARC_LARGE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_CONCAVE_ARC_LARGE_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** This bounded back set has no non-Factory selector mappings. */
+export const BACK_CONCAVE_ARC_LARGE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_CONCAVE_ARC_LARGE_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
+/** Every species selected by the generated `BACK_ANIM_CONVEX_DOUBLE_ARC` row. */
+export const BACK_CONVEX_DOUBLE_ARC_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_CONVEX_DOUBLE_ARC")
+    .map(([species]) => species),
+);
+
+/** All but Jirachi's source mapping have real Battle Factory rental records. */
+export const BACK_CONVEX_DOUBLE_ARC_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_CONVEX_DOUBLE_ARC_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** Jirachi is the one source selector mapping outside the Factory corpus. */
+export const BACK_CONVEX_DOUBLE_ARC_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_CONVEX_DOUBLE_ARC_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
+/** Every species selected by the generated `BACK_ANIM_CONCAVE_ARC_SMALL` row. */
+export const BACK_CONCAVE_ARC_SMALL_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_CONCAVE_ARC_SMALL")
+    .map(([species]) => species),
+);
+
+/** All but MEW's source mapping have real Battle Factory rental records. */
+export const BACK_CONCAVE_ARC_SMALL_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_CONCAVE_ARC_SMALL_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** MEW is the one source selector mapping outside the Factory corpus. */
+export const BACK_CONCAVE_ARC_SMALL_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_CONCAVE_ARC_SMALL_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
+/** Every species selected by the generated `BACK_ANIM_DIP_RIGHT_SIDE` row. */
+export const BACK_DIP_RIGHT_SIDE_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_DIP_RIGHT_SIDE")
+    .map(([species]) => species),
+);
+
+/** All 38 right-side dip mappings have real Battle Factory rental records. */
+export const BACK_DIP_RIGHT_SIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_DIP_RIGHT_SIDE_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** The right-side dip set has no non-Factory selector mappings. */
+export const BACK_DIP_RIGHT_SIDE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_DIP_RIGHT_SIDE_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
+/** Every species selected by `BACK_ANIM_SHRINK_GROW_VIBRATE`. */
+export const BACK_SHRINK_GROW_VIBRATE_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_SHRINK_GROW_VIBRATE")
+    .map(([species]) => species),
+);
+
+/** All mappings except DEOXYS have at least one Battle Factory record. */
+export const BACK_SHRINK_GROW_VIBRATE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHRINK_GROW_VIBRATE_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** DEOXYS is the sole selector mapping outside the Factory corpus. */
+export const BACK_SHRINK_GROW_VIBRATE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHRINK_GROW_VIBRATE_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -629,6 +731,242 @@ export const BACK_V_SHAKE_LOW_VARIANTS = Object.freeze({
 } as const);
 
 /**
+ * `BACK_ANIM_TRIANGLE_DOWN` selects three initializers around the shared
+ * non-affine TriangleDown callback. Its `data[5]` is both the signed source
+ * divisor and the per-tick vector amplitude; `data[6]` is the run count.
+ */
+export const BACK_TRIANGLE_DOWN_VARIANTS = Object.freeze({
+  twice: Object.freeze({
+    selector: "ANIM_TRIANGLE_DOWN_TWICE",
+    callback: "Anim_TriangleDown_Fast",
+    sourceId: 106,
+    natureMod: 0,
+    amplitude: 2,
+    runs: 2,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_TRIANGLE_DOWN",
+    callback: "Anim_TriangleDown",
+    sourceId: 105,
+    natureMod: 1,
+    amplitude: 2,
+    runs: 1,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_TRIANGLE_DOWN_SLOW",
+    callback: "Anim_TriangleDown_Slow",
+    sourceId: 104,
+    natureMod: 2,
+    amplitude: 1,
+    runs: 1,
+    accepted: true,
+  }),
+} as const);
+
+/**
+ * `BACK_ANIM_CONCAVE_ARC_LARGE` retains its selected initializer as the
+ * sprite callback. Each initializer guards its one-time state setup, invokes
+ * `ConcaveArc`, and relies on that helper to replace it only with
+ * `WaitAnimEnd` at the final strict-overflow branch.
+ */
+export const BACK_CONCAVE_ARC_LARGE_VARIANTS = Object.freeze({
+  twice: Object.freeze({
+    selector: "ANIM_CONCAVE_ARC_LARGE_TWICE",
+    callback: "Anim_ConcaveArcLarge_Twice",
+    sourceId: 123,
+    natureMod: 0,
+    step: 8,
+    xAmplitude: 12,
+    yAmplitude: 12,
+    runs: 2,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_CONCAVE_ARC_LARGE",
+    callback: "Anim_ConcaveArcLarge",
+    sourceId: 122,
+    natureMod: 1,
+    step: 6,
+    xAmplitude: 12,
+    yAmplitude: 12,
+    runs: 1,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_CONCAVE_ARC_LARGE_SLOW",
+    callback: "Anim_ConcaveArcLarge_Slow",
+    sourceId: 121,
+    natureMod: 2,
+    step: 4,
+    xAmplitude: 12,
+    yAmplitude: 12,
+    runs: 1,
+    accepted: true,
+  }),
+} as const);
+
+/**
+ * `BACK_ANIM_CONVEX_DOUBLE_ARC` keeps each selected guarded initializer as
+ * its active callback while it invokes ConvexDoubleArc. The source starts at
+ * arc one, alternates x sign by the current arc's parity, and completes
+ * three/two/two arcs for nature mods zero/one/two respectively.
+ */
+export const BACK_CONVEX_DOUBLE_ARC_VARIANTS = Object.freeze({
+  twice: Object.freeze({
+    selector: "ANIM_CONVEX_DOUBLE_ARC_TWICE",
+    callback: "Anim_ConvexDoubleArc_Twice",
+    sourceId: 126,
+    natureMod: 0,
+    step: 8,
+    xAmplitude: 16,
+    terminalArcCount: 3,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_CONVEX_DOUBLE_ARC",
+    callback: "Anim_ConvexDoubleArc",
+    sourceId: 125,
+    natureMod: 1,
+    step: 6,
+    xAmplitude: 16,
+    terminalArcCount: 2,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_CONVEX_DOUBLE_ARC_SLOW",
+    callback: "Anim_ConvexDoubleArc_Slow",
+    sourceId: 124,
+    natureMod: 2,
+    step: 4,
+    xAmplitude: 16,
+    terminalArcCount: 2,
+    accepted: true,
+  }),
+} as const);
+
+/**
+ * `BACK_ANIM_CONCAVE_ARC_SMALL` keeps each selected guarded initializer as
+ * its active callback while it invokes the source's shared `ConcaveArc`
+ * helper. It differs from the accepted large-arc route only in the source
+ * initializer constants: amplitude 4×6 rather than 12×12.
+ */
+export const BACK_CONCAVE_ARC_SMALL_VARIANTS = Object.freeze({
+  twice: Object.freeze({
+    selector: "ANIM_CONCAVE_ARC_SMALL_TWICE",
+    callback: "Anim_ConcaveArcSmall_Twice",
+    sourceId: 129,
+    natureMod: 0,
+    step: 8,
+    xAmplitude: 4,
+    yAmplitude: 6,
+    runs: 2,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_CONCAVE_ARC_SMALL",
+    callback: "Anim_ConcaveArcSmall",
+    sourceId: 128,
+    natureMod: 1,
+    step: 6,
+    xAmplitude: 4,
+    yAmplitude: 6,
+    runs: 1,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_CONCAVE_ARC_SMALL_SLOW",
+    callback: "Anim_ConcaveArcSmall_Slow",
+    sourceId: 127,
+    natureMod: 2,
+    step: 4,
+    xAmplitude: 4,
+    yAmplitude: 6,
+    runs: 1,
+    accepted: true,
+  }),
+} as const);
+
+/**
+ * `BACK_ANIM_DIP_RIGHT_SIDE` selects affine horizontal-dip initializers.
+ * The source's table order is twice, normal, fast for nature modifiers
+ * zero, one, two; the callback names intentionally retain the initializer
+ * throughout the active window.
+ */
+export const BACK_DIP_RIGHT_SIDE_VARIANTS = Object.freeze({
+  twice: Object.freeze({
+    selector: "ANIM_H_DIP_TWICE",
+    callback: "Anim_HorizontalDip_Twice",
+    sourceId: 132,
+    natureMod: 0,
+    duration: 30,
+    runs: 2,
+    amplitude: 8,
+    offset: -32,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_H_DIP",
+    callback: "Anim_HorizontalDip",
+    sourceId: 130,
+    natureMod: 1,
+    duration: 60,
+    runs: 1,
+    amplitude: 8,
+    offset: -32,
+    accepted: true,
+  }),
+  fast: Object.freeze({
+    selector: "ANIM_H_DIP_FAST",
+    callback: "Anim_HorizontalDip_Fast",
+    sourceId: 131,
+    natureMod: 2,
+    duration: 90,
+    runs: 1,
+    amplitude: 8,
+    offset: -32,
+    accepted: true,
+  }),
+} as const);
+
+/**
+ * `BACK_ANIM_SHRINK_GROW_VIBRATE` selects three guarded affine
+ * initializers over the shared `ShrinkGrowVibrate` helper. Fast and slow
+ * both end after data[2] 80, but fast completes two 40-tick sine periods
+ * while slow completes one 80-tick period; normal is one 40-tick period.
+ */
+export const BACK_SHRINK_GROW_VIBRATE_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_SHRINK_GROW_VIBRATE_FAST",
+    callback: "Anim_ShrinkGrowVibrate_Fast",
+    sourceId: 133,
+    natureMod: 0,
+    cycle: 40,
+    duration: 80,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_SHRINK_GROW_VIBRATE",
+    callback: "Anim_ShrinkGrowVibrate",
+    sourceId: 134,
+    natureMod: 1,
+    cycle: 40,
+    duration: 40,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_SHRINK_GROW_VIBRATE_SLOW",
+    callback: "Anim_ShrinkGrowVibrate_Slow",
+    sourceId: 135,
+    natureMod: 2,
+    cycle: 80,
+    duration: 80,
+    accepted: true,
+  }),
+} as const);
+
+/**
  * `BACK_ANIM_V_SHAKE_H_SLIDE` selects three standalone source callbacks.
  * Unlike the preceding shake triples, each callback stays installed directly
  * after the task dispatches it; the source does not use a shared helper or a
@@ -823,6 +1161,38 @@ type BackVShakeLowCallback = typeof BACK_V_SHAKE_LOW_VARIANTS[keyof typeof BACK_
 type BackVShakeLowSourceId = typeof BACK_V_SHAKE_LOW_VARIANTS[keyof typeof BACK_V_SHAKE_LOW_VARIANTS]["sourceId"];
 type BackVShakeLowStep = typeof BACK_V_SHAKE_LOW_VARIANTS[keyof typeof BACK_V_SHAKE_LOW_VARIANTS]["step"];
 type BackVShakeLowAmplitude = typeof BACK_V_SHAKE_LOW_VARIANTS[keyof typeof BACK_V_SHAKE_LOW_VARIANTS]["amplitude"];
+type BackTriangleDownSelector = typeof BACK_TRIANGLE_DOWN_VARIANTS[keyof typeof BACK_TRIANGLE_DOWN_VARIANTS]["selector"];
+type BackTriangleDownCallback = typeof BACK_TRIANGLE_DOWN_VARIANTS[keyof typeof BACK_TRIANGLE_DOWN_VARIANTS]["callback"];
+type BackTriangleDownSourceId = typeof BACK_TRIANGLE_DOWN_VARIANTS[keyof typeof BACK_TRIANGLE_DOWN_VARIANTS]["sourceId"];
+type BackTriangleDownAmplitude = typeof BACK_TRIANGLE_DOWN_VARIANTS[keyof typeof BACK_TRIANGLE_DOWN_VARIANTS]["amplitude"];
+type BackTriangleDownRuns = typeof BACK_TRIANGLE_DOWN_VARIANTS[keyof typeof BACK_TRIANGLE_DOWN_VARIANTS]["runs"];
+type BackConcaveArcLargeSelector = typeof BACK_CONCAVE_ARC_LARGE_VARIANTS[keyof typeof BACK_CONCAVE_ARC_LARGE_VARIANTS]["selector"];
+type BackConcaveArcLargeCallback = typeof BACK_CONCAVE_ARC_LARGE_VARIANTS[keyof typeof BACK_CONCAVE_ARC_LARGE_VARIANTS]["callback"];
+type BackConcaveArcLargeSourceId = typeof BACK_CONCAVE_ARC_LARGE_VARIANTS[keyof typeof BACK_CONCAVE_ARC_LARGE_VARIANTS]["sourceId"];
+type BackConcaveArcLargeStep = typeof BACK_CONCAVE_ARC_LARGE_VARIANTS[keyof typeof BACK_CONCAVE_ARC_LARGE_VARIANTS]["step"];
+type BackConcaveArcLargeRuns = typeof BACK_CONCAVE_ARC_LARGE_VARIANTS[keyof typeof BACK_CONCAVE_ARC_LARGE_VARIANTS]["runs"];
+type BackConvexDoubleArcSelector = typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS[keyof typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS]["selector"];
+type BackConvexDoubleArcCallback = typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS[keyof typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS]["callback"];
+type BackConvexDoubleArcSourceId = typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS[keyof typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS]["sourceId"];
+type BackConvexDoubleArcStep = typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS[keyof typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS]["step"];
+type BackConvexDoubleArcTerminalArcCount = typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS[keyof typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS]["terminalArcCount"];
+type BackConcaveArcSmallSelector = typeof BACK_CONCAVE_ARC_SMALL_VARIANTS[keyof typeof BACK_CONCAVE_ARC_SMALL_VARIANTS]["selector"];
+type BackConcaveArcSmallCallback = typeof BACK_CONCAVE_ARC_SMALL_VARIANTS[keyof typeof BACK_CONCAVE_ARC_SMALL_VARIANTS]["callback"];
+type BackConcaveArcSmallSourceId = typeof BACK_CONCAVE_ARC_SMALL_VARIANTS[keyof typeof BACK_CONCAVE_ARC_SMALL_VARIANTS]["sourceId"];
+type BackConcaveArcSmallStep = typeof BACK_CONCAVE_ARC_SMALL_VARIANTS[keyof typeof BACK_CONCAVE_ARC_SMALL_VARIANTS]["step"];
+type BackConcaveArcSmallRuns = typeof BACK_CONCAVE_ARC_SMALL_VARIANTS[keyof typeof BACK_CONCAVE_ARC_SMALL_VARIANTS]["runs"];
+type BackDipRightSideSelector = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["selector"];
+type BackDipRightSideCallback = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["callback"];
+type BackDipRightSideSourceId = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["sourceId"];
+type BackDipRightSideDuration = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["duration"];
+type BackDipRightSideRuns = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["runs"];
+type BackDipRightSideAmplitude = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["amplitude"];
+type BackDipRightSideOffset = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["offset"];
+type BackShrinkGrowVibrateSelector = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["selector"];
+type BackShrinkGrowVibrateCallback = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["callback"];
+type BackShrinkGrowVibrateSourceId = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["sourceId"];
+type BackShrinkGrowVibrateCycle = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["cycle"];
+type BackShrinkGrowVibrateDuration = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["duration"];
 type BackVShakeHSlideSelector = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["selector"];
 type BackVShakeHSlideCallback = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["callback"];
 type BackVShakeHSlideSourceId = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["sourceId"];
@@ -1079,6 +1449,91 @@ function vShakeLowVariant(selector: string): {
   return null;
 }
 
+function triangleDownVariant(selector: string): {
+  readonly selector: BackTriangleDownSelector;
+  readonly callback: BackTriangleDownCallback;
+  readonly sourceId: BackTriangleDownSourceId;
+  readonly amplitude: BackTriangleDownAmplitude;
+  readonly runs: BackTriangleDownRuns;
+} | null {
+  for (const variant of Object.values(BACK_TRIANGLE_DOWN_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function concaveArcLargeVariant(selector: string): {
+  readonly selector: BackConcaveArcLargeSelector;
+  readonly callback: BackConcaveArcLargeCallback;
+  readonly sourceId: BackConcaveArcLargeSourceId;
+  readonly step: BackConcaveArcLargeStep;
+  readonly xAmplitude: 12;
+  readonly yAmplitude: 12;
+  readonly runs: BackConcaveArcLargeRuns;
+} | null {
+  for (const variant of Object.values(BACK_CONCAVE_ARC_LARGE_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function convexDoubleArcVariant(selector: string): {
+  readonly selector: BackConvexDoubleArcSelector;
+  readonly callback: BackConvexDoubleArcCallback;
+  readonly sourceId: BackConvexDoubleArcSourceId;
+  readonly step: BackConvexDoubleArcStep;
+  readonly xAmplitude: 16;
+  readonly terminalArcCount: BackConvexDoubleArcTerminalArcCount;
+} | null {
+  for (const variant of Object.values(BACK_CONVEX_DOUBLE_ARC_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function concaveArcSmallVariant(selector: string): {
+  readonly selector: BackConcaveArcSmallSelector;
+  readonly callback: BackConcaveArcSmallCallback;
+  readonly sourceId: BackConcaveArcSmallSourceId;
+  readonly step: BackConcaveArcSmallStep;
+  readonly xAmplitude: 4;
+  readonly yAmplitude: 6;
+  readonly runs: BackConcaveArcSmallRuns;
+} | null {
+  for (const variant of Object.values(BACK_CONCAVE_ARC_SMALL_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function dipRightSideVariant(selector: string): {
+  readonly selector: BackDipRightSideSelector;
+  readonly callback: BackDipRightSideCallback;
+  readonly sourceId: BackDipRightSideSourceId;
+  readonly duration: BackDipRightSideDuration;
+  readonly runs: BackDipRightSideRuns;
+  readonly amplitude: BackDipRightSideAmplitude;
+  readonly offset: BackDipRightSideOffset;
+} | null {
+  for (const variant of Object.values(BACK_DIP_RIGHT_SIDE_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function shrinkGrowVibrateVariant(selector: string): {
+  readonly selector: BackShrinkGrowVibrateSelector;
+  readonly callback: BackShrinkGrowVibrateCallback;
+  readonly sourceId: BackShrinkGrowVibrateSourceId;
+  readonly cycle: BackShrinkGrowVibrateCycle;
+  readonly duration: BackShrinkGrowVibrateDuration;
+} | null {
+  for (const variant of Object.values(BACK_SHRINK_GROW_VIBRATE_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
 function vShakeHSlideVariant(selector: string): {
   readonly selector: BackVShakeHSlideSelector;
   readonly callback: BackVShakeHSlideCallback;
@@ -1124,6 +1579,10 @@ function hStretchVariant(selector: string): {
 function toS16(value: number): number {
   const wrapped = value & 0xffff;
   return wrapped >= 0x8000 ? wrapped - 0x10000 : wrapped;
+}
+
+function toU16(value: number): number {
+  return value & 0xffff;
 }
 
 function gbaSin(index: number, amplitude: number): number {
@@ -2532,6 +2991,1075 @@ export function backVerticalShakeLowWaitAnimEndCallback(
   animEnded: boolean,
 ): "WaitAnimEnd" | "SpriteCallbackDummy" {
   return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+const TRIANGLE_DOWN_ROWS = Object.freeze([
+  Object.freeze({ x: 1, y: 1, timer: 12 }),
+  Object.freeze({ x: -2, y: 0, timer: 12 }),
+  Object.freeze({ x: 1, y: -1, timer: 12 }),
+  Object.freeze({ x: 0, y: 0, timer: 0 }),
+] as const);
+
+function cS16Division(numerator: number, denominator: number): number {
+  const signedNumerator = toS16(numerator);
+  const signedDenominator = toS16(denominator);
+  if (signedDenominator === 0) throw new Error("source s16 division by zero");
+  return toS16(Math.trunc(signedNumerator / signedDenominator));
+}
+
+export interface BackTriangleDownFrame {
+  readonly x2: number;
+  readonly y2: number;
+  /** The shared task zeroes this register and TriangleDown never writes it. */
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** Progress within the selected source row before/after the callback. */
+  readonly data2Before: number;
+  readonly data2: number;
+  /** Source `sTriangleDownData` row cursor after the callback. */
+  readonly data3: 0 | 1 | 2 | 3;
+  /** Shared task register; TriangleDown leaves it zeroed. */
+  readonly data4: 0;
+  /** Source amplitude and signed `timer / data[5]` divisor. */
+  readonly data5: BackTriangleDownAmplitude;
+  /** Source repeat count after the callback's terminal-row decrement. */
+  readonly data6: 0 | 1 | 2;
+  /** Shared task register; TriangleDown leaves it zeroed. */
+  readonly data7: 0;
+  readonly sourceRowIndex: 0 | 1 | 2 | 3;
+  readonly sourceRowX: -2 | 0 | 1;
+  readonly sourceRowY: -1 | 0 | 1;
+  readonly sourceRowTimer: 0 | 12;
+  /** Exact C signed division of `sourceRowTimer / data[5]`. */
+  readonly sourceRowDuration: 0 | 6 | 12;
+  /** The first conditional branch advanced rows before this row was used. */
+  readonly phaseBoundary: boolean;
+  /** A non-final terminal row restarts because `data[2] == 0` next callback. */
+  readonly repeatWillRestart: boolean;
+  readonly selector: BackTriangleDownSelector;
+  readonly sourceId: BackTriangleDownSourceId;
+  readonly amplitude: BackTriangleDownAmplitude;
+  readonly runs: BackTriangleDownRuns;
+  /** Tick zero is the initializer's immediate helper invocation. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  /** First TryFlipX always runs; active vector rows call it once more. */
+  readonly tryFlipXCalls: 1 | 2;
+  /** Both source TryFlipX calls are no-ops under Task_HandleMonAnimation. */
+  readonly normalBackDontFlip: true;
+  /** TriangleDown neither changes affine state nor hides the OAM entry. */
+  readonly affineWriteCount: 0;
+  readonly affineMode: "normal";
+  readonly oamVisible: true;
+  readonly resetSpriteAfterAnim: false;
+  readonly callback: "TriangleDown" | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for `BACK_ANIM_TRIANGLE_DOWN`. The terminal row is
+ * deliberately inspected after the row-boundary check. On the twice variant,
+ * its first visit decrements `data[6]` but leaves `data[3] == 3`; the next
+ * callback's `data[2] == 0` reset is what starts the second triangle.
+ */
+export function backTriangleDownFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackTriangleDownFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_TRIANGLE_DOWN") return null;
+  const variant = triangleDownVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected triangle-down selector ${selection.selector}`);
+
+  let x2 = 0;
+  let y2 = 0;
+  let data2 = 0;
+  let data3 = 0 as 0 | 1 | 2 | 3;
+  let data6: 0 | 1 | 2 = variant.runs;
+  let terminal = false;
+  let result: BackTriangleDownFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    const data2Before = data2;
+    if (data2 === 0) data3 = 0;
+
+    const rowBeforeBoundary = TRIANGLE_DOWN_ROWS[data3]!;
+    const durationBeforeBoundary = cS16Division(rowBeforeBoundary.timer, variant.amplitude);
+    const phaseBoundary = durationBeforeBoundary === data2;
+    if (phaseBoundary) {
+      data3 = (data3 + 1) as 0 | 1 | 2 | 3;
+      data2 = 0;
+    }
+
+    const row = TRIANGLE_DOWN_ROWS[data3]!;
+    const sourceRowDuration = cS16Division(row.timer, variant.amplitude) as 0 | 6 | 12;
+    const isTerminalRow = sourceRowDuration === 0;
+    let callback: "TriangleDown" | "WaitAnimEnd" = "TriangleDown";
+    if (isTerminalRow) {
+      data6 = toS16(data6 - 1) as 0 | 1 | 2;
+      if (data6 === 0) {
+        callback = "WaitAnimEnd";
+        terminal = true;
+      } else {
+        data2 = 0;
+      }
+    } else {
+      x2 = toS16(x2 + row.x * variant.amplitude);
+      y2 = toS16(y2 + row.y * variant.amplitude);
+      data2 = toS16(data2 + 1);
+    }
+
+    result = Object.freeze({
+      x2,
+      y2,
+      data0: 0 as const,
+      data1: toS16(preservedData1),
+      data2Before: toS16(data2Before),
+      data2: toS16(data2),
+      data3,
+      data4: 0 as const,
+      data5: variant.amplitude,
+      data6,
+      data7: 0 as const,
+      sourceRowIndex: data3,
+      sourceRowX: row.x,
+      sourceRowY: row.y,
+      sourceRowTimer: row.timer,
+      sourceRowDuration,
+      phaseBoundary,
+      repeatWillRestart: isTerminalRow && data6 > 0,
+      selector: variant.selector,
+      sourceId: variant.sourceId,
+      amplitude: variant.amplitude,
+      runs: variant.runs,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      tryFlipXCalls: isTerminalRow ? 1 as const : 2 as const,
+      normalBackDontFlip: true as const,
+      affineWriteCount: 0 as const,
+      affineMode: "normal" as const,
+      oamVisible: true as const,
+      resetSpriteAfterAnim: false as const,
+      callback,
+    });
+  }
+  return result;
+}
+
+/** Source WaitAnimEnd lifecycle after the static back OAM reports animEnded. */
+export function backTriangleDownWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/**
+ * Task_HandleMonAnimation restores battler/data[0], species/data[2], and
+ * clears only data[1] after TriangleDown reaches the dummy. The source helper
+ * intentionally leaves its terminal row cursor and amplitude in data[3]/[5].
+ */
+export function backTriangleDownTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+): readonly [number, 0, number, 3, 0, BackTriangleDownAmplitude, 0, 0] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_TRIANGLE_DOWN") return null;
+  const variant = triangleDownVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected triangle-down selector ${selection.selector}`);
+  return [toS16(battlerId), 0, toS16(speciesId), 3, 0, variant.amplitude, 0, 0];
+}
+
+export interface BackConcaveArcLargeFrame {
+  readonly x2: number;
+  readonly y2: number;
+  /** The shared player-back task owns this register and leaves it zeroed. */
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** The initializer guard has run and stays latched for the whole callback. */
+  readonly data2: 1;
+  /** Source per-frame phase increment. */
+  readonly data3: BackConcaveArcLargeStep;
+  /** Source Y amplitude; it is also the reflection and vertical offset. */
+  readonly data4: 12;
+  /** Source X sine amplitude. */
+  readonly data5: 12;
+  /** Remaining full concave-arc runs after this callback. */
+  readonly data6: 1 | 2;
+  /** Phase before/after the source callback's strict-overflow branch. */
+  readonly data7Before: number;
+  readonly data7: number;
+  /** The branch is deliberately strict: phase 255 is still an active arc. */
+  readonly strictOverflow: boolean;
+  /** A nonfinal strict overflow restarts at C's positive modulo-256 result. */
+  readonly repeatWillRestart: boolean;
+  readonly sineIndex: number | null;
+  readonly reflectedY: boolean;
+  readonly selector: BackConcaveArcLargeSelector;
+  readonly sourceId: BackConcaveArcLargeSourceId;
+  readonly step: BackConcaveArcLargeStep;
+  readonly xAmplitude: 12;
+  readonly yAmplitude: 12;
+  readonly runs: BackConcaveArcLargeRuns;
+  /** The selected initializer calls ConcaveArc before returning. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  /** ConcaveArc is a helper, never an installed active sprite callback. */
+  readonly helperInvokedByInitializer: true;
+  /** No source TryFlipX call occurs in this callback family. */
+  readonly tryFlipXCalls: 0;
+  readonly normalBackDontFlip: true;
+  readonly affineWriteCount: 0;
+  readonly affineMode: "normal";
+  readonly oamVisible: true;
+  readonly resetSpriteAfterAnim: false;
+  readonly callback: BackConcaveArcLargeCallback | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for `BACK_ANIM_CONCAVE_ARC_LARGE`. The two-run entry
+ * follows C's strict `data[7] > 255` test: it does not clear x2/y2 when a
+ * run restarts, but phase zero on the next invocation restores both offsets.
+ */
+export function backConcaveArcLargeFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackConcaveArcLargeFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_CONCAVE_ARC_LARGE") return null;
+  const variant = concaveArcLargeVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected large concave-arc selector ${selection.selector}`);
+
+  let x2 = 0;
+  let y2 = 0;
+  let data6: 1 | 2 = variant.runs;
+  let data7 = 0;
+  let terminal = false;
+  let result: BackConcaveArcLargeFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    const data7Before = data7;
+    const strictOverflow = data7 > 255;
+    let sineIndex: number | null = null;
+    let reflectedY = false;
+    let callback: BackConcaveArcLargeCallback | "WaitAnimEnd" = variant.callback;
+    let repeatWillRestart = false;
+
+    if (strictOverflow) {
+      if (data6 <= 1) {
+        callback = "WaitAnimEnd";
+        x2 = 0;
+        y2 = 0;
+        terminal = true;
+      } else {
+        data7 %= 256;
+        data6 = toS16(data6 - 1) as 1 | 2;
+        repeatWillRestart = true;
+      }
+    } else {
+      sineIndex = data7 & 0xff;
+      x2 = toS16(-gbaSin(sineIndex, variant.xAmplitude));
+      y2 = gbaSin((sineIndex + 192) % 256, variant.yAmplitude);
+      if (y2 > 0) {
+        y2 = toS16(-y2);
+        reflectedY = true;
+      }
+      y2 = toS16(y2 + variant.yAmplitude);
+      data7 = toS16(data7 + variant.step);
+    }
+
+    result = Object.freeze({
+      x2,
+      y2,
+      data0: 0 as const,
+      data1: toS16(preservedData1),
+      data2: 1 as const,
+      data3: variant.step,
+      data4: 12 as const,
+      data5: 12 as const,
+      data6,
+      data7Before: toS16(data7Before),
+      data7: toS16(data7),
+      strictOverflow,
+      repeatWillRestart,
+      sineIndex,
+      reflectedY,
+      selector: variant.selector,
+      sourceId: variant.sourceId,
+      step: variant.step,
+      xAmplitude: 12 as const,
+      yAmplitude: 12 as const,
+      runs: variant.runs,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      helperInvokedByInitializer: true as const,
+      tryFlipXCalls: 0 as const,
+      normalBackDontFlip: true as const,
+      affineWriteCount: 0 as const,
+      affineMode: "normal" as const,
+      oamVisible: true as const,
+      resetSpriteAfterAnim: false as const,
+      callback,
+    });
+  }
+  return result;
+}
+
+/** Source WaitAnimEnd lifecycle after the static back OAM reports animEnded. */
+export function backConcaveArcLargeWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/**
+ * Task_HandleMonAnimation restores battler/data[0], species/data[2], and
+ * clears data[1] without disturbing the source callback's final phase state.
+ */
+export function backConcaveArcLargeTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+): readonly [number, 0, number, BackConcaveArcLargeStep, 12, 12, 1, number] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_CONCAVE_ARC_LARGE") return null;
+  const variant = concaveArcLargeVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected large concave-arc selector ${selection.selector}`);
+  let finalPhase = 0;
+  while (finalPhase <= 255) finalPhase = toS16(finalPhase + variant.step);
+  return [toS16(battlerId), 0, toS16(speciesId), variant.step, 12, 12, 1, finalPhase];
+}
+
+export interface BackConcaveArcSmallFrame {
+  readonly x2: number;
+  readonly y2: number;
+  /** The shared player-back task owns this register and leaves it zeroed. */
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** The initializer guard has run and stays latched for the whole callback. */
+  readonly data2: 1;
+  /** Source per-frame phase increment. */
+  readonly data3: BackConcaveArcSmallStep;
+  /** Source Y amplitude; it is also the reflection and vertical offset. */
+  readonly data4: 6;
+  /** Source X sine amplitude. */
+  readonly data5: 4;
+  /** Remaining full concave-arc runs after this callback. */
+  readonly data6: 1 | 2;
+  /** Phase before/after the source callback's strict-overflow branch. */
+  readonly data7Before: number;
+  readonly data7: number;
+  /** The branch is deliberately strict: phase 255 is still an active arc. */
+  readonly strictOverflow: boolean;
+  /** A nonfinal strict overflow restarts at C's positive modulo-256 result. */
+  readonly repeatWillRestart: boolean;
+  readonly sineIndex: number | null;
+  readonly reflectedY: boolean;
+  readonly selector: BackConcaveArcSmallSelector;
+  readonly sourceId: BackConcaveArcSmallSourceId;
+  readonly step: BackConcaveArcSmallStep;
+  readonly xAmplitude: 4;
+  readonly yAmplitude: 6;
+  readonly runs: BackConcaveArcSmallRuns;
+  /** The selected initializer calls ConcaveArc before returning. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  /** ConcaveArc is a helper, never an installed active sprite callback. */
+  readonly helperInvokedByInitializer: true;
+  /** No source TryFlipX call occurs in this callback family. */
+  readonly tryFlipXCalls: 0;
+  readonly normalBackDontFlip: true;
+  readonly affineWriteCount: 0;
+  readonly affineMode: "normal";
+  readonly oamVisible: true;
+  readonly resetSpriteAfterAnim: false;
+  readonly callback: BackConcaveArcSmallCallback | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for `BACK_ANIM_CONCAVE_ARC_SMALL`. It uses the same
+ * source `ConcaveArc` helper as set 16, but records the independently
+ * selected small-arc initializer constants rather than aliasing set 16.
+ */
+export function backConcaveArcSmallFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackConcaveArcSmallFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_CONCAVE_ARC_SMALL") return null;
+  const variant = concaveArcSmallVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected small concave-arc selector ${selection.selector}`);
+
+  let x2 = 0;
+  let y2 = 0;
+  let data6: 1 | 2 = variant.runs;
+  let data7 = 0;
+  let terminal = false;
+  let result: BackConcaveArcSmallFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    const data7Before = data7;
+    const strictOverflow = data7 > 255;
+    let sineIndex: number | null = null;
+    let reflectedY = false;
+    let callback: BackConcaveArcSmallCallback | "WaitAnimEnd" = variant.callback;
+    let repeatWillRestart = false;
+
+    if (strictOverflow) {
+      if (data6 <= 1) {
+        callback = "WaitAnimEnd";
+        x2 = 0;
+        y2 = 0;
+        terminal = true;
+      } else {
+        data7 %= 256;
+        data6 = toS16(data6 - 1) as 1 | 2;
+        repeatWillRestart = true;
+      }
+    } else {
+      sineIndex = data7 & 0xff;
+      x2 = toS16(-gbaSin(sineIndex, variant.xAmplitude));
+      y2 = gbaSin((sineIndex + 192) % 256, variant.yAmplitude);
+      if (y2 > 0) {
+        y2 = toS16(-y2);
+        reflectedY = true;
+      }
+      y2 = toS16(y2 + variant.yAmplitude);
+      data7 = toS16(data7 + variant.step);
+    }
+
+    result = Object.freeze({
+      x2,
+      y2,
+      data0: 0 as const,
+      data1: toS16(preservedData1),
+      data2: 1 as const,
+      data3: variant.step,
+      data4: 6 as const,
+      data5: 4 as const,
+      data6,
+      data7Before: toS16(data7Before),
+      data7: toS16(data7),
+      strictOverflow,
+      repeatWillRestart,
+      sineIndex,
+      reflectedY,
+      selector: variant.selector,
+      sourceId: variant.sourceId,
+      step: variant.step,
+      xAmplitude: 4 as const,
+      yAmplitude: 6 as const,
+      runs: variant.runs,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      helperInvokedByInitializer: true as const,
+      tryFlipXCalls: 0 as const,
+      normalBackDontFlip: true as const,
+      affineWriteCount: 0 as const,
+      affineMode: "normal" as const,
+      oamVisible: true as const,
+      resetSpriteAfterAnim: false as const,
+      callback,
+    });
+  }
+  return result;
+}
+
+/** Source WaitAnimEnd lifecycle after the static back OAM reports animEnded. */
+export function backConcaveArcSmallWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/**
+ * Task_HandleMonAnimation restores battler/data[0], species/data[2], and
+ * clears data[1] without disturbing the source callback's final phase state.
+ */
+export function backConcaveArcSmallTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+): readonly [number, 0, number, BackConcaveArcSmallStep, 6, 4, 1, number] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_CONCAVE_ARC_SMALL") return null;
+  const variant = concaveArcSmallVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected small concave-arc selector ${selection.selector}`);
+  let finalPhase = 0;
+  while (finalPhase <= 255) finalPhase = toS16(finalPhase + variant.step);
+  return [toS16(battlerId), 0, toS16(speciesId), variant.step, 6, 4, 1, finalPhase];
+}
+
+export interface BackDipRightSideAffineWrite {
+  readonly xScale: 256;
+  readonly yScale: 256;
+  /** The signed source `data[6]` value passed through the back path. */
+  readonly rotationSigned: number;
+  /** The same rotation as the u16 argument received by SetAffineData. */
+  readonly rotationU16: number;
+  /** GBA `SetAffineData`'s [a,b,c,d] matrix after the rotation write. */
+  readonly matrix: readonly [number, number, number, number];
+}
+
+export interface BackDipRightSideFrame {
+  readonly x2: number;
+  readonly y2: number;
+  /** Task_HandleMonAnimation owns this slot and leaves it zeroed. */
+  readonly data0: number;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** Source callback phase after its trailing increment (or terminal hold). */
+  readonly data2: number;
+  /** Source run count, written by the selected initializer. */
+  readonly data3: BackDipRightSideRuns;
+  /** SetHorizontalDip's positional compensation offset. */
+  readonly data4: BackDipRightSideOffset;
+  /** SetHorizontalDip's sine amplitude. */
+  readonly data5: BackDipRightSideAmplitude;
+  /** SetHorizontalDip's source affine rotation register. */
+  readonly data6: number;
+  /** Duration selected by the nature initializer. */
+  readonly data7: BackDipRightSideDuration;
+  readonly data2Before: number;
+  readonly strictOverflow: boolean;
+  /** Input angle passed to Sin before its u16 result becomes rotationIndex. */
+  readonly phaseIndex: number | null;
+  /** The u16 result of Sin((data[2] * 128) / data[7], 8). */
+  readonly rotationIndex: number | null;
+  readonly rotationSigned: number;
+  readonly rotationU16: number;
+  readonly perRunReset: boolean;
+  readonly selector: BackDipRightSideSelector;
+  readonly sourceId: BackDipRightSideSourceId;
+  readonly duration: BackDipRightSideDuration;
+  readonly amplitude: BackDipRightSideAmplitude;
+  readonly offset: BackDipRightSideOffset;
+  readonly runs: BackDipRightSideRuns;
+  /** Tick zero invokes HandleStartAffineAnim in the selected initializer. */
+  readonly initializerCalled: boolean;
+  readonly handleStartAffineAnimCalls: 0 | 1;
+  /** The initializer invokes SetHorizontalDip before returning. */
+  readonly callbackInvokedByInitializer: true;
+  readonly normalBackDontFlip: true;
+  readonly tryFlipXCalls: 0;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly affineWriteCount: 1;
+  readonly affineWrites: readonly [BackDipRightSideAffineWrite];
+  readonly affineMode: "double" | "normal";
+  readonly oamVisible: true;
+  readonly callback: BackDipRightSideCallback | "WaitAnimEnd";
+}
+
+function dipRightSideAffineWrite(rotationSigned: number): BackDipRightSideAffineWrite {
+  const signed = toS16(rotationSigned);
+  const rotationU16 = signed & 0xffff;
+  const angle = rotationU16 >> 8;
+  const sine = gbaSin(angle, 256);
+  const cosine = gbaCos(angle, 256);
+  return Object.freeze({
+    xScale: 256 as const,
+    yScale: 256 as const,
+    rotationSigned: signed,
+    rotationU16,
+    matrix: Object.freeze([cosine, toS16(-sine), toS16(sine), cosine]) as readonly [number, number, number, number],
+  });
+}
+
+/**
+ * Source-order reducer for `BACK_ANIM_DIP_RIGHT_SIDE`. The selected
+ * initializer installs affine mode and immediately invokes SetHorizontalDip;
+ * the initializer remains the active callback until the strict `data[2] >
+ * data[7]` branch resets the per-run offsets and either restarts or enters
+ * WaitAnimEnd. There is no TryFlipX on the player-back route.
+ */
+export function backDipRightSideFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackDipRightSideFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_DIP_RIGHT_SIDE") return null;
+  const variant = dipRightSideVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected right-side dip selector ${selection.selector}`);
+
+  let data0 = 0;
+  let data2 = 0;
+  let data6 = 0;
+  let x2 = 0;
+  let y2 = 0;
+  let phaseIndex: number | null = null;
+  let rotationIndex: number | null = null;
+  let strictOverflow = false;
+  let perRunReset = false;
+  let resetSpriteAfterAnim = false;
+  let affineMode: "double" | "normal" = "normal";
+  let callback: BackDipRightSideCallback | "WaitAnimEnd" = variant.callback;
+  let writes: readonly [BackDipRightSideAffineWrite] = [dipRightSideAffineWrite(0)];
+  let terminal = false;
+  let result: BackDipRightSideFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    const data2Before = data2;
+    strictOverflow = false;
+    perRunReset = false;
+    phaseIndex = null;
+    rotationIndex = null;
+    resetSpriteAfterAnim = false;
+
+    if (data2 === 0) {
+      affineMode = "double";
+      data6 = 0;
+      data0 = 0;
+    }
+
+    if (data2 > variant.duration) {
+      strictOverflow = true;
+      perRunReset = true;
+      x2 = 0;
+      y2 = 0;
+      data6 = 0;
+      writes = [dipRightSideAffineWrite(0)];
+      data0 += 1;
+      if (variant.runs <= data0) {
+        resetSpriteAfterAnim = true;
+        affineMode = "normal";
+        callback = "WaitAnimEnd";
+        terminal = true;
+      } else {
+        data2 = 0;
+      }
+    } else {
+      phaseIndex = Math.trunc((data2 * 128) / variant.duration);
+      rotationIndex = toU16(gbaSin(phaseIndex, variant.amplitude));
+      data6 = toS16(-(rotationIndex << 8));
+
+      // SetPosForRotation(sprite, index, data[4], 0), preserving the source's
+      // signed intermediate values and s16 writes on the GBA.
+      const negAmplitudeX = toS16(-variant.offset);
+      const cosX = gbaCos(rotationIndex, negAmplitudeX);
+      const sinX = gbaSin(rotationIndex, negAmplitudeX);
+      x2 = toS16(toS16(cosX) + variant.offset);
+      y2 = toS16(sinX);
+      writes = [dipRightSideAffineWrite(data6)];
+    }
+
+    if (!terminal) data2 += 1;
+    result = Object.freeze({
+      x2,
+      y2,
+      data0,
+      data1: toS16(preservedData1),
+      data2,
+      data3: variant.runs,
+      data4: variant.offset,
+      data5: variant.amplitude,
+      data6,
+      data7: variant.duration,
+      data2Before,
+      strictOverflow,
+      phaseIndex,
+      rotationIndex,
+      rotationSigned: writes[0].rotationSigned,
+      rotationU16: writes[0].rotationU16,
+      perRunReset,
+      selector: variant.selector,
+      sourceId: variant.sourceId,
+      duration: variant.duration,
+      amplitude: variant.amplitude,
+      offset: variant.offset,
+      runs: variant.runs,
+      initializerCalled: tick === 0,
+      handleStartAffineAnimCalls: tick === 0 ? 1 as const : 0 as const,
+      callbackInvokedByInitializer: true as const,
+      normalBackDontFlip: true as const,
+      tryFlipXCalls: 0 as const,
+      resetSpriteAfterAnim,
+      affineWriteCount: 1 as const,
+      affineWrites: writes,
+      affineMode,
+      oamVisible: true as const,
+      callback,
+    });
+  }
+  return result;
+}
+
+/** Source WaitAnimEnd lifecycle after the static affine OAM reports animEnded. */
+export function backDipRightSideWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/** Task_HandleMonAnimation's final battler/species restoration for the dip. */
+export function backDipRightSideTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+): readonly [number, 0, number, BackDipRightSideRuns, -32, 8, 0, BackDipRightSideDuration] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_DIP_RIGHT_SIDE") return null;
+  const variant = dipRightSideVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected right-side dip selector ${selection.selector}`);
+  return [toS16(battlerId), 0, toS16(speciesId), variant.runs, variant.offset, variant.amplitude, 0, variant.duration];
+}
+
+export interface BackShrinkGrowVibrateAffineWrite {
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly rotationSigned: 0;
+  readonly rotationU16: 0;
+}
+
+export interface BackShrinkGrowVibrateFrame {
+  readonly x2: 0;
+  readonly y2: number;
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  readonly data2: number;
+  readonly data3: 0;
+  readonly data4: number;
+  readonly data5: number;
+  readonly data6: BackShrinkGrowVibrateCycle;
+  readonly data7: BackShrinkGrowVibrateDuration;
+  readonly counter: number;
+  readonly strictOverflow: boolean;
+  readonly index: number | null;
+  readonly amplitude: 8 | 32 | null;
+  readonly sinY: number;
+  readonly selector: BackShrinkGrowVibrateSelector;
+  readonly sourceId: BackShrinkGrowVibrateSourceId;
+  readonly cycle: BackShrinkGrowVibrateCycle;
+  readonly duration: BackShrinkGrowVibrateDuration;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly initializerCalled: boolean;
+  readonly initializerY2Add: 2 | 0;
+  readonly handleStartAffineAnimCalls: 0 | 1;
+  readonly callbackInvokedByInitializer: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly normalBackDontFlip: true;
+  readonly tryFlipXCalls: 0;
+  readonly affineWriteCount: 1;
+  readonly affineWrites: readonly [BackShrinkGrowVibrateAffineWrite];
+  readonly affineMode: "double" | "normal";
+  readonly callback: BackShrinkGrowVibrateCallback | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for `BACK_ANIM_SHRINK_GROW_VIBRATE`. Tick zero is
+ * the guarded selected initializer, which starts affine mode, performs its
+ * otherwise-overwritten `y2 += 2`, writes data[6]/data[7], and immediately
+ * calls the shared helper. Active callbacks alternate amplitudes 32 and 8;
+ * the terminal branch is the strict `data[2] > data[7]` callback.
+ */
+export function backShrinkGrowVibrateFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackShrinkGrowVibrateFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_SHRINK_GROW_VIBRATE") return null;
+  const variant = shrinkGrowVibrateVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected shrink/grow/vibrate selector ${selection.selector}`);
+
+  const counter = Math.min(ticksSinceStart, variant.duration + 1);
+  const strictOverflow = counter > variant.duration;
+  const activeCounter = strictOverflow ? variant.duration : counter;
+  const index = strictOverflow
+    ? null
+    : Math.trunc(((activeCounter % variant.cycle) * 256) / variant.cycle) % 256;
+  const amplitude = strictOverflow ? null : (activeCounter % 2 === 0 ? 32 as const : 8 as const);
+  const sinY = strictOverflow ? 0 : gbaSin(index!, amplitude!);
+  const xScale = strictOverflow ? 256 : toS16(sinY + 256);
+  const yScale = xScale;
+  // The source narrows Sin to s8, divides signed by eight toward zero, then
+  // assigns through u16 to the sprite's signed y2 register.
+  const y2 = strictOverflow ? 0 : toS16(toU16(Math.trunc(toS16(sinY) / 8)));
+  const write = Object.freeze({
+    xScale,
+    yScale,
+    rotationSigned: 0 as const,
+    rotationU16: 0 as const,
+  });
+  return Object.freeze({
+    x2: 0 as const,
+    y2,
+    data0: 0 as const,
+    data1: toS16(preservedData1),
+    data2: toS16(counter + 1),
+    data3: 0 as const,
+    data4: xScale,
+    data5: yScale,
+    data6: variant.cycle,
+    data7: variant.duration,
+    counter,
+    strictOverflow,
+    index,
+    amplitude,
+    sinY,
+    selector: variant.selector,
+    sourceId: variant.sourceId,
+    cycle: variant.cycle,
+    duration: variant.duration,
+    xScale,
+    yScale,
+    initializerCalled: ticksSinceStart === 0,
+    initializerY2Add: ticksSinceStart === 0 ? 2 as const : 0 as const,
+    handleStartAffineAnimCalls: ticksSinceStart === 0 ? 1 as const : 0 as const,
+    callbackInvokedByInitializer: true as const,
+    resetSpriteAfterAnim: strictOverflow,
+    normalBackDontFlip: true as const,
+    tryFlipXCalls: 0 as const,
+    affineWriteCount: 1 as const,
+    affineWrites: [write] as const,
+    affineMode: strictOverflow ? "normal" as const : "double" as const,
+    callback: strictOverflow ? "WaitAnimEnd" as const : variant.callback,
+  });
+}
+
+/** Source WaitAnimEnd transition for the affine player-back sprite. */
+export function backShrinkGrowVibrateWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/** Task restoration preserves helper data[4..7], as in the source task. */
+export function backShrinkGrowVibrateTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+): readonly [number, 0, number, 0, 256, 256, BackShrinkGrowVibrateCycle, BackShrinkGrowVibrateDuration] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_SHRINK_GROW_VIBRATE") return null;
+  const variant = shrinkGrowVibrateVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected shrink/grow/vibrate selector ${selection.selector}`);
+  return [toS16(battlerId), 0, toS16(speciesId), 0, 256, 256, variant.cycle, variant.duration];
+}
+
+export interface BackConvexDoubleArcFrame {
+  readonly x2: number;
+  readonly y2: number;
+  /** The shared player-back task owns this register and leaves it zeroed. */
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** The guarded source initializer latches this register on its first call. */
+  readonly data2: 1;
+  /** Source per-frame phase increment. */
+  readonly data3: BackConvexDoubleArcStep;
+  /** Current one-based arc number; its parity selects the x sign. */
+  readonly data4Before: number;
+  readonly data4: number;
+  /** Source X sine amplitude. */
+  readonly data5: 16;
+  /** The source terminal arc count; it is not decremented between arcs. */
+  readonly data6: BackConvexDoubleArcTerminalArcCount;
+  /** Phase before/after the source callback's strict-overflow branch. */
+  readonly data7Before: number;
+  readonly data7: number;
+  /** The source test is strict: phase 256 is an active high-region sample. */
+  readonly strictOverflow: boolean;
+  /** Nonfinal overflow advances the current arc and restarts at phase zero. */
+  readonly repeatWillRestart: boolean;
+  /** Source's three mutually exclusive y-motion regions. */
+  readonly yRegion: "low" | "middle" | "high" | null;
+  readonly xSineIndex: number | null;
+  readonly ySineIndex: number | null;
+  readonly xSign: 1 | -1 | null;
+  readonly selector: BackConvexDoubleArcSelector;
+  readonly sourceId: BackConvexDoubleArcSourceId;
+  readonly step: BackConvexDoubleArcStep;
+  readonly xAmplitude: 16;
+  readonly terminalArcCount: BackConvexDoubleArcTerminalArcCount;
+  /** Tick zero is the selected initializer's immediate helper invocation. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  /** ConvexDoubleArc is a helper, never the installed active callback. */
+  readonly helperInvokedByInitializer: true;
+  readonly tryFlipXCalls: 0;
+  readonly normalBackDontFlip: true;
+  readonly affineWriteCount: 0;
+  readonly affineMode: "normal";
+  readonly oamVisible: true;
+  readonly resetSpriteAfterAnim: false;
+  readonly callback: BackConvexDoubleArcCallback | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for `BACK_ANIM_CONVEX_DOUBLE_ARC`.  The threshold is
+ * deliberately `data[7] > 256`, not `>=`: all three variants sample phase
+ * 256 in the high y region before their next callback clears x2/y2 and either
+ * starts the next arc or installs WaitAnimEnd.
+ */
+export function backConvexDoubleArcFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackConvexDoubleArcFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_CONVEX_DOUBLE_ARC") return null;
+  const variant = convexDoubleArcVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected convex-double-arc selector ${selection.selector}`);
+
+  let x2 = 0;
+  let y2 = 0;
+  let data4 = 1;
+  let data7 = 0;
+  let terminal = false;
+  let result: BackConvexDoubleArcFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    const data4Before = data4;
+    const data7Before = data7;
+    const strictOverflow = data7 > 256;
+    let repeatWillRestart = false;
+    let yRegion: BackConvexDoubleArcFrame["yRegion"] = null;
+    let xSineIndex: number | null = null;
+    let ySineIndex: number | null = null;
+    let xSign: 1 | -1 | null = null;
+    let callback: BackConvexDoubleArcCallback | "WaitAnimEnd" = variant.callback;
+
+    if (strictOverflow) {
+      if (variant.terminalArcCount <= data4) {
+        callback = "WaitAnimEnd";
+        terminal = true;
+      } else {
+        data4 = toS16(data4 + 1);
+        data7 = 0;
+        repeatWillRestart = true;
+      }
+      x2 = 0;
+      y2 = 0;
+    } else {
+      if (data7 > 159) {
+        // The nested `data[7] > 256` clamp in the C helper is unreachable
+        // here because the outer strict-overflow branch owns that range.
+        yRegion = "high";
+        ySineIndex = data7 % 256;
+        y2 = toS16(-gbaSin(ySineIndex, 8));
+      } else if (data7 > 95) {
+        yRegion = "middle";
+        ySineIndex = (data7 - 96) * 2;
+        y2 = toS16(gbaSin(96, 6) - gbaSin(ySineIndex, 4));
+      } else {
+        yRegion = "low";
+        ySineIndex = data7;
+        y2 = gbaSin(ySineIndex, 6);
+      }
+
+      xSineIndex = Math.trunc(data7 / 2);
+      xSign = data4 % 2 === 0 ? 1 : -1;
+      x2 = toS16(gbaSin(xSineIndex, variant.xAmplitude) * xSign);
+      data7 = toS16(data7 + variant.step);
+    }
+
+    result = Object.freeze({
+      x2,
+      y2,
+      data0: 0 as const,
+      data1: toS16(preservedData1),
+      data2: 1 as const,
+      data3: variant.step,
+      data4Before: toS16(data4Before),
+      data4: toS16(data4),
+      data5: 16 as const,
+      data6: variant.terminalArcCount,
+      data7Before: toS16(data7Before),
+      data7: toS16(data7),
+      strictOverflow,
+      repeatWillRestart,
+      yRegion,
+      xSineIndex,
+      ySineIndex,
+      xSign,
+      selector: variant.selector,
+      sourceId: variant.sourceId,
+      step: variant.step,
+      xAmplitude: 16 as const,
+      terminalArcCount: variant.terminalArcCount,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      helperInvokedByInitializer: true as const,
+      tryFlipXCalls: 0 as const,
+      normalBackDontFlip: true as const,
+      affineWriteCount: 0 as const,
+      affineMode: "normal" as const,
+      oamVisible: true as const,
+      resetSpriteAfterAnim: false as const,
+      callback,
+    });
+  }
+  return result;
+}
+
+/** Source WaitAnimEnd lifecycle after the static back OAM reports animEnded. */
+export function backConvexDoubleArcWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/**
+ * Task_HandleMonAnimation restores battler/data[0], species/data[2], and
+ * clears data[1] while leaving ConvexDoubleArc's final arc/phase registers
+ * intact for SpriteCallbackDummy.
+ */
+export function backConvexDoubleArcTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+): readonly [number, 0, number, BackConvexDoubleArcStep, number, 16, BackConvexDoubleArcTerminalArcCount, number] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_CONVEX_DOUBLE_ARC") return null;
+  const variant = convexDoubleArcVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected convex-double-arc selector ${selection.selector}`);
+  let finalPhase = 0;
+  while (finalPhase <= 256) finalPhase = toS16(finalPhase + variant.step);
+  return [
+    toS16(battlerId), 0, toS16(speciesId), variant.step,
+    variant.terminalArcCount, 16, variant.terminalArcCount, finalPhase,
+  ];
 }
 
 export interface BackVerticalShakeHorizontalSlideFrame {
