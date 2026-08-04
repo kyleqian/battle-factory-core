@@ -1,0 +1,180 @@
+{
+  "appRoute": "generated-orchestrator",
+  "oracleProfile": "battle-scene-off",
+  "appStage": {
+    "id": "win-terminal-window-off",
+    "frame": 4623
+  },
+  "oracleBattleLab": {
+    "scenario": "../../battle-lab/win-terminal-explosion-dusclops-off.json"
+  },
+  "segments": [
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 900,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 700,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 900,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 700,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 900,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 400,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 77,
+      "buttons": []
+    }
+  ],
+  "captureFrames": [
+    4623,
+    4624,
+    4625,
+    4626,
+    4627,
+    4628,
+    4629,
+    4630,
+    4631,
+    4632,
+    4633,
+    4634,
+    4635,
+    4636,
+    4637,
+    4638,
+    4639,
+    4640,
+    4641,
+    4642,
+    4643,
+    4644,
+    4645,
+    4646,
+    4647,
+    4648,
+    4649,
+    4650,
+    4651,
+    4652,
+    4653,
+    4654,
+    4655,
+    4656,
+    4657,
+    4658,
+    4659,
+    4660,
+    4661,
+    4662,
+    4663,
+    4664,
+    4665,
+    4666,
+    4667,
+    4668,
+    4669,
+    4670,
+    4671,
+    4672,
+    4673,
+    4674,
+    4675,
+    4676,
+    4677,
+    4678,
+    4679,
+    4680,
+    4681,
+    4682,
+    4683,
+    4684,
+    4685,
+    4686,
+    4687
+  ]
+}
