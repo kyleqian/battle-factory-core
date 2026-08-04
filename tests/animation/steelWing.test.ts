@@ -41,14 +41,15 @@ describe("MOVE_STEEL_WING source reducer", () => {
   it("ports both 24-tick affine then 20-tick linear gust lifecycles", () => {
     const start = steelWingGustAtTick(0, 0, "player", { x: 72, y: 80 }, { x: 176, y: 42 });
     const handoff = steelWingGustAtTick(24, 0, "player", { x: 72, y: 80 }, { x: 176, y: 42 });
-    expect(start).toMatchObject({ x: 47, y: 80, xScale: 16, yScale: 256 });
+    expect(start).toMatchObject({ x: 47, y: 88, xScale: 26, yScale: 256 });
     expect(handoff).toMatchObject({ xScale: 256, yScale: 256, affineAge: 24 });
-    expect(steelWingGustAtTick(44, 0, "player", { x: 72, y: 80 }, { x: 176, y: 42 })).toBeNull();
+    expect(steelWingGustAtTick(45, 0, "player", { x: 72, y: 80 }, { x: 176, y: 42 })).toMatchObject({ xScale: 256, yScale: 256 });
+    expect(steelWingGustAtTick(46, 0, "player", { x: 72, y: 80 }, { x: 176, y: 42 })).toBeNull();
   });
 
   it("mirrors the attacker slide, reuses non-permanent shine, and emits two animation-1 hitsplats", () => {
-    const player = steelWingAtAge(141, "player", { x: 72, y: 80 }, { x: 176, y: 42 });
-    const opponent = steelWingAtAge(141, "opponent", { x: 176, y: 42 }, { x: 72, y: 88 });
+    const player = steelWingAtAge(155, "player", { x: 72, y: 80 }, { x: 176, y: 42 });
+    const opponent = steelWingAtAge(155, "opponent", { x: 176, y: 42 }, { x: 72, y: 88 });
     // Q8.8 truncation leaves the 9-callback slide at +/-23 until teardown.
     expect(player.attackerX2).toBe(23);
     expect(opponent.attackerX2).toBe(-24);
@@ -66,8 +67,8 @@ describe("MOVE_STEEL_WING source reducer", () => {
   });
 
   it("exposes the reducer through the typed Scene-ON seam", () => {
-    const view = sceneOnSteelWingView({ ...playerStage(), age: 141 });
-    expect(view).toMatchObject({ age: 141, monbg: true, alpha: true });
+    const view = sceneOnSteelWingView({ ...playerStage(), age: 155 });
+    expect(view).toMatchObject({ age: 155, monbg: true, alpha: true });
     expect(view.hitsplats).toHaveLength(2);
   });
 

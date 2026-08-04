@@ -61,19 +61,23 @@ export function steelWingGustAtTick(
   attackerCenter: Readonly<{ x: number; y: number }>,
   targetCenter: Readonly<{ x: number; y: number }>,
 ): SteelWingGust | null {
-  if (tick < 0 || tick >= 44) return null;
+  if (tick < 0 || tick > 45) return null;
   const scriptX = index === 0 ? -25 : 25;
   const startX = attackerCenter.x + scriptX;
-  const targetX = targetCenter.x + (attackerSide === "player" ? 0 : -0);
+  const targetX = targetCenter.x;
+  const startY = attackerCenter.y + (attackerSide === "player" ? 8 : -8);
   const affineAge = Math.min(tick, 24);
-  const xScale = tick < 24 ? 16 + Math.trunc((246 * tick) / 24) : 256;
-  const callbacks = Math.max(0, tick - 23);
+  // AFFINEANIMCMD_FRAME(0x10, 0x100, 0, 0) is followed by the
+  // duration-24 +0xA command; its first update is retained immediately.
+  const xScale = tick < 24 ? 26 + 10 * tick : 256;
+  // Two neutral-scale callback displays bridge RunStoredCallbackWhenAffineAnimEnds.
+  const callbacks = Math.max(0, tick - 25);
   const dx = linearTranslationDeltaQ8(targetX - startX, 20);
-  const dy = linearTranslationDeltaQ8(targetCenter.y - attackerCenter.y, 20);
+  const dy = linearTranslationDeltaQ8(targetCenter.y - startY, 20);
   return {
     index,
     x: startX + linearTranslationOffsetAfterCallbacks(dx, callbacks, 20),
-    y: attackerCenter.y + linearTranslationOffsetAfterCallbacks(dy, callbacks, 20),
+    y: startY + linearTranslationOffsetAfterCallbacks(dy, callbacks, 20),
     xScale,
     yScale: 256,
     affineAge,
@@ -87,7 +91,11 @@ export function steelWingAtAge(
   attackerCenter: Readonly<{ x: number; y: number }>,
   targetCenter: Readonly<{ x: number; y: number }>,
 ): SteelWingState {
-  const contactAge = age - 100;
+  // Dense source window begins at loadspritegfx GUST. The interpreter then
+  // spends eight displays loading both tags/starting the HARDEN loop before
+  // MetallicShine's initializer, and the contact body begins at display 110.
+  const shineAge = age - 8;
+  const contactAge = age - 110;
   const ellipse = steelWingEllipticalAtTick(contactAge);
   const slideOut = slideMonToOffsetAtTick({
     battlerSide: attackerSide,
@@ -95,21 +103,21 @@ export function steelWingAtAge(
     targetYOffset: 0,
     mirrorVertical: false,
     durationTicks: 9,
-  }, contactAge - 24);
+  }, contactAge - 26);
   const slideBack = slideMonToOriginalPosAtTick({
     currentX2: attackerSide === "player" ? 24 : -24,
     currentY2: 0,
     axisSnapMode: 0,
     durationTicks: 11,
-  }, contactAge - 85);
-  const attackerOffset = contactAge >= 85 ? slideBack
-    : contactAge >= 24 ? slideOut : ellipse;
+  }, contactAge - 70);
+  const attackerOffset = contactAge >= 70 ? slideBack
+    : contactAge >= 26 ? slideOut : ellipse;
   const gusts = ([0, 1] as const)
     .map((index) => steelWingGustAtTick(
       contactAge, index, attackerSide, attackerCenter, targetCenter,
     ))
     .filter((gust): gust is SteelWingGust => gust !== null);
-  const hitsplatAge = contactAge - 41;
+  const hitsplatAge = contactAge - 45;
   const hitsplats = hitsplatAge >= 0 && hitsplatAge <= 9
     ? ([16, -16] as const).map((x) => ({
         x: targetCenter.x + x,
@@ -118,14 +126,14 @@ export function steelWingAtAge(
       }))
     : [];
   return {
-    active: age >= 0 && contactAge <= 97,
-    metallic: metallicShineAtAge(age, attackerCenter.x, attackerCenter.y, false),
+    active: age >= 0 && age <= 196,
+    metallic: metallicShineAtAge(shineAge, attackerCenter.x, attackerCenter.y, false),
     attackerX2: attackerOffset.x2,
     attackerY2: attackerOffset.y2,
     gusts,
     gustPaletteRotation: steelWingGustPaletteRotationAtTick(contactAge),
     hitsplats,
-    monbg: contactAge >= 0 && contactAge <= 96,
-    alpha: contactAge >= 0 && contactAge <= 96,
+    monbg: age >= 107 && age <= 194,
+    alpha: age >= 110 && age <= 191,
   };
 }
