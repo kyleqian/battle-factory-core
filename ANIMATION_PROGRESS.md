@@ -1,5 +1,41 @@
 # Animation coverage
 
+## Back `BACK_ANIM_SHAKE_GLOW_RED` triple accepted (2026-08-04)
+
+- **State:** exact for the twenty-third bounded player-back set: **23/25 back
+  sets, 69/75 selector variants, 365/376 Factory mappings**. Generated row:
+  **15 mappings / 13 Factory species / 2 outside (HO_OH, GROUDON) / 42
+  Factory records**. Move coverage remains **107/276 exact, 0 partial, 0
+  staged, 169 unsupported**; `ANIMATION_COVERAGE.json` is unchanged at
+  SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+- **Did:** ported source IDs **142/143/144**, `ShakeGlow_Blend`,
+  `ShakeGlow_Move`, `SHAKEGLOW_RED`, even-callback signed `Sin(data[2],12)`
+  palette blend/restore, selector parameters **10/2, 20/1, 80/1**,
+  thresholds **54/54/24**, C division/mod-256 movement, data[3]/[5]
+  sequencing, trailing data[2] increment, WaitAnimEnd→dummy, and task
+  restoration. PONYTA record **191** Hardy/mod-0; SLUGMA **30**
+  Sassy/mod-1; MAGCARGO **194** Gentle/mod-2; all 15 mappings batch-route
+  under every nature mod.
+- **Next:** await the supervisor's next bounded player-back selector step;
+  green/blue ShakeGlow sets 24-25 remain independent acceptance units.
+- **Notes:** paired byte-identical dense Scene-ON initializer→dummy receipts
+  retain every framebuffer hash plus player RAM/OAM/task and unfaded/faded/
+  hardware OBJ palette state: Ponyta **1838..1968 / 131 / 129,634 B /
+  `5cec6564e1dccb9cda0a539647abbeb7b26e9d9138e3aa5d9e35fe365635dafa`**;
+  Slugma **1838..1968 / 131 / 129,882 B /
+  `cdcca3b12bd03086ee6ddd104cef245d62e6d3e645fb217adbbd42d812bcd295`**;
+  Magcargo **1840..1970 / 131 / 130,055 B /
+  `0fbfc262f9ccbec3e9736d26e2e768a609c2e5519a88cad84aedf310b2d5e9b4`**.
+  Palette hardware is one-frame-lagged throughout; after the generic
+  materialization task releases the palette at callback 24, every sine-rise,
+  peak, fall, and red restore is exact. **Brief correction:** data[1] is the
+  `sDontFlip` alias; writing `SHAKEGLOW_RED == 0` makes both TryFlipX calls
+  active, so the ROM negates movement x2 (fast callback 55 is −4), proved in
+  all receipts. Focused evidence + both ratchets: **4 files / 21 tests**;
+  typecheck, smoke **7/347**, full **706 files / 6,823 passed / 1 skipped**,
+  build, and coverage are green. No boundary/unsupported widening, outside-
+  species oracle invention, coverage-ledger mutation, or move promotion.
+
 ## Back `BACK_ANIM_SHAKE_FLASH_YELLOW` triple accepted (2026-08-04)
 
 - **State:** exact for the twenty-second bounded player-back set: **22/25 back

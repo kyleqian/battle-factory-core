@@ -412,6 +412,23 @@ export const BACK_SHAKE_FLASH_YELLOW_OUTSIDE_FACTORY_SPECIES: readonly string[] 
   BACK_SHAKE_FLASH_YELLOW_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by `BACK_ANIM_SHAKE_GLOW_RED`. */
+export const BACK_SHAKE_GLOW_RED_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_SHAKE_GLOW_RED")
+    .map(([species]) => species),
+);
+
+/** The thirteen red-glow mappings reachable through Factory rentals. */
+export const BACK_SHAKE_GLOW_RED_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_GLOW_RED_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** HO_OH and GROUDON are the source row's two outside-Factory mappings. */
+export const BACK_SHAKE_GLOW_RED_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_GLOW_RED_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -1083,6 +1100,28 @@ export const BACK_SHAKE_FLASH_YELLOW_VARIANTS = Object.freeze({
 } as const);
 
 /**
+ * The three red ShakeGlow initializers share the same blend/movement helpers;
+ * only the movement period and number of passes differ by nature modifier.
+ */
+export const BACK_SHAKE_GLOW_RED_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_RED_FAST", callback: "Anim_ShakeGlowRed_Fast",
+    sourceId: 142, natureMod: 0, period: 10, passes: 2, movementThreshold: 54,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_RED", callback: "Anim_ShakeGlowRed",
+    sourceId: 143, natureMod: 1, period: 20, passes: 1, movementThreshold: 54,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_RED_SLOW", callback: "Anim_ShakeGlowRed_Slow",
+    sourceId: 144, natureMod: 2, period: 80, passes: 1, movementThreshold: 24,
+    accepted: true,
+  }),
+} as const);
+
+/**
  * `BACK_ANIM_V_SHAKE_H_SLIDE` selects three standalone source callbacks.
  * Unlike the preceding shake triples, each callback stays installed directly
  * after the task dispatches it; the source does not use a shared helper or a
@@ -1322,6 +1361,12 @@ type BackShakeFlashYellowSelector = BackShakeFlashYellowVariant["selector"];
 type BackShakeFlashYellowCallback = BackShakeFlashYellowVariant["callback"];
 type BackShakeFlashYellowSourceId = BackShakeFlashYellowVariant["sourceId"];
 type BackShakeFlashYellowTableIndex = BackShakeFlashYellowVariant["tableIndex"];
+type BackShakeGlowRedVariant = typeof BACK_SHAKE_GLOW_RED_VARIANTS[keyof typeof BACK_SHAKE_GLOW_RED_VARIANTS];
+type BackShakeGlowRedSelector = BackShakeGlowRedVariant["selector"];
+type BackShakeGlowRedCallback = BackShakeGlowRedVariant["callback"];
+type BackShakeGlowRedSourceId = BackShakeGlowRedVariant["sourceId"];
+type BackShakeGlowRedPeriod = BackShakeGlowRedVariant["period"];
+type BackShakeGlowRedPasses = BackShakeGlowRedVariant["passes"];
 type BackVShakeHSlideSelector = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["selector"];
 type BackVShakeHSlideCallback = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["callback"];
 type BackVShakeHSlideSourceId = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["sourceId"];
@@ -1681,6 +1726,13 @@ function joltRightVariant(selector: string): {
 
 function shakeFlashYellowVariant(selector: string): BackShakeFlashYellowVariant | null {
   for (const variant of Object.values(BACK_SHAKE_FLASH_YELLOW_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function shakeGlowRedVariant(selector: string): BackShakeGlowRedVariant | null {
+  for (const variant of Object.values(BACK_SHAKE_GLOW_RED_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -4371,6 +4423,157 @@ export function backShakeFlashYellowTerminalSpriteData(
   if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
   const terminal = backShakeFlashYellowFrameAtTick(
     species, natureId, Number.MAX_SAFE_INTEGER, 0, paletteBase,
+  );
+  if (terminal === null) return null;
+  return [
+    toS16(battlerId), 0, toS16(speciesId), terminal.data3,
+    terminal.data4, terminal.data5, terminal.data6, terminal.data7,
+  ];
+}
+
+export interface BackShakeGlowRedFrame {
+  readonly x2: number;
+  readonly y2: 0;
+  readonly data0: BackShakeGlowRedPeriod;
+  /** SHAKEGLOW_RED is enum value zero and overwrites the preserved task slot. */
+  readonly data1: 0;
+  readonly data2: number;
+  readonly data3: number;
+  readonly data4: BackShakeGlowRedPasses;
+  readonly data5: number;
+  readonly data6: number;
+  readonly data7: number;
+  readonly selector: BackShakeGlowRedSelector;
+  readonly sourceId: BackShakeGlowRedSourceId;
+  readonly callbackBefore: BackShakeGlowRedCallback;
+  readonly callback: BackShakeGlowRedCallback | "WaitAnimEnd";
+  readonly initializerCalled: boolean;
+  readonly blendCalled: boolean;
+  readonly blendCoefficient: number | null;
+  readonly blendColor: "RGB_RED" | null;
+  readonly paletteRestored: boolean;
+  readonly movementThreshold: number;
+  readonly moveCalled: boolean;
+  readonly movementPhase: number;
+  readonly movementIndex: number | null;
+  readonly movementSign: 1 | -1 | null;
+  readonly tryFlipXCalls: 0 | 2;
+  /** SHAKEGLOW_RED overwrites the `sDontFlip` data[1] alias with FALSE. */
+  readonly dontFlipAfterColorSelector: false;
+  readonly flipApplied: boolean;
+  readonly terminal: boolean;
+}
+
+/**
+ * Source-order reducer for the red ShakeGlow triple. Tick zero is the selected
+ * initializer callback after Task_HandleMonAnimation has zeroed data[2..7].
+ * Even callbacks run ShakeGlow_Blend before the movement threshold check;
+ * the initializer always performs its trailing data[2] increment, including
+ * the callback that installs WaitAnimEnd after restoring the red palette.
+ */
+export function backShakeGlowRedFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  paletteBase = 0x100,
+): BackShakeGlowRedFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(paletteBase)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_SHAKE_GLOW_RED") return null;
+  const variant = shakeGlowRedVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected ShakeGlowRed selector ${selection.selector}`);
+
+  let x2 = 0;
+  let data2 = 0;
+  let data3 = 0;
+  let data5 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let result: BackShakeGlowRedFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const initializerCalled = data2 === 0;
+    if (initializerCalled) {
+      data7 = toS16(paletteBase); // OBJ_PLTT_ID(sprite->oam.paletteNum)
+      data5 = 0;
+      data3 = 0;
+    }
+
+    const blendCalled = data2 % 2 === 0;
+    let blendCoefficient: number | null = null;
+    let paletteRestored = false;
+    let callback: BackShakeGlowRedCallback | "WaitAnimEnd" = variant.callback;
+    if (blendCalled) {
+      if (data2 > 127) {
+        blendCoefficient = 0;
+        paletteRestored = true;
+        callback = "WaitAnimEnd";
+      } else {
+        data6 = gbaSin(data2, 12);
+        blendCoefficient = data6;
+      }
+    }
+
+    const moveCalled = data2 >= variant.movementThreshold && data3 < variant.passes;
+    let movementIndex: number | null = null;
+    let movementSign: 1 | -1 | null = null;
+    let tryFlipXCalls: 0 | 2 = 0;
+    const movementPhase = data3;
+    if (moveCalled) {
+      tryFlipXCalls = 2;
+      if (data5 > variant.period) {
+        data3 = toS16(data3 + 1);
+        if (data3 < variant.passes) data5 = 0;
+        x2 = 0;
+      } else {
+        movementSign = data3 % 2 === 0 ? 1 : -1;
+        movementIndex = Math.trunc((data5 * 384) / variant.period) % 256;
+        // The first TryFlipX applies to the previous x2; the helper then
+        // assigns the sine result and its trailing TryFlipX negates it.
+        x2 = toS16(-movementSign * gbaSin(movementIndex, 6));
+        data5 = toS16(data5 + 1);
+      }
+    }
+
+    data2 = toS16(data2 + 1);
+    const terminal = callback === "WaitAnimEnd";
+    result = Object.freeze({
+      x2, y2: 0 as const,
+      data0: variant.period, data1: 0 as const, data2, data3,
+      data4: variant.passes, data5, data6, data7,
+      selector: variant.selector, sourceId: variant.sourceId,
+      callbackBefore: variant.callback, callback, initializerCalled,
+      blendCalled, blendCoefficient,
+      blendColor: blendCoefficient === null ? null : "RGB_RED" as const,
+      paletteRestored, movementThreshold: variant.movementThreshold,
+      moveCalled, movementPhase, movementIndex, movementSign, tryFlipXCalls,
+      dontFlipAfterColorSelector: false as const, flipApplied: tryFlipXCalls === 2,
+      terminal,
+    });
+    if (terminal) break;
+  }
+  return result;
+}
+
+export function backShakeGlowRedWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/** Task_HandleMonAnimation restores data[0..2] and preserves data[3..7]. */
+export function backShakeGlowRedTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+  paletteBase = 0x100,
+): readonly [number, 0, number, number, BackShakeGlowRedPasses, number, number, number] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const terminal = backShakeGlowRedFrameAtTick(
+    species, natureId, Number.MAX_SAFE_INTEGER, paletteBase,
   );
   if (terminal === null) return null;
   return [
