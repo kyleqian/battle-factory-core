@@ -378,6 +378,23 @@ export const BACK_SHRINK_GROW_VIBRATE_OUTSIDE_FACTORY_SPECIES: readonly string[]
   BACK_SHRINK_GROW_VIBRATE_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by `BACK_ANIM_JOLT_RIGHT`. */
+export const BACK_JOLT_RIGHT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_JOLT_RIGHT")
+    .map(([species]) => species),
+);
+
+/** All JoltRight selector mappings are reachable through Factory rentals. */
+export const BACK_JOLT_RIGHT_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_JOLT_RIGHT_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** This bounded JoltRight source row has no non-Factory selector mappings. */
+export const BACK_JOLT_RIGHT_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_JOLT_RIGHT_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -967,6 +984,51 @@ export const BACK_SHRINK_GROW_VIBRATE_VARIANTS = Object.freeze({
 } as const);
 
 /**
+ * `BACK_ANIM_JOLT_RIGHT` chooses one unguarded affine initializer, then
+ * transfers through the shared JoltRight state callbacks. The initializer
+ * differs only in the signed first travel step, left limit, oscillation
+ * count/amplitude, and initial return acceleration.
+ */
+export const BACK_JOLT_RIGHT_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_JOLT_RIGHT_FAST",
+    callback: "Anim_JoltRight_Fast",
+    sourceId: 136,
+    natureMod: 0,
+    initialStep: 2,
+    travelLimit: 12,
+    oscillationCount: 16,
+    oscillationDelta: 4,
+    initialReturnStep: 4,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_JOLT_RIGHT",
+    callback: "Anim_JoltRight",
+    sourceId: 137,
+    natureMod: 1,
+    initialStep: 1,
+    travelLimit: 8,
+    oscillationCount: 12,
+    oscillationDelta: 2,
+    initialReturnStep: 2,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_JOLT_RIGHT_SLOW",
+    callback: "Anim_JoltRight_Slow",
+    sourceId: 138,
+    natureMod: 2,
+    initialStep: 1,
+    travelLimit: 6,
+    oscillationCount: 6,
+    oscillationDelta: 2,
+    initialReturnStep: 0,
+    accepted: true,
+  }),
+} as const);
+
+/**
  * `BACK_ANIM_V_SHAKE_H_SLIDE` selects three standalone source callbacks.
  * Unlike the preceding shake triples, each callback stays installed directly
  * after the task dispatches it; the source does not use a shared helper or a
@@ -1193,6 +1255,14 @@ type BackShrinkGrowVibrateCallback = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[ke
 type BackShrinkGrowVibrateSourceId = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["sourceId"];
 type BackShrinkGrowVibrateCycle = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["cycle"];
 type BackShrinkGrowVibrateDuration = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["duration"];
+type BackJoltRightSelector = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["selector"];
+type BackJoltRightCallback = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["callback"];
+type BackJoltRightSourceId = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["sourceId"];
+type BackJoltRightInitialStep = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["initialStep"];
+type BackJoltRightTravelLimit = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["travelLimit"];
+type BackJoltRightOscillationCount = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["oscillationCount"];
+type BackJoltRightOscillationDelta = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["oscillationDelta"];
+type BackJoltRightInitialReturnStep = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["initialReturnStep"];
 type BackVShakeHSlideSelector = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["selector"];
 type BackVShakeHSlideCallback = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["callback"];
 type BackVShakeHSlideSourceId = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["sourceId"];
@@ -1529,6 +1599,22 @@ function shrinkGrowVibrateVariant(selector: string): {
   readonly duration: BackShrinkGrowVibrateDuration;
 } | null {
   for (const variant of Object.values(BACK_SHRINK_GROW_VIBRATE_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function joltRightVariant(selector: string): {
+  readonly selector: BackJoltRightSelector;
+  readonly callback: BackJoltRightCallback;
+  readonly sourceId: BackJoltRightSourceId;
+  readonly initialStep: BackJoltRightInitialStep;
+  readonly travelLimit: BackJoltRightTravelLimit;
+  readonly oscillationCount: BackJoltRightOscillationCount;
+  readonly oscillationDelta: BackJoltRightOscillationDelta;
+  readonly initialReturnStep: BackJoltRightInitialReturnStep;
+} | null {
+  for (const variant of Object.values(BACK_JOLT_RIGHT_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -3870,6 +3956,216 @@ export function backShrinkGrowVibrateTerminalSpriteData(
   const variant = shrinkGrowVibrateVariant(selection.selector);
   if (variant === null) throw new Error(`unexpected shrink/grow/vibrate selector ${selection.selector}`);
   return [toS16(battlerId), 0, toS16(speciesId), 0, 256, 256, variant.cycle, variant.duration];
+}
+
+type BackJoltRightPhase = "initializer" | "JoltRight" | "JoltRight_0" | "JoltRight_1" | "JoltRight_2" | "JoltRight_3";
+type BackJoltRightInstalledCallback = "JoltRight" | "JoltRight_0" | "JoltRight_1" | "JoltRight_2" | "JoltRight_3" | "WaitAnimEnd";
+
+export interface BackJoltRightFrame {
+  readonly x2: number;
+  readonly y2: 0;
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  readonly data2: BackJoltRightInitialStep;
+  /** JoltRight_2's completed oscillation count. */
+  readonly data3: number;
+  /** JoltRight_2's signed, alternating horizontal delta. */
+  readonly data4: number;
+  readonly data5: BackJoltRightOscillationCount;
+  readonly data6: BackJoltRightTravelLimit;
+  /** JoltRight_0/JoltRight_1's accelerating return-step register. */
+  readonly data7: number;
+  readonly phase: BackJoltRightPhase;
+  readonly callbackBefore: BackJoltRightCallback | BackJoltRightInstalledCallback;
+  readonly selector: BackJoltRightSelector;
+  readonly sourceId: BackJoltRightSourceId;
+  readonly initialStep: BackJoltRightInitialStep;
+  readonly travelLimit: BackJoltRightTravelLimit;
+  readonly oscillationCount: BackJoltRightOscillationCount;
+  readonly oscillationDelta: BackJoltRightOscillationDelta;
+  readonly initialReturnStep: BackJoltRightInitialReturnStep;
+  readonly initializerCalled: boolean;
+  readonly handleStartAffineAnimCalls: 0 | 1;
+  /** Each of the five shared phases executes a leading and trailing call. */
+  readonly tryFlipXCalls: 0 | 2;
+  /** The back task makes both calls no-ops by setting `sDontFlip = TRUE`. */
+  readonly normalBackDontFlip: true;
+  readonly flipApplied: false;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly affineWriteCount: 0;
+  readonly affineMode: "double" | "normal";
+  readonly callback: BackJoltRightInstalledCallback;
+}
+
+/**
+ * Source-order reducer for `BACK_ANIM_JOLT_RIGHT`. Tick zero invokes the
+ * selected unguarded initializer after Task_HandleMonAnimation has zeroed
+ * data[2..7]. It installs JoltRight, then the source moves left, accelerates
+ * right through `_0`/`_1`, oscillates in `_2`, and returns to zero in `_3`.
+ * Every shared phase retains its two `TryFlipX` calls; the player-back task's
+ * `sDontFlip` makes them observable no-ops rather than omitting them.
+ */
+export function backJoltRightFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackJoltRightFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_JOLT_RIGHT") return null;
+  const variant = joltRightVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected JoltRight selector ${selection.selector}`);
+
+  let x2 = 0;
+  let data2 = 0;
+  let data3 = 0;
+  let data4 = 0;
+  let data5 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let callback: BackJoltRightCallback | BackJoltRightInstalledCallback = variant.callback;
+  let affineMode: "double" | "normal" = "normal";
+  let terminal = false;
+  let result: BackJoltRightFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    const callbackBefore = callback;
+    let phase: BackJoltRightPhase = "initializer";
+    let initializerCalled = false;
+    let handleStartAffineAnimCalls: 0 | 1 = 0;
+    let tryFlipXCalls: 0 | 2 = 0;
+    let resetSpriteAfterAnim = false;
+
+    if (callback === variant.callback) {
+      initializerCalled = true;
+      handleStartAffineAnimCalls = 1;
+      affineMode = "double";
+      data7 = variant.initialReturnStep;
+      data6 = variant.travelLimit;
+      data5 = variant.oscillationCount;
+      data4 = variant.oscillationDelta;
+      data3 = 0;
+      data2 = variant.initialStep;
+      callback = "JoltRight";
+    } else {
+      tryFlipXCalls = 2;
+      switch (callback) {
+        case "JoltRight":
+          phase = "JoltRight";
+          x2 = toS16(x2 - data2);
+          if (x2 <= -data6) {
+            x2 = -data6;
+            data7 = 2;
+            callback = "JoltRight_0";
+          }
+          break;
+        case "JoltRight_0":
+          phase = "JoltRight_0";
+          x2 = toS16(x2 + data7);
+          data7 = toS16(data7 + 1);
+          if (x2 >= 0) callback = "JoltRight_1";
+          break;
+        case "JoltRight_1":
+          phase = "JoltRight_1";
+          x2 = toS16(x2 + data7);
+          data7 = toS16(data7 + 1);
+          if (x2 > data6) {
+            x2 = data6;
+            callback = "JoltRight_2";
+          }
+          break;
+        case "JoltRight_2":
+          phase = "JoltRight_2";
+          if (data3 >= data5) {
+            callback = "JoltRight_3";
+          } else {
+            x2 = toS16(x2 + data4);
+            data4 = toS16(data4 * -1);
+            data3 = toS16(data3 + 1);
+          }
+          break;
+        case "JoltRight_3":
+          phase = "JoltRight_3";
+          x2 = toS16(x2 - 2);
+          if (x2 <= 0) {
+            x2 = 0;
+            resetSpriteAfterAnim = true;
+            affineMode = "normal";
+            callback = "WaitAnimEnd";
+            terminal = true;
+          }
+          break;
+        case "WaitAnimEnd":
+          throw new Error("JoltRight reducer must retain its terminal WaitAnimEnd snapshot");
+      }
+    }
+
+    result = Object.freeze({
+      x2,
+      y2: 0 as const,
+      data0: 0 as const,
+      data1: toS16(preservedData1),
+      data2: data2 as BackJoltRightInitialStep,
+      data3,
+      data4,
+      data5: data5 as BackJoltRightOscillationCount,
+      data6: data6 as BackJoltRightTravelLimit,
+      data7,
+      phase,
+      callbackBefore,
+      selector: variant.selector,
+      sourceId: variant.sourceId,
+      initialStep: variant.initialStep,
+      travelLimit: variant.travelLimit,
+      oscillationCount: variant.oscillationCount,
+      oscillationDelta: variant.oscillationDelta,
+      initialReturnStep: variant.initialReturnStep,
+      initializerCalled,
+      handleStartAffineAnimCalls,
+      tryFlipXCalls,
+      normalBackDontFlip: true as const,
+      flipApplied: false as const,
+      resetSpriteAfterAnim,
+      affineWriteCount: 0 as const,
+      affineMode,
+      callback: callback as BackJoltRightInstalledCallback,
+    });
+  }
+  return result;
+}
+
+/** Source WaitAnimEnd transition after JoltRight's reset OAM reports completion. */
+export function backJoltRightWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/** Task_HandleMonAnimation restores only data[0], data[1], and data[2]. */
+export function backJoltRightTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+): readonly [number, 0, number, number, number, BackJoltRightOscillationCount, BackJoltRightTravelLimit, number] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const terminal = backJoltRightFrameAtTick(species, natureId, Number.MAX_SAFE_INTEGER);
+  if (terminal === null) return null;
+  return [
+    toS16(battlerId),
+    0,
+    toS16(speciesId),
+    terminal.data3,
+    terminal.data4,
+    terminal.data5,
+    terminal.data6,
+    terminal.data7,
+  ];
 }
 
 export interface BackConvexDoubleArcFrame {

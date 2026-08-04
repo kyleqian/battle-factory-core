@@ -1,5 +1,37 @@
 # Animation coverage
 
+## Back `BACK_ANIM_JOLT_RIGHT` triple accepted (2026-08-04)
+
+- **State:** exact for the twenty-first bounded player-back set: **21/25 back
+  sets, 63/75 selector variants, 344/376 Factory mappings**. Generated set
+  census: **33 mappings / 33 Factory species / 0 outside / 74 Factory
+  records**. Move coverage stays **107/276 exact, 0 partial, 0 staged, 169
+  unsupported**; `ANIMATION_COVERAGE.json` remains SHA-256
+  `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+- **Did:** ported source IDs **136/137/138** `Anim_JoltRight_Fast` / normal /
+  slow, their unguarded `HandleStartAffineAnim` initializers, and shared
+  `JoltRight` phases `_0`/`_1`/`_2`/`_3`: signed x2 travel/clamp,
+  accelerating return `data[7]`, strict `>` clamp, alternating signed
+  `data[4]`, oscillation count, reset, `WaitAnimEnd`→dummy, and task
+  restoration. Each source phase's two `TryFlipX` calls are retained; the
+  player-back task's `sDontFlip=TRUE` makes them no-ops. MACHOP record **82**
+  Adamant/mod-0; ELECTRIKE **64** Docile/mod-1; ELECTRODE **396** Quiet/mod-2;
+  all 33 mappings route through the generated nature table.
+- **Next:** await the supervisor's next bounded player-back selector step;
+  do not infer move acceptance from this shared back-sprite track.
+- **Notes:** fresh paired byte-identical dense Scene-ON initializer→dummy
+  receipts retain every framebuffer hash and player RAM/OAM/affine/task state:
+  Machop **1838..1875 / 38 / 18,361 B /
+  `97166605e5f413f011a2e2851b507f094a32eced476ed50a040da850a100e01a`**;
+  Electrike **1841..1873 / 33 / 16,000 B /
+  `74ba2bf876194fbba6803eee2f35c7e7650604898d239173f63f36a72f821377`**;
+  Electrode **1841..1863 / 23 / 11,425 B /
+  `af21667986fab28c40b7bfe7d9934bc93e37615772459584b18702abd88b7141`**.
+  Focused source/census/routing/reducer/evidence plus both ratchets: **4
+  files / 20 tests**; typecheck, smoke **7/347**, full `npm test`, build, and
+  coverage are green. No boundary or unsupported-branch widening and no move
+  promotion.
+
 ## Back `BACK_ANIM_SHRINK_GROW_VIBRATE` triple accepted (2026-08-04)
 
 - **State:** exact for the twentieth bounded player-back set: **20/25 back
