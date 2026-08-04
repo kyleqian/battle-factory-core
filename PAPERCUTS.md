@@ -618,3 +618,14 @@ Per entry:
 - **Cost each:** ~5 min.
 - **Workaround:** `${=ARGS}` for explicit splitting, or arrays
   (`"${traces[@]}"`), or pass files via xargs.
+
+## In-battle forced-switch party menu: cursor defaults to the fainted slot
+
+When staging multi-faint sequences (oracle traces that KO the player's
+active mon repeatedly), the forced-switch party menu opens with the cursor
+on the just-fainted ACTIVE slot, not the first alive mon — a bare `A` there
+yields "has no energy left to battle!" and wastes the input. Undocumented
+anywhere until 2026-08-04; cost the loss-path scout ~15 min of blind
+probing. Recipe now recorded in
+`docs/terminal-seam-loss-path-ground-truth.md` §0 — navigate to an alive
+slot explicitly before `A`. Hits: 1
