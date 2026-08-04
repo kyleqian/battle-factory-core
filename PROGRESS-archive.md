@@ -1,3 +1,42 @@
+## 920 — [supervisor, 2026-08-04 ~16:15] R3 verified both lanes: Slice D closure RATIFIED (4 sources checked) + LOSS window CLOSED 236/236; R4 launching (OFF-seam settle honesty MAIN + WIN compare wiring SIDE)
+
+- **State:** master at the side-R3 merge + this docs commit. LOSS
+  terminal-window compare **236/236** — worker twice-fresh + post-commit
+  third run + independent supervisor rerun post-merge, all PNG-identical.
+  Worker gates at `40b75dc6`: full suite 721 files green, build green,
+  differential canary 128/128.
+- **Did:** (1) verified the R3 MAIN worker's Slice-D-not-applicable verdict
+  myself before ratifying (SUPERVISOR.md's no-silent-ratification rule):
+  read `pokemon.c:6803-6852` (`SKIP_FRONT_ANIM` under
+  `HITMARKER_NO_ANIMATIONS` — cry only, `SpriteCallbackDummy`, no movement
+  task, no two-frame flip) and the OFF profile's own `bin/oracle info`
+  contract text; cross-checked entry 890's "fast-forward gotcha" (its
+  RATTATA `{1,0}` probes were `battle-scene-on` scenarios, and its OFF
+  probe already saw the flat truth) — the worker's verdict stands,
+  entry 919 + the ISSUES #71 Slice-D record are accurate. (2) Corrected
+  `PAPERCUTS.md`'s wrong "Real OFF-profile battles DO play send-out anims"
+  claim (supervisor is that file's writer; original kept for forensics).
+  (3) Merged side R3's scaffold fix, re-verified 236/236 independently,
+  applied the #73 trim. (4) Identified the follow-up the Slice-D evidence
+  exposes: Slices A/B's `speciesFrontIdleRestOffset` at the TWO
+  generated-route OFF hooks bakes ONIX/RATTATA `{+1,0}` the OFF oracle
+  never shows — latent 1px landmine on uncommitted windows (all committed
+  windows avoid those species; the 4 canonical ON-legacy hooks are
+  unaffected — their species are all `{0,0}`).
+- **Next:** R4 in flight — MAIN: remove the rest-offset application at the
+  two generated OFF hooks, flip the staged RATTATA pin to `{0,0}`, and
+  prove flat settle with a staged OFF dense window (also discharging entry
+  894's deferred non-ONIX staged-window check); SIDE: WIN-side compare
+  wiring (transplant the LOSS helpers, probe WIN's own
+  readyTick/dismissTick, honest accounting vs the banked 241-frame
+  fixture). Then wind-down: fold, ONE full union suite, play-preview
+  rebuild, session report.
+- **Notes:** #71's open remainder after R4 = §1e patch-site retirement +
+  coordinated KABUTO/MAGBY/ONIX hand-fit retirements. The rung-3
+  dispatcher stays correct-and-consumed on the animation lane's own terms
+  (Scene ON); no main-lane consumer exists by real-game design.
+
+---
 ## 919 — [bounded MAIN worker, 2026-08-04 ~15:25] ISSUES #71 Slice D found NOT APPLICABLE to the main lane's oracle — no src edits landed, docs-only
 
 - **State:** master `519b6bf8` unchanged + this docs commit. No production
