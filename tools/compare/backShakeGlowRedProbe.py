@@ -37,6 +37,16 @@ GREEN_EVIDENCE = {
     (363, 6): ("Factory record index 171 FRONTIER_MON_ROSELIA_1 NATURE_DOCILE", 171),
     (363, 17): ("Staged Quiet/mod-2 Roselia derived from Factory record index 171 FRONTIER_MON_ROSELIA_1", 171),
 }
+BLUE_VARIANTS = {
+    0: ("ANIM_SHAKE_GLOW_BLUE_FAST", "Anim_ShakeGlowBlue_Fast", 148, 10, 2, 54),
+    1: ("ANIM_SHAKE_GLOW_BLUE", "Anim_ShakeGlowBlue", 149, 20, 1, 54),
+    2: ("ANIM_SHAKE_GLOW_BLUE_SLOW", "Anim_ShakeGlowBlue_Slow", 150, 80, 1, 24),
+}
+BLUE_EVIDENCE = {
+    (285, 3): ("Factory record index 458 FRONTIER_MON_SWAMPERT_1 NATURE_ADAMANT", 458),
+    (313, 6): ("Factory record index 170 FRONTIER_MON_WAILMER_1 NATURE_DOCILE", 170),
+    (121, 15): ("Factory record index 439 FRONTIER_MON_STARMIE_1 NATURE_MODEST", 439),
+}
 FAMILIES = {
     "red": {
         "variants": VARIANTS,
@@ -55,6 +65,15 @@ FAMILIES = {
         "color_selector": "SHAKEGLOW_GREEN",
         "palette_contract": "OBJ_PLTT_ID(oam.paletteNum), even-tick Sin(data[2],12), RGB_GREEN; RGB_RED coefficient-zero restore",
         "schema": "back-shake-glow-green-scene-on-dense/v1",
+    },
+    "blue": {
+        "variants": BLUE_VARIANTS,
+        "evidence": BLUE_EVIDENCE,
+        "back_anim_set": "BACK_ANIM_SHAKE_GLOW_BLUE",
+        "back_anim_set_index": 24,
+        "color_selector": "SHAKEGLOW_BLUE",
+        "palette_contract": "OBJ_PLTT_ID(oam.paletteNum), even-tick Sin(data[2],12), RGB_BLUE; RGB_RED coefficient-zero restore",
+        "schema": "back-shake-glow-blue-scene-on-dense/v1",
     },
 }
 

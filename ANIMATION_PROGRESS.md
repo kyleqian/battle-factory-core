@@ -1,9 +1,42 @@
 # Animation coverage
 
+## Back `BACK_ANIM_SHAKE_GLOW_BLUE` triple accepted (2026-08-04)
+
+- **State:** player-back selector program complete: **25/25 sets, 75/75
+  selector variants, 376/376 Factory mappings**. Generated row: **13
+  mappings / 11 Factory species / 2 outside (LUGIA, KYOGRE) / 54 Factory
+  records**. Move coverage remains **107/276 exact, 0 partial, 0 staged,
+  169 unsupported**; `ANIMATION_COVERAGE.json` is unchanged at SHA-256
+  `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+- **Did:** ported source IDs **148/149/150** through the accepted shared
+  `ShakeGlow_Blend` / `ShakeGlow_Move` lifecycle: `SHAKEGLOW_BLUE == 2`,
+  even-tick `Sin(data[2], 12)` RGB_BLUE blending, fast/normal/slow **10/2,
+  20/1, 80/1**, thresholds **54/54/24**, both `TryFlipX` calls no-op through
+  the truthy `data[1]`/`sDontFlip` alias, and terminal coefficient-zero
+  RGB_RED restoration. Real Factory representatives: SWAMPERT record **458**
+  Adamant/mod-0, WAILMER **170** Docile/mod-1, STARMIE **439** Modest/mod-2;
+  all 13 mappings route under all three nature mods.
+- **Next:** player-back selector work is closed; await the supervisor's next
+  bounded animation step. No move was promoted by this component acceptance.
+- **Notes:** paired fresh, byte-identical dense Scene-ON initializer→
+  WaitAnimEnd→dummy receipts retain every framebuffer hash plus player
+  RAM/OAM/task and unfaded/faded/hardware OBJ palettes: Swampert **1840..1970
+  / 131 / 134,294 B / `4f5ff4465b1a6ec30a1d61e9467ce47d29307a5aca14eb5a4139e56fa98b615e`**;
+  Wailmer **1839..1969 / 131 / 133,489 B /
+  `cf50bd129485c7973a8ed2899c47a031ab8151d04a3952b7fabf2f423563c6a1`**;
+  Starmie **1839..1969 / 131 / 133,425 B /
+  `34dbd9c657faaf5417ec6eb1849b84e1e41b920e17d1220448c668319e36dfe4`**.
+  No Lugia/Kyogre oracle variants were invented. **Accounting correction:**
+  accepted sets 1–24 sum to **365**, not the previously carried 366 (+1
+  arithmetic error); corrected cumulative figures are set20 **310**, set21
+  **343**, set22 **351**, set23 **364**, set24 **365**. Per-row censuses were
+  already correct and are unchanged. No boundary/unsupported widening or
+  coverage-ledger mutation.
+
 ## Back `BACK_ANIM_SHAKE_GLOW_GREEN` triple accepted (2026-08-04)
 
 - **State:** exact for the twenty-fourth bounded player-back set: **24/25 back
-  sets, 72/75 selector variants, 366/376 Factory mappings**. Generated row:
+  sets, 72/75 selector variants, 365/376 Factory mappings**. Generated row:
   **2 mappings / 1 Factory species (ROSELIA) / 1 outside (CELEBI) / 2
   Factory records**. Move coverage remains **107/276 exact, 0 partial, 0
   staged, 169 unsupported**; `ANIMATION_COVERAGE.json` is unchanged at
@@ -34,7 +67,7 @@
 ## Back `BACK_ANIM_SHAKE_GLOW_RED` triple accepted (2026-08-04)
 
 - **State:** exact for the twenty-third bounded player-back set: **23/25 back
-  sets, 69/75 selector variants, 365/376 Factory mappings**. Generated row:
+  sets, 69/75 selector variants, 364/376 Factory mappings**. Generated row:
   **15 mappings / 13 Factory species / 2 outside (HO_OH, GROUDON) / 42
   Factory records**. Move coverage remains **107/276 exact, 0 partial, 0
   staged, 169 unsupported**; `ANIMATION_COVERAGE.json` is unchanged at
@@ -70,7 +103,7 @@
 ## Back `BACK_ANIM_SHAKE_FLASH_YELLOW` triple accepted (2026-08-04)
 
 - **State:** exact for the twenty-second bounded player-back set: **22/25 back
-  sets, 66/75 selector variants, 352/376 Factory mappings**. Generated set
+  sets, 66/75 selector variants, 351/376 Factory mappings**. Generated set
   census: **8 mappings / 8 Factory species / 0 outside / 33 Factory
   records**. Move coverage stays **107/276 exact, 0 partial, 0 staged, 169
   unsupported**; `ANIMATION_COVERAGE.json` remains SHA-256
@@ -103,7 +136,7 @@
 ## Back `BACK_ANIM_JOLT_RIGHT` triple accepted (2026-08-04)
 
 - **State:** exact for the twenty-first bounded player-back set: **21/25 back
-  sets, 63/75 selector variants, 344/376 Factory mappings**. Generated set
+  sets, 63/75 selector variants, 343/376 Factory mappings**. Generated set
   census: **33 mappings / 33 Factory species / 0 outside / 74 Factory
   records**. Move coverage stays **107/276 exact, 0 partial, 0 staged, 169
   unsupported**; `ANIMATION_COVERAGE.json` remains SHA-256
@@ -135,7 +168,7 @@
 ## Back `BACK_ANIM_SHRINK_GROW_VIBRATE` triple accepted (2026-08-04)
 
 - **State:** exact for the twentieth bounded player-back set: **20/25 back
-  sets, 60/75 selector variants, 311/376 Factory mappings**. Generated set
+  sets, 60/75 selector variants, 310/376 Factory mappings**. Generated set
   census: **23 mappings / 22 Factory species / 1 outside (DEOXYS) / 70
   Factory records**. Move coverage stays **107/276 exact, 0 partial, 0
   staged, 169 unsupported**; `ANIMATION_COVERAGE.json` remains SHA-256

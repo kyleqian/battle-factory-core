@@ -446,6 +446,23 @@ export const BACK_SHAKE_GLOW_GREEN_OUTSIDE_FACTORY_SPECIES: readonly string[] = 
   BACK_SHAKE_GLOW_GREEN_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by `BACK_ANIM_SHAKE_GLOW_BLUE`. */
+export const BACK_SHAKE_GLOW_BLUE_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_SHAKE_GLOW_BLUE")
+    .map(([species]) => species),
+);
+
+/** The eleven blue-glow mappings reachable through Factory rentals. */
+export const BACK_SHAKE_GLOW_BLUE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_GLOW_BLUE_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** Lugia and Kyogre are the source row's two outside-Factory mappings. */
+export const BACK_SHAKE_GLOW_BLUE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_GLOW_BLUE_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -1162,6 +1179,29 @@ export const BACK_SHAKE_GLOW_GREEN_VARIANTS = Object.freeze({
 } as const);
 
 /**
+ * The blue callbacks reuse ShakeGlow_Blend/ShakeGlow_Move exactly.
+ * SHAKEGLOW_BLUE is enum value two, so data[1]/sDontFlip remains truthy and
+ * both source TryFlipX calls are no-ops.
+ */
+export const BACK_SHAKE_GLOW_BLUE_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_BLUE_FAST", callback: "Anim_ShakeGlowBlue_Fast",
+    sourceId: 148, natureMod: 0, period: 10, passes: 2, movementThreshold: 54,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_BLUE", callback: "Anim_ShakeGlowBlue",
+    sourceId: 149, natureMod: 1, period: 20, passes: 1, movementThreshold: 54,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_BLUE_SLOW", callback: "Anim_ShakeGlowBlue_Slow",
+    sourceId: 150, natureMod: 2, period: 80, passes: 1, movementThreshold: 24,
+    accepted: true,
+  }),
+} as const);
+
+/**
  * `BACK_ANIM_V_SHAKE_H_SLIDE` selects three standalone source callbacks.
  * Unlike the preceding shake triples, each callback stays installed directly
  * after the task dispatches it; the source does not use a shared helper or a
@@ -1413,6 +1453,12 @@ type BackShakeGlowGreenCallback = BackShakeGlowGreenVariant["callback"];
 type BackShakeGlowGreenSourceId = BackShakeGlowGreenVariant["sourceId"];
 type BackShakeGlowGreenPeriod = BackShakeGlowGreenVariant["period"];
 type BackShakeGlowGreenPasses = BackShakeGlowGreenVariant["passes"];
+type BackShakeGlowBlueVariant = typeof BACK_SHAKE_GLOW_BLUE_VARIANTS[keyof typeof BACK_SHAKE_GLOW_BLUE_VARIANTS];
+type BackShakeGlowBlueSelector = BackShakeGlowBlueVariant["selector"];
+type BackShakeGlowBlueCallback = BackShakeGlowBlueVariant["callback"];
+type BackShakeGlowBlueSourceId = BackShakeGlowBlueVariant["sourceId"];
+type BackShakeGlowBluePeriod = BackShakeGlowBlueVariant["period"];
+type BackShakeGlowBluePasses = BackShakeGlowBlueVariant["passes"];
 type BackVShakeHSlideSelector = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["selector"];
 type BackVShakeHSlideCallback = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["callback"];
 type BackVShakeHSlideSourceId = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["sourceId"];
@@ -1786,6 +1832,13 @@ function shakeGlowRedVariant(selector: string): BackShakeGlowRedVariant | null {
 
 function shakeGlowGreenVariant(selector: string): BackShakeGlowGreenVariant | null {
   for (const variant of Object.values(BACK_SHAKE_GLOW_GREEN_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function shakeGlowBlueVariant(selector: string): BackShakeGlowBlueVariant | null {
+  for (const variant of Object.values(BACK_SHAKE_GLOW_BLUE_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -4484,14 +4537,14 @@ export function backShakeFlashYellowTerminalSpriteData(
   ];
 }
 
-type BackShakeGlowColor = "RGB_RED" | "RGB_GREEN";
-type BackShakeGlowVariant = BackShakeGlowRedVariant | BackShakeGlowGreenVariant;
+type BackShakeGlowColor = "RGB_RED" | "RGB_GREEN" | "RGB_BLUE";
+type BackShakeGlowVariant = BackShakeGlowRedVariant | BackShakeGlowGreenVariant | BackShakeGlowBlueVariant;
 
 interface BackShakeGlowFrameBase {
   readonly x2: number;
   readonly y2: 0;
   readonly data0: number;
-  readonly data1: 0 | 1;
+  readonly data1: 0 | 1 | 2;
   readonly data2: number;
   readonly data3: number;
   readonly data4: number;
@@ -4546,9 +4599,23 @@ export interface BackShakeGlowGreenFrame extends BackShakeGlowFrameBase {
   readonly dontFlipAfterColorSelector: true;
 }
 
+export interface BackShakeGlowBlueFrame extends BackShakeGlowFrameBase {
+  readonly data0: BackShakeGlowBluePeriod;
+  /** SHAKEGLOW_BLUE is enum value two and keeps sDontFlip truthy. */
+  readonly data1: 2;
+  readonly data4: BackShakeGlowBluePasses;
+  readonly selector: BackShakeGlowBlueSelector;
+  readonly sourceId: BackShakeGlowBlueSourceId;
+  readonly callbackBefore: BackShakeGlowBlueCallback;
+  readonly callback: BackShakeGlowBlueCallback | "WaitAnimEnd";
+  /** The shared terminal restore still calls BlendPalette with RGB_RED. */
+  readonly blendColor: "RGB_BLUE" | "RGB_RED" | null;
+  readonly dontFlipAfterColorSelector: true;
+}
+
 type BackShakeGlowReducerConfig = {
-  readonly backAnimSet: "BACK_ANIM_SHAKE_GLOW_RED" | "BACK_ANIM_SHAKE_GLOW_GREEN";
-  readonly colorSelector: 0 | 1;
+  readonly backAnimSet: "BACK_ANIM_SHAKE_GLOW_RED" | "BACK_ANIM_SHAKE_GLOW_GREEN" | "BACK_ANIM_SHAKE_GLOW_BLUE";
+  readonly colorSelector: 0 | 1 | 2;
   readonly glowColor: BackShakeGlowColor;
   readonly variantForSelector: (selector: string) => BackShakeGlowVariant | null;
 };
@@ -4567,8 +4634,15 @@ const SHAKE_GLOW_GREEN_REDUCER_CONFIG: BackShakeGlowReducerConfig = Object.freez
   variantForSelector: shakeGlowGreenVariant,
 });
 
+const SHAKE_GLOW_BLUE_REDUCER_CONFIG: BackShakeGlowReducerConfig = Object.freeze({
+  backAnimSet: "BACK_ANIM_SHAKE_GLOW_BLUE",
+  colorSelector: 2,
+  glowColor: "RGB_BLUE",
+  variantForSelector: shakeGlowBlueVariant,
+});
+
 /**
- * Shared source-order reducer for the red/green ShakeGlow triples. Tick zero
+ * Shared source-order reducer for the red/green/blue ShakeGlow triples. Tick zero
  * is the selected initializer callback after Task_HandleMonAnimation has
  * zeroed data[2..7]. Even callbacks run ShakeGlow_Blend before the movement
  * threshold check; each initializer performs its trailing data[2] increment,
@@ -4658,7 +4732,7 @@ function backShakeGlowFrameAtTick(
       paletteRestored, movementThreshold: variant.movementThreshold,
       moveCalled, movementPhase, movementIndex, movementSign, tryFlipXCalls,
       data1: config.colorSelector,
-      dontFlipAfterColorSelector: config.colorSelector === 1,
+      dontFlipAfterColorSelector: config.colorSelector !== 0,
       flipApplied: tryFlipXCalls === 2 && config.colorSelector === 0,
       terminal,
     });
@@ -4689,6 +4763,18 @@ export function backShakeGlowGreenFrameAtTick(
   return backShakeGlowFrameAtTick(
     species, natureId, ticksSinceStart, paletteBase, SHAKE_GLOW_GREEN_REDUCER_CONFIG,
   ) as BackShakeGlowGreenFrame | null;
+}
+
+/** Source-order reducer for the blue SHAKEGLOW_BLUE == 2 selector triple. */
+export function backShakeGlowBlueFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  paletteBase = 0x100,
+): BackShakeGlowBlueFrame | null {
+  return backShakeGlowFrameAtTick(
+    species, natureId, ticksSinceStart, paletteBase, SHAKE_GLOW_BLUE_REDUCER_CONFIG,
+  ) as BackShakeGlowBlueFrame | null;
 }
 
 export function backShakeGlowRedWaitAnimEndCallback(
@@ -4732,6 +4818,31 @@ export function backShakeGlowGreenTerminalSpriteData(
 ): readonly [number, 0, number, number, BackShakeGlowGreenPasses, number, number, number] | null {
   if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
   const terminal = backShakeGlowGreenFrameAtTick(
+    species, natureId, Number.MAX_SAFE_INTEGER, paletteBase,
+  );
+  if (terminal === null) return null;
+  return [
+    toS16(battlerId), 0, toS16(speciesId), terminal.data3,
+    terminal.data4, terminal.data5, terminal.data6, terminal.data7,
+  ];
+}
+
+export function backShakeGlowBlueWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return backShakeGlowRedWaitAnimEndCallback(animEnded);
+}
+
+/** Task_HandleMonAnimation restores data[0..2] and preserves data[3..7]. */
+export function backShakeGlowBlueTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+  paletteBase = 0x100,
+): readonly [number, 0, number, number, BackShakeGlowBluePasses, number, number, number] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const terminal = backShakeGlowBlueFrameAtTick(
     species, natureId, Number.MAX_SAFE_INTEGER, paletteBase,
   );
   if (terminal === null) return null;
