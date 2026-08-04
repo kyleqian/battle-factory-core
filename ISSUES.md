@@ -375,40 +375,20 @@ rules-context capture was already pinned directly by
 `tests/battleScriptSwitchinOpcode.test.ts`). Census: **54→49 UNRESOLVED**
 (exact −5). ISSUES #72 REACHABLE trimmed to **10** (15−5, arithmetic-checked).
 
-**`STRINGID_PKMNSXWHIPPEDUPSANDSTORM` investigated, not landed — genuinely
-new plumbing found, not just staging cost.** The switch-in repro (Tyranitar,
-same `trainerBenchOverride` shape as batch 2's Intimidate loop) reaches
-`BattleScript_SandstreamActivates` and its `STRINGID_PKMNSXWHIPPEDUPSANDSTORM`
-print fires correctly, but the script then halts at its own `end3`
-(`playanimation BS_BATTLER_0, B_ANIM_SANDSTORM_CONTINUES` / `call
-BattleScript_WeatherFormChanges` / `end3`), surfacing as a `machine-barrier`
-(`opcodeName: "B_SCR_OP_END3"`) instead of resuming the switch-in flow —
-`battleScriptSwitchinOpcode.ts`'s `callSwitchinScript` enters the ability
-script via a real interpreter `"call-current"` transition (unlike Trace/
-Intimidate's own `switchineffects` branches, which only flip a status bit and
-defer actual script execution to `battleScriptFaintedActionsOrchestration.ts`'s
-separate entry-hook resolution, never touching the interpreter's own call/
-end3 machinery at all), and nothing drives the machine past that `end3` back
-into the switch-in's own continuation. `battleScriptCallbackStack.ts`'s own
-header confirms this is a known, currently-`"UNWIRED DESIGN-SCOUT PROTOTYPE"`
-gap (`docs/end3-design.md`) — `Cmd_end3`/`BattleScriptPushCursorAndCallback`
-push/pop control flow is designed but not wired into the live full-turn
-reducer. Drizzle/Drought (`BattleScript_DrizzleActivates`/`DroughtActivates`)
-share the exact same `playanimation`+`call`+`end3` shape and would likely hit
-the identical wall if exercised through a full-turn switch-in test (not
-confirmed here — no existing test drives either through completion via
-`callSwitchinScript`). A small unrelated sub-barrier was found and fixed en
-route and then reverted since it's moot without landing the id: `Cmd_
-playanimation`'s `B_ANIM_SANDSTORM_CONTINUES` case is unregistered in
-`battleScriptStatbuffchangeOpcode.ts`'s `PLAYANIMATION_ANIM_TYPES` map
-(RAIN_CONTINUES/SUN_CONTINUES are registered, SANDSTORM_CONTINUES is not) —
-adding `["B_ANIM_SANDSTORM_CONTINUES", { argExpression: "NULL", animationId:
-"SANDSTORM_CONTINUES", readsAnimArg1: false }]` (same shape as its two
-siblings) is a one-line fix, but doesn't unblock the id alone; the real fix is
-wiring `end3`'s push/pop resumption for `call-current`-entered ability
-scripts, which is bigger than this step's remaining budget and plausibly
-worth its own step (would also unblock Drizzle/Drought's own full-turn
-switch-in testability, not just Sand Stream).
+**`STRINGID_PKMNSXWHIPPEDUPSANDSTORM` — kernel side UNBLOCKED 2026-08-04
+(PROGRESS 910, `8e2bf807`):** the `Cmd_end3`/`BattleScriptPushCursorAndCallback`
+resumption gap batch 7 hit is closed. `battleScriptMachine.ts`'s `end3()` now
+pops and resumes via the shared `callStack` exactly like `RETURN` when the
+stack is non-empty (design doc §1.4(b) "script" flavor; empty-stack halt
+unchanged, preserving the `battleEndTurnOrchestration.ts` cCallback flavor),
+and `B_ANIM_SANDSTORM_CONTINUES` is registered in `PLAYANIMATION_ANIM_TYPES`.
+Sand Stream, Drizzle, AND Drought full-turn switch-in repros all run to
+genuine completion with kernel-level event pins
+(`tests/battleScriptEnd3SwitchinResumption.test.ts`, red-verified against the
+old B_SCR_OP_END3 machine-barrier); frontier-ratchet pins unmoved. The id
+itself remains open below ONLY for its `messageLines` presentation branch +
+red-verified presentation test — the staged repro recipe is ready in that
+test file.
 
 **REACHABLE (10), ordered by carrier-weight proxy for likely-hit-first —
 name a batch, use the Taunt-pair idiom** (`messageId === "STRINGID_X"` branch
