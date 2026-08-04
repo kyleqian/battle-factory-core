@@ -1,5 +1,39 @@
 # Animation coverage
 
+## Back `BACK_ANIM_DIP_RIGHT_SIDE` triple accepted (2026-08-04)
+
+- **State:** exact for the nineteenth bounded player-back set: **19/25 back
+  sets, 57/75 selector variants, 288/376 Factory mappings**. Generated set
+  census: **38 mappings / 38 Factory species / 0 outside / 68 Factory
+  records**. Move coverage stays **107/276 exact, 0 partial, 0 staged, 169
+  unsupported**; `ANIMATION_COVERAGE.json` remains SHA-256
+  `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+- **Did:** ported source IDs **132/130/131**
+  `ANIM_H_DIP_TWICE` / normal / fast, guarded affine initializers, and
+  `SetHorizontalDip`: duration **30/60/90**, runs **2/1/1**, amplitude **8**,
+  offset **-32**, exact `Sin((data[2] * 128) / data[7], 8)` u16 rotation,
+  `SetPosForRotation`, `HandleSetAffineData`, strict `data[2] > data[7]`,
+  twice reset-to-zero plus trailing increment, per-run x2/y2 and matrix
+  reset, terminal-only `ResetSpriteAfterAnim`, `WaitAnimEnd`→dummy, affine
+  OAM lifecycle, task restoration, and no `TryFlipX`. BALTOY record **75**
+  Naughty/mod-0; SUNKERN record **0** Relaxed/mod-1; METAPOD record **8**
+  Bashful/mod-2; routing batch-checks all 38 source siblings.
+- **Next:** source-ranked unsupported player-back set
+  **`BACK_ANIM_SHRINK_GROW_VIBRATE` (set 20): 23 mappings / 22 Factory / 1
+  outside (DEOXYS) / 70 Factory records**.
+- **Notes:** fresh paired byte-identical dense Scene-ON initializer→dummy
+  receipts retain every framebuffer hash and player RAM/OAM/affine state:
+  Baltoy **1838..1902 / 65 / 31,781 B /
+  `155506b388538c586cbd03823a197ce8facbec36903b88f08d3fecf32f48ce53`**;
+  Sunkern **1839..1902 / 64 / 30,932 B /
+  `a2efd7c9d1574df2e8be311be3db7bfb9d93083bf44304de002ca200017d8ae3`**;
+  Metapod **1839..1932 / 94 / 45,591 B /
+  `913b57d6118fda7e98056ccaaa78f003a061b9f0cae587a3ebcc90eab261b5bd`**.
+  Focused source/census/routing/reducer/evidence plus both ratchets: **4
+  files / 18 tests**; typecheck, smoke, full `npm test`, build, and coverage
+  are green. No boundary or unsupported-branch widening and no move
+  promotion.
+
 ## Back `BACK_ANIM_CONCAVE_ARC_SMALL` triple accepted (2026-08-04)
 
 - **State:** exact for the eighteenth bounded player-back set: **18/25 back
@@ -65,40 +99,3 @@
   Focused source/census/routing/reducer/evidence plus both ratchets: **4
   files / 18 tests**; heap-sized typecheck is green. No boundary or
   unsupported-branch widening and no move promotion.
-
-## Back `BACK_ANIM_CONCAVE_ARC_LARGE` triple accepted (2026-08-03)
-
-- **State:** exact for the sixteenth bounded player-back set: **16/25 back
-  sets, 48/75 selector variants, 198/376 Factory mappings**. Generated set
-  census: **18 mappings / 18 Factory species / 0 outside / 33 Factory
-  records**. Move coverage is unchanged at **107/276 exact, 0 partial, 0
-  staged, 169 unsupported**; `ANIMATION_COVERAGE.json` remains SHA-256
-  `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
-- **Did:** ported source IDs **123/122/121**
-  `ANIM_CONCAVE_ARC_LARGE_TWICE` / normal / slow, their guarded
-  initializer-first `Anim_ConcaveArcLarge_Twice` / normal / slow callbacks,
-  and shared `ConcaveArc`. The reducer preserves steps **8/6/4**, 12/12
-  x/y amplitudes, runs **2/1/1**, signed GBA `Sin`, C modulo-256 restart,
-  y reflection plus 12 offset, strict `data[7] > 255`, repeat decrement,
-  terminal x2/y2 cleanup (with source-faithful terminal `data[6] == 1`),
-  `WaitAnimEnd`→dummy timing, visible non-affine OAM, and task
-  zero/preserve/restore. Legal representatives are MAGIKARP index **6**
-  Hardy/mod-0, AZURILL index **1** Rash/mod-1, and TREECKO index **94**
-  Lonely/mod-2; all eighteen siblings route through the selector triple.
-- **Next:** source-ranked unsupported player-back set
-  **`BACK_ANIM_CONVEX_DOUBLE_ARC` (set 17): 27 mappings / 26 Factory / 1
-  outside / 43 Factory records**.
-- **Notes:** paired byte-identical dense Scene-ON initializer→dummy receipts
-  retain every framebuffer hash plus player RAM/OAM/affine state: Magikarp
-  twice **1840..1907 / 68 / 33,049 B /
-  `8680c46aef9d76a7c4c231d42d7b2b56656f1108b21976a03beccbf919b1c581`**;
-  Azurill normal **1839..1884 / 46 / 22,308 B /
-  `8daceedff0517e495dc51daf6a1e2a6b6fa5f2564bcea4922ce88bf3bf13be35`**;
-  Treecko slow **1839..1905 / 67 / 32,513 B /
-  `6d1868ffe99209bbf097f56a9a1c37b38aa6e27e71e3f6f10df1ed7893b635b7`**.
-  Focused source/census/routing/reducer/evidence plus both ratchets: **4
-  files / 18 tests**; typecheck, smoke **7/346**, full `npm test` **687
-  files / 6,711 passed / 1 skipped**, build (**553 modules**), and coverage
-  are green. No boundary/unsupported-branch widening or move promotion.
-  Main-program finding: Emerald's internal IDs for Azurill/Treecko are
-  **350/277**, not their National Dex IDs; this affects probe staging only.

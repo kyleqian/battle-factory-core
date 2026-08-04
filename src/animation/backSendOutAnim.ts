@@ -344,6 +344,23 @@ export const BACK_CONCAVE_ARC_SMALL_OUTSIDE_FACTORY_SPECIES: readonly string[] =
   BACK_CONCAVE_ARC_SMALL_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_DIP_RIGHT_SIDE` row. */
+export const BACK_DIP_RIGHT_SIDE_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_DIP_RIGHT_SIDE")
+    .map(([species]) => species),
+);
+
+/** All 38 right-side dip mappings have real Battle Factory rental records. */
+export const BACK_DIP_RIGHT_SIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_DIP_RIGHT_SIDE_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** The right-side dip set has no non-Factory selector mappings. */
+export const BACK_DIP_RIGHT_SIDE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_DIP_RIGHT_SIDE_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -855,6 +872,48 @@ export const BACK_CONCAVE_ARC_SMALL_VARIANTS = Object.freeze({
 } as const);
 
 /**
+ * `BACK_ANIM_DIP_RIGHT_SIDE` selects affine horizontal-dip initializers.
+ * The source's table order is twice, normal, fast for nature modifiers
+ * zero, one, two; the callback names intentionally retain the initializer
+ * throughout the active window.
+ */
+export const BACK_DIP_RIGHT_SIDE_VARIANTS = Object.freeze({
+  twice: Object.freeze({
+    selector: "ANIM_H_DIP_TWICE",
+    callback: "Anim_HorizontalDip_Twice",
+    sourceId: 132,
+    natureMod: 0,
+    duration: 30,
+    runs: 2,
+    amplitude: 8,
+    offset: -32,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_H_DIP",
+    callback: "Anim_HorizontalDip",
+    sourceId: 130,
+    natureMod: 1,
+    duration: 60,
+    runs: 1,
+    amplitude: 8,
+    offset: -32,
+    accepted: true,
+  }),
+  fast: Object.freeze({
+    selector: "ANIM_H_DIP_FAST",
+    callback: "Anim_HorizontalDip_Fast",
+    sourceId: 131,
+    natureMod: 2,
+    duration: 90,
+    runs: 1,
+    amplitude: 8,
+    offset: -32,
+    accepted: true,
+  }),
+} as const);
+
+/**
  * `BACK_ANIM_V_SHAKE_H_SLIDE` selects three standalone source callbacks.
  * Unlike the preceding shake triples, each callback stays installed directly
  * after the task dispatches it; the source does not use a shared helper or a
@@ -1069,6 +1128,13 @@ type BackConcaveArcSmallCallback = typeof BACK_CONCAVE_ARC_SMALL_VARIANTS[keyof 
 type BackConcaveArcSmallSourceId = typeof BACK_CONCAVE_ARC_SMALL_VARIANTS[keyof typeof BACK_CONCAVE_ARC_SMALL_VARIANTS]["sourceId"];
 type BackConcaveArcSmallStep = typeof BACK_CONCAVE_ARC_SMALL_VARIANTS[keyof typeof BACK_CONCAVE_ARC_SMALL_VARIANTS]["step"];
 type BackConcaveArcSmallRuns = typeof BACK_CONCAVE_ARC_SMALL_VARIANTS[keyof typeof BACK_CONCAVE_ARC_SMALL_VARIANTS]["runs"];
+type BackDipRightSideSelector = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["selector"];
+type BackDipRightSideCallback = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["callback"];
+type BackDipRightSideSourceId = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["sourceId"];
+type BackDipRightSideDuration = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["duration"];
+type BackDipRightSideRuns = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["runs"];
+type BackDipRightSideAmplitude = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["amplitude"];
+type BackDipRightSideOffset = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["offset"];
 type BackVShakeHSlideSelector = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["selector"];
 type BackVShakeHSlideCallback = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["callback"];
 type BackVShakeHSlideSourceId = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["sourceId"];
@@ -1382,6 +1448,21 @@ function concaveArcSmallVariant(selector: string): {
   return null;
 }
 
+function dipRightSideVariant(selector: string): {
+  readonly selector: BackDipRightSideSelector;
+  readonly callback: BackDipRightSideCallback;
+  readonly sourceId: BackDipRightSideSourceId;
+  readonly duration: BackDipRightSideDuration;
+  readonly runs: BackDipRightSideRuns;
+  readonly amplitude: BackDipRightSideAmplitude;
+  readonly offset: BackDipRightSideOffset;
+} | null {
+  for (const variant of Object.values(BACK_DIP_RIGHT_SIDE_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
 function vShakeHSlideVariant(selector: string): {
   readonly selector: BackVShakeHSlideSelector;
   readonly callback: BackVShakeHSlideCallback;
@@ -1427,6 +1508,10 @@ function hStretchVariant(selector: string): {
 function toS16(value: number): number {
   const wrapped = value & 0xffff;
   return wrapped >= 0x8000 ? wrapped - 0x10000 : wrapped;
+}
+
+function toU16(value: number): number {
+  return value & 0xffff;
 }
 
 function gbaSin(index: number, amplitude: number): number {
@@ -3352,6 +3437,227 @@ export function backConcaveArcSmallTerminalSpriteData(
   let finalPhase = 0;
   while (finalPhase <= 255) finalPhase = toS16(finalPhase + variant.step);
   return [toS16(battlerId), 0, toS16(speciesId), variant.step, 6, 4, 1, finalPhase];
+}
+
+export interface BackDipRightSideAffineWrite {
+  readonly xScale: 256;
+  readonly yScale: 256;
+  /** The signed source `data[6]` value passed through the back path. */
+  readonly rotationSigned: number;
+  /** The same rotation as the u16 argument received by SetAffineData. */
+  readonly rotationU16: number;
+  /** GBA `SetAffineData`'s [a,b,c,d] matrix after the rotation write. */
+  readonly matrix: readonly [number, number, number, number];
+}
+
+export interface BackDipRightSideFrame {
+  readonly x2: number;
+  readonly y2: number;
+  /** Task_HandleMonAnimation owns this slot and leaves it zeroed. */
+  readonly data0: number;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** Source callback phase after its trailing increment (or terminal hold). */
+  readonly data2: number;
+  /** Source run count, written by the selected initializer. */
+  readonly data3: BackDipRightSideRuns;
+  /** SetHorizontalDip's positional compensation offset. */
+  readonly data4: BackDipRightSideOffset;
+  /** SetHorizontalDip's sine amplitude. */
+  readonly data5: BackDipRightSideAmplitude;
+  /** SetHorizontalDip's source affine rotation register. */
+  readonly data6: number;
+  /** Duration selected by the nature initializer. */
+  readonly data7: BackDipRightSideDuration;
+  readonly data2Before: number;
+  readonly strictOverflow: boolean;
+  /** Input angle passed to Sin before its u16 result becomes rotationIndex. */
+  readonly phaseIndex: number | null;
+  /** The u16 result of Sin((data[2] * 128) / data[7], 8). */
+  readonly rotationIndex: number | null;
+  readonly rotationSigned: number;
+  readonly rotationU16: number;
+  readonly perRunReset: boolean;
+  readonly selector: BackDipRightSideSelector;
+  readonly sourceId: BackDipRightSideSourceId;
+  readonly duration: BackDipRightSideDuration;
+  readonly amplitude: BackDipRightSideAmplitude;
+  readonly offset: BackDipRightSideOffset;
+  readonly runs: BackDipRightSideRuns;
+  /** Tick zero invokes HandleStartAffineAnim in the selected initializer. */
+  readonly initializerCalled: boolean;
+  readonly handleStartAffineAnimCalls: 0 | 1;
+  /** The initializer invokes SetHorizontalDip before returning. */
+  readonly callbackInvokedByInitializer: true;
+  readonly normalBackDontFlip: true;
+  readonly tryFlipXCalls: 0;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly affineWriteCount: 1;
+  readonly affineWrites: readonly [BackDipRightSideAffineWrite];
+  readonly affineMode: "double" | "normal";
+  readonly oamVisible: true;
+  readonly callback: BackDipRightSideCallback | "WaitAnimEnd";
+}
+
+function dipRightSideAffineWrite(rotationSigned: number): BackDipRightSideAffineWrite {
+  const signed = toS16(rotationSigned);
+  const rotationU16 = signed & 0xffff;
+  const angle = rotationU16 >> 8;
+  const sine = gbaSin(angle, 256);
+  const cosine = gbaCos(angle, 256);
+  return Object.freeze({
+    xScale: 256 as const,
+    yScale: 256 as const,
+    rotationSigned: signed,
+    rotationU16,
+    matrix: Object.freeze([cosine, toS16(-sine), toS16(sine), cosine]) as readonly [number, number, number, number],
+  });
+}
+
+/**
+ * Source-order reducer for `BACK_ANIM_DIP_RIGHT_SIDE`. The selected
+ * initializer installs affine mode and immediately invokes SetHorizontalDip;
+ * the initializer remains the active callback until the strict `data[2] >
+ * data[7]` branch resets the per-run offsets and either restarts or enters
+ * WaitAnimEnd. There is no TryFlipX on the player-back route.
+ */
+export function backDipRightSideFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackDipRightSideFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_DIP_RIGHT_SIDE") return null;
+  const variant = dipRightSideVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected right-side dip selector ${selection.selector}`);
+
+  let data0 = 0;
+  let data2 = 0;
+  let data6 = 0;
+  let x2 = 0;
+  let y2 = 0;
+  let phaseIndex: number | null = null;
+  let rotationIndex: number | null = null;
+  let strictOverflow = false;
+  let perRunReset = false;
+  let resetSpriteAfterAnim = false;
+  let affineMode: "double" | "normal" = "normal";
+  let callback: BackDipRightSideCallback | "WaitAnimEnd" = variant.callback;
+  let writes: readonly [BackDipRightSideAffineWrite] = [dipRightSideAffineWrite(0)];
+  let terminal = false;
+  let result: BackDipRightSideFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    const data2Before = data2;
+    strictOverflow = false;
+    perRunReset = false;
+    phaseIndex = null;
+    rotationIndex = null;
+    resetSpriteAfterAnim = false;
+
+    if (data2 === 0) {
+      affineMode = "double";
+      data6 = 0;
+      data0 = 0;
+    }
+
+    if (data2 > variant.duration) {
+      strictOverflow = true;
+      perRunReset = true;
+      x2 = 0;
+      y2 = 0;
+      data6 = 0;
+      writes = [dipRightSideAffineWrite(0)];
+      data0 += 1;
+      if (variant.runs <= data0) {
+        resetSpriteAfterAnim = true;
+        affineMode = "normal";
+        callback = "WaitAnimEnd";
+        terminal = true;
+      } else {
+        data2 = 0;
+      }
+    } else {
+      phaseIndex = Math.trunc((data2 * 128) / variant.duration);
+      rotationIndex = toU16(gbaSin(phaseIndex, variant.amplitude));
+      data6 = toS16(-(rotationIndex << 8));
+
+      // SetPosForRotation(sprite, index, data[4], 0), preserving the source's
+      // signed intermediate values and s16 writes on the GBA.
+      const negAmplitudeX = toS16(-variant.offset);
+      const cosX = gbaCos(rotationIndex, negAmplitudeX);
+      const sinX = gbaSin(rotationIndex, negAmplitudeX);
+      x2 = toS16(toS16(cosX) + variant.offset);
+      y2 = toS16(sinX);
+      writes = [dipRightSideAffineWrite(data6)];
+    }
+
+    if (!terminal) data2 += 1;
+    result = Object.freeze({
+      x2,
+      y2,
+      data0,
+      data1: toS16(preservedData1),
+      data2,
+      data3: variant.runs,
+      data4: variant.offset,
+      data5: variant.amplitude,
+      data6,
+      data7: variant.duration,
+      data2Before,
+      strictOverflow,
+      phaseIndex,
+      rotationIndex,
+      rotationSigned: writes[0].rotationSigned,
+      rotationU16: writes[0].rotationU16,
+      perRunReset,
+      selector: variant.selector,
+      sourceId: variant.sourceId,
+      duration: variant.duration,
+      amplitude: variant.amplitude,
+      offset: variant.offset,
+      runs: variant.runs,
+      initializerCalled: tick === 0,
+      handleStartAffineAnimCalls: tick === 0 ? 1 as const : 0 as const,
+      callbackInvokedByInitializer: true as const,
+      normalBackDontFlip: true as const,
+      tryFlipXCalls: 0 as const,
+      resetSpriteAfterAnim,
+      affineWriteCount: 1 as const,
+      affineWrites: writes,
+      affineMode,
+      oamVisible: true as const,
+      callback,
+    });
+  }
+  return result;
+}
+
+/** Source WaitAnimEnd lifecycle after the static affine OAM reports animEnded. */
+export function backDipRightSideWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/** Task_HandleMonAnimation's final battler/species restoration for the dip. */
+export function backDipRightSideTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+): readonly [number, 0, number, BackDipRightSideRuns, -32, 8, 0, BackDipRightSideDuration] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_DIP_RIGHT_SIDE") return null;
+  const variant = dipRightSideVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected right-side dip selector ${selection.selector}`);
+  return [toS16(battlerId), 0, toS16(speciesId), variant.runs, variant.offset, variant.amplitude, 0, variant.duration];
 }
 
 export interface BackConvexDoubleArcFrame {
