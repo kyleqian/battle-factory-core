@@ -1,5 +1,39 @@
 # Animation coverage
 
+## Rung-3 send-out sprite-frame (OAM/anim-frame) half landed (2026-08-04)
+
+- **State:** ISSUES #71 rung-3 item 2, the species-generic sprite ANIMCMD
+  half, complete and green. Move coverage unchanged: **107/276 exact, 1
+  partial, 0 staged, 168 unsupported**; `ANIMATION_COVERAGE.json` untouched.
+  No engine edits; no boundary/unsupported widening.
+- **Did:** extractor `tools/extract/extract-front-pic-anim-programs.ts` parses
+  the index-1 `sAnim_<Name>_1` programs (front_pic_anims.h:1-4808), the
+  SINGLE/DOUBLE_ANIMATION macro arrays (4825-5253), the three hand-written
+  `sAnims_` arrays (Blaziken 5083, Spinda 5115, Castform 5194) and
+  `gMonFrontAnimsPtrTable` (5255-5697) into
+  `front-pic-anim-programs.json` — **439 species keys / 415 index-1 tables**;
+  throws on any non-FRAME/END ANIMCMD form. Production module
+  `sendOutSpriteFrame.ts`: `hasTwoFramesAnimation` (pokemon.c:6988 predicate,
+  false for unkeyed species) and `frontSendOutSpriteFrameAtTick` (null for
+  unknown species/invalid ticks, 0 for the excluded species, cumulative
+  step-window walk, ANIMCMD_END last-frame hold, loud throw on frames outside
+  0|1); doc comment states the tick-0 anchor verbatim (`StartSpriteAnim(sprite,
+  1)` = the `affineAnimEnded` tick, never deferred by animationDelay).
+- **Next:** remaining rung-3 items — the live RAM-probe anchor pin, then the
+  back variant (`species, nature, ticksSinceStart`) in the same contract
+  shape.
+- **Notes:** cross-checks: all 6 summary-front-animation probe rows reproduced
+  (ONIX `[{1,50},{1,30},{0,30}]` …; SPINDA row correctly absent) + KABUTO
+  equals the 8-step engine literal (pinned, no engine import). Census: every
+  `frontAnimIds.species` key has a program except the pinned `["SPINDA"]`;
+  excluded species CASTFORM/DEOXYS/UNOWN recorded verbatim (predicate, not
+  data, excludes). **Stop-and-report:** EGG's `_1` program carries frames 2|3
+  (verbatim), so walking it throws by the invariant — EGG is not Factory-
+  legal, unreachable in the engine. Extractor twice byte-identical (SHA-256
+  `144239f6...`). Focused 3 files / 21 tests, typecheck, smoke **7/347**, full
+  **718 files / 6,905 passed / 1 skipped**, build green. Committed
+  `ce88ad7b`; tree clean at commit.
+
 ## Rung-3 FRONT send-out dispatcher landed (2026-08-04)
 
 - **State:** ISSUES #71 rung-3 item 1, FRONT half, complete and green. Move
