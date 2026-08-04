@@ -6,10 +6,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 897 — [bounded MAIN worker, 2026-08-03 ~17:20] ISSUES #72 batch 2: 11 more REACHABLE printstring STRINGIDs landed via the Taunt-pair idiom
 
-- **State:** master `1129cece`, on top of `896`'s commit. `npm test:smoke`
-  and the two new/red-verified test files green mid-step; full `npm test` +
-  `npm run build` + differential pending as this entry's own finish
-  requirement (see Next if not yet run when this lands).
+- **State:** master `86637733`, on top of `896`'s commit. Full `npm test`
+  green (**667 files / 6,606 passed / 1 skipped**, 0 failures), `npm run
+  build` green (`tsc -b && vite build`), `compare:differential --
+  battle-command-generated-off.json --base 15891bab --summary`: **PASS —
+  128/128 byte-identical**.
 - **Did:** Landed 11 more of ISSUES #72's ranked REACHABLE printstring
   STRINGIDs, starting at `STRINGID_PKMNSXWOREOFF` per the supervisor brief
   (skipping the 3 documented hard cases `PKMNHUNGONWITHX`/`PKMNPROTECTEDBY`/
