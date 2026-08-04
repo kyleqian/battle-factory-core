@@ -9,8 +9,8 @@ import {
   BACK_TRIANGLE_DOWN_OUTSIDE_FACTORY_SPECIES,
   BACK_TRIANGLE_DOWN_SPECIES,
   BACK_TRIANGLE_DOWN_VARIANTS,
-  backSendOutTerminalSpriteData,
   backTriangleDownFrameAtTick,
+  backTriangleDownTerminalSpriteData,
   backTriangleDownWaitAnimEndCallback,
   getSpeciesBackAnimSet,
   selectBackSendOutAnimation,
@@ -154,7 +154,9 @@ describe("BACK_ANIM_TRIANGLE_DOWN back send-out reducer", () => {
     });
     expect(backTriangleDownWaitAnimEndCallback(false)).toBe("WaitAnimEnd");
     expect(backTriangleDownWaitAnimEndCallback(true)).toBe("SpriteCallbackDummy");
-    expect(backSendOutTerminalSpriteData(0, 361)).toEqual([0, 0, 361, 0, 0, 0, 0, 0]);
+    expect(backTriangleDownTerminalSpriteData("SNORUNT", 2, 0, 346)).toEqual([0, 0, 346, 3, 0, 2, 0, 0]);
+    expect(backTriangleDownTerminalSpriteData("TYROGUE", 6, 0, 236)).toEqual([0, 0, 236, 3, 0, 2, 0, 0]);
+    expect(backTriangleDownTerminalSpriteData("PIDGEY", 1, 0, 16)).toEqual([0, 0, 16, 3, 0, 1, 0, 0]);
   });
 
   it("rejects invalid input and adjacent send-out families", () => {

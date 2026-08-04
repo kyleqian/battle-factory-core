@@ -2768,6 +2768,25 @@ export function backTriangleDownWaitAnimEndCallback(
   return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
 }
 
+/**
+ * Task_HandleMonAnimation restores battler/data[0], species/data[2], and
+ * clears only data[1] after TriangleDown reaches the dummy. The source helper
+ * intentionally leaves its terminal row cursor and amplitude in data[3]/[5].
+ */
+export function backTriangleDownTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+): readonly [number, 0, number, 3, 0, BackTriangleDownAmplitude, 0, 0] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_TRIANGLE_DOWN") return null;
+  const variant = triangleDownVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected triangle-down selector ${selection.selector}`);
+  return [toS16(battlerId), 0, toS16(speciesId), 3, 0, variant.amplitude, 0, 0];
+}
+
 export interface BackVerticalShakeHorizontalSlideFrame {
   readonly x2: number;
   readonly y2: number;
