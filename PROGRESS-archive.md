@@ -1,5 +1,74 @@
 
 ---
+## 903 — [bounded MAIN worker, 2026-08-03 ~23:45] CANCELER_TORMENTED step BLOCKED: assigned premise was factually wrong, corrected docs, no engine/presentation change
+
+- **State:** master `6eaae2c5` (unchanged — docs-only commit follows). Full
+  `npm test` green (**685 files / 6,706 passed / 1 skipped**, 0 failures),
+  `npm run build` green. No engine or presentation change was made, so no
+  differential run was needed (behavior is provably unchanged — see below).
+- **Did:** Assigned step: port `AtkCanceler_UnableToUseMove`'s alleged
+  "`CANCELLER_TORMENTED` case" (ISSUES #72's note + this doc's own prior
+  triage row both claimed it sits between `CANCELER_DISABLED` and
+  `CANCELER_TAUNTED`) as a new engine phase, then land
+  `STRINGID_PKMNCANTUSEMOVETORMENT`. Per the brief's own "read the C, don't
+  guess," read `reference/pokeemerald/src/battle_util.c:1983-2268` in full
+  before porting anything: the `CANCELER_*` enum and switch have **exactly
+  14 cases, 1:1, no gap** — there is no Torment case in `AtkCanceler` at all,
+  in the real pinned source. The premise both docs and the step brief
+  repeated was wrong. Torment's actual mechanism is a move-*selection*-time
+  rejection, `TrySetCantSelectMoveBattleScript` (`battle_util.c:999-1012`,
+  called from `HandleTurnActionSelectionState` in `battle_main.c:4382` for
+  both player and AI battlers), dispatching to `BattleScript_SelectingTormentedMove`
+  (`printselectionstring`, `battle_scripts_1.s:3563-3565`) — not
+  `BattleScript_MoveUsedIsTormented` (`printstring`, same STRINGID), which
+  has zero C callers and is dead in the real game too (the prior triage row
+  missed the `SelectingTormentedMove` label entirely). Porting a fabricated
+  `AtkCanceler` phase anyway would have been a real behavioral bug, not just
+  non-source-exact bookkeeping: a two-turn move's forced-continuation turn
+  (e.g. Fly turn 2) has `gCurrentMove == gLastMoves[attacker]` without
+  passing back through selection, and real Torment does not interrupt it —
+  an `AtkCanceler`-time recheck would incorrectly cancel that continuation.
+  This engine already ports Torment's *silent* legality half correctly
+  (`CheckMoveLimitations`'s Torment bit, `battleScriptActionAdmission.ts:2485-2491`,
+  mirrors `battle_util.c:1107` exactly); what's actually missing is
+  `TrySetCantSelectMoveBattleScript`'s interactive "reject this selection,
+  force a reselect, print the flavor text" loop, which this
+  decision-boundary-driven engine (`BattleMoveDecision`/`BattleSwitchDecision`
+  supplied directly, assumed pre-legal) has no representation for at all —
+  confirmed no other `printselectionstring` rejection path
+  (`SelectingDisabledMove`/`SelectingNotAllowedMoveTaunt`/
+  `SelectingImprisonedMove`) is wired anywhere in `src/engine` either. That's
+  a new subsystem, not the scoped "same idiom as Taunt/Imprison" one-enum-case
+  addition — genuinely out of bounds for this bounded step. Per this run's
+  worker contract ("if blocked or mis-scoped, say why instead of
+  improvising"), did **not** fabricate the phase and did **not** improvise
+  the larger selection-rejection subsystem unasked. Instead corrected the
+  misinformation at its source: ISSUES.md's "Also found, tracked separately"
+  note and `docs/issue72-reachability-triage.md`'s two
+  `STRINGID_PKMNCANTUSEMOVETORMENT` rows + a new dated correction section
+  (full C citations, same rigor as the doc's existing "settled" appendices).
+  Reran the census — byte-identical, still **67 UNRESOLVED** (no change, as
+  expected since nothing was landed).
+- **Next:** `CANCELER_TORMENTED`/`STRINGID_PKMNCANTUSEMOVETORMENT` needs a
+  supervisor re-scope, not a retry of this brief: either design the
+  selection-rejection subsystem as its own step (bigger than one STRINGID —
+  worth asking whether any other UNRESOLVED id needs the same shape before
+  committing to it), or accept it stays permanently DEAD and drop it from
+  future REACHABLE-adjacent picks. Otherwise resume ISSUES #72 batch 6 (the
+  REACHABLE-28 list from `STRINGID_PKMNSXCUREDYPROBLEM`, per entry 902's
+  Next), the hard trio, `TRACED`, `SXBLOCKSY2`, the loss-side terminal-seam
+  increment, typeref slices 4-8, #71 Slice D.
+- **Notes:** No PAPERCUT. This step cost real time to disprove (~25 min of
+  the 60 reading `battle_util.c`/`battle_main.c`/`battle_scripts_1.s`
+  directly rather than trusting two independent prior docs that agreed with
+  each other but were both wrong) — worth flagging that ISSUES #72's own
+  reachability triage methodology should prefer citing exact `battle_util.c`
+  case/function names over paraphrasing "Real Gen3 X has a Y recheck"
+  claims, since a paraphrase error propagated unchecked from the original
+  triage pass through a step brief without anyone re-deriving it from source
+  in between.
+
+---
 ## 902 — [bounded MAIN worker, 2026-08-03 ~23:15] #72 batch 5: 11 more REACHABLE printstring STRINGIDs landed
 
 - **State:** master `072b9066`. Full `npm test` green (**685 files / 6,706

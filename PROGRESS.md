@@ -4,6 +4,104 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 906 — [bounded MAIN worker, 2026-08-04 ~02:00] terminal-seam increment (i) LOSS half landed: LOST/DREW run BattleScript_LocalBattleLost as a second VM pass
+
+- **State:** master `1eb9d1e6`. Full `npm test` green (**688 files / 6,727
+  passed / 1 skipped**, 0 failures), `npm run build` green,
+  `compare:differential -- battle-command-generated-off.json --base 45291fc4
+  --summary`: **PASS — 128/128 byte-identical**.
+- **Did:** ISSUES #73 item 1 (loss-side implementation), mirroring the
+  win-side shape exactly (`runPostBattleOutcomeScript` in
+  `battleScriptFaintedActionsOrchestration.ts`, dispatch already in
+  `factoryBattleScriptTerminalDecision.ts`), fresh ground truth
+  `docs/terminal-seam-loss-path-ground-truth.md`. **DREW routing confirmed
+  against source first:** `battle_main.c`'s `sEndTurnFuncsTable` (`:557-559`)
+  maps both `B_OUTCOME_LOST` and `B_OUTCOME_DREW` to the SAME
+  `HandleEndTurn_BattleLost`, which for non-link Factory sets
+  `gBattlescriptCurrInstr = BattleScript_LocalBattleLost` regardless of which
+  — no separate draw script exists (the script's own `CheckDomeDrew` label
+  only special-cases DREW on the `BATTLE_TYPE_DOME` branch, which Factory
+  never takes). `runPostBattleOutcomeScript` now dispatches on
+  `outcome !== WON` rather than `outcome === WON` only. Registered `VARIOUS`
+  cases 19/20 (`RETURN_OPPONENT_MON1`/`MON2`) in `Cmd_various`
+  (`battleScriptSwitchinOpcode.ts`), ported source-exactly from
+  `battle_script_commands.c:6455-6470`: case 19 hardcodes battler 1
+  (ignoring the `BS_ATTACKER` selector operand the C switch-case body also
+  discards) and emits a `set-battler-sprite-visibility` (`invisible: true`)
+  recall event when that battler is alive, marking the scheduler pending so
+  the script's own following `waitstate` genuinely blocks on it (the first
+  `various` case in this file that actually dispatches to the controller —
+  every other case is pure state). Case 20 confirmed a real source no-op for
+  `battlersCount <= 3` (Factory singles never exceeds 2), not just inferred
+  from behavior. Resolved `STRINGID_TRAINER1WINTEXT` in `messageLines` from
+  `opponentTrainer.speechWin`, the exact hand-built-lines shape
+  `STRINGID_TRAINER1LOSETEXT` already uses (`speechWin` added as an
+  *optional* field on `BattleResolutionOpponentTrainer` so the many
+  pre-existing WIN-only test fixtures didn't need a dummy value). Two new
+  `JUMPIFWORD` comparands registered (`BATTLE_TYPE_DOME`,
+  `BATTLE_TYPE_TOWER_LINK_MULTI`) for the loss script's own early branches,
+  same "register the always-false value" idiom the existing
+  ARENA/TWO_OPPONENTS/PYRAMID entries use. Tests (all red-verified via `git
+  stash` of the touched `src/engine/*.ts` files, each threw the exact
+  pre-fix error): a LOSS kill-shot event-sequence pin and a DREW-routing pin
+  in `battleScriptFaintedActionsOrchestration.test.ts` (mirroring the
+  existing WIN pin's exact shape); a staged kill-shot LOSS through
+  `submitFactoryFullTurnDecision` in
+  `factoryBattleScriptFullTurnDecision.test.ts` (mirroring the WIN
+  "mid-turn KO" pin, roles swapped, same STRENGTH/200atk/50def numbers so
+  the 204-damage roll is already-proven, not newly derived); new
+  `tests/presentationStringTerminalSeamLoss.test.ts` mirroring
+  `presentationStringTerminalSeamWin.test.ts`'s exact idiom, pinning
+  DESTIN's real `speechWin` ("I AM ABOUT TO" / "OVERHEAT", pixel-confirmed
+  in the loss doc) plus a JENSON generalization pin. Win-side pins verified
+  untouched-green throughout. RNG: no new draws on either path (loss doc §4
+  independently oracle-verified this) — every new test asserts `rng.calls`
+  is unchanged. Census: **49→48 UNRESOLVED** (exact −1,
+  `STRINGID_TRAINER1WINTEXT`). ISSUES #73 item 1 trimmed to done (deleted,
+  entry retitled, items 2/3 renumbered 1/2, both widened to note they now
+  cover the loss window too).
+- **Surprise found, not fixed (flagged, out of scope):** while tracing
+  `trainerslidein BS_ATTACKER`'s battler resolution to confirm the LOSS
+  script's event sequence, direct source reading
+  (`include/constants/battle_script_commands.h:305`: `BS_ATTACKER` = **1**,
+  not 0; `B_POSITION_PLAYER_LEFT` = 0, `B_POSITION_OPPONENT_LEFT` = 1) shows
+  `battleScriptBattlerPositions.ts`'s existing `resolveSingleBattlePosition`
+  comment/mapping is backwards: it maps `"BS_ATTACKER"` to battler 0
+  (`B_POSITION_PLAYER_LEFT`), but `Cmd_trainerslidein` reads its operand as a
+  raw `GetBattlerAtPosition` argument and the compiled byte for `BS_ATTACKER`
+  is 1, so the real resolution is `GetBattlerAtPosition(1)` = battler 1 (the
+  **opponent**) — matching the loss doc's own observation that DESTIN (the
+  opponent trainer), not the player, visibly slides in on both the win and
+  loss quote screens. This is a real, pre-existing bug from the win-side
+  landing (`5f1b3d80`/`2bb9b3bc`), silently harmless today only because no
+  renderer consumes `trainer-slide-in`'s `battler` field yet (#73 item 1,
+  formerly item 2). Left untouched deliberately: fixing it would flip the
+  already-pinned win-side test's own `battler: 0` expectation
+  (`battleScriptFaintedActionsOrchestration.test.ts` "mid-turn KO" pin),
+  breaking the "win-side pins untouched-green" requirement for this step,
+  and the LOSS side's own new pins intentionally inherit the same
+  (consistent, bug-carrying) resolver rather than diverging from the WIN
+  side's established convention. Needs its own scoped fix (touches both the
+  resolver and both win/loss pins' `battler` expectations) — flagging here
+  since it's genuinely load-bearing for #73 item 1's future renderer work,
+  not just a doc typo.
+- **Next:** #73 item 1 (increment (iii), the win/loss trainer-slide-in
+  presentation phase — now also the right place to fix the `BS_ATTACKER`
+  resolver bug above, since that item is what will finally consume the
+  `battler` field). #73 item 2 (oracle-level pixel coverage, both outcomes).
+  #72's remaining REACHABLE-10 list (`STRINGID_PKMNHUNGONWITHX` next by rank).
+  The `Cmd_end3`/`call-current` resumption gap (`SXWHIPPEDUPSANDSTORM`).
+  #71 Slice D (gated on the animation lane's rung-3 dispatcher).
+- **Notes:** No PAPERCUT — the `git stash`/red-verify cycle and the
+  `submitFactoryFullTurnDecision` event-shape discovery (top-level `events`
+  are `{sequence, payload, provenance}`-wrapped, not flat — a one-line fix
+  once found) cost some exploration time but nothing structural. `npm test`
+  auto-backgrounded on its own past the Bash tool's foreground timeout
+  (known repo-wide issue, PROGRESS 905's own note); stopped the stray
+  background task and re-ran to a real foreground completion per this
+  step's execution discipline, same as that prior session.
+
+---
 ## 905 — [bounded MAIN worker, 2026-08-04 ~01:15] #72 batch 7: 5 more REACHABLE printstring STRINGIDs landed, Sand Stream investigated + deferred
 
 - **State:** master (this docs commit follows the engine commit). Full
@@ -146,72 +244,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   retired; #71 Slice D remains gated on the animation lane's rung-3
   dispatcher (not landed as of this session's orient). Side lane currently
   running the loss-path terminal ground-truth scout (docs+traces only).
-
----
-## 903 — [bounded MAIN worker, 2026-08-03 ~23:45] CANCELER_TORMENTED step BLOCKED: assigned premise was factually wrong, corrected docs, no engine/presentation change
-
-- **State:** master `6eaae2c5` (unchanged — docs-only commit follows). Full
-  `npm test` green (**685 files / 6,706 passed / 1 skipped**, 0 failures),
-  `npm run build` green. No engine or presentation change was made, so no
-  differential run was needed (behavior is provably unchanged — see below).
-- **Did:** Assigned step: port `AtkCanceler_UnableToUseMove`'s alleged
-  "`CANCELLER_TORMENTED` case" (ISSUES #72's note + this doc's own prior
-  triage row both claimed it sits between `CANCELER_DISABLED` and
-  `CANCELER_TAUNTED`) as a new engine phase, then land
-  `STRINGID_PKMNCANTUSEMOVETORMENT`. Per the brief's own "read the C, don't
-  guess," read `reference/pokeemerald/src/battle_util.c:1983-2268` in full
-  before porting anything: the `CANCELER_*` enum and switch have **exactly
-  14 cases, 1:1, no gap** — there is no Torment case in `AtkCanceler` at all,
-  in the real pinned source. The premise both docs and the step brief
-  repeated was wrong. Torment's actual mechanism is a move-*selection*-time
-  rejection, `TrySetCantSelectMoveBattleScript` (`battle_util.c:999-1012`,
-  called from `HandleTurnActionSelectionState` in `battle_main.c:4382` for
-  both player and AI battlers), dispatching to `BattleScript_SelectingTormentedMove`
-  (`printselectionstring`, `battle_scripts_1.s:3563-3565`) — not
-  `BattleScript_MoveUsedIsTormented` (`printstring`, same STRINGID), which
-  has zero C callers and is dead in the real game too (the prior triage row
-  missed the `SelectingTormentedMove` label entirely). Porting a fabricated
-  `AtkCanceler` phase anyway would have been a real behavioral bug, not just
-  non-source-exact bookkeeping: a two-turn move's forced-continuation turn
-  (e.g. Fly turn 2) has `gCurrentMove == gLastMoves[attacker]` without
-  passing back through selection, and real Torment does not interrupt it —
-  an `AtkCanceler`-time recheck would incorrectly cancel that continuation.
-  This engine already ports Torment's *silent* legality half correctly
-  (`CheckMoveLimitations`'s Torment bit, `battleScriptActionAdmission.ts:2485-2491`,
-  mirrors `battle_util.c:1107` exactly); what's actually missing is
-  `TrySetCantSelectMoveBattleScript`'s interactive "reject this selection,
-  force a reselect, print the flavor text" loop, which this
-  decision-boundary-driven engine (`BattleMoveDecision`/`BattleSwitchDecision`
-  supplied directly, assumed pre-legal) has no representation for at all —
-  confirmed no other `printselectionstring` rejection path
-  (`SelectingDisabledMove`/`SelectingNotAllowedMoveTaunt`/
-  `SelectingImprisonedMove`) is wired anywhere in `src/engine` either. That's
-  a new subsystem, not the scoped "same idiom as Taunt/Imprison" one-enum-case
-  addition — genuinely out of bounds for this bounded step. Per this run's
-  worker contract ("if blocked or mis-scoped, say why instead of
-  improvising"), did **not** fabricate the phase and did **not** improvise
-  the larger selection-rejection subsystem unasked. Instead corrected the
-  misinformation at its source: ISSUES.md's "Also found, tracked separately"
-  note and `docs/issue72-reachability-triage.md`'s two
-  `STRINGID_PKMNCANTUSEMOVETORMENT` rows + a new dated correction section
-  (full C citations, same rigor as the doc's existing "settled" appendices).
-  Reran the census — byte-identical, still **67 UNRESOLVED** (no change, as
-  expected since nothing was landed).
-- **Next:** `CANCELER_TORMENTED`/`STRINGID_PKMNCANTUSEMOVETORMENT` needs a
-  supervisor re-scope, not a retry of this brief: either design the
-  selection-rejection subsystem as its own step (bigger than one STRINGID —
-  worth asking whether any other UNRESOLVED id needs the same shape before
-  committing to it), or accept it stays permanently DEAD and drop it from
-  future REACHABLE-adjacent picks. Otherwise resume ISSUES #72 batch 6 (the
-  REACHABLE-28 list from `STRINGID_PKMNSXCUREDYPROBLEM`, per entry 902's
-  Next), the hard trio, `TRACED`, `SXBLOCKSY2`, the loss-side terminal-seam
-  increment, typeref slices 4-8, #71 Slice D.
-- **Notes:** No PAPERCUT. This step cost real time to disprove (~25 min of
-  the 60 reading `battle_util.c`/`battle_main.c`/`battle_scripts_1.s`
-  directly rather than trusting two independent prior docs that agreed with
-  each other but were both wrong) — worth flagging that ISSUES #72's own
-  reachability triage methodology should prefer citing exact `battle_util.c`
-  case/function names over paraphrasing "Real Gen3 X has a Y recheck"
-  claims, since a paraphrase error propagated unchecked from the original
-  triage pass through a step brief without anyone re-deriving it from source
-  in between.

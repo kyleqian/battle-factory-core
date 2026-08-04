@@ -451,16 +451,21 @@ in the triage doc's "MANUAL settlement" appendix):**
   ground-truth literals) plus a JENSON generalization pin (different
   facility class/name/speechLose) proving the mapping is data-driven, not
   DESTIN-hardcoded. Census: 80→78 UNRESOLVED.
-- `STRINGID_TRAINER1WINTEXT` → **still DEAD today, loss-path only.** The
-  win-side increment above deliberately left the LOSS script
-  (`BattleScript_LocalBattleLost`) untouched: it additionally needs `VARIOUS`
-  cases 19/20 (`RETURN_OPPONENT_MON1`/`MON2`, unmodeled in `Cmd_various`
-  today — `battleScriptSwitchinOpcode.ts:677+` only models case 0), and this
-  repo has **no dense oracle trace or RAM pin for the loss-path text at all**
-  (`docs/terminal-seam-round-flow-scout.md` trap 3 — only DESTIN's win quote
-  is traced). A follow-up increment needs both the two new `VARIOUS` cases
-  and a fresh oracle trace before it can land with the confidence the win
-  side had (DESTIN's already-committed `turn17-notes.md` ground truth).
+- `STRINGID_TRAINER1WINTEXT` → **REACHABLE, landed 2026-08-04** (terminal-seam
+  increment (i) LOSS half, `docs/terminal-seam-loss-path-ground-truth.md`):
+  the interpreter now resumes past `checkteamslost`'s own `end2` into a
+  second VM run at `BattleScript_LocalBattleLost` for outcomes `LOST`/`DREW`,
+  driven to its own `end2` before the `{kind:"terminal"}` boundary publishes
+  — the same shape as the WIN-side entry above, plus the two `VARIOUS` cases
+  (`RETURN_OPPONENT_MON1`/`MON2`, 19/20) that script additionally needs, now
+  registered in `Cmd_various` (`battleScriptSwitchinOpcode.ts`).
+  `battleResolutionPresentation.ts`'s `messageLines` resolves
+  `{B_TRAINER1_WIN_TEXT}` hand-built from `opponentTrainer.speechWin`, the
+  exact same bare-placeholder hand-built-lines shape
+  `STRINGID_TRAINER1LOSETEXT` already uses. Pinned in
+  `tests/presentationStringTerminalSeamLoss.test.ts`: DESTIN's real
+  speechWin ("I AM ABOUT TO"/"OVERHEAT", pixel-confirmed in the loss ground
+  truth doc) plus a JENSON generalization pin. Census: 49→48 UNRESOLVED.
 
 **Also found, tracked separately:** `STRINGID_PKMNCANTUSEMOVETORMENT` is
 DEAD *today*, but the prior note here (and `docs/issue72-reachability-triage.md`'s
@@ -493,29 +498,23 @@ change (deterministic, re-derives from the tree). Full 107-id list incl. all
 37 DEAD gates + emitting script label(s) + trigger/carrier evidence in
 `docs/issue72-reachability-triage.md`.
 
-## #73 — Terminal-seam remainder: loss-side implementation, increment (iii) presentation, and the win window's oracle-coverage gap
+## #73 — Terminal-seam remainder: increment (iii) presentation, and the win/loss window's oracle-coverage gap
 
-**Context:** increments (i)+(ii) landed 2026-08-03 (PROGRESS 901): a player
-win on the generic route now runs `BattleScript_FrontierTrainerBattleWon`
+**Context:** increments (i)+(ii) landed 2026-08-03 (PROGRESS 901) for the WIN
+path: a player win on the generic route runs `BattleScript_FrontierTrainerBattleWon`
 through a real second VM run and emits resolved
 `STRINGID_PLAYERDEFEATEDTRAINER1`/`STRINGID_TRAINER1LOSETEXT` message
-commands. Three bounded remainders, in recommended order:
+commands. Increment (i)'s LOSS half landed 2026-08-04 (PROGRESS 906): outcomes
+`LOST`/`DREW` now run `BattleScript_LocalBattleLost` through the same
+second-VM-run shape (`VARIOUS` cases 19/20 registered in `Cmd_various`,
+`STRINGID_TRAINER1WINTEXT` resolved from `speeches.speechWin`) — ground truth
+`docs/terminal-seam-loss-path-ground-truth.md`. The post-loss field routing
+(Lobby challenge-over sequence, not the pre-battle counter room) was already
+correct pre-existing behavior (`factoryTerminalPresentation.ts`'s `roundLost`
+path), not part of that increment. Two bounded remainders, in recommended
+order:
 
-1. **Loss-side implementation.** Mirror the win-side two-stage redispatch for
-   `B_OUTCOME_LOST`/`DREW` → `BattleScript_LocalBattleLost`: register
-   `VARIOUS` cases 19/20 (`returnopponentmon1toball`/`mon2toball` — case 19
-   visibly recalls the opponent sprite AND hides its healthbox before the
-   slide-in; case 20 is a no-op in singles by observation), resolve
-   `STRINGID_TRAINER1WINTEXT` from `speeches.speechWin` (same messageLines
-   idiom), and route the post-loss flow to the Lobby challenge-over sequence
-   — NOT the pre-battle counter room (`WarpToLobbyLost` has no
-   pre-battle-room warp). Ground truth is fully banked:
-   `docs/terminal-seam-loss-path-ground-truth.md` (2026-08-04 scout,
-   twice-run byte-identical fixture
-   `tools/battle-lab/loss-terminal-explosion-dusclops-off.json`, DESTIN
-   speechWin "I AM ABOUT TO OVERHEAT" pixel-confirmed, RNG frozen-then-
-   same-tick-resume pattern verified matching the win side).
-2. **Increment (iii) — the win/loss presentation phase.** The
+1. **Increment (iii) — the win/loss presentation phase.** The
    `trainer-slide-in`/`trainer-slide-out` events are emitted but
    `projectBattleResolutionCommands` (`battleResolutionPresentation.ts`,
    dispatch ~:2139-2465) has no case for them — they fall through with zero
@@ -524,14 +523,19 @@ commands. Three bounded remainders, in recommended order:
    renderer exists outside `battleScene.ts`'s canonical one-off. Scope per
    `docs/terminal-seam-round-flow-scout.md` §3(iii): real dismissible
    win/loss-text phase before `postwin`/`factoryTerminal` fire, sourcing the
-   already-resolved strings.
-3. **Oracle-level coverage for the win window.** The 2026-08-04 audit
+   already-resolved strings (both outcomes now resolve real text, per the
+   loss-side landing above).
+2. **Oracle-level coverage for the win/loss window.** The 2026-08-04 audit
    confirmed the (i)+(ii) landing is pinned only by Tier-1 tests plus a
    differential trace that never reaches a terminal — no emulator-vs-app
-   pixel evidence covers the new win sequence end-to-end. This is expected
-   (the window's pixels are incomplete until item 2 lands the slide-in) and
-   should be closed as part of item 2's acceptance: a dense oracle window
-   from the final hit through the quote dismiss, both outcomes.
+   pixel evidence covers the new win sequence end-to-end; the same is true of
+   the loss sequence landed above (Tier-1 + differential only, no dense
+   oracle window over the new boundary itself — `docs/terminal-seam-loss-path-ground-truth.md`'s
+   own dense trace covers the *pre-existing* engine's behavior, not this
+   engine's new event-driven boundary). This is expected (the window's
+   pixels are incomplete until item 1 lands the slide-in) and should be
+   closed as part of item 1's acceptance: a dense oracle window from the
+   final hit through the quote dismiss, both outcomes.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
