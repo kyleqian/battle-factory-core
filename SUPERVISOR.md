@@ -12,28 +12,25 @@ result, and decides what happens next. You are not the implementer — workers
 via `tools/run-subagent.sh` do the on-the-ground work and should burn most of
 the session's compute. You run rarely and think hard when you do.
 
-The launcher supports four first-class profiles:
+The launcher selects the two agent roles independently:
 
 - `./run-supervisor.sh` — Claude Fable supervisor with Claude Sonnet workers;
-- `./run-supervisor.sh --provider codex` — Codex Sol/high supervisor with
+- `./run-supervisor.sh -S codex` — Codex Sol/high supervisor with
   tiered Codex workers;
-- `./run-supervisor.sh -H` (`--hybrid`) — Claude Fable supervisor, available through
-  Claude Remote Control in interactive mode, with the same tiered Codex
-  workers as the ordinary Codex workflow;
-- `./run-supervisor.sh -D` (`--deepseek-workers`) — Claude Fable supervisor
+- `./run-supervisor.sh -S claude -s codex` — Claude Fable supervisor,
+  available through Claude Remote Control in interactive mode, with tiered
+  Codex workers;
+- `./run-supervisor.sh -S claude -s deepseek` — Claude Fable supervisor
   with workers fixed at `deepseek/deepseek-v4-flash` through headless
   OpenCode `--auto` runs.
 
-`-H` / `--hybrid` is shorthand for
-`--provider claude --worker-provider codex`.
-Worker provider and worker tier are independent of the supervisor model:
-the hybrid Fable supervisor chooses Terra/max, Luna/max, or Sol/high for each
-brief and passes that exact pair to `tools/run-subagent.sh`.
-
-`-D` is intentionally a temporary worker-only profile, not a supervisor
-provider. It fixes the supervisor at Claude Fable and the worker model at
-DeepSeek V4 Flash. It conflicts with `--provider`, `--worker-provider`,
-`--hybrid`, and `--max-mode`; do not pass worker model or effort overrides.
+`-S` / `--supervisor` accepts `claude` or `codex`; DeepSeek is not currently a
+valid supervisor. `-s` / `--sub-agent` accepts `claude`, `codex`, or
+`deepseek`. When `-s` is omitted, the sub-agent follows the supervisor. The
+supervisor and sub-agent choices are otherwise independent. DeepSeek
+sub-agents are always V4 Flash; do not pass worker model or effort overrides.
+`--max-mode` remains the special all-Codex profile and rejects either role
+being set to anything else.
 
 Read `AGENTS.md`, the authoritative reset at the start of ROADMAP Stage 8, and
 S10's **Executable-frontier reset** (the current stage's ordered next steps and
@@ -89,8 +86,8 @@ edit.
    before launching the worker** (AGENTS.md's commit discipline applies to
    you too; any session can be killed at any moment, and the next one resumes
    from git alone).
-   **Whenever the worker provider is ordinary Codex — including `--hybrid`
-   — the supervisor chooses one exact, mechanically enforced pair:**
+   **Whenever the sub-agent is ordinary Codex, the supervisor chooses one
+   exact, mechanically enforced pair:**
    - `gpt-5.6-terra` / `max`;
    - `gpt-5.6-luna` / `max` (available and exercised — Luna workers landed
      work on 2026-08-02; there is no availability probe, so treat it as
@@ -98,16 +95,16 @@ edit.
    - `gpt-5.6-sol` / `high` (launcher default).
    No other ordinary Codex model or effort pairing is allowed. In particular,
    never lower Terra or Luna below max, and never raise Sol above high.
-   The ordinary Codex profile keeps the supervisor at Sol/high; the hybrid
-   profile keeps it at Claude Fable while retaining this worker routing.
+   A Codex supervisor defaults to Sol/high; a Claude supervisor stays at
+   Claude Fable while retaining this worker routing.
    `./run-supervisor.sh --max-mode` remains the separate all-Sol
    profile: the supervisor runs Sol/ultra, every worker is locked to Sol, and
    workers default to xhigh (the worker ceiling) while permitting high.
-   Max mode rejects both the hybrid profile and every non-Sol worker override.
+   Max mode rejects every non-Codex role selection and non-Sol worker override.
 
-   **DeepSeek worker mode is fixed-route.** Under `-D`, do not apply the Codex
-   routing rubric and do not pass `--provider`, `--model`, or `--effort` to
-   `tools/run-subagent.sh`; the inherited profile always launches
+   **DeepSeek worker mode is fixed-route.** Under `-s deepseek`, do not apply
+   the Codex routing rubric and do not pass `--sub-agent`, `--model`, or
+   `--effort` to `tools/run-subagent.sh`; the inherited selection always launches
    `deepseek/deepseek-v4-flash` through OpenCode.
 
    **Which pair — the routing rubric.** The three pairs are legal; choosing
@@ -153,8 +150,8 @@ edit.
    §3).** More opcodes will always look like the better step — that is the
    drift this ordering exists to stop.
 3. **Delegate.** `./tools/run-subagent.sh "<brief>"` (`--help` lists
-   configuration flags). Provider-specific launch mechanics are load-bearing:
-   - **Claude supervisor (including hybrid and DeepSeek worker mode):** launch it in the background; a
+   configuration flags). Supervisor-specific launch mechanics are load-bearing:
+   - **Claude supervisor (with any sub-agent selection):** launch it in the background; a
      foreground Bash call times out long before a worker finishes. Retain the
      launcher's PID and output path and poll until it exits. The initial shell
      return only means the launcher was started, not that its worker finished.
@@ -170,8 +167,8 @@ edit.
    digest; the full event stream is in the log it names. Codex and OpenCode
    event JSONL and CLI stderr are separate sibling logs so the JSONL remains
    machine-parseable.
-   In hybrid mode the launcher already inherits `WORKER_PROVIDER=codex`; use
-   `--model` and `--effort` per step, for example:
+   With Codex selected as the sub-agent, the worker launcher inherits that
+   selection; use `--model` and `--effort` per step, for example:
 
    ```sh
    ./tools/run-subagent.sh --model gpt-5.6-terra --effort max --brief-file /tmp/scout.txt
@@ -179,9 +176,9 @@ edit.
    ./tools/run-subagent.sh --model gpt-5.6-sol --effort high --brief-file /tmp/implementation.txt
    ```
 
-   In DeepSeek worker mode the launcher instead inherits
-   `WORKER_PROVIDER=deepseek` and the fixed V4 Flash model; invoke the same
-   commands without model or effort flags.
+   With DeepSeek selected as the sub-agent, the launcher instead inherits the
+   fixed V4 Flash model; invoke the same commands without model or effort
+   flags.
 
    Wait for it to finish before launching another into
    the same tree — two workers in one working tree fight over it, and the

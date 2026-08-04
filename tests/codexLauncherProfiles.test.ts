@@ -14,13 +14,11 @@ let fakeBin = "";
 
 const PROFILE_ENV_KEYS = [
   "MODEL",
-  "SUPERVISOR_PROVIDER",
+  "SUPERVISOR_AGENT",
+  "SUB_AGENT",
   "SUPERVISOR_MODEL",
   "SUPERVISOR_REASONING_EFFORT",
-  "SUPERVISOR_HYBRID",
-  "SUPERVISOR_DEEPSEEK_WORKERS",
   "SUPERVISOR_MAX_MODE",
-  "WORKER_PROVIDER",
   "WORKER_MODEL",
   "WORKER_REASONING_EFFORT",
   "POKEBENCH_WORKER_PROVIDER",
@@ -81,13 +79,12 @@ describe("Supervisor and worker launcher profiles", () => {
 
     expect(result.status).toBe(0);
     expect(configFrom(result.stdout)).toMatchObject({
-      supervisor_provider: "claude",
+      supervisor: "claude",
       supervisor_model: "claude-fable-5",
       supervisor_effort: "n/a",
       supervisor_shell_cwd: "project-root-reset",
-      hybrid: "0",
       max_mode: "0",
-      worker_provider: "claude",
+      sub_agent: "claude",
       worker_launch_mode: "background",
       worker_routing: "fixed",
       worker_model: "claude-sonnet-5",
@@ -97,20 +94,19 @@ describe("Supervisor and worker launcher profiles", () => {
 
   it("keeps the ordinary Codex supervisor profile unchanged", () => {
     const result = runLauncher("run-supervisor.sh", [
-      "--provider",
-      "codex",
+      "--supervisor",
+      "Codex",
       "--print-config",
     ]);
 
     expect(result.status).toBe(0);
     expect(configFrom(result.stdout)).toMatchObject({
-      supervisor_provider: "codex",
+      supervisor: "codex",
       supervisor_model: "gpt-5.6-sol",
       supervisor_effort: "high",
       supervisor_shell_cwd: "per-command",
-      hybrid: "0",
       max_mode: "0",
-      worker_provider: "codex",
+      sub_agent: "codex",
       worker_launch_mode: "managed",
       worker_routing: "tiered",
       worker_model: "gpt-5.6-sol",
@@ -119,11 +115,10 @@ describe("Supervisor and worker launcher profiles", () => {
   });
 
   it.each([
-    ["hybrid shorthand", ["--hybrid"]],
-    ["short hybrid shorthand", ["-H"]],
+    ["short role flags", ["-S", "Claude", "-s", "Codex"]],
     [
-      "explicit mixed providers",
-      ["--provider", "claude", "--worker-provider", "codex"],
+      "long role flags",
+      ["--supervisor", "claude", "--sub-agent", "codex"],
     ],
   ])(
     "%s selects a Fable supervisor with tiered Codex workers",
@@ -135,13 +130,12 @@ describe("Supervisor and worker launcher profiles", () => {
 
       expect(result.status).toBe(0);
       expect(configFrom(result.stdout)).toMatchObject({
-        supervisor_provider: "claude",
+        supervisor: "claude",
         supervisor_model: "claude-fable-5",
         supervisor_effort: "n/a",
         supervisor_shell_cwd: "project-root-reset",
-        hybrid: "1",
         max_mode: "0",
-        worker_provider: "codex",
+        sub_agent: "codex",
         worker_launch_mode: "background",
         worker_routing: "tiered",
         worker_model: "gpt-5.6-sol",
@@ -150,27 +144,26 @@ describe("Supervisor and worker launcher profiles", () => {
     },
   );
 
-  it("supports the hybrid profile through environment configuration", () => {
+  it("supports independent role selection through environment configuration", () => {
     const result = runLauncher(
       "run-supervisor.sh",
       ["--print-config"],
-      { SUPERVISOR_HYBRID: "1" },
+      { SUPERVISOR_AGENT: "Claude", SUB_AGENT: "Codex" },
     );
 
     expect(result.status).toBe(0);
     expect(configFrom(result.stdout)).toMatchObject({
-      supervisor_provider: "claude",
+      supervisor: "claude",
       supervisor_shell_cwd: "project-root-reset",
-      hybrid: "1",
-      worker_provider: "codex",
+      sub_agent: "codex",
       worker_launch_mode: "background",
       worker_routing: "tiered",
     });
   });
 
   it.each([
-    ["short flag", ["-D"]],
-    ["long flag", ["--deepseek-workers"]],
+    ["short flag", ["-s", "DeepSeek"]],
+    ["long flag", ["--supervisor", "claude", "--sub-agent", "deepseek"]],
   ])(
     "%s selects a Fable supervisor with fixed DeepSeek V4 Flash/OpenCode workers",
     (_name, profileArgs) => {
@@ -181,14 +174,12 @@ describe("Supervisor and worker launcher profiles", () => {
 
       expect(result.status).toBe(0);
       expect(configFrom(result.stdout)).toMatchObject({
-        supervisor_provider: "claude",
+        supervisor: "claude",
         supervisor_model: "claude-fable-5",
         supervisor_effort: "n/a",
         supervisor_shell_cwd: "project-root-reset",
-        hybrid: "0",
-        deepseek_workers: "1",
         max_mode: "0",
-        worker_provider: "deepseek",
+        sub_agent: "deepseek",
         worker_launch_mode: "background",
         worker_routing: "fixed-deepseek",
         worker_model: "deepseek/deepseek-v4-flash",
@@ -204,14 +195,13 @@ describe("Supervisor and worker launcher profiles", () => {
     const result = runLauncher(
       "run-supervisor.sh",
       ["--print-config"],
-      { SUPERVISOR_DEEPSEEK_WORKERS: "1" },
+      { SUB_AGENT: "DeepSeek" },
     );
 
     expect(result.status).toBe(0);
     expect(configFrom(result.stdout)).toMatchObject({
-      supervisor_provider: "claude",
-      deepseek_workers: "1",
-      worker_provider: "deepseek",
+      supervisor: "claude",
+      sub_agent: "deepseek",
       worker_model: "deepseek/deepseek-v4-flash",
       worker_runtime: "opencode",
     });
@@ -219,14 +209,14 @@ describe("Supervisor and worker launcher profiles", () => {
 
   it("configures direct DeepSeek workers as headless OpenCode V4 Flash runs", () => {
     const result = runLauncher("tools/run-subagent.sh", [
-      "--provider",
-      "deepseek",
+      "--sub-agent",
+      "DeepSeek",
       "--print-config",
     ]);
 
     expect(result.status).toBe(0);
     expect(configFrom(result.stdout)).toMatchObject({
-      worker_provider: "deepseek",
+      sub_agent: "deepseek",
       worker_model: "deepseek/deepseek-v4-flash",
       worker_effort: "n/a",
       worker_runtime: "opencode",
@@ -258,11 +248,11 @@ describe("Supervisor and worker launcher profiles", () => {
 
       expect(result.status).toBe(0);
       expect(configFrom(result.stdout)).toMatchObject({
-        supervisor_provider: "codex",
+        supervisor: "codex",
         supervisor_model: "gpt-5.6-sol",
         supervisor_effort: "ultra",
         max_mode: "1",
-        worker_provider: "codex",
+        sub_agent: "codex",
         worker_model: "gpt-5.6-sol",
         worker_effort: "xhigh",
       });
@@ -283,7 +273,7 @@ describe("Supervisor and worker launcher profiles", () => {
 
     expect(inherited.status).toBe(0);
     expect(configFrom(inherited.stdout)).toMatchObject({
-      worker_provider: "codex",
+      sub_agent: "codex",
       worker_model: "gpt-5.6-sol",
       worker_effort: "xhigh",
       max_mode: "1",
@@ -329,19 +319,19 @@ describe("Supervisor and worker launcher profiles", () => {
 
     expect(terra.status).toBe(0);
     expect(configFrom(terra.stdout)).toMatchObject({
-      worker_provider: "codex",
+      sub_agent: "codex",
       worker_model: "gpt-5.6-terra",
       worker_effort: "max",
     });
     expect(luna.status).toBe(0);
     expect(configFrom(luna.stdout)).toMatchObject({
-      worker_provider: "codex",
+      sub_agent: "codex",
       worker_model: "gpt-5.6-luna",
       worker_effort: "max",
     });
     expect(sol.status).toBe(0);
     expect(configFrom(sol.stdout)).toMatchObject({
-      worker_provider: "codex",
+      sub_agent: "codex",
       worker_model: "gpt-5.6-sol",
       worker_effort: "high",
     });
@@ -349,22 +339,22 @@ describe("Supervisor and worker launcher profiles", () => {
 
   it("rejects effort that does not match the ordinary Codex model", () => {
     const directWorker = runLauncher("tools/run-subagent.sh", [
-      "--provider",
+      "--sub-agent",
       "codex",
       "--effort",
       "medium",
       "--print-config",
     ]);
     const codexSupervisor = runLauncher("run-supervisor.sh", [
-      "--provider",
+      "--supervisor",
       "codex",
       "--effort",
       "medium",
       "--print-config",
     ]);
-    const hybridWorkerOverride = runLauncher(
+    const mixedWorkerOverride = runLauncher(
       "run-supervisor.sh",
-      ["--hybrid", "--print-config"],
+      ["-S", "claude", "-s", "codex", "--print-config"],
       { WORKER_REASONING_EFFORT: "medium" },
     );
     const maxWorker = runLauncher("tools/run-subagent.sh", [
@@ -382,8 +372,8 @@ describe("Supervisor and worker launcher profiles", () => {
     expect(codexSupervisor.stderr).toContain(
       "ordinary Codex model 'gpt-5.6-sol' requires effort 'high'",
     );
-    expect(hybridWorkerOverride.status).toBe(2);
-    expect(hybridWorkerOverride.stderr).toContain(
+    expect(mixedWorkerOverride.status).toBe(2);
+    expect(mixedWorkerOverride.stderr).toContain(
       "ordinary Codex worker model 'gpt-5.6-sol' requires effort 'high'",
     );
     expect(maxWorker.status).toBe(2);
@@ -395,14 +385,14 @@ describe("Supervisor and worker launcher profiles", () => {
   it("defaults Terra and Luna to max and rejects lower effort", () => {
     for (const model of ["gpt-5.6-terra", "gpt-5.6-luna"]) {
       const implicit = runLauncher("tools/run-subagent.sh", [
-        "--provider",
+        "--sub-agent",
         "codex",
         "--model",
         model,
         "--print-config",
       ]);
       const lowered = runLauncher("tools/run-subagent.sh", [
-        "--provider",
+        "--sub-agent",
         "codex",
         "--model",
         model,
@@ -422,7 +412,7 @@ describe("Supervisor and worker launcher profiles", () => {
 
   it("keeps ordinary Sol fixed at high", () => {
     const raised = runLauncher("tools/run-subagent.sh", [
-      "--provider",
+      "--sub-agent",
       "codex",
       "--model",
       "gpt-5.6-sol",
@@ -437,11 +427,11 @@ describe("Supervisor and worker launcher profiles", () => {
     );
   });
 
-  it("resolves hybrid worker environment overrides through the same matrix", () => {
+  it("resolves mixed Codex sub-agent overrides through the same matrix", () => {
     for (const model of ["gpt-5.6-terra", "gpt-5.6-luna"]) {
       const result = runLauncher(
         "run-supervisor.sh",
-        ["--hybrid", "--print-config"],
+        ["-S", "claude", "-s", "codex", "--print-config"],
         { WORKER_MODEL: model },
       );
 
@@ -456,7 +446,7 @@ describe("Supervisor and worker launcher profiles", () => {
   it("applies the same Terra/max and Luna/max policy to Codex supervisors", () => {
     for (const model of ["gpt-5.6-terra", "gpt-5.6-luna"]) {
       const result = runLauncher("run-supervisor.sh", [
-        "--provider",
+        "--supervisor",
         "codex",
         "--model",
         model,
@@ -473,14 +463,14 @@ describe("Supervisor and worker launcher profiles", () => {
 
   it("rejects unsupported ordinary Codex models", () => {
     const worker = runLauncher("tools/run-subagent.sh", [
-      "--provider",
+      "--sub-agent",
       "codex",
       "--model",
       "gpt-5.6-other",
       "--print-config",
     ]);
     const supervisor = runLauncher("run-supervisor.sh", [
-      "--provider",
+      "--supervisor",
       "codex",
       "--model",
       "gpt-5.6-other",
@@ -499,7 +489,7 @@ describe("Supervisor and worker launcher profiles", () => {
     "%s selects the commit-free audit postflight",
     (flag) => {
       const result = runLauncher("tools/run-subagent.sh", [
-        "--provider",
+        "--sub-agent",
         "codex",
         flag,
         "--print-config",
@@ -507,17 +497,23 @@ describe("Supervisor and worker launcher profiles", () => {
 
       expect(result.status).toBe(0);
       expect(configFrom(result.stdout)).toMatchObject({
-        worker_provider: "codex",
+        sub_agent: "codex",
         worker_mode: "read-only",
       });
     },
   );
 
-  it("rejects Claude or Terra overrides in max mode", () => {
+  it("rejects non-Codex role selections or Terra overrides in max mode", () => {
     const claudeSupervisor = runLauncher("run-supervisor.sh", [
       "--max-mode",
-      "--provider",
+      "--supervisor",
       "claude",
+      "--print-config",
+    ]);
+    const deepSeekSubAgent = runLauncher("run-supervisor.sh", [
+      "--max-mode",
+      "--sub-agent",
+      "deepseek",
       "--print-config",
     ]);
     const terraWorker = runLauncher("tools/run-subagent.sh", [
@@ -528,76 +524,74 @@ describe("Supervisor and worker launcher profiles", () => {
     ]);
 
     expect(claudeSupervisor.status).toBe(2);
-    expect(claudeSupervisor.stderr).toContain("Codex-only profile");
+    expect(claudeSupervisor.stderr).toContain("requires a Codex supervisor");
+    expect(deepSeekSubAgent.status).toBe(2);
+    expect(deepSeekSubAgent.stderr).toContain("requires Codex sub-agents");
     expect(terraWorker.status).toBe(2);
     expect(terraWorker.stderr).toContain(
       "only permits gpt-5.6-sol workers",
     );
   });
 
-  it("rejects contradictory hybrid profile selections", () => {
-    const maxMode = runLauncher("run-supervisor.sh", [
-      "--hybrid",
-      "--max-mode",
-      "--print-config",
-    ]);
-    const claudeWorkers = runLauncher("run-supervisor.sh", [
-      "--hybrid",
-      "--worker-provider",
-      "claude",
-      "--print-config",
-    ]);
+  it.each([
+    ["run-supervisor.sh", ["--provider", "codex"]],
+    ["run-supervisor.sh", ["--worker-provider", "codex"]],
+    ["run-supervisor.sh", ["--hybrid"]],
+    ["run-supervisor.sh", ["-H"]],
+    ["run-supervisor.sh", ["--deepseek-workers"]],
+    ["run-supervisor.sh", ["-D"]],
+    ["tools/run-subagent.sh", ["--provider", "codex"]],
+    ["tools/run-subagent.sh", ["-p", "codex"]],
+  ])("retires the old provider/profile flag in %s: %j", (path, args) => {
+    const result = runLauncher(path, [...args, "--print-config"]);
 
-    expect(maxMode.status).toBe(2);
-    expect(maxMode.stderr).toContain(
-      "--hybrid and --max-mode are different profiles",
-    );
-    expect(claudeWorkers.status).toBe(2);
-    expect(claudeWorkers.stderr).toContain(
-      "--hybrid requires Codex workers",
-    );
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain("unknown option");
   });
 
-  it("rejects DeepSeek worker mode combined with provider-oriented profiles", () => {
-    const explicitProvider = runLauncher("run-supervisor.sh", [
-      "-D",
-      "--provider",
-      "claude",
-      "--print-config",
-    ]);
-    const explicitWorkerProvider = runLauncher("run-supervisor.sh", [
-      "-D",
-      "--worker-provider",
-      "deepseek",
-      "--print-config",
-    ]);
-    const hybrid = runLauncher("run-supervisor.sh", [
-      "-D",
-      "--hybrid",
-      "--print-config",
-    ]);
-    const maxMode = runLauncher("run-supervisor.sh", [
-      "-D",
-      "--max-mode",
+  it.each([["DeepSeek"], ["deepseek"]])(
+    "rejects %s as a supervisor",
+    (agent) => {
+      const result = runLauncher("run-supervisor.sh", [
+        "--supervisor",
+        agent,
+        "--print-config",
+      ]);
+
+      expect(result.status).toBe(2);
+      expect(result.stderr).toContain("DeepSeek is not supported as a supervisor");
+    },
+  );
+
+  it("allows a Codex supervisor to select DeepSeek sub-agents independently", () => {
+    const result = runLauncher("run-supervisor.sh", [
+      "-S",
+      "Codex",
+      "-s",
+      "DeepSeek",
       "--print-config",
     ]);
 
-    for (const result of [explicitProvider, explicitWorkerProvider, hybrid, maxMode]) {
-      expect(result.status).toBe(2);
-      expect(result.stderr).toContain("-D/--deepseek-workers conflicts");
-    }
+    expect(result.status).toBe(0);
+    expect(configFrom(result.stdout)).toMatchObject({
+      supervisor: "codex",
+      sub_agent: "deepseek",
+      supervisor_model: "gpt-5.6-sol",
+      worker_model: "deepseek/deepseek-v4-flash",
+      worker_runtime: "opencode",
+    });
   });
 
   it("keeps DeepSeek workers fixed at V4 Flash without an effort override", () => {
     const directModel = runLauncher("tools/run-subagent.sh", [
-      "--provider",
+      "--sub-agent",
       "deepseek",
       "--model",
       "deepseek/deepseek-reasoner",
       "--print-config",
     ]);
     const directEffort = runLauncher("tools/run-subagent.sh", [
-      "--provider",
+      "--sub-agent",
       "deepseek",
       "--effort",
       "high",
@@ -605,14 +599,14 @@ describe("Supervisor and worker launcher profiles", () => {
     ]);
     const inheritedModel = runLauncher(
       "run-supervisor.sh",
-      ["-D", "--print-config"],
+      ["-s", "deepseek", "--print-config"],
       { WORKER_MODEL: "deepseek/deepseek-reasoner" },
     );
 
     expect(directModel.status).toBe(2);
     expect(directModel.stderr).toContain("fixed at deepseek/deepseek-v4-flash");
     expect(directEffort.status).toBe(2);
-    expect(directEffort.stderr).toContain("--effort applies only to the codex provider");
+    expect(directEffort.stderr).toContain("--effort applies only to a Codex sub-agent");
     expect(inheritedModel.status).toBe(2);
     expect(inheritedModel.stderr).toContain("fixed at deepseek/deepseek-v4-flash");
   });

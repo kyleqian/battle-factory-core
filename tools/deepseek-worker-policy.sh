@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# The temporary DeepSeek worker profile is intentionally fixed. OpenCode's
+# The DeepSeek sub-agent selection is intentionally fixed. OpenCode's
 # model names include the upstream provider, so keeping this in one shared
 # policy file prevents the supervisor and worker launchers from drifting.
 POKEBENCH_DEEPSEEK_WORKER_MODEL="deepseek/deepseek-v4-flash"

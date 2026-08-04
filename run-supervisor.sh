@@ -3,14 +3,11 @@
 # increment at a time, delegates it to a capped disposable worker, verifies
 # the result, and continues, fixes, or defers — per SUPERVISOR.md. The
 # default remains the original Claude flow (claude-fable-5 supervisor,
-# claude-sonnet-5 workers). Pass --provider codex for the Codex profile
-# (gpt-5.6-sol/high supervisor; Codex-only worker routing defaults to
-# gpt-5.6-sol/high and may choose Terra/max, Luna/max, or Sol/high). Pass
-# --hybrid for the mixed profile:
-# a Claude Fable supervisor with the same tiered Codex worker routing. Pass
-# -D for the temporary Claude Fable + DeepSeek V4 Flash/OpenCode profile. Pass
-# --max-mode for the all-Sol profile: a Sol/ultra supervisor with Sol/xhigh
-# workers.
+# claude-sonnet-5 workers). Choose the two roles independently with
+# -S/--supervisor and -s/--sub-agent. Supervisors may be Claude or Codex;
+# sub-agents may additionally be DeepSeek V4 Flash through OpenCode. If the
+# sub-agent is omitted, it follows the supervisor. --max-mode remains the
+# all-Sol profile: a Sol/ultra supervisor with Sol/xhigh workers.
 #
 # By default the supervisor runs in the interactive CLI, autonomously through
 # the full session cap. The terminal remains available for optional user
@@ -26,9 +23,11 @@
 #   ./run-supervisor.sh               # interactive supervisor, 6h hard cap
 #   ./run-supervisor.sh -c 4          # different cap          (--cap-hours 4)
 #   ./run-supervisor.sh --headless    # unattended, stream view like run-agent.sh
-#   ./run-supervisor.sh --provider codex  # Sol/high supervisor + tiered Codex workers
-#   ./run-supervisor.sh -H            # Fable supervisor + tiered Codex workers
-#   ./run-supervisor.sh -D            # Fable supervisor + DeepSeek V4 Flash workers
+#   ./run-supervisor.sh -S codex      # Sol/high supervisor + tiered Codex workers
+#   ./run-supervisor.sh -S claude -s codex
+#                                      # Fable supervisor + tiered Codex workers
+#   ./run-supervisor.sh -S claude -s deepseek
+#                                      # Fable supervisor + DeepSeek V4 Flash workers
 #   ./run-supervisor.sh --max-mode    # Sol/ultra supervisor + Sol/xhigh workers
 #   ./run-supervisor.sh -m NAME       # override the selected profile's model
 #   ./run-supervisor.sh -e EFFORT     # Codex reasoning effort override
@@ -55,30 +54,22 @@ Usage: ./run-supervisor.sh [options]
                         persistent .worktrees/animation-main worktree on
                         branch animation-main (per ANIMATION_SUPERVISOR.md);
                         both supervisors may run concurrently.
-  -p, --provider NAME   claude (default) or codex
-  -H, --hybrid          Claude Fable supervisor with tiered Codex workers;
-                        shorthand for --provider claude --worker-provider codex
-  -D, --deepseek-workers
-                        temporary profile: Claude Fable supervisor with fixed
-                        DeepSeek V4 Flash workers launched through OpenCode.
-                        Conflicts with --provider, --worker-provider, --hybrid,
-                        and --max-mode.
-      --worker-provider NAME
-                        claude (default for Claude) or codex. DeepSeek workers
-                        are selected through -D. Codex workers may be routed
-                        per step with run-subagent.sh --model/--effort.
+  -S, --supervisor NAME claude (default) or codex. DeepSeek cannot supervise.
+  -s, --sub-agent NAME claude, codex, or deepseek. Defaults to the selected
+                        supervisor. DeepSeek means fixed V4 Flash workers via
+                        OpenCode; Codex workers may be routed per step with
+                        run-subagent.sh --model/--effort.
   -M, --max-mode        Codex all-Sol profile: Sol/ultra supervisor and
-                        Sol/xhigh workers (also selects --provider codex)
-  -m, --model NAME      supervisor model (provider default)
+                        Sol/xhigh workers (selects Codex for both roles)
+  -m, --model NAME      supervisor model (selected agent's default)
   -e, --effort EFFORT   Codex supervisor reasoning effort
                         (ordinary Terra/Luna=max; ordinary Sol=high)
-      --log FILE        raw JSONL log for --headless (provider default)
+      --log FILE        raw JSONL log for --headless (runtime default)
       --print-config    print the resolved profile without launching
   -h, --help            show this help
-Environment overrides: SUPERVISOR_PROVIDER, SUPERVISOR_MODEL,
-SUPERVISOR_REASONING_EFFORT, SUPERVISOR_HYBRID,
-SUPERVISOR_DEEPSEEK_WORKERS, SUPERVISOR_MAX_MODE, WORKER_PROVIDER,
-OPENCODE_BIN. Legacy MODEL remains supported.
+Environment overrides: SUPERVISOR_AGENT, SUB_AGENT, SUPERVISOR_MODEL,
+SUPERVISOR_REASONING_EFFORT, SUPERVISOR_MAX_MODE, OPENCODE_BIN. Legacy MODEL
+remains supported.
 Exit 6 means the lane's deferred file (DEFERRED.md for main,
 ANIMATION_DEFERRED.md for animation) has an unresolved question that must be
 resolved before another supervisor session can start in that lane.
@@ -88,19 +79,19 @@ EOF
 HEADLESS="${HEADLESS:-0}"
 CAP_HOURS="${CAP_HOURS:-6}"
 LANE="${SUPERVISOR_LANE:-main}"
-PROVIDER="${SUPERVISOR_PROVIDER:-claude}"
+PROVIDER="${SUPERVISOR_AGENT:-claude}"
 MODEL="${SUPERVISOR_MODEL:-${MODEL:-}}"
 REASONING_EFFORT="${SUPERVISOR_REASONING_EFFORT:-}"
 MAX_MODE="${SUPERVISOR_MAX_MODE:-0}"
-HYBRID="${SUPERVISOR_HYBRID:-0}"
-DEEPSEEK_WORKERS="${SUPERVISOR_DEEPSEEK_WORKERS:-0}"
-WORKER_PROVIDER="${WORKER_PROVIDER:-}"
+WORKER_PROVIDER="${SUB_AGENT:-}"
 SUPERVISOR_LOG="${SUPERVISOR_LOG:-}"
 PRINT_CONFIG=0
-PROVIDER_FLAG_SET=0
+SUPERVISOR_SELECTION_SET=0
+if [[ "${SUPERVISOR_AGENT+x}" == "x" ]]; then
+  SUPERVISOR_SELECTION_SET=1
+fi
 MODEL_FLAG_SET=0
 EFFORT_FLAG_SET=0
-WORKER_PROVIDER_FLAG_SET=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -109,12 +100,10 @@ while [[ $# -gt 0 ]]; do
     --cap-hours=*)    CAP_HOURS="${1#*=}"; shift ;;
     -l|--lane)        LANE="${2:?--lane needs main or animation}"; shift 2 ;;
     --lane=*)         LANE="${1#*=}"; shift ;;
-    -p|--provider)    PROVIDER="${2:?--provider needs a name}"; PROVIDER_FLAG_SET=1; shift 2 ;;
-    --provider=*)     PROVIDER="${1#*=}"; PROVIDER_FLAG_SET=1; shift ;;
-    -H|--hybrid)      HYBRID=1; shift ;;
-    -D|--deepseek-workers) DEEPSEEK_WORKERS=1; shift ;;
-    --worker-provider) WORKER_PROVIDER="${2:?--worker-provider needs a name}"; WORKER_PROVIDER_FLAG_SET=1; shift 2 ;;
-    --worker-provider=*) WORKER_PROVIDER="${1#*=}"; WORKER_PROVIDER_FLAG_SET=1; shift ;;
+    -S|--supervisor)  PROVIDER="${2:?--supervisor needs a name}"; SUPERVISOR_SELECTION_SET=1; shift 2 ;;
+    --supervisor=*)   PROVIDER="${1#*=}"; SUPERVISOR_SELECTION_SET=1; shift ;;
+    -s|--sub-agent)   WORKER_PROVIDER="${2:?--sub-agent needs a name}"; shift 2 ;;
+    --sub-agent=*)    WORKER_PROVIDER="${1#*=}"; shift ;;
     -M|--max-mode)    MAX_MODE=1; shift ;;
     -m|--model)       MODEL="${2:?--model needs a model name}"; MODEL_FLAG_SET=1; shift 2 ;;
     --model=*)        MODEL="${1#*=}"; MODEL_FLAG_SET=1; shift ;;
@@ -132,50 +121,17 @@ if [[ ! "$MAX_MODE" =~ ^(0|1)$ ]]; then
   echo "run-supervisor: SUPERVISOR_MAX_MODE must be 0 or 1 (got '$MAX_MODE')" >&2
   exit 2
 fi
-if [[ ! "$HYBRID" =~ ^(0|1)$ ]]; then
-  echo "run-supervisor: SUPERVISOR_HYBRID must be 0 or 1 (got '$HYBRID')" >&2
-  exit 2
+
+# Agent names are proper nouns in the CLI documentation, but selection is
+# intentionally case-insensitive for ergonomic `-S Claude -s DeepSeek` use.
+PROVIDER="$(printf '%s' "$PROVIDER" | tr '[:upper:]' '[:lower:]')"
+if [[ -n "$WORKER_PROVIDER" ]]; then
+  WORKER_PROVIDER="$(printf '%s' "$WORKER_PROVIDER" | tr '[:upper:]' '[:lower:]')"
 fi
-if [[ ! "$DEEPSEEK_WORKERS" =~ ^(0|1)$ ]]; then
-  echo "run-supervisor: SUPERVISOR_DEEPSEEK_WORKERS must be 0 or 1 (got '$DEEPSEEK_WORKERS')" >&2
-  exit 2
-fi
-if [[ "$DEEPSEEK_WORKERS" == "1" ]]; then
-  if [[ "$PROVIDER_FLAG_SET" == "1" ]]; then
-    echo "run-supervisor: -D/--deepseek-workers conflicts with --provider" >&2
-    exit 2
-  fi
-  if [[ "$WORKER_PROVIDER_FLAG_SET" == "1" ]]; then
-    echo "run-supervisor: -D/--deepseek-workers conflicts with --worker-provider" >&2
-    exit 2
-  fi
-  if [[ "$HYBRID" == "1" ]]; then
-    echo "run-supervisor: -D/--deepseek-workers conflicts with --hybrid" >&2
-    exit 2
-  fi
-  if [[ "$MAX_MODE" == "1" ]]; then
-    echo "run-supervisor: -D/--deepseek-workers conflicts with --max-mode" >&2
-    exit 2
-  fi
-  if [[ "$MODEL_FLAG_SET" == "1" && "$MODEL" != "claude-fable-5" ]]; then
-    echo "run-supervisor: -D/--deepseek-workers fixes the supervisor model at claude-fable-5 (got '$MODEL')" >&2
-    exit 2
-  fi
-  if [[ "$EFFORT_FLAG_SET" == "1" ]]; then
-    echo "run-supervisor: -D/--deepseek-workers uses a Claude supervisor and cannot use --effort" >&2
-    exit 2
-  fi
-  PROVIDER=claude
-  MODEL=claude-fable-5
-  WORKER_PROVIDER=deepseek
-fi
-if [[ "$MAX_MODE" == "1" && "$HYBRID" == "1" ]]; then
-  echo "run-supervisor: --hybrid and --max-mode are different profiles and cannot be combined" >&2
-  exit 2
-fi
+
 if [[ "$MAX_MODE" == "1" ]]; then
-  if [[ "$PROVIDER_FLAG_SET" == "1" && "$PROVIDER" != "codex" ]]; then
-    echo "run-supervisor: --max-mode is a Codex-only profile and cannot use provider '$PROVIDER'" >&2
+  if [[ "$SUPERVISOR_SELECTION_SET" == "1" && "$PROVIDER" != "codex" ]]; then
+    echo "run-supervisor: --max-mode requires a Codex supervisor (got '$PROVIDER')" >&2
     exit 2
   fi
   if [[ "$MODEL_FLAG_SET" == "1" && "$MODEL" != "gpt-5.6-sol" ]]; then
@@ -187,7 +143,7 @@ if [[ "$MAX_MODE" == "1" ]]; then
     exit 2
   fi
   if [[ -n "$WORKER_PROVIDER" && "$WORKER_PROVIDER" != "codex" ]]; then
-    echo "run-supervisor: --max-mode only permits Codex workers (got '$WORKER_PROVIDER')" >&2
+    echo "run-supervisor: --max-mode requires Codex sub-agents (got '$WORKER_PROVIDER')" >&2
     exit 2
   fi
   PROVIDER=codex
@@ -195,39 +151,22 @@ if [[ "$MAX_MODE" == "1" ]]; then
   MODEL=gpt-5.6-sol
   REASONING_EFFORT=ultra
 fi
-if [[ "$HYBRID" == "1" ]]; then
-  if [[ "$PROVIDER" != "claude" ]]; then
-    echo "run-supervisor: --hybrid requires a Claude supervisor (got '$PROVIDER')" >&2
-    exit 2
-  fi
-  if [[ -n "$WORKER_PROVIDER" && "$WORKER_PROVIDER" != "codex" ]]; then
-    echo "run-supervisor: --hybrid requires Codex workers (got '$WORKER_PROVIDER')" >&2
-    exit 2
-  fi
-  PROVIDER=claude
-  WORKER_PROVIDER=codex
-fi
 WORKER_PROVIDER="${WORKER_PROVIDER:-$PROVIDER}"
-# The explicit long form is equivalent to --hybrid and receives the same
-# routing guidance in the supervisor prompt.
-if [[ "$PROVIDER" == "claude" && "$WORKER_PROVIDER" == "codex" ]]; then
-  HYBRID=1
-fi
-if [[ "$WORKER_PROVIDER" == "deepseek" && "$DEEPSEEK_WORKERS" != "1" ]]; then
-  echo "run-supervisor: DeepSeek workers are selected only through -D/--deepseek-workers" >&2
-  exit 2
-fi
 
 if [[ ! "$CAP_HOURS" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
   echo "run-supervisor: --cap-hours must be a positive number (got '$CAP_HOURS')" >&2
   exit 2
 fi
+if [[ "$PROVIDER" == "deepseek" ]]; then
+  echo "run-supervisor: DeepSeek is not supported as a supervisor (expected claude or codex)" >&2
+  exit 2
+fi
 if [[ ! "$PROVIDER" =~ ^(claude|codex)$ ]]; then
-  echo "run-supervisor: unsupported provider '$PROVIDER' (expected claude or codex)" >&2
+  echo "run-supervisor: unsupported supervisor '$PROVIDER' (expected claude or codex)" >&2
   exit 2
 fi
 if [[ ! "$WORKER_PROVIDER" =~ ^(claude|codex|deepseek)$ ]]; then
-  echo "run-supervisor: unsupported worker provider '$WORKER_PROVIDER' (expected claude, codex, or deepseek)" >&2
+  echo "run-supervisor: unsupported sub-agent '$WORKER_PROVIDER' (expected claude, codex, or deepseek)" >&2
   exit 2
 fi
 if [[ ! "$LANE" =~ ^(main|animation)$ ]]; then
@@ -272,7 +211,7 @@ case "$PROVIDER" in
   claude)
     MODEL="${MODEL:-claude-fable-5}"
     if [[ -n "$REASONING_EFFORT" ]]; then
-      echo "run-supervisor: --effort applies only to the codex provider" >&2
+      echo "run-supervisor: --effort applies only to a Codex supervisor" >&2
       exit 2
     fi
     command -v claude >/dev/null 2>&1 || { echo "run-supervisor: claude CLI not found on PATH" >&2; exit 127; }
@@ -338,15 +277,13 @@ if [[ "$PROVIDER" != "codex" ]]; then
   codex_git_attribution_disable
 fi
 
-# Workers inherit the resolved worker provider. Max mode is intentionally
+# Workers inherit the resolved sub-agent selection. Max mode is intentionally
 # stricter: its inherited marker makes the worker launcher reject non-Sol
 # models, and these defaults give every worker the xhigh ceiling requested by
 # the profile.
-export WORKER_PROVIDER
 export POKEBENCH_WORKER_PROVIDER="$WORKER_PROVIDER"
 export POKEBENCH_CODEX_MAX_MODE="$MAX_MODE"
 if [[ "$MAX_MODE" == "1" ]]; then
-  export WORKER_PROVIDER=codex
   export WORKER_MODEL=gpt-5.6-sol
   export WORKER_REASONING_EFFORT=xhigh
 elif [[ "$WORKER_PROVIDER" == "codex" ]]; then
@@ -389,14 +326,12 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then
     WORKER_ROUTING=fixed
   fi
   echo "supervisor_lane=$LANE"
-  echo "supervisor_provider=$PROVIDER"
+  echo "supervisor=$PROVIDER"
   echo "supervisor_model=$MODEL"
   echo "supervisor_effort=${REASONING_EFFORT:-n/a}"
   echo "supervisor_shell_cwd=$SUPERVISOR_SHELL_CWD_POLICY"
-  echo "hybrid=$HYBRID"
-  echo "deepseek_workers=$DEEPSEEK_WORKERS"
   echo "max_mode=$MAX_MODE"
-  echo "worker_provider=$WORKER_PROVIDER"
+  echo "sub_agent=$WORKER_PROVIDER"
   echo "worker_launch_mode=$WORKER_LAUNCH_MODE"
   echo "worker_routing=$WORKER_ROUTING"
   if [[ "$WORKER_PROVIDER" == "codex" ]]; then
@@ -468,7 +403,7 @@ if [[ "$WORKER_PROVIDER" == "codex" ]]; then
     WORKER_ROUTING_NOTE="Ordinary Codex workers must use one exact pair: gpt-5.6-terra/max, gpt-5.6-luna/max, or gpt-5.6-sol/high. The launcher defaults to Sol/high and rejects every other model/effort pairing."
   fi
 elif [[ "$WORKER_PROVIDER" == "deepseek" ]]; then
-  WORKER_ROUTING_NOTE="DeepSeek worker mode is active: every worker is fixed at $POKEBENCH_DEEPSEEK_WORKER_MODEL through OpenCode. Invoke run-subagent.sh without --provider, --model, or --effort overrides."
+  WORKER_ROUTING_NOTE="DeepSeek worker mode is active: every worker is fixed at $POKEBENCH_DEEPSEEK_WORKER_MODEL through OpenCode. Invoke run-subagent.sh without --sub-agent, --model, or --effort overrides."
 else
   WORKER_ROUTING_NOTE="Workers are Claude on the launcher's default claude-sonnet-5 profile unless a step explicitly overrides the worker model."
 fi

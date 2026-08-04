@@ -5,7 +5,7 @@
 # worker (claude-sonnet-5); a Codex supervisor automatically selects the Codex
 # worker profile (gpt-5.6-sol at high effort). Ordinary Codex routing permits
 # exactly Terra/max, Luna/max, or Sol/high. Codex max mode remains the separate
-# all-Sol profile and defaults workers to xhigh. The temporary DeepSeek profile
+# all-Sol profile and defaults workers to xhigh. The DeepSeek sub-agent option
 # runs deepseek/deepseek-v4-flash through OpenCode. The transcript is summarized
 # to a fixed-size handoff and retained in the log file named below.
 # Killing a worker at any point is safe —
@@ -16,15 +16,15 @@
 #   tools/run-subagent.sh [options] "step brief for the worker"
 #   tools/run-subagent.sh [options] --brief-file path/to/brief.txt
 #     -c, --cap-minutes N   hard cap in minutes (default 60)
-#     -p, --provider NAME   claude (default), codex, or deepseek (OpenCode)
+#     -s, --sub-agent NAME  claude (default), codex, or deepseek (OpenCode)
 #     -M, --max-mode        Codex Sol/xhigh worker profile
-#     -m, --model NAME      worker model (provider default)
+#     -m, --model NAME      worker model (selected sub-agent's default)
 #     -e, --effort EFFORT   Codex reasoning effort (Terra/Luna=max; Sol=high)
 #     -w, --worktree        alias for --lane side
 #         --animation-worktree
 #                           alias for --lane animation
 #         --lane NAME       main, side, or animation
-#         --log FILE        provider event log path
+#         --log FILE        agent event log path
 #         --brief-file FILE read the step brief verbatim from a file
 #         --read-only       audit only; require a clean tree but no commit
 #     -h, --help            show this help
@@ -62,10 +62,10 @@ usage() {
 Usage: tools/run-subagent.sh [options] "step brief for the worker"
        tools/run-subagent.sh [options] --brief-file path/to/brief.txt
   -c, --cap-minutes N   hard cap in minutes (default 60)
-  -p, --provider NAME   claude (default), codex, or deepseek (via OpenCode)
+  -s, --sub-agent NAME  claude (default), codex, or deepseek (via OpenCode)
   -M, --max-mode        Codex all-Sol profile: fixes the model at
                         gpt-5.6-sol and defaults effort to xhigh
-  -m, --model NAME      worker model (provider default; DeepSeek is fixed at
+  -m, --model NAME      worker model (sub-agent default; DeepSeek is fixed at
                         deepseek/deepseek-v4-flash)
   -e, --effort EFFORT   Codex reasoning effort (Terra/Luna=max; Sol=high;
                         max mode also permits Sol/xhigh)
@@ -81,16 +81,16 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
                         commit when launching while main is mid-step, so the
                         worker doesn't inherit transiently-red intermediate
                         states)
-      --log FILE        provider event log path
+      --log FILE        agent event log path
       --brief-file FILE read the step brief verbatim from a file
       --brief TEXT      alias for the positional step brief
       --read-only       run an audit that must leave no edits or commits
       --audit           alias for --read-only
       --print-config    print the resolved profile without launching
   -h, --help            show this help
-Environment overrides: WORKER_PROVIDER, WORKER_MODEL, WORKER_REASONING_EFFORT,
+Environment overrides: SUB_AGENT, WORKER_MODEL, WORKER_REASONING_EFFORT,
 POKEBENCH_CODEX_MAX_MODE, OPENCODE_BIN. Legacy MODEL remains supported for
-direct worker launches.
+direct worker launches; supervisors pass their selection internally.
 Exits with the worker's status; 42 means an account usage/rate limit stopped it
 (either this worker's own, or a sibling's — a 42 in one lane cancels the others).
 Exit 4 means the requested lane already has a live worker (max 3 concurrent:
@@ -101,7 +101,7 @@ EOF
 }
 
 CAP_MINUTES="${CAP_MINUTES:-60}"
-PROVIDER="${WORKER_PROVIDER:-${POKEBENCH_WORKER_PROVIDER:-claude}}"
+PROVIDER="${SUB_AGENT:-${POKEBENCH_WORKER_PROVIDER:-claude}}"
 MODEL="${WORKER_MODEL:-${MODEL:-}}"
 REASONING_EFFORT="${WORKER_REASONING_EFFORT:-}"
 MAX_MODE="${POKEBENCH_CODEX_MAX_MODE:-0}"
@@ -114,7 +114,10 @@ BRIEF_FILE=""
 WT_BASE_REF=""
 PRINT_CONFIG=0
 READ_ONLY=0
-PROVIDER_FLAG_SET=0
+SUB_AGENT_SELECTION_SET=0
+if [[ "${SUB_AGENT+x}" == "x" || "${POKEBENCH_WORKER_PROVIDER+x}" == "x" ]]; then
+  SUB_AGENT_SELECTION_SET=1
+fi
 MODEL_FLAG_SET=0
 
 while [[ $# -gt 0 ]]; do
@@ -127,8 +130,8 @@ while [[ $# -gt 0 ]]; do
     --lane=*)         LANE="${1#*=}"; shift ;;
     --base)           WT_BASE_REF="${2:?--base needs a git ref}"; shift 2 ;;
     --base=*)         WT_BASE_REF="${1#*=}"; shift ;;
-    -p|--provider)    PROVIDER="${2:?--provider needs a name}"; PROVIDER_FLAG_SET=1; shift 2 ;;
-    --provider=*)     PROVIDER="${1#*=}"; PROVIDER_FLAG_SET=1; shift ;;
+    -s|--sub-agent)   PROVIDER="${2:?--sub-agent needs a name}"; SUB_AGENT_SELECTION_SET=1; shift 2 ;;
+    --sub-agent=*)    PROVIDER="${1#*=}"; SUB_AGENT_SELECTION_SET=1; shift ;;
     -M|--max-mode)    MAX_MODE=1; shift ;;
     -m|--model)       MODEL="${2:?--model needs a model name}"; MODEL_FLAG_SET=1; shift 2 ;;
     --model=*)        MODEL="${1#*=}"; MODEL_FLAG_SET=1; shift ;;
@@ -159,9 +162,12 @@ if [[ ! "$MAX_MODE" =~ ^(0|1)$ ]]; then
   echo "run-subagent: POKEBENCH_CODEX_MAX_MODE must be 0 or 1 (got '$MAX_MODE')" >&2
   exit 2
 fi
+
+PROVIDER="$(printf '%s' "$PROVIDER" | tr '[:upper:]' '[:lower:]')"
+
 if [[ "$MAX_MODE" == "1" ]]; then
-  if [[ "$PROVIDER_FLAG_SET" == "1" && "$PROVIDER" != "codex" ]]; then
-    echo "run-subagent: --max-mode is a Codex-only profile and cannot use provider '$PROVIDER'" >&2
+  if [[ "$SUB_AGENT_SELECTION_SET" == "1" && "$PROVIDER" != "codex" ]]; then
+    echo "run-subagent: --max-mode requires a Codex sub-agent (got '$PROVIDER')" >&2
     exit 2
   fi
   if [[ "$MODEL_FLAG_SET" == "1" && "$MODEL" != "gpt-5.6-sol" ]]; then
@@ -206,7 +212,7 @@ if [[ ! "$CAP_MINUTES" =~ ^[0-9]+$ || "$CAP_MINUTES" -lt 1 ]]; then
   exit 2
 fi
 if [[ ! "$PROVIDER" =~ ^(claude|codex|deepseek)$ ]]; then
-  echo "run-subagent: unsupported provider '$PROVIDER' (expected claude, codex, or deepseek)" >&2
+  echo "run-subagent: unsupported sub-agent '$PROVIDER' (expected claude, codex, or deepseek)" >&2
   exit 2
 fi
 if [[ ! "$LANE" =~ ^(main|side|animation)$ ]]; then
@@ -221,7 +227,7 @@ case "$PROVIDER" in
   claude)
     MODEL="${MODEL:-claude-sonnet-5}"
     if [[ -n "$REASONING_EFFORT" ]]; then
-      echo "run-subagent: --effort applies only to the codex provider" >&2
+      echo "run-subagent: --effort applies only to a Codex sub-agent" >&2
       exit 2
     fi
     command -v claude >/dev/null 2>&1 || { echo "run-subagent: claude CLI not found on PATH" >&2; exit 127; }
@@ -261,7 +267,7 @@ case "$PROVIDER" in
       exit 2
     fi
     if [[ -n "$REASONING_EFFORT" ]]; then
-      echo "run-subagent: --effort applies only to the codex provider" >&2
+      echo "run-subagent: --effort applies only to a Codex sub-agent" >&2
       exit 2
     fi
     if ! OPENCODE_BIN_RESOLVED="$(pokebench_resolve_opencode_bin)"; then
@@ -296,7 +302,7 @@ if [[ "$PROVIDER" == "codex" || "$PROVIDER" == "deepseek" ]]; then
   fi
 fi
 if [[ "$PRINT_CONFIG" == "1" ]]; then
-  echo "worker_provider=$PROVIDER"
+  echo "sub_agent=$PROVIDER"
   echo "worker_model=$MODEL"
   echo "worker_effort=${REASONING_EFFORT:-n/a}"
   if [[ "$PROVIDER" == "deepseek" ]]; then
