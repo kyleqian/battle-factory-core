@@ -961,8 +961,6 @@ function growStutterVariant(selector: string): {
   readonly duration: BackGrowStutterDuration;
   readonly amplitude: BackGrowStutterAmplitude;
   readonly runs: BackGrowStutterRuns;
-  readonly xScale: number;
-  readonly yScale: number;
 } | null {
   for (const variant of Object.values(BACK_GROW_STUTTER_VARIANTS)) {
     if (variant.selector === selector) return variant;
@@ -1889,6 +1887,8 @@ export interface BackGrowStutterFrame {
   readonly duration: BackGrowStutterDuration;
   readonly amplitude: BackGrowStutterAmplitude;
   readonly runs: BackGrowStutterRuns;
+  readonly xScale: number;
+  readonly yScale: number;
   readonly initializerCalled: boolean;
   readonly handleStartAffineAnimCalls: 0 | 1;
   readonly callbackInvokedByInitializer: true;
