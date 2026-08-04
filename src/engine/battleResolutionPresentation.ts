@@ -92,7 +92,7 @@ export type BattleFaintTiming =
 export type BattleSwitchInTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleSpriteVisibilityTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleTurnEndTiming = Readonly<{ minimumFrames: 8 }>;
-export type BattleTrainerSlideTiming = Readonly<{ minimumFrames: 53 }>;
+export type BattleTrainerSlideTiming = Readonly<{ minimumFrames: 38 }>;
 
 export type BattleResolutionPresentationCommand =
   | Readonly<{
@@ -411,15 +411,32 @@ const STATUS_ICON_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const SWITCH_IN_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
 /**
- * Ported from `battleScene.ts`'s `TURN17_TRAINER_SLIDE_SETTLE_DELAY` doc:
- * `OpponentHandleTrainerSlide` creates the trainer sprite at x2=96 and the
- * shared `SpriteCB_TrainerSlideIn` callback subtracts 2 per callback until
- * x2=0 -- 53 callbacks total, independent of which trainer or outcome. Any
- * `trainerslidein`/`trainerslideout` opcode uses this same source callback
- * (`battle_controller_opponent.c`'s `sSpriteCallbacks`), so the duration is
- * not DESTIN-specific.
+ * ISSUES #73 rung B correction (2026-08-04): the prior port (53, from
+ * `battleScene.ts`'s `TURN17_TRAINER_SLIDE_SETTLE_DELAY` doc comment) had two
+ * independent errors -- (1) it was never fit-verified against pixels, and
+ * (2) even its own arithmetic was wrong: source `OpponentHandleTrainerSlide`
+ * (`reference/pokeemerald/src/battle_controller_opponent.c:1385-1390`)
+ * creates the trainer sprite at `x2=96` with `sSpeedX=-2`, and the shared
+ * `SpriteCB_TrainerSlideIn` (`battle_gfx_sfx_util.c:396-409`) adds `sSpeedX`
+ * per callback until `x2==0` -- that is 96/2=48 callbacks, not 53.
+ *
+ * Fresh oracle pixel evidence settles the question directly (not just the
+ * source math): `docs/terminal-seam-loss-path-ground-truth.md`'s committed
+ * twice-identical fixture (`tools/battle-lab/loss-terminal-explosion-
+ * dusclops-off.json`) has the opponent-controller command dispatch the slide
+ * at tick 2996 (`opponentControllerCommand` 6->8) and the trainer sprite's
+ * on-screen bounding box stop moving at tick 3034 -- **38 ticks**, re-derived
+ * this session via a dense per-tick re-probe (frame 2994-3059) of that same
+ * fixture. The observed leading edge fits `offscreenX2 = 2*(38-age)` exactly
+ * at every sampled tick from first visibility (age 13, x=239) through settle
+ * (age 38, x=189) -- not merely close, bit-exact against 8 independent
+ * sample points. The remaining ~10-tick gap between dispatch and the sprite's
+ * first visible pixel (age 0-12) is invisible either way (still fully
+ * off-screen under this formula), so it does not distinguish a literal `x2`
+ * register replay from this observable-motion model; the model is pinned to
+ * what pixels can actually prove.
  */
-export const TRAINER_SLIDE_TIMING = Object.freeze({ minimumFrames: 53 } as const);
+export const TRAINER_SLIDE_TIMING = Object.freeze({ minimumFrames: 38 } as const);
 /**
  * The three terminal win/loss-text STRINGIDs are printed by
  * `BattleScript_FrontierTrainerBattleWon(_LoseTexts)`/

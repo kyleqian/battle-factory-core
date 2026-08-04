@@ -284,7 +284,7 @@ describe("terminal-seam presentation phase: generic trainer slide-in + dismissib
     const commands = resolution.segments[0]!.commands;
     expect(commands.map((c) => c.type)).toEqual(["message", "trainer-slide", "message"]);
     expect(commands[0]).toMatchObject({ type: "message", advance: "button", lines: ["Player defeated", "BUG CATCHER DESTIN!"] });
-    expect(commands[1]).toMatchObject({ type: "trainer-slide", battler: 1, direction: "in", timing: { minimumFrames: 53 } });
+    expect(commands[1]).toMatchObject({ type: "trainer-slide", battler: 1, direction: "in", timing: { minimumFrames: 38 } });
     expect(commands[2]).toMatchObject({ type: "message", advance: "button", lines: ["PLEASE I NEED", "SOME WATER"] });
 
     // Before the first dismiss: no trainer visual yet (still off-screen/absent).
@@ -295,7 +295,7 @@ describe("terminal-seam presentation phase: generic trainer slide-in + dismissib
     const justSliding = advanceUntil(resolution, (state) => state.commandIndex === 1);
     expect(justSliding.lifecycle).toEqual({ phase: "presenting", phaseElapsed: 0 });
     expect(createBattleResolutionPresentationRenderView(justSliding).trainerSlide)
-      .toEqual({ battler: 1, picSymbol: CANONICAL_DESTIN_PRESENTATION.trainerPic, offscreenX2: 106 });
+      .toEqual({ battler: 1, picSymbol: CANONICAL_DESTIN_PRESENTATION.trainerPic, offscreenX2: 76 });
 
     // Mid-slide: offscreenX2 shrinks 2px/tick toward 0, ported from
     // SpriteCB_TrainerSlideIn (TRAINER_SLIDE_TIMING's doc).
@@ -304,7 +304,7 @@ describe("terminal-seam presentation phase: generic trainer slide-in + dismissib
       (state) => state.commandIndex === 1 && state.lifecycle.phaseElapsed === 20,
     );
     expect(createBattleResolutionPresentationRenderView(midSlide).trainerSlide)
-      .toMatchObject({ offscreenX2: 2 * (53 - 20) });
+      .toMatchObject({ offscreenX2: 2 * (38 - 20) });
 
     // Fully settled: the slide command completes, the quote message begins,
     // and the trainer stays visible (settled, offscreenX2 0) through it.
@@ -330,7 +330,7 @@ describe("terminal-seam presentation phase: generic trainer slide-in + dismissib
     );
     const commands = resolution.segments[0]!.commands;
     expect(commands.map((c) => c.type)).toEqual(["sprite-visibility", "trainer-slide", "message"]);
-    expect(commands[1]).toMatchObject({ type: "trainer-slide", battler: 1, direction: "in", timing: { minimumFrames: 53 } });
+    expect(commands[1]).toMatchObject({ type: "trainer-slide", battler: 1, direction: "in", timing: { minimumFrames: 38 } });
     expect(commands[2]).toMatchObject({
       type: "message",
       advance: "button",
