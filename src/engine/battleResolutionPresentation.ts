@@ -970,6 +970,68 @@ function messageLines(
       B_BUFF1: () => moveName,
     });
   }
+  // ISSUES #72 batch 3 (docs/issue72-reachability-triage.md): the plain-idiom
+  // tail starting at STRINGID_PKMNLAIDCURSE.
+  if (messageId === "STRINGID_PKMNCOPIEDSTATCHANGES") {
+    // BattleScript_EffectPsychUp: Cmd_copyfoestats reads/writes the move's own
+    // (still-current) attacker/target roles unconditionally -- zero TS
+    // references to this label (a purely generic printstring), same shape as
+    // STRINGID_PKMNPREVENTSUSAGE's attacker+defender pair.
+    const attacker = requireMoveAttacker(lastMoveAttacker, "copied-stat-changes message");
+    const defender = requireMoveDefender(lastMoveAttacker, "copied-stat-changes message");
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNWASMADEDROWSY") {
+    // BattleScript_EffectYawn's own unconditional success tail (after the
+    // Insomnia/Vital Spirit/Safeguard/accuracy/jumpifcantmakeasleep gates all
+    // pass) prints against the move's own (still-current) attacker/target
+    // roles -- no role-changing opcode runs between setyawn and this print.
+    const attacker = requireMoveAttacker(lastMoveAttacker, "made-drowsy message");
+    const defender = requireMoveDefender(lastMoveAttacker, "made-drowsy message");
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNSXBLOCKSY") {
+    // BattleScript_SoundproofProtected: the attack-canceler's own moves-block
+    // Soundproof check (battleScriptAbilityMovesBlock.ts) reads
+    // selectorRoles.target without reassigning it -- the move's own
+    // (still-current) target is the Soundproof holder; {B_CURRENT_MOVE} is
+    // the actionSnapshot's own currentMove, same idiom
+    // STRINGID_PKMNSXMADEYUSELESS uses.
+    if (actionSnapshot === null || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot/ability substitution`);
+    }
+    const defender = requireMoveDefender(lastMoveAttacker, "blocks-move message");
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_DEF_ABILITY: () => ability,
+      B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
+    });
+  }
+  if (messageId === "STRINGID_PKMNSXMADEITINEFFECTIVE") {
+    // BattleScript_PrintAbilityMadeIneffective: reached by unlabeled
+    // fallthrough from BattleScript_PrintBankAbilityMadeIneffective, whose own
+    // `copybyte sBATTLER, sBATTLER_WITH_ABILITY` (battleScriptIngrainLeechSeed
+    // WrapOpcode.ts:297-306) already writes scriptingBattler to the Insomnia/
+    // Vital Spirit holder recorded by EffectYawn's own jumpifability checks --
+    // the exact same scriptingBattler idiom STRINGID_PKMNSXCUREDITSYPROBLEM
+    // already uses.
+    if (event.payload.scriptingBattler === undefined || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no scripting-battler/ability substitution`);
+    }
+    const battler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      B_SCR_ACTIVE_ABILITY: () => ability,
+    });
+  }
   if (
     messageId === "STRINGID_AVOIDEDDAMAGE"
     || messageId === "STRINGID_PKMNMAKESGROUNDMISS"

@@ -220,6 +220,8 @@ const ABILITY_DISPLAY_NAME_BY_ID: Readonly<Record<number, string>> = Object.free
   51: "KEEN EYE",
   52: "HYPER CUTTER",
   73: "WHITE SMOKE",
+  // ISSUES #72 batch 3: Soundproof (SoundproofProtected).
+  43: "SOUNDPROOF",
 });
 function abilityDisplayName(ability: number): string {
   const name = ABILITY_DISPLAY_NAME_BY_ID[ability];
@@ -1034,7 +1036,29 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                             ? (rules.battleTextBuff1Move === null
                                               ? []
                                               : [resolveMoveName(rules.battleTextBuff1Move)])
-                                            : [];
+                                            // ISSUES #72 batch 3:
+                                            // BattleScript_SoundproofProtected's
+                                            // {B_DEF_ABILITY} -- the attack
+                                            // canceler's moves-block Soundproof
+                                            // check reads selectorRoles.target
+                                            // without reassigning it
+                                            // (battleScriptAbilityMovesBlock.ts:431-436).
+                                            : operand.expression === "STRINGID_PKMNSXBLOCKSY"
+                                              ? (rules.selectorRoles.target === null
+                                                ? []
+                                                : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
+                                              // BattleScript_PrintAbilityMadeIneffective's
+                                              // {B_SCR_ACTIVE_ABILITY} --
+                                              // BattleScript_PrintBankAbilityMadeIneffective's
+                                              // own `copybyte sBATTLER,
+                                              // sBATTLER_WITH_ABILITY`
+                                              // (battleScriptIngrainLeechSeedWrapOpcode.ts:297-306)
+                                              // already writes scriptingBattler
+                                              // to the Insomnia/Vital Spirit
+                                              // holder before this fallthrough.
+                                              : operand.expression === "STRINGID_PKMNSXMADEITINEFFECTIVE"
+                                                ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
+                                                : [];
       return Object.freeze({
         kind: "message" as const,
         messageId: operand.expression,

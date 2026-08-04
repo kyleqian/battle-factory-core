@@ -114,7 +114,7 @@ animation lane's rung-3 dispatcher (`frontSendOutFrameAtTick` + OAM/anim-frame
 side, §5 of the consumer-map doc) stays open and is a prerequisite for Slice
 D only.
 
-## #72 — battleStringResolver completeness-guard gaps: 44 REACHABLE printstring STRINGIDs need the Taunt-pair fix idiom
+## #72 — battleStringResolver completeness-guard gaps: 40 REACHABLE printstring STRINGIDs need the Taunt-pair fix idiom
 
 **Symptom:** the same-day user-reported crash (2026-08-03, opponent MURKROW's
 TAUNT: `battleStringResolver: STRINGID_PKMNFELLFORTAUNT references placeholder
@@ -135,8 +135,8 @@ following #70's own per-id method — trace each id's emitting script label(s)
 to their trigger, check static gates, cross-reference Factory L50 singles
 carrier data): **66 REACHABLE, 41 DEAD, 0 MANUAL** of the original 107 (the
 4 originally-MANUAL ids all settled DEAD on 2026-08-03 — see the triage
-doc's "MANUAL settlement" appendix). 22 of the REACHABLE ids are now fixed
-(batches 1-2 below), leaving **44 REACHABLE**. DEAD ids (facility gates,
+doc's "MANUAL settlement" appendix). 26 of the REACHABLE ids are now fixed
+(batches 1-3 below), leaving **40 REACHABLE**. DEAD ids (facility gates,
 no-EXP rentals, zero-carrier moves, the sub-110 draft-floor class the
 settlement pass found, unimplemented mechanics) are not reopened here; see
 the triage doc for their gate citations.
@@ -181,20 +181,53 @@ hardcodes to 0 with no config override; a genuine switch-in sets it to 2),
 porting real source's own `PREPARE_MOVE_BUFFER` call into
 `battleEndTurnOrchestration.ts`'s existing `battleTextBuff1Move` field).
 
-**REACHABLE (44), ordered by carrier-weight proxy for likely-hit-first —
+**Batch 3 landed** (`tests/presentationStringIssue72Batch3.test.ts`, all 4
+red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
+src/engine/factoryBattleScriptFullTurnDecision.ts`): `STRINGID_
+PKMNCOPIEDSTATCHANGES` (Psych Up, plain attacker/defender), `STRINGID_
+PKMNSXBLOCKSY` (Soundproof vs. a sound move via `BattleScript_
+SoundproofProtected`'s own move's-own-target Soundproof check), `STRINGID_
+PKMNSXMADEITINEFFECTIVE` (Yawn vs. Insomnia/Vital Spirit via `BattleScript_
+PrintBankAbilityMadeIneffective`'s own `copybyte sBATTLER, sBATTLER_WITH_
+ABILITY` fallthrough, already writing `scriptingBattler`), `STRINGID_
+PKMNWASMADEDROWSY` (Yawn's own unconditional success tail, plain attacker/
+defender). Shortened step (45-minute cap); landed 4 of the targeted 6-8.
+`STRINGID_PKMNLAIDCURSE` (Ghost Curse) was staged and its `messageLines`
+shape confirmed correct, but a real full-turn repro hits an *unrelated*
+barrier first — see the new tracked gap below — so it was reverted rather
+than landed without a passing red-verified test; still open, still ranked
+first below. `STRINGID_PKMNTRACED` (needs new `battleTextBuff1MonNick`
+nickname-resolution wiring in `prepareMessage`, not yet ported) and
+`STRINGID_PKMNSXBLOCKSY2` (Perish Song vs. Soundproof — the loop's own
+`sBATTLER`/`addbyte` cycling needs the same per-iteration investigation
+`STRINGID_PKMNCUTSATTACKWITH`'s Intimidate loop already got) were not
+attempted this step; both are plausible next picks.
+
+**New tracked gap found staging `STRINGID_PKMNLAIDCURSE`:** a real Ghost
+Curse full turn (Dusclops-type user, real Curse use) reaches `STATUS2_CURSED`
+correctly, but the end-of-turn tick throws `full-turn reducer's end-turn
+orchestration hit case ENDTURN_CURSE (STATUS2_CURSED set but BattleScript_
+CurseTurnDmg is not wired)` (`factoryBattleScriptFullTurnDecision.ts`'s
+`runEndTurnTail` case-barrier) — the per-turn Curse damage tick itself has no
+handler, an engine gap unrelated to the printstring/messageLines fix. Fixing
+this (wiring `BattleScript_CurseTurnDmg` into the end-of-turn orchestration,
+same shape as the Wrap/Reflect/Wish ticks already there) is a prerequisite
+for landing `STRINGID_PKMNLAIDCURSE` via a full-turn repro.
+
+**REACHABLE (40), ordered by carrier-weight proxy for likely-hit-first —
 name a batch, use the Taunt-pair idiom** (`messageId === "STRINGID_X"` branch
 in `messageLines`, `requireMoveDefender`/`actionSnapshot`-sourced battler,
 staged full-turn repro test, red-verify via `git stash`):
 `STRINGID_PKMNHUNGONWITHX`,
 `STRINGID_PKMNREGAINEDHEALTH`,
 `STRINGID_PKMNPROTECTEDBY`,
-`STRINGID_PKMNLAIDCURSE`, `STRINGID_PKMNTRACED`, `STRINGID_PKMNSXBLOCKSY`,
-`STRINGID_PKMNSXBLOCKSY2`, `STRINGID_PKMNSXMADEITINEFFECTIVE`,
-`STRINGID_PKMNCOPIEDSTATCHANGES`, `STRINGID_PKMNFREEDFROM`,
+`STRINGID_PKMNLAIDCURSE` (blocked on the new `ENDTURN_CURSE` gap above),
+`STRINGID_PKMNTRACED`,
+`STRINGID_PKMNSXBLOCKSY2`, `STRINGID_PKMNFREEDFROM`,
 `STRINGID_PKMNGOTFREE`, `STRINGID_PKMNSXCUREDYPROBLEM`,
 `STRINGID_PKMNSXINFATUATEDY`,
 `STRINGID_PKMNSXWHIPPEDUPSANDSTORM`, `STRINGID_PKMNTOOKFOE`,
-`STRINGID_PKMNWASMADEDROWSY`, `STRINGID_PKMNWISHCAMETRUE`,
+`STRINGID_PKMNWISHCAMETRUE`,
 `STRINGID_PKMNKNOCKEDOFF`, `STRINGID_PKMNSAFEGUARDEXPIRED`,
 `STRINGID_PKMNUSEDSAFEGUARD`, `STRINGID_PKMNDREAMEATEN`,
 `STRINGID_PKMNSXRESTOREDHPALITTLE2`, `STRINGID_PKMNWASNTAFFECTED`,
