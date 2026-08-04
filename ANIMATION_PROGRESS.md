@@ -1,5 +1,41 @@
 # Animation coverage
 
+## `MOVE_STEEL_WING` reconciliation landed — opponent 197/197, player 180/197 (2026-08-04)
+
+- **State:** implemented the five confirmed fixes plus two source-derived target
+  anchors. Production framebuffer identity: **player-back 168→180/197** and
+  **opponent-front 140→197/197** (complete), both twice-fresh via the portable
+  compare (evidence/RGB hashes reproduce; no drift). Move coverage unchanged:
+  **107/276 exact, 1 partial (STEEL_WING), 0 staged, 168 unsupported** — status
+  stays **partial** (player incomplete; opponent's 197 is once, not twice-fresh).
+- **Did:** (per-fix counts below) elliptical tick≥15 inactive (+1 player, age
+  126); opponent gust startY +0 (opponent +26, ages 111-136); hitsplat affine
+  303 (not 372) with first rendered frame at age 156 (displayed — direct pixel
+  measurement shows the oracle's hitsplat is absent at creation age 155 in both
+  orientations, correcting the diagnosis's "renders on creation frame");
+  metallic grayscale+metal gated off the initializer display (+1 each, age 9 —
+  the real age-9 mechanism was the grayscale starting one callback early, not
+  the metal band); enemy shadow at opponent age 0 (+1); **gust/hitsplat target
+  Y_PIC_OFFSET** (+8 player-back target, source `relative_to=ANIM_TARGET` /
+  `InitAnimLinearTranslation` anchor) fixed opponent ages 137-154 (+18) and the
+  opponent hitsplat y. Baseline 140 → +26 (startY) → +1 (shadow+metallic) →
+  +18 (target Y offset) → +1 (metallic) → +10 (hitsplat 303+frame) → … → 197.
+- **Pins changed:** `steelWing.test.ts` — elliptical tick-15 inactive (was
+  terminal (-5,1) residue), tick-14 (-9,2) as last visible, added opponent
+  gust startY +0 pin; `steelWingEvidence.test.ts` — per-fixture counts 180/197
+  (was generic `<197`, which the opponent's complete identity now exceeds).
+- **Next:** player's two remaining ranges are the explicitly out-of-scope
+  plausible ones: ages 144-155 faded-vs-unfaded GUST palette base, ages
+  181-185 slide-back start/rate (derived offset 23, 2/frame decrement). Prove
+  opponent 197/197 twice fresh before any promotion.
+- **Notes:** the diagnosis's age-9 "metal band one callback early" was a
+  misattribution (pixel-verified: the initializer's grayscale palette is what
+  latched one display late; the metal band itself is invisible over the
+  attacker). The opponent ages 136-155 "startY carry-through" was incomplete —
+  the residual was the target's Y_PIC_OFFSET, not the gust start. No shared
+  `metallicShine.ts` change (gate is STEEL_WING-local); no boundary widening.
+  No PAPERcuts this session.
+
 ## STEEL_WING residual diagnosis doc landed (2026-08-04, READ-ONLY audit)
 
 - **State:** `docs/steel-wing-residual-diagnosis.md` records the mechanism
