@@ -1039,6 +1039,108 @@ function messageLines(
       B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
     });
   }
+  // ISSUES #72 batch 5 (docs/issue72-reachability-triage.md): the
+  // plain-idiom tail continued from STRINGID_PKMNFREEDFROM.
+  if (messageId === "STRINGID_PKMNFREEDFROM") {
+    // BattleScript_WrapEnds: runWrapTick's own release branch
+    // (WRAP_ENDS_LABEL, battleEndTurnOrchestration.ts), sibling of
+    // STRINGID_PKMNHURTBY's WRAP_TURN_DMG_LABEL branch -- same
+    // enterTickBattlerContext reassignment, same wrappedMove substitution.
+    if (actionSnapshot === null || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot/move substitution`);
+    }
+    const battler = singlesBattler(actionSnapshot.attacker, `${messageId} action snapshot`);
+    const trappingMoveName = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      B_BUFF1: () => trappingMoveName,
+    });
+  }
+  if (messageId === "STRINGID_PKMNGOTFREE") {
+    // BattleScript_WrapFree: Cmd_rapidspinfree's own Wrap branch
+    // (battleScriptIngrainLeechSeedWrapOpcode.ts:495-526) -- the Rapid Spin
+    // user's attacker role is never reassigned (only target/scriptingBattler
+    // are, and both land on the same battler as requireMoveDefender in this
+    // engine's singles-only scope), so {B_ATK_NAME_WITH_PREFIX} is the freed
+    // battler and {B_DEF_NAME_WITH_PREFIX} is the wrap's original caster.
+    if (actionSnapshot === null || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot/move substitution`);
+    }
+    const attacker = requireMoveAttacker(lastMoveAttacker, "got-free message");
+    const defender = requireMoveDefender(lastMoveAttacker, "got-free message");
+    const trappingMoveName = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_BUFF1: () => trappingMoveName,
+    });
+  }
+  if (
+    messageId === "STRINGID_PKMNDREAMEATEN"
+    || messageId === "STRINGID_PKMNWASNTAFFECTED"
+    || messageId === "STRINGID_PKMNGOTENCORE"
+    || messageId === "STRINGID_TARGETCANTESCAPENOW"
+  ) {
+    // BattleScript_DreamEaterWorked/WasntAffected (EffectDreamEater's own
+    // jumpifstatus-positive/negative branches), BattleScript_EffectEncore,
+    // BattleScript_EffectMeanLook (Mean Look/Spider Web/Block share this
+    // label) -- all zero-TS-reference move-effect entry scripts, so BS_TARGET
+    // is still the move's own (still-current) target.
+    const defender = requireMoveDefender(lastMoveAttacker, `${messageId.toLowerCase()} message`);
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNIDENTIFIED") {
+    // BattleScript_EffectForesight: another zero-TS-reference move-effect
+    // entry script, attacker/target both still the move's own unchanged
+    // roles.
+    const attacker = requireMoveAttacker(lastMoveAttacker, "identified message");
+    const defender = requireMoveDefender(lastMoveAttacker, "identified message");
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (
+    messageId === "STRINGID_PKMNSXINFATUATEDY"
+    || messageId === "STRINGID_PKMNHURTSWITH"
+    || messageId === "STRINGID_PKMNCOPIEDFOE"
+  ) {
+    // Cute Charm/Rough Skin (executeOnDamageAbilities, battleScriptMoveEndOpcode.ts:
+    // 507-521,562-586) and Role Play (a zero-TS-reference move-effect entry
+    // script) all read the ability holder off the move's own unchanged
+    // target -- same battler requireMoveDefender resolves, {B_DEF_ABILITY}
+    // engine-supplied via prepareMessage the same way STRINGID_PKMNRESTOREDHPUSING's
+    // family already is.
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no ability substitution`);
+    }
+    const attacker = requireMoveAttacker(lastMoveAttacker, `${messageId.toLowerCase()} message`);
+    const defender = requireMoveDefender(lastMoveAttacker, `${messageId.toLowerCase()} message`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_DEF_ABILITY: () => ability,
+    });
+  }
+  if (messageId === "STRINGID_PKMNKNOCKEDOFF") {
+    // MOVE_EFFECT_KNOCK_OFF handler (battleScriptHitChainOpcode.ts:3198-3239):
+    // effectBattler === target here (Knock Off is not an affects-user
+    // effect), and neither selectorRoles.attacker/target is ever reassigned
+    // -- the item is cleared from rules state before the script runs, but
+    // {B_LAST_ITEM} reads the already-owned `heldItems` snapshot, which still
+    // holds the pre-removal name at this same print (the typed removeitem
+    // controller receipt that would advance it comes later).
+    const attacker = requireMoveAttacker(lastMoveAttacker, "knocked-off message");
+    const defender = requireMoveDefender(lastMoveAttacker, "knocked-off message");
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_LAST_ITEM: () => factoryItemDisplayName(heldItems[defender]),
+    });
+  }
   if (messageId === "STRINGID_PKMNSXMADEITINEFFECTIVE") {
     // BattleScript_PrintAbilityMadeIneffective: reached by unlabeled
     // fallthrough from BattleScript_PrintBankAbilityMadeIneffective, whose own

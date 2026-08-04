@@ -223,6 +223,10 @@ const ABILITY_DISPLAY_NAME_BY_ID: Readonly<Record<number, string>> = Object.free
   73: "WHITE SMOKE",
   // ISSUES #72 batch 3: Soundproof (SoundproofProtected).
   43: "SOUNDPROOF",
+  // ISSUES #72 batch 5: Rough Skin, Cute Charm, Role Play's copied ability
+  // is arbitrary (LEVITATE reused from the existing table above).
+  24: "ROUGH SKIN",
+  56: "CUTE CHARM",
 });
 function abilityDisplayName(ability: number): string {
   const name = ABILITY_DISPLAY_NAME_BY_ID[ability];
@@ -852,7 +856,15 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
             // (Volt Absorb/Water Absorb, advancePastAccuracyCheck,
             // battleScriptHitChainOpcode.ts:873-905 -- selectorRoles.target
             // unchanged from the move's own real target) all share this
-            // exact B_TXT_DEF_ABILITY shape.
+            // exact B_TXT_DEF_ABILITY shape. ISSUES #72 batch 5:
+            // STRINGID_PKMNSXINFATUATEDY/STRINGID_PKMNHURTSWITH (Cute Charm/
+            // Rough Skin, executeOnDamageAbilities's own
+            // recordBattleScriptAbilityReveal(..., target, ability) calls,
+            // battleScriptMoveEndOpcode.ts:507-521,562-586 -- neither branch
+            // reassigns selectorRoles, so the ability holder is still the
+            // move's own unchanged target) and STRINGID_PKMNCOPIEDFOE (Role
+            // Play, a zero-TS-reference move-effect entry script reading the
+            // copied ability off the same unchanged target) share it too.
             : operand.expression === "STRINGID_AVOIDEDDAMAGE"
               || operand.expression === "STRINGID_PKMNMAKESGROUNDMISS"
               || operand.expression === "STRINGID_PKMNRAISEDFIREPOWERWITH"
@@ -861,6 +873,9 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
               || operand.expression === "STRINGID_PKMNPREVENTSUSAGE"
               || operand.expression === "STRINGID_PKMNRESTOREDHPUSING"
               || operand.expression === "STRINGID_PKMNSXMADEYUSELESS"
+              || operand.expression === "STRINGID_PKMNSXINFATUATEDY"
+              || operand.expression === "STRINGID_PKMNHURTSWITH"
+              || operand.expression === "STRINGID_PKMNCOPIEDFOE"
               ? (rules.selectorRoles.target === null
                 ? []
                 : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
@@ -894,6 +909,18 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                   // (applyWrapMoveEffect, battleScriptHitChainOpcode.ts:3722)
                   // holds the trapping move's id.
                   : operand.expression === "STRINGID_PKMNHURTBY"
+                    || operand.expression === "STRINGID_PKMNFREEDFROM"
+                    || operand.expression === "STRINGID_PKMNGOTFREE"
+                    // ISSUES #72 batch 5: STRINGID_PKMNFREEDFROM shares
+                    // WRAP_TURN_DMG_LABEL's own sibling WRAP_ENDS_LABEL call
+                    // (runWrapTick, battleEndTurnOrchestration.ts) --
+                    // enterTickBattlerContext reassigns BS_ATTACKER to the
+                    // trapped battler the exact same way for both branches.
+                    // STRINGID_PKMNGOTFREE (Rapid Spin, Cmd_rapidspinfree)
+                    // reads the SAME trapped battler's wrappedMove without
+                    // ever reassigning selectorRoles.attacker away from the
+                    // Rapid Spin user itself (battleScriptIngrainLeechSeed
+                    // WrapOpcode.ts:495-526).
                     ? (rules.selectorRoles.attacker === null
                         ? []
                         : [resolveMoveName(rules.battlers[rules.selectorRoles.attacker].wrappedMove)])
