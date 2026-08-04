@@ -284,15 +284,22 @@ export type BattleResolutionConfirmHandoff = Readonly<{
 
 /**
  * Frozen per-round trainer identity `messageLines` needs for the terminal
- * win-text seam (`STRINGID_PLAYERDEFEATEDTRAINER1`/`TRAINER1LOSETEXT`) in
- * addition to the send-out/intro family's existing `className`/`name`
- * substitutions. `speechLose` is `factoryTrainerPresentationForOpponent`'s
- * own already-formatted 2-line Easy Chat tuple (`factoryTrainerPresentation.ts`).
+ * win-text seam (`STRINGID_PLAYERDEFEATEDTRAINER1`/`TRAINER1LOSETEXT`/
+ * `TRAINER1WINTEXT`) in addition to the send-out/intro family's existing
+ * `className`/`name` substitutions. `speechLose`/`speechWin` are
+ * `factoryTrainerPresentationForOpponent`'s own already-formatted 2-line
+ * Easy Chat tuples (`factoryTrainerPresentation.ts`). `speechWin` is optional
+ * (unlike `speechLose`) so the many pre-existing WIN-side-only fixtures that
+ * never reach `STRINGID_TRAINER1WINTEXT` don't need a dummy value; every real
+ * production caller (`factoryTrainerPresentationForOpponent`'s return value)
+ * always supplies it. LOSS-side terminal seam,
+ * `docs/terminal-seam-loss-path-ground-truth.md` §5 item 3.
  */
 export type BattleResolutionOpponentTrainer = Readonly<{
   className: string;
   name: string;
   speechLose: readonly [string, string];
+  speechWin?: readonly [string, string];
 }>;
 
 export type BattleResolutionPresentationState = Readonly<{
@@ -1875,6 +1882,21 @@ function messageLines(
       );
     }
     return opponentTrainer.speechLose;
+  }
+  if (messageId === "STRINGID_TRAINER1WINTEXT") {
+    // data/battle_scripts_1.s:2968 (BattleScript_LocalBattleLostPrintTrainersWinText)
+    // -- the LOSS-side mirror of STRINGID_TRAINER1LOSETEXT just above: same
+    // bare {B_TRAINER1_WIN_TEXT} placeholder with no line-break segment of
+    // its own, same CopyFrontierTrainerText Easy-Chat-word buffer, just the
+    // opposite per-trainer speech field (speechWin instead of speechLose).
+    // docs/terminal-seam-loss-path-ground-truth.md §2(b): DESTIN's speechWin
+    // ("I AM ABOUT TO OVERHEAT") pixel-confirmed against this exact field.
+    if (opponentTrainer === null || opponentTrainer.speechWin === undefined) {
+      throw new Error(
+        "battle resolution trainer-win-text message requires a frozen trainer-name substitution",
+      );
+    }
+    return opponentTrainer.speechWin;
   }
   // ISSUES #72 batch 6 (docs/issue72-reachability-triage.md): the plain-idiom
   // tail continued from STRINGID_PKMNSXCUREDYPROBLEM.

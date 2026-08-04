@@ -78,8 +78,17 @@ const WHITE_HERB_END2_LABEL = "BattleScript_WhiteHerbEnd2";
  * `docs/terminal-seam-round-flow-scout.md` §3.
  */
 const FRONTIER_TRAINER_BATTLE_WON_LABEL = "BattleScript_FrontierTrainerBattleWon";
+/**
+ * The post-battle LOSS/DRAW script (`data/battle_scripts_1.s:2945`), reached
+ * for Factory Level-50 singles via `HandleEndTurn_BattleLost`'s own
+ * non-link `else` arm (`battle_main.c:5045`). Terminal-seam increment (i)
+ * LOSS half, `docs/terminal-seam-loss-path-ground-truth.md` §5 item 2.
+ */
+const LOCAL_BATTLE_LOST_LABEL = "BattleScript_LocalBattleLost";
 /** include/constants/battle.h:100-102 -- checkteamslost's own three terminal writes. */
 const B_OUTCOME_WON = 1;
+const B_OUTCOME_LOST = 2;
+const B_OUTCOME_DREW = 3;
 /** include/constants/abilities.h: source ids for state-6's two pending ability passes. */
 const PENDING_ENTRY_ABILITY = Object.freeze({ intimidate: 22, trace: 36 });
 const ITEM_WHITE_HERB = 180;
@@ -491,29 +500,42 @@ function runPendingSwitchinEffects(
  * script entry driven to its own end, not a continuation of the halted one —
  * and only then let the caller publish `{kind:"terminal"}`.
  *
- * Win-side only, deliberately. The LOSS script (`BattleScript_LocalBattleLost`)
- * additionally needs `VARIOUS` cases 19/20 (`RETURN_OPPONENT_MON1`/`MON2`),
- * which this engine's `Cmd_various` does not model, and the scout's trap 3
- * records that this repo has **no dense oracle trace or RAM pin for the loss
- * path at all** — only DESTIN's win quote. Landing loss on win-side timings
- * would be guessing, so it stays a separate increment with its own trace
- * budget. Losses keep today's behavior until then.
+ * LOSS/DRAW side (`docs/terminal-seam-loss-path-ground-truth.md`, fresh
+ * dense oracle trace + RAM pin, twice-run byte-identical): `battle_main.c`'s
+ * `sEndTurnFuncsTable` (`:557-559`) maps both `B_OUTCOME_LOST` and
+ * `B_OUTCOME_DREW` to the *same* `HandleEndTurn_BattleLost`, which for a
+ * non-link Factory battle (the `else` arm, `:5044-5045`) sets
+ * `gBattlescriptCurrInstr = BattleScript_LocalBattleLost` regardless of which
+ * of the two outcomes it is — there is no separate DRAW script. (The script's
+ * own `BattleScript_CheckDomeDrew` label special-cases `B_OUTCOME_DREW`, but
+ * only on the `BATTLE_TYPE_DOME` branch, which Factory never takes — Factory
+ * always takes the very next `jumpifbattletype BATTLE_TYPE_FRONTIER` arm
+ * straight to `_PrintTrainersWinText`, identically for LOST and DREW.) So
+ * this dispatches on outcome !== WON, not on outcome === LOST specifically.
  *
- * No RNG concern: the scout's trap 4 pins every opcode on this path
- * (`printstring`/`trainerslidein`/`waitstate`/`end2`/`jumpifword`) as
- * non-consuming, so the `BattleState.rng` cursor is untouched by this pass.
+ * No RNG concern: the scout's trap 4 (WIN side) and the loss doc's §4 (LOSS
+ * side, independently oracle-verified) both pin every opcode on these paths
+ * (`printstring`/`trainerslidein`/`waitstate`/`end2`/`jumpifword`/`various`
+ * RETURN_OPPONENT_MON1/2) as non-consuming, so the `BattleState.rng` cursor
+ * is untouched by this pass either way.
  */
 function runPostBattleOutcomeScript(
   program: BattleScriptProgram,
   handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
   completed: BattleScriptMachineState<BattleScriptRulesContext>,
 ): BattleScriptMachineState<BattleScriptRulesContext> {
-  if (completed.rulesContext.battleOutcome !== B_OUTCOME_WON) return completed;
+  const { battleOutcome } = completed.rulesContext;
+  const label = battleOutcome === B_OUTCOME_WON
+    ? FRONTIER_TRAINER_BATTLE_WON_LABEL
+    : battleOutcome === B_OUTCOME_LOST || battleOutcome === B_OUTCOME_DREW
+    ? LOCAL_BATTLE_LOST_LABEL
+    : null;
+  if (label === null) return completed;
   return requireCompletedPendingScript(
     program,
     handlers,
     Object.freeze({ ...completed, haltReason: null }),
-    FRONTIER_TRAINER_BATTLE_WON_LABEL,
+    label,
   );
 }
 

@@ -66,6 +66,8 @@ const BATTLE_TYPE_ARENA = 1 << 18;
 const BATTLE_TYPE_FACTORY = 1 << 19;
 const BATTLE_TYPE_PIKE = 1 << 20;
 const BATTLE_TYPE_PYRAMID = 1 << 21;
+/** include/constants/battle.h:82. */
+const BATTLE_TYPE_TOWER_LINK_MULTI = 1 << 23;
 const BATTLE_TYPE_FRONTIER =
   BATTLE_TYPE_BATTLE_TOWER | BATTLE_TYPE_DOME | BATTLE_TYPE_PALACE | BATTLE_TYPE_ARENA
   | BATTLE_TYPE_FACTORY | BATTLE_TYPE_PIKE | BATTLE_TYPE_PYRAMID;
@@ -123,6 +125,22 @@ const JUMPIFWORD_VALUES: ReadonlyMap<string, number> = new Map([
    */
   ["BATTLE_TYPE_TWO_OPPONENTS", BATTLE_TYPE_TWO_OPPONENTS],
   ["BATTLE_TYPE_PYRAMID", BATTLE_TYPE_PYRAMID],
+  /**
+   * Terminal-seam increment (i) LOSS half
+   * (`docs/terminal-seam-loss-path-ground-truth.md` §5 item 2):
+   * `BattleScript_LocalBattleLost`'s own opening `jumpifbattletype
+   * BATTLE_TYPE_DOME` (`data/battle_scripts_1.s:2945`) and
+   * `BattleScript_LocalBattleLostPrintTrainersWinText`'s own
+   * `jumpifbattletype BATTLE_TYPE_TOWER_LINK_MULTI` (`:2969`). Both are
+   * always-false for Level-50 Factory singles -- Factory is never Dome
+   * (`BATTLE_TYPE_DOME` is Frontier-facility-exclusive, mutually distinct
+   * from `BATTLE_TYPE_FACTORY`, same class as the `BATTLE_TYPE_ARENA` note
+   * above) and never a link battle at all -- so, exactly as with ARENA/
+   * TWO_OPPONENTS/PYRAMID, this registers the value and lets the real
+   * always-false compare run rather than special-casing the branch.
+   */
+  ["BATTLE_TYPE_DOME", BATTLE_TYPE_DOME],
+  ["BATTLE_TYPE_TOWER_LINK_MULTI", BATTLE_TYPE_TOWER_LINK_MULTI],
 ]);
 
 /**

@@ -211,10 +211,25 @@ const VARIOUS_RESET_PLAYER_FAINTED = 7;
 const VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT = 23;
 const VARIOUS_GET_MOVE_TARGET = 3;
 const VARIOUS_SET_MAGIC_COAT_TARGET = 1;
+/**
+ * `battle_script_commands.c:6455-6470` -- terminal-seam increment (i) LOSS
+ * half (`docs/terminal-seam-loss-path-ground-truth.md` §5 item 1). Both
+ * cases hardcode their own target battler (`gActiveBattler = 1` / `= 3`)
+ * immediately inside the case body, discarding whatever `Cmd_various`'s own
+ * generic `GetBattlerForBattleScript(gBattlescriptCurrInstr[1])` pre-resolve
+ * produced -- the `BS_ATTACKER` selector both call sites pass is a dummy
+ * operand, same class of value-collision `battleScriptBattlerPositions.ts`
+ * already documents for `trainerslidein`. So neither case reads this file's
+ * generic `resolveSwitchBattler`/battler-role machinery at all.
+ */
+const VARIOUS_RETURN_OPPONENT_MON1 = 19;
+const VARIOUS_RETURN_OPPONENT_MON2 = 20;
 const NAMED_BYTE_CONSTANTS = new Map<string, number>([
   ["VARIOUS_CANCEL_MULTI_TURN_MOVES", VARIOUS_CANCEL_MULTI_TURN_MOVES],
   ["VARIOUS_SET_MAGIC_COAT_TARGET", VARIOUS_SET_MAGIC_COAT_TARGET],
   ["VARIOUS_GET_MOVE_TARGET", VARIOUS_GET_MOVE_TARGET],
+  ["VARIOUS_RETURN_OPPONENT_MON1", VARIOUS_RETURN_OPPONENT_MON1],
+  ["VARIOUS_RETURN_OPPONENT_MON2", VARIOUS_RETURN_OPPONENT_MON2],
   ["VARIOUS_RESET_PLAYER_FAINTED", VARIOUS_RESET_PLAYER_FAINTED],
   ["VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT", VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT],
 ]);
@@ -676,19 +691,38 @@ function cancelallactionsOpcodeHandler(
 /**
  * `Cmd_various` cases `VARIOUS_CANCEL_MULTI_TURN_MOVES` (0),
  * `VARIOUS_GET_MOVE_TARGET` (3),
- * `VARIOUS_RESET_PLAYER_FAINTED` (7), and
- * `VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT` (23). GET_MOVE_TARGET's
- * `MOVE_TARGET_SELECTED` branch is source-complete for singles: it repeats
- * `Random() % gBattlersCount` until it finds a present opposing battler.
- * Doubles still use the handler's existing generic barrier because Follow
- * Me and Lightning Rod target redirection require state this context does
- * not own. CANCEL_MULTI_TURN_MOVES is the direct
- * `CancelMultiTurnMoves(gActiveBattler)` call at
+ * `VARIOUS_RESET_PLAYER_FAINTED` (7),
+ * `VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT` (23), and
+ * `VARIOUS_RETURN_OPPONENT_MON1`/`MON2` (19/20, terminal-seam increment (i)
+ * LOSS half). GET_MOVE_TARGET's `MOVE_TARGET_SELECTED` branch is
+ * source-complete for singles: it repeats `Random() % gBattlersCount` until
+ * it finds a present opposing battler. Doubles still use the handler's
+ * existing generic barrier because Follow Me and Lightning Rod target
+ * redirection require state this context does not own. CANCEL_MULTI_TURN_MOVES
+ * is the direct `CancelMultiTurnMoves(gActiveBattler)` call at
  * battle_script_commands.c:6327-6329; the shared helper ports its exact
- * status2/status3/timer clears from battle_util.c:877-888. Every other `id`
- * is that same named barrier.
+ * status2/status3/timer clears from battle_util.c:877-888.
+ * RETURN_OPPONENT_MON1 (`:6455-6461`) unconditionally targets battler 1 and,
+ * if it is still alive (`gBattleMons[1].hp != 0`), emits the return-to-ball
+ * controller receipt (recall sprite, hide healthbox --
+ * `docs/terminal-seam-loss-path-ground-truth.md` §2's frame 2951-2996
+ * recall-sparkle-then-gone observation). RETURN_OPPONENT_MON2 (`:6463-6472`)
+ * is the same shape gated on `gBattlersCount > 3` (battler 3) -- always false
+ * for Factory L50 singles (2 battlers), confirmed a source no-op rather than
+ * inferred from behavior, matching the ground-truth doc's own leftover
+ * "needs a source read to confirm" item. Unlike every other case this
+ * handler models, RETURN_OPPONENT_MON1/2 genuinely dispatch to the
+ * controller when the battler is alive (`MarkBattlerForControllerExec`), so
+ * -- alone among this file's `various` cases -- they gate on
+ * `isControllerIdle` and mark the scheduler pending, the same idiom
+ * `createGetswitchedmondataOpcodeHandler` above already uses; the LOSS
+ * script's own immediately-following `waitstate` genuinely blocks on that
+ * pending flag until the caller acknowledges it. Every other `id` is that
+ * same named barrier.
  */
-function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
+function createVariousOpcodeHandler(
+  isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>,
+): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
     const [selectorOperand, idOperand] = context.instruction.operands;
     if (
@@ -709,12 +743,41 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
       &&
       id !== VARIOUS_RESET_PLAYER_FAINTED
       && id !== VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT
+      && id !== VARIOUS_RETURN_OPPONENT_MON1
+      && id !== VARIOUS_RETURN_OPPONENT_MON2
       && !getMoveTargetSupported
     ) {
       return unsupportedBranch(
         context,
         `Cmd_various case ${idOperand.expression} is not modeled`,
         6326,
+      );
+    }
+    // Both cases hardcode their own target battler in the C switch body,
+    // discarding whatever the generic selector above resolved -- see this
+    // handler's own header comment and the VARIOUS_RETURN_OPPONENT_MON1/2
+    // const declarations. Handled before the generic battler requirement
+    // below so a stale/unset BS_ATTACKER role can't spuriously barrier a
+    // script position that source itself never reads it at.
+    if (id === VARIOUS_RETURN_OPPONENT_MON1 || id === VARIOUS_RETURN_OPPONENT_MON2) {
+      if (id === VARIOUS_RETURN_OPPONENT_MON2 && rules.battleTopology.battlersCount <= 3) {
+        return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+      }
+      const target = (id === VARIOUS_RETURN_OPPONENT_MON1 ? 1 : 3) as BattleScriptBattlerId;
+      const alive = rules.battlers[target].hp !== 0;
+      if (!alive) {
+        return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+      }
+      if (!isControllerIdle(context)) return controllerBusyBlock(context);
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        {
+          scheduler: markBattleScriptControllerPending(context.state.scheduler, target),
+          events: Object.freeze([
+            Object.freeze({ kind: "set-battler-sprite-visibility", battler: target, invisible: true }),
+          ]),
+        },
       );
     }
     const battler = resolveSwitchBattler(context);
@@ -1046,7 +1109,7 @@ export function createBattleScriptSwitchinOpcodeHandlers(
   install("B_SCR_OP_SWITCHINANIM", createSwitchinanimOpcodeHandler(ports.isControllerIdle));
   install("B_SCR_OP_HPTHRESHOLDS", hpthresholdsOpcodeHandler);
   install("B_SCR_OP_CANCELALLACTIONS", cancelallactionsOpcodeHandler);
-  install("B_SCR_OP_VARIOUS", createVariousOpcodeHandler());
+  install("B_SCR_OP_VARIOUS", createVariousOpcodeHandler(ports.isControllerIdle));
   install("B_SCR_OP_SWITCHINEFFECTS", createSwitchineffectsOpcodeHandler());
   install("B_SCR_OP_TRYGETINTIMIDATETARGET", createTrygetintimidatetargetOpcodeHandler());
   return Object.freeze(handlers);

@@ -366,6 +366,95 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
     expect(result.state.events.filter((event) => event.kind === "trainer-slide-out")).toEqual([]);
   });
 
+  it("player's last mon faints: the LOSS terminal outcome runs BattleScript_LocalBattleLost as a second VM pass, source-exact returnopponent -> slide-in -> win-text sequence (terminal-seam increment (i) LOSS half, docs/terminal-seam-loss-path-ground-truth.md)", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, hp: 0, partyIndex: 0, species: 261 }),
+        battler({ side: 1, hp: 90, partyIndex: 0, species: 261 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      selectorRoles: { attacker: 1, target: 0, effectBattler: 0 },
+      party: {
+        player: sixSlots(0),
+        opponent: sixSlots(90),
+      },
+    });
+    const initial = haltedAtOwnEnd(rc);
+    const result = runBattleScriptFaintedActionsOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("terminal");
+    if (result.kind !== "terminal") throw new Error("expected terminal");
+    expect(result.state.rulesContext.battleOutcome).toBe(2); // B_OUTCOME_LOST
+    expect(result.state.rulesContext.battlers[0]!.hp).toBe(0);
+    // Real source: LocalBattleLost's own label sequence draws no RNG, same as the WIN side.
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
+
+    // VARIOUS_RETURN_OPPONENT_MON1 (case 19) unconditionally targets battler 1
+    // (the opponent's own single active battler, B_POSITION_OPPONENT_LEFT) --
+    // it fires here because that battler is still alive (hp 90). MON2 (case
+    // 20) is a real no-op in this file's always-singles topology (battlersCount
+    // 2, not > 3), so it contributes zero events -- confirmed by the compact
+    // sequence below containing exactly one sprite-visibility event.
+    const compactSequence = result.state.events
+      .filter((event) =>
+        event.kind === "set-battler-sprite-visibility"
+        || event.kind === "trainer-slide-in"
+        || event.kind === "message")
+      .map((event) => {
+        if (event.kind === "set-battler-sprite-visibility") {
+          return `recall:${(event as Readonly<{ battler: number }>).battler}`;
+        }
+        if (event.kind === "trainer-slide-in") {
+          return `slide-in:${(event as Readonly<{ battler: number }>).battler}`;
+        }
+        return `message:${(event as Readonly<{ messageId: string }>).messageId}`;
+      });
+    expect(compactSequence).toEqual([
+      "recall:1",
+      // Same trainerslidein BS_ATTACKER value collision the WIN side's own
+      // pin documents (Cmd_trainerslidein reads its operand as a raw
+      // position, not an attacker role) -- battler 0, resolved identically on
+      // both paths since both scripts share the exact same BS_ATTACKER byte
+      // and the exact same resolveBattlerAtPosition port.
+      "slide-in:0",
+      "message:STRINGID_TRAINER1WINTEXT",
+    ]);
+  });
+
+  it("draw (both parties' last mon faint together): checkteamslost's B_OUTCOME_DREW routes through the SAME BattleScript_LocalBattleLost as a real LOSS -- battle_main.c's sEndTurnFuncsTable maps both LOST and DREW to HandleEndTurn_BattleLost, and the script itself only special-cases DREW on the BATTLE_TYPE_DOME branch Factory never takes", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, hp: 0, partyIndex: 0, species: 261 }),
+        battler({ side: 1, hp: 0, partyIndex: 0, species: 261 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      selectorRoles: { attacker: 0, target: 1, effectBattler: 1 },
+      party: {
+        player: sixSlots(0),
+        opponent: sixSlots(0),
+      },
+    });
+    const initial = haltedAtOwnEnd(rc);
+    const result = runBattleScriptFaintedActionsOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("terminal");
+    if (result.kind !== "terminal") throw new Error("expected terminal");
+    expect(result.state.rulesContext.battleOutcome).toBe(3); // B_OUTCOME_DREW
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
+
+    // The opponent's own battler is also at 0 HP here (mutual KO), so
+    // VARIOUS_RETURN_OPPONENT_MON1's own hp-gate correctly contributes zero
+    // recall events -- unlike the plain-LOSS pin above, where the opponent
+    // survives. Only the slide-in and the win-text print are unconditional.
+    expect(result.state.events.filter((event) => event.kind === "set-battler-sprite-visibility")).toEqual([]);
+    expect(result.state.events
+      .filter((event) => event.kind === "trainer-slide-in")
+      .map((event) => (event as Readonly<{ battler: number }>).battler))
+      .toEqual([0]);
+    expect(result.state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
+      .toEqual(["STRINGID_TRAINER1WINTEXT"]);
+  });
+
   it("state 6 resolves pending replacement Intimidate before White Herb and clears the pending bit", () => {
     const rc = context({
       battlers: [

@@ -1529,6 +1529,74 @@ describe("factory full-turn decision -- decision -> both actions -> end-turn -> 
     if (result.kind !== "terminal") throw new Error("expected terminal");
     expect(() => submitFactoryFullTurnDecision(result.state, { requestId: 2, side: "trainer", decision: TRAINER_ATTACKS })).toThrow();
   });
+
+  it(
+    "staged kill-shot LOSS through submitBattleDecision: the trainer's own STRENGTH kills the player's "
+      + "last mon (roles mirrored exactly from the WIN mid-turn-KO fixture above, same STRENGTH/200atk/50def "
+      + "numbers -- same 204-damage roll, just the opposite side dealing it) -- terminal-seam increment (i) "
+      + "LOSS half now runs BattleScript_LocalBattleLost as a real second VM pass through the SAME "
+      + "submitFactoryFullTurnDecision entry point the WIN pin above uses, "
+      + "docs/terminal-seam-loss-path-ground-truth.md",
+    () => {
+      const lossConfig = config({
+        player: {
+          species: 43, moveId: STRENGTH, attack: 50, defense: 50, spAttack: 50, spDefense: 50, speed: 50, hp: 90,
+        },
+        trainer: {
+          species: 1, moveId: STRENGTH, attack: 200, defense: 50, spAttack: 50, spDefense: 50, speed: 100, hp: 999,
+        },
+      });
+      const initial = createFactoryFullTurnBattleState(lossConfig);
+      const afterPlayer = submitFactoryFullTurnDecision(initial, {
+        requestId: 1, side: "player", decision: PLAYER_ATTACKS,
+      });
+      if (afterPlayer.kind !== "decision-required") throw new Error("expected decision-required");
+
+      const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+        requestId: 2, side: "trainer", decision: TRAINER_ATTACKS,
+      });
+      expect(result.kind).toBe("terminal");
+      if (result.kind !== "terminal") throw new Error("expected terminal");
+      expect(result.outcome).toBe("trainer-win");
+      expect(result.state.boundary).toEqual({ kind: "terminal", outcome: "trainer-win" });
+
+      // The trainer (speed 100) moves first and KOs the player outright, so
+      // the player's own queued Strength never dispatches -- same
+      // "mid-turn KO skips the second action" rule the WIN pin's own comment
+      // cites (RunTurnActionsFunctions, battle_main.c:4937-4943).
+      expect(result.state.rng.calls).toBe(4);
+
+      const rulesContext = (result.state.rules as { rulesContext: Record<string, unknown> }).rulesContext;
+      expect(rulesContext.battleOutcome).toBe(2); // B_OUTCOME_LOST, computed by checkteamslost, not injected.
+      expect((rulesContext.battlers as Array<{ hp: number }>)[0]!.hp).toBe(0);
+      expect((rulesContext.battlers as Array<{ pp: readonly number[] }>)[0]!.pp[0]).toBe(16); // player's own move never dispatched
+      expect((rulesContext.battlers as Array<{ pp: readonly number[] }>)[1]!.pp[0]).toBe(15);
+
+      // The new boundary's event sequence: VARIOUS_RETURN_OPPONENT_MON1
+      // recalling the (still-alive, hp 999) trainer's own battler 1, then the
+      // trainer sliding in, then the resolved win-text id -- source-exact
+      // order, zero renderer/presentation consumption asserted here. Filtered
+      // to `invisible: true` specifically: the ordinary fainted-mon handling
+      // ahead of this (HandleFaintedMon's own ClearSpritesVisibility-style
+      // makevisible resets) emits two unrelated `invisible: false` events for
+      // both battlers first -- ordinary events this pin isn't about.
+      const compactSequence = result.events
+        .filter((event) =>
+          (event.payload.kind === "set-battler-sprite-visibility" && event.payload.invisible)
+          || event.payload.kind === "trainer-slide-in"
+          || (event.payload.kind === "message" && event.payload.messageId === "STRINGID_TRAINER1WINTEXT"))
+        .map((event) => {
+          if (event.payload.kind === "set-battler-sprite-visibility") {
+            return `recall:${event.payload.battler}`;
+          }
+          if (event.payload.kind === "trainer-slide-in") {
+            return `slide-in:${event.payload.battler}`;
+          }
+          return `message:${(event.payload as Readonly<{ messageId: string }>).messageId}`;
+        });
+      expect(compactSequence).toEqual(["recall:1", "slide-in:0", "message:STRINGID_TRAINER1WINTEXT"]);
+    },
+  );
 });
 
 describe(
