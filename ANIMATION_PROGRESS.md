@@ -1,5 +1,44 @@
 # Animation coverage
 
+## Back `BACK_ANIM_V_SHAKE_H_SLIDE` triple accepted (2026-08-03)
+
+**State:** exact for the tenth bounded player-back set: **10/25 back sets,
+30/75 selector variants, 120/376 Factory mappings**. The generated set is
+exactly **9 mappings / 9 Factory / 0 outside** — RATTATA, RATICATE, VENONAT,
+KRABBY, LEDYBA, SPINARAK, SWINUB, NINCADA, and CACNEA. Move coverage remains
+**107/276 exact, 0 partial, 0 staged, 169 unsupported**;
+`ANIMATION_COVERAGE.json` is byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Did:** ported the direct source callbacks
+`Anim_VerticalShakeHorizontalSlide_Fast`/normal/slow (IDs **103/102/89**):
+64/96, 48/128, and 24/128 step/modulus pairs; signed GBA `Sin(..., 4)`;
+all four C horizontal phases; strict `counter > 2048`; terminal `data[6]=0`
+with retained `x2`/`y2`; both `TryFlipX` no-ops under `sDontFlip`; and the
+direct callback → `WaitAnimEnd` → dummy/task restoration lifecycle. The live
+selector stays species + party nature only. Factory Krabby index **111**
+Hardy/mod-0 is fast, Spinarak index **27** Quirky/mod-1 is normal, and Swinub
+index **31** Gentle/mod-2 is slow; all nine siblings are source/census/routing
+batch-checked.
+
+**Evidence:** six fresh, paired byte-identical Scene-ON receipts are dense
+from selected callback through `SpriteCallbackDummy`, retaining every
+framebuffer hash plus sprite RAM/OAM/affine state: Krabby fast
+**1838..1873 / 36 frames, 17,596 B,
+`e4df24020fb8442bd13c73bb21e7978396fae5986219eec8053ecdde36228eb0`**;
+Spinarak normal **1840..1885 / 46, 22,128 B,
+`18fddc2509ceb84f8b527dc8eeef64a448204bd85391ce4168a5b45f64b47a0c`**;
+Swinub slow **1838..1926 / 89, 42,671 B,
+`3f0f9e2246aeafbf3ddd2db443bd5e20976fb92aced600ab6f97590b7662327e`**.
+
+**Verification / next:** focused source/census/routing/reducer/evidence plus
+both animation/executable ratchets **4 files / 20 tests**, `npx tsc --noEmit`
+with `NODE_OPTIONS=--max-old-space-size=8192`, and smoke **7 files / 346
+tests** are green. Full suite/build and a final coverage rerun are next.
+Next source-ranked unsupported player-back set is **`BACK_ANIM_V_STRETCH`
+(set 11): 14 mappings / 14 Factory / 0 outside**. No move status was promoted
+and no gameplay, RNG, damage, turn, facility, or live dispatcher state changed.
+
 ## Back `BACK_ANIM_V_SHAKE` triple accepted (2026-08-03)
 
 **State:** exact for the ninth bounded player-back set: **9/25 back sets,
