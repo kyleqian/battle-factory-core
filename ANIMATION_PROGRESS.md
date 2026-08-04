@@ -1,5 +1,38 @@
 # Animation coverage
 
+## Back `BACK_ANIM_CONVEX_DOUBLE_ARC` triple accepted (2026-08-03)
+
+- **State:** exact for the seventeenth bounded player-back set: **17/25 back
+  sets, 51/75 selector variants, 224/376 Factory mappings**. Generated set
+  census: **27 mappings / 26 Factory species / 1 outside (JIRACHI) / 43
+  Factory records**. Move coverage is unchanged at **107/276 exact, 0
+  partial, 0 staged, 169 unsupported**; `ANIMATION_COVERAGE.json` is
+  unchanged.
+- **Did:** ported source IDs **126/125/124**
+  `ANIM_CONVEX_DOUBLE_ARC_TWICE` / normal / slow, their guarded
+  initializer-first callbacks, and shared `ConvexDoubleArc`. The reducer
+  preserves steps **8/6/4**, x amplitude **16**, current arc `data[4]=1`,
+  terminal counts **3/2/2**, strict `data[7] > 256`, low/middle/high y
+  regions, signed GBA `Sin`/C division, arc-parity x sign, restart,
+  x2/y2 cleanup, `WaitAnimEnd`→dummy timing, and task restoration. Source
+  correction: HOPPIP/LAX (record 29) is mod-1/normal and CASTFORM_1/HASTY
+  (204) is mod-0/twice; valid receipts therefore use CASTFORM_1 twice,
+  ZUBAT/SASSY (25) normal, and SWABLU/LONELY (93) slow.
+- **Next:** source-ranked unsupported player-back set
+  **`BACK_ANIM_CONCAVE_ARC_SMALL` (set 18): 27 mappings / 26 Factory / 1
+  outside (MEW) / 36 Factory records**.
+- **Notes:** paired byte-identical dense Scene-ON initializer→dummy receipts
+  retain every framebuffer hash plus player RAM/OAM/affine state: Castform
+  twice **1840..1943 / 104 / 50,134 B /
+  `435fe846a4b8243e09ca4e77e5d2f6478cab46f67cb75429118c6df8ad68fad6`**;
+  Zubat normal **1837..1926 / 90 / 42,919 B /
+  `75cf303c0cf744231e21f13f48b863ee021c3f70777c5f24606578958cb65fd1`**;
+  Swablu slow **1838..1971 / 134 / 64,218 B /
+  `f1ef314515109075460552612f482b5f0335715db3709a8f45c4cfcb761cd8f6`**.
+  Focused source/census/routing/reducer/evidence plus both ratchets: **4
+  files / 18 tests**; heap-sized typecheck is green. No boundary or
+  unsupported-branch widening and no move promotion.
+
 ## Back `BACK_ANIM_CONCAVE_ARC_LARGE` triple accepted (2026-08-03)
 
 - **State:** exact for the sixteenth bounded player-back set: **16/25 back
@@ -67,42 +100,3 @@
   18 tests**; typecheck, smoke **7/346**, full `npm test` **685 files /
   6,702 passed / 1 skipped**, build **553 modules**, and coverage green. No
   unsupported-branch/boundary widening and no main-program finding.
-
-## Back `BACK_ANIM_V_SHAKE_LOW` triple accepted (2026-08-03)
-
-**State:** exact for the fourteenth bounded player-back set: **14/25 back
-sets, 42/75 selector variants, 154/376 Factory mappings**. The generated set
-is exactly **15 mappings / 15 Factory / 0 outside** — POLIWRATH, GEODUDE,
-RHYHORN, RHYDON, PINSIR, TAUROS, DONPHAN, LARVITAR, TYRANITAR, NOSEPASS,
-MAKUHITA, HARIYAMA, NUMEL, TROPIUS, and AGGRON. Move coverage remains
-**107/276 exact, 0 partial, 0 staged, 169 unsupported**; the generated
-`ANIMATION_COVERAGE.json` is unchanged.
-
-**Did:** ported the source-selected `Anim_VerticalShakeLowTwice_Fast` / normal
-/ slow initializers (IDs **99/92/98**) and shared `VerticalShakeLowTwice`:
-56/9, 40/6, and 24/6 step/amplitude pairs; the complete source
-`sVerticalShakeData` pulse/gap/pulse/terminal rows `{6,30}`, `{-2,15}`,
-`{6,30}`, `{-1,0}`; u8-derived signed GBA sine phase; C integer damping;
-boundary no-increment behavior; terminal `WaitAnimEnd` then dummy/task
-restoration; non-affine OAM timing; and the task's back-side `sDontFlip`
-contract (no source `TryFlipX` calls). The selector remains species plus
-party nature only. Factory GEODUDE index **70** Brave/mod-0, MAKUHITA index
-**22** Docile/mod-1, and HARIYAMA_2 index **486** Quiet/mod-2 cover every
-variant, while the routing test batch-checks all fifteen siblings.
-
-**Evidence:** three fresh paired byte-identical Scene-ON dense receipts retain
-every framebuffer hash plus player sprite RAM/OAM/affine state from selected
-initializer through `SpriteCallbackDummy`: Geodude fast **1839..1919 / 81
-frames, 37,607 B, `c23772a75a41eeb0c9981675bd0223f876cfd091fdf2972f8a7e42189bb82ff1`**;
-Makuhita normal **1840..1920 / 81, 37,578 B,
-`9575423aff3eefc9058624a03ead8f61c7bc01d87ad67bad9d4efd134c666976`**;
-Hariyama slow **1840..1920 / 81, 37,582 B,
-`bf349b8ecfcbf42f1f77a363c86bbc504dbd1fc55dbe12e69ff511e6285fac22`**.
-
-**Verification / next:** focused source/census/routing/reducer/evidence plus
-both animation/executable ratchets **4 files / 18 tests**, heap-sized typecheck,
-smoke **7 files / 346 tests**, full `npm test` **678 files / 6,652 passed /
-1 skipped**, heap-sized `npm run build` (**553 modules transformed**), and
-`npm run animation:coverage` are green. Next source-ranked unsupported
-player-back set is `BACK_ANIM_TRIANGLE_DOWN` (set 15). No move status,
-gameplay, RNG, damage, turn, facility, or live dispatcher state changed.

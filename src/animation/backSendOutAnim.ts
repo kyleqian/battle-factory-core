@@ -310,6 +310,23 @@ export const BACK_CONCAVE_ARC_LARGE_OUTSIDE_FACTORY_SPECIES: readonly string[] =
   BACK_CONCAVE_ARC_LARGE_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_CONVEX_DOUBLE_ARC` row. */
+export const BACK_CONVEX_DOUBLE_ARC_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_CONVEX_DOUBLE_ARC")
+    .map(([species]) => species),
+);
+
+/** All but Jirachi's source mapping have real Battle Factory rental records. */
+export const BACK_CONVEX_DOUBLE_ARC_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_CONVEX_DOUBLE_ARC_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** Jirachi is the one source selector mapping outside the Factory corpus. */
+export const BACK_CONVEX_DOUBLE_ARC_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_CONVEX_DOUBLE_ARC_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -740,6 +757,45 @@ export const BACK_CONCAVE_ARC_LARGE_VARIANTS = Object.freeze({
 } as const);
 
 /**
+ * `BACK_ANIM_CONVEX_DOUBLE_ARC` keeps each selected guarded initializer as
+ * its active callback while it invokes ConvexDoubleArc. The source starts at
+ * arc one, alternates x sign by the current arc's parity, and completes
+ * three/two/two arcs for nature mods zero/one/two respectively.
+ */
+export const BACK_CONVEX_DOUBLE_ARC_VARIANTS = Object.freeze({
+  twice: Object.freeze({
+    selector: "ANIM_CONVEX_DOUBLE_ARC_TWICE",
+    callback: "Anim_ConvexDoubleArc_Twice",
+    sourceId: 126,
+    natureMod: 0,
+    step: 8,
+    xAmplitude: 16,
+    terminalArcCount: 3,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_CONVEX_DOUBLE_ARC",
+    callback: "Anim_ConvexDoubleArc",
+    sourceId: 125,
+    natureMod: 1,
+    step: 6,
+    xAmplitude: 16,
+    terminalArcCount: 2,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_CONVEX_DOUBLE_ARC_SLOW",
+    callback: "Anim_ConvexDoubleArc_Slow",
+    sourceId: 124,
+    natureMod: 2,
+    step: 4,
+    xAmplitude: 16,
+    terminalArcCount: 2,
+    accepted: true,
+  }),
+} as const);
+
+/**
  * `BACK_ANIM_V_SHAKE_H_SLIDE` selects three standalone source callbacks.
  * Unlike the preceding shake triples, each callback stays installed directly
  * after the task dispatches it; the source does not use a shared helper or a
@@ -944,6 +1000,11 @@ type BackConcaveArcLargeCallback = typeof BACK_CONCAVE_ARC_LARGE_VARIANTS[keyof 
 type BackConcaveArcLargeSourceId = typeof BACK_CONCAVE_ARC_LARGE_VARIANTS[keyof typeof BACK_CONCAVE_ARC_LARGE_VARIANTS]["sourceId"];
 type BackConcaveArcLargeStep = typeof BACK_CONCAVE_ARC_LARGE_VARIANTS[keyof typeof BACK_CONCAVE_ARC_LARGE_VARIANTS]["step"];
 type BackConcaveArcLargeRuns = typeof BACK_CONCAVE_ARC_LARGE_VARIANTS[keyof typeof BACK_CONCAVE_ARC_LARGE_VARIANTS]["runs"];
+type BackConvexDoubleArcSelector = typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS[keyof typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS]["selector"];
+type BackConvexDoubleArcCallback = typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS[keyof typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS]["callback"];
+type BackConvexDoubleArcSourceId = typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS[keyof typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS]["sourceId"];
+type BackConvexDoubleArcStep = typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS[keyof typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS]["step"];
+type BackConvexDoubleArcTerminalArcCount = typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS[keyof typeof BACK_CONVEX_DOUBLE_ARC_VARIANTS]["terminalArcCount"];
 type BackVShakeHSlideSelector = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["selector"];
 type BackVShakeHSlideCallback = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["callback"];
 type BackVShakeHSlideSourceId = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["sourceId"];
@@ -1223,6 +1284,20 @@ function concaveArcLargeVariant(selector: string): {
   readonly runs: BackConcaveArcLargeRuns;
 } | null {
   for (const variant of Object.values(BACK_CONCAVE_ARC_LARGE_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function convexDoubleArcVariant(selector: string): {
+  readonly selector: BackConvexDoubleArcSelector;
+  readonly callback: BackConvexDoubleArcCallback;
+  readonly sourceId: BackConvexDoubleArcSourceId;
+  readonly step: BackConvexDoubleArcStep;
+  readonly xAmplitude: 16;
+  readonly terminalArcCount: BackConvexDoubleArcTerminalArcCount;
+} | null {
+  for (const variant of Object.values(BACK_CONVEX_DOUBLE_ARC_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -3031,6 +3106,196 @@ export function backConcaveArcLargeTerminalSpriteData(
   let finalPhase = 0;
   while (finalPhase <= 255) finalPhase = toS16(finalPhase + variant.step);
   return [toS16(battlerId), 0, toS16(speciesId), variant.step, 12, 12, 1, finalPhase];
+}
+
+export interface BackConvexDoubleArcFrame {
+  readonly x2: number;
+  readonly y2: number;
+  /** The shared player-back task owns this register and leaves it zeroed. */
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** The guarded source initializer latches this register on its first call. */
+  readonly data2: 1;
+  /** Source per-frame phase increment. */
+  readonly data3: BackConvexDoubleArcStep;
+  /** Current one-based arc number; its parity selects the x sign. */
+  readonly data4Before: number;
+  readonly data4: number;
+  /** Source X sine amplitude. */
+  readonly data5: 16;
+  /** The source terminal arc count; it is not decremented between arcs. */
+  readonly data6: BackConvexDoubleArcTerminalArcCount;
+  /** Phase before/after the source callback's strict-overflow branch. */
+  readonly data7Before: number;
+  readonly data7: number;
+  /** The source test is strict: phase 256 is an active high-region sample. */
+  readonly strictOverflow: boolean;
+  /** Nonfinal overflow advances the current arc and restarts at phase zero. */
+  readonly repeatWillRestart: boolean;
+  /** Source's three mutually exclusive y-motion regions. */
+  readonly yRegion: "low" | "middle" | "high" | null;
+  readonly xSineIndex: number | null;
+  readonly ySineIndex: number | null;
+  readonly xSign: 1 | -1 | null;
+  readonly selector: BackConvexDoubleArcSelector;
+  readonly sourceId: BackConvexDoubleArcSourceId;
+  readonly step: BackConvexDoubleArcStep;
+  readonly xAmplitude: 16;
+  readonly terminalArcCount: BackConvexDoubleArcTerminalArcCount;
+  /** Tick zero is the selected initializer's immediate helper invocation. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  /** ConvexDoubleArc is a helper, never the installed active callback. */
+  readonly helperInvokedByInitializer: true;
+  readonly tryFlipXCalls: 0;
+  readonly normalBackDontFlip: true;
+  readonly affineWriteCount: 0;
+  readonly affineMode: "normal";
+  readonly oamVisible: true;
+  readonly resetSpriteAfterAnim: false;
+  readonly callback: BackConvexDoubleArcCallback | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for `BACK_ANIM_CONVEX_DOUBLE_ARC`.  The threshold is
+ * deliberately `data[7] > 256`, not `>=`: all three variants sample phase
+ * 256 in the high y region before their next callback clears x2/y2 and either
+ * starts the next arc or installs WaitAnimEnd.
+ */
+export function backConvexDoubleArcFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackConvexDoubleArcFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_CONVEX_DOUBLE_ARC") return null;
+  const variant = convexDoubleArcVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected convex-double-arc selector ${selection.selector}`);
+
+  let x2 = 0;
+  let y2 = 0;
+  let data4 = 1;
+  let data7 = 0;
+  let terminal = false;
+  let result: BackConvexDoubleArcFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    const data4Before = data4;
+    const data7Before = data7;
+    const strictOverflow = data7 > 256;
+    let repeatWillRestart = false;
+    let yRegion: BackConvexDoubleArcFrame["yRegion"] = null;
+    let xSineIndex: number | null = null;
+    let ySineIndex: number | null = null;
+    let xSign: 1 | -1 | null = null;
+    let callback: BackConvexDoubleArcCallback | "WaitAnimEnd" = variant.callback;
+
+    if (strictOverflow) {
+      if (variant.terminalArcCount <= data4) {
+        callback = "WaitAnimEnd";
+        terminal = true;
+      } else {
+        data4 = toS16(data4 + 1);
+        data7 = 0;
+        repeatWillRestart = true;
+      }
+      x2 = 0;
+      y2 = 0;
+    } else {
+      if (data7 > 159) {
+        // The nested `data[7] > 256` clamp in the C helper is unreachable
+        // here because the outer strict-overflow branch owns that range.
+        yRegion = "high";
+        ySineIndex = data7 % 256;
+        y2 = toS16(-gbaSin(ySineIndex, 8));
+      } else if (data7 > 95) {
+        yRegion = "middle";
+        ySineIndex = (data7 - 96) * 2;
+        y2 = toS16(gbaSin(96, 6) - gbaSin(ySineIndex, 4));
+      } else {
+        yRegion = "low";
+        ySineIndex = data7;
+        y2 = gbaSin(ySineIndex, 6);
+      }
+
+      xSineIndex = Math.trunc(data7 / 2);
+      xSign = data4 % 2 === 0 ? 1 : -1;
+      x2 = toS16(gbaSin(xSineIndex, variant.xAmplitude) * xSign);
+      data7 = toS16(data7 + variant.step);
+    }
+
+    result = Object.freeze({
+      x2,
+      y2,
+      data0: 0 as const,
+      data1: toS16(preservedData1),
+      data2: 1 as const,
+      data3: variant.step,
+      data4Before: toS16(data4Before),
+      data4: toS16(data4),
+      data5: 16 as const,
+      data6: variant.terminalArcCount,
+      data7Before: toS16(data7Before),
+      data7: toS16(data7),
+      strictOverflow,
+      repeatWillRestart,
+      yRegion,
+      xSineIndex,
+      ySineIndex,
+      xSign,
+      selector: variant.selector,
+      sourceId: variant.sourceId,
+      step: variant.step,
+      xAmplitude: 16 as const,
+      terminalArcCount: variant.terminalArcCount,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      helperInvokedByInitializer: true as const,
+      tryFlipXCalls: 0 as const,
+      normalBackDontFlip: true as const,
+      affineWriteCount: 0 as const,
+      affineMode: "normal" as const,
+      oamVisible: true as const,
+      resetSpriteAfterAnim: false as const,
+      callback,
+    });
+  }
+  return result;
+}
+
+/** Source WaitAnimEnd lifecycle after the static back OAM reports animEnded. */
+export function backConvexDoubleArcWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/**
+ * Task_HandleMonAnimation restores battler/data[0], species/data[2], and
+ * clears data[1] while leaving ConvexDoubleArc's final arc/phase registers
+ * intact for SpriteCallbackDummy.
+ */
+export function backConvexDoubleArcTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+): readonly [number, 0, number, BackConvexDoubleArcStep, number, 16, BackConvexDoubleArcTerminalArcCount, number] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_CONVEX_DOUBLE_ARC") return null;
+  const variant = convexDoubleArcVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected convex-double-arc selector ${selection.selector}`);
+  let finalPhase = 0;
+  while (finalPhase <= 256) finalPhase = toS16(finalPhase + variant.step);
+  return [
+    toS16(battlerId), 0, toS16(speciesId), variant.step,
+    variant.terminalArcCount, 16, variant.terminalArcCount, finalPhase,
+  ];
 }
 
 export interface BackVerticalShakeHorizontalSlideFrame {
