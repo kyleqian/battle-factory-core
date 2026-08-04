@@ -26,6 +26,7 @@ import {
   CANONICAL_DESTIN_PRESENTATION,
   CANONICAL_JENSON_PRESENTATION,
 } from "../src/engine/factoryTrainerPresentation.ts";
+import { battleStringPrintableLength } from "../src/engine/battleStringResolver.ts";
 
 /**
  * ISSUES #73 item 1 (`docs/terminal-seam-round-flow-scout.md` §3(iii)): the
@@ -421,5 +422,72 @@ describe("terminal-seam presentation phase: generic trainer slide-in + dismissib
       false,
     );
     expect(createBattleResolutionPresentationRenderView(quoteReady).waitCursor).toBeNull();
+  });
+
+  it("ISSUES #75: DESTIN's real 23-char speechLose quote never completes ahead of its own dismiss wait", () => {
+    // DESTIN's speechLose ("PLEASE I NEED"/"SOME WATER") is exactly
+    // `minimumFrames - 1` (23, for MESSAGE_TIMING's 24) -- the buggy band's
+    // own boundary, so this fixture doubles as the boundary case; a
+    // 22-printable-char message sits outside it and never raced.
+    const resolution = terminalResolution(
+      [
+        event(0, { kind: "message", messageId: "STRINGID_PLAYERDEFEATEDTRAINER1", substitutions: [] }),
+        event(1, { kind: "trainer-slide-in", battler: 1 }),
+        event(2, { kind: "message", messageId: "STRINGID_TRAINER1LOSETEXT", substitutions: [] }),
+      ],
+      "player-win",
+      CANONICAL_DESTIN_PRESENTATION,
+    );
+    const quoteCommand = resolution.segments[0]!.commands[2]!;
+    expect(quoteCommand).toMatchObject({
+      type: "message",
+      advance: "button",
+      lines: ["PLEASE I NEED", "SOME WATER"],
+    });
+    expect(battleStringPrintableLength(
+      (quoteCommand as Extract<typeof quoteCommand, { type: "message" }>).lines,
+    )).toBe(23);
+
+    const quoteStart = advanceUntil(resolution, (state) => state.commandIndex === 2);
+    expect(quoteStart.lifecycle).toEqual({ phase: "presenting", phaseElapsed: 0 });
+
+    // Drive forward WITHOUT ever pressing A, through the exact tick
+    // (`phaseElapsed: 23`) where the pre-fix duration formula
+    // (`23 + 1 >= max(24, 23)`) reported the message complete -- one tick
+    // before `isBattleResolutionButtonMessageReady` first goes true
+    // (`23 >= 24` is false). A button-advance message must never be
+    // "complete" ahead of "ready".
+    let held = quoteStart;
+    for (let tick = 0; tick < 23; tick += 1) {
+      held = stepPresenting(held, false);
+    }
+    expect(held.commandIndex).toBe(2);
+    expect(held.lifecycle).toEqual({ phase: "presenting", phaseElapsed: 23 });
+    expect(isBattleResolutionButtonMessageReady(held)).toBe(false);
+    expect(isBattleResolutionCommandComplete(held)).toBe(false);
+
+    // The very next un-pressed tick is where the old code silently jumped
+    // straight to the terminal handoff (`commandIndex` 2 -> 3) with zero
+    // button input observed. It must instead still be sitting on the same
+    // message, still "presenting" -- not yet ready, not yet dismissed.
+    const nextTick = stepPresenting(held, false);
+    expect(nextTick.commandIndex).toBe(2);
+    expect(nextTick.lifecycle).toEqual({ phase: "presenting", phaseElapsed: 24 });
+
+    // One more un-pressed tick reaches the ready threshold: the message now
+    // waits for real dismiss input instead of auto-advancing past it.
+    const ready = stepPresenting(nextTick, false);
+    expect(ready.commandIndex).toBe(2);
+    expect(ready.lifecycle).toEqual({ phase: "awaiting-message-dismiss", phaseElapsed: 24 });
+    expect(isBattleResolutionButtonMessageReady(ready)).toBe(true);
+
+    // Continuing to withhold input holds it frozen there -- no silent skip.
+    expect(stepPresenting(ready, false)).toEqual(ready);
+
+    // Only a real "A" press advances past the message -- straight to the
+    // terminal handoff since it's the segment's last command.
+    const dismissed = stepPresenting(ready, true);
+    expect(dismissed.commandIndex).toBe(3);
+    expect(dismissed.lifecycle.phase).toBe("terminal-handoff");
   });
 });

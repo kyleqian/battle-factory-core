@@ -310,6 +310,16 @@ export function isBattleResolutionCommandComplete(
   const segment = currentSegment(state);
   const command = segment.commands[state.commandIndex];
   if (!command) return true;
+  // A button-advance message's dismiss input is the only thing that may
+  // retire it -- `battleResolutionCommandDuration`'s length-derived duration
+  // is a typing-speed floor, not a substitute completion path. Without this
+  // gate, a message whose printable length sits within 1 of
+  // `minimumFrames` can have that duration elapse *before*
+  // `isBattleResolutionButtonMessageReady` first goes true, silently
+  // skipping the dismiss wait entirely (ISSUES #75).
+  if (command.type === "message" && command.advance === "button") {
+    return isBattleResolutionButtonMessageReady(state);
+  }
   let field = state.field;
   for (let index = 0; index < state.commandIndex; index += 1) {
     field = applyCompletedCommand(field, segment.commands[index]!);
