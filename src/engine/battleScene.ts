@@ -8028,7 +8028,7 @@ function drawFightSubmenuWindow(
       // of scope this session, docs/battle-menu-notes.md §13), so there's no
       // turn-2 equivalent of `drawRockSlideWindow`'s later phases yet.
       if (sm.cursor === 2) {
-        drawTurn2KickoffText(fb, t, pressTick, turn2CommandHandoff, currentTurn2Handoff, latestCompletedCommandHandoff);
+        drawTurn2KickoffText(fb, t, pressTick, latestCompletedCommandHandoff);
         return;
       }
       if (turn5CommandHandoff !== null) {
@@ -9019,7 +9019,6 @@ function drawDragonBreathScene(
   fb: Uint8Array,
   t: number,
   pressTick: number,
-  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null,
   latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null,
 ): void {
   drawStaticBgShiftedY(fb, 0);
@@ -9034,19 +9033,12 @@ function drawDragonBreathScene(
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
   drawSendOutHealthbox(fb, 0, grovyleContent);
   drawMenuHealthboxPlayer(fb, 0, 0);
-  const bounceTick = (
-    latestCompletedCommandPresentationEpoch(latestCompletedCommandHandoff) !== null
-    || isTurn1NextCommandHandoffReady(turn1NextCommandHandoff)
-  )
-    ? turn2KickoffBounceTick(
-        t - TICK0,
-        pressTick - TICK0,
-        currentPresentationEpochAge(
-          turn1NextCommandHandoff,
-          latestCompletedCommandHandoff,
-          t - TICK0,
-        ),
-      )
+  const genericEpochAge = latestCompletedCommandPresentationEpochElapsedSinceReset(
+    latestCompletedCommandHandoff,
+    t - TICK0,
+  );
+  const bounceTick = genericEpochAge !== null
+    ? turn2KickoffBounceTick(t - TICK0, pressTick - TICK0, genericEpochAge)
     : turnKickoffBounceTick(t, pressTick);
   drawMenuIdleBounceOverlay(fb, bounceTick);
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, hitFlashPressTick);
@@ -9151,19 +9143,14 @@ function turn3KickoffBounceTick(
 function drawDragonBreathTurnEndSettledMenu(
   fb: Uint8Array,
   t: number,
-  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff,
-  turn2Content: FightCommandPresentation | null = null,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
+  turn2Content: FightCommandPresentation,
 ): void {
-  const bounceTick = turn2Content !== null
-    ? fightCommandSettledBounceEpochTick(turn2Content, t - TICK0)
-    : MENU_IDLE_BLANK_END_TICK + 1
-      + turn2PresentationEpochElapsedSinceReset(turn2NextCommandHandoff, t - TICK0);
-  drawActionMenuIdleContent(
+  const bounceTick = fightCommandSettledBounceEpochTick(turn2Content, t - TICK0);
+  drawActionMenuIdleContentFromLatest(
     fb,
     bounceTick,
-    turn1NextCommandHandoff,
-    turn2NextCommandHandoff,
+    latestCompletedCommandHandoff,
   );
 }
 
@@ -9248,8 +9235,6 @@ function drawTurn2KickoffText(
   fb: Uint8Array,
   t: number,
   pressTick: number,
-  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null,
   latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null,
 ): void {
   const turn2Content = turn2FightCommandPresentationFromLatest(
@@ -9258,19 +9243,12 @@ function drawTurn2KickoffText(
   const dragonBreathStart = dragonBreathTextStartTick(pressTick, TURN2_OFF_DRAGONBREATH_TEXT_START_DELAY);
   if (
     t >= dragonBreathStart
-    && (turn2Content !== null || isTurn2NextCommandHandoffReady(turn2NextCommandHandoff))
-    && (turn2Content !== null
-      || (turn2NextCommandHandoff !== null
-        && turn2PresentationEpochElapsedSinceReset(turn2NextCommandHandoff, t - TICK0) >= 0))
+    && turn2Content !== null
   ) {
-    if (turn2NextCommandHandoff === null) {
-      throw new Error("turn-2 settled menu requires generic semantic content");
-    }
     drawDragonBreathTurnEndSettledMenu(
       fb,
       t,
-      turn1NextCommandHandoff,
-      turn2NextCommandHandoff,
+      latestCompletedCommandHandoff,
       turn2Content,
     );
     return;
@@ -9296,25 +9274,17 @@ function drawTurn2KickoffText(
       fb,
       t,
       pressTick,
-      turn1NextCommandHandoff,
       latestCompletedCommandHandoff,
     );
   } else {
-    const bounceTick = (
-      latestCompletedCommandPresentationEpoch(latestCompletedCommandHandoff) !== null
-      || isTurn1NextCommandHandoffReady(turn1NextCommandHandoff)
-    )
-      ? turn2KickoffBounceTick(
-          t - TICK0,
-          pressTick - TICK0,
-          currentPresentationEpochAge(
-            turn1NextCommandHandoff,
-            latestCompletedCommandHandoff,
-            t - TICK0,
-          ),
-        )
+    const genericEpochAge = latestCompletedCommandPresentationEpochElapsedSinceReset(
+      latestCompletedCommandHandoff,
+      t - TICK0,
+    );
+    const bounceTick = genericEpochAge !== null
+      ? turn2KickoffBounceTick(t - TICK0, pressTick - TICK0, genericEpochAge)
       : turnKickoffBounceTick(t, pressTick);
-    drawActionMenuIdleContent(fb, bounceTick, turn1NextCommandHandoff);
+    drawActionMenuIdleContentFromLatest(fb, bounceTick, latestCompletedCommandHandoff);
     // Onix's own hit-flash flicker (class b, paired with the wobble below)
     // is baked permanently visible into `menuIdleBase`'s flat harvest -
     // unlike `drawEndeavorSquish`'s own primitive reconstruction (where
