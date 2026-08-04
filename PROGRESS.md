@@ -59,6 +59,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** No PAPERCUT. Full suite + build ran in the foreground per this
   step's execution-discipline brief (an earlier attempt to background them
   was caught and corrected mid-step before either notification landed).
+- **[supervisor addendum, 2026-08-04 ~00:25]** Typeref slice 7b merged on top
+  of this entry (`88ddf84e`): battleScene.ts census **41→0**, −272 net lines,
+  8,199/8,199 differential captures byte-identical, union smoke + both pin
+  suites green post-merge. Slice-8 audit ran supervisor-side (no dead test
+  fixtures; adapter-owned types are legitimately retained) — **the §4.1
+  typeref retirement program is CLOSED**, recorded in ISSUES #39 and the
+  design doc header. Entry 904's "typeref slices 4-8" Next-item is thereby
+  retired; #71 Slice D remains gated on the animation lane's rung-3
+  dispatcher (not landed as of this session's orient). Side lane currently
+  running the loss-path terminal ground-truth scout (docs+traces only).
 
 ---
 ## 903 — [bounded MAIN worker, 2026-08-03 ~23:45] CANCELER_TORMENTED step BLOCKED: assigned premise was factually wrong, corrected docs, no engine/presentation change

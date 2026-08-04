@@ -614,28 +614,22 @@ remains open only for dispatcher debt. Dispatcher ladder status (2026-08-02): de
 `docs/species-render-entry-point-retirement-design.md` landed — capstone
 slice 4 (`90e5a2b2`) threads `SceneOffTurnView` species/asset identity as
 data (differential 144/144 byte-identical, base `46190382`). Remaining #39
-debt: the dispatcher-ladder remainder above plus the turnN-typeref
-retirement program (`docs/battlescene-turnN-typeref-retirement-design.md`,
-6-slice plan). **Typeref slice 1 landed (2026-08-03, `7ca03a17`):** Family S's
-dead turn5-13 predecessor-handoff parameters cut from
-`drawTurn6..15FightSubmenuWindow` (10 functions) and `drawFightSubmenuChrome`'s
-9 void-marked slots, ~14 call sites truncated, 9 dead
-`import type { TurnNCompletedResolutionNextCommandHandoff }` lines (N=5..13)
-deleted. battleScene.ts ref count 152→80. Differential replay held all 49
-named traces byte-identical (7,466 captures) against clean parent `4fe0e206`.
-**Slice 2 (Family P+Q turn1-4 fold) did not land**: Family Q's remaining 6
-functions (`drawMenuIdleBaseWithOpponentHp`, `drawActionMenuIdleContent`,
-`drawActionMenuIdleWindow`, `drawFightSubmenuChromeTurn1Through4PP`,
-`drawFightSubmenuChrome`, `drawFightSubmenuChromeFromCurrentOwner`) turn out
-to be called from far more than the in-scope `drawFightSubmenuWindow` —
-`drawActionMenuIdleContent` alone has 9+ call sites inside Family R (slices
-3/4a/4b, explicitly out of scope this session), each passing a differently-
-shaped positional argument list. At least one real semantic nuance surfaced
-(an HP-overlay guard that deliberately fires for turn 2/3 but not turn 1) that
-doesn't reduce to a plain "read `latest` directly" swap without per-call-site
-verification. This is more entangled than the design doc's "24 refs / 6
-functions" framing suggests; the slice-2 precondition pin test remains banked
-at `a76bb338` for whoever picks this up next. Slices 3/4a/4b/5 also remain.
+debt: the dispatcher-ladder remainder above. **The turnN-typeref retirement
+program is CLOSED (2026-08-04, supervisor-verified):** all 8 slices of
+`docs/battlescene-turnN-typeref-retirement-design.md` §4.1 are landed —
+slice 1 `7ca03a17` (152→80), slice 2 chrome retirement + slice 3 idle-content
+shim (80→68, pin test `a76bb338` extended), slice 4 closed-at-1/8 after the
+re-scope recorded under §4.1's dependency chain (68→67), slice 5 `504070d2`
+(67→62), slice 6 `723d8fa5` (62→47), slice 7a `f67b69e2` (47→41, Family R
+34/34 done), slice 7b `88ddf84e` (41→**0**, Family P + Q idle trio + entry
+point + all 7 bounce-tick helpers, −272 net lines). Slice 8's audit ran
+supervisor-side 2026-08-04: census 0/0 in battleScene.ts/battleMenu.ts; every
+remaining `Turn[N]CompletedResolutionNextCommandHandoff` mention lives in the
+`turnNResolutionAdapter.ts` files (their own exported types, explicitly
+in-scope-for-them per §4.1 row 8) and live tests pinning those adapters — no
+dead fixtures to delete. Differential evidence across the program: every
+slice byte-identical on its full window list (slice 7b alone: 8,199/8,199
+captures across the §2.5 turn-1-13 list + insurance).
 Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner

@@ -1,5 +1,12 @@
 # battleScene.ts TurnN-handoff type-ref retirement design
 
+> **PROGRAM COMPLETE (2026-08-04, supervisor-verified).** All §4.1 slices are
+> landed and merged; `rg -c 'CompletedResolutionNextCommandHandoff'
+> src/engine/battleScene.ts src/engine/battleMenu.ts` returns zero matches in
+> both. Slice-by-slice commits and the slice-8 audit record live in ISSUES
+> #39's typeref block (and git history). This doc is retained as the design
+> record; its counts describe the 2026-08-02 base, not the current tree.
+
 Status: census taken at base sha `68718a2a` (2026-08-02), against
 `src/engine/battleScene.ts` at 34,558 LOC. Design-only: no production file is
 touched by this doc, and every count below is reproduced by a named command
