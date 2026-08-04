@@ -18,7 +18,19 @@ import {
 const program = loadBattleScriptProgram();
 const TACKLE = 33;
 /** include/constants/battle.h:78 -- Factory always sets this bit. */
+const BATTLE_TYPE_TRAINER = 1 << 3;
 const BATTLE_TYPE_FACTORY = 1 << 19;
+/**
+ * What production actually stages (`factoryBattleScriptTerminalDecision.ts`
+ * and `factoryBattleScriptFullTurnDecision.ts` both set
+ * `BATTLE_TYPE_TRAINER | BATTLE_TYPE_FACTORY`): a Factory battle IS a trainer
+ * battle. This fixture carried FACTORY alone until 2026-08-03, which no test
+ * had yet been able to tell apart -- the post-battle WIN script's opening
+ * `jumpifnotbattletype BATTLE_TYPE_TRAINER` is the first branch that reads
+ * the TRAINER bit, and without it the run left down the wild-battle
+ * `BattleScript_PayDayMoneyAndPickUpItems` path.
+ */
+const BATTLE_TYPE_FACTORY_TRAINER = BATTLE_TYPE_TRAINER | BATTLE_TYPE_FACTORY;
 
 function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -89,7 +101,7 @@ function context(contextChanges: Partial<BattleScriptRulesContextInput> = {}): B
     missType: 0,
     hitMarker: 0,
     multiHitCounter: 0,
-    battleTopology: { battlersCount: 2, battleTypeFlags: BATTLE_TYPE_FACTORY, battlerPositions: [0, 1, 0xff, 0xff] },
+    battleTopology: { battlersCount: 2, battleTypeFlags: BATTLE_TYPE_FACTORY_TRAINER, battlerPositions: [0, 1, 0xff, 0xff] },
     ...contextChanges,
   });
 }
@@ -106,7 +118,13 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: () => null,
-    resolveBattlerAtPosition: () => null,
+    // GetBattlerAtPosition (battle_anim_mons.c:859-869) is the identity map in
+    // singles. Needed since the terminal seam now runs the post-battle WIN
+    // script, whose `trainerslidein BS_ATTACKER` resolves position 0.
+    resolveBattlerAtPosition: (_context, operand) =>
+      operand.expression === "B_POSITION_PLAYER_LEFT" || operand.expression === "BS_ATTACKER"
+        ? 0
+        : operand.expression === "B_POSITION_OPPONENT_LEFT" ? 1 : null,
     resolveHalfwordOperand: (_context, operand) =>
       operand.expression === "B_WAIT_TIME_LONG"
         ? 64
@@ -329,6 +347,23 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
     expect(result.state.rulesContext.battleOutcome).toBe(1);
     expect(result.state.rulesContext.battlers[1]!.hp).toBe(0);
     expect(result.state.rng.calls).toBe(initial.rng.calls);
+
+    // Terminal-seam increment (i), docs/terminal-seam-round-flow-scout.md §3:
+    // a WIN does not stop at checkteamslost's own end2. The post-battle WIN
+    // script runs as a second VM pass, so the win text the player is supposed
+    // to read is now actually emitted instead of being silently skipped.
+    expect(result.state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
+      .toEqual(["STRINGID_PLAYERDEFEATEDTRAINER1", "STRINGID_TRAINER1LOSETEXT"]);
+    // ...with the trainer slide-in between them, addressed to the battler at
+    // B_POSITION_PLAYER_LEFT (Cmd_trainerslidein reads its operand as a
+    // position, not an attacker role -- BS_ATTACKER is the same byte, 0).
+    expect(result.state.events
+      .filter((event) => event.kind === "trainer-slide-in")
+      .map((event) => (event as Readonly<{ battler: number }>).battler))
+      .toEqual([0]);
+    // The TWO_OPPONENTS and PYRAMID branches are always false for Factory L50
+    // singles, so neither the second trainer's quote nor pickup is reached.
+    expect(result.state.events.filter((event) => event.kind === "trainer-slide-out")).toEqual([]);
   });
 
   it("state 6 resolves pending replacement Intimidate before White Herb and clears the pending bit", () => {

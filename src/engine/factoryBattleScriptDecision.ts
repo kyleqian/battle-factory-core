@@ -32,6 +32,7 @@ import {
   type BattleScriptRulesBattlerState,
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
+import { resolveSingleBattlePosition } from "./battleScriptBattlerPositions.ts";
 
 const ADAPTER = "factory-asleep-move/v1";
 const PLAYER_SET_ID = 15;
@@ -624,7 +625,9 @@ BattleDecisionReducer<FactoryBattleScriptDecisionRules> = (
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: () => attacker,
-    resolveBattlerAtPosition: () => null,
+    // GetBattlerAtPosition -- see battleScriptBattlerPositions.ts. Needed since
+    // the terminal seam now runs the post-battle WIN script's trainerslidein.
+    resolveBattlerAtPosition: resolveSingleBattlePosition,
     resolveHalfwordOperand: (
       _context: unknown,
       operand: Readonly<{ expression: string }>,

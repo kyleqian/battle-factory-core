@@ -56,6 +56,8 @@ const JUMPIFWORD_COMPARATORS: ReadonlyMap<string, number> = new Map([
 const BATTLE_TYPE_DOUBLE = 1 << 0;
 const BATTLE_TYPE_LINK = 1 << 1;
 const BATTLE_TYPE_TRAINER = 1 << 3;
+/** include/constants/battle.h:74. */
+const BATTLE_TYPE_TWO_OPPONENTS = 1 << 15;
 const BATTLE_TYPE_RECORDED_LINK = 1 << 25;
 const BATTLE_TYPE_BATTLE_TOWER = 1 << 8;
 const BATTLE_TYPE_DOME = 1 << 16;
@@ -101,6 +103,26 @@ const JUMPIFWORD_VALUES: ReadonlyMap<string, number> = new Map([
    * the branch) lets the real always-false compare run instead of barriering.
    */
   ["BATTLE_TYPE_ARENA", BATTLE_TYPE_ARENA],
+  /**
+   * The two comparands the post-battle WIN script reaches
+   * (`BattleScript_FrontierTrainerBattleWon`'s own
+   * `jumpifbattletype BATTLE_TYPE_TWO_OPPONENTS` and
+   * `BattleScript_TryPickUpItems`' `jumpifnotbattletype BATTLE_TYPE_PYRAMID`,
+   * `data/battle_scripts_1.s:3029/3045`), registered for the terminal-seam
+   * increment (i) — `docs/terminal-seam-round-flow-scout.md` §3.
+   *
+   * The scout's §3 table read this path at *opcode* granularity and concluded
+   * "all already registered"; JUMPIFWORD is indeed registered, but its
+   * per-operand value map is a second, independent barrier — the same class
+   * the `BATTLE_TYPE_ARENA` note above records. Both are always-false for
+   * Level-50 Factory singles (`BATTLE_TYPE_TRAINER | BATTLE_TYPE_FACTORY`
+   * carries neither bit: TWO_OPPONENTS is doubles-only, and PYRAMID is a
+   * sibling facility inside the FRONTIER OR-combination above), so — exactly
+   * as with ARENA — this registers the value and lets the real always-false
+   * compare run rather than special-casing the branch.
+   */
+  ["BATTLE_TYPE_TWO_OPPONENTS", BATTLE_TYPE_TWO_OPPONENTS],
+  ["BATTLE_TYPE_PYRAMID", BATTLE_TYPE_PYRAMID],
 ]);
 
 /**

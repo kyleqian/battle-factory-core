@@ -142,6 +142,7 @@ import { battleCommandSpeciesDisplayName } from "./battleCommandPresentation.ts"
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import topologyData from "../data/gen/battle-script-topology.json" with { type: "json" };
 import frontierHeldItemsData from "../data/gen/battle-frontier-held-items.json" with { type: "json" };
+import { resolveSingleBattlePosition } from "./battleScriptBattlerPositions.ts";
 
 const ADAPTER = "factory-full-turn/v1";
 const B_WAIT_TIME_LONG = 64;
@@ -1121,7 +1122,9 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
     // enterTickBattlerContext), all sharing this one ports/handlers pair.
     resolveAttackerBattler: (context: Readonly<{ state: MachineState }>) =>
       context.state.rulesContext.selectorRoles.attacker,
-    resolveBattlerAtPosition: () => null,
+    // GetBattlerAtPosition -- see battleScriptBattlerPositions.ts. Needed since
+    // the terminal seam now runs the post-battle WIN script's trainerslidein.
+    resolveBattlerAtPosition: resolveSingleBattlePosition,
     resolveHalfwordOperand: (_context: unknown, operand: Readonly<{ expression: string }>) => {
       if (operand.expression === "B_WAIT_TIME_LONG") return B_WAIT_TIME_LONG;
       if (operand.expression === "B_WAIT_TIME_SHORT") return B_WAIT_TIME_SHORT;

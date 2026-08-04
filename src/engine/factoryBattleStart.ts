@@ -41,6 +41,7 @@ import {
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import { randomU16 } from "./opponentGen.ts";
 import { effectiveSpeed } from "./turnOrder.ts";
+import { resolveSingleBattlePosition } from "./battleScriptBattlerPositions.ts";
 
 const NEUTRAL_STAT_STAGES = Object.freeze([6, 6, 6, 6, 6, 6, 6, 6] as const);
 const BATTLE_START_HOOK_ABILITIES = new Set([2, 13, 22, 36, 45, 59, 70, 77]);
@@ -183,7 +184,9 @@ function lifecycleExternalPorts(): BattleScriptStatusRulesExternalPorts {
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: (context) => context.state.rulesContext.selectorRoles.attacker,
-    resolveBattlerAtPosition: () => null,
+    // GetBattlerAtPosition -- see battleScriptBattlerPositions.ts. Needed since
+    // the terminal seam now runs the post-battle WIN script's trainerslidein.
+    resolveBattlerAtPosition: resolveSingleBattlePosition,
     resolveHalfwordOperand: (_context, operand) =>
       operand.expression === "B_WAIT_TIME_LONG"
         ? 64

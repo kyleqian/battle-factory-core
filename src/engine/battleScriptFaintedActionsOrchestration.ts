@@ -71,6 +71,15 @@ const HANDLE_FAINTED_MON_LABEL = "BattleScript_HandleFaintedMon";
 const INTIMIDATE_LABEL = "BattleScript_IntimidateActivatesEnd3";
 const TRACE_LABEL = "BattleScript_TraceActivates";
 const WHITE_HERB_END2_LABEL = "BattleScript_WhiteHerbEnd2";
+/**
+ * The post-battle WIN script (`data/battle_scripts_1.s:3027`), reached for
+ * Factory Level-50 singles via `BattleScript_LocalTrainerBattleWon`'s own
+ * frontier dispatch. Terminal-seam increment (i),
+ * `docs/terminal-seam-round-flow-scout.md` §3.
+ */
+const FRONTIER_TRAINER_BATTLE_WON_LABEL = "BattleScript_FrontierTrainerBattleWon";
+/** include/constants/battle.h:100-102 -- checkteamslost's own three terminal writes. */
+const B_OUTCOME_WON = 1;
 /** include/constants/abilities.h: source ids for state-6's two pending ability passes. */
 const PENDING_ENTRY_ABILITY = Object.freeze({ intimidate: 22, trace: 36 });
 const ITEM_WHITE_HERB = 180;
@@ -309,7 +318,16 @@ function runScriptToOwnEnd(
     }
     state = stepped.state;
   }
-  throw new Error("fainted-actions orchestration exceeded its per-script instruction budget");
+  {
+    // Name where it stalled. A bare budget message costs a debugging round trip
+    // every time a newly-resumed script parks on an unsatisfiable port.
+    const stalled = program.instructions[state.programCounter];
+    throw new Error(
+      "fainted-actions orchestration exceeded its per-script instruction budget at "
+        + `${stalled?.source.label ?? "<off-program>"}:${state.programCounter} `
+        + `(${stalled?.opcodeName ?? "?"})`,
+    );
+  }
 }
 
 /**
@@ -368,7 +386,12 @@ function requireCompletedPendingScript(
 ): BattleScriptMachineState<BattleScriptRulesContext> {
   const result = runScriptToOwnEnd(program, handlers, startBattleScriptExecute(program, label, state));
   if (result.kind !== "terminal") {
-    throw new Error(`fainted-actions state 6 ${label} did not complete (${result.kind})`);
+    // Name the stopping instruction: "(barrier)" alone doesn't say which opcode
+    // or port is missing, which is a debugging round trip every time.
+    const at = "instruction" in result
+      ? ` at ${result.instruction.source.label}:${result.instruction.opcodeName}`
+      : "";
+    throw new Error(`fainted-actions state 6 ${label} did not complete (${result.kind}${at})`);
   }
   return result.state;
 }
@@ -452,6 +475,48 @@ function runPendingSwitchinEffects(
   return state;
 }
 
+/**
+ * Terminal-seam increment (i) (`docs/terminal-seam-round-flow-scout.md` §3).
+ *
+ * `checkteamslost`'s terminal jump ends the *battle* script, but it is not
+ * where the real game stops: C-side, `BattleScript_LocalTrainerBattleWon`
+ * dispatches straight into the frontier win script, which prints
+ * "Player defeated <TRAINER>!", slides the trainer in, and prints their lose
+ * quote before its own `end2`. Treating the first `end2` as *the* terminal
+ * condition is what made the engine skip that whole sequence — the round
+ * orchestrator fabricated a dismissed quote that nothing had rendered.
+ *
+ * So: mirror the two-stage redispatch this module already performs for
+ * `HandleFaintedMon`'s pending Intimidate/Trace/White Herb passes — a fresh
+ * script entry driven to its own end, not a continuation of the halted one —
+ * and only then let the caller publish `{kind:"terminal"}`.
+ *
+ * Win-side only, deliberately. The LOSS script (`BattleScript_LocalBattleLost`)
+ * additionally needs `VARIOUS` cases 19/20 (`RETURN_OPPONENT_MON1`/`MON2`),
+ * which this engine's `Cmd_various` does not model, and the scout's trap 3
+ * records that this repo has **no dense oracle trace or RAM pin for the loss
+ * path at all** — only DESTIN's win quote. Landing loss on win-side timings
+ * would be guessing, so it stays a separate increment with its own trace
+ * budget. Losses keep today's behavior until then.
+ *
+ * No RNG concern: the scout's trap 4 pins every opcode on this path
+ * (`printstring`/`trainerslidein`/`waitstate`/`end2`/`jumpifword`) as
+ * non-consuming, so the `BattleState.rng` cursor is untouched by this pass.
+ */
+function runPostBattleOutcomeScript(
+  program: BattleScriptProgram,
+  handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
+  completed: BattleScriptMachineState<BattleScriptRulesContext>,
+): BattleScriptMachineState<BattleScriptRulesContext> {
+  if (completed.rulesContext.battleOutcome !== B_OUTCOME_WON) return completed;
+  return requireCompletedPendingScript(
+    program,
+    handlers,
+    Object.freeze({ ...completed, haltReason: null }),
+    FRONTIER_TRAINER_BATTLE_WON_LABEL,
+  );
+}
+
 function runFaintedBattlerHandlers(
   program: BattleScriptProgram,
   handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
@@ -484,7 +549,10 @@ function runFaintedBattlerHandlers(
   // BattleScript_FaintedMonEnd label (docs/forced-switch-ground-truth.md §1) -- the battle resumes.
   const completed = runPendingSwitchinEffects(program, handlers, state);
   return completed.rulesContext.battleOutcome !== 0
-    ? Object.freeze({ kind: "terminal", state: completed })
+    ? Object.freeze({
+      kind: "terminal",
+      state: runPostBattleOutcomeScript(program, handlers, completed),
+    })
     : Object.freeze({ kind: "resumed", state: completed });
 }
 
@@ -548,6 +616,9 @@ export function resumeBattleScriptFaintedActionsAfterPlayerChoice(
   }
   const completed = runPendingSwitchinEffects(program, handlers, state);
   return completed.rulesContext.battleOutcome !== 0
-    ? Object.freeze({ kind: "terminal", state: completed })
+    ? Object.freeze({
+      kind: "terminal",
+      state: runPostBattleOutcomeScript(program, handlers, completed),
+    })
     : Object.freeze({ kind: "resumed", state: completed });
 }

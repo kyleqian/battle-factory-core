@@ -69,6 +69,7 @@ import {
   type BattleScriptRulesContext,
   type BattleScriptStatusRulesExternalPorts,
 } from "./battleScriptRulesContext.ts";
+import { resolveSingleBattlePosition } from "./battleScriptBattlerPositions.ts";
 
 const ADAPTER = "factory-terminal-ko/v1";
 const ENTRY_LABEL = "BattleScript_EffectHit";
@@ -477,7 +478,9 @@ function externalPorts(attacker: 0 | 1): BattleScriptStatusRulesExternalPorts {
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: () => attacker,
-    resolveBattlerAtPosition: () => null,
+    // GetBattlerAtPosition -- see battleScriptBattlerPositions.ts. Needed since
+    // the terminal seam now runs the post-battle WIN script's trainerslidein.
+    resolveBattlerAtPosition: resolveSingleBattlePosition,
     resolveHalfwordOperand: (_context: unknown, operand: Readonly<{ expression: string }>) =>
       operand.expression === "B_WAIT_TIME_LONG" ? B_WAIT_TIME_LONG : null,
     resolveByteOperand: () => null,
