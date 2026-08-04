@@ -114,7 +114,7 @@ animation lane's rung-3 dispatcher (`frontSendOutFrameAtTick` + OAM/anim-frame
 side, §5 of the consumer-map doc) stays open and is a prerequisite for Slice
 D only.
 
-## #72 — battleStringResolver completeness-guard gaps: 55 REACHABLE printstring STRINGIDs need the Taunt-pair fix idiom
+## #72 — battleStringResolver completeness-guard gaps: 44 REACHABLE printstring STRINGIDs need the Taunt-pair fix idiom
 
 **Symptom:** the same-day user-reported crash (2026-08-03, opponent MURKROW's
 TAUNT: `battleStringResolver: STRINGID_PKMNFELLFORTAUNT references placeholder
@@ -161,20 +161,33 @@ Present's opponent-target heal, Wish's frozen-at-cast battler) — needs its
 own per-context investigation, not the single shared `requireMoveDefender`
 shape the rest of this batch used.
 
-**REACHABLE (55), ordered by carrier-weight proxy for likely-hit-first —
+**Batch 2 landed** (`tests/presentationStringIssue72Batch2.test.ts`, all 11
+red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
+src/engine/factoryBattleScriptFullTurnDecision.ts
+src/engine/battleEndTurnOrchestration.ts src/engine/battleScriptEvents.ts`):
+`STRINGID_PKMNANCHORSITSELFWITH`, `STRINGID_PKMNANCHOREDITSELF` (a real
+2-turn Ingrain-then-Roar repro — Ingrain's `STATUS3_ROOTED` has no direct
+config override), `STRINGID_PKMNWASDRAGGEDOUT`, `STRINGID_PKMNCUTSATTACKWITH`,
+`STRINGID_PREVENTEDFROMWORKING` (both via the Intimidate switch-in loop, a
+new `targetBattler` event-payload field since `trygetintimidatetarget`'s own
+`BS_TARGET` cycling isn't the generic move's-own-target relationship
+`requireMoveDefender` assumes), `STRINGID_PKMNSXPREVENTSFLINCHING` (a real
+2-turn switch-in-then-Fake-Out repro — Fake Out's `jumpifnotfirstturn` gate
+needs `isFirstTurn !== 0`, which this reducer's initial battler construction
+hardcodes to 0 with no config override; a genuine switch-in sets it to 2),
+`STRINGID_PKMNSXPREVENTSYLOSS`, `STRINGID_PKMNPREVENTSUSAGE`,
+`STRINGID_PKMNRESTOREDHPUSING`, `STRINGID_PKMNSXMADEYUSELESS`, and
+`STRINGID_PKMNSXWOREOFF` (Reflect/Light Screen/Mist end-of-turn wear-off,
+porting real source's own `PREPARE_MOVE_BUFFER` call into
+`battleEndTurnOrchestration.ts`'s existing `battleTextBuff1Move` field).
+
+**REACHABLE (44), ordered by carrier-weight proxy for likely-hit-first —
 name a batch, use the Taunt-pair idiom** (`messageId === "STRINGID_X"` branch
 in `messageLines`, `requireMoveDefender`/`actionSnapshot`-sourced battler,
 staged full-turn repro test, red-verify via `git stash`):
 `STRINGID_PKMNHUNGONWITHX`,
 `STRINGID_PKMNREGAINEDHEALTH`,
-`STRINGID_PKMNSXWOREOFF`,
 `STRINGID_PKMNPROTECTEDBY`,
-`STRINGID_PKMNANCHOREDITSELF`, `STRINGID_PKMNANCHORSITSELFWITH`,
-`STRINGID_PKMNWASDRAGGEDOUT`,
-`STRINGID_PKMNCUTSATTACKWITH`, `STRINGID_PREVENTEDFROMWORKING`,
-`STRINGID_PKMNSXPREVENTSFLINCHING`, `STRINGID_PKMNSXPREVENTSYLOSS`,
-`STRINGID_PKMNPREVENTSUSAGE`,
-`STRINGID_PKMNRESTOREDHPUSING`, `STRINGID_PKMNSXMADEYUSELESS`,
 `STRINGID_PKMNLAIDCURSE`, `STRINGID_PKMNTRACED`, `STRINGID_PKMNSXBLOCKSY`,
 `STRINGID_PKMNSXBLOCKSY2`, `STRINGID_PKMNSXMADEITINEFFECTIVE`,
 `STRINGID_PKMNCOPIEDSTATCHANGES`, `STRINGID_PKMNFREEDFROM`,
