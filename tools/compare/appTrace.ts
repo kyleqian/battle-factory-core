@@ -47,8 +47,10 @@ import {
 } from "../../src/engine/battleDecisionBoundary.ts";
 import {
   createBattleResolutionPresentation,
+  type BattleResolutionPresentationState,
   type CreateBattleResolutionPresentationInput,
 } from "../../src/engine/battleResolutionPresentation.ts";
+import { battleStringPrintableLength } from "../../src/engine/battleStringResolver.ts";
 import {
   createBattleCommandPresentation,
   type BattleCommandPresentationState,
@@ -385,6 +387,27 @@ function createTerminalSeamPresentationBoundaries(
   })) as unknown as FactoryBattlePresentationBoundaries;
 }
 
+// docs/terminal-seam-antecedent-boundary-probe.md §2: the antecedent
+// "MURKROW fainted!" message's real down-arrow-eligible wait starts one tick
+// after its own last glyph draws (`TextPrinterInitDownArrowCounters`), and
+// the fixture's own real dismiss `A` press (`trace.segments[36]`, the same
+// committed input the rest of this window's antecedent chain already
+// represents) registers 22 ticks later. Both are RAM-probed absolute ticks
+// from the fixture's *original* antecedent flow, which predates this
+// window's own frame 0 (2996) and which this edge-relative scaffold does not
+// replay per-tick (see the commandIndex-4 comment below) -- not fitted or
+// simulated values.
+const TERMINAL_SEAM_ANTECEDENT_READY_TICK = 2907;
+const TERMINAL_SEAM_ANTECEDENT_DISMISS_TICK = 2929;
+// docs/terminal-seam-antecedent-boundary-probe.md §2: "frozenPhase =
+// floor((dismissTick-readyTick)/9) % 4, held constant... for every tick
+// after dismissTick". Kept here as an `age` (22) rather than a pre-computed
+// phase index so it feeds straight through the live render's own unmodified
+// `floor(age/9)%4` cursor-phase formula (battleScene.ts's
+// `CURSOR_Y_OFFSETS` lookup) instead of duplicating that arithmetic here.
+const TERMINAL_SEAM_ANTECEDENT_FROZEN_CURSOR_AGE =
+  TERMINAL_SEAM_ANTECEDENT_DISMISS_TICK - TERMINAL_SEAM_ANTECEDENT_READY_TICK;
+
 // ISSUES #73 LOSS window: constructs a real factoryRoundBattleOrchestrator
 // (so aiHistory/activeBattleCallStart/battlePresentationBoundaries are real,
 // non-null values -- finishBattle requires them once the dismiss press
@@ -470,7 +493,30 @@ function lossTerminalWindowStage(state: EngineState): EngineState {
     // The real CONTROLLER_RETURNMONTOBALL recall (A): opponent Dusclops.
     terminalSeamEvent(4, { kind: "set-battler-sprite-visibility", battler: 1, invisible: true }, { opcodeName: "B_SCR_OP_VARIOUS" }),
     terminalSeamEvent(5, { kind: "trainer-slide-in", battler: 1 }),
-    terminalSeamEvent(6, { kind: "message", messageId: "STRINGID_TRAINER1WINTEXT", substitutions: [] }),
+    // docs/terminal-seam-antecedent-boundary-probe.md §3: the oracle's real
+    // printstring dispatch lands 3 ticks after the trainer-slide's own
+    // completion -- three independently-caused one-tick holds stacked, not
+    // one "cadence" mechanism. Each filler below reuses the sprite-visibility
+    // command type as a genuine 1-frame no-op (opponent battler 1 is already
+    // invisible from the real recall event above, so re-asserting it changes
+    // nothing) purely to consume exactly one presentation-command tick each;
+    // `BattleSpriteVisibilityTiming.minimumFrames` is literal-typed to 1, so
+    // three separate commands -- not one command scaled to 3 -- is how this
+    // scaffold reproduces the exact tick count without editing src/.
+    // §3(1) interpreter-visibility lag: the slide sprite's completion clears
+    // gBattleControllerExecFlags mid-frame, one tick after the interpreter's
+    // own call already sampled the pre-clear value.
+    terminalSeamEvent(6, { kind: "set-battler-sprite-visibility", battler: 1, invisible: true }),
+    // §3(2) one-opcode-per-tick budget: the parked `waitstate` opcode only
+    // advances gBattlescriptCurrInstr to printstring's own address this
+    // tick; printstring itself cannot also run the same tick.
+    terminalSeamEvent(7, { kind: "set-battler-sprite-visibility", battler: 1, invisible: true }),
+    // §3(3) RAM-to-pixel render lag: printstring's same-tick AddTextPrinter
+    // call is not visible in the framebuffer until the following tick (the
+    // same +1 lag already established for an unrelated window by
+    // tools/probe/verify-turn4-kickoff-textgate-rule.py).
+    terminalSeamEvent(8, { kind: "set-battler-sprite-visibility", battler: 1, invisible: true }),
+    terminalSeamEvent(9, { kind: "message", messageId: "STRINGID_TRAINER1WINTEXT", substitutions: [] }),
   ];
   const transition = Object.freeze({
     kind: "terminal" as const,
@@ -520,6 +566,95 @@ function lossTerminalWindowStage(state: EngineState): EngineState {
     rngMode: "frontierBattle",
     rngValue: swapped.battle?.rng.value ?? state.rngValue,
   };
+}
+
+function lossTerminalWindowResolution(
+  state: EngineState,
+): BattleResolutionPresentationState | null {
+  return state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null;
+}
+
+/**
+ * docs/terminal-seam-antecedent-boundary-probe.md §2 (Class 1) + §5: the
+ * shared renderer only ever draws a wait-cursor for a segment's *current*
+ * command (battleResolutionPresentationRender.ts's `waitCursor` is scoped to
+ * `segment.commands[commandIndex]`), so once this window's antecedent
+ * "MURKROW fainted!" message is superseded by the trainer-slide/filler
+ * commands it jumps straight to, the shared renderer has no way left to know
+ * its down-arrow is real leftover window content rather than cleared -- §5:
+ * "not a render-layer bug", so the fix stays scaffold-only. Renders the
+ * antecedent message a second time, held at its RAM-derived frozen pose, and
+ * diffs it against the same message one tick before the cursor is eligible
+ * (fully typed, not yet ready -- `isBattleResolutionButtonMessageReady`)
+ * to isolate exactly the arrow's own pixels, independent of whatever else is
+ * on screen in the frame this mask gets patched onto.
+ */
+function lossTerminalWindowHeldCursorMask(
+  state: EngineState,
+): ReadonlyMap<number, number> | null {
+  const orchestrator = state.factoryRoundBattleOrchestrator;
+  const resolution = orchestrator?.battleResolutionPresentation ?? null;
+  if (!orchestrator || !resolution) return null;
+  const commands = resolution.segments[resolution.segmentIndex]?.commands;
+  const antecedentIndex = commands?.findIndex(
+    (command) => command.type === "message" && command.advance === "button" && !command.noCursor,
+  ) ?? -1;
+  const antecedent = antecedentIndex === -1 ? undefined : commands?.[antecedentIndex];
+  if (!antecedent || antecedent.type !== "message") return null;
+  const printableLength = battleStringPrintableLength(antecedent.lines);
+  const at = (phaseElapsed: number): EngineState => ({
+    ...state,
+    factoryRoundBattleOrchestrator: {
+      ...orchestrator,
+      battleResolutionPresentation: {
+        ...resolution,
+        commandIndex: antecedentIndex,
+        lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed }),
+      },
+    },
+  });
+  const withoutCursor = render(at(printableLength));
+  const withCursor = render(
+    at(printableLength + 1 + TERMINAL_SEAM_ANTECEDENT_FROZEN_CURSOR_AGE),
+  );
+  const mask = new Map<number, number>();
+  for (let index = 0; index < withCursor.length; index += 1) {
+    if (withCursor[index] !== withoutCursor[index]) {
+      mask.set(index, withCursor[index]!);
+    }
+  }
+  return mask;
+}
+
+/**
+ * docs/terminal-seam-antecedent-boundary-probe.md §2's own freeze span: held
+ * from the trainer-slide command (the first command after the real dismiss)
+ * through the last filler command -- every command before the swap-edge
+ * quote message (`noCursor`) becomes current. Derived from the live
+ * commandIndex/command shape, not a hardcoded frame range (AGENTS.md: "never
+ * add another ... absolute-tick rendering branch").
+ */
+function lossTerminalWindowHeldCursorActive(state: EngineState): boolean {
+  const resolution = lossTerminalWindowResolution(state);
+  const commands = resolution?.segments[resolution.segmentIndex]?.commands;
+  if (!resolution || !commands) return false;
+  const trainerSlideIndex = commands.findIndex((command) => command.type === "trainer-slide");
+  const quoteIndex = commands.findIndex(
+    (command) => command.type === "message" && command.noCursor,
+  );
+  if (trainerSlideIndex === -1 || quoteIndex === -1) return false;
+  return resolution.commandIndex >= trainerSlideIndex && resolution.commandIndex < quoteIndex;
+}
+
+function applyLossTerminalWindowHeldCursor(
+  state: EngineState,
+  rgba: Uint8Array,
+  mask: ReadonlyMap<number, number> | null,
+): Uint8Array {
+  if (!mask || mask.size === 0 || !lossTerminalWindowHeldCursorActive(state)) return rgba;
+  const patched = rgba.slice();
+  for (const [index, value] of mask) patched[index] = value;
+  return patched;
 }
 
 /**
@@ -703,22 +838,38 @@ export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {
   const captureFrames = new Set(trace.captureFrames ?? []);
   const captures: AppCapture[] = [];
   let frame = 0;
+  // docs/terminal-seam-antecedent-boundary-probe.md §2/§5: computed once (the
+  // pose is frozen, not per-frame) the moment this one stage applies; stays
+  // null -- a no-op -- for every other trace, which capture the plain
+  // `render(state)` output exactly as before.
+  let heldCursorMask: ReadonlyMap<number, number> | null = null;
 
   const applyStage = (): void => {
     if (!trace.appStage || trace.appStage.frame !== frame) return;
     const stage = APP_STAGES[trace.appStage.id];
     if (!stage) throw new Error(`unknown app stage ${trace.appStage.id}`);
     state = stage(state);
+    if (trace.appStage.id === "loss-terminal-window-off") {
+      heldCursorMask = lossTerminalWindowHeldCursorMask(state);
+    }
+  };
+
+  const captureFrame = (): void => {
+    if (!captureFrames.has(frame)) return;
+    const rgba = heldCursorMask === null
+      ? render(state)
+      : applyLossTerminalWindowHeldCursor(state, render(state), heldCursorMask);
+    captures.push({ frame, rgba });
   };
 
   applyStage();
-  if (captureFrames.has(frame)) captures.push({ frame, rgba: render(state) });
+  captureFrame();
 
   for (const advance of traceAdvances(trace.segments)) {
     state = tick(state, advance.buttons);
     frame = advance.frame;
     applyStage();
-    if (captureFrames.has(frame)) captures.push({ frame, rgba: render(state) });
+    captureFrame();
   }
 
   return captures;
