@@ -4,6 +4,63 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 904 — [bounded MAIN worker, 2026-08-04 ~00:10] #72 batch 6: 13 more REACHABLE printstring STRINGIDs landed
+
+- **State:** master (this docs commit follows the engine commit). Full
+  `npm test` green (**686 files / 6,717 passed / 1 skipped**, 0 failures),
+  `npm run build` green (`tsc -b && vite build`).
+- **Did:** Continued ISSUES #72's ranked REACHABLE-28 list from
+  `STRINGID_PKMNSXCUREDYPROBLEM` (skipping the hard trio/`TRACED`/`SXBLOCKSY2`
+  per the step brief) and landed 13 across 11 staged `it`s in
+  `tests/presentationStringIssue72Batch6.test.ts`: the end-turn ability-tick
+  trio Shed Skin/Rain Dish/Speed Boost (`SXCUREDYPROBLEM`/`SXRESTOREDHPALITTLE2`/
+  `RAISEDSPEED` — Shed Skin's tick gained a small `battleTextBuff1Status`
+  pre-clear capture mirroring `HOLD_EFFECT_CURE_STATUS`'s own branch, Speed
+  Boost's tick gained an explicit `scriptingBattler` write mirroring
+  `battle_util.c:2649`, Rain Dish needed neither — its own print reads
+  `B_ATK_*`, already supplied generically by `enterTickBattlerContext`); Wish's
+  delayed heal `WISHCAMETRUE` (real 2-turn cast-then-resolve repro); the
+  Disable attack-canceler pair `MOVEWASDISABLED`/`MOVEISDISABLED` (real
+  same-turn cast-then-blocked-reselect, the second sharing Taunt's exact
+  idiom); Perish Song's `PERISHCOUNTFELL` (real same-turn cast-then-tick,
+  reusing Stockpile's `battleTextBuff1ByteNumber` substitution); the Magic
+  Coat pair `SHROUDEDITSELF`/`MOVEBOUNCED` (real same-turn cast-then-bounced-
+  GROWL); `USEDSAFEGUARD` (real same-turn Safeguard-then-blocked Thunder
+  Wave); and three zero-new-plumbing defender-only ids
+  (`STATSWONTDECREASE2`/`FELLINTONIGHTMARE`/`HEALEDPARALYSIS`). Three ability
+  display names added (`RAIN DISH`/`SPEED BOOST`/`SHED SKIN`). All 11 `it`s
+  red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
+  src/engine/factoryBattleScriptFullTurnDecision.ts
+  src/engine/battleEndTurnOrchestration.ts` (each threw the exact pre-fix
+  completeness-guard error). Census: **67→54 UNRESOLVED** (exact −13). ISSUES
+  #72 REACHABLE trimmed to **15** (28−13, arithmetic-checked).
+- **Skipped, with reasons (not just budget):** `STRINGID_PKMNTOOKFOE`
+  (Destiny Bond) and `STRINGID_PKMNLOSTPPGRUDGE` (Grudge) both route through
+  `tryfaintmon`'s dual `BS_ATTACKER`/`BS_TARGET` operand
+  (`battleScriptHitChainOpcode.ts:4270-4340`) — the single-hit case resolves
+  to the plain idiom, but proving that holds across every reachable
+  `tryfaintmon` call site is its own investigation, not this step's scope.
+  `STRINGID_PKMNSXWHIPPEDUPSANDSTORM` (Sand Stream — mechanism fully
+  understood, needs a genuine mid-battle switch with a 2nd party slot),
+  `STRINGID_PKMNSAFEGUARDEXPIRED` (mechanism understood, needs a real 5-turn
+  expiry repro, no `sideTimers` config shortcut), `STRINGID_PKMNTOOKATTACK`
+  (Future Sight — mechanism understood, needs a real 3-turn delayed-hit
+  repro) all ran out of step budget on staging cost alone.
+  `STRINGID_MAGNITUDESTRENGTH` needs a new RNG-roll capture field (genuine new
+  plumbing). `STRINGID_PKMNCHANGEDTYPEWITH` (the one permitted plumbing
+  extension) not attempted, ran out of budget. `STRINGID_PKMNREDUCEDPP`/
+  `STRINGID_PKMNSITEMRESTOREDPP`/`STRINGID_PKMNSTOLEITEM` each need a small
+  new substitution-capture pair, not attempted.
+- **Next:** #72 batch 7 (REACHABLE-15 list: `SXWHIPPEDUPSANDSTORM` next in
+  order, or cherry-pick `STOLEITEM`/`CHANGEDTYPEWITH` first — both cheap per
+  this session's own research). The hard trio, `TRACED`, `SXBLOCKSY2`,
+  `TOOKFOE`/`LOSTPPGRUDGE`'s tryfaintmon investigation. typeref slices 4-8.
+  #71 Slice D.
+- **Notes:** No PAPERCUT. Full suite + build ran in the foreground per this
+  step's execution-discipline brief (an earlier attempt to background them
+  was caught and corrected mid-step before either notification landed).
+
+---
 ## 903 — [bounded MAIN worker, 2026-08-03 ~23:45] CANCELER_TORMENTED step BLOCKED: assigned premise was factually wrong, corrected docs, no engine/presentation change
 
 - **State:** master `6eaae2c5` (unchanged — docs-only commit follows). Full
@@ -140,68 +197,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   threshold; polled its output file to a foreground completion marker
   rather than treating the background move as a wait-for-notification
   pattern).
-
----
-## 901 — [bounded MAIN worker, 2026-08-03 ~22:15] Terminal-seam increments (i)+(ii) landed: win-side text is now real, resolved, and player-visible
-
-- **State:** master `b9a9366b`. Full `npm test` green (**684 files / 6,695
-  passed / 1 skipped**, 0 failures), `npm run build` green (`tsc -b && vite
-  build`), `compare:differential -- battle-command-generated-off.json --base
-  f420330c --summary`: **PASS — 128/128 byte-identical**.
-- **Did:** Landed the parked `wip/terminal-seam-increment-i` branch (single
-  commit `d64f10c3`, cherry-picked clean as `5f1b3d80`) together with
-  increment (ii) in the same change, per that commit's own diagnosis that
-  the two are not separable (landing (i) alone converts today's silent skip
-  into a hard completeness-guard crash). A player win on the generic round
-  path now actually resumes the interpreter past `checkteamslost`'s `end2`
-  into a second VM run at `BattleScript_FrontierTrainerBattleWon`, drives it
-  to its own `end2`, and emits real text instead of the round orchestrator
-  fabricating a dismissed win-quote. Fixed all 3 RED causes the wip commit
-  left open (commit `2bb9b3bc`): (1) resolver-mapped
-  `STRINGID_PLAYERDEFEATEDTRAINER1`/`STRINGID_TRAINER1LOSETEXT` in
-  `battleResolutionPresentation.ts`'s `messageLines` via the #72 Taunt-pair
-  idiom, sourcing `{B_TRAINER1_CLASS}`/`{B_TRAINER1_NAME}` and
-  `{B_TRAINER1_LOSE_TEXT}` off the already-threaded `opponentTrainer`
-  (widened to carry `speechLose`); (2) wired the shared
-  `resolveSingleBattlePosition` into the two test harnesses
-  (`battleEndTurnOrchestration.test.ts`, `battleScriptFutureAttack.test.ts`)
-  still stubbing `resolveBattlerAtPosition` to null; (3) fixed
-  `battleEndTurnOrchestration.test.ts`'s fixture to carry
-  `BATTLE_TYPE_TRAINER` (Factory battles are trainer battles, matching what
-  production actually stages). New pins: `tests/
-  presentationStringTerminalSeamWin.test.ts` asserts the DESTIN fixture's
-  exact 4 resolved lines ("Player defeated"/"BUG CATCHER DESTIN!"/"PLEASE I
-  NEED"/"SOME WATER", cross-checked against `battleScene.ts`'s `TURN17_*`
-  ground-truth literals) plus a JENSON generalization pin (different
-  facility class/name/speechLose) proving the mapping is data-driven, not
-  DESTIN-hardcoded — both red-verified via `git stash --
-  src/engine/battleResolutionPresentation.ts`. Census: **80→78
-  UNRESOLVED** (commit `b9a9366b`). ISSUES #72's MANUAL-settlement block and
-  the scout doc's §3 updated: the two win-side ids are REACHABLE-and-landed;
-  `STRINGID_TRAINER1WINTEXT` (loss-path) stays open, with the loss-side
-  follow-up (VARIOUS 19/20 + a fresh oracle trace — no loss-path ground
-  truth exists anywhere in this repo today) now recorded in both docs.
-  `wip/terminal-seam-increment-i` deleted after the merge went green.
-- **Scope held:** LOSS/DRAW path kept today's direct terminal boundary
-  (win-side second VM run only, per the step brief's hard limit) —
-  `VARIOUS` 19/20 not registered this step. Increment (iii) (rendering the
-  trainer slide-in + dismissible quote boxes before `postwin`) not
-  attempted — `trainer-slide-in`/`trainer-slide-out` semantic events are
-  emitted but `projectBattleResolutionCommands` has no branch for them yet,
-  so they're silently absorbed with zero visual effect (no new renderer
-  built, matching the step's hard limit). No RNG cursor movement from
-  entering the second VM run (scout trap 4 confirmed, unchanged).
-  Completeness guard untouched (stays fatal per the 2026-08-03 user
-  decision).
-- **Next:** loss-side terminal-seam increment (`VARIOUS` 19/20 + fresh
-  oracle trace for `BattleScript_LocalBattleLost`, then resolver-map
-  `STRINGID_TRAINER1WINTEXT`) — no ground truth exists yet, budget a trace.
-  Increment (iii) (trainer-slide-in visual + dismissible win/loss quote
-  boxes) once the loss side lands too, so both directions render together.
-  #72 batch 5 (plain-idiom tail from `STRINGID_PKMNFREEDFROM`, skip
-  `TRACED`/`SXBLOCKSY2`/the hard trio). typeref slices 4-8. #71 Slice D.
-- **Notes:** No surprises vs. the wip commit's 3-cause diagnosis — all 3
-  causes were exactly as described, no additional hidden causes surfaced
-  once the full suite reran green. No PAPERCUT this step.
-
----

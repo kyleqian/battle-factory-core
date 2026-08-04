@@ -283,7 +283,71 @@ message substitution; the rules-context field already exists
 `STRINGID_PKMNREDUCEDPP`, `STRINGID_PKMNSITEMRESTOREDPP`,
 `STRINGID_PKMNHEALEDPARALYSIS`, `STRINGID_PKMNSTOLEITEM`.
 
-**REACHABLE (28), ordered by carrier-weight proxy for likely-hit-first —
+**Batch 6 landed** (`tests/presentationStringIssue72Batch6.test.ts`, all 11
+`it`s red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
+src/engine/factoryBattleScriptFullTurnDecision.ts
+src/engine/battleEndTurnOrchestration.ts`, covering 13 ids): the end-turn
+ability-tick trio `STRINGID_PKMNSXCUREDYPROBLEM` (Shed Skin — `runShedSkinTick`
+now captures the pre-clear status name into `battleTextBuff1Status` the same
+shape `HOLD_EFFECT_CURE_STATUS` already established; shares
+`STRINGID_PKMNSXCUREDITSYPROBLEM`'s identical template/substitution),
+`STRINGID_PKMNSXRESTOREDHPALITTLE2` (Rain Dish — reads `B_ATK_NAME_WITH_PREFIX`/
+`B_ATK_ABILITY` off `enterTickBattlerContext`'s generic attacker reassignment,
+unlike the other two ticks), `STRINGID_PKMNRAISEDSPEED` (Speed Boost —
+`runAbilitiesTick`'s own branch now also sets `scriptingBattler` the same way
+Shed Skin's tick already does, `battle_util.c:2649`); Wish's delayed heal
+`STRINGID_PKMNWISHCAMETRUE` (real 2-turn cast-then-resolve repro, `B_BUFF1`
+resolves the caster's own name via the tick's `selectorRoles.target`/
+`enterTickBattlerContext` overlap in this engine's no-mid-resolution-switch
+scope); the Disable attack-canceler pair `STRINGID_PKMNMOVEWASDISABLED`/
+`STRINGID_PKMNMOVEISDISABLED` (real same-turn Disable-then-blocked-reselect,
+the second id sharing `STRINGID_PKMNCANTUSEMOVETAUNT`'s exact idiom); Perish
+Song's `STRINGID_PKMNPERISHCOUNTFELL` (real same-turn cast-then-tick, reusing
+`STRINGID_PKMNSTOCKPILED`'s `battleTextBuff1ByteNumber` substitution); the
+Magic Coat pair `STRINGID_PKMNSHROUDEDITSELF`/`STRINGID_PKMNMOVEBOUNCED` (real
+same-turn Magic Coat-then-bounced-GROWL, neither label reassigns
+attacker/target); `STRINGID_PKMNUSEDSAFEGUARD` (real same-turn
+Safeguard-then-blocked Thunder Wave, plain defender-only); and three more
+plain-idiom defender-only ids sharing zero new plumbing —
+`STRINGID_STATSWONTDECREASE2` (Tickle's compound both-stats-at-minimum gate),
+`STRINGID_PKMNFELLINTONIGHTMARE` (Nightmare's compound already-asleep gate),
+`STRINGID_PKMNHEALEDPARALYSIS` (Smelling Salt's sole carrier). Three ability
+display names (`RAIN DISH`/`SPEED BOOST`/`SHED SKIN`) added to the existing
+lookup table. Census: **67→54 UNRESOLVED** (exact −13). ISSUES #72 REACHABLE
+trimmed to **15** (28−13, arithmetic-checked against the list body's own
+unique-id count).
+
+**Not attempted this step, still open (skipped-with-reason, not just
+budget):** `STRINGID_PKMNTOOKFOE` (Destiny Bond) and `STRINGID_PKMNLOSTPPGRUDGE`
+(Grudge) both route through `tryfaintmon`'s dual `BS_ATTACKER`/`BS_TARGET`
+operand (`battleScriptHitChainOpcode.ts:4270-4340`, `isAttackerOperand`
+flipping which role is "the battler that just fainted" across the corpus's
+many `tryfaintmon BS_ATTACKER`/`BS_TARGET` call sites) — the single-hit case
+this batch traced through resolves to the plain attacker/defender idiom, but
+confirming that holds across every reachable `tryfaintmon` call site (not just
+the simple move-hit case) is its own investigation, same class of gap
+PROGRESS 902 already flagged. `STRINGID_PKMNSXWHIPPEDUPSANDSTORM` (Sand
+Stream — mechanism fully understood, `scriptingBattler` already wired at
+switch-in the same shape `STRINGID_PKMNPREVENTSSTATLOSSWITH` uses; needs a
+genuine mid-battle switch decision with a second full party-member config,
+ran out of step budget). `STRINGID_PKMNSAFEGUARDEXPIRED` (mechanism fully
+understood, same `runScreenFieldCase`/`B_ATK_PREFIX3` shape
+`STRINGID_PKMNSXWOREOFF` already uses; needs a real 5-turn expiry repro since
+`sideTimers` has no config-field shortcut, ran out of step budget).
+`STRINGID_PKMNTOOKATTACK` (Future Sight — mechanism fully understood,
+`requireMoveDefender(actionSnapshot.attacker)` + `rules.futureSightMove[target]`;
+needs a real 3-turn delayed-hit repro, ran out of step budget).
+`STRINGID_MAGNITUDESTRENGTH` (needs a new RNG-roll capture field — Magnitude's
+2-10 roll is not stored anywhere yet, genuine new plumbing).
+`STRINGID_PKMNCHANGEDTYPEWITH` (Color Change — the one permitted plumbing
+extension per this step's brief, not attempted, ran out of budget).
+`STRINGID_PKMNREDUCEDPP` (Spite — needs a move-name + PP-amount capture pair).
+`STRINGID_PKMNSITEMRESTOREDPP` (Leppa Berry tick — needs an item-holder +
+move-name capture pair). `STRINGID_PKMNSTOLEITEM` (Thief/Covet — needs an
+item-name capture, likely easy next pick following `STRINGID_PKMNKNOCKEDOFF`'s
+own `heldItems` precedent).
+
+**REACHABLE (15), ordered by carrier-weight proxy for likely-hit-first —
 name a batch, use the Taunt-pair idiom** (`messageId === "STRINGID_X"` branch
 in `messageLines`, `requireMoveDefender`/`actionSnapshot`-sourced battler,
 staged full-turn repro test, red-verify via `git stash`):
@@ -291,21 +355,13 @@ staged full-turn repro test, red-verify via `git stash`):
 `STRINGID_PKMNREGAINEDHEALTH`,
 `STRINGID_PKMNPROTECTEDBY`,
 `STRINGID_PKMNTRACED`,
-`STRINGID_PKMNSXBLOCKSY2`, `STRINGID_PKMNSXCUREDYPROBLEM`,
+`STRINGID_PKMNSXBLOCKSY2`,
 `STRINGID_PKMNSXWHIPPEDUPSANDSTORM`, `STRINGID_PKMNTOOKFOE`,
-`STRINGID_PKMNWISHCAMETRUE`,
 `STRINGID_PKMNSAFEGUARDEXPIRED`,
-`STRINGID_PKMNUSEDSAFEGUARD`,
-`STRINGID_PKMNSXRESTOREDHPALITTLE2`,
-`STRINGID_PKMNMOVEISDISABLED`,
-`STRINGID_PKMNMOVEWASDISABLED`, `STRINGID_PKMNTOOKATTACK`,
-`STRINGID_PKMNPERISHCOUNTFELL`,
-`STRINGID_PKMNMOVEBOUNCED`, `STRINGID_PKMNRAISEDSPEED`,
-`STRINGID_PKMNSHROUDEDITSELF`, `STRINGID_STATSWONTDECREASE2`,
+`STRINGID_PKMNTOOKATTACK`,
 `STRINGID_MAGNITUDESTRENGTH`, `STRINGID_PKMNCHANGEDTYPEWITH`,
-`STRINGID_PKMNFELLINTONIGHTMARE`, `STRINGID_PKMNLOSTPPGRUDGE`,
+`STRINGID_PKMNLOSTPPGRUDGE`,
 `STRINGID_PKMNREDUCEDPP`, `STRINGID_PKMNSITEMRESTOREDPP`,
-`STRINGID_PKMNHEALEDPARALYSIS`,
 `STRINGID_PKMNSTOLEITEM`.
 
 **MANUAL — all settled 2026-08-03 (side-lane settlement pass; full evidence

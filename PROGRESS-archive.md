@@ -1,3 +1,68 @@
+---
+## 901 — [bounded MAIN worker, 2026-08-03 ~22:15] Terminal-seam increments (i)+(ii) landed: win-side text is now real, resolved, and player-visible
+
+- **State:** master `b9a9366b`. Full `npm test` green (**684 files / 6,695
+  passed / 1 skipped**, 0 failures), `npm run build` green (`tsc -b && vite
+  build`), `compare:differential -- battle-command-generated-off.json --base
+  f420330c --summary`: **PASS — 128/128 byte-identical**.
+- **Did:** Landed the parked `wip/terminal-seam-increment-i` branch (single
+  commit `d64f10c3`, cherry-picked clean as `5f1b3d80`) together with
+  increment (ii) in the same change, per that commit's own diagnosis that
+  the two are not separable (landing (i) alone converts today's silent skip
+  into a hard completeness-guard crash). A player win on the generic round
+  path now actually resumes the interpreter past `checkteamslost`'s `end2`
+  into a second VM run at `BattleScript_FrontierTrainerBattleWon`, drives it
+  to its own `end2`, and emits real text instead of the round orchestrator
+  fabricating a dismissed win-quote. Fixed all 3 RED causes the wip commit
+  left open (commit `2bb9b3bc`): (1) resolver-mapped
+  `STRINGID_PLAYERDEFEATEDTRAINER1`/`STRINGID_TRAINER1LOSETEXT` in
+  `battleResolutionPresentation.ts`'s `messageLines` via the #72 Taunt-pair
+  idiom, sourcing `{B_TRAINER1_CLASS}`/`{B_TRAINER1_NAME}` and
+  `{B_TRAINER1_LOSE_TEXT}` off the already-threaded `opponentTrainer`
+  (widened to carry `speechLose`); (2) wired the shared
+  `resolveSingleBattlePosition` into the two test harnesses
+  (`battleEndTurnOrchestration.test.ts`, `battleScriptFutureAttack.test.ts`)
+  still stubbing `resolveBattlerAtPosition` to null; (3) fixed
+  `battleEndTurnOrchestration.test.ts`'s fixture to carry
+  `BATTLE_TYPE_TRAINER` (Factory battles are trainer battles, matching what
+  production actually stages). New pins: `tests/
+  presentationStringTerminalSeamWin.test.ts` asserts the DESTIN fixture's
+  exact 4 resolved lines ("Player defeated"/"BUG CATCHER DESTIN!"/"PLEASE I
+  NEED"/"SOME WATER", cross-checked against `battleScene.ts`'s `TURN17_*`
+  ground-truth literals) plus a JENSON generalization pin (different
+  facility class/name/speechLose) proving the mapping is data-driven, not
+  DESTIN-hardcoded — both red-verified via `git stash --
+  src/engine/battleResolutionPresentation.ts`. Census: **80→78
+  UNRESOLVED** (commit `b9a9366b`). ISSUES #72's MANUAL-settlement block and
+  the scout doc's §3 updated: the two win-side ids are REACHABLE-and-landed;
+  `STRINGID_TRAINER1WINTEXT` (loss-path) stays open, with the loss-side
+  follow-up (VARIOUS 19/20 + a fresh oracle trace — no loss-path ground
+  truth exists anywhere in this repo today) now recorded in both docs.
+  `wip/terminal-seam-increment-i` deleted after the merge went green.
+- **Scope held:** LOSS/DRAW path kept today's direct terminal boundary
+  (win-side second VM run only, per the step brief's hard limit) —
+  `VARIOUS` 19/20 not registered this step. Increment (iii) (rendering the
+  trainer slide-in + dismissible quote boxes before `postwin`) not
+  attempted — `trainer-slide-in`/`trainer-slide-out` semantic events are
+  emitted but `projectBattleResolutionCommands` has no branch for them yet,
+  so they're silently absorbed with zero visual effect (no new renderer
+  built, matching the step's hard limit). No RNG cursor movement from
+  entering the second VM run (scout trap 4 confirmed, unchanged).
+  Completeness guard untouched (stays fatal per the 2026-08-03 user
+  decision).
+- **Next:** loss-side terminal-seam increment (`VARIOUS` 19/20 + fresh
+  oracle trace for `BattleScript_LocalBattleLost`, then resolver-map
+  `STRINGID_TRAINER1WINTEXT`) — no ground truth exists yet, budget a trace.
+  Increment (iii) (trainer-slide-in visual + dismissible win/loss quote
+  boxes) once the loss side lands too, so both directions render together.
+  #72 batch 5 (plain-idiom tail from `STRINGID_PKMNFREEDFROM`, skip
+  `TRACED`/`SXBLOCKSY2`/the hard trio). typeref slices 4-8. #71 Slice D.
+- **Notes:** No surprises vs. the wip commit's 3-cause diagnosis — all 3
+  causes were exactly as described, no additional hidden causes surfaced
+  once the full suite reran green. No PAPERCUT this step.
+
+---
+
 ## 900 — [bounded MAIN worker, 2026-08-03 ~19:05] ENDTURN_CURSE wired + STRINGID_PKMNLAIDCURSE landed (#72 batch 4)
 
 - **State:** master `20a06520`. Full `npm test` green (**677 files / 6,662
