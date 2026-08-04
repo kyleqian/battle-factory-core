@@ -1,5 +1,43 @@
 # Animation coverage
 
+## Supervisor wind-down — rung-3 dispatcher COMPLETE + Steel Wing reconciled (2026-08-04 PM session)
+
+- **State:** the 2026-08-04 user directive is fully delivered. All three ISSUES
+  #71 cross-lane ask items are exported from `src/animation/sendOutDispatcher.ts`
+  / `sendOutSpriteFrame.ts` with a live-measured anchor, and the queued Steel
+  Wing reconciliation landed (opponent-front **197/197** complete, player-back
+  **180/197**, status stays partial). Move coverage: **107/276 exact, 1
+  partial, 0 staged, 168 unsupported**. Final merged full suite **720 files /
+  6,924 passed / 1 skipped**, build green, no worker worktrees or branches
+  left. Six DeepSeek V4 Flash worker rounds, six verified merges, zero failed
+  rounds (per-step entries below).
+- **For the main program:** Slice D can brief against this contract now —
+  (1) `frontSendOutFrameAtTick(species, ticksSinceStart)`: per-tick `{x2,y2}`,
+  terminal-clamped, species→family internal; (2)
+  `frontSendOutSpriteFrameAtTick(species, ticksSinceAnimStart)` +
+  `hasTwoFramesAnimation(species)`: the two-frame ANIMCMD half; (3)
+  `backSendOutFrameAtTick(species, natureName, ticksSinceStart)`. **Anchor,
+  RAM-measured** (fixtures `tools/compare/fixtures/front-send-out-flight-*.json`):
+  the movement anim installs on the `affineAnimEnded` tick plus
+  `animationDelay[species] − 1` when the delay is nonzero (pre-decrement,
+  source-verified); the two-frame program starts on the affineAnimEnded tick
+  undeferred; rendered OAM `x2/y2` for reducer tick N appears at alignment
+  **A = −1** (one-display-frame latch, `max(0, frame − t_move − 1)`), validated
+  per-tick across three species incl. RATTATA's full 87-frame flight. The two
+  `src/engine/` hand-fits (kabutoSendOut.ts, battleMenu.ts tables) remain in
+  place — retiring them stays the coordinated cross-lane change per the
+  program doc §6. `docs/steel-wing-residual-diagnosis.md` holds the verified
+  residual map for STEEL_WING's two remaining player-side ranges.
+- **Next:** (a) player-side STEEL_WING ranges 144-155 (faded-vs-unfaded gust
+  palette base) and 181-185 (slide-back start/rate) — both scoped in the
+  diagnosis doc; (b) prove opponent 197/197 twice fresh before any promotion;
+  (c) await main-lane Slice D fold feedback.
+- **Notes:** oracle-freshness FAIL at session start was the known docs-only
+  false positive (single NOTES.md harness commit since 8012 start). Probe
+  landmines documented in the session memory: `preCheckpointCaptureAllFrames`
+  opt-in, `resolve_probe_command` relative-path venv routing, animNum-flip
+  anchor marker.
+
 ## `MOVE_STEEL_WING` reconciliation landed — opponent 197/197, player 180/197 (2026-08-04)
 
 - **State:** implemented the five confirmed fixes plus two source-derived target
