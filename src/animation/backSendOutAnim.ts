@@ -2714,7 +2714,7 @@ export interface BackTriangleDownFrame {
   /** Source amplitude and signed `timer / data[5]` divisor. */
   readonly data5: BackTriangleDownAmplitude;
   /** Source repeat count after the callback's terminal-row decrement. */
-  readonly data6: 0 | 1 | 2;
+  readonly data6: 1 | 2;
   /** Shared task register; TriangleDown leaves it zeroed. */
   readonly data7: 0;
   readonly sourceRowIndex: 0 | 1 | 2 | 3;
@@ -2769,7 +2769,7 @@ export function backTriangleDownFrameAtTick(
   let y2 = 0;
   let data2 = 0;
   let data3 = 0 as 0 | 1 | 2 | 3;
-  let data6: 0 | 1 | 2 = variant.runs;
+  let data6: 1 | 2 = variant.runs;
   let terminal = false;
   let result: BackTriangleDownFrame | null = null;
 
@@ -2949,14 +2949,13 @@ export function backConcaveArcLargeFrameAtTick(
 
     if (strictOverflow) {
       if (data6 <= 1) {
-        data6 = 0;
         callback = "WaitAnimEnd";
         x2 = 0;
         y2 = 0;
         terminal = true;
       } else {
         data7 %= 256;
-        data6 = toS16(data6 - 1) as 0 | 1 | 2;
+        data6 = toS16(data6 - 1) as 1 | 2;
         repeatWillRestart = true;
       }
     } else {
@@ -3023,7 +3022,7 @@ export function backConcaveArcLargeTerminalSpriteData(
   natureId: number,
   battlerId: number,
   speciesId: number,
-): readonly [number, 0, number, BackConcaveArcLargeStep, 12, 12, 0, number] | null {
+): readonly [number, 0, number, BackConcaveArcLargeStep, 12, 12, 1, number] | null {
   if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
   const selection = selectBackSendOutAnimation(species, natureId);
   if (selection?.backAnimSet !== "BACK_ANIM_CONCAVE_ARC_LARGE") return null;
@@ -3031,7 +3030,7 @@ export function backConcaveArcLargeTerminalSpriteData(
   if (variant === null) throw new Error(`unexpected large concave-arc selector ${selection.selector}`);
   let finalPhase = 0;
   while (finalPhase <= 255) finalPhase = toS16(finalPhase + variant.step);
-  return [toS16(battlerId), 0, toS16(speciesId), variant.step, 12, 12, 0, finalPhase];
+  return [toS16(battlerId), 0, toS16(speciesId), variant.step, 12, 12, 1, finalPhase];
 }
 
 export interface BackVerticalShakeHorizontalSlideFrame {

@@ -139,7 +139,7 @@ describe("BACK_ANIM_CONCAVE_ARC_LARGE back send-out reducer", () => {
     });
     const twiceTerminal = backConcaveArcLargeFrameAtTick("MAGIKARP", 0, 65, -1)!;
     expect(twiceTerminal).toMatchObject({
-      x2: 0, y2: 0, data6: 0, data7Before: 256, data7: 256, strictOverflow: true,
+      x2: 0, y2: 0, data6: 1, data7Before: 256, data7: 256, strictOverflow: true,
       repeatWillRestart: false, sineIndex: null, callback: "WaitAnimEnd",
     });
     expect(backConcaveArcLargeFrameAtTick("MAGIKARP", 0, 999, -1)).toEqual(twiceTerminal);
@@ -148,18 +148,18 @@ describe("BACK_ANIM_CONCAVE_ARC_LARGE back send-out reducer", () => {
       sineIndex: 96, reflectedY: true, callback: "Anim_ConcaveArcLarge",
     });
     expect(backConcaveArcLargeFrameAtTick("AZURILL", 19, 43, 1)).toMatchObject({
-      x2: 0, y2: 0, data6: 0, data7Before: 258, data7: 258,
+      x2: 0, y2: 0, data6: 1, data7Before: 258, data7: 258,
       strictOverflow: true, callback: "WaitAnimEnd",
     });
     expect(backConcaveArcLargeFrameAtTick("TREECKO", 1, 64, 1)).toMatchObject({
-      data3: 4, data6: 0, data7Before: 256, data7: 256,
+      data3: 4, data6: 1, data7Before: 256, data7: 256,
       strictOverflow: true, callback: "WaitAnimEnd",
     });
     expect(backConcaveArcLargeWaitAnimEndCallback(false)).toBe("WaitAnimEnd");
     expect(backConcaveArcLargeWaitAnimEndCallback(true)).toBe("SpriteCallbackDummy");
-    expect(backConcaveArcLargeTerminalSpriteData("MAGIKARP", 0, 0, 129)).toEqual([0, 0, 129, 8, 12, 12, 0, 256]);
-    expect(backConcaveArcLargeTerminalSpriteData("AZURILL", 19, 0, 298)).toEqual([0, 0, 298, 6, 12, 12, 0, 258]);
-    expect(backConcaveArcLargeTerminalSpriteData("TREECKO", 1, 0, 252)).toEqual([0, 0, 252, 4, 12, 12, 0, 256]);
+    expect(backConcaveArcLargeTerminalSpriteData("MAGIKARP", 0, 0, 129)).toEqual([0, 0, 129, 8, 12, 12, 1, 256]);
+    expect(backConcaveArcLargeTerminalSpriteData("AZURILL", 19, 0, 350)).toEqual([0, 0, 350, 6, 12, 12, 1, 258]);
+    expect(backConcaveArcLargeTerminalSpriteData("TREECKO", 1, 0, 277)).toEqual([0, 0, 277, 4, 12, 12, 1, 256]);
   });
 
   it("rejects invalid input and adjacent send-out families", () => {
