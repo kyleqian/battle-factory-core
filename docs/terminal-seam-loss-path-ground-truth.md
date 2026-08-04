@@ -231,3 +231,134 @@ ground truth backing every claim:
   instead cross-checked via the documented static script (§2's table) plus
   the visible on-screen behavior at each step, which is the same method
   `postwin-notes.md` used for the WIN side's own label-sequence claims.
+
+## 6. 2026-08-04 MAIN-worker session: wait-cursor mechanism confirmed and gated; swap-edge + held-cursor residuals itemized (not guess-fit)
+
+**Cursor mechanism (source-confirmed, landed in `src`).** The reason the
+oracle shows no wait-cursor for the quote box at all, while ordinary
+messages like "MURKROW fainted!" do: they use *two different pause control
+codes*, and only one of them draws the arrow.
+
+- `Cmd_printstring`/`PrepareStringBattle`/`BtlController_EmitPrintString`
+  (`battle_script_commands.c:2137-2146`, `battle_util.c:906-911`) is
+  identical for every STRINGID — the difference is entirely in each
+  message's own *template*, not the printer call shape.
+- Ordinary messages like `STRINGID_ATTACKERFAINTED`/`STRINGID_TARGETFAINTED`
+  end their literal template in `\p` (`battle_message.c:74-75`,
+  `sText_AttackerFainted[] = _("{B_ATK_NAME_WITH_PREFIX}\nfainted!\p")`) —
+  charmap byte `0xFB`, `CHAR_PROMPT_CLEAR` (`charmap.txt:1088`). `text.c`'s
+  render loop resolves that literal byte directly to `RENDER_STATE_CLEAR`
+  (`text.c:1102-1105`), serviced every tick by `TextPrinterWaitWithDownArrow`
+  (`text.c:865-882`), which calls `TextPrinterDrawDownArrow`
+  (`text.c:787-836`) every tick while waiting — this is the actual down-arrow
+  task, bouncing through `sDownArrowYCoords = {0,1,2,1}` on an 8-tick
+  `downArrowDelay`, exactly the shape this engine's `CURSOR_Y_OFFSETS`/9-tick
+  cadence already ports (`battleScene.ts:2828,34111-34120`).
+- `STRINGID_TRAINER1WINTEXT`'s own static template is a **bare placeholder
+  with no control code at all**: `sText_Trainer1WinText[] =
+  _("{B_TRAINER1_WIN_TEXT}")` (`battle_message.c:1424`). Its wait comes
+  entirely from `BufferStringBattle`'s placeholder-substitution code
+  (`battle_message.c:2600-2748`): for exactly the four
+  `B_TXT_TRAINER{1,2}_{WIN,LOSE}_TEXT` cases (`:2616-2627`, `:2741-2748`),
+  after copying the resolved Easy Chat text it appends `EXT_CTRL_CODE_BEGIN`
+  + `EXT_CTRL_CODE_PAUSE_UNTIL_PRESS` — an *extended* control code (0xFC
+  prefix), not the literal `\p` byte. `text.c`'s render loop resolves that to
+  `RENDER_STATE_WAIT` (`text.c:1018-1022`), serviced by `TextPrinterWait`
+  (`text.c:884-900`): waits for `JOY_NEW(A_BUTTON|B_BUTTON)` and nothing
+  else — **it never calls `TextPrinterDrawDownArrow`**. Both families
+  genuinely block on a real button (confirming the existing "A dismiss"
+  timing model is correct), but only one of them animates a visible cursor
+  while doing so.
+- **WIN-side ids, checked as the brief required (not wired this session):**
+  `STRINGID_TRAINER1LOSETEXT` (`sText_Trainer1LoseText[] =
+  _("{B_TRAINER1_LOSE_TEXT}")`, `battle_message.c:55`) is the WIN-path
+  mirror of `TRAINER1WINTEXT` — same bare placeholder, same appended
+  `EXT_CTRL_CODE_PAUSE_UNTIL_PRESS`, so it never gets a cursor either.
+  **`STRINGID_PLAYERDEFEATEDTRAINER1` is different and must NOT be
+  suppressed**: its static template (`battle_message.c:371`,
+  `sText_PlayerDefeatedLinkTrainerTrainer1[] = _("Player defeated\n
+  {B_TRAINER1_CLASS} {B_TRAINER1_NAME}!\p")`) ends in a literal `\p` —
+  the ordinary `CHAR_PROMPT_CLEAR`/down-arrow path, so it genuinely does
+  spawn the cursor once ready. Treating `TERMINAL_SEAM_BUTTON_MESSAGE_IDS`'s
+  three ids as uniformly cursor-less (the shape the prior itemization
+  suggested) would have been a regression for this one. Landed as
+  `TERMINAL_SEAM_QUOTE_MESSAGE_IDS` (`battleResolutionPresentation.ts`,
+  containing only `STRINGID_TRAINER1LOSETEXT`/`STRINGID_TRAINER1WINTEXT`), a
+  `noCursor` boolean on the `"message"` presentation command threaded from
+  that set, and a `!command.noCursor` gate on
+  `battleResolutionPresentationRender.ts`'s `waitCursor` field. Red-verified
+  via `git stash`: `tests/presentationTerminalSeamTrainerSlide.test.ts`'s two
+  existing terminal-seam tests plus a new third test all fail against the
+  unfixed code (the `noCursor` field doesn't exist), pass against the fix.
+- **Result**: this fix alone took `npm run compare -- loss-terminal-window-off
+  --summary` from **1/236 → 175/236** (twice-run byte-identical) — every
+  frame from 3057 (quote fully typed) through 3230 (its own dismiss) now
+  matches, because the quote box correctly never shows a cursor through that
+  entire 174-frame settled/dismissable span.
+
+**Two residual classes remain, itemized precisely (not guess-fit) rather
+than force-fit against the brief's own explicit escape hatch:**
+
+1. **Held-cursor freeze during the trainer-slide, ticks 2996-3033 (38
+   frames, 37-38px each).** The antecedent "MURKROW fainted!" message (a
+   real `\p`/down-arrow message) is still displayed throughout the trainer
+   slide-in (nothing has overwritten the box yet), and the oracle's cursor
+   is present but **completely static** — byte-identical `ssimMean`/`ssimMin`
+   across all 38 sampled frames, unlike the genuinely-bouncing cursor once a
+   button message is the *current* command (whose bbox/ssim values visibly
+   cycle tick to tick, confirmed both before and after this session's fix).
+   This is consistent with the real mechanism: `TextPrinterDrawDownArrow`
+   only advances while its battler's printer callback is still being
+   actively serviced each tick; once the interpreter dispatches a later
+   command to a *different* battler (the opponent's trainer-slide) without
+   the antecedent message ever being cleared, the last-drawn arrow tile is
+   leftover window content — frozen, not still bouncing. Direct pixel
+   sampling (`app-02996.png`/`oracle-02996.png`, red glyph pixels
+   `(255,0,0)` against the teal `(107,165,165)` box background) confirms
+   this diagnosis and pins the frozen bounce-phase index empirically
+   (`CURSOR_Y_OFFSETS[2]` — any `age` in `[18,26]` reproduces all 38 frames
+   exactly). **Not landed**: this specific `age` value is real
+   gameplay-input-dependent (how many ticks the actual dismiss press lagged
+   behind ready, in the ORIGINAL antecedent-message flow this LOSS window's
+   compare scaffold deliberately does not replay per-tick —
+   `tools/compare/appTrace.ts`'s `lossTerminalWindowStage`, "commandIndex: 4
+   ... outside real ticks") — there is no principled way to *derive* it from
+   the message's own length/duration (confirmed by testing: the natural
+   `duration - printableLength - 1` formula gives age 8, not 18, and drawing
+   at age 8 makes the diff *worse*, not better). Landing a hand-fit "18"
+   with no source citation would violate this step's own evidence bar for
+   the cursor-gating fix. A correct general fix likely needs the scaffold to
+   record the antecedent message's real final `phaseElapsed` (or the render
+   layer to expose a `heldCursor` concept fed by that value) rather than a
+   presentation-layer-only derivation — flagged for whoever lands the WIN
+   compare wiring or revisits this window.
+2. **Swap-edge + typing cascade, ticks 3034-3056 (23 frames, 28-589px).**
+   The genuine 3-tick swap-edge micro-class (3034-3036, ~587-589px) that
+   ISSUES #73 already flagged: the app begins typing the quote's first
+   character 3 ticks before the oracle does (app's trainer-slide command
+   completes and immediately hands off to the message at local tick 38; the
+   oracle's antecedent box visibly holds through tick 3036, first quote
+   character not until 3037). This is a genuine **content** offset, not a
+   cursor artifact — confirmed by direct screenshots (app already shows "I
+   AM" at the tick the oracle still shows "I") — so cascades through the
+   entire typing phase as a per-character alignment mismatch, not just the
+   3 originally-itemized frames, until the text finishes typing and both
+   sides re-settle at frame 3057. Investigated this session
+   (`reference/pokeemerald/src/battle_script_commands.c`'s `Cmd_return`,
+   the trace's own button-press schedule reconstructed from
+   `tools/compare/traces/loss-terminal-window-off.json`'s `segments` array —
+   last real "A" press at absolute tick 2928-2929, ~300 silent ticks
+   afterward through the quote's own dismiss at 3230) without reaching a
+   source-confirmed mechanism: reconciling "the trainer sprite is visibly
+   sliding" (interpreter has progressed) against "the fainted message's own
+   `\p`/button-wait should otherwise gate all further script execution"
+   needs a live RAM/script-cursor probe of the committed fixture at this
+   exact boundary, beyond this session's remaining budget. Per this step's
+   brief, not guess-fit — left itemized for a follow-up with probe budget.
+
+**Acceptance honesty**: `npm run compare -- loss-terminal-window-off
+--summary` is **175/236** (twice-run byte-identical), short of the brief's
+"≥232" target — the two residual classes above account for the full 61-frame
+gap (38 + 23 = 61; 236 - 61 = 175). The quote-cursor mechanism fix itself is
+solid and source-confirmed; the two remaining classes need real per-tick
+oracle-input modeling this session did not have budget to complete honestly.

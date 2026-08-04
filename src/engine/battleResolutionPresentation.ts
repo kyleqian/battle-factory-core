@@ -100,6 +100,12 @@ export type BattleResolutionPresentationCommand =
       eventSequence: number;
       lines: readonly string[];
       advance: "automatic" | "button";
+      /**
+       * True only for the two quote-placeholder ids
+       * (`TERMINAL_SEAM_QUOTE_MESSAGE_IDS`) whose real printer path never
+       * spawns the wait-cursor task, per that const's own citation.
+       */
+      noCursor: boolean;
       timing: BattleMessageTiming;
     }>
   | Readonly<{
@@ -461,6 +467,52 @@ export const TRAINER_SLIDE_TIMING = Object.freeze({ minimumFrames: 38 } as const
  */
 const TERMINAL_SEAM_BUTTON_MESSAGE_IDS: ReadonlySet<string> = new Set([
   "STRINGID_PLAYERDEFEATEDTRAINER1",
+  "STRINGID_TRAINER1LOSETEXT",
+  "STRINGID_TRAINER1WINTEXT",
+]);
+/**
+ * Only 2 of the 3 button ids above are wait-cursor-less -- this is NOT
+ * uniform across `TERMINAL_SEAM_BUTTON_MESSAGE_IDS` (source-read for
+ * ISSUES #73's LOSS-window cursor-gating step):
+ *
+ * `STRINGID_TRAINER1WINTEXT`/`STRINGID_TRAINER1LOSETEXT`'s own static
+ * templates are bare placeholders with no literal pause code at all
+ * (`reference/pokeemerald/src/battle_message.c:1424`
+ * `sText_Trainer1WinText[] = _("{B_TRAINER1_WIN_TEXT}")`; `:55`
+ * `sText_Trainer1LoseText[] = _("{B_TRAINER1_LOSE_TEXT}")`). Their wait
+ * comes entirely from `BufferStringBattle`'s placeholder substitution
+ * (`battle_message.c:2600-2748`): for exactly the 4
+ * `B_TXT_TRAINER{1,2}_{WIN,LOSE}_TEXT` cases (`:2741-2748`), after copying
+ * the resolved Easy Chat text it appends `EXT_CTRL_CODE_BEGIN` +
+ * `EXT_CTRL_CODE_PAUSE_UNTIL_PRESS` -- an *extended* control code that
+ * `text.c`'s render loop (`:1018-1022`) resolves to `RENDER_STATE_WAIT`,
+ * serviced every tick by `TextPrinterWait` (`text.c:884-900`): waits for
+ * `JOY_NEW(A_BUTTON|B_BUTTON)` and nothing else -- it never calls
+ * `TextPrinterDrawDownArrow`.
+ *
+ * `STRINGID_PLAYERDEFEATEDTRAINER1` is different: its static template
+ * (`battle_message.c:371` `sText_PlayerDefeatedLinkTrainerTrainer1[] =
+ * _("Player defeated\n{B_TRAINER1_CLASS} {B_TRAINER1_NAME}!\p")`) ends in a
+ * literal `\p` (`CHAR_PROMPT_CLEAR`, byte 0xFB per `charmap.txt:1088`,
+ * *not* an extended code). `text.c`'s render loop resolves that byte
+ * directly to `RENDER_STATE_CLEAR` (`:1102-1105`), serviced by
+ * `TextPrinterWaitWithDownArrow` (`text.c:865-882`), which *does* call
+ * `TextPrinterDrawDownArrow` every tick while waiting -- the exact
+ * `sDownArrowYCoords`/8-tick-delay shape `CURSOR_Y_OFFSETS` in
+ * `battleScene.ts` already ports. So the down-arrow/wait-cursor task is
+ * genuinely spawned for this id; gating it off would be a regression, not a
+ * fix. (This id is LOSS-window-inapplicable -- `BattleScript_LocalBattleLost`
+ * never prints it, only `BattleScript_FrontierTrainerBattleWon` does -- so
+ * it does not appear in this window's own compare, but the set membership
+ * must still stay correct for the future WIN-side wiring, ISSUES #73.)
+ *
+ * `STRINGID_TRAINER2WINTEXT`/`STRINGID_TRAINER2LOSETEXT` share the identical
+ * bare-placeholder-plus-`EXT_CTRL_CODE_PAUSE_UNTIL_PRESS` shape (same
+ * `BufferStringBattle` cases) but aren't modeled at all yet (no two-opponent
+ * Factory battle support) -- not added here since there is no command site
+ * to gate.
+ */
+const TERMINAL_SEAM_QUOTE_MESSAGE_IDS: ReadonlySet<string> = new Set([
   "STRINGID_TRAINER1LOSETEXT",
   "STRINGID_TRAINER1WINTEXT",
 ]);
@@ -2545,6 +2597,7 @@ export function projectBattleResolutionCommands(
           || TERMINAL_SEAM_BUTTON_MESSAGE_IDS.has(payload.messageId)
             ? "button"
             : "automatic",
+        noCursor: TERMINAL_SEAM_QUOTE_MESSAGE_IDS.has(payload.messageId),
         timing: STAT_CHANGE_MESSAGE_IDS.has(payload.messageId)
           ? STAT_CHANGE_MESSAGE_TIMING
           : MESSAGE_TIMING,

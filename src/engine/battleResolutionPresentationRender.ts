@@ -489,6 +489,7 @@ export function createBattleResolutionPresentationRenderView(
       );
       if (
         command.advance === "button"
+        && !command.noCursor
         && isBattleResolutionButtonMessageReady(state)
       ) {
         waitCursor = Object.freeze({

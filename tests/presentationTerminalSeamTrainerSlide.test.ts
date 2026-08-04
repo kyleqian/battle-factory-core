@@ -254,10 +254,11 @@ function advanceUntil(
   resolution: BattleResolutionPresentationState,
   predicate: (state: BattleResolutionPresentationState) => boolean,
   budget = 500,
+  pressA = true,
 ): BattleResolutionPresentationState {
   let current = resolution;
   for (let i = 0; i < budget && !predicate(current); i += 1) {
-    current = stepPresenting(current, true);
+    current = stepPresenting(current, pressA);
   }
   if (!predicate(current)) {
     throw new Error("resolution did not reach the expected state within budget");
@@ -284,9 +285,16 @@ describe("terminal-seam presentation phase: generic trainer slide-in + dismissib
     );
     const commands = resolution.segments[0]!.commands;
     expect(commands.map((c) => c.type)).toEqual(["message", "trainer-slide", "message"]);
-    expect(commands[0]).toMatchObject({ type: "message", advance: "button", lines: ["Player defeated", "BUG CATCHER DESTIN!"] });
+    // STRINGID_PLAYERDEFEATEDTRAINER1's own template ends in a literal `\p`
+    // (battle_message.c:371) -- an ordinary button message, so it keeps the
+    // real down-arrow wait-cursor (noCursor: false). STRINGID_TRAINER1LOSETEXT
+    // is a bare `{B_TRAINER1_LOSE_TEXT}` placeholder (battle_message.c:55)
+    // whose only wait comes from BufferStringBattle's appended
+    // EXT_CTRL_CODE_PAUSE_UNTIL_PRESS (battle_message.c:2741-2748), which
+    // never spawns the down-arrow cursor (text.c:1018-1022, 884-900).
+    expect(commands[0]).toMatchObject({ type: "message", advance: "button", noCursor: false, lines: ["Player defeated", "BUG CATCHER DESTIN!"] });
     expect(commands[1]).toMatchObject({ type: "trainer-slide", battler: 1, direction: "in", timing: { minimumFrames: 38 } });
-    expect(commands[2]).toMatchObject({ type: "message", advance: "button", lines: ["PLEASE I NEED", "SOME WATER"] });
+    expect(commands[2]).toMatchObject({ type: "message", advance: "button", noCursor: true, lines: ["PLEASE I NEED", "SOME WATER"] });
 
     // Before the first dismiss: no trainer visual yet (still off-screen/absent).
     expect(createBattleResolutionPresentationRenderView(resolution).trainerSlide).toBeNull();
@@ -340,9 +348,14 @@ describe("terminal-seam presentation phase: generic trainer slide-in + dismissib
     const commands = resolution.segments[0]!.commands;
     expect(commands.map((c) => c.type)).toEqual(["sprite-visibility", "trainer-slide", "message"]);
     expect(commands[1]).toMatchObject({ type: "trainer-slide", battler: 1, direction: "in", timing: { minimumFrames: 38 } });
+    // STRINGID_TRAINER1WINTEXT is the LOSS-side mirror of TRAINER1LOSETEXT
+    // above -- same bare `{B_TRAINER1_WIN_TEXT}` placeholder
+    // (battle_message.c:1424) and the same appended
+    // EXT_CTRL_CODE_PAUSE_UNTIL_PRESS wait with no down-arrow cursor.
     expect(commands[2]).toMatchObject({
       type: "message",
       advance: "button",
+      noCursor: true,
       lines: ["YOUR POKéMON DON’T", "MAKE THE CUT"],
     });
 
@@ -365,5 +378,48 @@ describe("terminal-seam presentation phase: generic trainer slide-in + dismissib
     const final = driveToTerminalHandoff(resolution);
     expect(final.lifecycle.phase).toBe("terminal-handoff");
     expect(final.pendingBoundary).toEqual({ kind: "terminal", outcome: "trainer-win" });
+  });
+
+  it("waitCursor: an ordinary button message shows the down-arrow cursor once ready, a quote-placeholder message never does (ISSUES #73)", () => {
+    // Deliberately short lines (unlike the real STRINGID_PLAYERDEFEATEDTRAINER1/
+    // STRINGID_TRAINER1LOSETEXT production text above) so both messages
+    // reach `isBattleResolutionButtonMessageReady` well before
+    // `isBattleResolutionCommandComplete`'s `max(minimumFrames, printableLength)`
+    // duration would otherwise force-advance past them -- this test isolates
+    // the `noCursor` wiring end-to-end at the rendered view, not the
+    // pre-existing printableLength-vs-minimumFrames race longer production
+    // strings can hit (out of scope for this step).
+    const resolution = terminalResolution(
+      [
+        event(0, { kind: "health-bar-update", battler: 0, healthValue: 200 }),
+        event(1, { kind: "hp-change", battler: 0, from: 200, to: 0 }),
+        event(2, { kind: "faint-animation", battler: 0 }),
+        event(3, { kind: "message", messageId: "STRINGID_ATTACKERFAINTED", substitutions: [] }),
+        event(4, { kind: "message", messageId: "STRINGID_TRAINER1WINTEXT", substitutions: [] }),
+      ],
+      "trainer-win",
+      { ...CANONICAL_JENSON_PRESENTATION, speechWin: ["HI", "BYE"] },
+    );
+    const commands = resolution.segments[0]!.commands;
+    expect(commands.map((c) => c.type)).toEqual(["hp", "faint", "message", "message"]);
+    expect(commands[2]).toMatchObject({ advance: "button", noCursor: false });
+    expect(commands[3]).toMatchObject({ advance: "button", noCursor: true, lines: ["HI", "BYE"] });
+
+    const ordinaryReady = advanceUntil(
+      resolution,
+      (state) => state.commandIndex === 2 && isBattleResolutionButtonMessageReady(state),
+      500,
+      false,
+    );
+    expect(createBattleResolutionPresentationRenderView(ordinaryReady).waitCursor).not.toBeNull();
+
+    const quoteStart = advanceUntil(resolution, (state) => state.commandIndex === 3);
+    const quoteReady = advanceUntil(
+      quoteStart,
+      (state) => state.commandIndex === 3 && isBattleResolutionButtonMessageReady(state),
+      500,
+      false,
+    );
+    expect(createBattleResolutionPresentationRenderView(quoteReady).waitCursor).toBeNull();
   });
 });

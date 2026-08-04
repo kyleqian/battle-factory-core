@@ -394,6 +394,7 @@ describe("battle resolution presentation receipt ownership", () => {
         eventSequence: 0,
         lines: ["ONIX used", "ROCK SLIDE!"],
         advance: "automatic",
+        noCursor: false,
         timing: { minimumFrames: 24, holdFrames: 0 },
       },
       {
@@ -410,6 +411,7 @@ describe("battle resolution presentation receipt ownership", () => {
         eventSequence: 4,
         lines: ["It’s super effective!"],
         advance: "automatic",
+        noCursor: false,
         timing: { minimumFrames: 24, holdFrames: 0 },
       },
       { type: "turn-end", timing: { minimumFrames: 8 } },
