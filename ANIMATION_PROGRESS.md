@@ -1,5 +1,37 @@
 # Animation coverage
 
+## USER DIRECTIVE (2026-08-04, recorded from the user's interactive session): the §6 rung-3 send-out dispatcher is this lane's next bounded step
+
+- **Directive:** the first bounded step of the next animation session is
+  the send-out dispatcher — `docs/send-out-intro-animation-program.md` §6
+  rung 3: a dispatcher in `src/animation/` keyed by species (front) and
+  species+nature (back), replacing the three one-offs. Start it before any
+  new selector/move-animation program. The Steel Wing reconciliation in the
+  entry below is not displaced — it queues right after (supervisor's
+  ordering call), but the dispatcher goes first.
+- **Contract:** `docs/send-out-live-wiring-consumer-map.md` §5's cross-lane
+  ask, verbatim: (1) `frontSendOutFrameAtTick(species, ticksSinceStart)`
+  doing the species→family lookup internally over the 62 accepted front
+  reducers, with the tick-0 **anchor** defined explicitly in its doc
+  comment; (2) the OAM/anim-frame side (`HasTwoFramesAnimation`/
+  `sMonAnimationDelayTable`-derived frame-index state — KABUTO's
+  `kabutoFrame` is the only current example of the shape); (3) the back
+  variant (`species, nature, ticksSinceStart`) in the same contract shape.
+  The front functions are the piece gating the main lane. Retiring the two
+  `src/engine/` hand-fits stays a coordinated cross-lane change per §6 —
+  do not drive-by them from this lane.
+- **Why now:** this is ISSUES #71's open cross-lane ask. Main-lane Slice D
+  (live hookup of the banked intros at the generated battle-start seam) is
+  gated on it and queued for the next main session; both front and back
+  families are now fully banked (62/62 front, 25/25 back sets), so nothing
+  else in this lane precedes it.
+- **Acceptance:** program doc §7 unchanged — RAM probe of the settled
+  sprite, dense oracle window twice fresh, sibling-species spot-check per
+  promoted function.
+- **For the main program:** the main lane was notified the same day
+  (ISSUES #71 note + PROGRESS.md entry 914 addendum) — it briefs Slice D
+  only after folding the landed dispatcher.
+
 ## `MOVE_STEEL_WING` source/evidence partial (2026-08-04)
 
 - **State:** **107/276 exact, 1 partial, 0 staged, 168 unsupported**.
