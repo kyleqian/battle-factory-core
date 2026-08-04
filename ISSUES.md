@@ -343,6 +343,43 @@ written to transplant; the WIN fixture
 remember `STRINGID_PLAYERDEFEATEDTRAINER1` KEEPS its cursor and the WIN
 script never recalls the opponent mon).
 
+## #74 — Pre-existing 1-frame drift on both generated-route dense windows, found during ISSUES #71 Slice-D insurance, unrelated to that step
+
+**Symptom:** the two generated-route dense oracle windows that ISSUES #71's
+Slice-D offset-removal step re-ran as insurance no longer match their
+documented, previously-held baselines (entry 890/918, `ISSUES #56`
+SETTLED): `factory-arbitrary-intro-yoshi-off` is **699/751** (was **700/751**),
+one new mismatch at frame 640 (`bbox=46,73-97,111`, 120px,
+`ssimMean=0.9891`); `factory-arbitrary-intro-magneton-off` is **702/751**
+(was **703/751**), one new mismatch at frame 621 (`bbox=41,64-102,111`,
+396px, `ssimMean=0.9779`). Neither frame belongs to any previously-classified
+residual class (`docs/issue56-closure-audit.md` §3/§4 name every accepted
+frame precisely; 640 and 621 are absent from both lists).
+
+**Confirmed unrelated to Slice D:** both deltas reproduce **identically** at
+`1a12ce9c` (master HEAD immediately before the Slice-D offset-removal
+commit, `54979bf3`) via a scratch worktree — same frame numbers, same bbox,
+same pixel counts, both times. `npm run compare:differential --
+factory-arbitrary-intro-yoshi-off.json factory-arbitrary-intro-magneton-off.json
+--base 1a12ce9c --summary` (app-vs-app, no oracle) is **751/751
+byte-identical for both traces** — the Slice-D commit changes zero pixels
+of the app's own output for either window, at every frame including 640 and
+621. This rules out the offset-removal work as a cause; the drift predates
+it.
+
+**Not investigated further (out of scope for the Slice-D step):** likely
+introduced by one of the R2/R3/R4 merges between entry 890's last clean
+re-verification (2026-08-03, `32af4030`, both windows held) and `1a12ce9c`
+(2026-08-04) — none of those merges re-ran this specific dense-window pair
+before landing, the same class of gap ISSUES #56's original closure audit
+found once already (MAGNETON frame 437, since fixed) with the note "this
+audit's fresh run is the first re-verification of that pin since [X]
+landed." Root cause needs a bisection across the intervening merge commits
+(rung-3 dispatcher fold, LOSS terminal-window scaffold fixes, PAPERCUTS
+correction) — not attempted here. Filed rather than fixed or silently
+absorbed into a step it doesn't belong to, per this run's stop-and-report
+discipline for insurance deltas.
+
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
 **Symptom:** `generateInitialFactoryRentals`'s `constructionRngValue`
