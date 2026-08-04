@@ -493,6 +493,46 @@ change (deterministic, re-derives from the tree). Full 107-id list incl. all
 37 DEAD gates + emitting script label(s) + trigger/carrier evidence in
 `docs/issue72-reachability-triage.md`.
 
+## #73 — Terminal-seam remainder: loss-side implementation, increment (iii) presentation, and the win window's oracle-coverage gap
+
+**Context:** increments (i)+(ii) landed 2026-08-03 (PROGRESS 901): a player
+win on the generic route now runs `BattleScript_FrontierTrainerBattleWon`
+through a real second VM run and emits resolved
+`STRINGID_PLAYERDEFEATEDTRAINER1`/`STRINGID_TRAINER1LOSETEXT` message
+commands. Three bounded remainders, in recommended order:
+
+1. **Loss-side implementation.** Mirror the win-side two-stage redispatch for
+   `B_OUTCOME_LOST`/`DREW` → `BattleScript_LocalBattleLost`: register
+   `VARIOUS` cases 19/20 (`returnopponentmon1toball`/`mon2toball` — case 19
+   visibly recalls the opponent sprite AND hides its healthbox before the
+   slide-in; case 20 is a no-op in singles by observation), resolve
+   `STRINGID_TRAINER1WINTEXT` from `speeches.speechWin` (same messageLines
+   idiom), and route the post-loss flow to the Lobby challenge-over sequence
+   — NOT the pre-battle counter room (`WarpToLobbyLost` has no
+   pre-battle-room warp). Ground truth is fully banked:
+   `docs/terminal-seam-loss-path-ground-truth.md` (2026-08-04 scout,
+   twice-run byte-identical fixture
+   `tools/battle-lab/loss-terminal-explosion-dusclops-off.json`, DESTIN
+   speechWin "I AM ABOUT TO OVERHEAT" pixel-confirmed, RNG frozen-then-
+   same-tick-resume pattern verified matching the win side).
+2. **Increment (iii) — the win/loss presentation phase.** The
+   `trainer-slide-in`/`trainer-slide-out` events are emitted but
+   `projectBattleResolutionCommands` (`battleResolutionPresentation.ts`,
+   dispatch ~:2139-2465) has no case for them — they fall through with zero
+   visual (confirmed harmless by the 2026-08-04 read-only audit: no wedge,
+   no crash, just the missing trainer slide-in). No generic trainer-slide
+   renderer exists outside `battleScene.ts`'s canonical one-off. Scope per
+   `docs/terminal-seam-round-flow-scout.md` §3(iii): real dismissible
+   win/loss-text phase before `postwin`/`factoryTerminal` fire, sourcing the
+   already-resolved strings.
+3. **Oracle-level coverage for the win window.** The 2026-08-04 audit
+   confirmed the (i)+(ii) landing is pinned only by Tier-1 tests plus a
+   differential trace that never reaches a terminal — no emulator-vs-app
+   pixel evidence covers the new win sequence end-to-end. This is expected
+   (the window's pixels are incomplete until item 2 lands the slide-in) and
+   should be closed as part of item 2's acceptance: a dense oracle window
+   from the final hit through the quote dismiss, both outcomes.
+
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
 **Symptom:** `generateInitialFactoryRentals`'s `constructionRngValue`
