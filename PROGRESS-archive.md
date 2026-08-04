@@ -1,5 +1,82 @@
 
 ---
+## 905 — [bounded MAIN worker, 2026-08-04 ~01:15] #72 batch 7: 5 more REACHABLE printstring STRINGIDs landed, Sand Stream investigated + deferred
+
+- **State:** master (this docs commit follows the engine commit). Full
+  `npm test` green (**687 files / 6,722 passed / 1 skipped**, 0 failures),
+  `npm run build` green (`tsc -b && vite build`), `compare:differential --
+  battle-command-generated-off.json --base 854703f3 --summary`: **PASS —
+  128/128 byte-identical**.
+- **Did:** Worked ISSUES #72's REACHABLE-15 list per PROGRESS 904's own
+  batch-7 classification, cheapest-first, and landed 5 in
+  `tests/presentationStringIssue72Batch7.test.ts` (all red-verified via
+  `git stash -- src/engine/battleResolutionPresentation.ts
+  src/engine/factoryBattleScriptFullTurnDecision.ts
+  src/engine/battleEndTurnOrchestration.ts src/engine/battleScriptEvents.ts`,
+  each threw the exact pre-fix completeness-guard error): `STRINGID_
+  PKMNCHANGEDTYPEWITH` (Color Change — the one permitted new-plumbing
+  extension; `battleTextBuff1Type` was already captured by
+  `battleScriptMoveEndOpcode.ts:497` and already pinned directly by
+  `battleScriptMoveEndOpcode.test.ts`/`battleScriptTypeChangeOpcode.test.ts`,
+  only `prepareMessage`'s wiring to `Cmd_printstring` was missing; resolves
+  through `fightSubmenuText.ts`'s `TYPE_DISPLAY_NAMES` table, the same
+  `gTypeNames` abbreviation real source's `{B_BUFF1}` reads); `STRINGID_
+  PKMNREDUCEDPP` (Spite — `battleTextBuff1Move`/`battleTextBuff2ByteNumber`
+  were likewise already captured by `battleScriptTryspiteppreduceOpcode.ts`,
+  same missing-wiring-only shape); `STRINGID_PKMNSITEMRESTOREDPP` (Leppa
+  Berry end-turn tick — `runItemsTick`'s `HOLD_EFFECT_RESTORE_PP` branch now
+  also sets `scriptingBattler`/`battleTextBuff1Move`, pinned directly with a
+  new assertion in `tests/battleEndTurnOrchestration.test.ts`'s existing
+  Leppa Berry test); `STRINGID_PKMNSTOLEITEM` (Thief/Covet — `MOVE_EFFECT_
+  STEAL_ITEM`'s own set-battler-item event pair fires in the SAME transition
+  as the call into `BattleScript_ItemSteal`, strictly before the print, so
+  `heldItems[attacker]` — not `heldItems[defender]`, unlike Knock Off — is
+  the correct read at print time); `STRINGID_PKMNTRACED` (real Porygon
+  switch-in repro, reusing batch 2's Intimidate-loop `trainerBenchOverride`
+  staging shape — needed a genuinely new `monNickBattler` message-event field
+  (`battleScriptEvents.ts`) since the traced-from battler's name-with-prefix
+  needs `field`, unavailable inside `prepareMessage`'s rules-only scope;
+  `battleTextBuff1MonNick`'s own rules-context capture was already pinned
+  directly by `battleScriptSwitchinOpcode.test.ts`). Census: **54→49
+  UNRESOLVED** (exact −5). ISSUES #72 REACHABLE trimmed to **10** (15−5,
+  arithmetic-checked).
+- **Investigated, not landed:** `STRINGID_PKMNSXWHIPPEDUPSANDSTORM` (Sand
+  Stream) reaches its own `BattleScript_SandstreamActivates` printstring fine
+  via the same switch-in staging, but the script then halts at its own
+  `end3` (after `playanimation`+`call BattleScript_WeatherFormChanges`) as an
+  unresolved `machine-barrier` instead of resuming the switch-in flow —
+  `battleScriptSwitchinOpcode.ts`'s `callSwitchinScript` enters the ability
+  script via a real interpreter `"call-current"` transition (unlike Trace/
+  Intimidate, whose `switchineffects` branches only flip a status bit and
+  defer actual script execution to a separate, non-interpreter entry-hook
+  resolution). `battleScriptCallbackStack.ts` confirms `Cmd_end3`/
+  `BattleScriptPushCursorAndCallback` push/pop resumption is a known
+  `"UNWIRED DESIGN-SCOUT PROTOTYPE"` (`docs/end3-design.md`), not wired into
+  the live full-turn reducer — genuinely new plumbing, not a staging cost,
+  and Drizzle/Drought likely share the identical wall if ever full-turn
+  switch-in tested (unconfirmed). Full citations and a one-line sub-barrier
+  fix (`Cmd_playanimation`'s unregistered `B_ANIM_SANDSTORM_CONTINUES` case,
+  found en route, reverted since it's moot without the `end3` fix) are in
+  ISSUES #72's own batch-7 note. `STRINGID_PKMNSAFEGUARDEXPIRED` and
+  `STRINGID_PKMNTOOKATTACK` were not attempted this step (ran out of budget
+  after the end3 investigation) — both still just need staging per PROGRESS
+  904's own notes, no new gap found.
+- **Next:** #72 batch 8 (REACHABLE-10 list). `SAFEGUARDEXPIRED` (5-turn
+  expiry repro) and `TOOKATTACK` (`tests/battleScriptFutureAttack.test.ts`
+  has the staging harness) are the next cheapest per this step's own
+  research. The `Cmd_end3`/`call-current` resumption gap (would unblock
+  `SXWHIPPEDUPSANDSTORM` and make Drizzle/Drought's own switch-in
+  full-turn-testable) is worth a dedicated step — bigger than one STRINGID.
+  The hard trio, `SXBLOCKSY2`, `TOOKFOE`/`LOSTPPGRUDGE`'s `tryfaintmon`
+  investigation, `MAGNITUDESTRENGTH`'s new RNG-roll capture field. #71 Slice
+  D (gated on the animation lane's rung-3 dispatcher).
+- **Notes:** No PAPERCUT. `npm test`/`npm run build` both exceeded the Bash
+  tool's foreground timeout and auto-backgrounded; per this step's execution
+  discipline, stopped the stray background task and re-ran each to a real
+  foreground completion via the background-output file rather than treating
+  the auto-background as a wait-for-notification shortcut.
+
+---
 ## 904 — [bounded MAIN worker, 2026-08-04 ~00:10] #72 batch 6: 13 more REACHABLE printstring STRINGIDs landed
 
 - **State:** master (this docs commit follows the engine commit). Full

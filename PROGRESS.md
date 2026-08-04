@@ -4,6 +4,51 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 908 — [supervisor wind-down, 2026-08-04 ~02:50] Session close: terminal-seam WIN+LOSS both landed, typeref program CLOSED (census 0), #72 burned 80→48, day-audit clean; final union green
+
+- **State:** master `630bf3dc` (animation fold merge). Final independent
+  full `npm test`: **700 files / 6,786 passed / 1 skipped, 0 failures**;
+  `npm run build` green. Play-preview rebuilt at this commit, serving :5199.
+  No open DEFERRED entries. 13 workers this session (7 main + 6 side),
+  **0 lost** — every launcher exited normally.
+- **Did (headlines):** (1) **Terminal seam:** picked up the parked
+  `wip/terminal-seam-increment-i`, landed increments (i)+(ii) WIN side
+  (entry 901), then scouted (entry: loss ground-truth doc + twice-identical
+  fixture) and landed the **LOSS/DREW half same session** (entry 906,
+  `VARIOUS` 19/20 registered), plus the BS_ATTACKER mapping corrective
+  (entry 907). Both battle endings now run their real scripts with resolved
+  trainer text; remainder consolidated as **ISSUES #73** (renderer/increment
+  (iii) + win-window oracle coverage). (2) **Typeref retirement program
+  CLOSED:** slices 5/6/7a/7b landed on a stacked side-lane ladder, census
+  **67→0** (program total 144→0), slice-8 audit ran supervisor-side clean;
+  recorded in ISSUES #39 + design-doc header. (3) **ISSUES #72:** batches
+  5/6/7 + the 3 trainer ids — census UNRESOLVED **80→48**, REACHABLE
+  **39→10**; new plumbing landed: `battleTextBuff1Type`/`monNickBattler`;
+  CANCELER_TORMENTED premise **corrected** (real Torment = selection-time
+  rejection, subsystem tracked in #72's note; triage-doc citations fixed);
+  `Cmd_end3`/`call-current` resumption gap documented (blocks
+  SXWHIPPEDUPSANDSTORM + Drizzle/Drought full-turn switch-in tests).
+  (4) **Read-only day-audit** over all four surfaces: 0 functional defects,
+  2 record gaps (both folded into #73). (5) Two animation folds (orient:
+  none needed; wind-down: 11 commits, back-anim acceptances). PAPERCUTS +1
+  (forced-switch party-menu cursor). Oracle freshness FAIL at orient was the
+  documented docs-only false positive (single `_template` harness commit) —
+  no restart.
+- **Next:** ISSUES #73 item 2 (win/loss presentation phase incl. generic
+  trainer slide-in — next headline candidate; closes item 3's oracle window
+  with it). #72 batch 8: `SAFEGUARDEXPIRED`/`TOOKATTACK` cheapest, then the
+  end3 resumption gap as a dedicated step. #71 Slice D still gated on the
+  animation lane's rung-3 dispatcher (not landed as of 02:30). Hard trio /
+  `SXBLOCKSY2` / `TOOKFOE`+`LOSTPPGRUDGE` tryfaintmon / `MAGNITUDESTRENGTH`
+  RNG-field remain the #72 tail.
+- **Notes:** the animation supervisor was live until ~02:00 (its nested
+  worker worktree may persist under `.worktrees/animation-main/` — theirs to
+  clean). Merge discipline held all session: no master merges while a
+  main-lane worker was live; side ladder stacked 3 deep then folded in two
+  merges. All my worker worktrees/branches removed; `play-preview` +
+  `animation-main` worktrees are permanent.
+
+---
 ## 907 — [bounded MAIN worker, 2026-08-04 ~02:30] Corrective: fixed the backwards BS_ATTACKER trainer-slide-in mapping entry 906 flagged
 
 - **State:** master `0fd3367d`. Full `npm test` green (**688 files / 6,727
@@ -148,79 +193,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   step's execution discipline, same as that prior session.
 
 ---
-## 905 — [bounded MAIN worker, 2026-08-04 ~01:15] #72 batch 7: 5 more REACHABLE printstring STRINGIDs landed, Sand Stream investigated + deferred
-
-- **State:** master (this docs commit follows the engine commit). Full
-  `npm test` green (**687 files / 6,722 passed / 1 skipped**, 0 failures),
-  `npm run build` green (`tsc -b && vite build`), `compare:differential --
-  battle-command-generated-off.json --base 854703f3 --summary`: **PASS —
-  128/128 byte-identical**.
-- **Did:** Worked ISSUES #72's REACHABLE-15 list per PROGRESS 904's own
-  batch-7 classification, cheapest-first, and landed 5 in
-  `tests/presentationStringIssue72Batch7.test.ts` (all red-verified via
-  `git stash -- src/engine/battleResolutionPresentation.ts
-  src/engine/factoryBattleScriptFullTurnDecision.ts
-  src/engine/battleEndTurnOrchestration.ts src/engine/battleScriptEvents.ts`,
-  each threw the exact pre-fix completeness-guard error): `STRINGID_
-  PKMNCHANGEDTYPEWITH` (Color Change — the one permitted new-plumbing
-  extension; `battleTextBuff1Type` was already captured by
-  `battleScriptMoveEndOpcode.ts:497` and already pinned directly by
-  `battleScriptMoveEndOpcode.test.ts`/`battleScriptTypeChangeOpcode.test.ts`,
-  only `prepareMessage`'s wiring to `Cmd_printstring` was missing; resolves
-  through `fightSubmenuText.ts`'s `TYPE_DISPLAY_NAMES` table, the same
-  `gTypeNames` abbreviation real source's `{B_BUFF1}` reads); `STRINGID_
-  PKMNREDUCEDPP` (Spite — `battleTextBuff1Move`/`battleTextBuff2ByteNumber`
-  were likewise already captured by `battleScriptTryspiteppreduceOpcode.ts`,
-  same missing-wiring-only shape); `STRINGID_PKMNSITEMRESTOREDPP` (Leppa
-  Berry end-turn tick — `runItemsTick`'s `HOLD_EFFECT_RESTORE_PP` branch now
-  also sets `scriptingBattler`/`battleTextBuff1Move`, pinned directly with a
-  new assertion in `tests/battleEndTurnOrchestration.test.ts`'s existing
-  Leppa Berry test); `STRINGID_PKMNSTOLEITEM` (Thief/Covet — `MOVE_EFFECT_
-  STEAL_ITEM`'s own set-battler-item event pair fires in the SAME transition
-  as the call into `BattleScript_ItemSteal`, strictly before the print, so
-  `heldItems[attacker]` — not `heldItems[defender]`, unlike Knock Off — is
-  the correct read at print time); `STRINGID_PKMNTRACED` (real Porygon
-  switch-in repro, reusing batch 2's Intimidate-loop `trainerBenchOverride`
-  staging shape — needed a genuinely new `monNickBattler` message-event field
-  (`battleScriptEvents.ts`) since the traced-from battler's name-with-prefix
-  needs `field`, unavailable inside `prepareMessage`'s rules-only scope;
-  `battleTextBuff1MonNick`'s own rules-context capture was already pinned
-  directly by `battleScriptSwitchinOpcode.test.ts`). Census: **54→49
-  UNRESOLVED** (exact −5). ISSUES #72 REACHABLE trimmed to **10** (15−5,
-  arithmetic-checked).
-- **Investigated, not landed:** `STRINGID_PKMNSXWHIPPEDUPSANDSTORM` (Sand
-  Stream) reaches its own `BattleScript_SandstreamActivates` printstring fine
-  via the same switch-in staging, but the script then halts at its own
-  `end3` (after `playanimation`+`call BattleScript_WeatherFormChanges`) as an
-  unresolved `machine-barrier` instead of resuming the switch-in flow —
-  `battleScriptSwitchinOpcode.ts`'s `callSwitchinScript` enters the ability
-  script via a real interpreter `"call-current"` transition (unlike Trace/
-  Intimidate, whose `switchineffects` branches only flip a status bit and
-  defer actual script execution to a separate, non-interpreter entry-hook
-  resolution). `battleScriptCallbackStack.ts` confirms `Cmd_end3`/
-  `BattleScriptPushCursorAndCallback` push/pop resumption is a known
-  `"UNWIRED DESIGN-SCOUT PROTOTYPE"` (`docs/end3-design.md`), not wired into
-  the live full-turn reducer — genuinely new plumbing, not a staging cost,
-  and Drizzle/Drought likely share the identical wall if ever full-turn
-  switch-in tested (unconfirmed). Full citations and a one-line sub-barrier
-  fix (`Cmd_playanimation`'s unregistered `B_ANIM_SANDSTORM_CONTINUES` case,
-  found en route, reverted since it's moot without the `end3` fix) are in
-  ISSUES #72's own batch-7 note. `STRINGID_PKMNSAFEGUARDEXPIRED` and
-  `STRINGID_PKMNTOOKATTACK` were not attempted this step (ran out of budget
-  after the end3 investigation) — both still just need staging per PROGRESS
-  904's own notes, no new gap found.
-- **Next:** #72 batch 8 (REACHABLE-10 list). `SAFEGUARDEXPIRED` (5-turn
-  expiry repro) and `TOOKATTACK` (`tests/battleScriptFutureAttack.test.ts`
-  has the staging harness) are the next cheapest per this step's own
-  research. The `Cmd_end3`/`call-current` resumption gap (would unblock
-  `SXWHIPPEDUPSANDSTORM` and make Drizzle/Drought's own switch-in
-  full-turn-testable) is worth a dedicated step — bigger than one STRINGID.
-  The hard trio, `SXBLOCKSY2`, `TOOKFOE`/`LOSTPPGRUDGE`'s `tryfaintmon`
-  investigation, `MAGNITUDESTRENGTH`'s new RNG-roll capture field. #71 Slice
-  D (gated on the animation lane's rung-3 dispatcher).
-- **Notes:** No PAPERCUT. `npm test`/`npm run build` both exceeded the Bash
-  tool's foreground timeout and auto-backgrounded; per this step's execution
-  discipline, stopped the stray background task and re-ran each to a real
-  foreground completion via the background-output file rather than treating
-  the auto-background as a wait-for-notification shortcut.
-
