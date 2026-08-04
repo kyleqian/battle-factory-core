@@ -1,5 +1,50 @@
 # Animation coverage
 
+## Back `BACK_ANIM_H_STRETCH` triple accepted (2026-08-03)
+
+**State:** exact for the twelfth bounded player-back set: **12/25 back
+sets, 36/75 selector variants, 136/376 Factory mappings**. The generated set
+is exactly **2 mappings / 2 Factory / 0 outside** — MUK and LILEEP. Move
+coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**;
+`ANIMATION_COVERAGE.json` remains byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Did:** ported `Anim_HorizontalStretchFar_Twice`/normal/slow (IDs
+**117/118/91**) and shared `HorizontalStretchFar`: mod-0 two runs at duration
+20/amplitude 70, mod-1 one run at 30/60, and mod-2 one run at 40/40;
+initializer-first `data[2]` guard, `HandleStartAffineAnim`, signed GBA sine
+and C integer division, mid-window `data[7] += 51`/wrapped `index1`, back
+`sDontFlip` positive `xScale = 256 - Sin(index2, amplitude) -
+Sin(index1, (amplitude / 5) * 2)`, fixed `yScale=256`, strict
+`data[5] > data[6]` cycle boundary, identity affine write, twice-run
+decrement/reset, terminal `ResetSpriteAfterAnim`, `WaitAnimEnd`/dummy,
+OAM/matrix latency, and task zero/preserve/restore. Muk Factory index **420**
+Adamant/mod-0 is twice, Lileep index **140** Docile/mod-1 is normal (internal
+species ID **388**, not National Dex 345), and Muk index **612** Quiet/mod-2
+is slow; both source selector siblings are source/census/nature-routed and
+Factory batch-checked. No move status was promoted and no gameplay, RNG,
+damage, turn, facility, or live dispatcher state changed.
+
+**Evidence:** three fresh paired byte-identical Scene-ON receipts are dense
+from selected initializer through `SpriteCallbackDummy`, retaining every
+framebuffer hash plus sprite RAM/OAM/affine state: Muk twice **1835..1880 /
+46 frames, 21,967 B,
+`b788249706f3ba0157706a153fa19e2c9081ffc159e46ed45e17248f17eb536b`**;
+Lileep normal **1838..1871 / 34, 16,198 B,
+`4775b00b4e8f036195125be92e636fc41df2554824a1acd18ac081763e78128a`**;
+Muk slow **1835..1878 / 44, 21,017 B,
+`102606daeaa38841f4a8aaecc0538182cc5484ed995cb6e2b85d6ed5465d6a20`**.
+
+**Verification / next:** focused source/census/routing/reducer/evidence
+checks and both animation/executable ratchets are green (**4 files / 20
+tests**); heap-sized `npx tsc --noEmit`, `npm run test:smoke` (**7 files /
+346 tests**), full `npm test` (**674 files / 6,632 passed / 1 skipped**),
+heap-sized `npm run build`, and `npm run animation:coverage` are green. No
+unsupported-branch ratchet moved.
+Next source-ranked unsupported player-back set is **`BACK_ANIM_GROW_STUTTER`
+(set 13): 5 mappings / 3 Factory / 2 outside — ALAKAZAM, MEWTWO, QWILFISH,
+EXPLOUD, and RAYQUAZA**.
+
 ## Back `BACK_ANIM_V_STRETCH` triple accepted (2026-08-03)
 
 **State:** exact for the eleventh bounded player-back set: **11/25 back sets,
