@@ -102,7 +102,7 @@ describe("presentation-string ISSUES #72 batch 4 -- Ghost Curse's full turn (sel
       requestId: 1,
       rngSeed: 1,
       player: {
-        species: SPECIES_DUSCLOPS, moveId: CURSE, types: ["TYPE_GHOST", "TYPE_GHOST"],
+        species: SPECIES_DUSCLOPS, moveId: CURSE, types: ["TYPE_GHOST", "TYPE_GHOST"] as const,
         attack: 60, defense: 90, spAttack: 60, spDefense: 90, speed: 60, hp: 200, maxHp: 200,
       },
       trainer: statusedTargetConfig(),
@@ -120,7 +120,7 @@ describe("presentation-string ISSUES #72 batch 4 -- Ghost Curse's full turn (sel
       requestId: 1,
       rngSeed: 1,
       player: {
-        species: SPECIES_DUSCLOPS, moveId: CURSE, types: ["TYPE_GHOST", "TYPE_GHOST"],
+        species: SPECIES_DUSCLOPS, moveId: CURSE, types: ["TYPE_GHOST", "TYPE_GHOST"] as const,
         attack: 60, defense: 90, spAttack: 60, spDefense: 90, speed: 60, hp: 200, maxHp: 200,
       },
       trainer: statusedTargetConfig(),
