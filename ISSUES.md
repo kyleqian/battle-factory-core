@@ -478,29 +478,29 @@ in the triage doc's "MANUAL settlement" appendix):**
   truth doc) plus a JENSON generalization pin. Census: 49→48 UNRESOLVED.
 
 **Also found, tracked separately:** `STRINGID_PKMNCANTUSEMOVETORMENT` is
-DEAD *today*, but the prior note here (and `docs/issue72-reachability-triage.md`'s
-row for it) mis-cited *why* — **corrected 2026-08-03, see PROGRESS.md #903.**
-Read `reference/pokeemerald/src/battle_util.c:1983-2268` in full:
-`AtkCanceler_UnableToUseMove`'s `CANCELER_*` enum and switch have exactly 14
-cases (`CANCELER_FLAGS` … `CANCELER_THAW`, terminated by `CANCELER_END`) and
-**no Torment case at all** — not a missing phase between `DISABLED` and
-`TAUNTED`, a real absence in the ground-truth source itself. Torment's
-move-reuse block is enforced only at move-*selection* time, by
-`TrySetCantSelectMoveBattleScript` (`battle_util.c:999-1012`, called from
-`HandleTurnActionSelectionState` in `battle_main.c:4382` for both player and
-AI battlers), which dispatches to `BattleScript_SelectingTormentedMove`
-(`printselectionstring`, `battle_scripts_1.s:3563-3565`) — a different label
-than `BattleScript_MoveUsedIsTormented` (`printstring`, same STRINGID) that
-the old note pointed at, which has **zero callers anywhere in `src/*.c`** and
-is dead in the real game too. This engine already ports the *silent* half
-correctly (`CheckMoveLimitations`'s Torment bit,
-`battleScriptActionAdmission.ts:2485-2491`, mirrors `battle_util.c:1107`
-exactly) — the missing half is the interactive "rejected selection, forced
-reselect + flavor text" loop, which this decision-boundary-driven engine has
-no representation for at all (no other selection-time
-`printselectionstring` rejection path is wired either). That is a new
-subsystem, not a same-shape-as-Taunt/Imprison AtkCanceler phase addition —
-out of bounds for a bounded step; needs supervisor re-scoping.
+DEAD *today* — Torment's move-reuse block is enforced only at
+move-*selection* time by `TrySetCantSelectMoveBattleScript`
+(`battle_util.c:999-1012`), dispatching to
+`BattleScript_SelectingTormentedMove` (`printselectionstring`), not the dead
+`BattleScript_MoveUsedIsTormented`. **Scouted 2026-08-04, see
+`docs/selection-rejection-subsystem-scout.md`.**
+`TrySetCantSelectMoveBattleScript` actually covers 6 causes
+(Disabled/Torment/Taunt/Imprison/Choice-lock/no-PP), all equally unmodeled —
+this engine's `submitBattleDecision` pre-filters all 6 out of
+`legalDecisions` and throws a hard `Error` on an illegal submission instead
+of the source's reject+flavor-text+reprompt loop. The port's
+`CheckMoveLimitations` bitmask itself has **no gaps** (audited, all bits
+present). Reachability: Disabled/Torment/Taunt/Choice-lock/no-PP are
+REACHABLE (carriers cited in the scout); Imprison is DEAD (same
+RALTS-below-floor gate as `STRINGID_PKMNCANTUSEMOVESEALED`). Census-tool
+blind spot recorded there too: `printstring-literal-census.ts` matches only
+`printstring` mnemonics, so this whole `printselectionstring` family was
+structurally invisible to #70/#72's sweeps. The scout recommends the
+smallest bounded slice: a pure advisory `describeIllegalMoveSelection` query
+plus the 4 still-unresolved STRINGID `messageLines` branches (`NOPPLEFT`,
+`PKMNCANTUSEMOVETORMENT`, `ITEMALLOWSONLYYMOVE`, `PKMNHASNOMOVESLEFT`) — no
+`submitBattleDecision` contract change. Needs supervisor scoping as its own
+step.
 
 **Leads:** rerun `node --experimental-strip-types tools/report/
 printstring-literal-census.ts` after any `messageLines`/battle-script-program
@@ -605,37 +605,30 @@ three diagnosed mismatch classes. This session fixed all three:
   byte-identical across two independent runs plus a third supervisor rerun
   post-animation-fold (run-2026-08-04-17-32-22Z-58459).
 
-**Remaining classes, itemized (not guess-fit):** 232 of the 235 mismatched
-frames (2996–3230) differ only in a small region — pixel bbox around
-`(61–71, 140–149)`, exactly 37px (0.10%) on 212 static frames, 56–139px on
-~20 frames as the glyph animates/the message box height settles. The other
-**3 frames (3034–3036, ~587–589px) are a distinct micro-class the original
-itemization missed** (supervisor-measured, run-2026-08-04-17-32-22Z-58459):
-the antecedent "MURKROW fainted!♥" → quote text-swap edge, where the held
-antecedent line differs for 3 ticks — re-inspect it during the same source
-read below (it may be the same cursor/hold mechanism at the swap boundary,
-or its own timing edge). Root cause, pixel-confirmed via
-`tools/compare/out/*/diff-03100.png`: the generic wait-cursor (heart glyph,
-`battleScene.ts:34009–34017`, `drawCursor` at
-`CURSOR_Y_OFFSETS[Math.floor(view.waitCursor.age / 9) % N]`) draws
-unconditionally once any `advance: "button"` message becomes
-ready-for-input (`battleResolutionPresentationRender.ts`'s `waitCursor`
-field) — the same mechanism `STRINGID_TARGETFAINTED` uses. The oracle shows
-**no cursor at all** for the `STRINGID_TRAINER1WINTEXT` quote box across the
-entire window, including ~174 frames after the message is fully typed and
-settled (frame 3231, right before the real dismiss press) — this is not a
-blink-phase-alignment miss (the cursor bounces between Y offsets, it
-doesn't toggle on/off), so the real ROM's terminal win/loss-quote printer
-most likely never spawns the standard wait-cursor task at all, unlike
-ordinary in-battle button messages. Confirming this needs a source read of
-`_LocalBattleLostPrintTrainersWinText`/the win-side equivalent's actual
-`Cmd_printstring` call shape (likely a distinct printer path from
-`Cmd_printstring`'s ordinary use, since `TERMINAL_SEAM_BUTTON_MESSAGE_IDS`
-currently treats these three ids identically to any other button message) —
-not attempted this session, no budget remaining. A fix should gate
-`waitCursor` (or add a `noCursor` flag to `TERMINAL_SEAM_BUTTON_MESSAGE_IDS`'s
-three ids) once the real mechanism is confirmed, not just suppressed to make
-the number look clean.
+**2026-08-04 cursor-gating landed (`5e7457b1`): 175/236 frames fully
+matched** (twice-run byte-identical + independent supervisor rerun). The
+wait-cursor mechanism is source-confirmed and gated
+(`TERMINAL_SEAM_QUOTE_MESSAGE_IDS`: the two quote ids' wait is
+`BufferStringBattle`'s appended `EXT_CTRL_CODE_PAUSE_UNTIL_PRESS` →
+`TextPrinterWait`, no down-arrow ever; `STRINGID_PLAYERDEFEATEDTRAINER1`
+ends in a literal `\p` → `TextPrinterWaitWithDownArrow` and **keeps** its
+cursor — load-bearing for the WIN-side wiring). Full mechanism + citations:
+`docs/terminal-seam-loss-path-ground-truth.md` §6.
+
+**Two residual classes remain (61 frames), itemized with mechanisms in §6,
+deliberately not guess-fit; RAM-probe scout dispatched 2026-08-04:**
+1. **Held-cursor freeze, 2996-3033 (38 frames, 37-38px):** the antecedent
+   "MURKROW fainted!" down-arrow is present but static in the oracle during
+   the trainer slide (leftover window content once the printer stops being
+   serviced). Empirically `CURSOR_Y_OFFSETS[2]` (age ∈ [18,26]) reproduces
+   all 38 frames, but the value is input-lag-dependent — needs the real
+   printer state (`downArrowYPosIdx`/`downArrowDelay`) probed, or the
+   scaffold to replay the antecedent's real dismissal lag.
+2. **Swap-edge typing cascade, 3034-3056 (23 frames, 28-589px):** the app
+   starts typing the quote 3 ticks before the oracle (app at 3034, oracle
+   holds the antecedent through 3036, first quote glyph 3037), cascading
+   per-character until both settle at 3057. Needs the real sequencing of
+   `Cmd_printstring`/controller-ack/window-clear at that boundary probed.
 
 - WIN side still needs a **fresh** `mechanicLab` staging (final hit → quote
   dismiss), twice-run byte-identical, following the LOSS doc's own §0

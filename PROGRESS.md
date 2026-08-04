@@ -4,6 +4,42 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 916 — [supervisor, 2026-08-04 ~14:35] R1 landed: #73 wait-cursor gating (LOSS 1/236 → 175/236, cap-kill salvage) + selection-rejection scout merged; R2 launching (Magnitude MAIN + antecedent-boundary probe SIDE)
+
+- **State:** master `5e7457b1` + this docs commit. Full `npm test` 716
+  files green at the salvage (1 file re-verified after the pin fix),
+  `npm run build` green, differential canary 128/128 vs `b1a7bd34`.
+- **Did:** (1) MAIN #73: worker ran to its full 60-min cap with ZERO
+  commits but a coherent 247-line tree — supervisor verified and landed
+  the salvage (`5e7457b1`): wait-cursor mechanism source-confirmed (two
+  quote ids use `EXT_CTRL_CODE_PAUSE_UNTIL_PRESS`→`TextPrinterWait`, no
+  arrow; `PLAYERDEFEATEDTRAINER1` keeps its `\p` cursor — WIN-side
+  load-bearing), LOSS compare 1/236 → **175/236** (worker 2×, supervisor
+  1× independent). One `toEqual` pin (battleResolutionPresentation.test.ts)
+  missed the new `noCursor` field — the exact gap the worker was fixing at
+  cap; supervisor completed it. Residual 61 frames = held-cursor freeze
+  (38) + swap-edge typing cascade (23), mechanisms itemized in the loss
+  doc §6, not guess-fit. (2) SIDE scout landed+merged (`e7c58649`):
+  selection-rejection subsystem mapped — 6 causes, last-true-wins,
+  `printselectionstring` flashes with NO button wait; engine port has no
+  mask gaps; census tool structurally blind to `printselectionstring`
+  (new finding); Imprison DEAD, other 5 REACHABLE. ISSUES #72 Torment
+  paragraph re-scoped accordingly; recommended slice = advisory
+  `describeIllegalMoveSelection` + 4 resolver branches (supervisor to
+  schedule).
+- **Next:** R2 in flight — MAIN: `STRINGID_MAGNITUDESTRENGTH` (#72's last
+  REACHABLE id); SIDE: RAM/pixel probe of the antecedent boundary
+  (2985-3060) to give both #73 residual classes source-fidelity numbers.
+  Then WIN-side compare wiring (consumes cursor findings), then the
+  selection-rejection slice if budget allows. #71 Slice D still gated on
+  the animation lane's rung-3 dispatcher (re-check at wind-down fold).
+- **Notes:** worker was killed mid-final-suite by the cap, not by any
+  error — $16.68/229 turns, high-quality forensics; cap-kill salvage
+  recipe applied cleanly. Oracle-freshness FAIL remains the docs-only
+  false-positive class (no restart). Play-preview rebuild still queued
+  for wind-down.
+
+---
 ## 915 — [supervisor orient, 2026-08-04 ~13:20] Animation fold (Steel Wing partial + rung-3 directive) → master `b1a7bd34`; union green 716/6,887; R1 launched (#73 wait-cursor MAIN + Torment-scoping SIDE scout)
 
 - **State:** master `b1a7bd34` (fast-forward fold of `animation-main`:
@@ -83,54 +119,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   of launcher/profile work: DeepSeek V4 Flash worker profile + independent
   supervisor/sub-agent selection) appeared during this session — it is the
   user's own in-flight harness work, not a stale lane worktree.
-
----
-## 913 — [bounded MAIN worker, 2026-08-04 ~10:30; numbers supervisor-corrected] #73 LOSS terminal window: all three diagnosed classes fixed; only small cursor-glyph-scale residuals remain (1/236 frames fully match, was 0/236)
-
-- **State:** master `c8cc6cd4` + this step's uncommitted-until-now docs/tools
-  changes. Full `npm test` green (**703 files / 6,801 passed / 1 skipped**,
-  0 failures), `npm run build` green, `compare:differential --
-  battle-command-generated-off.json --base e62cc253 --summary`: **PASS —
-  128/128 byte-identical**.
-- **Did:** eliminated all three mismatch classes the morning's compare
-  wiring (`29e5cb3d`) diagnosed at a 0/236 baseline. (A) **genuine render
-  gap, fixed in `src`** (commit `c8cc6cd4`): recall
-  (`VARIOUS_RETURN_OPPONENT_MON1/2` → real `CONTROLLER_RETURNMONTOBALL`,
-  `battle_controller_opponent.c`'s `OpponentHandleReturnMonToBall`/
-  `FreeMonSpriteAfterSwitchOutAnim`) now clears the healthbox with the
-  sprite, generically distinguished from the unrelated
-  `CONTROLLER_SPRITEINVISIBILITY` (Dig/Fly) receipt via the emitting
-  instruction's own opcode name (`"sprite-visibility"` command's new
-  `recall` flag) — red-verified, full details in the commit. (B)+(C)
-  **scaffold artifacts, fixed in `tools/compare/appTrace.ts` only**: the
-  antecedent "MURKROW fainted!" box and the player's all-fainted empty field
-  are the same real event (MURKROW's own Explosion self-KO), now replayed
-  through the real `health-bar-update -> hp-change -> faint-animation ->
-  STRINGID_ATTACKERFAINTED` chain ahead of the recall/slide/win-text events,
-  hand-set to `commandIndex: 4` outside real ticks. Result: `npm run compare
-  -- loss-terminal-window-off --summary`: **1/236 frames fully matched**
-  (frame 3231, both times — the worker's original entry inverted this as
-  "235/236 matched"; supervisor-corrected), with the other 235 frames
-  reduced from the ~7,700-8,300px baseline diffs to the small residual
-  classes below, byte-identical across two independent runs (and a third
-  supervisor rerun post-fold, run-2026-08-04-17-32-22Z-58459: 212 frames
-  exactly 37px static cursor glyph, ~20 frames 56-139px glyph animation,
-  and 3 frames 3034-3036 at ~587-589px — the antecedent→quote text-swap
-  edge, a distinct micro-class the original entry's "only the small fixed
-  region" claim missed).
-- **Next:** one remaining class is itemized in ISSUES #73, not fixed: a
-  generic wait-cursor (heart glyph, `battleScene.ts:34009-34017`) draws for
-  every `advance: "button"` message once ready, but the oracle shows none at
-  all for the `STRINGID_TRAINER1WINTEXT` quote across the full window
-  (including ~174 frames after fully typed) — likely a distinct real
-  printer path for terminal quotes vs. ordinary battle messages
-  (`STRINGID_TARGETFAINTED` etc.), unconfirmed pending a source read. LOSS
-  half of #73 is otherwise closed. WIN half stays open (side lane owns its
-  ground-truth staging concurrently) and will likely hit the same
-  wait-cursor finding.
-- **Notes:** no `tools/battle-lab/` edits, no WIN-side ground-truth doc, no
-  kernel machine file edits, no #72 work — all per this step's brief.
-  `npm test`'s ~10-minute wall time both runs this session auto-backgrounded
-  past the Bash tool's 120s default (known PAPERCUT class); recovered via
-  `TaskOutput` polling to real completion each time, per entry 912's
-  precedent.
