@@ -1,5 +1,77 @@
 
 ---
+## 909 — [bounded MAIN worker, 2026-08-04 ~08:00] Terminal-seam increment (iii) landed: generic trainer slide-in + dismissible win/loss message boxes (ISSUES #73 item 1 rung A)
+
+- **State:** master `a1dc6614`. Full `npm test` green (**701 files / 6,788
+  passed / 1 skipped**, 0 failures), `npm run build` green,
+  `compare:differential -- battle-command-generated-off.json --base
+  4b883b3f --summary`: **PASS — 128/128 byte-identical**.
+- **Did:** the real presentation phase docs/terminal-seam-round-flow-scout.md
+  §3(iii) called for, on the generic route, before the postwin/factoryTerminal
+  handoff. `projectBattleResolutionCommands` (`battleResolutionPresentation.ts`)
+  gained a generic `"trainer-slide"` command case (keyed off the
+  `trainer-slide-in`/`-out` events and the already-threaded `opponentTrainer`
+  — data-driven, not DESTIN-hardcoded; new `TRAINER_SLIDE_TIMING` = 53 ticks,
+  ported from `battleScene.ts`'s own `TURN17_TRAINER_SLIDE_SETTLE_DELAY` doc
+  comment, cited in place). The three terminal STRINGIDs
+  (`PLAYERDEFEATEDTRAINER1`/`TRAINER1LOSETEXT`/`TRAINER1WINTEXT`) now advance
+  by button press (`TERMINAL_SEAM_BUTTON_MESSAGE_IDS`), reusing the exact
+  same dismiss machinery `STRINGID_TARGETFAINTED` already drives — no new
+  renderer, per the step's hard limit. `battleResolutionPresentationRender.ts`
+  exposes the slide's screen-relative offset (`offscreenX2`) generically in
+  the render view; `battleScene.ts`'s existing generic
+  `renderBattleResolutionSceneOffView` (the Scene-OFF drawScene callback the
+  generated route already wires at `core.ts:2346`, not the retired canonical
+  turn machine) draws the trainer sprite via `resolveFrontierTrainerPic`
+  keyed off `opponentTrainer.trainerPic`. The pre-existing
+  `"terminal-handoff"` lifecycle phase (already wired to call `finishBattle`
+  in `factoryRoundBattleOrchestrator.ts`) now only fires once every command in
+  the segment — including the new slide and both dismisses — has actually
+  played, closing the "silent fabrication" gap ISSUES #73 flagged. New
+  `tests/presentationTerminalSeamTrainerSlide.test.ts`: DESTIN WIN and JENSON
+  LOSS fixtures (mirroring `battleScriptFaintedActionsOrchestration.test.ts`'s
+  real production event shapes) pin the exact 3-command sequence per outcome,
+  drive the presentation step-by-step through the slide's mid-animation
+  offset, its settle, both message dismisses, and the final
+  `terminal-handoff`/`pendingBoundary` state. Red-verified via `git stash --
+  src/engine/battleResolutionPresentation.ts
+  src/engine/battleResolutionPresentationRender.ts src/engine/battleScene.ts`:
+  both tests failed their first assertion — command array
+  `["message","message","turn-end"]`/`["sprite-visibility","message","turn-end"]`,
+  confirming the event was silently dropped and the quote message never
+  became dismissible, exactly ISSUES #73's own diagnosis. Full
+  `factoryRoundBattleOrchestrator.test.ts` (36 tests, incl. the existing
+  terminal-boundary integration test that loops `advanceFactoryRoundBattleResolution`
+  to `postwin`) reran green untouched.
+- **Scope held:** no `battleScriptMachine.ts`/`battleScriptCallbackStack.ts`/
+  `battleScriptSwitchinOpcode.ts`/`battleScriptStatbuffchangeOpcode.ts` edits
+  (side-lane-owned this round); no #72 id additions; no canonical
+  `battleScene.ts` turn-machine change (`TURN17_*` one-off untouched, only
+  cited/ported); completeness guard untouched.
+- **Next:** ISSUES #73's remaining item (rung B): dense oracle-pixel coverage
+  over the new boundary. Ground truth is already committed
+  (`docs/terminal-seam-loss-path-ground-truth.md`'s twice-identical LOSS
+  trace) but **not yet run through `npm run compare`** against this landing —
+  budget ran out this step before attempting the matched app/oracle staging
+  (see Notes). The WIN side additionally needs a fresh `mechanicLab` window
+  (today's only WIN ground truth is the DESTIN-specific canonical
+  `turn17-notes.md`/`postwin-notes.md` pair, not a staged generic trace).
+  #72's remaining REACHABLE list. `Cmd_end3`/`call-current` resumption gap.
+  #71 Slice D (gated on the animation lane's dispatcher).
+- **Notes:** Honest stop at rung A per the step brief's own instruction
+  ("if not converging by minute 50, stop fitting, land rung A") — rung B's
+  oracle-window pass was not attempted at all this step (not "attempted and
+  stuck"), so there are no mismatch numbers to report yet; the next worker
+  should budget real time for `bin/oracle lab`/`npm run compare` staging
+  before assuming the ported `TRAINER_SLIDE_TIMING`/screen-position constants
+  are pixel-exact. No PAPERCUT beyond the recurring `npm test` auto-background
+  past the Bash tool's default timeout (same known issue entries 905/906
+  flagged); stopped the stray duplicate and re-ran to a real foreground
+  completion each time per this step's execution discipline.
+
+---
+
+---
 ## 908 — [supervisor wind-down, 2026-08-04 ~02:50] Session close: terminal-seam WIN+LOSS both landed, typeref program CLOSED (census 0), #72 burned 80→48, day-audit clean; final union green
 
 - **State:** master `630bf3dc` (animation fold merge). Final independent

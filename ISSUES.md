@@ -375,34 +375,56 @@ rules-context capture was already pinned directly by
 `tests/battleScriptSwitchinOpcode.test.ts`). Census: **54→49 UNRESOLVED**
 (exact −5). ISSUES #72 REACHABLE trimmed to **10** (15−5, arithmetic-checked).
 
-**`STRINGID_PKMNSXWHIPPEDUPSANDSTORM` — kernel side UNBLOCKED 2026-08-04
-(PROGRESS 910, `8e2bf807`):** the `Cmd_end3`/`BattleScriptPushCursorAndCallback`
-resumption gap batch 7 hit is closed. `battleScriptMachine.ts`'s `end3()` now
-pops and resumes via the shared `callStack` exactly like `RETURN` when the
-stack is non-empty (design doc §1.4(b) "script" flavor; empty-stack halt
-unchanged, preserving the `battleEndTurnOrchestration.ts` cCallback flavor),
-and `B_ANIM_SANDSTORM_CONTINUES` is registered in `PLAYANIMATION_ANIM_TYPES`.
-Sand Stream, Drizzle, AND Drought full-turn switch-in repros all run to
-genuine completion with kernel-level event pins
-(`tests/battleScriptEnd3SwitchinResumption.test.ts`, red-verified against the
-old B_SCR_OP_END3 machine-barrier); frontier-ratchet pins unmoved. The id
-itself remains open below ONLY for its `messageLines` presentation branch +
-red-verified presentation test — the staged repro recipe is ready in that
-test file.
+**Batch 8 landed** (`tests/presentationStringIssue72Batch8.test.ts`, all 9
+`it`s red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
+src/engine/factoryBattleScriptFullTurnDecision.ts`): the full REACHABLE-10
+hard tail minus `STRINGID_MAGNITUDESTRENGTH`, following
+`docs/issue72-hard-tail-scout.md`'s predictions (all confirmed correct except
+one staging-prose slip noted below). `STRINGID_PKMNPROTECTEDBY` (Sturdy vs.
+OHKO — scout §4a's correction confirmed: `Cmd_tryKO`'s Sturdy check
+short-circuits before any roll, deterministic, real Guillotine-vs-Sturdy
+staging). `STRINGID_PKMNSXWHIPPEDUPSANDSTORM` (Sand Stream — kernel-unblocked
+end3 resumption from PROGRESS 910, reused the Tyranitar switch-in staging,
+`scriptingBattler`+ability shape identical to `STRINGID_PKMNPREVENTSSTATLOSSWITH`).
+`STRINGID_PKMNSXBLOCKSY2` (Perish Song vs. Soundproof — scout §2 confirmed,
+`scriptingBattler` sufficient, no new payload field, single-turn staging).
+`STRINGID_PKMNTOOKFOE` + `STRINGID_PKMNLOSTPPGRUDGE` (Destiny Bond + Grudge —
+scout §1b's BS_TARGET-only theorem confirmed by a real 2-turn cast-then-
+counter-kill repro each, speed order player-faster per §1d's gotcha; **one
+scout divergence**: §1d's Grudge staging prose said `B_BUFF1`/`B_ATK_NAME_WITH_PREFIX`
+resolve to the Grudge *caster's* own name/move, but both the real source
+(`battle_script_commands.c:3016-3030`, `PREPARE_MOVE_BUFFER(gBattleTextBuff1,
+gBattleMons[gBattlerAttacker].moves[moveIndex])`) and the scout's own §1c
+code sample agree it's the *killing* battler's own move/name — landed per
+the correct mechanism, i.e. the killer's own move loses its PP). `STRINGID_PKMNREGAINEDHEALTH`
+(landed via the cheapest label, scout §3a's Recover self-heal — the 3-label
+`sourceLabelOf` dispatch from §3d is implemented in full since it's one
+function, but only the Recover branch has a red-verified test; Present's
+sub-path and `WishComesTrue`'s second printstring remain untested
+dispositions per §3e, not reopened as separate REACHABLE entries since the
+guard is satisfied for the id). `STRINGID_PKMNHUNGONWITHX` (Focus Band —
+scout §4b's `rngSeed: 62` staging reproduced standalone on the first try, no
+re-derivation needed; turned out to need zero new substitution plumbing since
+`heldItems[defender]` already holds the never-removed item, the same idiom
+`STRINGID_PKMNSTOLEITEM` established). `STRINGID_PKMNSAFEGUARDEXPIRED` (real
+5-turn expiry repro: cast turn 1, 4 silent Splash turns, `safeguardTimer`
+5→0 fires `BattleScript_SafeguardEnds` at turn 5's own end-turn tick;
+`{B_ATK_PREFIX3}` resolves through the identical "Ally"/"Foe" text
+`{B_ATK_PREFIX1}` already uses, source confirms — `battle_message.c:2649-2668`,
+distinct string constants, identical literal text). `STRINGID_PKMNTOOKATTACK`
+(Future Sight — real 3-turn delayed-hit repro: cast turn 1, 2 filler turns,
+`futureSightCounter` 3→0 fires `BattleScript_MonTookFutureAttack` at turn 3's
+own end-turn tick; `requireMoveDefender` off the tick's reassigned
+`actionSnapshot.attacker`, `{B_BUFF1}` off `rules.futureSightMove[target]`
+— still holds the cast-time-captured move id, never cleared before this
+print). Census: **48→39 UNRESOLVED** (exact −9, arithmetic-checked). ISSUES
+#72 REACHABLE trimmed to **1** (10−9).
 
-**REACHABLE (10), ordered by carrier-weight proxy for likely-hit-first —
-name a batch, use the Taunt-pair idiom** (`messageId === "STRINGID_X"` branch
-in `messageLines`, `requireMoveDefender`/`actionSnapshot`-sourced battler,
-staged full-turn repro test, red-verify via `git stash`):
-`STRINGID_PKMNHUNGONWITHX`,
-`STRINGID_PKMNREGAINEDHEALTH`,
-`STRINGID_PKMNPROTECTEDBY`,
-`STRINGID_PKMNSXBLOCKSY2`,
-`STRINGID_PKMNSXWHIPPEDUPSANDSTORM`, `STRINGID_PKMNTOOKFOE`,
-`STRINGID_PKMNSAFEGUARDEXPIRED`,
-`STRINGID_PKMNTOOKATTACK`,
-`STRINGID_MAGNITUDESTRENGTH`,
-`STRINGID_PKMNLOSTPPGRUDGE`.
+**REACHABLE (1):** `STRINGID_MAGNITUDESTRENGTH` (Magnitude's own damage-tier
+name — needs a new RNG-roll capture field; Magnitude's 2-10 `Random()` roll
+is not stored anywhere in `rulesContext` yet, genuine new plumbing, out of
+scope for the batch idiom used above — deliberately not started per this
+step's brief).
 
 **MANUAL — all settled 2026-08-03 (side-lane settlement pass; full evidence
 in the triage doc's "MANUAL settlement" appendix):**

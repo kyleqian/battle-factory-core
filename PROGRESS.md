@@ -4,6 +4,48 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 912 — [bounded MAIN worker, 2026-08-04 ~10:20] #72 batch 8: full REACHABLE-10 hard tail landed (9 ids), only STRINGID_MAGNITUDESTRENGTH remains
+
+- **State:** master `cf6579e9`. Full `npm test` green (**703 files /
+  6,801 passed / 1 skipped**, 0 failures), `npm run build` green.
+- **Did:** followed `docs/issue72-hard-tail-scout.md`'s per-id predictions
+  (committed this morning) to land the entire REACHABLE-10 list except
+  `STRINGID_MAGNITUDESTRENGTH` (explicitly out of scope — new RNG-roll
+  capture plumbing): `STRINGID_PKMNPROTECTEDBY` (Sturdy vs. OHKO, confirmed
+  deterministic not RNG-gated), `STRINGID_PKMNSXWHIPPEDUPSANDSTORM` (Sand
+  Stream, reused the end3-unblocked Tyranitar switch-in staging),
+  `STRINGID_PKMNSXBLOCKSY2` (Perish Song vs. Soundproof), `STRINGID_PKMNTOOKFOE`
+  + `STRINGID_PKMNLOSTPPGRUDGE` (Destiny Bond + Grudge, real 2-turn
+  cast-then-counter-kill repros, player-faster speed order), `STRINGID_PKMNREGAINEDHEALTH`
+  (Recover's self-heal, the cheapest of 3 labels — full `sourceLabelOf`
+  3-label dispatch implemented per scout §3d, only the Recover branch tested),
+  `STRINGID_PKMNHUNGONWITHX` (Focus Band, scout's `rngSeed: 62` staging
+  reproduced on the first try), `STRINGID_PKMNSAFEGUARDEXPIRED` (real 5-turn
+  expiry repro, not the cheaper direct-rulesContext-surgery shortcut),
+  `STRINGID_PKMNTOOKATTACK` (Future Sight, real 3-turn delayed-hit repro).
+  All 9 red-verified together via `git stash -- src/engine/battleResolutionPresentation.ts
+  src/engine/factoryBattleScriptFullTurnDecision.ts` (`tests/presentationStringIssue72Batch8.test.ts`,
+  9 `it`s, every one threw the exact completeness-guard error pre-fix). One
+  scout divergence found and corrected: §1d's Grudge staging prose had the
+  caster's own move losing PP; both real source
+  (`battle_script_commands.c:3016-3030`) and the scout's own §1c code sample
+  agree it's the *killing* battler's own move — landed per the correct
+  mechanism. Census: **48→39 UNRESOLVED** (exact −9, arithmetic-checked).
+  ISSUES #72 REACHABLE trimmed to **1** (`STRINGID_MAGNITUDESTRENGTH` only).
+- **Next:** `STRINGID_MAGNITUDESTRENGTH` needs new plumbing (Magnitude's 2-10
+  `Random()` roll isn't captured anywhere in `rulesContext` yet) — the last
+  #72 REACHABLE id, a bounded standalone follow-up. #73 rung B (oracle-pixel
+  coverage over the terminal-seam presentation) remains open per entry 911.
+- **Notes:** no `tools/compare/**`, kernel machine file, or `battleScene.ts`/
+  `core.ts`/`postwin.ts` edits this step (out of scope per brief); no guard
+  softening, no new opcodes. `npm test`'s ~10.7-minute wall time this session
+  reflects heavy concurrent CPU contention from the supervisor/animation
+  sessions also running — the Bash tool auto-backgrounded the run past its
+  120s default timeout as in the known PAPERCUT class; recovered by polling
+  the task's own output file to a real completion rather than treating the
+  auto-background as data loss.
+
+---
 ## 911 — [bounded MAIN worker, 2026-08-04 ~09:20] #73 rung B: TRAINER_SLIDE_TIMING corrected 53→38 (pixel-verified); `npm run compare` wiring NOT landed (honest checkpoint)
 
 - **State:** master `de6727bd`. Full `npm test` green (**702 files / 6,792
@@ -84,75 +126,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `.worktrees/animation-main/.worktrees/`); `animation-main` has advanced —
   fold check at wind-down. Worker 909's "~03:15" timestamp corrected to
   ~08:00 (known drift class).
-
----
-## 909 — [bounded MAIN worker, 2026-08-04 ~08:00] Terminal-seam increment (iii) landed: generic trainer slide-in + dismissible win/loss message boxes (ISSUES #73 item 1 rung A)
-
-- **State:** master `a1dc6614`. Full `npm test` green (**701 files / 6,788
-  passed / 1 skipped**, 0 failures), `npm run build` green,
-  `compare:differential -- battle-command-generated-off.json --base
-  4b883b3f --summary`: **PASS — 128/128 byte-identical**.
-- **Did:** the real presentation phase docs/terminal-seam-round-flow-scout.md
-  §3(iii) called for, on the generic route, before the postwin/factoryTerminal
-  handoff. `projectBattleResolutionCommands` (`battleResolutionPresentation.ts`)
-  gained a generic `"trainer-slide"` command case (keyed off the
-  `trainer-slide-in`/`-out` events and the already-threaded `opponentTrainer`
-  — data-driven, not DESTIN-hardcoded; new `TRAINER_SLIDE_TIMING` = 53 ticks,
-  ported from `battleScene.ts`'s own `TURN17_TRAINER_SLIDE_SETTLE_DELAY` doc
-  comment, cited in place). The three terminal STRINGIDs
-  (`PLAYERDEFEATEDTRAINER1`/`TRAINER1LOSETEXT`/`TRAINER1WINTEXT`) now advance
-  by button press (`TERMINAL_SEAM_BUTTON_MESSAGE_IDS`), reusing the exact
-  same dismiss machinery `STRINGID_TARGETFAINTED` already drives — no new
-  renderer, per the step's hard limit. `battleResolutionPresentationRender.ts`
-  exposes the slide's screen-relative offset (`offscreenX2`) generically in
-  the render view; `battleScene.ts`'s existing generic
-  `renderBattleResolutionSceneOffView` (the Scene-OFF drawScene callback the
-  generated route already wires at `core.ts:2346`, not the retired canonical
-  turn machine) draws the trainer sprite via `resolveFrontierTrainerPic`
-  keyed off `opponentTrainer.trainerPic`. The pre-existing
-  `"terminal-handoff"` lifecycle phase (already wired to call `finishBattle`
-  in `factoryRoundBattleOrchestrator.ts`) now only fires once every command in
-  the segment — including the new slide and both dismisses — has actually
-  played, closing the "silent fabrication" gap ISSUES #73 flagged. New
-  `tests/presentationTerminalSeamTrainerSlide.test.ts`: DESTIN WIN and JENSON
-  LOSS fixtures (mirroring `battleScriptFaintedActionsOrchestration.test.ts`'s
-  real production event shapes) pin the exact 3-command sequence per outcome,
-  drive the presentation step-by-step through the slide's mid-animation
-  offset, its settle, both message dismisses, and the final
-  `terminal-handoff`/`pendingBoundary` state. Red-verified via `git stash --
-  src/engine/battleResolutionPresentation.ts
-  src/engine/battleResolutionPresentationRender.ts src/engine/battleScene.ts`:
-  both tests failed their first assertion — command array
-  `["message","message","turn-end"]`/`["sprite-visibility","message","turn-end"]`,
-  confirming the event was silently dropped and the quote message never
-  became dismissible, exactly ISSUES #73's own diagnosis. Full
-  `factoryRoundBattleOrchestrator.test.ts` (36 tests, incl. the existing
-  terminal-boundary integration test that loops `advanceFactoryRoundBattleResolution`
-  to `postwin`) reran green untouched.
-- **Scope held:** no `battleScriptMachine.ts`/`battleScriptCallbackStack.ts`/
-  `battleScriptSwitchinOpcode.ts`/`battleScriptStatbuffchangeOpcode.ts` edits
-  (side-lane-owned this round); no #72 id additions; no canonical
-  `battleScene.ts` turn-machine change (`TURN17_*` one-off untouched, only
-  cited/ported); completeness guard untouched.
-- **Next:** ISSUES #73's remaining item (rung B): dense oracle-pixel coverage
-  over the new boundary. Ground truth is already committed
-  (`docs/terminal-seam-loss-path-ground-truth.md`'s twice-identical LOSS
-  trace) but **not yet run through `npm run compare`** against this landing —
-  budget ran out this step before attempting the matched app/oracle staging
-  (see Notes). The WIN side additionally needs a fresh `mechanicLab` window
-  (today's only WIN ground truth is the DESTIN-specific canonical
-  `turn17-notes.md`/`postwin-notes.md` pair, not a staged generic trace).
-  #72's remaining REACHABLE list. `Cmd_end3`/`call-current` resumption gap.
-  #71 Slice D (gated on the animation lane's dispatcher).
-- **Notes:** Honest stop at rung A per the step brief's own instruction
-  ("if not converging by minute 50, stop fitting, land rung A") — rung B's
-  oracle-window pass was not attempted at all this step (not "attempted and
-  stuck"), so there are no mismatch numbers to report yet; the next worker
-  should budget real time for `bin/oracle lab`/`npm run compare` staging
-  before assuming the ported `TRAINER_SLIDE_TIMING`/screen-position constants
-  are pixel-exact. No PAPERCUT beyond the recurring `npm test` auto-background
-  past the Bash tool's default timeout (same known issue entries 905/906
-  flagged); stopped the stray duplicate and re-ran to a real foreground
-  completion each time per this step's execution discipline.
-
----
