@@ -1,5 +1,48 @@
+## 912 — [bounded MAIN worker, 2026-08-04 ~10:20] #72 batch 8: full REACHABLE-10 hard tail landed (9 ids), only STRINGID_MAGNITUDESTRENGTH remains
 
----## 911 — [bounded MAIN worker, 2026-08-04 ~09:20] #73 rung B: TRAINER_SLIDE_TIMING corrected 53→38 (pixel-verified); `npm run compare` wiring NOT landed (honest checkpoint)
+- **State:** master `cf6579e9`. Full `npm test` green (**703 files /
+  6,801 passed / 1 skipped**, 0 failures), `npm run build` green.
+- **Did:** followed `docs/issue72-hard-tail-scout.md`'s per-id predictions
+  (committed this morning) to land the entire REACHABLE-10 list except
+  `STRINGID_MAGNITUDESTRENGTH` (explicitly out of scope — new RNG-roll
+  capture plumbing): `STRINGID_PKMNPROTECTEDBY` (Sturdy vs. OHKO, confirmed
+  deterministic not RNG-gated), `STRINGID_PKMNSXWHIPPEDUPSANDSTORM` (Sand
+  Stream, reused the end3-unblocked Tyranitar switch-in staging),
+  `STRINGID_PKMNSXBLOCKSY2` (Perish Song vs. Soundproof), `STRINGID_PKMNTOOKFOE`
+  + `STRINGID_PKMNLOSTPPGRUDGE` (Destiny Bond + Grudge, real 2-turn
+  cast-then-counter-kill repros, player-faster speed order), `STRINGID_PKMNREGAINEDHEALTH`
+  (Recover's self-heal, the cheapest of 3 labels — full `sourceLabelOf`
+  3-label dispatch implemented per scout §3d, only the Recover branch tested),
+  `STRINGID_PKMNHUNGONWITHX` (Focus Band, scout's `rngSeed: 62` staging
+  reproduced on the first try), `STRINGID_PKMNSAFEGUARDEXPIRED` (real 5-turn
+  expiry repro, not the cheaper direct-rulesContext-surgery shortcut),
+  `STRINGID_PKMNTOOKATTACK` (Future Sight, real 3-turn delayed-hit repro).
+  All 9 red-verified together via `git stash -- src/engine/battleResolutionPresentation.ts
+  src/engine/factoryBattleScriptFullTurnDecision.ts` (`tests/presentationStringIssue72Batch8.test.ts`,
+  9 `it`s, every one threw the exact completeness-guard error pre-fix). One
+  scout divergence found and corrected: §1d's Grudge staging prose had the
+  caster's own move losing PP; both real source
+  (`battle_script_commands.c:3016-3030`) and the scout's own §1c code sample
+  agree it's the *killing* battler's own move — landed per the correct
+  mechanism. Census: **48→39 UNRESOLVED** (exact −9, arithmetic-checked).
+  ISSUES #72 REACHABLE trimmed to **1** (`STRINGID_MAGNITUDESTRENGTH` only).
+- **Next:** `STRINGID_MAGNITUDESTRENGTH` needs new plumbing (Magnitude's 2-10
+  `Random()` roll isn't captured anywhere in `rulesContext` yet) — the last
+  #72 REACHABLE id, a bounded standalone follow-up. #73 rung B (oracle-pixel
+  coverage over the terminal-seam presentation) remains open per entry 911.
+- **Notes:** no `tools/compare/**`, kernel machine file, or `battleScene.ts`/
+  `core.ts`/`postwin.ts` edits this step (out of scope per brief); no guard
+  softening, no new opcodes. `npm test`'s ~10.7-minute wall time this session
+  reflects heavy concurrent CPU contention from the supervisor/animation
+  sessions also running — the Bash tool auto-backgrounded the run past its
+  120s default timeout as in the known PAPERCUT class; recovered by polling
+  the task's own output file to a real completion rather than treating the
+  auto-background as data loss.
+
+---
+
+---
+## 911 — [bounded MAIN worker, 2026-08-04 ~09:20] #73 rung B: TRAINER_SLIDE_TIMING corrected 53→38 (pixel-verified); `npm run compare` wiring NOT landed (honest checkpoint)
 
 - **State:** master `de6727bd`. Full `npm test` green (**702 files / 6,792
   passed / 1 skipped**, 0 failures), `npm run build` green,
