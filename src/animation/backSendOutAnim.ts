@@ -242,6 +242,23 @@ export const BACK_H_STRETCH_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.
   BACK_H_STRETCH_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_GROW_STUTTER` row. */
+export const BACK_GROW_STUTTER_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_GROW_STUTTER")
+    .map(([species]) => species),
+);
+
+/** Three GrowStutter mappings have real Factory rental records. */
+export const BACK_GROW_STUTTER_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_GROW_STUTTER_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** MEWTWO and RAYQUAZA require staged legal parties for this source row. */
+export const BACK_GROW_STUTTER_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_GROW_STUTTER_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -675,6 +692,44 @@ export const BACK_H_STRETCH_VARIANTS = Object.freeze({
   }),
 } as const);
 
+/**
+ * `BACK_ANIM_GROW_STUTTER` selects the shared affine GrowStutter helper.
+ * Initializers write the run count, duration, and amplitude, then invoke the
+ * helper while leaving their own callback installed.
+ */
+export const BACK_GROW_STUTTER_VARIANTS = Object.freeze({
+  twice: Object.freeze({
+    selector: "ANIM_GROW_STUTTER_TWICE",
+    callback: "Anim_GrowStutter_Twice",
+    sourceId: 119,
+    natureMod: 0,
+    duration: 20,
+    amplitude: 70,
+    runs: 2,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_GROW_STUTTER",
+    callback: "Anim_GrowStutter",
+    sourceId: 120,
+    natureMod: 1,
+    duration: 30,
+    amplitude: 60,
+    runs: 1,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_GROW_STUTTER_SLOW",
+    callback: "Anim_GrowStutter_Slow",
+    sourceId: 101,
+    natureMod: 2,
+    duration: 40,
+    amplitude: 40,
+    runs: 1,
+    accepted: true,
+  }),
+} as const);
+
 type BackHSlideSelector = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["selector"];
 type BackHSlideCallback = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["callback"];
 type BackHSlideDuration = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["duration"];
@@ -727,6 +782,12 @@ type BackHStretchSourceId = typeof BACK_H_STRETCH_VARIANTS[keyof typeof BACK_H_S
 type BackHStretchDuration = typeof BACK_H_STRETCH_VARIANTS[keyof typeof BACK_H_STRETCH_VARIANTS]["duration"];
 type BackHStretchAmplitude = typeof BACK_H_STRETCH_VARIANTS[keyof typeof BACK_H_STRETCH_VARIANTS]["amplitude"];
 type BackHStretchRuns = typeof BACK_H_STRETCH_VARIANTS[keyof typeof BACK_H_STRETCH_VARIANTS]["runs"];
+type BackGrowStutterSelector = typeof BACK_GROW_STUTTER_VARIANTS[keyof typeof BACK_GROW_STUTTER_VARIANTS]["selector"];
+type BackGrowStutterCallback = typeof BACK_GROW_STUTTER_VARIANTS[keyof typeof BACK_GROW_STUTTER_VARIANTS]["callback"];
+type BackGrowStutterSourceId = typeof BACK_GROW_STUTTER_VARIANTS[keyof typeof BACK_GROW_STUTTER_VARIANTS]["sourceId"];
+type BackGrowStutterDuration = typeof BACK_GROW_STUTTER_VARIANTS[keyof typeof BACK_GROW_STUTTER_VARIANTS]["duration"];
+type BackGrowStutterAmplitude = typeof BACK_GROW_STUTTER_VARIANTS[keyof typeof BACK_GROW_STUTTER_VARIANTS]["amplitude"];
+type BackGrowStutterRuns = typeof BACK_GROW_STUTTER_VARIANTS[keyof typeof BACK_GROW_STUTTER_VARIANTS]["runs"];
 
 /**
  * Source facts at the `LaunchAnimationTaskForBackSprite` seam. The shared
@@ -888,6 +949,22 @@ function growVariant(selector: string): {
   readonly runs?: 1 | 2;
 } | null {
   for (const variant of Object.values(BACK_GROW_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function growStutterVariant(selector: string): {
+  readonly selector: BackGrowStutterSelector;
+  readonly callback: BackGrowStutterCallback;
+  readonly sourceId: BackGrowStutterSourceId;
+  readonly duration: BackGrowStutterDuration;
+  readonly amplitude: BackGrowStutterAmplitude;
+  readonly runs: BackGrowStutterRuns;
+  readonly xScale: number;
+  readonly yScale: number;
+} | null {
+  for (const variant of Object.values(BACK_GROW_STUTTER_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -1788,6 +1865,157 @@ export function backGrowInStagesFrameAtTick(
 
 /** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
 export function backGrowWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+export interface BackGrowStutterFrame {
+  readonly x2: 0;
+  readonly y2: 0;
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  readonly data2: 1;
+  readonly data3: BackGrowStutterAmplitude;
+  readonly data4: number;
+  readonly data5: number;
+  readonly data6: BackGrowStutterDuration;
+  readonly data7: number;
+  readonly index1: number;
+  readonly index2: number;
+  readonly selector: BackGrowStutterSelector;
+  readonly sourceId: BackGrowStutterSourceId;
+  readonly duration: BackGrowStutterDuration;
+  readonly amplitude: BackGrowStutterAmplitude;
+  readonly runs: BackGrowStutterRuns;
+  readonly initializerCalled: boolean;
+  readonly handleStartAffineAnimCalls: 0 | 1;
+  readonly callbackInvokedByInitializer: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly normalBackDontFlip: true;
+  /** GrowStutter has no source TryFlipX calls. */
+  readonly tryFlipXCalls: 0;
+  readonly affineWriteCount: number;
+  readonly affineWrites: readonly BackGrowAffineWrite[];
+  readonly affineMode: "double" | "normal";
+  readonly callback: BackGrowStutterCallback | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for the complete `BACK_ANIM_GROW_STUTTER` triple.
+ * `GrowStutter` is shared by all three initializers: the selected initializer
+ * runs on the first task tick and remains installed while it invokes the
+ * helper. The extra boundary invocation resets data[5]/data[7] between the
+ * twice variant's two cycles and writes affine identity without advancing the
+ * phase.
+ */
+export function backGrowStutterFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackGrowStutterFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_GROW_STUTTER") return null;
+  const variant = growStutterVariant(selection.selector);
+  if (variant === null) return null;
+
+  let data2 = 0;
+  let data3 = variant.amplitude;
+  let data4 = variant.runs;
+  let data5 = 0;
+  let data6 = variant.duration;
+  let data7 = 0;
+  let index1 = 0;
+  let index2 = 0;
+  let xScale = 256;
+  let yScale = 256;
+  let affineMode: "double" | "normal" = "double";
+  let callback: BackGrowStutterCallback | "WaitAnimEnd" = variant.callback;
+  let resetSpriteAfterAnim = false;
+  let terminal = false;
+  let writes: readonly BackGrowAffineWrite[] = [];
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    writes = [];
+    resetSpriteAfterAnim = false;
+    if (data2 === 0) data2 = 1;
+
+    if (data5 > data6) {
+      data5 = 0;
+      yScale = 256;
+      xScale = 256;
+      writes = [growAffineWrite(256)];
+      if (data4 <= 1) {
+        resetSpriteAfterAnim = true;
+        affineMode = "normal";
+        callback = "WaitAnimEnd";
+        terminal = true;
+      } else {
+        data4 -= 1;
+        data7 = 0;
+      }
+      continue;
+    }
+
+    index2 = Math.trunc((data5 * 128) / data6);
+    const cmpVal1 = Math.trunc(data6 / 4);
+    const cmpVal2 = cmpVal1 * 3;
+    index1 = 0;
+    if (data5 >= cmpVal1 && data5 < cmpVal2) {
+      data7 += 51;
+      index1 = data7 & 0xff;
+    }
+    const xJitter = gbaSin(index1, Math.trunc(data3 / 5) * 2);
+    const bodyScale = gbaSin(index2, data3);
+    const yJitter = gbaSin(index1, Math.trunc(data3 / 5));
+    xScale = 256 - xJitter - bodyScale;
+    yScale = 256 - yJitter - bodyScale;
+    writes = [growAffineWrite(xScale)];
+    // The C helper increments data[5] after the affine write.
+    data5 += 1;
+  }
+
+  return Object.freeze({
+    x2: 0 as const,
+    y2: 0 as const,
+    data0: 0 as const,
+    data1: toS16(preservedData1),
+    data2: 1 as const,
+    data3,
+    data4,
+    data5,
+    data6,
+    data7,
+    index1,
+    index2,
+    selector: variant.selector,
+    sourceId: variant.sourceId,
+    duration: variant.duration,
+    amplitude: variant.amplitude,
+    runs: variant.runs,
+    xScale,
+    yScale,
+    initializerCalled: ticksSinceStart === 0,
+    handleStartAffineAnimCalls: ticksSinceStart === 0 ? 1 as const : 0 as const,
+    callbackInvokedByInitializer: true as const,
+    resetSpriteAfterAnim,
+    normalBackDontFlip: true as const,
+    tryFlipXCalls: 0 as const,
+    affineWriteCount: writes.length,
+    affineWrites: writes,
+    affineMode,
+    callback,
+  });
+}
+
+/** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
+export function backGrowStutterWaitAnimEndCallback(
   animEnded: boolean,
 ): "WaitAnimEnd" | "SpriteCallbackDummy" {
   return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
