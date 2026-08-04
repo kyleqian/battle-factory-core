@@ -1,3 +1,75 @@
+## 900 — [bounded MAIN worker, 2026-08-03 ~19:05] ENDTURN_CURSE wired + STRINGID_PKMNLAIDCURSE landed (#72 batch 4)
+
+- **State:** master `20a06520`. Full `npm test` green (**677 files / 6,662
+  passed / 1 skipped**, 0 failures), `npm run build` green (`tsc -b && vite
+  build`), `compare:differential -- battle-command-generated-off.json --base
+  21ea7954 --summary`: **PASS — 128/128 byte-identical** (end-turn Curse
+  never fires in that trace, as expected).
+- **Did (part 1 — engine):** Wired `battleEndTurnOrchestration.ts`'s
+  `ENDTURN_CURSE` case (`battle_util.c:1581-1591`), a hard case-barrier per
+  entry 898 (`BattleScript_CurseTurnDmg is not wired`). Same shape as the
+  already-wired Nightmare tick — identical `floor(maxHP/4)`, min-1 damage,
+  `BattleScript_CurseTurnDmg` → shared `DoTurnDmg` tail, ORWORD-only, no new
+  opcodes (`docs/end-turn-ground-truth.md` B9). Unlike Nightmare there's no
+  clearing-without-damage branch. Two direct orchestration tests added to
+  `tests/battleEndTurnOrchestration.test.ts` mirroring the Nightmare tests'
+  shape (quarter-HP ladder + printstring, and the real STATUS2_CURSED
+  guard), red-verified via `git stash --
+  src/engine/battleEndTurnOrchestration.ts` (exact pre-fix case-barrier).
+  Commit `4a29f2e9`.
+- **Did (part 2 — #72 batch 4):** Landed `STRINGID_PKMNLAIDCURSE` (Ghost
+  Curse, Dusclops carrier), ranked first in #72's REACHABLE list and now
+  unblocked. Plain attacker/defender `messageLines` pair, no new
+  substitution plumbing — 898 had already proved this shape correct. Full-
+  turn repro (`tests/presentationStringIssue72Batch4.test.ts`) surfaced a
+  real source detail: `cursetarget` sets `STATUS2_CURSED` on the move's
+  TARGET (who takes the recurring end-of-turn tick), while the self-damage
+  cost (`floor(attacker.maxHP/2)`) lands on the ATTACKER who cast it — two
+  different battlers, confirmed by asserting both HP deltas in one turn.
+  Census: 81→80 UNRESOLVED (exact -1/+0; `STRINGID_PKMNAFFLICTEDBYCURSE` was
+  already generic-fallback-resolvable, not counted). ISSUES #72 REACHABLE
+  trimmed to 39 (40−1, arithmetic-checked against the list body's own
+  unique count, excluding the `STRINGID_X` placeholder token).
+  Red-verified via `git stash -- src/engine/battleResolutionPresentation.ts`
+  (exact completeness-guard error pre-fix). Commit `5442e93f` (+ `20a06520`
+  fixing a `types` tuple-literal `tsc -b` error the vitest run didn't
+  catch).
+- **Part 3 (plain-idiom tail, `STRINGID_PKMNFREEDFROM` onward):** not
+  attempted — cap landed after parts 1-2's closing verification (full suite
+  + build + differential all took ~20 min alone on this run's machine).
+- **Next:** ISSUES #72 batch 5, starting at `STRINGID_PKMNFREEDFROM` (top of
+  the remaining plain-idiom tail; skip `TRACED`/`SXBLOCKSY2`, both need
+  scoped extra wiring per 898, and the hard trio
+  `HUNGONWITHX`/`PROTECTEDBY`/`REGAINEDHEALTH`). The `CANCELER_TORMENTED`
+  engine-gap fix. The terminal-seam increment (i) per
+  `docs/terminal-seam-round-flow-scout.md` (899's recommended headline,
+  still unstarted). typeref slices 4-8. #71 Slice D.
+- **Notes:** PAPERCUT: `npm test`'s full suite took noticeably longer this
+  session (~13-14 min wall clock, vs. AGENTS.md's stated 5-7 min) with 3
+  sibling lane sessions (side + animation) running concurrently on the same
+  machine — CPU contention, not a regression; the Bash tool's own 600s
+  single-call ceiling meant the run had to be polled to completion rather
+  than awaited in one blocking call. No functional papercut, just budget
+  awareness for future concurrent multi-lane sessions.
+- **[supervisor final addendum, ~19:10]** Bonus-round close on top of this
+  entry: typeref **slice 4 landed partial and merged** (`9a87786c`, worker
+  `d481cda2`): `turn3KickoffBounceTick`'s legacy param retired, census
+  **68→67**, differential 2,059 captures byte-identical, full suite green
+  in-worktree. **Honest-partial finding:** the row's other 7 bounce-tick
+  helpers form a tight internal delegation chain (not 8 independent
+  1-ref cuts) — the §4.1 slice-4 row needs a mini re-scope before the
+  remainder lands; next session's brief should start from the worker's
+  final message (side-lane log 20260803-182951). Union after both merges:
+  smoke green, targeted 10/10, build green (incremental). Entry 899's
+  session totals supersede to: **13 workers (5 main + 8 side), 1 lost**;
+  #72 census now **80 UNRESOLVED / 39 REACHABLE remaining**; typeref
+  **67** refs. Play-preview rebuilt at this addendum's own commit (final
+  master at close), serving :5199 nohup-detached. All worker worktrees
+  removed; `animation-main` fully folded at close (recheck at next orient
+  — its supervisor ran until 20:42).
+
+---
+
 ## 899 — [supervisor wind-down, 2026-08-03 ~18:30] Session close: #72 triage + 26 ids fixed (3 batches), #71 latent bug fixed, typeref slices 2+3 landed after re-scope, terminal-seam scout banked; two animation folds; final union green
 
 - **State:** master `45536c75`. Final independent full `npm test`: **676

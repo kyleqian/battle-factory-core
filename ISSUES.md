@@ -347,14 +347,29 @@ in the triage doc's "MANUAL settlement" appendix):**
   side had (DESTIN's already-committed `turn17-notes.md` ground truth).
 
 **Also found, tracked separately:** `STRINGID_PKMNCANTUSEMOVETORMENT` is
-DEAD *today* but not by a game-design gate — this engine's attack-canceler
-phase enum (`battleScriptSourceConstants.ts:69-85`) has no
-`CANCELER_TORMENTED` phase at all (goes `CANCELER_DISABLED` → `CANCELER_TAUNTED`
-directly), even though Torment itself is inflictable with a real 4/850
-carrier. Same fix idiom as the Taunt/Imprison pair (add the missing phase +
-handoff) would make it REACHABLE immediately — folded into the REACHABLE
-batch above is wrong since the printstring itself can't fire yet; fix the
-phase gap first, *then* it joins the batch.
+DEAD *today*, but the prior note here (and `docs/issue72-reachability-triage.md`'s
+row for it) mis-cited *why* — **corrected 2026-08-03, see PROGRESS.md #903.**
+Read `reference/pokeemerald/src/battle_util.c:1983-2268` in full:
+`AtkCanceler_UnableToUseMove`'s `CANCELER_*` enum and switch have exactly 14
+cases (`CANCELER_FLAGS` … `CANCELER_THAW`, terminated by `CANCELER_END`) and
+**no Torment case at all** — not a missing phase between `DISABLED` and
+`TAUNTED`, a real absence in the ground-truth source itself. Torment's
+move-reuse block is enforced only at move-*selection* time, by
+`TrySetCantSelectMoveBattleScript` (`battle_util.c:999-1012`, called from
+`HandleTurnActionSelectionState` in `battle_main.c:4382` for both player and
+AI battlers), which dispatches to `BattleScript_SelectingTormentedMove`
+(`printselectionstring`, `battle_scripts_1.s:3563-3565`) — a different label
+than `BattleScript_MoveUsedIsTormented` (`printstring`, same STRINGID) that
+the old note pointed at, which has **zero callers anywhere in `src/*.c`** and
+is dead in the real game too. This engine already ports the *silent* half
+correctly (`CheckMoveLimitations`'s Torment bit,
+`battleScriptActionAdmission.ts:2485-2491`, mirrors `battle_util.c:1107`
+exactly) — the missing half is the interactive "rejected selection, forced
+reselect + flavor text" loop, which this decision-boundary-driven engine has
+no representation for at all (no other selection-time
+`printselectionstring` rejection path is wired either). That is a new
+subsystem, not a same-shape-as-Taunt/Imprison AtkCanceler phase addition —
+out of bounds for a bounded step; needs supervisor re-scoping.
 
 **Leads:** rerun `node --experimental-strip-types tools/report/
 printstring-literal-census.ts` after any `messageLines`/battle-script-program

@@ -21,7 +21,7 @@ Re-ran `node --experimental-strip-types tools/report/printstring-literal-census.
 | `STRINGID_PKMNALREADYHASBURN` | REACHABLE | EFFECT_WILL_O_WISP jumpifstatus, 10/850 weighted (Will-O-Wisp). |
 | `STRINGID_PKMNALREADYPOISONED` | REACHABLE | EFFECT_TOXIC jumpifstatus, 26/850 weighted (Toxic). |
 | `STRINGID_PKMNISALREADYPARALYZED` | REACHABLE | EFFECT_PARALYZE jumpifstatus, 64/850 weighted (Thunder Wave/Stun Spore/Glare) — the single largest carrier pool in the whole census. |
-| `STRINGID_PKMNCANTUSEMOVETORMENT` | DEAD today (engine gap, not a game-design dead-end) | This engine's attack-canceler phase enum has no CANCELER_TORMENTED phase at all (goes DISABLED→TAUNTED directly); Torment itself is inflictable with a real 4/850 carrier, so the same fix idiom as the Taunt/Imprison pair would unlock it immediately. |
+| `STRINGID_PKMNCANTUSEMOVETORMENT` | DEAD today (engine gap, **not** the AtkCanceler shape — corrected 2026-08-03, see appendix) | Real Gen3 has no Torment case in `AtkCanceler_UnableToUseMove` at all; the block is a move-*selection*-time rejection (`TrySetCantSelectMoveBattleScript`) this engine's decision-boundary architecture doesn't model. Not a same-idiom Taunt/Imprison fix. |
 | `STRINGID_PKMNCANTUSEMOVESEALED` | **DEAD** (settled 2026-08-03, see appendix) | Engine wiring is real, but the sole Imprison carrier (FRONTIER_MON_RALTS, raw catalog index 5) sits below `FRONTIER_MON_GRIMER` = 110, the universal floor of every Factory L50 challenge-tier draft range (`sInitialRentalMonRanges`, `battle_factory.c:169-186`) — it is never drafted as opponent, initial rental, or Brain-party filler at any win streak. `battle-script-topology.json` was right; the raw-catalog "index ≤ 849" check was an incomplete test (missing the lower bound). |
 
 ## Full 107-id triage
@@ -44,7 +44,7 @@ Re-ran `node --experimental-strip-types tools/report/printstring-literal-census.
 | `STRINGID_PKMNANCHORSITSELFWITH` | `BattleScript_AbilityPreventsPhasingOut` | Same `EffectRoar` block, stmt3 `jumpifability BS_TARGET, ABILITY_SUCTION_CUPS, ...` (`ABILITY_SUCTION_CUPS` registered in `JUMPIFABILITY_VALUES`, `battleScriptIngrainLeechSeedWrapOpcode.ts:362,387`). | EFFECT_ROAR **40/850** weighted; Suction Cups **7/882** (3 species: Lileep/Octillery/Cradily). | **REACHABLE.** |
 | `STRINGID_PKMNATTACK` | `BattleScript_BeatUpLoop` | Beat Up's own multi-hit loop print (EFFECT_BEAT_UP). | `MOVE_BEAT_UP`: **0/882** raw carriers (independently confirmed by direct scan of `battle-frontier-mons.json`) — EFFECT_BEAT_UP is absent from `level50FactoryReachableEffects`. | **DEAD** — no carrier. |
 | `STRINGID_PKMNCANTUSEMOVESEALED` | `BattleScript_MoveUsedIsImprisoned`, `BattleScript_SelectingImprisonedMoveInPalace` | Attack-canceler `handoff` to `BattleScript_MoveUsedIsImprisoned` is real and wired (`battleScriptActionAdmission.ts:2588`, same idiom as the Taunt/#72 fix). `SelectingImprisonedMoveInPalace` is Battle Palace's move-auto-selection UI only. | **Settled 2026-08-03 (see appendix) — the raw-catalog vs. topology-JSON contradiction was an incomplete carrier test, not a generator bug.** `battle-frontier-mons.json` index 5 (`FRONTIER_MON_RALTS`) really does carry `MOVE_IMPRISON`, and index 5 is indeed ≤ `FRONTIER_MONS_HIGH_TIER` (849) — but source's real per-challenge draft table (`sInitialRentalMonRanges`, `battle_factory.c:169-186`, mirrored exactly in `factory-round-policy.json`'s `rentalSelection.ranges.level50`) never draws below `FRONTIER_MON_GRIMER` = 110 (`battle_frontier_mons.h:114`) at ANY win-streak/challenge number, for the opponent draft (`GenerateOpponentMons`), the initial rental draft (`GenerateInitialRentalMons`), or the Frontier Brain party (`FillFactoryBrainParty`) alike (`GetFactoryMonId`, `battle_factory.c:829-862`, all 3 call sites). RALTS (index 5) is below that floor and is never drafted into a real Factory L50 run. `battle-script-topology.json`'s `level50FactoryReachableEffects` (built from `factory-animation-inventory.json`'s `tiers.level50.moves`, itself built from `factory-round-policy.json`'s `rentalSelection.ranges` — **not** `factory-ai-policy.json`, the prior row's citation was wrong) correctly excludes `EFFECT_IMPRISON`. The `SelectingImprisonedMoveInPalace` sibling is DEAD (Battle Palace facility gate, not modeled/in scope). | **DEAD** — both labels; non-Palace path settled by source range-table proof (no battle-lab trace needed). |
-| `STRINGID_PKMNCANTUSEMOVETORMENT` | `BattleScript_MoveUsedIsTormented`, `BattleScript_SelectingTormentedMoveInPalace` | Real Gen3 `AtkCanceler_UnableToUseMove` has a Torment recheck between the Disabled and Taunted phases that would `handoff` to this label. | This engine's `BATTLE_SCRIPT_ATTACK_CANCELER_PHASES` (`battleScriptSourceConstants.ts:69-85`) goes `CANCELER_DISABLED: 6` → `CANCELER_TAUNTED: 7` directly — **there is no `CANCELER_TORMENTED` phase at all**, and `BattleScript_MoveUsedIsTormented` has **zero** references anywhere in `src/` outside `src/data/gen/`. Torment itself *is* inflictable (`settorment`/`Cmd_settorment` fully wired, `battleScriptSettormentOpcode.ts`) with a real carrier (EFFECT_TORMENT: **4/850** weighted), so the status can be set but the mid-turn re-use block+print that would follow it is simply never executed by this engine. `SelectingTormentedMoveInPalace` is the Palace-only sibling. | **DEAD today** — engine gap, not a game-design or battle-type gate: same fix idiom as the Taunt/Imprison pair (add a `CANCELER_TORMENTED` phase + handoff) would make it REACHABLE immediately given the 4/850 carrier. `SelectingTormentedMoveInPalace` alone: **DEAD** (Palace facility gate). |
+| `STRINGID_PKMNCANTUSEMOVETORMENT` | `BattleScript_SelectingTormentedMove`, `BattleScript_MoveUsedIsTormented`, `BattleScript_SelectingTormentedMoveInPalace` | **Corrected 2026-08-03 (see appendix) — the original row's premise was wrong.** `AtkCanceler_UnableToUseMove` has no Torment case; the real block is `TrySetCantSelectMoveBattleScript` (`battle_util.c:999-1012`), called from `HandleTurnActionSelectionState` (`battle_main.c:4382`) for both player and AI battlers, dispatching to `BattleScript_SelectingTormentedMove` (`printselectionstring`, missed by the original row entirely). | Same `BATTLE_SCRIPT_ATTACK_CANCELER_PHASES` enum fact still holds (`battleScriptSourceConstants.ts:69-85`, `CANCELER_DISABLED: 6`→`CANCELER_TAUNTED: 7`) but it's a red herring here — that phase genuinely doesn't exist in source for Torment (14 enum cases counted 1:1 against `battle_util.c:1983-2268`'s switch, no gap). `BattleScript_MoveUsedIsTormented` (`printstring`) has zero C callers and is dead in the real game too. This engine already ports the *silent* legality half correctly (`CheckMoveLimitations`'s Torment bit, `battleScriptActionAdmission.ts:2485-2491`, mirrors `battle_util.c:1107` exactly) — what's missing is the interactive "selection rejected, forced reselect + flavor text" loop `TrySetCantSelectMoveBattleScript` drives, which this decision-boundary engine has no representation for at all. `SelectingTormentedMoveInPalace` is the Palace-only sibling. | **DEAD today** — real engine gap, but a new selection-rejection subsystem, not a same-idiom Taunt/Imprison AtkCanceler phase addition; needs its own scoped step. `SelectingTormentedMoveInPalace` alone: **DEAD** (Palace facility gate). |
 | `STRINGID_PKMNCHANGEDTYPE` | `BattleScript_EffectCamouflage`, `BattleScript_EffectConversion`, `BattleScript_EffectConversion2` | Move-effect entry scripts for Camouflage/Conversion/Conversion2. | All three effects are **0/850** weighted — no Factory L50 rental carries any of the 3 moves. | **DEAD** — no carrier for any of the 3 triggering moves. |
 | `STRINGID_PKMNCHANGEDTYPEWITH` | `BattleScript_ColorChangeActivates` | Color Change ability branch, `battleScriptMoveEndOpcode.ts:482-503` — any damaging hit (no contact requirement) whose type doesn't already match the holder. | Color Change **2/882**, Kecleon only; attacking-side carrier pool (any damaging move) is unrestricted. | **REACHABLE.** |
 | `STRINGID_PKMNCOPIEDFOE` | `BattleScript_EffectRolePlay` | Move-effect entry script (Role Play copies target's ability). | EFFECT_ROLE_PLAY: **1/850** weighted (Role Play). | **REACHABLE** (thin but real). |
@@ -327,3 +327,62 @@ script execution from the terminal boundary through
 has no named roadmap line yet and should get one under S10 rather than being
 folded into S8, which is already closed and scoped to the lobby screens that
 come after.
+
+## 2026-08-03 correction (main lane): `STRINGID_PKMNCANTUSEMOVETORMENT`'s premise was wrong
+
+A step brief assigned to close "the `CANCELER_TORMENTED` engine gap" (per this
+doc's original row above and ISSUES.md's separately-tracked note) by porting
+`AtkCanceler_UnableToUseMove`'s "`CANCELLER_TORMENTED` case" between
+`CANCELER_DISABLED` and `CANCELER_TAUNTED`. Reading
+`reference/pokeemerald/src/battle_util.c:1983-2268` end to end (the enum
+declaration through the switch's closing `while`) before porting anything, per
+this repo's own "read the C, don't guess" discipline, found **no such case**:
+the enum is exactly `FLAGS, ASLEEP, FROZEN, TRUANT, RECHARGE, FLINCH,
+DISABLED, TAUNTED, IMPRISONED, CONFUSED, PARALYZED, IN_LOVE, BIDE, THAW, END`
+(14 cases + terminator), and the switch has exactly 14 `case` labels, one per
+non-`END` enum value, 1:1, no gaps.
+
+Torment's real mechanism, confirmed by reading further: `battle_util.c:999-1012`,
+inside `TrySetCantSelectMoveBattleScript` — checked once, at move-*selection*
+time (`move == gLastMoves[battler] && move != MOVE_STRUGGLE && status2 &
+STATUS2_TORMENT`), called from `HandleTurnActionSelectionState`
+(`battle_main.c:4382`) for **both** player and AI battlers whenever a chosen
+move index needs validating. On a hit it calls `CancelMultiTurnMoves` and sets
+`gSelectionBattleScripts[battler] = BattleScript_SelectingTormentedMove`
+(`data/battle_scripts_1.s:3563-3565`, `printselectionstring
+STRINGID_PKMNCANTUSEMOVETORMENT`) or the Palace sibling — never
+`BattleScript_MoveUsedIsTormented` (`printstring`, same STRINGID,
+`:3567-3570`), which is dead in the *real* game too (zero C callers, confirmed
+by grep across all of `src/*.c`). This is a materially different shape from
+Taunt/Disable/Imprison: those get **both** a selection-time check (same
+function, further down) **and** an `AtkCanceler` execution-time recheck
+(needed because a multi-turn move can be selected before the disabling status
+lands and must be re-validated right before it fires); Torment gets **only**
+the selection-time check in source. Porting a fabricated `CANCELER_TORMENTED`
+`AtkCanceler` phase anyway would not just be non-source-exact bookkeeping — it
+would change real behavior: a two-turn move's forced continuation turn (e.g.
+Fly's second turn) legitimately has `gCurrentMove == gLastMoves[attacker]`
+without ever passing back through move selection, and real Torment does not
+interrupt it (confirmed no AtkCanceler case exists to do so); an
+`AtkCanceler`-time port would incorrectly cancel that continuation.
+
+This engine already ports the *silent*, non-printing half of Torment
+correctly: `CheckMoveLimitations`'s Torment bit
+(`battle_util.c:1107`) is mirrored exactly by
+`battleScriptActionAdmission.ts:2485-2491`. What's actually missing is
+`TrySetCantSelectMoveBattleScript`'s "reject this selection, force a reselect,
+and show the flavor text" loop — an interactive per-battler action-selection
+state (`battle_main.c`'s `HandleTurnActionSelectionState`) that this engine's
+decision-boundary architecture (`BattleMoveDecision`/`BattleSwitchDecision`,
+supplied directly and assumed pre-legal) has no representation for at all,
+for *any* status
+(no other `printselectionstring` rejection path is wired anywhere in
+`src/engine` either — grepped for `SelectingDisabledMove`,
+`SelectingNotAllowedMoveTaunt`, `SelectingImprisonedMove`,
+`SelectingTormentedMove`: zero hits outside `battle_scripts_1.s`/`gen/`). That
+is a new subsystem, not a same-shape-as-Taunt/Imprison `AtkCanceler` phase
+addition, and is out of bounds for a bounded step scoped as "close the
+`CANCELER_TORMENTED` engine gap." No engine change was made this pass; the id
+stays **DEAD today**, correctly attributed. Left for a future step to
+re-scope (design a selection-rejection subsystem, or decide it's not worth
+one for a single STRINGID and reclassify permanently).

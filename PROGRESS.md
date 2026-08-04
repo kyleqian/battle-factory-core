@@ -4,6 +4,75 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 903 — [bounded MAIN worker, 2026-08-03 ~23:45] CANCELER_TORMENTED step BLOCKED: assigned premise was factually wrong, corrected docs, no engine/presentation change
+
+- **State:** master `6eaae2c5` (unchanged — docs-only commit follows). Full
+  `npm test` green (**685 files / 6,706 passed / 1 skipped**, 0 failures),
+  `npm run build` green. No engine or presentation change was made, so no
+  differential run was needed (behavior is provably unchanged — see below).
+- **Did:** Assigned step: port `AtkCanceler_UnableToUseMove`'s alleged
+  "`CANCELLER_TORMENTED` case" (ISSUES #72's note + this doc's own prior
+  triage row both claimed it sits between `CANCELER_DISABLED` and
+  `CANCELER_TAUNTED`) as a new engine phase, then land
+  `STRINGID_PKMNCANTUSEMOVETORMENT`. Per the brief's own "read the C, don't
+  guess," read `reference/pokeemerald/src/battle_util.c:1983-2268` in full
+  before porting anything: the `CANCELER_*` enum and switch have **exactly
+  14 cases, 1:1, no gap** — there is no Torment case in `AtkCanceler` at all,
+  in the real pinned source. The premise both docs and the step brief
+  repeated was wrong. Torment's actual mechanism is a move-*selection*-time
+  rejection, `TrySetCantSelectMoveBattleScript` (`battle_util.c:999-1012`,
+  called from `HandleTurnActionSelectionState` in `battle_main.c:4382` for
+  both player and AI battlers), dispatching to `BattleScript_SelectingTormentedMove`
+  (`printselectionstring`, `battle_scripts_1.s:3563-3565`) — not
+  `BattleScript_MoveUsedIsTormented` (`printstring`, same STRINGID), which
+  has zero C callers and is dead in the real game too (the prior triage row
+  missed the `SelectingTormentedMove` label entirely). Porting a fabricated
+  `AtkCanceler` phase anyway would have been a real behavioral bug, not just
+  non-source-exact bookkeeping: a two-turn move's forced-continuation turn
+  (e.g. Fly turn 2) has `gCurrentMove == gLastMoves[attacker]` without
+  passing back through selection, and real Torment does not interrupt it —
+  an `AtkCanceler`-time recheck would incorrectly cancel that continuation.
+  This engine already ports Torment's *silent* legality half correctly
+  (`CheckMoveLimitations`'s Torment bit, `battleScriptActionAdmission.ts:2485-2491`,
+  mirrors `battle_util.c:1107` exactly); what's actually missing is
+  `TrySetCantSelectMoveBattleScript`'s interactive "reject this selection,
+  force a reselect, print the flavor text" loop, which this
+  decision-boundary-driven engine (`BattleMoveDecision`/`BattleSwitchDecision`
+  supplied directly, assumed pre-legal) has no representation for at all —
+  confirmed no other `printselectionstring` rejection path
+  (`SelectingDisabledMove`/`SelectingNotAllowedMoveTaunt`/
+  `SelectingImprisonedMove`) is wired anywhere in `src/engine` either. That's
+  a new subsystem, not the scoped "same idiom as Taunt/Imprison" one-enum-case
+  addition — genuinely out of bounds for this bounded step. Per this run's
+  worker contract ("if blocked or mis-scoped, say why instead of
+  improvising"), did **not** fabricate the phase and did **not** improvise
+  the larger selection-rejection subsystem unasked. Instead corrected the
+  misinformation at its source: ISSUES.md's "Also found, tracked separately"
+  note and `docs/issue72-reachability-triage.md`'s two
+  `STRINGID_PKMNCANTUSEMOVETORMENT` rows + a new dated correction section
+  (full C citations, same rigor as the doc's existing "settled" appendices).
+  Reran the census — byte-identical, still **67 UNRESOLVED** (no change, as
+  expected since nothing was landed).
+- **Next:** `CANCELER_TORMENTED`/`STRINGID_PKMNCANTUSEMOVETORMENT` needs a
+  supervisor re-scope, not a retry of this brief: either design the
+  selection-rejection subsystem as its own step (bigger than one STRINGID —
+  worth asking whether any other UNRESOLVED id needs the same shape before
+  committing to it), or accept it stays permanently DEAD and drop it from
+  future REACHABLE-adjacent picks. Otherwise resume ISSUES #72 batch 6 (the
+  REACHABLE-28 list from `STRINGID_PKMNSXCUREDYPROBLEM`, per entry 902's
+  Next), the hard trio, `TRACED`, `SXBLOCKSY2`, the loss-side terminal-seam
+  increment, typeref slices 4-8, #71 Slice D.
+- **Notes:** No PAPERCUT. This step cost real time to disprove (~25 min of
+  the 60 reading `battle_util.c`/`battle_main.c`/`battle_scripts_1.s`
+  directly rather than trusting two independent prior docs that agreed with
+  each other but were both wrong) — worth flagging that ISSUES #72's own
+  reachability triage methodology should prefer citing exact `battle_util.c`
+  case/function names over paraphrasing "Real Gen3 X has a Y recheck"
+  claims, since a paraphrase error propagated unchecked from the original
+  triage pass through a step brief without anyone re-deriving it from source
+  in between.
+
+---
 ## 902 — [bounded MAIN worker, 2026-08-03 ~23:15] #72 batch 5: 11 more REACHABLE printstring STRINGIDs landed
 
 - **State:** master `072b9066`. Full `npm test` green (**685 files / 6,706
@@ -134,76 +203,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** No surprises vs. the wip commit's 3-cause diagnosis — all 3
   causes were exactly as described, no additional hidden causes surfaced
   once the full suite reran green. No PAPERCUT this step.
-
----
-## 900 — [bounded MAIN worker, 2026-08-03 ~19:05] ENDTURN_CURSE wired + STRINGID_PKMNLAIDCURSE landed (#72 batch 4)
-
-- **State:** master `20a06520`. Full `npm test` green (**677 files / 6,662
-  passed / 1 skipped**, 0 failures), `npm run build` green (`tsc -b && vite
-  build`), `compare:differential -- battle-command-generated-off.json --base
-  21ea7954 --summary`: **PASS — 128/128 byte-identical** (end-turn Curse
-  never fires in that trace, as expected).
-- **Did (part 1 — engine):** Wired `battleEndTurnOrchestration.ts`'s
-  `ENDTURN_CURSE` case (`battle_util.c:1581-1591`), a hard case-barrier per
-  entry 898 (`BattleScript_CurseTurnDmg is not wired`). Same shape as the
-  already-wired Nightmare tick — identical `floor(maxHP/4)`, min-1 damage,
-  `BattleScript_CurseTurnDmg` → shared `DoTurnDmg` tail, ORWORD-only, no new
-  opcodes (`docs/end-turn-ground-truth.md` B9). Unlike Nightmare there's no
-  clearing-without-damage branch. Two direct orchestration tests added to
-  `tests/battleEndTurnOrchestration.test.ts` mirroring the Nightmare tests'
-  shape (quarter-HP ladder + printstring, and the real STATUS2_CURSED
-  guard), red-verified via `git stash --
-  src/engine/battleEndTurnOrchestration.ts` (exact pre-fix case-barrier).
-  Commit `4a29f2e9`.
-- **Did (part 2 — #72 batch 4):** Landed `STRINGID_PKMNLAIDCURSE` (Ghost
-  Curse, Dusclops carrier), ranked first in #72's REACHABLE list and now
-  unblocked. Plain attacker/defender `messageLines` pair, no new
-  substitution plumbing — 898 had already proved this shape correct. Full-
-  turn repro (`tests/presentationStringIssue72Batch4.test.ts`) surfaced a
-  real source detail: `cursetarget` sets `STATUS2_CURSED` on the move's
-  TARGET (who takes the recurring end-of-turn tick), while the self-damage
-  cost (`floor(attacker.maxHP/2)`) lands on the ATTACKER who cast it — two
-  different battlers, confirmed by asserting both HP deltas in one turn.
-  Census: 81→80 UNRESOLVED (exact -1/+0; `STRINGID_PKMNAFFLICTEDBYCURSE` was
-  already generic-fallback-resolvable, not counted). ISSUES #72 REACHABLE
-  trimmed to 39 (40−1, arithmetic-checked against the list body's own
-  unique count, excluding the `STRINGID_X` placeholder token).
-  Red-verified via `git stash -- src/engine/battleResolutionPresentation.ts`
-  (exact completeness-guard error pre-fix). Commit `5442e93f` (+ `20a06520`
-  fixing a `types` tuple-literal `tsc -b` error the vitest run didn't
-  catch).
-- **Part 3 (plain-idiom tail, `STRINGID_PKMNFREEDFROM` onward):** not
-  attempted — cap landed after parts 1-2's closing verification (full suite
-  + build + differential all took ~20 min alone on this run's machine).
-- **Next:** ISSUES #72 batch 5, starting at `STRINGID_PKMNFREEDFROM` (top of
-  the remaining plain-idiom tail; skip `TRACED`/`SXBLOCKSY2`, both need
-  scoped extra wiring per 898, and the hard trio
-  `HUNGONWITHX`/`PROTECTEDBY`/`REGAINEDHEALTH`). The `CANCELER_TORMENTED`
-  engine-gap fix. The terminal-seam increment (i) per
-  `docs/terminal-seam-round-flow-scout.md` (899's recommended headline,
-  still unstarted). typeref slices 4-8. #71 Slice D.
-- **Notes:** PAPERCUT: `npm test`'s full suite took noticeably longer this
-  session (~13-14 min wall clock, vs. AGENTS.md's stated 5-7 min) with 3
-  sibling lane sessions (side + animation) running concurrently on the same
-  machine — CPU contention, not a regression; the Bash tool's own 600s
-  single-call ceiling meant the run had to be polled to completion rather
-  than awaited in one blocking call. No functional papercut, just budget
-  awareness for future concurrent multi-lane sessions.
-- **[supervisor final addendum, ~19:10]** Bonus-round close on top of this
-  entry: typeref **slice 4 landed partial and merged** (`9a87786c`, worker
-  `d481cda2`): `turn3KickoffBounceTick`'s legacy param retired, census
-  **68→67**, differential 2,059 captures byte-identical, full suite green
-  in-worktree. **Honest-partial finding:** the row's other 7 bounce-tick
-  helpers form a tight internal delegation chain (not 8 independent
-  1-ref cuts) — the §4.1 slice-4 row needs a mini re-scope before the
-  remainder lands; next session's brief should start from the worker's
-  final message (side-lane log 20260803-182951). Union after both merges:
-  smoke green, targeted 10/10, build green (incremental). Entry 899's
-  session totals supersede to: **13 workers (5 main + 8 side), 1 lost**;
-  #72 census now **80 UNRESOLVED / 39 REACHABLE remaining**; typeref
-  **67** refs. Play-preview rebuilt at this addendum's own commit (final
-  master at close), serving :5199 nohup-detached. All worker worktrees
-  removed; `animation-main` fully folded at close (recheck at next orient
-  — its supervisor ran until 20:42).
 
 ---
