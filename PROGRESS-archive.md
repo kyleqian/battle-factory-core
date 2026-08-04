@@ -1,3 +1,33 @@
+## 918 — [supervisor, 2026-08-04 ~15:15] R2 landed both lanes; rung-3 dispatcher FOLDED (union 721/6,925 green) → #71 Slice D unblocked and R3 launched (Slice D MAIN + #73 scaffold residuals SIDE)
+
+- **State:** master `519b6bf8` + this docs commit. Post-fold union: full
+  `npm test` **721 files / 6,925 passed / 1 skipped**, `npm run build`
+  green. Two merges since 917, both all-new-files: the antecedent-boundary
+  probe branch (`578bb461`) and `animation-main`'s complete rung-3
+  dispatcher (10 commits: FRONT dispatcher + sprite-frame/OAM half +
+  measured anchor evidence A=−1 + BACK dispatcher; their suite was green
+  at 719 files before fold).
+- **Did:** (1) verified+merged MAIN Magnitude (entry 917 — #72 REACHABLE
+  now 0, census 39→38, worker corrected the brief's stale 48→47 claim);
+  (2) verified+merged the SIDE RAM probe: both #73 residual classes now
+  have derived numbers — frozen cursor pose = `floor((2929−2907)/9)%4 = 2`
+  from the fixture's own committed A press, and the 3-tick swap edge =
+  controller-ack visibility + one-opcode-per-tick + RAM→pixel latch;
+  both fixes are compare-scaffold-side, render layer already correct
+  (`docs/terminal-seam-antecedent-boundary-probe.md`); (3) folded the
+  dispatcher and reran the union myself.
+- **Next:** R3 in flight — MAIN: **#71 Slice D** (per-tick front playback
+  at the generated battle-start seam via `frontSendOutFrameAtTick`,
+  user-directed priority, anchor math briefed from the dispatcher's own
+  doc comment + flight fixtures; boundary-ratchet widening for the two
+  dispatcher modules pre-authorized as the recorded cross-program
+  decision); SIDE: #73 LOSS scaffold fixes targeting 236/236. Then R4:
+  WIN-side compare wiring + possibly the selection-rejection advisory
+  slice. Wind-down fold + full suite + play-preview rebuild after.
+- **Notes:** animation supervisor still live on its lane (Steel Wing
+  reconciliation queued next per its ledger); fold again at wind-down.
+
+---
 ## 917 — [bounded MAIN worker, 2026-08-04 ~14:50] ISSUES #72 REACHABLE backlog CLOSED: `STRINGID_MAGNITUDESTRENGTH` landed (batch 9, the last id); Torment selection-time note is the only open remainder
 
 - **State:** master `9be8304d` + this docs commit. `tests/

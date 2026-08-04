@@ -161,6 +161,51 @@ effort, `docs/send-out-live-wiring-consumer-map.md` §1e) remains the only
 open main-lane share of this issue, alongside the KABUTO/MAGBY/ONIX one-off
 hand-fit retirements (coordinated follow-up, not a solo drive-by).
 
+**Addendum (2026-08-04, R4 MAIN worker): the flagged Slice-A landmine above
+is REMOVED.** This entry's own §-above paragraph flagged that Slice A's
+`speciesFrontIdleRestOffset` application at the two generated-route settle
+hooks (`drawGeneratedOpponentRelease`'s `coeff===0` branch +
+`renderGeneratedBattleStartPlayerRelease`'s duplicate) rests on the same
+`SKIP_FRONT_ANIM` mechanism this Slice-D record just proved never runs
+under Scene OFF — meaning those two hooks were baking a nonzero ONIX/RATTATA
+`{+1,0}` the real OFF game never shows. Removed at both call sites
+(`54979bf3`); replaced with a one-line comment citing this record. The
+staged RATTATA positive pin in `tests/battleScene.test.ts` (ISSUES #71
+Slice A/B describe block) is flipped to pin `{0,0}` at the generated
+settle, red-verified (the old `+1` behavior fails the new pin with the src
+edit stashed). Positive oracle evidence: a `battle-scene-off` mechanicLab
+clone of `send-out-front-idle-rattata.json` (RATTATA lead, the census's
+only non-ONIX nonzero species), RAM-probed across the full 634-tick trace —
+flat `x2=0`/`y2=0`/`animNum=0`/`SpriteCallbackDummy` for all 635 sampled
+ticks, receipt in `docs/rattata-off-seam-flat-settle-probe.md`. Insurance:
+`compare:differential -- battle-command-generated-off.json --base 1a12ce9c`
+stays 128/128 (ONIX/RATTATA appear in no committed generated window, so the
+removal is pixel-inert there); the entry-890 §4 dense-window list was
+re-run once — 4 of 6 match their documented baseline exactly
+(`battle2-kabuto-sendout-dense` 151/151, `battle2-player-sendout-dense`
+170/170, `sendout` 255/256, `battle2-jenson-sendout-text` 39/39); the
+remaining 2 (`factory-arbitrary-intro-yoshi-off`,
+`factory-arbitrary-intro-magneton-off`) show a 1-frame drift from their
+documented baseline that **pre-dates this step** (reproduced identically at
+the pre-edit commit `1a12ce9c` in a scratch worktree, and
+`compare:differential` shows this step's commit is 751/751 byte-identical
+to base for both traces at every frame) — filed separately as **ISSUES
+#74**, not this entry's concern.
+
+The four canonical hooks (`drawGrovyleSettled`, `drawKabutoHSlideWobble`'s
+settle branch, `drawTurn5PidgeottoSettled`, `drawTurn13MurkrowSettled`) and
+`speciesIdleAnim.ts`'s ONIX front terminal hand-fit were **not** touched —
+their windows derive from ON-profile-legacy traces where the animation
+genuinely played, and their species are all `{0,0}` regardless, so nothing
+about them was ever wrong. Entry 894's deferred "staged non-ONIX settle
+window" oracle-pixel check (folded into Slice D's acceptance bar per entry
+891/894) is now **moot at this seam**: there is no species-varying
+per-tick playback left to check here at all — Battle Scene OFF settles
+every species flat, unconditionally, which this RAM receipt plus the
+inert-insurance evidence above already cover in full. Disposition: no
+further check needed; the deferred item has nothing left to verify at the
+generated-route settle hooks.
+
 ## #72 — battleStringResolver completeness-guard gaps: REACHABLE printstring backlog CLOSED; Torment selection-time remainder still open
 
 **Original symptom** (2026-08-03, opponent MURKROW's TAUNT crash) and the
