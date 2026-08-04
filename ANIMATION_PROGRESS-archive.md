@@ -4,6 +4,44 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## Back `BACK_ANIM_GROW_STUTTER` triple accepted (2026-08-03)
+
+**State:** exact for the thirteenth bounded player-back set: **13/25 back
+sets, 39/75 selector variants, 139/376 Factory mappings**. The generated set
+is exactly **5 mappings / 3 Factory / 2 outside** — ALAKAZAM, MEWTWO, QWILFISH,
+EXPLOUD, and RAYQUAZA. Move coverage remains **107/276 exact, 0 partial,
+0 staged, 169 unsupported**; `ANIMATION_COVERAGE.json` is unchanged. The
+next source-ranked unsupported player-back set is
+`BACK_ANIM_V_SHAKE_LOW` (set 14): 15 mappings / 15 Factory / 0 outside.
+
+**Did:** ported source-relative `Anim_GrowStutter_Twice`/normal/slow (IDs
+**119/120/101**) and shared `GrowStutter`: duration/amplitude/run triples
+20/70/2, 30/60/1, and 40/40/1; initializer-first affine startup; signed GBA
+Sin/C integer division; middle-window `data[7] += 51` phase; positive
+back-side x/y scale formulas under `sDontFlip`; strict `data[5] > data[6]`
+cycle boundary; twice-cycle reset; terminal identity + `ResetSpriteAfterAnim`;
+initializer/`WaitAnimEnd`/dummy callback timing; and task zero/preserve/restore.
+The complete generated census and all five species route through the party
+nature selector; Factory records 316 QWILFISH/Adamant, 493 EXPLOUD/Quirky,
+and 404 ALAKAZAM/Modest provide the three legal variant representatives.
+
+**Evidence:** three fresh paired byte-identical Scene-ON dense receipts retain
+every framebuffer hash plus sprite RAM/OAM/affine state from selected callback
+through `SpriteCallbackDummy`: Qwilfish twice **1840..1885 / 46 frames,
+21,589 B, `dd3fd7f20cddcd5f4d749a210d3f8730e8ccc18b3f7c595e74f8cda085f49bd1`**;
+Exploud normal **1839..1872 / 34, 15,925 B,
+`aeff45bc8e553c8d7fd21a3e0f85e5d6c82cd34f3b57c8e4d24f1ebcd2637fe3`**;
+Alakazam slow **1840..1883 / 44, 20,657 B,
+`c557496c8b3c0c9372468d307cd8ecea1073f9dab962061b82838916d1a81eb2`**.
+
+**Verification / next:** focused source/census/routing/reducer/evidence
+checks **4 files / 20 tests**, both animation/executable ratchets **9 tests**,
+heap-sized `npx tsc --noEmit`, smoke **7 files / 346 tests**, full `npm test`
+**676 files / 6,643 passed / 1 skipped**, heap-sized `npm run build` (**553
+modules transformed**), and `npm run animation:coverage` are green. No move
+status, gameplay, RNG, damage, turn, facility, or live dispatcher state
+changed.
+
 ## MOVE_MIRROR_COAT promoted exact; sparkle-3-special-screen track complete (2026-07-29)
 
 **Verdict:** `MOVE_MIRROR_COAT` is exact. Source, generated inventory, and

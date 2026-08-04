@@ -1,5 +1,42 @@
 # Animation coverage
 
+## Back `BACK_ANIM_CONCAVE_ARC_LARGE` triple accepted (2026-08-03)
+
+- **State:** exact for the sixteenth bounded player-back set: **16/25 back
+  sets, 48/75 selector variants, 198/376 Factory mappings**. Generated set
+  census: **18 mappings / 18 Factory species / 0 outside / 33 Factory
+  records**. Move coverage is unchanged at **107/276 exact, 0 partial, 0
+  staged, 169 unsupported**; `ANIMATION_COVERAGE.json` remains SHA-256
+  `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+- **Did:** ported source IDs **123/122/121**
+  `ANIM_CONCAVE_ARC_LARGE_TWICE` / normal / slow, their guarded
+  initializer-first `Anim_ConcaveArcLarge_Twice` / normal / slow callbacks,
+  and shared `ConcaveArc`. The reducer preserves steps **8/6/4**, 12/12
+  x/y amplitudes, runs **2/1/1**, signed GBA `Sin`, C modulo-256 restart,
+  y reflection plus 12 offset, strict `data[7] > 255`, repeat decrement,
+  terminal x2/y2 cleanup (with source-faithful terminal `data[6] == 1`),
+  `WaitAnimEnd`→dummy timing, visible non-affine OAM, and task
+  zero/preserve/restore. Legal representatives are MAGIKARP index **6**
+  Hardy/mod-0, AZURILL index **1** Rash/mod-1, and TREECKO index **94**
+  Lonely/mod-2; all eighteen siblings route through the selector triple.
+- **Next:** source-ranked unsupported player-back set
+  **`BACK_ANIM_CONVEX_DOUBLE_ARC` (set 17): 27 mappings / 26 Factory / 1
+  outside / 43 Factory records**.
+- **Notes:** paired byte-identical dense Scene-ON initializer→dummy receipts
+  retain every framebuffer hash plus player RAM/OAM/affine state: Magikarp
+  twice **1840..1907 / 68 / 33,049 B /
+  `8680c46aef9d76a7c4c231d42d7b2b56656f1108b21976a03beccbf919b1c581`**;
+  Azurill normal **1839..1884 / 46 / 22,308 B /
+  `8daceedff0517e495dc51daf6a1e2a6b6fa5f2564bcea4922ce88bf3bf13be35`**;
+  Treecko slow **1839..1905 / 67 / 32,513 B /
+  `6d1868ffe99209bbf097f56a9a1c37b38aa6e27e71e3f6f10df1ed7893b635b7`**.
+  Focused source/census/routing/reducer/evidence plus both ratchets: **4
+  files / 18 tests**; typecheck, smoke **7/346**, full `npm test` **687
+  files / 6,711 passed / 1 skipped**, build (**553 modules**), and coverage
+  are green. No boundary/unsupported-branch widening or move promotion.
+  Main-program finding: Emerald's internal IDs for Azurill/Treecko are
+  **350/277**, not their National Dex IDs; this affects probe staging only.
+
 ## Back `BACK_ANIM_TRIANGLE_DOWN` triple accepted (2026-08-03)
 
 - **State:** exact for the fifteenth bounded player-back set: **15/25 back
@@ -69,41 +106,3 @@ smoke **7 files / 346 tests**, full `npm test` **678 files / 6,652 passed /
 `npm run animation:coverage` are green. Next source-ranked unsupported
 player-back set is `BACK_ANIM_TRIANGLE_DOWN` (set 15). No move status,
 gameplay, RNG, damage, turn, facility, or live dispatcher state changed.
-
-## Back `BACK_ANIM_GROW_STUTTER` triple accepted (2026-08-03)
-
-**State:** exact for the thirteenth bounded player-back set: **13/25 back
-sets, 39/75 selector variants, 139/376 Factory mappings**. The generated set
-is exactly **5 mappings / 3 Factory / 2 outside** — ALAKAZAM, MEWTWO, QWILFISH,
-EXPLOUD, and RAYQUAZA. Move coverage remains **107/276 exact, 0 partial,
-0 staged, 169 unsupported**; `ANIMATION_COVERAGE.json` is unchanged. The
-next source-ranked unsupported player-back set is
-`BACK_ANIM_V_SHAKE_LOW` (set 14): 15 mappings / 15 Factory / 0 outside.
-
-**Did:** ported source-relative `Anim_GrowStutter_Twice`/normal/slow (IDs
-**119/120/101**) and shared `GrowStutter`: duration/amplitude/run triples
-20/70/2, 30/60/1, and 40/40/1; initializer-first affine startup; signed GBA
-Sin/C integer division; middle-window `data[7] += 51` phase; positive
-back-side x/y scale formulas under `sDontFlip`; strict `data[5] > data[6]`
-cycle boundary; twice-cycle reset; terminal identity + `ResetSpriteAfterAnim`;
-initializer/`WaitAnimEnd`/dummy callback timing; and task zero/preserve/restore.
-The complete generated census and all five species route through the party
-nature selector; Factory records 316 QWILFISH/Adamant, 493 EXPLOUD/Quirky,
-and 404 ALAKAZAM/Modest provide the three legal variant representatives.
-
-**Evidence:** three fresh paired byte-identical Scene-ON dense receipts retain
-every framebuffer hash plus sprite RAM/OAM/affine state from selected callback
-through `SpriteCallbackDummy`: Qwilfish twice **1840..1885 / 46 frames,
-21,589 B, `dd3fd7f20cddcd5f4d749a210d3f8730e8ccc18b3f7c595e74f8cda085f49bd1`**;
-Exploud normal **1839..1872 / 34, 15,925 B,
-`aeff45bc8e553c8d7fd21a3e0f85e5d6c82cd34f3b57c8e4d24f1ebcd2637fe3`**;
-Alakazam slow **1840..1883 / 44, 20,657 B,
-`c557496c8b3c0c9372468d307cd8ecea1073f9dab962061b82838916d1a81eb2`**.
-
-**Verification / next:** focused source/census/routing/reducer/evidence
-checks **4 files / 20 tests**, both animation/executable ratchets **9 tests**,
-heap-sized `npx tsc --noEmit`, smoke **7 files / 346 tests**, full `npm test`
-**676 files / 6,643 passed / 1 skipped**, heap-sized `npm run build` (**553
-modules transformed**), and `npm run animation:coverage` are green. No move
-status, gameplay, RNG, damage, turn, facility, or live dispatcher state
-changed.
