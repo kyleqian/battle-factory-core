@@ -23257,18 +23257,48 @@ export function renderSceneOnMovePresentation(
       view.target.geometry.spriteCorner.y + targetIdle.y2,
     );
     const target2Backdrop = fb.slice();
+    // The oracle renders the opponent attacker's enemy shadow
+    // (SpriteCB_EnemyShadow, 32x8, `battle-enemy-shadow.json`) for exactly
+    // the first dense frame of the opponent orientation. Same asset + anchor
+    // (176, 40+29) path as drawGeneratedOpponentShadow, kept STEEL_WING-local
+    // (drawn before the attacker so the mon body covers it).
+    if (opponentToPlayer && state.age === 0
+      && elevatedEnemyShadowSpecies.has("SPECIES_WINGULL")) {
+      const shadowX = 176 - battleEnemyShadow.width / 2;
+      const shadowY = 40 + 29 - battleEnemyShadow.height / 2;
+      for (const pixel of battleEnemyShadow.mask) {
+        setPixel(
+          fb,
+          shadowX + pixel % battleEnemyShadow.width,
+          shadowY + Math.floor(pixel / battleEnemyShadow.width),
+          battleEnemyShadow.color,
+        );
+      }
+    }
+    // The metallic highlight's initializer writes (grayscale palette, metal
+    // BG1 load/scroll) all latch one display late (STEEL_WING-local gate; no
+    // shared metallicShine.ts change): through the initializer display
+    // (data10/data11 both 0) the oracle shows the attacker's original palette
+    // with no metal band, and only takes the first callback state (shineAge
+    // 1) on the following display. Production previously applied both one
+    // callback too early.
+    const metallicInitializerDisplay = displayed.metallic.data10 === 0
+      && displayed.metallic.data11 === 0;
     drawSpriteSheet(
       fb,
       attackerSprite.tileset,
-      state.age >= 2 && displayed.metallic.attackerGrayscale
+      state.age >= 2 && !metallicInitializerDisplay
+        && displayed.metallic.attackerGrayscale
         ? grayscalePalette(attackerSprite.palette) : attackerSprite.palette,
       view.attacker.geometry.spriteCorner.x + displayed.attackerX2,
       view.attacker.geometry.spriteCorner.y + displayed.attackerY2,
     );
-    if (state.age >= 2 && displayed.metallic.metalBgLoaded) {
+    if (state.age >= 2 && !metallicInitializerDisplay
+      && displayed.metallic.metalBgLoaded) {
       drawMetallicShineMasked(
         fb, attackerSprite, view.attacker.geometry.spriteCorner,
-        displayed.metallic.bg1X, displayed.metallic.bg1Y, steelWingArt.metal,
+        displayed.metallic.bg1X, displayed.metallic.bg1Y,
+        steelWingArt.metal,
       );
     }
     for (const gust of displayed.gusts) {
@@ -23278,10 +23308,15 @@ export function renderSceneOnMovePresentation(
         undefined, false,
       );
     }
+    // `animation=1` selects sAffineAnim_HitSplat_1 (0xD8 -> 65536/216 = 303),
+    // not the 0xB0 (372) variant. The hitsplat's first rendered frame is its
+    // first post-creation display (age 156), not the creation frame — the
+    // oracle's `displayed` (age-1) latch holds here like every other callback
+    // write, so `displayed.hitsplats` is correct.
     for (const hit of displayed.hitsplats) {
       drawSpriteSheetAffineStretchBlendedOverFb(
         fb, steelWingArt.impact.tileset, steelWingArt.impact.palette,
-        hit.x - 16, hit.y - 16, 372, 372, 12, 8, false, target2Backdrop,
+        hit.x - 16, hit.y - 16, 303, 303, 12, 8, false, target2Backdrop,
       );
     }
     const opponentSpecies = playerToOpponent ? "ONIX" : "WINGULL";

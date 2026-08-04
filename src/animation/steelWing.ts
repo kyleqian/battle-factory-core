@@ -73,6 +73,9 @@ export function steelWingGustAtTick(
   const targetX = targetCenter.x;
   // Y_PIC_OFFSET: player-back attacker spawns +8, opponent-front +0.
   const startY = attackerCenter.y + (attackerSide === "player" ? 8 : 0);
+  // The linear leg flies to the target's own Y_PIC_OFFSET anchor as well:
+  // the player-back target is +8, the opponent-front target is +0.
+  const targetY = targetCenter.y + (attackerSide === "player" ? 0 : 8);
   const affineAge = Math.min(tick, 24);
   // AFFINEANIMCMD_FRAME(0x10, 0x100, 0, 0) is followed by the
   // duration-24 +0xA command; its first update is retained immediately.
@@ -80,7 +83,7 @@ export function steelWingGustAtTick(
   // Two neutral-scale callback displays bridge RunStoredCallbackWhenAffineAnimEnds.
   const callbacks = Math.max(0, tick - 25);
   const dx = linearTranslationDeltaQ8(targetX - startX, 20);
-  const dy = linearTranslationDeltaQ8(targetCenter.y - startY, 20);
+  const dy = linearTranslationDeltaQ8(targetY - startY, 20);
   return {
     index,
     x: startX + linearTranslationOffsetAfterCallbacks(dx, callbacks, 20),
@@ -128,7 +131,9 @@ export function steelWingAtAge(
   const hitsplats = hitsplatAge >= 0 && hitsplatAge <= 9
     ? ([16, -16] as const).map((x) => ({
         x: targetCenter.x + x,
-        y: targetCenter.y,
+        // relative_to=ANIM_TARGET anchors on the target's Y_PIC_OFFSET too:
+        // player-back +8, opponent-front +0.
+        y: targetCenter.y + (attackerSide === "player" ? 0 : 8),
         animation: 1 as const,
       }))
     : [];
