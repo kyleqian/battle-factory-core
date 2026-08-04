@@ -34,7 +34,9 @@ Swinub slow **1838..1926 / 89, 42,671 B,
 **Verification / next:** focused source/census/routing/reducer/evidence plus
 both animation/executable ratchets **4 files / 20 tests**, `npx tsc --noEmit`
 with `NODE_OPTIONS=--max-old-space-size=8192`, and smoke **7 files / 346
-tests** are green. Full suite/build and a final coverage rerun are next.
+tests** are green; final coverage is unchanged. Full `npm test` is **670 files
+/ 6,610 passed / 1 skipped**; `npm run build` is green at **553 modules
+transformed** with the same Node heap setting.
 Next source-ranked unsupported player-back set is **`BACK_ANIM_V_STRETCH`
 (set 11): 14 mappings / 14 Factory / 0 outside**. No move status was promoted
 and no gameplay, RNG, damage, turn, facility, or live dispatcher state changed.
