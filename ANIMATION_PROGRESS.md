@@ -1,5 +1,35 @@
 # Animation coverage
 
+## Back `BACK_ANIM_SHAKE_FLASH_YELLOW` triple accepted (2026-08-04)
+
+- **State:** exact for the twenty-second bounded player-back set: **22/25 back
+  sets, 66/75 selector variants, 352/376 Factory mappings**. Generated set
+  census: **8 mappings / 8 Factory species / 0 outside / 33 Factory
+  records**. Move coverage stays **107/276 exact, 0 partial, 0 staged, 169
+  unsupported**; `ANIMATION_COVERAGE.json` remains SHA-256
+  `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+- **Did:** ported source IDs **139/140/141**, initializer pre-increment,
+  `SetShakeFlashYellowPos`, all three `sShakeYellowFlashData` u8 tables and
+  selector, and shared `ShakeFlashYellow`: cadence/sign flip, signed `-1`
+  sentinel observed as 255, data[4]/[5]/[6] order, `OBJ_PLTT_ID`, yellow/zero
+  `BlendPalette`, terminal x2/palette restoration, `WaitAnimEnd`→dummy, and
+  task restoration. RAICHU record **487** Adamant/mod-0; PIKACHU **66**
+  Docile/mod-1; LANTURN **381** Quiet/mod-2; all 8 mappings route under every
+  real nature mod.
+- **Next:** await the supervisor's next bounded player-back selector step;
+  red/green/blue ShakeGlow sets 23-25 remain separate acceptance units.
+- **Notes:** paired byte-identical dense Scene-ON initializer→dummy receipts
+  retain every framebuffer hash plus player RAM/OAM/task and unfaded/faded/
+  hardware OBJ palette state: Raichu **1838..1921 / 84 / 87,343 B /
+  `1cfae5f795ab25c9b9182229f08fb448fba6120bce404de4059eaa327d98e97a`**;
+  Pikachu **1839..1897 / 59 / 61,508 B /
+  `583fd84fa59aed49dacfdabd291c94774ec058d49d87c3c58d010b2adc39a4cb`**;
+  Lanturn **1839..1916 / 78 / 82,728 B /
+  `5518bbe2a4ad1817190863e43e2ce70b2e9f3e0ae6f5153cbb78ef204d9a314c`**.
+  Palette transfer is one-frame-lagged except Raichu frame 1844's observed
+  same-frame restoration transfer. No boundary/unsupported widening or move
+  promotion.
+
 ## Back `BACK_ANIM_JOLT_RIGHT` triple accepted (2026-08-04)
 
 - **State:** exact for the twenty-first bounded player-back set: **21/25 back

@@ -395,6 +395,23 @@ export const BACK_JOLT_RIGHT_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object
   BACK_JOLT_RIGHT_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by `BACK_ANIM_SHAKE_FLASH_YELLOW`. */
+export const BACK_SHAKE_FLASH_YELLOW_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_SHAKE_FLASH_YELLOW")
+    .map(([species]) => species),
+);
+
+/** The complete yellow-flash row is reachable through Factory rentals. */
+export const BACK_SHAKE_FLASH_YELLOW_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_FLASH_YELLOW_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** This bounded row has no species outside the Factory corpus. */
+export const BACK_SHAKE_FLASH_YELLOW_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_FLASH_YELLOW_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -1028,6 +1045,43 @@ export const BACK_JOLT_RIGHT_VARIANTS = Object.freeze({
   }),
 } as const);
 
+export const SHAKE_YELLOW_FLASH_TABLES = Object.freeze([
+  Object.freeze([
+    [false, 1], [true, 2], [false, 15], [true, 1], [false, 15], [true, 1],
+    [false, 15], [true, 1], [false, 1], [true, 1], [false, 1], [true, 1],
+    [false, 1], [true, 1], [false, 1], [true, 1], [false, 1], [true, 1],
+    [false, 1], [false, 0xff],
+  ] as const),
+  Object.freeze([
+    [false, 5], [true, 1], [false, 15], [true, 4], [false, 2], [true, 2],
+    [false, 2], [true, 2], [false, 2], [true, 2], [false, 2], [true, 2],
+    [false, 2], [false, 0xff],
+  ] as const),
+  Object.freeze([
+    [false, 1], [true, 1], [false, 20], [true, 1], [false, 20], [true, 1],
+    [false, 20], [true, 1], [false, 1], [false, 0xff],
+  ] as const),
+] as const);
+
+/** The three source callbacks differ only in their table selector. */
+export const BACK_SHAKE_FLASH_YELLOW_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_SHAKE_FLASH_YELLOW_FAST", callback: "Anim_ShakeFlashYellow_Fast",
+    sourceId: 139, natureMod: 0, tableIndex: 0, tableName: "sShakeYellowFlashData_Fast",
+    terminalTick: 81, accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_SHAKE_FLASH_YELLOW", callback: "Anim_ShakeFlashYellow",
+    sourceId: 140, natureMod: 1, tableIndex: 1, tableName: "sShakeYellowFlashData_Normal",
+    terminalTick: 56, accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_SHAKE_FLASH_YELLOW_SLOW", callback: "Anim_ShakeFlashYellow_Slow",
+    sourceId: 141, natureMod: 2, tableIndex: 2, tableName: "sShakeYellowFlashData_Slow",
+    terminalTick: 75, accepted: true,
+  }),
+} as const);
+
 /**
  * `BACK_ANIM_V_SHAKE_H_SLIDE` selects three standalone source callbacks.
  * Unlike the preceding shake triples, each callback stays installed directly
@@ -1263,6 +1317,11 @@ type BackJoltRightTravelLimit = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BAC
 type BackJoltRightOscillationCount = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["oscillationCount"];
 type BackJoltRightOscillationDelta = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["oscillationDelta"];
 type BackJoltRightInitialReturnStep = typeof BACK_JOLT_RIGHT_VARIANTS[keyof typeof BACK_JOLT_RIGHT_VARIANTS]["initialReturnStep"];
+type BackShakeFlashYellowVariant = typeof BACK_SHAKE_FLASH_YELLOW_VARIANTS[keyof typeof BACK_SHAKE_FLASH_YELLOW_VARIANTS];
+type BackShakeFlashYellowSelector = BackShakeFlashYellowVariant["selector"];
+type BackShakeFlashYellowCallback = BackShakeFlashYellowVariant["callback"];
+type BackShakeFlashYellowSourceId = BackShakeFlashYellowVariant["sourceId"];
+type BackShakeFlashYellowTableIndex = BackShakeFlashYellowVariant["tableIndex"];
 type BackVShakeHSlideSelector = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["selector"];
 type BackVShakeHSlideCallback = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["callback"];
 type BackVShakeHSlideSourceId = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["sourceId"];
@@ -1615,6 +1674,13 @@ function joltRightVariant(selector: string): {
   readonly initialReturnStep: BackJoltRightInitialReturnStep;
 } | null {
   for (const variant of Object.values(BACK_JOLT_RIGHT_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function shakeFlashYellowVariant(selector: string): BackShakeFlashYellowVariant | null {
+  for (const variant of Object.values(BACK_SHAKE_FLASH_YELLOW_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -4165,6 +4231,151 @@ export function backJoltRightTerminalSpriteData(
     terminal.data5,
     terminal.data6,
     terminal.data7,
+  ];
+}
+
+export interface BackShakeFlashYellowFrame {
+  readonly x2: number;
+  readonly y2: 0;
+  readonly data0: number;
+  readonly data1: number;
+  readonly data2: number;
+  readonly data3: BackShakeFlashYellowTableIndex;
+  readonly data4: number;
+  readonly data5: number;
+  readonly data6: number;
+  readonly data7: number;
+  readonly selector: BackShakeFlashYellowSelector;
+  readonly sourceId: BackShakeFlashYellowSourceId;
+  readonly callbackBefore: BackShakeFlashYellowCallback;
+  readonly callback: BackShakeFlashYellowCallback | "WaitAnimEnd";
+  readonly initializerCalled: boolean;
+  readonly setShakeFlashYellowPosCalls: 1;
+  readonly tableEntryIsYellow: boolean;
+  readonly tableEntryTimeU8: number;
+  readonly blendCoefficient: 0 | 16 | null;
+  readonly blendColor: "RGB_YELLOW" | null;
+  readonly paletteBase: number;
+  readonly terminal: boolean;
+}
+
+/**
+ * Source-order reducer for the complete yellow-flash family. The selected
+ * callback stays installed and pre-increments data[2] on every invocation;
+ * only its first invocation initializes the table selector and OBJ palette
+ * base. `ShakeFlashYellow` then executes position cadence, u8-sentinel,
+ * palette blend, and data[4]/[5]/[6] advancement in that exact order.
+ */
+export function backShakeFlashYellowFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+  paletteBase = 0x100,
+): BackShakeFlashYellowFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0
+      || !Number.isInteger(preservedData1) || !Number.isInteger(paletteBase)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_SHAKE_FLASH_YELLOW") return null;
+  const variant = shakeFlashYellowVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected ShakeFlashYellow selector ${selection.selector}`);
+  const table = SHAKE_YELLOW_FLASH_TABLES[variant.tableIndex] as readonly (readonly [boolean, number])[];
+
+  let x2 = 0;
+  let data0 = 0;
+  let data1 = toS16(preservedData1);
+  let data2 = 0;
+  let data3 = 0 as BackShakeFlashYellowTableIndex;
+  let data4 = 0;
+  let data5 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let result: BackShakeFlashYellowFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    data2 = toS16(data2 + 1); // `++sprite->data[2]` happens before the guard.
+    const initializerCalled = data2 === 1;
+    if (initializerCalled) {
+      data7 = toS16(paletteBase); // OBJ_PLTT_ID(sprite->oam.paletteNum)
+      data6 = 0;
+      data5 = 0;
+      data4 = 0;
+      data3 = variant.tableIndex;
+    }
+
+    // SetShakeFlashYellowPos: assign before cadence/sign advancement.
+    x2 = data1;
+    if (data0 > 1) {
+      data1 = toS16(data1 * -1);
+      data0 = 0;
+    } else {
+      data0 = toS16(data0 + 1);
+    }
+
+    const entry = table[data6];
+    if (entry === undefined) throw new Error(`yellow-flash table overrun at ${data6}`);
+    const [tableEntryIsYellow, tableEntryTimeU8] = entry;
+    let blendCoefficient: 0 | 16 | null = null;
+    let callback: BackShakeFlashYellowCallback | "WaitAnimEnd" = variant.callback;
+    let terminal = false;
+
+    // The C field is u8, so the signed `-1` initializer is observed as 255.
+    if (tableEntryTimeU8 === 0xff) {
+      x2 = 0;
+      callback = "WaitAnimEnd";
+      terminal = true;
+    } else {
+      if (data4 === 1) {
+        blendCoefficient = tableEntryIsYellow ? 16 : 0;
+        data4 = 0;
+      }
+      if (tableEntryTimeU8 === data5) {
+        data4 = 1;
+        data5 = 0;
+        data6 = toS16(data6 + 1);
+      } else {
+        data5 = toS16(data5 + 1);
+      }
+    }
+
+    result = Object.freeze({
+      x2, y2: 0 as const, data0, data1, data2, data3, data4, data5, data6, data7,
+      selector: variant.selector, sourceId: variant.sourceId,
+      callbackBefore: variant.callback, callback, initializerCalled,
+      setShakeFlashYellowPosCalls: 1 as const,
+      tableEntryIsYellow, tableEntryTimeU8, blendCoefficient,
+      blendColor: blendCoefficient === null ? null : "RGB_YELLOW" as const,
+      paletteBase: data7, terminal,
+    });
+    if (terminal) break;
+  }
+  return result;
+}
+
+export function backShakeFlashYellowWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/** Task_HandleMonAnimation restores data[0..2] and preserves data[3..7]. */
+export function backShakeFlashYellowTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+  paletteBase = 0x100,
+): readonly [number, 0, number, BackShakeFlashYellowTableIndex, number, number, number, number] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const terminal = backShakeFlashYellowFrameAtTick(
+    species, natureId, Number.MAX_SAFE_INTEGER, 0, paletteBase,
+  );
+  if (terminal === null) return null;
+  return [
+    toS16(battlerId), 0, toS16(speciesId), terminal.data3,
+    terminal.data4, terminal.data5, terminal.data6, terminal.data7,
   ];
 }
 
