@@ -10,14 +10,23 @@ history.
 
 ## Full `npm test` exceeds the Bash tool's default 120 s timeout
 
-- **What:** the full suite is now ~12 min (626+ files), so a worker running
-  the mandatory end-of-step `npm test` inside a default-timeout Bash call
-  gets auto-backgrounded mid-run and must re-establish a blocking wait
+- **What:** the full suite exceeds the Bash tool's default 120 s timeout, so a
+  worker running the mandatory end-of-step `npm test` inside a default-timeout
+  call gets auto-backgrounded mid-run and must re-establish a blocking wait
   (foreground poll loop) to honor the no-self-abort discipline. Flagged by
   the 2026-08-02 #66(b) side worker, ~2 min lost. Second hit same evening:
   the #67 worker's auto-backgrounded suite led it to pkill its own vitest
   workers before recovering with an explicit 600 s timeout (~4 min lost +
   a false "failed" notification).
+- **Budget the right number (measured 2026-08-03 on an idle box, 677 files /
+  6,662 tests): `npm test` solo is 4 min 8 s (248 s).** Earlier revisions of
+  this entry said "~12 min" and PROGRESS 900 logged 13-14 min — **those are
+  contention figures, not the suite's cost.** Both were measured with 3
+  sibling lanes saturating the machine. One explicit 600 s Bash timeout
+  covers a solo run with room to spare; only a known-contended run needs
+  polling. Don't reach for a workaround (backgrounding, pkill, chunking) on
+  the assumption the suite cannot fit — twice now that assumption, not the
+  runtime, was the thing that cost the session time.
 - **Hits:** 4 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
   contention from concurrent side/animation runs — auto-backgrounded; worker
   recovered by pid-polling, ~5 min lost. 2026-08-03: terminal-seam scout,

@@ -32,7 +32,10 @@ function livePeerVitestRuns(): number {
 // and this repo routinely runs 4+ sessions at once, which oversubscribes a
 // 16-core box badly enough to have caused a signal-143 kill and 16-30 minute
 // suites. Sizing the pool by the number of live peers keeps a solo run at full
-// speed (167s) while a contended one backs off automatically.
+// speed while a contended one backs off automatically. Solo wall clock grows
+// with the suite: 167s at ~500 files (2026-08-01), 248s at 677 files
+// (2026-08-03). Multi-minute figures well above that (PROGRESS 900's 13-14
+// min) are contention, not suite cost — see PAPERCUTS before budgeting.
 //
 // `POKEBENCH_VITEST_MAX_WORKERS` still wins when set — `run-subagent.sh`
 // exports 4 for bounded workers, and it is the escape hatch for a run you know

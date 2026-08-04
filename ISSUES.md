@@ -222,6 +222,16 @@ lands on the ATTACKER who cast it — the printstring's `{B_ATK_NAME_WITH_PREFIX
 `{B_DEF_NAME_WITH_PREFIX}` pair already had this right without any new
 substitution plumbing.
 
+**USER DECISION 2026-08-03 — the completeness guard stays FATAL everywhere,
+including the playable build. Do not re-raise.** Prior sessions repeatedly
+recommended softening it to a console error plus best-effort text in the
+browser build (kept fatal in tests); the user declined: "nah, just crash."
+So a player who reaches any id below still gets a hard throw, and that is the
+intended behavior — the remedy is landing the ids, not degrading the guard.
+Do not add a fallback path, a `try`/`catch`, or an env-gated non-fatal mode
+around `battleStringResolver`/`battleResolutionPresentation`'s placeholder
+and unknown-id throws.
+
 **REACHABLE (39), ordered by carrier-weight proxy for likely-hit-first —
 name a batch, use the Taunt-pair idiom** (`messageId === "STRINGID_X"` branch
 in `messageLines`, `requireMoveDefender`/`actionSnapshot`-sourced battler,

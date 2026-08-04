@@ -120,6 +120,14 @@ top entry of `PROGRESS.md` — uncommitted work is lost work.
   part of `npm test`; run it manually/densely while building.
 - **When you fix or add pure engine logic, pin it with a Tier-1 test** — reserve
   Tier 2 for parity that genuinely needs the emulator or exact pixels.
+- **Typecheck with `npm run typecheck`, never bare `tsc`/`npx tsc --noEmit`.**
+  Typechecking this project peaks at ~4.5 GB — over Node's 4 GB default heap —
+  so a bare invocation dies with a confusing out-of-memory crash. The script
+  (like `npm run build`) sets `--max-old-space-size=8192`. Most of that heap is
+  the ~46 MB of generated JSON under `src/` that `resolveJsonModule` types
+  literally; if the peak ever approaches the ceiling again, the cheapest relief
+  is moving test-only fixtures out of the `src` type graph (measured: the three
+  largest, ~9.5 MB, are worth ~650 MB).
 - **Mid-step sanity checks: `npm run test:smoke`** (~25 s) runs a curated
   subset — the frontier/census ratchets, kernel decision boundary, a full
   kernel turn, the round controller, and `battleScene` — instead of the full
