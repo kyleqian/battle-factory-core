@@ -11,6 +11,7 @@
 /tools/__pycache__/
 /.worktrees/
 /.codex-logs/
+/.opencode-logs/
 tsconfig.tsbuildinfo
 .env
 .DS_Store
