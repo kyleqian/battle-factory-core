@@ -2427,6 +2427,23 @@ function messageLines(
       B_BUFF1: () => moveName,
     });
   }
+  if (messageId === "STRINGID_MAGNITUDESTRENGTH") {
+    // BattleScript_EffectMagnitude (data/battle_scripts_1.s:1683-1692):
+    // magnitudedamagecalculation runs (and prints) BEFORE the actual hit
+    // lands (goto BattleScript_HitsAllWithUndergroundBonusLoop). Cmd_magnitude
+    // damagecalculation (battle_script_commands.c:8670-8710) writes the
+    // rolled tier straight into gBattleTextBuff1 via PREPARE_BYTE_NUMBER_BUFFER
+    // -- the same battleTextBuff1ByteNumber shape STOCKPILE/PERISHCOUNTFELL
+    // already use (magnitudeHandler, battleScriptRankedBatch1Opcode.ts:130).
+    // {B_BUFF1} is the only placeholder; no attacker/defender name needed.
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no magnitude substitution`);
+    }
+    const magnitude = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_BUFF1: () => magnitude,
+    });
+  }
   const resolvers: Record<string, () => string> = {};
   if (lastMoveAttacker !== null) {
     const displayed = fieldBattler(field, lastMoveAttacker);

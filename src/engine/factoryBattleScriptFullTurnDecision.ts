@@ -1001,8 +1001,14 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                             // shares this exact battleTextBuff1ByteNumber
                             // read -- runPerishSongAfterFutureAttacks's own
                             // pre-decrement capture (battle_util.c:1846).
+                            // ISSUES #72 (last REACHABLE id): STRINGID_MAGNITUDESTRENGTH
+                            // shares it too -- magnitudeHandler's own
+                            // PREPARE_BYTE_NUMBER_BUFFER-shaped write
+                            // (battleScriptRankedBatch1Opcode.ts:130,
+                            // Cmd_magnitudedamagecalculation, battle_script_commands.c:8710).
                             : operand.expression === "STRINGID_PKMNSTOCKPILED"
                               || operand.expression === "STRINGID_PKMNPERISHCOUNTFELL"
+                              || operand.expression === "STRINGID_MAGNITUDESTRENGTH"
                               ? [String(rules.battleTextBuff1ByteNumber)]
                               // Row 40 (STRINGID_PKMNTRANSFORMEDINTO): the
                               // species Transform just copied
