@@ -1,5 +1,44 @@
 # Animation coverage
 
+## Back `BACK_ANIM_V_SHAKE_LOW` triple accepted (2026-08-03)
+
+**State:** exact for the fourteenth bounded player-back set: **14/25 back
+sets, 42/75 selector variants, 154/376 Factory mappings**. The generated set
+is exactly **15 mappings / 15 Factory / 0 outside** — POLIWRATH, GEODUDE,
+RHYHORN, RHYDON, PINSIR, TAUROS, DONPHAN, LARVITAR, TYRANITAR, NOSEPASS,
+MAKUHITA, HARIYAMA, NUMEL, TROPIUS, and AGGRON. Move coverage remains
+**107/276 exact, 0 partial, 0 staged, 169 unsupported**; the generated
+`ANIMATION_COVERAGE.json` is unchanged.
+
+**Did:** ported the source-selected `Anim_VerticalShakeLowTwice_Fast` / normal
+/ slow initializers (IDs **99/92/98**) and shared `VerticalShakeLowTwice`:
+56/9, 40/6, and 24/6 step/amplitude pairs; the complete source
+`sVerticalShakeData` pulse/gap/pulse/terminal rows `{6,30}`, `{-2,15}`,
+`{6,30}`, `{-1,0}`; u8-derived signed GBA sine phase; C integer damping;
+boundary no-increment behavior; terminal `WaitAnimEnd` then dummy/task
+restoration; non-affine OAM timing; and the task's back-side `sDontFlip`
+contract (no source `TryFlipX` calls). The selector remains species plus
+party nature only. Factory GEODUDE index **70** Brave/mod-0, MAKUHITA index
+**22** Docile/mod-1, and HARIYAMA_2 index **486** Quiet/mod-2 cover every
+variant, while the routing test batch-checks all fifteen siblings.
+
+**Evidence:** three fresh paired byte-identical Scene-ON dense receipts retain
+every framebuffer hash plus player sprite RAM/OAM/affine state from selected
+initializer through `SpriteCallbackDummy`: Geodude fast **1839..1919 / 81
+frames, 37,607 B, `c23772a75a41eeb0c9981675bd0223f876cfd091fdf2972f8a7e42189bb82ff1`**;
+Makuhita normal **1840..1920 / 81, 37,578 B,
+`9575423aff3eefc9058624a03ead8f61c7bc01d87ad67bad9d4efd134c666976`**;
+Hariyama slow **1840..1920 / 81, 37,582 B,
+`bf349b8ecfcbf42f1f77a363c86bbc504dbd1fc55dbe12e69ff511e6285fac22`**.
+
+**Verification / next:** focused source/census/routing/reducer/evidence plus
+both animation/executable ratchets **4 files / 18 tests**, heap-sized typecheck,
+smoke **7 files / 346 tests**, full `npm test` **678 files / 6,652 passed /
+1 skipped**, heap-sized `npm run build` (**553 modules transformed**), and
+`npm run animation:coverage` are green. Next source-ranked unsupported
+player-back set is `BACK_ANIM_TRIANGLE_DOWN` (set 15). No move status,
+gameplay, RNG, damage, turn, facility, or live dispatcher state changed.
+
 ## Back `BACK_ANIM_GROW_STUTTER` triple accepted (2026-08-03)
 
 **State:** exact for the thirteenth bounded player-back set: **13/25 back
