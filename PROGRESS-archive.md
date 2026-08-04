@@ -1,3 +1,45 @@
+## 895 — [bounded MAIN worker, 2026-08-03 ~16:10] ISSUES #72 reachability triage done: 66 REACHABLE / 37 DEAD / 4 MANUAL of the 107-id printstring census
+
+- **State:** master, docs-only commit on top of `660494f9`. Re-ran
+  `printstring-literal-census.ts` first — byte-identical to committed, 107
+  UNRESOLVED unchanged, no churn to restore.
+- **Did:** Per-id reachability triage of ISSUES #72's 107 UNRESOLVED
+  `printstring`-literal STRINGIDs, following #70's method (trigger
+  attribution via `battle-script-program.json` call-graph + real-source
+  cross-refs, static-gate identification, Factory L50 singles carrier
+  evidence via `battle-script-topology.json`'s `level50FactoryReachableEffects`
+  + a fresh `battle-frontier-mons.json`↔`species-stats.json` ability join).
+  New doc `docs/issue72-reachability-triage.md`: **66 REACHABLE, 37 DEAD, 4
+  MANUAL**, every row cited. ISSUES #72 trimmed to the open remainder (full
+  REACHABLE list ordered by carrier-weight proxy + the 4 MANUAL cases +
+  fix-idiom pointer); nothing marked CLOSED. All 7 user-named
+  highest-suspicion ids got explicit verdicts: the 5 "already-status" ids are
+  REACHABLE (clean `jumpifstatus`-on-target-already-has-it chains, biggest is
+  Thunder Wave's 64/850); `PKMNCANTUSEMOVETORMENT` is a genuine **engine
+  gap** (found live this step) — the attack-canceler phase enum has no
+  `CANCELER_TORMENTED` phase at all (`battleScriptSourceConstants.ts:69-85`
+  goes DISABLED→TAUNTED directly) though Torment itself is inflictable
+  (4/850 carrier) — same fix idiom as the Taunt/Imprison pair would unlock
+  it; `PKMNCANTUSEMOVESEALED` is MANUAL — engine wiring is real but the
+  Imprison carrier is contradicted between two generated artifacts
+  (`battle-frontier-mons.json` vs `battle-script-topology.json`'s
+  inventory-sourced L50 tier). Second surprise: 3 more MANUAL ids
+  (`PLAYERDEFEATEDTRAINER1`/`TRAINER1LOSETEXT`/`TRAINER1WINTEXT`) — real,
+  certain triggers on every Factory win/loss, but this engine's terminal
+  boundary (`factoryBattleScriptTerminalDecision.ts:612-621`) short-circuits
+  before ever resuming the interpreter at those labels.
+- **Next:** #72 REACHABLE batch fixes (66 ids, Taunt-pair idiom, ranked list
+  in ISSUES #72); the `CANCELER_TORMENTED` engine-gap fix (unlocks 1 more);
+  the 4 MANUAL settling experiments if picked up; #71 Slice D (animation
+  rung-3 dependency); typeref slice-2 re-scope (#39).
+- **Notes:** docs-only step per its own acceptance criteria — no
+  `npm test`/`npm run build` run (machine shared with two other lanes today).
+  No PAPERCUT. Two research subagents (read-only, no fixes) ran in parallel
+  to cover the ability/item/facility clusters within the 60-minute cap; all
+  three batches (mine + both agents') cross-verified for row-count/pipe-
+  escaping integrity before merge — 107/107, no gaps, no dupes.
+
+---
 ## 894 — [supervisor orient, 2026-08-03 ~15:35] Animation fold (ff to `660494f9`) verified green on the union; session in progress
 
 - **State:** master `660494f9` = fast-forward fold of `animation-main` (6
