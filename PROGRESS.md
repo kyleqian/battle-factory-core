@@ -4,6 +4,54 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 911 — [bounded MAIN worker, 2026-08-04 ~09:20] #73 rung B: TRAINER_SLIDE_TIMING corrected 53→38 (pixel-verified); `npm run compare` wiring NOT landed (honest checkpoint)
+
+- **State:** master `de6727bd`. Full `npm test` green (**702 files / 6,792
+  passed / 1 skipped**, 0 failures), `npm run build` green,
+  `compare:differential -- battle-command-generated-off.json --base
+  a7bbed0b --summary`: **PASS — 128/128 byte-identical**.
+- **Did:** dense per-tick re-probe (`bin/oracle lab`, frames 2994-3059) of
+  the already-committed LOSS ground-truth fixture
+  (`tools/battle-lab/loss-terminal-explosion-dusclops-off.json`) pixel-pins
+  the trainer-slide-in duration at **38 ticks** (dispatch tick 2996 → settle
+  tick 3034), not the ported 53 — `offscreenX2 = 2*(38-age)` reproduces the
+  measured leading edge exactly at all 8 sampled ticks. The old 53 was
+  independently wrong twice over (never pixel-fit-verified, and its own
+  source arithmetic was off: `OpponentHandleTrainerSlide` creates the sprite
+  at x2=96 stepping -2/callback = 48, not 53). Fixed `TRAINER_SLIDE_TIMING`/
+  `BattleTrainerSlideTiming` in `battleResolutionPresentation.ts` with the
+  corrected source+oracle citation; red-verified
+  `tests/presentationTerminalSeamTrainerSlide.test.ts`'s old pins (53,
+  `offscreenX2: 106`) failed before updating to the new values (38, 76).
+- **Next (honest checkpoint — item not closed):** rung B's actual
+  `npm run compare` oracle-pixel pass was **not completed** this step — no
+  mismatching frames to report, because the compare-trace/app-stage wiring
+  itself wasn't finished in time, not because it ran and failed. ISSUES #73
+  now carries a detailed, concrete wiring plan for the next session: build a
+  compare-only `AppStage` (`tools/compare/appTrace.ts`) that directly
+  constructs the orchestrator already inside the resolution's `"presenting"`
+  phase at the trainer-slide command (app frame 0 == oracle tick 2996, past
+  the out-of-window return-to-ball recall), using the same
+  `createFactoryFullTurnBattleState`/`createBattleState`-based construction
+  `presentationTerminalSeamTrainerSlide.test.ts`'s `terminalResolution()`
+  helper already demonstrates, fed the real production LOSS event shape
+  `battleScriptFaintedActionsOrchestration.test.ts`'s own kernel-level test
+  already proves (`recall:1, slide-in:1, message:STRINGID_TRAINER1WINTEXT`).
+  Full plan, including the `finishBattle`/`aiHistory` non-null prerequisites
+  and the `oracleBattleLab.preCheckpointFrameOffset` mechanism for reusing
+  the fixture's own committed captures, is in ISSUES #73. WIN side still
+  needs a fresh twice-run `mechanicLab` staging before any of this applies
+  to it (untouched this session).
+- **Notes:** most of this step's time went to correctly scoping the
+  wiring (confirming the resolution-state construction recipe, the real
+  kernel event shape, and the `finishBattle` prerequisites) before running
+  out of budget to actually write it — the TRAINER_SLIDE_TIMING fix was the
+  one concrete, source-cited, pixel-verified deliverable that fit in the
+  remaining time. No PAPERCUT beyond the known `npm test`/full-suite runtime
+  (~9.5 min this session, ran to a real foreground completion per execution
+  discipline).
+
+---
 ## 910 — [supervisor, 2026-08-04 ~08:10] R1 pair landed: terminal-seam presentation phase (main) + Cmd_end3 resumption wiring (side, merged)
 
 - **State:** master `a7bbed0b` (merge of `worker/side-20260804-071645`,
@@ -106,50 +154,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   past the Bash tool's default timeout (same known issue entries 905/906
   flagged); stopped the stray duplicate and re-ran to a real foreground
   completion each time per this step's execution discipline.
-
----
-## 908 — [supervisor wind-down, 2026-08-04 ~02:50] Session close: terminal-seam WIN+LOSS both landed, typeref program CLOSED (census 0), #72 burned 80→48, day-audit clean; final union green
-
-- **State:** master `630bf3dc` (animation fold merge). Final independent
-  full `npm test`: **700 files / 6,786 passed / 1 skipped, 0 failures**;
-  `npm run build` green. Play-preview rebuilt at this commit, serving :5199.
-  No open DEFERRED entries. 13 workers this session (7 main + 6 side),
-  **0 lost** — every launcher exited normally.
-- **Did (headlines):** (1) **Terminal seam:** picked up the parked
-  `wip/terminal-seam-increment-i`, landed increments (i)+(ii) WIN side
-  (entry 901), then scouted (entry: loss ground-truth doc + twice-identical
-  fixture) and landed the **LOSS/DREW half same session** (entry 906,
-  `VARIOUS` 19/20 registered), plus the BS_ATTACKER mapping corrective
-  (entry 907). Both battle endings now run their real scripts with resolved
-  trainer text; remainder consolidated as **ISSUES #73** (renderer/increment
-  (iii) + win-window oracle coverage). (2) **Typeref retirement program
-  CLOSED:** slices 5/6/7a/7b landed on a stacked side-lane ladder, census
-  **67→0** (program total 144→0), slice-8 audit ran supervisor-side clean;
-  recorded in ISSUES #39 + design-doc header. (3) **ISSUES #72:** batches
-  5/6/7 + the 3 trainer ids — census UNRESOLVED **80→48**, REACHABLE
-  **39→10**; new plumbing landed: `battleTextBuff1Type`/`monNickBattler`;
-  CANCELER_TORMENTED premise **corrected** (real Torment = selection-time
-  rejection, subsystem tracked in #72's note; triage-doc citations fixed);
-  `Cmd_end3`/`call-current` resumption gap documented (blocks
-  SXWHIPPEDUPSANDSTORM + Drizzle/Drought full-turn switch-in tests).
-  (4) **Read-only day-audit** over all four surfaces: 0 functional defects,
-  2 record gaps (both folded into #73). (5) Two animation folds (orient:
-  none needed; wind-down: 11 commits, back-anim acceptances). PAPERCUTS +1
-  (forced-switch party-menu cursor). Oracle freshness FAIL at orient was the
-  documented docs-only false positive (single `_template` harness commit) —
-  no restart.
-- **Next:** ISSUES #73 item 2 (win/loss presentation phase incl. generic
-  trainer slide-in — next headline candidate; closes item 3's oracle window
-  with it). #72 batch 8: `SAFEGUARDEXPIRED`/`TOOKATTACK` cheapest, then the
-  end3 resumption gap as a dedicated step. #71 Slice D still gated on the
-  animation lane's rung-3 dispatcher (not landed as of 02:30). Hard trio /
-  `SXBLOCKSY2` / `TOOKFOE`+`LOSTPPGRUDGE` tryfaintmon / `MAGNITUDESTRENGTH`
-  RNG-field remain the #72 tail.
-- **Notes:** the animation supervisor was live until ~02:00 (its nested
-  worker worktree may persist under `.worktrees/animation-main/` — theirs to
-  clean). Merge discipline held all session: no master merges while a
-  main-lane worker was live; side ladder stacked 3 deep then folded in two
-  merges. All my worker worktrees/branches removed; `play-preview` +
-  `animation-main` worktrees are permanent.
 
 ---

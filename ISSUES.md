@@ -492,32 +492,106 @@ STRINGIDs are real dismissible message boxes (`TERMINAL_SEAM_BUTTON_MESSAGE_IDS`
 reusing the same button-advance/dismiss machinery `STRINGID_TARGETFAINTED`
 already uses), and `battleResolutionPresentationRender.ts`/`battleScene.ts`'s
 generic `renderBattleResolutionSceneOffView` draw the trainer sliding in
-(ported `SpriteCB_TrainerSlideIn` settle math, `TRAINER_SLIDE_TIMING` = 53
-ticks, cited from `battleScene.ts`'s `TURN17_TRAINER_SLIDE_SETTLE_DELAY` doc)
+(ported `SpriteCB_TrainerSlideIn` settle math, `TRAINER_SLIDE_TIMING`)
 before the existing `terminal-handoff` lifecycle phase hands off to
 `finishBattle`/`postwin`/`factoryTerminal` exactly as before. Tier-1-pinned
 (`tests/presentationTerminalSeamTrainerSlide.test.ts`, DESTIN WIN + JENSON
 LOSS, full command/phase sequence including the settle/dismiss timings) and
 `compare:differential` stayed 128/128 byte-identical.
 
-**Still open: oracle-level pixel coverage for the window itself.** The
-2026-08-04 landing is pinned only by Tier-1 tests plus a differential trace
-that never reaches a terminal — no emulator-vs-app pixel evidence covers the
-new trainer-slide-in visual or the two message boxes end-to-end for either
-outcome. Ground truth exists and is committed: the LOSS side has a
-twice-identical dense fixture (`docs/terminal-seam-loss-path-ground-truth.md`,
-`tools/battle-lab/loss-terminal-explosion-dusclops-off.json`) already showing
-the real trainer-slide/text timing (empty field at frame 2996 to text start at
-3057, i.e. 61 ticks — the ported `TRAINER_SLIDE_TIMING`'s 53-tick settle is
-close but not yet fit-verified against this exact span); the WIN side is only
-characterized via the DESTIN-specific `docs/turn17-notes.md`/`postwin-notes.md`
-canonical fixture, not a `mechanicLab`-staged generic trace. Next step: run
-`npm run compare` over the committed loss-path dense trace (full window, not
-endpoint frames) through the new generic renderer, and/or stage a fresh
-win-side `mechanicLab` window (final hit → quote dismiss) the same way the
-loss doc was staged; iterate the ported slide constant/timing against real
-pixels, or if the matched app/oracle staging cost is high, record the exact
-mismatching frames/spans here rather than guessing.
+**2026-08-04 rung-B session: `TRAINER_SLIDE_TIMING` corrected 53→38,
+pixel-verified; `npm run compare` wiring for either outcome NOT completed.**
+Direct pixel evidence (dense per-tick re-probe of the committed LOSS fixture,
+`tools/battle-lab/loss-terminal-explosion-dusclops-off.json`, frames
+2994-3059, via `bin/oracle lab`) finds the trainer sprite's on-screen
+bounding box first move at tick 3009 and stop moving at tick 3034 — **38**
+ticks after the slide dispatches (opponent-controller command 6→8 at 2996),
+not 53 (the old constant) and not the 61-tick span this issue's prior text
+guessed at (that 61 was the *empty-field-to-text-start* span, which also
+includes an unrelated ~10-tick dispatch/ack gap before the sprite becomes
+visible plus the message's own per-character typing time — not the slide
+alone). The fit is exact, not approximate: `offscreenX2 = 2*(38-age)`
+reproduces the measured leading edge at all 8 sampled ticks from first
+visibility (age 13, x=239) through settle (age 38, x=189). The old 53 was
+independently wrong twice over — never pixel-fit-verified, and its own
+source arithmetic was off (`OpponentHandleTrainerSlide` in
+`reference/pokeemerald/src/battle_controller_opponent.c:1385-1390` creates
+the sprite at `x2=96` stepping `sSpeedX=-2`/callback, i.e. 96/2=48 callbacks
+by that math alone, still not 53). Landed in `src/engine/
+battleResolutionPresentation.ts` (`TRAINER_SLIDE_TIMING`,
+`BattleTrainerSlideTiming`) with the corrected citation in place; Tier-1 pins
+in `tests/presentationTerminalSeamTrainerSlide.test.ts` red-verified against
+the old values (53, `offscreenX2: 106`) before updating to the new ones (38,
+76). Full `npm test` (702 files/6,792 passed/1 skipped) and `npm run build`
+green at this fix; `compare:differential -- battle-command-generated-off.json
+--base a7bbed0b --summary` stayed 128/128.
+
+**Still fully open: no `npm run compare` pixel evidence exists for either
+outcome through the generic route.** This session investigated the wiring
+cost and ran out of time before writing it, so there are no mismatching
+frames to report (not "attempted and stuck" — not attempted). Concrete
+findings for whoever picks this up next:
+- The committed LOSS fixture is a `mechanicLab` scenario
+  (`overrides.parties`), so its compare trace needs `oracleBattleLab.scenario`
+  (see `tools/compare/traces/battle-command-generated-off.json` +
+  `tools/battle-lab/mechanic-battle-command-generated-off.json` for the
+  established wrapper-trace/scenario-file pairing convention) — **not**
+  `factoryTerminalLoss.ts`'s bespoke `run-mgba-probe.py` mechanism, which is
+  a different, older tool for a different fixture shape.
+- Do **not** attempt to replay the fixture's full ~4938-frame/46-segment
+  script (3 forced Explosion turns + 2 forced-switch party-menu navigations)
+  through the app from frame 0 — that would require pixel-exact Explosion
+  move-animation and forced-switch-UI timing this task doesn't need and has
+  no budget to verify. Instead, edge-relative construction (this codebase's
+  established convention for every `postwin.ts`/`turn17-notes.md` engine
+  rung): build a compare-only `AppStage` (`tools/compare/appTrace.ts`) that
+  directly constructs a `factoryRoundBattleOrchestrator` state already
+  inside the resolution's `"presenting"` phase at `commandIndex: 1`
+  (trainer-slide, phaseElapsed 0) — i.e. app frame 0 == oracle tick 2996,
+  already past the return-to-ball sprite-visibility command (that animated
+  recall, ticks 2951-2995, is intentionally out of this window per the
+  brief). The resolution state is built the same way
+  `tests/presentationTerminalSeamTrainerSlide.test.ts`'s `terminalResolution()`
+  helper does (`createFactoryFullTurnBattleState` + `createBattleState` with
+  a hand-set `boundary: {kind: "terminal", outcome: "trainer-win"}` +
+  `createBattleResolutionPresentation`), but with the **real production
+  event shape** `tests/battleScriptFaintedActionsOrchestration.test.ts`'s
+  "player's last mon faints" test already proves the kernel emits for LOSS:
+  `[{kind: "set-battler-sprite-visibility", battler: 1, invisible: true},
+  {kind: "trainer-slide-in", battler: 1}, {kind: "message", messageId:
+  "STRINGID_TRAINER1WINTEXT", substitutions: []}]`, `opponentTrainer:
+  getFactoryTrainerPresentation(50)` (`CANONICAL_DESTIN_PRESENTATION`, since
+  the fixture uses `trainerId: 50`). Advance past command 0 once (outside
+  real ticks, in the stage constructor) via the real
+  `advanceFactoryRoundBattleResolution` so `battlePresentationBoundaries`
+  correctly reflects the recall.
+- Wrap that resolution in a **real** orchestrator base built via
+  `createFactoryRoundBattleOrchestrator({rentals: {type: "currentRecords",
+  ...}})` + the same `acknowledgeAndAdvance` pattern
+  `tests/factoryRoundBattleOrchestrator.test.ts`'s `createStartedGeneratedBattle`
+  uses, so `aiHistory`/`activeBattleCallStart`/`battlePresentationBoundaries`
+  are all real, non-null values before `battle`/`battleResolutionPresentation`
+  get swapped for the synthetic terminal ones above — `finishBattle` (fires
+  automatically once the dismiss press completes `terminal-handoff`, which
+  is inside the compare window) needs all of those non-null or it throws.
+  `FactoryBattlePresentationBattlerBoundary`'s exact shape is at
+  `factoryRoundBattleOrchestrator.ts:213-227`; the boundary-builder itself
+  (`createBattlePresentationBoundaries`) is private to that file, so
+  replicate its ~15 lines rather than importing it.
+- The compare trace's own `captureFrames` should be the corresponding
+  relative window (0 through the dismiss + a few frames past, i.e. real
+  ticks 2996-3232ish minus 2996), and `oracleBattleLab.preCheckpointFrameOffset:
+  2996` lets the oracle side reuse the fixture's own already-committed
+  208-capture list (renumbered) instead of re-running the whole battle —
+  see `runOracleBattleLab`'s `preCheckpointFrameOffset` branch in
+  `tools/compare/oracleClient.ts` for the exact mechanism (it was built for
+  exactly this "checkpoint mid-scenario" shape; unconfirmed this session
+  whether the LOSS fixture's own `captureFrames` already satisfies it as-is
+  or needs a `preCheckpointCaptureFrames` field added to the *scenario* file
+  — check `BATTLE_LAB.md`'s own checkpoint documentation before assuming).
+- WIN side additionally needs a **fresh** `mechanicLab` staging (final hit →
+  quote dismiss), twice-run byte-identical, following the LOSS doc's own
+  §0 staging recipe, before any of the above applies to it.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 

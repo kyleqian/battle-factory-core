@@ -1,5 +1,50 @@
 
 ---
+## 908 — [supervisor wind-down, 2026-08-04 ~02:50] Session close: terminal-seam WIN+LOSS both landed, typeref program CLOSED (census 0), #72 burned 80→48, day-audit clean; final union green
+
+- **State:** master `630bf3dc` (animation fold merge). Final independent
+  full `npm test`: **700 files / 6,786 passed / 1 skipped, 0 failures**;
+  `npm run build` green. Play-preview rebuilt at this commit, serving :5199.
+  No open DEFERRED entries. 13 workers this session (7 main + 6 side),
+  **0 lost** — every launcher exited normally.
+- **Did (headlines):** (1) **Terminal seam:** picked up the parked
+  `wip/terminal-seam-increment-i`, landed increments (i)+(ii) WIN side
+  (entry 901), then scouted (entry: loss ground-truth doc + twice-identical
+  fixture) and landed the **LOSS/DREW half same session** (entry 906,
+  `VARIOUS` 19/20 registered), plus the BS_ATTACKER mapping corrective
+  (entry 907). Both battle endings now run their real scripts with resolved
+  trainer text; remainder consolidated as **ISSUES #73** (renderer/increment
+  (iii) + win-window oracle coverage). (2) **Typeref retirement program
+  CLOSED:** slices 5/6/7a/7b landed on a stacked side-lane ladder, census
+  **67→0** (program total 144→0), slice-8 audit ran supervisor-side clean;
+  recorded in ISSUES #39 + design-doc header. (3) **ISSUES #72:** batches
+  5/6/7 + the 3 trainer ids — census UNRESOLVED **80→48**, REACHABLE
+  **39→10**; new plumbing landed: `battleTextBuff1Type`/`monNickBattler`;
+  CANCELER_TORMENTED premise **corrected** (real Torment = selection-time
+  rejection, subsystem tracked in #72's note; triage-doc citations fixed);
+  `Cmd_end3`/`call-current` resumption gap documented (blocks
+  SXWHIPPEDUPSANDSTORM + Drizzle/Drought full-turn switch-in tests).
+  (4) **Read-only day-audit** over all four surfaces: 0 functional defects,
+  2 record gaps (both folded into #73). (5) Two animation folds (orient:
+  none needed; wind-down: 11 commits, back-anim acceptances). PAPERCUTS +1
+  (forced-switch party-menu cursor). Oracle freshness FAIL at orient was the
+  documented docs-only false positive (single `_template` harness commit) —
+  no restart.
+- **Next:** ISSUES #73 item 2 (win/loss presentation phase incl. generic
+  trainer slide-in — next headline candidate; closes item 3's oracle window
+  with it). #72 batch 8: `SAFEGUARDEXPIRED`/`TOOKATTACK` cheapest, then the
+  end3 resumption gap as a dedicated step. #71 Slice D still gated on the
+  animation lane's rung-3 dispatcher (not landed as of 02:30). Hard trio /
+  `SXBLOCKSY2` / `TOOKFOE`+`LOSTPPGRUDGE` tryfaintmon / `MAGNITUDESTRENGTH`
+  RNG-field remain the #72 tail.
+- **Notes:** the animation supervisor was live until ~02:00 (its nested
+  worker worktree may persist under `.worktrees/animation-main/` — theirs to
+  clean). Merge discipline held all session: no master merges while a
+  main-lane worker was live; side ladder stacked 3 deep then folded in two
+  merges. All my worker worktrees/branches removed; `play-preview` +
+  `animation-main` worktrees are permanent.
+
+---
 ## 907 — [bounded MAIN worker, 2026-08-04 ~02:30] Corrective: fixed the backwards BS_ATTACKER trainer-slide-in mapping entry 906 flagged
 
 - **State:** master `0fd3367d`. Full `npm test` green (**688 files / 6,727
