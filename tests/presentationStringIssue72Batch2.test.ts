@@ -141,13 +141,15 @@ describe("presentation-string ISSUES #72 batch 2 -- EFFECT_ROAR's Ingrain/Suctio
       rngSeed: 1,
       player: {
         species: SPECIES_MURKROW,
-        moves: [ROAR, SPLASH, 0, 0],
+        moveId: ROAR,
+        moves: [ROAR, SPLASH, 0, 0] as [number, number, number, number],
         attack: 60, defense: 60, spAttack: 85, spDefense: 60,
         speed: 91, hp: 190, maxHp: 190,
       },
       trainer: {
         species: SPECIES_WOBBUFFET,
-        moves: [INGRAIN, SPLASH, 0, 0],
+        moveId: INGRAIN,
+        moves: [INGRAIN, SPLASH, 0, 0] as [number, number, number, number],
         attack: 60, defense: 60, spAttack: 60, spDefense: 90,
         speed: 60, hp: 200, maxHp: 200,
       },
@@ -208,12 +210,12 @@ describe("presentation-string ISSUES #72 batch 2 -- trainer-battle force-out", (
       rngSeed: 1,
       player: ATTACKER(ROAR),
       trainer: statusedTargetConfig(),
-      trainerBenchHp: [200, 0],
+      trainerBenchHp: [200, 0] as [number, number],
       trainerBenchOverride: [{
         species: 66, abilityNum: 0, moves: [33, 0, 0, 0],
         maxHP: 200, attack: 80, defense: 100, speed: 50,
         spAttack: 40, spDefense: 60,
-      }, undefined],
+      }, undefined] as FactoryFullTurnConfig["trainerBenchOverride"],
     });
     const { messageIds, lines, field } = runFullTurn(config, AT(1), AT(1));
     expect(messageIds).toContain("STRINGID_PKMNWASDRAGGEDOUT");
@@ -239,12 +241,12 @@ describe("presentation-string ISSUES #72 batch 2 -- Intimidate switch-in loop", 
         species: SPECIES_WOBBUFFET, moveId: SPLASH,
         attack: 100, defense: 100, spAttack: 100, spDefense: 100, speed: 1, hp: 300,
       },
-      trainerBenchHp: [200, 0],
+      trainerBenchHp: [200, 0] as [number, number],
       trainerBenchOverride: [{
         species: SPECIES_EKANS, abilityNum: 0, moves: [35, 0, 0, 0],
         maxHP: 200, attack: 80, defense: 200, speed: 50,
         spAttack: 40, spDefense: 100,
-      }, undefined],
+      }, undefined] as FactoryFullTurnConfig["trainerBenchOverride"],
     });
   }
 
@@ -297,11 +299,11 @@ describe("presentation-string ISSUES #72 batch 2 -- ability-blocks-the-move's-ow
         species: SPECIES_WOBBUFFET, moveId: SPLASH,
         attack: 60, defense: 60, spAttack: 60, spDefense: 90, speed: 1, hp: 200,
       },
-      trainerBenchHp: [200, 0],
+      trainerBenchHp: [200, 0] as [number, number],
       trainerBenchOverride: [{
         species: SPECIES_MURKROW, abilityNum: 0, moves: [FAKE_OUT, 0, 0, 0], pp: [5, 0, 0, 0],
         maxHP: 190, attack: 60, defense: 60, speed: 91, spAttack: 85, spDefense: 60,
-      }, undefined],
+      }, undefined] as FactoryFullTurnConfig["trainerBenchOverride"],
     });
     const initial = createFactoryFullTurnBattleState(config);
     if (initial.boundary.kind !== "decision-required") throw new Error("expected player boundary");
@@ -429,6 +431,7 @@ describe("presentation-string ISSUES #72 batch 2 -- end-of-turn side-status wear
         }),
       }),
     });
+    if (staged.boundary.kind !== "decision-required") throw new Error("expected player boundary");
     const afterPlayer = submitFactoryFullTurnDecision(staged, {
       requestId: 1, side: "player", decision: AT(0),
     });
