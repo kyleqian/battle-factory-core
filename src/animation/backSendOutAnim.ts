@@ -225,6 +225,23 @@ export const BACK_V_STRETCH_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.
   BACK_V_STRETCH_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_H_STRETCH` row. */
+export const BACK_H_STRETCH_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_H_STRETCH")
+    .map(([species]) => species),
+);
+
+/** Both horizontal-stretch mappings are reachable in the Factory rental pool. */
+export const BACK_H_STRETCH_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_H_STRETCH_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** This bounded back set has no non-Factory selector mappings. */
+export const BACK_H_STRETCH_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_H_STRETCH_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -620,6 +637,44 @@ export const BACK_V_STRETCH_VARIANTS = Object.freeze({
   }),
 } as const);
 
+/**
+ * `BACK_ANIM_H_STRETCH` selects the three source initializers around the
+ * shared affine HorizontalStretchFar callback. It has the same callback
+ * lifecycle as the vertical-stretch family but composes only x-scale.
+ */
+export const BACK_H_STRETCH_VARIANTS = Object.freeze({
+  twice: Object.freeze({
+    selector: "ANIM_H_STRETCH_FAR_TWICE",
+    callback: "Anim_HorizontalStretchFar_Twice",
+    sourceId: 117,
+    natureMod: 0,
+    duration: 20,
+    amplitude: 70,
+    runs: 2,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_H_STRETCH_FAR",
+    callback: "Anim_HorizontalStretchFar",
+    sourceId: 118,
+    natureMod: 1,
+    duration: 30,
+    amplitude: 60,
+    runs: 1,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_H_STRETCH_FAR_SLOW",
+    callback: "Anim_HorizontalStretchFar_Slow",
+    sourceId: 91,
+    natureMod: 2,
+    duration: 40,
+    amplitude: 40,
+    runs: 1,
+    accepted: true,
+  }),
+} as const);
+
 type BackHSlideSelector = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["selector"];
 type BackHSlideCallback = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["callback"];
 type BackHSlideDuration = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["duration"];
@@ -666,6 +721,12 @@ type BackVStretchSourceId = typeof BACK_V_STRETCH_VARIANTS[keyof typeof BACK_V_S
 type BackVStretchDuration = typeof BACK_V_STRETCH_VARIANTS[keyof typeof BACK_V_STRETCH_VARIANTS]["duration"];
 type BackVStretchAmplitude = typeof BACK_V_STRETCH_VARIANTS[keyof typeof BACK_V_STRETCH_VARIANTS]["amplitude"];
 type BackVStretchRuns = typeof BACK_V_STRETCH_VARIANTS[keyof typeof BACK_V_STRETCH_VARIANTS]["runs"];
+type BackHStretchSelector = typeof BACK_H_STRETCH_VARIANTS[keyof typeof BACK_H_STRETCH_VARIANTS]["selector"];
+type BackHStretchCallback = typeof BACK_H_STRETCH_VARIANTS[keyof typeof BACK_H_STRETCH_VARIANTS]["callback"];
+type BackHStretchSourceId = typeof BACK_H_STRETCH_VARIANTS[keyof typeof BACK_H_STRETCH_VARIANTS]["sourceId"];
+type BackHStretchDuration = typeof BACK_H_STRETCH_VARIANTS[keyof typeof BACK_H_STRETCH_VARIANTS]["duration"];
+type BackHStretchAmplitude = typeof BACK_H_STRETCH_VARIANTS[keyof typeof BACK_H_STRETCH_VARIANTS]["amplitude"];
+type BackHStretchRuns = typeof BACK_H_STRETCH_VARIANTS[keyof typeof BACK_H_STRETCH_VARIANTS]["runs"];
 
 /**
  * Source facts at the `LaunchAnimationTaskForBackSprite` seam. The shared
@@ -895,6 +956,20 @@ function vStretchVariant(selector: string): {
   readonly runs: BackVStretchRuns;
 } | null {
   for (const variant of Object.values(BACK_V_STRETCH_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function hStretchVariant(selector: string): {
+  readonly selector: BackHStretchSelector;
+  readonly callback: BackHStretchCallback;
+  readonly sourceId: BackHStretchSourceId;
+  readonly duration: BackHStretchDuration;
+  readonly amplitude: BackHStretchAmplitude;
+  readonly runs: BackHStretchRuns;
+} | null {
+  for (const variant of Object.values(BACK_H_STRETCH_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -2304,6 +2379,181 @@ export function backVerticalStretchFrameAtTick(
 
 /** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
 export function backVerticalStretchWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+export interface BackHorizontalStretchAffineWrite {
+  readonly xScale: number;
+  readonly yScale: 256;
+  readonly rotationSigned: 0;
+  readonly rotationU16: 0;
+}
+
+export interface BackHorizontalStretchFrame {
+  /** HorizontalStretchFar never writes offsets after the task zeroes them. */
+  readonly x2: 0;
+  readonly y2: 0;
+  /** Task_HandleMonAnimation zeroes this slot before the selected initializer. */
+  readonly data0: 0 | 1;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** The initializer writes one before the first shared-helper invocation. */
+  readonly data2: 1;
+  readonly data3: BackHStretchAmplitude;
+  /** Remaining helper cycles after the current callback. */
+  readonly data4: number;
+  /** Progress within the current stretch cycle. */
+  readonly data5: number;
+  readonly data6: BackHStretchDuration;
+  /** The mid-window phase accumulator, s16-wrapped. */
+  readonly data7: number;
+  readonly index1: number;
+  readonly index2: number | null;
+  readonly phaseBoundary: boolean;
+  readonly selector: BackHStretchSelector;
+  readonly sourceId: BackHStretchSourceId;
+  readonly duration: BackHStretchDuration;
+  readonly amplitude: BackHStretchAmplitude;
+  readonly runs: BackHStretchRuns;
+  /** Tick zero invokes the initializer before the next callback update. */
+  readonly initializerCalled: boolean;
+  readonly handleStartAffineAnimCalls: 0 | 1;
+  readonly callbackInvokedByInitializer: true;
+  readonly normalBackDontFlip: true;
+  readonly tryFlipXCalls: 0;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly affineWriteCount: number;
+  readonly affineWrites: readonly BackHorizontalStretchAffineWrite[];
+  readonly affineMode: "double" | "normal";
+  readonly callback: BackHStretchCallback | "WaitAnimEnd";
+}
+
+function horizontalStretchAffineWrite(xScale: number): BackHorizontalStretchAffineWrite {
+  return Object.freeze({
+    xScale: toS16(xScale),
+    yScale: 256 as const,
+    rotationSigned: 0 as const,
+    rotationU16: 0 as const,
+  });
+}
+
+/**
+ * Source-order reducer for every `BACK_ANIM_H_STRETCH` selector. The three
+ * initializers all install affine mode, write their duration/amplitude/run
+ * tuple, and invoke HorizontalStretchFar on their first callback. The helper
+ * holds y-scale at 256 and follows the source's left-to-right C division in
+ * `(amplitude / 5) * 2` for the second signed sine term.
+ */
+export function backHorizontalStretchFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackHorizontalStretchFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_H_STRETCH") return null;
+  const variant = hStretchVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected H-stretch selector ${selection.selector}`);
+
+  let data0 = 0 as 0 | 1;
+  let data2 = 0;
+  let data4 = variant.runs;
+  let data5 = 0;
+  let data7 = 0;
+  let xScale = 256;
+  let index1 = 0;
+  let index2: number | null = 0;
+  let phaseBoundary = false;
+  let resetSpriteAfterAnim = false;
+  let affineMode: "double" | "normal" = "normal";
+  let callback: BackHStretchCallback | "WaitAnimEnd" = variant.callback;
+  let writes: readonly BackHorizontalStretchAffineWrite[] = [];
+  let terminal = false;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    writes = [];
+    phaseBoundary = false;
+    // Both callback-local values are initialized before every helper call in
+    // the source, including the strict cycle-boundary path.
+    index1 = 0;
+    index2 = null;
+    if (data2 === 0) {
+      data2 = 1;
+      affineMode = "double";
+      xScale = 256;
+    }
+
+    if (data5 > variant.duration) {
+      phaseBoundary = true;
+      data5 = 0;
+      xScale = 256;
+      writes = [horizontalStretchAffineWrite(256)];
+      if (data4 <= 1) {
+        resetSpriteAfterAnim = true;
+        affineMode = "normal";
+        callback = "WaitAnimEnd";
+        terminal = true;
+      } else {
+        data4 -= 1;
+        data7 = 0;
+      }
+    } else {
+      index2 = Math.trunc((data5 * 128) / variant.duration);
+      const cmpVal1 = Math.trunc(variant.duration / 4);
+      const cmpVal2 = cmpVal1 * 3;
+      if (data5 >= cmpVal1 && data5 < cmpVal2) {
+        data7 = toS16(data7 + 51);
+        index1 = data7 & 0xff;
+      }
+      const modulationAmplitude = Math.trunc(variant.amplitude / 5) * 2;
+      xScale = 256
+        - gbaSin(index2, variant.amplitude)
+        - gbaSin(index1, modulationAmplitude);
+      writes = [horizontalStretchAffineWrite(xScale)];
+      data5 += 1;
+    }
+  }
+
+  return Object.freeze({
+    x2: 0 as const,
+    y2: 0 as const,
+    data0,
+    data1: toS16(preservedData1),
+    data2: 1 as const,
+    data3: variant.amplitude,
+    data4,
+    data5,
+    data6: variant.duration,
+    data7: toS16(data7),
+    index1,
+    index2,
+    phaseBoundary,
+    selector: variant.selector,
+    sourceId: variant.sourceId,
+    duration: variant.duration,
+    amplitude: variant.amplitude,
+    runs: variant.runs,
+    initializerCalled: ticksSinceStart === 0,
+    handleStartAffineAnimCalls: ticksSinceStart === 0 ? 1 as const : 0 as const,
+    callbackInvokedByInitializer: true as const,
+    normalBackDontFlip: true as const,
+    tryFlipXCalls: 0 as const,
+    resetSpriteAfterAnim,
+    affineWriteCount: writes.length,
+    affineWrites: writes,
+    affineMode,
+    callback,
+  });
+}
+
+/** Source WaitAnimEnd lifecycle after the static back OAM reports animEnded. */
+export function backHorizontalStretchWaitAnimEndCallback(
   animEnded: boolean,
 ): "WaitAnimEnd" | "SpriteCallbackDummy" {
   return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
