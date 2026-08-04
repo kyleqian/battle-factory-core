@@ -1129,11 +1129,23 @@ function runShedSkinTick(
   }
 
   const clearedStatus2 = (b.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) >>> 0;
+  // ISSUES #72 batch 6 (STRINGID_PKMNSXCUREDYPROBLEM): battle_util.c:2623-2632's
+  // own last-match-wins status1 chain (poison/sleep/paralysis/burn/freeze) --
+  // no confusion branch, unlike moveEndLumStatusName's shared Lum Berry
+  // sibling (Shed Skin never clears STATUS2_CONFUSION) -- captured before the
+  // status1 clear below, the same pre-clear-capture shape HOLD_EFFECT_CURE_
+  // STATUS's own branch already established for battleTextBuff1Status.
+  let statusName: "poison" | "sleep" | "paralysis" | "burn" | "ice" = "poison";
+  if ((b.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0) statusName = "sleep";
+  if ((b.status1 & STATUS1_PARALYSIS) !== 0) statusName = "paralysis";
+  if ((b.status1 & STATUS1_BURN) !== 0) statusName = "burn";
+  if ((b.status1 & STATUS1_FREEZE) !== 0) statusName = "ice";
   const withStatus = withBattler(drawnState.rulesContext, battler, { status1: 0, status2: clearedStatus2 });
   const synced = recordBattleScriptAbilityReveal(Object.freeze({
     ...withStatus,
     party: withBattleScriptPartyMemberStatus1(withStatus.party, b.side, b.partyIndex, 0),
     scriptingBattler: battler,
+    battleTextBuff1Status: statusName,
   }), battler, b.ability);
   return runPushCursorAndCallbackTickScript(program, handlers, drawnState, synced, battler, SHED_SKIN_ACTIVATES_LABEL);
 }
@@ -1182,7 +1194,13 @@ function runAbilitiesTick(
     if (b.statStages[STAT_SPEED]! < MAX_STAT_STAGE && b.isFirstTurn !== 2) {
       const stages = b.statStages.map((stage, stat) => (stat === STAT_SPEED ? stage + 1 : stage));
       const withStage = recordBattleScriptAbilityReveal(
-        withBattler(state.rulesContext, battler, { statStages: stages as never }),
+        Object.freeze({
+          ...withBattler(state.rulesContext, battler, { statStages: stages as never }),
+          // ISSUES #72 batch 6 (STRINGID_PKMNRAISEDSPEED): battle_util.c:2649's
+          // own gBattleScripting.battler = battler, the same explicit
+          // scriptingBattler write Shed Skin's own tick already makes.
+          scriptingBattler: battler,
+        }),
         battler,
         b.ability,
       );

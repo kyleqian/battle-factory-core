@@ -766,12 +766,18 @@ function messageLines(
       B_SCR_ACTIVE_ABILITY: () => ability,
     });
   }
-  if (messageId === "STRINGID_PKMNSXCUREDITSYPROBLEM") {
+  if (
+    messageId === "STRINGID_PKMNSXCUREDITSYPROBLEM"
+    || messageId === "STRINGID_PKMNSXCUREDYPROBLEM"
+  ) {
     // BattleScript_AbilityCuredStatus, MOVEEND_IMMUNITY_ABILITIES's quiet
     // scan (battleScriptMoveEndOpcode.ts:650-709) -- scriptingBattler is the
     // just-cured battler; {B_BUFF1} is the cured status's own display name
     // (battleTextBuff1Status, same source STRINGID_PKMNSITEMCUREDPROBLEM's
     // {B_BUFF1} above reads), engine-supplied alongside {B_SCR_ACTIVE_ABILITY}.
+    // ISSUES #72 batch 6: STRINGID_PKMNSXCUREDYPROBLEM (Shed Skin's own
+    // end-turn tick, runShedSkinTick) shares this identical template text and
+    // substitution shape byte-for-byte.
     if (event.payload.scriptingBattler === undefined || event.payload.substitutions.length < 2) {
       throw new Error(`battle resolution ${messageId} message has no scripting-battler/ability/status substitution`);
     }
@@ -1869,6 +1875,160 @@ function messageLines(
       );
     }
     return opponentTrainer.speechLose;
+  }
+  // ISSUES #72 batch 6 (docs/issue72-reachability-triage.md): the plain-idiom
+  // tail continued from STRINGID_PKMNSXCUREDYPROBLEM.
+  if (messageId === "STRINGID_PKMNWISHCAMETRUE") {
+    // BattleScript_WishComesTrue/WishButFullHp: Cmd_trywish's own heal-effect
+    // state PREPARE_MON_NICK_WITH_PREFIX_BUFFERs the Wish target's own name
+    // into {B_BUFF1} -- runDoFieldEndTurnEffects's own selectorRoles.target
+    // write plus enterTickBattlerContext's generic attacker reassignment both
+    // land on the same (no-switch-in-between) battler in this engine's scope.
+    if (actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot`);
+    }
+    const battler = singlesBattler(actionSnapshot.attacker, `${messageId} action snapshot`);
+    return resolveBattleStringLines(messageId, {
+      B_BUFF1: nameWithPrefixResolver(field, battler),
+    });
+  }
+  if (messageId === "STRINGID_PKMNUSEDSAFEGUARD") {
+    // BattleScript_SafeguardProtected/TeeterDanceSafeguardProtected: the
+    // jumpifsideaffecting check reads BS_TARGET without reassigning it -- the
+    // move's own (still-current) target, same plain shape
+    // STRINGID_TARGETCANTESCAPENOW already uses.
+    const defender = requireMoveDefender(lastMoveAttacker, "used-safeguard message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNSXRESTOREDHPALITTLE2") {
+    // BattleScript_RainDishActivates: runAbilitiesTick's own Rain Dish branch
+    // never reassigns scriptingBattler (unlike Shed Skin/Speed Boost) --
+    // {B_ATK_NAME_WITH_PREFIX}/{B_ATK_ABILITY} read gBattlerAttacker, set
+    // generically by enterTickBattlerContext for every end-turn tick
+    // (battle_util.c:2604's own unconditional gBattlerAttacker = battler).
+    if (actionSnapshot === null || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot/ability substitution`);
+    }
+    const battler = singlesBattler(actionSnapshot.attacker, `${messageId} action snapshot`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      B_ATK_ABILITY: () => ability,
+    });
+  }
+  if (messageId === "STRINGID_PKMNMOVEISDISABLED") {
+    // BattleScript_MoveUsedIsDisabled: same {B_ACTIVE_NAME_WITH_PREFIX}/
+    // {B_CURRENT_MOVE} shape STRINGID_PKMNCANTUSEMOVETAUNT already uses -- the
+    // attack-canceler's own handoff (battleScriptActionAdmission.ts:2192) is
+    // wired the same Taunt/Imprison idiom.
+    if (actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no preceding action snapshot`);
+    }
+    const battler = singlesBattler(actionSnapshot.attacker, `${messageId} action snapshot`);
+    return resolveBattleStringLines(messageId, {
+      B_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
+    });
+  }
+  if (messageId === "STRINGID_PKMNMOVEWASDISABLED") {
+    // BattleScript_EffectDisable: disablelastusedattack and this printstring
+    // run back-to-back with no role change in between
+    // (data/battle_scripts_1.s:1183-1193) -- BS_TARGET is still the move's
+    // own (still-current) defender, whose own disabledMove field
+    // Cmd_disablelastusedattack just wrote.
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no move substitution`);
+    }
+    const defender = requireMoveDefender(lastMoveAttacker, "move-was-disabled message");
+    const moveName = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_BUFF1: () => moveName,
+    });
+  }
+  if (messageId === "STRINGID_PKMNPERISHCOUNTFELL") {
+    // BattleScript_PerishSongCountGoesDown/PerishSongTakesLife share this
+    // printstring (data/battle_scripts_1.s:3438-3450); runPerishSongAfterFutureAttacks
+    // freezes selectorRoles.attacker to the counting battler and stamps the
+    // pre-decrement count into battleTextBuff1ByteNumber (battle_util.c:1846's
+    // own PREPARE_BYTE_NUMBER_BUFFER call, captured before the decrement).
+    if (actionSnapshot === null || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot/count substitution`);
+    }
+    const battler = singlesBattler(actionSnapshot.attacker, `${messageId} action snapshot`);
+    const count = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      B_BUFF1: () => count,
+    });
+  }
+  if (messageId === "STRINGID_PKMNMOVEBOUNCED") {
+    // BattleScript_MagicCoatBounce: the Magic Coat attack-canceler handoff
+    // never reassigns attacker/target (battleScriptMagicCoat.ts:470-506) --
+    // BS_ATTACKER/{B_CURRENT_MOVE} are still the original caster and their
+    // own blocked status move.
+    if (actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no preceding action snapshot`);
+    }
+    const attacker = requireMoveAttacker(lastMoveAttacker, "move-bounced message");
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
+    });
+  }
+  if (messageId === "STRINGID_PKMNRAISEDSPEED") {
+    // BattleScript_SpeedBoostActivates: runAbilitiesTick's own Speed Boost
+    // branch now sets scriptingBattler the same way Shed Skin's own tick
+    // already does (battle_util.c:2649's gBattleScripting.battler = battler).
+    if (event.payload.scriptingBattler === undefined || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no scripting-battler/ability substitution`);
+    }
+    const battler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      B_SCR_ACTIVE_ABILITY: () => ability,
+    });
+  }
+  if (messageId === "STRINGID_PKMNSHROUDEDITSELF") {
+    // BattleScript_EffectMagicCoat's own success tail -- a zero-TS-reference
+    // move-effect entry script, attacker/target both still the move's own
+    // unchanged roles.
+    if (actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no preceding action snapshot`);
+    }
+    const attacker = requireMoveAttacker(lastMoveAttacker, "shrouded-itself message");
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
+    });
+  }
+  if (messageId === "STRINGID_STATSWONTDECREASE2") {
+    // BattleScript_CantLowerMultipleStats (EffectTickle's own compound
+    // both-stats-already-at-minimum gate) -- BS_TARGET unchanged, plain
+    // defender-only shape.
+    const defender = requireMoveDefender(lastMoveAttacker, "stats-wont-decrease message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNFELLINTONIGHTMARE") {
+    // BattleScript_NightmareWorked (EffectNightmare's own compound
+    // already-asleep gate) -- BS_TARGET unchanged, plain defender-only shape.
+    const defender = requireMoveDefender(lastMoveAttacker, "fell-into-nightmare message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNHEALEDPARALYSIS") {
+    // MOVE_EFFECT_REMOVE_PARALYSIS handler (Smelling Salt's sole carrier) --
+    // BS_TARGET unchanged, plain defender-only shape.
+    const defender = requireMoveDefender(lastMoveAttacker, "healed-paralysis message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
   }
   const resolvers: Record<string, () => string> = {};
   if (lastMoveAttacker !== null) {

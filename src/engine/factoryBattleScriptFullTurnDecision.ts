@@ -227,6 +227,11 @@ const ABILITY_DISPLAY_NAME_BY_ID: Readonly<Record<number, string>> = Object.free
   // is arbitrary (LEVITATE reused from the existing table above).
   24: "ROUGH SKIN",
   56: "CUTE CHARM",
+  // ISSUES #72 batch 6: Rain Dish, Speed Boost, Shed Skin (all end-turn
+  // ability ticks).
+  44: "RAIN DISH",
+  3: "SPEED BOOST",
+  61: "SHED SKIN",
 });
 function abilityDisplayName(ability: number): string {
   const name = ABILITY_DISPLAY_NAME_BY_ID[ability];
@@ -825,7 +830,10 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
         // always the just-cured battler's own (immunityAbilityCure only ever
         // reads/reports the scriptingBattler's own ability,
         // battleScriptMoveEndOpcode.ts:668,684-687).
+        // ISSUES #72 batch 6: STRINGID_PKMNSXCUREDYPROBLEM (Shed Skin's own
+        // end-turn tick) shares this identical substitution shape byte-for-byte.
         : operand.expression === "STRINGID_PKMNSXCUREDITSYPROBLEM"
+          || operand.expression === "STRINGID_PKMNSXCUREDYPROBLEM"
         ? (rules.battleTextBuff1Status === null
           ? []
           : [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability), rules.battleTextBuff1Status])
@@ -983,7 +991,12 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                             // count itself (stockpileHandler,
                             // battleScriptStockpileOpcode.ts), the same
                             // counter-substitution shape as HITXTIMES above.
+                            // ISSUES #72 batch 6: STRINGID_PKMNPERISHCOUNTFELL
+                            // shares this exact battleTextBuff1ByteNumber
+                            // read -- runPerishSongAfterFutureAttacks's own
+                            // pre-decrement capture (battle_util.c:1846).
                             : operand.expression === "STRINGID_PKMNSTOCKPILED"
+                              || operand.expression === "STRINGID_PKMNPERISHCOUNTFELL"
                               ? [String(rules.battleTextBuff1ByteNumber)]
                               // Row 40 (STRINGID_PKMNTRANSFORMEDINTO): the
                               // species Transform just copied
@@ -1040,7 +1053,13 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                       // battleScriptFaintedActionsOrchestration.ts
                                       // both freeze it before entering
                                       // BattleScript_IntimidateActivatesEnd3).
+                                      // ISSUES #72 batch 6: STRINGID_PKMNRAISEDSPEED
+                                      // (Speed Boost's own end-turn tick, now
+                                      // setting scriptingBattler the same way
+                                      // Shed Skin's tick already does) shares
+                                      // this exact scriptingBattler-ability read.
                                       : operand.expression === "STRINGID_PKMNCUTSATTACKWITH"
+                                        || operand.expression === "STRINGID_PKMNRAISEDSPEED"
                                         ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
                                         // BattleScript_IntimidatePrevented's own
                                         // {B_DEF_ABILITY} -- BS_TARGET at this
@@ -1086,7 +1105,27 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                               // holder before this fallthrough.
                                               : operand.expression === "STRINGID_PKMNSXMADEITINEFFECTIVE"
                                                 ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
-                                                : [];
+                                                // ISSUES #72 batch 6:
+                                                // BattleScript_RainDishActivates's
+                                                // {B_ATK_ABILITY} -- runAbilitiesTick's
+                                                // own Rain Dish branch reads
+                                                // gBattlerAttacker (set generically by
+                                                // enterTickBattlerContext for every
+                                                // end-turn tick), not scriptingBattler.
+                                                : operand.expression === "STRINGID_PKMNSXRESTOREDHPALITTLE2"
+                                                  ? (rules.selectorRoles.attacker === null
+                                                    ? []
+                                                    : [abilityDisplayName(rules.battlers[rules.selectorRoles.attacker].ability)])
+                                                  // BattleScript_EffectDisable's own
+                                                  // {B_BUFF1} -- disablelastusedattack's
+                                                  // own disabledMove write on the move's
+                                                  // still-current target, read back
+                                                  // unconditionally right after.
+                                                  : operand.expression === "STRINGID_PKMNMOVEWASDISABLED"
+                                                    ? (rules.selectorRoles.target === null
+                                                      ? []
+                                                      : [resolveMoveName(rules.battlers[rules.selectorRoles.target].disabledMove)])
+                                                    : [];
       return Object.freeze({
         kind: "message" as const,
         messageId: operand.expression,
