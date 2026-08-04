@@ -232,7 +232,58 @@ Do not add a fallback path, a `try`/`catch`, or an env-gated non-fatal mode
 around `battleStringResolver`/`battleResolutionPresentation`'s placeholder
 and unknown-id throws.
 
-**REACHABLE (39), ordered by carrier-weight proxy for likely-hit-first —
+**Batch 5 landed** (`tests/presentationStringIssue72Batch5.test.ts`, all 11
+red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
+src/engine/factoryBattleScriptFullTurnDecision.ts`): `STRINGID_PKMNFREEDFROM`
+and `STRINGID_PKMNGOTFREE` (Bind/Wrap-family release, `WRAP_ENDS_LABEL`'s own
+sibling of the already-landed `STRINGID_PKMNHURTBY`'s `WRAP_TURN_DMG_LABEL`
+tick, plus Rapid Spin's `Cmd_rapidspinfree` — both share the same
+`wrappedMove` substitution, staged with a real 3-turn Bind-expiry repro and a
+real Bind-then-Rapid-Spin repro respectively), `STRINGID_PKMNDREAMEATEN`/
+`STRINGID_PKMNWASNTAFFECTED` (Dream Eater's own status-gated pair, zero TS
+role reassignment), `STRINGID_TARGETCANTESCAPENOW` (Mean Look family),
+`STRINGID_PKMNGOTENCORE` (Encore, staged via the `lastMove` config field),
+`STRINGID_PKMNIDENTIFIED` (Foresight), and three ids sharing the existing
+"move's own target's ability" substitution bucket
+(`STRINGID_PKMNRESTOREDHPUSING`'s family) unmodified except for the id list:
+`STRINGID_PKMNSXINFATUATEDY` (Cute Charm, real 1/3 contact-proc repro with
+opposite genders staged via `personality`), `STRINGID_PKMNHURTSWITH` (Rough
+Skin, deterministic — no RNG proc unlike Cute Charm/Static), and
+`STRINGID_PKMNCOPIEDFOE` (Role Play). `STRINGID_PKMNKNOCKEDOFF` (Knock Off)
+also landed, reading `heldItems` directly rather than through
+`pendingHeldItemEffectBattler` (Knock Off's own item-removal write precedes
+the print, but the typed removeitem controller receipt that would advance
+`heldItems` comes later). Two ability-display-name entries added
+(`ROUGH SKIN`/`CUTE CHARM`) to `factoryBattleScriptFullTurnDecision.ts`'s
+existing lookup table — no new substitution shapes, only new ids added to
+already-established buckets. Census: 78→67 UNRESOLVED (exact -11, all 11
+newly-landed ids counted, no generic-fallback-resolvable exceptions this
+batch). ISSUES #72 REACHABLE trimmed to 28 (39−11, arithmetic-checked
+against the list body's own unique count).
+
+**Not attempted this step, still open (mid-list, not new-plumbing blocked —
+just ran out of step budget after landing 11):** `STRINGID_PKMNSXCUREDYPROBLEM`
+(Shed Skin end-turn tick — needs one small engine addition, a
+`battleTextBuff1Status`-style pre-clear status-name capture in
+`runShedSkinTick`, the same field `HOLD_EFFECT_CURE_STATUS`'s own branch
+already populates; not a new phase, just unwired on this one tick),
+`STRINGID_PKMNSXWHIPPEDUPSANDSTORM`, `STRINGID_PKMNTOOKFOE` (Destiny Bond —
+`tryfaintmon`'s dual attacker/target operand needs its own role investigation,
+distinct from the plain idiom), `STRINGID_PKMNWISHCAMETRUE`,
+`STRINGID_PKMNSAFEGUARDEXPIRED`, `STRINGID_PKMNUSEDSAFEGUARD`,
+`STRINGID_PKMNSXRESTOREDHPALITTLE2`, `STRINGID_PKMNMOVEISDISABLED`,
+`STRINGID_PKMNMOVEWASDISABLED`, `STRINGID_PKMNTOOKATTACK`,
+`STRINGID_PKMNPERISHCOUNTFELL`, `STRINGID_PKMNMOVEBOUNCED`,
+`STRINGID_PKMNRAISEDSPEED`, `STRINGID_PKMNSHROUDEDITSELF`,
+`STRINGID_STATSWONTDECREASE2`, `STRINGID_MAGNITUDESTRENGTH`,
+`STRINGID_PKMNCHANGEDTYPEWITH` (Color Change — needs a new `battleTextBuff1Type`
+message substitution; the rules-context field already exists
+(`battleScriptTypeChangeOpcode.ts`) but is not yet wired into
+`prepareMessage`), `STRINGID_PKMNFELLINTONIGHTMARE`, `STRINGID_PKMNLOSTPPGRUDGE`,
+`STRINGID_PKMNREDUCEDPP`, `STRINGID_PKMNSITEMRESTOREDPP`,
+`STRINGID_PKMNHEALEDPARALYSIS`, `STRINGID_PKMNSTOLEITEM`.
+
+**REACHABLE (28), ordered by carrier-weight proxy for likely-hit-first —
 name a batch, use the Taunt-pair idiom** (`messageId === "STRINGID_X"` branch
 in `messageLines`, `requireMoveDefender`/`actionSnapshot`-sourced battler,
 staged full-turn repro test, red-verify via `git stash`):
@@ -240,24 +291,21 @@ staged full-turn repro test, red-verify via `git stash`):
 `STRINGID_PKMNREGAINEDHEALTH`,
 `STRINGID_PKMNPROTECTEDBY`,
 `STRINGID_PKMNTRACED`,
-`STRINGID_PKMNSXBLOCKSY2`, `STRINGID_PKMNFREEDFROM`,
-`STRINGID_PKMNGOTFREE`, `STRINGID_PKMNSXCUREDYPROBLEM`,
-`STRINGID_PKMNSXINFATUATEDY`,
+`STRINGID_PKMNSXBLOCKSY2`, `STRINGID_PKMNSXCUREDYPROBLEM`,
 `STRINGID_PKMNSXWHIPPEDUPSANDSTORM`, `STRINGID_PKMNTOOKFOE`,
 `STRINGID_PKMNWISHCAMETRUE`,
-`STRINGID_PKMNKNOCKEDOFF`, `STRINGID_PKMNSAFEGUARDEXPIRED`,
-`STRINGID_PKMNUSEDSAFEGUARD`, `STRINGID_PKMNDREAMEATEN`,
-`STRINGID_PKMNSXRESTOREDHPALITTLE2`, `STRINGID_PKMNWASNTAFFECTED`,
-`STRINGID_TARGETCANTESCAPENOW`, `STRINGID_PKMNMOVEISDISABLED`,
+`STRINGID_PKMNSAFEGUARDEXPIRED`,
+`STRINGID_PKMNUSEDSAFEGUARD`,
+`STRINGID_PKMNSXRESTOREDHPALITTLE2`,
+`STRINGID_PKMNMOVEISDISABLED`,
 `STRINGID_PKMNMOVEWASDISABLED`, `STRINGID_PKMNTOOKATTACK`,
-`STRINGID_PKMNGOTENCORE`, `STRINGID_PKMNPERISHCOUNTFELL`,
-`STRINGID_PKMNHURTSWITH`, `STRINGID_PKMNIDENTIFIED`,
+`STRINGID_PKMNPERISHCOUNTFELL`,
 `STRINGID_PKMNMOVEBOUNCED`, `STRINGID_PKMNRAISEDSPEED`,
 `STRINGID_PKMNSHROUDEDITSELF`, `STRINGID_STATSWONTDECREASE2`,
 `STRINGID_MAGNITUDESTRENGTH`, `STRINGID_PKMNCHANGEDTYPEWITH`,
 `STRINGID_PKMNFELLINTONIGHTMARE`, `STRINGID_PKMNLOSTPPGRUDGE`,
 `STRINGID_PKMNREDUCEDPP`, `STRINGID_PKMNSITEMRESTOREDPP`,
-`STRINGID_PKMNCOPIEDFOE`, `STRINGID_PKMNHEALEDPARALYSIS`,
+`STRINGID_PKMNHEALEDPARALYSIS`,
 `STRINGID_PKMNSTOLEITEM`.
 
 **MANUAL — all settled 2026-08-03 (side-lane settlement pass; full evidence
