@@ -41,7 +41,7 @@
   delay read from the selector tables (not hardcoded). GROVYLE animCmdIndex
   matches the index-1 program's cumulative durations with **latch offset 0**
   (the program is visible on the anchor frame, undelayed). Focused 4 files /
-  26 tests, typecheck, smoke **7/347**, full **718 files / 6,905 passed / 1
+  26 tests, typecheck, smoke **7/347**, full **719 files / 6,916 passed / 1
   skipped**, build green. Committed `7d4e2020` (probe+fixtures) then
   `8efef5c1` (evidence test + doc); tree clean at commit.
 
