@@ -412,18 +412,21 @@ of the app's own output for either window, at every frame including 640 and
 621. This rules out the offset-removal work as a cause; the drift predates
 it.
 
-**Not investigated further (out of scope for the Slice-D step):** likely
-introduced by one of the R2/R3/R4 merges between entry 890's last clean
-re-verification (2026-08-03, `32af4030`, both windows held) and `1a12ce9c`
-(2026-08-04) — none of those merges re-ran this specific dense-window pair
-before landing, the same class of gap ISSUES #56's original closure audit
-found once already (MAGNETON frame 437, since fixed) with the note "this
-audit's fresh run is the first re-verification of that pin since [X]
-landed." Root cause needs a bisection across the intervening merge commits
-(rung-3 dispatcher fold, LOSS terminal-window scaffold fixes, PAPERCUTS
-correction) — not attempted here. Filed rather than fixed or silently
-absorbed into a step it doesn't belong to, per this run's stop-and-report
-discipline for insurance deltas.
+**Root-caused (supervisor bisect, 2026-08-04 ~16:10):** app-vs-app
+differentials pin the flip to `7e14afae` (entry 894/895's ONIX-only
+`drawGeneratedPlayerMaterialize` gating): HEAD is **751/751 byte-identical**
+to `7e14afae` for `factory-arbitrary-intro-yoshi-off`, and **750/751** vs
+its parent `660494f9` — the single differing frame is exactly 640 (120px,
+same bbox as the oracle mismatch). The oracle agrees with the OLD (wobble)
+pixels: the real game's back-sprite materialize motion is NOT gated by
+Scene OFF (the Slice-D `SKIP_FRONT_ANIM` finding is front-sprite-specific
+— the wobble table's own evidence came from these OFF windows), so 894's
+deliberate flat-y2 approximation for non-ONIX leads surfaced here at the
+first re-run, precisely the drift its own entry predicted when it deferred
+the staged non-ONIX check. Fix in flight (R5): consume the just-landed
+back dispatcher (`backSendOutFrameAtTick(species, nature, tick)`) at the
+generated player materialize settle so every species draws its real
+descent; expected to restore YOSHI 700/751 + MAGNETON 703/751 or better.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
