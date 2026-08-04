@@ -103,22 +103,109 @@ pinned to `minimumFrames: 1`) transplants onto the WIN stage unchanged.
 
 Per `docs/terminal-seam-win-window-ground-truth.md` §2's own dense table
 (the same "coarse browsable table" convention the LOSS ground-truth doc used
-to pick `appStage.frame: 2996`), the WIN window's analogous start point is
-tick **4613** (`opponentControllerCommand` 16→8, `trainerslidein
-BS_ATTACKER` dispatches — already RAM-confirmed exactly by this probe, §2
-above), and its end point mirrors the LOSS window's own convention (`dismiss
-Tick + 1`, one frame past the quote's own real dismiss registering, still
-pixel-identical to the held quote per the ground-truth doc's own
-"5010-5017 RAM-ahead-of-pixel" note): the quote's dismiss registers at tick
-**5010** (`tools/battle-lab/win-terminal-explosion-dusclops-off.json`'s own
-committed segment start, cross-confirmed against §2's cited ground-truth
-tick), so the window runs **4613–5011 inclusive (399 frames)**.
+to pick `appStage.frame: 2996`), the naive first choice for the WIN window's
+start point was tick **4613** (`opponentControllerCommand` 16→8,
+`trainerslidein BS_ATTACKER` dispatches — RAM-confirmed exactly by this
+probe, §2 above). **This was wrong, corrected during compare-wiring** (see
+`docs/terminal-seam-win-window-ground-truth.md`'s sibling implementation
+notes / the compare-trace commit): `TRAINER_SLIDE_TIMING = 38`
+(`battleResolutionPresentation.ts`) is calibrated, by its own source comment,
+against the LOSS ground-truth doc's *coarse* (every-2-tick-sampled) dispatch
+observation (2996), not the RAM-precise dispatch tick this probe doc's own
+LOSS-sibling later found (2986, `terminal-seam-antecedent-boundary-probe.md`
+§2) — i.e. `38 = 3034(RAM ack) − 2996(coarse reference)`, not
+`3034 − 2986`. WIN's own coarse-vs-precise gap is different (this probe's
+own §2 table shows the coarse ground-truth doc's cited dispatch tick, 4613,
+*is* the RAM-precise one this time — the WIN ground-truth doc used
+edge-precision probes for this specific transition, not 2-tick sampling), so
+reusing 4613 as `appStage.frame` under-shoots the same shared 38-tick model
+by exactly the LOSS fixture's own 10-tick coarse/precise gap: the trainer
+sprite visibly settles far too early (pixel-confirmed: the app already shows
+the full sprite at dispatch+27 where the oracle shows only a sliver).
+**Correct window start: `ack(4661) − 38 = 4623`** — the tick that makes the
+shared 38-tick model's own settle point land on the RAM-confirmed ack tick
+(4661), the same relationship the LOSS window's 2996 already has to its own
+ack (3034 − 38 = 2996). Pixel-verified: with `appStage.frame: 4623` the
+trainer-slide region matches the oracle exactly at every sampled tick (see
+the compare-trace commit's own two-run 65/65 result).
 
-This is a different frame count than the LOSS window's 236 — expected, not
-itemized as a residual: the two windows are edge-relative to structurally
-different antecedents (WIN's slide-to-quote span is longer, and the quote's
-own idle-then-dismiss gap before its real `A` press is a different recorded
-duration than LOSS's), not a discrepancy needing reconciliation.
+**Window end is bounded by a genuine `src/`-side bug, not a choice** (§4
+below): the window runs **4623–4687 inclusive (65 frames)**, covering the
+full trainer-slide + swap-edge + most of the quote's typing animation, but
+stops well short of the quote's own settled/held state and its real dismiss
+— unlike the LOSS window, which covers its full antecedent-to-dismiss span.
+This is NOT a deliberate scope choice mirroring LOSS's convention; it is the
+last frame this session could safely capture before hitting the bug in §4.
+
+## 4. Genuine `src/`-side bug found while wiring the compare: button-message ready/complete race
+
+**Stop-and-report for the supervisor — not fixed here (out of this lane's
+scope this step).** `battleResolutionPresentationRender.ts` has two
+independent gates on a button-advance message:
+
+- `isBattleResolutionButtonMessageReady`: ready at
+  `phaseElapsed >= battleStringPrintableLength(command.lines) + 1`.
+- `isBattleResolutionCommandComplete`: complete at
+  `phaseElapsed + 1 >= Math.max(command.timing.minimumFrames, battleStringPrintableLength(command.lines))`
+  (`battleResolutionCommandDuration`'s `"message"` case).
+
+`factoryRoundBattleOrchestrator.ts`'s `advanceFactoryRoundBattleResolution`
+checks `command.advance === "button" && isBattleResolutionButtonMessageReady(...)`
+**first**; only when that's false does it fall through to the generic
+`isBattleResolutionCommandComplete` branch, which — if true — silently
+advances `commandIndex` past the message with **no button-dismiss wait at
+all**. For `MESSAGE_TIMING = { minimumFrames: 24, holdFrames: 0 }`, the two
+thresholds normally agree (ready fires at `printableLength+1`, at or before
+`minimumFrames`'s own complete tick, whenever `printableLength < minimumFrames`
+by more than 1). But whenever a button message's own printable length is
+**≥ `minimumFrames − 1`** (23, for the shipped `minimumFrames: 24`), duration
+becomes `Math.max(24, printableLength) = printableLength`, so "complete"
+fires at `printableLength − 1` — **before** "ready" fires at
+`printableLength + 1` — and the message silently skips its own dismiss-wait.
+
+**Concrete trigger, this session's own numbers**: DESTIN's `speechLose`
+(`STRINGID_TRAINER1LOSETEXT`, this window's own terminal quote) is
+`["PLEASE I NEED", "SOME WATER"]`, `battleStringPrintableLength` = **23**
+— one below the 24-frame floor, exactly inside the buggy range. DESTIN's
+`speechWin` (LOSS window's own quote, `["I AM ABOUT TO", "OVERHEAT"]`) is
+**21** — outside the buggy range, which is why the already-closed LOSS
+window (236/236) never observed this. Reproduced directly, no oracle
+needed: replaying this window's own scaffold past local tick 65
+(`resolution.commandIndex`/`lifecycle.phase` logged) shows `commandIndex`
+silently jump from 8 (the quote, `phaseElapsed: 23`, still `"presenting"`)
+straight to 9/`"terminal-handoff"` with **zero button input**, which then
+crashes `finishBattle`'s `assertSamePartyIdentity` (an unrelated downstream
+symptom of the same root cause: the synthetic scaffold's `terminalBattle`
+rules never matched `state.round.rules.playerKernelParty`'s real identity,
+which the shared code has no reason to expect a *scaffold* to reach at all,
+since a real playthrough would still be correctly gated at the message).
+
+**Blast radius**: this is real production code (`battleResolutionPresentation
+.ts`/`factoryRoundBattleOrchestrator.ts`), not scaffold-only — any live
+gameplay reaching `STRINGID_TRAINER1LOSETEXT` for a trainer whose
+`speechLose` is 22–23 printable characters (DESTIN is a real, reachable
+Factory trainer) would silently skip the player's own dismiss-wait on the
+real terminal quote once WIN's live-gameplay presentation path is wired.
+Likely also affects `STRINGID_PLAYERDEFEATEDTRAINER1`/other
+`TERMINAL_SEAM_BUTTON_MESSAGE_IDS`/`STRINGID_TARGETFAINTED`/
+`STRINGID_ATTACKERFAINTED` messages whenever a trainer/species name pushes
+their resolved text into the same 22–23-character band — not audited further
+this session (out of lane/scope).
+
+**Not fixed here**: `src/`/`tests/` edits are out of this lane's scope this
+step. The likely fix shape (for whoever picks this up): make
+`isBattleResolutionCommandComplete` skip/defer for button-advance messages
+until `isBattleResolutionButtonMessageReady` is also true (i.e. the "ready"
+threshold should be a floor under "complete" for button messages, not an
+independent race), or unify the two duration formulas so `minimumFrames`
+can't out-race `printableLength+1`. A Tier-1 test with a `speechLose`/
+`speechWin` (or any button-message text) of exactly 22–23 printable
+characters would red-verify it directly, no oracle needed (this session's
+own reproduction above needed none).
+
+This session's own window (§3) works around it only by stopping short (frame
+4687, `phaseElapsed: 23`, one tick before the race fires) — not a fix, a
+truncation forced by the bug.
 
 ## Verification
 

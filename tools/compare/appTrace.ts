@@ -327,6 +327,50 @@ const TERMINAL_SEAM_SCAFFOLD_TRAINER: FactoryFullTurnBattlerConfig = Object.free
   types: ["TYPE_DARK", "TYPE_FLYING"] as const,
 });
 
+// ISSUES #73 WIN window only: unlike LOSS (whose player battler is already
+// fainted/invisible for the entire compare window, so its placeholder
+// species is never actually drawn), the WIN window's player battler stays
+// alive and fully visible on screen throughout -- docs/terminal-seam-win-
+// window-ground-truth.md's own staging deliberately keeps all three player
+// DUSCLOPS at full, unchanged HP the entire battle ("115/115/115 confirmed
+// in every captured frame"). The oracle's own healthbox at this window's
+// frame 0 pixel-confirms species DUSCLOPS, Lv50, 115/115 (this session's own
+// fresh capture, tools/compare/out/.../oracle-04613.png) -- reusing the
+// shared MURKROW/200 placeholder here (correct for LOSS, where it's never
+// drawn) would draw the wrong species/HP on top of a real, visible healthbox.
+const TERMINAL_SEAM_WIN_SCAFFOLD_PLAYER: FactoryFullTurnBattlerConfig = Object.freeze({
+  species: 362, // DUSCLOPS
+  // TACKLE, not the fixture's own staged SPLASH: SPLASH's real targeting is
+  // self (moveSlot 0 -> targetBattler 0), which doesn't match this scaffold's
+  // shared { moveSlot: 0, targetBattler: 1 } sourceDecision (same value every
+  // other terminal-seam scaffold in this file uses) -- the move choice here
+  // is a placeholder either way (never actually used/rendered), so keep the
+  // decision-boundary shape consistent instead of re-deriving a new one.
+  moveId: 33,
+  moves: [33, 33, 33, 33] as const,
+  pp: [35, 35, 35, 35] as const,
+  ability: 0,
+  item: 0,
+  friendship: 0,
+  // The fixture's own overrides.parties[0] (tools/battle-lab/win-terminal-
+  // explosion-dusclops-off.json) stages "gender": "male" for this DUSCLOPS,
+  // pixel-confirmed against the oracle's own healthbox gender icon. DUSCLOPS's
+  // genderRatio is 127 (src/data/gen/species-stats.json); getMonGender
+  // resolves male whenever (personality & 0xff) >= genderRatio, so any
+  // personality with a low byte >= 127 reproduces it -- this is not the
+  // fixture's own exact personality value (not needed for this window, which
+  // never renders shininess/IVs), just a value in the correct male range.
+  personality: 0xff,
+  attack: 60,
+  defense: 60,
+  spAttack: 60,
+  spDefense: 60,
+  speed: 60,
+  hp: 115,
+  maxHp: 115,
+  types: ["TYPE_GHOST", "TYPE_GHOST"] as const,
+});
+
 const TERMINAL_SEAM_EVENT_PROVENANCE = Object.freeze({
   programCounter: 1,
   opcodeId: 1,
@@ -407,6 +451,18 @@ const TERMINAL_SEAM_ANTECEDENT_DISMISS_TICK = 2929;
 // `CURSOR_Y_OFFSETS` lookup) instead of duplicating that arithmetic here.
 const TERMINAL_SEAM_ANTECEDENT_FROZEN_CURSOR_AGE =
   TERMINAL_SEAM_ANTECEDENT_DISMISS_TICK - TERMINAL_SEAM_ANTECEDENT_READY_TICK;
+
+// docs/terminal-seam-win-window-probe.md §1: the WIN window's own antecedent
+// is STRINGID_PLAYERDEFEATEDTRAINER1 (not a plain fainted message -- the WIN
+// script has no recall step, so this button-gated, cursor-KEPT message is
+// what's still on screen when the trainer slide dispatches). Same
+// readyTick/dismissTick idiom as the LOSS constants above: both are real
+// RAM-probed absolute ticks from the fixture's own original antecedent flow
+// (predating this window's own frame 0, 4613), not fitted or simulated.
+const TERMINAL_SEAM_WIN_ANTECEDENT_READY_TICK = 4262;
+const TERMINAL_SEAM_WIN_ANTECEDENT_DISMISS_TICK = 4608;
+const TERMINAL_SEAM_WIN_ANTECEDENT_FROZEN_CURSOR_AGE =
+  TERMINAL_SEAM_WIN_ANTECEDENT_DISMISS_TICK - TERMINAL_SEAM_WIN_ANTECEDENT_READY_TICK;
 
 // ISSUES #73 LOSS window: constructs a real factoryRoundBattleOrchestrator
 // (so aiHistory/activeBattleCallStart/battlePresentationBoundaries are real,
@@ -568,7 +624,165 @@ function lossTerminalWindowStage(state: EngineState): EngineState {
   };
 }
 
-function lossTerminalWindowResolution(
+// ISSUES #73 WIN window: the sibling of lossTerminalWindowStage above, over
+// the banked WIN fixture (docs/terminal-seam-win-window-ground-truth.md,
+// tools/battle-lab/win-terminal-explosion-dusclops-off.json). Same
+// edge-relative-scaffold technique (a real orchestrator swapped onto a
+// synthetic terminal battle at a fixed commandIndex), but the WIN script
+// (BattleScript_FrontierTrainerBattleWon) differs from LOSS in exactly the
+// two ways the ground-truth doc's §4 flags: (a) no opponent-recall step at
+// all -- the opponent's own Explosion self-KO already clears its sprite via
+// the ordinary faint-sink before the terminal sequence starts, so this
+// window's frame 0 (oracle tick 4613, docs/terminal-seam-win-window-probe.md
+// §3) sits right after STRINGID_PLAYERDEFEATEDTRAINER1's own dismiss, not
+// after a recall; (b) that STRINGID_PLAYERDEFEATEDTRAINER1 message is a real
+// extra button-gated printstring the LOSS script never has, printed between
+// the antecedent fainted text and the trainer slide -- and, per
+// terminal-seam-loss-path-ground-truth.md §6, it KEEPS its down-arrow cursor
+// (unlike the two bare-placeholder quote ids), so it is this window's
+// held-cursor antecedent, not the fainted message beneath it. The antecedent
+// faint chain replays through the opponent's own battler (1), not the
+// player's (0) -- MURKROW is the opponent's own last mon here (ground-truth
+// doc §0/§2), matching TERMINAL_SEAM_SCAFFOLD_TRAINER's species (198)
+// already used for battler 1.
+function winTerminalWindowStage(state: EngineState): EngineState {
+  const playerRentalRecords = [
+    generatedCommandRecord(664),
+    generatedCommandRecord(678),
+    generatedCommandRecord(527),
+  ] as const;
+  let orchestrator = createFactoryRoundBattleOrchestrator({
+    id: "win-terminal-window-off",
+    rngValue: 4,
+    factoryWinStreak: 0,
+    playerTrainerId: 0x89ab_cdef,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords,
+      savedRentalRecords: [
+        ...playerRentalRecords,
+        generatedCommandRecord(1),
+        generatedCommandRecord(2),
+        generatedCommandRecord(3),
+      ],
+    },
+  });
+  const commandId = orchestrator.round.presentation?.command.commandId;
+  if (commandId === undefined) {
+    throw new Error("win terminal window stage requires the battle-start command");
+  }
+  orchestrator = advanceFactoryRoundPresentation(
+    completeFactoryRoundPresentation(orchestrator, { commandId }),
+  );
+  if (orchestrator.aiHistory === null || orchestrator.activeBattleCallStart === null) {
+    throw new Error("win terminal window stage requires a live started battle");
+  }
+
+  const config: FactoryFullTurnConfig = Object.freeze({
+    requestId: 1,
+    rngSeed: 1,
+    player: TERMINAL_SEAM_WIN_SCAFFOLD_PLAYER,
+    trainer: TERMINAL_SEAM_SCAFFOLD_TRAINER,
+  });
+  const initial = createFactoryFullTurnBattleState(config);
+  if (initial.boundary.kind !== "decision-required" || initial.boundary.request.kind !== "command") {
+    throw new Error("terminal seam scaffold has no source command");
+  }
+  const terminalBattle = Object.freeze({
+    ...createBattleState({
+      rules: initial.rules,
+      rngSeed: 9,
+      request: initial.boundary.request,
+    }),
+    boundary: Object.freeze({ kind: "terminal" as const, outcome: "player-win" as const }),
+  });
+  const events: readonly BattleKernelSemanticEvent[] = [
+    // The real segment this window is edge-relative to still holds the
+    // antecedent "Foe MURKROW fainted!" box before STRINGID_PLAYERDEFEATED-
+    // TRAINER1 ever prints (docs/terminal-seam-win-window-ground-truth.md
+    // §2, ticks ~3592-4206) -- MURKROW's own Explosion self-KO
+    // (setatkhptozero unconditionally zeroes the *attacker's* HP, same
+    // source fact the LOSS doc cites, just on the opponent's own battler
+    // here), replayed through the real health-bar-update -> hp-change ->
+    // faint-animation -> STRINGID_ATTACKERFAINTED chain on battler 1.
+    terminalSeamEvent(0, { kind: "health-bar-update", battler: 1, healthValue: 135 }),
+    terminalSeamEvent(1, { kind: "hp-change", battler: 1, from: 135, to: 0 }),
+    terminalSeamEvent(2, { kind: "faint-animation", battler: 1 }),
+    terminalSeamEvent(3, { kind: "message", messageId: "STRINGID_ATTACKERFAINTED", substitutions: [] }),
+    // Real WIN-only step: checkteamslost flips the outcome, then
+    // BattleScript_FrontierTrainerBattleWon prints STRINGID_PLAYERDEFEATED-
+    // TRAINER1 (ground-truth doc §2, ticks 4219/4229-4265) -- this window's
+    // own held-cursor antecedent (probe doc §1: cursor KEPT). No recall
+    // event follows it (ground-truth doc §4(1)): the trainer slide dispatches
+    // directly off this message's own dismiss.
+    terminalSeamEvent(4, { kind: "message", messageId: "STRINGID_PLAYERDEFEATEDTRAINER1", substitutions: [] }),
+    terminalSeamEvent(5, { kind: "trainer-slide-in", battler: 1 }),
+    // docs/terminal-seam-win-window-probe.md §2: the same 3-independently-
+    // caused-one-tick-hold swap-edge shape the LOSS probe doc found,
+    // RAM-confirmed again here on BattleScript_FrontierTrainerBattleWon_
+    // LoseTexts's identical trainerslidein/waitstate/printstring sequence.
+    // Battler 1's sprite is already invisible via the ordinary faint-sink
+    // (ground-truth doc §2: "opponent sprite + healthbox already fully gone"
+    // by the time the fainted text even settles), so re-asserting it here is
+    // a genuine no-op purely consuming one presentation-command tick each.
+    terminalSeamEvent(6, { kind: "set-battler-sprite-visibility", battler: 1, invisible: true }),
+    terminalSeamEvent(7, { kind: "set-battler-sprite-visibility", battler: 1, invisible: true }),
+    terminalSeamEvent(8, { kind: "set-battler-sprite-visibility", battler: 1, invisible: true }),
+    terminalSeamEvent(9, { kind: "message", messageId: "STRINGID_TRAINER1LOSETEXT", substitutions: [] }),
+  ];
+  const transition = Object.freeze({
+    kind: "terminal" as const,
+    state: terminalBattle,
+    events: Object.freeze(events),
+    outcome: "player-win" as const,
+  }) as BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>;
+  const command = createBattleCommandPresentation(initial.boundary.request, initial.rules.rulesContext, 0);
+  const input: CreateBattleResolutionPresentationInput = {
+    sourceRequest: initial.boundary.request,
+    sourceDecision: { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+    beforeRules: initial.rules,
+    transition,
+    fieldBoundary: command.field,
+    confirmHandoff: { fightDisplayCursor: 0, idleBounceElapsed: 0 },
+    opponentTrainer: getFactoryTrainerPresentation(50),
+  };
+  // Commands 0-2 (the antecedent faint chain: hp/faint/message) and command
+  // 3 (STRINGID_PLAYERDEFEATEDTRAINER1) are all out-of-window housekeeping
+  // this edge-relative scaffold places before its own frame 0 -- hand-set
+  // directly to commandIndex 4 (the trainer slide) rather than replayed
+  // through real per-tick advancement, matching the same "outside real
+  // ticks" idiom lossTerminalWindowStage uses.
+  const resolution = Object.freeze({
+    ...createBattleResolutionPresentation(input),
+    commandIndex: 4,
+    lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
+    confirmHandoff: null,
+  });
+  const boundaries = createTerminalSeamPresentationBoundaries(
+    command,
+    terminalBattle,
+    orchestrator.moveSelectionCursors,
+  );
+
+  const swapped = Object.freeze({
+    ...orchestrator,
+    battle: terminalBattle,
+    battleCommandPresentation: null,
+    battleResolutionPresentation: resolution,
+    battlePresentationBoundaries: boundaries,
+  });
+
+  return {
+    ...state,
+    factoryRoundBattleOrchestrator: swapped,
+    rngMode: "frontierBattle",
+    rngValue: swapped.battle?.rng.value ?? state.rngValue,
+  };
+}
+
+function terminalWindowResolution(
   state: EngineState,
 ): BattleResolutionPresentationState | null {
   return state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null;
@@ -579,26 +793,45 @@ function lossTerminalWindowResolution(
  * shared renderer only ever draws a wait-cursor for a segment's *current*
  * command (battleResolutionPresentationRender.ts's `waitCursor` is scoped to
  * `segment.commands[commandIndex]`), so once this window's antecedent
- * "MURKROW fainted!" message is superseded by the trainer-slide/filler
- * commands it jumps straight to, the shared renderer has no way left to know
- * its down-arrow is real leftover window content rather than cleared -- §5:
+ * button-gated, cursor-kept message (LOSS: "MURKROW fainted!"; WIN:
+ * "Player defeated...") is superseded by the trainer-slide/filler commands
+ * it jumps straight to, the shared renderer has no way left to know its
+ * down-arrow is real leftover window content rather than cleared -- §5:
  * "not a render-layer bug", so the fix stays scaffold-only. Renders the
- * antecedent message a second time, held at its RAM-derived frozen pose, and
- * diffs it against the same message one tick before the cursor is eligible
- * (fully typed, not yet ready -- `isBattleResolutionButtonMessageReady`)
- * to isolate exactly the arrow's own pixels, independent of whatever else is
- * on screen in the frame this mask gets patched onto.
+ * antecedent message a second time, held at its RAM-derived frozen pose
+ * (`frozenCursorAge`, one constant per window -- docs/terminal-seam-
+ * antecedent-boundary-probe.md §2 for LOSS, docs/terminal-seam-win-window-
+ * probe.md §1 for WIN), and diffs it against the same message one tick
+ * before the cursor is eligible (fully typed, not yet ready --
+ * `isBattleResolutionButtonMessageReady`) to isolate exactly the arrow's own
+ * pixels, independent of whatever else is on screen in the frame this mask
+ * gets patched onto.
  */
-function lossTerminalWindowHeldCursorMask(
+function terminalWindowHeldCursorMask(
   state: EngineState,
+  frozenCursorAge: number,
 ): ReadonlyMap<number, number> | null {
   const orchestrator = state.factoryRoundBattleOrchestrator;
   const resolution = orchestrator?.battleResolutionPresentation ?? null;
   if (!orchestrator || !resolution) return null;
   const commands = resolution.segments[resolution.segmentIndex]?.commands;
-  const antecedentIndex = commands?.findIndex(
-    (command) => command.type === "message" && command.advance === "button" && !command.noCursor,
-  ) ?? -1;
+  // The *last* button-advance, cursor-kept message strictly before the
+  // window's current position -- not the first. WIN's window has two such
+  // candidates ahead of the trainer slide (STRINGID_ATTACKERFAINTED, then
+  // STRINGID_PLAYERDEFEATEDTRAINER1 immediately before the slide itself);
+  // only the second is actually still on screen, superseding the first.
+  // LOSS's window only ever has one candidate, so this is a strict
+  // generalization, not a behavior change for it.
+  let antecedentIndex = -1;
+  if (commands) {
+    for (let index = Math.min(resolution.commandIndex, commands.length) - 1; index >= 0; index -= 1) {
+      const candidate = commands[index]!;
+      if (candidate.type === "message" && candidate.advance === "button" && !candidate.noCursor) {
+        antecedentIndex = index;
+        break;
+      }
+    }
+  }
   const antecedent = antecedentIndex === -1 ? undefined : commands?.[antecedentIndex];
   if (!antecedent || antecedent.type !== "message") return null;
   const printableLength = battleStringPrintableLength(antecedent.lines);
@@ -614,9 +847,7 @@ function lossTerminalWindowHeldCursorMask(
     },
   });
   const withoutCursor = render(at(printableLength));
-  const withCursor = render(
-    at(printableLength + 1 + TERMINAL_SEAM_ANTECEDENT_FROZEN_CURSOR_AGE),
-  );
+  const withCursor = render(at(printableLength + 1 + frozenCursorAge));
   const mask = new Map<number, number>();
   for (let index = 0; index < withCursor.length; index += 1) {
     if (withCursor[index] !== withoutCursor[index]) {
@@ -634,8 +865,8 @@ function lossTerminalWindowHeldCursorMask(
  * commandIndex/command shape, not a hardcoded frame range (AGENTS.md: "never
  * add another ... absolute-tick rendering branch").
  */
-function lossTerminalWindowHeldCursorActive(state: EngineState): boolean {
-  const resolution = lossTerminalWindowResolution(state);
+function terminalWindowHeldCursorActive(state: EngineState): boolean {
+  const resolution = terminalWindowResolution(state);
   const commands = resolution?.segments[resolution.segmentIndex]?.commands;
   if (!resolution || !commands) return false;
   const trainerSlideIndex = commands.findIndex((command) => command.type === "trainer-slide");
@@ -646,16 +877,28 @@ function lossTerminalWindowHeldCursorActive(state: EngineState): boolean {
   return resolution.commandIndex >= trainerSlideIndex && resolution.commandIndex < quoteIndex;
 }
 
-function applyLossTerminalWindowHeldCursor(
+function applyTerminalWindowHeldCursor(
   state: EngineState,
   rgba: Uint8Array,
   mask: ReadonlyMap<number, number> | null,
 ): Uint8Array {
-  if (!mask || mask.size === 0 || !lossTerminalWindowHeldCursorActive(state)) return rgba;
+  if (!mask || mask.size === 0 || !terminalWindowHeldCursorActive(state)) return rgba;
   const patched = rgba.slice();
   for (const [index, value] of mask) patched[index] = value;
   return patched;
 }
+
+/**
+ * Stage ids whose antecedent message keeps a wait-cursor through the
+ * trainer-slide/filler span, mapped to that antecedent's own RAM-probed
+ * `frozenCursorAge` (docs/terminal-seam-antecedent-boundary-probe.md §2,
+ * docs/terminal-seam-win-window-probe.md §1). Every other stage leaves
+ * `heldCursorMask` null in `renderAppTrace` below, a no-op.
+ */
+const TERMINAL_WINDOW_FROZEN_CURSOR_AGE: Readonly<Record<string, number>> = {
+  "loss-terminal-window-off": TERMINAL_SEAM_ANTECEDENT_FROZEN_CURSOR_AGE,
+  "win-terminal-window-off": TERMINAL_SEAM_WIN_ANTECEDENT_FROZEN_CURSOR_AGE,
+};
 
 /**
  * Named, dev-time-only staging registry. A stage may replace logical state at
@@ -831,6 +1074,7 @@ const APP_STAGES: Readonly<Record<string, AppStage>> = {
     rngMode: "vblank",
   }),
   "loss-terminal-window-off": lossTerminalWindowStage,
+  "win-terminal-window-off": winTerminalWindowStage,
 };
 
 export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {
@@ -849,8 +1093,9 @@ export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {
     const stage = APP_STAGES[trace.appStage.id];
     if (!stage) throw new Error(`unknown app stage ${trace.appStage.id}`);
     state = stage(state);
-    if (trace.appStage.id === "loss-terminal-window-off") {
-      heldCursorMask = lossTerminalWindowHeldCursorMask(state);
+    const frozenCursorAge = TERMINAL_WINDOW_FROZEN_CURSOR_AGE[trace.appStage.id];
+    if (frozenCursorAge !== undefined) {
+      heldCursorMask = terminalWindowHeldCursorMask(state, frozenCursorAge);
     }
   };
 
@@ -858,7 +1103,7 @@ export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {
     if (!captureFrames.has(frame)) return;
     const rgba = heldCursorMask === null
       ? render(state)
-      : applyLossTerminalWindowHeldCursor(state, render(state), heldCursorMask);
+      : applyTerminalWindowHeldCursor(state, render(state), heldCursorMask);
     captures.push({ frame, rgba });
   };
 
