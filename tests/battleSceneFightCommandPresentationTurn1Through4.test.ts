@@ -2,19 +2,28 @@ import { describe, expect, it } from "vitest";
 import {
   resolveTurn1CompletedResolutionNextCommandHandoff,
   resolveTurn1FightCommandPresentation,
+  resolveTurn1LatestCompletedCommandHandoff,
 } from "../src/engine/turn1ResolutionAdapter.ts";
 import {
+  isTurn2NextCommandHandoffReady,
   resolveTurn2CompletedResolutionNextCommandHandoff,
   resolveTurn2FightCommandPresentation,
+  resolveTurn2LatestCompletedCommandHandoff,
+  turn2FightCommandPresentationFromLatest,
 } from "../src/engine/turn2ResolutionAdapter.ts";
 import {
+  isTurn3NextCommandHandoffReady,
   resolveTurn3CompletedResolutionNextCommandHandoff,
   resolveTurn3FightCommandPresentation,
+  resolveTurn3LatestCompletedCommandHandoff,
+  turn3FightCommandPresentationFromLatest,
 } from "../src/engine/turn3ResolutionAdapter.ts";
 import {
   resolveTurn4CompletedResolutionNextCommandHandoff,
   resolveTurn4FightCommandPresentation,
+  resolveTurn4LatestCompletedCommandHandoff,
 } from "../src/engine/turn4ResolutionAdapter.ts";
+import type { LatestCompletedCommandHandoff } from "../src/engine/nextCommandHandoff.ts";
 import {
   ROCK_SLIDE_LINE1,
   ROCK_SLIDE_LINE2,
@@ -389,5 +398,79 @@ describe("slice-2 prerequisite: resolveTurn1..4FightCommandPresentation pinned a
     });
     expect(Object.hasOwn(presentation, "turn")).toBe(false);
     expect(Object.hasOwn(presentation, "pp")).toBe(false);
+  });
+});
+
+/**
+ * Slice 3 pin (`docs/battlescene-turnN-typeref-retirement-design.md` §4.1
+ * row 3, "Idle-content shim + trivial-null callers"): before
+ * `drawActionMenuIdleContentFromLatest` exists, pin the fire/no-fire split
+ * of `drawActionMenuIdleContent`'s own HP-overlay guard (battleScene.ts:
+ * `if (isTurn3NextCommandHandoffReady(turn3NextCommandHandoff) ||
+ * isTurn2NextCommandHandoffReady(turn2NextCommandHandoff))
+ * drawPlayerHealthboxHpOverlay(...)`) across turns 1-4, both for the legacy
+ * positional-argument shapes real call sites use (§4.2's call-site map) and
+ * for the generic `latest`-only accessor the new shim will read instead.
+ * Every predicate/bridge function used below (`isTurn2/3NextCommandHandoff
+ * Ready`, `turn2/3CompletedResolutionNextCommandHandoffFromLatest`) is
+ * already exported from `turn2ResolutionAdapter.ts`/`turn3ResolutionAdapter
+ * .ts` today -- these cases are green against the legacy body alone, no
+ * production edit required to pass.
+ */
+describe("slice 3: drawActionMenuIdleContent's HP-overlay guard fires for turn-2/3, not turn-1/4", () => {
+  const turn2Handoff = resolveTurn2CompletedResolutionNextCommandHandoff(TURN2_PRESENTATION_EPOCH_ELAPSED);
+  const turn3Handoff = resolveTurn3CompletedResolutionNextCommandHandoff(TURN3_PRESENTATION_EPOCH_ELAPSED);
+  const turn4Handoff = resolveTurn4CompletedResolutionNextCommandHandoff(TURN4_PRESENTATION_EPOCH_ELAPSED);
+
+  const latest1 = resolveTurn1LatestCompletedCommandHandoff(TURN1_PRESENTATION_EPOCH_ELAPSED);
+  const latest2 = resolveTurn2LatestCompletedCommandHandoff(TURN2_PRESENTATION_EPOCH_ELAPSED);
+  const latest3 = resolveTurn3LatestCompletedCommandHandoff(TURN3_PRESENTATION_EPOCH_ELAPSED);
+  const latest4 = resolveTurn4LatestCompletedCommandHandoff(TURN4_PRESENTATION_EPOCH_ELAPSED, latest3);
+
+  // Extracted verbatim from `drawActionMenuIdleContent`'s own guard line --
+  // the same two predicates over the same two positional slots, not a
+  // re-derivation.
+  function legacyHpOverlayGuardFires(
+    turn2NextCommandHandoff: Parameters<typeof isTurn2NextCommandHandoffReady>[0],
+    turn3NextCommandHandoff: Parameters<typeof isTurn3NextCommandHandoffReady>[0],
+  ): boolean {
+    return isTurn3NextCommandHandoffReady(turn3NextCommandHandoff)
+      || isTurn2NextCommandHandoffReady(turn2NextCommandHandoff);
+  }
+
+  // The exact expression the new shim (`drawActionMenuIdleContentFromLatest`)
+  // runs: `latest` carries turn-2 or turn-3 content, read via the same
+  // already-exported `turnNFightCommandPresentationFromLatest` narrowing
+  // functions `drawFightSubmenuWindow`'s own generic locals already use
+  // (battleScene.ts, e.g. its `genericTurn2Content`/`genericTurn3Content`).
+  function genericHpOverlayGuardFires(latest: LatestCompletedCommandHandoff | null): boolean {
+    return turn2FightCommandPresentationFromLatest(latest) !== null
+      || turn3FightCommandPresentationFromLatest(latest) !== null;
+  }
+
+  it("turn 1: does NOT fire -- drawTurnKickoffText's own (fb, tick, null) call shape carries no turn2/3 slot", () => {
+    expect(legacyHpOverlayGuardFires(null, null)).toBe(false);
+    expect(genericHpOverlayGuardFires(latest1)).toBe(false);
+    // Both callers this slice migrates pass a literal `null` latest, same as latest1's shape.
+    expect(genericHpOverlayGuardFires(null)).toBe(false);
+  });
+
+  it("turn 2: fires -- drawDragonBreathTurnEndSettledMenu's own (fb, bounceTick, turn1, turn2) call shape", () => {
+    expect(legacyHpOverlayGuardFires(turn2Handoff, null)).toBe(true);
+    expect(genericHpOverlayGuardFires(latest2)).toBe(true);
+  });
+
+  it("turn 3: fires -- drawTurn3RockSlideTurnEndSettledMenu's own (fb, bounceTick, null, null, turn3.hp.player, turn3) call shape", () => {
+    expect(legacyHpOverlayGuardFires(null, turn3Handoff)).toBe(true);
+    expect(genericHpOverlayGuardFires(latest3)).toBe(true);
+  });
+
+  it("turn 4: does NOT fire -- drawTurn4RockSlideTurnEndSettledMenu's real turn4 handoff lands in the guard's dead 7th slot", () => {
+    // turn4NextCommandHandoff is real (non-null) but is not one of the
+    // guard's own two read slots (turn2/turn3) -- the guard's own two
+    // arguments are both null for this call site's shape.
+    expect(turn4Handoff.hp.player).toBe(88);
+    expect(legacyHpOverlayGuardFires(null, null)).toBe(false);
+    expect(genericHpOverlayGuardFires(latest4)).toBe(false);
   });
 });
