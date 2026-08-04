@@ -2665,7 +2665,7 @@ describe("S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§5/§7): DRAGON_BREATH
   });
 });
 
-describe("ISSUES #71 Slice A/B: drawGeneratedOpponentRelease applies the real opponent species' front terminal offset (docs/send-out-live-wiring-consumer-map.md §4 item 3 + §5 Slice B)", () => {
+describe("ISSUES #71 Slice A/B/D: drawGeneratedOpponentRelease settles every species at the plain un-offset position - Slice D found Battle Scene OFF never applies speciesFrontIdleRestOffset here (SKIP_FRONT_ANIM keeps x2/y2 at {0,0} for the whole battle, docs/send-out-live-wiring-consumer-map.md §4 item 3 + §5 Slice B)", () => {
   // Mirrors drawSpriteSheet/drawSpriteSheetTile (battleScene.ts) verbatim -
   // both are private, so this reimplements the same tiny blit to build an
   // independent reference frame rather than exporting them just for a test.
@@ -2726,7 +2726,7 @@ describe("ISSUES #71 Slice A/B: drawGeneratedOpponentRelease applies the real op
     );
   }
 
-  it("settles RATTATA at x2=+1 relative to the un-offset position (speciesFrontIdleRestOffset(\"RATTATA\") = {1,0}, the empirical census's non-ONIX positive case)", () => {
+  it("settles RATTATA at the plain un-offset position - Slice D: Battle Scene OFF never launches the front-sprite animation task (SKIP_FRONT_ANIM, pokemon.c:6803-6852), so speciesFrontIdleRestOffset(\"RATTATA\") = {1,0} is never applied at this generated-route settle even though it's the empirical census's non-ONIX positive case", () => {
     const RATTATA_SPECIES_ID = 19;
     expect(speciesFrontIdleRestOffset("RATTATA")).toEqual({ x2: 1, y2: 0 });
 
@@ -2738,19 +2738,19 @@ describe("ISSUES #71 Slice A/B: drawGeneratedOpponentRelease applies the real op
 
     // handoffTick=0, t=100: elapsed=100 is well past MATERIALIZE_START_OFFSET
     // (19) plus the 16-tick coeff ramp from TURN5_BALL_HANDOFF_TICK, so
-    // turn5MaterializeCoeff has decayed to 0 and the settled (offset-applying)
-    // branch runs, not the affine-tinted-blend one.
+    // turn5MaterializeCoeff has decayed to 0 and the settled branch runs, not
+    // the affine-tinted-blend one.
     expect(turn5MaterializeCoeff(TURN5_BALL_HANDOFF_TICK + 19 + (100 - 19) - 1)).toBe(0);
     const frame = new Uint8Array(240 * 160 * 4);
     drawGeneratedOpponentRelease(frame, 100, 0, fieldView);
 
-    const shifted = new Uint8Array(240 * 160 * 4);
-    blitSprite(shifted, pic.tileset, pic.palette, origin.x + 1, origin.y);
-    expect(Array.from(frame)).toEqual(Array.from(shifted));
-
     const unshifted = new Uint8Array(240 * 160 * 4);
     blitSprite(unshifted, pic.tileset, pic.palette, origin.x, origin.y);
-    expect(Array.from(frame)).not.toEqual(Array.from(unshifted));
+    expect(Array.from(frame)).toEqual(Array.from(unshifted));
+
+    const shifted = new Uint8Array(240 * 160 * 4);
+    blitSprite(shifted, pic.tileset, pic.palette, origin.x + 1, origin.y);
+    expect(Array.from(frame)).not.toEqual(Array.from(shifted));
   });
 
   it("still settles a {0,0}-offset species (BULBASAUR) at the plain un-shifted origin - the Slice B species-threading guard against a shared/literal default", () => {

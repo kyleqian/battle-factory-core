@@ -4251,13 +4251,15 @@ export function drawGeneratedOpponentRelease(
       - enemyMonElevation(fieldView.fieldArt.opponent.speciesSymbol),
   };
   if (coeff === 0) {
-    const idle = speciesFrontIdleRestOffset(fieldView.fieldArt.opponent.speciesSymbol) ?? { x2: 0, y2: 0 };
+    // Battle Scene OFF never launches the front-sprite animation task
+    // (SKIP_FRONT_ANIM, pokemon.c:6803-6852) - x2/y2 stay {0,0} for every
+    // species for the whole battle; see ISSUES #71's Slice-D record.
     drawSpriteSheet(
       fb,
       pic.tileset as Tileset,
       pic.palette as RgbColor[],
-      origin.x + idle.x2,
-      origin.y + idle.y2,
+      origin.x,
+      origin.y,
     );
     return;
   }
@@ -4612,16 +4614,17 @@ export function renderGeneratedBattleStartPlayerRelease(
   // Same settled-opponent draw as drawGeneratedOpponentRelease's coeff===0
   // branch (post-materialize), reached once the compositor hands off to the
   // player's own release - the elevation adjustment must persist here too,
-  // see the #56 item 3 rule at drawGeneratedOpponentRelease.
-  const opponentIdle = speciesFrontIdleRestOffset(fieldView.fieldArt.opponent.speciesSymbol) ?? { x2: 0, y2: 0 };
+  // see the #56 item 3 rule at drawGeneratedOpponentRelease. Battle Scene OFF
+  // never launches the front-sprite animation task (SKIP_FRONT_ANIM,
+  // pokemon.c:6803-6852) - x2/y2 stay {0,0} for every species; see ISSUES
+  // #71's Slice-D record.
   drawSpriteSheet(
     fb,
     fieldView.fieldArt.opponent.pic.tileset as Tileset,
     fieldView.fieldArt.opponent.pic.palette as RgbColor[],
-    fieldView.fieldArt.opponent.origin.x + opponentIdle.x2,
+    fieldView.fieldArt.opponent.origin.x,
     fieldView.fieldArt.opponent.origin.y
-      - enemyMonElevation(fieldView.fieldArt.opponent.speciesSymbol)
-      + opponentIdle.y2,
+      - enemyMonElevation(fieldView.fieldArt.opponent.speciesSymbol),
   );
   const throwFrame = brendanThrowFrame(playerVisualT);
   if (playerVisualT < BRENDAN_THROW_START_TICK) {
