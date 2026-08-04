@@ -8040,9 +8040,7 @@ function drawFightSubmenuWindow(
           fb,
           t,
           pressTick,
-          currentEpochHandoff,
-          currentTurn2Handoff,
-          turn5CommandHandoff,
+          latestCompletedCommandHandoff,
           trainerPresentation,
         );
         return;
@@ -8059,10 +8057,7 @@ function drawFightSubmenuWindow(
           fb,
           t,
           pressTick,
-          currentEpochHandoff,
-          currentTurn2Handoff,
-          turn4CommandHandoff,
-          currentTurn4Handoff,
+          latestCompletedCommandHandoff,
         );
         return;
       }
@@ -8075,7 +8070,7 @@ function drawFightSubmenuWindow(
         // `turn3SettledWindowActive` keeps this branch selected through
         // turn 3's own settled menu even after its reset has evicted
         // `turn3CommandHandoff`'s own turn-2 view from the shared slot.
-        drawTurn3EndeavorText(fb, t, pressTick, currentEpochHandoff, turn3CommandHandoff, currentTurn3Handoff, genericTurn2Content);
+        drawTurn3EndeavorText(fb, t, pressTick, latestCompletedCommandHandoff, genericTurn2Content);
         return;
       }
       // ISSUES #39 rank-6 slice 1: turn 1 is now Scene-OFF-owned - DOUBLE_TEAM's
@@ -9359,9 +9354,7 @@ function drawTurn3EndeavorText(
   fb: Uint8Array,
   t: number,
   pressTick: number,
-  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
   turn2Content: FightCommandPresentation | null = null,
 ): void {
   // ISSUES #39 rank-6 slice 3: hands off into turn 3's own ROCK_SLIDE half
@@ -9369,16 +9362,13 @@ function drawTurn3EndeavorText(
   // the ON-fit default) - same shape `drawTurn2KickoffText`'s own
   // `dragonBreathStart` handoff already established for turn 2.
   if (t >= rockSlideTextStartTick(TURN3_ROCKSLIDE_PRESS_TICK, TURN3_OFF_ROCKSLIDE_TEXT_DELAY)) {
-    drawTurn3RockSlideWindow(fb, t, turn2NextCommandHandoff, turn3NextCommandHandoff, turn2Content);
+    drawTurn3RockSlideWindow(fb, t, latestCompletedCommandHandoff, turn2Content);
     return;
   }
   // Reached only pre-reset (the branch above always wins once turn 3's own
   // source-owned reset publishes into the shared generic slot and evicts
   // turn 2's own compatibility view - see `turn3SettledWindowActive`'s own
   // doc in `drawFightSubmenuWindow`).
-  if (turn2NextCommandHandoff === null) {
-    throw new Error("turn-3 kickoff text requires the completed turn-2 receipt before its own reset");
-  }
   if (turn2Content === null) {
     throw new Error("turn-3 kickoff text requires semantic turn-2 presentation content");
   }
@@ -9388,11 +9378,10 @@ function drawTurn3EndeavorText(
     turn2Content,
   );
   const onixHp = endeavorHp(t, pressTick, anchorPlayerAfterTurnHp, anchorPlayerAfterTurn3Hp, TURN3_OFF_ENDEAVOR_HP_DRAIN_START_DELAY);
-  drawActionMenuIdleContent(
+  drawActionMenuIdleContentFromLatest(
     fb,
     bounceTick,
-    turn1NextCommandHandoff,
-    turn2NextCommandHandoff,
+    latestCompletedCommandHandoff,
     onixHp,
   );
   // Onix's own hit-flash flicker (class b, paired with the wobble below) is
@@ -9524,7 +9513,6 @@ const TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE = {
 function drawTurn3RockSlideAttack(
   fb: Uint8Array,
   t: number,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null,
   turn2Content: FightCommandPresentation | null = null,
 ): void {
   const pressTick = TURN3_ROCKSLIDE_PRESS_TICK;
@@ -9540,9 +9528,6 @@ function drawTurn3RockSlideAttack(
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
   drawMenuHealthboxPlayer(fb, 0);
   // Reached only pre-reset - see `drawTurn3EndeavorText`'s own guard doc.
-  if (turn2NextCommandHandoff === null) {
-    throw new Error("turn-3 attack phase requires the completed turn-2 receipt before its own reset");
-  }
   if (turn2Content === null) {
     throw new Error("turn-3 attack phase requires semantic turn-2 presentation content");
   }
@@ -9580,12 +9565,18 @@ function turn3RockSlideResettledBounceTick(
 function drawTurn3RockSlideTurnEndSettledMenu(
   fb: Uint8Array,
   t: number,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
 ): void {
-  const bounceTick = turn3RockSlideResettledBounceTick(t, turn3NextCommandHandoff);
-  drawActionMenuIdleContent(fb, bounceTick, null, null, turn3NextCommandHandoff.hp.player, turn3NextCommandHandoff);
-  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(turn3NextCommandHandoff.hp.opponent));
-  drawPlayerHealthboxHpOverlay(fb, turn3NextCommandHandoff.hp.player, menuIdleBounce(bounceTick).healthboxY2);
+  const turn3Content = turn3FightCommandPresentationFromLatest(latestCompletedCommandHandoff);
+  if (turn3Content === null) {
+    throw new Error("turn-3 settled menu requires semantic turn-3 presentation content");
+  }
+  const bounceTick = fightCommandSettledBounceEpochTick(turn3Content, t - TICK0);
+  const playerHp = turn3Content.field.player.hp.current;
+  const opponentHp = turn3Content.field.opponent.hp.current;
+  drawActionMenuIdleContentFromLatest(fb, bounceTick, latestCompletedCommandHandoff, playerHp);
+  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(opponentHp));
+  drawPlayerHealthboxHpOverlay(fb, playerHp, menuIdleBounce(bounceTick).healthboxY2);
 }
 
 /**
@@ -9609,21 +9600,17 @@ function drawTurn3RockSlideTurnEndSettledMenu(
 function drawTurn3RockSlideWindow(
   fb: Uint8Array,
   t: number,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
   turn2Content: FightCommandPresentation | null = null,
 ): void {
   const pressTick = TURN3_ROCKSLIDE_PRESS_TICK;
   const redrawTick = pressTick + TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY;
   if (t >= redrawTick) {
-    if (!isTurn3NextCommandHandoffReady(turn3NextCommandHandoff)) {
-      throw new Error("turn-3 settled menu requires its completed next-command handoff");
-    }
-    drawTurn3RockSlideTurnEndSettledMenu(fb, t, turn3NextCommandHandoff);
+    drawTurn3RockSlideTurnEndSettledMenu(fb, t, latestCompletedCommandHandoff);
     return;
   }
   const textClearTick = pressTick + TURN3_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY;
-  drawTurn3RockSlideAttack(fb, t, turn2NextCommandHandoff, turn2Content);
+  drawTurn3RockSlideAttack(fb, t, turn2Content);
   drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn3Hp);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t < textClearTick) {
@@ -9683,6 +9670,40 @@ function turn4KickoffBounceTick(
 }
 
 /**
+ * Generic sibling of `turn4KickoffBounceTick` for callers with no legacy-
+ * typed turn-3 predecessor handoff of their own (typeref-retirement slice 6,
+ * `docs/battlescene-turnN-typeref-retirement-design.md` §4.1). Same freeze-
+ * then-hold formula and the same `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` offset
+ * `turn4SubmenuBounceTick`/`turn3RockSlideResettledBounceTick` compose -
+ * `turn3PresentationEpochElapsedSinceReset(turn3NextCommandHandoff, elapsed)`
+ * reads the same `presentationEpoch.elapsed` field
+ * `latestCompletedCommandPresentationEpochElapsedSinceReset` reads off
+ * `latest.content` directly (verified field-for-field, not a renamed but
+ * differently-anchored fact - `TURN3_IDLE_BOUNCE_EPOCH_TICK` equals
+ * `MENU_IDLE_BLANK_END_TICK + 1`, and `actionMenuRedrawTick` is always
+ * `presentationEpoch.elapsed`). `turn4KickoffBounceTick`/
+ * `turn4SubmenuBounceTick`/`turn3RockSlideResettledBounceTick` themselves
+ * stay legacy-typed - `drawFightSubmenuWindow`/`drawActionMenuIdleWindow`
+ * (Family Q, slice 7) still call them with a real reconstructed handoff.
+ */
+function turn4KickoffBounceTickFromLatest(
+  t: number,
+  pressTick: number,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
+): number {
+  const freezeTick = pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY;
+  const sourceTick = t < freezeTick ? t : pressTick - 11;
+  const epochAge = latestCompletedCommandPresentationEpochElapsedSinceReset(
+    latestCompletedCommandHandoff,
+    sourceTick - TICK0,
+  );
+  if (epochAge === null) {
+    throw new Error("turn-4 kickoff bounce requires semantic turn-3 presentation epoch content");
+  }
+  return MENU_IDLE_BLANK_END_TICK + 1 + epochAge - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+}
+
+/**
  * ISSUES #39 rank-6 slice 4: turn 4's own DOUBLE_TEAM-half Scene-OFF
  * re-timing, same treatment slice 1 established for turn 1's own DOUBLE_TEAM
  * half - `drawDoubleTeamClones`'s entire clone-blend content is class (c),
@@ -9709,29 +9730,25 @@ function drawTurn4KickoffText(
   fb: Uint8Array,
   t: number,
   pressTick: number,
-  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
 ): void {
   if (t - pressTick > TURN4_OFF_STATS_BANNER_END_DELAY) {
-    drawTurn4RockSlideWindow(fb, t, turn3NextCommandHandoff, turn4NextCommandHandoff);
+    drawTurn4RockSlideWindow(fb, t, latestCompletedCommandHandoff);
     return;
   }
   // Reached only pre-reset (turn 4's own source-owned reset evicts the
   // turn-3 shape this DOUBLE_TEAM kickoff text still needs - see
   // `turn4SettledWindowActive`'s own doc in `drawFightSubmenuWindow`).
-  if (turn3NextCommandHandoff === null) {
+  const turn3Content = turn3FightCommandPresentationFromLatest(latestCompletedCommandHandoff);
+  if (turn3Content === null) {
     throw new Error("turn-4 kickoff text requires the completed turn-3 receipt before its own reset");
   }
-  const bounceTick = turn4KickoffBounceTick(t, pressTick, turn3NextCommandHandoff);
-  drawActionMenuIdleContent(
+  const bounceTick = turn4KickoffBounceTickFromLatest(t, pressTick, latestCompletedCommandHandoff);
+  drawActionMenuIdleContentFromLatest(
     fb,
     bounceTick,
-    turn1NextCommandHandoff,
-    turn2NextCommandHandoff,
-    turn3NextCommandHandoff.hp.player,
-    turn3NextCommandHandoff,
+    latestCompletedCommandHandoff,
+    turn3Content.field.player.hp.current,
   );
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(fb, TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2, turnKickoffTextVisibleChars(t, pressTick));
@@ -9798,7 +9815,7 @@ const TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE = {
 function drawTurn4RockSlideAttack(
   fb: Uint8Array,
   t: number,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
 ): void {
   const pressTick = TURN4_CONFIRM_PRESS_TICK;
   drawStaticBgShiftedY(fb, 0);
@@ -9813,10 +9830,7 @@ function drawTurn4RockSlideAttack(
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
   drawMenuHealthboxPlayer(fb, 0);
   // Reached only pre-reset - see `drawTurn4KickoffText`'s own guard doc.
-  if (turn3NextCommandHandoff === null) {
-    throw new Error("turn-4 attack phase requires the completed turn-3 receipt before its own reset");
-  }
-  drawMenuIdleBounceOverlay(fb, turn4KickoffBounceTick(t, TURN4_CONFIRM_PRESS_TICK, turn3NextCommandHandoff));
+  drawMenuIdleBounceOverlay(fb, turn4KickoffBounceTickFromLatest(t, TURN4_CONFIRM_PRESS_TICK, latestCompletedCommandHandoff));
 }
 
 /**
@@ -9836,12 +9850,18 @@ function turn4RockSlideResettledBounceTick(
 function drawTurn4RockSlideTurnEndSettledMenu(
   fb: Uint8Array,
   t: number,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
 ): void {
-  const bounceTick = turn4RockSlideResettledBounceTick(t, turn4NextCommandHandoff);
-  drawActionMenuIdleContent(fb, bounceTick, null, null, turn4NextCommandHandoff.hp.player, null, turn4NextCommandHandoff);
-  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(turn4NextCommandHandoff.hp.opponent));
-  drawPlayerHealthboxHpOverlay(fb, turn4NextCommandHandoff.hp.player, menuIdleBounce(bounceTick).healthboxY2);
+  const turn4Content = turn4FightCommandPresentationFromLatest(latestCompletedCommandHandoff);
+  if (turn4Content === null) {
+    throw new Error("turn-4 settled menu requires semantic turn-4 presentation content");
+  }
+  const bounceTick = fightCommandSettledBounceEpochTick(turn4Content, t - TICK0);
+  const playerHp = turn4Content.field.player.hp.current;
+  const opponentHp = turn4Content.field.opponent.hp.current;
+  drawActionMenuIdleContentFromLatest(fb, bounceTick, latestCompletedCommandHandoff, playerHp);
+  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(opponentHp));
+  drawPlayerHealthboxHpOverlay(fb, playerHp, menuIdleBounce(bounceTick).healthboxY2);
 }
 
 /**
@@ -9862,27 +9882,24 @@ function drawTurn4RockSlideTurnEndSettledMenu(
 function drawTurn4RockSlideWindow(
   fb: Uint8Array,
   t: number,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
 ): void {
   const pressTick = TURN4_CONFIRM_PRESS_TICK;
   const redrawTick = pressTick + TURN4_OFF_ROCKSLIDE_MENU_REDRAW_DELAY;
   if (t >= redrawTick) {
-    if (!isTurn4NextCommandHandoffReady(turn4NextCommandHandoff)) {
-      throw new Error("turn-4 settled menu requires its completed next-command handoff");
-    }
-    drawTurn4RockSlideTurnEndSettledMenu(fb, t, turn4NextCommandHandoff);
+    drawTurn4RockSlideTurnEndSettledMenu(fb, t, latestCompletedCommandHandoff);
     return;
   }
   // Reached only pre-reset - see `drawTurn4KickoffText`'s own guard doc.
-  if (turn3NextCommandHandoff === null) {
+  const turn3Content = turn3FightCommandPresentationFromLatest(latestCompletedCommandHandoff);
+  if (turn3Content === null) {
     throw new Error("turn-4 attack phase requires the completed turn-3 receipt before its own reset");
   }
   const statRoseStart = statRoseTextStartTick(pressTick, TURN4_OFF_STAT_ROSE_TEXT_DELAY);
   const rockSlideStart = rockSlideTextStartTick(pressTick, TURN4_OFF_ROCKSLIDE_TEXT_DELAY);
   const textClearTick = pressTick + TURN4_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY;
-  drawTurn4RockSlideAttack(fb, t, turn3NextCommandHandoff);
-  drawPlayerHealthboxHpOverlay(fb, turn3NextCommandHandoff.hp.player);
+  drawTurn4RockSlideAttack(fb, t, latestCompletedCommandHandoff);
+  drawPlayerHealthboxHpOverlay(fb, turn3Content.field.player.hp.current);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t < textClearTick) {
     let line1: string;
@@ -9982,6 +9999,59 @@ function turn5KickoffBounceTick(
 }
 
 /**
+ * Generic sibling of `turn5KickoffBounceTick` for callers with no legacy-
+ * typed turn-4 predecessor handoff of their own (typeref-retirement slice 7,
+ * `docs/battlescene-turnN-typeref-retirement-design.md` §4.1, same shape
+ * `turn4KickoffBounceTickFromLatest` established one turn earlier). The
+ * `null` branch (turn 13's own switch-in echo,
+ * `drawTurn13SwitchinPresentationFieldBase`, and every plain-bounceTick
+ * caller of `drawTurn6FieldBase` that folds through `drawTurn5RockSlideAttack`
+ * with no handoff of its own) is copied verbatim, unchanged - it is a fixed
+ * formula over `t`/`pressTick`/constants only and never reads the handoff,
+ * so there is nothing to generalize there. The non-null branch composes the
+ * same `turn5SubmenuBounceTick`/`turn5LegacyResettledBounceTick`/
+ * `turn4RockSlideResettledBounceTick` chain off
+ * `latestCompletedCommandPresentationEpochElapsedSinceReset` instead of a
+ * reconstructed Turn4 handoff - verified field-for-field:
+ * `turn4RockSlideResettledBounceTick` reads
+ * `turn4NextCommandHandoff.presentationEpoch.elapsed` via
+ * `turn4PresentationEpochElapsedSinceReset`, the exact same fact
+ * `latestCompletedCommandPresentationEpochElapsedSinceReset` reads off
+ * `latest.content.presentationEpoch.elapsed` (already confirmed equal at the
+ * publish boundary for turn 4's content, `turn4KickoffBounceTickFromLatest`'s
+ * own doc). `turn5KickoffBounceTick`/`turn5SubmenuBounceTick`/
+ * `turn5LegacyResettledBounceTick`/`turn4RockSlideResettledBounceTick`
+ * themselves stay legacy-typed - `drawFightSubmenuWindow` (Family Q, slice
+ * 7b) still calls them directly with a real reconstructed handoff.
+ */
+function turn5KickoffBounceTickFromLatest(
+  t: number,
+  pressTick: number,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
+): number {
+  if (latestCompletedCommandHandoff === null) {
+    const historicalResettledTick = (value: number) => value
+      - (TURN4_CONFIRM_PRESS_TICK + TURN4_ROCKSLIDE_MENU_REDRAW_DELAY)
+      + (MENU_IDLE_BLANK_END_TICK + 1);
+    if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) {
+      return historicalResettledTick(t) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+    }
+    return historicalResettledTick(TURN5_CONFIRM_PRESS_TICK)
+      - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  }
+  const sourceTick = t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY ? t : pressTick;
+  const epochAge = latestCompletedCommandPresentationEpochElapsedSinceReset(
+    latestCompletedCommandHandoff,
+    sourceTick - TICK0,
+  );
+  if (epochAge === null) {
+    throw new Error("turn-5 kickoff bounce requires semantic turn-4 presentation epoch content");
+  }
+  return MENU_IDLE_BLANK_END_TICK + 1 + epochAge
+    - TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+}
+
+/**
  * Presentation-seam wiring, window 3 (`docs/presentation-seam-scout.md`
  * §9.4 rungs 2-3): resolved from the REAL staged MOVE_ENDEAVOR kernel event
  * stream (`turn5EndeavorPresentationStaging.ts`), not the RAM-probe-sourced
@@ -10037,28 +10107,23 @@ function drawTurn5EndeavorText(
   fb: Uint8Array,
   t: number,
   pressTick: number,
-  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
   trainerPresentation?: FactoryTrainerPresentation,
 ): void {
   if (t >= rockSlideTextStartTick(TURN5_ROCKSLIDE_PRESS_TICK)) {
-    drawTurn5RockSlideWindow(fb, t, turn4NextCommandHandoff, trainerPresentation);
+    drawTurn5RockSlideWindow(fb, t, latestCompletedCommandHandoff, trainerPresentation);
     return;
   }
-  const bounceTick = turn5KickoffBounceTick(t, pressTick, turn4NextCommandHandoff);
+  const bounceTick = turn5KickoffBounceTickFromLatest(t, pressTick, latestCompletedCommandHandoff);
   const onixHp = endeavorHp(t, pressTick, TURN5_ENDEAVOR_HP.from, TURN5_ENDEAVOR_HP.to);
   if (drawEndeavorSquish(fb, t, pressTick, anchorOpponentAfterTurn4Hp, bounceTick, ROCK_SLIDE_MOVE_POWER)) {
     drawPlayerHealthboxHpOverlay(fb, onixHp, endeavorHealthboxBounceY2(t, pressTick));
   } else {
-    drawActionMenuIdleContent(
+    drawActionMenuIdleContentFromLatest(
       fb,
       bounceTick,
-      turn1NextCommandHandoff,
-      turn2NextCommandHandoff,
+      latestCompletedCommandHandoff,
       onixHp,
-      null,
-      turn4NextCommandHandoff,
     );
   }
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
@@ -10596,7 +10661,7 @@ export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: 
  */
 const TURN5_ROCKSLIDE_OPPONENT_TO_HP = resolveTurn5FaintWindowKoHp();
 
-function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false, bgFadeYOverride?: number, onixSinkSkipRows: number = 0, turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null = null): void {
+function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false, bgFadeYOverride?: number, onixSinkSkipRows: number = 0, latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   const shiftY = rockSlideBg3Y(t, pressTick);
   drawStaticBgShiftedY(fb, shiftY, bgFadeYOverride ?? turn5BgFadeY(t), darken ? turn10BgDarkPalette() : undefined);
@@ -10682,7 +10747,7 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
     drawSendOutHealthbox(fb, 0, opponentContent);
     if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
   }
-  drawMenuIdleBounceOverlay(fb, turn5KickoffBounceTick(t, TURN5_CONFIRM_PRESS_TICK, turn4NextCommandHandoff));
+  drawMenuIdleBounceOverlay(fb, turn5KickoffBounceTickFromLatest(t, TURN5_CONFIRM_PRESS_TICK, latestCompletedCommandHandoff));
   for (const i of rockSlideDrawOrder(t, pressTick)) {
     const rock = rockSlideRockState(i, t, pressTick);
     if (!rock) continue;
@@ -15426,12 +15491,12 @@ function drawFaintedOpponentWindow(
  * same "generalize a hardcoded value into a defaulted param" idiom every
  * other reused mechanism in this file already uses.
  */
-function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTickOrTurn4Handoff: number | Turn4CompletedResolutionNextCommandHandoff | null = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0, pidgeottoSink: { keptRows: number; y2: number } | null = null, pidgeottoHealthboxVisible: boolean = true): void {
-  const bounceTick = typeof bounceTickOrTurn4Handoff === "number" ? bounceTickOrTurn4Handoff : t;
-  const turn4NextCommandHandoff = typeof bounceTickOrTurn4Handoff === "number"
+function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTickOrLatest: number | LatestCompletedCommandHandoff | null = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0, pidgeottoSink: { keptRows: number; y2: number } | null = null, pidgeottoHealthboxVisible: boolean = true): void {
+  const bounceTick = typeof bounceTickOrLatest === "number" ? bounceTickOrLatest : t;
+  const latestCompletedCommandHandoff = typeof bounceTickOrLatest === "number"
     ? null
-    : bounceTickOrTurn4Handoff;
-  drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite, onixX2, onixInvisible, onixY2Extra, darken, undefined, 0, turn4NextCommandHandoff);
+    : bounceTickOrLatest;
+  drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite, onixX2, onixInvisible, onixY2Extra, darken, undefined, 0, latestCompletedCommandHandoff);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t, pidgeottoX2, pidgeottoSink);
   // S7 slice M (docs/faint-switch-notes.md §8e/§11): Pidgeotto's own
@@ -15467,11 +15532,11 @@ function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTickOrTurn4Handoff:
 function drawTurn5RockSlideWindow(
   fb: Uint8Array,
   t: number,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
   trainerPresentation?: FactoryTrainerPresentation,
 ): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
-  drawTurn6FieldBase(fb, t, turn4NextCommandHandoff);
+  drawTurn6FieldBase(fb, t, latestCompletedCommandHandoff);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const faintedStart = turn5FaintedTextStartTick(pressTick);
   if (t < faintedStart) {
