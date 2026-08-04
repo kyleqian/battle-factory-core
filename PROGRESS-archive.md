@@ -1,5 +1,39 @@
 
 ---
+## 910 — [supervisor, 2026-08-04 ~08:10] R1 pair landed: terminal-seam presentation phase (main) + Cmd_end3 resumption wiring (side, merged)
+
+- **State:** master `a7bbed0b` (merge of `worker/side-20260804-071645`,
+  `8e2bf807`). Union verified supervisor-side: smoke 347/347, the four
+  touched test surfaces green (end3 resumption, machine, frontier ratchet,
+  trainer-slide — 21/21). Each worker ran its own full `npm test` green at
+  its commit (main: 701 files/6,788; side: 701 files/6,790). Side worktree
+  and branch removed.
+- **Did:** (1) MAIN: #73 item 1 rung A — see entry 909. (2) SIDE:
+  `Cmd_end3`/`BattleScriptPushCursorAndCallback` resumption for
+  `call-current`-entered switch-in ability scripts (`battleScriptMachine.ts`
+  `end3()` pops/resumes via shared `callStack` like `RETURN` when non-empty;
+  empty-stack halt unchanged so the end-turn cCallback flavor is preserved);
+  `B_ANIM_SANDSTORM_CONTINUES` registered. Sand Stream + Drizzle + Drought
+  full-turn switch-in repros run to completion, kernel-event-pinned,
+  red-verified vs the old `B_SCR_OP_END3` barrier; ratchet pins unmoved.
+  ISSUES #72's end3 block updated (kernel unblocked; id needs only its
+  `messageLines` branch now). (3) Launcher note: main R1's launcher pipeline
+  broke mid-run (spurious exit-1 notification at ~07:51) while launcher +
+  worker were both alive and healthy — diagnosed via process-tree +
+  JSONL-growth check before touching anything; zero kills, worker finished
+  normally at 08:03.
+- **Next:** R2 pair — MAIN: #73 rung B (oracle-pixel windows over the new
+  terminal presentation, both outcomes). SIDE: docs-only falsification scout
+  for the #72 hard tail (tryfaintmon dual-operand roles for
+  TOOKFOE/LOSTPPGRUDGE, SXBLOCKSY2 Perish-Song loop, HUNGONWITHX Focus-Band
+  staging search). Then #72 batch 8 (SXWHIPPEDUPSANDSTORM +
+  SAFEGUARDEXPIRED + TOOKATTACK).
+- **Notes:** animation supervisor live concurrently (its own Codex worker in
+  `.worktrees/animation-main/.worktrees/`); `animation-main` has advanced —
+  fold check at wind-down. Worker 909's "~03:15" timestamp corrected to
+  ~08:00 (known drift class).
+
+---
 ## 909 — [bounded MAIN worker, 2026-08-04 ~08:00] Terminal-seam increment (iii) landed: generic trainer slide-in + dismissible win/loss message boxes (ISSUES #73 item 1 rung A)
 
 - **State:** master `a1dc6614`. Full `npm test` green (**701 files / 6,788

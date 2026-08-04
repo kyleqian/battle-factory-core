@@ -30,7 +30,6 @@ import frontierMonsData from "../../src/data/gen/battle-frontier-mons.json" with
 import naturesData from "../../src/data/gen/natures.json" with { type: "json" };
 import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusParty.ts";
 import {
-  advanceFactoryRoundBattleResolution,
   advanceFactoryRoundPresentation,
   beginFactoryRoundBattleStartIntro,
   completeFactoryRoundPresentation,
@@ -286,7 +285,12 @@ function generatedBattleStartIntroMagnetonStage(state: EngineState): EngineState
 // tests/presentationTerminalSeamTrainerSlide.test.ts's terminalResolution()
 // helper uses.
 const TERMINAL_SEAM_SCAFFOLD_PLAYER: FactoryFullTurnBattlerConfig = Object.freeze({
-  species: 12, // BUTTERFREE
+  // MURKROW -- matches the real committed fixture's own last-to-faint player
+  // mon (docs/terminal-seam-loss-path-ground-truth.md §2, frame 2896:
+  // "MURKROW / fainted!"), so the antecedent STRINGID_ATTACKERFAINTED
+  // message this window's scaffold now holds resolves the real oracle text
+  // via the real name resolver rather than a hardcoded string.
+  species: 198, // MURKROW
   moveId: 33, // TACKLE
   moves: [33, 33, 33, 33] as const,
   pp: [35, 35, 35, 35] as const,
@@ -447,9 +451,26 @@ function lossTerminalWindowStage(state: EngineState): EngineState {
     boundary: Object.freeze({ kind: "terminal" as const, outcome: "trainer-win" as const }),
   });
   const events: readonly BattleKernelSemanticEvent[] = [
-    terminalSeamEvent(0, { kind: "set-battler-sprite-visibility", battler: 1, invisible: true }),
-    terminalSeamEvent(1, { kind: "trainer-slide-in", battler: 1 }),
-    terminalSeamEvent(2, { kind: "message", messageId: "STRINGID_TRAINER1WINTEXT", substitutions: [] }),
+    // ISSUES #73 (B)+(C): the real segment this window is edge-relative to
+    // still holds the antecedent "MURKROW fainted!" box (ground-truth doc
+    // §2, frames 2896-2945), and all 3 player mons are already fainted
+    // (§0) -- both are the SAME real event, MURKROW's own Explosion self-KO
+    // (setatkhptozero unconditionally zeroes the user's HP, §0's staging
+    // note), replayed through the real health-bar-update -> hp-change ->
+    // faint-animation -> STRINGID_ATTACKERFAINTED chain (not
+    // STRINGID_TARGETFAINTED -- the *user* of the move is the one who
+    // faints here). The real "faint" command this produces generically
+    // clears both the player's sprite and healthbox (the same
+    // `fainted`-gated visibility every other faint already uses), so it
+    // fixes (C) as a side effect without a separate synthetic event.
+    terminalSeamEvent(0, { kind: "health-bar-update", battler: 0, healthValue: 200 }),
+    terminalSeamEvent(1, { kind: "hp-change", battler: 0, from: 200, to: 0 }),
+    terminalSeamEvent(2, { kind: "faint-animation", battler: 0 }),
+    terminalSeamEvent(3, { kind: "message", messageId: "STRINGID_ATTACKERFAINTED", substitutions: [] }),
+    // The real CONTROLLER_RETURNMONTOBALL recall (A): opponent Dusclops.
+    terminalSeamEvent(4, { kind: "set-battler-sprite-visibility", battler: 1, invisible: true }, { opcodeName: "B_SCR_OP_VARIOUS" }),
+    terminalSeamEvent(5, { kind: "trainer-slide-in", battler: 1 }),
+    terminalSeamEvent(6, { kind: "message", messageId: "STRINGID_TRAINER1WINTEXT", substitutions: [] }),
   ];
   const transition = Object.freeze({
     kind: "terminal" as const,
@@ -467,8 +488,15 @@ function lossTerminalWindowStage(state: EngineState): EngineState {
     confirmHandoff: { fightDisplayCursor: 0, idleBounceElapsed: 0 },
     opponentTrainer: getFactoryTrainerPresentation(50),
   };
+  // Commands 0-2 (the player's antecedent faint chain: hp/faint/message)
+  // and command 3 (opponent recall) are all out-of-window housekeeping this
+  // edge-relative scaffold places before its own frame 0 -- hand-set
+  // directly to commandIndex 4 (the trainer slide) rather than replayed
+  // through real per-tick advancement, matching the same "outside real
+  // ticks" idiom the prior single-command skip used (ISSUES #73).
   const resolution = Object.freeze({
     ...createBattleResolutionPresentation(input),
+    commandIndex: 4,
     lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
     confirmHandoff: null,
   });
@@ -478,11 +506,7 @@ function lossTerminalWindowStage(state: EngineState): EngineState {
     orchestrator.moveSelectionCursors,
   );
 
-  // Advance past command 0 (the opponent return-to-ball sprite-visibility
-  // receipt, minimumFrames 1) once, outside real ticks, so
-  // battlePresentationBoundaries correctly reflects the recall before the
-  // window's own frame 0 (commandIndex 1, the trainer slide) starts.
-  const swapped = advanceFactoryRoundBattleResolution({
+  const swapped = Object.freeze({
     ...orchestrator,
     battle: terminalBattle,
     battleCommandPresentation: null,

@@ -4,6 +4,50 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 913 — [bounded MAIN worker, 2026-08-04 ~11:15] #73 LOSS terminal window closed to 235/236 (reproduced twice); one itemized wait-cursor gap remains
+
+- **State:** master `c8cc6cd4` + this step's uncommitted-until-now docs/tools
+  changes. Full `npm test` green (**703 files / 6,801 passed / 1 skipped**,
+  0 failures), `npm run build` green, `compare:differential --
+  battle-command-generated-off.json --base e62cc253 --summary`: **PASS —
+  128/128 byte-identical**.
+- **Did:** eliminated all three mismatch classes the morning's compare
+  wiring (`29e5cb3d`) diagnosed at a 0/236 baseline. (A) **genuine render
+  gap, fixed in `src`** (commit `c8cc6cd4`): recall
+  (`VARIOUS_RETURN_OPPONENT_MON1/2` → real `CONTROLLER_RETURNMONTOBALL`,
+  `battle_controller_opponent.c`'s `OpponentHandleReturnMonToBall`/
+  `FreeMonSpriteAfterSwitchOutAnim`) now clears the healthbox with the
+  sprite, generically distinguished from the unrelated
+  `CONTROLLER_SPRITEINVISIBILITY` (Dig/Fly) receipt via the emitting
+  instruction's own opcode name (`"sprite-visibility"` command's new
+  `recall` flag) — red-verified, full details in the commit. (B)+(C)
+  **scaffold artifacts, fixed in `tools/compare/appTrace.ts` only**: the
+  antecedent "MURKROW fainted!" box and the player's all-fainted empty field
+  are the same real event (MURKROW's own Explosion self-KO), now replayed
+  through the real `health-bar-update -> hp-change -> faint-animation ->
+  STRINGID_ATTACKERFAINTED` chain ahead of the recall/slide/win-text events,
+  hand-set to `commandIndex: 4` outside real ticks. Result: `npm run compare
+  -- loss-terminal-window-off --summary`: **235/236 frames matched**,
+  reproduced byte-identical across two independent runs (same single match,
+  frame 3231, both times).
+- **Next:** one remaining class is itemized in ISSUES #73, not fixed: a
+  generic wait-cursor (heart glyph, `battleScene.ts:34009-34017`) draws for
+  every `advance: "button"` message once ready, but the oracle shows none at
+  all for the `STRINGID_TRAINER1WINTEXT` quote across the full window
+  (including ~174 frames after fully typed) — likely a distinct real
+  printer path for terminal quotes vs. ordinary battle messages
+  (`STRINGID_TARGETFAINTED` etc.), unconfirmed pending a source read. LOSS
+  half of #73 is otherwise closed. WIN half stays open (side lane owns its
+  ground-truth staging concurrently) and will likely hit the same
+  wait-cursor finding.
+- **Notes:** no `tools/battle-lab/` edits, no WIN-side ground-truth doc, no
+  kernel machine file edits, no #72 work — all per this step's brief.
+  `npm test`'s ~10-minute wall time both runs this session auto-backgrounded
+  past the Bash tool's 120s default (known PAPERCUT class); recovered via
+  `TaskOutput` polling to real completion each time, per entry 912's
+  precedent.
+
+---
 ## 912 — [bounded MAIN worker, 2026-08-04 ~10:20] #72 batch 8: full REACHABLE-10 hard tail landed (9 ids), only STRINGID_MAGNITUDESTRENGTH remains
 
 - **State:** master `cf6579e9`. Full `npm test` green (**703 files /
@@ -93,36 +137,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (~9.5 min this session, ran to a real foreground completion per execution
   discipline).
 
----
-## 910 — [supervisor, 2026-08-04 ~08:10] R1 pair landed: terminal-seam presentation phase (main) + Cmd_end3 resumption wiring (side, merged)
-
-- **State:** master `a7bbed0b` (merge of `worker/side-20260804-071645`,
-  `8e2bf807`). Union verified supervisor-side: smoke 347/347, the four
-  touched test surfaces green (end3 resumption, machine, frontier ratchet,
-  trainer-slide — 21/21). Each worker ran its own full `npm test` green at
-  its commit (main: 701 files/6,788; side: 701 files/6,790). Side worktree
-  and branch removed.
-- **Did:** (1) MAIN: #73 item 1 rung A — see entry 909. (2) SIDE:
-  `Cmd_end3`/`BattleScriptPushCursorAndCallback` resumption for
-  `call-current`-entered switch-in ability scripts (`battleScriptMachine.ts`
-  `end3()` pops/resumes via shared `callStack` like `RETURN` when non-empty;
-  empty-stack halt unchanged so the end-turn cCallback flavor is preserved);
-  `B_ANIM_SANDSTORM_CONTINUES` registered. Sand Stream + Drizzle + Drought
-  full-turn switch-in repros run to completion, kernel-event-pinned,
-  red-verified vs the old `B_SCR_OP_END3` barrier; ratchet pins unmoved.
-  ISSUES #72's end3 block updated (kernel unblocked; id needs only its
-  `messageLines` branch now). (3) Launcher note: main R1's launcher pipeline
-  broke mid-run (spurious exit-1 notification at ~07:51) while launcher +
-  worker were both alive and healthy — diagnosed via process-tree +
-  JSONL-growth check before touching anything; zero kills, worker finished
-  normally at 08:03.
-- **Next:** R2 pair — MAIN: #73 rung B (oracle-pixel windows over the new
-  terminal presentation, both outcomes). SIDE: docs-only falsification scout
-  for the #72 hard tail (tryfaintmon dual-operand roles for
-  TOOKFOE/LOSTPPGRUDGE, SXBLOCKSY2 Perish-Song loop, HUNGONWITHX Focus-Band
-  staging search). Then #72 batch 8 (SXWHIPPEDUPSANDSTORM +
-  SAFEGUARDEXPIRED + TOOKATTACK).
-- **Notes:** animation supervisor live concurrently (its own Codex worker in
-  `.worktrees/animation-main/.worktrees/`); `animation-main` has advanced —
-  fold check at wind-down. Worker 909's "~03:15" timestamp corrected to
-  ~08:00 (known drift class).

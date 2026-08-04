@@ -548,72 +548,86 @@ the old values (53, `offscreenX2: 106`) before updating to the new ones (38,
 green at this fix; `compare:differential -- battle-command-generated-off.json
 --base a7bbed0b --summary` stayed 128/128.
 
-**Still fully open: no `npm run compare` pixel evidence exists for either
-outcome through the generic route.** This session investigated the wiring
-cost and ran out of time before writing it, so there are no mismatching
-frames to report (not "attempted and stuck" — not attempted). Concrete
-findings for whoever picks this up next:
-- The committed LOSS fixture is a `mechanicLab` scenario
-  (`overrides.parties`), so its compare trace needs `oracleBattleLab.scenario`
-  (see `tools/compare/traces/battle-command-generated-off.json` +
-  `tools/battle-lab/mechanic-battle-command-generated-off.json` for the
-  established wrapper-trace/scenario-file pairing convention) — **not**
-  `factoryTerminalLoss.ts`'s bespoke `run-mgba-probe.py` mechanism, which is
-  a different, older tool for a different fixture shape.
-- Do **not** attempt to replay the fixture's full ~4938-frame/46-segment
-  script (3 forced Explosion turns + 2 forced-switch party-menu navigations)
-  through the app from frame 0 — that would require pixel-exact Explosion
-  move-animation and forced-switch-UI timing this task doesn't need and has
-  no budget to verify. Instead, edge-relative construction (this codebase's
-  established convention for every `postwin.ts`/`turn17-notes.md` engine
-  rung): build a compare-only `AppStage` (`tools/compare/appTrace.ts`) that
-  directly constructs a `factoryRoundBattleOrchestrator` state already
-  inside the resolution's `"presenting"` phase at `commandIndex: 1`
-  (trainer-slide, phaseElapsed 0) — i.e. app frame 0 == oracle tick 2996,
-  already past the return-to-ball sprite-visibility command (that animated
-  recall, ticks 2951-2995, is intentionally out of this window per the
-  brief). The resolution state is built the same way
-  `tests/presentationTerminalSeamTrainerSlide.test.ts`'s `terminalResolution()`
-  helper does (`createFactoryFullTurnBattleState` + `createBattleState` with
-  a hand-set `boundary: {kind: "terminal", outcome: "trainer-win"}` +
-  `createBattleResolutionPresentation`), but with the **real production
-  event shape** `tests/battleScriptFaintedActionsOrchestration.test.ts`'s
-  "player's last mon faints" test already proves the kernel emits for LOSS:
-  `[{kind: "set-battler-sprite-visibility", battler: 1, invisible: true},
-  {kind: "trainer-slide-in", battler: 1}, {kind: "message", messageId:
-  "STRINGID_TRAINER1WINTEXT", substitutions: []}]`, `opponentTrainer:
-  getFactoryTrainerPresentation(50)` (`CANONICAL_DESTIN_PRESENTATION`, since
-  the fixture uses `trainerId: 50`). Advance past command 0 once (outside
-  real ticks, in the stage constructor) via the real
-  `advanceFactoryRoundBattleResolution` so `battlePresentationBoundaries`
-  correctly reflects the recall.
-- Wrap that resolution in a **real** orchestrator base built via
-  `createFactoryRoundBattleOrchestrator({rentals: {type: "currentRecords",
-  ...}})` + the same `acknowledgeAndAdvance` pattern
-  `tests/factoryRoundBattleOrchestrator.test.ts`'s `createStartedGeneratedBattle`
-  uses, so `aiHistory`/`activeBattleCallStart`/`battlePresentationBoundaries`
-  are all real, non-null values before `battle`/`battleResolutionPresentation`
-  get swapped for the synthetic terminal ones above — `finishBattle` (fires
-  automatically once the dismiss press completes `terminal-handoff`, which
-  is inside the compare window) needs all of those non-null or it throws.
-  `FactoryBattlePresentationBattlerBoundary`'s exact shape is at
-  `factoryRoundBattleOrchestrator.ts:213-227`; the boundary-builder itself
-  (`createBattlePresentationBoundaries`) is private to that file, so
-  replicate its ~15 lines rather than importing it.
-- The compare trace's own `captureFrames` should be the corresponding
-  relative window (0 through the dismiss + a few frames past, i.e. real
-  ticks 2996-3232ish minus 2996), and `oracleBattleLab.preCheckpointFrameOffset:
-  2996` lets the oracle side reuse the fixture's own already-committed
-  208-capture list (renumbered) instead of re-running the whole battle —
-  see `runOracleBattleLab`'s `preCheckpointFrameOffset` branch in
-  `tools/compare/oracleClient.ts` for the exact mechanism (it was built for
-  exactly this "checkpoint mid-scenario" shape; unconfirmed this session
-  whether the LOSS fixture's own `captureFrames` already satisfies it as-is
-  or needs a `preCheckpointCaptureFrames` field added to the *scenario* file
-  — check `BATTLE_LAB.md`'s own checkpoint documentation before assuming).
-- WIN side additionally needs a **fresh** `mechanicLab` staging (final hit →
-  quote dismiss), twice-run byte-identical, following the LOSS doc's own
-  §0 staging recipe, before any of the above applies to it.
+**2026-08-04 LOSS-half closed: 235/236 (reproduced twice byte-identical);
+one itemized remaining class, not this window's scaffold.** The compare
+wiring landed that morning (`29e5cb3d`, `tools/compare/appTrace.ts`'s
+`loss-terminal-window-off` stage) at a reproducible 0/236 baseline with
+three diagnosed mismatch classes. This session fixed all three:
+- **(A) genuine render gap, fixed in `src`:** `VARIOUS_RETURN_OPPONENT_MON1/2`'s
+  real controller receipt is `CONTROLLER_RETURNMONTOBALL`
+  (`BtlController_EmitReturnMonToBall`), not `CONTROLLER_SPRITEINVISIBILITY`
+  — `battle_controller_opponent.c`'s `OpponentHandleReturnMonToBall`/
+  `FreeMonSpriteAfterSwitchOutAnim` both call `SetHealthboxSpriteInvisible`
+  alongside destroying the sprite, unlike `OpponentHandleSpriteInvisibility`
+  (`Cmd_moveend`'s Dig/Fly semi-invisible toggle, `Cmd_makevisible`), which
+  never touches the healthbox. Both real ROM commands were modeled as the
+  same kernel event kind (`set-battler-sprite-visibility`); the
+  `"sprite-visibility"` presentation command now carries a `recall` flag
+  distinguishing them, sourced generically from the emitting instruction's
+  own interpreter provenance (`opcodeName === "B_SCR_OP_VARIOUS"`), not any
+  window-specific special case. `battleResolutionPresentationRender.ts` gates
+  `visibility.{player,opponent}.healthbox` on a new `healthboxVisibility` map
+  that only recall transitions touch. Red-verified via
+  `tests/presentationTerminalSeamTrainerSlide.test.ts`'s LOSS case (asserts
+  `{sprite: false, healthbox: false}`; `git stash -- src/engine/
+  battleResolutionPresentation.ts src/engine/battleResolutionPresentationRender.ts`
+  flips it to `{sprite: false, healthbox: true}`, the bug). Existing Dig/Fly
+  pins (`turn15FlyResolutionAdapter.test.ts`) and every other
+  `sprite-visibility` pin (`toMatchObject`/`objectContaining`, plus two
+  `toEqual` arrays updated to `recall: false` in `battleTurnPortability.test.ts`)
+  are unaffected — landed `c8cc6cd4`.
+- **(B)+(C) scaffold artifacts, fixed in `tools/compare/appTrace.ts` only:**
+  the antecedent "MURKROW fainted!" box and the player's all-fainted empty
+  field are the *same* real event — MURKROW's own Explosion self-KO
+  (`setatkhptozero`) — now replayed through the real
+  `health-bar-update -> hp-change -> faint-animation -> STRINGID_ATTACKERFAINTED`
+  chain (not `STRINGID_TARGETFAINTED`: the move's *user* is the one who
+  faints here) ahead of the existing recall/slide/win-text events, all
+  hand-set to `commandIndex: 4` (outside real ticks, same idiom as the prior
+  single-command skip) rather than replayed from true frame 0.
+  `TERMINAL_SEAM_SCAFFOLD_PLAYER`'s species changed to MURKROW (198) so the
+  real name resolver — not a hardcoded string — reproduces the oracle's
+  literal text. The real `"faint"` command's existing `fainted`-gated
+  visibility hides the player sprite+healthbox as a side effect, so no
+  separate synthetic event was needed for (C).
+- **Result:** `npm run compare -- loss-terminal-window-off --summary`:
+  **235/236 frames matched**, reproduced byte-identical across two
+  independent runs (same single frame, 3231, matches both times; same
+  single remaining mismatch class both times).
+
+**One remaining class, itemized (not guess-fit):** every mismatched frame
+(2996–3230, all 235) differs only in a small fixed region — pixel bbox
+around `(61–71, 140–149)`, 37px (0.10%), drifting a few pixels per frame as
+the message box height settles then holding fixed once the win-text is
+fully typed. Root cause, pixel-confirmed via
+`tools/compare/out/*/diff-03100.png`: the generic wait-cursor (heart glyph,
+`battleScene.ts:34009–34017`, `drawCursor` at
+`CURSOR_Y_OFFSETS[Math.floor(view.waitCursor.age / 9) % N]`) draws
+unconditionally once any `advance: "button"` message becomes
+ready-for-input (`battleResolutionPresentationRender.ts`'s `waitCursor`
+field) — the same mechanism `STRINGID_TARGETFAINTED` uses. The oracle shows
+**no cursor at all** for the `STRINGID_TRAINER1WINTEXT` quote box across the
+entire window, including ~174 frames after the message is fully typed and
+settled (frame 3231, right before the real dismiss press) — this is not a
+blink-phase-alignment miss (the cursor bounces between Y offsets, it
+doesn't toggle on/off), so the real ROM's terminal win/loss-quote printer
+most likely never spawns the standard wait-cursor task at all, unlike
+ordinary in-battle button messages. Confirming this needs a source read of
+`_LocalBattleLostPrintTrainersWinText`/the win-side equivalent's actual
+`Cmd_printstring` call shape (likely a distinct printer path from
+`Cmd_printstring`'s ordinary use, since `TERMINAL_SEAM_BUTTON_MESSAGE_IDS`
+currently treats these three ids identically to any other button message) —
+not attempted this session, no budget remaining. A fix should gate
+`waitCursor` (or add a `noCursor` flag to `TERMINAL_SEAM_BUTTON_MESSAGE_IDS`'s
+three ids) once the real mechanism is confirmed, not just suppressed to make
+the number look clean.
+
+- WIN side still needs a **fresh** `mechanicLab` staging (final hit → quote
+  dismiss), twice-run byte-identical, following the LOSS doc's own §0
+  staging recipe, before any of the above (including the wait-cursor
+  finding, which likely applies equally to the WIN quote) applies to it —
+  out of scope this session per the brief (WIN ground truth is a side lane's
+  concurrent responsibility).
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
