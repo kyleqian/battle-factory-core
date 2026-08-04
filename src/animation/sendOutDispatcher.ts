@@ -90,11 +90,6 @@ import {
 
 const FRONT_ANIM_PREFIX = "ANIM_";
 
-interface SendOutFrontDispatchEntry {
-  readonly reducer: (tick: number) => SpeciesIdleOffset | null;
-  readonly terminalTick: number;
-}
-
 /**
  * Per-family clamp ticks, copied VERBATIM from `computeTerminalOffset`'s
  * per-case reducer-call literals (`speciesIdleAnim.ts:7088-7528`). The
