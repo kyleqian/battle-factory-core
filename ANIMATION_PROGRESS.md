@@ -43,7 +43,7 @@
   (the program is visible on the anchor frame, undelayed). Focused 4 files /
   26 tests, typecheck, smoke **7/347**, full **718 files / 6,905 passed / 1
   skipped**, build green. Committed `7d4e2020` (probe+fixtures) then
-  `4d5c0c22` (evidence test + doc); tree clean at commit.
+  `8efef5c1` (evidence test + doc); tree clean at commit.
 
 ## Rung-3 send-out sprite-frame (OAM/anim-frame) half landed (2026-08-04)
 
