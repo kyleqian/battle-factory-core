@@ -8,18 +8,17 @@
   compare (evidence/RGB hashes reproduce; no drift). Move coverage unchanged:
   **107/276 exact, 1 partial (STEEL_WING), 0 staged, 168 unsupported** — status
   stays **partial** (player incomplete; opponent's 197 is once, not twice-fresh).
-- **Did:** (per-fix counts below) elliptical tick≥15 inactive (+1 player, age
-  126); opponent gust startY +0 (opponent +26, ages 111-136); hitsplat affine
-  303 (not 372) with first rendered frame at age 156 (displayed — direct pixel
-  measurement shows the oracle's hitsplat is absent at creation age 155 in both
-  orientations, correcting the diagnosis's "renders on creation frame");
-  metallic grayscale+metal gated off the initializer display (+1 each, age 9 —
-  the real age-9 mechanism was the grayscale starting one callback early, not
-  the metal band); enemy shadow at opponent age 0 (+1); **gust/hitsplat target
-  Y_PIC_OFFSET** (+8 player-back target, source `relative_to=ANIM_TARGET` /
-  `InitAnimLinearTranslation` anchor) fixed opponent ages 137-154 (+18) and the
-  opponent hitsplat y. Baseline 140 → +26 (startY) → +1 (shadow+metallic) →
-  +18 (target Y offset) → +1 (metallic) → +10 (hitsplat 303+frame) → … → 197.
+- **Did:** player 168 → **180/197**: +1 ellipse terminal tick≥15 inactive (age
+  126), +10 hitsplat affine 303 + displayed-first-frame (ages 156-165), +1
+  metallic grayscale gate (age 9). Opponent 140 → **197/197**: +26 gust startY
+  +0 (ages 111-136), +1 enemy shadow (age 0), +1 metallic grayscale gate (age
+  9), +18 gust/hitsplat **target Y_PIC_OFFSET** (ages 137-154; the source's
+  `relative_to=ANIM_TARGET` / `InitAnimLinearTranslation` anchor is +8 for the
+  player-back target, not the attacker's), +10 hitsplat affine 303 +
+  target-y + displayed-first-frame (ages 156-165), +1 hitsplat absent at the
+  creation frame (age 155 — direct pixel measurement shows the oracle's
+  hitsplat is NOT rendered at creation; the diagnosis's "renders on creation
+  frame" was OAM-presence misread as rendered).
 - **Pins changed:** `steelWing.test.ts` — elliptical tick-15 inactive (was
   terminal (-5,1) residue), tick-14 (-9,2) as last visible, added opponent
   gust startY +0 pin; `steelWingEvidence.test.ts` — per-fixture counts 180/197
