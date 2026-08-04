@@ -7369,12 +7369,11 @@ function drawBattle2RockSlideTurn1Window(
       FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
       frozen,
     );
-    drawFightSubmenuChrome(
+    drawFightSubmenuChromeFromLatest(
       fb,
       sm.displayCursor,
-      null,
-      null,
       sm.activeMonMoveset,
+      null,
     );
     return;
   }
@@ -8102,7 +8101,7 @@ function drawFightSubmenuWindow(
     // Slice 7 doc comment: `DoBounceEffect` stops being polled the instant
     // the A-press hands off, not merely once the text becomes visible).
     drawMenuIdleBaseWithOpponentHp(fb, currentEpochHandoff, currentTurn2Handoff, currentTurn3Handoff, currentTurn4Handoff);
-    drawFightSubmenuChromeFromCurrentOwner(fb, sm.displayCursor, currentEpochHandoff, currentTurn2Handoff, sm.activeMonMoveset, currentTurn3Handoff, currentTurn4Handoff, latestCompletedCommandHandoff);
+    drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latestCompletedCommandHandoff);
     // S7 slice G: turn 3's own confirm-wait window now uses the same
     // freeze-then-hold shape turns 1/2 already established
     // (`turn3KickoffBounceTick`) instead of the plain live formula slice F's
@@ -8147,7 +8146,7 @@ function drawFightSubmenuWindow(
     return;
   }
   drawMenuIdleBaseWithOpponentHp(fb, currentEpochHandoff, currentTurn2Handoff, currentTurn3Handoff, currentTurn4Handoff);
-  drawFightSubmenuChromeFromCurrentOwner(fb, sm.displayCursor, currentEpochHandoff, currentTurn2Handoff, sm.activeMonMoveset, currentTurn3Handoff, currentTurn4Handoff, latestCompletedCommandHandoff);
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latestCompletedCommandHandoff);
   // S7 slice E1: turn 2's own reopened submenu inherits the resettled menu's
   // bounce phase, not the plain absolute-`t` mapping turn 1's first open
   // happened to coincide with (the turn-2 epoch mapping's own doc). S7 slice
@@ -8247,81 +8246,18 @@ function drawFightSubmenuOuterChrome(fb: Uint8Array): void {
 }
 
 /**
- * `drawFightSubmenuChrome`'s own historical turn 1-4 predecessor-chain PP
- * reconstruction. Turn 5-13 never reach this route with a real value (every
- * caller omits them, defaulting to null - see the census-verified positional
- * ABI this slice retired from `currentPPForActiveMon` itself), so this keeps
- * only the turn 1-4 subset of that retired chain, local to its one remaining
- * caller.
- */
-function drawFightSubmenuChromeTurn1Through4PP(
-  moveset: ActiveMonMoveset,
-  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null,
-  lockedActionResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null,
-  followingResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null,
-): readonly [number, number, number, number] {
-  const [a, b, c, d] = moveset.maxPP;
-  const turn1Slot0Uses = isTurn1NextCommandHandoffReady(turn1NextCommandHandoff)
-    ? rentalMoveset("ONIX").maxPP[turn1NextCommandHandoff.persistedMoveSlot]
-      - turn1NextCommandHandoff.playerPp[turn1NextCommandHandoff.persistedMoveSlot]
-    : 0;
-  const turn2Slot2Uses = isTurn2NextCommandHandoffReady(turn2NextCommandHandoff)
-    ? rentalMoveset("ONIX").maxPP[turn2NextCommandHandoff.persistedMoveSlot]
-      - turn2NextCommandHandoff.playerPp[turn2NextCommandHandoff.persistedMoveSlot]
-    : 0;
-  const slot0UsesAfterTurn3 = isTurn3NextCommandHandoffReady(turn3NextCommandHandoff)
-    ? rentalMoveset("ONIX").maxPP[turn3NextCommandHandoff.persistedMoveSlot]
-      - turn3NextCommandHandoff.playerPp[turn3NextCommandHandoff.persistedMoveSlot]
-    : turn1Slot0Uses;
-  const slot0UsesAfterTurn4 = isTurn4NextCommandHandoffReady(turn4NextCommandHandoff)
-    ? rentalMoveset("ONIX").maxPP[turn4NextCommandHandoff.persistedMoveSlot]
-      - turn4NextCommandHandoff.playerPp[turn4NextCommandHandoff.persistedMoveSlot]
-    : slot0UsesAfterTurn3;
-  const resolvedPlayerPp = lockedActionResolution?.segments[0]
-    ?.afterRules.rulesContext.battlers[0]!.pp;
-  const followingPlayerPp = followingResolution?.segments.at(-1)
-    ?.afterRules.rulesContext.battlers[0]!.pp;
-  if (followingPlayerPp !== undefined) return followingPlayerPp;
-  return [
-    a - slot0UsesAfterTurn4,
-    b,
-    resolvedPlayerPp?.[2] ?? c - turn2Slot2Uses,
-    d,
-  ];
-}
-
-function drawFightSubmenuChrome(
-  fb: Uint8Array,
-  displayCursor: FightSubmenuSlot,
-  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null,
-  moveset: ActiveMonMoveset,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null = null,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null = null,
-  lockedActionResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
-  followingResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
-): void {
-  const currentPP = drawFightSubmenuChromeTurn1Through4PP(moveset, turn1NextCommandHandoff, turn2NextCommandHandoff, turn3NextCommandHandoff, turn4NextCommandHandoff, lockedActionResolution, followingResolution);
-  drawFightSubmenuChromeFromLiveState(
-    fb,
-    displayCursor,
-    buildFightMoveset(moveset.moveIds, currentPP),
-  );
-}
-
-/**
  * Generic-owner chrome for the contentful production route: this live route
  * receives one canonical tuple from its semantic owner instead of rebuilding
- * it from a turn-keyed predecessor list.
+ * it from a turn-keyed predecessor list. `latest` may be `null` before any
+ * command has completed - `currentPPForActiveMon` projects that to the raw
+ * moveset maxima, the same fallback the retired turn1-4 predecessor-chain
+ * reconstruction produced when every turnN handoff was unready.
  */
 function drawFightSubmenuChromeFromLatest(
   fb: Uint8Array,
   displayCursor: FightSubmenuSlot,
   moveset: ActiveMonMoveset,
-  latest: LatestCompletedCommandHandoff,
+  latest: LatestCompletedCommandHandoff | null,
   lockedActionResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
   followingResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
 ): void {
@@ -8335,36 +8271,6 @@ function drawFightSubmenuChromeFromLatest(
     fb,
     displayCursor,
     buildFightMoveset(moveset.moveIds, currentPP),
-  );
-}
-
-/**
- * Production Turn 1 and 5-13 records both project PP from their generic
- * owner. The positional path remains only for direct legacy renderer tests
- * until slice 10 removes that ABI.
- */
-function drawFightSubmenuChromeFromCurrentOwner(
-  fb: Uint8Array,
-  displayCursor: FightSubmenuSlot,
-  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null,
-  moveset: ActiveMonMoveset,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null,
-  latest: LatestCompletedCommandHandoff | null,
-): void {
-  if (isLatestCompletedCommandHandoffReady(latest)) {
-    drawFightSubmenuChromeFromLatest(fb, displayCursor, moveset, latest);
-    return;
-  }
-  drawFightSubmenuChrome(
-    fb,
-    displayCursor,
-    turn1NextCommandHandoff,
-    turn2NextCommandHandoff,
-    moveset,
-    turn3NextCommandHandoff,
-    turn4NextCommandHandoff,
   );
 }
 
@@ -12162,17 +12068,13 @@ function drawTurn6FightSubmenuWindow(
   // remaining x=232-239 strip is the outer window frame's own right-edge
   // decoration, unaffected by open/closed state (the same reason turns 1-5's
   // code gets away with reusing `menuIdleBase` unconditionally under
-  // `drawFightSubmenuChrome`: that static harvest's own border pixels are
+  // `drawFightSubmenuChromeFromLatest`: that static harvest's own border pixels are
   // valid for BOTH states). `drawTileBg` alone doesn't fill it (proven only
   // by `drawTurn5SitrusSettledMenuChrome`'s own unconditional overwrite in
   // the idle path) - draw the same chrome crop first so the submenu box then
   // opaquely overwrites just its own interior on top.
   drawTurn5SitrusSettledMenuChrome(fb);
-  if (latest !== null) {
-    drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
-  } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
-  }
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
 }
 
 /**
@@ -12261,11 +12163,7 @@ function drawTurn7FightSubmenuWindow(
   drawTurn7FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  if (latest !== null) {
-    drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
-  } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
-  }
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
 }
 
 /**
@@ -12479,11 +12377,7 @@ function drawTurn8FightSubmenuWindow(
   drawTurn8FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  if (latest !== null) {
-    drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
-  } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
-  }
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
 }
 
 /**
@@ -13460,11 +13354,7 @@ function drawTurn9FightSubmenuWindow(
   drawTurn9FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  if (latest !== null) {
-    drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
-  } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
-  }
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
 }
 
 /**
@@ -14048,11 +13938,7 @@ function drawTurn10FightSubmenuWindow(
   drawTurn10FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  if (latest !== null) {
-    drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
-  } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
-  }
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
 }
 
 /**
@@ -14387,11 +14273,7 @@ function drawTurn11FightSubmenuWindow(
   drawTurn11FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  if (latest !== null) {
-    drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
-  } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
-  }
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
 }
 
 /**
@@ -14636,11 +14518,7 @@ function drawTurn12FightSubmenuWindow(
   drawTurn12FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  if (latest !== null) {
-    drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
-  } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
-  }
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
 }
 
 /**
@@ -14750,11 +14628,7 @@ function drawTurn13FightSubmenuWindow(
   drawTurn13FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  if (latest !== null) {
-    drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
-  } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
-  }
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
 }
 
 /**
@@ -16423,11 +16297,7 @@ function drawTurn14FightSubmenuWindow(
   drawTurn5SitrusSettledMenuChrome(fb);
   // The handoff owns turn 13's already-completed PP and persisted slot before
   // the retained charge receipt advances to its locked strike segment.
-  if (latest !== null) {
-    drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
-  } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
-  }
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
 }
 
 // --- S7/S8 turn 15 (docs/turn15-notes.md): Murkrow's FLY strike-half kickoff
@@ -16897,17 +16767,13 @@ function drawTurn15FightSubmenuWindow(
   drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  if (latest !== null) {
-    drawFightSubmenuChromeFromLatest(
-      fb,
-      sm.displayCursor,
-      sm.activeMonMoveset,
-      latest,
-      resolution,
-    );
-  } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, resolution);
-  }
+  drawFightSubmenuChromeFromLatest(
+    fb,
+    sm.displayCursor,
+    sm.activeMonMoveset,
+    latest,
+    resolution,
+  );
 }
 
 type PartyChromeFrame = { palette: number[]; indices: string };
@@ -18167,13 +18033,10 @@ function drawTurn16FightSubmenuWindow(
     }
 
     drawTurn5SitrusSettledMenuChrome(fb);
-    drawFightSubmenuChrome(
+    drawFightSubmenuChromeFromLatest(
       fb,
       sm.displayCursor,
-      null,
-      null,
       sm.activeMonMoveset,
-      null,
       null,
       null,
       followingPresentation?.resolution ?? null,
@@ -18292,13 +18155,10 @@ function drawTurn16FightSubmenuWindow(
 
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  drawFightSubmenuChrome(
+  drawFightSubmenuChromeFromLatest(
     fb,
     sm.displayCursor,
-    null,
-    null,
     sm.activeMonMoveset,
-    null,
     null,
     null,
     isNextCommand ? followingPresentation.resolution : null,
@@ -22444,11 +22304,12 @@ export function renderSceneOnMovePresentation(
     const menuLastAge = playerToOpponent ? -31 : -35;
     if (reflectState.age <= menuLastAge) {
       drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-      drawFightSubmenuChrome(
-        fb, 0, null, null,
+      drawFightSubmenuChromeFromLatest(
+        fb, 0,
         playerToOpponent
           ? { moveIds: [115, 115, 115, 115], maxPP: [20, 20, 20, 20] }
           : { moveIds: [33, 33, 33, 33], maxPP: [35, 35, 35, 35] },
+        null,
       );
       // The move-selection window is 231 px wide and intentionally leaves
       // the persistent right-edge field chrome untouched.
@@ -22759,14 +22620,13 @@ export function renderSceneOnMovePresentation(
         battleWindow.tilemap,
         battleWindow.palette,
       );
-      drawFightSubmenuChrome(
+      drawFightSubmenuChromeFromLatest(
         fb,
         0,
-        null,
-        null,
         playerToOpponent
           ? { moveIds: [113, 113, 113, 113], maxPP: [30, 30, 30, 30] }
           : { moveIds: [33, 33, 33, 33], maxPP: [35, 35, 35, 35] },
+        null,
       );
       for (let y = 113; y < 159; y++) {
         for (let x = 232; x < 239; x++) {
@@ -24623,12 +24483,11 @@ export function renderSceneOnMovePresentation(
     );
     if (controllerDisplay.fightMenuVisible) {
       drawFightSubmenuOuterChrome(fb);
-      drawFightSubmenuChrome(
+      drawFightSubmenuChromeFromLatest(
         fb,
         fakeState.config.controllerPresentation.kickoff.selection.cursor,
-        null,
-        null,
         fakeState.config.controllerPresentation.kickoff.selection,
+        null,
       );
       return;
     }
@@ -34672,7 +34531,7 @@ export function renderSceneOffTurnView(
     }
   }
   if (view.bottom === "fight") {
-    drawFightSubmenuChrome(fb, 0, null, null, view.moveset);
+    drawFightSubmenuChromeFromLatest(fb, 0, view.moveset, null);
   } else if (view.bottom === "action") {
     drawTurn5SitrusSettledMenuChrome(fb);
   } else if (view.bottom === "message" && view.messageLines) {
