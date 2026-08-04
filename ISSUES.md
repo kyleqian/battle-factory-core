@@ -203,25 +203,32 @@ nickname-resolution wiring in `prepareMessage`, not yet ported) and
 `STRINGID_PKMNCUTSATTACKWITH`'s Intimidate loop already got) were not
 attempted this step; both are plausible next picks.
 
-**New tracked gap found staging `STRINGID_PKMNLAIDCURSE`:** a real Ghost
-Curse full turn (Dusclops-type user, real Curse use) reaches `STATUS2_CURSED`
-correctly, but the end-of-turn tick throws `full-turn reducer's end-turn
-orchestration hit case ENDTURN_CURSE (STATUS2_CURSED set but BattleScript_
-CurseTurnDmg is not wired)` (`factoryBattleScriptFullTurnDecision.ts`'s
-`runEndTurnTail` case-barrier) — the per-turn Curse damage tick itself has no
-handler, an engine gap unrelated to the printstring/messageLines fix. Fixing
-this (wiring `BattleScript_CurseTurnDmg` into the end-of-turn orchestration,
-same shape as the Wrap/Reflect/Wish ticks already there) is a prerequisite
-for landing `STRINGID_PKMNLAIDCURSE` via a full-turn repro.
+**ENDTURN_CURSE engine gap FIXED:** `battleEndTurnOrchestration.ts`'s
+`ENDTURN_CURSE` case (`battle_util.c:1581-1591`) is now wired the same shape
+as the already-wired Nightmare tick (`docs/end-turn-ground-truth.md` B9,
+identical `maxHP/4`-min-1 damage math via the shared `DoTurnDmg` tail, no new
+opcodes). Two direct orchestration tests pin it in
+`tests/battleEndTurnOrchestration.test.ts`.
 
-**REACHABLE (40), ordered by carrier-weight proxy for likely-hit-first —
+**Batch 4 landed** (`tests/presentationStringIssue72Batch4.test.ts`, both
+red-verified via `git stash -- src/engine/battleResolutionPresentation.ts`):
+`STRINGID_PKMNLAIDCURSE` (Ghost Curse, Dusclops carrier — plain
+attacker/defender pair, unblocked now that the Curse end-turn tick above
+resolves the same turn instead of case-barriering). Note the real source's
+own curse/self-damage split, live-verified by the full-turn repro: `cursetarget`
+sets `STATUS2_CURSED` on the move's TARGET (the opponent takes the recurring
+end-of-turn tick), while the self-damage cost (`floor(attacker.maxHP / 2)`)
+lands on the ATTACKER who cast it — the printstring's `{B_ATK_NAME_WITH_PREFIX}`/
+`{B_DEF_NAME_WITH_PREFIX}` pair already had this right without any new
+substitution plumbing.
+
+**REACHABLE (39), ordered by carrier-weight proxy for likely-hit-first —
 name a batch, use the Taunt-pair idiom** (`messageId === "STRINGID_X"` branch
 in `messageLines`, `requireMoveDefender`/`actionSnapshot`-sourced battler,
 staged full-turn repro test, red-verify via `git stash`):
 `STRINGID_PKMNHUNGONWITHX`,
 `STRINGID_PKMNREGAINEDHEALTH`,
 `STRINGID_PKMNPROTECTEDBY`,
-`STRINGID_PKMNLAIDCURSE` (blocked on the new `ENDTURN_CURSE` gap above),
 `STRINGID_PKMNTRACED`,
 `STRINGID_PKMNSXBLOCKSY2`, `STRINGID_PKMNFREEDFROM`,
 `STRINGID_PKMNGOTFREE`, `STRINGID_PKMNSXCUREDYPROBLEM`,

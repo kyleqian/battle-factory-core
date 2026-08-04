@@ -970,8 +970,20 @@ function messageLines(
       B_BUFF1: () => moveName,
     });
   }
-  // ISSUES #72 batch 3 (docs/issue72-reachability-triage.md): the plain-idiom
+  // ISSUES #72 batch 4 (docs/issue72-reachability-triage.md): the plain-idiom
   // tail starting at STRINGID_PKMNLAIDCURSE.
+  if (messageId === "STRINGID_PKMNLAIDCURSE") {
+    // BattleScript_DoGhostCurse: a Ghost-type Curse always targets the
+    // opponent (MOVE_TARGET_SELECTED), so gBattlerAttacker != gBattlerTarget
+    // and the label's own jumpifbytenotequal skips getmovetarget -- the
+    // move's own (still-current) attacker/target roles are unchanged.
+    const attacker = requireMoveAttacker(lastMoveAttacker, "laid-curse message");
+    const defender = requireMoveDefender(lastMoveAttacker, "laid-curse message");
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
   if (messageId === "STRINGID_PKMNCOPIEDSTATCHANGES") {
     // BattleScript_EffectPsychUp: Cmd_copyfoestats reads/writes the move's own
     // (still-current) attacker/target roles unconditionally -- zero TS
