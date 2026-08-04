@@ -58,6 +58,7 @@ const ITEM_LEFTOVERS = 200;
 /** include/constants/battle.h:129-142. */
 const STATUS2_CONFUSION = (1 << 0) | (1 << 1) | (1 << 2);
 const STATUS2_NIGHTMARE = 1 << 27;
+const STATUS2_CURSED = 1 << 28;
 const STATUS2_INFATUATION = (1 << 16) | (1 << 17) | (1 << 18) | (1 << 19);
 /** include/constants/battle.h:115-120. */
 const STATUS1_PARALYSIS = 1 << 6;
@@ -323,6 +324,58 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
     expect(result.state.rulesContext.battlers[0]).toMatchObject({ hp: 58, status2: 0 });
     expect(result.state.rulesContext.party.player[0].hp).toBe(58);
     expect(result.state.rng.calls).toBe(0);
+  });
+
+  it("ENDTURN_CURSE deals floor(maxHP/4), persists the curse across turns, and prints STRINGID_PKMNAFFLICTEDBYCURSE (battle_util.c:1581-1591, docs/end-turn-ground-truth.md B9)", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, hp: 116, maxHP: 116, status2: STATUS2_CURSED }),
+        battler({ side: 1, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      party: { player: sixSlots(116), opponent: sixSlots(0, 0, 100) },
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+    const turn1 = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+    expect(turn1.kind).toBe("next-turn");
+    if (turn1.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(turn1.state.rulesContext.battlers[0]).toMatchObject({
+      hp: 87,
+      status2: STATUS2_CURSED,
+    });
+    expect(turn1.state.rulesContext.party.player[0].hp).toBe(87);
+    expect(turn1.state.events.some((event) =>
+      event.kind === "message" && event.messageId === "STRINGID_PKMNAFFLICTEDBYCURSE"
+    )).toBe(true);
+    const turn2 = runBattleEndTurnOrchestration(program, handlers, turn1.state);
+    expect(turn2.kind).toBe("next-turn");
+    if (turn2.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(turn2.state.rulesContext.battlers[0]).toMatchObject({
+      hp: 58,
+      status2: STATUS2_CURSED,
+    });
+    expect(turn2.state.rulesContext.party.player[0].hp).toBe(58);
+    expect(turn2.state.rng.calls).toBe(0);
+  });
+
+  it("ENDTURN_CURSE does not fire without STATUS2_CURSED set (real guard, not a blanket skip)", () => {
+    const uncursedRc = context({
+      battlers: [
+        battler({ side: 0, hp: 116, maxHP: 116 }),
+        battler({ side: 1, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      party: { player: sixSlots(116), opponent: sixSlots(0, 0, 100) },
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+    const uncursedInitial = scratchState(uncursedRc, 1);
+    const uncursedResult = runBattleEndTurnOrchestration(program, handlers, uncursedInitial);
+    expect(uncursedResult.kind).toBe("next-turn");
+    if (uncursedResult.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(uncursedResult.state.rulesContext.battlers[0]!.hp).toBe(116);
+    expect(uncursedResult.state.rng.calls).toBe(uncursedInitial.rng.calls);
   });
 
   it.each([

@@ -86,6 +86,7 @@ import {
 const POISON_TURN_DMG_LABEL = "BattleScript_PoisonTurnDmg";
 const BURN_TURN_DMG_LABEL = "BattleScript_BurnTurnDmg";
 const NIGHTMARE_TURN_DMG_LABEL = "BattleScript_NightmareTurnDmg";
+const CURSE_TURN_DMG_LABEL = "BattleScript_CurseTurnDmg";
 const INGRAIN_TURN_HEAL_LABEL = "BattleScript_IngrainTurnHeal";
 const LEECH_SEED_TURN_DRAIN_LABEL = "BattleScript_LeechSeedTurnDrain";
 const WRAP_TURN_DMG_LABEL = "BattleScript_WrapTurnDmg";
@@ -706,6 +707,28 @@ function runNightmareTick(
   const damage = floorDivAtLeastOne(b.maxHP, 4);
   const rc = Object.freeze({ ...state.rulesContext, battleMoveDamage: damage });
   return runTickScript(program, handlers, state, rc, battler, NIGHTMARE_TURN_DMG_LABEL);
+}
+
+/**
+ * `ENDTURN_CURSE` (`battle_util.c:1581-1591`): while `STATUS2_CURSED` is set
+ * and the battler is alive, deal floor(maxHP/4), minimum one -- the same
+ * damage math as Nightmare (`gBattleMoveDamage = maxHP / 4`, bumped to 1 if
+ * it floors to 0). No RNG draw, and no clearing-without-damage branch --
+ * unlike Nightmare, the real source has no path that removes the curse here.
+ */
+function runCurseTick(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  battler: BattleScriptBattlerId,
+): TickOutcome {
+  const b = state.rulesContext.battlers[battler];
+  if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CURSED) === 0 || b.hp === 0) {
+    return Object.freeze({ kind: "advance", state });
+  }
+  const damage = floorDivAtLeastOne(b.maxHP, 4);
+  const rc = Object.freeze({ ...state.rulesContext, battleMoveDamage: damage });
+  return runTickScript(program, handlers, state, rc, battler, CURSE_TURN_DMG_LABEL);
 }
 
 /**
@@ -1416,7 +1439,9 @@ type BattlerLoopResult =
  * source-file position). Ingrain/Leech Seed/Wrap/Yawn/Thrash are now fully
  * wired (docs/ingrain-leechseed-wrap-ground-truth.md §5 slices 1-3;
  * docs/yawn-thrash-endturn-design.md §2 for Yawn, §4 for Thrash's own
- * end-turn lock countdown/confusion transition); Items1/Items2 both call
+ * end-turn lock countdown/confusion transition); Curse is wired the same
+ * shape as Nightmare (docs/end-turn-ground-truth.md B9 -- `maxHP/4` via the
+ * shared `DoTurnDmg` tail, no clearing branch); Items1/Items2 both call
  * the same `runItemsTick` with `moveTurn` false/true respectively
  * (docs/yawn-thrash-endturn-design.md §5 -- Items2 is no longer a no-op);
  * every other reachable-but-unmodeled case gates on whatever real bit/field
@@ -1490,10 +1515,12 @@ function runDoBattlerEndTurnEffects(
     if (nightmare.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: nightmare.state });
     state = nightmare.state;
 
-    const b = state.rulesContext.battlers[battler];
-    if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CURSED) !== 0) {
-      return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_CURSE", detail: "STATUS2_CURSED set but BattleScript_CurseTurnDmg is not wired" });
+    const curse = applyTickOutcome(runCurseTick(program, handlers, state, battler));
+    if (curse.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: curse.state, instruction: curse.instruction });
     }
+    if (curse.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: curse.state });
+    state = curse.state;
 
     const wrap = applyTickOutcome(runWrapTick(program, handlers, state, battler));
     if (wrap.kind === "opcode-barrier") {
