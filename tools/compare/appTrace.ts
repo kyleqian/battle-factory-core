@@ -331,6 +331,18 @@ const TERMINAL_SEAM_EVENT_PROVENANCE = Object.freeze({
   instructionExecution: 1,
 });
 
+// tests/battleScriptFaintedActionsOrchestration.test.ts's "player's last mon
+// faints" pin proves this event is the real interpreter's
+// VARIOUS_RETURN_OPPONENT_MON1 receipt (Cmd_various), not a generic
+// placeholder -- battleResolutionPresentation.ts's "sprite-visibility"
+// command reads this exact opcodeName to distinguish the real
+// CONTROLLER_RETURNMONTOBALL recall from the unrelated
+// CONTROLLER_SPRITEINVISIBILITY (Dig/Fly) receipt.
+const TERMINAL_SEAM_RECALL_EVENT_PROVENANCE = Object.freeze({
+  ...TERMINAL_SEAM_EVENT_PROVENANCE,
+  opcodeName: "B_SCR_OP_VARIOUS",
+});
+
 function terminalSeamEvent(
   sequence: number,
   payload: BattleKernelSemanticEvent["payload"],
@@ -338,7 +350,9 @@ function terminalSeamEvent(
   return Object.freeze({
     sequence,
     payload: Object.freeze(payload),
-    provenance: TERMINAL_SEAM_EVENT_PROVENANCE,
+    provenance: payload.kind === "set-battler-sprite-visibility"
+      ? TERMINAL_SEAM_RECALL_EVENT_PROVENANCE
+      : TERMINAL_SEAM_EVENT_PROVENANCE,
   });
 }
 

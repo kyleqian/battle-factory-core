@@ -367,6 +367,11 @@ export function createBattleResolutionPresentationRenderView(
   let partySummary: BattleResolutionPresentationRenderView["partySummary"] = null;
   const fainted = new Set<0 | 1>();
   const spriteVisibility = new Map<0 | 1, boolean>([[0, true], [1, true]]);
+  // Recalled battlers (real CONTROLLER_RETURNMONTOBALL receipts) lose their
+  // healthbox alongside the sprite; the unrelated CONTROLLER_SPRITEINVISIBILITY
+  // receipt (Dig/Fly semi-invisibility) never does -- see the "sprite-visibility"
+  // command's own `recall` doc comment.
+  const healthboxVisibility = new Map<0 | 1, boolean>([[0, true], [1, true]]);
   let settledTrainer: Readonly<{ battler: 0 | 1 }> | null = null;
   // Visibility receipts are controller-owned persistent state. A later
   // automatic locked-action segment starts from the finished prior segment,
@@ -375,6 +380,7 @@ export function createBattleResolutionPresentationRenderView(
     for (const completed of state.segments[segmentIndex]!.commands) {
       if (completed.type === "sprite-visibility") {
         spriteVisibility.set(completed.battler, completed.visible);
+        if (completed.recall) healthboxVisibility.set(completed.battler, completed.visible);
       }
       if (completed.type === "trainer-slide") {
         settledTrainer = completed.direction === "in"
@@ -442,6 +448,7 @@ export function createBattleResolutionPresentationRenderView(
     if (completed.type === "switch-in") fainted.delete(completed.battler);
     if (completed.type === "sprite-visibility") {
       spriteVisibility.set(completed.battler, completed.visible);
+      if (completed.recall) healthboxVisibility.set(completed.battler, completed.visible);
     }
     if (completed.type === "party-summary") {
       partySummary = completed.visible
@@ -585,6 +592,7 @@ export function createBattleResolutionPresentationRenderView(
       fainted.delete(command.battler);
     } else if (command.type === "sprite-visibility") {
       spriteVisibility.set(command.battler, command.visible);
+      if (command.recall) healthboxVisibility.set(command.battler, command.visible);
     } else if (command.type === "trainer-slide") {
       const age = Math.min(state.lifecycle.phaseElapsed, command.timing.minimumFrames);
       activeTrainerSlide = Object.freeze({
@@ -654,7 +662,8 @@ export function createBattleResolutionPresentationRenderView(
               >= fieldArt.player.pic.tileset.rows * 8
           ),
         healthbox: !fainted.has(0)
-          && (playerFaint?.healthboxVisible ?? true),
+          && (playerFaint?.healthboxVisible ?? true)
+          && (healthboxVisibility.get(0) ?? true),
       }),
       opponent: Object.freeze({
         sprite: (spriteVisibility.get(1) ?? true)
@@ -665,7 +674,8 @@ export function createBattleResolutionPresentationRenderView(
             && opponentFaint.sink.keptRows === 0
           ),
         healthbox: !fainted.has(1)
-          && (opponentFaint?.healthboxVisible ?? true),
+          && (opponentFaint?.healthboxVisible ?? true)
+          && (healthboxVisibility.get(1) ?? true),
       }),
     }),
     waitCursor,

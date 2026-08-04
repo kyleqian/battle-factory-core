@@ -108,11 +108,12 @@ const PROVENANCE = Object.freeze({
 function event(
   sequence: number,
   payload: BattleKernelSemanticEvent["payload"],
+  provenanceOverride?: Readonly<{ opcodeName?: string }>,
 ): BattleKernelSemanticEvent {
   return Object.freeze({
     sequence,
     payload: Object.freeze(payload),
-    provenance: Object.freeze(PROVENANCE),
+    provenance: Object.freeze({ ...PROVENANCE, ...provenanceOverride }),
   });
 }
 
@@ -321,7 +322,15 @@ describe("terminal-seam presentation phase: generic trainer slide-in + dismissib
   it("LOSS (JENSON, non-DESTIN): sprite-visibility(recall) -> trainer-slide(in, battler 1) -> message(quote) -> terminal-handoff -- proves the mapping is data-driven, not DESTIN-hardcoded", () => {
     const resolution = terminalResolution(
       [
-        event(0, { kind: "set-battler-sprite-visibility", battler: 1, invisible: true }),
+        // Real provenance opcodeName (VARIOUS_RETURN_OPPONENT_MON1 dispatches
+        // through Cmd_various), not the generic placeholder -- this is the
+        // real CONTROLLER_RETURNMONTOBALL receipt
+        // (docs/terminal-seam-loss-path-ground-truth.md §2: sprite AND
+        // healthbox both gone by oracle tick 2996), which
+        // battleResolutionPresentation.ts's "sprite-visibility" command
+        // distinguishes from the unrelated CONTROLLER_SPRITEINVISIBILITY
+        // (Dig/Fly) receipt by this exact opcode name.
+        event(0, { kind: "set-battler-sprite-visibility", battler: 1, invisible: true }, { opcodeName: "B_SCR_OP_VARIOUS" }),
         event(1, { kind: "trainer-slide-in", battler: 1 }),
         event(2, { kind: "message", messageId: "STRINGID_TRAINER1WINTEXT", substitutions: [] }),
       ],
@@ -344,6 +353,14 @@ describe("terminal-seam presentation phase: generic trainer slide-in + dismissib
     const sliding = advanceUntil(resolution, (state) => state.commandIndex === 1);
     const view = createBattleResolutionPresentationRenderView(sliding);
     expect(view.trainerSlide).toMatchObject({ battler: 1, picSymbol: CANONICAL_JENSON_PRESENTATION.trainerPic });
+
+    // The recalled opponent's healthbox clears together with its sprite
+    // (ground-truth doc §2, tick 2996): the ROM's own
+    // OpponentHandleReturnMonToBall/FreeMonSpriteAfterSwitchOutAnim
+    // (battle_controller_opponent.c) calls SetHealthboxSpriteInvisible
+    // alongside destroying the sprite -- unlike a Dig/Fly semi-invisible
+    // sprite toggle, which never touches the healthbox.
+    expect(view.visibility.opponent).toEqual({ sprite: false, healthbox: false });
 
     const final = driveToTerminalHandoff(resolution);
     expect(final.lifecycle.phase).toBe("terminal-handoff");

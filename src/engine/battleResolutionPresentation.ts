@@ -177,6 +177,19 @@ export type BattleResolutionPresentationCommand =
       eventSequence: number;
       battler: 0 | 1;
       visible: boolean;
+      /**
+       * True only when this transition is the real `CONTROLLER_RETURNMONTOBALL`
+       * receipt (`Cmd_various`'s `VARIOUS_RETURN_OPPONENT_MON1`/`MON2`,
+       * `BtlController_EmitReturnMonToBall` -- `battle_controller_opponent.c`'s
+       * `OpponentHandleReturnMonToBall`/`FreeMonSpriteAfterSwitchOutAnim` both
+       * call `SetHealthboxSpriteInvisible` alongside destroying the sprite),
+       * distinguished from the unrelated `CONTROLLER_SPRITEINVISIBILITY`
+       * receipt (`Cmd_moveend`'s semi-invulnerable Dig/Fly toggle,
+       * `Cmd_makevisible` -- `OpponentHandleSpriteInvisibility` only ever
+       * touches the sprite's own `invisible` flag) via the emitting
+       * instruction's own opcode, not any window-specific context.
+       */
+      recall: boolean;
       timing: BattleSpriteVisibilityTiming;
     }>
   | Readonly<{
@@ -2697,9 +2710,14 @@ export function projectBattleResolutionCommands(
         eventSequence: event.sequence,
         battler: singlesBattler(payload.battler, "sprite visibility"),
         visible: !payload.invisible,
-        // BtlController_EmitSpriteInvisibility is one controller callback;
-        // the receipt itself owns the relative display edge.
+        // Each of BtlController_EmitReturnMonToBall/EmitSpriteInvisibility is
+        // one controller callback; the receipt itself owns the relative
+        // display edge.
         timing: Object.freeze({ minimumFrames: 1 as const }),
+        // See the "sprite-visibility" command type's own doc comment: only
+        // Cmd_various's VARIOUS_RETURN_OPPONENT_MON1/MON2 case is the real
+        // CONTROLLER_RETURNMONTOBALL receipt.
+        recall: event.provenance?.opcodeName === "B_SCR_OP_VARIOUS",
       }));
       continue;
     }
