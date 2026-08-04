@@ -2199,6 +2199,169 @@ function messageLines(
       B_BUFF2: () => ability,
     });
   }
+  // ISSUES #72 batch 8 (docs/issue72-hard-tail-scout.md): the REACHABLE-10
+  // hard tail.
+  if (messageId === "STRINGID_PKMNPROTECTEDBY") {
+    // Cmd_tryKO (battleScriptTryKOOpcode.ts:117-134): the Sturdy check never
+    // reassigns selectorRoles -- the move's own (still-current) target is
+    // the Sturdy holder, matching real source's unconditional
+    // gBattlerTarget check (battle_script_commands.c:7511-7518) ahead of
+    // any accuracy/hit roll -- deterministic, not RNG-gated.
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no ability substitution`);
+    }
+    const defender = requireMoveDefender(lastMoveAttacker, "protected-by message");
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_DEF_ABILITY: () => ability,
+    });
+  }
+  if (messageId === "STRINGID_PKMNSXWHIPPEDUPSANDSTORM") {
+    // BattleScript_SandstreamActivates: Cmd_switchineffects's own Sand
+    // Stream branch freezes scriptingBattler to the switching-in battler
+    // (battleScriptSwitchinOpcode.ts:973-981), same shape
+    // STRINGID_PKMNPREVENTSSTATLOSSWITH already uses.
+    if (event.payload.scriptingBattler === undefined || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no scripting-battler/ability substitution`);
+    }
+    const battler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      B_SCR_ACTIVE_ABILITY: () => ability,
+    });
+  }
+  if (messageId === "STRINGID_PKMNSXBLOCKSY2") {
+    // BattleScript_PerishSongNotAffected: EffectPerishSong's own per-battler
+    // Soundproof loop (setbyte/addbyte sBATTLER) -- scriptingBattler is
+    // already the generic sBATTLER field (battleScriptSetByte.ts:267,304),
+    // {B_CURRENT_MOVE} is the actionSnapshot's own currentMove, same idiom
+    // STRINGID_PKMNSXBLOCKSY uses.
+    if (event.payload.scriptingBattler === undefined || event.payload.substitutions.length === 0 || actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no scripting-battler/ability/action-snapshot`);
+    }
+    const battler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      B_SCR_ACTIVE_ABILITY: () => ability,
+      B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
+    });
+  }
+  if (messageId === "STRINGID_PKMNTOOKFOE") {
+    // BattleScript_DestinyBondTakesLife: Cmd_tryfaintmon's nested
+    // call-stack transition never reassigns selectorRoles.attacker/.target
+    // (battleScriptHitChainOpcode.ts:4295-4340) -- the plain
+    // attacker/defender pair from the original hit, unchanged. Destiny
+    // Bond/Grudge can only ever fire off a BS_TARGET/BS_FAINTED
+    // tryfaintmon call site (docs/issue72-hard-tail-scout.md §1b) since
+    // both require the attacker role's own battler to still be alive.
+    const attacker = requireMoveAttacker(lastMoveAttacker, "took-foe message");
+    const defender = requireMoveDefender(lastMoveAttacker, "took-foe message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+    });
+  }
+  if (messageId === "STRINGID_PKMNLOSTPPGRUDGE") {
+    // BattleScript_GrudgeTakesPP: scheduleGrudge (battleScriptHitChainOpcode.ts:
+    // 4354-4376) captures battleTextBuff1Move off the ATTACKER role's own
+    // chosen move (the battler that just landed the killing hit, real
+    // source's gBattleMons[gBattlerAttacker].moves[moveIndex] --
+    // battle_script_commands.c:3030), not the Grudge caster's own move --
+    // same plain attacker/defender pair STRINGID_PKMNTOOKFOE above uses.
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no move substitution`);
+    }
+    const attacker = requireMoveAttacker(lastMoveAttacker, "lost-pp-grudge message");
+    const moveName = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_BUFF1: () => moveName,
+    });
+  }
+  if (messageId === "STRINGID_PKMNREGAINEDHEALTH") {
+    // The 3-label split (docs/issue72-hard-tail-scout.md §3): the correct
+    // battler differs per emitting label, since BattleScript_EffectRestoreHp/
+    // the self-heal family reassign selectorRoles.target = attacker
+    // (battleScriptTryhealhalfhealthOpcode.ts:47) while
+    // BattleScript_PresentHealTarget's own Present sub-path never reassigns
+    // (a genuinely opposing battler) and BattleScript_WishComesTrue is a
+    // tick-scoped actionSnapshot.attacker read, same shape
+    // STRINGID_PKMNWISHCAMETRUE already uses.
+    if (actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot`);
+    }
+    const MOVE_PRESENT = 217;
+    const label = sourceLabelOf(event);
+    if (label === "BattleScript_WishComesTrue") {
+      const battler = singlesBattler(actionSnapshot.attacker, `${messageId} action snapshot`);
+      return resolveBattleStringLines(messageId, {
+        B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      });
+    }
+    if (label === "BattleScript_PresentHealTarget" && actionSnapshot.currentMove === MOVE_PRESENT) {
+      const defender = requireMoveDefender(lastMoveAttacker, "regained-health message (Present)");
+      return resolveBattleStringLines(messageId, {
+        B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      });
+    }
+    // BattleScript_EffectRestoreHp, or PresentHealTarget reached via the
+    // self-heal family (Rest/Moonlight/Synthesis/Swallow/Softboiled/MilkDrink).
+    const attacker = requireMoveAttacker(lastMoveAttacker, "regained-health message (self-heal)");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+    });
+  }
+  if (messageId === "STRINGID_PKMNHUNGONWITHX") {
+    // BattleScript_FocusBandActivates: Cmd_adjustnormaldamage's own Focus
+    // Band branch (battleScriptHitChainOpcode.ts:1978-1996) never removes
+    // the item (unlike Knock Off/Thief) -- heldItems[defender] already
+    // holds it unchanged at print time, the plain requireMoveDefender +
+    // item-name idiom STRINGID_PKMNSTOLEITEM's own B_LAST_ITEM read already
+    // established.
+    const defender = requireMoveDefender(lastMoveAttacker, "hung-on-with message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_LAST_ITEM: () => factoryItemDisplayName(heldItems[defender]),
+    });
+  }
+  if (messageId === "STRINGID_PKMNSAFEGUARDEXPIRED") {
+    // BattleScript_SafeguardEnds: runScreenFieldCase's own tick
+    // (battleEndTurnOrchestration.ts:1916-1924) shares the identical
+    // enterTickBattlerContext-set selectorRoles.attacker shape
+    // STRINGID_PKMNSXWOREOFF already uses. {B_ATK_PREFIX3} resolves through
+    // the identical "Ally"/"Foe" side text as {B_ATK_PREFIX1}
+    // (battle_message.c:2649-2668: sText_AllyPkmnPrefix/AllyPkmnPrefix3 are
+    // both literally "Ally", sText_FoePkmnPrefix2/FoePkmnPrefix4 both
+    // literally "Foe" -- distinct string constants, identical text).
+    if (actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot`);
+    }
+    const battler = singlesBattler(actionSnapshot.attacker, `${messageId} action snapshot`);
+    return resolveBattleStringLines(messageId, {
+      B_ATK_PREFIX3: () => (battler === 0 ? "Ally" : "Foe"),
+    });
+  }
+  if (messageId === "STRINGID_PKMNTOOKATTACK") {
+    // BattleScript_MonTookFutureAttack: runFutureAttacksAfterFaints's own
+    // tick (battleEndTurnOrchestration.ts:2246-2264) reassigns selectorRoles
+    // to the ORIGINAL caster (attacker) and the delayed hit's own recipient
+    // (target) -- in this engine's singles-only scope the recipient is
+    // always the singles-opposite of the caster, the same requireMoveDefender
+    // relationship every other plain-idiom id already uses.
+    if (actionSnapshot === null || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot/move substitution`);
+    }
+    const caster = singlesBattler(actionSnapshot.attacker, `${messageId} action snapshot`);
+    const defender = requireMoveDefender(caster, "took-attack message");
+    const moveName = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_BUFF1: () => moveName,
+    });
+  }
   const resolvers: Record<string, () => string> = {};
   if (lastMoveAttacker !== null) {
     const displayed = fieldBattler(field, lastMoveAttacker);
