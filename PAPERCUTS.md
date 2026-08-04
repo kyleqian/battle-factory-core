@@ -577,18 +577,33 @@ Per entry:
 
 ## mechanicLab send-out fast-forward silently inert under battle-scene-off
 
-- **What:** probing send-out/settle sprite state via a `mechanicLab`
-  scenario under `profile: "battle-scene-off"` never dispatches the front
-  idle-anim task at all — the probe reads a flat `SpriteCallbackDummy` /
-  `x2=0` from tick 0, which looks exactly like "the offset never applies"
-  when it actually means "this staging path skipped the intro under OFF."
-  Real OFF-profile battles DO play send-out anims (Scene OFF gates only
-  move anims); this is a mechanicLab staging artifact. Workaround: run
-  send-out RAM probes under `battle-scene-on`. Flagged by the 2026-08-03
-  #71 Slice-A worker, ~10 min lost root-causing. Hits: 1. Candidate fix:
-  a warning note in `tools/probe/dump-onix-front-idle-anim.py`'s module
-  doc (done 2026-08-03 by the Slice-C step) and/or a mechanicLab README
-  line.
+- **CORRECTED 2026-08-04 (supervisor, after the R3 Slice-D verdict):** the
+  original explanation below was WRONG and cost a later worker ~15 min.
+  The flat `SpriteCallbackDummy`/`x2=0` reading is NOT a mechanicLab
+  staging artifact — it is the real game: `BattleAnimateFrontSprite` under
+  `HITMARKER_NO_ANIMATIONS` takes the `SKIP_FRONT_ANIM` branch
+  (`reference/pokeemerald/src/pokemon.c:6803-6852`) and never launches the
+  front animation task in ANY Scene-OFF battle, staged or organic. The
+  prior claim "Real OFF-profile battles DO play send-out anims (Scene OFF
+  gates only move anims)" is refuted by the oracle profile's own contract
+  text, the source, `drawGeneratedOpponentRelease`'s doc comment, and the
+  #56 closure audit (see ISSUES #71's Slice-D record, 2026-08-04). The
+  practical guidance survives with a different reason: probe send-out
+  ANIMATION state under `battle-scene-on` because only there does the
+  animation exist; a flat OFF-profile reading is a true fact about OFF,
+  not a staging failure. Hits: 2.
+- **Original (wrong) entry, kept for forensics:** probing send-out/settle
+  sprite state via a `mechanicLab` scenario under
+  `profile: "battle-scene-off"` never dispatches the front idle-anim task
+  at all — the probe reads a flat `SpriteCallbackDummy` / `x2=0` from tick
+  0, which looks exactly like "the offset never applies" when it actually
+  means "this staging path skipped the intro under OFF." Real OFF-profile
+  battles DO play send-out anims (Scene OFF gates only move anims); this
+  is a mechanicLab staging artifact. Workaround: run send-out RAM probes
+  under `battle-scene-on`. Flagged by the 2026-08-03 #71 Slice-A worker,
+  ~10 min lost root-causing. Hits: 1. Candidate fix: a warning note in
+  `tools/probe/dump-onix-front-idle-anim.py`'s module doc (done
+  2026-08-03 by the Slice-C step) and/or a mechanicLab README line.
 
 
 ## `BattleScriptPartyMemberInput.moves` override silently defaults PP to 0 (Struggle fallback)

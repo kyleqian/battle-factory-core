@@ -329,27 +329,19 @@ ends in a literal `\p` → `TextPrinterWaitWithDownArrow` and **keeps** its
 cursor — load-bearing for the WIN-side wiring). Full mechanism + citations:
 `docs/terminal-seam-loss-path-ground-truth.md` §6.
 
-**Two residual classes remain (61 frames), itemized with mechanisms in §6,
-deliberately not guess-fit; RAM-probe scout dispatched 2026-08-04:**
-1. **Held-cursor freeze, 2996-3033 (38 frames, 37-38px):** the antecedent
-   "MURKROW fainted!" down-arrow is present but static in the oracle during
-   the trainer slide (leftover window content once the printer stops being
-   serviced). Empirically `CURSOR_Y_OFFSETS[2]` (age ∈ [18,26]) reproduces
-   all 38 frames, but the value is input-lag-dependent — needs the real
-   printer state (`downArrowYPosIdx`/`downArrowDelay`) probed, or the
-   scaffold to replay the antecedent's real dismissal lag.
-2. **Swap-edge typing cascade, 3034-3056 (23 frames, 28-589px):** the app
-   starts typing the quote 3 ticks before the oracle (app at 3034, oracle
-   holds the antecedent through 3036, first quote glyph 3037), cascading
-   per-character until both settle at 3057. Needs the real sequencing of
-   `Cmd_printstring`/controller-ack/window-clear at that boundary probed.
-
-- WIN side still needs a **fresh** `mechanicLab` staging (final hit → quote
-  dismiss), twice-run byte-identical, following the LOSS doc's own §0
-  staging recipe, before any of the above (including the wait-cursor
-  finding, which likely applies equally to the WIN quote) applies to it —
-  out of scope this session per the brief (WIN ground truth is a side lane's
-  concurrent responsibility).
+**LOSS window CLOSED at 236/236 (`40b75dc6`, supervisor re-verified
+independently); WIN-side wiring remains.** Both residual classes
+(held-cursor freeze at the derived frozen pose, swap-edge +3 as three
+cited one-tick filler events) fixed scaffold-only in
+`tools/compare/appTrace.ts`'s `lossTerminalWindowStage`, per
+`docs/terminal-seam-antecedent-boundary-probe.md`. WIN side still needs its
+own fresh `mechanicLab` staging + its own `readyTick`/`dismissTick` probe
+before this machinery applies there (the held-cursor and +3 helpers are
+written to transplant; the WIN fixture
+`tools/battle-lab/win-terminal-explosion-dusclops-off.json` and
+`docs/terminal-seam-win-window-ground-truth.md` are already banked —
+remember `STRINGID_PLAYERDEFEATEDTRAINER1` KEEPS its cursor and the WIN
+script never recalls the opponent mon).
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 

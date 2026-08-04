@@ -4,6 +4,45 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 920 — [supervisor, 2026-08-04 ~16:15] R3 verified both lanes: Slice D closure RATIFIED (4 sources checked) + LOSS window CLOSED 236/236; R4 launching (OFF-seam settle honesty MAIN + WIN compare wiring SIDE)
+
+- **State:** master at the side-R3 merge + this docs commit. LOSS
+  terminal-window compare **236/236** — worker twice-fresh + post-commit
+  third run + independent supervisor rerun post-merge, all PNG-identical.
+  Worker gates at `40b75dc6`: full suite 721 files green, build green,
+  differential canary 128/128.
+- **Did:** (1) verified the R3 MAIN worker's Slice-D-not-applicable verdict
+  myself before ratifying (SUPERVISOR.md's no-silent-ratification rule):
+  read `pokemon.c:6803-6852` (`SKIP_FRONT_ANIM` under
+  `HITMARKER_NO_ANIMATIONS` — cry only, `SpriteCallbackDummy`, no movement
+  task, no two-frame flip) and the OFF profile's own `bin/oracle info`
+  contract text; cross-checked entry 890's "fast-forward gotcha" (its
+  RATTATA `{1,0}` probes were `battle-scene-on` scenarios, and its OFF
+  probe already saw the flat truth) — the worker's verdict stands,
+  entry 919 + the ISSUES #71 Slice-D record are accurate. (2) Corrected
+  `PAPERCUTS.md`'s wrong "Real OFF-profile battles DO play send-out anims"
+  claim (supervisor is that file's writer; original kept for forensics).
+  (3) Merged side R3's scaffold fix, re-verified 236/236 independently,
+  applied the #73 trim. (4) Identified the follow-up the Slice-D evidence
+  exposes: Slices A/B's `speciesFrontIdleRestOffset` at the TWO
+  generated-route OFF hooks bakes ONIX/RATTATA `{+1,0}` the OFF oracle
+  never shows — latent 1px landmine on uncommitted windows (all committed
+  windows avoid those species; the 4 canonical ON-legacy hooks are
+  unaffected — their species are all `{0,0}`).
+- **Next:** R4 in flight — MAIN: remove the rest-offset application at the
+  two generated OFF hooks, flip the staged RATTATA pin to `{0,0}`, and
+  prove flat settle with a staged OFF dense window (also discharging entry
+  894's deferred non-ONIX staged-window check); SIDE: WIN-side compare
+  wiring (transplant the LOSS helpers, probe WIN's own
+  readyTick/dismissTick, honest accounting vs the banked 241-frame
+  fixture). Then wind-down: fold, ONE full union suite, play-preview
+  rebuild, session report.
+- **Notes:** #71's open remainder after R4 = §1e patch-site retirement +
+  coordinated KABUTO/MAGBY/ONIX hand-fit retirements. The rung-3
+  dispatcher stays correct-and-consumed on the animation lane's own terms
+  (Scene ON); no main-lane consumer exists by real-game design.
+
+---
 ## 919 — [bounded MAIN worker, 2026-08-04 ~15:25] ISSUES #71 Slice D found NOT APPLICABLE to the main lane's oracle — no src edits landed, docs-only
 
 - **State:** master `519b6bf8` unchanged + this docs commit. No production
@@ -87,44 +126,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   slice. Wind-down fold + full suite + play-preview rebuild after.
 - **Notes:** animation supervisor still live on its lane (Steel Wing
   reconciliation queued next per its ledger); fold again at wind-down.
-
----
-## 917 — [bounded MAIN worker, 2026-08-04 ~14:50] ISSUES #72 REACHABLE backlog CLOSED: `STRINGID_MAGNITUDESTRENGTH` landed (batch 9, the last id); Torment selection-time note is the only open remainder
-
-- **State:** master `9be8304d` + this docs commit. `tests/
-  presentationStringIssue72Batch9.test.ts` red-verified (`git stash --
-  src/engine/battleResolutionPresentation.ts
-  src/engine/factoryBattleScriptFullTurnDecision.ts` throws the exact
-  completeness-guard error pre-fix, restored clean after). `npm run
-  test:smoke` green (347/347, incl. the frontier ratchet). Full `npm test`
-  + `npm run build` green at this docs commit (see this commit's own
-  message for the exact numbers).
-- **Did:** verified both premises the brief staged before coding
-  (`battleScriptRankedBatch1Opcode.ts:130`'s `magnitudeHandler` already
-  writes `battleTextBuff1ByteNumber: selected.magnitude`; source confirms
-  via `Cmd_magnitudedamagecalculation`'s `PREPARE_BYTE_NUMBER_BUFFER
-  (gBattleTextBuff1, 2, magnitude)`, `battle_script_commands.c:8670-8710`).
-  The brief's `battleResolutionPresentation.ts:1648` citation had drifted
-  (file growth since entry 914) but the substance held — the HITXTIMES/
-  STOCKPILE/PERISHCOUNTFELL `battleTextBuff1ByteNumber` number-buffer idiom
-  is real and is what this batch reused. Landed: (1)
-  `factoryBattleScriptFullTurnDecision.ts`'s `prepareMessage` substitutions
-  ternary joins `STRINGID_MAGNITUDESTRENGTH` to the existing STOCKPILE/
-  PERISHCOUNTFELL branch; (2) `battleResolutionPresentation.ts`'s
-  `messageLines` gets a new `B_BUFF1`-only resolver (template is bare
-  `MAGNITUDE {B_BUFF1}!`, no attacker/defender name). `BattleScript_
-  EffectMagnitude` (`data/battle_scripts_1.s:1683-1692`) confirms the
-  printstring fires before the hit lands. Census regenerated: **39→38
-  UNRESOLVED** (exact −1 — the honest number; the brief's "48→47" was stale
-  from before batch 8 landed, which had already brought REACHABLE to 1 and
-  UNRESOLVED to 39). ISSUES #72 rewritten: the batch-by-batch history
-  (1-9, ~400 lines) trimmed to a summary + the two still-open remainders
-  (Torment selection-time note, DEAD-id leads) per the ISSUES pruning rule
-  — full forensic history stays in git.
-- **Next:** #72's REACHABLE backlog is fully closed. Remaining known work:
-  Torment/selection-rejection slice (advisory `describeIllegalMoveSelection`
-  + 4 resolver branches, scoped in `docs/selection-rejection-subsystem-scout.md`,
-  needs supervisor scheduling); #73 WIN-side compare wiring + the two probed
-  residual classes (held-cursor freeze, swap-edge typing cascade); #71 Slice
-  D still gated on the animation lane's rung-3 dispatcher.
-- **Notes:** none — single clean step, no papercuts.

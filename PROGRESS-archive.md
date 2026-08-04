@@ -1,3 +1,44 @@
+## 917 — [bounded MAIN worker, 2026-08-04 ~14:50] ISSUES #72 REACHABLE backlog CLOSED: `STRINGID_MAGNITUDESTRENGTH` landed (batch 9, the last id); Torment selection-time note is the only open remainder
+
+- **State:** master `9be8304d` + this docs commit. `tests/
+  presentationStringIssue72Batch9.test.ts` red-verified (`git stash --
+  src/engine/battleResolutionPresentation.ts
+  src/engine/factoryBattleScriptFullTurnDecision.ts` throws the exact
+  completeness-guard error pre-fix, restored clean after). `npm run
+  test:smoke` green (347/347, incl. the frontier ratchet). Full `npm test`
+  + `npm run build` green at this docs commit (see this commit's own
+  message for the exact numbers).
+- **Did:** verified both premises the brief staged before coding
+  (`battleScriptRankedBatch1Opcode.ts:130`'s `magnitudeHandler` already
+  writes `battleTextBuff1ByteNumber: selected.magnitude`; source confirms
+  via `Cmd_magnitudedamagecalculation`'s `PREPARE_BYTE_NUMBER_BUFFER
+  (gBattleTextBuff1, 2, magnitude)`, `battle_script_commands.c:8670-8710`).
+  The brief's `battleResolutionPresentation.ts:1648` citation had drifted
+  (file growth since entry 914) but the substance held — the HITXTIMES/
+  STOCKPILE/PERISHCOUNTFELL `battleTextBuff1ByteNumber` number-buffer idiom
+  is real and is what this batch reused. Landed: (1)
+  `factoryBattleScriptFullTurnDecision.ts`'s `prepareMessage` substitutions
+  ternary joins `STRINGID_MAGNITUDESTRENGTH` to the existing STOCKPILE/
+  PERISHCOUNTFELL branch; (2) `battleResolutionPresentation.ts`'s
+  `messageLines` gets a new `B_BUFF1`-only resolver (template is bare
+  `MAGNITUDE {B_BUFF1}!`, no attacker/defender name). `BattleScript_
+  EffectMagnitude` (`data/battle_scripts_1.s:1683-1692`) confirms the
+  printstring fires before the hit lands. Census regenerated: **39→38
+  UNRESOLVED** (exact −1 — the honest number; the brief's "48→47" was stale
+  from before batch 8 landed, which had already brought REACHABLE to 1 and
+  UNRESOLVED to 39). ISSUES #72 rewritten: the batch-by-batch history
+  (1-9, ~400 lines) trimmed to a summary + the two still-open remainders
+  (Torment selection-time note, DEAD-id leads) per the ISSUES pruning rule
+  — full forensic history stays in git.
+- **Next:** #72's REACHABLE backlog is fully closed. Remaining known work:
+  Torment/selection-rejection slice (advisory `describeIllegalMoveSelection`
+  + 4 resolver branches, scoped in `docs/selection-rejection-subsystem-scout.md`,
+  needs supervisor scheduling); #73 WIN-side compare wiring + the two probed
+  residual classes (held-cursor freeze, swap-edge typing cascade); #71 Slice
+  D still gated on the animation lane's rung-3 dispatcher.
+- **Notes:** none — single clean step, no papercuts.
+
+---
 ## 916 — [supervisor, 2026-08-04 ~14:35] R1 landed: #73 wait-cursor gating (LOSS 1/236 → 175/236, cap-kill salvage) + selection-rejection scout merged; R2 launching (Magnitude MAIN + antecedent-boundary probe SIDE)
 
 - **State:** master `5e7457b1` + this docs commit. Full `npm test` 716
