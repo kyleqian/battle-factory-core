@@ -1,3 +1,39 @@
+## 916 — [supervisor, 2026-08-04 ~14:35] R1 landed: #73 wait-cursor gating (LOSS 1/236 → 175/236, cap-kill salvage) + selection-rejection scout merged; R2 launching (Magnitude MAIN + antecedent-boundary probe SIDE)
+
+- **State:** master `5e7457b1` + this docs commit. Full `npm test` 716
+  files green at the salvage (1 file re-verified after the pin fix),
+  `npm run build` green, differential canary 128/128 vs `b1a7bd34`.
+- **Did:** (1) MAIN #73: worker ran to its full 60-min cap with ZERO
+  commits but a coherent 247-line tree — supervisor verified and landed
+  the salvage (`5e7457b1`): wait-cursor mechanism source-confirmed (two
+  quote ids use `EXT_CTRL_CODE_PAUSE_UNTIL_PRESS`→`TextPrinterWait`, no
+  arrow; `PLAYERDEFEATEDTRAINER1` keeps its `\p` cursor — WIN-side
+  load-bearing), LOSS compare 1/236 → **175/236** (worker 2×, supervisor
+  1× independent). One `toEqual` pin (battleResolutionPresentation.test.ts)
+  missed the new `noCursor` field — the exact gap the worker was fixing at
+  cap; supervisor completed it. Residual 61 frames = held-cursor freeze
+  (38) + swap-edge typing cascade (23), mechanisms itemized in the loss
+  doc §6, not guess-fit. (2) SIDE scout landed+merged (`e7c58649`):
+  selection-rejection subsystem mapped — 6 causes, last-true-wins,
+  `printselectionstring` flashes with NO button wait; engine port has no
+  mask gaps; census tool structurally blind to `printselectionstring`
+  (new finding); Imprison DEAD, other 5 REACHABLE. ISSUES #72 Torment
+  paragraph re-scoped accordingly; recommended slice = advisory
+  `describeIllegalMoveSelection` + 4 resolver branches (supervisor to
+  schedule).
+- **Next:** R2 in flight — MAIN: `STRINGID_MAGNITUDESTRENGTH` (#72's last
+  REACHABLE id); SIDE: RAM/pixel probe of the antecedent boundary
+  (2985-3060) to give both #73 residual classes source-fidelity numbers.
+  Then WIN-side compare wiring (consumes cursor findings), then the
+  selection-rejection slice if budget allows. #71 Slice D still gated on
+  the animation lane's rung-3 dispatcher (re-check at wind-down fold).
+- **Notes:** worker was killed mid-final-suite by the cap, not by any
+  error — $16.68/229 turns, high-quality forensics; cap-kill salvage
+  recipe applied cleanly. Oracle-freshness FAIL remains the docs-only
+  false-positive class (no restart). Play-preview rebuild still queued
+  for wind-down.
+
+---
 ## 915 — [supervisor orient, 2026-08-04 ~13:20] Animation fold (Steel Wing partial + rung-3 directive) → master `b1a7bd34`; union green 716/6,887; R1 launched (#73 wait-cursor MAIN + Torment-scoping SIDE scout)
 
 - **State:** master `b1a7bd34` (fast-forward fold of `animation-main`:

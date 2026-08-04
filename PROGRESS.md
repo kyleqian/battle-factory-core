@@ -4,6 +4,61 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 919 — [bounded MAIN worker, 2026-08-04 ~15:25] ISSUES #71 Slice D found NOT APPLICABLE to the main lane's oracle — no src edits landed, docs-only
+
+- **State:** master `519b6bf8` unchanged + this docs commit. No production
+  code touched — the step's own premise didn't survive first contact with
+  the oracle, so nothing was landed rather than a fitted/regressing wiring.
+  `npm test`/`npm run build` unaffected by this commit (docs only); ran both
+  anyway per the finish requirement (see commit message for exact numbers).
+- **Did:** before writing render code (per the brief's own instruction to
+  validate the anchor first), checked whether Battle Scene OFF — this lane's
+  oracle — plays the front send-out per-tick animation at all. It does not.
+  Four independent sources converge: (1) `bin/oracle info`'s own bootstrap
+  description states outright *"Move/effect and species front-sprite
+  entrance animations are skipped by the real game"* under
+  `battle-scene-off` (contrast `--profile battle-scene-on`: *"front-sprite
+  entrance animations play"*); (2) source
+  (`reference/pokeemerald/src/pokemon.c:6803-6852`,
+  `DoMonFrontSpriteAnimation`'s `HITMARKER_NO_ANIMATIONS`/`SKIP_FRONT_ANIM`
+  branch) never launches the movement task under Scene OFF, set once at
+  battle init and never cleared; (3) `drawGeneratedOpponentRelease`'s own
+  pre-existing doc comment already says so verbatim ("Battle Scene OFF skips
+  the later species front-animation callback"); (4) ISSUES #56's closure
+  audit found **zero** front-sprite-movement residual in the two committed
+  generated-route Scene-OFF dense windows (YOSHI 700/751, MAGNETON 703/751)
+  despite YOSHI/COMBUSKEN's real `ANIM_V_JUMPS_H_JUMPS` family — every
+  residual frame there is unrelated (display-tail + idle-menu-bounce).
+  Wiring `frontSendOutFrameAtTick`/`frontSendOutSpriteFrameAtTick` into the
+  OFF-oracle-compared generated seam would therefore *introduce* mismatches,
+  not fix any. A speculative implementation was written to sanity-check this
+  live (type widening for the front-pic `frame2` asset + the per-tick call
+  site), then reverted (`git checkout`) once the evidence closed — tree was
+  never left dirty at a bad commit. `PAPERCUTS.md`'s existing "mechanicLab
+  send-out fast-forward silently inert under battle-scene-off" entry asserts
+  the opposite ("Real OFF-profile battles DO play send-out anims") and is
+  wrong per all four sources above; flagged for a solo session to correct
+  since supervised workers don't edit `PAPERCUTS.md`. ISSUES #71 rewritten:
+  Slice D closed as not-applicable (full reasoning + citations in place of
+  the old "gated on the dispatcher" framing), §1e patch-site retirement +
+  the coordinated hand-fit retirements are the only main-lane share left.
+- **Next:** #71's main-lane share is down to the §1e 56/58 move-window
+  patch-site retirement (separate pair-guard-refactor effort) and the
+  coordinated KABUTO/MAGBY/ONIX hand-fit retirement (needs the animation
+  lane, not solo). Worth a supervisor look: Slice A (already-landed, applies
+  `speciesFrontIdleRestOffset`'s static terminal offset at the generated
+  route's `coeff===0`) rests on the same `SKIP_FRONT_ANIM` mechanism this
+  entry found — flagged, not touched, since it's a separate already-merged
+  decision outside this step's scope.
+- **Notes:** the cross-lane ask (`frontSendOutFrameAtTick` +
+  `frontSendOutSpriteFrameAtTick`) is real, correct, tested work on the
+  animation lane's own terms — it simply has no valid consumer in the main
+  lane's OFF-oracle render seams, all of which this same real-game mechanism
+  gates off. PAPERCUT: the incorrect PAPERCUTS.md claim cost ~15min to
+  chase down and rule out via source+oracle-doc+audit cross-checking before
+  the (correct) reversal.
+
+---
 ## 918 — [supervisor, 2026-08-04 ~15:15] R2 landed both lanes; rung-3 dispatcher FOLDED (union 721/6,925 green) → #71 Slice D unblocked and R3 launched (Slice D MAIN + #73 scaffold residuals SIDE)
 
 - **State:** master `519b6bf8` + this docs commit. Post-fold union: full
@@ -73,39 +128,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   residual classes (held-cursor freeze, swap-edge typing cascade); #71 Slice
   D still gated on the animation lane's rung-3 dispatcher.
 - **Notes:** none — single clean step, no papercuts.
-
----
-## 916 — [supervisor, 2026-08-04 ~14:35] R1 landed: #73 wait-cursor gating (LOSS 1/236 → 175/236, cap-kill salvage) + selection-rejection scout merged; R2 launching (Magnitude MAIN + antecedent-boundary probe SIDE)
-
-- **State:** master `5e7457b1` + this docs commit. Full `npm test` 716
-  files green at the salvage (1 file re-verified after the pin fix),
-  `npm run build` green, differential canary 128/128 vs `b1a7bd34`.
-- **Did:** (1) MAIN #73: worker ran to its full 60-min cap with ZERO
-  commits but a coherent 247-line tree — supervisor verified and landed
-  the salvage (`5e7457b1`): wait-cursor mechanism source-confirmed (two
-  quote ids use `EXT_CTRL_CODE_PAUSE_UNTIL_PRESS`→`TextPrinterWait`, no
-  arrow; `PLAYERDEFEATEDTRAINER1` keeps its `\p` cursor — WIN-side
-  load-bearing), LOSS compare 1/236 → **175/236** (worker 2×, supervisor
-  1× independent). One `toEqual` pin (battleResolutionPresentation.test.ts)
-  missed the new `noCursor` field — the exact gap the worker was fixing at
-  cap; supervisor completed it. Residual 61 frames = held-cursor freeze
-  (38) + swap-edge typing cascade (23), mechanisms itemized in the loss
-  doc §6, not guess-fit. (2) SIDE scout landed+merged (`e7c58649`):
-  selection-rejection subsystem mapped — 6 causes, last-true-wins,
-  `printselectionstring` flashes with NO button wait; engine port has no
-  mask gaps; census tool structurally blind to `printselectionstring`
-  (new finding); Imprison DEAD, other 5 REACHABLE. ISSUES #72 Torment
-  paragraph re-scoped accordingly; recommended slice = advisory
-  `describeIllegalMoveSelection` + 4 resolver branches (supervisor to
-  schedule).
-- **Next:** R2 in flight — MAIN: `STRINGID_MAGNITUDESTRENGTH` (#72's last
-  REACHABLE id); SIDE: RAM/pixel probe of the antecedent boundary
-  (2985-3060) to give both #73 residual classes source-fidelity numbers.
-  Then WIN-side compare wiring (consumes cursor findings), then the
-  selection-rejection slice if budget allows. #71 Slice D still gated on
-  the animation lane's rung-3 dispatcher (re-check at wind-down fold).
-- **Notes:** worker was killed mid-final-suite by the cap, not by any
-  error — $16.68/229 turns, high-quality forensics; cap-kill salvage
-  recipe applied cleanly. Oracle-freshness FAIL remains the docs-only
-  false-positive class (no restart). Play-preview rebuild still queued
-  for wind-down.

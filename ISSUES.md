@@ -103,24 +103,63 @@ non-ONIX settle window was NOT completed (matched app/oracle fixture-pair
 authoring cost + suspected oracle single-frame nondeterminism under
 multi-lane load — see PAPERCUTS); fold that check into Slice D's acceptance.
 
-**Still open (main-lane share):** Slice D (per-tick front playback at the generated
-battle-start seam, **gated on the animation lane's rung-3 dispatcher landing
-first** — do not hand-roll a per-tick dispatch switch in `src/engine/` to
-dodge this dependency, same class of mistake as the MAGBY/ONIX-back
-hand-fits this issue already flags); the §1e 56/58 move-window patch-site
-retirement (separate, larger pair-guard-refactor effort,
-`docs/send-out-live-wiring-consumer-map.md` §1e). The cross-lane ask for the
-animation lane's rung-3 dispatcher (`frontSendOutFrameAtTick` + OAM/anim-frame
-side, §5 of the consumer-map doc) stays open and is a prerequisite for Slice
-D only.
+**Slice D — NOT APPLICABLE for the main lane's oracle (found 2026-08-04, R3
+worker, before writing any render code, no src edits landed).** The rung-3
+dispatcher itself landed (`src/animation/sendOutDispatcher.ts` +
+`sendOutSpriteFrame.ts`, folded into master `519b6bf8`), but wiring its
+per-tick playback into `drawGeneratedOpponentRelease`/
+`renderGeneratedBattleStartPlayerRelease` — the main lane's **Battle Scene
+OFF** seam — would be wrong, not a stretch improvement. Four independent,
+converging sources all agree the real Scene-OFF game never plays this
+animation at all:
 
-**User directive (2026-08-04, interactive session):** the animation lane has
-been directed to build the rung-3 dispatcher as its **next bounded step**
-(recorded as the top entry of `ANIMATION_PROGRESS.md` on `animation-main`,
-commit `420a7578`). Main-lane sequencing: fold `animation-main` at orient as
-usual; once the dispatcher has landed, Slice D is unblocked and should be
-briefed against the §5 contract. Note `animation-main` also carries an
-unfolded Steel Wing partial (6 commits ahead of master as of this note).
+1. `bin/oracle info`'s own bootstrap description (battle-scene-off profile):
+   *"Move/effect and species front-sprite entrance animations are skipped by
+   the real game."* Contrast `--profile battle-scene-on`: *"in-battle,
+   move/effect and front-sprite entrance animations play."*
+2. Source (`reference/pokeemerald/src/pokemon.c:6803-6852`,
+   `DoMonFrontSpriteAnimation`): under `HITMARKER_NO_ANIMATIONS` (set once at
+   battle init from `gSaveBlock2Ptr->optionsBattleSceneOff` and never cleared
+   mid-battle, `battle_main.c:3081-3090`), the `SKIP_FRONT_ANIM` branch runs —
+   `LaunchAnimationTaskForFrontSprite` is never called, `sprite->callback =
+   SpriteCallbackDummy`, `x2`/`y2`/`animNum` stay at their pre-callback values
+   forever. This is the exact callback (`SpriteCB_OpponentMonFromBall`,
+   installed at the same `StartSpriteAffineAnim(..., BATTLER_AFFINE_EMERGE)`
+   handoff `drawGeneratedOpponentRelease` already models) `frontSendOutFrameAtTick`
+   is meant to feed.
+3. `drawGeneratedOpponentRelease`'s own pre-existing doc comment
+   (`battleScene.ts`, predates this session) already says so verbatim:
+   *"Battle Scene OFF skips the later species front-animation callback."*
+4. `ISSUES.md` #56's closure audit (settled 2026-08-03) found **every**
+   residual frame in the two committed generated-route dense Scene-OFF
+   windows (`factory-arbitrary-intro-yoshi-off` 700/751,
+   `-magneton-off` 703/751) accounted for by two unrelated mechanisms
+   (display-tail VBlank phase + idle-menu-bounce) — zero residual from
+   front-sprite movement, despite YOSHI/COMBUSKEN's real `ANIM_V_JUMPS_H_JUMPS`
+   family, which would show visible mid-flight displacement if it played.
+
+`PAPERCUTS.md`'s "mechanicLab send-out fast-forward silently inert under
+battle-scene-off" entry asserts the opposite ("Real OFF-profile battles DO
+play send-out anims") — that claim is **incorrect**, contradicted by all four
+sources above; a solo session should correct/retract it (supervised workers
+don't edit `PAPERCUTS.md`). The already-landed Slice A (applying
+`speciesFrontIdleRestOffset`'s static terminal offset at `coeff===0`) is a
+separate, already-merged decision outside this step's scope to re-litigate,
+but the same source facts arguably bear on it too (`SKIP_FRONT_ANIM` never
+runs the animation task at all, so a real Scene-OFF sprite's `x2`/`y2` may
+never leave `{0,0}` even for ONIX/RATTATA at this exact seam) — flagged here
+for whoever next touches this code, not fixed in this entry.
+
+**Conclusion:** the cross-lane ask (`frontSendOutFrameAtTick` +
+`frontSendOutSpriteFrameAtTick`) is fully delivered and correct on the
+animation lane's own terms, but has **no valid consumer in the main lane's
+Battle-Scene-OFF-compared render seams** — every seam Slice D would touch is
+gated off by the same real-game mechanism. Nothing to wire; Slice D is
+closed as not-applicable rather than done or blocked. The §1e 56/58
+move-window patch-site retirement (separate, larger pair-guard-refactor
+effort, `docs/send-out-live-wiring-consumer-map.md` §1e) remains the only
+open main-lane share of this issue, alongside the KABUTO/MAGBY/ONIX one-off
+hand-fit retirements (coordinated follow-up, not a solo drive-by).
 
 ## #72 — battleStringResolver completeness-guard gaps: REACHABLE printstring backlog CLOSED; Torment selection-time remainder still open
 
