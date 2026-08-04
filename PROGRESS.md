@@ -42,7 +42,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   its nested worker worktree under `.worktrees/animation-main/` is theirs
   to clean. Play-preview worktree still serves the pre-session build
   (630bf3dc) on :5199 — rebuild it next session if the user wants to play
-  today's landings.
+  today's landings. **USER-OWNED, do not clean or merge:**
+  `.worktrees/deepseek-worker` (branch `codex/deepseek-worker`, 2 commits
+  of launcher/profile work: DeepSeek V4 Flash worker profile + independent
+  supervisor/sub-agent selection) appeared during this session — it is the
+  user's own in-flight harness work, not a stale lane worktree.
 
 ---
 ## 913 — [bounded MAIN worker, 2026-08-04 ~10:30; numbers supervisor-corrected] #73 LOSS terminal window: all three diagnosed classes fixed; only small cursor-glyph-scale residuals remain (1/236 frames fully match, was 0/236)
