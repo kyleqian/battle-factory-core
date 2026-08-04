@@ -2,6 +2,35 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_STEEL_WING",
+      "status": "partial",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage the lowest Factory carrier FRONTIER_MON_WINGULL record 45 (Hardy) with all four choices constrained to STEEL WING against a stable legal ONIX target in both orientations",
+        "twice-fresh byte-identical Scene-ON evidence retains the complete first-active-source-frame through first-inactive-cleanup window at 197/197 frames: player-back frames 77-273 semantic/raw receipts e321040c649b29c2d7e1a9702aae0cae11d4d3e42215ccabbc318ba0f8ef5f52 / 2f44c8117fc921c59575f2dcc38503d47c6df569bc57afaaa6d55b9d3b6b3b69; opponent-front frames 81-277 receipts 7af04b3579d84e48d6a7a46c2a9f06c2920ef09a615a4ad8dbd1830f66302659 / 25c8e06b17b643baea699189d5a43eab782089346673b49cb320c4cc8d4654e1",
+        "source audit and reducers port GUST/IMPACT loading, the accepted non-permanent MetallicShine prelude, both looped sound tasks, target-partner monbg/splitbgprio/12:8 alpha, TranslateMonElliptical(0,12,4,1,4), faded GUST palette rotation (1,70), both signed-offset gGustToTargetSpriteTemplate affine/linear lifecycles, mirrored slides, two animation-1 IMPACT hitsplats, waits, cleanup, and stable gameplay fields",
+        "production framebuffer identity remains partial at 168/197 player-back and 140/197 opponent-front; MOVE_STEEL_WING is not exact and therefore does not establish an exact representative for ANIM_TAG_GUST or AnimTask_TranslateMonElliptical",
+        "MOVE_WING_ATTACK receives no credit: source audit proves the related GUST/elliptical/two-gust/slide/hitsplat body omits MetallicShine and uses distinct hit audio, and it lacks independent dense evidence",
+        "MOVE_RAZOR_WIND receives no credit: source audit proves it shares only ANIM_TAG_GUST and uses a distinct two-turn gRazorWindTornado body without independent dense evidence"
+      ],
+      "remaining": "Reconcile the source/display transfer and OAM-depth differences responsible for 29 player-back and 57 opponent-front framebuffer mismatches, then prove 197/197 production framebuffer identity twice fresh in both orientations before promotion; do not transfer credit to Wing Attack or Razor Wind.",
+      "evidence": [
+        "tools/battle-lab/mechanic-steel-wing-player-wingull-opponent-onix.json",
+        "tools/battle-lab/mechanic-steel-wing-opponent-wingull-player-onix.json",
+        "tools/compare/fixtures/steel-wing-player-wingull-opponent-onix.json",
+        "tools/compare/fixtures/steel-wing-opponent-wingull-player-onix.json",
+        "tools/compare/steelWingProbe.py",
+        "tools/compare/steelWingPortable.ts",
+        "tools/compare/steelWingSourceAudit.ts",
+        "tools/compare/extractSteelWingAssets.ts",
+        "src/animation/steelWing.ts",
+        "src/animation/assets/steel-wing.json",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/steelWing.test.ts",
+        "tests/animation/steelWingEvidence.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_BRICK_BREAK",
       "status": "exact",
       "covered": [

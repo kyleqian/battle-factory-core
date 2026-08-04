@@ -1,0 +1,19 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-steel-wing-opponent-wingull-player-onix.json",
+  "probe": "tools/compare/steelWingProbe.py",
+  "pair": "FRONTIER_MON_WINGULL record 45 (opponent-front) -> legal ONIX (player-back)",
+  "orientation": "opponent-to-player",
+  "move": "STEEL_WING",
+  "denseWindow": { "startFrame": 81, "endFrame": 277, "frameCount": 197 },
+  "appStage": { "presentationAge": 0 },
+  "attacker": { "species": "WINGULL", "geometry": { "side": "opponent", "spriteCorner": { "x": 144, "y": 16 }, "animationCenter": { "x": 176, "y": 48 }, "battlePositionCenter": { "x": 176, "y": 40 } } },
+  "target": { "species": "ONIX", "geometry": { "side": "player", "spriteCorner": { "x": 40, "y": 48 }, "animationCenter": { "x": 72, "y": 80 }, "battlePositionCenter": { "x": 72, "y": 80 } } },
+  "fieldProfile": { "playerHp": 110, "playerMaxHp": 110, "opponentHp": 147, "opponentMaxHp": 147, "playerGender": "male", "opponentGender": "male" },
+  "evidenceSchema": "steel-wing-dense-evidence/v1",
+  "evidenceSha256": "7af04b3579d84e48d6a7a46c2a9f06c2920ef09a615a4ad8dbd1830f66302659",
+  "secondFreshEvidenceSha256": "7af04b3579d84e48d6a7a46c2a9f06c2920ef09a615a4ad8dbd1830f66302659",
+  "rawRgbSha256": "25c8e06b17b643baea699189d5a43eab782089346673b49cb320c4cc8d4654e1",
+  "acceptance": { "status": "partial", "framebufferMatching": 140, "reason": "dense evidence and source component lifecycles are accepted; complete production framebuffer identity remains unproved" }
+}

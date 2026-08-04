@@ -1,5 +1,25 @@
 # Animation coverage
 
+## `MOVE_STEEL_WING` source/evidence partial (2026-08-04)
+
+- **State:** **107/276 exact, 1 partial, 0 staged, 168 unsupported**.
+  Steel Wing is deliberately not promoted: complete production framebuffer
+  identity is **168/197 player-back** and **140/197 opponent-front**.
+- **Did:** ported the source-relative GUST/IMPACT, elliptical, palette-cycle,
+  two-gust affine/linear, mirrored slide, hitsplat, monbg/alpha and cleanup
+  body behind the typed Scene-ON seam. Extracted GUST from pinned source.
+  Source-audited Wing Attack and Razor Wind with explicit no-credit results.
+- **Next:** reconcile the remaining live compositor differences (player ages
+  9, 126, 144-164 and cleanup edge; opponent initial/front-idle and contact
+  ranges), then rerun both complete windows twice before changing status to
+  exact. GUST/TranslateMonElliptical still lack an exact representative.
+- **Notes:** legal Hardy Factory Wingull record 45 vs legal Onix, complete
+  197-frame windows through first inactive cleanup. Twice-fresh byte-identical
+  evidence/raw RGB: player frames **77-273** `e321040c...f52` /
+  `2f44c811...b69`; opponent frames **81-277** `7af04b35...659` /
+  `25c8e06b...e1`. Receipts retain script state, tasks, software/hardware OAM,
+  matrices, palettes/tags, registers/blend, audio/pan, and stable battlers.
+
 ## Back `BACK_ANIM_SHAKE_GLOW_BLUE` triple accepted (2026-08-04)
 
 - **State:** player-back selector program complete: **25/25 sets, 75/75
