@@ -1,5 +1,51 @@
 # Animation coverage
 
+## Back `BACK_ANIM_V_STRETCH` triple accepted (2026-08-03)
+
+**State:** exact for the eleventh bounded player-back set: **11/25 back sets,
+33/75 selector variants, 134/376 Factory mappings**. The generated set is
+exactly **14 mappings / 14 Factory / 0 outside** — BELLSPROUT, WEEPINBELL,
+VICTREEBEL, GRIMER, TANGELA, CHINCHOU, WOOPER, WOBBUFFET, WURMPLE, BARBOACH,
+GULPIN, SWALOT, SEVIPER, and CRADILY. Move coverage remains **107/276 exact,
+0 partial, 0 staged, 169 unsupported**; `ANIMATION_COVERAGE.json` remains
+byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Did:** ported `Anim_VerticalStretchBothEnds_Twice`/normal/slow (IDs
+**116/115/90**) and shared `VerticalStretchBothEnds`: mod-0 two runs at
+duration 20/amplitude 70, mod-1 one run at 30/60, and mod-2 one run at
+40/40; initializer-first `data[2]` guard, `HandleStartAffineAnim`, signed GBA
+sine and C division, mid-window `data[7] += 51`/wrapped `index1`, back
+`sDontFlip` positive x-scale, composed y-scale, strict `data[5] > data[6]`
+cycle boundary, identity writes, twice-run decrement/reset, terminal
+`ResetSpriteAfterAnim`, and task zero/preserve/restore. Chinchou Factory
+index **116** Hardy is twice, Wurmple index **4** Quirky is normal, and
+Weepinbell index **165** Quiet is slow; all fourteen siblings are
+source/census/nature-routed and Factory batch-checked. No move status was
+promoted and no gameplay, RNG, damage, turn, facility, or live dispatcher
+state changed.
+
+**Evidence:** three fresh paired byte-identical Scene-ON receipts are dense
+from selected initializer through `SpriteCallbackDummy`, retaining every
+framebuffer hash plus sprite RAM/OAM/affine state: Chinchou twice
+**1840..1885 / 46 frames, 22,114 B,
+`456f9cdd0391f3edb503c89c6a7c7df1a6cf8cccbe9c45cf7ff6a6dc4897ef26`**;
+Wurmple normal **1839..1872 / 34, 16,304 B,
+`c430eeb4c6c4aa81de301fc577f6fad1451211a0afa20a488e4c39704b803345`**;
+Weepinbell slow **1842..1885 / 44, 21,162 B,
+`eb5dca2cb07b4d2dc440a36c4d442fc277e0428d77236cae780dd81f4cc01306`**.
+
+**Verification / next:** focused source/census/routing/reducer/evidence checks
+and both animation/executable ratchets are green (**4 files / 20 tests**);
+`npm run test:smoke` is green (**7 files / 346 tests**); heap-sized
+`npx tsc --noEmit` is green; full `npm test` is green (**672 files / 6,621
+passed / 1 skipped**); and heap-sized `npm run build` is green (**553 modules
+transformed**). `npm run animation:coverage` remains **107/276 exact, 0
+partial, 0 staged, 169 unsupported**, with `ANIMATION_COVERAGE.json`
+unchanged. No unsupported-branch ratchet moved. Next source-ranked unsupported
+player-back set is **`BACK_ANIM_H_STRETCH` (set 12): 2 mappings / 2 Factory /
+0 outside — MUK and LILEEP**.
+
 ## Back `BACK_ANIM_V_SHAKE_H_SLIDE` triple accepted (2026-08-03)
 
 **State:** exact for the tenth bounded player-back set: **10/25 back sets,
