@@ -1,3 +1,27 @@
+## 915 — [supervisor orient, 2026-08-04 ~13:20] Animation fold (Steel Wing partial + rung-3 directive) → master `b1a7bd34`; union green 716/6,887; R1 launched (#73 wait-cursor MAIN + Torment-scoping SIDE scout)
+
+- **State:** master `b1a7bd34` (fast-forward fold of `animation-main`:
+  6 Steel Wing partial commits + the 2026-08-04 rung-3 dispatcher
+  directive). Union verification: full `npm test` **716 files / 6,887
+  passed / 1 skipped**, `npm run build` green. Animation supervisor is
+  live concurrently (started 13:06, same 19:06 deadline, DeepSeek
+  workers) — the rung-3 send-out dispatcher has NOT landed yet, so #71
+  Slice D stays gated; re-check at the wind-down fold.
+- **Did:** folded `animation-main` (clean ff — the animation supervisor
+  had already merged master in at its own orient); ran the full union
+  suite + build myself. Oracle freshness FAIL judged a docs-only false
+  positive (harness commits since both service starts: `d47bff3`
+  _template-only + `5251112` docs-only) — no restart, sibling session
+  live on 8012.
+- **Next:** R1 in flight — MAIN: #73 wait-cursor source read + gating
+  fix + the 3-frame swap-edge micro-class (target ≥232/236 honest);
+  SIDE: docs-only selection-rejection (Torment) re-scoping scout. Then
+  #72 `STRINGID_MAGNITUDESTRENGTH` (brief staged), then #73 WIN-side
+  compare wiring, then #71 Slice D if the dispatcher lands mid-session.
+- **Notes:** play-preview worktree still serves pre-session `630bf3dc`
+  on :5199 — rebuild at wind-down so the user can play today's landings.
+
+---
 ## 914 — [supervisor wind-down, 2026-08-04 ~11:00, user-requested early close] R3+R4 landed: #72 REACHABLE 10→1 (batch 8, 9 ids), #73 LOSS window to cursor-only residuals + WIN ground truth banked; 7-commit animation fold; final union verification in flight
 
 - **State:** master at the animation fold merge. Session totals: 8 workers

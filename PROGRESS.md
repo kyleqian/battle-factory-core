@@ -4,6 +4,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 918 — [supervisor, 2026-08-04 ~15:15] R2 landed both lanes; rung-3 dispatcher FOLDED (union 721/6,925 green) → #71 Slice D unblocked and R3 launched (Slice D MAIN + #73 scaffold residuals SIDE)
+
+- **State:** master `519b6bf8` + this docs commit. Post-fold union: full
+  `npm test` **721 files / 6,925 passed / 1 skipped**, `npm run build`
+  green. Two merges since 917, both all-new-files: the antecedent-boundary
+  probe branch (`578bb461`) and `animation-main`'s complete rung-3
+  dispatcher (10 commits: FRONT dispatcher + sprite-frame/OAM half +
+  measured anchor evidence A=−1 + BACK dispatcher; their suite was green
+  at 719 files before fold).
+- **Did:** (1) verified+merged MAIN Magnitude (entry 917 — #72 REACHABLE
+  now 0, census 39→38, worker corrected the brief's stale 48→47 claim);
+  (2) verified+merged the SIDE RAM probe: both #73 residual classes now
+  have derived numbers — frozen cursor pose = `floor((2929−2907)/9)%4 = 2`
+  from the fixture's own committed A press, and the 3-tick swap edge =
+  controller-ack visibility + one-opcode-per-tick + RAM→pixel latch;
+  both fixes are compare-scaffold-side, render layer already correct
+  (`docs/terminal-seam-antecedent-boundary-probe.md`); (3) folded the
+  dispatcher and reran the union myself.
+- **Next:** R3 in flight — MAIN: **#71 Slice D** (per-tick front playback
+  at the generated battle-start seam via `frontSendOutFrameAtTick`,
+  user-directed priority, anchor math briefed from the dispatcher's own
+  doc comment + flight fixtures; boundary-ratchet widening for the two
+  dispatcher modules pre-authorized as the recorded cross-program
+  decision); SIDE: #73 LOSS scaffold fixes targeting 236/236. Then R4:
+  WIN-side compare wiring + possibly the selection-rejection advisory
+  slice. Wind-down fold + full suite + play-preview rebuild after.
+- **Notes:** animation supervisor still live on its lane (Steel Wing
+  reconciliation queued next per its ledger); fold again at wind-down.
+
+---
 ## 917 — [bounded MAIN worker, 2026-08-04 ~14:50] ISSUES #72 REACHABLE backlog CLOSED: `STRINGID_MAGNITUDESTRENGTH` landed (batch 9, the last id); Torment selection-time note is the only open remainder
 
 - **State:** master `9be8304d` + this docs commit. `tests/
@@ -79,28 +109,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   recipe applied cleanly. Oracle-freshness FAIL remains the docs-only
   false-positive class (no restart). Play-preview rebuild still queued
   for wind-down.
-
----
-## 915 — [supervisor orient, 2026-08-04 ~13:20] Animation fold (Steel Wing partial + rung-3 directive) → master `b1a7bd34`; union green 716/6,887; R1 launched (#73 wait-cursor MAIN + Torment-scoping SIDE scout)
-
-- **State:** master `b1a7bd34` (fast-forward fold of `animation-main`:
-  6 Steel Wing partial commits + the 2026-08-04 rung-3 dispatcher
-  directive). Union verification: full `npm test` **716 files / 6,887
-  passed / 1 skipped**, `npm run build` green. Animation supervisor is
-  live concurrently (started 13:06, same 19:06 deadline, DeepSeek
-  workers) — the rung-3 send-out dispatcher has NOT landed yet, so #71
-  Slice D stays gated; re-check at the wind-down fold.
-- **Did:** folded `animation-main` (clean ff — the animation supervisor
-  had already merged master in at its own orient); ran the full union
-  suite + build myself. Oracle freshness FAIL judged a docs-only false
-  positive (harness commits since both service starts: `d47bff3`
-  _template-only + `5251112` docs-only) — no restart, sibling session
-  live on 8012.
-- **Next:** R1 in flight — MAIN: #73 wait-cursor source read + gating
-  fix + the 3-frame swap-edge micro-class (target ≥232/236 honest);
-  SIDE: docs-only selection-rejection (Torment) re-scoping scout. Then
-  #72 `STRINGID_MAGNITUDESTRENGTH` (brief staged), then #73 WIN-side
-  compare wiring, then #71 Slice D if the dispatcher lands mid-session.
-- **Notes:** play-preview worktree still serves pre-session `630bf3dc`
-  on :5199 — rebuild at wind-down so the user can play today's landings.
-
