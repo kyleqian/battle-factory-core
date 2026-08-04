@@ -1,5 +1,38 @@
 # Animation coverage
 
+## Rung-3 FRONT send-out dispatcher landed (2026-08-04)
+
+- **State:** ISSUES #71 rung-3 item 1, FRONT half, complete and green. Move
+  coverage unchanged: **107/276 exact, 1 partial, 0 staged, 168
+  unsupported**; `ANIMATION_COVERAGE.json` untouched at SHA-256
+  `162b48ff87e3d38897ff53a871dbda868a46ae84ea3149a08bc8df8d74288ae7` (the
+  `6e8067e5...` literal in older entries predates the Steel Wing partial
+  recording). No engine edits, no boundary/unsupported widening.
+- **Did:** added `src/animation/sendOutDispatcher.ts` (front half only):
+  `frontSendOutFrameAtTick(species, ticksSinceStart)` resolves the species'
+  `ANIM_*` front family from `selectorTables.frontAnimIds.species`, guards on
+  its own dispatch table before casting, clamps the tick to
+  `FRONT_SEND_OUT_TERMINAL_TICKS[family]` (copied verbatim from
+  `computeTerminalOffset`'s per-case literals; RAPID_H_HOPS loop-verified last
+  non-null tick **85**, `{x2:1,y2:0}`), and returns `Object.freeze({x2, y2})`
+  from the same single-tick reducer each switch case calls; a below-clamp
+  reducer null is passed through. Doc comment states the exact tick-0 anchor
+  (`SpriteCB_OpponentMonFromBall` @ `battle_main.c:2838` + animationDelay).
+  Tests `tests/animation/sendOutDispatcher.test.ts`: **386-species** terminal
+  consistency vs `speciesFrontIdleRestOffset`, **62-family** mid-flight
+  passthrough vs each reducer directly (families enumerated from the
+  `FRONT_SEND_OUT_TERMINAL_TICKS` export), clamp (RAPID_H_HOPS via ONIX +
+  4 families) incl. `ONIX@85 == {x2:1,y2:0}`, null inputs (unknown species,
+  OLD_UNOWN_B, -1, 1.5), frozen return.
+- **Next:** remaining rung-3 items — OAM/anim-frame side
+  (`HasTwoFramesAnimation` / `sMonAnimationDelayTable`-derived frame-index
+  state), the live RAM-probe anchor pin, and the back variant
+  (`species, nature, ticksSinceStart`) in the same contract shape.
+- **Notes:** focused dispatcher + animation boundary + frontier ratchet
+  **3 files / 15 tests**; typecheck, smoke **7 files / 347 tests**, full
+  **717 files / 6,893 passed / 1 skipped**, and build green. Committed as
+  `96ef4acf` (+ `b627e991` interface cleanup); tree clean at commit.
+
 ## USER DIRECTIVE (2026-08-04, recorded from the user's interactive session): the §6 rung-3 send-out dispatcher is this lane's next bounded step
 
 - **Directive:** the first bounded step of the next animation session is
