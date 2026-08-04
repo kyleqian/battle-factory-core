@@ -1594,7 +1594,7 @@ describe("factory full-turn decision -- decision -> both actions -> end-turn -> 
           }
           return `message:${(event.payload as Readonly<{ messageId: string }>).messageId}`;
         });
-      expect(compactSequence).toEqual(["recall:1", "slide-in:0", "message:STRINGID_TRAINER1WINTEXT"]);
+      expect(compactSequence).toEqual(["recall:1", "slide-in:1", "message:STRINGID_TRAINER1WINTEXT"]);
     },
   );
 });

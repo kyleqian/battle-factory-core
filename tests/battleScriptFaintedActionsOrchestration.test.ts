@@ -120,11 +120,14 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
     resolveAttackerBattler: () => null,
     // GetBattlerAtPosition (battle_anim_mons.c:859-869) is the identity map in
     // singles. Needed since the terminal seam now runs the post-battle WIN
-    // script, whose `trainerslidein BS_ATTACKER` resolves position 0.
+    // script, whose `trainerslidein BS_ATTACKER` reads BS_ATTACKER
+    // (battle_script_commands.h:305 = 1) as a raw position operand, the same
+    // byte as B_POSITION_OPPONENT_LEFT -- resolving position 1, not 0
+    // (battleScriptBattlerPositions.ts).
     resolveBattlerAtPosition: (_context, operand) =>
-      operand.expression === "B_POSITION_PLAYER_LEFT" || operand.expression === "BS_ATTACKER"
+      operand.expression === "B_POSITION_PLAYER_LEFT"
         ? 0
-        : operand.expression === "B_POSITION_OPPONENT_LEFT" ? 1 : null,
+        : operand.expression === "B_POSITION_OPPONENT_LEFT" || operand.expression === "BS_ATTACKER" ? 1 : null,
     resolveHalfwordOperand: (_context, operand) =>
       operand.expression === "B_WAIT_TIME_LONG"
         ? 64
@@ -355,12 +358,13 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
     expect(result.state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
       .toEqual(["STRINGID_PLAYERDEFEATEDTRAINER1", "STRINGID_TRAINER1LOSETEXT"]);
     // ...with the trainer slide-in between them, addressed to the battler at
-    // B_POSITION_PLAYER_LEFT (Cmd_trainerslidein reads its operand as a
-    // position, not an attacker role -- BS_ATTACKER is the same byte, 0).
+    // B_POSITION_OPPONENT_LEFT (Cmd_trainerslidein reads its operand as a raw
+    // position, not an attacker role -- BS_ATTACKER is the same byte, 1, as
+    // B_POSITION_OPPONENT_LEFT, so the OPPONENT trainer slides in).
     expect(result.state.events
       .filter((event) => event.kind === "trainer-slide-in")
       .map((event) => (event as Readonly<{ battler: number }>).battler))
-      .toEqual([0]);
+      .toEqual([1]);
     // The TWO_OPPONENTS and PYRAMID branches are always false for Factory L50
     // singles, so neither the second trainer's quote nor pickup is reached.
     expect(result.state.events.filter((event) => event.kind === "trainer-slide-out")).toEqual([]);
@@ -413,10 +417,11 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
       "recall:1",
       // Same trainerslidein BS_ATTACKER value collision the WIN side's own
       // pin documents (Cmd_trainerslidein reads its operand as a raw
-      // position, not an attacker role) -- battler 0, resolved identically on
-      // both paths since both scripts share the exact same BS_ATTACKER byte
-      // and the exact same resolveBattlerAtPosition port.
-      "slide-in:0",
+      // position, not an attacker role) -- battler 1 (the opponent, at
+      // B_POSITION_OPPONENT_LEFT), resolved identically on both paths since
+      // both scripts share the exact same BS_ATTACKER byte and the exact
+      // same resolveBattlerAtPosition port.
+      "slide-in:1",
       "message:STRINGID_TRAINER1WINTEXT",
     ]);
   });
@@ -450,7 +455,7 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
     expect(result.state.events
       .filter((event) => event.kind === "trainer-slide-in")
       .map((event) => (event as Readonly<{ battler: number }>).battler))
-      .toEqual([0]);
+      .toEqual([1]);
     expect(result.state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
       .toEqual(["STRINGID_TRAINER1WINTEXT"]);
   });
