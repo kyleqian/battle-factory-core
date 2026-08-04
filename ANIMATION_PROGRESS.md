@@ -1,5 +1,35 @@
 # Animation coverage
 
+## Back `BACK_ANIM_SHRINK_GROW_VIBRATE` triple accepted (2026-08-04)
+
+- **State:** exact for the twentieth bounded player-back set: **20/25 back
+  sets, 60/75 selector variants, 311/376 Factory mappings**. Generated set
+  census: **23 mappings / 22 Factory species / 1 outside (DEOXYS) / 70
+  Factory records**. Move coverage stays **107/276 exact, 0 partial, 0
+  staged, 169 unsupported**; `ANIMATION_COVERAGE.json` remains SHA-256
+  `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+- **Did:** ported source IDs **133/134/135**, guarded initializer-first
+  affine callbacks, and `ShrinkGrowVibrate`: cycle/duration **40/80,
+  40/40, 80/80**, alternating even/odd amplitudes **32/8**, exact u16
+  phase construction and signed `sinY / 8`, strict `data[2] > data[7]`,
+  trailing increment, affine/OAM reset, `WaitAnimEnd`→dummy, task
+  restoration, and player-back no-flip. SHEDINJA record **21** Naive/mod-0;
+  RALTS **5** Docile/mod-1; ABRA **90** Lonely/mod-2; all 23 mappings route.
+- **Next:** source-ranked unsupported player-back set **`BACK_ANIM_JOLT_RIGHT`
+  (set 21): 33 mappings / 33 Factory / 0 outside / 74 Factory records**.
+- **Notes:** fresh paired byte-identical dense Scene-ON initializer→dummy
+  receipts retain every framebuffer hash and player RAM/OAM/affine state:
+  Shedinja **1840..1923 / 84 / 40,911 B /
+  `c2a45100d6439267f90292268772216844e2a2bb642c93a68dffe8570be85df4`**;
+  Ralts **1837..1880 / 44 / 21,548 B /
+  `a9b1f9c6c8d3ef0ee8dab0c39af346404c96e9781ebc7446152530023c42a1b9`**;
+  Abra **1836..1919 / 84 / 40,902 B /
+  `3cdc7412eeedcf3a52a48d355bbc8dd7754a5e1c981227ea21434ea211e0b8d6`**.
+  Focused source/census/routing/reducer/evidence plus both ratchets: **4
+  files / 21 tests**; typecheck, smoke **7/346**, full **695 files / 6,752
+  passed / 1 skipped**, build (**553 modules**), and coverage are green. No
+  boundary or unsupported-branch widening and no move promotion.
+
 ## Back `BACK_ANIM_DIP_RIGHT_SIDE` triple accepted (2026-08-04)
 
 - **State:** exact for the nineteenth bounded player-back set: **19/25 back

@@ -361,6 +361,23 @@ export const BACK_DIP_RIGHT_SIDE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Ob
   BACK_DIP_RIGHT_SIDE_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by `BACK_ANIM_SHRINK_GROW_VIBRATE`. */
+export const BACK_SHRINK_GROW_VIBRATE_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_SHRINK_GROW_VIBRATE")
+    .map(([species]) => species),
+);
+
+/** All mappings except DEOXYS have at least one Battle Factory record. */
+export const BACK_SHRINK_GROW_VIBRATE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHRINK_GROW_VIBRATE_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** DEOXYS is the sole selector mapping outside the Factory corpus. */
+export const BACK_SHRINK_GROW_VIBRATE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHRINK_GROW_VIBRATE_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -914,6 +931,42 @@ export const BACK_DIP_RIGHT_SIDE_VARIANTS = Object.freeze({
 } as const);
 
 /**
+ * `BACK_ANIM_SHRINK_GROW_VIBRATE` selects three guarded affine
+ * initializers over the shared `ShrinkGrowVibrate` helper. Fast and slow
+ * both end after data[2] 80, but fast completes two 40-tick sine periods
+ * while slow completes one 80-tick period; normal is one 40-tick period.
+ */
+export const BACK_SHRINK_GROW_VIBRATE_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_SHRINK_GROW_VIBRATE_FAST",
+    callback: "Anim_ShrinkGrowVibrate_Fast",
+    sourceId: 133,
+    natureMod: 0,
+    cycle: 40,
+    duration: 80,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_SHRINK_GROW_VIBRATE",
+    callback: "Anim_ShrinkGrowVibrate",
+    sourceId: 134,
+    natureMod: 1,
+    cycle: 40,
+    duration: 40,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_SHRINK_GROW_VIBRATE_SLOW",
+    callback: "Anim_ShrinkGrowVibrate_Slow",
+    sourceId: 135,
+    natureMod: 2,
+    cycle: 80,
+    duration: 80,
+    accepted: true,
+  }),
+} as const);
+
+/**
  * `BACK_ANIM_V_SHAKE_H_SLIDE` selects three standalone source callbacks.
  * Unlike the preceding shake triples, each callback stays installed directly
  * after the task dispatches it; the source does not use a shared helper or a
@@ -1135,6 +1188,11 @@ type BackDipRightSideDuration = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof
 type BackDipRightSideRuns = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["runs"];
 type BackDipRightSideAmplitude = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["amplitude"];
 type BackDipRightSideOffset = typeof BACK_DIP_RIGHT_SIDE_VARIANTS[keyof typeof BACK_DIP_RIGHT_SIDE_VARIANTS]["offset"];
+type BackShrinkGrowVibrateSelector = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["selector"];
+type BackShrinkGrowVibrateCallback = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["callback"];
+type BackShrinkGrowVibrateSourceId = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["sourceId"];
+type BackShrinkGrowVibrateCycle = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["cycle"];
+type BackShrinkGrowVibrateDuration = typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS[keyof typeof BACK_SHRINK_GROW_VIBRATE_VARIANTS]["duration"];
 type BackVShakeHSlideSelector = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["selector"];
 type BackVShakeHSlideCallback = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["callback"];
 type BackVShakeHSlideSourceId = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["sourceId"];
@@ -1458,6 +1516,19 @@ function dipRightSideVariant(selector: string): {
   readonly offset: BackDipRightSideOffset;
 } | null {
   for (const variant of Object.values(BACK_DIP_RIGHT_SIDE_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function shrinkGrowVibrateVariant(selector: string): {
+  readonly selector: BackShrinkGrowVibrateSelector;
+  readonly callback: BackShrinkGrowVibrateCallback;
+  readonly sourceId: BackShrinkGrowVibrateSourceId;
+  readonly cycle: BackShrinkGrowVibrateCycle;
+  readonly duration: BackShrinkGrowVibrateDuration;
+} | null {
+  for (const variant of Object.values(BACK_SHRINK_GROW_VIBRATE_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -3658,6 +3729,147 @@ export function backDipRightSideTerminalSpriteData(
   const variant = dipRightSideVariant(selection.selector);
   if (variant === null) throw new Error(`unexpected right-side dip selector ${selection.selector}`);
   return [toS16(battlerId), 0, toS16(speciesId), variant.runs, variant.offset, variant.amplitude, 0, variant.duration];
+}
+
+export interface BackShrinkGrowVibrateAffineWrite {
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly rotationSigned: 0;
+  readonly rotationU16: 0;
+}
+
+export interface BackShrinkGrowVibrateFrame {
+  readonly x2: 0;
+  readonly y2: number;
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  readonly data2: number;
+  readonly data3: 0;
+  readonly data4: number;
+  readonly data5: number;
+  readonly data6: BackShrinkGrowVibrateCycle;
+  readonly data7: BackShrinkGrowVibrateDuration;
+  readonly counter: number;
+  readonly strictOverflow: boolean;
+  readonly index: number | null;
+  readonly amplitude: 8 | 32 | null;
+  readonly sinY: number;
+  readonly selector: BackShrinkGrowVibrateSelector;
+  readonly sourceId: BackShrinkGrowVibrateSourceId;
+  readonly cycle: BackShrinkGrowVibrateCycle;
+  readonly duration: BackShrinkGrowVibrateDuration;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly initializerCalled: boolean;
+  readonly initializerY2Add: 2 | 0;
+  readonly handleStartAffineAnimCalls: 0 | 1;
+  readonly callbackInvokedByInitializer: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly normalBackDontFlip: true;
+  readonly tryFlipXCalls: 0;
+  readonly affineWriteCount: 1;
+  readonly affineWrites: readonly [BackShrinkGrowVibrateAffineWrite];
+  readonly affineMode: "double" | "normal";
+  readonly callback: BackShrinkGrowVibrateCallback | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for `BACK_ANIM_SHRINK_GROW_VIBRATE`. Tick zero is
+ * the guarded selected initializer, which starts affine mode, performs its
+ * otherwise-overwritten `y2 += 2`, writes data[6]/data[7], and immediately
+ * calls the shared helper. Active callbacks alternate amplitudes 32 and 8;
+ * the terminal branch is the strict `data[2] > data[7]` callback.
+ */
+export function backShrinkGrowVibrateFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackShrinkGrowVibrateFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_SHRINK_GROW_VIBRATE") return null;
+  const variant = shrinkGrowVibrateVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected shrink/grow/vibrate selector ${selection.selector}`);
+
+  const counter = Math.min(ticksSinceStart, variant.duration + 1);
+  const strictOverflow = counter > variant.duration;
+  const activeCounter = strictOverflow ? variant.duration : counter;
+  const index = strictOverflow
+    ? null
+    : Math.trunc(((activeCounter % variant.cycle) * 256) / variant.cycle) % 256;
+  const amplitude = strictOverflow ? null : (activeCounter % 2 === 0 ? 32 as const : 8 as const);
+  const sinY = strictOverflow ? 0 : gbaSin(index!, amplitude!);
+  const xScale = strictOverflow ? 256 : toS16(sinY + 256);
+  const yScale = xScale;
+  // The source narrows Sin to s8, divides signed by eight toward zero, then
+  // assigns through u16 to the sprite's signed y2 register.
+  const y2 = strictOverflow ? 0 : toS16(toU16(Math.trunc(toS16(sinY) / 8)));
+  const write = Object.freeze({
+    xScale,
+    yScale,
+    rotationSigned: 0 as const,
+    rotationU16: 0 as const,
+  });
+  return Object.freeze({
+    x2: 0 as const,
+    y2,
+    data0: 0 as const,
+    data1: toS16(preservedData1),
+    data2: toS16(counter + 1),
+    data3: 0 as const,
+    data4: xScale,
+    data5: yScale,
+    data6: variant.cycle,
+    data7: variant.duration,
+    counter,
+    strictOverflow,
+    index,
+    amplitude,
+    sinY,
+    selector: variant.selector,
+    sourceId: variant.sourceId,
+    cycle: variant.cycle,
+    duration: variant.duration,
+    xScale,
+    yScale,
+    initializerCalled: ticksSinceStart === 0,
+    initializerY2Add: ticksSinceStart === 0 ? 2 as const : 0 as const,
+    handleStartAffineAnimCalls: ticksSinceStart === 0 ? 1 as const : 0 as const,
+    callbackInvokedByInitializer: true as const,
+    resetSpriteAfterAnim: strictOverflow,
+    normalBackDontFlip: true as const,
+    tryFlipXCalls: 0 as const,
+    affineWriteCount: 1 as const,
+    affineWrites: [write] as const,
+    affineMode: strictOverflow ? "normal" as const : "double" as const,
+    callback: strictOverflow ? "WaitAnimEnd" as const : variant.callback,
+  });
+}
+
+/** Source WaitAnimEnd transition for the affine player-back sprite. */
+export function backShrinkGrowVibrateWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+/** Task restoration preserves helper data[4..7], as in the source task. */
+export function backShrinkGrowVibrateTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+): readonly [number, 0, number, 0, 256, 256, BackShrinkGrowVibrateCycle, BackShrinkGrowVibrateDuration] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_SHRINK_GROW_VIBRATE") return null;
+  const variant = shrinkGrowVibrateVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected shrink/grow/vibrate selector ${selection.selector}`);
+  return [toS16(battlerId), 0, toS16(speciesId), 0, 256, 256, variant.cycle, variant.duration];
 }
 
 export interface BackConvexDoubleArcFrame {
