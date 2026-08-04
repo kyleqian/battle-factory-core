@@ -1,5 +1,33 @@
 # Animation coverage
 
+## STEEL_WING residual diagnosis doc landed (2026-08-04, READ-ONLY audit)
+
+- **State:** `docs/steel-wing-residual-diagnosis.md` records the mechanism
+  attribution for every divergent framebuffer range of the MOVE_STEEL_WING
+  partial. Move coverage unchanged: **107/276 exact, 1 partial, 0 staged, 168
+  unsupported**; STEEL_WING stays partial. No production edits, no `src/`
+  commits, `ANIMATION_COVERAGE.json` untouched.
+- **Did:** reran both portable orientations (fresh, own mGBA); counts reproduce
+  exactly (**168/197** player-back and **140/197** opponent-front, no drift).
+  Per-range probe+diff analysis attributes **12 of 14 distinct ranges**, split
+  8 confirmed-by-evidence / 2 plausible / 2+1 unresolved-but-narrowed.
+  Confirmed: metallic-BG1 band one callback early (player+opp age 9);
+  elliptical tick-15 residue (player 126 — source wrap-frame resets to 0);
+  hitsplat affine 303-vs-372 (`HitSplat_1` 0xD8 vs the app's 0xB0) + hitsplat
+  first frame deferred by the `displayed` lag (both, 155-165); opponent gust
+  `startY` should be `+0` not `−8` (opp 111-155); enemy shadow renders exactly
+  one frame at the opponent dense-window head (opp 0). Plausible: slide-back
+  start/rate (player 181-185), faded-vs-unfaded gust palette base (player
+  144-155, exact render path unisolated). Ruled out: front-idle two-frame
+  cadence (Wingull ANIMCMD held at rest frame all window; rung-3 modules do
+  not apply), gust palette-rotation timing, alpha/monbg blend.
+- **Next:** an implementation step can fix the confirmed mechanisms directly
+  from the doc; the two plausible ranges list the exact probe to pin them.
+- **Notes:** one recorded range boundary moved: the player entry said ages
+  144-164, this audit measures **144-165** (same total, age 165 also diverges).
+  No PAPERcuts (only audit tooling was reused). Committed doc+entry only; tree
+  clean at commit.
+
 ## Rung-3 BACK send-out dispatcher landed (2026-08-04)
 
 - **State:** ISSUES #71 rung-3 cross-lane ask item 3 (back variant) complete
