@@ -8117,11 +8117,10 @@ function drawFightSubmenuWindow(
       ? turn5KickoffBounceTick(t, pressTick, turn5CommandHandoff)
       : turn4CommandHandoff !== null
         ? turn4KickoffBounceTick(t, pressTick, turn4CommandHandoff)
-        : turn3CommandHandoff !== null
+        : turn3CommandHandoff !== null && genericTurn2Content !== null
           ? turn3KickoffBounceTick(
               t - TICK0,
               sm.confirmElapsed,
-              turn3CommandHandoff,
               genericTurn2Content,
             )
           : turn2CommandHandoff !== null
@@ -9131,31 +9130,21 @@ const TURN3_CONFIRM_PRESS_TICK = 3891;
 /**
  * The turn-3 confirm keeps the turn-2 receipt's live epoch through the
  * controller wait, then freezes at that same epoch's confirmed plateau.
- * No move-local redraw delay owns either clock.
+ * No move-local redraw delay owns either clock. `fightCommandKickoffBounceEpochTick`
+ * is the generic form of this same pre-freeze/frozen formula (already the
+ * live production path below - the retired legacy branch was an
+ * unreachable fallback, see the differential proof this slice's commit
+ * cites).
  */
 function turn3KickoffBounceTick(
   currentElapsed: number,
   confirmElapsed: number,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff,
-  turn2Content: FightCommandPresentation | null = null,
+  turn2Content: FightCommandPresentation,
 ): number {
-  if (turn2Content !== null) {
-    return fightCommandKickoffBounceEpochTick(
-      turn2Content,
-      currentElapsed,
-      confirmElapsed,
-    );
-  }
-  if (currentElapsed < confirmElapsed + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) {
-    return turn3SubmenuBounceTickFromPresentationEpochAge(
-      turn2PresentationEpochElapsedSinceReset(turn2NextCommandHandoff, currentElapsed),
-    );
-  }
-  return turn3SubmenuBounceTickFromPresentationEpochAge(
-    turn2PresentationEpochElapsedSinceReset(
-      turn2NextCommandHandoff,
-      confirmElapsed + 9,
-    ),
+  return fightCommandKickoffBounceEpochTick(
+    turn2Content,
+    currentElapsed,
+    confirmElapsed,
   );
 }
 
@@ -9420,10 +9409,12 @@ function drawTurn3EndeavorText(
   if (turn2NextCommandHandoff === null) {
     throw new Error("turn-3 kickoff text requires the completed turn-2 receipt before its own reset");
   }
+  if (turn2Content === null) {
+    throw new Error("turn-3 kickoff text requires semantic turn-2 presentation content");
+  }
   const bounceTick = turn3KickoffBounceTick(
     t - TICK0,
     pressTick - TICK0,
-    turn2NextCommandHandoff,
     turn2Content,
   );
   const onixHp = endeavorHp(t, pressTick, anchorPlayerAfterTurnHp, anchorPlayerAfterTurn3Hp, TURN3_OFF_ENDEAVOR_HP_DRAIN_START_DELAY);
@@ -9582,10 +9573,12 @@ function drawTurn3RockSlideAttack(
   if (turn2NextCommandHandoff === null) {
     throw new Error("turn-3 attack phase requires the completed turn-2 receipt before its own reset");
   }
+  if (turn2Content === null) {
+    throw new Error("turn-3 attack phase requires semantic turn-2 presentation content");
+  }
   drawMenuIdleBounceOverlay(fb, turn3KickoffBounceTick(
     t - TICK0,
     TURN3_CONFIRM_PRESS_TICK - TICK0,
-    turn2NextCommandHandoff,
     turn2Content,
   ));
 }
