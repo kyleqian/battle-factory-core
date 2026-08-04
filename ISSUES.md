@@ -122,367 +122,40 @@ usual; once the dispatcher has landed, Slice D is unblocked and should be
 briefed against the §5 contract. Note `animation-main` also carries an
 unfolded Steel Wing partial (6 commits ahead of master as of this note).
 
-## #72 — battleStringResolver completeness-guard gaps: 40 REACHABLE printstring STRINGIDs need the Taunt-pair fix idiom
+## #72 — battleStringResolver completeness-guard gaps: REACHABLE printstring backlog CLOSED; Torment selection-time remainder still open
 
-**Symptom:** the same-day user-reported crash (2026-08-03, opponent MURKROW's
-TAUNT: `battleStringResolver: STRINGID_PKMNFELLFORTAUNT references placeholder
-{B_DEF_NAME_WITH_PREFIX} with no resolver supplied`) and a sibling gap found
-alongside it (`STRINGID_PKMNCANTUSEMOVETAUNT`) are both now fixed
-(`battleResolutionPresentation.ts`'s `messageLines`, `tests/
-presentationStringTaunt.test.ts`). Both evaded ISSUES #70's 47-id sweep
-because #70 grepped `src/engine/*.ts` for `STRINGID_` TS literals, but these
-ids are emitted purely by the generic `printstring <STRINGID_X>` opcode
-handler reading the operand straight out of the parsed battle-script program
-— no TS code ever spells the id out. `tools/report/printstring-literal-
-census.ts` (regenerable, `docs/printstring-literal-census.md`) enumerated the
-full blind spot: of 207 unique literal `printstring` operands, 107 are
-UNRESOLVED (would hit the completeness guard).
-
-**Reachability triage done** (`docs/issue72-reachability-triage.md`,
-following #70's own per-id method — trace each id's emitting script label(s)
-to their trigger, check static gates, cross-reference Factory L50 singles
-carrier data): **66 REACHABLE, 41 DEAD, 0 MANUAL** of the original 107 (the
-4 originally-MANUAL ids all settled DEAD on 2026-08-03 — see the triage
-doc's "MANUAL settlement" appendix). 26 of the REACHABLE ids are now fixed
-(batches 1-3 below), leaving **40 REACHABLE**. DEAD ids (facility gates,
-no-EXP rentals, zero-carrier moves, the sub-110 draft-floor class the
-settlement pass found, unimplemented mechanics) are not reopened here; see
-the triage doc for their gate citations.
-
-**Batch 1 landed** (`tests/presentationStringIssue72Batch1.test.ts`, all 11
-red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
-src/engine/factoryBattleScriptFullTurnDecision.ts`): the "already status"
-five (`STRINGID_PKMNISALREADYPARALYZED`/`ALREADYCONFUSED`/`ALREADYASLEEP`/
-`ALREADYPOISONED`/`ALREADYHASBURN`), `STRINGID_PKMNWASDEFROSTED`,
-`STRINGID_PKMNFELLINLOVE`, and the ability-blocks-the-move's-own-target-
-effect cluster (`STRINGID_PKMNPREVENTSSTATLOSSWITH`/
-`PREVENTSCONFUSIONWITH`/`PREVENTSROMANCEWITH`, `STRINGID_PKMNSXCUREDITSYPROBLEM`).
-Two ranked-nearby ids were deliberately deferred (still below, unlanded):
-`STRINGID_PKMNHUNGONWITHX` (Focus Band's hang-on roll is RNG-gated with no
-guaranteed-success staging found yet) and `STRINGID_PKMNPROTECTEDBY` (Sturdy
-vs. OHKO — OHKO accuracy is a level-difference formula, ~30% at mirrored
-levels, same seed-search problem). `STRINGID_PKMNREGAINEDHEALTH` was also
-skipped this batch despite its rank: its 3 emitting labels
-(`BattleScript_EffectRestoreHp`/`PresentHealTarget`/`WishComesTrue`) source
-{B_DEF_NAME_WITH_PREFIX} from 3 different battler roles (self-target heal,
-Present's opponent-target heal, Wish's frozen-at-cast battler) — needs its
-own per-context investigation, not the single shared `requireMoveDefender`
-shape the rest of this batch used.
-
-**Batch 2 landed** (`tests/presentationStringIssue72Batch2.test.ts`, all 11
-red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
-src/engine/factoryBattleScriptFullTurnDecision.ts
-src/engine/battleEndTurnOrchestration.ts src/engine/battleScriptEvents.ts`):
-`STRINGID_PKMNANCHORSITSELFWITH`, `STRINGID_PKMNANCHOREDITSELF` (a real
-2-turn Ingrain-then-Roar repro — Ingrain's `STATUS3_ROOTED` has no direct
-config override), `STRINGID_PKMNWASDRAGGEDOUT`, `STRINGID_PKMNCUTSATTACKWITH`,
-`STRINGID_PREVENTEDFROMWORKING` (both via the Intimidate switch-in loop, a
-new `targetBattler` event-payload field since `trygetintimidatetarget`'s own
-`BS_TARGET` cycling isn't the generic move's-own-target relationship
-`requireMoveDefender` assumes), `STRINGID_PKMNSXPREVENTSFLINCHING` (a real
-2-turn switch-in-then-Fake-Out repro — Fake Out's `jumpifnotfirstturn` gate
-needs `isFirstTurn !== 0`, which this reducer's initial battler construction
-hardcodes to 0 with no config override; a genuine switch-in sets it to 2),
-`STRINGID_PKMNSXPREVENTSYLOSS`, `STRINGID_PKMNPREVENTSUSAGE`,
-`STRINGID_PKMNRESTOREDHPUSING`, `STRINGID_PKMNSXMADEYUSELESS`, and
-`STRINGID_PKMNSXWOREOFF` (Reflect/Light Screen/Mist end-of-turn wear-off,
-porting real source's own `PREPARE_MOVE_BUFFER` call into
-`battleEndTurnOrchestration.ts`'s existing `battleTextBuff1Move` field).
-
-**Batch 3 landed** (`tests/presentationStringIssue72Batch3.test.ts`, all 4
-red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
-src/engine/factoryBattleScriptFullTurnDecision.ts`): `STRINGID_
-PKMNCOPIEDSTATCHANGES` (Psych Up, plain attacker/defender), `STRINGID_
-PKMNSXBLOCKSY` (Soundproof vs. a sound move via `BattleScript_
-SoundproofProtected`'s own move's-own-target Soundproof check), `STRINGID_
-PKMNSXMADEITINEFFECTIVE` (Yawn vs. Insomnia/Vital Spirit via `BattleScript_
-PrintBankAbilityMadeIneffective`'s own `copybyte sBATTLER, sBATTLER_WITH_
-ABILITY` fallthrough, already writing `scriptingBattler`), `STRINGID_
-PKMNWASMADEDROWSY` (Yawn's own unconditional success tail, plain attacker/
-defender). Shortened step (45-minute cap); landed 4 of the targeted 6-8.
-`STRINGID_PKMNLAIDCURSE` (Ghost Curse) was staged and its `messageLines`
-shape confirmed correct, but a real full-turn repro hits an *unrelated*
-barrier first — see the new tracked gap below — so it was reverted rather
-than landed without a passing red-verified test; still open, still ranked
-first below. `STRINGID_PKMNTRACED` (needs new `battleTextBuff1MonNick`
-nickname-resolution wiring in `prepareMessage`, not yet ported) and
-`STRINGID_PKMNSXBLOCKSY2` (Perish Song vs. Soundproof — the loop's own
-`sBATTLER`/`addbyte` cycling needs the same per-iteration investigation
-`STRINGID_PKMNCUTSATTACKWITH`'s Intimidate loop already got) were not
-attempted this step; both are plausible next picks.
-
-**ENDTURN_CURSE engine gap FIXED:** `battleEndTurnOrchestration.ts`'s
-`ENDTURN_CURSE` case (`battle_util.c:1581-1591`) is now wired the same shape
-as the already-wired Nightmare tick (`docs/end-turn-ground-truth.md` B9,
-identical `maxHP/4`-min-1 damage math via the shared `DoTurnDmg` tail, no new
-opcodes). Two direct orchestration tests pin it in
-`tests/battleEndTurnOrchestration.test.ts`.
-
-**Batch 4 landed** (`tests/presentationStringIssue72Batch4.test.ts`, both
-red-verified via `git stash -- src/engine/battleResolutionPresentation.ts`):
-`STRINGID_PKMNLAIDCURSE` (Ghost Curse, Dusclops carrier — plain
-attacker/defender pair, unblocked now that the Curse end-turn tick above
-resolves the same turn instead of case-barriering). Note the real source's
-own curse/self-damage split, live-verified by the full-turn repro: `cursetarget`
-sets `STATUS2_CURSED` on the move's TARGET (the opponent takes the recurring
-end-of-turn tick), while the self-damage cost (`floor(attacker.maxHP / 2)`)
-lands on the ATTACKER who cast it — the printstring's `{B_ATK_NAME_WITH_PREFIX}`/
-`{B_DEF_NAME_WITH_PREFIX}` pair already had this right without any new
-substitution plumbing.
+**Original symptom** (2026-08-03, opponent MURKROW's TAUNT crash) and the
+full reachability triage (`docs/issue72-reachability-triage.md`: 66
+REACHABLE / 41 DEAD / 0 MANUAL of 107 UNRESOLVED `printstring` operands
+found by `tools/report/printstring-literal-census.ts`) are in git history.
+**All 66 REACHABLE ids are now landed**, batches 1-9
+(`tests/presentationStringIssue72Batch{1..9}.test.ts`, each red-verified via
+`git stash -- src/engine/battleResolutionPresentation.ts
+src/engine/factoryBattleScriptFullTurnDecision.ts` plus whichever other
+engine file that batch touched) — see each batch commit and the prior
+revision of this entry for the per-id mechanism notes. Final batch (9):
+`STRINGID_MAGNITUDESTRENGTH` (Magnitude's damage-tier name) — the kernel
+already captured the roll (`magnitudeHandler`,
+`battleScriptRankedBatch1Opcode.ts:130`, matching real source's
+`PREPARE_BYTE_NUMBER_BUFFER(gBattleTextBuff1, 2, magnitude)` in
+`Cmd_magnitudedamagecalculation`, `battle_script_commands.c:8670-8710`), so
+this was presentation-only wiring following the STOCKPILE/PERISHCOUNTFELL
+`battleTextBuff1ByteNumber` idiom. Census: 39→38 UNRESOLVED (final).
 
 **USER DECISION 2026-08-03 — the completeness guard stays FATAL everywhere,
-including the playable build. Do not re-raise.** Prior sessions repeatedly
-recommended softening it to a console error plus best-effort text in the
-browser build (kept fatal in tests); the user declined: "nah, just crash."
-So a player who reaches any id below still gets a hard throw, and that is the
-intended behavior — the remedy is landing the ids, not degrading the guard.
-Do not add a fallback path, a `try`/`catch`, or an env-gated non-fatal mode
-around `battleStringResolver`/`battleResolutionPresentation`'s placeholder
-and unknown-id throws.
+including the playable build. Do not re-raise.** The user declined
+softening it to a non-fatal/best-effort path: "nah, just crash." Do not add
+a fallback, `try`/`catch`, or env-gated non-fatal mode around
+`battleStringResolver`/`battleResolutionPresentation`'s placeholder and
+unknown-id throws — this decision outlives the now-closed REACHABLE backlog
+above and still applies to any future id.
 
-**Batch 5 landed** (`tests/presentationStringIssue72Batch5.test.ts`, all 11
-red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
-src/engine/factoryBattleScriptFullTurnDecision.ts`): `STRINGID_PKMNFREEDFROM`
-and `STRINGID_PKMNGOTFREE` (Bind/Wrap-family release, `WRAP_ENDS_LABEL`'s own
-sibling of the already-landed `STRINGID_PKMNHURTBY`'s `WRAP_TURN_DMG_LABEL`
-tick, plus Rapid Spin's `Cmd_rapidspinfree` — both share the same
-`wrappedMove` substitution, staged with a real 3-turn Bind-expiry repro and a
-real Bind-then-Rapid-Spin repro respectively), `STRINGID_PKMNDREAMEATEN`/
-`STRINGID_PKMNWASNTAFFECTED` (Dream Eater's own status-gated pair, zero TS
-role reassignment), `STRINGID_TARGETCANTESCAPENOW` (Mean Look family),
-`STRINGID_PKMNGOTENCORE` (Encore, staged via the `lastMove` config field),
-`STRINGID_PKMNIDENTIFIED` (Foresight), and three ids sharing the existing
-"move's own target's ability" substitution bucket
-(`STRINGID_PKMNRESTOREDHPUSING`'s family) unmodified except for the id list:
-`STRINGID_PKMNSXINFATUATEDY` (Cute Charm, real 1/3 contact-proc repro with
-opposite genders staged via `personality`), `STRINGID_PKMNHURTSWITH` (Rough
-Skin, deterministic — no RNG proc unlike Cute Charm/Static), and
-`STRINGID_PKMNCOPIEDFOE` (Role Play). `STRINGID_PKMNKNOCKEDOFF` (Knock Off)
-also landed, reading `heldItems` directly rather than through
-`pendingHeldItemEffectBattler` (Knock Off's own item-removal write precedes
-the print, but the typed removeitem controller receipt that would advance
-`heldItems` comes later). Two ability-display-name entries added
-(`ROUGH SKIN`/`CUTE CHARM`) to `factoryBattleScriptFullTurnDecision.ts`'s
-existing lookup table — no new substitution shapes, only new ids added to
-already-established buckets. Census: 78→67 UNRESOLVED (exact -11, all 11
-newly-landed ids counted, no generic-fallback-resolvable exceptions this
-batch). ISSUES #72 REACHABLE trimmed to 28 (39−11, arithmetic-checked
-against the list body's own unique count).
-
-**Not attempted this step, still open (mid-list, not new-plumbing blocked —
-just ran out of step budget after landing 11):** `STRINGID_PKMNSXCUREDYPROBLEM`
-(Shed Skin end-turn tick — needs one small engine addition, a
-`battleTextBuff1Status`-style pre-clear status-name capture in
-`runShedSkinTick`, the same field `HOLD_EFFECT_CURE_STATUS`'s own branch
-already populates; not a new phase, just unwired on this one tick),
-`STRINGID_PKMNSXWHIPPEDUPSANDSTORM`, `STRINGID_PKMNTOOKFOE` (Destiny Bond —
-`tryfaintmon`'s dual attacker/target operand needs its own role investigation,
-distinct from the plain idiom), `STRINGID_PKMNWISHCAMETRUE`,
-`STRINGID_PKMNSAFEGUARDEXPIRED`, `STRINGID_PKMNUSEDSAFEGUARD`,
-`STRINGID_PKMNSXRESTOREDHPALITTLE2`, `STRINGID_PKMNMOVEISDISABLED`,
-`STRINGID_PKMNMOVEWASDISABLED`, `STRINGID_PKMNTOOKATTACK`,
-`STRINGID_PKMNPERISHCOUNTFELL`, `STRINGID_PKMNMOVEBOUNCED`,
-`STRINGID_PKMNRAISEDSPEED`, `STRINGID_PKMNSHROUDEDITSELF`,
-`STRINGID_STATSWONTDECREASE2`, `STRINGID_MAGNITUDESTRENGTH`,
-`STRINGID_PKMNCHANGEDTYPEWITH` (Color Change — needs a new `battleTextBuff1Type`
-message substitution; the rules-context field already exists
-(`battleScriptTypeChangeOpcode.ts`) but is not yet wired into
-`prepareMessage`), `STRINGID_PKMNFELLINTONIGHTMARE`, `STRINGID_PKMNLOSTPPGRUDGE`,
-`STRINGID_PKMNREDUCEDPP`, `STRINGID_PKMNSITEMRESTOREDPP`,
-`STRINGID_PKMNHEALEDPARALYSIS`, `STRINGID_PKMNSTOLEITEM`.
-
-**Batch 6 landed** (`tests/presentationStringIssue72Batch6.test.ts`, all 11
-`it`s red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
-src/engine/factoryBattleScriptFullTurnDecision.ts
-src/engine/battleEndTurnOrchestration.ts`, covering 13 ids): the end-turn
-ability-tick trio `STRINGID_PKMNSXCUREDYPROBLEM` (Shed Skin — `runShedSkinTick`
-now captures the pre-clear status name into `battleTextBuff1Status` the same
-shape `HOLD_EFFECT_CURE_STATUS` already established; shares
-`STRINGID_PKMNSXCUREDITSYPROBLEM`'s identical template/substitution),
-`STRINGID_PKMNSXRESTOREDHPALITTLE2` (Rain Dish — reads `B_ATK_NAME_WITH_PREFIX`/
-`B_ATK_ABILITY` off `enterTickBattlerContext`'s generic attacker reassignment,
-unlike the other two ticks), `STRINGID_PKMNRAISEDSPEED` (Speed Boost —
-`runAbilitiesTick`'s own branch now also sets `scriptingBattler` the same way
-Shed Skin's tick already does, `battle_util.c:2649`); Wish's delayed heal
-`STRINGID_PKMNWISHCAMETRUE` (real 2-turn cast-then-resolve repro, `B_BUFF1`
-resolves the caster's own name via the tick's `selectorRoles.target`/
-`enterTickBattlerContext` overlap in this engine's no-mid-resolution-switch
-scope); the Disable attack-canceler pair `STRINGID_PKMNMOVEWASDISABLED`/
-`STRINGID_PKMNMOVEISDISABLED` (real same-turn Disable-then-blocked-reselect,
-the second id sharing `STRINGID_PKMNCANTUSEMOVETAUNT`'s exact idiom); Perish
-Song's `STRINGID_PKMNPERISHCOUNTFELL` (real same-turn cast-then-tick, reusing
-`STRINGID_PKMNSTOCKPILED`'s `battleTextBuff1ByteNumber` substitution); the
-Magic Coat pair `STRINGID_PKMNSHROUDEDITSELF`/`STRINGID_PKMNMOVEBOUNCED` (real
-same-turn Magic Coat-then-bounced-GROWL, neither label reassigns
-attacker/target); `STRINGID_PKMNUSEDSAFEGUARD` (real same-turn
-Safeguard-then-blocked Thunder Wave, plain defender-only); and three more
-plain-idiom defender-only ids sharing zero new plumbing —
-`STRINGID_STATSWONTDECREASE2` (Tickle's compound both-stats-at-minimum gate),
-`STRINGID_PKMNFELLINTONIGHTMARE` (Nightmare's compound already-asleep gate),
-`STRINGID_PKMNHEALEDPARALYSIS` (Smelling Salt's sole carrier). Three ability
-display names (`RAIN DISH`/`SPEED BOOST`/`SHED SKIN`) added to the existing
-lookup table. Census: **67→54 UNRESOLVED** (exact −13). ISSUES #72 REACHABLE
-trimmed to **15** (28−13, arithmetic-checked against the list body's own
-unique-id count).
-
-**Not attempted this step, still open (skipped-with-reason, not just
-budget):** `STRINGID_PKMNTOOKFOE` (Destiny Bond) and `STRINGID_PKMNLOSTPPGRUDGE`
-(Grudge) both route through `tryfaintmon`'s dual `BS_ATTACKER`/`BS_TARGET`
-operand (`battleScriptHitChainOpcode.ts:4270-4340`, `isAttackerOperand`
-flipping which role is "the battler that just fainted" across the corpus's
-many `tryfaintmon BS_ATTACKER`/`BS_TARGET` call sites) — the single-hit case
-this batch traced through resolves to the plain attacker/defender idiom, but
-confirming that holds across every reachable `tryfaintmon` call site (not just
-the simple move-hit case) is its own investigation, same class of gap
-PROGRESS 902 already flagged. `STRINGID_PKMNSXWHIPPEDUPSANDSTORM` (Sand
-Stream — mechanism fully understood, `scriptingBattler` already wired at
-switch-in the same shape `STRINGID_PKMNPREVENTSSTATLOSSWITH` uses; needs a
-genuine mid-battle switch decision with a second full party-member config,
-ran out of step budget). `STRINGID_PKMNSAFEGUARDEXPIRED` (mechanism fully
-understood, same `runScreenFieldCase`/`B_ATK_PREFIX3` shape
-`STRINGID_PKMNSXWOREOFF` already uses; needs a real 5-turn expiry repro since
-`sideTimers` has no config-field shortcut, ran out of step budget).
-`STRINGID_PKMNTOOKATTACK` (Future Sight — mechanism fully understood,
-`requireMoveDefender(actionSnapshot.attacker)` + `rules.futureSightMove[target]`;
-needs a real 3-turn delayed-hit repro, ran out of step budget).
-`STRINGID_MAGNITUDESTRENGTH` (needs a new RNG-roll capture field — Magnitude's
-2-10 roll is not stored anywhere yet, genuine new plumbing).
-`STRINGID_PKMNCHANGEDTYPEWITH` (Color Change — the one permitted plumbing
-extension per this step's brief, not attempted, ran out of budget).
-`STRINGID_PKMNREDUCEDPP` (Spite — needs a move-name + PP-amount capture pair).
-`STRINGID_PKMNSITEMRESTOREDPP` (Leppa Berry tick — needs an item-holder +
-move-name capture pair). `STRINGID_PKMNSTOLEITEM` (Thief/Covet — needs an
-item-name capture, likely easy next pick following `STRINGID_PKMNKNOCKEDOFF`'s
-own `heldItems` precedent).
-
-**Batch 7 landed** (`tests/presentationStringIssue72Batch7.test.ts`, all 5
-`it`s red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
-src/engine/factoryBattleScriptFullTurnDecision.ts
-src/engine/battleEndTurnOrchestration.ts src/engine/battleScriptEvents.ts`):
-`STRINGID_PKMNCHANGEDTYPEWITH` (Color Change — the permitted plumbing
-extension landed: `battleTextBuff1Type` [already captured by
-`battleScriptMoveEndOpcode.ts:497`, pinned directly by
-`tests/battleScriptMoveEndOpcode.test.ts`/`battleScriptTypeChangeOpcode.test.ts`]
-wired into `prepareMessage`, resolving through `TYPE_DISPLAY_NAMES`
-(`fightSubmenuText.ts`'s own `gTypeNames` abbreviation table — real source's
-{B_BUFF1} reads that identical table, `battle_message.c:2802`); `STRINGID_
-PKMNREDUCEDPP` (Spite — `battleTextBuff1Move`/`battleTextBuff2ByteNumber` were
-already captured by `battleScriptTryspiteppreduceOpcode.ts:81-82`, only the
-`prepareMessage`→`Cmd_printstring` wiring was missing); `STRINGID_
-PKMNSITEMRESTOREDPP` (Leppa Berry end-turn tick — `runItemsTick`'s
-`HOLD_EFFECT_RESTORE_PP` branch now also sets `scriptingBattler`/
-`battleTextBuff1Move`, pinned directly in `tests/battleEndTurnOrchestration.test.ts`);
-`STRINGID_PKMNSTOLEITEM` (Thief/Covet — `MOVE_EFFECT_STEAL_ITEM`'s own
-same-transition `set-battler-item` pair means `heldItems[attacker]`, not
-`heldItems[defender]`, already holds the transferred item by print time,
-unlike Knock Off); `STRINGID_PKMNTRACED` (real Porygon switch-in — new
-`monNickBattler` message-event field [`battleScriptEvents.ts`], since the
-traced-from battler's name-with-prefix needs `field`, unavailable inside
-`prepareMessage`'s rules-only scope; `battleTextBuff1MonNick`'s own
-rules-context capture was already pinned directly by
-`tests/battleScriptSwitchinOpcode.test.ts`). Census: **54→49 UNRESOLVED**
-(exact −5). ISSUES #72 REACHABLE trimmed to **10** (15−5, arithmetic-checked).
-
-**Batch 8 landed** (`tests/presentationStringIssue72Batch8.test.ts`, all 9
-`it`s red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
-src/engine/factoryBattleScriptFullTurnDecision.ts`): the full REACHABLE-10
-hard tail minus `STRINGID_MAGNITUDESTRENGTH`, following
-`docs/issue72-hard-tail-scout.md`'s predictions (all confirmed correct except
-one staging-prose slip noted below). `STRINGID_PKMNPROTECTEDBY` (Sturdy vs.
-OHKO — scout §4a's correction confirmed: `Cmd_tryKO`'s Sturdy check
-short-circuits before any roll, deterministic, real Guillotine-vs-Sturdy
-staging). `STRINGID_PKMNSXWHIPPEDUPSANDSTORM` (Sand Stream — kernel-unblocked
-end3 resumption from PROGRESS 910, reused the Tyranitar switch-in staging,
-`scriptingBattler`+ability shape identical to `STRINGID_PKMNPREVENTSSTATLOSSWITH`).
-`STRINGID_PKMNSXBLOCKSY2` (Perish Song vs. Soundproof — scout §2 confirmed,
-`scriptingBattler` sufficient, no new payload field, single-turn staging).
-`STRINGID_PKMNTOOKFOE` + `STRINGID_PKMNLOSTPPGRUDGE` (Destiny Bond + Grudge —
-scout §1b's BS_TARGET-only theorem confirmed by a real 2-turn cast-then-
-counter-kill repro each, speed order player-faster per §1d's gotcha; **one
-scout divergence**: §1d's Grudge staging prose said `B_BUFF1`/`B_ATK_NAME_WITH_PREFIX`
-resolve to the Grudge *caster's* own name/move, but both the real source
-(`battle_script_commands.c:3016-3030`, `PREPARE_MOVE_BUFFER(gBattleTextBuff1,
-gBattleMons[gBattlerAttacker].moves[moveIndex])`) and the scout's own §1c
-code sample agree it's the *killing* battler's own move/name — landed per
-the correct mechanism, i.e. the killer's own move loses its PP). `STRINGID_PKMNREGAINEDHEALTH`
-(landed via the cheapest label, scout §3a's Recover self-heal — the 3-label
-`sourceLabelOf` dispatch from §3d is implemented in full since it's one
-function, but only the Recover branch has a red-verified test; Present's
-sub-path and `WishComesTrue`'s second printstring remain untested
-dispositions per §3e, not reopened as separate REACHABLE entries since the
-guard is satisfied for the id). `STRINGID_PKMNHUNGONWITHX` (Focus Band —
-scout §4b's `rngSeed: 62` staging reproduced standalone on the first try, no
-re-derivation needed; turned out to need zero new substitution plumbing since
-`heldItems[defender]` already holds the never-removed item, the same idiom
-`STRINGID_PKMNSTOLEITEM` established). `STRINGID_PKMNSAFEGUARDEXPIRED` (real
-5-turn expiry repro: cast turn 1, 4 silent Splash turns, `safeguardTimer`
-5→0 fires `BattleScript_SafeguardEnds` at turn 5's own end-turn tick;
-`{B_ATK_PREFIX3}` resolves through the identical "Ally"/"Foe" text
-`{B_ATK_PREFIX1}` already uses, source confirms — `battle_message.c:2649-2668`,
-distinct string constants, identical literal text). `STRINGID_PKMNTOOKATTACK`
-(Future Sight — real 3-turn delayed-hit repro: cast turn 1, 2 filler turns,
-`futureSightCounter` 3→0 fires `BattleScript_MonTookFutureAttack` at turn 3's
-own end-turn tick; `requireMoveDefender` off the tick's reassigned
-`actionSnapshot.attacker`, `{B_BUFF1}` off `rules.futureSightMove[target]`
-— still holds the cast-time-captured move id, never cleared before this
-print). Census: **48→39 UNRESOLVED** (exact −9, arithmetic-checked). ISSUES
-#72 REACHABLE trimmed to **1** (10−9).
-
-**REACHABLE (1):** `STRINGID_MAGNITUDESTRENGTH` (Magnitude's own damage-tier
-name — needs a new RNG-roll capture field; Magnitude's 2-10 `Random()` roll
-is not stored anywhere in `rulesContext` yet, genuine new plumbing, out of
-scope for the batch idiom used above — deliberately not started per this
-step's brief).
-
-**MANUAL — all settled 2026-08-03 (side-lane settlement pass; full evidence
-in the triage doc's "MANUAL settlement" appendix):**
-- `STRINGID_PKMNCANTUSEMOVESEALED` → **DEAD**: Imprison's sole carrier
-  (`FRONTIER_MON_RALTS`, raw index 5) sits below `FRONTIER_MON_GRIMER = 110`,
-  the lower bound of every L50 draft range (`sInitialRentalMonRanges`) — the
-  original check verified only the ≤849 upper bound. The topology artifact
-  was right all along; batch-1 carriers reproduce 6/6 through it.
-- `STRINGID_PLAYERDEFEATEDTRAINER1`/`STRINGID_TRAINER1LOSETEXT` →
-  **REACHABLE, landed 2026-08-03** (terminal-seam increments (i)+(ii),
-  `docs/terminal-seam-round-flow-scout.md`): the interpreter now resumes past
-  `checkteamslost`'s own `end2` into a second VM run at
-  `BattleScript_FrontierTrainerBattleWon`, driven to its own `end2` before
-  the `{kind:"terminal"}` boundary publishes. `battleResolutionPresentation.ts`'s
-  `messageLines` resolves both off the already-threaded `opponentTrainer`
-  (`factoryTrainerPresentationForOpponent`) — `{B_TRAINER1_CLASS}`/
-  `{B_TRAINER1_NAME}` via `resolveBattleStringLines` (the Taunt-pair idiom),
-  `{B_TRAINER1_LOSE_TEXT}` hand-built from `opponentTrainer.speechLose`
-  (its template is a single bare placeholder with no line-break segment of
-  its own, unlike every other id here — the source's 2-line split lives
-  inside the Easy-Chat-word buffer, not the template, so this follows
-  `STRINGID_SWITCHINMON`'s existing hand-built-lines shape instead). Pinned
-  in `tests/presentationStringTerminalSeamWin.test.ts`: the DESTIN fixture's
-  exact 4 resolved lines ("Player defeated"/"BUG CATCHER DESTIN!"/"PLEASE I
-  NEED"/"SOME WATER", cross-checked against `battleScene.ts`'s `TURN17_*`
-  ground-truth literals) plus a JENSON generalization pin (different
-  facility class/name/speechLose) proving the mapping is data-driven, not
-  DESTIN-hardcoded. Census: 80→78 UNRESOLVED.
-- `STRINGID_TRAINER1WINTEXT` → **REACHABLE, landed 2026-08-04** (terminal-seam
-  increment (i) LOSS half, `docs/terminal-seam-loss-path-ground-truth.md`):
-  the interpreter now resumes past `checkteamslost`'s own `end2` into a
-  second VM run at `BattleScript_LocalBattleLost` for outcomes `LOST`/`DREW`,
-  driven to its own `end2` before the `{kind:"terminal"}` boundary publishes
-  — the same shape as the WIN-side entry above, plus the two `VARIOUS` cases
-  (`RETURN_OPPONENT_MON1`/`MON2`, 19/20) that script additionally needs, now
-  registered in `Cmd_various` (`battleScriptSwitchinOpcode.ts`).
-  `battleResolutionPresentation.ts`'s `messageLines` resolves
-  `{B_TRAINER1_WIN_TEXT}` hand-built from `opponentTrainer.speechWin`, the
-  exact same bare-placeholder hand-built-lines shape
-  `STRINGID_TRAINER1LOSETEXT` already uses. Pinned in
-  `tests/presentationStringTerminalSeamLoss.test.ts`: DESTIN's real
-  speechWin ("I AM ABOUT TO"/"OVERHEAT", pixel-confirmed in the loss ground
-  truth doc) plus a JENSON generalization pin. Census: 49→48 UNRESOLVED.
-
-**Also found, tracked separately:** `STRINGID_PKMNCANTUSEMOVETORMENT` is
-DEAD *today* — Torment's move-reuse block is enforced only at
-move-*selection* time by `TrySetCantSelectMoveBattleScript`
-(`battle_util.c:999-1012`), dispatching to
-`BattleScript_SelectingTormentedMove` (`printselectionstring`), not the dead
-`BattleScript_MoveUsedIsTormented`. **Scouted 2026-08-04, see
+**Still open — tracked here, not yet scoped as its own issue number:**
+`STRINGID_PKMNCANTUSEMOVETORMENT` is DEAD *today* — Torment's move-reuse
+block is enforced only at move-*selection* time by
+`TrySetCantSelectMoveBattleScript` (`battle_util.c:999-1012`), dispatching
+to `BattleScript_SelectingTormentedMove` (`printselectionstring`), not the
+dead `BattleScript_MoveUsedIsTormented`. **Scouted 2026-08-04, see
 `docs/selection-rejection-subsystem-scout.md`.**
 `TrySetCantSelectMoveBattleScript` actually covers 6 causes
 (Disabled/Torment/Taunt/Imprison/Choice-lock/no-PP), all equally unmodeled —
@@ -504,8 +177,10 @@ step.
 
 **Leads:** rerun `node --experimental-strip-types tools/report/
 printstring-literal-census.ts` after any `messageLines`/battle-script-program
-change (deterministic, re-derives from the tree). Full 107-id list incl. all
-37 DEAD gates + emitting script label(s) + trigger/carrier evidence in
+change (deterministic, re-derives from the tree). DEAD ids (facility gates,
+no-EXP rentals, zero-carrier moves, the sub-110 draft-floor class, unimplemented
+mechanics) are not reopened here; full 107-id list incl. all 37 DEAD gates +
+emitting script label(s) + trigger/carrier evidence in
 `docs/issue72-reachability-triage.md`.
 
 ## #73 — Terminal-seam remainder: the win/loss window's oracle-coverage gap (rung B)

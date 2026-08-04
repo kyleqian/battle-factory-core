@@ -1,3 +1,60 @@
+## 914 — [supervisor wind-down, 2026-08-04 ~11:00, user-requested early close] R3+R4 landed: #72 REACHABLE 10→1 (batch 8, 9 ids), #73 LOSS window to cursor-only residuals + WIN ground truth banked; 7-commit animation fold; final union verification in flight
+
+- **State:** master at the animation fold merge. Session totals: 8 workers
+  (4 main + 4 side), 0 lost. Wind-down was user-requested (~10:05, "no
+  rush") — both live R4 workers were allowed to finish, nothing killed.
+  Final independent full `npm test` + `npm run build` result recorded in
+  the wind-down commit message (running at entry-write time; the commit
+  only lands if green). No open DEFERRED entries.
+- **Did (this supervisor round):** (1) merged side R4 (WIN-side terminal
+  fixture `win-terminal-explosion-dusclops-off.json`, twice-identical
+  241/241, + `docs/terminal-seam-win-window-ground-truth.md` — key finding:
+  the WIN script never recalls the opponent mon, and the terminal needs
+  three serial dismiss presses); (2) **corrected entry 913's inverted
+  compare fraction** (worker wrote "235/236 matched"; honest number is
+  1/236 fully matched with all other frames reduced to cursor-glyph-scale
+  residuals — see 913's corrected body and ISSUES #73 for the
+  supervisor-measured class distribution incl. the 3-frame swap-edge
+  micro-class the worker's itemization missed); (3) folded `animation-main`
+  (7 commits: back shake-flash-yellow + JoltRight + red/green/blue
+  shake-glow selector acceptances); (4) reran the LOSS compare post-fold
+  myself (same residual classes — fold did not disturb Scene-OFF rendering).
+- **Next (recommended order):** #73: wait-cursor source read (does the ROM
+  terminal-quote printer ever spawn the cursor task?), the 3-frame
+  swap-edge micro-class, then the WIN-side compare (wiring pattern
+  established, fixture banked). #72: `STRINGID_MAGNITUDESTRENGTH` RNG-roll
+  capture plumbing (last REACHABLE id). #71 Slice D: still gated on the
+  animation lane's rung-3 dispatcher (not landed as of 10:40). Torment
+  selection-time-rejection subsystem still needs supervisor re-scoping
+  (#72 note).
+- **Addendum (2026-08-04 evening, user directive via interactive session):**
+  the animation lane's next bounded step is now the rung-3 send-out
+  dispatcher (directive recorded as `ANIMATION_PROGRESS.md`'s top entry on
+  `animation-main`, commit `420a7578`; ISSUES #71 updated in the same
+  note). `animation-main` is 7 commits ahead of master (6 Steel Wing
+  partial + the directive) — fold at orient per protocol. #71 Slice D
+  unblocks once the dispatcher lands. On the Magnitude "Next" item above:
+  the kernel already captures the roll (`rulesContext.
+  battleTextBuff1ByteNumber`, `battleScriptRankedBatch1Opcode.ts:130`) —
+  the remaining work is the presentation-side resolver entry (the
+  HITXTIMES pattern, see `battleResolutionPresentation.ts:1648`'s own
+  comment), smaller than 912's "new plumbing" phrasing suggests.
+- **Notes:** main R1's launcher tee-pipeline broke mid-run producing a
+  spurious exit-1 while launcher+worker were healthy (diagnosed via
+  process-tree + JSONL growth; zero kills; later launches redirect with
+  `>` instead of piping). One discipline slip acknowledged: a docs-only
+  side merge landed while a main worker was live (no harm; rule re-affirmed).
+  The animation supervisor was live concurrently earlier (~07:40-08:45);
+  its nested worker worktree under `.worktrees/animation-main/` is theirs
+  to clean. Play-preview worktree still serves the pre-session build
+  (630bf3dc) on :5199 — rebuild it next session if the user wants to play
+  today's landings. **USER-OWNED, do not clean or merge:**
+  `.worktrees/deepseek-worker` (branch `codex/deepseek-worker`, 2 commits
+  of launcher/profile work: DeepSeek V4 Flash worker profile + independent
+  supervisor/sub-agent selection) appeared during this session — it is the
+  user's own in-flight harness work, not a stale lane worktree.
+
+---
 ## 913 — [bounded MAIN worker, 2026-08-04 ~10:30; numbers supervisor-corrected] #73 LOSS terminal window: all three diagnosed classes fixed; only small cursor-glyph-scale residuals remain (1/236 frames fully match, was 0/236)
 
 - **State:** master `c8cc6cd4` + this step's uncommitted-until-now docs/tools
