@@ -191,6 +191,23 @@ export const BACK_V_SHAKE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.fr
   BACK_V_SHAKE_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_V_SHAKE_H_SLIDE` row. */
+export const BACK_V_SHAKE_H_SLIDE_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_V_SHAKE_H_SLIDE")
+    .map(([species]) => species),
+);
+
+/** All nine V-shake/H-slide mappings are reachable through Factory rentals. */
+export const BACK_V_SHAKE_H_SLIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_V_SHAKE_H_SLIDE_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** This bounded back set has no non-Factory selector mappings. */
+export const BACK_V_SHAKE_H_SLIDE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_V_SHAKE_H_SLIDE_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -507,6 +524,46 @@ export const BACK_V_SHAKE_VARIANTS = Object.freeze({
   }),
 } as const);
 
+/**
+ * `BACK_ANIM_V_SHAKE_H_SLIDE` selects three standalone source callbacks.
+ * Unlike the preceding shake triples, each callback stays installed directly
+ * after the task dispatches it; the source does not use a shared helper or a
+ * callback-installing initializer. Its first/second `TryFlipX` calls remain
+ * no-ops because the player-back task has set `sDontFlip`.
+ */
+export const BACK_V_SHAKE_H_SLIDE_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_V_SHAKE_H_SLIDE_FAST",
+    callback: "Anim_VerticalShakeHorizontalSlide_Fast",
+    sourceId: 103,
+    natureMod: 0,
+    step: 64,
+    modulus: 96,
+    amplitude: 4,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_V_SHAKE_H_SLIDE",
+    callback: "Anim_VerticalShakeHorizontalSlide",
+    sourceId: 102,
+    natureMod: 1,
+    step: 48,
+    modulus: 128,
+    amplitude: 4,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_V_SHAKE_H_SLIDE_SLOW",
+    callback: "Anim_VerticalShakeHorizontalSlide_Slow",
+    sourceId: 89,
+    natureMod: 2,
+    step: 24,
+    modulus: 128,
+    amplitude: 4,
+    accepted: true,
+  }),
+} as const);
+
 type BackHSlideSelector = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["selector"];
 type BackHSlideCallback = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["callback"];
 type BackHSlideDuration = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["duration"];
@@ -542,6 +599,11 @@ type BackVShakeCallback = typeof BACK_V_SHAKE_VARIANTS[keyof typeof BACK_V_SHAKE
 type BackVShakeSourceId = typeof BACK_V_SHAKE_VARIANTS[keyof typeof BACK_V_SHAKE_VARIANTS]["sourceId"];
 type BackVShakeStep = typeof BACK_V_SHAKE_VARIANTS[keyof typeof BACK_V_SHAKE_VARIANTS]["step"];
 type BackVShakeAmplitude = typeof BACK_V_SHAKE_VARIANTS[keyof typeof BACK_V_SHAKE_VARIANTS]["amplitude"];
+type BackVShakeHSlideSelector = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["selector"];
+type BackVShakeHSlideCallback = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["callback"];
+type BackVShakeHSlideSourceId = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["sourceId"];
+type BackVShakeHSlideStep = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["step"];
+type BackVShakeHSlideModulus = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["modulus"];
 
 /**
  * Source facts at the `LaunchAnimationTaskForBackSprite` seam. The shared
@@ -743,6 +805,20 @@ function vShakeVariant(selector: string): {
   readonly amplitude: BackVShakeAmplitude;
 } | null {
   for (const variant of Object.values(BACK_V_SHAKE_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function vShakeHSlideVariant(selector: string): {
+  readonly selector: BackVShakeHSlideSelector;
+  readonly callback: BackVShakeHSlideCallback;
+  readonly sourceId: BackVShakeHSlideSourceId;
+  readonly step: BackVShakeHSlideStep;
+  readonly modulus: BackVShakeHSlideModulus;
+  readonly amplitude: 4;
+} | null {
+  for (const variant of Object.values(BACK_V_SHAKE_H_SLIDE_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -1849,6 +1925,130 @@ export function backVerticalShakeFrameAtTick(
 
 /** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
 export function backVerticalShakeWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+export interface BackVerticalShakeHorizontalSlideFrame {
+  readonly x2: number;
+  readonly y2: number;
+  /** The shared player-back task owns this zeroed register. */
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** `sprite->data[2]` immediately before the selected source callback. */
+  readonly data2Before: number;
+  /** Active calls add the selected step; the terminal call retains it. */
+  readonly data2: number;
+  /** The source explicitly writes this zero only at the terminal branch. */
+  readonly data6: 0;
+  readonly horizontalPhase: 0 | 1 | 2 | 3 | null;
+  readonly horizontalRemainder: number | null;
+  readonly ySineIndex: number | null;
+  readonly selector: BackVShakeHSlideSelector;
+  readonly sourceId: BackVShakeHSlideSourceId;
+  readonly step: BackVShakeHSlideStep;
+  readonly modulus: BackVShakeHSlideModulus;
+  readonly amplitude: 4;
+  /** The task dispatches the selected callback directly; no helper install occurs. */
+  readonly callbackInvokedDirectlyFromTask: true;
+  readonly normalBackDontFlip: true;
+  /** Both selected source callbacks call TryFlipX around their body. */
+  readonly tryFlipXCalls: 2;
+  readonly affineWriteCount: 0;
+  readonly affineMode: "normal";
+  readonly resetSpriteAfterAnim: false;
+  readonly callback: BackVShakeHSlideCallback | "WaitAnimEnd";
+}
+
+/** Exact signed-C arithmetic for the source's four 512-counter X phases. */
+function verticalShakeHorizontalSlideX2(counter: number): {
+  readonly horizontalPhase: 0 | 1 | 2 | 3;
+  readonly horizontalRemainder: number;
+  readonly x2: number;
+} {
+  const horizontalPhase = Math.trunc(counter / 512) % 4 as 0 | 1 | 2 | 3;
+  const horizontalRemainder = counter % 512;
+  switch (horizontalPhase) {
+    case 0:
+      return { horizontalPhase, horizontalRemainder, x2: Math.trunc(horizontalRemainder / 32) };
+    case 1:
+      return {
+        horizontalPhase,
+        horizontalRemainder,
+        x2: Math.trunc(-(horizontalRemainder * 16) / 512) + 16,
+      };
+    case 2:
+      return {
+        horizontalPhase,
+        horizontalRemainder,
+        x2: Math.trunc(-(horizontalRemainder * 16) / 512),
+      };
+    case 3:
+      return { horizontalPhase, horizontalRemainder, x2: Math.trunc(horizontalRemainder / 32) - 16 };
+  }
+}
+
+/**
+ * Source-order reducer for every `BACK_ANIM_V_SHAKE_H_SLIDE` selector. Tick
+ * zero is the selected callback's first direct task invocation after the
+ * shared task has zeroed its registers. The strict `counter > 2048` branch
+ * does not increment data[2] or clear x2/y2: it only installs WaitAnimEnd and
+ * writes data[6] = 0, so the final active offsets remain visible.
+ */
+export function backVerticalShakeHorizontalSlideFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackVerticalShakeHorizontalSlideFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_V_SHAKE_H_SLIDE") return null;
+  const variant = vShakeHSlideVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected V-shake/H-slide selector ${selection.selector}`);
+
+  // The terminal callback is the first one whose initial counter is greater
+  // than 2048. Clamp later reducer queries because WaitAnimEnd only polls.
+  const terminalTick = Math.floor(2048 / variant.step) + 1;
+  const effectiveTick = Math.min(ticksSinceStart, terminalTick);
+  const terminal = effectiveTick === terminalTick;
+  const data2Before = effectiveTick * variant.step;
+  const activeCounter = terminal ? (terminalTick - 1) * variant.step : data2Before;
+  const horizontal = verticalShakeHorizontalSlideX2(activeCounter);
+  const ySineIndex = activeCounter % variant.modulus;
+
+  return Object.freeze({
+    x2: toS16(horizontal.x2),
+    y2: gbaSin(ySineIndex, variant.amplitude),
+    data0: 0 as const,
+    data1: toS16(preservedData1),
+    data2Before: toS16(data2Before),
+    data2: toS16(terminal ? data2Before : data2Before + variant.step),
+    data6: 0 as const,
+    horizontalPhase: terminal ? null : horizontal.horizontalPhase,
+    horizontalRemainder: terminal ? null : horizontal.horizontalRemainder,
+    ySineIndex: terminal ? null : ySineIndex,
+    selector: variant.selector,
+    sourceId: variant.sourceId,
+    step: variant.step,
+    modulus: variant.modulus,
+    amplitude: variant.amplitude,
+    callbackInvokedDirectlyFromTask: true as const,
+    normalBackDontFlip: true as const,
+    tryFlipXCalls: 2 as const,
+    affineWriteCount: 0 as const,
+    affineMode: "normal" as const,
+    resetSpriteAfterAnim: false as const,
+    callback: terminal ? "WaitAnimEnd" as const : variant.callback,
+  });
+}
+
+/** Source WaitAnimEnd lifecycle after the static back OAM reports animEnded. */
+export function backVerticalShakeHorizontalSlideWaitAnimEndCallback(
   animEnded: boolean,
 ): "WaitAnimEnd" | "SpriteCallbackDummy" {
   return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
