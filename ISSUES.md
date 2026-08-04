@@ -267,15 +267,36 @@ in the triage doc's "MANUAL settlement" appendix):**
   the lower bound of every L50 draft range (`sInitialRentalMonRanges`) — the
   original check verified only the ≤849 upper bound. The topology artifact
   was right all along; batch-1 carriers reproduce 6/6 through it.
-- `STRINGID_PLAYERDEFEATEDTRAINER1`/`TRAINER1LOSETEXT`/`TRAINER1WINTEXT` →
-  **DEAD today, by the terminal-boundary architecture** (deliberate Gate-3
-  decision; nothing resumes the interpreter at those labels). The reopening
-  path is now scouted end-to-end: `docs/terminal-seam-round-flow-scout.md`
-  (2026-08-03) maps the win/loss label sequences, the orchestrator's
-  zero-presentation gap, and the increment order — its increment (i) (second
-  VM run at the win/loss labels, mirroring the `HandleFaintedMon` two-stage
-  redispatch; zero new opcodes on the WIN branch) is the recommended next
-  round-flow step and would flip these three to REACHABLE.
+- `STRINGID_PLAYERDEFEATEDTRAINER1`/`STRINGID_TRAINER1LOSETEXT` →
+  **REACHABLE, landed 2026-08-03** (terminal-seam increments (i)+(ii),
+  `docs/terminal-seam-round-flow-scout.md`): the interpreter now resumes past
+  `checkteamslost`'s own `end2` into a second VM run at
+  `BattleScript_FrontierTrainerBattleWon`, driven to its own `end2` before
+  the `{kind:"terminal"}` boundary publishes. `battleResolutionPresentation.ts`'s
+  `messageLines` resolves both off the already-threaded `opponentTrainer`
+  (`factoryTrainerPresentationForOpponent`) — `{B_TRAINER1_CLASS}`/
+  `{B_TRAINER1_NAME}` via `resolveBattleStringLines` (the Taunt-pair idiom),
+  `{B_TRAINER1_LOSE_TEXT}` hand-built from `opponentTrainer.speechLose`
+  (its template is a single bare placeholder with no line-break segment of
+  its own, unlike every other id here — the source's 2-line split lives
+  inside the Easy-Chat-word buffer, not the template, so this follows
+  `STRINGID_SWITCHINMON`'s existing hand-built-lines shape instead). Pinned
+  in `tests/presentationStringTerminalSeamWin.test.ts`: the DESTIN fixture's
+  exact 4 resolved lines ("Player defeated"/"BUG CATCHER DESTIN!"/"PLEASE I
+  NEED"/"SOME WATER", cross-checked against `battleScene.ts`'s `TURN17_*`
+  ground-truth literals) plus a JENSON generalization pin (different
+  facility class/name/speechLose) proving the mapping is data-driven, not
+  DESTIN-hardcoded. Census: 80→78 UNRESOLVED.
+- `STRINGID_TRAINER1WINTEXT` → **still DEAD today, loss-path only.** The
+  win-side increment above deliberately left the LOSS script
+  (`BattleScript_LocalBattleLost`) untouched: it additionally needs `VARIOUS`
+  cases 19/20 (`RETURN_OPPONENT_MON1`/`MON2`, unmodeled in `Cmd_various`
+  today — `battleScriptSwitchinOpcode.ts:677+` only models case 0), and this
+  repo has **no dense oracle trace or RAM pin for the loss-path text at all**
+  (`docs/terminal-seam-round-flow-scout.md` trap 3 — only DESTIN's win quote
+  is traced). A follow-up increment needs both the two new `VARIOUS` cases
+  and a fresh oracle trace before it can land with the confidence the win
+  side had (DESTIN's already-committed `turn17-notes.md` ground truth).
 
 **Also found, tracked separately:** `STRINGID_PKMNCANTUSEMOVETORMENT` is
 DEAD *today* but not by a game-design gate — this engine's attack-canceler

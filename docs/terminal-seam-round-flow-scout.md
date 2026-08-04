@@ -265,6 +265,24 @@ confirmed already-available (not net-new extraction):
   specifically; a second trainer (different class/name/quote) would be the
   generalization proof.
 
+  **2026-08-03 update — win case landed, loss case still open.**
+  `STRINGID_PLAYERDEFEATEDTRAINER1`/`STRINGID_TRAINER1LOSETEXT` are landed
+  (ISSUES #72's MANUAL-settlement block, `tests/
+  presentationStringTerminalSeamWin.test.ts`; census 80→78 UNRESOLVED).
+  `STRINGID_TRAINER1WINTEXT` (the loss case, `{B_TRAINER1_WIN_TEXT}` from
+  `speeches.speechWin`) is **not** landed — it depends on the LOSS script
+  (`BattleScript_LocalBattleLost`, §1c above), which increment (i) explicitly
+  left untouched (VARIOUS 19/20 unmodeled, no oracle ground truth for the
+  loss path anywhere in this repo — trap 3 below). A future loss-side
+  increment needs, in order: `Cmd_various` cases 19/20
+  (`RETURN_OPPONENT_MON1`/`MON2`, "return the opponent's active mon(s) to
+  their ball" — no new opcode family, `battleScriptSwitchinOpcode.ts:677+`
+  already dispatches this table), the same second-VM-run resume shape at
+  `BattleScript_LocalBattleLost` instead of `_FrontierTrainerBattleWon`, and
+  a **fresh oracle trace** (a staged Factory L50 loss) before
+  `{B_TRAINER1_WIN_TEXT}` can be resolver-mapped with real ground truth
+  rather than guessed from the win side's timings.
+
 **(iii) Hand off to the swap/round controller with a real presentation step
 instead of a silent fabrication.** Files: `core.ts` (`createPostwinStateFromRound`
 call site, `:583-587`) and `postwin.ts` (`createPostwinStateFromRound`,

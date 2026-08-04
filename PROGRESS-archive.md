@@ -1,3 +1,61 @@
+## 898 — [bounded MAIN worker, 2026-08-03 ~18:05] ISSUES #72 batch 3 (shortened, 45-min cap): 4 more REACHABLE printstring STRINGIDs landed
+
+- **State:** master `4913d940`, on top of `897`'s commit (`efecd519`). Full
+  `npm test` green (**668 files / 6,614 passed / 1 skipped**, 0 failures),
+  `npm run build` green (`tsc -b && vite build`), `compare:differential --
+  battle-command-generated-off.json --base efecd519 --summary`: **PASS —
+  128/128 byte-identical**.
+- **Did:** Shortened (45-min cap) continuation of ISSUES #72's ranked
+  REACHABLE list, starting at `STRINGID_PKMNLAIDCURSE` per the supervisor
+  brief (skipping the 3 documented hard cases again:
+  `PKMNHUNGONWITHX`/`PKMNPROTECTEDBY`/`PKMNREGAINEDHEALTH`, still unlanded).
+  Landed 4 via the Taunt-pair idiom (census: 85→81 UNRESOLVED, 35→39
+  already-explicit, exact -4/+4 match): `STRINGID_PKMNCOPIEDSTATCHANGES`
+  (Psych Up, plain move-attacker/defender pair), `STRINGID_PKMNSXBLOCKSY`
+  (Soundproof vs. a sound move via `BattleScript_SoundproofProtected`'s own
+  unreassigned move-target read), `STRINGID_PKMNSXMADEITINEFFECTIVE` (Yawn
+  vs. Insomnia/Vital Spirit — `BattleScript_PrintBankAbilityMadeIneffective`'s
+  own `copybyte sBATTLER, sBATTLER_WITH_ABILITY` fallthrough already writes
+  `scriptingBattler`, so no new plumbing needed), `STRINGID_PKMNWASMADEDROWSY`
+  (Yawn's own unconditional success tail). All 4 staged as full-turn
+  production-kernel repros in one new file,
+  `tests/presentationStringIssue72Batch3.test.ts`, red-verified via `git
+  stash -- src/engine/battleResolutionPresentation.ts
+  src/engine/factoryBattleScriptFullTurnDecision.ts` (exact completeness-
+  guard error pre-fix, confirmed per-id). `STRINGID_PKMNLAIDCURSE` (Ghost
+  Curse, Dusclops) was staged first — its `messageLines` shape (plain
+  attacker/defender, no substitutions) is correct and was proven against the
+  script trace, but a real full-turn repro hits an *unrelated* barrier:
+  `runEndTurnTail`'s `ENDTURN_CURSE` case throws
+  `BattleScript_CurseTurnDmg is not wired` (the per-turn Curse damage tick
+  has no handler at all in this reducer's end-of-turn orchestration).
+  Reverted rather than landed without a passing red-verified test; new
+  tracked gap recorded in ISSUES #72, `STRINGID_PKMNLAIDCURSE` stays open and
+  ranked first. `STRINGID_PKMNTRACED` (needs new `battleTextBuff1MonNick`
+  nickname-resolution wiring in `prepareMessage`, not yet ported — deferred,
+  not attempted) and `STRINGID_PKMNSXBLOCKSY2` (Perish Song vs. Soundproof,
+  needs the same per-iteration `sBATTLER`/`addbyte` loop investigation
+  `STRINGID_PKMNCUTSATTACKWITH`'s Intimidate loop already got — deferred, not
+  attempted) were the next two candidates but the cap landed first. ISSUES
+  #72 REACHABLE list trimmed to the remaining 40 (44 − 4, arithmetic-checked
+  via `awk`+`grep -o 'STRINGID_[A-Z0-9]*'`+`sort -u`+`wc -l` against the list
+  body's own unique count, excluding the one `STRINGID_X` placeholder token
+  in the instructional parenthetical).
+- **Next:** ISSUES #72 batch 4, starting from `STRINGID_PKMNHUNGONWITHX`/
+  `PKMNPROTECTEDBY`/`PKMNREGAINEDHEALTH` if a dedicated seed-search/
+  multi-context step is picked up, else `STRINGID_PKMNTRACED` or
+  `STRINGID_PKMNSXBLOCKSY2` (both scoped above) or the next plain-idiom id
+  after those (`STRINGID_PKMNFREEDFROM`). The new `ENDTURN_CURSE` end-of-turn
+  gap (wire `BattleScript_CurseTurnDmg`, same shape as the existing Wrap/
+  Reflect/Wish ticks) — a prerequisite for `STRINGID_PKMNLAIDCURSE`. The
+  `CANCELER_TORMENTED` engine-gap fix (separate step, not a messageLines
+  fix). The 4 MANUAL settling experiments (already DEAD-settled per 897 — no
+  further action). #71 Slice D. typeref slice-2 re-scope (#39).
+- **Notes:** Shortened step (45-min cap) — landed 4 of the targeted 6-8,
+  prioritizing landing fewer ids fully over more partially, per the brief.
+  No PAPERCUT this step (research-heavy but no tooling friction hit).
+
+---
 ## 897 — [bounded MAIN worker, 2026-08-03 ~17:20] ISSUES #72 batch 2: 11 more REACHABLE printstring STRINGIDs landed via the Taunt-pair idiom
 
 - **State:** master `86637733`, on top of `896`'s commit. Full `npm test`

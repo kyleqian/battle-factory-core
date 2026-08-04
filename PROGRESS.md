@@ -4,6 +4,69 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 901 — [bounded MAIN worker, 2026-08-03 ~22:15] Terminal-seam increments (i)+(ii) landed: win-side text is now real, resolved, and player-visible
+
+- **State:** master `b9a9366b`. Full `npm test` green (**684 files / 6,695
+  passed / 1 skipped**, 0 failures), `npm run build` green (`tsc -b && vite
+  build`), `compare:differential -- battle-command-generated-off.json --base
+  f420330c --summary`: **PASS — 128/128 byte-identical**.
+- **Did:** Landed the parked `wip/terminal-seam-increment-i` branch (single
+  commit `d64f10c3`, cherry-picked clean as `5f1b3d80`) together with
+  increment (ii) in the same change, per that commit's own diagnosis that
+  the two are not separable (landing (i) alone converts today's silent skip
+  into a hard completeness-guard crash). A player win on the generic round
+  path now actually resumes the interpreter past `checkteamslost`'s `end2`
+  into a second VM run at `BattleScript_FrontierTrainerBattleWon`, drives it
+  to its own `end2`, and emits real text instead of the round orchestrator
+  fabricating a dismissed win-quote. Fixed all 3 RED causes the wip commit
+  left open (commit `2bb9b3bc`): (1) resolver-mapped
+  `STRINGID_PLAYERDEFEATEDTRAINER1`/`STRINGID_TRAINER1LOSETEXT` in
+  `battleResolutionPresentation.ts`'s `messageLines` via the #72 Taunt-pair
+  idiom, sourcing `{B_TRAINER1_CLASS}`/`{B_TRAINER1_NAME}` and
+  `{B_TRAINER1_LOSE_TEXT}` off the already-threaded `opponentTrainer`
+  (widened to carry `speechLose`); (2) wired the shared
+  `resolveSingleBattlePosition` into the two test harnesses
+  (`battleEndTurnOrchestration.test.ts`, `battleScriptFutureAttack.test.ts`)
+  still stubbing `resolveBattlerAtPosition` to null; (3) fixed
+  `battleEndTurnOrchestration.test.ts`'s fixture to carry
+  `BATTLE_TYPE_TRAINER` (Factory battles are trainer battles, matching what
+  production actually stages). New pins: `tests/
+  presentationStringTerminalSeamWin.test.ts` asserts the DESTIN fixture's
+  exact 4 resolved lines ("Player defeated"/"BUG CATCHER DESTIN!"/"PLEASE I
+  NEED"/"SOME WATER", cross-checked against `battleScene.ts`'s `TURN17_*`
+  ground-truth literals) plus a JENSON generalization pin (different
+  facility class/name/speechLose) proving the mapping is data-driven, not
+  DESTIN-hardcoded — both red-verified via `git stash --
+  src/engine/battleResolutionPresentation.ts`. Census: **80→78
+  UNRESOLVED** (commit `b9a9366b`). ISSUES #72's MANUAL-settlement block and
+  the scout doc's §3 updated: the two win-side ids are REACHABLE-and-landed;
+  `STRINGID_TRAINER1WINTEXT` (loss-path) stays open, with the loss-side
+  follow-up (VARIOUS 19/20 + a fresh oracle trace — no loss-path ground
+  truth exists anywhere in this repo today) now recorded in both docs.
+  `wip/terminal-seam-increment-i` deleted after the merge went green.
+- **Scope held:** LOSS/DRAW path kept today's direct terminal boundary
+  (win-side second VM run only, per the step brief's hard limit) —
+  `VARIOUS` 19/20 not registered this step. Increment (iii) (rendering the
+  trainer slide-in + dismissible quote boxes before `postwin`) not
+  attempted — `trainer-slide-in`/`trainer-slide-out` semantic events are
+  emitted but `projectBattleResolutionCommands` has no branch for them yet,
+  so they're silently absorbed with zero visual effect (no new renderer
+  built, matching the step's hard limit). No RNG cursor movement from
+  entering the second VM run (scout trap 4 confirmed, unchanged).
+  Completeness guard untouched (stays fatal per the 2026-08-03 user
+  decision).
+- **Next:** loss-side terminal-seam increment (`VARIOUS` 19/20 + fresh
+  oracle trace for `BattleScript_LocalBattleLost`, then resolver-map
+  `STRINGID_TRAINER1WINTEXT`) — no ground truth exists yet, budget a trace.
+  Increment (iii) (trainer-slide-in visual + dismissible win/loss quote
+  boxes) once the loss side lands too, so both directions render together.
+  #72 batch 5 (plain-idiom tail from `STRINGID_PKMNFREEDFROM`, skip
+  `TRACED`/`SXBLOCKSY2`/the hard trio). typeref slices 4-8. #71 Slice D.
+- **Notes:** No surprises vs. the wip commit's 3-cause diagnosis — all 3
+  causes were exactly as described, no additional hidden causes surfaced
+  once the full suite reran green. No PAPERCUT this step.
+
+---
 ## 900 — [bounded MAIN worker, 2026-08-03 ~19:05] ENDTURN_CURSE wired + STRINGID_PKMNLAIDCURSE landed (#72 batch 4)
 
 - **State:** master `20a06520`. Full `npm test` green (**677 files / 6,662
@@ -132,63 +195,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   non-fatal in the playable build (loud console error + best-effort text)
   while staying fatal in tests — still recommended; 81 unresolved ids
   remain reachable-in-principle until the program finishes.
-
----
-## 898 — [bounded MAIN worker, 2026-08-03 ~18:05] ISSUES #72 batch 3 (shortened, 45-min cap): 4 more REACHABLE printstring STRINGIDs landed
-
-- **State:** master `4913d940`, on top of `897`'s commit (`efecd519`). Full
-  `npm test` green (**668 files / 6,614 passed / 1 skipped**, 0 failures),
-  `npm run build` green (`tsc -b && vite build`), `compare:differential --
-  battle-command-generated-off.json --base efecd519 --summary`: **PASS —
-  128/128 byte-identical**.
-- **Did:** Shortened (45-min cap) continuation of ISSUES #72's ranked
-  REACHABLE list, starting at `STRINGID_PKMNLAIDCURSE` per the supervisor
-  brief (skipping the 3 documented hard cases again:
-  `PKMNHUNGONWITHX`/`PKMNPROTECTEDBY`/`PKMNREGAINEDHEALTH`, still unlanded).
-  Landed 4 via the Taunt-pair idiom (census: 85→81 UNRESOLVED, 35→39
-  already-explicit, exact -4/+4 match): `STRINGID_PKMNCOPIEDSTATCHANGES`
-  (Psych Up, plain move-attacker/defender pair), `STRINGID_PKMNSXBLOCKSY`
-  (Soundproof vs. a sound move via `BattleScript_SoundproofProtected`'s own
-  unreassigned move-target read), `STRINGID_PKMNSXMADEITINEFFECTIVE` (Yawn
-  vs. Insomnia/Vital Spirit — `BattleScript_PrintBankAbilityMadeIneffective`'s
-  own `copybyte sBATTLER, sBATTLER_WITH_ABILITY` fallthrough already writes
-  `scriptingBattler`, so no new plumbing needed), `STRINGID_PKMNWASMADEDROWSY`
-  (Yawn's own unconditional success tail). All 4 staged as full-turn
-  production-kernel repros in one new file,
-  `tests/presentationStringIssue72Batch3.test.ts`, red-verified via `git
-  stash -- src/engine/battleResolutionPresentation.ts
-  src/engine/factoryBattleScriptFullTurnDecision.ts` (exact completeness-
-  guard error pre-fix, confirmed per-id). `STRINGID_PKMNLAIDCURSE` (Ghost
-  Curse, Dusclops) was staged first — its `messageLines` shape (plain
-  attacker/defender, no substitutions) is correct and was proven against the
-  script trace, but a real full-turn repro hits an *unrelated* barrier:
-  `runEndTurnTail`'s `ENDTURN_CURSE` case throws
-  `BattleScript_CurseTurnDmg is not wired` (the per-turn Curse damage tick
-  has no handler at all in this reducer's end-of-turn orchestration).
-  Reverted rather than landed without a passing red-verified test; new
-  tracked gap recorded in ISSUES #72, `STRINGID_PKMNLAIDCURSE` stays open and
-  ranked first. `STRINGID_PKMNTRACED` (needs new `battleTextBuff1MonNick`
-  nickname-resolution wiring in `prepareMessage`, not yet ported — deferred,
-  not attempted) and `STRINGID_PKMNSXBLOCKSY2` (Perish Song vs. Soundproof,
-  needs the same per-iteration `sBATTLER`/`addbyte` loop investigation
-  `STRINGID_PKMNCUTSATTACKWITH`'s Intimidate loop already got — deferred, not
-  attempted) were the next two candidates but the cap landed first. ISSUES
-  #72 REACHABLE list trimmed to the remaining 40 (44 − 4, arithmetic-checked
-  via `awk`+`grep -o 'STRINGID_[A-Z0-9]*'`+`sort -u`+`wc -l` against the list
-  body's own unique count, excluding the one `STRINGID_X` placeholder token
-  in the instructional parenthetical).
-- **Next:** ISSUES #72 batch 4, starting from `STRINGID_PKMNHUNGONWITHX`/
-  `PKMNPROTECTEDBY`/`PKMNREGAINEDHEALTH` if a dedicated seed-search/
-  multi-context step is picked up, else `STRINGID_PKMNTRACED` or
-  `STRINGID_PKMNSXBLOCKSY2` (both scoped above) or the next plain-idiom id
-  after those (`STRINGID_PKMNFREEDFROM`). The new `ENDTURN_CURSE` end-of-turn
-  gap (wire `BattleScript_CurseTurnDmg`, same shape as the existing Wrap/
-  Reflect/Wish ticks) — a prerequisite for `STRINGID_PKMNLAIDCURSE`. The
-  `CANCELER_TORMENTED` engine-gap fix (separate step, not a messageLines
-  fix). The 4 MANUAL settling experiments (already DEAD-settled per 897 — no
-  further action). #71 Slice D. typeref slice-2 re-scope (#39).
-- **Notes:** Shortened step (45-min cap) — landed 4 of the targeted 6-8,
-  prioritizing landing fewer ids fully over more partially, per the brief.
-  No PAPERCUT this step (research-heavy but no tooling friction hit).
 
 ---
