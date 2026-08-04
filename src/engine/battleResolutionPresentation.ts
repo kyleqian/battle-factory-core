@@ -2030,6 +2030,96 @@ function messageLines(
       B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
     });
   }
+  // ISSUES #72 batch 7: the small-plumbing + known-staging cluster of the
+  // remaining REACHABLE-15 list (docs/issue72-reachability-triage.md,
+  // PROGRESS 904's own classification).
+  if (messageId === "STRINGID_PKMNCHANGEDTYPEWITH") {
+    // BattleScript_ColorChangeActivates: executeOnDamageAbilities's own
+    // Color Change branch never reassigns selectorRoles -- BS_TARGET stays
+    // the move's own still-current target, the same battler whose types[]
+    // just changed.
+    if (event.payload.substitutions.length < 2) {
+      throw new Error(`battle resolution ${messageId} message has no ability/type substitution`);
+    }
+    const defender = requireMoveDefender(lastMoveAttacker, "changed-type-with message");
+    const ability = event.payload.substitutions[0]!;
+    const typeName = event.payload.substitutions[1]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_DEF_ABILITY: () => ability,
+      B_BUFF1: () => typeName,
+    });
+  }
+  if (messageId === "STRINGID_PKMNREDUCEDPP") {
+    // Cmd_tryspiteppreduce (Spite): reads rules.selectorRoles.target
+    // directly (requireBattlerRole), never reassigned -- the move's own
+    // still-current target, whose last-used move/PP this reduces.
+    if (event.payload.substitutions.length < 2) {
+      throw new Error(`battle resolution ${messageId} message has no move/pp substitution`);
+    }
+    const defender = requireMoveDefender(lastMoveAttacker, "reduced-pp message");
+    const moveName = event.payload.substitutions[0]!;
+    const ppAmount = event.payload.substitutions[1]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_BUFF1: () => moveName,
+      B_BUFF2: () => ppAmount,
+    });
+  }
+  if (messageId === "STRINGID_PKMNSITEMRESTOREDPP") {
+    // BattleScript_BerryPPHealEnd2 (Leppa Berry): runItemsTick's own
+    // HOLD_EFFECT_RESTORE_PP branch sets scriptingBattler to the berry
+    // holder, same shape STRINGID_USINGITEMSTATOFPKMNROSE already uses for
+    // {B_SCR_ACTIVE_NAME_WITH_PREFIX}/{B_LAST_ITEM}.
+    if (event.payload.scriptingBattler === undefined || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no scripting-battler/move substitution`);
+    }
+    const scriptingBattler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const moveName = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, scriptingBattler),
+      B_LAST_ITEM: () => factoryItemDisplayName(heldItems[scriptingBattler]),
+      B_BUFF1: () => moveName,
+    });
+  }
+  if (messageId === "STRINGID_PKMNSTOLEITEM") {
+    // MOVE_EFFECT_STEAL_ITEM handler (Thief/Covet): unlike Knock Off, this
+    // handler's own set-battler-item events (attacker gains the stolen item,
+    // target loses it) fire in the SAME transition that calls into
+    // BattleScript_ItemSteal, i.e. strictly before this print in event
+    // order -- so by print time heldItems[attacker] already holds the
+    // transferred item (heldItems[defender] would read ITEM_NONE here).
+    const attacker = requireMoveAttacker(lastMoveAttacker, "stole-item message");
+    const defender = requireMoveDefender(lastMoveAttacker, "stole-item message");
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_LAST_ITEM: () => factoryItemDisplayName(heldItems[attacker]),
+    });
+  }
+  if (messageId === "STRINGID_PKMNTRACED") {
+    // ABILITYEFFECT_TRACE (battle_util.c:3017-3069): scriptingBattler is the
+    // tracer itself; {B_BUFF1} is the traced-FROM battler's own
+    // name-with-prefix (PREPARE_MON_NICK_WITH_PREFIX_BUFFER, a distinct
+    // battler from scriptingBattler, threaded via prepareMessage's new
+    // monNickBattler field since name resolution needs `field`); {B_BUFF2}
+    // is the copied ability, engine-supplied via prepareMessage.
+    if (
+      event.payload.scriptingBattler === undefined
+      || event.payload.monNickBattler === undefined
+      || event.payload.substitutions.length === 0
+    ) {
+      throw new Error(`battle resolution ${messageId} message has no scripting/mon-nick-battler or ability substitution`);
+    }
+    const scriptingBattler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const nickBattler = singlesBattler(event.payload.monNickBattler, `${messageId} mon-nick battler`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, scriptingBattler),
+      B_BUFF1: nameWithPrefixResolver(field, nickBattler),
+      B_BUFF2: () => ability,
+    });
+  }
   const resolvers: Record<string, () => string> = {};
   if (lastMoveAttacker !== null) {
     const displayed = fieldBattler(field, lastMoveAttacker);

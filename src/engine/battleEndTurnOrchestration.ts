@@ -1389,7 +1389,13 @@ function runItemsTick(
     const maxPp = resolveBattleScriptMoveBasePp(move);
     const restoredPp = Math.min(param, maxPp);
     const pp = b.pp.map((value, index) => (index === slot ? restoredPp : value)) as unknown as BattleScriptRulesBattlerState["pp"];
-    const rc = withBattler(state.rulesContext, battler, { pp });
+    const withPp = withBattler(state.rulesContext, battler, { pp });
+    // ISSUES #72 batch 7 (STRINGID_PKMNSITEMRESTOREDPP): scriptingBattler is
+    // the berry holder ({B_SCR_ACTIVE_NAME_WITH_PREFIX}/{B_LAST_ITEM}, same
+    // shape the STAT_UP_BERRIES branch above already sets); battleTextBuff1Move
+    // is the just-restored move ({B_BUFF1}), Spite's own tryspiteppreduceOpcode.ts
+    // sibling field.
+    const rc = Object.freeze({ ...withPp, scriptingBattler: battler, battleTextBuff1Move: move });
     return runTickScript(program, handlers, state, rc, battler, BERRY_PP_HEAL_END2_LABEL);
   }
   const statUpStatId = STAT_UP_BERRIES.get(holdEffect);

@@ -112,6 +112,7 @@ import {
 } from "./battleEndTurnOrchestration.ts";
 import { effectiveSpeed, getWhoStrikesFirst, type TurnOrderBattler, type WeatherState } from "./turnOrder.ts";
 import { ABILITY_SYMBOLS } from "./battleScriptSwitchinOpcode.ts";
+import { TYPE_DISPLAY_NAMES } from "./fightSubmenuText.ts";
 import {
   BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING,
   BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
@@ -232,6 +233,8 @@ const ABILITY_DISPLAY_NAME_BY_ID: Readonly<Record<number, string>> = Object.free
   44: "RAIN DISH",
   3: "SPEED BOOST",
   61: "SHED SKIN",
+  // ISSUES #72 batch 7: Color Change.
+  16: "COLOR CHANGE",
 });
 function abilityDisplayName(ability: number): string {
   const name = ABILITY_DISPLAY_NAME_BY_ID[ability];
@@ -1125,7 +1128,47 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                                     ? (rules.selectorRoles.target === null
                                                       ? []
                                                       : [resolveMoveName(rules.battlers[rules.selectorRoles.target].disabledMove)])
-                                                    : [];
+                                                    // ISSUES #72 batch 7: BattleScript_ColorChangeActivates's
+                                                    // {B_DEF_ABILITY}/{B_BUFF1} -- executeOnDamageAbilities's own
+                                                    // Color Change branch never reassigns selectorRoles (BS_TARGET
+                                                    // stays the move's own still-current target, the ability
+                                                    // holder), and battleTextBuff1Type already carries the new
+                                                    // TYPE_* symbol (battleScriptMoveEndOpcode.ts:497). {B_BUFF1}'s
+                                                    // real source reads gTypeNames (battle_message.c:2802), the
+                                                    // same abbreviation table fightSubmenuText.ts's TYPE_DISPLAY_NAMES
+                                                    // already transcribes for the FIGHT menu's type icon.
+                                                    : operand.expression === "STRINGID_PKMNCHANGEDTYPEWITH"
+                                                      ? (rules.selectorRoles.target === null || rules.battleTextBuff1Type === null
+                                                        ? []
+                                                        : [
+                                                            abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability),
+                                                            TYPE_DISPLAY_NAMES[rules.battleTextBuff1Type] ?? rules.battleTextBuff1Type,
+                                                          ])
+                                                      // ISSUES #72 batch 7: Cmd_tryspiteppreduce (Spite) already
+                                                      // captures both {B_BUFF1}/{B_BUFF2} substitutions itself
+                                                      // (battleScriptTryspiteppreduceOpcode.ts:81-82) -- only the
+                                                      // prepareMessage wiring down to Cmd_printstring was missing.
+                                                      : operand.expression === "STRINGID_PKMNREDUCEDPP"
+                                                        ? (rules.battleTextBuff1Move === null || rules.battleTextBuff2ByteNumber === null
+                                                          ? []
+                                                          : [resolveMoveName(rules.battleTextBuff1Move), String(rules.battleTextBuff2ByteNumber)])
+                                                        // ISSUES #72 batch 7: BattleScript_BerryPPHealEnd2 (Leppa
+                                                        // Berry) -- {B_BUFF1} is the just-restored move, now also
+                                                        // captured by runItemsTick's own HOLD_EFFECT_RESTORE_PP
+                                                        // branch (battleEndTurnOrchestration.ts) the same shape
+                                                        // Spite's battleTextBuff1Move already established.
+                                                        : operand.expression === "STRINGID_PKMNSITEMRESTOREDPP"
+                                                          ? (rules.battleTextBuff1Move === null ? [] : [resolveMoveName(rules.battleTextBuff1Move)])
+                                                          // ISSUES #72 batch 7: BattleScript_TraceActivates's
+                                                          // {B_BUFF2} -- the copied ability, off the traced-from
+                                                          // battler factoryBattleStart.ts's own battleTextBuff1MonNick
+                                                          // write already identifies (its ability field is
+                                                          // untouched by the trace, only the tracer's is).
+                                                          : operand.expression === "STRINGID_PKMNTRACED"
+                                                            ? (rules.battleTextBuff1MonNick === null
+                                                              ? []
+                                                              : [abilityDisplayName(rules.battlers[rules.battleTextBuff1MonNick.battler].ability)])
+                                                            : [];
       return Object.freeze({
         kind: "message" as const,
         messageId: operand.expression,
@@ -1177,6 +1220,15 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
           || operand.expression === "STRINGID_PREVENTEDFROMWORKING"
         ) && rules.selectorRoles.target !== null
           ? { targetBattler: rules.selectorRoles.target }
+          : {}),
+        // Source PREPARE_MON_NICK_WITH_PREFIX_BUFFER's own battler argument
+        // (gActiveBattler, the traced-from battler) at print time --
+        // ISSUES #72 batch 7's STRINGID_PKMNTRACED needs the name-with-prefix
+        // resolved presentation-side (nameWithPrefixResolver needs `field`,
+        // unavailable inside this rules-only prepareMessage), distinct from
+        // scriptingBattler (the tracer itself).
+        ...(operand.expression === "STRINGID_PKMNTRACED" && rules.battleTextBuff1MonNick !== null
+          ? { monNickBattler: rules.battleTextBuff1MonNick.battler }
           : {}),
       });
     },

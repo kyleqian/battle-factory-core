@@ -119,6 +119,14 @@ export type BattleScriptSemanticEventPayload =
      * "no live emitter yet" caveat as `introBattler`.
      */
     introOutcome?: BattleOutcome;
+    /**
+     * Source gActiveBattler at PREPARE_MON_NICK_WITH_PREFIX_BUFFER time
+     * (rulesContext.battleTextBuff1MonNick.battler) -- ISSUES #72 batch 7's
+     * STRINGID_PKMNTRACED, the traced-from battler whose name-with-prefix
+     * fills {B_BUFF1}, distinct from scriptingBattler (the tracer itself).
+     * Optional for synthetic/staged receipts that predate this field.
+     */
+    monNickBattler?: BattleScriptBattlerId;
   }>
   | Readonly<{
     kind: "selection-message";

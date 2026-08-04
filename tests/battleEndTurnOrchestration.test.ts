@@ -1486,6 +1486,11 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
             expect(result.state.rulesContext.battlers[1]!.pp).toEqual([10, 0, 0, 0]); // MOVE_TACKLE base pp 35, param 10
             expect(result.state.rulesContext.battlers[1]!.item).toBe(0);
             expect(result.state.rng.calls).toBe(initial.rng.calls);
+            // ISSUES #72 batch 7 (STRINGID_PKMNSITEMRESTOREDPP): scriptingBattler
+            // is the berry holder ({B_SCR_ACTIVE_NAME_WITH_PREFIX}/{B_LAST_ITEM}),
+            // battleTextBuff1Move is the just-restored move ({B_BUFF1}).
+            expect(result.state.rulesContext.scriptingBattler).toBe(1);
+            expect(result.state.rulesContext.battleTextBuff1Move).toBe(MOVE_TACKLE);
           });
 
           it("Leppa Berry's restore is capped at the move's own base PP (Hydro Pump: 5, not the raw param 10)", () => {
