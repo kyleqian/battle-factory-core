@@ -33,6 +33,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   animation lane's rung-3 dispatcher (not landed as of 10:40). Torment
   selection-time-rejection subsystem still needs supervisor re-scoping
   (#72 note).
+- **Addendum (2026-08-04 evening, user directive via interactive session):**
+  the animation lane's next bounded step is now the rung-3 send-out
+  dispatcher (directive recorded as `ANIMATION_PROGRESS.md`'s top entry on
+  `animation-main`, commit `420a7578`; ISSUES #71 updated in the same
+  note). `animation-main` is 7 commits ahead of master (6 Steel Wing
+  partial + the directive) — fold at orient per protocol. #71 Slice D
+  unblocks once the dispatcher lands. On the Magnitude "Next" item above:
+  the kernel already captures the roll (`rulesContext.
+  battleTextBuff1ByteNumber`, `battleScriptRankedBatch1Opcode.ts:130`) —
+  the remaining work is the presentation-side resolver entry (the
+  HITXTIMES pattern, see `battleResolutionPresentation.ts:1648`'s own
+  comment), smaller than 912's "new plumbing" phrasing suggests.
 - **Notes:** main R1's launcher tee-pipeline broke mid-run producing a
   spurious exit-1 while launcher+worker were healthy (diagnosed via
   process-tree + JSONL growth; zero kills; later launches redirect with

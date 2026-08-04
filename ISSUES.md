@@ -114,6 +114,14 @@ animation lane's rung-3 dispatcher (`frontSendOutFrameAtTick` + OAM/anim-frame
 side, §5 of the consumer-map doc) stays open and is a prerequisite for Slice
 D only.
 
+**User directive (2026-08-04, interactive session):** the animation lane has
+been directed to build the rung-3 dispatcher as its **next bounded step**
+(recorded as the top entry of `ANIMATION_PROGRESS.md` on `animation-main`,
+commit `420a7578`). Main-lane sequencing: fold `animation-main` at orient as
+usual; once the dispatcher has landed, Slice D is unblocked and should be
+briefed against the §5 contract. Note `animation-main` also carries an
+unfolded Steel Wing partial (6 commits ahead of master as of this note).
+
 ## #72 — battleStringResolver completeness-guard gaps: 40 REACHABLE printstring STRINGIDs need the Taunt-pair fix idiom
 
 **Symptom:** the same-day user-reported crash (2026-08-03, opponent MURKROW's
