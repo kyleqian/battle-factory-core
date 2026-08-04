@@ -1,5 +1,148 @@
 # Animation coverage
 
+## Rung-3 BACK send-out dispatcher landed (2026-08-04)
+
+- **State:** ISSUES #71 rung-3 cross-lane ask item 3 (back variant) complete
+  and green — all three cross-lane items now delivered (front per-tick, OAM
+  frame side, back variant). Move coverage unchanged: **107/276 exact, 1
+  partial, 0 staged, 168 unsupported**; `ANIMATION_COVERAGE.json` untouched.
+  The only production edit adds exports to `sendOutDispatcher.ts`. No engine
+  edits, no boundary/unsupported widening.
+- **Did:** `backSendOutFrameAtTick(species, nature, ticksSinceStart)` in the
+  same contract shape as the front half: resolves the species' back set +
+  nature-mod selector via `selectBackSendOutAnimation` (`3 * backAnimSet +
+  natureMod` lookup), routes through the exported 25-set
+  `BACK_SEND_OUT_REDUCERS` map, and returns the frozen `{ x2, y2 }`
+  projection. `BACK_ANIM_GROW` is the one set with two reducer entry points:
+  selector `ANIM_GROW_IN_STAGES` → `backGrowInStagesFrameAtTick`, the shared
+  Grow selectors (`ANIM_GROW`/`ANIM_GROW_TWICE`) → `backGrowFrameAtTick`
+  (verified via `growVariant`'s speed/runs split, not blind-trying). No
+  terminal-clamp table: back reducers return their own stable terminal frames
+  (ShakeGlow settled-tick scan pinned, 200-window stable run).
+- **Next:** supervisor's call — Steel Wing reconciliation remains queued per
+  the 2026-08-04 directive.
+- **Notes:** routing totality = **386 species keys × 25 natures = 9,650**
+  combos, every one non-null at tick 0 and equal to its direct reducer's
+  `{ x2, y2 }` projection; per-set passthrough over all **25/25** sets at
+  ticks [0,1,5,17,40,90,200] exact incl. both GROW entry points. Nature names
+  accepted verbatim via `BACK_ANIM_NATURE_ORDER` (length 25). Tests
+  `tests/animation/backSendOutDispatcher.test.ts` (7). Focused 4 files / 22
+  tests (incl. both ratchets), typecheck, smoke **7/347**, full **720 files /
+  6,923 passed / 1 skipped**, build green. Committed on
+  `worker/animation-20260804-142745`; tree clean at commit.
+
+## Rung-3 FRONT send-out ANCHOR pinned live (RAM probe, all three flights) (2026-08-04)
+
+- **State:** ISSUES #71 rung-3 item 1's "define the anchor explicitly"
+  follow-up complete and green. Move coverage unchanged: **107/276 exact, 1
+  partial, 0 staged, 168 unsupported**; `ANIMATION_COVERAGE.json` untouched.
+  The only production edit is the `frontSendOutFrameAtTick` doc comment
+  (`sendOutDispatcher.ts`); `sendOutSpriteFrame.ts` needed no change ((iv)
+  confirms its anchor). No engine edits, no boundary/unsupported widening.
+- **Did:** `tools/compare/frontSendOutFlightProbe.py` captures the Scene-ON
+  opponent front send-out flight inside `BattleLab.prepare()`'s fast-forward
+  (`preCheckpointCaptureAllFrames` set on the scenario dict, never the
+  committed scenarios), reading `gBattlerSpriteIds[1]` plus both
+  `Task_HandleMonAnimation` and `Task_AnimateAfterDelay` task scans. Anchor =
+  first battler1 animNum 0→1 after the `SpriteCB_OpponentMonFromBall` emerge
+  installs (naive flip detection is noise — the slot points at rental-screen
+  sprites pre-battle). Six fixtures committed under
+  `tools/compare/fixtures/front-send-out-flight-<species>-run-{a,b}.json`,
+  twice fresh and byte-identical: GROVYLE `84829e36…`, PIDGEOTTO
+  `32414807…`, RATTATA `8d9d36f3…`. Evidence test
+  `tests/animation/sendOutDispatcherAnchorEvidence.test.ts` (11 tests)
+  validates the dispatcher per tick at alignment A = −1 over every flight row
+  from t_move through t_end (no skips).
+- **Next:** rung-3 remaining item — the back variant
+  (`species, nature, ticksSinceStart`) in the same contract shape.
+- **Notes:** measured anchor table: GROVYLE (V_STRETCH, delay 0)
+  t_anchor=t_move=1616, t_end=1658, gap 0; PIDGEOTTO (V_STRETCH, delay 25)
+  t_anchor=1618, t_move=1642, t_end=1684, gap 24 (SpriteCallbackDummy_2 holds
+  1618..1641 while the delay task counts 24→0); RATTATA (RAPID_H_HOPS, delay
+  0) t_anchor=t_move=1616, t_end=1703, gap 0, settled {x2:1, y2:0}. Validated
+  per-tick rows: GROVYLE 42, PIDGEOTTO 42, RATTATA 87 (incl. the clamp).
+  Alignment A = −1 — the callback's OAM write latches one display frame late
+  (KABUTO hand-fit precedent); at t_move the row holds the pre-flight {0,0}
+  (install frame, callback not yet run) and the test asserts that boundary
+  explicitly. **Brief deviation to flag:** the brief expected PIDGEOTTO gap =
+  delay-0 gap + 25, but the ROM measures **24** — `Task_AnimateAfterDelay`'s
+  `--sAnimDelay == 0` pre-decrement consumes the creation frame, so the Anim_*
+  install is `delay − 1` frames after the affineAnimEnded handoff. The doc
+  records the measured formula and the test asserts `gap = delay − 1` with
+  delay read from the selector tables (not hardcoded). GROVYLE animCmdIndex
+  matches the index-1 program's cumulative durations with **latch offset 0**
+  (the program is visible on the anchor frame, undelayed). Focused 4 files /
+  26 tests, typecheck, smoke **7/347**, full **719 files / 6,916 passed / 1
+  skipped**, build green. Committed `7d4e2020` (probe+fixtures) then
+  `8efef5c1` (evidence test + doc); tree clean at commit.
+
+## Rung-3 send-out sprite-frame (OAM/anim-frame) half landed (2026-08-04)
+
+- **State:** ISSUES #71 rung-3 item 2, the species-generic sprite ANIMCMD
+  half, complete and green. Move coverage unchanged: **107/276 exact, 1
+  partial, 0 staged, 168 unsupported**; `ANIMATION_COVERAGE.json` untouched.
+  No engine edits; no boundary/unsupported widening.
+- **Did:** extractor `tools/extract/extract-front-pic-anim-programs.ts` parses
+  the index-1 `sAnim_<Name>_1` programs (front_pic_anims.h:1-4808), the
+  SINGLE/DOUBLE_ANIMATION macro arrays (4825-5253), the three hand-written
+  `sAnims_` arrays (Blaziken 5083, Spinda 5115, Castform 5194) and
+  `gMonFrontAnimsPtrTable` (5255-5697) into
+  `front-pic-anim-programs.json` — **439 species keys / 415 index-1 tables**;
+  throws on any non-FRAME/END ANIMCMD form. Production module
+  `sendOutSpriteFrame.ts`: `hasTwoFramesAnimation` (pokemon.c:6988 predicate,
+  false for unkeyed species) and `frontSendOutSpriteFrameAtTick` (null for
+  unknown species/invalid ticks, 0 for the excluded species, cumulative
+  step-window walk, ANIMCMD_END last-frame hold, loud throw on frames outside
+  0|1); doc comment states the tick-0 anchor verbatim (`StartSpriteAnim(sprite,
+  1)` = the `affineAnimEnded` tick, never deferred by animationDelay).
+- **Next:** remaining rung-3 items — the live RAM-probe anchor pin, then the
+  back variant (`species, nature, ticksSinceStart`) in the same contract
+  shape.
+- **Notes:** cross-checks: all 6 summary-front-animation probe rows reproduced
+  (ONIX `[{1,50},{1,30},{0,30}]` …; SPINDA row correctly absent) + KABUTO
+  equals the 8-step engine literal (pinned, no engine import). Census: every
+  `frontAnimIds.species` key has a program except the pinned `["SPINDA"]`;
+  excluded species CASTFORM/DEOXYS/UNOWN recorded verbatim (predicate, not
+  data, excludes). **Stop-and-report:** EGG's `_1` program carries frames 2|3
+  (verbatim), so walking it throws by the invariant — EGG is not Factory-
+  legal, unreachable in the engine. Extractor twice byte-identical (SHA-256
+  `144239f6...`). Focused 3 files / 21 tests, typecheck, smoke **7/347**, full
+  **718 files / 6,905 passed / 1 skipped**, build green. Committed
+  `ce88ad7b`; tree clean at commit.
+
+## Rung-3 FRONT send-out dispatcher landed (2026-08-04)
+
+- **State:** ISSUES #71 rung-3 item 1, FRONT half, complete and green. Move
+  coverage unchanged: **107/276 exact, 1 partial, 0 staged, 168
+  unsupported**; `ANIMATION_COVERAGE.json` untouched at SHA-256
+  `162b48ff87e3d38897ff53a871dbda868a46ae84ea3149a08bc8df8d74288ae7` (the
+  `6e8067e5...` literal in older entries predates the Steel Wing partial
+  recording). No engine edits, no boundary/unsupported widening.
+- **Did:** added `src/animation/sendOutDispatcher.ts` (front half only):
+  `frontSendOutFrameAtTick(species, ticksSinceStart)` resolves the species'
+  `ANIM_*` front family from `selectorTables.frontAnimIds.species`, guards on
+  its own dispatch table before casting, clamps the tick to
+  `FRONT_SEND_OUT_TERMINAL_TICKS[family]` (copied verbatim from
+  `computeTerminalOffset`'s per-case literals; RAPID_H_HOPS loop-verified last
+  non-null tick **85**, `{x2:1,y2:0}`), and returns `Object.freeze({x2, y2})`
+  from the same single-tick reducer each switch case calls; a below-clamp
+  reducer null is passed through. Doc comment states the exact tick-0 anchor
+  (`SpriteCB_OpponentMonFromBall` @ `battle_main.c:2838` + animationDelay).
+  Tests `tests/animation/sendOutDispatcher.test.ts`: **386-species** terminal
+  consistency vs `speciesFrontIdleRestOffset`, **62-family** mid-flight
+  passthrough vs each reducer directly (families enumerated from the
+  `FRONT_SEND_OUT_TERMINAL_TICKS` export), clamp (RAPID_H_HOPS via ONIX +
+  4 families) incl. `ONIX@85 == {x2:1,y2:0}`, null inputs (unknown species,
+  OLD_UNOWN_B, -1, 1.5), frozen return.
+- **Next:** remaining rung-3 items — OAM/anim-frame side
+  (`HasTwoFramesAnimation` / `sMonAnimationDelayTable`-derived frame-index
+  state), the live RAM-probe anchor pin, and the back variant
+  (`species, nature, ticksSinceStart`) in the same contract shape.
+- **Notes:** focused dispatcher + animation boundary + frontier ratchet
+  **3 files / 15 tests**; typecheck, smoke **7 files / 347 tests**, full
+  **717 files / 6,893 passed / 1 skipped**, and build green. Committed as
+  `96ef4acf` (+ `b627e991` interface cleanup); tree clean at commit.
+
 ## USER DIRECTIVE (2026-08-04, recorded from the user's interactive session): the §6 rung-3 send-out dispatcher is this lane's next bounded step
 
 - **Directive:** the first bounded step of the next animation session is
