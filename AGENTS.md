@@ -24,11 +24,12 @@ cap (`--help` lists the flags).
 **Supervised alternative:** **`./run-supervisor.sh`** runs the two-level flow:
 a supervisor plans one increment at a time, delegates it to a capped
 disposable worker via `tools/run-subagent.sh`, and verifies the result between
-steps. Use `./run-supervisor.sh --hybrid` for a Claude Fable supervisor
-(interactive sessions are available through Claude Remote Control) routing
-each step to an appropriate Codex Terra, Luna, or Sol worker (the supervisor
-guides carry the routing rubric); it otherwise follows
-the same supervised contract. Configuration options live in the launchers
+steps. Select the two roles independently: `-S` / `--supervisor` accepts
+Claude or Codex, while `-s` / `--sub-agent` accepts Claude, Codex, or
+DeepSeek. Omitting the sub-agent makes it follow the supervisor; DeepSeek is
+not currently a valid supervisor. Codex workers use the Terra/Luna/Sol routing
+rubric in the supervisor guide, while DeepSeek workers are fixed at V4 Flash
+through headless OpenCode. Configuration options live in the launchers
 (`--help` lists them). If your prompt says you're a bounded worker session,
 you are one of those workers: this guide applies to you in full, plus the step
 brief in your prompt — and `SUPERVISOR.md` is *not* for you. **No agent

@@ -4,192 +4,153 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 908 — [supervisor wind-down, 2026-08-04 ~02:50] Session close: terminal-seam WIN+LOSS both landed, typeref program CLOSED (census 0), #72 burned 80→48, day-audit clean; final union green
+## 914 — [supervisor wind-down, 2026-08-04 ~11:00, user-requested early close] R3+R4 landed: #72 REACHABLE 10→1 (batch 8, 9 ids), #73 LOSS window to cursor-only residuals + WIN ground truth banked; 7-commit animation fold; final union verification in flight
 
-- **State:** master `630bf3dc` (animation fold merge). Final independent
-  full `npm test`: **700 files / 6,786 passed / 1 skipped, 0 failures**;
-  `npm run build` green. Play-preview rebuilt at this commit, serving :5199.
-  No open DEFERRED entries. 13 workers this session (7 main + 6 side),
-  **0 lost** — every launcher exited normally.
-- **Did (headlines):** (1) **Terminal seam:** picked up the parked
-  `wip/terminal-seam-increment-i`, landed increments (i)+(ii) WIN side
-  (entry 901), then scouted (entry: loss ground-truth doc + twice-identical
-  fixture) and landed the **LOSS/DREW half same session** (entry 906,
-  `VARIOUS` 19/20 registered), plus the BS_ATTACKER mapping corrective
-  (entry 907). Both battle endings now run their real scripts with resolved
-  trainer text; remainder consolidated as **ISSUES #73** (renderer/increment
-  (iii) + win-window oracle coverage). (2) **Typeref retirement program
-  CLOSED:** slices 5/6/7a/7b landed on a stacked side-lane ladder, census
-  **67→0** (program total 144→0), slice-8 audit ran supervisor-side clean;
-  recorded in ISSUES #39 + design-doc header. (3) **ISSUES #72:** batches
-  5/6/7 + the 3 trainer ids — census UNRESOLVED **80→48**, REACHABLE
-  **39→10**; new plumbing landed: `battleTextBuff1Type`/`monNickBattler`;
-  CANCELER_TORMENTED premise **corrected** (real Torment = selection-time
-  rejection, subsystem tracked in #72's note; triage-doc citations fixed);
-  `Cmd_end3`/`call-current` resumption gap documented (blocks
-  SXWHIPPEDUPSANDSTORM + Drizzle/Drought full-turn switch-in tests).
-  (4) **Read-only day-audit** over all four surfaces: 0 functional defects,
-  2 record gaps (both folded into #73). (5) Two animation folds (orient:
-  none needed; wind-down: 11 commits, back-anim acceptances). PAPERCUTS +1
-  (forced-switch party-menu cursor). Oracle freshness FAIL at orient was the
-  documented docs-only false positive (single `_template` harness commit) —
-  no restart.
-- **Next:** ISSUES #73 item 2 (win/loss presentation phase incl. generic
-  trainer slide-in — next headline candidate; closes item 3's oracle window
-  with it). #72 batch 8: `SAFEGUARDEXPIRED`/`TOOKATTACK` cheapest, then the
-  end3 resumption gap as a dedicated step. #71 Slice D still gated on the
-  animation lane's rung-3 dispatcher (not landed as of 02:30). Hard trio /
-  `SXBLOCKSY2` / `TOOKFOE`+`LOSTPPGRUDGE` tryfaintmon / `MAGNITUDESTRENGTH`
-  RNG-field remain the #72 tail.
-- **Notes:** the animation supervisor was live until ~02:00 (its nested
-  worker worktree may persist under `.worktrees/animation-main/` — theirs to
-  clean). Merge discipline held all session: no master merges while a
-  main-lane worker was live; side ladder stacked 3 deep then folded in two
-  merges. All my worker worktrees/branches removed; `play-preview` +
-  `animation-main` worktrees are permanent.
-
----
-## 907 — [bounded MAIN worker, 2026-08-04 ~02:30] Corrective: fixed the backwards BS_ATTACKER trainer-slide-in mapping entry 906 flagged
-
-- **State:** master `0fd3367d`. Full `npm test` green (**688 files / 6,727
-  passed / 1 skipped**, 0 failures), `npm run build` green,
-  `compare:differential -- battle-command-generated-off.json --base bb39b434
-  --summary`: **PASS — 128/128 byte-identical** (confirms zero visible
-  change, as expected — no renderer consumes this field yet).
-- **Did:** Fixed entry 906's flagged-but-unfixed bug: source-verified both
-  `Cmd_trainerslidein`/`Cmd_trainerslideout` (`battle_script_commands.c:
-  5301-5308,10319-10326`) — both do `gActiveBattler =
-  GetBattlerAtPosition(gBattlescriptCurrInstr[1])`, no hardcoding, the
-  compiled operand byte genuinely selects the position (confirmed
-  `resolveBattlerAtPosition`/`resolveSingleBattlePosition` is this opcode's
-  *only* call site, `battleScriptSourceCommands.ts`'s
-  `emitTrainerSlideControllerEvent`). `BS_ATTACKER`
-  (`battle_script_commands.h:305`) compiles to **1**, matching
-  `B_POSITION_OPPONENT_LEFT` (`include/constants/battle.h:29`, also 1) — NOT
-  `B_POSITION_PLAYER_LEFT` (`battle.h:28`, value 0) as the prior mapping and
-  its comment both incorrectly asserted. So `trainerslidein BS_ATTACKER`
-  (both the WIN script `BattleScript_FrontierTrainerBattleWon_LoseTexts` and
-  the LOSS/DREW script `BattleScript_LocalBattleLostPrintTrainersWinText`,
-  `data/battle_scripts_1.s:2927,2966`) always resolves the **opponent**'s
-  battler (1), matching the oracle trace where DESTIN visibly slides in on
-  both outcomes. Fixed `resolveSingleBattlePosition`
-  (`battleScriptBattlerPositions.ts`) — moved `BS_ATTACKER` to the same
-  value (1) as `B_POSITION_OPPONENT_LEFT`, rewrote the module's doc comment
-  with the corrected citations. Audited every other entry in
-  `SINGLE_BATTLE_POSITIONS` against the header (only `B_POSITION_PLAYER_LEFT`
-  and `B_POSITION_OPPONENT_LEFT` remain, both already correct raw-position
-  mappings; `BS_FAINTED` is never reached in Factory singles — its only
-  script use is behind a `BATTLE_TYPE_TWO_OPPONENTS` branch Factory never
-  takes — so it correctly stays unmapped/null, unchanged). Blast radius
-  (`rg` for `resolveBattlerAtPosition`/`resolveSingleBattlePosition`/
-  `trainer-slide-in` across `src/`+`tests/`): only two call sites actually
-  exercise `BS_ATTACKER` through this resolver and needed flips — both
-  red-verified (stash/revert → old-mapping pins pass, new pins fail;
-  restore → new pins pass, confirmed via actual test runs, not inferred):
-  (1) `battleScriptFaintedActionsOrchestration.test.ts`'s own hand-rolled
-  `resolveBattlerAtPosition` port mock (doesn't import the production
-  function) — fixed the mock plus its 3 pins (WIN kill-shot, LOSS
-  compactSequence, DREW) from `battler: 0`/`"slide-in:0"` to `1`; (2)
-  `factoryBattleScriptFullTurnDecision.test.ts`'s staged-LOSS
-  `compactSequence` pin, which routes through the real production
-  `resolveSingleBattlePosition` via `factoryBattleScriptFullTurnDecision.ts`
-  — flipped `"slide-in:0"` to `"slide-in:1"`. Every other file importing
-  `resolveSingleBattlePosition` (`factoryBattleStart.ts`,
-  `factoryBattleScriptDecision.ts`, `factoryBattleScriptTerminalDecision.ts`,
-  `battleEndTurnOrchestration.test.ts`, `battleScriptFutureAttack.test.ts`)
-  either never exercises `BS_ATTACKER` through it or has no matching
-  `trainer-slide-in` battler pin — confirmed unaffected by running their
-  suites green. `battleScriptSwitchinOpcode.ts`'s VARIOUS case 19/20 comment
-  (a *different* opcode, `Cmd_various`, which genuinely discards its
-  `BS_ATTACKER` operand and hardcodes `gActiveBattler`) makes no numeric
-  claim about `BS_ATTACKER`'s value, so it needed no correction.
-- **Next:** #73 item 1 (increment (iii), the win/loss trainer-slide-in
-  presentation phase, now backed by source-true event data). #73 item 2
-  (oracle-level pixel coverage, both outcomes). #72's remaining REACHABLE-10
-  list (`STRINGID_PKMNHUNGONWITHX` next by rank). The `Cmd_end3`/
-  `call-current` resumption gap (`SXWHIPPEDUPSANDSTORM`). #71 Slice D (gated
-  on the animation lane's rung-3 dispatcher).
-- **Notes:** No PAPERCUT. Scope stayed exactly the corrective as briefed —
-  resolver + its comments + the pins it drives, nothing in `battleScene.ts`
-  or any other #72/#73 item touched. `npm test`/`npm run build`/the
-  differential all ran to real foreground completion.
+- **State:** master at the animation fold merge. Session totals: 8 workers
+  (4 main + 4 side), 0 lost. Wind-down was user-requested (~10:05, "no
+  rush") — both live R4 workers were allowed to finish, nothing killed.
+  Final independent full `npm test` + `npm run build` result recorded in
+  the wind-down commit message (running at entry-write time; the commit
+  only lands if green). No open DEFERRED entries.
+- **Did (this supervisor round):** (1) merged side R4 (WIN-side terminal
+  fixture `win-terminal-explosion-dusclops-off.json`, twice-identical
+  241/241, + `docs/terminal-seam-win-window-ground-truth.md` — key finding:
+  the WIN script never recalls the opponent mon, and the terminal needs
+  three serial dismiss presses); (2) **corrected entry 913's inverted
+  compare fraction** (worker wrote "235/236 matched"; honest number is
+  1/236 fully matched with all other frames reduced to cursor-glyph-scale
+  residuals — see 913's corrected body and ISSUES #73 for the
+  supervisor-measured class distribution incl. the 3-frame swap-edge
+  micro-class the worker's itemization missed); (3) folded `animation-main`
+  (7 commits: back shake-flash-yellow + JoltRight + red/green/blue
+  shake-glow selector acceptances); (4) reran the LOSS compare post-fold
+  myself (same residual classes — fold did not disturb Scene-OFF rendering).
+- **Next (recommended order):** #73: wait-cursor source read (does the ROM
+  terminal-quote printer ever spawn the cursor task?), the 3-frame
+  swap-edge micro-class, then the WIN-side compare (wiring pattern
+  established, fixture banked). #72: `STRINGID_MAGNITUDESTRENGTH` RNG-roll
+  capture plumbing (last REACHABLE id). #71 Slice D: still gated on the
+  animation lane's rung-3 dispatcher (not landed as of 10:40). Torment
+  selection-time-rejection subsystem still needs supervisor re-scoping
+  (#72 note).
+- **Addendum (2026-08-04 evening, user directive via interactive session):**
+  the animation lane's next bounded step is now the rung-3 send-out
+  dispatcher (directive recorded as `ANIMATION_PROGRESS.md`'s top entry on
+  `animation-main`, commit `420a7578`; ISSUES #71 updated in the same
+  note). `animation-main` is 7 commits ahead of master (6 Steel Wing
+  partial + the directive) — fold at orient per protocol. #71 Slice D
+  unblocks once the dispatcher lands. On the Magnitude "Next" item above:
+  the kernel already captures the roll (`rulesContext.
+  battleTextBuff1ByteNumber`, `battleScriptRankedBatch1Opcode.ts:130`) —
+  the remaining work is the presentation-side resolver entry (the
+  HITXTIMES pattern, see `battleResolutionPresentation.ts:1648`'s own
+  comment), smaller than 912's "new plumbing" phrasing suggests.
+- **Notes:** main R1's launcher tee-pipeline broke mid-run producing a
+  spurious exit-1 while launcher+worker were healthy (diagnosed via
+  process-tree + JSONL growth; zero kills; later launches redirect with
+  `>` instead of piping). One discipline slip acknowledged: a docs-only
+  side merge landed while a main worker was live (no harm; rule re-affirmed).
+  The animation supervisor was live concurrently earlier (~07:40-08:45);
+  its nested worker worktree under `.worktrees/animation-main/` is theirs
+  to clean. Play-preview worktree still serves the pre-session build
+  (630bf3dc) on :5199 — rebuild it next session if the user wants to play
+  today's landings. **USER-OWNED, do not clean or merge:**
+  `.worktrees/deepseek-worker` (branch `codex/deepseek-worker`, 2 commits
+  of launcher/profile work: DeepSeek V4 Flash worker profile + independent
+  supervisor/sub-agent selection) appeared during this session — it is the
+  user's own in-flight harness work, not a stale lane worktree.
 
 ---
-## 906 — [bounded MAIN worker, 2026-08-04 ~02:00] terminal-seam increment (i) LOSS half landed: LOST/DREW run BattleScript_LocalBattleLost as a second VM pass
+## 913 — [bounded MAIN worker, 2026-08-04 ~10:30; numbers supervisor-corrected] #73 LOSS terminal window: all three diagnosed classes fixed; only small cursor-glyph-scale residuals remain (1/236 frames fully match, was 0/236)
 
-- **State:** master `1eb9d1e6`. Full `npm test` green (**688 files / 6,727
-  passed / 1 skipped**, 0 failures), `npm run build` green,
-  `compare:differential -- battle-command-generated-off.json --base 45291fc4
-  --summary`: **PASS — 128/128 byte-identical**.
-- **Did:** ISSUES #73 item 1 (loss-side implementation), mirroring the
-  win-side shape exactly (`runPostBattleOutcomeScript` in
-  `battleScriptFaintedActionsOrchestration.ts`, dispatch already in
-  `factoryBattleScriptTerminalDecision.ts`), fresh ground truth
-  `docs/terminal-seam-loss-path-ground-truth.md`. **DREW routing confirmed
-  against source first:** `battle_main.c`'s `sEndTurnFuncsTable` (`:557-559`)
-  maps both `B_OUTCOME_LOST` and `B_OUTCOME_DREW` to the SAME
-  `HandleEndTurn_BattleLost`, which for non-link Factory sets
-  `gBattlescriptCurrInstr = BattleScript_LocalBattleLost` regardless of which
-  — no separate draw script exists (the script's own `CheckDomeDrew` label
-  only special-cases DREW on the `BATTLE_TYPE_DOME` branch, which Factory
-  never takes). `runPostBattleOutcomeScript` now dispatches on
-  `outcome !== WON` rather than `outcome === WON` only. Registered `VARIOUS`
-  cases 19/20 (`RETURN_OPPONENT_MON1`/`MON2`) in `Cmd_various`
-  (`battleScriptSwitchinOpcode.ts`), ported source-exactly from
-  `battle_script_commands.c:6455-6470`: case 19 hardcodes battler 1
-  (ignoring the `BS_ATTACKER` selector operand the C switch-case body also
-  discards) and emits a `set-battler-sprite-visibility` (`invisible: true`)
-  recall event when that battler is alive, marking the scheduler pending so
-  the script's own following `waitstate` genuinely blocks on it (the first
-  `various` case in this file that actually dispatches to the controller —
-  every other case is pure state). Case 20 confirmed a real source no-op for
-  `battlersCount <= 3` (Factory singles never exceeds 2), not just inferred
-  from behavior. Resolved `STRINGID_TRAINER1WINTEXT` in `messageLines` from
-  `opponentTrainer.speechWin`, the exact hand-built-lines shape
-  `STRINGID_TRAINER1LOSETEXT` already uses (`speechWin` added as an
-  *optional* field on `BattleResolutionOpponentTrainer` so the many
-  pre-existing WIN-only test fixtures didn't need a dummy value). Two new
-  `JUMPIFWORD` comparands registered (`BATTLE_TYPE_DOME`,
-  `BATTLE_TYPE_TOWER_LINK_MULTI`) for the loss script's own early branches,
-  same "register the always-false value" idiom the existing
-  ARENA/TWO_OPPONENTS/PYRAMID entries use. Tests (all red-verified via `git
-  stash` of the touched `src/engine/*.ts` files, each threw the exact
-  pre-fix error): a LOSS kill-shot event-sequence pin and a DREW-routing pin
-  in `battleScriptFaintedActionsOrchestration.test.ts` (mirroring the
-  existing WIN pin's exact shape); a staged kill-shot LOSS through
-  `submitFactoryFullTurnDecision` in
-  `factoryBattleScriptFullTurnDecision.test.ts` (mirroring the WIN
-  "mid-turn KO" pin, roles swapped, same STRENGTH/200atk/50def numbers so
-  the 204-damage roll is already-proven, not newly derived); new
-  `tests/presentationStringTerminalSeamLoss.test.ts` mirroring
-  `presentationStringTerminalSeamWin.test.ts`'s exact idiom, pinning
-  DESTIN's real `speechWin` ("I AM ABOUT TO" / "OVERHEAT", pixel-confirmed
-  in the loss doc) plus a JENSON generalization pin. Win-side pins verified
-  untouched-green throughout. RNG: no new draws on either path (loss doc §4
-  independently oracle-verified this) — every new test asserts `rng.calls`
-  is unchanged. Census: **49→48 UNRESOLVED** (exact −1,
-  `STRINGID_TRAINER1WINTEXT`). ISSUES #73 item 1 trimmed to done (deleted,
-  entry retitled, items 2/3 renumbered 1/2, both widened to note they now
-  cover the loss window too).
-- **Surprise found, not fixed (flagged, out of scope):** while tracing
-  `trainerslidein BS_ATTACKER`'s battler resolution to confirm the LOSS
-  script's event sequence, direct source reading showed
-  `battleScriptBattlerPositions.ts`'s `resolveSingleBattlePosition` mapping
-  was backwards (`BS_ATTACKER` mapped to battler 0/player instead of the
-  real battler 1/opponent). **Fixed in entry 907**, the very next step.
-- **Next:** #73 item 1 (increment (iii), the win/loss trainer-slide-in
-  presentation phase, now backed by source-true event data per entry 907).
-  #73 item 2 (oracle-level pixel coverage, both outcomes). #72's remaining
-  REACHABLE-10 list (`STRINGID_PKMNHUNGONWITHX` next by rank). The
-  `Cmd_end3`/`call-current` resumption gap (`SXWHIPPEDUPSANDSTORM`). #71
-  Slice D (gated on the animation lane's rung-3 dispatcher).
-- **Notes:** No PAPERCUT — the `git stash`/red-verify cycle and the
-  `submitFactoryFullTurnDecision` event-shape discovery (top-level `events`
-  are `{sequence, payload, provenance}`-wrapped, not flat — a one-line fix
-  once found) cost some exploration time but nothing structural. `npm test`
-  auto-backgrounded on its own past the Bash tool's foreground timeout
-  (known repo-wide issue, PROGRESS 905's own note); stopped the stray
-  background task and re-ran to a real foreground completion per this
-  step's execution discipline, same as that prior session.
+- **State:** master `c8cc6cd4` + this step's uncommitted-until-now docs/tools
+  changes. Full `npm test` green (**703 files / 6,801 passed / 1 skipped**,
+  0 failures), `npm run build` green, `compare:differential --
+  battle-command-generated-off.json --base e62cc253 --summary`: **PASS —
+  128/128 byte-identical**.
+- **Did:** eliminated all three mismatch classes the morning's compare
+  wiring (`29e5cb3d`) diagnosed at a 0/236 baseline. (A) **genuine render
+  gap, fixed in `src`** (commit `c8cc6cd4`): recall
+  (`VARIOUS_RETURN_OPPONENT_MON1/2` → real `CONTROLLER_RETURNMONTOBALL`,
+  `battle_controller_opponent.c`'s `OpponentHandleReturnMonToBall`/
+  `FreeMonSpriteAfterSwitchOutAnim`) now clears the healthbox with the
+  sprite, generically distinguished from the unrelated
+  `CONTROLLER_SPRITEINVISIBILITY` (Dig/Fly) receipt via the emitting
+  instruction's own opcode name (`"sprite-visibility"` command's new
+  `recall` flag) — red-verified, full details in the commit. (B)+(C)
+  **scaffold artifacts, fixed in `tools/compare/appTrace.ts` only**: the
+  antecedent "MURKROW fainted!" box and the player's all-fainted empty field
+  are the same real event (MURKROW's own Explosion self-KO), now replayed
+  through the real `health-bar-update -> hp-change -> faint-animation ->
+  STRINGID_ATTACKERFAINTED` chain ahead of the recall/slide/win-text events,
+  hand-set to `commandIndex: 4` outside real ticks. Result: `npm run compare
+  -- loss-terminal-window-off --summary`: **1/236 frames fully matched**
+  (frame 3231, both times — the worker's original entry inverted this as
+  "235/236 matched"; supervisor-corrected), with the other 235 frames
+  reduced from the ~7,700-8,300px baseline diffs to the small residual
+  classes below, byte-identical across two independent runs (and a third
+  supervisor rerun post-fold, run-2026-08-04-17-32-22Z-58459: 212 frames
+  exactly 37px static cursor glyph, ~20 frames 56-139px glyph animation,
+  and 3 frames 3034-3036 at ~587-589px — the antecedent→quote text-swap
+  edge, a distinct micro-class the original entry's "only the small fixed
+  region" claim missed).
+- **Next:** one remaining class is itemized in ISSUES #73, not fixed: a
+  generic wait-cursor (heart glyph, `battleScene.ts:34009-34017`) draws for
+  every `advance: "button"` message once ready, but the oracle shows none at
+  all for the `STRINGID_TRAINER1WINTEXT` quote across the full window
+  (including ~174 frames after fully typed) — likely a distinct real
+  printer path for terminal quotes vs. ordinary battle messages
+  (`STRINGID_TARGETFAINTED` etc.), unconfirmed pending a source read. LOSS
+  half of #73 is otherwise closed. WIN half stays open (side lane owns its
+  ground-truth staging concurrently) and will likely hit the same
+  wait-cursor finding.
+- **Notes:** no `tools/battle-lab/` edits, no WIN-side ground-truth doc, no
+  kernel machine file edits, no #72 work — all per this step's brief.
+  `npm test`'s ~10-minute wall time both runs this session auto-backgrounded
+  past the Bash tool's 120s default (known PAPERCUT class); recovered via
+  `TaskOutput` polling to real completion each time, per entry 912's
+  precedent.
+
+---
+## 912 — [bounded MAIN worker, 2026-08-04 ~10:20] #72 batch 8: full REACHABLE-10 hard tail landed (9 ids), only STRINGID_MAGNITUDESTRENGTH remains
+
+- **State:** master `cf6579e9`. Full `npm test` green (**703 files /
+  6,801 passed / 1 skipped**, 0 failures), `npm run build` green.
+- **Did:** followed `docs/issue72-hard-tail-scout.md`'s per-id predictions
+  (committed this morning) to land the entire REACHABLE-10 list except
+  `STRINGID_MAGNITUDESTRENGTH` (explicitly out of scope — new RNG-roll
+  capture plumbing): `STRINGID_PKMNPROTECTEDBY` (Sturdy vs. OHKO, confirmed
+  deterministic not RNG-gated), `STRINGID_PKMNSXWHIPPEDUPSANDSTORM` (Sand
+  Stream, reused the end3-unblocked Tyranitar switch-in staging),
+  `STRINGID_PKMNSXBLOCKSY2` (Perish Song vs. Soundproof), `STRINGID_PKMNTOOKFOE`
+  + `STRINGID_PKMNLOSTPPGRUDGE` (Destiny Bond + Grudge, real 2-turn
+  cast-then-counter-kill repros, player-faster speed order), `STRINGID_PKMNREGAINEDHEALTH`
+  (Recover's self-heal, the cheapest of 3 labels — full `sourceLabelOf`
+  3-label dispatch implemented per scout §3d, only the Recover branch tested),
+  `STRINGID_PKMNHUNGONWITHX` (Focus Band, scout's `rngSeed: 62` staging
+  reproduced on the first try), `STRINGID_PKMNSAFEGUARDEXPIRED` (real 5-turn
+  expiry repro, not the cheaper direct-rulesContext-surgery shortcut),
+  `STRINGID_PKMNTOOKATTACK` (Future Sight, real 3-turn delayed-hit repro).
+  All 9 red-verified together via `git stash -- src/engine/battleResolutionPresentation.ts
+  src/engine/factoryBattleScriptFullTurnDecision.ts` (`tests/presentationStringIssue72Batch8.test.ts`,
+  9 `it`s, every one threw the exact completeness-guard error pre-fix). One
+  scout divergence found and corrected: §1d's Grudge staging prose had the
+  caster's own move losing PP; both real source
+  (`battle_script_commands.c:3016-3030`) and the scout's own §1c code sample
+  agree it's the *killing* battler's own move — landed per the correct
+  mechanism. Census: **48→39 UNRESOLVED** (exact −9, arithmetic-checked).
+  ISSUES #72 REACHABLE trimmed to **1** (`STRINGID_MAGNITUDESTRENGTH` only).
+- **Next:** `STRINGID_MAGNITUDESTRENGTH` needs new plumbing (Magnitude's 2-10
+  `Random()` roll isn't captured anywhere in `rulesContext` yet) — the last
+  #72 REACHABLE id, a bounded standalone follow-up. #73 rung B (oracle-pixel
+  coverage over the terminal-seam presentation) remains open per entry 911.
+- **Notes:** no `tools/compare/**`, kernel machine file, or `battleScene.ts`/
+  `core.ts`/`postwin.ts` edits this step (out of scope per brief); no guard
+  softening, no new opcodes. `npm test`'s ~10.7-minute wall time this session
+  reflects heavy concurrent CPU contention from the supervisor/animation
+  sessions also running — the Bash tool auto-backgrounded the run past its
+  120s default timeout as in the known PAPERCUT class; recovered by polling
+  the task's own output file to a real completion rather than treating the
+  auto-background as data loss.
 
 ---

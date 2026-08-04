@@ -114,6 +114,14 @@ animation lane's rung-3 dispatcher (`frontSendOutFrameAtTick` + OAM/anim-frame
 side, §5 of the consumer-map doc) stays open and is a prerequisite for Slice
 D only.
 
+**User directive (2026-08-04, interactive session):** the animation lane has
+been directed to build the rung-3 dispatcher as its **next bounded step**
+(recorded as the top entry of `ANIMATION_PROGRESS.md` on `animation-main`,
+commit `420a7578`). Main-lane sequencing: fold `animation-main` at orient as
+usual; once the dispatcher has landed, Slice D is unblocked and should be
+briefed against the §5 contract. Note `animation-main` also carries an
+unfolded Steel Wing partial (6 commits ahead of master as of this note).
+
 ## #72 — battleStringResolver completeness-guard gaps: 40 REACHABLE printstring STRINGIDs need the Taunt-pair fix idiom
 
 **Symptom:** the same-day user-reported crash (2026-08-03, opponent MURKROW's
@@ -375,54 +383,56 @@ rules-context capture was already pinned directly by
 `tests/battleScriptSwitchinOpcode.test.ts`). Census: **54→49 UNRESOLVED**
 (exact −5). ISSUES #72 REACHABLE trimmed to **10** (15−5, arithmetic-checked).
 
-**`STRINGID_PKMNSXWHIPPEDUPSANDSTORM` investigated, not landed — genuinely
-new plumbing found, not just staging cost.** The switch-in repro (Tyranitar,
-same `trainerBenchOverride` shape as batch 2's Intimidate loop) reaches
-`BattleScript_SandstreamActivates` and its `STRINGID_PKMNSXWHIPPEDUPSANDSTORM`
-print fires correctly, but the script then halts at its own `end3`
-(`playanimation BS_BATTLER_0, B_ANIM_SANDSTORM_CONTINUES` / `call
-BattleScript_WeatherFormChanges` / `end3`), surfacing as a `machine-barrier`
-(`opcodeName: "B_SCR_OP_END3"`) instead of resuming the switch-in flow —
-`battleScriptSwitchinOpcode.ts`'s `callSwitchinScript` enters the ability
-script via a real interpreter `"call-current"` transition (unlike Trace/
-Intimidate's own `switchineffects` branches, which only flip a status bit and
-defer actual script execution to `battleScriptFaintedActionsOrchestration.ts`'s
-separate entry-hook resolution, never touching the interpreter's own call/
-end3 machinery at all), and nothing drives the machine past that `end3` back
-into the switch-in's own continuation. `battleScriptCallbackStack.ts`'s own
-header confirms this is a known, currently-`"UNWIRED DESIGN-SCOUT PROTOTYPE"`
-gap (`docs/end3-design.md`) — `Cmd_end3`/`BattleScriptPushCursorAndCallback`
-push/pop control flow is designed but not wired into the live full-turn
-reducer. Drizzle/Drought (`BattleScript_DrizzleActivates`/`DroughtActivates`)
-share the exact same `playanimation`+`call`+`end3` shape and would likely hit
-the identical wall if exercised through a full-turn switch-in test (not
-confirmed here — no existing test drives either through completion via
-`callSwitchinScript`). A small unrelated sub-barrier was found and fixed en
-route and then reverted since it's moot without landing the id: `Cmd_
-playanimation`'s `B_ANIM_SANDSTORM_CONTINUES` case is unregistered in
-`battleScriptStatbuffchangeOpcode.ts`'s `PLAYANIMATION_ANIM_TYPES` map
-(RAIN_CONTINUES/SUN_CONTINUES are registered, SANDSTORM_CONTINUES is not) —
-adding `["B_ANIM_SANDSTORM_CONTINUES", { argExpression: "NULL", animationId:
-"SANDSTORM_CONTINUES", readsAnimArg1: false }]` (same shape as its two
-siblings) is a one-line fix, but doesn't unblock the id alone; the real fix is
-wiring `end3`'s push/pop resumption for `call-current`-entered ability
-scripts, which is bigger than this step's remaining budget and plausibly
-worth its own step (would also unblock Drizzle/Drought's own full-turn
-switch-in testability, not just Sand Stream).
+**Batch 8 landed** (`tests/presentationStringIssue72Batch8.test.ts`, all 9
+`it`s red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
+src/engine/factoryBattleScriptFullTurnDecision.ts`): the full REACHABLE-10
+hard tail minus `STRINGID_MAGNITUDESTRENGTH`, following
+`docs/issue72-hard-tail-scout.md`'s predictions (all confirmed correct except
+one staging-prose slip noted below). `STRINGID_PKMNPROTECTEDBY` (Sturdy vs.
+OHKO — scout §4a's correction confirmed: `Cmd_tryKO`'s Sturdy check
+short-circuits before any roll, deterministic, real Guillotine-vs-Sturdy
+staging). `STRINGID_PKMNSXWHIPPEDUPSANDSTORM` (Sand Stream — kernel-unblocked
+end3 resumption from PROGRESS 910, reused the Tyranitar switch-in staging,
+`scriptingBattler`+ability shape identical to `STRINGID_PKMNPREVENTSSTATLOSSWITH`).
+`STRINGID_PKMNSXBLOCKSY2` (Perish Song vs. Soundproof — scout §2 confirmed,
+`scriptingBattler` sufficient, no new payload field, single-turn staging).
+`STRINGID_PKMNTOOKFOE` + `STRINGID_PKMNLOSTPPGRUDGE` (Destiny Bond + Grudge —
+scout §1b's BS_TARGET-only theorem confirmed by a real 2-turn cast-then-
+counter-kill repro each, speed order player-faster per §1d's gotcha; **one
+scout divergence**: §1d's Grudge staging prose said `B_BUFF1`/`B_ATK_NAME_WITH_PREFIX`
+resolve to the Grudge *caster's* own name/move, but both the real source
+(`battle_script_commands.c:3016-3030`, `PREPARE_MOVE_BUFFER(gBattleTextBuff1,
+gBattleMons[gBattlerAttacker].moves[moveIndex])`) and the scout's own §1c
+code sample agree it's the *killing* battler's own move/name — landed per
+the correct mechanism, i.e. the killer's own move loses its PP). `STRINGID_PKMNREGAINEDHEALTH`
+(landed via the cheapest label, scout §3a's Recover self-heal — the 3-label
+`sourceLabelOf` dispatch from §3d is implemented in full since it's one
+function, but only the Recover branch has a red-verified test; Present's
+sub-path and `WishComesTrue`'s second printstring remain untested
+dispositions per §3e, not reopened as separate REACHABLE entries since the
+guard is satisfied for the id). `STRINGID_PKMNHUNGONWITHX` (Focus Band —
+scout §4b's `rngSeed: 62` staging reproduced standalone on the first try, no
+re-derivation needed; turned out to need zero new substitution plumbing since
+`heldItems[defender]` already holds the never-removed item, the same idiom
+`STRINGID_PKMNSTOLEITEM` established). `STRINGID_PKMNSAFEGUARDEXPIRED` (real
+5-turn expiry repro: cast turn 1, 4 silent Splash turns, `safeguardTimer`
+5→0 fires `BattleScript_SafeguardEnds` at turn 5's own end-turn tick;
+`{B_ATK_PREFIX3}` resolves through the identical "Ally"/"Foe" text
+`{B_ATK_PREFIX1}` already uses, source confirms — `battle_message.c:2649-2668`,
+distinct string constants, identical literal text). `STRINGID_PKMNTOOKATTACK`
+(Future Sight — real 3-turn delayed-hit repro: cast turn 1, 2 filler turns,
+`futureSightCounter` 3→0 fires `BattleScript_MonTookFutureAttack` at turn 3's
+own end-turn tick; `requireMoveDefender` off the tick's reassigned
+`actionSnapshot.attacker`, `{B_BUFF1}` off `rules.futureSightMove[target]`
+— still holds the cast-time-captured move id, never cleared before this
+print). Census: **48→39 UNRESOLVED** (exact −9, arithmetic-checked). ISSUES
+#72 REACHABLE trimmed to **1** (10−9).
 
-**REACHABLE (10), ordered by carrier-weight proxy for likely-hit-first —
-name a batch, use the Taunt-pair idiom** (`messageId === "STRINGID_X"` branch
-in `messageLines`, `requireMoveDefender`/`actionSnapshot`-sourced battler,
-staged full-turn repro test, red-verify via `git stash`):
-`STRINGID_PKMNHUNGONWITHX`,
-`STRINGID_PKMNREGAINEDHEALTH`,
-`STRINGID_PKMNPROTECTEDBY`,
-`STRINGID_PKMNSXBLOCKSY2`,
-`STRINGID_PKMNSXWHIPPEDUPSANDSTORM`, `STRINGID_PKMNTOOKFOE`,
-`STRINGID_PKMNSAFEGUARDEXPIRED`,
-`STRINGID_PKMNTOOKATTACK`,
-`STRINGID_MAGNITUDESTRENGTH`,
-`STRINGID_PKMNLOSTPPGRUDGE`.
+**REACHABLE (1):** `STRINGID_MAGNITUDESTRENGTH` (Magnitude's own damage-tier
+name — needs a new RNG-roll capture field; Magnitude's 2-10 `Random()` roll
+is not stored anywhere in `rulesContext` yet, genuine new plumbing, out of
+scope for the batch idiom used above — deliberately not started per this
+step's brief).
 
 **MANUAL — all settled 2026-08-03 (side-lane settlement pass; full evidence
 in the triage doc's "MANUAL settlement" appendix):**
@@ -498,44 +508,141 @@ change (deterministic, re-derives from the tree). Full 107-id list incl. all
 37 DEAD gates + emitting script label(s) + trigger/carrier evidence in
 `docs/issue72-reachability-triage.md`.
 
-## #73 — Terminal-seam remainder: increment (iii) presentation, and the win/loss window's oracle-coverage gap
+## #73 — Terminal-seam remainder: the win/loss window's oracle-coverage gap (rung B)
 
-**Context:** increments (i)+(ii) landed 2026-08-03 (PROGRESS 901) for the WIN
-path: a player win on the generic route runs `BattleScript_FrontierTrainerBattleWon`
-through a real second VM run and emits resolved
-`STRINGID_PLAYERDEFEATEDTRAINER1`/`STRINGID_TRAINER1LOSETEXT` message
-commands. Increment (i)'s LOSS half landed 2026-08-04 (PROGRESS 906): outcomes
-`LOST`/`DREW` now run `BattleScript_LocalBattleLost` through the same
-second-VM-run shape (`VARIOUS` cases 19/20 registered in `Cmd_various`,
-`STRINGID_TRAINER1WINTEXT` resolved from `speeches.speechWin`) — ground truth
-`docs/terminal-seam-loss-path-ground-truth.md`. The post-loss field routing
-(Lobby challenge-over sequence, not the pre-battle counter room) was already
-correct pre-existing behavior (`factoryTerminalPresentation.ts`'s `roundLost`
-path), not part of that increment. Two bounded remainders, in recommended
-order:
+**Context:** increments (i)+(ii) landed 2026-08-03/04 (PROGRESS 901/906) for
+both outcomes: WIN runs `BattleScript_FrontierTrainerBattleWon`, LOSS/DREW run
+`BattleScript_LocalBattleLost`, each as a real second VM pass emitting
+resolved message/trainer-slide events. Increment (iii) — the presentation
+phase itself — landed 2026-08-04 (PROGRESS 909): `projectBattleResolutionCommands`
+(`battleResolutionPresentation.ts`) now has a generic `"trainer-slide"`
+command case (keyed off `trainer-slide-in`/`-out` events and the already-
+threaded `opponentTrainer`, not DESTIN-hardcoded), the three terminal
+STRINGIDs are real dismissible message boxes (`TERMINAL_SEAM_BUTTON_MESSAGE_IDS`,
+reusing the same button-advance/dismiss machinery `STRINGID_TARGETFAINTED`
+already uses), and `battleResolutionPresentationRender.ts`/`battleScene.ts`'s
+generic `renderBattleResolutionSceneOffView` draw the trainer sliding in
+(ported `SpriteCB_TrainerSlideIn` settle math, `TRAINER_SLIDE_TIMING`)
+before the existing `terminal-handoff` lifecycle phase hands off to
+`finishBattle`/`postwin`/`factoryTerminal` exactly as before. Tier-1-pinned
+(`tests/presentationTerminalSeamTrainerSlide.test.ts`, DESTIN WIN + JENSON
+LOSS, full command/phase sequence including the settle/dismiss timings) and
+`compare:differential` stayed 128/128 byte-identical.
 
-1. **Increment (iii) — the win/loss presentation phase.** The
-   `trainer-slide-in`/`trainer-slide-out` events are emitted but
-   `projectBattleResolutionCommands` (`battleResolutionPresentation.ts`,
-   dispatch ~:2139-2465) has no case for them — they fall through with zero
-   visual (confirmed harmless by the 2026-08-04 read-only audit: no wedge,
-   no crash, just the missing trainer slide-in). No generic trainer-slide
-   renderer exists outside `battleScene.ts`'s canonical one-off. Scope per
-   `docs/terminal-seam-round-flow-scout.md` §3(iii): real dismissible
-   win/loss-text phase before `postwin`/`factoryTerminal` fire, sourcing the
-   already-resolved strings (both outcomes now resolve real text, per the
-   loss-side landing above).
-2. **Oracle-level coverage for the win/loss window.** The 2026-08-04 audit
-   confirmed the (i)+(ii) landing is pinned only by Tier-1 tests plus a
-   differential trace that never reaches a terminal — no emulator-vs-app
-   pixel evidence covers the new win sequence end-to-end; the same is true of
-   the loss sequence landed above (Tier-1 + differential only, no dense
-   oracle window over the new boundary itself — `docs/terminal-seam-loss-path-ground-truth.md`'s
-   own dense trace covers the *pre-existing* engine's behavior, not this
-   engine's new event-driven boundary). This is expected (the window's
-   pixels are incomplete until item 1 lands the slide-in) and should be
-   closed as part of item 1's acceptance: a dense oracle window from the
-   final hit through the quote dismiss, both outcomes.
+**2026-08-04 rung-B session: `TRAINER_SLIDE_TIMING` corrected 53→38,
+pixel-verified; `npm run compare` wiring for either outcome NOT completed.**
+Direct pixel evidence (dense per-tick re-probe of the committed LOSS fixture,
+`tools/battle-lab/loss-terminal-explosion-dusclops-off.json`, frames
+2994-3059, via `bin/oracle lab`) finds the trainer sprite's on-screen
+bounding box first move at tick 3009 and stop moving at tick 3034 — **38**
+ticks after the slide dispatches (opponent-controller command 6→8 at 2996),
+not 53 (the old constant) and not the 61-tick span this issue's prior text
+guessed at (that 61 was the *empty-field-to-text-start* span, which also
+includes an unrelated ~10-tick dispatch/ack gap before the sprite becomes
+visible plus the message's own per-character typing time — not the slide
+alone). The fit is exact, not approximate: `offscreenX2 = 2*(38-age)`
+reproduces the measured leading edge at all 8 sampled ticks from first
+visibility (age 13, x=239) through settle (age 38, x=189). The old 53 was
+independently wrong twice over — never pixel-fit-verified, and its own
+source arithmetic was off (`OpponentHandleTrainerSlide` in
+`reference/pokeemerald/src/battle_controller_opponent.c:1385-1390` creates
+the sprite at `x2=96` stepping `sSpeedX=-2`/callback, i.e. 96/2=48 callbacks
+by that math alone, still not 53). Landed in `src/engine/
+battleResolutionPresentation.ts` (`TRAINER_SLIDE_TIMING`,
+`BattleTrainerSlideTiming`) with the corrected citation in place; Tier-1 pins
+in `tests/presentationTerminalSeamTrainerSlide.test.ts` red-verified against
+the old values (53, `offscreenX2: 106`) before updating to the new ones (38,
+76). Full `npm test` (702 files/6,792 passed/1 skipped) and `npm run build`
+green at this fix; `compare:differential -- battle-command-generated-off.json
+--base a7bbed0b --summary` stayed 128/128.
+
+**2026-08-04 LOSS-half: all three diagnosed classes fixed; small residual
+classes remain (1/236 frames fully match — the original entry inverted this
+as "235/236"; supervisor-corrected).** The compare
+wiring landed that morning (`29e5cb3d`, `tools/compare/appTrace.ts`'s
+`loss-terminal-window-off` stage) at a reproducible 0/236 baseline with
+three diagnosed mismatch classes. This session fixed all three:
+- **(A) genuine render gap, fixed in `src`:** `VARIOUS_RETURN_OPPONENT_MON1/2`'s
+  real controller receipt is `CONTROLLER_RETURNMONTOBALL`
+  (`BtlController_EmitReturnMonToBall`), not `CONTROLLER_SPRITEINVISIBILITY`
+  — `battle_controller_opponent.c`'s `OpponentHandleReturnMonToBall`/
+  `FreeMonSpriteAfterSwitchOutAnim` both call `SetHealthboxSpriteInvisible`
+  alongside destroying the sprite, unlike `OpponentHandleSpriteInvisibility`
+  (`Cmd_moveend`'s Dig/Fly semi-invisible toggle, `Cmd_makevisible`), which
+  never touches the healthbox. Both real ROM commands were modeled as the
+  same kernel event kind (`set-battler-sprite-visibility`); the
+  `"sprite-visibility"` presentation command now carries a `recall` flag
+  distinguishing them, sourced generically from the emitting instruction's
+  own interpreter provenance (`opcodeName === "B_SCR_OP_VARIOUS"`), not any
+  window-specific special case. `battleResolutionPresentationRender.ts` gates
+  `visibility.{player,opponent}.healthbox` on a new `healthboxVisibility` map
+  that only recall transitions touch. Red-verified via
+  `tests/presentationTerminalSeamTrainerSlide.test.ts`'s LOSS case (asserts
+  `{sprite: false, healthbox: false}`; `git stash -- src/engine/
+  battleResolutionPresentation.ts src/engine/battleResolutionPresentationRender.ts`
+  flips it to `{sprite: false, healthbox: true}`, the bug). Existing Dig/Fly
+  pins (`turn15FlyResolutionAdapter.test.ts`) and every other
+  `sprite-visibility` pin (`toMatchObject`/`objectContaining`, plus two
+  `toEqual` arrays updated to `recall: false` in `battleTurnPortability.test.ts`)
+  are unaffected — landed `c8cc6cd4`.
+- **(B)+(C) scaffold artifacts, fixed in `tools/compare/appTrace.ts` only:**
+  the antecedent "MURKROW fainted!" box and the player's all-fainted empty
+  field are the *same* real event — MURKROW's own Explosion self-KO
+  (`setatkhptozero`) — now replayed through the real
+  `health-bar-update -> hp-change -> faint-animation -> STRINGID_ATTACKERFAINTED`
+  chain (not `STRINGID_TARGETFAINTED`: the move's *user* is the one who
+  faints here) ahead of the existing recall/slide/win-text events, all
+  hand-set to `commandIndex: 4` (outside real ticks, same idiom as the prior
+  single-command skip) rather than replayed from true frame 0.
+  `TERMINAL_SEAM_SCAFFOLD_PLAYER`'s species changed to MURKROW (198) so the
+  real name resolver — not a hardcoded string — reproduces the oracle's
+  literal text. The real `"faint"` command's existing `fainted`-gated
+  visibility hides the player sprite+healthbox as a side effect, so no
+  separate synthetic event was needed for (C).
+- **Result:** `npm run compare -- loss-terminal-window-off --summary`:
+  **1/236 frames fully matched** (frame 3231, both times), the other 235
+  reduced from the ~7,700-8,300px baseline to the residual classes below,
+  byte-identical across two independent runs plus a third supervisor rerun
+  post-animation-fold (run-2026-08-04-17-32-22Z-58459).
+
+**Remaining classes, itemized (not guess-fit):** 232 of the 235 mismatched
+frames (2996–3230) differ only in a small region — pixel bbox around
+`(61–71, 140–149)`, exactly 37px (0.10%) on 212 static frames, 56–139px on
+~20 frames as the glyph animates/the message box height settles. The other
+**3 frames (3034–3036, ~587–589px) are a distinct micro-class the original
+itemization missed** (supervisor-measured, run-2026-08-04-17-32-22Z-58459):
+the antecedent "MURKROW fainted!♥" → quote text-swap edge, where the held
+antecedent line differs for 3 ticks — re-inspect it during the same source
+read below (it may be the same cursor/hold mechanism at the swap boundary,
+or its own timing edge). Root cause, pixel-confirmed via
+`tools/compare/out/*/diff-03100.png`: the generic wait-cursor (heart glyph,
+`battleScene.ts:34009–34017`, `drawCursor` at
+`CURSOR_Y_OFFSETS[Math.floor(view.waitCursor.age / 9) % N]`) draws
+unconditionally once any `advance: "button"` message becomes
+ready-for-input (`battleResolutionPresentationRender.ts`'s `waitCursor`
+field) — the same mechanism `STRINGID_TARGETFAINTED` uses. The oracle shows
+**no cursor at all** for the `STRINGID_TRAINER1WINTEXT` quote box across the
+entire window, including ~174 frames after the message is fully typed and
+settled (frame 3231, right before the real dismiss press) — this is not a
+blink-phase-alignment miss (the cursor bounces between Y offsets, it
+doesn't toggle on/off), so the real ROM's terminal win/loss-quote printer
+most likely never spawns the standard wait-cursor task at all, unlike
+ordinary in-battle button messages. Confirming this needs a source read of
+`_LocalBattleLostPrintTrainersWinText`/the win-side equivalent's actual
+`Cmd_printstring` call shape (likely a distinct printer path from
+`Cmd_printstring`'s ordinary use, since `TERMINAL_SEAM_BUTTON_MESSAGE_IDS`
+currently treats these three ids identically to any other button message) —
+not attempted this session, no budget remaining. A fix should gate
+`waitCursor` (or add a `noCursor` flag to `TERMINAL_SEAM_BUTTON_MESSAGE_IDS`'s
+three ids) once the real mechanism is confirmed, not just suppressed to make
+the number look clean.
+
+- WIN side still needs a **fresh** `mechanicLab` staging (final hit → quote
+  dismiss), twice-run byte-identical, following the LOSS doc's own §0
+  staging recipe, before any of the above (including the wait-cursor
+  finding, which likely applies equally to the WIN quote) applies to it —
+  out of scope this session per the brief (WIN ground truth is a side lane's
+  concurrent responsibility).
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 

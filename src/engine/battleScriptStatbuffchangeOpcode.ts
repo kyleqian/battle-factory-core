@@ -197,6 +197,8 @@ const PLAYANIMATION_ANIM_TYPES: ReadonlyMap<
   ["B_ANIM_STATS_CHANGE", { argExpression: "sB_ANIM_ARG1", animationId: "STATS_CHANGE", readsAnimArg1: true }],
   ["B_ANIM_RAIN_CONTINUES", { argExpression: "NULL", animationId: "RAIN_CONTINUES", readsAnimArg1: false }],
   ["B_ANIM_SUN_CONTINUES", { argExpression: "NULL", animationId: "SUN_CONTINUES", readsAnimArg1: false }],
+  /** BattleScript_SandstreamActivates' own switch-in continuation animation, same NULL-arg shape as its two siblings above. */
+  ["B_ANIM_SANDSTORM_CONTINUES", { argExpression: "NULL", animationId: "SANDSTORM_CONTINUES", readsAnimArg1: false }],
   /**
    * docs/ingrain-leechseed-wrap-ground-truth.md §2a/§2b/§2c -- Ingrain's own
    * `playanimation BS_ATTACKER, B_ANIM_INGRAIN_HEAL` (no third operand, `arg`

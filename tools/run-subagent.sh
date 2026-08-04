@@ -5,8 +5,9 @@
 # worker (claude-sonnet-5); a Codex supervisor automatically selects the Codex
 # worker profile (gpt-5.6-sol at high effort). Ordinary Codex routing permits
 # exactly Terra/max, Luna/max, or Sol/high. Codex max mode remains the separate
-# all-Sol profile and defaults workers to xhigh. The transcript is
-# summarized to a fixed-size handoff and retained in the log file named below.
+# all-Sol profile and defaults workers to xhigh. The DeepSeek sub-agent option
+# runs deepseek/deepseek-v4-flash through OpenCode. The transcript is summarized
+# to a fixed-size handoff and retained in the log file named below.
 # Killing a worker at any point is safe —
 # workers follow AGENTS.md's commit-often discipline, so the next step resumes
 # from git + PROGRESS.md.
@@ -15,15 +16,15 @@
 #   tools/run-subagent.sh [options] "step brief for the worker"
 #   tools/run-subagent.sh [options] --brief-file path/to/brief.txt
 #     -c, --cap-minutes N   hard cap in minutes (default 60)
-#     -p, --provider NAME   claude (default) or codex
+#     -s, --sub-agent NAME  claude (default), codex, or deepseek (OpenCode)
 #     -M, --max-mode        Codex Sol/xhigh worker profile
-#     -m, --model NAME      worker model (provider default)
+#     -m, --model NAME      worker model (selected sub-agent's default)
 #     -e, --effort EFFORT   Codex reasoning effort (Terra/Luna=max; Sol=high)
 #     -w, --worktree        alias for --lane side
 #         --animation-worktree
 #                           alias for --lane animation
 #         --lane NAME       main, side, or animation
-#         --log FILE        provider event log path
+#         --log FILE        agent event log path
 #         --brief-file FILE read the step brief verbatim from a file
 #         --read-only       audit only; require a clean tree but no commit
 #     -h, --help            show this help
@@ -46,6 +47,7 @@
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 source tools/codex-model-policy.sh
+source tools/deepseek-worker-policy.sh
 
 # Recursion guard: workers must never spawn agents. Every launcher exports
 # POKEBENCH_ROLE to its agent, and the agent's shells inherit it — so a worker
@@ -60,10 +62,11 @@ usage() {
 Usage: tools/run-subagent.sh [options] "step brief for the worker"
        tools/run-subagent.sh [options] --brief-file path/to/brief.txt
   -c, --cap-minutes N   hard cap in minutes (default 60)
-  -p, --provider NAME   claude (default) or codex
+  -s, --sub-agent NAME  claude (default), codex, or deepseek (via OpenCode)
   -M, --max-mode        Codex all-Sol profile: fixes the model at
                         gpt-5.6-sol and defaults effort to xhigh
-  -m, --model NAME      worker model (provider default)
+  -m, --model NAME      worker model (sub-agent default; DeepSeek is fixed at
+                        deepseek/deepseek-v4-flash)
   -e, --effort EFFORT   Codex reasoning effort (Terra/Luna=max; Sol=high;
                         max mode also permits Sol/xhigh)
                         (aliases: --reasoning, --reasoning-effort)
@@ -78,16 +81,16 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
                         commit when launching while main is mid-step, so the
                         worker doesn't inherit transiently-red intermediate
                         states)
-      --log FILE        provider event log path
+      --log FILE        agent event log path
       --brief-file FILE read the step brief verbatim from a file
       --brief TEXT      alias for the positional step brief
       --read-only       run an audit that must leave no edits or commits
       --audit           alias for --read-only
       --print-config    print the resolved profile without launching
   -h, --help            show this help
-Environment overrides: WORKER_PROVIDER, WORKER_MODEL, WORKER_REASONING_EFFORT,
-POKEBENCH_CODEX_MAX_MODE. Legacy MODEL remains supported for direct worker
-launches.
+Environment overrides: SUB_AGENT, WORKER_MODEL, WORKER_REASONING_EFFORT,
+POKEBENCH_CODEX_MAX_MODE, OPENCODE_BIN. Legacy MODEL remains supported for
+direct worker launches; supervisors pass their selection internally.
 Exits with the worker's status; 42 means an account usage/rate limit stopped it
 (either this worker's own, or a sibling's — a 42 in one lane cancels the others).
 Exit 4 means the requested lane already has a live worker (max 3 concurrent:
@@ -98,7 +101,7 @@ EOF
 }
 
 CAP_MINUTES="${CAP_MINUTES:-60}"
-PROVIDER="${WORKER_PROVIDER:-${POKEBENCH_WORKER_PROVIDER:-claude}}"
+PROVIDER="${SUB_AGENT:-${POKEBENCH_WORKER_PROVIDER:-claude}}"
 MODEL="${WORKER_MODEL:-${MODEL:-}}"
 REASONING_EFFORT="${WORKER_REASONING_EFFORT:-}"
 MAX_MODE="${POKEBENCH_CODEX_MAX_MODE:-0}"
@@ -111,7 +114,10 @@ BRIEF_FILE=""
 WT_BASE_REF=""
 PRINT_CONFIG=0
 READ_ONLY=0
-PROVIDER_FLAG_SET=0
+SUB_AGENT_SELECTION_SET=0
+if [[ "${SUB_AGENT+x}" == "x" || "${POKEBENCH_WORKER_PROVIDER+x}" == "x" ]]; then
+  SUB_AGENT_SELECTION_SET=1
+fi
 MODEL_FLAG_SET=0
 
 while [[ $# -gt 0 ]]; do
@@ -124,8 +130,8 @@ while [[ $# -gt 0 ]]; do
     --lane=*)         LANE="${1#*=}"; shift ;;
     --base)           WT_BASE_REF="${2:?--base needs a git ref}"; shift 2 ;;
     --base=*)         WT_BASE_REF="${1#*=}"; shift ;;
-    -p|--provider)    PROVIDER="${2:?--provider needs a name}"; PROVIDER_FLAG_SET=1; shift 2 ;;
-    --provider=*)     PROVIDER="${1#*=}"; PROVIDER_FLAG_SET=1; shift ;;
+    -s|--sub-agent)   PROVIDER="${2:?--sub-agent needs a name}"; SUB_AGENT_SELECTION_SET=1; shift 2 ;;
+    --sub-agent=*)    PROVIDER="${1#*=}"; SUB_AGENT_SELECTION_SET=1; shift ;;
     -M|--max-mode)    MAX_MODE=1; shift ;;
     -m|--model)       MODEL="${2:?--model needs a model name}"; MODEL_FLAG_SET=1; shift 2 ;;
     --model=*)        MODEL="${1#*=}"; MODEL_FLAG_SET=1; shift ;;
@@ -156,9 +162,12 @@ if [[ ! "$MAX_MODE" =~ ^(0|1)$ ]]; then
   echo "run-subagent: POKEBENCH_CODEX_MAX_MODE must be 0 or 1 (got '$MAX_MODE')" >&2
   exit 2
 fi
+
+PROVIDER="$(printf '%s' "$PROVIDER" | tr '[:upper:]' '[:lower:]')"
+
 if [[ "$MAX_MODE" == "1" ]]; then
-  if [[ "$PROVIDER_FLAG_SET" == "1" && "$PROVIDER" != "codex" ]]; then
-    echo "run-subagent: --max-mode is a Codex-only profile and cannot use provider '$PROVIDER'" >&2
+  if [[ "$SUB_AGENT_SELECTION_SET" == "1" && "$PROVIDER" != "codex" ]]; then
+    echo "run-subagent: --max-mode requires a Codex sub-agent (got '$PROVIDER')" >&2
     exit 2
   fi
   if [[ "$MODEL_FLAG_SET" == "1" && "$MODEL" != "gpt-5.6-sol" ]]; then
@@ -202,8 +211,8 @@ if [[ ! "$CAP_MINUTES" =~ ^[0-9]+$ || "$CAP_MINUTES" -lt 1 ]]; then
   echo "run-subagent: --cap-minutes must be a positive integer (got '$CAP_MINUTES')" >&2
   exit 2
 fi
-if [[ ! "$PROVIDER" =~ ^(claude|codex)$ ]]; then
-  echo "run-subagent: unsupported provider '$PROVIDER' (expected claude or codex)" >&2
+if [[ ! "$PROVIDER" =~ ^(claude|codex|deepseek)$ ]]; then
+  echo "run-subagent: unsupported sub-agent '$PROVIDER' (expected claude, codex, or deepseek)" >&2
   exit 2
 fi
 if [[ ! "$LANE" =~ ^(main|side|animation)$ ]]; then
@@ -218,7 +227,7 @@ case "$PROVIDER" in
   claude)
     MODEL="${MODEL:-claude-sonnet-5}"
     if [[ -n "$REASONING_EFFORT" ]]; then
-      echo "run-subagent: --effort applies only to the codex provider" >&2
+      echo "run-subagent: --effort applies only to a Codex sub-agent" >&2
       exit 2
     fi
     command -v claude >/dev/null 2>&1 || { echo "run-subagent: claude CLI not found on PATH" >&2; exit 127; }
@@ -247,6 +256,25 @@ case "$PROVIDER" in
     fi
     command -v codex >/dev/null 2>&1 || { echo "run-subagent: codex CLI not found on PATH" >&2; exit 127; }
     ;;
+  deepseek)
+    if [[ "$MODEL_FLAG_SET" == "1" && "$MODEL" != "$POKEBENCH_DEEPSEEK_WORKER_MODEL" ]]; then
+      echo "run-subagent: DeepSeek workers are fixed at $POKEBENCH_DEEPSEEK_WORKER_MODEL (got '$MODEL')" >&2
+      exit 2
+    fi
+    MODEL="${MODEL:-$POKEBENCH_DEEPSEEK_WORKER_MODEL}"
+    if [[ "$MODEL" != "$POKEBENCH_DEEPSEEK_WORKER_MODEL" ]]; then
+      echo "run-subagent: DeepSeek workers are fixed at $POKEBENCH_DEEPSEEK_WORKER_MODEL (got '$MODEL')" >&2
+      exit 2
+    fi
+    if [[ -n "$REASONING_EFFORT" ]]; then
+      echo "run-subagent: --effort applies only to a Codex sub-agent" >&2
+      exit 2
+    fi
+    if ! OPENCODE_BIN_RESOLVED="$(pokebench_resolve_opencode_bin)"; then
+      echo "run-subagent: OpenCode CLI not found (set OPENCODE_BIN or install it at ~/.opencode/bin/opencode)" >&2
+      exit 127
+    fi
+    ;;
 esac
 source tools/codex-git-attribution.sh
 if [[ "$PROVIDER" != "codex" ]]; then
@@ -257,23 +285,31 @@ fi
 if [[ -z "$AGENT_LOG" ]]; then
   if [[ "$PROVIDER" == "claude" ]]; then
     AGENT_LOG="/tmp/emerald-factory-subagent-$(date +%Y%m%d-%H%M%S).jsonl"
+  elif [[ "$PROVIDER" == "deepseek" ]]; then
+    OPENCODE_LOG_ROOT="${POKEBENCH_OPENCODE_LOG_DIR:-${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.opencode-logs}}"
+    AGENT_LOG="$OPENCODE_LOG_ROOT/workers/worker-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
   else
     CODEX_LOG_ROOT="${POKEBENCH_CODEX_LOG_DIR:-${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.codex-logs}}"
     AGENT_LOG="$CODEX_LOG_ROOT/workers/worker-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
   fi
 fi
-CODEX_STDERR_LOG=""
-if [[ "$PROVIDER" == "codex" ]]; then
+PROVIDER_STDERR_LOG=""
+if [[ "$PROVIDER" == "codex" || "$PROVIDER" == "deepseek" ]]; then
   if [[ "$AGENT_LOG" == *.jsonl ]]; then
-    CODEX_STDERR_LOG="${AGENT_LOG%.jsonl}.stderr.log"
+    PROVIDER_STDERR_LOG="${AGENT_LOG%.jsonl}.stderr.log"
   else
-    CODEX_STDERR_LOG="${AGENT_LOG}.stderr.log"
+    PROVIDER_STDERR_LOG="${AGENT_LOG}.stderr.log"
   fi
 fi
 if [[ "$PRINT_CONFIG" == "1" ]]; then
-  echo "worker_provider=$PROVIDER"
+  echo "sub_agent=$PROVIDER"
   echo "worker_model=$MODEL"
   echo "worker_effort=${REASONING_EFFORT:-n/a}"
+  if [[ "$PROVIDER" == "deepseek" ]]; then
+    echo "worker_runtime=opencode"
+    echo "worker_headless=1"
+    echo "worker_permissions=auto"
+  fi
   echo "max_mode=$MAX_MODE"
   echo "worker_lane=$LANE"
   if [[ "$READ_ONLY" == "1" ]]; then
@@ -478,21 +514,25 @@ fi
 CAP_SECONDS=$(( CAP_MINUTES * 60 ))
 if [[ "$PROVIDER" == "claude" ]]; then
   echo "worker: $MODEL · lane $LANE · oracle $ORACLE_PROFILE · cap ${CAP_MINUTES}min · raw log: $AGENT_LOG"
+elif [[ "$PROVIDER" == "deepseek" ]]; then
+  echo "worker: $MODEL via OpenCode · lane $LANE · oracle $ORACLE_PROFILE · cap ${CAP_MINUTES}min · raw JSONL: $AGENT_LOG · stderr: $PROVIDER_STDERR_LOG"
 else
-  echo "worker: $MODEL/$REASONING_EFFORT · lane $LANE · oracle $ORACLE_PROFILE · cap ${CAP_MINUTES}min · raw JSONL: $AGENT_LOG · stderr: $CODEX_STDERR_LOG"
+  echo "worker: $MODEL/$REASONING_EFFORT · lane $LANE · oracle $ORACLE_PROFILE · cap ${CAP_MINUTES}min · raw JSONL: $AGENT_LOG · stderr: $PROVIDER_STDERR_LOG"
 fi
 
 WORK_DIR="$(pwd)"
 if [[ "$IS_WORKTREE" == "1" ]]; then WORK_DIR="$WT_PATH"; fi
 
-if [[ "$PROVIDER" == "codex" ]]; then
-  CODEX_START_HEAD="$(git -C "$WORK_DIR" rev-parse HEAD)"
-  CODEX_START_DIRTY="$(git -C "$WORK_DIR" status --porcelain=v1)"
-  if [[ -n "$CODEX_START_DIRTY" ]]; then
-    echo "run-subagent: refusing to launch Codex worker from a dirty $LANE lane:" >&2
-    echo "$CODEX_START_DIRTY" >&2
+if [[ "$PROVIDER" == "codex" || "$PROVIDER" == "deepseek" ]]; then
+  ENFORCED_START_HEAD="$(git -C "$WORK_DIR" rev-parse HEAD)"
+  ENFORCED_START_DIRTY="$(git -C "$WORK_DIR" status --porcelain=v1)"
+  if [[ -n "$ENFORCED_START_DIRTY" ]]; then
+    echo "run-subagent: refusing to launch $PROVIDER worker from a dirty $LANE lane:" >&2
+    echo "$ENFORCED_START_DIRTY" >&2
     exit 5
   fi
+fi
+if [[ "$PROVIDER" == "codex" ]]; then
   # Attribute commits in either lane without changing persistent git config.
   codex_git_attribution_enable "$WORK_DIR" "$MODEL" "$REASONING_EFFORT"
 fi
@@ -512,7 +552,7 @@ if [[ "$PROVIDER" == "claude" ]]; then
       --model "$MODEL" \
       --dangerously-skip-permissions "$PROMPT"
   ) >> "$AGENT_LOG" &
-else
+elif [[ "$PROVIDER" == "codex" ]]; then
   (
     cd "$WORK_DIR"
     export POKEBENCH_ROLE=worker POKEBENCH_ORACLE_URL="$ORACLE_URL" \
@@ -526,7 +566,24 @@ else
         --model "$MODEL" \
         -c "model_reasoning_effort=\"$REASONING_EFFORT\"" \
         --dangerously-bypass-approvals-and-sandbox "$PROMPT" </dev/null
-  ) >> "$AGENT_LOG" 2>> "$CODEX_STDERR_LOG" &
+  ) >> "$AGENT_LOG" 2>> "$PROVIDER_STDERR_LOG" &
+else
+  (
+    cd "$WORK_DIR"
+    export POKEBENCH_ROLE=worker POKEBENCH_ORACLE_URL="$ORACLE_URL" \
+      POKEBENCH_ORACLE_PROFILE="$ORACLE_PROFILE" \
+      POKEBENCH_MAIN_ORACLE_URL="$MAIN_ORACLE_URL" POKEBENCH_ANIMATION_ORACLE_URL="$ANIMATION_ORACLE_URL" \
+      POKEBENCH_VITEST_MAX_WORKERS="${POKEBENCH_VITEST_MAX_WORKERS:-4}"
+    exec python3 tools/run-codex-worker-with-deadline.py \
+      "$CAP_SECONDS" \
+      "run-subagent: ${CAP_MINUTES}min cap reached — stopping DeepSeek/OpenCode worker process group" -- \
+      "$OPENCODE_BIN_RESOLVED" run \
+        --model "$MODEL" \
+        --format json \
+        --auto \
+        --title "pokebench-$LANE-worker" \
+        "$PROMPT" </dev/null
+  ) >> "$AGENT_LOG" 2>> "$PROVIDER_STDERR_LOG" &
 fi
 agent_pid=$!
 echo "$$ $agent_pid" > "$LANE_FILE"
@@ -554,21 +611,21 @@ if [[ -n "$watchdog_pid" ]]; then
   kill "$watchdog_pid" 2>/dev/null || true
   wait "$watchdog_pid" 2>/dev/null || true
 fi
-if [[ "$PROVIDER" == "codex" ]]; then
-  CODEX_END_HEAD="$(git -C "$WORK_DIR" rev-parse HEAD)"
-  CODEX_END_DIRTY="$(git -C "$WORK_DIR" status --porcelain=v1)"
+if [[ "$PROVIDER" == "codex" || "$PROVIDER" == "deepseek" ]]; then
+  ENFORCED_END_HEAD="$(git -C "$WORK_DIR" rev-parse HEAD)"
+  ENFORCED_END_DIRTY="$(git -C "$WORK_DIR" status --porcelain=v1)"
   if [[ "$READ_ONLY" == "1" ]]; then
-    if [[ "$CODEX_END_HEAD" != "$CODEX_START_HEAD" ]]; then
-      echo "run-subagent: read-only Codex worker created a commit" >&2
+    if [[ "$ENFORCED_END_HEAD" != "$ENFORCED_START_HEAD" ]]; then
+      echo "run-subagent: read-only $PROVIDER worker created a commit" >&2
       if [[ "$status" -eq 0 ]]; then status=5; fi
     fi
-  elif [[ "$CODEX_END_HEAD" == "$CODEX_START_HEAD" ]]; then
-    echo "run-subagent: Codex worker produced no commit" >&2
+  elif [[ "$ENFORCED_END_HEAD" == "$ENFORCED_START_HEAD" ]]; then
+    echo "run-subagent: $PROVIDER worker produced no commit" >&2
     if [[ "$status" -eq 0 ]]; then status=5; fi
   fi
-  if [[ -n "$CODEX_END_DIRTY" ]]; then
-    echo "run-subagent: Codex worker left uncommitted changes:" >&2
-    echo "$CODEX_END_DIRTY" >&2
+  if [[ -n "$ENFORCED_END_DIRTY" ]]; then
+    echo "run-subagent: $PROVIDER worker left uncommitted changes:" >&2
+    echo "$ENFORCED_END_DIRTY" >&2
     if [[ "$status" -eq 0 ]]; then status=5; fi
   fi
 fi
@@ -577,10 +634,15 @@ fi
 if [[ -f "$AGENT_LOG" ]]; then
   if [[ "$PROVIDER" == "claude" ]]; then
     node tools/stream-summary.mjs < "$AGENT_LOG" || true
+  elif [[ "$PROVIDER" == "deepseek" ]]; then
+    node tools/opencode-stream-summary.mjs < "$AGENT_LOG" || true
+    if [[ -s "$PROVIDER_STDERR_LOG" ]]; then
+      echo "OpenCode stderr log: $PROVIDER_STDERR_LOG"
+    fi
   else
     node tools/codex-stream-summary.mjs < "$AGENT_LOG" || true
-    if [[ -s "$CODEX_STDERR_LOG" ]]; then
-      echo "Codex stderr log: $CODEX_STDERR_LOG"
+    if [[ -s "$PROVIDER_STDERR_LOG" ]]; then
+      echo "Codex stderr log: $PROVIDER_STDERR_LOG"
     fi
   fi
 fi
@@ -634,7 +696,7 @@ if [[ -f "$AGENT_LOG" ]]; then
         | grep -qiE 'usage limit|rate.?limit'; then
       USAGE_STOPPED=1
     fi
-  else
+  elif [[ "$PROVIDER" == "codex" ]]; then
     # Codex JSON events can embed arbitrary command output and project docs.
     # Inspect only provider failure fields (plus explicit denied rate-limit
     # events), then scan the separate unstructured stderr stream.
@@ -656,8 +718,27 @@ if [[ -f "$AGENT_LOG" ]]; then
             )
           ' >/dev/null 2>&1; then
       USAGE_STOPPED=1
-    elif tail -n 20 "$CODEX_STDERR_LOG" 2>/dev/null \
+    elif tail -n 20 "$PROVIDER_STDERR_LOG" 2>/dev/null \
         | sed -E 's/--no-rate-limit//g' \
+        | grep -qiE 'usage limit|rate.?limit|quota exceeded'; then
+      USAGE_STOPPED=1
+    fi
+  else
+    # OpenCode events put provider failures in top-level error events or in
+    # error-finished step parts. Do not scan tool output, which may merely
+    # mention rate-limit handling in project docs.
+    if tail -n 50 "$AGENT_LOG" 2>/dev/null \
+        | jq -Re '
+            fromjson?
+            |
+            select(
+              (.type == "error" or .part.reason == "error")
+              and ((.message // .error.message // .error // .part.error.message // .part.error // "")
+                | tostring | test("usage limit|rate.?limit|quota exceeded"; "i"))
+            )
+          ' >/dev/null 2>&1; then
+      USAGE_STOPPED=1
+    elif tail -n 20 "$PROVIDER_STDERR_LOG" 2>/dev/null \
         | grep -qiE 'usage limit|rate.?limit|quota exceeded'; then
       USAGE_STOPPED=1
     fi
@@ -698,9 +779,11 @@ if [[ "$worker_status" -eq 124 || "$worker_status" -ge 128 ]]; then
   echo "run-subagent: worker was killed before turn completion (exit $worker_status — cap/deadline or signal, NOT an authentication failure). Check the digest's worker-FAILED marker and the branch's committed state." >&2
 elif [[ "$worker_status" -ne 0 && -f "$AGENT_LOG" ]] \
     && grep -qiE 'not logged in|authentication required|unauthorized|HTTP[ /]?401' \
-      "$AGENT_LOG" ${CODEX_STDERR_LOG:+"$CODEX_STDERR_LOG"}; then
+      "$AGENT_LOG" ${PROVIDER_STDERR_LOG:+"$PROVIDER_STDERR_LOG"}; then
   if [[ "$PROVIDER" == "claude" ]]; then
     echo "run-subagent: worker exited unauthenticated — this launch was probably sandboxed. Relaunch with the Bash tool's dangerouslyDisableSandbox: true (see the header comment)." >&2
+  elif [[ "$PROVIDER" == "deepseek" ]]; then
+    echo "run-subagent: DeepSeek worker exited unauthenticated — run 'opencode providers login' and retry" >&2
   else
     echo "run-subagent: codex worker exited unauthenticated — log in with the codex CLI and retry" >&2
   fi

@@ -34,9 +34,31 @@ import {
   beginFactoryRoundBattleStartIntro,
   completeFactoryRoundPresentation,
   createFactoryRoundBattleOrchestrator,
+  type FactoryBattleMoveSelectionCursors,
+  type FactoryBattlePresentationBoundaries,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
 import type { FactoryRentalRecord } from "../../src/engine/battleScenario.ts";
 import { getLevel50InitialRentalFixedIv } from "../../src/engine/factoryRentalGeneration.ts";
+import {
+  createBattleState,
+  type BattleDecisionTransitionResult,
+  type BattleKernelSemanticEvent,
+  type BattleState,
+} from "../../src/engine/battleDecisionBoundary.ts";
+import {
+  createBattleResolutionPresentation,
+  type CreateBattleResolutionPresentationInput,
+} from "../../src/engine/battleResolutionPresentation.ts";
+import {
+  createBattleCommandPresentation,
+  type BattleCommandPresentationState,
+} from "../../src/engine/battleCommandPresentation.ts";
+import { getFactoryTrainerPresentation } from "../../src/engine/factoryTrainerPresentation.ts";
+import type {
+  FactoryFullTurnBattlerConfig,
+  FactoryFullTurnConfig,
+  FactoryFullTurnDecisionRules,
+} from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 
 export interface AppCapture {
   frame: number;
@@ -254,6 +276,252 @@ function generatedBattleStartIntroMagnetonStage(state: EngineState): EngineState
   };
 }
 
+// ISSUES #73: edge-relative scaffold for the LOSS terminal window
+// (docs/terminal-seam-loss-path-ground-truth.md). These battler configs only
+// exist to give createFactoryFullTurnBattleState a valid rules/request
+// boundary to build the synthetic terminal transition from -- the compare
+// window's own claim (trainer-slide-in + dismissible message box) does not
+// depend on which species/moves populate that scaffold. Same values
+// tests/presentationTerminalSeamTrainerSlide.test.ts's terminalResolution()
+// helper uses.
+const TERMINAL_SEAM_SCAFFOLD_PLAYER: FactoryFullTurnBattlerConfig = Object.freeze({
+  // MURKROW -- matches the real committed fixture's own last-to-faint player
+  // mon (docs/terminal-seam-loss-path-ground-truth.md §2, frame 2896:
+  // "MURKROW / fainted!"), so the antecedent STRINGID_ATTACKERFAINTED
+  // message this window's scaffold now holds resolves the real oracle text
+  // via the real name resolver rather than a hardcoded string.
+  species: 198, // MURKROW
+  moveId: 33, // TACKLE
+  moves: [33, 33, 33, 33] as const,
+  pp: [35, 35, 35, 35] as const,
+  ability: 0,
+  item: 0,
+  friendship: 0,
+  attack: 60,
+  defense: 60,
+  spAttack: 80,
+  spDefense: 80,
+  speed: 120,
+  hp: 200,
+  maxHp: 200,
+  types: ["TYPE_BUG", "TYPE_FLYING"] as const,
+});
+
+const TERMINAL_SEAM_SCAFFOLD_TRAINER: FactoryFullTurnBattlerConfig = Object.freeze({
+  species: 198, // MURKROW
+  moveId: 33,
+  moves: [33, 33, 33, 33] as const,
+  pp: [35, 35, 35, 35] as const,
+  ability: 0,
+  item: 0,
+  friendship: 0,
+  attack: 60,
+  defense: 60,
+  spAttack: 60,
+  spDefense: 60,
+  speed: 60,
+  hp: 200,
+  maxHp: 200,
+  types: ["TYPE_DARK", "TYPE_FLYING"] as const,
+});
+
+const TERMINAL_SEAM_EVENT_PROVENANCE = Object.freeze({
+  programCounter: 1,
+  opcodeId: 1,
+  opcodeName: "compare-fixture",
+  dispatcher: "compare-fixture",
+  sourceLabel: "compare-fixture",
+  sourceStatementLine: 1,
+  instructionExecution: 1,
+});
+
+// tests/battleScriptFaintedActionsOrchestration.test.ts's "player's last mon
+// faints" pin proves this event is the real interpreter's
+// VARIOUS_RETURN_OPPONENT_MON1 receipt (Cmd_various), not a generic
+// placeholder -- battleResolutionPresentation.ts's "sprite-visibility"
+// command reads this exact opcodeName to distinguish the real
+// CONTROLLER_RETURNMONTOBALL recall from the unrelated
+// CONTROLLER_SPRITEINVISIBILITY (Dig/Fly) receipt.
+const TERMINAL_SEAM_RECALL_EVENT_PROVENANCE = Object.freeze({
+  ...TERMINAL_SEAM_EVENT_PROVENANCE,
+  opcodeName: "B_SCR_OP_VARIOUS",
+});
+
+function terminalSeamEvent(
+  sequence: number,
+  payload: BattleKernelSemanticEvent["payload"],
+): BattleKernelSemanticEvent {
+  return Object.freeze({
+    sequence,
+    payload: Object.freeze(payload),
+    provenance: payload.kind === "set-battler-sprite-visibility"
+      ? TERMINAL_SEAM_RECALL_EVENT_PROVENANCE
+      : TERMINAL_SEAM_EVENT_PROVENANCE,
+  });
+}
+
+// Replicates factoryRoundBattleOrchestrator.ts's private
+// createBattlePresentationBoundaries (ISSUES #73: that helper isn't
+// exported, so compare-only code rebuilds its ~15 lines rather than
+// reaching into src/ for an export the main lane hasn't added).
+function createTerminalSeamPresentationBoundaries(
+  presentation: BattleCommandPresentationState,
+  battle: BattleState<FactoryFullTurnDecisionRules>,
+  cursors: FactoryBattleMoveSelectionCursors,
+): FactoryBattlePresentationBoundaries {
+  const fields = [presentation.field.player, presentation.field.opponent] as const;
+  return Object.freeze(fields.map((field, battler) => {
+    const active = battle.rules.rulesContext.battlers[battler]!;
+    return Object.freeze({
+      battler: battler as 0 | 1,
+      partyIndex: field.partyIndex,
+      field,
+      displayedHp: field.hp,
+      displayedStatus1: active.status1,
+      spriteVisible: true,
+      idleEpoch: 0,
+      moveCursor: cursors[battler]!,
+    });
+  })) as unknown as FactoryBattlePresentationBoundaries;
+}
+
+// ISSUES #73 LOSS window: constructs a real factoryRoundBattleOrchestrator
+// (so aiHistory/activeBattleCallStart/battlePresentationBoundaries are real,
+// non-null values -- finishBattle requires them once the dismiss press
+// completes terminal-handoff), then swaps in a synthetic terminal battle +
+// resolution already at commandIndex 1 (trainer-slide, phaseElapsed 0) --
+// i.e. app frame 0 == oracle tick 2996 of the committed LOSS fixture
+// (docs/terminal-seam-loss-path-ground-truth.md), already past the
+// opponent's return-to-ball recall (oracle ticks 2951-2995), which this
+// window deliberately excludes. The event shape is the real one
+// tests/battleScriptFaintedActionsOrchestration.test.ts's "player's last mon
+// faints" test proves the kernel emits for LOSS; opponentTrainer is DESTIN
+// (trainerId 50), matching the fixture.
+function lossTerminalWindowStage(state: EngineState): EngineState {
+  const playerRentalRecords = [
+    generatedCommandRecord(664),
+    generatedCommandRecord(678),
+    generatedCommandRecord(527),
+  ] as const;
+  let orchestrator = createFactoryRoundBattleOrchestrator({
+    id: "loss-terminal-window-off",
+    rngValue: 4,
+    factoryWinStreak: 0,
+    playerTrainerId: 0x89ab_cdef,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords,
+      savedRentalRecords: [
+        ...playerRentalRecords,
+        generatedCommandRecord(1),
+        generatedCommandRecord(2),
+        generatedCommandRecord(3),
+      ],
+    },
+  });
+  const commandId = orchestrator.round.presentation?.command.commandId;
+  if (commandId === undefined) {
+    throw new Error("loss terminal window stage requires the battle-start command");
+  }
+  orchestrator = advanceFactoryRoundPresentation(
+    completeFactoryRoundPresentation(orchestrator, { commandId }),
+  );
+  if (orchestrator.aiHistory === null || orchestrator.activeBattleCallStart === null) {
+    throw new Error("loss terminal window stage requires a live started battle");
+  }
+
+  const config: FactoryFullTurnConfig = Object.freeze({
+    requestId: 1,
+    rngSeed: 1,
+    player: TERMINAL_SEAM_SCAFFOLD_PLAYER,
+    trainer: TERMINAL_SEAM_SCAFFOLD_TRAINER,
+  });
+  const initial = createFactoryFullTurnBattleState(config);
+  if (initial.boundary.kind !== "decision-required" || initial.boundary.request.kind !== "command") {
+    throw new Error("terminal seam scaffold has no source command");
+  }
+  const terminalBattle = Object.freeze({
+    ...createBattleState({
+      rules: initial.rules,
+      rngSeed: 9,
+      request: initial.boundary.request,
+    }),
+    boundary: Object.freeze({ kind: "terminal" as const, outcome: "trainer-win" as const }),
+  });
+  const events: readonly BattleKernelSemanticEvent[] = [
+    // ISSUES #73 (B)+(C): the real segment this window is edge-relative to
+    // still holds the antecedent "MURKROW fainted!" box (ground-truth doc
+    // §2, frames 2896-2945), and all 3 player mons are already fainted
+    // (§0) -- both are the SAME real event, MURKROW's own Explosion self-KO
+    // (setatkhptozero unconditionally zeroes the user's HP, §0's staging
+    // note), replayed through the real health-bar-update -> hp-change ->
+    // faint-animation -> STRINGID_ATTACKERFAINTED chain (not
+    // STRINGID_TARGETFAINTED -- the *user* of the move is the one who
+    // faints here). The real "faint" command this produces generically
+    // clears both the player's sprite and healthbox (the same
+    // `fainted`-gated visibility every other faint already uses), so it
+    // fixes (C) as a side effect without a separate synthetic event.
+    terminalSeamEvent(0, { kind: "health-bar-update", battler: 0, healthValue: 200 }),
+    terminalSeamEvent(1, { kind: "hp-change", battler: 0, from: 200, to: 0 }),
+    terminalSeamEvent(2, { kind: "faint-animation", battler: 0 }),
+    terminalSeamEvent(3, { kind: "message", messageId: "STRINGID_ATTACKERFAINTED", substitutions: [] }),
+    // The real CONTROLLER_RETURNMONTOBALL recall (A): opponent Dusclops.
+    terminalSeamEvent(4, { kind: "set-battler-sprite-visibility", battler: 1, invisible: true }, { opcodeName: "B_SCR_OP_VARIOUS" }),
+    terminalSeamEvent(5, { kind: "trainer-slide-in", battler: 1 }),
+    terminalSeamEvent(6, { kind: "message", messageId: "STRINGID_TRAINER1WINTEXT", substitutions: [] }),
+  ];
+  const transition = Object.freeze({
+    kind: "terminal" as const,
+    state: terminalBattle,
+    events: Object.freeze(events),
+    outcome: "trainer-win" as const,
+  }) as BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>;
+  const command = createBattleCommandPresentation(initial.boundary.request, initial.rules.rulesContext, 0);
+  const input: CreateBattleResolutionPresentationInput = {
+    sourceRequest: initial.boundary.request,
+    sourceDecision: { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+    beforeRules: initial.rules,
+    transition,
+    fieldBoundary: command.field,
+    confirmHandoff: { fightDisplayCursor: 0, idleBounceElapsed: 0 },
+    opponentTrainer: getFactoryTrainerPresentation(50),
+  };
+  // Commands 0-2 (the player's antecedent faint chain: hp/faint/message)
+  // and command 3 (opponent recall) are all out-of-window housekeeping this
+  // edge-relative scaffold places before its own frame 0 -- hand-set
+  // directly to commandIndex 4 (the trainer slide) rather than replayed
+  // through real per-tick advancement, matching the same "outside real
+  // ticks" idiom the prior single-command skip used (ISSUES #73).
+  const resolution = Object.freeze({
+    ...createBattleResolutionPresentation(input),
+    commandIndex: 4,
+    lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
+    confirmHandoff: null,
+  });
+  const boundaries = createTerminalSeamPresentationBoundaries(
+    command,
+    terminalBattle,
+    orchestrator.moveSelectionCursors,
+  );
+
+  const swapped = Object.freeze({
+    ...orchestrator,
+    battle: terminalBattle,
+    battleCommandPresentation: null,
+    battleResolutionPresentation: resolution,
+    battlePresentationBoundaries: boundaries,
+  });
+
+  return {
+    ...state,
+    factoryRoundBattleOrchestrator: swapped,
+    rngMode: "frontierBattle",
+    rngValue: swapped.battle?.rng.value ?? state.rngValue,
+  };
+}
+
 /**
  * Named, dev-time-only staging registry. A stage may replace logical state at
  * a target boundary while the oracle still replays the untouched anchor
@@ -427,6 +695,7 @@ const APP_STAGES: Readonly<Record<string, AppStage>> = {
     }),
     rngMode: "vblank",
   }),
+  "loss-terminal-window-off": lossTerminalWindowStage,
 };
 
 export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {

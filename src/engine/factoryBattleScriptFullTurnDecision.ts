@@ -235,6 +235,9 @@ const ABILITY_DISPLAY_NAME_BY_ID: Readonly<Record<number, string>> = Object.free
   61: "SHED SKIN",
   // ISSUES #72 batch 7: Color Change.
   16: "COLOR CHANGE",
+  // ISSUES #72 batch 8: Sturdy (OHKO block), Sand Stream.
+  5: "STURDY",
+  45: "SAND STREAM",
 });
 function abilityDisplayName(ability: number): string {
   const name = ABILITY_DISPLAY_NAME_BY_ID[ability];
@@ -1168,7 +1171,45 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                                             ? (rules.battleTextBuff1MonNick === null
                                                               ? []
                                                               : [abilityDisplayName(rules.battlers[rules.battleTextBuff1MonNick.battler].ability)])
-                                                            : [];
+                                                            // ISSUES #72 batch 8: Cmd_tryKO's own Sturdy check
+                                                            // (battleScriptTryKOOpcode.ts:117-134) never reassigns
+                                                            // selectorRoles -- the move's own still-current target
+                                                            // is the Sturdy holder.
+                                                            : operand.expression === "STRINGID_PKMNPROTECTEDBY"
+                                                              ? (rules.selectorRoles.target === null
+                                                                ? []
+                                                                : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
+                                                              // BattleScript_SandstreamActivates's {B_SCR_ACTIVE_ABILITY}
+                                                              // -- Cmd_switchineffects's own Sand Stream branch sets
+                                                              // scriptingBattler to the switching-in battler
+                                                              // (battleScriptSwitchinOpcode.ts:973-981).
+                                                              : operand.expression === "STRINGID_PKMNSXWHIPPEDUPSANDSTORM"
+                                                                ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
+                                                                // BattleScript_PerishSongNotAffected's
+                                                                // {B_SCR_ACTIVE_ABILITY} -- EffectPerishSong's own
+                                                                // per-battler Soundproof loop already threads
+                                                                // scriptingBattler through the generic sBATTLER field.
+                                                                : operand.expression === "STRINGID_PKMNSXBLOCKSY2"
+                                                                  ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
+                                                                  // BattleScript_GrudgeTakesPP's {B_BUFF1} --
+                                                                  // scheduleGrudge (battleScriptHitChainOpcode.ts:
+                                                                  // 4354-4376) already captures the killing battler's
+                                                                  // own chosen move into battleTextBuff1Move, same
+                                                                  // shape STRINGID_PKMNSXWOREOFF/STRINGID_PKMNSITEMRESTOREDPP
+                                                                  // already use.
+                                                                  : operand.expression === "STRINGID_PKMNLOSTPPGRUDGE"
+                                                                    ? (rules.battleTextBuff1Move === null ? [] : [resolveMoveName(rules.battleTextBuff1Move)])
+                                                                    // BattleScript_MonTookFutureAttack's {B_BUFF1} --
+                                                                    // runFutureAttacksAfterFaints's own tick reassigns
+                                                                    // selectorRoles.target to the delayed hit's own
+                                                                    // recipient before this print; futureSightMove[target]
+                                                                    // still holds the cast-time-captured move id
+                                                                    // (Cmd_trysetfutureattack, battleScriptTrysetfutureattackOpcode.ts:152).
+                                                                    : operand.expression === "STRINGID_PKMNTOOKATTACK"
+                                                                      ? (rules.selectorRoles.target === null
+                                                                        ? []
+                                                                        : [resolveMoveName(rules.futureSightMove[rules.selectorRoles.target])])
+                                                                      : [];
       return Object.freeze({
         kind: "message" as const,
         messageId: operand.expression,

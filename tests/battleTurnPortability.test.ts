@@ -182,6 +182,7 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         eventSequence: 7,
         battler: 0,
         visible: true,
+        recall: false,
         timing: { minimumFrames: 1 },
       },
       {
@@ -189,6 +190,7 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         eventSequence: 8,
         battler: 1,
         visible: true,
+        recall: false,
         timing: { minimumFrames: 1 },
       },
       {
@@ -219,6 +221,7 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         eventSequence: 15,
         battler: 1,
         visible: true,
+        recall: false,
         timing: { minimumFrames: 1 },
       },
       {
@@ -226,6 +229,7 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         eventSequence: 16,
         battler: 0,
         visible: true,
+        recall: false,
         timing: { minimumFrames: 1 },
       },
       { type: "turn-end", timing: { minimumFrames: 8 } },

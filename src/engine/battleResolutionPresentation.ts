@@ -92,6 +92,7 @@ export type BattleFaintTiming =
 export type BattleSwitchInTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleSpriteVisibilityTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleTurnEndTiming = Readonly<{ minimumFrames: 8 }>;
+export type BattleTrainerSlideTiming = Readonly<{ minimumFrames: 38 }>;
 
 export type BattleResolutionPresentationCommand =
   | Readonly<{
@@ -176,11 +177,32 @@ export type BattleResolutionPresentationCommand =
       eventSequence: number;
       battler: 0 | 1;
       visible: boolean;
+      /**
+       * True only when this transition is the real `CONTROLLER_RETURNMONTOBALL`
+       * receipt (`Cmd_various`'s `VARIOUS_RETURN_OPPONENT_MON1`/`MON2`,
+       * `BtlController_EmitReturnMonToBall` -- `battle_controller_opponent.c`'s
+       * `OpponentHandleReturnMonToBall`/`FreeMonSpriteAfterSwitchOutAnim` both
+       * call `SetHealthboxSpriteInvisible` alongside destroying the sprite),
+       * distinguished from the unrelated `CONTROLLER_SPRITEINVISIBILITY`
+       * receipt (`Cmd_moveend`'s semi-invulnerable Dig/Fly toggle,
+       * `Cmd_makevisible` -- `OpponentHandleSpriteInvisibility` only ever
+       * touches the sprite's own `invisible` flag) via the emitting
+       * instruction's own opcode, not any window-specific context.
+       */
+      recall: boolean;
       timing: BattleSpriteVisibilityTiming;
     }>
   | Readonly<{
       type: "turn-end";
       timing: BattleTurnEndTiming;
+    }>
+  | Readonly<{
+      /** `Cmd_trainerslidein`/`Cmd_trainerslideout` -- generic across any trainer/outcome, see `TRAINER_SLIDE_TIMING`. */
+      type: "trainer-slide";
+      eventSequence: number;
+      battler: 0 | 1;
+      direction: "in" | "out";
+      timing: BattleTrainerSlideTiming;
     }>;
 
 export type BattleResolutionDisplayedField = Readonly<{
@@ -294,12 +316,19 @@ export type BattleResolutionConfirmHandoff = Readonly<{
  * production caller (`factoryTrainerPresentationForOpponent`'s return value)
  * always supplies it. LOSS-side terminal seam,
  * `docs/terminal-seam-loss-path-ground-truth.md` §5 item 3.
+ *
+ * `trainerPic` is the extracted Frontier trainer-picture symbol
+ * (`FactoryTrainerPresentation.trainerPic`, resolvable via
+ * `resolveFrontierTrainerPic`) the terminal-seam trainer-slide visual draws
+ * -- optional for the same reason as `speechWin`: only real production
+ * callers need it, synthetic non-terminal fixtures don't.
  */
 export type BattleResolutionOpponentTrainer = Readonly<{
   className: string;
   name: string;
   speechLose: readonly [string, string];
   speechWin?: readonly [string, string];
+  trainerPic?: string;
 }>;
 
 export type BattleResolutionPresentationState = Readonly<{
@@ -394,6 +423,47 @@ const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
 const STATUS_ICON_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const SWITCH_IN_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
+/**
+ * ISSUES #73 rung B correction (2026-08-04): the prior port (53, from
+ * `battleScene.ts`'s `TURN17_TRAINER_SLIDE_SETTLE_DELAY` doc comment) had two
+ * independent errors -- (1) it was never fit-verified against pixels, and
+ * (2) even its own arithmetic was wrong: source `OpponentHandleTrainerSlide`
+ * (`reference/pokeemerald/src/battle_controller_opponent.c:1385-1390`)
+ * creates the trainer sprite at `x2=96` with `sSpeedX=-2`, and the shared
+ * `SpriteCB_TrainerSlideIn` (`battle_gfx_sfx_util.c:396-409`) adds `sSpeedX`
+ * per callback until `x2==0` -- that is 96/2=48 callbacks, not 53.
+ *
+ * Fresh oracle pixel evidence settles the question directly (not just the
+ * source math): `docs/terminal-seam-loss-path-ground-truth.md`'s committed
+ * twice-identical fixture (`tools/battle-lab/loss-terminal-explosion-
+ * dusclops-off.json`) has the opponent-controller command dispatch the slide
+ * at tick 2996 (`opponentControllerCommand` 6->8) and the trainer sprite's
+ * on-screen bounding box stop moving at tick 3034 -- **38 ticks**, re-derived
+ * this session via a dense per-tick re-probe (frame 2994-3059) of that same
+ * fixture. The observed leading edge fits `offscreenX2 = 2*(38-age)` exactly
+ * at every sampled tick from first visibility (age 13, x=239) through settle
+ * (age 38, x=189) -- not merely close, bit-exact against 8 independent
+ * sample points. The remaining ~10-tick gap between dispatch and the sprite's
+ * first visible pixel (age 0-12) is invisible either way (still fully
+ * off-screen under this formula), so it does not distinguish a literal `x2`
+ * register replay from this observable-motion model; the model is pinned to
+ * what pixels can actually prove.
+ */
+export const TRAINER_SLIDE_TIMING = Object.freeze({ minimumFrames: 38 } as const);
+/**
+ * The three terminal win/loss-text STRINGIDs are printed by
+ * `BattleScript_FrontierTrainerBattleWon(_LoseTexts)`/
+ * `BattleScript_LocalBattleLost(PrintTrainersWinText)`, each followed by a
+ * real `PAUSE_UNTIL_PRESS`-gated wait for input (oracle-confirmed dismiss:
+ * `docs/terminal-seam-loss-path-ground-truth.md` §2 frame ~3230, the same
+ * "A" dismiss shape already modeled for `STRINGID_TARGETFAINTED`/
+ * `STRINGID_ATTACKERFAINTED`).
+ */
+const TERMINAL_SEAM_BUTTON_MESSAGE_IDS: ReadonlySet<string> = new Set([
+  "STRINGID_PLAYERDEFEATEDTRAINER1",
+  "STRINGID_TRAINER1LOSETEXT",
+  "STRINGID_TRAINER1WINTEXT",
+]);
 
 /**
  * `{B_BUFF1}`'s real source for every stat-change message, oracle-confirmed
@@ -2142,6 +2212,169 @@ function messageLines(
       B_BUFF2: () => ability,
     });
   }
+  // ISSUES #72 batch 8 (docs/issue72-hard-tail-scout.md): the REACHABLE-10
+  // hard tail.
+  if (messageId === "STRINGID_PKMNPROTECTEDBY") {
+    // Cmd_tryKO (battleScriptTryKOOpcode.ts:117-134): the Sturdy check never
+    // reassigns selectorRoles -- the move's own (still-current) target is
+    // the Sturdy holder, matching real source's unconditional
+    // gBattlerTarget check (battle_script_commands.c:7511-7518) ahead of
+    // any accuracy/hit roll -- deterministic, not RNG-gated.
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no ability substitution`);
+    }
+    const defender = requireMoveDefender(lastMoveAttacker, "protected-by message");
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_DEF_ABILITY: () => ability,
+    });
+  }
+  if (messageId === "STRINGID_PKMNSXWHIPPEDUPSANDSTORM") {
+    // BattleScript_SandstreamActivates: Cmd_switchineffects's own Sand
+    // Stream branch freezes scriptingBattler to the switching-in battler
+    // (battleScriptSwitchinOpcode.ts:973-981), same shape
+    // STRINGID_PKMNPREVENTSSTATLOSSWITH already uses.
+    if (event.payload.scriptingBattler === undefined || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no scripting-battler/ability substitution`);
+    }
+    const battler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      B_SCR_ACTIVE_ABILITY: () => ability,
+    });
+  }
+  if (messageId === "STRINGID_PKMNSXBLOCKSY2") {
+    // BattleScript_PerishSongNotAffected: EffectPerishSong's own per-battler
+    // Soundproof loop (setbyte/addbyte sBATTLER) -- scriptingBattler is
+    // already the generic sBATTLER field (battleScriptSetByte.ts:267,304),
+    // {B_CURRENT_MOVE} is the actionSnapshot's own currentMove, same idiom
+    // STRINGID_PKMNSXBLOCKSY uses.
+    if (event.payload.scriptingBattler === undefined || event.payload.substitutions.length === 0 || actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no scripting-battler/ability/action-snapshot`);
+    }
+    const battler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      B_SCR_ACTIVE_ABILITY: () => ability,
+      B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
+    });
+  }
+  if (messageId === "STRINGID_PKMNTOOKFOE") {
+    // BattleScript_DestinyBondTakesLife: Cmd_tryfaintmon's nested
+    // call-stack transition never reassigns selectorRoles.attacker/.target
+    // (battleScriptHitChainOpcode.ts:4295-4340) -- the plain
+    // attacker/defender pair from the original hit, unchanged. Destiny
+    // Bond/Grudge can only ever fire off a BS_TARGET/BS_FAINTED
+    // tryfaintmon call site (docs/issue72-hard-tail-scout.md §1b) since
+    // both require the attacker role's own battler to still be alive.
+    const attacker = requireMoveAttacker(lastMoveAttacker, "took-foe message");
+    const defender = requireMoveDefender(lastMoveAttacker, "took-foe message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+    });
+  }
+  if (messageId === "STRINGID_PKMNLOSTPPGRUDGE") {
+    // BattleScript_GrudgeTakesPP: scheduleGrudge (battleScriptHitChainOpcode.ts:
+    // 4354-4376) captures battleTextBuff1Move off the ATTACKER role's own
+    // chosen move (the battler that just landed the killing hit, real
+    // source's gBattleMons[gBattlerAttacker].moves[moveIndex] --
+    // battle_script_commands.c:3030), not the Grudge caster's own move --
+    // same plain attacker/defender pair STRINGID_PKMNTOOKFOE above uses.
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no move substitution`);
+    }
+    const attacker = requireMoveAttacker(lastMoveAttacker, "lost-pp-grudge message");
+    const moveName = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_BUFF1: () => moveName,
+    });
+  }
+  if (messageId === "STRINGID_PKMNREGAINEDHEALTH") {
+    // The 3-label split (docs/issue72-hard-tail-scout.md §3): the correct
+    // battler differs per emitting label, since BattleScript_EffectRestoreHp/
+    // the self-heal family reassign selectorRoles.target = attacker
+    // (battleScriptTryhealhalfhealthOpcode.ts:47) while
+    // BattleScript_PresentHealTarget's own Present sub-path never reassigns
+    // (a genuinely opposing battler) and BattleScript_WishComesTrue is a
+    // tick-scoped actionSnapshot.attacker read, same shape
+    // STRINGID_PKMNWISHCAMETRUE already uses.
+    if (actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot`);
+    }
+    const MOVE_PRESENT = 217;
+    const label = sourceLabelOf(event);
+    if (label === "BattleScript_WishComesTrue") {
+      const battler = singlesBattler(actionSnapshot.attacker, `${messageId} action snapshot`);
+      return resolveBattleStringLines(messageId, {
+        B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      });
+    }
+    if (label === "BattleScript_PresentHealTarget" && actionSnapshot.currentMove === MOVE_PRESENT) {
+      const defender = requireMoveDefender(lastMoveAttacker, "regained-health message (Present)");
+      return resolveBattleStringLines(messageId, {
+        B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      });
+    }
+    // BattleScript_EffectRestoreHp, or PresentHealTarget reached via the
+    // self-heal family (Rest/Moonlight/Synthesis/Swallow/Softboiled/MilkDrink).
+    const attacker = requireMoveAttacker(lastMoveAttacker, "regained-health message (self-heal)");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+    });
+  }
+  if (messageId === "STRINGID_PKMNHUNGONWITHX") {
+    // BattleScript_FocusBandActivates: Cmd_adjustnormaldamage's own Focus
+    // Band branch (battleScriptHitChainOpcode.ts:1978-1996) never removes
+    // the item (unlike Knock Off/Thief) -- heldItems[defender] already
+    // holds it unchanged at print time, the plain requireMoveDefender +
+    // item-name idiom STRINGID_PKMNSTOLEITEM's own B_LAST_ITEM read already
+    // established.
+    const defender = requireMoveDefender(lastMoveAttacker, "hung-on-with message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_LAST_ITEM: () => factoryItemDisplayName(heldItems[defender]),
+    });
+  }
+  if (messageId === "STRINGID_PKMNSAFEGUARDEXPIRED") {
+    // BattleScript_SafeguardEnds: runScreenFieldCase's own tick
+    // (battleEndTurnOrchestration.ts:1916-1924) shares the identical
+    // enterTickBattlerContext-set selectorRoles.attacker shape
+    // STRINGID_PKMNSXWOREOFF already uses. {B_ATK_PREFIX3} resolves through
+    // the identical "Ally"/"Foe" side text as {B_ATK_PREFIX1}
+    // (battle_message.c:2649-2668: sText_AllyPkmnPrefix/AllyPkmnPrefix3 are
+    // both literally "Ally", sText_FoePkmnPrefix2/FoePkmnPrefix4 both
+    // literally "Foe" -- distinct string constants, identical text).
+    if (actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot`);
+    }
+    const battler = singlesBattler(actionSnapshot.attacker, `${messageId} action snapshot`);
+    return resolveBattleStringLines(messageId, {
+      B_ATK_PREFIX3: () => (battler === 0 ? "Ally" : "Foe"),
+    });
+  }
+  if (messageId === "STRINGID_PKMNTOOKATTACK") {
+    // BattleScript_MonTookFutureAttack: runFutureAttacksAfterFaints's own
+    // tick (battleEndTurnOrchestration.ts:2246-2264) reassigns selectorRoles
+    // to the ORIGINAL caster (attacker) and the delayed hit's own recipient
+    // (target) -- in this engine's singles-only scope the recipient is
+    // always the singles-opposite of the caster, the same requireMoveDefender
+    // relationship every other plain-idiom id already uses.
+    if (actionSnapshot === null || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot/move substitution`);
+    }
+    const caster = singlesBattler(actionSnapshot.attacker, `${messageId} action snapshot`);
+    const defender = requireMoveDefender(caster, "took-attack message");
+    const moveName = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_BUFF1: () => moveName,
+    });
+  }
   const resolvers: Record<string, () => string> = {};
   if (lastMoveAttacker !== null) {
     const displayed = fieldBattler(field, lastMoveAttacker);
@@ -2309,6 +2542,7 @@ export function projectBattleResolutionCommands(
         advance:
           payload.messageId === "STRINGID_TARGETFAINTED"
           || payload.messageId === "STRINGID_ATTACKERFAINTED"
+          || TERMINAL_SEAM_BUTTON_MESSAGE_IDS.has(payload.messageId)
             ? "button"
             : "automatic",
         timing: STAT_CHANGE_MESSAGE_IDS.has(payload.messageId)
@@ -2317,6 +2551,16 @@ export function projectBattleResolutionCommands(
       }));
       pendingStatusMessageBattler = null;
       pendingHeldItemEffectBattler = null;
+      continue;
+    }
+    if (payload.kind === "trainer-slide-in" || payload.kind === "trainer-slide-out") {
+      commands.push(Object.freeze({
+        type: "trainer-slide",
+        eventSequence: event.sequence,
+        battler: singlesBattler(payload.battler, "trainer slide"),
+        direction: payload.kind === "trainer-slide-in" ? "in" as const : "out" as const,
+        timing: TRAINER_SLIDE_TIMING,
+      }));
       continue;
     }
     if (
@@ -2466,9 +2710,14 @@ export function projectBattleResolutionCommands(
         eventSequence: event.sequence,
         battler: singlesBattler(payload.battler, "sprite visibility"),
         visible: !payload.invisible,
-        // BtlController_EmitSpriteInvisibility is one controller callback;
-        // the receipt itself owns the relative display edge.
+        // Each of BtlController_EmitReturnMonToBall/EmitSpriteInvisibility is
+        // one controller callback; the receipt itself owns the relative
+        // display edge.
         timing: Object.freeze({ minimumFrames: 1 as const }),
+        // See the "sprite-visibility" command type's own doc comment: only
+        // Cmd_various's VARIOUS_RETURN_OPPONENT_MON1/MON2 case is the real
+        // CONTROLLER_RETURNMONTOBALL receipt.
+        recall: event.provenance?.opcodeName === "B_SCR_OP_VARIOUS",
       }));
       continue;
     }
