@@ -43,7 +43,7 @@ dismiss, and the re-ask:
   / 7043 frames / 204 captures.
 - `tools/battle-lab/scratch-postwin-retire-probe.json` — prefix + `DOWN`×3
   (cursor→RECORD→REST→RETIRE) + `A` (6649-6650, select RETIRE) + question
-  hold + `A` (6733-6734, dismiss = default NO) + re-ask settle. 30 segments
+  hold + `A` (6733-6734, dismiss = default NO) + re-ask settle. 35 segments
   / 7055 frames / 211 captures.
 
 Party staging is unchanged from the scout lineage (player GLALIE×3 with
