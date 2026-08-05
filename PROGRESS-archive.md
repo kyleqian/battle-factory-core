@@ -1,3 +1,47 @@
+## 938 — [bounded MAIN worker, 2026-08-05] #73 LOSS decline continuation CLOSED end-to-end: generic NO-decline farewell through free-roam, new canonical trace exact **155/155** twice fresh
+
+- **State:** master `39b30079` + `b6a5f9fa` + this docs commit, clean. New
+  `loss-terminal-decline-continuation-off` **155/155** twice fresh,
+  PNG-hash byte-identical on both sides; regressions re-held: LOSS **1943/1943**,
+  WIN **890/890**, win-beyond **228/228**; smoke 347/347; full `npm test` 727
+  files / **6,972 passed / 1 skipped** (+2 Tier-1) and `npm run build` green
+  (final gates below).
+- **Did:** closed #73's LOSS-decline gap by consuming `recordChoice` — the
+  shared `advanceFactoryTerminalRecordPrompt` now stores the decline edge
+  (the tick the record menu's NO is chosen, age 1757 = frame 4989 under the
+  app's release-age convention) and a second-A dismiss; every later clock is
+  edge-relative per `BattleFrontier_BattleFactoryLobby/scripts.inc:81-94`
+  (`EndRecordBattle`: `msgbox Text_LookForwardToNextVisit, MSGBOX_DEFAULT;
+  closemessage; setvar VAR_TEMP_CHALLENGE_STATUS, 255; releaseall`).
+  `factoryTerminalRender` draws the decline span: YES/NO window clears at
+  edge+1 (frame 4990), box wipes edge+3 (4992), the 35-glyph "We look
+  forward to your next visit." types 1 glyph/tick from edge+4 (4993, last
+  glyph edge+38, held from edge+39 with NO wait-cursor — measured), the
+  farewell's own A dismiss registers at edge+102 (5091), and the box closes
+  into the bare Lobby field at dismiss+2 (5093) — the field-only frame
+  `toEqual(renderFactoryTerminalField())`. NO only; the YES/cancel branches
+  stay unconsumed (record playback + GO ON selection remain out of scope).
+  Focused 1-tick scratch compares pinned the boundaries first (4988-5030
+  **43/43**, 5088-5094 **7/7**). New canonical trace
+  `tools/compare/traces/loss-terminal-decline-continuation-off.json`:
+  segments byte-for-byte the committed scratch-loss-beyond-boundary-probe
+  schedule, `captureFrames` dense 4939..5093 (155). Two red-verified Tier-1
+  pins (decline state machine + decline render, both fail with the old
+  unconsumed-recordChoice source stashed). The evidence trace
+  `loss-beyond-boundary-off` is unchanged: 162/183, all 183−162 residual
+  frames are the fixture's own post-5174 walk samples (out of scope — no
+  overworld movement subsystem built, per brief).
+- **Next:** #73's remaining LOSS-terminal boundary is the record-YES
+  playback + free-roam movement itself (a real overworld subsystem); WIN's
+  remaining boundary is the GO ON/RECORD/REST/RETIRE selection. Both need
+  new fixtures; the decline continuation here is exact end-to-end through
+  the idle free-roam field (5093+ static frames already byte-exact).
+- **Notes:** source-relative ages only, no absolute-frame/battle/fixture
+  branch; LOSS-profile decline fields are inert in WIN (record prompt never
+  reached in WIN windows). No new assets, no extractor change; the decline
+  renders through the existing record-prompt drawer + message-box
+  compositor. `PAPERCUT`: none new.
+
 ## 937 — [bounded MAIN worker, 2026-08-05] #73 WIN slice 4 CLOSED end-to-end: `win-terminal-window-off` extended and exact **890/890** through fixture endpoint 5512
 
 - **State:** master `77f3787a` + this docs commit, clean. Committed windows

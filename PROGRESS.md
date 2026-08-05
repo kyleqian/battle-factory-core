@@ -4,6 +4,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 941 — [bounded MAIN worker, 2026-08-05] #73 WIN type-commentary page promoted into the canonical window: `win-terminal-window-off` exact **2686/2686** through held boundary 7308
+
+- **State:** master `ee0f9b19`, clean. Extended canonical gate **2686/2686**
+  twice fresh (frames 4623-7308, 5372 PNGs byte-identical both runs);
+  regressions re-held: LOSS **1943/1943**, LOSS decline **155/155**,
+  win-beyond **228/228**, GO ON scout **143/143**, type-page **93/93**.
+  Full `npm test` **727 files / 6,972 passed / 1 skipped** and `npm run
+  build` green.
+- **Did:** promoted the supervisor-rerun opponent-type commentary evidence
+  (`win-go-on-type-commentary-off` 93/93) into the canonical Battle Scene
+  OFF WIN terminal acceptance window. **Pure data change — zero src edits.**
+  `win-terminal-window-off`'s scenario switched from
+  `scratch-win-go-on-scout-probe` to `scratch-win-go-on-type-commentary-probe`;
+  its segments are now byte-for-byte the newer fixture's own full 29-segment /
+  8138-frame schedule (prefix-proven before writing: the old canonical 27
+  segments == the prior fixture's full 27, and the prior fixture's 27 == the
+  newer fixture's first 27 — no invented input, nothing past the newer
+  fixture's single type-page A at 7237-7238), and `captureFrames` extend
+  contiguously 4623..7308 (2686 captures) through the genuine held
+  `MSGBOX_DEFAULT` no-favorite-type commentary boundary at 7308. The existing
+  `postwin` continuation machinery (`acceptPostwinDialoguePage` →
+  `dialoguePage 2` → `POSTWIN_SCOUTING_LINES[1]`) reproduced every boundary
+  with no calibration: held scouting page through 7239, box clear 7240, the
+  67-frame "The TRAINER appears to have no clear / favorites when it comes to
+  type." typing 7241-7307, wait-cursor hold from 7308.
+- **Next:** #73's remaining WIN boundaries are past the held type-commentary
+  page — the battle-style commentary page, the swap offer/decision, and the
+  unexercised RECORD/REST/RETIRE continuation choices, each needing its own
+  new fixture A press. LOSS's remaining boundary stays the record playback +
+  free-roam movement (a real overworld subsystem).
+- **Notes:** no absolute-frame/battle-number/fixture branch and no `src/` or
+  test edit. The canonical baseline 2082/2082 was re-run via the extension
+  itself (4623-6704 is a subset of the new dense span). The 27→29 segment
+  schedule change keeps the trace byte-for-byte the newer fixture's full
+  input prefix, so the oracle replay stays gapless. `PAPERCUT`: none new.
+
+---
 ## 940 — [supervisor fold, 2026-08-05] #73 WIN scouting page 2 bound: opponent-type commentary exact **93/93** through held boundary 7308
 
 - **State:** side evidence commit `d7c58d75` merged after main's canonical
@@ -65,46 +102,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   oracle replay stays gapless. `PAPERCUT`: none new.
 
 ---
-## 938 — [bounded MAIN worker, 2026-08-05] #73 LOSS decline continuation CLOSED end-to-end: generic NO-decline farewell through free-roam, new canonical trace exact **155/155** twice fresh
-
-- **State:** master `39b30079` + `b6a5f9fa` + this docs commit, clean. New
-  `loss-terminal-decline-continuation-off` **155/155** twice fresh,
-  PNG-hash byte-identical on both sides; regressions re-held: LOSS **1943/1943**,
-  WIN **890/890**, win-beyond **228/228**; smoke 347/347; full `npm test` 727
-  files / **6,972 passed / 1 skipped** (+2 Tier-1) and `npm run build` green
-  (final gates below).
-- **Did:** closed #73's LOSS-decline gap by consuming `recordChoice` — the
-  shared `advanceFactoryTerminalRecordPrompt` now stores the decline edge
-  (the tick the record menu's NO is chosen, age 1757 = frame 4989 under the
-  app's release-age convention) and a second-A dismiss; every later clock is
-  edge-relative per `BattleFrontier_BattleFactoryLobby/scripts.inc:81-94`
-  (`EndRecordBattle`: `msgbox Text_LookForwardToNextVisit, MSGBOX_DEFAULT;
-  closemessage; setvar VAR_TEMP_CHALLENGE_STATUS, 255; releaseall`).
-  `factoryTerminalRender` draws the decline span: YES/NO window clears at
-  edge+1 (frame 4990), box wipes edge+3 (4992), the 35-glyph "We look
-  forward to your next visit." types 1 glyph/tick from edge+4 (4993, last
-  glyph edge+38, held from edge+39 with NO wait-cursor — measured), the
-  farewell's own A dismiss registers at edge+102 (5091), and the box closes
-  into the bare Lobby field at dismiss+2 (5093) — the field-only frame
-  `toEqual(renderFactoryTerminalField())`. NO only; the YES/cancel branches
-  stay unconsumed (record playback + GO ON selection remain out of scope).
-  Focused 1-tick scratch compares pinned the boundaries first (4988-5030
-  **43/43**, 5088-5094 **7/7**). New canonical trace
-  `tools/compare/traces/loss-terminal-decline-continuation-off.json`:
-  segments byte-for-byte the committed scratch-loss-beyond-boundary-probe
-  schedule, `captureFrames` dense 4939..5093 (155). Two red-verified Tier-1
-  pins (decline state machine + decline render, both fail with the old
-  unconsumed-recordChoice source stashed). The evidence trace
-  `loss-beyond-boundary-off` is unchanged: 162/183, all 183−162 residual
-  frames are the fixture's own post-5174 walk samples (out of scope — no
-  overworld movement subsystem built, per brief).
-- **Next:** #73's remaining LOSS-terminal boundary is the record-YES
-  playback + free-roam movement itself (a real overworld subsystem); WIN's
-  remaining boundary is the GO ON/RECORD/REST/RETIRE selection. Both need
-  new fixtures; the decline continuation here is exact end-to-end through
-  the idle free-roam field (5093+ static frames already byte-exact).
-- **Notes:** source-relative ages only, no absolute-frame/battle/fixture
-  branch; LOSS-profile decline fields are inert in WIN (record prompt never
-  reached in WIN windows). No new assets, no extractor change; the decline
-  renders through the existing record-prompt drawer + message-box
-  compositor. `PAPERCUT`: none new.

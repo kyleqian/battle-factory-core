@@ -770,6 +770,20 @@ seam had masked:
   Existing `acceptPostwinDialoguePage` / `dialoguePage 2` rendering is the
   whole mechanism. Remaining WIN work narrows to the battle-style page, swap
   offer/decision, and the unexercised RECORD/REST/RETIRE continuation choices.
+- **2026-08-05 WIN opponent-type commentary promoted into the canonical
+  window: `win-terminal-window-off` is **2686/2686** exact twice fresh
+  through the held boundary at frame 7308, pure data change (zero src
+  edits).** The trace's scenario switches to
+  `scratch-win-go-on-type-commentary-probe.json` with segments byte-for-byte
+  the newer fixture's own full 29-segment/8138-frame schedule (prefix-proven
+  before switching: old canonical 27 == prior fixture's full 27 == newer
+  fixture's first 27) and `captureFrames` contiguous 4623..7308 (2686).
+  Existing `acceptPostwinDialoguePage` / `dialoguePage 2` /
+  `POSTWIN_SCOUTING_LINES[1]` reproduced every frame with no calibration.
+  Regressions re-held: LOSS 1943/1943, LOSS decline 155/155, WIN beyond
+  228/228, GO ON scout 143/143, type-page 93/93. Remaining WIN work narrows
+  to the battle-style page, swap offer/decision, and the unexercised
+  RECORD/REST/RETIRE continuation choices.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
