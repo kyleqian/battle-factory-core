@@ -286,6 +286,24 @@ function generatedBattleStartIntroMagnetonStage(state: EngineState): EngineState
 // depend on which species/moves populate that scaffold. Same values
 // tests/presentationTerminalSeamTrainerSlide.test.ts's terminalResolution()
 // helper uses.
+//
+// `hp: 0` on both (docs/terminal-seam-win-window-probe.md §5): this window's
+// own real orchestrator (`createFactoryRoundBattleOrchestrator({rngValue: 4,
+// ...})`) generates its own, disjoint real parties for
+// `state.round.rules.playerParty`/`currentOpponent.party` -- whatever species
+// that RNG draw actually produces, NOT these placeholder MURKROWs (never
+// rendered; both battlers are recalled/invisible for this window's entire
+// span). `finishBattle` carries `id`/`maxHp` from that real party but
+// overlays `hp` from this synthetic one (`battleResolutionAdapter.ts`'s
+// `deriveBattleParty`), so this placeholder's `hp` must fall inside
+// `[0, realMaxHp]` for a `realMaxHp` this scaffold never sees -- 0 is the one
+// value that satisfies that bound for any positive real max, and it is also
+// the narratively correct terminal value: both configs' own event chains
+// below narrate exactly this battler fainting (LOSS: battler 0, this
+// MURKROW's own Explosion self-KO; WIN: battler 1, the opponent's antecedent
+// faint). `maxHp` stays 200 (a fainted mon's own display max, discarded by
+// `deriveBattleParty` regardless -- never the value that reaches
+// `assertBattleMon`).
 const TERMINAL_SEAM_SCAFFOLD_PLAYER: FactoryFullTurnBattlerConfig = Object.freeze({
   // MURKROW -- matches the real committed fixture's own last-to-faint player
   // mon (docs/terminal-seam-loss-path-ground-truth.md §2, frame 2896:
@@ -304,7 +322,7 @@ const TERMINAL_SEAM_SCAFFOLD_PLAYER: FactoryFullTurnBattlerConfig = Object.freez
   spAttack: 80,
   spDefense: 80,
   speed: 120,
-  hp: 200,
+  hp: 0,
   maxHp: 200,
   types: ["TYPE_BUG", "TYPE_FLYING"] as const,
 });
@@ -322,7 +340,7 @@ const TERMINAL_SEAM_SCAFFOLD_TRAINER: FactoryFullTurnBattlerConfig = Object.free
   spAttack: 60,
   spDefense: 60,
   speed: 60,
-  hp: 200,
+  hp: 0,
   maxHp: 200,
   types: ["TYPE_DARK", "TYPE_FLYING"] as const,
 });
