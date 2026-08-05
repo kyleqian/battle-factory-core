@@ -43,15 +43,6 @@ at the fixture's fight-menu-open checkpoint), so the §6 dense-compare
 acceptance for slices 1-3 is unexecuted — Tier-1 + differential cover the
 change, pixel compare remains.
 
-## #79 — Live play: Fly's semi-invisible turn leaves the sprite visible (verify first)
-
-**User play-test 2026-08-05** (user asked for a double-check): MURKROW used
-FLY and its sprite stayed on screen during the airborne turn. The kernel
-emits `set-battler-sprite-visibility` (moveend Dig/Fly toggle); the live
-presentation may not consume it mid-battle. First a short OFF-profile oracle
-probe of the real visible behavior, then wire the existing signal through if
-confirmed.
-
 ## #80 — Live play: in-battle party/switch menu is scaffolding-grade
 
 **User play-test 2026-08-05:** the party menu opened for switching "looks

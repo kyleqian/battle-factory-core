@@ -5,6 +5,42 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 952 — [bounded MAIN worker, 2026-08-05] ISSUES #79 CLOSED: airborne FLY/Dig sprite hidden through the fight-menu handoff
+
+- **State:** master `21128f7a`, clean. Red-verified Tier-1 pins + fix committed.
+- **Did:** ground truth (`docs/fly-semi-invisible-off-ground-truth.md`) said the
+  consumption chain "looks wired end-to-end" — and the resolution path is
+  (Tier-1-pinned). The break was the **fight-menu draw path**: the turn boundary
+  hands the scene to `renderGeneratedBattleCommandPresentation` →
+  `drawBattle2ActionMenuWindow`, which drew the fieldArt opponent/player sprites
+  unconditionally — so the airborne opponent's sprite reappeared for the entire
+  turn-boundary menu idle (~1200 of the staged trace's frames 333-1523). Fix is
+  generic: `BattleCommandPresentationState` gains a persistent
+  `spriteVisibility {player,opponent}`; `settledCommandForResolutionHandoff`
+  threads it from the orchestrator `battlePresentationBoundaries` (already
+  updated by `commitCompletedResolutionCommand` on every sprite-visibility
+  receipt); the render view exposes it; `drawBattle2ActionMenuWindow` gates the
+  sprite draws on it with the healthbox untouched (real
+  `OpponentHandleSpriteInvisibility` semantics — Dig/Fly hides sprite only,
+  recall hides both); the resolution confirmHandoff branch passes the
+  resolution view's own visibility. Pins: `tests/flySemiInvisibleSceneOffPresentation.test.ts`
+  (4 tests, each red-verified before the fix): (1) OFF-kernel ONIX-SPLASH vs
+  MURKROW-FLY charge + locked strike — sprite hidden from the charge moveend
+  through the strike, healthbox always true, restored at the strike moveend;
+  (2) DIG sibling same toggle, healthbox never hidden; (3) fight-menu handoff
+  carries `spriteVisibility.opponent === false` after the charge; (4) the
+  fight-menu renderer's hidden-opponent frame differs from the visible frame
+  only in the sprite region.
+- **Next:** #81 torment message, #80 party-menu inventory, #55 provenance
+  wiring, #78's recall-span slice 4.
+- **Notes:** full `npm test` **730 files / 6,991 passed / 1 skipped**, build
+  green, typecheck green, smoke 347/347, and insurance
+  `compare:differential --base a0b9ad9a` **384/384 byte-identical**
+  (battle-command-generated-off 128/128, turn15-fly-strike 256/256 — the
+  canonical Fly window unmoved).
+
+---
+
 ## 951 — [bounded MAIN worker, 2026-08-05] ISSUES #78 slices 1-3 landed: mid-battle switch cadence + materialize + healthbox slide
 
 - **State:** master `db74b38c`, clean. Three green commits on top of the #77
