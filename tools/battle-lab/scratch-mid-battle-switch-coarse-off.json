@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "mode": "mechanicLab",
+  "profile": "battle-scene-off",
+  "level": 50,
+  "challengeNum": 2,
+  "battleNum": 2,
+  "trainerId": 110,
+  "playerSetIds": [274, 354, 338],
+  "opponentSetIds": [349, 339, 327],
+  "seed": 1,
+  "overrides": {
+    "parties": {
+      "player": [
+        {"species": 19, "level": 50, "nature": 0,
+         "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31},
+         "evs": {"hp": 0, "attack": 0, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0},
+         "moves": [150, 150, 150, 150], "ppUps": [0, 0, 0, 0], "item": 0, "abilitySlot": 0},
+        {"species": 19, "level": 50, "nature": 0,
+         "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31},
+         "evs": {"hp": 0, "attack": 0, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0},
+         "moves": [150, 150, 150, 150], "ppUps": [0, 0, 0, 0], "item": 0, "abilitySlot": 0},
+        {"species": 19, "level": 50, "nature": 0,
+         "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31},
+         "evs": {"hp": 0, "attack": 0, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0},
+         "moves": [150, 150, 150, 150], "ppUps": [0, 0, 0, 0], "item": 0, "abilitySlot": 0}
+      ],
+      "opponent": [
+        {"species": 19, "level": 50, "nature": 0,
+         "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31},
+         "evs": {"hp": 0, "attack": 0, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0},
+         "moves": [150, 150, 150, 150], "ppUps": [0, 0, 0, 0], "item": 0, "abilitySlot": 0},
+        {"species": 19, "level": 50, "nature": 0,
+         "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31},
+         "evs": {"hp": 0, "attack": 0, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0},
+         "moves": [150, 150, 150, 150], "ppUps": [0, 0, 0, 0], "item": 0, "abilitySlot": 0},
+        {"species": 19, "level": 50, "nature": 0,
+         "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31},
+         "evs": {"hp": 0, "attack": 0, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0},
+         "moves": [150, 150, 150, 150], "ppUps": [0, 0, 0, 0], "item": 0, "abilitySlot": 0}
+      ]
+    }
+  },
+  "trace": {
+    "segments": [
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 18, "buttons": []},
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 700, "buttons": []},
+      {"frames": 2, "buttons": ["DOWN"]},
+      {"frames": 38, "buttons": []},
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 118, "buttons": []},
+      {"frames": 2, "buttons": ["RIGHT"]},
+      {"frames": 38, "buttons": []},
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 38, "buttons": []},
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 900, "buttons": []}
+    ],
+    "captureFrames": [0, 700, 720, 722, 724, 760, 762, 764, 800, 850, 880, 882, 884, 920, 922, 924, 950, 960, 962, 964, 970, 975, 980, 985, 990, 995, 1000, 1010, 1020, 1030, 1040, 1050, 1060, 1070, 1080, 1090, 1100, 1110, 1120, 1130, 1140, 1150, 1160, 1170, 1180, 1190, 1200, 1210, 1220, 1230, 1240, 1250, 1260, 1270, 1280, 1290, 1300, 1320, 1340, 1360, 1380, 1400, 1420, 1440, 1460, 1480, 1500, 1550, 1600, 1650, 1700, 1750, 1800, 1863]
+  }
+}
