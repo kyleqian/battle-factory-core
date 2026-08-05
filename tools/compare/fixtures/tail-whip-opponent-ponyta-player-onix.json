@@ -1,0 +1,52 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-tail-whip-opponent-ponyta-player-onix.json",
+  "probe": "tools/compare/tailWhipProbe.py",
+  "pair": "FRONTIER_MON_PONYTA_1 record 191 (opponent-front) -> legal ONIX (player-back)",
+  "orientation": "opponent-to-player",
+  "move": "TAIL_WHIP",
+  "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 153,
+    "frameCount": 77
+  },
+  "appStage": {
+    "presentationAge": 0
+  },
+  "attacker": {
+    "species": "PONYTA",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 16 },
+      "animationCenter": { "x": 176, "y": 48 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 80 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "playerMaxHp": 117,
+    "opponentHp": 143,
+    "opponentMaxHp": 143,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "tail-whip-dense-evidence/v1",
+  "evidenceSha256": "5a1a6ae14bd8b6d8dbef997b6814cb577bf34c779d9d9b77045cc4b3ccff9c78",
+  "secondFreshEvidenceSha256": "5a1a6ae14bd8b6d8dbef997b6814cb577bf34c779d9d9b77045cc4b3ccff9c78",
+  "rawRgbSha256": "02197a46c6b798f43b136f48c284d85339d85f60982255e69d6da8038bfc2f93",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 77,
+    "reason": "complete Scene-ON production framebuffer identity proven twice fresh"
+  }
+}

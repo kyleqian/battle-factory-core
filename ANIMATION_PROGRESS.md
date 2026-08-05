@@ -1,5 +1,41 @@
 # Animation coverage
 
+## MOVE_TAIL_WHIP closed — 77/77 both orientations twice-fresh, promoted to exact (2026-08-04 evening)
+
+- **State:** TAIL_WHIP (new move) → **exact**. Move coverage: **109/276 exact,
+  0 partial, 0 staged, 167 unsupported**. Both fixtures pin
+  `framebufferMatching: 77` with status `exact`.
+- **Did:** full new-move acceptance, **zero new source components** (the
+  entire script is `loopsewithpan SE_M_TAIL_WHIP` + one
+  `AnimTask_TranslateMonEllipticalRespectSide(ANIM_ATTACKER,12,4,2,3)`).
+  Landed the reducer (`src/animation/tailWhip.ts`), Scene-ON seam route
+  (`SceneOnTailWhipConfig/View`), `battleScene.ts` draw case (Ponyta attacker
+  at spriteCorner + displayed elliptical offset over Onix; Ponyta back/front
+  from the shared gen assets — no new art), the two mechanic scenarios
+  (FRONTIER_MON_PONYTA_1 record 191, all four slots TAIL_WHIP, vs legal
+  ONIX), `tailWhipProbe.py`, `tailWhipPortable.ts`, two
+  scene-on-portable-evidence/v1 fixtures, and `tailWhip.test.ts` +
+  `tailWhipEvidence.test.ts`.
+- **Measured:** player-back frames 73-149 and opponent-front frames 77-153,
+  both 77/77 twice fresh via the portable — evidence
+  `24e2ecd6…`/`5a1a6ae1…`, RGB `3a1363ef…`/`02197a46…` reproduce the fixture
+  pins exactly. **Key mechanism:** the battler x2/y2 passes the elliptical
+  task → software sprite → OAM pipeline **two displays behind** the dense
+  index (the oracle's framebuffer shows software-OAM step θ=8 on dense age 3,
+  not 1), so the reducer's displayed angle is `8*(age-1)` for ages 2..63;
+  loop-1 wrap renders the origin at age 33, and the terminal θ=240 (age 63)
+  precedes the θ=248 wrap that resets and destroys the task (no trailing
+  offset frame). The probe-derived frames are the `animationBoundaryRatchet`
+  and gameplay-stability pins.
+- **Next:** MOVE_IRON_DEFENSE (CLAMPERL record 134) — per supervisor
+  component analysis 20 Level-50 moves still need zero new components.
+- **Notes:** no `extract*Assets` step (the move spawns no effect sprites — SE
+  + mon translation only); enemy shadow stays invisible
+  (`SpriteCB_SetInvisible`) across both windows; the Onix target's Defense
+  stage is already −1 at the first dense frame (stat stage applies before the
+  animation) and is treated as an immutable field input, never advanced by
+  the reducer. No boundary widening, no new unsupported barriers.
+
 ## MOVE_STEEL_WING closed — 197/197 both orientations twice-fresh, promoted to exact (2026-08-04 evening)
 
 - **State:** STEEL_WING partial → **exact**. Move coverage: **108/276 exact, 0
