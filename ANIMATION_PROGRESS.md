@@ -1,5 +1,52 @@
 # Animation coverage
 
+## MOVE_METAL_CLAW closed — 140/140 both orientations twice-fresh, promoted to exact (2026-08-05 morning session)
+
+- **State:** METAL_CLAW (new move) → **exact**. Move coverage: **111/276 exact,
+  0 partial, 0 staged, 165 unsupported**. Both fixtures pin
+  `framebufferMatching: 140` with status `exact`.
+- **Did:** full new-move acceptance reusing only established source-faithful
+  components — non-permanent `metallic_shine` (accepted HARDEN body), the
+  6×4 `gHorizontalLungeSpriteTemplate`, the `create_claw_slash_sprite`
+  5-frame art/callback, and `shake_mon_or_platform -4,1,10,SHAKE_MON_Y`. The
+  script is `loopsewithpan SE_M_HARDEN` + shine → wait → two strikes, each a
+  lunge, a delay-2 SE_M_RAZOR_WIND, a mirrored claw-slash pair at the
+  target's `BATTLER_COORD_X_2/Y_PIC_OFFSET` ±10, and the target shake.
+  Landed the reducer (`src/animation/metalClaw.ts`): shine at ages 0..95,
+  first lunge tick 98, first slashes+shake at 103, second lunge tick 112,
+  second mirrored slashes+shake at 117, 21-frame slash lifetime, and the
+  11-frame pairwise `gSpriteCoordOffsetY` pattern [0,4,4,0,0,4,4,0,0,4,0].
+  Added the typed `SceneOnMetalClawConfig/View` + `sceneOnMetalClawView`
+  seam, the `battleScene.ts` draw case (grayscale attacker + masked metal
+  sweep, lunged attacker, shaken ONIX, both claw-slash groups), the two
+  mechanic scenarios (FRONTIER_MON_CHARMANDER record 88, all four slots
+  METAL_CLAW, vs legal ONIX), `metalClawProbe.py` (dense 227-366/229-368,
+  metallic + loop-SE tasks, claw/lunge/shake sprite families, registers,
+  palettes, hardware OAM, se1 audio, RGB), `metalClawPortable.ts`, the two
+  scene-on-portable-evidence/v1 fixtures, and `metalClaw.test.ts` +
+  `metalClawEvidence.test.ts`. No new art: CHARMANDER back/front from the
+  shared battle-back/opponent-front assets, claw-slash art reused from
+  dragon-claw.json.
+- **Measured:** player-back frames 227-366 and opponent-front frames 229-368,
+  both **140/140 twice fresh** via the portable (reducer-vs-oracle lunge /
+  shake / slash semantic identity also 140/140 each run). Evidence
+  `db095360…`/`21a1e2ae…`, RGB `55859416…`/`0ff639d1…` reproduce the fixture
+  pins exactly. **Pipeline facts:** the claw-slash sprite spawns at the
+  target's `BATTLER_COORD_Y_PIC_OFFSET`, which for a player-back target is
+  the OAM centre +8 (ONIX player-back = 88, not 80 — this is why the
+  ironDefense-opponent fixture's `animationCenter {72,80}` was never
+  position-sensitive for that move). The two strikes' slash groups overlap
+  for 7 frames (the first group's 21-frame lifetime spans the second
+  strike's spawn), and the shake coordinate alternates in pairs (not
+  alternating single frames as the DRAGON_CLAW shake's own probe-derived
+  table does).
+- **Next:** continue the zero-new-component Level-50 ladder (17 remain).
+- **Notes:** the damage/HP bar resolution happens after the animation window
+  (opponent stays 110/110 throughout), so the field profile carries the
+  pre-drain HP as an immutable input. No boundary widening, no new
+  unsupported barriers. `factoryAnimationInventory.test.ts` summary pin
+  moved 110→111 / 166→165 with the promotion.
+
 ## Supervisor wind-down — three moves promoted in one session: STEEL_WING, TAIL_WHIP, IRON_DEFENSE (2026-08-04 evening session)
 
 - **State:** move coverage went **107 exact / 1 partial → 110/276 exact, 0

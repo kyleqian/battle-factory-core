@@ -992,6 +992,7 @@ import {
   sceneOnNeedleArmView,
   sceneOnSandstormView,
   sceneOnDragonClawView,
+  sceneOnMetalClawView,
   sceneOnSingView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
@@ -1335,6 +1336,7 @@ const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, Oppone
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
 const ponytaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PONYTA!;
 const clamperlFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CLAMPERL!;
+const charmanderFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CHARMANDER!;
 const houndourFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HOUNDOUR!;
 const delibirdFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DELIBIRD!;
 const mareepFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAREEP!;
@@ -2489,6 +2491,7 @@ const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
 const ponytaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PONYTA!;
 const clamperlBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CLAMPERL!;
+const charmanderBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CHARMANDER!;
 const houndourBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HOUNDOUR!;
 const magbyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGBY!;
 const mareepBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAREEP!;
@@ -34065,6 +34068,151 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "ALTARIA used" : "Foe ALTARIA used",
       "DRAGON CLAW!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "METAL_CLAW") {
+    const view = sceneOnMetalClawView(state);
+    // OAM/palette/register writes become visible on the following display
+    // latch, so the shine sweep, the lunge offset, the target shake, and the
+    // claw slashes are all rendered one age behind the source state (same
+    // seam as HARDEN/IRON_DEFENSE/DRAGON_CLAW).
+    const displayed = sceneOnMetalClawView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "CHARMANDER"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CHARMANDER"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged METAL_CLAW pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? charmanderBackSprite : charmanderFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      state.age >= 2 && displayed.metallic.attackerGrayscale
+        ? grayscalePalette(attackerSprite.palette)
+        : attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0)
+        + displayed.targetGlobalY,
+    );
+    // Both battlers use OBJ priority 2; opponent-front sits below player-back.
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    if (state.age >= 2 && displayed.metallic.metalBgLoaded) {
+      drawMetallicShineMasked(
+        fb,
+        attackerSprite,
+        view.attacker.geometry.spriteCorner,
+        displayed.metallic.bg1X,
+        displayed.metallic.bg1Y,
+      );
+    }
+    const slashes = [...displayed.slashes].sort((a, b) => a.y - b.y);
+    for (const slash of slashes) {
+      const claw = subTileset(
+        dragonClawArt.clawSlash.tileset,
+        slash.animationFrame * 4,
+        4,
+      );
+      if (slash.animation === 1) {
+        drawSpriteSheetHFlip(
+          fb,
+          claw,
+          dragonClawArt.clawSlash.palette,
+          slash.x - 16,
+          slash.y - 16,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          claw,
+          dragonClawArt.clawSlash.palette,
+          slash.x - 16,
+          slash.y - 16,
+        );
+      }
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "CHARMANDER";
+    const playerSpecies = playerToOpponent ? "CHARMANDER" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CHARMANDER used" : "Foe CHARMANDER used",
+      "METAL CLAW!",
       99,
     );
     return;

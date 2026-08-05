@@ -537,6 +537,10 @@ import {
   type DragonClawState,
 } from "./dragonClaw.ts";
 import {
+  metalClawAtAge,
+  type MetalClawState,
+} from "./metalClaw.ts";
+import {
   singNotesBackToFrontAtAge,
   singPanTaskAtAge,
   type SingNote,
@@ -662,7 +666,8 @@ export interface SceneOnPresentationBattler {
     | "LUVDISC"
     | "DELIBIRD"
     | "PARASECT"
-    | "PONYTA";
+    | "PONYTA"
+    | "CHARMANDER";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1811,6 +1816,15 @@ export interface SceneOnDragonClawConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnMetalClawConfig {
+  readonly move: "METAL_CLAW";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source battler sprite `x/y`, used to initialize BG1_X/BG1_Y. */
+  readonly attackerSpriteCenter: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnSingConfig {
   readonly move: "SING";
   readonly attacker: SceneOnPresentationBattler;
@@ -1953,6 +1967,7 @@ export type SceneOnMoveConfig =
   | SceneOnShadowBallConfig
   | SceneOnEncoreConfig
   | SceneOnDragonClawConfig
+  | SceneOnMetalClawConfig
   | SceneOnSingConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
@@ -2423,6 +2438,12 @@ export interface SceneOnEncoreView extends EncoreState {
 }
 
 export interface SceneOnDragonClawView extends DragonClawState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnMetalClawView extends MetalClawState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2956,7 +2977,8 @@ export function createSceneOnMovePresentation<
     | SceneOnHeadbuttConfig | SceneOnBodySlamConfig | SceneOnSlamConfig
     | SceneOnSecretPowerConfig
     | SceneOnWhirlwindConfig | SceneOnBlockConfig
-    | SceneOnIronDefenseConfig,
+    | SceneOnIronDefenseConfig
+    | SceneOnMetalClawConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -5072,6 +5094,26 @@ export function sceneOnDragonClawView(
       attackerSide: state.config.attacker.geometry.side,
       attackerCenter: state.config.attacker.geometry.battlePositionCenter,
       targetCenter: state.config.target.geometry.animationCenter,
+    }),
+  };
+}
+
+/** `age=0` is the MetallicShine task creation frame (first displayed step at 2). */
+export function sceneOnMetalClawView(
+  state: SceneOnMovePresentationState,
+): SceneOnMetalClawView {
+  if (state.config.move !== "METAL_CLAW") {
+    throw new Error(`expected METAL_CLAW presentation, got ${state.config.move}`);
+  }
+  const config = state.config as SceneOnMetalClawConfig;
+  return {
+    age: state.age,
+    attacker: config.attacker,
+    target: config.target,
+    ...metalClawAtAge(state.age, {
+      attackerSide: config.attacker.geometry.side,
+      attackerCenter: config.attackerSpriteCenter,
+      targetCenter: config.target.geometry.animationCenter,
     }),
   };
 }
