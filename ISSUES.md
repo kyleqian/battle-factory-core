@@ -847,6 +847,16 @@ seam had masked:
   is already at battleIndex 1; aligning the synthetic stage's opponent/RNG
   provenance, without fixture branching, is the remaining far-side task.
   Evidence: `docs/post-terminal-beyond-boundary-win-go-on-guide-dismiss-evidence.md`.
+- **2026-08-05 source-order ownership fixed generically (`7708808c`):**
+  accepting GO ON now calls `preGenerateFactoryRoundNextOpponent` while the
+  defeated opponent remains current, before type/style commentary and the
+  swap offer, matching `AskSwapMon`'s `factory_generateopponentmons` order.
+  The pending generation owns its RNG receipt immediately and is published
+  after either swap result without rerolling; accept still draws its offered
+  party from the defeated opponent. Tier-1 pins cover timing, idempotence,
+  accept/decline publication, and live routing. This removes the controller-
+  sequencing ambiguity but does not synthesize the ROM's ambient VBlank draws,
+  so LILIANA-vs-ABBIE at frame 10638 remains #55 rather than a #73 timing fix.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
@@ -878,6 +888,13 @@ generates battle 2's ABBIE (id 73) while the ROM has already generated LILIANA
 (id 9) from the ambiently advanced `gRngValue`. This is the same unresolved
 stream/provenance class at a round boundary; it is not evidence for a
 trainer-specific presentation branch.
+
+**Ownership correction (2026-08-05, `7708808c`):** the generic round now
+pre-generates battleIndex+1 at the accepted GO ON/scouting boundary and
+publishes it after swap resolution, matching source `AskSwapMon`. This makes
+the modeled RNG spend occur at the right logical seam, but the synthetic
+terminal stage's input cursor still omits prior ambient VBlank interleaving;
+therefore it still selects ABBIE rather than the ROM's LILIANA.
 
 **Leads:** either extend the construction contract with an explicit
 interleaving representation (per-mon start cursors or a per-frame tick
