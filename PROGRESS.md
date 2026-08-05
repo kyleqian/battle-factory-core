@@ -5,6 +5,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 954 — [bounded MAIN worker, 2026-08-05] ISSUES #55 wiring landed: win-terminal scaffold produces the ROM's battle-2 LILIANA byte-for-byte
+
+- **State:** master `67211ca2`, clean. Typecheck green; smoke 7/347 green;
+  all five committed win/loss terminal traces byte-identical.
+- **Did:** wired receipt §7 into `winTerminalWindowStage`: `playerTrainerId`
+  `0x18CC699A`, real six saved rental set ids 156/149/180/188/184/135, the
+  synthetic terminal battle rngSeed transplanted to the probed pre-call
+  cursor `0x7399E3AE`, and new `config.adoptedNextOpponent` that
+  `preGenerateFactoryRoundNextOpponent` reads at the GO ON seam (per-mon
+  construction cursors `0x2F959DF4/0xBD6F8138/0xDE320F3A` via
+  `adoptFactoryOpponentSchedule`). Tier-1 pin: trainer 9 LILIANA, sets
+  169/170/130, KADABRA/WAILMER/NUZLEAF, items 214/221/142, personalities
+  `0x801D2ED7/0x0FFC69A4/0x1AE16FDA`, selection end cursor `0x50F04E72`.
+  Regression list byte-identical: win-terminal-window-off 3590/3590,
+  win-go-on-swap-offer-yes-off 248/248, no-off 213/213,
+  no-guide-dismiss-off 232/232, loss-terminal-window-off 1943/1943.
+- **Next:** (1) canonical-window extension past 10638 — the far side's
+  LILIANA quote text now matches the oracle, but the battle-room opponent
+  walk-in sprite still renders the static generic NPC
+  (`battleRoomRender.ts:253`); it needs trainer-class-specific overworld
+  sprites (LILIANA = School Kid F). Quote typing/msgbox at ~10724+ is already
+  LILIANA-exact; the sprite head/hair pixels remain (189px at 10718+).
+  (2) continue PROGRESS 953's ordered list (#78 slice 4, #81, #80, RECORD/
+  RETIRE, lobby).
+- **Notes:** `config.rngValue` stays 4 (it feeds the byte-identical battle-1
+  opponent; the GO-ON cursor is carried at the boundary instead — the
+  synthetic terminal resolution overwrites round.rules.rngValue before the
+  GO ON edge). Full `npm test` deferred per cap discipline; smoke + focused +
+  the compare list above are this step's acceptance.
+
+---
+
 ## 953 — [interactive supervisor WIND-DOWN, 2026-08-05] Session summary: 10 workers / 5 rounds — swap-YES 248/248, provenance receipt, 4 user play-test bugs closed same-day, RECORD/RETIRE ground truth, animation fold
 
 - **State:** master at this entry's commit, clean. Final independent union

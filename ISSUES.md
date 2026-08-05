@@ -924,6 +924,25 @@ seam had masked:
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
+**Wiring landed (2026-08-05, `67211ca2`):** the win-terminal scaffold
+(`tools/compare/appTrace.ts` `winTerminalWindowStage`) now carries the ROM's
+probed battle-2 schedule per receipt §7 — `playerTrainerId 0x18CC699A`, real
+six saved rental set ids, the synthetic terminal battle rngSeed transplanted
+to the probed pre-call cursor `0x7399E3AE`, and a new
+`FactoryRoundBattleOrchestratorConfig.adoptedNextOpponent` that
+`preGenerateFactoryRoundNextOpponent` reads at the GO ON seam, adopting the
+per-mon construction cursors so LILIANA (trainer 9) and her exact
+personalities (`0x801D2ED7/0x0FFC69A4/0x1AE16FDA`) reproduce byte-for-byte.
+Tier-1-pinned; all five committed win/loss terminal traces remain
+byte-identical (3590/3590, 248/248, 213/213, 232/232, 1943/1943).
+**Remainder (still-open stream-model boundary):** live generation with a
+single `constructionRngValue` still cannot express interleaved ambient ticks;
+the scaffold sidesteps it via adoption, it does not fix the contract. And the
+battle-room far side past 10638 still renders the static generic opponent NPC
+(`battleRoomRender.ts:253`) — LILIANA's School Kid F walk-in head/hair pixels
+and the quote timing past the window need the trainer-class-specific
+overworld sprite + canonical-window extension (NEXT SESSION's step).
+
 **Symptom:** `generateInitialFactoryRentals`'s `constructionRngValue`
 contract consumes construction draws back-to-back from one cursor, but on
 real hardware `CreateFrontierFactorySelectableMons` spans **53 video frames**
