@@ -1,0 +1,12 @@
+{
+  "schema": "scene-on-muddy-water-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-muddy-water-player-marshtomp-opponent-onix.json",
+  "probe": "tools/compare/muddyWaterProbe.py",
+  "orientation": "player-back MARSHTOMP -> opponent-front ONIX",
+  "currentMoveWindow": {"startFrame":39,"endFrame":634,"frameCount":596},
+  "sourceOwnedComponentWindow": {"startFrame":80,"endFrame":223,"frameCount":144},
+  "activeSourceScriptWindow": {"startFrame":80,"endFrame":222,"frameCount":143},
+  "evidenceSha256": "4e330cc3434534ff0789072dc123fa50c3122ac1e2a252d54bc8b42303a94a46",
+  "rawRgbSha256": "c527751a0307496a26e171c40dfa1b37ebaf12b46817fcbbb7f242ddb9e935bf"
+}

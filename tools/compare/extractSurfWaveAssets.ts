@@ -60,6 +60,7 @@ writeFileSync(out, `${JSON.stringify({
     opponentTilemap: "graphics/battle_anims/backgrounds/water_opponent.bin; gBattleAnimBgTilemap_SurfOpponent",
     surfPalette: "water.png palette; gBattleAnimBgPalette_Surf",
     muddyWaterPalette: "graphics/battle_anims/backgrounds/water_muddy.pal; gBattleAnimBackgroundImageMuddyWater_Pal",
+    muddyCarrier: "FRONTIER_MON_MARSHTOMP_2 set 295 back/front art",
     excluded: "contest tilemap is not required by Battle Factory single battles; no software sprite asset is loaded by create_surf_wave",
   },
   water: {
@@ -81,6 +82,14 @@ writeFileSync(out, `${JSON.stringify({
   wartortleFront: sprite(
     "graphics/pokemon/wartortle/anim_front.png",
     "graphics/pokemon/wartortle/normal.pal",
+  ),
+  marshtompBack: sprite(
+    "graphics/pokemon/marshtomp/back.png",
+    "graphics/pokemon/marshtomp/normal.pal",
+  ),
+  marshtompFront: sprite(
+    "graphics/pokemon/marshtomp/anim_front.png",
+    "graphics/pokemon/marshtomp/normal.pal",
   ),
 })}\n`);
 console.log(`wrote ${out}`);

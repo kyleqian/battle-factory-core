@@ -1503,7 +1503,8 @@ export interface SceneOnThunderWaveConfig {
 }
 
 export interface SceneOnSurfConfig {
-  readonly move: "SURF";
+  /** `Move_MUDDY_WATER` is the muddy-palette sibling of `Move_SURF`. */
+  readonly move: "SURF" | "MUDDY_WATER";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -4412,18 +4413,24 @@ export function sceneOnThunderWaveView(
   };
 }
 
-/** `age=0` is Move_SURF's active source-script offset-zero display. */
+/** `age=0` is the move's active source-script offset-zero display. */
 export function sceneOnSurfView(
   state: SceneOnSurfPresentationState,
 ): SceneOnSurfView {
-  if (state.config.move !== "SURF") {
-    throw new Error(`expected SURF presentation, got ${state.config.move}`);
+  if (state.config.move !== "SURF" && state.config.move !== "MUDDY_WATER") {
+    throw new Error(
+      `expected SURF presentation, got ${state.config.move}`,
+    );
   }
   return {
     age: state.age,
     attacker: state.config.attacker,
     target: state.config.target,
-    ...surfWaveAtAge(state.age, state.config.attacker.geometry.side),
+    ...surfWaveAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      { palette: state.config.move === "MUDDY_WATER" ? "muddy-water" : "surf" },
+    ),
   };
 }
 

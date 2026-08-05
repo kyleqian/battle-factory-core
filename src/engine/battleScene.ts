@@ -1706,11 +1706,14 @@ const surfWaveArt = surfWaveAsset as {
     rows: number;
     tiles: readonly { pixels: readonly number[]; subpalette: number }[];
     surfPalette: RgbColor[];
+    muddyWaterPalette: RgbColor[];
   };
   playerTilemap: Tilemap;
   opponentTilemap: Tilemap;
   wartortleBack: { tileset: Tileset; palette: RgbColor[] };
   wartortleFront: { tileset: Tileset; palette: RgbColor[] };
+  marshtompBack: { tileset: Tileset; palette: RgbColor[] };
+  marshtompFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const charmArt = charmAsset as {
   magentaHeart: { tileset: Tileset; palette: RgbColor[] };
@@ -18451,8 +18454,9 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
-  if (state.config.move === "SURF") {
+  if (state.config.move === "SURF" || state.config.move === "MUDDY_WATER") {
     const surfState = state as SceneOnSurfPresentationState;
+    const muddy = state.config.move === "MUDDY_WATER";
     const view = sceneOnSurfView(surfState);
     // Palette transfer and scanline-buffer selection precede the source
     // callbacks; BG scroll registers are already the current display values.
@@ -18465,19 +18469,21 @@ export function renderSceneOnMovePresentation(
       age: surfState.age
         - (surfState.config.attacker.geometry.side === "player" ? 1 : 2),
     });
+    const attackerSpecies = muddy ? "MARSHTOMP" : "WARTORTLE";
+    const targetSpecies = muddy ? "ONIX" : "SHUCKLE";
     const playerToOpponent =
-      view.attacker.species === "WARTORTLE"
+      view.attacker.species === attackerSpecies
       && view.attacker.geometry.side === "player"
-      && view.target.species === "SHUCKLE"
+      && view.target.species === targetSpecies
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "WARTORTLE"
+      view.attacker.species === attackerSpecies
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "SHUCKLE"
+      && view.target.species === targetSpecies
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
-        `unsupported staged SURF pair `
+        `unsupported staged SURF/MUDDY_WATER pair `
         + `${view.attacker.species}->${view.target.species}`,
       );
     }
@@ -18488,31 +18494,44 @@ export function renderSceneOnMovePresentation(
       battleBg.static.tilemap,
       battleBg.palette,
     );
-    const wartortle = playerToOpponent
-      ? surfWaveArt.wartortleBack
+    const attackerFront = muddy
+      ? surfWaveArt.marshtompFront
+      : surfWaveArt.wartortleFront;
+    const attackerBack = muddy
+      ? surfWaveArt.marshtompBack
+      : surfWaveArt.wartortleBack;
+    const attacker = playerToOpponent
+      ? attackerBack
       : {
-          ...surfWaveArt.wartortleFront,
-          tileset: subTileset(surfWaveArt.wartortleFront.tileset, 0, 8),
+          ...attackerFront,
+          tileset: subTileset(attackerFront.tileset, 0, 8),
         };
-    const shuckle = playerToOpponent
-      ? {
-          ...selfDestructArt.shuckleFront,
-          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
-        }
-      : selfDestructArt.shuckleBack;
+    const target = playerToOpponent
+      ? muddy
+        ? { ...onixFrontSprite, tileset: subTileset(onixFrontSprite.tileset, 0, 8) }
+        : {
+            ...selfDestructArt.shuckleFront,
+            tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+          }
+      : muddy
+        ? onixBackSprite
+        : selfDestructArt.shuckleBack;
     drawSpriteSheet(
       fb,
-      wartortle.tileset,
-      wartortle.palette,
+      attacker.tileset,
+      attacker.palette,
       view.attacker.geometry.spriteCorner.x,
       view.attacker.geometry.spriteCorner.y,
     );
+    const targetIdle = muddy && playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
     drawSpriteSheet(
       fb,
-      shuckle.tileset,
-      shuckle.palette,
-      view.target.geometry.spriteCorner.x,
-      view.target.geometry.spriteCorner.y,
+      target.tileset,
+      target.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
     );
 
     // BG1 is priority 1: it alpha-composites over the priority-2 field and
@@ -18522,7 +18541,9 @@ export function renderSceneOnMovePresentation(
       const tilemap = playerToOpponent
         ? surfWaveArt.playerTilemap
         : surfWaveArt.opponentTilemap;
-      const palette = [...surfWaveArt.water.surfPalette];
+      const palette = [...(muddy
+        ? surfWaveArt.water.muddyWaterPalette
+        : surfWaveArt.water.surfPalette)];
       const turns = displayedEffect.paletteRotations % 7;
       for (let i = 0; i < turns; i += 1) {
         const last = palette[7]!;
@@ -18578,7 +18599,7 @@ export function renderSceneOnMovePresentation(
       fb,
       0,
       composeOpponentHealthbox(healthboxAssemblyAssets, {
-        name: playerToOpponent ? "SHUCKLE" : "WARTORTLE",
+        name: playerToOpponent ? targetSpecies : attackerSpecies,
         level: 50,
         gender: "male",
         hpFraction: 1,
@@ -18588,13 +18609,13 @@ export function renderSceneOnMovePresentation(
     drawComposedPlayerHealthbox(
       fb,
       composePlayerHealthbox(playerHealthboxAssets, {
-        name: playerToOpponent ? "WARTORTLE" : "SHUCKLE",
+        name: playerToOpponent ? attackerSpecies : targetSpecies,
         level: 50,
         gender: "male",
         hpFraction: 1,
         status: "none",
-        currentHp: playerToOpponent ? 134 : 127,
-        maxHp: playerToOpponent ? 134 : 127,
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
       }),
     );
     drawTileBg(
@@ -18605,8 +18626,10 @@ export function renderSceneOnMovePresentation(
     );
     drawMessageTextLines(
       fb,
-      playerToOpponent ? "WARTORTLE used" : "Foe WARTORTLE used",
-      "SURF!",
+      playerToOpponent
+        ? `${attackerSpecies} used`
+        : `Foe ${attackerSpecies} used`,
+      muddy ? "MUDDY WATER!" : "SURF!",
       99,
     );
     return;

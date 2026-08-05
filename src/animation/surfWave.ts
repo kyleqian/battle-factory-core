@@ -1,5 +1,7 @@
 export type SurfWaveSide = "player" | "opponent";
 
+export type SurfWavePalette = "surf" | "muddy-water";
+
 export interface SurfWaveState {
   readonly active: boolean;
   readonly controllerPhase:
@@ -20,7 +22,7 @@ export interface SurfWaveState {
   }>;
   /** Number of source rotations of palette entries 1..7. */
   readonly paletteRotations: number;
-  readonly soundRestart: "SE_M_SURF" | null;
+  readonly soundRestart: "SE_M_SURF" | "SE_M_WHIRLPOOL" | null;
   readonly soundPan: number | null;
 }
 
@@ -30,17 +32,23 @@ const wrap9 = (value: number) => ((value % 512) + 512) % 512;
 
 /**
  * Pure source-relative port of `AnimTask_CreateSurfWave` and
- * `AnimTask_SurfWaveScanlineEffect`.
+ * `AnimTask_SurfWaveScanlineEffect`, shared by the `Move_SURF` and
+ * `Move_MUDDY_WATER` scripts (identical wave body; the muddy palette swap and
+ * the preceding `panse SE_M_WHIRLPOOL` pan sweep are the only source-owned
+ * differences).
  *
- * Age zero is the first display at `Move_SURF`; age 143 is the first fully
- * inactive display after BG1, blend registers, and the scanline task clear.
- * All timing below is relative to that source event.
+ * Age zero is the first display at the move's active script offset zero;
+ * age 143 is the first fully inactive display after BG1, blend registers,
+ * and the scanline task clear. All timing below is relative to that source
+ * event.
  */
 export function surfWaveAtAge(
   age: number,
   attackerSide: SurfWaveSide,
+  params: Readonly<{ palette?: SurfWavePalette }> = {},
 ): SurfWaveState {
   const player = attackerSide === "player";
+  const muddy = params.palette === "muddy-water";
   const step = Math.max(0, Math.min(133, age - 3));
   const halfStep = Math.ceil(step / 2);
   const risingEva = Math.min(13, halfStep);
@@ -70,6 +78,17 @@ export function surfWaveAtAge(
   const upper = player
     ? 112
     : Math.min(112, Math.max(0, age - 3));
+  // The muddy script runs its `panse` before `createvisualtask`, so the
+  // initial BG scroll write lands one display later: both orientations show
+  // the origin at age 4 instead of the surf player's `(0, -48)`.
+  const originAtAge4 = age === 4 && (!player || muddy);
+  // The muddy `panse SE_M_WHIRLPOOL` plays from the first display and its
+  // Task_PanFromInitialToTarget sweep is shown two displays behind the
+  // task's own accumulator (same display latency as the surf sound).
+  const whirlpoolTaskPan = (stepCount: number) => player
+    ? Math.min(63, Math.max(-64, -64 + 2 * stepCount))
+    : Math.max(-63, Math.min(63, 63 - 2 * stepCount));
+  const whirlpoolPan = age < 1 ? null : whirlpoolTaskPan(Math.max(1, age - 2) - 1);
 
   return {
     active: age >= 1 && age < SURF_WAVE_FRAME_COUNT - 1,
@@ -78,10 +97,10 @@ export function surfWaveAtAge(
     bgLoaded,
     bgScroll: age >= 4 && age <= 142
       ? {
-          x: !player && age === 4
+          x: originAtAge4
             ? 0
             : wrap9(initialX + dx * scrollStep),
-          y: !player && age === 4
+          y: originAtAge4
             ? 0
             : wrap9(initialY + dy * scrollStep),
         }
@@ -93,7 +112,17 @@ export function surfWaveAtAge(
     paletteRotations: age >= 4
       ? Math.floor(Math.min(132, age - 3) / 4)
       : 0,
-    soundRestart: age === 30 ? "SE_M_SURF" : null,
-    soundPan: age === 30 ? (player ? -62 : 61) : null,
+    soundRestart: muddy
+      ? age === 1
+        ? "SE_M_WHIRLPOOL"
+        : null
+      : age === 30
+        ? "SE_M_SURF"
+        : null,
+    soundPan: muddy
+      ? whirlpoolPan
+      : age === 30
+        ? (player ? -62 : 61)
+        : null,
   };
 }
