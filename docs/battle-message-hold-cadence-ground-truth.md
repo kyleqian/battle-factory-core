@@ -127,7 +127,7 @@ BattleScript_MoveEnd:::
 | --- | --- | --- | --- |
 | "X used Y!" (STRINGID_USEDMOVE) | `Cmd_attackstring` (`battle_script_commands.c:1191-1203`, sets `MSG_DISPLAY=0`) | **none** — held by animation+HP time, then replaced | — |
 | "A critical hit!" (STRINGID_CRITICALHIT) | `Cmd_critmessage` (`:1989-1999`, sets `MSG_DISPLAY=1`) | `waitmessage B_WAIT_TIME_LONG` (`battle_scripts_1.s:262`) | 64 |
-| "It's super effective!" (STRINGID_SUPEREFFECTIVE) / "It's not very effective..." (STRINGID_NOTVERYEFFECTIVE) / one-hit-KO / endured / failed / "doesn't affect" lines | `Cmd_resultmessage` (`battle_script_commands.c:2049-2135`, effectiveness ids at `:2065-2082`, sets `MSG_DISPLAY=1`) | `waitmessage B_WAIT_TIME_LONG` (`battle_scripts_1.s:264`) | 64 |
+| "It's super effective!" (STRINGID_SUPEREFFECTIVE) / "It's not very effective…" (STRINGID_NOTVERYEFFECTIVE) / one-hit-KO / endured / failed / "doesn't affect" lines | `Cmd_resultmessage` (`battle_script_commands.c:2049-2135`, effectiveness ids at `:2065-2082`, sets `MSG_DISPLAY=1`) | `waitmessage B_WAIT_TIME_LONG` (`battle_scripts_1.s:264`) | 64 |
 | **No** result line for a plain neutral hit with no flags | `Cmd_resultmessage` default branch (`:2124-2127`, `MSG_DISPLAY=0`, no print) | — | — |
 
 Miss path for reference (`BattleScript_PrintMoveMissed`,
@@ -170,7 +170,7 @@ commits the player's move):
 | "LOMBRE used WATER GUN!" (attackstring) | 44 | 64 | 21 | 65–182 | 183 (replaced) | 118 | 139 (44→182) |
 | "It's super effective!" (resultmessage) | 183 | 203 | 21 | 204–280 | 281 (replaced) | **77 = 64 + 13** | 98 (183→280) |
 | "NOSEPASS used EARTHQUAKE!" (attackstring) | 281 | 308 | 28 | 309–416 | 417 (replaced) | 108 | 136 (281→416) |
-| "It's not very effective..." (resultmessage) | 417 | 440 | 24 | 441–506 | 507 (box cleared) | **66 = 64 + 2** | 90 (417→506) |
+| "It's not very effective…" (resultmessage) | 417 | 440 | 24 | 441–506 | 507 (box cleared) | **66 = 64 + 2** | 90 (417→506) |
 
 Turn-end aftermath: opponent HP lands 105→70 during frame 179 (inside the
 "used" hold, `Cmd_datahpupdate`); player HP lands 135→116 at frame 413
@@ -185,14 +185,17 @@ What the numbers prove:
    exactly 64 frames plus a small turn-end remainder** (13 and 2 frames), and
    the box then *keeps showing the text* until the next event wipes it. The
    effective on-box time for "It's super effective!" is **98 frames**; for
-   "It's not very effective..." **90 frames**.
+   "It's not very effective…" **90 frames**.
 2. **The two `attackstring` boxes are NOT wait-gated**: their 118/108-frame
    holds are the Scene-OFF move execution (skipped attack/hit animation
    controller lifetime + health-bar drain). They are replaced, not cleared,
    by the following result message.
-3. **Typing is 1 glyph/frame** (21 glyphs → 21 frames; 24 glyphs → 24 frames;
-   25 glyphs → 24... the 28-frame typing of "NOSEPASS used EARTHQUAKE!" is 25
-   glyphs + space-cursor pauses) — consistent with Options text speed FAST.
+3. **Typing is 1 glyph/frame** — the source strings are `"It's super
+   effective!"` (21 glyphs → 21 frames, `battle_message.c:317`), `"It's not
+   very effective…"` (24 glyphs incl. the single U+2026 ellipsis → 24 frames,
+   `battle_message.c:316`), and `"NOSEPASS used EARTHQUAKE!"` (25 glyphs → 28
+   frames, the extra 3 being space-glyph/cursor frames). Consistent with
+   Options text speed FAST.
 4. Determinism: the whole 638-frame dense sweep re-run fresh is byte-identical
    (PNG `sha256` + semantic state).
 
@@ -294,8 +297,8 @@ ISSUES #77 direction ("a small constants family, not per-message work").
 - **Oracle:** replay
   `tools/battle-lab/scratch-message-hold-dense-probe.json` (or the full
   dense chunk set) and require, per §4: "It's super effective!" post-typing
-  hold = 64 (stable 204→267 before any turn-end), "It's not very
-  effective..." = 64 (441→504), with the box still showing the full line at
+   hold = 64 (stable 204→267 before any turn-end), "It's not very
+   effective…" = 64 (441→504), with the box still showing the full line at
   the end of the hold. Dense compare must show the message held, not
   cleared, across the whole 64-frame window.
 - **Full suite + build:** `npm test` and `npm run build` green at the commit.
