@@ -1,5 +1,49 @@
 # Animation coverage
 
+## MOVE_MUDDY_WATER closed — 144/144 both orientations twice-fresh, promoted to exact (2026-08-05 afternoon session)
+
+- **State:** MUDDY_WATER (new move) → **exact**. Move coverage: **114/276
+  exact, 0 partial, 0 staged, 162 unsupported**. Both fixtures pin
+  `framebufferMatching: 144` with status `exact`.
+- **Did:** full new-move acceptance reusing the already-exact
+  `create_surf_wave` component (the surfWave source audit already recorded
+  this distinct sibling). `Move_MUDDY_WATER` (battle_anim_scripts.s:8601)
+  is `panse SE_M_WHIRLPOOL attacker→target +2,0` followed by
+  `create_surf_wave palette=ANIM_SURF_PAL_MUDDY_WATER` + wait + end.
+  Generalized `surfWaveAtAge` to take a `palette` param — the muddy variant
+  keeps the identical wave/scanline/BG1 body, swaps the water palette, plays
+  the SE_M_WHIRLPOOL pan sweep from age 1 (player -64→+63, opponent +63→-63,
+  ±2/age, terminal one step earlier on the opponent side; track flags drop to
+  128 and the sound finishes at 122), and shows the origin scroll at age 4 on
+  the player side (the pre-wave panse shifts the initial BG write one display
+  later). Staged two complete legal mechanicLab parties
+  (FRONTIER_MON_MARSHTOMP_2 set 295, all four slots MUDDY_WATER, vs legal
+  ONIX — the only Factory MUDDY_WATER carrier, confirmed in the generated
+  mons data). Added MARSHTOMP back/front art to surf-wave.json via the
+  extended extractor, `muddyWaterProbe.py` (dense, SE_M_WHIRLPOOL + battler
+  RAM field profile), `muddyWaterPortable.ts`, the two
+  scene-on-portable-evidence fixtures, and `muddyWater.test.ts` (5 Tier-1
+  tests). The Scene-ON seam and battleScene.ts draw case were generalized to
+  both moves (muddy palette + MARSHTOMP/ONIX art + `MUDDY WATER!` text; the
+  ONIX target keeps its established opponent-front idle x2=+1).
+- **Measured:** player-back frames 80-223 and opponent-front frames 84-227,
+  both **144/144 source-component and shared-framebuffer exact twice fresh**
+  (semantic identity also 144/144 each run). Evidence `4e330cc3…` /
+  `f99e8df2…`, RGB `c527751a…` / `1167773f…` reproduce the fixture pins
+  exactly. Field profiles from fresh battler RAM: MARSHTOMP 145/145 vs ONIX
+  142/142 (both orientations, full HP and stat-neutral at the first dense
+  frame).
+- **Next:** continue the zero-new-component Level-50 ladder.
+- **Notes:** MUDDY_WATER is a **sibling move acceptance** — sharing the
+  surfWave reducer/tilemap/draw accepts no other move (SECRET_POWER's
+  Factory building dispatch keeps Move_STRENGTH). SURF remains exact at
+  144/144 (the generalized reducer defaults to the surf palette; surf
+  tests unchanged). `factoryAnimationInventory.test.ts` summary pin moved
+  113→114 / 163→162 with the promotion. No boundary widening, no new
+  unsupported barriers. The opponent pan sweep reaching its terminal one
+  step earlier than the player is a real source consequence of the
+  ±(64→63) vs ±(63→-63) ranges, not a fitting.
+
 ## MOVE_BULK_UP closed — 104/104 both orientations twice-fresh, promoted to exact (2026-08-05 midday session)
 
 - **State:** BULK_UP (new move) → **exact**. Move coverage: **113/276 exact, 0

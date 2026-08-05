@@ -677,7 +677,8 @@ export interface SceneOnPresentationBattler {
     | "PONYTA"
     | "CHARMANDER"
     | "LEDYBA"
-    | "PRIMEAPE";
+    | "PRIMEAPE"
+    | "MARSHTOMP";
   readonly geometry: SceneOnBattlerGeometry;
 }
 

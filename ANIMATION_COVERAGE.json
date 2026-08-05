@@ -1622,6 +1622,31 @@
    ]
   },
   {
+   "move": "MOVE_MUDDY_WATER",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage the sole Factory MUDDY_WATER carrier FRONTIER_MON_MARSHTOMP_2 (set 295, species 284) with all four active choices constrained to MUDDY_WATER and ONIX constrained to TACKLE in both Scene-ON orientations",
+    "the complete move-owned source body plus first inactive cleanup passes 144/144 source-reducer, typed-seam, software+hardware register/task/palette, SE_M_WHIRLPOOL identity/pan-sweep, raw-RGB, and shared-framebuffer frames twice fresh: player-back MARSHTOMP frames 80-223 and opponent-front MARSHTOMP frames 84-227, evidence digests 4e330cc3434534ff0789072dc123fa50c3122ac1e2a252d54bc8b42303a94a46 / f99e8df2cb9825aeec9308149c8a06cba6357febf8d48fe83854709eaf929e4a and raw-RGB digests c527751a0307496a26e171c40dfa1b37ebaf12b46817fcbbb7f242ddb9e935bf / 1167773f5335fb04e77420ac4f752b63623700882984eef57d817e5d0bbcd0d6",
+    "Move_MUDDY_WATER (battle_anim_scripts.s:8601) is panse SE_M_WHIRLPOOL attacker-to-target +2,0 followed by the already-exact create_surf_wave command with ANIM_SURF_PAL_MUDDY_WATER, waitforvisualfinish, end: the generalized surfWaveAtAge reducer takes a muddy-water palette parameter and ports the identical wave/scanline/BG body plus the pre-wave SE_M_WHIRLPOOL pan sweep (attacker -64/+63 start, +/-2 per age, terminal one step earlier on the opponent side, track flags dropping to 128 and finishing on schedule) and the one-display-later origin scroll on the player side at age 4",
+    "field-profile values derive from fresh battler RAM in the probe (player MARSHTOMP 145/145 vs opponent ONIX 142/142, both full HP and stat-neutral at the first dense frame); MARSHTOMP back/front art regenerates byte-for-byte via the extended tools/compare/extractSurfWaveAssets.ts and the shared source water tilemap/tiles feed both palettes",
+    "MUDDY_WATER is a sibling move acceptance of the exact SURF wave command: sharing the create_surf_wave reducer/tilemap/draw promotes no other move (MOVE_SECRET_POWER's Factory building dispatch keeps Move_STRENGTH, and every other Surf-wave consumer retains independent body/evidence); the factory animation inventory pin moves 113->114 exact / 163->162 unsupported with this promotion"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-muddy-water-player-marshtomp-opponent-onix.json",
+    "tools/battle-lab/mechanic-muddy-water-opponent-marshtomp-player-onix.json",
+    "tools/compare/fixtures/muddy-water-player-marshtomp-opponent-onix.json",
+    "tools/compare/fixtures/muddy-water-opponent-marshtomp-player-onix.json",
+    "tools/compare/muddyWaterProbe.py",
+    "tools/compare/muddyWaterPortable.ts",
+    "tools/compare/extractSurfWaveAssets.ts",
+    "src/animation/assets/surf-wave.json",
+    "src/animation/surfWave.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/muddyWater.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_MUD_SHOT",
    "status": "exact",
    "covered": [
