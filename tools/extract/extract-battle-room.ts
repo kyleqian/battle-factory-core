@@ -240,10 +240,20 @@ function writeJson(path: string, data: unknown): void {
   const fishermanFrames = extractSheet(join(REF, "graphics", "object_events", "pics", "people", "fisherman.png"));
   const fishermanPalette = loadJascPal(join(REF, "graphics", "object_events", "palettes", "npc_2.pal"));
 
+  // Generated round opponents resolve their walk-in sprite through the same
+  // facility-class lookup (see src/engine/factoryTrainerOverworldGfx.ts).
+  // Trainer 9 LILIANA is FACILITY_CLASS_SCHOOL_KID_F (female index 7) ->
+  // OBJ_EVENT_GFX_GIRL_3 (battle_tower.c:196/254) ->
+  // gObjectEventGraphicsInfo_Girl3 (object_event_graphics_info.h:286-303):
+  // sPicTable_Girl3 / OBJ_EVENT_PAL_TAG_NPC_2, the standard 9-frame sheet.
+  const girl3Frames = extractSheet(join(REF, "graphics", "object_events", "pics", "people", "girl_3.png"));
+  const girl3Palette = loadJascPal(join(REF, "graphics", "object_events", "palettes", "npc_2.pal"));
+
   writeJson(join(ASSETS_GEN, "battle-room-npcs.json"), {
     player: { frames: playerFrames, palette: playerPalette },
     scientist: { frames: scientistFrames, palette: scientistPalette },
     opponent: { frames: opponentFrames, palette: opponentPalette },
     fisherman: { frames: fishermanFrames, palette: fishermanPalette },
+    girl3: { frames: girl3Frames, palette: girl3Palette },
   });
 }
