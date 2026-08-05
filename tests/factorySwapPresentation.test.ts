@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState, tick } from "../src/engine/core.ts";
+import { CATEGORY_BY_SPECIES } from "../src/engine/factorySwapRender.ts";
 import rentalFixture from "../src/data/gen/battle1-swap-rentalmons-dump.json" with { type: "json" };
 import {
   CANONICAL_FACTORY_RENTAL_ROSTER,
   CANONICAL_SWAP_ENEMY_PARTY,
   CANONICAL_SWAP_PLAYER_PARTY,
   FACTORY_SWAP_ENTRY_READY_DELAY,
+  FACTORY_SWAP_SPECIES_FADE_ACTIVATE_ELAPSED,
   advanceFactorySwapPresentation,
   beginFactorySwapSummaryReturn,
   createCanonicalFactorySwapPresentation,
@@ -68,6 +70,7 @@ import {
 import {
   activateSpeciesNameFade,
   advanceSpeciesNameFade,
+  speciesNameColor,
 } from "../src/engine/speciesNameFade.ts";
 
 function advance(
@@ -513,6 +516,61 @@ describe("live Factory swap presentation adapter", () => {
     state = advance(state, 55);
     expect(state.selectedBallClock).toBe(113);
     expect(state.speciesNameFade).toEqual(expectedBreathe);
+  });
+
+  it("activates the entry species-breathe at the fade-settle + softwareFadeFinishing edge", () => {
+    // Swap_Task_HandleChooseMons' STATE_CHOOSE_MONS_INIT activates the
+    // species-name breathe once `!gPaletteFade.active` (battle_factory_screen.c
+    // :2638-2643). The entry fade-in settles visually at elapsed 58 (FADE_IN
+    // math), but gPaletteFade.softwareFadeFinishing holds `active` TRUE for
+    // five further ticks before clearing it (palette.c:807-823), so the
+    // activation edge is elapsed 63 — pinned against the oracle's first
+    // visible species-color step (docs/post-terminal-beyond-boundary-win-go-
+    // on-swap-offer-yes-decision-evidence.md §2).
+    let state = createCanonicalFactorySwapPresentation();
+    const beforeActivation = advance(
+      state,
+      FACTORY_SWAP_SPECIES_FADE_ACTIVATE_ELAPSED - 1,
+    );
+    expect(beforeActivation.speciesNameFade.active).toBe(false);
+
+    state = advance(beforeActivation, 1);
+    expect(state.speciesNameFade.active).toBe(true);
+    expect(state.speciesNameFade.coeff).toBe(0);
+    expect(state.speciesNameFade.renderCoeff).toBe(0);
+
+    // The 6-(1+16)+1 = 103-tick coeff-0 bounce plus the one-tick render lag:
+    // the first visible step (renderCoeff 1 -> RGB 239,0,0) lands at swap
+    // elapsed 167, exactly the oracle's first color change on the YES route.
+    const firstStep = advance(state, 167 - FACTORY_SWAP_SPECIES_FADE_ACTIVATE_ELAPSED);
+    expect(firstStep.speciesNameFade.renderCoeff).toBe(1);
+    expect(speciesNameColor(firstStep.speciesNameFade.renderCoeff))
+      .toEqual({ r: 239, g: 0, b: 0 });
+    const justBefore = advance(
+      state,
+      167 - FACTORY_SWAP_SPECIES_FADE_ACTIVATE_ELAPSED - 1,
+    );
+    expect(justBefore.speciesNameFade.renderCoeff).toBe(0);
+    expect(speciesNameColor(justBefore.speciesNameFade.renderCoeff))
+      .toEqual({ r: 255, g: 0, b: 0 });
+  });
+
+  it("resolves the picker category from the full Factory species-header data", () => {
+    // Source `Select_PrintMonCategory`/`Swap_PrintMonn` render
+    // `CopyMonCategoryText(SpeciesToNationalPokedexNum(species), text)`, the
+    // species' Pokedex category. The swap picker's map now derives from
+    // draft-pool-header.json (all 376 gBattleFrontierMons species) instead of
+    // a six-species hand-cast, so every swap-screen party member — including
+    // the WIN-route DUSCLOPS party this step binds — resolves a real
+    // category. The prior canonical values must not regress.
+    expect(CATEGORY_BY_SPECIES.DUSCLOPS).toBe("BECKON");
+    expect(CATEGORY_BY_SPECIES.ONIX).toBe("ROCK SNAKE");
+    expect(CATEGORY_BY_SPECIES.MAGBY).toBe("LIVE COAL");
+    expect(CATEGORY_BY_SPECIES.BAYLEEF).toBe("LEAF");
+    expect(CATEGORY_BY_SPECIES.GROVYLE).toBe("WOOD GECKO");
+    expect(CATEGORY_BY_SPECIES.MURKROW).toBe("DARKNESS");
+    expect(CATEGORY_BY_SPECIES.PIDGEOTTO).toBe("BIRD");
+    expect(CATEGORY_BY_SPECIES.SLAKING).toBe("LAZY");
   });
 
   it("pins the source moving-ball table to the relative entry epoch", () => {

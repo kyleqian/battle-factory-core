@@ -56,6 +56,7 @@ import textPaletteData from "../assets/gen/text-palette.json" with { type: "json
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import fontSmallData from "../data/gen/font-small.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
+import draftPoolHeaderData from "../data/gen/draft-pool-header.json" with { type: "json" };
 
 const menuBg = menuBgData as unknown as TileBg;
 const pokeball = pokeballData as {
@@ -103,14 +104,21 @@ const PLAYER_OPTIONS_ORIGIN = { x: 21 * 8, y: 14 * 8 } as const;
 const YES_NO_LABELS = ["YES", "NO"] as const;
 const YES_NO_ORIGIN = { x: 22 * 8, y: 14 * 8 } as const;
 
-const CATEGORY_BY_SPECIES: Readonly<Record<string, string>> = {
-  ONIX: "ROCK SNAKE",
-  MAGBY: "LIVE COAL",
-  BAYLEEF: "LEAF",
-  GROVYLE: "WOOD GECKO",
-  MURKROW: "DARKNESS",
-  PIDGEOTTO: "BIRD",
-};
+// Source `Select_PrintMonCategory`/`Swap_PrintMonn`
+// (reference/pokeemerald/src/battle_factory_screen.c) renders
+// `CopyMonCategoryText(SpeciesToNationalPokedexNum(species), text)` — the
+// species' Pokedex category name plus "POKéMON" — for whichever mon is under
+// the picker cursor. Every swap-screen party member is a Factory corpus
+// member, so the speciesHeaders extract (draft-pool-header.json, all 376
+// gBattleFrontierMons species) covers them all; keyed by the bare species
+// name the swap state carries.
+export const CATEGORY_BY_SPECIES: Readonly<Record<string, string>> =
+  Object.fromEntries(
+    (draftPoolHeaderData.speciesHeaders as ReadonlyArray<{
+      readonly name: string;
+      readonly category: string;
+    }>).map((header) => [header.name, header.category]),
+  );
 
 export interface FactorySwapRenderView {
   readonly state: FactorySwapState;

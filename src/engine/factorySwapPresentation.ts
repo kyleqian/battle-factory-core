@@ -218,7 +218,16 @@ export const CANONICAL_SWAP_ENEMY_PARTY: FactorySwapParty = [
 ];
 
 export const FACTORY_SWAP_ENTRY_READY_DELAY = 99;
-export const FACTORY_SWAP_SPECIES_FADE_ACTIVATE_ELAPSED = 59;
+// Swap_Task_HandleChooseMons' STATE_CHOOSE_MONS_INIT activates the species-name
+// breathe when `!gPaletteFade.active` (battle_factory_screen.c:2638-2643). The
+// fade's visual settle (bgY 0 at elapsed 58, the FADE_IN math above) is NOT
+// the activation edge: `softwareFadeFinishing` holds `gPaletteFade.active`
+// TRUE for five further ticks before it clears (palette.c:807-823), so the
+// activation the swap screen consumes lands at elapsed 63 (58 + 5). The app's
+// activate call at this elapsed becomes effective one tick later (the same
+// advance first no-ops on the inactive state, then activates), matching the
+// oracle's first visible species-color step exactly.
+export const FACTORY_SWAP_SPECIES_FADE_ACTIVATE_ELAPSED = 63;
 const INITIAL_FACTORY_SWAP_SPECIES_FADE: SpeciesNameFadeState = {
   active: false,
   tState: "run",
