@@ -4,6 +4,65 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 926 — [bounded MAIN worker, 2026-08-04 ~18:05] ISSUES #74 FIXED — generated-route player materialize tail-tick off-by-one, RAM-confirmed on both committed traces, prediction-pinned and exact; YOSHI 700/751 + MAGNETON 703/751 restored
+
+- **State:** master at this docs commit (src fix `src/engine/battleScene.ts`
+  + test update, prior commit). `npm test` **721/721 files, 6,927
+  passed/1 skipped**, `npm run build` green. `npm run compare --
+  factory-arbitrary-intro-yoshi-off --summary` **700/751** (run twice
+  fresh, byte-identical); `... -magneton-off --summary` **703/751** (same,
+  twice fresh byte-identical) — both exactly the predicted counts pinned
+  *before* the post-fix rerun, frames 640/621 now matched, zero newly-
+  mismatched frames. Insurance spot-check `battle2-player-sendout-dense`
+  **170/170**, unmoved.
+- **Did:** Step 1 (probe): RAM-probed the ACTUAL committed
+  `factory-arbitrary-intro-{yoshi,magneton}-off` battle-lab scenarios
+  directly (not just the banked KADABRA scenario) around the player
+  materialize/settle boundary. Both traces show the identical
+  species-agnostic 13-value descent (`14,13,...,2,0`) `docs/probes/
+  materialize-hitmarker-gating/` already found — confirming it on the two
+  actually-regressed leads (GRIMER, DELCATTY). Reconciling RAM ticks with
+  displayed pixels via this codebase's own established one-tick
+  write→display lag convention pins the exact defect:
+  `drawGeneratedPlayerMaterialize`'s mechanism-1 window
+  (`PLAYER_MATERIALIZE_START_TICK.._END_TICK`) consumes only
+  `MATERIALIZE_Y2_TABLE`'s first 11 of 12
+  entries, so the table's final value (`2`) is never drawn — the very next
+  tick (`PLAYER_MATERIALIZE_SETTLE_START_TICK`, 1664) falls straight to
+  `generatedPlayerMaterializeSettleY2`'s species branch, which drew flat
+  `y2=0` for every non-ONIX species. Frames 640 (YOSHI) and 621 (MAGNETON)
+  are exactly `playerVisualT=1664` in both traces — the shared missing
+  tick. This is why the old (pre-entry-894) all-species ONIX-wobble code
+  matched the oracle here: `PLAYER_SETTLE_WOBBLE_Y2_TABLE[0]` independently
+  RAM-derives to the same value (`2`) — two unrelated derivations agreeing
+  by coincidence, not because the wobble table is broadly correct. Verdict
+  **(a)**, crisp, with an exact named tick boundary — full evidence banked
+  at `docs/probes/generated-player-materialize-tail-tick/README.md`
+  (RAM dumps included).
+  Step 2 (fix): `generatedPlayerMaterializeSettleY2` now special-cases
+  `playerVisualT === PLAYER_MATERIALIZE_SETTLE_START_TICK`, returning
+  `MATERIALIZE_Y2_TABLE`'s last entry for every species (a no-op for ONIX,
+  which was already coincidentally correct there) before falling through
+  to the existing species-gated/flat logic for every later tick. No touch
+  to `PLAYER_MATERIALIZE_START_TICK`/`_END_TICK` (shared with the
+  out-of-scope canonical `drawPlayerMaterialize` path) or to
+  `battleMenu.ts` (out of scope per brief). Red-verified: reverting the
+  fix flips 3 of `tests/generatedPlayerMaterializeSettleSpecies.test.ts`'s
+  7 cases, which were pinning the pre-fix flat-0 behavior at this exact
+  tick; updated in the same commit to pin the corrected value (all 7
+  green post-fix).
+- **Next:** #74 closed below. Standing: #39, #55. Entry 922's flagged
+  possible-latent bug in `PLAYER_SETTLE_WOBBLE_Y2_TABLE`'s ONIX-only
+  partial application (ticks 1665-1669, the genuine per-species
+  `BACK_ANIM_V_SHAKE` portion) is untouched and still open — this step's
+  probe found no new evidence bearing on it (only the shared tail tick,
+  1664, was ever in scope here).
+- **Notes:** no PAPERCUT. The RAM-probe driver script and the app-side
+  `renderAppTrace`-instrumented clock-mapping script were both scratch
+  (not committed), same convention as this run's other RAM probes; only
+  the trimmed evidence windows are banked under `docs/probes/`.
+
+---
 ## 925 — [supervisor wind-down, 2026-08-04 ~17:15] Session close: LOSS window CLOSED 236/236 + WIN wired 65/65 + #75 same-day fix, #72 REACHABLE closed, Slice-D double premise-inversion resolved honestly; final union green 721 files / 6,927
 
 - **State:** master `3dd61f73` (final animation fold: Steel Wing
@@ -93,33 +152,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   flagged here only because it's easy to second-guess on a quick read.
 
 ---
-## 923 — [supervisor, 2026-08-04 ~16:50] R4-side WIN window merged (65/65 twice-run + supervisor rerun; LOSS holds 236/236 post-merge); #75 filed (button dismiss-skip race); R5's premise-stop accepted (#74 stays open, corrected); R6 launched (#75 fix, final round)
-
-- **State:** master at this docs commit. Post-merge supervisor reruns:
-  `win-terminal-window-off` **65/65**, `loss-terminal-window-off`
-  **236/236**. Worker gates at `af036937`: full suite 721 green, build
-  green, canary 128/128, LOSS unchanged by the shared-helper
-  generalization.
-- **Did:** (1) merged the WIN wiring (probe constants banked:
-  `readyTick=4262`/`dismissTick=4608`/`frozenCursorAge=346`; two
-  scaffold-side bugs found+fixed during transplant are documented in
-  `docs/terminal-seam-win-window-probe.md`); (2) filed **ISSUES #75** —
-  the genuine src race the WIN worker isolated (button messages ≥23
-  printable chars silently skip their dismiss wait → live-path crash;
-  independently corroborated by R1's test comment that dodged it);
-  (3) accepted R5's premise-stop as correct (`BattleAnimateBackSprite`
-  carries the SAME Scene-OFF gate — supervisor's own bisect-verdict
-  mechanism attribution was wrong; the bisect FACTS stand, #74 stays
-  open with the worker's sharper next-step: probe whether frames 640/621
-  sit in the affine-emerge window (alignment bug) or the settle window);
-  (4) during the #73 trim, briefly clobbered #74's entry with a bad
-  python slice — caught immediately and restored verbatim from git
-  (`61d1ffd5`) before commit.
-- **Next:** R6 in flight — MAIN: #75 invariant fix (button message never
-  completes without its dismiss input), red-verified on DESTIN's exact
-  23-char lines, regression sweep, optional WIN-window extension stretch.
-  Then wind-down: final animation fold, ONE full union suite,
-  play-preview rebuild, session report.
-- **Notes:** #74's open next-step is a next-session probe; the back/front
-  dispatchers both stay animation-lane-only consumers by real-game design
-  (both halves gated identically under Scene OFF).

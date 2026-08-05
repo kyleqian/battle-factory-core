@@ -1,3 +1,34 @@
+## 923 — [supervisor, 2026-08-04 ~16:50] R4-side WIN window merged (65/65 twice-run + supervisor rerun; LOSS holds 236/236 post-merge); #75 filed (button dismiss-skip race); R5's premise-stop accepted (#74 stays open, corrected); R6 launched (#75 fix, final round)
+
+- **State:** master at this docs commit. Post-merge supervisor reruns:
+  `win-terminal-window-off` **65/65**, `loss-terminal-window-off`
+  **236/236**. Worker gates at `af036937`: full suite 721 green, build
+  green, canary 128/128, LOSS unchanged by the shared-helper
+  generalization.
+- **Did:** (1) merged the WIN wiring (probe constants banked:
+  `readyTick=4262`/`dismissTick=4608`/`frozenCursorAge=346`; two
+  scaffold-side bugs found+fixed during transplant are documented in
+  `docs/terminal-seam-win-window-probe.md`); (2) filed **ISSUES #75** —
+  the genuine src race the WIN worker isolated (button messages ≥23
+  printable chars silently skip their dismiss wait → live-path crash;
+  independently corroborated by R1's test comment that dodged it);
+  (3) accepted R5's premise-stop as correct (`BattleAnimateBackSprite`
+  carries the SAME Scene-OFF gate — supervisor's own bisect-verdict
+  mechanism attribution was wrong; the bisect FACTS stand, #74 stays
+  open with the worker's sharper next-step: probe whether frames 640/621
+  sit in the affine-emerge window (alignment bug) or the settle window);
+  (4) during the #73 trim, briefly clobbered #74's entry with a bad
+  python slice — caught immediately and restored verbatim from git
+  (`61d1ffd5`) before commit.
+- **Next:** R6 in flight — MAIN: #75 invariant fix (button message never
+  completes without its dismiss input), red-verified on DESTIN's exact
+  23-char lines, regression sweep, optional WIN-window extension stretch.
+  Then wind-down: final animation fold, ONE full union suite,
+  play-preview rebuild, session report.
+- **Notes:** #74's open next-step is a next-session probe; the back/front
+  dispatchers both stay animation-lane-only consumers by real-game design
+  (both halves gated identically under Scene OFF).
+
 ## 922 — [bounded MAIN worker, 2026-08-04 ~17:45] R5 MAIN: STOPPED before wiring — ISSUES #74's back-dispatcher premise FAILS its own step-1 check; docs-only, no src edits
 
 - **State:** master at this docs commit only (no `src/` changes). `npm

@@ -1,0 +1,387 @@
+{
+  "scenario": "tools/battle-lab/factory-arbitrary-intro-magneton-off.json",
+  "center": 1799,
+  "totalPreCheckpointCaptures": 2007,
+  "frames": [
+    {
+      "frame": 1784,
+      "sha256": "9cbcab8826e129dccff82d5a21c671204324d3b533b34ce3ddbefed1c52d91b2",
+      "player": {
+        "slot": 6,
+        "visible": false,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1785,
+      "sha256": "d15d85cf87ce2e98dfebbf94fb8af62b0ddcdd419fc0fadd733e8cf7dcf0d7be",
+      "player": {
+        "slot": 6,
+        "visible": false,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1786,
+      "sha256": "d15d85cf87ce2e98dfebbf94fb8af62b0ddcdd419fc0fadd733e8cf7dcf0d7be",
+      "player": {
+        "slot": 6,
+        "visible": false,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1787,
+      "sha256": "d15d85cf87ce2e98dfebbf94fb8af62b0ddcdd419fc0fadd733e8cf7dcf0d7be",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 14,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1788,
+      "sha256": "2c3899faacc06364e0eeb2cd90c5d022a388c0a7aa3f379ece697253049f2587",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 13,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1789,
+      "sha256": "d347b7f342a54f3bb94d85f6746695d17769348ca60608b44e086fc3927750fb",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 12,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1790,
+      "sha256": "04e7184160571b7f0703caea332a7218e1c94c56f710d5e53f5474648ee5a770",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 11,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1791,
+      "sha256": "2ed9c439cb90011c100952c3fdd2df29a0a20d3b9e4bf113c479557a6fa50485",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 10,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1792,
+      "sha256": "bb10757f94783c9c17dff46d6123b66315c4f2152220030ea5dac23fa9285252",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 9,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1793,
+      "sha256": "af740dea74677083f5c049e39430c56608edb9f903c091aea5760bd9f40dd373",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 8,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1794,
+      "sha256": "5a31a88fff4897b06a8b1d5a57cb5b5dbcaf721fafb95445d4e63727c3c8df79",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 7,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1795,
+      "sha256": "fda58c72784e3738b29ee8b88f901457a9d85027e31d2bd6c7670d89e0364a58",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 5,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1796,
+      "sha256": "fde0690dbc18db1e50d11dc8b938c816f7ecf2b091a9ee20bc788fbb0d06fe13",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 4,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1797,
+      "sha256": "a3bfbccf79dc24f468502cae5d80f14ae2cb6cdd872c8371c42b8aba9a9c8e7a",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 3,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1798,
+      "sha256": "504a84a858a8315ed5411c132fc0ea87eb26bde0da6a50eeeeb08f3479df9a5b",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 2,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1799,
+      "sha256": "5c2461caa66e704e713134b87236dff78a4620f13b9b956580b524ab21afb293",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1800,
+      "sha256": "d0d70e89b88fa2525ea9b6405fa5c7babff06ab3c468552de300eab2360b117b",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1801,
+      "sha256": "d0d70e89b88fa2525ea9b6405fa5c7babff06ab3c468552de300eab2360b117b",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08039e45"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1802,
+      "sha256": "786b580cb947bb508ec0eef93bcd940d82764e0e5fe904ab191ef0deaefdf9e7",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    },
+    {
+      "frame": 1803,
+      "sha256": "80cd70b0364265c70e121857dc4ef1578b3910b0bb179274197de197d76aa8e5",
+      "player": {
+        "slot": 6,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "opponent": {
+        "slot": 8,
+        "visible": true,
+        "y2": 0,
+        "animNum": 0,
+        "callback": "0x08007429"
+      },
+      "hitmarker": 128
+    }
+  ]
+}
