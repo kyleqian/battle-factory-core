@@ -6,6 +6,8 @@ import {
   createBattleResolutionPresentation,
   createBattleTerminalResolutionPresentation,
   storeBattleTerminalPresentationDismiss,
+  WAITMESSAGE_LONG_MESSAGE_IDS,
+  WAITMESSAGE_LONG_TIMING,
   type BattleResolutionPresentationState,
   type CreateBattleResolutionPresentationInput,
 } from "../src/engine/battleResolutionPresentation.ts";
@@ -412,10 +414,77 @@ describe("battle resolution presentation receipt ownership", () => {
         lines: ["It’s super effective!"],
         advance: "automatic",
         noCursor: false,
-        timing: { minimumFrames: 24, holdFrames: 0 },
+        timing: { minimumFrames: 24, holdFrames: 64 },
       },
       { type: "turn-end", timing: { minimumFrames: 8 } },
     ]);
+  });
+
+  it("ISSUES #77: holds the hit-chain effectiveness/crit messages for the source's B_WAIT_TIME_LONG", () => {
+    // The whole family is one shared WAITMESSAGE_LONG_TIMING object (holdFrames
+    // 64 = B_WAIT_TIME_LONG, reference/pokeemerald/include/constants/battle.h:
+    // 324) keyed off WAITMESSAGE_LONG_MESSAGE_IDS membership -- a future id
+    // joins the family by joining that set, not as a new literal at the call
+    // site (docs/battle-message-hold-cadence-ground-truth.md §bind plan).
+    expect(WAITMESSAGE_LONG_MESSAGE_IDS.has("STRINGID_SUPEREFFECTIVE")).toBe(true);
+    expect(WAITMESSAGE_LONG_MESSAGE_IDS.has("STRINGID_NOTVERYEFFECTIVE")).toBe(true);
+    expect(WAITMESSAGE_LONG_MESSAGE_IDS.has("STRINGID_CRITICALHIT")).toBe(true);
+    // STRINGID_CRITICALHIT (Cmd_critmessage -> waitmessage B_WAIT_TIME_LONG,
+    // battle_scripts_1.s:262) resolves to the same shared hold object.
+    const critical = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }),
+      event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }),
+      event(2, { kind: "message", messageId: "STRINGID_CRITICALHIT", substitutions: [] }),
+    ], NEXT_COMMAND));
+    const criticalCommand = critical.segments[0]!.commands.find(
+      (c) => c.type === "message" && c.lines[0] === "A critical hit!",
+    )!;
+    expect(criticalCommand).toMatchObject({
+      type: "message",
+      lines: ["A critical hit!"],
+      advance: "automatic",
+      noCursor: false,
+      timing: { minimumFrames: 24, holdFrames: 64 },
+    });
+    expect(criticalCommand.timing).toBe(WAITMESSAGE_LONG_TIMING);
+    // The duration formula carries the 64-frame post-print hold on top of the
+    // 24-frame floor (print length 14 < 24, so 24 + 64 = 88).
+    expect(battleResolutionCommandDuration(criticalCommand, critical.field)).toBe(88);
+    // STRINGID_NOTVERYEFFECTIVE (Cmd_resultmessage -> waitmessage, :264).
+    const notVery = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }),
+      event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }),
+      event(2, { kind: "message", messageId: "STRINGID_NOTVERYEFFECTIVE", substitutions: [] }),
+    ], NEXT_COMMAND));
+    const notVeryCommand = notVery.segments[0]!.commands.find(
+      (c) => c.type === "message" && c.lines[0] === "It’s not very effective…",
+    )!;
+    expect(notVeryCommand.timing).toBe(WAITMESSAGE_LONG_TIMING);
+    // STRINGID_USEDMOVE (Cmd_attackstring) has no waitmessage -- the plain
+    // MESSAGE_TIMING floor holds (doc §3), so its holdFrames stays 0.
+    const usedMove = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }),
+      event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }),
+    ], NEXT_COMMAND));
+    expect(usedMove.segments[0]!.commands[0]!.timing).toEqual({
+      minimumFrames: 24,
+      holdFrames: 0,
+    });
+    // The faint-family ids are button-dismissed (advance "button") and their
+    // scripts print then return with no waitmessage (BattleScript_FaintTarget,
+    // battle_scripts_1.s:2822-2824) -- they must NOT join the hold family.
+    expect(WAITMESSAGE_LONG_MESSAGE_IDS.has("STRINGID_TARGETFAINTED")).toBe(false);
+    expect(WAITMESSAGE_LONG_MESSAGE_IDS.has("STRINGID_ATTACKERFAINTED")).toBe(false);
+    const faint = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "health-bar-update", battler: 1, healthValue: 0 }),
+      event(1, { kind: "hp-change", battler: 1, from: 91, to: 0 }),
+      event(2, { kind: "play-faint-cry", battler: 1 }),
+      event(3, { kind: "faint-animation", battler: 1 }),
+      event(4, { kind: "message", messageId: "STRINGID_TARGETFAINTED", substitutions: [] }),
+    ], NEXT_COMMAND));
+    const faintMessage = faint.segments[0]!.commands.at(-1)!;
+    expect(faintMessage).toMatchObject({ type: "message", advance: "button" });
+    expect(faintMessage.timing).toEqual({ minimumFrames: 24, holdFrames: 0 });
   });
 
   it("projects Scene-OFF move pause and target hit receipt before immutable HP drain", () => {
