@@ -1387,6 +1387,10 @@ function settledCommandForResolutionHandoff(
   }
   const presentation = Object.freeze({
     ...entering,
+    spriteVisibility: Object.freeze({
+      player: boundaries[0]!.spriteVisible,
+      opponent: boundaries[1]!.spriteVisible,
+    }),
     lifecycle: Object.freeze({ phase: "action-menu" as const, phaseElapsed: 0 }),
   });
   return Object.freeze({

@@ -64,6 +64,7 @@ export type BattleCommandPresentationRenderView = Readonly<{
     player: BattleCommandPlayerHealthboxRenderParams;
     opponent: HealthboxContentParams;
   }>;
+  spriteVisibility: BattleCommandPresentationState["spriteVisibility"];
   actionMenu: BattleCommandActionMenuRenderView;
   fightMenu: Readonly<{
     moveset: FightMoveset;
@@ -117,6 +118,7 @@ export function createBattleCommandPresentationRenderView(
   const fieldView = createBattleCommandFieldRenderView(presentation.field);
   return Object.freeze({
     ...fieldView,
+    spriteVisibility: presentation.spriteVisibility,
     actionMenu: Object.freeze({
       prompt:
         `${BATTLE_COMMAND_ACTION_PROMPT_PREFIX}${presentation.field.player.name}`

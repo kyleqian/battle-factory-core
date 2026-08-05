@@ -105,6 +105,16 @@ export type BattleCommandPresentationState = Readonly<{
    * open/cancel/reopen transitions.
    */
   idleBounceElapsed: number;
+  /**
+   * Persistent controller-owned battler sprite visibility across command
+   * handoffs (the real sprite's `invisible` flag). The resolution seam sets
+   * it from its own sprite-visibility receipts; the Dig/Fly semi-invisible
+   * toggle hides only the sprite, never the healthbox (ISSUES #79).
+   */
+  spriteVisibility: Readonly<{
+    player: boolean;
+    opponent: boolean;
+  }>;
   field: Readonly<{
     player: BattleCommandFieldBattler;
     opponent: BattleCommandFieldBattler;
@@ -326,6 +336,7 @@ export function createBattleCommandPresentation(
     request,
     lifecycle: Object.freeze({ phase: "action-enter", phaseElapsed: 0 }),
     idleBounceElapsed: 0,
+    spriteVisibility: Object.freeze({ player: true, opponent: true }),
     field: Object.freeze({
       player: fieldBattler(
         "player",

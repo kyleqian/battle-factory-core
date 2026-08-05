@@ -7088,6 +7088,7 @@ function drawBattle2ActionMenuWindow(
   revealedOverride?: boolean,
   healthboxes?: BattleCommandPresentationRenderView["healthboxes"],
   fieldArt?: BattleCommandPresentationRenderView["fieldArt"],
+  spriteVisibility?: Readonly<{ player: boolean; opponent: boolean }>,
 ): void {
   const age = actionMenuAge(t, handoffTick);
   const playerVisualT = playerTrainerSendOutClock(t, handoffTick, "jenson");
@@ -7102,25 +7103,31 @@ function drawBattle2ActionMenuWindow(
     // drawGeneratedOpponentRelease (ISSUES #56 item 3) - the shadow persists
     // for the whole battle, not just the send-out materialize window.
     drawGeneratedOpponentShadow(fb, fieldArt);
-    drawSpriteSheet(
-      fb,
-      fieldArt.opponent.pic.tileset as Tileset,
-      fieldArt.opponent.pic.palette as RgbColor[],
-      fieldArt.opponent.origin.x,
-      fieldArt.opponent.origin.y - enemyMonElevation(fieldArt.opponent.speciesSymbol),
-    );
+    // ISSUES #79: the semi-invisible Fly/Dig battler's sprite stays hidden
+    // through the fight-menu handoff; its healthbox never hides.
+    if (spriteVisibility === undefined || spriteVisibility.opponent) {
+      drawSpriteSheet(
+        fb,
+        fieldArt.opponent.pic.tileset as Tileset,
+        fieldArt.opponent.pic.palette as RgbColor[],
+        fieldArt.opponent.origin.x,
+        fieldArt.opponent.origin.y - enemyMonElevation(fieldArt.opponent.speciesSymbol),
+      );
+    }
   } else {
     drawKabutoHSlideWobble(fb, t, handoffTick, "jenson");
   }
   if (revealed) {
     if (fieldArt) {
-      drawSpriteSheet(
-        fb,
-        fieldArt.player.pic.tileset as Tileset,
-        fieldArt.player.pic.palette as RgbColor[],
-        fieldArt.player.origin.x,
-        fieldArt.player.origin.y + bounce.onixY2,
-      );
+      if (spriteVisibility === undefined || spriteVisibility.player) {
+        drawSpriteSheet(
+          fb,
+          fieldArt.player.pic.tileset as Tileset,
+          fieldArt.player.pic.palette as RgbColor[],
+          fieldArt.player.origin.x,
+          fieldArt.player.origin.y + bounce.onixY2,
+        );
+      }
     } else {
       drawSpriteSheet(
         fb,
@@ -18222,6 +18229,7 @@ export function renderGeneratedBattleCommandPresentation(
         revealed,
         view.healthboxes,
         view.fieldArt,
+        view.spriteVisibility,
       );
       if (revealed) drawBattleCommandActionChrome(framebuffer, view.actionMenu);
     },
@@ -18235,6 +18243,7 @@ export function renderGeneratedBattleCommandPresentation(
         true,
         view.healthboxes,
         view.fieldArt,
+        view.spriteVisibility,
       );
       drawFightSubmenuChromeFromLiveState(
         framebuffer,
@@ -34337,6 +34346,10 @@ export function renderBattleResolutionSceneOffView(
       true,
       view.healthboxes,
       view.fieldArt,
+      {
+        player: view.visibility.player.sprite,
+        opponent: view.visibility.opponent.sprite,
+      },
     );
     drawFightSubmenuChromeFromLiveState(
       fb,
