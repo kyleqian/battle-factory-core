@@ -34,27 +34,37 @@ ball-release emerge (RAM pa ramp 862→256 over 1188-1199, pinned Tier-1), and
 the healthbox slide-in (110→0 @ 5 px/frame over 1205-1227) while the field
 is idle. Tier-1 pins + render smoke landed; `compare:differential` 579/579
 byte-identical vs base across the battle-command and forced-switch windows.
+
+**2026-08-05 MAIN seam + close cadence landed (R2 worker, `a47ac0c9`).** The
+live voluntary-switch route now presents instead of dropping to the turn-2
+action menu: the orchestrator's party-select branch routes a confirmed switch
+through `beginCommandResolution` (was `installDriveReceiptImmediately`),
+`createBattleResolutionPresentation` accepts a `switch` source decision
+(`confirmHandoff` optional; begins in the null-handoff field-hold confirm
+phase) and re-synthesizes the recall printstring + return-to-ball receipts the
+kernel deliberately skips as presentation bookkeeping (`runVoluntarySwitchAction`),
+and the party menu close holds the settled menu through the real menu-close
+span (menu to 1019, fade 1019-1034, field idle 1035-1043, recall first glyph
+1044). Dense compare (`scratch-mid-battle-switch-dense-a-off` app stage):
+frames 1035-1076 diff only the **pre-existing 48px staged-RATTATA residual**
+(recall text typing byte-aligned; the app's turn-2 fight menu lands at the
+real 1407 edge); 1077+ diverges as expected (slice 4 recall hold). Tier-1
+pins: `tests/factoryVoluntarySwitchSeam.test.ts` (5, two orchestrator-level
+red-verified) + the re-based `returns the exact legal voluntary row…` test.
+
 **Remainder:** (4) recall-side span — `STRINGID_RETURNMON` still shows
 `max(24,~35)≈35f` instead of the real 82f hold (the outgoing mon's
-return-to-ball scale-up + teardown is unmodeled); and the §6 dense-compare
-acceptance for slices 1-3 is still unexecuted for a *second* reason beyond
-wiring: the app stage now exists
-(`mid-battle-switch-dense-off` in `tools/compare/appTrace.ts`, committed
-`16c65185`) and deterministically positions the orchestrator at the fixture's
-frame-0 fight-menu-open checkpoint with the staged RATTATA x3 / SPLASH parties,
-replaying the fixture's verbatim segments through the live route (turn-1 double
-SPLASH byte-near-exact at 48px residual; the party-menu voluntary switch
-completes at the real frame), but the orchestrator's live voluntary-switch path
-(`advanceFactoryRoundBattleCommand`'s party-select branch) hands the switch
-transition straight to `installDriveReceiptImmediately`, which installs the next
-command presentation and **drops the kernel's switch / switch-in-animation /
-message events** — so the app shows the turn-2 action menu the moment the party
-menu closes, with no recall / "Go!" / materialize / healthbox-slide frames to
-compare. No byte-exact span exists in the fixture's 1000-1460 window until that
-presentation seam builds a `battleResolutionPresentation` from the switch events
-(the slices 1-3 machinery is currently only exercised by forced-switch and
-direct Tier-1 resolution tests). That seam is the gating item for the §6 dense
-acceptance, alongside slice 4's recall-hold/return-to-ball work.
+return-to-ball scale-up + teardown is unmodeled); the dense §6 acceptance
+spec is still NOT committed because no byte-exact span exists in the
+fixture's window — the pre-existing **48px staged-RATTATA sprite palette
+residual** (the ROM's RATTATA front/back sprites show a light-cyan region
+whose color the extracted `src/assets/gen/battle-{back,opponent-front}-
+sprites.json` RATTATA palettes lack; the purple body pixels match 100%,
+attribution staged-fixture asset side, NOT the seam/renderer) keeps every
+frame of 1035-1260 at ≥24px diff — whoever fixes that palette (side lane's
+asset territory) can re-probe `1035-1076` and commit the spec; the party-menu
+close's fade pixels are also held-and-cut (menu pixels are #80 scope, frame
+budget is the acceptance).
 
 ## #80 — Live play: in-battle party/switch menu is scaffolding-grade
 
