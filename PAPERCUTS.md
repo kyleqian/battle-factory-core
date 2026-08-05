@@ -8,6 +8,20 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## `_template` lacks the DeepSeek/OpenCode worker route entirely
+
+- **What:** the DeepSeek worker profile (OpenCode launch branch in
+  `tools/run-subagent.sh`, `-s deepseek` routing, deadline clause,
+  attribution enable) was built in this run and never mirrored —
+  `_template/tools/run-subagent.sh` has zero `deepseek` references
+  (~561-line drift as of 2026-08-05). Only the generic attribution files
+  (`codex-git-attribution.sh`, `git-hooks/prepare-commit-msg`,
+  `test-codex-git-attribution.sh`) are mirrored, so a run initialized fresh
+  today has no DeepSeek workers and the launcher-side deadline/attribution
+  branches have nothing to attach to there. Mirroring the route is a
+  deliberate follow-up port, not a copy-paste of the diverged launcher.
+- **Hits:** 1.
+
 ## Pinned line-number citations in report generators break on unrelated insertions
 
 - **What:** `tools/report/ability-item-parity-census.ts` pins an exact

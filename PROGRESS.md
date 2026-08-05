@@ -5,6 +5,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 947 — [interactive supervisor, 2026-08-05] Launcher: DeepSeek deadline-in-prompt + generalized commit attribution
+
+- **State:** master `35d1f90e`, clean; tooling-only (no engine or fixture
+  change). `tools/test-codex-git-attribution.sh` **4/4**;
+  `codexLauncherProfiles` + `vitestWorkerBudget` **38/38**. Claude/Codex
+  worker briefs stay byte-identical (deadline clause is DeepSeek-only by
+  design).
+- **Did:** (1) DeepSeek worker/audit briefs now state their absolute deadline
+  (local time + epoch derived from --cap-minutes) and instruct `date +%s`
+  checks with a 10-minute wind-down — both observed cap-kills (exit 124) had
+  every edit complete but uncommitted. (2) Root-caused untrailed DeepSeek
+  commits: the 2026-08-04/05 trailer census read all supervisor commits
+  `[Codex]` vs all worker commits `[NONE]`; `run-subagent.sh` strips the
+  inherited Codex attribution env for every non-Codex provider and the
+  OpenCode route never re-enabled it. Env passthrough itself was verified by
+  a live OpenCode probe (GIT_CONFIG_* and POKEBENCH_* survive to tool
+  shells), the deadline wrapper is transparent, and workers committed with
+  plain `git commit` — so re-enabling at launch is sufficient. DeepSeek
+  worker commits now stamp `Generated-by: OpenCode` +
+  `Agent-model: deepseek/deepseek-v4-flash` (Agent-effort omitted — that
+  route has no knob). Generic attribution files mirrored to
+  `_template/tools/` (template test 4/4).
+- **Next:** unchanged from 946 (terminal ambient-RNG/opponent provenance,
+  WIN YES swap branch, RECORD/REST/RETIRE). `_template` still lacks the
+  whole DeepSeek/OpenCode worker route (zero deepseek references there; the
+  new launcher branches have nothing to attach to) — tallied in PAPERCUTS.md
+  as deliberate follow-up debt, not silently absorbed.
+- **Notes:** attribution stays trailer-based (author/committer unchanged) per
+  the Codex precedent; `codex_git_attribution_enable` is retained as a
+  Codex-identity wrapper so existing call sites are untouched.
+
+---
+
 ## 946 — [supervisor fold, 2026-08-05] #73 WIN room handoff exact **232/232**; next-opponent generation moved to the source boundary
 
 - **State:** union through `7708808c`; guide dismissal, attendant/player walk, warp
@@ -82,32 +115,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   source-relative (the real game only writes HP/status/item/PP back to
   `gPlayerParty` during a battle — identity is never battle-mutable). LOSS
   record playback/free-roam remain separate.
-
-
----
-
-## 944 — [supervisor recovery/fold, 2026-08-05] #73 WIN swap-offer boundary bound: YES/NO hold exact **115/115** through input-ready frame 9111
-
-- **State:** recovered side evidence commit `61a7c343` merged after main's
-  style-page canonical promotion. Union reruns are exact at swap offer
-  **115/115** and canonical WIN **3590/3590**. Main's full `npm test` was
-  **727 files / 6,972 passed / 1 skipped** and build green; the recovered
-  data-only side packet passed smoke 347/347 and build.
-- **Did:** stopped the evidence-only side worker when it began temporary
-  production instrumentation, removed every debug edit, and retained only
-  its twice-exact fixture/spec. The recovered 33-segment fixture preserves
-  the prior 31 segments byte-for-byte, presses the held style page once at
-  9040-9041, clears the box at 9044, types "Before starting the battle,
-  would you / like to swap a POKéMON?" at 9045-9104, copies the YES/NO
-  window at 9107, and reaches the real input-ready hold at 9111. Existing
-  page-4/menu clocks reproduced all 115 captures with no production change.
-- **Next:** exercise one bounded NO decision from the held swap offer through
-  the `Right this way, please!` guide and next-battle handoff. A separate YES
-  decision should enter the already-generic swap UI. Promote the proven offer
-  span after the decision fixture is banked.
-- **Notes:** no side-lane `src/` edit was committed; branch diff contained
-  only the fixture, ground-truth spec, and evidence note. No absolute frame,
-  battle number, or fixture branch. LOSS record playback/free-roam and the
-  RECORD/REST/RETIRE continuation choices remain separate.
 
 ---

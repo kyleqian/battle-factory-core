@@ -62,6 +62,32 @@
 
 ---
 
+## 944 — [supervisor recovery/fold, 2026-08-05] #73 WIN swap-offer boundary bound: YES/NO hold exact **115/115** through input-ready frame 9111
+
+- **State:** recovered side evidence commit `61a7c343` merged after main's
+  style-page canonical promotion. Union reruns are exact at swap offer
+  **115/115** and canonical WIN **3590/3590**. Main's full `npm test` was
+  **727 files / 6,972 passed / 1 skipped** and build green; the recovered
+  data-only side packet passed smoke 347/347 and build.
+- **Did:** stopped the evidence-only side worker when it began temporary
+  production instrumentation, removed every debug edit, and retained only
+  its twice-exact fixture/spec. The recovered 33-segment fixture preserves
+  the prior 31 segments byte-for-byte, presses the held style page once at
+  9040-9041, clears the box at 9044, types "Before starting the battle,
+  would you / like to swap a POKéMON?" at 9045-9104, copies the YES/NO
+  window at 9107, and reaches the real input-ready hold at 9111. Existing
+  page-4/menu clocks reproduced all 115 captures with no production change.
+- **Next:** exercise one bounded NO decision from the held swap offer through
+  the `Right this way, please!` guide and next-battle handoff. A separate YES
+  decision should enter the already-generic swap UI. Promote the proven offer
+  span after the decision fixture is banked.
+- **Notes:** no side-lane `src/` edit was committed; branch diff contained
+  only the fixture, ground-truth spec, and evidence note. No absolute frame,
+  battle number, or fixture branch. LOSS record playback/free-roam and the
+  RECORD/REST/RETIRE continuation choices remain separate.
+
+---
+
 ## 943 — [bounded MAIN worker, 2026-08-05] #73 WIN battle-style commentary page promoted into the canonical window: `win-terminal-window-off` exact **3590/3590** through held boundary 8212
 
 - **State:** master `a048faa0`, clean. Extended canonical gate **3590/3590**
