@@ -125,7 +125,7 @@ npm run compare -- win-go-on-style-commentary-off --summary  # 92/92 (new)
 npm run compare -- win-go-on-type-commentary-off --summary  # 93/93 (regression)
 npm run compare -- win-go-on-scout-off --summary           # 143/143 (regression)
 npm run compare -- win-beyond-boundary-off --summary       # 228/228 (regression)
-npm run compare -- win-terminal-window-off --summary       # 2082/2082 (canonical)
+npm run compare -- win-terminal-window-off --summary       # 2686/2686 after the parallel type-page promotion
 ```
 
 Runs used: `tools/compare/out/run-2026-08-05-08-49-31Z-53752` and
@@ -135,7 +135,10 @@ Runs used: `tools/compare/out/run-2026-08-05-08-49-31Z-53752` and
 ## 6. Checks
 
 `npm run test:smoke` and the full `npm test` / `npm run build` were run green
-before the side-lane commit (see the committing entry). Only new files were
+before the side-lane commit (see the committing entry). The side branch saw
+the previous 2082/2082 canonical WIN gate; after its merge, the parallel main
+promotion extends that same gate through the held type page at 2686/2686.
+Only new files were
 committed: the scratch fixture, the ground-truth spec, and this doc. No
 `src/`, `tests/`, `tools/compare/traces/`, canonical trace, or existing
 fixture was edited. PAPERCUT: none new.

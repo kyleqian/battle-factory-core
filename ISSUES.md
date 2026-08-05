@@ -784,6 +784,15 @@ seam had masked:
   228/228, GO ON scout 143/143, type-page 93/93. Remaining WIN work narrows
   to the battle-style page, swap offer/decision, and the unexercised
   RECORD/REST/RETIRE continuation choices.
+- **2026-08-05 WIN battle-style commentary bound at the next held page:
+  `win-go-on-style-commentary-off` is **92/92** exact twice fresh through
+  frame 8212, with no production change.** A file-disjoint fixture preserves
+  the prior 29 segments byte-for-byte, presses the held type page once at
+  8138-8139, observes box clear 8142 and the 69-frame `StyleUnrestrained`
+  line at 8143-8211, then stops on the wait-cursor hold from 8212. Existing
+  `acceptPostwinDialoguePage` / `dialoguePage 3` rendering is sufficient.
+  Remaining WIN work narrows to the swap offer/decision and unexercised
+  RECORD/REST/RETIRE continuation choices.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
