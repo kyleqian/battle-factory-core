@@ -800,6 +800,15 @@ seam had masked:
   228/228, GO ON scout 143/143, type-page 93/93, style-page 92/92. Remaining
   WIN work narrows to the swap offer/decision and the unexercised
   RECORD/REST/RETIRE continuation choices.
+- **2026-08-05 WIN swap offer bound at the real YES/NO hold:
+  `win-go-on-swap-offer-off` is **115/115** exact twice fresh through the
+  input-ready boundary at frame 9111, with no production change.** The
+  recovered evidence fixture preserves the prior 31 segments byte-for-byte,
+  presses the held style page once at 9040-9041, observes box clear 9044,
+  60-character offer typing 9045-9104, YES/NO window copy at 9107, and input
+  readiness at 9111. Temporary side-lane debug instrumentation was discarded;
+  the folded commit contains only the fixture/spec/note. Remaining WIN work
+  is a real NO or YES decision plus the unexercised RECORD/REST/RETIRE paths.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
