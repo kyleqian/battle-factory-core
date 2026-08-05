@@ -2437,6 +2437,90 @@ export function scanBattleScriptImprisonedMoves(
 }
 
 /**
+ * Per-cause predicates shared by both `checkBattleScriptMoveLimitations`
+ * (the `CheckMoveLimitations` bitmask, `battle_util.c:1082-1123`) and
+ * `describeIllegalMoveSelection` (the `TrySetCantSelectMoveBattleScript`
+ * mirror, `:976-1080`) below. Five of six causes are byte-identical
+ * conditions in both source functions; each is extracted once here so
+ * neither caller re-derives it. (Disable is the sixth -- see
+ * `describeIllegalMoveSelection`'s own extra `move !== MOVE_NONE` guard,
+ * which `CheckMoveLimitations`'s Disable bit does not carry; a real source
+ * asymmetry, not a shared predicate.)
+ */
+function isMoveSlotDisabledBit(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+  slot: number,
+): boolean {
+  const source = rulesContext.battlers[battler];
+  return source.moves[slot] === source.disabledMove;
+}
+
+/** `battle_util.c:1105-1106` / `:999`: `move == lastMove && status2 & STATUS2_TORMENT`, shared verbatim. */
+function isMoveSlotTormentedBit(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+  slot: number,
+): boolean {
+  const source = rulesContext.battlers[battler];
+  const lastMove = rulesContext.moveHistory.lastMoves[battler]!;
+  return (
+    source.moves[slot] === lastMove
+    && (source.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_TORMENT) !== 0
+  );
+}
+
+/** `battle_util.c:1107-1108` / `:1014`: `tauntTimer != 0 && gBattleMoves[move].power == 0`, shared verbatim. */
+function isMoveSlotTauntedBit(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+  slot: number,
+): boolean {
+  const source = rulesContext.battlers[battler];
+  return (
+    source.tauntTimer !== 0
+    && resolveBattleScriptCurrentMovePower(source.moves[slot]!) === 0
+  );
+}
+
+/** `battle_util.c:1109-1110` / `:1029`: `GetImprisonedMovesCount(battler, move)`, shared verbatim. */
+function isMoveSlotImprisonedBit(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+  slot: number,
+): boolean {
+  const source = rulesContext.battlers[battler];
+  return scanBattleScriptImprisonedMoves(rulesContext, battler, source.moves[slot]!)
+    .imprisonedMovesCount !== 0;
+}
+
+/** `battle_util.c:1116-1117` / `:1051`: the Choice Band lock, shared verbatim. */
+function isMoveSlotChoiceLockedBit(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+  slot: number,
+): boolean {
+  const source = rulesContext.battlers[battler];
+  const choicedMove = rulesContext.choicedMove[battler]!;
+  const holdEffect = resolveBattleScriptBattlerHoldEffect(rulesContext, battler);
+  return (
+    holdEffect === BATTLE_SCRIPT_HOLD_EFFECT_CHOICE_BAND
+    && choicedMove !== BATTLE_SCRIPT_MOVE_NONE
+    && choicedMove !== 0xffff
+    && choicedMove !== source.moves[slot]
+  );
+}
+
+/** `battle_util.c:1099-1100` / `:1066`: `pp[slot] == 0`, shared verbatim. */
+function isMoveSlotOutOfPpBit(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+  slot: number,
+): boolean {
+  return rulesContext.battlers[battler].pp[slot] === 0;
+}
+
+/**
  * Immutable `CheckMoveLimitations` port (`battle_util.c:1082-1123`).
  *
  * The returned low four bits correspond to the four source move slots.
@@ -2456,7 +2540,6 @@ export function checkBattleScriptMoveLimitations(
     throw new Error(`move limitations check mask must be a u8, got ${check}`);
   }
   const source = rulesContext.battlers[battler];
-  const lastMove = rulesContext.moveHistory.lastMoves[battler]!;
   const choicedMove = rulesContext.choicedMove[battler]!;
   const holdEffect = resolveBattleScriptBattlerHoldEffect(rulesContext, battler);
   let mask = unusableMoves;
@@ -2471,35 +2554,32 @@ export function checkBattleScriptMoveLimitations(
       mask |= bit;
     }
     if (
-      source.pp[slot] === 0
-      && (check & BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATION_PP) !== 0
+      (check & BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATION_PP) !== 0
+      && isMoveSlotOutOfPpBit(rulesContext, battler, slot)
     ) {
       mask |= bit;
     }
     if (
-      move === source.disabledMove
-      && (check & BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATION_DISABLED) !== 0
+      (check & BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATION_DISABLED) !== 0
+      && isMoveSlotDisabledBit(rulesContext, battler, slot)
     ) {
       mask |= bit;
     }
     if (
-      move === lastMove
-      && (check & BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATION_TORMENTED) !== 0
-      && (source.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_TORMENT) !== 0
+      (check & BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATION_TORMENTED) !== 0
+      && isMoveSlotTormentedBit(rulesContext, battler, slot)
     ) {
       mask |= bit;
     }
     if (
-      source.tauntTimer !== 0
-      && (check & BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATION_TAUNT) !== 0
-      && resolveBattleScriptCurrentMovePower(move) === 0
+      (check & BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATION_TAUNT) !== 0
+      && isMoveSlotTauntedBit(rulesContext, battler, slot)
     ) {
       mask |= bit;
     }
     if (
       (check & BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATION_IMPRISON) !== 0
-      && scanBattleScriptImprisonedMoves(rulesContext, battler, move)
-        .imprisonedMovesCount !== 0
+      && isMoveSlotImprisonedBit(rulesContext, battler, slot)
     ) {
       mask |= bit;
     }
@@ -2516,6 +2596,152 @@ export function checkBattleScriptMoveLimitations(
     }
   }
   return mask & 0xff;
+}
+
+/** One `TrySetCantSelectMoveBattleScript` cause (`battle_util.c:976-1080`). */
+export type BattleScriptSelectionRejectionCause =
+  | "disabled"
+  | "tormented"
+  | "taunt"
+  | "imprison"
+  | "choice-item"
+  | "no-pp";
+
+/**
+ * Pure query result describing why one move slot would be rejected if
+ * selected, plus the raw ingredients a presentation layer needs to render
+ * the source's flavor text (`resolveBattleStringLines`'s placeholders).
+ * `currentMove` mirrors source's own `gCurrentMove` assignment for the
+ * winning cause: the rejected move itself for every cause except
+ * `choice-item`, where source instead points `gCurrentMove` at the *allowed*
+ * move (`*choicedMove`, `battle_util.c:1057`) -- the item's own message
+ * names the move it still permits, not the one just rejected.
+ */
+export type BattleScriptSelectionRejection = Readonly<{
+  cause: BattleScriptSelectionRejectionCause;
+  stringId: string;
+  battler: BattleScriptBattlerId;
+  moveSlot: number;
+  move: number;
+  currentMove: number;
+  heldItem: number;
+}>;
+
+/**
+ * Pure, side-effect-free mirror of `TrySetCantSelectMoveBattleScript`
+ * (`battle_util.c:976-1080`) for exactly one battler/moveSlot pair --
+ * ISSUES #72 scout `docs/selection-rejection-subsystem-scout.md` §2.2
+ * option (b). Source evaluates all six causes unconditionally in this exact
+ * order, each unconditionally overwriting `gSelectionBattleScripts` with no
+ * "already set" guard, so **the last true cause wins** the displayed
+ * message when more than one applies to the same slot -- not derivable from
+ * `checkBattleScriptMoveLimitations`'s aggregate bitmask, which only ever
+ * answers "is this slot usable," never "by which single cause."
+ *
+ * Does not model Torment's `CancelMultiTurnMoves` side effect (`:1001`):
+ * this query never mutates state and is never invoked along a path that
+ * actually executes the rejection (`submitBattleDecision`'s pre-filter +
+ * throw-on-illegal contract is unchanged by this step).
+ */
+export function describeIllegalMoveSelection(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+  moveSlot: number,
+): BattleScriptSelectionRejection | null {
+  if (!Number.isSafeInteger(moveSlot) || moveSlot < 0 || moveSlot > 3) {
+    throw new Error(`illegal-move-selection query requires a move slot 0..3, got ${moveSlot}`);
+  }
+  const source = rulesContext.battlers[battler];
+  const move = source.moves[moveSlot]!;
+  const heldItem = source.item;
+  let winner: BattleScriptSelectionRejection | null = null;
+
+  // 1. Disabled (:983) -- unlike CheckMoveLimitations' Disable bit, source
+  // guards the empty-slot/no-move-disabled coincidence (disabledMove default
+  // 0 === an empty slot's move 0) explicitly.
+  if (
+    move !== BATTLE_SCRIPT_MOVE_NONE
+    && isMoveSlotDisabledBit(rulesContext, battler, moveSlot)
+  ) {
+    winner = Object.freeze({
+      cause: "disabled",
+      stringId: "STRINGID_PKMNMOVEISDISABLED",
+      battler,
+      moveSlot,
+      move,
+      currentMove: move,
+      heldItem,
+    });
+  }
+  // 2. Torment (:999) -- source also guards MOVE_STRUGGLE, inert in
+  // practice (Struggle is never a real moveset slot) but citation-exact.
+  if (
+    move !== BATTLE_SCRIPT_MOVE_STRUGGLE
+    && isMoveSlotTormentedBit(rulesContext, battler, moveSlot)
+  ) {
+    winner = Object.freeze({
+      cause: "tormented",
+      stringId: "STRINGID_PKMNCANTUSEMOVETORMENT",
+      battler,
+      moveSlot,
+      move,
+      currentMove: move,
+      heldItem,
+    });
+  }
+  // 3. Taunt (:1014)
+  if (isMoveSlotTauntedBit(rulesContext, battler, moveSlot)) {
+    winner = Object.freeze({
+      cause: "taunt",
+      stringId: "STRINGID_PKMNCANTUSEMOVETAUNT",
+      battler,
+      moveSlot,
+      move,
+      currentMove: move,
+      heldItem,
+    });
+  }
+  // 4. Imprison (:1029) -- DEAD at Factory L50 singles (sole raw-catalog
+  // carrier FRONTIER_MON_RALTS sits below the draft floor), kept for
+  // resolver completeness per the scout's own six-cause mirror.
+  if (isMoveSlotImprisonedBit(rulesContext, battler, moveSlot)) {
+    winner = Object.freeze({
+      cause: "imprison",
+      stringId: "STRINGID_PKMNCANTUSEMOVESEALED",
+      battler,
+      moveSlot,
+      move,
+      currentMove: move,
+      heldItem,
+    });
+  }
+  // 5. Choice Band lock (:1051) -- gCurrentMove points at the still-allowed
+  // choiced move, not the rejected slot (:1057).
+  if (isMoveSlotChoiceLockedBit(rulesContext, battler, moveSlot)) {
+    const choicedMove = rulesContext.choicedMove[battler]!;
+    winner = Object.freeze({
+      cause: "choice-item",
+      stringId: "STRINGID_ITEMALLOWSONLYYMOVE",
+      battler,
+      moveSlot,
+      move,
+      currentMove: choicedMove,
+      heldItem,
+    });
+  }
+  // 6. No PP (:1066)
+  if (isMoveSlotOutOfPpBit(rulesContext, battler, moveSlot)) {
+    winner = Object.freeze({
+      cause: "no-pp",
+      stringId: "STRINGID_NOPPLEFT",
+      battler,
+      moveSlot,
+      move,
+      currentMove: move,
+      heldItem,
+    });
+  }
+  return winner;
 }
 
 /**

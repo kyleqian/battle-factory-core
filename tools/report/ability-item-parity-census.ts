@@ -392,7 +392,7 @@ for (const hit of droppedStringHits) {
   recoveredStringSites.push(`${hit.file}:${hit.line} ${member}`);
 }
 const EXPECTED_RECOVERED_STRING_SITES = [
-  "src/engine/battleScriptActionAdmission.ts:2764 ABILITY_GUTS",
+  "src/engine/battleScriptActionAdmission.ts:2990 ABILITY_GUTS",
   "src/engine/battleScriptHealpartystatusOpcode.ts:76 ABILITY_SOUNDPROOF",
   "src/engine/battleScriptHitChainOpcode.ts:1178 HOLD_EFFECT_EVASION_UP",
   "src/engine/battleScriptTrysetfutureattackOpcode.ts:111 ABILITY_GUTS",

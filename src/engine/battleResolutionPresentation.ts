@@ -21,6 +21,7 @@ import type {
   BattleScriptSemanticEventPayload,
 } from "./battleScriptEvents.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import type { BattleScriptSelectionRejection } from "./battleScriptActionAdmission.ts";
 import {
   resolveBattleNameWithPrefix,
   resolveBattleStringLines,
@@ -588,6 +589,77 @@ function factoryItemDisplayName(itemId: number): string {
     throw new Error(`battle resolution cannot resolve Factory held item ${itemId}`);
   }
   return name;
+}
+
+/**
+ * ISSUES #72 scout §2.2 option (b): the 4 still-unresolved
+ * `printselectionstring` STRINGIDs (`docs/selection-rejection-subsystem-scout.md`
+ * §1.5) -- `battleStringResolver`'s completeness guard has zero coverage for
+ * these today, because no `messageLines` caller can ever reach them: this
+ * engine's `submitBattleDecision` pre-filters every illegal move slot out of
+ * `legalDecisions` before it could ever be selected and rejected
+ * (`battleDecisionBoundary.ts:678-680`). Exported so the advisory
+ * `describeIllegalMoveSelection` query (`battleScriptActionAdmission.ts`,
+ * surfaced as `rejectionReasonBySlot` in `battleCommandPresentation.ts`) can
+ * render source-exact flavor text for a greyed-out slot directly, without
+ * threading a synthetic kernel event through the whole resolution pipeline.
+ * `STRINGID_PKMNCANTUSEMOVESEALED` (Imprison) is deliberately absent -- DEAD
+ * carrier, same RALTS-below-floor gate as its AtkCanceler-side sibling
+ * (ISSUES #72) -- the completeness guard below stays fatal for it precisely
+ * because it should never actually be reached (user decision 2026-08-03: no
+ * fallbacks).
+ */
+export function resolveMoveSelectionRejectionMessageLines(
+  rejection: BattleScriptSelectionRejection,
+  field: BattleResolutionDisplayedField,
+): readonly string[] {
+  const { stringId, battler, currentMove, heldItem } = rejection;
+  if (stringId === "STRINGID_NOPPLEFT") {
+    // sText_NoPPLeft (battle_message.c:360): no placeholders at all.
+    return resolveBattleStringLines(stringId);
+  }
+  if (stringId === "STRINGID_PKMNCANTUSEMOVETORMENT") {
+    // sText_PkmnCantUseMoveTorment (battle_message.c:260): only
+    // {B_ACTIVE_NAME_WITH_PREFIX} -- the rejected move never appears in the
+    // message text, unlike Disabled/Taunt's sibling branches.
+    return resolveBattleStringLines(stringId, {
+      B_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(
+        field,
+        singlesBattler(battler, `${stringId} selection rejection`),
+      ),
+    });
+  }
+  if (stringId === "STRINGID_ITEMALLOWSONLYYMOVE") {
+    // sText_ItemAllowsOnlyYMove (battle_message.c:496): {B_LAST_ITEM} is the
+    // holder's own Choice Band; {B_CURRENT_MOVE} is gCurrentMove, which
+    // TrySetCantSelectMoveBattleScript (:1057) points at the still-allowed
+    // *choicedMove -- describeIllegalMoveSelection already threads that
+    // through `currentMove` for this cause.
+    return resolveBattleStringLines(stringId, {
+      B_LAST_ITEM: () => factoryItemDisplayName(heldItem),
+      B_CURRENT_MOVE: () => resolveMoveName(currentMove),
+    });
+  }
+  throw new Error(
+    `battle resolution ${stringId} has no move-selection-rejection message resolver`,
+  );
+}
+
+/**
+ * `AreAllMovesUnusable`'s own selection script (`battle_util.c:1125-1140`,
+ * `BattleScript_NoMovesLeft`) -- a different, battler-level cause from
+ * `describeIllegalMoveSelection`'s six (scout §1.2b), sharing only the
+ * `printselectionstring`/STRINGID-blind-spot shape. Source gates this
+ * *before* the move menu is shown at all, so it has no per-slot rejection
+ * object to carry -- just the battler whose turn it is.
+ */
+export function resolveNoMovesLeftMessageLines(
+  field: BattleResolutionDisplayedField,
+  battler: 0 | 1,
+): readonly string[] {
+  return resolveBattleStringLines("STRINGID_PKMNHASNOMOVESLEFT", {
+    B_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+  });
 }
 
 /**

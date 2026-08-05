@@ -75,7 +75,11 @@ import {
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import { handleBattleActionFinished } from "./battleActionFinished.ts";
-import { checkBattleScriptMoveLimitations } from "./battleScriptActionAdmission.ts";
+import {
+  checkBattleScriptMoveLimitations,
+  describeIllegalMoveSelection,
+  type BattleScriptSelectionRejection,
+} from "./battleScriptActionAdmission.ts";
 import { resolveMoveName } from "./battleStringResolver.ts";
 import {
   HOLD_EFFECT_NAME_BY_ID,
@@ -1766,6 +1770,37 @@ function legalMoveDecisions(
         })]
       : []);
   return Object.freeze(legal);
+}
+
+/**
+ * Advisory sibling of `legalMoveDecisions` (ISSUES #72 scout §2.2 option
+ * (b)): for every one of the four move slots, mirrors why
+ * `TrySetCantSelectMoveBattleScript` would reject it, or `null` for a slot
+ * that is currently selectable. Pure and side-effect-free -- does not
+ * change `legalMoveDecisions`/`submitBattleDecision`'s pre-filter contract,
+ * just explains slots that projection already omits. A slot masked only by
+ * Encore-lock or the zero-move bit (not one of
+ * `describeIllegalMoveSelection`'s six causes) resolves `null` here too,
+ * matching source: neither ever reaches
+ * `TrySetCantSelectMoveBattleScript` in the first place (Encore-lock and
+ * `AreAllMovesUnusable` both gate *before* the move menu is shown,
+ * `battle_main.c:4184-4267`).
+ */
+export function legalMoveSelectionRejections(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): readonly [
+  BattleScriptSelectionRejection | null,
+  BattleScriptSelectionRejection | null,
+  BattleScriptSelectionRejection | null,
+  BattleScriptSelectionRejection | null,
+] {
+  return Object.freeze([
+    describeIllegalMoveSelection(rulesContext, battler, 0),
+    describeIllegalMoveSelection(rulesContext, battler, 1),
+    describeIllegalMoveSelection(rulesContext, battler, 2),
+    describeIllegalMoveSelection(rulesContext, battler, 3),
+  ]);
 }
 
 /**

@@ -16,6 +16,10 @@ import {
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import {
+  describeIllegalMoveSelection,
+  type BattleScriptSelectionRejection,
+} from "./battleScriptActionAdmission.ts";
+import {
   FIGHT_SUBMENU_CLOSE_DELAY,
   FIGHT_SUBMENU_OPEN_DELAY,
   FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
@@ -113,6 +117,20 @@ export type BattleCommandPresentationState = Readonly<{
     BattleMoveDecision | null,
     BattleMoveDecision | null,
     BattleMoveDecision | null,
+  ];
+  /**
+   * Advisory-only parallel to `legalMoveBySlot` (ISSUES #72 scout §2.2
+   * option (b)): for a slot that projection greys out, the six-cause
+   * `TrySetCantSelectMoveBattleScript` reason why, or `null` when the slot
+   * is legal or masked only by a cause outside the six (Encore/zero-move).
+   * Never affects `legalMoveBySlot`/`pendingDecision`/`submitBattleDecision`
+   * -- explanatory data only.
+   */
+  rejectionReasonBySlot: readonly [
+    BattleScriptSelectionRejection | null,
+    BattleScriptSelectionRejection | null,
+    BattleScriptSelectionRejection | null,
+    BattleScriptSelectionRejection | null,
   ];
   legalSwitchPartyIndexes: readonly BattlePartyIndex[];
   pendingDecision: BattleCommandDecision | null;
@@ -288,6 +306,21 @@ export function createBattleCommandPresentation(
     }
     legalMoveBySlot[decision.moveSlot] = decision;
   }
+  const rejectionReasonForSlot = (slot: 0 | 1 | 2 | 3): BattleScriptSelectionRejection | null =>
+    legalMoveBySlot[slot] === null
+      ? describeIllegalMoveSelection(rules, request.battler, slot)
+      : null;
+  const rejectionReasonBySlot: [
+    BattleScriptSelectionRejection | null,
+    BattleScriptSelectionRejection | null,
+    BattleScriptSelectionRejection | null,
+    BattleScriptSelectionRejection | null,
+  ] = [
+    rejectionReasonForSlot(0),
+    rejectionReasonForSlot(1),
+    rejectionReasonForSlot(2),
+    rejectionReasonForSlot(3),
+  ];
 
   return Object.freeze({
     request,
@@ -313,6 +346,7 @@ export function createBattleCommandPresentation(
     fightCursor: initialFightCursor,
     fightDisplayCursor: initialFightCursor,
     legalMoveBySlot: Object.freeze(legalMoveBySlot),
+    rejectionReasonBySlot: Object.freeze(rejectionReasonBySlot),
     legalSwitchPartyIndexes: Object.freeze(legalSwitchPartyIndexes),
     pendingDecision: null,
   });

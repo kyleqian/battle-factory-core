@@ -112,7 +112,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | HOLD_EFFECT_SPEED_UP | engine-referenced | 21 | 22 | SALAC_BERRY | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_SP_ATTACK_UP | engine-referenced | 16 | 16 | PETAYA_BERRY | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_ATTACK_UP | engine-referenced | 12 | 12 | LIECHI_BERRY | NORMAL | 0 | 0 | 2 |
-| HOLD_EFFECT_CHOICE_BAND | engine-referenced | 12 | 12 | CHOICE_BAND | — | 4 | 0 | 8 |
+| HOLD_EFFECT_CHOICE_BAND | engine-referenced | 12 | 12 | CHOICE_BAND | — | 4 | 0 | 9 |
 | HOLD_EFFECT_PSYCHIC_POWER | engine-referenced | 10 | 10 | TWISTED_SPOON | — | 1 | 0 | 2 |
 | HOLD_EFFECT_CURE_BRN | engine-referenced | 8 | 8 | RAWST_BERRY | NORMAL, MOVE_END | 0 | 0 | 4 |
 | HOLD_EFFECT_CURE_PSN | engine-referenced | 7 | 7 | PECHA_BERRY | NORMAL, MOVE_END | 0 | 0 | 4 |
