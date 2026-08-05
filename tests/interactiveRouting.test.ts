@@ -751,9 +751,9 @@ describe("interactive battle routing", () => {
         ...engine,
         factoryTerminal: {
           ...createFactoryTerminalLossPresentation(command),
-          age: 209,
-          firstPageReleaseAge: 80,
-          secondPageReleaseAge: 160,
+          age: 287,
+          firstPageReleaseAge: 171,
+          secondPageReleaseAge: 238,
         },
       };
       engine = tick(engine, new Set());

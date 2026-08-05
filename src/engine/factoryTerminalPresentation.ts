@@ -64,17 +64,26 @@ export interface FactoryTerminalRoundWonProfile
   readonly battlePointAward: number;
 }
 
-/** Source-relative Scene-OFF loss route from the staged lobby CB2_LoadMap seam. */
+/**
+ * Source-relative Scene-OFF loss route from the real post-terminal Lobby
+ * warp. Ages are relative to the roundLost publish (dismiss+2), so the
+ * shared return-to-field span (rendered by postwin) covers ages 0-113 and
+ * this profile's first rendered frame is the Lobby fade-in at age 114 —
+ * the real schedule banked dense in ISSUES #73 (fade 114-128, box 141,
+ * page-0 "Thank you for participating!" typing 143-170 + cursor 171, the
+ * fixture's real A at 300 dismissing it, page-1 return-rentals typing 306+
+ * and its real A at 602 dismissing it).
+ */
 export const FACTORY_LOSS_TERMINAL_PROFILE: FactoryTerminalLossProfile =
   Object.freeze({
     outcome: "loss",
     blackFirstAge: 2,
-    fieldFirstAge: 13,
-    fadeFirstAge: 13,
-    messageFrameAge: 40,
-    firstPageTextAge: 41,
-    firstPageInputReadyAge: 68,
-    nextPageVisualDelay: 2,
+    fieldFirstAge: 114,
+    fadeFirstAge: 114,
+    messageFrameAge: 141,
+    firstPageTextAge: 143,
+    firstPageInputReadyAge: 171,
+    nextPageVisualDelay: 6,
     printerHandoffDelay: 2,
     statusClearDelayFromSecondRelease: 50,
     recordPromptDelayFromRestore: 172,

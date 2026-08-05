@@ -212,11 +212,14 @@ export function renderFactoryTerminalField(
         // docs/post-terminal-return-to-lobby-ground-truth.md §2: the real
         // Lobby warp (4,8) centers the field camera at layout.cameraOriginPx
         // (see forEachVisibleBlock), and every overworld sprite OAM anchors
-        // through the same camera. The player's own sprite carries the
-        // standard +1-px x2 sub-pixel offset the other object events lack.
+        // through the same camera with the source 16x32 feet-anchor
+        // (event_object_movement.c's SetSpritePosToMapCoords + centerToCornerVec
+        // and the +16 `sprite->y` shift, i.e. box top = tile*16 - cameraOrigin
+        // - 16). The player's own sprite carries the standard +1-px x2
+        // sub-pixel offset the other object events lack.
         x: object.tile.x * 16 - layout.cameraOriginPx.x +
           (object.id === "player" ? 1 : 0),
-        y: object.tile.y * 16 - layout.cameraOriginPx.y - 21,
+        y: object.tile.y * 16 - layout.cameraOriginPx.y - 16,
       },
     }))
     .sort((a, b) =>

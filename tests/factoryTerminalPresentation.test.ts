@@ -149,22 +149,22 @@ describe("Factory Scene-OFF loss terminal adapter", () => {
   it("rejects early page input, stores source-relative releases, and clears only at second release +50", () => {
     const command = lossController().presentation!.command;
     if (command.type !== "roundLost") throw new Error("expected roundLost");
-    let terminal = advanceTo(createFactoryTerminalLossPresentation(command), 66);
+    let terminal = advanceTo(createFactoryTerminalLossPresentation(command), 169);
     terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
-    expect(terminal.age).toBe(67);
+    expect(terminal.age).toBe(170);
     expect(terminal.firstPageReleaseAge).toBeNull();
     terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
-    expect(terminal.firstPageReleaseAge).toBe(68);
+    expect(terminal.firstPageReleaseAge).toBe(171);
     expect(factoryTerminalVisibleChars(terminal)).toBe(28);
 
-    terminal = advanceTo(terminal, 129);
+    terminal = advanceTo(terminal, 237);
     terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
-    expect(terminal.secondPageReleaseAge).toBe(130);
-    terminal = advanceTo(terminal, 179);
+    expect(terminal.secondPageReleaseAge).toBe(238);
+    terminal = advanceTo(terminal, 287);
     expect(factoryTerminalCompletion(terminal)).toBeNull();
     terminal = advanceFactoryTerminalPresentation(terminal, {});
     expect(terminal).toMatchObject({
-      age: 180,
+      age: 288,
       challengeStatus: "clear",
       partyRestored: true,
       completed: true,
@@ -174,7 +174,7 @@ describe("Factory Scene-OFF loss terminal adapter", () => {
     });
   });
 
-  it("pins canonical +80/+160 releases and acknowledges at +210 without mutating round rules or RNG", () => {
+  it("pins canonical +171/+238 releases and acknowledges at +288 without mutating round rules or RNG", () => {
     const roundController = lossController();
     const command = roundController.presentation!.command;
     if (command.type !== "roundLost") throw new Error("expected roundLost");
@@ -185,16 +185,16 @@ describe("Factory Scene-OFF loss terminal adapter", () => {
       factoryTerminal: createFactoryTerminalLossPresentation(command),
       rngMode: "vblank" as const,
     };
-    for (let age = 1; age <= 210; age += 1) {
-      engine = tick(engine, new Set(age === 80 || age === 160 ? ["A"] : []));
-      if (age < 210) {
+    for (let age = 1; age <= 288; age += 1) {
+      engine = tick(engine, new Set(age === 171 || age === 238 ? ["A"] : []));
+      if (age < 288) {
         expect(engine.roundController!.presentation!.completed).toBe(false);
       }
     }
     expect(engine.factoryTerminal).toMatchObject({
-      age: 210,
-      firstPageReleaseAge: 80,
-      secondPageReleaseAge: 160,
+      age: 288,
+      firstPageReleaseAge: 171,
+      secondPageReleaseAge: 238,
       partyRestored: true,
       challengeStatus: "clear",
       completed: true,
@@ -209,26 +209,27 @@ describe("Factory Scene-OFF loss terminal adapter", () => {
     const command = lossController().presentation!.command;
     if (command.type !== "roundLost") throw new Error("expected roundLost");
     let terminal = createFactoryTerminalLossPresentation(command);
-    terminal = advanceTo(terminal, 79);
+    terminal = advanceTo(terminal, 169);
     terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
-    terminal = advanceTo(terminal, 159);
     terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
-    terminal = advanceTo(terminal, 598);
+    terminal = advanceTo(terminal, 237);
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
+    terminal = advanceTo(terminal, 523);
     terminal = advanceFactoryTerminalPresentation(terminal, { pressedB: true });
-    expect(terminal.recordPromptReleaseAge).toBe(599);
+    expect(terminal.recordPromptReleaseAge).toBe(524);
     expect(terminal.recordMenuCursor).toBe(1);
 
-    terminal = advanceTo(terminal, 621);
+    terminal = advanceTo(terminal, 546);
     expect(factoryTerminalRecordMenuVisible(terminal)).toBe(false);
     terminal = advanceFactoryTerminalPresentation(terminal, {});
-    expect(terminal.age).toBe(622);
+    expect(terminal.age).toBe(547);
     expect(factoryTerminalRecordMenuVisible(terminal)).toBe(true);
     expect(factoryTerminalRecordMenuInputReady(terminal)).toBe(false);
     terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
-    expect(terminal.age).toBe(623);
+    expect(terminal.age).toBe(548);
     expect(terminal.recordChoice).toBeNull();
     terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
-    expect(terminal.age).toBe(624);
+    expect(terminal.age).toBe(549);
     expect(factoryTerminalRecordMenuInputReady(terminal)).toBe(true);
     expect(terminal.recordChoice).toBe("no");
   });
@@ -244,18 +245,18 @@ describe("Factory Scene-OFF loss terminal adapter", () => {
       factoryTerminal: createFactoryTerminalLossPresentation(command),
       rngMode: "vblank",
     };
-    for (let age = 1; age <= 626; age += 1) {
-      const buttons = age === 80 || age === 160
+    for (let age = 1; age <= 551; age += 1) {
+      const buttons = age === 171 || age === 238
         ? new Set(["A"] as const)
-        : age >= 599 && age <= 624
+        : age === 524
         ? new Set(["B"] as const)
-        : age === 626
+        : age === 551
         ? new Set(["A"] as const)
         : new Set<never>();
       engine = tick(engine, buttons);
     }
     expect(engine.factoryTerminal).toMatchObject({
-      recordPromptReleaseAge: 599,
+      recordPromptReleaseAge: 524,
       recordMenuCursor: 1,
       recordChoice: "no",
     });

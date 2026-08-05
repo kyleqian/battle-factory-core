@@ -548,18 +548,40 @@ seam had masked:
   every few glyphs (`RenderText`'s `textSpeed` delay counter, text.c:941-961)
   the 1-char/tick `factoryTerminalVisibleChars` model must eventually
   replicate.
-- **Not yet landed:** the `FACTORY_LOSS_TERMINAL_PROFILE` timing (still
-  calibrated to the staged probe's +41/+68/+80/+160/+210) must be
-  recalibrated to the real route's ages above (field 114 / box 141 / page-0
-  text 143 / input-ready 171 / page-1 text at +6 / dismiss 300 / 602), which
-  also re-bases the roundController-path pins in
-  `tests/factoryTerminalPresentation.test.ts` and
-  `tests/interactiveRouting.test.ts`; until then every frame past 3345
-  renders the lobby with the staged message timing and matches nothing.
-  **Honest contiguous exact checkpoint therefore remains 3345 (350/350).**
-  Receipts: `bin/oracle lab` passes `/tmp/loss-s2-{coarse,c1,c2,c3}.json`
-  (62 + 194 + 38 + 75 captures; 3346-3834 dense), all re-runnable from the
-  committed fixture; this session's probes were reproduced twice.
+- **Timing recalibrated + object anchors corrected (this session's second
+  commit): `FACTORY_LOSS_TERMINAL_PROFILE` now models the real
+  post-terminal schedule** (fieldFirstAge 114 / messageFrameAge 141 /
+  page-0 text 143 / page-0 input-ready 171 / nextPageVisualDelay 6, i.e.
+  page-1 text at page0release+6; all ages = frame − 3232), and the object
+  OAM anchors use the source 16x32 feet-anchor (`box top = tile*16 −
+  cameraOrigin − 16`, `event_object_movement.c:1850-1854`), which makes the
+  fatMan/woman/scientist sprites pixel-exact (0 diff vs the oracle at frame
+  3361). The four LOSS state-machine pins in
+  `tests/factoryTerminalPresentation.test.ts` and the one in
+  `tests/interactiveRouting.test.ts` were re-based to the real route's
+  release edges (+171/+238 pages, +524 B-release, +288 completion, +547/+549
+  record menu). Measured on a dense 3346-3834 scratch window: fade-in 37-133
+  px, page-0 typing 133-175, page-0 cursor 133-170, page-1 typing 182-898,
+  page-1 cursor 133-229 — down from 26014 px before the camera fix.
+- **Residual classes (documented, honest checkpoint):** (1) the **player
+  sprite** (~133 px, constant across every frame) — the oracle renders the
+  bootstrapped save's actual player character (red-brown hat + red shirt,
+  ~36 px tall), which is NOT the source-derived Brendan walking frame 1 the
+  layout asset carries (blue hat, 20 px); the game substitutes the player's
+  object graphic from the save at runtime, so the extracted Brendan asset
+  cannot match — needs the oracle's real player graphic extracted (probe:
+  `bin/oracle` RAM/save read, or a source player-pic family check). (2) the
+  **page-1 printer pause cadence** (up to ~900 px during 3538-3596) — the
+  real `RenderText` prints with `textSpeed`-delayed glyph bursts
+  (`text.c:941-961`), the 1-char/tick `factoryTerminalVisibleChars` model
+  needs the cadence. (3) the **page-1 box-open transition** (905 px at
+  3535-3537) — a 3-tick clear/reopen the `nextPageVisualDelay` model
+  approximates. **Honest contiguous exact checkpoint therefore remains
+  frame 3345 (350/350); the committed trace's capture window was NOT
+  extended** (a red committed window would misrepresent the state). Receipts:
+  dense `bin/oracle lab` passes over the committed fixture (`/tmp/
+  loss-s2-{coarse,c1,c2,c3}.json`, 62+194+38+75 captures), reproduced twice;
+  the scratch compare trace used for the numbers above is not committed.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
