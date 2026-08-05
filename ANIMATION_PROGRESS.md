@@ -1,5 +1,43 @@
 # Animation coverage
 
+## MOVE_AGILITY — new-move implementation, NOT promoted (2026-08-05 bounded worker)
+
+- **State:** AGILITY (new move) → **partial** (player-back exact 87/87 twice
+  fresh; opponent-front 0/87 framebuffer). Move coverage unchanged at **111/276
+  exact, 0 partial, 0 staged, 165 unsupported** — no promotion, so
+  ANIMATION_COVERAGE.json and the inventory pin are untouched.
+- **Did:** full source-faithful Scene-ON AGILITY for the sole Level-50 carrier
+  FRONTIER_MON_LEDYBA record 40 vs legal ONIX, both orientations: monbg
+  ANIM_ATK_PARTNER + setalpha 12/8 + TranslateMonEllipticalRespectSide(24,6,4,4)
+  + TraceMonBlended(0,4,7,10) + five SE_M_DOUBLE_TEAM restarts +
+  clearmonbg/blendoff/delay-1. Reducer (`src/animation/agility.ts`): elliptical
+  software offset = Sin(16*(A-3), ±24)/−Cos+6 for ages 3..65 (creation-frame
+  double-step; four-loop destroy resets at 66); ten clones at software ages
+  4,9,..,49 drawn C+1..C+7, slots 3/4 alternating; alpha 4..73; monbg 1..76; SE
+  restarts at ages 4/18/32/46/60. SceneOnAgilityConfig/View seam + battleScene
+  draw case (one-age display latch; erase/redraw monbg; clones blended 12/8 with
+  the SortSprites OAM-y tie winner — the older slot-3 clone wins AGILITY's
+  overlaps, the mirror of QUICK_ATTACK's slot-4 win). agilityProbe.py +
+  agilityPortable.ts + two mechanic scenarios + two evidence fixtures + reducer
+  and evidence Tier-1 tests.
+- **Measured:** player-back frames 217-303 exact 87/87 twice fresh (evidence
+  `6913b732…`, RGB `f8633f41…`). Opponent-front frames 218-304: every frame
+  carries a fixed ~86px battle-bg field artifact at (92,33-34) and
+  (188-220,97-103) — the oracle's opponent field tiles (field palette slot 22,
+  colors 90,214,132/74,66,90) differ from the app's battle-bg asset, which the
+  app's palette provably cannot produce. The same asset matched the TAIL_WHIP /
+  METAL_CLAW / STEEL_WING opponent orientations exactly, so this is an
+  AGILITY-opponent field-state difference (monbg setup corrupts shared field
+  tiles in the oracle), not a reducer/draw bug. **Not promoted** per the
+  evidence requirement.
+- **Next:** diagnose the AGILITY-opponent field artifact (candidate: the
+  monbg `RequestDma3Fill` on the field's shared charblock) or re-extract the
+  field asset; then re-run both portables fresh.
+- **Notes:** focused tests + boundary/inventory ratchets 39/39 green;
+  QUICK_ATTACK/AERIAL_ACE/TAIL_WHIP batch-checked (shared TraceMonBlended /
+  elliptical-respect-side / display-latch machinery unchanged); smoke 347/347;
+  typecheck green. No boundary widening, no new unsupported barriers.
+
 ## MOVE_METAL_CLAW closed — 140/140 both orientations twice-fresh, promoted to exact (2026-08-05 morning session)
 
 - **State:** METAL_CLAW (new move) → **exact**. Move coverage: **111/276 exact,
