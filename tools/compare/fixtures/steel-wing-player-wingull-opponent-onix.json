@@ -63,8 +63,8 @@
  "secondFreshEvidenceSha256": "e321040c649b29c2d7e1a9702aae0cae11d4d3e42215ccabbc318ba0f8ef5f52",
  "rawRgbSha256": "2f44c8117fc921c59575f2dcc38503d47c6df569bc57afaaa6d55b9d3b6b3b69",
  "acceptance": {
-  "status": "partial",
-  "framebufferMatching": 180,
-  "reason": "dense evidence and source component lifecycles are accepted; complete production framebuffer identity remains unproved"
+  "status": "exact",
+  "framebufferMatching": 197,
+  "reason": "complete Scene-ON production framebuffer identity proven twice fresh"
  }
 }

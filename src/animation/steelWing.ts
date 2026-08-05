@@ -107,16 +107,18 @@ export function steelWingAtAge(
   const shineAge = age - 8;
   const contactAge = age - 110;
   const ellipse = steelWingEllipticalAtTick(contactAge);
-  const slideOut = slideMonToOffsetAtTick({
+  const slideOutArgs = {
     battlerSide: attackerSide,
     targetXOffset: 24,
     targetYOffset: 0,
     mirrorVertical: false,
     durationTicks: 9,
-  }, contactAge - 26);
+  } as const;
+  const slideOut = slideMonToOffsetAtTick(slideOutArgs, contactAge - 26);
+  const slideOutTerminal = slideMonToOffsetAtTick(slideOutArgs, slideOutArgs.durationTicks - 1);
   const slideBack = slideMonToOriginalPosAtTick({
-    currentX2: attackerSide === "player" ? 24 : -24,
-    currentY2: 0,
+    currentX2: slideOutTerminal.x2,
+    currentY2: slideOutTerminal.y2,
     axisSnapMode: 0,
     durationTicks: 11,
   }, contactAge - 70);

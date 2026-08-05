@@ -1,5 +1,38 @@
 # Animation coverage
 
+## MOVE_STEEL_WING closed — 197/197 both orientations twice-fresh, promoted to exact (2026-08-04 evening)
+
+- **State:** STEEL_WING partial → **exact**. Move coverage: **108/276 exact, 0
+  partial, 0 staged, 168 unsupported**. Both fixtures now pin
+  `framebufferMatching: 197` with status `exact`.
+- **Did:** two player-side fixes closed the last 17 divergent frames. (1) Ages
+  181-185: slide-back start now derives from the slide-out's actual Q8.8
+  terminal (`(682*9)>>8 = 23` player / `−24` opponent floor-shift asymmetry)
+  instead of the hardcoded 24 — the reducer renders the oracle's 20,18,16,14,12
+  2/frame fall, pinned as `[23,20,…,0]` over ages 179-190 in
+  `steelWing.test.ts`. (2) Ages 144-155: the two-gust **overlap draw order** —
+  the player orientation draws the index-1 gust first (index-0 frontmost);
+  opponent order unchanged. **Diagnosis correction:** the doc's
+  "faded-vs-unfaded gust palette base" hypothesis for 144-155 is **disproved**
+  — the worker's probe read `gPlttBufferFaded` slot 23 as the unfaded rotated
+  gray ramp (no per-channel darkening); the residual was OAM ordering at the
+  gust overlap (addendum added to `docs/steel-wing-residual-diagnosis.md`).
+- **Measured:** player 180 → **197/197**, opponent **197/197** (no
+  regression); twice-fresh post-change — worker runs plus the supervisor's own
+  independent fresh pair (evidence `e321040c…`/`7af04b35…`, RGB
+  `2f44c811…`/`25c8e06b…` reproduce the fixture pins exactly).
+- **Next:** MOVE_TAIL_WHIP (sole Level-50 carrier FRONTIER_MON_PONYTA record
+  191; zero new source components), then MOVE_IRON_DEFENSE (CLAMPERL 134) —
+  per supervisor component analysis, 20 Level-50 moves currently need zero new
+  components.
+- **Notes:** the DeepSeek worker round hit its 60-min cap (exit 124) after
+  completing every code/fixture/test edit and its own twice-fresh player +
+  once-fresh opponent measurement, but before the ledger entry and commit.
+  Supervisor salvaged the uncommitted worktree state and verified from
+  scratch: both portables fresh (197/197 + hashes), focused 4 files / 20
+  tests, typecheck, smoke 347/347 — then committed. No boundary widening, no
+  new barriers.
+
 ## Supervisor wind-down — rung-3 dispatcher COMPLETE + Steel Wing reconciled (2026-08-04 PM session)
 
 - **State:** the 2026-08-04 user directive is fully delivered. All three ISSUES

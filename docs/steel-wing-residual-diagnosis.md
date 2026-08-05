@@ -3,6 +3,18 @@
 Audit date: 2026-08-04, animation lane, worker `worker/animation-20260804-144953`.
 Status: **read-only diagnosis** — no production edits, no `src/` commits.
 
+> **RESOLVED 2026-08-04 evening (all 197/197, move exact).** Both remaining
+> player ranges are closed; two attributions in this doc are corrected by the
+> implementing round's probes: (1) ages **144-155** were NOT the
+> faded-vs-unfaded gust palette base — `gPlttBufferFaded` slot 23 holds the
+> unfaded rotated ramp with no per-channel darkening; the divergence was the
+> **two-gust overlap draw order** (player orientation renders index-0
+> frontmost; the app drew index-1 last). (2) Ages **181-185** confirmed as the
+> slide-back start: the slide-out's Q8.8 terminal is 23 (player), and
+> `SlideMonToOriginalPos` starting there yields the measured 2/frame fall.
+> This doc remains as the residual-map record; do not consume its 144-155
+> palette hypothesis.
+
 ## Repro (both orientations, exact commands)
 
 ```sh
