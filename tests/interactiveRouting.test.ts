@@ -34,7 +34,7 @@ import {
   resolveRoundBattle,
 } from "../src/engine/roundController.ts";
 import type { BattleParty } from "../src/engine/battleScenario.ts";
-import { INITIAL_POSTWIN_STATE } from "../src/engine/postwin.ts";
+import { INITIAL_POSTWIN_STATE, POSTWIN_CONTINUATION_INPUT_READY_DELAY } from "../src/engine/postwin.ts";
 import {
   BATTLE_2_SCENE_HANDOFF_ELAPSED,
   WARP_FADE_TO_ROOM_ELAPSED,
@@ -639,6 +639,66 @@ describe("interactive battle routing", () => {
     expect(accepted.factoryRoundBattleOrchestrator!.round.presentation?.command.type)
       .toBe("battleStart");
     expect(accepted.postwin!.swapDeclineElapsed).not.toBeNull();
+  });
+
+  it("pre-generates the next opponent when the generated route accepts GO ON", () => {
+    const anchor = createInitialState();
+    let orchestrator = createFactoryAnchorSession({
+      playerRentalRecords: selectedRentalParty({
+        ...anchor.draftScreen,
+        selectedIds: selectedIdsForSlots(4, 0, 2),
+      }),
+      savedRentalRecords: anchor.draftScreen.rentals.map(({ source }) => source),
+      roomTrainer: CANONICAL_DESTIN_PRESENTATION,
+      constructionRngValues: ANCHOR_BATTLE_1_CONSTRUCTION_RNG_VALUES,
+      freshBattleRngValue: ANCHOR_BATTLE_1_HANDOFF_RNG_VALUE,
+    });
+    const start = orchestrator.round.presentation?.command;
+    if (start?.type !== "battleStart") throw new Error("expected battleStart");
+    const active = advanceRoundController(
+      completeBattlePresentation(orchestrator.round, { commandId: start.commandId }),
+    );
+    const won = resolveRoundBattle(active, {
+      outcome: "win",
+      playerParty: active.rules.playerParty,
+      opponentParty: active.rules.currentOpponent.party,
+      rngValue: active.rules.rngValue,
+    });
+    orchestrator = {
+      ...orchestrator,
+      round: won,
+      battle: null,
+      battleCommandPresentation: null,
+      battleResolutionPresentation: null,
+      activeBattleCallStart: null,
+    };
+    expect(orchestrator.round.rules.phase).toBe("presentingBattleWin");
+    expect(orchestrator.round.presentation?.command.type).toBe("battleWon");
+    expect(orchestrator.pendingNextOpponent).toBeNull();
+
+    let engine: EngineState = {
+      ...createInitialState({ appRoute: "generated-orchestrator" }),
+      postwin: {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: 20_000,
+        healDismissElapsed:
+          20_000 - POSTWIN_CONTINUATION_INPUT_READY_DELAY,
+        continuationCursorPos: 0 as const,
+      },
+      factoryRoundBattleOrchestrator: orchestrator,
+    };
+    // The continuation menu is input-ready; the held GO ON A pre-generates
+    // battleIndex+1 at the scouting transition (source `AskSwapMon`), before
+    // any swap decision.
+    engine = tick(engine, new Set(["A"]));
+    expect(engine.postwin?.dialoguePage).toBe(1);
+    const preGenerated = engine.factoryRoundBattleOrchestrator!;
+    expect(preGenerated.pendingNextOpponent).not.toBeNull();
+    expect(preGenerated.round.rules.phase).toBe("presentingBattleWin");
+    expect(preGenerated.round.rules.battleIndex).toBe(0);
+    expect(preGenerated.round.rules.currentOpponent).toBe(
+      orchestrator.round.rules.currentOpponent,
+    );
   });
 
   it("reuses one generated room/intro/start lifecycle at battle indexes 1 and 5", () => {

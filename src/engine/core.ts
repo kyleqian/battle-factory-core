@@ -314,6 +314,7 @@ import {
   beginFactoryRoundBattleStartIntro,
   chooseFactoryRoundSwap,
   completeFactoryRoundPresentation,
+  preGenerateFactoryRoundNextOpponent,
   type FactoryRoundBattleOrchestratorState,
 } from "./factoryRoundBattleOrchestrator.ts";
 import {
@@ -912,7 +913,22 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       } else if (newAndRepeatedKeys.has("UP")) {
         nextPostwin = movePostwinContinuationCursor(nextPostwin, -1);
       } else if (newKeys.has("A")) {
+        const beforeContinuation = nextPostwin;
         nextPostwin = acceptPostwinContinuation(nextPostwin);
+        // Source `AskSwapMon` (`pre-battle-room scripts.inc:137-149`)
+        // generates the next opponent before the type/style commentary and
+        // the swap offer, so pre-generate at the accepted GO ON edge. The
+        // orchestrator seam is idempotent and no-ops on staged canonical
+        // postwins, mid-battle rounds, or already-published pendings.
+        if (
+          beforeContinuation.dialoguePage === 0 &&
+          nextPostwin.dialoguePage === 1 &&
+          factoryRoundBattleOrchestrator !== null
+        ) {
+          factoryRoundBattleOrchestrator = preGenerateFactoryRoundNextOpponent(
+            factoryRoundBattleOrchestrator,
+          );
+        }
       }
     }
     if (

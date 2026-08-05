@@ -269,6 +269,18 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
   aiHistory: FactoryAiBattleHistory | null;
   initialRentalGeneration: FactoryInitialRentalGenerationResult | null;
   opponentGenerations: readonly FactoryOpponentGenerationResult[];
+  /**
+   * Source `AskSwapMon` ownership: `factory_generateopponentmons` runs before
+   * the opponent type/style commentary and before the swap offer
+   * (`pre-battle-room scripts.inc:137-149`), so the round controller
+   * pre-generates battleIndex+1 at the post-win/scouting transition and
+   * publishes it only when the swap resolves. Null until that transition and
+   * cleared by publication; the segment for it is recorded at pre-generation
+   * so the RNG receipt stays gapless. Simplified rounds that never
+   * pre-generate still generate at swap resolution (see
+   * `advanceFactoryRoundPresentation`).
+   */
+  pendingNextOpponent: FactoryOpponentGenerationResult | null;
   rngSegments: readonly FactoryFacilityRngSegment[];
   /** Monotonic count across facility generation and every battle cursor. */
   facilityRngCalls: number;
@@ -544,6 +556,7 @@ export function createFactoryRoundBattleOrchestrator(
     aiHistory: null,
     initialRentalGeneration,
     opponentGenerations: Object.freeze([firstOpponent]),
+    pendingNextOpponent: null,
     rngSegments: Object.freeze(rngSegments),
     facilityRngCalls,
     activeBattleCallStart: null,
@@ -716,10 +729,84 @@ function nextSavedRentalRecords(
   return [...player, ...opponent];
 }
 
+/**
+ * Source `AskSwapMon` seam (`pre-battle-room scripts.inc:137-149`): the ROM
+ * calls `factory_generateopponentmons` before the opponent type/style
+ * commentary and before the swap offer, and only publishes the pending
+ * opponent after the swap resolves. This pre-generates battleIndex+1 from the
+ * post-battle cursor at the post-win/scouting transition (the accepted GO ON
+ * continuation), consuming the same RNG receipt the swap-resolved advance
+ * would otherwise spend, so the ledger stays gapless and the defeated
+ * opponent's party/records remain the swap screen's enemy pool. Idempotent:
+ * a second call returns the same state, so repeated GO ON handling can never
+ * double-generate. Any round not sitting on an uncompleted `battleWon` (a
+ * staged canonical postwin, a mid-battle round, or an already-published
+ * pending opponent) is returned unchanged.
+ */
+export function preGenerateFactoryRoundNextOpponent(
+  state: FactoryRoundBattleOrchestratorState,
+): FactoryRoundBattleOrchestratorState {
+  if (state.pendingNextOpponent !== null) return state;
+  const pending = state.round.presentation;
+  if (
+    state.round.rules.phase !== "presentingBattleWin"
+    || pending === null
+    || pending.command.type !== "battleWon"
+    || pending.completed
+  ) {
+    return state;
+  }
+  const battleIndex = state.round.rules.battleIndex + 1;
+  if (battleIndex > 6) {
+    return fail("a seventh win has no next opponent to pre-generate");
+  }
+  const previous = state.opponentGenerations.at(-1)!;
+  const rngBefore = state.round.rules.rngValue;
+  const generated = generateOpponentFor(
+    state.config,
+    battleIndex,
+    rngBefore,
+    previous.storedTrainerIds,
+    nextSavedRentalRecords(state),
+  );
+  const segment = generationSegment(
+    "opponent-generation",
+    battleIndex,
+    state.facilityRngCalls,
+    rngBefore,
+    generated.rngValue,
+    generated.drawLedger.length,
+  );
+  return Object.freeze({
+    ...state,
+    pendingNextOpponent: generated,
+    rngSegments: Object.freeze([...state.rngSegments, segment]),
+    facilityRngCalls: segment.callEnd,
+  });
+}
+
 export function advanceFactoryRoundPresentation(
   state: FactoryRoundBattleOrchestratorState,
 ): FactoryRoundBattleOrchestratorState {
   if (state.round.rules.phase === "presentingSwapResult") {
+    const pending = state.pendingNextOpponent;
+    if (pending !== null) {
+      // The source-equivalent pre-generation already spent this segment's
+      // RNG receipt at the post-win/scouting transition; publishing here
+      // must not re-roll the opponent or append a second receipt.
+      return Object.freeze({
+        ...state,
+        round: advanceRoundControllerWithGeneratedOpponent(state.round, {
+          opponent: generatedOpponent(pending),
+          rngValue: pending.rngValue,
+        }),
+        opponentGenerations: Object.freeze([...state.opponentGenerations, pending]),
+        pendingNextOpponent: null,
+      });
+    }
+    // Simplified rounds that never pre-generate (fixture stages, direct
+    // swap-decision tests) still roll at swap resolution, byte-for-byte the
+    // same cursor/spend as a pre-generation would have recorded.
     const battleIndex = state.round.rules.battleIndex + 1;
     const previous = state.opponentGenerations.at(-1)!;
     const rngBefore = state.round.rules.rngValue;

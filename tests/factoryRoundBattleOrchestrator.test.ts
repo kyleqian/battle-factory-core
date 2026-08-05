@@ -32,6 +32,7 @@ import {
   chooseFactoryRoundSwap,
   completeFactoryRoundPresentation,
   createFactoryRoundBattleOrchestrator,
+  preGenerateFactoryRoundNextOpponent,
   submitFactoryRoundPlayerDecision,
   type FactoryRoundBattleOrchestratorState,
 } from "../src/engine/factoryRoundBattleOrchestrator.ts";
@@ -1495,6 +1496,162 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     }
     expect(state.battle!.rng).toEqual({ calls: 2, value: 4029920645 });
     expect(state.facilityRngCalls).toBe(527);
+  });
+
+  /**
+   * Drives a fresh generated round to the source `AskSwapMon` boundary: the
+   * battle is won and the round sits on an uncompleted `battleWon` while the
+   * defeated opponent is still current.
+   */
+  function driveGeneratedRoundToWin(
+    seed: number,
+  ): FactoryRoundBattleOrchestratorState {
+    const playerRecords = [record(664), record(678), record(527)] as const;
+    const savedRentalRecords = [
+      ...playerRecords,
+      record(1),
+      record(2),
+      record(3),
+    ] as const;
+    let state = createFactoryRoundBattleOrchestrator({
+      id: `generated-round-pregen-win-${seed}`,
+      rngValue: seed,
+      factoryWinStreak: 0,
+      playerTrainerId: PLAYER_TRAINER_ID,
+      battleTowerLevel50WinStreak: 0,
+      facilityState: { rentsCount: 0 },
+      rentals: {
+        type: "currentRecords",
+        playerRentalRecords: playerRecords,
+        savedRentalRecords,
+      },
+    });
+    state = acknowledgeAndAdvance(state);
+    expect(state.round.rules.phase).toBe("battleActive");
+    for (let budget = 0; budget < 60 && state.battle !== null; budget += 1) {
+      state = submitFactoryRoundPlayerDecision(state, choosePlayerDecision(state));
+    }
+    expect(state.battle).toBeNull();
+    expect(state.round.rules.phase).toBe("presentingBattleWin");
+    expect(state.round.presentation?.command.type).toBe("battleWon");
+    return state;
+  }
+
+  it("pre-generates battleIndex+1 at the post-win/scouting transition, not at swap resolution", () => {
+    let state = driveGeneratedRoundToWin(RNG_SEED);
+    const postBattleRng = state.round.rules.rngValue;
+    const defeatedOpponentId = state.round.rules.currentOpponent.id;
+    const segmentCountBefore = state.rngSegments.length;
+    expect(state.pendingNextOpponent).toBeNull();
+
+    // Source `AskSwapMon` (`pre-battle-room scripts.inc:137-149`) runs
+    // factory_generateopponentmons before the type/style commentary and the
+    // swap offer, so pre-generation is an orchestrator action at this
+    // post-win/scouting boundary, not a side effect of swap resolution.
+    state = preGenerateFactoryRoundNextOpponent(state);
+    expect(state.pendingNextOpponent).not.toBeNull();
+    const preGeneratedTrainerId = state.pendingNextOpponent!.trainerId;
+    // The round has not advanced: the defeated opponent is still current, so
+    // an optional swap keeps the defeated party as its enemy pool.
+    expect(state.round.rules.phase).toBe("presentingBattleWin");
+    expect(state.round.rules.battleIndex).toBe(0);
+    expect(state.round.rules.currentOpponent.id).toBe(defeatedOpponentId);
+    expect(state.opponentGenerations).toHaveLength(1);
+    expect(state.rngSegments).toHaveLength(segmentCountBefore + 1);
+    const preSegment = state.rngSegments.at(-1)!;
+    expect(preSegment.kind).toBe("opponent-generation");
+    expect(preSegment.battleIndex).toBe(1);
+    expect(preSegment.rngBefore).toBe(postBattleRng);
+
+    // Swap resolution only publishes the pending opponent; it rolls nothing.
+    state = acknowledgeAndAdvance(state);
+    expect(state.round.rules.phase).toBe("awaitingSwapDecision");
+    const offerId = state.round.presentation?.command.commandId;
+    if (offerId === undefined) throw new Error("expected swap offer");
+    state = completeFactoryRoundPresentation(state, { commandId: offerId });
+    state = chooseFactoryRoundSwap(state, { type: "decline" });
+    expect(state.round.rules.phase).toBe("presentingSwapResult");
+    state = acknowledgeAndAdvance(state);
+
+    expect(state.round.rules.battleIndex).toBe(1);
+    expect(state.round.rules.phase).toBe("presentingBattleStart");
+    expect(state.round.rules.currentOpponent.id)
+      .toBe(`factory-trainer-${preGeneratedTrainerId}`);
+    expect(state.opponentGenerations).toHaveLength(2);
+    expect(state.opponentGenerations[1]!.trainerId).toBe(preGeneratedTrainerId);
+    expect(state.pendingNextOpponent).toBeNull();
+    // One uninterrupted RNG receipt: recorded at pre-generation, unchanged by
+    // publication.
+    expect(state.rngSegments).toHaveLength(segmentCountBefore + 1);
+    expect(state.facilityRngCalls).toBe(preSegment.callEnd);
+  });
+
+  it("is idempotent and never double-generates across repeated or late pre-generation calls", () => {
+    let state = driveGeneratedRoundToWin(RNG_SEED);
+    state = preGenerateFactoryRoundNextOpponent(state);
+    const pending = state.pendingNextOpponent;
+    const segmentCount = state.rngSegments.length;
+    const calls = state.facilityRngCalls;
+
+    // Re-entering the scouting transition cannot roll a second opponent or
+    // append a second receipt.
+    state = preGenerateFactoryRoundNextOpponent(state);
+    expect(state.pendingNextOpponent).toBe(pending);
+    expect(state.rngSegments).toHaveLength(segmentCount);
+    expect(state.facilityRngCalls).toBe(calls);
+
+    // Publishing after swap resolution rolls nothing new either.
+    state = acknowledgeAndAdvance(state);
+    const offerId = state.round.presentation?.command.commandId;
+    if (offerId === undefined) throw new Error("expected swap offer");
+    state = completeFactoryRoundPresentation(state, { commandId: offerId });
+    state = chooseFactoryRoundSwap(state, { type: "decline" });
+    state = acknowledgeAndAdvance(state);
+    expect(state.opponentGenerations).toHaveLength(2);
+    expect(state.rngSegments).toHaveLength(segmentCount);
+    expect(state.facilityRngCalls).toBe(calls);
+    expect(state.opponentGenerations[1]!.trainerId).toBe(pending!.trainerId);
+  });
+
+  it("retains the defeated opponent party for the optional swap and publishes the pre-generated opponent on accept", () => {
+    let state = driveGeneratedRoundToWin(RNG_SEED);
+    state = preGenerateFactoryRoundNextOpponent(state);
+    const preGeneratedTrainerId = state.pendingNextOpponent!.trainerId;
+    const defeatedEnemyFirstSpecies = state.round.rules.currentOpponent
+      .party[0]!.species.replace("SPECIES_", "");
+    const defeatedEnemySetId =
+      state.round.rules.currentOpponent.rentalRecords![1]!.setId;
+    const acceptedPlayerSetId = state.round.rules.playerRentalRecords![0]!.setId;
+
+    state = acknowledgeAndAdvance(state);
+    const offerId = state.round.presentation?.command.commandId;
+    if (offerId === undefined) throw new Error("expected swap offer");
+    state = completeFactoryRoundPresentation(state, { commandId: offerId });
+    const swap = createPendingFactorySwapPresentation(state.round);
+    expect(swap).not.toBeNull();
+    // The swap screen's enemy pool is the defeated party, not the already
+    // pre-generated next opponent.
+    expect(swap!.controller.enemyParty[0]!.species).toBe(defeatedEnemyFirstSpecies);
+
+    state = chooseFactoryRoundSwap(state, {
+      type: "accept",
+      playerPartyIndex: 0,
+      opponentPartyIndex: 1,
+    });
+    expect(state.round.rules.phase).toBe("presentingSwapResult");
+    expect(state.round.rules.playerRentalRecords![0]!.setId)
+      .toBe(defeatedEnemySetId);
+    expect(state.round.rules.playerRentalRecords![0]!.setId)
+      .not.toBe(acceptedPlayerSetId);
+    state = acknowledgeAndAdvance(state);
+
+    expect(state.round.rules.battleIndex).toBe(1);
+    expect(state.round.rules.currentOpponent.id)
+      .toBe(`factory-trainer-${preGeneratedTrainerId}`);
+    // The accept's party mutation did not re-roll the pre-generated opponent.
+    expect(state.opponentGenerations[1]!.trainerId).toBe(preGeneratedTrainerId);
+    expect(state.pendingNextOpponent).toBeNull();
+    expect(state.rngSegments).toHaveLength(3);
   });
 
   it("seed 17 completes seven generated wins with multi-candidate trainer replacements on one cursor", () => {
