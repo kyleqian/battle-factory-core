@@ -952,6 +952,7 @@ import {
   sceneOnEndureView,
   sceneOnReversalView,
   sceneOnTailGlowView,
+  sceneOnTailWhipView,
   sceneOnDizzyPunchView,
   sceneOnAstonishView,
   sceneOnSwaggerView,
@@ -1044,6 +1045,7 @@ import {
   type SceneOnEndureConfig,
   type SceneOnReversalConfig,
   type SceneOnTailGlowConfig,
+  type SceneOnTailWhipConfig,
   type SceneOnDizzyPunchConfig,
   type SceneOnAstonishConfig,
 } from "../animation/sceneOnPresentation.ts";
@@ -1330,6 +1332,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const ponytaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PONYTA!;
 const houndourFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HOUNDOUR!;
 const delibirdFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DELIBIRD!;
 const mareepFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAREEP!;
@@ -2482,6 +2485,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const ponytaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PONYTA!;
 const houndourBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HOUNDOUR!;
 const magbyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGBY!;
 const mareepBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAREEP!;
@@ -19958,6 +19962,98 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "VOLBEAT used" : "Foe VOLBEAT used",
       "TAIL GLOW!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "TAIL_WHIP") {
+    const whipState =
+      state as SceneOnMovePresentationState<SceneOnTailWhipConfig>;
+    const view = sceneOnTailWhipView(whipState);
+    // RunTasks writes the elliptical task's x2/y2 after BuildOamBuffer, so
+    // the battler offset latches one age late — same shared latch as the
+    // other Scene-ON mon-translation cases.
+    const displayed = sceneOnTailWhipView({
+      ...whipState,
+      age: whipState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "PONYTA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "PONYTA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged TAIL_WHIP pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const ponyta = playerToOpponent
+      ? ponytaBackSprite
+      : { ...ponytaFrontSprite, tileset: { columns: 8, rows: 8,
+          tiles: ponytaFrontSprite.tileset.tiles.slice(0, 64) } };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onixIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // The target is drawn first so the attacker's ellipse slides over it.
+    if (playerToOpponent) {
+      drawSpriteSheet(
+        fb, onix.tileset, onix.palette,
+        view.target.geometry.spriteCorner.x + onixIdle.x2,
+        view.target.geometry.spriteCorner.y + onixIdle.y2,
+      );
+      drawSpriteSheet(
+        fb, ponyta.tileset, ponyta.palette,
+        view.attacker.geometry.spriteCorner.x + displayed.attackerX2,
+        view.attacker.geometry.spriteCorner.y + displayed.attackerY2,
+      );
+    } else {
+      drawSpriteSheet(
+        fb, ponyta.tileset, ponyta.palette,
+        view.attacker.geometry.spriteCorner.x + displayed.attackerX2,
+        view.attacker.geometry.spriteCorner.y + displayed.attackerY2,
+      );
+      drawSpriteSheet(
+        fb, onix.tileset, onix.palette,
+        view.target.geometry.spriteCorner.x + onixIdle.x2,
+        view.target.geometry.spriteCorner.y + onixIdle.y2,
+      );
+    }
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "PONYTA",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "PONYTA" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "PONYTA used" : "Foe PONYTA used",
+      "TAIL WHIP!",
       99,
     );
     return;

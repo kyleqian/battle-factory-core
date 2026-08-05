@@ -384,6 +384,10 @@ import {
   type TailGlowState,
 } from "./tailGlow.ts";
 import {
+  tailWhipAtAge,
+  type TailWhipState,
+} from "./tailWhip.ts";
+import {
   selfDestructAtAge,
   type SelfDestructState,
 } from "./selfDestruct.ts";
@@ -653,7 +657,8 @@ export interface SceneOnPresentationBattler {
     | "WARTORTLE"
     | "LUVDISC"
     | "DELIBIRD"
-    | "PARASECT";
+    | "PARASECT"
+    | "PONYTA";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1662,6 +1667,13 @@ export interface SceneOnTailGlowConfig {
   readonly attackerPictureOffset: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnTailWhipConfig {
+  readonly move: "TAIL_WHIP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSelfDestructConfig {
   readonly move: "SELF_DESTRUCT";
   readonly attacker: SceneOnPresentationBattler;
@@ -1911,6 +1923,7 @@ export type SceneOnMoveConfig =
   | SceneOnNeedleArmConfig
   | SceneOnSandstormConfig
   | SceneOnTailGlowConfig
+  | SceneOnTailWhipConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
   | SceneOnDynamicPunchConfig
@@ -2020,6 +2033,8 @@ export type SceneOnSandstormPresentationState =
   SceneOnMovePresentationState<SceneOnSandstormConfig>;
 export type SceneOnTailGlowPresentationState =
   SceneOnMovePresentationState<SceneOnTailGlowConfig>;
+export type SceneOnTailWhipPresentationState =
+  SceneOnMovePresentationState<SceneOnTailWhipConfig>;
 
 export interface SceneOnSupersonicView {
   readonly age: number;
@@ -2321,6 +2336,12 @@ export interface SceneOnSandstormView extends SandstormState {
 }
 
 export interface SceneOnTailGlowView extends TailGlowState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnTailWhipView extends TailWhipState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4685,6 +4706,21 @@ export function sceneOnTailGlowView(
       state.config.attacker.geometry.side,
       state.config.attackerPictureOffset,
     ),
+  };
+}
+
+/** `age=0` is Move_TAIL_WHIP's first active source-script frame. */
+export function sceneOnTailWhipView(
+  state: SceneOnTailWhipPresentationState,
+): SceneOnTailWhipView {
+  if (state.config.move !== "TAIL_WHIP") {
+    throw new Error(`expected TAIL_WHIP presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...tailWhipAtAge(state.age, state.config.attacker.geometry.side),
   };
 }
 
