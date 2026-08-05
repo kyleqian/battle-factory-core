@@ -894,6 +894,7 @@ import {
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
+  sceneOnWrapView,
   sceneOnDragonBreathView,
   sceneOnEmberView,
   sceneOnFlamethrowerView,
@@ -1346,6 +1347,7 @@ const ponytaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentF
 const ledybaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LEDYBA!;
 const clamperlFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CLAMPERL!;
 const charmanderFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CHARMANDER!;
+const tentacoolFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).TENTACOOL!;
 const houndourFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HOUNDOUR!;
 const delibirdFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DELIBIRD!;
 const mareepFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAREEP!;
@@ -2509,6 +2511,7 @@ const ponytaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpr
 const ledybaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LEDYBA!;
 const clamperlBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CLAMPERL!;
 const charmanderBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CHARMANDER!;
+const tentacoolBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).TENTACOOL!;
 const houndourBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HOUNDOUR!;
 const magbyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGBY!;
 const mareepBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAREEP!;
@@ -23221,6 +23224,104 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "ONIX used" : "Foe ONIX used",
       "BIND!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "WRAP") {
+    // The elliptical task and the shared squeeze tasks mutate battler
+    // x2/affine state after this frame's OAM buffer has already been built,
+    // so the live framebuffer trails the task/component state by two
+    // captured advances (same pipeline as the BIND sway case).
+    const view = sceneOnWrapView({ ...state, age: state.age - 2 });
+    const playerToOpponent =
+      view.attacker.species === "TENTACOOL"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "TENTACOOL"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged WRAP pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent
+      ? tentacoolBackSprite
+      : tentacoolFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    // Opponent-front ONIX keeps its permanent front-sprite idle-bob residual
+    // (`x2=1`) for the whole window (speciesIdleAnim.ts, same RAPID_H_HOPS
+    // finding as the other ONIX-target moves); the player-back target does
+    // not.
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawSpriteSheetAffineStretch(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+      view.targetAffine.xScale,
+      view.targetAffine.yScale,
+      0,
+      { r: 0, g: 0, b: 0 },
+      0,
+      view.targetAffine.active,
+    );
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x + view.attackerX2,
+      view.attacker.geometry.spriteCorner.y + view.attackerY2,
+    );
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "TENTACOOL",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "TENTACOOL" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "TENTACOOL used" : "Foe TENTACOOL used",
+      "WRAP!",
       99,
     );
     return;

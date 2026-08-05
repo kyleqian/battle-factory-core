@@ -207,6 +207,11 @@ import {
   type BindAnimationState,
 } from "./bind.ts";
 import {
+  wrapAnimationAtAge,
+  type WrapAnimationProfile,
+  type WrapAnimationState,
+} from "./wrap.ts";
+import {
   growthAnimationAtAge,
   type GrowthAnimationState,
 } from "./growth.ts";
@@ -781,6 +786,14 @@ export interface SceneOnBindConfig {
   readonly target: SceneOnPresentationBattler;
   readonly animationProfile: Readonly<BindAnimationProfile>;
   readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+}
+
+export interface SceneOnWrapConfig {
+  readonly move: "WRAP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly animationProfile: Readonly<WrapAnimationProfile>;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
 export interface SceneOnFeatherDanceConfig {
@@ -1914,6 +1927,7 @@ export type SceneOnMoveConfig =
   | SceneOnFlamethrowerConfig
   | SceneOnBlazeKickConfig
   | SceneOnBindConfig
+  | SceneOnWrapConfig
   | SceneOnEmberConfig
   | SceneOnDragonRageConfig
   | SceneOnShadowPunchConfig
@@ -2820,6 +2834,12 @@ export interface SceneOnBindView extends BindAnimationState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnWrapView extends WrapAnimationState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnGrowthView extends GrowthAnimationState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -3027,7 +3047,8 @@ export function createSceneOnMovePresentation<
     | SceneOnSecretPowerConfig
     | SceneOnWhirlwindConfig | SceneOnBlockConfig
     | SceneOnIronDefenseConfig
-    | SceneOnMetalClawConfig,
+    | SceneOnMetalClawConfig
+    | SceneOnWrapConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -3337,6 +3358,24 @@ export function sceneOnBindView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...bindAnimationAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.animationProfile,
+    ),
+  };
+}
+
+export function sceneOnWrapView(
+  state: SceneOnMovePresentationState,
+): SceneOnWrapView {
+  if (state.config.move !== "WRAP") {
+    throw new Error(`expected WRAP presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...wrapAnimationAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.animationProfile,

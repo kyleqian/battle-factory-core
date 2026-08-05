@@ -1,0 +1,87 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-wrap-opponent-tentacool-player-onix.json",
+  "probe": "tools/compare/wrapProbe.py",
+  "pair": "FRONTIER_MON_TENTACOOL record 124 (opponent-front) -> legal ONIX (player-back)",
+  "orientation": "opponent-to-player",
+  "move": "WRAP",
+  "denseWindow": {
+    "startFrame": 78,
+    "endFrame": 115,
+    "frameCount": 38
+  },
+  "appStage": {
+    "presentationAge": 0
+  },
+  "attacker": {
+    "species": "TENTACOOL",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {
+        "x": 144,
+        "y": 17
+      },
+      "animationCenter": {
+        "x": 176,
+        "y": 49
+      },
+      "battlePositionCenter": {
+        "x": 176,
+        "y": 40
+      }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {
+        "x": 40,
+        "y": 48
+      },
+      "animationCenter": {
+        "x": 72,
+        "y": 80
+      },
+      "battlePositionCenter": {
+        "x": 72,
+        "y": 80
+      }
+    }
+  },
+  "animationProfile": {
+    "ellipse": {
+      "xRadius": 6,
+      "yRadius": 4,
+      "loops": 2,
+      "speed": 4
+    },
+    "squeeze": {
+      "xDelta": 10,
+      "yDelta": -5,
+      "duration": 5
+    },
+    "squeezeStarts": [
+      1,
+      19
+    ]
+  },
+  "fieldProfile": {
+    "playerHp": 110,
+    "playerMaxHp": 110,
+    "opponentHp": 136,
+    "opponentMaxHp": 136,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "wrap-dense-evidence/v1",
+  "evidenceSha256": "62037408173eeaa3127b670a8c92a10f19035720669e65675e5b9bcfd2301088",
+  "secondFreshEvidenceSha256": "62037408173eeaa3127b670a8c92a10f19035720669e65675e5b9bcfd2301088",
+  "rawRgbSha256": "39d3acfcd1f87cfd92f55192c1e9047dc520147d9da529680c9078e4f8d90133",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 38,
+    "reason": "complete Scene-ON production framebuffer identity proven twice fresh"
+  }
+}
