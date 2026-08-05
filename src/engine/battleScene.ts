@@ -775,6 +775,10 @@ import type {
   BattleResolutionRenderEffect,
   BattleResolutionPresentationRenderView,
 } from "./battleResolutionPresentationRender.ts";
+import {
+  MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR,
+  type MidBattleSwitchInView,
+} from "./battleResolutionPresentationRender.ts";
 import type {
   BattleStatName,
   BattleTerminalResolutionPresentationState,
@@ -34265,6 +34269,53 @@ export const SCENE_OFF_TURN_DEFAULT_IDENTITY: SceneOffTurnIdentity = {
  * resolution renderer. All species, HP, status, lines, and effect clocks
  * arrive in the render view; this layer performs no battle-rule lookup.
  */
+/**
+ * ISSUES #78 slice 2/3: the mid-battle switch-in's battler pixels -- the
+ * closed-ball throw, then the ball-release scale-down
+ * (`sAffineAnim_Battler_Emerge` entered at accumulator 76, pa 862 per the
+ * §3 RAM ramp), then the settled sprite. The mon is not on field before the
+ * emerge; the ball covers the throw. Tint is `LaunchBallFadeMonTask`'s ball
+ * open color (same as the battle-START release); the fade-strength curve is
+ * not yet pixel-fit for this window, so the draw stays on the RAM-pinned
+ * accumulator ramp.
+ */
+function drawMidBattleSwitchInSprite(
+  fb: Uint8Array,
+  art: BattleCommandFieldArtBattler,
+  state: MidBattleSwitchInView,
+): void {
+  if (state.ballVisible) {
+    drawSpriteSheet(
+      fb,
+      BALL_CLOSED_TILESET,
+      summaryBall.palette,
+      state.ballPosition.x,
+      state.ballPosition.y,
+    );
+    return;
+  }
+  if (!state.monVisible) return;
+  if (state.emergeAccumulator < MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR) {
+    drawSpriteSheetAffineTinted(
+      fb,
+      art.pic.tileset as Tileset,
+      art.origin.x,
+      art.origin.y,
+      state.emergeAccumulator,
+      MATERIALIZE_TINT_COLOR,
+      0,
+    );
+    return;
+  }
+  drawSpriteSheet(
+    fb,
+    art.pic.tileset as Tileset,
+    art.pic.palette as RgbColor[],
+    art.origin.x,
+    art.origin.y,
+  );
+}
+
 export function renderBattleResolutionSceneOffView(
   fb: Uint8Array,
   view: BattleResolutionPresentationRenderView,
@@ -34297,6 +34348,15 @@ export function renderBattleResolutionSceneOffView(
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   const faint = view.effect?.type === "faint" ? view.effect : null;
   const hit = view.effect?.type === "hit" ? view.effect : null;
+  // ISSUES #78: the mid-battle switch-in battler's pixels are owned here
+  // (ball throw + ball-release emerge), not by the generic sprite draws.
+  const midSwitch = view.midBattleSwitchIn;
+  if (midSwitch !== null && midSwitch.battler === 1) {
+    drawMidBattleSwitchInSprite(fb, view.fieldArt.opponent, midSwitch);
+  }
+  if (midSwitch !== null && midSwitch.battler === 0) {
+    drawMidBattleSwitchInSprite(fb, view.fieldArt.player, midSwitch);
+  }
   if (view.visibility.opponent.sprite) {
     if (
       faint?.battler === 1
@@ -34351,7 +34411,19 @@ export function renderBattleResolutionSceneOffView(
       hit?.battler === 1 ? hit.healthboxY2 : 0,
     );
   }
-  if (view.visibility.player.healthbox) {
+  if (
+    midSwitch !== null
+    && midSwitch.battler === 0
+    && midSwitch.healthboxDx !== null
+  ) {
+    // ISSUES #78 slice 3: the mid-battle healthbox slide-in
+    // (StartHealthboxSlideIn, pokeball.c:1241-1269) -- 110 -> 0 at 5 px/frame.
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, view.healthboxes.player),
+      midSwitch.healthboxDx,
+    );
+  } else if (view.visibility.player.healthbox) {
     drawComposedPlayerHealthbox(
       fb,
       composePlayerHealthbox(playerHealthboxAssets, view.healthboxes.player),

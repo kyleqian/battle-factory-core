@@ -51,6 +51,99 @@ export const BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES =
  */
 export const BATTLE_RESOLUTION_STAT_CHANGE_FRAMES = 2;
 
+/**
+ * ISSUES #78 slices 2/3: the mid-battle voluntary switch-in presentation,
+ * keyed on the `switch-in` command's own phaseElapsed (0 = the frame
+ * `CONTROLLER_SWITCHINANIM` starts). Every boundary is the RAM-probed value
+ * from `docs/mid-battle-switch-presentation-ground-truth.md` §3, expressed
+ * relative to that command's frame 1140.
+ */
+export const MID_BATTLE_SWITCH_BALL_LAND_ELAPSED = 46; // 1140+46 = 1186: ball lands, emerge begins (pa 1638)
+export const MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED = 48; // 1140+48 = 1188: mon becomes visible (pa 862)
+export const MID_BATTLE_SWITCH_EMERGE_END_ELAPSED = 59; // 1140+59 = 1199: scale-down completes (pa 256)
+export const MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED = 65; // 1140+65 = 1205: healthbox slide starts
+export const MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_END_ELAPSED = 87; // 1140+87 = 1227: slide completes
+export const MID_BATTLE_SWITCH_HEALTHBOX_START_DX = 110;
+export const MID_BATTLE_SWITCH_HEALTHBOX_STEP = 5;
+/**
+ * Ball-release emerge: `sAffineAnim_Battler_Emerge` (`src/data.c:144-149`,
+ * the same +18-per-tick accumulator step the battle-START release uses),
+ * entered at accumulator 76 when the mon becomes visible. §3's RAM `pa` ramp
+ * 862->697->...->256 is exactly `floor(0x10000/accumulator)` for
+ * accumulator = 76 + 18k, k = 0..10 -- the same table, one visible entry off
+ * the start-release's own accumulator-40 onset.
+ */
+export const MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR = 76;
+export const MID_BATTLE_SWITCH_EMERGE_ACCUMULATOR_STEP = 18;
+export const MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR = 256;
+
+export type MidBattleSwitchInView = Readonly<{
+  elapsed: number;
+  battler: 0 | 1;
+  ballVisible: boolean;
+  /** Best-effort throw position (px, top-left of the 16x16 ball sprite). */
+  ballPosition: Readonly<{ x: number; y: number }>;
+  monVisible: boolean;
+  /** `sAffineAnim_Battler_Emerge` accumulator during the ball-release scale-down. */
+  emergeAccumulator: number;
+  /** Player-healthbox x2 slide offset (110 -> 0 at 5 px/frame), or null before the slide. */
+  healthboxDx: number | null;
+}>;
+
+/**
+ * Projects the mid-battle switch-in's visible state from the `switch-in`
+ * command's phaseElapsed alone. The source send-in is
+ * `SpriteCB_PlayerMonSendOut_1/2` (`pokeball.c:911-985`) for the ball throw,
+ * `SpriteCB_PlayerMonFromBall` (`battle_main.c:2987-2990`) + the ball-release
+ * emerge for the scale-down, and `StartHealthboxSlideIn` (`pokeball.c:
+ * 1241-1269`) for the healthbox -- all four cadences pinned in the §3 table.
+ */
+export function midBattleSwitchInAt(
+  elapsed: number,
+  battler: 0 | 1,
+): MidBattleSwitchInView {
+  const n = Math.max(
+    0,
+    Math.min(elapsed, MID_BATTLE_SWITCH_BALL_LAND_ELAPSED - 1),
+  );
+  // TranslateAnimHorizontalArc (battle_anim_mons.c:794), the same source
+  // shape the battle-START player throw uses (battleMenu.ts
+  // playerThrowBallTopLeft), re-parameterized for this window's own base
+  // (24,68) -> mon spot over the 45-frame throw. Pixel evidence in §3
+  // confirms the right-down drift; the arc bump is modeled, not yet
+  // brute-force fit.
+  const dx = Math.floor((n * ((48 << 8) / MID_BATTLE_SWITCH_BALL_LAND_ELAPSED)) / 256);
+  const yStep = ((25 << 8) / MID_BATTLE_SWITCH_BALL_LAND_ELAPSED);
+  const linearDy = Math.floor((n * yStep) / 256);
+  const arcIdx = Math.floor((n * 1310) / 256);
+  const arcBump = Math.floor(-30 * Math.sin((2 * Math.PI * arcIdx) / 256));
+  const monVisible = elapsed >= MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED;
+  const emergeAccumulator = Math.min(
+    MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR,
+    MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR
+      + MID_BATTLE_SWITCH_EMERGE_ACCUMULATOR_STEP
+        * (elapsed - MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED),
+  );
+  const healthboxDx =
+    elapsed < MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED
+      ? null
+      : Math.max(
+          0,
+          MID_BATTLE_SWITCH_HEALTHBOX_START_DX
+            - MID_BATTLE_SWITCH_HEALTHBOX_STEP
+              * (elapsed - MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED),
+        );
+  return Object.freeze({
+    elapsed,
+    battler,
+    ballVisible: elapsed < MID_BATTLE_SWITCH_BALL_LAND_ELAPSED,
+    ballPosition: Object.freeze({ x: 24 + dx, y: 68 + linearDy + arcBump }),
+    monVisible,
+    emergeAccumulator,
+    healthboxDx,
+  });
+}
+
 export type BattleResolutionRenderEffect =
   | Readonly<{
       type: "hit";
@@ -121,6 +214,15 @@ export type BattleResolutionPresentationRenderView = Readonly<{
     battler: 0 | 1;
     partyStates: readonly import("./battleResolutionPresentation.ts").PartyBallState[];
   }> | null;
+  /**
+   * ISSUES #78: the mid-battle voluntary switch-in presentation, populated
+   * while the `switch-in` command is current in the ordinary `presenting`
+   * phase (the forced-switch path uses `switchIn` + the party-select clock
+   * instead). `renderBattleResolutionSceneOffView` draws the ball throw and
+   * ball-release emerge from this; `midBattleSwitchInAt` supplies the
+   * per-frame state from the command's own phaseElapsed.
+   */
+  midBattleSwitchIn: MidBattleSwitchInView | null;
   partySummary: Readonly<{
     battler: 0 | 1;
     states: readonly import("./battleResolutionPresentation.ts").PartyBallState[];
@@ -374,6 +476,7 @@ export function createBattleResolutionPresentationRenderView(
   let field = state.field;
   let latestMessage: readonly string[] | null = null;
   let switchIn: BattleResolutionPresentationRenderView["switchIn"] = null;
+  let midBattleSwitchIn: BattleResolutionPresentationRenderView["midBattleSwitchIn"] = null;
   let partySummary: BattleResolutionPresentationRenderView["partySummary"] = null;
   const fainted = new Set<0 | 1>();
   const spriteVisibility = new Map<0 | 1, boolean>([[0, true], [1, true]]);
@@ -599,7 +702,13 @@ export function createBattleResolutionPresentationRenderView(
         ? Object.freeze({ battler: command.battler, states: command.states })
         : null;
     } else if (command.type === "switch-in") {
+      // The incoming mon is already the field battler; the mid-battle
+      // switch-in view holds its visible onset until the ball-release emerge.
       field = replaceFieldBattler(field, command.battler, command.incoming);
+      midBattleSwitchIn = midBattleSwitchInAt(
+        state.lifecycle.phaseElapsed,
+        command.battler,
+      );
       fainted.delete(command.battler);
     } else if (command.type === "sprite-visibility") {
       spriteVisibility.set(command.battler, command.visible);
@@ -667,6 +776,10 @@ export function createBattleResolutionPresentationRenderView(
         sprite: (spriteVisibility.get(0) ?? true)
           && !fainted.has(0)
           && !(playerHit?.targetInvisible ?? false)
+          // ISSUES #78: the mid-battle switch-in scene renderer owns the
+          // battler's pixels for the whole send-in (ball throw, emerge, then
+          // the full sprite) -- the generic draw must not double it.
+          && midBattleSwitchIn?.battler !== 0
           && !(
             playerFaint?.sink.type === "player-pixel-rows"
             && playerFaint.sink.skipPixelRows
@@ -674,19 +787,22 @@ export function createBattleResolutionPresentationRenderView(
           ),
         healthbox: !fainted.has(0)
           && (playerFaint?.healthboxVisible ?? true)
-          && (healthboxVisibility.get(0) ?? true),
+          && (healthboxVisibility.get(0) ?? true)
+          && midBattleSwitchIn?.battler !== 0,
       }),
       opponent: Object.freeze({
         sprite: (spriteVisibility.get(1) ?? true)
           && !fainted.has(1)
           && !(opponentHit?.targetInvisible ?? false)
+          && midBattleSwitchIn?.battler !== 1
           && !(
             opponentFaint?.sink.type === "opponent-tile-rows"
             && opponentFaint.sink.keptRows === 0
           ),
         healthbox: !fainted.has(1)
           && (opponentFaint?.healthboxVisible ?? true)
-          && (healthboxVisibility.get(1) ?? true),
+          && (healthboxVisibility.get(1) ?? true)
+          && midBattleSwitchIn?.battler !== 1,
       }),
     }),
     waitCursor,
@@ -699,6 +815,7 @@ export function createBattleResolutionPresentationRenderView(
         : "message",
     confirmHandoff,
     switchIn,
+    midBattleSwitchIn,
     partySummary,
     trainerSlide: activeTrainerSlide !== null
       ? Object.freeze({
