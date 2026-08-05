@@ -5,7 +5,6 @@ import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
 import {
   createBattleState,
   type BattleDecisionTransitionResult,
-  type BattleKernelSemanticEvent,
   type BattleState,
   type BattleSubmittedDecision,
 } from "../src/engine/battleDecisionBoundary.ts";
