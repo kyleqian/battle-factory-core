@@ -4,6 +4,47 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 931 — [supervisor wind-down, 2026-08-04 ~19:55] Session close: #74 closed + WIN window 389/389 + selection-rejection slice landed & ROM-verified + post-terminal ground truth banked; final union 724 files / 6,954 green
+
+- **State:** master `fd8910a5` + this docs commit. Final independent union:
+  full `npm test` **724 files / 6,954 passed / 1 skipped**, `npm run build`
+  green. Windows: WIN **389/389**, LOSS **236/236**, YOSHI **700/751** /
+  MAGNETON **703/751** (baselines restored). Play-preview worktree advanced
+  to `fd8910a5`, rebuilt, serving 200 on :5199. Working tree clean. **No
+  open DEFERRED entries.** Worktrees: only the permanent `animation-main`
+  (whose own live session has a worker at `animation-20260804-193008` —
+  theirs to clean) and the intentional `play-preview`.
+- **Session totals:** 3 rounds, 6 workers (3 main / 3 side), 0 lost, all
+  landed. #74 CLOSED (`MATERIALIZE_Y2_TABLE` 11-of-12 tail-tick, RAM-
+  confirmed, prediction-pinned exact restore). #73: WIN 65/65→389/389
+  (pure data; quote hold + real dismiss), scaffold party-identity crash
+  fixed generically (`hp:0`), and the REAL remaining blocker mapped —
+  post-`finishBattle` presentation timing (probe doc §6). #72 fully
+  settled: option-(b) advisory slice (six-cause resolver, 4 STRINGIDs,
+  20 red-verified tests) + 3 of 4 causes ROM-verified byte-for-byte
+  (Torment, Choice Band, no-PP; PKMNHASNOMOVESLEFT staging cost
+  documented). Post-terminal return ground truth banked
+  (`docs/post-terminal-return-to-lobby-ground-truth.md`): mid-streak WIN
+  → PreBattleRoom (not Lobby), 108-tick shared fade/warp sequence,
+  5-slice implementation plan. TWO animation folds (STEEL_WING 108/276,
+  TAIL_WHIP 109/276 exact) — second fold resolved the
+  `factoryAnimationInventory` pin conflict to the coverage-JSON side
+  (109), after R3 caught the STEEL_WING fold's stale pin (107→108).
+- **Next session (recommended order):** (1) post-terminal presentation:
+  the scout's 5-slice plan — slice 1 (shared 108-tick fade/warp machinery)
+  proves on BOTH windows from one implementation; slice 4's `postwin.ts`
+  creation-gate investigation (`core.ts:577-604`) unlocks WIN. (2) #73
+  window extensions ride on those slices. (3) #71 §1e + coordinated
+  hand-fit retirements. Standing: #39, #55.
+- **Notes:** animation-fold verification now needs
+  `tests/animation/factoryAnimationInventory.test.ts` explicitly (stale
+  coverage-summary pin is a 2-occurrence class). Never merge into the main
+  tree while a suite runs there (killed my own background suite before the
+  TAIL_WHIP fold). Oracle-freshness FAIL at orient was the docs-only
+  false-positive class again. PAPERCUTS: line-pin census entry added;
+  full-suite timeout entry bumped to Hits: 6.
+
+---
 ## 930 — [bounded MAIN worker, 2026-08-04 ~19:45] ISSUES #72 oracle-verification gap closed for NOPPLEFT + ITEMALLOWSONLYYMOVE; PKMNHASNOMOVESLEFT skipped (documented)
 
 - **State:** master + this docs commit. `npm test` green (see final gate
@@ -79,57 +120,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   wind-down: fold re-check, ONE full union suite, preview rebuild.
 - **Notes:** #73's next implementation step is the §6 subsystem (src work,
   next session's headline candidate). Deadline 21:17 holds comfortably.
-
----
-## 928 — [bounded MAIN worker, 2026-08-04 ~19:15] ISSUES #72 remainder CLOSED — selection-rejection advisory slice (scout option (b)) landed + oracle-verified
-
-- **State:** master `05d7dccf` (this docs commit next). `npm test` **722
-  files / 6,947 passed / 1 skipped** (up from 721/6,927 — the 20 new cases),
-  run twice independently, both exit 0. `npm run build` green.
-  `printstring-literal-census.ts` rerun: **38 UNRESOLVED, unchanged**
-  (structurally blind to `printselectionstring`, as documented — not
-  re-fixed this step).
-- **Did:** landed the scout's recommended option (b) verbatim, no
-  `submitBattleDecision`/`legalDecisions`/`battleDecisionBoundary.ts`
-  contract change. (1) `battleScriptActionAdmission.ts`: extracted the six
-  `TrySetCantSelectMoveBattleScript` per-cause predicates so
-  `checkBattleScriptMoveLimitations`'s bitmask and the new
-  `describeIllegalMoveSelection` share logic (behavior-preserving refactor,
-  confirmed via the existing Torment opcode suite); the new resolver mirrors
-  source's exact 6-cause unconditional-overwrite order (last-true-wins),
-  including the two real per-function asymmetries source itself has
-  (Disabled's extra `!= MOVE_NONE` guard, Torment's extra `!= MOVE_STRUGGLE`
-  guard — neither present in `CheckMoveLimitations`). (2) Wired alongside
-  `legalMoveDecisions` as `legalMoveSelectionRejections`
-  (`factoryBattleScriptFullTurnDecision.ts`) and surfaced as
-  `rejectionReasonBySlot` parallel to `legalMoveBySlot`
-  (`battleCommandPresentation.ts`). (3) Added the 4 STRINGID resolvers in
-  `battleResolutionPresentation.ts`
-  (`resolveMoveSelectionRejectionMessageLines`/`resolveNoMovesLeftMessageLines`);
-  `PKMNCANTUSEMOVESEALED` stays unresolved on purpose (DEAD Imprison
-  carrier), guard stays fatal. (4) 20 Tier-1 tests
-  (`tests/battleScriptSelectionRejection.test.ts`), red-verified via
-  `git stash` (all 20 fail without the src changes). (5) **Oracle-verified**:
-  staged the exact two-turn Torment scenario via `mechanicLab
-  overrides.parties` (BUTTERFREE TACKLE/GUST vs. MURKROW TORMENT,
-  battle-scene-off) and read the captured PNGs directly — the real ROM
-  prints "BUTTERFREE can't use the same / move in a row due to the TORMENT!"
-  byte-for-byte matching the resolver's output. Found and recorded a
-  scout-doc correction in the same probe: the message needs an actual button
-  press to dismiss (tested 100+ frames with none — no dismissal), contra the
-  scout's "no waitmessage -> no button needed" inference; doesn't affect
-  anything landed this step (no live dismiss-timing UI built), but matters
-  for whoever eventually builds option (a). The no-PP/Choice-lock ORDERED
-  STRETCH traces were **not attempted** (said explicitly, per the brief's own
-  allowance) — only the Torment cause is oracle-verified; the other three
-  reachable causes are pinned by Tier-1 tests against the extracted string
-  table only.
-- **Next:** #72's selection-rejection remainder is closed (see ISSUES.md).
-  Standing: #39, #55, #71 (§1e + hand-fit retirements), #73 (WIN toward
-  241/241, scaffold party-identity gap).
-- **Notes:** no PAPERCUT this step. Regenerating
-  `docs/ability-item-parity-census.md` was required (a pinned line-number
-  citation in `tools/report/ability-item-parity-census.ts` pointed at
-  `battleScriptActionAdmission.ts:2764`, which the new code shifted to
-  `:2990`) — same deliberate-regen discipline as the move census, updated in
-  the same commit.
