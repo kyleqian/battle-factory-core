@@ -8,6 +8,19 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Pinned line-number citations in report generators break on unrelated insertions
+
+- **What:** `tools/report/ability-item-parity-census.ts` pins an exact
+  line-number citation into its generated doc
+  (`battleScriptActionAdmission.ts:2764`); any insertion above that line in
+  the cited file shifts it and fails `abilityItemParityCensus.test.ts` — a
+  test file nowhere near the edited code, so the cause is easy to miss.
+  Regenerating the census costs ~5 min once diagnosed. Flagged by the
+  2026-08-04 selection-rejection worker (~5 min lost). Candidate fix:
+  cite a symbol/anchor (function name) instead of a raw line number, or
+  auto-derive the line in the generator.
+- **Hits:** 1.
+
 ## Full `npm test` exceeds the Bash tool's default 120 s timeout
 
 - **What:** the full suite exceeds the Bash tool's default 120 s timeout, so a

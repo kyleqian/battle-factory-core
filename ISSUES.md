@@ -206,7 +206,7 @@ inert-insurance evidence above already cover in full. Disposition: no
 further check needed; the deferred item has nothing left to verify at the
 generated-route settle hooks.
 
-## #72 — battleStringResolver completeness-guard gaps: REACHABLE printstring backlog CLOSED; selection-rejection advisory slice CLOSED
+## #72 — [CLOSED 2026-08-04; retained as settled record] battleStringResolver completeness guard — FATAL-guard user decision + selection-dismiss timing facts for future option-(a) work
 
 **Original symptom** (2026-08-03, opponent MURKROW's TAUNT crash) and the
 full reachability triage (`docs/issue72-reachability-triage.md`: 66

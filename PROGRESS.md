@@ -4,6 +4,41 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 929 — [supervisor, 2026-08-04 ~19:10] R2 both lanes landed + animation STEEL_WING fold; #72 fully closed (retitled settled record); R3 launched (post-terminal timing scout + no-PP/Choice-lock oracle verification)
+
+- **State:** master `5993ff41` + this docs commit. Union checks post-merge:
+  `win-terminal-window-off` **389/389**, `loss-terminal-window-off`
+  **236/236**, smoke 347/347, `steelWingEvidence` 2/2, new
+  `battleScriptSelectionRejection` 20/20. Workers' own full-suite gates:
+  MAIN 722 files / 6,947 passed / 1 skipped (run twice) at `05d7dccf`;
+  SIDE 721 files / 6,927 at `5ef59e60`. Build green both.
+- **Did:** (1) verified + kept R2-MAIN's selection-rejection advisory slice
+  (#72 remainder: shared six-cause resolver mirroring
+  `TrySetCantSelectMoveBattleScript` incl. two source asymmetries the
+  bitmask lacks; `rejectionReasonBySlot`; 4 STRINGIDs; Torment
+  oracle-verified byte-for-byte; boundary contract untouched). Retitled
+  #72 to a settled record (FATAL-guard user decision + the probe's
+  button-gated dismiss-timing correction retained for future option-(a)).
+  (2) verified + merged R2-SIDE (`5ef59e60`): terminal-scaffold party
+  identity reconciled generically (`hp:0`), §5 crash closed, windows hold
+  389/389 + 236/236; NEW blocker documented in probe doc §6 — the
+  post-`finishBattle` return-to-lobby presentation has no real timing
+  model (WIN phase renders black; LOSS races to lobby in 28 ticks vs
+  oracle 800+). (3) folded `animation-main` (STEEL_WING exact, 108/276
+  exact, no main-program ask in its top entry). (4) PAPERCUTS: added
+  line-pin census entry (R2 worker flag); R1's suspected-slow `npm test`
+  was load, not a regression — not filed.
+- **Next:** R3 in flight — SIDE: read-only dense-probe scout of the
+  post-terminal span (WIN 5012+, LOSS 3232+) producing the
+  return-to-lobby ground-truth timeline + consumer map (docs only, arms
+  the next session's implementation). MAIN: stage the two skipped
+  oracle-verification traces for `NOPPLEFT`/`ITEMALLOWSONLYYMOVE` (and
+  `PKMNHASNOMOVESLEFT` if stageable) against the real ROM. Then
+  wind-down: fold re-check, ONE full union suite, preview rebuild.
+- **Notes:** #73's next implementation step is the §6 subsystem (src work,
+  next session's headline candidate). Deadline 21:17 holds comfortably.
+
+---
 ## 928 — [bounded MAIN worker, 2026-08-04 ~19:15] ISSUES #72 remainder CLOSED — selection-rejection advisory slice (scout option (b)) landed + oracle-verified
 
 - **State:** master `05d7dccf` (this docs commit next). `npm test` **722
@@ -84,63 +119,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** orient oracle-freshness FAIL was the docs-only false-positive
   class again (2 harness commits since service start, both docs/template
   — verified before accepting). Session deadline 21:17; R2 caps fit.
-
----
-## 926 — [bounded MAIN worker, 2026-08-04 ~18:05] ISSUES #74 FIXED — generated-route player materialize tail-tick off-by-one, RAM-confirmed on both committed traces, prediction-pinned and exact; YOSHI 700/751 + MAGNETON 703/751 restored
-
-- **State:** master at this docs commit (src fix `src/engine/battleScene.ts`
-  + test update, prior commit). `npm test` **721/721 files, 6,927
-  passed/1 skipped**, `npm run build` green. `npm run compare --
-  factory-arbitrary-intro-yoshi-off --summary` **700/751** (run twice
-  fresh, byte-identical); `... -magneton-off --summary` **703/751** (same,
-  twice fresh byte-identical) — both exactly the predicted counts pinned
-  *before* the post-fix rerun, frames 640/621 now matched, zero newly-
-  mismatched frames. Insurance spot-check `battle2-player-sendout-dense`
-  **170/170**, unmoved.
-- **Did:** Step 1 (probe): RAM-probed the ACTUAL committed
-  `factory-arbitrary-intro-{yoshi,magneton}-off` battle-lab scenarios
-  directly (not just the banked KADABRA scenario) around the player
-  materialize/settle boundary. Both traces show the identical
-  species-agnostic 13-value descent (`14,13,...,2,0`) `docs/probes/
-  materialize-hitmarker-gating/` already found — confirming it on the two
-  actually-regressed leads (GRIMER, DELCATTY). Reconciling RAM ticks with
-  displayed pixels via this codebase's own established one-tick
-  write→display lag convention pins the exact defect:
-  `drawGeneratedPlayerMaterialize`'s mechanism-1 window
-  (`PLAYER_MATERIALIZE_START_TICK.._END_TICK`) consumes only
-  `MATERIALIZE_Y2_TABLE`'s first 11 of 12
-  entries, so the table's final value (`2`) is never drawn — the very next
-  tick (`PLAYER_MATERIALIZE_SETTLE_START_TICK`, 1664) falls straight to
-  `generatedPlayerMaterializeSettleY2`'s species branch, which drew flat
-  `y2=0` for every non-ONIX species. Frames 640 (YOSHI) and 621 (MAGNETON)
-  are exactly `playerVisualT=1664` in both traces — the shared missing
-  tick. This is why the old (pre-entry-894) all-species ONIX-wobble code
-  matched the oracle here: `PLAYER_SETTLE_WOBBLE_Y2_TABLE[0]` independently
-  RAM-derives to the same value (`2`) — two unrelated derivations agreeing
-  by coincidence, not because the wobble table is broadly correct. Verdict
-  **(a)**, crisp, with an exact named tick boundary — full evidence banked
-  at `docs/probes/generated-player-materialize-tail-tick/README.md`
-  (RAM dumps included).
-  Step 2 (fix): `generatedPlayerMaterializeSettleY2` now special-cases
-  `playerVisualT === PLAYER_MATERIALIZE_SETTLE_START_TICK`, returning
-  `MATERIALIZE_Y2_TABLE`'s last entry for every species (a no-op for ONIX,
-  which was already coincidentally correct there) before falling through
-  to the existing species-gated/flat logic for every later tick. No touch
-  to `PLAYER_MATERIALIZE_START_TICK`/`_END_TICK` (shared with the
-  out-of-scope canonical `drawPlayerMaterialize` path) or to
-  `battleMenu.ts` (out of scope per brief). Red-verified: reverting the
-  fix flips 3 of `tests/generatedPlayerMaterializeSettleSpecies.test.ts`'s
-  7 cases, which were pinning the pre-fix flat-0 behavior at this exact
-  tick; updated in the same commit to pin the corrected value (all 7
-  green post-fix).
-- **Next:** #74 closed below. Standing: #39, #55. Entry 922's flagged
-  possible-latent bug in `PLAYER_SETTLE_WOBBLE_Y2_TABLE`'s ONIX-only
-  partial application (ticks 1665-1669, the genuine per-species
-  `BACK_ANIM_V_SHAKE` portion) is untouched and still open — this step's
-  probe found no new evidence bearing on it (only the shared tail tick,
-  1664, was ever in scope here).
-- **Notes:** no PAPERCUT. The RAM-probe driver script and the app-side
-  `renderAppTrace`-instrumented clock-mapping script were both scratch
-  (not committed), same convention as this run's other RAM probes; only
-  the trimmed evidence windows are banked under `docs/probes/`.
-
