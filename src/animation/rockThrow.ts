@@ -83,9 +83,9 @@ export interface RockThrowGeometry {
 export const ROCK_THROW_ANIMATION_PROFILE: Readonly<RockThrowAnimationProfile> =
   Object.freeze({
     rockAnchorAge: 3,
-    targetShakeStartAge: 24,
+    targetShakeStartAge: 21,
     targetShakeEndAge: 57,
-    targetX2OffAge: 999,
+    targetX2OffAge: 21,
     spriteOrderSeed: [
       62, 60, 0, 63, 1, 61, 6, 8, 2, 3, 4, 21, 20, 5, 19, 18, 17, 16,
       15, 14, 13, 12, 11, 10, 9, 7, 54, 55, 56, 57, 58, 59, 23, 22, 48,
@@ -319,11 +319,13 @@ export function rockThrowDrawOrder(
 }
 
 /**
- * `AnimTask_ShakeMon(ANIM_TARGET,0,5,20,1)` DISPLAYED y2. RAM-measured: the
- * task's y2 toggles 5→0 every two RAM ticks from RAM age 16 (2-on-2-off), but
- * the battler sprite's OAM latches the shake two frames behind its RAM write,
- * so the framebuffer shows 5 at display ages 24,25,28,29,...,56,57 (the RAM
- * pattern shifted by two). Outside that window the ONIX stays at y2=0.
+ * `AnimTask_ShakeMon(ANIM_TARGET,0,5,20,1)` DISPLAYED y2 (RGB-measured). The
+ * shake's y2 toggles 5→0 every two frames, but the framebuffer does NOT show
+ * the RAM y2 field's own pattern (the probe's RAM read and the OAM copy latch
+ * differently): the RGB scan shows +5 at display ages 21, 24-25, 28-29, ...,
+ * 56-57 (i.e. `(age - 21) % 4` is 0 or 3 over [21,57]), with a single lead
+ * frame at 21 ahead of the RAM-2 pattern's settled pairs. Outside that window
+ * the ONIX stays at y2=0.
  */
 export function rockThrowTargetY2(
   age: number,
@@ -331,21 +333,21 @@ export function rockThrowTargetY2(
 ): number {
   if (age < profile.targetShakeStartAge || age > profile.targetShakeEndAge) return 0;
   const d = age - profile.targetShakeStartAge;
-  return d % 4 < 2 ? 5 : 0;
+  return d % 4 === 0 || d % 4 === 3 ? 5 : 0;
 }
 
 /**
- * The opponent-front ONIX target's permanent idle-bob residual x2=+1. The
- * `AnimTask_ShakeMon` xOffset=0 write is NOT reflected in the framebuffer
- * (the same two-frame OAM latch hides it), so the +1 idle residual stays
- * visible for the whole window. The player-back ONIX target has no residual;
- * the caller decides per side.
+ * The opponent-front ONIX target's displayed x2. The idle-bob residual +1
+ * stays visible until the shake task's xOffset=0 write latches into the
+ * framebuffer at `targetX2OffAge` (RGB-measured: +1 through display age
+ * targetX2OffAge-1, 0 from targetX2OffAge). The player-back ONIX target has
+ * no residual; the caller decides per side.
  */
 export function rockThrowTargetX2(
-  _age: number,
-  _profile: Readonly<RockThrowAnimationProfile> = ROCK_THROW_ANIMATION_PROFILE,
+  age: number,
+  profile: Readonly<RockThrowAnimationProfile> = ROCK_THROW_ANIMATION_PROFILE,
 ): number {
-  return 1;
+  return age < profile.targetX2OffAge ? 1 : 0;
 }
 
 export interface RockThrowAnimationState {

@@ -136,10 +136,22 @@ for (
   // previous RAM tick's value (one-tick render lag, same as ROCK_SLIDE).
   const previous = frames.get(frame - 1);
   const displayedBg3Y = previous?.bg3Y ?? 0;
-  // The target shake's y2 latches into OAM two frames behind its RAM write.
+  // The target shake's y2 latches into OAM two frames behind its RAM write for
+  // the settled 2-on-2-off pairs, but the shake's first displayed +5 (the
+  // task's initial y2=5 write at `targetShakeStartAge`) leads that pattern by
+  // one frame (RGB-measured; dense scan verified the full 21..57 window).
   const shakeRam = frames.get(frame - 2);
-  const displayedTargetY2 = shakeRam
+  const ramY2 = shakeRam
     ? (fixture.target.geometry.side === "opponent" ? shakeRam.opponentSprite.y2 : shakeRam.playerSprite.y2)
+    : 0;
+  const displayedTargetY2 = age === fixture.animationProfile.targetShakeStartAge ? 5 : ramY2;
+  // The opponent-front ONIX idle-bob residual x2=+1 drops one frame behind its
+  // RAM write (RAM x2 falls at age 20, the framebuffer shows +1 through age
+  // 20 and 0 from 21), so the displayed x2 is the RAM x2 one frame back; the
+  // player-back ONIX target has no residual and reads 0 throughout.
+  const idleRam = frames.get(frame - 1);
+  const displayedTargetX2 = fixture.target.geometry.side === "opponent"
+    ? (age === 0 ? 1 : (idleRam?.opponentSprite.x2 ?? 0))
     : 0;
   // Falling rocks likewise render one RAM tick behind their probe record.
   const previousOracle = frames.get(frame - 1);
@@ -155,15 +167,15 @@ for (
       && rock.animNum === oracleRocks[i]!.animNum
     );
   const targetX2Exact = fixture.target.geometry.side === "opponent"
-    ? view.targetX2 === targetSprite.x2
-    : targetSprite.x2 === 0;
+    ? view.targetX2 === displayedTargetX2
+    : displayedTargetX2 === 0;
   const componentExact =
     view.bg3Y === displayedBg3Y
     && view.targetY2 === displayedTargetY2
     && targetX2Exact
     && rocksExact;
   if (componentExact) componentMatches += 1;
-  else componentMismatches.push(`frame ${frame}/age ${age}: component (bg3Y ${view.bg3Y}vs${oracle.bg3Y}, y2 ${view.targetY2}vs${targetSprite.y2}, x2 ${view.targetX2}vs${targetSprite.x2}, rocks ${viewRocks.length}vs${oracleRocks.length})`);
+  else componentMismatches.push(`frame ${frame}/age ${age}: component (bg3Y ${view.bg3Y}vs${oracle.bg3Y}, y2 ${view.targetY2}vs${targetSprite.y2}, x2 ${view.targetX2}vs${displayedTargetX2}, rocks ${viewRocks.length}vs${oracleRocks.length})`);
 
   const engine: EngineState = {
     ...createInitialState(),

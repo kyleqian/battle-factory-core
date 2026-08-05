@@ -34,9 +34,9 @@
   },
   "animationProfile": {
     "rockAnchorAge": 3,
-    "targetShakeStartAge": 22,
-    "targetShakeEndAge": 55,
-    "targetX2OffAge": 20,
+    "targetShakeStartAge": 21,
+    "targetShakeEndAge": 57,
+    "targetX2OffAge": 21,
     "spriteOrderSeed": [62, 60, 0, 63, 1, 61, 6, 8, 2, 3, 4, 21, 20, 5, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 7, 54, 55, 56, 57, 58, 59, 23, 22, 48, 49, 50, 51, 52, 53, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47],
     "occupiedSpriteSlots": [0, 1, 2, 6, 8, 60, 61, 62, 63]
   },
@@ -53,7 +53,7 @@
   "secondFreshEvidenceSha256": "3dc82aade1ca96036c22f28ca11695aa06e588067e49163ddc77c28b41669c3d",
   "rawRgbSha256": "e2592ba27969c44e5f3f64dca24bbf2869d9d765b6270833ea564cdfb7e52b89",
   "acceptance": {
-    "status": "partial",
-    "reason": "staged source model; dense production framebuffer identity is not yet accepted"
+    "status": "exact",
+    "framebufferMatching": 87
   }
 }
