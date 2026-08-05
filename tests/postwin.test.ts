@@ -24,6 +24,7 @@ import {
   createBattleTerminalResolutionPresentation,
   storeBattleTerminalPresentationDismiss,
 } from "../src/engine/battleResolutionPresentation.ts";
+import type { BattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
 import {
   BATTLE_2_SCENE_HANDOFF_ELAPSED,
   INITIAL_BATTLE_2_ROOM_STATE,
@@ -263,7 +264,10 @@ describe("S8 Battle-1 postwin transition", () => {
       rngValue: round.rules.rngValue,
     });
     const beforeRules = round.rules;
-    const state = createPostwinStateFromRound(round);
+    const state = createPostwinStateFromRound(
+      round,
+      {} as unknown as BattleResolutionPresentationRenderView,
+    );
     const opponentSetIds = generated.opponents.map(({ setId }) => setId);
     const commentary = getFactoryOpponentCommentary(generated.party);
 

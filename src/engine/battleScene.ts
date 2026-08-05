@@ -16702,6 +16702,48 @@ function fastFadeComponentToBlack(component8: number, updates: number): number {
 }
 
 /**
+ * BeginFastPaletteFade's generic per-pixel step, factored out of
+ * applyTurn17PostwinFastFade so any already-composed framebuffer can reuse
+ * the same BG/OBJ-alternating-update math given its own occupancy mask
+ * (docs/post-terminal-return-to-lobby-ground-truth.md §3(1): the same
+ * BeginFastPaletteFade(3) mechanism, generic across every battle -- Turn17
+ * canonical and the Battle Scene OFF generated-orchestrator route both call
+ * the same real ROM function). `updates` counts (BG, OBJ) come from the
+ * caller's own age-relative schedule (see fastFadeUpdatesForLocalTick).
+ */
+export function applyFastFadeToBlack(
+  fb: Uint8Array,
+  objMask: Uint8Array,
+  bgUpdates: number,
+  objUpdates: number,
+): void {
+  for (let p = 0; p < 240 * 160; p += 1) {
+    const o = p * 4;
+    const updates = objMask[o + 3] !== 0 ? objUpdates : bgUpdates;
+    fb[o] = fastFadeComponentToBlack(fb[o]!, updates);
+    fb[o + 1] = fastFadeComponentToBlack(fb[o + 1]!, updates);
+    fb[o + 2] = fastFadeComponentToBlack(fb[o + 2]!, updates);
+    fb[o + 3] = 255;
+  }
+}
+
+/**
+ * `BeginFastPaletteFadeInternal` performs one update immediately, then the
+ * inherited BG/OBJ toggle gives BG the next (even-local) update while OBJ
+ * resumes on odd-local updates -- oracle-confirmed both here and by
+ * applyTurn17PostwinFastFade's own citation. `localTick` is 1 on the first
+ * visibly-faded tick (the tick immediately after the fade's own hold span).
+ */
+export function fastFadeUpdatesForLocalTick(
+  localTick: number,
+): { bgUpdates: number; objUpdates: number } {
+  return {
+    bgUpdates: Math.floor(localTick / 2) + 1,
+    objUpdates: Math.ceil(localTick / 2),
+  };
+}
+
+/**
  * BeginFastPaletteFade(FAST_FADE_OUT_TO_BLACK), used only after the accepted
  * DESTIN loss-quote dismiss. Unlike BeginNormalPaletteFade, fast fade
  * subtracts two directly from each 5-bit channel on alternating BG/OBJ
@@ -34276,7 +34318,7 @@ export function renderBattleResolutionSceneOffView(
   }
 }
 
-function drawBattleResolutionSceneOffObjMask(
+export function drawBattleResolutionSceneOffObjMask(
   mask: Uint8Array,
   view: BattleResolutionPresentationRenderView,
 ): void {
@@ -34313,6 +34355,34 @@ function drawBattleResolutionSceneOffObjMask(
   }
   // BG0's opaque message window owns the complete bottom strip.
   mask.fill(0, 112 * 240 * 4);
+}
+
+/**
+ * `drawBattleResolutionSceneOffObjMask` plus the settled trainer-slide
+ * sprite (docs/post-terminal-return-to-lobby-ground-truth.md §3(1)'s own
+ * fast-fade span always sits after a completed slide-in, so this trainer
+ * pic is a real OBJ layer occupant too -- `renderBattleResolutionSceneOffView`
+ * draws it via the same `drawSpriteSheet` primitive, just outside the
+ * shared mask helper above because that helper's other existing callers
+ * never carry a settled `trainerSlide`). A dedicated export instead of
+ * folding this into `drawBattleResolutionSceneOffObjMask` itself, so this
+ * doesn't change pixels for that function's other callers.
+ */
+export function drawBattleResolutionSceneOffFadeMask(
+  mask: Uint8Array,
+  view: BattleResolutionPresentationRenderView,
+): void {
+  drawBattleResolutionSceneOffObjMask(mask, view);
+  if (view.trainerSlide !== null && view.trainerSlide.picSymbol !== null) {
+    const trainerPic = resolveFrontierTrainerPic(view.trainerSlide.picSymbol);
+    drawSpriteSheet(
+      mask,
+      trainerPic.tileset,
+      trainerPic.palette,
+      176 + view.trainerSlide.offscreenX2,
+      OPPONENT_CORNER.y,
+    );
+  }
 }
 
 /**

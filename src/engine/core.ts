@@ -114,9 +114,12 @@ import { applyBattleTransitionOverlay, exitFadeY } from "./battleTransition.ts";
 import {
   actionMenuInputReady,
   advanceBattleScene,
+  applyFastFadeToBlack,
   applyTurn17PostwinFastFade,
   battle2PreTurnRngCalls,
   battle2Turn1RngCalls,
+  drawBattleResolutionSceneOffFadeMask,
+  fastFadeUpdatesForLocalTick,
   INITIAL_BATTLE_SCENE_STATE,
   renderBattleScene,
   renderBattleResolutionForcedPartySelect,
@@ -228,6 +231,7 @@ import {
   acceptPostwinContinuation,
   acceptPostwinDialoguePage,
   acceptPostwinHealDismiss,
+  createBattleReturnHoldState,
   createPostwinState,
   createPostwinStateFromOpponentRentalRecords,
   createPostwinStateFromRound,
@@ -575,16 +579,28 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   }
 
   if (state.factoryRoundBattleOrchestrator?.battleResolutionPresentation) {
+    const preAdvanceResolution =
+      state.factoryRoundBattleOrchestrator.battleResolutionPresentation;
     factoryRoundBattleOrchestrator = advanceFactoryRoundBattleResolution(
       state.factoryRoundBattleOrchestrator,
       newKeys,
     );
     const generatedRound = factoryRoundBattleOrchestrator.round;
+    const generatedCommandType = generatedRound.presentation?.command.type ?? null;
     const generatedPostwin =
-      postwin === null
-      && generatedRound.presentation?.command.type === "battleWon"
-        ? createPostwinStateFromRound(generatedRound)
-        : postwin;
+      postwin !== null
+        ? postwin
+        : generatedCommandType === "battleWon"
+          ? createPostwinStateFromRound(
+              generatedRound,
+              createBattleResolutionPresentationRenderView(preAdvanceResolution),
+            )
+          : generatedCommandType === "roundLost"
+              || generatedCommandType === "roundCompleted"
+            ? createBattleReturnHoldState(
+                createBattleResolutionPresentationRenderView(preAdvanceResolution),
+              )
+            : postwin;
     const generatedTerminalCommand = terminalCommandForRound(generatedRound);
     const generatedFactoryTerminal =
       factoryTerminal === null && generatedTerminalCommand !== null
@@ -670,6 +686,14 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       ...state,
       frame: state.frame + 1,
       keyRepeat,
+      // The shared return-to-field span (docs/post-terminal-return-to-lobby-
+      // ground-truth.md §3) keeps advancing its own elapsed clock underneath
+      // factoryTerminal's own (out-of-this-slice, roundLost/roundCompleted)
+      // presentation, exactly as it already does underneath the postwin
+      // branch below for WIN -- this branch is the LOSS/roundCompleted
+      // sibling of that same requirement (render() prefers this state over
+      // factoryTerminal until its own phase reaches "counterRoom").
+      postwin: postwin ? advancePostwin(postwin) : postwin,
       factoryTerminal,
       roundController,
       factoryRoundBattleOrchestrator,
@@ -2162,6 +2186,16 @@ function renderPostwinState(state: EngineState): Uint8Array {
   const phase = postwinPhase(age);
   if (phase === "battleHold" || phase === "battleFade") {
     const fb = createFramebuffer();
+    if (postwin.frozenSceneView) {
+      renderBattleResolutionSceneOffView(fb, postwin.frozenSceneView);
+      if (phase === "battleFade") {
+        const mask = createFramebuffer();
+        drawBattleResolutionSceneOffFadeMask(mask, postwin.frozenSceneView);
+        const { bgUpdates, objUpdates } = fastFadeUpdatesForLocalTick(age - 6);
+        applyFastFadeToBlack(fb, mask, bgUpdates, objUpdates);
+      }
+      return fb;
+    }
     if (!state.battleScene) return blackFrame();
     renderBattleScene(fb, state.battleScene);
     applyTurn17PostwinFastFade(fb, state.battleScene, age);
@@ -2711,6 +2745,16 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
 }
 
 export function render(state: EngineState): Uint8Array {
+  // docs/post-terminal-return-to-lobby-ground-truth.md §3: the 108-tick
+  // fade/black/battle-room-flash/black return-to-field span is shared,
+  // byte-identical machinery ahead of EITHER outcome's own destination-map
+  // content (postwin's "counterRoom" phase for WIN; factoryTerminal for
+  // roundLost/roundCompleted) -- so it must render ahead of the
+  // factoryTerminal dispatch below, not just postwin's usual (WIN-only)
+  // precedence inside renderWithoutFactoryTerminal.
+  if (state.postwin && postwinPhase(state.postwin.elapsed) !== "counterRoom") {
+    return renderPostwinState(state);
+  }
   const generatedTerminalCommand = terminalCommandForRound(
     state.factoryRoundBattleOrchestrator?.round ?? null,
   );

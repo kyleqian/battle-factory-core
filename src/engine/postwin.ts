@@ -15,6 +15,7 @@ import type {
   BattleParty,
 } from "./battleScenario.ts";
 import type { RoundControllerState } from "./roundController.ts";
+import type { BattleResolutionPresentationRenderView } from "./battleResolutionPresentationRender.ts";
 
 export type FactoryPostwinOpponentRentalRecords = readonly [
   FactoryCorpusPartyInstance,
@@ -74,6 +75,16 @@ export interface PostwinState {
   swapDeclineElapsed: number | null;
   /** Accepted "Right this way" dismiss edge; walk/warp clocks derive from it. */
   rightThisWayDismissElapsed: number | null;
+  /**
+   * Battle Scene OFF only (docs/post-terminal-return-to-lobby-ground-truth.md
+   * §3): a frozen snapshot of the terminal message's own last rendered scene,
+   * held then BeginFastPaletteFade(3)'d to black by the shared battleHold/
+   * battleFade phases below. `state.battleScene` (Turn17 canonical's own
+   * equivalent) is always null on this route, so this is its OFF-profile
+   * stand-in. Null on the canonical Turn17 route, which has real
+   * `battleScene` state instead.
+   */
+  frozenSceneView: BattleResolutionPresentationRenderView | null;
 }
 
 /** gMain.inBattle clears and outside-battle VBlank RNG resumes at dismiss+43. */
@@ -185,6 +196,7 @@ function createPostwinStateFromSnapshot(
     swapCursorMoveElapsed: null,
     swapDeclineElapsed: null,
     rightThisWayDismissElapsed: null,
+    frozenSceneView: null,
   };
 }
 
@@ -233,12 +245,27 @@ function sameBattlePartySnapshot(
 }
 
 /**
+ * Battle Scene OFF's `finishBattle` handoff completes one tick later
+ * (relative to its own real dismiss edge) than the canonical Turn17 route's
+ * own handoff does relative to ITS dismiss edge -- a two-tick real dismiss
+ * press (this route) vs. Turn17's one-tick press, both oracle-confirmed
+ * (docs/post-terminal-return-to-lobby-ground-truth.md §3;
+ * docs/terminal-seam-win-window-probe.md §5's own citation of the two-tick
+ * press). Starting this route's own `elapsed` clock at 1 (not 0, the
+ * canonical route's own start value) re-aligns it to the exact same
+ * `postwinPhase`/`POSTWIN_*_AGE` boundaries Turn17 already pins, with no
+ * changes to those shared constants themselves.
+ */
+const GENERATED_ROUTE_INITIAL_ELAPSED = 1;
+
+/**
  * Generated-route adapter. The pending battleWon command and retained
  * last-battle snapshot are the presentation boundary; all mutable-looking
  * rows are frozen from that same typed round before postwin clocks begin.
  */
 export function createPostwinStateFromRound(
   round: RoundControllerState,
+  frozenSceneView: BattleResolutionPresentationRenderView,
 ): PostwinState {
   const pending = round.presentation;
   const lastBattle = round.rules.lastBattle;
@@ -277,15 +304,57 @@ export function createPostwinStateFromRound(
   const opponentRentalMonIds = opponentRentalRecords.map(
     ({ setId }) => setId,
   ) as unknown as readonly [number, number, number];
-  return createPostwinStateFromSnapshot({
-    challengeBattleNum: round.rules.battleIndex,
-    challengeBattleNumAfterWrite: nextBattleIndex as BattleIndex,
-    opponentRentalMonIds,
-    opponentRentalMonIdsAfterWrite: opponentRentalMonIds,
-    opponentParty: createFactoryCorpusParty(opponentRentalRecords),
-    playerPartyHp: partyHp(lastBattle.playerParty, "hp"),
-    healedPlayerPartyHp: partyHp(lastBattle.playerParty, "maxHp"),
-  });
+  return {
+    ...createPostwinStateFromSnapshot({
+      challengeBattleNum: round.rules.battleIndex,
+      challengeBattleNumAfterWrite: nextBattleIndex as BattleIndex,
+      opponentRentalMonIds,
+      opponentRentalMonIdsAfterWrite: opponentRentalMonIds,
+      opponentParty: createFactoryCorpusParty(opponentRentalRecords),
+      playerPartyHp: partyHp(lastBattle.playerParty, "hp"),
+      healedPlayerPartyHp: partyHp(lastBattle.playerParty, "maxHp"),
+    }),
+    elapsed: GENERATED_ROUTE_INITIAL_ELAPSED,
+    frozenSceneView,
+  };
+}
+
+/**
+ * Shared return-to-field adapter for the generated route's non-WIN terminal
+ * outcomes (roundLost; a terminal 7th-battle roundCompleted also warps to
+ * the Lobby per docs/post-terminal-return-to-lobby-ground-truth.md §3's own
+ * note). dismiss+8..+115's fade/black/battle-room-flash/black sequence is
+ * byte- and callback-identical to WIN's own (§3) -- this reuses the exact
+ * same `PostwinState` phase machine and elapsed convention as
+ * `createPostwinStateFromRound`; only the fields `postwinPhase`'s
+ * "counterRoom" branch reads (scoutingLines, heal message, swap offer -- all
+ * WIN-only content, out of this slice's dismiss+115 boundary) stay at inert
+ * placeholder values, since a non-WIN outcome is never meant to reach them.
+ */
+export function createBattleReturnHoldState(
+  frozenSceneView: BattleResolutionPresentationRenderView,
+): PostwinState {
+  return {
+    elapsed: GENERATED_ROUTE_INITIAL_ELAPSED,
+    challengeBattleNum: 0,
+    challengeBattleNumAfterWrite: 0,
+    opponentRentalMonIds: [0, 0, 0],
+    opponentRentalMonIdsAfterWrite: [0, 0, 0],
+    scoutingLines: [["", ""], ["", ""], ["", ""], ["", ""]],
+    healDismissElapsed: null,
+    playerPartyHp: [0, 0, 0],
+    healedPlayerPartyHp: [0, 0, 0],
+    continuationCursorPos: null,
+    continuationConfirmElapsed: null,
+    dialoguePage: 0,
+    dialoguePageEdgeElapsed: null,
+    swapCursorPos: null,
+    swapCursorDisplayPos: null,
+    swapCursorMoveElapsed: null,
+    swapDeclineElapsed: null,
+    rightThisWayDismissElapsed: null,
+    frozenSceneView,
+  };
 }
 
 export const INITIAL_POSTWIN_STATE = createPostwinState();
@@ -411,6 +480,7 @@ export function advancePostwin(state: PostwinState): PostwinState {
     swapCursorMoveElapsed: state.swapCursorMoveElapsed,
     swapDeclineElapsed: state.swapDeclineElapsed,
     rightThisWayDismissElapsed: state.rightThisWayDismissElapsed,
+    frozenSceneView: state.frozenSceneView,
   };
 }
 

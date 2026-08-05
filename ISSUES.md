@@ -457,16 +457,51 @@ byte-identical + supervisor rerun post-merge; LOSS re-held 236/236. Pure
 data change — `winTerminalWindowStage` needed zero code edits; the trace's
 segments are a literal prefix of the committed fixture's own recorded
 schedule. Pinned: quote settled span 4688–5010, real dismiss tick 5010
-(2-tick press at 5011–5012). **Remaining and blocking both windows' true
-ends: the scaffold party-identity gap** (`docs/terminal-seam-win-window-probe.md`
-§5) — frame 5012 completes the lifecycle and `finishBattle` hits
-`assertSamePartyIdentity` because the scaffold's synthetic `terminalBattle`
-party (`TERMINAL_SEAM_SCAFFOLD_TRAINER`, hp 200) was never reconciled with
-the orchestrator's own generated opponent party (ARON lead, maxHp 143).
-Same structural reason LOSS stops one tick short of its own handoff. Next
-pickup: reconcile scaffold-side in `tools/compare/appTrace.ts` (generic
-across both windows), then extend WIN through the fade/handoff end and
-LOSS through its own handoff tick.
+(2-tick press at 5011–5012). The scaffold party-identity gap this paragraph
+used to flag here (`docs/terminal-seam-win-window-probe.md` §5, frame 5012's
+`assertSamePartyIdentity` throw) was fixed generically in a later session
+(`hp: 0` on both terminal-seam scaffold configs, §6 of that same doc,
+PROGRESS entry 931) — frame 5012/3232 no longer crash on either window.
+
+**Post-`finishBattle` presentation timing (§6's real blocker) closed for
+slice 1 of the 5-slice plan in `docs/post-terminal-return-to-lobby-ground-truth.md`:
+WIN 389/389 → 503/503, LOSS 236/236 → 350/350, both twice-run
+byte-identical.** The shared 108-tick return-to-field span (dismiss+8
+fade-to-black → dismiss+37, black hold, `BeginFastPaletteFade(3)`'s
+battle-room fade-in-with-brightness-pulse dismiss+58→+96, second black hold
+through dismiss+115) is now one outcome-agnostic mechanism, reusing the
+existing (previously Turn17-canonical-only) `postwin.ts` phase machine
+(`postwinPhase`, `POSTWIN_BATTLE_FADE_FIRST_AGE`/etc., unchanged) for BOTH
+outcomes: `createPostwinStateFromRound` (WIN) and the new
+`createBattleReturnHoldState` (LOSS/roundCompleted) both start `elapsed` at
+the same value (1, one tick later than Turn17's own convention — this
+route's real dismiss press is 2 ticks vs. Turn17's 1). Battle Scene OFF's
+`renderPostwinState` gained a `frozenSceneView`-driven fallback (a snapshot
+of `createBattleResolutionPresentationRenderView` taken the instant
+`finishBattle` fires) for the `battleHold`/`battleFade` phases, since
+`state.battleScene` (Turn17's own equivalent) is always null on this route;
+the fade math reuses `BeginFastPaletteFade`'s real BG/OBJ-alternating-update
+schedule (`applyFastFadeToBlack`/`fastFadeUpdatesForLocalTick`, new exports
+in `battleScene.ts`, factored out of the existing Turn17 fade function) over
+a mask built from `renderBattleResolutionSceneOffView`'s own draw calls plus
+the settled trainer-slide sprite (`drawBattleResolutionSceneOffFadeMask`,
+new). `render()` now checks `state.postwin` (while its phase isn't yet
+`counterRoom`) ahead of `factoryTerminal`, so LOSS's shared span renders
+before its own (out-of-scope, still-uncalibrated) Lobby content takes over;
+`factoryTerminal`'s own per-tick branch in `tick()` now also advances
+`postwin` underneath itself, fixing a found-along-the-way bug where it
+otherwise froze the shared clock at its initial tick forever. Tier-1 pin:
+`tests/factoryBattleReturnPresentation.test.ts` (4 tests: shared elapsed
+start, every doc-cited phase boundary, a full 114-tick lockstep WIN/LOSS
+phase-sequence walk, the fade BG/OBJ update schedule) — the elapsed-start
+and fade-schedule pins were red-verified this session (flipped
+`GENERATED_ROUTE_INITIAL_ELAPSED`/`objUpdates`' formula, watched two tests
+fail, reverted). Full `npm test`/`npm run build` green at this session's
+final commit (see PROGRESS for exact counts). **Out of scope, next pickup:**
+slices 2–4 — LOSS's Lobby arrival + first message + held-cursor dismiss,
+LOSS's restore/save wait + record prompt, WIN's PreBattleRoom arrival + heal
+message (all past dismiss+115, where the two destinations genuinely
+diverge) — see that doc's §5 for the bounded plan.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 

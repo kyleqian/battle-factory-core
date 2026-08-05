@@ -1,3 +1,38 @@
+## 929 — [supervisor, 2026-08-04 ~19:10] R2 both lanes landed + animation STEEL_WING fold; #72 fully closed (retitled settled record); R3 launched (post-terminal timing scout + no-PP/Choice-lock oracle verification)
+
+- **State:** master `5993ff41` + this docs commit. Union checks post-merge:
+  `win-terminal-window-off` **389/389**, `loss-terminal-window-off`
+  **236/236**, smoke 347/347, `steelWingEvidence` 2/2, new
+  `battleScriptSelectionRejection` 20/20. Workers' own full-suite gates:
+  MAIN 722 files / 6,947 passed / 1 skipped (run twice) at `05d7dccf`;
+  SIDE 721 files / 6,927 at `5ef59e60`. Build green both.
+- **Did:** (1) verified + kept R2-MAIN's selection-rejection advisory slice
+  (#72 remainder: shared six-cause resolver mirroring
+  `TrySetCantSelectMoveBattleScript` incl. two source asymmetries the
+  bitmask lacks; `rejectionReasonBySlot`; 4 STRINGIDs; Torment
+  oracle-verified byte-for-byte; boundary contract untouched). Retitled
+  #72 to a settled record (FATAL-guard user decision + the probe's
+  button-gated dismiss-timing correction retained for future option-(a)).
+  (2) verified + merged R2-SIDE (`5ef59e60`): terminal-scaffold party
+  identity reconciled generically (`hp:0`), §5 crash closed, windows hold
+  389/389 + 236/236; NEW blocker documented in probe doc §6 — the
+  post-`finishBattle` return-to-lobby presentation has no real timing
+  model (WIN phase renders black; LOSS races to lobby in 28 ticks vs
+  oracle 800+). (3) folded `animation-main` (STEEL_WING exact, 108/276
+  exact, no main-program ask in its top entry). (4) PAPERCUTS: added
+  line-pin census entry (R2 worker flag); R1's suspected-slow `npm test`
+  was load, not a regression — not filed.
+- **Next:** R3 in flight — SIDE: read-only dense-probe scout of the
+  post-terminal span (WIN 5012+, LOSS 3232+) producing the
+  return-to-lobby ground-truth timeline + consumer map (docs only, arms
+  the next session's implementation). MAIN: stage the two skipped
+  oracle-verification traces for `NOPPLEFT`/`ITEMALLOWSONLYYMOVE` (and
+  `PKMNHASNOMOVESLEFT` if stageable) against the real ROM. Then
+  wind-down: fold re-check, ONE full union suite, preview rebuild.
+- **Notes:** #73's next implementation step is the §6 subsystem (src work,
+  next session's headline candidate). Deadline 21:17 holds comfortably.
+
+---
 ## 928 — [bounded MAIN worker, 2026-08-04 ~19:15] ISSUES #72 remainder CLOSED — selection-rejection advisory slice (scout option (b)) landed + oracle-verified
 
 - **State:** master `05d7dccf` (this docs commit next). `npm test` **722
