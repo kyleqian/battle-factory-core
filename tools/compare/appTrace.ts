@@ -61,11 +61,21 @@ import {
   type BattleCommandPresentationState,
 } from "../../src/engine/battleCommandPresentation.ts";
 import { getFactoryTrainerPresentation } from "../../src/engine/factoryTrainerPresentation.ts";
+import { createFactoryAiBattleHistory } from "../../src/engine/factoryAiLiveDriver.ts";
+import type {
+  BattleScriptPartyMemberInput,
+} from "../../src/engine/battleScriptRulesContext.ts";
 import type {
   FactoryFullTurnBattlerConfig,
   FactoryFullTurnConfig,
   FactoryFullTurnDecisionRules,
 } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
+import type {
+  FactoryBattleMoveSelectionCursors,
+  FactoryBattlePresentationBoundaries,
+  FactoryRoundBattleOrchestratorState,
+} from "../../src/engine/factoryRoundBattleOrchestrator.ts";
+import type { BattleCommandPresentationState } from "../../src/engine/battleCommandPresentation.ts";
 
 export interface AppCapture {
   frame: number;
@@ -868,6 +878,154 @@ function winTerminalWindowStage(state: EngineState): EngineState {
   };
 }
 
+// ISSUES #78 dense-compare wiring: the scout's staged mid-battle switch
+// fixture (tools/battle-lab/scratch-mid-battle-switch-dense-*-off.json)
+// stages BOTH sides as three Level-50 RATTATA (species 19) with SPLASH x4,
+// seed 1. The frontier corpus has no such set, so the battle is staged
+// directly via createFactoryFullTurnBattleState (the same staged-battle seam
+// battle2-off-turn1-before-confirm and the terminal scaffolds use) and
+// installed into a real orchestrator at the fixture's fight-menu-open
+// checkpoint (frame 0). The orchestrator's live route then replays the
+// fixture's verbatim segments: turn-1 double SPLASH, the party-menu voluntary
+// switch to slot 1, and the switch-in cadence (ISSUES #78 slices 1-3).
+const RATTATA_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
+  species: 19,
+  moveId: 150, // MOVE_SPLASH
+  moves: [150, 150, 150, 150] as const,
+  pp: [40, 40, 40, 40] as const,
+  ability: 50, // ABILITY_RUN_AWAY
+  abilityNum: 0,
+  item: 0,
+  friendship: 0,
+  attack: 76,
+  defense: 55,
+  spAttack: 45,
+  spDefense: 55,
+  speed: 92,
+  hp: 105,
+  maxHp: 105,
+  types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+});
+
+const RATTATA_LV50_BENCH: BattleScriptPartyMemberInput = Object.freeze({
+  species: 19,
+  isEgg: false,
+  abilityNum: 0,
+  personality: 0,
+  level: 50,
+  friendship: 0,
+  hp: 105,
+  maxHP: 105,
+  attack: 76,
+  defense: 55,
+  speed: 92,
+  spAttack: 45,
+  spDefense: 55,
+  status1: 0,
+  item: 0,
+  moves: [150, 150, 150, 150] as const,
+  pp: [40, 40, 40, 40] as const,
+});
+
+function midBattleSwitchDenseOffStage(state: EngineState): EngineState {
+  const playerRentalRecords = [
+    generatedCommandRecord(664),
+    generatedCommandRecord(678),
+    generatedCommandRecord(527),
+  ] as const;
+  let orchestrator = createFactoryRoundBattleOrchestrator({
+    id: "mid-battle-switch-dense-off",
+    rngValue: 4,
+    factoryWinStreak: 0,
+    playerTrainerId: 0x89ab_cdef,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords,
+      savedRentalRecords: [
+        ...playerRentalRecords,
+        generatedCommandRecord(1),
+        generatedCommandRecord(2),
+        generatedCommandRecord(3),
+      ],
+    },
+  });
+  const commandId = orchestrator.round.presentation?.command.commandId;
+  if (commandId === undefined) {
+    throw new Error("mid-battle switch stage requires the battle-start command");
+  }
+  orchestrator = advanceFactoryRoundPresentation(
+    completeFactoryRoundPresentation(orchestrator, { commandId }),
+  );
+  if (orchestrator.battle === null || orchestrator.activeBattleCallStart === null) {
+    throw new Error("mid-battle switch stage requires a live started battle");
+  }
+  const staged = createFactoryFullTurnBattleState({
+    requestId: 1,
+    rngSeed: 1,
+    player: RATTATA_LV50,
+    trainer: RATTATA_LV50,
+    playerBenchHp: [105, 105],
+    playerBenchOverride: [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH],
+    trainerBenchHp: [105, 105],
+    trainerBenchOverride: [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH],
+  });
+  if (
+    staged.boundary.kind !== "decision-required"
+    || staged.boundary.request.kind !== "command"
+  ) {
+    throw new Error("mid-battle switch staged battle has no player command boundary");
+  }
+  const cursors: FactoryBattleMoveSelectionCursors = Object.freeze([0, 0, 0, 0]);
+  const presentation: BattleCommandPresentationState = Object.freeze({
+    ...createBattleCommandPresentation(
+      staged.boundary.request,
+      staged.rules.rulesContext,
+      cursors[0],
+    ),
+    // The fixture's frame 0 is the already-interactive action menu (its first
+    // segment is an A press at frame 0), so the app stage must skip the
+    // action-enter delay the generated-route carrier otherwise starts in.
+    lifecycle: Object.freeze({ phase: "action-menu" as const, phaseElapsed: 0 }),
+  });
+  const boundaries = Object.freeze(
+    ([presentation.field.player, presentation.field.opponent] as const).map(
+      (field, battler) => {
+        const active = staged.rules.rulesContext.battlers[battler]!;
+        return Object.freeze({
+          battler: battler as 0 | 1,
+          partyIndex: field.partyIndex,
+          field,
+          displayedHp: field.hp,
+          displayedStatus1: active.status1,
+          spriteVisible: true,
+          idleEpoch: 0,
+          moveCursor: cursors[battler]!,
+        });
+      },
+    ),
+  ) as unknown as FactoryBattlePresentationBoundaries;
+  const swapped: FactoryRoundBattleOrchestratorState = Object.freeze({
+    ...orchestrator,
+    battle: staged,
+    battleCommandPresentation: presentation,
+    battleResolutionPresentation: null,
+    retainedLockedActionPresentationOwner: null,
+    battlePartySelect: null,
+    battleForcedPartySelect: null,
+    moveSelectionCursors: cursors,
+    battlePresentationBoundaries: boundaries,
+    aiHistory: createFactoryAiBattleHistory(staged.rules.rulesContext),
+  });
+  return {
+    ...state,
+    factoryRoundBattleOrchestrator: swapped,
+    rngMode: "frontierBattle",
+    rngValue: swapped.battle?.rng.value ?? state.rngValue,
+  };
+}
+
 function terminalWindowResolution(
   state: EngineState,
 ): BattleResolutionPresentationState | null {
@@ -1161,6 +1319,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   }),
   "loss-terminal-window-off": lossTerminalWindowStage,
   "win-terminal-window-off": winTerminalWindowStage,
+  "mid-battle-switch-dense-off": midBattleSwitchDenseOffStage,
 };
 
 export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {
