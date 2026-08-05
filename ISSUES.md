@@ -17,16 +17,6 @@ backlog.
 
 # Open
 
-## #77 — Live play: battle message hold cadence ignored ("super effective" flashes)
-
-**User play-test 2026-08-05:** result/effectiveness messages hold for a
-fraction of a second. The real game holds them via battle-script
-`waitmessage`/`pause` waits (`B_WAIT_TIME_*`, 64/32 frames) — the kernel
-executes those opcodes, but the live presentation does not honor the
-durations. Scout the source constants + one dense OFF oracle window over a
-super-effective hit, then bind the shared hold-constants family on the live
-route. A small constants family, not per-message work.
-
 ## #78 — Live play: mid-battle switch send-out pops in; post-switch pacing immediate
 
 **User play-test 2026-08-05:** (a) a switched-in Pokémon appears with no
