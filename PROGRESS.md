@@ -9,6 +9,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 - **State:** master `67211ca2`, clean. Typecheck green; smoke 7/347 green;
   all five committed win/loss terminal traces byte-identical.
+  **[Supervisor union verification 13:49, final session act:** full
+  `npm test` green (288s run), `npm run build` green, guide-dismiss trace
+  re-spot-checked **232/232** on this union — the deferred full-suite gap
+  in this entry's Notes is closed. `animation-main` gained 4 commits after
+  the 12:46 fold (sibling supervisor likely live) — left UNFOLDED
+  deliberately at 13:52; next session folds at orient per protocol.**]**
 - **Did:** wired receipt §7 into `winTerminalWindowStage`: `playerTrainerId`
   `0x18CC699A`, real six saved rental set ids 156/149/180/188/184/135, the
   synthetic terminal battle rngSeed transplanted to the probed pre-call
