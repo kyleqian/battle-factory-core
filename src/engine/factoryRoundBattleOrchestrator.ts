@@ -330,11 +330,16 @@ function asBattleScriptParty(party: FactoryKernelParty): BattleScriptPartyState 
 }
 
 /**
- * Carries the battle's own party writes (HP, status, held item, PP -- the
- * only fields the real game's `gPlayerParty`/`gEnemyParty` entries mutate
- * during a battle, via the controller REQUEST_* writes) back onto the rental
- * identity. Identity fields (species, personality, IVs, ability slot, moves,
- * ppBonuses) are never battle-mutable in the real game and must stay the
+ * Carries the battle's own party writes (HP, status1, held item, PP -- the
+ * only persistent fields the real game's `gPlayerParty`/`gEnemyParty` entries
+ * mutate via the controller REQUEST_* write-backs, per the emit-site census
+ * in `battle_script_commands.c`/`battle_util.c`: every `EmitSetMonData` call
+ * writes only `REQUEST_HP/STATUS/HELDITEM/PP*`; the sole general exception is
+ * Sketch's `REQUEST_MOVES_PP_BATTLE` (moves+PP), which no Factory-legal
+ * Level-50 rental set carries, and Transform/Mimic rewrite only the in-battle
+ * `gBattleMons`, never the party) back onto the rental identity. Identity
+ * fields (species, personality, IVs, ability slot, moves, ppBonuses) are
+ * therefore never battle-mutable on the Factory route and must stay the
  * records' own values: overlaying them from the terminal party would import a
  * scaffold/placeholder battler's identity into the kernel party, which
  * `healFactoryKernelParty`'s source-derived identity guard then rejects at

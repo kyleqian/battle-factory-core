@@ -102,11 +102,17 @@ imported the placeholder's identity into the post-battle kernel party, and
 (`advanceAfterSwapResult` → `healFactoryKernelParty(records, playerKernelParty)`).
 
 The real game never mutates a party member's species/personality/IVs/ability
-slot/moves/PP-bonus byte during a battle — the controller `REQUEST_*` writes
-touch only HP, status1, held item, and PP (the same set
-`docs/battle-resolution-adapter-ground-truth.md` §2's `deriveBattleParty`
-overlays onto the BattleParty). The overlay now carries exactly those four
-mutable fields and keeps the records' identity, so a scaffold terminal party
+slot/PP-bonus byte during a battle, and on the Factory-legal Level-50 move
+corpus the controller `REQUEST_*` write-backs touch only HP, status1, held
+item, and PP (the same set `docs/battle-resolution-adapter-ground-truth.md`
+§2's `deriveBattleParty` overlays onto the BattleParty). Two general-engine
+caveats, audited against `battle_script_commands.c`/`battle_util.c` and the
+corpus (882 sets): Sketch is the sole `EmitSetMonData` site that also writes
+moves+PP (`REQUEST_MOVES_PP_BATTLE`, `battle_script_commands.c:8182`) and no
+Factory set carries it; Transform (`Cmd_transformdataexecution`) and Mimic
+(`Cmd_mimicattackcopy`) rewrite only the in-battle `gBattleMons`, never the
+party. The overlay now carries exactly those four mutable fields and keeps
+the records' identity, so a scaffold terminal party
 (any future one) can never corrupt the round's kernel identity. No absolute
 frame / battle number / fixture branch was added.
 
