@@ -18,12 +18,11 @@ export interface TailWhipState {
  */
 export const TAIL_WHIP_FRAME_COUNT = 77;
 /** First displayed `AnimTask_TranslateMonEllipticalRespectSide` step. */
-export const TAIL_WHIP_FIRST_OFFSET_AGE = 1;
+export const TAIL_WHIP_FIRST_OFFSET_AGE = 2;
 /** Last displayed ellipse offset (θ=240); the terminal θ=248 wrap resets. */
-export const TAIL_WHIP_LAST_OFFSET_AGE = 62;
+export const TAIL_WHIP_LAST_OFFSET_AGE = 63;
 /** Elliptical task exists from its creation frame through its last step. */
 export const TAIL_WHIP_LAST_TASK_AGE = 62;
-
 function gbaSin(index: number, amplitude: number): number {
   return (GBA_SINE_TABLE_256[index & 0xff]! * amplitude) >> 8;
 }
@@ -31,13 +30,15 @@ function gbaSin(index: number, amplitude: number): number {
 /**
  * `AnimTask_TranslateMonEllipticalRespectSide(ANIM_ATTACKER, 12, 4, 2, 3)`.
  *
- * Speed 3 -> wavePeriod 8, two loops. The reducer age is the dense-window
- * index: the creation frame (age 1) already shows the first scheduled step
- * (θ=8), so the displayed angle is `8 * age`. The loop-1 wrap lands on age 32
- * where θ wraps to 0 and renders the origin; the final θ=248 wrap on age 62 is
- * the last displayed offset before the task destroys itself (age 63), so the
- * active range is ages 1..62. The width is negated for the opponent side
- * (`RespectSide`), mirroring the source's `GetBattlerSide` branch.
+ * Speed 3 -> wavePeriod 8, two loops. Battler x2/y2 passes the task ->
+ * software sprite -> OAM pipeline two displays behind the dense-window index
+ * (measured: the oracle's framebuffer shows software-OAM step θ=8 on dense
+ * age 3), so the reducer's displayed angle is `8 * (age - 1)`. The loop-1
+ * wrap lands on age 33 where θ wraps to 0 and renders the origin; the final
+ * θ=240 (age 63) is the last displayed offset before the θ=248 wrap resets
+ * and destroys the task (age 64), so the active range is ages 2..63. The
+ * width is negated for the opponent side (`RespectSide`), mirroring the
+ * source's `GetBattlerSide` branch.
  */
 export function tailWhipAttackerOffset(
   age: number,
@@ -46,7 +47,7 @@ export function tailWhipAttackerOffset(
   if (age < TAIL_WHIP_FIRST_OFFSET_AGE || age > TAIL_WHIP_LAST_OFFSET_AGE) {
     return { x2: 0, y2: 0 };
   }
-  const angle = 8 * age;
+  const angle = 8 * (age - 1);
   const width = attackerSide === "player" ? 12 : -12;
   return {
     x2: gbaSin(angle, width),
@@ -70,6 +71,6 @@ export function tailWhipAtAge(
     ellipseLoaded: age >= 1 && age <= TAIL_WHIP_LAST_TASK_AGE,
     attackerX2: offset.x2,
     attackerY2: offset.y2,
-    scriptOffset: age === 0 ? 0 : age < 64 ? 23 : 24,
+    scriptOffset: age === 0 ? 0 : age <= 63 ? 23 : 24,
   };
 }

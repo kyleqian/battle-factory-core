@@ -12,32 +12,33 @@ import {
 
 describe("MOVE_TAIL_WHIP source reducer", () => {
   it("transcribes AnimTask_TranslateMonEllipticalRespectSide(12,4,2,3)", () => {
-    // The dense window's first active frame is the loopsewithpan display
-    // (no task yet); the creation frame (age 1) already shows the first
-    // scheduled step θ=8, so the displayed angle is 8 * age for ages 1..62.
+    // Battler x2/y2 passes the task -> software sprite -> OAM pipeline two
+    // displays behind the dense-window index, so the reducer's displayed
+    // angle is 8 * (age - 1) for ages 2..63.
     expect(tailWhipAttackerOffset(0, "player")).toEqual({ x2: 0, y2: 0 });
-    expect(tailWhipAttackerOffset(1, "player")).toEqual({ x2: 2, y2: 1 });
-    expect(tailWhipAttackerOffset(2, "player")).toEqual({ x2: 4, y2: 1 });
-    expect(tailWhipAttackerOffset(8, "player")).toEqual({ x2: 12, y2: 4 });
-    expect(tailWhipAttackerOffset(16, "player")).toEqual({ x2: 0, y2: 8 });
-    // Loop-1 wrap: θ=248 (age 31), then θ wraps to 0 on age 32 -> origin.
-    expect(tailWhipAttackerOffset(31, "player")).toEqual({ x2: -3, y2: 1 });
-    expect(tailWhipAttackerOffset(32, "player")).toEqual({ x2: 0, y2: 0 });
-    // Loop-2 restarts: age 33 displays θ=8 again.
-    expect(tailWhipAttackerOffset(33, "player")).toEqual({ x2: 2, y2: 1 });
-    expect(tailWhipAttackerOffset(61, "player")).toEqual({ x2: -7, y2: 1 });
-    // The final θ=240 (age 62) is the last displayed offset; the θ=248 wrap
-    // frame (age 63) resets and destroys the task before any display.
-    expect(tailWhipAttackerOffset(62, "player")).toEqual({ x2: -5, y2: 1 });
-    expect(tailWhipAttackerOffset(63, "player")).toEqual({ x2: 0, y2: 0 });
+    expect(tailWhipAttackerOffset(1, "player")).toEqual({ x2: 0, y2: 0 });
+    expect(tailWhipAttackerOffset(2, "player")).toEqual({ x2: 2, y2: 1 });
+    expect(tailWhipAttackerOffset(3, "player")).toEqual({ x2: 4, y2: 1 });
+    expect(tailWhipAttackerOffset(9, "player")).toEqual({ x2: 12, y2: 4 });
+    expect(tailWhipAttackerOffset(17, "player")).toEqual({ x2: 0, y2: 8 });
+    // Loop-1 wrap: θ=248 (age 32), then θ wraps to 0 on age 33 -> origin.
+    expect(tailWhipAttackerOffset(32, "player")).toEqual({ x2: -3, y2: 1 });
+    expect(tailWhipAttackerOffset(33, "player")).toEqual({ x2: 0, y2: 0 });
+    // Loop-2 restarts: age 34 displays θ=8 again.
+    expect(tailWhipAttackerOffset(34, "player")).toEqual({ x2: 2, y2: 1 });
+    expect(tailWhipAttackerOffset(62, "player")).toEqual({ x2: -7, y2: 1 });
+    // θ=240 (age 63) is the last displayed offset; the θ=248 wrap resets
+    // and destroys the task before any display.
+    expect(tailWhipAttackerOffset(63, "player")).toEqual({ x2: -5, y2: 1 });
+    expect(tailWhipAttackerOffset(64, "player")).toEqual({ x2: 0, y2: 0 });
     expect(tailWhipAttackerOffset(76, "player")).toEqual({ x2: 0, y2: 0 });
   });
 
   it("mirrors the ellipse width for the opponent side (RespectSide)", () => {
-    expect(tailWhipAttackerOffset(1, "opponent")).toEqual({ x2: -3, y2: 1 });
-    expect(tailWhipAttackerOffset(31, "opponent")).toEqual({ x2: 2, y2: 1 });
-    expect(tailWhipAttackerOffset(62, "opponent")).toEqual({ x2: 4, y2: 1 });
-    expect(tailWhipAttackerOffset(32, "opponent")).toEqual({ x2: 0, y2: 0 });
+    expect(tailWhipAttackerOffset(2, "opponent")).toEqual({ x2: -3, y2: 1 });
+    expect(tailWhipAttackerOffset(32, "opponent")).toEqual({ x2: 2, y2: 1 });
+    expect(tailWhipAttackerOffset(63, "opponent")).toEqual({ x2: 4, y2: 1 });
+    expect(tailWhipAttackerOffset(33, "opponent")).toEqual({ x2: 0, y2: 0 });
   });
 
   it("owns the dense source window through first-inactive cleanup", () => {
@@ -51,8 +52,8 @@ describe("MOVE_TAIL_WHIP source reducer", () => {
     });
     expect(tailWhipAtAge(1, "player")).toMatchObject({
       ellipseLoaded: true,
-      attackerX2: 2,
-      attackerY2: 1,
+      attackerX2: 0,
+      attackerY2: 0,
       scriptOffset: 23,
     });
     expect(tailWhipAtAge(35, "player")).toMatchObject({
@@ -69,8 +70,8 @@ describe("MOVE_TAIL_WHIP source reducer", () => {
     expect(tailWhipAtAge(63, "player")).toMatchObject({
       active: true,
       ellipseLoaded: false,
-      attackerX2: 0,
-      attackerY2: 0,
+      attackerX2: -5,
+      attackerY2: 1,
       scriptOffset: 23,
     });
     expect(tailWhipAtAge(75, "player")).toMatchObject({
