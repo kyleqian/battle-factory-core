@@ -6,6 +6,7 @@ import {
   createBattleResolutionPresentation,
   createBattleTerminalResolutionPresentation,
   storeBattleTerminalPresentationDismiss,
+  SWITCH_IN_SPAN_FRAMES,
   WAITMESSAGE_LONG_MESSAGE_IDS,
   WAITMESSAGE_LONG_TIMING,
   type BattleResolutionPresentationCommand,
@@ -952,6 +953,92 @@ describe("battle resolution presentation receipt ownership", () => {
       hp: 80,
       maxHP: 80,
     });
+  });
+
+  it("times the voluntary mid-battle switch-in span so the send-out cadence holds (ISSUES #78)", () => {
+    const initial = initialBattle();
+    const context = initial.rules.rulesContext;
+    const incoming = context.party.player[1]!;
+    const switchedBattler = Object.freeze({
+      ...context.battlers[0]!,
+      ...incoming,
+      side: 0 as const,
+      partyIndex: 1,
+      species: incoming.species,
+      types: Object.freeze(["TYPE_FIGHTING", "TYPE_FIGHTING"] as const),
+    });
+    const afterContext = Object.freeze({
+      ...context,
+      party: Object.freeze({
+        ...context.party,
+        player: Object.freeze([
+          context.party.player[0]!,
+          context.party.player[1]!,
+          context.party.player[2]!,
+          context.party.player[3]!,
+          context.party.player[4]!,
+          context.party.player[5]!,
+        ]),
+      }),
+      battlers: Object.freeze([
+        switchedBattler,
+        context.battlers[1]!,
+        context.battlers[2]!,
+        context.battlers[3]!,
+      ]) as typeof context.battlers,
+    });
+    const afterRules = Object.freeze({
+      ...initial.rules,
+      rulesContext: afterContext,
+    }) as FactoryFullTurnDecisionRules;
+    const resolution = createBattleResolutionPresentation(inputFor([
+      event(0, {
+        kind: "message",
+        messageId: "STRINGID_RETURNMON",
+        substitutions: [],
+        introBattler: 0,
+        introHpScale: 0,
+      }),
+      event(1, { kind: "draw-party-status-summary", battler: 0 }),
+      event(2, { kind: "switch", side: "player", fromPartyIndex: 0, toPartyIndex: 1 }),
+      event(3, { kind: "message", messageId: "STRINGID_SWITCHINMON", substitutions: [] }),
+      event(4, { kind: "hide-party-status-summary", battler: 0 }),
+      event(5, { kind: "switch-in-animation", battler: 0, partyIndex: 1 }),
+    ], NEXT_COMMAND, afterRules));
+
+    const commands = resolution.segments[0]!.commands;
+    const switchIndex = commands.findIndex((command) => command.type === "switch-in");
+    const switchCommand = commands[switchIndex]!;
+    if (switchCommand.type !== "switch-in") {
+      throw new Error("battle resolution voluntary switch has no typed switch-in command");
+    }
+    // The real `CONTROLLER_SWITCHINANIM` cadence (1140-1230, 91 frames)
+    // must gate the opponent's next move, not the old 1-frame instant swap.
+    expect(switchCommand.timing).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
+    expect(battleResolutionCommandDuration(switchCommand, resolution.field))
+      .toBe(SWITCH_IN_SPAN_FRAMES);
+    // The incoming mon is already on field while the "Go!" box owns the span.
+    const view = createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, switchIndex, Math.floor(SWITCH_IN_SPAN_FRAMES / 2)),
+    );
+    expect(view.field.player).toMatchObject({
+      partyIndex: 1,
+      name: "MACHOP",
+      hp: 80,
+      maxHP: 80,
+    });
+    expect(view.message).toEqual({
+      lines: ["Go! MACHOP!"],
+      visibleCharacters: 11,
+    });
+    // The switch-in command is not complete a frame early and completes
+    // exactly at the end of the span.
+    expect(isBattleResolutionCommandComplete(
+      atRenderClock(resolution, switchIndex, SWITCH_IN_SPAN_FRAMES - 2),
+    )).toBe(false);
+    expect(isBattleResolutionCommandComplete(
+      atRenderClock(resolution, switchIndex, SWITCH_IN_SPAN_FRAMES - 1),
+    )).toBe(true);
   });
 
   it("fails closed on unpaired HP, missing switch-in markers, and out-of-order sequences", () => {

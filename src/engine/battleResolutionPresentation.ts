@@ -90,7 +90,7 @@ export type BattleFaintTiming =
       spriteRows: number;
       healthboxVanishFrame: number;
     }>;
-export type BattleSwitchInTiming = Readonly<{ minimumFrames: 1 }>;
+export type BattleSwitchInTiming = Readonly<{ minimumFrames: number }>;
 export type BattleSpriteVisibilityTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleTurnEndTiming = Readonly<{ minimumFrames: 8 }>;
 export type BattleTrainerSlideTiming = Readonly<{ minimumFrames: 38 }>;
@@ -456,7 +456,23 @@ const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
  * one callback, independent of any skipped Scene-OFF status animation.
  */
 const STATUS_ICON_TIMING = Object.freeze({ minimumFrames: 1 } as const);
-const SWITCH_IN_TIMING = Object.freeze({ minimumFrames: 1 } as const);
+/**
+ * ISSUES #78: the mid-battle voluntary switch-in span. `Cmd_switchinanim`
+ * (`reference/pokeemerald/data/battle_scripts_1.s:3122`) starts the
+ * `CONTROLLER_SWITCHINANIM` send-out at frame 1140 of the staged OFF fixture
+ * and its `waitstate` releases at ~1230 (`docs/mid-battle-switch-presentation-
+ * ground-truth.md` §2) -- a 91-frame controller lifetime. The opponent's next
+ * move message waits for the whole send-in (first glyph 1241), so the app's
+ * `switch-in` command must hold ~91 frames while "Go! ...!" persists on the
+ * box -- NOT the old 1-frame instant swap. The visible sub-phases (ball
+ * throw 45f, ball-release emerge 12f, healthbox slide 23f) are modeled by
+ * the renderer inside this span; the command duration covers the whole
+ * cadence either way. With the app's 24-frame SWITCHINMON message + 1-frame
+ * party-summary hide, the 91-frame span lands the opponent's move at the
+ * source's 116-frame gap exactly.
+ */
+export const SWITCH_IN_SPAN_FRAMES = 91;
+const SWITCH_IN_TIMING = Object.freeze({ minimumFrames: SWITCH_IN_SPAN_FRAMES } as const);
 const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
 /**
  * ISSUES #73 rung B correction (2026-08-04): the prior port (53, from
