@@ -297,10 +297,14 @@ ISSUES #77 direction ("a small constants family, not per-message work").
 - **Oracle:** replay
   `tools/battle-lab/scratch-message-hold-dense-probe.json` (or the full
   dense chunk set) and require, per §4: "It's super effective!" post-typing
-   hold = 64 (stable 204→267 before any turn-end), "It's not very
-   effective…" = 64 (441→504), with the box still showing the full line at
+  hold = 64 (stable 204→267 before any turn-end), "It's not very
+  effective…" = 64 (441→504), with the box still showing the full line at
   the end of the hold. Dense compare must show the message held, not
   cleared, across the whole 64-frame window.
+  `tools/probe/verify-message-hold-cadence.ts` re-runs the committed trace
+  twice fresh and PASS/FAILs the determinism + semantic receipt (HP deltas,
+  move transitions, no-faint, next-input-ready) that anchors the schedule;
+  the box-pixel boundaries are measured with `tools/probe/analyze-message-box.py`.
 - **Full suite + build:** `npm test` and `npm run build` green at the commit.
 
 ## Out of scope / notes
