@@ -102,7 +102,7 @@ export const FACTORY_LOSS_TERMINAL_PROFILE: FactoryTerminalLossProfile =
     nextPageVisualDelay: 2,
     printerHandoffDelay: 2,
     statusClearDelayFromSecondRelease: 50,
-    recordPromptDelayFromRestore: 172,
+    recordPromptDelayFromRestore: 169,
     recordPromptTextDelay: 1,
     recordPromptInputDelay: 63,
     recordScrollTicks: 4,

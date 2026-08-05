@@ -27,6 +27,9 @@ import {
   factoryTerminalRecordPromptFirstAge,
   factoryTerminalRecordMenuInputReady,
   factoryTerminalRecordMenuVisible,
+  factoryTerminalRecordPromptInputReady,
+  factoryTerminalRecordPromptTextFirstAge,
+  factoryTerminalRestoreAge,
   factoryTerminalVisibleChars,
   isFactoryTerminalRoundWon,
 } from "../src/engine/factoryTerminalPresentation.ts";
@@ -353,6 +356,80 @@ describe("Factory Scene-OFF loss terminal adapter", () => {
     expect(factoryTerminalVisibleChars(terminal)).toBe(1);
     terminal = advanceTo(terminal, 143);
     expect(factoryTerminalVisibleChars(terminal)).toBe(2);
+  });
+
+  it("pins the LOSS record prompt on the real restore-to-question delay (169), so the box clears at second release +220 and types the tick after", () => {
+    const command = lossController().presentation!.command;
+    if (command.type !== "roundLost") throw new Error("expected roundLost");
+    // Dense 1-tick oracle probe of the committed LOSS fixture pins the real
+    // record-question schedule: box clears at frame 4054 (terminal age 822),
+    // first glyph "W" of "Would you like..." at 4055 (age 823), first red
+    // wait-cursor at 4118 (age 886). The app's releases are the tick after
+    // the fixture's own dismiss A (page-0 A at age 301 → release 302, page-1
+    // A at age 602 → release 603), so restore = 603 + 50 = 653 and the
+    // record prompt must land at 822 — i.e. recordPromptDelayFromRestore is
+    // 169, not 172 (the old 172 cleared two ticks late and typed two chars
+    // behind every frame 4054-4126, the box-clear residual #73 measured).
+    // The roundWon profile already carried 169, so both outcomes now share
+    // the same restore-to-question gap.
+    expect(FACTORY_LOSS_TERMINAL_PROFILE.recordPromptDelayFromRestore).toBe(169);
+    let terminal = createFactoryTerminalLossPresentation(command);
+    terminal = advanceTo(terminal, 301);
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
+    terminal = advanceTo(terminal, 602);
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
+    expect(terminal.firstPageReleaseAge).toBe(302);
+    expect(terminal.secondPageReleaseAge).toBe(603);
+    expect(factoryTerminalRestoreAge(terminal)).toBe(653);
+    expect(factoryTerminalRecordPromptFirstAge(terminal)).toBe(822);
+    expect(factoryTerminalRecordPromptTextFirstAge(terminal)).toBe(823);
+    // The oracle's first red wait-cursor lands at age 886 (frame 4118);
+    // inputReady turns true one tick earlier (822 + recordPromptInputDelay).
+    terminal = advanceTo(terminal, 884);
+    expect(factoryTerminalRecordPromptInputReady(terminal)).toBe(false);
+    terminal = advanceFactoryTerminalPresentation(terminal, {});
+    expect(terminal.age).toBe(885);
+    expect(factoryTerminalRecordPromptInputReady(terminal)).toBe(true);
+  });
+
+  it("renders the LOSS record prompt's dense-mapped box-clear frame empty (age 822) and its first 'W' glyph the next tick (age 823)", () => {
+    const command = lossController().presentation!.command;
+    if (command.type !== "roundLost") throw new Error("expected roundLost");
+    const atAge = (age: number) => {
+      let terminal = createFactoryTerminalLossPresentation(command);
+      terminal = advanceTo(terminal, 301);
+      terminal = advanceFactoryTerminalPresentation(terminal, {
+        pressedA: true,
+      });
+      terminal = advanceTo(terminal, 602);
+      terminal = advanceFactoryTerminalPresentation(terminal, {
+        pressedA: true,
+      });
+      terminal = advanceTo(terminal, age);
+      return renderFactoryTerminalPresentation(
+        terminal,
+        () => createFramebuffer(),
+      );
+    };
+    const darkAt = (fb: Uint8Array, x: number, y: number) => {
+      const i = (y * 240 + x) * 4;
+      return fb[i]! < 200 && fb[i + 1]! < 200 && fb[i + 2]! < 200;
+    };
+    // Age 822 = recordPromptFirstAge (the real frame 4054 box-clear): the
+    // old page-2 text is wiped and the record question has not started, so
+    // the box interior reads empty.
+    const cleared = atAge(822);
+    expect(darkAt(cleared, 40, 127)).toBe(false);
+    expect(darkAt(cleared, 16, 124)).toBe(false);
+    // Age 823 = recordPromptTextFirstAge (the real frame 4055): the "W" of
+    // "Would you like to record your last" prints at the box's line-1
+    // origin (x16-21, y124-132).
+    const firstGlyph = atAge(823);
+    expect(firstGlyph).not.toEqual(cleared);
+    expect(darkAt(firstGlyph, 16, 124)).toBe(true);
+    expect(darkAt(firstGlyph, 20, 124)).toBe(true);
+    expect(darkAt(firstGlyph, 17, 130)).toBe(true);
+    expect(darkAt(firstGlyph, 19, 130)).toBe(true);
   });
 
   it("places the bootstrapped save's north-facing Brendan at the source-derived (112,56) OAM anchor, not (113,56)", () => {
