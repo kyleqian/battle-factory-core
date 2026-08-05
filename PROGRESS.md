@@ -7,12 +7,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 946 — [supervisor fold, 2026-08-05] #73 WIN guide dismissal through Battle Room handoff exact **232/232**
 
-- **State:** master `599122c3`; guide dismissal, attendant/player walk, warp
+- **State:** union through `b727500d`; guide dismissal, attendant/player walk, warp
   fade, room fade-in, and battle-2 room handoff are exact at **232/232**
   (frames 10406-10637). Regression gates re-held: NO/guide **213/213**,
   canonical WIN **3590/3590**, LOSS **1943/1943**, LOSS decline **155/155**,
-  and generated command **128/128**. Smoke **347/347** and typecheck are
-  green; final union `npm test`/build follow this ledger commit.
+  and generated command **128/128**. Final union `npm test` is green at
+  **727 files / 6,973 passed / 1 skipped**; `npm run build`, smoke **347/347**,
+  typecheck, and `bin/oracle info` are green. `animation-main` has no commit
+  missing from master at wind-down, so no second fold was required.
 - **Did:** banked a 39-segment fixture that preserves the prior 37 segments
   byte-for-byte, presses the held `Right this way, please!` once, and idles
   through the Battle Room's stable quote. Existing generic postwin and room
