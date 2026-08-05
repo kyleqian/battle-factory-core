@@ -4,56 +4,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 932 — [bounded MAIN worker, 2026-08-05 ~04:10] Post-terminal slice 1 landed: shared 108-tick return-to-field span, WIN 389/389→503/503, LOSS 236/236→350/350
+## 932 — [supervisor, 2026-08-04 ~21:16] Shared post-battle return exact on WIN+LOSS; animation and beyond-boundary evidence folded
 
-- **State:** master + this commit. `npm test` **725 files / 6,958 passed / 1
-  skipped**, `npm run build` green. Both compare windows extended and
-  twice-run byte-identical: `win-terminal-window-off` **503/503**,
-  `loss-terminal-window-off` **350/350**.
-- **Did:** implemented `docs/post-terminal-return-to-lobby-ground-truth.md`
-  §5 slice 1 (dismiss+8→dismiss+115, 108 shared ticks) as ONE
-  outcome-agnostic mechanism, no WIN/LOSS branch. Reused the existing
-  (previously Turn17-canonical-only) `postwin.ts` phase machine
-  (`postwinPhase`, `POSTWIN_BATTLE_FADE_FIRST_AGE`/etc. — all unchanged) for
-  both outcomes: `createPostwinStateFromRound` (WIN) and new
-  `createBattleReturnHoldState` (LOSS/roundCompleted) both start `elapsed`
-  at 1 (this route's real dismiss press is 2 ticks vs. Turn17's 1 — RAM/
-  pixel-derived this session, not guessed). Added a `frozenSceneView`
-  fallback to `renderPostwinState`'s battleHold/battleFade phases for
-  Battle Scene OFF (`state.battleScene` is always null there); the fade
-  reuses the real `BeginFastPaletteFade` BG/OBJ-alternating-update schedule
-  (new `applyFastFadeToBlack`/`fastFadeUpdatesForLocalTick` exports in
-  `battleScene.ts`, extracted from the existing Turn17 fade function) over a
-  mask built from the OFF scene's own draw calls plus the settled
-  trainer-slide sprite (new `drawBattleResolutionSceneOffFadeMask`).
-  `render()` now checks `state.postwin` (while not yet phase `counterRoom`)
-  ahead of `factoryTerminal` so LOSS's shared span renders before its own
-  out-of-scope Lobby content; found and fixed a bug where `factoryTerminal`'s
-  own tick() branch froze `postwin`'s clock forever by never advancing it.
-  Tier-1 pin: `tests/factoryBattleReturnPresentation.test.ts` (4 tests —
-  shared elapsed start, every doc-cited phase boundary, a full 114-tick
-  lockstep WIN/LOSS phase walk, the fade BG/OBJ schedule); the elapsed-start
-  and fade-schedule pins were red-verified this session (flipped
-  `GENERATED_ROUTE_INITIAL_ELAPSED` 1→0 and the `objUpdates` formula,
-  watched 2+1 tests fail, reverted). ISSUES #73 updated in place — its stale
-  final paragraph (party-identity gap) corrected to note that fix already
-  landed generically; new paragraph records this slice's close.
-- **Next:** slices 2–4 of the same doc's §5 plan (all past dismiss+115,
-  where WIN's PreBattleRoom and LOSS's Lobby genuinely diverge): LOSS's
-  Lobby arrival + first message + held-cursor dismiss (frame 3346→3834),
-  LOSS's restore/save wait + record prompt (→4938), WIN's PreBattleRoom
-  arrival + heal message (→5202). Each needs its own new scratch/compare
-  fixture extension per that doc's own proof plan.
-- **Notes:** the elapsed-alignment constant (Factory route starts 1 tick
-  later than Turn17's own convention, both real dismiss-press-length facts)
-  was the load-bearing find this session — once identified, the existing
-  `postwin.ts`/`battleRoomRender.ts` machinery needed almost no new pixel
-  logic, just the OFF-profile frozen-scene fade path and the mask's missing
-  trainer-slide sprite. `PAPERCUT:` `npm test` needs run in the foreground
-  with an explicit large `timeout` (not the 120s default) or the harness
-  auto-backgrounds it — confirmed again this session (~9 min actual
-  duration); one attempt was accidentally interrupted mid-run by an
-  unrelated `pkill` before being redone cleanly.
+- **State:** master `ddbafa41` + this docs commit, clean. Independent folded
+  union: full `npm test` **727 files / 6,964 passed / 1 skipped** and
+  `npm run build` green. OFF windows are twice-stable: WIN **503/503**,
+  LOSS **350/350**. No open DEFERRED entries.
+- **Did:** accepted main commit `45f58e36`: one outcome-neutral 108-tick
+  `postwin` return-to-field mechanism now drives both outcomes through
+  dismiss+115, including the frozen Scene-OFF framebuffer fade, trainer OBJ
+  mask, and the loss-path clock-advance fix; 4 red-verified Tier-1 pins.
+  Folded `animation-main` at `5df68a9f`: IRON_DEFENSE is exact, coverage
+  **110/276 exact / 0 partial / 166 unsupported**. Verified and merged side
+  evidence `1d87393b`: WIN's heal/fanfare reaches the held GO ON menu at
+  5739; LOSS record-NO reaches a second held farewell then genuine free-roam
+  at 5093 (movement proven at 5174). Side worktree/branch cleaned.
+- **Next:** #73 slice 2 only: extend LOSS contiguously through frame 3834 and
+  implement the Lobby arrival, scripted movement, first return-rentals
+  message, held cursor, and real dismiss edge. Then slice 3 continues through
+  restore/save + record prompt; slice 4 is WIN PreBattleRoom/heal message.
+- **Notes:** `check-oracle-freshness.sh` reported the known timestamp-only
+  false positive: harness HEAD `5251112` changes only `NOTES.md`; live OFF
+  service advertises bootstrap v5 and the required `overrides.parties`
+  battle-lab contract. PAPERCUTS full-suite timeout hit bumped to 7.
 
 ---
 ## 931 — [supervisor wind-down, 2026-08-04 ~19:55] Session close: #74 closed + WIN window 389/389 + selection-rejection slice landed & ROM-verified + post-terminal ground truth banked; final union 724 files / 6,954 green

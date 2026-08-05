@@ -40,14 +40,16 @@ history.
   polling. Don't reach for a workaround (backgrounding, pkill, chunking) on
   the assumption the suite cannot fit — twice now that assumption, not the
   runtime, was the thing that cost the session time.
-- **Hits:** 6 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
+- **Hits:** 7 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
   contention from concurrent side/animation runs — auto-backgrounded; worker
   recovered by pid-polling, ~5 min lost. 2026-08-03: terminal-seam scout,
   ~6 min of foreground-poll waiting. 2026-08-04 R3: two workers same round —
   the post-terminal scout waited ~10 min on a fully-buffered background
   capture that emitted zero bytes until completion, and the
   selection-verify worker's suite auto-backgrounded twice at ~10-11 min
-  under 3-lane contention, recovered by log-polling each time.)
+  under 3-lane contention, recovered by log-polling each time. 2026-08-04:
+  post-terminal slice-1 worker's successful run auto-backgrounded at 120 s,
+  obscuring its exit and causing a redundant ~9 min foreground rerun.)
 - **Possible durable fix:** teach the worker preamble (or the brief
   template) to pass an explicit long timeout for the final full-suite call
   (the tool accepts up to 10 min per call; the suite may soon exceed even
