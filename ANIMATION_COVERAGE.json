@@ -2913,6 +2913,32 @@
     "tests/animation/wishAssets.test.ts",
     "tests/animation/wish.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_IRON_DEFENSE",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage the sole Factory carrier FRONTIER_MON_CLAMPERL record 134 (Docile, Sp.Def/Def/HP spread, Deep Sea Scale item slot, all four move slots IRON_DEFENSE) against a stable legal ONIX target in both orientations",
+    "twice-fresh byte-identical Scene-ON evidence retains the complete first-active-source-frame through first-inactive-cleanup window at 101/101 frames: player-back frames 215-315 semantic/raw receipts 6da0086cdd53a8aeb75772ddf4c8671905fb90f1b1cae26f13ea5f0af7e5571d / a2b2a60adb7bc8924e9beead705b04ab0995f1ae720de23d2f98167df1719d0e; opponent-front frames 215-315 receipts 4390cfb3e8b87e4cca85cad96feb199eee542902398cc668d795b97515431a94 / 32987f6ea503a9a7259c69e61eec3f0cf7cebd39d852754fd4f4e9ea7684fc7e",
+    "the pure source-relative reducer reuses the accepted non-permanent MetallicShine (loopsewithpan SE_SHINY cadence + 4px BG1_X sweep/wrap, clear after sweep two, teardown after sweep three) and transcribes the BG-only complex_palette_blend (AnimComplexPaletteBlend, battle_anim_normal.c) with IRON_DEFENSE literal args: selector F_PAL_BG, delay 8, num_blends 2, RGB_WHITEALPHA, blend_y1 14, blend_y2 0 - white 14 -> 0 -> 14 -> restore at creation-relative ages 0/8/17/27, one tick behind the shine first step",
+    "the typed Scene-ON seam carries only resolved CLAMPERL/ONIX presentation geometry and immutable HP field state; battleScene renders the F_PAL_BG white pulse on the battle-bg palette banks and keeps the grayscale attacker and unblended metal palette during the pulse, both Clamperl back/front from the shared battle-back/opponent-front sprite assets with no new extracted art",
+    "ironDefensePortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 101 immutable dense source/RGB/framebuffer frames twice fresh in both orientations through first inactive cleanup (BLDCNT teardown), with gameplay fields stable across the window",
+    "no damage, stat-stage outcome (the attacker Defense rise is an immutable field input already applied before the window), gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-iron-defense-player-clamperl-opponent-onix.json",
+    "tools/battle-lab/mechanic-iron-defense-opponent-clamperl-player-onix.json",
+    "tools/compare/fixtures/iron-defense-player-clamperl-opponent-onix.json",
+    "tools/compare/fixtures/iron-defense-opponent-clamperl-player-onix.json",
+    "tools/compare/ironDefenseProbe.py",
+    "tools/compare/ironDefensePortable.ts",
+    "src/animation/ironDefense.ts",
+    "src/animation/metallicShine.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/ironDefense.test.ts",
+    "tests/animation/ironDefenseEvidence.test.ts"
+   ]
   }
  ],
  "queue": [

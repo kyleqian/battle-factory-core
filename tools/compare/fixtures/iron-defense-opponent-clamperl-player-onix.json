@@ -1,0 +1,53 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-iron-defense-opponent-clamperl-player-onix.json",
+  "probe": "tools/compare/ironDefenseProbe.py",
+  "pair": "FRONTIER_MON_CLAMPERL record 134 (opponent-front) -> legal ONIX (player-back)",
+  "orientation": "opponent-to-player",
+  "move": "IRON_DEFENSE",
+  "denseWindow": {
+    "startFrame": 215,
+    "endFrame": 315,
+    "frameCount": 101
+  },
+  "appStage": {
+    "presentationAge": -1
+  },
+  "attacker": {
+    "species": "CLAMPERL",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 22 },
+      "animationCenter": { "x": 176, "y": 54 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 80 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "attackerSpriteCenter": { "x": 176, "y": 54 },
+  "fieldProfile": {
+    "playerHp": 110,
+    "playerMaxHp": 110,
+    "opponentHp": 122,
+    "opponentMaxHp": 131,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "iron-defense-dense-evidence/v1",
+  "evidenceSha256": "4390cfb3e8b87e4cca85cad96feb199eee542902398cc668d795b97515431a94",
+  "secondFreshEvidenceSha256": "4390cfb3e8b87e4cca85cad96feb199eee542902398cc668d795b97515431a94",
+  "rawRgbSha256": "32987f6ea503a9a7259c69e61eec3f0cf7cebd39d852754fd4f4e9ea7684fc7e",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 101,
+    "reason": "complete Scene-ON production framebuffer identity proven twice fresh"
+  }
+}
