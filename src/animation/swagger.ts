@@ -72,6 +72,21 @@ export function swaggerGrowAndShrinkAtAge(
   };
 }
 
+/**
+ * `SetBattlerSpriteYOffsetFromYScale` with the species-specific picture height
+ * (`MON_PIC_HEIGHT - 2 * gMonBackPicCoords[species].y_offset`, source
+ * `battle_anim_mons.c:1873`). Shared by SWAGGER (Rattata 38/32) and BULK_UP
+ * (Primeape 50/50) so grow/shrink never forks.
+ */
+export function growAndShrinkY2AtAge(
+  age: number,
+  battlerHeight: number,
+): number {
+  const scale = swaggerGrowAndShrinkAtAge(age);
+  const scaledHeight = Math.trunc((battlerHeight << 8) / scale.y);
+  return Math.trunc((battlerHeight - scaledHeight) / 2);
+}
+
 function breathFrame(age: number): number {
   if (age < 4) return 0;
   if (age < 44) return 1;
@@ -145,10 +160,9 @@ export function swaggerAtAge(
 ): SwaggerState {
   const attackerScale = swaggerGrowAndShrinkAtAge(age);
   const battlerHeight = attackerSide === "player" ? 38 : 32;
-  const scaledHeight = Math.trunc((battlerHeight << 8) / attackerScale.y);
   return {
     attackerScale,
-    attackerY2: Math.trunc((battlerHeight - scaledHeight) / 2),
+    attackerY2: growAndShrinkY2AtAge(age, battlerHeight),
     breath: swaggerBreathAtAge(age, attackerSide, attackerCenter),
     angerMarks: [
       swaggerAngerMarkAtAge(

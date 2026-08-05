@@ -1,5 +1,41 @@
 # Animation coverage
 
+## MOVE_BULK_UP closed — 104/104 both orientations twice-fresh, promoted to exact (2026-08-05 midday session)
+
+- **State:** BULK_UP (new move) → **exact**. Move coverage: **113/276 exact, 0
+  partial, 0 staged, 163 unsupported**. Both fixtures pin `framebufferMatching:
+  104` with status `exact`.
+- **Did:** full new-move acceptance with **zero new source components**.
+  `Move_BULK_UP` (battle_anim_scripts.s:4390) is exactly the already-exact
+  `Move_SWAGGER` prefix — ANIM_TAG_BREATH, AnimTask_GrowAndShrink,
+  playsewithpan SE_M_SWAGGER, wait, gBreathPuffSpriteTemplate, loopsewithpan
+  SE_M_SWAGGER 4,2, wait, end. The reducer (`src/animation/bulkUp.ts`) reuses
+  `swaggerGrowAndShrinkAtAge`, `swaggerBreathAtAge`, and a newly generalized
+  `growAndShrinkY2AtAge` (battle_anim_mons.c `SetBattlerSpriteYOffsetFromYScale`)
+  with the legal carrier's 64−2·7=50 picture height; the draw reuses the shared
+  SWAGGER breath asset. Staged two complete legal mechanicLab parties
+  (PRIMEAPE set 337 all-slot BULK_UP vs ONIX TACKLE, both orientations —
+  independently confirmed the lowest BULK_UP Factory carrier from the generated
+  mons data). `bulkUpProbe.py` dense 72-175 / 76-179, `bulkUpPortable.ts`,
+  `extractBulkUpAssets.ts` (Primeape back/front only; breath shared), the two
+  scene-on-portable-evidence/v1 fixtures, and `bulkUp.test.ts` +
+  `bulkUpEvidence.test.ts`.
+- **Measured:** player-back frames 72-175 and opponent-front frames 76-179,
+  both **104/104 source-component and shared-framebuffer exact twice fresh**
+  (semantic identity also 104/104 each run). Evidence `b9077266…` /
+  `0648527d…`, RGB `b5c127f2…` / `8f2d4c93…` reproduce the fixture pins exactly.
+  Field profiles from fresh battler RAM: PRIMEAPE 158/158 vs ONIX 117/117
+  (player-back) and ONIX 128/128 vs PRIMEAPE 158/158 (opponent-front), all
+  full-HP and stat-neutral at the first dense frame.
+- **Next:** continue the zero-new-component Level-50 ladder.
+- **Notes:** BULK_UP is a **sibling move acceptance** — sharing the SWAGGER
+  grow/breath reducers accepts no other move (GROWTH and friends keep their own
+  bodies/evidence). `factoryAnimationInventory.test.ts` summary pin moved
+  112→113 / 164→163 with the promotion. No boundary widening, no new unsupported
+  barriers. Primeape opponent-front carries no idle-bob residual (x2=0), so the
+  draw needs no front idle offset for the attacker; the Onix target keeps its
+  established opponent-front x2=1.
+
 ## MOVE_AGILITY closed — 87/87 both orientations twice-fresh, promoted to exact (2026-08-05 morning session)
 
 - **State:** AGILITY (new move) → **exact**. Coverage is **112/276 exact, 0

@@ -402,6 +402,32 @@
    ]
   },
   {
+   "move": "MOVE_BULK_UP",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Scene-ON mechanicLab parties stage FRONTIER_MON_PRIMEAPE_2 (set 337, SPECIES_PRIMEAPE, NATURE_QUIRKY, Scope Lens) with all four active choices constrained to BULK_UP and ONIX constrained to TACKLE in both player-back and opponent-front orientations; the source/generated audit confirms set 337 is the lowest BULK_UP Factory carrier",
+    "the complete move-owned source body plus first inactive cleanup passes 104/104 source-reducer, typed-seam, software+hardware OAM/affine, palette/tag, register, SE_M_SWAGGER identity/restart/pan, immutable-battle-state, raw-RGB, and shared-framebuffer frames twice fresh: player-back PRIMEAPE frames 72-175 and opponent-front PRIMEAPE frames 76-179, evidence digests b907726693f1e64a205bf36924253b8d083936b7c55baaaa0897282b2159aed6 / 0648527d9c372ca611c8940e83384eb1d2e1f81dc1a7f269f5566b67383dcecf and raw-RGB digests b5c127f2989ad6a9ca5d90a2a122cc2c73cdff703eb087cfe84148cdfe8c6229 / 8f2d4c934377f6eba9eb59b65d118afd4c050cdf4c7a372a63ce1511583ec230",
+    "Move_BULK_UP (battle_anim_scripts.s:4390) is precisely the already exact Move_SWAGGER prefix - ANIM_TAG_BREATH, AnimTask_GrowAndShrink, playsewithpan SE_M_SWAGGER, waitforvisualfinish, gBreathPuffSpriteTemplate, loopsewithpan SE_M_SWAGGER 4,2, waitforvisualfinish, end - so the reducer (src/animation/bulkUp.ts) reuses the shared swaggerGrowAndShrinkAtAge, swaggerBreathAtAge, and the newly generalized growAndShrinkY2AtAge (battle_anim_mons.c SetBattlerSpriteYOffsetFromYScale) with the Primeape picture height 64-2*7=50; no anger marks, no monbg, no forked grow/shrink or breath logic",
+    "field-profile values derive from fresh battler RAM, not transcription: player-back PRIMEAPE 158/158 vs ONIX 117/117 and opponent-front ONIX 128/128 vs PRIMEAPE 158/158, both full HP and stat-stage neutral at the first dense frame; PRIMEAPE back/front art regenerates byte-for-byte via tools/compare/extractBulkUpAssets.ts and the shared SWAGGER breath asset is reused source-identical (not duplicated)",
+    "BULK_UP is a sibling move acceptance: sharing the SWAGGER grow/breath reducers does not accept any other move (GROWTH, BELLY_DRUM, BULK_UP-only siblings keep their own bodies/evidence); SWAGGER remains exact and the factory animation inventory pin moves 112->113 exact / 164->163 unsupported with this promotion"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+    "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+    "tools/compare/fixtures/bulk-up-player-primeape-opponent-onix.json",
+    "tools/compare/fixtures/bulk-up-opponent-primeape-player-onix.json",
+    "tools/compare/bulkUpProbe.py",
+    "tools/compare/bulkUpPortable.ts",
+    "tools/compare/extractBulkUpAssets.ts",
+    "src/animation/assets/bulk-up.json",
+    "src/animation/bulkUp.ts",
+    "src/animation/swagger.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/bulkUp.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_CALM_MIND",
    "status": "exact",
    "covered": [

@@ -318,6 +318,10 @@ import {
   type SwaggerState,
 } from "./swagger.ts";
 import {
+  bulkUpAtAge,
+  type BulkUpState,
+} from "./bulkUp.ts";
+import {
   tauntAtAge,
   type TauntState,
 } from "./taunt.ts";
@@ -672,7 +676,8 @@ export interface SceneOnPresentationBattler {
     | "PARASECT"
     | "PONYTA"
     | "CHARMANDER"
-    | "LEDYBA";
+    | "LEDYBA"
+    | "PRIMEAPE";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1438,6 +1443,20 @@ export interface SceneOnSwaggerConfig {
   readonly breathOrigin: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnBulkUpConfig {
+  readonly move: "BULK_UP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /**
+   * `GetBattlerSpriteCoord(attacker, X_2/Y_PIC_OFFSET)`; the legal
+   * FRONTIER_MON_PRIMEAPE_2 picture needs the shared grow/shrink Y anchoring
+   * plus the carrier's `MON_PIC_HEIGHT - 2*y_offset` picture height (50).
+   */
+  readonly breathOrigin: Readonly<{ x: number; y: number }>;
+  readonly battlerHeight: number;
+}
+
 export interface SceneOnTauntConfig {
   readonly move: "TAUNT";
   readonly attacker: SceneOnPresentationBattler;
@@ -1939,6 +1958,7 @@ export type SceneOnMoveConfig =
   | SceneOnEndureConfig
   | SceneOnReversalConfig
   | SceneOnSwaggerConfig
+  | SceneOnBulkUpConfig
   | SceneOnTauntConfig
   | SceneOnScaryFaceConfig
   | SceneOnSparkConfig
@@ -2272,6 +2292,12 @@ export interface SceneOnReversalView extends ReversalState {
 }
 
 export interface SceneOnSwaggerView extends SwaggerState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnBulkUpView extends BulkUpState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4265,6 +4291,26 @@ export function sceneOnSwaggerView(
       state.config.breathOrigin,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_BULK_UP's first displayed GrowAndShrink task frame. */
+export function sceneOnBulkUpView(
+  state: SceneOnMovePresentationState,
+): SceneOnBulkUpView {
+  if (state.config.move !== "BULK_UP") {
+    throw new Error(`expected BULK_UP presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...bulkUpAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.breathOrigin,
+      state.config.battlerHeight,
     ),
   };
 }

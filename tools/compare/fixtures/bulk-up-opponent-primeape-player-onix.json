@@ -1,0 +1,75 @@
+{
+ "schema": "scene-on-portable-evidence/v1",
+ "oracleProfile": "battle-scene-on",
+ "scenario": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+ "probe": "tools/compare/bulkUpProbe.py",
+ "pair": "FRONTIER_MON_PRIMEAPE_2 set 337 (opponent-front) -> legal ONIX (player-back)",
+ "orientation": "opponent-to-player",
+ "move": "BULK_UP",
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 179,
+  "frameCount": 104
+ },
+ "appStage": {
+  "presentationAge": 0
+ },
+ "attacker": {
+  "species": "PRIMEAPE",
+  "geometry": {
+   "side": "opponent",
+   "spriteCorner": {
+    "x": 144,
+    "y": 15
+   },
+   "animationCenter": {
+    "x": 176,
+    "y": 47
+   },
+   "battlePositionCenter": {
+    "x": 176,
+    "y": 40
+   }
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player",
+   "spriteCorner": {
+    "x": 40,
+    "y": 48
+   },
+   "animationCenter": {
+    "x": 72,
+    "y": 88
+   },
+   "battlePositionCenter": {
+    "x": 72,
+    "y": 80
+   }
+  }
+ },
+ "breathOrigin": {
+  "x": 176,
+  "y": 47
+ },
+ "battlerHeight": 50,
+ "fieldProfile": {
+  "playerHp": 128,
+  "playerMaxHp": 128,
+  "opponentHp": 158,
+  "opponentMaxHp": 158,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "evidenceSchema": "bulk-up-dense-evidence/v1",
+ "evidenceSha256": "0648527d9c372ca611c8940e83384eb1d2e1f81dc1a7f269f5566b67383dcecf",
+ "secondFreshEvidenceSha256": "0648527d9c372ca611c8940e83384eb1d2e1f81dc1a7f269f5566b67383dcecf",
+ "rawRgbSha256": "8f2d4c934377f6eba9eb59b65d118afd4c050cdf4c7a372a63ce1511583ec230",
+ "acceptance": {
+  "status": "exact",
+  "framebufferMatching": 104,
+  "reason": "complete Scene-ON production framebuffer identity proven twice fresh"
+ }
+}

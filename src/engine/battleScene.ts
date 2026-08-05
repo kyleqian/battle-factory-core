@@ -585,6 +585,7 @@ import megaPunchAsset from "../animation/assets/megaPunch.json" with { type: "js
 import rollingKickAsset from "../animation/assets/rollingKick.json" with { type: "json" };
 import lowKickAsset from "../animation/assets/lowKick.json" with { type: "json" };
 import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
+import bulkUpAsset from "../animation/assets/bulk-up.json" with { type: "json" };
 import tauntAsset from "../animation/assets/taunt.json" with { type: "json" };
 import scaryFaceAsset from "../animation/assets/scary-face.json" with { type: "json" };
 import charmAsset from "../animation/assets/charm.json" with { type: "json" };
@@ -957,6 +958,7 @@ import {
   sceneOnDizzyPunchView,
   sceneOnAstonishView,
   sceneOnSwaggerView,
+  sceneOnBulkUpView,
   sceneOnTauntView,
   sceneOnScaryFaceView,
   sceneOnSelfDestructView,
@@ -1596,6 +1598,10 @@ const swaggerArt = swaggerAsset as {
   anger: { tileset: Tileset; palette: RgbColor[] };
   rattataBack: { tileset: Tileset; palette: RgbColor[] };
   rattataFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const bulkUpArt = bulkUpAsset as {
+  primeapeBack: { tileset: Tileset; palette: RgbColor[] };
+  primeapeFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const tauntArt = tauntAsset as {
   thoughtBubble: { tileset: Tileset; palette: RgbColor[] };
@@ -27463,6 +27469,117 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "RATTATA used" : "Foe RATTATA used",
       "SWAGGER!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "BULK_UP") {
+    const view = sceneOnBulkUpView(state);
+    const displayed = sceneOnBulkUpView({ ...state, age: state.age - 1 });
+    const affineDisplayed = sceneOnBulkUpView({ ...state, age: state.age - 2 });
+    const playerToOpponent =
+      view.attacker.species === "PRIMEAPE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "PRIMEAPE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged BULK_UP pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const primeapeSource = playerToOpponent ? bulkUpArt.primeapeBack : {
+      ...bulkUpArt.primeapeFront,
+      tileset: {
+        columns: 8, rows: 8, tiles: bulkUpArt.primeapeFront.tileset.tiles.slice(0, 64),
+      },
+    };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const attackerIdle = opponentToPlayer
+      ? (speciesFrontIdleRestOffset("PRIMEAPE") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    drawSpriteSheetAffineStretch(
+      fb,
+      primeapeSource.tileset,
+      primeapeSource.palette,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+      affineDisplayed.attackerScale.x,
+      affineDisplayed.attackerScale.y,
+      affineDisplayed.attackerY2,
+      { r: 0, g: 0, b: 0 },
+      0,
+      affineDisplayed.attackerScale.x !== 256
+        || affineDisplayed.attackerScale.y !== 256,
+    );
+    if (displayed.breath) {
+      const currentBreath = view.breath;
+      const breathFrame = state.age === 53 || state.age === 93 || state.age === 97
+        ? (currentBreath?.frame ?? displayed.breath.frame)
+        : displayed.breath.frame;
+      const frameStart = breathFrame * 4;
+      const drawBreath = displayed.breath.hFlip
+        ? drawSpriteSheetHFlip : drawSpriteSheet;
+      drawBreath(
+        fb,
+        {
+          columns: 2,
+          rows: 2,
+          tiles: swaggerArt.breath.tileset.tiles.slice(frameStart, frameStart + 4),
+        },
+        swaggerArt.breath.palette,
+        displayed.breath.x - 8,
+        displayed.breath.y - 8,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "PRIMEAPE";
+    const playerSpecies = playerToOpponent ? "PRIMEAPE" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "PRIMEAPE used" : "Foe PRIMEAPE used",
+      "BULK UP!",
       99,
     );
     return;
