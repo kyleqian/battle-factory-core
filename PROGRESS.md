@@ -4,6 +4,46 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 925 — [supervisor wind-down, 2026-08-04 ~17:15] Session close: LOSS window CLOSED 236/236 + WIN wired 65/65 + #75 same-day fix, #72 REACHABLE closed, Slice-D double premise-inversion resolved honestly; final union green 721 files / 6,927
+
+- **State:** master `3dd61f73` (final animation fold: Steel Wing
+  reconciliation, opponent 197/197 + player 180/197; `master..animation-main`
+  empty at close). Final independent union: full `npm test` **721 files /
+  6,927 passed / 1 skipped**, `npm run build` green. Terminal windows:
+  LOSS **236/236**, WIN **65/65** (both supervisor-rerun post-merge).
+  Play-preview rebuilt at `3dd61f73`, serving on :5199. Working tree clean.
+  **No open DEFERRED entries.** No stale worker worktrees or branches
+  (`.worktrees/animation-main` permanent; play-preview intentional).
+- **Session totals:** 6 rounds, 10 workers (6 main / 4 side), 0 lost —
+  1 cap-kill salvaged (R1 cursor gating), 2 premise-stops that were correct
+  outcomes (R3 Slice D, R5 back-dispatcher). Landed: #73 LOSS 1/236 →
+  236/236 (cursor mechanism + RAM-probe-derived scaffold constants); WIN
+  wired 65/65 with its own probe constants; **#75 found and fixed same
+  day** (button dismiss-skip race, red-verified on DESTIN's real lines);
+  **#72 REACHABLE backlog CLOSED** (Magnitude batch 9, census 39→38);
+  selection-rejection subsystem scouted (6 causes; census structurally
+  blind to `printselectionstring`; advisory-slice recommendation banked);
+  rung-3 dispatcher folded; OFF-seam rest-offset landmine removed with RAM
+  receipt; #74 filed, bisected to `7e14afae` (facts stand), mechanism
+  re-attributed by R5's probe (back anims gated identically under OFF;
+  KADABRA descent = species-agnostic affine-emerge).
+- **Next session (recommended order):** (1) #74 — probe whether YOSHI
+  frame 640 / MAGNETON 621 sit in the affine-emerge window (alignment bug
+  in `MATERIALIZE_Y2_TABLE` consumption) or the settle window (where flat
+  is right and the oracle diff means something else); entry 922 has the
+  worker's guided next step. (2) #73 — extend `winTerminalWindowStage`
+  past the now-fixed dismiss wait toward 241/241 (probe constants in the
+  entry). (3) Torment/selection-rejection advisory slice (scout doc ready,
+  needs scheduling decision). (4) #71 §1e + coordinated hand-fit
+  retirements. Standing: #39, #55.
+- **Notes:** the animation supervisor ran concurrently and wound down
+  cleanly (~16:45); both folds this session were boring, as designed. Both
+  dispatcher halves (front + back) are animation-lane-only consumers under
+  Scene OFF by real-game design — recorded in #71's Slice-D record so the
+  next session doesn't re-litigate. Oracle-freshness FAIL remains the
+  docs-only false-positive class (services untouched all session).
+
+---
 ## 924 — [bounded MAIN worker, 2026-08-04 ~17:05] R6 MAIN: ISSUES #75 FIXED — button-message dismiss-skip race closed, red-verified on DESTIN's real 23-char lines; full regression sweep green; stretch not attempted (time)
 
 - **State:** master at `e88fb4a5` (src fix + test) plus this docs commit.
@@ -83,50 +123,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** #74's open next-step is a next-session probe; the back/front
   dispatchers both stay animation-lane-only consumers by real-game design
   (both halves gated identically under Scene OFF).
-
----
-## 922 — [bounded MAIN worker, 2026-08-04 ~17:45] R5 MAIN: STOPPED before wiring — ISSUES #74's back-dispatcher premise FAILS its own step-1 check; docs-only, no src edits
-
-- **State:** master at this docs commit only (no `src/` changes). `npm
-  test`/`npm run build` verified green (see commit message for exact
-  numbers). Nothing to differential/oracle-compare — no render code touched.
-- **Did:** the R5 brief's step 1 required verifying, at source, that the
-  back-sprite materialize path is NOT gated by Scene OFF (unlike front's
-  `SKIP_FRONT_ANIM`) before wiring `backSendOutFrameAtTick` into
-  `drawGeneratedPlayerMaterialize`'s settle path, with an explicit
-  instruction to STOP if it IS gated. It is: `BattleAnimateBackSprite`
-  (`pokemon.c:6886-6897`) checks the identical `HITMARKER_NO_ANIMATIONS`
-  gate as the front path, reached via the identical unconditional
-  `BATTLER_AFFINE_EMERGE` ball-emerge handoff on both sides — no asymmetry
-  in source. Went beyond a source read: RAM-probed `gHitMarker`/
-  `gBattleTypeFlags`/both battlers' sprite state across the full banked
-  KADABRA scenario (reused from `docs/probes/kadabra-materialize-settle/`)
-  and confirmed live that the gate's condition holds throughout. Also found
-  the "KADABRA descent 14→0" evidence entry 894/895's Slice-D bisect
-  attributed to a per-species back-anim family is actually the
-  species-agnostic, unconditional `BATTLER_AFFINE_EMERGE` collapse —
-  reproduced byte-identically on the FRONT sprite of a different species in
-  the same trace, and complete before either sprite's callback leaves its
-  `...MonFromBall` state (i.e. before the per-species-gated
-  `BattleAnimate{Front,Back}Sprite` call even runs) — already banked in this
-  codebase as `MATERIALIZE_Y2_TABLE`/`drawPlayerSideAffineMaterialize`
-  (`battleScene.ts:4900-5011`, doc'd species-independent) and already
-  consumed by `drawGeneratedPlayerMaterialize`'s first phase. Full evidence
-  + citations: `docs/probes/materialize-hitmarker-gating/README.md` (raw RAM
-  transition dumps banked alongside it). ISSUES #74 addended with the
-  correction (not closed — still open, re-scope needed); #71 untouched
-  pending that re-scope.
-- **Next:** #74 needs re-scoping, not the R5 brief's original wiring plan.
-  Whoever picks it up next should probe the actual committed
-  `factory-arbitrary-intro-{yoshi,magneton}-off` traces directly (not the
-  standalone KADABRA scenario) to determine whether the regressed frames
-  640/621 fall inside the already-modeled affine-emerge window (a clock/
-  alignment bug) or the later settle window (where flat `y2=0` for every
-  species, ONIX included, is likely the source-correct draw under Scene
-  OFF — not a species-keyed dispatcher call). `playerMaterializeSettleY2`'s
-  own doc comment already flags its ONIX table as Scene-ON-derived, applied
-  at a Scene-OFF seam — worth revisiting whether even the ONIX-only partial
-  application (ticks 1664-1669) is itself a latent bug.
-- **Notes:** no PAPERCUT. This step never reached the src-edit/test/
-  acceptance stages (2-7) of its own brief since step 1's own stop condition
-  fired; `npm test`/`npm run build` run anyway per the finish requirement.

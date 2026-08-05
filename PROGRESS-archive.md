@@ -1,3 +1,50 @@
+## 922 — [bounded MAIN worker, 2026-08-04 ~17:45] R5 MAIN: STOPPED before wiring — ISSUES #74's back-dispatcher premise FAILS its own step-1 check; docs-only, no src edits
+
+- **State:** master at this docs commit only (no `src/` changes). `npm
+  test`/`npm run build` verified green (see commit message for exact
+  numbers). Nothing to differential/oracle-compare — no render code touched.
+- **Did:** the R5 brief's step 1 required verifying, at source, that the
+  back-sprite materialize path is NOT gated by Scene OFF (unlike front's
+  `SKIP_FRONT_ANIM`) before wiring `backSendOutFrameAtTick` into
+  `drawGeneratedPlayerMaterialize`'s settle path, with an explicit
+  instruction to STOP if it IS gated. It is: `BattleAnimateBackSprite`
+  (`pokemon.c:6886-6897`) checks the identical `HITMARKER_NO_ANIMATIONS`
+  gate as the front path, reached via the identical unconditional
+  `BATTLER_AFFINE_EMERGE` ball-emerge handoff on both sides — no asymmetry
+  in source. Went beyond a source read: RAM-probed `gHitMarker`/
+  `gBattleTypeFlags`/both battlers' sprite state across the full banked
+  KADABRA scenario (reused from `docs/probes/kadabra-materialize-settle/`)
+  and confirmed live that the gate's condition holds throughout. Also found
+  the "KADABRA descent 14→0" evidence entry 894/895's Slice-D bisect
+  attributed to a per-species back-anim family is actually the
+  species-agnostic, unconditional `BATTLER_AFFINE_EMERGE` collapse —
+  reproduced byte-identically on the FRONT sprite of a different species in
+  the same trace, and complete before either sprite's callback leaves its
+  `...MonFromBall` state (i.e. before the per-species-gated
+  `BattleAnimate{Front,Back}Sprite` call even runs) — already banked in this
+  codebase as `MATERIALIZE_Y2_TABLE`/`drawPlayerSideAffineMaterialize`
+  (`battleScene.ts:4900-5011`, doc'd species-independent) and already
+  consumed by `drawGeneratedPlayerMaterialize`'s first phase. Full evidence
+  + citations: `docs/probes/materialize-hitmarker-gating/README.md` (raw RAM
+  transition dumps banked alongside it). ISSUES #74 addended with the
+  correction (not closed — still open, re-scope needed); #71 untouched
+  pending that re-scope.
+- **Next:** #74 needs re-scoping, not the R5 brief's original wiring plan.
+  Whoever picks it up next should probe the actual committed
+  `factory-arbitrary-intro-{yoshi,magneton}-off` traces directly (not the
+  standalone KADABRA scenario) to determine whether the regressed frames
+  640/621 fall inside the already-modeled affine-emerge window (a clock/
+  alignment bug) or the later settle window (where flat `y2=0` for every
+  species, ONIX included, is likely the source-correct draw under Scene
+  OFF — not a species-keyed dispatcher call). `playerMaterializeSettleY2`'s
+  own doc comment already flags its ONIX table as Scene-ON-derived, applied
+  at a Scene-OFF seam — worth revisiting whether even the ONIX-only partial
+  application (ticks 1664-1669) is itself a latent bug.
+- **Notes:** no PAPERCUT. This step never reached the src-edit/test/
+  acceptance stages (2-7) of its own brief since step 1's own stop condition
+  fired; `npm test`/`npm run build` run anyway per the finish requirement.
+
+---
 ## 921 — [bounded MAIN worker, 2026-08-04 ~17:00] R4 MAIN: OFF-seam rest-offset landmine REMOVED (ISSUES #71 Slice-D follow-up); NEW pre-existing #74 filed, unrelated to this step
 
 - **State:** master at this docs commit (3 commits since 920:
