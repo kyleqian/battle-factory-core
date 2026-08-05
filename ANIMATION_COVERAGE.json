@@ -3,16 +3,15 @@
   "entries": [
     {
       "move": "MOVE_STEEL_WING",
-      "status": "partial",
+      "status": "exact",
       "covered": [
         "complete legal Level-50 mechanicLab parties stage the lowest Factory carrier FRONTIER_MON_WINGULL record 45 (Hardy) with all four choices constrained to STEEL WING against a stable legal ONIX target in both orientations",
         "twice-fresh byte-identical Scene-ON evidence retains the complete first-active-source-frame through first-inactive-cleanup window at 197/197 frames: player-back frames 77-273 semantic/raw receipts e321040c649b29c2d7e1a9702aae0cae11d4d3e42215ccabbc318ba0f8ef5f52 / 2f44c8117fc921c59575f2dcc38503d47c6df569bc57afaaa6d55b9d3b6b3b69; opponent-front frames 81-277 receipts 7af04b3579d84e48d6a7a46c2a9f06c2920ef09a615a4ad8dbd1830f66302659 / 25c8e06b17b643baea699189d5a43eab782089346673b49cb320c4cc8d4654e1",
         "source audit and reducers port GUST/IMPACT loading, the accepted non-permanent MetallicShine prelude, both looped sound tasks, target-partner monbg/splitbgprio/12:8 alpha, TranslateMonElliptical(0,12,4,1,4), faded GUST palette rotation (1,70), both signed-offset gGustToTargetSpriteTemplate affine/linear lifecycles, mirrored slides, two animation-1 IMPACT hitsplats, waits, cleanup, and stable gameplay fields",
-        "production framebuffer identity is 180/197 player-back (only the two plausible out-of-scope ranges remain: ages 144-155 faded-gust-palette base, 181-185 slide-back ramp) and 197/197 opponent-front; MOVE_STEEL_WING is not promoted to exact because the player orientation is not 197/197 and the opponent's complete identity is proven once, not twice fresh, and it therefore does not establish an exact representative for ANIM_TAG_GUST or AnimTask_TranslateMonElliptical",
+        "production framebuffer identity is 197/197 twice fresh in BOTH orientations. Player-back gains 17 frames: ages 181-185 from deriving the SlideMonToOriginalPos start from the slide-out terminal (Q8.8 24*256/9=682 gives x2 23, not 24) with the retained in-Q8 subtraction, and ages 144-155 from the two-gust overlap draw order — the oracle's frontmost selection at the converging gust overlap is the index-0 gust on the player side (the compositor draws index 1 first, then index 0) while the opponent side keeps index 1 frontmost. The probe disproved the prior faded-gust-palette hypothesis: gPlttBufferFaded slot 23 stays the unfaded rotated gray ramp (123-255) with no per-channel darkening; the divergence was entirely the gust-overlap OAM ordering, not the palette base",
         "MOVE_WING_ATTACK receives no credit: source audit proves the related GUST/elliptical/two-gust/slide/hitsplat body omits MetallicShine and uses distinct hit audio, and it lacks independent dense evidence",
         "MOVE_RAZOR_WIND receives no credit: source audit proves it shares only ANIM_TAG_GUST and uses a distinct two-turn gRazorWindTornado body without independent dense evidence"
       ],
-      "remaining": "Player orientation: confirm the faded-vs-unfaded GUST palette base (ages 144-155) and derive the slide-back start/rate from the actual slid offset 23 with the oracle's 2/frame decrement (ages 181-185), then prove 197/197 production framebuffer identity twice fresh in both orientations before promotion; do not transfer credit to Wing Attack or Razor Wind.",
       "evidence": [
         "tools/battle-lab/mechanic-steel-wing-player-wingull-opponent-onix.json",
         "tools/battle-lab/mechanic-steel-wing-opponent-wingull-player-onix.json",

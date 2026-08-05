@@ -23324,7 +23324,8 @@ export function renderSceneOnMovePresentation(
         steelWingArt.metal,
       );
     }
-    for (const gust of displayed.gusts) {
+    const gustDrawOrder = playerToOpponent ? [...displayed.gusts].reverse() : displayed.gusts;
+    for (const gust of gustDrawOrder) {
       drawSpriteSheetAffineRotate(
         fb, steelWingArt.gust.tileset, rotatedGustPalette,
         gust.x, gust.y, Math.trunc(0x10000 / gust.xScale), 0, 0, 256,

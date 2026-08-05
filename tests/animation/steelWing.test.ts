@@ -68,6 +68,22 @@ describe("MOVE_STEEL_WING source reducer", () => {
     ]);
   });
 
+  it("derives the player slide-back from the slide-out terminal and falls 2/frame", () => {
+    // `SlideMonToOriginalPos` starts from the mover's actual x2 at creation:
+    // the slide-out's Q8.8 terminal is 23 on the player side (24*256/9=682,
+    // (682*9)>>8=23), not 24. The compositor's one-display latch means the
+    // reducer value at age A renders at age A+1, so reducer ages 179-190
+    // produce the rendered view offsets 23,20,18,16,14,12 at ages 180-185
+    // (the last five were the divergent ages the oracle measured as a
+    // 2/frame decrement) then 10,8,6,4,2,0 to the SlideMonToOriginalPos
+    // finish.
+    const reducerOffsets: number[] = [];
+    for (let age = 179; age <= 190; age += 1) {
+      reducerOffsets.push(steelWingAtAge(age, "player", { x: 72, y: 80 }, { x: 176, y: 42 }).attackerX2);
+    }
+    expect(reducerOffsets).toEqual([23, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0]);
+  });
+
   it("source-audits Steel Wing and the two explicit no-credit siblings", () => {
     const run = spawnSync(process.execPath, ["--experimental-strip-types", "tools/compare/steelWingSourceAudit.ts"], { encoding: "utf8" });
     expect(run.stderr).toBe("");
