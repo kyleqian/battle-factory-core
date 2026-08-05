@@ -4,9 +4,9 @@ export const IRON_DEFENSE_BLEND_DELAY = 8;
 export const IRON_DEFENSE_BLEND_NUM_BLENDS = 2;
 export const IRON_DEFENSE_BLEND_Y1 = 14;
 export const IRON_DEFENSE_BLEND_Y2 = 0;
-// The `complex_palette_blend` sprite is created three engine-age ticks after
-// the MetallicShine task (script interpreter cadence; probe-derived).
-export const IRON_DEFENSE_BLEND_START_AGE = 3;
+// The `complex_palette_blend` sprite is created one engine-age tick after the
+// MetallicShine task's first step (script interpreter cadence; probe-derived).
+export const IRON_DEFENSE_BLEND_START_AGE = 1;
 
 export interface IronDefensePaletteState {
   readonly active: boolean;
