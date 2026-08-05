@@ -4521,6 +4521,23 @@ const MATERIALIZE_SETTLE_WOBBLE_SPECIES_SYMBOL = "ONIX";
  * gets the wobble table; every other species draws `y2=0` (flat) through
  * the settle window until the animation lane's per-species back-animation
  * dispatcher (Slice D) lands.
+ *
+ * ISSUES #74: `drawGeneratedPlayerMaterialize`'s mechanism-1 window
+ * (`PLAYER_MATERIALIZE_START_TICK..PLAYER_MATERIALIZE_END_TICK`) stops one
+ * tick short of `MATERIALIZE_Y2_TABLE`'s own 12th/last entry - the table's
+ * final value (`2`) is never drawn, and `PLAYER_MATERIALIZE_SETTLE_START_TICK`
+ * (the very next tick) falls straight to this function's species branch
+ * instead. RAM-probed directly against the two committed generated-route
+ * traces (`docs/probes/generated-player-materialize-tail-tick/`): the real
+ * `y2` descent at `PLAYER_MATERIALIZE_SETTLE_START_TICK` is `2` for BOTH a
+ * GRIMER lead (`factory-arbitrary-intro-yoshi-off`) and a DELCATTY lead
+ * (`factory-arbitrary-intro-magneton-off`) - the same species-agnostic
+ * affine-emerge collapse `MATERIALIZE_Y2_TABLE` already models elsewhere,
+ * not a per-species mechanism. This is why `PLAYER_SETTLE_WOBBLE_Y2_TABLE[0]`
+ * (ONIX's own, independently RAM-derived table) already reads `2` here too
+ * - both tables agree on the same real value by two unrelated derivations.
+ * Every species draws that one shared tail tick before any species-specific
+ * settle behavior begins.
  */
 export function generatedPlayerMaterializeSettleY2(
   art: Pick<BattleCommandFieldArtBattler, "species" | "speciesSymbol">,
@@ -4531,6 +4548,9 @@ export function generatedPlayerMaterializeSettleY2(
   // the shared pre-clear settle offsets remain valid through tick 1669,
   // and only for ONIX itself - see the function doc above.
   if (playerVisualT >= GENERATED_PLAYER_NEUTRAL_Y_VISUAL_TICK) return 0;
+  if (playerVisualT === PLAYER_MATERIALIZE_SETTLE_START_TICK) {
+    return MATERIALIZE_Y2_TABLE[MATERIALIZE_Y2_TABLE.length - 1]!;
+  }
   const isSettleWobbleSpecies = art.species === MATERIALIZE_SETTLE_WOBBLE_SPECIES_ID
     && art.speciesSymbol === MATERIALIZE_SETTLE_WOBBLE_SPECIES_SYMBOL;
   return isSettleWobbleSpecies ? playerMaterializeSettleY2(playerVisualT) : 0;

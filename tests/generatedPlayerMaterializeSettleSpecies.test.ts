@@ -50,9 +50,15 @@ function drawAt(playerSpecies: number, playerVisualT: number): Uint8Array {
   return frame;
 }
 
-describe("generatedPlayerMaterializeSettleY2 (ISSUES #71 entry-891)", () => {
-  it("draws a flat y2=0 for a non-ONIX species across the whole settle window", () => {
-    for (let t = PLAYER_MATERIALIZE_SETTLE_START_TICK; t < GENERATED_PLAYER_NEUTRAL_Y_VISUAL_TICK + 5; t += 1) {
+describe("generatedPlayerMaterializeSettleY2 (ISSUES #71 entry-891, ISSUES #74)", () => {
+  it("draws the shared species-agnostic affine-emerge tail (MATERIALIZE_Y2_TABLE's last entry, 2) at the first settle tick for every species, then flat y2=0 for a non-ONIX species the rest of the settle window", () => {
+    // ISSUES #74: RAM-probed against both committed generated-route traces
+    // (docs/probes/generated-player-materialize-tail-tick/) - the real
+    // descent's last nonzero tick lands exactly on
+    // PLAYER_MATERIALIZE_SETTLE_START_TICK, species-agnostically, not just
+    // for ONIX's own (coincidentally-equal) wobble table.
+    expect(generatedPlayerMaterializeSettleY2(KADABRA, PLAYER_MATERIALIZE_SETTLE_START_TICK)).toBe(2);
+    for (let t = PLAYER_MATERIALIZE_SETTLE_START_TICK + 1; t < GENERATED_PLAYER_NEUTRAL_Y_VISUAL_TICK + 5; t += 1) {
       expect(generatedPlayerMaterializeSettleY2(KADABRA, t)).toBe(0);
     }
   });
@@ -70,9 +76,17 @@ describe("generatedPlayerMaterializeSettleY2 (ISSUES #71 entry-891)", () => {
     expect(generatedPlayerMaterializeSettleY2(KADABRA, GENERATED_PLAYER_NEUTRAL_Y_VISUAL_TICK)).toBe(0);
   });
 
-  it("requires both species id and symbol to match ONIX (defends the field-art lookup's own species<->symbol mapping)", () => {
-    expect(generatedPlayerMaterializeSettleY2({ species: 95, speciesSymbol: "KADABRA" }, PLAYER_MATERIALIZE_SETTLE_START_TICK)).toBe(0);
-    expect(generatedPlayerMaterializeSettleY2({ species: 64, speciesSymbol: "ONIX" }, PLAYER_MATERIALIZE_SETTLE_START_TICK)).toBe(0);
+  it("the shared tail tick ignores the species<->symbol guard, but the guard still governs every later settle tick", () => {
+    // At PLAYER_MATERIALIZE_SETTLE_START_TICK itself the value is
+    // species-agnostic (see the test above), so a mismatched species/symbol
+    // pair reads the same shared tail value as everyone else there.
+    expect(generatedPlayerMaterializeSettleY2({ species: 95, speciesSymbol: "KADABRA" }, PLAYER_MATERIALIZE_SETTLE_START_TICK)).toBe(2);
+    expect(generatedPlayerMaterializeSettleY2({ species: 64, speciesSymbol: "ONIX" }, PLAYER_MATERIALIZE_SETTLE_START_TICK)).toBe(2);
+    // One tick later the species-specific branch is live again; a mismatched
+    // id/symbol pair must still fail the ONIX guard (defends the field-art
+    // lookup's own species<->symbol mapping).
+    expect(generatedPlayerMaterializeSettleY2({ species: 95, speciesSymbol: "KADABRA" }, PLAYER_MATERIALIZE_SETTLE_START_TICK + 1)).toBe(0);
+    expect(generatedPlayerMaterializeSettleY2({ species: 64, speciesSymbol: "ONIX" }, PLAYER_MATERIALIZE_SETTLE_START_TICK + 1)).toBe(0);
   });
 
   it("leaves the species-generic tint ramp untouched by the species guard", () => {
@@ -83,16 +97,16 @@ describe("generatedPlayerMaterializeSettleY2 (ISSUES #71 entry-891)", () => {
   });
 });
 
-describe("drawGeneratedPlayerMaterialize (ISSUES #71 entry-891, render-level pin)", () => {
-  it("renders a non-ONIX (KADABRA) generated player identically across the one tick the ONIX wobble table is non-zero", () => {
-    // PLAYER_SETTLE_WOBBLE_Y2_TABLE (battleMenu.ts) is [2, 0, 0, ...] - tick
-    // PLAYER_MATERIALIZE_SETTLE_START_TICK is the only tick in the whole
-    // settle window where a wrongly-applied ONIX table would move the
-    // sprite. The tint ramp is identical at both ticks (both <= 1675), so
-    // a byte-identical frame here pins a flat y2=0 render for KADABRA.
-    const first = drawAt(KADABRA_SPECIES_ID, PLAYER_MATERIALIZE_SETTLE_START_TICK);
+describe("drawGeneratedPlayerMaterialize (ISSUES #71 entry-891, ISSUES #74, render-level pin)", () => {
+  it("renders a non-ONIX (KADABRA) generated player's shared tail tick differently from the following (flat) settle tick", () => {
+    // ISSUES #74: PLAYER_MATERIALIZE_SETTLE_START_TICK itself draws the
+    // shared species-agnostic tail offset (2, MATERIALIZE_Y2_TABLE's last
+    // entry), not flat 0 - so it must render differently from the very next
+    // tick, which is genuinely flat for a non-ONIX species. The tint ramp is
+    // identical at both ticks (both <= 1675), isolating the y2 change.
+    const tail = drawAt(KADABRA_SPECIES_ID, PLAYER_MATERIALIZE_SETTLE_START_TICK);
     const next = drawAt(KADABRA_SPECIES_ID, PLAYER_MATERIALIZE_SETTLE_START_TICK + 1);
-    expect(Array.from(first)).toEqual(Array.from(next));
+    expect(Array.from(tail)).not.toEqual(Array.from(next));
   });
 
   it("still renders the ONIX wobble at that same tick for an ONIX generated player", () => {
