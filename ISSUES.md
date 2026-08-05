@@ -729,11 +729,38 @@ seam had masked:
   dense 4939..5093 (155). The evidence trace `loss-beyond-boundary-off` is
   unchanged (162/183 — every residual is the fixture's own post-5174 walk
   samples, out of scope). NO only; the YES and B/cancel branches stay
-  unconsumed (record playback + free-roam movement + WIN's GO ON/RECORD/REST/
-  RETIRE selection remain the open boundaries). Two red-verified Tier-1 pins
+  unconsumed (record playback + free-roam movement remain the open LOSS
+  boundaries). Two red-verified Tier-1 pins
   (decline state machine + decline render; both fail with the old source
   stashed); full `npm test` 727 files / 6,972 passed / 1 skipped and
   `npm run build` green.
+- **2026-08-05 WIN GO ON → first scouting message promoted into the
+  canonical window: `win-terminal-window-off` is **2082/2082** exact through
+  the genuine held first scouting boundary at frame 6704, twice fresh
+  (PNG-byte-identical), regressions re-held LOSS 1943/1943, LOSS decline
+  155/155, win-beyond 228/228, win-go-on-scout 143/143.** The supervisor-
+  rerun GO ON evidence (`tools/compare/traces-groundtruth/win-go-on-scout-off.json`,
+  143/143, `docs/post-terminal-beyond-boundary-win-go-on-scout-evidence.md`)
+  is promoted into the canonical acceptance window as a **pure data change
+  (zero src edits)**: the trace's scenario switches to
+  `scratch-win-go-on-scout-probe.json`, its 27 segments are byte-for-byte
+  the fixture's own full input prefix (verified before writing; no invented
+  presses, nothing past the fixture's single GO ON A at 6634-6635), and
+  `captureFrames` extend contiguously 4623..6704 (2082 captures). The
+  existing `postwin` continuation machinery
+  (`acceptPostwinContinuation` → `dialoguePage 1` →
+  `POSTWIN_SCOUTING_LINES[0]`) reproduced every boundary with no
+  calibration: GO ON menu hold through 6633, multichoice dismiss/box-clear
+  6636-6638, the 65-frame first-scouting-message typing 6639-6703, and the
+  wait-cursor hold from 6704. **Canonical covered boundary:** the WIN
+  terminal window now runs from the DESTIN slide (4623) through the held
+  first scouting page unpressed. **Remaining WIN work (unchanged):** the
+  pages past the held first scouting message — the type/style commentary
+  (`CommentOnOpponentType`'s `TrainerSkilledIn…` lines) and the swap offer —
+  each need their own new fixture A press; the GO ON/RECORD/REST/RETIRE
+  selection is now partially canonical (GO ON consumed), with RECORD/REST/
+  RETIRE still unpressable on a committed fixture. LOSS's remaining boundary
+  stays the record playback + free-roam movement.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 

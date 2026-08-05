@@ -4,6 +4,42 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 939 — [bounded MAIN worker, 2026-08-05] #73 WIN GO ON → first scouting message promoted into the canonical window: `win-terminal-window-off` extended and exact **2082/2082** through the held boundary 6704
+
+- **State:** master `efdfcbf4`, clean. Extended canonical gate **2082/2082**
+  twice fresh (frames 4623-6704, PNG-hash byte-identical both runs);
+  regressions re-held: LOSS **1943/1943**, LOSS decline **155/155**, win-beyond
+  **228/228**, GO ON scout **143/143**. Full `npm test` **727 files / 6,972
+  passed / 1 skipped** and `npm run build` green; smoke 347/347.
+- **Did:** promoted the supervisor-rerun GO ON → first scouting-message
+  evidence (`win-go-on-scout-off` 143/143) into the canonical Battle Scene
+  OFF WIN terminal acceptance window. **Pure data change — zero src edits.**
+  `win-terminal-window-off`'s scenario switched from
+  `win-terminal-explosion-dusclops-off` to `scratch-win-go-on-scout-probe`,
+  its segments now byte-for-byte the fixture's own full 27-segment /
+  7236-frame prefix (verified against the fixture before writing; no
+  invented input, no presses past the fixture's single GO ON A at
+  6634-6635), and `captureFrames` extend contiguously 4623..6704 (2082
+  captures) through the genuine held first scouting boundary at 6704. The
+  existing `postwin` continuation machinery
+  (`acceptPostwinContinuation` → `dialoguePage 1` →
+  `POSTWIN_SCOUTING_LINES[0]`) reproduced every measured boundary with no
+  calibration: GO ON menu hold through 6633, dismiss/clear 6636-6638, the
+  65-frame "I've conducted a little investigation\nabout your upcoming
+  opponent." typing 6639-6703, and the wait-cursor hold from 6704.
+- **Next:** #73's remaining WIN boundary is past the held first scouting
+  page (the type/style commentary + swap offer + record menu, each needing
+  its own new fixture A press); LOSS's remaining boundary stays the record
+  playback + free-roam movement (a real overworld subsystem). The already-
+  committed spec `win-go-on-scout-off` remains as the dense 6133-7236
+  ground-truth window.
+- **Notes:** no absolute-frame/battle-number/fixture branch added; the
+  canonical baseline 890/890 was re-run via the extension itself (4623-5512
+  is a subset of the new dense span). The 22→27 segment schedule change
+  keeps the trace byte-for-byte the fixture's full input prefix, so the
+  oracle replay stays gapless. `PAPERCUT`: none new.
+
+---
 ## 938 — [bounded MAIN worker, 2026-08-05] #73 LOSS decline continuation CLOSED end-to-end: generic NO-decline farewell through free-roam, new canonical trace exact **155/155** twice fresh
 
 - **State:** master `39b30079` + `b6a5f9fa` + this docs commit, clean. New
@@ -78,47 +114,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no fanfare/GO ON extension, no LOSS record choice/free-roam, no
   absolute-frame/battle-number/fixture branch. `npm run compare --
   win-terminal-window-off` now exercises the full 890-frame contiguous span.
-
----
-## 936 — [bounded MAIN worker, 2026-08-05] #73 LOSS slice 3 CLOSED end-to-end: `loss-terminal-window-off` extended and exact **1943/1943** through fixture endpoint 4938
-
-- **State:** master `f20fab08` + this docs commit, clean. Full `npm test`
-  **727 files / 6,970 passed / 1 skipped** (+2 new Tier-1) and `npm run
-  build` green; `npm run test:smoke` 347/347; typecheck clean. Committed
-  windows twice-stable: LOSS **1943/1943** (frames 2996-4938, PNG-hash
-  byte-identical across two fresh runs), WIN **503/503**. Two red-verified
-  Tier-1 pins (both fail with the old value stashed).
-- **Did:** closed #73 slice 3 by mapping frames 3835-4938 dense and correcting
-  one generic source-relative clock: `FACTORY_LOSS_TERMINAL_PROFILE.
-  recordPromptDelayFromRestore` **172 → 169** (the same value the roundWon
-  profile already carries). The app's release ages are the tick after the
-  fixture's dismiss A (page-1 A at age 602 → secondPageReleaseAge 603,
-  restore 653), so 653+169=822 lands exactly on the real record box-clear
-  (frame 4054); text starts 823 (frame 4055, the "W" of "Would you like to
-  record your last"), the first red wait-cursor at 886 (frame 4118), the
-  fixture's own A at 4136-4138 dismisses it, and the box scrolls to the held
-  "BATTLE FACTORY match on your / FRONTIER PASS?" + YES/▶NO multichoice
-  (160,8) hold byte-identical to frame 4938. The old 172 cleared two ticks
-  late and typed two chars behind every frame 4054-4126 (the measured
-  ~1,350px box-clear residual). `loss-terminal-window-off` extended
-  contiguously 2996..4938 (1943 captures) with the fixture's full 46-segment
-  prefix byte-for-byte (the last A at 4136-4138 + 800 idle tail are the
-  fixture's own recorded schedule; no invented input). No absolute-frame/
-  battle-number/fixture branch, no generated asset/extractor change; the fix
-  is LOSS-profile-only and inert in WIN. Tier-1 pins
-  (`tests/factoryTerminalPresentation.test.ts`): the 169 delay + derived
-  promptFirst 822 / textFirst 823 / inputReady 885 ages, and the render's
-  empty box-clear frame at age 822 vs. the first "W" at 823.
-- **Next:** slice 3 is exact end-to-end. LOSS-terminal's remaining boundary is
-  out of this fixture's own recorded reach (record-accept/decline → free-roam,
-  needs a new fixture per `docs/post-terminal-return-to-lobby-ground-truth.md`
-  §5 slice 5). Slice 4 is WIN PreBattleRoom/heal; animation/canonical Battle 2
-  untouched.
-- **Notes:** the record question's real line 2 prints "BATTLE FACTORY match on
-  your FRONTIER PASS?" on one row (no mid-typing scroll); the multichoice
-  window sits at pixel (160,8), not the (160,64) the old renderer assumed —
-  both already matched pre-fix via the shared record-prompt drawer. `npm run
-  compare -- loss-terminal-window-off` now exercises the full 1943-frame
-  contiguous span (the oracle client auto-batches past its 256-capture cap).
-
----
