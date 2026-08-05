@@ -12,7 +12,6 @@ import {
 } from "../src/engine/battleResolutionPresentationRender.ts";
 import {
   advanceFactoryRoundBattleCommand,
-  advanceFactoryRoundBattleResolution,
   advanceFactoryRoundPresentation,
   completeFactoryRoundPresentation,
   createFactoryRoundBattleOrchestrator,
@@ -279,8 +278,8 @@ function stagedBattle() {
   const RATTATA = Object.freeze({
     species: 19,
     moveId: 150,
-    moves: [150, 150, 150, 150],
-    pp: [40, 40, 40, 40],
+    moves: [150, 150, 150, 150] as [150, 150, 150, 150],
+    pp: [40, 40, 40, 40] as [40, 40, 40, 40],
     ability: 0,
     item: 0,
     friendship: 0,
@@ -291,7 +290,7 @@ function stagedBattle() {
     speed: 92,
     hp: 105,
     maxHp: 105,
-    types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
   });
   const BENCH = Object.freeze({
     species: 19,
@@ -309,8 +308,8 @@ function stagedBattle() {
     spDefense: 55,
     status1: 0,
     item: 0,
-    moves: [150, 150, 150, 150],
-    pp: [40, 40, 40, 40],
+    moves: [150, 150, 150, 150] as [150, 150, 150, 150],
+    pp: [40, 40, 40, 40] as [40, 40, 40, 40],
   });
   return createFactoryFullTurnBattleState({
     requestId: 1,
@@ -368,18 +367,22 @@ function switchResolutionInput(
   ) {
     throw new Error("fixture has no source command");
   }
+  if (
+    boundary.kind !== "decision-required"
+    || boundary.request.kind !== "command"
+  ) {
+    throw new Error("fixture requires a player command boundary");
+  }
   const state = createBattleState({
     rules: afterRules,
     rngSeed: 9,
     request: boundary.request,
   });
   const transition = Object.freeze({
-    kind: boundary.kind === "terminal" ? "terminal" : "decision-required",
+    kind: "decision-required",
     state,
     events: Object.freeze(events),
-    ...(boundary.kind === "terminal"
-      ? { outcome: boundary.outcome }
-      : { nextRequest: boundary.request }),
+    nextRequest: boundary.request,
   }) as BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>;
   return {
     sourceRequest: initial.boundary.request,
