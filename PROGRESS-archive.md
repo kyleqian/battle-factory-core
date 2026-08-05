@@ -1,3 +1,27 @@
+## 940 — [supervisor fold, 2026-08-05] #73 WIN scouting page 2 bound: opponent-type commentary exact **93/93** through held boundary 7308
+
+- **State:** side evidence commit `d7c58d75` merged after main's canonical
+  promotion; union reruns are exact at type-commentary **93/93** and canonical
+  WIN **2082/2082**. The side lane's full `npm test` was **727 files / 6,972
+  passed / 1 skipped**, `npm run build` green, smoke 347/347; main independently
+  reported the same full-suite/build result before the merge.
+- **Did:** extended the source fixture by exactly one safely-held A press on
+  the first scouting page. The ROM clears the box at 7240, types "The TRAINER
+  appears to have no clear / favorites when it comes to type." at 7241-7307,
+  then holds the real wait-cursor boundary from 7308. The existing generic
+  `acceptPostwinDialoguePage` → `dialoguePage 2` path reproduced all 93
+  captures twice with no production change. Banked the 29-segment fixture,
+  ground-truth spec, and source-backed boundary ledger; the prior 27 segments
+  remain byte-for-byte the previous fixture prefix.
+- **Next:** press only the held type-commentary page and bind the battle-style
+  page to its next genuine hold; after that, bind the swap offer/decision and
+  promote proven spans into the canonical WIN window. LOSS record playback
+  and moving free-roam remain separate real subsystems.
+- **Notes:** no absolute-frame/battle/fixture branch and no `src/` or test
+  edit. The parallel main promotion is already canonical through the first
+  scouting hold (4623-6704); this entry records the next evidence-only page.
+  `PAPERCUT`: none new.
+
 ## 939 — [bounded MAIN worker, 2026-08-05] #73 WIN GO ON → first scouting message promoted into the canonical window: `win-terminal-window-off` extended and exact **2082/2082** through the held boundary 6704
 
 - **State:** master `efdfcbf4`, clean. Extended canonical gate **2082/2082**
