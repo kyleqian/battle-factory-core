@@ -646,6 +646,42 @@ seam had masked:
   **503/503**. Slice 2 is therefore exact end-to-end; the only remaining LOSS
   slice-2 boundary is slice 3's own record-prompt transition (frame 4054+,
   ~1,350 px).
+- **2026-08-05 LOSS slice 3 CLOSED end-to-end: `loss-terminal-window-off` is
+  1943/1943 exact through the fixture's honest endpoint frame 4938, twice-run
+  byte-identical (PNG-hash equal).** One generic source-relative correction
+  closes the entire 3835-4938 span (the record question + multichoice):
+  `FACTORY_LOSS_TERMINAL_PROFILE.recordPromptDelayFromRestore` is **169, not
+  172** — the same value the roundWon profile already carried, so both
+  outcomes now share one restore-to-question gap. Dense 1-tick scratch
+  compare over the whole extension plus per-frame pixel decoding pinned the
+  real schedule: the record box clears at frame 4054 (terminal age 822), the
+  "W" of "Would you like to record your last" lands at 4055 (age 823), line-2
+  continues "BATTLE FACTORY match on your FRONTIER PASS?" on the same row,
+  the first red wait-cursor appears at 4118 (age 886, exactly
+  `promptFirst + recordPromptInputDelay + 1`), the fixture's own A at
+  4136-4138 dismisses it, and the box scrolls to the held
+  "BATTLE FACTORY match on your / FRONTIER PASS?" + YES/▶NO multichoice
+  (160,8) hold that is byte-identical to the fixture's own final captured
+  frame 4938. The app's release ages are the tick after the fixture's dismiss
+  A (page-1 A at age 602 → `secondPageReleaseAge` 603, restore 653), so
+  653 + 169 = 822 lands exactly on the real box-clear; the old 172 cleared
+  two ticks late and typed two chars behind every frame 4054-4126 (the
+  measured ~1,350px box-clear residual). No new input, no absolute-frame/
+  battle-number/fixture branch, no generated asset/extractor change, no WIN
+  route touch (the fix is LOSS-profile-only and inert in the WIN window).
+  The committed trace's segments are now the fixture's full 46-segment prefix
+  byte-for-byte (the last A at 4136-4138 and the 800-tick idle tail are the
+  fixture's own recorded schedule) and `captureFrames` extend contiguously
+  2996..4938 (1943 frames). Two red-verified Tier-1 pins
+  (`tests/factoryTerminalPresentation.test.ts`: delay 169 + derived
+  promptFirst 822/textFirst 823/inputReady 885, and the render's empty
+  box-clear frame at 822 vs. the first "W" at 823; both fail with 172
+  stashed). WIN re-held **503/503**; full `npm test` 727 files / 6,970
+  passed / 1 skipped and `npm run build` green. Slice 3 is exact end-to-end;
+  the only remaining LOSS-terminal work is out of this fixture's own recorded
+  reach (the record-accept/decline branch through to free-roam, which needs a
+  new fixture per `docs/post-terminal-return-to-lobby-ground-truth.md` §5
+  slice 5).
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
