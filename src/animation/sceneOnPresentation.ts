@@ -568,6 +568,12 @@ import {
   type HypnosisRing,
   type HypnosisState,
 } from "./hypnosis.ts";
+import {
+  agilityAnimationAtAge,
+  type AgilityAfterimage,
+  type AgilityOffset,
+  type AgilityState,
+} from "./agility.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -667,7 +673,8 @@ export interface SceneOnPresentationBattler {
     | "DELIBIRD"
     | "PARASECT"
     | "PONYTA"
-    | "CHARMANDER";
+    | "CHARMANDER"
+    | "LEDYBA";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1683,6 +1690,13 @@ export interface SceneOnTailWhipConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnAgilityConfig {
+  readonly move: "AGILITY";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSelfDestructConfig {
   readonly move: "SELF_DESTRUCT";
   readonly attacker: SceneOnPresentationBattler;
@@ -1951,6 +1965,7 @@ export type SceneOnMoveConfig =
   | SceneOnSandstormConfig
   | SceneOnTailGlowConfig
   | SceneOnTailWhipConfig
+  | SceneOnAgilityConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
   | SceneOnDynamicPunchConfig
@@ -2064,6 +2079,8 @@ export type SceneOnTailGlowPresentationState =
   SceneOnMovePresentationState<SceneOnTailGlowConfig>;
 export type SceneOnTailWhipPresentationState =
   SceneOnMovePresentationState<SceneOnTailWhipConfig>;
+export type SceneOnAgilityPresentationState =
+  SceneOnMovePresentationState<SceneOnAgilityConfig>;
 
 export interface SceneOnSupersonicView {
   readonly age: number;
@@ -2371,6 +2388,12 @@ export interface SceneOnTailGlowView extends TailGlowState {
 }
 
 export interface SceneOnTailWhipView extends TailWhipState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnAgilityView extends AgilityState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4763,6 +4786,21 @@ export function sceneOnTailWhipView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...tailWhipAtAge(state.age, state.config.attacker.geometry.side),
+  };
+}
+
+/** `age=0` is Move_AGILITY's first active source-script frame. */
+export function sceneOnAgilityView(
+  state: SceneOnAgilityPresentationState,
+): SceneOnAgilityView {
+  if (state.config.move !== "AGILITY") {
+    throw new Error(`expected AGILITY presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...agilityAnimationAtAge(state.age, state.config.attacker.geometry.side),
   };
 }
 

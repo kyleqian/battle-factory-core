@@ -953,6 +953,7 @@ import {
   sceneOnReversalView,
   sceneOnTailGlowView,
   sceneOnTailWhipView,
+  sceneOnAgilityView,
   sceneOnDizzyPunchView,
   sceneOnAstonishView,
   sceneOnSwaggerView,
@@ -1048,6 +1049,8 @@ import {
   type SceneOnReversalConfig,
   type SceneOnTailGlowConfig,
   type SceneOnTailWhipConfig,
+  type SceneOnAgilityConfig,
+  type SceneOnAgilityPresentationState,
   type SceneOnDizzyPunchConfig,
   type SceneOnAstonishConfig,
 } from "../animation/sceneOnPresentation.ts";
@@ -1335,6 +1338,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
 const ponytaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PONYTA!;
+const ledybaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LEDYBA!;
 const clamperlFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CLAMPERL!;
 const charmanderFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CHARMANDER!;
 const houndourFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HOUNDOUR!;
@@ -2490,6 +2494,7 @@ const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
 const ponytaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PONYTA!;
+const ledybaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LEDYBA!;
 const clamperlBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CLAMPERL!;
 const charmanderBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CHARMANDER!;
 const houndourBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HOUNDOUR!;
@@ -20122,6 +20127,168 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "PONYTA used" : "Foe PONYTA used",
       "TAIL WHIP!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "AGILITY") {
+    const agilityState = state as SceneOnAgilityPresentationState;
+    const view = sceneOnAgilityView(agilityState);
+    // RunTasks writes the elliptical task's x2/y2 after BuildOamBuffer, so
+    // the battler offset latches one age late — the same shared latch as the
+    // other Scene-ON mon-translation cases.
+    const displayed = sceneOnAgilityView({
+      ...agilityState,
+      age: agilityState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "LEDYBA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LEDYBA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged AGILITY pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent
+      ? ledybaBackSprite
+      : ledybaFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onixIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const attackerCorner = view.attacker.geometry.spriteCorner;
+    const attackerClipY =
+      opponentToPlayer ? OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM : 160;
+    // The target is drawn first so the attacker's ellipse slides over it.
+    if (playerToOpponent) {
+      drawSpriteSheet(
+        fb, targetSprite.tileset, targetSprite.palette,
+        view.target.geometry.spriteCorner.x + onixIdle.x2,
+        view.target.geometry.spriteCorner.y + onixIdle.y2,
+      );
+      drawSpriteSheet(
+        fb, attackerSprite.tileset, attackerSprite.palette,
+        attackerCorner.x, attackerCorner.y,
+      );
+      if (
+        displayed.attackerOffset.x2 !== 0
+        || displayed.attackerOffset.y2 !== 0
+        || displayed.afterimages.length > 0
+      ) {
+        eraseSpriteFootprint(fb, attackerSprite.tileset, attackerCorner);
+        drawSpriteSheetClippedBelow(
+          fb, attackerSprite.tileset, attackerSprite.palette,
+          attackerCorner.x + displayed.attackerOffset.x2,
+          attackerCorner.y + displayed.attackerOffset.y2,
+          attackerClipY,
+        );
+      }
+    } else {
+      drawSpriteSheet(
+        fb, targetSprite.tileset, targetSprite.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+      );
+      drawSpriteSheet(
+        fb, attackerSprite.tileset, attackerSprite.palette,
+        attackerCorner.x, attackerCorner.y,
+      );
+      if (
+        displayed.attackerOffset.x2 !== 0
+        || displayed.attackerOffset.y2 !== 0
+        || displayed.afterimages.length > 0
+      ) {
+        eraseSpriteFootprint(fb, attackerSprite.tileset, attackerCorner, attackerClipY);
+        drawSpriteSheetClippedBelow(
+          fb, attackerSprite.tileset, attackerSprite.palette,
+          attackerCorner.x + displayed.attackerOffset.x2,
+          attackerCorner.y + displayed.attackerOffset.y2,
+          attackerClipY,
+        );
+      }
+    }
+    // OAM-tie winner: SortSprites' stable y tie puts the same-priority clone
+    // with the larger OAM y first (front). In every AGILITY overlap pair the
+    // older slot-3 clone carries the larger y2, so it wins the overlap (the
+    // same y-tie QUICK_ATTACK's accepted clones pin, just the other slot).
+    const tieWinner = displayed.afterimages.length > 1
+      ? [...displayed.afterimages].sort((a, b) => b.y2 - a.y2)[0]!
+      : null;
+    for (const image of displayed.afterimages) {
+      const skipMask = tieWinner && image !== tieWinner
+        ? turn9QuickAttackOpaqueMask(
+            attackerSprite.tileset,
+            attackerCorner.x + tieWinner.x2,
+            attackerCorner.y + tieWinner.y2,
+            attackerClipY,
+          )
+        : null;
+      if (skipMask) {
+        drawSpriteSheetBlendedOverFbSkipping(
+          fb,
+          attackerSprite.tileset,
+          attackerSprite.palette,
+          attackerCorner.x + image.x2,
+          attackerCorner.y + image.y2,
+          12,
+          8,
+          attackerClipY,
+          skipMask,
+        );
+      } else {
+        drawSpriteSheetBlendedOverFb(
+          fb,
+          attackerSprite.tileset,
+          attackerSprite.palette,
+          attackerCorner.x + image.x2,
+          attackerCorner.y + image.y2,
+          12,
+          8,
+          attackerClipY,
+        );
+      }
+    }
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "LEDYBA",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LEDYBA" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LEDYBA used" : "Foe LEDYBA used",
+      "AGILITY!",
       99,
     );
     return;
