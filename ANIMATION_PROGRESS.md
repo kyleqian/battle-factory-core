@@ -1,5 +1,25 @@
 # Animation coverage
 
+## Supervisor wind-down — four Level-50 moves exact; animation-main green (2026-08-05)
+
+- **State:** coverage advanced **110→114/276 exact** with no partial or staged
+  moves and **162 unsupported**. This branch is folded through master
+  `edb54320` and contains no live animation worker worktrees or branches.
+- **Did:** independently reviewed, dense-replayed, and merged MOVE_METAL_CLAW,
+  MOVE_AGILITY, MOVE_BULK_UP, and MOVE_MUDDY_WATER. Each move is exact in both
+  orientations twice fresh; the source-component/shared-framebuffer windows
+  are respectively 140/140, 87/87, 104/104, and 144/144. The SURF control also
+  remained 144/144 in both orientations twice after the muddy sibling port.
+- **Verified:** integrated `npm test` — **737 files passed, 7020 tests passed,
+  1 established skip**; integrated `npm run build` — green. Final coverage
+  report: **114 exact, 0 partial, 0 staged, 162 unsupported**.
+- **Next:** resume the zero-new-component Level-50 ladder from the ranked
+  coverage report, one bounded move acceptance at a time.
+- **Notes:** no new unsupported barriers, controller ownership, battle-state
+  ownership, or animation deferrals. AGILITY's initially reported opponent
+  mismatch was stale probe field-profile data plus the established
+  species-relative terrain cutoff, corrected before acceptance.
+
 ## MOVE_MUDDY_WATER closed — 144/144 both orientations twice-fresh, promoted to exact (2026-08-05 afternoon session)
 
 - **State:** MUDDY_WATER (new move) → **exact**. Move coverage: **114/276
