@@ -63,7 +63,12 @@ history.
   selection-verify worker's suite auto-backgrounded twice at ~10-11 min
   under 3-lane contention, recovered by log-polling each time. 2026-08-04:
   post-terminal slice-1 worker's successful run auto-backgrounded at 120 s,
-  obscuring its exit and causing a redundant ~9 min foreground rerun.)
+  obscuring its exit and causing a redundant ~9 min foreground rerun.
+  2026-08-05 R5: the side scout's first 10-min suite run was killed and its
+  second stretched to ~9.4 min while the SUPERVISOR ran focused vitest
+  verification in the main tree concurrently — supervisor-side lesson:
+  even focused verification runs contend; batch them between rounds or
+  after sibling suites, ~4 min lost.)
 - **Possible durable fix:** teach the worker preamble (or the brief
   template) to pass an explicit long timeout for the final full-suite call
   (the tool accepts up to 10 min per call; the suite may soon exceed even

@@ -5,6 +5,117 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 954 — [bounded MAIN worker, 2026-08-05] ISSUES #55 wiring landed: win-terminal scaffold produces the ROM's battle-2 LILIANA byte-for-byte
+
+- **State:** master `67211ca2`, clean. Typecheck green; smoke 7/347 green;
+  all five committed win/loss terminal traces byte-identical.
+- **Did:** wired receipt §7 into `winTerminalWindowStage`: `playerTrainerId`
+  `0x18CC699A`, real six saved rental set ids 156/149/180/188/184/135, the
+  synthetic terminal battle rngSeed transplanted to the probed pre-call
+  cursor `0x7399E3AE`, and new `config.adoptedNextOpponent` that
+  `preGenerateFactoryRoundNextOpponent` reads at the GO ON seam (per-mon
+  construction cursors `0x2F959DF4/0xBD6F8138/0xDE320F3A` via
+  `adoptFactoryOpponentSchedule`). Tier-1 pin: trainer 9 LILIANA, sets
+  169/170/130, KADABRA/WAILMER/NUZLEAF, items 214/221/142, personalities
+  `0x801D2ED7/0x0FFC69A4/0x1AE16FDA`, selection end cursor `0x50F04E72`.
+  Regression list byte-identical: win-terminal-window-off 3590/3590,
+  win-go-on-swap-offer-yes-off 248/248, no-off 213/213,
+  no-guide-dismiss-off 232/232, loss-terminal-window-off 1943/1943.
+- **Next:** (1) canonical-window extension past 10638 — the far side's
+  LILIANA quote text now matches the oracle, but the battle-room opponent
+  walk-in sprite still renders the static generic NPC
+  (`battleRoomRender.ts:253`); it needs trainer-class-specific overworld
+  sprites (LILIANA = School Kid F). Quote typing/msgbox at ~10724+ is already
+  LILIANA-exact; the sprite head/hair pixels remain (189px at 10718+).
+  (2) continue PROGRESS 953's ordered list (#78 slice 4, #81, #80, RECORD/
+  RETIRE, lobby).
+- **Notes:** `config.rngValue` stays 4 (it feeds the byte-identical battle-1
+  opponent; the GO-ON cursor is carried at the boundary instead — the
+  synthetic terminal resolution overwrites round.rules.rngValue before the
+  GO ON edge). Full `npm test` deferred per cap discipline; smoke + focused +
+  the compare list above are this step's acceptance.
+
+---
+
+## 953 — [interactive supervisor WIND-DOWN, 2026-08-05] Session summary: 10 workers / 5 rounds — swap-YES 248/248, provenance receipt, 4 user play-test bugs closed same-day, RECORD/RETIRE ground truth, animation fold
+
+- **State:** master at this entry's commit, clean. Final independent union
+  verification: full `npm test` **730+ files / 7,014 passed / 1 skipped**
+  (+37 tests today), `npm run build` green, smoke green, animation-inventory
+  pin green post-fold, `bin/oracle info` green. `animation-main` fully
+  folded (METAL_CLAW 140/140, AGILITY complete, BULK_UP 104/104 — inventory
+  now 113 exact). No worktrees or worker branches left; DEFERRED.md still
+  has no open entries. Oracle freshness FAIL at orient was the documented
+  docs-only false positive (harness commits since start touch only
+  `_template`/NOTES) — no restart was needed.
+- **Did (10 workers, 2 cap-kills both salvaged clean, 0 lost work):**
+  R1: #73 swap-YES bound **248/248** (+2 generic src fixes) + #55 battle-2
+  opponent provenance receipt (LILIANA byte-for-byte from the probed cursor;
+  single-frame selection, per-mon construction cursors). R2: #76 Confuse Ray
+  crash fixed same-day (confusion string family + reachable-gap census:
+  38 unresolved ids split Factory-plausible vs out-of-scope) + #77 cadence
+  ground truth. R3: #77 CLOSED (effectiveness/crit hold B_WAIT_TIME_LONG) +
+  #78 switch ground truth (105-frame schedule, RAM-proven emerge ramp).
+  R4: #78 slices 1-3 (cadence + materialize + healthbox slide; recall span
+  remains) + #79 verdict + #80 party-menu inventory (~40% px, ranked).
+  R5: #79 CLOSED (fight-menu handoff redraw was the break; DIG sibling
+  pinned) + RECORD/RETIRE ground truth (headline: the prebattle-room
+  question shows NO visible YES/NO window — dismiss-A IS default-NO,
+  re-asked menu byte-identical; YES unreachable in that staging, flagged
+  as hypothesis; RETIRE-YES tail = the already-exact LOSS script).
+- **User decisions this session (recorded in ROADMAP S10 + ISSUES #73):**
+  full battle-parity breadth (all legal Gen-3 singles; barriers become
+  implement-or-prove-unreachable; doubles out), RECORD stub-only, REST
+  unselectable, RETIRE via loss-flow reuse, lobby walkable/no-exit/no-PC/
+  silent NPCs. Play-preview worktree serves the user's pinned build at
+  :5199 (commit `974ef563` — PRE-dates today's fixes; re-pin on request
+  only, user directive "will NOT be overwritten").
+- **Next (ordered):** (1) #55 provenance wiring into `winTerminalWindowStage`
+  per receipt §7 → extend canonical WIN past 10638 (LILIANA room content);
+  (2) #78 slice 4 (recall span) + dense-compare wiring; (3) #81 torment
+  rejection message (resolver census names its string id); (4) #80
+  party-menu binds per inventory; (5) RECORD/RETIRE binds per ground truth
+  (resolve the YES-window staging hypothesis first); (6) lobby walkable +
+  REST guard. No open DEFERRED entries; nothing blocks the next session.
+
+---
+
+## 952 — [bounded MAIN worker, 2026-08-05] ISSUES #79 CLOSED: airborne FLY/Dig sprite hidden through the fight-menu handoff
+
+- **State:** master `21128f7a`, clean. Red-verified Tier-1 pins + fix committed.
+- **Did:** ground truth (`docs/fly-semi-invisible-off-ground-truth.md`) said the
+  consumption chain "looks wired end-to-end" — and the resolution path is
+  (Tier-1-pinned). The break was the **fight-menu draw path**: the turn boundary
+  hands the scene to `renderGeneratedBattleCommandPresentation` →
+  `drawBattle2ActionMenuWindow`, which drew the fieldArt opponent/player sprites
+  unconditionally — so the airborne opponent's sprite reappeared for the entire
+  turn-boundary menu idle (~1200 of the staged trace's frames 333-1523). Fix is
+  generic: `BattleCommandPresentationState` gains a persistent
+  `spriteVisibility {player,opponent}`; `settledCommandForResolutionHandoff`
+  threads it from the orchestrator `battlePresentationBoundaries` (already
+  updated by `commitCompletedResolutionCommand` on every sprite-visibility
+  receipt); the render view exposes it; `drawBattle2ActionMenuWindow` gates the
+  sprite draws on it with the healthbox untouched (real
+  `OpponentHandleSpriteInvisibility` semantics — Dig/Fly hides sprite only,
+  recall hides both); the resolution confirmHandoff branch passes the
+  resolution view's own visibility. Pins: `tests/flySemiInvisibleSceneOffPresentation.test.ts`
+  (4 tests, each red-verified before the fix): (1) OFF-kernel ONIX-SPLASH vs
+  MURKROW-FLY charge + locked strike — sprite hidden from the charge moveend
+  through the strike, healthbox always true, restored at the strike moveend;
+  (2) DIG sibling same toggle, healthbox never hidden; (3) fight-menu handoff
+  carries `spriteVisibility.opponent === false` after the charge; (4) the
+  fight-menu renderer's hidden-opponent frame differs from the visible frame
+  only in the sprite region.
+- **Next:** #81 torment message, #80 party-menu inventory, #55 provenance
+  wiring, #78's recall-span slice 4.
+- **Notes:** full `npm test` **730 files / 6,991 passed / 1 skipped**, build
+  green, typecheck green, smoke 347/347, and insurance
+  `compare:differential --base a0b9ad9a` **384/384 byte-identical**
+  (battle-command-generated-off 128/128, turn15-fly-strike 256/256 — the
+  canonical Fly window unmoved).
+
+---
+
 ## 951 — [bounded MAIN worker, 2026-08-05] ISSUES #78 slices 1-3 landed: mid-battle switch cadence + materialize + healthbox slide
 
 - **State:** master `db74b38c`, clean. Three green commits on top of the #77
@@ -43,75 +154,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   named in ISSUES #78's remainder for the dense compare.
 
 ---
-
-## 950 — [supervisor salvage, 2026-08-05] #77 CLOSED: effectiveness/crit messages hold `B_WAIT_TIME_LONG` on the live route
-
-- **State:** master at the docs commit following `7adbd559`, clean. The
-  live-route fix is committed: `STRINGID_SUPEREFFECTIVE`/`NOTVERYEFFECTIVE`/
-  `CRITICALHIT` now carry `WAITMESSAGE_LONG_TIMING` (64 frames post-typing,
-  named for the source `B_WAIT_TIME_LONG`, `battle.h:324`) instead of
-  `holdFrames: 0` — the user-reported "flashes for a fraction of a second"
-  cadence bug. `STRINGID_USEDMOVE` untouched (no `waitmessage` in source —
-  its pacing is animation/HP-driven). Old-value pins red-verified; negative
-  pins added. Focused suite, typecheck, smoke **347/347**, and
-  `compare:differential -- battle-command-generated-off.json --base 82563164`
-  **128/128 byte-identical** (supervisor-run post-salvage).
-- **Did:** worker was cap-killed (exit 124, 45-min cap) after its fix commit
-  with one uncommitted type-only test narrowing; supervisor kept the
-  narrowing (typecheck needs it), ran the remaining verification, deleted
-  ISSUES #77, and wrote this entry. Ground truth + re-runnable oracle
-  verifier live in `docs/battle-message-hold-cadence-ground-truth.md` +
-  `tools/probe/verify-message-hold-cadence.ts` (merged earlier, ALL CHECKS
-  PASSED twice).
-- **Next:** #78 switch-presentation scout is completing in the side lane;
-  then #55 scaffold provenance wiring (receipt §7), #79 Fly probe, #81
-  torment message, #80 party-menu inventory, RECORD/RETIRE/lobby/REST.
-- **Notes:** the scout flagged other `holdFrames: 0` ids for a follow-up
-  audit only where a source `waitmessage` is unambiguous; the worker's
-  final message lists none it was confident in — treat as a small future
-  scout, not silent debt.
-
----
-
-## 949 — [bounded MAIN worker, 2026-08-05] #76 Confuse Ray crash fixed: confusion message family resolves + reachable-gap census
-
-- **State:** master `26579665`, clean. ISSUES #76 deleted (fixed); confusion
-  family branches + repro tests + census docs + mechanicLab probe committed.
-- **Did:** (1) Red-verified repro: HAUNTER CONFUSE_RAY vs MURKROW through the
-  real full-turn reducer + presentation seam threw
-  `battleStringResolver: unsupported control segment {B_EFF_NAME_WITH_PREFIX}
-  in STRINGID_PKMNWASCONFUSED`. Root cause: confusion is a STATUS2 write
-  (applyConfusionStatus2Mutation) that emits no `set-battler-status-data`
-  receipt, so the generic fallback's pendingStatusMessageBattler bridge never
-  fired — the one status-infliction id the generic path could not resolve.
-  (2) Fix (red→green): `prepareMessage` now attaches `effectBattler` to
-  STRINGID_PKMNWASCONFUSED (applySetMoveEffect already wrote it to the move's
-  target) + three new messageLines branches — PKMNWASCONFUSED
-  (`{B_EFF_NAME_WITH_PREFIX}` ← effectBattler payload), and
-  PKMNISCONFUSED/PKMNHEALEDCONFUSION/PKMNFATIGUECONFUSION
-  (`{B_ATK_NAME_WITH_PREFIX}` ← action snapshot's own attacker). Pinned by
-  `tests/confuseRayInflictionPresentationRepro.test.ts` +
-  `tests/confusedAdmissionPresentation.test.ts`. (3) Oracle spot-check:
-  mechanicLab OFF trace (`tools/battle-lab/mechanic-confuse-ray-haunter-
-  murkrow-off.json`, overrides.parties, all-opponent-slots-SPLASH) — the ROM
-  inflicts confusion (status2=3, confusionTurns=3 at frame 112+); a
-  pixel-check probe (`tools/confuseMessagePixelCheck.ts`) overlays the app's
-  battle-window + "Foe MURKROW became\nconfused!" text onto the oracle
-  message-hold frames: **0/38400 px differ at frames 140-160** (box ~108,
-  typing 108-140 — typing cadence is #77, out of scope). (4) Census:
-  regenerated `docs/printstring-literal-census.md` (confusion family now
-  explicit; 207 ids → 86 explicit + 83 generic + 38 UNRESOLVED, unchanged
-  count) and authored `docs/battle-string-resolver-reachable-gap-census.md`
-  verifying the status-infliction family (paralysis/poison/burn/sleep already
-  covered via the status1 bridge + explicit -BY branches) and splitting the 38
-  remaining UNRESOLVED ids into Factory-plausible (incl. #81's
-  STRINGID_PKMNCANTUSEMOVETORMENT) vs structurally out-of-Factory-scope.
-- **Next:** MAIN: provenance wiring into `winTerminalWindowStage` per receipt
-  §7, then #78 switch-presentation scout; SIDE: #77 message-hold timing scout.
-  The next resolver gap (census list) should be picked up by a repro test
-  first, per the census doc's enforced pattern.
-- **Notes:** status1-infliction "was X" ids resolve via the generic fallback's
-  status-data bridge; the confusion family was the only STATUS2-written
-  infliction id and is now explicit. Smoke **347/347** at commit; full
-  `npm test` + build pending at entry write.
-

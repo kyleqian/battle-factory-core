@@ -45,6 +45,10 @@ import {
   POSTWIN_SWAP_INPUT_READY_DELAY,
 } from "../src/engine/postwin.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
+import {
+  adoptFactoryOpponentSchedule,
+  generateFactoryOpponent,
+} from "../src/engine/factoryOpponentGeneration.ts";
 import { resolveTurn15FlyResolutionAdapter } from "../src/engine/turn15FlyResolutionAdapter.ts";
 
 const RNG_SEED = 4;
@@ -1945,5 +1949,82 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     state = acknowledgeAndAdvance(state);
     expect(state.round.rules.battleIndex).toBe(1);
     expect(state.round.rules.phase).toBe("presentingBattleStart");
+  });
+
+  it("adopts the probed battle-2 opponent schedule (trainer 9 LILIANA) at the GO ON pre-generation seam", () => {
+    // ISSUES #55 receipt (`docs/win-battle2-opponent-provenance-receipt.md`):
+    // the ROM's battle-2 opponent on the WIN GO ON route is set-selected
+    // single-frame from pre-call cursor 0x7399E3AE, but its personalities are
+    // constructed 32 frames later under per-mon cursors, so exact
+    // personalities require the adopted per-mon schedule.
+    const selection = generateFactoryOpponent({
+      rngValue: 0x7399e3ae,
+      factoryWinStreak: 1,
+      battleIndex: 1,
+      storedTrainerIds: [50] as const,
+      savedRentalSetIds: [156, 149, 180, 188, 184, 135] as const,
+      playerTrainerId: 416_049_562,
+      battleTowerLevel50WinStreak: 0,
+    });
+    const adoptedNext = adoptFactoryOpponentSchedule({
+      factoryWinStreak: 1,
+      battleIndex: 1,
+      storedTrainerIds: [50] as const,
+      savedRentalSetIds: [156, 149, 180, 188, 184, 135] as const,
+      playerTrainerId: 416_049_562,
+      battleTowerLevel50WinStreak: 0,
+      trainerId: 9,
+      setIds: [169, 170, 130] as const,
+      selectionDrawLedger: selection.drawLedger.filter((draw) => draw.phase !== "personality"),
+      constructionRngValues: [0x2f959df4, 0xbd6f8138, 0xde320f3a] as const,
+    });
+
+    const playerRecords = [record(666), record(570), record(378)] as const;
+    let state = createFactoryRoundBattleOrchestrator({
+      id: "win-terminal-window-off-provenance",
+      rngValue: 4,
+      factoryWinStreak: 0,
+      playerTrainerId: 416_049_562,
+      battleTowerLevel50WinStreak: 0,
+      facilityState: { rentsCount: 0 },
+      rentals: {
+        type: "currentRecords",
+        playerRentalRecords: playerRecords,
+        savedRentalRecords: [
+          record(156),
+          record(149),
+          record(180),
+          record(188),
+          record(184),
+          record(135),
+        ],
+      },
+      adoptedNextOpponent: { generation: adoptedNext, battleIndex: 1 },
+    });
+    state = acknowledgeAndAdvance(state);
+    expect(state.round.rules.phase).toBe("battleActive");
+    for (let budget = 0; budget < 60 && state.battle !== null; budget += 1) {
+      state = submitFactoryRoundPlayerDecision(state, choosePlayerDecision(state));
+    }
+    expect(state.round.rules.phase).toBe("presentingBattleWin");
+
+    state = preGenerateFactoryRoundNextOpponent(state);
+    const pending = state.pendingNextOpponent;
+    expect(pending).not.toBeNull();
+    expect(pending!.trainerId).toBe(9);
+    expect(pending!.trainerName).toBe("LILIANA");
+    expect(pending!.opponents.map((o) => o.setId).join(",")).toBe("169,170,130");
+    expect(pending!.opponents.map((o) => o.speciesName).join(","))
+      .toBe("SPECIES_KADABRA,SPECIES_WAILMER,SPECIES_NUZLEAF");
+    expect(pending!.opponents.map((o) => o.itemId).join(",")).toBe("214,221,142");
+    expect(pending!.opponents.map((o) => o.personality)).toEqual([
+      0x801d2ed7, 0x0ffc69a4, 0x1ae16fda,
+    ]);
+    expect(pending!.selectionRngValue).toBe(0x50f04e72);
+
+    const segment = state.rngSegments.at(-1)!;
+    expect(segment.kind).toBe("opponent-generation");
+    expect(segment.battleIndex).toBe(1);
+    expect(segment.rngBefore).toBe(state.round.rules.rngValue);
   });
 });
