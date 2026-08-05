@@ -35,6 +35,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `battleResolutionPresentation` from the switch events in the party-select branch,
   mirroring `beginCommandResolution`), then author the dense spec over 1137-1255
   (+ pre-recall prefix) — then slice 4's recall-hold/return-to-ball (82f hold).
+- **[Supervisor 16:05:** (1) at-orient fold of `animation-main` was a
+  fast-forward (WRAP 115/276 + MUDDY_WATER); union verified full `npm test`
+  739 files / 7027 passed / 1 skipped + build green. Oracle-freshness FAIL
+  re-confirmed as the docs-only false positive (only `_template`/NOTES
+  harness commits since oracle start). (2) SIDE R1 merged (`18deb820`):
+  walk-in sprite now trainer-class-driven via `factoryTrainerOverworldGfx.ts`
+  (SetBattleFacilityTrainerGfxId port, battle_tower.c:1161-1251;
+  LILIANA → GIRL_3), girl_3 extracted, canonical
+  `win-go-on-swap-offer-no-guide-dismiss-off` window extended
+  **232 → 903/903** to the fixture endpoint 11308 — supervisor re-ran the
+  headline (903/903), mapping test 4/4, smoke 347/347 on the union. 31 tower
+  gfx ids still fall back to the generic sheet (asset debt, listed in
+  `battleRoomRender.ts` opponentSheetForGfx doc). Worker's own gate: full
+  suite 740/7031 + build green in worktree. (3) The seam finding above
+  supersedes 953's "(a)/(b) closed" reading for the LIVE voluntary route —
+  presentation machinery exists but voluntary switches bypass it; seam brief
+  dispatched as main R2.**]**
 
 ---
 
