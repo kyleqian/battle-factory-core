@@ -664,10 +664,20 @@ function lossTerminalWindowStage(state: EngineState): EngineState {
 // doc §0/§2), matching TERMINAL_SEAM_SCAFFOLD_TRAINER's species (198)
 // already used for battler 1.
 function winTerminalWindowStage(state: EngineState): EngineState {
+  // The swap-offer/swap-screen fixtures (scratch-win-go-on-swap-offer-*,
+  // win-terminal-explosion-dusclops-off) stage the player party as DUSCLOPS
+  // (species 362) x3, so the round's player records must render the same
+  // species the oracle's swap picker shows. The win-terminal window itself
+  // never draws the round party (the scaffold battle does), so swapping the
+  // arbitrary 664/678/527 placeholder for DUSCLOPS records is a no-op there.
+  // Nature is chosen from the DUSCLOPS frontier corpus (ADAMANT/IMPISH); the
+  // swap picker only renders species name + category, so any legal DUSCLOPS
+  // set reproduces it (the fixture's staged HARDY personality is not
+  // representable through the source corpus, which has no HARDY DUSCLOPS).
   const playerRentalRecords = [
-    generatedCommandRecord(664),
-    generatedCommandRecord(678),
-    generatedCommandRecord(527),
+    generatedCommandRecord(666),
+    generatedCommandRecord(570),
+    generatedCommandRecord(378),
   ] as const;
   let orchestrator = createFactoryRoundBattleOrchestrator({
     id: "win-terminal-window-off",
