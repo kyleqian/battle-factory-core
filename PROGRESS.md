@@ -2,8 +2,48 @@
 
 Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
+---
+## 945 — [bounded MAIN worker, 2026-08-05] #73 WIN swap-offer NO decision bound: `win-go-on-swap-offer-no-off` exact **213/213** twice fresh
+
+- **State:** master `89693d9d`, clean. The swap-offer NO decision + the generic
+  `Right this way, please!` guide are bound at **213/213** exact twice fresh
+  (frames 9930-10406, dense; PNG-byte-identical both runs). Regressions
+  re-held: canonical WIN **3590/3590**, LOSS **1943/1943**, LOSS decline
+  **155/155**, win-beyond **228/228**, GO ON scout **143/143**, type **93/93**,
+  style **92/92**, swap-offer **115/115**, battle-command-generated **128/128**.
+  Full `npm test` **727 files / 6,973 passed / 1 skipped** and `npm run build`
+  green; smoke 347/347.
+- **Did:** authored `scratch-win-go-on-swap-offer-no-probe.json`, preserving the
+  swap-offer fixture's 33 segments byte-for-byte and appending a safely-held
+  DOWN (9943-9944, cursor display -> NO at 9944), a bounded idle, an A
+  accepting NO at 10005-10006, and a bounded idle tail (37 segments / 10406
+  frames). Dense oracle captures bind the NO decision, YES/NO-window dismissal
+  (edge+1), box clear (edge+3), and the generic `Right this way, please!`
+  guide typing 1 glyph/tick from edge+4 to its final glyph at edge+26 (frame
+  10031), held **with no wait-cursor** through the endpoint 10406 — the genuine
+  held/dismiss-ready boundary, unpressed per contract (no walk/warp). One
+  generic src fix was required and landed (`overlayTerminalKernelParty` now
+  overlays only the four battle-mutable fields — HP/status1/item/PP — onto the
+  rental identity instead of spreading the whole terminal party): the WIN
+  scaffold's placeholder terminal party (DUSCLOPS, personality `0xff`, IV 3)
+  was corrupting the kernel party so `healFactoryKernelParty`'s identity guard
+  threw on the NO advance. Red-verified Tier-1 pin
+  (`tests/factoryRoundBattleOrchestrator.test.ts`); no calibration — the
+  existing `movePostwinSwapCursor`/`acceptPostwinSwapDecline`/
+  `postwinRightThisWay*` machinery reproduced every boundary with its current
+  constants. Evidence: `docs/post-terminal-beyond-boundary-win-go-on-swap-offer-no-decision-evidence.md`.
+- **Next:** a separate YES decision should enter the already-generic swap UI
+  (or hand its fixture to the swap-screen path); the unexercised
+  RECORD/REST/RETIRE continuation choices remain. Promote the proven decision
+  span into the canonical WIN window once the YES/guide tail is also bound.
+- **Notes:** no absolute frame/battle-number/fixture branch; the overlay fix is
+  source-relative (the real game only writes HP/status/item/PP back to
+  `gPlayerParty` during a battle — identity is never battle-mutable). LOSS
+  record playback/free-roam remain separate.
+
 
 ---
+
 ## 944 — [supervisor recovery/fold, 2026-08-05] #73 WIN swap-offer boundary bound: YES/NO hold exact **115/115** through input-ready frame 9111
 
 - **State:** recovered side evidence commit `61a7c343` merged after main's
@@ -29,6 +69,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   RECORD/REST/RETIRE continuation choices remain separate.
 
 ---
+
+---
+
 ## 943 — [bounded MAIN worker, 2026-08-05] #73 WIN battle-style commentary page promoted into the canonical window: `win-terminal-window-off` exact **3590/3590** through held boundary 8212
 
 - **State:** master `a048faa0`, clean. Extended canonical gate **3590/3590**
@@ -68,26 +111,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   input prefix, so the oracle replay stays gapless. `PAPERCUT`: none new.
 
 ---
-## 942 — [supervisor fold, 2026-08-05] #73 WIN scouting page 3 bound: battle-style commentary exact **92/92** through held boundary 8212
-
-- **State:** side evidence commit `7d78bbea` merged after main's type-page
-  canonical promotion. Union reruns are exact at style-page **92/92** and
-  canonical WIN **2686/2686**. The side lane's full `npm test` was **727 files
-  / 6,972 passed / 1 skipped**, `npm run build` green, smoke 347/347; main
-  independently reported the same full-suite/build result before the merge.
-- **Did:** extended the source fixture by exactly one safely-held A press on
-  the type-commentary page. The ROM clears the box at 8142, types "The
-  favorite battle style appears to / be free-spirited and unrestrained." at
-  8143-8211, then holds the wait cursor from 8212. The existing generic
-  `acceptPostwinDialoguePage` → `dialoguePage 3` path reproduced all 92
-  captures twice with no production change. Banked the 31-segment fixture,
-  ground-truth spec, and source-backed ledger; the prior 29 segments remain a
-  byte-for-byte fixture prefix.
-- **Next:** press only the held style page and bind the swap-offer YES/NO
-  window to its input-ready hold. Then exercise decline/accept decisions and
-  promote proven spans into the canonical WIN window. LOSS record playback
-  and moving free-roam remain separate real subsystems.
-- **Notes:** no absolute-frame/battle/fixture branch and no `src/` or test
-  edit. The main promotion is canonical through the preceding held type page
-  (4623-7308); this entry records the next evidence-only boundary.
-  `PAPERCUT`: none new.

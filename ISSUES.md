@@ -806,9 +806,35 @@ seam had masked:
   recovered evidence fixture preserves the prior 31 segments byte-for-byte,
   presses the held style page once at 9040-9041, observes box clear 9044,
   60-character offer typing 9045-9104, YES/NO window copy at 9107, and input
-  readiness at 9111. Temporary side-lane debug instrumentation was discarded;
-  the folded commit contains only the fixture/spec/note. Remaining WIN work
-  is a real NO or YES decision plus the unexercised RECORD/REST/RETIRE paths.
+   readiness at 9111. Temporary side-lane debug instrumentation was discarded;
+   the folded commit contains only the fixture/spec/note. Remaining WIN work
+   is a real NO or YES decision plus the unexercised RECORD/REST/RETIRE paths.
+- **2026-08-05 WIN swap-offer NO decision bound end-to-end through the
+  guide: `win-go-on-swap-offer-no-off` is **213/213** exact twice fresh
+  (frames 9930-10406), canonical WIN/LOSS/decline/commentary all re-held
+  (3590/3590 + 1943/1943 + 155/155 + 228/228 + 143/143 + 93/93 + 92/92 +
+  115/115 + 128/128).** The new scratch fixture preserves the swap-offer
+  fixture's 33 segments byte-for-byte, appends a safely-held DOWN
+  (9943-9944, cursor display → NO at 9944), a bounded idle, an A accepting
+  NO at 10005-10006, and a bounded idle tail. Dense oracle captures bind the
+  NO decision, YES/NO-window dismissal (edge+1), box clear (edge+3), and the
+  generic `EnterBattleRoom` "Right this way, please!" guide typing 1
+  glyph/tick from edge+4 through its final glyph at edge+26 (frame 10031),
+  held **with no wait-cursor** through the endpoint 10406 (the genuine
+  held/dismiss-ready boundary — no press into walk/warp, per the bounded
+  contract). One generic source-relative fix was required and landed:
+  `overlayTerminalKernelParty` (`factoryRoundBattleOrchestrator.ts`) now
+  overlays only the four battle-mutable fields (HP/status1/item/PP) onto the
+  rental identity instead of spreading the whole terminal party — the WIN
+  scaffold's placeholder terminal party (DUSCLOPS, personality `0xff`, IV 3)
+  was corrupting the kernel party so `healFactoryKernelParty`'s identity
+  guard threw on the NO advance. Red-verified Tier-1 pin
+  (`tests/factoryRoundBattleOrchestrator.test.ts`); the existing
+  `movePostwinSwapCursor`/`acceptPostwinSwapDecline`/`postwinRightThisWay*`
+  machinery reproduced every boundary with zero calibration. Evidence:
+  `docs/post-terminal-beyond-boundary-win-go-on-swap-offer-no-decision-evidence.md`.
+  Remaining WIN work is the YES branch into the swap UI plus the unexercised
+  RECORD/REST/RETIRE continuation choices.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 

@@ -36009,3 +36009,27 @@ both verify scripts/census independently re-verified before this entry.)*
   redraw/input readiness), then retire `turn13Resolved`. Side lane: the
   rung-1 five-table extraction.
 - **Notes:** session deadline 15:32; supervisor session, hybrid profile.
+
+## 942 — [supervisor fold, 2026-08-05] #73 WIN scouting page 3 bound: battle-style commentary exact **92/92** through held boundary 8212
+
+- **State:** side evidence commit `7d78bbea` merged after main's type-page
+  canonical promotion. Union reruns are exact at style-page **92/92** and
+  canonical WIN **2686/2686**. The side lane's full `npm test` was **727 files
+  / 6,972 passed / 1 skipped**, `npm run build` green, smoke 347/347; main
+  independently reported the same full-suite/build result before the merge.
+- **Did:** extended the source fixture by exactly one safely-held A press on
+  the type-commentary page. The ROM clears the box at 8142, types "The
+  favorite battle style appears to / be free-spirited and unrestrained." at
+  8143-8211, then holds the wait cursor from 8212. The existing generic
+  `acceptPostwinDialoguePage` → `dialoguePage 3` path reproduced all 92
+  captures twice with no production change. Banked the 31-segment fixture,
+  ground-truth spec, and source-backed ledger; the prior 29 segments remain a
+  byte-for-byte fixture prefix.
+- **Next:** press only the held style page and bind the swap-offer YES/NO
+  window to its input-ready hold. Then exercise decline/accept decisions and
+  promote proven spans into the canonical WIN window. LOSS record playback
+  and moving free-roam remain separate real subsystems.
+- **Notes:** no absolute-frame/battle/fixture branch and no `src/` or test
+  edit. The main promotion is canonical through the preceding held type page
+  (4623-7308); this entry records the next evidence-only boundary.
+  `PAPERCUT`: none new.
