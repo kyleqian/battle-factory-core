@@ -1,3 +1,31 @@
+## 927 — [supervisor, 2026-08-04 ~18:15] R1 both lanes landed: #74 FIXED+CLOSED (materialize tail-tick, baselines restored) + WIN window 65/65 -> 389/389 merged; R2 launched (selection-rejection slice + terminal-scaffold party reconciliation)
+
+- **State:** master `bba958a3` + this docs commit. Post-merge supervisor
+  reruns: `win-terminal-window-off` **389/389**, `loss-terminal-window-off`
+  **236/236**, `factory-arbitrary-intro-yoshi-off` **700/751** (baseline
+  restored), smoke 347/347, materialize species test 7/7. Workers' own
+  full-suite gates at their commits: 721 files / 6,927 passed / 1 skipped,
+  build green (both lanes).
+- **Did:** (1) verified + kept R1-MAIN's #74 fix (`bea22b65`) — 11-of-12
+  `MATERIALIZE_Y2_TABLE` consumption off-by-one, RAM-confirmed on both
+  committed traces, prediction-pinned exact; #74 deleted from ISSUES.
+  (2) verified + merged R1-SIDE's WIN extension (`9b0a04dc` ->
+  `bba958a3`): pure trace-data change, 389/389 twice-run; #73 updated —
+  remaining blocker for BOTH windows' true ends is the scaffold
+  party-identity gap (probe doc §5). (3) PAPERCUTS send-out-fast-forward
+  correction: found already corrected by the prior session; no edit needed.
+- **Next:** R2 in flight — MAIN: ISSUES #72 remainder, selection-rejection
+  advisory slice (scout option (b) adopted verbatim: pure
+  `describeIllegalMoveSelection` + `rejectionReasonBySlot` + the 4
+  unresolved STRINGIDs; no boundary-contract change). SIDE: reconcile the
+  terminal-scaffold party identity in `tools/compare/appTrace.ts` and
+  extend WIN through fade/handoff + LOSS through its handoff tick. Then
+  wind-down: fold check, ONE full union suite, preview rebuild.
+- **Notes:** orient oracle-freshness FAIL was the docs-only false-positive
+  class again (2 harness commits since service start, both docs/template
+  — verified before accepting). Session deadline 21:17; R2 caps fit.
+
+---
 ## 926 — [bounded MAIN worker, 2026-08-04 ~18:05] ISSUES #74 FIXED — generated-route player materialize tail-tick off-by-one, RAM-confirmed on both committed traces, prediction-pinned and exact; YOSHI 700/751 + MAGNETON 703/751 restored
 
 - **State:** master at this docs commit (src fix `src/engine/battleScene.ts`

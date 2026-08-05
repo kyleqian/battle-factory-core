@@ -4,6 +4,48 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 930 — [bounded MAIN worker, 2026-08-04 ~19:45] ISSUES #72 oracle-verification gap closed for NOPPLEFT + ITEMALLOWSONLYYMOVE; PKMNHASNOMOVESLEFT skipped (documented)
+
+- **State:** master + this docs commit. `npm test` green (see final gate
+  below), `npm run build` green. No `src/` changes — both resolvers already
+  matched the real ROM.
+- **Did:** staged two `mechanicLab overrides.parties` battle-scene-off
+  traces (`tools/battle-lab/mechanic-selection-reject-{choice-band,no-pp}-
+  off.json`) and read the captured PNG text directly, cross-checked against
+  the manifest's semantic `pp` state to confirm the staged precondition.
+  **ITEMALLOWSONLYYMOVE:** CHANSEY holds Choice Band, turn 1 TACKLE
+  (locks), turn 2 attempts GROWL — ROM prints "CHOICE BAND allows the / use
+  of only TACKLE!" byte-for-byte matching the resolver and its existing
+  Tier-1 pin. **NOPPLEFT:** CHANSEY's SUNNY DAY (5 PP, the cheapest
+  depletable move short of Sketch) genuinely exhausted 5→0 PP over 5 real
+  turns (`overrides.parties` can't inject PP — it's always ROM-derived from
+  base PP × PP Ups), then reselected with TACKLE still legal so the menu
+  stayed open — ROM prints "There's no PP left for / this move!"
+  byte-for-byte matching the resolver. Both MATCH, no src fix needed.
+  Receipts banked: `docs/probes/selection-rejection-oracle-verification/`
+  (README + both PNGs). ISSUES #72's oracle-verified paragraph extended in
+  place. **PKMNHASNOMOVESLEFT not attempted** — needs all four move slots
+  at 0 PP simultaneously (4×5=20 turns via the cheap-status-move vehicle, or
+  a riskier 4-turn Sketch path gated on an unverified speed-ordering
+  argument); documented precisely in the probe doc's closing section for a
+  future step with more headroom.
+- **Next:** #72's settled record is now fully oracle-verified except
+  PKMNHASNOMOVESLEFT (open, low-priority — advisory-only text, never
+  reachable through this engine's own `submitBattleDecision` boundary
+  today). Next candidate: verify a speed-ordering fixture (player IVs/nature
+  vs. a slow opponent) once, then stage the 4-Sketch-turn NOPPLEFT-shaped
+  trace for PKMNHASNOMOVESLEFT.
+- **Notes:** confirmed the Torment probe from `05d7dccf` never banked its
+  trace/PNGs to disk (checked `docs/probes/`, git history, and
+  `tools/battle-lab/` — nothing matches its BUTTERFREE/MURKROW scenario);
+  this step's own two receipts are the first banked selection-rejection
+  oracle evidence on disk. `PAPERCUT:` none new this step — the flagged
+  `BattleScriptPartyMemberInput.moves`-defaults-PP-to-0 papercut didn't
+  apply here (that's the bench-party-member override path; `overrides.
+  parties`' active-battler PP derivation used throughout this step is a
+  different, already-correct code path).
+
+---
 ## 929 — [supervisor, 2026-08-04 ~19:10] R2 both lanes landed + animation STEEL_WING fold; #72 fully closed (retitled settled record); R3 launched (post-terminal timing scout + no-PP/Choice-lock oracle verification)
 
 - **State:** master `5993ff41` + this docs commit. Union checks post-merge:
@@ -91,31 +133,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `battleScriptActionAdmission.ts:2764`, which the new code shifted to
   `:2990`) — same deliberate-regen discipline as the move census, updated in
   the same commit.
-
----
-## 927 — [supervisor, 2026-08-04 ~18:15] R1 both lanes landed: #74 FIXED+CLOSED (materialize tail-tick, baselines restored) + WIN window 65/65 -> 389/389 merged; R2 launched (selection-rejection slice + terminal-scaffold party reconciliation)
-
-- **State:** master `bba958a3` + this docs commit. Post-merge supervisor
-  reruns: `win-terminal-window-off` **389/389**, `loss-terminal-window-off`
-  **236/236**, `factory-arbitrary-intro-yoshi-off` **700/751** (baseline
-  restored), smoke 347/347, materialize species test 7/7. Workers' own
-  full-suite gates at their commits: 721 files / 6,927 passed / 1 skipped,
-  build green (both lanes).
-- **Did:** (1) verified + kept R1-MAIN's #74 fix (`bea22b65`) — 11-of-12
-  `MATERIALIZE_Y2_TABLE` consumption off-by-one, RAM-confirmed on both
-  committed traces, prediction-pinned exact; #74 deleted from ISSUES.
-  (2) verified + merged R1-SIDE's WIN extension (`9b0a04dc` ->
-  `bba958a3`): pure trace-data change, 389/389 twice-run; #73 updated —
-  remaining blocker for BOTH windows' true ends is the scaffold
-  party-identity gap (probe doc §5). (3) PAPERCUTS send-out-fast-forward
-  correction: found already corrected by the prior session; no edit needed.
-- **Next:** R2 in flight — MAIN: ISSUES #72 remainder, selection-rejection
-  advisory slice (scout option (b) adopted verbatim: pure
-  `describeIllegalMoveSelection` + `rejectionReasonBySlot` + the 4
-  unresolved STRINGIDs; no boundary-contract change). SIDE: reconcile the
-  terminal-scaffold party identity in `tools/compare/appTrace.ts` and
-  extend WIN through fade/handoff + LOSS through its handoff tick. Then
-  wind-down: fold check, ONE full union suite, preview rebuild.
-- **Notes:** orient oracle-freshness FAIL was the docs-only false-positive
-  class again (2 harness commits since service start, both docs/template
-  — verified before accepting). Session deadline 21:17; R2 caps fit.

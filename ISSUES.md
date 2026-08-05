@@ -276,11 +276,32 @@ gate on more than raw text-printer inactivity. This doesn't affect anything
 landed this step (no live dismiss-timing UI was built, per option (b)'s
 scope), but whoever builds option (a) or any live text-box wiring for this
 family needs the real button-gated timing, not the scout's auto-advance
-assumption. The no-PP/Choice-lock stretch traces were not run (ORDERED
-STRETCH, explicitly optional) — the Torment case above is the only
-oracle-verified cause; no-PP/Choice-lock text content is untested against
-the real ROM (only against the extracted string table, which is itself
-ROM-sourced).
+assumption. (That first Torment probe's trace/PNGs were never banked to
+disk — a gap the follow-up below both repeats-not and fixes for its own two
+causes.)
+
+**Oracle-verified, remaining two feasible causes (2026-08-04,
+`docs/probes/selection-rejection-oracle-verification/`):**
+`STRINGID_ITEMALLOWSONLYYMOVE` (`mechanic-selection-reject-choice-band-off.json`:
+CHANSEY holds Choice Band, turn 1 uses TACKLE, turn 2 attempts GROWL) prints
+exactly "CHOICE BAND allows the / use of only TACKLE!" byte-for-byte
+matching the resolver. `STRINGID_NOPPLEFT`
+(`mechanic-selection-reject-no-pp-off.json`: CHANSEY's SUNNY DAY genuinely
+depleted 5→0 PP over 5 real turns — `overrides.parties` cannot inject PP
+directly, only derive it from base PP × PP Ups — then reselected with
+TACKLE still legal so the menu stays open) prints exactly "There's no PP
+left for / this move!" byte-for-byte matching the resolver. Both traces and
+PNGs are checked in this time (`tools/battle-lab/mechanic-selection-reject-
+{choice-band,no-pp}-off.json`, receipts under the probe doc above) — no src
+mismatch found, no fix needed. **`STRINGID_PKMNHASNOMOVESLEFT` was not
+attempted**: it needs all four move slots at 0 PP simultaneously, and every
+slot's PP is independently ROM-derived with no injection path; the cheapest
+depletion vehicle would cost 4×5=20 real turns (or a riskier 4-turn Sketch
+path gated on an unverified speed-ordering argument — see the probe doc's
+closing section for the full reasoning). All three causes' resolver text
+was already Tier-1-pinned before this step
+(`tests/battleScriptSelectionRejection.test.ts`); this step only added the
+oracle-side confirmation for two of the three untested causes.
 
 **Leads:** rerun `node --experimental-strip-types tools/report/
 printstring-literal-census.ts` after any `messageLines`/battle-script-program
