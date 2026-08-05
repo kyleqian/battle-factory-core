@@ -402,11 +402,25 @@ Red-verified on DESTIN's exact 23-char `speechLose` lines (doubles as the
 `loss-terminal-window-off` 236/236, `win-terminal-window-off` 65/65,
 `compare:differential -- battle-command-generated-off.json` 128/128,
 full `npm test` 721/721 files (6,926 passed/1 skipped, no existing pin
-depended on the old skip timing). **The WIN window's remaining ~320
-frames (settled quote hold + real dismiss + fade) are still unwired** —
-the fix unblocks it but `winTerminalWindowStage` extending past the
-now-fixed dismiss wait toward the full 241-frame window is not done this
-session; still open, next WIN-lane pickup.
+depended on the old skip timing).
+
+**WIN window extended 2026-08-04 (`9b0a04dc`, merged `bba958a3`): 65/65 →
+389/389** (frames 4623–5011: slide + swap edge + fully-typed quote + the
+323-frame settled hold + the real dismiss press's first tick), twice-run
+byte-identical + supervisor rerun post-merge; LOSS re-held 236/236. Pure
+data change — `winTerminalWindowStage` needed zero code edits; the trace's
+segments are a literal prefix of the committed fixture's own recorded
+schedule. Pinned: quote settled span 4688–5010, real dismiss tick 5010
+(2-tick press at 5011–5012). **Remaining and blocking both windows' true
+ends: the scaffold party-identity gap** (`docs/terminal-seam-win-window-probe.md`
+§5) — frame 5012 completes the lifecycle and `finishBattle` hits
+`assertSamePartyIdentity` because the scaffold's synthetic `terminalBattle`
+party (`TERMINAL_SEAM_SCAFFOLD_TRAINER`, hp 200) was never reconciled with
+the orchestrator's own generated opponent party (ARON lead, maxHp 143).
+Same structural reason LOSS stops one tick short of its own handoff. Next
+pickup: reconcile scaffold-side in `tools/compare/appTrace.ts` (generic
+across both windows), then extend WIN through the fade/handoff end and
+LOSS through its own handoff tick.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
