@@ -16,8 +16,8 @@ interface Receipt {
 const fixtures: Array<[string, number, string]> = [
   // player-back Ledyba -> opponent Onix (exact)
   ["tools/compare/fixtures/agility-player-ledyba-opponent-onix.json", 87, "exact"],
-  // opponent-front Ledyba -> player Onix (partial: battle-bg field artifact)
-  ["tools/compare/fixtures/agility-opponent-ledyba-player-onix.json", 0, "partial"],
+  // opponent-front Ledyba -> player Onix (exact)
+  ["tools/compare/fixtures/agility-opponent-ledyba-player-onix.json", 87, "exact"],
 ];
 
 describe("MOVE_AGILITY dense evidence receipts", () => {

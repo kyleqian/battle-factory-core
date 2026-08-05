@@ -69,6 +69,29 @@
    ]
   },
   {
+   "move": "MOVE_AGILITY",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage the sole Factory carrier FRONTIER_MON_LEDYBA record 40 with all four active choices constrained to AGILITY against a stable legal ONIX target in both orientations",
+    "player-back LEDYBA frames 217-303 and opponent-front LEDYBA frames 218-304 each pass 87/87 dense source/task/register/palette/audio/raw-RGB and shared-framebuffer frames twice fresh through first inactive cleanup",
+    "the source-relative reducer and typed Scene-ON seam port monbg ANIM_ATK_PARTNER, alpha 12/8, TranslateMonEllipticalRespectSide(ANIM_ATTACKER,24,6,4,4), TraceMonBlended(0,4,7,10), five SE_M_DOUBLE_TEAM restarts, clone allocator/OAM overlap order, species-relative opponent terrain clipping, clearmonbg, blendoff, and delay-1 cleanup",
+    "the opponent fixture pins the live post-Tackle field state from probe battler RAM (ONIX 128/128, LEDYBA 102/122); the opponent redraw uses the established spriteCorner.y + 55 terrain cutoff, which is y=75 for LEDYBA rather than the y=74 cutoff of earlier species"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-agility-player-ledyba-opponent-onix.json",
+    "tools/battle-lab/mechanic-agility-opponent-ledyba-player-onix.json",
+    "tools/compare/fixtures/agility-player-ledyba-opponent-onix.json",
+    "tools/compare/fixtures/agility-opponent-ledyba-player-onix.json",
+    "tools/compare/agilityProbe.py",
+    "tools/compare/agilityPortable.ts",
+    "src/animation/agility.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/agility.test.ts",
+    "tests/animation/agilityEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_AROMATHERAPY",
    "status": "exact",
    "covered": [

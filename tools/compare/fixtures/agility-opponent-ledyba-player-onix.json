@@ -51,10 +51,10 @@
   }
  },
  "fieldProfile": {
-  "playerHp": 117,
-  "playerMaxHp": 117,
-  "opponentHp": 114,
-  "opponentMaxHp": 133,
+  "playerHp": 128,
+  "playerMaxHp": 128,
+  "opponentHp": 102,
+  "opponentMaxHp": 122,
   "playerGender": "male",
   "opponentGender": "male"
  },
@@ -63,8 +63,7 @@
  "secondFreshEvidenceSha256": "9f8a7cfb087a989e653b03b776ca789a55031a7b720268beade980b7f293c870",
  "rawRgbSha256": "50df74b10a78c2bd7fcc290b3e7f5595e49f66b2011f4000e974a9642379d0cc",
  "acceptance": {
-  "status": "partial",
-  "framebufferMatching": 0,
-  "reason": "battle-bg field tiles differ from app asset at (92,33-34) and (188-220,97-103) in the opponent orientation (86px per frame)"
+  "status": "exact",
+  "framebufferMatching": 87
  }
 }

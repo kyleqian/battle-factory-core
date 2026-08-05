@@ -20170,8 +20170,9 @@ export function renderSceneOnMovePresentation(
       battleBg.palette,
     );
     const attackerCorner = view.attacker.geometry.spriteCorner;
-    const attackerClipY =
-      opponentToPlayer ? OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM : 160;
+    const attackerClipY = opponentToPlayer
+      ? attackerCorner.y + 55
+      : 160;
     // The target is drawn first so the attacker's ellipse slides over it.
     if (playerToOpponent) {
       drawSpriteSheet(
