@@ -83,6 +83,10 @@ import {
   type MetallicShineState,
 } from "./metallicShine.ts";
 import {
+  ironDefenseAtAge,
+  type IronDefenseState,
+} from "./ironDefense.ts";
+import {
   calmMindAtAge,
   type CalmMindState,
 } from "./calmMind.ts";
@@ -1764,6 +1768,15 @@ export interface SceneOnHardenConfig {
   readonly attackerSpriteCenter: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnIronDefenseConfig {
+  readonly move: "IRON_DEFENSE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source battler sprite `x/y`, used to initialize BG1_X/BG1_Y. */
+  readonly attackerSpriteCenter: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnCalmMindConfig {
   readonly move: "CALM_MIND";
   readonly attacker: SceneOnPresentationBattler;
@@ -1935,6 +1948,7 @@ export type SceneOnMoveConfig =
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
+  | SceneOnIronDefenseConfig
   | SceneOnCalmMindConfig
   | SceneOnShadowBallConfig
   | SceneOnEncoreConfig
@@ -2433,6 +2447,11 @@ export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
 
 export interface SceneOnHardenView extends MetallicShineState {
   readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnIronDefenseView extends IronDefenseState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -2936,7 +2955,8 @@ export function createSceneOnMovePresentation<
     | SceneOnBiteConfig
     | SceneOnHeadbuttConfig | SceneOnBodySlamConfig | SceneOnSlamConfig
     | SceneOnSecretPowerConfig
-    | SceneOnWhirlwindConfig | SceneOnBlockConfig,
+    | SceneOnWhirlwindConfig | SceneOnBlockConfig
+    | SceneOnIronDefenseConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -4952,6 +4972,27 @@ export function sceneOnHardenView(
       state.config.attackerSpriteCenter.y,
       false,
     ),
+  };
+}
+
+/** `age=0` is the MetallicShine initializer's first displayed frame. */
+export function sceneOnIronDefenseView(
+  state: SceneOnMovePresentationState,
+): SceneOnIronDefenseView {
+  if (state.config.move !== "IRON_DEFENSE") {
+    throw new Error(
+      `expected IRON_DEFENSE presentation, got ${state.config.move}`,
+    );
+  }
+  const config = state.config as SceneOnIronDefenseConfig;
+  return {
+    ...ironDefenseAtAge(
+      state.age,
+      config.attackerSpriteCenter.x,
+      config.attackerSpriteCenter.y,
+    ),
+    attacker: config.attacker,
+    target: config.target,
   };
 }
 

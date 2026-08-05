@@ -967,6 +967,7 @@ import {
   sceneOnToxicView,
   sceneOnEarthquakeView,
   sceneOnHardenView,
+  sceneOnIronDefenseView,
   sceneOnCalmMindView,
   sceneOnShadowBallView,
   sceneOnEncoreView,
@@ -1333,6 +1334,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
 const ponytaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PONYTA!;
+const clamperlFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CLAMPERL!;
 const houndourFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HOUNDOUR!;
 const delibirdFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DELIBIRD!;
 const mareepFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAREEP!;
@@ -2486,6 +2488,7 @@ const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
 const ponytaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PONYTA!;
+const clamperlBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CLAMPERL!;
 const houndourBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HOUNDOUR!;
 const magbyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGBY!;
 const mareepBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAREEP!;
@@ -28195,6 +28198,123 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "RELICANTH used" : "Foe RELICANTH used",
       "HARDEN!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "IRON_DEFENSE") {
+    const view = sceneOnIronDefenseView(state);
+    // OAM/palette/register writes become visible on the following display
+    // latch, so both the MetallicShine sweep and the BG palette pulse are
+    // rendered one age behind the source state (same seam as HARDEN).
+    const displayed = sceneOnIronDefenseView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "CLAMPERL"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CLAMPERL"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged IRON_DEFENSE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? clamperlBackSprite : clamperlFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    const bgPalette = displayed.palette.active
+      ? blendPaletteBanksToward(
+          battleBg.palette,
+          { r: 255, g: 255, b: 255 },
+          displayed.palette.coefficient,
+        )
+      : battleBg.palette;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      bgPalette,
+    );
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      state.age >= 2 && displayed.metallic.attackerGrayscale
+        ? grayscalePalette(attackerSprite.palette)
+        : attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (state.age >= 2 && displayed.metallic.metalBgLoaded) {
+      drawMetallicShineMasked(
+        fb,
+        attackerSprite,
+        view.attacker.geometry.spriteCorner,
+        displayed.metallic.bg1X,
+        displayed.metallic.bg1Y,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "CLAMPERL";
+    const playerSpecies = playerToOpponent ? "CLAMPERL" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CLAMPERL used" : "Foe CLAMPERL used",
+      "IRON DEFENSE!",
       99,
     );
     return;
