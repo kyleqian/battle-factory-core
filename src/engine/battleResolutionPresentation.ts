@@ -4,6 +4,7 @@ import {
   type BattleCommandPresentationState,
 } from "./battleCommandPresentation.ts";
 import { createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
+import { PARTY_SELECT_CLOSE_FIELD_HOLD_FRAMES } from "./battlePartySelect.ts";
 import type {
   BattleBoundary,
   BattleCommandDecision,
@@ -373,7 +374,14 @@ export type CreateBattleResolutionPresentationInput = Readonly<{
   beforeRules: FactoryFullTurnDecisionRules;
   transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>;
   fieldBoundary: BattleCommandPresentationState["field"];
-  confirmHandoff: Readonly<{
+  /**
+   * Required only for a confirmed `use-move` source decision (the fight-menu
+   * bounce handoff). A voluntary `switch` source decision skips the
+   * confirm-handoff entirely -- its resolution begins in the null-handoff
+   * confirm phase (the settled-field hold) that `advanceBattleResolutionConfirmHandoff`
+   * owns before the recall printstring's first glyph.
+   */
+  confirmHandoff?: Readonly<{
     fightDisplayCursor: 0 | 1 | 2 | 3;
     idleBounceElapsed: number;
   }>;
@@ -2692,7 +2700,9 @@ export function projectBattleResolutionCommands(
     0 | 1,
     { eventSequence: number; fromPartyIndex: BattlePartyIndex; toPartyIndex: BattlePartyIndex }
   >();
-  let lastSequence = -1;
+  // -3 so the ISSUES #78 voluntary-switch seam's synthesized recall receipts
+  // (sequences -2/-1) sort ahead of every real kernel event (sequence 0+).
+  let lastSequence = -3;
   let lastStatChange: Extract<
     BattleScriptSemanticEventPayload,
     { kind: "stat-stage-change" }
@@ -2943,10 +2953,15 @@ export function projectBattleResolutionCommands(
         // one controller callback; the receipt itself owns the relative
         // display edge.
         timing: Object.freeze({ minimumFrames: 1 as const }),
-        // See the "sprite-visibility" command type's own doc comment: only
-        // Cmd_various's VARIOUS_RETURN_OPPONENT_MON1/MON2 case is the real
-        // CONTROLLER_RETURNMONTOBALL receipt.
-        recall: event.provenance?.opcodeName === "B_SCR_OP_VARIOUS",
+        // See the "sprite-visibility" command type's own doc comment: the
+        // real CONTROLLER_RETURNMONTOBALL receipts are Cmd_various's
+        // VARIOUS_RETURN_OPPONENT_MON1/MON2 case and the voluntary-switch
+        // `Cmd_returnatktoball` sibling (PlayerHandleReturnMonToBall,
+        // battle_controller_player.c:2227-2242 -- both free the sprite AND
+        // SetHealthboxSpriteInvisible). The synthesized voluntary-switch
+        // receipt (ISSUES #78 seam) carries the returnatktoball provenance.
+        recall: event.provenance?.opcodeName === "B_SCR_OP_VARIOUS"
+          || event.provenance?.opcodeName === "B_SCR_OP_RETURNATKTOBALL",
       }));
       continue;
     }
@@ -3081,25 +3096,34 @@ export function createBattleResolutionPresentation(
   )) {
     throw new Error("battle resolution source decision is not legal for its source request");
   }
-  if (
-    input.sourceDecision.kind !== "use-move"
-    || input.sourceDecision.moveSlot !== input.confirmHandoff.fightDisplayCursor
-  ) {
+  if (input.sourceDecision.kind === "use-move") {
+    if (
+      input.confirmHandoff === undefined
+      || input.sourceDecision.moveSlot !== input.confirmHandoff.fightDisplayCursor
+    ) {
+      throw new Error(
+        "battle resolution confirm handoff requires the confirmed move cursor",
+      );
+    }
+  } else if (input.sourceDecision.kind !== "switch") {
     throw new Error(
-      "battle resolution confirm handoff requires the confirmed move cursor",
+      "battle resolution source decision must be a confirmed move or a voluntary switch",
     );
   }
   const field = Object.freeze({
     player: input.fieldBoundary.player,
     opponent: input.fieldBoundary.opponent,
   });
+  const events = input.sourceDecision.kind === "switch"
+    ? withSynthesizedSwitchRecallEvents(input.transition.events, field)
+    : input.transition.events;
   const segment = Object.freeze({
     field,
     beforeRules: input.beforeRules,
     afterRules: input.transition.state.rules,
-    events: input.transition.events,
+    events,
     commands: projectBattleResolutionCommands(
-      input.transition.events,
+      events,
       input.beforeRules.rulesContext,
       input.transition.state.rules.rulesContext,
       field,
@@ -3128,17 +3152,83 @@ export function createBattleResolutionPresentation(
       phase: "confirm-handoff" as const,
       phaseElapsed: 0,
     }),
-    confirmHandoff: Object.freeze({
-      stage: "move-selection-response" as const,
-      bounceReset: false,
-      ...input.confirmHandoff,
-    }),
+    confirmHandoff: input.sourceDecision.kind === "switch"
+      ? null
+      : Object.freeze({
+          stage: "move-selection-response" as const,
+          bounceReset: false,
+          fightDisplayCursor: input.confirmHandoff!.fightDisplayCursor,
+          idleBounceElapsed: input.confirmHandoff!.idleBounceElapsed,
+        }),
     field,
     pendingBoundary: boundary,
     pendingBattle: input.transition.state,
     forcedRequest,
     opponentTrainer: input.opponentTrainer ?? null,
   });
+}
+
+/**
+ * ISSUES #78 seam: the kernel deliberately treats the voluntary-switch
+ * `BattleScript_ActionSwitch` prelude as "presentation bookkeeping"
+ * (`factoryBattleScriptFullTurnDecision.ts`'s `runVoluntarySwitchAction`
+ * comment -- the RETURNMON text and the return-to-ball controller round-trip
+ * mutate no rules/RNG). The presentation therefore re-synthesizes those two
+ * receipts ahead of the kernel's own `draw-party-status-summary` event so the
+ * live voluntary-switch route shows the real recall message before "Go! X!",
+ * exactly as the forced-switch and direct-resolution tests already do. The
+ * negative sequences sort before every real kernel event
+ * (`docs/mid-battle-switch-presentation-ground-truth.md` §2: recall printstring
+ * 1044, return-to-ball 1077+).
+ */
+function withSynthesizedSwitchRecallEvents(
+  events: readonly BattleKernelSemanticEvent[],
+  field: BattleResolutionDisplayedField,
+): readonly BattleKernelSemanticEvent[] {
+  const outgoing = field.player;
+  const hpScale: 0 | 1 | 2 | 3 = (() => {
+    const ratio = (outgoing.hp * 4) / outgoing.maxHP;
+    return ratio >= 3 ? 0 : ratio >= 2 ? 1 : ratio >= 1 ? 2 : 3;
+  })();
+  return Object.freeze([
+    Object.freeze({
+      sequence: -2,
+      payload: Object.freeze({
+        kind: "message",
+        messageId: "STRINGID_RETURNMON",
+        substitutions: Object.freeze([]),
+        introBattler: 0 as const,
+        introHpScale: hpScale,
+      }),
+      provenance: Object.freeze({
+        programCounter: -1,
+        opcodeId: -1,
+        opcodeName: "B_SCR_OP_PRINTSTRING",
+        dispatcher: "synthesized-voluntary-switch",
+        sourceLabel: "BattleScript_ActionSwitch",
+        sourceStatementLine: -1,
+        instructionExecution: -1,
+      }),
+    }),
+    Object.freeze({
+      sequence: -1,
+      payload: Object.freeze({
+        kind: "set-battler-sprite-visibility",
+        battler: 0 as const,
+        invisible: true,
+      }),
+      provenance: Object.freeze({
+        programCounter: -1,
+        opcodeId: -1,
+        opcodeName: "B_SCR_OP_RETURNATKTOBALL",
+        dispatcher: "synthesized-voluntary-switch",
+        sourceLabel: "BattleScript_ActionSwitch",
+        sourceStatementLine: -1,
+        instructionExecution: -1,
+      }),
+    }),
+    ...events,
+  ]);
 }
 
 const CONFIRM_HANDOFF_NEXT = Object.freeze({
@@ -3168,8 +3258,33 @@ export function advanceBattleResolutionConfirmHandoff(
   state: BattleResolutionPresentationState,
 ): BattleResolutionPresentationState {
   const handoff = state.confirmHandoff;
-  if (state.lifecycle.phase !== "confirm-handoff" || handoff === null) {
+  if (state.lifecycle.phase !== "confirm-handoff") {
     return state;
+  }
+  if (handoff === null) {
+    // ISSUES #78: a voluntary-switch resolution enters the confirm phase with
+    // a null handoff -- no fight-menu bounce to walk. The phase is the
+    // settled-field hold between the party-menu close and the recall
+    // printstring (docs/mid-battle-switch-presentation-ground-truth.md §2:
+    // field idle 1035-1043), then the recall message's first glyph lands at
+    // the fixture's 1044 edge.
+    const nextElapsed = state.lifecycle.phaseElapsed + 1;
+    if (nextElapsed < PARTY_SELECT_CLOSE_FIELD_HOLD_FRAMES) {
+      return Object.freeze({
+        ...state,
+        lifecycle: Object.freeze({
+          phase: "confirm-handoff" as const,
+          phaseElapsed: nextElapsed,
+        }),
+      });
+    }
+    return Object.freeze({
+      ...state,
+      lifecycle: Object.freeze({
+        phase: "presenting" as const,
+        phaseElapsed: 0,
+      }),
+    });
   }
   const nextStage = CONFIRM_HANDOFF_NEXT[handoff.stage];
   if (nextStage === null) {

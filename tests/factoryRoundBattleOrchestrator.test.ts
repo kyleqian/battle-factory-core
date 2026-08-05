@@ -9,6 +9,7 @@ import {
   type BattleSubmittedDecision,
 } from "../src/engine/battleDecisionBoundary.ts";
 import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
+import { PARTY_SELECT_CLOSE_MENU_FRAMES } from "../src/engine/battlePartySelect.ts";
 import { createFactoryAiBattleHistory } from "../src/engine/factoryAiLiveDriver.ts";
 import { createBattleResolutionPresentation } from "../src/engine/battleResolutionPresentation.ts";
 import { createBattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
@@ -949,7 +950,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(state.battleCommandPresentation?.request.requestId).toBe(requestId);
   });
 
-  it("returns the exact legal voluntary row to the ordinary switch submission", () => {
+  it("returns the exact legal voluntary row to the ordinary switch submission through the close cadence", () => {
     let state = createStartedGeneratedBattle(RNG_SEED);
     state = advanceCommandToPhase(state, "action-menu");
     state = advanceFactoryRoundBattleCommand(state, new Set(["DOWN"]));
@@ -960,8 +961,30 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(state.battlePartySelect?.rows[2].legal).toBe(true);
     state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
     state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
-    expect(state.battle?.rules.rulesContext.battlers[0].partyIndex).toBe(2);
+    expect(state.battlePartySelect?.outcome).toEqual({
+      kind: "select",
+      partyIndex: 2,
+    });
+    // ISSUES #78 close cadence: the settled party menu stays on screen through
+    // the real menu-close span before the switch crosses the ordinary
+    // submission bridge (docs/mid-battle-switch-presentation-ground-truth.md
+    // §2 -- the recall printstring is not what closes the menu).
+    for (
+      let tick = 0;
+      tick < PARTY_SELECT_CLOSE_MENU_FRAMES - 1;
+      tick += 1
+    ) {
+      state = advanceFactoryRoundBattleCommand(state, new Set());
+      expect(state.battlePartySelect).not.toBeNull();
+    }
+    state = advanceFactoryRoundBattleCommand(state, new Set());
     expect(state.battlePartySelect).toBeNull();
+    expect(state.battleResolutionPresentation).not.toBeNull();
+    // The resolution owns the whole switch turn; its pending battle has the
+    // switched-in mon live at party index 2.
+    expect(state.battleResolutionPresentation!.pendingBattle
+      .rules.rulesContext.battlers[0].partyIndex).toBe(2);
+    expect(state.battle?.rules.rulesContext.battlers[0].partyIndex).toBe(2);
   });
 
   it("routes a live request through FIGHT slot 3 and seeds the next request from the controller-owned cursor", () => {

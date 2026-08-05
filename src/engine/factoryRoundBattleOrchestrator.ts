@@ -19,6 +19,7 @@ import {
 } from "./battleCommandPresentation.ts";
 import {
   advanceBattlePartySelect,
+  battlePartySelectClosePhase,
   createBattlePartySelectState,
   type BattlePartySelectState,
 } from "./battlePartySelect.ts";
@@ -1834,6 +1835,22 @@ export function advanceFactoryRoundBattleCommand(
         battlePartySelect: null,
       });
     }
+    // ISSUES #78 close cadence: after the SEND OUT confirm (fixture 963) the
+    // real party menu stays on screen through its fade-out (1019-1034) before
+    // the field idles 1035-1043 and the recall printstring lands at 1044
+    // (docs/mid-battle-switch-presentation-ground-truth.md §2). Hold the
+    // settled selector through the menu-hold/menu-fade span, then clear it and
+    // route the voluntary switch through the resolution presentation, whose
+    // null-handoff confirm phase owns the field-hold frames before the recall
+    // message. The party-menu fade pixels themselves are ISSUES #80 scope, so
+    // the settled frame is held and cut; the frame budget is the acceptance.
+    if (
+      selector.closeElapsed !== null
+      && battlePartySelectClosePhase(selector.closeElapsed) !== "field-hold"
+      && battlePartySelectClosePhase(selector.closeElapsed) !== "done"
+    ) {
+      return Object.freeze({ ...state, battlePartySelect: selector });
+    }
     const returned = returnBattleCommandPartySelection(
       presentation,
       selector.outcome.partyIndex,
@@ -1847,10 +1864,7 @@ export function advanceFactoryRoundBattleCommand(
       return fail("legal voluntary party selection did not submit");
     }
     const cleared = Object.freeze({ ...state, battlePartySelect: null });
-    return installDriveReceiptImmediately(
-      cleared,
-      driveTrainerBoundary(cleared, transition, history),
-    );
+    return beginCommandResolution(cleared, returned, transition, history);
   }
   const advanced = advanceBattleCommandPresentation(presentation, newKeys);
   const moveSelectionCursors = Object.freeze(

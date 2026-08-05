@@ -52,7 +52,49 @@ export type BattlePartySelectState = Readonly<{
     | Readonly<{ kind: "cancel" }>
     | Readonly<{ kind: "select"; partyIndex: BattlePartyIndex }>;
   elapsed: number;
+  /**
+   * Frames since the SEND OUT confirm edge (the tick that set `outcome`), or
+   * null before it. The voluntary-switch teardown keeps the settled menu on
+   * screen through the real menu-close cadence
+   * (`docs/mid-battle-switch-presentation-ground-truth.md` §2: menu visible
+   * to 1019, fade 1019-1034, field idle 1035-1043, recall printstring 1044)
+   * before the orchestrator clears the selector and hands the switch to the
+   * resolution presentation -- see `battlePartySelectClosePhase`.
+   */
+  closeElapsed: number | null;
 }>;
+
+export type BattlePartySelectClosePhase =
+  | "menu-hold"
+  | "menu-fade"
+  | "field-hold"
+  | "done";
+
+/** Settled menu through fixture frame 1018 (confirm at 963, closeElapsed 0-55). */
+export const PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES = 56;
+/** Menu fade-out window 1019-1034 (closeElapsed 56-71). */
+export const PARTY_SELECT_CLOSE_MENU_FADE_FRAMES = 16;
+/** Full menu-visible span 963-1034 (closeElapsed 0-71). */
+export const PARTY_SELECT_CLOSE_MENU_FRAMES =
+  PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES + PARTY_SELECT_CLOSE_MENU_FADE_FRAMES;
+/**
+ * Field idle 1035-1043 (closeElapsed 72-80) -- the resolution's
+ * null-handoff confirm phase holds the settled field before the recall
+ * printstring's first glyph lands at fixture frame 1044.
+ */
+export const PARTY_SELECT_CLOSE_FIELD_HOLD_FRAMES = 9;
+/** Full close span: confirm edge 963 -> recall first glyph 1044. */
+export const PARTY_SELECT_CLOSE_TOTAL_FRAMES =
+  PARTY_SELECT_CLOSE_MENU_FRAMES + PARTY_SELECT_CLOSE_FIELD_HOLD_FRAMES;
+
+export function battlePartySelectClosePhase(
+  closeElapsed: number,
+): BattlePartySelectClosePhase {
+  if (closeElapsed < PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES) return "menu-hold";
+  if (closeElapsed < PARTY_SELECT_CLOSE_MENU_FRAMES) return "menu-fade";
+  if (closeElapsed < PARTY_SELECT_CLOSE_TOTAL_FRAMES) return "field-hold";
+  return "done";
+}
 
 /**
  * Shares the source-composed voluntary selector's row/icon renderer with a
@@ -91,6 +133,7 @@ export function battlePartySelectStateForForcedParty(
     message: forced.message,
     outcome: null,
     elapsed: forced.elapsed,
+    closeElapsed: null,
   });
 }
 
@@ -145,6 +188,7 @@ export function createBattlePartySelectState(
     message: null,
     outcome: null,
     elapsed: 0,
+    closeElapsed: null,
   });
 }
 
@@ -181,7 +225,11 @@ export function advanceBattlePartySelect(
   state: BattlePartySelectState,
   newKeys: ReadonlySet<GbaButton>,
 ): BattlePartySelectState {
-  const next = Object.freeze({ ...state, elapsed: state.elapsed + 1 });
+  const next = Object.freeze({
+    ...state,
+    elapsed: state.elapsed + 1,
+    closeElapsed: state.closeElapsed === null ? null : state.closeElapsed + 1,
+  });
   if (state.outcome !== null) return next;
   if (state.message !== null) {
     return newKeys.has("A") || newKeys.has("B")
@@ -203,10 +251,15 @@ export function advanceBattlePartySelect(
     return Object.freeze({
       ...next,
       outcome: Object.freeze({ kind: "select", partyIndex: row.partyIndex }),
+      closeElapsed: 0,
     });
   }
   if (newKeys.has("B") || (newKeys.has("A") && state.cursor === "cancel")) {
-    return Object.freeze({ ...next, outcome: Object.freeze({ kind: "cancel" }) });
+    return Object.freeze({
+      ...next,
+      outcome: Object.freeze({ kind: "cancel" }),
+      closeElapsed: 0,
+    });
   }
   if (newKeys.has("A")) return Object.freeze({ ...next, submenuOpen: true });
   const direction = (["UP", "DOWN", "LEFT", "RIGHT"] as const)
