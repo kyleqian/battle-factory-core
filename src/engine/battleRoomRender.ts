@@ -36,6 +36,8 @@ import layout from "../data/gen/battle-room-layout.json" with { type: "json" };
 import tileset from "../assets/gen/battle-room-tileset.json" with { type: "json" };
 import npcs from "../assets/gen/battle-room-npcs.json" with { type: "json" };
 
+import { OBJ_EVENT_GFX, type ObjectEventGfxId, facilityTrainerGfxIdForClass } from "./factoryTrainerOverworldGfx.ts";
+
 interface TileEntry {
   tile: number;
   hFlip: boolean;
@@ -80,7 +82,7 @@ interface NpcSprite {
 
 const roomLayout = layout as RoomLayout;
 const roomTileset = tileset as RoomTileset;
-const roomNpcs = npcs as { player: NpcSprite; scientist: NpcSprite; opponent: NpcSprite; fisherman: NpcSprite };
+const roomNpcs = npcs as { player: NpcSprite; scientist: NpcSprite; opponent: NpcSprite; fisherman: NpcSprite; girl3: NpcSprite };
 
 function drawBlockLayer(fb: Uint8Array, entries: TileEntry[], screenX: number, screenY: number, fadeY: number): void {
   for (let i = 0; i < 4; i += 1) {
@@ -219,6 +221,32 @@ function drawOpponentMsgbox(
 }
 
 /**
+ * Walk-in sheet for a generated opponent's resolved OBJ_EVENT_GFX id
+ * (factoryTrainerOverworldGfx.ts, ported from SetBattleFacilityTrainerGfxId
+ * battle_tower.c:1161-1251). Only the gfx ids with an extracted sheet map to
+ * their own art; every other id intentionally renders the existing generic
+ * opponent sheet - a deterministic, documented fallback so generated
+ * walk-ins never crash or go blank. Not-yet-extracted gfx ids: HIKER,
+ * TUBER_M, MAN_3, RICH_BOY, MANIAC, RUNNING_TRIATHLETE_M/F, BLACK_BELT,
+ * MAN_5, CAMPER, PSYCHIC_M, GENTLEMAN, SCHOOL_KID_M, POKEFAN_M/F, EXPERT_M/F,
+ * YOUNGSTER, CYCLING_TRIATHLETE_M/F, NINJA_BOY, SAILOR, MAN_4, WOMAN_2,
+ * WOMAN_5, HEX_MANIAC, BEAUTY, LASS, TUBER_F, BOY_1 (asset debt - see the
+ * side-lane report).
+ */
+function opponentSheetForGfx(gfxId: ObjectEventGfxId): NpcSprite {
+  switch (gfxId) {
+    case OBJ_EVENT_GFX.GIRL_3:
+      return roomNpcs.girl3;
+    case OBJ_EVENT_GFX.BUG_CATCHER:
+      return roomNpcs.opponent;
+    case OBJ_EVENT_GFX.FISHERMAN:
+      return roomNpcs.fisherman;
+    default:
+      return roomNpcs.opponent;
+  }
+}
+
+/**
  * Renders the battle-room ENTRY window's scene at a given camera pan amount
  * (0 = initial/warp-landing origin, 80 = settled), decoy frame/facing, and
  * optional BG/OBJ fade coefficients (paletteFade.ts convention - 0 = no
@@ -250,7 +278,15 @@ export function renderBattleRoomEntryScene(
   drawNpcFrame(fb, roomNpcs.player, step.decoyFrame, decoyScreenPos, step.decoyHFlip, objFadeY);
   const opponent = opponentStep(elapsed);
   if (opponent.visible) {
-    const npc = state.encounter === "jenson" ? roomNpcs.fisherman : roomNpcs.opponent;
+    // trainerPresentation takes precedence: the generated battle-2 room
+    // carries BOTH the legacy "jenson" encounter label and the generated
+    // trainer identity (core.ts seeds INITIAL_BATTLE_2_ROOM_STATE +
+    // trainerPresentation), and the identity's class must drive the sheet.
+    const npc = state.trainerPresentation !== undefined
+      ? opponentSheetForGfx(facilityTrainerGfxIdForClass(state.trainerPresentation.facilityClassId))
+      : state.encounter === "jenson"
+        ? roomNpcs.fisherman
+        : roomNpcs.opponent;
     drawNpcFrame(fb, npc, opponent.frame, { x: opponentScreenX, y: opponent.screenY }, false, objFadeY);
   }
   drawOpponentMsgbox(fb, msgbox, battleRoomQuote(state));
