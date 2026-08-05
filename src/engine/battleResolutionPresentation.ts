@@ -933,6 +933,49 @@ function messageLines(
       B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
     });
   }
+  if (messageId === "STRINGID_PKMNWASCONFUSED") {
+    // BattleScript_MoveEffectConfusion (battle_scripts_1.s:3932-3936), the
+    // success tail of every direct EFFECT_CONFUSE move (Confuse Ray/Swagger/
+    // Flatter/Teeter Dance): `setmoveeffect MOVE_EFFECT_CONFUSION` +
+    // `seteffectprimary` then print this. {B_EFF_NAME_WITH_PREFIX} reads
+    // gEffectBattler (charmap.txt:368), which applySetMoveEffect set to the
+    // move's own target (battleScriptHitChainOpcode.ts:2841-2848,
+    // applyConfusionMoveEffect) -- so the message event carries that battler
+    // via prepareMessage's scoped effectBattler attach
+    // (factoryBattleScriptFullTurnDecision.ts). Unlike the status1 infliction
+    // quartet, confusion is a STATUS2 write with no set-battler-status-data
+    // receipt, so the generic fallback's pendingStatusMessageBattler bridge
+    // never fires -- this branch is the only route to resolve it.
+    if (event.payload.effectBattler === undefined) {
+      throw new Error(`battle resolution ${messageId} message has no effect-battler substitution`);
+    }
+    const effectBattler = singlesBattler(event.payload.effectBattler, `${messageId} effect battler`);
+    return resolveBattleStringLines(messageId, {
+      B_EFF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, effectBattler),
+    });
+  }
+  if (
+    messageId === "STRINGID_PKMNISCONFUSED"
+    || messageId === "STRINGID_PKMNHEALEDCONFUSION"
+    || messageId === "STRINGID_PKMNFATIGUECONFUSION"
+  ) {
+    // BattleScript_MoveUsedIsConfused / MoveUsedIsConfusedNoMore
+    // (battle_scripts_1.s:3796-3822, the CANCELER_CONFUSED_ACTION_CHECK
+    // admission handoffs) and BattleScript_ThrashConfuses (:3790-3794, the
+    // end-turn Thrash fatigue infliction). Each prints {B_ATK_NAME_WITH_PREFIX}
+    // reading gBattlerAttacker -- the confused battler trying to act / just
+    // snapped out / the thrashing battler -- which the frozen action
+    // snapshot's own attacker is (the acting battler owns the admission; the
+    // end-turn tick reassigns the attacker role per tick battler,
+    // battleEndTurnOrchestration.ts's enterTickBattlerContext).
+    if (actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no preceding action snapshot`);
+    }
+    const battler = singlesBattler(actionSnapshot.attacker, `${messageId.toLowerCase()} action snapshot`);
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+    });
+  }
   if (messageId === "STRINGID_PKMNWASDEFROSTED") {
     // executeDefrost (battleScriptMoveEndControllers.ts:133-168): a special
     // Fire-type hit thawing its own (still-current) target.

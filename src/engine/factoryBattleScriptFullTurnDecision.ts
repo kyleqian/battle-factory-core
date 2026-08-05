@@ -1257,6 +1257,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
           || operand.expression === "STRINGID_PKMNPREVENTSPARALYSISWITH"
           || operand.expression === "STRINGID_PKMNSXHADNOEFFECTONY"
           || operand.expression === "STRINGID_PKMNSXPREVENTSFLINCHING"
+          || operand.expression === "STRINGID_PKMNWASCONFUSED"
         ) && rules.selectorRoles.effectBattler !== null
           ? { effectBattler: rules.selectorRoles.effectBattler }
           : {}),
