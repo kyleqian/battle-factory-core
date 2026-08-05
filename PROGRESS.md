@@ -2,7 +2,39 @@
 
 Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
+
 ---
+
+## 946 — [supervisor fold, 2026-08-05] #73 WIN guide dismissal through Battle Room handoff exact **232/232**
+
+- **State:** master `599122c3`; guide dismissal, attendant/player walk, warp
+  fade, room fade-in, and battle-2 room handoff are exact at **232/232**
+  (frames 10406-10637). Regression gates re-held: NO/guide **213/213**,
+  canonical WIN **3590/3590**, LOSS **1943/1943**, LOSS decline **155/155**,
+  and generated command **128/128**. Smoke **347/347** and typecheck are
+  green; final union `npm test`/build follow this ledger commit.
+- **Did:** banked a 39-segment fixture that preserves the prior 37 segments
+  byte-for-byte, presses the held `Right this way, please!` once, and idles
+  through the Battle Room's stable quote. Existing generic postwin and room
+  machinery reproduced every timing boundary through the first opponent-art
+  pixel with no calibration or battle-number branch. A RAM probe identifies
+  the ROM's next trainer as LILIANA (id 9). The app's synthetic terminal stage
+  instead generates ABBIE (id 73), so divergence begins at 10638 solely in
+  next-opponent sprite/quote content. Audited and narrowed the terminal-party
+  overlay wording: Sketch is the general move-write exception, but no legal
+  Factory set carries it; Transform/Mimic do not persist to party identity.
+- **Next:** align the terminal comparison stage's round-RNG/opponent
+  provenance with the ROM without trainer-specific staging, then bind the
+  held battle-2 quote dismissal/setup. Separately exercise the WIN YES swap
+  branch and RECORD/REST/RETIRE choices; do not resume the retired canonical
+  Battle-2 turn march.
+- **Notes:** the generic owner is already at battleIndex 1 before the
+  guide/walk/warp. The far-side content gap is an exposure of #55's ambient
+  RNG/provenance model, not a presentation-timing failure. Evidence:
+  `docs/post-terminal-beyond-boundary-win-go-on-guide-dismiss-evidence.md`.
+
+---
+
 ## 945 — [bounded MAIN worker, 2026-08-05] #73 WIN swap-offer NO decision bound: `win-go-on-swap-offer-no-off` exact **213/213** twice fresh
 
 - **State:** master `89693d9d`, clean. The swap-offer NO decision + the generic
@@ -67,47 +99,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   only the fixture, ground-truth spec, and evidence note. No absolute frame,
   battle number, or fixture branch. LOSS record playback/free-roam and the
   RECORD/REST/RETIRE continuation choices remain separate.
-
----
-
----
-
-## 943 — [bounded MAIN worker, 2026-08-05] #73 WIN battle-style commentary page promoted into the canonical window: `win-terminal-window-off` exact **3590/3590** through held boundary 8212
-
-- **State:** master `a048faa0`, clean. Extended canonical gate **3590/3590**
-  twice fresh (frames 4623-8212, 7180 PNGs byte-identical both runs);
-  regressions re-held: LOSS **1943/1943**, LOSS decline **155/155**,
-  win-beyond **228/228**, GO ON scout **143/143**, type-page **93/93**,
-  style-page **92/92**. Full `npm test` **727 files / 6,972 passed / 1
-  skipped** and `npm run build` green.
-- **Did:** promoted the supervisor-rerun opponent-style commentary evidence
-  (`win-go-on-style-commentary-off` 92/92) into the canonical Battle Scene
-  OFF WIN terminal acceptance window. **Pure data change — zero src edits.**
-  `win-terminal-window-off`'s scenario switched from
-  `scratch-win-go-on-type-commentary-probe` to
-  `scratch-win-go-on-style-commentary-probe`; its segments are now
-  byte-for-byte the newer fixture's own full 31-segment / 9040-frame
-  schedule (prefix-proven before writing: the old canonical 29 segments ==
-  the prior fixture's full 29, and the prior fixture's 29 == the newer
-  fixture's first 29 — no invented input, nothing past the newer fixture's
-  single style-page A at 8138-8139, no press into the swap offer), and
-  `captureFrames` extend contiguously 4623..8212 (3590 captures) through the
-  genuine held `MSGBOX_DEFAULT` StyleUnrestrained boundary at 8212. The
-  existing `postwin` continuation machinery (`acceptPostwinDialoguePage` →
-  `dialoguePage 3` → `POSTWIN_SCOUTING_LINES[2]`) reproduced every boundary
-  with no calibration: held type page through 8141, the A press at
-  8138-8139 with no visual change, box clear 8142, the 69-frame "The
-  favorite battle style appears to / be free-spirited and unrestrained."
-  typing 8143-8211, and the wait-cursor hold from 8212.
-- **Next:** #73's remaining WIN boundaries are past the held battle-style
-  page — the swap offer/decision and the unexercised RECORD/REST/RETIRE
-  continuation choices, each needing its own new fixture A press. LOSS's
-  remaining boundary stays the record playback + free-roam movement (a real
-  overworld subsystem).
-- **Notes:** no absolute-frame/battle-number/fixture branch and no `src/` or
-  test edit. The canonical baseline 2686/2686 was re-run via the extension
-  itself (4623-7308 is a subset of the new dense span). The 29→31 segment
-  schedule change keeps the trace byte-for-byte the newer fixture's full
-  input prefix, so the oracle replay stays gapless. `PAPERCUT`: none new.
 
 ---

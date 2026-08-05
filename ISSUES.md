@@ -835,6 +835,18 @@ seam had masked:
   `docs/post-terminal-beyond-boundary-win-go-on-swap-offer-no-decision-evidence.md`.
   Remaining WIN work is the YES branch into the swap UI plus the unexercised
   RECORD/REST/RETIRE continuation choices.
+- **2026-08-05 WIN guide dismissal, walk, warp, and Battle Room handoff are
+  exact through the first next-opponent content pixel:**
+  `win-go-on-swap-offer-no-guide-dismiss-off` is **232/232** exact across
+  frames 10406-10637. The 39-segment fixture preserves the prior 37 segments
+  byte-for-byte, dismisses the held guide once, and binds the full generic
+  `messageClosing -> walking -> warpFade -> battleRoom` seam. The first
+  divergence at 10638 is content, not timing: the ROM's next trainer is
+  LILIANA (id 9, RAM-probed) while the synthetic terminal stage generates
+  ABBIE (id 73) from its modeled terminal RNG seed. The generic round owner
+  is already at battleIndex 1; aligning the synthetic stage's opponent/RNG
+  provenance, without fixture branching, is the remaining far-side task.
+  Evidence: `docs/post-terminal-beyond-boundary-win-go-on-guide-dismiss-evidence.md`.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
@@ -859,6 +871,13 @@ gender and shininess are the real exposure. The production anchor route loads
 `anchor-state.json` directly and never calls this function today, so nothing
 user-visible is wrong now; the boundary bites any future live-generation or
 personality-exact receipt (e.g. Gate-6 seeded end-to-end rounds).
+
+**New exposure (2026-08-05, #73):** after the WIN swap-decline route, room
+movement/warp timing remains pixel-exact, but the synthetic terminal stage
+generates battle 2's ABBIE (id 73) while the ROM has already generated LILIANA
+(id 9) from the ambiently advanced `gRngValue`. This is the same unresolved
+stream/provenance class at a round boundary; it is not evidence for a
+trainer-specific presentation branch.
 
 **Leads:** either extend the construction contract with an explicit
 interleaving representation (per-mon start cursors or a per-frame tick
