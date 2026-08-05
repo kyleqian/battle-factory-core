@@ -384,40 +384,29 @@ on the covered span** (trainer slide + swap edge + most of the quote's
 typing), with WIN's own probe constants banked
 (`docs/terminal-seam-win-window-probe.md`: antecedent `readyTick=4262`,
 `dismissTick=4608`, `frozenCursorAge=346`; +3 swap-edge shape RAM-confirmed
-identical to LOSS). Bounded short of the full 241-frame window by the
-GENUINE src bug now filed as ISSUES #75 (DESTIN's 23-char speechLose skips
-its own dismiss wait) — the remaining ~320 frames (settled quote hold +
-real dismiss + fade) wire up once #75 lands. Two scaffold-side bugs found
-and fixed during wiring are documented in the probe doc (held-cursor
-last-match lookup; frame0 from ack−38, since `TRAINER_SLIDE_TIMING=38` is
-calibrated against coarse dispatch, not RAM-precise dispatch).
+identical to LOSS). Bounded short of the full 241-frame window by a
+GENUINE src bug (DESTIN's 23-char speechLose skips its own dismiss wait).
+Two scaffold-side bugs found and fixed during wiring are documented in the
+probe doc (held-cursor last-match lookup; frame0 from ack−38, since
+`TRAINER_SLIDE_TIMING=38` is calibrated against coarse dispatch, not
+RAM-precise dispatch).
 
-## #75 — Button-message ready-vs-complete race: printable length >= minimumFrames-1 silently skips the dismiss wait (live-path crash)
-
-**Symptom:** any `advance: "button"` presentation message whose printable
-length is >= `minimumFrames - 1` (23 chars vs the 24-frame floor) can have
-`isBattleResolutionCommandComplete` fire before/at the tick
-`isBattleResolutionButtonMessageReady` first becomes true — the command
-auto-advances, silently skipping the button-dismiss wait entirely, and the
-downstream lifecycle then crashes (`finishBattle`/`assertSamePartyIdentity`)
-on a live WIN playthrough. DESTIN's `speechLose` ("PLEASE I NEED"/"SOME
-WATER") is exactly 23 printable chars — in range; the LOSS window's DESTIN
-`speechWin` (21 chars) is not, which is why the LOSS work never tripped it.
-
-**Confirmed:** reproduced WITHOUT the oracle by the 2026-08-04 WIN-wiring
-worker — full mechanism + fix-shape suggestion in
-`docs/terminal-seam-win-window-probe.md` §4. Independently corroborated by
-the R1 cursor-gating step, whose new waitCursor test deliberately used
-short lines to dodge "the pre-existing printableLength-vs-minimumFrames
-race longer production strings can hit" (its own comment,
-`tests/presentationTerminalSeamTrainerSlide.test.ts`).
-
-**The work:** fix the invariant in `battleResolutionPresentationRender.ts`/
-`battleResolutionPresentation.ts` (a button message is never complete
-without its dismiss input), red-verified Tier-1 pin on DESTIN's exact
-23-char lines, regression sweep (LOSS 236/236, WIN 65/65, generated
-canary 128/128, full suite). Then the WIN window's remaining ~320 frames
-unblock (see #73).
+**Button-message dismiss-skip race FIXED 2026-08-04 (`e88fb4a5`, was filed
+as ISSUES #75).** `isBattleResolutionCommandComplete` now defers to
+`isBattleResolutionButtonMessageReady` for any `message`+`advance:"button"`
+command, so the length-derived duration formula can never substitute for
+the real dismiss wait regardless of printable length vs `minimumFrames`.
+Red-verified on DESTIN's exact 23-char `speechLose` lines (doubles as the
+`minimumFrames-1` boundary case,
+`tests/presentationTerminalSeamTrainerSlide.test.ts`). Regression sweep:
+`loss-terminal-window-off` 236/236, `win-terminal-window-off` 65/65,
+`compare:differential -- battle-command-generated-off.json` 128/128,
+full `npm test` 721/721 files (6,926 passed/1 skipped, no existing pin
+depended on the old skip timing). **The WIN window's remaining ~320
+frames (settled quote hold + real dismiss + fade) are still unwired** —
+the fix unblocks it but `winTerminalWindowStage` extending past the
+now-fixed dismiss wait toward the full 241-frame window is not done this
+session; still open, next WIN-lane pickup.
 
 ## #74 — Pre-existing 1-frame drift on both generated-route dense windows, found during ISSUES #71 Slice-D insurance, unrelated to that step
 

@@ -1,3 +1,51 @@
+## 921 — [bounded MAIN worker, 2026-08-04 ~17:00] R4 MAIN: OFF-seam rest-offset landmine REMOVED (ISSUES #71 Slice-D follow-up); NEW pre-existing #74 filed, unrelated to this step
+
+- **State:** master at this docs commit (3 commits since 920:
+  `54979bf3` src fix + test flip, `2cf1e18b` RAM probe evidence,
+  `bed1bf1b` #74 filing). `npm test`/`npm run build` verified green at the
+  final commit (see that commit message for exact numbers).
+  `compare:differential -- battle-command-generated-off.json --base
+  1a12ce9c --summary`: **128/128 byte-identical**.
+- **Did:** removed `speciesFrontIdleRestOffset` from the two generated-route
+  OFF settle hooks (`drawGeneratedOpponentRelease`'s `coeff===0` branch +
+  `renderGeneratedBattleStartPlayerRelease`'s duplicate) per entry 920's
+  Slice-D-exposed landmine: Scene OFF never launches the front-sprite
+  animation task at all (`SKIP_FRONT_ANIM`), so these two hooks were baking
+  a nonzero ONIX/RATTATA `{+1,0}` the real game never shows. Left a
+  one-line comment citing ISSUES #71's Slice-D record at each site; the
+  four canonical hooks and `speciesIdleAnim.ts`'s ONIX hand-fit are
+  untouched (their ON-legacy species are all `{0,0}` regardless — never
+  wrong). Flipped the staged RATTATA pin in `tests/battleScene.test.ts` to
+  `{0,0}`, red-verified (fails against the old `+1` behavior with the src
+  edit stashed). Positive oracle evidence: cloned
+  `send-out-front-idle-rattata.json` to a `battle-scene-off` variant,
+  RAM-probed `gBattlerSpriteIds[1]` across the full 634-tick trace — flat
+  `x2=0`/`y2=0`/`SpriteCallbackDummy` for all 635 ticks
+  (`docs/rattata-off-seam-flat-settle-probe.md`); also corrected the probe
+  script's own stale "OFF plays send-out anims" docstring claim (same wrong
+  claim entry 920 retracted from PAPERCUTS.md). ISSUES #71 Slice-D record
+  addended with the removal + receipt; entry 894's deferred staged
+  non-ONIX settle check recorded as moot at this seam (no species-varying
+  behavior left to check — every species settles flat).
+- **Found, not fixed:** re-running the entry-890 §4 dense-window list as
+  insurance, 4/6 matched their documented baseline exactly
+  (`battle2-kabuto-sendout-dense` 151/151, `battle2-player-sendout-dense`
+  170/170, `sendout` 255/256, `battle2-jenson-sendout-text` 39/39); the
+  other 2 (`factory-arbitrary-intro-yoshi-off`,
+  `-magneton-off`) are each **1 frame short** of their documented baseline
+  (699/751 vs 700/751, frame 640; 702/751 vs 703/751, frame 621) — proven
+  **pre-existing and unrelated** to this step (identical reproduction at
+  `1a12ce9c` in a scratch worktree; `compare:differential` shows this
+  step's commit is 751/751 byte-identical to base for both traces at every
+  frame). Filed as **ISSUES #74** for the supervisor rather than
+  root-caused here (needs bisecting the R2/R3/R4 merges between entry 890
+  and 1a12ce9c, out of this step's scope).
+- **Next:** #74 needs a bisection/root-cause session. #71's remaining
+  main-lane share stays the §1e 56/58 move-window patch-site retirement +
+  the coordinated KABUTO/MAGBY/ONIX hand-fit retirements.
+- **Notes:** none beyond the #74 finding above.
+
+---
 ## 920 — [supervisor, 2026-08-04 ~16:15] R3 verified both lanes: Slice D closure RATIFIED (4 sources checked) + LOSS window CLOSED 236/236; R4 launching (OFF-seam settle honesty MAIN + WIN compare wiring SIDE)
 
 - **State:** master at the side-R3 merge + this docs commit. LOSS
