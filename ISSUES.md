@@ -36,12 +36,25 @@ is idle. Tier-1 pins + render smoke landed; `compare:differential` 579/579
 byte-identical vs base across the battle-command and forced-switch windows.
 **Remainder:** (4) recall-side span — `STRINGID_RETURNMON` still shows
 `max(24,~35)≈35f` instead of the real 82f hold (the outgoing mon's
-return-to-ball scale-up + teardown is unmodeled); and the scout's
-`scratch-mid-battle-switch-dense-*-off` traces are not yet wired into
-`tools/compare/appTrace.ts` (needs an app stage positioning the orchestrator
-at the fixture's fight-menu-open checkpoint), so the §6 dense-compare
-acceptance for slices 1-3 is unexecuted — Tier-1 + differential cover the
-change, pixel compare remains.
+return-to-ball scale-up + teardown is unmodeled); and the §6 dense-compare
+acceptance for slices 1-3 is still unexecuted for a *second* reason beyond
+wiring: the app stage now exists
+(`mid-battle-switch-dense-off` in `tools/compare/appTrace.ts`, committed
+`16c65185`) and deterministically positions the orchestrator at the fixture's
+frame-0 fight-menu-open checkpoint with the staged RATTATA x3 / SPLASH parties,
+replaying the fixture's verbatim segments through the live route (turn-1 double
+SPLASH byte-near-exact at 48px residual; the party-menu voluntary switch
+completes at the real frame), but the orchestrator's live voluntary-switch path
+(`advanceFactoryRoundBattleCommand`'s party-select branch) hands the switch
+transition straight to `installDriveReceiptImmediately`, which installs the next
+command presentation and **drops the kernel's switch / switch-in-animation /
+message events** — so the app shows the turn-2 action menu the moment the party
+menu closes, with no recall / "Go!" / materialize / healthbox-slide frames to
+compare. No byte-exact span exists in the fixture's 1000-1460 window until that
+presentation seam builds a `battleResolutionPresentation` from the switch events
+(the slices 1-3 machinery is currently only exercised by forced-switch and
+direct Tier-1 resolution tests). That seam is the gating item for the §6 dense
+acceptance, alongside slice 4's recall-hold/return-to-ball work.
 
 ## #80 — Live play: in-battle party/switch menu is scaffolding-grade
 

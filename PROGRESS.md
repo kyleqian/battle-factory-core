@@ -5,6 +5,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 955 — [bounded MAIN worker, 2026-08-05] ISSUES #78 dense-compare app stage wired; dense acceptance blocked by the live voluntary-switch presentation seam
+
+- **State:** master `16c65185`, clean. Typecheck green; `battle-command-generated-off`
+  regression 128/128. Full `npm test` + `npm run build` gate green at the docs commit.
+- **Did:** `mid-battle-switch-dense-off` app stage
+  (`tools/compare/appTrace.ts`): installs a staged Level-50 RATTATA x3 / SPLASH
+  battle (`createFactoryFullTurnBattleState`, the same seam battle2-off-turn1 and
+  the terminal scaffolds use — the frontier corpus has no RATTATA/Splash set)
+  into a real orchestrator at the scratch-mid-battle-switch-dense-a-off fixture's
+  frame-0 fight-menu-open checkpoint, replaying the fixture's verbatim segments
+  through the live route.
+- **Probe (dense-a, seeded):** the stage reaches the checkpoint deterministically
+  and turn-1's fight menu is byte-near-exact (48px systematic residual, opponent
+  RATTATA sprite ~24px + top-left 24px); the party-menu voluntary switch completes
+  at the real frame (party select created 763, RIGHT→slot 1 at 883, SEND OUT
+  submenu 923, confirm 963).
+- **Blocker found (reported to ISSUES #78):** the orchestrator's live voluntary
+  switch path (`advanceFactoryRoundBattleCommand`'s party-select branch) hands the
+  switch transition to `installDriveReceiptImmediately`, which installs the next
+  command presentation and **drops the kernel's switch / switch-in-animation /
+  message events** — the app shows the turn-2 action menu the moment the party
+  menu closes, no recall/"Go!"/materialize/healthbox-slide frames exist to compare.
+  No byte-exact span in the fixture's 1000-1460 window; the slices 1-3
+  `battleResolutionPresentation` machinery is only exercised by forced-switch and
+  direct Tier-1 tests. A red probe spec was authored then removed (run's no-red-commits
+  convention); the dense spec waits on that seam + slice 4.
+- **Next:** wire the voluntary-switch presentation seam (build a
+  `battleResolutionPresentation` from the switch events in the party-select branch,
+  mirroring `beginCommandResolution`), then author the dense spec over 1137-1255
+  (+ pre-recall prefix) — then slice 4's recall-hold/return-to-ball (82f hold).
+
+---
+
 ## 954 — [bounded MAIN worker, 2026-08-05] ISSUES #55 wiring landed: win-terminal scaffold produces the ROM's battle-2 LILIANA byte-for-byte
 
 - **State:** master `67211ca2`, clean. Typecheck green; smoke 7/347 green;
