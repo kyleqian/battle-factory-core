@@ -346,6 +346,126 @@ twice-run byte-identical. `npm run compare -- loss-terminal-window-off
 --summary`: 236/236, unaffected. Full `npm test`: 721 files, 6927 passed/1
 skipped. `npm run build`: green.
 
+## 6. 2026-08-05 SIDE-lane session: the §5 party-identity mismatch is fixed
+scaffold-side (generic, both windows); a second, much larger, unrelated gap
+now blocks any further extension
+
+**§5's crash is fixed, scaffold-side, `tools/compare/appTrace.ts` only.**
+Both `TERMINAL_SEAM_SCAFFOLD_TRAINER` and `TERMINAL_SEAM_SCAFFOLD_PLAYER`
+(the two synthetic placeholder configs `winTerminalWindowStage`/
+`lossTerminalWindowStage` feed into `createFactoryFullTurnBattleState` to
+build each window's `terminalBattle`) had `hp: 200` — a full-health value
+with no relationship to either window's own real orchestrator-generated
+party. `finishBattle`'s `deriveBattleResolutionFromTerminalBoundary`
+(`battleResolutionAdapter.ts`'s `deriveBattleParty`) carries `id`/`maxHp`
+from the real party (`state.round.rules.currentOpponent.party`/
+`playerParty` — confirmed by direct construction this session: for this
+scaffold's fixed inputs, `rngValue: 4` generates player
+GRANBULL(165)/HARIYAMA(251)/MACHAMP(186) and opponent
+ARON(143)/DELIBIRD(138)/GRIMER(162), maxHp in parens — species neither
+window's own text ever depends on, since both configs' battlers are
+recalled/invisible for their entire respective capture windows) but overlays
+`hp` from the synthetic party. `200 > 143` (WIN's opponent) is exactly §5's
+crash; the same shared `TERMINAL_SEAM_SCAFFOLD_TRAINER`/`_PLAYER` `hp: 200`
+would equally throw for LOSS once extended (`200 > 143` opponent, `200 >
+165` player) — the "same structural reason" this doc's own summary already
+named.
+
+Fix: `hp: 0` on both configs (`maxHp` left at 200 — discarded by
+`deriveBattleParty` regardless, since the derived party's `maxHp` always
+comes from the real preBattle party, never from this synthetic one). `0` is
+the one value that satisfies `assertBattleMon`'s `[0, maxHp]` bound for
+*any* positive real `maxHp`, so it needs no knowledge of what the real
+orchestrator generates — and it is independently the narratively correct
+terminal value: both configs play the battler that each window's own event
+chain (commands 0-3, replayed before frame 0) narrates fainting (WIN:
+battler 1, the opponent's antecedent self-KO; LOSS: battler 0, this
+MURKROW's own Explosion self-KO). One mechanism, no WIN/LOSS branch, exactly
+per the step brief. `TERMINAL_SEAM_WIN_SCAFFOLD_PLAYER` (WIN's visible,
+pixel-verified 115/115 DUSCLOPS) is untouched — it already satisfies the
+bound today (115 ≤ the real GRANBULL's 165) and is the one placeholder that
+*is* actually rendered, so its value stays pinned to the oracle's own
+healthbox, not the real (disjoint, invisible) party.
+
+**Verified directly** (repro: `tools/compare/traces/win-terminal-window-off
+.json`'s last segment `{frames: 1, buttons: ["A"]}` → `{frames: 2, buttons:
+["A"]}` plus `captureFrames` extended by one to 5012; same edit to
+`loss-terminal-window-off.json`'s own last segment, `captureFrames`
+extended to 3232): with the `hp: 0` fix, **neither window throws anymore**
+at its own dismiss-press-completion tick (WIN 5012, LOSS 3232) — §5's crash
+is gone, confirmed by direct reproduction, not inference.
+
+**But a second, unrelated, much larger gap replaces it: the post-`finishBattle`
+presentation this scaffold hands off to does not model this fixture's real
+timing at all.** Neither window can actually render past its handoff tick
+today, for a completely different reason than party identity:
+
+- **WIN** (`round.rules.phase` → `"presentingBattleWin"`, not a terminal
+  round outcome — battle index 0 of 7, not battle 6): `render()`
+  (`core.ts`) only special-cases `factoryRoundBattleOrchestrator` state via
+  `battleStartIntro`/`battleResolutionPresentation`/`battleCommandPresentation`/
+  `factorySwap`/`postwin`; none of those fire for `"presentingBattleWin"`
+  with no `postwin` populated, so it falls through to whatever the generic
+  map/overworld path draws for this synthetic scenario's placeholder
+  location — a **solid black frame** at tick 5012, where the oracle is still
+  pixel-identical to the held quote (RAM-ahead-of-pixel per §3's own ground
+  truth — the real fade doesn't even *start* until tick 5018, doesn't reach
+  the battle-room flash until 5079). 38247/38400px differ (99.60%),
+  `ssimMean≈0.0001` — not a near-miss, a completely different screen.
+- **LOSS** (`round.rules.phase` → `"roundLost"`, which *is* one of
+  `terminalCommandForRound`'s two recognized terminal phases): `render()`'s
+  `factoryTerminal` branch **does** fire here — `createFactoryTerminalPresentation`
+  is a real, already-implemented feature. But its modeled timing has no
+  relationship to this fixture's actual recorded schedule: captured ticks
+  3232-3259 (the 28 ticks immediately after the dismiss's 2nd press) show our
+  app's `factoryTerminal` presentation racing all the way through its own
+  fade to a **fully-rendered Battle Factory lobby/counter-room scene** by
+  tick 3259, while the oracle at the same tick is still mid-fade on the held
+  quote text ("I AM ABOUT TO / OVERHEAT", fading) — the *committed fixture's
+  own recorded schedule* (`tools/battle-lab/loss-terminal-explosion-dusclops-off.json`,
+  `trace.segments`) doesn't even reach its own final capture until +800 idle
+  ticks past this same dismiss press. Diff % drifts from 99.6% down to ~86%
+  over those 28 ticks (both screens are trending darker as they fade, which
+  mechanically narrows SSIM even though the actual content is unrelated) —
+  not a calibration nudge, a different animation on a different clock
+  entirely.
+
+**This is not a repeat of either §4 or the party-identity bug above**: no
+crash, no party/HP shape involved. It's a timing/feature mismatch in a
+substantial, separate presentation subsystem (`factoryTerminalPresentation.ts`/
+`postwin.ts`/`core.ts`'s render dispatch for the between-battle "return to
+the counter room" sequence) that has never been calibrated against either of
+these two fixtures' own multi-hundred-tick real schedules. Diagnosing it
+properly needs dense oracle re-probing of the post-dismiss span on both
+fixtures (WIN: ticks 5012-5079+ per this doc's own §2 citations already on
+file; LOSS: ticks 3232-4938 per the committed fixture's own recorded
+schedule, §0 above) to characterize the real per-tick sequence before it can
+be compared against what `factoryTerminalPresentation.ts`/`postwin.ts`
+currently model — multi-probe, likely multi-session work, not a data-file
+extension. Out of this session's remaining budget; flagged for whoever picks
+up the fade/post-dismiss span next.
+
+**Not fixed here**: extending either trace past its current bound
+(WIN 389/389 at frame 5011, LOSS 236/236 at frame 3231) requires closing the
+gap above, which is a `src/` presentation-timing task, not a scaffold data
+edit — out of this lane's authority this step. Both trace files are
+byte-identical to their pre-session committed state (`git diff --stat
+tools/compare/traces/` shows no changes this session); only
+`tools/compare/appTrace.ts`'s two placeholder `hp` fields changed.
+
+**Verification**: `git diff --stat` for this session's changes:
+`tools/compare/appTrace.ts` (`TERMINAL_SEAM_SCAFFOLD_TRAINER`/`_PLAYER`
+`hp: 200` → `hp: 0`, plus the comment explaining why) + this doc's §6. Zero
+`src/`/`tests/`/`tools/compare/traces/` edits. `npm run compare --
+win-terminal-window-off --summary`: 389/389, twice-run byte-identical
+manifests (modulo `generatedAt`). `npm run compare -- loss-terminal-window-off
+--summary`: 236/236, twice-run byte-identical manifests (modulo
+`generatedAt`). Full `npm test`: 721 files, 6927 passed/1 skipped. `npm run
+build`: green. The two mid-investigation trace extensions used to reproduce
+and characterize the post-handoff gap above were reverted before commit —
+confirmed via `diff` against the pre-session committed files showing no
+differences.
+
 ## Verification
 
 - `git diff --stat` for this session's changes: `docs/` (this file, new) +
