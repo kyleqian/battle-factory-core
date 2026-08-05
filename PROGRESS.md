@@ -4,6 +4,51 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 938 — [bounded MAIN worker, 2026-08-05] #73 LOSS decline continuation CLOSED end-to-end: generic NO-decline farewell through free-roam, new canonical trace exact **155/155** twice fresh
+
+- **State:** master `39b30079` + `b6a5f9fa` + this docs commit, clean. New
+  `loss-terminal-decline-continuation-off` **155/155** twice fresh,
+  PNG-hash byte-identical on both sides; regressions re-held: LOSS **1943/1943**,
+  WIN **890/890**, win-beyond **228/228**; smoke 347/347; full `npm test` 727
+  files / **6,972 passed / 1 skipped** (+2 Tier-1) and `npm run build` green
+  (final gates below).
+- **Did:** closed #73's LOSS-decline gap by consuming `recordChoice` — the
+  shared `advanceFactoryTerminalRecordPrompt` now stores the decline edge
+  (the tick the record menu's NO is chosen, age 1757 = frame 4989 under the
+  app's release-age convention) and a second-A dismiss; every later clock is
+  edge-relative per `BattleFrontier_BattleFactoryLobby/scripts.inc:81-94`
+  (`EndRecordBattle`: `msgbox Text_LookForwardToNextVisit, MSGBOX_DEFAULT;
+  closemessage; setvar VAR_TEMP_CHALLENGE_STATUS, 255; releaseall`).
+  `factoryTerminalRender` draws the decline span: YES/NO window clears at
+  edge+1 (frame 4990), box wipes edge+3 (4992), the 35-glyph "We look
+  forward to your next visit." types 1 glyph/tick from edge+4 (4993, last
+  glyph edge+38, held from edge+39 with NO wait-cursor — measured), the
+  farewell's own A dismiss registers at edge+102 (5091), and the box closes
+  into the bare Lobby field at dismiss+2 (5093) — the field-only frame
+  `toEqual(renderFactoryTerminalField())`. NO only; the YES/cancel branches
+  stay unconsumed (record playback + GO ON selection remain out of scope).
+  Focused 1-tick scratch compares pinned the boundaries first (4988-5030
+  **43/43**, 5088-5094 **7/7**). New canonical trace
+  `tools/compare/traces/loss-terminal-decline-continuation-off.json`:
+  segments byte-for-byte the committed scratch-loss-beyond-boundary-probe
+  schedule, `captureFrames` dense 4939..5093 (155). Two red-verified Tier-1
+  pins (decline state machine + decline render, both fail with the old
+  unconsumed-recordChoice source stashed). The evidence trace
+  `loss-beyond-boundary-off` is unchanged: 162/183, all 183−162 residual
+  frames are the fixture's own post-5174 walk samples (out of scope — no
+  overworld movement subsystem built, per brief).
+- **Next:** #73's remaining LOSS-terminal boundary is the record-YES
+  playback + free-roam movement itself (a real overworld subsystem); WIN's
+  remaining boundary is the GO ON/RECORD/REST/RETIRE selection. Both need
+  new fixtures; the decline continuation here is exact end-to-end through
+  the idle free-roam field (5093+ static frames already byte-exact).
+- **Notes:** source-relative ages only, no absolute-frame/battle/fixture
+  branch; LOSS-profile decline fields are inert in WIN (record prompt never
+  reached in WIN windows). No new assets, no extractor change; the decline
+  renders through the existing record-prompt drawer + message-box
+  compositor. `PAPERCUT`: none new.
+
+---
 ## 937 — [bounded MAIN worker, 2026-08-05] #73 WIN slice 4 CLOSED end-to-end: `win-terminal-window-off` extended and exact **890/890** through fixture endpoint 5512
 
 - **State:** master `77f3787a` + this docs commit, clean. Committed windows
@@ -75,51 +120,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   both already matched pre-fix via the shared record-prompt drawer. `npm run
   compare -- loss-terminal-window-off` now exercises the full 1943-frame
   contiguous span (the oracle client auto-batches past its 256-capture cap).
-
----
-## 935 — [bounded MAIN worker, 2026-08-04] #73 LOSS slice 2 CLOSED end-to-end: player residual removed, `loss-terminal-window-off` extended and exact **839/839** through frame 3834
-
-- **State:** master `85a69357` + this entry's commit, clean. Supervisor final
-  gate: full `npm test` **727 files / 6,968 passed / 1 skipped** and
-  `npm run build` green; worker smoke 347/347. Committed windows
-  twice-stable: LOSS **839/839**
-  (frames 2996-3834, byte-identical across two fresh runs), WIN **503/503**.
-  Two red-verified Tier-1 pins (both fail with the old values stashed).
-- **Did:** finished #73 LOSS slice 2 by removing the sole remaining player
-  residual and extending the committed dense window through frame 3834.
-  (1) **Player OAM anchor** — the generic Lobby object anchor's player-only
-  `+1px x2` sub-pixel offset was erroneous: it drew the sprite at (113,56),
-  reproducing the ~133px residual exactly; removed so every object event
-  anchors at `tile*16 - cameraOriginPx` (player (4,8) + camera {x:-48,y:56}
-  → (112,56)). The source-derived field + that player match oracle frame
-  3365 with 0 differing pixels. (2) **Page-0 first-glyph age** —
-  `FACTORY_LOSS_TERMINAL_PROFILE.firstPageTextAge` corrected **143 → 142**:
-  the prior slice's scratch windows only covered page-1's span (3534+); a
-  dense oracle re-probe of frames 3373-3375 shows the box opens at terminal
-  age 141 and page-0's "T" lands at age 142, so the old 143 delayed every
-  page-0 typing (3374-3403) + cursor phase (3412-3529) frame by one tick.
-  The committed trace's segments were restored to the fixture's own real
-  schedule through cumulative 3834 (segments 0..41, buttons unchanged — the
-  committed window's tail had truncated the fixture at segment 39/3345) and
-  `captureFrames` extended contiguously 2996..3834 (839 frames). No
-  generated asset/extractor edit: `factory-lobby-terminal-npcs.json` already
-  carried the exact north-facing Brendan frame 1 + palette (the supervisor's
-  evidence; the "different player asset needed" claim is retracted).
-  Tier-1 pins: player-unique pixels at source-derived positions
-  (renderField, `factoryTerminalPresentation.test.ts`) + page-0 timing
-  (`firstPageTextAge === 142`, visibleChars 0/1/2 at ages 141/142/143).
-- **Next:** slice 2 is closed end-to-end. Slice 3 (restore/save + record
-  prompt, whose 4054+ box-clear residual is already measured ~1,350px)
-  rides on the corrected profile; slice 4 is WIN PreBattleRoom/heal.
-- **Notes:** page-0 typing was never oracle-verified before this step (the
-  scratch windows started at 3534), which is why the 143 constant survived;
-  both corrections are pure terminal-presentation logic, inert in WIN
-  (`exchangeNextPageVisualDelay`/roundWon profile untouched) — WIN re-ran
-  503/503 after the change. Frame 3834 = the fixture's real page-1 A
-  dismiss (terminal age 602), exactly slice 2's end; frame 3835+ is slice
-  3. No absolute-frame/battle/fixture branch added. The bounded worker hit
-  its cap during its redundant final full-suite run and produced no commit;
-  the supervisor audited the diff, reran both committed oracle windows plus
-  the full suite/build, and committed the intact bounded result.
 
 ---

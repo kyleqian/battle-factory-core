@@ -705,6 +705,35 @@ seam had masked:
   record-accept/decline branch through to free-roam, which needs a new
   fixture per `docs/post-terminal-return-to-lobby-ground-truth.md` §5 slice
   5, same as LOSS slice 5).
+- **2026-08-05 LOSS decline continuation CLOSED end-to-end: `recordChoice`
+  is no longer a dead-end — the generic NO branch drives the source
+  `EndRecordBattle` farewell through the free-roam Lobby field, and a new
+  canonical trace `loss-terminal-decline-continuation-off` is exact
+  **155/155** twice fresh (PNG-byte-identical), LOSS/WIN/win-beyond
+  re-held 1943/1943 + 890/890 + 228/228.** The shared
+  `advanceFactoryTerminalRecordPrompt` now stores the decline edge (the
+  tick the record menu's NO is stored; age 1757 = frame 4989 under the
+  app's release-age convention) plus the farewell's own second-A dismiss,
+  and `factoryTerminalRender` draws the span edge-relative per
+  `BattleFrontier_BattleFactoryLobby/scripts.inc:81-94`: YES/NO window
+  clears edge+1 (frame 4990), box wipes edge+3 (4992), the 35-glyph
+  "We look forward to your next visit." types 1 glyph/tick from edge+4
+  (4993), holds from edge+39 with **no wait-cursor** (measured zero red
+  down-arrow pixels across the whole hold), the second real A registers at
+  edge+102 (5091), and the box closes into the bare Lobby field at
+  dismiss+2 (5093) — the field-only frame `toEqual(renderFactoryTerminalField())`,
+  and every later static frame is byte-exact with no work. Focused 1-tick
+  scratch compares pinned the boundaries first (4988-5030 **43/43**,
+  5088-5094 **7/7**); the canonical trace's segments are byte-for-byte the
+  committed scratch-loss-beyond-boundary-probe schedule with `captureFrames`
+  dense 4939..5093 (155). The evidence trace `loss-beyond-boundary-off` is
+  unchanged (162/183 — every residual is the fixture's own post-5174 walk
+  samples, out of scope). NO only; the YES and B/cancel branches stay
+  unconsumed (record playback + free-roam movement + WIN's GO ON/RECORD/REST/
+  RETIRE selection remain the open boundaries). Two red-verified Tier-1 pins
+  (decline state machine + decline render; both fail with the old source
+  stashed); full `npm test` 727 files / 6,972 passed / 1 skipped and
+  `npm run build` green.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 

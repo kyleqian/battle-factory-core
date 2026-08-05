@@ -1,3 +1,50 @@
+## 935 — [bounded MAIN worker, 2026-08-04] #73 LOSS slice 2 CLOSED end-to-end: player residual removed, `loss-terminal-window-off` extended and exact **839/839** through frame 3834
+
+- **State:** master `85a69357` + this entry's commit, clean. Supervisor final
+  gate: full `npm test` **727 files / 6,968 passed / 1 skipped** and
+  `npm run build` green; worker smoke 347/347. Committed windows
+  twice-stable: LOSS **839/839**
+  (frames 2996-3834, byte-identical across two fresh runs), WIN **503/503**.
+  Two red-verified Tier-1 pins (both fail with the old values stashed).
+- **Did:** finished #73 LOSS slice 2 by removing the sole remaining player
+  residual and extending the committed dense window through frame 3834.
+  (1) **Player OAM anchor** — the generic Lobby object anchor's player-only
+  `+1px x2` sub-pixel offset was erroneous: it drew the sprite at (113,56),
+  reproducing the ~133px residual exactly; removed so every object event
+  anchors at `tile*16 - cameraOriginPx` (player (4,8) + camera {x:-48,y:56}
+  → (112,56)). The source-derived field + that player match oracle frame
+  3365 with 0 differing pixels. (2) **Page-0 first-glyph age** —
+  `FACTORY_LOSS_TERMINAL_PROFILE.firstPageTextAge` corrected **143 → 142**:
+  the prior slice's scratch windows only covered page-1's span (3534+); a
+  dense oracle re-probe of frames 3373-3375 shows the box opens at terminal
+  age 141 and page-0's "T" lands at age 142, so the old 143 delayed every
+  page-0 typing (3374-3403) + cursor phase (3412-3529) frame by one tick.
+  The committed trace's segments were restored to the fixture's own real
+  schedule through cumulative 3834 (segments 0..41, buttons unchanged — the
+  committed window's tail had truncated the fixture at segment 39/3345) and
+  `captureFrames` extended contiguously 2996..3834 (839 frames). No
+  generated asset/extractor edit: `factory-lobby-terminal-npcs.json` already
+  carried the exact north-facing Brendan frame 1 + palette (the supervisor's
+  evidence; the "different player asset needed" claim is retracted).
+  Tier-1 pins: player-unique pixels at source-derived positions
+  (renderField, `factoryTerminalPresentation.test.ts`) + page-0 timing
+  (`firstPageTextAge === 142`, visibleChars 0/1/2 at ages 141/142/143).
+- **Next:** slice 2 is closed end-to-end. Slice 3 (restore/save + record
+  prompt, whose 4054+ box-clear residual is already measured ~1,350px)
+  rides on the corrected profile; slice 4 is WIN PreBattleRoom/heal.
+- **Notes:** page-0 typing was never oracle-verified before this step (the
+  scratch windows started at 3534), which is why the 143 constant survived;
+  both corrections are pure terminal-presentation logic, inert in WIN
+  (`exchangeNextPageVisualDelay`/roundWon profile untouched) — WIN re-ran
+  503/503 after the change. Frame 3834 = the fixture's real page-1 A
+  dismiss (terminal age 602), exactly slice 2's end; frame 3835+ is slice
+  3. No absolute-frame/battle/fixture branch added. The bounded worker hit
+  its cap during its redundant final full-suite run and produced no commit;
+  the supervisor audited the diff, reran both committed oracle windows plus
+  the full suite/build, and committed the intact bounded result.
+
+---
+
 ## 934 — [bounded MAIN worker, 2026-08-04] #73 slice-2 page-transition residual resolved: `nextPageVisualDelay` 6→2 makes the whole LOSS page-1 window exact
 
 - **State:** master `44ce0508` + this docs commit, clean. Full `npm test`
