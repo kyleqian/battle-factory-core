@@ -11,7 +11,7 @@ import spriteCoords from "../src/assets/gen/party-menu-sprite-coords.json" with 
 // ♀/♂ printed on the real cards use exactly these pixel patterns and colors).
 
 const frameNames = statusIcons.statusIcons.frameNames;
-const frames = statusIcons.statusIcons.frames;
+const frames: Record<string, { columns: number; rows: number; tiles: number[][] }> = statusIcons.statusIcons.frames;
 
 function nonZeroCount(tiles: number[][]): number {
   return tiles.flat().filter((v) => v !== 0).length;
