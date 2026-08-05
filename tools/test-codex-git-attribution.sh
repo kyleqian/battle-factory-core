@@ -42,6 +42,19 @@ grep -qx 'Agent-effort: unknown' <<<"$unknown_message"
 
 (
   source "$run_root/tools/codex-git-attribution.sh"
+  agent_git_attribution_enable "$run_root" "OpenCode" "deepseek/deepseek-v4-flash" ""
+  git -C "$test_repo" "${commit_args[@]}" \
+    -m "DeepSeek worker attribution" \
+    -m $'Generated-by: Codex\nAgent-model: gpt-5.4'
+)
+
+opencode_message="$(git -C "$test_repo" log -1 --format=%B)"
+grep -qx 'Generated-by: OpenCode' <<<"$opencode_message"
+grep -qx 'Agent-model: deepseek/deepseek-v4-flash' <<<"$opencode_message"
+! grep -qE '^Generated-by: Codex$|^Agent-model: gpt-5\.4$|^Agent-effort:' <<<"$opencode_message"
+
+(
+  source "$run_root/tools/codex-git-attribution.sh"
   export GIT_CONFIG_COUNT=1
   export GIT_CONFIG_KEY_0=color.ui
   export GIT_CONFIG_VALUE_0=never
@@ -62,4 +75,4 @@ claude_message="$(git -C "$test_repo" log -1 --format=%B)"
 grep -qx 'Co-Authored-By: Claude <noreply@anthropic.com>' <<<"$claude_message"
 ! grep -qE '^Generated-by: Codex$|^Agent-model:|^Agent-effort:' <<<"$claude_message"
 
-echo "Codex attribution hook: 3/3 PASS"
+echo "Agent attribution hook: 4/4 PASS"

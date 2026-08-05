@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-# Enable commit trailers for git processes started by this Codex session.
-# This is sourced by the launchers; it deliberately changes only their
-# process environment, never the repository's persistent git configuration.
+# Enable commit trailers for git processes started by a launched agent
+# session (Codex supervisor/worker, DeepSeek/OpenCode worker). This is
+# sourced by the launchers; it deliberately changes only their process
+# environment, never the repository's persistent git configuration.
 
-codex_git_attribution_enable() {
+agent_git_attribution_enable() {
   local run_root="${1:?run root is required}"
-  local model="${2:-unknown}"
-  local effort="${3:-unknown}"
+  local generator="${2:?generator is required}"
+  local model="${3:-unknown}"
+  local effort="${4:-}"
   local config_index="${GIT_CONFIG_COUNT:-0}"
   local hook_path="${run_root}/tools/git-hooks"
 
@@ -15,7 +17,7 @@ codex_git_attribution_enable() {
     return 2
   fi
 
-  export POKEBENCH_COMMIT_GENERATOR="Codex"
+  export POKEBENCH_COMMIT_GENERATOR="$generator"
   export POKEBENCH_COMMIT_MODEL="$model"
   export POKEBENCH_COMMIT_EFFORT="$effort"
 
@@ -35,6 +37,11 @@ codex_git_attribution_enable() {
   export GIT_CONFIG_COUNT="$((config_index + 1))"
   export POKEBENCH_CODEX_HOOK_CONFIG_INDEX="$config_index"
   export POKEBENCH_CODEX_HOOK_PATH="$hook_path"
+}
+
+codex_git_attribution_enable() {
+  agent_git_attribution_enable "${1:?run root is required}" "Codex" \
+    "${2:-unknown}" "${3:-unknown}"
 }
 
 codex_git_attribution_disable() {

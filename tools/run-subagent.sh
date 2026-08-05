@@ -279,7 +279,9 @@ esac
 source tools/codex-git-attribution.sh
 if [[ "$PROVIDER" != "codex" ]]; then
   # A mixed-provider worker may inherit the temporary hook config from a Codex
-  # supervisor. Remove it entirely; Claude owns its own attribution.
+  # supervisor. Remove it entirely; Claude owns its own attribution, and the
+  # DeepSeek/OpenCode route re-enables the hook under its own identity before
+  # launch.
   codex_git_attribution_disable
 fi
 if [[ -z "$AGENT_LOG" ]]; then
@@ -462,14 +464,27 @@ fi
 # to the supervisor there — two branches rewriting the same ledger top entry
 # is a guaranteed merge conflict — so the worker reports in its final message
 # and the supervisor folds docs into the merge.
+# DeepSeek workers do not pace themselves from a bare cap duration: observed
+# cap-kills (exit 124) had every edit complete but uncommitted. Give that
+# route an absolute clock anchor; Claude/Codex briefs stay byte-identical.
+DEADLINE_CLAUSE_AUDIT=""
+DEADLINE_CLAUSE_WORKER=""
+if [[ "$PROVIDER" == "deepseek" ]]; then
+  WORKER_DEADLINE_EPOCH=$(( $(date +%s) + CAP_MINUTES * 60 ))
+  WORKER_DEADLINE_LOCAL="$(date -r "$WORKER_DEADLINE_EPOCH" '+%H:%M:%S %Z' 2>/dev/null \
+    || date -d "@$WORKER_DEADLINE_EPOCH" '+%H:%M:%S %Z')"
+  DEADLINE_CLAUSE_AUDIT=" Your hard deadline is ${WORKER_DEADLINE_LOCAL} (epoch ${WORKER_DEADLINE_EPOCH}): compare date +%s against it between steps, and once fewer than 10 minutes remain, stop inspecting and write your final report."
+  DEADLINE_CLAUSE_WORKER=" Your hard deadline is ${WORKER_DEADLINE_LOCAL} (epoch ${WORKER_DEADLINE_EPOCH}): compare date +%s against it between steps, and once fewer than 10 minutes remain, start nothing new — commit what is already green and report."
+fi
+
 if [[ "$READ_ONLY" == "1" ]]; then
-  SESSION_OPENING="Follow AGENTS.md. You are one bounded, explicitly read-only audit session with a hard ${CAP_MINUTES}-minute cap. Make no edits and no commits; inspect the assigned scope and return an evidence-backed report."
+  SESSION_OPENING="Follow AGENTS.md. You are one bounded, explicitly read-only audit session with a hard ${CAP_MINUTES}-minute cap. Make no edits and no commits; inspect the assigned scope and return an evidence-backed report.${DEADLINE_CLAUSE_AUDIT}"
   WORKTREE_OWNERSHIP="Work only inside this worktree. Do NOT edit or commit any file, including PROGRESS.md or ISSUES.md."
   MAIN_OWNERSHIP="Do NOT edit or commit any file, including PROGRESS.md, ISSUES.md, or PAPERCUTS.md."
   WORKTREE_FINISH_REQUIREMENT="Before finishing: leave the worktree clean. A commit is neither required nor allowed for this audit."
   MAIN_FINISH_REQUIREMENT="Before finishing: leave the main worktree clean. A commit is neither required nor allowed for this audit."
 else
-  SESSION_OPENING="Follow AGENTS.md. You are one bounded worker session with a hard ${CAP_MINUTES}-minute cap — you can be stopped at any moment, so commit after every green step."
+  SESSION_OPENING="Follow AGENTS.md. You are one bounded worker session with a hard ${CAP_MINUTES}-minute cap — you can be stopped at any moment, so commit after every green step.${DEADLINE_CLAUSE_WORKER}"
   WORKTREE_OWNERSHIP="Work only inside this worktree and commit only to this branch. Do NOT edit PROGRESS.md or ISSUES.md (reading them is fine): shared docs for this lane belong to the supervisor, who folds them in when merging your branch — report your results fully in your final message instead."
   MAIN_OWNERSHIP="Keep the top entry of PROGRESS.md current as you go."
   WORKTREE_FINISH_REQUIREMENT="Before finishing: npm test and npm run build green, work committed on ${WT_BRANCH}."
@@ -535,6 +550,10 @@ fi
 if [[ "$PROVIDER" == "codex" ]]; then
   # Attribute commits in either lane without changing persistent git config.
   codex_git_attribution_enable "$WORK_DIR" "$MODEL" "$REASONING_EFFORT"
+elif [[ "$PROVIDER" == "deepseek" ]]; then
+  # Same trailer mechanism under the DeepSeek/OpenCode identity. This route
+  # has no reasoning-effort knob, so the Agent-effort trailer is omitted.
+  agent_git_attribution_enable "$WORK_DIR" "OpenCode" "$MODEL" ""
 fi
 
 # No process substitution here: sandboxed supervisor sessions can't open

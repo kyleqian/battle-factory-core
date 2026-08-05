@@ -1,20 +1,28 @@
 #!/usr/bin/env bash
-# Mechanically normalize attribution for commits made inside a launched Codex
-# process. Human and other-provider launches do not enable this hook.
+# Mechanically normalize attribution for commits made inside a launched agent
+# process (Codex or DeepSeek/OpenCode). Human and Claude launches do not
+# enable this hook.
 set -euo pipefail
 
 message_file="${1:?commit message file is required}"
-[[ "${POKEBENCH_COMMIT_GENERATOR:-}" == "Codex" ]] || exit 0
+generator="${POKEBENCH_COMMIT_GENERATOR:-}"
+[[ -n "$generator" ]] || exit 0
 
 model="${POKEBENCH_COMMIT_MODEL:-unknown}"
-effort="${POKEBENCH_COMMIT_EFFORT:-unknown}"
+effort="${POKEBENCH_COMMIT_EFFORT:-}"
 
 # Launcher metadata is authoritative. Replace guessed/manual values instead of
 # preserving them, so the model never needs to reason about its own identity.
+trailer_args=(
+  --trailer "Generated-by: $generator"
+  --trailer "Agent-model: $model"
+)
+if [[ -n "$effort" ]]; then
+  trailer_args+=(--trailer "Agent-effort: $effort")
+fi
+
 git interpret-trailers --in-place \
   --if-exists replace \
   --if-missing add \
-  --trailer "Generated-by: Codex" \
-  --trailer "Agent-model: $model" \
-  --trailer "Agent-effort: $effort" \
+  "${trailer_args[@]}" \
   "$message_file"
