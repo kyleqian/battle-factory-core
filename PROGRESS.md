@@ -4,6 +4,48 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 933 — [bounded MAIN worker, 2026-08-04] #73 slice-2 exact-foundation: Lobby arrival mapped dense, field renderer moved to the real warp camera
+
+- **State:** master `b1c8ad28` + this docs commit, clean. `npm run
+  test:smoke` green (347/347). Committed windows still twice-stable: LOSS
+  **350/350**, WIN **503/503** (re-run both after the render change). Full
+  `npm test` NOT re-run before this commit (see Notes); `npm run build`
+  green at the prior commit.
+- **Did:** bounded slice-2 groundwork per ISSUES #73. Dense 1-tick oracle
+  probe of the committed LOSS fixture's frames 3346-3834 mapped the real
+  Lobby arrival schedule (fade-in 114-128, box+page-0 typing 141-170,
+  cursor 171-302, A-dismiss 300, page-1 typing 306-365, cursor ~366-601,
+  A-dismiss 602; terminal age = frame − 3232) and corrected the shared
+  lobby renderer to the real warp camera: `renderFactoryTerminalField` now
+  defaults to `cameraOriginPx` ({x:-48,y:56}) instead of the staged probe's
+  hardcoded bgOriginX=16, and object-event sprites anchor through the same
+  camera with the source `centerToCornerVec` feet-anchor (+1px player x2).
+  Verified against the oracle at frame 3361: field tiles 0 diff outside the
+  sprite silhouettes; sprite residual dropped 26014 → 1095 px (three blobs,
+  pose/anchor pixels still to fit). The prior scout doc's "walk-cycle" is
+  actually the page-0 held-cursor blink (lockall freezes all NPCs — no walk
+  animation needed). Both committed terminal windows end exactly at
+  dismiss+115, so the camera change is inert there (350/350 + 503/503
+  re-verified).
+- **Next:** #73 slice 2 continuation — recalibrate
+  `FACTORY_LOSS_TERMINAL_PROFILE` to the banked real ages (field 114 / box
+  141 / page-0 text 143 / input-ready 171 / page-1 text at release+6 /
+  dismisses 300+602), re-basing `tests/factoryTerminalPresentation.test.ts`
+  + `tests/interactiveRouting.test.ts` to the real route's release edges,
+  and fit the three sprite silhouettes' remaining ~1095 px (pose frames +
+  exact anchors) before extending `loss-terminal-window-off` past 3345.
+  Then slice 3 (restore/save + record prompt) rides on the recalibrated
+  profile.
+- **Notes:** honest checkpoint is still frame 3345 (350/350) — no frame
+  past it is byte-exact yet, and the trace's capture window was NOT extended
+  (a red committed window would misrepresent the state). Residual classes
+  past 3345: (1) staged-vs-real message timing, (2) three sprite silhouettes
+  (player/woman/fatMan pose + anchor), (3) the ~1-2-tick printer pause
+  cadence in page-1 typing. `npm test` full run was not re-run this session
+  (time-capped); the render change touches no test-pinned output (the
+  lobby-field data tests pin the layout JSON, unchanged).
+
+---
 ## 932 — [supervisor, 2026-08-04 ~21:16] Shared post-battle return exact on WIN+LOSS; animation and beyond-boundary evidence folded
 
 - **State:** master `ddbafa41` + this docs commit, clean. Independent folded

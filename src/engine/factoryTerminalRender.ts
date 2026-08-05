@@ -131,10 +131,9 @@ function forEachVisibleBlock(
   ) => void,
   bgOriginX: number,
 ): void {
-  // Fresh staged RAM at +29 pins saved camera position (8,8) and BG1/BG2
-  // scroll (0,40). MapGrid's seven-block padding therefore makes layout
-  // block (1,1) buffer-local (0,0), yielding source origins (16,56).
-  // Object events use the independently centered cameraOriginPx below.
+  // The real terminal warp (4,8) centers the camera at the layout's own
+  // cameraOriginPx; the legacy staged seam's (8,8) camera was only ever a
+  // probe-side position, so the renderer no longer hardcodes its x offset.
   const bgOrigin = { x: bgOriginX, y: layout.cameraOriginPx.y };
   const minBx = Math.floor(bgOrigin.x / 16);
   const minBy = Math.floor(bgOrigin.y / 16);
@@ -195,7 +194,7 @@ function drawNpc(
 export function renderFactoryTerminalField(
   bgY = 0,
   objY = 0,
-  bgOriginX = 16,
+  bgOriginX = -48,
 ): Uint8Array {
   const fb = createFramebuffer();
   fillFramebuffer(fb, 0, 0, 0);
@@ -210,9 +209,14 @@ export function renderFactoryTerminalField(
     .map((object) => ({
       object,
       pos: {
-        x: object.tile.x * 16 -
-          (object.id === "player" ? layout.cameraOriginPx.x : 16),
-        y: object.tile.y * 16 - 16 - layout.cameraOriginPx.y,
+        // docs/post-terminal-return-to-lobby-ground-truth.md §2: the real
+        // Lobby warp (4,8) centers the field camera at layout.cameraOriginPx
+        // (see forEachVisibleBlock), and every overworld sprite OAM anchors
+        // through the same camera. The player's own sprite carries the
+        // standard +1-px x2 sub-pixel offset the other object events lack.
+        x: object.tile.x * 16 - layout.cameraOriginPx.x +
+          (object.id === "player" ? 1 : 0),
+        y: object.tile.y * 16 - layout.cameraOriginPx.y - 21,
       },
     }))
     .sort((a, b) =>

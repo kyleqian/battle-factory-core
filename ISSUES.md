@@ -503,6 +503,64 @@ LOSS's restore/save wait + record prompt, WIN's PreBattleRoom arrival + heal
 message (all past dismiss+115, where the two destinations genuinely
 diverge) — see that doc's §5 for the bounded plan.
 
+**2026-08-04 slice-2 groundwork: the Lobby arrival's real schedule mapped
+dense and the shared field renderer corrected to the real warp camera —
+committed as an exact-foundation checkpoint (LOSS 350/350, WIN 503/503
+both still twice-stable), exactness past frame 3345 NOT yet reached.** A
+bounded MAIN-lane worker probed frames 3346-3834 of the committed LOSS
+fixture 1-tick dense (per-slice `bin/oracle lab` passes, receipts at the
+end of this paragraph) and corrected two things in
+`src/engine/factoryTerminalRender.ts` that the prior probe-side staged
+seam had masked:
+- **Camera.** The real post-terminal Lobby warp (4,8) centers the field at
+  the layout's own `cameraOriginPx` ({x:-48, y:56}) — the renderer was
+  hardcoding a `bgOriginX=16` left over from the staged (8,8) probe camera.
+  `renderFactoryTerminalField` now renders the field at `cameraOriginPx.x`
+  by default; the extracted 19×12 Lobby tileset is pixel-exact against the
+  oracle at that origin (measured 0 diff outside the object sprites at
+  frame 3361). Both committed terminal windows stop exactly at dismiss+115
+  (WIN 5125, LOSS 3345), so neither ever rendered the lobby field — the
+  change is inert there, confirmed by re-running both at 503/503 and
+  350/350.
+- **Object OAM anchors.** The old per-object formula hardcoded a -16px x
+  anchor (staged-camera artifact). All object-event sprites anchor through
+  the same camera with `centerToCornerVec` = -(width/2) and the standard
+  16×32 `sprite->y += 16 + centerToCornerVecY` feet-anchor
+  (`event_object_movement.c:1850-1854`, `sprite.c:349-355`); the player's
+  own sprite additionally carries the standard +1px x2 sub-pixel. Object
+  screen positions are now `tile.x*16 - cameraOriginPx.x` (+1 for player)
+  and `tile.y*16 - cameraOriginPx.y - 21`. Verified: player at (113,51),
+  fatMan (6,10) and woman (3,11) at their oracle blobs (their upper halves
+  correctly hidden behind the counter's NORMAL top layer); singles
+  attendant (4,7) hidden behind the counter; doubles attendant/camper/
+  picnicker off-screen right. Frame 3361 residual dropped 26014 → 1095 px
+  (all in the three sprite silhouettes, still pose/anchor pixels to fit).
+- **Real schedule (banked for the timing calibration, dense 1-tick):**
+  Lobby fade-in age 114-128 (terminal age = frame − 3232), map settle (no
+  box) 129-140, box open 141-142, page 0 "Thank you for participating!"
+  typing 143-170 + cursor 171-302, fixture's real A at 300 dismisses it,
+  box clear 303-305, page 1 "I will return your POKéMON in exchange /
+  for our rental POKéMON." typing 306-365 + cursor ~366-601, fixture's real
+  A at 602 dismisses it (frame 3834 = slice 2's end). The prior scout
+  doc's "repeating 3-frame walk-cycle" (3350-3510) is actually the page-0
+  held-cursor blink only — `lockall` freezes every NPC, so no walk
+  animation is needed. The page-1 typing has an irregular ~1-2-tick pause
+  every few glyphs (`RenderText`'s `textSpeed` delay counter, text.c:941-961)
+  the 1-char/tick `factoryTerminalVisibleChars` model must eventually
+  replicate.
+- **Not yet landed:** the `FACTORY_LOSS_TERMINAL_PROFILE` timing (still
+  calibrated to the staged probe's +41/+68/+80/+160/+210) must be
+  recalibrated to the real route's ages above (field 114 / box 141 / page-0
+  text 143 / input-ready 171 / page-1 text at +6 / dismiss 300 / 602), which
+  also re-bases the roundController-path pins in
+  `tests/factoryTerminalPresentation.test.ts` and
+  `tests/interactiveRouting.test.ts`; until then every frame past 3345
+  renders the lobby with the staged message timing and matches nothing.
+  **Honest contiguous exact checkpoint therefore remains 3345 (350/350).**
+  Receipts: `bin/oracle lab` passes `/tmp/loss-s2-{coarse,c1,c2,c3}.json`
+  (62 + 194 + 38 + 75 captures; 3346-3834 dense), all re-runnable from the
+  committed fixture; this session's probes were reproduced twice.
+
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
 **Symptom:** `generateInitialFactoryRentals`'s `constructionRngValue`
