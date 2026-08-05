@@ -1049,7 +1049,6 @@ import {
   type SceneOnReversalConfig,
   type SceneOnTailGlowConfig,
   type SceneOnTailWhipConfig,
-  type SceneOnAgilityConfig,
   type SceneOnAgilityPresentationState,
   type SceneOnDizzyPunchConfig,
   type SceneOnAstonishConfig,

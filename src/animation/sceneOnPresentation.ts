@@ -570,8 +570,6 @@ import {
 } from "./hypnosis.ts";
 import {
   agilityAnimationAtAge,
-  type AgilityAfterimage,
-  type AgilityOffset,
   type AgilityState,
 } from "./agility.ts";
 
