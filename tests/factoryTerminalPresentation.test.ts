@@ -30,7 +30,7 @@ import {
   factoryTerminalVisibleChars,
   isFactoryTerminalRoundWon,
 } from "../src/engine/factoryTerminalPresentation.ts";
-import { renderFactoryTerminalPresentation } from "../src/engine/factoryTerminalRender.ts";
+import { renderFactoryTerminalField, renderFactoryTerminalPresentation } from "../src/engine/factoryTerminalRender.ts";
 import { createFramebuffer } from "../src/engine/framebuffer.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
 
@@ -332,6 +332,59 @@ describe("Factory Scene-OFF loss terminal adapter", () => {
     expect(darkAt(reopening, 25, 127)).toBe(true);
     expect(darkAt(reopening, 27, 127)).toBe(true);
     expect(darkAt(reopening, 29, 127)).toBe(true);
+  });
+
+  it("types page-0's first glyph at the source-relative firstPageTextAge (142), one tick after the box opens", () => {
+    const command = lossController().presentation!.command;
+    if (command.type !== "roundLost") throw new Error("expected roundLost");
+    // Dense oracle re-probe of the committed LOSS fixture pins the real
+    // schedule: box frame at terminal age 141 (frame 3373), first page-0
+    // glyph "T" at age 142 (frame 3374), "Th" at 143 (frame 3375). The old
+    // firstPageTextAge 143 was never oracle-verified (the prior slice's
+    // scratch windows only covered page-1's span, 3534+) and delayed every
+    // page-0 typing + cursor frame by one tick (frames 3374-3403 typing,
+    // 3412-3529 cursor phase).
+    expect(createFactoryTerminalLossPresentation(command).profile.firstPageTextAge)
+      .toBe(142);
+    let terminal = createFactoryTerminalLossPresentation(command);
+    terminal = advanceTo(terminal, 141);
+    expect(factoryTerminalVisibleChars(terminal)).toBe(0);
+    terminal = advanceTo(terminal, 142);
+    expect(factoryTerminalVisibleChars(terminal)).toBe(1);
+    terminal = advanceTo(terminal, 143);
+    expect(factoryTerminalVisibleChars(terminal)).toBe(2);
+  });
+
+  it("places the bootstrapped save's north-facing Brendan at the source-derived (112,56) OAM anchor, not (113,56)", () => {
+    // The real Lobby warp (4,8) and the generic 16x32 feet-anchor put every
+    // object event at `tile*16 - cameraOriginPx` (box top y = tile.y*16 -
+    // cameraOriginPx.y - 16, event_object_movement.c:1850-1854). The player's
+    // tile is (4,8) and cameraOriginPx is {x:-48, y:56}, so the anchor is
+    // (112,56). The removed player-only +1px x2 sub-pixel offset (which drew
+    // the sprite at (113,56)) reproduced the ~133px oracle residual exactly;
+    // the oracle's player at (112,56) matches frame 3365 with 0 diff. These
+    // pins assert player-unique pixels at the source-derived screen positions
+    // (hat blue-grey 57,74,123 at the sprite's top-left; hat white
+    // 222,231,239; dark navy 16,33,57; shirt red 123,66,66) — each would
+    // land one column right under the old +1 offset.
+    const fb = renderFactoryTerminalField();
+    const px = (x: number, y: number) => {
+      const i = (y * 240 + x) * 4;
+      return [fb[i]!, fb[i + 1]!, fb[i + 2]!];
+    };
+    expect(px(117, 66)).toEqual([57, 74, 123]);
+    expect(px(116, 69)).toEqual([222, 231, 239]);
+    expect(px(113, 80)).toEqual([123, 66, 66]);
+    expect(px(115, 73)).toEqual([16, 33, 57]);
+    expect(px(125, 82)).toEqual([16, 33, 57]);
+    // The sprite's drawn bbox is 113..126 x 66..85, i.e. the source 16x32
+    // frame anchored at (112,56) with its transparent left/right columns:
+    // (126,81) is a player-unique dark pixel at the right edge and (117,66)
+    // the hat's top-left — the left-edge shirt red at x=113 pins the anchor
+    // (under the removed +1 offset it would sit at x=114, i.e. (113,80)
+    // would not be the player's shirt).
+    expect(px(126, 81)).toEqual([16, 33, 57]);
+    expect(px(117, 66)).toEqual([57, 74, 123]);
   });
 });
 

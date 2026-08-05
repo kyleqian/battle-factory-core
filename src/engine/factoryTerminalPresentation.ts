@@ -70,7 +70,7 @@ export interface FactoryTerminalRoundWonProfile
  * shared return-to-field span (rendered by postwin) covers ages 0-113 and
  * this profile's first rendered frame is the Lobby fade-in at age 114 —
  * the real schedule banked dense in ISSUES #73 (fade 114-128, box 141,
- * page-0 "Thank you for participating!" typing 143-170 + cursor 171, the
+ * page-0 "Thank you for participating!" typing 142-169 + cursor 171, the
  * fixture's real A at 301 dismissing it, page-1 return-rentals typing 303+
  * and its real A at 602 dismissing it).
  *
@@ -82,6 +82,13 @@ export interface FactoryTerminalRoundWonProfile
  * identically to the empty box frame, which is exactly the oracle's
  * 3-tick clear/reopen look at frames 3535-3537 (empty 3535-3536, first
  * visible glyph "w" at 3537) before the 1-char/tick printer takes over.
+ *
+ * The page-0 first-glyph age was corrected 143 -> 142 by a dense oracle
+ * re-probe over the previously-unverified page-0 span (frames 3374-3403,
+ * one tick after the box opens at 3373): the old 143 delayed every page-0
+ * typing + cursor frame by one tick. The correction is covered by
+ * `tests/factoryTerminalPresentation.test.ts`'s "types page-0's first glyph"
+ * pin, red-verified against the old value.
  */
 export const FACTORY_LOSS_TERMINAL_PROFILE: FactoryTerminalLossProfile =
   Object.freeze({
@@ -90,7 +97,7 @@ export const FACTORY_LOSS_TERMINAL_PROFILE: FactoryTerminalLossProfile =
     fieldFirstAge: 114,
     fadeFirstAge: 114,
     messageFrameAge: 141,
-    firstPageTextAge: 143,
+    firstPageTextAge: 142,
     firstPageInputReadyAge: 171,
     nextPageVisualDelay: 2,
     printerHandoffDelay: 2,

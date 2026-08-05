@@ -216,10 +216,14 @@ export function renderFactoryTerminalField(
         // through the same camera with the source 16x32 feet-anchor
         // (event_object_movement.c's SetSpritePosToMapCoords + centerToCornerVec
         // and the +16 `sprite->y` shift, i.e. box top = tile*16 - cameraOrigin
-        // - 16). The player's own sprite carries the standard +1-px x2
-        // sub-pixel offset the other object events lack.
-        x: object.tile.x * 16 - layout.cameraOriginPx.x +
-          (object.id === "player" ? 1 : 0),
+        // - 16, left = tile*16 - cameraOrigin). The bootstrapped save's
+        // north-facing Brendan frame 1 (OBJ_EVENT_GFX_BRENDAN_NORMAL, saved
+        // at tile (4,8), asset `factory-lobby-terminal-npcs.json`) shares the
+        // same generic OAM anchor as every other object event — the old
+        // player-only +1px x2 sub-pixel offset was wrong (113,56 reproduced
+        // the ~133px residual; the oracle's player at (112,56) matches frame
+        // 3365 with 0 diff).
+        x: object.tile.x * 16 - layout.cameraOriginPx.x,
         y: object.tile.y * 16 - layout.cameraOriginPx.y - 16,
       },
     }))

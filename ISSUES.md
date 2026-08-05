@@ -535,6 +535,9 @@ seam had masked:
   attendant (4,7) hidden behind the counter; doubles attendant/camper/
   picnicker off-screen right. Frame 3361 residual dropped 26014 → 1095 px
   (all in the three sprite silhouettes, still pose/anchor pixels to fit).
+  *[2026-08-04 correction: the "+1px x2 sub-pixel" / (113,51) player anchor
+  was the erroneous offset this step removed — see the closing paragraph of
+  this entry; the player now anchors at (112,56) with 0 diff.]*
 - **Real schedule (banked for the timing calibration, dense 1-tick):**
   Lobby fade-in age 114-128 (terminal age = frame − 3232), map settle (no
   box) 129-140, box open 141-142, page 0 "Thank you for participating!"
@@ -609,6 +612,40 @@ seam had masked:
   the committed fixture (`/tmp/loss-s2-{coarse,c1,c2,c3}.json`, 62+194+38+75
   captures), reproduced twice; the scratch compare traces used for the
   numbers above are not committed.
+- **2026-08-04 LOSS slice-2 player-sprite residual CLOSED + window extended:
+  `loss-terminal-window-off` is 839/839 exact through frame 3834, twice-run
+  byte-identical.** Two source-side corrections, both pure logic in the
+  terminal presentation (no generated asset/extractor edit; the supervisor's
+  evidence that `factory-lobby-terminal-npcs.json` already carries the exact
+  north-facing Brendan frame 1 + palette was confirmed — no new player
+  graphic was ever needed, and the earlier "different player asset" claim
+  below is **retracted** as the stale mis-attribution this paragraph records):
+  1. **Player OAM anchor** (`factoryTerminalRender.ts`): the generic Lobby
+     object anchor's player-only `+1px x2` sub-pixel offset was wrong — it
+     placed the sprite at (113,56), reproducing the ~133px residual exactly.
+     Removed; all object events now anchor at `tile*16 - cameraOriginPx`
+     (player tile (4,8), cameraOriginPx {x:-48,y:56} → (112,56)). The
+     source-derived field + player at (112,56) match the oracle's frame 3365
+     with 0 differing pixels. Tier-1 pin (red-verified by stashing): player-
+     unique pixels at the source-derived screen positions (hat blue-grey
+     (117,66), hat white (116,69), shirt red (113,80), navy (115,73)/(125,82),
+     right-edge (126,81)).
+  2. **Page-0 first-glyph age** (`FACTORY_LOSS_TERMINAL_PROFILE.
+     firstPageTextAge`): corrected **143 → 142**. The prior worker's dense
+     scratch windows only covered page-1's span (3534+); a fresh oracle
+     re-probe of the committed fixture's frames 3373-3375 shows the box
+     opens at terminal age 141 and page-0's first glyph "T" lands at age 142
+     (frame 3374), so 143 delayed every page-0 typing + cursor frame by one
+     tick (frames 3374-3403 typing, 3412-3529 cursor phase). Tier-1 pin
+     (red-verified by stashing): `firstPageTextAge === 142` with
+     `factoryTerminalVisibleChars` 0/1/2 at ages 141/142/143.
+  The committed trace's segments were restored to the fixture's own real
+  schedule through cumulative 3834 (segments 0..41, unchanged buttons; the
+  committed window's tail had truncated the fixture at segment 39/3345) and
+  `captureFrames` extended contiguously 2996..3834 (839 frames). WIN remains
+  **503/503**. Slice 2 is therefore exact end-to-end; the only remaining LOSS
+  slice-2 boundary is slice 3's own record-prompt transition (frame 4054+,
+  ~1,350 px).
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
