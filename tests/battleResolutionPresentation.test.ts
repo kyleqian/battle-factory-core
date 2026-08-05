@@ -8,6 +8,7 @@ import {
   storeBattleTerminalPresentationDismiss,
   WAITMESSAGE_LONG_MESSAGE_IDS,
   WAITMESSAGE_LONG_TIMING,
+  type BattleResolutionPresentationCommand,
   type BattleResolutionPresentationState,
   type CreateBattleResolutionPresentationInput,
 } from "../src/engine/battleResolutionPresentation.ts";
@@ -437,7 +438,8 @@ describe("battle resolution presentation receipt ownership", () => {
       event(2, { kind: "message", messageId: "STRINGID_CRITICALHIT", substitutions: [] }),
     ], NEXT_COMMAND));
     const criticalCommand = critical.segments[0]!.commands.find(
-      (c) => c.type === "message" && c.lines[0] === "A critical hit!",
+      (c): c is Extract<BattleResolutionPresentationCommand, { type: "message" }> =>
+        c.type === "message" && c.lines[0] === "A critical hit!",
     )!;
     expect(criticalCommand).toMatchObject({
       type: "message",
@@ -457,7 +459,8 @@ describe("battle resolution presentation receipt ownership", () => {
       event(2, { kind: "message", messageId: "STRINGID_NOTVERYEFFECTIVE", substitutions: [] }),
     ], NEXT_COMMAND));
     const notVeryCommand = notVery.segments[0]!.commands.find(
-      (c) => c.type === "message" && c.lines[0] === "It’s not very effective…",
+      (c): c is Extract<BattleResolutionPresentationCommand, { type: "message" }> =>
+        c.type === "message" && c.lines[0] === "It’s not very effective…",
     )!;
     expect(notVeryCommand.timing).toBe(WAITMESSAGE_LONG_TIMING);
     // STRINGID_USEDMOVE (Cmd_attackstring) has no waitmessage -- the plain
@@ -466,7 +469,11 @@ describe("battle resolution presentation receipt ownership", () => {
       event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }),
       event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }),
     ], NEXT_COMMAND));
-    expect(usedMove.segments[0]!.commands[0]!.timing).toEqual({
+    const usedMoveCommand = usedMove.segments[0]!.commands.find(
+      (c): c is Extract<BattleResolutionPresentationCommand, { type: "message" }> =>
+        c.type === "message" && c.lines[0] === "ONIX used",
+    )!;
+    expect(usedMoveCommand.timing).toEqual({
       minimumFrames: 24,
       holdFrames: 0,
     });
@@ -482,7 +489,10 @@ describe("battle resolution presentation receipt ownership", () => {
       event(3, { kind: "faint-animation", battler: 1 }),
       event(4, { kind: "message", messageId: "STRINGID_TARGETFAINTED", substitutions: [] }),
     ], NEXT_COMMAND));
-    const faintMessage = faint.segments[0]!.commands.at(-1)!;
+    const faintMessage = faint.segments[0]!.commands.find(
+      (c): c is Extract<BattleResolutionPresentationCommand, { type: "message" }> =>
+        c.type === "message",
+    )!;
     expect(faintMessage).toMatchObject({ type: "message", advance: "button" });
     expect(faintMessage.timing).toEqual({ minimumFrames: 24, holdFrames: 0 });
   });
