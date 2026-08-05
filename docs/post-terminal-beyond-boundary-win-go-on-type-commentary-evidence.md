@@ -115,7 +115,7 @@ outside this packet's single-input contract.
 npm run compare -- win-go-on-type-commentary-off --summary  # 93/93 (new)
 npm run compare -- win-go-on-scout-off --summary           # 143/143 (regression)
 npm run compare -- win-beyond-boundary-off --summary       # 228/228 (regression)
-npm run compare -- win-terminal-window-off --summary       # 890/890 (regression)
+npm run compare -- win-terminal-window-off --summary       # 2082/2082 after the parallel canonical promotion
 ```
 
 Runs used: `tools/compare/out/run-2026-08-05-08-22-46Z-40600` and
@@ -126,7 +126,10 @@ Runs used: `tools/compare/out/run-2026-08-05-08-22-46Z-40600` and
 ## 6. Checks
 
 `npm run test:smoke` and the full `npm test` / `npm run build` were run green
-before the final commit (see the committing entry). Only new files were
+before the side-lane commit (see the committing entry). The side branch saw
+the then-current 890/890 canonical WIN window; after its merge, the parallel
+main-lane promotion extended that same gate to 2082/2082 through frame 6704.
+Only new files were
 committed: the scratch fixture, the ground-truth spec, and this doc. No
 `src/`, `tests/`, `tools/compare/traces/`, canonical trace, or existing
 fixture was edited. PAPERCUT: none new.

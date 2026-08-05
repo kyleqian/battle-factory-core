@@ -761,6 +761,15 @@ seam had masked:
   selection is now partially canonical (GO ON consumed), with RECORD/REST/
   RETIRE still unpressable on a committed fixture. LOSS's remaining boundary
   stays the record playback + free-roam movement.
+- **2026-08-05 WIN opponent-type commentary bound at the next held page:
+  `win-go-on-type-commentary-off` is **93/93** exact twice fresh through
+  frame 7308, with no production change.** A file-disjoint fixture preserves
+  the prior 27 segments byte-for-byte, presses the held first scouting page
+  once at 7237-7238, observes box clear 7240 and the 67-frame no-favorite-
+  type line at 7241-7307, then stops on the wait-cursor hold from 7308.
+  Existing `acceptPostwinDialoguePage` / `dialoguePage 2` rendering is the
+  whole mechanism. Remaining WIN work narrows to the battle-style page, swap
+  offer/decision, and the unexercised RECORD/REST/RETIRE continuation choices.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
