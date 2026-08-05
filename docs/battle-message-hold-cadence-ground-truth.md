@@ -154,10 +154,10 @@ Battle Scene OFF, `profile: "battle-scene-off"`, seed 1:
   (move 89) to constrain the Factory AI to one legal choice.
 - LOMBRE speed 70 > NOSEPASS 50, so the player acts first and one turn
   produces **both** a super-effective line and a not-very-effective line.
-- WATER GUN is 2x on Rock (not 4x), so it does 36-42 of NOSEPASS's 105 HP
-  (no KO); EARTHQUAKE is 0.5x on Grass/Water LOMBRE, 18-21 of 135 (no KO).
-  Neither side faints and no secondary effect fires — a clean, two-message
-  turn.
+- WATER GUN is 2x on pure Rock (not 4x), so it does 35-42 of NOSEPASS's 105 HP
+  (observed 105→70; no KO); EARTHQUAKE is 0.5x on Grass/Water LOMBRE, 18-21 of
+  135 (observed 135→116; no KO). Neither side faints and no secondary effect
+  fires — a clean, two-message turn.
 - Trace input: `A`(2) + 30 idle + `A`(2) + idle — the standard
   fight-menu-commit pattern used by every committed hit-chain scenario.
 
