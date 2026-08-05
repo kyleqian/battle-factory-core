@@ -1,3 +1,42 @@
+## 925 — [supervisor wind-down, 2026-08-04 ~17:15] Session close: LOSS window CLOSED 236/236 + WIN wired 65/65 + #75 same-day fix, #72 REACHABLE closed, Slice-D double premise-inversion resolved honestly; final union green 721 files / 6,927
+
+- **State:** master `3dd61f73` (final animation fold: Steel Wing
+  reconciliation, opponent 197/197 + player 180/197; `master..animation-main`
+  empty at close). Final independent union: full `npm test` **721 files /
+  6,927 passed / 1 skipped**, `npm run build` green. Terminal windows:
+  LOSS **236/236**, WIN **65/65** (both supervisor-rerun post-merge).
+  Play-preview rebuilt at `3dd61f73`, serving on :5199. Working tree clean.
+  **No open DEFERRED entries.** No stale worker worktrees or branches
+  (`.worktrees/animation-main` permanent; play-preview intentional).
+- **Session totals:** 6 rounds, 10 workers (6 main / 4 side), 0 lost —
+  1 cap-kill salvaged (R1 cursor gating), 2 premise-stops that were correct
+  outcomes (R3 Slice D, R5 back-dispatcher). Landed: #73 LOSS 1/236 →
+  236/236 (cursor mechanism + RAM-probe-derived scaffold constants); WIN
+  wired 65/65 with its own probe constants; **#75 found and fixed same
+  day** (button dismiss-skip race, red-verified on DESTIN's real lines);
+  **#72 REACHABLE backlog CLOSED** (Magnitude batch 9, census 39→38);
+  selection-rejection subsystem scouted (6 causes; census structurally
+  blind to `printselectionstring`; advisory-slice recommendation banked);
+  rung-3 dispatcher folded; OFF-seam rest-offset landmine removed with RAM
+  receipt; #74 filed, bisected to `7e14afae` (facts stand), mechanism
+  re-attributed by R5's probe (back anims gated identically under OFF;
+  KADABRA descent = species-agnostic affine-emerge).
+- **Next session (recommended order):** (1) #74 — probe whether YOSHI
+  frame 640 / MAGNETON 621 sit in the affine-emerge window (alignment bug
+  in `MATERIALIZE_Y2_TABLE` consumption) or the settle window (where flat
+  is right and the oracle diff means something else); entry 922 has the
+  worker's guided next step. (2) #73 — extend `winTerminalWindowStage`
+  past the now-fixed dismiss wait toward 241/241 (probe constants in the
+  entry). (3) Torment/selection-rejection advisory slice (scout doc ready,
+  needs scheduling decision). (4) #71 §1e + coordinated hand-fit
+  retirements. Standing: #39, #55.
+- **Notes:** the animation supervisor ran concurrently and wound down
+  cleanly (~16:45); both folds this session were boring, as designed. Both
+  dispatcher halves (front + back) are animation-lane-only consumers under
+  Scene OFF by real-game design — recorded in #71's Slice-D record so the
+  next session doesn't re-litigate. Oracle-freshness FAIL remains the
+  docs-only false-positive class (services untouched all session).
+
 ## 924 — [bounded MAIN worker, 2026-08-04 ~17:05] R6 MAIN: ISSUES #75 FIXED — button-message dismiss-skip race closed, red-verified on DESTIN's real 23-char lines; full regression sweep green; stretch not attempted (time)
 
 - **State:** master at `e88fb4a5` (src fix + test) plus this docs commit.

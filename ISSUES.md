@@ -206,7 +206,7 @@ inert-insurance evidence above already cover in full. Disposition: no
 further check needed; the deferred item has nothing left to verify at the
 generated-route settle hooks.
 
-## #72 — battleStringResolver completeness-guard gaps: REACHABLE printstring backlog CLOSED; Torment selection-time remainder still open
+## #72 — battleStringResolver completeness-guard gaps: REACHABLE printstring backlog CLOSED; selection-rejection advisory slice CLOSED
 
 **Original symptom** (2026-08-03, opponent MURKROW's TAUNT crash) and the
 full reachability triage (`docs/issue72-reachability-triage.md`: 66
@@ -234,37 +234,62 @@ a fallback, `try`/`catch`, or env-gated non-fatal mode around
 unknown-id throws — this decision outlives the now-closed REACHABLE backlog
 above and still applies to any future id.
 
-**Still open — tracked here, not yet scoped as its own issue number:**
-`STRINGID_PKMNCANTUSEMOVETORMENT` is DEAD *today* — Torment's move-reuse
-block is enforced only at move-*selection* time by
-`TrySetCantSelectMoveBattleScript` (`battle_util.c:999-1012`), dispatching
-to `BattleScript_SelectingTormentedMove` (`printselectionstring`), not the
-dead `BattleScript_MoveUsedIsTormented`. **Scouted 2026-08-04, see
-`docs/selection-rejection-subsystem-scout.md`.**
-`TrySetCantSelectMoveBattleScript` actually covers 6 causes
-(Disabled/Torment/Taunt/Imprison/Choice-lock/no-PP), all equally unmodeled —
-this engine's `submitBattleDecision` pre-filters all 6 out of
-`legalDecisions` and throws a hard `Error` on an illegal submission instead
-of the source's reject+flavor-text+reprompt loop. The port's
-`CheckMoveLimitations` bitmask itself has **no gaps** (audited, all bits
-present). Reachability: Disabled/Torment/Taunt/Choice-lock/no-PP are
-REACHABLE (carriers cited in the scout); Imprison is DEAD (same
-RALTS-below-floor gate as `STRINGID_PKMNCANTUSEMOVESEALED`). Census-tool
-blind spot recorded there too: `printstring-literal-census.ts` matches only
-`printstring` mnemonics, so this whole `printselectionstring` family was
-structurally invisible to #70/#72's sweeps. The scout recommends the
-smallest bounded slice: a pure advisory `describeIllegalMoveSelection` query
-plus the 4 still-unresolved STRINGID `messageLines` branches (`NOPPLEFT`,
-`PKMNCANTUSEMOVETORMENT`, `ITEMALLOWSONLYYMOVE`, `PKMNHASNOMOVESLEFT`) — no
-`submitBattleDecision` contract change. Needs supervisor scoping as its own
-step.
+**Selection-rejection advisory slice landed 2026-08-04 (scout option (b),
+adopted verbatim).** `describeIllegalMoveSelection`
+(`battleScriptActionAdmission.ts`) is a pure, side-effect-free mirror of
+`TrySetCantSelectMoveBattleScript` (`battle_util.c:976-1080`)'s six causes
+(Disabled/Torment/Taunt/Imprison/Choice-lock/no-PP), sharing its per-cause
+predicates with the existing `checkBattleScriptMoveLimitations` bitmask
+rather than duplicating them, and reproducing source's own
+last-true-wins-on-overwrite winner selection when more than one cause
+applies to a slot (Tier-1-pinned). Wired alongside `legalMoveDecisions` as
+`legalMoveSelectionRejections` (`factoryBattleScriptFullTurnDecision.ts`) and
+surfaced as `rejectionReasonBySlot`, parallel to `legalMoveBySlot`
+(`battleCommandPresentation.ts`). The 4 STRINGID resolvers
+(`NOPPLEFT`/`PKMNCANTUSEMOVETORMENT`/`ITEMALLOWSONLYYMOVE`/`PKMNHASNOMOVESLEFT`)
+are landed in `battleResolutionPresentation.ts`
+(`resolveMoveSelectionRejectionMessageLines`/`resolveNoMovesLeftMessageLines`);
+`PKMNCANTUSEMOVESEALED`/Imprison stays unresolved on purpose (DEAD carrier,
+RALTS-below-floor gate) so the completeness guard stays fatal for it.
+`submitBattleDecision`/`legalDecisions`/`battleDecisionBoundary.ts`'s public
+contract is untouched, exactly as the scout's option (b) specified — options
+(a) (reject-at-submit with a new event kind) and (c) (a full selection
+battle-script mini-VM) remain unbuilt, clearly-scoped follow-ups if source-
+exact event/requestId fidelity is ever wanted. Tests:
+`tests/battleScriptSelectionRejection.test.ts` (20 cases: all six causes,
+two multi-cause last-true-wins pins, the per-slot projection, the
+`rejectionReasonBySlot` presentation wiring, and all 4 STRINGID resolutions
+including the fatal-guard case), red-verified via `git stash`.
+
+**Oracle-verified (2026-08-04):** a `mechanicLab overrides.parties` trace
+(BUTTERFREE TACKLE/GUST vs. MURKROW-family TORMENT, `battle-scene-off`,
+turn 1 torments the player's just-used TACKLE, turn 2 reselects it) confirms
+the real ROM prints exactly "BUTTERFREE can't use the same / move in a row
+due to the TORMENT!" byte-for-byte matching this resolver's output.
+**Scout-doc correction found in the same probe:** contrary to
+`selection-rejection-subsystem-scout.md` §1.2's claim that the selection
+scripts' lack of `waitmessage` means "no button-press dismissal and no extra
+hold," the real ROM in fact holds the message on screen indefinitely (tested
+100+ frames) until a button is pressed, then reopens the move menu ~10-14
+frames later — `Cmd_printselectionstring`'s controller-side completion must
+gate on more than raw text-printer inactivity. This doesn't affect anything
+landed this step (no live dismiss-timing UI was built, per option (b)'s
+scope), but whoever builds option (a) or any live text-box wiring for this
+family needs the real button-gated timing, not the scout's auto-advance
+assumption. The no-PP/Choice-lock stretch traces were not run (ORDERED
+STRETCH, explicitly optional) — the Torment case above is the only
+oracle-verified cause; no-PP/Choice-lock text content is untested against
+the real ROM (only against the extracted string table, which is itself
+ROM-sourced).
 
 **Leads:** rerun `node --experimental-strip-types tools/report/
 printstring-literal-census.ts` after any `messageLines`/battle-script-program
-change (deterministic, re-derives from the tree). DEAD ids (facility gates,
-no-EXP rentals, zero-carrier moves, the sub-110 draft-floor class, unimplemented
-mechanics) are not reopened here; full 107-id list incl. all 37 DEAD gates +
-emitting script label(s) + trigger/carrier evidence in
+change (deterministic, re-derives from the tree; stays 38 UNRESOLVED after
+this step — structurally blind to the `printselectionstring` family just
+landed, per the tool's own known limitation, not re-fixed here). DEAD ids
+(facility gates, no-EXP rentals, zero-carrier moves, the sub-110 draft-floor
+class, unimplemented mechanics) are not reopened here; full 107-id list incl.
+all 37 DEAD gates + emitting script label(s) + trigger/carrier evidence in
 `docs/issue72-reachability-triage.md`.
 
 ## #73 — Terminal-seam remainder: the win/loss window's oracle-coverage gap (rung B)
