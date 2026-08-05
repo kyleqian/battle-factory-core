@@ -5,6 +5,7 @@ import { dirname, join, resolve } from "node:path";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import {
   createSceneOnMovePresentation,
+  sceneOnBulkUpView,
   type SceneOnDragonRageFieldProfile,
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
@@ -38,7 +39,7 @@ interface ProbeFrame {
     readonly matrix: readonly number[];
   }[];
   readonly tasks: readonly ({ readonly func: { readonly symbol: string }; readonly data: readonly number[] } | null)[];
-  readonly se1: { readonly status: number; readonly tracks: readonly { readonly flags: number; readonly panX: number }[] };
+  readonly se1: { readonly songHeader: number; readonly status: number; readonly tracks: readonly { readonly flags: number; readonly panX: number }[] };
   readonly scriptOffset: number | null;
 }
 
@@ -61,6 +62,7 @@ const bytes = readFileSync(output);
 const probe = JSON.parse(bytes.toString("utf8")) as {
   readonly schema: string;
   readonly sourceWindow: { readonly startFrame: number; readonly endFrame: number; readonly frameCount: number };
+  readonly sourceSymbols: { readonly SE_M_SWAGGER: number };
   readonly frames: readonly ProbeFrame[];
 };
 const evidenceHash = createHash("sha256").update(bytes).digest("hex");
@@ -135,16 +137,20 @@ for (let frame = fixture.denseWindow.startFrame;
     : breath.length === 0;
   const soundBoundary = age === 0 || age === 49 || age === 53;
   const soundShape = !soundBoundary || (
-    oracle.se1.status === 0
+    oracle.se1.songHeader === probe.sourceSymbols.SE_M_SWAGGER
+    && oracle.se1.status === 0
     && oracle.se1.tracks[0]?.flags === 131
     && Math.abs((oracle.se1.tracks[0]?.panX ?? 0) - (fixture.attacker.geometry.side === "player" ? -64 : 64)) <= 1
   );
-  const seam = { breath: predicted.breath, attackerScale: predicted.attackerScale };
-  const componentShape = growShape && breathShape && soundShape
-    && seam.breath?.x === predicted.breath?.x;
+  const seam = sceneOnBulkUpView({ ...stage, age });
+  const seamShape = seam.attackerScale.x === predicted.attackerScale.x
+    && seam.attackerScale.y === predicted.attackerScale.y
+    && seam.attackerY2 === predicted.attackerY2
+    && JSON.stringify(seam.breath) === JSON.stringify(predicted.breath);
+  const componentShape = growShape && breathShape && soundShape && seamShape;
   if (componentShape) matches += 1;
   else componentMismatches.push(
-    `frame ${frame}/age ${age}: grow=${growShape} breath=${breathShape} sound=${soundShape}`,
+    `frame ${frame}/age ${age}: grow=${growShape} breath=${breathShape} sound=${soundShape} seam=${seamShape}`,
   );
 
   const engine: EngineState = {

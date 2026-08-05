@@ -77,6 +77,6 @@ def main() -> None:
     if not required_tasks<=set(topology["tasks"]): raise RuntimeError(f"Bulk Up task topology changed: {topology}")
     if not required_templates<=set(topology["templates"]): raise RuntimeError(f"Bulk Up sprite topology changed: {topology}")
     if source[-1]["gAnimScriptActive"] or source[-1]["visualTaskCount"]: raise RuntimeError("Bulk Up window missing first inactive cleanup")
-    result={"schema":"bulk-up-dense-evidence/v1","setup":setup,"sourceWindow":{"startFrame":source[0]["frame"],"endFrame":source[-1]["frame"],"frameCount":len(source)},"sourceSymbols":{"Move_BULK_UP":start,"Move_COVET":end},"topology":topology,"frames":source}
+    result={"schema":"bulk-up-dense-evidence/v1","setup":setup,"sourceWindow":{"startFrame":source[0]["frame"],"endFrame":source[-1]["frame"],"frameCount":len(source)},"sourceSymbols":{"Move_BULK_UP":start,"Move_COVET":end,"SE_M_SWAGGER":names["se_m_swagger"]},"topology":topology,"frames":source}
     OUTPUT.write_text(json.dumps(result,separators=(",",":"))+"\n"); print(f"wrote {OUTPUT}: source {source[0]['frame']}..{source[-1]['frame']} ({len(source)} frames)")
 if __name__ == "__main__": main()

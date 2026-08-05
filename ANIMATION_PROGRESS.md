@@ -22,8 +22,8 @@
   `bulkUpEvidence.test.ts`.
 - **Measured:** player-back frames 72-175 and opponent-front frames 76-179,
   both **104/104 source-component and shared-framebuffer exact twice fresh**
-  (semantic identity also 104/104 each run). Evidence `b9077266…` /
-  `0648527d…`, RGB `b5c127f2…` / `8f2d4c93…` reproduce the fixture pins exactly.
+  (semantic identity also 104/104 each run). Evidence `2fb724ec…` /
+  `fa85b2f3…`, RGB `b5c127f2…` / `8f2d4c93…` reproduce the fixture pins exactly.
   Field profiles from fresh battler RAM: PRIMEAPE 158/158 vs ONIX 117/117
   (player-back) and ONIX 128/128 vs PRIMEAPE 158/158 (opponent-front), all
   full-HP and stat-neutral at the first dense frame.
