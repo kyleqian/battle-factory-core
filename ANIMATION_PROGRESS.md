@@ -1,5 +1,111 @@
 # Animation coverage
 
+## MOVE_BULK_UP closed — 104/104 both orientations twice-fresh, promoted to exact (2026-08-05 midday session)
+
+- **State:** BULK_UP (new move) → **exact**. Move coverage: **113/276 exact, 0
+  partial, 0 staged, 163 unsupported**. Both fixtures pin `framebufferMatching:
+  104` with status `exact`.
+- **Did:** full new-move acceptance with **zero new source components**.
+  `Move_BULK_UP` (battle_anim_scripts.s:4390) is exactly the already-exact
+  `Move_SWAGGER` prefix — ANIM_TAG_BREATH, AnimTask_GrowAndShrink,
+  playsewithpan SE_M_SWAGGER, wait, gBreathPuffSpriteTemplate, loopsewithpan
+  SE_M_SWAGGER 4,2, wait, end. The reducer (`src/animation/bulkUp.ts`) reuses
+  `swaggerGrowAndShrinkAtAge`, `swaggerBreathAtAge`, and a newly generalized
+  `growAndShrinkY2AtAge` (battle_anim_mons.c `SetBattlerSpriteYOffsetFromYScale`)
+  with the legal carrier's 64−2·7=50 picture height; the draw reuses the shared
+  SWAGGER breath asset. Staged two complete legal mechanicLab parties
+  (PRIMEAPE set 337 all-slot BULK_UP vs ONIX TACKLE, both orientations —
+  independently confirmed the lowest BULK_UP Factory carrier from the generated
+  mons data). `bulkUpProbe.py` dense 72-175 / 76-179, `bulkUpPortable.ts`,
+  `extractBulkUpAssets.ts` (Primeape back/front only; breath shared), the two
+  scene-on-portable-evidence/v1 fixtures, and `bulkUp.test.ts` +
+  `bulkUpEvidence.test.ts`.
+- **Measured:** player-back frames 72-175 and opponent-front frames 76-179,
+  both **104/104 source-component and shared-framebuffer exact twice fresh**
+  (semantic identity also 104/104 each run). Evidence `2fb724ec…` /
+  `fa85b2f3…`, RGB `b5c127f2…` / `8f2d4c93…` reproduce the fixture pins exactly.
+  Field profiles from fresh battler RAM: PRIMEAPE 158/158 vs ONIX 117/117
+  (player-back) and ONIX 128/128 vs PRIMEAPE 158/158 (opponent-front), all
+  full-HP and stat-neutral at the first dense frame.
+- **Next:** continue the zero-new-component Level-50 ladder.
+- **Notes:** BULK_UP is a **sibling move acceptance** — sharing the SWAGGER
+  grow/breath reducers accepts no other move (GROWTH and friends keep their own
+  bodies/evidence). `factoryAnimationInventory.test.ts` summary pin moved
+  112→113 / 164→163 with the promotion. No boundary widening, no new unsupported
+  barriers. Primeape opponent-front carries no idle-bob residual (x2=0), so the
+  draw needs no front idle offset for the attacker; the Onix target keeps its
+  established opponent-front x2=1.
+
+## MOVE_AGILITY closed — 87/87 both orientations twice-fresh, promoted to exact (2026-08-05 morning session)
+
+- **State:** AGILITY (new move) → **exact**. Coverage is **112/276 exact, 0
+  partial, 0 staged, 164 unsupported**. Both fixtures pin 87/87 framebuffer
+  identity through first inactive cleanup.
+- **Did:** ported the full source body for sole Level-50 carrier
+  FRONTIER_MON_LEDYBA record 40: monbg, alpha 12/8,
+  TranslateMonEllipticalRespectSide(24,6,4,4), TraceMonBlended(0,4,7,10), five
+  SE_M_DOUBLE_TEAM restarts, clone allocator/OAM overlap order, cleanup, and
+  delay 1. Added the pure reducer, typed Scene-ON seam and draw case, two legal
+  LEDYBA/ONIX scenarios, dense probe/portable fixtures, and reducer/evidence
+  Tier-1 tests.
+- **Measured:** player-back frames 217-303 reproduce evidence `6913b732…` /
+  RGB `f8633f41…`; opponent-front frames 218-304 reproduce `9f8a7cfb…` /
+  `50df74b1…`. Both are 87/87 semantic, raw-RGB, and shared-framebuffer exact
+  twice fresh.
+- **Next:** continue the zero-new-component Level-50 ladder.
+- **Notes:** supervisor review corrected the worker's false field-artifact
+  diagnosis: 85/86 pixels were stale field-profile values (probe RAM is ONIX
+  128/128 and LEDYBA 102/122 after Tackle); the last pixel required the already
+  established species-relative opponent terrain cutoff (`spriteCorner.y + 55`,
+  y=75 for LEDYBA). No boundary widening or new unsupported barrier.
+
+## MOVE_METAL_CLAW closed — 140/140 both orientations twice-fresh, promoted to exact (2026-08-05 morning session)
+
+- **State:** METAL_CLAW (new move) → **exact**. Move coverage: **111/276 exact,
+  0 partial, 0 staged, 165 unsupported**. Both fixtures pin
+  `framebufferMatching: 140` with status `exact`.
+- **Did:** full new-move acceptance reusing only established source-faithful
+  components — non-permanent `metallic_shine` (accepted HARDEN body), the
+  6×4 `gHorizontalLungeSpriteTemplate`, the `create_claw_slash_sprite`
+  5-frame art/callback, and `shake_mon_or_platform -4,1,10,SHAKE_MON_Y`. The
+  script is `loopsewithpan SE_M_HARDEN` + shine → wait → two strikes, each a
+  lunge, a delay-2 SE_M_RAZOR_WIND, a mirrored claw-slash pair at the
+  target's `BATTLER_COORD_X_2/Y_PIC_OFFSET` ±10, and the target shake.
+  Landed the reducer (`src/animation/metalClaw.ts`): shine at ages 0..95,
+  first lunge tick 98, first slashes+shake at 103, second lunge tick 112,
+  second mirrored slashes+shake at 117, 21-frame slash lifetime, and the
+  11-frame pairwise `gSpriteCoordOffsetY` pattern [0,4,4,0,0,4,4,0,0,4,0].
+  Added the typed `SceneOnMetalClawConfig/View` + `sceneOnMetalClawView`
+  seam, the `battleScene.ts` draw case (grayscale attacker + masked metal
+  sweep, lunged attacker, shaken ONIX, both claw-slash groups), the two
+  mechanic scenarios (FRONTIER_MON_CHARMANDER record 88, all four slots
+  METAL_CLAW, vs legal ONIX), `metalClawProbe.py` (dense 227-366/229-368,
+  metallic + loop-SE tasks, claw/lunge/shake sprite families, registers,
+  palettes, hardware OAM, se1 audio, RGB), `metalClawPortable.ts`, the two
+  scene-on-portable-evidence/v1 fixtures, and `metalClaw.test.ts` +
+  `metalClawEvidence.test.ts`. No new art: CHARMANDER back/front from the
+  shared battle-back/opponent-front assets, claw-slash art reused from
+  dragon-claw.json.
+- **Measured:** player-back frames 227-366 and opponent-front frames 229-368,
+  both **140/140 twice fresh** via the portable (reducer-vs-oracle lunge /
+  shake / slash semantic identity also 140/140 each run). Evidence
+  `db095360…`/`21a1e2ae…`, RGB `55859416…`/`0ff639d1…` reproduce the fixture
+  pins exactly. **Pipeline facts:** the claw-slash sprite spawns at the
+  target's `BATTLER_COORD_Y_PIC_OFFSET`, which for a player-back target is
+  the OAM centre +8 (ONIX player-back = 88, not 80 — this is why the
+  ironDefense-opponent fixture's `animationCenter {72,80}` was never
+  position-sensitive for that move). The two strikes' slash groups overlap
+  for 7 frames (the first group's 21-frame lifetime spans the second
+  strike's spawn), and the shake coordinate alternates in pairs (not
+  alternating single frames as the DRAGON_CLAW shake's own probe-derived
+  table does).
+- **Next:** continue the zero-new-component Level-50 ladder (17 remain).
+- **Notes:** the damage/HP bar resolution happens after the animation window
+  (opponent stays 110/110 throughout), so the field profile carries the
+  pre-drain HP as an immutable input. No boundary widening, no new
+  unsupported barriers. `factoryAnimationInventory.test.ts` summary pin
+  moved 110→111 / 166→165 with the promotion.
+
 ## Supervisor wind-down — three moves promoted in one session: STEEL_WING, TAIL_WHIP, IRON_DEFENSE (2026-08-04 evening session)
 
 - **State:** move coverage went **107 exact / 1 partial → 110/276 exact, 0

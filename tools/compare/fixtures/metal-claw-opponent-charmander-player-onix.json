@@ -1,0 +1,53 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-metal-claw-opponent-charmander-player-onix.json",
+  "probe": "tools/compare/metalClawProbe.py",
+  "pair": "FRONTIER_MON_CHARMANDER record 88 (opponent-front) -> legal ONIX (player-back)",
+  "orientation": "opponent-to-player",
+  "move": "METAL_CLAW",
+  "denseWindow": {
+    "startFrame": 229,
+    "endFrame": 368,
+    "frameCount": 140
+  },
+  "appStage": {
+    "presentationAge": -1
+  },
+  "attacker": {
+    "species": "CHARMANDER",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 20 },
+      "animationCenter": { "x": 176, "y": 52 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "attackerSpriteCenter": { "x": 176, "y": 52 },
+  "fieldProfile": {
+    "playerHp": 110,
+    "playerMaxHp": 110,
+    "opponentHp": 119,
+    "opponentMaxHp": 135,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "metal-claw-dense-evidence/v1",
+  "evidenceSha256": "21a1e2aed7de2e6ee682c6238c49ee48aedca0732dd77d31f284f5a6d733ebba",
+  "secondFreshEvidenceSha256": "21a1e2aed7de2e6ee682c6238c49ee48aedca0732dd77d31f284f5a6d733ebba",
+  "rawRgbSha256": "0ff639d17a8bd39279807f12c6ce58da4be6ea746a102d85747c3aa9452a2e1a",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 140,
+    "reason": "complete Scene-ON production framebuffer identity proven twice fresh"
+  }
+}

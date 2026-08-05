@@ -1,0 +1,70 @@
+{
+ "schema": "scene-on-portable-evidence/v1",
+ "oracleProfile": "battle-scene-on",
+ "scenario": "tools/battle-lab/mechanic-agility-player-ledyba-opponent-onix.json",
+ "probe": "tools/compare/agilityProbe.py",
+ "pair": "FRONTIER_MON_LEDYBA record 40 (player-back) -> legal ONIX (opponent-front)",
+ "orientation": "player-to-opponent",
+ "move": "AGILITY",
+ "denseWindow": {
+  "startFrame": 217,
+  "endFrame": 303,
+  "frameCount": 87
+ },
+ "appStage": {
+  "presentationAge": 0
+ },
+ "attacker": {
+  "species": "LEDYBA",
+  "geometry": {
+   "side": "player",
+   "spriteCorner": {
+    "x": 40,
+    "y": 59
+   },
+   "animationCenter": {
+    "x": 72,
+    "y": 91
+   },
+   "battlePositionCenter": {
+    "x": 72,
+    "y": 80
+   }
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent",
+   "spriteCorner": {
+    "x": 144,
+    "y": 10
+   },
+   "animationCenter": {
+    "x": 176,
+    "y": 42
+   },
+   "battlePositionCenter": {
+    "x": 176,
+    "y": 40
+   }
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 114,
+  "playerMaxHp": 133,
+  "opponentHp": 117,
+  "opponentMaxHp": 117,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "evidenceSchema": "agility-dense-evidence/v1",
+ "evidenceSha256": "6913b732b7f88342dea3ade53502bf6ffb03fc070a2f9eeb1b033ce819778b6f",
+ "secondFreshEvidenceSha256": "6913b732b7f88342dea3ade53502bf6ffb03fc070a2f9eeb1b033ce819778b6f",
+ "rawRgbSha256": "f8633f41ae9e3f28eb261402c6769994a0095d02e13ae3896c95154a27ea3ee9",
+ "acceptance": {
+  "status": "exact",
+  "framebufferMatching": 87,
+  "reason": "complete Scene-ON production framebuffer identity proven twice fresh"
+ }
+}

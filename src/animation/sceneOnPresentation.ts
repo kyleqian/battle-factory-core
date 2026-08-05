@@ -318,6 +318,10 @@ import {
   type SwaggerState,
 } from "./swagger.ts";
 import {
+  bulkUpAtAge,
+  type BulkUpState,
+} from "./bulkUp.ts";
+import {
   tauntAtAge,
   type TauntState,
 } from "./taunt.ts";
@@ -537,6 +541,10 @@ import {
   type DragonClawState,
 } from "./dragonClaw.ts";
 import {
+  metalClawAtAge,
+  type MetalClawState,
+} from "./metalClaw.ts";
+import {
   singNotesBackToFrontAtAge,
   singPanTaskAtAge,
   type SingNote,
@@ -564,6 +572,10 @@ import {
   type HypnosisRing,
   type HypnosisState,
 } from "./hypnosis.ts";
+import {
+  agilityAnimationAtAge,
+  type AgilityState,
+} from "./agility.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -662,7 +674,10 @@ export interface SceneOnPresentationBattler {
     | "LUVDISC"
     | "DELIBIRD"
     | "PARASECT"
-    | "PONYTA";
+    | "PONYTA"
+    | "CHARMANDER"
+    | "LEDYBA"
+    | "PRIMEAPE";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1428,6 +1443,20 @@ export interface SceneOnSwaggerConfig {
   readonly breathOrigin: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnBulkUpConfig {
+  readonly move: "BULK_UP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /**
+   * `GetBattlerSpriteCoord(attacker, X_2/Y_PIC_OFFSET)`; the legal
+   * FRONTIER_MON_PRIMEAPE_2 picture needs the shared grow/shrink Y anchoring
+   * plus the carrier's `MON_PIC_HEIGHT - 2*y_offset` picture height (50).
+   */
+  readonly breathOrigin: Readonly<{ x: number; y: number }>;
+  readonly battlerHeight: number;
+}
+
 export interface SceneOnTauntConfig {
   readonly move: "TAUNT";
   readonly attacker: SceneOnPresentationBattler;
@@ -1678,6 +1707,13 @@ export interface SceneOnTailWhipConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnAgilityConfig {
+  readonly move: "AGILITY";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSelfDestructConfig {
   readonly move: "SELF_DESTRUCT";
   readonly attacker: SceneOnPresentationBattler;
@@ -1811,6 +1847,15 @@ export interface SceneOnDragonClawConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnMetalClawConfig {
+  readonly move: "METAL_CLAW";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source battler sprite `x/y`, used to initialize BG1_X/BG1_Y. */
+  readonly attackerSpriteCenter: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnSingConfig {
   readonly move: "SING";
   readonly attacker: SceneOnPresentationBattler;
@@ -1913,6 +1958,7 @@ export type SceneOnMoveConfig =
   | SceneOnEndureConfig
   | SceneOnReversalConfig
   | SceneOnSwaggerConfig
+  | SceneOnBulkUpConfig
   | SceneOnTauntConfig
   | SceneOnScaryFaceConfig
   | SceneOnSparkConfig
@@ -1937,6 +1983,7 @@ export type SceneOnMoveConfig =
   | SceneOnSandstormConfig
   | SceneOnTailGlowConfig
   | SceneOnTailWhipConfig
+  | SceneOnAgilityConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
   | SceneOnDynamicPunchConfig
@@ -1953,6 +2000,7 @@ export type SceneOnMoveConfig =
   | SceneOnShadowBallConfig
   | SceneOnEncoreConfig
   | SceneOnDragonClawConfig
+  | SceneOnMetalClawConfig
   | SceneOnSingConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
@@ -2049,6 +2097,8 @@ export type SceneOnTailGlowPresentationState =
   SceneOnMovePresentationState<SceneOnTailGlowConfig>;
 export type SceneOnTailWhipPresentationState =
   SceneOnMovePresentationState<SceneOnTailWhipConfig>;
+export type SceneOnAgilityPresentationState =
+  SceneOnMovePresentationState<SceneOnAgilityConfig>;
 
 export interface SceneOnSupersonicView {
   readonly age: number;
@@ -2247,6 +2297,12 @@ export interface SceneOnSwaggerView extends SwaggerState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnBulkUpView extends BulkUpState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnTauntView extends TauntState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -2361,6 +2417,12 @@ export interface SceneOnTailWhipView extends TailWhipState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnAgilityView extends AgilityState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnSelfDestructView extends SelfDestructState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -2423,6 +2485,12 @@ export interface SceneOnEncoreView extends EncoreState {
 }
 
 export interface SceneOnDragonClawView extends DragonClawState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnMetalClawView extends MetalClawState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2956,7 +3024,8 @@ export function createSceneOnMovePresentation<
     | SceneOnHeadbuttConfig | SceneOnBodySlamConfig | SceneOnSlamConfig
     | SceneOnSecretPowerConfig
     | SceneOnWhirlwindConfig | SceneOnBlockConfig
-    | SceneOnIronDefenseConfig,
+    | SceneOnIronDefenseConfig
+    | SceneOnMetalClawConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -4226,6 +4295,26 @@ export function sceneOnSwaggerView(
   };
 }
 
+/** `age=0` is Move_BULK_UP's first displayed GrowAndShrink task frame. */
+export function sceneOnBulkUpView(
+  state: SceneOnMovePresentationState,
+): SceneOnBulkUpView {
+  if (state.config.move !== "BULK_UP") {
+    throw new Error(`expected BULK_UP presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...bulkUpAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.breathOrigin,
+      state.config.battlerHeight,
+    ),
+  };
+}
+
 /** `age=0` is the first displayed thought-bubble software OAM. */
 export function sceneOnTauntView(
   state: SceneOnMovePresentationState,
@@ -4744,6 +4833,21 @@ export function sceneOnTailWhipView(
   };
 }
 
+/** `age=0` is Move_AGILITY's first active source-script frame. */
+export function sceneOnAgilityView(
+  state: SceneOnAgilityPresentationState,
+): SceneOnAgilityView {
+  if (state.config.move !== "AGILITY") {
+    throw new Error(`expected AGILITY presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...agilityAnimationAtAge(state.age, state.config.attacker.geometry.side),
+  };
+}
+
 /** `age=0` is the first software-OAM explosion sprite. */
 export function sceneOnSelfDestructView(
   state: SceneOnMovePresentationState,
@@ -5072,6 +5176,26 @@ export function sceneOnDragonClawView(
       attackerSide: state.config.attacker.geometry.side,
       attackerCenter: state.config.attacker.geometry.battlePositionCenter,
       targetCenter: state.config.target.geometry.animationCenter,
+    }),
+  };
+}
+
+/** `age=0` is the MetallicShine task creation frame (first displayed step at 2). */
+export function sceneOnMetalClawView(
+  state: SceneOnMovePresentationState,
+): SceneOnMetalClawView {
+  if (state.config.move !== "METAL_CLAW") {
+    throw new Error(`expected METAL_CLAW presentation, got ${state.config.move}`);
+  }
+  const config = state.config as SceneOnMetalClawConfig;
+  return {
+    age: state.age,
+    attacker: config.attacker,
+    target: config.target,
+    ...metalClawAtAge(state.age, {
+      attackerSide: config.attacker.geometry.side,
+      attackerCenter: config.attackerSpriteCenter,
+      targetCenter: config.target.geometry.animationCenter,
     }),
   };
 }

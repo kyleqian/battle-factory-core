@@ -585,6 +585,7 @@ import megaPunchAsset from "../animation/assets/megaPunch.json" with { type: "js
 import rollingKickAsset from "../animation/assets/rollingKick.json" with { type: "json" };
 import lowKickAsset from "../animation/assets/lowKick.json" with { type: "json" };
 import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
+import bulkUpAsset from "../animation/assets/bulk-up.json" with { type: "json" };
 import tauntAsset from "../animation/assets/taunt.json" with { type: "json" };
 import scaryFaceAsset from "../animation/assets/scary-face.json" with { type: "json" };
 import charmAsset from "../animation/assets/charm.json" with { type: "json" };
@@ -957,9 +958,11 @@ import {
   sceneOnReversalView,
   sceneOnTailGlowView,
   sceneOnTailWhipView,
+  sceneOnAgilityView,
   sceneOnDizzyPunchView,
   sceneOnAstonishView,
   sceneOnSwaggerView,
+  sceneOnBulkUpView,
   sceneOnTauntView,
   sceneOnScaryFaceView,
   sceneOnSelfDestructView,
@@ -996,6 +999,7 @@ import {
   sceneOnNeedleArmView,
   sceneOnSandstormView,
   sceneOnDragonClawView,
+  sceneOnMetalClawView,
   sceneOnSingView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
@@ -1051,6 +1055,7 @@ import {
   type SceneOnReversalConfig,
   type SceneOnTailGlowConfig,
   type SceneOnTailWhipConfig,
+  type SceneOnAgilityPresentationState,
   type SceneOnDizzyPunchConfig,
   type SceneOnAstonishConfig,
 } from "../animation/sceneOnPresentation.ts";
@@ -1338,7 +1343,9 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
 const ponytaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PONYTA!;
+const ledybaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LEDYBA!;
 const clamperlFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CLAMPERL!;
+const charmanderFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CHARMANDER!;
 const houndourFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HOUNDOUR!;
 const delibirdFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DELIBIRD!;
 const mareepFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAREEP!;
@@ -1595,6 +1602,10 @@ const swaggerArt = swaggerAsset as {
   anger: { tileset: Tileset; palette: RgbColor[] };
   rattataBack: { tileset: Tileset; palette: RgbColor[] };
   rattataFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const bulkUpArt = bulkUpAsset as {
+  primeapeBack: { tileset: Tileset; palette: RgbColor[] };
+  primeapeFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const tauntArt = tauntAsset as {
   thoughtBubble: { tileset: Tileset; palette: RgbColor[] };
@@ -2492,7 +2503,9 @@ const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
 const ponytaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PONYTA!;
+const ledybaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LEDYBA!;
 const clamperlBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CLAMPERL!;
+const charmanderBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CHARMANDER!;
 const houndourBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HOUNDOUR!;
 const magbyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGBY!;
 const mareepBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAREEP!;
@@ -20137,6 +20150,169 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "AGILITY") {
+    const agilityState = state as SceneOnAgilityPresentationState;
+    const view = sceneOnAgilityView(agilityState);
+    // RunTasks writes the elliptical task's x2/y2 after BuildOamBuffer, so
+    // the battler offset latches one age late — the same shared latch as the
+    // other Scene-ON mon-translation cases.
+    const displayed = sceneOnAgilityView({
+      ...agilityState,
+      age: agilityState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "LEDYBA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LEDYBA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged AGILITY pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent
+      ? ledybaBackSprite
+      : ledybaFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onixIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const attackerCorner = view.attacker.geometry.spriteCorner;
+    const attackerClipY = opponentToPlayer
+      ? attackerCorner.y + 55
+      : 160;
+    // The target is drawn first so the attacker's ellipse slides over it.
+    if (playerToOpponent) {
+      drawSpriteSheet(
+        fb, targetSprite.tileset, targetSprite.palette,
+        view.target.geometry.spriteCorner.x + onixIdle.x2,
+        view.target.geometry.spriteCorner.y + onixIdle.y2,
+      );
+      drawSpriteSheet(
+        fb, attackerSprite.tileset, attackerSprite.palette,
+        attackerCorner.x, attackerCorner.y,
+      );
+      if (
+        displayed.attackerOffset.x2 !== 0
+        || displayed.attackerOffset.y2 !== 0
+        || displayed.afterimages.length > 0
+      ) {
+        eraseSpriteFootprint(fb, attackerSprite.tileset, attackerCorner);
+        drawSpriteSheetClippedBelow(
+          fb, attackerSprite.tileset, attackerSprite.palette,
+          attackerCorner.x + displayed.attackerOffset.x2,
+          attackerCorner.y + displayed.attackerOffset.y2,
+          attackerClipY,
+        );
+      }
+    } else {
+      drawSpriteSheet(
+        fb, targetSprite.tileset, targetSprite.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+      );
+      drawSpriteSheet(
+        fb, attackerSprite.tileset, attackerSprite.palette,
+        attackerCorner.x, attackerCorner.y,
+      );
+      if (
+        displayed.attackerOffset.x2 !== 0
+        || displayed.attackerOffset.y2 !== 0
+        || displayed.afterimages.length > 0
+      ) {
+        eraseSpriteFootprint(fb, attackerSprite.tileset, attackerCorner, attackerClipY);
+        drawSpriteSheetClippedBelow(
+          fb, attackerSprite.tileset, attackerSprite.palette,
+          attackerCorner.x + displayed.attackerOffset.x2,
+          attackerCorner.y + displayed.attackerOffset.y2,
+          attackerClipY,
+        );
+      }
+    }
+    // OAM-tie winner: SortSprites' stable y tie puts the same-priority clone
+    // with the larger OAM y first (front). In every AGILITY overlap pair the
+    // older slot-3 clone carries the larger y2, so it wins the overlap (the
+    // same y-tie QUICK_ATTACK's accepted clones pin, just the other slot).
+    const tieWinner = displayed.afterimages.length > 1
+      ? [...displayed.afterimages].sort((a, b) => b.y2 - a.y2)[0]!
+      : null;
+    for (const image of displayed.afterimages) {
+      const skipMask = tieWinner && image !== tieWinner
+        ? turn9QuickAttackOpaqueMask(
+            attackerSprite.tileset,
+            attackerCorner.x + tieWinner.x2,
+            attackerCorner.y + tieWinner.y2,
+            attackerClipY,
+          )
+        : null;
+      if (skipMask) {
+        drawSpriteSheetBlendedOverFbSkipping(
+          fb,
+          attackerSprite.tileset,
+          attackerSprite.palette,
+          attackerCorner.x + image.x2,
+          attackerCorner.y + image.y2,
+          12,
+          8,
+          attackerClipY,
+          skipMask,
+        );
+      } else {
+        drawSpriteSheetBlendedOverFb(
+          fb,
+          attackerSprite.tileset,
+          attackerSprite.palette,
+          attackerCorner.x + image.x2,
+          attackerCorner.y + image.y2,
+          12,
+          8,
+          attackerClipY,
+        );
+      }
+    }
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "LEDYBA",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LEDYBA" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LEDYBA used" : "Foe LEDYBA used",
+      "AGILITY!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "TWINEEDLE") {
     const needleState =
       state as SceneOnMovePresentationState<SceneOnTwineedleConfig>;
@@ -27311,6 +27487,117 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "BULK_UP") {
+    const view = sceneOnBulkUpView(state);
+    const displayed = sceneOnBulkUpView({ ...state, age: state.age - 1 });
+    const affineDisplayed = sceneOnBulkUpView({ ...state, age: state.age - 2 });
+    const playerToOpponent =
+      view.attacker.species === "PRIMEAPE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "PRIMEAPE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged BULK_UP pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const primeapeSource = playerToOpponent ? bulkUpArt.primeapeBack : {
+      ...bulkUpArt.primeapeFront,
+      tileset: {
+        columns: 8, rows: 8, tiles: bulkUpArt.primeapeFront.tileset.tiles.slice(0, 64),
+      },
+    };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const attackerIdle = opponentToPlayer
+      ? (speciesFrontIdleRestOffset("PRIMEAPE") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    drawSpriteSheetAffineStretch(
+      fb,
+      primeapeSource.tileset,
+      primeapeSource.palette,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+      affineDisplayed.attackerScale.x,
+      affineDisplayed.attackerScale.y,
+      affineDisplayed.attackerY2,
+      { r: 0, g: 0, b: 0 },
+      0,
+      affineDisplayed.attackerScale.x !== 256
+        || affineDisplayed.attackerScale.y !== 256,
+    );
+    if (displayed.breath) {
+      const currentBreath = view.breath;
+      const breathFrame = state.age === 53 || state.age === 93 || state.age === 97
+        ? (currentBreath?.frame ?? displayed.breath.frame)
+        : displayed.breath.frame;
+      const frameStart = breathFrame * 4;
+      const drawBreath = displayed.breath.hFlip
+        ? drawSpriteSheetHFlip : drawSpriteSheet;
+      drawBreath(
+        fb,
+        {
+          columns: 2,
+          rows: 2,
+          tiles: swaggerArt.breath.tileset.tiles.slice(frameStart, frameStart + 4),
+        },
+        swaggerArt.breath.palette,
+        displayed.breath.x - 8,
+        displayed.breath.y - 8,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "PRIMEAPE";
+    const playerSpecies = playerToOpponent ? "PRIMEAPE" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "PRIMEAPE used" : "Foe PRIMEAPE used",
+      "BULK UP!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "TAUNT") {
     const view = sceneOnTauntView(state);
     // Sprite callbacks mutate software OAM after the current buffer transfer;
@@ -34078,6 +34365,151 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "ALTARIA used" : "Foe ALTARIA used",
       "DRAGON CLAW!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "METAL_CLAW") {
+    const view = sceneOnMetalClawView(state);
+    // OAM/palette/register writes become visible on the following display
+    // latch, so the shine sweep, the lunge offset, the target shake, and the
+    // claw slashes are all rendered one age behind the source state (same
+    // seam as HARDEN/IRON_DEFENSE/DRAGON_CLAW).
+    const displayed = sceneOnMetalClawView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "CHARMANDER"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CHARMANDER"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged METAL_CLAW pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? charmanderBackSprite : charmanderFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      state.age >= 2 && displayed.metallic.attackerGrayscale
+        ? grayscalePalette(attackerSprite.palette)
+        : attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0)
+        + displayed.targetGlobalY,
+    );
+    // Both battlers use OBJ priority 2; opponent-front sits below player-back.
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    if (state.age >= 2 && displayed.metallic.metalBgLoaded) {
+      drawMetallicShineMasked(
+        fb,
+        attackerSprite,
+        view.attacker.geometry.spriteCorner,
+        displayed.metallic.bg1X,
+        displayed.metallic.bg1Y,
+      );
+    }
+    const slashes = [...displayed.slashes].sort((a, b) => a.y - b.y);
+    for (const slash of slashes) {
+      const claw = subTileset(
+        dragonClawArt.clawSlash.tileset,
+        slash.animationFrame * 4,
+        4,
+      );
+      if (slash.animation === 1) {
+        drawSpriteSheetHFlip(
+          fb,
+          claw,
+          dragonClawArt.clawSlash.palette,
+          slash.x - 16,
+          slash.y - 16,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          claw,
+          dragonClawArt.clawSlash.palette,
+          slash.x - 16,
+          slash.y - 16,
+        );
+      }
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "CHARMANDER";
+    const playerSpecies = playerToOpponent ? "CHARMANDER" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CHARMANDER used" : "Foe CHARMANDER used",
+      "METAL CLAW!",
       99,
     );
     return;
