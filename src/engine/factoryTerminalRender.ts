@@ -10,6 +10,11 @@ import {
 } from "./prebattleRoomRender.ts";
 import {
   factoryTerminalActivePage,
+  factoryTerminalDeclineBoxClearAge,
+  factoryTerminalDeclineBoxGoneAge,
+  factoryTerminalDeclineEdgeAge,
+  factoryTerminalDeclineMenuClearAge,
+  factoryTerminalDeclineTextFirstAge,
   factoryTerminalPageTextFirstAge,
   factoryTerminalPageVisualPhase,
   factoryTerminalRecordPromptFirstAge,
@@ -335,6 +340,7 @@ function drawClippedMessageText(
 function drawRecordPrompt(
   fb: Uint8Array,
   state: FactoryTerminalPresentationState,
+  suppressMenu = false,
 ): void {
   const release = state.recordPromptReleaseAge;
   const textFirstAge = factoryTerminalRecordPromptTextFirstAge(state);
@@ -390,7 +396,7 @@ function drawRecordPrompt(
     MESSAGE_ORIGIN.x,
     137,
   );
-  if (factoryTerminalRecordMenuVisible(state)) {
+  if (factoryTerminalRecordMenuVisible(state) && !suppressMenu) {
     drawStandardWindowFrame(fb, 160, 64, 4, 4);
     drawStandardWindowText(fb, "YES", 176, 73);
     drawStandardWindowText(fb, "NO", 176, 89);
@@ -400,6 +406,41 @@ function drawRecordPrompt(
       168,
       73 + state.recordMenuCursor * 16,
     );
+  }
+}
+
+/**
+ * The EndRecordBattle decline span (recordChoice === "no"): the YES/NO
+ * multichoice vanishes `declineMenuClearDelay` ticks after the decline edge
+ * while the scrolled record question stays drawn until `declineTextClearDelay`,
+ * then FillWindowPixelBuffer wipes the box and the farewell prints 1 glyph/tick
+ * from `declineTextFirstDelay`, holds (no wait-cursor), and stays fully drawn
+ * through its own A dismiss + `declineReleaseClearDelay` before the box closes
+ * into the bare free-roam Lobby field (the caller returns the field-only frame
+ * once `declineBoxGoneAge` is reached).
+ */
+function drawDeclineFarewell(
+  fb: Uint8Array,
+  state: FactoryTerminalPresentationState,
+): void {
+  const menuClearAge = factoryTerminalDeclineMenuClearAge(state)!;
+  const boxClearAge = factoryTerminalDeclineBoxClearAge(state)!;
+  const textFirstAge = factoryTerminalDeclineTextFirstAge(state)!;
+  const lines = state.profile.declineFarewell;
+  if (state.age < menuClearAge) {
+    drawRecordPrompt(fb, state);
+    return;
+  }
+  if (state.age < boxClearAge) {
+    drawRecordPrompt(fb, state, true);
+    return;
+  }
+  if (state.age >= textFirstAge) {
+    const chars = Math.min(
+      lines[0].length + lines[1].length,
+      state.age - textFirstAge + 1,
+    );
+    drawPageText(fb, lines, chars);
   }
 }
 
@@ -564,6 +605,16 @@ export function renderFactoryTerminalPresentation(
   const objY = fadeAge < 0 ? 16 : objFadeY(fadeAge, FADE_IN);
   const fb = renderFactoryTerminalField(bgY, objY);
   if (state.age < state.profile.messageFrameAge) return fb;
+  // EndRecordBattle's `closemessage` closes the farewell box into the
+  // free-roam Lobby field: from the decline box-gone age onward the box frame
+  // itself is no longer drawn, leaving the bare (already byte-exact) field.
+  if (factoryTerminalDeclineEdgeAge(state) !== null) {
+    const boxGoneAge = factoryTerminalDeclineBoxGoneAge(state);
+    if (boxGoneAge !== null && state.age >= boxGoneAge) return fb;
+    drawMessageBoxFrame(fb);
+    drawDeclineFarewell(fb, state);
+    return fb;
+  }
   drawMessageBoxFrame(fb);
   if (isFactoryTerminalRoundWon(state)) {
     const recordFirstAge = factoryTerminalRecordPromptFirstAge(state);

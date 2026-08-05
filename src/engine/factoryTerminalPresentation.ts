@@ -13,6 +13,35 @@ export interface FactoryTerminalRecordProfile {
   readonly recordMenuDrawDelay: number;
   readonly recordMenuVisibleDelay: number;
   readonly recordMenuInputDelay: number;
+  /**
+   * The decline branch of the shared record question (NO, or B, on the
+   * multichoice) -> EndRecordBattle, the LAST step of either terminal flow.
+   * Source: BattleFrontier_BattleFactoryLobby/scripts.inc:81-94 -- after
+   * `switch VAR_RESULT` declines, EventScript_EndRecordBattle runs
+   * `msgbox Text_LookForwardToNextVisit, MSGBOX_DEFAULT; closemessage;
+   * setvar VAR_TEMP_CHALLENGE_STATUS, 255; releaseall; end`. Every age below
+   * is relative to the decline edge (the terminal tick the multichoice's NO
+   * choice is stored): the multichoice window itself vanishes
+   * `declineMenuClearDelay` ticks in (the oracle's first pixel change is the
+   * YES/NO window clearing -- the scrolled record question stays drawn until
+   * `declineTextClearDelay`), FillWindowPixelBuffer then wipes the box and
+   * the farewell prints 1 glyph/tick from `declineTextFirstDelay` (dense
+   * 1-tick probe: edge+1 multichoice gone, edge+3 box clears, edge+4 first
+   * glyph, 35-glyph line -> edge+38 last glyph, held edge+39+), the farewell
+   * message's own A dismiss is accepted from `declineInputDelay` (last
+   * glyph + 1, the MSGBOX_DEFAULT waitmessage gate; the real second A lands
+   * at edge+102), and the box stays fully drawn through the dismiss for
+   * `declineReleaseClearDelay` ticks before closing into the free-roam Lobby
+   * field. The farewell holds a plain message box with NO wait-cursor
+   * (measured zero red down-arrow pixels across the whole hold; MSGBOX_DEFAULT
+   * prints then blocks on waitmessage).
+   */
+  readonly declineMenuClearDelay: number;
+  readonly declineTextClearDelay: number;
+  readonly declineTextFirstDelay: number;
+  readonly declineInputDelay: number;
+  readonly declineReleaseClearDelay: number;
+  readonly declineFarewell: readonly [string, string];
 }
 
 export interface FactoryTerminalLossProfile extends FactoryTerminalRecordProfile {
@@ -110,6 +139,15 @@ export const FACTORY_LOSS_TERMINAL_PROFILE: FactoryTerminalLossProfile =
     recordMenuDrawDelay: 23,
     recordMenuVisibleDelay: 23,
     recordMenuInputDelay: 25,
+    declineMenuClearDelay: 1,
+    declineTextClearDelay: 3,
+    declineTextFirstDelay: 4,
+    declineInputDelay: 39,
+    declineReleaseClearDelay: 2,
+    declineFarewell: Object.freeze([
+      "We look forward to your next visit.",
+      "",
+    ] as const),
     pages: Object.freeze([
       Object.freeze(["Thank you for participating!", ""] as const),
       Object.freeze([
@@ -157,6 +195,15 @@ export const FACTORY_ROUND_WON_TERMINAL_PROFILE: FactoryTerminalRoundWonProfile 
     recordMenuDrawDelay: 22,
     recordMenuVisibleDelay: 23,
     recordMenuInputDelay: 24,
+    declineMenuClearDelay: 1,
+    declineTextClearDelay: 3,
+    declineTextFirstDelay: 4,
+    declineInputDelay: 39,
+    declineReleaseClearDelay: 2,
+    declineFarewell: Object.freeze([
+      "We look forward to your next visit.",
+      "",
+    ] as const),
     congratulations: Object.freeze([
       "Congratulations! You’ve won seven",
       "straight Battle Swap matches!",
@@ -197,6 +244,11 @@ export interface FactoryTerminalLossPresentationState {
   readonly recordPromptReleaseAge: number | null;
   readonly recordMenuCursor: 0 | 1;
   readonly recordChoice: "yes" | "no" | "cancel" | null;
+  /** Age the record menu's NO choice was stored -- the decline edge all
+   *  EndRecordBattle clocks are relative to; null until the decline branch. */
+  readonly declineFarewellReleaseAge: number | null;
+  /** Age the farewell message's own A dismiss is stored. */
+  readonly declineDismissAge: number | null;
 }
 
 export interface FactoryTerminalRoundWonPresentationState {
@@ -218,6 +270,11 @@ export interface FactoryTerminalRoundWonPresentationState {
   readonly recordPromptReleaseAge: number | null;
   readonly recordMenuCursor: 0 | 1;
   readonly recordChoice: "yes" | "no" | "cancel" | null;
+  /** Age the record menu's NO choice was stored -- the decline edge all
+   *  EndRecordBattle clocks are relative to; null until the decline branch. */
+  readonly declineFarewellReleaseAge: number | null;
+  /** Age the farewell message's own A dismiss is stored. */
+  readonly declineDismissAge: number | null;
 }
 
 export type FactoryTerminalPresentationState =
@@ -249,6 +306,8 @@ export function createFactoryTerminalLossPresentation(
     recordPromptReleaseAge: null,
     recordMenuCursor: 1,
     recordChoice: null,
+    declineFarewellReleaseAge: null,
+    declineDismissAge: null,
   };
 }
 
@@ -277,6 +336,8 @@ export function createFactoryTerminalRoundWonPresentation(
     recordPromptReleaseAge: null,
     recordMenuCursor: 1,
     recordChoice: null,
+    declineFarewellReleaseAge: null,
+    declineDismissAge: null,
   };
 }
 
@@ -442,6 +503,48 @@ export function factoryTerminalRecordMenuInputReady(
       state.recordPromptReleaseAge + state.profile.recordMenuInputDelay;
 }
 
+export function factoryTerminalDeclineEdgeAge(
+  state: FactoryTerminalPresentationState,
+): number | null {
+  return state.declineFarewellReleaseAge;
+}
+
+export function factoryTerminalDeclineMenuClearAge(
+  state: FactoryTerminalPresentationState,
+): number | null {
+  const edge = state.declineFarewellReleaseAge;
+  return edge === null
+    ? null
+    : edge + state.profile.declineMenuClearDelay;
+}
+
+export function factoryTerminalDeclineBoxClearAge(
+  state: FactoryTerminalPresentationState,
+): number | null {
+  const edge = state.declineFarewellReleaseAge;
+  return edge === null
+    ? null
+    : edge + state.profile.declineTextClearDelay;
+}
+
+export function factoryTerminalDeclineTextFirstAge(
+  state: FactoryTerminalPresentationState,
+): number | null {
+  const edge = state.declineFarewellReleaseAge;
+  return edge === null
+    ? null
+    : edge + state.profile.declineTextFirstDelay;
+}
+
+export function factoryTerminalDeclineBoxGoneAge(
+  state: FactoryTerminalPresentationState,
+): number | null {
+  const dismiss = state.declineDismissAge;
+  return dismiss === null
+    ? null
+    : dismiss + state.profile.declineReleaseClearDelay;
+}
+
 export function factoryTerminalRoundWonBattlePointMutationAge(
   state: FactoryTerminalRoundWonPresentationState,
 ): number | null {
@@ -504,11 +607,17 @@ function advanceFactoryTerminalRecordPrompt<
   },
 ): Pick<
   State,
-  "recordPromptReleaseAge" | "recordMenuCursor" | "recordChoice"
+  | "recordPromptReleaseAge"
+  | "recordMenuCursor"
+  | "recordChoice"
+  | "declineFarewellReleaseAge"
+  | "declineDismissAge"
 > {
   let recordPromptReleaseAge = state.recordPromptReleaseAge;
   let recordMenuCursor = state.recordMenuCursor;
   let recordChoice = state.recordChoice;
+  let declineFarewellReleaseAge = state.declineFarewellReleaseAge;
+  let declineDismissAge = state.declineDismissAge;
   const atNextAge = { ...state, age };
   if (
     recordPromptReleaseAge === null &&
@@ -528,7 +637,29 @@ function advanceFactoryTerminalRecordPrompt<
       recordChoice = recordMenuCursor === 0 ? "yes" : "no";
     }
   }
-  return { recordPromptReleaseAge, recordMenuCursor, recordChoice };
+  // EndRecordBattle decline edge: NO (or, in the real game, B) on the record
+  // multichoice -> `msgbox Text_LookForwardToNextVisit` + a second dismiss
+  // before `releaseall`. Store the edge so every decline clock can be
+  // source-relative to it; the YES/cancel branches are intentionally left
+  // unconsumed (out of scope: the YES record-playback flow).
+  if (recordChoice === "no" && declineFarewellReleaseAge === null) {
+    declineFarewellReleaseAge = age;
+  }
+  if (
+    declineFarewellReleaseAge !== null &&
+    declineDismissAge === null &&
+    input.pressedA &&
+    age >= declineFarewellReleaseAge + state.profile.declineInputDelay
+  ) {
+    declineDismissAge = age;
+  }
+  return {
+    recordPromptReleaseAge,
+    recordMenuCursor,
+    recordChoice,
+    declineFarewellReleaseAge,
+    declineDismissAge,
+  };
 }
 
 export function advanceFactoryTerminalRoundWonPresentation(

@@ -21,6 +21,11 @@ import {
   FACTORY_ROUND_WON_TERMINAL_PROFILE,
   factoryTerminalActivePage,
   factoryTerminalCompletion,
+  factoryTerminalDeclineBoxClearAge,
+  factoryTerminalDeclineBoxGoneAge,
+  factoryTerminalDeclineEdgeAge,
+  factoryTerminalDeclineMenuClearAge,
+  factoryTerminalDeclineTextFirstAge,
   factoryTerminalPageTextFirstAge,
   factoryTerminalPageVisualPhase,
   factoryTerminalRecordMenuDrawn,
@@ -271,6 +276,126 @@ describe("Factory Scene-OFF loss terminal adapter", () => {
     expect(engine.roundController!.rules).toBe(rules);
     expect(engine.roundController!.rules.phase).toBe("roundLost");
     expect(engine.roundController!.rules.rngValue).toBe(0x89abcdef);
+  });
+
+  // The canonical decline line: page-0 A at 301, page-1 A at 602, record
+  // question A at 904 (the app's release ages are the tick after the
+  // fixture's own dismiss presses), then the record menu's NO at the decline
+  // edge (age 1757 = frame 4989) and the farewell's own second A at the
+  // dismiss edge (age 1859 = frame 5091). All ages match the committed
+  // scratch-loss-beyond-boundary-probe schedule byte-for-byte.
+  function declinedTerminal(command: ReturnType<typeof lossController>["presentation"]["command"]) {
+    let terminal = createFactoryTerminalLossPresentation(command);
+    terminal = advanceTo(terminal, 301);
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
+    terminal = advanceTo(terminal, 602);
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
+    terminal = advanceTo(terminal, 904);
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
+    terminal = advanceTo(terminal, 1756);
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
+    return terminal;
+  }
+
+  it("stores the decline edge on the record menu's NO choice and dismisses on the farewell's own second A", () => {
+    const command = lossController().presentation!.command;
+    if (command.type !== "roundLost") throw new Error("expected roundLost");
+    expect(FACTORY_LOSS_TERMINAL_PROFILE.declineFarewell).toEqual([
+      "We look forward to your next visit.",
+      "",
+    ]);
+    const terminal = declinedTerminal(command);
+    expect(terminal).toMatchObject({
+      age: 1757,
+      recordPromptReleaseAge: 905,
+      recordChoice: "no",
+      declineFarewellReleaseAge: 1757,
+    });
+    expect(factoryTerminalDeclineEdgeAge(terminal)).toBe(1757);
+    // Dense 1-tick oracle probe of the decline span (frames 4988-5093):
+    // the multichoice window clears at the decline edge + 1 (frame 4990),
+    // the scrolled record question text clears at edge + 3 (frame 4992),
+    // the farewell's first glyph "W" lands at edge + 4 (frame 4993), the
+    // 35-glyph line finishes at edge + 38 (frame 5027) and holds from
+    // edge + 39 (frame 5028) with no wait-cursor.
+    expect(factoryTerminalDeclineMenuClearAge(terminal)).toBe(1758);
+    expect(factoryTerminalDeclineBoxClearAge(terminal)).toBe(1760);
+    expect(factoryTerminalDeclineTextFirstAge(terminal)).toBe(1761);
+    expect(FACTORY_LOSS_TERMINAL_PROFILE.declineFarewell[0].length).toBe(35);
+    // The farewell's own A dismiss is accepted from edge + 39 (last glyph
+    // + 1, the MSGBOX_DEFAULT waitmessage gate); the real second A (fixture
+    // press at frames 5090-5091) registers at age 1859.
+    let dismissed = advanceTo(terminal, 1858);
+    dismissed = advanceFactoryTerminalPresentation(dismissed, {
+      pressedA: true,
+    });
+    expect(dismissed).toMatchObject({
+      age: 1859,
+      declineDismissAge: 1859,
+    });
+    expect(factoryTerminalDeclineBoxGoneAge(dismissed)).toBe(1861);
+  });
+
+  it("renders the decline span: menu clears at edge+1, box wipes at edge+3, first 'W' at edge+4, bare field from dismiss+2", () => {
+    const command = lossController().presentation!.command;
+    if (command.type !== "roundLost") throw new Error("expected roundLost");
+    const atAge = (age: number) => {
+      let terminal = declinedTerminal(command);
+      terminal = advanceTo(terminal, age);
+      return renderFactoryTerminalPresentation(
+        terminal,
+        () => createFramebuffer(),
+      );
+    };
+    const px = (fb: Uint8Array, x: number, y: number) => {
+      const i = (y * 240 + x) * 4;
+      return [fb[i]!, fb[i + 1]!, fb[i + 2]!];
+    };
+    const darkAt = (fb: Uint8Array, x: number, y: number) =>
+      fb[(y * 240 + x) * 4]! < 200 &&
+      fb[(y * 240 + x) * 4 + 1]! < 200 &&
+      fb[(y * 240 + x) * 4 + 2]! < 200;
+    // Edge (1757): the YES/NO multichoice window border is still drawn at
+    // its source (160,64) position.
+    const held = atAge(1757);
+    expect(px(held, 162, 65)).toEqual([41, 49, 49]);
+    // Edge + 1 (1758): the multichoice window is gone (its border pixel now
+    // reads as the field behind it) while the scrolled record question text
+    // is still drawn in the box.
+    const menuCleared = atAge(1758);
+    expect(px(menuCleared, 162, 65)).not.toEqual([41, 49, 49]);
+    expect(darkAt(menuCleared, 16, 124)).toBe(true);
+    // Edge + 3 (1760): FillWindowPixelBuffer wipes the box interior (the
+    // farewell has not started typing).
+    const boxCleared = atAge(1760);
+    expect(darkAt(boxCleared, 16, 124)).toBe(false);
+    expect(darkAt(boxCleared, 40, 127)).toBe(false);
+    // Edge + 4 (1761): the "W" of "We look forward to your next visit."
+    // prints at the box's line-1 origin (x16-21, y124-132), same drawer the
+    // record prompt's own "W" used.
+    const firstGlyph = atAge(1761);
+    expect(firstGlyph).not.toEqual(boxCleared);
+    expect(darkAt(firstGlyph, 16, 124)).toBe(true);
+    expect(darkAt(firstGlyph, 20, 124)).toBe(true);
+    expect(darkAt(firstGlyph, 17, 130)).toBe(true);
+    // Edge + 102 (1859) is the real second A: the farewell stays fully drawn
+    // through the dismiss, then the box closes into the bare Lobby field from
+    // dismiss + 2 (1861) -- the field-only frame equals renderFactoryTerminalField.
+    let dismissed = advanceTo(declinedTerminal(command), 1858);
+    dismissed = advanceFactoryTerminalPresentation(dismissed, {
+      pressedA: true,
+    });
+    expect(dismissed.age).toBe(1859);
+    const stillHeld = renderFactoryTerminalPresentation(
+      advanceTo(dismissed, 1860),
+      () => createFramebuffer(),
+    );
+    expect(darkAt(stillHeld, 16, 124)).toBe(true);
+    const boxGone = renderFactoryTerminalPresentation(
+      advanceTo(dismissed, 1861),
+      () => createFramebuffer(),
+    );
+    expect(boxGone).toEqual(renderFactoryTerminalField());
   });
 
   it("holds the released page for nextPageVisualDelay ticks, then clears it and starts the next page typing the same tick (the box clear/reopen handoff)", () => {
