@@ -284,7 +284,9 @@ describe("Factory Scene-OFF loss terminal adapter", () => {
   // edge (age 1757 = frame 4989) and the farewell's own second A at the
   // dismiss edge (age 1859 = frame 5091). All ages match the committed
   // scratch-loss-beyond-boundary-probe schedule byte-for-byte.
-  function declinedTerminal(command: ReturnType<typeof lossController>["presentation"]["command"]) {
+  function declinedTerminal(
+    command: Parameters<typeof createFactoryTerminalLossPresentation>[0],
+  ) {
     let terminal = createFactoryTerminalLossPresentation(command);
     terminal = advanceTo(terminal, 301);
     terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
