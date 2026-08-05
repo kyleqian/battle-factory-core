@@ -55,7 +55,7 @@ export type PartyBallState = "empty" | "healthy" | "status" | "fainted";
  * `BattleScript_StatDown`, `reference/pokeemerald/data/battle_scripts_1.s:
  * 513,559`; `BattleScript_AllStatsUp*`'s five identically-shaped per-stat
  * blocks, `:3464,3469,3474,3479,3483`) but not modeled for every message kind
- * here -- see `STAT_CHANGE_MESSAGE_IDS` at the call site.
+ * here -- see `WAITMESSAGE_LONG_MESSAGE_IDS` at the call site.
  */
 export type BattleMessageTiming = Readonly<{ minimumFrames: 24; holdFrames: 0 | 64 }>;
 export type BattleMoveAnimationTiming = Readonly<{ minimumFrames: number }>;
@@ -381,6 +381,19 @@ export type CreateBattleResolutionPresentationInput = Readonly<{
 }>;
 
 const MESSAGE_TIMING = Object.freeze({ minimumFrames: 24, holdFrames: 0 } as const);
+/** `B_WAIT_TIME_LONG` (`reference/pokeemerald/include/constants/battle.h:324`). */
+export const WAITMESSAGE_LONG_HOLD_FRAMES = 64;
+/**
+ * Shared post-print hold for every message id whose emitting script prints it
+ * and then runs `waitmessage B_WAIT_TIME_LONG`. The hold counts down from
+ * print completion, not from the print command (see
+ * `docs/battle-message-hold-cadence-ground-truth.md` §2), so `holdFrames` is
+ * strictly additive to the print floor/length term.
+ */
+export const WAITMESSAGE_LONG_TIMING = Object.freeze({
+  minimumFrames: 24,
+  holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES,
+} as const);
 /**
  * Every stat-change message id source prints via `printfromtable
  * gStatUpStringIds`/`gStatDownStringIds` immediately followed by
@@ -400,10 +413,25 @@ const STAT_CHANGE_MESSAGE_IDS: ReadonlySet<string> = new Set([
   "STRINGID_DEFENDERSSTATFELL",
   "STRINGID_STATSWONTDECREASE",
 ]);
-const STAT_CHANGE_MESSAGE_TIMING = Object.freeze({
-  minimumFrames: 24,
-  holdFrames: 64,
-} as const);
+/**
+ * The shared `waitmessage B_WAIT_TIME_LONG` family: stat-change ids plus the
+ * standard hit chain's `critmessage`/`resultmessage` class. `STRINGID_
+ * CRITICALHIT` is printed by `Cmd_critmessage` then held by `waitmessage
+ * B_WAIT_TIME_LONG` (`battle_scripts_1.s:262`); `STRINGID_SUPEREFFECTIVE`/
+ * `STRINGID_NOTVERYEFFECTIVE` are printed by `Cmd_resultmessage` then held
+ * (`:264`); `STRINGID_ONEHITKO`/`STRINGID_PKMNENDUREDHIT` get their own
+ * dedicated `printstring` + `waitmessage B_WAIT_TIME_LONG` scripts
+ * (`BattleScript_OneHitKOMsg`/`BattleScript_EnduredMsg`, `:3688-3695`).
+ * A future id joins the family here, not as a new literal at the call site.
+ */
+export const WAITMESSAGE_LONG_MESSAGE_IDS: ReadonlySet<string> = new Set([
+  ...STAT_CHANGE_MESSAGE_IDS,
+  "STRINGID_SUPEREFFECTIVE",
+  "STRINGID_NOTVERYEFFECTIVE",
+  "STRINGID_CRITICALHIT",
+  "STRINGID_ONEHITKO",
+  "STRINGID_PKMNENDUREDHIT",
+]);
 /**
  * Scene-OFF hit controller lifetime:
  * setup, 32 blink callbacks, completion, and waitstate release.
@@ -931,6 +959,49 @@ function messageLines(
     const defender = requireMoveDefender(lastMoveAttacker, `${messageId.toLowerCase()} message`);
     return resolveBattleStringLines(messageId, {
       B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNWASCONFUSED") {
+    // BattleScript_MoveEffectConfusion (battle_scripts_1.s:3932-3936), the
+    // success tail of every direct EFFECT_CONFUSE move (Confuse Ray/Swagger/
+    // Flatter/Teeter Dance): `setmoveeffect MOVE_EFFECT_CONFUSION` +
+    // `seteffectprimary` then print this. {B_EFF_NAME_WITH_PREFIX} reads
+    // gEffectBattler (charmap.txt:368), which applySetMoveEffect set to the
+    // move's own target (battleScriptHitChainOpcode.ts:2841-2848,
+    // applyConfusionMoveEffect) -- so the message event carries that battler
+    // via prepareMessage's scoped effectBattler attach
+    // (factoryBattleScriptFullTurnDecision.ts). Unlike the status1 infliction
+    // quartet, confusion is a STATUS2 write with no set-battler-status-data
+    // receipt, so the generic fallback's pendingStatusMessageBattler bridge
+    // never fires -- this branch is the only route to resolve it.
+    if (event.payload.effectBattler === undefined) {
+      throw new Error(`battle resolution ${messageId} message has no effect-battler substitution`);
+    }
+    const effectBattler = singlesBattler(event.payload.effectBattler, `${messageId} effect battler`);
+    return resolveBattleStringLines(messageId, {
+      B_EFF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, effectBattler),
+    });
+  }
+  if (
+    messageId === "STRINGID_PKMNISCONFUSED"
+    || messageId === "STRINGID_PKMNHEALEDCONFUSION"
+    || messageId === "STRINGID_PKMNFATIGUECONFUSION"
+  ) {
+    // BattleScript_MoveUsedIsConfused / MoveUsedIsConfusedNoMore
+    // (battle_scripts_1.s:3796-3822, the CANCELER_CONFUSED_ACTION_CHECK
+    // admission handoffs) and BattleScript_ThrashConfuses (:3790-3794, the
+    // end-turn Thrash fatigue infliction). Each prints {B_ATK_NAME_WITH_PREFIX}
+    // reading gBattlerAttacker -- the confused battler trying to act / just
+    // snapped out / the thrashing battler -- which the frozen action
+    // snapshot's own attacker is (the acting battler owns the admission; the
+    // end-turn tick reassigns the attacker role per tick battler,
+    // battleEndTurnOrchestration.ts's enterTickBattlerContext).
+    if (actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no preceding action snapshot`);
+    }
+    const battler = singlesBattler(actionSnapshot.attacker, `${messageId.toLowerCase()} action snapshot`);
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
     });
   }
   if (messageId === "STRINGID_PKMNWASDEFROSTED") {
@@ -2687,8 +2758,8 @@ export function projectBattleResolutionCommands(
             ? "button"
             : "automatic",
         noCursor: TERMINAL_SEAM_QUOTE_MESSAGE_IDS.has(payload.messageId),
-        timing: STAT_CHANGE_MESSAGE_IDS.has(payload.messageId)
-          ? STAT_CHANGE_MESSAGE_TIMING
+        timing: WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
+          ? WAITMESSAGE_LONG_TIMING
           : MESSAGE_TIMING,
       }));
       pendingStatusMessageBattler = null;

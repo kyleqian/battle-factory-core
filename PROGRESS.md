@@ -5,6 +5,94 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 949 — [bounded MAIN worker, 2026-08-05] #76 Confuse Ray crash fixed: confusion message family resolves + reachable-gap census
+
+- **State:** master `26579665`, clean. ISSUES #76 deleted (fixed); confusion
+  family branches + repro tests + census docs + mechanicLab probe committed.
+- **Did:** (1) Red-verified repro: HAUNTER CONFUSE_RAY vs MURKROW through the
+  real full-turn reducer + presentation seam threw
+  `battleStringResolver: unsupported control segment {B_EFF_NAME_WITH_PREFIX}
+  in STRINGID_PKMNWASCONFUSED`. Root cause: confusion is a STATUS2 write
+  (applyConfusionStatus2Mutation) that emits no `set-battler-status-data`
+  receipt, so the generic fallback's pendingStatusMessageBattler bridge never
+  fired — the one status-infliction id the generic path could not resolve.
+  (2) Fix (red→green): `prepareMessage` now attaches `effectBattler` to
+  STRINGID_PKMNWASCONFUSED (applySetMoveEffect already wrote it to the move's
+  target) + three new messageLines branches — PKMNWASCONFUSED
+  (`{B_EFF_NAME_WITH_PREFIX}` ← effectBattler payload), and
+  PKMNISCONFUSED/PKMNHEALEDCONFUSION/PKMNFATIGUECONFUSION
+  (`{B_ATK_NAME_WITH_PREFIX}` ← action snapshot's own attacker). Pinned by
+  `tests/confuseRayInflictionPresentationRepro.test.ts` +
+  `tests/confusedAdmissionPresentation.test.ts`. (3) Oracle spot-check:
+  mechanicLab OFF trace (`tools/battle-lab/mechanic-confuse-ray-haunter-
+  murkrow-off.json`, overrides.parties, all-opponent-slots-SPLASH) — the ROM
+  inflicts confusion (status2=3, confusionTurns=3 at frame 112+); a
+  pixel-check probe (`tools/confuseMessagePixelCheck.ts`) overlays the app's
+  battle-window + "Foe MURKROW became\nconfused!" text onto the oracle
+  message-hold frames: **0/38400 px differ at frames 140-160** (box ~108,
+  typing 108-140 — typing cadence is #77, out of scope). (4) Census:
+  regenerated `docs/printstring-literal-census.md` (confusion family now
+  explicit; 207 ids → 86 explicit + 83 generic + 38 UNRESOLVED, unchanged
+  count) and authored `docs/battle-string-resolver-reachable-gap-census.md`
+  verifying the status-infliction family (paralysis/poison/burn/sleep already
+  covered via the status1 bridge + explicit -BY branches) and splitting the 38
+  remaining UNRESOLVED ids into Factory-plausible (incl. #81's
+  STRINGID_PKMNCANTUSEMOVETORMENT) vs structurally out-of-Factory-scope.
+- **Next:** MAIN: provenance wiring into `winTerminalWindowStage` per receipt
+  §7, then #78 switch-presentation scout; SIDE: #77 message-hold timing scout.
+  The next resolver gap (census list) should be picked up by a repro test
+  first, per the census doc's enforced pattern.
+- **Notes:** status1-infliction "was X" ids resolve via the generic fallback's
+  status-data bridge; the confusion family was the only STATUS2-written
+  infliction id and is now explicit. Smoke **347/347** at commit; full
+  `npm test` + build pending at entry write.
+
+---
+
+
+- **State:** master `857dc84f` (swap-YES bind `5489a9f7` + side receipt merge),
+  clean. New canonical trace `win-go-on-swap-offer-yes-off` **248/248** exact
+  (frames 9930-10177; supervisor re-ran twice fresh post-salvage). Regressions
+  re-held at the commit: WIN **3590/3590**, offer **115/115**, NO **213/213**
+  (supervisor rerun), guide-dismiss **232/232**, LOSS **1943/1943**. Worker's
+  full suite green pre-kill (**727 files / 6,979 passed / 1 skipped**);
+  supervisor ran `npm run build` + smoke **347/347** after. The MAIN worker
+  was cap-killed (exit 124) *after* its feature commit, during the final
+  build — clean-tree salvage; this entry is the docs remainder.
+- **Did:** (1) YES now enters the generic factory swap screen at the real
+  schedule (A 10005-10006; settled input-ready player picker elapsed 99 =
+  frame 10105). Two generic red-verified src fixes:
+  `FACTORY_SWAP_SPECIES_FADE_ACTIVATE_ELAPSED` 59→63 (palette
+  `softwareFadeFinishing` holds `active` 5 ticks past visual settle), and
+  swap-picker category text derived from `draft-pool-header.json` (all 376
+  species; was a six-species hand-cast that couldn't resolve the WIN route's
+  DUSCLOPS party). Honest boundary: ball-rocking restart is per-ball
+  `Random()%5` (ambient RNG, #55-adjacent), so the window ends at 10177,
+  one frame before the first anim-end. (2) SIDE receipt
+  (`docs/win-battle2-opponent-provenance-receipt.md`, supervisor re-ran the
+  driver: ALL CHECKS PASSED): `GenerateOpponentMons` is **single-frame**
+  (6636), pre-call cursor `0x7399E3AE` → 4 gapless draws → trainer **9
+  LILIANA** + sets 169/170/130 byte-for-byte; party construction spans 32
+  frames with ambient interleaving — per-mon cursors reproduce all three
+  personalities exactly. §7 names the exact scaffold fields for the wiring
+  step.
+- **Next:** MAIN: #76 Confuse Ray crash (user play-test, top priority);
+  SIDE: #77 message-hold timing scout. Then: provenance wiring into
+  `winTerminalWindowStage` per receipt §7; #78 switch-presentation scout;
+  #79 Fly visibility probe; #80 party-menu inventory; #81 torment
+  indication; RECORD/RETIRE/lobby/REST per the user decisions below.
+- **Notes:** user play-tested the pinned preview (`.worktrees/play-preview`
+  at `974ef563`, port 5199) and filed six reports → ISSUES #76-#81. User
+  scope decisions (2026-08-05, recorded in ROADMAP S10 + ISSUES #73): full
+  battle parity breadth (all legal Gen-3 species/moves/abilities/items in
+  singles; barriers become implement-or-prove-unreachable), RECORD
+  stub-only (session flag for the 4→3 menu variant), REST unselectable
+  (deliberate divergence), RETIRE fully (reuses the loss-lobby flow — same
+  ROM script), lobby walkable / no exit / no PC (real map has none) /
+  silent NPCs, wandering optional.
+
+---
+
 ## 947 — [interactive supervisor, 2026-08-05] Launcher: DeepSeek deadline-in-prompt + generalized commit attribution
 
 - **State:** master `35d1f90e`, clean; tooling-only (no engine or fixture
@@ -35,85 +123,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** attribution stays trailer-based (author/committer unchanged) per
   the Codex precedent; `codex_git_attribution_enable` is retained as a
   Codex-identity wrapper so existing call sites are untouched.
-
----
-
-## 946 — [supervisor fold, 2026-08-05] #73 WIN room handoff exact **232/232**; next-opponent generation moved to the source boundary
-
-- **State:** union through `7708808c`; guide dismissal, attendant/player walk, warp
-  fade, room fade-in, and battle-2 room handoff are exact at **232/232**
-  (frames 10406-10637). Regression gates re-held: NO/guide **213/213**,
-  canonical WIN **3590/3590**, LOSS **1943/1943**, LOSS decline **155/155**,
-  and generated command **128/128**. Final union `npm test` is green at
-  **727 files / 6,977 passed / 1 skipped**; `npm run build`, smoke **347/347**,
-  typecheck, and `bin/oracle info` are green. `animation-main` has no commit
-  missing from master at wind-down, so no second fold was required.
-- **Did:** banked a 39-segment fixture that preserves the prior 37 segments
-  byte-for-byte, presses the held `Right this way, please!` once, and idles
-  through the Battle Room's stable quote. Existing generic postwin and room
-  machinery reproduced every timing boundary through the first opponent-art
-  pixel with no calibration or battle-number branch. A RAM probe identifies
-  the ROM's next trainer as LILIANA (id 9). The app's synthetic terminal stage
-  instead generates ABBIE (id 73), so divergence begins at 10638 solely in
-  next-opponent sprite/quote content. Audited and narrowed the terminal-party
-  overlay wording: Sketch is the general move-write exception, but no legal
-  Factory set carries it; Transform/Mimic do not persist to party identity.
-  Corrected the generic controller's ownership seam to match source
-  `AskSwapMon`: accepting GO ON now pre-generates battleIndex+1 before the
-  type/style commentary and swap offer, records the uninterrupted facility-RNG
-  segment immediately, retains the defeated party for the optional swap, and
-  publishes the already-generated opponent only after swap resolution. Four
-  Tier-1 cases pin the timing, idempotence, decline/accept publication, and
-  live `core.tick` routing; focused **56/56**, typecheck, and smoke are green.
-- **Next:** align the terminal comparison stage's ambient-RNG/opponent
-  provenance with the ROM without trainer-specific staging, then bind the
-  held battle-2 quote dismissal/setup. Separately exercise the WIN YES swap
-  branch and RECORD/REST/RETIRE choices; do not resume the retired canonical
-  Battle-2 turn march.
-- **Notes:** the source-order generation owner is now explicit and the generic
-  round advances to battleIndex 1 only when the swap result publishes it.
-  The far-side content gap remains an exposure of #55's ambient RNG/provenance
-  model, not a presentation-timing failure. Evidence:
-  `docs/post-terminal-beyond-boundary-win-go-on-guide-dismiss-evidence.md`.
-
----
-
-## 945 — [bounded MAIN worker, 2026-08-05] #73 WIN swap-offer NO decision bound: `win-go-on-swap-offer-no-off` exact **213/213** twice fresh
-
-- **State:** master `89693d9d`, clean. The swap-offer NO decision + the generic
-  `Right this way, please!` guide are bound at **213/213** exact twice fresh
-  (frames 9930-10406, dense; PNG-byte-identical both runs). Regressions
-  re-held: canonical WIN **3590/3590**, LOSS **1943/1943**, LOSS decline
-  **155/155**, win-beyond **228/228**, GO ON scout **143/143**, type **93/93**,
-  style **92/92**, swap-offer **115/115**, battle-command-generated **128/128**.
-  Full `npm test` **727 files / 6,973 passed / 1 skipped** and `npm run build`
-  green; smoke 347/347.
-- **Did:** authored `scratch-win-go-on-swap-offer-no-probe.json`, preserving the
-  swap-offer fixture's 33 segments byte-for-byte and appending a safely-held
-  DOWN (9943-9944, cursor display -> NO at 9944), a bounded idle, an A
-  accepting NO at 10005-10006, and a bounded idle tail (37 segments / 10406
-  frames). Dense oracle captures bind the NO decision, YES/NO-window dismissal
-  (edge+1), box clear (edge+3), and the generic `Right this way, please!`
-  guide typing 1 glyph/tick from edge+4 to its final glyph at edge+26 (frame
-  10031), held **with no wait-cursor** through the endpoint 10406 — the genuine
-  held/dismiss-ready boundary, unpressed per contract (no walk/warp). One
-  generic src fix was required and landed (`overlayTerminalKernelParty` now
-  overlays only the four battle-mutable fields — HP/status1/item/PP — onto the
-  rental identity instead of spreading the whole terminal party): the WIN
-  scaffold's placeholder terminal party (DUSCLOPS, personality `0xff`, IV 3)
-  was corrupting the kernel party so `healFactoryKernelParty`'s identity guard
-  threw on the NO advance. Red-verified Tier-1 pin
-  (`tests/factoryRoundBattleOrchestrator.test.ts`); no calibration — the
-  existing `movePostwinSwapCursor`/`acceptPostwinSwapDecline`/
-  `postwinRightThisWay*` machinery reproduced every boundary with its current
-  constants. Evidence: `docs/post-terminal-beyond-boundary-win-go-on-swap-offer-no-decision-evidence.md`.
-- **Next:** a separate YES decision should enter the already-generic swap UI
-  (or hand its fixture to the swap-screen path); the unexercised
-  RECORD/REST/RETIRE continuation choices remain. Promote the proven decision
-  span into the canonical WIN window once the YES/guide tail is also bound.
-- **Notes:** no absolute frame/battle-number/fixture branch; the overlay fix is
-  source-relative (the real game only writes HP/status/item/PP back to
-  `gPlayerParty` during a battle — identity is never battle-mutable). LOSS
-  record playback/free-roam remain separate.
 
 ---

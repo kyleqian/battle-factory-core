@@ -1595,6 +1595,17 @@ each shared semantic family plus interaction boundaries, rather than claiming
 quality from brute-forcing every possible three-mon team against every other
 team.
 
+**Breadth scope expansion (user decision, 2026-08-05):** gate 4's and gate
+6's "source-reachable Level-50 singles cases" clauses extend beyond
+Factory-reachable compositions to **all legal Gen-3 species, moves,
+abilities, and held items in singles battles**. Named `unsupported-branch`
+barriers whose justification was Factory-set absence (Snatch,
+Castform/Forecast, non-Factory held items, and kin) become implementation
+targets: each is either implemented source-completely or carries a proof it
+cannot occur in any legal singles battle. `mechanicLab overrides.parties` is
+the staging surface. Doubles remains out of scope (supervisor-stated
+interpretation, user-uncorrected 2026-08-05).
+
 ### [ ] S11 — Audio (separate milestone, user-directed 2026-07-28)
 
 Sound effects, mon cries, fanfares, and background music across the draft,
