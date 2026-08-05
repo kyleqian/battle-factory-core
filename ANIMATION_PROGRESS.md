@@ -1,5 +1,46 @@
 # Animation coverage
 
+## MOVE_IRON_DEFENSE closed — 101/101 both orientations twice-fresh, promoted to exact (2026-08-04 evening)
+
+- **State:** IRON_DEFENSE (new move) → **exact**. Move coverage: **110/276 exact,
+  0 partial, 0 staged, 166 unsupported**. Both fixtures pin
+  `framebufferMatching: 101` with status `exact`.
+- **Did:** full new-move acceptance, **zero new source components**. The script
+  is `loopsewithpan SE_SHINY` + non-permanent `metallic_shine` (the accepted
+  HARDEN body, reused unchanged) + one BG-only `complex_palette_blend`
+  (selector F_PAL_BG, delay 8, num_blends 2, RGB_WHITEALPHA, blend_y 14 → 0).
+  Landed the reducer (`src/animation/ironDefense.ts`): `complexPaletteBlendAtAge`
+  transcribes `AnimComplexPaletteBlend` (`battle_anim_normal.c:344-405`) as a
+  white 14 → 0 → 14 → restore RAM pulse at creation-relative ages 0/8/17/27,
+  and the whole move-owned body trails the shine by one tick
+  (`IRON_DEFENSE_BLEND_START_AGE=1`, probe-derived). Cloned HARDEN's Scene-ON
+  seam + draw case for the CLAMPERL→ONIX pair, drawing the white pulse on the
+  battle-bg palette banks while keeping the grayscale attacker and unblended
+  metal palette (F_PAL_BG never touches OBJ/bank-8). No new art: CLAMPERL
+  back/front from the shared battle-back/opponent-front sprite assets. Added
+  the two mechanic scenarios (FRONTIER_MON_CLAMPERL record 134, all four slots
+  IRON_DEFENSE, vs legal ONIX), `ironDefenseProbe.py` (dense 215-315 window,
+  metallic + Task_LoopAndPlaySE + blend sprite + BG palette + registers + RGB),
+  `ironDefensePortable.ts`, the two scene-on-portable-evidence fixtures, and
+  `ironDefense.test.ts` + `ironDefenseEvidence.test.ts`.
+- **Measured:** player-back frames 215-315 and opponent-front frames 215-315,
+  both **101/101 twice fresh** via the portable. Evidence
+  `6da0086c…`/`4390cfb3…`, RGB `a2b2a60a…`/`32987f6e…` reproduce the fixture
+  pins exactly. **Display model:** the blend sprite is created one engine-age
+  tick after the shine's first step and its `gPlttBufferFaded` writes latch one
+  display behind, so the displayed pulse runs at ages 2..9 / 10..18 / 19..28 /
+  29+ (the source's 8/9/10-frame asymmetry from the delay=8 countdowns); the
+  metalled bg keeps its own palette because `GetBattlePalettesMask(TRUE,…)` for
+  F_PAL_BG selects only banks 1-3, never the metal bank.
+- **Next:** next zero-new-component Level-50 move (20 remain per supervisor
+  component analysis).
+- **Notes:** the opponent-front CLAMPERL carries no idle-bob residual
+  (`x2=0`), so the draw needs no front idle offset for the attacker; the ONIX
+  target keeps its `speciesFrontIdleRestOffset` x2=1. The attacker's Defense
+  stage is already +2 at the first dense frame (stat stage applies before the
+  animation) and is treated as an immutable field input, never advanced by the
+  reducer. No boundary widening, no new unsupported barriers.
+
 ## MOVE_TAIL_WHIP closed — 77/77 both orientations twice-fresh, promoted to exact (2026-08-04 evening)
 
 - **State:** TAIL_WHIP (new move) → **exact**. Move coverage: **109/276 exact,
