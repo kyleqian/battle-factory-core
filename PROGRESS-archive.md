@@ -1,3 +1,74 @@
+## 950 — [supervisor salvage, 2026-08-05] #77 CLOSED: effectiveness/crit messages hold `B_WAIT_TIME_LONG` on the live route
+
+- **State:** master at the docs commit following `7adbd559`, clean. The
+  live-route fix is committed: `STRINGID_SUPEREFFECTIVE`/`NOTVERYEFFECTIVE`/
+  `CRITICALHIT` now carry `WAITMESSAGE_LONG_TIMING` (64 frames post-typing,
+  named for the source `B_WAIT_TIME_LONG`, `battle.h:324`) instead of
+  `holdFrames: 0` — the user-reported "flashes for a fraction of a second"
+  cadence bug. `STRINGID_USEDMOVE` untouched (no `waitmessage` in source —
+  its pacing is animation/HP-driven). Old-value pins red-verified; negative
+  pins added. Focused suite, typecheck, smoke **347/347**, and
+  `compare:differential -- battle-command-generated-off.json --base 82563164`
+  **128/128 byte-identical** (supervisor-run post-salvage).
+- **Did:** worker was cap-killed (exit 124, 45-min cap) after its fix commit
+  with one uncommitted type-only test narrowing; supervisor kept the
+  narrowing (typecheck needs it), ran the remaining verification, deleted
+  ISSUES #77, and wrote this entry. Ground truth + re-runnable oracle
+  verifier live in `docs/battle-message-hold-cadence-ground-truth.md` +
+  `tools/probe/verify-message-hold-cadence.ts` (merged earlier, ALL CHECKS
+  PASSED twice).
+- **Next:** #78 switch-presentation scout is completing in the side lane;
+  then #55 scaffold provenance wiring (receipt §7), #79 Fly probe, #81
+  torment message, #80 party-menu inventory, RECORD/RETIRE/lobby/REST.
+- **Notes:** the scout flagged other `holdFrames: 0` ids for a follow-up
+  audit only where a source `waitmessage` is unambiguous; the worker's
+  final message lists none it was confident in — treat as a small future
+  scout, not silent debt.
+
+---
+
+## 949 — [bounded MAIN worker, 2026-08-05] #76 Confuse Ray crash fixed: confusion message family resolves + reachable-gap census
+
+- **State:** master `26579665`, clean. ISSUES #76 deleted (fixed); confusion
+  family branches + repro tests + census docs + mechanicLab probe committed.
+- **Did:** (1) Red-verified repro: HAUNTER CONFUSE_RAY vs MURKROW through the
+  real full-turn reducer + presentation seam threw
+  `battleStringResolver: unsupported control segment {B_EFF_NAME_WITH_PREFIX}
+  in STRINGID_PKMNWASCONFUSED`. Root cause: confusion is a STATUS2 write
+  (applyConfusionStatus2Mutation) that emits no `set-battler-status-data`
+  receipt, so the generic fallback's pendingStatusMessageBattler bridge never
+  fired — the one status-infliction id the generic path could not resolve.
+  (2) Fix (red→green): `prepareMessage` now attaches `effectBattler` to
+  STRINGID_PKMNWASCONFUSED (applySetMoveEffect already wrote it to the move's
+  target) + three new messageLines branches — PKMNWASCONFUSED
+  (`{B_EFF_NAME_WITH_PREFIX}` ← effectBattler payload), and
+  PKMNISCONFUSED/PKMNHEALEDCONFUSION/PKMNFATIGUECONFUSION
+  (`{B_ATK_NAME_WITH_PREFIX}` ← action snapshot's own attacker). Pinned by
+  `tests/confuseRayInflictionPresentationRepro.test.ts` +
+  `tests/confusedAdmissionPresentation.test.ts`. (3) Oracle spot-check:
+  mechanicLab OFF trace (`tools/battle-lab/mechanic-confuse-ray-haunter-
+  murkrow-off.json`, overrides.parties, all-opponent-slots-SPLASH) — the ROM
+  inflicts confusion (status2=3, confusionTurns=3 at frame 112+); a
+  pixel-check probe (`tools/confuseMessagePixelCheck.ts`) overlays the app's
+  battle-window + "Foe MURKROW became\nconfused!" text onto the oracle
+  message-hold frames: **0/38400 px differ at frames 140-160** (box ~108,
+  typing 108-140 — typing cadence is #77, out of scope). (4) Census:
+  regenerated `docs/printstring-literal-census.md` (confusion family now
+  explicit; 207 ids → 86 explicit + 83 generic + 38 UNRESOLVED, unchanged
+  count) and authored `docs/battle-string-resolver-reachable-gap-census.md`
+  verifying the status-infliction family (paralysis/poison/burn/sleep already
+  covered via the status1 bridge + explicit -BY branches) and splitting the 38
+  remaining UNRESOLVED ids into Factory-plausible (incl. #81's
+  STRINGID_PKMNCANTUSEMOVETORMENT) vs structurally out-of-Factory-scope.
+- **Next:** MAIN: provenance wiring into `winTerminalWindowStage` per receipt
+  §7, then #78 switch-presentation scout; SIDE: #77 message-hold timing scout.
+  The next resolver gap (census list) should be picked up by a repro test
+  first, per the census doc's enforced pattern.
+- **Notes:** status1-infliction "was X" ids resolve via the generic fallback's
+  status-data bridge; the confusion family was the only STATUS2-written
+  infliction id and is now explicit. Smoke **347/347** at commit; full
+  `npm test` + build pending at entry write.
+
 ## 946 — [supervisor fold, 2026-08-05] #73 WIN room handoff exact **232/232**; next-opponent generation moved to the source boundary
 
 - **State:** union through `7708808c`; guide dismissal, attendant/player walk, warp
