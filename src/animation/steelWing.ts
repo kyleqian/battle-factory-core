@@ -36,9 +36,15 @@ function sin(index: number, amplitude: number): number {
   return Math.floor(GBA_SINE_TABLE_256[index & 0xff]! * amplitude / 256) || 0;
 }
 
-/** Exact `AnimTask_TranslateMonElliptical(0, 12, 4, 1, 4)` callback body. */
+/**
+ * Exact `AnimTask_TranslateMonElliptical(0, 12, 4, 1, 4)` callback body.
+ *
+ * Speed 4 -> wavePeriod 16. The wrap frame (data[5] wraps to 0) writes
+ * (-5,1) then immediately resets to (0,0) and destroys the task, so tick 15
+ * is never a visible frame — the active window is 0..14.
+ */
 export function steelWingEllipticalAtTick(tick: number): Readonly<{ x2: number; y2: number; active: boolean }> {
-  if (tick < 0 || tick >= 16) return { x2: 0, y2: 0, active: false };
+  if (tick < 0 || tick >= 15) return { x2: 0, y2: 0, active: false };
   const phase = (tick * 16) & 0xff;
   return { x2: sin(phase, 12), y2: -sin(phase + 64, 4) + 4, active: true };
 }
@@ -65,7 +71,11 @@ export function steelWingGustAtTick(
   const scriptX = index === 0 ? -25 : 25;
   const startX = attackerCenter.x + scriptX;
   const targetX = targetCenter.x;
-  const startY = attackerCenter.y + (attackerSide === "player" ? 8 : -8);
+  // Y_PIC_OFFSET: player-back attacker spawns +8, opponent-front +0.
+  const startY = attackerCenter.y + (attackerSide === "player" ? 8 : 0);
+  // The linear leg flies to the target's own Y_PIC_OFFSET anchor as well:
+  // the player-back target is +8, the opponent-front target is +0.
+  const targetY = targetCenter.y + (attackerSide === "player" ? 0 : 8);
   const affineAge = Math.min(tick, 24);
   // AFFINEANIMCMD_FRAME(0x10, 0x100, 0, 0) is followed by the
   // duration-24 +0xA command; its first update is retained immediately.
@@ -73,7 +83,7 @@ export function steelWingGustAtTick(
   // Two neutral-scale callback displays bridge RunStoredCallbackWhenAffineAnimEnds.
   const callbacks = Math.max(0, tick - 25);
   const dx = linearTranslationDeltaQ8(targetX - startX, 20);
-  const dy = linearTranslationDeltaQ8(targetCenter.y - startY, 20);
+  const dy = linearTranslationDeltaQ8(targetY - startY, 20);
   return {
     index,
     x: startX + linearTranslationOffsetAfterCallbacks(dx, callbacks, 20),
@@ -121,7 +131,9 @@ export function steelWingAtAge(
   const hitsplats = hitsplatAge >= 0 && hitsplatAge <= 9
     ? ([16, -16] as const).map((x) => ({
         x: targetCenter.x + x,
-        y: targetCenter.y,
+        // relative_to=ANIM_TARGET anchors on the target's Y_PIC_OFFSET too:
+        // player-back +8, opponent-front +0.
+        y: targetCenter.y + (attackerSide === "player" ? 0 : 8),
         animation: 1 as const,
       }))
     : [];

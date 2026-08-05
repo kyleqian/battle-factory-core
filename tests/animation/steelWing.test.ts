@@ -30,6 +30,10 @@ describe("MOVE_STEEL_WING source reducer", () => {
     expect(steelWingEllipticalAtTick(0)).toEqual({ x2: 0, y2: 0, active: true });
     expect(steelWingEllipticalAtTick(4)).toEqual({ x2: 12, y2: 4, active: true });
     expect(steelWingEllipticalAtTick(8)).toEqual({ x2: 0, y2: 8, active: true });
+    expect(steelWingEllipticalAtTick(14)).toEqual({ x2: -9, y2: 2, active: true });
+    // The source wrap frame resets/destroys the task before it can render, so
+    // tick 15 (the previous terminal (-5,1)) is never a visible frame.
+    expect(steelWingEllipticalAtTick(15)).toEqual({ x2: 0, y2: 0, active: false });
     expect(steelWingEllipticalAtTick(16)).toEqual({ x2: 0, y2: 0, active: false });
   });
 
@@ -45,6 +49,11 @@ describe("MOVE_STEEL_WING source reducer", () => {
     expect(handoff).toMatchObject({ xScale: 256, yScale: 256, affineAge: 24 });
     expect(steelWingGustAtTick(45, 0, "player", { x: 72, y: 80 }, { x: 176, y: 42 })).toMatchObject({ xScale: 256, yScale: 256 });
     expect(steelWingGustAtTick(46, 0, "player", { x: 72, y: 80 }, { x: 176, y: 42 })).toBeNull();
+  });
+
+  it("spawns opponent-side gusts at the attacker's y (Y_PIC_OFFSET +0, not -8)", () => {
+    const opponent = steelWingGustAtTick(0, 1, "opponent", { x: 176, y: 42 }, { x: 72, y: 88 });
+    expect(opponent).toMatchObject({ x: 201, y: 42, xScale: 26, yScale: 256 });
   });
 
   it("mirrors the attacker slide, reuses non-permanent shine, and emits two animation-1 hitsplats", () => {

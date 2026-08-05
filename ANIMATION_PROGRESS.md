@@ -1,5 +1,106 @@
 # Animation coverage
 
+## Supervisor wind-down — rung-3 dispatcher COMPLETE + Steel Wing reconciled (2026-08-04 PM session)
+
+- **State:** the 2026-08-04 user directive is fully delivered. All three ISSUES
+  #71 cross-lane ask items are exported from `src/animation/sendOutDispatcher.ts`
+  / `sendOutSpriteFrame.ts` with a live-measured anchor, and the queued Steel
+  Wing reconciliation landed (opponent-front **197/197** complete, player-back
+  **180/197**, status stays partial). Move coverage: **107/276 exact, 1
+  partial, 0 staged, 168 unsupported**. Final merged full suite **720 files /
+  6,924 passed / 1 skipped**, build green, no worker worktrees or branches
+  left. Six DeepSeek V4 Flash worker rounds, six verified merges, zero failed
+  rounds (per-step entries below).
+- **For the main program:** Slice D can brief against this contract now —
+  (1) `frontSendOutFrameAtTick(species, ticksSinceStart)`: per-tick `{x2,y2}`,
+  terminal-clamped, species→family internal; (2)
+  `frontSendOutSpriteFrameAtTick(species, ticksSinceAnimStart)` +
+  `hasTwoFramesAnimation(species)`: the two-frame ANIMCMD half; (3)
+  `backSendOutFrameAtTick(species, natureName, ticksSinceStart)`. **Anchor,
+  RAM-measured** (fixtures `tools/compare/fixtures/front-send-out-flight-*.json`):
+  the movement anim installs on the `affineAnimEnded` tick plus
+  `animationDelay[species] − 1` when the delay is nonzero (pre-decrement,
+  source-verified); the two-frame program starts on the affineAnimEnded tick
+  undeferred; rendered OAM `x2/y2` for reducer tick N appears at alignment
+  **A = −1** (one-display-frame latch, `max(0, frame − t_move − 1)`), validated
+  per-tick across three species incl. RATTATA's full 87-frame flight. The two
+  `src/engine/` hand-fits (kabutoSendOut.ts, battleMenu.ts tables) remain in
+  place — retiring them stays the coordinated cross-lane change per the
+  program doc §6. `docs/steel-wing-residual-diagnosis.md` holds the verified
+  residual map for STEEL_WING's two remaining player-side ranges.
+- **Next:** (a) player-side STEEL_WING ranges 144-155 (faded-vs-unfaded gust
+  palette base) and 181-185 (slide-back start/rate) — both scoped in the
+  diagnosis doc; (b) prove opponent 197/197 twice fresh before any promotion;
+  (c) await main-lane Slice D fold feedback.
+- **Notes:** oracle-freshness FAIL at session start was the known docs-only
+  false positive (single NOTES.md harness commit since 8012 start). Probe
+  landmines documented in the session memory: `preCheckpointCaptureAllFrames`
+  opt-in, `resolve_probe_command` relative-path venv routing, animNum-flip
+  anchor marker.
+
+## `MOVE_STEEL_WING` reconciliation landed — opponent 197/197, player 180/197 (2026-08-04)
+
+- **State:** implemented the five confirmed fixes plus two source-derived target
+  anchors. Production framebuffer identity: **player-back 168→180/197** and
+  **opponent-front 140→197/197** (complete), both twice-fresh via the portable
+  compare (evidence/RGB hashes reproduce; no drift). Move coverage unchanged:
+  **107/276 exact, 1 partial (STEEL_WING), 0 staged, 168 unsupported** — status
+  stays **partial** (player incomplete; opponent's 197 is once, not twice-fresh).
+- **Did:** player 168 → **180/197**: +1 ellipse terminal tick≥15 inactive (age
+  126), +10 hitsplat affine 303 + displayed-first-frame (ages 156-165), +1
+  metallic grayscale gate (age 9). Opponent 140 → **197/197**: +26 gust startY
+  +0 (ages 111-136), +1 enemy shadow (age 0), +1 metallic grayscale gate (age
+  9), +18 gust/hitsplat **target Y_PIC_OFFSET** (ages 137-154; the source's
+  `relative_to=ANIM_TARGET` / `InitAnimLinearTranslation` anchor is +8 for the
+  player-back target, not the attacker's), +10 hitsplat affine 303 +
+  target-y + displayed-first-frame (ages 156-165), +1 hitsplat absent at the
+  creation frame (age 155 — direct pixel measurement shows the oracle's
+  hitsplat is NOT rendered at creation; the diagnosis's "renders on creation
+  frame" was OAM-presence misread as rendered).
+- **Pins changed:** `steelWing.test.ts` — elliptical tick-15 inactive (was
+  terminal (-5,1) residue), tick-14 (-9,2) as last visible, added opponent
+  gust startY +0 pin; `steelWingEvidence.test.ts` — per-fixture counts 180/197
+  (was generic `<197`, which the opponent's complete identity now exceeds).
+- **Next:** player's two remaining ranges are the explicitly out-of-scope
+  plausible ones: ages 144-155 faded-vs-unfaded GUST palette base, ages
+  181-185 slide-back start/rate (derived offset 23, 2/frame decrement). Prove
+  opponent 197/197 twice fresh before any promotion.
+- **Notes:** the diagnosis's age-9 "metal band one callback early" was a
+  misattribution (pixel-verified: the initializer's grayscale palette is what
+  latched one display late; the metal band itself is invisible over the
+  attacker). The opponent ages 136-155 "startY carry-through" was incomplete —
+  the residual was the target's Y_PIC_OFFSET, not the gust start. No shared
+  `metallicShine.ts` change (gate is STEEL_WING-local); no boundary widening.
+  No PAPERcuts this session.
+
+## STEEL_WING residual diagnosis doc landed (2026-08-04, READ-ONLY audit)
+
+- **State:** `docs/steel-wing-residual-diagnosis.md` records the mechanism
+  attribution for every divergent framebuffer range of the MOVE_STEEL_WING
+  partial. Move coverage unchanged: **107/276 exact, 1 partial, 0 staged, 168
+  unsupported**; STEEL_WING stays partial. No production edits, no `src/`
+  commits, `ANIMATION_COVERAGE.json` untouched.
+- **Did:** reran both portable orientations (fresh, own mGBA); counts reproduce
+  exactly (**168/197** player-back and **140/197** opponent-front, no drift).
+  Per-range probe+diff analysis attributes **12 of 14 distinct ranges**, split
+  8 confirmed-by-evidence / 2 plausible / 2+1 unresolved-but-narrowed.
+  Confirmed: metallic-BG1 band one callback early (player+opp age 9);
+  elliptical tick-15 residue (player 126 — source wrap-frame resets to 0);
+  hitsplat affine 303-vs-372 (`HitSplat_1` 0xD8 vs the app's 0xB0) + hitsplat
+  first frame deferred by the `displayed` lag (both, 155-165); opponent gust
+  `startY` should be `+0` not `−8` (opp 111-155); enemy shadow renders exactly
+  one frame at the opponent dense-window head (opp 0). Plausible: slide-back
+  start/rate (player 181-185), faded-vs-unfaded gust palette base (player
+  144-155, exact render path unisolated). Ruled out: front-idle two-frame
+  cadence (Wingull ANIMCMD held at rest frame all window; rung-3 modules do
+  not apply), gust palette-rotation timing, alpha/monbg blend.
+- **Next:** an implementation step can fix the confirmed mechanisms directly
+  from the doc; the two plausible ranges list the exact probe to pin them.
+- **Notes:** one recorded range boundary moved: the player entry said ages
+  144-164, this audit measures **144-165** (same total, age 165 also diverges).
+  No PAPERcuts (only audit tooling was reused). Committed doc+entry only; tree
+  clean at commit.
+
 ## Rung-3 BACK send-out dispatcher landed (2026-08-04)
 
 - **State:** ISSUES #71 rung-3 cross-lane ask item 3 (back variant) complete
