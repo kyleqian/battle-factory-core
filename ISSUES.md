@@ -17,17 +17,6 @@ backlog.
 
 # Open
 
-## #76 — Live play: Confuse Ray crashes (string-resolver FATAL guard suspected)
-
-**User play-test 2026-08-05** (pinned preview at `974ef563`): HAUNTER used
-CONFUSE_RAY vs MURKROW in a live battle → hard crash. `battleStringResolver.ts`
-carries zero confusion-family strings and throws on unknown ids — the #72
-user-decision FATAL guard working as designed, but this family should exist.
-Repro on the play route, add the confusion string family source-faithfully,
-then sweep sibling status-move strings (a census of string ids reachable from
-registered effects vs. the resolver table) so the next family is found by the
-census, not a player. Top-priority MAIN fix.
-
 ## #77 — Live play: battle message hold cadence ignored ("super effective" flashes)
 
 **User play-test 2026-08-05:** result/effectiveness messages hold for a
