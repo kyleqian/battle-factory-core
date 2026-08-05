@@ -329,13 +329,27 @@ function asBattleScriptParty(party: FactoryKernelParty): BattleScriptPartyState 
   ]);
 }
 
+/**
+ * Carries the battle's own party writes (HP, status, held item, PP -- the
+ * only fields the real game's `gPlayerParty`/`gEnemyParty` entries mutate
+ * during a battle, via the controller REQUEST_* writes) back onto the rental
+ * identity. Identity fields (species, personality, IVs, ability slot, moves,
+ * ppBonuses) are never battle-mutable in the real game and must stay the
+ * records' own values: overlaying them from the terminal party would import a
+ * scaffold/placeholder battler's identity into the kernel party, which
+ * `healFactoryKernelParty`'s source-derived identity guard then rejects at
+ * the next swap/advance (ISSUES #73, WIN swap-offer NO decision).
+ */
 function overlayTerminalKernelParty(
   identity: FactoryKernelParty,
   terminal: BattleScriptPartyState,
 ): FactoryKernelParty {
   return identity.map((member, index) => Object.freeze({
     ...member,
-    ...terminal[index]!,
+    hp: terminal[index]!.hp,
+    status1: terminal[index]!.status1,
+    item: terminal[index]!.item,
+    pp: terminal[index]!.pp,
   })) as unknown as FactoryKernelParty;
 }
 

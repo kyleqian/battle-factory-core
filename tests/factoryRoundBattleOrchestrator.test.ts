@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import naturesData from "../src/data/gen/natures.json" with { type: "json" };
 import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
-import type { BattleState, BattleSubmittedDecision } from "../src/engine/battleDecisionBoundary.ts";
+import {
+  createBattleState,
+  type BattleDecisionTransitionResult,
+  type BattleKernelSemanticEvent,
+  type BattleState,
+  type BattleSubmittedDecision,
+} from "../src/engine/battleDecisionBoundary.ts";
 import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
 import { createFactoryAiBattleHistory } from "../src/engine/factoryAiLiveDriver.ts";
 import { createBattleResolutionPresentation } from "../src/engine/battleResolutionPresentation.ts";
@@ -11,10 +17,14 @@ import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../src/engine/battleScrip
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
 import { createFreshFactoryBattle } from "../src/engine/factoryBattleStart.ts";
 import {
+  createFactoryFullTurnBattleState,
   submitFactoryFullTurnDecision,
+  type FactoryFullTurnBattlerConfig,
+  type FactoryFullTurnConfig,
   type FactoryFullTurnDecisionRules,
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import type { BattleScriptPartyState } from "../src/engine/battleScriptRulesContext.ts";
+import { getFactoryTrainerPresentation } from "../src/engine/factoryTrainerPresentation.ts";
 import { createInitialState, render, tick } from "../src/engine/core.ts";
 import {
   advanceFactoryRoundBattleCommand,
@@ -38,6 +48,7 @@ import { advanceRngValue } from "../src/engine/rng.ts";
 import { resolveTurn15FlyResolutionAdapter } from "../src/engine/turn15FlyResolutionAdapter.ts";
 
 const RNG_SEED = 4;
+const MOVE_TACKLE = 33;
 const PLAYER_TRAINER_ID = 0x89ab_cdef;
 const natureByName = new Map(naturesData.natures.map((row) => [row.name, row.index]));
 
@@ -1657,5 +1668,126 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       playerHp: seed === 6 ? [0, 0, 0] : expect.any(Array),
       opponentHp: seed === 6 ? [0, 0, 126] : expect.any(Array),
     });
+  });
+
+  it("keeps rental identity when a scaffold terminal party is overlaid, so the swap decline can still advance", () => {
+    let state = createStartedGeneratedBattle(RNG_SEED);
+    expect(state.battle).not.toBeNull();
+    const playerRecords = state.round.rules.playerRentalRecords!;
+    const originalKernelParty = state.round.rules.playerKernelParty!;
+
+    // A terminal battle whose player party is a *placeholder* (DUSCLOPS,
+    // personality 0xff, uniform IV 3) deliberately NOT the round's rental
+    // identity (sets 664/678/527, nature-derived personalities, IV 31) --
+    // exactly the win-terminal-window scaffold's shape
+    // (tools/compare/appTrace.ts). The real game never mutates
+    // personality/IVs/species during a battle, so the overlay must keep the
+    // records' identity and carry only HP/status/item/PP.
+    const scaffoldPlayer: FactoryFullTurnBattlerConfig = Object.freeze({
+      species: 362, // DUSCLOPS
+      personality: 0xff,
+      moveId: MOVE_TACKLE,
+      moves: [MOVE_TACKLE, MOVE_TACKLE, MOVE_TACKLE, MOVE_TACKLE] as const,
+      pp: [35, 35, 35, 35] as const,
+      ability: 0,
+      item: 0,
+      friendship: 0,
+      attack: 60,
+      defense: 60,
+      spAttack: 60,
+      spDefense: 60,
+      speed: 60,
+      hp: 115,
+      maxHp: 115,
+      types: ["TYPE_GHOST", "TYPE_GHOST"] as const,
+    });
+    const scaffoldTrainer: FactoryFullTurnBattlerConfig = Object.freeze({
+      species: 198, // MURKROW
+      moveId: MOVE_TACKLE,
+      moves: [MOVE_TACKLE, MOVE_TACKLE, MOVE_TACKLE, MOVE_TACKLE] as const,
+      pp: [35, 35, 35, 35] as const,
+      ability: 0,
+      item: 0,
+      friendship: 0,
+      attack: 60,
+      defense: 60,
+      spAttack: 60,
+      spDefense: 60,
+      speed: 60,
+      hp: 0,
+      maxHp: 200,
+      types: ["TYPE_DARK", "TYPE_FLYING"] as const,
+    });
+    const config: FactoryFullTurnConfig = Object.freeze({
+      requestId: 1,
+      rngSeed: 1,
+      player: scaffoldPlayer,
+      trainer: scaffoldTrainer,
+    });
+    const initial = createFactoryFullTurnBattleState(config);
+    if (initial.boundary.kind !== "decision-required" || initial.boundary.request.kind !== "command") {
+      throw new Error("scaffold has no source command");
+    }
+    const terminalBattle = Object.freeze({
+      ...createBattleState({
+        rules: initial.rules,
+        rngSeed: 9,
+        request: initial.boundary.request,
+      }),
+      boundary: Object.freeze({ kind: "terminal" as const, outcome: "player-win" as const }),
+    });
+    const transition = Object.freeze({
+      kind: "terminal" as const,
+      state: terminalBattle,
+      events: Object.freeze([]),
+      outcome: "player-win" as const,
+    }) as BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>;
+    const command = createBattleCommandPresentation(initial.boundary.request, initial.rules.rulesContext, 0);
+    const resolution = Object.freeze({
+      ...createBattleResolutionPresentation({
+        sourceRequest: initial.boundary.request,
+        sourceDecision: { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+        beforeRules: initial.rules,
+        transition,
+        fieldBoundary: command.field,
+        confirmHandoff: { fightDisplayCursor: 0, idleBounceElapsed: 0 },
+        opponentTrainer: getFactoryTrainerPresentation(50),
+      }),
+      lifecycle: Object.freeze({ phase: "terminal-handoff" as const, phaseElapsed: 0 }),
+      confirmHandoff: null,
+    });
+
+    state = Object.freeze({
+      ...state,
+      battle: terminalBattle,
+      battleResolutionPresentation: resolution,
+    });
+    state = advanceFactoryRoundBattleResolution(state);
+    expect(state.battle).toBeNull();
+    expect(state.round.rules.phase).toBe("presentingBattleWin");
+    const kernel = state.round.rules.playerKernelParty!;
+    expect(kernel[0]!.personality).toBe(playerRecords[0]!.personality);
+    expect(kernel[0]!.setId).toBe(playerRecords[0]!.setId);
+    expect(kernel[0]!.ivs.attack).toBe(playerRecords[0]!.fixedIv);
+    expect(kernel[0]!.hp).toBe(115);
+    expect(kernel[0]!.status1).toBe(0);
+    expect(kernel).toEqual(originalKernelParty.map((member, index) => ({
+      ...member,
+      hp: terminalBattle.rules.rulesContext.party.player[index]!.hp,
+      status1: terminalBattle.rules.rulesContext.party.player[index]!.status1,
+      item: terminalBattle.rules.rulesContext.party.player[index]!.item,
+      pp: terminalBattle.rules.rulesContext.party.player[index]!.pp,
+    })));
+
+    state = acknowledgeAndAdvance(state);
+    expect(state.round.rules.phase).toBe("awaitingSwapDecision");
+    const swapOfferId = state.round.presentation?.command.commandId;
+    if (swapOfferId === undefined) throw new Error("expected swap offer");
+    state = completeFactoryRoundPresentation(state, { commandId: swapOfferId });
+    state = chooseFactoryRoundSwap(state, { type: "decline" });
+    expect(state.round.rules.phase).toBe("presentingSwapResult");
+    state = acknowledgeAndAdvance(state);
+    expect(state.round.rules.battleIndex).toBe(1);
+    expect(state.round.rules.phase).toBe("presentingBattleStart");
   });
 });
