@@ -37,6 +37,11 @@ import {
   type FactoryBattleMoveSelectionCursors,
   type FactoryBattlePresentationBoundaries,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
+import {
+  adoptFactoryOpponentSchedule,
+  generateFactoryOpponent,
+  type FactoryOpponentGenerationResult,
+} from "../../src/engine/factoryOpponentGeneration.ts";
 import type { FactoryRentalRecord } from "../../src/engine/battleScenario.ts";
 import { getLevel50InitialRentalFixedIv } from "../../src/engine/factoryRentalGeneration.ts";
 import {
@@ -663,6 +668,47 @@ function lossTerminalWindowStage(state: EngineState): EngineState {
 // player's (0) -- MURKROW is the opponent's own last mon here (ground-truth
 // doc §0/§2), matching TERMINAL_SEAM_SCAFFOLD_TRAINER's species (198)
 // already used for battler 1.
+
+// ISSUES #55 battle-2 opponent provenance (docs/win-battle2-opponent-
+// provenance-receipt.md §7): on this WIN GO ON route the ROM's real battle-2
+// opponent is trainer 9 LILIANA, set-selected single-frame (frame 6636) from
+// pre-call cursor 0x7399E3AE (4 gapless draws: trainer + sets 169/170/130),
+// with personalities constructed 32 frames later under per-mon cursors
+// [0x2F959DF4, 0xBD6F8138, 0xDE320F3A] (interleaved ambient VBlank ticks).
+// The ported generator is byte-exact; only the single-cursor construction
+// contract is wrong (ISSUES #55), so this scaffold adopts the per-mon
+// schedule at the GO ON pre-generation seam (config.adoptedNextOpponent)
+// instead of re-rolling the personalities back-to-back from one cursor.
+const WIN_TERMINAL_SELECTION_RNG_VALUE = 0x7399e3ae;
+const WIN_TERMINAL_PLAYER_TRAINER_ID = 416_049_562;
+const WIN_TERMINAL_SAVED_RENTAL_SET_IDS = [156, 149, 180, 188, 184, 135] as const;
+const WIN_TERMINAL_SET_IDS = [169, 170, 130] as const;
+const WIN_TERMINAL_CONSTRUCTION_RNG_VALUES = [0x2f959df4, 0xbd6f8138, 0xde320f3a] as const;
+
+function winTerminalNextOpponentGeneration(): FactoryOpponentGenerationResult {
+  const selection = generateFactoryOpponent({
+    rngValue: WIN_TERMINAL_SELECTION_RNG_VALUE,
+    factoryWinStreak: 1,
+    battleIndex: 1,
+    storedTrainerIds: [50] as const,
+    savedRentalSetIds: WIN_TERMINAL_SAVED_RENTAL_SET_IDS,
+    playerTrainerId: WIN_TERMINAL_PLAYER_TRAINER_ID,
+    battleTowerLevel50WinStreak: 0,
+  });
+  return adoptFactoryOpponentSchedule({
+    factoryWinStreak: 1,
+    battleIndex: 1,
+    storedTrainerIds: [50] as const,
+    savedRentalSetIds: WIN_TERMINAL_SAVED_RENTAL_SET_IDS,
+    playerTrainerId: WIN_TERMINAL_PLAYER_TRAINER_ID,
+    battleTowerLevel50WinStreak: 0,
+    trainerId: 9,
+    setIds: WIN_TERMINAL_SET_IDS,
+    selectionDrawLedger: selection.drawLedger.filter((draw) => draw.phase !== "personality"),
+    constructionRngValues: WIN_TERMINAL_CONSTRUCTION_RNG_VALUES,
+  });
+}
+
 function winTerminalWindowStage(state: EngineState): EngineState {
   // The swap-offer/swap-screen fixtures (scratch-win-go-on-swap-offer-*,
   // win-terminal-explosion-dusclops-off) stage the player party as DUSCLOPS
@@ -683,18 +729,24 @@ function winTerminalWindowStage(state: EngineState): EngineState {
     id: "win-terminal-window-off",
     rngValue: 4,
     factoryWinStreak: 0,
-    playerTrainerId: 0x89ab_cdef,
+    playerTrainerId: WIN_TERMINAL_PLAYER_TRAINER_ID,
     battleTowerLevel50WinStreak: 0,
     facilityState: { rentsCount: 0 },
     rentals: {
       type: "currentRecords",
       playerRentalRecords,
       savedRentalRecords: [
-        ...playerRentalRecords,
-        generatedCommandRecord(1),
-        generatedCommandRecord(2),
-        generatedCommandRecord(3),
+        generatedCommandRecord(156),
+        generatedCommandRecord(149),
+        generatedCommandRecord(180),
+        generatedCommandRecord(188),
+        generatedCommandRecord(184),
+        generatedCommandRecord(135),
       ],
+    },
+    adoptedNextOpponent: {
+      generation: winTerminalNextOpponentGeneration(),
+      battleIndex: 1,
     },
   });
   const commandId = orchestrator.round.presentation?.command.commandId;
@@ -721,7 +773,13 @@ function winTerminalWindowStage(state: EngineState): EngineState {
   const terminalBattle = Object.freeze({
     ...createBattleState({
       rules: initial.rules,
-      rngSeed: 9,
+      // Carries the ROM's real pre-call cursor (receipt §2 row 1) through the
+      // synthetic terminal resolution: `resolveRoundBattle` banks the terminal
+      // `battle.rng.value` as the round's post-win `rngValue`, which is exactly
+      // what `preGenerateFactoryRoundNextOpponent` reads at the GO ON edge --
+      // so the battle-2 selection cursor lands on the probed 0x7399E3AE rather
+      // than a modeled seed.
+      rngSeed: WIN_TERMINAL_SELECTION_RNG_VALUE,
       request: initial.boundary.request,
     }),
     boundary: Object.freeze({ kind: "terminal" as const, outcome: "player-win" as const }),
@@ -933,7 +991,7 @@ const TERMINAL_WINDOW_FROZEN_CURSOR_AGE: Readonly<Record<string, number>> = {
  * a target boundary while the oracle still replays the untouched anchor
  * trace. Production code never imports this registry.
  */
-const APP_STAGES: Readonly<Record<string, AppStage>> = {
+export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "battle-command-generated-off": generatedBattleCommandStage,
   "factory-arbitrary-intro-yoshi-off": generatedBattleStartIntroArbitraryStage,
   "factory-arbitrary-intro-magneton-off": generatedBattleStartIntroMagnetonStage,

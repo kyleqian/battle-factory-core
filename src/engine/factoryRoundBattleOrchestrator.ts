@@ -184,6 +184,20 @@ export type FactoryRoundBattleOrchestratorConfig = Readonly<{
     /** Adapter-pinned draws before the fresh battle kernel begins. */
     preCommandRngCalls?: number;
   }>;
+  /**
+   * A later battle's pre-generated opponent schedule may already be probed
+   * (docs/win-battle2-opponent-provenance-receipt.md): set selection is a
+   * single real cursor, but personality construction spans 32 frames with
+   * interleaved ambient VBlank ticks, so exact personalities need per-mon
+   * construction cursors via `adoptFactoryOpponentSchedule`. Adopt that
+   * result at the GO ON pre-generation seam instead of re-rolling the three
+   * mon personalities back-to-back from one modeled cursor.
+   */
+  adoptedNextOpponent?: Readonly<{
+    generation: FactoryOpponentGenerationResult;
+    /** Source challenge battle number this schedule is for (1 = battle 2). */
+    battleIndex: number;
+  }>;
 }>;
 
 export type FactoryFacilityRngSegment = Readonly<{
@@ -762,13 +776,16 @@ export function preGenerateFactoryRoundNextOpponent(
   }
   const previous = state.opponentGenerations.at(-1)!;
   const rngBefore = state.round.rules.rngValue;
-  const generated = generateOpponentFor(
-    state.config,
-    battleIndex,
-    rngBefore,
-    previous.storedTrainerIds,
-    nextSavedRentalRecords(state),
-  );
+  const adoptedNext = state.config.adoptedNextOpponent;
+  const generated = adoptedNext !== undefined && adoptedNext.battleIndex === battleIndex
+    ? adoptedNext.generation
+    : generateOpponentFor(
+      state.config,
+      battleIndex,
+      rngBefore,
+      previous.storedTrainerIds,
+      nextSavedRentalRecords(state),
+    );
   const segment = generationSegment(
     "opponent-generation",
     battleIndex,
