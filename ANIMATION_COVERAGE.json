@@ -12,7 +12,6 @@
         "MOVE_WING_ATTACK receives no credit: source audit proves the related GUST/elliptical/two-gust/slide/hitsplat body omits MetallicShine and uses distinct hit audio, and it lacks independent dense evidence",
         "MOVE_RAZOR_WIND receives no credit: source audit proves it shares only ANIM_TAG_GUST and uses a distinct two-turn gRazorWindTornado body without independent dense evidence"
       ],
-      "remaining": "None — MOVE_STEEL_WING is exact. It establishes the exact representative for asset:ANIM_TAG_GUST and task:AnimTask_TranslateMonElliptical; do not transfer credit to Wing Attack or Razor Wind.",
       "evidence": [
         "tools/battle-lab/mechanic-steel-wing-player-wingull-opponent-onix.json",
         "tools/battle-lab/mechanic-steel-wing-opponent-wingull-player-onix.json",
