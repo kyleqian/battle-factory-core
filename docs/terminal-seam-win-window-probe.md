@@ -136,6 +136,8 @@ stops well short of the quote's own settled/held state and its real dismiss
 — unlike the LOSS window, which covers its full antecedent-to-dismiss span.
 This is NOT a deliberate scope choice mirroring LOSS's convention; it is the
 last frame this session could safely capture before hitting the bug in §4.
+**Superseded by §5 below**, once §4's bug was fixed in `src` (`e88fb4a5`):
+the window now runs through frame 5011 (389 frames).
 
 ## 4. Genuine `src/`-side bug found while wiring the compare: button-message ready/complete race
 
@@ -206,6 +208,143 @@ own reproduction above needed none).
 This session's own window (§3) works around it only by stopping short (frame
 4687, `phaseElapsed: 23`, one tick before the race fires) — not a fix, a
 truncation forced by the bug.
+
+## 5. 2026-08-04/05 SIDE-lane session: extended 65/65 → 389/389 (settled hold + real dismiss); a second, distinct `src`-side identity mismatch now bounds the window short of the fade
+
+**§4's bug is fixed in `src`** (`e88fb4a5`, ISSUES #75/#73): the button-message
+ready/complete race no longer skips the quote's own dismiss-wait. This
+unblocked the window past frame 4687. Extending it is purely a `tools/compare/
+traces/win-terminal-window-off.json` **data** change (`winTerminalWindowStage`
+itself needed zero code changes — it was already driving the resolution
+lifecycle generically off the real per-tick `commandIndex`/`lifecycle.phase`
+advancement; nothing about the extension is WIN-specific logic). The trace's
+`segments` array is a literal prefix of `tools/battle-lab/
+win-terminal-explosion-dusclops-off.json`'s own `trace.segments` (the real,
+full recorded input schedule for this staged battle, confirmed identical
+tick-for-tick through the point both files diverge) — extending the window is
+just replaying more of that same real schedule and capturing every
+intervening tick, the same "every tick, consecutively" convention
+`loss-terminal-window-off.json` already uses for its own 236-frame span.
+
+**Pinned ticks (prediction, then verified):**
+
+- **Quote settled/held span**: 4688–5010 inclusive (323 frames), the
+  fully-typed "PLEASE I NEED\nSOME WATER" quote held with no cursor (§2's
+  `noCursor` gate, unaffected by this session) — matches
+  `terminal-seam-win-window-ground-truth.md` §2's own citation of the same
+  span (dismiss+78 through the next real dismiss press).
+- **Real dismiss tick = 5010** (the last full hold frame before the press),
+  matching `TERMINAL_SEAM_WIN_ANTECEDENT_DISMISS_TICK`'s own naming
+  convention (the tick *before* the button-press ticks) and the
+  ground-truth doc's own citation ("5010 (this trace's own dismiss press)").
+  Cross-checked directly against `win-terminal-explosion-dusclops-off.json`'s
+  own `trace.segments`: the idle span immediately preceding the fixture's
+  final `A`-press segment sums to exactly 5010 ticks.
+- **Predicted extended window, before wiring**: 4623–5011 inclusive (389
+  frames) — the settled hold (323) + the trainer-slide/swap-edge span already
+  covered (65) + the single tick the real dismiss press first registers on
+  (1), i.e. `65 + 323 + 1 = 389`. **Verified exactly**: `npm run compare --
+  win-terminal-window-off --summary` is **389/389**, twice-run byte-identical
+  (`manifest.json` identical end to end except the `generatedAt` timestamp).
+  `loss-terminal-window-off` unaffected, reran **236/236**. Full `npm test`
+  (721 files, 6927 passed/1 skipped) and `npm run build` green.
+
+**Why the window stops at 5011, one tick into the real dismiss press, and
+cannot extend further this session: a second, distinct `src`-side party/HP
+mismatch, not the same bug as §4.** Extending the trace's own `segments` past
+5011 (even by one more tick of the same real `A` press, i.e. to 5012 — the
+fixture's own real press is two ticks, 5011-5012) makes the app **throw**,
+every time, deterministically:
+
+```
+Error: resolution.opponentParty[0].hp must be an integer in [0, maxHp]
+    at assertBattleMon (src/engine/battleScenario.ts:115)
+    at assertBattleParty (src/engine/battleScenario.ts:122)
+    at assertSamePartyIdentity (src/engine/roundController.ts:431)
+    at resolveRoundBattle (src/engine/roundController.ts:455)
+    at finishBattle (src/engine/factoryRoundBattleOrchestrator.ts:786)
+    at advanceFactoryRoundBattleResolution (src/engine/factoryRoundBattleOrchestrator.ts:1607)
+```
+
+Repro (no oracle needed, pure engine call): extend `win-terminal-window-off
+.json`'s trailing segment from `{frames: 1, buttons: ["A"]}` back to `{frames:
+2, buttons: ["A"]}` (restoring the fixture's real 2-tick press) with
+`captureFrames: [5012]`, then `npm run compare -- win-terminal-window-off
+--summary` (or any single-frame trace requesting frame 5012) throws the
+error above every time. Frame 5011 (the press's first tick) renders fine;
+frame 5012 (the press's second tick, where the "next-command-handoff"
+lifecycle phase completes and the orchestrator hands off to `finishBattle`)
+does not.
+
+**Mechanism, confirmed by direct instrumentation (a temporary `console.error`
+in `assertBattleMon`, reverted before commit — not left in the tree):**
+
+```
+DEBUG resolution.opponentParty[0] {"id":"rental-122-3717558781","species":"SPECIES_ARON","maxHp":143,"hp":200,"status":"none"}
+```
+
+`finishBattle` (`factoryRoundBattleOrchestrator.ts:763-777`) builds its
+`BattleResolution` via `deriveBattleResolutionFromTerminalBoundary`, which
+carries `id`/`maxHp` from `state.round.rules.currentOpponent.party` (the
+**real orchestrator's own** party — here, whatever
+`createFactoryRoundBattleOrchestrator({rngValue: 4, factoryWinStreak: 0, ...})`
+actually generates for battle 1, which is **not** DESTIN's ONIX/SHUCKLE/
+MURKROW roster; it happens to start with an ARON, `maxHp: 143`) but overlays
+`hp` from `battle.rules.rulesContext.party.opponent` (the **scaffold's own
+synthetic** `terminalBattle`, built from `TERMINAL_SEAM_SCAFFOLD_TRAINER` for
+the `initial = createFactoryFullTurnBattleState(config)` call — an unrelated,
+disjoint 1-mon battle constructed purely to get the right `STRINGID_*`
+message content and species names, whose own full HP is `200`). These two
+parties were never meant to be reconciled — `winTerminalWindowStage` (like
+`lossTerminalWindowStage`) deliberately keeps the orchestrator (real party
+identity, needed for `activeBattleCallStart`/`aiHistory` plumbing) and the
+`terminalBattle` (synthetic party, needed for exact message/species text)
+as two independent constructions, hand-joined at `commandIndex: 4` — a
+combination that has always been able to drive the *presentation* phase
+(rendering commands 4-9), but was never exercised past the point where the
+resolution lifecycle actually calls `finishBattle`, because neither window
+had reached a real dismiss of the terminal message before this session.
+
+**Not a repeat of §4**: this is a different mechanism (party/HP identity,
+not a message-duration race), first reachable only because this session's
+extension is the first time either window's scaffold has ever driven a real
+dismiss of the terminal-most message through to lifecycle completion. LOSS's
+own window (236/236, closed) never reaches this either — it stops at its own
+dismiss-press tick (3231) by the same "last safe frame" logic, one tick short
+of its own `terminal-handoff`.
+
+**Blast radius**: scaffold-only, as far as this session traced it — real
+gameplay's `finishBattle` always derives both parties from the *same* live
+`battle`/`round` state (there is no second, disjoint synthetic battle in a
+real playthrough), so this specific crash shape is very likely unreachable
+outside these two compare-trace scaffolds. Not fully audited against every
+other terminal-window scaffold in this file this session (out of scope/time).
+
+**Not fixed here**: reconciling the two constructions (e.g. building
+`winTerminalWindowStage`'s `initial`/`terminalBattle` from the *same* real
+generated party the orchestrator already produced, instead of the disjoint
+`TERMINAL_SEAM_WIN_SCAFFOLD_PLAYER`/`TERMINAL_SEAM_SCAFFOLD_TRAINER` pair) is
+a materially bigger rework of this window's own staging strategy than a data
+extension — it would need the real orchestrator's generated opponent species/
+stats threaded into the `createFactoryFullTurnBattleState` config while still
+reproducing DESTIN's exact terminal-message text (`opponentTrainer:
+getFactoryTrainerPresentation(50)`, independent of `config.trainer`'s
+species, so this is plausible but unverified), and was out of this session's
+remaining budget. Flagged for whoever next picks up the fade/post-dismiss
+span. The `noCursor`/held-quote/dismiss-injection wiring landed this session
+is unaffected either way — it is a strict superset extension of the
+previously-closed 65-frame span, not a rewrite.
+
+**Verification**: `git diff --stat` for this session's changes:
+`tools/compare/traces/win-terminal-window-off.json` (segments extended,
+captureFrames extended to 389 entries) + this doc. Zero `src/`/`tests/`
+edits survive (the diagnostic `console.error` in `battleScenario.ts` used to
+confirm the mechanism above was reverted immediately after capturing its
+output, verified via `git diff --stat src/engine/battleScenario.ts` showing
+no changes). `npm run compare -- win-terminal-window-off --summary`: 389/389,
+twice-run byte-identical. `npm run compare -- loss-terminal-window-off
+--summary`: 236/236, unaffected. Full `npm test`: 721 files, 6927 passed/1
+skipped. `npm run build`: green.
 
 ## Verification
 
