@@ -776,6 +776,10 @@ import type {
   BattleResolutionRenderEffect,
   BattleResolutionPresentationRenderView,
 } from "./battleResolutionPresentationRender.ts";
+import {
+  MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR,
+  type MidBattleSwitchInView,
+} from "./battleResolutionPresentationRender.ts";
 import type {
   BattleStatName,
   BattleTerminalResolutionPresentationState,
@@ -7097,6 +7101,7 @@ function drawBattle2ActionMenuWindow(
   revealedOverride?: boolean,
   healthboxes?: BattleCommandPresentationRenderView["healthboxes"],
   fieldArt?: BattleCommandPresentationRenderView["fieldArt"],
+  spriteVisibility?: Readonly<{ player: boolean; opponent: boolean }>,
 ): void {
   const age = actionMenuAge(t, handoffTick);
   const playerVisualT = playerTrainerSendOutClock(t, handoffTick, "jenson");
@@ -7111,25 +7116,31 @@ function drawBattle2ActionMenuWindow(
     // drawGeneratedOpponentRelease (ISSUES #56 item 3) - the shadow persists
     // for the whole battle, not just the send-out materialize window.
     drawGeneratedOpponentShadow(fb, fieldArt);
-    drawSpriteSheet(
-      fb,
-      fieldArt.opponent.pic.tileset as Tileset,
-      fieldArt.opponent.pic.palette as RgbColor[],
-      fieldArt.opponent.origin.x,
-      fieldArt.opponent.origin.y - enemyMonElevation(fieldArt.opponent.speciesSymbol),
-    );
+    // ISSUES #79: the semi-invisible Fly/Dig battler's sprite stays hidden
+    // through the fight-menu handoff; its healthbox never hides.
+    if (spriteVisibility === undefined || spriteVisibility.opponent) {
+      drawSpriteSheet(
+        fb,
+        fieldArt.opponent.pic.tileset as Tileset,
+        fieldArt.opponent.pic.palette as RgbColor[],
+        fieldArt.opponent.origin.x,
+        fieldArt.opponent.origin.y - enemyMonElevation(fieldArt.opponent.speciesSymbol),
+      );
+    }
   } else {
     drawKabutoHSlideWobble(fb, t, handoffTick, "jenson");
   }
   if (revealed) {
     if (fieldArt) {
-      drawSpriteSheet(
-        fb,
-        fieldArt.player.pic.tileset as Tileset,
-        fieldArt.player.pic.palette as RgbColor[],
-        fieldArt.player.origin.x,
-        fieldArt.player.origin.y + bounce.onixY2,
-      );
+      if (spriteVisibility === undefined || spriteVisibility.player) {
+        drawSpriteSheet(
+          fb,
+          fieldArt.player.pic.tileset as Tileset,
+          fieldArt.player.pic.palette as RgbColor[],
+          fieldArt.player.origin.x,
+          fieldArt.player.origin.y + bounce.onixY2,
+        );
+      }
     } else {
       drawSpriteSheet(
         fb,
@@ -18231,6 +18242,7 @@ export function renderGeneratedBattleCommandPresentation(
         revealed,
         view.healthboxes,
         view.fieldArt,
+        view.spriteVisibility,
       );
       if (revealed) drawBattleCommandActionChrome(framebuffer, view.actionMenu);
     },
@@ -18244,6 +18256,7 @@ export function renderGeneratedBattleCommandPresentation(
         true,
         view.healthboxes,
         view.fieldArt,
+        view.spriteVisibility,
       );
       drawFightSubmenuChromeFromLiveState(
         framebuffer,
@@ -34697,6 +34710,53 @@ export const SCENE_OFF_TURN_DEFAULT_IDENTITY: SceneOffTurnIdentity = {
  * resolution renderer. All species, HP, status, lines, and effect clocks
  * arrive in the render view; this layer performs no battle-rule lookup.
  */
+/**
+ * ISSUES #78 slice 2/3: the mid-battle switch-in's battler pixels -- the
+ * closed-ball throw, then the ball-release scale-down
+ * (`sAffineAnim_Battler_Emerge` entered at accumulator 76, pa 862 per the
+ * §3 RAM ramp), then the settled sprite. The mon is not on field before the
+ * emerge; the ball covers the throw. Tint is `LaunchBallFadeMonTask`'s ball
+ * open color (same as the battle-START release); the fade-strength curve is
+ * not yet pixel-fit for this window, so the draw stays on the RAM-pinned
+ * accumulator ramp.
+ */
+function drawMidBattleSwitchInSprite(
+  fb: Uint8Array,
+  art: BattleCommandFieldArtBattler,
+  state: MidBattleSwitchInView,
+): void {
+  if (state.ballVisible) {
+    drawSpriteSheet(
+      fb,
+      BALL_CLOSED_TILESET,
+      summaryBall.palette,
+      state.ballPosition.x,
+      state.ballPosition.y,
+    );
+    return;
+  }
+  if (!state.monVisible) return;
+  if (state.emergeAccumulator < MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR) {
+    drawSpriteSheetAffineTinted(
+      fb,
+      art.pic.tileset as Tileset,
+      art.origin.x,
+      art.origin.y,
+      state.emergeAccumulator,
+      MATERIALIZE_TINT_COLOR,
+      0,
+    );
+    return;
+  }
+  drawSpriteSheet(
+    fb,
+    art.pic.tileset as Tileset,
+    art.pic.palette as RgbColor[],
+    art.origin.x,
+    art.origin.y,
+  );
+}
+
 export function renderBattleResolutionSceneOffView(
   fb: Uint8Array,
   view: BattleResolutionPresentationRenderView,
@@ -34718,6 +34778,10 @@ export function renderBattleResolutionSceneOffView(
       true,
       view.healthboxes,
       view.fieldArt,
+      {
+        player: view.visibility.player.sprite,
+        opponent: view.visibility.opponent.sprite,
+      },
     );
     drawFightSubmenuChromeFromLiveState(
       fb,
@@ -34729,6 +34793,15 @@ export function renderBattleResolutionSceneOffView(
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   const faint = view.effect?.type === "faint" ? view.effect : null;
   const hit = view.effect?.type === "hit" ? view.effect : null;
+  // ISSUES #78: the mid-battle switch-in battler's pixels are owned here
+  // (ball throw + ball-release emerge), not by the generic sprite draws.
+  const midSwitch = view.midBattleSwitchIn;
+  if (midSwitch !== null && midSwitch.battler === 1) {
+    drawMidBattleSwitchInSprite(fb, view.fieldArt.opponent, midSwitch);
+  }
+  if (midSwitch !== null && midSwitch.battler === 0) {
+    drawMidBattleSwitchInSprite(fb, view.fieldArt.player, midSwitch);
+  }
   if (view.visibility.opponent.sprite) {
     if (
       faint?.battler === 1
@@ -34783,7 +34856,19 @@ export function renderBattleResolutionSceneOffView(
       hit?.battler === 1 ? hit.healthboxY2 : 0,
     );
   }
-  if (view.visibility.player.healthbox) {
+  if (
+    midSwitch !== null
+    && midSwitch.battler === 0
+    && midSwitch.healthboxDx !== null
+  ) {
+    // ISSUES #78 slice 3: the mid-battle healthbox slide-in
+    // (StartHealthboxSlideIn, pokeball.c:1241-1269) -- 110 -> 0 at 5 px/frame.
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, view.healthboxes.player),
+      midSwitch.healthboxDx,
+    );
+  } else if (view.visibility.player.healthbox) {
     drawComposedPlayerHealthbox(
       fb,
       composePlayerHealthbox(playerHealthboxAssets, view.healthboxes.player),

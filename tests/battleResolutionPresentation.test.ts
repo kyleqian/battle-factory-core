@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createFramebuffer } from "../src/engine/framebuffer.ts";
 import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
 import {
   advanceBattleResolutionConfirmHandoff,
@@ -19,6 +20,11 @@ import {
   isBattleResolutionButtonMessageReady,
   isBattleResolutionCommandComplete,
   isBattleResolutionNextCommandHandoffComplete,
+  midBattleSwitchInAt,
+  MID_BATTLE_SWITCH_BALL_LAND_ELAPSED,
+  MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED,
+  MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED,
+  MID_BATTLE_SWITCH_EMERGE_END_ELAPSED,
   renderBattleResolutionPresentation,
 } from "../src/engine/battleResolutionPresentationRender.ts";
 import {
@@ -212,6 +218,64 @@ function damageResolution(): BattleResolutionPresentationState {
     event(3, { kind: "hp-change", battler: 1, from: 91, to: 74 }),
     event(4, { kind: "message", messageId: "STRINGID_SUPEREFFECTIVE", substitutions: [] }),
   ], NEXT_COMMAND));
+}
+
+/**
+ * A voluntary mid-battle switch segment: the outgoing mon is recalled, the
+ * party status summary is drawn/hidden, and the switch-in-animation marker
+ * arrives -- the exact event shape the real `BattleScript_ActionSwitch`
+ * window emits (docs/mid-battle-switch-presentation-ground-truth.md §2).
+ */
+function voluntarySwitchResolution(): BattleResolutionPresentationState {
+  const initial = initialBattle();
+  const context = initial.rules.rulesContext;
+  const incoming = context.party.player[1]!;
+  const switchedBattler = Object.freeze({
+    ...context.battlers[0]!,
+    ...incoming,
+    side: 0 as const,
+    partyIndex: 1,
+    species: incoming.species,
+    types: Object.freeze(["TYPE_FIGHTING", "TYPE_FIGHTING"] as const),
+  });
+  const afterContext = Object.freeze({
+    ...context,
+    party: Object.freeze({
+      ...context.party,
+      player: Object.freeze([
+        context.party.player[0]!,
+        context.party.player[1]!,
+        context.party.player[2]!,
+        context.party.player[3]!,
+        context.party.player[4]!,
+        context.party.player[5]!,
+      ]),
+    }),
+    battlers: Object.freeze([
+      switchedBattler,
+      context.battlers[1]!,
+      context.battlers[2]!,
+      context.battlers[3]!,
+    ]) as typeof context.battlers,
+  });
+  const afterRules = Object.freeze({
+    ...initial.rules,
+    rulesContext: afterContext,
+  }) as FactoryFullTurnDecisionRules;
+  return createBattleResolutionPresentation(inputFor([
+    event(0, {
+      kind: "message",
+      messageId: "STRINGID_RETURNMON",
+      substitutions: [],
+      introBattler: 0,
+      introHpScale: 0,
+    }),
+    event(1, { kind: "draw-party-status-summary", battler: 0 }),
+    event(2, { kind: "switch", side: "player", fromPartyIndex: 0, toPartyIndex: 1 }),
+    event(3, { kind: "message", messageId: "STRINGID_SWITCHINMON", substitutions: [] }),
+    event(4, { kind: "hide-party-status-summary", battler: 0 }),
+    event(5, { kind: "switch-in-animation", battler: 0, partyIndex: 1 }),
+  ], NEXT_COMMAND, afterRules));
 }
 
 describe("battle resolution presentation receipt ownership", () => {
@@ -956,55 +1020,7 @@ describe("battle resolution presentation receipt ownership", () => {
   });
 
   it("times the voluntary mid-battle switch-in span so the send-out cadence holds (ISSUES #78)", () => {
-    const initial = initialBattle();
-    const context = initial.rules.rulesContext;
-    const incoming = context.party.player[1]!;
-    const switchedBattler = Object.freeze({
-      ...context.battlers[0]!,
-      ...incoming,
-      side: 0 as const,
-      partyIndex: 1,
-      species: incoming.species,
-      types: Object.freeze(["TYPE_FIGHTING", "TYPE_FIGHTING"] as const),
-    });
-    const afterContext = Object.freeze({
-      ...context,
-      party: Object.freeze({
-        ...context.party,
-        player: Object.freeze([
-          context.party.player[0]!,
-          context.party.player[1]!,
-          context.party.player[2]!,
-          context.party.player[3]!,
-          context.party.player[4]!,
-          context.party.player[5]!,
-        ]),
-      }),
-      battlers: Object.freeze([
-        switchedBattler,
-        context.battlers[1]!,
-        context.battlers[2]!,
-        context.battlers[3]!,
-      ]) as typeof context.battlers,
-    });
-    const afterRules = Object.freeze({
-      ...initial.rules,
-      rulesContext: afterContext,
-    }) as FactoryFullTurnDecisionRules;
-    const resolution = createBattleResolutionPresentation(inputFor([
-      event(0, {
-        kind: "message",
-        messageId: "STRINGID_RETURNMON",
-        substitutions: [],
-        introBattler: 0,
-        introHpScale: 0,
-      }),
-      event(1, { kind: "draw-party-status-summary", battler: 0 }),
-      event(2, { kind: "switch", side: "player", fromPartyIndex: 0, toPartyIndex: 1 }),
-      event(3, { kind: "message", messageId: "STRINGID_SWITCHINMON", substitutions: [] }),
-      event(4, { kind: "hide-party-status-summary", battler: 0 }),
-      event(5, { kind: "switch-in-animation", battler: 0, partyIndex: 1 }),
-    ], NEXT_COMMAND, afterRules));
+    const resolution = voluntarySwitchResolution();
 
     const commands = resolution.segments[0]!.commands;
     const switchIndex = commands.findIndex((command) => command.type === "switch-in");
@@ -1052,6 +1068,113 @@ describe("battle resolution presentation receipt ownership", () => {
       event(2, { kind: "health-bar-update", battler: 1, healthValue: 11 }),
       event(1, { kind: "hp-change", battler: 1, from: 91, to: 80 }),
     ], NEXT_COMMAND))).toThrow(/not strictly increasing/);
+  });
+
+  it("models the mid-battle switch-in ball-release emerge on the RAM-pinned pa ramp (ISSUES #78 slice 2)", () => {
+    // docs/mid-battle-switch-presentation-ground-truth.md §3: the mon becomes
+    // visible at frame 1188 (pa 862) and scales down to pa 256 by 1199.
+    const paAt = (accumulator: number): number => Math.floor(0x10000 / accumulator);
+    const ramp: number[] = [];
+    for (let elapsed = MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED;
+      elapsed <= MID_BATTLE_SWITCH_EMERGE_END_ELAPSED; elapsed += 1) {
+      ramp.push(paAt(midBattleSwitchInAt(elapsed, 0).emergeAccumulator));
+    }
+    expect(ramp).toEqual([
+      862, 697, 585, 504, 442, 394, 356, 324, 297, 275, 256, 256,
+    ]);
+    // Not visible before the emerge onset; ball visible only during the throw.
+    expect(midBattleSwitchInAt(0, 0).monVisible).toBe(false);
+    expect(midBattleSwitchInAt(MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED - 1, 0).monVisible)
+      .toBe(false);
+    expect(midBattleSwitchInAt(MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED, 0).monVisible)
+      .toBe(true);
+    expect(midBattleSwitchInAt(0, 0).ballVisible).toBe(true);
+    expect(midBattleSwitchInAt(MID_BATTLE_SWITCH_BALL_LAND_ELAPSED - 1, 0).ballVisible)
+      .toBe(true);
+    expect(midBattleSwitchInAt(MID_BATTLE_SWITCH_BALL_LAND_ELAPSED, 0).ballVisible)
+      .toBe(false);
+    // The ball throws from the player corner toward the mon spot.
+    const first = midBattleSwitchInAt(0, 0).ballPosition;
+    const last = midBattleSwitchInAt(MID_BATTLE_SWITCH_BALL_LAND_ELAPSED - 1, 0).ballPosition;
+    expect(first.x).toBe(24);
+    expect(first.y).toBe(68);
+    expect(last.x).toBeGreaterThan(50);
+    expect(last.y).toBeGreaterThan(80);
+  });
+
+  it("models the mid-battle switch-in healthbox slide at 5 px/frame (ISSUES #78 slice 3)", () => {
+    // StartHealthboxSlideIn (pokeball.c:1241-1269): x2 110 -> 0 at 5 px/frame
+    // over frames 1205-1227 (elapsed 65-87), doc §3.
+    expect(midBattleSwitchInAt(MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED - 1, 0).healthboxDx)
+      .toBeNull();
+    expect(midBattleSwitchInAt(MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED, 0).healthboxDx)
+      .toBe(110);
+    expect(midBattleSwitchInAt(MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED + 1, 0).healthboxDx)
+      .toBe(105);
+    expect(midBattleSwitchInAt(MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED + 22, 0).healthboxDx)
+      .toBe(0);
+    expect(midBattleSwitchInAt(MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED + 40, 0).healthboxDx)
+      .toBe(0);
+  });
+
+  it("exposes the mid-battle switch-in view while the switch-in command owns the field (ISSUES #78 slice 2)", () => {
+    const resolution = voluntarySwitchResolution();
+    const switchIndex = resolution.segments[0]!.commands.findIndex(
+      (command) => command.type === "switch-in",
+    );
+    const throwing = createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, switchIndex, 20),
+    );
+    expect(throwing.midBattleSwitchIn).toEqual(
+      expect.objectContaining({
+        battler: 0,
+        ballVisible: true,
+        monVisible: false,
+      }),
+    );
+    // The generic sprite draw is suppressed; the scene renderer owns the ball.
+    expect(throwing.visibility.player.sprite).toBe(false);
+    const emerged = createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, switchIndex, 55),
+    );
+    expect(emerged.midBattleSwitchIn).toEqual(
+      expect.objectContaining({ ballVisible: false, monVisible: true }),
+    );
+    expect(emerged.visibility.player.sprite).toBe(false);
+    expect(emerged.field.player).toMatchObject({
+      partyIndex: 1,
+      name: "MACHOP",
+      hp: 80,
+      maxHP: 80,
+    });
+    expect(emerged.message).toEqual({
+      lines: ["Go! MACHOP!"],
+      visibleCharacters: 11,
+    });
+  });
+
+  it("renders the mid-battle switch-in ball throw and emerge without throwing (ISSUES #78 slice 2)", () => {
+    const resolution = voluntarySwitchResolution();
+    const switchIndex = resolution.segments[0]!.commands.findIndex(
+      (command) => command.type === "switch-in",
+    );
+    for (const elapsed of [0, 20, 45, 48, 55, 70, 90]) {
+      const fb = createFramebuffer();
+      renderBattleResolutionPresentation(
+        fb,
+        atRenderClock(resolution, switchIndex, elapsed),
+        { drawScene: renderBattleResolutionSceneOffView },
+      );
+      expect(fb.length).toBe(240 * 160 * 4);
+    }
+    // The ball throw actually paints pixels during the throw window.
+    const throwing = createFramebuffer();
+    renderBattleResolutionPresentation(
+      throwing,
+      atRenderClock(resolution, switchIndex, 10),
+      { drawScene: renderBattleResolutionSceneOffView },
+    );
+    expect(throwing.some((channel) => channel !== 0 && channel !== 255)).toBe(true);
   });
 });
 

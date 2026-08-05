@@ -25,6 +25,24 @@ mid-battle switch route lacks it; (b) after switching, the opponent's move
 played immediately with no send-out cadence between. Stage a mid-battle
 switch (Scene OFF), map the real schedule dense, bind generically.
 
+**2026-08-05 MAIN bind (ground truth: `docs/mid-battle-switch-presentation-ground-truth.md`):**
+slices 1-3 landed — (b) closed: the `switch-in` command now holds the real
+91-frame `CONTROLLER_SWITCHINANIM` span (`SWITCH_IN_SPAN_FRAMES`), so "Go!
+…!" persists and the opponent's move waits for the full send-in; (a) closed
+in presentation: the mid-battle switch-in now draws the ball throw, the
+ball-release emerge (RAM pa ramp 862→256 over 1188-1199, pinned Tier-1), and
+the healthbox slide-in (110→0 @ 5 px/frame over 1205-1227) while the field
+is idle. Tier-1 pins + render smoke landed; `compare:differential` 579/579
+byte-identical vs base across the battle-command and forced-switch windows.
+**Remainder:** (4) recall-side span — `STRINGID_RETURNMON` still shows
+`max(24,~35)≈35f` instead of the real 82f hold (the outgoing mon's
+return-to-ball scale-up + teardown is unmodeled); and the scout's
+`scratch-mid-battle-switch-dense-*-off` traces are not yet wired into
+`tools/compare/appTrace.ts` (needs an app stage positioning the orchestrator
+at the fixture's fight-menu-open checkpoint), so the §6 dense-compare
+acceptance for slices 1-3 is unexecuted — Tier-1 + differential cover the
+change, pixel compare remains.
+
 ## #79 — Live play: Fly's semi-invisible turn leaves the sprite visible (verify first)
 
 **User play-test 2026-08-05** (user asked for a double-check): MURKROW used
