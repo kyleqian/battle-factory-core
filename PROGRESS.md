@@ -5,6 +5,51 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 948 — [interactive supervisor round 1, 2026-08-05] #73 WIN swap-YES bound **248/248**; battle-2 opponent provenance receipt banked; user play-test intake #76–#81 + scope decisions
+
+- **State:** master `857dc84f` (swap-YES bind `5489a9f7` + side receipt merge),
+  clean. New canonical trace `win-go-on-swap-offer-yes-off` **248/248** exact
+  (frames 9930-10177; supervisor re-ran twice fresh post-salvage). Regressions
+  re-held at the commit: WIN **3590/3590**, offer **115/115**, NO **213/213**
+  (supervisor rerun), guide-dismiss **232/232**, LOSS **1943/1943**. Worker's
+  full suite green pre-kill (**727 files / 6,979 passed / 1 skipped**);
+  supervisor ran `npm run build` + smoke **347/347** after. The MAIN worker
+  was cap-killed (exit 124) *after* its feature commit, during the final
+  build — clean-tree salvage; this entry is the docs remainder.
+- **Did:** (1) YES now enters the generic factory swap screen at the real
+  schedule (A 10005-10006; settled input-ready player picker elapsed 99 =
+  frame 10105). Two generic red-verified src fixes:
+  `FACTORY_SWAP_SPECIES_FADE_ACTIVATE_ELAPSED` 59→63 (palette
+  `softwareFadeFinishing` holds `active` 5 ticks past visual settle), and
+  swap-picker category text derived from `draft-pool-header.json` (all 376
+  species; was a six-species hand-cast that couldn't resolve the WIN route's
+  DUSCLOPS party). Honest boundary: ball-rocking restart is per-ball
+  `Random()%5` (ambient RNG, #55-adjacent), so the window ends at 10177,
+  one frame before the first anim-end. (2) SIDE receipt
+  (`docs/win-battle2-opponent-provenance-receipt.md`, supervisor re-ran the
+  driver: ALL CHECKS PASSED): `GenerateOpponentMons` is **single-frame**
+  (6636), pre-call cursor `0x7399E3AE` → 4 gapless draws → trainer **9
+  LILIANA** + sets 169/170/130 byte-for-byte; party construction spans 32
+  frames with ambient interleaving — per-mon cursors reproduce all three
+  personalities exactly. §7 names the exact scaffold fields for the wiring
+  step.
+- **Next:** MAIN: #76 Confuse Ray crash (user play-test, top priority);
+  SIDE: #77 message-hold timing scout. Then: provenance wiring into
+  `winTerminalWindowStage` per receipt §7; #78 switch-presentation scout;
+  #79 Fly visibility probe; #80 party-menu inventory; #81 torment
+  indication; RECORD/RETIRE/lobby/REST per the user decisions below.
+- **Notes:** user play-tested the pinned preview (`.worktrees/play-preview`
+  at `974ef563`, port 5199) and filed six reports → ISSUES #76-#81. User
+  scope decisions (2026-08-05, recorded in ROADMAP S10 + ISSUES #73): full
+  battle parity breadth (all legal Gen-3 species/moves/abilities/items in
+  singles; barriers become implement-or-prove-unreachable), RECORD
+  stub-only (session flag for the 4→3 menu variant), REST unselectable
+  (deliberate divergence), RETIRE fully (reuses the loss-lobby flow — same
+  ROM script), lobby walkable / no exit / no PC (real map has none) /
+  silent NPCs, wandering optional.
+
+---
+
 ## 947 — [interactive supervisor, 2026-08-05] Launcher: DeepSeek deadline-in-prompt + generalized commit attribution
 
 - **State:** master `35d1f90e`, clean; tooling-only (no engine or fixture
@@ -75,45 +120,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   The far-side content gap remains an exposure of #55's ambient RNG/provenance
   model, not a presentation-timing failure. Evidence:
   `docs/post-terminal-beyond-boundary-win-go-on-guide-dismiss-evidence.md`.
-
----
-
-## 945 — [bounded MAIN worker, 2026-08-05] #73 WIN swap-offer NO decision bound: `win-go-on-swap-offer-no-off` exact **213/213** twice fresh
-
-- **State:** master `89693d9d`, clean. The swap-offer NO decision + the generic
-  `Right this way, please!` guide are bound at **213/213** exact twice fresh
-  (frames 9930-10406, dense; PNG-byte-identical both runs). Regressions
-  re-held: canonical WIN **3590/3590**, LOSS **1943/1943**, LOSS decline
-  **155/155**, win-beyond **228/228**, GO ON scout **143/143**, type **93/93**,
-  style **92/92**, swap-offer **115/115**, battle-command-generated **128/128**.
-  Full `npm test` **727 files / 6,973 passed / 1 skipped** and `npm run build`
-  green; smoke 347/347.
-- **Did:** authored `scratch-win-go-on-swap-offer-no-probe.json`, preserving the
-  swap-offer fixture's 33 segments byte-for-byte and appending a safely-held
-  DOWN (9943-9944, cursor display -> NO at 9944), a bounded idle, an A
-  accepting NO at 10005-10006, and a bounded idle tail (37 segments / 10406
-  frames). Dense oracle captures bind the NO decision, YES/NO-window dismissal
-  (edge+1), box clear (edge+3), and the generic `Right this way, please!`
-  guide typing 1 glyph/tick from edge+4 to its final glyph at edge+26 (frame
-  10031), held **with no wait-cursor** through the endpoint 10406 — the genuine
-  held/dismiss-ready boundary, unpressed per contract (no walk/warp). One
-  generic src fix was required and landed (`overlayTerminalKernelParty` now
-  overlays only the four battle-mutable fields — HP/status1/item/PP — onto the
-  rental identity instead of spreading the whole terminal party): the WIN
-  scaffold's placeholder terminal party (DUSCLOPS, personality `0xff`, IV 3)
-  was corrupting the kernel party so `healFactoryKernelParty`'s identity guard
-  threw on the NO advance. Red-verified Tier-1 pin
-  (`tests/factoryRoundBattleOrchestrator.test.ts`); no calibration — the
-  existing `movePostwinSwapCursor`/`acceptPostwinSwapDecline`/
-  `postwinRightThisWay*` machinery reproduced every boundary with its current
-  constants. Evidence: `docs/post-terminal-beyond-boundary-win-go-on-swap-offer-no-decision-evidence.md`.
-- **Next:** a separate YES decision should enter the already-generic swap UI
-  (or hand its fixture to the swap-screen path); the unexercised
-  RECORD/REST/RETIRE continuation choices remain. Promote the proven decision
-  span into the canonical WIN window once the YES/guide tail is also bound.
-- **Notes:** no absolute frame/battle-number/fixture branch; the overlay fix is
-  source-relative (the real game only writes HP/status/item/PP back to
-  `gPlayerParty` during a battle — identity is never battle-mutable). LOSS
-  record playback/free-roam remain separate.
 
 ---

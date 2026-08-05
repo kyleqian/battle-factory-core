@@ -17,6 +17,60 @@ backlog.
 
 # Open
 
+## #76 — Live play: Confuse Ray crashes (string-resolver FATAL guard suspected)
+
+**User play-test 2026-08-05** (pinned preview at `974ef563`): HAUNTER used
+CONFUSE_RAY vs MURKROW in a live battle → hard crash. `battleStringResolver.ts`
+carries zero confusion-family strings and throws on unknown ids — the #72
+user-decision FATAL guard working as designed, but this family should exist.
+Repro on the play route, add the confusion string family source-faithfully,
+then sweep sibling status-move strings (a census of string ids reachable from
+registered effects vs. the resolver table) so the next family is found by the
+census, not a player. Top-priority MAIN fix.
+
+## #77 — Live play: battle message hold cadence ignored ("super effective" flashes)
+
+**User play-test 2026-08-05:** result/effectiveness messages hold for a
+fraction of a second. The real game holds them via battle-script
+`waitmessage`/`pause` waits (`B_WAIT_TIME_*`, 64/32 frames) — the kernel
+executes those opcodes, but the live presentation does not honor the
+durations. Scout the source constants + one dense OFF oracle window over a
+super-effective hit, then bind the shared hold-constants family on the live
+route. A small constants family, not per-message work.
+
+## #78 — Live play: mid-battle switch send-out pops in; post-switch pacing immediate
+
+**User play-test 2026-08-05:** (a) a switched-in Pokémon appears with no
+materialize — battle-START send-outs have the verified emerge, but the
+mid-battle switch route lacks it; (b) after switching, the opponent's move
+played immediately with no send-out cadence between. Stage a mid-battle
+switch (Scene OFF), map the real schedule dense, bind generically.
+
+## #79 — Live play: Fly's semi-invisible turn leaves the sprite visible (verify first)
+
+**User play-test 2026-08-05** (user asked for a double-check): MURKROW used
+FLY and its sprite stayed on screen during the airborne turn. The kernel
+emits `set-battler-sprite-visibility` (moveend Dig/Fly toggle); the live
+presentation may not consume it mid-battle. First a short OFF-profile oracle
+probe of the real visible behavior, then wire the existing signal through if
+confirmed.
+
+## #80 — Live play: in-battle party/switch menu is scaffolding-grade
+
+**User play-test 2026-08-05:** the party menu opened for switching "looks
+completely wrong" (layout/sprites/HP bars/message strip). Scout with a dense
+OFF window over the mid-battle party screen, inventory the visual gaps, then
+slice the binding work. Largest play-test item; sequenced after #76/#77/#78.
+
+## #81 — Live play: Torment gives no reselection-rejection indication
+
+**User play-test 2026-08-05:** BUTTERFREE tormented by MURKROW; reselecting
+the banned move gives no "can't use" indication. Known remainder: #72's
+settled record banked the selection-dismiss timing facts for exactly this
+option-(a) work, and the 2026-08-04 option-(b) slice ROM-verified the three
+rejection causes. Implement the selection-time rejection message flow on the
+live route.
+
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **Symptom:** all 62 Factory-front send-out intro families (**376/376** species
@@ -857,6 +911,28 @@ seam had masked:
   accept/decline publication, and live routing. This removes the controller-
   sequencing ambiguity but does not synthesize the ROM's ambient VBlank draws,
   so LILIANA-vs-ABBIE at frame 10638 remains #55 rather than a #73 timing fix.
+- **2026-08-05 WIN swap-YES bound into the swap screen (`5489a9f7`):**
+  `win-go-on-swap-offer-yes-off` is **248/248** exact twice fresh (frames
+  9930-10177; supervisor re-ran twice post-salvage): YES accept at
+  10005-10006, YES/NO dismissal, box teardown, swap-screen fade/init, and
+  the settled input-ready player picker at elapsed 99 (frame 10105). Two
+  generic red-verified src fixes: `FACTORY_SWAP_SPECIES_FADE_ACTIVATE_ELAPSED`
+  59→63 (`softwareFadeFinishing` holds `gPaletteFade.active` 5 ticks past
+  the visual settle) and swap-picker category text derived from
+  `draft-pool-header.json` (all 376 species; was a six-species hand-cast).
+  Honest boundary: the ball-rocking restart after the first anim-end is
+  per-ball `Random()%5` ambient RNG (#55-adjacent), so the window stops one
+  frame short of it. **User decisions 2026-08-05 narrow the remainder:**
+  RECORD is stub-only (dialogue-exact, in-session flag for the 4→3-choice
+  menu variant, no real recording/playback ever), REST is deliberately
+  unselectable (real game saves + soft-resets to title —
+  `EventScript_PauseChallenge`; no save system in scope; comparison
+  fixtures must never press it), RETIRE is implemented fully (its YES jumps
+  to `WarpToLobbyLost`, the same script as the loss ending, already exact).
+  The walkable lobby (free movement, inert exit door, no PC — the real map
+  has none — silent NPCs including the doubles attendant, wandering
+  optional) is a user-directed feature sequenced behind the play-test fixes
+  #76-#81.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
@@ -895,6 +971,19 @@ publishes it after swap resolution, matching source `AskSwapMon`. This makes
 the modeled RNG spend occur at the right logical seam, but the synthetic
 terminal stage's input cursor still omits prior ambient VBlank interleaving;
 therefore it still selects ABBIE rather than the ROM's LILIANA.
+
+**Receipt (2026-08-05, `docs/win-battle2-opponent-provenance-receipt.md`,
+supervisor re-ran the driver: ALL CHECKS PASSED):** selection is
+**single-frame** (frame 6636): pre-call cursor `0x7399E3AE` → 4 gapless
+draws (trainer 25209%100 = 9 LILIANA; sets 169/170/130), zero ambient
+interleaving inside the span; the app generator reproduces trainer, sets,
+species, items, and the end cursor `0x50F04E72` byte-for-byte. Party
+*construction* spans 32 frames with interleaved ambient ticks (anchor-draft
+class); the per-mon cursors `[0x2F959DF4, 0xBD6F8138, 0xDE320F3A]`
+reproduce all three personalities exactly via `adoptFactoryOpponentSchedule`.
+Receipt §7 names the scaffold wiring fields (`winTerminalWindowStage`
+`rngValue`/`playerTrainerId`/`savedRentalRecords` + the per-mon schedule);
+the wiring step is queued.
 
 **Leads:** either extend the construction contract with an explicit
 interleaving representation (per-mon start cursors or a per-frame tick
