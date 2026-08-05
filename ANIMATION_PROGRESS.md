@@ -1,5 +1,47 @@
 # Animation coverage
 
+## MOVE_WRAP closed — 38/38 both orientations twice-fresh, promoted to exact (2026-08-05 worker)
+
+- **State:** WRAP (new move) → **exact**. Move coverage: **115/276 exact, 0
+  partial, 0 staged, 161 unsupported**. Both fixtures pin
+  `framebufferMatching: 38` with status `exact`.
+- **Did:** full new-move acceptance on the shared BindWrap track with the
+  already-exact MOVE_BIND control. `Move_WRAP` (battle_anim_scripts.s:7130)
+  is `AnimTask_TranslateMonEllipticalRespectSide(ANIM_ATTACKER,6,4,2,4)` +
+  `goto BindWrap` (SE_M_BIND + two `BindWrapSqueezeTarget`
+  `AnimTask_ScaleMonAndRestore(10,-5,5)` calls + waitforvisualfinish + end).
+  Landed the reducer (`src/animation/wrap.ts`) reusing bind.ts's shared
+  `scaleMonAndRestoreAtAge`: the ellipse runs 32 steps (wavePeriod 16, two
+  loops, origin at steps 0/16, final-step origin reset at 31) with the
+  source's RespectSide opponent width negation before signed Q8.8 rounding,
+  and the two squeezes at probe-measured starts [1,19]. Added
+  `SceneOnWrapConfig/View` + `sceneOnWrapView` seam, the `battleScene.ts`
+  draw case (TENTACOOL back/front over affine-stretched ONIX target with the
+  ONIX front idle residual x2=1, side-correct healthboxes/text), the two
+  mechanic scenarios (FRONTIER_MON_TENTACOOL record 124, all four slots
+  WRAP, vs legal ONIX — the carrier/species/side audited in the generated
+  mons data), `wrapProbe.py` (dense, ellipse+squeeze task lifecycles,
+  battler sprite records, RGB), `wrapPortable.ts`, the two
+  scene-on-portable-evidence/v1 fixtures, and `wrap.test.ts` +
+  `wrapEvidence.test.ts`.
+- **Measured:** player-back frames 222-259 and opponent-front frames 78-115,
+  both **38/38 source-component and shared-framebuffer exact twice fresh**
+  (semantic identity also 38/38 each run). Evidence `0220a498…` /
+  `62037408…`, RGB `cc7ca56f…` / `39d3acfc…` reproduce the fixture pins
+  exactly on every fresh portable run.
+- **Next:** continue the zero-new-component Level-50 ladder from the ranked
+  coverage report.
+- **Notes:** WRAP is a **sibling move acceptance** — sharing the BIND
+  squeeze/scale-and-restore component accepts no other move. BIND remains
+  exact (45/45 both orientations) as the control. Two diagnosis corrections
+  during fitting: (1) the gender symbol color/position mismatch was the
+  wrong fixture gender (personality rule is `ratio > (pid&0xFF) ? female :
+  male`, so pid-low 0xa0 ONIX is male, blue ♂), and (2) the player/opponent
+  healthbox HP fields must key off the healthbox position, not the attacking
+  side. `factoryAnimationInventory.test.ts` summary pin moved 114→115 /
+  162→161 with the promotion. No boundary widening, no new unsupported
+  barriers.
+
 ## Supervisor wind-down — four Level-50 moves exact; animation-main green (2026-08-05)
 
 - **State:** coverage advanced **110→114/276 exact** with no partial or staged
