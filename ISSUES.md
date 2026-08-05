@@ -544,15 +544,12 @@ seam had masked:
   A at 602 dismisses it (frame 3834 = slice 2's end). The prior scout
   doc's "repeating 3-frame walk-cycle" (3350-3510) is actually the page-0
   held-cursor blink only — `lockall` freezes every NPC, so no walk
-  animation is needed. The page-1 typing has an irregular ~1-2-tick pause
-  every few glyphs (`RenderText`'s `textSpeed` delay counter, text.c:941-961)
-  the 1-char/tick `factoryTerminalVisibleChars` model must eventually
-  replicate.
+  animation is needed.
 - **Timing recalibrated + object anchors corrected (this session's second
   commit): `FACTORY_LOSS_TERMINAL_PROFILE` now models the real
   post-terminal schedule** (fieldFirstAge 114 / messageFrameAge 141 /
-  page-0 text 143 / page-0 input-ready 171 / nextPageVisualDelay 6, i.e.
-  page-1 text at page0release+6; all ages = frame − 3232), and the object
+  page-0 text 143 / page-0 input-ready 171 / nextPageVisualDelay 2, i.e.
+  page-1 text at page0release+2; all ages = frame − 3232), and the object
   OAM anchors use the source 16x32 feet-anchor (`box top = tile*16 −
   cameraOrigin − 16`, `event_object_movement.c:1850-1854`), which makes the
   fatMan/woman/scientist sprites pixel-exact (0 diff vs the oracle at frame
@@ -563,6 +560,35 @@ seam had masked:
   record menu). Measured on a dense 3346-3834 scratch window: fade-in 37-133
   px, page-0 typing 133-175, page-0 cursor 133-170, page-1 typing 182-898,
   page-1 cursor 133-229 — down from 26014 px before the camera fix.
+- **Page-transition residual class RESOLVED (2026-08-04, R5 MAIN worker):
+  `nextPageVisualDelay` is 2, not 6 — and the whole page-1 window is now
+  exact.** The earlier "page-1 typing 182-898 px" measurement and the
+  "RenderText printer pause cadence" attribution were both artefacts of the
+  wrong `nextPageVisualDelay`: a dense 1-tick re-probe of the committed
+  LOSS fixture (frames 3534-3600) shows the real printer types page-1
+  **1 glyph/tick with no pauses** — the "no-change" frames are exactly the
+  two invisible space glyphs, and the "3-tick box clear/reopen" at
+  3535-3537 is page-1's opening "I " of "I will return your POKéMON in
+  exchange" printing onto the box frame itself (the serif-I's pixels are
+  the frame's own border pixels, so the box reads empty at 3535-3536 and
+  the first visible glyph "w" lands at 3537). With `nextPageVisualDelay=2`
+  the generic `factoryTerminalActivePage`/`factoryTerminalPageTextFirstAge`
+  flip happens at the real edge (release+2), and the existing 1-char/tick
+  `factoryTerminalVisibleChars` model reproduces every frame 3535-4053
+  (page-1 typing + cursor + dismiss + page-2 typing + cursor) **0 diff
+  outside the out-of-scope player sprite** (twice-run byte-identical on the
+  scratch windows below). The mechanism is expressed as a first-class
+  source-relative phase — `FactoryTerminalPageVisualPhase`
+  (`idle`/`typing`/`held`/`cleared`, `factoryTerminalPageVisualPhase` in
+  `factoryTerminalPresentation.ts`), documented against the real
+  CHAR_PROMPT_CLEAR handoff (text.c RENDER_STATE_CLEAR: the released page
+  stays drawn `nextPageVisualDelay` ticks, then FillWindowPixelBuffer wipes
+  and the next page prints the same tick), with the render's page cursor
+  gated on it. Two red-verified Tier-1 tests
+  (`tests/factoryTerminalPresentation.test.ts` "holds the released page…"
+  + "renders the box-clear/reopen phase…"; both fail with the old value 6
+  stashed). The record-prompt transition at frame 4054+ (the next box
+  clear, ~1,350 px) is slice 3's own territory, untouched here.
 - **Residual classes (documented, honest checkpoint):** (1) the **player
   sprite** (~133 px, constant across every frame) — the oracle renders the
   bootstrapped save's actual player character (red-brown hat + red shirt,
@@ -570,18 +596,19 @@ seam had masked:
   layout asset carries (blue hat, 20 px); the game substitutes the player's
   object graphic from the save at runtime, so the extracted Brendan asset
   cannot match — needs the oracle's real player graphic extracted (probe:
-  `bin/oracle` RAM/save read, or a source player-pic family check). (2) the
-  **page-1 printer pause cadence** (up to ~900 px during 3538-3596) — the
-  real `RenderText` prints with `textSpeed`-delayed glyph bursts
-  (`text.c:941-961`), the 1-char/tick `factoryTerminalVisibleChars` model
-  needs the cadence. (3) the **page-1 box-open transition** (905 px at
-  3535-3537) — a 3-tick clear/reopen the `nextPageVisualDelay` model
-  approximates. **Honest contiguous exact checkpoint therefore remains
-  frame 3345 (350/350); the committed trace's capture window was NOT
-  extended** (a red committed window would misrepresent the state). Receipts:
-  dense `bin/oracle lab` passes over the committed fixture (`/tmp/
-  loss-s2-{coarse,c1,c2,c3}.json`, 62+194+38+75 captures), reproduced twice;
-  the scratch compare trace used for the numbers above is not committed.
+  `bin/oracle` RAM/save read, or a source player-pic family check). The
+  page-1 printer-pause and page-1 box-open classes above are **closed**;
+  the remaining page-2/record-prompt transition (frame 4054+, ~1,350 px)
+  belongs to slice 3. **Honest contiguous exact checkpoint therefore
+  remains frame 3345 (350/350) in the committed trace — which was NOT
+  extended** (the capture window ends before the page-0 dismiss, so a
+  red window would misrepresent it) — while the dense scratch windows prove
+  the page-1 span exact: `loss-s2-page1-window` (3534-3660) and
+  `loss-s2-page1-tail` (3590-3845) are 0-diff outside the player sprite,
+  twice-run byte-identical. Receipts: dense `bin/oracle lab` passes over
+  the committed fixture (`/tmp/loss-s2-{coarse,c1,c2,c3}.json`, 62+194+38+75
+  captures), reproduced twice; the scratch compare traces used for the
+  numbers above are not committed.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 

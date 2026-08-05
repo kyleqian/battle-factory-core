@@ -11,6 +11,7 @@ import {
 import {
   factoryTerminalActivePage,
   factoryTerminalPageTextFirstAge,
+  factoryTerminalPageVisualPhase,
   factoryTerminalRecordPromptFirstAge,
   factoryTerminalRecordPromptTextFirstAge,
   factoryTerminalRecordMenuVisible,
@@ -580,6 +581,11 @@ export function renderFactoryTerminalPresentation(
     state.profile.pages[page],
     factoryTerminalVisibleChars(state),
   );
-  if (page === 0 || page === 1) drawPageCursor(fb, state, page);
+  if (
+    (page === 0 || page === 1) &&
+    factoryTerminalPageVisualPhase(state, page) !== "cleared"
+  ) {
+    drawPageCursor(fb, state, page);
+  }
   return fb;
 }

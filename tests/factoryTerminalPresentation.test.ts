@@ -19,7 +19,10 @@ import {
   createFactoryTerminalRoundWonPresentation,
   FACTORY_LOSS_TERMINAL_PROFILE,
   FACTORY_ROUND_WON_TERMINAL_PROFILE,
+  factoryTerminalActivePage,
   factoryTerminalCompletion,
+  factoryTerminalPageTextFirstAge,
+  factoryTerminalPageVisualPhase,
   factoryTerminalRecordMenuDrawn,
   factoryTerminalRecordPromptFirstAge,
   factoryTerminalRecordMenuInputReady,
@@ -27,6 +30,8 @@ import {
   factoryTerminalVisibleChars,
   isFactoryTerminalRoundWon,
 } from "../src/engine/factoryTerminalPresentation.ts";
+import { renderFactoryTerminalPresentation } from "../src/engine/factoryTerminalRender.ts";
+import { createFramebuffer } from "../src/engine/framebuffer.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
 
 function mon(id: string): BattleMon {
@@ -263,6 +268,70 @@ describe("Factory Scene-OFF loss terminal adapter", () => {
     expect(engine.roundController!.rules).toBe(rules);
     expect(engine.roundController!.rules.phase).toBe("roundLost");
     expect(engine.roundController!.rules.rngValue).toBe(0x89abcdef);
+  });
+
+  it("holds the released page for nextPageVisualDelay ticks, then clears it and starts the next page typing the same tick (the box clear/reopen handoff)", () => {
+    const command = lossController().presentation!.command;
+    if (command.type !== "roundLost") throw new Error("expected roundLost");
+    let terminal = createFactoryTerminalLossPresentation(command);
+    terminal = advanceTo(terminal, 170);
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
+    expect(terminal.firstPageReleaseAge).toBe(171);
+    // The real CHAR_PROMPT_CLEAR handoff: page-0 stays fully drawn for the
+    // profile's nextPageVisualDelay ticks after the release edge, then
+    // FillWindowPixelBuffer wipes the box and page-1 prints from the same
+    // tick (dense-mapped real schedule: page-1 typing at release+2).
+    expect(terminal.profile.nextPageVisualDelay).toBe(2);
+    expect(factoryTerminalPageTextFirstAge(terminal, 1)).toBe(173);
+    terminal = advanceTo(terminal, 172);
+    expect(factoryTerminalPageVisualPhase(terminal, 0)).toBe("held");
+    expect(factoryTerminalActivePage(terminal)).toBe(0);
+    terminal = advanceTo(terminal, 173);
+    expect(factoryTerminalPageVisualPhase(terminal, 0)).toBe("cleared");
+    expect(factoryTerminalPageVisualPhase(terminal, 1)).toBe("typing");
+    expect(factoryTerminalActivePage(terminal)).toBe(1);
+    // Page-1's opening "I " lands on the box frame itself, so the box reads
+    // empty for its first two printing ticks (the oracle's 3535-3536 look).
+    expect(factoryTerminalVisibleChars(terminal)).toBe(1);
+  });
+
+  it("renders the box-clear/reopen phase as the empty frame, then the first visible page-1 glyph at the source-relative position", () => {
+    const command = lossController().presentation!.command;
+    if (command.type !== "roundLost") throw new Error("expected roundLost");
+    const releasedAt = (age: number) => {
+      let terminal = createFactoryTerminalLossPresentation(command);
+      terminal = advanceTo(terminal, 170);
+      terminal = advanceFactoryTerminalPresentation(terminal, {
+        pressedA: true,
+      });
+      terminal = advanceTo(terminal, age);
+      return renderFactoryTerminalPresentation(
+        terminal,
+        () => createFramebuffer(),
+      );
+    };
+    const darkAt = (fb: Uint8Array, x: number, y: number) => {
+      const i = (y * 240 + x) * 4;
+      return fb[i]! < 200 && fb[i + 1]! < 200 && fb[i + 2]! < 200;
+    };
+    // Age 172 = release + nextPageVisualDelay - 1: the released page-0 is
+    // still fully drawn (its "T" glyph spans x16-21).
+    const held = releasedAt(172);
+    expect(darkAt(held, 16, 124)).toBe(true);
+    // Age 173 = release + nextPageVisualDelay: page-0's text is wiped and
+    // page-1's first char ("I") prints onto the box frame itself — page-0's
+    // text is gone while the frame region reads as before (the oracle's
+    // 3535-3536 clear/reopen look).
+    const cleared = releasedAt(173);
+    expect(darkAt(cleared, 40, 127)).toBe(false);
+    expect(darkAt(cleared, 16, 124)).toBe(true);
+    // Age 175 = two more printing ticks: "I w" — the first visible glyph
+    // ("w") appears at the source-derived x25-30/y127-132 position.
+    const reopening = releasedAt(175);
+    expect(reopening).not.toEqual(cleared);
+    expect(darkAt(reopening, 25, 127)).toBe(true);
+    expect(darkAt(reopening, 27, 127)).toBe(true);
+    expect(darkAt(reopening, 29, 127)).toBe(true);
   });
 });
 

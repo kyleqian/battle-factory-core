@@ -71,8 +71,17 @@ export interface FactoryTerminalRoundWonProfile
  * this profile's first rendered frame is the Lobby fade-in at age 114 —
  * the real schedule banked dense in ISSUES #73 (fade 114-128, box 141,
  * page-0 "Thank you for participating!" typing 143-170 + cursor 171, the
- * fixture's real A at 300 dismissing it, page-1 return-rentals typing 306+
+ * fixture's real A at 301 dismissing it, page-1 return-rentals typing 303+
  * and its real A at 602 dismissing it).
+ *
+ * The page-0 -> page-1 handoff is the real game's CHAR_PROMPT_CLEAR
+ * (text.c RENDER_STATE_CLEAR): the held page survives `nextPageVisualDelay`
+ * ticks after the dismiss edge, then FillWindowPixelBuffer wipes the box
+ * interior and the next page starts printing the same tick. Page-1's first
+ * two characters ("I " of "I will return your POKéMON in exchange") render
+ * identically to the empty box frame, which is exactly the oracle's
+ * 3-tick clear/reopen look at frames 3535-3537 (empty 3535-3536, first
+ * visible glyph "w" at 3537) before the 1-char/tick printer takes over.
  */
 export const FACTORY_LOSS_TERMINAL_PROFILE: FactoryTerminalLossProfile =
   Object.freeze({
@@ -83,7 +92,7 @@ export const FACTORY_LOSS_TERMINAL_PROFILE: FactoryTerminalLossProfile =
     messageFrameAge: 141,
     firstPageTextAge: 143,
     firstPageInputReadyAge: 171,
-    nextPageVisualDelay: 6,
+    nextPageVisualDelay: 2,
     printerHandoffDelay: 2,
     statusClearDelayFromSecondRelease: 50,
     recordPromptDelayFromRestore: 172,
@@ -273,6 +282,46 @@ export function createFactoryTerminalPresentation(
   return command.type === "roundLost"
     ? createFactoryTerminalLossPresentation(command)
     : createFactoryTerminalRoundWonPresentation(command);
+}
+
+/**
+ * Source-relative message-box visual phase for a LOSS terminal page,
+ * expressing the page-to-page handoff as the real game's CHAR_PROMPT_CLEAR
+ * (text.c RENDER_STATE_CLEAR): after a page's release edge its text stays
+ * fully on screen for `nextPageVisualDelay` ticks ("held"), then
+ * FillWindowPixelBuffer wipes the interior and the next page starts
+ * printing from that same tick ("cleared" — the previous page's text is no
+ * longer drawn). Page-1's opening "I " of "I will return your POKéMON in
+ * exchange" draws onto the box frame itself, so during its first two
+ * printing ticks the box reads empty — exactly the oracle's 3535-3536
+ * clear/reopen look ahead of the first visible glyph at 3537.
+ */
+export type FactoryTerminalPageVisualPhase =
+  | "idle"
+  | "typing"
+  | "held"
+  | "cleared";
+
+export function factoryTerminalPageVisualPhase(
+  state: FactoryTerminalLossPresentationState,
+  page: 0 | 1,
+): FactoryTerminalPageVisualPhase {
+  if (page === 0) {
+    if (state.firstPageReleaseAge === null) {
+      return state.age < state.profile.firstPageTextAge ? "idle" : "typing";
+    }
+    return state.age <
+      state.firstPageReleaseAge + state.profile.nextPageVisualDelay
+      ? "held"
+      : "cleared";
+  }
+  const firstAge = factoryTerminalPageTextFirstAge(state, 1);
+  if (firstAge === null || state.age < firstAge) return "idle";
+  if (state.secondPageReleaseAge === null) return "typing";
+  return state.age <
+    state.secondPageReleaseAge + state.profile.nextPageVisualDelay
+    ? "held"
+    : "cleared";
 }
 
 export function factoryTerminalActivePage(

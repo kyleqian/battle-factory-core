@@ -4,6 +4,51 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 934 — [bounded MAIN worker, 2026-08-04] #73 slice-2 page-transition residual resolved: `nextPageVisualDelay` 6→2 makes the whole LOSS page-1 window exact
+
+- **State:** master `44ce0508` + this docs commit, clean. Full `npm test`
+  **727 files / 6,966 passed / 1 skipped** (+2 new Tier-1), `npm run build`
+  and `npm run typecheck` green, `npm run test:smoke` 347/347. Committed
+  windows twice-stable: LOSS **350/350**, WIN **503/503**. New tests
+  red-verified (both fail with the old value stashed).
+- **Did:** #73 slice-2 residual class (3) — the 3535-3537 page-1 box
+  clear/reopen — is FIXED and far more: `FACTORY_LOSS_TERMINAL_PROFILE.
+  nextPageVisualDelay` is **2, not 6**. A dense 1-tick re-probe of the
+  committed LOSS fixture (frames 3534-3600) showed the earlier "page-1
+  typing 182-898px" + "printer pause cadence" measurements were artefacts of
+  the wrong delay: the real printer types page-1 **1 glyph/tick, no pauses**
+  (the "no-change" frames are exactly the two invisible spaces), and the
+  "3-tick box clear/reopen" at 3535-3537 is page-1's opening "I " printing
+  onto the box frame itself (the serif-I pixels are the frame's own, so the
+  box reads empty 3535-3536, first visible "w" at 3537). With
+  `nextPageVisualDelay=2` the generic activePage/pageTextFirstAge flip lands
+  at the real release+2 edge and the existing 1-char/tick model reproduces
+  **every frame 3535-4053 (page-1 typing + cursor + dismiss + page-2 typing
+  + cursor) at 0 diff outside the out-of-scope player sprite**, twice-run
+  byte-identical on scratch windows (3534-3660, 3590-3845; the 4054+
+  record-prompt box clear is slice 3). Added the first-class source-relative
+  `FactoryTerminalPageVisualPhase` (`idle`/`typing`/`held`/`cleared`,
+  `factoryTerminalPageVisualPhase`) documented against text.c
+  RENDER_STATE_CLEAR; render's page cursor gated on it. Two red-verified
+  Tier-1 tests (timing + render-state) in
+  `tests/factoryTerminalPresentation.test.ts`. ISSUES #73 updated (corrected
+  the "pause cadence" attribution; closed classes 2+3; recorded the exact
+  span).
+- **Next:** slice 2 is now exact to frame 4053 (minus the player sprite);
+  the remaining #73 slice-2 work is the out-of-scope player sprite
+  extraction, then slice 3 (restore/save + record prompt, whose 4054+
+  box-clear residual is already measured ~1,350px) rides on the corrected
+  profile; extend `loss-terminal-window-off` past 3345 once the player
+  sprite is resolved.
+- **Notes:** the committed trace's capture window was NOT extended (it ends
+  before the page-0 dismiss; a red committed window would misrepresent the
+  state) — the exactness beyond 3345 is proven by the uncommitted scratch
+  windows listed above. `nextPageVisualDelay` is LOSS-only (WIN uses
+  `exchangeNextPageVisualDelay`), so the WIN route is untouched; the change
+  is inert in both committed terminal windows (they end at dismiss+115,
+  before any page flip).
+
+---
 ## 933 — [bounded MAIN worker, 2026-08-04] #73 slice-2: Lobby arrival mapped dense, field renderer + LOSS profile recalibrated to the real route
 
 - **State:** master `55bd3231` + this docs commit, clean. `npm run
