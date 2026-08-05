@@ -911,6 +911,7 @@ import {
   sceneOnQuickAttackView,
   sceneOnExtremeSpeedView,
   sceneOnRockSlideView,
+  sceneOnRockThrowView,
   sceneOnSandAttackView,
   sceneOnMudSlapView,
   sceneOnDragonRageView,
@@ -1347,6 +1348,7 @@ const ponytaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentF
 const ledybaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LEDYBA!;
 const clamperlFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CLAMPERL!;
 const charmanderFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CHARMANDER!;
+const gravelerFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GRAVELER!;
 const tentacoolFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).TENTACOOL!;
 const houndourFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HOUNDOUR!;
 const delibirdFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DELIBIRD!;
@@ -2511,6 +2513,7 @@ const ponytaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpr
 const ledybaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LEDYBA!;
 const clamperlBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CLAMPERL!;
 const charmanderBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CHARMANDER!;
+const gravelerBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GRAVELER!;
 const tentacoolBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).TENTACOOL!;
 const houndourBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HOUNDOUR!;
 const magbyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGBY!;
@@ -32805,6 +32808,109 @@ export function renderSceneOnMovePresentation(
       line1,
       line2,
       Math.min(line1.length + line2.length, view.age - textStartAge + 1),
+    );
+    return;
+  }
+
+  if (state.config.move === "ROCK_THROW") {
+    const view = sceneOnRockThrowView(state);
+    const { attacker, target } = view;
+    const player = attacker.geometry.side === "player" ? attacker : target;
+    const opponent = attacker.geometry.side === "opponent" ? attacker : target;
+    const playerToOpponent =
+      attacker.species === "GRAVELER"
+      && attacker.geometry.side === "player"
+      && target.species === "ONIX"
+      && target.geometry.side === "opponent";
+    const opponentToPlayer =
+      attacker.species === "GRAVELER"
+      && attacker.geometry.side === "opponent"
+      && target.species === "ONIX"
+      && target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ROCK_THROW pair ${attacker.species}->${target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent
+      ? gravelerBackSprite : gravelerFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+
+    drawStaticBgShiftedY(fb, view.bg3Y);
+    // Opponent-front sits below player-back (same OBJ priority rule as the
+    // other scene-on staged pairs). The opponent-front ONIX target keeps its
+    // idle-bob residual +1 until the shake task's xOffset=0 write overrides
+    // it (rockThrowTargetX2); the player-back ONIX target has no residual.
+    if (playerToOpponent) {
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        target.geometry.spriteCorner.x + view.targetX2,
+        target.geometry.spriteCorner.y + view.targetY2,
+      );
+      drawSpriteSheet(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        attacker.geometry.spriteCorner.x,
+        attacker.geometry.spriteCorner.y,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        attacker.geometry.spriteCorner.x,
+        attacker.geometry.spriteCorner.y,
+      );
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        target.geometry.spriteCorner.x,
+        target.geometry.spriteCorner.y + view.targetY2,
+      );
+    }
+    for (const rock of view.rocks) {
+      drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponent.species,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: player.species,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "GRAVELER used" : "Foe GRAVELER used",
+      "ROCK THROW!",
+      99,
     );
     return;
   }

@@ -106,6 +106,10 @@ import {
   type AnimationGpuRegisterState,
 } from "./gpuRegisterQueue.ts";
 import {
+  rockThrowAnimationAtAge,
+  type RockThrowAnimationProfile,
+} from "./rockThrow.ts";
+import {
   actionMenuDisplayAtAge,
   doubleTeamAnimationAtAge,
   genericHitReactionAtAge,
@@ -684,7 +688,8 @@ export interface SceneOnPresentationBattler {
     | "LEDYBA"
     | "PRIMEAPE"
     | "MARSHTOMP"
-    | "TENTACOOL";
+    | "TENTACOOL"
+    | "GRAVELER";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -988,6 +993,17 @@ export interface SceneOnRockSlideConfig {
   readonly animationProfile: Readonly<RockSlideAnimationProfile>;
   /** Immutable field values; the presentation seam never calculates damage. */
   readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  /** Relative first printer age; negative means text predates this seam. */
+  readonly moveTextStartAge?: number;
+}
+
+export interface SceneOnRockThrowConfig {
+  readonly move: "ROCK_THROW";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly animationProfile: Readonly<RockThrowAnimationProfile>;
+  /** Immutable field values; the presentation seam never calculates damage. */
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   /** Relative first printer age; negative means text predates this seam. */
   readonly moveTextStartAge?: number;
 }
@@ -1914,6 +1930,7 @@ export type SceneOnMoveConfig =
   | SceneOnThunderPunchConfig
   | SceneOnFaintAttackConfig
   | SceneOnRockSlideConfig
+  | SceneOnRockThrowConfig
   | SceneOnDoubleTeamConfig
   | SceneOnEndeavorConfig
   | SceneOnFeatherDanceConfig
@@ -2629,6 +2646,16 @@ export interface SceneOnRockSlideView {
   readonly targetInvisible: boolean;
   readonly healthboxY2: number;
   readonly rocks: ReturnType<typeof rockSlideAnimationAtAge>["rocks"];
+}
+
+export interface SceneOnRockThrowView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly bg3Y: number;
+  readonly targetY2: number;
+  readonly targetX2: number;
+  readonly rocks: ReturnType<typeof rockThrowAnimationAtAge>["rocks"];
 }
 
 export interface SceneOnDoubleTeamView {
@@ -5819,6 +5846,31 @@ export function sceneOnRockSlideView(
       rockOrigin: {
         x: target.geometry.battlePositionCenter.x,
         y: target.geometry.battlePositionCenter.y + 14,
+      },
+    },
+  );
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...animation,
+  };
+}
+
+export function sceneOnRockThrowView(
+  state: SceneOnMovePresentationState,
+): SceneOnRockThrowView {
+  if (state.config.move !== "ROCK_THROW") {
+    throw new Error(`expected ROCK_THROW presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationProfile } = state.config;
+  const animation = rockThrowAnimationAtAge(
+    state.age,
+    animationProfile,
+    {
+      rockOrigin: {
+        x: target.geometry.animationCenter.x,
+        y: target.geometry.animationCenter.y + 14,
       },
     },
   );
