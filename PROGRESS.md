@@ -4,6 +4,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 937 — [bounded MAIN worker, 2026-08-05] #73 WIN slice 4 CLOSED end-to-end: `win-terminal-window-off` extended and exact **890/890** through fixture endpoint 5512
+
+- **State:** master `77f3787a` + this docs commit, clean. Committed windows
+  twice-stable: WIN **890/890** (frames 4623-5512, PNG-hash byte-identical
+  across two fresh runs), LOSS **1943/1943**. Ground-truth split windows
+  reproduced at **256/256 + 131/131**; the canonical **503/503** baseline
+  re-run before the extension. Full `npm test` and `npm run build` green
+  (final gate below).
+- **Did:** closed #73 WIN slice 4 by promoting the supervisor-verified
+  generic PreBattleRoom return/heal span (`docs/win-prebattleroom-return-
+  evidence.md`) into the canonical committed Scene-OFF window. Pure data
+  change — **zero src edits**. `win-terminal-window-off` extended
+  contiguously 5126-5512: last segment 113→500, so the 22-segment schedule
+  is now byte-for-byte the fixture's own full 5512-frame prefix (no invented
+  input, no presses past the fixture's own last A at 5010-5011);
+  `captureFrames` dense 4623..5512 (890 captures). The production postwin
+  `counterRoom` path (age = frame − 5011) already reproduced every measured
+  boundary with no clock adjustment: PreBattleRoom fade-in 5126-5140,
+  settled hold 5141-5149, box fully formed 5150, 1-glyph/tick typing
+  5151-5202 (52 glyphs), byte-identical held text 5202-5512. LOSS re-held
+  1943/1943.
+- **Next:** #73 WIN slice 4 is exact end-to-end. Both outcomes' remaining
+  terminal boundary is out of this fixture's own recorded reach
+  (record-accept/decline → free-roam, needs a new fixture per
+  `docs/post-terminal-return-to-lobby-ground-truth.md` §5 slice 5).
+  Animation/canonical Battle 2 untouched.
+- **Notes:** no fanfare/GO ON extension, no LOSS record choice/free-roam, no
+  absolute-frame/battle-number/fixture branch. `npm run compare --
+  win-terminal-window-off` now exercises the full 890-frame contiguous span.
+
+---
 ## 936 — [bounded MAIN worker, 2026-08-05] #73 LOSS slice 3 CLOSED end-to-end: `loss-terminal-window-off` extended and exact **1943/1943** through fixture endpoint 4938
 
 - **State:** master `f20fab08` + this docs commit, clean. Full `npm test`

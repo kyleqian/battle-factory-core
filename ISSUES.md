@@ -682,6 +682,29 @@ seam had masked:
   reach (the record-accept/decline branch through to free-roam, which needs a
   new fixture per `docs/post-terminal-return-to-lobby-ground-truth.md` §5
   slice 5).
+- **2026-08-05 WIN slice 4 CLOSED end-to-end: `win-terminal-window-off` is
+  890/890 exact through the fixture's honest endpoint frame 5512, twice-run
+  byte-identical (PNG-hash equal), LOSS re-held 1943/1943.** The generic
+  postwin PreBattleRoom return/heal span (dismiss+116..+502, frames
+  5126-5512) is promoted from the side-lane evidence packet
+  (`docs/win-prebattleroom-return-evidence.md`, whose spec windows
+  win-prebattleroom-return-off-a/b reproduced at 256/256 + 131/131) into the
+  canonical committed compare trace: last segment 113→500 so the 22-segment
+  schedule is byte-for-byte the fixture's own full 5512-frame
+  `trace.segments` (no invented input, no presses past the fixture's own
+  last A at 5010-5011), and `captureFrames` dense 4623..5512 (890 captures).
+  **No src edit** — `createPostwinStateFromRound`/`renderPostwinState`'s
+  `counterRoom` phase (postwin age = frame − 5011) already reproduces every
+  measured boundary with no clock adjustment: PreBattleRoom fade-in
+  5126-5140, settled player+attendant hold 5141-5149, message box fully
+  formed in one tick at 5150, 1-glyph/tick typing 5151-5202 (52 glyph
+  positions incl. the 7 space pairs), byte-identical held "Thank you for
+  competing! / Let us restore your POKéMON!" 5202-5512. The canonical
+  503/503 baseline was re-run before the extension. Both outcomes' remaining
+  terminal work is now out of this fixture's own recorded reach (the
+  record-accept/decline branch through to free-roam, which needs a new
+  fixture per `docs/post-terminal-return-to-lobby-ground-truth.md` §5 slice
+  5, same as LOSS slice 5).
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
