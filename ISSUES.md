@@ -66,11 +66,26 @@ male (fg 66,206,255), the app stage defaulted female. Fixed by pinning
 preserved; bench stays female, matching the oracle). The §6 dense spec IS
 now committed: `mid-battle-switch-dense-a-off` **84/84** (recall window
 1035-1090 + settled-send-in/"used"-typing window 1228-1255, byte-exact).]**
-Remaining un-green spans, all named: (1) the **white background palette
-fade** (`LaunchBallFadeMonTask` → `BeginNormalPaletteFade(RGB_WHITE)` + the
-mon's ball-color blend, oracle 1093-1126 recall / 1191-1224 switch-in, up to
-~16k px at the scale-up peak — §8's coefficient tables reproduce it 144/144,
-bind pending); (2) **[CLOSED 2026-08-05 late, `032a03b2`]** the
+Remaining un-green spans, all named: (1) **the white background palette
+fade BIND landed 2026-08-06 (`0aeb2fde`)** — `BeginNormalPaletteFade
+(RGB_WHITE)`'s white coefficient + the mon's `gBallOpenFadeColors[BALL_POKE]`
+(0x7ADF) OBJ blend now render byte-exact for the FIELD BG across the whole
+fade window (the dense `--capture-range 1091:1126` field diff drops from
+~16k px at the plateau to ~0 outside the sprites; Tier-1 pin
+`tests/midBattleSwitchBallFade.test.ts`, the two §8.3 stolen ticks modeled).
+**The fade windows still are NOT in the committed spec**: the remaining
+fade-window diffs are PRE-EXISTING mon-sprite rendering classes, not the
+fade — (1a) switch-out affine scale-up 1101-1112 (172-935 px, bbox
+49,74-95,111: the app's scaled sprite is smaller + higher than the oracle's);
+(1b) a recall sparkle/shadow + mon bottom-edge class 1091-1100 (7-59 px) and
+1113-1126 (47-96 px — oracle shows (255,173,0) ball-open particles / whiter
+field at the mon's feet, `AnimTask_SwitchOutBallEffect`'s
+`AnimateBallOpenParticles`, unmodeled); (1c) send-in emerge 1188-1200
+(90-616 px — app flat-tints `MATERIALIZE_TINT_COLOR`, oracle shows the
+ball-colored textured sprite anchored at the ground); (1d) send-in
+healthbox-slide / settle 1207-1227 (211-1379 px). Extending the dense spec
+across 1091-1130 + 1188-1227 waits on (1a)-(1d); (2) **[CLOSED 2026-08-05
+late, `032a03b2`]** the
 party-summary panel pixels were app **overdraw** (§9: the real game draws no
 player tray here, `skipPlayer=1`) — the player-side tray draw is dropped on
 the resolution route and the dense spec extends to **95/95** (1127-1138 now

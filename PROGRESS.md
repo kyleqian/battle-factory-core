@@ -5,7 +5,54 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 960 — [supervisor WIND-DOWN, 2026-08-05] Session summary: 10 workers / 5 rounds — #78 seam+slice-4+spec, #81 live flow, #80 ranks 1/3/4, LILIANA sprite + WIN 903/903, two animation folds
+## 961 — [bounded MAIN worker, 2026-08-06] ISSUES #78 residual (1): ball-fade bind landed (field byte-exact, mon-sprite residuals measured)
+
+- **State:** master `0aeb2fde`, clean at commit. Typecheck green; smoke
+  347/347; committed spec `mid-battle-switch-dense-a-off` re-verified **95/95**
+  (fade windows were never in it, so it is unchanged). Full `npm test` +
+  build pending at session end.
+- **Did:** ported the white ball-fade mechanism into the voluntary-switch
+  resolution presentation — a monotonic `fadeTick` clock (0 = the null-handoff
+  confirm phase's first render = staged trace frame 1035, bumped once per
+  resolution frame) keys `midBattleSwitchFadeAt(traceFrame)` to the real
+  timeline across the multi-command windows. The projection reproduces
+  `BeginNormalPaletteFade` stepping (deltaY=2, BG re-blend on BG-toggle frames,
+  `softwareFadeFinishing` plateau, both §8.3 stolen ticks) plus the
+  `Task_FadeMon_ToBallColor` ramp, with the oracle's measured one-frame render
+  lag behind the §8.3 tables (`rendered bg = y[N-2]`, pixel-verified). The
+  scene renderer now blends `battleBg.palette` rows 0/1 (hardware banks 2/3 =
+  the `0xe` mask rows actually drawn) toward `RGB_WHITE` and the player mon's
+  palette toward `gBallOpenFadeColors[BALL_POKE]` (0x7ADF); message window +
+  both healthboxes stay unfaded. Tier-1 pin
+  `tests/midBattleSwitchBallFade.test.ts` (7: full recall/send-in coefficient
+  sequences + §8.4 blend arithmetic).
+- **Oracle (fade windows, `--capture-range`):** the field BG is now byte-exact
+  across 1091-1126 (was ~16k px at the plateau 1105-1109) and across the
+  send-in window's field — the residual classes left are **pre-existing
+  mon-sprite rendering**, not the fade: (a) switch-out affine scale-up
+  1101-1112, 172-935 px, bbox 49,74-95,111 — the app's scaled sprite is
+  smaller + higher than the oracle's; (b) a recall sparkle/shadow + mon
+  bottom-edge class 1091-1100 (7-59 px) and 1113-1126 (47-96 px, oracle shows
+  (255,173,0) ball-open particles + whiter field at the mon's feet); (c)
+  send-in emerge 1188-1200 (90-616 px, app flat-tints while oracle shows the
+  ball-colored textured sprite, anchored lower); (d) 1207-1227 healthbox-slide
+  / settle (211-1379 px). None were covered by the committed spec, so the
+  spec was NOT extended (fade-window frames are not byte-exact until (a)-(d)
+  land) — recorded as ISSUES #78's new remainder.
+- **Next:** (1) fix the switch-out affine scale-up sampling + the recall
+  ball-open sparkle/shadow, then extend `mid-battle-switch-dense-a-off`
+  captureFrames across 1091-1126 and the §8.3 send-in window byte-exact; (2)
+  then #78's fight-menu chrome pass (target arrow / type cell / type-name /
+  A-press highlight / sprite bounce); (3) #80 ranks 2/5/6; (4) RECORD/RETIRE
+  per `docs/postwin-record-retire-ground-truth.md` §5; (5) lobby walkable +
+  REST guard; (6) 31 tower overworld gfx debt.
+- **Notes:** measured the one-frame render lag empirically (the §8.3 tables
+  are per-tick STATE; the oracle's rendered frame lags one tick). The
+  healthbox (opponent OBJ at top-left, FRAME_ORIGIN (12,14)) is a tan/green
+  sprite — earlier "field tan/green" misreads were the healthbox, not the
+  field BG. PAPERCUT: the battle-bg palette is compact local indices (hardware
+  banks 2/3/4), so the `0xe` mask maps to rows 0/1 only, row 2 stays.
+  ## 960 — [supervisor WIND-DOWN, 2026-08-05] Session summary: 10 workers / 5 rounds — #78 seam+slice-4+spec, #81 live flow, #80 ranks 1/3/4, LILIANA sprite + WIN 903/903, two animation folds
 
 - **State:** master at this entry's commit, clean. Final independent union
   verification: full `npm test` **748 files / 7083 passed / 1 skipped**
