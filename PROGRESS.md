@@ -7,6 +7,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 958 — [bounded MAIN worker, 2026-08-05] ISSUES #81 live Torment selection-rejection message phase landed; dense spec gated on pre-existing fight-menu chrome residuals
 
+- **[Supervisor 19:20 — the "48px residual" class is CLOSED, spec committed:**
+  pixel-sampling (inspect-frame clusters) showed the mid-battle-switch
+  fixture's two 24px clusters are the **healthbox gender glyphs** at
+  (52,21)/(174,79) — oracle actives ♂ (fg 66,206,255), app staged ♀ by
+  personality default. NOT a RATTATA sprite-palette gap (956's attribution)
+  and NOT a move-target arrow (this entry's y21-28 x55-59 item is the same
+  gender class on the torment fixture's MURKROW). Fix: `personality: 150`
+  (male, HARDY bits) pinned on `RATTATA_LV50` + `MURKROW_TORMENT_LV50` in
+  `appTrace.ts`; **`mid-battle-switch-dense-a-off` spec committed 84/84**
+  (1035-1090 recall + 1228-1255 settled-send-in, byte-exact; typecheck +
+  smoke green). Side R4 (palette-fix brief) was cap-killed 0-commit chasing
+  the wrong attribution — lesson: sample diff pixels before briefing on a
+  worker's residual attribution. #78's remaining un-green spans re-listed in
+  ISSUES (#78): ball fade, party-summary panel, fight-menu chrome/highlight.**]**
 - **State:** master `7165ff5e`, clean. Typecheck green; full `npm test`
   **743 files / 7060 passed / 1 skipped** + `npm run build` green.
   `battle-command-generated-off` regression **128/128**; presentation/

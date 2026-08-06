@@ -58,15 +58,24 @@ the real schedule (message-only 42f, switch-out 32f with affine scale-up
 256→736 over relative 14-24 and sprite freed at ~25, party-summary+getswitched
 7f, "Go!" 13f, switch-in + 11f settle hold), and the incoming sprite's
 visibility restore bug the slice exposed is fixed — the dense probe's
-1035-1255 window is schedule-exact (1228-1255 = 24px). The dense §6 acceptance
-spec is still NOT committed: the **48px staged-RATTATA palette residual**
-(side-lane asset fix) plus two unmodeled real oracle effects keep frames out of
-byte-exact — (1) the **white background palette fade** (`LaunchBallFadeMonTask`
-→ `BeginNormalPaletteFade(RGB_WHITE)` + the mon's ball-color blend, oracle
-1093-1126 recall / 1191-1224 switch-in, up to ~16k px at the scale-up peak);
-(2) the **in-battle party-summary panel pixels** (1127-1138, ~389 px). The
-party-menu close's fade pixels are also held-and-cut (menu pixels are #80
-scope, frame budget is the acceptance).
+1035-1255 window is schedule-exact. **[Supervisor 2026-08-05 19:15: the
+"48px staged-RATTATA palette residual" was a misattribution — pixel-sampled,
+it is the two healthbox GENDER glyphs: the oracle's ROM-derived actives are
+male (fg 66,206,255), the app stage defaulted female. Fixed by pinning
+`personality: 150` on the staged actives in `appTrace.ts` (male, HARDY bits
+preserved; bench stays female, matching the oracle). The §6 dense spec IS
+now committed: `mid-battle-switch-dense-a-off` **84/84** (recall window
+1035-1090 + settled-send-in/"used"-typing window 1228-1255, byte-exact).]**
+Remaining un-green spans, all named: (1) the **white background palette
+fade** (`LaunchBallFadeMonTask` → `BeginNormalPaletteFade(RGB_WHITE)` + the
+mon's ball-color blend, oracle 1093-1126 recall / 1191-1224 switch-in, up to
+~16k px at the scale-up peak); (2) the **in-battle party-summary panel
+pixels** (1127-1138, ~389 px; bbox 136,88-239,99); (3) turn-boundary
+fight-menu chrome (A-press highlight ~1776-2177px, sprite-bounce phase —
+same class PROGRESS 958 lists for #81's fixture; 1256-1407 also carries
+opponent-move resolution gaps, 11/155 matched). The party-menu close's fade
+pixels are held-and-cut (menu pixels are #80 scope, frame budget is the
+acceptance).
 
 ## #80 — Live play: in-battle party/switch menu is scaffolding-grade
 

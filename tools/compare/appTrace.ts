@@ -891,6 +891,17 @@ function winTerminalWindowStage(state: EngineState): EngineState {
 // switch to slot 1, and the switch-in cadence (ISSUES #78 slices 1-3).
 const RATTATA_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
   species: 19,
+  // The oracle fixture leaves personalities unpinned, and the ROM derived
+  // BOTH actives male: their healthbox gender glyphs render in the male
+  // colors (fg 66,206,255) at (52,21)/(174,79) in the dense-a captures --
+  // this was the two-cluster "48px residual" misattributed to a RATTATA
+  // sprite-palette gap in PROGRESS 956. getMonGender is male when
+  // (personality & 0xff) >= genderRatio (127 for RATTATA); 150 % 25 == 0
+  // also preserves the default personality-0 HARDY nature bits carried
+  // through switch reconstruction. Bench members stay personality 0
+  // (female): the switched-in slot-1 mon's healthbox matches the oracle
+  // as female (post-switch frames carry only the opponent-box cluster).
+  personality: 150,
   moveId: 150, // MOVE_SPLASH
   moves: [150, 150, 150, 150] as const,
   pp: [40, 40, 40, 40] as const,
@@ -1056,6 +1067,12 @@ const BUTTERFREE_TORMENTED_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
 
 const MURKROW_TORMENT_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
   species: 198,
+  // Same staged-gender class as RATTATA_LV50 above: the oracle's ROM-derived
+  // MURKROW is male (the ~24px "pink-vs-cyan" cluster at (55,21)-(59,28) in
+  // PROGRESS 958's residual list is the opponent healthbox gender glyph, not
+  // a move-target arrow). MURKROW genderRatio 127; 150 => male, HARDY bits.
+  // BUTTERFREE stays at the default personality (female matches the oracle).
+  personality: 150,
   moves: [259, 259, 259, 259] as const, // TORMENT x4 (constrain-to-one-legal-choice idiom)
   pp: [15, 15, 15, 15] as const,
   attack: 105,
