@@ -1052,7 +1052,15 @@ function midBattleSwitchDenseOffStage(state: EngineState): EngineState {
 const BUTTERFREE_TORMENTED_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
   species: 12,
   moves: [33, 16, 0, 0] as const, // TACKLE, GUST
-  pp: [35, 35, 0, 0] as const,
+  // Same staged-gender class as MURKROW: the oracle's BUTTERFREE is male
+  // (the ~24px "detail-box type cell" residual at (190-194, 79-87) is the
+  // player-healthbox gender glyph; fixture pins `"gender": "male"`).
+  // BUTTERFREE genderRatio 127; personality 150 => male, HARDY bits.
+  // Also stages the oracle's real post-turn-1 TACKLE PP: turn 1 used TACKLE
+  // once, so currentPP[0] is 34, not 35 (the "34/35" PP digit at
+  // (208-213, 124-133) - docs/fight-menu-chrome-ground-truth.md §4).
+  personality: 150,
+  pp: [34, 35, 0, 0] as const,
   attack: 65,
   defense: 70,
   spAttack: 100,
@@ -1071,7 +1079,6 @@ const MURKROW_TORMENT_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
   // MURKROW is male (the ~24px "pink-vs-cyan" cluster at (55,21)-(59,28) in
   // PROGRESS 958's residual list is the opponent healthbox gender glyph, not
   // a move-target arrow). MURKROW genderRatio 127; 150 => male, HARDY bits.
-  // BUTTERFREE stays at the default personality (female matches the oracle).
   personality: 150,
   moves: [259, 259, 259, 259] as const, // TORMENT x4 (constrain-to-one-legal-choice idiom)
   pp: [15, 15, 15, 15] as const,
