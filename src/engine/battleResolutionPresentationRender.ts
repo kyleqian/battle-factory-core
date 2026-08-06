@@ -73,12 +73,12 @@ export const MID_BATTLE_SWITCH_HEALTHBOX_STEP = 5;
 /**
  * Ball-release emerge: `sAffineAnim_Battler_Emerge` (`src/data.c:144-149`,
  * the same +18-per-tick accumulator step the battle-START release uses),
- * entered at accumulator 76 when the mon becomes visible. §3's RAM `pa` ramp
- * 862->697->...->256 is exactly `floor(0x10000/accumulator)` for
- * accumulator = 76 + 18k, k = 0..10 -- the same table, one visible entry off
- * the start-release's own accumulator-40 onset.
+ * entered at accumulator 58 when the mon becomes visible. §10.3's RAM `pa`
+ * ramp 1129->862->697->...->256 is exactly `floor(0x10000/accumulator)` for
+ * accumulator = 58 + 18k, k = 0..11 -- one visible entry ahead of the §3
+ * table (which lists `pa 862` at the mon's first visible frame; §10 wins).
  */
-export const MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR = 76;
+export const MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR = 58;
 export const MID_BATTLE_SWITCH_EMERGE_ACCUMULATOR_STEP = 18;
 export const MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR = 256;
 
@@ -206,11 +206,16 @@ export function midBattleSwitchInAt(
   const arcIdx = Math.floor((n * 1310) / 256);
   const arcBump = Math.floor(-30 * Math.sin((2 * Math.PI * arcIdx) / 256));
   const monVisible = elapsed >= MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED;
+  // The emerge's scale (and y2 descent) render one tick behind the §10.3
+  // RAM table -- the mon becomes visible at elapsed 48 but that frame shows
+  // the accumulator the probe records at 1187 (acc 40, pa 1638), and acc 58
+  // first renders at elapsed 49 (trace 1189). Pixel-fit across 1190-1198:
+  // rendered acc = 58 + 18*(elapsed-49), y2 = MATERIALIZE_Y2_TABLE[elapsed-49].
   const emergeAccumulator = Math.min(
     MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR,
     MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR
       + MID_BATTLE_SWITCH_EMERGE_ACCUMULATOR_STEP
-        * (elapsed - MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED),
+        * (elapsed - MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED - 1),
   );
   const healthboxDx =
     elapsed < MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED

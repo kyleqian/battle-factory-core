@@ -778,6 +778,7 @@ import type {
 } from "./battleResolutionPresentationRender.ts";
 import {
   MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR,
+  MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED,
   MID_BATTLE_SWITCH_OUT_SCALE_START,
   type MidBattleSwitchInView,
   type MidBattleSwitchOutView,
@@ -4974,7 +4975,7 @@ function affineEmergeAccumulator(logicalOffset: number): number {
  * i.e. the residual pixels are mechanism 2 (already-implemented, already
  * validated) occluding mechanism 4, not a mechanism-4 sampling error.
  */
-const MATERIALIZE_Y2_TABLE: readonly number[] = [14, 13, 12, 11, 10, 9, 8, 7, 5, 4, 3, 2];
+export const MATERIALIZE_Y2_TABLE: readonly number[] = [14, 13, 12, 11, 10, 9, 8, 7, 5, 4, 3, 2];
 
 /**
  * §7.23 (re-applying §7.22's verified fix): mechanism 5's own affine matrix
@@ -35208,12 +35209,15 @@ export const SCENE_OFF_TURN_DEFAULT_IDENTITY: SceneOffTurnIdentity = {
 /**
  * ISSUES #78 slice 2/3: the mid-battle switch-in's battler pixels -- the
  * closed-ball throw, then the ball-release scale-down
- * (`sAffineAnim_Battler_Emerge` entered at accumulator 76, pa 862 per the
- * §3 RAM ramp), then the settled sprite. The mon is not on field before the
- * emerge; the ball covers the throw. Tint is `LaunchBallFadeMonTask`'s ball
- * open color (same as the battle-START release); the fade-strength curve is
- * not yet pixel-fit for this window, so the draw stays on the RAM-pinned
- * accumulator ramp.
+ * (`sAffineAnim_Battler_Emerge` entered at accumulator 58, pa 1129 per the
+ * §10.3 RAM ramp), then the settled sprite. The mon is not on field before
+ * the emerge; the ball covers the throw. Residual 1c: the emerge keeps the
+ * mon's own TEXTURE with its OBJ row (paletteNum 0) blended toward
+ * gBallOpenFadeColors[BALL_POKE] by the §8.3 obj coefficient (the caller's
+ * `paletteOverride` -- the same `blendPaletteToward` the ball-fade already
+ * applies), NOT the flat MATERIALIZE_TINT_COLOR fill, and descends 14->2 via
+ * the shared `MATERIALIZE_Y2_TABLE` (the same descent the battle-START
+ * player materialize uses).
  */
 function drawMidBattleSwitchInSprite(
   fb: Uint8Array,
@@ -35233,12 +35237,19 @@ function drawMidBattleSwitchInSprite(
   }
   if (!state.monVisible) return;
   if (state.emergeAccumulator < MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR) {
-    drawSpriteSheetAffineTinted(
+    const scale = Math.trunc(0x10000 / state.emergeAccumulator);
+    const emergeY2 = MATERIALIZE_Y2_TABLE[
+      state.elapsed - MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED - 1
+    ] ?? 0;
+    drawSpriteSheetAffineStretch(
       fb,
       art.pic.tileset as Tileset,
+      paletteOverride ?? (art.pic.palette as RgbColor[]),
       art.origin.x,
       art.origin.y,
-      state.emergeAccumulator,
+      scale,
+      scale,
+      emergeY2,
       MATERIALIZE_TINT_COLOR,
       0,
     );

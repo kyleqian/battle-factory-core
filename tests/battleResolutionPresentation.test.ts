@@ -1075,8 +1075,11 @@ describe("battle resolution presentation receipt ownership", () => {
   });
 
   it("models the mid-battle switch-in ball-release emerge on the RAM-pinned pa ramp (ISSUES #78 slice 2)", () => {
-    // docs/mid-battle-switch-presentation-ground-truth.md §3: the mon becomes
-    // visible at frame 1188 (pa 862) and scales down to pa 256 by 1199.
+    // docs/mid-battle-switch-presentation-ground-truth.md §10.3: the mon
+    // becomes visible at frame 1188 and scales down to pa 256 by 1199, but
+    // the rendered scale lags the RAM table one tick (the mon's first
+    // visible frame renders the accumulator the probe records at 1187, acc
+    // 40 -> pa 1638; acc 58 -> pa 1129 first renders at 1189).
     const paAt = (accumulator: number): number => Math.floor(0x10000 / accumulator);
     const ramp: number[] = [];
     for (let elapsed = MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED;
@@ -1084,7 +1087,7 @@ describe("battle resolution presentation receipt ownership", () => {
       ramp.push(paAt(midBattleSwitchInAt(elapsed, 0).emergeAccumulator));
     }
     expect(ramp).toEqual([
-      862, 697, 585, 504, 442, 394, 356, 324, 297, 275, 256, 256,
+      1638, 1129, 862, 697, 585, 504, 442, 394, 356, 324, 297, 275,
     ]);
     // Not visible before the emerge onset; ball visible only during the throw.
     expect(midBattleSwitchInAt(0, 0).monVisible).toBe(false);
