@@ -1,0 +1,250 @@
+{
+ "schema": "mid-battle-switch-party-summary-compare/v1",
+ "trace": "scratch-mid-battle-switch-dense-a-off.json",
+ "appStage": "mid-battle-switch-dense-off",
+ "oracleProfile": "battle-scene-off",
+ "frames": [
+  {
+   "frame": 1119,
+   "diffPixels": 4979,
+   "trayRegionDiffPixels": 368,
+   "bbox": [
+    0,
+    1,
+    239,
+    111
+   ]
+  },
+  {
+   "frame": 1120,
+   "diffPixels": 4973,
+   "trayRegionDiffPixels": 368,
+   "bbox": [
+    0,
+    1,
+    239,
+    111
+   ]
+  },
+  {
+   "frame": 1121,
+   "diffPixels": 3968,
+   "trayRegionDiffPixels": 366,
+   "bbox": [
+    5,
+    21,
+    239,
+    111
+   ]
+  },
+  {
+   "frame": 1122,
+   "diffPixels": 3968,
+   "trayRegionDiffPixels": 366,
+   "bbox": [
+    5,
+    21,
+    239,
+    111
+   ]
+  },
+  {
+   "frame": 1123,
+   "diffPixels": 3968,
+   "trayRegionDiffPixels": 366,
+   "bbox": [
+    5,
+    21,
+    239,
+    111
+   ]
+  },
+  {
+   "frame": 1124,
+   "diffPixels": 3079,
+   "trayRegionDiffPixels": 362,
+   "bbox": [
+    12,
+    21,
+    239,
+    111
+   ]
+  },
+  {
+   "frame": 1125,
+   "diffPixels": 3083,
+   "trayRegionDiffPixels": 362,
+   "bbox": [
+    12,
+    21,
+    239,
+    111
+   ]
+  },
+  {
+   "frame": 1126,
+   "diffPixels": 416,
+   "trayRegionDiffPixels": 362,
+   "bbox": [
+    31,
+    21,
+    239,
+    111
+   ]
+  },
+  {
+   "frame": 1127,
+   "diffPixels": 410,
+   "trayRegionDiffPixels": 362,
+   "bbox": [
+    31,
+    21,
+    239,
+    111
+   ]
+  },
+  {
+   "frame": 1128,
+   "diffPixels": 403,
+   "trayRegionDiffPixels": 362,
+   "bbox": [
+    27,
+    21,
+    239,
+    111
+   ]
+  },
+  {
+   "frame": 1129,
+   "diffPixels": 397,
+   "trayRegionDiffPixels": 362,
+   "bbox": [
+    27,
+    21,
+    239,
+    111
+   ]
+  },
+  {
+   "frame": 1130,
+   "diffPixels": 393,
+   "trayRegionDiffPixels": 362,
+   "bbox": [
+    23,
+    21,
+    239,
+    111
+   ]
+  },
+  {
+   "frame": 1131,
+   "diffPixels": 386,
+   "trayRegionDiffPixels": 362,
+   "bbox": [
+    52,
+    21,
+    239,
+    99
+   ]
+  },
+  {
+   "frame": 1132,
+   "diffPixels": 386,
+   "trayRegionDiffPixels": 362,
+   "bbox": [
+    52,
+    21,
+    239,
+    99
+   ]
+  },
+  {
+   "frame": 1133,
+   "diffPixels": 386,
+   "trayRegionDiffPixels": 362,
+   "bbox": [
+    52,
+    21,
+    239,
+    99
+   ]
+  },
+  {
+   "frame": 1134,
+   "diffPixels": 386,
+   "trayRegionDiffPixels": 362,
+   "bbox": [
+    52,
+    21,
+    239,
+    99
+   ]
+  },
+  {
+   "frame": 1135,
+   "diffPixels": 386,
+   "trayRegionDiffPixels": 362,
+   "bbox": [
+    52,
+    21,
+    239,
+    99
+   ]
+  },
+  {
+   "frame": 1136,
+   "diffPixels": 386,
+   "trayRegionDiffPixels": 362,
+   "bbox": [
+    52,
+    21,
+    239,
+    99
+   ]
+  },
+  {
+   "frame": 1137,
+   "diffPixels": 386,
+   "trayRegionDiffPixels": 362,
+   "bbox": [
+    52,
+    21,
+    239,
+    99
+   ]
+  },
+  {
+   "frame": 1138,
+   "diffPixels": 386,
+   "trayRegionDiffPixels": 362,
+   "bbox": [
+    52,
+    21,
+    239,
+    99
+   ]
+  },
+  {
+   "frame": 1139,
+   "diffPixels": 24,
+   "trayRegionDiffPixels": 0,
+   "bbox": [
+    52,
+    21,
+    56,
+    28
+   ]
+  },
+  {
+   "frame": 1140,
+   "diffPixels": 127,
+   "trayRegionDiffPixels": 0,
+   "bbox": [
+    26,
+    21,
+    56,
+    81
+   ]
+  }
+ ]
+}
