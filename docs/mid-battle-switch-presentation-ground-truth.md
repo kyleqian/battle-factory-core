@@ -225,6 +225,315 @@ binds those); and any change to the kernel's switch logic (already real).
 - Battle-START send-outs are a distinct, verified path (the generated-route
   release); nothing in this doc changes that. The mid-battle switch path is the
   one that needs the bind.
-- Determinism: two fresh runs of `dense-a` (256 frames) byte-identical; the
-  whole scenario is seed-fixed (seed 1) and re-runnable via
+## 8. Ball-fade palette curves (ISSUES #78 residual 1)
+
+The two residual classes PROGRESS 957 left open are now measured dense. This
+section banks the per-frame palette curves for the white ball-fade
+(`LaunchBallFadeMonTask`), and §9 banks the party-summary panel. Both were
+measured with a fresh RAM probe
+(`tools/probe/dump-midbattle-switch-fade-palette.py`, committed) replaying
+the identical dense-a scenario in-process; the probe reads
+`gPlttBufferFaded`/`gPlttBufferUnfaded` (all 512 entries), the decoded
+`gPaletteFade` control struct, and the fade task, each tick. **Two
+independent probe runs (frames 1000-1255) are byte-identical on every common
+field** (fade state, task data, full palette arrays). Receipt:
+`docs/probes/mid-battle-switch-ball-fade-palette/palette-ram-probe.json`
+(frames 1080-1235) + the oracle PNGs for 1093-1126 in the same dir.
+
+### 8.1 What fades, and which rows
+
+The real game fades **exactly four 16-color rows** (nothing else — the
+healthbox and every other sprite's palette row are untouched, verified by
+row-diff over the whole window):
+
+| Row | Index | Palette | Effect | Source |
+| ---: | ---: | --- | --- | --- |
+| BG 1 | 0x010..0x01F | battle-field tiles | **white fade** (in, hold, out) | `BeginNormalPaletteFade(0xe, 0, 0, 16, RGB_WHITE)` |
+| BG 2 | 0x020..0x02F | battle-field tiles | white fade (same curve, identical values) | same |
+| BG 3 | 0x030..0x03F | battle-field tiles | white fade (same curve, identical values) | same |
+| OBJ `paletteNum` (16 = 0x100..0x10F here) | player mon sprite | **ball-color blend** (normal→POKE BALL on recall; POKE BALL→normal on send-in) | `BlendPalette(OBJ_PLTT_ID(tPalOffset), 16, tCoeff, gBallOpenFadeColors[ballId])` |
+
+`selectedPalettes = 0xe` = bits 1,2,3 — i.e. **BG palettes 1-3 only**,
+exactly `GetBattlePalettesMask(TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)`
+(`battle_anim_throw.c:693`, the first flag selects the healthbox-independent
+field mask — the observed 0xe is the field-tile palette set). The player
+mon's sprite OBJ palette is `GetBattlerSpritePaletteNumber(battler)`'s row
+(here `paletteNum 0`, confirmed from the sprite's `attr2`), passed as
+`sprite->sBattler`/`gBattleAnimAttacker` straight into
+`LaunchBallFadeMonTask`'s `spritePalNum`.
+
+The blend target colors (both verified against the actual faded RAM rows):
+
+- `RGB_WHITE` = 0x7FFF (`include/constants/rgb.h`).
+- POKE BALL fade color = `gBallOpenFadeColors[BALL_POKE] = RGB(31, 22, 30)`
+  = **0x7ADF** (`battle_anim_throw.c:371-384`, `:373`).
+
+Two extra OBJ rows change but are *not* part of the fade: the **ball-open
+particle palette** (`gBattleAnimSpritePal_CircleImpact`,
+`battle_anim_throw.c:159-173`) is loaded into OBJ row 22 (0x160) on the
+recall (created by `AnimTask_SwitchOutBallEffect`'s `AnimateBallOpenParticles`,
+`battle_anim_throw.c:692`) and OBJ row 23 (0x170) on the send-in (created by
+`SpriteCB_ReleaseMonFromBall`'s `AnimateBallOpenParticles`,
+`pokeball.c:757`). The row differs between the two windows because the
+palette allocation slot depends on what is free at that moment; the values
+are identical (banked verbatim in the receipt).
+
+### 8.2 The mechanism (both windows are the same two-stage machine)
+
+`LaunchBallFadeMonTask` (`battle_anim_throw.c:2033-2058`) does three things
+in one tick: it sets the mon's OBJ row to a ball-color blend, starts a
+`BeginNormalPaletteFade`, and installs a follow-through task:
+
+- **Recall side** — launched by `AnimTask_SwitchOutBallEffect`
+  (`battle_anim_throw.c:669-702`, from `Special_SwitchOutPlayerMon`'s
+  `createvisualtask`, `battle_anim_scripts.s:10713-10717`) with
+  `unfadeLater=FALSE`: `BlendPalette(OBJ, 16, 0, ball)` (identity), then
+  `BeginNormalPaletteFade(0xe, 0, 0, 16, RGB_WHITE)` (white in), and task
+  `Task_FadeMon_ToBallColor` ramps the ball blend **0→16**.
+- **Send-in side** — launched by `SpriteCB_ReleaseMonFromBall`
+  (`pokeball.c:750-824`, `:758`) with `unfadeLater=TRUE`:
+  `BlendPalette(OBJ, 16, 16, ball)` (fully ball-colored), then the same
+  white-in fade, and task `Task_FadeMon_ToNormal` waits for the fade, starts
+  the white-out (16→0), and its `_Step` ramps the ball blend **16→0**.
+
+`BeginNormalPaletteFade` (`palette.c:156-200`): `deltaY=2`, `y` steps toward
+`targetY` by 2 every *two* `UpdatePaletteFade` calls
+(`palette.c:406-490`), and — critically for a frame-exact bind — **BG
+palettes are only re-blended on the BG-toggle frames** (`objPaletteToggle==0`
+at update entry); on the intervening OBJ-toggle frames the BG rows keep the
+previous frame's blend. `BlendPalette` is a linear per-channel
+interpolation with the source's exact arithmetic:
+`faded = c + (((target - c) * coeff) >> 4)` with a signed (arithmetic) shift
+(`util.c:264-278`). The finish plateau is `softwareFadeFinishing`
+(`palette.c:807-828`): `y` freezes at the target for 4+1 ticks while
+`active` stays set, and the *next* `BeginNormalPaletteFade` cannot start
+until it clears — so the two fades never overlap.
+
+### 8.3 Per-frame coefficient tables (verified byte-exact against RAM)
+
+"bg" = the white-fade coefficient applied to BG rows 1-3 that frame (the
+per-frame `gPaletteFade.y` on BG-toggle frames, held one frame on
+OBJ-toggle frames). "obj" = the ball-color coefficient applied to OBJ row
+`paletteNum` that frame. The model reproduces **every frame's actual
+16-color rows 1,2,3 and OBJ `paletteNum` exactly** (144/144 frames,
+0 mismatches). "fin" = `softwareFadeFinishing`.
+
+**Recall window (white in 1088-1104, plateau 1105-1109, white out
+1110-1126; mon row 0→16→held):**
+
+| Frame | bg | obj | y | fin | | Frame | bg | obj | y | fin |
+| ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: |
+| 1088 | 0 | 0 | 0 | . | | 1110 | 16 | 16 | 16 | . |
+| 1089 | 0 | 0 | 2 | . | | 1111 | 16 | 16 | 14 | . |
+| 1090 | 2 | 1 | 2 | . | | 1112 | 14 | 16 | 14 | . |
+| 1091 | 2 | 2 | 4 | . | | 1113 | 14 | 16 | 12 | . |
+| 1092 | 4 | 3 | 4 | . | | 1114 | 12 | 16 | 12 | . |
+| 1093 | 4 | 4 | 6 | . | | 1115 | 12 | 16 | 10 | . |
+| 1094 | 6 | 5 | 6 | . | | 1116 | 10 | 16 | 10 | . |
+| 1095 | 6 | 6 | 8 | . | | 1117 | 10 | 16 | 8 | . |
+| 1096 | 8 | 7 | 8 | . | | 1118 | 8 | 16 | 8 | . |
+| 1097 | 8 | 8 | 10 | . | | 1119 | 8 | 16 | 6 | . |
+| 1098 | 10 | 9 | 10 | . | | 1120 | 6 | 16 | 6 | . |
+| 1099 | 10 | 10 | 12 | . | | 1121 | 6 | 16 | 6 | . |
+| 1100 | 12 | 11 | 12 | . | | 1122 | 6 | 16 | 4 | . |
+| 1101 | 12 | 12 | 14 | . | | 1123 | 4 | 16 | 4 | . |
+| 1102 | 14 | 13 | 14 | . | | 1124 | 4 | 16 | 2 | . |
+| 1103 | 14 | 14 | 16 | . | | 1125 | 2 | 16 | 2 | . |
+| 1104 | 16 | 15 | 16 | . | | 1126 | 2 | 16 | 0 | . |
+| 1105 | 16 | 16 | 16 | 1 | | 1127 | 0 | 16 | 0 | . |
+| 1106 | 16 | 16 | 16 | 1 | | 1128 | 0 | 16 | 0 | 1 |
+| 1107 | 16 | 16 | 16 | 1 | | 1129 | 0 | 16 | 0 | 1 |
+| 1108 | 16 | 16 | 16 | 1 | | 1130 | 0 | 16 | 0 | 1 |
+| 1109 | 16 | 16 | 16 | 1 | | 1131 | 0 | 16 | 0 | 1 |
+
+Notes: 1104-1109 is the white *plateau* (`finishing`; the whole field rows
+1-3 sit at pure white while the mon scales up — this is the ~16k px peak at
+the scale-up 1100-1110). The 1121 row shows the **measured jitter**: `y`
+holds at 6 for three ticks (1119-1121) because the
+drawpartystatussummary/getswitchedmondata commands run heavy compressed
+sprite-sheet work (`CreatePartyStatusSummarySprites`,
+`battle_interface.c:1450-1668`; the incoming mon's GFX load) that steals a
+palette-fade update tick; the palette rows follow the jitter verbatim (the
+receipt is ground truth, not the ideal curve). The mon's OBJ row stays at
+full POKE BALL color (0x7ADF on every entry, incl. the transparent slot)
+from 1104 through **1139**, then flips to the incoming mon's normal palette
+at **1140** (switch-in start reloads it).
+
+**Send-in window (white in 1187-1202, plateau 1203-1208, white out
+1209-1225; mon row held 16, then 16→0):**
+
+| Frame | bg | obj | y | fin | | Frame | bg | obj | y | fin |
+| ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: |
+| 1187 | 0 | 16 | 2 | . | | 1210 | 16 | 16 | 14 | . |
+| 1188 | 2 | 16 | 2 | . | | 1211 | 14 | 15 | 14 | . |
+| 1189 | 2 | 16 | 4 | . | | 1212 | 14 | 14 | 12 | . |
+| 1190 | 4 | 16 | 4 | . | | 1213 | 12 | 13 | 12 | . |
+| 1191 | 4 | 16 | 6 | . | | 1214 | 12 | 12 | 10 | . |
+| 1192 | 6 | 16 | 6 | . | | 1215 | 10 | 11 | 10 | . |
+| 1193 | 6 | 16 | 8 | . | | 1216 | 10 | 10 | 8 | . |
+| 1194 | 8 | 16 | 8 | . | | 1217 | 8 | 9 | 8 | . |
+| 1195 | 8 | 16 | 10 | . | | 1218 | 8 | 8 | 6 | . |
+| 1196 | 10 | 16 | 10 | . | | 1219 | 6 | 7 | 6 | . |
+| 1197 | 10 | 16 | 12 | . | | 1220 | 6 | 6 | 4 | . |
+| 1198 | 12 | 16 | 12 | . | | 1221 | 4 | 5 | 4 | . |
+| 1199 | 12 | 16 | 14 | . | | 1222 | 4 | 4 | 2 | . |
+| 1200 | 14 | 16 | 14 | . | | 1223 | 2 | 3 | 2 | . |
+| 1201 | 14 | 16 | 16 | . | | 1224 | 2 | 2 | 0 | . |
+| 1202 | 16 | 16 | 16 | . | | 1225 | 0 | 1 | 0 | . |
+| 1203 | 16 | 16 | 16 | 1 | | 1226 | 0 | 0 | 0 | 1 |
+| 1204 | 16 | 16 | 16 | 1 | | 1227 | 0 | — | 0 | 1 |
+| 1205 | 16 | 16 | 16 | 1 | | 1228 | 0 | — | 0 | 1 |
+| 1206 | 16 | 16 | 16 | 1 | | 1229 | 0 | — | 0 | 1 |
+| 1207 | 16 | 16 | 16 | 1 | | 1230 | 0 | — | 0 | 1 |
+| 1208 | 16 | 16 | 16 | 1 | | 1231 | 0 | — | 0 | . |
+| 1209 | 16 | 16 | 16 | . | | | | | | |
+
+Notes: the send-in white-in runs 1187-1202 (the ball-release path,
+`pokeball.c:758`), plateau 1203-1208 (**6 ticks** — one longer than the
+recall's 5; the healthbox slide-in start at 1205 steals an update tick),
+white-out 1209-1225. The mon's OBJ row sits at full POKE BALL color
+1187-1209, then blends back to normal 1210-1226 (applied 16,15,…,1,0) and
+the row equals the unfaded palette again from 1226. The ISSUES-cited
+*pixel-visible* window (1191-1224) is the `y≥4` portion of this 1187-1231
+RAM span.
+
+### 8.4 Exact palette reproduction (the bind recipe)
+
+The full 16-color rows are in the receipt; here is the exact recipe that
+reproduces them all (verified 144/144):
+
+```ts
+// faded(c) = c + (((target - c) * coeff) >> 4), per 5-bit channel, with the
+// sign-aware shift of util.c:264-278 (i.e. Math.floor for negatives).
+// BG rows 1-3: coeff = the frame's effective white coefficient from §8.3.
+// OBJ row paletteNum: coeff = the frame's ball coefficient from §8.3,
+//   target = 0x7ADF (POKE BALL). row16 = ball-blended during the fade;
+//   the mon row is NORMAL (unfaded) outside 1088-1139 / 1187-1226.
+```
+
+So a bind does **not** need to port `BeginNormalPaletteFade` — it needs the
+per-frame coefficient schedules above applied over the app's rendered
+background (rows 1-3 pixels) and the player mon sprite (row `paletteNum`)
+with `BlendPalette`'s exact arithmetic. Because the app renders final
+colors (no palette pipeline), the practical seam is a post-render
+per-channel blend over the already-drawn background layer and mon sprite,
+keyed to the two fade windows (recall 1088-1131, send-in 1187-1231).
+
+### 8.5 Interleaving with the existing schedule (§2/§3)
+
+- The recall fade starts at **1088**, 2 frames into
+  `CONTROLLER_RETURNMONTOBALL` (1086-1117): `AnimTask_SwitchOutBallEffect`
+  (priority 2) runs first and `AnimTask_SwitchOutShrinkMon` (the affine
+  scale-up) starts 10 ticks later per `Special_SwitchOutPlayerMon`'s
+  `delay 10` (`battle_anim_scripts.s:10714-10716`). The white plateau
+  1105-1109 therefore **exactly overlaps** the scale-up peak (1100-1110);
+  the ball-color mon row is full POKE BALL the whole scale-up.
+- The sprite-freed edge (1111-1117) happens while the white-out is mid-run
+  (bg 16→10); the freed mon leaves its row ball-colored until the switch-in
+  reloads it at 1140.
+- The send-in fade (1187-1231) starts 1 frame after the ball lands (1186)
+  and wraps the materialize (1188-1199) and the healthbox slide (1205-1227)
+  already in §3: the mon emerges **ball-colored**, then restores to its
+  normal palette as the white-out runs (1210-1226).
+
+## 9. Party-summary panel (ISSUES #78 residual 2)
+
+Receipt: `docs/probes/mid-battle-switch-party-summary/` — oracle PNGs
+(1119-1140), app PNGs and diffs for the same window (from the dense-a app
+stage), and `app-oracle-diff.json` (per-frame diff-pixel counts).
+
+### 9.1 The finding: the real game draws **no** party tray here
+
+The in-battle party-status-summary tray is **not drawn** anywhere in this
+fixture's switch window, and the ~389 px residual is the app over-drawing
+its own settled tray where the real game draws nothing:
+
+- **Source.** `Cmd_drawpartystatussummary` emits
+  `BtlController_EmitDrawPartyStatusSummary(..., skipPlayer = 1)`
+  (`battle_script_commands.c:5697-5732`, `:5728`), and
+  `PlayerHandleDrawPartyStatusSummary` **skips** the player when
+  `gBattleBufferA[gActiveBattler][1] != 0` and the battler is on the player
+  side (`battle_controller_player.c:3013-3031`, `:3015-3018`). The
+  voluntary-switch `drawpartystatussummary BS_ATTACKER`
+  (`battle_scripts_1.s:3109`) therefore produces *no* tray on the player
+  side. (The opponent side *would* draw, but no opponent command fires in
+  this fixture.)
+- **Pixels.** Frames 1120-1160 contain zero tray pixels: frame 1138 vs 1160
+  (tray fully gone) differ by only 104 px elsewhere (the incoming mon), and
+  the region where the app draws its tray (y 84-112, x 120-240) is pure
+  field (255,255,255)/(247,247,255) throughout.
+
+### 9.2 What the residual actually is (app-vs-oracle, dense)
+
+`npm run compare` over the dense-a app stage, frames 1119-1140:
+
+| Frame | total diff | tray region (y84-112,x120-240) | note |
+| ---: | ---: | ---: | --- |
+| 1119-1125 | 3079-4979 | 362-368 | dominated by the unmodeled BG white fade (§8) + tray |
+| 1126-1127 | 410-416 | 362 | fade diff recedes; tray remains |
+| **1128-1138** | **386-417** | **362** | the ISSUES ~389 px class: 362 px tray overdraw + 24 px RATTATA sprite palette |
+| 1139 | 24 | 0 | app's tray draw stops |
+| 1140 | 127 | 0 | send-in start |
+
+The 362 px are the app's `drawTypedPartyStatusSummary` settled tray at
+bar (136,96) + ball icons at (156+10·i, 88)
+(`src/engine/battleScene.ts:35373-35403`, drawn via `view.partySummary` at
+`:35052-35058`); the oracle shows empty field there. The ~24 px class is the
+known staged-RATTATA front-sprite palette residual (PROGRESS 957, side-asset
+class), not the tray.
+
+### 9.3 The real tray's source geometry (for the cases where it IS drawn)
+
+`CreatePartyStatusSummarySprites` (`battle_interface.c:1450-1668`) — banked
+here for the opponent-side / battle-start cases this fixture does not
+exercise, and so the bind can reuse it verbatim if a future slice needs a
+real tray:
+
+- **Bar** (`sStatusSummaryBarSpriteTemplates`, `:695-715`; 128×8 via the
+  4×32px subsprite table `sStatusSummaryBar_Subsprites_Enter`, `:535-569`):
+  created at (136,96) player / (104,40) opponent, then `x += 96` player /
+  `x -= 96` + HFLIP opponent, and `x2 = 100` player / `-100` opponent. The
+  enter callback slides `x2` by `±5`/frame to 0 (`SpriteCB_StatusSummaryBar_Enter`,
+  `:1817-1821`) — i.e. **player tray slides in from the right edge, bar left
+  edge 136→136 settled, ~20 frames**. Sub-sprite offsets place the visible
+  bar at `[x+x2-96, x+x2+32]` × `[96,104]`.
+- **Ball icons** (`sStatusSummaryBallsSpriteTemplates`, `:717-737`; 8×8):
+  created at (136,92) player, `x += 10·i + 24`, `x2 = 120`; for a mid-battle
+  switch (`!isBattleStart`) the callback is
+  `SpriteCB_StatusSummaryBalls_OnSwitchout` (`:1904-1910`), which **copies
+  the bar's x2** so the six balls ride the bar — settled at
+  **(160+10·i, 92)**, 8×8.
+- **Ball glyphs** come from
+  `gHealthboxElementsGfxTable[HEALTHBOX_GFX_STATUS_BALL]`
+  (`graphics/battle_interface/ball_display.png`, 4 glyphs): base tile =
+  normal ball, `+1` = empty slot, `+2` = statused, `+3` = fainted
+  (`:1549-1562` tileNum deltas; `HP_EMPTY_SLOT`/`hp==0`/`status!=0`
+  dispatched at `:1564-1593`). The palette is `gBattleInterface_BallDisplayPal`.
+- **Hide** (`Task_HidePartyStatusSummary`, `:1671-1725` + `_DuringBattle`,
+  `:1779-1809`): the tray does **not** slide out — it sets the sprites to
+  `ST_OAM_OBJ_BLEND` and steps `BLDALPHA` from `(16,0)` to `(0,16)` over
+  `tBlend` 16→0 (a ~17-frame fade-out), then destroys the sprites.
+
+### 9.4 Bind plan (for the MAIN worker)
+
+1. **Gate the app's tray off on the voluntary-switch route.** The
+   presentation emits the `party-summary` command for the switch
+   (`battleResolutionPresentationRender.ts:637-641` → `view.partySummary` →
+   `battleScene.ts:35052`), but the real player-side switch skips the tray
+   (`battle_controller_player.c:3015-3018`). The bind is to *not* draw the
+   tray for the player battler on this route (drop the `party-summary` draw
+   when `completed.battler === 0`, or mirror the source's skipPlayer gate).
+   **Acceptance:** dense compare frames 1128-1138 drop to the remaining 24
+   px RATTATA class (~386→~24 px per frame).
+2. **Model the BG white fade + mon ball-color blend (§8).** Apply the §8.3
+   per-frame coefficients with the §8.4 recipe over the background layer
+   (BG rows 1-3 pixels) and the player mon sprite. **Acceptance:** dense
+   compare frames 1093-1126 (recall) and 1191-1224 (send-in) go byte-exact
+   once the RATTATA sprite palette residual is also fixed (that residual is
+   a side-lane asset fix).
+3. If a real tray is ever wanted for the opponent side or battle-start
+   (ISSUES #80 scope), §9.3 is the exact geometry; it is **not** needed to
+   close this window.
+
+
   `bin/oracle lab tools/battle-lab/scratch-mid-battle-switch-dense-*-off.json`.
