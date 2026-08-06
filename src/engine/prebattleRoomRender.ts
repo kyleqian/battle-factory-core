@@ -336,6 +336,8 @@ export function drawMessageBoxTextFaded(
  * Draws the source-backed 3x3 user-window frame used by field multichoice
  * menus. `x`/`y` are the outer border origin; width/height are the inner
  * window dimensions in tiles, matching WindowFunc_DrawStandardFrame.
+ * `palette` overrides the default std-window palette (e.g. the party-menu
+ * message window draws the same frame1 tiles with an olive corner color).
  */
 export function drawStandardWindowFrame(
   fb: Uint8Array,
@@ -343,9 +345,10 @@ export function drawStandardWindowFrame(
   y: number,
   width: number,
   height: number,
+  palette?: readonly RgbColor[],
 ): void {
   const tiles = stdWindowAsset.tileset.tiles;
-  const palette = stdWindowAsset.palette;
+  const activePalette = palette ?? stdWindowAsset.palette;
   for (let by = 0; by < height + 2; by += 1) {
     for (let bx = 0; bx < width + 2; bx += 1) {
       const borderRow = by === 0 ? 0 : by === height + 1 ? 2 : 1;
@@ -355,7 +358,7 @@ export function drawStandardWindowFrame(
         for (let px = 0; px < 8; px += 1) {
           const colorIndex = tile[py * 8 + px]!;
           if (colorIndex === 0) continue;
-          const color = palette[colorIndex]!;
+          const color = activePalette[colorIndex]!;
           setPixel(fb, x + bx * 8 + px, y + by * 8 + py, color.r, color.g, color.b);
         }
       }

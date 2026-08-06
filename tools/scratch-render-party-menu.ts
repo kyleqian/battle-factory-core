@@ -1,6 +1,8 @@
 // Scratch: render the app's mid-battle party menu for the ISSUES #78 switch
-// scenario's settled state (3x ONIX, cursor on slot index 1, submenu closed,
-// "Choose a POKéMON.") and write a PNG for ISSUES #80 region inventory.
+// scenario's settled state (3x RATTATA as staged in
+// scratch-mid-battle-switch-dense-menu-a-off.json frame 905: 105/105 HP,
+// cursor on slot index 1, submenu closed, "Choose a POKéMON.") and write a
+// PNG for ISSUES #80 region diffing.
 // Run: node --experimental-strip-types tools/scratch-render-party-menu.ts <out.png>
 import { writeFileSync } from "node:fs";
 import { PNG } from "pngjs";
@@ -11,16 +13,19 @@ const state: BattlePartySelectState = Object.freeze({
   requestId: 1,
   rows: Object.freeze([
     Object.freeze({
-      partyIndex: 0, species: 95, speciesKey: "SPECIES_ONIX", name: "ONIX",
-      level: 50, hp: 110, maxHP: 110, fainted: false, active: true, legal: false,
+      partyIndex: 0, species: 19, speciesKey: "SPECIES_RATTATA", name: "RATTATA",
+      level: 50, hp: 105, maxHP: 105, fainted: false, active: true, legal: false,
+      gender: "male",
     }),
     Object.freeze({
-      partyIndex: 1, species: 95, speciesKey: "SPECIES_ONIX", name: "ONIX",
-      level: 50, hp: 110, maxHP: 110, fainted: false, active: false, legal: true,
+      partyIndex: 1, species: 19, speciesKey: "SPECIES_RATTATA", name: "RATTATA",
+      level: 50, hp: 105, maxHP: 105, fainted: false, active: false, legal: true,
+      gender: "female",
     }),
     Object.freeze({
-      partyIndex: 2, species: 95, speciesKey: "SPECIES_ONIX", name: "ONIX",
-      level: 50, hp: 110, maxHP: 110, fainted: false, active: false, legal: true,
+      partyIndex: 2, species: 19, speciesKey: "SPECIES_RATTATA", name: "RATTATA",
+      level: 50, hp: 105, maxHP: 105, fainted: false, active: false, legal: true,
+      gender: "female",
     }),
   ]),
   cursor: 1,
