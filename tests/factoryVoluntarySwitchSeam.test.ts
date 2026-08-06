@@ -549,6 +549,75 @@ describe("ISSUES #78 voluntary-switch source decision", () => {
     });
   });
 
+  it("renders no player party tray on the voluntary-switch route (ISSUES #78 skipPlayer gate)", () => {
+    // docs/mid-battle-switch-presentation-ground-truth.md §9.1: the real game
+    // emits skipPlayer=1 (battle_script_commands.c:5728) and skips the player
+    // side (battle_controller_player.c:3015-3018), so the voluntary-switch
+    // window draws no player tray. The app's `party-summary` view must stay
+    // null for the player battler (0) for the whole recall->send-in span.
+    const initial = stagedBattle();
+    const context = initial.rules.rulesContext;
+    const incoming = context.party.player[1]!;
+    const switchedBattler = Object.freeze({
+      ...context.battlers[0]!,
+      ...incoming,
+      side: 0 as const,
+      partyIndex: 1,
+      species: incoming.species,
+      types: Object.freeze(["TYPE_NORMAL", "TYPE_NORMAL"] as const),
+    });
+    const afterRules = Object.freeze({
+      ...initial.rules,
+      rulesContext: Object.freeze({
+        ...context,
+        battlers: Object.freeze([
+          switchedBattler,
+          context.battlers[1]!,
+          context.battlers[2]!,
+          context.battlers[3]!,
+        ]) as typeof context.battlers,
+      }),
+    }) as FactoryFullTurnDecisionRules;
+    const resolution = createBattleResolutionPresentation(switchResolutionInput([
+      event(0, { kind: "draw-party-status-summary", battler: 0 }),
+      event(1, { kind: "switch", side: "player", fromPartyIndex: 0, toPartyIndex: 1 }),
+      event(2, { kind: "message", messageId: "STRINGID_SWITCHINMON", substitutions: [] }),
+      event(3, { kind: "hide-party-status-summary", battler: 0 }),
+      event(4, { kind: "switch-in-animation", battler: 0, partyIndex: 1 }),
+    ], NEXT_COMMAND, afterRules));
+    const commands = resolution.segments[0]!.commands;
+    const partySummaryIndex = commands.findIndex(
+      (c) => c.type === "party-summary" && c.visible,
+    );
+    const switchInIndex = commands.findIndex((c) => c.type === "switch-in");
+    if (partySummaryIndex < 0 || switchInIndex < 0) {
+      throw new Error("voluntary switch misses party-summary/switch-in commands");
+    }
+    // The draw receipt's own 7-frame window and every frame through the
+    // switch-in span must expose no player tray view.
+    for (const elapsed of [0, 3, 6]) {
+      const view = createBattleResolutionPresentationRenderView(
+        Object.freeze({
+          ...resolution,
+          commandIndex: partySummaryIndex,
+          lifecycle: Object.freeze({ phase: "presenting", phaseElapsed: elapsed }),
+        }),
+      );
+      expect(view.partySummary).toBeNull();
+    }
+    const switchInView = createBattleResolutionPresentationRenderView(
+      Object.freeze({
+        ...resolution,
+        commandIndex: switchInIndex,
+        lifecycle: Object.freeze({
+          phase: "presenting",
+          phaseElapsed: Math.floor(SWITCH_IN_SPAN_FRAMES / 2),
+        }),
+      }),
+    );
+    expect(switchInView.partySummary).toBeNull();
+  });
+
   it("models the return-to-ball scale-up 256->736 over relative 14-24 and frees the sprite at relative 25", () => {
     // AnimTask_SwitchOutShrinkMon (battle_anim_throw.c:642-667) steps the
     // affine scale +0x30/tick from 0x100 until >= 0x2D0: 256->736 across the

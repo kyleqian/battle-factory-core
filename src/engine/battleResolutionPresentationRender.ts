@@ -635,7 +635,12 @@ export function createBattleResolutionPresentationRenderView(
       if (completed.recall) healthboxVisibility.set(completed.battler, completed.visible);
     }
     if (completed.type === "party-summary") {
-      partySummary = completed.visible
+      // ISSUES #78: `Cmd_drawpartystatussummary` always emits skipPlayer=1
+      // (battle_script_commands.c:5728) and `PlayerHandleDrawPartyStatusSummary`
+      // skips the player side (battle_controller_player.c:3015-3018) -- the
+      // real game draws no player tray on the mid-battle switch route. Only
+      // the opponent side (battler 1) draws via this command.
+      partySummary = completed.visible && completed.battler !== 0
         ? Object.freeze({ battler: completed.battler, states: completed.states })
         : null;
     }
@@ -769,7 +774,9 @@ export function createBattleResolutionPresentationRenderView(
         });
       }
     } else if (command.type === "party-summary") {
-      partySummary = command.visible
+      // ISSUES #78: the same skipPlayer gate as the completed-command loop
+      // above -- the player side never draws the tray on the switch route.
+      partySummary = command.visible && command.battler !== 0
         ? Object.freeze({ battler: command.battler, states: command.states })
         : null;
     } else if (command.type === "switch-in") {
