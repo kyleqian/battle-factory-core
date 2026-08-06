@@ -333,6 +333,12 @@ game, what's broken, and roughly where the current milestone stands. Offer
 progress when it's clear, and keep it brief. Internal ledgers and briefs
 keep their precise technical voice.
 
+**Write user reports in Simplified Technical English (user directive,
+2026-08-06):** short sentences (about 20 words maximum), one idea per
+sentence, active voice, simple common words; keep technical names
+unchanged. This governs how the plain-English rule above is written, for
+every user-facing report including wind-down summaries.
+
 ## Deadline and usage limits
 
 - Your launch prompt gives a wall-clock deadline (also as epoch seconds);

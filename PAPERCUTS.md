@@ -698,3 +698,22 @@ anywhere until 2026-08-04; cost the loss-path scout ~15 min of blind
 probing. Recipe now recorded in
 `docs/terminal-seam-loss-path-ground-truth.md` §0 — navigate to an alive
 slot explicitly before `A`. Hits: 1
+
+## No in-tree tool reconstructs an oracle periodic-phase schedule from dense captures
+
+2026-08-06, main worker (bounce bind): matching the app's idle-bounce phase
+to the oracle required scratch Python cross-correlation over dense capture
+diffs — rebuilt ad hoc in the worker session (~20 min). Any future
+oscillation/phase bind (bounce, blink, breathing) pays this again. Possible
+fix: a small `tools/compare/` helper that takes a frame range + bbox and
+emits the per-frame changed-pixel counts as a series ready for phase
+fitting.
+
+## Compare diff-PNG legend is easy to misread; no numeric per-region decomposition helper
+
+2026-08-06, side worker (OAM ground truth): the diff PNG convention
+(matching pixels keep the oracle color, mismatches are red) reads as "whole
+image differs" at a glance, and workers that cannot view images must
+decompose diffs numerically with ad-hoc PIL scripts. Possible fix: a
+`--regions` mode on inspect-frame that prints per-cluster bbox + px counts
+(the cluster code already exists) so no image viewing is needed.
