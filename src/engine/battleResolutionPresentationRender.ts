@@ -61,8 +61,13 @@ export const BATTLE_RESOLUTION_STAT_CHANGE_FRAMES = 2;
 export const MID_BATTLE_SWITCH_BALL_LAND_ELAPSED = 46; // 1140+46 = 1186: ball lands, emerge begins (pa 1638)
 export const MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED = 48; // 1140+48 = 1188: mon becomes visible (pa 862)
 export const MID_BATTLE_SWITCH_EMERGE_END_ELAPSED = 59; // 1140+59 = 1199: scale-down completes (pa 256)
-export const MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED = 65; // 1140+65 = 1205: healthbox slide starts
-export const MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_END_ELAPSED = 87; // 1140+87 = 1227: slide completes
+// The rendered healthbox lags the RAM schedule by one tick (§10 timeline note,
+// `docs/mid-battle-switch-presentation-ground-truth.md` §10.4): RAM x2 steps
+// 110->0 over 1205-1227, but the visible slide spans rendered frames 1206-1228
+// (x2 110...0 at 5 px/frame), so the app keys off elapsed 66-88, one tick later
+// than the §3 RAM table.
+export const MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED = 66; // 1140+66 = 1206 (render-lagged): slide starts
+export const MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_END_ELAPSED = 88; // 1140+88 = 1228: slide completes
 export const MID_BATTLE_SWITCH_HEALTHBOX_START_DX = 110;
 export const MID_BATTLE_SWITCH_HEALTHBOX_STEP = 5;
 /**
