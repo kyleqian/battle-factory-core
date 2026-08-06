@@ -535,5 +535,274 @@ real tray:
    (ISSUES #80 scope), §9.3 is the exact geometry; it is **not** needed to
    close this window.
 
+## 10. The four mon-sprite residual classes (ISSUES #78 residuals 1a-1d) — OAM ground truth
 
-  `bin/oracle lab tools/battle-lab/scratch-mid-battle-switch-dense-*-off.json`.
+This section banks the per-tick OAM ground truth for the four classes
+PROGRESS 961 measured and left for a MAIN bind: (1a) the recall switch-out
+affine scale-up, (1b) the recall/send-in ball-open particles, (1c) the
+send-in emerge, (1d) the send-in settle / healthbox slide. Everything here
+was measured with a fresh RAM probe
+(`tools/probe/dump-midbattle-switch-oam.py`, committed; a copy of the §8
+probe's recipe) replaying the identical dense-a scenario in-process and
+dumping, each tick, every live `gSprites` entry (decoded OAM attrs, `x`/`y`/
+`x2`/`y2`, `centerToCornerVec`, anim/affine-anim cursors, `data[0..7]`,
+visibility, template + callback pointers), the `gOamMatrices` `a/b/c/d`, the
+`gMain.oamBuffer[128]`, and the battler/healthbox sprite ids. **Two
+independent probe runs (frames 1085-1235) are byte-identical on every
+common field.** Receipt:
+`docs/probes/mid-battle-switch-oam/oam-ram-probe.json` plus the oracle
+PNGs + app-vs-oracle diff PNGs for the four windows (1091-1117, 1118-1130,
+1186-1204, 1207-1227) from `npm run compare`.
+
+**Timeline convention.** The probe's tick N = the post-`BattleLab.prepare`
+state after N advances, which equals the oracle trace frame N (confirmed:
+the oracle's rendered frames match the probe's gSprites state — the mon is
+invisible through 1187 and first visible at 1188 in both). The §8 palette
+tables (§8.3) use this same convention. **The §3 send-in rows (ball land
+1186 / pa 1638 / pa 862 at 1188) are each one tick ahead of this
+convention** (e.g. §3 says `pa=862` at 1188, this probe measures `pa=1129`
+at 1188 and `862` at 1189); the §3 recall rows (scale-up 256→736 over
+1100-1110) and the healthbox slide (1205-1227, 110→0) agree exactly. Treat
+this section's tables as authoritative (they are consistent with §8.3).
+
+### 10.1 Class 1a — recall switch-out affine scale-up (1101-1112, 172-935 px)
+
+`AnimTask_SwitchOutShrinkMon` (`battle_anim_throw.c:642-667`) drives the
+outgoing player mon (gSprites slot 7 here). RAM per tick (`a`/`d` = the
+OAM matrix scale, `y2` = the feet anchor, mode/ctc = the affine OAM
+geometry, `art.origin` = the app's settled top-left = (40,61)):
+
+| Frame | matrix a/d | y2 | mode | ctc | box TL (x,y) | canvas TL | center (x,y) |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1085-1099 | 256 | 0 | 1 | (−32,−32) | (40,61) | (40,61) | (72,93) |
+| 1100 | 256 | 0 | **3** | **(−64,−64)** | (8,29) | (40,61) | (72,93) |
+| 1101 | 304 | 3 | 3 | (−64,−64) | (8,32) | (40,64) | (72,96) |
+| 1102 | 352 | 5 | 3 | (−64,−64) | (8,34) | (40,66) | (72,98) |
+| 1103 | 400 | 7 | 3 | (−64,−64) | (8,36) | (40,68) | (72,100) |
+| 1104 | 448 | 8 | 3 | (−64,−64) | (8,37) | (40,69) | (72,101) |
+| 1105 | 496 | 9 | 3 | (−64,−64) | (8,38) | (40,70) | (72,102) |
+| 1106 | 544 | 10 | 3 | (−64,−64) | (8,39) | (40,71) | (72,103) |
+| 1107 | 592 | 11 | 3 | (−64,−64) | (8,40) | (40,72) | (72,104) |
+| 1108 | 640 | 11 | 3 | (−64,−64) | (8,40) | (40,72) | (72,104) |
+| 1109 | 688 | 12 | 3 | (−64,−64) | (8,41) | (40,73) | (72,105) |
+| 1110 | 736 | 12 | 3 | (−64,−64) | (8,41) | (40,73) | (72,105) |
+| 1111 | 256 | 12 | 1 | (−32,−32) | (40,72) | invisible; freed ~1117 | |
+
+"box TL" is the OAM buffer's double-size-box top-left
+(`oam.x = x + x2 + ctcX`, `oam.y = y + y2 + ctcY`); "canvas TL" is the
+64×64 sprite's top-left = box TL + 32; the transform center = the canvas
+center = (x, y + y2) = (72, 93+y2). The sprite is a plain affine OBJ (mode
+1, ctc ±32) at rest and flips to **double-size (mode 3, ctc ±64)** for the
+whole scale-up window (1100-1110), then back to mode 1 at 1111 (same tick
+it goes invisible). The scale ramp is the pinned 256→736 at 48/tick, but
+the visible first frame (1101) already reads 304 — i.e. the §2 "1100-1110"
+window's 1100 frame is the invisible mode flip only.
+
+**The `y2` column is the missing mechanism.** It is
+`SetBattlerSpriteYOffsetFromYScale` (`battle_anim_mons.c:1873-1883`):
+`var = MON_PIC_HEIGHT(64) - GetBattlerYDeltaFromSpriteId*2`, for RATTATA
+`gMonBackPicCoords[19].y_offset = 13` (`back_pic_coordinates.h:26`) so
+`var = 38`, then `y2 = (var - SAFE_DIV(var<<8, gOamMatrices[matrix].d))/2`.
+Verified value-for-value: 304→3, 352→5, 400→7, 448→8, 496→9, 544→10,
+592→11, 640→11, 688→12, 736→12 (integer division, exactly as measured).
+This anchors the sprite's **feet** at the ground as it grows.
+
+**Where the app diverges** (`battleScene.ts:35264-35293`
+`drawMidBattleSwitchOutSprite` → `drawSpriteSheetAffineStretch`): the app
+passes `y2=0` and `doubled=false`, so it (1) scales around the center
+(72,93) instead of (72,93+y2) — the sprite sits ~3-12px too high — and
+(2) clips the scaled sprite to the 64×64 canvas footprint instead of the
+real 128×128 double-size box, so at the peak (736) the app draws only the
+central ~22 source rows (~22 screen px tall) where the real sprite fills
+the 128px box (~44 source rows). Both make the app's sprite **smaller and
+higher** than the oracle's, exactly the ISSUES diff signature (compare:
+1101→813 px, 1102→935 px, then receding; bbox 49,74-95,111).
+
+**Bind (MAIN):** pass `doubled=true` and `y2 = 61 + feetAnchorY2(elapsed)`
+to the affine stretch (or add a `y2` argument to
+`drawSpriteSheetAffineStretch` and call with the §10.1 y2 table over
+relative elapsed 15-24), keep the origin (40,61) as the canvas top-left.
+A Tier-1 pin of the 10-entry `y2` table + the mode/ctc flip boundary
+(relative 14) is cheap and file-disjoint.
+
+### 10.2 Class 1b — ball-open particles (1091-1100 7-59 px; 1113-1126 47-96 px)
+
+`AnimateBallOpenParticles` (`battle_anim_throw.c:1577-1652`): a task
+(`sBallParticleAnimationFuncs[0]` = `PokeBallOpenParticleAnimation`,
+0x08171E50) spawns one 8×8 particle sprite per tick for 16 ticks, each at
+`var0 = (task tick) mod 8` → `data[0] = var0*32` (0,32,…,224, wrapping), at
+the base (x, y), then `PokeBallOpenParticleAnimation_Step1/_Step2`
+(0x08171F68/0x08171F88) move it radially. **Recall window** (launched by
+`AnimTask_SwitchOutBallEffect`, `battle_anim_throw.c:669-702`):
+- Spawn: one particle/tick **1089-1104** (16 total), base **(72,112)**
+  (= the mon's feet: `GetBattlerSpriteCoord` + 32).
+- Each particle: 8×8 (shape 0 size 0), OAM priority **2**, subpriority 30,
+  OBJ palette bank **6** (= flat palette row 0x160 =
+  `gBattleAnimSpritePal_CircleImpact` — this is §8.1's "row 22"; the
+  (255,173,0) orange family confirmed in the §8 receipt at 0x160), tile
+  base **405** cycling 405/406/407 (3-frame anim).
+- Motion (`Step2`): `x2 = Sin(data[0], data[1])`, `y2 = Cos(data[0],
+  data[1])` (gSineTable amplitude-scaled: `x2 = (gSineTable[data[0]] ·
+  data[1]) >> 8`), `data[1] += 2` per tick, destroyed at `data[1] == 50`
+  (~26 ticks alive; first particle 1089→1115). The first particle's `x2`
+  is 0 and `y2` grows +2/tick (angle 0 = straight down); the others fan at
+  22.5° steps. The rendered frame lags one tick (visible x2/y2 = the RAM
+  value at `data[1]-2`).
+- Screen position = (72 + x2, 112 + y2) per the RAM columns in the
+  receipt; 16 alive 1104-1114, then one destroyed/tick through 1130.
+
+**Send-in window** (launched by `SpriteCB_ReleaseMonFromBall`,
+`pokeball.c:750-824`, `:757`): identical machinery, base **(72,123)**
+(= ball sprite (72,128) minus 5), spawn 1187-1202, tile base **417**
+(417/418/419), OBJ palette bank **7** (= flat row 0x170), OAM priority
+**1**/subpriority 30 — the send-in particles draw **above** the mon (prio
+1 < 2), the recall particles tie the mon at prio 2 (OAM order breaks the
+tie; they sit above the mon's feet region regardless). Last destroyed 1228.
+
+**Where the app diverges:** it draws no particles at all. The 1091-1100
+class is purely these recall particles (7→59 px as they spread); the
+1113-1126 class is their tail (1118:90 px decaying to 1126:48 px; 1127-1130
+are 42/28/18/7 px and the committed spec starts byte-exact at 1131). The
+24-32 px in 1201-1204 (send-in) are also particles.
+
+**Bind (MAIN):** a `drawMidBattleSwitchBallOpenParticles` keyed off the
+§8.3 fade windows (recall 1089-1130, send-in 1187-1228), 16 sprites at
+base (72,112)/(72,123) with the (255,173,0)-family `gBattleAnimSpritePal_
+CircleImpact` palette (bank 6/7) and the Sin/Cos radial motion; draw order
+prio 2 (recall) / prio 1 (send-in). Particle tiles/palette are the
+`TAG_PARTICLES_POKEBALL` sheet already extracted under the battle-anim
+assets if a move animation needs them; otherwise the 3-frame tile cycle
+can be a generated mini-sheet. The exact per-tick `data[0]/data[1]/x2/y2/
+tile` columns are in the receipt.
+
+### 10.3 Class 1c — send-in emerge (1188-1200, 90-616 px)
+
+The incoming mon sprite (slot 6) during the ball-release emerge. RAM per
+tick (acc = `sAffineAnim_Battler_Emerge` accumulator; `a/d` =
+`floor(0x10000/acc)`; y2 = the same descent `MATERIALIZE_Y2_TABLE` the
+battle-START materialize uses):
+
+| Frame | invisible | a/d | acc | y2 | | Frame | invisible | a/d | acc | y2 |
+| ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: |
+| 1186 | T | 256 | 256 | 0 | | 1194 | F | 394 | 166 | 8 |
+| 1187 | T | 1638 | 40 | 0 | | 1195 | F | 356 | 184 | 7 |
+| 1188 | F | 1129 | 58 | 14 | | 1196 | F | 324 | 202 | 5 |
+| 1189 | F | 862 | 76 | 13 | | 1197 | F | 297 | 220 | 4 |
+| 1190 | F | 697 | 94 | 12 | | 1198 | F | 275 | 238 | 3 |
+| 1191 | F | 585 | 112 | 11 | | 1199 | F | 256 | 256 | 2 |
+| 1192 | F | 504 | 130 | 10 | | 1200 | F | 256 | 256 | 0 |
+| 1193 | F | 442 | 148 | 9 | | | | | | |
+
+Notes: the emerge affine starts 1187 (acc 40) while the sprite is still
+invisible (the ball sprite is at (72,128), open tile 409, from 1187); the
+sprite becomes visible at 1188 already at acc **58** (matrix 1129), and
+`862` does not appear until 1189. The §3 "pa 862 at 1188" row is one tick
+ahead (§10 timeline note). The y2 column is **exactly**
+`MATERIALIZE_Y2_TABLE` (14,13,12,11,10,9,8,7,5,4,3,2) — the emerging
+sprite descends 14→2 px as it scales down, same source as the battle-start
+player materialize (§7.21). Sprite canvas: mode 1 (single), ctc (−32,−32),
+`x=72,y=93`, so canvas top-left = (40, 61+y2), center = (72, 93+y2) — the
+app's `art.origin` (40,61) is correct at rest.
+
+**Where the app diverges** (`battleScene.ts:35218-35254`
+`drawMidBattleSwitchInSprite`): (1) the pinned
+`MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR=76` lands on acc 76 at the
+first visible frame, but the real first visible frame is acc **58** — the
+app's scale-down is one logical tick behind (and one frame shorter: 11 vs
+the real 12). (2) The draw passes `y2=0`; the real sprite descends 14→2.
+(3) The draw is a flat `MATERIALIZE_TINT_COLOR` fill while the real sprite
+keeps its **texture** with its OBJ row (paletteNum 0) blended toward
+`gBallOpenFadeColors[BALL_POKE]` (0x7ADF) by the §8.3 obj coefficient (16
+through 1209, then 16→0 over 1210-1226). Pixel check (frame 1192, mon
+region): the oracle shows the textured ball-blended body (e.g. (255,181,247)
+and the un-blended reddish RATTATA patch (214,74,57) at y 115), while the
+app's mon region mixes the flat tint (255,181,247) with the **un-blended**
+teal (107,165,165) — the affine tint is also over-drawn by the settled
+mon's generic player draw (`battleScene.ts:35433-35454`,
+`view.visibility.player.sprite`) that the switch-in command leaves visible.
+
+**Bind (MAIN):** (a) start the emerge at acc 58 (12 frames, not 11); (b)
+apply the y2 descent table; (c) replace the flat tint with a per-pixel
+blend of the mon's own back-sprite palette toward 0x7ADF by the §8.3 obj
+coefficient (the app's `blendPaletteToward` + `drawSpriteSheet` on the
+already-blended `playerMonPalette` gives exactly this), and (d) suppress
+the generic settled player draw while the emerge command is current
+(gate `visibility.player.sprite` off during the affine window).
+
+### 10.4 Class 1d — send-in settle / healthbox slide (1207-1227, 211-1379 px)
+
+**Healthbox slide (the named target).** RAM: the player healthbox sprite's
+`x2` is 110 at 1205 and steps −5/tick to 0 at 1227 (`StartHealthboxSlideIn`,
+`pokeball.c:1241-1269`, `SpriteCB_HealthboxSlideIn` 0x080769CC), exactly
+the pinned schedule. But the **oracle's rendered** healthbox lags the RAM
+by one tick (the §8 render-lag): the visible slide spans rendered frames
+**1206-1228** (x2 110…0), so at rendered frame F the healthbox sits at
+`max(0, 110 - 5·(F-1206))`. The app's `midBattleSwitchInAt` healthboxDx
+(elapsed 65→87, frames 1205-1227) renders the slide **one frame early and
+one frame short** — measured directly: on every rendered frame 1208-1227
+the app's healthbox tan frame-left is **exactly 5 px left** of the
+oracle's (oracle 237→142, app 232→137, same slope), collapsing to byte-exact
+at 1228 (the committed spec's first settle frame). **This is a pure
+one-frame-timing fix**: key the slide off `elapsed - 66` (frames
+1206-1228) instead of `elapsed - 65`, or shift the dx formula to
+`max(0, 110 - 5·(elapsed - 66))` and keep the healthbox drawn (dx>0)
+through elapsed 88.
+
+**Mon sprite: static — the §3 "bounce begins ~1206" is corrected.** The
+incoming mon is completely still through the whole slide window and beyond
+(x2=0, y2=0, callback `SpriteCallbackDummy` 0x08007428 from 1203 through
+1235; no idle-bounce x2/y2 write anywhere in the receipt). The app already
+draws the settled mon at (40,61), so the mon itself is not the 1d driver.
+
+**Per-frame diff decomposition** (`npm run compare`, frames 1207-1227;
+`x<120` = mon/particle region, `x≥120` = healthbox band):
+
+| Frame | total | hb-band (x≥120) | mon/particles (x<120) | | Frame | total | hb-band | mon/particles |
+| ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: |
+| 1207 | 211 | 186 | 25 | | 1218 | 802 | 743 | 59 |
+| 1208 | 333 | 304 | 29 | | 1219 | 813 | 767 | 46 |
+| 1209 | 363 | 329 | 34 | | 1220 | 854 | 818 | 36 |
+| 1210 | 397 | 358 | 39 | | 1221 | 900 | 871 | 29 |
+| 1211 | 456 | 413 | 43 | | 1222 | 967 | 933 | 34 |
+| 1212 | 554 | 484 | 70 | | 1223 | 1001 | 969 | 32 |
+| 1213 | 603 | 536 | 67 | | 1224 | 1099 | 1066 | 33 |
+| 1214 | 668 | 596 | 72 | | 1225 | 1274 | 1240 | 34 |
+| 1215 | 716 | 646 | 70 | | 1226 | 1379 | 1357 | 22 |
+| 1216 | 754 | 683 | 71 | | 1227 | 1368 | 1357 | 11 |
+| 1217 | 782 | 710 | 72 | | | | | |
+
+The healthbox band (186→1357 px, growing as more of the 100-px-wide
+healthbox becomes visible) is entirely the 5-px slide-timing offset above;
+it vanishes at 1228 (committed byte-exact). The `x<120` remainder (11-72
+px) is the **send-in ball-open particles still alive** (1187-1202 spawn,
+through 1228; the app draws none, §10.2) plus the known staged-RATTATA
+mon palette residual (PROGRESS 957 side-asset class). So the 1d bind is
+one timing constant; the particles and palette classes are separate,
+already-named binds.
+
+### 10.5 Bind-plan summary (MAIN, in the existing route)
+
+Read-only seams in `battleResolutionPresentationRender.ts` /
+`battleScene.ts` (the voluntary-switch presentation route):
+
+1. **1a** — `battleScene.ts:35264` `drawMidBattleSwitchOutSprite`: call
+   `drawSpriteSheetAffineStretch` with `doubled=true` and the §10.1
+   `y2(elapsed)` feet-anchor table (relative 15-24; constants live at
+   `battleResolutionPresentationRender.ts:91-95`). Verdict: app is smaller
+   + higher because of the 64-vs-128 clip and the missing `y2`.
+2. **1b** — new `drawMidBattleSwitchBallOpenParticles` in
+   `renderBattleResolutionSceneOffView` (`battleScene.ts:35391`), keyed to
+   the §8.3 fade windows; recall base (72,112)/bank 6/tiles 405-407/prio 2,
+   send-in base (72,123)/bank 7/tiles 417-419/prio 1, Sin/Cos radial
+   motion. Verdict: app draws nothing; both particle batches unmodeled.
+3. **1c** — `battleScene.ts:35218` `drawMidBattleSwitchInSprite` + the
+   `battleResolutionPresentationRender.ts:76` accumulator pin: acc 58 (not
+   76) on the first visible frame (12 frames), y2 descent 14→2, textured
+   OBJ-row blend toward 0x7ADF by the obj coeff instead of the flat tint,
+   and suppress the generic settled player draw during the affine window.
+4. **1d** — `battleResolutionPresentationRender.ts:64-67` healthbox slide
+   constants: key off elapsed−66 (rendered frames 1206-1228), dx ends at
+   elapsed 88. Verdict: pure one-frame render-lag timing fix; the mon is
+   static (no bounce).
+
+   `bin/oracle lab tools/battle-lab/scratch-mid-battle-switch-dense-*-off.json`.
