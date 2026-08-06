@@ -1,0 +1,45 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-refresh-opponent-chansey-player-onix.json",
+  "probe": "tools/compare/refreshProbe.py",
+  "pair": "CHANSEY (opponent-front, Factory record 227) -> ONIX (player-back)",
+  "orientation": "opponent-to-player",
+  "move": "REFRESH",
+  "appStage": { "oracleFrame": 519, "presentationAge": 0 },
+  "denseWindow": { "startFrame": 519, "endFrame": 727, "frameCount": 209 },
+  "attacker": {
+    "species": "CHANSEY",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 17 },
+      "animationCenter": { "x": 176, "y": 49 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 80 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 142,
+    "playerMaxHp": 142,
+    "opponentHp": 325,
+    "opponentMaxHp": 325,
+    "playerGender": "male",
+    "opponentGender": "female"
+  },
+  "evidenceSchema": "refresh-dense-evidence/v1",
+  "evidenceSha256": "8f27ac49c2bc3f515d4842921d5326f148b2975a2c088f9ae37b51d3170cb473",
+  "rawRgbSha256": "bd2ba9fa9392e2ec757ea4c9c784b7bbecf14efc0e2cd3dd8dcd31facf58f05a",
+  "lifecycleCounts": {
+    "gGrantingStarsSpriteTemplate": 2,
+    "gThinRingExpandingSpriteTemplate": 1,
+    "gSimplePaletteBlendSpriteTemplate": 1
+  }
+}

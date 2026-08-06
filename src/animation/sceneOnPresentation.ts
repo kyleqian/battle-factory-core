@@ -280,6 +280,10 @@ import {
   type MilkDrinkEffectSprite,
 } from "./milkDrink.ts";
 import {
+  refreshAtAge,
+  type RefreshState,
+} from "./refresh.ts";
+import {
   supersonicEffectAtAge,
   type SupersonicRingSprite,
 } from "./supersonic.ts";
@@ -1229,6 +1233,13 @@ export interface SceneOnMilkDrinkConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnRefreshConfig {
+  readonly move: "REFRESH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSupersonicConfig {
   readonly move: "SUPERSONIC";
   readonly attacker: SceneOnPresentationBattler;
@@ -1962,6 +1973,7 @@ export type SceneOnMoveConfig =
   | SceneOnAromatherapyConfig
   | SceneOnWishConfig
   | SceneOnMilkDrinkConfig
+  | SceneOnRefreshConfig
   | SceneOnSupersonicConfig
   | SceneOnWaterGunConfig
   | SceneOnAcidConfig
@@ -2914,6 +2926,12 @@ export interface SceneOnWishView extends WishState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnRefreshView extends RefreshState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnMilkDrinkView {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -3715,6 +3733,25 @@ export function sceneOnMilkDrinkView(
     attacker: state.config.attacker,
     target: state.config.target,
     sprites: milkDrinkEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` spans the complete Move_REFRESH script body through cleanup. */
+export function sceneOnRefreshView(
+  state: SceneOnMovePresentationState,
+): SceneOnRefreshView {
+  if (state.config.move !== "REFRESH") {
+    throw new Error(`expected REFRESH presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...refreshAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
