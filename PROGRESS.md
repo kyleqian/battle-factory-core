@@ -5,6 +5,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 963 — [bounded MAIN worker, 2026-08-06] #81 class-4 bounce bind landed: torment spec 11/57 → 52/57 (5 measured residuals remain)
+
+- **State:** master `f0b52d7d`, clean at commit. Typecheck green; smoke
+  347/347; `battle-command-generated-off` re-verified **82/128** (exact same
+  matched-frame set — no regression), `mid-battle-switch-dense-a-off`
+  **95/95**. Full `npm test` + `npm run build` at session-end gate.
+- **Did:** (1) `commandMenuBounceY2(age)` (`battleMenu.ts`) — the
+  entry-relative `SpriteCB_BounceEffect` contract (DoBounceEffect seeds 128
+  healthbox / 192 mon, `sSinIndex += 7`/frame, `y2 = Sin(index,1)+1`,
+  battle_main.c:2899-2937/2967-2979), byte-equivalent to the retired
+  `menuIdleBounce(MENU_DRAW_TICK + age)` (battle-1 anchor cancels), wired
+  into the generated command menu + resolution confirm-handoff; the torment
+  stage seeds `idleBounceElapsed = 7` (1 first-tick reveal + 6 pre-stage
+  bounce frames). (2) Fixed the phantom mid-battle ball-fade: it was firing
+  on the non-switch GUST resolution at 1100/1200 (fadeTick lands in the
+  recall/send-in windows) — now gated on `sourceDecision.kind === "switch"`
+  in `createBattleResolutionPresentationRenderView` (1100/1200 dropped
+  5022/6313 → 822/648 px). Tier-1 pins:
+  `tests/commandMenuBounceY2.test.ts` (two full periods for both bouncers +
+  26 oracle-checked seeded ages + unseeded wrong-phase red-verify) +
+  phantom-fade gate in `tests/battleResolutionPresentation.test.ts`.
+- **Oracle:** `fight-menu-chrome-torment-off` **52/57**. Remaining (all
+  measured, doc §8.1): 736 (857px sprite), 766 (1776px healthbox), 977
+  (857px sprite — the one regression from green) are 1-frame class-4
+  phase-boundary frames: the app's battle-1-calibrated idle-bounce freeze
+  model (2-tick fight-opening) ≠ the oracle's own 4-frame opening +
+  message + reopen-tail freeze schedule at exactly those transitions (the
+  oracle's offset drifts +9/+7/+6 across windows; matching all three needs
+  the shared battle-1-pinned freeze constant changed — not done, no
+  per-route phases). 1100/1200 (822/648px) are a separate pre-existing
+  move-resolution message-typing pacing class (the real printer holds
+  "Foe MURKROW used TORMENT!" two lines while the app auto-advances at 1
+  glyph/frame).
+- **Next:** (1) resolve the 3 freeze-model boundary frames by measuring the
+  oracle's real opening/message/reopen freeze schedule dense and re-pinning
+  the shared fight-opening constant (battle-1 specs re-verify) — or accept
+  as recorded; (2) the 1100/1200 message-pacing class (message-typing rate
+  in the move resolution); (3) then per ROADMAP: #80 ranks 2/5/6,
+  RECORD/RETIRE, lobby walkable, 31 tower gfx.
+- **Notes:** the 3 boundary frames were red-verified against 26
+  oracle-checked seeded ages that all pass — the constant entry-phase model
+  is right; only the freeze-schedule edges differ. PAPERCUT: reconstructing
+  the oracle's bounce phase required dense cross-correlation tooling that
+  didn't exist in-tree (the doc's §5.1 misattribution had no per-frame
+  measurements) — ~20 min of scratch-python pixel forensics.
+
 ## 962 — [bounded MAIN worker, 2026-08-06] #81 torment spec: settled frames byte-exact (11/57) via 3 staging pins; class-4 bounce root-caused to the player healthbox (doc §5.1 misattribution corrected)
 
 - **State:** master `32fc39b4`, clean at commit. Typecheck green; smoke
@@ -145,103 +191,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **748 files / 7084 passed / 1 skipped** + `npm run build` green on the
   final tree. #78's remainder is now ball fade (§8 bind) + fight-menu
   chrome only.**]**
-## 959 — [bounded MAIN worker, 2026-08-05] ISSUES #80 ranks 1/3/4 landed: in-battle party menu HP bars, real HP/level text, gender glyphs, real WIN_MSG window
-
-- **State:** master `81e2db18`, clean. Typecheck green; full `npm test` **744 files / 7064 passed / 1 skipped** + `npm run build` green; smoke 347/347.
-- **Did:** the live party menu now draws the real content on all three cards
-  (`battlePartySelect.ts`): (1) graphical HP bars at `sPartyBoxInfoRects`
-  positions (right (184,18)/(184,42), left (32,59), 48x3) filled
-  `GetScaledHPFraction`-style with the `sHPBar{Green,Yellow,Red}PalIds`
-  families (dark 1px over light 2px; >50% green, >20% yellow, else red);
-  HP numbers moved to the real rects as `105/`+`/105` white-on-the-HP-box,
-  level text split out at the level rect, name/level ink switched to the
-  empty-vs-current-selection colors ((57,148,222) vs (123,214,239)); (3)
-  gender glyphs from party-menu-gender-glyphs.json at the print-site
-  positions (72,44)/(158,20)/(158,44, cellOffsetY 4, oracle-verified male
-  (66,206,255)/female (255,156,148) fg+shadow); (4) message strip now uses
-  `sDefaultPartyMsgWindowTemplate` (frame (0,128), 21x2, interior
-  (8,136)-(176,152)) with the frame1 tiles + party-menu olive corner palette
-  and "Choose a POKéMON." at (8,137) — replacing the misplaced
-  `drawStandardWindowFrame(0,112,28,4)`.
-- **Oracle frame 905 diff: 15267 → 6955 px total** (doc baseline was ONIX;
-  acceptance render now stages the fixture's real 3× RATTATA). Bands (rows):
-  top 1391→970, slot0 4500→3170, slot1 1998→1295, slot2 3893→2845, message
-  6990→813, mid 2386→2002. Message residual = the rank-6 pokeball/CANCEL
-  button sprites at x184-234 y134-153 (out of scope); card residuals = the
-  rank-2 list-art gap (app still draws the 32x32 party icon).
-- **Rank 2 UNBOUND (evidence):** the chrome list art for ONIX
-  (`party-menu-chrome.json` listOnix, tick 20070) is COLORED with a dense
-  sprite (slot-0 card region ~2818 opaque px, incl. non-ONIX pink/orange
-  palette entries and an empty HP bar at that tick), while the field front
-  family (`battle-opponent-front-sprites.json` ONIX) is GRAYSCALE
-  (palette 222,222,222/255,255,255/247,239,239…) with 1840 opaque px; best
-  silhouette overlap vs the chrome art is 1272/1840 (69%) at an off-standard
-  offset — shapes and palette do not match, so rank 2 cannot be bound from
-  the field asset.
-- **Tier-1 pins:** `tests/inbattlePartyMenuVisualBind.test.ts` (4: HP-bar
-  geometry + green/yellow thresholds, gender glyph colors/position, HP-text
-  on-box + level position, WIN_MSG window geometry + olive frame).
-- **Next:** rank 2 front-art (needs a per-species chrome capture pass or a
-  colored list-art family, not the grayscale field asset), then ranks 5
-  (status/held-item) and 6 (cursor/ball/fade) to close the menu spec.
-- **Notes:** fixture mons are RATTATA; a parallel side worker owns the
-  RATTATA sprite-palette asset gap (not chased here).
-
----
-
-## 958 — [bounded MAIN worker, 2026-08-05] ISSUES #81 live Torment selection-rejection message phase landed; dense spec gated on pre-existing fight-menu chrome residuals
-
-- **[Supervisor 19:20 — the "48px residual" class is CLOSED, spec committed:**
-  pixel-sampling (inspect-frame clusters) showed the mid-battle-switch
-  fixture's two 24px clusters are the **healthbox gender glyphs** at
-  (52,21)/(174,79) — oracle actives ♂ (fg 66,206,255), app staged ♀ by
-  personality default. NOT a RATTATA sprite-palette gap (956's attribution)
-  and NOT a move-target arrow (this entry's y21-28 x55-59 item is the same
-  gender class on the torment fixture's MURKROW). Fix: `personality: 150`
-  (male, HARDY bits) pinned on `RATTATA_LV50` + `MURKROW_TORMENT_LV50` in
-  `appTrace.ts`; **`mid-battle-switch-dense-a-off` spec committed 84/84**
-  (1035-1090 recall + 1228-1255 settled-send-in, byte-exact; typecheck +
-  smoke green). Side R4 (palette-fix brief) was cap-killed 0-commit chasing
-  the wrong attribution — lesson: sample diff pixels before briefing on a
-  worker's residual attribution. #78's remaining un-green spans re-listed in
-  ISSUES (#78): ball fade, party-summary panel, fight-menu chrome/highlight.**]**
-- **State:** master `7165ff5e`, clean. Typecheck green; full `npm test`
-  **743 files / 7060 passed / 1 skipped** + `npm run build` green.
-  `battle-command-generated-off` regression **128/128**; presentation/
-  voluntary-switch/rejection suites green.
-- **Did:** the live fight-menu now enters a rejection-message phase when the
-  player confirms a slot whose `rejectionReasonBySlot` entry is non-null
-  (Torment = acceptance vehicle): resolver's two lines type **1 glyph/frame
-  from +3**, hold **button-gated** (`\p` PAUSE_UNTIL_PRESS, no auto-advance)
-  with the wait ▼ bobbing from +66 (`CURSOR_Y_OFFSETS[age/9%4]`), and on
-  **A or B** dismiss the fully-typed box freezes with the cursor held at its
-  dismiss pose for **9 frames** before the move menu redraws byte-identical,
-  cursor unchanged. Reuses `drawBattleMessageTextLines`/`drawCursor`/the
-  battle-window tilemap — no new printer. Tier-1 pins:
-  `tests/factoryTormentSelectionRejectionLive.test.ts` (7, red-verified on
-  the +3 and +9 constants). App stage for
-  `mechanic-selection-reject-torment-off.json` installed at the turn-2
-  checkpoint (frame 734, player pre-Tormented + TACKLE last move).
-- **Dense probe (scratch spec over the doc's window, 145 frames):** the
-  message box + text region renders byte-exact — the frozen-box frame 977 and
-  the GUST resolution 1050 both diff only **60px** (whole-frame), all inside
-  three **pre-existing fight-menu chrome residual classes** (same family as
-  the mid-battle-switch fixture's documented 48px, not this flow): the
-  ~24px **pink-vs-cyan move-target arrow** baked in the static fight-submenu
-  harvest (bbox y21-28 x55-59), the **detail-box type cell** ~28px
-  (y80-87 x184-199), and the **type-name text** ~24px (y120-135 x205-215);
-  plus the **unmodeled A-press highlight** state (~1776px bbox y74-110
-  x127-229 at 766-769/987-1000) and the app's sprite-bounce phase vs the
-  oracle's static move-menu sprites (up to ~950px at menu-idle frames). No
-  full-frame byte-exact span → **no spec committed** (run's no-red-commits
-  convention); ISSUES #81 trimmed to the spec-only remainder.
-- **Next:** a fight-menu-chrome pass (target-arrow palette + detail-box/type
-  cell + A-press highlight + move-menu bounce freeze) to close the dense
-  window, then the `torment-selection-rejection-off` ground-truth spec; then
-  #80 party-menu visuals.
-- **Notes:** `PAPERCUT`: multi-round pixel-archaeology on the oracle's
-  A-press-highlight/move-detail-box layout cost ~30 min before the
-  pre-existing-chrome attribution was confirmed; the scratch spec's segments/
-  captureFrames are in git history if that pass wants to re-probe.
-
----

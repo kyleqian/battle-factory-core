@@ -295,3 +295,55 @@ torment fixture's settled windows land on the oracle schedule; do NOT add a
 y2 term to the opponent sprite. Regressions to re-verify:
 `battle-command-generated-off` (pre-existing 82/128 at baseline),
 `mid-battle-switch-dense-a-off` 95/95, full `npm test`.
+
+### §8.1 Bind landed 2026-08-06 (MAIN, `f0b52d7d`): 11/57 → 52/57
+
+The entry-relative bind is in as `commandMenuBounceY2(age)`
+(`battleMenu.ts`): the `SpriteCB_BounceEffect` contract verbatim — seeds 128
+(`BOUNCE_HEALTHBOX`) / 192 (`BOUNCE_MON`), `sSinIndex += 7` per frame,
+`y2 = Sin(index,1) + 1 = gSineTable[index] >> 8 + 1` (`battle_main.c:2967-2979`,
+`trig.c:515-518`) — keyed to the menu-entry-relative
+`idleBounceElapsed` (age < 1 = the menu's first interactive tick, no bounce
+yet; age ≥ 1 → `index = 7 * (age - 1)`, the established +1 render lag).
+It is byte-equivalent to the retired `menuIdleBounce(MENU_DRAW_TICK + age)`
+expression (the battle-1 absolute anchor cancels), so
+`battle-command-generated-off` stays **82/128** (exact matched-frame set) and
+`mid-battle-switch-dense-a-off` stays **95/95**. The torment stage seeds
+`idleBounceElapsed = 7` (1 first-tick reveal + 6 pre-stage bounce frames: the
+fixture's frame-734 action menu was already interactive for 6 frames, so the
+app clock lands on the oracle schedule). Tier-1 pin
+`tests/commandMenuBounceY2.test.ts` (two full periods for both bouncers +
+26 oracle-checked seeded ages + the unseeded-phase red-verify).
+
+**Remaining 5 frames (all measured):**
+- **736 (857px, sprite), 766 (1776px, healthbox), 977 (857px, sprite)** — the
+  app's battle-1-calibrated idle-bounce freeze model (2-tick fight-opening
+  freeze, no message/reopen freeze) lands 1-2 frames off the oracle's bounce
+  index at exactly three phase-transition windows. Dense cross-correlation of
+  the oracle captures (`tools/compare/out/run-2026-08-06-21-50-27Z-19713`)
+  shows the oracle's index trajectory is NOT a constant offset from the app's
+  clock: it needs the oracle's own 4-frame opening freeze (736-739) + a
+  1-frame message-entry freeze (767) + a 1-frame reopen-tail freeze, i.e.
+  `oracleBF = n + 9` (opening) / `+ 7` (fight-menu 740-766) / `+ 6` (767+),
+  versus the app's single `+ 6`. Matching all three windows exactly would
+  require changing the shared fight-opening freeze constant, which the
+  battle-1 nav/idle specs pin — deliberately not done (no per-route phase
+  special-casing). 977 was green pre-bind and is the one regression; it is the
+  same 1-frame reopen-tail anomaly class, measured at 857px.
+- **1100 (822px), 1200 (648px)** — a separate, PRE-EXISTING message-typing
+  pacing class in the move resolution, not the bounce: the app types
+  "Foe MURKROW used TORMENT!" (1052-1075), "But it failed!" (1076-1101),
+  "BUTTERFREE used GUST!" (1102+) at 1 glyph/frame, while the oracle at 1100
+  still holds the two-line "Foe MURKROW used TORMENT!" — the real printer
+  types/holds slower. Both frames dropped from 5022/6313px when the phantom
+  mid-battle ball-fade was gated off (see ISSUES #81 close note).
+
+**Along-the-way fix:** `midBattleSwitchFadeAt` was firing on NON-switch
+resolutions whose `fadeTick` happened to land in the recall/send-in
+trace-frame windows (the torment GUST resolution at 1100/1200): gated on
+`sourceDecision.kind === "switch"` in
+`createBattleResolutionPresentationRenderView` (`battleResolutionPresentationRender.ts`),
+removing the ghost white ball-fade + mon tint (Tier-1 pinned in
+`tests/battleResolutionPresentation.test.ts`). This is the mechanism behind
+§1's "1100-1200 resolution field" class — the remaining 822/648px are the
+message-pacing class only.

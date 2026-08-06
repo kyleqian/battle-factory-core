@@ -89,11 +89,11 @@ late, `032a03b2`]** the
 party-summary panel pixels were app **overdraw** (§9: the real game draws no
 player tray here, `skipPlayer=1`) — the player-side tray draw is dropped on
 the resolution route and the dense spec extends to **95/95** (1127-1138 now
-byte-exact); (3) turn-boundary fight-menu chrome (A-press highlight
-~1776-2177px, sprite-bounce phase — same class PROGRESS 958 lists for #81's
-fixture; 1256-1407 also carries opponent-move resolution gaps, 11/155
-matched). The party-menu close's fade pixels are held-and-cut (menu pixels
-are #80 scope, frame budget is the acceptance).
+byte-exact); (3) turn-boundary fight-menu chrome — the class-4 sprite/healthbox bounce
+phase bind landed 2026-08-06 (`commandMenuBounceY2`, `f0b52d7d`); the
+1256-1407 window still carries opponent-move resolution gaps (out of scope,
+not extended). The party-menu close's fade pixels are held-and-cut (menu
+pixels are #80 scope, frame budget is the acceptance).
 
 ## #80 — Live play: in-battle party/switch menu is scaffolding-grade
 
@@ -146,15 +146,22 @@ class as the mid-battle-switch fixture's documented 48px, not the rejection
 flow). **2026-08-06 MAIN bind:** classes (1)-(3) were re-attributed and
 closed by appTrace staging pins (personality 150 for male BUTTERFREE +
 MURKROW, post-turn-1 TACKLE PP 34/35, MURKROW real HP 119/135) — all settled
-torment frames (734/765/820/977/984-986/994-995/1040/1050) are now
-byte-exact (compare `fight-menu-chrome-torment-off` 11/57, remainder is
-entirely the class-4 bounce). **Remainder:** (4) the class-4 dynamic — the
-oracle's player-healthbox `y2` oscillation (`DoBounceEffect(BOUNCE_HEALTHBOX,
-7,1)`, seed 128, `SpriteCB_BounceEffect` battle_main.c:2967) vs the app's
-battle-1-calibrated `menuIdleBounce` phase; the doc's §5.1 "MURKROW y2"
-misreads this region (MURKROW sprite is static — docs §8). Bind pending: a
-menu-entry-tick-relative healthbox/player-sprite y2 (seed 128/192, +7/frame),
-then extend the spec's captureFrames green.
+torment frames are byte-exact, and the class-4 bounce bind landed
+(`f0b52d7d`, `commandMenuBounceY2`: entry-relative `SpriteCB_BounceEffect`,
+seeds 128/192, +7/frame; torment stage seeds `idleBounceElapsed=7`; the
+phantom mid-battle ball-fade is gated to switch-source resolutions, which
+also closed the 1100/1200 tint). Compare `fight-menu-chrome-torment-off` is
+**52/57** (was 11/57). **Remainder (measured, docs §8.1):** (4a) three
+1-frame class-4 phase-boundary frames — 736 (857px sprite), 766 (1776px
+healthbox), 977 (857px sprite, the one regression from green) — the app's
+battle-1-calibrated idle-bounce freeze model (2-tick fight-opening freeze)
+does not match the oracle's own 4-frame opening + message + reopen-tail
+freeze schedule at exactly those transition windows; matching all three
+would change the battle-1-pinned fight-opening constant (not done, no
+per-route phases); (4b) the move-resolution message-typing pacing class at
+1100 (822px) / 1200 (648px) — the real printer types/holds
+"Foe MURKROW used TORMENT!" two lines while the app auto-advances at 1
+glyph/frame (pre-existing, unrelated to the bounce).
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
