@@ -115,15 +115,16 @@ y23-30 — exactly the level line. The level text is absent.
 ### 4.2 Held-item icon
 
 The 8×8 sprite's generic item glyph (non-mail anim 0) occupies tile offsets
-**x 1..6, y 1..6** (banked `party-menu-held-item.json` `frames.item`, palette
+**x 1..7, y 1..7** (banked `party-menu-held-item.json` `frames.item`; palette
 indices **4** `(255,247,156)`, **5** `(222,222,115)`, **6** `(247,82,41)`,
-**7** `(165,90,82)`, **15** `(99,99,99)`).
+**7** `(165,90,82)`, **15** `(99,99,99)`; index 15 is the gray shadow on the
+glyph's right/bottom edges at offset 7).
 
 | Slot | Sprite center | Glyph bbox (rendered) | Item | Palette used |
 | --- | --- | --- | --- | --- |
-| 0 | (20, 50) | x 17-22, y 47-52 | Leftovers | 4,5,6,7,15 |
-| 1 | (108, 28) | x 105-110, y 25-30 | Silk Scarf | same |
-| 2 | (108, 52) | x 105-110, y 49-54 | Quick Claw | same |
+| 0 | (20, 50) | x 17-23, y 47-53 | Leftovers | 4,5,6,7,15 |
+| 1 | (108, 28) | x 105-111, y 25-31 | Silk Scarf | same |
+| 2 | (108, 52) | x 105-111, y 49-55 | Quick Claw | same |
 
 **The held-item icon is a single generic 8×8 sprite** — the same tiles render
 for every held item (`ShowOrHideHeldItemSprite` only switches mail vs non-mail
