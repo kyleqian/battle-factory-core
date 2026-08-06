@@ -50,6 +50,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   attribution — lesson recorded: pixel-sample diffs before briefing on a
   worker's attribution. PAPERCUTS gained the battle-lab→compare wrapper
   entry (3 hand-conversions of the same fixture in one day).
+- **[Post-wind-down addendum, 20:45:** one more 30-min-capped worker landed
+  `032a03b2` — the §9.4 player-tray overdraw drop (surgical battler-0 gate
+  in `battleResolutionPresentationRender.ts`, source-cited) — then was
+  cap-killed at its own full-suite gate; supervisor salvage-verified: spec
+  rerun **95/95** (1127-1138 now byte-exact), typecheck + smoke 347/347 +
+  seam/presentation 37/37 green, and an independent full `npm test`
+  **748 files / 7084 passed / 1 skipped** + `npm run build` green on the
+  final tree. #78's remainder is now ball fade (§8 bind) + fight-menu
+  chrome only.**]**
 ## 959 — [bounded MAIN worker, 2026-08-05] ISSUES #80 ranks 1/3/4 landed: in-battle party menu HP bars, real HP/level text, gender glyphs, real WIN_MSG window
 
 - **State:** master `81e2db18`, clean. Typecheck green; full `npm test` **744 files / 7064 passed / 1 skipped** + `npm run build` green; smoke 347/347.

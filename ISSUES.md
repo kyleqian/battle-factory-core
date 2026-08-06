@@ -69,13 +69,16 @@ now committed: `mid-battle-switch-dense-a-off` **84/84** (recall window
 Remaining un-green spans, all named: (1) the **white background palette
 fade** (`LaunchBallFadeMonTask` → `BeginNormalPaletteFade(RGB_WHITE)` + the
 mon's ball-color blend, oracle 1093-1126 recall / 1191-1224 switch-in, up to
-~16k px at the scale-up peak); (2) the **in-battle party-summary panel
-pixels** (1127-1138, ~389 px; bbox 136,88-239,99); (3) turn-boundary
-fight-menu chrome (A-press highlight ~1776-2177px, sprite-bounce phase —
-same class PROGRESS 958 lists for #81's fixture; 1256-1407 also carries
-opponent-move resolution gaps, 11/155 matched). The party-menu close's fade
-pixels are held-and-cut (menu pixels are #80 scope, frame budget is the
-acceptance).
+~16k px at the scale-up peak — §8's coefficient tables reproduce it 144/144,
+bind pending); (2) **[CLOSED 2026-08-05 late, `032a03b2`]** the
+party-summary panel pixels were app **overdraw** (§9: the real game draws no
+player tray here, `skipPlayer=1`) — the player-side tray draw is dropped on
+the resolution route and the dense spec extends to **95/95** (1127-1138 now
+byte-exact); (3) turn-boundary fight-menu chrome (A-press highlight
+~1776-2177px, sprite-bounce phase — same class PROGRESS 958 lists for #81's
+fixture; 1256-1407 also carries opponent-move resolution gaps, 11/155
+matched). The party-menu close's fade pixels are held-and-cut (menu pixels
+are #80 scope, frame budget is the acceptance).
 
 ## #80 — Live play: in-battle party/switch menu is scaffolding-grade
 
