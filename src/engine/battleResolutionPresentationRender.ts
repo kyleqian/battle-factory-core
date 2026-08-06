@@ -622,7 +622,14 @@ export function createBattleResolutionPresentationRenderView(
     field = applyCompletedCommand(field, completed);
     if (completed.type === "message") latestMessage = completed.lines;
     if (completed.type === "faint") fainted.add(completed.battler);
-    if (completed.type === "switch-in") fainted.delete(completed.battler);
+    if (completed.type === "switch-in") {
+      // The recall receipt hid the outgoing mon's sprite+healthbox; the
+      // switch-in restores both for the incoming battler once the span's
+      // controller receipt has passed.
+      fainted.delete(completed.battler);
+      spriteVisibility.set(completed.battler, true);
+      healthboxVisibility.set(completed.battler, true);
+    }
     if (completed.type === "sprite-visibility") {
       spriteVisibility.set(completed.battler, completed.visible);
       if (completed.recall) healthboxVisibility.set(completed.battler, completed.visible);

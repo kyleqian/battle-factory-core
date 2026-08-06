@@ -5,6 +5,7 @@ import {
   RETURN_TO_BALL_SPAN_FRAMES,
   SWITCH_IN_SPAN_FRAMES,
   SWITCH_IN_WAITSTATE_HOLD_FRAMES,
+  type BattleResolutionPresentationCommand,
   type BattleResolutionPresentationState,
   type CreateBattleResolutionPresentationInput,
 } from "../src/engine/battleResolutionPresentation.ts";
