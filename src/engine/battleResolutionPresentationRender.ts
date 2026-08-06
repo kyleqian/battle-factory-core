@@ -77,6 +77,57 @@ export const MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR = 76;
 export const MID_BATTLE_SWITCH_EMERGE_ACCUMULATOR_STEP = 18;
 export const MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR = 256;
 
+/**
+ * ISSUES #78 slice 4: the return-to-ball (`CONTROLLER_RETURNMONTOBALL`)
+ * span's affine scale-up, keyed on the `switch-out` command's phaseElapsed
+ * (0 = the frame 1086 the receipt dispatches). `AnimTask_SwitchOutShrinkMon`
+ * (`battle_anim_throw.c:642-667`) runs `scale += 0x30` (48) per tick from
+ * `0x100` (256, 1.0x) until `>= 0x2D0` (720), i.e. 256->736 across relative
+ * frames 14-24 (trace 1100-1110); the sprite then goes invisible at relative
+ * 25 (trace 1111) and is freed ~1111-1117 while the healthbox persists until
+ * the recall receipt that follows (`docs/mid-battle-switch-presentation-
+ * ground-truth.md` §2).
+ */
+export const MID_BATTLE_SWITCH_OUT_SCALE_UP_ELAPSED = 14;
+export const MID_BATTLE_SWITCH_OUT_SCALE_UP_END_ELAPSED = 24;
+export const MID_BATTLE_SWITCH_OUT_SPRITE_FREED_ELAPSED = 25;
+export const MID_BATTLE_SWITCH_OUT_SCALE_START = 256;
+export const MID_BATTLE_SWITCH_OUT_SCALE_STEP = 48;
+
+export type MidBattleSwitchOutView = Readonly<{
+  elapsed: number;
+  battler: 0 | 1;
+  /** Affine scale factor (256 = 1.0x) during the scale-up window. */
+  scale: number;
+  /** False from relative frame 25 (the real sprite is freed ~1111-1117). */
+  spriteVisible: boolean;
+}>;
+
+/**
+ * Projects the return-to-ball's visible state from the `switch-out` command's
+ * phaseElapsed alone. Before the scale-up window the outgoing sprite sits at
+ * full size; during it the affine scale grows 256->736 at 48/tick; from
+ * relative 25 the sprite is gone (the field is empty until the send-in).
+ */
+export function midBattleSwitchOutAt(
+  elapsed: number,
+  battler: 0 | 1,
+): MidBattleSwitchOutView {
+  const inWindow = elapsed >= MID_BATTLE_SWITCH_OUT_SCALE_UP_ELAPSED
+    && elapsed <= MID_BATTLE_SWITCH_OUT_SCALE_UP_END_ELAPSED;
+  const scale = inWindow
+    ? MID_BATTLE_SWITCH_OUT_SCALE_START
+      + MID_BATTLE_SWITCH_OUT_SCALE_STEP
+        * (elapsed - MID_BATTLE_SWITCH_OUT_SCALE_UP_ELAPSED)
+    : MID_BATTLE_SWITCH_OUT_SCALE_START;
+  return Object.freeze({
+    elapsed,
+    battler,
+    scale,
+    spriteVisible: elapsed < MID_BATTLE_SWITCH_OUT_SPRITE_FREED_ELAPSED,
+  });
+}
+
 export type MidBattleSwitchInView = Readonly<{
   elapsed: number;
   battler: 0 | 1;
@@ -223,6 +274,14 @@ export type BattleResolutionPresentationRenderView = Readonly<{
    * per-frame state from the command's own phaseElapsed.
    */
   midBattleSwitchIn: MidBattleSwitchInView | null;
+  /**
+   * ISSUES #78 slice 4: the voluntary-switch return-to-ball presentation,
+   * populated while the `switch-out` command is current in the `presenting`
+   * phase. `renderBattleResolutionSceneOffView` draws the outgoing mon's
+   * affine scale-up (and then nothing once freed) from this; the recall
+   * receipt that follows the span commits the hidden sprite/healthbox.
+   */
+  switchOut: MidBattleSwitchOutView | null;
   partySummary: Readonly<{
     battler: 0 | 1;
     states: readonly import("./battleResolutionPresentation.ts").PartyBallState[];
@@ -328,6 +387,7 @@ function applyCompletedCommand(
     || command.type === "faint"
     || command.type === "party-summary"
     || command.type === "sprite-visibility"
+    || command.type === "switch-out"
     || command.type === "turn-end"
     || command.type === "trainer-slide"
   ) return field;
@@ -394,10 +454,13 @@ export function battleResolutionCommandDuration(
     case "status-icon":
     case "faint":
     case "switch-in":
+    case "switch-out":
     case "sprite-visibility":
-      return command.timing.minimumFrames;
+      return command.type === "switch-in"
+        ? command.timing.minimumFrames + (command.settleHoldFrames ?? 0)
+        : command.timing.minimumFrames;
     case "party-summary":
-      return 1;
+      return command.timing?.minimumFrames ?? 1;
     case "turn-end":
       return command.timing.minimumFrames;
     case "trainer-slide":
@@ -477,6 +540,7 @@ export function createBattleResolutionPresentationRenderView(
   let latestMessage: readonly string[] | null = null;
   let switchIn: BattleResolutionPresentationRenderView["switchIn"] = null;
   let midBattleSwitchIn: BattleResolutionPresentationRenderView["midBattleSwitchIn"] = null;
+  let switchOut: BattleResolutionPresentationRenderView["switchOut"] = null;
   let partySummary: BattleResolutionPresentationRenderView["partySummary"] = null;
   const fainted = new Set<0 | 1>();
   const spriteVisibility = new Map<0 | 1, boolean>([[0, true], [1, true]]);
@@ -710,6 +774,15 @@ export function createBattleResolutionPresentationRenderView(
         command.battler,
       );
       fainted.delete(command.battler);
+    } else if (command.type === "switch-out") {
+      // ISSUES #78 slice 4: the outgoing mon's return-to-ball scale-up owns
+      // the battler's pixels for the whole span (the generic draw is gated
+      // off below); from relative 25 the sprite is freed and the field is
+      // empty until the send-in.
+      switchOut = midBattleSwitchOutAt(
+        state.lifecycle.phaseElapsed,
+        command.battler,
+      );
     } else if (command.type === "sprite-visibility") {
       spriteVisibility.set(command.battler, command.visible);
       if (command.recall) healthboxVisibility.set(command.battler, command.visible);
@@ -780,6 +853,10 @@ export function createBattleResolutionPresentationRenderView(
           // battler's pixels for the whole send-in (ball throw, emerge, then
           // the full sprite) -- the generic draw must not double it.
           && midBattleSwitchIn?.battler !== 0
+          // ISSUES #78 slice 4: the switch-out scene renderer owns the
+          // outgoing mon's pixels for the whole return-to-ball span (full
+          // sprite through the scale-up, then freed).
+          && switchOut?.battler !== 0
           && !(
             playerFaint?.sink.type === "player-pixel-rows"
             && playerFaint.sink.skipPixelRows
@@ -795,6 +872,7 @@ export function createBattleResolutionPresentationRenderView(
           && !fainted.has(1)
           && !(opponentHit?.targetInvisible ?? false)
           && midBattleSwitchIn?.battler !== 1
+          && switchOut?.battler !== 1
           && !(
             opponentFaint?.sink.type === "opponent-tile-rows"
             && opponentFaint.sink.keptRows === 0
@@ -816,6 +894,7 @@ export function createBattleResolutionPresentationRenderView(
     confirmHandoff,
     switchIn,
     midBattleSwitchIn,
+    switchOut,
     partySummary,
     trainerSlide: activeTrainerSlide !== null
       ? Object.freeze({

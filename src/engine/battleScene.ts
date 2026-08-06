@@ -778,7 +778,9 @@ import type {
 } from "./battleResolutionPresentationRender.ts";
 import {
   MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR,
+  MID_BATTLE_SWITCH_OUT_SCALE_START,
   type MidBattleSwitchInView,
+  type MidBattleSwitchOutView,
 } from "./battleResolutionPresentationRender.ts";
 import type {
   BattleStatName,
@@ -34881,6 +34883,43 @@ function drawMidBattleSwitchInSprite(
   );
 }
 
+/**
+ * ISSUES #78 slice 4: the return-to-ball affine scale-up. `AnimTask_
+ * SwitchOutShrinkMon` (`battle_anim_throw.c:642-667`) applies
+ * `SetSpriteRotScale(sprite, scale, scale, 0)` with `scale` stepping 256->736
+ * at 48/tick, so the sprite grows around its affine center; the full-size
+ * sprite before the window is drawn plain. Once `spriteVisible` is false the
+ * caller draws nothing (the sprite is freed ~relative 25).
+ */
+function drawMidBattleSwitchOutSprite(
+  fb: Uint8Array,
+  art: BattleCommandFieldArtBattler,
+  state: MidBattleSwitchOutView,
+): void {
+  if (state.scale === MID_BATTLE_SWITCH_OUT_SCALE_START) {
+    drawSpriteSheet(
+      fb,
+      art.pic.tileset as Tileset,
+      art.pic.palette as RgbColor[],
+      art.origin.x,
+      art.origin.y,
+    );
+    return;
+  }
+  drawSpriteSheetAffineStretch(
+    fb,
+    art.pic.tileset as Tileset,
+    art.pic.palette as RgbColor[],
+    art.origin.x,
+    art.origin.y,
+    state.scale,
+    state.scale,
+    0,
+    { r: 255, g: 255, b: 255 },
+    0,
+  );
+}
+
 export function renderBattleResolutionSceneOffView(
   fb: Uint8Array,
   view: BattleResolutionPresentationRenderView,
@@ -34925,6 +34964,16 @@ export function renderBattleResolutionSceneOffView(
   }
   if (midSwitch !== null && midSwitch.battler === 0) {
     drawMidBattleSwitchInSprite(fb, view.fieldArt.player, midSwitch);
+  }
+  // ISSUES #78 slice 4: the outgoing mon's return-to-ball scale-up owns the
+  // battler's pixels for the whole switch-out span (full sprite through the
+  // scale-up, then freed -- the field stays empty until the send-in).
+  const switchOut = view.switchOut;
+  if (switchOut !== null && switchOut.battler === 1 && switchOut.spriteVisible) {
+    drawMidBattleSwitchOutSprite(fb, view.fieldArt.opponent, switchOut);
+  }
+  if (switchOut !== null && switchOut.battler === 0 && switchOut.spriteVisible) {
+    drawMidBattleSwitchOutSprite(fb, view.fieldArt.player, switchOut);
   }
   if (view.visibility.opponent.sprite) {
     if (

@@ -58,7 +58,10 @@ export type PartyBallState = "empty" | "healthy" | "status" | "fainted";
  * blocks, `:3464,3469,3474,3479,3483`) but not modeled for every message kind
  * here -- see `WAITMESSAGE_LONG_MESSAGE_IDS` at the call site.
  */
-export type BattleMessageTiming = Readonly<{ minimumFrames: 24; holdFrames: 0 | 64 }>;
+export type BattleMessageTiming =
+  | Readonly<{ minimumFrames: 24; holdFrames: 0 | 64 }>
+  | Readonly<{ minimumFrames: 24; holdFrames: 9 }>
+  | Readonly<{ minimumFrames: 13; holdFrames: 0 }>;
 export type BattleMoveAnimationTiming = Readonly<{ minimumFrames: number }>;
 export type BattleHitAnimationTiming = Readonly<{
   minimumFrames: 35;
@@ -170,6 +173,15 @@ export type BattleResolutionPresentationCommand =
       battler: 0 | 1;
       visible: boolean;
       states: readonly PartyBallState[];
+      /**
+       * ISSUES #78 slice 4: the player's draw-party-status-summary receipt
+       * plus the `getswitched` handoff before "Go!" -- the real
+       * CONTROLLER_DRAWPARTYSTATUSSUMMARY occupies 1119-1120 and getswitched
+       * flips at 1121, so the field-hold between the return-to-ball and the
+       * "Go!" printstring (1119-1125) is 7 frames. Absent on every other
+       * (non-voluntary-switch) path, where the default 1-frame receipt stands.
+       */
+      timing?: Readonly<{ minimumFrames: number }>;
     }>
   | Readonly<{
       type: "switch-in";
@@ -178,6 +190,18 @@ export type BattleResolutionPresentationCommand =
       fromPartyIndex: BattlePartyIndex;
       toPartyIndex: BattlePartyIndex;
       incoming: BattleCommandFieldBattler;
+      timing: BattleSwitchInTiming;
+      /**
+       * ISSUES #78 slice 4: the send-in's post-controller `waitstate` release
+       * + move-load hold (`SWITCH_IN_WAITSTATE_HOLD_FRAMES`), on top of the
+       * 91-frame controller span.
+       */
+      settleHoldFrames?: number;
+    }>
+  | Readonly<{
+      type: "switch-out";
+      eventSequence: number;
+      battler: 0 | 1;
       timing: BattleSwitchInTiming;
     }>
   | Readonly<{
@@ -403,6 +427,32 @@ export const WAITMESSAGE_LONG_TIMING = Object.freeze({
   holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES,
 } as const);
 /**
+ * ISSUES #78 slice 4: STRINGID_RETURNMON is printed with NO `waitmessage` --
+ * its visible hold (1043-1124, 82 frames) is the return-to-ball controller
+ * round-trip (`docs/mid-battle-switch-presentation-ground-truth.md` §4). The
+ * message-only region is its own typing (1 glyph/frame from the 1044 edge)
+ * plus the 9-frame post-print hold (1077-1085) before `returnatktoball`
+ * dispatches; the box then stays as `latestMessage` through the switch-out,
+ * party-summary, and getswitched (the full 82-frame window).
+ */
+export const RETURN_MON_POST_PRINT_HOLD_FRAMES = 9;
+const RETURN_MON_TIMING = Object.freeze({
+  minimumFrames: 24,
+  holdFrames: RETURN_MON_POST_PRINT_HOLD_FRAMES,
+} as const);
+/**
+ * ISSUES #78 slice 4: "Go! X!" is also waitmessage-free; its visible hold
+ * (1125-1139, 13 frames from the 1126 first glyph) is the party-summary hide
+ * + switch-in dispatch (ground truth §4). The generic 24-frame
+ * `MESSAGE_TIMING` floor overshoots by 11.
+ */
+const SWITCH_IN_MESSAGE_TIMING = Object.freeze({ minimumFrames: 13, holdFrames: 0 } as const);
+/**
+ * ISSUES #78 slice 4: the player's draw-party-status-summary + getswitched
+ * hold (real 1119-1125, 7 frames) before the "Go!" printstring at 1125.
+ */
+const PARTY_SUMMARY_DRAW_TIMING = Object.freeze({ minimumFrames: 7 } as const);
+/**
  * Every stat-change message id source prints via `printfromtable
  * gStatUpStringIds`/`gStatDownStringIds` immediately followed by
  * `waitmessage B_WAIT_TIME_LONG` -- `BattleScript_StatUp`/`StatDown`
@@ -481,6 +531,25 @@ const STATUS_ICON_TIMING = Object.freeze({ minimumFrames: 1 } as const);
  */
 export const SWITCH_IN_SPAN_FRAMES = 91;
 const SWITCH_IN_TIMING = Object.freeze({ minimumFrames: SWITCH_IN_SPAN_FRAMES } as const);
+/**
+ * ISSUES #78 slice 4: the 11-frame `waitstate` release + move-load hold
+ * (`switchinanim`'s `waitstate` releases 1231-1238, the opponent's move is
+ * loaded 1239-1240, and the "used" printstring dispatches at 1241 --
+ * docs/mid-battle-switch-presentation-ground-truth.md §2). The send-in
+ * sprite/healthbox stay settled on field through this hold, so the switch-in
+ * command's duration carries it on top of the 91-frame controller span.
+ */
+export const SWITCH_IN_WAITSTATE_HOLD_FRAMES = 11;
+/**
+ * ISSUES #78 slice 4: the real `CONTROLLER_RETURNMONTOBALL` receipt's
+ * 32-frame lifetime (`returnatktoball` -> `PlayerHandleReturnMonToBall` ->
+ * `DoSwitchOutAnimation`, battle_controller_player.c:2227-2259). The outgoing
+ * mon's switch-out animation (affine scale-up 256->736 over the span's
+ * relative frames 14-24, sprite freed from ~25) is modeled by the switch-out
+ * command's renderer.
+ */
+export const RETURN_TO_BALL_SPAN_FRAMES = 32;
+const SWITCH_OUT_TIMING = Object.freeze({ minimumFrames: RETURN_TO_BALL_SPAN_FRAMES } as const);
 const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
 /**
  * ISSUES #73 rung B correction (2026-08-04): the prior port (53, from
@@ -2784,9 +2853,13 @@ export function projectBattleResolutionCommands(
             ? "button"
             : "automatic",
         noCursor: TERMINAL_SEAM_QUOTE_MESSAGE_IDS.has(payload.messageId),
-        timing: WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
-          ? WAITMESSAGE_LONG_TIMING
-          : MESSAGE_TIMING,
+        timing: payload.messageId === "STRINGID_RETURNMON"
+          ? RETURN_MON_TIMING
+          : payload.messageId === "STRINGID_SWITCHINMON"
+            ? SWITCH_IN_MESSAGE_TIMING
+            : WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
+              ? WAITMESSAGE_LONG_TIMING
+              : MESSAGE_TIMING,
       }));
       pendingStatusMessageBattler = null;
       pendingHeldItemEffectBattler = null;
@@ -2944,10 +3017,25 @@ export function projectBattleResolutionCommands(
       continue;
     }
     if (payload.kind === "set-battler-sprite-visibility") {
+      const battler = singlesBattler(payload.battler, "sprite visibility");
+      // ISSUES #78 slice 4: the synthesized voluntary-switch return-atk-to-ball
+      // receipt is the real `CONTROLLER_RETURNMONTOBALL` round-trip -- a
+      // 32-frame span, not the 1-frame visibility toggle. Emit a switch-out
+      // command (the outgoing mon's scale-up + teardown, rendered from the
+      // switch-out view) ahead of the recall receipt that commits the hidden
+      // sprite/healthbox after the span.
+      if (event.provenance?.opcodeName === "B_SCR_OP_RETURNATKTOBALL") {
+        commands.push(Object.freeze({
+          type: "switch-out",
+          eventSequence: event.sequence,
+          battler,
+          timing: SWITCH_OUT_TIMING,
+        }));
+      }
       commands.push(Object.freeze({
         type: "sprite-visibility",
         eventSequence: event.sequence,
-        battler: singlesBattler(payload.battler, "sprite visibility"),
+        battler,
         visible: !payload.invisible,
         // Each of BtlController_EmitReturnMonToBall/EmitSpriteInvisibility is
         // one controller callback; the receipt itself owns the relative
@@ -3015,6 +3103,9 @@ export function projectBattleResolutionCommands(
         battler,
         visible: payload.kind === "draw-party-status-summary",
         states: partyBallStates(afterRules, battler),
+        timing: payload.kind === "draw-party-status-summary" && battler === 0
+          ? PARTY_SUMMARY_DRAW_TIMING
+          : undefined,
       }));
       continue;
     }
@@ -3066,6 +3157,7 @@ export function projectBattleResolutionCommands(
         toPartyIndex: switched.toPartyIndex,
         incoming,
         timing: SWITCH_IN_TIMING,
+        settleHoldFrames: SWITCH_IN_WAITSTATE_HOLD_FRAMES,
       }));
     }
   }

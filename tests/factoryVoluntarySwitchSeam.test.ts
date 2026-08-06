@@ -2,13 +2,16 @@ import { describe, expect, it } from "vitest";
 import {
   advanceBattleResolutionConfirmHandoff,
   createBattleResolutionPresentation,
+  RETURN_TO_BALL_SPAN_FRAMES,
   SWITCH_IN_SPAN_FRAMES,
+  SWITCH_IN_WAITSTATE_HOLD_FRAMES,
   type BattleResolutionPresentationState,
   type CreateBattleResolutionPresentationInput,
 } from "../src/engine/battleResolutionPresentation.ts";
 import {
   battleResolutionCommandDuration,
   createBattleResolutionPresentationRenderView,
+  midBattleSwitchOutAt,
 } from "../src/engine/battleResolutionPresentationRender.ts";
 import {
   advanceFactoryRoundBattleCommand,
@@ -169,10 +172,11 @@ describe("ISSUES #78 voluntary-switch presentation seam", () => {
     if (switchIn?.type !== "switch-in") {
       throw new Error("battle resolution voluntary switch has no switch-in command");
     }
-    // The real CONTROLLER_SWITCHINANIM 91-frame span gates the opponent's move.
+    // The real CONTROLLER_SWITCHINANIM 91-frame span gates the opponent's move
+    // (plus the 11-frame waitstate/move-load hold to the "used" message).
     expect(switchIn.timing).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
     expect(battleResolutionCommandDuration(switchIn, resolution.field))
-      .toBe(SWITCH_IN_SPAN_FRAMES);
+      .toBe(SWITCH_IN_SPAN_FRAMES + SWITCH_IN_WAITSTATE_HOLD_FRAMES);
 
     // The switch-in command owns the field for the whole span with the
     // incoming mon already swapped in (mid-battle switch-in view active).
@@ -448,11 +452,119 @@ describe("ISSUES #78 voluntary-switch source decision", () => {
       type: "message",
       lines: ["RATTATA, that’s enough!", "Come back!"],
     });
+    // ISSUES #78 slice 4: the synthesized return-atk-to-ball receipt now emits
+    // the 32-frame switch-out span ahead of the recall receipt that commits
+    // the hidden sprite/healthbox.
     expect(commands[1]).toMatchObject({
+      type: "switch-out",
+      battler: 0,
+      timing: { minimumFrames: RETURN_TO_BALL_SPAN_FRAMES },
+    });
+    expect(commands[2]).toMatchObject({
       type: "sprite-visibility",
       battler: 0,
       visible: false,
       recall: true,
     });
+  });
+
+  it("times the recall hold at the real 82-frame schedule: typing+9, 32f switch-out, 7f party-summary/getswitched, 13f Go!", () => {
+    // docs/mid-battle-switch-presentation-ground-truth.md §2/§4: the recall
+    // message's visible hold is 1043-1124 (82 frames) -- message typing (33)
+    // + 9-frame post-print hold, then the 32-frame CONTROLLER_RETURNMONTOBALL
+    // (1086-1117), then party-summary draw + getswitched (1119-1125) before
+    // the "Go!" printstring (1125, first glyph 1126).
+    const initial = stagedBattle();
+    const context = initial.rules.rulesContext;
+    const incoming = context.party.player[1]!;
+    const switchedBattler = Object.freeze({
+      ...context.battlers[0]!,
+      ...incoming,
+      side: 0 as const,
+      partyIndex: 1,
+      species: incoming.species,
+      types: Object.freeze(["TYPE_NORMAL", "TYPE_NORMAL"] as const),
+    });
+    const afterRules = Object.freeze({
+      ...initial.rules,
+      rulesContext: Object.freeze({
+        ...context,
+        battlers: Object.freeze([
+          switchedBattler,
+          context.battlers[1]!,
+          context.battlers[2]!,
+          context.battlers[3]!,
+        ]) as typeof context.battlers,
+      }),
+    }) as FactoryFullTurnDecisionRules;
+    const resolution = createBattleResolutionPresentation(switchResolutionInput([
+      event(0, { kind: "draw-party-status-summary", battler: 0 }),
+      event(1, { kind: "switch", side: "player", fromPartyIndex: 0, toPartyIndex: 1 }),
+      event(2, { kind: "message", messageId: "STRINGID_SWITCHINMON", substitutions: [] }),
+      event(3, { kind: "hide-party-status-summary", battler: 0 }),
+      event(4, { kind: "switch-in-animation", battler: 0, partyIndex: 1 }),
+    ], NEXT_COMMAND, afterRules));
+    const commands = resolution.segments[0]!.commands;
+    const recall = commands[0]!;
+    if (recall.type !== "message") {
+      throw new Error("voluntary switch has no recall message command");
+    }
+    const switchOut = commands.find((c) => c.type === "switch-out");
+    const partySummary = commands.find(
+      (c) => c.type === "party-summary" && c.visible,
+    );
+    const go = commands.find(
+      (c): c is Extract<BattleResolutionPresentationCommand, { type: "message" }> =>
+        c.type === "message" && c.lines[0]?.startsWith("Go!"),
+    );
+    if (!switchOut || !partySummary || !go) {
+      throw new Error("voluntary switch misses slice-4 commands");
+    }
+    // message-only region: 33 glyphs + 9f post-print hold = 42.
+    expect(battleResolutionCommandDuration(recall, resolution.field)).toBe(42);
+    // switch-out owns 1086-1117.
+    expect(switchOut.timing).toEqual({ minimumFrames: RETURN_TO_BALL_SPAN_FRAMES });
+    // party-summary draw + getswitched holds 1119-1125.
+    expect(partySummary.timing).toEqual({ minimumFrames: 7 });
+    // "Go!" first glyph at 1126; its visible hold is 13 frames.
+    expect(go.timing).toEqual({ minimumFrames: 13, holdFrames: 0 });
+    // The full 1044->1125 window (82 frames) before "Go!" wipes the box.
+    const beforeGo = commands
+      .slice(0, commands.indexOf(go))
+      .reduce((total, command) =>
+        total + battleResolutionCommandDuration(command, resolution.field), 0);
+    expect(beforeGo).toBe(82);
+    // The recall message persists as latestMessage across the switch-out span.
+    const switchOutView = createBattleResolutionPresentationRenderView(
+      Object.freeze({
+        ...resolution,
+        commandIndex: commands.indexOf(switchOut),
+        lifecycle: Object.freeze({ phase: "presenting", phaseElapsed: 20 }),
+      }),
+    );
+    expect(switchOutView.message).toEqual({
+      lines: ["RATTATA, that’s enough!", "Come back!"],
+      visibleCharacters: 33,
+    });
+  });
+
+  it("models the return-to-ball scale-up 256->736 over relative 14-24 and frees the sprite at relative 25", () => {
+    // AnimTask_SwitchOutShrinkMon (battle_anim_throw.c:642-667) steps the
+    // affine scale +0x30/tick from 0x100 until >= 0x2D0: 256->736 across the
+    // span's relative frames 14-24 (trace 1100-1110), sprite invisible from
+    // relative 25 (trace 1111) -- ground truth §2.
+    const viewAt = (elapsed: number) => midBattleSwitchOutAt(elapsed, 0);
+    expect(viewAt(13)).toEqual({
+      elapsed: 13,
+      battler: 0,
+      scale: 256,
+      spriteVisible: true,
+    });
+    expect(viewAt(14).scale).toBe(256);
+    expect(viewAt(15).scale).toBe(304);
+    expect(viewAt(24).scale).toBe(736);
+    expect(viewAt(24).spriteVisible).toBe(true);
+    expect(viewAt(25).spriteVisible).toBe(false);
+    expect(viewAt(31).spriteVisible).toBe(false);
   });
 });
