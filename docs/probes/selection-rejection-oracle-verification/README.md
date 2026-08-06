@@ -1,12 +1,16 @@
-# Selection-rejection oracle verification: NOPPLEFT + ITEMALLOWSONLYYMOVE (ISSUES #72)
+# Selection-rejection oracle verification: NOPPLEFT + ITEMALLOWSONLYYMOVE + TORMENT (ISSUES #72 / #81)
 
 Closes the remaining oracle-verification gap the `05d7dccf` session left open:
 of the four `printselectionstring` STRINGID resolvers landed that session
 (`resolveMoveSelectionRejectionMessageLines`/`resolveNoMovesLeftMessageLines`,
 `src/engine/battleResolutionPresentation.ts`), only Torment had been checked
 against the real ROM (that probe's trace/PNGs were never banked to disk —
-this doc's sibling gap). This step verifies the other two feasible causes;
-`PKMNHASNOMOVESLEFT` is intentionally skipped (see bottom).
+this doc's sibling gap). The other two feasible causes are verified below;
+`PKMNHASNOMOVESLEFT` is intentionally skipped (see bottom). The Torment cause
+(`STRINGID_PKMNCANTUSEMOVETORMENT`) is now banked too — text, hold, and
+dismiss/reopen timing — see the new `torment-*.png` receipts below and the
+companion `docs/torment-selection-rejection-ground-truth.md` for the full
+timing schedule (ISSUES #81).
 
 ## Method
 
@@ -80,6 +84,64 @@ against the existing Tier-1 pin
 (`tests/battleScriptSelectionRejection.test.ts:420-430`,
 `["There's no PP left for", "this move!"]`). **Verdict: MATCH, no src
 change needed.**
+
+## Cause 3 — `STRINGID_PKMNCANTUSEMOVETORMENT` (Tormented move reselect, ISSUES #81)
+
+**Trace:** `tools/battle-lab/mechanic-selection-reject-torment-off.json`.
+Player BUTTERFREE (species 12) moves `[TACKLE, GUST, 0, 0]`; opponent MURKROW
+(species 198, `FRONTIER_MON_MURKROW_1` record 184) all four slots `MOVE_TORMENT`
+(259). Turn 1: MURKROW (speed 91 > 70) uses TORMENT first — player `status2`
+becomes `0x80000000` (`STATUS2_TORMENT`) at frame 100 — then the player uses
+TACKLE (the move Torment will ban). Turn 2: `A, A` on slot 0 (TACKLE) trips
+`TrySetCantSelectMoveBattleScript` → rejection message.
+
+**Run:**
+```sh
+bin/oracle lab tools/battle-lab/mechanic-selection-reject-torment-off.json -o /tmp/orb/torment
+```
+
+**Result:** the ROM prints
+```
+BUTTERFREE can't use the same
+move in a row due to the TORMENT!
+```
+Byte-for-byte match against `sText_PkmnCantUseMoveTorment`
+(`reference/pokeemerald/src/battle_message.c:260`,
+`"{B_ACTIVE_NAME_WITH_PREFIX} can't use the same\nmove in a row due to the TORMENT!\p"`)
+and against the existing Tier-1 pin
+(`tests/battleScriptSelectionRejection.test.ts:432-442`). Verified
+programmatically: `tools/probe/verify-torrent-rejection-message.ts` renders
+the expected two lines with the app's FONT_NORMAL glyphs and diffs — 14/38400
+px differ on a fully-typed frame, 51/38400 px on a hold frame (the residual
+is the blinking ▼ cursor + one 14 px shadow-glyph nuance; every white glyph
+pixel is identical).
+
+**Hold / dismiss / reopen timing (measured dense; see the companion ground-truth
+doc for the full frame-by-frame table):** first glyph +3 frames after the
+commit A press (frame 770), typing 1 glyph/frame to the `!` at 831, ▼ cursor
+first at 833, then **no auto-advance for 137+ frames** (the `\p` /
+PAUSE_UNTIL_PRESS control code keeps the printer active until A or B), A-press
+dismissal reopens the move menu **10 frames later** byte-identical to the
+pre-rejection menu (frame 978 sha == frame 765 sha). B dismisses identically
+(`scratch-selection-reject-torment-bpress-off.json`). The reopened menu is
+live: `RIGHT, A` selects GUST and the turn resolves (player PP 35→34,
+MURKROW 119→92). Two fresh runs of the fixture are byte-identical: 152/152
+PNG `sha256`s + full semantic state.
+
+Receipts (this directory):
+- `torment-pre-rejection-menu.png` (frame 765 — the move menu before the commit A)
+- `torment-rejection-print-start.png` (frame 770 — box + first glyph `B`)
+- `torment-rejection-line1-end.png` (frame 798 — line 1 complete)
+- `torment-rejection-print-end.png` (frame 831 — line 2 complete, last glyph `!`)
+- `torment-rejection-arrow-first.png` (frame 833 — ▼ cursor first appears)
+- `torment-rejection-hold-sample.png` (frame 900 — mid-hold, box byte-stable)
+- `torment-rejection-dismiss-press.png` (frame 968 — A-press dismissal edge)
+- `torment-rejection-reopened-menu.png` (frame 978 — byte-identical to 765)
+
+**Verdict: MATCH, no src change needed** — the resolver text is correct; the
+ISSUES #81 gap is the app's missing live message phase (no `\p` hold, no
+byte-identical reopen), which the companion ground-truth doc's Bind plan §6
+specifies for a MAIN worker.
 
 ## `PKMNHASNOMOVESLEFT` — not attempted, documented reason
 
