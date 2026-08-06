@@ -1,5 +1,45 @@
 # Animation coverage
 
+## MOVE_ROCK_THROW closed — 87/87 both orientations twice-fresh, promoted to exact (2026-08-05 worker)
+
+- **State:** ROCK_THROW (new move) → **exact**. Move coverage: **116/276 exact,
+  0 partial, 0 staged, 160 unsupported**. Both fixtures pin
+  `framebufferMatching: 87` with status `exact`.
+- **Did:** finished the staged Level-50 ROCK_THROW unit. The sole eligible
+  carrier is FRONTIER_MON_GRAVELER_1 record 166 (GRAVELER, all four slots move
+  88) vs legal ONIX; zero new source components — `Move_ROCK_THROW`
+  (battle_anim_scripts.s:2098) reuses the shared
+  `gFallingRockSpriteTemplate`/`AnimFallingRock`/`TranslateSpriteInEllipse`
+  falling-rock body (the ROCK_SLIDE component), the `shake_mon_or_platform`
+  BG3-Y shake, and `AnimTask_ShakeMon(ANIM_TARGET,0,5,20,1)`. Kept the
+  committed reducer, scenarios, probe, portable, and two fixtures; corrected
+  the reducer + fixture profiles + portable oracle-side derivation from dense
+  RGB evidence (see Notes), then added `rockThrow.test.ts` (8 Tier-1 tests:
+  rock table/stride, BG-Y sequence, spawn/lifetime geometry pinned to oracle,
+  measured target-shake boundary) and `rockThrowEvidence.test.ts` (receipt
+  pins). Updated `factoryAnimationInventory.test.ts` 115→116 / 161→160.
+- **Measured:** player-back frames 296-382 and opponent-front frames 296-382,
+  both **87/87 source-component and shared-framebuffer exact twice fresh**
+  (semantic identity also 87/87 each run). Evidence `9a7fa756…` /
+  `3dc82aad…`, RGB `773f4366…` / `e2592ba2…` reproduce the fixture pins
+  exactly on every fresh portable run. The dense exact MOVE_ROCK_SLIDE control
+  fixture `rock-slide-grovyle-onix.json` re-ran 175/175 twice fresh (probe
+  `984fe6c1…`).
+- **Next:** continue the zero-new-component Level-50 ladder from the ranked
+  coverage report.
+- **Notes:** the capped investigation's remaining mismatch was the target ONIX
+  display shake/idle residual, and its staged profile values were hypotheses.
+  A dense RGB scan (debug script, since removed) derived the true displayed
+  target x2/y2 directly for both orientations: the framebuffer shows +5 at
+  display ages 21, 24-25, 28-29, …, 56-57 — a lead frame at 21 then 2-on-2-off
+  pairs, i.e. `(age-21)%4 ∈ {0,3}` over [21,57] — NOT the staged 22..55 or
+  default 24..57 windows; and the opponent-front ONIX idle-bob x2=+1 drops to
+  0 at display age 21, one frame behind its RAM write. The portable's
+  oracle-side derivation now uses this RGB-verified latch (y2 lead at
+  `targetShakeStartAge`, x2 from RAM one frame back). No boundary widening, no
+  new unsupported barriers; ROCK_THROW is a sibling acceptance and shares no
+  move credit.
+
 ## MOVE_WRAP closed — 38/38 both orientations twice-fresh, promoted to exact (2026-08-05 worker)
 
 - **State:** WRAP (new move) → **exact**. Move coverage: **115/276 exact, 0
