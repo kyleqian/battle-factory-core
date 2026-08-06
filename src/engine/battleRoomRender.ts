@@ -82,7 +82,7 @@ interface NpcSprite {
 
 const roomLayout = layout as RoomLayout;
 const roomTileset = tileset as RoomTileset;
-const roomNpcs = npcs as { player: NpcSprite; scientist: NpcSprite; opponent: NpcSprite; fisherman: NpcSprite; girl3: NpcSprite };
+const roomNpcs = npcs as { player: NpcSprite; scientist: NpcSprite; opponents: Record<string, NpcSprite> };
 
 function drawBlockLayer(fb: Uint8Array, entries: TileEntry[], screenX: number, screenY: number, fadeY: number): void {
   for (let i = 0; i < 4; i += 1) {
@@ -223,28 +223,66 @@ function drawOpponentMsgbox(
 /**
  * Walk-in sheet for a generated opponent's resolved OBJ_EVENT_GFX id
  * (factoryTrainerOverworldGfx.ts, ported from SetBattleFacilityTrainerGfxId
- * battle_tower.c:1161-1251). Only the gfx ids with an extracted sheet map to
- * their own art; every other id intentionally renders the existing generic
- * opponent sheet - a deterministic, documented fallback so generated
- * walk-ins never crash or go blank. Not-yet-extracted gfx ids: HIKER,
- * TUBER_M, MAN_3, RICH_BOY, MANIAC, RUNNING_TRIATHLETE_M/F, BLACK_BELT,
- * MAN_5, CAMPER, PSYCHIC_M, GENTLEMAN, SCHOOL_KID_M, POKEFAN_M/F, EXPERT_M/F,
- * YOUNGSTER, CYCLING_TRIATHLETE_M/F, NINJA_BOY, SAILOR, MAN_4, WOMAN_2,
- * WOMAN_5, HEX_MANIAC, BEAUTY, LASS, TUBER_F, BOY_1 (asset debt - see the
- * side-lane report).
+ * battle_tower.c:1161-1251). Every OBJ_EVENT_GFX id the tower tables can
+ * produce is extracted to its own sheet (battle-room-npcs.json's `opponents`
+ * record, produced by tools/extract/extract-battle-room.ts from the reference
+ * object-event pic tables + OBJ_EVENT_PAL_TAG palettes); nothing is left
+ * unextracted. The generic BUG_CATCHER sheet remains a deterministic
+ * defensive fallback for ids that don't (yet) have a mapping - the asset
+ * debt listed in earlier sessions (HIKER, TUBER_M, MAN_3, RICH_BOY, MANIAC,
+ * RUNNING_TRIATHLETE_M/F, BLACK_BELT, MAN_5, CAMPER, PSYCHIC_M, GENTLEMAN,
+ * SCHOOL_KID_M, POKEFAN_M/F, EXPERT_M/F, YOUNGSTER, CYCLING_TRIATHLETE_M/F,
+ * NINJA_BOY, SAILOR, MAN_4, WOMAN_2, WOMAN_5, HEX_MANIAC, BEAUTY, LASS,
+ * TUBER_F, BOY_1, plus PICNICKER) is fully burned down.
  */
-function opponentSheetForGfx(gfxId: ObjectEventGfxId): NpcSprite {
-  switch (gfxId) {
-    case OBJ_EVENT_GFX.GIRL_3:
-      return roomNpcs.girl3;
-    case OBJ_EVENT_GFX.BUG_CATCHER:
-      return roomNpcs.opponent;
-    case OBJ_EVENT_GFX.FISHERMAN:
-      return roomNpcs.fisherman;
-    default:
-      return roomNpcs.opponent;
-  }
+export const GENERIC_OPPONENT_SHEET = "BUG_CATCHER";
+
+const OPPONENT_SHEET_BY_GFX: Record<number, string> = {
+  [OBJ_EVENT_GFX.NINJA_BOY]: "NINJA_BOY",
+  [OBJ_EVENT_GFX.BOY_1]: "BOY_1",
+  [OBJ_EVENT_GFX.GIRL_3]: "GIRL_3",
+  [OBJ_EVENT_GFX.RICH_BOY]: "RICH_BOY",
+  [OBJ_EVENT_GFX.POKEFAN_F]: "POKEFAN_F",
+  [OBJ_EVENT_GFX.WOMAN_2]: "WOMAN_2",
+  [OBJ_EVENT_GFX.EXPERT_M]: "EXPERT_M",
+  [OBJ_EVENT_GFX.EXPERT_F]: "EXPERT_F",
+  [OBJ_EVENT_GFX.POKEFAN_M]: "POKEFAN_M",
+  [OBJ_EVENT_GFX.CAMPER]: "CAMPER",
+  [OBJ_EVENT_GFX.PICNICKER]: "PICNICKER",
+  [OBJ_EVENT_GFX.MAN_3]: "MAN_3",
+  [OBJ_EVENT_GFX.WOMAN_5]: "WOMAN_5",
+  [OBJ_EVENT_GFX.YOUNGSTER]: "YOUNGSTER",
+  [OBJ_EVENT_GFX.BUG_CATCHER]: "BUG_CATCHER",
+  [OBJ_EVENT_GFX.PSYCHIC_M]: "PSYCHIC_M",
+  [OBJ_EVENT_GFX.SCHOOL_KID_M]: "SCHOOL_KID_M",
+  [OBJ_EVENT_GFX.MANIAC]: "MANIAC",
+  [OBJ_EVENT_GFX.HEX_MANIAC]: "HEX_MANIAC",
+  [OBJ_EVENT_GFX.BLACK_BELT]: "BLACK_BELT",
+  [OBJ_EVENT_GFX.BEAUTY]: "BEAUTY",
+  [OBJ_EVENT_GFX.LASS]: "LASS",
+  [OBJ_EVENT_GFX.GENTLEMAN]: "GENTLEMAN",
+  [OBJ_EVENT_GFX.SAILOR]: "SAILOR",
+  [OBJ_EVENT_GFX.FISHERMAN]: "FISHERMAN",
+  [OBJ_EVENT_GFX.RUNNING_TRIATHLETE_M]: "RUNNING_TRIATHLETE_M",
+  [OBJ_EVENT_GFX.RUNNING_TRIATHLETE_F]: "RUNNING_TRIATHLETE_F",
+  [OBJ_EVENT_GFX.TUBER_F]: "TUBER_F",
+  [OBJ_EVENT_GFX.TUBER_M]: "TUBER_M",
+  [OBJ_EVENT_GFX.HIKER]: "HIKER",
+  [OBJ_EVENT_GFX.CYCLING_TRIATHLETE_M]: "CYCLING_TRIATHLETE_M",
+  [OBJ_EVENT_GFX.CYCLING_TRIATHLETE_F]: "CYCLING_TRIATHLETE_F",
+  [OBJ_EVENT_GFX.MAN_4]: "MAN_4",
+  [OBJ_EVENT_GFX.MAN_5]: "MAN_5",
+};
+
+/** The sheet name an OBJ_EVENT_GFX id resolves to (GENERIC_OPPONENT_SHEET when unmapped). */
+export function opponentSheetNameForGfx(gfxId: ObjectEventGfxId): string {
+  return OPPONENT_SHEET_BY_GFX[gfxId] ?? GENERIC_OPPONENT_SHEET;
 }
+
+function opponentSheetForGfx(gfxId: ObjectEventGfxId): NpcSprite {
+  return roomNpcs.opponents[opponentSheetNameForGfx(gfxId)] ?? roomNpcs.opponents[GENERIC_OPPONENT_SHEET]!;
+}
+export { opponentSheetForGfx };
 
 /**
  * Renders the battle-room ENTRY window's scene at a given camera pan amount
@@ -285,8 +323,8 @@ export function renderBattleRoomEntryScene(
     const npc = state.trainerPresentation !== undefined
       ? opponentSheetForGfx(facilityTrainerGfxIdForClass(state.trainerPresentation.facilityClassId))
       : state.encounter === "jenson"
-        ? roomNpcs.fisherman
-        : roomNpcs.opponent;
+        ? roomNpcs.opponents.FISHERMAN
+        : roomNpcs.opponents[GENERIC_OPPONENT_SHEET]!;
     drawNpcFrame(fb, npc, opponent.frame, { x: opponentScreenX, y: opponent.screenY }, false, objFadeY);
   }
   drawOpponentMsgbox(fb, msgbox, battleRoomQuote(state));
