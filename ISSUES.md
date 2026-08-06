@@ -84,6 +84,34 @@ option-(a) work, and the 2026-08-04 option-(b) slice ROM-verified the three
 rejection causes. Implement the selection-time rejection message flow on the
 live route.
 
+**2026-08-05 MAIN bind landed (`7165ff5e`).** The fight-menu presentation now
+enters a rejection-message phase when the player confirms a slot whose
+`rejectionReasonBySlot` entry is non-null instead of dropping the press
+(`battleCommandPresentation.ts`): the resolver's two lines type 1 glyph/frame
+from +3, hold button-gated (`\p` PAUSE_UNTIL_PRESS, no auto-advance) with the
+wait ▼ bobbing from +66, and on A/B dismiss freeze the fully-typed box with
+the cursor held at its dismiss pose for 9 frames before the move menu redraws
+byte-identical with the cursor unchanged. Reuses the existing battle-window
+text/cursor machinery (`drawBattleMessageTextLines`/`drawCursor`) — no new
+printer. Tier-1 pins: `tests/factoryTormentSelectionRejectionLive.test.ts`
+(7, red-verified on the +3 and +9 constants); `battle-command-generated-off`
+regression 128/128, full `npm test` 743/7060 + build green.
+
+**Remainder (compare spec only):** the dense spec over
+`mechanic-selection-reject-torment-off.json` (app stage installed at the
+turn-2 checkpoint, frame 734) is NOT committed — the full window is not
+byte-exact because of **pre-existing fight-menu chrome residuals** (same
+class as the mid-battle-switch fixture's documented 48px, not the rejection
+flow): (1) a ~24px pink-vs-cyan **move-target arrow** baked in the static
+fight-submenu harvest (bbox y21-28 x55-59); (2) the **detail-box type cell**
+~28px (y80-87 x184-199); (3) the **type-name text** ~24px (y120-135 x205-215);
+(4) the unmodeled **A-press highlight** state (~1776px bbox y74-110 x127-229,
+frames 766-769/987-1000); plus the app's sprite-bounce phase vs the oracle's
+static move-menu sprites. The rejection **message box + text region itself
+renders byte-exact** (60px whole-frame at the frozen-box 977 and GUST
+resolution 1050, all in the three chrome classes above). The spec waits on a
+fight-menu-chrome pass (side-lane asset/`src` gap), not on this flow.
+
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **Symptom:** all 62 Factory-front send-out intro families (**376/376** species

@@ -1,3 +1,5 @@
+# Progress archive
+
 
 ## 953 — [interactive supervisor WIND-DOWN, 2026-08-05] Session summary: 10 workers / 5 rounds — swap-YES 248/248, provenance receipt, 4 user play-test bugs closed same-day, RECORD/RETIRE ground truth, animation fold
 
@@ -36461,3 +36463,53 @@ both verify scripts/census independently re-verified before this entry.)*
   no-guide-dismiss-off 232/232, loss-terminal-window-off 1943/1943.
 - **Next:** canonical-window extension past 10638 (trainer-class overworld
   sprites), then #78 slice 4, #81, #80, RECORD/RETIRE, lobby.
+
+## 955 — [bounded MAIN worker, 2026-08-05] ISSUES #78 dense-compare app stage wired; dense acceptance blocked by the live voluntary-switch presentation seam
+
+- **State:** master `16c65185`, clean. Typecheck green; `battle-command-generated-off`
+  regression 128/128. Full `npm test` + `npm run build` gate green at the docs commit.
+- **Did:** `mid-battle-switch-dense-off` app stage
+  (`tools/compare/appTrace.ts`): installs a staged Level-50 RATTATA x3 / SPLASH
+  battle (`createFactoryFullTurnBattleState`, the same seam battle2-off-turn1 and
+  the terminal scaffolds use — the frontier corpus has no RATTATA/Splash set)
+  into a real orchestrator at the scratch-mid-battle-switch-dense-a-off fixture's
+  frame-0 fight-menu-open checkpoint, replaying the fixture's verbatim segments
+  through the live route.
+- **Probe (dense-a, seeded):** the stage reaches the checkpoint deterministically
+  and turn-1's fight menu is byte-near-exact (48px systematic residual, opponent
+  RATTATA sprite ~24px + top-left 24px); the party-menu voluntary switch completes
+  at the real frame (party select created 763, RIGHT→slot 1 at 883, SEND OUT
+  submenu 923, confirm 963).
+- **Blocker found (reported to ISSUES #78):** the orchestrator's live voluntary
+  switch path (`advanceFactoryRoundBattleCommand`'s party-select branch) hands the
+  switch transition to `installDriveReceiptImmediately`, which installs the next
+  command presentation and **drops the kernel's switch / switch-in-animation /
+  message events** — the app shows the turn-2 action menu the moment the party
+  menu closes, no recall/"Go!"/materialize/healthbox-slide frames exist to compare.
+  No byte-exact span in the fixture's 1000-1460 window; the slices 1-3
+  `battleResolutionPresentation` machinery is only exercised by forced-switch and
+  direct Tier-1 tests. A red probe spec was authored then removed (run's no-red-commits
+  convention); the dense spec waits on that seam + slice 4.
+- **Next:** wire the voluntary-switch presentation seam (build a
+  `battleResolutionPresentation` from the switch events in the party-select branch,
+  mirroring `beginCommandResolution`), then author the dense spec over 1137-1255
+  (+ pre-recall prefix) — then slice 4's recall-hold/return-to-ball (82f hold).
+- **[Supervisor 16:05:** (1) at-orient fold of `animation-main` was a
+  fast-forward (WRAP 115/276 + MUDDY_WATER); union verified full `npm test`
+  739 files / 7027 passed / 1 skipped + build green. Oracle-freshness FAIL
+  re-confirmed as the docs-only false positive (only `_template`/NOTES
+  harness commits since oracle start). (2) SIDE R1 merged (`18deb820`):
+  walk-in sprite now trainer-class-driven via `factoryTrainerOverworldGfx.ts`
+  (SetBattleFacilityTrainerGfxId port, battle_tower.c:1161-1251;
+  LILIANA → GIRL_3), girl_3 extracted, canonical
+  `win-go-on-swap-offer-no-guide-dismiss-off` window extended
+  **232 → 903/903** to the fixture endpoint 11308 — supervisor re-ran the
+  headline (903/903), mapping test 4/4, smoke 347/347 on the union. 31 tower
+  gfx ids still fall back to the generic sheet (asset debt, listed in
+  `battleRoomRender.ts` opponentSheetForGfx doc). Worker's own gate: full
+  suite 740/7031 + build green in worktree. (3) The seam finding above
+  supersedes 953's "(a)/(b) closed" reading for the LIVE voluntary route —
+  presentation machinery exists but voluntary switches bypass it; seam brief
+  dispatched as main R2.**]**
+
+---

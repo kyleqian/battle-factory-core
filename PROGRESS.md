@@ -5,6 +5,49 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 958 — [bounded MAIN worker, 2026-08-05] ISSUES #81 live Torment selection-rejection message phase landed; dense spec gated on pre-existing fight-menu chrome residuals
+
+- **State:** master `7165ff5e`, clean. Typecheck green; full `npm test`
+  **743 files / 7060 passed / 1 skipped** + `npm run build` green.
+  `battle-command-generated-off` regression **128/128**; presentation/
+  voluntary-switch/rejection suites green.
+- **Did:** the live fight-menu now enters a rejection-message phase when the
+  player confirms a slot whose `rejectionReasonBySlot` entry is non-null
+  (Torment = acceptance vehicle): resolver's two lines type **1 glyph/frame
+  from +3**, hold **button-gated** (`\p` PAUSE_UNTIL_PRESS, no auto-advance)
+  with the wait ▼ bobbing from +66 (`CURSOR_Y_OFFSETS[age/9%4]`), and on
+  **A or B** dismiss the fully-typed box freezes with the cursor held at its
+  dismiss pose for **9 frames** before the move menu redraws byte-identical,
+  cursor unchanged. Reuses `drawBattleMessageTextLines`/`drawCursor`/the
+  battle-window tilemap — no new printer. Tier-1 pins:
+  `tests/factoryTormentSelectionRejectionLive.test.ts` (7, red-verified on
+  the +3 and +9 constants). App stage for
+  `mechanic-selection-reject-torment-off.json` installed at the turn-2
+  checkpoint (frame 734, player pre-Tormented + TACKLE last move).
+- **Dense probe (scratch spec over the doc's window, 145 frames):** the
+  message box + text region renders byte-exact — the frozen-box frame 977 and
+  the GUST resolution 1050 both diff only **60px** (whole-frame), all inside
+  three **pre-existing fight-menu chrome residual classes** (same family as
+  the mid-battle-switch fixture's documented 48px, not this flow): the
+  ~24px **pink-vs-cyan move-target arrow** baked in the static fight-submenu
+  harvest (bbox y21-28 x55-59), the **detail-box type cell** ~28px
+  (y80-87 x184-199), and the **type-name text** ~24px (y120-135 x205-215);
+  plus the **unmodeled A-press highlight** state (~1776px bbox y74-110
+  x127-229 at 766-769/987-1000) and the app's sprite-bounce phase vs the
+  oracle's static move-menu sprites (up to ~950px at menu-idle frames). No
+  full-frame byte-exact span → **no spec committed** (run's no-red-commits
+  convention); ISSUES #81 trimmed to the spec-only remainder.
+- **Next:** a fight-menu-chrome pass (target-arrow palette + detail-box/type
+  cell + A-press highlight + move-menu bounce freeze) to close the dense
+  window, then the `torment-selection-rejection-off` ground-truth spec; then
+  #80 party-menu visuals.
+- **Notes:** `PAPERCUT`: multi-round pixel-archaeology on the oracle's
+  A-press-highlight/move-detail-box layout cost ~30 min before the
+  pre-existing-chrome attribution was confirmed; the scratch spec's segments/
+  captureFrames are in git history if that pass wants to re-probe.
+
+---
+
 ## 957 — [bounded MAIN worker, 2026-08-05] ISSUES #78 slice 4 landed: recall 82f hold + return-to-ball switch-out; schedule exact through 1255, two residual classes remain
 
 - **State:** master `8514c827`, clean. Typecheck green; full `npm test`
@@ -66,56 +109,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** party-menu fade pixels are held-and-cut (menu pixels are #80
   scope; frame budget is the acceptance). The 48px residual attribution is
   staged-fixture asset side, not the seam/renderer.
-
----
-
-## 955 — [bounded MAIN worker, 2026-08-05] ISSUES #78 dense-compare app stage wired; dense acceptance blocked by the live voluntary-switch presentation seam
-
-- **State:** master `16c65185`, clean. Typecheck green; `battle-command-generated-off`
-  regression 128/128. Full `npm test` + `npm run build` gate green at the docs commit.
-- **Did:** `mid-battle-switch-dense-off` app stage
-  (`tools/compare/appTrace.ts`): installs a staged Level-50 RATTATA x3 / SPLASH
-  battle (`createFactoryFullTurnBattleState`, the same seam battle2-off-turn1 and
-  the terminal scaffolds use — the frontier corpus has no RATTATA/Splash set)
-  into a real orchestrator at the scratch-mid-battle-switch-dense-a-off fixture's
-  frame-0 fight-menu-open checkpoint, replaying the fixture's verbatim segments
-  through the live route.
-- **Probe (dense-a, seeded):** the stage reaches the checkpoint deterministically
-  and turn-1's fight menu is byte-near-exact (48px systematic residual, opponent
-  RATTATA sprite ~24px + top-left 24px); the party-menu voluntary switch completes
-  at the real frame (party select created 763, RIGHT→slot 1 at 883, SEND OUT
-  submenu 923, confirm 963).
-- **Blocker found (reported to ISSUES #78):** the orchestrator's live voluntary
-  switch path (`advanceFactoryRoundBattleCommand`'s party-select branch) hands the
-  switch transition to `installDriveReceiptImmediately`, which installs the next
-  command presentation and **drops the kernel's switch / switch-in-animation /
-  message events** — the app shows the turn-2 action menu the moment the party
-  menu closes, no recall/"Go!"/materialize/healthbox-slide frames exist to compare.
-  No byte-exact span in the fixture's 1000-1460 window; the slices 1-3
-  `battleResolutionPresentation` machinery is only exercised by forced-switch and
-  direct Tier-1 tests. A red probe spec was authored then removed (run's no-red-commits
-  convention); the dense spec waits on that seam + slice 4.
-- **Next:** wire the voluntary-switch presentation seam (build a
-  `battleResolutionPresentation` from the switch events in the party-select branch,
-  mirroring `beginCommandResolution`), then author the dense spec over 1137-1255
-  (+ pre-recall prefix) — then slice 4's recall-hold/return-to-ball (82f hold).
-- **[Supervisor 16:05:** (1) at-orient fold of `animation-main` was a
-  fast-forward (WRAP 115/276 + MUDDY_WATER); union verified full `npm test`
-  739 files / 7027 passed / 1 skipped + build green. Oracle-freshness FAIL
-  re-confirmed as the docs-only false positive (only `_template`/NOTES
-  harness commits since oracle start). (2) SIDE R1 merged (`18deb820`):
-  walk-in sprite now trainer-class-driven via `factoryTrainerOverworldGfx.ts`
-  (SetBattleFacilityTrainerGfxId port, battle_tower.c:1161-1251;
-  LILIANA → GIRL_3), girl_3 extracted, canonical
-  `win-go-on-swap-offer-no-guide-dismiss-off` window extended
-  **232 → 903/903** to the fixture endpoint 11308 — supervisor re-ran the
-  headline (903/903), mapping test 4/4, smoke 347/347 on the union. 31 tower
-  gfx ids still fall back to the generic sheet (asset debt, listed in
-  `battleRoomRender.ts` opponentSheetForGfx doc). Worker's own gate: full
-  suite 740/7031 + build green in worktree. (3) The seam finding above
-  supersedes 953's "(a)/(b) closed" reading for the LIVE voluntary route —
-  presentation machinery exists but voluntary switches bypass it; seam brief
-  dispatched as main R2.**]**
 
 ---
 
