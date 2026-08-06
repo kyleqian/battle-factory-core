@@ -1955,6 +1955,30 @@
    ]
   },
   {
+   "move": "MOVE_REFRESH",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage CHANSEY (Factory record 227, move 287) against legal ONIX whose four slots duplicate TOXIC, so the CHANSEY healthbox carries the poison status icon; both orientations pass the complete 209-frame move-owned window frames 515-723 / 519-727 twice fresh",
+    "the pure source-relative reducer ports Move_REFRESH (battle_anim_scripts.s:8472) composing the already-exact StatusClearedEffect cure-bubbles BG1 mask (numFadeSteps=10, fadeStepDelay=2, duration=30, scrollSpeed=0x1A0), GrantingStarsEffect (two gGrantingStarsSpriteTemplate stars on the delay-8 interpreter boundary), the F_PAL_BG|F_PAL_BATTLERS 10->0 simple_palette_blend to RGB(12,24,30), and the gThinRingExpandingSpriteTemplate MILK_DRINK ring (32+min(local,29)*16 scale)",
+    "the displayed blend is measured: the BG banks latch coeff 10 immediately at creation age 173 and then step 2 every five frames, while the attacking battler's OBJ bank shows 0 at the creation age and trails one frame behind (UpdateNormalPaletteFade alternates BG/OBJ); the mask scrolls 146 over the window and stalls on its final display frame",
+    "both orientation portables prove 209/209 source/software, typed seam, hardware, raw-RGB, and shared-framebuffer frames twice fresh: player-back frames 515-723 evidence 35ede52ec58ef5f320d7a0cc18797fe563af5634f5e82dd7fbf9bb5426fcbd10 / raw RGB d35ee9214677c27694d4154d09fce739158ad29c27801d74f96a96d6ec620dde, opponent-front frames 519-727 evidence 8f27ac49c2bc3f515d4842921d5326f148b2975a2c088f9ae37b51d3170cb473 / raw RGB bd2ba9fa9392e2ec757ea4c9c784b7bbecf14efc0e2cd3dd8dcd31facf58f05a",
+    "MOVE_SYNTHESIS remains exact (130/130) as the GrantingStars control, MOVE_AROMATHERAPY at 400/400 as the mask/StatusClearedEffect control, and MOVE_MILK_DRINK at 186/186 as the thin-ring control; shared components alone accept no other move"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-refresh-player-chansey-opponent-onix.json",
+    "tools/battle-lab/mechanic-refresh-opponent-chansey-player-onix.json",
+    "tools/compare/fixtures/refresh-player-chansey-opponent-onix.json",
+    "tools/compare/fixtures/refresh-opponent-chansey-player-onix.json",
+    "tools/compare/refreshProbe.py",
+    "tools/compare/refreshPortable.ts",
+    "src/animation/refresh.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/refresh.test.ts",
+    "tests/animation/refreshEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_REST",
    "status": "exact",
    "covered": [
@@ -3836,7 +3860,7 @@
     "MOVE_AROMATHERAPY",
     "MOVE_COSMIC_POWER"
    ],
-   "goal": "MOVE_SYNTHESIS independently proves its complete delay-2 attacker blend, two GrantingStarsEffect stars, unload/delay/load boundary, and shared HealingEffect in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_AROMATHERAPY independently proves its complete nine-FLOWER, green blend/monbg, StatusClearedEffect, two SparklingStars, thin-ring, and cleanup body at 400/400 player-back and 396/396 opponent-front source/hardware/raw-RGB/framebuffer frames, reproduced twice. No sibling is promoted. HEAL BELL needs its bell, twelve music-note sprites with palette allocation/free, three HealBellRing thin-ring/palette tasks, and its own blended finale. WISH needs ANIM_TAG_GOLD_STARS, black-BG fade, panning, gWishStarSpriteTemplate, and delay before GrantingStarsEffect. REFRESH has distinct field/battler palette restoration and thin-ring sequencing around StatusClearedEffect. COSMIC POWER needs non-attacker palette fades, BG_COSMIC load/slide/restore, sound tasks, and two GrantingStarsEffect calls. Each remains unsupported pending independent complete dense evidence."
+   "goal": "MOVE_SYNTHESIS independently proves its complete delay-2 attacker blend, two GrantingStarsEffect stars, unload/delay/load boundary, and shared HealingEffect in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_AROMATHERAPY independently proves its complete nine-FLOWER, green blend/monbg, StatusClearedEffect, two SparklingStars, thin-ring, and cleanup body at 400/400 player-back and 396/396 opponent-front source/hardware/raw-RGB/framebuffer frames, reproduced twice. MOVE_REFRESH independently proves its StatusClearedEffect mask, two GrantingStarsEffect stars, field/battler palette-restoration blend, and thin-ring body at 209/209 in both orientations, reproduced twice. No sibling is promoted. HEAL BELL needs its bell, twelve music-note sprites with palette allocation/free, three HealBellRing thin-ring/palette tasks, and its own blended finale. WISH needs ANIM_TAG_GOLD_STARS, black-BG fade, panning, gWishStarSpriteTemplate, and delay before GrantingStarsEffect. COSMIC POWER needs non-attacker palette fades, BG_COSMIC load/slide/restore, sound tasks, and two GrantingStarsEffect calls. Each remains unsupported pending independent complete dense evidence."
   },
   {
    "id": "healing-blue-star",

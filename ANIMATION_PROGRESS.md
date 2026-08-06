@@ -1,5 +1,30 @@
 # Animation coverage
 
+## MOVE_REFRESH closed — 209/209 both orientations twice-fresh, promoted to exact (2026-08-05 closure worker)
+
+- **State:** REFRESH (new move) → **exact**. Move coverage: **117/276 exact,
+  0 partial, 0 staged, 159 unsupported**. Both fixtures pin `framebufferMatching: 209`.
+- **Did:** closed the already-implemented MOVE_REFRESH unit without re-investigating
+  the 209/209 renderer. Added `refresh.test.ts` (7 Tier-1 reducer tests: BG1
+  mask window/scroll/eva, delay-8 star spawns + x-only mirror, BG-vs-attacker
+  five-frame blend steps, displayed BG-immediacy/OBJ-lag latch, thin-ring scale,
+  visual-task counts, typed seam) and `refreshEvidence.test.ts` (2 receipt/source
+  pins: windows 515-723 / 519-727, CHANSEY 287×4 vs ONIX 92×4, lifecycle
+  counts). Re-ran the named exact portable controls once each: SYNTHESIS
+  130/130 and MILK_DRINK 186/186 component+framebuffer clean; AROMATHERAPY
+  400/400 framebuffer identity held but its probe evidence hash drifted
+  (receipt-only, raw RGB unchanged) — pins left untouched, see report.
+- **Measured:** player-back frames 515-723 and opponent-front frames 519-727,
+  both **209/209 source-component and shared-framebuffer exact twice fresh**.
+  Evidence `35ede52e…` / `8f27ac49…`, RGB `d35ee921…` / `bd2ba9fa…` reproduce
+  the fixture pins exactly on every fresh portable run. Coverage JSON + ledger
+  promoted REFRESH only; no component credit, no sibling promotion.
+- **Next:** continue the zero-new-component Level-50 ladder from the ranked
+  coverage report.
+- **Notes:** AROMATHERAPY receipt drift: new evidence `cec76eae360c…`, pinned
+  `83f9f2d03fb0…`; raw RGB
+  unchanged at `dc02bff98836…` — framebuffer identity required and met.
+
 ## MOVE_ROCK_THROW closed — 87/87 both orientations twice-fresh, promoted to exact (2026-08-05 worker)
 
 - **State:** ROCK_THROW (new move) → **exact**. Move coverage: **116/276 exact,
