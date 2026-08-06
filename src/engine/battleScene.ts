@@ -35219,6 +35219,7 @@ function drawMidBattleSwitchInSprite(
   fb: Uint8Array,
   art: BattleCommandFieldArtBattler,
   state: MidBattleSwitchInView,
+  paletteOverride?: RgbColor[],
 ): void {
   if (state.ballVisible) {
     drawSpriteSheet(
@@ -35246,7 +35247,7 @@ function drawMidBattleSwitchInSprite(
   drawSpriteSheet(
     fb,
     art.pic.tileset as Tileset,
-    art.pic.palette as RgbColor[],
+    paletteOverride ?? (art.pic.palette as RgbColor[]),
     art.origin.x,
     art.origin.y,
   );
@@ -35264,12 +35265,14 @@ function drawMidBattleSwitchOutSprite(
   fb: Uint8Array,
   art: BattleCommandFieldArtBattler,
   state: MidBattleSwitchOutView,
+  paletteOverride?: RgbColor[],
 ): void {
+  const palette = paletteOverride ?? (art.pic.palette as RgbColor[]);
   if (state.scale === MID_BATTLE_SWITCH_OUT_SCALE_START) {
     drawSpriteSheet(
       fb,
       art.pic.tileset as Tileset,
-      art.pic.palette as RgbColor[],
+      palette,
       art.origin.x,
       art.origin.y,
     );
@@ -35278,7 +35281,7 @@ function drawMidBattleSwitchOutSprite(
   drawSpriteSheetAffineStretch(
     fb,
     art.pic.tileset as Tileset,
-    art.pic.palette as RgbColor[],
+    palette,
     art.origin.x,
     art.origin.y,
     state.scale,
@@ -35286,6 +35289,37 @@ function drawMidBattleSwitchOutSprite(
     0,
     { r: 255, g: 255, b: 255 },
     0,
+  );
+}
+
+/**
+ * `gBallOpenFadeColors[BALL_POKE] = RGB(31, 22, 30)` (`battle_anim_throw.c:
+ * 371-384`, `:373`) = 0x7ADF, expanded with the app's `<<3 | >>2` 15-bit
+ * convention (the same value `MATERIALIZE_TINT_COLOR` derives from
+ * `battleAnimTables.ballOpenFadeColor.rgb8`).
+ */
+const BALL_OPEN_FADE_POKE_COLOR: RgbColor = Object.freeze({ r: 255, g: 181, b: 247 });
+
+/**
+ * ISSUES #78 residual (1): the white ball-fade applied to the battle-field's
+ * BG palette. `battleBg.palette` is a COMPACT array (`extract-battle-bg.ts`):
+ * local rows 0/1 are hardware banks 2/3 (the `0xe` mask rows the static
+ * tilemap actually draws) and fade toward RGB_WHITE; local row 2 is hardware
+ * bank 4, outside the `BeginNormalPaletteFade(0xe, ...)` mask, and stays.
+ */
+function whiteFadeFieldPaletteRows(
+  palette: readonly (readonly RgbColor[])[],
+  coeff: number,
+): RgbColor[][] {
+  if (coeff <= 0) return palette as RgbColor[][];
+  return palette.map((row, i) =>
+    i === 2
+      ? row as RgbColor[]
+      : row.map((color) => ({
+          r: blendComponentToWhite(color.r, coeff),
+          g: blendComponentToWhite(color.g, coeff),
+          b: blendComponentToWhite(color.b, coeff),
+        })),
   );
 }
 
@@ -35325,6 +35359,35 @@ export function renderBattleResolutionSceneOffView(
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   const faint = view.effect?.type === "faint" ? view.effect : null;
   const hit = view.effect?.type === "hit" ? view.effect : null;
+  // ISSUES #78 residual (1): the white ball-fade blends the battle-field BG
+  // rows (battleBg.palette[0]/[1] = hardware banks 2/3, the `0xe` mask's
+  // rows the app actually draws) toward RGB_WHITE, and ball-blends the player
+  // mon's OBJ row toward gBallOpenFadeColors[BALL_POKE]. The message window
+  // (battleWindow) and both healthboxes are never faded (oracle-verified: the
+  // bottom strip's colors are byte-identical through the whole fade window).
+  // battleBg.palette row 2 = hardware bank 4 is outside the mask and stays.
+  const midBattleFade = view.midBattleSwitchFade;
+  const fadedFieldPalette = midBattleFade === null
+    ? battleBg.palette
+    : whiteFadeFieldPaletteRows(battleBg.palette, midBattleFade.bg);
+  drawTileBg(
+    fb,
+    battleBg.static.tileset,
+    battleBg.static.tilemap,
+    fadedFieldPalette,
+  );
+  // ISSUES #78 residual (1): the player mon's OBJ row ball-blends toward
+  // gBallOpenFadeColors[BALL_POKE] (0x7ADF) during the recall/send-in fade.
+  // Only the player side -- the opponent sprite's OBJ row is never touched
+  // (§8.1). `coeff 0` returns the original array identity so the regular
+  // (no-fade) frames are pixel-inert.
+  const playerMonPalette = midBattleFade === null
+    ? view.fieldArt.player.pic.palette as RgbColor[]
+    : blendPaletteToward(
+        view.fieldArt.player.pic.palette as RgbColor[],
+        BALL_OPEN_FADE_POKE_COLOR,
+        midBattleFade.obj,
+      );
   // ISSUES #78: the mid-battle switch-in battler's pixels are owned here
   // (ball throw + ball-release emerge), not by the generic sprite draws.
   const midSwitch = view.midBattleSwitchIn;
@@ -35332,7 +35395,7 @@ export function renderBattleResolutionSceneOffView(
     drawMidBattleSwitchInSprite(fb, view.fieldArt.opponent, midSwitch);
   }
   if (midSwitch !== null && midSwitch.battler === 0) {
-    drawMidBattleSwitchInSprite(fb, view.fieldArt.player, midSwitch);
+    drawMidBattleSwitchInSprite(fb, view.fieldArt.player, midSwitch, playerMonPalette);
   }
   // ISSUES #78 slice 4: the outgoing mon's return-to-ball scale-up owns the
   // battler's pixels for the whole switch-out span (full sprite through the
@@ -35342,7 +35405,7 @@ export function renderBattleResolutionSceneOffView(
     drawMidBattleSwitchOutSprite(fb, view.fieldArt.opponent, switchOut);
   }
   if (switchOut !== null && switchOut.battler === 0 && switchOut.spriteVisible) {
-    drawMidBattleSwitchOutSprite(fb, view.fieldArt.player, switchOut);
+    drawMidBattleSwitchOutSprite(fb, view.fieldArt.player, switchOut, playerMonPalette);
   }
   if (view.visibility.opponent.sprite) {
     if (
@@ -35375,7 +35438,7 @@ export function renderBattleResolutionSceneOffView(
       drawSpriteSheetTopClipped(
         fb,
         view.fieldArt.player.pic.tileset as Tileset,
-        view.fieldArt.player.pic.palette as RgbColor[],
+        playerMonPalette,
         view.fieldArt.player.origin.x,
         view.fieldArt.player.origin.y,
         faint.sink.skipPixelRows,
@@ -35384,7 +35447,7 @@ export function renderBattleResolutionSceneOffView(
       drawSpriteSheet(
         fb,
         view.fieldArt.player.pic.tileset as Tileset,
-        view.fieldArt.player.pic.palette as RgbColor[],
+        playerMonPalette,
         view.fieldArt.player.origin.x,
         view.fieldArt.player.origin.y,
       );

@@ -1292,6 +1292,14 @@ function withResolutionLifecycle(
     ...state,
     commandIndex,
     lifecycle: Object.freeze({ phase, phaseElapsed }),
+    // ISSUES #78 residual (1): the ball-fade clock advances exactly one tick
+    // per resolution frame (the confirm-handoff phase bumps its own clock in
+    // `advanceBattleResolutionConfirmHandoff`; every presenting frame lands
+    // here). The `presenting-switch-in` forced path drives this clock from
+    // the party-select send-out elapsed instead of 1:1 -- harmless, because
+    // the fade projection is only ever active inside the voluntary-switch
+    // recall/send-in windows, which never use that phase.
+    fadeTick: state.fadeTick + 1,
   });
 }
 

@@ -195,6 +195,99 @@ export function midBattleSwitchInAt(
   });
 }
 
+export type MidBattleSwitchFadeAt = Readonly<{ bg: number; obj: number }>;
+
+/**
+ * ISSUES #78 residual (1): the resolution presentation's `fadeTick` clock
+ * starts at 0 on the tick the null-handoff confirm phase first renders, i.e.
+ * the staged voluntary-switch fixture's frame 1035 (the field-hold after the
+ * party-menu close -- `docs/mid-battle-switch-presentation-ground-truth.md`
+ * §2, pinned by `tests/factoryVoluntarySwitchSeam.test.ts`). `traceFrame =
+ * MID_BATTLE_SWITCH_FADE_BASE_TRACE + fadeTick`, so the fade windows
+ * (recall 1088-1131, send-in 1187-1231) map onto the real trace timeline even
+ * though each spans several presentation commands.
+ */
+export const MID_BATTLE_SWITCH_FADE_BASE_TRACE = 1035;
+
+/**
+ * ISSUES #78 residual (1): the mid-battle switch white ball-fade, ported as a
+ * mechanism (`BeginNormalPaletteFade`/`LaunchBallFadeMonTask`,
+ * `palette.c:156-200,406-490`, `battle_anim_throw.c:2033-2102`), keyed to the
+ * staged trace's own frame timeline (see `MID_BATTLE_SWITCH_FADE_BASE_TRACE`).
+ *
+ * `bg` is the frame's effective white coefficient for the battle-field BG rows
+ * 1-3: the fade's `y` steps by `deltaY=2` every second `UpdatePaletteFade`,
+ * BG rows are only re-blended on the BG-toggle frames, and the rendered frame
+ * shows that blend two ticks after the stepping tick (`bg[N] = y[N-2]`,
+ * pixel-verified across every frame of the recall window). `obj` is the
+ * `Task_FadeMon_ToBallColor`/`_Step` ball ramp: +1/frame 0->16 on the recall,
+ * held 16, then -1/frame 16->0 on the send-in (independent of the BG/OBJ
+ * toggle, unlike the white fade); it lags the same one frame behind the §8.3
+ * per-tick state.
+ *
+ * The two stolen ticks are the documented ground truth, not the ideal curve
+ * (§8.3 notes): the party-summary sprite-sheet work steals the update at
+ * recall frame 1121 (white-out steps shift one frame later), and the
+ * healthbox-slide start steals it at send-in frame 1205 (plateau runs one tick
+ * longer).
+ *
+ * Render-lag: the oracle's RENDERED frame shows the palette one tick behind
+ * the §8.3 tables (`rendered[N] = table[N-1]`, so the white coefficient at
+ * frame N is the fade's `y` two ticks earlier -- pixel-verified across every
+ * frame of the recall window, and the mon's ball ramp lags identically). The
+ * caller therefore passes the render frame and gets the coefficients for that
+ * frame directly.
+ */
+export function midBattleSwitchFadeAt(
+  traceFrame: number,
+): MidBattleSwitchFadeAt | null {
+  // The §8.3 tables are the fade's per-tick STATE; the oracle's rendered
+  // frame lags one tick behind them, so each coefficient is the table value
+  // at `traceFrame - 1` (i.e. the white fade's `y` at `traceFrame - 2`).
+  const inRecall = traceFrame >= 1088 && traceFrame <= 1139;
+  if (inRecall) {
+    return Object.freeze({
+      bg: recallWhiteCoefficientAtFrame(traceFrame - 2),
+      obj: Math.max(0, Math.min(16, traceFrame - 1090)),
+    });
+  }
+  const inSendIn = traceFrame >= 1187 && traceFrame <= 1231;
+  if (inSendIn) {
+    return Object.freeze({
+      bg: sendInWhiteCoefficientAtFrame(traceFrame - 2),
+      obj: traceFrame - 1 < 1211
+        ? 16
+        : Math.max(0, 16 - (traceFrame - 1 - 1210)),
+    });
+  }
+  return null;
+}
+
+function recallWhiteCoefficientAtFrame(frame: number): number {
+  const k = frame - 1088;
+  if (k < 0) return 0;
+  if (k <= 16) return 2 * Math.floor((k + 1) / 2); // white in 1088-1104
+  if (k <= 21) return 16; // plateau 1105-1109 (softwareFadeFinishing)
+  if (k <= 38) {
+    // White out 1110-1126. The frame-1121 stolen tick (heavy party-summary
+    // sprite-sheet work) skips that frame's update: y holds at 6 for three
+    // ticks (1119-1121), and the remaining steps shift one frame later.
+    if (k === 33) return 6;
+    const shifted = k >= 34 ? k - 1 : k;
+    return 16 - 2 * Math.ceil((shifted - 22) / 2);
+  }
+  return 0; // finishing 1128-1131 clears, then idle
+}
+
+function sendInWhiteCoefficientAtFrame(frame: number): number {
+  const k = frame - 1187;
+  if (k < 0) return 0;
+  if (k <= 15) return 2 * Math.floor((k + 2) / 2); // white in 1187-1202 (launch already stepped)
+  if (k <= 21) return 16; // plateau 1203-1208 (healthbox-slide stolen tick extends it)
+  if (k <= 38) return 16 - 2 * Math.ceil((k - 22) / 2); // white out 1209-1224
+  return 0; // finishing 1226-1230 clears, then idle
+}
+
 export type BattleResolutionRenderEffect =
   | Readonly<{
       type: "hit";
@@ -286,6 +379,17 @@ export type BattleResolutionPresentationRenderView = Readonly<{
     battler: 0 | 1;
     states: readonly import("./battleResolutionPresentation.ts").PartyBallState[];
   }> | null;
+  /**
+   * ISSUES #78 residual (1): the white ball-fade's per-frame blend
+   * coefficients, active only inside the two measured windows
+   * (`docs/mid-battle-switch-presentation-ground-truth.md` §8.3). `bg` is the
+   * white-fade coefficient for the battle-field BG rows 1-3 (0..16, `<<4`
+   * scale); `obj` is the POKE BALL blend coefficient for the player mon's
+   * OBJ row (`gBallOpenFadeColors[BALL_POKE] = 0x7ADF`, 16 = fully ball
+   * colored). The message window and both healthboxes are never faded. Null
+   * outside the windows.
+   */
+  midBattleSwitchFade: Readonly<{ bg: number; obj: number }> | null;
   /**
    * The terminal win/loss-text trainer slide-in/out, generic across any
    * trainer/outcome (`docs/terminal-seam-round-flow-scout.md` §3(iii)).
@@ -580,6 +684,9 @@ export function createBattleResolutionPresentationRenderView(
           displayCursor: state.confirmHandoff.fightDisplayCursor,
         }),
       });
+  const midBattleSwitchFade = midBattleSwitchFadeAt(
+    MID_BATTLE_SWITCH_FADE_BASE_TRACE + state.fadeTick,
+  );
   if (state.lifecycle.phase === "presenting-switch-in") {
     const switchCommand = segment.commands.find(
       (candidate): candidate is Extract<
@@ -909,6 +1016,7 @@ export function createBattleResolutionPresentationRenderView(
     switchIn,
     midBattleSwitchIn,
     switchOut,
+    midBattleSwitchFade,
     partySummary,
     trainerSlide: activeTrainerSlide !== null
       ? Object.freeze({

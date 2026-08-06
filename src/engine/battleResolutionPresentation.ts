@@ -384,6 +384,18 @@ export type BattleResolutionPresentationState = Readonly<{
       | "terminal-handoff";
     phaseElapsed: number;
   }>;
+  /**
+   * ISSUES #78 residual (1): monotonic per-frame clock since this resolution
+   * first rendered (0 = the null-handoff confirm phase's first tick, i.e.
+   * trace frame 1035 of the staged voluntary-switch fixture). One frame per
+   * `advanceFactoryRoundBattleResolution`/`advanceBattleResolutionConfirmHandoff`
+   * tick, so the mid-battle ball-fade windows (recall 1088-1131, send-in
+   * 1187-1231) can be keyed to the real trace timeline even though each fade
+   * spans multiple presentation commands (switch-out -> party-summary ->
+   * "Go!" / switch-in). Inactive for every other route (the fade coefficient
+   * projection only reports nonzero work inside the two windows).
+   */
+  fadeTick: number;
   confirmHandoff: BattleResolutionConfirmHandoff | null;
   field: BattleResolutionDisplayedField;
   pendingBoundary: BattleBoundary;
@@ -3244,6 +3256,7 @@ export function createBattleResolutionPresentation(
       phase: "confirm-handoff" as const,
       phaseElapsed: 0,
     }),
+    fadeTick: 0,
     confirmHandoff: input.sourceDecision.kind === "switch"
       ? null
       : Object.freeze({
@@ -3368,6 +3381,7 @@ export function advanceBattleResolutionConfirmHandoff(
           phase: "confirm-handoff" as const,
           phaseElapsed: nextElapsed,
         }),
+        fadeTick: state.fadeTick + 1,
       });
     }
     return Object.freeze({
@@ -3376,6 +3390,7 @@ export function advanceBattleResolutionConfirmHandoff(
         phase: "presenting" as const,
         phaseElapsed: 0,
       }),
+      fadeTick: state.fadeTick + 1,
     });
   }
   const nextStage = CONFIRM_HANDOFF_NEXT[handoff.stage];
@@ -3387,6 +3402,7 @@ export function advanceBattleResolutionConfirmHandoff(
         phaseElapsed: 0,
       }),
       confirmHandoff: null,
+      fadeTick: state.fadeTick + 1,
     });
   }
   const bounceRuns =
@@ -3409,6 +3425,7 @@ export function advanceBattleResolutionConfirmHandoff(
       idleBounceElapsed:
         handoff.idleBounceElapsed + (bounceRuns ? 1 : 0),
     }),
+    fadeTick: state.fadeTick + 1,
   });
 }
 
