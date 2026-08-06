@@ -5,6 +5,50 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 959 — [bounded MAIN worker, 2026-08-05] ISSUES #80 ranks 1/3/4 landed: in-battle party menu HP bars, real HP/level text, gender glyphs, real WIN_MSG window
+
+- **State:** master `81e2db18`, clean. Typecheck green; full `npm test` **744 files / 7064 passed / 1 skipped** + `npm run build` green; smoke 347/347.
+- **Did:** the live party menu now draws the real content on all three cards
+  (`battlePartySelect.ts`): (1) graphical HP bars at `sPartyBoxInfoRects`
+  positions (right (184,18)/(184,42), left (32,59), 48x3) filled
+  `GetScaledHPFraction`-style with the `sHPBar{Green,Yellow,Red}PalIds`
+  families (dark 1px over light 2px; >50% green, >20% yellow, else red);
+  HP numbers moved to the real rects as `105/`+`/105` white-on-the-HP-box,
+  level text split out at the level rect, name/level ink switched to the
+  empty-vs-current-selection colors ((57,148,222) vs (123,214,239)); (3)
+  gender glyphs from party-menu-gender-glyphs.json at the print-site
+  positions (72,44)/(158,20)/(158,44, cellOffsetY 4, oracle-verified male
+  (66,206,255)/female (255,156,148) fg+shadow); (4) message strip now uses
+  `sDefaultPartyMsgWindowTemplate` (frame (0,128), 21x2, interior
+  (8,136)-(176,152)) with the frame1 tiles + party-menu olive corner palette
+  and "Choose a POKéMON." at (8,137) — replacing the misplaced
+  `drawStandardWindowFrame(0,112,28,4)`.
+- **Oracle frame 905 diff: 15267 → 6955 px total** (doc baseline was ONIX;
+  acceptance render now stages the fixture's real 3× RATTATA). Bands (rows):
+  top 1391→970, slot0 4500→3170, slot1 1998→1295, slot2 3893→2845, message
+  6990→813, mid 2386→2002. Message residual = the rank-6 pokeball/CANCEL
+  button sprites at x184-234 y134-153 (out of scope); card residuals = the
+  rank-2 list-art gap (app still draws the 32x32 party icon).
+- **Rank 2 UNBOUND (evidence):** the chrome list art for ONIX
+  (`party-menu-chrome.json` listOnix, tick 20070) is COLORED with a dense
+  sprite (slot-0 card region ~2818 opaque px, incl. non-ONIX pink/orange
+  palette entries and an empty HP bar at that tick), while the field front
+  family (`battle-opponent-front-sprites.json` ONIX) is GRAYSCALE
+  (palette 222,222,222/255,255,255/247,239,239…) with 1840 opaque px; best
+  silhouette overlap vs the chrome art is 1272/1840 (69%) at an off-standard
+  offset — shapes and palette do not match, so rank 2 cannot be bound from
+  the field asset.
+- **Tier-1 pins:** `tests/inbattlePartyMenuVisualBind.test.ts` (4: HP-bar
+  geometry + green/yellow thresholds, gender glyph colors/position, HP-text
+  on-box + level position, WIN_MSG window geometry + olive frame).
+- **Next:** rank 2 front-art (needs a per-species chrome capture pass or a
+  colored list-art family, not the grayscale field asset), then ranks 5
+  (status/held-item) and 6 (cursor/ball/fade) to close the menu spec.
+- **Notes:** fixture mons are RATTATA; a parallel side worker owns the
+  RATTATA sprite-palette asset gap (not chased here).
+
+---
+
 ## 958 — [bounded MAIN worker, 2026-08-05] ISSUES #81 live Torment selection-rejection message phase landed; dense spec gated on pre-existing fight-menu chrome residuals
 
 - **[Supervisor 19:20 — the "48px residual" class is CLOSED, spec committed:**

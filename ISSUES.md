@@ -84,6 +84,20 @@ completely wrong" (layout/sprites/HP bars/message strip). Scout with a dense
 OFF window over the mid-battle party screen, inventory the visual gaps, then
 slice the binding work. Largest play-test item; sequenced after #76/#77/#78.
 
+**2026-08-05 MAIN bind (ranks 1/3/4, `81e2db18`, PROGRESS 959):** graphical
+HP bars + real HP/level text (all three cards), gender glyphs, and the real
+`WIN_MSG`/party-menu message window are landed; oracle frame-905 diff
+15267 → 6955 px. Tier-1 pins: `tests/inbattlePartyMenuVisualBind.test.ts`.
+
+**Remainder:** (2) slot list art — the field front family
+(`battle-opponent-front-sprites.json`) is grayscale and does NOT match the
+chrome's colored list art (ONIX silhouette overlap 1272/1840; rank 2 left
+unbound with that evidence) — needs a per-species chrome capture pass or a
+colored list-art family; (5) status-condition + held-item icon binds
+(assets banked, no exercising fixture yet); (6) cursor/ball/selection +
+party-menu fade pixels (incl. the pokeball/CANCEL buttons at x184-234
+y134-153).
+
 ## #81 — Live play: Torment gives no reselection-rejection indication
 
 **User play-test 2026-08-05:** BUTTERFREE tormented by MURKROW; reselecting
