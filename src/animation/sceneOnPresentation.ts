@@ -106,6 +106,10 @@ import {
   type AnimationGpuRegisterState,
 } from "./gpuRegisterQueue.ts";
 import {
+  rockThrowAnimationAtAge,
+  type RockThrowAnimationProfile,
+} from "./rockThrow.ts";
+import {
   actionMenuDisplayAtAge,
   doubleTeamAnimationAtAge,
   genericHitReactionAtAge,
@@ -275,6 +279,10 @@ import {
   milkDrinkEffectAtAge,
   type MilkDrinkEffectSprite,
 } from "./milkDrink.ts";
+import {
+  refreshAtAge,
+  type RefreshState,
+} from "./refresh.ts";
 import {
   supersonicEffectAtAge,
   type SupersonicRingSprite,
@@ -684,7 +692,8 @@ export interface SceneOnPresentationBattler {
     | "LEDYBA"
     | "PRIMEAPE"
     | "MARSHTOMP"
-    | "TENTACOOL";
+    | "TENTACOOL"
+    | "GRAVELER";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -992,6 +1001,17 @@ export interface SceneOnRockSlideConfig {
   readonly moveTextStartAge?: number;
 }
 
+export interface SceneOnRockThrowConfig {
+  readonly move: "ROCK_THROW";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly animationProfile: Readonly<RockThrowAnimationProfile>;
+  /** Immutable field values; the presentation seam never calculates damage. */
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Relative first printer age; negative means text predates this seam. */
+  readonly moveTextStartAge?: number;
+}
+
 export interface SceneOnDoubleTeamConfig {
   readonly move: "DOUBLE_TEAM";
   readonly attacker: SceneOnPresentationBattler;
@@ -1208,6 +1228,13 @@ export interface SceneOnWishConfig {
 
 export interface SceneOnMilkDrinkConfig {
   readonly move: "MILK_DRINK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnRefreshConfig {
+  readonly move: "REFRESH";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -1914,6 +1941,7 @@ export type SceneOnMoveConfig =
   | SceneOnThunderPunchConfig
   | SceneOnFaintAttackConfig
   | SceneOnRockSlideConfig
+  | SceneOnRockThrowConfig
   | SceneOnDoubleTeamConfig
   | SceneOnEndeavorConfig
   | SceneOnFeatherDanceConfig
@@ -1945,6 +1973,7 @@ export type SceneOnMoveConfig =
   | SceneOnAromatherapyConfig
   | SceneOnWishConfig
   | SceneOnMilkDrinkConfig
+  | SceneOnRefreshConfig
   | SceneOnSupersonicConfig
   | SceneOnWaterGunConfig
   | SceneOnAcidConfig
@@ -2631,6 +2660,16 @@ export interface SceneOnRockSlideView {
   readonly rocks: ReturnType<typeof rockSlideAnimationAtAge>["rocks"];
 }
 
+export interface SceneOnRockThrowView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly bg3Y: number;
+  readonly targetY2: number;
+  readonly targetX2: number;
+  readonly rocks: ReturnType<typeof rockThrowAnimationAtAge>["rocks"];
+}
+
 export interface SceneOnDoubleTeamView {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -2882,6 +2921,12 @@ export interface SceneOnAromatherapyView extends AromatherapyState {
 }
 
 export interface SceneOnWishView extends WishState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnRefreshView extends RefreshState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3688,6 +3733,25 @@ export function sceneOnMilkDrinkView(
     attacker: state.config.attacker,
     target: state.config.target,
     sprites: milkDrinkEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` spans the complete Move_REFRESH script body through cleanup. */
+export function sceneOnRefreshView(
+  state: SceneOnMovePresentationState,
+): SceneOnRefreshView {
+  if (state.config.move !== "REFRESH") {
+    throw new Error(`expected REFRESH presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...refreshAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
@@ -5819,6 +5883,31 @@ export function sceneOnRockSlideView(
       rockOrigin: {
         x: target.geometry.battlePositionCenter.x,
         y: target.geometry.battlePositionCenter.y + 14,
+      },
+    },
+  );
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...animation,
+  };
+}
+
+export function sceneOnRockThrowView(
+  state: SceneOnMovePresentationState,
+): SceneOnRockThrowView {
+  if (state.config.move !== "ROCK_THROW") {
+    throw new Error(`expected ROCK_THROW presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationProfile } = state.config;
+  const animation = rockThrowAnimationAtAge(
+    state.age,
+    animationProfile,
+    {
+      rockOrigin: {
+        x: target.geometry.animationCenter.x,
+        y: target.geometry.animationCenter.y + 14,
       },
     },
   );

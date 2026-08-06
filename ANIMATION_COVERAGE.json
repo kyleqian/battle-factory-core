@@ -1955,6 +1955,30 @@
    ]
   },
   {
+   "move": "MOVE_REFRESH",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage CHANSEY (Factory record 227, move 287) against legal ONIX whose four slots duplicate TOXIC, so the CHANSEY healthbox carries the poison status icon; both orientations pass the complete 209-frame move-owned window frames 515-723 / 519-727 twice fresh",
+    "the pure source-relative reducer ports Move_REFRESH (battle_anim_scripts.s:8472) composing the already-exact StatusClearedEffect cure-bubbles BG1 mask (numFadeSteps=10, fadeStepDelay=2, duration=30, scrollSpeed=0x1A0), GrantingStarsEffect (two gGrantingStarsSpriteTemplate stars on the delay-8 interpreter boundary), the F_PAL_BG|F_PAL_BATTLERS 10->0 simple_palette_blend to RGB(12,24,30), and the gThinRingExpandingSpriteTemplate MILK_DRINK ring (32+min(local,29)*16 scale)",
+    "the displayed blend is measured: the BG banks latch coeff 10 immediately at creation age 173 and then step 2 every five frames, while the attacking battler's OBJ bank shows 0 at the creation age and trails one frame behind (UpdateNormalPaletteFade alternates BG/OBJ); the mask scrolls 146 over the window and stalls on its final display frame",
+    "both orientation portables prove 209/209 source/software, typed seam, hardware, raw-RGB, and shared-framebuffer frames twice fresh: player-back frames 515-723 evidence 35ede52ec58ef5f320d7a0cc18797fe563af5634f5e82dd7fbf9bb5426fcbd10 / raw RGB d35ee9214677c27694d4154d09fce739158ad29c27801d74f96a96d6ec620dde, opponent-front frames 519-727 evidence 8f27ac49c2bc3f515d4842921d5326f148b2975a2c088f9ae37b51d3170cb473 / raw RGB bd2ba9fa9392e2ec757ea4c9c784b7bbecf14efc0e2cd3dd8dcd31facf58f05a",
+    "MOVE_SYNTHESIS remains exact (130/130) as the GrantingStars control, MOVE_AROMATHERAPY at 400/400 as the mask/StatusClearedEffect control, and MOVE_MILK_DRINK at 186/186 as the thin-ring control; shared components alone accept no other move"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-refresh-player-chansey-opponent-onix.json",
+    "tools/battle-lab/mechanic-refresh-opponent-chansey-player-onix.json",
+    "tools/compare/fixtures/refresh-player-chansey-opponent-onix.json",
+    "tools/compare/fixtures/refresh-opponent-chansey-player-onix.json",
+    "tools/compare/refreshProbe.py",
+    "tools/compare/refreshPortable.ts",
+    "src/animation/refresh.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/refresh.test.ts",
+    "tests/animation/refreshEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_REST",
    "status": "exact",
    "covered": [
@@ -2058,6 +2082,31 @@
     "tools/compare/rockSlidePortable.ts",
     "tools/probe/stage-fire-punch-portable-on.py",
     "docs/rock-slide-portable-staging-probe.md"
+   ]
+  },
+  {
+   "move": "MOVE_ROCK_THROW",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Scene-ON mechanicLab parties stage the sole ROCK_THROW carrier FRONTIER_MON_GRAVELER_1 record 166 (GRAVELER, move 88) against legal ONIX in both orientations; both orientations pass the complete 87-frame move-owned window frames 296-382 twice fresh",
+    "the pure source-relative reducer and typed Scene-ON seam port Move_ROCK_THROW reusing the shared gFallingRockSpriteTemplate/AnimFallingRock/TranslateSpriteInEllipse falling-rock component (the ROCK_SLIDE body), the AnimShakeMonOrBattlePlatforms BG3-Y shake, and the AnimTask_ShakeMon(ANIM_TARGET,0,5,20,1) target shake",
+    "the five rock spawns land at RAM ages 3/11/19/27/35 (createsprite + playse + delay-6 stride of 8) with arg3=0 skipping SetAverageBattlerPositions; the dense probe and production framebuffer pin the rock geometry, spawn/lifetime/order, and the 17-entry displayed BG3-Y sequence exactly at every animation age",
+    "RGB evidence corrects the staged target-shake hypotheses: the shake's displayed y2 is NOT the RAM field's 2-on-2-off pattern and NOT the staged 22..55 or default 24..57 windows — the framebuffer shows +5 at display ages 21, 24-25, 28-29, ..., 56-57 (a lead frame at 21 then 2-on-2-off pairs; (age-21)%4 in {0,3} over [21,57]), and the opponent-front ONIX idle-bob x2=+1 drops to 0 at display age 21 (one frame behind its RAM write)",
+    "the portable re-runs both committed probes through tools/run-mgba-probe.py and proves 87/87 source/software, typed seam, hardware, raw-RGB, and shared-framebuffer frames twice fresh in both orientations: player-back frames 296-382 evidence 9a7fa756d09fc4fbf41d547e09d6adb977e62903449cc4fd6a249bf46cafbca0 / raw RGB 773f4366ccd8dcb37df307caa623134a44bb260951b00512ea0ec7583d8badd2, opponent-front frames 296-382 evidence 3dc82aade1ca96036c22f28ca11695aa06e588067e49163ddc77c28b41669c3d / raw RGB e2592ba27969c44e5f3f64dca24bbf2869d9d765b6270833ea564cdfb7e52b89",
+    "MOVE_ROCK_SLIDE remains exact (175/175 through its own shared falling-rock acceptance); the shared gFallingRockSpriteTemplate/AnimFallingRock component alone accepts no other move"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-rock-throw-player-graveler-opponent-onix.json",
+    "tools/battle-lab/mechanic-rock-throw-opponent-graveler-player-onix.json",
+    "tools/compare/fixtures/rock-throw-player-graveler-opponent-onix.json",
+    "tools/compare/fixtures/rock-throw-opponent-graveler-player-onix.json",
+    "tools/compare/rockThrowProbe.py",
+    "tools/compare/rockThrowPortable.ts",
+    "src/animation/rockThrow.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/rockThrow.test.ts",
+    "tests/animation/rockThrowEvidence.test.ts"
    ]
   },
   {
@@ -3811,7 +3860,7 @@
     "MOVE_AROMATHERAPY",
     "MOVE_COSMIC_POWER"
    ],
-   "goal": "MOVE_SYNTHESIS independently proves its complete delay-2 attacker blend, two GrantingStarsEffect stars, unload/delay/load boundary, and shared HealingEffect in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_AROMATHERAPY independently proves its complete nine-FLOWER, green blend/monbg, StatusClearedEffect, two SparklingStars, thin-ring, and cleanup body at 400/400 player-back and 396/396 opponent-front source/hardware/raw-RGB/framebuffer frames, reproduced twice. No sibling is promoted. HEAL BELL needs its bell, twelve music-note sprites with palette allocation/free, three HealBellRing thin-ring/palette tasks, and its own blended finale. WISH needs ANIM_TAG_GOLD_STARS, black-BG fade, panning, gWishStarSpriteTemplate, and delay before GrantingStarsEffect. REFRESH has distinct field/battler palette restoration and thin-ring sequencing around StatusClearedEffect. COSMIC POWER needs non-attacker palette fades, BG_COSMIC load/slide/restore, sound tasks, and two GrantingStarsEffect calls. Each remains unsupported pending independent complete dense evidence."
+   "goal": "MOVE_SYNTHESIS independently proves its complete delay-2 attacker blend, two GrantingStarsEffect stars, unload/delay/load boundary, and shared HealingEffect in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_AROMATHERAPY independently proves its complete nine-FLOWER, green blend/monbg, StatusClearedEffect, two SparklingStars, thin-ring, and cleanup body at 400/400 player-back and 396/396 opponent-front source/hardware/raw-RGB/framebuffer frames, reproduced twice. MOVE_REFRESH independently proves its StatusClearedEffect mask, two GrantingStarsEffect stars, field/battler palette-restoration blend, and thin-ring body at 209/209 in both orientations, reproduced twice. No sibling is promoted. HEAL BELL needs its bell, twelve music-note sprites with palette allocation/free, three HealBellRing thin-ring/palette tasks, and its own blended finale. WISH needs ANIM_TAG_GOLD_STARS, black-BG fade, panning, gWishStarSpriteTemplate, and delay before GrantingStarsEffect. COSMIC POWER needs non-attacker palette fades, BG_COSMIC load/slide/restore, sound tasks, and two GrantingStarsEffect calls. Each remains unsupported pending independent complete dense evidence."
   },
   {
    "id": "healing-blue-star",

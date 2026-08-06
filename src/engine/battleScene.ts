@@ -913,6 +913,7 @@ import {
   sceneOnQuickAttackView,
   sceneOnExtremeSpeedView,
   sceneOnRockSlideView,
+  sceneOnRockThrowView,
   sceneOnSandAttackView,
   sceneOnMudSlapView,
   sceneOnDragonRageView,
@@ -930,6 +931,7 @@ import {
   sceneOnSynthesisView,
   sceneOnWishView,
   sceneOnMilkDrinkView,
+  sceneOnRefreshView,
   sceneOnSupersonicView,
   sceneOnWaterGunView,
   sceneOnAcidView,
@@ -1062,6 +1064,7 @@ import {
   type SceneOnDizzyPunchConfig,
   type SceneOnAstonishConfig,
 } from "../animation/sceneOnPresentation.ts";
+import { refreshDisplayedBlendCoeffAtAge, REFRESH_BLEND_START_AGE } from "../animation/refresh.ts";
 import {
   extremeSpeedBackgroundVariant,
   extremeSpeedImpactAtAge,
@@ -1349,7 +1352,9 @@ const ponytaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentF
 const ledybaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LEDYBA!;
 const clamperlFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CLAMPERL!;
 const charmanderFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CHARMANDER!;
+const gravelerFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GRAVELER!;
 const tentacoolFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).TENTACOOL!;
+const chanseyFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CHANSEY!;
 const houndourFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HOUNDOUR!;
 const delibirdFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DELIBIRD!;
 const mareepFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAREEP!;
@@ -2513,7 +2518,9 @@ const ponytaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpr
 const ledybaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LEDYBA!;
 const clamperlBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CLAMPERL!;
 const charmanderBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CHARMANDER!;
+const gravelerBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GRAVELER!;
 const tentacoolBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).TENTACOOL!;
+const chanseyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CHANSEY!;
 const houndourBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HOUNDOUR!;
 const magbyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGBY!;
 const mareepBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAREEP!;
@@ -3606,6 +3613,24 @@ function drawTileBg(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalet
       if (!c) continue;
       setPixel(fb, screenX, screenY, c);
     }
+  }
+}
+
+/** The battle BG's scanline-0 strip only (used to restore the first-scanline palette latch). */
+function drawTileBgRow0(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalettes: RgbColor[][]): void {
+  for (let screenX = 0; screenX < 240; screenX += 1) {
+    const tileCol = Math.floor(screenX / 8);
+    const inTileX = screenX % 8;
+    const entry = tilemap.entries[tileCol];
+    if (!entry) continue;
+    const tile = tileset.tiles[entry.tile];
+    if (!tile) continue;
+    const sx = entry.hFlip ? 7 - inTileX : inTileX;
+    const idx = tile[sx]!;
+    if (idx === 0) continue;
+    const c = subpalettes[entry.palette]?.[idx];
+    if (!c) continue;
+    setPixel(fb, screenX, 0, c);
   }
 }
 
@@ -30752,6 +30777,193 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "REFRESH") {
+    const view = sceneOnRefreshView(state);
+    // Sprites (stars/ring) and the mask's scroll/alpha latch one display
+    // frame behind their RAM writes, so the draw uses the prior age's state.
+    const displayed = sceneOnRefreshView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "CHANSEY"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CHANSEY"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged REFRESH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const chanseySource = playerToOpponent
+      ? chanseyBackSprite : chanseyFrontSprite;
+    const chanseySprite = playerToOpponent
+      ? chanseySource
+      : {
+          ...chanseySource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: chanseySource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    // Source `simple_palette_blend color=RGB(12,24,30)` (5-bit channels),
+    // expanded with mGBA's 15->24-bit curve. Because REFRESH targets the
+    // user, the F_PAL_BG | F_PAL_BATTLERS blend reaches the BG banks 1-3 and
+    // only the attacking CHANSEY OBJ palette (never the ONIX target).
+    const refreshTarget = { r: 99, g: 198, b: 247 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        refreshTarget,
+        refreshDisplayedBlendCoeffAtAge(state.age, "bg"),
+      ),
+    );
+    if (
+      opponentToPlayer
+      && state.age === REFRESH_BLEND_START_AGE
+      && refreshDisplayedBlendCoeffAtAge(state.age, "bg") > 0
+    ) {
+      // The blend sprite's creation call latches the whole palette mid-frame
+      // on this orientation, so the first scanline keeps the pre-blend BG.
+      drawTileBgRow0(
+        fb,
+        battleBg.static.tileset,
+        battleBg.static.tilemap,
+        battleBg.palette,
+      );
+    }
+    const chanseyPalette = blendPaletteToward(
+      chanseySprite.palette,
+      refreshTarget,
+      refreshDisplayedBlendCoeffAtAge(state.age, "attacker"),
+    );
+    if (playerToOpponent) {
+      const idle = speciesFrontIdleRestOffset("ONIX");
+      drawSpriteSheet(
+        fb,
+        onixSprite.tileset,
+        onixSprite.palette,
+        view.target.geometry.spriteCorner.x + (idle?.x2 ?? 0),
+        view.target.geometry.spriteCorner.y + (idle?.y2 ?? 0),
+      );
+      drawSpriteSheet(
+        fb,
+        chanseySprite.tileset,
+        chanseyPalette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        chanseySprite.tileset,
+        chanseyPalette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+      drawSpriteSheet(
+        fb,
+        onixSprite.tileset,
+        onixSprite.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+      );
+    }
+    if (displayed.mask.active) {
+      // The BG1 scroll and the blend alpha register both latch one frame
+      // behind their RAM writes (same display lag the AROMATHERAPY draw
+      // applies via its paletteView).
+      drawAromatherapyCureMask(
+        fb,
+        chanseySprite,
+        view.attacker.geometry.spriteCorner,
+        displayed.mask.scrollY,
+        displayed.mask.eva,
+        displayed.mask.evb,
+      );
+    }
+    for (const star of displayed.stars.slice().reverse()) {
+      drawSpriteSheet(
+        fb,
+        {
+          columns: 4,
+          rows: 4,
+          tiles: aromatherapyArt.sparkle2.tileset.tiles.slice(
+            star.frame * 16,
+            star.frame * 16 + 16,
+          ),
+        },
+        aromatherapyArt.sparkle2.palette,
+        star.x - 16,
+        star.y - 16,
+      );
+    }
+    if (displayed.ring) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        aromatherapyArt.thinRing.tileset,
+        aromatherapyArt.thinRing.palette,
+        displayed.ring.x,
+        displayed.ring.y,
+        displayed.ring.matrixScale,
+        0,
+        0,
+        displayed.ring.matrixScale,
+        undefined,
+        true,
+      );
+    }
+    // The legal ONIX opponent forces TOXIC as its only move, so the REFRESH
+    // user (CHANSEY) is badly poisoned while the animation plays - the healthbox
+    // shows the poison status icon (source `UpdateStatusIconInHealthbox`).
+    const chanseyStatus = "poison" as const;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "CHANSEY",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: opponentToPlayer ? chanseyStatus : "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "CHANSEY" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: playerToOpponent ? chanseyStatus : "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CHANSEY used" : "Foe CHANSEY used",
+      "REFRESH!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "FUTURE_SIGHT") {
     const view = sceneOnFutureSightView(state);
     const playerToOpponent =
@@ -32861,6 +33073,109 @@ export function renderSceneOnMovePresentation(
       line1,
       line2,
       Math.min(line1.length + line2.length, view.age - textStartAge + 1),
+    );
+    return;
+  }
+
+  if (state.config.move === "ROCK_THROW") {
+    const view = sceneOnRockThrowView(state);
+    const { attacker, target } = view;
+    const player = attacker.geometry.side === "player" ? attacker : target;
+    const opponent = attacker.geometry.side === "opponent" ? attacker : target;
+    const playerToOpponent =
+      attacker.species === "GRAVELER"
+      && attacker.geometry.side === "player"
+      && target.species === "ONIX"
+      && target.geometry.side === "opponent";
+    const opponentToPlayer =
+      attacker.species === "GRAVELER"
+      && attacker.geometry.side === "opponent"
+      && target.species === "ONIX"
+      && target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ROCK_THROW pair ${attacker.species}->${target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent
+      ? gravelerBackSprite : gravelerFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+
+    drawStaticBgShiftedY(fb, view.bg3Y);
+    // Opponent-front sits below player-back (same OBJ priority rule as the
+    // other scene-on staged pairs). The opponent-front ONIX target keeps its
+    // idle-bob residual +1 until the shake task's xOffset=0 write overrides
+    // it (rockThrowTargetX2); the player-back ONIX target has no residual.
+    if (playerToOpponent) {
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        target.geometry.spriteCorner.x + view.targetX2,
+        target.geometry.spriteCorner.y + view.targetY2,
+      );
+      drawSpriteSheet(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        attacker.geometry.spriteCorner.x,
+        attacker.geometry.spriteCorner.y,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        attacker.geometry.spriteCorner.x,
+        attacker.geometry.spriteCorner.y,
+      );
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        target.geometry.spriteCorner.x,
+        target.geometry.spriteCorner.y + view.targetY2,
+      );
+    }
+    for (const rock of view.rocks) {
+      drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponent.species,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: player.species,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "GRAVELER used" : "Foe GRAVELER used",
+      "ROCK THROW!",
+      99,
     );
     return;
   }

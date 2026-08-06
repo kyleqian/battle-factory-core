@@ -1,0 +1,59 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-rock-throw-player-graveler-opponent-onix.json",
+  "probe": "tools/compare/rockThrowProbe.py",
+  "pair": "FRONTIER_MON_GRAVELER_1 record 166 (player-back) -> legal ONIX (opponent-front)",
+  "orientation": "player-to-opponent",
+  "move": "ROCK_THROW",
+  "denseWindow": {
+    "startFrame": 296,
+    "endFrame": 382,
+    "frameCount": 87
+  },
+  "appStage": {
+    "presentationAge": 0
+  },
+  "attacker": {
+    "species": "GRAVELER",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 60 },
+      "animationCenter": { "x": 72, "y": 92 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 10 },
+      "animationCenter": { "x": 176, "y": 42 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "animationProfile": {
+    "rockAnchorAge": 3,
+    "targetShakeStartAge": 21,
+    "targetShakeEndAge": 57,
+    "targetX2OffAge": 21,
+    "spriteOrderSeed": [62, 60, 0, 63, 1, 61, 6, 8, 2, 3, 4, 21, 20, 5, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 7, 54, 55, 56, 57, 58, 59, 23, 22, 48, 49, 50, 51, 52, 53, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47],
+    "occupiedSpriteSlots": [0, 1, 2, 6, 8, 60, 61, 62, 63]
+  },
+  "fieldProfile": {
+    "playerHp": 148,
+    "playerMaxHp": 151,
+    "opponentHp": 110,
+    "opponentMaxHp": 110,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "rock-throw-dense-evidence/v1",
+  "evidenceSha256": "9a7fa756d09fc4fbf41d547e09d6adb977e62903449cc4fd6a249bf46cafbca0",
+  "secondFreshEvidenceSha256": "9a7fa756d09fc4fbf41d547e09d6adb977e62903449cc4fd6a249bf46cafbca0",
+  "rawRgbSha256": "773f4366ccd8dcb37df307caa623134a44bb260951b00512ea0ec7583d8badd2",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 87
+  }
+}

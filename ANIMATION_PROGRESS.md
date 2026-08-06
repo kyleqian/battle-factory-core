@@ -1,5 +1,78 @@
 # Animation coverage
 
+## MOVE_REFRESH closed — 209/209 both orientations twice-fresh, promoted to exact (2026-08-05 closure worker)
+
+- **State:** REFRESH (new move) → **exact**. Move coverage: **117/276 exact,
+  0 partial, 0 staged, 159 unsupported**. Both fixtures pin `framebufferMatching: 209`.
+- **Did:** closed the already-implemented MOVE_REFRESH unit without re-investigating
+  the 209/209 renderer. Added `refresh.test.ts` (7 Tier-1 reducer tests: BG1
+  mask window/scroll/eva, delay-8 star spawns + x-only mirror, BG-vs-attacker
+  five-frame blend steps, displayed BG-immediacy/OBJ-lag latch, thin-ring scale,
+  visual-task counts, typed seam) and `refreshEvidence.test.ts` (2 receipt/source
+  pins: windows 515-723 / 519-727, CHANSEY 287×4 vs ONIX 92×4, lifecycle
+  counts). Re-ran the named exact portable controls once each: SYNTHESIS
+  130/130 and MILK_DRINK 186/186 component+framebuffer clean; AROMATHERAPY
+  400/400 framebuffer identity held but its probe evidence hash drifted
+  (receipt-only, raw RGB unchanged) — pins left untouched, see report.
+- **Measured:** player-back frames 515-723 and opponent-front frames 519-727,
+  both **209/209 source-component and shared-framebuffer exact twice fresh**.
+  Evidence `35ede52e…` / `8f27ac49…`, RGB `d35ee921…` / `bd2ba9fa…` reproduce
+  the fixture pins exactly on every fresh portable run. Coverage JSON + ledger
+  promoted REFRESH only; no component credit, no sibling promotion.
+- **Verified:** supervisor independently re-ran both portables at 209/209,
+  focused tests at 18/18, `npm run animation:coverage` at 117/276 exact,
+  the full suite at 743/743 files (7,046 passed, 1 skipped), and the production
+  build. All pre-existing tracked scratch diagnostics were preserved.
+- **Next:** continue the staged zero-new-component `MOVE_GRASS_WHISTLE` unit:
+  isolate `Move_GRASS_WHISTLE` by script pointer from the following sleep-status
+  animation, then prove the rainbow tasks/green BG blend and build the portable.
+- **Notes:** AROMATHERAPY receipt drift: new evidence `cec76eae360c…`, pinned
+  `83f9f2d03fb0…`; raw RGB
+  unchanged at `dc02bff98836…` — framebuffer identity required and met.
+  GRASS_WHISTLE now has legal ROSELIA-171/ONIX scenarios and a partial probe in
+  both orientations (458 current-move frames, 316 animation-active, 12 notes);
+  it remains unsupported and must not be promoted from this combined window.
+
+## MOVE_ROCK_THROW closed — 87/87 both orientations twice-fresh, promoted to exact (2026-08-05 worker)
+
+- **State:** ROCK_THROW (new move) → **exact**. Move coverage: **116/276 exact,
+  0 partial, 0 staged, 160 unsupported**. Both fixtures pin
+  `framebufferMatching: 87` with status `exact`.
+- **Did:** finished the staged Level-50 ROCK_THROW unit. The sole eligible
+  carrier is FRONTIER_MON_GRAVELER_1 record 166 (GRAVELER, all four slots move
+  88) vs legal ONIX; zero new source components — `Move_ROCK_THROW`
+  (battle_anim_scripts.s:2098) reuses the shared
+  `gFallingRockSpriteTemplate`/`AnimFallingRock`/`TranslateSpriteInEllipse`
+  falling-rock body (the ROCK_SLIDE component), the `shake_mon_or_platform`
+  BG3-Y shake, and `AnimTask_ShakeMon(ANIM_TARGET,0,5,20,1)`. Kept the
+  committed reducer, scenarios, probe, portable, and two fixtures; corrected
+  the reducer + fixture profiles + portable oracle-side derivation from dense
+  RGB evidence (see Notes), then added `rockThrow.test.ts` (8 Tier-1 tests:
+  rock table/stride, BG-Y sequence, spawn/lifetime geometry pinned to oracle,
+  measured target-shake boundary) and `rockThrowEvidence.test.ts` (receipt
+  pins). Updated `factoryAnimationInventory.test.ts` 115→116 / 161→160.
+- **Measured:** player-back frames 296-382 and opponent-front frames 296-382,
+  both **87/87 source-component and shared-framebuffer exact twice fresh**
+  (semantic identity also 87/87 each run). Evidence `9a7fa756…` /
+  `3dc82aad…`, RGB `773f4366…` / `e2592ba2…` reproduce the fixture pins
+  exactly on every fresh portable run. The dense exact MOVE_ROCK_SLIDE control
+  fixture `rock-slide-grovyle-onix.json` re-ran 175/175 twice fresh (probe
+  `984fe6c1…`).
+- **Next:** continue the zero-new-component Level-50 ladder from the ranked
+  coverage report.
+- **Notes:** the capped investigation's remaining mismatch was the target ONIX
+  display shake/idle residual, and its staged profile values were hypotheses.
+  A dense RGB scan (debug script, since removed) derived the true displayed
+  target x2/y2 directly for both orientations: the framebuffer shows +5 at
+  display ages 21, 24-25, 28-29, …, 56-57 — a lead frame at 21 then 2-on-2-off
+  pairs, i.e. `(age-21)%4 ∈ {0,3}` over [21,57] — NOT the staged 22..55 or
+  default 24..57 windows; and the opponent-front ONIX idle-bob x2=+1 drops to
+  0 at display age 21, one frame behind its RAM write. The portable's
+  oracle-side derivation now uses this RGB-verified latch (y2 lead at
+  `targetShakeStartAge`, x2 from RAM one frame back). No boundary widening, no
+  new unsupported barriers; ROCK_THROW is a sibling acceptance and shares no
+  move credit.
+
 ## MOVE_WRAP closed — 38/38 both orientations twice-fresh, promoted to exact (2026-08-05 worker)
 
 - **State:** WRAP (new move) → **exact**. Move coverage: **115/276 exact, 0
