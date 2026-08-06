@@ -133,6 +133,22 @@ history.
   it already computed the exact `createFactoryCorpusPartyMember` output
   needed — see its final message in the 2026-08-03 side-lane log).
 
+## battle-lab fixtures are not directly consumable by the compare CLI
+
+- **What:** `npm run compare` takes a compare trace (appRoute/appStage/
+  segments/captureFrames), not a `tools/battle-lab/` mechanicLab fixture —
+  replaying a banked fixture against the app means hand-deriving a wrapper
+  trace (copy segments verbatim, pick the appStage, re-list captures). Three
+  separate actors did this conversion for the SAME dense-a fixture on
+  2026-08-05: the PROGRESS 955 worker, the side ball-fade worker (flagged
+  it, ~5 min), and the supervisor (whose first hand-written wrapper had two
+  JSON/path bugs before running).
+- **Hits:** 3 (one fixture, one day).
+- **Cost each:** ~5 min + error-retry noise.
+- **Possible durable fix:** let `npm run compare` accept a battle-lab
+  fixture path plus `--app-stage <id>` and synthesize the wrapper in memory
+  (segments verbatim, captures from `--capture-range`).
+
 ## Oracle single-frame diffs appear non-deterministic under concurrent multi-lane load
 
 - **What:** the #71 retry worker saw repeated runs of the same compare
