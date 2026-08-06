@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   midBattleSwitchFadeAt,
   MID_BATTLE_SWITCH_FADE_BASE_TRACE,
-  type MidBattleSwitchFadeAt,
 } from "../src/engine/battleResolutionPresentationRender.ts";
 import { blendComponentToWhite } from "../src/engine/paletteFade.ts";
 
