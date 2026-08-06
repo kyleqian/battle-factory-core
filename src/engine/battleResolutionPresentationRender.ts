@@ -237,6 +237,53 @@ export function midBattleSwitchInAt(
   });
 }
 
+export type MidBattleSwitchParticle = Readonly<{
+  /** Spawn index 0-15 (angle = (i % 8) * 32). */
+  i: number;
+  /** Particle's own rendered age (frame - spawn - 2, clamped >= 0). */
+  age: number;
+  /** Screen offset from the window origin (Sin/Cos radial, `gSineTable` Q8.8). */
+  dx: number;
+  dy: number;
+}>;
+
+/** §10.2: `AnimateBallOpenParticles`/`PokeBallOpenParticleAnimation` (battle_anim_throw.c:1577-1652, trig.c:515-523). */
+export const MID_BATTLE_SWITCH_RECALL_PARTICLE_START_TRACE = 1089; // recall spawn 1089-1104, base (72,112), tiles 405-407, prio 2
+export const MID_BATTLE_SWITCH_SEND_IN_PARTICLE_START_TRACE = 1187; // send-in spawn 1187-1202, base (72,123), tiles 417-419, prio 1
+
+/**
+ * The mid-battle switch ball-open particle burst, one particle/tick for 16
+ * ticks at the window's base, each with angle `(i%8)*32` and radial
+ * `dx/dy = Sin/Cos(angle, radius)` (`gSineTable` amplitude-scaled, Q8.8,
+ * `trig.c:515-523`), `radius = 2*(age-1)`, tile `sAnim_RegularBall[age%6]`
+ * (`battle_anim_throw.c:180`), destroyed at age 26. The RENDERED frame lags
+ * the RAM spawn tick by one (visible x2/y2 = the RAM value at data[1]-2,
+ * §10.2), so a particle spawned at trace S renders at age 0 from frame S+2
+ * (and the newest particle renders at age -1 on its first visible frame) --
+ * pixel-verified byte-exact across the whole recall window (1091-1099).
+ * `dx`/`dy` are computed by the scene renderer (battleScene.ts owns the
+ * `gSineTable`), so this function carries the raw age/angle and the caller
+ * applies the Sin/Cos.
+ */
+export function midBattleSwitchParticleSchedulesAt(
+  traceFrame: number,
+  window: "recall" | "send-in",
+): readonly MidBattleSwitchParticle[] {
+  const start = window === "recall"
+    ? MID_BATTLE_SWITCH_RECALL_PARTICLE_START_TRACE
+    : MID_BATTLE_SWITCH_SEND_IN_PARTICLE_START_TRACE;
+  const out: MidBattleSwitchParticle[] = [];
+  for (let i = 0; i < 16; i += 1) {
+    const age = traceFrame - start - 2 - i;
+    if (age < 0) continue;
+    if (age > 25) continue;
+    out.push(Object.freeze({ i, age, dx: 0, dy: 0 }));
+  }
+  return out;
+}
+
+
+
 export type MidBattleSwitchFadeAt = Readonly<{ bg: number; obj: number }>;
 
 /**
@@ -432,6 +479,16 @@ export type BattleResolutionPresentationRenderView = Readonly<{
    * outside the windows.
    */
   midBattleSwitchFade: Readonly<{ bg: number; obj: number }> | null;
+  /**
+   * §10.2 residual 1b: the mid-battle switch ball-open particles (recall
+   * 1089-1130 base (72,112) prio 2, send-in 1187-1228 base (72,123) prio 1).
+   * `schedules` carries each alive particle's spawn index + rendered age; the
+   * scene renderer applies the Sin/Cos radial offsets and the tile cycle.
+   */
+  midBattleSwitchParticles: Readonly<{
+    window: "recall" | "send-in";
+    schedules: readonly MidBattleSwitchParticle[];
+  }> | null;
   /**
    * The terminal win/loss-text trainer slide-in/out, generic across any
    * trainer/outcome (`docs/terminal-seam-round-flow-scout.md` §3(iii)).
@@ -736,6 +793,21 @@ export function createBattleResolutionPresentationRenderView(
   const midBattleSwitchFade = state.sourceDecision.kind === "switch"
     ? midBattleSwitchFadeAt(MID_BATTLE_SWITCH_FADE_BASE_TRACE + state.fadeTick)
     : null;
+  // §10.2 residual 1b: the ball-open particle burst, keyed to the same
+  // switch-only fade windows (recall 1089-1130, send-in 1187-1228) so a
+  // non-switch resolution never leaks particles.
+  const midBattleSwitchParticles = state.sourceDecision.kind !== "switch"
+    ? null
+    : (() => {
+        const traceFrame = MID_BATTLE_SWITCH_FADE_BASE_TRACE + state.fadeTick;
+        const window = traceFrame >= MID_BATTLE_SWITCH_SEND_IN_PARTICLE_START_TRACE
+          ? "send-in"
+          : "recall";
+        return Object.freeze({
+          window,
+          schedules: midBattleSwitchParticleSchedulesAt(traceFrame, window),
+        });
+      })();
   if (state.lifecycle.phase === "presenting-switch-in") {
     const switchCommand = segment.commands.find(
       (candidate): candidate is Extract<
@@ -1066,6 +1138,7 @@ export function createBattleResolutionPresentationRenderView(
     midBattleSwitchIn,
     switchOut,
     midBattleSwitchFade,
+    midBattleSwitchParticles,
     partySummary,
     trainerSlide: activeTrainerSlide !== null
       ? Object.freeze({

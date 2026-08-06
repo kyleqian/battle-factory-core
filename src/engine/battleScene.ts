@@ -783,6 +783,7 @@ import {
   type MidBattleSwitchInView,
   type MidBattleSwitchOutView,
 } from "./battleResolutionPresentationRender.ts";
+import type { MidBattleSwitchParticle } from "./battleResolutionPresentationRender.ts";
 import type {
   BattleStatName,
   BattleTerminalResolutionPresentationState,
@@ -6172,6 +6173,54 @@ function drawParticleTile(fb: Uint8Array, tileIndex: number, hFlip: boolean, ox:
       if (!c) continue;
       setPixel(fb, ox + px, y, c);
     }
+  }
+}
+
+/**
+ * ISSUES #78 residual 1b (§10.2): the mid-battle switch ball-open particles --
+ * the same `PokeBallOpenParticleAnimation` machinery as the battle-START
+ * burst, re-anchored to this window's own bases. Recall base (72,112) =>
+ * top-left (68,108) with the foreground terrain clip at y>=112; send-in base
+ * (72,123) => top-left (68,119), same clip (both are player-side). The
+ * scheduler (`midBattleSwitchParticleSchedulesAt`) supplies each alive
+ * particle's spawn index + rendered age; the radial offsets are
+ * `Sin/Cos((i%8)*32, radius)` and the tile is `sAnim_RegularBall[age%6]`
+ * (the same `regularBallAnim` the start-release uses). Draw order mirrors
+ * `sortAliveParticlesByScreenY` (dy asc, newest first on ties so the oldest
+ * renders on top -- pixel-verified for the recall stack 1091-1095).
+ */
+function drawMidBattleSwitchBallOpenParticles(
+  fb: Uint8Array,
+  window: "recall" | "send-in",
+  schedules: readonly MidBattleSwitchParticle[],
+): void {
+  if (schedules.length === 0) return;
+  const origin = window === "recall"
+    ? { x: 68, y: 108 }
+    : { x: 68, y: 119 };
+  const anim = battleAnimParticles.regularBallAnim;
+  const alive: AliveParticle[] = schedules.map((p) => ({
+    i: p.i,
+    age: p.age,
+    dx: 0,
+    dy: 0,
+  }));
+  for (const p of alive) {
+    const radius = p.age <= 1 ? 0 : 2 * (p.age - 1);
+    const angle = (p.i % 8) * 32;
+    p.dx = gbaSin(angle, radius);
+    p.dy = gbaCos(angle, radius);
+  }
+  for (const p of sortAliveParticlesByScreenY(alive)) {
+    const frame = anim[Math.max(0, p.age) % anim.length]!;
+    drawParticleTile(
+      fb,
+      frame.tile,
+      frame.hFlip,
+      origin.x + p.dx,
+      origin.y + p.dy,
+      112,
+    );
   }
 }
 
@@ -35425,6 +35474,17 @@ export function renderBattleResolutionSceneOffView(
   }
   if (switchOut !== null && switchOut.battler === 0 && switchOut.spriteVisible) {
     drawMidBattleSwitchOutSprite(fb, view.fieldArt.player, switchOut, playerMonPalette);
+  }
+  // ISSUES #78 residual 1b (§10.2): the mid-battle switch ball-open particles.
+  // Drawn after the mon so the send-in particles (prio 1) sit above it; the
+  // recall particles (prio 2) tie the mon's priority but the real OAM still
+  // draws them over the feet region.
+  if (view.midBattleSwitchParticles !== null) {
+    drawMidBattleSwitchBallOpenParticles(
+      fb,
+      view.midBattleSwitchParticles.window,
+      view.midBattleSwitchParticles.schedules,
+    );
   }
   if (view.visibility.opponent.sprite) {
     if (
