@@ -1087,7 +1087,7 @@ const MURKROW_TORMENT_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
   spAttack: 105,
   spDefense: 62,
   speed: 111,
-  hp: 135,
+  hp: 119,
   maxHp: 135,
   types: ["TYPE_DARK", "TYPE_FLYING"] as const,
 });

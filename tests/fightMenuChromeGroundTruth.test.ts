@@ -23,6 +23,7 @@
 import { describe, expect, it } from "vitest";
 import { getMonGender } from "../src/engine/monGender.ts";
 import { ppRemainingGlyphCodes } from "../src/engine/battleMenu.ts";
+import { calcBarFilledPixels } from "../src/engine/healthboxAssembly.ts";
 import fightSubmenuWindowAsset from "../src/assets/gen/fight-submenu-window.json" with { type: "json" };
 
 const BUTTERFREE_GENDER_RATIO = 127; // 50% female, `summary-info.json` species 12
@@ -58,6 +59,36 @@ describe("ppRemainingGlyphCodes: the oracle's post-turn-1 TACKLE PP (class 3 roo
 
   it("the app's current full-PP staging (35/35) is the residual - a full-PP mon renders '35/35'", () => {
     expect(ppRemainingGlyphCodes(35, 35)).toEqual([164, 166, 186, 164, 166]);
+  });
+});
+
+describe("calcBarFilledPixels: the MURKROW HP-bar end-cap residual is HP staging, not bar width (class 5 root cause)", () => {
+  // docs/fight-menu-chrome-ground-truth.md §1 lists a 12px "HP-bar end cap"
+  // residual at (94,33)-(99,34): the app drew the last 6px of the bar glossy
+  // green while the oracle showed the frame's dark groove. Root cause is NOT
+  // the bar's width derivation (GetScaledHPFraction/CalcBarFilledPixels -
+  // battle_interface.c:2517-2525/2413-2459 - is byte-exact, proven by the
+  // RATTATA full-HP 48px bar in mid-battle-switch-dense-a-off): it is the
+  // app stage pinning MURKROW at full 135/135 while the oracle's real
+  // post-turn-1 value is 119/135 (TACKLE did 16). 119/135 => 42 filled px,
+  // so the last column shows 2px green + 6px groove - exactly the observed
+  // oracle pixels. This pins that the staged value produces the oracle bar.
+  it("119/135 fills 42px - the bar ends 6px before x99 (the observed groove)", () => {
+    const { filledPixels, columns } = calcBarFilledPixels(119 / 135);
+    expect(filledPixels).toBe(42);
+    expect(columns).toEqual([8, 8, 8, 8, 8, 2]);
+  });
+
+  it("full HP (1.0) fills the whole 48px bar - the width derivation is correct for the RATTATA case", () => {
+    const { filledPixels, columns } = calcBarFilledPixels(1);
+    expect(filledPixels).toBe(48);
+    expect(columns).toEqual([8, 8, 8, 8, 8, 8]);
+  });
+
+  it("the app stage must use the oracle's real 119/135, not full (135/135 renders the too-wide bar)", () => {
+    expect(calcBarFilledPixels(135 / 135).filledPixels).toBe(48);
+    expect(calcBarFilledPixels(119 / 135).filledPixels).toBe(42);
+    expect(135 - 119).toBe(16); // turn-1 TACKLE damage (oracle state.parties)
   });
 });
 

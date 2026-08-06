@@ -43,6 +43,22 @@ healthbox HP-bar end cap (12px at (94,33)-(99,34), every frame) — the app's
 while the oracle shows the frame's dark groove (74,66,90) there. Lives in
 `src/engine/healthboxAssembly.ts`, not the fight menu.
 
+> **2026-08-06 root-cause correction (MAIN bind, Stage 2):** the residual is
+> **NOT a bar-width bug** in `composeOpponentHealthbox`. The width derivation
+> is byte-exact: `calcBarFilledPixels` reproduces `CalcBarFilledPixels`
+> (`battle_interface.c:2413-2459`) and `GetScaledHPFraction`
+> (`battle_interface.c:2517-2525`) exactly, and the RATTATA full-HP bar
+> (105/105 → 48px → ends at x99) in `mid-battle-switch-dense-a-off` renders
+> byte-exact. The real cause is the **app stage pinning MURKROW at full
+> 135/135** when the oracle's real post-turn-1 HP is **119/135** (turn-1
+> TACKLE did 16 damage — oracle `state.parties` on
+> `mechanic-selection-reject-torment-off.json`, frames 734-1344 all report
+> `hp: 119, maxHp: 135`). 119/135 → `CalcBarFilledPixels` = 42 filled px, so
+> the last column shows 2px green + 6px groove — exactly the oracle's pixels.
+> Fix: stage `hp: 119, maxHp: 135` on `MURKROW_TORMENT_LV50` in `appTrace.ts`
+> (same staging class as the §3/§4 pins). All settled frames (734/765/820/977/
+> 984-986/994-995/1040/1050) are now byte-exact.
+
 ---
 
 ## 1. Method
