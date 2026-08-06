@@ -143,15 +143,18 @@ regression 128/128, full `npm test` 743/7060 + build green.
 turn-2 checkpoint, frame 734) is NOT committed — the full window is not
 byte-exact because of **pre-existing fight-menu chrome residuals** (same
 class as the mid-battle-switch fixture's documented 48px, not the rejection
-flow): (1) a ~24px pink-vs-cyan **move-target arrow** baked in the static
-fight-submenu harvest (bbox y21-28 x55-59); (2) the **detail-box type cell**
-~28px (y80-87 x184-199); (3) the **type-name text** ~24px (y120-135 x205-215);
-(4) the unmodeled **A-press highlight** state (~1776px bbox y74-110 x127-229,
-frames 766-769/987-1000); plus the app's sprite-bounce phase vs the oracle's
-static move-menu sprites. The rejection **message box + text region itself
-renders byte-exact** (60px whole-frame at the frozen-box 977 and GUST
-resolution 1050, all in the three chrome classes above). The spec waits on a
-fight-menu-chrome pass (side-lane asset/`src` gap), not on this flow.
+flow). **2026-08-06 MAIN bind:** classes (1)-(3) were re-attributed and
+closed by appTrace staging pins (personality 150 for male BUTTERFREE +
+MURKROW, post-turn-1 TACKLE PP 34/35, MURKROW real HP 119/135) — all settled
+torment frames (734/765/820/977/984-986/994-995/1040/1050) are now
+byte-exact (compare `fight-menu-chrome-torment-off` 11/57, remainder is
+entirely the class-4 bounce). **Remainder:** (4) the class-4 dynamic — the
+oracle's player-healthbox `y2` oscillation (`DoBounceEffect(BOUNCE_HEALTHBOX,
+7,1)`, seed 128, `SpriteCB_BounceEffect` battle_main.c:2967) vs the app's
+battle-1-calibrated `menuIdleBounce` phase; the doc's §5.1 "MURKROW y2"
+misreads this region (MURKROW sprite is static — docs §8). Bind pending: a
+menu-entry-tick-relative healthbox/player-sprite y2 (seed 128/192, +7/frame),
+then extend the spec's captureFrames green.
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 

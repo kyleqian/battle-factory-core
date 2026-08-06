@@ -259,3 +259,39 @@ appear static" is true for the sampled 760-765 window; the general truth is the
   static residuals (classes 2/3) and the HP-bar cap (12 px) all live in
   `appTrace.ts` / `healthboxAssembly.ts`, which are outside this round's
   ownership. The exact one-line fixes are in §3/§4.
+
+## 8. Stage-3 reconciliation finding (MAIN bind, 2026-08-06)
+
+The class-4 bind was partially reconciled against the oracle before the
+worker hit its cap. **The doc's §5.1 attribution is WRONG in one respect:**
+dense oracle diffs (`tools/compare/out/run-2026-08-06-20-34-21Z-87461`,
+appTrace HP-staged) show the 1776px oscillation is the **player healthbox**
+(bbox y74-110 x127-229 == `PLAYER_HEALTHBOX_FRAME_ORIGIN` (126,72) +
+interior), NOT MURKROW. The oracle's **MURKROW sprite is static** (0 diff at
+its bbox x144-192 y19-67 in *every* frame pair 734-1100). The doc's §5.3
+claim "the oracle's healthbox is static" is therefore backwards: the oracle
+bounces the player healthbox via `DoBounceEffect(BOUNCE_HEALTHBOX, 7, 1)`
+(seed sSinIndex=128), and the app's `menuIdleBounce` healthbox term is the
+one that's phase-wrong. The observed-but-unchanged **BUTTERFREE** (player
+back sprite, bbox x40-98 y60-111, 841px) and **MURKROW** (static) differ from
+the §5.1 "both mon sprites oscillate" claim.
+
+Source mechanism found (answers the brief's questions (a)/(b)):
+- (a) The healthbox bounce does NOT end when the move submenu opens — the
+  `SpriteCB_BounceEffect` bouncer sprite keeps running (it is only destroyed
+  by `EndBounceEffect`, `battle_main.c:2940-2965`, emitted as
+  `CONTROLLER_ENDBOUNCE` from `battle_main.c:4289/4317` — the partner-cancel
+  path, not the move-submenu entry). The move menu's y2=0 look is phase, not
+  a freeze (doc §5.4 stands).
+- (b) The opponent sprite does NOT bounce in the real game here: the source
+  only ever calls `DoBounceEffect(gActiveBattler, BOUNCE_MON, 7, 1)`
+  (`battle_controller_player.c:238`), and `gBattlerSpriteIds[gActiveBattler]`
+  is the player's sprite in singles. The 1776px "MURKROW y2" in the doc was a
+  misread of the player-healthbox region.
+
+Bind still TODO (worker cap): derive the healthbox/player-sprite y2 from
+`idleBounceElapsed` (menu-entry-relative, seed 128/192, +7/frame) so the
+torment fixture's settled windows land on the oracle schedule; do NOT add a
+y2 term to the opponent sprite. Regressions to re-verify:
+`battle-command-generated-off` (pre-existing 82/128 at baseline),
+`mid-battle-switch-dense-a-off` 95/95, full `npm test`.

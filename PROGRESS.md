@@ -5,6 +5,45 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 962 — [bounded MAIN worker, 2026-08-06] #81 torment spec: settled frames byte-exact (11/57) via 3 staging pins; class-4 bounce root-caused to the player healthbox (doc §5.1 misattribution corrected)
+
+- **State:** master `32fc39b4`, clean at commit. Typecheck green; smoke
+  347/347. Full `npm test` + `npm run build` NOT run (cap-killed at the
+  Stage-3 oracle-reconciliation gate); smoke+typecheck green is the last
+  verified tier.
+- **Did (stages 1-3 partial):** (1) two appTrace staging one-liners —
+  `personality: 150` (male BUTTERFREE, closes the "detail-box type cell" =
+  player-healthbox gender glyph) and `pp: [34,35,0,0]` (post-turn-1 TACKLE
+  PP, closes the "type-name text" = PP digit). Settled frames dropped
+  72px→12px exactly as the doc predicted. (2) Root-caused the 12px "HP-bar
+  end cap" to **HP staging, not bar width**: the width derivation is
+  byte-exact (RATTATA 105/105→48px→x99 proves it); MURKROW's real oracle HP
+  is 119/135 (turn-1 TACKLE = 16, oracle state.parties), so
+  `hp:119,maxHp:135` staged → bar 42px → byte-exact. Tier-1 pins
+  (calcBarFilledPixels 119/135→42, full→48) + doc §1 correction. (3) Stage 3
+  (bounce bind) **reconciled but not landed**: dense oracle diffs prove the
+  1776px oscillation is the **player healthbox** (bbox 127-229,74-110),
+  NOT MURKROW — the oracle's MURKROW sprite is static every frame; the doc's
+  §5.1 "MURKROW y2" table is a misread of the healthbox region. Source: only
+  `DoBounceEffect(gActiveBattler, BOUNCE_MON)` runs (player-only, singles);
+  the healthbox bouncer (seed 128) is what oscillates. Recorded in doc §8.
+- **Oracle:** `fight-menu-chrome-torment-off` 0/57 → **11/57** (all settled
+  frames byte-exact; remainder is purely class-4 bounce). Regressions:
+  `mid-battle-switch-dense-a-off` **95/95**; `battle-command-generated-off`
+  **82/128** — pre-existing red at session-start baseline too (verified at
+  27be9ea2 and fbf9721c via worktrees), NOT caused by this work.
+- **Next:** (1) land the class-4 bind per doc §8: derive player-healthbox +
+  player-sprite y2 from `idleBounceElapsed` (menu-entry-relative, seeds
+  128/192, +7/frame, SpriteCB_BounceEffect contract), do NOT add opponent
+  y2; then extend `fight-menu-chrome-torment-off` captureFrames green; (2)
+  full `npm test` + `npm run build` gate; (3) per ROADMAP: #80 ranks 2/5/6,
+  RECORD/RETIRE, lobby walkable, 31 tower gfx.
+- **Notes:** PAPERCUT: the supervisor brief's stage-2 "width derivation" and
+  doc §5.1 "both sprites bounce" attributions were both wrong — pixel-sampling
+  the oracle before binding would have saved the ~35 min of Stage-3
+  re-investigation. battle-command-generated-off baseline red (82/128) is a
+  separate pre-existing debt worth a supervisor look.
+
 ## 961 — [bounded MAIN worker, 2026-08-06] ISSUES #78 residual (1): ball-fade bind landed (field byte-exact, mon-sprite residuals measured)
 
 - **State:** master `0aeb2fde`, clean at commit. Typecheck green; smoke
