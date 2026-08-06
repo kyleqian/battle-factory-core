@@ -1,9 +1,10 @@
 // Dev-time extractor: reads reference/pokeemerald's
 // BattleFrontier_BattleFactoryBattleRoom map (tileset + layout + border), the
-// three overworld sprite sheets visible in the S6 room-entry choreography
-// (the fake player object, the 6 background scientists, and the opponent's
-// walk-in sprite resolved via SetBattleFacilityTrainerGfxId), writing
-// committed, decoded artifacts under src/assets/gen/ + src/data/gen/. Run
+// overworld sprite sheets visible in the S6 room-entry choreography (the fake
+// player object, the 6 background scientists, and the opponent's walk-in
+// sprite resolved via SetBattleFacilityTrainerGfxId - every OBJ_EVENT_GFX id
+// the tower tables can produce), writing committed, decoded artifacts under
+// src/assets/gen/ + src/data/gen/. Run
 // with:
 //   node --experimental-strip-types tools/extract/extract-battle-room.ts
 //
@@ -179,10 +180,14 @@ function writeJson(path: string, data: unknown): void {
 }
 
 // --- Overworld sprite sheets (full 9-frame sAnimTable_Standard sheets) -----
-// All three characters visible in this scene use the shared 16x32, 9-frame
-// overworld_frame(*, 2, 4, N) layout (144x32px = 18x4 8x8-tiles); frame N is
-// tile columns [2N, 2N+1] x all 4 rows. sAnimTable_Standard's animation
-// commands (object_event_anims.h) resolve to these frame indices:
+// Every character visible in this scene uses the shared 9-frame
+// sAnimTable_Standard layout: frame N is tile columns [N*frameCols, N*frameCols
+// + frameCols) x all frameRows rows of the sheet PNG (the per-frame dims come
+// from the pic table's overworld_frame(*, frameCols, frameRows, N) entries).
+// Most NPCs are 16x32 (2x4 tiles, 144x32px = 18x4 tiles); NINJA_BOY and the
+// TUBERs are 16x16 (2x2, 144x16px); the CYCLING_TRIATHLETEs are 32x32 (4x4,
+// 288x32px). sAnimTable_Standard's animation commands (object_event_anims.h)
+// resolve to these frame indices:
 //   0 = face south         3,4 = walk south (alternating, + frame 0)
 //   1 = face north         5,6 = walk north (alternating, + frame 1)
 //   2 = face west (raw)    7,8 = walk west (alternating, + frame 2)
@@ -191,20 +196,20 @@ function writeJson(path: string, data: unknown): void {
 // docs/battle-room-notes.md), but the full sheet is extracted for each so a
 // future engine slice isn't blocked on a second extraction pass.
 {
-  function extractSheet(sheetPath: string) {
+  function extractSheet(sheetPath: string, frameCols: number, frameRows: number) {
     const img = decodeIndexedPng(sheetPath);
-    const sliced = sliceTiles(img); // 18 cols x 4 rows
+    const sliced = sliceTiles(img);
     const frames: { columns: number; rows: number; tiles: number[][] }[] = [];
     for (let frame = 0; frame < 9; frame += 1) {
       const tiles: number[][] = [];
-      for (let row = 0; row < 4; row += 1) {
-        for (let col = 0; col < 2; col += 1) {
-          const tx = frame * 2 + col;
+      for (let row = 0; row < frameRows; row += 1) {
+        for (let col = 0; col < frameCols; col += 1) {
+          const tx = frame * frameCols + col;
           const tile = sliced.tiles[row * sliced.columns + tx];
           tiles.push(tile ? [...tile.pixels] : new Array(64).fill(0));
         }
       }
-      frames.push({ columns: 2, rows: 4, tiles });
+      frames.push({ columns: frameCols, rows: frameRows, tiles });
     }
     return frames;
   }
@@ -217,43 +222,73 @@ function writeJson(path: string, data: unknown): void {
   // (object_event_graphics_info.h:1920-1937) uses the SAME sPicTable_
   // BrendanNormal / OBJ_EVENT_PAL_TAG_BRENDAN as the plain "BrendanNormal"
   // gfx already extracted for the pre-battle room - same source PNG.
-  const playerFrames = extractSheet(join(REF, "graphics", "object_events", "pics", "people", "brendan", "walking.png"));
+  const playerFrames = extractSheet(join(REF, "graphics", "object_events", "pics", "people", "brendan", "walking.png"), 2, 4);
   const playerPalette = loadJascPal(join(REF, "graphics", "object_events", "palettes", "brendan.pal"));
 
   // Scientists (OBJ_EVENT_GFX_SCIENTIST_1, all 6 background NPCs) - same
   // sheet/palette as the pre-battle room's attendant.
-  const scientistFrames = extractSheet(join(REF, "graphics", "object_events", "pics", "people", "scientist_1.png"));
+  const scientistFrames = extractSheet(join(REF, "graphics", "object_events", "pics", "people", "scientist_1.png"), 2, 4);
   const scientistPalette = loadJascPal(join(REF, "graphics", "object_events", "palettes", "npc_3.pal"));
 
-  // Opponent walk-in sprite: SetBattleFacilityTrainerGfxId(gTrainerBattleOpponent_A, 0)
-  // (src/battle_factory.c:379-382) looks up trainer 50 DESTIN's facilityClass
-  // (FACILITY_CLASS_BUG_CATCHER) in gTowerMaleFacilityClasses[28] (src/
-  // battle_tower.c:153-181) and reads the parallel gTowerMaleTrainerGfxIds[28]
-  // (:211-240) = OBJ_EVENT_GFX_BUG_CATCHER -> gObjectEventGraphicsInfo_
-  // BugCatcher (object_event_graphics_info.h:704-720): sPicTable_BugCatcher /
-  // OBJ_EVENT_PAL_TAG_NPC_1, also the standard 9-frame sheet.
-  const opponentFrames = extractSheet(join(REF, "graphics", "object_events", "pics", "people", "bug_catcher.png"));
-  const opponentPalette = loadJascPal(join(REF, "graphics", "object_events", "palettes", "npc_1.pal"));
-  // Battle 2's canonical opponent JENSON is FACILITY_CLASS_FISHERMAN.
-  // The same SetBattleFacilityTrainerGfxId lookup resolves that class to
-  // OBJ_EVENT_GFX_FISHERMAN (battle_tower.c's parallel class/gfx tables).
-  const fishermanFrames = extractSheet(join(REF, "graphics", "object_events", "pics", "people", "fisherman.png"));
-  const fishermanPalette = loadJascPal(join(REF, "graphics", "object_events", "palettes", "npc_2.pal"));
+  // Generated round opponents resolve their walk-in sprite through the
+  // facility-class lookup (see src/engine/factoryTrainerOverworldGfx.ts, a
+  // port of SetBattleFacilityTrainerGfxId, battle_tower.c:1161-1251). Each
+  // OBJ_EVENT_GFX_* id the tower tables can produce maps to one
+  // gObjectEventGraphicsInfo_* (object_event_graphics_info.h) -> its
+  // sPicTable_* overworld_frame dims (object_event_pic_tables.h) + the
+  // OBJ_EVENT_PAL_TAG_* palette file. The sheet PNGs are all under
+  // graphics/object_events/pics/people/ and palettes under
+  // graphics/object_events/palettes/. Every id in the OBJ_EVENT_GFX const
+  // below is extracted here, so no generated opponent falls back to the
+  // generic BUG_CATCHER sheet for lack of assets.
+  const OPPONENT_GFX_SHEETS: Record<string, { png: string; pal: string; frameCols: number; frameRows: number }> = {
+    NINJA_BOY: { png: "ninja_boy", pal: "npc_1", frameCols: 2, frameRows: 2 },
+    BOY_1: { png: "boy_1", pal: "npc_3", frameCols: 2, frameRows: 4 },
+    GIRL_3: { png: "girl_3", pal: "npc_2", frameCols: 2, frameRows: 4 },
+    RICH_BOY: { png: "rich_boy", pal: "npc_3", frameCols: 2, frameRows: 4 },
+    POKEFAN_F: { png: "pokefan_f", pal: "npc_2", frameCols: 2, frameRows: 4 },
+    WOMAN_2: { png: "woman_2", pal: "npc_3", frameCols: 2, frameRows: 4 },
+    EXPERT_M: { png: "expert_m", pal: "npc_4", frameCols: 2, frameRows: 4 },
+    EXPERT_F: { png: "expert_f", pal: "npc_4", frameCols: 2, frameRows: 4 },
+    POKEFAN_M: { png: "pokefan_m", pal: "npc_2", frameCols: 2, frameRows: 4 },
+    CAMPER: { png: "camper", pal: "npc_3", frameCols: 2, frameRows: 4 },
+    PICNICKER: { png: "picnicker", pal: "npc_3", frameCols: 2, frameRows: 4 },
+    MAN_3: { png: "man_3", pal: "npc_2", frameCols: 2, frameRows: 4 },
+    WOMAN_5: { png: "woman_5", pal: "npc_2", frameCols: 2, frameRows: 4 },
+    YOUNGSTER: { png: "youngster", pal: "npc_1", frameCols: 2, frameRows: 4 },
+    BUG_CATCHER: { png: "bug_catcher", pal: "npc_1", frameCols: 2, frameRows: 4 },
+    PSYCHIC_M: { png: "psychic_m", pal: "npc_4", frameCols: 2, frameRows: 4 },
+    SCHOOL_KID_M: { png: "school_kid_m", pal: "npc_1", frameCols: 2, frameRows: 4 },
+    MANIAC: { png: "maniac", pal: "npc_4", frameCols: 2, frameRows: 4 },
+    HEX_MANIAC: { png: "hex_maniac", pal: "npc_4", frameCols: 2, frameRows: 4 },
+    BLACK_BELT: { png: "black_belt", pal: "npc_3", frameCols: 2, frameRows: 4 },
+    BEAUTY: { png: "beauty", pal: "npc_3", frameCols: 2, frameRows: 4 },
+    LASS: { png: "lass", pal: "npc_4", frameCols: 2, frameRows: 4 },
+    GENTLEMAN: { png: "gentleman", pal: "npc_3", frameCols: 2, frameRows: 4 },
+    SAILOR: { png: "sailor", pal: "npc_1", frameCols: 2, frameRows: 4 },
+    FISHERMAN: { png: "fisherman", pal: "npc_2", frameCols: 2, frameRows: 4 },
+    RUNNING_TRIATHLETE_M: { png: "running_triathlete_m", pal: "npc_4", frameCols: 2, frameRows: 4 },
+    RUNNING_TRIATHLETE_F: { png: "running_triathlete_f", pal: "npc_2", frameCols: 2, frameRows: 4 },
+    TUBER_F: { png: "tuber_f", pal: "npc_1", frameCols: 2, frameRows: 2 },
+    TUBER_M: { png: "tuber_m", pal: "npc_2", frameCols: 2, frameRows: 2 },
+    HIKER: { png: "hiker", pal: "npc_1", frameCols: 2, frameRows: 4 },
+    CYCLING_TRIATHLETE_M: { png: "cycling_triathlete_m", pal: "npc_3", frameCols: 4, frameRows: 4 },
+    CYCLING_TRIATHLETE_F: { png: "cycling_triathlete_f", pal: "npc_1", frameCols: 4, frameRows: 4 },
+    MAN_4: { png: "man_4", pal: "npc_4", frameCols: 2, frameRows: 4 },
+    MAN_5: { png: "man_5", pal: "npc_2", frameCols: 2, frameRows: 4 },
+  };
 
-  // Generated round opponents resolve their walk-in sprite through the same
-  // facility-class lookup (see src/engine/factoryTrainerOverworldGfx.ts).
-  // Trainer 9 LILIANA is FACILITY_CLASS_SCHOOL_KID_F (female index 7) ->
-  // OBJ_EVENT_GFX_GIRL_3 (battle_tower.c:196/254) ->
-  // gObjectEventGraphicsInfo_Girl3 (object_event_graphics_info.h:286-303):
-  // sPicTable_Girl3 / OBJ_EVENT_PAL_TAG_NPC_2, the standard 9-frame sheet.
-  const girl3Frames = extractSheet(join(REF, "graphics", "object_events", "pics", "people", "girl_3.png"));
-  const girl3Palette = loadJascPal(join(REF, "graphics", "object_events", "palettes", "npc_2.pal"));
+  const opponentsOut: Record<string, { frames: { columns: number; rows: number; tiles: number[][] }[]; palette: { r: number; g: number; b: number }[] }> = {};
+  for (const [name, spec] of Object.entries(OPPONENT_GFX_SHEETS)) {
+    opponentsOut[name] = {
+      frames: extractSheet(join(REF, "graphics", "object_events", "pics", "people", `${spec.png}.png`), spec.frameCols, spec.frameRows),
+      palette: loadJascPal(join(REF, "graphics", "object_events", "palettes", `${spec.pal}.pal`)),
+    };
+  }
 
   writeJson(join(ASSETS_GEN, "battle-room-npcs.json"), {
     player: { frames: playerFrames, palette: playerPalette },
     scientist: { frames: scientistFrames, palette: scientistPalette },
-    opponent: { frames: opponentFrames, palette: opponentPalette },
-    fisherman: { frames: fishermanFrames, palette: fishermanPalette },
-    girl3: { frames: girl3Frames, palette: girl3Palette },
+    opponents: opponentsOut,
   });
 }
