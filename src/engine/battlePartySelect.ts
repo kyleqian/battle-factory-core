@@ -58,6 +58,14 @@ export type BattlePartySelectState = Readonly<{
     | Readonly<{ kind: "select"; partyIndex: BattlePartyIndex }>;
   elapsed: number;
   /**
+   * The `elapsed` value when the current cursor slot was last selected (the
+   * party menu's `AnimatePartySlot(slot, 1)` edge). Drives the selected
+   * mon-icon bounce's initial y2 hold and phase. Initialized to
+   * `MON_ICON_CREATION_ELAPSED_OFFSET` so a menu-open selection is treated as
+   * having happened at icon creation (the hold is already over).
+   */
+  selectedSinceElapsed: number;
+  /**
    * Frames since the SEND OUT confirm edge (the tick that set `outcome`), or
    * null before it. The voluntary-switch teardown keeps the settled menu on
    * screen through the real menu-close cadence
@@ -139,6 +147,7 @@ export function battlePartySelectStateForForcedParty(
     message: forced.message,
     outcome: null,
     elapsed: forced.elapsed,
+    selectedSinceElapsed: -MON_ICON_CREATION_ELAPSED_OFFSET,
     closeElapsed: null,
   });
 }
@@ -207,6 +216,7 @@ export function createBattlePartySelectState(
     message: null,
     outcome: null,
     elapsed: 0,
+    selectedSinceElapsed: -MON_ICON_CREATION_ELAPSED_OFFSET,
     closeElapsed: null,
   });
 }
@@ -283,7 +293,13 @@ export function advanceBattlePartySelect(
   if (newKeys.has("A")) return Object.freeze({ ...next, submenuOpen: true });
   const direction = (["UP", "DOWN", "LEFT", "RIGHT"] as const)
     .find((button) => newKeys.has(button));
-  return direction === undefined ? next : Object.freeze({ ...next, ...moveCursor(state, direction) });
+  if (direction === undefined) return next;
+  const moved = Object.freeze({ ...next, ...moveCursor(state, direction) });
+  // AnimatePartySlot(newSlotId, 1): the moved-to slot starts bouncing on this
+  // edge, so its bounce phase resets at the new elapsed.
+  return moved.cursor === state.cursor
+    ? moved
+    : Object.freeze({ ...moved, selectedSinceElapsed: next.elapsed });
 }
 
 type Tileset = Readonly<{ columns: number; rows: number; tiles: readonly (readonly number[])[] }>;
@@ -352,14 +368,65 @@ function drawSlot(
   }
 }
 
-function drawIcon(fb: Uint8Array, row: BattlePartySelectRow, selected: boolean, elapsed: number): void {
+/**
+ * ROM-accurate party-menu mon-icon animation (pokemon_icon.c sAnim_0 +
+ * UpdateMonIconFrame + SpriteCB_BouncePartyMonIcon, party_menu.c
+ * AnimateSelectedPartyIcon/SpriteCB_BouncePartyMonIcon). Each icon's anim
+ * starts with a fresh frame-0 copy at its creation tick and advances once per
+ * frame; frame 0 shows for 7 ticks, frame 1 for 8 (FRAME durations of 6 plus
+ * the trailing ANIMCMD_JUMP's extra tick), a 15-tick cycle. The creation
+ * clock is offset from the selector's `elapsed` clock by
+ * `MON_ICON_CREATION_ELAPSED_OFFSET`, calibrated against the oracle's settled
+ * menu window (frame-905 acceptance: slot 0/2 byte-exact, selected slot 1
+ * bouncing at the oracle's phase).
+ */
+const MON_ICON_CREATION_ELAPSED_OFFSET = -30;
+const MON_ICON_FRAME_CYCLE = 15;
+/** First frame-1 copy at anim-clock tick 7; frame 0's first copy at 15. */
+const MON_ICON_FRAME1_FIRST_TICK = 7;
+const MON_ICON_FRAME1_TICKS = 8;
+
+/** sAnim_0 displayed frame at `elapsed` (frame 0 in [15+15k, 7+15(k+1))). */
+export function monIconFrameAt(elapsed: number): 0 | 1 {
+  const tick = elapsed + MON_ICON_CREATION_ELAPSED_OFFSET;
+  const r = ((tick - MON_ICON_FRAME1_FIRST_TICK) % MON_ICON_FRAME_CYCLE + MON_ICON_FRAME_CYCLE) % MON_ICON_FRAME_CYCLE;
+  return r < MON_ICON_FRAME1_TICKS ? 1 : 0;
+}
+
+/** Next frame-copy tick strictly after `animClock`, in anim-clock terms. */
+function monIconNextFrameChange(animClock: number): number {
+  // Frame-1 copies at 7+15k, frame-0 copies at 15+15k.
+  const frame1 = MON_ICON_FRAME1_FIRST_TICK
+    + MON_ICON_FRAME_CYCLE
+      * (Math.floor((animClock - MON_ICON_FRAME1_FIRST_TICK) / MON_ICON_FRAME_CYCLE) + 1);
+  const frame0FirstTick = MON_ICON_FRAME1_FIRST_TICK + MON_ICON_FRAME_CYCLE - MON_ICON_FRAME1_TICKS;
+  const frame0 = frame0FirstTick
+    + MON_ICON_FRAME_CYCLE * (Math.floor((animClock - frame0FirstTick) / MON_ICON_FRAME_CYCLE) + 1);
+  return Math.min(frame1, frame0);
+}
+
+/**
+ * SpriteCB_BouncePartyMonIcon: a selected icon holds y2 = 0 until its first
+ * frame change after selection, then sits at y2 = -3 while frame 0 shows and
+ * y2 = +1 while frame 1 shows (animCmd = 1 flips to -3, animCmd = 2 to +1).
+ */
+export function monIconSelectedY2(elapsed: number, selectedSinceElapsed: number): number {
+  const animClock = elapsed + MON_ICON_CREATION_ELAPSED_OFFSET;
+  const selectionClock = selectedSinceElapsed + MON_ICON_CREATION_ELAPSED_OFFSET;
+  if (animClock < monIconNextFrameChange(selectionClock)) return 0;
+  return monIconFrameAt(elapsed) === 0 ? -3 : 1;
+}
+
+function drawIcon(fb: Uint8Array, row: BattlePartySelectRow, selected: boolean, elapsed: number, selectedSinceElapsed: number): void {
   const icon = partyIcons[row.speciesKey];
   if (!icon) return fail(`missing icon catalog entry ${row.speciesKey}`);
   const centers = [{ x: 16, y: 40 }, { x: 104, y: 18 }, { x: 104, y: 42 }] as const;
   const center = centers[row.partyIndex];
-  const sheet = Math.floor(elapsed / 8) % 2 === 0 ? icon.frame0 : icon.frame1;
+  const sheet = monIconFrameAt(elapsed) === 0 ? icon.frame0 : icon.frame1;
   const x2 = selected || row.partyIndex === 0 ? 0 : -4;
-  const y2 = selected ? (Math.floor(elapsed / 16) % 2 === 0 ? -3 : 1) : row.partyIndex === 0 ? -4 : 0;
+  const y2 = selected
+    ? monIconSelectedY2(elapsed, selectedSinceElapsed)
+    : row.partyIndex === 0 ? -4 : 0;
   for (let ty = 0; ty < sheet.rows; ty += 1) for (let tx = 0; tx < sheet.columns; tx += 1) {
     const tile = sheet.tiles[ty * sheet.columns + tx]!;
     for (let py = 0; py < 8; py += 1) for (let px = 0; px < 8; px += 1) {
@@ -487,14 +554,18 @@ export function renderBattlePartySelect(
   state: BattlePartySelectState,
 ): void {
   drawSourceBackground(fb);
+  // LoadPartyBoxPalette (party_menu.c:2205-2280) overwrites box banks 3/4/5
+  // with the same "empty slot" colors (sPartyBoxEmptySlotPalIds {52,53,54} /
+  // {49,55,56} -> gPartyMenuBg_Pal bank 3), so every normal box renders from
+  // bank 3; fainted uses bank 6, the current-selection box bank 7.
   drawSlot(fb, partySource.slots.main, 8, 24, state.cursor === 0 ? 7 : state.rows[0].fainted ? 6 : 3);
-  drawSlot(fb, partySource.slots.wide, 96, 8, state.cursor === 1 ? 7 : state.rows[1].fainted ? 6 : 4);
-  drawSlot(fb, partySource.slots.wide, 96, 32, state.cursor === 2 ? 7 : state.rows[2].fainted ? 6 : 5);
+  drawSlot(fb, partySource.slots.wide, 96, 8, state.cursor === 1 ? 7 : state.rows[1].fainted ? 6 : 3);
+  drawSlot(fb, partySource.slots.wide, 96, 32, state.cursor === 2 ? 7 : state.rows[2].fainted ? 6 : 3);
   for (const row of state.rows) {
     drawRowText(fb, row, state.cursor === row.partyIndex);
     drawGenderGlyph(fb, row);
     drawHpBar(fb, row);
-    drawIcon(fb, row, state.cursor === row.partyIndex, state.elapsed);
+    drawIcon(fb, row, state.cursor === row.partyIndex, state.elapsed, state.selectedSinceElapsed);
   }
 
   if (state.submenuOpen) {
