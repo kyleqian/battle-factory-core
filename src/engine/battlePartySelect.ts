@@ -554,9 +554,13 @@ export function renderBattlePartySelect(
   state: BattlePartySelectState,
 ): void {
   drawSourceBackground(fb);
+  // LoadPartyBoxPalette (party_menu.c:2205-2280) overwrites box banks 3/4/5
+  // with the same "empty slot" colors (sPartyBoxEmptySlotPalIds {52,53,54} /
+  // {49,55,56} -> gPartyMenuBg_Pal bank 3), so every normal box renders from
+  // bank 3; fainted uses bank 6, the current-selection box bank 7.
   drawSlot(fb, partySource.slots.main, 8, 24, state.cursor === 0 ? 7 : state.rows[0].fainted ? 6 : 3);
-  drawSlot(fb, partySource.slots.wide, 96, 8, state.cursor === 1 ? 7 : state.rows[1].fainted ? 6 : 4);
-  drawSlot(fb, partySource.slots.wide, 96, 32, state.cursor === 2 ? 7 : state.rows[2].fainted ? 6 : 5);
+  drawSlot(fb, partySource.slots.wide, 96, 8, state.cursor === 1 ? 7 : state.rows[1].fainted ? 6 : 3);
+  drawSlot(fb, partySource.slots.wide, 96, 32, state.cursor === 2 ? 7 : state.rows[2].fainted ? 6 : 3);
   for (const row of state.rows) {
     drawRowText(fb, row, state.cursor === row.partyIndex);
     drawGenderGlyph(fb, row);
