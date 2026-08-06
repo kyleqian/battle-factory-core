@@ -5,6 +5,51 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 965 — [bounded MAIN worker, 2026-08-06] #78 residuals 1a-1d bound: switch-out scale-up, send-in emerge, healthbox slide lag, ball-open particles — dense 95/95, command spec 128/128
+
+- **State:** master `9a9c6563`, clean at commit. Typecheck green. Full
+  `npm test` + `npm run build` NOT run (cap-killed at the docs gate);
+  typecheck + `battle-command-generated-off` **128/128** +
+  `mid-battle-switch-dense-a-off` **95/95** are the last verified tiers.
+- **Did:** bound §10.5's four residual classes smallest-risk-first, one
+  commit each: (1d `d8fd6b41`) healthbox slide keyed off elapsed 66-88 (the
+  oracle renders the slide one tick later than the RAM: 110→0 over rendered
+  1206-1228) — the 186-1379px healthbox band vanished, leaving only the
+  particle + palette classes; (1a `07f632cb`) switch-out scale-up now uses
+  the doubled 128px affine box + the `SetBattlerSpriteYOffsetFromYScale`
+  feet-anchor y2 formula (var=64-2*13=38, `(var - floor(var<<8/scale))/2`),
+  AND the rendered scale lags the §10.1 RAM table by **2 ticks** (the
+  gOamMatrices write latches into the OAM matrix table two frames later —
+  pixel-fit proved frame N renders §10.1's N-2 value; 813-988px → 46-78px,
+  the mon scale-up itself byte-exact); (1c `2209e353`) emerge starts acc 58
+  (not 76) + descends via the shared `MATERIALIZE_Y2_TABLE` (now exported)
+  + textured OBJ-row ball-blend instead of the flat tint, rendered **1 tick
+  behind** the §10.3 RAM table — 1189-1199 byte-exact (was 51-442px);
+  (1b `9a9c6563`) recall (1089-1130, base (72,112)) + send-in (1187-1228,
+  base (72,123)) ball-open particles via a pure scheduler
+  (`midBattleSwitchParticleSchedulesAt`, age = frame-start-2-i, one-tick
+  render lag) + the existing Sin/Cos + `sAnim_RegularBall` machinery —
+  recall 1091-1099 and send-in 1195-1203 byte-exact.
+- **Oracle:** `mid-battle-switch-dense-a-off` **95/95** (unchanged);
+  `battle-command-generated-off` **128/128** (switch-route draws gated on
+  `sourceDecision.kind === "switch"`, no leak into the GUST resolution).
+  Remaining dense residuals (all measured): 1188 27px (emerge first-sliver),
+  1200 254px, 1205-1207 25-48px (the pre-existing staged-RATTATA mon
+  palette class, PROGRESS 957 side-asset) + 1203-1204 ~30px (particles tail
+  + palette).
+- **Next:** (1) extend the dense spec's `captureFrames` across 1091-1126 +
+  1185-1227 (stage 5) — the committed spec stays 95/95; byte-exact is
+  blocked only by the ~25-254px palette class; (2) the 1256-1407
+  fight-menu window (out of scope for this step).
+- **Notes:** three of the four classes needed a render-lag correction vs the
+  doc's RAM tables (healthbox +1, particles +1, switch-out scale +2, emerge
+  +1) — the probe reads the register/state the tick it's written, which
+  renders one or two frames later; the §10 tables are the RAM state, not the
+  rendered frame. PAPERCUT: the §10.2 particle z-order/draw-order and the
+  scale-up pixel-fit each cost ~30-40 min of scratch-python forensics the
+  doc's RAM-only tables couldn't answer (they had no per-frame rendered
+  pixel ground truth).
+
 ## 964 — [bounded MAIN worker, 2026-08-06] ball-fade canary regression isolated + already-fixed: 0aeb2fde introduced 82/128, f0b52d7d's gate restores 128/128 — no source change needed, 962/963 corrected
 
 - **State:** master `407635d0`, clean at commit. Typecheck green; smoke

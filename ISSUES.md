@@ -66,25 +66,21 @@ male (fg 66,206,255), the app stage defaulted female. Fixed by pinning
 preserved; bench stays female, matching the oracle). The §6 dense spec IS
 now committed: `mid-battle-switch-dense-a-off` **84/84** (recall window
 1035-1090 + settled-send-in/"used"-typing window 1228-1255, byte-exact).]**
-Remaining un-green spans, all named: (1) **the white background palette
-fade BIND landed 2026-08-06 (`0aeb2fde`)** — `BeginNormalPaletteFade
-(RGB_WHITE)`'s white coefficient + the mon's `gBallOpenFadeColors[BALL_POKE]`
-(0x7ADF) OBJ blend now render byte-exact for the FIELD BG across the whole
-fade window (the dense `--capture-range 1091:1126` field diff drops from
-~16k px at the plateau to ~0 outside the sprites; Tier-1 pin
-`tests/midBattleSwitchBallFade.test.ts`, the two §8.3 stolen ticks modeled).
-**The fade windows still are NOT in the committed spec**: the remaining
-fade-window diffs are PRE-EXISTING mon-sprite rendering classes, not the
-fade — (1a) switch-out affine scale-up 1101-1112 (172-935 px, bbox
-49,74-95,111: the app's scaled sprite is smaller + higher than the oracle's);
-(1b) a recall sparkle/shadow + mon bottom-edge class 1091-1100 (7-59 px) and
-1113-1126 (47-96 px — oracle shows (255,173,0) ball-open particles / whiter
-field at the mon's feet, `AnimTask_SwitchOutBallEffect`'s
-`AnimateBallOpenParticles`, unmodeled); (1c) send-in emerge 1188-1200
-(90-616 px — app flat-tints `MATERIALIZE_TINT_COLOR`, oracle shows the
-ball-colored textured sprite anchored at the ground); (1d) send-in
-healthbox-slide / settle 1207-1227 (211-1379 px). Extending the dense spec
-across 1091-1130 + 1188-1227 waits on (1a)-(1d); (2) **[CLOSED 2026-08-05
+Remaining un-green spans, all named: (1) **[CLOSED 2026-08-06 `d8fd6b41`+
+`07f632cb`+`2209e353`+`9a9c6563`]** the four mon-sprite residual classes
+(§10.5) are bound — (1d) healthbox slide one-tick render lag (elapsed 66-88);
+(1a) switch-out scale-up doubled box + `SetBattlerSpriteYOffsetFromYScale`
+feet anchor, rendered 2 ticks behind the §10.1 RAM table; (1c) send-in
+emerge acc 58 start, `MATERIALIZE_Y2_TABLE` descent, textured OBJ-row
+ball-blend, one-tick render lag; (1b) recall/send-in ball-open particles
+(Sin/Cos radial, shared `sAnim_RegularBall` cycle). Dense residuals now:
+1188 27px (emerge first-sliver), 1200 254px + 1205-1207 ~25-48px (the
+pre-existing **staged-RATTATA mon palette** class, PROGRESS 957 side-asset),
+1203-1204 ~30px (particles tail + palette). **The dense spec's
+captureFrames were NOT extended across 1091-1130/1185-1227** (stage 5
+unreached under the time cap) — the committed `mid-battle-switch-dense-a-off`
+stays **95/95** with the already-green 1035-1090 + 1131-1139 + 1186-1187 +
+1228-1255 windows; (2) **[CLOSED 2026-08-05
 late, `032a03b2`]** the
 party-summary panel pixels were app **overdraw** (§9: the real game draws no
 player tray here, `skipPlayer=1`) — the player-side tray draw is dropped on
