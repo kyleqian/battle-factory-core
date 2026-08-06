@@ -1711,3 +1711,34 @@ describe("battle resolution typed Scene-OFF renderer", () => {
     }).toEqual({ count: 0, bounds: null });
   });
 });
+
+describe("midBattleSwitchFade gate (ISSUES #81: non-switch resolutions never fade)", () => {
+  it("a use-move resolution whose fadeTick lands in the recall window renders no phantom ball-fade", () => {
+    // The fade's trace-frame windows ([1088,1139] recall / [1187,1231]
+    // send-in relative to MID_BATTLE_SWITCH_FADE_BASE_TRACE) are calibrated
+    // to the staged voluntary-switch fixture. A plain move resolution (this
+    // trace's turn-2 GUST) also advances fadeTick during its confirm
+    // handoff, so fadeTick 60 -> trace 1095 lands inside the recall window --
+    // without the sourceDecision gate the player sprite/field would render a
+    // ghost white ball-fade (measured 1100/1200, now 0 px outside the
+    // message window).
+    const resolution = Object.freeze({ ...damageResolution(), fadeTick: 60 });
+    const view = createBattleResolutionPresentationRenderView(resolution);
+    expect(view.midBattleSwitchFade).toBeNull();
+  });
+
+  it("the gate is source-driven, not event-driven: a switch-command resolution whose sourceDecision is use-move still never fades", () => {
+    // `voluntarySwitchResolution` processes real switch/party-summary events
+    // but is created through `inputFor`, whose `sourceDecision` is
+    // `{ kind: "use-move" }` -- only the orchestrator's voluntary-switch
+    // route stamps a `kind: "switch"` source. That source is the sole gate:
+    // a use-move source with switch-shaped events renders no fade either
+    // (the mid-battle-switch compare 95/95 is the positive case).
+    const resolution = voluntarySwitchResolution();
+    const view = createBattleResolutionPresentationRenderView({
+      ...resolution,
+      fadeTick: 60,
+    });
+    expect(view.midBattleSwitchFade).toBeNull();
+  });
+});

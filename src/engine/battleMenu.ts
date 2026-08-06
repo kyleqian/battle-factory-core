@@ -832,6 +832,36 @@ export function menuIdleBounce(t: number): { onixY2: number; healthboxY2: number
   };
 }
 
+/**
+ * Entry-relative `SpriteCB_BounceEffect` y2 for the live generated command
+ * menu (docs/fight-menu-chrome-ground-truth.md §8). `DoBounceEffect`
+ * (`battle_main.c:2899-2938`) seeds the invisible bouncer sprite's
+ * `sSinIndex` to 128 (`BOUNCE_HEALTHBOX`) or 192 (`BOUNCE_MON`), and
+ * `SpriteCB_BounceEffect` (`battle_main.c:2967-2979`) steps `sSinIndex += 7`
+ * (`sDelta`) each frame and writes
+ * `y2 = Sin(index, sAmplitude) + sAmplitude = gSineTable[index] >> 8 + 1`
+ * (amplitude 1, `trig.c:515-518`). `age` is the menu-entry-relative clock
+ * (`BattleCommandPresentationState.idleBounceElapsed`): the menu's first
+ * interactive screen tick shows no bounce yet (the seed only fires on the
+ * NEXT screen tick -- this route's established +1 render lag, the same
+ * `MENU_BOUNCE_RAM_SETUP_TICK`/`ramTick = t - 1` relation `menuIdleBounce`
+ * encodes at its own absolute anchor), so age < 1 is 0 and age >= 1 uses
+ * `index = 7 * (age - 1)`. Only the player battler sprite and player
+ * healthbox bounce -- `DoBounceEffect(gActiveBattler, ...)` targets the
+ * player side in singles and the opponent never bounces (§8(b)). Equivalent
+ * to `menuIdleBounce(MENU_DRAW_TICK + age)`; the entry-relative form drops
+ * the battle-1 absolute-tick anchor so staged fixtures can seed
+ * `idleBounceElapsed` with their pre-stage bounce time.
+ */
+export function commandMenuBounceY2(age: number): { onixY2: number; healthboxY2: number } {
+  if (age < 1) return { onixY2: 0, healthboxY2: 0 };
+  const index = 7 * (age - 1);
+  return {
+    onixY2: bounceSin(192 + index) + 1,
+    healthboxY2: bounceSin(128 + index) + 1,
+  };
+}
+
 export interface ActionMenuDisplayTransition {
   readonly visible: boolean;
   readonly battlerY2: number;

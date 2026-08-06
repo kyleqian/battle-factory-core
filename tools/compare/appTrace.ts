@@ -1149,6 +1149,15 @@ function tormentSelectionRejectionOffStage(state: EngineState): EngineState {
     // (its first turn-2 segment is an A press at 734-735), so the app stage
     // skips the action-enter delay, exactly like mid-battle-switch-dense-off.
     lifecycle: Object.freeze({ phase: "action-menu" as const, phaseElapsed: 0 }),
+    // Class-4 bounce entry phase (docs/fight-menu-chrome-ground-truth.md §8):
+    // the real `DoBounceEffect` sprite was seeded when the turn-2 action menu
+    // first polled input, 6 frames before this stage's clock starts (the
+    // frame-734 action menu's `menuIdleBounce`/`commandMenuBounceY2` phase
+    // lands on the oracle's schedule at `idleBounceElapsed = 7`, i.e. 1
+    // first-tick reveal + 6 pre-stage bounce frames). Without this seed the
+    // app's entry-relative clock is 49 index units (7 frames) behind the
+    // oracle and every bounce frame shows the 857/1776px class-4 diff.
+    idleBounceElapsed: 7,
   });
   const boundaries = Object.freeze(
     ([presentation.field.player, presentation.field.opponent] as const).map(

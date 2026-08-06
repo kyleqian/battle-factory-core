@@ -441,7 +441,7 @@ import {
   MENU_IDLE_BLANK_START_TICK,
   MENU_IDLE_BLANK_END_TICK,
   menuIdleBounce,
-  actionMenuDisplayAtAge,
+  commandMenuBounceY2,
   FIGHT_SUBMENU_OPEN_DELAY,
   FIGHT_SUBMENU_CLOSE_DELAY,
   FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
@@ -18273,9 +18273,9 @@ export function renderGeneratedBattleCommandPresentation(
   presentation: BattleCommandPresentationState,
 ): void {
   const bounceTick = presentation.idleBounceElapsed;
-  const idleBounce = actionMenuDisplayAtAge(bounceTick, 0);
+  const idleBounce = commandMenuBounceY2(bounceTick);
   const bounce = {
-    onixY2: idleBounce.battlerY2,
+    onixY2: idleBounce.onixY2,
     healthboxY2: idleBounce.healthboxY2,
   };
   renderBattleCommandPresentation(fb, presentation, {
@@ -35329,7 +35329,7 @@ export function renderBattleResolutionSceneOffView(
 ): void {
   if (view.confirmHandoff) {
     const bounceTick = view.confirmHandoff.idleBounceElapsed;
-    const idleBounce = actionMenuDisplayAtAge(bounceTick, 0);
+    const idleBounce = commandMenuBounceY2(bounceTick);
     drawBattle2ActionMenuWindow(
       fb,
       bounceTick,
@@ -35337,7 +35337,7 @@ export function renderBattleResolutionSceneOffView(
       0,
       {
         onixY2:
-          view.confirmHandoff.bounceReset ? 0 : idleBounce.battlerY2,
+          view.confirmHandoff.bounceReset ? 0 : idleBounce.onixY2,
         healthboxY2:
           view.confirmHandoff.bounceReset ? 0 : idleBounce.healthboxY2,
       },

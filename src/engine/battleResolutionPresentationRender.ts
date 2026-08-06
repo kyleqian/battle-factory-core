@@ -684,9 +684,16 @@ export function createBattleResolutionPresentationRenderView(
           displayCursor: state.confirmHandoff.fightDisplayCursor,
         }),
       });
-  const midBattleSwitchFade = midBattleSwitchFadeAt(
-    MID_BATTLE_SWITCH_FADE_BASE_TRACE + state.fadeTick,
-  );
+  // ISSUES #78 residual (1): the white ball-fade only ever runs on a
+  // mid-battle SWITCH resolution. The `fadeTick` clock + the hardcoded
+  // recall/send-in trace-frame windows ([1088,1139]/[1187,1231] relative to
+  // `MID_BATTLE_SWITCH_FADE_BASE_TRACE`) are calibrated to the staged
+  // voluntary-switch fixture; a non-switch resolution (e.g. a plain move like
+  // this trace's GUST) can still advance `fadeTick` into that numeric range
+  // and must not render a phantom ball-fade on its field/sprite.
+  const midBattleSwitchFade = state.sourceDecision.kind === "switch"
+    ? midBattleSwitchFadeAt(MID_BATTLE_SWITCH_FADE_BASE_TRACE + state.fadeTick)
+    : null;
   if (state.lifecycle.phase === "presenting-switch-in") {
     const switchCommand = segment.commands.find(
       (candidate): candidate is Extract<
