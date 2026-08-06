@@ -19,6 +19,10 @@
   Evidence `35ede52e…` / `8f27ac49…`, RGB `d35ee921…` / `bd2ba9fa…` reproduce
   the fixture pins exactly on every fresh portable run. Coverage JSON + ledger
   promoted REFRESH only; no component credit, no sibling promotion.
+- **Verified:** supervisor independently re-ran both portables at 209/209,
+  focused tests at 18/18, `npm run animation:coverage` at 117/276 exact,
+  the full suite at 743/743 files (7,046 passed, 1 skipped), and the production
+  build. All pre-existing tracked scratch diagnostics were preserved.
 - **Next:** continue the zero-new-component Level-50 ladder from the ranked
   coverage report.
 - **Notes:** AROMATHERAPY receipt drift: new evidence `cec76eae360c…`, pinned
