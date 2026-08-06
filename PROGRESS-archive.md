@@ -36446,3 +36446,18 @@ both verify scripts/census independently re-verified before this entry.)*
   Codex-identity wrapper so existing call sites are untouched.
 
 ---
+
+## 954 — [bounded MAIN worker, 2026-08-05] ISSUES #55 wiring landed: win-terminal scaffold produces the ROM's battle-2 LILIANA byte-for-byte
+
+- **State:** master `67211ca2`, clean. Typecheck green; smoke 7/347 green;
+  all five committed win/loss terminal traces byte-identical.
+- **Did:** wired receipt §7 into `winTerminalWindowStage`: playerTrainerId
+  `0x18CC699A`, real six saved rental set ids, the synthetic terminal battle
+  rngSeed transplanted, and `config.adoptedNextOpponent` feeding
+  `preGenerateFactoryRoundNextOpponent` at the GO ON seam. Tier-1 pin:
+  trainer 9 LILIANA + sets + personalities + selection end cursor.
+  Regression list byte-identical: win-terminal-window-off 3590/3590,
+  win-go-on-swap-offer-yes-off 248/248, no-off 213/213,
+  no-guide-dismiss-off 232/232, loss-terminal-window-off 1943/1943.
+- **Next:** canonical-window extension past 10638 (trainer-class overworld
+  sprites), then #78 slice 4, #81, #80, RECORD/RETIRE, lobby.

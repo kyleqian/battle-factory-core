@@ -52,19 +52,21 @@ real 1407 edge); 1077+ diverges as expected (slice 4 recall hold). Tier-1
 pins: `tests/factoryVoluntarySwitchSeam.test.ts` (5, two orchestrator-level
 red-verified) + the re-based `returns the exact legal voluntary row…` test.
 
-**Remainder:** (4) recall-side span — `STRINGID_RETURNMON` still shows
-`max(24,~35)≈35f` instead of the real 82f hold (the outgoing mon's
-return-to-ball scale-up + teardown is unmodeled); the dense §6 acceptance
-spec is still NOT committed because no byte-exact span exists in the
-fixture's window — the pre-existing **48px staged-RATTATA sprite palette
-residual** (the ROM's RATTATA front/back sprites show a light-cyan region
-whose color the extracted `src/assets/gen/battle-{back,opponent-front}-
-sprites.json` RATTATA palettes lack; the purple body pixels match 100%,
-attribution staged-fixture asset side, NOT the seam/renderer) keeps every
-frame of 1035-1260 at ≥24px diff — whoever fixes that palette (side lane's
-asset territory) can re-probe `1035-1076` and commit the spec; the party-menu
-close's fade pixels are also held-and-cut (menu pixels are #80 scope, frame
-budget is the acceptance).
+**Remainder:** (4) recall-side span — the 82f hold + return-to-ball scale-up
+landed (PROGRESS 957, `afb35f4c` + `8514c827`): the recall message now holds
+the real schedule (message-only 42f, switch-out 32f with affine scale-up
+256→736 over relative 14-24 and sprite freed at ~25, party-summary+getswitched
+7f, "Go!" 13f, switch-in + 11f settle hold), and the incoming sprite's
+visibility restore bug the slice exposed is fixed — the dense probe's
+1035-1255 window is schedule-exact (1228-1255 = 24px). The dense §6 acceptance
+spec is still NOT committed: the **48px staged-RATTATA palette residual**
+(side-lane asset fix) plus two unmodeled real oracle effects keep frames out of
+byte-exact — (1) the **white background palette fade** (`LaunchBallFadeMonTask`
+→ `BeginNormalPaletteFade(RGB_WHITE)` + the mon's ball-color blend, oracle
+1093-1126 recall / 1191-1224 switch-in, up to ~16k px at the scale-up peak);
+(2) the **in-battle party-summary panel pixels** (1127-1138, ~389 px). The
+party-menu close's fade pixels are also held-and-cut (menu pixels are #80
+scope, frame budget is the acceptance).
 
 ## #80 — Live play: in-battle party/switch menu is scaffolding-grade
 

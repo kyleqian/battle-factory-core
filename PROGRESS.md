@@ -5,6 +5,42 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 957 — [bounded MAIN worker, 2026-08-05] ISSUES #78 slice 4 landed: recall 82f hold + return-to-ball switch-out; schedule exact through 1255, two residual classes remain
+
+- **State:** master `8514c827`, clean. Typecheck green; full `npm test`
+  **742 files / 7053 passed / 1 skipped** + `npm run build` green.
+  `compare:differential --base 51a8fdaa` over battle-command-generated-off +
+  turn15-fly-strike: **384/384 byte-identical** (forced/move paths unmoved).
+- **Did:** STRINGID_RETURNMON message gains the 9-frame post-print hold
+  (typing+9 = 42f message-only region 1044-1085); new `switch-out` command
+  (`RETURN_TO_BALL_SPAN_FRAMES` = 32) emitted for the synthesized
+  return-atk-to-ball receipt, rendering the affine scale-up 256→736 over
+  relative frames 14-24 (trace 1100-1110) with the sprite freed from relative
+  25 (1111+); SWITCHINMON timed 13f, party-summary draw+getswitched 7f
+  (1119-1125), switch-in carries the 11f waitstate/move-load settle hold —
+  so the pre-"Go!" window is the real 82f (1044-1125) and the opponent's
+  "used" first glyph lands at 1242. Also fixed a masked bug the slice exposed:
+  the switch-in command now restores the incoming battler's
+  sprite/healthbox visibility (the recall receipt had hidden them; the
+  resolution render view never re-enabled them). Tier-1 pins red-verified
+  (seam test 7, battleResolutionPresentation 29).
+- **Dense probe (`mid-battle-switch-dense-off`, dense-a, frames 1000-1255):**
+  1035-1090 = 48px RATTATA-only; 1139 = 24px; 1140-1188 = 24-250px (send-in
+  ball/emerge); **1228-1255 = 24px** (settled send-in + waitstate hold +
+  "used SPLASH!" typing byte-aligned). Residual classes (both real oracle
+  effects, neither modeled): (1) the **white BG palette fade** (1093-1126
+  recall, 1191-1224 switch-in — `LaunchBallFadeMonTask`'s BeginNormalPaletteFade
+  + the mon's ball-color blend; up to ~16k px at the scale-up peak); (2) the
+  **in-battle party-summary panel pixels** (1127-1138, ~389 px). No byte-exact
+  full-window span → **no spec committed** (still gated on the RATTATA
+  palette fix + these two).
+- **Next:** the two residuals (BG fade + party panel) to close the dense
+  window, then the spec once the RATTATA palette is fixed; then #80, #81.
+- **Notes:** contract fallback taken — the affine scale-up + teardown are in
+  with probe numbers; the fades are the honestly-remaining sub-piece.
+
+---
+
 ## 956 — [bounded MAIN worker, 2026-08-05] ISSUES #78 voluntary-switch presentation seam + party-menu close cadence landed
 
 - **State:** master `a47ac0c9`, clean. Typecheck green; seam tests 5/5 (2
