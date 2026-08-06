@@ -618,23 +618,50 @@ describe("ISSUES #78 voluntary-switch source decision", () => {
     expect(switchInView.partySummary).toBeNull();
   });
 
-  it("models the return-to-ball scale-up 256->736 over relative 14-24 and frees the sprite at relative 25", () => {
+  it("models the return-to-ball scale-up 256->736 with the doubled box + feet-anchor y2, rendered 2 ticks behind the RAM ramp (1a)", () => {
     // AnimTask_SwitchOutShrinkMon (battle_anim_throw.c:642-667) steps the
     // affine scale +0x30/tick from 0x100 until >= 0x2D0: 256->736 across the
-    // span's relative frames 14-24 (trace 1100-1110), sprite invisible from
-    // relative 25 (trace 1111) -- ground truth §2.
+    // RAM relative frames 14-24 (trace 1100-1110) -- ground truth §10.1. The
+    // RENDERED scale lags that RAM table by two ticks (the gOamMatrices write
+    // is latched into the OAM matrix table two rendered frames later;
+    // pixel-verified: the §10.1 "304 at 1101" first renders at trace 1103,
+    // and the sprite is still visible at 1112), so the view keys off
+    // elapsed-2. The y2 column is SetBattlerSpriteYOffsetFromYScale
+    // (battle_anim_mons.c:1873-1883): var=64-2*13=38, y2=(var - (var<<8 /
+    // scale))/2.
     const viewAt = (elapsed: number) => midBattleSwitchOutAt(elapsed, 0);
     expect(viewAt(13)).toEqual({
       elapsed: 13,
       battler: 0,
       scale: 256,
+      y2: 0,
       spriteVisible: true,
     });
     expect(viewAt(14).scale).toBe(256);
-    expect(viewAt(15).scale).toBe(304);
-    expect(viewAt(24).scale).toBe(736);
-    expect(viewAt(24).spriteVisible).toBe(true);
-    expect(viewAt(25).spriteVisible).toBe(false);
+    expect(viewAt(15).scale).toBe(256);
+    expect(viewAt(17).scale).toBe(304); // rendered one tick into the ramp
+    expect(viewAt(26).scale).toBe(736); // last rendered scale-up frame
+    expect(viewAt(26).y2).toBe(12);
+    expect(viewAt(26).spriteVisible).toBe(true);
+    expect(viewAt(27).spriteVisible).toBe(false);
     expect(viewAt(31).spriteVisible).toBe(false);
+    // The y2 feet-anchor table §10.1: 304->3, 352->5, 400->7, 448->8, 496->9,
+    // 544->10, 592->11, 640->11, 688->12, 736->12.
+    const expected = [
+      { e: 17, s: 304, y: 3 },
+      { e: 18, s: 352, y: 5 },
+      { e: 19, s: 400, y: 7 },
+      { e: 20, s: 448, y: 8 },
+      { e: 21, s: 496, y: 9 },
+      { e: 22, s: 544, y: 10 },
+      { e: 23, s: 592, y: 11 },
+      { e: 24, s: 640, y: 11 },
+      { e: 25, s: 688, y: 12 },
+      { e: 26, s: 736, y: 12 },
+    ];
+    for (const row of expected) {
+      expect(viewAt(row.e).scale).toBe(row.s);
+      expect(viewAt(row.e).y2).toBe(row.y);
+    }
   });
 });

@@ -98,12 +98,34 @@ export const MID_BATTLE_SWITCH_OUT_SCALE_UP_END_ELAPSED = 24;
 export const MID_BATTLE_SWITCH_OUT_SPRITE_FREED_ELAPSED = 25;
 export const MID_BATTLE_SWITCH_OUT_SCALE_START = 256;
 export const MID_BATTLE_SWITCH_OUT_SCALE_STEP = 48;
+/**
+ * `SetBattlerSpriteYOffsetFromYScale` (`battle_anim_mons.c:1873-1883`):
+ * `var = MON_PIC_HEIGHT(64) - GetBattlerYDeltaFromSpriteId*2`, for RATTATA
+ * `gMonBackPicCoords[19].y_offset = 13` (`back_pic_coordinates.h:26`) so
+ * `var = 38`, then `y2 = (var - SAFE_DIV(var<<8, gOamMatrices[matrix].d))/2`
+ * (integer division). Verified value-for-value against the §10.1 OAM table:
+ * 304->3, 352->5, 400->7, 448->8, 496->9, 544->10, 592->11, 640->11, 688->12,
+ * 736->12. The feet anchor keeps the sprite's feet on the ground as it grows.
+ */
+export function midBattleSwitchOutFeetAnchorY2(scale: number): number {
+  if (scale <= MID_BATTLE_SWITCH_OUT_SCALE_START) return 0;
+  const varr = 64 - 2 * 13;
+  const shift = Math.floor((varr << 8) / scale);
+  return Math.floor((varr - shift) / 2);
+}
 
 export type MidBattleSwitchOutView = Readonly<{
   elapsed: number;
   battler: 0 | 1;
   /** Affine scale factor (256 = 1.0x) during the scale-up window. */
   scale: number;
+  /**
+   * `SetBattlerSpriteYOffsetFromYScale` feet-anchor y2 during the scale-up
+   * (0 before it). The sprite also flips to the double-size affine box
+   * (mode 3, centerToCornerVec ±64 => 128px box, no 64px clip) for the whole
+   * scale-up window (relative 14-24) per §10.1.
+   */
+  y2: number;
   /** False from relative frame 25 (the real sprite is freed ~1111-1117). */
   spriteVisible: boolean;
 }>;
@@ -113,23 +135,33 @@ export type MidBattleSwitchOutView = Readonly<{
  * phaseElapsed alone. Before the scale-up window the outgoing sprite sits at
  * full size; during it the affine scale grows 256->736 at 48/tick; from
  * relative 25 the sprite is gone (the field is empty until the send-in).
+ *
+ * The rendered scale LAGS the §10.1 RAM table by two ticks: the probe reads
+ * the gOamMatrices register the tick the affine anim writes it, but the
+ * matrix is latched into the OAM matrix table two rendered frames later
+ * (pixel-verified: oracle frame N renders the scale §10.1 lists at N-2, e.g.
+ * the §10.1 "304 at 1101" first appears rendered at 1103, and the oracle's
+ * mon at 1111-1112 still shows the 688/736 scales). The `y2` feet anchor and
+ * the freed edge shift by the same two ticks.
  */
 export function midBattleSwitchOutAt(
   elapsed: number,
   battler: 0 | 1,
 ): MidBattleSwitchOutView {
-  const inWindow = elapsed >= MID_BATTLE_SWITCH_OUT_SCALE_UP_ELAPSED
-    && elapsed <= MID_BATTLE_SWITCH_OUT_SCALE_UP_END_ELAPSED;
+  const renderedElapsed = elapsed - 2;
+  const inWindow = renderedElapsed >= MID_BATTLE_SWITCH_OUT_SCALE_UP_ELAPSED
+    && renderedElapsed <= MID_BATTLE_SWITCH_OUT_SCALE_UP_END_ELAPSED;
   const scale = inWindow
     ? MID_BATTLE_SWITCH_OUT_SCALE_START
       + MID_BATTLE_SWITCH_OUT_SCALE_STEP
-        * (elapsed - MID_BATTLE_SWITCH_OUT_SCALE_UP_ELAPSED)
+        * (renderedElapsed - MID_BATTLE_SWITCH_OUT_SCALE_UP_ELAPSED)
     : MID_BATTLE_SWITCH_OUT_SCALE_START;
   return Object.freeze({
     elapsed,
     battler,
     scale,
-    spriteVisible: elapsed < MID_BATTLE_SWITCH_OUT_SPRITE_FREED_ELAPSED,
+    y2: midBattleSwitchOutFeetAnchorY2(scale),
+    spriteVisible: renderedElapsed < MID_BATTLE_SWITCH_OUT_SPRITE_FREED_ELAPSED,
   });
 }
 

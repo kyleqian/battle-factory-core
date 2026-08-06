@@ -35278,6 +35278,13 @@ function drawMidBattleSwitchOutSprite(
     );
     return;
   }
+  // ISSUES #78 residual 1a (§10.1): the real sprite flips to the double-size
+  // affine box (mode 3, centerToCornerVec ±64 => 128px box, no 64px clip) for
+  // the whole scale-up window, and `SetBattlerSpriteYOffsetFromYScale`
+  // (battle_anim_mons.c:1873-1883) anchors its feet via the y2 table. The app
+  // previously passed y2=0 + doubled=false, so it scaled around the center
+  // (sitting ~3-12px high) and clipped to the 64x64 canvas (at the 736 peak
+  // drawing only ~22 source rows where the real sprite fills the 128px box).
   drawSpriteSheetAffineStretch(
     fb,
     art.pic.tileset as Tileset,
@@ -35286,9 +35293,10 @@ function drawMidBattleSwitchOutSprite(
     art.origin.y,
     state.scale,
     state.scale,
-    0,
+    state.y2,
     { r: 255, g: 255, b: 255 },
     0,
+    true,
   );
 }
 
