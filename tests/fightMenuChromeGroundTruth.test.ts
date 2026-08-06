@@ -71,7 +71,7 @@ describe("fight-submenu-window.json: the harvest's per-slot cursor arrow is corr
   };
   const SLOT_NAMES = ["ROCK_SLIDE", "BIND", "SANDSTORM", "DRAGON_BREATH"] as const;
   const CURSOR_COLOR = [74, 66, 82]; // the arrow's outline color, oracle-verified at screen (3-8, 124-133)
-  const { width, height } = window;
+  const { width } = window;
 
   // Per-slot cursor bbox, patch-local: row1 (y11-19) or row2 (y27-35), left
   // column (x3-9) or right column (x80-88). NOTE the fight menu's second row
@@ -104,7 +104,6 @@ describe("fight-submenu-window.json: the harvest's per-slot cursor arrow is corr
   it("each slot's cursor arrow sits at its own expected row/column (the harvest bakes per-slot positions, no context-dependent arrow)", () => {
     for (const name of SLOT_NAMES) {
       const slot = window.slots[name]!;
-      const expected = EXPECTED_ARROWS[name]!;
       // The arrow must be present at its own slot's position and ABSENT from
       // the other three slots' positions.
       for (const other of SLOT_NAMES) {
