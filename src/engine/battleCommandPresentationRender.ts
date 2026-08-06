@@ -17,6 +17,12 @@ import {
 import { setPixel } from "./framebuffer.ts";
 import { drawText, type FontData } from "./font.ts";
 import type { HealthboxContentParams } from "./healthboxAssembly.ts";
+import {
+  REJECTION_MESSAGE_FIRST_GLYPH_AT,
+  REJECTION_MESSAGE_HOLD_AT,
+} from "./battleCommandPresentation.ts";
+import { resolveMoveSelectionRejectionMessageLines } from "./battleResolutionPresentation.ts";
+import { battleStringPrintableLength } from "./battleStringResolver.ts";
 
 type BattleWindowAsset = Readonly<{
   tileset: Readonly<{
@@ -70,6 +76,17 @@ export type BattleCommandPresentationRenderView = Readonly<{
     moveset: FightMoveset;
     displayCursor: 0 | 1 | 2 | 3;
   }>;
+  /**
+   * ISSUES #81: the selection-rejection message currently on the box (typed
+   * 1 glyph/frame from the commit press, then held button-gated with the
+   * wait ▼, then frozen cursorless through the reopen span). `null` unless
+   * the presentation is in a rejection phase.
+   */
+  rejectionMessage: Readonly<{
+    lines: readonly string[];
+    visibleCharacters: number;
+    waitCursorAge: number | null;
+  }> | null;
 }>;
 
 export type BattleCommandFieldRenderView = Readonly<{
@@ -116,6 +133,44 @@ export function createBattleCommandPresentationRenderView(
   presentation: BattleCommandPresentationState,
 ): BattleCommandPresentationRenderView {
   const fieldView = createBattleCommandFieldRenderView(presentation.field);
+  let rejectionMessage: BattleCommandPresentationRenderView["rejectionMessage"] = null;
+  if (
+    presentation.rejectedSlot !== null
+    && (presentation.lifecycle.phase === "rejection-message"
+      || presentation.lifecycle.phase === "rejection-reopen")
+  ) {
+    const rejection = presentation.rejectionReasonBySlot[presentation.rejectedSlot];
+    if (rejection !== null) {
+      const lines = resolveMoveSelectionRejectionMessageLines(
+        rejection,
+        presentation.field,
+      );
+      const total = battleStringPrintableLength(lines);
+      if (presentation.lifecycle.phase === "rejection-message") {
+        const phaseElapsed = presentation.lifecycle.phaseElapsed;
+        rejectionMessage = Object.freeze({
+          lines,
+          visibleCharacters: Math.min(
+            total,
+            Math.max(0, phaseElapsed - REJECTION_MESSAGE_FIRST_GLYPH_AT + 1),
+          ),
+          waitCursorAge:
+            phaseElapsed >= REJECTION_MESSAGE_HOLD_AT
+              ? phaseElapsed - REJECTION_MESSAGE_HOLD_AT
+              : null,
+        });
+      } else {
+        // The dismissed box freezes the fully-typed text with the wait ▼
+        // held at its dismiss pose for the reopen span (oracle 968-977 all
+        // one sha, cursor at the same age as the 968 frame).
+        rejectionMessage = Object.freeze({
+          lines,
+          visibleCharacters: total,
+          waitCursorAge: presentation.rejectionWaitCursorAge,
+        });
+      }
+    }
+  }
   return Object.freeze({
     ...fieldView,
     spriteVisibility: presentation.spriteVisibility,
@@ -134,6 +189,7 @@ export function createBattleCommandPresentationRenderView(
       ),
       displayCursor: presentation.fightDisplayCursor,
     }),
+    rejectionMessage,
   });
 }
 
@@ -267,6 +323,10 @@ export type BattleCommandPresentationRenderAssets = Readonly<{
     framebuffer: Uint8Array,
     view: BattleCommandPresentationRenderView,
   ): void;
+  drawRejectionMessage(
+    framebuffer: Uint8Array,
+    view: BattleCommandPresentationRenderView,
+  ): void;
 }>;
 
 /**
@@ -291,6 +351,18 @@ export function renderBattleCommandPresentation(
     case "fight-menu":
     case "fight-closing":
       assets.drawFightMenu(framebuffer, view);
+      return;
+    case "rejection-message":
+      // The reject press leaves the live move menu up until the first
+      // glyph's frame (oracle 766-769: box not yet drawn, pixels unchanged).
+      if (presentation.lifecycle.phaseElapsed < REJECTION_MESSAGE_FIRST_GLYPH_AT) {
+        assets.drawFightMenu(framebuffer, view);
+        return;
+      }
+      assets.drawRejectionMessage(framebuffer, view);
+      return;
+    case "rejection-reopen":
+      assets.drawRejectionMessage(framebuffer, view);
       return;
     case "party-handoff":
     case "submitting":

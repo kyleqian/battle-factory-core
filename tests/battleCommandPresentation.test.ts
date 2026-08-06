@@ -557,6 +557,9 @@ describe("battle-command presentation renderer", () => {
           `fight:${view.fightMenu.displayCursor}:${view.field.player.name}`,
         );
       },
+      drawRejectionMessage() {
+        throw new Error("blank/action/FIGHT dispatch must not reach rejection");
+      },
     };
     const at = (
       phase: BattleCommandPresentationState["lifecycle"]["phase"],
@@ -628,6 +631,9 @@ describe("battle-command presentation renderer", () => {
         },
         drawFightMenu(_framebuffer, received) {
           calls.push(received);
+        },
+        drawRejectionMessage() {
+          throw new Error("fight-menu must not dispatch rejection chrome");
         },
       });
 

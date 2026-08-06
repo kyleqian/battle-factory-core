@@ -76,6 +76,7 @@ import type {
   FactoryRoundBattleOrchestratorState,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
 import type { BattleCommandPresentationState } from "../../src/engine/battleCommandPresentation.ts";
+import { BATTLE_SCRIPT_STATUS2_MASKS } from "../../src/engine/battleScriptSourceConstants.ts";
 
 export interface AppCapture {
   frame: number;
@@ -1026,6 +1027,142 @@ function midBattleSwitchDenseOffStage(state: EngineState): EngineState {
   };
 }
 
+// ISSUES #81 dense-compare wiring: the Torment selection-rejection fixture
+// (tools/battle-lab/mechanic-selection-reject-torment-off.json) stages
+// BUTTERFREE (TACKLE/GUST) vs MURKROW (TORMENT x4), seed 1; turn 1 lands
+// TORMENT on the player and leaves TACKLE as gLastMoves[0], so turn 2's
+// fight menu flags slot 0 (`rejectionReasonBySlot`) and the commit types the
+// rejection message. The app cannot replay turn 1 byte-for-byte yet, so the
+// stage installs the post-turn-1 checkpoint directly at the fixture's
+// turn-2 frame 734: a staged full-turn battle with the player already
+// Tormented and TACKLE as the last move, the command presentation in the
+// interactive action-menu phase, and the live orchestrator replaying the
+// fixture's verbatim segments from there.
+const BUTTERFREE_TORMENTED_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
+  species: 12,
+  moves: [33, 16, 0, 0] as const, // TACKLE, GUST
+  pp: [35, 35, 0, 0] as const,
+  attack: 65,
+  defense: 70,
+  spAttack: 100,
+  spDefense: 100,
+  speed: 90,
+  hp: 135,
+  maxHp: 135,
+  types: ["TYPE_BUG", "TYPE_FLYING"] as const,
+  status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_TORMENT,
+  lastMove: 33, // TACKLE -- the banned last move
+});
+
+const MURKROW_TORMENT_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
+  species: 198,
+  moves: [259, 259, 259, 259] as const, // TORMENT x4 (constrain-to-one-legal-choice idiom)
+  pp: [15, 15, 15, 15] as const,
+  attack: 105,
+  defense: 62,
+  spAttack: 105,
+  spDefense: 62,
+  speed: 111,
+  hp: 135,
+  maxHp: 135,
+  types: ["TYPE_DARK", "TYPE_FLYING"] as const,
+});
+
+function tormentSelectionRejectionOffStage(state: EngineState): EngineState {
+  const playerRentalRecords = [
+    generatedCommandRecord(664),
+    generatedCommandRecord(678),
+    generatedCommandRecord(527),
+  ] as const;
+  let orchestrator = createFactoryRoundBattleOrchestrator({
+    id: "mechanic-selection-reject-torment-off",
+    rngValue: 4,
+    factoryWinStreak: 0,
+    playerTrainerId: 0x89ab_cdef,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords,
+      savedRentalRecords: [
+        ...playerRentalRecords,
+        generatedCommandRecord(1),
+        generatedCommandRecord(2),
+        generatedCommandRecord(3),
+      ],
+    },
+  });
+  const commandId = orchestrator.round.presentation?.command.commandId;
+  if (commandId === undefined) {
+    throw new Error("torment rejection stage requires the battle-start command");
+  }
+  orchestrator = advanceFactoryRoundPresentation(
+    completeFactoryRoundPresentation(orchestrator, { commandId }),
+  );
+  if (orchestrator.battle === null || orchestrator.activeBattleCallStart === null) {
+    throw new Error("torment rejection stage requires a live started battle");
+  }
+  const staged = createFactoryFullTurnBattleState({
+    requestId: 1,
+    rngSeed: 1,
+    player: BUTTERFREE_TORMENTED_LV50,
+    trainer: MURKROW_TORMENT_LV50,
+  });
+  if (
+    staged.boundary.kind !== "decision-required"
+    || staged.boundary.request.kind !== "command"
+  ) {
+    throw new Error("torment rejection staged battle has no player command boundary");
+  }
+  const cursors: FactoryBattleMoveSelectionCursors = Object.freeze([0, 0, 0, 0]);
+  const presentation: BattleCommandPresentationState = Object.freeze({
+    ...createBattleCommandPresentation(
+      staged.boundary.request,
+      staged.rules.rulesContext,
+      cursors[0],
+    ),
+    // The fixture's frame 734 is the already-interactive turn-2 action menu
+    // (its first turn-2 segment is an A press at 734-735), so the app stage
+    // skips the action-enter delay, exactly like mid-battle-switch-dense-off.
+    lifecycle: Object.freeze({ phase: "action-menu" as const, phaseElapsed: 0 }),
+  });
+  const boundaries = Object.freeze(
+    ([presentation.field.player, presentation.field.opponent] as const).map(
+      (field, battler) => {
+        const active = staged.rules.rulesContext.battlers[battler]!;
+        return Object.freeze({
+          battler: battler as 0 | 1,
+          partyIndex: field.partyIndex,
+          field,
+          displayedHp: field.hp,
+          displayedStatus1: active.status1,
+          spriteVisible: true,
+          idleEpoch: 0,
+          moveCursor: cursors[battler]!,
+        });
+      },
+    ),
+  ) as unknown as FactoryBattlePresentationBoundaries;
+  const swapped: FactoryRoundBattleOrchestratorState = Object.freeze({
+    ...orchestrator,
+    battle: staged,
+    battleCommandPresentation: presentation,
+    battleResolutionPresentation: null,
+    retainedLockedActionPresentationOwner: null,
+    battlePartySelect: null,
+    battleForcedPartySelect: null,
+    moveSelectionCursors: cursors,
+    battlePresentationBoundaries: boundaries,
+    aiHistory: createFactoryAiBattleHistory(staged.rules.rulesContext),
+  });
+  return {
+    ...state,
+    factoryRoundBattleOrchestrator: swapped,
+    rngMode: "frontierBattle",
+    rngValue: swapped.battle?.rng.value ?? state.rngValue,
+  };
+}
+
 function terminalWindowResolution(
   state: EngineState,
 ): BattleResolutionPresentationState | null {
@@ -1320,6 +1457,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "loss-terminal-window-off": lossTerminalWindowStage,
   "win-terminal-window-off": winTerminalWindowStage,
   "mid-battle-switch-dense-off": midBattleSwitchDenseOffStage,
+  "mechanic-selection-reject-torment-off": tormentSelectionRejectionOffStage,
 };
 
 export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {

@@ -7314,6 +7314,20 @@ function drawBattle2FightSubmenuWindow(
         view.fightMenu.moveset,
       );
     },
+    // The retired Battle 2 march never enters a rejection phase; this branch
+    // stays a defensive draw of the settled menu.
+    drawRejectionMessage(framebuffer, view) {
+      drawBattle2ActionMenuWindow(
+        framebuffer,
+        t,
+        handoffTick,
+        fightBounceShift,
+        undefined,
+        true,
+        view.healthboxes,
+        view.fieldArt,
+      );
+    },
   });
 }
 
@@ -18271,6 +18285,46 @@ export function renderGeneratedBattleCommandPresentation(
         view.fightMenu.displayCursor,
         view.fightMenu.moveset,
       );
+    },
+    drawRejectionMessage(framebuffer, view) {
+      drawBattle2ActionMenuWindow(
+        framebuffer,
+        bounceTick,
+        0,
+        0,
+        bounce,
+        true,
+        view.healthboxes,
+        view.fieldArt,
+        view.spriteVisibility,
+      );
+      const rejection = view.rejectionMessage;
+      if (rejection === null) return;
+      // The message box is the same `B_WIN_MSG` battle-window tilemap the
+      // resolution seam draws below the field; the field/healthboxes above
+      // it stay live (the fight-menu state continues underneath).
+      drawTileBg(
+        framebuffer,
+        battleWindow.tileset,
+        battleWindow.tilemap,
+        battleWindow.palette,
+      );
+      drawBattleMessageTextLines(
+        framebuffer,
+        rejection.lines[0] ?? "",
+        rejection.lines[1] ?? "",
+        rejection.visibleCharacters,
+      );
+      if (rejection.waitCursorAge !== null) {
+        const line2 = rejection.lines[1] ?? "";
+        drawCursor(
+          framebuffer,
+          CURSOR_Y_OFFSETS[
+            Math.floor(rejection.waitCursorAge / 9) % CURSOR_Y_OFFSETS.length
+          ]!,
+          LINE2_ORIGIN.x + measureText(font, charmap, line2),
+        );
+      }
     },
   });
 }

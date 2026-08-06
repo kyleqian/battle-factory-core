@@ -91,6 +91,8 @@ export type BattleCommandPresentationPhase =
   | "fight-menu"
   | "fight-closing"
   | "party-handoff"
+  | "rejection-message"
+  | "rejection-reopen"
   | "submitting";
 
 export type BattleCommandPresentationState = Readonly<{
@@ -143,6 +145,21 @@ export type BattleCommandPresentationState = Readonly<{
     BattleScriptSelectionRejection | null,
   ];
   legalSwitchPartyIndexes: readonly BattlePartyIndex[];
+  /**
+   * The fight-menu slot whose commit entered a selection-rejection message
+   * phase (ISSUES #81), or `null`. While `rejection-message`/
+   * `rejection-reopen` are the current phase, the render view resolves the
+   * `rejectionReasonBySlot[rejectedSlot]` STRINGID's two lines and types
+   * them on the message box; the slot stays cursor-preserved for the
+   * byte-identical reopen.
+   */
+  rejectedSlot: 0 | 1 | 2 | 3 | null;
+  /**
+   * The wait ▼'s age at the dismiss press, frozen for the reopen span: the
+   * real `\p` release leaves the fully-typed box up with the cursor held at
+   * its dismiss pose until the menu redraws (oracle 968-977 all one sha).
+   */
+  rejectionWaitCursorAge: number;
   pendingDecision: BattleCommandDecision | null;
 }>;
 
@@ -152,6 +169,20 @@ export class BattleCommandPresentationError extends Error {
 
 /** Six displayed blank-message frames precede the atomic action-menu draw. */
 export const BATTLE_COMMAND_ACTION_ENTER_DELAY = 6;
+
+/**
+ * ISSUES #81 selection-rejection timing, all relative to the reject commit
+ * A-press frame (`docs/torment-selection-rejection-ground-truth.md` §2/§6):
+ * - first message glyph at +3 (oracle 767->770, typed 1 glyph/frame),
+ * - the wait ▼ first appears at +66 (oracle 833) and the box holds
+ *   button-gated (no auto-advance) until an A/B press (the `\p`
+ *   PAUSE_UNTIL_PRESS gate, text.c:865-882),
+ * - the dismissed box clears to the byte-identical move menu +9 frames
+ *   after the dismiss press frame (oracle 969->978).
+ */
+export const REJECTION_MESSAGE_FIRST_GLYPH_AT = 3;
+export const REJECTION_MESSAGE_HOLD_AT = 66;
+export const REJECTION_MESSAGE_REOPEN_FRAMES = 9;
 
 export function moveBattleCommandActionCursor(
   cursor: 0 | 1 | 2 | 3,
@@ -359,6 +390,8 @@ export function createBattleCommandPresentation(
     legalMoveBySlot: Object.freeze(legalMoveBySlot),
     rejectionReasonBySlot: Object.freeze(rejectionReasonBySlot),
     legalSwitchPartyIndexes: Object.freeze(legalSwitchPartyIndexes),
+    rejectedSlot: null,
+    rejectionWaitCursorAge: 0,
     pendingDecision: null,
   });
 }
@@ -421,6 +454,36 @@ export function advanceBattleCommandPresentation(
         { fightDisplayCursor: state.fightCursor },
       );
       break;
+    case "rejection-message": {
+      const elapsed = state.lifecycle.phaseElapsed + 1;
+      // The `\p` PAUSE_UNTIL_PRESS gate (text.c:865-882) keeps the box up
+      // until A or B once the final glyph has landed; neither button does
+      // anything before the hold opens. The rejected slot is preserved
+      // through the reopen span so the renderer can keep drawing the frozen
+      // message box (oracle 968-977 all one sha).
+      if (
+        elapsed >= REJECTION_MESSAGE_HOLD_AT
+        && (newKeys.has("A") || newKeys.has("B"))
+      ) {
+        return withLifecycle(state, "rejection-reopen", 0, {
+          rejectionWaitCursorAge: elapsed - REJECTION_MESSAGE_HOLD_AT,
+        });
+      }
+      return withLifecycle(state, "rejection-message", elapsed);
+    }
+    case "rejection-reopen": {
+      const elapsed = state.lifecycle.phaseElapsed + 1;
+      // The dismissed box stays on screen (message frozen, cursor held at
+      // its dismiss pose) through the reopen span, then the move menu is
+      // redrawn byte-identical with the cursor unchanged.
+      if (elapsed >= REJECTION_MESSAGE_REOPEN_FRAMES) {
+        return withLifecycle(state, "fight-menu", 0, {
+          fightDisplayCursor: state.fightCursor,
+          rejectedSlot: null,
+        });
+      }
+      return withLifecycle(state, "rejection-reopen", elapsed);
+    }
     default:
       state = advancePhaseElapsed(state);
       break;
@@ -451,9 +514,19 @@ export function advanceBattleCommandPresentation(
 
   if (newKeys.has("A")) {
     const decision = state.legalMoveBySlot[state.fightCursor];
-    return decision === null
-      ? state
-      : withLifecycle(state, "submitting", 0, { pendingDecision: decision });
+    if (decision !== null) {
+      return withLifecycle(state, "submitting", 0, { pendingDecision: decision });
+    }
+    // ISSUES #81: a slot that `rejectionReasonBySlot` flags (Torment et al.)
+    // does NOT submit -- it enters the rejection-message phase, which types
+    // the resolver's two lines, holds button-gated, and reopens the menu.
+    const rejection = state.rejectionReasonBySlot[state.fightCursor];
+    if (rejection !== null) {
+      return withLifecycle(state, "rejection-message", 0, {
+        rejectedSlot: state.fightCursor,
+      });
+    }
+    return state;
   }
   if (newKeys.has("B")) {
     return withLifecycle(state, "fight-closing", 0);
