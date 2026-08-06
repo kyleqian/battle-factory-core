@@ -23,12 +23,15 @@
   focused tests at 18/18, `npm run animation:coverage` at 117/276 exact,
   the full suite at 743/743 files (7,046 passed, 1 skipped), and the production
   build. All pre-existing tracked scratch diagnostics were preserved.
-- **Next:** dispatch the zero-new-component `MOVE_GRASS_WHISTLE` unit on the
-  `music-notes` track, using lowest carrier ROSELIA record 171 in both orientations
-  and `MOVE_SING` as the named exact wavy-note/rainbow control.
+- **Next:** continue the staged zero-new-component `MOVE_GRASS_WHISTLE` unit:
+  isolate `Move_GRASS_WHISTLE` by script pointer from the following sleep-status
+  animation, then prove the rainbow tasks/green BG blend and build the portable.
 - **Notes:** AROMATHERAPY receipt drift: new evidence `cec76eae360c…`, pinned
   `83f9f2d03fb0…`; raw RGB
   unchanged at `dc02bff98836…` — framebuffer identity required and met.
+  GRASS_WHISTLE now has legal ROSELIA-171/ONIX scenarios and a partial probe in
+  both orientations (458 current-move frames, 316 animation-active, 12 notes);
+  it remains unsupported and must not be promoted from this combined window.
 
 ## MOVE_ROCK_THROW closed — 87/87 both orientations twice-fresh, promoted to exact (2026-08-05 worker)
 
