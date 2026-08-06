@@ -23,8 +23,9 @@
   focused tests at 18/18, `npm run animation:coverage` at 117/276 exact,
   the full suite at 743/743 files (7,046 passed, 1 skipped), and the production
   build. All pre-existing tracked scratch diagnostics were preserved.
-- **Next:** continue the zero-new-component Level-50 ladder from the ranked
-  coverage report.
+- **Next:** dispatch the zero-new-component `MOVE_GRASS_WHISTLE` unit on the
+  `music-notes` track, using lowest carrier ROSELIA record 171 in both orientations
+  and `MOVE_SING` as the named exact wavy-note/rainbow control.
 - **Notes:** AROMATHERAPY receipt drift: new evidence `cec76eae360c…`, pinned
   `83f9f2d03fb0…`; raw RGB
   unchanged at `dc02bff98836…` — framebuffer identity required and met.
