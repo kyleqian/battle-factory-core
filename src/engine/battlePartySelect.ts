@@ -410,7 +410,7 @@ function monIconNextFrameChange(animClock: number): number {
  * frame change after selection, then sits at y2 = -3 while frame 0 shows and
  * y2 = +1 while frame 1 shows (animCmd = 1 flips to -3, animCmd = 2 to +1).
  */
-function monIconSelectedY2(elapsed: number, selectedSinceElapsed: number): number {
+export function monIconSelectedY2(elapsed: number, selectedSinceElapsed: number): number {
   const animClock = elapsed + MON_ICON_CREATION_ELAPSED_OFFSET;
   const selectionClock = selectedSinceElapsed + MON_ICON_CREATION_ELAPSED_OFFSET;
   if (animClock < monIconNextFrameChange(selectionClock)) return 0;
