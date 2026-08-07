@@ -59,7 +59,24 @@ byte-exact**. **Open remainder — fully forensics-banked 2026-08-07
 per-frame (y_bg, y_obj) tables for both windows):**
 (b) open window: the app pops the full menu instantly at 763 with NO open
 fade and NO field fade-out at all — oracle: field fades out 766-808, menu
-fades in from black 809-824 (y 14→2 held 2f, OBJ lags 1 tick).
+fades in from black 809-824 (y 14→2 held 2f, OBJ lags 1 tick). **OPEN
+ANIMATION LANDED 2026-08-07**: `openElapsed` (0 at the 763 A-press) +
+`battlePartySelectOpenPhase` (bright-hold 0-2, field-fade-out 3-18,
+black-hold 19-45, menu-fade-in 46-61) render the frozen action-menu battle
+scene (`drawBattleScene`, the party-handoff presentation re-rendered in
+action-menu phase) through the field fade-out, plain black 782-808, and the
+layer-split menu fade-in 809-824. Dense-a spec extended to **980-1255 + 763-765 +
+767/769/771/773/775/777/779/781 + 782-808 + 809-824 = 330 frames; 325/330
+byte-exact**. **Residual (named, 5 frames): 771, 773, 775, 777, 779 each
+carry a 1639-2037px opponent-sprite residual** — the oracle's opponent front
+sprite has a non-rigid idle breathing squish during the field fade-out
+(sampled per-row dy 0/-1/-2/-3, not a translation: a whole-sheet +1px drop
+makes the healthbox overlap worse, so it is NOT a simple offset) that the
+brief's §6 forensics could not see (it sampled only (4,4)/(176,52); the
+latter is a uniform sprite-body pixel). The 8 OBJ-lag frames
+(766/768/770/772/774/776/778/780) remain the brief's named whole-field-blend
+residual. Follow-up: model the opponent idle breathing (frame-2 sprite or a
+bounded squish) to close 771-779.
 (c) message-box residual, now known to span **960-978** (not just 960-963):
 during the submenu-open/close the oracle's message box is a DIFFERENT window
 than the app's settled 21x2 olive "Choose a POKéMON." box — at 964 the frame

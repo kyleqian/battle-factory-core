@@ -121,6 +121,14 @@ export type BattlePartySelectState = Readonly<{
     | Readonly<{ kind: "select"; partyIndex: BattlePartyIndex }>;
   elapsed: number;
   /**
+   * Frames since the POKéMON A-press that opened this selector (oracle frame
+   * 763), mirroring `closeElapsed`. Drives the open animation
+   * (`battlePartySelectOpenPhase`): bright-hold 0-2, field-fade-out 3-18,
+   * black-hold 19-45, menu-fade-in 46-61, done 62+. Increments alongside
+   * `elapsed`; ignored once `closeElapsed` is set (the close takes over).
+   */
+  openElapsed: number;
+  /**
    * The `elapsed` value when the current cursor slot was last selected (the
    * party menu's `AnimatePartySlot(slot, 1)` edge). Drives the selected
    * mon-icon bounce's initial y2 hold and phase. Initialized to
@@ -147,6 +155,87 @@ export type BattlePartySelectClosePhase =
   | "field-reveal"
   | "field-hold"
   | "done";
+
+/**
+ * Open schedule (docs/fade-layer-forensics.md §6(g), ISSUES #80 open remainder
+ * item (b)): the party menu's open animation. The A-press on POKéMON completes
+ * at oracle frame 763 (`openElapsed 0`); the oracle holds the settled battle
+ * scene through 765, fades the whole field out 766-781 (BG at y_bg, the OBJ
+ * layer one blend step behind -- no BG/OBJ split for the battle scene), holds
+ * solid black 782-808, then fades the party menu in from black 809-824 (BG at
+ * `y_bg`, OBJ one tick behind at `y_obj`, layer-split blend). From openElapsed
+ * 62 (frame 825) the settled menu renders exactly as before.
+ */
+export type BattlePartySelectOpenPhase =
+  | "bright-hold"
+  | "field-fade-out"
+  | "black-hold"
+  | "menu-fade-in"
+  | "done";
+
+/** Bright-hold: the settled battle scene, unfaded (frames 763-765). */
+export const PARTY_SELECT_OPEN_BRIGHT_HOLD_FRAMES = 3;
+/** Field fade-out: the battle scene blended at `y_bg` (frames 766-781). */
+export const PARTY_SELECT_OPEN_FIELD_FADE_FRAMES = 16;
+/** Full black hold (frames 782-808). */
+export const PARTY_SELECT_OPEN_BLACK_HOLD_FRAMES = 27;
+/** Menu fade-in from black (frames 809-824). */
+export const PARTY_SELECT_OPEN_MENU_FADE_FRAMES = 16;
+/** Full open span: bright-hold + field-fade-out + black-hold + menu-fade-in. */
+export const PARTY_SELECT_OPEN_TOTAL_FRAMES =
+  PARTY_SELECT_OPEN_BRIGHT_HOLD_FRAMES
+  + PARTY_SELECT_OPEN_FIELD_FADE_FRAMES
+  + PARTY_SELECT_OPEN_BLACK_HOLD_FRAMES
+  + PARTY_SELECT_OPEN_MENU_FADE_FRAMES;
+
+export function battlePartySelectOpenPhase(
+  openElapsed: number,
+): BattlePartySelectOpenPhase {
+  if (openElapsed < PARTY_SELECT_OPEN_BRIGHT_HOLD_FRAMES) return "bright-hold";
+  if (
+    openElapsed
+    < PARTY_SELECT_OPEN_BRIGHT_HOLD_FRAMES + PARTY_SELECT_OPEN_FIELD_FADE_FRAMES
+  ) {
+    return "field-fade-out";
+  }
+  if (
+    openElapsed
+    < PARTY_SELECT_OPEN_BRIGHT_HOLD_FRAMES
+      + PARTY_SELECT_OPEN_FIELD_FADE_FRAMES
+      + PARTY_SELECT_OPEN_BLACK_HOLD_FRAMES
+  ) {
+    return "black-hold";
+  }
+  if (openElapsed < PARTY_SELECT_OPEN_TOTAL_FRAMES) return "menu-fade-in";
+  return "done";
+}
+
+/**
+ * Field fade-out BG coefficient, `docs/fade-layer-forensics.md` §6(b):
+ * `y_bg(e) = min(16, 2 * max(0, floor((e - 1) / 2)))` -- steps 2,4,...,16
+ * each held 2 frames. The battle scene has no OBJ/BG split, so the whole
+ * draw is blended at `y_bg`; the OBJ pixels stay one blend step bright on
+ * the odd `e` frames (known residual, excluded from the spec).
+ */
+export function partySelectOpenFieldFadeBgY(openElapsed: number): number {
+  return Math.min(16, 2 * Math.max(0, Math.floor((openElapsed - 1) / 2)));
+}
+
+/**
+ * Menu fade-in coefficients, `docs/fade-layer-forensics.md` §2, with
+ * `m = openElapsed - 46` (m = 0..15): `y_bg(m) = 14 - 2 * floor(m / 2)`
+ * (14,14,12,12,...,0,0) and the OBJ layer one blend step behind,
+ * `y_obj(m) = 16 - 2 * floor((m + 1) / 2)` (16,14,14,12,...,2,0). Both
+ * descend toward 0 (full brightness); the menu is drawn BG-then-OBJ and
+ * each layer blended at its own coefficient.
+ */
+export function partySelectOpenMenuFadeBgY(m: number): number {
+  return 14 - 2 * Math.floor(m / 2);
+}
+
+export function partySelectOpenMenuFadeObjY(m: number): number {
+  return 16 - 2 * Math.floor((m + 1) / 2);
+}
 
 /**
  * Measured close schedule (docs/party-menu-rank6-ground-truth.md §7 +
@@ -262,6 +351,7 @@ export function battlePartySelectStateForForcedParty(
     message: forced.message,
     outcome: null,
     elapsed: forced.elapsed,
+    openElapsed: 0,
     selectedSinceElapsed: -MON_ICON_CREATION_ELAPSED_OFFSET,
     closeElapsed: null,
   });
@@ -338,6 +428,7 @@ export function createBattlePartySelectState(
     message: null,
     outcome: null,
     elapsed: 0,
+    openElapsed: 0,
     selectedSinceElapsed: -MON_ICON_CREATION_ELAPSED_OFFSET,
     closeElapsed: null,
   });
@@ -379,6 +470,7 @@ export function advanceBattlePartySelect(
   const next = Object.freeze({
     ...state,
     elapsed: state.elapsed + 1,
+    openElapsed: state.openElapsed + 1,
     closeElapsed: state.closeElapsed === null ? null : state.closeElapsed + 1,
   });
   if (state.outcome !== null) return next;
@@ -1026,6 +1118,56 @@ export function renderBattlePartySelect(
     renderPartySelectClose(fb, state, close);
     return;
   }
+  // ISSUES #80 open remainder (b): the menu's open animation. Only the live
+  // voluntary route supplies the battle-scene asset (`close`); every other
+  // caller (forced snapshots without assets) renders the menu settled,
+  // exactly as before the open-fade existed.
+  const openPhase = closeElapsed === null && close !== undefined
+    ? battlePartySelectOpenPhase(state.openElapsed)
+    : "done";
+  if (openPhase === "bright-hold" || openPhase === "field-fade-out") {
+    if (close === undefined) {
+      drawPartySelectBgLayer(fb, state);
+      drawPartySelectObjLayer(fb, state);
+      return;
+    }
+    // The oracle holds the settled action-menu battle scene through frame 765
+    // and fades the whole scene at the BG coefficient (no BG/OBJ split for the
+    // battle scene -- the OBJ pixels trail by one blend step on the odd
+    // `e` frames, a named residual excluded from the spec).
+    close.drawBattleScene(fb);
+    if (openPhase === "field-fade-out") {
+      applyFadeToBlack(fb, partySelectOpenFieldFadeBgY(state.openElapsed));
+    }
+    return;
+  }
+  if (openPhase === "black-hold") {
+    fillFramebuffer(fb, 0, 0, 0);
+    return;
+  }
+  if (openPhase === "menu-fade-in") {
+    // Same scratch-buffer + alpha-coverage composite idiom as the close
+    // menu-fade, but descending from black: BG at `y_bg(m)`, OBJ one blend
+    // step behind at `y_obj(m)`, m = openElapsed - 46 (docs/fade-layer-
+    // forensics.md §2). At m=15 both layers are at y=0 = the settled menu.
+    const m = state.openElapsed
+      - (PARTY_SELECT_OPEN_BRIGHT_HOLD_FRAMES
+        + PARTY_SELECT_OPEN_FIELD_FADE_FRAMES
+        + PARTY_SELECT_OPEN_BLACK_HOLD_FRAMES);
+    drawPartySelectBgLayer(fb, state);
+    applyFadeToBlack(fb, partySelectOpenMenuFadeBgY(m));
+    const obj = new Uint8Array(fb.length);
+    drawPartySelectObjLayer(obj, state);
+    applyFadeToBlack(obj, partySelectOpenMenuFadeObjY(m));
+    for (let p = 0; p < fb.length; p += 4) {
+      if (obj[p + 3] !== 0) {
+        fb[p] = obj[p]!;
+        fb[p + 1] = obj[p + 1]!;
+        fb[p + 2] = obj[p + 2]!;
+      }
+    }
+    return;
+  }
   drawPartySelectBgLayer(fb, state);
   if (phase === "menu-fade") {
     if (closeElapsed === null) fail("menu-fade phase requires a non-null closeElapsed");
@@ -1060,6 +1202,15 @@ export function renderBattlePartySelect(
 export type PartySelectCloseRenderAssets = Readonly<{
   /** Draws the settled battle field (the resolution's own scene view). */
   drawField(fb: Uint8Array): void;
+  /**
+   * Draws the settled pre-party-menu battle scene the open window holds
+   * (oracle frames 763-765): the battle-command presentation frozen in
+   * party-handoff, rendered as if still in its action-menu phase (field +
+   * sprites + healthboxes + the "What will X do?" message box + the
+   * FIGHT/BAG/POKéMON/RUN action menu). The close path's `drawField` omits
+   * that bottom chrome, so the open side needs this separate drawable.
+   */
+  drawBattleScene(fb: Uint8Array): void;
 }>;
 
 function renderPartySelectClose(

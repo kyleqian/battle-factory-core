@@ -5,10 +5,19 @@ import {
   PARTY_SELECT_CLOSE_MENU_FADE_FRAMES,
   PARTY_SELECT_CLOSE_MENU_FRAMES,
   PARTY_SELECT_CLOSE_TOTAL_FRAMES,
+  PARTY_SELECT_OPEN_BLACK_HOLD_FRAMES,
+  PARTY_SELECT_OPEN_BRIGHT_HOLD_FRAMES,
+  PARTY_SELECT_OPEN_FIELD_FADE_FRAMES,
+  PARTY_SELECT_OPEN_MENU_FADE_FRAMES,
+  PARTY_SELECT_OPEN_TOTAL_FRAMES,
   advanceBattlePartySelect,
   battlePartyNoEnergyMessage,
   battlePartySelectClosePhase,
+  battlePartySelectOpenPhase,
   createBattlePartySelectState,
+  partySelectOpenFieldFadeBgY,
+  partySelectOpenMenuFadeBgY,
+  partySelectOpenMenuFadeObjY,
   renderBattlePartySelect,
   type BattlePartySelectState,
 } from "../src/engine/battlePartySelect.ts";
@@ -249,6 +258,68 @@ describe("voluntary battle party selector", () => {
     expect(PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES).toBe(39);
     expect(PARTY_SELECT_CLOSE_MENU_FRAMES).toBe(72);
     expect(PARTY_SELECT_CLOSE_TOTAL_FRAMES).toBe(81);
+  });
+
+  it("maps the open phases to the measured openElapsed boundaries (ISSUES #80 open remainder (b))", () => {
+    // docs/fade-layer-forensics.md §6(g): bright-hold 0-2 (frames 763-765),
+    // field-fade-out 3-18 (766-781), black-hold 19-45 (782-808),
+    // menu-fade-in 46-61 (809-824), done 62+ (825+).
+    expect(battlePartySelectOpenPhase(0)).toBe("bright-hold");
+    expect(battlePartySelectOpenPhase(2)).toBe("bright-hold");
+    expect(battlePartySelectOpenPhase(3)).toBe("field-fade-out");
+    expect(battlePartySelectOpenPhase(18)).toBe("field-fade-out");
+    expect(battlePartySelectOpenPhase(19)).toBe("black-hold");
+    expect(battlePartySelectOpenPhase(45)).toBe("black-hold");
+    expect(battlePartySelectOpenPhase(46)).toBe("menu-fade-in");
+    expect(battlePartySelectOpenPhase(61)).toBe("menu-fade-in");
+    expect(battlePartySelectOpenPhase(62)).toBe("done");
+    expect(PARTY_SELECT_OPEN_BRIGHT_HOLD_FRAMES).toBe(3);
+    expect(PARTY_SELECT_OPEN_FIELD_FADE_FRAMES).toBe(16);
+    expect(PARTY_SELECT_OPEN_BLACK_HOLD_FRAMES).toBe(27);
+    expect(PARTY_SELECT_OPEN_MENU_FADE_FRAMES).toBe(16);
+    expect(PARTY_SELECT_OPEN_TOTAL_FRAMES).toBe(62);
+  });
+
+  it("blends the open window's field fade-out at y_bg and the menu fade-in at the §2 per-layer coefficients (ISSUES #80 open remainder (b))", () => {
+    // Field fade-out §6(b): y_bg(e) = min(16, 2*max(0,floor((e-1)/2))) --
+    // (2,0) at e=3, (2,2) at e=4, (4,2) at e=5, ... (16,14) at e=17, (16,16)
+    // at e=18. Menu fade-in §2, m = e-46: y_bg(m)=14-2*floor(m/2),
+    // y_obj(m)=16-2*floor((m+1)/2) -- (14,16) at m=0, (14,14) at m=1,
+    // (12,14) at m=2, ... (0,2) at m=14, (0,0) at m=15.
+    expect(partySelectOpenFieldFadeBgY(3)).toBe(2);
+    expect(partySelectOpenFieldFadeBgY(4)).toBe(2);
+    expect(partySelectOpenFieldFadeBgY(5)).toBe(4);
+    expect(partySelectOpenFieldFadeBgY(17)).toBe(16);
+    expect(partySelectOpenFieldFadeBgY(18)).toBe(16);
+    expect(partySelectOpenMenuFadeBgY(0)).toBe(14);
+    expect(partySelectOpenMenuFadeObjY(0)).toBe(16);
+    expect(partySelectOpenMenuFadeBgY(1)).toBe(14);
+    expect(partySelectOpenMenuFadeObjY(1)).toBe(14);
+    expect(partySelectOpenMenuFadeBgY(2)).toBe(12);
+    expect(partySelectOpenMenuFadeObjY(2)).toBe(14);
+    expect(partySelectOpenMenuFadeBgY(14)).toBe(0);
+    expect(partySelectOpenMenuFadeObjY(14)).toBe(2);
+    expect(partySelectOpenMenuFadeBgY(15)).toBe(0);
+    expect(partySelectOpenMenuFadeObjY(15)).toBe(0);
+  });
+
+  it("increments openElapsed alongside elapsed and renders a field-fade-out open frame black-free when assets are absent (ISSUES #80 open remainder (b))", () => {
+    // The openElapsed clock mirrors closeElapsed: starts at 0 on creation and
+    // advances every tick. Rendering without assets (forced snapshots) must
+    // keep drawing the settled menu, never the open animation.
+    const base = liveSelector();
+    expect(base.openElapsed).toBe(0);
+    const advanced = advanceBattlePartySelect(base, new Set());
+    expect(advanced.elapsed).toBe(1);
+    expect(advanced.openElapsed).toBe(1);
+    const fb = createFramebuffer();
+    renderBattlePartySelect(fb, { ...base, openElapsed: 10 });
+    // No assets supplied: the settled menu renders (open animation skipped).
+    const px = (x: number, y: number) => {
+      const i = (y * 240 + x) * 4;
+      return [fb[i]!, fb[i + 1]!, fb[i + 2]!] as const;
+    };
+    expect(px(190, 140)).toEqual([181, 66, 0]);
   });
 
   it("follows the source single-layout cursor edges, including Cancel", () => {

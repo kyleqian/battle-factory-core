@@ -78,6 +78,7 @@ function baseState(
     message: "Choose a POKéMON.",
     outcome: null,
     elapsed: 0,
+    openElapsed: 0,
     selectedSinceElapsed: 30,
     closeElapsed: null,
   });

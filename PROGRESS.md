@@ -5,7 +5,54 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 985 — [bounded MAIN worker, 2026-08-07] ISSUES #80 item (a) close-fade LAYER SPLIT landed; dense-a stays 276/276 — the 292/292 extension is BLOCKED by the (c) message-box residual now known to span 960-978
+## 986 — [bounded MAIN worker, 2026-08-07] ISSUES #80 item (b) OPEN ANIMATION landed: 763-824 open window now renders (bright-hold/field-fade/black/menu-fade-in); dense-a spec → 330 frames, **325/330** — the 5 missing are the opponent sprite's idle breathing squish (new residual class)
+
+- **State:** master `7c7e8fe2` (uncommitted at session end — see Notes),
+  typecheck + `npm run build` green, `npm run test:smoke` **347/347**, touched
+  test files **22/22** (battlePartySelect 14/14 + inbattlePartyMenuVisualBind
+  8/8; 3 new open-phase pins red-verified by breaking the phase boundary /
+  y_bg formula). Keep-green all held: `party-menu-status-item-off`
+  **251/251**, `mid-battle-switch-pacing-b-off` **153/153**,
+  `battle-command-generated-off` **128/128**, `mid-battle-switch-dense-a-off`
+  **325/330** (spec extended 980-1255 → **330** frames with the 54-frame open
+  list; the 5 red are the named breathing residual). Full `npm test` NOT run
+  (worker rule — supervisor after merge).
+- **Did (per `docs/fade-layer-forensics.md` §6/§2):** (1) `openElapsed` on the
+  party-select state (0 at the 763 A-press, mirrors `closeElapsed`) +
+  `battlePartySelectOpenPhase` with named constants (bright-hold 3 /
+  field-fade-out 16 / black-hold 27 / menu-fade-in 16, total 62) and the
+  §6(b)/§2 coefficient helpers. (2) open-path render in
+  `renderBattlePartySelect`: bright-hold + field-fade-out draw the **settled
+  action-menu battle scene** — the party-handoff presentation re-rendered in
+  action-menu phase (new `drawBattleScene` asset; the brief's `drawField`
+  omits the 6621px message-box/action-menu strip, so a byte-exact open needs
+  the action-menu drawable) — blended whole at `y_bg`; black-hold = plain
+  black; menu-fade-in reuses the close-fade's BG/OBJ scratch-buffer composite
+  at `y_bg(m)=14-2⌊m/2⌋` / `y_obj(m)=16-2⌊(m+1)/2⌋`. Result: **49 of the 54
+  open frames byte-exact** (763-765, 767/769/781, 782-808, 809-824).
+- **Blocked short of 330/330 (measured, not guessed):** the 8 OBJ-lag frames
+  (766/768/770/772/774/776/778/780) are the brief's own named residual. The 5
+  frames **771/773/775/777/779 each carry a 1639-2037px opponent-sprite
+  residual**: the oracle's opponent front RATTATA runs a **non-rigid idle
+  breathing squish** during the fade-out — per-row source-dy samples decode
+  0/-1/-2/-3 (not a translation), and a whole-sheet +1px drop (tried and
+  reverted) makes the healthbox-overlap band worse (1639→2031px). The brief's
+  §6 forensics missed it by sampling only (4,4)/(176,52) — the latter a
+  uniform sprite-body pixel. Modeling the breathing (frame-2 sprite or bounded
+  squish) is a follow-up, not improvised here.
+- **Next:** supervisor verify + full `npm test`; then either model the
+  opponent idle breathing to close 771-779 (dense-a → 330/330), or bind item
+  (c)'s submenu/close message box (960-978, 277/292 close extension), per the
+  ISSUES #80 remainder.
+- **Notes:** the brief's 54-frame spec was added verbatim (330 entries); the
+  5 breathing frames are reported red rather than dropped so the supervisor
+  can decide keep-vs-model. The `drawField`-vs-action-menu discovery (brief's
+  item 2 assumption) is the reason the open side draws a separate asset. No
+  PAPERCUTS. This entry is written from a work-in-progress state: the final
+  commit + verify numbers must be re-confirmed by the committing session if
+  the tree moved.
+
+
 
 - **State:** master `de560ef5`, clean. Typecheck + `npm run build` green,
   `npm run test:smoke` **347/347**, touched test files **19/19**
