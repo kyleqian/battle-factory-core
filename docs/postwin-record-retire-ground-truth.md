@@ -161,6 +161,60 @@ must therefore reproduce the postwin behavior exactly as staged here
 (dismiss ⇒ re-ask) and must NOT assume the Lobby prompt's visible window
 applies to the postwin prebattle-room question.
 
+### 3a. CORRECTION (2026-08-06, MAIN bind) — the YES/NO window IS visible during the hold
+
+This section's headline claim — "the RECORD/RETIRE question's YES/NO window
+never visibly appears" — is an **over-generalization**. Its negative tests
+only sampled AFTER the dismiss-A, and the supervisor's 2026-08-06 dense
+verification (run `tools/compare/out/run-2026-08-07-02-56-49Z-58767`) found
+the window **is present throughout the input-ready hold**, drawn fully-formed
+in a single frame:
+
+- **RECORD**: window first visible at canonical tick **6711** (the same frame
+  the question text reaches its final glyph), present through the dismiss-A
+  press frames **6722**, gone at 6723 (the box-clear transition). Window span
+  = 6711-6722, 12 frames.
+- **RETIRE**: window first visible at **6712**, present through **6734**, gone
+  at 6735. Window span = 6712-6734, 23 frames.
+
+Measured geometry (both branches, byte-identical): bbox **(161,65)-(206,110)**
+= the same 4×4-tile std-window at tile (20,8) the Lobby record prompt uses —
+`drawStandardWindowFrame(fb, 160, 64, 4, 4)` with **YES** at (176,73),
+**NO** at (176,89), and the cursor **▶ at (168,89) = on NO** (the
+`multichoicedefault` default 1), **1828 px/frame stable** across the whole
+hold, appearing fully-formed in one frame (no 2-frame draw-in). The
+during-hold diff is exactly the window region; nothing else changes.
+**Teardown**: the window clears with the message box on the dismiss-A —
+RECORD gone at 6723 (= box-clear transition), RETIRE gone at 6735 — so the
+post-dismiss box-clear frames in §1/§2 stay byte-identical as originally
+captured. §3's "no window" claim therefore holds only **post-dismiss**, and
+the §5 bind plan's "No YES/NO window to draw" line is **superseded**: the
+MAIN bind (commit `2f579d21`) draws the window during the hold via the shared
+Lobby-record-prompt machinery, and the specs now capture it —
+`postwin-record-off` **204/204**, `postwin-retire-off` **211/211** full-window
+dense.
+
+**During-hold YES reachability (2026-08-06 probe, ground truth only, no
+binding):** §3's "YES unreachable" claim was also only tested post-dismiss.
+Two scratch probes (`tools/battle-lab/scratch-postwin-{record,retire}-up-a-probe.json`,
+verbatim prefixes + UP ~4 frames into the hold + A two frames later, dense
+captures over the following ~125 frames, each twice-run byte-identical:
+record 125/125, retire 125/125 manifest shas) prove:
+- **UP during the hold DOES move the cursor to YES** (record: visible at
+  canonical 6717; retire: at 6718).
+- **A-on-YES takes a genuinely new path** per source
+  (`scripts.inc:111-134`): RECORD case 0 → `EventScript_RecordBattle` →
+  `call BattleFrontier_EventScript_SaveBattle` — the question box holds
+  without the window through the save-SE span (6721-6741), box clears at
+  6742, then **"{PLAYER}'s battle was recorded / on the FRONTIER PASS."**
+  types and holds (MSGBOX_DEFAULT). RETIRE case 0 →
+  `BattleFactoryBattleRoom_EventScript_WarpToLobbyLost` — fade-to-black
+  (6724-6738), black hold, fade-in from 6758, Lobby arrival typing the
+  **LostChallenge "Thank you for participating!"** chain (the same LOSS-ending
+  flow the app already renders, `docs/factory-loss-ending-off-probe.md`).
+  These are ground-truth receipts only; nothing is bound from them this slice.
+
+
 ## 4. RETIRE convergence with the LOSS ending (source-cited)
 
 `case 0` of `AskRetireChallenge` jumps to

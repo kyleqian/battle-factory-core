@@ -5,6 +5,56 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 968 — [bounded MAIN worker, 2026-08-06] postwin RECORD/RETIRE question window bound 204/204 + 211/211; during-hold YES ground truth banked
+
+Covers the prior step (fdb49a4d, its PROGRESS entry was lost to a cap-kill)
+plus this step (2f579d21 + 8286ba97).
+
+- **State:** master `8286ba97`, clean. Typecheck green; `npm run test:smoke`
+  **347/347**. `postwin-record-off` **204/204**, `postwin-retire-off`
+  **211/211** (both extended from 192/192 / 188/188 to the full fixture
+  capture sets), `win-go-on-scout-off` **143/143** — all unchanged regressions.
+- **Did (fdb49a4d, prior step):** bound the postwin RECORD/RETIRE question
+  branches (dismiss = default-NO re-ask) — continuation cursor one-VBlank
+  display handoff, question phase at 1 glyph/tick from edge+5 with
+  wait-cursor/YES-NO hold, dismiss-A resolves default NO and re-enters the
+  ReadyFor2ndOpponent reprint. Tier-1 pins in `tests/postwin.test.ts`.
+  Specs green at 192/192 / 188/188 **excluding** the question-hold frames
+  (record 6711-6722, retire 6712-6734) because the app drew no YES/NO window.
+- **Did (this step, Part 1 — `2f579d21`):** measured the held window on the
+  oracle (compare `--capture-range`): appears **fully-formed in one frame** at
+  canonical **6711** (record) / **6712** (retire), bbox **(161,65)-(206,110)**
+  = the Lobby record prompt's 4×4 std-window at tile (20,8), cursor on **NO**
+  (default), **1828 px/frame stable**; teardown clears with the message box
+  (record gone 6723, retire gone 6735). Reused that shared machinery in
+  `renderPostwinState` (`drawStandardWindowFrame(fb,160,64,4,4)` + YES/NO text
+  + cursor at 168,89) gated on `postwinQuestionWindowVisible` with teardown
+  `dDelay<=1` — the app's existing `POSTWIN_QUESTION_WINDOW_DELAYS` constants
+  already land on the oracle's appear frames. Extended both specs to the full
+  fixture sets: **204/204 + 211/211**. New Tier-1 render pin (window appears
+  with cursor on NO; dismiss clears it) red-verified via stash.
+- **Did (this step, Part 2 — `8286ba97`, ground truth only, no binding):**
+  two scratch probes (`scratch-postwin-{record,retire}-up-a-probe.json`):
+  verbatim prefixes + UP ~4 frames into the hold + A two frames later, dense
+  captures over ~125 frames, **each twice-run byte-identical**. Verdict: **UP
+  during the hold DOES move the cursor to YES** (record visible 6717, retire
+  6718); **A-on-YES takes a genuinely new path** — RECORD → `SaveBattle`
+  (save-SE hold 6721-6741, then "{PLAYER}'s battle was recorded / on the
+  FRONTIER PASS."), RETIRE → `WarpToLobbyLost` (fade-to-black 6724-6738,
+  black hold, lobby arrival typing the LostChallenge "Thank you for
+  participating!" chain = the LOSS-ending flow the app already renders).
+- **Docs:** `docs/postwin-record-retire-ground-truth.md` §3 gains a dated
+  correction subsection (§3a): the window IS visible during the hold
+  (over-generalization corrected; §3's no-window claim holds only
+  post-dismiss), citing the measured appear/teardown frames + the probe
+  verdict. ISSUES.md untouched (supervisor owns the related trims).
+- **Next:** the RECORD YES (save) and RETIRE YES (lobby warp) routes are now
+  ground-truthed but unbound — decide whether to bind them (RETIRE YES
+  converges on the existing LOSS lobby flow); then per PROGRESS 966's ordered
+  list: #80 rank 6 cursor/ball/fade, lobby walkable + REST guard.
+- **Notes:** full `npm test` + `npm run build` NOT run this step (cap); smoke
+  + typecheck + the three specs are the last verified tiers. PAPERCUT: none.
+
 ## 967 — [bounded MAIN worker, 2026-08-06] #80 rank 5 bound: in-battle party-menu status + held-item icons (spec 0/251->0/251 with 453px/frame off, all target bboxes glyph-exact)
 
 - **State:** master `3e1d718e`, clean. Typecheck green; full `npm test`
