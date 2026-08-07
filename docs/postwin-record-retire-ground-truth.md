@@ -298,3 +298,109 @@ A MAIN slice has bound both: `postwin-record-yes-off` **125/125** and
 `postwin.ts`/`core.ts`; RETIRE-YES reuses the shared WARP_FADE_OUT fade +
 the existing `factoryTerminal` LOSS Lobby-arrival presentation (age = delay
 + 76). The §5 "No YES/NO window to draw" line is also superseded by §3a.
+
+## 7. Second RECORD selection in the same postwin session (2026-08-07, SIDE scout)
+
+**QUESTION:** what does the real game do when RECORD is selected a SECOND
+time in the same postwin session? The app stubs recording behind a session
+flag (user decision 2026-08-05: RECORD stub-only); a second selection showing
+a menu/text variant was never probed.
+
+**VERDICT — a measured variant, but not a text variant: after a successful
+RECORD-YES, the re-asked continuation menu DROPS the RECORD entry entirely.**
+The menu re-asks as the 3-option GO ON / REST / RETIRE variant
+(`MULTI_GO_ON_REST_RETIRE`, at a different window position), so a second
+RECORD selection is *impossible from the menu* — the option is gone. The
+session flag the app stubs against is real in the ROM: it is the persistent
+`FRONTIER_DATA_RECORD_DISABLED` flag that `SaveRecordBattle` sets on every
+successful save.
+
+### 7a. Source chain (every claim cited)
+
+1. RECORD-YES route: `EventScript_AskRecordBattle`
+   (`BattleFrontier_BattleFactoryPreBattleRoom/scripts.inc:108-115`) case 0 →
+   `EventScript_RecordBattle` (`scripts.inc:117-119`) → `call
+   BattleFrontier_EventScript_SaveBattle` → `goto AskReadyForOpponent`.
+2. `BattleFrontier_EventScript_SaveBattle` (shared,
+   `BattleFrontier_BattleTowerLobby/scripts.inc:132-137`): `frontier_savebattle`
+   → on success `playse SE_SAVE` + `msgbox
+   BattleFrontier_BattleTowerLobby_Text_BattleRecordedOnPass, MSGBOX_DEFAULT`
+   ("{PLAYER}'s battle was recorded\non the FRONTIER PASS.",
+   `BattleFrontier_BattleTowerBattleRoom/scripts.inc:472-474`) → `return`.
+3. `frontier_savebattle` macro →
+   `CallFrontierUtilFunc(FRONTIER_UTIL_FUNC_SAVE_BATTLE)`
+   (`asm/macros/battle_frontier/frontier_util.inc:131-134`) → `SaveRecordBattle`
+   (`src/frontier_util.c:2173-2177`), which runs `MoveRecordedBattleToSaveData()`
+   **and unconditionally sets `gSaveBlock2Ptr->frontier.disableRecordBattle =
+   TRUE`** (`frontier_util.c:2176`). This is the session flag.
+4. Back in the prebattle room, `AskReadyForRegularOpponent`
+   (`scripts.inc:82-98`) calls `BattleFrontier_EventScript_GetCantRecordBattle`
+   (`scripts.inc:90`; reads `FRONTIER_DATA_RECORD_DISABLED` via
+   `GetFrontierData`, `frontier_util.c:843-845`) and on TRUE routes to
+   `EventScript_AskReadyForOpponentNoRecord` (`scripts.inc:100-106`), which
+   shows `multichoice 20, 6, MULTI_GO_ON_REST_RETIRE, TRUE` — the **3-option
+   menu without RECORD** (`src/data/script_menu.h:703-708`), at window
+   position (20,6) instead of the 4-option (19,4).
+5. The flag resets to FALSE only at the next battle start
+   (`BattleFrontier_BattleFactoryBattleRoom/scripts.inc:80` and
+   `scripts.inc:171`, `frontier_set FRONTIER_DATA_RECORD_DISABLED, FALSE`), so
+   within one postwin session the re-asked menu stays 3-option.
+6. There is **no overwrite question, no alternate text, and no already-recorded
+   branch** anywhere in the chain: `SaveBattle`/`SaveRecordBattle`/`MoveRecordedBattleToSaveData`
+   (`recorded_battle.c:319-475`, single `RecordedBattleToSave` overwrite of
+   `SECTOR_ID_RECORDED_BATTLE`) run the identical script every time. The
+   "variant" is purely the menu-content gate at step 4.
+
+### 7b. Staged receipts
+
+Fixture `tools/battle-lab/scratch-postwin-record-second-selection-probe.json`
+= the banked `scratch-postwin-record-up-a-probe.json` **verbatim (all 33
+segments, raw segment-list equality checked)** — the §3 prefix + DOWN + A
+(select RECORD) + UP + A (YES) landing on the recorded-message hold — plus a
+3-segment tail: `A` (6846-6847, dismiss the recorded message), 2-frame settle,
+160-frame hold. 36 segments / 7010 frames / 164 captures (6846-7009). Party
+staging unchanged (GLALIE×3 / ONIX SHUCKLE MURKROW, `battleOutcome` 1,
+`mainCallback2` 134766173 stable across the extension). **Twice-run
+byte-identical** — the committed fixture reproduces the session's dense run
+manifests for all 164 captures (run-1/run-2/committed-final: 0 sha
+mismatches), the same twice-run bar §3a set for the up-a probes.
+
+| canonical tick | span | sha256 (prefix) | what's on screen |
+|---:|---|---|---|
+| 6846-6849 | 4 | `4f7b83285aa7` | recorded-message hold ("…battle was recorded / on the FRONTIER PASS."), cursor waiting — the up-a probe's end state |
+| 6850 | 1 | `4bf39eb6ea32` | message box cleared (the A at 6846-6847 dismisses the `msgbox` — MSGBOX_DEFAULT blocks on A) |
+| 6851-6885 | 35 | `e724d159b158`→`dce1b51073` | "The 2nd match is next!\nAre you ready?" re-types (`ReadyFor2ndOpponent`) — **byte-identical glyph shas to §1's re-ask typing span (6726-6760), 35/35 frame-pairs** |
+| 6886-6889 | 4 | `cf0ef6761ee7` | settled re-ask state — **byte-identical to §1's settle (6761-6764)** |
+| 6890-7009 | held | `a542519b73a7` | **re-asked GO ON / REST / RETIRE menu — RECORD GONE. NOT the original `e83628935b`** |
+
+Diff vs the original held menu (`e83628935b`, frame 6800 of the record-probe):
+**exactly the menu window region** — bbox x153-222 × y33-110, 3335 differing
+px confined there; every pixel outside that bbox is byte-identical (the
+"2nd match" message box below is untouched). The 4-option menu has text
+entries at rows 44-52 / 60-68 / 76-84 / 92-100 (GO ON / RECORD / REST /
+RETIRE); the new menu has only rows 60-68 / 76-84 / 92-100 — the RECORD row
+(44-52) is absent. Window geometry matches the source position shift
+(4-option `multichoice 19, 4` → 3-option `multichoice 20, 6`).
+
+### 7c. Conclusion for the app
+
+The user-decision session flag is **load-bearing in the ROM** — it is
+`frontier.disableRecordBattle`, set by every successful save and cleared only
+at the next battle start. The app's RECORD stub must therefore:
+
+- Keep the first RECORD-YES flow exactly as bound (§5/§3a): question +
+  during-hold YES/NO window (§3a) + save-SE hold + "…battle was recorded on
+  the FRONTIER PASS." msgbox.
+- **On the re-ask after a successful RECORD-YES, switch the continuation menu
+  to the 3-option GO ON / REST / RETIRE variant** (no RECORD entry), at the
+  (20,6) window position — mirroring `MULTI_GO_ON_REST_RETIRE`. The re-ask's
+  "2nd match is next!" reprint span and settle are byte-identical to §1, so
+  the bind reuses the existing `ReadyFor2ndOpponent` machinery and only swaps
+  the menu contents + position.
+- RECORD stays absent for the rest of that postwin session; it returns when a
+  next battle resets the flag (a fresh `battleNum`/battle start), matching the
+  ROM's `scripts.inc:80` reset.
+- There is **no overwrite question, no alternate "already recorded" text, and
+  no second-selection branch** to build. A Tier-1 pin should assert the
+  session flag disables the RECORD menu entry (and the app already has the
+  input plumbing to make the option non-navigable).
