@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createFramebuffer } from "../src/engine/framebuffer.ts";
 import {
+  DO_WHAT_WITH_MON_TAIL_CODES,
   PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES,
   PARTY_SELECT_CLOSE_MENU_FADE_FRAMES,
   PARTY_SELECT_CLOSE_MENU_FRAMES,
@@ -340,6 +341,61 @@ describe("voluntary battle party selector", () => {
     expect(state.cursor).toBe(0);
     state = advanceBattlePartySelect(state, new Set(["RIGHT"]));
     expect(state.cursor).toBe(2);
+  });
+
+  it("swaps the message window to the 16x2 sDoWhatWithMonMsgWindowTemplate on the submenu-open edge and keeps it through the close (ISSUES #80 (c))", () => {
+    // docs/fade-layer-forensics.md §7(b): sDoWhatWithMonMsgWindowTemplate
+    // (data/party_menu.h:430-439) is 16x2 -> px (8,136)-(136,152) with the
+    // frame bevel at x141, while the settled sDefaultPartyMsgWindowTemplate is
+    // 21x2 with the frame out to x182 (x141 is still its interior). The swap
+    // stays live through the close fade (the confirm edge sets closeElapsed,
+    // which keeps the swapped message window while the submenu window closes).
+    const renderAt141 = (over: Partial<BattlePartySelectState>): readonly [number, number, number] => {
+      const fb = createFramebuffer();
+      renderBattlePartySelect(fb, { ...liveSelector(), ...over });
+      const i = (140 * 240 + 141) * 4;
+      return [fb[i]!, fb[i + 1]!, fb[i + 2]!] as const;
+    };
+    // Settled: (141,140) is the 21x2 interior's white.
+    expect(renderAt141({})).toEqual([255, 255, 255]);
+    // Submenu open: (141,140) is the 16x2 frame's dark-purple bevel.
+    expect(renderAt141({ submenuOpen: true, submenuOpened: true })).toEqual([74, 74, 107]);
+    // Close started (submenu window closed, message window still swapped).
+    expect(renderAt141({ submenuOpen: false, closeElapsed: 0, submenuOpened: true })).toEqual([74, 74, 107]);
+  });
+
+  it("suppresses the CANCEL pokeball window while the submenu covers it and restores it on the close (ISSUES #80 (c))", () => {
+    const ballAt = (over: Partial<BattlePartySelectState>): readonly [number, number, number] => {
+      const fb = createFramebuffer();
+      renderBattlePartySelect(fb, { ...liveSelector(), ...over });
+      const i = (140 * 240 + 190) * 4;
+      return [fb[i]!, fb[i + 1]!, fb[i + 2]!] as const;
+    };
+    // Settled: the CANCEL pokeball red is at (190,140).
+    expect(ballAt({})).toEqual([181, 66, 0]);
+    // Submenu open: the SEND OUT submenu window replaces the CANCEL button.
+    expect(ballAt({ submenuOpen: true, submenuOpened: true })).not.toEqual([181, 66, 0]);
+    // Close started: the submenu window closes and the CANCEL button returns.
+    expect(ballAt({ submenuOpen: false, closeElapsed: 0, submenuOpened: true })).toEqual([181, 66, 0]);
+  });
+
+  it("renders the {PKMN} tail with the ROM's ligature glyph codes 83/84/172 (ISSUES #80 (c))", () => {
+    // gText_DoWhatWithPokemon = "Do what with this {PKMN}?" (strings.c:434).
+    // The charmap encodes {PKMN} as the two ligature glyph bytes 0x53/0x54 and
+    // the trailing "?" as 0xAC (172) -- NOT a nickname splice
+    // (docs/fade-layer-forensics.md §7(c), supervisor-resolved).
+    expect(DO_WHAT_WITH_MON_TAIL_CODES).toEqual([83, 84, 172]);
+    // The swapped message's tail ink matches the oracle's measured 164 px at
+    // x100-121 y138-152 (docs/fade-layer-forensics.md §7(c)).
+    const fb = createFramebuffer();
+    renderBattlePartySelect(fb, { ...liveSelector(), submenuOpen: true, submenuOpened: true });
+    let ink = 0;
+    for (let y = 138; y <= 152; y += 1) for (let x = 100; x <= 121; x += 1) {
+      const i = (y * 240 + x) * 4;
+      const c = [fb[i]!, fb[i + 1]!, fb[i + 2]!];
+      if ((c[0] === 214 && c[1] === 214 && c[2] === 206) || (c[0] === 99 && c[1] === 99 && c[2] === 99)) ink += 1;
+    }
+    expect(ink).toBe(164);
   });
 
   it("prints the source fainted-row refusal and remains in the selector", () => {

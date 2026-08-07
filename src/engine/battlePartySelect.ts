@@ -7,6 +7,7 @@ import partyMenuSpriteCoordsData from "../assets/gen/party-menu-sprite-coords.js
 import partyMenuPokeballData from "../assets/gen/party-menu-pokeball.json" with { type: "json" };
 import stdWindowData from "../assets/gen/prebattle-room-std-window.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
+import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import fontSmallData from "../data/gen/font-small.json" with { type: "json" };
 import speciesNamesData from "../data/gen/species-names.json" with { type: "json" };
 import summaryInfoData from "../data/gen/summary-info.json" with { type: "json" };
@@ -34,6 +35,8 @@ import { drawText, drawGlyphCodes, codeForChar, type FontData } from "./font.ts"
 import {
   drawStandardWindowFrame,
   drawStandardWindowText,
+  MESSAGE_PALETTE,
+  MESSAGE_TEXT_COLORS,
 } from "./prebattleRoomRender.ts";
 
 export const PARTY_NO_ENERGY_LINE_1_SUFFIX = " has no energy";
@@ -114,6 +117,15 @@ export type BattlePartySelectState = Readonly<{
   cursor: BattlePartySelectCursor;
   rightColumnCursor: 1 | 2;
   submenuOpen: boolean;
+  /**
+   * True once the SEND OUT submenu has ever opened (the A-press edge at
+   * frames 922-923 in the mid-battle-switch fixture). The oracle's mon-icon
+   * animation clock stalls by 2 frames during the submenu-open processing and
+   * never catches back up, so this stays set through the close
+   * (docs/fade-layer-forensics.md §7(e)) -- unlike `submenuOpen`, which clears
+   * on the confirm edge.
+   */
+  submenuOpened: boolean;
   message: string | null;
   outcome:
     | null
@@ -348,6 +360,9 @@ export function battlePartySelectStateForForcedParty(
     submenuOpen:
       forced.submenuOpen
       && (forced.sendOutElapsed === null || forced.sendOutElapsed === 0),
+    submenuOpened:
+      forced.submenuOpen
+      && (forced.sendOutElapsed === null || forced.sendOutElapsed === 0),
     message: forced.message,
     outcome: null,
     elapsed: forced.elapsed,
@@ -425,6 +440,7 @@ export function createBattlePartySelectState(
     cursor: 0,
     rightColumnCursor: 1,
     submenuOpen: false,
+    submenuOpened: false,
     message: null,
     outcome: null,
     elapsed: 0,
@@ -509,7 +525,9 @@ export function advanceBattlePartySelect(
       closeElapsed: 0,
     });
   }
-  if (newKeys.has("A")) return Object.freeze({ ...next, submenuOpen: true });
+  if (newKeys.has("A")) {
+    return Object.freeze({ ...next, submenuOpen: true, submenuOpened: true });
+  }
   const direction = (["UP", "DOWN", "LEFT", "RIGHT"] as const)
     .find((button) => newKeys.has(button));
   if (direction === undefined) return next;
@@ -547,6 +565,7 @@ const fontSmall = {
   ...(fontSmallData as unknown as FontData),
   glyphHeight: 12,
 } satisfies FontData;
+const fontNormal = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>(
   (charmapData as { entries: [string, number][] }).entries,
 );
@@ -619,6 +638,36 @@ const MON_ICON_FRAME_CYCLE = 15;
 /** First frame-1 copy at anim-clock tick 7; frame 0's first copy at 15. */
 const MON_ICON_FRAME1_FIRST_TICK = 7;
 const MON_ICON_FRAME1_TICKS = 8;
+
+/**
+ * The oracle's mon-icon animation clock stalls by exactly 2 frames while the
+ * SEND OUT submenu opens (A-press 922-923, window lands 926), so from the
+ * submenu-open edge the displayed phase lags the raw `elapsed` clock by 2:
+ * toggles land at 930/937/945/... not 928/935/943/... and the frame-0 B phase
+ * holds 920-929 (docs/fade-layer-forensics.md §7(e)). The stall is permanent
+ * once the submenu has opened.
+ */
+export const MON_ICON_SUBMENU_OPEN_STALL = 2;
+
+/**
+ * The icon-anim clock value to feed `monIconFrameAt`/`monIconSelectedY2`,
+ * applying the §7(e) submenu-open stall to a raw `elapsed`.
+ */
+export function monIconElapsedAfterSubmenuStall(
+  elapsed: number,
+  submenuOpened: boolean,
+): number {
+  return elapsed - (submenuOpened ? MON_ICON_SUBMENU_OPEN_STALL : 0);
+}
+
+/**
+ * The rendered tail of gText_DoWhatWithPokemon = "Do what with this {PKMN}?"
+ * (strings.c:434): `{PKMN}` is NOT a nickname splice -- the ROM charmap encodes
+ * it as the two ligature glyph bytes 0x53/0x54 (PK/MN, charmap.txt:51) and the
+ * trailing "?" as 0xAC (decimal 172), drawn at FONT_NORMAL origin (8,137) one
+ * line, no wrap (docs/fade-layer-forensics.md §7(c)).
+ */
+export const DO_WHAT_WITH_MON_TAIL_CODES = [83, 84, 172] as const;
 
 /** sAnim_0 displayed frame at `elapsed` (frame 0 in [15+15k, 7+15(k+1))). */
 export function monIconFrameAt(elapsed: number): 0 | 1 {
@@ -1054,16 +1103,49 @@ function drawPartySelectBgLayer(fb: Uint8Array, state: BattlePartySelectState): 
     drawStandardWindowText(fb, "  CANCEL", 152, 121);
   }
 
-  // sDefaultPartyMsgWindowTemplate (data/party_menu.h:419-428): bg 2, tilemap
-  // (1,17), 21x2 = px (8,136)-(176,152); the frame is one tile around. Uses
-  // the party-menu message-window frame style (frame1 tiles, olive corner).
-  drawStandardWindowFrame(fb, 0, 128, 21, 2, PARTY_MESSAGE_WINDOW_PALETTE);
-  const message = state.message ?? "Choose a POKéMON.";
-  const [line1, line2] = message.split("\n");
-  drawStandardWindowText(fb, line1!, 8, 137);
-  if (line2) drawStandardWindowText(fb, line2, 8, 153);
-  if (state.cursor === "cancel") drawStandardWindowText(fb, "▶ CANCEL", 168, 145);
-  drawCancelWindow(fb);
+  // ISSUES #80 open remainder (c): from the submenu-open edge through the
+  // close, the oracle swaps the message window from sDefaultPartyMsgWindowTemplate
+  // (21x2, frame to x182) to sDoWhatWithMonMsgWindowTemplate (16x2, frame to
+  // x141, data/party_menu.h:430-439) and prints gText_DoWhatWithPokemon =
+  // "Do what with this {PKMN}?" (strings.c:434) -- the {PKMN} tail is the two
+  // PK/MN ligature glyphs 0x53/0x54 + the full-width "?" 0xAC, NOT a nickname
+  // splice (docs/fade-layer-forensics.md §7). The submenu window closes on the
+  // confirm edge but the swapped message window stays through the close fade;
+  // the CANCEL window is suppressed only while the submenu window covers it.
+  const messageWindowSwapped = state.submenuOpen || state.closeElapsed !== null;
+  if (messageWindowSwapped) {
+    drawStandardWindowFrame(fb, 0, 128, 16, 2, PARTY_MESSAGE_WINDOW_PALETTE);
+    drawText(
+      fb,
+      fontNormal,
+      charmap,
+      "Do what with this ",
+      8,
+      137,
+      MESSAGE_PALETTE,
+      MESSAGE_TEXT_COLORS,
+    );
+    drawGlyphCodes(
+      fb,
+      fontNormal,
+      DO_WHAT_WITH_MON_TAIL_CODES,
+      100,
+      137,
+      MESSAGE_PALETTE,
+      MESSAGE_TEXT_COLORS,
+    );
+  } else {
+    // sDefaultPartyMsgWindowTemplate (data/party_menu.h:419-428): bg 2, tilemap
+    // (1,17), 21x2 = px (8,136)-(176,152); the frame is one tile around. Uses
+    // the party-menu message-window frame style (frame1 tiles, olive corner).
+    drawStandardWindowFrame(fb, 0, 128, 21, 2, PARTY_MESSAGE_WINDOW_PALETTE);
+    const message = state.message ?? "Choose a POKéMON.";
+    const [line1, line2] = message.split("\n");
+    drawStandardWindowText(fb, line1!, 8, 137);
+    if (line2) drawStandardWindowText(fb, line2, 8, 153);
+    if (state.cursor === "cancel") drawStandardWindowText(fb, "▶ CANCEL", 168, 145);
+  }
+  if (!state.submenuOpen) drawCancelWindow(fb);
 }
 
 /**
@@ -1075,17 +1157,25 @@ function drawPartySelectBgLayer(fb: Uint8Array, state: BattlePartySelectState): 
  * its own (one-tick-trailing) coefficient.
  */
 function drawPartySelectObjLayer(fb: Uint8Array, state: BattlePartySelectState): void {
+  // The submenu-open processing stalls the oracle's mon-icon clock by 2 frames
+  // (§7(e)), so the icon/bounce clocks feed the shifted elapsed.
+  const iconElapsed = monIconElapsedAfterSubmenuStall(state.elapsed, state.submenuOpened);
+  const iconSelectionElapsed = monIconElapsedAfterSubmenuStall(
+    state.selectedSinceElapsed,
+    state.submenuOpened,
+  );
   for (const row of state.rows) {
     // The per-slot menu Pokéball sprite sits under the mon icon (icon
     // oam.priority 1, ball default 3), so it draws first.
     drawMenuPokeball(fb, row, state.cursor);
-    drawIcon(fb, row, state.cursor === row.partyIndex, state.elapsed, state.selectedSinceElapsed);
+    drawIcon(fb, row, state.cursor === row.partyIndex, iconElapsed, iconSelectionElapsed);
     // sPartyMenuSpriteCoords per-slot order: icon, heldItem, status, pokeball --
     // the item sprite draws on top of the mon icon's lower-left corner.
     drawHeldItemIcon(fb, row);
     drawStatusIcon(fb, row);
   }
-  drawCancelPokeball(fb);
+  // The SEND OUT submenu window replaces the CANCEL pokeball button while open.
+  if (!state.submenuOpen) drawCancelPokeball(fb);
 }
 
 /**

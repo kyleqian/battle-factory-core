@@ -5,6 +5,42 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 988 — [bounded MAIN worker, 2026-08-07] ISSUES #80 item (c) CLOSED: submenu-open message window swap + icon-clock +2 stall — dense-a spec 325 → **341/341 byte-exact**
+
+- **State:** master `23c64070`, clean. Typecheck + `npm run build` green,
+  `npm run test:smoke` **347/347**, touched test files **31/31**
+  (battlePartySelect 17/17 + partyMonIconAnim 6/6 + inbattlePartyMenuVisualBind
+  8/8; 3 new pins red-verified by breaking each behavior). Keep-green all held:
+  dense-a **341/341** (spec extended 964-979, twice-run), party-menu-status-item-off
+  **251/251**, mid-battle-switch-pacing-b-off **153/153**, battle-command-generated-off
+  **128/128**. Full `npm test` NOT run (worker rule — supervisor after merge).
+- **Did (per `docs/fade-layer-forensics.md` §7, side-branch `1648f56f`):**
+  (1) message-window swap at the submenu-open edge — `drawPartySelectBgLayer`
+  now draws **sDoWhatWithMonMsgWindowTemplate** (16x2, frame to x141) +
+  `gText_DoWhatWithPokemon` "Do what with this {PKMN}?" (prefix via charmap,
+  tail = glyph codes **83/84/172** = the PK/MN ligatures + full-width "?",
+  NOT a nickname splice) in place of the 21x2 "Choose a POKéMON." window; the
+  swap persists through the close (`submenuOpen || closeElapsed`), while the
+  submenu window closes on the confirm edge and the CANCEL pokeball window
+  returns. (2) icon clock — new persistent `submenuOpened` state flag +
+  `MON_ICON_SUBMENU_OPEN_STALL = 2` (`monIconElapsedAfterSubmenuStall`): the
+  oracle's 2-frame submenu-open stall is applied as a +2 offset from the
+  submenu-open edge, so toggles land at **930/937/945/...** not 928/935/943/
+  (B hold 920-929), clearing the 489px residual on 965/966/973/974.
+- **Acceptance:** dense-a `captureFrames` extended 964-979 (325 → **341**),
+  **341/341 byte-exact** — the close-fade band 964-978 residuals were exactly
+  the (c) content classes, not the §1 fade blend. Tier-1 pins: the 16x2 window
+  rect switch ((141,140) frame bevel vs settled white, incl. through closeElapsed),
+  `DO_WHAT_WITH_MON_TAIL_CODES === [83,84,172]` + 164px oracle-measured tail ink,
+  and the stall's toggle ticks (stall(928/929)=1, stall(930)=0, stall(937)=1,
+  stall(945)=0 vs un-stalled 928/935) — each red-verified.
+- **Next:** supervisor verify + full `npm test`; then the #80 open-fade
+  residual (opponent idle breathing 771/773/775/777/779) or the newly-named
+  submenu-window geometry gap (926-963, uncaptured).
+- **Notes:** the app's SEND OUT submenu window geometry (10x6 at (144,80)) is
+  still a visual gap vs the oracle's taller window (~4461px at 926-963) — left
+  out of scope (uncaptured; not part of the (c) acceptance). No PAPERCUTS.
+
 ## 987 — [bounded MAIN worker, 2026-08-07] Post-loss lobby free-roam input freeze FIXED + walk timing corrected; `loss-lobby-walk-off` promotion BLOCKED at 129/177 by the woman's south/east-walk residuals
 
 - **State:** master `395fc2cc`, clean. Typecheck + `npm run build` green,

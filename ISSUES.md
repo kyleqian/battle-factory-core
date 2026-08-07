@@ -79,24 +79,26 @@ latter is a uniform sprite-body pixel). The 8 OBJ-lag frames
 (766/768/770/772/774/776/778/780) remain the brief's named whole-field-blend
 residual. Follow-up: model the opponent idle breathing (frame-2 sprite or a
 bounded squish) to close 771-779.
-(c) message-box residual, now known to span **960-978** (not just 960-963):
-during the submenu-open/close the oracle's message box is a DIFFERENT window
-than the app's settled 21x2 olive "Choose a POKéMON." box — at 964 the frame
-right edge is x141 vs the app's x181, the interior has gradient border rows
-(115,107,132)/(222,214,222) instead of solid white, and the text is longer/
-different (never decoded; the app's settled box IS byte-exact at 883 and in
-party-menu-status-item-off 2050-2300). **The item-(a) layer-separated close
-blend is LANDED 2026-08-07** (`renderBattlePartySelect` now draws a BG pass
-and an OBJ pass and blends them at `y_bg = closeElapsed & ~1` / `y_obj =
-(closeElapsed - 1) & ~1`; menu fade-out now 965-979 y=2..16, black
-980-1018, `PARTY_SELECT_CLOSE_MENU_FADE_FRAMES` 14→15 / `BLACK_HOLD` 40→39
-with the total span unchanged; frame 979 = the OBJ-tail discriminator is
-**byte-exact**, and the dense-a spec is green at 980-1255), but the dense-a
-extension 964-979 stays **277/292** — the red frames 964-978 are the (c)
-message-box residual plus an intermittent ~489px mon-icon/slot-region phase
-residual on the y_obj=0/2/8/10 frames (also the 5224px frame-883 open-state
-band), i.e. out-of-scope content classes, not the fade blend. Extending the
-spec to 292/292 is blocked until (c) is bound.
+(c) message-box residual — **CLOSED 2026-08-07** (dense-a spec **341/341
+byte-exact**). On the submenu-open edge (A-press 922-923, window lands 926)
+the oracle swaps the message window from sDefaultPartyMsgWindowTemplate (21x2,
+frame to x182) to **sDoWhatWithMonMsgWindowTemplate** (16x2, frame to x141,
+data/party_menu.h:430-439) and prints `gText_DoWhatWithPokemon` = "Do what
+with this {PKMN}?" (strings.c:434): the `{PKMN}` tail is the two PK/MN
+ligature glyph bytes 0x53/0x54 + the full-width "?" 0xAC (charmap.txt:51) —
+**NOT a nickname splice** (docs/fade-layer-forensics.md §7, side-branch
+`1648f56f`; probe mode 4 re-verifies). The swapped window persists through the
+close fade while the submenu window closes on the confirm edge (the CANCEL
+pokeball window returns). The mon-icon clock's 2-frame submenu-open stall is
+modeled as a permanent +2 offset from the submenu-open edge (oracle toggles
+930/937/945 vs the app's pre-fix 928/935/943; B hold 920-929), clearing the
+489px icon residual on 965/966/973/974. Tier-1 pins red-verified in
+`tests/battlePartySelect.test.ts` + `tests/partyMonIconAnim.test.ts`. Dense-a
+captureFrames extended 964-979 → **341 frames, 341/341 byte-exact**; keep-green
+251/251 + 153/153 + 128/128 all held. **Remaining party-menu visual gap (not
+captured by any spec): the SEND OUT/SUMMARY/CANCEL submenu window geometry —
+the app's 10x6 window at (144,80) vs the oracle's taller window (~4461px at
+926-963).**
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 

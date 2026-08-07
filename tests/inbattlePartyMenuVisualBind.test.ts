@@ -75,6 +75,7 @@ function baseState(
     cursor: 1 as const,
     rightColumnCursor: 1,
     submenuOpen: false,
+    submenuOpened: false,
     message: "Choose a POKéMON.",
     outcome: null,
     elapsed: 0,

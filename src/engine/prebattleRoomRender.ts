@@ -304,8 +304,8 @@ export function drawMessageBoxFrameFaded(
 const MESSAGE_TEXT_ORIGIN = { x: 16, y: 121 };
 
 /** {fg:1,bg:0,shadow:2} into a 3-entry palette matching font.ts's role convention (raw 0/3->colors.bg, 1->fg, 2->shadow); bg=0 is always skipped (transparent). Indexed straight from message_box.json's own palette - see module doc. */
-const MESSAGE_PALETTE: RgbColor[] = [{ r: 0, g: 0, b: 0 }, msgboxPalette[2]!, msgboxPalette[3]!];
-const MESSAGE_TEXT_COLORS = { fg: 1, bg: 0, shadow: 2 };
+export const MESSAGE_PALETTE: RgbColor[] = [{ r: 0, g: 0, b: 0 }, msgboxPalette[2]!, msgboxPalette[3]!];
+export const MESSAGE_TEXT_COLORS = { fg: 1, bg: 0, shadow: 2 };
 
 /** Draws `text` at the given screen position using the message box's own fg/shadow palette (msgboxPalette indices 2/3) - shared with battleRoomRender.ts's opponent-speech box, which reuses this literal same box asset (docs/battle-room-notes.md §8.1). */
 export function drawMessageBoxText(fb: Uint8Array, text: string, x: number, y: number): void {
