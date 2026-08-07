@@ -95,12 +95,18 @@ import {
   beginPostwinQuestion,
   acceptPostwinQuestionDismiss,
   acceptPostwinQuestionYes,
+  acceptPostwinRecordedMessageDismiss,
+  postwinContinuationChoiceCount,
+  postwinRecordedInputReady,
+  postwinReaskElapsed,
   postwinQuestionVisibleChars,
   postwinQuestionMenuReady,
   postwinQuestionReprintVisibleChars,
   postwinQuestionYesDelay,
   postwinRecordedVisibleChars,
   POSTWIN_QUESTION_MENU_READY_DELAY,
+  POSTWIN_QUESTION_REPRINT_FIRST_DELAY,
+  POSTWIN_RECORDED_INPUT_READY_DELAY,
   POSTWIN_QUESTION_RECORD_TEXT,
   POSTWIN_QUESTION_RETIRE_TEXT,
   POSTWIN_QUESTION_TEXT_TOTAL,
@@ -1209,6 +1215,139 @@ describe("S8 Battle-1 postwin transition", () => {
       expect(postwinQuestionYesDelay({ ...yes, elapsed: edge2 + POSTWIN_RETIRE_FADE_FIRST_DELAY - 1 })).toBe(3);
       expect(postwinQuestionYesDelay({ ...yes, elapsed: edge2 + POSTWIN_RETIRE_FADE_IN_DELAY })).toBe(38);
       expect(postwinQuestionYesDelay({ ...yes, elapsed: edge2 + POSTWIN_RETIRE_FADE_IN_DELAY - 1 })).toBe(37);
+    });
+
+    it("sets the disableRecordBattle flag on RECORD-YES only, never on RETIRE-YES or NO dismisses", () => {
+      const edge = 6_639;
+      const windowDelay = POSTWIN_QUESTION_WINDOW_DELAYS.record;
+      const holdAge = edge + windowDelay;
+      const recordBase = {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: holdAge,
+        healDismissElapsed: 2_000,
+        question: { kind: "record" as const, edgeElapsed: edge },
+        questionCursorPos: 0 as const,
+        questionCursorDisplayPos: 0 as const,
+      };
+      // RECORD-YES: `SaveRecordBattle` sets `frontier.disableRecordBattle`.
+      const recordYes = acceptPostwinQuestionYes(recordBase);
+      expect(recordYes.disableRecordBattle).toBe(true);
+      expect(recordYes.questionYesElapsed).toBe(holdAge - 1);
+      // RETIRE-YES: the flag stays false (no save runs).
+      const retireYes = acceptPostwinQuestionYes({
+        ...recordBase,
+        question: { kind: "retire" as const, edgeElapsed: edge },
+        questionCursorPos: 0 as const,
+        questionCursorDisplayPos: 0 as const,
+      });
+      expect(retireYes.disableRecordBattle).toBe(false);
+      // NO dismiss on either kind: no flag.
+      expect(acceptPostwinQuestionDismiss(recordBase).disableRecordBattle).toBe(false);
+      // A before the window draws is swallowed entirely.
+      expect(acceptPostwinQuestionYes({ ...recordBase, elapsed: holdAge - 1, questionCursorPos: 0 })
+        .disableRecordBattle).toBe(false);
+    });
+
+    it("drops the re-asked continuation menu to the 3-option GO ON/REST/RETIRE variant once the flag is set", () => {
+      const edge = 6_639;
+      const windowDelay = POSTWIN_QUESTION_WINDOW_DELAYS.record;
+      const holdAge = edge + windowDelay;
+      const flagState = {
+        ...INITIAL_POSTWIN_STATE,
+        disableRecordBattle: true as const,
+        elapsed: holdAge,
+        healDismissElapsed: 2_000,
+        continuationCursorPos: 0 as const,
+        continuationCursorDisplayPos: 0 as const,
+      };
+      // The menu offers exactly three entries: RECORD is gone (§7a).
+      expect(postwinContinuationChoiceCount(flagState)).toBe(3);
+      expect(postwinContinuationChoiceCount({
+        ...flagState,
+        disableRecordBattle: false as const,
+      })).toBe(4);
+      // Cursor traversal wraps over the 3 entries (GO ON -> REST -> RETIRE ->
+      // GO ON), not the 4-option ring.
+      const moved = movePostwinContinuationCursor(flagState, 1);
+      expect(moved.continuationCursorPos).toBe(1);
+      const onRetire = movePostwinContinuationCursor({ ...moved, elapsed: moved.elapsed + 1 }, 1);
+      expect(onRetire.continuationCursorPos).toBe(2);
+      const wrapped = movePostwinContinuationCursor({ ...onRetire, elapsed: onRetire.elapsed + 1 }, 1);
+      expect(wrapped.continuationCursorPos).toBe(0);
+      // In the 3-option variant, RETIRE is the last entry and routes to the
+      // retire question; REST (1) stays A-guarded.
+      expect(acceptPostwinContinuation(onRetire).question?.kind).toBe("retire");
+      const restPress = acceptPostwinContinuation(moved);
+      expect(restPress.question).toBeNull();
+      expect(restPress).toBe(moved);
+    });
+
+    it("routes the recorded-message dismiss-A back to the re-ask with the flag set and the flag NOT set for RETIRE/plain re-asks", () => {
+      const edge = 6_639;
+      const windowDelay = POSTWIN_QUESTION_WINDOW_DELAYS.record;
+      const holdAge = edge + windowDelay;
+      const yes = acceptPostwinQuestionYes({
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: holdAge,
+        healDismissElapsed: 2_000,
+        question: { kind: "record" as const, edgeElapsed: edge },
+        questionCursorPos: 0 as const,
+        questionCursorDisplayPos: 0 as const,
+      });
+      expect(yes.disableRecordBattle).toBe(true);
+      const yesEdge = yes.questionYesElapsed!;
+      // The recorded message is MSGBOX_DEFAULT: A accepted two ticks after
+      // the final glyph (edge + 74).
+      expect(POSTWIN_RECORDED_INPUT_READY_DELAY)
+        .toBe(POSTWIN_RECORDED_LAST_GLYPH_DELAY + 2);
+      expect(postwinRecordedInputReady({ ...yes, elapsed: yesEdge + POSTWIN_RECORDED_INPUT_READY_DELAY - 1 })).toBe(false);
+      expect(postwinRecordedInputReady({ ...yes, elapsed: yesEdge + POSTWIN_RECORDED_INPUT_READY_DELAY })).toBe(true);
+      // Early A is swallowed; the ready A accepts and keys the re-ask.
+      expect(acceptPostwinRecordedMessageDismiss({ ...yes, elapsed: yesEdge + POSTWIN_RECORDED_INPUT_READY_DELAY - 1 })
+        .recordedMessageDismissElapsed).toBeNull();
+      const dismissEdge = yesEdge + POSTWIN_RECORDED_INPUT_READY_DELAY;
+      const dismissed = acceptPostwinRecordedMessageDismiss({
+        ...yes,
+        elapsed: dismissEdge + 1,
+      });
+      expect(dismissed.recordedMessageDismissElapsed).toBe(dismissEdge);
+      // The re-ask reprint + menu ready run off the recorded-dismiss edge,
+      // the same §1/§7b schedule as the NO-dismiss re-ask.
+      expect(postwinReaskElapsed(dismissed)).toBe(dismissEdge);
+      expect(postwinQuestionReprintVisibleChars({
+        ...dismissed,
+        elapsed: dismissEdge + POSTWIN_QUESTION_REPRINT_FIRST_DELAY,
+      })).toBe(1);
+      expect(postwinQuestionMenuReady({
+        ...dismissed,
+        elapsed: dismissEdge + POSTWIN_QUESTION_MENU_READY_DELAY,
+      })).toBe(true);
+      const reAsked = advancePostwin({
+        ...dismissed,
+        elapsed: dismissEdge + POSTWIN_QUESTION_MENU_READY_DELAY,
+        continuationCursorPos: 1 as const,
+        continuationCursorDisplayPos: 1 as const,
+      });
+      // Fresh 3-option menu: cursor back on GO ON, flag still set.
+      expect(reAsked.continuationCursorPos).toBe(0);
+      expect(reAsked.continuationCursorDisplayPos).toBe(0);
+      expect(reAsked.disableRecordBattle).toBe(true);
+      // RETIRE-YES / plain NO re-asks never set the flag (red-verify).
+      const retireYes = acceptPostwinQuestionYes({
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: holdAge,
+        healDismissElapsed: 2_000,
+        question: { kind: "retire" as const, edgeElapsed: edge },
+        questionCursorPos: 0 as const,
+        questionCursorDisplayPos: 0 as const,
+      });
+      expect(retireYes.disableRecordBattle).toBe(false);
+      expect(postwinReaskElapsed(acceptPostwinQuestionDismiss({
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: holdAge,
+        healDismissElapsed: 2_000,
+        question: { kind: "retire" as const, edgeElapsed: edge },
+      }))).not.toBeNull();
     });
   });
 });

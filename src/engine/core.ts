@@ -232,6 +232,7 @@ import {
   acceptPostwinDialoguePage,
   acceptPostwinHealDismiss,
   acceptPostwinQuestionDismiss,
+  acceptPostwinRecordedMessageDismiss,
   createBattleReturnHoldState,
   createPostwinState,
   createPostwinStateFromOpponentRentalRecords,
@@ -272,6 +273,7 @@ import {
   postwinQuestionMenuReady,
   postwinQuestionYesDelay,
   postwinRecordedVisibleChars,
+  postwinRecordedInputReady,
   movePostwinContinuationCursor,
   movePostwinSwapCursor,
   movePostwinQuestionCursor,
@@ -1017,6 +1019,17 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
           nextPostwin = acceptPostwinQuestionDismiss(nextPostwin);
         }
       }
+    } else if (
+      nextPostwin.question !== null &&
+      nextPostwin.questionYesElapsed !== null &&
+      nextPostwin.recordedMessageDismissElapsed === null &&
+      nextPostwin.question.kind === "record" &&
+      postwinRecordedInputReady(nextPostwin) &&
+      newKeys.has("A")
+    ) {
+      // RECORD-YES recorded-message hold: the dismiss-A resolves it back to
+      // the continuation menu (the re-ask, which drops RECORD per §7a).
+      nextPostwin = acceptPostwinRecordedMessageDismiss(nextPostwin);
     } else if (
       nextPostwin.question === null &&
       postwinContinuationInputReady(nextPostwin)
@@ -2399,7 +2412,26 @@ function renderPostwinState(state: EngineState): Uint8Array {
       const qDelay = age - q.edgeElapsed;
       const dDelay = dismissed ? age - postwin.questionDismissElapsed! : -1;
       const yesDelay = postwinQuestionYesDelay(postwin);
-      if (yesDelay >= 0 && q.kind === "record") {
+      if (postwin.recordedMessageDismissElapsed !== null) {
+        // RECORD-YES recorded message resolved back to the menu: the message
+        // holds through +3 after the dismiss-A, the box clears at +4, then
+        // the ReadyFor2ndOpponent reprint re-types (the §7b re-ask, which
+        // drops the RECORD entry). Mirrors the NO-dismiss re-ask schedule.
+        const rDelay = age - postwin.recordedMessageDismissElapsed;
+        if (rDelay <= 3) {
+          drawLines(
+            POSTWIN_RECORDED_TEXT[0],
+            POSTWIN_RECORDED_TEXT[1],
+            postwinRecordedVisibleChars(postwin),
+          );
+        } else if (rDelay !== 4) {
+          drawLines(
+            POSTWIN_NEXT_LINE1,
+            POSTWIN_NEXT_LINE2,
+            postwinQuestionReprintVisibleChars(postwin),
+          );
+        }
+      } else if (yesDelay >= 0 && q.kind === "record") {
         // RECORD-YES: window clears +2 after the A-on-YES edge, the question
         // box holds through the save-SE span (+2..+22), clears at +23, then
         // "{PLAYER}'s battle was recorded" types from +24.
@@ -2526,28 +2558,46 @@ function renderPostwinState(state: EngineState): Uint8Array {
       (
         (
           postwin.questionDismissElapsed === null &&
+          postwin.recordedMessageDismissElapsed === null &&
           age - postwin.question.edgeElapsed <= 1
         ) ||
-        (
-          postwin.questionDismissElapsed !== null &&
-          postwinQuestionMenuReady(postwin)
-        )
+        postwinQuestionMenuReady(postwin)
       );
     if (
       healDismiss !== null &&
       age >= healDismiss + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY &&
       (normalMenuVisible || questionMenuVisible)
     ) {
-      drawStandardWindowFrame(fb, 152, 32, 6, 8);
-      const choices = ["GO ON", "RECORD", "REST", "RETIRE"];
+      // The 3-option GO ON / REST / RETIRE variant after a successful
+      // RECORD-YES (`MULTI_GO_ON_REST_RETIRE` at tile (20,6), §7a/§7b): the
+      // window drops the RECORD row, shifting its position +1 tile x / +2
+      // tiles y from the 4-option (19,4), and the text rows move up to the
+      // 4-option's rows 2-4. Measured byte-exact from the §7b held frame.
+      const disabledRecord = postwin.disableRecordBattle;
+      drawStandardWindowFrame(
+        fb,
+        disabledRecord ? 160 : 152,
+        disabledRecord ? 48 : 32,
+        6,
+        disabledRecord ? 6 : 8,
+      );
+      const choices = disabledRecord
+        ? ["GO ON", "REST", "RETIRE"]
+        : ["GO ON", "RECORD", "REST", "RETIRE"];
+      const firstRow = disabledRecord ? 57 : 41;
       for (let i = 0; i < choices.length; i += 1) {
-        drawStandardWindowText(fb, choices[i]!, 168, 41 + i * 16);
+        drawStandardWindowText(
+          fb,
+          choices[i]!,
+          disabledRecord ? 176 : 168,
+          firstRow + i * 16,
+        );
       }
       drawStandardWindowText(
         fb,
         "▶",
-        160,
-        41 + (postwin.continuationCursorDisplayPos ?? postwin.continuationCursorPos ?? 0) * 16,
+        disabledRecord ? 168 : 160,
+        firstRow + (postwin.continuationCursorDisplayPos ?? postwin.continuationCursorPos ?? 0) * 16,
       );
     }
     if (

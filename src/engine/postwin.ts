@@ -103,6 +103,22 @@ export interface PostwinState {
   continuationCursorDisplayPos: 0 | 1 | 2 | 3 | null;
   /** Accepted continuation-cursor edge, used for the one-VBlank display handoff. */
   continuationCursorMoveElapsed: number | null;
+  /**
+   * `frontier.disableRecordBattle` session flag
+   * (docs/postwin-record-retire-ground-truth.md §7a): `SaveRecordBattle`
+   * sets it on every successful RECORD save, and the next re-asked
+   * continuation menu drops the RECORD entry (the 3-option
+   * GO ON / REST / RETIRE variant). The ROM clears it at the next battle
+   * start; a fresh `createPostwinState*` (one per battle) already does so.
+   */
+  disableRecordBattle: boolean;
+  /**
+   * Accepted dismiss-A edge for the RECORD-YES "{PLAYER}'s battle was
+   * recorded" message (canonical, edge-relative). The re-ask that follows
+   * resolves back to the continuation menu via the same
+   * `POSTWIN_QUESTION_*` reprint schedule as the NO dismiss.
+   */
+  recordedMessageDismissElapsed: number | null;
   /** Accepted "Right this way" dismiss edge; walk/warp clocks derive from it. */
   rightThisWayDismissElapsed: number | null;
   /**
@@ -233,6 +249,8 @@ function createPostwinStateFromSnapshot(
     questionDismissElapsed: null,
     continuationCursorDisplayPos: null,
     continuationCursorMoveElapsed: null,
+    disableRecordBattle: false,
+    recordedMessageDismissElapsed: null,
     rightThisWayDismissElapsed: null,
     frozenSceneView: null,
   };
@@ -398,6 +416,8 @@ export function createBattleReturnHoldState(
     questionDismissElapsed: null,
     continuationCursorDisplayPos: null,
     continuationCursorMoveElapsed: null,
+    disableRecordBattle: false,
+    recordedMessageDismissElapsed: null,
     rightThisWayDismissElapsed: null,
     frozenSceneView,
   };
@@ -481,6 +501,9 @@ export const POSTWIN_RECORDED_TEXT_FIRST_DELAY = 24;
 /** RECORD: final glyph edge-offset (+72). */
 export const POSTWIN_RECORDED_LAST_GLYPH_DELAY =
   POSTWIN_RECORDED_TEXT_FIRST_DELAY + POSTWIN_RECORDED_TEXT_TOTAL - 1;
+/** RECORD-YES message is MSGBOX_DEFAULT: A accepted two ticks after the final glyph. */
+export const POSTWIN_RECORDED_INPUT_READY_DELAY =
+  POSTWIN_RECORDED_LAST_GLYPH_DELAY + 2;
 /** RETIRE: fade-to-black first frame at +4 (the shared WARP_FADE_OUT start). */
 export const POSTWIN_RETIRE_FADE_FIRST_DELAY = 4;
 /** RETIRE: first fully-black frame at +19. */
@@ -561,11 +584,13 @@ export function advancePostwin(state: PostwinState): PostwinState {
     elapsed >= state.dialoguePageEdgeElapsed + POSTWIN_SWAP_MENU_VISIBLE_DELAY;
   // The re-asked continuation menu after a RECORD/RETIRE question is a fresh
   // menu: cursor back on GO ON (ground-truth §1: re-asked menu byte-identical
-  // to the original held menu, which sits on GO ON).
+  // to the original held menu, which sits on GO ON). The re-ask edge is the
+  // NO dismiss OR the RECORD-YES recorded-message dismiss (§7b) -- both run
+  // the same ReadyFor2ndOpponent reprint schedule.
+  const reAskElapsed = postwinReaskElapsed(state);
   const reAskMenuReady =
-    state.question !== null &&
-    state.questionDismissElapsed !== null &&
-    elapsed >= state.questionDismissElapsed + POSTWIN_QUESTION_MENU_READY_DELAY;
+    reAskElapsed !== null &&
+    elapsed >= reAskElapsed + POSTWIN_QUESTION_MENU_READY_DELAY;
   return {
     elapsed,
     challengeBattleNum:
@@ -620,6 +645,8 @@ export function advancePostwin(state: PostwinState): PostwinState {
     questionCursorMoveElapsed: state.questionCursorMoveElapsed,
     questionYesElapsed: state.questionYesElapsed,
     questionDismissElapsed: state.questionDismissElapsed,
+    disableRecordBattle: state.disableRecordBattle,
+    recordedMessageDismissElapsed: state.recordedMessageDismissElapsed,
     // One-VBlank display handoff for the continuation-menu cursor, mirroring
     // the swap cursor: the logical pos moves on the press frame, the field
     // window copies it one tick later (docs/...-ground-truth.md §5).
@@ -661,6 +688,15 @@ export function postwinContinuationInputReady(state: PostwinState): boolean {
       state.healDismissElapsed + POSTWIN_CONTINUATION_INPUT_READY_DELAY;
 }
 
+/**
+ * Continuation menu entry count: 4 (GO ON/RECORD/REST/RETIRE) until a
+ * successful RECORD-YES sets `disableRecordBattle`, then 3
+ * (GO ON/REST/RETIRE, the MULTI_GO_ON_REST_RETIRE variant at §7a).
+ */
+export function postwinContinuationChoiceCount(state: PostwinState): 3 | 4 {
+  return state.disableRecordBattle ? 3 : 4;
+}
+
 export function movePostwinContinuationCursor(
   state: PostwinState,
   direction: 1 | -1,
@@ -668,10 +704,11 @@ export function movePostwinContinuationCursor(
   if (!postwinContinuationInputReady(state) || state.continuationCursorPos === null) {
     return state;
   }
+  const count = postwinContinuationChoiceCount(state);
+  const next = (state.continuationCursorPos + direction + count) % count;
   return {
     ...state,
-    continuationCursorPos:
-      ((state.continuationCursorPos + direction + 4) % 4) as 0 | 1 | 2 | 3,
+    continuationCursorPos: next as 0 | 1 | 2 | 3,
     continuationCursorMoveElapsed: state.elapsed,
   };
 }
@@ -739,6 +776,40 @@ export function acceptPostwinQuestionYes(
     ...state,
     // Same canonical-edge convention as beginPostwinQuestion.
     questionYesElapsed: state.elapsed - 1,
+    // `SaveRecordBattle` unconditionally sets
+    // `frontier.disableRecordBattle = TRUE` on every successful save
+    // (frontier_util.c:2173-2177); the re-asked continuation menu then drops
+    // the RECORD entry (docs/postwin-record-retire-ground-truth.md §7a).
+    disableRecordBattle:
+      state.question.kind === "record" || state.disableRecordBattle,
+  };
+}
+
+/** RECORD-YES recorded message: MSGBOX_DEFAULT accepts A two ticks after the final glyph. */
+export function postwinRecordedInputReady(state: PostwinState): boolean {
+  return postwinQuestionYesDelay(state) >= POSTWIN_RECORDED_INPUT_READY_DELAY;
+}
+
+/**
+ * RECORD-YES: accept the recorded-message dismiss-A. This resolves
+ * "{PLAYER}'s battle was recorded / on the FRONTIER PASS." back to the
+ * continuation menu -- the re-ask runs the same ReadyFor2ndOpponent reprint
+ * schedule as a NO dismiss (§7b), keyed to this edge.
+ */
+export function acceptPostwinRecordedMessageDismiss(
+  state: PostwinState,
+): PostwinState {
+  if (
+    state.question === null ||
+    state.question.kind !== "record" ||
+    state.questionYesElapsed === null ||
+    state.recordedMessageDismissElapsed !== null ||
+    !postwinRecordedInputReady(state)
+  ) return state;
+  return {
+    ...state,
+    // Same canonical-edge convention as beginPostwinQuestion.
+    recordedMessageDismissElapsed: state.elapsed - 1,
   };
 }
 
@@ -794,10 +865,24 @@ export function postwinRecordedVisibleChars(state: PostwinState): number {
   );
 }
 
+/**
+ * The re-ask reference edge for the current question: the NO dismiss-A edge
+ * (default-NO answer) or the RECORD-YES recorded-message dismiss-A edge.
+ * Null while neither has resolved. Both routes re-enter the continuation
+ * menu through the same ReadyFor2ndOpponent reprint schedule
+ * (docs/postwin-record-retire-ground-truth.md §1/§7b).
+ */
+export function postwinReaskElapsed(state: PostwinState): number | null {
+  return state.questionDismissElapsed !== null
+    ? state.questionDismissElapsed
+    : state.recordedMessageDismissElapsed;
+}
+
 /** Re-ask "2nd match is next!" visible glyph count after a question dismiss. */
 export function postwinQuestionReprintVisibleChars(state: PostwinState): number {
-  if (state.question === null || state.questionDismissElapsed === null) return 0;
-  const delay = state.elapsed - state.questionDismissElapsed;
+  const reAsk = postwinReaskElapsed(state);
+  if (state.question === null || reAsk === null) return 0;
+  const delay = state.elapsed - reAsk;
   if (delay < POSTWIN_QUESTION_REPRINT_FIRST_DELAY) return 0;
   return Math.min(
     POSTWIN_NEXT_TEXT_TOTAL,
@@ -806,14 +891,16 @@ export function postwinQuestionReprintVisibleChars(state: PostwinState): number 
 }
 
 export function postwinQuestionReprintSettled(state: PostwinState): boolean {
-  if (state.question === null || state.questionDismissElapsed === null) return false;
-  return state.elapsed - state.questionDismissElapsed >=
+  const reAsk = postwinReaskElapsed(state);
+  if (state.question === null || reAsk === null) return false;
+  return state.elapsed - reAsk >=
     POSTWIN_QUESTION_REPRINT_SETTLED_DELAY;
 }
 
 export function postwinQuestionMenuReady(state: PostwinState): boolean {
-  if (state.question === null || state.questionDismissElapsed === null) return false;
-  return state.elapsed - state.questionDismissElapsed >=
+  const reAsk = postwinReaskElapsed(state);
+  if (state.question === null || reAsk === null) return false;
+  return state.elapsed - reAsk >=
     POSTWIN_QUESTION_MENU_READY_DELAY;
 }
 
@@ -827,19 +914,27 @@ export function acceptPostwinContinuation(
     state.continuationCursorPos === null ||
     !postwinContinuationInputReady(state)
   ) return state;
+  if (state.continuationCursorPos === 0) return {
+    ...state,
+    continuationConfirmElapsed: state.elapsed,
+    dialoguePage: 1,
+    dialoguePageEdgeElapsed: state.elapsed,
+  };
+  if (state.disableRecordBattle) {
+    // 3-option variant: 1 = REST (guarded), 2 = RETIRE.
+    if (state.continuationCursorPos === 1) return state;
+    if (state.continuationCursorPos === 2) {
+      return beginPostwinQuestion(state, "retire");
+    }
+    return state;
+  }
   if (state.continuationCursorPos === 1) {
     return beginPostwinQuestion(state, "record");
   }
   if (state.continuationCursorPos === 3) {
     return beginPostwinQuestion(state, "retire");
   }
-  if (state.continuationCursorPos !== 0) return state;
-  return {
-    ...state,
-    continuationConfirmElapsed: state.elapsed,
-    dialoguePage: 1,
-    dialoguePageEdgeElapsed: state.elapsed,
-  };
+  return state;
 }
 
 export function postwinDialogueDelay(state: PostwinState): number | null {
