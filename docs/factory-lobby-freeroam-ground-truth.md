@@ -342,16 +342,30 @@ west 5341→5356, east 5241→5256):
 | … | … | … | … | … |
 | 15 | (0,15) | (0,-15) | (15,0) | (-15,0) |
 
-Field content at the next boundary frame equals the prior boundary frame's
+~~Field content at the next boundary frame equals the prior boundary frame's
 content (same tiles, camera clamped at (-56,0)); the in-step offsets are
-sub-tile scrolls that reset at each 16-frame boundary. The whole-field scroll
+sub-tile scrolls that reset at each 16-frame boundary.~~ **CORRECTED
+(2026-08-07 supervisor, pixel-proved):** the field advances a NET 16px per
+tile step — consecutive boundary frames f05181 vs f05196 of the probe's own
+PNG dump differ by 21385 px raw but only 6452 px after a 16px vertical
+shift (player region + newly revealed rows). The camera FOLLOWS the player
+(standard overworld follow-cam): the visible scroll = player world position
+− (112,56), the HOFS/VOFS sub-tile phase wraps at each boundary while the
+tilemap slice advances one tile, and `gCamera` is a non-updating symbol here
+(§3a's "camera does not scroll" is void — `sFieldCameraOffset`/`gFieldCamera`
+is the live camera). Consequence: rendering off-map BORDER BLOCKS is
+required — with the camera anchored to the player, positions away from the
+map center bring the area beyond the 19×12 layout on screen (source: the
+layout's border blocks, repeated 2×2). The whole-field scroll
 is the same for the wall, floor, potted plants, and NPCs (they all ride the
 BG scroll).
 
-**Compositing model for the fix worker:** on step frame `k` of direction `d`
-(16-frame tile step), draw the field shifted by `(ox_k, oy_k)` from the table
-above and draw the player sprite at fixed screen `(112,56)` with walk-cycle
-pose `n_k`. Pose `n_k` follows the source `sAnim_Go{South,North,West}` tables
+**Compositing model for the fix worker:** the camera is anchored to the
+player's interpolated world position; on step frame `k` of direction `d`
+the field is drawn at scroll `spawnScroll + tilesWalked·16·d̂ + k·d̂` (the
+per-frame `(ox_k, oy_k)` table above gives the sub-tile phase within the
+step) and the player sprite is drawn at fixed screen `(112,56)` with
+walk-cycle pose `n_k`. Pose `n_k` follows the source `sAnim_Go{South,North,West}` tables
 (`object_event_anims.h:200-236`): 8 ticks per pose, cycle
 [walk1, stand, walk2, stand], the same 4-phase cycle the app already uses; the
 player sprite's OAM never moves.
