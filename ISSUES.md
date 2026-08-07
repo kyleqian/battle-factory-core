@@ -107,8 +107,12 @@ HP bars + real HP/level text (all three cards), gender glyphs, and the real
 (`battle-opponent-front-sprites.json`) is grayscale and does NOT match the
 chrome's colored list art (ONIX silhouette overlap 1272/1840; rank 2 left
 unbound with that evidence) — needs a per-species chrome capture pass or a
-colored list-art family; (5) status-condition + held-item icon binds
-(assets banked, no exercising fixture yet); (6) cursor/ball/selection +
+colored list-art family; (5) **[CLOSED 2026-08-06, PROGRESS 967]** the
+status-condition + held-item icon binds landed per
+`docs/party-menu-status-item-ground-truth.md` §7 (spec
+`party-menu-status-item-off`, frame-2150 status/item bboxes glyph-exact,
+Lv50 suppressed on statused rows, per-frame 2050-2300 diffs 9234-9306px vs
+the 9687-9759px baseline); (6) cursor/ball/selection +
 party-menu fade pixels (incl. the pokeball/CANCEL buttons at x184-234
 y134-153).
 
