@@ -1227,6 +1227,7 @@ function beginCommandResolution(
         fightDisplayCursor: presentation.fightDisplayCursor,
         idleBounceElapsed: presentation.idleBounceElapsed,
       }),
+      usedMessageHoldFrames: presentation.usedMessageHoldFrames,
       opponentTrainer: factoryTrainerPresentationForOpponent(
         state.round.rules.currentOpponent,
       ),

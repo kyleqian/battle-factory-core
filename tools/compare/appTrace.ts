@@ -52,6 +52,8 @@ import {
 } from "../../src/engine/battleDecisionBoundary.ts";
 import {
   createBattleResolutionPresentation,
+  USED_MESSAGE_B_WAIT_TIME_SHORT_HOLD_FRAMES,
+  USED_MESSAGE_SPLASH_CONTROLLER_HOLD_FRAMES,
   type BattleResolutionPresentationState,
   type CreateBattleResolutionPresentationInput,
 } from "../../src/engine/battleResolutionPresentation.ts";
@@ -1281,6 +1283,12 @@ function tormentSelectionRejectionOffStage(state: EngineState): EngineState {
       // Only this route supplies it; every other caller keeps the battle-1
       // default.
       TORMENT_ROUTE_BOUNCE_SCHEDULE,
+      // Route-scoped used-move hold (ISSUES #81 remainder 4b): the failed
+      // Torment's attackstring is followed by `pause B_WAIT_TIME_SHORT`
+      // (32) + ~6 dispatch with NO waitmessage, so M1 holds 38 frames
+      // (oracle 1076-1113) before "But it failed!" types at 1114
+      // (docs/battle-message-pacing-ground-truth.md §1).
+      USED_MESSAGE_B_WAIT_TIME_SHORT_HOLD_FRAMES,
     ),
     // The fixture's frame 734 is the already-interactive turn-2 action menu
     // (its first turn-2 segment is an A press at 734-735), so the app stage

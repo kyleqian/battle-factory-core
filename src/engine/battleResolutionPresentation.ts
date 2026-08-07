@@ -422,11 +422,38 @@ export type CreateBattleResolutionPresentationInput = Readonly<{
     idleBounceElapsed: number;
   }>;
   opponentTrainer?: BattleResolutionOpponentTrainer | null;
+  /**
+   * Route-scoped post-print hold for `STRINGID_USEDMOVE` on the
+   * failed/no-anim path (ISSUES #81 remainder 4b). The source runs a
+   * `pause B_WAIT_TIME_SHORT` / an animation controller span after the
+   * attackstring with NO `waitmessage`, so the message's on-box time is the
+   * following script steps -- measured 38 (ButItFailed) / 39 (SPLASH) in
+   * `docs/battle-message-pacing-ground-truth.md`. Only a route's staging
+   * context supplies a nonzero value; the standard hit chain's USEDMOVE
+   * stays held by its subsequent move/hit/HP commands (default 0).
+   */
+  usedMessageHoldFrames?: number;
 }>;
 
 const MESSAGE_TIMING = Object.freeze({ minimumFrames: 24, holdFrames: 0 } as const);
 /** `B_WAIT_TIME_LONG` (`reference/pokeemerald/include/constants/battle.h:324`). */
 export const WAITMESSAGE_LONG_HOLD_FRAMES = 64;
+/**
+ * Route-scoped `STRINGID_USEDMOVE` hold for the ButItFailed/no-anim path
+ * (`pause B_WAIT_TIME_SHORT` = 32 + ~6 dispatch steps, measured 38 =
+ * 1076-1113 in `docs/battle-message-pacing-ground-truth.md` §1/§3.4).
+ * The standard hit chain's USEDMOVE is held by the subsequent move/hit/HP
+ * commands instead, so this hold is opt-in via the staging context
+ * (`CreateBattleResolutionPresentationInput.usedMessageHoldFrames`), never
+ * a blanket USEDMOVE hold.
+ */
+export const USED_MESSAGE_B_WAIT_TIME_SHORT_HOLD_FRAMES = 38;
+/**
+ * Route-scoped `STRINGID_USEDMOVE` hold for the SPLASH no-anim path: the
+ * `attackanimation`/`waitanimation` controller span (measured 39 = 1265-1303
+ * in `docs/battle-message-pacing-ground-truth.md` §2).
+ */
+export const USED_MESSAGE_SPLASH_CONTROLLER_HOLD_FRAMES = 39;
 /**
  * Shared post-print hold for every message id whose emitting script prints it
  * and then runs `waitmessage B_WAIT_TIME_LONG`. The hold counts down from
@@ -492,6 +519,11 @@ const STAT_CHANGE_MESSAGE_IDS: ReadonlySet<string> = new Set([
  * (`:264`); `STRINGID_ONEHITKO`/`STRINGID_PKMNENDUREDHIT` get their own
  * dedicated `printstring` + `waitmessage B_WAIT_TIME_LONG` scripts
  * (`BattleScript_OneHitKOMsg`/`BattleScript_EnduredMsg`, `:3688-3695`).
+ * `STRINGID_BUTITFAILED`/`STRINGID_BUTNOTHINGHAPPENED` join via the
+ * `ButItFailed`/`ButNothingHappened` script tails' `waitmessage B_WAIT_TIME_LONG`
+ * (`BattleScript_ButItFailed`, `data/battle_scripts_1.s:2058-2063`, and
+ * `BattleScript_EffectSplash`, `:1172-1181`) -- measured holds 79/74 in
+ * `docs/battle-message-pacing-ground-truth.md` §1/§2.
  * A future id joins the family here, not as a new literal at the call site.
  */
 export const WAITMESSAGE_LONG_MESSAGE_IDS: ReadonlySet<string> = new Set([
@@ -501,6 +533,8 @@ export const WAITMESSAGE_LONG_MESSAGE_IDS: ReadonlySet<string> = new Set([
   "STRINGID_CRITICALHIT",
   "STRINGID_ONEHITKO",
   "STRINGID_PKMNENDUREDHIT",
+  "STRINGID_BUTITFAILED",
+  "STRINGID_BUTNOTHINGHAPPENED",
 ]);
 /**
  * Scene-OFF hit controller lifetime:
@@ -2774,6 +2808,7 @@ export function projectBattleResolutionCommands(
   field: BattleResolutionDisplayedField,
   afterField: BattleResolutionDisplayedField | null,
   opponentTrainer: BattleResolutionOpponentTrainer | null = null,
+  usedMessageHoldFrames = 0,
 ): readonly BattleResolutionPresentationCommand[] {
   const commands: BattleResolutionPresentationCommand[] = [];
   const pendingHealth = new Map<0 | 1, { eventSequence: number; healthValue: number }>();
@@ -2865,13 +2900,17 @@ export function projectBattleResolutionCommands(
             ? "button"
             : "automatic",
         noCursor: TERMINAL_SEAM_QUOTE_MESSAGE_IDS.has(payload.messageId),
-        timing: payload.messageId === "STRINGID_RETURNMON"
-          ? RETURN_MON_TIMING
-          : payload.messageId === "STRINGID_SWITCHINMON"
-            ? SWITCH_IN_MESSAGE_TIMING
-            : WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
-              ? WAITMESSAGE_LONG_TIMING
-              : MESSAGE_TIMING,
+        timing: payload.messageId === "STRINGID_USEDMOVE"
+          ? usedMessageHoldFrames > 0
+            ? Object.freeze({ minimumFrames: 24, holdFrames: usedMessageHoldFrames })
+            : MESSAGE_TIMING
+          : payload.messageId === "STRINGID_RETURNMON"
+            ? RETURN_MON_TIMING
+            : payload.messageId === "STRINGID_SWITCHINMON"
+              ? SWITCH_IN_MESSAGE_TIMING
+              : WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
+                ? WAITMESSAGE_LONG_TIMING
+                : MESSAGE_TIMING,
       }));
       pendingStatusMessageBattler = null;
       pendingHeldItemEffectBattler = null;
@@ -3233,6 +3272,7 @@ export function createBattleResolutionPresentation(
       field,
       fieldAfter(input.transition),
       input.opponentTrainer ?? null,
+      input.usedMessageHoldFrames ?? 0,
     ),
   });
   const boundary = input.transition.state.boundary;

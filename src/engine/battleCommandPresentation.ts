@@ -209,6 +209,13 @@ export type BattleCommandPresentationState = Readonly<{
    * its dismiss pose until the menu redraws (oracle 968-977 all one sha).
    */
   rejectionWaitCursorAge: number;
+  /**
+   * Route-scoped `STRINGID_USEDMOVE` post-print hold (failed/no-anim path
+   * only), threaded into the resolution on `beginCommandResolution`
+   * (`battleResolutionPresentation.ts`'s `usedMessageHoldFrames`). Defaults
+   * to 0 for every route that does not supply it.
+   */
+  usedMessageHoldFrames: number;
   pendingDecision: BattleCommandDecision | null;
 }>;
 
@@ -349,6 +356,15 @@ export function createBattleCommandPresentation(
   rules: BattleScriptRulesContext,
   initialFightCursor: 0 | 1 | 2 | 3 = 0,
   bounceSchedule: BattleCommandBounceSchedule = BATTLE_COMMAND_BOUNCE_SCHEDULE_DEFAULT,
+  /**
+   * Route-scoped post-print hold for the confirmed move's STRINGID_USEDMOVE
+   * on the failed/no-anim path (ISSUES #81 remainder 4b) -- the source runs
+   * a `pause B_WAIT_TIME_SHORT` / animation controller span after the
+   * attackstring with no `waitmessage`. Defaults to 0 (no hold), which the
+   * standard hit chain keeps; only a route's staging context (the torment /
+   * switch pacing fixtures) supplies 38/39.
+   */
+  usedMessageHoldFrames = 0,
 ): BattleCommandPresentationState {
   const request = createBattleCommandRequest(requestInput);
   if (request.side !== "player" || request.battler !== 0) {
@@ -442,10 +458,11 @@ export function createBattleCommandPresentation(
     legalMoveBySlot: Object.freeze(legalMoveBySlot),
     rejectionReasonBySlot: Object.freeze(rejectionReasonBySlot),
     legalSwitchPartyIndexes: Object.freeze(legalSwitchPartyIndexes),
-    rejectedSlot: null,
-    rejectionWaitCursorAge: 0,
-    pendingDecision: null,
-  });
+  rejectedSlot: null,
+  rejectionWaitCursorAge: 0,
+  pendingDecision: null,
+  usedMessageHoldFrames,
+});
 }
 
 /**
