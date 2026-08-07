@@ -16,7 +16,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   expansion and the woman walking sheet). Supervisor regenerated the level50
   manifest (structurally identical except displayRows) and re-pinned all
   three; targeted rerun 18/18 + smoke 347/347 green, and a final full
-  `npm test` confirmation was started detached (result appended below).
+  `npm test` confirmation ran detached: **760 files / 7221 passed / 1
+  skipped, exit 0** — the union (all session work + the animation fold +
+  the re-pins) is fully green.
   Supervisor-rerun specs this session: `mid-battle-switch-pacing-b-off`
   **153/153** (was 148/152; spec +1408), `party-menu-status-item-off`
   **251/251 byte-exact** (was 0/251 red-band 757/803),
