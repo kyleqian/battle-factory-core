@@ -153,6 +153,13 @@ def main() -> None:
         snapshot = lab.snapshot()
         if snapshot["engine"]["currentMove"] != 320:
             return
+        live_script_ptr = oracle.read_u32(script_ptr)
+        if not (
+            script_bounds["Move_GRASS_WHISTLE"]
+            <= live_script_ptr
+            < script_bounds["Move_TICKLE"]
+        ):
+            return
         rgb = oracle.screen_rgb()
         (RGB_DIR / f"{frame:05d}.rgb").write_bytes(rgb)
         battler_sprite_slots = [oracle.read_u8(battler_ids + index) for index in range(2)]

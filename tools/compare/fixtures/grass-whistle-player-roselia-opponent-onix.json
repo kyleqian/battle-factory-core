@@ -1,0 +1,71 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-grass-whistle-player-roselia-opponent-onix.json",
+  "probe": "tools/compare/grassWhistleProbe.py",
+  "pair": "FRONTIER_MON_ROSELIA_1 record 171 (player-back) -> legal ONIX (opponent-front)",
+  "orientation": "player-to-opponent",
+  "move": "GRASS_WHISTLE",
+  "denseWindow": {
+    "startFrame": 216,
+    "endFrame": 440,
+    "frameCount": 225
+  },
+  "appStage": {
+    "presentationAge": 0
+  },
+  "attacker": {
+    "species": "ROSELIA",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {
+        "x": 40,
+        "y": 56
+      },
+      "animationCenter": {
+        "x": 72,
+        "y": 96
+      },
+      "battlePositionCenter": {
+        "x": 72,
+        "y": 80
+      }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {
+        "x": 144,
+        "y": 10
+      },
+      "animationCenter": {
+        "x": 176,
+        "y": 42
+      },
+      "battlePositionCenter": {
+        "x": 176,
+        "y": 40
+      }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 147,
+    "playerMaxHp": 157,
+    "opponentHp": 110,
+    "opponentMaxHp": 110,
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "grass-whistle-dense-evidence/v1",
+  "evidenceSha256": "4b4aef457f57f541977a898787a4285a14b44144654a6898c6d08df02ff5298a",
+  "secondFreshEvidenceSha256": "4b4aef457f57f541977a898787a4285a14b44144654a6898c6d08df02ff5298a",
+  "rawRgbSha256": "eee49e4817a8d51a0dfe8c0a366b013d3ffd11e7c68e4d1ba9c1bff75a0154ee",
+  "acceptance": {
+    "status": "partial",
+    "framebufferMatching": 225,
+    "componentMatching": 129,
+    "residual": "note array ordering only: matching notes by localAge instead of array index is 225/225 clean on every field (x, y, y2, animation, localAge, palette). The reducer needs its own note->sprite-slot table like sing.ts's SING_NOTE_SPRITE_SLOTS/SING_NOTE_ORDER_SEED; GRASS_WHISTLE allocates different slots than SING because it has no monbg BG sprites."
+  }
+}

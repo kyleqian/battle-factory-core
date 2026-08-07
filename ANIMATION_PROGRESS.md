@@ -1,5 +1,46 @@
 # Animation coverage
 
+## MOVE_GRASS_WHISTLE staged — window isolated, framebuffer 225/225 twice fresh; residual is note ordering alone (2026-08-07 cap-killed worker + supervisor salvage)
+
+- **State:** GRASS_WHISTLE stays **unsupported** — one orientation only and the
+  source-component axis is still short. Move coverage unchanged at **117/276
+  exact, 0 partial, 0 staged, 159 unsupported**. Nothing promoted; the
+  inventory pin did not move.
+- **Did:** the worker isolated the move-owned window by script pointer — the
+  probe now gates on `sBattleAnimScriptPtr` lying inside the
+  `Move_GRASS_WHISTLE`..`Move_TICKLE` label bounds, which cuts the previously
+  combined 458-frame capture (move + trailing sleep-status animation) down to
+  the true **225-frame window, player frames 216-440**. It then landed the
+  reducer (`src/animation/grassWhistle.ts`, reusing sing.ts's shared wavy-note
+  math), the `sceneOnGrassWhistleView` seam, the `battleScene.ts` draw case,
+  and `grassWhistlePortable.ts` before being cap-killed at 45 min mid-fit.
+- **Measured (supervisor, independent fresh run):** player-back **framebuffer
+  225/225 exact**, evidence `4b4aef45…` and RGB `eee49e48…` reproducing the
+  worker's pins exactly — so the framebuffer axis is twice fresh. The
+  source-component axis is **129/225**.
+- **Residual is note ARRAY ORDERING ONLY.** The supervisor re-matched the app's
+  notes to the probe's notes by `localAge` instead of by array index and got
+  **225/225 clean on every field** — x, y, y2, animation, localAge and palette
+  are all already correct. The reducer simply emits notes in a different order
+  than the ROM's sprite slots hold them. (Comparing at the displayed age
+  `age - 1` scores 81/225 and at the actual age 129/225; neither is the fix.)
+  The cure is GRASS_WHISTLE's own note→sprite-slot table, the same shape as
+  sing.ts's `SING_NOTE_SPRITE_SLOTS` / `SING_NOTE_ORDER_SEED` — its slots differ
+  from SING's because GRASS_WHISTLE allocates no `monbg` BG sprites.
+- **Also found:** the ROM's move name has no space — `GRASSWHISTLE`, 12
+  characters (`src/data/gen/moves.json`). The draw case's message line was
+  corrected to match; this was worth ~10 of the worker's minutes in font
+  diagnostics.
+- **Next:** finish GRASS_WHISTLE — derive the slot table from the probe, make
+  the component axis 225/225, build the opponent-orientation fixture, add
+  `grassWhistle.test.ts` + `grassWhistleEvidence.test.ts`, then promote and move
+  the inventory pin 117→118 / 159→158.
+- **Notes:** the player fixture is deliberately marked `partial` with both
+  counts and the residual recorded; the portable now reports a staged
+  checkpoint against those recorded counts instead of only ever hard-failing,
+  and stays strict for `exact` fixtures. No boundary widening, no new
+  unsupported barriers, no coverage change.
+
 ## MOVE_REFRESH closed — 209/209 both orientations twice-fresh, promoted to exact (2026-08-05 closure worker)
 
 - **State:** REFRESH (new move) → **exact**. Move coverage: **117/276 exact,

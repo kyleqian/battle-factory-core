@@ -38,9 +38,9 @@ import {
 
 export const GRASS_WHISTLE_WINDOW_FRAMES = 225;
 export const GRASS_WHISTLE_FIRST_NOTE_AGE = 19;
-/** Initial green `simple_palette_blend` sprite: ages 4-18 (probe frame 220-234). */
+/** Initial green `simple_palette_blend` sprite: ages 4-17 (probe frame 220-233). */
 export const GRASS_WHISTLE_BLEND_START_AGE = 4;
-export const GRASS_WHISTLE_BLEND_LAST_AGE = 18;
+export const GRASS_WHISTLE_BLEND_LAST_AGE = 17;
 /** Restore `simple_palette_blend` sprite creation age (probe: player frame 379, opponent 382). */
 export const GRASS_WHISTLE_RESTORE_BLEND_START_AGE = 163;
 export const GRASS_WHISTLE_RESTORE_BLEND_START_AGE_OPPONENT = 166;

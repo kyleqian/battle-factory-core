@@ -29385,7 +29385,7 @@ export function renderSceneOnMovePresentation(
     drawMessageTextLines(
       fb,
       playerToOpponent ? "ROSELIA used" : "Foe ROSELIA used",
-      "GRASS WHISTLE!",
+      "GRASSWHISTLE!",
       99,
     );
     return;
