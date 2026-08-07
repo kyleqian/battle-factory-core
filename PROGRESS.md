@@ -5,6 +5,41 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 975 — [bounded MAIN worker, 2026-08-07] #80 slice 3 + box-color0 landed: party-menu band 7038/7110 → 1224/1270 px/frame
+
+- **State:** master `4154fafc`, clean. Typecheck green; `npm run test:smoke`
+  **347/347**; 8 party-menu/battleScene test files **300/300**. Full `npm test`
+  NOT run (worker rule — supervisor runs it after merge); build run green.
+- **Did:** slice 3 — the voluntary party-menu open rule. `OpenPartyMenuInBattle`
+  (party_menu.c:5774-5779) → `InitPartyMenu(keepCursorPos=FALSE)` forces
+  `gPartyMenu.slotId = 0` (party_menu.c:524-525); `createBattlePartySelectState`
+  was `cursor: activePartyIndex`. **Scoped per-route:** voluntary route
+  (`factoryRoundBattleOrchestrator.ts:1926`, the only caller) now opens cursor
+  on slot 0; forced route (`partySelect.ts`/`battlePartySelectStateForForcedParty`)
+  KEEPS its fainted-mon default (RAM/ground-truth provenance —
+  `docs/party-menu-notes.md` + forced-switch ground truth; in every canonical
+  fixture the fainted mon IS slot 0, so both routes agree with the source).
+  Then the box-color0 interior fix: the content boxes painted their color0
+  texels opaque (bank3 123,156,115 / bank7 57,156,255) over the box interiors
+  the oracle shows as (181,181,90)/(206,214,123) — the empty boxes already
+  skipped color0 (slice 4), the content boxes now do too
+  (RenderPartyMenuBox transparency), `drawSlot(..., true)`.
+- **Verified:** `party-menu-status-item-off` band **7038/7110 → 1224/1270
+  px/frame** (drop ~5814 px/frame, beyond the ~3200 slice-3 prediction because
+  the slot-0 bounce/icon interplay and box-color0 landed with it; NO frame
+  worse than baseline). Residual now: buttons ~467px (slice 5, parked),
+  mon-icon palette/position ~525px, box-edge/text ~210px. Regressions hold:
+  `battle-command-generated-off` **128/128**, `mid-battle-switch-dense-a-off`
+  **221/221**, `mid-battle-switch-pacing-b-off` **148/152** (same 4 named red
+  frames 1399/1400/1406/1407). New Tier-1 pin in `tests/battlePartySelect.test.ts`
+  (cursor opens slot 0 with the active battler on slot 1; red-verified by
+  restoring the pre-slice-3 src — pin failed `expected 1 to be +0`); forced
+  route's "defaults to fainted ONIX" pin untouched.
+- **Next:** slice 5 (buttons — needs the bg-subtract pixel-forensics probe per
+  the ISSUES #80 banked findings) → slice 6 (fade + spec extension) vs lobby
+  walkable + REST guard.
+- **Notes:** no PAPERCUTS.
+
 ## 974 — [MAIN worker + supervisor salvage, 2026-08-07] #80 slices 1+4 landed (band 9234/9306 → 7038/7110); slice 2 premise was STALE (already landed 2026-07-29); slice-5 button findings banked
 
 - **State:** master at this entry's commit, clean. Supervisor-verified after
@@ -75,33 +110,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no PAPERCUTS. The verify script's `_verify-*` scratch dirs and the
   two pacing spec fixtures are the same battle (identical segments/parties,
   different capture windows). B_WAIT_TIME_MED (48) still unexercised.
-
-## 972 — [bounded MAIN worker, 2026-08-06] postwin RECORD-YES + RETIRE-YES routes bound from the banked ground truth
-
-- **State:** master `4b02c245`, clean. Typecheck green; `npm run test:smoke`
-  **347/347**; new Tier-1 pins green. Full `npm test` + `npm run build` NOT
-  run (worker rule — supervisor runs them after merge).
-- **Did:** bound the YES routes the 8286ba97 up-a probes ground-truthed.
-  (1) Cursor: UP/DOWN on the held YES/NO window moves the cursor (logical
-  move at the press edge, one-VBlank display handoff → oracle-visible
-  edge+2; record probe cursor visible 6717, retire 6718). (2) RECORD-YES →
-  SaveBattle: window clears +2, question box holds through the save-SE span
-  (box clears +23), then "{PLAYER}'s battle was recorded / on the FRONTIER
-  PASS." types from +24..+72 and holds. (3) RETIRE-YES → WarpToLobbyLost:
-  window clears +2, WARP_FADE_OUT palette fade +4..+18 (BG 1-tick ahead of
-  OBJ), black hold +19..+37, then the Lobby arrival fade-in +38 renders via
-  the existing factoryTerminal LOSS presentation (age = delay + 76). New
-  dense specs `postwin-record-yes-off` **125/125** and `postwin-retire-yes-off`
-  **125/125** full-window byte-exact. New Tier-1 pins in `tests/postwin.test.ts`
-  (cursor swap timing, RECORD save/recorded phase, RETIRE warp clocks,
-  NO-dismiss unchanged), red-verified by breaking `acceptPostwinQuestionYes`.
-- **Verified:** regressions unchanged — `postwin-record-off` **204/204**,
-  `postwin-retire-off` **211/211**, `win-go-on-scout-off` **143/143**.
-  Probes rerun byte-identical (record/retire up-a, 125/125 manifest shas).
-  The recorded message's apostrophe is U+2019 (charmap has no U+0027).
-- **Next:** #81 remainder 4b (message pacing at 1100/1200), then per the
-  ordered list: #80 rank 6, lobby walkable + REST guard, #78's 1256-1407
-  window.
-- **Notes:** no PAPERCUTS. The retire fade is the shared WARP_FADE_OUT
-  palette fade (not the battle fast-fade), matching pixel-for-pixel.
 
