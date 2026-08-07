@@ -226,8 +226,9 @@ describe("in-battle party menu visual binds (ISSUES #80)", () => {
   it("suppresses the Lv50 level line for a statused row (DisplayPartyPokemonLevelCheck)", () => {
     // party_menu.c:2290-2298 only prints the level when the ailment is
     // AILMENT_NONE/PKRS; a statused mon replaces the level line with the
-    // status icon. Pixel (141,29) is inside the Lv50 glyph when drawn and
-    // inside the slot-1 status glyph when suppressed.
+    // status icon. Pixel (141,29) is inside the slot-1 status glyph when
+    // suppressed; the level line's "0" left stroke sits at (139,29) with the
+    // {LV} ligature (glyph 0x34=52, widths[52]=8) shifting the digits left.
     const renderWith = (status: BattlePartySelectState["rows"][number]["status"]) => {
       const fb = createFramebuffer();
       renderBattlePartySelect(fb, {
@@ -244,7 +245,7 @@ describe("in-battle party menu visual binds (ISSUES #80)", () => {
     expect(px(renderWith("paralyzed"), 141, 29)).toEqual([189, 189, 24]);
     expect(px(renderWith("sleep"), 141, 29)).toEqual([165, 165, 140]);
     // Clean row: the Lv50 text prints at the level rect in the card text ink.
-    expect(px(renderWith(null), 141, 29)).toEqual([255, 255, 255]);
+    expect(px(renderWith(null), 139, 29)).toEqual([255, 255, 255]);
   });
 
   it("maps status1 bitmasks onto the status-icon variant names (GetAilmentFromStatus)", () => {
