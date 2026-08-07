@@ -5,6 +5,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 982 — [bounded MAIN worker, 2026-08-07] Second-RECORD continuation menu LANDED: RECORD-YES sets `disableRecordBattle` → re-ask drops RECORD — postwin-record-second-off 164/164
+
+- **State:** master `c4ab96b4`, clean. Typecheck + `npm run build` green,
+  `npm run test:smoke` **347/347**, touched test file **38/38** (postwin.ts;
+  3 new pins red-verified by neutralizing the flag write — 2 fail). New spec
+  `postwin-record-second-off` **164/164**, **twice-run green**. Keep-green:
+  `postwin-record-off` **204/204**, `postwin-retire-off` **211/211**,
+  `postwin-record-yes-off` **125/125**, `postwin-retire-yes-off` **125/125**.
+  Full `npm test` NOT run (worker rule — supervisor after merge).
+- **Did (RUNG 1+2):** bound `docs/postwin-record-retire-ground-truth.md` §7:
+  `acceptPostwinQuestionYes` on RECORD-YES sets the new
+  `disableRecordBattle` session flag (`SaveRecordBattle` → `frontier_util.c:2176`),
+  never on RETIRE-YES or NO dismisses; new `recordedMessageDismissElapsed`
+  edge keys the recorded-message dismiss-A (MSGBOX_DEFAULT, input-ready +74)
+  back to the re-ask via the shared `postwinReaskElapsed` schedule (§7b re-ask
+  typing byte-identical 35/35, box clear +4 / reprint +5 / settle +40 / menu +44).
+  The re-asked menu renders the 3-option GO ON/REST/RETIRE variant
+  (`MULTI_GO_ON_REST_RETIRE`) at tile (20,6): window (160,48,6,6), text rows
+  y=57/73/89 at x176, cursor x168 — measured byte-exact from the §7b held
+  frame 7009 (arrow x169-175, text x176; vs 4-option x153-214/y33-110). Cursor
+  wraps over 3 entries (REST still A-guarded, RETIRE still routes to its
+  question). Flag resets naturally per-battle via fresh `createPostwinState*`.
+- **Next:** supervisor full `npm test`; then ROADMAP Stage-8 residue / ISSUES
+  backlog — e.g. the wandering-woman NPC class (lobby) and #80's two named
+  residuals. Second-RECORD in-session has no further text/overwrite variant
+  to build (§7a step 6).
+- **Notes:** the RECORD-YES flag is set at the save (like the ROM), and the
+  re-ask menu readiness generalizes to either re-ask edge (NO-dismiss or
+  recorded-message dismiss). Spec promoted from the committed
+  `scratch-postwin-record-second-selection-probe.json` (36 segments/7010
+  frames, 164 captures 6846-7009). No PAPERCUTS.
+
 ## 981 — [bounded MAIN worker, 2026-08-07] Lobby free-roam follow-camera + 2-pose turn LANDED — loss-beyond-boundary-off 165 → 171/183 (named woman-wander residual)
 
 - **State:** master `9658ed2c`, clean. Typecheck + `npm run build` green,
