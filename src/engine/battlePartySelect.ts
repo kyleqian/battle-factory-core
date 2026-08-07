@@ -1,6 +1,9 @@
 import partyMenuSourceData from "../assets/gen/party-menu-source.json" with { type: "json" };
 import partyMenuGenderGlyphsData from "../assets/gen/party-menu-gender-glyphs.json" with { type: "json" };
 import partyMonIconsData from "../assets/gen/party-mon-icons.json" with { type: "json" };
+import partyMenuHeldItemData from "../assets/gen/party-menu-held-item.json" with { type: "json" };
+import partyMenuContentData from "../assets/gen/party-menu-content.json" with { type: "json" };
+import partyMenuSpriteCoordsData from "../assets/gen/party-menu-sprite-coords.json" with { type: "json" };
 import stdWindowData from "../assets/gen/prebattle-room-std-window.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import fontSmallData from "../data/gen/font-small.json" with { type: "json" };
@@ -507,6 +510,87 @@ function drawIcon(fb: Uint8Array, row: BattlePartySelectRow, selected: boolean, 
   }
 }
 
+type IconTilesetFrame = Readonly<{
+  columns: number;
+  rows: number;
+  tiles: readonly (readonly number[])[];
+}>;
+type HeldItemAsset = Readonly<{
+  palette: readonly RgbColor[];
+  frames: Readonly<{ item: IconTilesetFrame; mail: IconTilesetFrame }>;
+}>;
+type StatusIconAsset = Readonly<{
+  palette: readonly RgbColor[];
+  frames: Readonly<Record<string, IconTilesetFrame>>;
+}>;
+type PartyMenuSpriteCoords = Readonly<{
+  layouts: Readonly<{
+    single: readonly Readonly<{
+      heldItem: readonly [number, number];
+      status: readonly [number, number];
+    }>[];
+  }>;
+}>;
+
+const heldItemAsset = partyMenuHeldItemData as unknown as HeldItemAsset;
+const statusIconAsset = partyMenuContentData as unknown as Readonly<{
+  statusIcons: StatusIconAsset;
+}>;
+const partyMenuSpriteCoords = partyMenuSpriteCoordsData as unknown as PartyMenuSpriteCoords;
+
+/** Blit an OBJ 4bpp tile frame centered at (centerX, centerY), honoring the banked palette. */
+function blitIconFrame(
+  fb: Uint8Array,
+  frame: IconTilesetFrame,
+  palette: readonly RgbColor[],
+  centerX: number,
+  centerY: number,
+): void {
+  const offsetX = Math.floor(frame.columns * 8 / 2);
+  const offsetY = Math.floor(frame.rows * 8 / 2);
+  for (let ty = 0; ty < frame.rows; ty += 1) for (let tx = 0; tx < frame.columns; tx += 1) {
+    const tile = frame.tiles[ty * frame.columns + tx]!;
+    for (let py = 0; py < 8; py += 1) for (let px = 0; px < 8; px += 1) {
+      const colorIndex = tile[py * 8 + px]!;
+      if (colorIndex === 0) continue;
+      const color = palette[colorIndex];
+      if (!color) continue;
+      setPixel(
+        fb,
+        centerX - offsetX + tx * 8 + px,
+        centerY - offsetY + ty * 8 + py,
+        color.r,
+        color.g,
+        color.b,
+      );
+    }
+  }
+}
+
+/**
+ * CreatePartyMonHeldItemSprite (party_menu.c:4021-4038): an 8x8 generic item
+ * sprite at the slot's `heldItem` center; `ShowOrHideHeldItemSprite` hides it
+ * for ITEM_NONE (the glyph itself is shared by every held item).
+ */
+function drawHeldItemIcon(fb: Uint8Array, row: BattlePartySelectRow): void {
+  if (row.item === 0) return;
+  const [centerX, centerY] = partyMenuSpriteCoords.layouts.single[row.partyIndex]!.heldItem;
+  blitIconFrame(fb, heldItemAsset.frames.item, heldItemAsset.palette, centerX, centerY);
+}
+
+/**
+ * CreatePartyMonStatusSprite / UpdatePartyMonAilmentGfx (party_menu.c:4185-4220):
+ * the 32x8 status-icon frame at the slot's `status` center, selected by the
+ * row's primary status; AILMENT_NONE renders nothing.
+ */
+function drawStatusIcon(fb: Uint8Array, row: BattlePartySelectRow): void {
+  if (row.status === null) return;
+  const frame = statusIconAsset.statusIcons.frames[row.status];
+  if (!frame) return fail(`missing status-icon frame ${row.status}`);
+  const [centerX, centerY] = partyMenuSpriteCoords.layouts.single[row.partyIndex]!.status;
+  blitIconFrame(fb, frame, statusIconAsset.statusIcons.palette, centerX, centerY);
+}
+
 /**
  * sPartyBoxInfoRects (data/party_menu.h:32-62), per-card absolute pixel
  * positions (window origin + relative rect). HP bar geometry: left column
@@ -597,7 +681,12 @@ function drawRowText(fb: Uint8Array, row: BattlePartySelectRow, selected: boolea
   ];
   const colors = { fg: 1, bg: 0, shadow: 2 };
   drawText(fb, fontSmall, charmap, row.name, info.name.x, info.name.y, palette, colors);
-  drawText(fb, fontSmall, charmap, `Lv${row.level}`, info.level.x, info.level.y, palette, colors);
+  // DisplayPartyPokemonLevelCheck (party_menu.c:2290-2298): the level line
+  // prints only when the ailment is AILMENT_NONE (or PKRS); a statused mon
+  // suppresses it and the status icon takes the level line's position.
+  if (row.status === null) {
+    drawText(fb, fontSmall, charmap, `Lv${row.level}`, info.level.x, info.level.y, palette, colors);
+  }
   // DisplayPartyPokemonHP/MaxHP (party_menu.c:2367-2394): "105/" + "/105" printed
   // on the HP-number box already in the card tilemap (white ink, dark shadow).
   const hpPalette: RgbColor[] = [
@@ -628,6 +717,10 @@ export function renderBattlePartySelect(
     drawGenderGlyph(fb, row);
     drawHpBar(fb, row);
     drawIcon(fb, row, state.cursor === row.partyIndex, state.elapsed, state.selectedSinceElapsed);
+    // sPartyMenuSpriteCoords per-slot order: icon, heldItem, status, pokeball --
+    // the item sprite draws on top of the mon icon's lower-left corner.
+    drawHeldItemIcon(fb, row);
+    drawStatusIcon(fb, row);
   }
 
   if (state.submenuOpen) {
