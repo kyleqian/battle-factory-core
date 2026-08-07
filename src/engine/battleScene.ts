@@ -514,6 +514,7 @@ import {
   DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG,
 } from "../animation/dragonBreath.ts";
 import { flamethrowerDisplayedBattlerOffsetsAtAge } from "../animation/flamethrower.ts";
+import { FACADE_BLEND_COLORS } from "../animation/facade.ts";
 import {
   dragonRageSchedule,
   orderFirePlumesForDraw,
@@ -987,6 +988,7 @@ import {
   sceneOnHardenView,
   sceneOnIronDefenseView,
   sceneOnFlashView,
+  sceneOnFacadeView,
   sceneOnCalmMindView,
   sceneOnShadowBallView,
   sceneOnEncoreView,
@@ -1366,6 +1368,7 @@ const chanseyFrontSprite = (opponentFrontSpritesAsset as Record<string, Opponent
 const houndourFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HOUNDOUR!;
 const delibirdFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DELIBIRD!;
 const mareepFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAREEP!;
+const azumarillFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).AZUMARILL!;
 const PIDGEOTTO_CORNER = { x: 144, y: 19 };
 /** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): MURKROW's own `yOffset` (11, `mon-pic-coords.json`) is bit-identical to Pidgeotto's, so the same `(144, 8+yOffset)` formula lands on the identical corner - not a coincidence, both front pics share the same 48px-wide/11px-yOffset box. */
 const murkrowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MURKROW!;
@@ -2532,6 +2535,7 @@ const chanseyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSp
 const houndourBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HOUNDOUR!;
 const magbyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGBY!;
 const mareepBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAREEP!;
+const azumarillBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).AZUMARILL!;
 const battleAnimItemHeal = battleAnimItemHealAsset as BattleAnimItemHealAsset;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
@@ -29059,6 +29063,163 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MAREEP used" : "Foe MAREEP used",
       "FLASH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FACADE") {
+    const view = sceneOnFacadeView(state);
+    // The squish affine matrix renders two displays behind the RAM state (the
+    // software gOamMatrices write shows in the framebuffer at age+2) and the
+    // sweat-drop sprites + attacker palette one display behind.
+    const affineDisplayed = sceneOnFacadeView({ ...state, age: state.age - 2 });
+    const displayed = sceneOnFacadeView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "AZUMARILL"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "AZUMARILL"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FACADE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? azumarillBackSprite : azumarillFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? (speciesFrontIdleRestOffset(view.target.species) ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // The facade color blend tints the ATTACKER's OBJ palette bank (bank 0
+    // player / bank 1 opponent) toward gFacadeBlendColors[i] at coefficient 8.
+    const blendIndex = displayed.blendColorIndex;
+    const blendColor = blendIndex === null
+      ? null
+      : FACADE_BLEND_COLORS[blendIndex]!;
+    const attackerPalette = blendColor === null
+      ? attackerSprite.palette
+      : blendPaletteToward(
+          attackerSprite.palette,
+          {
+            r: blendColor[0] << 3,
+            g: blendColor[1] << 3,
+            b: blendColor[2] << 3,
+          },
+          8,
+        );
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    // Paint strictly back-to-front by the ROM's own subpriority, where a LOWER
+    // subpriority draws in front. The droplets are always `attackerSubpriority
+    // - 5`, so the order FLIPS with the orientation:
+    //   player-back   ONIX target 40 -> AZUMARILL attacker 30 -> droplets 25
+    //   opponent-front AZUMARILL attacker 40 -> droplets 35 -> ONIX target 30
+    // The droplets therefore sit on top of everything player-back but BETWEEN
+    // the two battlers opponent-front. Painting them behind the opponent-front
+    // attacker cost exactly the 9 frames where a droplet still overlapped the
+    // attacker's opaque box (64px, 25px, 2px per lower-droplet batch).
+    const drawTarget = (): void => {
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        view.target.geometry.spriteCorner.x + targetIdle.x2,
+        view.target.geometry.spriteCorner.y + targetIdle.y2,
+      );
+    };
+    const drawAttacker = (): void => {
+      drawSpriteSheetAffineStretch(
+        fb,
+        attackerSprite.tileset,
+        attackerPalette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+        affineDisplayed.matrix.a,
+        affineDisplayed.matrix.d,
+        affineDisplayed.y2,
+        { r: 0, g: 0, b: 0 },
+        0,
+        affineDisplayed.matrix.a !== 256 || affineDisplayed.matrix.d !== 256,
+      );
+    };
+    const drawDroplets = (): void => {
+      for (const drop of displayed.droplets) {
+        if (drop.tick < 1) continue;
+        drawSpriteSheet(
+          fb,
+          battleAnimSweatDrop.tileset,
+          battleAnimSweatDrop.palette,
+          drop.x - 4,
+          drop.y - 4,
+        );
+      }
+    };
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+      drawDroplets();
+    } else {
+      drawAttacker();
+      drawDroplets();
+      drawTarget();
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "AZUMARILL";
+    const playerSpecies = playerToOpponent ? "AZUMARILL" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "AZUMARILL used" : "Foe AZUMARILL used",
+      "FACADE!",
       99,
     );
     return;

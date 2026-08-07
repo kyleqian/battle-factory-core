@@ -91,6 +91,10 @@ import {
   type FlashState,
 } from "./flash.ts";
 import {
+  facadeAtAge,
+  type FacadeState,
+} from "./facade.ts";
+import {
   calmMindAtAge,
   type CalmMindState,
 } from "./calmMind.ts";
@@ -671,6 +675,7 @@ export interface SceneOnPresentationBattler {
     | "SABLEYE"
     | "ALTARIA"
     | "AZURILL"
+    | "AZUMARILL"
     | "CLAMPERL"
     | "SEVIPER"
     | "SUDOWOODO"
@@ -1873,6 +1878,15 @@ export interface SceneOnFlashConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnFacadeConfig {
+  readonly move: "FACADE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Attacker `MON_PIC_HEIGHT - 2*yDelta` for the squish y2 offset. */
+  readonly battlerHeight: number;
+}
+
 export interface SceneOnCalmMindConfig {
   readonly move: "CALM_MIND";
   readonly attacker: SceneOnPresentationBattler;
@@ -2067,6 +2081,7 @@ export type SceneOnMoveConfig =
   | SceneOnHardenConfig
   | SceneOnIronDefenseConfig
   | SceneOnFlashConfig
+  | SceneOnFacadeConfig
   | SceneOnCalmMindConfig
   | SceneOnShadowBallConfig
   | SceneOnEncoreConfig
@@ -2611,6 +2626,11 @@ export interface SceneOnFlashView extends FlashState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnFacadeView extends FacadeState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnCalmMindView extends CalmMindState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -3135,6 +3155,7 @@ export function createSceneOnMovePresentation<
     | SceneOnWhirlwindConfig | SceneOnBlockConfig
     | SceneOnIronDefenseConfig
     | SceneOnFlashConfig
+    | SceneOnFacadeConfig
     | SceneOnMetalClawConfig
     | SceneOnWrapConfig,
 >(
@@ -5266,6 +5287,26 @@ export function sceneOnFlashView(
   const config = state.config as SceneOnFlashConfig;
   return {
     ...flashAtAge(state.age),
+    attacker: config.attacker,
+    target: config.target,
+  };
+}
+
+/** `age=0` is the move script's first captured frame. The squish task runs
+ *  ages 4-78, the blend task ages 4-75 (restore on 76); the affine matrix
+ *  renders two displays behind the RAM state and the palette one behind. */
+export function sceneOnFacadeView(
+  state: SceneOnMovePresentationState,
+): SceneOnFacadeView {
+  if (state.config.move !== "FACADE") {
+    throw new Error(`expected FACADE presentation, got ${state.config.move}`);
+  }
+  const config = state.config as SceneOnFacadeConfig;
+  return {
+    ...facadeAtAge(state.age, {
+      x: config.attacker.geometry.battlePositionCenter.x,
+      y: config.attacker.geometry.battlePositionCenter.y,
+    }, config.battlerHeight),
     attacker: config.attacker,
     target: config.target,
   };
