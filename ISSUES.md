@@ -113,10 +113,18 @@ party-menu 4px box-frame style, bank-1 frame colors
 (74,74,99)/(231,239,140)/(99,90,0), interior color15 (115,90,181), ball =
 32x32 sprite w/ 16x16 visible at center (198,148), AND the app's banked
 bg.png already draws a box at x187-236, so the class is the DELTA between
-that banked box and the oracle's composited window+ball+CANCEL — needs a
-pixel-forensics probe (bg-subtract) before the next bind attempt, not
-another blind cap; (slice 6) party-menu open/close fade pixels
-(open 809-823, close 965-1034 measured in the rank-6 doc §7).
+that banked box and the oracle's composited window+ball+CANCEL. The
+forensics probe LANDED 2026-08-07 (`804c5506`,
+`tools/probe/slice5-button-forensics.ts` + rank-6 doc §6 addendum: 467px
+fully classified, 0 unattributed, simulation residual 0, ordered 5-op
+draw plan) and the pokeball sprite asset is banked
+(`src/assets/gen/party-menu-pokeball.json`, d0deef0c) — yet a THIRD
+30-min fix cap still died re-deriving "frame shape" instead of
+implementing the model. Everything needed is banked; the next attempt
+should be a tightly-scoped implementation (or supervisor-inline) that
+treats doc §6's per-row ranges as literal draw calls; (slice 6)
+party-menu open/close fade pixels (open 809-823, close 965-1034 measured
+in the rank-6 doc §7).
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 

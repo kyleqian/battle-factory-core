@@ -1,5 +1,36 @@
 # Progress archive
 
+## 974 — [MAIN worker + supervisor salvage, 2026-08-07] #80 slices 1+4 landed (band 9234/9306 → 7038/7110); slice 2 premise was STALE (already landed 2026-07-29); slice-5 button findings banked
+
+- **State:** master at this entry's commit, clean. Supervisor-verified after
+  the cap-kill: typecheck green, `party-menu-status-item-off` band
+  **7038/7110 px/frame** (was 9234/9306), `battle-command-generated-off`
+  **128/128**, `mid-battle-switch-dense-a-off` **221/221**. Worker was
+  cap-killed mid-slice-5 with slices 1+4 committed green (`26ec156b`,
+  `b2e2ebd4`); this entry is the supervisor-written ledger (provenance:
+  worker JSONL `worker-20260806-231350-74528.jsonl` + fresh reruns).
+- **Did:** slice 1 (ink): white FG for card name/level in `drawRowText`,
+  −288px (doc §5 predicted ~290). Slice 4 (empty boxes): mon-4/5/6 empty
+  boxes at (96,56)/(96,80)/(96,104), −1908px exactly; key mechanism: the
+  empty-box interior tile is pixel-0 TRANSPARENT (bg checkerboard shows
+  through) — a bank-color0 fill is wrong. **Slice 2 (icon palette) is a
+  NO-OP:** the extractor has applied `gMonIconPaletteIndices` since
+  `be7a4fee` (2026-07-29); re-run produced zero diff and the rendered icons
+  already use palette_2 colors. The rank-6 doc §3/§8's slice-2 premise is
+  stale — the icon-region residual belongs to the slice-3 cursor/bounce
+  interplay instead (slice 3's expected yield is correspondingly larger).
+- **Slice-5 findings banked (from the JSONL, unlanded):** the CANCEL window
+  is the PARTY-MENU 4px box-frame style (bank 1: frame colors
+  (74,74,99)/(231,239,140)/(99,90,0), interior color15 = (115,90,181)) —
+  NOT the std 1-tile window frame; the pokeball is a 32x32 sprite with the
+  16x16 visible ball at png offset (4,4)-(19,19), centered (198,148).
+- **Next:** slice 5 (buttons, findings above) → slice 3 (cursor open rule;
+  scoped per-route — forced-switch route's fainted-mon default is
+  RAM-verified, voluntary route gets the source's slot-0) → slice 6 (fade +
+  spec extension) vs lobby walkable + REST guard (priority order holds:
+  lobby first if time forces a choice).
+
+
 ## 972 — [bounded MAIN worker, 2026-08-06] postwin RECORD-YES + RETIRE-YES routes bound from the banked ground truth
 
 - **State:** master `4b02c245`, clean. Typecheck green; `npm run test:smoke`

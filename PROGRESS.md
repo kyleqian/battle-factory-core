@@ -5,6 +5,61 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 977 — [supervisor WIND-DOWN, 2026-08-07] Session summary: 14 workers / 5 rounds — #81 CLOSED 57/57, #82 CLOSED, postwin YES routes 125/125+125/125, #80 band 9234→1224, walkable lobby + REST guard LIVE, #78 down to 4 named frames
+
+- **State:** master at this entry's commit, clean. Final independent union
+  verification: full `npm test` **756 files / 7162 passed / 1 skipped**
+  (+21 tests this session), `npm run build` green. Supervisor-rerun specs
+  this session: `fight-menu-chrome-torment-off` **57/57** (was 52/57),
+  `mid-battle-switch-pacing-b-off` **148/152** (new; red = the 4 named #78
+  frames), `postwin-record-yes-off` **125/125** (new), `postwin-retire-yes-off`
+  **125/125** (new), `party-menu-status-item-off` red band **1224/1270**
+  px/frame (was 9234/9306), `loss-terminal-decline-continuation-off`
+  **155/155**, `loss-beyond-boundary-off` **165/183** (was 162),
+  `battle-command-generated-off` **128/128**, `mid-battle-switch-dense-a-off`
+  **221/221**, `postwin-record-off` **204/204**, `postwin-retire-off`
+  **211/211**. `animation-main`: nothing to fold at orient or wind-down.
+  No worker worktrees/branches left. DEFERRED.md: no open entries.
+  Oracle-freshness FAIL at orient was again the documented docs-only false
+  positive (harness delta since service start = _template/NOTES only).
+- **Did (14 DeepSeek workers: 9 main, 5 side; 4 cap-kills all salvaged, 1
+  exit-5 false alarm that landed everything):** MAIN — #81 4a route-scoped
+  `BattleCommandBounceSchedule` (853e6540, from a cap-killed worker's
+  JSONL-salvaged validated model) + 4b message-pacing holds (6a0a445d..)
+  → torment 57/57, #81 entry REMOVED; postwin RECORD-YES/RETIRE-YES bound
+  (e09eec10/f52646af); #80 slices 1+4 (26ec156b/b2e2ebd4, salvage ledger
+  974), slice 3 + box-color0 (e7977ff8/4154fafc); REST guard pinned +
+  walkable lobby free-roam (a5658c42/07e50d44: 8f turn/16f-tile/collision
+  grid/silent NPCs/door-mat-blocked no-exit). SIDE — lobby+REST scout
+  (e2f0ae35), #80 rank-6 measurement scout (6385255a), message-pacing scout
+  (ee198233, verify script), #82 retirement (4bbe5a24, entry REMOVED),
+  slice-5 pixel forensics (804c5506: 467px fully classified, 0 unattributed).
+- **Supervisor corrections/decisions:** rank-6 doc slice-2 premise was
+  STALE (extractor fixed since 2026-07-29 — worker verified no-op); lobby
+  scout camera claim corrected in-doc (RAM-fixed `gCamera` but render
+  scrolls sub-tile via `sFieldCameraOffset` — 16c68afd); REST guard scoped
+  to A-only (scout's swallow-the-DOWN recommendation contradicted the
+  pinned retire specs); #82 decided option (a) retire; slice 5 PARKED after
+  three cap-kills (all assets/model banked, see ISSUES #80); pokeball asset
+  salvage-banked (d0deef0c). A concurrent Codex supervisor session wrote
+  docs-only PROGRESS 970 mid-flight (user-launched; it detected this
+  session and wound down; no conflicts).
+- **Next (ordered):** (1) #80 slice 5 from the banked forensics model —
+  brief must inline the literal draw calls (three DeepSeek caps died on
+  doc-pointer briefs) or supervisor-inline; (2) #80 slice 6 fade + spec
+  extension 964-1034; (3) #78's 4 frames (1399/1400 turn-end tail seam,
+  1406/1407 menu redraw chrome); (4) lobby walk-spec blockers (sub-tile
+  camera scroll model + turn pose A identification) → promote
+  `loss-lobby-walk-off`; (5) micro-scout: postwin second-RECORD-selection
+  variant never probed (session-flag menu-variant premise).
+- **Notes:** DeepSeek cap economics: 45-min caps landed whenever the brief
+  carried a validated model/measured plan; all 4 cap-kills were
+  exploration tails (3 on the same 467px button class). JSONL salvage
+  recovered value from every kill. New PAPERCUTS entry: probe verify
+  scripts writing `_verify-*` scratch dirs trip the exit-5 clean-tree
+  postflight. No DEFERRED entries; run-supervisor.sh is unblocked.
+
+
 ## 976 — [bounded MAIN worker, 2026-08-07] REST guard + walkable Lobby free-roam (RUNGS 1-3+5 of the lobby step); RUNG 4 spec NOT promoted — named §-fact disagreement + turn pose A
 
 - **State:** master `07e50d44`, clean. Typecheck + `npm run build` green;
@@ -95,32 +150,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   walkable + REST guard.
 - **Notes:** no PAPERCUTS.
 
-## 974 — [MAIN worker + supervisor salvage, 2026-08-07] #80 slices 1+4 landed (band 9234/9306 → 7038/7110); slice 2 premise was STALE (already landed 2026-07-29); slice-5 button findings banked
-
-- **State:** master at this entry's commit, clean. Supervisor-verified after
-  the cap-kill: typecheck green, `party-menu-status-item-off` band
-  **7038/7110 px/frame** (was 9234/9306), `battle-command-generated-off`
-  **128/128**, `mid-battle-switch-dense-a-off` **221/221**. Worker was
-  cap-killed mid-slice-5 with slices 1+4 committed green (`26ec156b`,
-  `b2e2ebd4`); this entry is the supervisor-written ledger (provenance:
-  worker JSONL `worker-20260806-231350-74528.jsonl` + fresh reruns).
-- **Did:** slice 1 (ink): white FG for card name/level in `drawRowText`,
-  −288px (doc §5 predicted ~290). Slice 4 (empty boxes): mon-4/5/6 empty
-  boxes at (96,56)/(96,80)/(96,104), −1908px exactly; key mechanism: the
-  empty-box interior tile is pixel-0 TRANSPARENT (bg checkerboard shows
-  through) — a bank-color0 fill is wrong. **Slice 2 (icon palette) is a
-  NO-OP:** the extractor has applied `gMonIconPaletteIndices` since
-  `be7a4fee` (2026-07-29); re-run produced zero diff and the rendered icons
-  already use palette_2 colors. The rank-6 doc §3/§8's slice-2 premise is
-  stale — the icon-region residual belongs to the slice-3 cursor/bounce
-  interplay instead (slice 3's expected yield is correspondingly larger).
-- **Slice-5 findings banked (from the JSONL, unlanded):** the CANCEL window
-  is the PARTY-MENU 4px box-frame style (bank 1: frame colors
-  (74,74,99)/(231,239,140)/(99,90,0), interior color15 = (115,90,181)) —
-  NOT the std 1-tile window frame; the pokeball is a 32x32 sprite with the
-  16x16 visible ball at png offset (4,4)-(19,19), centered (198,148).
-- **Next:** slice 5 (buttons, findings above) → slice 3 (cursor open rule;
-  scoped per-route — forced-switch route's fainted-mon default is
-  RAM-verified, voluntary route gets the source's slot-0) → slice 6 (fade +
-  spec extension) vs lobby walkable + REST guard (priority order holds:
-  lobby first if time forces a choice).
