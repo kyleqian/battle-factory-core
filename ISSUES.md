@@ -66,30 +66,23 @@ male (fg 66,206,255), the app stage defaulted female. Fixed by pinning
 preserved; bench stays female, matching the oracle). The §6 dense spec IS
 now committed: `mid-battle-switch-dense-a-off` **84/84** (recall window
 1035-1090 + settled-send-in/"used"-typing window 1228-1255, byte-exact).]**
-Remaining un-green spans, all named: (1) **[CLOSED 2026-08-06 `d8fd6b41`+
-`07f632cb`+`2209e353`+`9a9c6563`]** the four mon-sprite residual classes
-(§10.5) are bound — (1d) healthbox slide one-tick render lag (elapsed 66-88);
-(1a) switch-out scale-up doubled box + `SetBattlerSpriteYOffsetFromYScale`
-feet anchor, rendered 2 ticks behind the §10.1 RAM table; (1c) send-in
-emerge acc 58 start, `MATERIALIZE_Y2_TABLE` descent, textured OBJ-row
-ball-blend, one-tick render lag; (1b) recall/send-in ball-open particles
-(Sin/Cos radial, shared `sAnim_RegularBall` cycle). Dense residuals now:
-1188 27px (emerge first-sliver), 1200 254px + 1205-1207 ~25-48px (the
-pre-existing **staged-RATTATA mon palette** class, PROGRESS 957 side-asset),
-1203-1204 ~30px (particles tail + palette). **The dense spec's
-captureFrames were NOT extended across 1091-1130/1185-1227** (stage 5
-unreached under the time cap) — the committed `mid-battle-switch-dense-a-off`
-stays **95/95** with the already-green 1035-1090 + 1131-1139 + 1186-1187 +
-1228-1255 windows; (2) **[CLOSED 2026-08-05
-late, `032a03b2`]** the
-party-summary panel pixels were app **overdraw** (§9: the real game draws no
-player tray here, `skipPlayer=1`) — the player-side tray draw is dropped on
-the resolution route and the dense spec extends to **95/95** (1127-1138 now
-byte-exact); (3) turn-boundary fight-menu chrome — the class-4 sprite/healthbox bounce
-phase bind landed 2026-08-06 (`commandMenuBounceY2`, `f0b52d7d`); the
-1256-1407 window still carries opponent-move resolution gaps (out of scope,
-not extended). The party-menu close's fade pixels are held-and-cut (menu
-pixels are #80 scope, frame budget is the acceptance).
+**2026-08-06 evening: the dense switch window is CLOSED byte-exact.** The
+committed `mid-battle-switch-dense-a-off` spec is **221/221** across
+1035-1255 (recall tail 1091-1130, ball-throw 1140-1185, emerge/settle
+1185-1227 all added). Landed via the four §10.5 mon-sprite class binds
+(`d8fd6b41`+`07f632cb`+`2209e353`+`9a9c6563`), the particle
+destroy-tick/emerge-gate salvage (`c8aecf8c`), and the final side pass
+(`490197ab` ball-throw RAM table + spin matrix + 1-tick render lag +
+terrain clip; `87165ead` particle alive-set boundary + stolen-tick
+freeze). NOTE: PROGRESS 965/966's residual lists for this window were
+understated (the 1140-1185 ball-throw band was never green and went
+unlisted) — the 221/221 spec supersedes them as the record.
+
+**Open remainder:** the 1256-1407 turn-boundary fight-menu window still
+carries opponent-move resolution gaps (class-4 bounce bind landed
+`f0b52d7d`; the rest is unextended, overlaps #81's pacing class). The
+party-menu close's fade pixels are held-and-cut (menu pixels are #80
+scope, frame budget is the acceptance).
 
 ## #80 — Live play: in-battle party/switch menu is scaffolding-grade
 
@@ -103,16 +96,14 @@ HP bars + real HP/level text (all three cards), gender glyphs, and the real
 `WIN_MSG`/party-menu message window are landed; oracle frame-905 diff
 15267 → 6955 px. Tier-1 pins: `tests/inbattlePartyMenuVisualBind.test.ts`.
 
-**Remainder:** (2) slot list art — the field front family
-(`battle-opponent-front-sprites.json`) is grayscale and does NOT match the
-chrome's colored list art (ONIX silhouette overlap 1272/1840; rank 2 left
-unbound with that evidence) — needs a per-species chrome capture pass or a
-colored list-art family; (5) **[CLOSED 2026-08-06, PROGRESS 967]** the
-status-condition + held-item icon binds landed per
-`docs/party-menu-status-item-ground-truth.md` §7 (spec
-`party-menu-status-item-off`, frame-2150 status/item bboxes glyph-exact,
-Lv50 suppressed on statused rows, per-frame 2050-2300 diffs 9234-9306px vs
-the 9687-9759px baseline); (6) cursor/ball/selection +
+**Remainder** (rank 5 landed 2026-08-06, PROGRESS 967 — spec
+`party-menu-status-item-off` banked as a red measured baseline,
+9234-9306px/frame over 2050-2300): (2) slot list art — the residual
+mon-icon/box palette class measures ~4-5kpx/frame on the
+`party-menu-status-item-off` window (2026-08-06); also the app's
+party-menu-open cursor rule differs (oracle opens on slot 0, app on the
+active slot) and the app prints Lv50/HP text in blue vs the oracle's
+white — both rank-6-adjacent, measured PROGRESS 967; (6) cursor/ball/selection +
 party-menu fade pixels (incl. the pokeball/CANCEL buttons at x184-234
 y134-153).
 
@@ -156,9 +147,15 @@ also closed the 1100/1200 tint). Compare `fight-menu-chrome-torment-off` is
 healthbox), 977 (857px sprite, the one regression from green) — the app's
 battle-1-calibrated idle-bounce freeze model (2-tick fight-opening freeze)
 does not match the oracle's own 4-frame opening + message + reopen-tail
-freeze schedule at exactly those transition windows; matching all three
-would change the battle-1-pinned fight-opening constant (not done, no
-per-route phases); (4b) the move-resolution message-typing pacing class at
+freeze schedule at exactly those transition windows. **The open
+freeze-schedule question is ANSWERED (2026-08-06 probe, verdict (b)
+ROUTE-DEPENDENT, `docs/fight-menu-freeze-schedule-probe.md` +
+`tools/probe/verify-fight-menu-freeze-schedule.py` PASS twice + supervisor
+rerun):** battle-1's own windows show a 0-frame opening freeze, a 2-frame
+submenu-open freeze, and two 1-frame B-close freezes — NOT the torment
+4/1/1 — so the shared battle-1 constant must NOT change; closing 736/766/977
+requires a route-scoped (or phase-event-driven) freeze schedule on the
+torment/battle-2 route only; (4b) the move-resolution message-typing pacing class at
 1100 (822px) / 1200 (648px) — the real printer types/holds
 "Foe MURKROW used TORMENT!" two lines while the app auto-advances at 1
 glyph/frame (pre-existing, unrelated to the bounce).
@@ -1025,6 +1022,30 @@ seam had masked:
   has none — silent NPCs including the doubles attendant, wandering
   optional) is a user-directed feature sequenced behind the play-test fixes
   #76-#81.
+
+## #82 — Legacy `factoryTerminalLoss` comparator family desynced (0/210 wholesale); superseded coverage, retarget or retire
+
+**Found 2026-08-06 (supervisor verification of the RECORD/RETIRE step).**
+`npm run compare:factory-terminal-loss` reports **0/210, 38400px/frame**
+(whole screen). Signature is identical at session-start `6b774ff0` and at
+HEAD — no 2026-08-06 commit caused it. Diagnostic PNGs show BOTH sides in
+the wrong scene: the app renders the forced-switch party menu (the
+canonical ONIX-FNT scaffold party), the oracle probe renders the
+pre-battle swap prompt — the comparator's bespoke staging (a
+`CB2_LoadMap`-handoff scaffold + wrapped mGBA probe, PROGRESS 336 era,
+green 210/210 on 2026-07-23) predates the August factoryTerminal rebuild.
+Sibling variants are equally desynced: `-record-menu` mismatches
++211..+624, `-round-won` +1..+2513. Modern LOSS/terminal coverage lives in
+the committed specs (`loss-beyond-boundary-off` 162/183 documented steady
+state — the 21 residuals are the out-of-scope post-5174 walk samples;
+`loss-terminal-decline-continuation-off` 155/155; the postwin specs).
+`docs/postwin-record-retire-ground-truth.md` §5 names
+`compare:factory-terminal-loss` as a RETIRE-tail regression gate — that
+reference is stale; use `compare -- loss-beyond-boundary-off` +
+`loss-terminal-decline-continuation-off` instead. Options: (a) retire the
+comparator family + its fixtures (git keeps them), (b) rebuild its
+scaffold against the current terminal system. Either is a bounded step; no
+live coverage depends on it today.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 

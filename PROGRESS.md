@@ -5,6 +5,67 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 969 — [supervisor WIND-DOWN, 2026-08-06] Session summary: 6 workers / 3 rounds — #78 switch window CLOSED 221/221, #80 rank 5 bound, postwin RECORD/RETIRE bound 204/204+211/211 incl. the YES/NO window, #81 freeze question ANSWERED (route-dependent), #82 filed
+
+- **State:** master at this entry's commit, clean. Final independent union
+  verification: full `npm test` **754 files / 7141 passed / 1 skipped** (+9 tests today),
+  `npm run build` green.
+  Compare specs re-verified by supervisor this session:
+  `mid-battle-switch-dense-a-off` **221/221** (was 95), `postwin-record-off`
+  **204/204** (new), `postwin-retire-off` **211/211** (new),
+  `battle-command-generated-off` **128/128**, `win-go-on-scout-off`
+  **143/143**, `party-menu-status-item-off` banked red baseline
+  9234-9306px/frame. `animation-main`: nothing to fold at orient or
+  wind-down. No worker worktrees/branches left. DEFERRED.md: no open
+  entries. Oracle-freshness FAIL at orient was again the documented
+  docs-only false positive.
+- **Did (6 DeepSeek workers: 3 main, 3 side; 4 cap-kills, all salvaged to
+  zero loss):** MAIN — (967) #80 rank 5: status + held-item icons per the
+  banked §7 plan, target bboxes glyph-exact, level-text suppression;
+  (968a `fdb49a4d`) postwin RECORD/RETIRE question branches
+  (dismiss=default-NO re-ask, cursor handoff, specs initially 192/188 with
+  the question-hold excluded); (968b `2f579d21`+`8286ba97`) the exclusion
+  was explained: the oracle DRAWS a held YES/NO window (supervisor
+  pixel-check vs doc §3's over-general "not visible" claim) — bound by
+  reusing the Lobby prompt machinery, specs extended to FULL coverage, and
+  the during-hold UP+A probe proved YES IS REACHABLE (RECORD-YES →
+  SaveBattle; RETIRE-YES → WarpToLobbyLost; ground truth banked, nothing
+  bound). SIDE — (#78) two-worker chain: salvage `c8aecf8c` (particle
+  destroy-tick model + emerge acc-58 render gate) then `490197ab`+
+  `87165ead`+`7dc9cfff`: ball-throw window byte-exact (RAM throw table +
+  spin matrix + 1-tick lag + terrain clip), particle alive-set boundary +
+  stolen-tick freeze, spec widened 95→221 all-match; (#81 probe
+  `505fca40`) battle-1 freeze schedule measured RAM+pixel cross-validated:
+  verdict (b) ROUTE-DEPENDENT (battle-1 = 0-frame opening / 2-frame
+  submenu-open / two 1-frame B-close freezes — not torment's 4/1/1), so
+  the shared constant stays; verify script PASS twice + supervisor rerun.
+- **Supervisor corrections this session:** PROGRESS 965/966's #78 residual
+  lists were understated (the 1140-1185 ball-throw band was red and
+  unlisted — fresh differential-vs-stash measurement before rebriefing);
+  ISSUES #80 item (5) was marked CLOSED in place by a worker (now
+  removed); doc §3's "no YES/NO window" over-generalization corrected in
+  place (§3a). Legacy `compare:factory-terminal-loss` family found
+  desynced 0/210 wholesale — proven pre-existing (identical at
+  session-start commit), filed as **ISSUES #82** (superseded by modern
+  specs; retarget-or-retire is a bounded future step).
+- **Next (ordered):** (1) #81's 3 phase-boundary frames via a route-scoped
+  freeze schedule per the probe doc (+ the 2 message-pacing frames);
+  (2) postwin RECORD-YES/RETIRE-YES binds from the banked `8286ba97`
+  ground truth (RETIRE-YES reuses the existing loss-lobby flow per the
+  standing user decision); (3) #80 rank 6 (cursor/ball/selection + fade;
+  note the cursor-open rule + Lv50 ink findings in PROGRESS 967);
+  (4) lobby walkable + REST guard (scout brief drafted this session, not
+  launched); (5) #78's 1256-1407 fight-menu window (overlaps #81 pacing).
+- **Notes:** DeepSeek cap economics this session: 60-min caps were killed
+  at the suite/docs tail 4-of-5 times while the work itself was green and
+  committed — the standing salvage recipes (verify-from-JSONL + fresh
+  reruns; commit-tail suite-run) recovered all four at ~10-20 min each.
+  Consider 45-min caps with an explicit "no full suite, supervisor runs
+  it" clause for DeepSeek next session. Vitest contention: my background
+  full suite overlapped a worker's own suite once and pushed it past its
+  10-min shell timeout — keep supervisor suites off the box while any
+  worker is in its finish phase. No DEFERRED entries; no PAPERCUTS added.
+
 ## 968 — [bounded MAIN worker, 2026-08-06] postwin RECORD/RETIRE question window bound 204/204 + 211/211; during-hold YES ground truth banked
 
 Covers the prior step (fdb49a4d, its PROGRESS entry was lost to a cap-kill)
@@ -102,129 +163,3 @@ plus this step (2f579d21 + 8286ba97).
   prints Lv50 in white vs the app's card-text ink — pre-existing
   `drawRowText` color class, deliberately not changed this step (would risk
   the pinned 128/128). PAPERCUT: none new.
-
-## 966 — [supervisor WIND-DOWN, 2026-08-06] Session summary: 10 workers / 5 rounds — #78 switch route fully bound, #81 fight menu 52/57, same-day canary regression caught+fixed, #80 rank 2 + 34 walk-in sheets landed, rank-5 ground truth banked
-
-- **State:** master at this entry's commit, clean. Final independent union
-  verification: full `npm test` **754 files / 7128 passed / 1 skipped**
-  (+44 tests today), `npm run build` green, `mid-battle-switch-dense-a-off`
-  **95/95**, `battle-command-generated-off` canary **128/128**,
-  `fight-menu-chrome-torment-off` **52/57** (5 measured residuals listed in
-  ISSUES #81). `animation-main`: nothing to fold at orient or wind-down. No
-  worker worktrees/branches left. DEFERRED.md: no open entries.
-  Oracle-freshness FAIL at orient was again the documented docs-only false
-  positive (only `_template`/NOTES harness commits since oracle start).
-- **Did (10 workers: 5 main, 5 side; 2 cap-kills, both salvaged):** MAIN —
-  (961) #78 ball-fade mechanism bind, field byte-exact incl. the 1-frame
-  render lag; (962) torment settled frames byte-exact via 3 staging pins
-  (two prior attributions falsified: "type cell"/"type text" were staging,
-  "HP-cap" was staged HP); (963) class-4 bounce bind 11→52/57 + the
-  phantom-fade source gate; (964) canary regression isolated — `0aeb2fde`
-  introduced 82/128, `f0b52d7d`'s gate IS the whole fix, differential vs
-  `a75c0f3a` clean; (965) #78 residuals 1a-1d all bound (doubled affine box
-  + 2-tick OAM latch, emerge acc-58 + textured ball-blend + 1-tick lag,
-  healthbox slide +1 tick, pure ball-open particle scheduler). SIDE —
-  fight-menu chrome ground truth (arrow class falsified, singles have no
-  target arrow); #80 rank 2 landed (ROM mon-icon sAnim_0 cadence +
-  party-box bank-3 palette; frame-905 6810→4975px); §10 OAM ground truth
-  for 1a-1d (probe twice-run byte-identical + 2 doc corrections); all 34
-  tower walk-in sheets extracted+wired (0 px mismatches; LILIANA 903/903 +
-  FISHERMAN 98/98 hold); #80 rank-5 status/held-item ground truth (fixture
-  twice-run 251/251, PRZ template 156/156, level-text-suppressed-by-status
-  finding).
-- **Next (ordered):** (1) #78: extend the dense spec across the fade
-  windows (measured remainder: 1188 27px emerge sliver, 1200 254px,
-  1205-1207 staged-RATTATA class) and then the 1256-1407 fight-menu window;
-  (2) #81's 5 residual frames (3 phase-boundary freeze-schedule frames —
-  needs the shared battle-1 freeze constant question answered — + 2
-  message-pacing); (3) #80 rank-5 bind per
-  `docs/party-menu-status-item-ground-truth.md` §7, then rank 6; (4)
-  RECORD/RETIRE binds per `docs/postwin-record-retire-ground-truth.md` §5;
-  (5) lobby walkable + REST guard.
-- **Notes:** two worker regression/attribution claims were disproven by
-  supervisor cross-checks same-day (962's "pre-existing at baseline";
-  963's "identical before/after gate") — verify such claims with per-frame
-  sets and pixel samples before rebriefing on them. Salvage note: a draft
-  1b boundary pin (frame-1104 particle count 15-vs-14) was dropped red at
-  wind-down; re-derive from §10.2 with an oracle check if wanted. User
-  directive mid-session: user reports are now written in Simplified
-  Technical English (SUPERVISOR.md communication section updated).
-  PAPERCUTS +2 (periodic-phase reconstruction tooling; diff-PNG legend).
-
-## 965 — [bounded MAIN worker, 2026-08-06] #78 residuals 1a-1d bound: switch-out scale-up, send-in emerge, healthbox slide lag, ball-open particles — dense 95/95, command spec 128/128
-
-- **State:** master `9a9c6563`, clean at commit. Typecheck green. Full
-  `npm test` + `npm run build` NOT run (cap-killed at the docs gate);
-  typecheck + `battle-command-generated-off` **128/128** +
-  `mid-battle-switch-dense-a-off` **95/95** are the last verified tiers.
-- **Did:** bound §10.5's four residual classes smallest-risk-first, one
-  commit each: (1d `d8fd6b41`) healthbox slide keyed off elapsed 66-88 (the
-  oracle renders the slide one tick later than the RAM: 110→0 over rendered
-  1206-1228) — the 186-1379px healthbox band vanished, leaving only the
-  particle + palette classes; (1a `07f632cb`) switch-out scale-up now uses
-  the doubled 128px affine box + the `SetBattlerSpriteYOffsetFromYScale`
-  feet-anchor y2 formula (var=64-2*13=38, `(var - floor(var<<8/scale))/2`),
-  AND the rendered scale lags the §10.1 RAM table by **2 ticks** (the
-  gOamMatrices write latches into the OAM matrix table two frames later —
-  pixel-fit proved frame N renders §10.1's N-2 value; 813-988px → 46-78px,
-  the mon scale-up itself byte-exact); (1c `2209e353`) emerge starts acc 58
-  (not 76) + descends via the shared `MATERIALIZE_Y2_TABLE` (now exported)
-  + textured OBJ-row ball-blend instead of the flat tint, rendered **1 tick
-  behind** the §10.3 RAM table — 1189-1199 byte-exact (was 51-442px);
-  (1b `9a9c6563`) recall (1089-1130, base (72,112)) + send-in (1187-1228,
-  base (72,123)) ball-open particles via a pure scheduler
-  (`midBattleSwitchParticleSchedulesAt`, age = frame-start-2-i, one-tick
-  render lag) + the existing Sin/Cos + `sAnim_RegularBall` machinery —
-  recall 1091-1099 and send-in 1195-1203 byte-exact.
-- **Oracle:** `mid-battle-switch-dense-a-off` **95/95** (unchanged);
-  `battle-command-generated-off` **128/128** (switch-route draws gated on
-  `sourceDecision.kind === "switch"`, no leak into the GUST resolution).
-  Remaining dense residuals (all measured): 1188 27px (emerge first-sliver),
-  1200 254px, 1205-1207 25-48px (the pre-existing staged-RATTATA mon
-  palette class, PROGRESS 957 side-asset) + 1203-1204 ~30px (particles tail
-  + palette).
-- **Next:** (1) extend the dense spec's `captureFrames` across 1091-1126 +
-  1185-1227 (stage 5) — the committed spec stays 95/95; byte-exact is
-  blocked only by the ~25-254px palette class; (2) the 1256-1407
-  fight-menu window (out of scope for this step).
-- **Notes:** three of the four classes needed a render-lag correction vs the
-  doc's RAM tables (healthbox +1, particles +1, switch-out scale +2, emerge
-  +1) — the probe reads the register/state the tick it's written, which
-  renders one or two frames later; the §10 tables are the RAM state, not the
-  rendered frame. PAPERCUT: the §10.2 particle z-order/draw-order and the
-  scale-up pixel-fit each cost ~30-40 min of scratch-python forensics the
-  doc's RAM-only tables couldn't answer (they had no per-frame rendered
-  pixel ground truth).
-
-## 964 — [bounded MAIN worker, 2026-08-06] ball-fade canary regression isolated + already-fixed: 0aeb2fde introduced 82/128, f0b52d7d's gate restores 128/128 — no source change needed, 962/963 corrected
-
-- **State:** master `407635d0`, clean at commit. Typecheck green; smoke
-  347/347. Full `npm test` + `npm run build` at session-end gate.
-- **Did:** decisively isolated the `battle-command-generated-off` regression
-  the supervisor brief attributed to 0aeb2fde — then proved the current tree
-  already fixes it, so **no source edit was warranted** (supervisor's 15:10
-  "matched-frame set identical before/after the gate" was itself wrong).
-  Worktree receipts (app-vs-oracle, all fresh oracle replays): a75c0f3a
-  (pre-0aeb2fde baseline) = **128/128**; 0aeb2fde = **82/128** with exactly
-  the reported 2124px plateau bbox 42,59-100,111 (frames ~119-135, the
-  non-switch GUST resolution's `fadeTick` landing in the recall window);
-  27be9ea2 (0aeb2fde descendant) = 82/128, i.e. PROGRESS 962's "pre-existing
-  at session-start baseline" claim only checked post-0aeb2fde commits —
-  **WRONG**, corrected below. f0b52d7d (the `sourceDecision.kind === "switch"`
-  gate) = **128/128**; HEAD = **128/128** and `compare:differential --base
-  a75c0f3a` clean 128/128 byte-identical. Gate red-test: reverting JUST the
-  gate line at HEAD reproduces the identical 82/128 (same 46 frames, 2124px),
-  so the gate is the whole fix — no other leak in 0aeb2fde's touch set.
-- **Oracle:** `battle-command-generated-off` **128/128**, differential vs
-  a75c0f3a clean; `mid-battle-switch-dense-a-off` **95/95**;
-  `fight-menu-chrome-torment-off` **52/57** (same documented 5: 736/766/977
-  freeze-boundary + 1100/1200 message-pacing, ISSUES #81). Tier-1 gate pins
-  (`tests/battleResolutionPresentation.test.ts` "midBattleSwitchFade gate",
-  2) re-red-verified this session (both fail with the gate line stashed).
-- **Next:** canary regression closed as already-fixed; per ROADMAP continue
-  #80 ranks 2/5/6, RECORD/RETIRE, lobby walkable, 31 tower gfx.
-- **Notes:** PAPERCUT: supervisor's 15:10 "identical before/after gate"
-  evidence path was wrong (the gate demonstrably flips 82↔128 on the canary);
-  the reliable recipe was worktree compare at the four lineage commits + a
-  one-line gate revert at HEAD. 963's "re-verified 82/128" line is likewise
-  corrected — f0b52d7d is 128/128.
