@@ -986,6 +986,7 @@ import {
   sceneOnEarthquakeView,
   sceneOnHardenView,
   sceneOnIronDefenseView,
+  sceneOnFlashView,
   sceneOnCalmMindView,
   sceneOnShadowBallView,
   sceneOnEncoreView,
@@ -28955,6 +28956,109 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "CLAMPERL used" : "Foe CLAMPERL used",
       "IRON DEFENSE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FLASH") {
+    const view = sceneOnFlashView(state);
+    // Palette writes become visible on the following display latch, so the
+    // flash palette override is rendered one age behind the RAM state (the
+    // snap shows from display age 2 through 9 and the 16..0 ramp from 10).
+    const displayed = sceneOnFlashView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "MAREEP"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MAREEP"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FLASH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? mareepBackSprite : mareepFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    const white = { r: 255, g: 255, b: 255 };
+    const black = { r: 0, g: 0, b: 0 };
+    const coeff = displayed.fadedCoefficient ?? 0;
+    const bgPalette = blendPaletteBanksToward(battleBg.palette, white, coeff);
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      bgPalette,
+    );
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      blendPaletteToward(targetSprite.palette, black, coeff),
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      blendPaletteToward(attackerSprite.palette, black, coeff),
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const opponentSpecies = playerToOpponent ? "ONIX" : "MAREEP";
+    const playerSpecies = playerToOpponent ? "MAREEP" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MAREEP used" : "Foe MAREEP used",
+      "FLASH!",
       99,
     );
     return;

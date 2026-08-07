@@ -87,6 +87,10 @@ import {
   type IronDefenseState,
 } from "./ironDefense.ts";
 import {
+  flashAtAge,
+  type FlashState,
+} from "./flash.ts";
+import {
   calmMindAtAge,
   type CalmMindState,
 } from "./calmMind.ts";
@@ -1862,6 +1866,13 @@ export interface SceneOnIronDefenseConfig {
   readonly attackerSpriteCenter: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnFlashConfig {
+  readonly move: "FLASH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnCalmMindConfig {
   readonly move: "CALM_MIND";
   readonly attacker: SceneOnPresentationBattler;
@@ -2055,6 +2066,7 @@ export type SceneOnMoveConfig =
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
   | SceneOnIronDefenseConfig
+  | SceneOnFlashConfig
   | SceneOnCalmMindConfig
   | SceneOnShadowBallConfig
   | SceneOnEncoreConfig
@@ -2594,6 +2606,11 @@ export interface SceneOnIronDefenseView extends IronDefenseState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnFlashView extends FlashState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnCalmMindView extends CalmMindState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -3117,6 +3134,7 @@ export function createSceneOnMovePresentation<
     | SceneOnSecretPowerConfig
     | SceneOnWhirlwindConfig | SceneOnBlockConfig
     | SceneOnIronDefenseConfig
+    | SceneOnFlashConfig
     | SceneOnMetalClawConfig
     | SceneOnWrapConfig,
 >(
@@ -5231,6 +5249,23 @@ export function sceneOnIronDefenseView(
       config.attackerSpriteCenter.x,
       config.attackerSpriteCenter.y,
     ),
+    attacker: config.attacker,
+    target: config.target,
+  };
+}
+
+/** `age=0` is the move script's first frame (playsewithpan SE_M_LEER); the
+ *  flash task is created one engine age later and the palette writes latch
+ *  one display behind the RAM state (the draw uses `age - 1`). */
+export function sceneOnFlashView(
+  state: SceneOnMovePresentationState,
+): SceneOnFlashView {
+  if (state.config.move !== "FLASH") {
+    throw new Error(`expected FLASH presentation, got ${state.config.move}`);
+  }
+  const config = state.config as SceneOnFlashConfig;
+  return {
+    ...flashAtAge(state.age),
     attacker: config.attacker,
     target: config.target,
   };
