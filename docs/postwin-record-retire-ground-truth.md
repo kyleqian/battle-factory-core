@@ -284,3 +284,14 @@ across both extensions (`battleOutcome` 1, `mainCallback2` 134766173, one
 LCG-per-VBlank outside-battle ownership — no new burst). New files only:
 the two `tools/battle-lab/` fixtures and this doc. No `src/`, `tests/`,
 `PROGRESS.md`, or `ISSUES.md` edits.
+
+### §5 addendum (2026-08-06, MAIN worker): YES routes bound
+
+The §5 "YES unreachable" premise (before §3a's correction) is superseded:
+the up-a probes (banked commit 8286ba97, rerun byte-identical this session)
+prove UP during the hold reaches YES and A-on-YES takes the branch routes.
+A MAIN slice has bound both: `postwin-record-yes-off` **125/125** and
+`postwin-retire-yes-off` **125/125** (full-window dense) via
+`postwin.ts`/`core.ts`; RETIRE-YES reuses the shared WARP_FADE_OUT fade +
+the existing `factoryTerminal` LOSS Lobby-arrival presentation (age = delay
++ 76). The §5 "No YES/NO window to draw" line is also superseded by §3a.

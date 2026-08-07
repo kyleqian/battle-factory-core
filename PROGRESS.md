@@ -5,6 +5,35 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 972 — [bounded MAIN worker, 2026-08-06] postwin RECORD-YES + RETIRE-YES routes bound from the banked ground truth
+
+- **State:** master `4b02c245`, clean. Typecheck green; `npm run test:smoke`
+  **347/347**; new Tier-1 pins green. Full `npm test` + `npm run build` NOT
+  run (worker rule — supervisor runs them after merge).
+- **Did:** bound the YES routes the 8286ba97 up-a probes ground-truthed.
+  (1) Cursor: UP/DOWN on the held YES/NO window moves the cursor (logical
+  move at the press edge, one-VBlank display handoff → oracle-visible
+  edge+2; record probe cursor visible 6717, retire 6718). (2) RECORD-YES →
+  SaveBattle: window clears +2, question box holds through the save-SE span
+  (box clears +23), then "{PLAYER}'s battle was recorded / on the FRONTIER
+  PASS." types from +24..+72 and holds. (3) RETIRE-YES → WarpToLobbyLost:
+  window clears +2, WARP_FADE_OUT palette fade +4..+18 (BG 1-tick ahead of
+  OBJ), black hold +19..+37, then the Lobby arrival fade-in +38 renders via
+  the existing factoryTerminal LOSS presentation (age = delay + 76). New
+  dense specs `postwin-record-yes-off` **125/125** and `postwin-retire-yes-off`
+  **125/125** full-window byte-exact. New Tier-1 pins in `tests/postwin.test.ts`
+  (cursor swap timing, RECORD save/recorded phase, RETIRE warp clocks,
+  NO-dismiss unchanged), red-verified by breaking `acceptPostwinQuestionYes`.
+- **Verified:** regressions unchanged — `postwin-record-off` **204/204**,
+  `postwin-retire-off` **211/211**, `win-go-on-scout-off` **143/143**.
+  Probes rerun byte-identical (record/retire up-a, 125/125 manifest shas).
+  The recorded message's apostrophe is U+2019 (charmap has no U+0027).
+- **Next:** #81 remainder 4b (message pacing at 1100/1200), then per the
+  ordered list: #80 rank 6, lobby walkable + REST guard, #78's 1256-1407
+  window.
+- **Notes:** no PAPERCUTS. The retire fade is the shared WARP_FADE_OUT
+  palette fade (not the battle fast-fade), matching pixel-for-pixel.
+
 ## 971 — [bounded MAIN worker, 2026-08-06] #81 remainder 4a: route-scoped idle-bounce freeze schedule bound — torment 55/57, no regressions
 
 - **State:** master `e1decfff`, clean. Typecheck green; `npm run test:smoke`
