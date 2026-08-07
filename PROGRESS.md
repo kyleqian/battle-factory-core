@@ -30,7 +30,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   128/128, `loss-terminal-decline-continuation-off` 155/155.
   `animation-main` folded at wind-down (FLASH + GRASS_WHISTLE promoted exact,
   inventory pin 110-exact/166-unsupported rides the fold; nothing to fold at
-  orient). No worker worktrees/branches left. DEFERRED.md: no open entries.
+  orient). Their session stayed live and landed 2 further commits AFTER the
+  fold — deliberately left unfolded (documented-fine); the next session's
+  orient fold takes them. No worker worktrees/branches left. DEFERRED.md: no open entries.
   Oracle-freshness FAIL at orient was the documented docs-only false positive.
 - **Did (11 DeepSeek workers: 6 main, 5 side; 2 cap-kills salvaged, 1
   cap-kill relaunched):** MAIN — #80 slice 6 close-fade (`1bedd921`, dense-a
