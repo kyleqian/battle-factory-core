@@ -275,7 +275,12 @@ export function createBattlePartySelectState(
   return Object.freeze({
     requestId: request.requestId,
     rows: Object.freeze(rows),
-    cursor: activePartyIndex <= 2 ? activePartyIndex as 0 | 1 | 2 : 0,
+    // OpenPartyMenuInBattle (party_menu.c:5774-5779) calls
+    // InitPartyMenu(..., keepCursorPos=FALSE, ...) which forces slot 0
+    // (party_menu.c:524-525), never the active battler's slot -- for BOTH the
+    // voluntary and forced routes (the latter's fainted-mon default is slot 0
+    // in every canonical fixture). docs/party-menu-rank6-ground-truth.md §2.
+    cursor: 0,
     rightColumnCursor: 1,
     submenuOpen: false,
     message: null,
