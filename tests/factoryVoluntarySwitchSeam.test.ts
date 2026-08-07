@@ -16,6 +16,7 @@ import {
 } from "../src/engine/battleResolutionPresentationRender.ts";
 import {
   advanceFactoryRoundBattleCommand,
+  advanceFactoryRoundBattleResolution,
   advanceFactoryRoundPresentation,
   completeFactoryRoundPresentation,
   createFactoryRoundBattleOrchestrator,
@@ -687,5 +688,202 @@ describe("ISSUES #78 voluntary-switch source decision", () => {
       expect(viewAt(row.e).scale).toBe(row.s);
       expect(viewAt(row.e).y2).toBe(row.y);
     }
+  });
+
+  it("blanks the held box text 2 frames before the switch-seam turn-end completes (ISSUES #78 Fix A)", () => {
+    // docs/switch-pacing-tail-forensics.md §4a: the oracle wipes the
+    // "But nothing happened!" box text at 1398->1399, 2 frames before the
+    // app's turn-end command completes (pe >= minimumFrames - 2). Route-scoped
+    // to the switch source decision -- a use-move resolution's turn-end keeps
+    // the message box up for its full 8-frame hold.
+    const resolution = createBattleResolutionPresentation(switchResolutionInput([
+      event(0, { kind: "message", messageId: "STRINGID_BUTNOTHINGHAPPENED", substitutions: [] }),
+    ], NEXT_COMMAND, createFactoryFullTurnBattleState({
+      requestId: 1,
+      rngSeed: 1,
+      player: {
+        species: 19,
+        moveId: 150,
+        moves: [150, 150, 150, 150],
+        pp: [40, 40, 40, 40],
+        ability: 0,
+        item: 0,
+        friendship: 0,
+        attack: 76,
+        defense: 55,
+        spAttack: 45,
+        spDefense: 55,
+        speed: 92,
+        hp: 105,
+        maxHp: 105,
+        types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      },
+      trainer: {
+        species: 19,
+        moveId: 150,
+        moves: [150, 150, 150, 150],
+        pp: [40, 40, 40, 40],
+        ability: 0,
+        item: 0,
+        friendship: 0,
+        attack: 76,
+        defense: 55,
+        spAttack: 45,
+        spDefense: 55,
+        speed: 92,
+        hp: 105,
+        maxHp: 105,
+        types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      },
+      playerBenchHp: [105, 105],
+      playerBenchOverride: [
+        {
+          species: 19,
+          isEgg: false,
+          abilityNum: 0,
+          personality: 0,
+          level: 50,
+          friendship: 0,
+          hp: 105,
+          maxHP: 105,
+          attack: 76,
+          defense: 55,
+          speed: 92,
+          spAttack: 45,
+          spDefense: 55,
+          status1: 0,
+          item: 0,
+          moves: [150, 150, 150, 150],
+          pp: [40, 40, 40, 40],
+        },
+        {
+          species: 19,
+          isEgg: false,
+          abilityNum: 0,
+          personality: 0,
+          level: 50,
+          friendship: 0,
+          hp: 105,
+          maxHP: 105,
+          attack: 76,
+          defense: 55,
+          speed: 92,
+          spAttack: 45,
+          spDefense: 55,
+          status1: 0,
+          item: 0,
+          moves: [150, 150, 150, 150],
+          pp: [40, 40, 40, 40],
+        },
+      ],
+      trainerBenchHp: [105, 105],
+      trainerBenchOverride: [
+        {
+          species: 19,
+          isEgg: false,
+          abilityNum: 0,
+          personality: 0,
+          level: 50,
+          friendship: 0,
+          hp: 105,
+          maxHP: 105,
+          attack: 76,
+          defense: 55,
+          speed: 92,
+          spAttack: 45,
+          spDefense: 55,
+          status1: 0,
+          item: 0,
+          moves: [150, 150, 150, 150],
+          pp: [40, 40, 40, 40],
+        },
+        {
+          species: 19,
+          isEgg: false,
+          abilityNum: 0,
+          personality: 0,
+          level: 50,
+          friendship: 0,
+          hp: 105,
+          maxHP: 105,
+          attack: 76,
+          defense: 55,
+          speed: 92,
+          spAttack: 45,
+          spDefense: 55,
+          status1: 0,
+          item: 0,
+          moves: [150, 150, 150, 150],
+          pp: [40, 40, 40, 40],
+        },
+      ],
+    }).rules));
+    const commands = resolution.segments[0]!.commands;
+    const turnEndIndex = commands.findIndex((command) => command.type === "turn-end");
+    if (turnEndIndex < 0) {
+      throw new Error("switch resolution has no turn-end command");
+    }
+    const turnEnd = commands[turnEndIndex]!;
+    if (turnEnd.type !== "turn-end") throw new Error("unreachable");
+    const at = (phaseElapsed: number) => createBattleResolutionPresentationRenderView(
+      Object.freeze({
+        ...resolution,
+        commandIndex: turnEndIndex,
+        lifecycle: Object.freeze({ phase: "presenting", phaseElapsed }),
+      }),
+    );
+    // The box text stays up until the last 2 frames of the turn-end hold.
+    expect(at(turnEnd.timing.minimumFrames - 3).bottom).toBe("message");
+    expect(at(turnEnd.timing.minimumFrames - 2).bottom).toBe("blank");
+    expect(at(turnEnd.timing.minimumFrames - 1).bottom).toBe("blank");
+    // A use-move resolution's turn-end keeps the message for its whole hold
+    // (bottom stays "fight" via its confirm-handoff -- critically NOT blanked
+    // early by the switch-route scope).
+    const useMove = createResolutionWithUseMove();
+    const useMoveCommands = useMove.segments[0]!.commands;
+    const useMoveTurnEnd = useMoveCommands.findIndex((command) => command.type === "turn-end");
+    if (useMoveTurnEnd < 0) throw new Error("use-move resolution has no turn-end command");
+    const useMoveTurnEndCommand = useMoveCommands[useMoveTurnEnd]!;
+    if (useMoveTurnEndCommand.type !== "turn-end") throw new Error("unreachable");
+    const useMoveView = createBattleResolutionPresentationRenderView(
+      Object.freeze({
+        ...useMove,
+        commandIndex: useMoveTurnEnd,
+        lifecycle: Object.freeze({
+          phase: "presenting",
+          phaseElapsed: useMoveTurnEndCommand.timing.minimumFrames - 2,
+        }),
+      }),
+    );
+    expect(useMoveView.bottom).not.toBe("blank");
+  });
+
+  it("hands off the switch seam's fight-menu one frame earlier than the shared 6-frame clock (ISSUES #78 Fix B)", () => {
+    // docs/switch-pacing-tail-forensics.md §4b: the whole fight-menu sequence
+    // is exactly one frame late (oracle 1405->1406, app 1406->1407). The
+    // switch seam's next-command-handoff completes at 5 frames instead of the
+    // shared BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES=6, so the menu opens
+    // at 1406 while every other seam keeps its 6-frame clock.
+    let next = confirmVoluntarySwitchThroughClose(1);
+    for (
+      let budget = 0;
+      budget < 2_000
+        && next.battleResolutionPresentation?.lifecycle.phase !== "next-command-handoff";
+      budget += 1
+    ) {
+      next = advanceFactoryRoundBattleResolution(next);
+    }
+    expect(next.battleResolutionPresentation?.lifecycle.phase).toBe("next-command-handoff");
+    expect(next.battleResolutionPresentation?.sourceDecision.kind).toBe("switch");
+    for (let tick = 0; tick < 4; tick += 1) {
+      next = advanceFactoryRoundBattleResolution(next);
+      expect(next.battleResolutionPresentation?.lifecycle.phase).toBe(
+        "next-command-handoff",
+      );
+    }
+    // Frame 5 (one earlier than the global 6) is where the seam hands off.
+    next = advanceFactoryRoundBattleResolution(next);
+    expect(next.battleResolutionPresentation).toBeNull();
+    expect(next.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
   });
 });
