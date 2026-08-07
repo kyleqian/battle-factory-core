@@ -7,8 +7,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 986 — [bounded MAIN worker, 2026-08-07] ISSUES #80 item (b) OPEN ANIMATION landed: 763-824 open window now renders (bright-hold/field-fade/black/menu-fade-in); dense-a spec → 330 frames, **325/330** — the 5 missing are the opponent sprite's idle breathing squish (new residual class)
 
-- **State:** master `7c7e8fe2` (uncommitted at session end — see Notes),
-  typecheck + `npm run build` green, `npm run test:smoke` **347/347**, touched
+- **State:** master `054ab5ce`, clean. Typecheck + `npm run build` green,
+  `npm run test:smoke` **347/347**, touched
   test files **22/22** (battlePartySelect 14/14 + inbattlePartyMenuVisualBind
   8/8; 3 new open-phase pins red-verified by breaking the phase boundary /
   y_bg formula). Keep-green all held: `party-menu-status-item-off`
@@ -48,9 +48,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   5 breathing frames are reported red rather than dropped so the supervisor
   can decide keep-vs-model. The `drawField`-vs-action-menu discovery (brief's
   item 2 assumption) is the reason the open side draws a separate asset. No
-  PAPERCUTS. This entry is written from a work-in-progress state: the final
-  commit + verify numbers must be re-confirmed by the committing session if
-  the tree moved.
+  PAPERCUTS.
 
 
 
