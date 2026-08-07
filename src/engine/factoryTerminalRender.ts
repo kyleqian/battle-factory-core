@@ -707,19 +707,27 @@ export function renderFactoryLobbyFreeRoam(
     layout.cameraOriginPx,
   );
   const woman = womanAtTick(tick);
+  // The doc's world box-top is the sprite's LOGICAL x/y (gSprites[i].x/y,
+  // docs §6a), which is +56 in x over the app's tile-anchored world px
+  // (tile.x*16; the extra +56 is the sprite's fixed centerToCornerVec x +
+  // the coordinate frame the oracle's OAM is measured in — verified against
+  // the §6a OAM column at spawn (104,160)→(96,104) with cameraOrigin (-48,56)).
+  // Screen = (docWorld − (56,0)) − cameraOrigin, the same −16 y convention
+  // the NPC loop already uses.
+  const womanScreen = woman === null
+    ? null
+    : {
+        x: woman.x - 56 - cameraOrigin.x,
+        y: woman.y - cameraOrigin.y,
+        frame: woman.frame,
+        hFlip: woman.hFlip,
+      };
   return renderFactoryTerminalField(0, 0, cameraOrigin, {
     x: LOBBY_PLAYER_SCREEN_POS.x,
     y: LOBBY_PLAYER_SCREEN_POS.y,
     frame: lobbyFreeRoamPlayerFrame(state),
     hFlip: lobbyFreeRoamPlayerFrameHFlipped(state),
-  }, woman === null
+  }, womanScreen === null
     ? undefined
-    : new Map<string, LobbyPlayerOverride>([
-        ["woman", {
-          x: woman.x - cameraOrigin.x,
-          y: woman.y - cameraOrigin.y,
-          frame: woman.frame,
-          hFlip: woman.hFlip,
-        }],
-      ]));
+    : new Map<string, LobbyPlayerOverride>([["woman", womanScreen]]));
 }

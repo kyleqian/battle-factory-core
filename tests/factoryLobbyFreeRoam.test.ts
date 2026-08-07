@@ -279,13 +279,17 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     // ≤5184 idle SOUTH at spawn (3,11) — no override (static map-json tile).
     expect(womanAtTick(5093)).toBeNull();
     expect(womanAtTick(5184)).toBeNull();
-    // 5185-5199: NORTH walk, world y = 160−(T−5184), walk2 then stand pose.
-    expect(womanAtTick(5185)).toMatchObject({ x: 104, y: 159, frame: 6, hFlip: false });
-    expect(womanAtTick(5192)).toMatchObject({ y: 152, frame: 6 });
-    expect(womanAtTick(5193)).toMatchObject({ y: 151, frame: 1 });
-    expect(womanAtTick(5199)).toMatchObject({ y: 145, frame: 1 });
-    // ≥5200 idle NORTH at (3,10), world (104,144), frozen standing pose.
-    expect(womanAtTick(5200)).toMatchObject({ x: 104, y: 144, frame: 1 });
+    // 5185-5200: NORTH walk; RENDERED box-top y = 161−(T−5184) (the §6a
+    // logical table lags the OAM by 1px through the walk + settle tick,
+    // pixel-verified), walk2 then stand pose.
+    expect(womanAtTick(5185)).toMatchObject({ x: 104, y: 160, frame: 6, hFlip: false });
+    expect(womanAtTick(5186)).toMatchObject({ y: 159, frame: 6 });
+    expect(womanAtTick(5192)).toMatchObject({ y: 153, frame: 6 });
+    expect(womanAtTick(5193)).toMatchObject({ y: 152, frame: 1 });
+    expect(womanAtTick(5199)).toMatchObject({ y: 146, frame: 1 });
+    expect(womanAtTick(5200)).toMatchObject({ y: 145, frame: 1 });
+    // ≥5201 idle NORTH at (3,10), world (104,144), frozen standing pose.
+    expect(womanAtTick(5201)).toMatchObject({ x: 104, y: 144, frame: 1 });
     expect(womanAtTick(5254)).toMatchObject({ x: 104, y: 144, frame: 1 });
   });
 

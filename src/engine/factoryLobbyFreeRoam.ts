@@ -340,9 +340,13 @@ export function lobbyFreeRoamPlayerFrameHFlipped(
  *
  * Tick windows (all canonical):
  *  - ≤5184 idle SOUTH at (3,11), world (104,160)
- *  - 5185-5199 NORTH walk (3,10), world y = 160−(T−5184), anim5 cmdIdx 2 then
- *    3 → sheet frames 6 (north walk2) then 1 (north stand), sAnim_GoNorth
- *  - 5200-5295 idle NORTH at (3,10), world (104,144), frozen 5/3 (frame 1)
+ *  - 5185-5200 NORTH walk (3,10), world y = 161−(T−5184), anim5 cmdIdx 2 then
+ *    3 → sheet frames 6 (north walk2) then 1 (north stand), sAnim_GoNorth.
+ *    NOTE: the rendered box-top lags the §6a logical table by 1px through the
+ *    walk and the settle tick (RAM-probe world box-top = logical, but the
+ *    OAM/rendered position is +1; measured pixel-exact on 5186-5205) — so
+ *    y here is the RENDERED world box-top.
+ *  - 5201-5295 idle NORTH at (3,10), world (104,144), frozen 5/3 (frame 1)
  *  - 5296-5311 SOUTH walk (3,11), world y = 145+(T−5296), anim4 cmdIdx 0 then
  *    1 → sheet frames 3 (south walk1) then 0 (south stand), sAnim_GoSouth
  *  - 5312-5406 idle SOUTH at (3,11), world (104,160)
@@ -359,11 +363,12 @@ export interface WomanNpcAtTick {
 
 export function womanAtTick(tick: number): WomanNpcAtTick | null {
   if (tick <= 5184) return null;
-  if (tick <= 5199) {
-    // North walk 5185-5199: anim5 cmdIdx 2 (sheet frame 6, walk2) for the
-    // first 8 frames, cmdIdx 3 (sheet frame 1, stand) for the rest.
+  if (tick <= 5200) {
+    // North walk 5185-5200: anim5 cmdIdx 2 (sheet frame 6, walk2) for the
+    // first 8 frames, cmdIdx 3 (sheet frame 1, stand) for the rest. Rendered
+    // y = 161−(T−5184) (the +1 render lag through the walk + settle tick).
     const frame = tick - 5185 < LOBBY_FREE_ROAM_POSE_FRAMES ? 6 : 1;
-    return { x: 104, y: 160 - (tick - 5184), frame, hFlip: false };
+    return { x: 104, y: 161 - (tick - 5184), frame, hFlip: false };
   }
   if (tick <= 5295) return { x: 104, y: 144, frame: 1, hFlip: false };
   if (tick <= 5311) {
