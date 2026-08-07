@@ -2902,7 +2902,13 @@ export function projectBattleResolutionCommands(
         noCursor: TERMINAL_SEAM_QUOTE_MESSAGE_IDS.has(payload.messageId),
         timing: payload.messageId === "STRINGID_USEDMOVE"
           ? usedMessageHoldFrames > 0
-            ? Object.freeze({ minimumFrames: 24, holdFrames: usedMessageHoldFrames })
+            // The route-scoped used-move hold counts from print completion
+            // (`docs/battle-message-pacing-ground-truth.md` §3.3: the
+            // `pause B_WAIT_TIME_SHORT` / controller span starts after the
+            // attackstring finishes), so the typing term is the exact
+            // printable length, not the 24-frame `MESSAGE_TIMING` floor --
+            // the 23-glyph "…used\nSPLASH!" must clear at +62, not +63.
+            ? Object.freeze({ minimumFrames: 0, holdFrames: usedMessageHoldFrames })
             : MESSAGE_TIMING
           : payload.messageId === "STRINGID_RETURNMON"
             ? RETURN_MON_TIMING

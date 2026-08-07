@@ -59,6 +59,7 @@ import {
 } from "../../src/engine/battleResolutionPresentation.ts";
 import { battleStringPrintableLength } from "../../src/engine/battleStringResolver.ts";
 import {
+  BATTLE_COMMAND_BOUNCE_SCHEDULE_DEFAULT,
   TORMENT_ROUTE_BOUNCE_SCHEDULE,
   createBattleCommandPresentation,
   type BattleCommandPresentationState,
@@ -997,6 +998,13 @@ function midBattleSwitchDenseOffStage(state: EngineState): EngineState {
       staged.boundary.request,
       staged.rules.rulesContext,
       cursors[0],
+      BATTLE_COMMAND_BOUNCE_SCHEDULE_DEFAULT,
+      // Route-scoped used-move hold (ISSUES #81 / #78): the SPLASH no-anim
+      // attackstring is held by its `attackanimation`/`waitanimation`
+      // controller span (measured 39 = 1265-1303 in
+      // docs/battle-message-pacing-ground-truth.md §2), shared by the
+      // dense-a and pacing-b fixtures (identical scenarios).
+      USED_MESSAGE_SPLASH_CONTROLLER_HOLD_FRAMES,
     ),
     // The fixture's frame 0 is the already-interactive action menu (its first
     // segment is an A press at frame 0), so the app stage must skip the
@@ -1031,6 +1039,7 @@ function midBattleSwitchDenseOffStage(state: EngineState): EngineState {
     moveSelectionCursors: cursors,
     battlePresentationBoundaries: boundaries,
     aiHistory: createFactoryAiBattleHistory(staged.rules.rulesContext),
+    usedMessageHoldFrames: USED_MESSAGE_SPLASH_CONTROLLER_HOLD_FRAMES,
   });
   return {
     ...state,

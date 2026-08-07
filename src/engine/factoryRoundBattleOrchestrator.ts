@@ -13,6 +13,7 @@ import {
   advanceBattleCommandPresentation,
   cancelBattleCommandPartySelection,
   createBattleCommandPresentation,
+  BATTLE_COMMAND_BOUNCE_SCHEDULE_DEFAULT,
   returnBattleCommandPartySelection,
   submitBattleCommandPresentationDecision,
   type BattleCommandPresentationState,
@@ -303,6 +304,16 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
   /** One-shot adapter input, cleared as soon as the adopted battle starts. */
   pendingBattlePreCommandRngCalls: number;
   nextBattleRequestId: number;
+  /**
+   * Route-scoped `STRINGID_USEDMOVE` post-print hold (failed/no-anim path)
+   * applied to EVERY command presentation this orchestrator installs --
+   * including the fresh handoff presentation at the next command boundary,
+   * which is how the mid-battle-switch turn-2 resolution (whose "Foe RATTATA
+   * used SPLASH!" is captured by the pacing spec) receives the SPLASH
+   * controller-span hold. Defaults to 0 for every route that does not supply
+   * it via the staging context.
+   */
+  usedMessageHoldFrames: number;
 }>;
 
 export class FactoryRoundOrchestratorError extends Error {
@@ -577,6 +588,7 @@ export function createFactoryRoundBattleOrchestrator(
     activeBattleCallStart: null,
     pendingBattlePreCommandRngCalls: adopted?.preCommandRngCalls ?? 0,
     nextBattleRequestId: 1,
+    usedMessageHoldFrames: 0,
   });
 }
 
@@ -984,6 +996,7 @@ function createBattlePresentationBoundaries(
 function commandPresentationForBoundary(
   battle: BattleState<FactoryFullTurnDecisionRules>,
   cursors: FactoryBattleMoveSelectionCursors,
+  usedMessageHoldFrames: number,
 ): BattleCommandPresentationState | null {
   if (
     battle.boundary.kind !== "decision-required"
@@ -994,6 +1007,8 @@ function commandPresentationForBoundary(
     battle.boundary.request,
     battle.rules.rulesContext,
     cursors[battle.boundary.request.battler],
+    BATTLE_COMMAND_BOUNCE_SCHEDULE_DEFAULT,
+    usedMessageHoldFrames,
   );
 }
 
@@ -1390,11 +1405,12 @@ function settledCommandForResolutionHandoff(
   battle: BattleState<FactoryFullTurnDecisionRules>,
   cursors: FactoryBattleMoveSelectionCursors,
   boundaries: FactoryBattlePresentationBoundaries,
+  usedMessageHoldFrames: number,
 ): Readonly<{
   presentation: BattleCommandPresentationState;
   boundaries: FactoryBattlePresentationBoundaries;
 }> {
-  const entering = commandPresentationForBoundary(battle, cursors);
+  const entering = commandPresentationForBoundary(battle, cursors, usedMessageHoldFrames);
   if (entering === null) {
     return fail("Slice 3 resolution completed without a player command boundary");
   }
@@ -1718,6 +1734,7 @@ export function advanceFactoryRoundBattleResolution(
       resolution.pendingBattle,
       state.moveSelectionCursors,
       committedBoundaries,
+      state.usedMessageHoldFrames,
     );
     return Object.freeze({
       ...state,
@@ -1805,6 +1822,7 @@ export function advanceFactoryRoundBattleResolution(
     resolution.pendingBattle,
     state.moveSelectionCursors,
     boundaries,
+    state.usedMessageHoldFrames,
   );
   return Object.freeze({
     ...state,
