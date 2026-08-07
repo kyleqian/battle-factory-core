@@ -91,17 +91,30 @@ import {
   postwinRngSteps,
   movePostwinSwapCursor,
   movePostwinContinuationCursor,
+  movePostwinQuestionCursor,
   beginPostwinQuestion,
   acceptPostwinQuestionDismiss,
+  acceptPostwinQuestionYes,
   postwinQuestionVisibleChars,
   postwinQuestionMenuReady,
   postwinQuestionReprintVisibleChars,
+  postwinQuestionYesDelay,
+  postwinRecordedVisibleChars,
   POSTWIN_QUESTION_MENU_READY_DELAY,
   POSTWIN_QUESTION_RECORD_TEXT,
   POSTWIN_QUESTION_RETIRE_TEXT,
   POSTWIN_QUESTION_TEXT_TOTAL,
   POSTWIN_QUESTION_WINDOW_DELAYS,
   POSTWIN_QUESTION_LAST_GLYPH_DELAY,
+  POSTWIN_QUESTION_WINDOW_CLEAR_DELAY,
+  POSTWIN_RECORDED_BOX_CLEAR_DELAY,
+  POSTWIN_RECORDED_TEXT,
+  POSTWIN_RECORDED_TEXT_TOTAL,
+  POSTWIN_RECORDED_TEXT_FIRST_DELAY,
+  POSTWIN_RECORDED_LAST_GLYPH_DELAY,
+  POSTWIN_RETIRE_FADE_FIRST_DELAY,
+  POSTWIN_RETIRE_BLACK_AGE_DELAY,
+  POSTWIN_RETIRE_FADE_IN_DELAY,
 } from "../src/engine/postwin.ts";
 
 describe("S8 Battle-1 postwin transition", () => {
@@ -1083,6 +1096,89 @@ describe("S8 Battle-1 postwin transition", () => {
       const dismissed = render(questionState(edge + windowDelay + 2, edge + windowDelay));
       expect(px(dismissed, 161, 66)).toEqual([255, 255, 255]);
       expect(px(dismissed, 169, 95)).not.toEqual([99, 99, 99]);
+    });
+
+    it("moves the YES/NO question cursor UP at the edge and copies it to the window one tick later", () => {
+      const edge = 6_639;
+      const windowDelay = POSTWIN_QUESTION_WINDOW_DELAYS.record;
+      const holdAge = edge + windowDelay;
+      const base = {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: holdAge,
+        healDismissElapsed: 2_000,
+        question: { kind: "record" as const, edgeElapsed: edge },
+        questionDismissElapsed: null,
+        questionYesElapsed: null,
+      };
+      // Default cursor is NO (1); UP moves the logical pos to YES (0) and
+      // stores the edge; the window copies it one tick later (the oracle's
+      // visible swap is the press edge + 2, see ground-truth §3a).
+      const moved = movePostwinQuestionCursor(base, -1);
+      expect(moved.questionCursorPos).toBe(0);
+      expect(moved.questionCursorMoveElapsed).toBe(holdAge);
+      expect(moved.questionCursorDisplayPos).toBe(1);
+      expect(advancePostwin(moved).questionCursorDisplayPos).toBe(0);
+      // DOWN moves back to NO.
+      const down = movePostwinQuestionCursor({ ...moved, elapsed: holdAge + 1 }, 1);
+      expect(down.questionCursorPos).toBe(1);
+    });
+
+    it("routes A-on-YES RECORD into the save/recorded phase and keeps NO on the dismiss path", () => {
+      const edge = 6_639;
+      const windowDelay = POSTWIN_QUESTION_WINDOW_DELAYS.record;
+      const holdAge = edge + windowDelay;
+      const base = {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: holdAge,
+        healDismissElapsed: 2_000,
+        question: { kind: "record" as const, edgeElapsed: edge },
+      };
+      // Early A (before the window draws) is swallowed on either cursor.
+      expect(acceptPostwinQuestionYes({ ...base, elapsed: holdAge - 1, questionCursorPos: 0 })
+        .questionYesElapsed).toBeNull();
+      const moved = movePostwinQuestionCursor(base, -1);
+      const yes = acceptPostwinQuestionYes(moved);
+      expect(yes.questionYesElapsed).toBe(holdAge - 1);
+      expect(yes.questionDismissElapsed).toBeNull();
+      // Window clears +2, box clears +23, recorded message types +24..+72.
+      expect(POSTWIN_QUESTION_WINDOW_CLEAR_DELAY).toBe(2);
+      expect(POSTWIN_RECORDED_BOX_CLEAR_DELAY).toBe(23);
+      expect(postwinQuestionYesDelay(yes)).toBe(1);
+      expect(postwinRecordedVisibleChars({ ...yes, elapsed: yes.questionYesElapsed! + POSTWIN_RECORDED_TEXT_FIRST_DELAY - 1 })).toBe(0);
+      expect(postwinRecordedVisibleChars({ ...yes, elapsed: yes.questionYesElapsed! + POSTWIN_RECORDED_TEXT_FIRST_DELAY })).toBe(1);
+      expect(postwinRecordedVisibleChars({ ...yes, elapsed: yes.questionYesElapsed! + POSTWIN_RECORDED_LAST_GLYPH_DELAY }))
+        .toBe(POSTWIN_RECORDED_TEXT_TOTAL);
+      // A-on-NO still dismisses (the re-ask path), never the save phase.
+      expect(acceptPostwinQuestionYes(base).questionYesElapsed).toBeNull();
+      const no = acceptPostwinQuestionDismiss(base);
+      expect(no.questionDismissElapsed).toBe(holdAge - 1);
+      expect(no.questionYesElapsed).toBeNull();
+      // The recorded message mirrors the oracle's string exactly.
+      expect(POSTWIN_RECORDED_TEXT[0]).toBe("MEMORY\u2019s battle was recorded");
+      expect(POSTWIN_RECORDED_TEXT[1]).toBe("on the FRONTIER PASS.");
+    });
+
+    it("pins the RETIRE-YES warp clocks: window clear +2, fade +4..+18, black +19..+37, Lobby fade-in +38", () => {
+      expect(POSTWIN_RETIRE_FADE_FIRST_DELAY).toBe(4);
+      expect(POSTWIN_RETIRE_BLACK_AGE_DELAY).toBe(19);
+      expect(POSTWIN_RETIRE_FADE_IN_DELAY).toBe(38);
+      const edge = 6_639;
+      const windowDelay = POSTWIN_QUESTION_WINDOW_DELAYS.retire;
+      const holdAge = edge + windowDelay;
+      const base = {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: holdAge,
+        healDismissElapsed: 2_000,
+        question: { kind: "retire" as const, edgeElapsed: edge },
+        questionCursorPos: 0 as const,
+        questionCursorDisplayPos: 0 as const,
+      };
+      const yes = acceptPostwinQuestionYes(base);
+      expect(yes.questionYesElapsed).toBe(holdAge - 1);
+      const edge2 = yes.questionYesElapsed!;
+      expect(postwinQuestionYesDelay({ ...yes, elapsed: edge2 + POSTWIN_RETIRE_FADE_FIRST_DELAY - 1 })).toBe(3);
+      expect(postwinQuestionYesDelay({ ...yes, elapsed: edge2 + POSTWIN_RETIRE_FADE_IN_DELAY })).toBe(38);
+      expect(postwinQuestionYesDelay({ ...yes, elapsed: edge2 + POSTWIN_RETIRE_FADE_IN_DELAY - 1 })).toBe(37);
     });
   });
 });
