@@ -6103,7 +6103,7 @@ function gbaCos(index: number, amplitude: number): number {
   return gbaSin(index + 64, amplitude);
 }
 
-export type AliveParticle = { i: number; age: number; dx: number; dy: number };
+export type AliveParticle = { i: number; age: number; dx: number; dy: number; frozen?: boolean };
 
 /**
  * §7.26 OAM-priority-compositor model, `struct OamData.priority`/
@@ -6203,17 +6203,34 @@ function drawMidBattleSwitchBallOpenParticles(
   const alive: AliveParticle[] = schedules.map((p) => ({
     i: p.i,
     age: p.age,
+    frozen: p.frozen,
     dx: 0,
     dy: 0,
   }));
   for (const p of alive) {
-    const radius = p.age <= 1 ? 0 : 2 * (p.age - 1);
+    // ISSUES #78 recall tail / send-in settle: the OAM receipt shows one
+    // STOLEN particle-update tick per window (recall 1121 = party-summary
+    // sprite-sheet work, send-in 1204 = healthbox-slide start), during which
+    // every alive particle's `data[1]` (and thus its radius) freezes for one
+    // tick instead of stepping +2. Rendered one tick later, the freeze shows
+    // from the following frame on (recall frames >= 1122, send-in frames >=
+    // 1205), so the visible radius is one step (2px) behind the ideal ramp
+    // there. The destroy schedule's +1 shift for those windows (in
+    // `midBattleSwitchParticleSchedulesAt`) is the same stolen tick's effect
+    // on the destroy boundary. The scheduler flags the affected particles.
+    const radius = p.frozen
+      ? (p.age <= 1 ? 0 : 2 * (p.age - 1)) - 2
+      : (p.age <= 1 ? 0 : 2 * (p.age - 1));
     const angle = (p.i % 8) * 32;
     p.dx = gbaSin(angle, radius);
     p.dy = gbaCos(angle, radius);
   }
   for (const p of sortAliveParticlesByScreenY(alive)) {
-    const frame = anim[Math.max(0, p.age) % anim.length]!;
+    // `sAnim_RegularBall[age%6]`: the tile index is the particle sprite's
+    // animation frame, i.e. `data[1]/2 % 6` (the Step2 tick counter), which
+    // the stolen tick leaves one behind `age` for frozen particles.
+    const tileAge = Math.max(0, p.age - (p.frozen ? 1 : 0));
+    const frame = anim[tileAge % anim.length]!;
     drawParticleTile(
       fb,
       frame.tile,

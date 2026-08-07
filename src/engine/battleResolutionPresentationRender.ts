@@ -338,6 +338,12 @@ export type MidBattleSwitchParticle = Readonly<{
   i: number;
   /** Particle's own rendered age (frame - spawn - 2, clamped >= 0). */
   age: number;
+  /**
+   * True when the window's stolen particle-update tick (recall 1121 / send-in
+   * 1204) has already occurred, so the rendered radius is one 2px step behind
+   * the ideal `2*(age-1)` ramp for the rest of the particle's life.
+   */
+  frozen: boolean;
   /** Screen offset from the window origin (Sin/Cos radial, `gSineTable` Q8.8). */
   dx: number;
   dy: number;
@@ -376,15 +382,21 @@ export function midBattleSwitchParticleSchedulesAt(
     // particle spawned at trace S dies at trace S+26. The RECALL window's
     // frame-1121 stolen tick (the party-summary sprite-sheet work §8.3 notes)
     // skips one destroy, shifting the i>=6 particles to S+27; the send-in
-    // window has no stolen tick (verified against the OAM receipt's per-frame
-    // particle counts, 1104-1131 / 1202-1229).
+    // window's healthbox-slide-start stolen tick (1204, see the freeze note on
+    // the caller's radius) likewise shifts every particle to S+27.
+    // Rendered one tick behind the RAM receipt, a particle survives on screen
+    // THROUGH the destroy-tick's rendered frame (the frame showing the tick
+    // before the destroy), so the alive test is `traceFrame > destroyTick`.
     const destroyTick = window === "recall"
       ? start + 26 + i + (i >= 6 ? 1 : 0)
       : start + 27 + i;
-    if (traceFrame >= destroyTick) continue;
+    if (traceFrame > destroyTick) continue;
     const age = traceFrame - start - 2 - i;
     if (age < 0) continue;
-    out.push(Object.freeze({ i, age, dx: 0, dy: 0 }));
+    const frozen =
+      (window === "recall" && traceFrame >= 1122 && i >= 6)
+      || (window === "send-in" && traceFrame >= 1205);
+    out.push(Object.freeze({ i, age, frozen, dx: 0, dy: 0 }));
   }
   return out;
 }
