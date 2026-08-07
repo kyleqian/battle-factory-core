@@ -21,6 +21,21 @@ function bytes(name: string): number[] {
   return [...readFileSync(join(PARTY_GFX, name))];
 }
 
+// sCancelButton_Tilemap = graphics/party_menu/cancel_button.bin (a 7x2 tilemap
+// of u16 tile indices with the palette-1 bit already baked in). It is stamped
+// into BG1 at tile (23,18) by DrawCancelConfirmButtons ->
+// CopyToBgTilemapBufferRect_ChangePalette(1, sCancelButton_Tilemap, 23, 18, 7, 2, 17)
+// (party_menu.c:1199-1205, data/party_menu.h:110). Banked here as a drawSlot
+// slot reusing the party-menu tileset + palette (mirror of slots.wideEmpty).
+function cancelButtonTilemap(): { width: number; height: number; tiles: number[] } {
+  const raw = readFileSync(join(PARTY_GFX, "cancel_button.bin"));
+  const tiles: number[] = [];
+  for (let i = 0; i < raw.length; i += 2) {
+    tiles.push((raw[i]! | (raw[i + 1]! << 8)) & 0x3ff);
+  }
+  return { width: 7, height: 2, tiles };
+}
+
 const asset = {
   source: {
     graphics: "graphics/party_menu/bg.png",
@@ -42,6 +57,10 @@ const asset = {
     // box for mon-4/5/6, rendered with the PARTY_PAL_NO_MON palette
     // (sPartyBoxNoMonPalIds {17,27,28} -> gPartyMenuBg_Pal bank 1).
     wideEmpty: { width: 18, height: 3, tiles: bytes("slot_wide_empty.bin") },
+    // sCancelButton_Tilemap = graphics/party_menu/cancel_button.bin (7x2 tiles
+    // at bg tile (23,18), palette bank 1 via the baked-in 0x1000 bit). See the
+    // helper above for the source citation.
+    cancelButton: cancelButtonTilemap(),
   },
 };
 
