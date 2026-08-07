@@ -7,9 +7,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 970 — [supervisor WIND-DOWN, 2026-08-06] Orientation only; stopped before worker dispatch at user request
 
-- **State:** master at this entry's commit, clean. No worker launched and no
-  production code changed. `animation-main` had no commits absent from master,
-  so no fold was required. DEFERRED.md has no open entries.
+- **State:** master at this entry's commit, clean. This Codex supervisor did
+  not launch a worker, and it changed no production code. `animation-main` had
+  no commits absent from master, so no fold was required. DEFERRED.md has no
+  open entries.
 - **Verified:** read the supervisor guide, AGENTS.md, and the authoritative S8
   and S10 executable-frontier resets. The Battle Scene OFF oracle reports the
   expected v5 contract and 45,000-frame cap. The freshness guard's failure is
@@ -26,8 +27,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   terminal presentation seam; (3) #80 cursor/ball/selection/fade; (4) lobby
   walkability + REST guard; (5) #78's 1256-1407 fight-menu window. Do not
   resume the retired canonical Battle-2 turn march after tick 33331.
-- **Notes:** no worker branches/worktrees were created. No new papercut or
-  deferred decision.
+- **Notes:** a separate, concurrent Claude supervisor owned active main and
+  side workers at wind-down; this session did not modify or stop them. No new
+  papercut or deferred decision.
 
 ## 969 — [supervisor WIND-DOWN, 2026-08-06] Session summary: 6 workers / 3 rounds — #78 switch window CLOSED 221/221, #80 rank 5 bound, postwin RECORD/RETIRE bound 204/204+211/211 incl. the YES/NO window, #81 freeze question ANSWERED (route-dependent), #82 filed
 
