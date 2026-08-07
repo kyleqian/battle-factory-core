@@ -19,8 +19,18 @@ const DATA_GEN = join(RUN_ROOT, "src", "data", "gen");
 
 mkdirSync(DATA_GEN, { recursive: true });
 
-// Same fixed anchor rental pool as extract-species-header.ts (slots 1-6).
-const POOL_SPECIES = ["ONIX", "MAGBY", "BAYLEEF", "BUTTERFREE", "HAUNTER", "QUILAVA"];
+// Every species the party menu can stage: the full Battle Factory rental
+// pool (battle-frontier-mons.json entries), so genderRatio is banked for any
+// rental/bench mon a party window can draw -- the 6-anchor pool left every
+// other species falling back to "male" in memberGender (ISSUES #80 band:
+// RATTATA slots 0/2 rendered ♂ instead of the oracle's ♀). The anchor six
+// are a subset, so existing summary-screen consumers are unaffected.
+const frontierMons = JSON.parse(
+  readFileSync(join(DATA_GEN, "battle-frontier-mons.json"), "utf8"),
+) as { entries: { species: string }[] };
+const POOL_SPECIES = [...new Set(frontierMons.entries.map((e) => e.species))].map((s) =>
+  s.replace(/^SPECIES_/, ""),
+);
 
 const speciesInfoC = readFileSync(join(REF, "src", "data", "pokemon", "species_info.h"), "utf8");
 const pokedexConstantsH = readFileSync(join(REF, "include", "constants", "pokedex.h"), "utf8");
@@ -44,7 +54,9 @@ function parseNationalDexOrder(): Map<string, number> {
 const nationalDexOrder = parseNationalDexOrder();
 
 function speciesBlock(species: string): string {
-  const re = new RegExp(`\\[SPECIES_${species}\\]\\s*=\\s*\\{(.*?)\\n    \\},`, "s");
+  // The last entry (CHIMECHO) closes with "    }\n};" (no trailing comma),
+  // every other block with "    }," -- the optional comma covers both.
+  const re = new RegExp(`\\[SPECIES_${species}\\]\\s*=\\s*\\{(.*?)\\n    \\},?`, "s");
   const m = re.exec(speciesInfoC);
   if (!m) throw new Error(`species_info.h block not found for SPECIES_${species}`);
   return m[1]!;

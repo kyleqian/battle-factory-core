@@ -1063,19 +1063,29 @@ const THUNDER_WAVE_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
   pp: [20, 20, 20, 20] as const,
 });
 
+// ISSUES #80 settled-band gender fix: the fixture's oracle party is
+// slot 0 = item 200 bench female, slot 1 = item 217 ACTIVE male, slot 2 =
+// item 183 bench female (RATTATA genderRatio 127; bench personalities low
+// byte 0 render female, the active personality 150 male). These overrides
+// pin the same personalities onto the item-bearing slots so the party-menu
+// gender glyphs match -- before RATTATA's genderRatio was banked, memberGender
+// fell back to "male" on every slot and masked the placement.
 const RATTATA_LV50_ITEM_SLOT0: FactoryFullTurnBattlerConfig = Object.freeze({
   ...RATTATA_LV50,
   item: 200, // ITEM_LEFTOVERS
+  personality: 0, // bench female
 });
 
 const RATTATA_LV50_ITEM_BENCH: BattleScriptPartyMemberInput = Object.freeze({
   ...RATTATA_LV50_BENCH,
-  item: 217, // ITEM_SILK_SCARF (slot 1)
+  item: 217, // ITEM_SILK_SCARF (slot 1, the active male)
+  personality: 150,
 });
 
 const RATTATA_LV50_ITEM_BENCH2: BattleScriptPartyMemberInput = Object.freeze({
   ...RATTATA_LV50_BENCH,
   item: 183, // ITEM_QUICK_CLAW (slot 2)
+  personality: 0, // bench female
 });
 
 function partyMenuStatusItemOffStage(state: EngineState): EngineState {
