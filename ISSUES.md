@@ -40,17 +40,25 @@ on the fourth cap (`a435a933`+`12a97095`+`f6f0bb7e`: cancel_button.bin
 banked, forensics-verified composite draw, in-region diff 0px on 2150+2250,
 band 1224/1270 → **757/803**; the three earlier caps died hand-deriving
 geometry — the landing brief inlined banked assets + the drawSlot idiom +
-the forensics script as an acceptance loop). Remaining: the ~757px band =
-the residual mon-icon (~525px) + box-edge/text (~210px) classes measured at
-frame 2150 (icon/wash interplay, PROGRESS 975). Slice 6 (close fade
-pixels) LANDED 2026-08-07 (`1bedd921`): close now drives from closeElapsed
-per the rank-6 §7 schedule (menu fade-out 965-978 y=2..14 held 2f, black
-979-1018, field reveal 1019-1034); `mid-battle-switch-dense-a-off` extended
-1035-1255 → **980-1255, 276/276 byte-exact**. Named residual: the 16 menu-fade
-frames 964-979 — the oracle's OBJ layer lags the BG one tick in the palette
-fade (~2700-3900 px/frame; frame 979 OBJ tail 1559 px), needs layer-separated
-blend. Open-fade (809-823) still unpinned. Full suite was run by the
-supervisor after merge.
+the forensics script as an acceptance loop). **Settled band CLOSED 2026-08-07**
+(`c74ac274`+`b7df5ac7`+`3507046f`): the ~757px band was fully classified by
+the side-lane forensics (`docs/party-band-forensics.md`) as three per-slot
+menu Pokéball sprites (595px — OPEN ball on the cursor slot, CLOSED on the
+others, `CreatePartyMonPokeballSprite`/`AnimatePartySlot`; frame-1 open ball
+now banked) + the slot-2 level text (90px — the `{LV}` ligature glyph is
+charmap **hex** 0x34=52, not glyph 34) + two gender glyphs (72px — RATTATA
+genderRatio now banked across the full rental pool; the fixture's per-slot
+personalities pinned). `party-menu-status-item-off` is **251/251 byte-exact**,
+forensics probe 0px/0 unattributed on 2060/2150/2280; Tier-1 pins in
+`tests/battlePartySelect.test.ts` (cursor-following open ball + LV ligature)
+red-verified. Slice 6 (close fade pixels) LANDED 2026-08-07 (`1bedd921`):
+close now drives from closeElapsed per the rank-6 §7 schedule (menu fade-out
+965-978 y=2..14 held 2f, black 979-1018, field reveal 1019-1034);
+`mid-battle-switch-dense-a-off` extended 1035-1255 → **980-1255, 276/276
+byte-exact**. Named residual: the 16 menu-fade frames 964-979 — the oracle's
+OBJ layer lags the BG one tick in the palette fade (~2700-3900 px/frame;
+frame 979 OBJ tail 1559 px), needs layer-separated blend. Open-fade
+(809-823) still unpinned. Full suite was run by the supervisor after merge.
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
