@@ -778,6 +778,7 @@ import type {
 } from "./battleResolutionPresentationRender.ts";
 import {
   MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR,
+  MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR,
   MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED,
   MID_BATTLE_SWITCH_OUT_SCALE_START,
   type MidBattleSwitchInView,
@@ -6102,7 +6103,7 @@ function gbaCos(index: number, amplitude: number): number {
   return gbaSin(index + 64, amplitude);
 }
 
-export type AliveParticle = { i: number; age: number; dx: number; dy: number };
+export type AliveParticle = { i: number; age: number; dx: number; dy: number; frozen?: boolean };
 
 /**
  * §7.26 OAM-priority-compositor model, `struct OamData.priority`/
@@ -6202,17 +6203,34 @@ function drawMidBattleSwitchBallOpenParticles(
   const alive: AliveParticle[] = schedules.map((p) => ({
     i: p.i,
     age: p.age,
+    frozen: p.frozen,
     dx: 0,
     dy: 0,
   }));
   for (const p of alive) {
-    const radius = p.age <= 1 ? 0 : 2 * (p.age - 1);
+    // ISSUES #78 recall tail / send-in settle: the OAM receipt shows one
+    // STOLEN particle-update tick per window (recall 1121 = party-summary
+    // sprite-sheet work, send-in 1204 = healthbox-slide start), during which
+    // every alive particle's `data[1]` (and thus its radius) freezes for one
+    // tick instead of stepping +2. Rendered one tick later, the freeze shows
+    // from the following frame on (recall frames >= 1122, send-in frames >=
+    // 1205), so the visible radius is one step (2px) behind the ideal ramp
+    // there. The destroy schedule's +1 shift for those windows (in
+    // `midBattleSwitchParticleSchedulesAt`) is the same stolen tick's effect
+    // on the destroy boundary. The scheduler flags the affected particles.
+    const radius = p.frozen
+      ? (p.age <= 1 ? 0 : 2 * (p.age - 1)) - 2
+      : (p.age <= 1 ? 0 : 2 * (p.age - 1));
     const angle = (p.i % 8) * 32;
     p.dx = gbaSin(angle, radius);
     p.dy = gbaCos(angle, radius);
   }
   for (const p of sortAliveParticlesByScreenY(alive)) {
-    const frame = anim[Math.max(0, p.age) % anim.length]!;
+    // `sAnim_RegularBall[age%6]`: the tile index is the particle sprite's
+    // animation frame, i.e. `data[1]/2 % 6` (the Step2 tick counter), which
+    // the stolen tick leaves one behind `age` for frozen particles.
+    const tileAge = Math.max(0, p.age - (p.frozen ? 1 : 0));
+    const frame = anim[tileAge % anim.length]!;
     drawParticleTile(
       fb,
       frame.tile,
@@ -35275,17 +35293,33 @@ function drawMidBattleSwitchInSprite(
   paletteOverride?: RgbColor[],
 ): void {
   if (state.ballVisible) {
-    drawSpriteSheet(
+    // ISSUES #78 window A: the thrown ball renders from the RAM ball sprite's
+    // per-tick state (center + `sAffineAnim_BallRotate_4` matrix, one tick
+    // lagged), affine-sampled around the center and clipped by the player
+    // front-terrain row 112. Pixel-verified byte-exact for frames 1143-1184.
+    drawSpriteSheetAffineRotate(
       fb,
       BALL_CLOSED_TILESET,
       summaryBall.palette,
       state.ballPosition.x,
       state.ballPosition.y,
+      state.ballMatrix.pa,
+      state.ballMatrix.pb,
+      state.ballMatrix.pc,
+      state.ballMatrix.pd,
+      112,
     );
     return;
   }
   if (!state.monVisible) return;
-  if (state.emergeAccumulator < MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR) {
+  // ISSUES #78 residual: the oracle's RENDERED first visible emerge frame is
+  // trace 1189 (elapsed 49, acc 58), not 1188 -- §10.3's "first visible at
+  // 1188" is the RAM state, which renders one tick later (pixel-verified:
+  // oracle 1188 has zero mon pixels, 1189 has 57). The accumulator formula
+  // below yields acc 40 at elapsed 48 (the invisible 1187 RAM value), so gate
+  // the draw on the accumulator reaching the visible 58.
+  if (state.emergeAccumulator < MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR) return;
+  if (state.emergeAccumulator <= MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR) {
     const scale = Math.trunc(0x10000 / state.emergeAccumulator);
     const emergeY2 = MATERIALIZE_Y2_TABLE[
       state.elapsed - MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED - 1
