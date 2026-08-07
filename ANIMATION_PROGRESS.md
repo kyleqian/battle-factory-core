@@ -1,45 +1,41 @@
 # Animation coverage
 
-## MOVE_GRASS_WHISTLE staged — window isolated, framebuffer 225/225 twice fresh; residual is note ordering alone (2026-08-07 cap-killed worker + supervisor salvage)
+## MOVE_GRASS_WHISTLE closed — 225/225 both orientations twice-fresh, promoted to exact (2026-08-07 closure worker)
 
-- **State:** GRASS_WHISTLE stays **unsupported** — one orientation only and the
-  source-component axis is still short. Move coverage unchanged at **117/276
-  exact, 0 partial, 0 staged, 159 unsupported**. Nothing promoted; the
-  inventory pin did not move.
-- **Did:** the worker isolated the move-owned window by script pointer — the
-  probe now gates on `sBattleAnimScriptPtr` lying inside the
-  `Move_GRASS_WHISTLE`..`Move_TICKLE` label bounds, which cuts the previously
-  combined 458-frame capture (move + trailing sleep-status animation) down to
-  the true **225-frame window, player frames 216-440**. It then landed the
-  reducer (`src/animation/grassWhistle.ts`, reusing sing.ts's shared wavy-note
-  math), the `sceneOnGrassWhistleView` seam, the `battleScene.ts` draw case,
-  and `grassWhistlePortable.ts` before being cap-killed at 45 min mid-fit.
-- **Measured (supervisor, independent fresh run):** player-back **framebuffer
-  225/225 exact**, evidence `4b4aef45…` and RGB `eee49e48…` reproducing the
-  worker's pins exactly — so the framebuffer axis is twice fresh. The
-  source-component axis is **129/225**.
-- **Residual is note ARRAY ORDERING ONLY.** The supervisor re-matched the app's
-  notes to the probe's notes by `localAge` instead of by array index and got
-  **225/225 clean on every field** — x, y, y2, animation, localAge and palette
-  are all already correct. The reducer simply emits notes in a different order
-  than the ROM's sprite slots hold them. (Comparing at the displayed age
-  `age - 1` scores 81/225 and at the actual age 129/225; neither is the fix.)
-  The cure is GRASS_WHISTLE's own note→sprite-slot table, the same shape as
-  sing.ts's `SING_NOTE_SPRITE_SLOTS` / `SING_NOTE_ORDER_SEED` — its slots differ
-  from SING's because GRASS_WHISTLE allocates no `monbg` BG sprites.
-- **Also found:** the ROM's move name has no space — `GRASSWHISTLE`, 12
-  characters (`src/data/gen/moves.json`). The draw case's message line was
-  corrected to match; this was worth ~10 of the worker's minutes in font
-  diagnostics.
-- **Next:** finish GRASS_WHISTLE — derive the slot table from the probe, make
-  the component axis 225/225, build the opponent-orientation fixture, add
-  `grassWhistle.test.ts` + `grassWhistleEvidence.test.ts`, then promote and move
-  the inventory pin 117→118 / 159→158.
-- **Notes:** the player fixture is deliberately marked `partial` with both
-  counts and the residual recorded; the portable now reports a staged
-  checkpoint against those recorded counts instead of only ever hard-failing,
-  and stays strict for `exact` fixtures. No boundary widening, no new
-  unsupported barriers, no coverage change.
+- **State:** GRASS_WHISTLE (new move) → **exact**. Move coverage: **118/276 exact,
+  0 partial, 0 staged, 158 unsupported**. Both fixtures pin
+  `framebufferMatching: 225` / `componentMatching: 225` with status `exact`.
+- **Did:** finished the staged unit's one diagnosed defect — the note ARRAY
+  ordering — and the opponent orientation. (1) The component axis was comparing
+  the seam's painter-ordered notes against the ROM's ascending-slot sprite
+  records; the cure was GRASS_WHISTLE's own probe-derived
+  note→sprite-slot table (`GRASS_WHISTLE_NOTE_SPRITE_SLOTS`/`_ORDER_SEED`,
+  generalized `wavyMusicNotesBackToFrontAtAge` to take them) with the portable
+  comparing notes at the ACTUAL age re-sorted by slot. (2) The opponent
+  framebuffer was 153/225 because the draw order ignored the ROM's
+  orientation-dependent OAM subpriority: the notes sit between the two battlers
+  on OPPOSITE sides (player ROSELIA sub 30 / note 38 / ONIX sub 40; opponent
+  note 28 / ONIX 30 / ROSELIA 40), so player-back ROSELIA draws after its notes
+  and opponent-front ROSELIA before them. Both fixtures re-run twice fresh at
+  225/225 component AND framebuffer.
+- **Measured:** player-back frames 216-440 and opponent-front frames 216-440
+  (both script-pointer-isolated 225-frame windows), each **225/225
+  source-component and shared-framebuffer exact twice fresh**. Evidence
+  `4b4aef45…` / `22a0ea61…`, RGB `eee49e48…` / `9d218d9a…` reproduce the
+  fixture pins exactly on every fresh portable run. The slot table and order
+  seed coincide with SING's in both orientations (verified at the first-note
+  frame 235); GRASS_WHISTLE's no-monbg delta shifts other scene sprites, not
+  the notes. MOVE_SING control re-ran **245/245 player / 248/248 opponent**.
+- **Next:** continue the zero-new-component Level-50 ladder from the ranked
+  coverage report.
+- **Notes:** GRASS_WHISTLE is a **sibling move acceptance** — sharing the
+  wavy-note reducer accepts no other move; MOVE_SING remains the control and
+  did not regress. `factoryAnimationInventory.test.ts` summary pin moved
+  117→118 / 159→158 with the promotion. `grassWhistle.test.ts` (8 Tier-1 tests:
+  twelve spawn ages + pinned palette rule, note→slot table, velocity/Sin wave
+  geometry on both sides, green 0→4→0 blend ramp, visual-task counts, shared
+  sSpriteOrder pass, typed seam) and `grassWhistleEvidence.test.ts` added. No
+  boundary widening, no new unsupported barriers.
 
 ## MOVE_REFRESH closed — 209/209 both orientations twice-fresh, promoted to exact (2026-08-05 closure worker)
 
