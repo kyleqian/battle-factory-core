@@ -1,5 +1,44 @@
 # Animation coverage
 
+## MOVE_FLASH closed — 64/64 both orientations twice-fresh, promoted to exact (2026-08-07 worker)
+
+- **State:** FLASH (new move) → **exact**. Move coverage: **119/276 exact, 0
+  partial, 0 staged, 157 unsupported**. Both fixtures pin `framebufferMatching: 64`.
+- **Did:** full new-move acceptance on the smallest remaining unit. `Move_FLASH`
+  (battle_anim_scripts.s:2984) is `playsewithpan SE_M_LEER` +
+  `createvisualtask AnimTask_Flash, 2` + wait + end — a pure palette
+  animation, no sprites. `AnimTask_Flash` (battle_anim_utility_funcs.c:649)
+  snaps every battle-mon OBJ palette (GetBattleMonSpritePalettesMask(1,1,1,1)
+  >> 16 = 0x3, banks 0-1) to RGB_BLACK and the BG palettes
+  (GetBattlePalettesMask(TRUE,…) & 0xFFFF = 0xe, banks 1-3) to RGB_WHITEALPHA,
+  holds 7 frames, then steps the blend coefficient 16 down to 0 one decrement
+  per 2 frames (BG toward 0xFFFF, OBJ toward 0) and is destroyed at age 40.
+  Landed the reducer (`src/animation/flash.ts`) — faded coefficient null at
+  age 0, 16 at ages 1-8, 15..0 at ages 9..39 (one per 2 frames), null from 40;
+  the palette writes latch one display behind the RAM (snap shows at display
+  ages 2-9, ramp at 10-39). Added the `SceneOnFlashConfig/View` +
+  `sceneOnFlashView` seam and the `battleScene.ts` draw case (field BG banks
+  blended toward white, both battler palettes toward black, healthboxes and
+  message window untouched), the two mechanic scenarios (FRONTIER_MON_MAREEP
+  record 49, all four slots FLASH, vs legal ONIX), `flashProbe.py` (dense,
+  task lifecycle + all 512 faded/unfaded/hardware palettes + RGB),
+  `flashPortable.ts`, the two scene-on-portable-evidence/v1 fixtures, and
+  `flash.test.ts` + `flashEvidence.test.ts`.
+- **Measured:** player-back frames 213-276 and opponent-front frames 279-342
+  (both script-pointer-isolated 64-frame windows), each **64/64
+  source-component and shared-framebuffer exact twice fresh**. Evidence
+  `5479cd1b…` / `7969b083…`, RGB `46543297…` / `d6c65c11…` reproduce the
+  fixture pins exactly on every fresh portable run (4 runs total).
+- **Next:** continue the Level-50 ladder from the ranked coverage report.
+- **Notes:** the opponent-front scenario needed a different legal staging
+  (seed 1, cotton-spore opponent sets) than the player-back one (seed
+  305419897, double-edge opponent sets) — the seed-1 player-staging produced
+  an ambiguous ~150-frame `currentMove` window whose script pointer never
+  entered the `Move_FLASH` bounds, so it was discarded for the clean
+  64-frame config. `factoryAnimationInventory.test.ts` summary pin moved
+  118→119 / 158→157 with the promotion. No boundary widening; one new source
+  component `task:AnimTask_Flash` expected and recorded.
+
 ## MOVE_DOUBLE_EDGE staged — both orientations isolated at 141 frames; scenarios + dense probe banked (2026-08-07 cap-killed worker + supervisor salvage)
 
 - **State:** DOUBLE_EDGE stays **unsupported**. Coverage unchanged at **118/276
