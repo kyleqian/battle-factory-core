@@ -141,24 +141,16 @@ torment frames are byte-exact, and the class-4 bounce bind landed
 (`f0b52d7d`, `commandMenuBounceY2`: entry-relative `SpriteCB_BounceEffect`,
 seeds 128/192, +7/frame; torment stage seeds `idleBounceElapsed=7`; the
 phantom mid-battle ball-fade is gated to switch-source resolutions, which
-also closed the 1100/1200 tint). Compare `fight-menu-chrome-torment-off` is
-**52/57** (was 11/57). **Remainder (measured, docs §8.1):** (4a) three
-1-frame class-4 phase-boundary frames — 736 (857px sprite), 766 (1776px
-healthbox), 977 (857px sprite, the one regression from green) — the app's
-battle-1-calibrated idle-bounce freeze model (2-tick fight-opening freeze)
-does not match the oracle's own 4-frame opening + message + reopen-tail
-freeze schedule at exactly those transition windows. **The open
-freeze-schedule question is ANSWERED (2026-08-06 probe, verdict (b)
-ROUTE-DEPENDENT, `docs/fight-menu-freeze-schedule-probe.md` +
-`tools/probe/verify-fight-menu-freeze-schedule.py` PASS twice + supervisor
-rerun):** battle-1's own windows show a 0-frame opening freeze, a 2-frame
-submenu-open freeze, and two 1-frame B-close freezes — NOT the torment
-4/1/1 — so the shared battle-1 constant must NOT change; closing 736/766/977
-requires a route-scoped (or phase-event-driven) freeze schedule on the
-torment/battle-2 route only; (4b) the move-resolution message-typing pacing class at
-1100 (822px) / 1200 (648px) — the real printer types/holds
-"Foe MURKROW used TORMENT!" two lines while the app auto-advances at 1
-glyph/frame (pre-existing, unrelated to the bounce).
+also closed the 1100/1200 tint). The route-scoped freeze schedule landed
+2026-08-06 (`853e6540`, `BattleCommandBounceSchedule` phase-keyed offsets
+supplied only by the torment staging context per
+`docs/fight-menu-freeze-schedule-probe.md`'s route-dependent verdict;
+battle-1 constants untouched) — compare `fight-menu-chrome-torment-off` is
+**55/57** (was 11/57 → 52/57 → 55/57). **Remainder (measured, docs §8.1):**
+(4b) the move-resolution message-typing pacing class at 1100 (822px) / 1200
+(648px) — the real printer types/holds "Foe MURKROW used TORMENT!" two
+lines while the app auto-advances at 1 glyph/frame (pre-existing, unrelated
+to the bounce; same class as #78's open 1256-1407 fight-menu window).
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
