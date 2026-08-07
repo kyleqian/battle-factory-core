@@ -312,3 +312,67 @@ PC interaction, silent NPCs**.
   verified.
 - `npm run test:smoke` run once before the final commit (sanity gate; this
   lane makes no `src/`/`tests/` edits).
+
+## 5. CORRECTION ADDENDUM (2026-08-07 SIDE worker) — sub-tile scroll + turn pose A
+
+Rung A/B/C re-probed with a dense RAM+framebuffer probe
+(`tools/probe/dump-lobby-walk-subtile.py`; run via `tools/run-mgba-probe.py`,
+walk fixture `scratch-loss-lobby-walk-probe.json`, windows 5172-5200 / 5272-5392,
+collision fixture for east 5232-5290). All facts below measured, not assumed.
+
+### 5a. BLOCKER 1 — the compositing model (per direction, one full step)
+
+Player OAM stays **fixed at (112,56)** for every walk frame (`gSprites[i].oam`
+x=112,y=56 constant through steps; the sprite's logical `x/y` advance 1px/frame
+but `gSpriteCoordOffsetX/Y` decrement to cancel, `sprite.c:349-350`). The FIELD
+scrolls instead: `sFieldCameraOffset`/`gFieldCamera` accumulate `movementSpeed`
+1px/frame (`field_camera.c:408-423`), and the BG1/2/3 HOFS/VOFS registers I read
+per tick confirm the field offset changes each in-step frame and snaps back at
+the 16-frame tile boundary. The player does **not** slide; the field slides.
+
+Whole-field per-frame shift vs the tile-boundary frame (measured by landmark
+tracking + phase correlation; south first step 5181→5196, north 5281→5296,
+west 5341→5356, east 5241→5256):
+
+| step frame k (0=boundary, 15=next boundary) | south | north | west | east |
+|---|---|---|---|---|
+| 0 | (0,0) | (0,0) | (0,0) | (0,0) |
+| 1 | (0,1) | (0,-1) | (1,0) | (-1,0) |
+| 2 | (0,2) | (0,-2) | (2,0) | (-2,0) |
+| … | … | … | … | … |
+| 15 | (0,15) | (0,-15) | (15,0) | (-15,0) |
+
+Field content at the next boundary frame equals the prior boundary frame's
+content (same tiles, camera clamped at (-56,0)); the in-step offsets are
+sub-tile scrolls that reset at each 16-frame boundary. The whole-field scroll
+is the same for the wall, floor, potted plants, and NPCs (they all ride the
+BG scroll).
+
+**Compositing model for the fix worker:** on step frame `k` of direction `d`
+(16-frame tile step), draw the field shifted by `(ox_k, oy_k)` from the table
+above and draw the player sprite at fixed screen `(112,56)` with walk-cycle
+pose `n_k`. Pose `n_k` follows the source `sAnim_Go{South,North,West}` tables
+(`object_event_anims.h:200-236`): 8 ticks per pose, cycle
+[walk1, stand, walk2, stand], the same 4-phase cycle the app already uses; the
+player sprite's OAM never moves.
+
+### 5b. BLOCKER 2 — turn pose A identified
+
+The in-place turn is `MOVEMENT_ACTION_WALK_IN_PLACE_FAST_*`
+(`field_player_avatar.c:1027-1030` → `PlayerTurnInPlace`, 8 frames,
+`event_object_movement.c:5780-5805`, animNum = `ANIM_STD_GO_FAST_SOUTH` etc).
+Sprite state during the turn (RAM, south turn 5174-5181): `animNum=8`
+(GO_FAST_SOUTH), pose sequence = sheet frame **4** for 5174-5177 and sheet
+frame **0** for 5178-5181 — i.e. **pose A = the walk-2 pose, not a missing
+frame**. Byte-exact pixel proof: bg-subtracted player box vs every candidate
+(frame 0-8, each h-flipped) rendered over a byte-exact field
+(`tools/probe/verify-lobby-turn-pose.py`): pose A (5174-5177) → frame 4 = **0px
+diff**; pose B (5178-5181) → frame 0 = **0px diff**. West turn (5333-5340)
+matches `ANIM_STD_GO_FAST_WEST` → frame 8 (walk-2 west) for 4 frames then
+frame 2 (stand west), same pattern.
+
+**Turn compositing:** on turn frame 1-4 of direction d draw walk-2 pose
+(south=4, north=6, west=8, east=8 h-flipped), on turn frame 5-8 draw the
+standing pose (south=0, north=1, west=2, east=2 h-flipped), all at fixed
+(112,56). The extractor's 9-sheet-frame residual for pose A was a wrong
+candidate assumption — pose A **is** a banked frame (frame 4 / 8).
