@@ -87,6 +87,10 @@ import {
   type IronDefenseState,
 } from "./ironDefense.ts";
 import {
+  flashAtAge,
+  type FlashState,
+} from "./flash.ts";
+import {
   calmMindAtAge,
   type CalmMindState,
 } from "./calmMind.ts";
@@ -564,6 +568,11 @@ import {
   type SingPanTask,
 } from "./sing.ts";
 import {
+  grassWhistleAtAge,
+  grassWhistleNotesBackToFrontAtAge,
+  type GrassWhistleNote,
+} from "./grassWhistle.ts";
+import {
   sweetKissAtAge,
   type SweetKissState,
 } from "./sweetKiss.ts";
@@ -693,7 +702,8 @@ export interface SceneOnPresentationBattler {
     | "PRIMEAPE"
     | "MARSHTOMP"
     | "TENTACOOL"
-    | "GRAVELER";
+    | "GRAVELER"
+    | "ROSELIA";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1856,6 +1866,13 @@ export interface SceneOnIronDefenseConfig {
   readonly attackerSpriteCenter: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnFlashConfig {
+  readonly move: "FLASH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnCalmMindConfig {
   readonly move: "CALM_MIND";
   readonly attacker: SceneOnPresentationBattler;
@@ -1901,6 +1918,13 @@ export interface SceneOnMetalClawConfig {
 
 export interface SceneOnSingConfig {
   readonly move: "SING";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnGrassWhistleConfig {
+  readonly move: "GRASS_WHISTLE";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -2042,12 +2066,14 @@ export type SceneOnMoveConfig =
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
   | SceneOnIronDefenseConfig
+  | SceneOnFlashConfig
   | SceneOnCalmMindConfig
   | SceneOnShadowBallConfig
   | SceneOnEncoreConfig
   | SceneOnDragonClawConfig
   | SceneOnMetalClawConfig
   | SceneOnSingConfig
+  | SceneOnGrassWhistleConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -2551,6 +2577,16 @@ export interface SceneOnSingView {
   readonly targetInMonBg: boolean;
 }
 
+export interface SceneOnGrassWhistleView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly notes: readonly GrassWhistleNote[];
+  readonly pan: SingPanTask | null;
+  readonly greenBlendCoeff: number;
+  readonly visualTaskCount: number;
+}
+
 export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -2566,6 +2602,11 @@ export interface SceneOnHardenView extends MetallicShineState {
 }
 
 export interface SceneOnIronDefenseView extends IronDefenseState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFlashView extends FlashState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -3093,6 +3134,7 @@ export function createSceneOnMovePresentation<
     | SceneOnSecretPowerConfig
     | SceneOnWhirlwindConfig | SceneOnBlockConfig
     | SceneOnIronDefenseConfig
+    | SceneOnFlashConfig
     | SceneOnMetalClawConfig
     | SceneOnWrapConfig,
 >(
@@ -5212,6 +5254,23 @@ export function sceneOnIronDefenseView(
   };
 }
 
+/** `age=0` is the move script's first frame (playsewithpan SE_M_LEER); the
+ *  flash task is created one engine age later and the palette writes latch
+ *  one display behind the RAM state (the draw uses `age - 1`). */
+export function sceneOnFlashView(
+  state: SceneOnMovePresentationState,
+): SceneOnFlashView {
+  if (state.config.move !== "FLASH") {
+    throw new Error(`expected FLASH presentation, got ${state.config.move}`);
+  }
+  const config = state.config as SceneOnFlashConfig;
+  return {
+    ...flashAtAge(state.age),
+    attacker: config.attacker,
+    target: config.target,
+  };
+}
+
 /** `age=0` is the settled field immediately before the script's `monbg`. */
 export function sceneOnCalmMindView(
   state: SceneOnMovePresentationState,
@@ -5337,6 +5396,41 @@ export function sceneOnSingView(
       && state.age <= (
         state.config.attacker.geometry.side === "player" ? 150 : 153
       ),
+  };
+}
+
+/**
+ * `age=0` is the first frame of GRASS_WHISTLE's move animation script
+ * (isolated by `sBattleAnimScriptPtr` within the `Move_GRASS_WHISTLE` bytes).
+ * The note body starts at age 19 (`GRASS_WHISTLE_FIRST_NOTE_AGE`).
+ */
+export function sceneOnGrassWhistleView(
+  state: SceneOnMovePresentationState,
+): SceneOnGrassWhistleView {
+  if (state.config.move !== "GRASS_WHISTLE") {
+    throw new Error(`expected GRASS_WHISTLE presentation, got ${state.config.move}`);
+  }
+  const noteAge = state.age - 19;
+  const body = grassWhistleAtAge(
+    state.age,
+    state.config.attacker.geometry.animationCenter,
+    state.config.target.geometry.animationCenter,
+    state.config.attacker.geometry.side,
+  );
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    notes: noteAge < 0
+      ? []
+      : grassWhistleNotesBackToFrontAtAge(
+          noteAge,
+          state.config.attacker.geometry.animationCenter,
+          state.config.target.geometry.animationCenter,
+        ),
+    pan: body.pan,
+    greenBlendCoeff: body.greenBlendCoeff,
+    visualTaskCount: body.visualTaskCount,
   };
 }
 

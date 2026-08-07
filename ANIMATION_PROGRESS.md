@@ -1,5 +1,110 @@
 # Animation coverage
 
+## MOVE_FLASH closed — 64/64 both orientations twice-fresh, promoted to exact (2026-08-07 worker)
+
+- **State:** FLASH (new move) → **exact**. Move coverage: **119/276 exact, 0
+  partial, 0 staged, 157 unsupported**. Both fixtures pin `framebufferMatching: 64`.
+- **Did:** full new-move acceptance on the smallest remaining unit. `Move_FLASH`
+  (battle_anim_scripts.s:2984) is `playsewithpan SE_M_LEER` +
+  `createvisualtask AnimTask_Flash, 2` + wait + end — a pure palette
+  animation, no sprites. `AnimTask_Flash` (battle_anim_utility_funcs.c:649)
+  snaps every battle-mon OBJ palette (GetBattleMonSpritePalettesMask(1,1,1,1)
+  >> 16 = 0x3, banks 0-1) to RGB_BLACK and the BG palettes
+  (GetBattlePalettesMask(TRUE,…) & 0xFFFF = 0xe, banks 1-3) to RGB_WHITEALPHA,
+  holds 7 frames, then steps the blend coefficient 16 down to 0 one decrement
+  per 2 frames (BG toward 0xFFFF, OBJ toward 0) and is destroyed at age 40.
+  Landed the reducer (`src/animation/flash.ts`) — faded coefficient null at
+  age 0, 16 at ages 1-8, 15..0 at ages 9..39 (one per 2 frames), null from 40;
+  the palette writes latch one display behind the RAM (snap shows at display
+  ages 2-9, ramp at 10-39). Added the `SceneOnFlashConfig/View` +
+  `sceneOnFlashView` seam and the `battleScene.ts` draw case (field BG banks
+  blended toward white, both battler palettes toward black, healthboxes and
+  message window untouched), the two mechanic scenarios (FRONTIER_MON_MAREEP
+  record 49, all four slots FLASH, vs legal ONIX), `flashProbe.py` (dense,
+  task lifecycle + all 512 faded/unfaded/hardware palettes + RGB),
+  `flashPortable.ts`, the two scene-on-portable-evidence/v1 fixtures, and
+  `flash.test.ts` + `flashEvidence.test.ts`.
+- **Measured:** player-back frames 213-276 and opponent-front frames 279-342
+  (both script-pointer-isolated 64-frame windows), each **64/64
+  source-component and shared-framebuffer exact twice fresh**. Evidence
+  `5479cd1b…` / `7969b083…`, RGB `46543297…` / `d6c65c11…` reproduce the
+  fixture pins exactly on every fresh portable run (4 runs total).
+- **Next:** continue the Level-50 ladder from the ranked coverage report.
+- **Notes:** the opponent-front scenario needed a different legal staging
+  (seed 1, cotton-spore opponent sets) than the player-back one (seed
+  305419897, double-edge opponent sets) — the seed-1 player-staging produced
+  an ambiguous ~150-frame `currentMove` window whose script pointer never
+  entered the `Move_FLASH` bounds, so it was discarded for the clean
+  64-frame config. `factoryAnimationInventory.test.ts` summary pin moved
+  118→119 / 158→157 with the promotion. No boundary widening; one new source
+  component `task:AnimTask_Flash` expected and recorded.
+
+## MOVE_DOUBLE_EDGE staged — both orientations isolated at 141 frames; scenarios + dense probe banked (2026-08-07 cap-killed worker + supervisor salvage)
+
+- **State:** DOUBLE_EDGE stays **unsupported**. Coverage unchanged at **118/276
+  exact, 0 partial, 0 staged, 158 unsupported**. Nothing promoted; no pin moved.
+- **Did:** the worker was cap-killed at 45 min having committed nothing. Salvaged
+  its two legal mechanicLab scenarios (FRONTIER_MON_HITMONTOP_2 record 341,
+  HITMONTOP, all four slots DOUBLE_EDGE, versus legal ONIX) and
+  `tools/compare/doubleEdgeProbe.py`, plus a first-draft
+  `src/animation/doubleEdge.ts` reducer that is **not yet wired to any seam and
+  is unverified** — it reuses `slideMon.ts`, `shakeMonInPlace.ts` and wrap.ts's
+  elliptical helper. Fixed one unused import that left the tree red.
+- **Measured (supervisor, fresh runs of both scenarios):** the probe isolates the
+  move-owned window by script pointer against the
+  `Move_DOUBLE_EDGE`..`Move_POISON_STING` label bounds and yields **141 frames in
+  both orientations — player 80-220, opponent 84-224**. Across the window:
+  3 distinct task functions, visual-task count 0-5, sprite count 0-2. Schema
+  `double-edge-dense-evidence/v1`.
+- **Next:** finish DOUBLE_EDGE from this staged base — the expensive staging
+  (legal carrier, both scenarios, dense isolated probe) is already banked, so the
+  remaining work is the seam, the `battleScene.ts` draw case, the portable, two
+  fixtures, the Tier-1 tests, and promotion.
+- **Notes:** DOUBLE_EDGE is a 9-component contact move with both battlers acted
+  on symmetrically (two `AnimTask_RotateMonSpriteToSide` pairs and two
+  `AnimTask_ShakeMonInPlace` pairs, plus a restore pass). It did not fit a
+  45-minute cap from scratch; split it as staging-then-closure like
+  GRASS_WHISTLE. **For a future step:** derive the painter order per orientation
+  from the probe's OAM subpriorities — GRASS_WHISTLE's opponent side was
+  153/225 purely from an orientation-blind draw order.
+
+## MOVE_GRASS_WHISTLE closed — 225/225 both orientations twice-fresh, promoted to exact (2026-08-07 closure worker)
+
+- **State:** GRASS_WHISTLE (new move) → **exact**. Move coverage: **118/276 exact,
+  0 partial, 0 staged, 158 unsupported**. Both fixtures pin
+  `framebufferMatching: 225` / `componentMatching: 225` with status `exact`.
+- **Did:** finished the staged unit's one diagnosed defect — the note ARRAY
+  ordering — and the opponent orientation. (1) The component axis was comparing
+  the seam's painter-ordered notes against the ROM's ascending-slot sprite
+  records; the cure was GRASS_WHISTLE's own probe-derived
+  note→sprite-slot table (`GRASS_WHISTLE_NOTE_SPRITE_SLOTS`/`_ORDER_SEED`,
+  generalized `wavyMusicNotesBackToFrontAtAge` to take them) with the portable
+  comparing notes at the ACTUAL age re-sorted by slot. (2) The opponent
+  framebuffer was 153/225 because the draw order ignored the ROM's
+  orientation-dependent OAM subpriority: the notes sit between the two battlers
+  on OPPOSITE sides (player ROSELIA sub 30 / note 38 / ONIX sub 40; opponent
+  note 28 / ONIX 30 / ROSELIA 40), so player-back ROSELIA draws after its notes
+  and opponent-front ROSELIA before them. Both fixtures re-run twice fresh at
+  225/225 component AND framebuffer.
+- **Measured:** player-back frames 216-440 and opponent-front frames 216-440
+  (both script-pointer-isolated 225-frame windows), each **225/225
+  source-component and shared-framebuffer exact twice fresh**. Evidence
+  `4b4aef45…` / `22a0ea61…`, RGB `eee49e48…` / `9d218d9a…` reproduce the
+  fixture pins exactly on every fresh portable run. The slot table and order
+  seed coincide with SING's in both orientations (verified at the first-note
+  frame 235); GRASS_WHISTLE's no-monbg delta shifts other scene sprites, not
+  the notes. MOVE_SING control re-ran **245/245 player / 248/248 opponent**.
+- **Next:** continue the zero-new-component Level-50 ladder from the ranked
+  coverage report.
+- **Notes:** GRASS_WHISTLE is a **sibling move acceptance** — sharing the
+  wavy-note reducer accepts no other move; MOVE_SING remains the control and
+  did not regress. `factoryAnimationInventory.test.ts` summary pin moved
+  117→118 / 159→158 with the promotion. `grassWhistle.test.ts` (8 Tier-1 tests:
+  twelve spawn ages + pinned palette rule, note→slot table, velocity/Sin wave
+  geometry on both sides, green 0→4→0 blend ramp, visual-task counts, shared
+  sSpriteOrder pass, typed seam) and `grassWhistleEvidence.test.ts` added. No
+  boundary widening, no new unsupported barriers.
+
 ## MOVE_REFRESH closed — 209/209 both orientations twice-fresh, promoted to exact (2026-08-05 closure worker)
 
 - **State:** REFRESH (new move) → **exact**. Move coverage: **117/276 exact,

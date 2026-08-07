@@ -1,0 +1,52 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-flash-player-mareep-opponent-onix.json",
+  "probe": "tools/compare/flashProbe.py",
+  "move": "FLASH",
+  "pair": "FRONTIER_MON_MAREEP record 49 (player-back) -> legal ONIX (opponent-front)",
+  "orientation": "player-to-opponent",
+  "appStage": {
+    "presentationAge": 0
+  },
+  "denseWindow": {
+    "startFrame": 213,
+    "endFrame": 276,
+    "frameCount": 64
+  },
+  "attacker": {
+    "species": "MAREEP",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 57 },
+      "animationCenter": { "x": 72, "y": 89 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 10 },
+      "animationCenter": { "x": 176, "y": 42 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 147,
+    "playerMaxHp": 162,
+    "opponentHp": 142,
+    "opponentMaxHp": 142,
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "flash-dense-evidence/v1",
+  "evidenceSha256": "5479cd1b0d362af916997d618c440766867e277dabd70c310ef21c1e165ef2ec",
+  "secondFreshEvidenceSha256": "5479cd1b0d362af916997d618c440766867e277dabd70c310ef21c1e165ef2ec",
+  "rawRgbSha256": "465432973f5f94de56b6106681cc541fed5e73748bfa498fefa6ca0933b38a7f",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 64,
+    "componentMatching": 64
+  }
+}

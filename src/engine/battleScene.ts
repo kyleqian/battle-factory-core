@@ -986,6 +986,7 @@ import {
   sceneOnEarthquakeView,
   sceneOnHardenView,
   sceneOnIronDefenseView,
+  sceneOnFlashView,
   sceneOnCalmMindView,
   sceneOnShadowBallView,
   sceneOnEncoreView,
@@ -1012,6 +1013,7 @@ import {
   sceneOnDragonClawView,
   sceneOnMetalClawView,
   sceneOnSingView,
+  sceneOnGrassWhistleView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
@@ -28959,6 +28961,109 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "FLASH") {
+    const view = sceneOnFlashView(state);
+    // Palette writes become visible on the following display latch, so the
+    // flash palette override is rendered one age behind the RAM state (the
+    // snap shows from display age 2 through 9 and the 16..0 ramp from 10).
+    const displayed = sceneOnFlashView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "MAREEP"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MAREEP"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FLASH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? mareepBackSprite : mareepFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    const white = { r: 255, g: 255, b: 255 };
+    const black = { r: 0, g: 0, b: 0 };
+    const coeff = displayed.fadedCoefficient ?? 0;
+    const bgPalette = blendPaletteBanksToward(battleBg.palette, white, coeff);
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      bgPalette,
+    );
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      blendPaletteToward(targetSprite.palette, black, coeff),
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      blendPaletteToward(attackerSprite.palette, black, coeff),
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const opponentSpecies = playerToOpponent ? "ONIX" : "MAREEP";
+    const playerSpecies = playerToOpponent ? "MAREEP" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MAREEP used" : "Foe MAREEP used",
+      "FLASH!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "CALM_MIND") {
     const view = sceneOnCalmMindView(state);
     // OAM/palette writes become visible on the following display latch.
@@ -29258,6 +29363,135 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "AZURILL used" : "Foe AZURILL used",
       "SING!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "GRASS_WHISTLE") {
+    const view = sceneOnGrassWhistleView(state);
+    // Sprites (notes) latch one display frame behind their RAM writes; the
+    // green BG palette blend, by contrast, is immediately visible because
+    // the blend sprite's creation call copies the whole palette (BG banks
+    // included) synchronously.
+    const displayed = sceneOnGrassWhistleView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "ROSELIA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "ROSELIA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged GRASS_WHISTLE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const roseliaSource = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ROSELIA!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ROSELIA!;
+    const roseliaSprite = playerToOpponent
+      ? roseliaSource
+      : {
+          ...roseliaSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: roseliaSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    // Source RGB(18,31,12) (5-bit) expanded with mGBA's 15->24-bit curve.
+    const greenTarget = { r: 148, g: 255, b: 99 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        greenTarget,
+        view.greenBlendCoeff,
+      ),
+    );
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    // No monbg: the target OBJ stays visible for the whole move.
+    const drawNotes = () => {
+      for (const note of displayed.notes) {
+        const current = view.notes.find((candidate) => candidate.index === note.index);
+        if (!current) continue;
+        const frame: Tileset = {
+          columns: 2,
+          rows: 2,
+          tiles: singArt.musicNotes.tileset.tiles.slice(
+            note.tileOffset,
+            note.tileOffset + 4,
+          ),
+        };
+        drawSpriteSheetAffineRotate(
+          fb,
+          frame,
+          // GRASS_WHISTLE's notes are pinned to gParticlesColorBlendTable[1].
+          singArt.musicNotes.palettes[1]!,
+          note.x,
+          note.y + note.y2,
+          current.affinePaPd,
+          0,
+          0,
+          current.affinePaPd,
+        );
+      }
+    };
+    // OAM painter order differs by orientation. The notes' subpriority (38
+    // player / 28 opponent) pins them between the two battlers on opposite
+    // sides: player-back the player ROSELIA is frontmost (ONIX -> notes ->
+    // ROSELIA), opponent-front ROSELIA is backmost (ROSELIA -> ONIX -> notes).
+    // The player ROSELIA is therefore drawn after its notes and the opponent
+    // ROSELIA before them; the target ONIX is always behind the notes.
+    const onixX = view.target.geometry.spriteCorner.x + onixIdle.x2;
+    const onixY = view.target.geometry.spriteCorner.y + onixIdle.y2;
+    const roseliaX = view.attacker.geometry.spriteCorner.x;
+    const roseliaY = view.attacker.geometry.spriteCorner.y;
+    if (playerToOpponent) {
+      drawSpriteSheet(fb, onix.tileset, onix.palette, onixX, onixY);
+      drawNotes();
+      drawSpriteSheet(fb, roseliaSprite.tileset, roseliaSprite.palette, roseliaX, roseliaY);
+    } else {
+      drawSpriteSheet(fb, roseliaSprite.tileset, roseliaSprite.palette, roseliaX, roseliaY);
+      drawSpriteSheet(fb, onix.tileset, onix.palette, onixX, onixY);
+      drawNotes();
+    }
+    const fieldProfile = state.config.fieldProfile;
+    const opponentHealthbox = composeOpponentHealthbox(
+      healthboxAssemblyAssets,
+      {
+        name: playerToOpponent ? "ONIX" : "ROSELIA",
+        level: 50,
+        gender: fieldProfile.opponentGender ?? "male",
+        hpFraction: fieldProfile.opponentHp / fieldProfile.opponentMaxHp,
+        status: "none",
+      },
+    );
+    const playerHealthbox = composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "ROSELIA" : "ONIX",
+      level: 50,
+      gender: fieldProfile.playerGender ?? "male",
+      hpFraction: fieldProfile.playerHp / fieldProfile.playerMaxHp,
+      status: "none",
+      currentHp: fieldProfile.playerHp,
+      maxHp: fieldProfile.playerMaxHp,
+    });
+    drawSendOutHealthbox(fb, 0, opponentHealthbox);
+    drawComposedPlayerHealthbox(fb, playerHealthbox);
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ROSELIA used" : "Foe ROSELIA used",
+      "GRASSWHISTLE!",
       99,
     );
     return;

@@ -54,6 +54,7 @@ def main() -> None:
     visual_task_count = oracle.symbols["gAnimVisualTaskCount"]
     sound_task_count = oracle.symbols["gAnimSoundTaskCount"]
     note_template = oracle.symbols["gWavyMusicNotesSpriteTemplate"]
+    script_ptr = 0x020383F0  # sBattleAnimScriptPtr (static)
     nm = subprocess.run(
         ["arm-none-eabi-nm", str(reference / "pokeemerald.elf")],
         check=True,
@@ -79,6 +80,13 @@ def main() -> None:
             "sMonAnimTaskIdArray",
             "sSpritePaletteTags",
             "sSpriteOrder",
+        )
+    }
+    script_bounds = {
+        name: int(addr, 16)
+        for name, addr in (
+            ("Move_GRASS_WHISTLE", "082cee04"),
+            ("Move_TICKLE", "082ceef7"),
         )
     }
 
@@ -145,6 +153,13 @@ def main() -> None:
         snapshot = lab.snapshot()
         if snapshot["engine"]["currentMove"] != 320:
             return
+        live_script_ptr = oracle.read_u32(script_ptr)
+        if not (
+            script_bounds["Move_GRASS_WHISTLE"]
+            <= live_script_ptr
+            < script_bounds["Move_TICKLE"]
+        ):
+            return
         rgb = oracle.screen_rgb()
         (RGB_DIR / f"{frame:05d}.rgb").write_bytes(rgb)
         battler_sprite_slots = [oracle.read_u8(battler_ids + index) for index in range(2)]
@@ -159,6 +174,12 @@ def main() -> None:
             "engine": snapshot["engine"],
             "battleMons": [battle_mon(slot) for slot in range(2)],
             "animScriptActive": oracle.read_u8(anim_script_active),
+            "animScriptPtr": oracle.read_u32(script_ptr),
+            "inMoveScript": (
+                script_bounds["Move_GRASS_WHISTLE"]
+                <= oracle.read_u32(script_ptr)
+                < script_bounds["Move_TICKLE"]
+            ),
             "visualTaskCount": oracle.read_u8(visual_task_count),
             "soundTaskCount": oracle.read_u8(sound_task_count),
             "tasks": active_tasks(),
@@ -230,6 +251,7 @@ def main() -> None:
         "schema": "grass-whistle-dense-evidence/v1",
         "setup": setup,
         "symbols": {**watched, "noteTemplate": note_template},
+        "scriptBounds": script_bounds,
         "frames": rows,
     }) + "\n")
     print(
