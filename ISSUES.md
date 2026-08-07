@@ -107,24 +107,17 @@ mon-4/5/6 empty boxes; spec `party-menu-status-item-off` red baseline now
 2026-07-29, see PROGRESS 974): (slice 3) the cursor open rule + selected-card
 wash — oracle opens on slot 0, app on the active slot; biggest remaining
 class (~3200px + the icon/bounce interplay the stale slice-2 estimate
-actually belonged to); (slice 5, PARKED after two cap-kills 2026-08-07) the
-pokeball/CANCEL buttons at x184-238 y132-158 (~467px): banked findings —
-party-menu 4px box-frame style, bank-1 frame colors
-(74,74,99)/(231,239,140)/(99,90,0), interior color15 (115,90,181), ball =
-32x32 sprite w/ 16x16 visible at center (198,148), AND the app's banked
-bg.png already draws a box at x187-236, so the class is the DELTA between
-that banked box and the oracle's composited window+ball+CANCEL. The
-forensics probe LANDED 2026-08-07 (`804c5506`,
-`tools/probe/slice5-button-forensics.ts` + rank-6 doc §6 addendum: 467px
-fully classified, 0 unattributed, simulation residual 0, ordered 5-op
-draw plan) and the pokeball sprite asset is banked
-(`src/assets/gen/party-menu-pokeball.json`, d0deef0c) — yet a THIRD
-30-min fix cap still died re-deriving "frame shape" instead of
-implementing the model. Everything needed is banked; the next attempt
-should be a tightly-scoped implementation (or supervisor-inline) that
-treats doc §6's per-row ranges as literal draw calls; (slice 6)
-party-menu open/close fade pixels (open 809-823, close 965-1034 measured
-in the rank-6 doc §7).
+actually belonged to). Slice 5 (pokeball/CANCEL buttons) LANDED 2026-08-07
+on the fourth cap (`a435a933`+`12a97095`+`f6f0bb7e`: cancel_button.bin
+banked, forensics-verified composite draw, in-region diff 0px on 2150+2250,
+band 1224/1270 → **757/803**; the three earlier caps died hand-deriving
+geometry — the landing brief inlined banked assets + the drawSlot idiom +
+the forensics script as an acceptance loop). Remaining: the ~757px band =
+the residual mon-icon (~525px) + box-edge/text (~210px) classes measured at
+frame 2150 (icon/wash interplay, PROGRESS 975), and (slice 6) party-menu
+open/close fade pixels (open 809-823, close 965-1034 measured in the
+rank-6 doc §7; extends `mid-battle-switch-dense-a-off` to 964-1034 — full
+suite risk, run it).
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 

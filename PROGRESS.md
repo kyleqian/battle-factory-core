@@ -46,6 +46,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 
+- **Supervisor verification (wind-down addendum):** independent rerun
+  `party-menu-status-item-off` band **757/803** confirmed, forensics script
+  **0px in-region** on 2150+2250, `battle-command-generated-off` 128/128;
+  one more full independent `npm test` over the slice-5 commits: **green
+  (exit 0)**. ISSUES #80 slice-5 paragraph trimmed to the landed record.
+
 ## 977 — [supervisor WIND-DOWN, 2026-08-07] Session summary: 14 workers / 5 rounds — #81 CLOSED 57/57, #82 CLOSED, postwin YES routes 125/125+125/125, #80 band 9234→1224, walkable lobby + REST guard LIVE, #78 down to 4 named frames
 
 - **State:** master at this entry's commit, clean. Final independent union
