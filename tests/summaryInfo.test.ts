@@ -7,8 +7,10 @@ type SpeciesInfo = { species: string; dexNumber: number; types: string[]; gender
 const bySpecies = new Map<string, SpeciesInfo>((summaryInfo.species as SpeciesInfo[]).map((s) => [s.species, s]));
 
 describe("summary-info.json (Info page extraction)", () => {
-  it("has an entry for all 6 anchor rental-pool species", () => {
-    expect(bySpecies.size).toBe(6);
+  it("has an entry for the full 376-species rental pool including the 6 anchors", () => {
+    // Pool extended from the 6 RAM-probed anchors to every rental species on
+    // 2026-08-07 (ISSUES #80 gender-glyph fix, PROGRESS 983).
+    expect(bySpecies.size).toBe(376);
     for (const rental of anchorState.rentals) {
       expect(bySpecies.has(rental.species)).toBe(true);
     }

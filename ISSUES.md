@@ -55,10 +55,21 @@ red-verified. Slice 6 (close fade pixels) LANDED 2026-08-07 (`1bedd921`):
 close now drives from closeElapsed per the rank-6 §7 schedule (menu fade-out
 965-978 y=2..14 held 2f, black 979-1018, field reveal 1019-1034);
 `mid-battle-switch-dense-a-off` extended 1035-1255 → **980-1255, 276/276
-byte-exact**. Named residual: the 16 menu-fade frames 964-979 — the oracle's
-OBJ layer lags the BG one tick in the palette fade (~2700-3900 px/frame;
-frame 979 OBJ tail 1559 px), needs layer-separated blend. Open-fade
-(809-823) still unpinned. Full suite was run by the supervisor after merge.
+byte-exact**. **Open remainder — fully forensics-banked 2026-08-07
+(`docs/fade-layer-forensics.md` + `tools/probe/fade-layer-forensics.ts`,
+per-frame (y_bg, y_obj) tables for both windows):** (a) close-fade frames
+964-979 — the OBJ layer trails the BG by exactly 1 blend tick
+(`objPaletteToggle`, palette.c:454 alternates BG/OBJ per tick); fix =
+layer-separated blend in the close path (battlePartySelect.ts:982-1016,
+blend BG at y_bg, OBJ at y_bg−2), predicted acceptance: extend the dense-a
+spec's captures with 964-979 → 292/292. (b) open window: the app pops the
+full menu instantly at 763 with NO open fade and NO field fade-out at all —
+oracle: field fades out 766-808, menu fades in from black 809-824 (y 14→2
+held 2f, OBJ lags 1 tick). (c) NEW: pre-fade frames 960-963 carry a
+5141-6008px message-box-region residual (oracle static, no pokeball button
+until 964; app draws its own text + CANCEL interior + button 4 frames early
++ a one-frame box-fill flip at 963) — classified in the forensics doc,
+never spec-pinned (dense-a starts at 980).
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 

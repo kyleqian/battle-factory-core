@@ -78,7 +78,9 @@ describe("Level-50 move parameterization manifest", () => {
         completeness: "intentionally-partial", unsupportedCategories: null,
       },
       ability: {
-        displayRows: 8, catalogedDispatcherCategories: 9, soundproofSourceSelectorRows: 10,
+        // displayRows follows summary-info.json's species pool (6 anchors → full
+        // 376-species rental pool on 2026-08-07, ISSUES #80 gender fix).
+        displayRows: 74, catalogedDispatcherCategories: 9, soundproofSourceSelectorRows: 10,
         soundproofLevel50RosterSelectorRows: 9, completeness: "intentionally-partial", unsupportedCategories: null,
       },
     });

@@ -48,7 +48,16 @@ describe("Factory Lobby terminal visual extraction", () => {
       expect(frame).toMatchObject({ columns: 2, rows: 4 });
       expect(frame.tiles).toHaveLength(8);
     }
-    for (const npc of [npcs.scientist, npcs.woman, npcs.fatMan, npcs.camper, npcs.picnicker]) {
+    // The woman carries her full 9-frame walking sheet too: the wander-NPC
+    // schedule (docs/factory-lobby-freeroam-ground-truth.md §6) renders her
+    // walk-cycle poses; the remaining NPCs keep their single pose.
+    expect(npcs.woman.frames).toHaveLength(9);
+    for (const frame of npcs.woman.frames) {
+      expect(frame).toMatchObject({ columns: 2, rows: 4 });
+      expect(frame.tiles).toHaveLength(8);
+    }
+    expect(npcs.woman.palette).toHaveLength(16);
+    for (const npc of [npcs.scientist, npcs.fatMan, npcs.camper, npcs.picnicker]) {
       expect(npc.frames).toHaveLength(1);
       expect(npc.frames[0]).toMatchObject({ columns: 2, rows: 4 });
       expect(npc.frames[0].tiles).toHaveLength(8);

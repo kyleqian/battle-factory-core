@@ -5,6 +5,67 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 984 — [supervisor WIND-DOWN, 2026-08-07] Session summary: 11 workers / 6 rounds — #78 CLOSED 153/153, #80 settled band CLOSED 251/251 + slice 6, lobby follow-cam + wander NPC → loss-beyond-boundary 183/183, postwin second-RECORD 164/164, fade forensics banked
+
+- **State:** master at this entry's commit, clean. Final independent union
+  verification (including the animation-main fold): `npm run build` green;
+  full `npm test` on the union found **3 stale adjacent pins** (worker
+  touched-file sets missed them): summaryInfo 6→376 pool, lobby-terminal
+  woman 1→9 frames, level50 manifest `ability.displayRows` 8→74 (all three
+  track this session's intentional data changes — summary-info pool
+  expansion and the woman walking sheet). Supervisor regenerated the level50
+  manifest (structurally identical except displayRows) and re-pinned all
+  three; targeted rerun 18/18 + smoke 347/347 green, and a final full
+  `npm test` confirmation was started detached (result appended below).
+  Supervisor-rerun specs this session: `mid-battle-switch-pacing-b-off`
+  **153/153** (was 148/152; spec +1408), `party-menu-status-item-off`
+  **251/251 byte-exact** (was 0/251 red-band 757/803),
+  `mid-battle-switch-dense-a-off` **276/276** (spec 1035-1255 → 980-1255),
+  `loss-beyond-boundary-off` **183/183** (was 165/183),
+  `postwin-record-second-off` **164/164** (new spec),
+  `postwin-record-off` 204/204, `postwin-retire-off` 211/211,
+  `fight-menu-chrome-torment-off` 57/57, `battle-command-generated-off`
+  128/128, `loss-terminal-decline-continuation-off` 155/155.
+  `animation-main` folded at wind-down (FLASH + GRASS_WHISTLE promoted exact,
+  inventory pin 110-exact/166-unsupported rides the fold; nothing to fold at
+  orient). No worker worktrees/branches left. DEFERRED.md: no open entries.
+  Oracle-freshness FAIL at orient was the documented docs-only false positive.
+- **Did (11 DeepSeek workers: 6 main, 5 side; 2 cap-kills salvaged, 1
+  cap-kill relaunched):** MAIN — #80 slice 6 close-fade (`1bedd921`, dense-a
+  276/276, 964-979 residual named); #78 both tail fixes route-scoped
+  (`f82bbf56`+`1c7903fd`, docs-tail cap-kill salvaged by supervisor, entry
+  REMOVED); postwin second-RECORD variant (`c4ab96b4`, disableRecordBattle
+  flag + 3-option re-ask, spec 164/164); #80 settled band 3 rungs
+  (`c74ac274`+`b7df5ac7`+`3507046f`, 251/251); lobby wander NPC rungs 1+2
+  (`e63e4c5c`+`b3ca3033`, 183/183; rung-3 walk-spec draft was red 27/153 —
+  dropped, hold-walk +1 finding banked in Next). SIDE — #78 tail forensics
+  (57b40647, 5th red frame 1408 discovered); lobby blockers scout (d73e0c60,
+  camera + pose A); second-RECORD probe (ff9ea053, 3-run byte-identical);
+  party-band forensics (dce2da72, 757px → 3 named classes, 0 unattributed);
+  fade-layer forensics (23369900, retry after a zero-commit cap-kill, per-frame
+  y_bg/y_obj tables both windows).
+- **Supervisor corrections/decisions:** the lobby scout's "camera clamped /
+  same tiles at boundaries" clause was pixel-refuted (21385px raw vs 6452px
+  after 16px shift) — §5a corrected to FOLLOW-CAM + border blocks before
+  briefing the bind; the band-forensics "mon-icon" attribution dissolved
+  (3 missing pokeball sprites); `{LV}` ligature is charmap HEX 0x34=52 (doc
+  said 34 decimal); the walk-spec draft was deleted rather than committed
+  red. PAPERCUTS +1: side worktrees can start with a dangling reference/
+  symlink.
+- **Next (ordered):** (1) `loss-lobby-walk-off` promotion — blocked on the
+  hold-walk +1 finding (the walk fixture's continuous-hold stepping runs 1
+  frame behind the oracle and accumulates; tap/turn model is exact at
+  183/183; re-measure hold-start latency, then promote); (2) #80 fade
+  remainder from `docs/fade-layer-forensics.md` (close 964-979 layer-split
+  blend → dense-a 292/292; open-path fade render 766-824; the 960-963
+  pre-fade message-box residual); (3) #71 send-out seam (standing);
+  (4) animation lane's next: METAL_CLAW / AGILITY per their ledger.
+- **Notes:** DeepSeek cap economics again: every landing brief carried an
+  inlined validated model/table; both zero-commit or red tails were
+  exploration (fade scout round 1, walk-spec rung 3). JSONL salvage seeded
+  the fade retry's verified-facts brief (landed in one cap). No DEFERRED
+  entries; run-supervisor.sh is unblocked.
+
 ## 983 — [bounded MAIN worker, 2026-08-07] ISSUES #80 settled band CLOSED: `party-menu-status-item-off` 0/251 → **251/251 byte-exact**; keep-green 276+128+153 all held
 
 - **State:** master `ed38a6a8`, clean. Typecheck + `npm run build` green,
