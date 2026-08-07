@@ -156,6 +156,63 @@ is `SetBgTilemapPalette(1, 23, 17, 7, 2, 2)` (party_menu.c:1141-1148) — the
 window palette swap (bank 1 → 2), only relevant when the cursor is on CANCEL
 and out of scope for this settled window.
 
+### §6 addendum — slice-5 pixel-forensics model (SIDE, 2026-08-07)
+
+Per-pixel model of the pokeball/CANCEL delta, derived computationally from
+three fresh `party-menu-status-item-off` compare runs (band 1224/1270) by
+`tools/probe/slice5-button-forensics.ts`. Frames 2150/2200/2250 are identical
+(467 px diff, cursor-slot invariant in this region); all numbers measured, not
+guessed. Rerun: `npm run compare -- party-menu-status-item-off --summary` then
+`node --experimental-strip-types tools/probe/slice5-button-forensics.ts
+tools/compare/out/run-*/`.
+
+**App's banked box vs oracle's window.** The app's banked bg already draws a
+box-frame box at x186-237 y136-151: frame (74,74,99) 2px, interior color15
+(115,90,181) at x188-235 y138-149. The oracle's CANCEL window is **larger and
+shifted 2px up-left**: footprint x184-237 y134-153, frame (74,74,99), interior
+(115,90,181), plus the 16x16 pokeball sprite at (186,136)-(201,151) and CANCEL
+text ink/shadow at x204-232 y141-147. The oracle window **fully contains** the
+app's box (app box bbox ⊂ window bbox), so the fix is one composite overpaint,
+no partial suppression needed.
+
+**Classification (467/467 attributed, 0 unattributed, sim residual 0):**
+
+| oracle class | px | bbox | app currently draws |
+| --- | --- | --- | --- |
+| text_shadow (115,115,115) | 100 | (204,141)-(233,148) | interior (355px total) |
+| ball_grey (181,189,206) | 90 | (186,142)-(201,151) | interior |
+| text_ink (255,255,255) | 81 | (204,141)-(232,147) | interior |
+| ball_red (181,66,0) | 73 | (186,136)-(201,142) | interior/frame |
+| window frame (74,74,99) | 64 | (184,134)-(203,153) | checker L/O + interior |
+| ball_whiteband (74,74,99) | 54 | (186,136)-(201,151) | interior/frame |
+| ball_darkred (198,82,0) | 5 | (186,142)-(190,142) | interior/frame |
+
+App side: interior 355px @(188,138)-(233,149), frame 54px @(186,136)-(198,151),
+checker_L 29px @(184,134)-(198,152), checker_O 29px @(184,135)-(198,153). The
+ball's white band (74,74,98 in the png) renders as (74,74,99) = the frame color;
+distinguish by bbox (ball pixels x186-201 y136-151).
+
+**Ordered draw ops (verified: simulation residual 0):**
+1. **Suppress/overpaint the app's banked bg box over x184-237 y134-153** (the
+   window footprint fully covers it; no clip needed inside the window).
+2. **Window frame (74,74,99)** per the party-menu box-frame tile pattern
+   (2px frame; the app's existing box-frame renderer with a 54x20 box at
+   (184,134) reproduces it) — exact frame pixel row-ranges in the probe output.
+3. **Interior color15 (115,90,181)** at x202-235 y138-149 (fills the same as the
+   app's current interior where the ball/text do not overlap).
+4. **Pokeball sprite** 16x16, pixel-0 transparent, blit at (186,136)-(201,151)
+   (asset `pokeball.png` frame 0, 32x32 sprite with the visible ball at png
+   offset (4,4)-(19,19); center (198,148)); red (181,66,0) upper half,
+   darkred (198,82,0) row 142, grey (181,189,206) lower half, white band
+   (74,74,99) at the mid rows — exact rows in the probe output.
+5. **CANCEL text**: ink (255,255,255) @(204,141)-(232,147), shadow (115,115,115)
+   @(204,141)-(233,148) — exact glyph row-ranges in the probe output (7x7 glyph
+   cells, `sFontColorTable[0]` white on color15 interior).
+
+The `▶ CANCEL` text at app's (168,145) is unrelated (submenu cursor line) and
+stays. A fix worker should land ops 1-5 and rerun the probe: residual 0 in the
+region = band drop ~467 px/frame on the 1224/1270 phase.
+
 ## 7. Fade schedule (open + close, measured)
 
 Both fades are the standard `BeginNormalPaletteFade` blend, steps held **2
