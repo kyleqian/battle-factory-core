@@ -119,6 +119,33 @@ describe("voluntary battle party selector", () => {
     expect(px(206, 141)).toEqual([255, 255, 255]);
   });
 
+  it("shows the OPEN pokeball frame on the cursor slot and CLOSED elsewhere, following navigation (ISSUES #80 settled band)", () => {
+    // AnimatePartySlot (party_menu.c:861-865): the cursor slot gets anim 1
+    // (open, sheet rows [32,64)) and every other slot anim 0 (closed).
+    // Marker pixels (measured from the oracle match): slot 0's ball at (9,22)
+    // and slot 1's at (95,13) are open-orange (247,181,123) on the cursor slot
+    // and closed-red (181,66,0) otherwise.
+    let state = liveSelector();
+    const render = () => {
+      const fb = createFramebuffer();
+      renderBattlePartySelect(fb, state);
+      const px = (x: number, y: number) => {
+        const i = (y * 240 + x) * 4;
+        return [fb[i]!, fb[i + 1]!, fb[i + 2]!] as const;
+      };
+      return { slot0: px(9, 22), slot1: px(95, 13) };
+    };
+    expect(state.cursor).toBe(0);
+    expect(render()).toEqual({ slot0: [247, 181, 123], slot1: [181, 66, 0] });
+    state = advanceBattlePartySelect(state, new Set(["DOWN"]));
+    expect(state.cursor).toBe(1);
+    expect(render()).toEqual({ slot0: [181, 66, 0], slot1: [247, 181, 123] });
+    state = advanceBattlePartySelect(state, new Set(["DOWN"]));
+    state = advanceBattlePartySelect(state, new Set(["DOWN"]));
+    expect(state.cursor).toBe("cancel");
+    expect(render()).toEqual({ slot0: [181, 66, 0], slot1: [181, 66, 0] });
+  });
+
   it("closes the SEND OUT submenu on the confirm edge (ISSUES #80 slice 6)", () => {
     // docs/party-menu-rank6-ground-truth.md §7: the confirm A lands while the
     // submenu is open; the real menu closes the submenu and starts the fade on

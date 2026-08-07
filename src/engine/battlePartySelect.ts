@@ -598,6 +598,7 @@ type PartyMenuSpriteCoords = Readonly<{
     single: readonly Readonly<{
       heldItem: readonly [number, number];
       status: readonly [number, number];
+      pokeball: readonly [number, number];
     }>[];
   }>;
 }>;
@@ -659,6 +660,27 @@ function drawStatusIcon(fb: Uint8Array, row: BattlePartySelectRow): void {
   if (!frame) return fail(`missing status-icon frame ${row.status}`);
   const [centerX, centerY] = partyMenuSpriteCoords.layouts.single[row.partyIndex]!.status;
   blitIconFrame(fb, frame, statusIconAsset.statusIcons.palette, centerX, centerY);
+}
+
+/**
+ * CreatePartyMonPokeballSprite (party_menu.c:4122-4126) at the slot's
+ * `pokeball` coord (sPartyMenuSpriteCoords, data/party_menu.h:68-78), using
+ * sSpriteTemplate_MenuPokeball's 32x32 frame. AnimatePartySlot
+ * (party_menu.c:861-865) shows the OPEN frame (anim 1, sheet rows [32,64)) on
+ * the cursor slot and the CLOSED frame (anim 0) on every other slot; with the
+ * cursor on "cancel" no slot is open. The ball draws BEHIND the mon icon
+ * (icon oam.priority 1 vs the ball's default 3), so the icon overpaints the
+ * overlap exactly like the oracle.
+ */
+function drawMenuPokeball(fb: Uint8Array, row: BattlePartySelectRow, cursor: BattlePartySelectCursor): void {
+  const [centerX, centerY] = partyMenuSpriteCoords.layouts.single[row.partyIndex]!.pokeball;
+  const ball = partyMenuPokeballData as unknown as {
+    frame: IconTilesetFrame;
+    frameOpen: IconTilesetFrame;
+    palette: readonly RgbColor[];
+  };
+  const open = cursor === row.partyIndex;
+  blitIconFrame(fb, open ? ball.frameOpen : ball.frame, ball.palette, centerX, centerY);
 }
 
 /**
@@ -904,6 +926,9 @@ export function renderBattlePartySelect(
     drawRowText(fb, row);
     drawGenderGlyph(fb, row);
     drawHpBar(fb, row);
+    // The per-slot menu Pokéball sprite sits under the mon icon (icon
+    // oam.priority 1, ball default 3), so it draws first.
+    drawMenuPokeball(fb, row, state.cursor);
     drawIcon(fb, row, state.cursor === row.partyIndex, state.elapsed, state.selectedSinceElapsed);
     // sPartyMenuSpriteCoords per-slot order: icon, heldItem, status, pokeball --
     // the item sprite draws on top of the mon icon's lower-left corner.
