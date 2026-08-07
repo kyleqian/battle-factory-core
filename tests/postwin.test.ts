@@ -967,14 +967,44 @@ describe("S8 Battle-1 postwin transition", () => {
       );
       expect(retire.question?.kind).toBe("retire");
 
-      // REST (pos 2) is unselectable: neither GO ON nor a question begins.
-      const rest = acceptPostwinContinuation({
+      // REST (pos 2) is guarded: A is swallowed entirely -- the handler
+      // returns the SAME state object (no window, no confirm, no page), the
+      // REST-guard divergence the 2026-08-05 user decision pins (real game
+      // saves + soft-resets; the app keeps the cursor parked on REST with the
+      // press as a no-op). The cursor must still be ABLE to traverse REST
+      // (the committed postwin-retire-off/yes-off specs pin the cursor
+      // visible on REST at tick 6641 en route to RETIRE), so the guard is the
+      // A press only, not a swallowed DOWN.
+      const restState = {
         ...base,
         continuationCursorPos: 2 as const,
-      });
+      };
+      const rest = acceptPostwinContinuation(restState);
+      expect(rest).toBe(restState);
       expect(rest.question).toBeNull();
       expect(rest.continuationConfirmElapsed).toBeNull();
       expect(rest.dialoguePage).toBe(0);
+    });
+
+    it("walks the cursor DOWN across REST onto RETIRE and back", () => {
+      const ready = menuReadyAt(2_000);
+      const base = {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: ready,
+        healDismissElapsed: 2_000,
+        continuationCursorPos: 1 as const,
+        continuationCursorDisplayPos: 1 as const,
+      };
+      // RECORD (1) -> REST (2): REST is reachable -- the guard swallows only A.
+      const onRest = movePostwinContinuationCursor(base, 1);
+      expect(onRest.continuationCursorPos).toBe(2);
+      // REST (2) -> RETIRE (3): traversal continues across REST.
+      const onRetire = movePostwinContinuationCursor(onRest, 1);
+      expect(onRetire.continuationCursorPos).toBe(3);
+      // The committed postwin-retire-off spec's held-RETIRE pose is intact.
+      expect(beginPostwinQuestion(onRetire, "retire").question?.kind).toBe("retire");
+      // And back down through REST: RETIRE (3) -> REST (2).
+      expect(movePostwinContinuationCursor(onRetire, -1).continuationCursorPos).toBe(2);
     });
 
     it("types the question at 1 glyph/tick from edge+5 and reaches the final glyph at edge+LAST_GLYPH", () => {
