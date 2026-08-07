@@ -30,12 +30,18 @@
 #                                      # Fable supervisor + DeepSeek V4 Flash workers
 #   ./run-supervisor.sh --max-mode    # Sol/ultra supervisor + Sol/xhigh workers
 #   ./run-supervisor.sh -m NAME       # override the selected profile's model
+#   ./run-supervisor.sh -S opus -s sonnet
+#                                      # Opus supervisor + Sonnet workers, via
+#                                      # the Claude model aliases (opus,
+#                                      # sonnet, fable, haiku all work on
+#                                      # either -S/-s or -m)
 #   ./run-supervisor.sh -e EFFORT     # Codex reasoning effort override
 #   ./run-supervisor.sh -h            # help
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 source tools/codex-model-policy.sh
 source tools/deepseek-worker-policy.sh
+source tools/claude-model-policy.sh
 
 # Recursion guard: supervisors aren't nested, and workers never spawn agents.
 if [[ -n "${POKEBENCH_ROLE:-}" ]]; then
@@ -54,14 +60,23 @@ Usage: ./run-supervisor.sh [options]
                         persistent .worktrees/animation-main worktree on
                         branch animation-main (per ANIMATION_SUPERVISOR.md);
                         both supervisors may run concurrently.
-  -S, --supervisor NAME claude (default) or codex. DeepSeek cannot supervise.
-  -s, --sub-agent NAME claude, codex, or deepseek. Defaults to the selected
-                        supervisor. DeepSeek means fixed V4 Flash workers via
-                        OpenCode; Codex workers may be routed per step with
-                        run-subagent.sh --model/--effort.
+  -S, --supervisor NAME claude (default), codex, or a Claude model alias
+                        (opus, sonnet, fable, haiku) that selects Claude and
+                        that exact model in one step. DeepSeek cannot
+                        supervise.
+  -s, --sub-agent NAME claude, codex, deepseek, or a Claude model alias
+                        (opus, sonnet, fable, haiku). Defaults to the
+                        selected supervisor. DeepSeek means fixed V4 Flash
+                        workers via OpenCode; Codex workers may be routed per
+                        step with run-subagent.sh --model/--effort; a Claude
+                        alias fixes every worker's model for the session
+                        (still overridable per step with run-subagent.sh -m).
   -M, --max-mode        Codex all-Sol profile: Sol/ultra supervisor and
                         Sol/xhigh workers (selects Codex for both roles)
-  -m, --model NAME      supervisor model (selected agent's default)
+  -m, --model NAME      supervisor model (selected agent's default). Also
+                        accepts a Claude model alias (opus, sonnet, fable,
+                        haiku), which additionally selects Claude as the
+                        supervisor.
   -e, --effort EFFORT   Codex supervisor reasoning effort
                         (ordinary Terra/Luna=max; ordinary Sol=high)
       --log FILE        raw JSONL log for --headless (runtime default)
@@ -127,6 +142,36 @@ fi
 PROVIDER="$(printf '%s' "$PROVIDER" | tr '[:upper:]' '[:lower:]')"
 if [[ -n "$WORKER_PROVIDER" ]]; then
   WORKER_PROVIDER="$(printf '%s' "$WORKER_PROVIDER" | tr '[:upper:]' '[:lower:]')"
+fi
+
+# Claude model aliases (opus/sonnet/fable/haiku) select Claude and that exact
+# model together, wherever a provider name is accepted: -S/--supervisor picks
+# the supervisor's model, -s/--sub-agent fixes every worker's default model
+# for the session. A bare `-m`/`--model` alias (no matching -S/-s alias) does
+# the same for whichever role it targets. An explicit --model that disagrees
+# with a --supervisor alias is a conflict, not a silent override.
+if SUPERVISOR_ALIAS_MODEL="$(pokebench_claude_model_alias "$PROVIDER")"; then
+  if [[ "$MODEL_FLAG_SET" == "1" && "$MODEL" != "$SUPERVISOR_ALIAS_MODEL" ]]; then
+    echo "run-supervisor: --supervisor '$PROVIDER' already selects model '$SUPERVISOR_ALIAS_MODEL'; --model '$MODEL' conflicts with it" >&2
+    exit 2
+  fi
+  PROVIDER=claude
+  MODEL="$SUPERVISOR_ALIAS_MODEL"
+  MODEL_FLAG_SET=1
+elif [[ "$MODEL_FLAG_SET" == "1" ]]; then
+  MODEL_LOWER="$(printf '%s' "$MODEL" | tr '[:upper:]' '[:lower:]')"
+  if MODEL_ALIAS_RESOLVED="$(pokebench_claude_model_alias "$MODEL_LOWER")"; then
+    if [[ "$SUPERVISOR_SELECTION_SET" == "1" && "$PROVIDER" != "claude" ]]; then
+      echo "run-supervisor: --model '$MODEL' is a Claude model alias but --supervisor selected '$PROVIDER'" >&2
+      exit 2
+    fi
+    PROVIDER=claude
+    MODEL="$MODEL_ALIAS_RESOLVED"
+  fi
+fi
+if [[ -n "$WORKER_PROVIDER" ]] && WORKER_ALIAS_MODEL="$(pokebench_claude_model_alias "$WORKER_PROVIDER")"; then
+  WORKER_PROVIDER=claude
+  WORKER_MODEL="$WORKER_ALIAS_MODEL"
 fi
 
 if [[ "$MAX_MODE" == "1" ]]; then
@@ -309,6 +354,10 @@ elif [[ "$WORKER_PROVIDER" == "deepseek" ]]; then
     exit 2
   fi
   export WORKER_MODEL
+elif [[ "$WORKER_PROVIDER" == "claude" && -n "${WORKER_MODEL:-}" ]]; then
+  # Only set when a Claude model alias (-s opus, etc.) fixed it; otherwise
+  # tools/run-subagent.sh applies its own claude-sonnet-5 default per call.
+  export WORKER_MODEL
 fi
 if [[ "$PRINT_CONFIG" == "1" ]]; then
   if [[ "$PROVIDER" == "claude" ]]; then
@@ -405,7 +454,7 @@ if [[ "$WORKER_PROVIDER" == "codex" ]]; then
 elif [[ "$WORKER_PROVIDER" == "deepseek" ]]; then
   WORKER_ROUTING_NOTE="DeepSeek worker mode is active: every worker is fixed at $POKEBENCH_DEEPSEEK_WORKER_MODEL through OpenCode. Invoke run-subagent.sh without --sub-agent, --model, or --effort overrides."
 else
-  WORKER_ROUTING_NOTE="Workers are Claude on the launcher's default claude-sonnet-5 profile unless a step explicitly overrides the worker model."
+  WORKER_ROUTING_NOTE="Workers are Claude on the ${WORKER_MODEL:-claude-sonnet-5} profile unless a step explicitly overrides the worker model with run-subagent.sh -m (accepts a full model name or the aliases opus/sonnet/fable/haiku)."
 fi
 if [[ "$PROVIDER" == "codex" ]]; then
   WORKER_LAUNCH_NOTE="Invoke each ./tools/run-subagent.sh call directly in its own execution-tool session without shell backgrounding, '&', or nohup. A yielded call is still running; retain its handle and wait on it."

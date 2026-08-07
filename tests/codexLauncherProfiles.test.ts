@@ -115,6 +115,239 @@ describe("Supervisor and worker launcher profiles", () => {
   });
 
   it.each([
+    ["opus", "claude-opus-5"],
+    ["sonnet", "claude-sonnet-5"],
+    ["fable", "claude-fable-5"],
+    ["haiku", "claude-haiku-4-5-20251001"],
+  ])(
+    "resolves the '%s' Claude model alias on --supervisor to claude/%s",
+    (alias, model) => {
+      const lower = runLauncher("run-supervisor.sh", [
+        "--supervisor",
+        alias,
+        "--print-config",
+      ]);
+      const upper = runLauncher("run-supervisor.sh", [
+        "-S",
+        alias.toUpperCase(),
+        "--print-config",
+      ]);
+
+      for (const result of [lower, upper]) {
+        expect(result.status).toBe(0);
+        expect(configFrom(result.stdout)).toMatchObject({
+          supervisor: "claude",
+          supervisor_model: model,
+          sub_agent: "claude",
+          worker_model: "claude-sonnet-5",
+        });
+      }
+    },
+  );
+
+  it.each([
+    ["opus", "claude-opus-5"],
+    ["sonnet", "claude-sonnet-5"],
+    ["fable", "claude-fable-5"],
+    ["haiku", "claude-haiku-4-5-20251001"],
+  ])(
+    "resolves the '%s' Claude model alias on --sub-agent to fixed claude/%s workers",
+    (alias, model) => {
+      const result = runLauncher("run-supervisor.sh", [
+        "-s",
+        alias,
+        "--print-config",
+      ]);
+
+      expect(result.status).toBe(0);
+      expect(configFrom(result.stdout)).toMatchObject({
+        supervisor: "claude",
+        supervisor_model: "claude-fable-5",
+        sub_agent: "claude",
+        worker_routing: "fixed",
+        worker_model: model,
+      });
+    },
+  );
+
+  it("resolves a bare --model Claude alias on the supervisor without --supervisor", () => {
+    const result = runLauncher("run-supervisor.sh", [
+      "-m",
+      "opus",
+      "--print-config",
+    ]);
+
+    expect(result.status).toBe(0);
+    expect(configFrom(result.stdout)).toMatchObject({
+      supervisor: "claude",
+      supervisor_model: "claude-opus-5",
+    });
+  });
+
+  it("selects independent Claude model aliases for supervisor and sub-agent together", () => {
+    const result = runLauncher("run-supervisor.sh", [
+      "-S",
+      "opus",
+      "-s",
+      "sonnet",
+      "--print-config",
+    ]);
+
+    expect(result.status).toBe(0);
+    expect(configFrom(result.stdout)).toMatchObject({
+      supervisor: "claude",
+      supervisor_model: "claude-opus-5",
+      sub_agent: "claude",
+      worker_model: "claude-sonnet-5",
+    });
+  });
+
+  it("accepts a matching --model alongside a --supervisor Claude alias", () => {
+    const result = runLauncher("run-supervisor.sh", [
+      "-S",
+      "opus",
+      "-m",
+      "claude-opus-5",
+      "--print-config",
+    ]);
+
+    expect(result.status).toBe(0);
+    expect(configFrom(result.stdout).supervisor_model).toBe("claude-opus-5");
+  });
+
+  it("rejects a --model that conflicts with a --supervisor Claude alias", () => {
+    const result = runLauncher("run-supervisor.sh", [
+      "-S",
+      "opus",
+      "-m",
+      "claude-sonnet-5",
+      "--print-config",
+    ]);
+
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain(
+      "--supervisor 'opus' already selects model 'claude-opus-5'; --model 'claude-sonnet-5' conflicts with it",
+    );
+  });
+
+  it("rejects a Claude model alias in --model when --supervisor selected Codex", () => {
+    const result = runLauncher("run-supervisor.sh", [
+      "-S",
+      "codex",
+      "-m",
+      "opus",
+      "--print-config",
+    ]);
+
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain(
+      "--model 'opus' is a Claude model alias but --supervisor selected 'codex'",
+    );
+  });
+
+  it.each([
+    ["opus", "claude-opus-5"],
+    ["fable", "claude-fable-5"],
+  ])(
+    "resolves the '%s' Claude model alias through SUPERVISOR_AGENT/SUB_AGENT env vars",
+    (alias, model) => {
+      const result = runLauncher(
+        "run-supervisor.sh",
+        ["--print-config"],
+        { SUPERVISOR_AGENT: alias, SUB_AGENT: alias },
+      );
+
+      expect(result.status).toBe(0);
+      expect(configFrom(result.stdout)).toMatchObject({
+        supervisor: "claude",
+        supervisor_model: model,
+        sub_agent: "claude",
+        worker_model: model,
+      });
+    },
+  );
+
+  it.each([
+    ["opus", "claude-opus-5"],
+    ["sonnet", "claude-sonnet-5"],
+    ["fable", "claude-fable-5"],
+    ["haiku", "claude-haiku-4-5-20251001"],
+  ])(
+    "resolves the '%s' Claude model alias on tools/run-subagent.sh --sub-agent",
+    (alias, model) => {
+      const result = runLauncher("tools/run-subagent.sh", [
+        "-s",
+        alias,
+        "--print-config",
+      ]);
+
+      expect(result.status).toBe(0);
+      expect(configFrom(result.stdout)).toMatchObject({
+        sub_agent: "claude",
+        worker_model: model,
+      });
+    },
+  );
+
+  it("resolves a bare --model Claude alias on tools/run-subagent.sh without --sub-agent", () => {
+    const result = runLauncher("tools/run-subagent.sh", [
+      "-m",
+      "opus",
+      "--print-config",
+    ]);
+
+    expect(result.status).toBe(0);
+    expect(configFrom(result.stdout)).toMatchObject({
+      sub_agent: "claude",
+      worker_model: "claude-opus-5",
+    });
+  });
+
+  it("rejects a --model that conflicts with a --sub-agent Claude alias on tools/run-subagent.sh", () => {
+    const result = runLauncher("tools/run-subagent.sh", [
+      "-s",
+      "opus",
+      "-m",
+      "claude-sonnet-5",
+      "--print-config",
+    ]);
+
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain(
+      "--sub-agent 'opus' already selects model 'claude-opus-5'; --model 'claude-sonnet-5' conflicts with it",
+    );
+  });
+
+  it("rejects a Claude model alias in --model when --sub-agent selected Codex on tools/run-subagent.sh", () => {
+    const result = runLauncher("tools/run-subagent.sh", [
+      "-s",
+      "codex",
+      "-m",
+      "opus",
+      "--print-config",
+    ]);
+
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain(
+      "--model 'opus' is a Claude model alias but --sub-agent selected 'codex'",
+    );
+  });
+
+  it("propagates a supervisor-level Claude sub-agent alias to a direct worker launch via env", () => {
+    const result = runLauncher(
+      "tools/run-subagent.sh",
+      ["--print-config"],
+      { POKEBENCH_WORKER_PROVIDER: "claude", WORKER_MODEL: "claude-opus-5" },
+    );
+
+    expect(result.status).toBe(0);
+    expect(configFrom(result.stdout)).toMatchObject({
+      sub_agent: "claude",
+      worker_model: "claude-opus-5",
+    });
+  });
+
+  it.each([
     ["short role flags", ["-S", "Claude", "-s", "Codex"]],
     [
       "long role flags",

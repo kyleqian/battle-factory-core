@@ -16,9 +16,13 @@
 #   tools/run-subagent.sh [options] "step brief for the worker"
 #   tools/run-subagent.sh [options] --brief-file path/to/brief.txt
 #     -c, --cap-minutes N   hard cap in minutes (default 60)
-#     -s, --sub-agent NAME  claude (default), codex, or deepseek (OpenCode)
+#     -s, --sub-agent NAME  claude (default), codex, deepseek (OpenCode), or a
+#                        Claude model alias (opus, sonnet, fable, haiku) that
+#                        selects Claude and that exact model in one step
 #     -M, --max-mode        Codex Sol/xhigh worker profile
-#     -m, --model NAME      worker model (selected sub-agent's default)
+#     -m, --model NAME      worker model (selected sub-agent's default). Also
+#                        accepts a Claude model alias (opus, sonnet, fable,
+#                        haiku), which additionally selects Claude.
 #     -e, --effort EFFORT   Codex reasoning effort (Terra/Luna=max; Sol=high)
 #     -w, --worktree        alias for --lane side
 #         --animation-worktree
@@ -48,6 +52,7 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 source tools/codex-model-policy.sh
 source tools/deepseek-worker-policy.sh
+source tools/claude-model-policy.sh
 
 # Recursion guard: workers must never spawn agents. Every launcher exports
 # POKEBENCH_ROLE to its agent, and the agent's shells inherit it — so a worker
@@ -62,11 +67,15 @@ usage() {
 Usage: tools/run-subagent.sh [options] "step brief for the worker"
        tools/run-subagent.sh [options] --brief-file path/to/brief.txt
   -c, --cap-minutes N   hard cap in minutes (default 60)
-  -s, --sub-agent NAME  claude (default), codex, or deepseek (via OpenCode)
+  -s, --sub-agent NAME  claude (default), codex, deepseek (via OpenCode), or
+                        a Claude model alias (opus, sonnet, fable, haiku)
+                        that selects Claude and that exact model at once
   -M, --max-mode        Codex all-Sol profile: fixes the model at
                         gpt-5.6-sol and defaults effort to xhigh
   -m, --model NAME      worker model (sub-agent default; DeepSeek is fixed at
-                        deepseek/deepseek-v4-flash)
+                        deepseek/deepseek-v4-flash). Also accepts a Claude
+                        model alias (opus, sonnet, fable, haiku), which
+                        additionally selects Claude as the sub-agent.
   -e, --effort EFFORT   Codex reasoning effort (Terra/Luna=max; Sol=high;
                         max mode also permits Sol/xhigh)
                         (aliases: --reasoning, --reasoning-effort)
@@ -164,6 +173,31 @@ if [[ ! "$MAX_MODE" =~ ^(0|1)$ ]]; then
 fi
 
 PROVIDER="$(printf '%s' "$PROVIDER" | tr '[:upper:]' '[:lower:]')"
+
+# Claude model aliases (opus/sonnet/fable/haiku) select Claude and that exact
+# model together, wherever a provider name is accepted: -s/--sub-agent picks
+# the worker's model directly, and a bare -m/--model alias (no matching -s
+# alias) does the same. An explicit --model that disagrees with a --sub-agent
+# alias is a conflict, not a silent override.
+if SUB_AGENT_ALIAS_MODEL="$(pokebench_claude_model_alias "$PROVIDER")"; then
+  if [[ "$MODEL_FLAG_SET" == "1" && "$MODEL" != "$SUB_AGENT_ALIAS_MODEL" ]]; then
+    echo "run-subagent: --sub-agent '$PROVIDER' already selects model '$SUB_AGENT_ALIAS_MODEL'; --model '$MODEL' conflicts with it" >&2
+    exit 2
+  fi
+  PROVIDER=claude
+  MODEL="$SUB_AGENT_ALIAS_MODEL"
+  MODEL_FLAG_SET=1
+elif [[ "$MODEL_FLAG_SET" == "1" ]]; then
+  MODEL_LOWER="$(printf '%s' "$MODEL" | tr '[:upper:]' '[:lower:]')"
+  if MODEL_ALIAS_RESOLVED="$(pokebench_claude_model_alias "$MODEL_LOWER")"; then
+    if [[ "$SUB_AGENT_SELECTION_SET" == "1" && "$PROVIDER" != "claude" ]]; then
+      echo "run-subagent: --model '$MODEL' is a Claude model alias but --sub-agent selected '$PROVIDER'" >&2
+      exit 2
+    fi
+    PROVIDER=claude
+    MODEL="$MODEL_ALIAS_RESOLVED"
+  fi
+fi
 
 if [[ "$MAX_MODE" == "1" ]]; then
   if [[ "$SUB_AGENT_SELECTION_SET" == "1" && "$PROVIDER" != "codex" ]]; then
