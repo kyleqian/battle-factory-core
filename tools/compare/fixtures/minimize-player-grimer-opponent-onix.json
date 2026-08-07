@@ -1,70 +1,70 @@
 {
- "schema": "scene-on-portable-evidence/v1",
- "oracleProfile": "battle-scene-on",
- "scenario": "tools/battle-lab/mechanic-minimize-player-grimer-opponent-onix.json",
- "probe": "tools/compare/minimizeProbe.py",
- "move": "MINIMIZE",
- "pair": "FRONTIER_MON_GRIMER record (player-back) -> legal ONIX (opponent-front)",
- "orientation": "player-to-opponent",
- "appStage": {
-  "presentationAge": 0
- },
- "denseWindow": {
-  "startFrame": 210,
-  "endFrame": 362,
-  "frameCount": 153
- },
- "fieldProfile": {
-  "playerHp": 145,
-  "playerMaxHp": 155,
-  "opponentHp": 142,
-  "opponentMaxHp": 142,
-  "playerGender": "female",
-  "opponentGender": "male"
- },
- "attacker": {
-  "species": "GRIMER",
-  "geometry": {
-   "side": "player",
-   "spriteCorner": {
-    "x": 40,
-    "y": 60
-   },
-   "animationCenter": {
-    "x": 72,
-    "y": 92
-   },
-   "battlePositionCenter": {
-    "x": 72,
-    "y": 80
-   }
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-minimize-player-grimer-opponent-onix.json",
+  "probe": "tools/compare/minimizeProbe.py",
+  "move": "MINIMIZE",
+  "pair": "FRONTIER_MON_GRIMER record (player-back) -> legal ONIX (opponent-front)",
+  "orientation": "player-to-opponent",
+  "appStage": {
+    "presentationAge": 0
+  },
+  "denseWindow": {
+    "startFrame": 210,
+    "endFrame": 362,
+    "frameCount": 153
+  },
+  "fieldProfile": {
+    "playerHp": 145,
+    "playerMaxHp": 155,
+    "opponentHp": 142,
+    "opponentMaxHp": 142,
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "attacker": {
+    "species": "GRIMER",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {
+        "x": 40,
+        "y": 60
+      },
+      "animationCenter": {
+        "x": 72,
+        "y": 92
+      },
+      "battlePositionCenter": {
+        "x": 72,
+        "y": 80
+      }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {
+        "x": 144,
+        "y": 10
+      },
+      "animationCenter": {
+        "x": 176,
+        "y": 42
+      },
+      "battlePositionCenter": {
+        "x": 176,
+        "y": 40
+      }
+    }
+  },
+  "evidenceSchema": "minimize-dense-evidence/v1",
+  "evidenceSha256": "c044f61de3cfbb0cc7a1ec4bda64148c52e28be62e0eb2c23c01c404691fb4e6",
+  "secondFreshEvidenceSha256": "c044f61de3cfbb0cc7a1ec4bda64148c52e28be62e0eb2c23c01c404691fb4e6",
+  "rawRgbSha256": "54dfaf4058dfa44f4e8264f7850197b50f15748abb7cbb0f7396b8e843bb0d2e",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 153,
+    "componentMatching": 153
   }
- },
- "target": {
-  "species": "ONIX",
-  "geometry": {
-   "side": "opponent",
-   "spriteCorner": {
-    "x": 144,
-    "y": 10
-   },
-   "animationCenter": {
-    "x": 176,
-    "y": 42
-   },
-   "battlePositionCenter": {
-    "x": 176,
-    "y": 40
-   }
-  }
- },
- "evidenceSchema": "minimize-dense-evidence/v1",
- "evidenceSha256": "c044f61de3cfbb0cc7a1ec4bda64148c52e28be62e0eb2c23c01c404691fb4e6",
- "secondFreshEvidenceSha256": "c044f61de3cfbb0cc7a1ec4bda64148c52e28be62e0eb2c23c01c404691fb4e6",
- "rawRgbSha256": "54dfaf4058dfa44f4e8264f7850197b50f15748abb7cbb0f7396b8e843bb0d2e",
- "acceptance": {
-  "status": "partial",
-  "framebufferMatching": 144,
-  "componentMatching": 153
- }
 }

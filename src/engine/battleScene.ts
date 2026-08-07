@@ -29230,10 +29230,22 @@ export function renderSceneOnMovePresentation(
 
   if (state.config.move === "MINIMIZE") {
     const view = sceneOnMinimizeView(state);
-    // The affine matrix renders two displays behind the RAM state and the
-    // clones (OAM sprites) two displays behind as well.
+    // Two different render lags meet on the clones, and the window needs both.
+    // A clone can only be PAINTED once its freshly allocated OAM matrix has
+    // reached the hardware, which is the two-display matrix lag; but its
+    // REMOVAL is a plain OAM edit, which lands one display behind. Measured on
+    // the player-back probe: clone 0 lives RAM frames 211-226 yet the oracle
+    // shows it only on frames 213-227 - two displays behind its creation, one
+    // behind its destruction, so 15 displayed frames for a 16-frame RAM life.
+    // Taking either lag alone fails: age-2 leaves the expiry frames 228/231/234
+    // over-drawn, age-1 leaves the spawn frames 212/215/218 drawn too early.
     const affineDisplayed = sceneOnMinimizeView({ ...state, age: state.age - 2 });
-    const displayed = sceneOnMinimizeView({ ...state, age: state.age - 2 });
+    const matrixDisplayed = sceneOnMinimizeView({ ...state, age: state.age - 2 });
+    const oamDisplayed = sceneOnMinimizeView({ ...state, age: state.age - 1 });
+    const stillInOam = new Set(oamDisplayed.clones.map((clone) => clone.spawnAge));
+    const displayed = {
+      clones: matrixDisplayed.clones.filter((clone) => stillInOam.has(clone.spawnAge)),
+    };
     const playerToOpponent =
       view.attacker.species === "GRIMER"
       && view.attacker.geometry.side === "player"

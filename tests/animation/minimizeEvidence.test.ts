@@ -50,8 +50,8 @@ describe("MOVE_MINIMIZE dense evidence receipts", () => {
     expect(receipt.secondFreshEvidenceSha256).toBe(receipt.evidenceSha256);
     expect(receipt.rawRgbSha256).toMatch(/^[0-9a-f]{64}$/);
     expect(receipt.acceptance).toEqual({
-      status: "partial",
-      framebufferMatching: 144,
+      status: "exact",
+      framebufferMatching: 153,
       componentMatching: 153,
     });
     expect(scenario).toMatchObject({ profile: "battle-scene-on", level: 50 });
