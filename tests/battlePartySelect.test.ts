@@ -102,6 +102,23 @@ describe("voluntary battle party selector", () => {
     expect(iconRegion.some((channel) => channel !== 0 && channel !== 255)).toBe(true);
   });
 
+  it("draws the banked pokeball sprite and CANCEL text at the oracle's measured window (ISSUES #80 slice 5)", () => {
+    // docs/party-menu-rank6-ground-truth.md §6 addendum: the CANCEL pokeball
+    // button window overpaints the baked bg box at x184-237 y134-153. Pins one
+    // ball-red pixel and one CANCEL white-ink pixel at oracle-measured spots.
+    const state = liveSelector();
+    const fb = createFramebuffer();
+    renderBattlePartySelect(fb, state);
+    const px = (x: number, y: number) => {
+      const i = (y * 240 + x) * 4;
+      return [fb[i]!, fb[i + 1]!, fb[i + 2]!] as const;
+    };
+    // Ball red (181,66,0) at (190,140); the sprite blits pixel-0 transparent.
+    expect(px(190, 140)).toEqual([181, 66, 0]);
+    // CANCEL ink white (255,255,255) at (206,141) (sFontColorTable[0] LIGHT_GRAY).
+    expect(px(206, 141)).toEqual([255, 255, 255]);
+  });
+
   it("follows the source single-layout cursor edges, including Cancel", () => {
     let state = liveSelector();
     state = advanceBattlePartySelect(state, new Set(["UP"]));
