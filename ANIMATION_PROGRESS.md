@@ -1,5 +1,48 @@
 # Animation coverage
 
+## Supervisor wind-down — GRASS_WHISTLE + FLASH exact, 117→119; DOUBLE_EDGE and FACADE staged (2026-08-07 animation session)
+
+- **State:** coverage advanced **117→119/276 exact**, 0 partial, 0 staged, 157
+  unsupported. `animation-main` is committed and green with no animation worker
+  worktrees or branches left behind. 6 workers, 4 cap-kills, 3 of them salvaged.
+- **Did:** promoted **MOVE_GRASS_WHISTLE** (225/225 both orientations, twice
+  fresh, source-component + shared-framebuffer) and **MOVE_FLASH** (64/64 both
+  orientations, twice fresh). Staged **MOVE_DOUBLE_EDGE** (both scenarios, dense
+  isolated probe, 141-frame windows at player 80-220 / opponent 84-224, measured
+  task+sprite lifecycles) and **MOVE_FACADE** (both scenarios, dense isolated
+  probe, 81-frame window 212-292 both sides). See the four entries below.
+- **Verified:** every promotion re-run by the supervisor rather than accepted on
+  report — all four GRASS_WHISTLE portable runs and all four FLASH runs
+  reproduced their evidence and raw-RGB hashes exactly; the MOVE_SING control
+  held at 245/245 player and 248/248 opponent after its reducer was
+  parametrized. Integrated `npm test` **760 files / 7206 passed / 1 established
+  skip** and `npm run build` green.
+- **Next:** finish **MOVE_FACADE** from its staged base (smallest remaining
+  unit — resolve the zero-sprite caveat first), then **MOVE_DOUBLE_EDGE** from
+  its staged base with a larger cap or a stronger tier.
+- **Notes — step sizing, for whoever briefs the next round:** size animation
+  steps by anim-script size, not by zero-new-component rank. At a 45-minute
+  DeepSeek cap this session, MOVE_FLASH (4-line script, 1 component) closed in
+  ONE round; MOVE_GRASS_WHISTLE (6 components) took two; **MOVE_DOUBLE_EDGE (9
+  components, ~30-line script) failed three consecutive rounds**, one of which
+  produced zero file writes. All remaining zero-new-component Level-50 moves are
+  >=9 components, while several 1-new-component moves (SUBSTITUTE 1, HAZE 2,
+  MINIMIZE 3, FACADE 3) are much smaller total units — a new component that is
+  30 lines of C is cheaper than nine reused ones.
+- **Notes — two recurring defect classes worth briefing against:** (1) an
+  orientation-blind draw case; GRASS_WHISTLE was framebuffer-exact player-back
+  and 153/225 opponent-front purely because one painter order was used for both
+  sides, and the ROM's per-sprite subpriority flips placement between
+  orientations. (2) an overclaimed fixture; a cap-killed worker left
+  `acceptance.status: "exact"` on a fixture whose portable exited 1, so always
+  run the portable yourself before merging.
+- **For the main program:** nothing blocking. No boundary widening, no new
+  unsupported barriers, no controller or battle-state ownership taken, no
+  animation deferrals opened (ANIMATION_DEFERRED.md remains empty).
+  `tests/animation/factoryAnimationInventory.test.ts` now pins 119 exact / 157
+  unsupported — that pin moves on every promotion, so a fold that resolves
+  ANIMATION_COVERAGE.json must re-run it.
+
 ## MOVE_FACADE staged — both orientations isolated at 81 frames; scenarios + dense probe banked (2026-08-07 cap-killed worker + supervisor salvage)
 
 - **State:** FACADE stays **unsupported**. Coverage unchanged at **119/276
