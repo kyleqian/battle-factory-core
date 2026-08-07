@@ -101,16 +101,22 @@ HP bars + real HP/level text (all three cards), gender glyphs, and the real
 `WIN_MSG`/party-menu message window are landed; oracle frame-905 diff
 15267 → 6955 px. Tier-1 pins: `tests/inbattlePartyMenuVisualBind.test.ts`.
 
-**Remainder** (rank 5 landed 2026-08-06, PROGRESS 967 — spec
-`party-menu-status-item-off` banked as a red measured baseline,
-9234-9306px/frame over 2050-2300): (2) slot list art — the residual
-mon-icon/box palette class measures ~4-5kpx/frame on the
-`party-menu-status-item-off` window (2026-08-06); also the app's
-party-menu-open cursor rule differs (oracle opens on slot 0, app on the
-active slot) and the app prints Lv50/HP text in blue vs the oracle's
-white — both rank-6-adjacent, measured PROGRESS 967; (6) cursor/ball/selection +
-party-menu fade pixels (incl. the pokeball/CANCEL buttons at x184-234
-y134-153).
+**Remainder** (rank-6 plan slices 1+4 landed 2026-08-07 — ink white +
+mon-4/5/6 empty boxes; spec `party-menu-status-item-off` red baseline now
+**7038/7110 px/frame** over 2050-2300; slice 2 was already landed
+2026-07-29, see PROGRESS 974): (slice 3) the cursor open rule + selected-card
+wash — oracle opens on slot 0, app on the active slot; biggest remaining
+class (~3200px + the icon/bounce interplay the stale slice-2 estimate
+actually belonged to); (slice 5, PARKED after two cap-kills 2026-08-07) the
+pokeball/CANCEL buttons at x184-238 y132-158 (~467px): banked findings —
+party-menu 4px box-frame style, bank-1 frame colors
+(74,74,99)/(231,239,140)/(99,90,0), interior color15 (115,90,181), ball =
+32x32 sprite w/ 16x16 visible at center (198,148), AND the app's banked
+bg.png already draws a box at x187-236, so the class is the DELTA between
+that banked box and the oracle's composited window+ball+CANCEL — needs a
+pixel-forensics probe (bg-subtract) before the next bind attempt, not
+another blind cap; (slice 6) party-menu open/close fade pixels
+(open 809-823, close 965-1034 measured in the rank-6 doc §7).
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
