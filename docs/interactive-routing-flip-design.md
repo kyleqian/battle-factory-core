@@ -549,10 +549,9 @@ npx vitest run tests/interactiveRouting.test.ts \
   tests/factoryRoundBattleOrchestrator.test.ts \
   tests/factoryEndingPolicy.test.ts tests/roundController.test.ts \
   tests/executableFrontierRatchet.test.ts
-npm run compare:factory-terminal-loss
-npm run compare:factory-terminal-loss-record-menu
-npm run compare:factory-terminal-round-won
-npm run compare:factory-terminal-round-won-continuation
+npm run compare -- loss-beyond-boundary-off --summary
+npm run compare -- loss-terminal-decline-continuation-off --summary
+npm run compare -- win-terminal-window-off --summary
 # Run the full §4.1 loop.
 npm test
 npm run build

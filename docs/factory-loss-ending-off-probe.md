@@ -40,18 +40,15 @@ The wrapper accepts mGBA's known teardown SIGSEGV only after validating the
 fresh output JSON. The JSON retains every one of 720 relative frames as raw
 RGB hashes plus map/status/controller RAM; it contains no pixel assets.
 
-The dense app comparison owns its own fresh scratch directory and runs the
-same wrapped probe:
+The dense app comparison owned its own fresh scratch directory and ran the
+same wrapped probe via the retired `compare:factory-terminal-loss` family
+(ISSUES #82; the bespoke `CB2_LoadMap` scaffold desynced in the August
+factoryTerminal rebuild). Modern loss-terminal coverage is:
 
 ```sh
-npm run compare:factory-terminal-loss
+npm run compare -- loss-beyond-boundary-off --summary
+npm run compare -- loss-terminal-decline-continuation-off --summary
 ```
-
-`tools/compare/fixtures/factory-terminal-loss-off.json` pins the exact
-relative +1..+210 window and A releases at +80/+160. The helper compares all
-210 raw frames, then discards the scratch location with normal OS temporary
-storage lifecycle; the application renders only source-extracted map, NPC,
-window, arrow, and font data.
 
 ## Observed OFF window (fresh run, 2026-07-23)
 
