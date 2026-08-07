@@ -5,6 +5,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 981 — [bounded MAIN worker, 2026-08-07] Lobby free-roam follow-camera + 2-pose turn LANDED — loss-beyond-boundary-off 165 → 171/183 (named woman-wander residual)
+
+- **State:** master `9658ed2c`, clean. Typecheck + `npm run build` green,
+  `npm run test:smoke` **347/347**, touched test file **14/14** (turn-pose and
+  tap pins red-verified by stashing the src behaviors). Keep-green:
+  `loss-terminal-decline-continuation-off` **155/155**, `postwin-retire-off`
+  **211/211**, `postwin-record-off` **204/204**,
+  `loss-beyond-boundary-off` **171/183** (≥ the 165 baseline). Full `npm test`
+  NOT run (worker rule — supervisor after merge).
+- **Did (RUNG 1+2):** bound the walkable-lobby render to the measured
+  follow-camera model (`factory-lobby-freeroam-ground-truth.md` §5a): field +
+  NPCs render at the player-anchored scroll origin (`lobbyFreeRoamCameraOrigin`
+  = spawn camera + player world px − spawn tile; net 16px/tile, 1px/frame
+  sub-tile phase; the layout's already-banked 2×2 border fills out-of-map),
+  player sprite fixed at (112,56) (`LOBBY_PLAYER_SCREEN_POS`), and the
+  in-place turn draws the §5b 2-pose animation (turn frames 1-4 = walk-2
+  sheet frame, 5-8 = stand; east = west h-flipped). Also corrected the
+  turn→step commit rule: a step only starts if the direction is still held
+  when the turn completes — oracle-probed (beyond-boundary DOWN tap 5172-5173
+  turns 5174-5181 then idles at (4,8) forever, VOFS flat 40) — and the
+  walk-cycle clock resets on a direction change (source GO anims restart at
+  walk-1). `renderFactoryTerminalField` now takes a camera-origin object;
+  the terminal's default call is unchanged (spawn view byte-identical).
+- **Next:** the 12 red frames are all the **wandering-woman NPC** class
+  (`MOVEMENT_TYPE_WANDER_AROUND`, bbox 96,99-111,134, 137→423px on 5186,
+  5188, 5190, 5195, 5200, 5205, 5210, 5215, 5220, 5224, 5240, 5254): the
+  real NPC leaves spawn at 5186 and settles covered/off-screen ~5205; the
+  app renders all NPCs at their static map-json tiles. `loss-lobby-walk-off`
+  spec NOT drafted (the promotion rule gates on 183/183). Then #80's two
+  named residuals.
+- **Notes:** the app's spawn/terminal field remains byte-identical (the
+  follow-cam at the spawn tile = the terminal's own camera). The tap rule
+  changed the prior "tap = one tile" §2 model — the committed beyond-boundary
+  fixture's 2-frame DOWN press is turn-only, verified by a fresh dense RAM/
+  framebuffer probe (`/tmp/subtile-bb.json`, walk probe `/tmp/subtile.json`).
+  No PAPERCUTS.
+
 ## 980 — [MAIN worker + supervisor salvage, 2026-08-07] ISSUES #78 CLOSED: both switch-seam tail fixes landed route-scoped — pacing-b 148/152 → 153/153, entry REMOVED
 
 - **State:** master `1c7903fd` + this docs commit, clean. Worker was
