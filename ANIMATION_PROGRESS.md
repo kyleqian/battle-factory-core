@@ -1,5 +1,81 @@
 # Animation coverage
 
+## Supervisor wind-down — GRASS_WHISTLE + FLASH exact, 117→119; DOUBLE_EDGE and FACADE staged (2026-08-07 animation session)
+
+- **State:** coverage advanced **117→119/276 exact**, 0 partial, 0 staged, 157
+  unsupported. `animation-main` is committed and green with no animation worker
+  worktrees or branches left behind. 6 workers, 4 cap-kills, 3 of them salvaged.
+- **Did:** promoted **MOVE_GRASS_WHISTLE** (225/225 both orientations, twice
+  fresh, source-component + shared-framebuffer) and **MOVE_FLASH** (64/64 both
+  orientations, twice fresh). Staged **MOVE_DOUBLE_EDGE** (both scenarios, dense
+  isolated probe, 141-frame windows at player 80-220 / opponent 84-224, measured
+  task+sprite lifecycles) and **MOVE_FACADE** (both scenarios, dense isolated
+  probe, 81-frame window 212-292 both sides). See the four entries below.
+- **Verified:** every promotion re-run by the supervisor rather than accepted on
+  report — all four GRASS_WHISTLE portable runs and all four FLASH runs
+  reproduced their evidence and raw-RGB hashes exactly; the MOVE_SING control
+  held at 245/245 player and 248/248 opponent after its reducer was
+  parametrized. Integrated `npm test` **760 files / 7206 passed / 1 established
+  skip** and `npm run build` green.
+- **Next:** finish **MOVE_FACADE** from its staged base (smallest remaining
+  unit — resolve the zero-sprite caveat first), then **MOVE_DOUBLE_EDGE** from
+  its staged base with a larger cap or a stronger tier.
+- **Notes — step sizing, for whoever briefs the next round:** size animation
+  steps by anim-script size, not by zero-new-component rank. At a 45-minute
+  DeepSeek cap this session, MOVE_FLASH (4-line script, 1 component) closed in
+  ONE round; MOVE_GRASS_WHISTLE (6 components) took two; **MOVE_DOUBLE_EDGE (9
+  components, ~30-line script) failed three consecutive rounds**, one of which
+  produced zero file writes. All remaining zero-new-component Level-50 moves are
+  >=9 components, while several 1-new-component moves (SUBSTITUTE 1, HAZE 2,
+  MINIMIZE 3, FACADE 3) are much smaller total units — a new component that is
+  30 lines of C is cheaper than nine reused ones.
+- **Notes — two recurring defect classes worth briefing against:** (1) an
+  orientation-blind draw case; GRASS_WHISTLE was framebuffer-exact player-back
+  and 153/225 opponent-front purely because one painter order was used for both
+  sides, and the ROM's per-sprite subpriority flips placement between
+  orientations. (2) an overclaimed fixture; a cap-killed worker left
+  `acceptance.status: "exact"` on a fixture whose portable exited 1, so always
+  run the portable yourself before merging.
+- **For the main program:** nothing blocking. No boundary widening, no new
+  unsupported barriers, no controller or battle-state ownership taken, no
+  animation deferrals opened (ANIMATION_DEFERRED.md remains empty).
+  `tests/animation/factoryAnimationInventory.test.ts` now pins 119 exact / 157
+  unsupported — that pin moves on every promotion, so a fold that resolves
+  ANIMATION_COVERAGE.json must re-run it.
+
+## MOVE_FACADE staged — both orientations isolated at 81 frames; scenarios + dense probe banked (2026-08-07 cap-killed worker + supervisor salvage)
+
+- **State:** FACADE stays **unsupported**. Coverage unchanged at **119/276
+  exact, 0 partial, 0 staged, 157 unsupported**. Nothing promoted; no pin moved.
+- **Did:** the worker was cap-killed at 45 min having committed nothing.
+  Salvaged its two legal mechanicLab scenarios (FRONTIER_MON_AZUMARILL_1,
+  AZUMARILL, versus legal ONIX) and `tools/compare/facadeProbe.py`. No reducer,
+  no seam, no portable, no fixtures, no tests.
+- **Measured (supervisor, fresh runs of both scenarios):** the probe isolates the
+  move-owned window by script pointer and yields **81 frames in both
+  orientations — frames 212-292 each**. Task lifecycles are identical on both
+  sides: `AnimTask_SquishAndSweatDroplets_Step` slot 0 ages 4-78 and
+  `AnimTask_FacadeColorBlend_Step` slot 1 ages **4-75 — exactly the 72 blend
+  frames the source predicts** (`gBattleAnimArgs[1] = 72`). Visual-task count
+  range 0-2. Schema `facade-dense-evidence/v1`.
+- **CAVEAT for the next worker:** the probe records **zero sprites across the
+  whole window**. Either it is not watching the `ANIM_TAG_SWEAT_DROP` template
+  or the droplets do not spawn in this configuration. Resolve that FIRST —
+  confirm from the framebuffer and hardware OAM whether droplet sprites are
+  visible at all before fitting a droplet reducer.
+- **Next:** finish FACADE from this staged base — the reducer, the seam, the
+  `battleScene.ts` draw case, the portable, two fixtures, the Tier-1 tests, and
+  promotion. The new component `task:AnimTask_FacadeColorBlend` is small: blend
+  the attacker's 16-entry OBJ palette at a FIXED coefficient of 8 toward
+  `gFacadeBlendColors[i]` (24-entry table, src/battle_anim_effects_3.c:902),
+  i advancing per frame and wrapping 23->0, for 72 frames, then one
+  coefficient-0 restore and destroy.
+- **Notes:** the other two components (`asset:ANIM_TAG_SWEAT_DROP`,
+  `task:AnimTask_SquishAndSweatDroplets`) are credited to exact MOVE_ENDEAVOR,
+  but ENDEAVOR's `sceneOnEndeavorView` seam exposes only an HP-drain view — that
+  credit may be window bookkeeping rather than reusable rendering code. Expect to
+  write the squish/droplet reducer fresh.
+
 ## MOVE_FLASH closed — 64/64 both orientations twice-fresh, promoted to exact (2026-08-07 worker)
 
 - **State:** FLASH (new move) → **exact**. Move coverage: **119/276 exact, 0
