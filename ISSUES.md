@@ -114,10 +114,15 @@ band 1224/1270 → **757/803**; the three earlier caps died hand-deriving
 geometry — the landing brief inlined banked assets + the drawSlot idiom +
 the forensics script as an acceptance loop). Remaining: the ~757px band =
 the residual mon-icon (~525px) + box-edge/text (~210px) classes measured at
-frame 2150 (icon/wash interplay, PROGRESS 975), and (slice 6) party-menu
-open/close fade pixels (open 809-823, close 965-1034 measured in the
-rank-6 doc §7; extends `mid-battle-switch-dense-a-off` to 964-1034 — full
-suite risk, run it).
+frame 2150 (icon/wash interplay, PROGRESS 975). Slice 6 (close fade
+pixels) LANDED 2026-08-07 (`1bedd921`): close now drives from closeElapsed
+per the rank-6 §7 schedule (menu fade-out 965-978 y=2..14 held 2f, black
+979-1018, field reveal 1019-1034); `mid-battle-switch-dense-a-off` extended
+1035-1255 → **980-1255, 276/276 byte-exact**. Named residual: the 16 menu-fade
+frames 964-979 — the oracle's OBJ layer lags the BG one tick in the palette
+fade (~2700-3900 px/frame; frame 979 OBJ tail 1559 px), needs layer-separated
+blend. Open-fade (809-823) still unpinned. Full suite was run by the
+supervisor after merge.
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 

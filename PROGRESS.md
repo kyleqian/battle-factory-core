@@ -5,6 +5,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 979 — [bounded MAIN worker, 2026-08-07] ISSUES #80 slice 6 LANDED: party-menu close fade rendered from closeElapsed — dense-a spec 1035-1255 → 980-1255, 276/276
+
+- **State:** master `1bedd921`, clean. Typecheck + `npm run build` green at
+  commit, `npm run test:smoke` **347/347**, touched test files **3/3**. Full
+  `npm test` NOT run (worker rule — supervisor after merge).
+- **Did:** (RUNG 1) re-aligned `PARTY_SELECT_CLOSE_*` phases to the measured
+  rank-6 §7 schedule (was: settled through 1018 + fade 1019-1034) — menu-hold
+  963-964, menu-fade 965-978 (y=2..14 held 2f), black-hold 979-1018,
+  field-reveal 1019-1034, field-hold 1035-1043, done 1044+. `renderBattlePartySelect`
+  now drives the close from `closeElapsed`: blend-to-black via
+  `paletteFade.blendComponentToBlack` over 965-978, fill black 979-1018, and the
+  settled battle field (resolution's own scene view, built from the live
+  battle-command presentation) blended from black 1019-1034 with the oracle's
+  per-channel rounding (red `(c*k+15)>>4`, green/blue `(c*k)>>4`). Also clears
+  the SEND OUT submenu on the confirm edge (oracle 964 = settled menu). (RUNG 2)
+  spec `mid-battle-switch-dense-a-off` extended to **980-1255 = 276/276
+  byte-exact** (+55 frames: black-hold + field-reveal). (RUNG 3) Tier-1 pins in
+  `tests/battlePartySelect.test.ts`: mid-fade shadow (82,82,82) at (220,145),
+  black-hold all-zero, submenu-closed-on-confirm — red-verified by disabling
+  the close draw.
+- **Next:** #80 slice 6 open-fade (809-823) or the named 964-979 residual
+  (OBJ/BG one-tick lag, needs layer-separated blend); supervisor re-runs full
+  `npm test`.
+- **Notes:** named residual — the 16 menu-fade frames 964-979 are NOT in the
+  spec: the oracle's OBJ layer lags the BG one tick in the palette fade
+  (~2700-3900 px/frame on 964-978, frame 979 = OBJ tail 1559 px). The field
+  reveal's per-channel rounding (R ceil, G/B floor) was derived empirically
+  from fresh oracle captures (the reveal ramp is an 8-bit blend, not a 5-bit
+  palette fade — values like 15/31 prove it). `bin/oracle run` does NOT stage
+  battle-lab overrides (posts to /v1/run); the compare tool's
+  `/v1/battle-lab/run` is the authoritative route. No PAPERCUTS.
+
 ## 978 — [bounded MAIN worker, 2026-08-07] ISSUES #80 slice 5 LANDED: CANCEL pokeball-button window drawn from banked assets — in-region 467px → 0, band 1224/1270 → 757/803
 
 - **State:** master `f6f0bb7e`, clean. Typecheck + `npm run build` not yet at
