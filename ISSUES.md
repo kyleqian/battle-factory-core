@@ -78,11 +78,16 @@ freeze). NOTE: PROGRESS 965/966's residual lists for this window were
 understated (the 1140-1185 ball-throw band was never green and went
 unlisted) — the 221/221 spec supersedes them as the record.
 
-**Open remainder:** the 1256-1407 turn-boundary fight-menu window still
-carries opponent-move resolution gaps (class-4 bounce bind landed
-`f0b52d7d`; the rest is unextended, overlaps #81's pacing class). The
-party-menu close's fade pixels are held-and-cut (menu pixels are #80
-scope, frame budget is the acceptance).
+**Open remainder:** the 1256-1407 window is now spec-pinned
+(`mid-battle-switch-pacing-b-off` **148/152**, 2026-08-06: message-pacing
+holds landed with the route-scoped used-move hold +
+`WAITMESSAGE_LONG_MESSAGE_IDS` additions, torment sibling 57/57). Four
+named red frames remain: **1399/1400** (634px, the app's turn-end tail
+persists M2 two frames past the oracle's box-text clear — the 64+10
+turn-end seam, not the message hold) and **1406/1407** (6083/1641px,
+action-menu/fight-menu redraw chrome at the turn-2 edge). The party-menu
+close's fade pixels are held-and-cut (menu pixels are #80 scope — its
+rank-6 plan slice 6 owns the fade window extension).
 
 ## #80 — Live play: in-battle party/switch menu is scaffolding-grade
 
@@ -106,51 +111,6 @@ active slot) and the app prints Lv50/HP text in blue vs the oracle's
 white — both rank-6-adjacent, measured PROGRESS 967; (6) cursor/ball/selection +
 party-menu fade pixels (incl. the pokeball/CANCEL buttons at x184-234
 y134-153).
-
-## #81 — Live play: Torment gives no reselection-rejection indication
-
-**User play-test 2026-08-05:** BUTTERFREE tormented by MURKROW; reselecting
-the banned move gives no "can't use" indication. Known remainder: #72's
-settled record banked the selection-dismiss timing facts for exactly this
-option-(a) work, and the 2026-08-04 option-(b) slice ROM-verified the three
-rejection causes. Implement the selection-time rejection message flow on the
-live route.
-
-**2026-08-05 MAIN bind landed (`7165ff5e`).** The fight-menu presentation now
-enters a rejection-message phase when the player confirms a slot whose
-`rejectionReasonBySlot` entry is non-null instead of dropping the press
-(`battleCommandPresentation.ts`): the resolver's two lines type 1 glyph/frame
-from +3, hold button-gated (`\p` PAUSE_UNTIL_PRESS, no auto-advance) with the
-wait ▼ bobbing from +66, and on A/B dismiss freeze the fully-typed box with
-the cursor held at its dismiss pose for 9 frames before the move menu redraws
-byte-identical with the cursor unchanged. Reuses the existing battle-window
-text/cursor machinery (`drawBattleMessageTextLines`/`drawCursor`) — no new
-printer. Tier-1 pins: `tests/factoryTormentSelectionRejectionLive.test.ts`
-(7, red-verified on the +3 and +9 constants); `battle-command-generated-off`
-regression 128/128, full `npm test` 743/7060 + build green.
-
-**Remainder (compare spec only):** the dense spec over
-`mechanic-selection-reject-torment-off.json` (app stage installed at the
-turn-2 checkpoint, frame 734) is NOT committed — the full window is not
-byte-exact because of **pre-existing fight-menu chrome residuals** (same
-class as the mid-battle-switch fixture's documented 48px, not the rejection
-flow). **2026-08-06 MAIN bind:** classes (1)-(3) were re-attributed and
-closed by appTrace staging pins (personality 150 for male BUTTERFREE +
-MURKROW, post-turn-1 TACKLE PP 34/35, MURKROW real HP 119/135) — all settled
-torment frames are byte-exact, and the class-4 bounce bind landed
-(`f0b52d7d`, `commandMenuBounceY2`: entry-relative `SpriteCB_BounceEffect`,
-seeds 128/192, +7/frame; torment stage seeds `idleBounceElapsed=7`; the
-phantom mid-battle ball-fade is gated to switch-source resolutions, which
-also closed the 1100/1200 tint). The route-scoped freeze schedule landed
-2026-08-06 (`853e6540`, `BattleCommandBounceSchedule` phase-keyed offsets
-supplied only by the torment staging context per
-`docs/fight-menu-freeze-schedule-probe.md`'s route-dependent verdict;
-battle-1 constants untouched) — compare `fight-menu-chrome-torment-off` is
-**55/57** (was 11/57 → 52/57 → 55/57). **Remainder (measured, docs §8.1):**
-(4b) the move-resolution message-typing pacing class at 1100 (822px) / 1200
-(648px) — the real printer types/holds "Foe MURKROW used TORMENT!" two
-lines while the app auto-advances at 1 glyph/frame (pre-existing, unrelated
-to the bounce; same class as #78's open 1256-1407 fight-menu window).
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
@@ -1014,30 +974,6 @@ seam had masked:
   has none — silent NPCs including the doubles attendant, wandering
   optional) is a user-directed feature sequenced behind the play-test fixes
   #76-#81.
-
-## #82 — Legacy `factoryTerminalLoss` comparator family desynced (0/210 wholesale); superseded coverage, retarget or retire
-
-**Found 2026-08-06 (supervisor verification of the RECORD/RETIRE step).**
-`npm run compare:factory-terminal-loss` reports **0/210, 38400px/frame**
-(whole screen). Signature is identical at session-start `6b774ff0` and at
-HEAD — no 2026-08-06 commit caused it. Diagnostic PNGs show BOTH sides in
-the wrong scene: the app renders the forced-switch party menu (the
-canonical ONIX-FNT scaffold party), the oracle probe renders the
-pre-battle swap prompt — the comparator's bespoke staging (a
-`CB2_LoadMap`-handoff scaffold + wrapped mGBA probe, PROGRESS 336 era,
-green 210/210 on 2026-07-23) predates the August factoryTerminal rebuild.
-Sibling variants are equally desynced: `-record-menu` mismatches
-+211..+624, `-round-won` +1..+2513. Modern LOSS/terminal coverage lives in
-the committed specs (`loss-beyond-boundary-off` 162/183 documented steady
-state — the 21 residuals are the out-of-scope post-5174 walk samples;
-`loss-terminal-decline-continuation-off` 155/155; the postwin specs).
-`docs/postwin-record-retire-ground-truth.md` §5 names
-`compare:factory-terminal-loss` as a RETIRE-tail regression gate — that
-reference is stale; use `compare -- loss-beyond-boundary-off` +
-`loss-terminal-decline-continuation-off` instead. Options: (a) retire the
-comparator family + its fixtures (git keeps them), (b) rebuild its
-scaffold against the current terminal system. Either is a bounded step; no
-live coverage depends on it today.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 

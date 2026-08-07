@@ -8,6 +8,20 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Probe verify scripts write untracked scratch dirs into the tree → postflight exit-5 false alarms
+
+- **What:** `tools/probe/verify-battle-message-pacing.ts` writes its
+  transient replay outputs to `tools/probe/ground-truth/_verify-*/`
+  (non-gitignored). Any worker that runs it per its brief then exits with
+  those dirs untracked and trips the launcher's clean-tree postflight
+  (exit 5 "left uncommitted changes") even though every rung landed —
+  happened 2026-08-06 (pacing-bind MAIN worker; supervisor had also
+  manually cleaned the same dirs from a scout worktree earlier the same
+  night). Fix shape: verify scripts should write under `$TMPDIR` (the
+  established TMPDIR-sandbox pattern) or the pattern needs a `.gitignore`
+  entry.
+- **Hits:** 2.
+
 ## `_template` lacks the DeepSeek/OpenCode worker route entirely
 
 - **What:** the DeepSeek worker profile (OpenCode launch branch in

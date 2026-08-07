@@ -225,8 +225,10 @@ FRONTIER_DATA_CHALLENGE_STATUS, CHALLENGE_STATUS_LOST` then `goto
 EventScript_WarpToLobby` (`scripts.inc:222-227`) → `warp
 MAP_BATTLE_FRONTIER_BATTLE_FACTORY_LOBBY, 4, 8` + `waitstate`. That Lobby
 arrival and its `LostChallenge` text chain are already byte-exact in the app
-(`docs/factory-loss-ending-off-probe.md`; `tools/compare/fixtures/
-factory-terminal-loss-off.json` pins the +1..+210 window). Because §3 proves
+(`docs/factory-loss-ending-off-probe.md`; the modern committed specs
+`loss-beyond-boundary-off` / `loss-terminal-decline-continuation-off` pin
+that window — the legacy `factory-terminal-loss-off.json` fixture this
+paragraph originally cited was retired with ISSUES #82 on 2026-08-06). Because §3 proves
 the postwin RETIRE YES is unreachable via the postwin menu input path, the
 retire handoff's convergence evidence is **source identity** (same label,
 same `CHALLENGE_STATUS_LOST` write, same single-mode lobby warp), not a fresh
@@ -265,8 +267,9 @@ never pressed.
   to these fixtures): `npm run compare -- postwin-record-off --summary` and
   `npm run compare -- postwin-retire-off --summary` (both full-window,
   dense per-tick), plus `npm run compare -- win-go-on-scout-off --summary`
-  (regression) and `npm run compare:factory-terminal-loss` (RETIRE-tail
-  regression). Tier-1 pins in `tests/` should cover: cursor-move edges,
+  (regression) and `npm run compare -- loss-terminal-decline-continuation-off
+  --summary` (RETIRE-tail regression; the legacy `compare:factory-terminal-loss`
+  gate originally named here was retired with ISSUES #82 on 2026-08-06). Tier-1 pins in `tests/` should cover: cursor-move edges,
   the dismiss-A ⇒ re-ask boundary (early dismiss-A swallowed, the re-ask's
   "2nd match" reprint + byte-identical menu), and the YES-unreachable
   negative (UP+A after dismiss has no effect).
