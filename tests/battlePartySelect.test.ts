@@ -29,7 +29,7 @@ function record(setId: number): FactoryRentalRecord {
   });
 }
 
-function liveSelector() {
+function liveSelectorParts() {
   const records = [record(664), record(678), record(527)] as const;
   let carrier = createFactoryRoundBattleOrchestrator({
     id: "voluntary-party-render-test",
@@ -54,10 +54,38 @@ function liveSelector() {
     ? battle.boundary.request
     : null;
   if (!request) throw new Error("expected live player command");
-  return createBattlePartySelectState(request, battle.rules.rulesContext);
+  return { request, rulesContext: battle.rules.rulesContext };
+}
+
+function liveSelector() {
+  const { request, rulesContext } = liveSelectorParts();
+  return createBattlePartySelectState(request, rulesContext);
 }
 
 describe("voluntary battle party selector", () => {
+  it("opens on slot 0, never the active battler's slot (OpenPartyMenuInBattle keepCursorPos=FALSE)", () => {
+    // docs/party-menu-rank6-ground-truth.md §2: OpenPartyMenuInBattle
+    // (party_menu.c:5774-5779) -> InitPartyMenu(keepCursorPos=FALSE) forces
+    // gPartyMenu.slotId = 0 (party_menu.c:524-525), so a party menu opened
+    // while the active battler sits on slot 1 still opens the cursor on
+    // slot 0 (regression: cursor was activePartyIndex). The forced route's
+    // fainted-mon default stays its own pin (partySelect.test.ts).
+    const { request, rulesContext } = liveSelectorParts();
+    const activeOnSlotOne = Object.freeze({
+      ...rulesContext,
+      battlers: Object.freeze([
+        Object.freeze({ ...rulesContext.battlers[0]!, partyIndex: 1 }),
+        rulesContext.battlers[1]!,
+        rulesContext.battlers[2]!,
+        rulesContext.battlers[3]!,
+      ]) as typeof rulesContext.battlers,
+    });
+    const state = createBattlePartySelectState(request, activeOnSlotOne);
+    expect(state.cursor).toBe(0);
+    expect(state.rows[0].active).toBe(false);
+    expect(state.rows[1].active).toBe(true);
+  });
+
   it("constructs and renders all rows from live noncanonical records and SPECIES_* icons", () => {
     const state = liveSelector();
     expect(state.rows.map((row) => row.speciesKey)).toEqual([
