@@ -1,0 +1,746 @@
+{
+  "schemaVersion": 1,
+  "mode": "mechanicLab",
+  "profile": "battle-scene-off",
+  "level": 50,
+  "challengeNum": 0,
+  "battleNum": 0,
+  "trainerId": 50,
+  "playerSetIds": [
+    156,
+    149,
+    180
+  ],
+  "opponentSetIds": [
+    188,
+    184,
+    135
+  ],
+  "seed": 305419896,
+  "overrides": {
+    "parties": {
+      "player": [
+        {
+          "species": 95,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 31,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            153,
+            153,
+            153,
+            153
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        },
+        {
+          "species": 213,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 31,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            153,
+            153,
+            153,
+            153
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        },
+        {
+          "species": 198,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 31,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            153,
+            153,
+            153,
+            153
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        }
+      ],
+      "opponent": [
+        {
+          "species": 362,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 0,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        },
+        {
+          "species": 362,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 0,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        },
+        {
+          "species": 362,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 0,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        }
+      ]
+    }
+  },
+  "trace": {
+    "segments": [
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 30,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "B"
+        ]
+      },
+      {
+        "frames": 100,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "DOWN"
+        ]
+      },
+      {
+        "frames": 100,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 100,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 30,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "B"
+        ]
+      },
+      {
+        "frames": 100,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "DOWN"
+        ]
+      },
+      {
+        "frames": 100,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "DOWN"
+        ]
+      },
+      {
+        "frames": 100,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 100,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 30,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 850,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 100,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 80,
+        "buttons": []
+      },
+      {
+        "frames": 40,
+        "buttons": [
+          "UP"
+        ]
+      },
+      {
+        "frames": 20,
+        "buttons": []
+      },
+      {
+        "frames": 100,
+        "buttons": [
+          "RIGHT"
+        ]
+      },
+      {
+        "frames": 20,
+        "buttons": []
+      },
+      {
+        "frames": 60,
+        "buttons": [
+          "UP"
+        ]
+      },
+      {
+        "frames": 20,
+        "buttons": []
+      },
+      {
+        "frames": 90,
+        "buttons": [
+          "DOWN"
+        ]
+      },
+      {
+        "frames": 40,
+        "buttons": []
+      }
+    ],
+    "captureFrames": [
+      4930,
+      4938,
+      4985,
+      4988,
+      4989,
+      4990,
+      4991,
+      4992,
+      4993,
+      4994,
+      4995,
+      4996,
+      4997,
+      4998,
+      4999,
+      5000,
+      5001,
+      5002,
+      5003,
+      5004,
+      5028,
+      5060,
+      5088,
+      5089,
+      5090,
+      5091,
+      5092,
+      5093,
+      5094,
+      5095,
+      5096,
+      5097,
+      5098,
+      5099,
+      5100,
+      5101,
+      5102,
+      5103,
+      5104,
+      5120,
+      5150,
+      5170,
+      5171,
+      5172,
+      5173,
+      5174,
+      5175,
+      5176,
+      5177,
+      5178,
+      5179,
+      5180,
+      5181,
+      5182,
+      5183,
+      5184,
+      5185,
+      5186,
+      5187,
+      5188,
+      5189,
+      5190,
+      5191,
+      5192,
+      5193,
+      5194,
+      5195,
+      5196,
+      5197,
+      5198,
+      5199,
+      5200,
+      5203,
+      5206,
+      5209,
+      5212,
+      5215,
+      5218,
+      5221,
+      5224,
+      5227,
+      5230,
+      5233,
+      5236,
+      5239,
+      5242,
+      5245,
+      5248,
+      5251,
+      5254,
+      5257,
+      5260,
+      5263,
+      5266,
+      5269,
+      5272,
+      5275,
+      5278,
+      5281,
+      5284,
+      5287,
+      5290,
+      5293,
+      5296,
+      5299,
+      5302,
+      5305,
+      5308,
+      5311,
+      5314,
+      5317,
+      5320,
+      5323,
+      5326,
+      5329,
+      5332,
+      5335,
+      5338,
+      5341,
+      5344,
+      5347,
+      5350,
+      5353,
+      5356,
+      5359,
+      5362,
+      5365,
+      5368,
+      5371,
+      5374,
+      5377,
+      5380,
+      5383,
+      5386,
+      5389,
+      5392,
+      5395,
+      5398,
+      5401,
+      5404,
+      5407,
+      5410,
+      5413,
+      5416,
+      5419,
+      5422,
+      5425,
+      5428,
+      5431,
+      5434,
+      5437,
+      5440,
+      5443,
+      5446,
+      5449,
+      5452,
+      5455,
+      5458,
+      5461,
+      5464,
+      5467,
+      5470,
+      5473,
+      5476,
+      5479,
+      5482,
+      5485,
+      5488,
+      5491,
+      5494,
+      5497,
+      5500,
+      5503,
+      5506,
+      5509,
+      5512,
+      5515,
+      5518,
+      5521,
+      5524,
+      5527,
+      5530,
+      5533,
+      5536,
+      5539,
+      5542,
+      5545,
+      5548,
+      5551,
+      5554,
+      5557,
+      5560
+    ]
+  }
+}
