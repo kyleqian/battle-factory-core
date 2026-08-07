@@ -1,0 +1,70 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-grass-whistle-opponent-roselia-player-onix.json",
+  "probe": "tools/compare/grassWhistleProbe.py",
+  "pair": "FRONTIER_MON_ROSELIA_1 record 171 (opponent-front) -> legal ONIX (player-back)",
+  "orientation": "opponent-to-player",
+  "move": "GRASS_WHISTLE",
+  "denseWindow": {
+    "startFrame": 216,
+    "endFrame": 440,
+    "frameCount": 225
+  },
+  "appStage": {
+    "presentationAge": 0
+  },
+  "attacker": {
+    "species": "ROSELIA",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {
+        "x": 144,
+        "y": 16
+      },
+      "animationCenter": {
+        "x": 176,
+        "y": 48
+      },
+      "battlePositionCenter": {
+        "x": 176,
+        "y": 40
+      }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {
+        "x": 40,
+        "y": 48
+      },
+      "animationCenter": {
+        "x": 72,
+        "y": 88
+      },
+      "battlePositionCenter": {
+        "x": 72,
+        "y": 80
+      }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 110,
+    "playerMaxHp": 110,
+    "opponentHp": 147,
+    "opponentMaxHp": 157,
+    "playerGender": "male",
+    "opponentGender": "female"
+  },
+  "evidenceSchema": "grass-whistle-dense-evidence/v1",
+  "evidenceSha256": "22a0ea611845be719b07ae323f132f40ddb417176b967767e9b023f4068e51db",
+  "secondFreshEvidenceSha256": "22a0ea611845be719b07ae323f132f40ddb417176b967767e9b023f4068e51db",
+  "rawRgbSha256": "9d218d9a997f651cdecb491c973ca4baa660d98fcb37052f16d3330e32d21ee5",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 225,
+    "componentMatching": 225
+  }
+}

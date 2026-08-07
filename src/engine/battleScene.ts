@@ -29315,13 +29315,6 @@ export function renderSceneOnMovePresentation(
     const onixIdle = playerToOpponent
       ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
       : { x2: 0, y2: 0 };
-    drawSpriteSheet(
-      fb,
-      onix.tileset,
-      onix.palette,
-      view.target.geometry.spriteCorner.x + onixIdle.x2,
-      view.target.geometry.spriteCorner.y + onixIdle.y2,
-    );
     // No monbg: the target OBJ stays visible for the whole move.
     const drawNotes = () => {
       for (const note of displayed.notes) {
@@ -29349,16 +29342,25 @@ export function renderSceneOnMovePresentation(
         );
       }
     };
-    // Both orientations keep the target visible; notes sit above it and the
-    // attacker draws last (same ordering shape as the SING case).
-    drawNotes();
-    drawSpriteSheet(
-      fb,
-      roseliaSprite.tileset,
-      roseliaSprite.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
-    );
+    // OAM painter order differs by orientation. The notes' subpriority (38
+    // player / 28 opponent) pins them between the two battlers on opposite
+    // sides: player-back the player ROSELIA is frontmost (ONIX -> notes ->
+    // ROSELIA), opponent-front ROSELIA is backmost (ROSELIA -> ONIX -> notes).
+    // The player ROSELIA is therefore drawn after its notes and the opponent
+    // ROSELIA before them; the target ONIX is always behind the notes.
+    const onixX = view.target.geometry.spriteCorner.x + onixIdle.x2;
+    const onixY = view.target.geometry.spriteCorner.y + onixIdle.y2;
+    const roseliaX = view.attacker.geometry.spriteCorner.x;
+    const roseliaY = view.attacker.geometry.spriteCorner.y;
+    if (playerToOpponent) {
+      drawSpriteSheet(fb, onix.tileset, onix.palette, onixX, onixY);
+      drawNotes();
+      drawSpriteSheet(fb, roseliaSprite.tileset, roseliaSprite.palette, roseliaX, roseliaY);
+    } else {
+      drawSpriteSheet(fb, roseliaSprite.tileset, roseliaSprite.palette, roseliaX, roseliaY);
+      drawSpriteSheet(fb, onix.tileset, onix.palette, onixX, onixY);
+      drawNotes();
+    }
     const fieldProfile = state.config.fieldProfile;
     const opponentHealthbox = composeOpponentHealthbox(
       healthboxAssemblyAssets,

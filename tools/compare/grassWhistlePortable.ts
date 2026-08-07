@@ -6,7 +6,9 @@ import {
   createSceneOnMovePresentation,
   sceneOnGrassWhistleView,
 } from "../../src/animation/sceneOnPresentation.ts";
-import { grassWhistleNotesAtAge } from "../../src/animation/grassWhistle.ts";
+import {
+  grassWhistleNoteSlotForIndex,
+} from "../../src/animation/grassWhistle.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 
@@ -119,24 +121,32 @@ const framebufferDiffLines: string[] = [];
 for (const frame of moveFrames) {
   const age = frame.frame - fixture.denseWindow.startFrame;
   const view = sceneOnGrassWhistleView({ ...stage, age });
-  const displayed = sceneOnGrassWhistleView({ ...stage, age: age - 1 });
-  const noteExact = displayed.notes.length === frame.notes.length
-    && displayed.notes.every((note, index) => {
-      const actual = frame.notes[index];
-      if (!actual) return false;
-      return actual.x === note.x
-        && actual.y === note.y
-        && actual.y2 === note.y2
-        && actual.animNum === note.animation
-        && actual.paletteNum === 8
-        && actual.data[0] === note.localAge
-        && actual.data[1] === 1
-        && actual.data[2] === 0
-        && actual.data[3] === 0;
-    });
+  // Notes latch RAM->framebuffer one display behind (the draw uses age-1), so
+  // the RAM-level component comparison runs at the ACTUAL age. The app's notes
+  // are ordered by the spriteOrder painter pass; re-order them by their
+  // probe-derived sprite slot to compare positionally against the ROM's
+  // ascending-slot records.
+  const noteExact = view.notes.length === frame.notes.length
+    && [...view.notes]
+      .sort(
+        (a, b) => grassWhistleNoteSlotForIndex(a.index) - grassWhistleNoteSlotForIndex(b.index),
+      )
+      .every((note, index) => {
+        const actual = frame.notes[index];
+        if (!actual) return false;
+        return actual.x === note.x
+          && actual.y === note.y
+          && actual.y2 === note.y2
+          && actual.animNum === note.animation
+          && actual.paletteNum === 8
+          && actual.data[0] === note.localAge
+          && actual.data[1] === 1
+          && actual.data[2] === 0
+          && actual.data[3] === 0;
+      });
   const taskExact = view.visualTaskCount === frame.visualTaskCount;
   if (!noteExact || !taskExact) {
-    componentMismatches.push(`frame ${frame.frame}/age ${age}: notes ${displayed.notes.length}vs${frame.notes.length} vt ${view.visualTaskCount}vs${frame.visualTaskCount}`);
+    componentMismatches.push(`frame ${frame.frame}/age ${age}: notes ${view.notes.length}vs${frame.notes.length} vt ${view.visualTaskCount}vs${frame.visualTaskCount}`);
   } else {
     componentMatches += 1;
   }

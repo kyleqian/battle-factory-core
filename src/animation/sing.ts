@@ -142,7 +142,12 @@ export function singNotesAtAge(
   }));
 }
 
-/** Shared persistent-`sSpriteOrder` pass (see `singNotesBackToFrontAtAge`). */
+/**
+ * Shared persistent-`sSpriteOrder` pass (see `singNotesBackToFrontAtAge`).
+ * The note->sprite-slot pool and initial OAM order are the caller's:
+ * GRASS_WHISTLE derives its own pair from its probe's sprite records (they
+ * coincide with SING's in both legal orientations), so this stays shared.
+ */
 export function wavyMusicNotesBackToFrontAtAge(
   age: number,
   origin: SingPoint,
@@ -152,11 +157,13 @@ export function wavyMusicNotesBackToFrontAtAge(
     origin: SingPoint,
     target: SingPoint,
   ) => readonly { readonly index: number; readonly y: number; readonly y2: number }[],
+  slots: readonly number[] = SING_NOTE_SPRITE_SLOTS,
+  orderSeed: readonly number[] = SING_NOTE_ORDER_SEED,
 ): readonly { readonly index: number; readonly y: number; readonly y2: number }[] {
   if (age < 0) return [];
   let order = createSpriteOrderState(
-    SING_NOTE_SPRITE_SLOTS,
-    SING_NOTE_ORDER_SEED,
+    slots,
+    orderSeed,
   );
   for (let tick = 0; tick <= age; tick += 1) {
     const notes = notesAtAge(tick, origin, target);

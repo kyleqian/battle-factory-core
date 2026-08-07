@@ -38,6 +38,24 @@ import {
 
 export const GRASS_WHISTLE_WINDOW_FRAMES = 225;
 export const GRASS_WHISTLE_FIRST_NOTE_AGE = 19;
+/**
+ * GRASS_WHISTLE's own note->sprite-slot table, derived from the probe's
+ * sprite records (both legal orientations, `grassWhistleProbe.py`): the twelve
+ * `gWavyMusicNotesSpriteTemplate` sprites allocate the same lowest-free slots
+ * in spawn order and sit in the same initial `sSpriteOrder` arrangement as
+ * SING's — GRASS_WHISTLE's no-`monbg` delta shifts other scene sprites, not
+ * these slots. Verified identical at the first-note frame (235) in both
+ * orientations; not copied from SING blindly.
+ */
+export const GRASS_WHISTLE_NOTE_SPRITE_SLOTS =
+  [3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16] as const;
+export const GRASS_WHISTLE_NOTE_ORDER_SEED =
+  [3, 4, 5, 16, 15, 14, 13, 12, 11, 10, 9, 7] as const;
+
+export function grassWhistleNoteSlotForIndex(index: number): number {
+  return GRASS_WHISTLE_NOTE_SPRITE_SLOTS[index]!;
+}
+
 /** Initial green `simple_palette_blend` sprite: ages 4-17 (probe frame 220-233). */
 export const GRASS_WHISTLE_BLEND_START_AGE = 4;
 export const GRASS_WHISTLE_BLEND_LAST_AGE = 17;
@@ -108,6 +126,8 @@ export function grassWhistleNotesBackToFrontAtAge(
     origin,
     target,
     grassWhistleNotesAtAge,
+    GRASS_WHISTLE_NOTE_SPRITE_SLOTS,
+    GRASS_WHISTLE_NOTE_ORDER_SEED,
   )
     .map((note) => notes.get(note.index))
     .filter((note): note is GrassWhistleNote => note !== undefined);

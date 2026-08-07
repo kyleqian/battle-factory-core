@@ -63,9 +63,8 @@
   "secondFreshEvidenceSha256": "4b4aef457f57f541977a898787a4285a14b44144654a6898c6d08df02ff5298a",
   "rawRgbSha256": "eee49e4817a8d51a0dfe8c0a366b013d3ffd11e7c68e4d1ba9c1bff75a0154ee",
   "acceptance": {
-    "status": "partial",
+    "status": "exact",
     "framebufferMatching": 225,
-    "componentMatching": 129,
-    "residual": "note array ordering only: matching notes by localAge instead of array index is 225/225 clean on every field (x, y, y2, animation, localAge, palette). The reducer needs its own note->sprite-slot table like sing.ts's SING_NOTE_SPRITE_SLOTS/SING_NOTE_ORDER_SEED; GRASS_WHISTLE allocates different slots than SING because it has no monbg BG sprites."
+    "componentMatching": 225
   }
 }
