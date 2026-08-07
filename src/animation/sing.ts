@@ -39,6 +39,20 @@ export interface SingNote {
   readonly affinePaPd: number;
 }
 
+/** Shared wavy-note geometry, palette-independent (`battle_anim_effects_1.c` AnimWavyMusicNotes/Step + CalcVelocity). */
+export interface WavyMusicNoteGeometry {
+  readonly index: number;
+  readonly localAge: number;
+  readonly x: number;
+  readonly y: number;
+  readonly y2: number;
+  readonly animation: number;
+  readonly tileOffset: number;
+  readonly vFlip: boolean;
+  readonly scale: number;
+  readonly affinePaPd: number;
+}
+
 export interface SingPanTask {
   readonly initialPan: number;
   readonly targetPan: number;
@@ -79,13 +93,14 @@ export function singNoteAffinePaPdAtLocalAge(localAge: number): number {
   return Math.trunc(0x10000 / singNoteScaleAtLocalAge(localAge));
 }
 
-export function singNotesAtAge(
+/** Shared wavy-note body (see `singNotesAtAge`): spawn ages, velocity, wave, scale. */
+export function wavyMusicNotesGeometryAtAge(
   age: number,
   origin: SingPoint,
   target: SingPoint,
-): readonly SingNote[] {
+): readonly WavyMusicNoteGeometry[] {
   const velocity = noteVelocity(origin, target);
-  const notes: SingNote[] = [];
+  const notes: WavyMusicNoteGeometry[] = [];
   for (let index = 0; index < SING_NOTE_SPAWN_AGES.length; index += 1) {
     const localAge = age - SING_NOTE_SPAWN_AGES[index]! + 1;
     if (localAge < 1) continue;
@@ -95,7 +110,6 @@ export function singNotesAtAge(
     const y = yFixed >> 4;
     if (x < -16 || x > 256 || y < -16 || y > 128) continue;
     const animation = NOTE_ANIMS[index]!;
-    const blendStep = Math.floor(localAge / 13);
     notes.push({
       index,
       localAge,
@@ -105,7 +119,6 @@ export function singNotesAtAge(
       animation,
       tileOffset: NOTE_TILE_OFFSETS[animation]!,
       vFlip: animation >= 6,
-      paletteIndex: (NOTE_PALETTES[index]! + blendStep) % 4,
       scale: singNoteScaleAtLocalAge(localAge),
       affinePaPd: singNoteAffinePaPdAtLocalAge(localAge),
     });
@@ -113,23 +126,40 @@ export function singNotesAtAge(
   return notes;
 }
 
-/**
- * Ports the shared persistent `sSpriteOrder` pass for SING's allocation
- * pool. The side-independent seed is live-probed immediately before the
- * first note in both legal orientations.
- */
-export function singNotesBackToFrontAtAge(
+/** SING-specific palette cycle: `sBlendTableIdx` advances every 13 frames; the source argv pins palette 0,1,2,3,0,1,2,3,0,1,2,3 (DIFFERENT from GRASS_WHISTLE's pinned unk1=1). */
+export function singPaletteIndexFor(index: number, localAge: number): number {
+  return (NOTE_PALETTES[index]! + Math.floor(localAge / 13)) % 4;
+}
+
+export function singNotesAtAge(
   age: number,
   origin: SingPoint,
   target: SingPoint,
 ): readonly SingNote[] {
+  return wavyMusicNotesGeometryAtAge(age, origin, target).map((note) => ({
+    ...note,
+    paletteIndex: singPaletteIndexFor(note.index, note.localAge),
+  }));
+}
+
+/** Shared persistent-`sSpriteOrder` pass (see `singNotesBackToFrontAtAge`). */
+export function wavyMusicNotesBackToFrontAtAge(
+  age: number,
+  origin: SingPoint,
+  target: SingPoint,
+  notesAtAge: (
+    age: number,
+    origin: SingPoint,
+    target: SingPoint,
+  ) => readonly { readonly index: number; readonly y: number; readonly y2: number }[],
+): readonly { readonly index: number; readonly y: number; readonly y2: number }[] {
   if (age < 0) return [];
   let order = createSpriteOrderState(
     SING_NOTE_SPRITE_SLOTS,
     SING_NOTE_ORDER_SEED,
   );
   for (let tick = 0; tick <= age; tick += 1) {
-    const notes = singNotesAtAge(tick, origin, target);
+    const notes = notesAtAge(tick, origin, target);
     const owners = new Set(notes.map((note) => note.index));
     for (const occupant of order.occupants) {
       if (!owners.has(occupant.owner)) {
@@ -154,10 +184,33 @@ export function singNotesBackToFrontAtAge(
     order = sortSpriteOrder(order);
   }
   const byIndex = new Map(
-    singNotesAtAge(age, origin, target).map((note) => [note.index, note]),
+    notesAtAge(age, origin, target).map((note) => [note.index, note]),
   );
   return spriteOwnersBackToFront(order)
     .map((owner) => byIndex.get(owner))
+    .filter((note): note is { readonly index: number; readonly y: number; readonly y2: number } => note !== undefined);
+}
+
+/**
+ * Ports the shared persistent `sSpriteOrder` pass for SING's allocation
+ * pool. The side-independent seed is live-probed immediately before the
+ * first note in both legal orientations.
+ */
+export function singNotesBackToFrontAtAge(
+  age: number,
+  origin: SingPoint,
+  target: SingPoint,
+): readonly SingNote[] {
+  const notes = new Map(
+    singNotesAtAge(age, origin, target).map((note) => [note.index, note]),
+  );
+  return wavyMusicNotesBackToFrontAtAge(
+    age,
+    origin,
+    target,
+    singNotesAtAge,
+  )
+    .map((note) => notes.get(note.index))
     .filter((note): note is SingNote => note !== undefined);
 }
 
