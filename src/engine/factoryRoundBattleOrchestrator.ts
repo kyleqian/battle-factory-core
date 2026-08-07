@@ -1114,6 +1114,7 @@ function installDriveReceiptImmediately(
   const battleCommandPresentation = commandPresentationForBoundary(
     receipt.battle,
     moveSelectionCursors,
+    state.usedMessageHoldFrames,
   );
   return Object.freeze({
     ...state,

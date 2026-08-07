@@ -61,7 +61,11 @@ export type PartyBallState = "empty" | "healthy" | "status" | "fainted";
 export type BattleMessageTiming =
   | Readonly<{ minimumFrames: 24; holdFrames: 0 | 64 }>
   | Readonly<{ minimumFrames: 24; holdFrames: 9 }>
-  | Readonly<{ minimumFrames: 13; holdFrames: 0 }>;
+  | Readonly<{ minimumFrames: 13; holdFrames: 0 }>
+  // ISSUES #81 4b route-scoped used-move hold: the failed/no-anim path's
+  // `pause`/controller span counts from print completion, so the typing term
+  // is the exact printable length (minimumFrames 0), not the 24-frame floor.
+  | Readonly<{ minimumFrames: 0; holdFrames: number }>;
 export type BattleMoveAnimationTiming = Readonly<{ minimumFrames: number }>;
 export type BattleHitAnimationTiming = Readonly<{
   minimumFrames: 35;

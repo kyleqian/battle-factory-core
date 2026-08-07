@@ -565,6 +565,67 @@ describe("battle resolution presentation receipt ownership", () => {
     expect(faintMessage.timing).toEqual({ minimumFrames: 24, holdFrames: 0 });
   });
 
+  it("ISSUES #81 4b: ButItFailed/ButNothingHappened join the waitmessage-long family", () => {
+    // The ButItFailed/ButNothingHappened script tails print then run
+    // `waitmessage B_WAIT_TIME_LONG` (BattleScript_ButItFailed /
+    // BattleScript_EffectSplash, docs/battle-message-pacing-ground-truth.md
+    // §3.3), so both join WAITMESSAGE_LONG_MESSAGE_IDS and resolve to the
+    // shared 64-frame hold object -- a census join, not a new literal.
+    expect(WAITMESSAGE_LONG_MESSAGE_IDS.has("STRINGID_BUTITFAILED")).toBe(true);
+    expect(WAITMESSAGE_LONG_MESSAGE_IDS.has("STRINGID_BUTNOTHINGHAPPENED")).toBe(true);
+    const failed = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }),
+      event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }),
+      event(2, { kind: "message", messageId: "STRINGID_BUTITFAILED", substitutions: [] }),
+    ], NEXT_COMMAND));
+    const failedCommand = failed.segments[0]!.commands.find(
+      (c): c is Extract<BattleResolutionPresentationCommand, { type: "message" }> =>
+        c.type === "message" && c.lines[0] === "But it failed!",
+    )!;
+    expect(failedCommand.timing).toBe(WAITMESSAGE_LONG_TIMING);
+    // print length 14 < the 24-frame floor, so 24 + 64 = 88.
+    expect(battleResolutionCommandDuration(failedCommand, failed.field)).toBe(88);
+    const nothing = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }),
+      event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }),
+      event(2, { kind: "message", messageId: "STRINGID_BUTNOTHINGHAPPENED", substitutions: [] }),
+    ], NEXT_COMMAND));
+    const nothingCommand = nothing.segments[0]!.commands.find(
+      (c): c is Extract<BattleResolutionPresentationCommand, { type: "message" }> =>
+        c.type === "message" && c.lines[0] === "But nothing happened!",
+    )!;
+    expect(nothingCommand.timing).toBe(WAITMESSAGE_LONG_TIMING);
+  });
+
+  it("ISSUES #81 4b: route-scoped used-move hold fires only when the staging context supplies it", () => {
+    // The failed/no-anim path's `STRINGID_USEDMOVE` is followed by a
+    // `pause B_WAIT_TIME_SHORT` / animation controller span with NO
+    // waitmessage (docs/battle-message-pacing-ground-truth.md §3.3), so the
+    // hold is opt-in via `usedMessageHoldFrames` and counts from print
+    // completion (minimumFrames 0, exact printable length). The default 0
+    // leaves the standard hit chain's USEDMOVE on the plain MESSAGE_TIMING.
+    const events = (): readonly BattleKernelSemanticEvent[] => [
+      event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }),
+      event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }),
+    ];
+    const unheld = createBattleResolutionPresentation(inputFor(events(), NEXT_COMMAND));
+    const unheldMove = unheld.segments[0]!.commands[0]! as Extract<
+      BattleResolutionPresentationCommand, { type: "message" }
+    >;
+    expect(unheldMove.timing).toEqual({ minimumFrames: 24, holdFrames: 0 });
+
+    const routed = createBattleResolutionPresentation(Object.freeze({
+      ...inputFor(events(), NEXT_COMMAND),
+      usedMessageHoldFrames: 38,
+    }));
+    const routedMove = routed.segments[0]!.commands[0]! as Extract<
+      BattleResolutionPresentationCommand, { type: "message" }
+    >;
+    expect(routedMove.timing).toEqual({ minimumFrames: 0, holdFrames: 38 });
+    // "ONIX used"/"ROCK SLIDE!" = 20 printable glyphs: 20 + 38 = 58.
+    expect(battleResolutionCommandDuration(routedMove, routed.field)).toBe(58);
+  });
+
   it("projects Scene-OFF move pause and target hit receipt before immutable HP drain", () => {
     const resolution = createBattleResolutionPresentation(inputFor([
       event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }, 2),
