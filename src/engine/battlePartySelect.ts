@@ -4,6 +4,7 @@ import partyMonIconsData from "../assets/gen/party-mon-icons.json" with { type: 
 import partyMenuHeldItemData from "../assets/gen/party-menu-held-item.json" with { type: "json" };
 import partyMenuContentData from "../assets/gen/party-menu-content.json" with { type: "json" };
 import partyMenuSpriteCoordsData from "../assets/gen/party-menu-sprite-coords.json" with { type: "json" };
+import partyMenuPokeballData from "../assets/gen/party-menu-pokeball.json" with { type: "json" };
 import stdWindowData from "../assets/gen/prebattle-room-std-window.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import fontSmallData from "../data/gen/font-small.json" with { type: "json" };
@@ -387,6 +388,7 @@ type PartySourceAsset = Readonly<{
     main: Readonly<{ width: number; height: number; tiles: readonly number[] }>;
     wide: Readonly<{ width: number; height: number; tiles: readonly number[] }>;
     wideEmpty: Readonly<{ width: number; height: number; tiles: readonly number[] }>;
+    cancelButton: Readonly<{ width: number; height: number; tiles: readonly number[] }>;
   }>;
 }>;
 type PartyIcon = Readonly<{ frame0: Tileset; frame1: Tileset; palette: readonly RgbColor[] }>;
@@ -719,6 +721,114 @@ function drawRowText(fb: Uint8Array, row: BattlePartySelectRow): void {
   drawText(fb, fontSmall, charmap, `/${row.maxHP}`, info.maxHp.x, info.maxHp.y, hpPalette, colors);
 }
 
+/**
+ * ISSUES #80 slice 5: the CANCEL pokeball-button window over the baked bg box.
+ * The window is the oracle's composited CANCEL window (x184-237 y134-153):
+ * a 2px box-frame with stepped corners and a divider at x202, interior color15
+ * (115,90,181), the 16x16 pokeball sprite (pixel-0 transparent) at center
+ * (198,148), and "CANCEL" printed with sFontColorTable[0] (white ink,
+ * (115,115,115) shadow). All coordinates are oracle-measured
+ * (`docs/party-menu-rank6-ground-truth.md` §6 addendum + the slice-5
+ * forensics probe); nothing here is hand-guessed geometry.
+ */
+
+/** The oracle window frame (74,74,99), exact per-row x-ranges (inclusive). */
+const CANCEL_FRAME_ROWS: ReadonlyArray<readonly [number, string]> = [
+  [134, "191-196"],
+  [135, "189-198"],
+  [136, "200-233"],
+  [137, "200-235"],
+  [138, "233-236"],
+  [139, "185,202,235-236"],
+  [140, "185,202,235-237"],
+  [141, "184-185,202-203,236-237"],
+  [142, "184-185,202-203,236-237"],
+  [143, "184-185,202-203,236-237"],
+  [144, "184-185,202-203,236-237"],
+  [145, "184-185,202-203,236-237"],
+  [146, "184-185,202-203,236-237"],
+  [147, "185,202,235-237"],
+  [148, "185,202,235-236"],
+  [149, "233-236"],
+  [150, "200-235"],
+  [151, "200-233"],
+  [152, "189-198"],
+  [153, "191-196"],
+];
+
+const CANCEL_FRAME_COLOR: RgbColor = { r: 74, g: 74, b: 99 };
+const CANCEL_INTERIOR_COLOR: RgbColor = { r: 115, g: 90, b: 181 };
+const CANCEL_CHECKER_L: RgbColor = { r: 206, g: 214, b: 123 };
+const CANCEL_CHECKER_O: RgbColor = { r: 181, g: 181, b: 90 };
+
+function drawCancelFrameRows(fb: Uint8Array): void {
+  for (const [y, ranges] of CANCEL_FRAME_ROWS) {
+    for (const part of ranges.split(",")) {
+      const [a, b] = part.split("-").map(Number);
+      for (let x = a!; x <= (b ?? a)!; x += 1) {
+        setPixel(fb, x, y, CANCEL_FRAME_COLOR.r, CANCEL_FRAME_COLOR.g, CANCEL_FRAME_COLOR.b);
+      }
+    }
+  }
+}
+
+/**
+ * The app's baked bg box (x186-228 y136-151) sits 2px low-right of the oracle
+ * window, so the slice first repaints the window footprint (x184-237 y134-153)
+ * with the party-menu checkerboard rows (L/O alternating, as in bg.png), then
+ * overpaints frame + interior + ball + text.
+ */
+function drawCancelWindowBackground(fb: Uint8Array): void {
+  for (let y = 134; y <= 153; y += 1) {
+    const color = (y - 134) % 2 === 0 ? CANCEL_CHECKER_L : CANCEL_CHECKER_O;
+    for (let x = 184; x <= 237; x += 1) {
+      setPixel(fb, x, y, color.r, color.g, color.b);
+    }
+  }
+}
+
+function drawCancelWindow(fb: Uint8Array): void {
+  drawCancelWindowBackground(fb);
+  // Interior color15 fills the right half (x202-235) between the divider and
+  // the right frame; the ball + CANCEL text overpaint their own footprints.
+  for (let y = 138; y <= 149; y += 1) {
+    for (let x = 202; x <= 235; x += 1) {
+      setPixel(fb, x, y, CANCEL_INTERIOR_COLOR.r, CANCEL_INTERIOR_COLOR.g, CANCEL_INTERIOR_COLOR.b);
+    }
+  }
+  drawCancelFrameRows(fb);
+  // The 16x16 pokeball (png offset (4,4)-(19,19) of the 32x32 frame 0), blitted
+  // pixel-0 transparent so the window frame shows through its corners.
+  const ball = partyMenuPokeballData as unknown as {
+    frame: IconTilesetFrame;
+    palette: readonly RgbColor[];
+  };
+  const bx = 198 - 16;
+  const by = 148 - 16;
+  for (let ty = 0; ty < ball.frame.rows; ty += 1) for (let tx = 0; tx < ball.frame.columns; tx += 1) {
+    const tile = ball.frame.tiles[ty * ball.frame.columns + tx]!;
+    for (let py = 0; py < 8; py += 1) for (let px = 0; px < 8; px += 1) {
+      const colorIndex = tile[py * 8 + px]!;
+      if (colorIndex === 0) continue;
+      const color = ball.palette[colorIndex];
+      if (!color) continue;
+      const x = bx + tx * 8 + px;
+      const y = by + ty * 8 + py;
+      if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+      setPixel(fb, x, y, color.r, color.g, color.b);
+    }
+  }
+  // "CANCEL" (sFontColorTable[0]: white ink + dark-grey shadow) centered in the
+  // window's right half; FONT_SMALL's ink lands 4px below the draw origin, so
+  // (204,137) puts the glyph bbox at the oracle's x204-233 y141-148.
+  const cancelPalette: RgbColor[] = [
+    { r: 0, g: 0, b: 0 },
+    { r: 255, g: 255, b: 255 },
+    { r: 115, g: 115, b: 115 },
+  ];
+  drawText(fb, fontSmall, charmap, "CANCEL", 204, 137, cancelPalette, { fg: 1, bg: 0, shadow: 2 });
+}
+
 /** Live voluntary party screen composed from source tiles, fonts, and icons. */
 export function renderBattlePartySelect(
   fb: Uint8Array,
@@ -767,4 +877,5 @@ export function renderBattlePartySelect(
   drawStandardWindowText(fb, line1!, 8, 137);
   if (line2) drawStandardWindowText(fb, line2, 8, 153);
   if (state.cursor === "cancel") drawStandardWindowText(fb, "▶ CANCEL", 168, 145);
+  drawCancelWindow(fb);
 }
