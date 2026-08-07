@@ -86,7 +86,7 @@ console.log("== §1 close window (oracle 964-980) ==");
 let closeOk = true;
 for (let f = 964; f <= 980; f++) {
   const data = loadOracle(closeDir, f);
-  if (!data) { console.log(`  frame ${f}: no capture`); continue; }
+  if (!data) { closeOk = false; fail(`frame ${f}: no capture in ${closeDir}`); continue; }
   const bg = px(data, 204, 140);
   const obj = px(data, 193, 138);
   const ybg = decodeY(bg[0], bg[1], bg[2], BG_BASE);
@@ -103,7 +103,7 @@ if (openDir) {
   let openOk = true;
   for (let f = 803; f <= 824; f++) {
     const data = loadOracle(openDir, f);
-    if (!data) { console.log(`  frame ${f}: no capture`); continue; }
+    if (!data) { openOk = false; fail(`frame ${f}: no capture in ${openDir}`); continue; }
     const bg = px(data, 204, 140);
     const obj = px(data, 193, 138);
     const ybg = decodeY(bg[0], bg[1], bg[2], BG_BASE);
@@ -121,7 +121,7 @@ let clsOk = true;
 for (const f of [960, 961, 962, 963]) {
   const od = loadOracle(closeDir, f);
   const ad = loadPng(closeDir, f, "app");
-  if (!od || !ad) { console.log(`  frame ${f}: no capture`); continue; }
+  if (!od || !ad) { clsOk = false; fail(`frame ${f}: no capture in ${closeDir}`); continue; }
   const oc = new Map<string, number>();
   const ac = new Map<string, number>();
   let tot = 0;
@@ -189,7 +189,7 @@ if (fieldDir) {
   let fieldOk = true;
   for (let f = 762; f <= 808; f++) {
     const data = loadOracle(fieldDir, f);
-    if (!data) { console.log(`  frame ${f}: no capture`); continue; }
+    if (!data) { fieldOk = false; fail(`frame ${f}: no capture in ${fieldDir}`); continue; }
     const bg = px(data, 4, 4);
     const obj = px(data, 176, 52);
     const ybg = decodeY(bg[0], bg[1], bg[2], FIELD_BG_BASE);
@@ -206,7 +206,7 @@ if (fieldDir) {
   };
   for (const [f, [ebg, eobj]] of Object.entries(edgeExp)) {
     const data = loadOracle(fieldDir, Number(f));
-    if (!data) continue;
+    if (!data) { fieldOk = false; fail(`edge frame ${f}: no capture in ${fieldDir}`); continue; }
     const ybg = decodeY(...px(data, 4, 4), FIELD_BG_BASE);
     const yobj = decodeY(...px(data, 176, 52), FIELD_OBJ_BASE);
     if (ybg !== ebg || yobj !== eobj) {
