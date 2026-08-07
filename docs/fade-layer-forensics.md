@@ -388,3 +388,167 @@ counts per class — e.g. ball-red app (181,66,0):195 ↔ oracle (156,57,0):195)
 so 823 goes byte-exact too once the OBJ layer is blended at y=2. Dense-a
 should then pin 763-830 with only the §3 message-region residual (960-963)
 remaining on the open side.
+
+## 8. OPEN-window residual classes A and B
+
+MEASUREMENT-ONLY follow-up to the §6 open-window forensics, on the last 13
+red frames of the party-menu OPEN fade (the brief's residual classes A + B).
+No `src/` edits. Produced by a side-lane worker; the fix plan (§8(e)) is a
+spec extension for a MAIN worker.
+
+Data source: `npm run compare -- mid-battle-switch-dense-a-off
+--capture-range 758:790 --summary` →
+`tools/compare/out/run-2026-08-07-23-00-35Z-60136` (deterministic — a second
+fresh run gives identical per-frame px counts). Probe:
+`node --experimental-strip-types tools/probe/fade-open-residual.ts <out-dir>`
+re-verifies every table below with a PASS/FAIL verdict; a missing capture is a
+FAIL (never a silent pass).
+
+### (a) Class B is the player's healthbox — the "opponent breathing" label is REFUTED
+
+| frame | diff px | bbox | opponent-sprite region (130,10)-(215,70) |
+| ---: | ---: | --- | --- |
+| 771 | 1639 | (127,74)-(229,110) | 0 px (byte-exact) |
+| 773 | 1639 | (127,74)-(229,110) | 0 px |
+| 775 | 1639 | (127,74)-(229,110) | 0 px |
+| 777 | 1639 | (127,74)-(229,110) | 0 px |
+| 779 | 2037 | (49,74)-(229,111) | 0 px |
+
+The diff bbox (127,74)-(229,110) is the **player's healthbox** (the box at
+x=127-229 holding nickname/Lv text, the HP bar, HP numbers, and the box's
+frame/interior/shadow — its settled colours are the §6 healthbox palette:
+interior (255,255,222), frame (222,214,181), HP-teal (82,107,99), dark-green
+(33,57,0), text shadow (66,66,66), all from `gBattleInterface_BallStatusBarPal`
+`graphics/battle_interface/ball_status_bar.png`). 779 widens to
+(49,74)-(229,111) by adding the **player's back sprite** (the RATTATA at
+x=49-95, body (181,115,181)). The opponent front sprite region is byte-exact
+on all five frames, and the §71 slice-a RAM receipt shows the opponent sprite
+settles at `SpriteCallbackDummy`/`{x2:0,y2:0}` with no idle under Battle Scene
+OFF — there is nothing for it to be "out of phase" with. The standing
+"opponent idle breathing squish" attribution does not survive the pixels.
+
+Sub-region px counts (frame 771; 773/775/777 scale identically at their own
+y_obj, 779 adds the back sprite):
+
+| sub-region | rows | px | oracle is one step... |
+| --- | --- | ---: | --- |
+| box top frame + first interior row | 74-77 | 356 | neither — content shifted (see below) |
+| nickname / Lv text row | 79-87 | 225 | " |
+| HP bar region | 89-95 | 424 | " |
+| HP numbers text row | 96-103 | 113 | " |
+| bottom frame + box shadow | 104-110 | 526 | " |
+
+### (b) Not two fade levels — one level, one row's content
+
+The brief's "two one-blend-step pairs in both directions" (oracle
+(156,156,132)↔app (132,132,107) etc.) is **not** two fade coefficients in the
+oracle. For every Class-B pixel the oracle's value equals `blend(settled,
+y_obj)` for a *different source pixel*: the pixel **one row above** it. Frame
+771: 1612 of its 1639 diff px satisfy `oracle(x,y) = blend(settled(x, y-1),
+y_obj=6)` (1619/1639 at 773-777; 1658 of 779's 2037). Example: the interior
+pixel (141,77) renders frame@6 because settled (141,76) is the frame row —
+`(255,255,222)` interior@6 would be (156,156,132), but the box's first
+interior row draws the frame row's content. So each "step apart" pair is the
+same colour sampled from the row above, at one y. **There is no third fade
+schedule**: the healthbox interior tracks `y_obj` exactly (per-frame table =
+the §6 table; the healthbox reference pixel (145,78) = (255,255,222) decodes
+y=0,2,2,4,4,…,16 on 766-781 = `y_obj(e)=min(16,2·max(0,⌊(e−2)/2⌋))`).
+
+The mechanism is a **1-row content offset of the healthbox OBJ tiles from
+frame 770** (the box renders the row above it, at the same OBJ blend y), not a
+delay or a separate ramp. Source context: the healthbox is an OBJ sprite
+composite (`sHealthboxPlayerSpriteTemplates`, `battle_interface.c:209-231`,
+palette `TAG_HEALTHBOX_PAL` = `gBattleInterface_BallStatusBarPal`,
+`battle_gfx_sfx_util.c:80-83`); the field fade-out is
+`PlayerHandleChoosePokemon`'s `BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16,
+RGB_BLACK)` (`battle_controller_player.c:2668`), whose
+`UpdateNormalPaletteFade`/`objPaletteToggle` (`palette.c:406-466`) puts every
+OBJ palette on `y_obj` (§6). The exact function that re-uploads the healthbox
+tiles one row low during this window is not conclusively pinned from static
+source this session (the tile copy sites are `TextIntoHealthboxObject`/
+`FillHealthboxObject`, `battle_interface.c:2575-2601`); the pixel
+characterization above is the load-bearing evidence. 779 additionally shows
+the back sprite on a 1-row content offset (content-from-below at `y_obj=14`,
+354 px) from 778.
+
+### (c) Why it starts at 771 and not 766
+
+The content offset **begins at frame 770**, not at the fade's first blend:
+765-769 all decode exactly at their OBJ y (0 undecodable px), and 767/769 are
+byte-exact. 770 (y_obj=4) is the first frame with aliased healthbox rows. 770
+is a Class A frame (BG y=6 ≠ OBJ y=4): the *whole* healthbox already differs
+there (the OBJ-lag), so the 1-row artifact is hidden inside 770's 7453 px. 771
+is the **first frame after 770 where BG==OBJ** (both y=6), so the healthbox's
+un-shifted interior now matches the app's single-y blend and the only residual
+is the shifted rows → the clean 1639 px Class B. Not a delayed or slower ramp
+— a content artifact that begins at 770 and is first *isolated* at 771.
+
+### (d) Class A OBJ mask (for the MAIN fix)
+
+Derived from the oracle alone (frame 766 blends BG at y_bg=2, OBJ untouched at
+y_obj=0): pixels **unchanged** 765→766 but **changed** 766→767 are OBJ; pixels
+changed 765→766 are BG. Identity-blend handling was a non-issue on this scene:
+no pixel stayed unchanged at 766 and 767 and then changed only at 768 (a
+would-be dark BG whose y=2 blend is identity) and none changed only at 769 (a
+would-be dark OBJ); every settled pixel has changed by 769. The resulting
+**OBJ mask is exactly 7528 px**, bbox (13,16)-(229,111), and it equals the
+app-vs-oracle diff at 766 pixel-for-pixel (7528 = 7528, set-identical), so the
+oracle-only derivation is cross-confirmed by the app comparison.
+
+The OBJ stack is the **switch-selection screen's** sprite set, not a standard
+two-battler battle:
+
+| OBJ sub-region | bbox | dominant settled classes |
+| --- | --- | --- |
+| summary window (frame/interior/HP bar) | (13,16)-(109,40) | interior 910, frame 380, HP-teal 234 |
+| separator rule | (21,41)-(187,43) | HP-teal 262 |
+| summary mon sprite (RATTATA) | (163,44)-(189,71) | body 37, shade 66, highlight 24, outline 63 |
+| player healthbox | (127,74)-(229,110) | interior 762+663, frame 292+258, HP-teal 322, shadow 135 |
+| player back sprite (RATTATA) | (49,74)-(95,111) | body 239+251 |
+
+So the "two battler sprites + both healthboxes" expectation does **not** apply
+here — this scene carries one healthbox, one back sprite, the summary window,
+and the summary mon sprite. The surprise to note for the fix: the summary
+window itself is OBJ (its frame/interior/HP bar), so a BG/OBJ split must pull
+it out too.
+
+### (e) Fix plan (for a MAIN worker, per ISSUES #80)
+
+The open-side render must stop blending the whole battle scene at one `y_bg`:
+
+1. **Split the settled scene into BG + OBJ layers.** `drawBattleScene`
+   currently draws one opaque framebuffer then `applyFadeToBlack(fb, y_bg)`.
+   Split it into a BG pass (the screen background, the party-list window
+   interior/text, the message box / action-menu strip — 30872 px change at
+   766) and an OBJ pass (the 7528 px mask above: summary window, summary mon
+   sprite, player healthbox, player back sprite). Blend BG at `y_bg`, then
+   composite OBJ blended at `y_obj = y_bg − 2` (clamped ≥ 0) over it, using
+   the §4 alpha-coverage mask idiom. This alone makes the 8 Class A frames
+   (766/768/770/772/774/776/778/780) byte-exact.
+2. **Model the Class-B content offset.** From frame 770, the healthbox OBJ
+   content is rendered one row low (each healthbox pixel shows the settled
+   pixel one row above, still at `y_obj`); from 778 the back sprite is one row
+   high. Cost is small and enumerable — the healthbox is a ~100×36 sprite
+   region and the shifted set is 1619 px (2% of screen), so this is a
+   per-sprite row offset, not a second compositor. If the MAIN worker prefers,
+   the healthbox can be redrawn from the settled tiles with a +1px vertical
+   tile-source offset (and the back sprite with a −1px offset) instead of a
+   general mechanism.
+3. **Predicted acceptance.** Extend dense-a's `captureFrames` with 766, 768,
+   770, 771, 772, 773, 774, 775, 776, 777, 778, 779, 780 (13 frames) → 330 →
+   **338/338** on top of whatever the concurrent item-(c) step lands. The
+   healthbox's own interior rows and all non-Open frames are already pinned.
+
+### (f) Verification
+
+`node --experimental-strip-types tools/probe/fade-open-residual.ts
+<compare-out-dir-758-790>` prints all §8 tables (Class-A frame diffs, OBJ mask
+7528 px, Class-B frame diffs 1639/2037 px with the row-above-shift count,
+healthbox interior `y_obj` schedule, and the 770-begins/771-isolates edge
+check) with a PASS/FAIL verdict. PASS on the receipt dir below; FAIL (exit 1)
+on a truncated capture dir (missing capture is a FAIL, verified).
+
+Receipt for this doc:
+`tools/compare/out/run-2026-08-07-23-00-35Z-60136` (capture-range 758:790,
+`mid-battle-switch-dense-a-off`; probe PASSes; a second fresh run
+`run-2026-08-07-22-41-29Z-52643` gives identical px counts).
