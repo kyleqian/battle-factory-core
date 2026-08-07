@@ -1095,16 +1095,27 @@ describe("battle resolution presentation receipt ownership", () => {
       .toBe(false);
     expect(midBattleSwitchInAt(MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED, 0).monVisible)
       .toBe(true);
-    expect(midBattleSwitchInAt(0, 0).ballVisible).toBe(true);
-    expect(midBattleSwitchInAt(MID_BATTLE_SWITCH_BALL_LAND_ELAPSED - 1, 0).ballVisible)
-      .toBe(true);
+    // ISSUES #78 window A: the rendered ball lags the RAM probe one tick, so
+    // it is visible only for rendered frames 1143-1184 (elapsed 3-44); the
+    // ball sprite exists at RAM 1141-1142 but renders no pixels until elapsed
+    // 3, and at elapsed 45+ its rotating opaque pixels sit below the terrain
+    // clip row 112 (oracle frames 1140-1142 / 1185 have zero ball pixels).
+    expect(midBattleSwitchInAt(0, 0).ballVisible).toBe(false);
+    expect(midBattleSwitchInAt(2, 0).ballVisible).toBe(false);
+    expect(midBattleSwitchInAt(3, 0).ballVisible).toBe(true);
+    expect(midBattleSwitchInAt(44, 0).ballVisible).toBe(true);
+    expect(midBattleSwitchInAt(45, 0).ballVisible).toBe(false);
     expect(midBattleSwitchInAt(MID_BATTLE_SWITCH_BALL_LAND_ELAPSED, 0).ballVisible)
       .toBe(false);
-    // The ball throws from the player corner toward the mon spot.
-    const first = midBattleSwitchInAt(0, 0).ballPosition;
-    const last = midBattleSwitchInAt(MID_BATTLE_SWITCH_BALL_LAND_ELAPSED - 1, 0).ballPosition;
+    // The ball throws from the player corner toward the mon spot; the center
+    // is the RAM ball sprite's x2/y2 (base (24,68)), one tick lagged.
+    const first = midBattleSwitchInAt(3, 0).ballPosition;
+    const last = midBattleSwitchInAt(44, 0).ballPosition;
     expect(first.x).toBe(24);
     expect(first.y).toBe(68);
+    expect(midBattleSwitchInAt(44, 0).ballMatrix).toEqual({
+      pa: -109, pb: -231, pc: 231, pd: -109,
+    });
     expect(last.x).toBeGreaterThan(50);
     expect(last.y).toBeGreaterThan(80);
   });

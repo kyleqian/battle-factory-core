@@ -35276,12 +35276,21 @@ function drawMidBattleSwitchInSprite(
   paletteOverride?: RgbColor[],
 ): void {
   if (state.ballVisible) {
-    drawSpriteSheet(
+    // ISSUES #78 window A: the thrown ball renders from the RAM ball sprite's
+    // per-tick state (center + `sAffineAnim_BallRotate_4` matrix, one tick
+    // lagged), affine-sampled around the center and clipped by the player
+    // front-terrain row 112. Pixel-verified byte-exact for frames 1143-1184.
+    drawSpriteSheetAffineRotate(
       fb,
       BALL_CLOSED_TILESET,
       summaryBall.palette,
       state.ballPosition.x,
       state.ballPosition.y,
+      state.ballMatrix.pa,
+      state.ballMatrix.pb,
+      state.ballMatrix.pc,
+      state.ballMatrix.pd,
+      112,
     );
     return;
   }

@@ -59,6 +59,90 @@ export const BATTLE_RESOLUTION_STAT_CHANGE_FRAMES = 2;
  * relative to that command's frame 1140.
  */
 export const MID_BATTLE_SWITCH_BALL_LAND_ELAPSED = 46; // 1140+46 = 1186: ball lands, emerge begins (pa 1638)
+/**
+ * ISSUES #78 window A: the thrown ball's visible span and per-frame state.
+ *
+ * The oracle RENDERED ball (pixel-verified frames 1143-1184, byte-exact via
+ * the affine sampler in `battleScene.ts`) lags the RAM probe one tick: rendered
+ * frame N shows the ball sprite's state at RAM tick N-1, so the ball first
+ * renders at trace 1143 (elapsed 3, the ball sprite created at RAM 1141 with
+ * no translation) and last at trace 1184 (elapsed 44, RAM 1183's (45,47)
+ * translation); at elapsed 45 (RAM 1184) the ball's rotated opaque pixels all
+ * sit at y>=112 and the terrain clip hides them entirely (oracle 1185 has zero
+ * ball pixels). At elapsed 0-2 there is no rendered ball (oracle 1140-1142).
+ *
+ * Position is the RAM ball sprite's `x2`/`y2` (base (24,68), affine sprite so
+ * the fields are the CENTER), and the affine matrix is the RAM
+ * `gOamMatrices[2]` state (identical to `battleMenu.ts`'s committed
+ * `BALL_SPIN_TABLE`, shared `sAffineAnim_BallRotate_4`; both verified
+ * value-for-value against `docs/probes/mid-battle-switch-oam/oam-ram-probe.json`
+ * ticks 1142-1183). The table is indexed by `elapsed - 2` (elapsed 3 -> RAM
+ * 1142 -> entry 0, ... elapsed 44 -> RAM 1183 -> entry 41).
+ *
+ * Source: `SpriteCB_PlayerMonSendOut_2` (`pokeball.c:924-978`) +
+ * `InitAnimArcTranslation`/`TranslateAnimHorizontalArc`
+ * (`battle_anim_mons.c:785-808`) with `data[0]=25`, `stepX=490`,
+ * `stepY=582`, `data[5]=-30` (the mid-battle send-out's target y, 24px lower
+ * than the battle-START throw's 562). The battle-START forced-switch ball
+ * (`battleScene.ts` `forcedSwitchBallCenter`) ports the same mechanism; this
+ * table pins the exact per-tick result for THIS window's trace so the two
+ * routes stay independent.
+ */
+export const MID_BATTLE_SWITCH_BALL_FIRST_VISIBLE_ELAPSED = 3; // rendered 1143
+export const MID_BATTLE_SWITCH_BALL_LAST_VISIBLE_ELAPSED = 44; // rendered 1184
+export const MID_BATTLE_SWITCH_BALL_BASE_X = 24;
+export const MID_BATTLE_SWITCH_BALL_BASE_Y = 68;
+export const MID_BATTLE_SWITCH_BALL_THROW_TABLE: readonly Readonly<{
+  x2: number;
+  y2: number;
+  pa: number;
+  pb: number;
+  pc: number;
+  pd: number;
+}>[] = [
+  { x2: 0, y2: 0, pa: 256, pb: 0, pc: 0, pd: 256 },
+  { x2: 1, y2: -2, pa: 256, pb: 0, pc: 0, pd: 256 },
+  { x2: 3, y2: -4, pa: 256, pb: 0, pc: 0, pd: 256 },
+  { x2: 5, y2: -5, pa: 256, pb: 0, pc: 0, pd: 256 },
+  { x2: 7, y2: -6, pa: 256, pb: 0, pc: 0, pd: 256 },
+  { x2: 9, y2: -7, pa: 256, pb: 0, pc: 0, pd: 256 },
+  { x2: 11, y2: -8, pa: 256, pb: 0, pc: 0, pd: 256 },
+  { x2: 13, y2: -8, pa: 256, pb: 0, pc: 0, pd: 256 },
+  { x2: 14, y2: -8, pa: 209, pb: -147, pc: 147, pd: 209 },
+  { x2: 14, y2: -8, pa: 86, pb: -241, pc: 241, pd: 86 },
+  { x2: 15, y2: -7, pa: -68, pb: -246, pc: 246, pd: -68 },
+  { x2: 15, y2: -8, pa: -197, pb: -162, pc: 162, pd: -197 },
+  { x2: 16, y2: -8, pa: -255, pb: -18, pc: 18, pd: -255 },
+  { x2: 17, y2: -8, pa: -219, pb: 131, pc: -131, pd: -219 },
+  { x2: 17, y2: -7, pa: -103, pb: 234, pc: -234, pd: -103 },
+  { x2: 18, y2: -7, pa: 49, pb: 251, pc: -251, pd: 49 },
+  { x2: 19, y2: -7, pa: 185, pb: 176, pc: -176, pd: 185 },
+  { x2: 19, y2: -6, pa: 253, pb: 37, pc: -37, pd: 253 },
+  { x2: 20, y2: -6, pa: 228, pb: -115, pc: 115, pd: 228 },
+  { x2: 20, y2: -5, pa: 120, pb: -225, pc: 225, pd: 120 },
+  { x2: 21, y2: -5, pa: -31, pb: -254, pc: 254, pd: -31 },
+  { x2: 22, y2: -4, pa: -171, pb: -189, pc: 189, pd: -171 },
+  { x2: 22, y2: -3, pa: -249, pb: -56, pc: 56, pd: -249 },
+  { x2: 23, y2: -2, pa: -236, pb: 97, pc: -97, pd: -236 },
+  { x2: 24, y2: -2, pa: -136, pb: 216, pc: -216, pd: -136 },
+  { x2: 24, y2: -1, pa: 12, pb: 255, pc: -255, pd: 12 },
+  { x2: 25, y2: 0, pa: 157, pb: 201, pc: -201, pd: 157 },
+  { x2: 26, y2: 1, pa: 244, pb: 74, pc: -74, pd: 244 },
+  { x2: 26, y2: 1, pa: 243, pb: -80, pc: 80, pd: 243 },
+  { x2: 27, y2: 2, pa: 152, pb: -205, pc: 205, pd: 152 },
+  { x2: 27, y2: 3, pa: 6, pb: -255, pc: 255, pd: 6 },
+  { x2: 28, y2: 5, pa: -142, pb: -212, pc: 212, pd: -142 },
+  { x2: 29, y2: 5, pa: -238, pb: -92, pc: 92, pd: -238 },
+  { x2: 29, y2: 7, pa: -248, pb: 62, pc: -62, pd: -248 },
+  { x2: 31, y2: 10, pa: -167, pb: 193, pc: -193, pd: -167 },
+  { x2: 33, y2: 15, pa: -25, pb: 254, pc: -254, pd: -25 },
+  { x2: 35, y2: 20, pa: 126, pb: 222, pc: -222, pd: 126 },
+  { x2: 37, y2: 25, pa: 231, pb: 109, pc: -109, pd: 231 },
+  { x2: 39, y2: 30, pa: 252, pb: -43, pc: 43, pd: 252 },
+  { x2: 41, y2: 36, pa: 181, pb: -181, pc: 181, pd: 181 },
+  { x2: 43, y2: 41, pa: 43, pb: -252, pc: 252, pd: 43 },
+  { x2: 45, y2: 47, pa: -109, pb: -231, pc: 231, pd: -109 },
+];
 export const MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED = 48; // 1140+48 = 1188: mon becomes visible (pa 862)
 export const MID_BATTLE_SWITCH_EMERGE_END_ELAPSED = 59; // 1140+59 = 1199: scale-down completes (pa 256)
 // The rendered healthbox lags the RAM schedule by one tick (§10 timeline note,
@@ -169,8 +253,17 @@ export type MidBattleSwitchInView = Readonly<{
   elapsed: number;
   battler: 0 | 1;
   ballVisible: boolean;
-  /** Best-effort throw position (px, top-left of the 16x16 ball sprite). */
+  /**
+   * Thrown-ball CENTER (px) + affine matrix, from the exact per-tick RAM
+   * state (`MID_BATTLE_SWITCH_BALL_THROW_TABLE`, rendered one tick behind the
+   * probe — see its doc). `ballVisible` is true only for rendered frames
+   * 1143-1184 (elapsed 3-44): before that the ball sprite doesn't exist yet
+   * and at elapsed 45+ the rotating ball's opaque pixels sit below the
+   * terrain clip row. The scene renderer draws the 16x16 closed ball affine-
+   * sampled around this center, clipped at y=112.
+   */
   ballPosition: Readonly<{ x: number; y: number }>;
+  ballMatrix: Readonly<{ pa: number; pb: number; pc: number; pd: number }>;
   monVisible: boolean;
   /** `sAffineAnim_Battler_Emerge` accumulator during the ball-release scale-down. */
   emergeAccumulator: number;
@@ -190,21 +283,16 @@ export function midBattleSwitchInAt(
   elapsed: number,
   battler: 0 | 1,
 ): MidBattleSwitchInView {
-  const n = Math.max(
-    0,
-    Math.min(elapsed, MID_BATTLE_SWITCH_BALL_LAND_ELAPSED - 1),
-  );
-  // TranslateAnimHorizontalArc (battle_anim_mons.c:794), the same source
-  // shape the battle-START player throw uses (battleMenu.ts
-  // playerThrowBallTopLeft), re-parameterized for this window's own base
-  // (24,68) -> mon spot over the 45-frame throw. Pixel evidence in §3
-  // confirms the right-down drift; the arc bump is modeled, not yet
-  // brute-force fit.
-  const dx = Math.floor((n * ((48 << 8) / MID_BATTLE_SWITCH_BALL_LAND_ELAPSED)) / 256);
-  const yStep = ((25 << 8) / MID_BATTLE_SWITCH_BALL_LAND_ELAPSED);
-  const linearDy = Math.floor((n * yStep) / 256);
-  const arcIdx = Math.floor((n * 1310) / 256);
-  const arcBump = Math.floor(-30 * Math.sin((2 * Math.PI * arcIdx) / 256));
+  // The ball's rendered state is the RAM probe one tick earlier (trace 1143 =
+  // elapsed 3 first shows RAM 1142's (0,0) state; trace 1184 = elapsed 44
+  // shows RAM 1183's (45,47); elapsed 45's RAM 1184 state renders no opaque
+  // pixels above the terrain clip). Table entry = elapsed - 2.
+  const ballEntry = elapsed - MID_BATTLE_SWITCH_BALL_FIRST_VISIBLE_ELAPSED;
+  const ballVisible = ballEntry >= 0
+    && ballEntry < MID_BATTLE_SWITCH_BALL_THROW_TABLE.length;
+  const ball = ballVisible
+    ? MID_BATTLE_SWITCH_BALL_THROW_TABLE[ballEntry]!
+    : null;
   const monVisible = elapsed >= MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED;
   // The emerge's scale (and y2 descent) render one tick behind the §10.3
   // RAM table -- the mon becomes visible at elapsed 48 but that frame shows
@@ -229,8 +317,16 @@ export function midBattleSwitchInAt(
   return Object.freeze({
     elapsed,
     battler,
-    ballVisible: elapsed < MID_BATTLE_SWITCH_BALL_LAND_ELAPSED,
-    ballPosition: Object.freeze({ x: 24 + dx, y: 68 + linearDy + arcBump }),
+    ballVisible,
+    ballPosition: ball
+      ? Object.freeze({
+          x: MID_BATTLE_SWITCH_BALL_BASE_X + ball.x2,
+          y: MID_BATTLE_SWITCH_BALL_BASE_Y + ball.y2,
+        })
+      : Object.freeze({ x: MID_BATTLE_SWITCH_BALL_BASE_X, y: MID_BATTLE_SWITCH_BALL_BASE_Y }),
+    ballMatrix: ball
+      ? Object.freeze({ pa: ball.pa, pb: ball.pb, pc: ball.pc, pd: ball.pd })
+      : Object.freeze({ pa: 256, pb: 0, pc: 0, pd: 256 }),
     monVisible,
     emergeAccumulator,
     healthboxDx,
