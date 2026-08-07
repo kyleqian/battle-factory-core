@@ -1250,6 +1250,16 @@ export function createBattleResolutionPresentationRenderView(
         ? "fight"
       : state.lifecycle.phase === "next-command-handoff"
       || switchIn?.phase === "blankMessage"
+      // ISSUES #78 tail: the post-voluntary-switch turn-end clears the held
+      // box text 2 frames before the turn-end command completes (oracle
+      // 1398→1399, app +2 = 1400→1401). Route-scoped to the switch seam; the
+      // shared next-command-handoff clock and every other seam stay untouched.
+      || (
+        command?.type === "turn-end"
+        && state.sourceDecision.kind === "switch"
+        && state.lifecycle.phaseElapsed
+          >= command.timing.minimumFrames - 2
+      )
         ? "blank"
         : "message",
     confirmHandoff,

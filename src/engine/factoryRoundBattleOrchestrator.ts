@@ -53,10 +53,10 @@ import {
   type BattleResolutionPresentationState,
 } from "./battleResolutionPresentation.ts";
 import {
+  BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES,
   createBattleResolutionPresentationRenderView,
   isBattleResolutionButtonMessageReady,
   isBattleResolutionCommandComplete,
-  isBattleResolutionNextCommandHandoffComplete,
 } from "./battleResolutionPresentationRender.ts";
 import {
   advancePartySelect,
@@ -1774,7 +1774,16 @@ export function advanceFactoryRoundBattleResolution(
     "next-command-handoff",
     resolution.lifecycle.phaseElapsed + 1,
   );
-  if (!isBattleResolutionNextCommandHandoffComplete(advanced)) {
+  // ISSUES #78 tail: the post-voluntary-switch seam's whole fight-menu
+  // sequence runs exactly one frame late (oracle 1405→1406, app 1406→1407).
+  // Shorten ONLY this seam's pre-reveal handoff by one frame; the shared
+  // BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES clock and every other seam
+  // stay untouched (the menu seam's blank box is the resolution render's
+  // own `bottom === "blank"`, which is not lengthened by this).
+  const handoffFrames = resolution.sourceDecision.kind === "switch"
+    ? BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES - 1
+    : BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES;
+  if (advanced.lifecycle.phaseElapsed < handoffFrames) {
     return Object.freeze({
       ...state,
       battleResolutionPresentation: advanced,
