@@ -5,6 +5,61 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 976 — [bounded MAIN worker, 2026-08-07] REST guard + walkable Lobby free-roam (RUNGS 1-3+5 of the lobby step); RUNG 4 spec NOT promoted — named §-fact disagreement + turn pose A
+
+- **State:** master `07e50d44`, clean. Typecheck + `npm run build` green;
+  `npm run test:smoke` **347/347**; touched test files **49/49** (postwin 35,
+  factoryLobbyTerminal 14, factoryLobbyFreeRoam 10). Full `npm test` NOT run
+  (worker rule).
+- **Did — RUNG 1 (REST guard):** the guard already existed in `postwin.ts`
+  (`acceptPostwinContinuation` cursor-2 no-op). Strengthened the Tier-1 pin:
+  A-on-REST returns the SAME state object (identity no-op) + a DOWN-traversal
+  test walking RECORD→REST→RETIRE (the committed retire specs pin the cursor
+  visible on REST at 6641 — the guard is the A press, not a swallowed DOWN).
+  Red-verified by un-guarding src (pin failed), restored. Regressions re-held
+  before/after: `postwin-retire-off` **211/211**, `postwin-record-off`
+  **204/204**.
+- **Did — RUNGS 2+3+5 (walkable Lobby):** `src/engine/factoryLobbyFreeRoam.ts`
+  — 4-dir movement at the measured cadence (8f turn-in-place on a direction
+  change, 16f/tile, tap = exactly one tile, +1 press-latency buffer so the
+  app's turn-visible window lands on the oracle's canonical tick, e.g. turn
+  rendered 5174-5181), collision from the extracted layout grid + the standing
+  NPC cells (attendant (4,7) etc.) + the door-mat cells **(9,11)/(10,11)
+  BLOCKED — the no-exit divergence**, borders impassable, A/B ignored (silent
+  NPCs). Handoff in `core.ts`: at the decline chain's box-gone age (loss
+  tick 5093) the terminal renders hand off to the free-roam overworld — the
+  spawn frame is byte-identical to the bare terminal field, so the handoff is
+  invisible (`loss-terminal-decline-continuation-off` **155/155** holds).
+  Extractor now emits the player's full 9-frame walking.png sheet;
+  `factoryTerminalRender.ts` draws the static terminal player with frame 1
+  (north stand) and the free-roam player at its interpolated position +
+  walk-cycle pose. 10 Tier-1 pins in `tests/factoryLobbyFreeRoam.test.ts`
+  (turn-vs-step, 16f tile clock, NPC/counter/border/door-mat blocks,
+  walkable cells, A-no-op); red-verified the turn pin by shrinking the turn
+  constant.
+- **RUNG 4 (spec) NOT promoted — two named blockers:** (1) the oracle's
+  in-place turn is a 2-pose 8-frame animation (poses 5174-5177 + 5178-5181);
+  pose B = the target standing frame (my model matches 5178-5181 byte-exact),
+  but pose A is an unidentified frame with no source-sheet counterpart
+  (~167px residual on 5174-5177). (2) **§-fact disagreement (STOP-and-report
+  per brief):** the doc's §3a "camera fixed / whole interior rendered on one
+  fixed frame" holds for RAM `gCamera` (-56,0 constant, probe re-run
+  confirmed), but the RENDERED field scrolls by a sub-tile camera offset
+  (`sFieldCameraOffset`/`gFieldCamera`, field_camera.c `CameraUpdate`) —
+  1px/frame during each step, snapping back at the tile boundary. The app
+  implements the doc's fixed-camera literal, so every in-step frame differs
+  by the offset (loss-beyond-boundary-off walk samples went 162→**165**/183
+  but the ~18 movement frames stay residual). A full-match walk spec needs
+  that sub-tile scroll model + pose A — not forced into the cap's tail. The
+  scratch `loss-lobby-walk-off.json` I drafted was deleted (would be red).
+- **Next:** supervisor decides: (a) land a sub-tile camera-scroll render +
+  identify turn pose A to promote `loss-lobby-walk-off`; or (b) accept the
+  free-roam state-machine landing and move to the next roadmap item.
+- **Notes:** no PAPERCUTS. `loss-beyond-boundary-off` improved and stays
+  committed (165/183, movement frames named residual).
+
+---
+
 ## 975 — [bounded MAIN worker, 2026-08-07] #80 slice 3 + box-color0 landed: party-menu band 7038/7110 → 1224/1270 px/frame
 
 - **State:** master `4154fafc`, clean. Typecheck green; `npm run test:smoke`
@@ -69,45 +124,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   RAM-verified, voluntary route gets the source's slot-0) → slice 6 (fade +
   spec extension) vs lobby walkable + REST guard (priority order holds:
   lobby first if time forces a choice).
-
-## 973 — [bounded MAIN worker, 2026-08-06] battle-message pacing holds bound — #81 4b CLOSED 57/57, #78's 1256-1407 message-pacing window byte-exact
-
-- **State:** master `13a368a3`, clean. Typecheck green; `npm run test:smoke`
-  **347/347**; touched test file 35/35. Full `npm test` NOT run (worker rule —
-  supervisor runs it after merge); build run green.
-- **Did (bind the two hold classes; `docs/battle-message-pacing-ground-truth.md`**
-  **is the measured target, verify script PASS):** (1) Class 2 — added
-  `STRINGID_BUTITFAILED` + `STRINGID_BUTNOTHINGHAPPENED` to
-  `WAITMESSAGE_LONG_MESSAGE_IDS` (holdFrames 64, the ButItFailed/Splash script
-  tails' `waitmessage B_WAIT_TIME_LONG`). (2) Class 1 — route-scoped
-  `STRINGID_USEDMOVE` post-print hold for the failed/no-anim path: the source
-  runs `pause B_WAIT_TIME_SHORT` (32)+~6 dispatch / the SPLASH controller span
-  with NO waitmessage, measured 38 (torment) / 39 (SPLASH). The orchestrator
-  carries `usedMessageHoldFrames` and applies it to every command presentation
-  it installs (incl. the fresh handoff at the next command boundary, so the
-  turn-2 switch resolution gets it); the route hold counts from print
-  completion (`minimumFrames: 0`, exact printable length — the 23-glyph
-  "…used SPLASH!" clears at +62 not +63). Default 0 keeps the standard hit
-  chain untouched.
-- **Verified:** `fight-menu-chrome-torment-off` **55/57 → 57/57** (frames
-  1100/1200 green, #81 remainder 4b closed). New dense spec
-  `mid-battle-switch-pacing-b-off` **148/152**: the **1256-1398 message-pacing
-  window is byte-exact** (M1 "…used SPLASH!" typing + 39-hold, M2 "But nothing
-  happened!" typing + 64-hold). Named residual, the #78 turn-boundary
-  menu-chrome class (NOT trimmed, NOT chased per brief): **1399/1400** = app's
-  box text clears 2 frames late (its separate `turn-end` command persists the
-  M2 text past the oracle's 1399 clear — the 64+10 turn-end tail seam, not the
-  message hold), **1406/1407** = action-menu/fight-menu redraw chrome (the #78
-  window's own binding target). Regressions unchanged:
-  `battle-command-generated-off` **128/128**, `mid-battle-switch-dense-a-off`
-  **221/221**, `postwin-record-off` **204/204**. New Tier-1 pins in
-  `tests/battleResolutionPresentation.test.ts` (the two WAITMESSAGE_LONG ids
-  resolve to the shared 64-hold object; the route hold fires with
-  `usedMessageHoldFrames` and does NOT fire by default) — red-verified by
-  reverting the src (1/2 pins fail), restored green.
-- **Next:** #78's 1399-1407 box-clear + action-menu redraw binding; then per
-  the ordered list: #80 rank 6, lobby walkable + REST guard.
-- **Notes:** no PAPERCUTS. The verify script's `_verify-*` scratch dirs and the
-  two pacing spec fixtures are the same battle (identical segments/parties,
-  different capture windows). B_WAIT_TIME_MED (48) still unexercised.
-
