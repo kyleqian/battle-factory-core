@@ -390,3 +390,163 @@ frame 2 (stand west), same pattern.
 standing pose (south=0, north=1, west=2, east=2 h-flipped), all at fixed
 (112,56). The extractor's 9-sheet-frame residual for pose A was a wrong
 candidate assumption — pose A **is** a banked frame (frame 4 / 8).
+
+## 6. BLOCKER 3 (2026-08-07 SIDE worker) — the wandering-woman NPC
+`MOVEMENT_TYPE_WANDER_AROUND`
+
+The last named residual of `loss-beyond-boundary-off` (183/183 promotion gate)
+is the woman (`OBJ_EVENT_GFX_WOMAN_1`, map.json spawn **(3,11)**,
+`MOVEMENT_TYPE_WANDER_AROUND`) leaving her spawn at **tick 5185** and settling
+covered at **(3,10)** from **5200**. Measured by a dense RAM probe
+(`tools/probe/dump-lobby-wander-npc.py`, run through
+`tools/run-mgba-probe.py`) reading `gObjectEvents[16]` + `gSprites[]` + the
+object-event's sprite every tick of the residual window (both committed lobby
+fixtures), twice-run byte-identical.
+
+### 6a. Per-tick schedule (loss-beyond-boundary fixture, canonical ticks)
+
+Map coords = grid − 7 (`MAP_OFFSET`, `include/fieldmap.h:18`). Facing is the
+real field-direction enum (`constants/global.h:138-141`: SOUTH=1/NORTH=2).
+`movementActionId` 0x09 = `MOVEMENT_ACTION_WALK_NORMAL_UP`
+(`constants/event_object_movement.h:96`), 0xFF = none. World box-top = the
+sprite's logical `x/y` (`gSprites[i].x/y`, `sprite.h`), the follow-cam render
+anchor; **OAM is camera-relative** and differs per fixture (the walk probe's
+player walks, so the woman's OAM rides the camera), while **world box-top is
+camera-independent and identical across both fixtures** (verified tick-by-tick:
+loss 5170-5254 vs walk 5170-5254, 85/85 ticks identical).
+
+| canonical tick | map tile | facing | actionId | world box-top (x,y) | OAM (loss fixture) | pose (animNum/idx) | meaning |
+|---:|---|---:|---:|---:|---:|---:|---|
+| 5170-5184 | (3,11) | SOUTH | 0xFF | (104,160) | (96,104) | 4/1 | idle at spawn (standing south) |
+| **5185** | (3,10) | NORTH | 0x09 | (104,159) | (96,103) | 5/2 | step starts, 1px up |
+| 5186 | (3,10) | NORTH | 0x09 | (104,158) | (96,102) | 5/2 | 2px up |
+| 5187 | (3,10) | NORTH | 0x09 | (104,157) | (96,101) | 5/2 | |
+| 5188 | (3,10) | NORTH | 0x09 | (104,156) | (96,100) | 5/2 | |
+| 5189 | (3,10) | NORTH | 0x09 | (104,155) | (96,99) | 5/2 | |
+| 5190 | (3,10) | NORTH | 0x09 | (104,154) | (96,98) | 5/2 | |
+| 5191 | (3,10) | NORTH | 0x09 | (104,153) | (96,97) | 5/2 | |
+| 5192 | (3,10) | NORTH | 0x09 | (104,152) | (96,96) | 5/2 | |
+| 5193 | (3,10) | NORTH | 0x09 | (104,151) | (96,95) | 5/3 | |
+| 5194 | (3,10) | NORTH | 0x09 | (104,150) | (96,94) | 5/3 | |
+| 5195 | (3,10) | NORTH | 0x09 | (104,149) | (96,93) | 5/3 | |
+| 5196 | (3,10) | NORTH | 0x09 | (104,148) | (96,92) | 5/3 | |
+| 5197 | (3,10) | NORTH | 0x09 | (104,147) | (96,91) | 5/3 | |
+| 5198 | (3,10) | NORTH | 0x09 | (104,146) | (96,90) | 5/3 | |
+| 5199 | (3,10) | NORTH | 0x09 | (104,145) | (96,89) | 5/3 | |
+| **5200** | (3,10) | NORTH | 0xFF | (104,144) | (96,88) | 5/3 | step completes, settles |
+| 5200-5254 | (3,10) | NORTH | 0xFF | (104,144) | (96,88) | 5/3 | idle at new tile (frozen walk-2 pose) |
+
+Compact rule (tick T, 5185 ≤ T ≤ 5199): **world box-top y = 160 − (T − 5184)**,
+x = 104; facing NORTH; actionId 0x09. For T ≤ 5184: world (104,160), facing
+SOUTH, standing. For T ≥ 5200: world (104,144), facing NORTH, frozen. The
+woman's walk cycle is the ordinary overworld one — 1 px/frame, 16 frames per
+tile, matching §3a — with no in-place turn before it (WanderAround picks a
+direction and walks directly, `event_object_movement.c:2599-2612`).
+
+**The 12 red frames** (5186, 5188, 5190, 5195, 5200, 5205, 5210, 5215, 5220,
+5224, 5240, 5254) are all this NPC: the app draws her at her static map-json
+tile (3,11) ⇒ world (104,160) ⇒ OAM (96,104) for every tick, while the oracle
+moves her 1px/frame up through 5185-5199 and settles at OAM (96,88) from 5200.
+A fix that moves the woman's drawn world box-top per the table above closes all
+12.
+
+### 6b. Determinism evidence
+
+Both fixtures' full woman schedule + `gRngValue` were probed **twice** each and
+are **byte-identical across reruns**:
+
+- loss-beyond-boundary fixture 5170-5254: **85/85 ticks identical** (tile,
+  facing, actionId, OAM, world, animNum), `gRngValue` equal every tick.
+- walk probe fixture 5170-5472: **303/303 ticks identical**, `gRngValue` equal.
+
+Cross-fixture: at every shared tick the woman's **world box-top is identical**
+(85/85) even though OAM differs (the walk probe's player moves the camera) —
+so the wander schedule is **tick-deterministic and player-independent**.
+
+### 6c. Mechanism verdict — what RNG drives her steps, and the fix shape
+
+**(a) RNG stream.** `MovementType_WanderAround` (`event_object_movement.c:2566-2630`)
+consumes the ambient `gRngValue` stream (EWRAM, `random.c:8`) at two points per
+cycle:
+- **Step2** (`event_object_movement.c:2584`): after the in-place face-turn,
+  `SetMovementDelay(sprite, sMovementDelaysMedium[Random() % 4])` — the
+  idle delay is drawn from `{32, 64, 96, 128}` (`:709`).
+- **Step4** (`:2605`): `chosenDirection = directions[Random() & 3]` — the next
+  heading.
+
+The stream itself is advanced **once per VBlank** by the ambient `Random()`
+at `main.c:366` (`if (!gMain.inBattle …) Random();`). The probe's per-tick
+`gRngValue` LCG deltas confirm this: **1 LCG step per frame** everywhere,
+plus exactly one extra draw on the walk-start tick (5185: direction) and on
+the settle ticks (5201: delay; 5218: direction re-roll after the delay, no
+move because the next roll is the same heading/collision — 3 steps = 1 VBlank
++ 2 draws). So the woman's step schedule is a **pure function of `gRngValue`
+at free-roam start**, which the trace replays deterministically from the
+canonical snapshot.
+
+**(b) Is a general wander model feasible without the ambient VBlank stream?**
+No — and the reason is the trace's determinism itself. The oracle replays from
+a fixed snapshot, so `gRngValue` at every tick is a deterministic function of
+the snapshot + tick count. To reproduce the woman's exact schedule, the app
+would have to advance the *same* `gRngValue` 1/frame from the same starting
+cursor — i.e. model the ambient VBlank interleaving that ISSUES #55 says this
+run does **not** model (the app's `constructionRngValue` contract consumes
+construction draws back-to-back from one cursor; it has no per-frame ambient
+advance). A general `WanderAround` reimplementation over the app's existing
+stream would pick a *different* direction/delay than the ROM from the same
+seed offset, so it cannot be byte-exact against the committed traces without
+first fixing the stream contract (a main-lane stream-model change, out of this
+lane's scope).
+
+**(c) Recommended fix shape: bounded per-trace schedule table.** AGENTS.md
+sanctions bounded evidence checkpoints. The measured table in §6a, keyed to
+the committed traces' residual windows, is exactly that: a per-tick
+`{tick → mapTile, worldBoxTop, facing, pose}` override consumed by the
+free-roam renderer's NPC draw path, active only in the lobby free-roam window.
+It is tick-keyed and deterministic (twice-run identical), needs no RNG model,
+and closes the 12 red frames. A general mechanism is the future owner of
+ISSUES #55's stream contract, not this residual.
+
+### 6d. Fix plan for the MAIN bind worker (table-based)
+
+Where to plug in: `factoryTerminalRender.ts`'s `renderFactoryTerminalField`
+NPC loop draws each `layout.visibleObjects` entry at
+`object.tile*16 − cameraOrigin` (box top y −16, `factoryTerminalRender.ts:250-251`).
+The woman's entry is the `woman` asset at tile (3,11). The fix overrides that
+entry's draw position **and** pose for the residual window of the
+`loss-beyond-boundary` trace (and, if `loss-lobby-walk-off` is promoted, the
+walk fixture's full window below).
+
+Literal table (loss-beyond-boundary; map tile → world box-top / facing / pose):
+
+| ticks | map tile | world box-top (x,y) | facing | pose (sheet frame) |
+|---|---:|---:|---|---|
+| ≤ 5184 | (3,11) | (104,160) | SOUTH | woman standing frame |
+| 5185-5199 | (3,10) | (104, 160−(T−5184)) | NORTH | walk-cycle pose per `floor((T−5185)/8)%2` (walk-2 for the first 8, walk-1 for the last 8 — oracle anim5 idx2 then idx3; if the asset lacks separate walk poses, the standing north frame is the smallest acceptable delta) |
+| ≥ 5200 | (3,10) | (104,144) | NORTH | standing north |
+
+World box-top is the app's own anchor already (the terminal's camera-at-spawn
+render is byte-identical, §5a), so converting world box-top to screen px is
+`worldBoxTop − cameraOrigin` with the same −16 y convention the NPC loop
+already uses. The walk fixture extends the same table (identical world
+schedule, verified): the woman additionally walks SOUTH (3,10)→(3,11) 5296-5311
+(world y 145→160) and EAST (3,11)→(4,11) 5407-5421 (world x 105→120), each
+16 frames at 1px/frame, frozen poses 5/3, 4/0-4/1, 7/2-7/3 respectively.
+
+Acceptance: `npm run compare -- loss-beyond-boundary-off --summary` reaches
+**183/183** (the 12 red frames close). Keep-green: all other lobby specs +
+`npm run test:smoke`. Pin the pure-logic part (a `womanAtTick(t)` helper) with
+a Tier-1 test asserting the §6a table's boundary ticks (5184/5185/5199/5200).
+
+### 6e. Rerunnable verify script
+
+`tools/probe/verify-lobby-woman-schedule.py` re-probes the loss-beyond-boundary
+fixture (5170-5254) and PASS/FAILs the woman's tile/facing/actionId/world
+box-top at 17 pinned ticks against §6a. Run:
+
+```sh
+python3 tools/run-mgba-probe.py /tmp/wander-verify.json -- \
+    python3 tools/probe/verify-lobby-woman-schedule.py /tmp/wander-verify.json
+```
+
+Verified PASS on a fresh probe run 2026-08-07 (17/17).
