@@ -729,9 +729,9 @@ export function renderBattlePartySelect(
   // with the same "empty slot" colors (sPartyBoxEmptySlotPalIds {52,53,54} /
   // {49,55,56} -> gPartyMenuBg_Pal bank 3), so every normal box renders from
   // bank 3; fainted uses bank 6, the current-selection box bank 7.
-  drawSlot(fb, partySource.slots.main, 8, 24, state.cursor === 0 ? 7 : state.rows[0].fainted ? 6 : 3);
-  drawSlot(fb, partySource.slots.wide, 96, 8, state.cursor === 1 ? 7 : state.rows[1].fainted ? 6 : 3);
-  drawSlot(fb, partySource.slots.wide, 96, 32, state.cursor === 2 ? 7 : state.rows[2].fainted ? 6 : 3);
+  drawSlot(fb, partySource.slots.main, 8, 24, state.cursor === 0 ? 7 : state.rows[0].fainted ? 6 : 3, true);
+  drawSlot(fb, partySource.slots.wide, 96, 8, state.cursor === 1 ? 7 : state.rows[1].fainted ? 6 : 3, true);
+  drawSlot(fb, partySource.slots.wide, 96, 32, state.cursor === 2 ? 7 : state.rows[2].fainted ? 6 : 3, true);
   // DrawEmptySlot (party_menu.c:824-870, 2193-2195): a 3-mon party still
   // renders the six right-column boxes; slots 4-6 are empty boxes drawn from
   // sSlotTilemap_WideEmpty with the PARTY_PAL_NO_MON palette
