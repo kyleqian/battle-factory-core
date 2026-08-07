@@ -35,6 +35,12 @@ import messageBoxData from "../assets/gen/prebattle-room-msgbox.json" with { typ
 import fontData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import { measureText, type FontData } from "./font.ts";
+import {
+  lobbyFreeRoamPlayerFrame,
+  lobbyFreeRoamPlayerFrameHFlipped,
+  lobbyFreeRoamPlayerScreenPos,
+  type FactoryLobbyFreeRoamState,
+} from "./factoryLobbyFreeRoam.ts";
 
 interface TileEntry {
   readonly tile: number;
@@ -176,12 +182,15 @@ function drawNpc(
   npc: NpcAsset,
   pos: { readonly x: number; readonly y: number },
   fadeY: number,
+  frameIndex = 0,
+  hFlip = false,
 ): void {
-  const frame = npc.frames[0]!;
+  const frame = npc.frames[frameIndex] ?? npc.frames[0]!;
   frame.tiles.forEach((tile, index) => {
     for (let py = 0; py < 8; py += 1) {
       for (let px = 0; px < 8; px += 1) {
-        const colorIndex = tile[py * 8 + px]!;
+        const sx = hFlip ? 7 - px : px;
+        const colorIndex = tile[py * 8 + sx]!;
         if (colorIndex === 0) continue;
         const color = fadeColor(npc.palette[colorIndex]!, fadeY);
         setPixel(
@@ -197,10 +206,18 @@ function drawNpc(
   });
 }
 
+export interface LobbyPlayerOverride {
+  readonly x: number;
+  readonly y: number;
+  readonly frame: number;
+  readonly hFlip: boolean;
+}
+
 export function renderFactoryTerminalField(
   bgY = 0,
   objY = 0,
   bgOriginX = -48,
+  playerOverride?: LobbyPlayerOverride,
 ): Uint8Array {
   const fb = createFramebuffer();
   fillFramebuffer(fb, 0, 0, 0);
@@ -237,6 +254,22 @@ export function renderFactoryTerminalField(
       (a.object.tile.x - b.object.tile.x)
     );
   for (const { object, pos } of objects) {
+    if (object.asset === "player") {
+      // The terminal lock only ever shows the player's north-standing pose
+      // (the saved spawn frame, walking.png sheet frame 1 — frames[0] is the
+      // south standing pose used only by the free-roam walk-cycle indexing).
+      const frame = playerOverride ? playerOverride.frame : 1;
+      const hFlip = playerOverride?.hFlip ?? false;
+      drawNpc(
+        fb,
+        npcs[object.asset]!,
+        playerOverride ?? pos,
+        objY,
+        frame,
+        hFlip,
+      );
+      continue;
+    }
     drawNpc(fb, npcs[object.asset]!, pos, objY);
   }
   // NORMAL and SPLIT top layers cover object-event sprites.
@@ -643,4 +676,23 @@ export function renderFactoryTerminalPresentation(
     drawPageCursor(fb, state, page);
   }
   return fb;
+}
+
+/**
+ * Free-roam Lobby field (docs/factory-lobby-freeroam-ground-truth.md §3a):
+ * the same fixed-camera field as the terminal's bare-frame, with the player
+ * drawn at its live interpolated position and walk-cycle pose. The camera
+ * does NOT scroll — the render origin stays at layout.cameraOriginPx for
+ * every walk, matching the measured fixed (-56,0) gCamera.
+ */
+export function renderFactoryLobbyFreeRoam(
+  state: FactoryLobbyFreeRoamState,
+): Uint8Array {
+  const { x, y } = lobbyFreeRoamPlayerScreenPos(state, layout.cameraOriginPx);
+  return renderFactoryTerminalField(0, 0, layout.cameraOriginPx.x, {
+    x,
+    y,
+    frame: lobbyFreeRoamPlayerFrame(state),
+    hFlip: lobbyFreeRoamPlayerFrameHFlipped(state),
+  });
 }

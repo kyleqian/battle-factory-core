@@ -39,12 +39,22 @@ describe("Factory Lobby terminal visual extraction", () => {
       { id: "picnicker", graphicsId: "OBJ_EVENT_GFX_PICNICKER", tile: { x: 13, y: 11 }, facing: "east", pose: "east", asset: "picnicker" },
     ]);
     expect(Object.keys(npcs)).toEqual(["player", "scientist", "woman", "fatMan", "camper", "picnicker"]);
-    for (const npc of Object.values(npcs)) {
+    // The player carries the full 9-frame walking.png sheet (0=south stand,
+    // 1=north stand, 2=west stand, 3/4=south walk1/2, 5/6=north walk1/2,
+    // 7/8=west walk1/2) for the free-roam walk-cycle (docs/factory-lobby-
+    // freeroam-ground-truth.md §3a); the other NPCs keep their single pose.
+    expect(npcs.player.frames).toHaveLength(9);
+    for (const frame of npcs.player.frames) {
+      expect(frame).toMatchObject({ columns: 2, rows: 4 });
+      expect(frame.tiles).toHaveLength(8);
+    }
+    for (const npc of [npcs.scientist, npcs.woman, npcs.fatMan, npcs.camper, npcs.picnicker]) {
       expect(npc.frames).toHaveLength(1);
       expect(npc.frames[0]).toMatchObject({ columns: 2, rows: 4 });
       expect(npc.frames[0].tiles).toHaveLength(8);
       expect(npc.palette).toHaveLength(16);
     }
+    expect(npcs.player.palette).toHaveLength(16);
     expect(npcs.player.frame).toBe(1); // standard face-north frame
     expect(npcs.scientist.frame).toBe(0); // standard face-south frame
     expect(npcs.picnicker.frame).toBe(2); // east = west frame h-flipped

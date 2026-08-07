@@ -319,8 +319,16 @@ import {
   createFactoryTerminalPresentation,
   FACTORY_LOSS_TERMINAL_PROFILE,
   factoryTerminalCompletion,
+  factoryTerminalDeclineBoxGoneAge,
   type FactoryTerminalPresentationState,
 } from "./factoryTerminalPresentation.ts";
+import {
+  advanceFactoryLobbyFreeRoam,
+  createFactoryLobbyFreeRoamState,
+  type FactoryLobbyFreeRoamState,
+  type LobbyDirection,
+} from "./factoryLobbyFreeRoam.ts";
+import { renderFactoryLobbyFreeRoam } from "./factoryTerminalRender.ts";
 import { renderFactoryTerminalPresentation } from "./factoryTerminalRender.ts";
 import {
   renderBattlePartySelect,
@@ -485,6 +493,12 @@ export interface EngineState {
   factoryTerminal: FactoryTerminalPresentationState | null;
   /** App-visible generated battle-command route; production installs it after draft. */
   factoryRoundBattleOrchestrator: FactoryRoundBattleOrchestratorState | null;
+  /**
+   * Walkable Factory Lobby after the LOSS/RETIRE terminal's decline chain
+   * completes ("We look forward to your next visit." dismiss, tick 5093 of
+   * the loss timeline). Null until that handoff; see factoryLobbyFreeRoam.ts.
+   */
+  lobbyFreeRoam: FactoryLobbyFreeRoamState | null;
 }
 
 /** battleRoom "settled" phase's own elapsed (0 = trace tick 843, see battleTransition.ts) at which core.ts hands off to battleScene.ts - trace tick 1040 (battleScene.ts's own TICK0), the ground-truth trace's own window start. Ticks 1030-1039 are flat black either way (battleTransition's own exit-fade hold and battleScene's own pre-reveal hold render byte-identical solid black), so the exact handoff point within that range is inconsequential to pixels. */
@@ -521,6 +535,28 @@ function pendingFactoryTerminalCommand(
     ?? terminalCommandForRound(legacy);
 }
 
+const GB_BUTTON_TO_LOBBY_DIR: Readonly<Record<GbaButton, LobbyDirection | null>> = {
+  UP: "north",
+  DOWN: "south",
+  LEFT: "west",
+  RIGHT: "east",
+  A: null,
+  B: null,
+  SELECT: null,
+  START: null,
+  L: null,
+  R: null,
+};
+
+function lobbyHeldDirections(buttons: ReadonlySet<GbaButton>): ReadonlySet<LobbyDirection> {
+  const held = new Set<LobbyDirection>();
+  for (const button of buttons) {
+    const dir = GB_BUTTON_TO_LOBBY_DIR[button];
+    if (dir !== null) held.add(dir);
+  }
+  return held;
+}
+
 export function createInitialState(
   options: InitialEngineStateOptions = {},
 ): EngineState {
@@ -547,6 +583,7 @@ export function createInitialState(
     factorySwap: null,
     factoryTerminal: null,
     factoryRoundBattleOrchestrator: null,
+    lobbyFreeRoam: null,
   };
 }
 
@@ -675,6 +712,23 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     };
   }
 
+  if (state.lobbyFreeRoam) {
+    // Free-roam Lobby overworld owns both input and rendering once the
+    // terminal decline chain has handed off (factoryLobbyFreeRoam.ts). A/B
+    // are no-ops (silent NPCs, no PC, no exit warp — user decisions).
+    const lobbyFreeRoam = advanceFactoryLobbyFreeRoam(state.lobbyFreeRoam, {
+      heldDirs: lobbyHeldDirections(buttons),
+    });
+    return {
+      ...state,
+      frame: state.frame + 1,
+      keyRepeat,
+      lobbyFreeRoam,
+      rngMode: "vblank",
+      rngValue,
+    };
+  }
+
   if (factoryTerminal) {
     factoryTerminal = advanceFactoryTerminalPresentation(
       factoryTerminal,
@@ -702,6 +756,17 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         completion,
       );
     }
+    // docs/factory-lobby-freeroam-ground-truth.md §2: the decline chain's
+    // final dismiss closes the farewell box into the free-roam Lobby field
+    // (`closemessage` -> `setvar` -> `releaseall`, tick 5093 of the loss
+    // timeline). From that box-gone age the app hands input/rendering to the
+    // walkable-lobby overworld (factoryLobbyFreeRoam.ts); until then the
+    // terminal presentation still owns the screen.
+    const freeRoamBoxGoneAge = factoryTerminalDeclineBoxGoneAge(factoryTerminal);
+    const lobbyFreeRoam =
+      freeRoamBoxGoneAge !== null && factoryTerminal.age >= freeRoamBoxGoneAge
+        ? state.lobbyFreeRoam ?? createFactoryLobbyFreeRoamState()
+        : state.lobbyFreeRoam;
     return {
       ...state,
       frame: state.frame + 1,
@@ -717,6 +782,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       factoryTerminal,
       roundController,
       factoryRoundBattleOrchestrator,
+      lobbyFreeRoam,
       rngMode: "vblank",
       rngValue,
     };
@@ -2946,6 +3012,12 @@ export function render(state: EngineState): Uint8Array {
   // precedence inside renderWithoutFactoryTerminal.
   if (state.postwin && postwinPhase(state.postwin.elapsed) !== "counterRoom") {
     return renderPostwinState(state);
+  }
+  // Free-roam Lobby owns the screen once the decline chain hands off
+  // (factoryLobbyFreeRoam.ts); its spawn frame is byte-identical to the
+  // terminal's bare-field frame, so the handoff is invisible.
+  if (state.lobbyFreeRoam) {
+    return renderFactoryLobbyFreeRoam(state.lobbyFreeRoam);
   }
   const generatedTerminalCommand = terminalCommandForRound(
     state.factoryRoundBattleOrchestrator?.round ?? null,

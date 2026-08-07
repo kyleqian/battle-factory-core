@@ -163,8 +163,13 @@ function readBlocks(path: string, count: number): Block[] {
   const people = join(REF, "graphics", "object_events", "pics", "people");
   const paletteDir = join(REF, "graphics", "object_events", "palettes");
   writeJson(join(ASSETS, "factory-lobby-terminal-npcs.json"), {
-    // sAnimTable_Standard: face south = source frame 0; face north = 1.
-    player: { frame: 1, frames: [extractPose(join(people, "brendan", "walking.png"), 1)], palette: loadJascPal(join(paletteDir, "brendan.pal")) },
+    // Brendan walking.png is the 9-frame standard overworld sheet (sPicTable_
+    // BrendanNormal): 0=south stand, 1=north stand, 2=west stand,
+    // 3=south walk1, 4=south walk2, 5=north walk1, 6=north walk2,
+    // 7=west walk1, 8=west walk2 (east reuses west h-flipped, sAnim_GoEast).
+    // The free-roam walk (docs/factory-lobby-freeroam-ground-truth.md §3a)
+    // needs the full set; the terminal lock only ever shows frame 1.
+    player: { frame: 1, frames: Array.from({ length: 9 }, (_, i) => extractPose(join(people, "brendan", "walking.png"), i)), palette: loadJascPal(join(paletteDir, "brendan.pal")) },
     scientist: { frame: 0, frames: [extractPose(join(people, "scientist_1.png"), 0)], palette: loadJascPal(join(paletteDir, "npc_3.pal")) },
     woman: { frame: 0, frames: [extractPose(join(people, "woman_1.png"), 0)], palette: loadJascPal(join(paletteDir, "npc_1.pal")) },
     fatMan: { frame: 0, frames: [extractPose(join(people, "fat_man.png"), 0)], palette: loadJascPal(join(paletteDir, "npc_1.pal")) },
