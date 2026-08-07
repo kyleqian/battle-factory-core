@@ -5,6 +5,40 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 971 — [bounded MAIN worker, 2026-08-06] #81 remainder 4a: route-scoped idle-bounce freeze schedule bound — torment 55/57, no regressions
+
+- **State:** master `e1decfff`, clean. Typecheck green; `npm run test:smoke`
+  **347/347**; Tier-1 pins green. Full `npm test` + `npm run build` NOT run
+  (worker rule — supervisor runs them after merge).
+- **Did:** implemented the SALVAGED VALIDATED model from the prior
+  cap-killed worker as `BattleCommandBounceSchedule` — a phase-keyed offset
+  table on `BattleCommandPresentationState.bounceSchedule`, supplied ONLY by
+  the torment staging context (`TORMENT_ROUTE_BOUNCE_SCHEDULE` in
+  `tools/compare/appTrace.ts`); all other `createBattleCommandPresentation`
+  callers (battle-1 march, adapters, live orchestrator) default to the
+  all-zero battle-1 schedule. Offsets in `idleBounceElapsed` terms:
+  fight-opening +3 (736), fight-menu +1 (740-766, flips only 766), rejection-
+  message 0, rejection-reopen −1 (977); the reopened fight-menu suppresses
+  the first-window +1 (`bounceFightMenuReopened`) so 986 stays at 0. Applied
+  in `renderGeneratedBattleCommandPresentation` (battleScene.ts) via
+  `battleCommandBounceAgeOffset`.
+- **Verified:** `fight-menu-chrome-torment-off` **55/57** (was 52/57; only
+  the out-of-scope message-pacing 1100/1200 red). Regressions:
+  `battle-command-generated-off` **128/128** (unchanged),
+  `mid-battle-switch-dense-a-off` **221/221** (unchanged). New Tier-1 pin
+  `tests/fightMenuBounceSchedule.test.ts` drives the fixture's exact frame
+  walk and asserts each phase-boundary pose incl. 986 at offset 0 +
+  battle-1 default all-zero; red-verified by reverting the src (3/4 red),
+  restored green. Docs §8.1 appended with the bind.
+- **Next:** #81 remainder (4b) — the message-pacing class at 1100/1200 (the
+  real printer types/holds slower than the app's 1 glyph/frame); then per
+  PROGRESS 969/970's ordered list: postwin RECORD-YES/RETIRE-YES binds,
+  #80 rank 6, lobby walkable + REST guard, #78's 1256-1407 window.
+- **Notes:** no PAPERCUTS. The two rejection-reopen freezes the probe doc
+  described land as a single −1 offset over the whole reopen span (pose-
+  stable 239-247), and the first-window-only fight-menu regime required one
+  extra state flag beyond a bare per-phase table — documented in code.
+
 ## 970 — [supervisor WIND-DOWN, 2026-08-06] Orientation only; stopped before worker dispatch at user request
 
 - **State:** master at this entry's commit, clean. This Codex supervisor did
