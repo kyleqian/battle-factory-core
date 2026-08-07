@@ -1,5 +1,34 @@
 # Animation coverage
 
+## MOVE_DOUBLE_EDGE staged — both orientations isolated at 141 frames; scenarios + dense probe banked (2026-08-07 cap-killed worker + supervisor salvage)
+
+- **State:** DOUBLE_EDGE stays **unsupported**. Coverage unchanged at **118/276
+  exact, 0 partial, 0 staged, 158 unsupported**. Nothing promoted; no pin moved.
+- **Did:** the worker was cap-killed at 45 min having committed nothing. Salvaged
+  its two legal mechanicLab scenarios (FRONTIER_MON_HITMONTOP_2 record 341,
+  HITMONTOP, all four slots DOUBLE_EDGE, versus legal ONIX) and
+  `tools/compare/doubleEdgeProbe.py`, plus a first-draft
+  `src/animation/doubleEdge.ts` reducer that is **not yet wired to any seam and
+  is unverified** — it reuses `slideMon.ts`, `shakeMonInPlace.ts` and wrap.ts's
+  elliptical helper. Fixed one unused import that left the tree red.
+- **Measured (supervisor, fresh runs of both scenarios):** the probe isolates the
+  move-owned window by script pointer against the
+  `Move_DOUBLE_EDGE`..`Move_POISON_STING` label bounds and yields **141 frames in
+  both orientations — player 80-220, opponent 84-224**. Across the window:
+  3 distinct task functions, visual-task count 0-5, sprite count 0-2. Schema
+  `double-edge-dense-evidence/v1`.
+- **Next:** finish DOUBLE_EDGE from this staged base — the expensive staging
+  (legal carrier, both scenarios, dense isolated probe) is already banked, so the
+  remaining work is the seam, the `battleScene.ts` draw case, the portable, two
+  fixtures, the Tier-1 tests, and promotion.
+- **Notes:** DOUBLE_EDGE is a 9-component contact move with both battlers acted
+  on symmetrically (two `AnimTask_RotateMonSpriteToSide` pairs and two
+  `AnimTask_ShakeMonInPlace` pairs, plus a restore pass). It did not fit a
+  45-minute cap from scratch; split it as staging-then-closure like
+  GRASS_WHISTLE. **For a future step:** derive the painter order per orientation
+  from the probe's OAM subpriorities — GRASS_WHISTLE's opponent side was
+  153/225 purely from an orientation-blind draw order.
+
 ## MOVE_GRASS_WHISTLE closed — 225/225 both orientations twice-fresh, promoted to exact (2026-08-07 closure worker)
 
 - **State:** GRASS_WHISTLE (new move) → **exact**. Move coverage: **118/276 exact,
