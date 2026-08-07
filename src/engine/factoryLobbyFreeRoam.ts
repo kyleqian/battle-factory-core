@@ -29,6 +29,13 @@ export const LOBBY_FREE_ROAM_TURN_FRAMES = 8;
 export const LOBBY_FREE_ROAM_TILE_FRAMES = 16;
 /** Frames per walk-cycle pose (source sAnim_Go*: ANIMCMD_FRAME(..., 8)). */
 export const LOBBY_FREE_ROAM_POSE_FRAMES = 8;
+/**
+ * Frames per border-bump cycle (movement action 25, `WALK_IN_PLACE_NORMAL_*`,
+ * docs/factory-lobby-freeroam-ground-truth.md §7b): holding into a blocked
+ * tile runs back-to-back 16-frame bump cycles — 5229-5244 / 5245-5260 for the
+ * south hold — with the pose alternating walk-2 / stand between cycles.
+ */
+export const LOBBY_FREE_ROAM_BUMP_FRAMES = 16;
 /** Free-roam spawn tile (map (4,8), §2); the follow-cam's scroll anchor. */
 export const LOBBY_SPAWN_TILE = Object.freeze({ x: 4, y: 8 });
 
@@ -108,9 +115,18 @@ export interface FactoryLobbyFreeRoamState {
    * press 5172-5173, turn visible 5174-5181, §2), while the app edge-detects
    * one tick earlier. A fresh direction while idle is buffered here for
    * exactly one frame so the app's first movement render lands on the
-   * oracle's canonical turn-start tick.
+   * oracle's canonical turn-start tick. A refused step (blocked target)
+   * clears it; a held direction at a blocked border never re-arms it.
    */
   readonly pendingDir: LobbyDirection | null;
+  /**
+   * Frames spent in the border bump (movement action 25) while a held
+   * direction is blocked; 0 = not bumping. Monotonic 1-based counter across
+   * the whole blocked hold — `floor((bumpElapsed-1)/16) % 2` selects the
+   * walk-2 / stand pose of the current 16-frame cycle and a value divisible
+   * by 16 marks a completed cycle (re-arm while held, settle on release).
+   */
+  readonly bumpElapsed: number;
 }
 
 export function createFactoryLobbyFreeRoamState(): FactoryLobbyFreeRoamState {
@@ -127,25 +143,58 @@ export function createFactoryLobbyFreeRoamState(): FactoryLobbyFreeRoamState {
     animClock: 0,
     heldDir: null,
     pendingDir: null,
+    bumpElapsed: 0,
   });
 }
 
 function startStep(
   state: FactoryLobbyFreeRoamState,
   dir: LobbyDirection,
+  fresh = false,
 ): FactoryLobbyFreeRoamState {
   const { dx, dy } = DIR_DELTA[dir];
   const targetX = state.x + dx;
   const targetY = state.y + dy;
-  if (!isFactoryLobbyCellWalkable(targetX, targetY)) return state;
+  if (!isFactoryLobbyCellWalkable(targetX, targetY)) {
+    // Refused step (blocked target): clear the buffered press and enter the
+    // border bump on THIS frame — the oracle's act-25 bump begins on the
+    // exact blocked tick (§7b 5229), and the press must never re-arm while
+    // the direction stays held (§7g fix 1).
+    return Object.freeze({ ...state, pendingDir: null, bumpElapsed: 1 });
+  }
   return Object.freeze({
     ...state,
-    stepRemaining: LOBBY_FREE_ROAM_TILE_FRAMES,
+    // FRESH steps (the turn-completion commit) begin with their FIRST pixel
+    // on the step-start frame itself: the oracle's turn's last rendered frame
+    // occupies the RAM step-1 start tick, so the app's first visible walk
+    // pixel (progress 1, walk-cycle phase 0) lands on the tick after the turn
+    // finishes (§7b/§7c: displayed scroll 5182 = 1, anim 4/0; the RENDERED
+    // pose cycle lags the RAM cmdIndex by one, so phase = ((T−5182)/8)%4 needs
+    // animClock 0 at 5182). Continuations (a held walk re-arming at a tile
+    // center) instead show progress 0 on the arrival frame — that frame IS the
+    // arrived tile's full displacement (§7e re-arm).
+    stepRemaining: fresh
+      ? LOBBY_FREE_ROAM_TILE_FRAMES - 1
+      : LOBBY_FREE_ROAM_TILE_FRAMES,
+    // Fresh walk steps restart the GO anim at the pose the ROM's step
+    // alternation produces on the FIRST step after a turn. The turn (GO_FAST)
+    // runs cmdIdx 2→3 (walk2 then stand) when its own alternation saw a stand
+    // cmdIdx (1) from the idle FACE action, ending at 3 → the walk's
+    // alternation maps 3→0 (walk1); when the turn started at cmdIdx 0 (walk1,
+    // pre-state cmdIdx 0/3) it ends at 1 → the walk maps 1→2 (walk2).
+    // Measured on the walk fixture: south/west fresh steps render walk1
+    // (animClock 0), north fresh steps render walk2 (animClock 16).
+    animClock: fresh
+      ? dir === "north"
+        ? LOBBY_FREE_ROAM_POSE_FRAMES * 2
+        : 0
+      : state.animClock,
     stepFromX: state.x,
     stepFromY: state.y,
     stepDir: dir,
     facing: dir,
     pendingDir: null,
+    bumpElapsed: 0,
   });
 }
 
@@ -159,6 +208,40 @@ export function advanceFactoryLobbyFreeRoam(
 ): FactoryLobbyFreeRoamState {
   // A single held direction; fixtures never press diagonals.
   const heldDir = input.heldDirs.values().next().value ?? null;
+  if (state.bumpElapsed > 0) {
+    // Border bump (act 25): the sprite freezes facing the blocked direction
+    // while the 16-frame cycle counts. A completed cycle re-arms only while
+    // the same direction is still held (§7b/§7f); a release settles and a
+    // new held direction turns at the boundary.
+    if (state.bumpElapsed % LOBBY_FREE_ROAM_BUMP_FRAMES === 0) {
+      if (heldDir === state.facing) {
+        return Object.freeze({
+          ...state,
+          bumpElapsed: state.bumpElapsed + 1,
+          heldDir,
+          pendingDir: null,
+        });
+      }
+      if (heldDir !== null) {
+        return Object.freeze({
+          ...state,
+          bumpElapsed: 0,
+          turnRemaining: LOBBY_FREE_ROAM_TURN_FRAMES,
+          turnTarget: heldDir,
+          animClock: 0,
+          heldDir,
+          pendingDir: null,
+        });
+      }
+      return Object.freeze({ ...state, bumpElapsed: 0, heldDir, pendingDir: null });
+    }
+    return Object.freeze({
+      ...state,
+      bumpElapsed: state.bumpElapsed + 1,
+      heldDir,
+      pendingDir: null,
+    });
+  }
   if (state.turnRemaining > 0) {
     const turnRemaining = state.turnRemaining - 1;
     if (turnRemaining > 0) {
@@ -171,7 +254,7 @@ export function advanceFactoryLobbyFreeRoam(
     // (4,8) forever, VOFS flat 40), while a hold walks continuously. Holding
     // through the turn (>= the 8-frame turn) is the one-tile tap.
     if (heldDir === state.turnTarget) {
-      return startStep({ ...state, facing, turnRemaining, heldDir }, facing);
+      return startStep({ ...state, facing, turnRemaining, heldDir }, facing, true);
     }
     return Object.freeze({
       ...state,
@@ -229,7 +312,17 @@ export function advanceFactoryLobbyFreeRoam(
     });
   }
   if (heldDir === null) return state;
-  // Fresh direction while idle: buffer it for the one-frame latency.
+  // Fresh direction while idle: buffer it for the one-frame latency. A held
+  // direction that CANNOT move must never arm a press — enter the border bump
+  // instead (§7g fix 1: the idle path must not re-buffer pendingDir = heldDir
+  // at a blocked border, or releasing then re-pressing is swallowed forever).
+  const { dx, dy } = DIR_DELTA[heldDir];
+  if (
+    state.facing === heldDir &&
+    !isFactoryLobbyCellWalkable(state.x + dx, state.y + dy)
+  ) {
+    return Object.freeze({ ...state, heldDir, pendingDir: null, bumpElapsed: 1 });
+  }
   return Object.freeze({ ...state, heldDir, pendingDir: heldDir });
 }
 
@@ -286,6 +379,24 @@ export function lobbyFreeRoamCameraOrigin(
 
 /** Player overworld frame index for the current pose (walking.png layout). */
 export function lobbyFreeRoamPlayerFrame(state: FactoryLobbyFreeRoamState): number {
+  if (state.bumpElapsed > 0) {
+    // Border bump (act 25, §7b/§7g item 3): sprite frozen facing the blocked
+    // direction, pose alternating walk-2 / stand between the back-to-back
+    // 16-frame bump cycles. The RENDERED pose lags the RAM cycle by one frame
+    // (the same lag as every other overworld pose): cycle 0's first frame
+    // (bumpElapsed 1 = the 5229 block tick) still shows the pre-bump standing
+    // pose, then walk-2 spans cycle 0's remaining frames (5230-5244), stand
+    // spans cycle 1 (5245-5260), and the alternation repeats while held.
+    const walkTwo =
+      Math.floor((state.bumpElapsed - 1) / LOBBY_FREE_ROAM_BUMP_FRAMES) % 2 === 0 &&
+      state.bumpElapsed !== 1;
+    switch (state.facing) {
+      case "south": return walkTwo ? 4 : 0;
+      case "north": return walkTwo ? 6 : 1;
+      case "west": return walkTwo ? 8 : 2;
+      case "east": return walkTwo ? 8 : 2;
+    }
+  }
   if (state.turnRemaining > 0) {
     // The in-place turn is the fast GO anims' own 2-pose 8-frame animation
     // (docs/factory-lobby-freeroam-ground-truth.md §5b, RAM + byte-exact
@@ -364,25 +475,34 @@ export interface WomanNpcAtTick {
 export function womanAtTick(tick: number): WomanNpcAtTick | null {
   if (tick <= 5184) return null;
   if (tick <= 5200) {
-    // North walk 5185-5200: anim5 cmdIdx 2 (sheet frame 6, walk2) for the
-    // first 8 frames, cmdIdx 3 (sheet frame 1, stand) for the rest. Rendered
-    // y = 161−(T−5184) (the +1 render lag through the walk + settle tick).
-    const frame = tick - 5185 < LOBBY_FREE_ROAM_POSE_FRAMES ? 6 : 1;
+    // North walk 5185-5200: anim5 cmdIdx 2 (sheet frame 6, walk2) then
+    // cmdIdx 3 (sheet frame 1, stand). The RENDERED pose lags the RAM cmdIdx
+    // by one frame (the same lag as the player's walk cycle): 5185 still shows
+    // the pre-walk south standing pose (frame 0), walk2 renders 5186-5193 and
+    // stand 5194-5200 (pixel-verified on the walk fixture).
+    // Rendered y = 161−(T−5184) (the +1 render lag through the walk + settle
+    // tick).
+    const frame = tick >= 5194 ? 1 : tick === 5185 ? 0 : 6;
     return { x: 104, y: 161 - (tick - 5184), frame, hFlip: false };
   }
   if (tick <= 5295) return { x: 104, y: 144, frame: 1, hFlip: false };
   if (tick <= 5311) {
     // South walk 5296-5311: anim4 cmdIdx 0 (sheet frame 3, walk1) then
-    // cmdIdx 1 (sheet frame 0, stand).
-    const frame = tick - 5296 < LOBBY_FREE_ROAM_POSE_FRAMES ? 3 : 0;
+    // cmdIdx 1 (sheet frame 0, stand), rendered one frame later: 5296 keeps
+    // the pre-walk north standing pose (frame 1), walk1 renders 5297-5304 and
+    // stand 5305-5311.
+    const frame = tick >= 5305 ? 0 : tick === 5296 ? 1 : 3;
     return { x: 104, y: 145 + (tick - 5296), frame, hFlip: false };
   }
   if (tick <= 5406) return { x: 104, y: 160, frame: 0, hFlip: false };
   if (tick <= 5421) {
     // East walk 5407-5421: anim7 cmdIdx 2 (sheet frame 8, walk2 h-flipped)
-    // then cmdIdx 3 (sheet frame 2, stand h-flipped).
-    const frame = tick - 5407 < LOBBY_FREE_ROAM_POSE_FRAMES ? 8 : 2;
-    return { x: 105 + (tick - 5407), y: 160, frame, hFlip: true };
+    // then cmdIdx 3 (sheet frame 2, stand h-flipped), rendered one frame
+    // later: 5407 keeps the pre-walk south standing pose (frame 0, not
+    // h-flipped), walk2 renders 5408-5415 and stand 5416-5421.
+    const frame = tick >= 5416 ? 2 : tick === 5407 ? 0 : 8;
+    const hFlip = tick > 5407;
+    return { x: 105 + (tick - 5407), y: 160, frame, hFlip };
   }
   return { x: 120, y: 160, frame: 2, hFlip: true };
 }
