@@ -5,6 +5,47 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 978 — [bounded MAIN worker, 2026-08-07] ISSUES #80 slice 5 LANDED: CANCEL pokeball-button window drawn from banked assets — in-region 467px → 0, band 1224/1270 → 757/803
+
+- **State:** master `f6f0bb7e`, clean. Typecheck + `npm run build` not yet at
+  commit (worker running), `npm run test:smoke` **347/347**, touched test file
+  **5/5**. Full `npm test` NOT run (worker rule — supervisor after merge).
+- **Did:** (RUNG 1) banked `sCancelButton_Tilemap` (`graphics/party_menu/
+  cancel_button.bin`, a 7x2 u16 tilemap stamped to BG1 tile (23,18) by
+  `DrawCancelConfirmButtons` → `CopyToBgTilemapBufferRect_ChangePalette(1, …,
+  23, 18, 7, 2, 17)`, party_menu.c:1199-1205) as `slots.cancelButton` in
+  `extract-party-menu-source.ts`, mirroring `slots.wideEmpty` (a435a933). The
+  slot itself is inert in this trace (non-chooseHalf path never stamps it), so
+  the visible CANCEL window was drawn per the forensics model. (RUNG 2) the
+  window draw in `renderBattlePartySelect` (12a97095): repaint the window
+  footprint x184-237 y134-153 with the checkerboard rows, then the 2px
+  box-frame + divider (74,74,99) and interior color15 (115,90,181) at the
+  oracle-measured per-row ranges (`CANCEL_FRAME_ROWS`, from
+  `docs/party-menu-rank6-ground-truth.md` §6 addendum), then the 16x16 pokeball
+  sprite (pixel-0 transparent, center (198,148)) from `party-menu-pokeball.json`
+  (frame-0 visible ball at png offset (4,4)-(19,19)), then "CANCEL" via the
+  FONT_SMALL glyph renderer with white ink + (115,115,115) shadow drawn at
+  (204,137) (the font's ink lands 4px below the origin — calibrated against the
+  card-name rendering). Acceptance loop: `slice5-button-forensics.ts` reports
+  **0 remaining diff px in-region on frames 2150 AND 2250** (was 467);
+  `party-menu-status-item-off` band **1224/1270 → 757/803 px/frame with NO frame
+  worse** (bbox now 2,11-162,55 = the pre-existing icon/wash residuals only).
+- **Keep-green:** `battle-command-generated-off` **128/128**,
+  `mid-battle-switch-dense-a-off` **221/221**. (RUNG 3) Tier-1 pin in
+  `tests/battlePartySelect.test.ts` (f6f0bb7e): ball-red (181,66,0) at (190,140)
+  + CANCEL ink (255,255,255) at (206,141), red-verified by disabling the draw
+  call (interior 115,90,181 appeared at the ball pixel).
+- **Next:** #80 slice 6 (open/close fade pixels + spec extension 964-1034 per
+  the rank-6 doc §7), then the supervisor re-runs full `npm test`.
+- **Notes:** the brief's primitive-1 mechanism (cancel_button.bin stamped at
+  (23,18)) is real but inert in this single-cancel trace — `DrawCancelConfirmButtons`
+  only runs in chooseHalf mode; the visible window is the `sCancelButtonWindowTemplate`
+  BG0 std window at (24,17). The slice drew the forensics-verified composite
+  directly; `slots.cancelButton` is banked for the chooseHalf path. No
+  PAPERCUTS.
+
+
+
 ## 977 — [supervisor WIND-DOWN, 2026-08-07] Session summary: 14 workers / 5 rounds — #81 CLOSED 57/57, #82 CLOSED, postwin YES routes 125/125+125/125, #80 band 9234→1224, walkable lobby + REST guard LIVE, #78 down to 4 named frames
 
 - **State:** master at this entry's commit, clean. Final independent union
