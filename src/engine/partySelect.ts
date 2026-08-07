@@ -255,19 +255,19 @@ export const INITIAL_PARTY_SELECT_STATE: PartySelectState = {
       partyIndex: 0, id: "onix", speciesId: 95, speciesKey: "SPECIES_ONIX",
       species: "ONIX", level: 50, hp: 0, maxHp: 117,
       status: "none", personality: 1205102525, abilitySlot: 1,
-      friendship: 0, fainted: true, legal: false, item: 0,
+      friendship: 0, fainted: true, legal: false, item: 142,
     },
     {
       partyIndex: 1, id: "magby", speciesId: 240, speciesKey: "SPECIES_MAGBY",
       species: "MAGBY", level: 50, hp: 138, maxHp: 138,
       status: "none", personality: 1534575931, abilitySlot: 0,
-      friendship: 0, fainted: false, legal: true, item: 0,
+      friendship: 0, fainted: false, legal: true, item: 221,
     },
     {
       partyIndex: 2, id: "bayleef", speciesId: 153, speciesKey: "SPECIES_BAYLEEF",
       species: "BAYLEEF", level: 50, hp: 153, maxHp: 153,
       status: "none", personality: 1550278706, abilitySlot: 0,
-      friendship: 0, fainted: false, legal: true, item: 0,
+      friendship: 0, fainted: false, legal: true, item: 179,
     },
   ],
 };
