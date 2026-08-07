@@ -989,6 +989,7 @@ import {
   sceneOnIronDefenseView,
   sceneOnFlashView,
   sceneOnFacadeView,
+  sceneOnMinimizeView,
   sceneOnCalmMindView,
   sceneOnShadowBallView,
   sceneOnEncoreView,
@@ -1369,6 +1370,7 @@ const houndourFrontSprite = (opponentFrontSpritesAsset as Record<string, Opponen
 const delibirdFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DELIBIRD!;
 const mareepFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAREEP!;
 const azumarillFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).AZUMARILL!;
+const grimerFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GRIMER!;
 const PIDGEOTTO_CORNER = { x: 144, y: 19 };
 /** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): MURKROW's own `yOffset` (11, `mon-pic-coords.json`) is bit-identical to Pidgeotto's, so the same `(144, 8+yOffset)` formula lands on the identical corner - not a coincidence, both front pics share the same 48px-wide/11px-yOffset box. */
 const murkrowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MURKROW!;
@@ -2536,6 +2538,7 @@ const houndourBackSprite = (battleBackSpritesAsset as Record<string, BattleBackS
 const magbyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGBY!;
 const mareepBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAREEP!;
 const azumarillBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).AZUMARILL!;
+const grimerBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GRIMER!;
 const battleAnimItemHeal = battleAnimItemHealAsset as BattleAnimItemHealAsset;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
@@ -29220,6 +29223,155 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "AZUMARILL used" : "Foe AZUMARILL used",
       "FACADE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "MINIMIZE") {
+    const view = sceneOnMinimizeView(state);
+    // The affine matrix renders two displays behind the RAM state and the
+    // clones (OAM sprites) two displays behind as well.
+    const affineDisplayed = sceneOnMinimizeView({ ...state, age: state.age - 2 });
+    const displayed = sceneOnMinimizeView({ ...state, age: state.age - 2 });
+    const playerToOpponent =
+      view.attacker.species === "GRIMER"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "GRIMER"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged MINIMIZE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? grimerBackSprite : grimerFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? (speciesFrontIdleRestOffset(view.target.species) ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const black = { r: 0, g: 0, b: 0 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    // Clones are `ST_OAM_OBJ_BLEND` OBJ that composite under the script's
+    // `setalpha 10, 8` BLDALPHA. The clones straddle the attacker via
+    // subpriority = attackerSubpriority - cloneIndex. A LOWER subpriority
+    // draws in front, and the stable sprite sort keeps the attacker (allocated
+    // before its clones) in front of clone0 at the equal-subpriority tie, so
+    // the full back-to-front order FLIPS with orientation:
+    //   player-back    ONIX target 40 -> clone0 30 -> GRIMER attacker 30
+    //                  -> clone1 29 -> clone2 28
+    //   opponent-front GRIMER attacker 40 -> clone0 40 -> clone1 39 -> clone2 38
+    //                  -> ONIX target 30
+    const drawTarget = (): void => {
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        view.target.geometry.spriteCorner.x + targetIdle.x2,
+        view.target.geometry.spriteCorner.y + targetIdle.y2,
+      );
+    };
+    const drawAttacker = (): void => {
+      drawSpriteSheetAffineStretch(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+        affineDisplayed.scale,
+        affineDisplayed.scale,
+        affineDisplayed.y2,
+        black,
+        0,
+        affineDisplayed.scale !== 256,
+      );
+    };
+    const drawClone = (clone: { matrix: number; y2: number } | undefined): void => {
+      if (!clone) return;
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y + clone.y2,
+        clone.matrix,
+        clone.matrix,
+        10,
+        8,
+        false,
+        "static",
+      );
+    };
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+      drawClone(displayed.clones[0]!);
+      drawClone(displayed.clones[1]!);
+      drawClone(displayed.clones[2]!);
+    } else {
+      drawAttacker();
+      drawClone(displayed.clones[0]!);
+      drawClone(displayed.clones[1]!);
+      drawClone(displayed.clones[2]!);
+      drawTarget();
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "GRIMER";
+    const playerSpecies = playerToOpponent ? "GRIMER" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "GRIMER used" : "Foe GRIMER used",
+      "MINIMIZE!",
       99,
     );
     return;

@@ -1,0 +1,12 @@
+import { readFileSync, writeFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { createSceneOnMovePresentation } from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render } from "../../src/engine/core.ts";
+const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
+const fixture = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/minimize-player-grimer-opponent-onix.json"), "utf8"));
+const stage = createSceneOnMovePresentation({ move: "MINIMIZE", attacker: fixture.attacker, target: fixture.target, fieldProfile: fixture.fieldProfile, battlerHeight: 40 } as never);
+const engine: any = { ...createInitialState(), rngMode: "frontierBattle", sceneOnPresentation: { ...stage, age: 1 } };
+const app = render(engine);
+const px = (x,y) => { const i=(y*240+x)*4; return [app[i],app[i+1],app[i+2]]; };
+console.log("app top-left:", px(0,0), "field mid:", px(120,80), "grimer area:", px(68,80));
+writeFileSync("/tmp/app-211.rgba", app);

@@ -95,6 +95,10 @@ import {
   type FacadeState,
 } from "./facade.ts";
 import {
+  minimizeAtAge,
+  type MinimizeState,
+} from "./minimize.ts";
+import {
   calmMindAtAge,
   type CalmMindState,
 } from "./calmMind.ts";
@@ -1887,6 +1891,15 @@ export interface SceneOnFacadeConfig {
   readonly battlerHeight: number;
 }
 
+export interface SceneOnMinimizeConfig {
+  readonly move: "MINIMIZE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Attacker `MON_PIC_HEIGHT - 2*yDelta` (40 for GRIMER). */
+  readonly battlerHeight: number;
+}
+
 export interface SceneOnCalmMindConfig {
   readonly move: "CALM_MIND";
   readonly attacker: SceneOnPresentationBattler;
@@ -2082,6 +2095,7 @@ export type SceneOnMoveConfig =
   | SceneOnIronDefenseConfig
   | SceneOnFlashConfig
   | SceneOnFacadeConfig
+  | SceneOnMinimizeConfig
   | SceneOnCalmMindConfig
   | SceneOnShadowBallConfig
   | SceneOnEncoreConfig
@@ -2627,6 +2641,11 @@ export interface SceneOnFlashView extends FlashState {
 }
 
 export interface SceneOnFacadeView extends FacadeState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnMinimizeView extends MinimizeState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -5307,6 +5326,23 @@ export function sceneOnFacadeView(
       x: config.attacker.geometry.battlePositionCenter.x,
       y: config.attacker.geometry.battlePositionCenter.y,
     }, config.battlerHeight),
+    attacker: config.attacker,
+    target: config.target,
+  };
+}
+
+/** `age=0` is the move script's first captured frame. The minimize task runs
+ *  ages 1-150 with BLDALPHA 10/8 held through 151; the affine matrix renders
+ *  two displays behind the RAM state and the clones one behind. */
+export function sceneOnMinimizeView(
+  state: SceneOnMovePresentationState,
+): SceneOnMinimizeView {
+  if (state.config.move !== "MINIMIZE") {
+    throw new Error(`expected MINIMIZE presentation, got ${state.config.move}`);
+  }
+  const config = state.config as SceneOnMinimizeConfig;
+  return {
+    ...minimizeAtAge(state.age),
     attacker: config.attacker,
     target: config.target,
   };
