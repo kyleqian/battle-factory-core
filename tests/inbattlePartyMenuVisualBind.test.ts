@@ -244,7 +244,7 @@ describe("in-battle party menu visual binds (ISSUES #80)", () => {
     expect(px(renderWith("paralyzed"), 141, 29)).toEqual([189, 189, 24]);
     expect(px(renderWith("sleep"), 141, 29)).toEqual([165, 165, 140]);
     // Clean row: the Lv50 text prints at the level rect in the card text ink.
-    expect(px(renderWith(null), 141, 29)).toEqual([123, 214, 239]);
+    expect(px(renderWith(null), 141, 29)).toEqual([255, 255, 255]);
   });
 
   it("maps status1 bitmasks onto the status-icon variant names (GetAilmentFromStatus)", () => {

@@ -603,9 +603,6 @@ const PARTY_CARD_INFO = [
 ] as const;
 
 const CARD_TEXT_SHADOW: RgbColor = { r: 115, g: 115, b: 115 };
-/** Unselected-card text ink (observed sPartyBoxEmptySlotPalIds bank); selected-card ink is the current-selection pal (123,214,239). */
-const CARD_TEXT_FG_UNSELECTED: RgbColor = { r: 57, g: 148, b: 222 };
-const CARD_TEXT_FG_SELECTED: RgbColor = { r: 123, g: 214, b: 239 };
 
 type GenderGlyph = Readonly<{ width: number; pixels: readonly number[] }>;
 type GenderGlyphAsset = Readonly<{
@@ -671,9 +668,13 @@ function drawHpBar(fb: Uint8Array, row: BattlePartySelectRow): void {
   }
 }
 
-function drawRowText(fb: Uint8Array, row: BattlePartySelectRow, selected: boolean): void {
+function drawRowText(fb: Uint8Array, row: BattlePartySelectRow): void {
   const info = PARTY_CARD_INFO[row.partyIndex];
-  const fg = selected ? CARD_TEXT_FG_SELECTED : CARD_TEXT_FG_UNSELECTED;
+  // DisplayPartyPokemonNickname/Level (party_menu.c:2287-2321) print with
+  // sFontColorTable[0] = LIGHT_GRAY (the window bank's color3), which is white
+  // (255,255,255) in every box bank -- not the blue CARD_TEXT_FG_* the app
+  // previously used (ground truth docs/party-menu-rank6-ground-truth.md §5).
+  const fg: RgbColor = { r: 255, g: 255, b: 255 };
   const palette: RgbColor[] = [
     { r: 0, g: 0, b: 0 },
     fg,
@@ -713,7 +714,7 @@ export function renderBattlePartySelect(
   drawSlot(fb, partySource.slots.wide, 96, 8, state.cursor === 1 ? 7 : state.rows[1].fainted ? 6 : 3);
   drawSlot(fb, partySource.slots.wide, 96, 32, state.cursor === 2 ? 7 : state.rows[2].fainted ? 6 : 3);
   for (const row of state.rows) {
-    drawRowText(fb, row, state.cursor === row.partyIndex);
+    drawRowText(fb, row);
     drawGenderGlyph(fb, row);
     drawHpBar(fb, row);
     drawIcon(fb, row, state.cursor === row.partyIndex, state.elapsed, state.selectedSinceElapsed);
