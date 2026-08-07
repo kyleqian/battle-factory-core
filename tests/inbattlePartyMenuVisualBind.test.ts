@@ -28,6 +28,8 @@ function baseState(
         active: true,
         legal: false,
         gender: "male",
+        item: 0,
+        status: null,
         ...overrides,
       }),
       Object.freeze({
@@ -42,6 +44,8 @@ function baseState(
         active: false,
         legal: true,
         gender: "female",
+        item: 0,
+        status: null,
       }),
       Object.freeze({
         partyIndex: 2 as const,
@@ -55,6 +59,8 @@ function baseState(
         active: false,
         legal: true,
         gender: "female",
+        item: 0,
+        status: null,
       }),
     ]) as BattlePartySelectState["rows"],
     cursor: 1 as const,
@@ -93,6 +99,8 @@ describe("in-battle party menu visual binds (ISSUES #80)", () => {
       active: false,
       legal: true,
       gender: "female",
+      item: 0,
+      status: null,
     });
     const lowFb = createFramebuffer();
     renderBattlePartySelect(lowFb, {

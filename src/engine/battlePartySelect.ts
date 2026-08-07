@@ -7,10 +7,19 @@ import fontSmallData from "../data/gen/font-small.json" with { type: "json" };
 import speciesNamesData from "../data/gen/species-names.json" with { type: "json" };
 import summaryInfoData from "../data/gen/summary-info.json" with { type: "json" };
 import type { GbaButton } from "../input.ts";
+import {
+  BATTLE_SCRIPT_STATUS1_BURN,
+  BATTLE_SCRIPT_STATUS1_FREEZE,
+  BATTLE_SCRIPT_STATUS1_PARALYSIS,
+  BATTLE_SCRIPT_STATUS1_POISON,
+  BATTLE_SCRIPT_STATUS1_SLEEP,
+  BATTLE_SCRIPT_STATUS1_TOXIC_POISON,
+} from "./battleScriptSourceConstants.ts";
 import type {
   BattleCommandRequest,
   BattlePartyIndex,
 } from "./battleDecisionBoundary.ts";
+import type { BattleStatus } from "./battleScenario.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { getMonGender, type MonGender } from "./monGender.ts";
 import type { PartySelectState } from "./partySelect.ts";
@@ -27,6 +36,51 @@ export const PARTY_NO_ENERGY_LINE_2 = "left to battle!";
 
 export type BattlePartySelectCursor = 0 | 1 | 2 | "cancel";
 
+/**
+ * Primary (non-volatile) status as a party-menu status-icon variant name,
+ * mirroring the banked `party-menu-content.json` `statusIcons.frames` keys.
+ */
+export type PartyMenuPrimaryStatus =
+  | "poison"
+  | "paralyzed"
+  | "sleep"
+  | "frozen"
+  | "burn"
+  | null;
+
+/**
+ * GetAilmentFromStatus -> status-icon frame: the frame index is the ailment
+ * (PSN/PRZ/SLP/FRZ/BRN) minus one, so the primary status maps one-to-one
+ * onto the banked variant. `AILMENT_NONE` renders no sprite (and, per
+ * DisplayPartyPokemonLevelCheck, keeps the level line).
+ */
+export function primaryStatusFromStatus1(status1: number): PartyMenuPrimaryStatus {
+  if ((status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0) return "sleep";
+  if ((status1 & (BATTLE_SCRIPT_STATUS1_POISON | BATTLE_SCRIPT_STATUS1_TOXIC_POISON)) !== 0) return "poison";
+  if ((status1 & BATTLE_SCRIPT_STATUS1_BURN) !== 0) return "burn";
+  if ((status1 & BATTLE_SCRIPT_STATUS1_FREEZE) !== 0) return "frozen";
+  if ((status1 & BATTLE_SCRIPT_STATUS1_PARALYSIS) !== 0) return "paralyzed";
+  return null;
+}
+
+function primaryStatusFromBattleStatus(status: BattleStatus): PartyMenuPrimaryStatus {
+  switch (status) {
+    case "none":
+      return null;
+    case "poison":
+    case "toxic":
+      return "poison";
+    case "paralysis":
+      return "paralyzed";
+    case "sleep":
+      return "sleep";
+    case "freeze":
+      return "frozen";
+    case "burn":
+      return "burn";
+  }
+}
+
 export type BattlePartySelectRow = Readonly<{
   partyIndex: 0 | 1 | 2;
   species: number;
@@ -39,6 +93,10 @@ export type BattlePartySelectRow = Readonly<{
   active: boolean;
   legal: boolean;
   gender: MonGender;
+  /** Source party record's held item (`ITEM_NONE` hides the icon). */
+  item: number;
+  /** Primary status; non-null hides the "Lv50" line and draws the status icon. */
+  status: PartyMenuPrimaryStatus;
 }>;
 
 export type BattlePartySelectState = Readonly<{
@@ -135,6 +193,8 @@ export function battlePartySelectStateForForcedParty(
     active: member.partyIndex === forced.request.faintedPartyIndex,
     legal: member.legal,
     gender: memberGender(member.speciesId, member.personality),
+    item: member.item,
+    status: primaryStatusFromBattleStatus(member.status),
   })) as unknown as BattlePartySelectState["rows"];
   return Object.freeze({
     requestId: forced.request.requestId,
@@ -205,6 +265,8 @@ export function createBattlePartySelectState(
       active: partyIndex === activePartyIndex,
       legal: legal.has(partyIndex),
       gender: memberGender(member.species, member.personality),
+      item: member.item ?? 0,
+      status: primaryStatusFromStatus1(member.status1 ?? 0),
     });
   }) as unknown as BattlePartySelectState["rows"];
   return Object.freeze({

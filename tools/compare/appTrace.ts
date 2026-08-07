@@ -1038,6 +1038,137 @@ function midBattleSwitchDenseOffStage(state: EngineState): EngineState {
   };
 }
 
+// ISSUES #80 rank 5 dense-compare wiring: the party-menu status/held-item
+// fixture (tools/battle-lab/party-menu-status-item-off.json) extends the
+// mid-battle-switch dense-a recipe with the player's three real held items
+// (slot 0 Leftovers 200, slot 1 Silk Scarf 217, slot 2 Quick Claw 183) and
+// the opponent using THUNDER_WAVE (86) x4 (the Factory AI's only legal
+// choice, no AI injection). The live route then replays the fixture's
+// verbatim segments: turn-1 Thunder Wave PRZ's slot 0, the first party-menu
+// voluntary switch to slot 1, turn-2 Thunder Wave PRZ's slot 1, and the
+// second party-menu open settles with slot 0 benched-and-PRZ'd, slot 1
+// active-and-PRZ'd, slot 2 clean -- the three-way status/item contrast the
+// doc's §4 acceptance measures.
+const THUNDER_WAVE_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
+  ...RATTATA_LV50,
+  moveId: 86, // MOVE_THUNDER_WAVE
+  moves: [86, 86, 86, 86] as const,
+  pp: [20, 20, 20, 20] as const,
+});
+
+const RATTATA_LV50_ITEM_SLOT0: FactoryFullTurnBattlerConfig = Object.freeze({
+  ...RATTATA_LV50,
+  item: 200, // ITEM_LEFTOVERS
+});
+
+const RATTATA_LV50_ITEM_BENCH: BattleScriptPartyMemberInput = Object.freeze({
+  ...RATTATA_LV50_BENCH,
+  item: 217, // ITEM_SILK_SCARF (slot 1)
+});
+
+const RATTATA_LV50_ITEM_BENCH2: BattleScriptPartyMemberInput = Object.freeze({
+  ...RATTATA_LV50_BENCH,
+  item: 183, // ITEM_QUICK_CLAW (slot 2)
+});
+
+function partyMenuStatusItemOffStage(state: EngineState): EngineState {
+  const playerRentalRecords = [
+    generatedCommandRecord(664),
+    generatedCommandRecord(678),
+    generatedCommandRecord(527),
+  ] as const;
+  let orchestrator = createFactoryRoundBattleOrchestrator({
+    id: "party-menu-status-item-off",
+    rngValue: 4,
+    factoryWinStreak: 0,
+    playerTrainerId: 0x89ab_cdef,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords,
+      savedRentalRecords: [
+        ...playerRentalRecords,
+        generatedCommandRecord(1),
+        generatedCommandRecord(2),
+        generatedCommandRecord(3),
+      ],
+    },
+  });
+  const commandId = orchestrator.round.presentation?.command.commandId;
+  if (commandId === undefined) {
+    throw new Error("party-menu status/item stage requires the battle-start command");
+  }
+  orchestrator = advanceFactoryRoundPresentation(
+    completeFactoryRoundPresentation(orchestrator, { commandId }),
+  );
+  if (orchestrator.battle === null || orchestrator.activeBattleCallStart === null) {
+    throw new Error("party-menu status/item stage requires a live started battle");
+  }
+  const staged = createFactoryFullTurnBattleState({
+    requestId: 1,
+    rngSeed: 1,
+    player: RATTATA_LV50_ITEM_SLOT0,
+    trainer: THUNDER_WAVE_LV50,
+    playerBenchHp: [105, 105],
+    playerBenchOverride: [RATTATA_LV50_ITEM_BENCH, RATTATA_LV50_ITEM_BENCH2],
+    trainerBenchHp: [105, 105],
+    trainerBenchOverride: [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH],
+  });
+  if (
+    staged.boundary.kind !== "decision-required"
+    || staged.boundary.request.kind !== "command"
+  ) {
+    throw new Error("party-menu status/item staged battle has no player command boundary");
+  }
+  const cursors: FactoryBattleMoveSelectionCursors = Object.freeze([0, 0, 0, 0]);
+  const presentation: BattleCommandPresentationState = Object.freeze({
+    ...createBattleCommandPresentation(
+      staged.boundary.request,
+      staged.rules.rulesContext,
+      cursors[0],
+    ),
+    // The fixture's frame 0 is the already-interactive action menu (its first
+    // segment is an A press at frame 0), exactly like mid-battle-switch-dense-off.
+    lifecycle: Object.freeze({ phase: "action-menu" as const, phaseElapsed: 0 }),
+  });
+  const boundaries = Object.freeze(
+    ([presentation.field.player, presentation.field.opponent] as const).map(
+      (field, battler) => {
+        const active = staged.rules.rulesContext.battlers[battler]!;
+        return Object.freeze({
+          battler: battler as 0 | 1,
+          partyIndex: field.partyIndex,
+          field,
+          displayedHp: field.hp,
+          displayedStatus1: active.status1,
+          spriteVisible: true,
+          idleEpoch: 0,
+          moveCursor: cursors[battler]!,
+        });
+      },
+    ),
+  ) as unknown as FactoryBattlePresentationBoundaries;
+  const swapped: FactoryRoundBattleOrchestratorState = Object.freeze({
+    ...orchestrator,
+    battle: staged,
+    battleCommandPresentation: presentation,
+    battleResolutionPresentation: null,
+    retainedLockedActionPresentationOwner: null,
+    battlePartySelect: null,
+    battleForcedPartySelect: null,
+    moveSelectionCursors: cursors,
+    battlePresentationBoundaries: boundaries,
+    aiHistory: createFactoryAiBattleHistory(staged.rules.rulesContext),
+  });
+  return {
+    ...state,
+    factoryRoundBattleOrchestrator: swapped,
+    rngMode: "frontierBattle",
+    rngValue: swapped.battle?.rng.value ?? state.rngValue,
+  };
+}
+
 // ISSUES #81 dense-compare wiring: the Torment selection-rejection fixture
 // (tools/battle-lab/mechanic-selection-reject-torment-off.json) stages
 // BUTTERFREE (TACKLE/GUST) vs MURKROW (TORMENT x4), seed 1; turn 1 lands
@@ -1491,6 +1622,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "win-terminal-window-off": winTerminalWindowStage,
   "mid-battle-switch-dense-off": midBattleSwitchDenseOffStage,
   "mechanic-selection-reject-torment-off": tormentSelectionRejectionOffStage,
+  "party-menu-status-item-off": partyMenuStatusItemOffStage,
 };
 
 export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {
