@@ -22,10 +22,14 @@ import {
   isBattleResolutionCommandComplete,
   isBattleResolutionNextCommandHandoffComplete,
   midBattleSwitchInAt,
+  midBattleSwitchParticleSchedulesAt,
   MID_BATTLE_SWITCH_BALL_LAND_ELAPSED,
   MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED,
   MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED,
   MID_BATTLE_SWITCH_EMERGE_END_ELAPSED,
+  MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR,
+  MID_BATTLE_SWITCH_RECALL_PARTICLE_START_TRACE,
+  MID_BATTLE_SWITCH_SEND_IN_PARTICLE_START_TRACE,
   renderBattleResolutionPresentation,
 } from "../src/engine/battleResolutionPresentationRender.ts";
 import {
@@ -1118,6 +1122,76 @@ describe("battle resolution presentation receipt ownership", () => {
     });
     expect(last.x).toBeGreaterThan(50);
     expect(last.y).toBeGreaterThan(80);
+  });
+
+  it("pins the particle destroy-tick schedule and the stolen-tick freeze (ISSUES #78 residual 1b)", () => {
+    // `PokeBallOpenParticleAnimation_Step2` (battle_anim_throw.c:1642-1657)
+    // kills a particle when `data[1]` reaches 50, i.e. at spawn+26; the RECALL
+    // window's frame-1121 party-summary stolen tick shifts the i>=6 particles
+    // one tick later (spawn+27), the send-in's frame-1204 healthbox-slide
+    // stolen tick shifts all of them. Rendered one tick behind the RAM
+    // receipt, each particle stays on screen THROUGH its destroy-tick's
+    // rendered frame (`traceFrame > destroyTick` is the kill test).
+    const ids = (schedules: readonly { i: number }[]): number[] =>
+      schedules.map((p) => p.i).sort((a, b) => a - b);
+    // Recall: i=0 spawned at 1089 dies at RAM 1115 -> alive through frame 1115
+    // (the frame rendering RAM 1114); i=6 (spawn 1095, +1 stolen shift) dies at
+    // RAM 1122 -> alive through 1122.
+    expect(ids(midBattleSwitchParticleSchedulesAt(1115, "recall"))).toEqual([
+      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+    ]);
+    expect(midBattleSwitchParticleSchedulesAt(1116, "recall").find((p) => p.i === 0))
+      .toBeUndefined();
+    expect(ids(midBattleSwitchParticleSchedulesAt(1116, "recall"))).toEqual([
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+    ]);
+    // The i>=6 +1 shift: without it i=6 would die at 1121; with it alive through 1122.
+    expect(midBattleSwitchParticleSchedulesAt(1121, "recall").some((p) => p.i === 6))
+      .toBe(true);
+    expect(midBattleSwitchParticleSchedulesAt(1121, "recall").some((p) => p.i === 5))
+      .toBe(false);
+    expect(midBattleSwitchParticleSchedulesAt(1122, "recall").some((p) => p.i === 6))
+      .toBe(true);
+    expect(midBattleSwitchParticleSchedulesAt(1123, "recall").find((p) => p.i === 6))
+      .toBeUndefined();
+    expect(midBattleSwitchParticleSchedulesAt(1130, "recall").map((p) => p.i))
+      .toEqual([14, 15]);
+    expect(midBattleSwitchParticleSchedulesAt(1131, "recall").map((p) => p.i))
+      .toEqual([15]);
+    expect(midBattleSwitchParticleSchedulesAt(1132, "recall")).toEqual([]);
+    // Send-in: i=0 spawned at 1187 dies at RAM 1214 -> alive through 1214.
+    expect(midBattleSwitchParticleSchedulesAt(1214, "send-in").some((p) => p.i === 0))
+      .toBe(true);
+    expect(midBattleSwitchParticleSchedulesAt(1215, "send-in").find((p) => p.i === 0))
+      .toBeUndefined();
+    expect(midBattleSwitchParticleSchedulesAt(1229, "send-in").map((p) => p.i))
+      .toEqual([15]);
+    expect(midBattleSwitchParticleSchedulesAt(1230, "send-in")).toEqual([]);
+    // Frozen flag: recall frames >= 1122 for i>=6; send-in frames >= 1205.
+    expect(midBattleSwitchParticleSchedulesAt(1121, "recall").every((p) => !p.frozen))
+      .toBe(true);
+    expect(midBattleSwitchParticleSchedulesAt(1122, "recall").every((p) => p.i >= 6 && p.frozen))
+      .toBe(true);
+    expect(midBattleSwitchParticleSchedulesAt(1204, "send-in").every((p) => !p.frozen))
+      .toBe(true);
+    expect(midBattleSwitchParticleSchedulesAt(1205, "send-in").every((p) => p.frozen))
+      .toBe(true);
+  });
+
+  it("pins the emerge first-visible accumulator-58 gate and the one-tick render lag (ISSUES #78 residual 1c)", () => {
+    // §10.3: the mon becomes visible at RAM 1188 (acc 40) but the oracle's
+    // first RENDERED emerge frame is 1189 (elapsed 49) at acc 58. The draw
+    // gate is `emergeAccumulator >= 58` (battleScene drawMidBattleSwitchInSprite),
+    // so the accumulator at elapsed 48 (40) must NOT draw and elapsed 49's
+    // must.
+    expect(midBattleSwitchInAt(48, 0).monVisible).toBe(true);
+    expect(midBattleSwitchInAt(48, 0).emergeAccumulator).toBe(40);
+    expect(midBattleSwitchInAt(48, 0).emergeAccumulator)
+      .toBeLessThan(MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR);
+    expect(midBattleSwitchInAt(49, 0).emergeAccumulator)
+      .toBe(MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR);
+    expect(midBattleSwitchInAt(49, 0).emergeAccumulator)
+      .toBeGreaterThanOrEqual(MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR);
   });
 
   it("models the mid-battle switch-in healthbox slide at 5 px/frame (ISSUES #78 slice 3)", () => {
