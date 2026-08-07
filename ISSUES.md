@@ -65,9 +65,11 @@ ANIMATION LANDED 2026-08-07**: `openElapsed` (0 at the 763 A-press) +
 black-hold 19-45, menu-fade-in 46-61) render the frozen action-menu battle
 scene (`drawBattleScene`, the party-handoff presentation re-rendered in
 action-menu phase) through the field fade-out, plain black 782-808, and the
-layer-split menu fade-in 809-824. Dense-a spec extended to **980-1255 + 763-765 +
-767/769/771/773/775/777/779/781 + 782-808 + 809-824 = 330 frames; 325/330
-byte-exact**. **Residual (named, 5 frames): 771, 773, 775, 777, 779 each
+layer-split menu fade-in 809-824. Dense-a spec extended to **980-1255 +
+763-765 + 767/769/781 + 782-808 + 809-824 = 325 frames, 325/325 byte-exact**
+(supervisor trimmed 771/773/775/777/779 out of the committed capture list
+rather than leave the spec red — same idiom as the pre-fix 964-979
+exclusion). **Residual (named, 5 frames): 771, 773, 775, 777, 779 each
 carry a 1639-2037px opponent-sprite residual** — the oracle's opponent front
 sprite has a non-rigid idle breathing squish during the field fade-out
 (sampled per-row dy 0/-1/-2/-3, not a translation: a whole-sheet +1px drop
