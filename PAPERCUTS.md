@@ -8,6 +8,17 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Fresh side worktrees can start with a dangling `reference/` symlink
+
+- **What:** a side-lane worker (2026-08-07, second-RECORD scout) found the
+  worktree's `reference/` symlink dangling at session start and had to
+  self-remedy with `../../initialize-run.sh --relink` before it could read
+  the decomp. The launcher's worktree setup installs node_modules but does
+  not guarantee the gitignored `reference/` link points anywhere valid.
+  Fix shape: the worktree-setup step in `tools/run-subagent.sh` should
+  create/refresh the `reference/` symlink the same way it handles deps.
+- **Hits:** 1 (~2 min, worker self-fixed)
+
 ## Probe verify scripts write untracked scratch dirs into the tree → postflight exit-5 false alarms
 
 - **What:** `tools/probe/verify-battle-message-pacing.ts` writes its
