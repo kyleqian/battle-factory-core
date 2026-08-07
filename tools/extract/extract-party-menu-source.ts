@@ -25,7 +25,7 @@ const asset = {
   source: {
     graphics: "graphics/party_menu/bg.png",
     tilemap: "graphics/party_menu/bg.bin",
-    slots: "src/data/party_menu.h:sSlotTilemap_{Main,Wide}",
+    slots: "src/data/party_menu.h:sSlotTilemap_{Main,Wide,WideEmpty}",
   },
   tileset: {
     columns: sliced.columns,
@@ -37,6 +37,11 @@ const asset = {
   slots: {
     main: { width: 10, height: 7, tiles: bytes("slot_main.bin") },
     wide: { width: 18, height: 3, tiles: bytes("slot_wide.bin") },
+    // DrawEmptySlot (party_menu.c:2193-2195): BlitBitmapToPartyWindow(
+    // windowId, sSlotTilemap_WideEmpty, 18, 0, 0, 18, 3) -- the empty-slot
+    // box for mon-4/5/6, rendered with the PARTY_PAL_NO_MON palette
+    // (sPartyBoxNoMonPalIds {17,27,28} -> gPartyMenuBg_Pal bank 1).
+    wideEmpty: { width: 18, height: 3, tiles: bytes("slot_wide_empty.bin") },
   },
 };
 

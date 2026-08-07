@@ -381,6 +381,7 @@ type PartySourceAsset = Readonly<{
   slots: Readonly<{
     main: Readonly<{ width: number; height: number; tiles: readonly number[] }>;
     wide: Readonly<{ width: number; height: number; tiles: readonly number[] }>;
+    wideEmpty: Readonly<{ width: number; height: number; tiles: readonly number[] }>;
   }>;
 }>;
 type PartyIcon = Readonly<{ frame0: Tileset; frame1: Tileset; palette: readonly RgbColor[] }>;
@@ -403,13 +404,16 @@ function drawTile(
   y: number,
   hFlip = false,
   vFlip = false,
+  transparentZero = false,
 ): void {
   const tile = partySource.tileset.tiles[tileIndex];
   if (tile === undefined) return;
   for (let py = 0; py < 8; py += 1) for (let px = 0; px < 8; px += 1) {
     const sx = hFlip ? 7 - px : px;
     const sy = vFlip ? 7 - py : py;
-    const color = partySource.palette[paletteBank * 16 + tile[sy * 8 + sx]!];
+    const colorIndex = tile[sy * 8 + sx]!;
+    if (transparentZero && colorIndex === 0) continue;
+    const color = partySource.palette[paletteBank * 16 + colorIndex];
     if (color) setPixel(fb, x + px, y + py, color.r, color.g, color.b);
   }
 }
@@ -427,9 +431,19 @@ function drawSlot(
   x: number,
   y: number,
   paletteBank: number,
+  transparentZero = false,
 ): void {
   for (let ty = 0; ty < slot.height; ty += 1) for (let tx = 0; tx < slot.width; tx += 1) {
-    drawTile(fb, slot.tiles[ty * slot.width + tx]!, paletteBank, x + tx * 8, y + ty * 8);
+    drawTile(
+      fb,
+      slot.tiles[ty * slot.width + tx]!,
+      paletteBank,
+      x + tx * 8,
+      y + ty * 8,
+      false,
+      false,
+      transparentZero,
+    );
   }
 }
 
@@ -713,6 +727,14 @@ export function renderBattlePartySelect(
   drawSlot(fb, partySource.slots.main, 8, 24, state.cursor === 0 ? 7 : state.rows[0].fainted ? 6 : 3);
   drawSlot(fb, partySource.slots.wide, 96, 8, state.cursor === 1 ? 7 : state.rows[1].fainted ? 6 : 3);
   drawSlot(fb, partySource.slots.wide, 96, 32, state.cursor === 2 ? 7 : state.rows[2].fainted ? 6 : 3);
+  // DrawEmptySlot (party_menu.c:824-870, 2193-2195): a 3-mon party still
+  // renders the six right-column boxes; slots 4-6 are empty boxes drawn from
+  // sSlotTilemap_WideEmpty with the PARTY_PAL_NO_MON palette
+  // (sPartyBoxNoMonPalIds {17,27,28} -> gPartyMenuBg_Pal bank 1, color1/11/12
+  // = (74,74,99)/(231,239,140)/(99,90,0)).
+  drawSlot(fb, partySource.slots.wideEmpty, 96, 56, 1, true);
+  drawSlot(fb, partySource.slots.wideEmpty, 96, 80, 1, true);
+  drawSlot(fb, partySource.slots.wideEmpty, 96, 104, 1, true);
   for (const row of state.rows) {
     drawRowText(fb, row);
     drawGenderGlyph(fb, row);
