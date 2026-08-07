@@ -5,6 +5,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 970 — [supervisor WIND-DOWN, 2026-08-06] Orientation only; stopped before worker dispatch at user request
+
+- **State:** master at this entry's commit, clean. No worker launched and no
+  production code changed. `animation-main` had no commits absent from master,
+  so no fold was required. DEFERRED.md has no open entries.
+- **Verified:** read the supervisor guide, AGENTS.md, and the authoritative S8
+  and S10 executable-frontier resets. The Battle Scene OFF oracle reports the
+  expected v5 contract and 45,000-frame cap. The freshness guard's failure is
+  the known docs/tooling-only false positive: harness commit `2328682` changes
+  only `_template` commit-attribution hooks and tests. The direct full suite
+  showed no failures before the execution host terminated it at three minutes;
+  a follow-up shard completed **189 files / 1546 tests** green. A second shard
+  was manually stopped, without observed failures, when the user requested
+  early wind-down. The build was not rerun; PROGRESS 969's same-commit full
+  **754 files / 7141 tests / 1 skipped** and build remain the last complete
+  baseline.
+- **Next (unchanged):** (1) #81 route-scoped fight-menu freeze schedule and
+  message pacing; (2) bind postwin RECORD-YES/RETIRE-YES through the generic
+  terminal presentation seam; (3) #80 cursor/ball/selection/fade; (4) lobby
+  walkability + REST guard; (5) #78's 1256-1407 fight-menu window. Do not
+  resume the retired canonical Battle-2 turn march after tick 33331.
+- **Notes:** no worker branches/worktrees were created. No new papercut or
+  deferred decision.
+
 ## 969 — [supervisor WIND-DOWN, 2026-08-06] Session summary: 6 workers / 3 rounds — #78 switch window CLOSED 221/221, #80 rank 5 bound, postwin RECORD/RETIRE bound 204/204+211/211 incl. the YES/NO window, #81 freeze question ANSWERED (route-dependent), #82 filed
 
 - **State:** master at this entry's commit, clean. Final independent union
@@ -115,51 +139,3 @@ plus this step (2f579d21 + 8286ba97).
   list: #80 rank 6 cursor/ball/fade, lobby walkable + REST guard.
 - **Notes:** full `npm test` + `npm run build` NOT run this step (cap); smoke
   + typecheck + the three specs are the last verified tiers. PAPERCUT: none.
-
-## 967 — [bounded MAIN worker, 2026-08-06] #80 rank 5 bound: in-battle party-menu status + held-item icons (spec 0/251->0/251 with 453px/frame off, all target bboxes glyph-exact)
-
-- **State:** master `3e1d718e`, clean. Typecheck green; full `npm test`
-  **754 files / 7132 passed / 1 skipped**; `npm run build` green.
-  `battle-command-generated-off` **128/128**, `mid-battle-switch-dense-a-off`
-  **95/95**, `fight-menu-chrome-torment-off` **52/57** — all unchanged.
-- **Did (per `docs/party-menu-status-item-ground-truth.md` §7, one commit per
-  rung):** (1) compare spec + app stage
-  `party-menu-status-item-off` landed (mirrors `midBattleSwitchDenseOffStage`
-  with the fixture's items 200/217/183 + opponent THUNDER_WAVE x4); oracle
-  runs 251/251 twice-stable, app baseline 9687-9759px/frame (status glyphs
-  rendered as Lv50 text). (2) `BattlePartySelectRow` + both state builders
-  thread `item` (source party record) + `primaryStatusFromStatus1` (variant
-  names poison|paralyzed|sleep|frozen|burn; Toxic collapses to poison;
-  sleep-over-paralysis precedence) — forced-party projection threads them via
-  `PartySelectMember` (sourced from the corpus rental record, so the canonical
-  constant's items synced to 142/221/179). (3) `drawHeldItemIcon` (banked
-  `party-menu-held-item.json` frames.item 8x8 at `heldItem` centers
-  (20,50)/(108,28)/(108,52), hidden for ITEM_NONE) + `drawStatusIcon` (banked
-  `party-menu-content.json` statusIcons 32x8 frame at `status` centers,
-  drawn only for non-none) via a shared center-based `blitIconFrame`; Lv50
-  gated on `status === null` (mirrors `DisplayPartyPokemonLevelCheck`).
-  Draw order per sPartyMenuSpriteCoords: icon, heldItem, status, pokeball.
-- **Oracle/acceptance:** frame-2150 target bboxes glyph-exact — status
-  x40-59/y48-55 + x126-145/y23-30 (156/156 glyph pixels per the doc's own
-  template measure) and item x17-23/y47-53, x105-111/y25-31, x105-111/y49-55
-  (slot 2 fully byte-exact). Slot 2 keeps Lv50; slots 0/1 show the PRZ glyph
-  and no level text (level-rect ink counts match the oracle 208/208 and
-  137/137). Per-frame diffs 2050-2300 drop to **9234-9306px**, `<=` the
-  rung-1 baseline on all 251 frames (0 frames worse; max reduction 453px).
-  Residual classes (all pre-existing, out of scope): (a) the rank-6 cursor
-  selected/unselected wash + card-text swap (~2180px; oracle cursor sits on
-  slot 0, app on slot 1), incl. the 4 corner pixels per status bbox + 2 per
-  item bbox; (b) the staged-RATTATA mon-icon/box palette class (~4-5kpx);
-  (c) Lv50/HP-text ink class (~1.2kpx, app prints Lv50 blue vs oracle's
-  white). Tier-1 pins: 4 new in `tests/inbattlePartyMenuVisualBind.test.ts`
-  (item-on/off centers, variant selection paralyzed-vs-sleep, Lv50
-  suppression via pixel (141,29), status1->variant mapping), all 3 pixel
-  pins red-verified (3 failed with the draw change stashed).
-- **Next:** #80 rank 6 (cursor/ball/selection + party-menu fade pixels),
-  then the RECORD/RETIRE binds and lobby walkable + REST guard per PROGRESS
-  966's ordered list.
-- **Notes:** the app's party-menu-open cursor rule (active mon) differs from
-  the oracle's (slot 0) — rank-6 cursor scope, flagged not fixed. The oracle
-  prints Lv50 in white vs the app's card-text ink — pre-existing
-  `drawRowText` color class, deliberately not changed this step (would risk
-  the pinned 128/128). PAPERCUT: none new.
