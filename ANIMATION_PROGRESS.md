@@ -1,5 +1,56 @@
 # Animation coverage
 
+## MOVE_MINIMIZE staged — both orientations isolated at 153 frames; scenarios + dense probe + measured window banked (2026-08-07 worker)
+
+- **State:** MINIMIZE stays **unsupported**. Coverage unchanged at **120/276
+  exact, 0 partial, 0 staged, 156 unsupported**. Nothing promoted; no pin moved.
+- **Did:** staged two legal mechanicLab scenarios (FRONTIER_MON_GRIMER lead vs
+  legal ONIX, all four active move slots MINIMIZE so the Factory AI has one
+  legal choice; player-back `mechanic-minimize-player-grimer-opponent-onix.json`
+  and opponent-front `mechanic-minimize-opponent-grimer-player-onix.json`) and
+  `tools/compare/minimizeProbe.py` — a dense probe copied from
+  `facadeProbe.py` with script-pointer isolation to `Move_MINIMIZE`
+  (`082ccf52`..`Move_METRONOME` `082ccf65`) and the clone machinery's own
+  capture: EVERY `ClonedMinizeSprite_Step` clone (slot, template, callback,
+  x/y/x2/y2, subpriority, attr0/1/2, matrixNum, matrix a/b/c/d, data[0..7]),
+  the attacker's own matrix + y2 + attr words, BLDCNT/BLDALPHA/BLDY, hardware
+  OAM/matrices, full palettes, per-frame raw RGB + sha256. Probe run command
+  recorded in the probe docstring.
+- **Measured (fresh runs, both orientations, deterministic and identical):**
+  the move-owned window is **153 frames — frames 210..362 each** (task first
+  present at 211, last present at 360, destroyed by 361; blendoff lands on 362
+  where BLDCNT/BLDALPHA return to 0). Task slot 0, `AnimTask_Minimize_Step`:
+  `data[0]` attacker spriteId (6 player / 8 opponent), `data[7]` = attacker
+  subpriority (30 player / 40 opponent). Three 32-frame shrink cycles at ages
+  (window-210) 1-32, 35-66, 69-100, scale series **296→1536 in +40 steps**
+  (`0x100+0x28`), each cycle one state-1 wait frame + state-2 reset frame
+  (scale back to 256), then a 33-frame hold (state 3, ages 101-133, scale
+  pinned 1536), then state-4 grow-back ages 134-150 at **-80/frame**
+  (1536→256 in 16 steps), state-5 reset at 150, task gone at 151. Attacker
+  matrix.a == data[4]; y2 = `SetBattlerSpriteYOffsetFromYScale` with var=40
+  (`MON_PIC_HEIGHT 64 - 2*GRIMER y_offset 12`): `trunc((40 - trunc(10240/d))/2)`
+  verified 0..17 across the whole series (0 at 256 → 17 at 1536). **Clone
+  spawn frames ages 1,4,7 / 35,38,41 / 69,72,75** (data[2]==0,3,6 pre-check),
+  slots **3,4,5** per cycle (reused), subpriority = attackerSubpriority -
+  cloneIndex (30,29,28 player / 40,39,38 opponent), clone matrix FROZEN at the
+  spawn-time scale (256, 376, 496) and clone y2 = y2(cloneMatrix) (0, 6, 10),
+  each clone alive exactly **16 frames** (data[0] 16→1; `data[6]` live count
+  1,2,3 then 2 at +16, 1 at +19, 0 at +22). `setalpha 10,8` = **BLDCNT
+  0x3f40, BLDALPHA 0x80a** held frames 211-361; visual-task count 0→1 (211) /
+  1→0 (361); SE_M_MINIMIZE sound task 1 at 211..279 (0 at 280), panX -64.
+- **Next:** (d) `src/animation/minimize.ts` reducer + `SceneOnMinimizeConfig`/
+  View seam + `battleScene.ts` draw case — clone draw order FLIPS between
+  orientations (subpriority-based: player-back ONIX 40 → GRIMER 30 → clones
+  30/29/28; opponent-front GRIMER 40 → clones 40/39/38 → ONIX 30), so derive
+  the painter order from subpriority per orientation and test both; (e) the
+  portable + two fixtures; (f) Tier-1 tests, coverage entry, inventory pin
+  120→121 exact / 156→155 unsupported.
+- **Notes — variant evidence:** GRIMER was picked (FRONTIER_MON_GRIMER) with
+  all four slots MINIMIZE; back and front pic y_offset are both 12, so the y2
+  var is 40 in both orientations. `AllocOamMatrix()` returned a real matrix
+  every spawn in both runs (no 0xFF-failure clones observed in the live
+  window), but the reducer still models the failure branch from source.
+
 ## MOVE_FACADE promoted to exact — 119→120; pinning and ledger only, rendering was already verified (2026-08-07 worker)
 
 - **State:** coverage advanced **119→120/276 exact**, 0 partial, 0 staged, 156
