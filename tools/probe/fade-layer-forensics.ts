@@ -1,17 +1,19 @@
 // Rerunnable forensics probe for ISSUES #80 per-layer fade (docs/fade-layer-forensics.md).
 // Reads oracle captures from a `npm run compare` out dir and prints the measured
-// per-frame (y_bg, y_obj) against the §1/§2 tables and the §3 960-963 class counts.
+// per-frame (y_bg, y_obj) against the §1/§2 tables, the §3 960-963 class counts,
+// and the §6 open-window field fade-out schedule.
 //
-// Usage: node --experimental-strip-types tools/probe/fade-layer-forensics.ts <close-out-dir> [open-out-dir]
-//   close-out-dir: must contain oracle-00958..oracle-00985.png (capture-range 958:985)
-//   open-out-dir : must contain oracle-00803..oracle-00824.png (capture-range 803:830)
+// Usage: node --experimental-strip-types tools/probe/fade-layer-forensics.ts <close-out-dir> [open-out-dir] [field-out-dir]
+//   close-out-dir : must contain oracle-00958..oracle-00985.png (capture-range 958:985)
+//   open-out-dir  : must contain oracle-00803..oracle-00824.png (capture-range 803:830)
+//   field-out-dir : must contain oracle-00762..oracle-00808.png (capture-range 758:830)
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { PNG } from "pngjs";
 
-const [closeDir, openDir] = process.argv.slice(2);
+const [closeDir, openDir, fieldDir] = process.argv.slice(2);
 if (!closeDir) {
-  console.error("usage: node --experimental-strip-types tools/probe/fade-layer-forensics.ts <close-out-dir> [open-out-dir]");
+  console.error("usage: node --experimental-strip-types tools/probe/fade-layer-forensics.ts <close-out-dir> [open-out-dir] [field-out-dir]");
   process.exit(2);
 }
 
@@ -142,29 +144,78 @@ for (const f of [960, 961, 962, 963]) {
   console.log(`       app@diff:    ${top(ac, 3)}`);
 }
 // Class sanity: oracle top-1 class should be white, app top classes should include the CANCEL window + button colors.
-const od = loadOracle(closeDir, 960)!;
-const ad = loadPng(closeDir, 960, "app")!;
-const oc960 = new Map<string, number>();
-const ac960 = new Map<string, number>();
-for (let y = 80; y < 160; y++) for (let x = 0; x < 240; x++) {
-  const i = (y * 240 + x) * 4;
-  if (od[i] !== ad[i] || od[i + 1] !== ad[i + 1] || od[i + 2] !== ad[i + 2]) {
-    const ok_ = `${od[i]},${od[i + 1]},${od[i + 2]}`;
-    const ak = `${ad[i]},${ad[i + 1]},${ad[i + 2]}`;
-    oc960.set(ok_, (oc960.get(ok_) ?? 0) + 1);
-    ac960.set(ak, (ac960.get(ak) ?? 0) + 1);
+const od = loadOracle(closeDir, 960);
+const ad = loadPng(closeDir, 960, "app");
+if (!od || !ad) {
+  console.log("  frame 960: no capture (skipping class sanity)");
+} else {
+  const oc960 = new Map<string, number>();
+  const ac960 = new Map<string, number>();
+  for (let y = 80; y < 160; y++) for (let x = 0; x < 240; x++) {
+    const i = (y * 240 + x) * 4;
+    if (od[i] !== ad[i] || od[i + 1] !== ad[i + 1] || od[i + 2] !== ad[i + 2]) {
+      const ok_ = `${od[i]},${od[i + 1]},${od[i + 2]}`;
+      const ak = `${ad[i]},${ad[i + 1]},${ad[i + 2]}`;
+      oc960.set(ok_, (oc960.get(ok_) ?? 0) + 1);
+      ac960.set(ak, (ac960.get(ak) ?? 0) + 1);
+    }
   }
+  const orcWhite = oc960.get("255,255,255") ?? 0;
+  const appBtn = (ac960.get("181,66,0") ?? 0);
+  const appCancel = (ac960.get("115,90,181") ?? 0);
+  const expectWhite = Math.abs(orcWhite - CLASS_EXPECT.oracleTop["255,255,255"]!) <= 3;
+  const expectBtn = appBtn >= 70 && appBtn <= 80; // oracle draws NO button (0), app draws 73
+  if (!expectWhite) { clsOk = false; fail(`frame 960 oracle white@diff ${orcWhite} expected ~${CLASS_EXPECT.oracleTop["255,255,255"]}`); }
+  if (!expectBtn) { clsOk = false; fail(`frame 960 app ball-red button ${appBtn}px expected ~73 (oracle has 0)`); }
+  if (appCancel < 180 || appCancel > 215) { clsOk = false; fail(`frame 960 app CANCEL interior ${appCancel}px expected ~201`); }
+  console.log(`  frame 960: oracle white@diff=${orcWhite} (exp ~1452), app button-red=${appBtn} (exp 73), app CANCEL interior=${appCancel} (exp 201)`);
+  console.log(`  §3 ${clsOk ? "PASS" : "FAIL"}`);
 }
-const orcWhite = oc960.get("255,255,255") ?? 0;
-const appBtn = (ac960.get("181,66,0") ?? 0);
-const appCancel = (ac960.get("115,90,181") ?? 0);
-const expectWhite = Math.abs(orcWhite - CLASS_EXPECT.oracleTop["255,255,255"]!) <= 3;
-const expectBtn = appBtn >= 70 && appBtn <= 80; // oracle draws NO button (0), app draws 73
-if (!expectWhite) { clsOk = false; fail(`frame 960 oracle white@diff ${orcWhite} expected ~${CLASS_EXPECT.oracleTop["255,255,255"]}`); }
-if (!expectBtn) { clsOk = false; fail(`frame 960 app ball-red button ${appBtn}px expected ~73 (oracle has 0)`); }
-if (appCancel < 180 || appCancel > 215) { clsOk = false; fail(`frame 960 app CANCEL interior ${appCancel}px expected ~201`); }
-console.log(`  frame 960: oracle white@diff=${orcWhite} (exp ~1452), app button-red=${appBtn} (exp 73), app CANCEL interior=${appCancel} (exp 201)`);
-console.log(`  §3 ${clsOk ? "PASS" : "FAIL"}`);
+// ---- §6 open-window field fade-out (frames 762-808) ----
+// Reference pixels chosen for the pre-menu switch screen (the battle field that
+// fades out before the party menu opens). BG = white screen background @ (4,4)
+// base (31,31,31)5; OBJ = battler front-sprite body maroon @ (176,52) base
+// (20,3,7)5. openElapsed e = frame - 763 (confirm frame = A-press 762-763, the
+// app pops the menu at 763). Closed forms:
+//   y_bg(e)  = min(16, 2 * max(0, floor((e - 1) / 2)))
+//   y_obj(e) = min(16, 2 * max(0, floor((e - 2) / 2)))
+const FIELD_BG_BASE: [number, number, number] = [31, 31, 31]; // white (255,255,255)
+const FIELD_OBJ_BASE: [number, number, number] = [20, 3, 7];  // sprite maroon (165,24,57)
+const fieldYbg = (e: number): number => Math.min(16, 2 * Math.max(0, Math.floor((e - 1) / 2)));
+const fieldYobj = (e: number): number => Math.min(16, 2 * Math.max(0, Math.floor((e - 2) / 2)));
+
+if (fieldDir) {
+  console.log("== §6 open window field fade-out (oracle 762-808) ==");
+  let fieldOk = true;
+  for (let f = 762; f <= 808; f++) {
+    const data = loadOracle(fieldDir, f);
+    if (!data) { console.log(`  frame ${f}: no capture`); continue; }
+    const bg = px(data, 4, 4);
+    const obj = px(data, 176, 52);
+    const ybg = decodeY(bg[0], bg[1], bg[2], FIELD_BG_BASE);
+    const yobj = decodeY(obj[0], obj[1], obj[2], FIELD_OBJ_BASE);
+    const e = f - 763;
+    const [ebg, eobj] = [fieldYbg(e), fieldYobj(e)];
+    const ok = ybg === ebg && yobj === eobj;
+    if (!ok) { fieldOk = false; fail(`frame ${f}: measured (${ybg},${yobj}) expected (${ebg},${eobj})  bg=${bg} obj=${obj}`); }
+    console.log(`  ${f} e=${String(e).padStart(2)}: measured (y_bg=${String(ybg).padStart(2)}, y_obj=${String(yobj).padStart(2)}) expected (${ebg},${eobj}) ${ok ? "OK" : "MISMATCH"}`);
+  }
+  // Edge checks: last fully-bright 765, first blend 766, BG black 780, all-black 781, last all-black 808.
+  const edgeExp: Record<number, [number, number]> = {
+    765: [0, 0], 766: [2, 0], 780: [16, 14], 781: [16, 16], 808: [16, 16],
+  };
+  for (const [f, [ebg, eobj]] of Object.entries(edgeExp)) {
+    const data = loadOracle(fieldDir, Number(f));
+    if (!data) continue;
+    const ybg = decodeY(...px(data, 4, 4), FIELD_BG_BASE);
+    const yobj = decodeY(...px(data, 176, 52), FIELD_OBJ_BASE);
+    if (ybg !== ebg || yobj !== eobj) {
+      fieldOk = false;
+      fail(`edge frame ${f}: measured (${ybg},${yobj}) expected (${ebg},${eobj})`);
+    }
+  }
+  console.log(`  §6 ${fieldOk ? "PASS" : "FAIL"} (frames 762-808, closed forms + edges)`);
+}
 
 console.log(failures === 0 ? "\nALL CHECKS PASS" : `\n${failures} CHECK(S) FAILED`);
 process.exit(failures === 0 ? 0 : 1);
