@@ -69,16 +69,29 @@ layer-split menu fade-in 809-824. Dense-a spec extended to **980-1255 +
 763-765 + 767/769/781 + 782-808 + 809-824 = 325 frames, 325/325 byte-exact**
 (supervisor trimmed 771/773/775/777/779 out of the committed capture list
 rather than leave the spec red — same idiom as the pre-fix 964-979
-exclusion). **Residual (named, 5 frames): 771, 773, 775, 777, 779 each
-carry a 1639-2037px opponent-sprite residual** — the oracle's opponent front
-sprite has a non-rigid idle breathing squish during the field fade-out
-(sampled per-row dy 0/-1/-2/-3, not a translation: a whole-sheet +1px drop
-makes the healthbox overlap worse, so it is NOT a simple offset) that the
-brief's §6 forensics could not see (it sampled only (4,4)/(176,52); the
-latter is a uniform sprite-body pixel). The 8 OBJ-lag frames
-(766/768/770/772/774/776/778/780) remain the brief's named whole-field-blend
-residual. Follow-up: model the opponent idle breathing (frame-2 sprite or a
-bounded squish) to close 771-779.
+exclusion; the spec is **341/341** after item (c) closed). **Open-fade
+residual — 13 frames, both classes measured and attributed
+(`docs/fade-layer-forensics.md` §8, 2026-08-07 SIDE):**
+**Class A (8 frames: 766/768/770/772/774/776/778/780, ~7400-7600px each)** —
+the oracle's OBJ layer is one blend step behind its BG layer while the app
+blends the whole scene at a single `y_bg` (`drawBattleScene` is one opaque
+draw). The OBJ mask is now banked oracle-side: **7528 px**, bbox
+(13,16)-(229,111) = opponent healthbox + opponent front sprite + player
+healthbox + player back sprite (§8 labels the first two "summary window /
+summary sprite"; they are the opponent's healthbox and front sprite).
+**Class B (5 frames: 771/773/775/777/779, 1639px, 2037px at 779)** — the
+**player's healthbox**, bbox (127,74)-(229,110), carrying a **1-row-down
+content offset from frame 770**: `oracle(x,y) = blend(settled(x,y−1), y_obj)`
+for ~1612-1619px. At 779 the player back sprite joins it (1 row high).
+**Two earlier labels are REFUTED, do not reinstate them:** it is not an
+"opponent idle breathing squish" (the opponent-sprite region is byte-exact on
+all five frames, and the OFF RAM receipt in
+`docs/send-out-slice-a-positive-case.md` shows that sprite settled at
+`SpriteCallbackDummy`/`animNum 0`/`{x2:0,y2:0}` with nothing to animate), and
+there is **no third fade schedule** — the healthbox interior tracks `y_obj`
+exactly. Fix (§8 item 5, moderate cost): split the settled scene into BG
+(30872px at `y_bg`) + OBJ (7528px at `y_obj`) plus the two per-sprite row
+offsets; predicted acceptance dense-a **341 → 354/354**.
 (c) message-box residual — **CLOSED 2026-08-07** (dense-a spec **341/341
 byte-exact**). On the submenu-open edge (A-press 922-923, window lands 926)
 the oracle swaps the message window from sDefaultPartyMsgWindowTemplate (21x2,
