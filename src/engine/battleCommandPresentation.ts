@@ -95,6 +95,42 @@ export type BattleCommandPresentationPhase =
   | "rejection-reopen"
   | "submitting";
 
+/**
+ * Route-scoped idle-bounce freeze schedule (ISSUES #81 remainder 4a,
+ * `docs/fight-menu-freeze-schedule-probe.md`). The oracle's fight-menu
+ * bounce (`SpriteCB_BounceEffect`) freezes for a route-dependent number of
+ * frames at each phase transition; the app's single battle-1-calibrated
+ * model (docs/fight-menu-chrome-ground-truth.md §8) reproduces battle-1's
+ * own 0/2/1+1 schedule, and the torment fixture's 4/1/1 is a per-route
+ * overlay, NOT a change to any shared constant. Each entry is a phase-keyed
+ * offset (in bounce frames) added to the entry-relative `idleBounceElapsed`
+ * at render time; absent phases mean 0 (battle-1 behavior unchanged).
+ * Supplied by the route's staging context; production code never keys off
+ * battle number or absolute tick.
+ */
+export type BattleCommandBounceSchedule = Readonly<{
+  phaseOffsets: Readonly<Partial<Record<BattleCommandPresentationPhase, number>>>;
+}>;
+
+export const BATTLE_COMMAND_BOUNCE_SCHEDULE_DEFAULT: BattleCommandBounceSchedule =
+  Object.freeze({ phaseOffsets: Object.freeze({}) });
+
+/**
+ * The torment fixture's route-scoped schedule (oracle terms §8.1: 4-frame
+ * opening freeze 736-739 = app offset +3; fight-menu 740-766 = +1; reopen
+ * window 977 = -1). The +1 fight-menu offset is a FIRST-window-only regime
+ * (see `bounceFightMenuReopened`): after the rejection reopen the oracle is
+ * back on the app's clock and 986 must stay at offset 0.
+ */
+export const TORMENT_ROUTE_BOUNCE_SCHEDULE: BattleCommandBounceSchedule =
+  Object.freeze({
+    phaseOffsets: Object.freeze({
+      "fight-opening": 3,
+      "fight-menu": 1,
+      "rejection-reopen": -1,
+    }),
+  });
+
 export type BattleCommandPresentationState = Readonly<{
   request: BattleCommandRequest;
   lifecycle: Readonly<{
@@ -107,6 +143,19 @@ export type BattleCommandPresentationState = Readonly<{
    * open/cancel/reopen transitions.
    */
   idleBounceElapsed: number;
+  /**
+   * Route-scoped idle-bounce freeze schedule (see `BattleCommandBounceSchedule`).
+   * Defaults to the all-zero battle-1 schedule; only a route's staging
+   * context supplies the torment 4/1/1 overlay.
+   */
+  bounceSchedule: BattleCommandBounceSchedule;
+  /**
+   * True once the rejection reopen has returned the presentation to the
+   * fight-menu. The schedule's +1 fight-menu offset is a FIRST-window-only
+   * regime (the oracle is back on the app's clock after the reopen tail —
+   * frame 986 must stay at offset 0), so the reopened window suppresses it.
+   */
+  bounceFightMenuReopened: boolean;
   /**
    * Persistent controller-owned battler sprite visibility across command
    * handoffs (the real sprite's `invisible` flag). The resolution seam sets
@@ -299,6 +348,7 @@ export function createBattleCommandPresentation(
   requestInput: BattleCommandRequest,
   rules: BattleScriptRulesContext,
   initialFightCursor: 0 | 1 | 2 | 3 = 0,
+  bounceSchedule: BattleCommandBounceSchedule = BATTLE_COMMAND_BOUNCE_SCHEDULE_DEFAULT,
 ): BattleCommandPresentationState {
   const request = createBattleCommandRequest(requestInput);
   if (request.side !== "player" || request.battler !== 0) {
@@ -367,6 +417,8 @@ export function createBattleCommandPresentation(
     request,
     lifecycle: Object.freeze({ phase: "action-enter", phaseElapsed: 0 }),
     idleBounceElapsed: 0,
+    bounceSchedule,
+    bounceFightMenuReopened: false,
     spriteVisibility: Object.freeze({ player: true, opponent: true }),
     field: Object.freeze({
       player: fieldBattler(
@@ -480,6 +532,7 @@ export function advanceBattleCommandPresentation(
         return withLifecycle(state, "fight-menu", 0, {
           fightDisplayCursor: state.fightCursor,
           rejectedSlot: null,
+          bounceFightMenuReopened: true,
         });
       }
       return withLifecycle(state, "rejection-reopen", elapsed);
@@ -539,6 +592,20 @@ export function advanceBattleCommandPresentation(
     ...state,
     fightCursor: moveFightCursor(state.fightCursor, direction),
   });
+}
+
+/**
+ * The render-time idle-bounce age offset for the presentation's current
+ * lifecycle phase (ISSUES #81 remainder 4a). Reads the route-scoped schedule
+ * (`bounceSchedule.phaseOffsets`), with the reopened fight-menu suppressing
+ * its first-window +1 offset so frame 986 stays on the app's clock.
+ */
+export function battleCommandBounceAgeOffset(
+  presentation: BattleCommandPresentationState,
+): number {
+  const phase = presentation.lifecycle.phase;
+  if (phase === "fight-menu" && presentation.bounceFightMenuReopened) return 0;
+  return presentation.bounceSchedule.phaseOffsets[phase] ?? 0;
 }
 
 /**

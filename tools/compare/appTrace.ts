@@ -57,6 +57,7 @@ import {
 } from "../../src/engine/battleResolutionPresentation.ts";
 import { battleStringPrintableLength } from "../../src/engine/battleStringResolver.ts";
 import {
+  TORMENT_ROUTE_BOUNCE_SCHEDULE,
   createBattleCommandPresentation,
   type BattleCommandPresentationState,
 } from "../../src/engine/battleCommandPresentation.ts";
@@ -75,7 +76,6 @@ import type {
   FactoryBattlePresentationBoundaries,
   FactoryRoundBattleOrchestratorState,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
-import type { BattleCommandPresentationState } from "../../src/engine/battleCommandPresentation.ts";
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "../../src/engine/battleScriptSourceConstants.ts";
 
 export interface AppCapture {
@@ -1275,6 +1275,12 @@ function tormentSelectionRejectionOffStage(state: EngineState): EngineState {
       staged.boundary.request,
       staged.rules.rulesContext,
       cursors[0],
+      // Route-scoped idle-bounce freeze schedule (ISSUES #81 remainder 4a):
+      // the torment fixture's 4/1/1 opening/message/reopen-tail freezes vs
+      // battle-1's own 0/2/1+1 (docs/fight-menu-freeze-schedule-probe.md §4).
+      // Only this route supplies it; every other caller keeps the battle-1
+      // default.
+      TORMENT_ROUTE_BOUNCE_SCHEDULE,
     ),
     // The fixture's frame 734 is the already-interactive turn-2 action menu
     // (its first turn-2 segment is an A press at 734-735), so the app stage

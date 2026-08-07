@@ -766,6 +766,9 @@ import type {
   BattleCommandPresentationState,
 } from "./battleCommandPresentation.ts";
 import {
+  battleCommandBounceAgeOffset,
+} from "./battleCommandPresentation.ts";
+import {
   createBattleCommandFieldRenderView,
   drawBattleCommandActionChrome,
   renderBattleCommandPresentation,
@@ -18340,7 +18343,8 @@ export function renderGeneratedBattleCommandPresentation(
   fb: Uint8Array,
   presentation: BattleCommandPresentationState,
 ): void {
-  const bounceTick = presentation.idleBounceElapsed;
+  const bounceTick = presentation.idleBounceElapsed
+    + battleCommandBounceAgeOffset(presentation);
   const idleBounce = commandMenuBounceY2(bounceTick);
   const bounce = {
     onixY2: idleBounce.onixY2,
