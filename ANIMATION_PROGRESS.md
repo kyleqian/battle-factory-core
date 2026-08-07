@@ -1,5 +1,66 @@
 # Animation coverage
 
+## MOVE_TORMENT staged — both orientations isolated at 177 frames; scenarios + dense probe + measured window banked (2026-08-07 worker)
+
+- **State:** TORMENT stays **unsupported**. Coverage unchanged at **121/276
+  exact, 0 partial, 0 staged, 155 unsupported**. Nothing promoted; no pin moved.
+- **Did:** staged two legal mechanicLab scenarios (MURKROW_1 set 184 lead vs
+  legal ONIX, all four active move slots TORMENT so the Factory AI has a single
+  legal choice; player-back `mechanic-torment-player-murkrow-opponent-onix.json`
+  and opponent-front `mechanic-torment-opponent-murkrow-player-onix.json`) and
+  `tools/compare/tormentProbe.py` — a dense probe copied from `minimizeProbe.py`
+  with script-pointer isolation to `Move_TORMENT` (`082cdcae`..`Move_MEMENTO`
+  `082cdcf2`) capturing the `AnimTask_TormentAttacker`/`TormentAttacker_Step`
+  lifecycle with all 16 data words, EVERY `gThoughtBubbleSpriteTemplate` and
+  `gAngerMarkSpriteTemplate` sprite (slot, template, callback, x/y/x2/y2,
+  subpriority, attr0/1/2, matrixNum, hFlip at `0x3f`, matrix a/b/c/d, data[0..7]),
+  the `AnimTask_BlendMonInAndOut` palette-blend task, the attacker's own matrix +
+  y2 + attrs, BLDCNT/BLDALPHA/BLDY, full palettes, hardware OAM/matrices, and
+  per-frame raw RGB + sha256. Probe run command recorded in the step brief.
+- **Measured (fresh runs, both orientations, deterministic and identical):**
+  move-owned window **177 frames each — player-back frames 68..244, opponent-front
+  72..248** (script first in-bounds .. first inactive cleanup). Task slot 0:
+  first step-visible frame is the FIRST bubble's creation (data[1] already 1 —
+  the createvisualtask setup and state-0 step run in consecutive task updates).
+  Player-back data[2]=72 (X_2), data[3]=97 (Y_PIC_OFFSET = sprite y 89 + 8);
+  opponent-front data[2]=176, data[3]=51 (sprite y, no +8 on opponent side).
+  **Six thought bubbles** with ABSOLUTE subpriorities 6..1 (6-data[1]) and
+  alternating hFlip (data[1]&1), spawn frames player-back **75/100/125/140/155/170**
+  (opponent-front +4: 79/104/129/144/159/174), positions player-back x =
+  104,40,98,46,92,52 (72±32/26/20), y = 77,77,71,71,65,65 (97−20/26/32);
+  opponent-front x = 208,144,202,150,196,156 (176±…), y = 31,31,25,25,19,19. A
+  bubble NEVER moves once placed (callback replaced by SpriteCallbackDummy).
+  **Attacker wobble** (sAffineAnims_Torment, 3 frames × 4 ticks) restarts with
+  every bubble: software matrix a/d series 244/264,232/272,220/280,208/288,
+  228/268,248/248,268/228,288/208,280/220,272/232,264/244,256/256 over 12 ticks
+  starting the frame after each bubble, y2 via SetBattlerSpriteYOffsetFromYScale
+  (var 48 back / 40 front MURKROW). Cadence: bubbles 0→1 gap 25 (12 affine +
+  10 data[6] wait), 1→2 gap 25, then 15 (12 affine + 0 wait); after the 6th
+  bubble data[6]=8 wait (state 3), state 4 at player-back f=192 sets every
+  bubble's callback + StartSpriteAnim(anim 2, forward 4×2-tick), state 5
+  countdown, all six destroyed at f=203 (task destroyed same frame). Second
+  half (TARGET): `AnimTask_BlendMonInAndOut` RGB_RED (d1=31, d3=10, d5=1, d7=1,
+  d0=273 = OBJ_PLTT_ID(target)+1) player-back f=204..222, d2 ramps 1..10 then
+  9..1; anger mark1 f=204 x=196 y=14 sub 38 (target sub 40 − 2), mark2 f=226
+  x=156 y=14 sub 38; opponent-front target is player-back ONIX → anger sub 28
+  (30 − 2), mark1 f=208 x=52 y=60, mark2 f=230 x=92 y=60 (Y_PIC_OFFSET 88 =
+  sprite y 80 + 8). Each anger mark runs the 16-tick gAngerMarkAffineAnimCmds
+  (×11/−11 per tick) then DestroySpriteAndMatrix (mark1 gone 1 frame later;
+  mark2 gone f=243, window ends f=244/248).
+- **Next:** (d) `src/animation/torment.ts` reducer + `SceneOnTormentConfig`/
+  View seam + `battleScene.ts` draw case — the back-to-front painter order
+  FLIPS with orientation (player-back: ONIX 40 → anger 38 → MURKROW 30 →
+  bubbles 6..1; opponent-front: MURKROW 40 → anger 28 → ONIX 30 → bubbles 6..1)
+  and the six bubbles' explicit absolute subpriorities are the trap — test both
+  orders, never one for both sides. Reuse `swaggerAngerMarkAtAge` for the anger
+  marks and the thought-bubble tileset from `taunt.json`. Then (e) portable +
+  fixtures, (f) Tier-1 + evidence tests + coverage entry + inventory pin
+  121→122 exact / 155→154 unsupported.
+- **Notes — probe gotcha (twice bitten):** the sprite TEMPLATE symbols
+  (`gThoughtBubbleSpriteTemplate` etc.) are data pointers — the `|1` thumb-bit
+  applied to function symbols corrupts them; and `hFlip` is the `0x3f` bitfield,
+  NOT attr1's matrix bits. Both were wrong on the first probe run.
+
 ## MOVE_MINIMIZE promoted to exact — 121/276 exact (2026-08-07 worker)
 
 - **State:** MINIMIZE is **exact** — 153/153 on both axes in both orientations.
