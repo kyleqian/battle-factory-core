@@ -38,6 +38,9 @@ export type PostwinPhase =
   | "blackBeforeCounter"
   | "counterRoom";
 
+/** RECORD/RETIRE question branch kind (docs/postwin-record-retire-ground-truth.md §1-§2). */
+export type PostwinQuestionKind = "record" | "retire";
+
 export interface PostwinState {
   /** Ticks since the accepted loss-quote dismiss (0 = the A edge). */
   elapsed: number;
@@ -73,6 +76,20 @@ export interface PostwinState {
   swapCursorMoveElapsed: number | null;
   /** Accepted NO edge; the following field-message clock is edge-relative. */
   swapDeclineElapsed: number | null;
+  /**
+   * RECORD/RETIRE question phase. `edgeElapsed` is the accepted selection
+   * A edge (this state's relative elapsed clock, matching the oracle's
+   * canonical select tick). Non-null only while a question is active;
+   * after the dismiss it stays non-null until the re-ask re-enters the
+   * continuation menu. See docs/postwin-record-retire-ground-truth.md §5.
+   */
+  question: { kind: PostwinQuestionKind; edgeElapsed: number } | null;
+  /** Accepted dismiss-A edge for the active question (default NO), edge-relative. */
+  questionDismissElapsed: number | null;
+  /** Cursor copied to the field window one VBlank after the logical move. */
+  continuationCursorDisplayPos: 0 | 1 | 2 | 3 | null;
+  /** Accepted continuation-cursor edge, used for the one-VBlank display handoff. */
+  continuationCursorMoveElapsed: number | null;
   /** Accepted "Right this way" dismiss edge; walk/warp clocks derive from it. */
   rightThisWayDismissElapsed: number | null;
   /**
@@ -195,6 +212,10 @@ function createPostwinStateFromSnapshot(
     swapCursorDisplayPos: null,
     swapCursorMoveElapsed: null,
     swapDeclineElapsed: null,
+    question: null,
+    questionDismissElapsed: null,
+    continuationCursorDisplayPos: null,
+    continuationCursorMoveElapsed: null,
     rightThisWayDismissElapsed: null,
     frozenSceneView: null,
   };
@@ -352,6 +373,10 @@ export function createBattleReturnHoldState(
     swapCursorDisplayPos: null,
     swapCursorMoveElapsed: null,
     swapDeclineElapsed: null,
+    question: null,
+    questionDismissElapsed: null,
+    continuationCursorDisplayPos: null,
+    continuationCursorMoveElapsed: null,
     rightThisWayDismissElapsed: null,
     frozenSceneView,
   };
@@ -371,6 +396,51 @@ export const POSTWIN_RIGHT_THIS_WAY_TEXT_SETTLED_DELAY =
 /** MSGBOX_DEFAULT accepts A two ticks after the final glyph. */
 export const POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY =
   POSTWIN_RIGHT_THIS_WAY_TEXT_SETTLED_DELAY + 2;
+
+// RECORD/RETIRE question phase (docs/postwin-record-retire-ground-truth.md
+// §1-§2). All delays are relative to the canonical select tick (the oracle's
+// own canonical tick numbers; the app's accept edge lands one tick later, so
+// `beginPostwinQuestion` stores the canonical edge = its accept frame - 1,
+// keeping these offsets verbatim from the ground-truth ledger).
+/** First question glyph at select-edge + 5 (canonical). */
+export const POSTWIN_QUESTION_TEXT_FIRST_DELAY = 5;
+/** YES/NO multichoice window draws 3 ticks after the final glyph. */
+export const POSTWIN_QUESTION_WINDOW_DELAY = 3;
+/** Box clears 4 ticks after the accepted dismiss edge. */
+export const POSTWIN_QUESTION_BOX_CLEAR_DELAY = 4;
+/** "The 2nd match is next!" reprint first glyph, dismiss + 5. */
+export const POSTWIN_QUESTION_REPRINT_FIRST_DELAY = 5;
+/** Reprint settles (menu + 2nd-match message + wait cursor), dismiss + 40. */
+export const POSTWIN_QUESTION_REPRINT_SETTLED_DELAY = 40;
+/** Re-asked continuation menu input-ready, dismiss + 44. */
+export const POSTWIN_QUESTION_MENU_READY_DELAY = 44;
+
+export const POSTWIN_QUESTION_RECORD_TEXT: readonly [string, string] = [
+  "Would you like to record your latest",
+  "battle on your FRONTIER PASS?",
+] as const;
+export const POSTWIN_QUESTION_RETIRE_TEXT: readonly [string, string] = [
+  "Would you like to retire from your",
+  "Battle Swap challenge?",
+] as const;
+export const POSTWIN_QUESTION_TEXT_TOTAL: Readonly<Record<PostwinQuestionKind, number>> = {
+  record:
+    POSTWIN_QUESTION_RECORD_TEXT[0].length +
+    POSTWIN_QUESTION_RECORD_TEXT[1].length,
+  retire:
+    POSTWIN_QUESTION_RETIRE_TEXT[0].length +
+    POSTWIN_QUESTION_RETIRE_TEXT[1].length,
+};
+/** Canonical last-glyph edge-offset per kind (record: +69, retire: +60). */
+export const POSTWIN_QUESTION_LAST_GLYPH_DELAY: Readonly<Record<PostwinQuestionKind, number>> = {
+  record: POSTWIN_QUESTION_TEXT_FIRST_DELAY + POSTWIN_QUESTION_TEXT_TOTAL.record - 1,
+  retire: POSTWIN_QUESTION_TEXT_FIRST_DELAY + POSTWIN_QUESTION_TEXT_TOTAL.retire - 1,
+};
+/** Canonical YES/NO window edge-offset per kind (record: +72, retire: +63). */
+export const POSTWIN_QUESTION_WINDOW_DELAYS: Readonly<Record<PostwinQuestionKind, number>> = {
+  record: POSTWIN_QUESTION_LAST_GLYPH_DELAY.record + POSTWIN_QUESTION_WINDOW_DELAY,
+  retire: POSTWIN_QUESTION_LAST_GLYPH_DELAY.retire + POSTWIN_QUESTION_WINDOW_DELAY,
+};
 
 // Exact write ages are filled by the dense RAM audit accompanying this
 // slice. They remain relative state boundaries, never canonical ticks.
@@ -443,6 +513,13 @@ export function advancePostwin(state: PostwinState): PostwinState {
     state.dialoguePage === 4 &&
     state.dialoguePageEdgeElapsed !== null &&
     elapsed >= state.dialoguePageEdgeElapsed + POSTWIN_SWAP_MENU_VISIBLE_DELAY;
+  // The re-asked continuation menu after a RECORD/RETIRE question is a fresh
+  // menu: cursor back on GO ON (ground-truth §1: re-asked menu byte-identical
+  // to the original held menu, which sits on GO ON).
+  const reAskMenuReady =
+    state.question !== null &&
+    state.questionDismissElapsed !== null &&
+    elapsed >= state.questionDismissElapsed + POSTWIN_QUESTION_MENU_READY_DELAY;
   return {
     elapsed,
     challengeBattleNum:
@@ -462,7 +539,9 @@ export function advancePostwin(state: PostwinState): PostwinState {
     continuationCursorPos:
       menuVisible && state.continuationCursorPos === null
         ? 0
-        : state.continuationCursorPos,
+        : reAskMenuReady
+          ? 0
+          : state.continuationCursorPos,
     continuationConfirmElapsed: state.continuationConfirmElapsed,
     dialoguePage: state.dialoguePage,
     dialoguePageEdgeElapsed: state.dialoguePageEdgeElapsed,
@@ -479,6 +558,21 @@ export function advancePostwin(state: PostwinState): PostwinState {
           : state.swapCursorDisplayPos,
     swapCursorMoveElapsed: state.swapCursorMoveElapsed,
     swapDeclineElapsed: state.swapDeclineElapsed,
+    question: state.question,
+    questionDismissElapsed: state.questionDismissElapsed,
+    // One-VBlank display handoff for the continuation-menu cursor, mirroring
+    // the swap cursor: the logical pos moves on the press frame, the field
+    // window copies it one tick later (docs/...-ground-truth.md §5).
+    continuationCursorDisplayPos:
+      menuVisible && state.continuationCursorDisplayPos === null
+        ? 0
+        : reAskMenuReady
+          ? 0
+          : state.continuationCursorMoveElapsed !== null &&
+              elapsed > state.continuationCursorMoveElapsed
+            ? state.continuationCursorPos
+            : state.continuationCursorDisplayPos,
+    continuationCursorMoveElapsed: state.continuationCursorMoveElapsed,
     rightThisWayDismissElapsed: state.rightThisWayDismissElapsed,
     frozenSceneView: state.frozenSceneView,
   };
@@ -518,7 +612,83 @@ export function movePostwinContinuationCursor(
     ...state,
     continuationCursorPos:
       ((state.continuationCursorPos + direction + 4) % 4) as 0 | 1 | 2 | 3,
+    continuationCursorMoveElapsed: state.elapsed,
   };
+}
+
+export function beginPostwinQuestion(
+  state: PostwinState,
+  kind: PostwinQuestionKind,
+): PostwinState {
+  if (
+    state.dialoguePage !== 0 ||
+    state.question !== null ||
+    state.continuationCursorPos === null ||
+    !postwinContinuationInputReady(state)
+  ) return state;
+  return {
+    ...state,
+    // The app's accepted A edge lands one tick after the oracle's canonical
+    // select tick; storing the canonical edge keeps every POSTWIN_QUESTION_*
+    // offset verbatim (docs/postwin-record-retire-ground-truth.md §5).
+    question: { kind, edgeElapsed: state.elapsed - 1 },
+    questionDismissElapsed: null,
+  };
+}
+
+export function acceptPostwinQuestionDismiss(
+  state: PostwinState,
+): PostwinState {
+  if (state.question === null) return state;
+  const delay = state.elapsed - state.question.edgeElapsed;
+  if (
+    state.questionDismissElapsed !== null ||
+    delay < POSTWIN_QUESTION_WINDOW_DELAYS[state.question.kind]
+  ) return state;
+  return {
+    ...state,
+    // Same canonical-edge convention as beginPostwinQuestion.
+    questionDismissElapsed: state.elapsed - 1,
+  };
+}
+
+export function postwinQuestionVisibleChars(state: PostwinState): number {
+  if (state.question === null) return 0;
+  const delay = state.elapsed - state.question.edgeElapsed;
+  if (delay < POSTWIN_QUESTION_TEXT_FIRST_DELAY) return 0;
+  return Math.min(
+    POSTWIN_QUESTION_TEXT_TOTAL[state.question.kind],
+    delay - POSTWIN_QUESTION_TEXT_FIRST_DELAY + 1,
+  );
+}
+
+export function postwinQuestionWindowVisible(state: PostwinState): boolean {
+  if (state.question === null) return false;
+  const delay = state.elapsed - state.question.edgeElapsed;
+  return delay >= POSTWIN_QUESTION_WINDOW_DELAYS[state.question.kind];
+}
+
+/** Re-ask "2nd match is next!" visible glyph count after a question dismiss. */
+export function postwinQuestionReprintVisibleChars(state: PostwinState): number {
+  if (state.question === null || state.questionDismissElapsed === null) return 0;
+  const delay = state.elapsed - state.questionDismissElapsed;
+  if (delay < POSTWIN_QUESTION_REPRINT_FIRST_DELAY) return 0;
+  return Math.min(
+    POSTWIN_NEXT_TEXT_TOTAL,
+    delay - POSTWIN_QUESTION_REPRINT_FIRST_DELAY + 1,
+  );
+}
+
+export function postwinQuestionReprintSettled(state: PostwinState): boolean {
+  if (state.question === null || state.questionDismissElapsed === null) return false;
+  return state.elapsed - state.questionDismissElapsed >=
+    POSTWIN_QUESTION_REPRINT_SETTLED_DELAY;
+}
+
+export function postwinQuestionMenuReady(state: PostwinState): boolean {
+  if (state.question === null || state.questionDismissElapsed === null) return false;
+  return state.elapsed - state.questionDismissElapsed >=
+    POSTWIN_QUESTION_MENU_READY_DELAY;
 }
 
 export function acceptPostwinContinuation(
@@ -527,9 +697,17 @@ export function acceptPostwinContinuation(
   if (
     state.dialoguePage !== 0 ||
     state.continuationConfirmElapsed !== null ||
-    state.continuationCursorPos !== 0 ||
+    state.question !== null ||
+    state.continuationCursorPos === null ||
     !postwinContinuationInputReady(state)
   ) return state;
+  if (state.continuationCursorPos === 1) {
+    return beginPostwinQuestion(state, "record");
+  }
+  if (state.continuationCursorPos === 3) {
+    return beginPostwinQuestion(state, "retire");
+  }
+  if (state.continuationCursorPos !== 0) return state;
   return {
     ...state,
     continuationConfirmElapsed: state.elapsed,

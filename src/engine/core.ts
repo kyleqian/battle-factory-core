@@ -231,6 +231,7 @@ import {
   acceptPostwinContinuation,
   acceptPostwinDialoguePage,
   acceptPostwinHealDismiss,
+  acceptPostwinQuestionDismiss,
   createBattleReturnHoldState,
   createPostwinState,
   createPostwinStateFromOpponentRentalRecords,
@@ -250,6 +251,8 @@ import {
   POSTWIN_SWAP_MENU_VISIBLE_DELAY,
   POSTWIN_RIGHT_THIS_WAY,
   POSTWIN_IN_BATTLE_CLEAR_AGE,
+  POSTWIN_QUESTION_RECORD_TEXT,
+  POSTWIN_QUESTION_RETIRE_TEXT,
   acceptPostwinSwapDecline,
   beginPostwinNextBattleGuide,
   acceptPostwinRightThisWayDismiss,
@@ -257,6 +260,9 @@ import {
   postwinDialogueInputReady,
   postwinDialogueVisibleChars,
   postwinHealVisibleChars,
+  postwinQuestionReprintVisibleChars,
+  postwinQuestionVisibleChars,
+  postwinQuestionMenuReady,
   movePostwinContinuationCursor,
   movePostwinSwapCursor,
   postwinContinuationInputReady,
@@ -907,7 +913,19 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     ) {
       nextPostwin = acceptPostwinRightThisWayDismiss(nextPostwin);
       prebattleRoom = { phase: "messageClosing", elapsed: 0 };
-    } else if (postwinContinuationInputReady(nextPostwin)) {
+    } else if (
+      nextPostwin.question !== null &&
+      nextPostwin.questionDismissElapsed === null
+    ) {
+      // RECORD/RETIRE question phase: the dismiss-A resolves the multichoice
+      // default NO (no YES/NO input here; UP/A after dismissal is ignored).
+      if (newKeys.has("A")) {
+        nextPostwin = acceptPostwinQuestionDismiss(nextPostwin);
+      }
+    } else if (
+      nextPostwin.question === null &&
+      postwinContinuationInputReady(nextPostwin)
+    ) {
       if (newAndRepeatedKeys.has("DOWN")) {
         nextPostwin = movePostwinContinuationCursor(nextPostwin, 1);
       } else if (newAndRepeatedKeys.has("UP")) {
@@ -2270,7 +2288,39 @@ function renderPostwinState(state: EngineState): Uint8Array {
       }
     };
 
-    if (beforeContinuation) {
+    if (postwin.question !== null) {
+      const q = postwin.question;
+      const qText = q.kind === "record"
+        ? POSTWIN_QUESTION_RECORD_TEXT
+        : POSTWIN_QUESTION_RETIRE_TEXT;
+      const dismissed = postwin.questionDismissElapsed !== null;
+      const qDelay = age - q.edgeElapsed;
+      const dDelay = dismissed ? age - postwin.questionDismissElapsed! : -1;
+      if (dismissed) {
+        // Dismiss transition: question stays fully shown through +3 (the
+        // default-NO A press + 2 more frames), box clears at +4, then the
+        // ReadyFor2ndOpponent reprint re-types.
+        if (dDelay <= 3) {
+          drawLines(qText[0], qText[1], qText[0].length + qText[1].length);
+        } else if (dDelay !== 4) {
+          drawLines(
+            POSTWIN_NEXT_LINE1,
+            POSTWIN_NEXT_LINE2,
+            postwinQuestionReprintVisibleChars(postwin),
+          );
+        }
+      } else if (qDelay <= 3) {
+        // Select-close visual: the 4-choice menu window clears while the
+        // "2nd match" message is still in the box (ground-truth §1 6641-6642).
+        drawLines(
+          POSTWIN_NEXT_LINE1,
+          POSTWIN_NEXT_LINE2,
+          POSTWIN_NEXT_LINE1.length + POSTWIN_NEXT_LINE2.length,
+        );
+      } else if (qDelay !== 4) {
+        drawLines(qText[0], qText[1], postwinQuestionVisibleChars(postwin));
+      }
+    } else if (beforeContinuation) {
       drawLines(
         POSTWIN_HEAL_LINE1,
         POSTWIN_HEAL_LINE2,
@@ -2326,13 +2376,28 @@ function renderPostwinState(state: EngineState): Uint8Array {
     }
 
     const dialogueDelay = postwinDialogueDelay(postwin);
-    if (
-      healDismiss !== null &&
-      age >= healDismiss + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY &&
+    const normalMenuVisible =
+      postwin.question === null &&
       (
         postwin.dialoguePage === 0 ||
         (postwin.dialoguePage === 1 && dialogueDelay === 0)
-      )
+      );
+    const questionMenuVisible =
+      postwin.question !== null &&
+      (
+        (
+          postwin.questionDismissElapsed === null &&
+          age - postwin.question.edgeElapsed <= 1
+        ) ||
+        (
+          postwin.questionDismissElapsed !== null &&
+          postwinQuestionMenuReady(postwin)
+        )
+      );
+    if (
+      healDismiss !== null &&
+      age >= healDismiss + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY &&
+      (normalMenuVisible || questionMenuVisible)
     ) {
       drawStandardWindowFrame(fb, 152, 32, 6, 8);
       const choices = ["GO ON", "RECORD", "REST", "RETIRE"];
@@ -2343,7 +2408,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
         fb,
         "▶",
         160,
-        41 + (postwin.continuationCursorPos ?? 0) * 16,
+        41 + (postwin.continuationCursorDisplayPos ?? postwin.continuationCursorPos ?? 0) * 16,
       );
     }
     if (

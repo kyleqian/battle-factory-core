@@ -89,6 +89,18 @@ import {
   postwinRightThisWayVisibleChars,
   postwinRngSteps,
   movePostwinSwapCursor,
+  movePostwinContinuationCursor,
+  beginPostwinQuestion,
+  acceptPostwinQuestionDismiss,
+  postwinQuestionVisibleChars,
+  postwinQuestionMenuReady,
+  postwinQuestionReprintVisibleChars,
+  POSTWIN_QUESTION_MENU_READY_DELAY,
+  POSTWIN_QUESTION_RECORD_TEXT,
+  POSTWIN_QUESTION_RETIRE_TEXT,
+  POSTWIN_QUESTION_TEXT_TOTAL,
+  POSTWIN_QUESTION_WINDOW_DELAYS,
+  POSTWIN_QUESTION_LAST_GLYPH_DELAY,
 } from "../src/engine/postwin.ts";
 
 describe("S8 Battle-1 postwin transition", () => {
@@ -895,5 +907,148 @@ describe("S8 Battle-1 postwin transition", () => {
       .toEqual([157, 20, 225, 201]);
     expect(state.battleScene?.fightSubmenu.activeMonMoveset.moveIds)
       .toEqual([157, 20, 225, 201]);
+  });
+
+  describe("S8 RECORD/RETIRE postwin question branch", () => {
+    const menuReadyAt = (healEdge: number) =>
+      healEdge + POSTWIN_CONTINUATION_INPUT_READY_DELAY;
+
+    it("moves the continuation cursor at the DOWN edge and copies it one VBlank later", () => {
+      const ready = menuReadyAt(2_000);
+      const state = {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: ready,
+        healDismissElapsed: 2_000,
+        continuationCursorPos: 0 as const,
+        continuationCursorDisplayPos: 0 as const,
+      };
+      const moved = movePostwinContinuationCursor(state, 1);
+      expect(moved.continuationCursorPos).toBe(1);
+      expect(moved.continuationCursorMoveElapsed).toBe(ready);
+      // one-VBlank display handoff: display pos stays on GO ON until the tick after
+      expect(moved.continuationCursorDisplayPos).toBe(0);
+      expect(advancePostwin(moved).continuationCursorDisplayPos).toBe(1);
+    });
+
+    it("enters a record/retire question on selection and keeps REST unselectable", () => {
+      const ready = menuReadyAt(2_000);
+      const base = {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: ready,
+        healDismissElapsed: 2_000,
+        continuationCursorPos: 0 as const,
+        continuationCursorDisplayPos: 0 as const,
+      };
+      const record = beginPostwinQuestion(
+        { ...base, continuationCursorPos: 1 as const },
+        "record",
+      );
+      expect(record.question).toEqual({ kind: "record", edgeElapsed: ready - 1 });
+      expect(record.dialoguePage).toBe(0);
+      expect(record.continuationConfirmElapsed).toBeNull();
+
+      const retire = beginPostwinQuestion(
+        { ...base, continuationCursorPos: 3 as const },
+        "retire",
+      );
+      expect(retire.question?.kind).toBe("retire");
+
+      // REST (pos 2) is unselectable: neither GO ON nor a question begins.
+      const rest = acceptPostwinContinuation({
+        ...base,
+        continuationCursorPos: 2 as const,
+      });
+      expect(rest.question).toBeNull();
+      expect(rest.continuationConfirmElapsed).toBeNull();
+      expect(rest.dialoguePage).toBe(0);
+    });
+
+    it("types the question at 1 glyph/tick from edge+5 and reaches the final glyph at edge+LAST_GLYPH", () => {
+      const edge = 6_639;
+      const base = {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: edge,
+        question: { kind: "record" as const, edgeElapsed: edge },
+      };
+      expect(POSTWIN_QUESTION_TEXT_TOTAL.record).toBe(65);
+      expect(POSTWIN_QUESTION_LAST_GLYPH_DELAY.record).toBe(69);
+      expect(postwinQuestionVisibleChars(base)).toBe(0);
+      expect(postwinQuestionVisibleChars(
+        { ...base, elapsed: edge + POSTWIN_QUESTION_LAST_GLYPH_DELAY.record },
+      )).toBe(POSTWIN_QUESTION_TEXT_TOTAL.record);
+    });
+
+    it("swallows the early dismiss-A and accepts it only once the YES/NO window would draw", () => {
+      const edge = 6_639;
+      const base = {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: edge,
+        question: { kind: "record" as const, edgeElapsed: edge },
+      };
+      const windowDelay = POSTWIN_QUESTION_WINDOW_DELAYS.record;
+      // A before the window draw is ignored (the YES/NO default NO is
+      // unreachable early).
+      expect(acceptPostwinQuestionDismiss(base).questionDismissElapsed).toBeNull();
+      expect(acceptPostwinQuestionDismiss(
+        { ...base, elapsed: edge + windowDelay - 1 },
+      ).questionDismissElapsed).toBeNull();
+      const accepted = acceptPostwinQuestionDismiss(
+        { ...base, elapsed: edge + windowDelay },
+      );
+      expect(accepted.questionDismissElapsed).toBe(edge + windowDelay - 1);
+    });
+
+    it("re-asks via the dismiss-A boundary: box clear, reprint, and a fresh GO ON menu", () => {
+      const edge = 6_639;
+      const windowDelay = POSTWIN_QUESTION_WINDOW_DELAYS.record;
+      const dismiss = edge + windowDelay - 1;
+      const dismissed = {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: dismiss,
+        healDismissElapsed: 2_000,
+        question: { kind: "record" as const, edgeElapsed: edge },
+        questionDismissElapsed: dismiss,
+      };
+      expect(postwinQuestionReprintVisibleChars(
+        { ...dismissed, elapsed: dismiss + POSTWIN_QUESTION_MENU_READY_DELAY - 1 },
+      )).toBe(POSTWIN_NEXT_TEXT_SETTLED_DELAY - POSTWIN_NEXT_TEXT_FIRST_DELAY + 1);
+      const menu = {
+        ...dismissed,
+        elapsed: dismiss + POSTWIN_QUESTION_MENU_READY_DELAY,
+      };
+      expect(postwinQuestionMenuReady(menu)).toBe(true);
+      const advanced = advancePostwin({
+        ...menu,
+        continuationCursorPos: 1 as const,
+        continuationCursorDisplayPos: 1 as const,
+      });
+      // re-asked menu is a fresh menu: cursor back on GO ON, byte-identical hold
+      expect(advanced.continuationCursorPos).toBe(0);
+      expect(advanced.continuationCursorDisplayPos).toBe(0);
+      expect(advanced.question).not.toBeNull();
+    });
+
+    it("ignores UP+A after the dismiss (the YES answer is unreachable)", () => {
+      const edge = 6_639;
+      const windowDelay = POSTWIN_QUESTION_WINDOW_DELAYS.record;
+      const dismiss = edge + windowDelay - 1;
+      const dismissed = {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: dismiss + POSTWIN_QUESTION_MENU_READY_DELAY,
+        healDismissElapsed: 2_000,
+        question: { kind: "record" as const, edgeElapsed: edge },
+        questionDismissElapsed: dismiss,
+      };
+      // UP on the question phase does nothing; the dismiss already happened.
+      const up = acceptPostwinQuestionDismiss(dismissed);
+      expect(up.questionDismissElapsed).toBe(dismiss);
+      // The question text stays canonical for the spec strings.
+      expect(POSTWIN_QUESTION_RECORD_TEXT[0]).toBe(
+        "Would you like to record your latest",
+      );
+      expect(POSTWIN_QUESTION_RETIRE_TEXT[1]).toBe(
+        "Battle Swap challenge?",
+      );
+    });
   });
 });
