@@ -388,3 +388,163 @@ counts per class — e.g. ball-red app (181,66,0):195 ↔ oracle (156,57,0):195)
 so 823 goes byte-exact too once the OBJ layer is blended at y=2. Dense-a
 should then pin 763-830 with only the §3 message-region residual (960-963)
 remaining on the open side.
+
+## 7. Message window swap (924-978) + the icon phase residual
+
+MEASUREMENT-ONLY forensics for ISSUES #80 open remainder item (c): from the
+submenu open through the close, the oracle's in-battle party-menu message
+window is a DIFFERENT window (and message) than the app's. Data source: fresh
+`npm run compare -- mid-battle-switch-dense-a-off --capture-range 900:980
+--summary` oracle captures (25/81 matched). The §1 fade model and the settled
+message box (byte-exact at 883) are NOT re-derived. Receipt:
+`tools/compare/out/run-2026-08-07-21-35-45Z-3175`; the §7 probe (§5 addendum)
+PASSes on it.
+
+### (a) The exact frame the window changes — 926
+
+The oracle message-window band (x0-240, y124-160) is byte-identical across
+900-925 (0 changed px 923→924, 924→925; the only pre-926 oracle motion is the
+489 px mon-icon 2-frame toggle, bbox (7,9)-(112,55), at 905/913/920 — see (e)).
+At **frame 926** the band changes by **+6008 px** (bbox (8,97)-(238,158)): the
+message window's right frame moves from **x182 to x141** and the settled
+"CANCEL pokeball" window (x184-239) is replaced by the SEND OUT submenu window.
+Frames 927-963 are then static (0 changed px, plus the icon toggles); the
+close fade starts at 964.
+
+The trigger is the trace's **segment 11 A-press at frames 922-923** (the
+submenu-open press on the right-column mon: the party menu had been open since
+the 762-763 A-press, cursor moved RIGHT at 882-883). The submenu window and the
+new message window land together at 926 — 3 frames after the press edge, and
+frames 924-925 still render the settled window unchanged. (The earlier §3
+"960-963" residual was this same swapped window; it had been mis-scoped to a
+4-frame text artifact.)
+
+### (b) The oracle's window — sDoWhatWithMonMsgWindowTemplate (16x2)
+
+The settled window the app already draws correctly is
+`sDefaultPartyMsgWindowTemplate` (data/party_menu.h:419-428): bg 2, tilemap
+(1,17), **21x2** → px (8,136)-(176,152); measured frame extent **x0-182, y133-155**
+(right frame column at x182 on frames 900-925). From frame 926 the oracle swaps
+to **`sDoWhatWithMonMsgWindowTemplate` (data/party_menu.h:430-439)**: bg 2,
+tilemap (1,17), **16x2** → px (8,136)-(136,152); measured frame extent **x0-141, y133-155**
+(right frame column at x141-142, the stepped edge; verified on 930/960/964). Both windows
+are the same party-menu message-window frame style (`DrawStdFrameWithCustomTileAndPalette
+(windowId, FALSE, 0x4F, 13)`, party_menu.c:2498) with the olive corner.
+
+Full sampled 24-bit palette of the swapped window (frame 930, region
+x0-141 y133-155):
+
+| colour | px | role |
+| --- | ---: | --- |
+| (255,255,255) | 2022 | interior fill |
+| (214,214,206) | 338 | text fg |
+| (222,214,222) | 296 | frame light-purple gradient (also the "gradient border rows" of the brief) |
+| (99,99,99) | 280 | text shadow |
+| (115,107,132) | 228 | frame purple |
+| (74,74,107) | 46 | frame dark |
+| (140,156,41) | 23 | olive corner |
+| (41,49,49) | 23 | frame near-black |
+| (173,189,173) | 8 | frame light-grey |
+| (99,99,148) | 2 | glyph residual |
+
+The window is 16 tiles wide → the message text runs in a **128 px interior**
+(white), which is the direct cause of the wrap/clip behaviour in (c).
+
+### (c) The oracle's text — "Do what with this RATTATA?" (one line, clipped)
+
+The swapped window renders `gText_DoWhatWithPokemon` = **"Do what with this
+{PKMN}?"** (strings.c:434), the `{PKMN}` placeholder filled by `GetMonNickname`
+(party_menu.c:2701, gStringVar1) + `StringExpandPlaceholders` (:2499). The
+nickname in this trace is **RATTATA** (decoded from the oracle's slot-1 card
+name, white FONT_SMALL ink at x118-147 y15-22). The final string is
+**"Do what with this RATTATA?"** — a 140 px run in the 128 px window, so it
+renders as ONE line at FONT_NORMAL origin **(8,137)** and is clipped by the
+window:
+
+- **"Do what with this"** decodes glyph-by-glyph from the oracle pixels with
+  **100% coverage** at (8,137) — render 454 ink px, all present in the oracle
+  (fg (214,214,206) + shadow (99,99,99), the sFontColorTable[0] LIGHT_GRAY/DARK_GRAY
+  pair resolving to the window bank). Ink bbox x8-98, rows y140-149.
+- **The nickname tail** (x100-121, rows y138-151 — 14 rows, taller than the
+  standard R/A/T glyphs' 10 rows) does NOT template-match the app's FONT_NORMAL
+  Latin atlas: rendering "RATTATA?" at (100,137) covers only 89/300 of its own
+  pixels in the oracle, and 75 oracle px stay uncovered. The tail's trailing
+  glyph is the **full-width "?"** (font code 172) at x116-121 — matched 32/32.
+  The 3 glyph clusters (x100-103, x108-112, x116-121) exactly tile atlas codes
+  83+84+172 (61+71+32 = 164 px, zero residual) — i.e. the ROM renders the
+  nickname run with a glyph-code range the app's charmap maps to katakana
+  (83=ウ, 84=エ) rather than the app's Latin R/A/T codes (204/187/206). This is
+  the concrete, measurable tail signature the MAIN worker must reproduce
+  (decode the ROM's FONT_NORMAL nickname glyphs, not the app's atlas codes).
+
+There is **no second line**: rows y145-155 at x8-58 are empty, so the message
+does not wrap — it is a single clipped line. The settled window's
+"Choose a POKéMON." (strings.c:429) does not appear at all during 926-978.
+
+### (d) Static across 924-978?
+
+The message window content is **static** across the whole window: 0 changed
+oracle px 900-925, 0 changed 927-963 (message band), and from 964 the only
+change is the §1 per-layer close fade (the window is still present and blended).
+The single content change is at **926** (the (a) swap). The 489 px icon toggles
+at 905/913/920/930/937/945/952/960 (pre-close) and 967/975 (during the fade) are
+in the icon bbox (7,9)-(112,55), not in the message window.
+
+### (e) The 489 px icon residual — PHASE OFFSET of +2 frames (not a freeze)
+
+The 489 px residual (bbox (7,9)-(112,55)) appears on exactly the four close
+frames **965, 966, 973, 974** (and, pre-close, on the phase-mismatch frames
+928-929, 935-936, 943-944, 950-951, 958-959 — the 5630-px compare rows). It is
+the mon-icon 2-frame animation (frame0/frame1 of the RATTATA icons;
+`monIconFrameAt`, `MON_ICON_FRAME_CYCLE = 15`, `MON_ICON_FRAME1_TICKS = 8`,
+battlePartySelect.ts:526-536) being **phase-offset by exactly 2 frames**.
+
+Oracle icon-phase toggles (measured from the 489 phase-differing px, oracle
+frames): **905, 913, 920, 930, 937, 945, 952, 960, 967, 975**.
+App icon-phase toggles (same method, app frames): **905, 913, 920, 928, 935,
+943, 950, 958, 965, 973**.
+Oracle − App = 0,0,0,+2,+2,+2,+2,+2,+2,+2 — i.e. the oracle LAGS the app by 2
+frames from the first toggle after the submenu open. Mechanism: the oracle's B
+phase holds 920-929 (10 frames instead of 8) — the toggle that should land at
+928 lands at 930 — a 2-frame stall/delay of the icon anim clock during the
+submenu-open processing (A-press 922-923, window lands 926). The cadence then
+continues normally (8/7-tick 15-cycle; oracle A 960-966, B 967-974, A 975-978).
+
+**The oracle does NOT freeze the icon animation at the close** — it keeps
+animating on its normal cadence through 964-978. The app's clock runs 2 frames
+ahead, so on the close frames the two differ exactly when the phases disagree:
+
+| frame | oracle | app | residual |
+| ---: | --- | --- | ---: |
+| 964 | A | A | 0 |
+| 965-966 | A | B | 489 |
+| 967-972 | B | B | 0 |
+| 973-974 | B | A | 489 |
+| 975-978 | A | A | 0 |
+
+### (f) Fix plan (for a MAIN worker, per ISSUES #80 item (c))
+
+1. **Message window swap.** On the submenu-open edge (the A-press at 922-923;
+   `submenuOpen` in `advanceBattlePartySelect`, battlePartySelect.ts:420), swap
+   the message window from `sDefaultPartyMsgWindowTemplate` (21x2,
+   (8,136)-(176,152)) to **`sDoWhatWithMonMsgWindowTemplate` (16x2,
+   (8,136)-(136,152))** and render **"Do what with this RATTATA?"** in place of
+   "Choose a POKéMON." (`drawPartySelectBgLayer`, battlePartySelect.ts:968-972).
+   The window frame style and palette are unchanged (same
+   `PARTY_MESSAGE_WINDOW_PALETTE`); only the width (21→16 tiles) and the message
+   change. The nickname run must render with the ROM's FONT_NORMAL glyph codes
+   for the tail (see (c)) — the exact tail signature is the 83/84/172-pattern at
+   x100-121.
+2. **Icon clock +2.** Introduce a +2-frame delay in the mon-icon animation clock
+   effective from the submenu-open edge (so the toggles land at 930/937/945/952/
+   960/967/975 instead of 928/935/943/950/958/965/973). This removes the 489 px
+   residual on 965-966, 973-974 AND the pre-close 5630-px frames (928-929, etc.).
+3. **Predicted acceptance.** Extending the dense-a spec's `captureFrames` with
+   **964-979 (16 frames)** reaches **byte-exact on all 16**: the close-fade
+   layer model is already byte-exact (§1, frame 979 is byte-exact today); the
+   964-978 residuals are exactly the wrong-window/message class (1994-6008 px at
+   bbox (8,129)-(182,158)) plus the icon phase (489 px on 965/966/973/974). Both
+   are content defects, not fade defects, so a single MAIN cap that lands items
+   1-2 should clear the whole band. Keep green: `battle-command-generated-off`
+   128/128, `mid-battle-switch-dense-a-off` 221/221, and the Tier-1
+   `inbattlePartyMenu*` pins.
