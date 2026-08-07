@@ -225,6 +225,38 @@ function writeJson(path: string, data: unknown): void {
   });
 }
 
+// --- Cancel/confirm pokeball button sprite -----------------------------------
+// CreateCancelConfirmPokeballSprites (src/party_menu.c:1097-1118) ->
+// CreatePokeballButtonSprite(198, 148) uses sSpriteTemplate_MenuPokeball
+// (src/data/party_menu.h:1107-1130), whose gfx is gPartyMenuPokeballGfx =
+// graphics/party_menu/pokeball.png (32x64, two 32x32 frames; frame 0 is the
+// static ball). The sprite is blitted pixel-0 transparent; palette index 0 is
+// the png's blue (41,131,205) which never renders, so the visible ball is the
+// 16x16 at png offset (4,4)-(19,19).
+{
+  const image = decodeIndexedPng(join(REF, "graphics", "party_menu", "pokeball.png"));
+  if (image.width !== 32 || image.height !== 64) {
+    throw new Error(`pokeball.png: expected 32x64, got ${image.width}x${image.height}`);
+  }
+  const sliced = sliceTiles(image);
+  // Frame 0 = sheet rows [0,32) = tiles 0..15 (4 columns x 4 rows).
+  const columns = sliced.columns;
+  const frameTiles: number[][] = [];
+  for (let i = 0; i < columns * 4; i += 1) {
+    frameTiles.push([...sliced.tiles[i]!.pixels]);
+  }
+  writeJson(join(ASSETS_GEN, "party-menu-pokeball.json"), {
+    source: {
+      graphics: "graphics/party_menu/pokeball.png",
+      rom: "gPartyMenuPokeballGfx / sSpriteTemplate_MenuPokeball, src/data/party_menu.h:1107-1130",
+      order: "CreatePokeballButtonSprite(198, 148), src/party_menu.c:1114",
+      transparency: "palette index 0 (the png's blue) is OBJ-transparent; the visible ball is the 16x16 at png offset (4,4)-(19,19)",
+    },
+    frame: { columns, rows: 4, tiles: frameTiles },
+    palette: image.palette,
+  });
+}
+
 // --- Per-slot sprite coords -------------------------------------------------
 // sPartyMenuSpriteCoords (src/data/party_menu.h:68-78): per slot, in order
 // icon (x,y), held item (x,y), status condition (x,y), menu Poké Ball (x,y).
