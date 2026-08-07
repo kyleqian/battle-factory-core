@@ -19,10 +19,6 @@ import {
   ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE,
 } from "../../src/animation/sceneOnPresentation.ts";
 import {
-  createFactoryTerminalLossPresentation,
-  createFactoryTerminalRoundWonPresentation,
-} from "../../src/engine/factoryTerminalPresentation.ts";
-import {
   createPostwinStateFromOpponentRentalRecords,
   type FactoryPostwinOpponentRentalRecords,
 } from "../../src/engine/postwin.ts";
@@ -1622,24 +1618,6 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
       resolutionProfile: ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE,
     }),
     rngMode: "frontierBattle",
-  }),
-  "factory-terminal-loss-cb2-load-map": (state) => ({
-    ...state,
-    factoryTerminal: createFactoryTerminalLossPresentation({
-      type: "roundLost",
-      commandId: 1,
-      battleIndex: 0,
-    }),
-    rngMode: "vblank",
-  }),
-  "factory-terminal-round-won-cb2-load-map": (state) => ({
-    ...state,
-    factoryTerminal: createFactoryTerminalRoundWonPresentation({
-      type: "roundCompleted",
-      commandId: 1,
-      battleIndex: 6,
-    }),
-    rngMode: "vblank",
   }),
   "loss-terminal-window-off": lossTerminalWindowStage,
   "win-terminal-window-off": winTerminalWindowStage,
