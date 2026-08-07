@@ -29,6 +29,8 @@ export const LOBBY_FREE_ROAM_TURN_FRAMES = 8;
 export const LOBBY_FREE_ROAM_TILE_FRAMES = 16;
 /** Frames per walk-cycle pose (source sAnim_Go*: ANIMCMD_FRAME(..., 8)). */
 export const LOBBY_FREE_ROAM_POSE_FRAMES = 8;
+/** Free-roam spawn tile (map (4,8), §2); the follow-cam's scroll anchor. */
+export const LOBBY_SPAWN_TILE = Object.freeze({ x: 4, y: 8 });
 
 interface TerminalLayout {
   readonly width: number;
@@ -113,14 +115,14 @@ export interface FactoryLobbyFreeRoamState {
 
 export function createFactoryLobbyFreeRoamState(): FactoryLobbyFreeRoamState {
   return Object.freeze({
-    x: 4,
-    y: 8,
+    x: LOBBY_SPAWN_TILE.x,
+    y: LOBBY_SPAWN_TILE.y,
     facing: "north",
     turnRemaining: 0,
     turnTarget: "north",
     stepRemaining: 0,
-    stepFromX: 4,
-    stepFromY: 8,
+    stepFromX: LOBBY_SPAWN_TILE.x,
+    stepFromY: LOBBY_SPAWN_TILE.y,
     stepDir: "north",
     animClock: 0,
     heldDir: null,
@@ -163,10 +165,21 @@ export function advanceFactoryLobbyFreeRoam(
       return Object.freeze({ ...state, turnRemaining, heldDir, pendingDir: null });
     }
     const facing = state.turnTarget;
-    // The turn commits a step regardless of the held state (a tap = one tile
-    // after the turn, measured §2: press 5172-5173, turn 5174-5181, step
-    // 5182-5196). The step itself is still collision-checked.
-    return startStep({ ...state, facing, turnRemaining, heldDir }, facing);
+    // The turn only commits a step if its direction is STILL HELD when the
+    // turn completes: a 2-frame tap turns in place and stands (oracle-probe:
+    // beyond-boundary fixture's DOWN 5172-5173 turns 5174-5181 then idles at
+    // (4,8) forever, VOFS flat 40), while a hold walks continuously. Holding
+    // through the turn (>= the 8-frame turn) is the one-tile tap.
+    if (heldDir === state.turnTarget) {
+      return startStep({ ...state, facing, turnRemaining, heldDir }, facing);
+    }
+    return Object.freeze({
+      ...state,
+      facing,
+      turnRemaining,
+      heldDir,
+      pendingDir: null,
+    });
   }
   if (state.stepRemaining > 0) {
     const stepRemaining = state.stepRemaining - 1;
@@ -190,11 +203,14 @@ export function advanceFactoryLobbyFreeRoam(
     }
     // Direction changed at the tile center: turn in place, then the committed
     // step (mirrors the fresh-press rule). Held-hold continuations do not
-    // re-apply the press latency (the direction was already registered).
+    // re-apply the press latency (the direction was already registered). The
+    // walk-cycle clock resets: the source GO anims restart at their walk-1
+    // pose when the direction changes (animNum + animCmdIndex 0).
     return Object.freeze({
       ...arrived,
       turnRemaining: LOBBY_FREE_ROAM_TURN_FRAMES,
       turnTarget: heldDir,
+      animClock: 0,
     });
   }
   if (state.pendingDir !== null) {
@@ -207,6 +223,7 @@ export function advanceFactoryLobbyFreeRoam(
       ...state,
       turnRemaining: LOBBY_FREE_ROAM_TURN_FRAMES,
       turnTarget: state.pendingDir,
+      animClock: 0,
       heldDir,
       pendingDir: null,
     });
@@ -220,35 +237,68 @@ export function isFactoryLobbyIdle(state: FactoryLobbyFreeRoamState): boolean {
   return state.turnRemaining === 0 && state.stepRemaining === 0;
 }
 
-export function lobbyFreeRoamPlayerScreenPos(
+/**
+ * The player sprite's fixed screen position (docs/factory-lobby-freeroam-
+ * ground-truth.md §5a, RAM-proved): the real overworld FOLLOW-camera keeps the
+ * player OAM at (112,56) for every walk/turn frame and scrolls the field under
+ * it instead (gSpriteCoordOffset cancels the sprite's 1px/frame logical
+ * advance, sprite.c:349-350). The terminal's spawn view is the same camera at
+ * the spawn tile, so this is also the terminal lock's byte-identical anchor.
+ */
+export const LOBBY_PLAYER_SCREEN_POS = Object.freeze({ x: 112, y: 56 });
+
+/**
+ * The player's world-space box-top position in map pixels, interpolated
+ * 1px/frame across the current tile step (or the arrived tile when idle).
+ */
+export function lobbyFreeRoamPlayerWorldPx(
   state: FactoryLobbyFreeRoamState,
-  cameraOriginPx: { readonly x: number; readonly y: number },
 ): { readonly x: number; readonly y: number } {
-  // Same feet-anchor OAM convention as renderFactoryTerminalField: box top =
-  // tile*16 - cameraOrigin - 16, left = tile*16 - cameraOrigin. During a step
-  // the position interpolates 1px/frame from the departed tile to the target.
-  const fromX = state.stepFromX * 16 - cameraOriginPx.x;
-  const fromY = state.stepFromY * 16 - cameraOriginPx.y - 16;
-  if (state.stepRemaining === 0) return { x: fromX, y: fromY };
+  if (state.stepRemaining === 0) {
+    return { x: state.x * 16, y: state.y * 16 };
+  }
   const progress = LOBBY_FREE_ROAM_TILE_FRAMES - state.stepRemaining;
   const { dx, dy } = DIR_DELTA[state.stepDir];
   return {
-    x: fromX + dx * progress,
-    y: fromY + dy * progress,
+    x: state.stepFromX * 16 + dx * progress,
+    y: state.stepFromY * 16 + dy * progress,
+  };
+}
+
+/**
+ * The follow-camera's field origin for the current free-roam state (§5a):
+ * the field's scroll = the player's interpolated world position minus the
+ * spawn tile, added to the terminal's spawn camera origin. The tilemap slice
+ * advances one 16px tile per step (net 16px), the in-step sub-tile phase
+ * slides 1px/frame, and the border blocks fill every out-of-map tile the
+ * follow-cam reveals.
+ */
+export function lobbyFreeRoamCameraOrigin(
+  state: FactoryLobbyFreeRoamState,
+  spawnCameraOriginPx: { readonly x: number; readonly y: number },
+): { readonly x: number; readonly y: number } {
+  const world = lobbyFreeRoamPlayerWorldPx(state);
+  return {
+    x: spawnCameraOriginPx.x + (world.x - LOBBY_SPAWN_TILE.x * 16),
+    y: spawnCameraOriginPx.y + (world.y - LOBBY_SPAWN_TILE.y * 16),
   };
 }
 
 /** Player overworld frame index for the current pose (walking.png layout). */
 export function lobbyFreeRoamPlayerFrame(state: FactoryLobbyFreeRoamState): number {
   if (state.turnRemaining > 0) {
-    // The in-place turn: render the target direction's standing pose (the
-    // real game's own 2-pose 8-frame turn animation, §2, is a named residual
-    // — the source sheet has no dedicated turn frames).
+    // The in-place turn is the fast GO anims' own 2-pose 8-frame animation
+    // (docs/factory-lobby-freeroam-ground-truth.md §5b, RAM + byte-exact
+    // pixel-proved): turn frames 1-4 draw the walk-2 pose (GO_FAST cmdIdx 2:
+    // south sheet frame 4 / north 6 / west 8), turn frames 5-8 the standing
+    // pose (GO_FAST cmdIdx 3: south 0 / north 1 / west 2). East reuses west
+    // h-flipped (GO_FAST_EAST = GO_FAST_WEST hFlip).
+    const walkTwo = state.turnRemaining > LOBBY_FREE_ROAM_TURN_FRAMES / 2;
     switch (state.turnTarget) {
-      case "south": return 0;
-      case "north": return 1;
-      case "west": return 2;
-      case "east": return 2;
+      case "south": return walkTwo ? 4 : 0;
+      case "north": return walkTwo ? 6 : 1;
+      case "west": return walkTwo ? 8 : 2;
+      case "east": return walkTwo ? 8 : 2;
     }
   }
   if (state.stepRemaining > 0) {
@@ -272,5 +322,6 @@ export function lobbyFreeRoamPlayerFrame(state: FactoryLobbyFreeRoamState): numb
 export function lobbyFreeRoamPlayerFrameHFlipped(
   state: FactoryLobbyFreeRoamState,
 ): boolean {
+  if (state.turnRemaining > 0) return state.turnTarget === "east";
   return state.facing === "east";
 }

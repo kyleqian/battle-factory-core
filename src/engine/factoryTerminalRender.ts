@@ -36,9 +36,10 @@ import fontData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import { measureText, type FontData } from "./font.ts";
 import {
+  lobbyFreeRoamCameraOrigin,
   lobbyFreeRoamPlayerFrame,
   lobbyFreeRoamPlayerFrameHFlipped,
-  lobbyFreeRoamPlayerScreenPos,
+  LOBBY_PLAYER_SCREEN_POS,
   type FactoryLobbyFreeRoamState,
 } from "./factoryLobbyFreeRoam.ts";
 
@@ -141,12 +142,13 @@ function forEachVisibleBlock(
     screenX: number,
     screenY: number,
   ) => void,
-  bgOriginX: number,
+  bgOrigin: { readonly x: number; readonly y: number },
 ): void {
   // The real terminal warp (4,8) centers the camera at the layout's own
   // cameraOriginPx; the legacy staged seam's (8,8) camera was only ever a
   // probe-side position, so the renderer no longer hardcodes its x offset.
-  const bgOrigin = { x: bgOriginX, y: layout.cameraOriginPx.y };
+  // The free-roam follow-camera (factory-lobby-freeroam-ground-truth.md §5a)
+  // passes the player-anchored scroll origin here instead.
   const minBx = Math.floor(bgOrigin.x / 16);
   const minBy = Math.floor(bgOrigin.y / 16);
   for (let by = minBy; by <= minBy + 10; by += 1) {
@@ -216,7 +218,7 @@ export interface LobbyPlayerOverride {
 export function renderFactoryTerminalField(
   bgY = 0,
   objY = 0,
-  bgOriginX = -48,
+  cameraOrigin: { readonly x: number; readonly y: number } = layout.cameraOriginPx,
   playerOverride?: LobbyPlayerOverride,
 ): Uint8Array {
   const fb = createFramebuffer();
@@ -227,7 +229,7 @@ export function renderFactoryTerminalField(
     if (metatile.layerType === 1) {
       drawLayerEntries(fb, metatile.entries.slice(4, 8), x, y, bgY);
     }
-  }, bgOriginX);
+  }, cameraOrigin);
   const objects = layout.visibleObjects
     .map((object) => ({
       object,
@@ -245,8 +247,8 @@ export function renderFactoryTerminalField(
         // player-only +1px x2 sub-pixel offset was wrong (113,56 reproduced
         // the ~133px residual; the oracle's player at (112,56) matches frame
         // 3365 with 0 diff).
-        x: object.tile.x * 16 - layout.cameraOriginPx.x,
-        y: object.tile.y * 16 - layout.cameraOriginPx.y - 16,
+        x: object.tile.x * 16 - cameraOrigin.x,
+        y: object.tile.y * 16 - cameraOrigin.y - 16,
       },
     }))
     .sort((a, b) =>
@@ -277,7 +279,7 @@ export function renderFactoryTerminalField(
     if (metatile.layerType !== 1) {
       drawLayerEntries(fb, metatile.entries.slice(4, 8), x, y, bgY);
     }
-  }, bgOriginX);
+  }, cameraOrigin);
   return fb;
 }
 
@@ -679,19 +681,23 @@ export function renderFactoryTerminalPresentation(
 }
 
 /**
- * Free-roam Lobby field (docs/factory-lobby-freeroam-ground-truth.md §3a):
- * the same fixed-camera field as the terminal's bare-frame, with the player
- * drawn at its live interpolated position and walk-cycle pose. The camera
- * does NOT scroll — the render origin stays at layout.cameraOriginPx for
- * every walk, matching the measured fixed (-56,0) gCamera.
+ * Free-roam Lobby field (docs/factory-lobby-freeroam-ground-truth.md §5a):
+ * the follow-camera renders the field + NPCs at the player-anchored scroll
+ * origin (net 16px per tile, 1px/frame sub-tile phase, border blocks for the
+ * out-of-map area the follow-cam reveals) and the player sprite at the fixed
+ * (112,56) screen anchor with the walk-cycle/turn pose. At the spawn tile the
+ * camera equals the terminal's own, so the handoff frame stays byte-identical.
  */
 export function renderFactoryLobbyFreeRoam(
   state: FactoryLobbyFreeRoamState,
 ): Uint8Array {
-  const { x, y } = lobbyFreeRoamPlayerScreenPos(state, layout.cameraOriginPx);
-  return renderFactoryTerminalField(0, 0, layout.cameraOriginPx.x, {
-    x,
-    y,
+  const cameraOrigin = lobbyFreeRoamCameraOrigin(
+    state,
+    layout.cameraOriginPx,
+  );
+  return renderFactoryTerminalField(0, 0, cameraOrigin, {
+    x: LOBBY_PLAYER_SCREEN_POS.x,
+    y: LOBBY_PLAYER_SCREEN_POS.y,
     frame: lobbyFreeRoamPlayerFrame(state),
     hFlip: lobbyFreeRoamPlayerFrameHFlipped(state),
   });

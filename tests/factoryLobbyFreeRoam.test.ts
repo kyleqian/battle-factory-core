@@ -4,9 +4,12 @@ import {
   createFactoryLobbyFreeRoamState,
   isFactoryLobbyCellWalkable,
   isFactoryLobbyIdle,
+  lobbyFreeRoamCameraOrigin,
+  lobbyFreeRoamPlayerFrame,
+  lobbyFreeRoamPlayerFrameHFlipped,
+  LOBBY_PLAYER_SCREEN_POS,
   LOBBY_FREE_ROAM_TILE_FRAMES,
   LOBBY_FREE_ROAM_TURN_FRAMES,
-  lobbyFreeRoamPlayerScreenPos,
   type FactoryLobbyFreeRoamState,
   type LobbyDirection,
 } from "../src/engine/factoryLobbyFreeRoam.ts";
@@ -35,13 +38,113 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     const state = createFactoryLobbyFreeRoamState();
     expect(state).toMatchObject({ x: 4, y: 8, facing: "north" });
     expect(isFactoryLobbyIdle(state)).toBe(true);
-    // The render anchor is the byte-exact terminal spawn pose (112,56).
-    const { x, y } = lobbyFreeRoamPlayerScreenPos(state, SPAWN_CAMERA);
-    expect([x, y]).toEqual([112, 56]);
+    // The follow-camera at the spawn tile equals the terminal's own, so the
+    // player anchor is the byte-exact terminal spawn position (112,56).
+    const camera = lobbyFreeRoamCameraOrigin(state, SPAWN_CAMERA);
+    expect(camera).toEqual(SPAWN_CAMERA);
+    expect([LOBBY_PLAYER_SCREEN_POS.x, LOBBY_PLAYER_SCREEN_POS.y]).toEqual([112, 56]);
     // The spawn render is byte-identical to the terminal's bare field frame
     // (the handoff is invisible; loss-terminal-decline-continuation-off 155/155).
     const field = renderFactoryLobbyFreeRoam(state);
     expect(field.length).toBe(240 * 160 * 4);
+  });
+
+  it("follow-cam: the player stays at fixed (112,56) while the field scrolls 1px/frame south (§5a)", () => {
+    // The real overworld follow-camera: player OAM fixed, field slides under
+    // it. South step boundary frames f05181 (k=0) and f05196 (k=15) differ by
+    // the full 16px net scroll per tile (probe VOFS 40→55).
+    const stepping = advance(createFactoryLobbyFreeRoamState(), ["south"], 10);
+    // 2-frame press latency + 8-frame turn -> step started at frame 10.
+    expect(stepping.stepRemaining).toBe(16);
+    // Progress 0: camera still at spawn.
+    expect(lobbyFreeRoamCameraOrigin(stepping, SPAWN_CAMERA)).toEqual(SPAWN_CAMERA);
+    // Mid-step k: camera origin y advanced k px (field slides under a fixed
+    // player). progress = 16 - stepRemaining.
+    const mid = advance(stepping, ["south"], 5);
+    expect(mid.stepRemaining).toBe(11);
+    expect(lobbyFreeRoamCameraOrigin(mid, SPAWN_CAMERA)).toEqual({ x: -48, y: 56 + 5 });
+    // The player screen anchor never moves.
+    expect(LOBBY_PLAYER_SCREEN_POS).toEqual({ x: 112, y: 56 });
+    // Arrival: the tilemap slice advanced the full net 16px and, with DOWN
+    // still held, the next tile step begins immediately.
+    const arrived = advance(mid, ["south"], 11);
+    expect(arrived).toMatchObject({ x: 4, y: 9, stepRemaining: 16 });
+    expect(lobbyFreeRoamCameraOrigin(arrived, SPAWN_CAMERA)).toEqual({ x: -48, y: 56 + 16 });
+  });
+
+  it("follow-cam: the field scrolls along the direction of travel (west/east/north) (§5a)", () => {
+    // Each player already faces its walk direction, so no turn: press
+    // (buffered) + step start + 1 step frame = 3 advances.
+    const west = advance(
+      { ...createFactoryLobbyFreeRoamState(), facing: "west" as const },
+      ["west"],
+      3,
+    );
+    expect(west.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES - 1);
+    expect(lobbyFreeRoamCameraOrigin(west, SPAWN_CAMERA)).toEqual({ x: -48 - 1, y: 56 });
+    // North: camera origin y decreases. (From (4,8) north is blocked by the
+    // attendant NPC, so start one tile south on the walkable floor and assert
+    // the 1px delta against the non-spawn tile's own anchor.)
+    const northIdle = { ...createFactoryLobbyFreeRoamState(), x: 3, y: 9, facing: "north" as const };
+    const northBase = lobbyFreeRoamCameraOrigin(northIdle, SPAWN_CAMERA);
+    const north = advance(northIdle, ["north"], 3);
+    expect(north.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES - 1);
+    const northCam = lobbyFreeRoamCameraOrigin(north, SPAWN_CAMERA);
+    expect(northCam.x).toBe(northBase.x);
+    expect(northCam.y).toBe(northBase.y - 1);
+    // East: camera origin x increases.
+    const east = advance(
+      { ...createFactoryLobbyFreeRoamState(), facing: "east" as const },
+      ["east"],
+      3,
+    );
+    expect(east.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES - 1);
+    expect(lobbyFreeRoamCameraOrigin(east, SPAWN_CAMERA)).toEqual({ x: -48 + 1, y: 56 });
+  });
+
+  it("turn poses: walk-2 for turn frames 1-4, standing pose for frames 5-8 (§5b)", () => {
+    // South turn: GO_FAST_SOUTH sheet frames 4 (walk-2) then 0 (stand),
+    // byte-proved 0px diff against the oracle (5174-5177 vs 5178-5181).
+    const turning = advance(createFactoryLobbyFreeRoamState(), ["south"], 2);
+    expect(turning.turnRemaining).toBe(8);
+    expect(lobbyFreeRoamPlayerFrame(turning)).toBe(4);
+    const turnFrame4 = advance(turning, ["south"], 3);
+    expect(turnFrame4.turnRemaining).toBe(5);
+    expect(lobbyFreeRoamPlayerFrame(turnFrame4)).toBe(4);
+    const turnFrame5 = advance(turnFrame4, ["south"], 1);
+    expect(turnFrame5.turnRemaining).toBe(4);
+    expect(lobbyFreeRoamPlayerFrame(turnFrame5)).toBe(0);
+    const turnFrame8 = advance(turnFrame5, ["south"], 3);
+    expect(turnFrame8.turnRemaining).toBe(1);
+    expect(lobbyFreeRoamPlayerFrame(turnFrame8)).toBe(0);
+    // North: 6 then 1; west: 8 then 2; east: 8 h-flipped then 2 h-flipped.
+    const north = advance({ ...createFactoryLobbyFreeRoamState(), facing: "south" as const }, ["north"], 2);
+    expect(lobbyFreeRoamPlayerFrame(north)).toBe(6);
+    expect(lobbyFreeRoamPlayerFrame(advance(north, ["north"], 4))).toBe(1);
+    const west = advance({ ...createFactoryLobbyFreeRoamState(), facing: "south" as const }, ["west"], 2);
+    expect(lobbyFreeRoamPlayerFrame(west)).toBe(8);
+    expect(lobbyFreeRoamPlayerFrameHFlipped(west)).toBe(false);
+    expect(lobbyFreeRoamPlayerFrame(advance(west, ["west"], 4))).toBe(2);
+    const east = advance({ ...createFactoryLobbyFreeRoamState(), facing: "south" as const }, ["east"], 2);
+    expect(lobbyFreeRoamPlayerFrame(east)).toBe(8);
+    expect(lobbyFreeRoamPlayerFrameHFlipped(east)).toBe(true);
+    expect(lobbyFreeRoamPlayerFrame(advance(east, ["east"], 4))).toBe(2);
+    expect(lobbyFreeRoamPlayerFrameHFlipped(advance(east, ["east"], 4))).toBe(true);
+  });
+
+  it("resets the walk cycle after a turn (source GO anims restart at walk-1)", () => {
+    // After walking (animClock > 0) a held direction change only turns once
+    // the current step reaches its tile center; the next step's first pose is
+    // walk-1 again, not the accumulated phase.
+    const walked = advance(createFactoryLobbyFreeRoamState(), ["south"], 2 + LOBBY_FREE_ROAM_TURN_FRAMES + 20);
+    expect(walked.stepRemaining).toBeGreaterThan(0);
+    expect(walked.animClock).toBeGreaterThan(8);
+    const turning = advance(walked, ["west"], walked.stepRemaining);
+    expect(turning.turnRemaining).toBe(8);
+    expect(turning.animClock).toBe(0);
+    const stepping = advance(turning, ["west"], LOBBY_FREE_ROAM_TURN_FRAMES);
+    expect(stepping.stepRemaining).toBe(16);
+    expect(lobbyFreeRoamPlayerFrame(stepping)).toBe(7);
   });
 
   it("turns in place for 8 frames before stepping a fresh direction (§2)", () => {
@@ -73,14 +176,23 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     expect(arrived.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES);
   });
 
-  it("a tap (press then release) walks exactly one tile (§2 tap rule)", () => {
-    // DOWN pressed for one frame, then released.
+  it("a 2-frame tap turns in place and stands; a hold through the turn walks one tile", () => {
+    // Oracle-probed (beyond-boundary fixture, DOWN 5172-5173 then release):
+    // the turn animates 5174-5181 at (4,8) and the player NEVER walks — a
+    // step only commits if the direction is still held when the turn ends.
     const pressed = advance(createFactoryLobbyFreeRoamState(), ["south"], 1);
-    const released = advance(pressed, [], LOBBY_FREE_ROAM_TURN_FRAMES + LOBBY_FREE_ROAM_TILE_FRAMES + 1);
-    // Turn (8) completes committing the step, the step traverses the tile,
-    // and with nothing held the player stops exactly at (4,9).
-    expect(released).toMatchObject({ x: 4, y: 9, facing: "south" });
+    const turning = advance(pressed, [], 1);
+    expect(turning.turnRemaining).toBe(8);
+    const released = advance(turning, [], LOBBY_FREE_ROAM_TURN_FRAMES);
+    expect(released).toMatchObject({ x: 4, y: 8, facing: "south" });
+    expect(released.stepRemaining).toBe(0);
     expect(isFactoryLobbyIdle(released)).toBe(true);
+    // Holding through the turn (>= 8 frames) commits the step.
+    const held = advance(pressed, ["south"], LOBBY_FREE_ROAM_TURN_FRAMES + 1);
+    expect(held).toMatchObject({ x: 4, y: 8, facing: "south", stepRemaining: 16 });
+    const arrived = advance(held, [], LOBBY_FREE_ROAM_TILE_FRAMES);
+    expect(arrived).toMatchObject({ x: 4, y: 9, facing: "south" });
+    expect(isFactoryLobbyIdle(arrived)).toBe(true);
   });
 
   it("blocks the attendant NPC cell (4,7): UP at the spawn never moves (§3c)", () => {
