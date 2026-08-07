@@ -169,6 +169,19 @@ any movement in the walkable floor region. The lobby is 19 tiles (304 px) wide
 vs the 240 px screen, and the view is clamped at its leftmost position for all
 probed walks; the whole walkable interior is rendered on one fixed frame.
 
+> **CORRECTION (2026-08-07, MAIN bind worker + supervisor fold):** the
+> paragraph above is RAM-true but render-false as stated. `gCamera` is
+> indeed fixed at (−56,0), but the RENDERED field still scrolls sub-tile
+> during each step via `sFieldCameraOffset` (`field_camera.c`,
+> `CameraUpdate`): ~1 px/frame over the 16-frame step, snapping back at
+> tile boundaries. A renderer that draws the interior as one fixed frame
+> matches only the tile-boundary ticks; every in-step tick differs by the
+> sub-tile offset. This is the first named blocker for promoting the
+> `loss-lobby-walk-off` spec (PROGRESS 976); the second is the 2-pose
+> 8-frame in-place turn whose pose A (oracle ticks 5174-5177) has no
+> source-sheet counterpart (~167 px). The tile-boundary facts, cadence,
+> collision grid, and spawn/facing in this doc all still stand.
+
 Player sprite: standard overworld walk-cycle (multiple unique shas per step,
 the same walk-cycle family the beyond-boundary doc measured); no special
 animation — the sprite faces the walk direction with the ordinary 4-phase
