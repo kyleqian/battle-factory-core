@@ -58,11 +58,19 @@
   `AnimTask_FacadeColorBlend_Step` slot 1 ages **4-75 — exactly the 72 blend
   frames the source predicts** (`gBattleAnimArgs[1] = 72`). Visual-task count
   range 0-2. Schema `facade-dense-evidence/v1`.
-- **CAVEAT for the next worker:** the probe records **zero sprites across the
-  whole window**. Either it is not watching the `ANIM_TAG_SWEAT_DROP` template
-  or the droplets do not spawn in this configuration. Resolve that FIRST —
-  confirm from the framebuffer and hardware OAM whether droplet sprites are
-  visible at all before fitting a droplet reducer.
+- ~~**CAVEAT for the next worker:** the probe records **zero sprites across the
+  whole window**.~~ **CORRECTED (supervisor, 2026-08-07, both scenarios re-run
+  fresh):** that caveat is **false**. `facadeProbe.py` as committed records
+  **168 sweat-drop rows per orientation** — 6 spawn batches of 4 sprites, each
+  batch alive exactly 7 displayed frames. Spawn frames are 221, 233, 246, 258,
+  271 and 283 in both orientations; sprite slots are 3, 4, 5 and 7 (slot 6 is
+  skipped — read the slot from the probe, do not assume contiguity). Droplet
+  geometry reproduces the source exactly: `CreateSweatDroplets` at `tTimer==6`
+  uses xOffset 30 / yOffset +20 and at `tTimer==18` uses xOffset 18 /
+  yOffset -20; `xCoords = [bx-off, bx-off-4, bx+off, bx+off+4]`,
+  `yCoords[i&1] = [by+yoff, by+yoff+6]`; `velocX` is -2 for i<2 else +2,
+  `velocY` is -1; subpriority is `tSubpriority - 5`. No probe fix is needed and
+  no droplet-visibility question remains open.
 - **Next:** finish FACADE from this staged base — the reducer, the seam, the
   `battleScene.ts` draw case, the portable, two fixtures, the Tier-1 tests, and
   promotion. The new component `task:AnimTask_FacadeColorBlend` is small: blend
@@ -70,6 +78,23 @@
   `gFacadeBlendColors[i]` (24-entry table, src/battle_anim_effects_3.c:902),
   i advancing per frame and wrapping 23->0, for 72 frames, then one
   coefficient-0 restore and destroy.
+- **Supervisor-measured lifecycles (2026-08-07, both scenarios fresh):** the
+  squish task is present frames **216-290**; `data[]` is
+  `[tState, tTimer, tActiveSprites, tNumSquishes, tBaseX, tBaseY, tSubpriority,
+  tBattlerSpriteId, …]`. `tBaseX/tBaseY/tSubpriority` are **72 / 80 / 30**
+  player-back and **176 / 40 / 40** opponent-front. `tTimer` runs 1..24 per
+  squish; three squishes occupy frames 216-239, 240-264 and 265-289; frame 290
+  is `tState=1, tTimer=25` and the task is then destroyed. The blend task is
+  present frames **216-287** (72 blends); its `data[2]` palette offset is
+  **256** player (OBJ bank 0) and **272** opponent (OBJ bank 1); the
+  coefficient-0 restore lands on frame 288. The attacker's affine squish comes
+  from `gFacadeSquishAffineAnimCmds` = FRAME(-16,+16,0,6), FRAME(+16,-16,0,12),
+  FRAME(-16,+16,0,6); the probe captures the live matrix a/d and `y2` per frame,
+  so fit against those rather than re-deriving. The blend arithmetic is
+  confirmed against RAM: unfaded `0x5739` blended with
+  `gFacadeBlendColors[0] = RGB(28,25,1)` at coefficient 8 gives `0x2F3A`, which
+  is exactly what the probe reads at frame 216 — so the RAM write is same-frame
+  and only the display latch remains to be measured.
 - **Notes:** the other two components (`asset:ANIM_TAG_SWEAT_DROP`,
   `task:AnimTask_SquishAndSweatDroplets`) are credited to exact MOVE_ENDEAVOR,
   but ENDEAVOR's `sceneOnEndeavorView` seam exposes only an HP-drain view — that
