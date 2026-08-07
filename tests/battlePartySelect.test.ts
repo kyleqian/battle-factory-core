@@ -146,6 +146,25 @@ describe("voluntary battle party selector", () => {
     expect(render()).toEqual({ slot0: [181, 66, 0], slot1: [181, 66, 0] });
   });
 
+  it("prints the level line with the ROM's {LV} ligature glyph (0x34=52), not L+v (ISSUES #80 settled band)", () => {
+    // gText_LevelSymbol = "{LV}" + digits via DisplayPartyPokemonLevel
+    // (party_menu.c:2316-2320). The charmap's `LV = 34` is HEX (charmap.txt:
+    // 45), so the ligature is FONT_SMALL glyph 52 (widths[52]=8, cell (4,3) of
+    // latin_small.png: the "Lv" ligature). Slot 2's level line (origin
+    // (126,44), ink y48-55): the ligature's two "v" strokes are white ink at
+    // (130,51) and (132,51). The wrong glyph 34 (decimal) put a lone "v" at
+    // x126-130 (shadow at (130,51)) and L+v printed the pair 3px too wide.
+    const state = liveSelector();
+    const fb = createFramebuffer();
+    renderBattlePartySelect(fb, state);
+    const px = (x: number, y: number) => {
+      const i = (y * 240 + x) * 4;
+      return [fb[i]!, fb[i + 1]!, fb[i + 2]!] as const;
+    };
+    expect(px(130, 51)).toEqual([255, 255, 255]);
+    expect(px(132, 51)).toEqual([255, 255, 255]);
+  });
+
   it("closes the SEND OUT submenu on the confirm edge (ISSUES #80 slice 6)", () => {
     // docs/party-menu-rank6-ground-truth.md §7: the confirm A lands while the
     // submenu is open; the real menu closes the submenu and starts the fade on

@@ -30,7 +30,7 @@ import type { PartySelectState } from "./partySelect.ts";
 import type { RgbColor } from "./bg.ts";
 import { blendComponentToBlack } from "./paletteFade.ts";
 import { fillFramebuffer, setPixel } from "./framebuffer.ts";
-import { drawText, type FontData } from "./font.ts";
+import { drawText, drawGlyphCodes, codeForChar, type FontData } from "./font.ts";
 import {
   drawStandardWindowFrame,
   drawStandardWindowText,
@@ -778,7 +778,18 @@ function drawRowText(fb: Uint8Array, row: BattlePartySelectRow): void {
   // prints only when the ailment is AILMENT_NONE (or PKRS); a statused mon
   // suppresses it and the status icon takes the level line's position.
   if (row.status === null) {
-    drawText(fb, fontSmall, charmap, `Lv${row.level}`, info.level.x, info.level.y, palette, colors);
+    // DisplayPartyPokemonLevelCheck prints gText_LevelSymbol = "{LV}"
+    // (strings.c:208) + the level digits. The charmap's `LV = 34` is HEX
+    // (charmap.txt:45): 0x34 = 52, the FONT_SMALL "Lv" ligature glyph (widths
+    // [52]=8). Drawing glyph 34 (decimal) instead showed a lone "v" and drew
+    // the line 3px too narrow (ISSUES #80 settled band leveltext class).
+    const lvCode = 52;
+    const digitCodes = String(row.level).split("").map((digit) => {
+      const code = codeForChar(charmap, digit);
+      if (code === undefined) return fail(`no font-small glyph for digit ${digit}`);
+      return code;
+    });
+    drawGlyphCodes(fb, fontSmall, [lvCode, ...digitCodes], info.level.x, info.level.y, palette, colors);
   }
   // DisplayPartyPokemonHP/MaxHP (party_menu.c:2367-2394): "105/" + "/105" printed
   // on the HP-number box already in the card tilemap (white ink, dark shadow).
