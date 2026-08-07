@@ -1,0 +1,30 @@
+{
+ "_comment": "GROUND-TRUTH PROBE (ISSUES #81): battle-1 fight-menu bounce driver trajectory. Watches the invisible SpriteCB_BounceEffect driver sprites' sSinIndex (the exact oracle bounce index, seed 128 healthbox / 192 mon, +7/frame) and the target sprites' y2 across the whole battle1-fight-submenu-idle.json window (action-menu open at ~1748, FIGHT submenu open at ~1886-1892, idle to 2139). Answers: is the oracle's index-vs-frame mapping a constant offset (the app's model) or piecewise-freeze like the torment fixture? Paths mirror dump-turn14-bounce-driver.py addressing.",
+ "trace": "../../compare/traces-groundtruth/battle1-fight-submenu-idle.json",
+ "oracleProfile": "battle-scene-off",
+ "startTick": 1740,
+ "watch": [
+  { "name": "healthboxY2", "addr": "gSprites+0x26", "size": 2 },
+  { "name": "onixY2", "addr": "gSprites+0x1BE", "size": 2 },
+  { "name": "healthboxDriverSinIndex", "path": [
+   {"symbol": "gBattleSpritesDataPtr"},
+   {"derefU32": true},
+   {"add": 4},
+   {"derefU32": true},
+   {"add": 2},
+   {"derefU8Scaled": 68},
+   {"addSymbol": "gSprites"},
+   {"add": 46}
+  ], "size": 2 },
+  { "name": "onixDriverSinIndex", "path": [
+   {"symbol": "gBattleSpritesDataPtr"},
+   {"derefU32": true},
+   {"add": 4},
+   {"derefU32": true},
+   {"add": 3},
+   {"derefU8Scaled": 68},
+   {"addSymbol": "gSprites"},
+   {"add": 46}
+  ], "size": 2 }
+ ]
+}
