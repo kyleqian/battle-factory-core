@@ -1,5 +1,43 @@
 # Animation coverage
 
+## MOVE_MINIMIZE reducer+seam landed at partial — component 153/153, framebuffer 144/153 (2026-08-07 worker)
+
+- **State:** MINIMIZE stays **unsupported** (partial, not promoted). Coverage
+  unchanged at **120/276 exact, 0 partial, 0 staged, 156 unsupported**.
+- **Did:** on top of the staged scenarios + `minimizeProbe.py` (previous entry),
+  landed the full rung (d): `src/animation/minimize.ts` reducer (source-shaped
+  `AnimTask_Minimize` lifecycle — three 32-frame shrink cycles at ages 1-32/
+  35-66/69-100, 33-frame hold 101-133, 16-step grow-back 134-150, clones
+  spawning ages 1/4/7 per cycle with FROZEN matrices 256/376/496 and y2 0/6/10,
+  each alive 16 frames), `SceneOnMinimizeConfig`/`SceneOnMinimizeView` seam +
+  `sceneOnMinimizeView`, and the `battleScene.ts` MINIMIZE draw case (subpriority
+  derived back-to-front per orientation). Wrote `tools/compare/minimizePortable.ts`
+  (copied from `facadePortable.ts`, clone-aware) and both
+  `tools/compare/fixtures/minimize-*.json`
+  (`scene-on-portable-evidence/v1`, dense window 210-362 = 153 frames both
+  orientations, hashes twice-fresh). Added Tier-1 `tests/animation/minimize.test.ts`
+  (7 reducer tests: task life, scale series, y2 var=40, clone spawns/frozen
+  matrices/lifetime/live-count schedule).
+- **Measured (both portables, fresh runs, exit 0):** evidence + raw-RGB sha256
+  reproduce the fixture pins in both orientations; **component axis 153/153**,
+  **framebuffer axis 144/153** — the 9 residual frames are exactly the
+  clone-expiry frames (228/231/234 per cycle), where the clone's 16-frame
+  lifetime boundary is one frame off from the ROM's OAM teardown under the
+  display-seam lag (clone disappears a frame earlier/later than modeled).
+  Fixtures honestly record `status: "partial"`, 144/153 framebuffer, 153/153
+  component (NOT exact — the portable's own exit-0 check was run to verify).
+- **Next:** fix the clone-expiry off-by-one (compare the probed `data[0]` and
+  the displayed clone slot on frames 227-228; the destroy lands one display
+  frame earlier than `spawnAge+16` under the two-frame OAM lag), re-run both
+  portables to 153/153, then promote: coverage entry to `exact`, inventory pin
+  120→121 exact / 156→155 unsupported.
+- **Notes — blend target:** the clones are `ST_OAM_OBJ_BLEND` under BLDALPHA
+  10/8; `target:"static"` (field pixel, single-spring rule) scored 144, and
+  `target:"live"` scored worse, so the residual is not the blend target. The
+  orientation-blind draw order was tested both ways (clone0 behind attacker at
+  the equal-subpriority tie) and matches the oracle; the residual is purely the
+  expiry frame.
+
 ## MOVE_MINIMIZE staged — both orientations isolated at 153 frames; scenarios + dense probe + measured window banked (2026-08-07 worker)
 
 - **State:** MINIMIZE stays **unsupported**. Coverage unchanged at **120/276
