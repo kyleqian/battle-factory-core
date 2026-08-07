@@ -5,7 +5,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 986 — [bounded MAIN worker, 2026-08-07] ISSUES #80 item (b) OPEN ANIMATION landed: 763-824 open window now renders (bright-hold/field-fade/black/menu-fade-in); dense-a spec → 330 frames, **325/330** — the 5 missing are the opponent sprite's idle breathing squish (new residual class)
+## 987 — [bounded MAIN worker, 2026-08-07] Post-loss lobby free-roam input freeze FIXED + walk timing corrected; `loss-lobby-walk-off` promotion BLOCKED at 129/177 by the woman's south/east-walk residuals
+
+- **State:** master `395fc2cc`, clean. Typecheck + `npm run build` green,
+  `npm run test:smoke` **347/347**, touched test files **22/22**
+  (factoryLobbyFreeRoam 18/18 incl. 2 new pins red-verified + factoryLobbyTerminal
+  4/4). Keep-green `loss-beyond-boundary-off` **183/183**; `verify-lobby-hold-walk`
+  **24/24**.
+- **Did:** (1) the confirmed bug — a refused `startStep` (:140 old) returned the
+  state unchanged and the idle path re-buffered `pendingDir = heldDir` every
+  frame at a blocked border, so holding DOWN at map (4,11) swallowed every later
+  press forever. Now: refused steps clear `pendingDir` and enter the §7b act-25
+  border bump on the blocked tick (16-frame cycles 5229-5244/5245-5260, pose
+  walk-2→stand, re-arms only while held, settles on release). (2) NEW finding,
+  beyond the brief: the app's walk was **1 frame behind the oracle's DISPLAYED
+  scroll/pose** (the side worker's "walk clock byte-true" claim held for the RAM
+  timings, not the rendered pixels — verified via the box-gone same-tick anchor
+  at 5093 and the displayed step-1 first-pixel at 5182). Fixed by rendering a
+  FRESH step's first pixel (progress 1) on the step-start frame and starting the
+  walk cycle at the ROM step-alternation pose (south/west walk1, north walk2);
+  continuations keep progress 0 on the arrival frame (= arrived tile). (3)
+  `womanAtTick` pose lag (rendered one frame behind the RAM cmdIdx) for all
+  three walks — north walk 5185/5193 now byte-exact.
+- **Blocker (why no spec):** `loss-lobby-walk-off.json` reached **129/177**
+  byte-exact; the 48 red are entirely the woman's SOUTH walk (5296-5311,
+  ~180-194px) and EAST walk + idle-east (5421-5452, ~265-310px), all inside her
+  16px sprite column. Her north walk is green; the south/east rendered poses do
+  not match ANY `woman_1.png` sheet frame at the app's modeled position/schedule
+  (RAM §6d schedule ≠ rendered). Out of time to diagnose; the red spec was
+  deleted per the promotion rule (fix + tests committed WITHOUT it).
+- **Next:** decode the woman's south/east walk rendered schedule (fresh oracle
+  probe; check for a turn-then-step like the player, or a position offset), then
+  re-promote `loss-lobby-walk-off` at 177/177.
+- **Notes:** no PAPERCUTS. Full `npm test` not run (worker rule). ISSUES #80 item (b) OPEN ANIMATION landed: 763-824 open window now renders (bright-hold/field-fade/black/menu-fade-in); dense-a spec → 330 frames, **325/330** — the 5 missing are the opponent sprite's idle breathing squish (new residual class)
 
 - **State:** master `b76089cc`, clean. Typecheck + `npm run build` green,
   `npm run test:smoke` **347/347**, touched
