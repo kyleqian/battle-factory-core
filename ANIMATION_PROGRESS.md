@@ -1,5 +1,45 @@
 # Animation coverage
 
+## MOVE_FACADE promoted to exact — 119→120; pinning and ledger only, rendering was already verified (2026-08-07 worker)
+
+- **State:** coverage advanced **119→120/276 exact**, 0 partial, 0 staged, 156
+  unsupported. This step landed the Tier-1 pinning and the ledger bookkeeping
+  only — the rendering itself was already done and oracle-verified on commit
+  16d2e52b (cap-killed worker + supervisor salvage).
+- **Did:** re-ran **both `facadePortable.ts` runs fresh on this tree**: each
+  reports `FACADE component 81/81; framebuffer 81/81` and exits 0, with
+  evidence + raw-RGB sha256 reproducing the fixture pins — player
+  `0c0069cd…`/`f053995a…`, opponent `0b6d6e52…`/`2c20c276…`, window 212-292
+  (81 frames) in both orientations. Added `tests/animation/facade.test.ts`
+  (9 reducer tests: task lifecycles ages 4-78/4-75 with the coefficient-0
+  restore at 76; blend index advancing per age and wrapping 23→0 across the
+  full 72; six droplet batches at ages 9, 21, 34, 46, 59, 71 with four
+  droplets each; droplet geometry xOffset 30/+20 vs 18/-20, xCoords
+  `[bx-off, bx-off-4, bx+off, bx+off+4]`, `yCoords[i&1]=[by+yoff, by+yoff+6]`,
+  velocX -2/+2, velocY -1, 7-tick lifetime; three 24-frame squish FRAME
+  cycles with identity resets; y2; typed seam). Added
+  `tests/animation/facadeEvidence.test.ts` (3 tests) pinning both fixtures'
+  schema, window, evidence/second-fresh/raw-RGB hashes, acceptance 81/81, and
+  legal party structure. Promoted the `MOVE_FACADE` entry in
+  `ANIMATION_COVERAGE.json` to `exact` (MOVE_FLASH entry shape) and moved the
+  inventory pin 119→120 exact / 157→156 unsupported.
+- **Measured:** `npx vitest run tests/animation` **302 files / 1685 passed / 1
+  established skip**, `npm run animation:coverage` reports **120/276 exact, 0
+  partial, 0 staged, 156 unsupported**, both portables 81/81 exit 0.
+- **Next:** resume **MOVE_DOUBLE_EDGE** from its staged base (largest remaining
+  staged unit), or the next bounded component track from
+  `npm run animation:coverage`.
+- **Notes — rendering provenance:** the rendering landed via a cap-killed
+  worker plus supervisor salvage (commit 16d2e52b); the salvage fixed an
+  orientation-blind painter order that had cost 9 opponent-front frames —
+  droplets are always `attackerSubpriority - 5` and a LOWER subpriority draws
+  in front, so the back-to-front order is ONIX 40 → AZUMARILL 30 → droplets 25
+  player-back but AZUMARILL 40 → droplets 35 → ONIX 30 opponent-front. The
+  display seam latches the squish affine matrix two displays behind the RAM
+  state and the palette + droplets one behind. No engine changes beyond the
+  existing FACADE draw case; no boundary widening; `tests/animation/factoryAnimationInventory.test.ts`
+  pin updated for this promotion.
+
 ## Supervisor wind-down — GRASS_WHISTLE + FLASH exact, 117→119; DOUBLE_EDGE and FACADE staged (2026-08-07 animation session)
 
 - **State:** coverage advanced **117→119/276 exact**, 0 partial, 0 staged, 157

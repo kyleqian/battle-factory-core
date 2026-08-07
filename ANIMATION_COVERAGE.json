@@ -951,6 +951,32 @@
       ]
     },
     {
+      "move": "MOVE_FACADE",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_AZUMARILL_1 (record 90) against legal ONIX with all four active slots constrained to FACADE (move 263); both orientations pass the complete 81-frame move-owned window (player-back frames 212-292 and opponent-front frames 212-292, isolated by sBattleAnimScriptPtr within the Move_FACADE..Move_SMELLING_SALT label bounds) twice fresh",
+        "the pure source-relative reducer ports both of Move_FACADE's visual tasks (battle_anim_effects_3.c:3742/3875): AnimTask_SquishAndSweatDroplets squishes the attacker three times through gFacadeSquishAffineAnimCmds = FRAME(-16,+16,0,6), FRAME(+16,-16,0,12), FRAME(-16,+16,0,6) and spawns six batches of four sweat-drop sprites at tTimer==6 (xOffset 30 / yOffset +20) and tTimer==18 (xOffset 18 / yOffset -20), xCoords [bx-off, bx-off-4, bx+off, bx+off+4] with yCoords[i&1] = [by+yoff, by+yoff+6], velocX -2 for i<2 else +2 and velocY -1, each droplet alive exactly 7 RAM ticks; the squish task is present ages 4-78 and the blend task ages 4-75",
+        "AnimTask_FacadeColorBlend (battle_anim_effects_3.c:902's 24-entry gFacadeBlendColors) blends the attacker's 16-entry OBJ palette bank (0 player / 1 opponent) at FIXED coefficient 8 with the color index advancing one per frame and wrapping 23->0 across the full 72 (3 full cycles), then a coefficient-0 restore to RGB_BLACK and destroy at age 76",
+        "the shared display seam's FACADE draw case latches the squish affine matrix TWO displays behind the RAM state (age-2, the software gOamMatrices write renders at age+2) and the palette and droplets ONE behind (age-1), and draws the staged AZUMARILL/ONIX field with the orientation-flipped painter order",
+        "the orientation-flipped painter order is pinned by the ROM's own subpriority: droplet subpriority is always attackerSubpriority - 5 and a LOWER subpriority draws in front, so the back-to-front order is ONIX 40 -> AZUMARILL 30 -> droplets 25 player-back but AZUMARILL 40 -> droplets 35 -> ONIX 30 opponent-front; painting the droplets behind the opponent-front attacker had cost exactly the 9 frames where a droplet still overlapped the attacker's opaque box, fixed by the salvage",
+        "the portable proves 81/81 source-component and shared-framebuffer frames twice fresh per orientation: component axis reproduces the squish software matrix a/d and y2 (SetBattlerSpriteYOffsetFromYScale from the attacker MON_PIC_HEIGHT), the visual-task lifecycle, the blend color index and the 16-entry faded palette blended at coefficient 8, and the sweat-drop sprite count; framebuffer axis renders the full field through the engine with healthboxes and message window untouched",
+        "player-back evidence 0c0069cd1f25034cfda871536fb070e3c0119666acfce947a91f81d4a5c5395a / raw RGB f053995ab27f48282c47e9d65466011cd93840222ffdeefb00f83777bbb2097a, opponent-front evidence 0b6d6e52e8b38f101a9ee123f192e5ca4b6eee222980b8c30c0f4f089c6031d2 / raw RGB 2c20c276ea3ba49466ce1c072588244273706b4e85e23bc0e47d4ec9b346ccc2"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-facade-player-azumarill-opponent-onix.json",
+        "tools/battle-lab/mechanic-facade-opponent-azumarill-player-onix.json",
+        "tools/compare/fixtures/facade-player-azumarill-opponent-onix.json",
+        "tools/compare/fixtures/facade-opponent-azumarill-player-onix.json",
+        "tools/compare/facadeProbe.py",
+        "tools/compare/facadePortable.ts",
+        "src/animation/facade.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/facade.test.ts",
+        "tests/animation/facadeEvidence.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_FAKE_TEARS",
       "status": "exact",
       "covered": [
