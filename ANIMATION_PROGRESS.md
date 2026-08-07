@@ -1,5 +1,43 @@
 # Animation coverage
 
+## MOVE_MINIMIZE promoted to exact — 121/276 exact (2026-08-07 worker)
+
+- **State:** MINIMIZE is **exact** — 153/153 on both axes in both orientations.
+  Coverage now **121/276 exact, 0 partial, 0 staged, 155 unsupported**.
+- **Did:** the 144/153 residual (9 clone-expiry frames) was diagnosed and FIXED
+  by the supervisor during salvage of a cap-killed worker — the fix already
+  shipped on this branch. This worker lifted it out of the draw case into the
+  reducer: exported `minimizeDisplayedClonesAtAge(age)` in `src/animation/minimize.ts`
+  (the `minimizeClonesAtAge` RAM-truth function is unchanged — the portable's
+  component axis still checks it) and the `battleScene.ts` MINIMIZE case now
+  calls it instead of computing two views inline. Both fixtures already recorded
+  `status: "exact"` with 153/153 on both axes and the twice-fresh sha pins were
+  already in `tests/animation/minimizeEvidence.test.ts`; re-ran BOTH portables
+  after the refactor — 153/153 component + framebuffer, exit 0, evidence hashes
+  byte-identical to the fixture pins (pure move, no behaviour change). Added 2
+  Tier-1 tests pinning the dual-lag displayed window for all nine clones,
+  updated the ANIMATION_COVERAGE.json entry to `exact` (shaped like FACADE,
+  nothing else touched) and the inventory summary pin 120→121 exact / 156→155
+  unsupported. `npx vitest run tests/animation` 304 files / 1697 tests green;
+  `npm run build` green.
+- **Measured (both portables, fresh runs, exit 0):** component 153/153 and
+  framebuffer 153/153 on player-back and opponent-front, 153-frame windows
+  (frames 210-362). Player evidence c044f61d… / raw RGB 54dfaf40…; opponent
+  evidence 060ee54d… / raw RGB da319b66… — matching the fixture pins twice fresh.
+- **Next:** pick the next move from the component-leverage ranking
+  (`npm run animation:coverage`); MINIMIZE's shared components (clone/OAM-blend
+  painter, SetBattlerSpriteYOffsetFromYScale) are now proven by an exact move.
+- **Notes — REUSABLE FINDING (first in this lane):** two DIFFERENT render lags
+  can meet on the SAME sprite and both are needed. A minimize clone is PAINTED
+  only once its freshly allocated OAM matrix reaches the hardware (two-display
+  lag) but its REMOVAL is a plain OAM edit (one-display lag). Measured: clone 0
+  lives RAM frames 211-226 yet shows on screen 213-227 — 15 displayed frames
+  for a 16-frame RAM life. Either lag alone fails: age-2 alone over-draws the
+  expiry frames 228/231/234, age-1 alone draws the spawn frames 212/215/218 too
+  early. The rule intersects them: clones + frozen matrices from age-2,
+  intersected with still-alive-at-age-1. The Tier-1 tests state the measured
+  frames so the rule is traceable to evidence, not a fitted constant.
+
 ## MOVE_MINIMIZE reducer+seam landed at partial — component 153/153, framebuffer 144/153 (2026-08-07 worker)
 
 - **State:** MINIMIZE stays **unsupported** (partial, not promoted). Coverage

@@ -4,6 +4,8 @@ import {
   minimizeScaleAtAge,
   minimizeY2FromScale,
   minimizeClonesAtAge,
+  minimizeDisplayedClonesAtAge,
+  minimizeCloneSpawnAges,
   MINIMIZE_FIRST_TASK_AGE,
   MINIMIZE_LAST_TASK_AGE,
   MINIMIZE_BLEND_OFF_AGE,
@@ -78,5 +80,37 @@ describe("minimizeClonesAtAge", () => {
     expect(minimizeClonesAtAge(17).length).toBe(2);
     expect(minimizeClonesAtAge(20).length).toBe(1);
     expect(minimizeClonesAtAge(23).length).toBe(0);
+  });
+});
+
+describe("minimizeDisplayedClonesAtAge", () => {
+  it("paints each clone spawnAge+2..spawnAge+16 inclusive (15 frames), empty before and after", () => {
+    // Measured on the player-back probe: clone 0 lives RAM frames 211-226 (its
+    // data[0] counts 16 down to 1), yet the oracle screen shows it only on
+    // frames 213-227. With age = frame - 210 that is spawnAge 1, a paint two
+    // displays behind creation (the two-display OAM-matrix lag) and a removal
+    // one display behind destruction (a plain-OAM-edit lag), so the displayed
+    // window is spawnAge+2 through spawnAge+16 inclusive — 15 frames for a
+    // 16-frame RAM life. The rule is evidence, not a fitted constant.
+    for (const cycle of [0, 1, 2] as const) {
+      for (const spawnAge of minimizeCloneSpawnAges(cycle)) {
+        expect(minimizeDisplayedClonesAtAge(spawnAge).some((c) => c.spawnAge === spawnAge)).toBe(false);
+        expect(minimizeDisplayedClonesAtAge(spawnAge + 1).some((c) => c.spawnAge === spawnAge)).toBe(false);
+        for (let age = spawnAge + 2; age <= spawnAge + 16; age += 1) {
+          expect(minimizeDisplayedClonesAtAge(age).some((c) => c.spawnAge === spawnAge)).toBe(true);
+        }
+        expect(minimizeDisplayedClonesAtAge(spawnAge + 17).some((c) => c.spawnAge === spawnAge)).toBe(false);
+      }
+    }
+  });
+
+  it("paints the frozen matrix from age-2 while dropping clones gone from OAM at age-1", () => {
+    // The last displayed frame of clone 0 (age 17) still paints its frozen
+    // 256 matrix from RAM age 15, two lags behind.
+    expect(minimizeDisplayedClonesAtAge(17).find((c) => c.index === 0)?.matrix).toBe(256);
+    // At age 18 the clone is still alive in RAM (data[0] hits 0 only at 17)
+    // but the age-1 OAM intersection removes it one frame before the age-2
+    // rule alone would have stopped painting.
+    expect(minimizeDisplayedClonesAtAge(18).some((c) => c.index === 0)).toBe(false);
   });
 });

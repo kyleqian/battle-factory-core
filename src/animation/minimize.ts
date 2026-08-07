@@ -129,6 +129,32 @@ export function minimizeClonesAtAge(age: number): readonly MinimizeClone[] {
   return out;
 }
 
+/**
+ * Clones actually painted at a DISPLAYED age.
+ *
+ * Two different render lags meet on the minimize clones and the window needs
+ * BOTH. A clone can only be PAINTED once its freshly allocated OAM matrix has
+ * reached the hardware — the two-display matrix lag — but its REMOVAL is a
+ * plain OAM edit that lands one display behind. Measured on the player-back
+ * probe: clone 0 lives RAM frames 211-226 (its `data[0]` counts 16 down to 1)
+ * yet the oracle screen shows it only on frames 213-227 — two displays behind
+ * its creation and one behind its destruction, so 15 displayed frames for a
+ * 16-frame RAM life. Taking either lag alone provably fails: `age - 2` alone
+ * leaves the expiry frames (228/231/234 and the same three in each later
+ * cycle) over-drawn, while `age - 1` alone draws the spawn frames (212/215/218
+ * and the same three in each later cycle) too early. The rule intersects them:
+ * take the clone list and their FROZEN matrices from `age - 2`, then drop any
+ * clone that is no longer alive at `age - 1`.
+ */
+export function minimizeDisplayedClonesAtAge(
+  age: number,
+): readonly MinimizeClone[] {
+  const matrixDisplayed = minimizeClonesAtAge(age - 2);
+  const oamDisplayed = minimizeClonesAtAge(age - 1);
+  const stillInOam = new Set(oamDisplayed.map((clone) => clone.spawnAge));
+  return matrixDisplayed.filter((clone) => stillInOam.has(clone.spawnAge));
+}
+
 export function minimizeAtAge(age: number): MinimizeState {
   const scale = minimizeScaleAtAge(age);
   return {

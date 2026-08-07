@@ -1665,6 +1665,30 @@
       ]
     },
     {
+      "move": "MOVE_MINIMIZE",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_GRIMER (record 88) against legal ONIX with all four active GRIMER slots constrained to MINIMIZE (move 107) so the Factory AI has one legal choice; player-back and opponent-front pass the complete 153-frame move-owned Scene-ON window (frames 210-362 each, isolated by sBattleAnimScriptPtr within the Move_MINIMIZE..Move_METRONOME label bounds) twice fresh with evidence c044f61de3cfbb0cc7a1ec4bda64148c52e28be62e0eb2c23c01c404691fb4e6 / raw RGB 54dfaf4058dfa44f4e8264f7850197b50f15748abb7cbb0f7396b8e843bb0d2e player-back and evidence 060ee54d0061daa6296017c1f224e9a25f555433828ab74856d9a8a8e440a9d9 / raw RGB da319b662e471c81985441b007dca58ec8db552407c8c01d443352a4ad27affc opponent-front",
+        "the pure source-relative reducer ports battle_anim_effects_2.c's AnimTask_Minimize_Step lifecycle: three 32-frame shrink cycles at ages 1-32/35-66/69-100 with the scale series 296..1536 in +40 steps, a 33-frame hold (ages 101-133, scale pinned 1536), then the 16-step grow-back at -80/frame (ages 134-150), with each cycle's two state-1/state-2 reset frames; clones spawn at cycle frames 0/3/6 (ages 1/4/7, 35/38/41, 69/72/75) in slots 3/4/5 with FROZEN affine matrices 256/376/496 and SetBattlerSpriteYOffsetFromYScale y2 0/6/10, each alive exactly 16 RAM frames (data[0] 16..1, live count 1,2,3 then 2 at +16, 1 at +19, 0 at +22), subpriority = attackerSubpriority - cloneIndex",
+        "the ST_OAM_OBJ_BLEND clones composite under the script's setalpha 10,8 BLDALPHA (BLDCNT 0x3f40, BLDALPHA 0x80a held ages 1-151 with blendoff on 152); the shared seam's MINIMIZE draw case draws the orientation-flipped painter order pinned by the ROM's own subpriorities — a LOWER subpriority draws in front, so player-back is ONIX 40 -> clone0 30 -> GRIMER attacker 30 -> clone1 29 -> clone2 28 while opponent-front is GRIMER attacker 40 -> clone0 40 -> clone1 39 -> clone2 38 -> ONIX 30, with the attacker's affine and y2 rendered two displays behind RAM",
+        "the dual-lag displayed-clone rule is the first time this lane has needed TWO different render lags on the SAME sprite: a clone is PAINTED only once its freshly allocated OAM matrix reaches the hardware (the two-display matrix lag) but its REMOVAL is a plain OAM edit that lands one display behind, so the displayed clones take the clone list and frozen matrices from age-2 intersected with the clones still alive at age-1; measured on the player-back probe clone 0 lives RAM frames 211-226 yet shows on screen only 213-227 (15 displayed frames for a 16-frame RAM life), and either lag alone provably fails (age-2 alone over-draws the expiry frames 228/231/234, age-1 alone draws the spawn frames 212/215/218 too early); minimizeDisplayedClonesAtAge in the reducer and its Tier-1 pin tests state the evidence frames so the rule is traceable, not fitted",
+        "the portable proves 153/153 source-component and shared-framebuffer frames twice fresh per orientation: component axis reproduces the clone spawn/frozen-matrix/lifetime schedule, the attacker affine scale/y2 series, the visual-task lifecycle, and BLDALPHA state; framebuffer axis renders the full staged field through the engine with healthboxes and message window untouched"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-minimize-player-grimer-opponent-onix.json",
+        "tools/battle-lab/mechanic-minimize-opponent-grimer-player-onix.json",
+        "tools/compare/fixtures/minimize-player-grimer-opponent-onix.json",
+        "tools/compare/fixtures/minimize-opponent-grimer-player-onix.json",
+        "tools/compare/minimizeProbe.py",
+        "tools/compare/minimizePortable.ts",
+        "src/animation/minimize.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/minimize.test.ts",
+        "tests/animation/minimizeEvidence.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_MIRROR_COAT",
       "status": "exact",
       "covered": [
