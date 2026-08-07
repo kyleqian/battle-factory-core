@@ -1,9 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { createFramebuffer } from "../src/engine/framebuffer.ts";
 import {
+  primaryStatusFromStatus1,
   renderBattlePartySelect,
   type BattlePartySelectState,
 } from "../src/engine/battlePartySelect.ts";
+import {
+  BATTLE_SCRIPT_STATUS1_BURN,
+  BATTLE_SCRIPT_STATUS1_FREEZE,
+  BATTLE_SCRIPT_STATUS1_PARALYSIS,
+  BATTLE_SCRIPT_STATUS1_POISON,
+  BATTLE_SCRIPT_STATUS1_SLEEP,
+  BATTLE_SCRIPT_STATUS1_TOXIC_POISON,
+} from "../src/engine/battleScriptSourceConstants.ts";
 
 function px(fb: Uint8Array, x: number, y: number): [number, number, number] {
   const o = (y * 240 + x) * 4;
@@ -147,5 +156,105 @@ describe("in-battle party menu visual binds (ISSUES #80)", () => {
     // "Choose a POKéMON." is drawn inside the window (fg dark gray ink).
     const windowText = Array.from({ length: 60 }, (_, i) => px(fb, 8 + i, 144));
     expect(windowText.some((c) => c[0] === 99 && c[1] === 99 && c[2] === 99)).toBe(true);
+  });
+
+  it("draws the 8x8 held-item icon at the slot center iff the row holds an item", () => {
+    // CreatePartyMonHeldItemSprite (party_menu.c:4021-4038): the generic item
+    // glyph at sPartyMenuSpriteCoords `heldItem` (108,28) for slot 1, 8x8,
+    // covering the bbox x105-111,y25-31 with the banked palette (index 4 =
+    // (255,247,156), index 6 = (247,82,41)).
+    const withItem = createFramebuffer();
+    renderBattlePartySelect(withItem, {
+      ...baseState(),
+      rows: Object.freeze([
+        baseState().rows[0],
+        Object.freeze({ ...baseState().rows[1], item: 200 }),
+        baseState().rows[2],
+      ]) as BattlePartySelectState["rows"],
+    });
+    let yellow = 0;
+    let orange = 0;
+    for (let y = 25; y <= 31; y += 1) for (let x = 105; x <= 111; x += 1) {
+      const c = px(withItem, x, y);
+      if (c[0] === 255 && c[1] === 247 && c[2] === 156) yellow += 1;
+      if (c[0] === 247 && c[1] === 82 && c[2] === 41) orange += 1;
+    }
+    expect(yellow).toBe(16);
+    expect(orange).toBe(8);
+
+    const withoutItem = createFramebuffer();
+    renderBattlePartySelect(withoutItem, baseState());
+    for (let y = 25; y <= 31; y += 1) for (let x = 105; x <= 111; x += 1) {
+      const c = px(withoutItem, x, y);
+      expect(c).not.toEqual([255, 247, 156]);
+    }
+  });
+
+  it("draws the status-icon variant selected by the row's primary status at the slot center", () => {
+    // UpdatePartyMonAilmentGfx (party_menu.c:4208-4220): frame = ailment - 1
+    // (PSN/PRZ/SLP/FRZ/BRN), sprite invisible for AILMENT_NONE. Slot 1 status
+    // center (136,27); the PRZ glyph's palette-6 ink (189,189,24) vs SLP's
+    // palette-8 ink (165,165,140) distinguish the variants.
+    const renderWith = (status: BattlePartySelectState["rows"][number]["status"]) => {
+      const fb = createFramebuffer();
+      renderBattlePartySelect(fb, {
+        ...baseState(),
+        rows: Object.freeze([
+          baseState().rows[0],
+          Object.freeze({ ...baseState().rows[1], status }),
+          baseState().rows[2],
+        ]) as BattlePartySelectState["rows"],
+      });
+      return fb;
+    };
+    const countColor = (fb: Uint8Array, color: [number, number, number]): number => {
+      let n = 0;
+      for (let y = 23; y <= 30; y += 1) for (let x = 126; x <= 145; x += 1) {
+        const c = px(fb, x, y);
+        if (c[0] === color[0] && c[1] === color[1] && c[2] === color[2]) n += 1;
+      }
+      return n;
+    };
+    expect(countColor(renderWith("paralyzed"), [189, 189, 24])).toBeGreaterThan(0);
+    expect(countColor(renderWith("paralyzed"), [165, 165, 140])).toBe(0);
+    expect(countColor(renderWith("sleep"), [165, 165, 140])).toBeGreaterThan(0);
+    expect(countColor(renderWith("sleep"), [189, 189, 24])).toBe(0);
+    // AILMENT_NONE renders no status sprite at all.
+    expect(countColor(renderWith(null), [189, 189, 24])).toBe(0);
+  });
+
+  it("suppresses the Lv50 level line for a statused row (DisplayPartyPokemonLevelCheck)", () => {
+    // party_menu.c:2290-2298 only prints the level when the ailment is
+    // AILMENT_NONE/PKRS; a statused mon replaces the level line with the
+    // status icon. Pixel (141,29) is inside the Lv50 glyph when drawn and
+    // inside the slot-1 status glyph when suppressed.
+    const renderWith = (status: BattlePartySelectState["rows"][number]["status"]) => {
+      const fb = createFramebuffer();
+      renderBattlePartySelect(fb, {
+        ...baseState(),
+        rows: Object.freeze([
+          baseState().rows[0],
+          Object.freeze({ ...baseState().rows[1], status }),
+          baseState().rows[2],
+        ]) as BattlePartySelectState["rows"],
+      });
+      return fb;
+    };
+    // Statused row: the level line carries the status glyph, not text ink.
+    expect(px(renderWith("paralyzed"), 141, 29)).toEqual([189, 189, 24]);
+    expect(px(renderWith("sleep"), 141, 29)).toEqual([165, 165, 140]);
+    // Clean row: the Lv50 text prints at the level rect in the card text ink.
+    expect(px(renderWith(null), 141, 29)).toEqual([123, 214, 239]);
+  });
+
+  it("maps status1 bitmasks onto the status-icon variant names (GetAilmentFromStatus)", () => {
+    expect(primaryStatusFromStatus1(BATTLE_SCRIPT_STATUS1_PARALYSIS)).toBe("paralyzed");
+    expect(primaryStatusFromStatus1(BATTLE_SCRIPT_STATUS1_SLEEP)).toBe("sleep");
+    expect(primaryStatusFromStatus1(BATTLE_SCRIPT_STATUS1_POISON)).toBe("poison");
+    expect(primaryStatusFromStatus1(BATTLE_SCRIPT_STATUS1_TOXIC_POISON)).toBe("poison");
+    expect(primaryStatusFromStatus1(BATTLE_SCRIPT_STATUS1_BURN)).toBe("burn");
+    expect(primaryStatusFromStatus1(BATTLE_SCRIPT_STATUS1_FREEZE)).toBe("frozen");
+    expect(primaryStatusFromStatus1(0)).toBeNull();
+    expect(primaryStatusFromStatus1(BATTLE_SCRIPT_STATUS1_PARALYSIS | BATTLE_SCRIPT_STATUS1_SLEEP)).toBe("sleep");
   });
 });
