@@ -6,10 +6,10 @@ MEASUREMENT-ONLY forensics for the party-menu open/close fade windows of
 proposed spec extension for a MAIN worker.
 
 Data source: `npm run compare -- mid-battle-switch-dense-a-off
---capture-range 958:985 --summary` and `... --capture-range 803:830
---summary` oracle captures. Measured with a throwaway pngjs sampler at the
-fixed reference pixels below; the probe script (§5) reruns the same
-measurement.
+--capture-range 958:985 --summary`, `... --capture-range 803:830
+--summary`, and `... --capture-range 758:830 --summary` oracle captures.
+Measured with a throwaway pngjs sampler at the fixed reference pixels below;
+the probe script (§5) reruns the same measurement.
 
 ## 0. The model
 
@@ -209,10 +209,182 @@ field reveal. That cannot reproduce the oracle's per-layer lag.
 ## 5. Verification
 
 `node --experimental-strip-types tools/probe/fade-layer-forensics.ts
-<compare-out-dir-958-985> <compare-out-dir-803-830>` prints the per-frame
-measured `(y_bg, y_obj)` against §1/§2 tables and the 960-963 per-class px
-counts against §3, with a PASS/FAIL verdict.
+<compare-out-dir-958-985> [compare-out-dir-803-830]
+[compare-out-dir-758-830]` prints the per-frame measured `(y_bg, y_obj)`
+against the §1/§2 tables, the 960-963 per-class px counts against §3, and the
+§6 field fade-out schedule against §6 (third argument), with a PASS/FAIL
+verdict.
 
-Receipt for this doc: `tools/compare/out/run-2026-08-07-19-17-13Z-88801`
-(close, 958-985) and `tools/compare/out/run-2026-08-07-19-19-35Z-94131`
-(open, 803-830).
+Receipts for this doc: `tools/compare/out/run-2026-08-07-19-17-13Z-88801`
+(close, 958-985), `tools/compare/out/run-2026-08-07-19-19-35Z-94131`
+(open, 803-830), and `tools/compare/out/run-2026-08-07-20-46-49Z-63439`
+(field open window, capture-range 758:830; §6 probe PASSes on this dir).
+
+## 6. OPEN window — field fade-out 762-808 (per-frame)
+
+The "battle field" of §2's shorthand is the **settled pre-party-menu scene**
+the mid-battle switch flow sits on before the party menu opens: a static,
+fully-bright switch-selection screen (current-battler summary window on the
+left (BG), party-list text boxes (OBJ), battler front sprite (OBJ)). It is
+byte-identical across 761-765; the A-press lands on 762-763; the app pops the
+full menu at 763, but the oracle holds the field through 765 and fades it out
+766-781 (black hold 782-808), then the menu fades in 809-824 (§2). This
+section measures the fade-out with two **field reference pixels** — the §0
+menu pixels (204,140)/(193,138) do not exist yet:
+
+| layer | coord | unfaded 24-bit | unfaded 5-bit |
+| --- | --- | --- | --- |
+| BG screen background | (4,4) | (255,255,255) | (31,31,31) |
+| OBJ battler front-sprite body | (176,52) | (165,24,57) | (20,3,7) |
+
+(white (4,4) is the plain BG fill top-left; maroon (165,24,57) is the
+front-sprite body at rows 44-72 right of the sprite area. Both are constant
+across 762-765 and obey the §0 blend model through the fade; `openElapsed
+e = frame - 763`.)
+
+### (a) Edges
+
+- **Last fully-bright settled field frame: 765.** BG (4,4)=(255,255,255) and
+  OBJ (176,52)=(165,24,57) both decode y=0; 38400 non-black px. 761-765 are
+  byte-identical (0 diff px; shared sha256 of the raw RGB888 framebuffer =
+  `212a4e15eef5bcfb54db18768391f8e0721fbedc1c01f8f888c55ea2bc9619dd`).
+- **First frame carrying any blend: 766.** BG (4,4)→(222,222,222)=y=2 (the §0
+  model's 31→27→222); 30872 px differ from 765. OBJ is not yet touched (y=0).
+- **First fully-black frame:** **780 for BG** ((4,4)=(0,0,0)=y=16) with 6939
+  OBJ-tail px still at y=14 (the whole OBJ sprite stack, one tick behind);
+  **781 for both layers** (0 non-black px).
+- **Last fully-black frame before the menu's first blend at 809: 808.**
+  782-808 is one contiguous black hold (0 changed px per frame, 0 non-black).
+
+### (b) Per-frame (y_bg, y_obj) table
+
+`y_bg`/`y_obj` are the blend coefficients that reproduce the sampled oracle
+pixel exactly; steps run 2,4,…,16, each held **2 frames** (BG 766-780, OBJ one
+tick behind 767-781).
+
+| frame | oracle BG @(4,4) | y_bg | oracle OBJ @(176,52) | y_obj |
+| ---: | --- | ---: | --- | ---: |
+| 762 | (255,255,255) | 0 | (165,24,57) | 0 |
+| 763 | (255,255,255) | 0 | (165,24,57) | 0 |
+| 764 | (255,255,255) | 0 | (165,24,57) | 0 |
+| 765 | (255,255,255) | 0 | (165,24,57) | 0 |
+| 766 | (222,222,222) | 2 | (165,24,57) | 0 |
+| 767 | (222,222,222) | 2 | (140,16,49) | 2 |
+| 768 | (189,189,189) | 4 | (140,16,49) | 2 |
+| 769 | (189,189,189) | 4 | (123,16,41) | 4 |
+| 770 | (156,156,156) | 6 | (123,16,41) | 4 |
+| 771 | (156,156,156) | 6 | (99,8,33) | 6 |
+| 772 | (123,123,123) | 8 | (99,8,33) | 6 |
+| 773 | (123,123,123) | 8 | (82,8,24) | 8 |
+| 774 | (90,90,90) | 10 | (82,8,24) | 8 |
+| 775 | (90,90,90) | 10 | (57,8,16) | 10 |
+| 776 | (57,57,57) | 12 | (57,8,16) | 10 |
+| 777 | (57,57,57) | 12 | (41,0,8) | 12 |
+| 778 | (24,24,24) | 14 | (41,0,8) | 12 |
+| 779 | (24,24,24) | 14 | (16,0,0) | 14 |
+| 780 | (0,0,0) | 16 | (16,0,0) | 14 |
+| 781 | (0,0,0) | 16 | (0,0,0) | 16 |
+| 782-808 | (0,0,0) | 16 | (0,0,0) | 16 |
+
+All 47 frames reproduce the §0 blend formula **exactly** — the sampled colour
+equals `expand5(blendToBlack(base, y))` for a unique integer y with zero
+residual (checked per frame; no non-fitting frame exists). A non-fitting frame
+would have been reported as a finding; there are none.
+
+### (c) The 37 frames, explained
+
+766-802 (= 37 frames) is **16 fade-ramp frames + 21 black-hold frames**; §2's
+"the battle field fades out 766-808" conflates the ramp with the hold. The
+ramp is a **plain deltaY=2, 2-frames-per-step fade, structurally identical to
+the §1 close window** — there is no different deltaY and no unexplained hold
+inside the ramp. Exact counts:
+
+- **Bright hold: 3 frames (763-765).** Byte-static, (0,0). (761-762 are also
+  bright and byte-identical; the A-press is 762-763, so the field stays fully
+  bright for 3 more frames.)
+- **Field fade-out: 16 frames (766-781).** BG blends 766-779 (y=2..14) and
+  reaches 16 at 780; OBJ lags one tick, blends 767-780, reaches 16 at 781.
+  Frame 780 is the OBJ-tail (BG black, OBJ y=14): 6939 non-black px, top
+  classes (24,24,24):2680, (8,8,8):1652, (24,24,16):938, (16,8,16):851 — the
+  whole OBJ sprite stack held at y=14 for one frame (mirror of close 979's
+  1559-px tail).
+- **Black hold: 27 frames (782-808).** Both layers y=16, 0 changed px, 0
+  non-black.
+
+### (d) Does OBJ lag BG here too?
+
+**Yes — confirmed.** The same two-reference-pixel method gives OBJ exactly one
+blend step (one frame) behind BG across the whole fade-out: 766=(2,0),
+767=(2,2), 768=(4,2), …, 779=(14,14), 780=(16,14), 781=(16,16). This is the
+same `objPaletteToggle` BG/OBJ alternation (palette.c:454) already verified in
+§1/§2.
+
+### (e) What is on screen 762-765
+
+Still the settled, fully-bright field screen. 762-765 are byte-identical to
+761 (0 diff px; shared sha256 above). Nothing else appears — no message box,
+no cursor change. (For context, 758-760 differ from 761 by 538 px at
+(49,74)-(95,111): the second battler sprite region settling before the hold —
+outside this window.)
+
+### (f) The menu is already behind the black
+
+At 803-808 the party menu is **already built and its palette force-blended to
+black** — the black is the menu's own palette at blend 16, not a separate
+black fill. Evidence:
+
+- **809's first blend** (§2) shows the real menu content (box interior
+  (204,140), ball-red (193,138)) at y_bg=14/y_obj=16 — the pixels appear
+  instantly, which is only possible if the menu was already rendered behind
+  the fade.
+- **Source:** `ShowPartyMenu` (party_menu.c:570) runs one init state per frame
+  behind the black: state 21 (party_menu.c:673)
+  `BlendPalettes(PALETTES_ALL, 16, RGB_BLACK)` force-blends the whole menu
+  palette to black in the buffer (`gPaletteFade.bufferTransferDisabled = TRUE`
+  set at state 2, party_menu.c:596); state 22 (party_menu.c:686)
+  `BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK)` starts the
+  y=16→0 fade-in, then hands off to `CB2_UpdatePartyMenu` (party_menu.c:542),
+  whose per-frame `UpdatePaletteFade()` produces the §2 schedule. The black
+  hold is the party menu's init (VRAM/OAM reset, BG alloc, sprite/gfx load,
+  box render, mon icons, message) all happening while the screen is black.
+
+### (g) Fix plan (for a MAIN worker)
+
+Add an open-side state machine in the party-menu-open path keyed on
+`openElapsed e = frame - 763` (the confirm frame: A-press 762-763 completes,
+the app currently pops the menu at 763). The four phases:
+
+| phase | frames | e range | count |
+| --- | --- | ---: | --- |
+| bright-hold | 763-765 | 0..2 | 3 |
+| field-fade-out | 766-781 | 3..18 | 16 |
+| black-hold | 782-808 | 19..45 | 27 |
+| menu-fade-in | 809-824 | 46..61 | 16 |
+
+Closed forms for the fade-out and the black hold (identical machinery to §4's
+close plan — per-layer post-blends keyed to the layer's own y; both clamp at
+16, so they stay correct through the hold):
+
+```
+y_bg(e)  = min(16, 2 * max(0, floor((e - 1) / 2)))
+y_obj(e) = min(16, 2 * max(0, floor((e - 2) / 2)))
+```
+
+For the menu fade-in use §2's table with `m = e - 46`:
+`y_bg(m) = max(0, 14 - 2 * floor(m/2))` and
+`y_obj(m) = max(0, min(16, 14 - 2 * floor((m-1)/2)))` (OBJ one tick behind:
+809=(14,16), 823=(0,2), 824=(0,0)).
+
+The bright-hold must render the settled field screen — today the app pops the
+full menu at 763 and never renders the fade-out, black hold, or fade-in at all
+(§2), so those phases are the whole missing piece.
+
+**Predicted acceptance:** the open band **763-824 (62 frames) goes byte-exact**
+— bright-hold 763-765 (now 37113-px diff because the app pops the menu early),
+fade-out 766-781 + black 782-808 (now a 100%-diff band), and fade-in 809-824
+(now 100% to 1498 px). The 823 residual is *not* a text issue: it is the §2
+OBJ-tail (oracle = the app's full-bright values blended at y=2, identical px
+counts per class — e.g. ball-red app (181,66,0):195 ↔ oracle (156,57,0):195),
+so 823 goes byte-exact too once the OBJ layer is blended at y=2. Dense-a
+should then pin 763-830 with only the §3 message-region residual (960-963)
+remaining on the open side.
