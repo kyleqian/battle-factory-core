@@ -84,6 +84,19 @@ export interface PostwinState {
    * continuation menu. See docs/postwin-record-retire-ground-truth.md §5.
    */
   question: { kind: PostwinQuestionKind; edgeElapsed: number } | null;
+  /** YES/NO window cursor: 0 = YES, 1 = NO (the multichoicedefault). */
+  questionCursorPos: 0 | 1;
+  /** Cursor copied to the field window one VBlank after the logical move. */
+  questionCursorDisplayPos: 0 | 1;
+  /** Accepted question-cursor move edge (this state's relative clock). */
+  questionCursorMoveElapsed: number | null;
+  /**
+   * Accepted A-on-YES edge for the active question (edge-relative, same
+   * canonical-edge convention as `questionDismissElapsed`). Non-null only
+   * while a question is active and resolved YES; RECORD types the recorded
+   * message, RETIRE warps to the Lobby LOSS flow.
+   */
+  questionYesElapsed: number | null;
   /** Accepted dismiss-A edge for the active question (default NO), edge-relative. */
   questionDismissElapsed: number | null;
   /** Cursor copied to the field window one VBlank after the logical move. */
@@ -213,6 +226,10 @@ function createPostwinStateFromSnapshot(
     swapCursorMoveElapsed: null,
     swapDeclineElapsed: null,
     question: null,
+    questionCursorPos: 1,
+    questionCursorDisplayPos: 1,
+    questionCursorMoveElapsed: null,
+    questionYesElapsed: null,
     questionDismissElapsed: null,
     continuationCursorDisplayPos: null,
     continuationCursorMoveElapsed: null,
@@ -374,6 +391,10 @@ export function createBattleReturnHoldState(
     swapCursorMoveElapsed: null,
     swapDeclineElapsed: null,
     question: null,
+    questionCursorPos: 1,
+    questionCursorDisplayPos: 1,
+    questionCursorMoveElapsed: null,
+    questionYesElapsed: null,
     questionDismissElapsed: null,
     continuationCursorDisplayPos: null,
     continuationCursorMoveElapsed: null,
@@ -441,6 +462,31 @@ export const POSTWIN_QUESTION_WINDOW_DELAYS: Readonly<Record<PostwinQuestionKind
   record: POSTWIN_QUESTION_LAST_GLYPH_DELAY.record + POSTWIN_QUESTION_WINDOW_DELAY,
   retire: POSTWIN_QUESTION_LAST_GLYPH_DELAY.retire + POSTWIN_QUESTION_WINDOW_DELAY,
 };
+
+// A-on-YES clocks (docs/postwin-record-retire-ground-truth.md §3a + the
+// banked up-a probes, canonical-edge-relative). All offsets are relative to
+// the accepted A-on-YES canonical edge (`questionYesElapsed`).
+/** YES/NO window clears this many ticks after the A-on-YES edge. */
+export const POSTWIN_QUESTION_WINDOW_CLEAR_DELAY = 2;
+/** RECORD: box clears at +23; the save-SE hold keeps the question up to then. */
+export const POSTWIN_RECORDED_BOX_CLEAR_DELAY = 23;
+export const POSTWIN_RECORDED_TEXT: readonly [string, string] = [
+  "MEMORY\u2019s battle was recorded",
+  "on the FRONTIER PASS.",
+] as const;
+export const POSTWIN_RECORDED_TEXT_TOTAL =
+  POSTWIN_RECORDED_TEXT[0].length + POSTWIN_RECORDED_TEXT[1].length;
+/** RECORD: first "{PLAYER}'s battle was recorded" glyph at +24. */
+export const POSTWIN_RECORDED_TEXT_FIRST_DELAY = 24;
+/** RECORD: final glyph edge-offset (+72). */
+export const POSTWIN_RECORDED_LAST_GLYPH_DELAY =
+  POSTWIN_RECORDED_TEXT_FIRST_DELAY + POSTWIN_RECORDED_TEXT_TOTAL - 1;
+/** RETIRE: fade-to-black first frame at +4 (the shared WARP_FADE_OUT start). */
+export const POSTWIN_RETIRE_FADE_FIRST_DELAY = 4;
+/** RETIRE: first fully-black frame at +19. */
+export const POSTWIN_RETIRE_BLACK_AGE_DELAY = 19;
+/** RETIRE: Lobby arrival fade-in first frame at +38. */
+export const POSTWIN_RETIRE_FADE_IN_DELAY = 38;
 
 // Exact write ages are filled by the dense RAM audit accompanying this
 // slice. They remain relative state boundaries, never canonical ticks.
@@ -559,6 +605,20 @@ export function advancePostwin(state: PostwinState): PostwinState {
     swapCursorMoveElapsed: state.swapCursorMoveElapsed,
     swapDeclineElapsed: state.swapDeclineElapsed,
     question: state.question,
+    // One-VBlank display handoff for the YES/NO question cursor, mirroring
+    // the continuation/swap cursors: the logical pos moves on the press
+    // frame, the field window copies it one tick later (the oracle's
+    // visible cursor swap is the press edge + 2; the app processes the
+    // press one tick later, so the copy is `elapsed > edge`).
+    questionCursorDisplayPos:
+      state.questionCursorMoveElapsed !== null &&
+        elapsed > state.questionCursorMoveElapsed
+        ? state.questionCursorPos
+        : state.questionCursorDisplayPos,
+    questionCursorPos:
+      state.question !== null ? state.questionCursorPos : 1,
+    questionCursorMoveElapsed: state.questionCursorMoveElapsed,
+    questionYesElapsed: state.questionYesElapsed,
     questionDismissElapsed: state.questionDismissElapsed,
     // One-VBlank display handoff for the continuation-menu cursor, mirroring
     // the swap cursor: the logical pos moves on the press frame, the field
@@ -632,7 +692,53 @@ export function beginPostwinQuestion(
     // select tick; storing the canonical edge keeps every POSTWIN_QUESTION_*
     // offset verbatim (docs/postwin-record-retire-ground-truth.md §5).
     question: { kind, edgeElapsed: state.elapsed - 1 },
+    questionCursorPos: 1,
+    questionCursorDisplayPos: 1,
+    questionCursorMoveElapsed: null,
+    questionYesElapsed: null,
     questionDismissElapsed: null,
+  };
+}
+
+/** Earliest age (this state's relative clock) the YES/NO window accepts input. */
+export function postwinQuestionInputReadyAge(state: PostwinState): number {
+  const question = state.question;
+  if (question === null) return Number.POSITIVE_INFINITY;
+  return question.edgeElapsed +
+    POSTWIN_QUESTION_WINDOW_DELAYS[question.kind];
+}
+
+export function movePostwinQuestionCursor(
+  state: PostwinState,
+  direction: 1 | -1,
+): PostwinState {
+  if (
+    state.question === null ||
+    state.questionDismissElapsed !== null ||
+    state.questionYesElapsed !== null ||
+    state.elapsed < postwinQuestionInputReadyAge(state)
+  ) return state;
+  return {
+    ...state,
+    questionCursorPos: direction === 1 ? 1 : 0,
+    questionCursorMoveElapsed: state.elapsed,
+  };
+}
+
+export function acceptPostwinQuestionYes(
+  state: PostwinState,
+): PostwinState {
+  if (
+    state.question === null ||
+    state.questionDismissElapsed !== null ||
+    state.questionYesElapsed !== null ||
+    state.questionCursorPos !== 0 ||
+    state.elapsed < postwinQuestionInputReadyAge(state)
+  ) return state;
+  return {
+    ...state,
+    // Same canonical-edge convention as beginPostwinQuestion.
+    questionYesElapsed: state.elapsed - 1,
   };
 }
 
@@ -643,6 +749,7 @@ export function acceptPostwinQuestionDismiss(
   const delay = state.elapsed - state.question.edgeElapsed;
   if (
     state.questionDismissElapsed !== null ||
+    state.questionYesElapsed !== null ||
     delay < POSTWIN_QUESTION_WINDOW_DELAYS[state.question.kind]
   ) return state;
   return {
@@ -666,6 +773,25 @@ export function postwinQuestionWindowVisible(state: PostwinState): boolean {
   if (state.question === null) return false;
   const delay = state.elapsed - state.question.edgeElapsed;
   return delay >= POSTWIN_QUESTION_WINDOW_DELAYS[state.question.kind];
+}
+
+/**
+ * RECORD-YES: delay relative to the accepted A-on-YES canonical edge
+ * (`questionYesElapsed`). Returns -1 when the YES route is not active.
+ */
+export function postwinQuestionYesDelay(state: PostwinState): number {
+  if (state.question === null || state.questionYesElapsed === null) return -1;
+  return state.elapsed - state.questionYesElapsed;
+}
+
+/** RECORD-YES "{PLAYER}'s battle was recorded" visible glyph count. */
+export function postwinRecordedVisibleChars(state: PostwinState): number {
+  const delay = postwinQuestionYesDelay(state);
+  if (delay < POSTWIN_RECORDED_TEXT_FIRST_DELAY) return 0;
+  return Math.min(
+    POSTWIN_RECORDED_TEXT_TOTAL,
+    delay - POSTWIN_RECORDED_TEXT_FIRST_DELAY + 1,
+  );
 }
 
 /** Re-ask "2nd match is next!" visible glyph count after a question dismiss. */

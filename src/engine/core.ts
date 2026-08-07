@@ -253,6 +253,12 @@ import {
   POSTWIN_IN_BATTLE_CLEAR_AGE,
   POSTWIN_QUESTION_RECORD_TEXT,
   POSTWIN_QUESTION_RETIRE_TEXT,
+  POSTWIN_QUESTION_WINDOW_CLEAR_DELAY,
+  POSTWIN_RECORDED_BOX_CLEAR_DELAY,
+  POSTWIN_RECORDED_TEXT,
+  POSTWIN_RETIRE_FADE_FIRST_DELAY,
+  POSTWIN_RETIRE_BLACK_AGE_DELAY,
+  POSTWIN_RETIRE_FADE_IN_DELAY,
   acceptPostwinSwapDecline,
   beginPostwinNextBattleGuide,
   acceptPostwinRightThisWayDismiss,
@@ -264,8 +270,12 @@ import {
   postwinQuestionVisibleChars,
   postwinQuestionWindowVisible,
   postwinQuestionMenuReady,
+  postwinQuestionYesDelay,
+  postwinRecordedVisibleChars,
   movePostwinContinuationCursor,
   movePostwinSwapCursor,
+  movePostwinQuestionCursor,
+  acceptPostwinQuestionYes,
   postwinContinuationInputReady,
   postwinNextVisibleChars,
   postwinPhase,
@@ -305,7 +315,9 @@ import { factorySwapRoundDecision } from "./factorySwap.ts";
 import { renderFactorySwapPicker } from "./factorySwapRender.ts";
 import {
   advanceFactoryTerminalPresentation,
+  createFactoryTerminalLossPresentation,
   createFactoryTerminalPresentation,
+  FACTORY_LOSS_TERMINAL_PROFILE,
   factoryTerminalCompletion,
   type FactoryTerminalPresentationState,
 } from "./factoryTerminalPresentation.ts";
@@ -916,12 +928,23 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       prebattleRoom = { phase: "messageClosing", elapsed: 0 };
     } else if (
       nextPostwin.question !== null &&
-      nextPostwin.questionDismissElapsed === null
+      nextPostwin.questionDismissElapsed === null &&
+      nextPostwin.questionYesElapsed === null
     ) {
-      // RECORD/RETIRE question phase: the dismiss-A resolves the multichoice
-      // default NO (no YES/NO input here; UP/A after dismissal is ignored).
-      if (newKeys.has("A")) {
-        nextPostwin = acceptPostwinQuestionDismiss(nextPostwin);
+      // RECORD/RETIRE question phase: UP/DOWN move the YES/NO window cursor
+      // (default NO), and A resolves the choice -- NO dismisses back to the
+      // re-ask, YES takes the branch route (record save / retire warp). The
+      // input-ready gate lives inside each reducer (the window must draw).
+      if (newAndRepeatedKeys.has("UP")) {
+        nextPostwin = movePostwinQuestionCursor(nextPostwin, -1);
+      } else if (newAndRepeatedKeys.has("DOWN")) {
+        nextPostwin = movePostwinQuestionCursor(nextPostwin, 1);
+      } else if (newKeys.has("A")) {
+        if (nextPostwin.questionCursorPos === 0) {
+          nextPostwin = acceptPostwinQuestionYes(nextPostwin);
+        } else {
+          nextPostwin = acceptPostwinQuestionDismiss(nextPostwin);
+        }
       }
     } else if (
       nextPostwin.question === null &&
@@ -2260,6 +2283,13 @@ function renderPostwinState(state: EngineState): Uint8Array {
 
   const fb = createFramebuffer();
   const fadeLocal = age - POSTWIN_COUNTER_ROOM_FIRST_AGE;
+  const retireYesDelay =
+    postwin.question?.kind === "retire"
+      ? postwinQuestionYesDelay(postwin)
+      : -1;
+  if (retireYesDelay >= POSTWIN_RETIRE_FADE_FIRST_DELAY) {
+    return renderPostwinRetireWarp(retireYesDelay);
+  }
   renderPrebattleRoomScene(
     fb,
     bgFadeY(fadeLocal, FADE_IN),
@@ -2297,7 +2327,23 @@ function renderPostwinState(state: EngineState): Uint8Array {
       const dismissed = postwin.questionDismissElapsed !== null;
       const qDelay = age - q.edgeElapsed;
       const dDelay = dismissed ? age - postwin.questionDismissElapsed! : -1;
-      if (dismissed) {
+      const yesDelay = postwinQuestionYesDelay(postwin);
+      if (yesDelay >= 0 && q.kind === "record") {
+        // RECORD-YES: window clears +2 after the A-on-YES edge, the question
+        // box holds through the save-SE span (+2..+22), clears at +23, then
+        // "{PLAYER}'s battle was recorded" types from +24.
+        if (yesDelay <= 1) {
+          drawLines(qText[0], qText[1], qText[0].length + qText[1].length);
+        } else if (yesDelay < POSTWIN_RECORDED_BOX_CLEAR_DELAY) {
+          drawLines(qText[0], qText[1], qText[0].length + qText[1].length);
+        } else if (yesDelay !== POSTWIN_RECORDED_BOX_CLEAR_DELAY) {
+          drawLines(
+            POSTWIN_RECORDED_TEXT[0],
+            POSTWIN_RECORDED_TEXT[1],
+            postwinRecordedVisibleChars(postwin),
+          );
+        }
+      } else if (dismissed) {
         // Dismiss transition: question stays fully shown through +3 (the
         // default-NO A press + 2 more frames), box clears at +4, then the
         // ReadyFor2ndOpponent reprint re-types.
@@ -2324,16 +2370,23 @@ function renderPostwinState(state: EngineState): Uint8Array {
       // The YES/NO multichoice window (same 4x4 std-window at tile (20,8)
       // as the Lobby record prompt, ground-truth §3 correction: the window
       // IS visible during the question hold). It draws from the window-edge
-      // offset and clears when the question box clears on dismiss.
-      if (
-        postwinQuestionWindowVisible(postwin) &&
-        (postwin.questionDismissElapsed === null ||
-          age - postwin.questionDismissElapsed <= 1)
-      ) {
+      // offset and clears when the question box clears on dismiss (NO path)
+      // or +2 after the A-on-YES edge (YES path). The cursor copies the
+      // logical YES/NO position one tick after a UP/DOWN move.
+      const windowCleared =
+        dismissed ? age - postwin.questionDismissElapsed! > 1
+          : yesDelay >= 0 ? yesDelay >= POSTWIN_QUESTION_WINDOW_CLEAR_DELAY
+            : false;
+      if (postwinQuestionWindowVisible(postwin) && !windowCleared) {
         drawStandardWindowFrame(fb, 160, 64, 4, 4);
         drawStandardWindowText(fb, "YES", 176, 73);
         drawStandardWindowText(fb, "NO", 176, 89);
-        drawStandardWindowText(fb, "▶", 168, 89);
+        drawStandardWindowText(
+          fb,
+          "▶",
+          168,
+          73 + (postwin.questionCursorDisplayPos ?? postwin.questionCursorPos ?? 1) * 16,
+        );
       }
     } else if (beforeContinuation) {
       drawLines(
@@ -2447,6 +2500,49 @@ function renderPostwinState(state: EngineState): Uint8Array {
     }
   }
   return fb;
+}
+
+/**
+ * RETIRE-YES warp (docs/postwin-record-retire-ground-truth.md §3a probe:
+ * WarpToLobbyLost). `delay` is relative to the accepted A-on-YES canonical
+ * edge: the question scene fades out via the shared WARP_FADE_OUT palette
+ * fade (+4..+18, BG 1-tick ahead of OBJ), holds black (+19..+37), then the
+ * Lobby arrival fade-in renders through the existing loss-terminal
+ * presentation machinery (`renderFactoryTerminalPresentation`), whose age 114
+ * is the arrival fade-in first frame -- so `age = delay + 76` reproduces the
+ * probe's arrival fade-in at +38, message box at +65, and LostChallenge
+ * page-0 typing/cursor after that.
+ */
+function renderPostwinRetireWarp(
+  delay: number,
+): Uint8Array {
+  if (delay < POSTWIN_RETIRE_BLACK_AGE_DELAY) {
+    const qText = POSTWIN_QUESTION_RETIRE_TEXT;
+    const bgY = bgFadeY(delay, WARP_FADE_OUT);
+    const objY = objFadeY(delay, WARP_FADE_OUT);
+    const fb = createFramebuffer();
+    renderPrebattleRoomScene(fb, bgY, objY);
+    if (delay < POSTWIN_RETIRE_FADE_FIRST_DELAY) {
+      drawMessageBoxFrame(fb);
+    } else {
+      drawMessageBoxFrameFaded(fb, bgY);
+    }
+    drawMessageBoxTextFaded(fb, qText[0], 16, 121, bgY);
+    drawMessageBoxTextFaded(fb, qText[1], 16, 137, bgY);
+    return fb;
+  }
+  if (delay < POSTWIN_RETIRE_FADE_IN_DELAY) return blackFrame();
+  const terminalAge = delay - POSTWIN_RETIRE_FADE_IN_DELAY +
+    FACTORY_LOSS_TERMINAL_PROFILE.fieldFirstAge;
+  const terminal = {
+    ...createFactoryTerminalLossPresentation({
+      type: "roundLost" as const,
+      commandId: 0,
+      battleIndex: 0,
+    }),
+    age: terminalAge,
+  };
+  return renderFactoryTerminalPresentation(terminal, () => blackFrame());
 }
 
 function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
