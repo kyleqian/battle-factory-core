@@ -171,7 +171,13 @@ function readBlocks(path: string, count: number): Block[] {
     // needs the full set; the terminal lock only ever shows frame 1.
     player: { frame: 1, frames: Array.from({ length: 9 }, (_, i) => extractPose(join(people, "brendan", "walking.png"), i)), palette: loadJascPal(join(paletteDir, "brendan.pal")) },
     scientist: { frame: 0, frames: [extractPose(join(people, "scientist_1.png"), 0)], palette: loadJascPal(join(paletteDir, "npc_3.pal")) },
-    woman: { frame: 0, frames: [extractPose(join(people, "woman_1.png"), 0)], palette: loadJascPal(join(paletteDir, "npc_1.pal")) },
+    // The wandering woman (OBJ_EVENT_GFX_WOMAN_1, docs/factory-lobby-freeroam-
+    // ground-truth.md §6d) leaves her spawn during the free-roam Lobby window,
+    // so the full standard 9-frame sheet is banked (same layout as Brendan:
+    // 0=south stand, 1=north stand, 2=west stand, 3=south walk1, 4=south
+    // walk2, 5=north walk1, 6=north walk2, 7=west walk1, 8=west walk2; east
+    // reuses west h-flipped, sAnim_GoEast).
+    woman: { frame: 0, frames: Array.from({ length: 9 }, (_, i) => extractPose(join(people, "woman_1.png"), i)), palette: loadJascPal(join(paletteDir, "npc_1.pal")) },
     fatMan: { frame: 0, frames: [extractPose(join(people, "fat_man.png"), 0)], palette: loadJascPal(join(paletteDir, "npc_1.pal")) },
     camper: { frame: 0, frames: [extractPose(join(people, "camper.png"), 0)], palette: loadJascPal(join(paletteDir, "npc_3.pal")) },
     picnicker: { frame: 2, frames: [extractPose(join(people, "picnicker.png"), 2, true)], palette: loadJascPal(join(paletteDir, "npc_3.pal")) },

@@ -3111,7 +3111,7 @@ export function render(state: EngineState): Uint8Array {
   // (factoryLobbyFreeRoam.ts); its spawn frame is byte-identical to the
   // terminal's bare-field frame, so the handoff is invisible.
   if (state.lobbyFreeRoam) {
-    return renderFactoryLobbyFreeRoam(state.lobbyFreeRoam);
+    return renderFactoryLobbyFreeRoam(state.lobbyFreeRoam, state.frame);
   }
   const generatedTerminalCommand = terminalCommandForRound(
     state.factoryRoundBattleOrchestrator?.round ?? null,

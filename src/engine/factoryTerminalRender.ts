@@ -40,6 +40,7 @@ import {
   lobbyFreeRoamPlayerFrame,
   lobbyFreeRoamPlayerFrameHFlipped,
   LOBBY_PLAYER_SCREEN_POS,
+  womanAtTick,
   type FactoryLobbyFreeRoamState,
 } from "./factoryLobbyFreeRoam.ts";
 
@@ -220,6 +221,7 @@ export function renderFactoryTerminalField(
   objY = 0,
   cameraOrigin: { readonly x: number; readonly y: number } = layout.cameraOriginPx,
   playerOverride?: LobbyPlayerOverride,
+  npcOverrides?: ReadonlyMap<string, LobbyPlayerOverride>,
 ): Uint8Array {
   const fb = createFramebuffer();
   fillFramebuffer(fb, 0, 0, 0);
@@ -272,7 +274,15 @@ export function renderFactoryTerminalField(
       );
       continue;
     }
-    drawNpc(fb, npcs[object.asset]!, pos, objY);
+    const override = npcOverrides?.get(object.id);
+    drawNpc(
+      fb,
+      npcs[object.asset]!,
+      override ?? pos,
+      objY,
+      override?.frame ?? 0,
+      override?.hFlip ?? false,
+    );
   }
   // NORMAL and SPLIT top layers cover object-event sprites.
   forEachVisibleBlock((metatile, x, y) => {
@@ -690,15 +700,26 @@ export function renderFactoryTerminalPresentation(
  */
 export function renderFactoryLobbyFreeRoam(
   state: FactoryLobbyFreeRoamState,
+  tick: number,
 ): Uint8Array {
   const cameraOrigin = lobbyFreeRoamCameraOrigin(
     state,
     layout.cameraOriginPx,
   );
+  const woman = womanAtTick(tick);
   return renderFactoryTerminalField(0, 0, cameraOrigin, {
     x: LOBBY_PLAYER_SCREEN_POS.x,
     y: LOBBY_PLAYER_SCREEN_POS.y,
     frame: lobbyFreeRoamPlayerFrame(state),
     hFlip: lobbyFreeRoamPlayerFrameHFlipped(state),
-  });
+  }, woman === null
+    ? undefined
+    : new Map<string, LobbyPlayerOverride>([
+        ["woman", {
+          x: woman.x - cameraOrigin.x,
+          y: woman.y - cameraOrigin.y,
+          frame: woman.frame,
+          hFlip: woman.hFlip,
+        }],
+      ]));
 }

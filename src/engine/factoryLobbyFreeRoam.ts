@@ -325,3 +325,59 @@ export function lobbyFreeRoamPlayerFrameHFlipped(
   if (state.turnRemaining > 0) return state.turnTarget === "east";
   return state.facing === "east";
 }
+
+/**
+ * The wandering-woman NPC (OBJ_EVENT_GFX_WOMAN_1, MOVEMENT_TYPE_WANDER_AROUND,
+ * map-json spawn (3,11)) leaves her spawn during the free-roam Lobby window.
+ * A general WanderAround model is out of scope (ISSUES #55 ambient RNG
+ * stream); this is the bounded per-trace schedule table from
+ * docs/factory-lobby-freeroam-ground-truth.md §6d, RAM-measured tick-by-tick
+ * (twice-run byte-identical on both committed lobby fixtures) and keyed to
+ * the canonical oracle ticks. Returns the woman's world box-top px (the
+ * app's own render anchor: tile*16 − cameraOrigin − 16) plus the
+ * woman_1.png sheet frame, or null for a tick that keeps her static at her
+ * map-json tile (no override).
+ *
+ * Tick windows (all canonical):
+ *  - ≤5184 idle SOUTH at (3,11), world (104,160)
+ *  - 5185-5199 NORTH walk (3,10), world y = 160−(T−5184), anim5 cmdIdx 2 then
+ *    3 → sheet frames 6 (north walk2) then 1 (north stand), sAnim_GoNorth
+ *  - 5200-5295 idle NORTH at (3,10), world (104,144), frozen 5/3 (frame 1)
+ *  - 5296-5311 SOUTH walk (3,11), world y = 145+(T−5296), anim4 cmdIdx 0 then
+ *    1 → sheet frames 3 (south walk1) then 0 (south stand), sAnim_GoSouth
+ *  - 5312-5406 idle SOUTH at (3,11), world (104,160)
+ *  - 5407-5421 EAST walk (4,11), world x = 105+(T−5407), anim7 cmdIdx 2 then
+ *    3 → sheet frames 8 then 2 h-flipped (sAnim_GoEast)
+ *  - ≥5422 idle EAST at (4,11), world (120,160)
+ */
+export interface WomanNpcAtTick {
+  readonly x: number;
+  readonly y: number;
+  readonly frame: number;
+  readonly hFlip: boolean;
+}
+
+export function womanAtTick(tick: number): WomanNpcAtTick | null {
+  if (tick <= 5184) return null;
+  if (tick <= 5199) {
+    // North walk 5185-5199: anim5 cmdIdx 2 (sheet frame 6, walk2) for the
+    // first 8 frames, cmdIdx 3 (sheet frame 1, stand) for the rest.
+    const frame = tick - 5185 < LOBBY_FREE_ROAM_POSE_FRAMES ? 6 : 1;
+    return { x: 104, y: 160 - (tick - 5184), frame, hFlip: false };
+  }
+  if (tick <= 5295) return { x: 104, y: 144, frame: 1, hFlip: false };
+  if (tick <= 5311) {
+    // South walk 5296-5311: anim4 cmdIdx 0 (sheet frame 3, walk1) then
+    // cmdIdx 1 (sheet frame 0, stand).
+    const frame = tick - 5296 < LOBBY_FREE_ROAM_POSE_FRAMES ? 3 : 0;
+    return { x: 104, y: 145 + (tick - 5296), frame, hFlip: false };
+  }
+  if (tick <= 5406) return { x: 104, y: 160, frame: 0, hFlip: false };
+  if (tick <= 5421) {
+    // East walk 5407-5421: anim7 cmdIdx 2 (sheet frame 8, walk2 h-flipped)
+    // then cmdIdx 3 (sheet frame 2, stand h-flipped).
+    const frame = tick - 5407 < LOBBY_FREE_ROAM_POSE_FRAMES ? 8 : 2;
+    return { x: 105 + (tick - 5407), y: 160, frame, hFlip: true };
+  }
+  return { x: 120, y: 160, frame: 2, hFlip: true };
+}

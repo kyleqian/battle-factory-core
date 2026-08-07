@@ -7,6 +7,7 @@ import {
   lobbyFreeRoamCameraOrigin,
   lobbyFreeRoamPlayerFrame,
   lobbyFreeRoamPlayerFrameHFlipped,
+  womanAtTick,
   LOBBY_PLAYER_SCREEN_POS,
   LOBBY_FREE_ROAM_TILE_FRAMES,
   LOBBY_FREE_ROAM_TURN_FRAMES,
@@ -45,7 +46,7 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     expect([LOBBY_PLAYER_SCREEN_POS.x, LOBBY_PLAYER_SCREEN_POS.y]).toEqual([112, 56]);
     // The spawn render is byte-identical to the terminal's bare field frame
     // (the handoff is invisible; loss-terminal-decline-continuation-off 155/155).
-    const field = renderFactoryLobbyFreeRoam(state);
+    const field = renderFactoryLobbyFreeRoam(state, 5093);
     expect(field.length).toBe(240 * 160 * 4);
   });
 
@@ -272,5 +273,34 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     expect(isFactoryLobbyIdle(state)).toBe(true);
     expect(state.x).toBe(4);
     expect(state.y).toBe(8);
+  });
+
+  it("womanAtTick: the wandering woman's north-walk boundary ticks (§6a/§6d)", () => {
+    // ≤5184 idle SOUTH at spawn (3,11) — no override (static map-json tile).
+    expect(womanAtTick(5093)).toBeNull();
+    expect(womanAtTick(5184)).toBeNull();
+    // 5185-5199: NORTH walk, world y = 160−(T−5184), walk2 then stand pose.
+    expect(womanAtTick(5185)).toMatchObject({ x: 104, y: 159, frame: 6, hFlip: false });
+    expect(womanAtTick(5192)).toMatchObject({ y: 152, frame: 6 });
+    expect(womanAtTick(5193)).toMatchObject({ y: 151, frame: 1 });
+    expect(womanAtTick(5199)).toMatchObject({ y: 145, frame: 1 });
+    // ≥5200 idle NORTH at (3,10), world (104,144), frozen standing pose.
+    expect(womanAtTick(5200)).toMatchObject({ x: 104, y: 144, frame: 1 });
+    expect(womanAtTick(5254)).toMatchObject({ x: 104, y: 144, frame: 1 });
+  });
+
+  it("womanAtTick: the walk fixture's south + east extra movements (§6d)", () => {
+    // SOUTH walk (3,10)→(3,11) 5296-5311: world y = 145+(T−5296).
+    expect(womanAtTick(5296)).toMatchObject({ x: 104, y: 145, frame: 3 });
+    expect(womanAtTick(5303)).toMatchObject({ y: 152, frame: 3 });
+    expect(womanAtTick(5304)).toMatchObject({ y: 153, frame: 0 });
+    expect(womanAtTick(5311)).toMatchObject({ y: 160, frame: 0 });
+    // EAST walk (3,11)→(4,11) 5407-5421: world x = 105+(T−5407), h-flipped.
+    expect(womanAtTick(5407)).toMatchObject({ x: 105, y: 160, frame: 8, hFlip: true });
+    expect(womanAtTick(5414)).toMatchObject({ x: 112, frame: 8 });
+    expect(womanAtTick(5415)).toMatchObject({ x: 113, frame: 2 });
+    expect(womanAtTick(5421)).toMatchObject({ x: 119, frame: 2 });
+    expect(womanAtTick(5422)).toMatchObject({ x: 120, y: 160, frame: 2, hFlip: true });
+    expect(womanAtTick(5472)).toMatchObject({ x: 120, frame: 2 });
   });
 });
