@@ -5,7 +5,56 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 984 — [supervisor WIND-DOWN, 2026-08-07] Session summary: 11 workers / 6 rounds — #78 CLOSED 153/153, #80 settled band CLOSED 251/251 + slice 6, lobby follow-cam + wander NPC → loss-beyond-boundary 183/183, postwin second-RECORD 164/164, fade forensics banked
+## 985 — [bounded MAIN worker, 2026-08-07] ISSUES #80 item (a) close-fade LAYER SPLIT landed; dense-a stays 276/276 — the 292/292 extension is BLOCKED by the (c) message-box residual now known to span 960-978
+
+- **State:** master `de560ef5`, clean. Typecheck + `npm run build` green,
+  `npm run test:smoke` **347/347**, touched test files **19/19**
+  (battlePartySelect 11/11 + inbattlePartyMenuVisualBind 8/8; 2 new pins
+  red-verified — y_obj formula and phase-boundary constants each fail when
+  broken). Keep-green all held: `mid-battle-switch-dense-a-off` **276/276**
+  (spec NOT extended — see blocker), `party-menu-status-item-off`
+  **251/251**, `mid-battle-switch-pacing-b-off` **153/153**,
+  `battle-command-generated-off` **128/128**. Full `npm test` NOT run
+  (worker rule — supervisor after merge).
+- **Did (per `docs/fade-layer-forensics.md` §1, model used verbatim):**
+  (1) extended the menu-fade by one frame and shrunk the black hold by one —
+  `PARTY_SELECT_CLOSE_MENU_FADE_FRAMES` 14→15 (closeElapsed 2-16 = frames
+  965-979), `BLACK_HOLD` 40→39 (17-55 = 980-1018); the recomputed
+  `MENU_FRAMES` stays 72 / `TOTAL` 81 so the 1019-1034 reveal and 1035+
+  hold never move. (2) split `renderBattlePartySelect` into a BG pass
+  (`drawPartySelectBgLayer`: background, six slots, row text/gender/HP,
+  submenu window, message window + text, CANCEL window's bg/interior/frame/
+  text) and an OBJ pass (`drawPartySelectObjLayer`: per-slot menu pokeball,
+  mon icon, held-item, status icons + the CANCEL pokeball, pulled out of
+  `drawCancelWindow` into `drawCancelPokeball`). The non-fading path draws
+  BG-then-OBJ byte-identically to before. (3) the menu-fade branch blends
+  BG at `closeElapsed & ~1` and the OBJ scratch layer at `(closeElapsed-1)
+  & ~1`, composited over the alpha-255 coverage mask (`setPixel` writes a=255;
+  no colour heuristic). **Frame 979 — the discriminator (OBJ stack at y=14
+  over fully-black BG, 1559px) — is byte-exact.** Tier-1 pins: per-pair
+  (y_bg,y_obj) at closeElapsed 2/3/16/17 on the CANCEL-window reference
+  pixels (204,140)/(193,138) and the phase boundary (16="menu-fade",
+  17="black-hold") + the constant recomputation (72/81).
+- **Blocker (why NOT 292/292):** the dense-a capture extension 964-979
+  measures **277/292**; the 15 red frames are 964-978, all a PRE-EXISTING
+  message-box residual, NOT the fade (frame 979 matches). Oracle evidence
+  (dense-a + fresh 883/940 captures): the app's settled message box is
+  byte-exact at 883 and 2050-2300, but from the submenu-open (~924) through
+  the close (978) the oracle swaps to a DIFFERENT window — at 964 the frame
+  right edge is x141 vs the app's x181, the interior gets gradient border
+  rows (115,107,132)/(222,214,222) instead of solid white, and the text is
+  longer/different. The doc §3's "960-963 message-box residual" (item (c))
+  therefore actually spans 960-978. A second, intermittent ~489px
+  mon-icon/slot-region phase residual appears on the y_obj=0/2/8/10 fade
+  frames (also the 5224px band at frame 883). Both are content classes out
+  of this step's scope, so I kept the dense-a spec green at 276/276 rather
+  than commit a red extension, and did NOT open a scout.
+- **Next:** bind item (c) (decode the oracle's submenu/close message box:
+  window template + text + when it reverts to the settled box), then extend
+  dense-a to 964-979 → 292/292; then item (b) (open-fade 766-824) per
+  `docs/fade-layer-forensics.md` §2.
+- **Notes:** ISSUES #80 remainder rewritten — item (a)'s blend folded in as
+  LANDED, its open 964-978 exactness attributed to (c). No PAPERCUTS.
 
 - **State:** master at this entry's commit, clean. Final independent union
   verification (including the animation-main fold): `npm run build` green;

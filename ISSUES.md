@@ -52,24 +52,32 @@ personalities pinned). `party-menu-status-item-off` is **251/251 byte-exact**,
 forensics probe 0px/0 unattributed on 2060/2150/2280; Tier-1 pins in
 `tests/battlePartySelect.test.ts` (cursor-following open ball + LV ligature)
 red-verified. Slice 6 (close fade pixels) LANDED 2026-08-07 (`1bedd921`):
-close now drives from closeElapsed per the rank-6 §7 schedule (menu fade-out
-965-978 y=2..14 held 2f, black 979-1018, field reveal 1019-1034);
+close now drives from closeElapsed per the rank-6 §7 schedule;
 `mid-battle-switch-dense-a-off` extended 1035-1255 → **980-1255, 276/276
 byte-exact**. **Open remainder — fully forensics-banked 2026-08-07
 (`docs/fade-layer-forensics.md` + `tools/probe/fade-layer-forensics.ts`,
-per-frame (y_bg, y_obj) tables for both windows):** (a) close-fade frames
-964-979 — the OBJ layer trails the BG by exactly 1 blend tick
-(`objPaletteToggle`, palette.c:454 alternates BG/OBJ per tick); fix =
-layer-separated blend in the close path (battlePartySelect.ts:982-1016,
-blend BG at y_bg, OBJ at y_bg−2), predicted acceptance: extend the dense-a
-spec's captures with 964-979 → 292/292. (b) open window: the app pops the
-full menu instantly at 763 with NO open fade and NO field fade-out at all —
-oracle: field fades out 766-808, menu fades in from black 809-824 (y 14→2
-held 2f, OBJ lags 1 tick). (c) NEW: pre-fade frames 960-963 carry a
-5141-6008px message-box-region residual (oracle static, no pokeball button
-until 964; app draws its own text + CANCEL interior + button 4 frames early
-+ a one-frame box-fill flip at 963) — classified in the forensics doc,
-never spec-pinned (dense-a starts at 980).
+per-frame (y_bg, y_obj) tables for both windows):**
+(b) open window: the app pops the full menu instantly at 763 with NO open
+fade and NO field fade-out at all — oracle: field fades out 766-808, menu
+fades in from black 809-824 (y 14→2 held 2f, OBJ lags 1 tick).
+(c) message-box residual, now known to span **960-978** (not just 960-963):
+during the submenu-open/close the oracle's message box is a DIFFERENT window
+than the app's settled 21x2 olive "Choose a POKéMON." box — at 964 the frame
+right edge is x141 vs the app's x181, the interior has gradient border rows
+(115,107,132)/(222,214,222) instead of solid white, and the text is longer/
+different (never decoded; the app's settled box IS byte-exact at 883 and in
+party-menu-status-item-off 2050-2300). **The item-(a) layer-separated close
+blend is LANDED 2026-08-07** (`renderBattlePartySelect` now draws a BG pass
+and an OBJ pass and blends them at `y_bg = closeElapsed & ~1` / `y_obj =
+(closeElapsed - 1) & ~1`; menu fade-out now 965-979 y=2..16, black
+980-1018, `PARTY_SELECT_CLOSE_MENU_FADE_FRAMES` 14→15 / `BLACK_HOLD` 40→39
+with the total span unchanged; frame 979 = the OBJ-tail discriminator is
+**byte-exact**, and the dense-a spec is green at 980-1255), but the dense-a
+extension 964-979 stays **277/292** — the red frames 964-978 are the (c)
+message-box residual plus an intermittent ~489px mon-icon/slot-region phase
+residual on the y_obj=0/2/8/10 frames (also the 5224px frame-883 open-state
+band), i.e. out-of-scope content classes, not the fade blend. Extending the
+spec to 292/292 is blocked until (c) is bound.
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 

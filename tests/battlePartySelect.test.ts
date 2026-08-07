@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { createFramebuffer } from "../src/engine/framebuffer.ts";
 import {
+  PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES,
+  PARTY_SELECT_CLOSE_MENU_FADE_FRAMES,
+  PARTY_SELECT_CLOSE_MENU_FRAMES,
+  PARTY_SELECT_CLOSE_TOTAL_FRAMES,
   advanceBattlePartySelect,
   battlePartyNoEnergyMessage,
+  battlePartySelectClosePhase,
   createBattlePartySelectState,
   renderBattlePartySelect,
   type BattlePartySelectState,
@@ -200,6 +205,50 @@ describe("voluntary battle party selector", () => {
     expect(px(blackFb, 220, 145)).toEqual([0, 0, 0]);
     expect(px(blackFb, 4, 4)).toEqual([0, 0, 0]);
     expect(px(blackFb, 236, 156)).toEqual([0, 0, 0]);
+  });
+
+  it("blends BG at y_bg and OBJ at y_obj = (closeElapsed-1)&~1 through the close fade (ISSUES #80 open remainder (a))", () => {
+    // docs/fade-layer-forensics.md §1: y_bg = closeElapsed & ~1, y_obj =
+    // (closeElapsed - 1) & ~1 (the OBJ layer trails the BG by exactly one
+    // blend step, objPaletteToggle). Reference pixels: BG CANCEL-window
+    // interior (204,140) base (115,90,181); OBJ pokeball red (193,138) base
+    // (181,66,0). Expected values are blendComponentToBlack of the base at
+    // the table's y.
+    const base = liveSelector();
+    const px = (fb: Uint8Array, x: number, y: number) => {
+      const i = (y * 240 + x) * 4;
+      return [fb[i]!, fb[i + 1]!, fb[i + 2]!] as const;
+    };
+    const close = (closeElapsed: number) => {
+      const fb = createFramebuffer();
+      renderBattlePartySelect(fb, { ...base, closeElapsed });
+      return { bg: px(fb, 204, 140), obj: px(fb, 193, 138) };
+    };
+    // closeElapsed 2 (frame 965): BG y=2 (99,74,156), OBJ still y=0 (untouched).
+    expect(close(2)).toEqual({ bg: [99, 74, 156], obj: [181, 66, 0] });
+    // closeElapsed 3 (frame 966): BG y=2, OBJ y=2 (156,57,0).
+    expect(close(3)).toEqual({ bg: [99, 74, 156], obj: [156, 57, 0] });
+    // closeElapsed 16 (frame 979): BG y=16 (fully black), OBJ one step behind
+    // at y=14 (16,8,0) -- the 1559-px OBJ-tail discriminator frame.
+    expect(close(16)).toEqual({ bg: [0, 0, 0], obj: [16, 8, 0] });
+    // closeElapsed 17 (frame 980): black-hold, both layers black.
+    expect(close(17)).toEqual({ bg: [0, 0, 0], obj: [0, 0, 0] });
+  });
+
+  it("extends the menu-fade phase by one frame: closeElapsed 16 fades, 17 is the black hold (ISSUES #80 open remainder (a))", () => {
+    // The fade now runs closeElapsed 2-16 (frames 965-979) and the black hold
+    // starts one frame later at 17 (frame 980), so the total close span (and
+    // the 1019-1034 field reveal) is unchanged.
+    expect(battlePartySelectClosePhase(1)).toBe("menu-hold");
+    expect(battlePartySelectClosePhase(2)).toBe("menu-fade");
+    expect(battlePartySelectClosePhase(16)).toBe("menu-fade");
+    expect(battlePartySelectClosePhase(17)).toBe("black-hold");
+    expect(battlePartySelectClosePhase(55)).toBe("black-hold");
+    expect(battlePartySelectClosePhase(56)).toBe("field-reveal");
+    expect(PARTY_SELECT_CLOSE_MENU_FADE_FRAMES).toBe(15);
+    expect(PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES).toBe(39);
+    expect(PARTY_SELECT_CLOSE_MENU_FRAMES).toBe(72);
+    expect(PARTY_SELECT_CLOSE_TOTAL_FRAMES).toBe(81);
   });
 
   it("follows the source single-layout cursor edges, including Cancel", () => {
