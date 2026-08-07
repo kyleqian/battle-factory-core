@@ -7,6 +7,7 @@ import {
 import {
   BATTLE_IN_BATTLE_FIRST_ELAPSED,
   createInitialState,
+  render,
   tick,
   type EngineState,
 } from "../src/engine/core.ts";
@@ -1049,6 +1050,39 @@ describe("S8 Battle-1 postwin transition", () => {
       expect(POSTWIN_QUESTION_RETIRE_TEXT[1]).toBe(
         "Battle Swap challenge?",
       );
+    });
+
+    it("renders the held YES/NO window with the cursor on NO from its appear offset and clears it on dismiss", () => {
+      const edge = 6_639;
+      const windowDelay = POSTWIN_QUESTION_WINDOW_DELAYS.record;
+      const px = (fb: Uint8Array, x: number, y: number) => {
+        const i = (y * 240 + x) * 4;
+        return [fb[i]!, fb[i + 1]!, fb[i + 2]!] as const;
+      };
+      const questionState = (elapsed: number, questionDismissElapsed: number | null): EngineState => ({
+        ...createInitialState(),
+        postwin: {
+          ...INITIAL_POSTWIN_STATE,
+          elapsed,
+          healDismissElapsed: 2_000,
+          question: { kind: "record" as const, edgeElapsed: edge },
+          questionDismissElapsed,
+        },
+      });
+      // One frame before the window edge: no window (the region is the room).
+      const pre = render(questionState(edge + windowDelay - 1, null));
+      expect(px(pre, 161, 66)).toEqual([255, 255, 255]);
+      // At the window edge: the 4x4 std-window appears fully-formed with the
+      // cursor on NO (default), byte-exact to the oracle (bbox 161,65-206,110).
+      const hold = render(questionState(edge + windowDelay, null));
+      expect(px(hold, 161, 66)).toEqual([41, 49, 49]);
+      expect(px(hold, 206, 66)).toEqual([41, 49, 49]);
+      expect(px(hold, 169, 95)).toEqual([99, 99, 99]);
+      expect(px(hold, 176, 76)).toEqual([99, 99, 99]);
+      // Dismiss clears the window with the message box (teardown dDelay <= 1).
+      const dismissed = render(questionState(edge + windowDelay + 2, edge + windowDelay));
+      expect(px(dismissed, 161, 66)).toEqual([255, 255, 255]);
+      expect(px(dismissed, 169, 95)).not.toEqual([99, 99, 99]);
     });
   });
 });

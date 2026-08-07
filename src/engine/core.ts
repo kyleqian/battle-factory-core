@@ -262,6 +262,7 @@ import {
   postwinHealVisibleChars,
   postwinQuestionReprintVisibleChars,
   postwinQuestionVisibleChars,
+  postwinQuestionWindowVisible,
   postwinQuestionMenuReady,
   movePostwinContinuationCursor,
   movePostwinSwapCursor,
@@ -2319,6 +2320,20 @@ function renderPostwinState(state: EngineState): Uint8Array {
         );
       } else if (qDelay !== 4) {
         drawLines(qText[0], qText[1], postwinQuestionVisibleChars(postwin));
+      }
+      // The YES/NO multichoice window (same 4x4 std-window at tile (20,8)
+      // as the Lobby record prompt, ground-truth §3 correction: the window
+      // IS visible during the question hold). It draws from the window-edge
+      // offset and clears when the question box clears on dismiss.
+      if (
+        postwinQuestionWindowVisible(postwin) &&
+        (postwin.questionDismissElapsed === null ||
+          age - postwin.questionDismissElapsed <= 1)
+      ) {
+        drawStandardWindowFrame(fb, 160, 64, 4, 4);
+        drawStandardWindowText(fb, "YES", 176, 73);
+        drawStandardWindowText(fb, "NO", 176, 89);
+        drawStandardWindowText(fb, "▶", 168, 89);
       }
     } else if (beforeContinuation) {
       drawLines(
