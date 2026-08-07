@@ -274,9 +274,20 @@ export function midBattleSwitchParticleSchedulesAt(
     : MID_BATTLE_SWITCH_SEND_IN_PARTICLE_START_TRACE;
   const out: MidBattleSwitchParticle[] = [];
   for (let i = 0; i < 16; i += 1) {
+    // `PokeBallOpenParticleAnimation_Step2` (battle_anim_throw.c:1642-1657)
+    // destroys a particle when its `data[1]` reaches 50; `data[1]` is 0 on
+    // the spawn tick and the two ticks after, then steps +2/tick, so a
+    // particle spawned at trace S dies at trace S+26. The RECALL window's
+    // frame-1121 stolen tick (the party-summary sprite-sheet work §8.3 notes)
+    // skips one destroy, shifting the i>=6 particles to S+27; the send-in
+    // window has no stolen tick (verified against the OAM receipt's per-frame
+    // particle counts, 1104-1131 / 1202-1229).
+    const destroyTick = window === "recall"
+      ? start + 26 + i + (i >= 6 ? 1 : 0)
+      : start + 27 + i;
+    if (traceFrame >= destroyTick) continue;
     const age = traceFrame - start - 2 - i;
     if (age < 0) continue;
-    if (age > 25) continue;
     out.push(Object.freeze({ i, age, dx: 0, dy: 0 }));
   }
   return out;

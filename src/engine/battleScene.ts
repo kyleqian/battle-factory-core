@@ -778,6 +778,7 @@ import type {
 } from "./battleResolutionPresentationRender.ts";
 import {
   MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR,
+  MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR,
   MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED,
   MID_BATTLE_SWITCH_OUT_SCALE_START,
   type MidBattleSwitchInView,
@@ -35285,7 +35286,14 @@ function drawMidBattleSwitchInSprite(
     return;
   }
   if (!state.monVisible) return;
-  if (state.emergeAccumulator < MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR) {
+  // ISSUES #78 residual: the oracle's RENDERED first visible emerge frame is
+  // trace 1189 (elapsed 49, acc 58), not 1188 -- §10.3's "first visible at
+  // 1188" is the RAM state, which renders one tick later (pixel-verified:
+  // oracle 1188 has zero mon pixels, 1189 has 57). The accumulator formula
+  // below yields acc 40 at elapsed 48 (the invisible 1187 RAM value), so gate
+  // the draw on the accumulator reaching the visible 58.
+  if (state.emergeAccumulator < MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR) return;
+  if (state.emergeAccumulator <= MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR) {
     const scale = Math.trunc(0x10000 / state.emergeAccumulator);
     const emergeY2 = MATERIALIZE_Y2_TABLE[
       state.elapsed - MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED - 1
