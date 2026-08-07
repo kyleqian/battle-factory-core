@@ -23,7 +23,9 @@ import {
 } from "../src/engine/factoryRoundBattleOrchestrator.ts";
 import {
   battlePartySelectClosePhase,
+  PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES,
   PARTY_SELECT_CLOSE_FIELD_HOLD_FRAMES,
+  PARTY_SELECT_CLOSE_FIELD_REVEAL_FRAMES,
   PARTY_SELECT_CLOSE_MENU_FRAMES,
   PARTY_SELECT_CLOSE_MENU_FADE_FRAMES,
   PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES,
@@ -197,11 +199,13 @@ describe("ISSUES #78 voluntary-switch presentation seam", () => {
   });
 
   it("times the party-menu close so the recall message's first glyph lands at the fixture edge", () => {
-    // docs/mid-battle-switch-presentation-ground-truth.md §2: confirm at 963,
-    // menu visible to 1019 (56f), fade 1019-1034 (16f), field idle 1035-1043
-    // (9f), recall printstring first glyph at 1044.
-    expect(PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES).toBe(56);
-    expect(PARTY_SELECT_CLOSE_MENU_FADE_FRAMES).toBe(16);
+    // docs/party-menu-rank6-ground-truth.md §7: confirm at 964, menu fade-out
+    // 965-978 (14f), black hold 979-1018 (40f), field reveal 1019-1034 (16f),
+    // field idle 1035-1043 (9f), recall printstring first glyph at 1044.
+    expect(PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES).toBe(2);
+    expect(PARTY_SELECT_CLOSE_MENU_FADE_FRAMES).toBe(14);
+    expect(PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES).toBe(40);
+    expect(PARTY_SELECT_CLOSE_FIELD_REVEAL_FRAMES).toBe(16);
     expect(PARTY_SELECT_CLOSE_MENU_FRAMES).toBe(72);
     expect(PARTY_SELECT_CLOSE_FIELD_HOLD_FRAMES).toBe(9);
     expect(PARTY_SELECT_CLOSE_TOTAL_FRAMES).toBe(81);
@@ -210,8 +214,28 @@ describe("ISSUES #78 voluntary-switch presentation seam", () => {
       .toBe("menu-hold");
     expect(battlePartySelectClosePhase(PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES))
       .toBe("menu-fade");
-    expect(battlePartySelectClosePhase(PARTY_SELECT_CLOSE_MENU_FRAMES - 1))
+    expect(
+      battlePartySelectClosePhase(
+        PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES + PARTY_SELECT_CLOSE_MENU_FADE_FRAMES - 1,
+      ),
+    )
       .toBe("menu-fade");
+    expect(
+      battlePartySelectClosePhase(
+        PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES + PARTY_SELECT_CLOSE_MENU_FADE_FRAMES,
+      ),
+    )
+      .toBe("black-hold");
+    expect(
+      battlePartySelectClosePhase(
+        PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES
+          + PARTY_SELECT_CLOSE_MENU_FADE_FRAMES
+          + PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES,
+      ),
+    )
+      .toBe("field-reveal");
+    expect(battlePartySelectClosePhase(PARTY_SELECT_CLOSE_MENU_FRAMES - 1))
+      .toBe("field-reveal");
     expect(battlePartySelectClosePhase(PARTY_SELECT_CLOSE_MENU_FRAMES))
       .toBe("field-hold");
     expect(battlePartySelectClosePhase(PARTY_SELECT_CLOSE_TOTAL_FRAMES - 1))

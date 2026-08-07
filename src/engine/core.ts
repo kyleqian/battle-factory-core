@@ -332,7 +332,12 @@ import { renderFactoryLobbyFreeRoam } from "./factoryTerminalRender.ts";
 import { renderFactoryTerminalPresentation } from "./factoryTerminalRender.ts";
 import {
   renderBattlePartySelect,
+  type PartySelectCloseRenderAssets,
 } from "./battlePartySelect.ts";
+import {
+  createBattleCommandPresentationRenderView,
+} from "./battleCommandPresentationRender.ts";
+import type { BattleCommandPresentationState } from "./battleCommandPresentation.ts";
 import {
   advanceFactoryRoundBattleStartIntro,
   advanceFactoryRoundBattleCommand,
@@ -2611,6 +2616,46 @@ function renderPostwinRetireWarp(
   return renderFactoryTerminalPresentation(terminal, () => blackFrame());
 }
 
+/**
+ * ISSUES #80 slice 6: the party-select field-reveal (1019-1034) draws the
+ * settled battle field through the SAME scene view the resolution presentation
+ * renders at 1035+ (both mons out, no message), then blends it from black.
+ * Built from the live battle-command presentation, whose `field`/`fieldArt`/
+ * `healthboxes`/`spriteVisibility` are the resolution's own inputs.
+ */
+function partySelectCloseRenderAssets(
+  presentation: BattleCommandPresentationState,
+): PartySelectCloseRenderAssets {
+  const view = createBattleCommandPresentationRenderView(presentation);
+  const player = view.spriteVisibility.player;
+  const opponent = view.spriteVisibility.opponent;
+  return {
+    drawField(fb: Uint8Array): void {
+      renderBattleResolutionSceneOffView(fb, {
+        field: view.field as unknown as import("./battleResolutionPresentationRender.ts").BattleResolutionPresentationRenderView["field"],
+        fieldArt: view.fieldArt,
+        healthboxes: view.healthboxes,
+        message: null,
+        effect: null,
+        visibility: Object.freeze({
+          player: Object.freeze({ sprite: player, healthbox: true }),
+          opponent: Object.freeze({ sprite: opponent, healthbox: true }),
+        }),
+        waitCursor: null,
+        bottom: "blank",
+        confirmHandoff: null,
+        switchIn: null,
+        midBattleSwitchIn: null,
+        switchOut: null,
+        partySummary: null,
+        midBattleSwitchFade: null,
+        midBattleSwitchParticles: null,
+        trainerSlide: null,
+      });
+    },
+  };
+}
+
 function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   if (state.factoryRoundBattleOrchestrator?.battleStartIntro) {
     const fb = createFramebuffer();
@@ -2642,13 +2687,12 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   }
   if (state.factoryRoundBattleOrchestrator?.battleCommandPresentation) {
     const fb = createFramebuffer();
+    const presentation = state.factoryRoundBattleOrchestrator.battleCommandPresentation;
     const selector = state.factoryRoundBattleOrchestrator.battlePartySelect;
-    if (selector) renderBattlePartySelect(fb, selector);
-    else {
-      renderGeneratedBattleCommandPresentation(
-        fb,
-        state.factoryRoundBattleOrchestrator.battleCommandPresentation,
-      );
+    if (selector) {
+      renderBattlePartySelect(fb, selector, partySelectCloseRenderAssets(presentation));
+    } else {
+      renderGeneratedBattleCommandPresentation(fb, presentation);
     }
     return fb;
   }

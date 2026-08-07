@@ -119,6 +119,43 @@ describe("voluntary battle party selector", () => {
     expect(px(206, 141)).toEqual([255, 255, 255]);
   });
 
+  it("closes the SEND OUT submenu on the confirm edge (ISSUES #80 slice 6)", () => {
+    // docs/party-menu-rank6-ground-truth.md §7: the confirm A lands while the
+    // submenu is open; the real menu closes the submenu and starts the fade on
+    // the same edge (oracle frame 964 = settled menu, no submenu window).
+    let state = liveSelector();
+    state = advanceBattlePartySelect(state, new Set(["DOWN"]));
+    state = advanceBattlePartySelect(state, new Set(["A"]));
+    expect(state.submenuOpen).toBe(true);
+    state = advanceBattlePartySelect(state, new Set(["A"]));
+    expect(state.outcome).toMatchObject({ kind: "select", partyIndex: 1 });
+    expect(state.submenuOpen).toBe(false);
+    expect(state.closeElapsed).toBe(0);
+  });
+
+  it("blends the settled menu to black on a mid-fade close frame and holds black (ISSUES #80 slice 6)", () => {
+    // Measured close schedule (docs/party-menu-rank6-ground-truth.md §7):
+    // menu fade-out 965-978 (standard fade-to-black, y=2..14 held 2 frames),
+    // then full black 979-1018. closeElapsed 4 -> the y=4 blend frame; the
+    // CANCEL text shadow (115,115,115) at (220,145) becomes blendComponentToBlack
+    // (5-bit 14, y=4) = (82,82,82). closeElapsed 30 is inside the black hold.
+    const base = liveSelector();
+    const px = (fb: Uint8Array, x: number, y: number) => {
+      const i = (y * 240 + x) * 4;
+      return [fb[i]!, fb[i + 1]!, fb[i + 2]!] as const;
+    };
+    const midFade: BattlePartySelectState = { ...base, closeElapsed: 4 };
+    const fadeFb = createFramebuffer();
+    renderBattlePartySelect(fadeFb, midFade);
+    expect(px(fadeFb, 220, 145)).toEqual([82, 82, 82]);
+    const blackHold: BattlePartySelectState = { ...base, closeElapsed: 30 };
+    const blackFb = createFramebuffer();
+    renderBattlePartySelect(blackFb, blackHold);
+    expect(px(blackFb, 220, 145)).toEqual([0, 0, 0]);
+    expect(px(blackFb, 4, 4)).toEqual([0, 0, 0]);
+    expect(px(blackFb, 236, 156)).toEqual([0, 0, 0]);
+  });
+
   it("follows the source single-layout cursor edges, including Cancel", () => {
     let state = liveSelector();
     state = advanceBattlePartySelect(state, new Set(["UP"]));

@@ -28,7 +28,8 @@ import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { getMonGender, type MonGender } from "./monGender.ts";
 import type { PartySelectState } from "./partySelect.ts";
 import type { RgbColor } from "./bg.ts";
-import { setPixel } from "./framebuffer.ts";
+import { blendComponentToBlack } from "./paletteFade.ts";
+import { fillFramebuffer, setPixel } from "./framebuffer.ts";
 import { drawText, type FontData } from "./font.ts";
 import {
   drawStandardWindowFrame,
@@ -142,16 +143,39 @@ export type BattlePartySelectState = Readonly<{
 export type BattlePartySelectClosePhase =
   | "menu-hold"
   | "menu-fade"
+  | "black-hold"
+  | "field-reveal"
   | "field-hold"
   | "done";
 
-/** Settled menu through fixture frame 1018 (confirm at 963, closeElapsed 0-55). */
-export const PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES = 56;
-/** Menu fade-out window 1019-1034 (closeElapsed 56-71). */
-export const PARTY_SELECT_CLOSE_MENU_FADE_FRAMES = 16;
-/** Full menu-visible span 963-1034 (closeElapsed 0-71). */
+/**
+ * Measured close schedule (docs/party-menu-rank6-ground-truth.md §7,
+ * oracle-verified against `mid-battle-switch-dense-a-off`): confirm A at
+ * 964; menu fade-out 965-978 (standard fade-to-black, y=2..14 held 2 frames
+ * each); full black 979-1018; battle field fades in from black 1019-1034
+ * (16 frames); field idle 1035-1043; recall first glyph 1044. closeElapsed 0
+ * is the confirm tick (fixture frame 963 per the old hold-through-1034 model
+ * the app kept green on captures 1035+), so:
+ *   menu-hold    0-1  = frames 963-964
+ *   menu-fade    2-15 = frames 965-978
+ *   black-hold   16-55 = frames 979-1018
+ *   field-reveal 56-71 = frames 1019-1034
+ *   field-hold   72-80 = frames 1035-1043
+ *   done         81+   = frame 1044+
+ */
+export const PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES = 2;
+/** Menu fade-out window 965-978 (closeElapsed 2-15, y=2..14). */
+export const PARTY_SELECT_CLOSE_MENU_FADE_FRAMES = 14;
+/** Full black hold 979-1018 (closeElapsed 16-55). */
+export const PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES = 40;
+/** Battle field fade-in from black 1019-1034 (closeElapsed 56-71). */
+export const PARTY_SELECT_CLOSE_FIELD_REVEAL_FRAMES = 16;
+/** Full party-select-visible span 963-1034 (closeElapsed 0-71). */
 export const PARTY_SELECT_CLOSE_MENU_FRAMES =
-  PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES + PARTY_SELECT_CLOSE_MENU_FADE_FRAMES;
+  PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES
+  + PARTY_SELECT_CLOSE_MENU_FADE_FRAMES
+  + PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES
+  + PARTY_SELECT_CLOSE_FIELD_REVEAL_FRAMES;
 /**
  * Field idle 1035-1043 (closeElapsed 72-80) -- the resolution's
  * null-handoff confirm phase holds the settled field before the recall
@@ -160,13 +184,33 @@ export const PARTY_SELECT_CLOSE_MENU_FRAMES =
 export const PARTY_SELECT_CLOSE_FIELD_HOLD_FRAMES = 9;
 /** Full close span: confirm edge 963 -> recall first glyph 1044. */
 export const PARTY_SELECT_CLOSE_TOTAL_FRAMES =
-  PARTY_SELECT_CLOSE_MENU_FRAMES + PARTY_SELECT_CLOSE_FIELD_HOLD_FRAMES;
+  PARTY_SELECT_CLOSE_MENU_FRAMES
+  + PARTY_SELECT_CLOSE_FIELD_HOLD_FRAMES;
 
 export function battlePartySelectClosePhase(
   closeElapsed: number,
 ): BattlePartySelectClosePhase {
   if (closeElapsed < PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES) return "menu-hold";
-  if (closeElapsed < PARTY_SELECT_CLOSE_MENU_FRAMES) return "menu-fade";
+  if (closeElapsed < PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES + PARTY_SELECT_CLOSE_MENU_FADE_FRAMES) {
+    return "menu-fade";
+  }
+  if (
+    closeElapsed
+    < PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES
+      + PARTY_SELECT_CLOSE_MENU_FADE_FRAMES
+      + PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES
+  ) {
+    return "black-hold";
+  }
+  if (
+    closeElapsed
+    < PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES
+      + PARTY_SELECT_CLOSE_MENU_FADE_FRAMES
+      + PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES
+      + PARTY_SELECT_CLOSE_FIELD_REVEAL_FRAMES
+  ) {
+    return "field-reveal";
+  }
   if (closeElapsed < PARTY_SELECT_CLOSE_TOTAL_FRAMES) return "field-hold";
   return "done";
 }
@@ -348,8 +392,13 @@ export function advanceBattlePartySelect(
       });
     }
     if (!row.legal) return next;
+    // The confirm A lands while the SEND OUT submenu is open; the real menu
+    // closes the submenu on the confirm edge (oracle frame 964 has no submenu
+    // window -- it is the settled menu starting its close), so the committed
+    // state must not keep rendering it through the fade.
     return Object.freeze({
       ...next,
+      submenuOpen: false,
       outcome: Object.freeze({ kind: "select", partyIndex: row.partyIndex }),
       closeElapsed: 0,
     });
@@ -833,6 +882,7 @@ function drawCancelWindow(fb: Uint8Array): void {
 export function renderBattlePartySelect(
   fb: Uint8Array,
   state: BattlePartySelectState,
+  close: PartySelectCloseRenderAssets | undefined = undefined,
 ): void {
   drawSourceBackground(fb);
   // LoadPartyBoxPalette (party_menu.c:2205-2280) overwrites box banks 3/4/5
@@ -878,4 +928,70 @@ export function renderBattlePartySelect(
   if (line2) drawStandardWindowText(fb, line2, 8, 153);
   if (state.cursor === "cancel") drawStandardWindowText(fb, "▶ CANCEL", 168, 145);
   drawCancelWindow(fb);
+  renderPartySelectClose(fb, state, close);
+}
+
+/**
+ * ISSUES #80 slice 6: drive the party-menu close from `closeElapsed` instead
+ * of holding the settled frame through the whole close. Measured schedule
+ * (docs/party-menu-rank6-ground-truth.md §7, oracle-verified): menu fade-out
+ * 965-978 (standard fade-to-black, y=2..14 held 2 frames each), full black
+ * 979-1018, battle field fade-in from black 1019-1034.
+ */
+export type PartySelectCloseRenderAssets = Readonly<{
+  /** Draws the settled battle field (the resolution's own scene view). */
+  drawField(fb: Uint8Array): void;
+}>;
+
+function renderPartySelectClose(
+  fb: Uint8Array,
+  state: BattlePartySelectState,
+  close: PartySelectCloseRenderAssets | undefined,
+): void {
+  if (state.closeElapsed === null) return;
+  const phase = battlePartySelectClosePhase(state.closeElapsed);
+  if (phase === "menu-fade") {
+    // y = 2,4,...,14, each held 2 frames (closeElapsed 2-15).
+    applyFadeToBlack(fb, state.closeElapsed & ~1);
+  } else if (phase === "black-hold") {
+    fillFramebuffer(fb, 0, 0, 0);
+  } else if (phase === "field-reveal") {
+    if (close === undefined) {
+      fillFramebuffer(fb, 0, 0, 0);
+      return;
+    }
+    close.drawField(fb);
+    // k = 1..16 across the 16 reveal frames (closeElapsed 56-71).
+    const k = state.closeElapsed
+      - (PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES
+        + PARTY_SELECT_CLOSE_MENU_FADE_FRAMES
+        + PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES)
+      + 1;
+    applyFadeFromBlack(fb, k);
+  }
+}
+
+/** Standard `BlendPalette` fade-to-black over the whole framebuffer (5-bit). */
+function applyFadeToBlack(fb: Uint8Array, y: number): void {
+  for (let p = 0; p < fb.length; p += 4) {
+    fb[p] = blendComponentToBlack(fb[p]!, y);
+    fb[p + 1] = blendComponentToBlack(fb[p + 1]!, y);
+    fb[p + 2] = blendComponentToBlack(fb[p + 2]!, y);
+  }
+}
+
+/**
+ * Field reveal from black, 8-bit linear blend, k = 1..16. Measured on the
+ * oracle the reveal ramp is a straight 8-bit blend (non-5-bit-quantized
+ * values like 15/31 prove it is not a palette fade) with a per-channel
+ * rounding quirk: the red byte rounds UP (`(c*k + 15) >> 4`) while green and
+ * blue round DOWN (`(c*k) >> 4`). Pinned per-frame against
+ * `mid-battle-switch-dense-a-off` frames 1019-1034.
+ */
+function applyFadeFromBlack(fb: Uint8Array, k: number): void {
+  for (let p = 0; p < fb.length; p += 4) {
+    fb[p] = (fb[p]! * k + 15) >> 4;
+    fb[p + 1] = (fb[p + 1]! * k) >> 4;
+    fb[p + 2] = (fb[p + 2]! * k) >> 4;
+  }
 }
