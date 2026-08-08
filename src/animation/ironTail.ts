@@ -60,7 +60,14 @@ export function ironTailAtAge(
   attackerSide: "player" | "opponent",
   attackerCenter: Readonly<{ x: number; y: number }>,
 ): IronTailState {
-  const shineAge = age - METALLIC_SHINE_FIRST_STEP_AGE + 1;
+  const shineAge = age < METALLIC_SHINE_FIRST_STEP_AGE
+    ? Math.max(0, age - METALLIC_SHINE_FIRST_STEP_AGE + 1)
+    : age <= 68
+      ? age - METALLIC_SHINE_FIRST_STEP_AGE + 1
+      // Sweep 3 holds data10 at 0 for three frames (f285-287) after
+      // ClearBattleAnimBg — the reducer keeps step with RAM, but the hold
+      // and sweep 3 are never pixels.
+      : age <= 71 ? 64 : age - 7;
   const metallic = metallicShineAtAge(
     shineAge,
     attackerCenter.x,

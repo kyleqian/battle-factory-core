@@ -49,6 +49,23 @@ describe("Move_IRON_TAIL source-relative reducer", () => {
     expect(band(120)).toBe(false);
   });
 
+  it("steps the metallic-shine data words in lockstep with RAM", () => {
+    const metallic = (age: number) => ironTailAtAge(age, "player", PLAYER.attacker).metallic;
+    expect(metallic(4)).toMatchObject({ data10: 0, data11: 0, active: true });
+    expect(metallic(6)).toMatchObject({ data10: 4, data11: 0 });
+    expect(metallic(36)).toMatchObject({ data10: 124, data11: 0 });
+    expect(metallic(37)).toMatchObject({ data10: 0, data11: 1 });
+    expect(metallic(68)).toMatchObject({ data10: 124, data11: 1 });
+    // The sweep-3 3-frame hold at f285-287 (data10 pinned 0, data11 2) is RAM
+    // truth but never a visual.
+    expect(metallic(69)).toMatchObject({ data10: 0, data11: 2 });
+    expect(metallic(70)).toMatchObject({ data10: 0, data11: 2 });
+    expect(metallic(71)).toMatchObject({ data10: 0, data11: 2 });
+    expect(metallic(72)).toMatchObject({ data10: 4, data11: 2 });
+    expect(metallic(102)).toMatchObject({ data10: 124, data11: 2, active: true });
+    expect(metallic(103)).toMatchObject({ active: false });
+  });
+
   it("marches the lunge out, holds, and returns, with the opponent negated", () => {
     const out = (age: number, side: "player" | "opponent") =>
       ironTailAtAge(age, side, side === "player" ? PLAYER.attacker : OPPONENT.attacker).attackerX2;
