@@ -1,5 +1,50 @@
 # Animation coverage
 
+## MOVE_TORMENT promoted to exact — 122/276 exact (2026-08-07 worker)
+
+- **State:** TORMENT is **exact** — 177/177 on both axes in both orientations.
+  Coverage now **122/276 exact, 0 partial, 0 staged, 154 unsupported**.
+- **Did:** `src/animation/torment.ts` reducer (source-shaped
+  `AnimTask_TormentAttacker`/`TormentAttacker_Step`: six thought bubbles at
+  move-relative ages 7/32/57/72/87/102, absolute subpriorities 6..1,
+  alternating hFlip, X_2±32/26/20 and Y_PIC−20/20/26/26/32/32; the 12-tick
+  sAffineAnims_Torment wobble restarting per bubble with y2 var 48 back / 42
+  front; BlendMonInAndOut RGB_RED coeff 1..10..1 ages 136-154; two anger marks
+  at 136/158 via the proven `swaggerAngerMarkAtAge`), the
+  `SceneOnTormentConfig`/`SceneOnTormentView` seam, and the battleScene TORMENT
+  draw case with per-orientation painter order. `tools/compare/tormentPortable.ts`
+  + both `tools/compare/fixtures/torment-*.json` (`scene-on-portable-evidence/v1`,
+  dense 177-frame windows 68-244 / 72-248, hashes twice-fresh). Added Tier-1
+  `tests/animation/torment.test.ts` (10 reducer tests) + `tormentEvidence.test.ts`
+  (dense receipt + twice-fresh hash pins), the ANIMATION_COVERAGE.json entry
+  (MOVE_TORMENT only, inserted between TOXIC and TWINEEDLE), and the inventory
+  summary pin 121→122 exact / 155→154 unsupported. `npm run animation:coverage`
+  now reads 122/276 exact. npx vitest on the four touched files green.
+- **Measured (both portables, fresh runs, exit 0):** component 177/177 and
+  framebuffer 177/177 on player-back and opponent-front, 177-frame windows
+  (player-back 68-244, opponent-front 72-248). Player evidence
+  7d0bb71d… / raw RGB 805da7f5…; opponent evidence 0116cb14… / raw RGB
+  82f08073… — matching the fixture pins twice fresh.
+- **Next:** pick the next move from the component-leverage ranking; TORMENT's
+  new `AnimTask_TormentAttacker` task is proven by an exact move and the
+  absolute-subpriority orientation trap is documented for the anger-tag track.
+- **Notes — THIRD and FOURTH display-lag findings (this lane):**
+  1. The six TORMENT bubbles carry EXPLICIT ABSOLUTE subpriorities 6..1, so
+     the back-to-front painter order FLIPS with orientation (player-back ONIX
+     40 → anger 38 → MURKROW 30 → bubbles 6..1; opponent-front MURKROW 40 →
+     ONIX 30 → anger 28 → bubbles 6..1). Drawing one order for both sides was
+     the trap.
+  2. The bubbles reuse the MINIMIZE dual-lag class but the marks/blend DON'T:
+     task-created bubbles paint at age−2 and remove at age−1 (the intersection),
+     while script-`createsprite` anger marks and the BlendPalette ramp are ONE
+     display behind and the wobble affine matrix is TWO behind. The anim
+     restart (state 4) reaches the display later than the software state-4
+     frame AND plays REVERSED: `StartSpriteAnim(sprite, 2)` is anim index 2 =
+     `gMetronomeThroughtBubbleAnimCmds3`, the 48,32,16,0 program — measured
+     display start at age 127 showing frames 2,1,0. Displayed bubble flip is
+     always `animHFlip(TRUE) XOR field`. Probe gotchas (both bitten twice):
+     template symbols need `& ~1`, hFlip lives at sprite offset `0x3f`.
+
 ## MOVE_TORMENT staged — both orientations isolated at 177 frames; scenarios + dense probe + measured window banked (2026-08-07 worker)
 
 - **State:** TORMENT stays **unsupported**. Coverage unchanged at **121/276
