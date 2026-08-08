@@ -657,6 +657,10 @@ import { resolveTurn4DoubleTeamKickoffLines } from "./turn4DoubleTeamPresentatio
 import { resolveTurn5EndeavorAttackLines } from "./turn5EndeavorPresentationStaging.ts";
 import { resolveTurn8BindKickoffLines, resolveTurn8MissLines } from "./turn8BindPresentationStaging.ts";
 import { resolveTurn13AccFellLines, resolveTurn13SandAttackKickoffLines } from "./turn13SandAttackPresentationStaging.ts";
+import { resolveTurn6AtkFellLines, resolveTurn6FeatherDanceKickoffLines } from "./turn6FeatherDancePresentationStaging.ts";
+import { resolveTurn6RockSlideAttackLines, resolveTurn7RockSlideAttackLines } from "./turn67RockSlidePresentationStaging.ts";
+import { resolveTurn7AtkFellLines, resolveTurn7FeatherDanceKickoffLines, resolveTurn8AtkFellLines, resolveTurn8FeatherDanceKickoffLines } from "./turn78FeatherDancePresentationStaging.ts";
+import { resolveTurn11AtkFloorLines } from "./turn11FeatherDancePresentationStaging.ts";
 import { type BattleSceneState } from "./battleScene.ts";
 
 // --- slice 3: remaining canonical-only leaves (import-referencing consts + external-only function leaves) ---
@@ -2446,3 +2450,57 @@ export const TURN13_ACCFELL_TEXT_TOTAL = TURN13_ACCFELL_EVENT_LINE1.length + TUR
 
 export const [TURN1_ROCKSLIDE_KICKOFF_LINE1, TURN1_ROCKSLIDE_KICKOFF_LINE2] = resolveTurn1DoubleTeamKickoffLines();
 export const [TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2] = resolveTurn1RockSlideAttackLines();
+
+// --- slice 4 batch 4: verbatim move ---
+
+export const [TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn6FeatherDanceKickoffLines();
+
+export const [TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2] = resolveTurn6AtkFellLines();
+
+export const [TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn7FeatherDanceKickoffLines();
+export const [TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2] = resolveTurn7AtkFellLines();
+
+export const [TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn8FeatherDanceKickoffLines();
+export const [TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2] = resolveTurn8AtkFellLines();
+
+export const [TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2] = resolveTurn6RockSlideAttackLines();
+
+export const [TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2] = resolveTurn7RockSlideAttackLines();
+
+export const [TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2] = resolveTurn11AtkFloorLines();
+
+export function turn5FaintedTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn5FaintedTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN5_FAINTED_TEXT_TOTAL, t - start + 1);
+}
+
+export function turn8BindTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn8BindTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN8_BIND_TEXT_TOTAL, t - start + 1);
+}
+
+export function turn8MissTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn8MissTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN8_MISS_TEXT_TOTAL, t - start + 1);
+}
+
+export function turn12MissTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn12MissTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN8_MISS_TEXT_TOTAL, t - start + 1);
+}
+
+export function turn13SandAttackTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn13SandAttackTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN13_SANDATTACK_TEXT_TOTAL, t - start + 1);
+}
+
+export function turn13AccFellTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn13AccFellTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN13_ACCFELL_TEXT_TOTAL, t - start + 1);
+}
