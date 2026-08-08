@@ -285,6 +285,12 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    */
   isConfused?: boolean;
   /**
+   * Whether `gStatuses3[AI_TARGET] & STATUS3_LEECHSEED` is nonzero --
+   * `AI_CBM_LeechSeed`'s first, source-ordered rejection gate. Optional,
+   * defaulting to false.
+   */
+  isLeechSeeded?: boolean;
+  /**
    * `gBattleMons[AI_TARGET].level` -- `AI_CBM_OneHitKO`'s final
    * `if_level_cond 1` (less-than) gate operand. Optional, defaulting to 0
    * (the neutral "not lower" outcome when omitted, so the level gate never
@@ -1594,6 +1600,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_LEECH_SEED -> AI_CBM_LeechSeed
+  // (`data/battle_ai_scripts.s:152,410-416`).
+  if (move.effect === "EFFECT_LEECH_SEED") {
+    const leechSeed = runCbmLeechSeed(target, rng);
+    for (const draw of leechSeed.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: leechSeed.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: leechSeed.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -1821,6 +1840,40 @@ function runCbmOneHitKO(
   return Object.freeze({
     rng: ability.rng,
     draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
+    scoreDelta: blocked ? -10 : 0,
+  });
+}
+
+/**
+ * `AI_CBM_LeechSeed` (`data/battle_ai_scripts.s:410-416`):
+ *
+ * ```
+ * if_status3 AI_TARGET, STATUS3_LEECHSEED, Score_Minus10
+ * get_target_type1
+ * if_equal TYPE_GRASS, Score_Minus10
+ * get_target_type2
+ * if_equal TYPE_GRASS, Score_Minus10
+ * end
+ * ```
+ *
+ * Leech Seed already on the target, or a Grass-typed target, JUMPs to -10.
+ * Zero `get_ability` calls -- every gate reads direct battle state
+ * (`gStatuses3[].status3`, the two type slots), no RNG.
+ */
+function runCbmLeechSeed(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  const blocked = (target.isLeechSeeded ?? false)
+    || target.types[0] === "TYPE_GRASS"
+    || target.types[1] === "TYPE_GRASS";
+  return Object.freeze({
+    rng,
+    draws: Object.freeze([]),
     scoreDelta: blocked ? -10 : 0,
   });
 }

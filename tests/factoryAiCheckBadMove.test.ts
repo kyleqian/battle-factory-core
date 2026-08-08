@@ -693,6 +693,51 @@ describe("AI_CBM_OneHitKO (data/battle_ai_scripts.s:358-362, EFFECT_OHKO)", () =
   });
 });
 
+describe("AI_CBM_LeechSeed (data/battle_ai_scripts.s:410-416, EFFECT_LEECH_SEED)", () => {
+  const MOVE_LEECH_SEED = 73; // EFFECT_LEECH_SEED, TYPE_GRASS
+
+  // A known ability suppresses the universal Soundproof draw, isolating the
+  // handler's own zero-get_ability body.
+  const LEECH_SEED_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    ...MAROWAK,
+    knownAbility: "ABILITY_ROCK_HEAD",
+  });
+
+  it("already-leech-seeded target JUMPs to Score_Minus10 with zero draws", () => {
+    const result = run(MOVE_LEECH_SEED, {
+      ...LEECH_SEED_TARGET,
+      isLeechSeeded: true,
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("Grass target type1 JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_LEECH_SEED, {
+      ...LEECH_SEED_TARGET,
+      types: ["TYPE_GRASS", "TYPE_ROCK"] as const,
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("Grass target type2 JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_LEECH_SEED, {
+      ...LEECH_SEED_TARGET,
+      types: ["TYPE_ROCK", "TYPE_GRASS"] as const,
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("non-seeded non-Grass target FALLS THROUGH to end at zero", () => {
+    const result = run(MOVE_LEECH_SEED, LEECH_SEED_TARGET);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+    expect(result.rng.calls).toBe(0);
+  });
+});
+
 const MOVE_SURF = 57;
 const MOVE_ROCK_SLIDE = 157;
 const MOVE_BODY_SLAM = 34;

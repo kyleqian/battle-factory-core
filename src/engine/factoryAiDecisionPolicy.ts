@@ -805,6 +805,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     isConfused: view.target.isConfused,
     safeguardUp: view.target.safeguardUp,
     usablePartyMons: view.target.usablePartyMons,
+    isLeechSeeded: view.target.isLeechSeeded,
     level: view.target.level,
   });
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({
