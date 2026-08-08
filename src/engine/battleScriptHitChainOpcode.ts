@@ -517,6 +517,28 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
     "STRINGID_PKMNHIDUNDERWATER",
     "STRINGID_PKMNSPRANGUP",
   ]),
+  /** battle_message.c:1102-1106 -- B_MSG_DEFROSTED(0)/DEFROSTED_BY_MOVE(1), BattleScript_MoveUsedUnfroze (frozen mon thawed by a fire move). */
+  gGotDefrostedStringIds: Object.freeze([
+    "STRINGID_PKMNWASDEFROSTED2",
+    "STRINGID_PKMNWASDEFROSTEDBY",
+  ]),
+  /**
+   * battle_message.c:1176-1183 -- BattleScript_MoveUsedLoafingAroundMsg's own
+   * table (Truant loafing) plus the traded-mon disobedience rows:
+   * B_MSG_LOAFING(0)/WONT_OBEY(1)/TURNED_AWAY(2)/PRETEND_NOT_NOTICE(3)/
+   * INCAPABLE_OF_POWER(4). Rows 1-4 need a disobedient traded mon, which
+   * Frontier rental teams never contain (no traded-mon disobedience), so only
+   * row 0 is reachable in Factory singles; all five are transcribed anyway
+   * because the table is the ROM's data and truncating it would reintroduce an
+   * index bug.
+   */
+  gInobedientStringIds: Object.freeze([
+    "STRINGID_PKMNLOAFING",
+    "STRINGID_PKMNWONTOBEY",
+    "STRINGID_PKMNTURNEDAWAY",
+    "STRINGID_PKMNPRETENDNOTNOTICE",
+    "STRINGID_PKMNINCAPABLEOFPOWER",
+  ]),
 });
 
 const MOVE_EFFECT_LABEL_BY_BYTE: Readonly<Record<number, string>> = Object.freeze({

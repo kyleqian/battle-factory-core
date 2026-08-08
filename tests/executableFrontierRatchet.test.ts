@@ -256,16 +256,18 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // other concrete call sites -- Shield Dust/Suction Cups/Own Tempo/Water
   // Veil/Rock Head/Clear Body/... -- plus the BS_ATTACKER_SIDE/
   // BS_NOT_ATTACKER_SIDE AbilityBattleEffects branches, unreached by any
-  // concrete call site). Cmd_manipulatedamage is narrowed to DMG_CHANGE_SIGN
-  // (1 barrier, DMG_RECOIL_FROM_MISS/DMG_DOUBLED -- Struggle recoil/Beat Up,
-  // out of this slice's scope). Widened, not narrowed further (EFFECT_ENDEAVOR
+  // concrete call site). Cmd_manipulatedamage used to be narrowed to
+  // DMG_CHANGE_SIGN (its third barrier, DMG_RECOIL_FROM_MISS/DMG_DOUBLED --
+  // Struggle recoil/Beat Up) but is now source-complete across all three
+  // modes (docs/barrier-reachability-triage.md item 10), retiring that
+  // barrier: 3 -> 2. Widened, not narrowed further (EFFECT_ENDEAVOR
   // registration, seam-scout §9.2): Cmd_copyarray's own accepted tuple set now
   // also covers `gHpDealt<-gBattleMoveDamage` (BattleScript_EffectEndeavor's
   // own reverse pair, stashing its set-damage across typecalc's STAB/type-
   // effectiveness multiply so Endeavor's real damage is immune to it) -- one
   // more concrete call site resolves (Endeavor no longer among the "every
   // other" rejected sites), same single barrier call site, count unchanged.
-  ["src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts", 3],
+  ["src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts", 2],
   // REMOVEITEM registration (docs/endturn-abilities-items-ground-truth.md
   // §5 slice 4): Cmd_removeitem's only unmodeled branch is a selector that
   // resolves to no live battler role at all (BS_ATTACKER before an attacker
