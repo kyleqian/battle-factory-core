@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  monIconElapsedAfterSubmenuStall,
   monIconFrameAt,
   monIconSelectedY2,
 } from "../src/engine/battlePartySelect.ts";
@@ -79,5 +80,31 @@ describe("party-menu mon-icon animation cadence", () => {
     expect(monIconSelectedY2(142, 121)).toBe(1);
     // Frame-905 acceptance: selected slot 1 sits at +1, matching the oracle.
     expect(monIconFrameAt(142)).toBe(1);
+  });
+
+  it("stalls the icon clock by +2 from the submenu-open edge (ISSUES #80 (c))", () => {
+    // docs/fade-layer-forensics.md §7(e): the oracle's icon clock stalls 2
+    // frames while the SEND OUT submenu opens, so the B phase holds 920-929 and
+    // the toggles land at oracle frames 930/937/945/... -- not the un-stalled
+    // app's 928/935/943/... (the fixture's icon clock is elapsed = frame - 763).
+    const preStall = (frame: number) =>
+      monIconFrameAt(monIconElapsedAfterSubmenuStall(frame - 763, false));
+    const stalled = (frame: number) =>
+      monIconFrameAt(monIconElapsedAfterSubmenuStall(frame - 763, true));
+    // Before the submenu opens the toggles at 905/913/920 are unchanged.
+    expect(preStall(905)).toBe(1);
+    expect(preStall(913)).toBe(0);
+    expect(preStall(920)).toBe(1);
+    // Un-stalled (the bug): the frame-1→frame-0 toggle lands at 928 (and 935).
+    expect(monIconFrameAt(928 - 763)).toBe(0);
+    expect(monIconFrameAt(935 - 763)).toBe(1);
+    // Stalled: the B hold covers 928-929 and the toggle lands at 930, then the
+    // cadence carries the +2 through 937/945.
+    expect(stalled(928)).toBe(1);
+    expect(stalled(929)).toBe(1);
+    expect(stalled(930)).toBe(0);
+    expect(stalled(935)).toBe(0);
+    expect(stalled(937)).toBe(1);
+    expect(stalled(945)).toBe(0);
   });
 });

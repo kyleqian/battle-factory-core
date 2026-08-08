@@ -11,6 +11,7 @@ import {
   LOBBY_PLAYER_SCREEN_POS,
   LOBBY_FREE_ROAM_TILE_FRAMES,
   LOBBY_FREE_ROAM_TURN_FRAMES,
+  LOBBY_FREE_ROAM_BUMP_FRAMES,
   type FactoryLobbyFreeRoamState,
   type LobbyDirection,
 } from "../src/engine/factoryLobbyFreeRoam.ts";
@@ -52,24 +53,27 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
 
   it("follow-cam: the player stays at fixed (112,56) while the field scrolls 1px/frame south (§5a)", () => {
     // The real overworld follow-camera: player OAM fixed, field slides under
-    // it. South step boundary frames f05181 (k=0) and f05196 (k=15) differ by
-    // the full 16px net scroll per tile (probe VOFS 40→55).
+    // it. South step boundary frames f05182 (k=1) and f05197 (k=16) differ by
+    // the full 16px net scroll per tile (probe VOFS 41→56).
     const stepping = advance(createFactoryLobbyFreeRoamState(), ["south"], 10);
-    // 2-frame press latency + 8-frame turn -> step started at frame 10.
-    expect(stepping.stepRemaining).toBe(16);
-    // Progress 0: camera still at spawn.
-    expect(lobbyFreeRoamCameraOrigin(stepping, SPAWN_CAMERA)).toEqual(SPAWN_CAMERA);
-    // Mid-step k: camera origin y advanced k px (field slides under a fixed
-    // player). progress = 16 - stepRemaining.
+    // 2-frame press latency + 8-frame turn -> step started at frame 10 with
+    // its FIRST pixel (the oracle's turn's last rendered frame occupies the
+    // RAM step-1 start tick, so the visible walk begins on the commit frame).
+    expect(stepping.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES - 1);
+    // Progress 1: camera advanced 1px.
+    expect(lobbyFreeRoamCameraOrigin(stepping, SPAWN_CAMERA)).toEqual({ x: -48, y: 56 + 1 });
+    // Mid-step k: camera origin y advanced (16 - stepRemaining) px (field
+    // slides under a fixed player).
     const mid = advance(stepping, ["south"], 5);
-    expect(mid.stepRemaining).toBe(11);
-    expect(lobbyFreeRoamCameraOrigin(mid, SPAWN_CAMERA)).toEqual({ x: -48, y: 56 + 5 });
+    expect(mid.stepRemaining).toBe(10);
+    expect(lobbyFreeRoamCameraOrigin(mid, SPAWN_CAMERA)).toEqual({ x: -48, y: 56 + 6 });
     // The player screen anchor never moves.
     expect(LOBBY_PLAYER_SCREEN_POS).toEqual({ x: 112, y: 56 });
     // Arrival: the tilemap slice advanced the full net 16px and, with DOWN
-    // still held, the next tile step begins immediately.
-    const arrived = advance(mid, ["south"], 11);
-    expect(arrived).toMatchObject({ x: 4, y: 9, stepRemaining: 16 });
+    // still held, the next tile step re-arms on the arrival frame (progress 0
+    // = the arrived tile's full displacement).
+    const arrived = advance(mid, ["south"], 10);
+    expect(arrived).toMatchObject({ x: 4, y: 9, stepRemaining: LOBBY_FREE_ROAM_TILE_FRAMES });
     expect(lobbyFreeRoamCameraOrigin(arrived, SPAWN_CAMERA)).toEqual({ x: -48, y: 56 + 16 });
   });
 
@@ -144,7 +148,7 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     expect(turning.turnRemaining).toBe(8);
     expect(turning.animClock).toBe(0);
     const stepping = advance(turning, ["west"], LOBBY_FREE_ROAM_TURN_FRAMES);
-    expect(stepping.stepRemaining).toBe(16);
+    expect(stepping.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES - 1);
     expect(lobbyFreeRoamPlayerFrame(stepping)).toBe(7);
   });
 
@@ -157,21 +161,22 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     // 7 more frames complete the 8-frame turn.
     const turned = advance(turning, ["south"], 7);
     expect(turned.turnRemaining).toBe(1);
-    // The next frame the turn ends and the committed step begins.
+    // The next frame the turn ends and the committed step begins (its first
+    // pixel lands on this same frame).
     const stepping = advance(turned, ["south"], 1);
-    expect(stepping).toMatchObject({ stepRemaining: 16, facing: "south", x: 4, y: 8 });
+    expect(stepping).toMatchObject({ stepRemaining: LOBBY_FREE_ROAM_TILE_FRAMES - 1, facing: "south", x: 4, y: 8 });
   });
 
   it("steps one tile in exactly 16 frames at on-foot cadence (§3a)", () => {
-    // Press + 8-frame turn -> step starts on the next frame.
+    // Press + 8-frame turn -> step starts on the next frame (first pixel).
     const stepping = advance(createFactoryLobbyFreeRoamState(), ["south"], 10);
-    expect(stepping.stepRemaining).toBe(16);
+    expect(stepping.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES - 1);
     expect(stepping).toMatchObject({ x: 4, y: 8 });
-    // 15 more frames: still traversing (1 px/frame).
-    const nearArrival = advance(stepping, ["south"], 15);
+    // 14 more frames: still traversing (1 px/frame).
+    const nearArrival = advance(stepping, ["south"], 14);
     expect(nearArrival.stepRemaining).toBe(1);
     expect(nearArrival).toMatchObject({ x: 4, y: 8 });
-    // The 16th frame completes the tile; a held DOWN continues walking.
+    // The 15th frame completes the tile; a held DOWN continues walking.
     const arrived = advance(nearArrival, ["south"], 1);
     expect(arrived).toMatchObject({ x: 4, y: 9, facing: "south" });
     expect(arrived.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES);
@@ -190,7 +195,7 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     expect(isFactoryLobbyIdle(released)).toBe(true);
     // Holding through the turn (>= 8 frames) commits the step.
     const held = advance(pressed, ["south"], LOBBY_FREE_ROAM_TURN_FRAMES + 1);
-    expect(held).toMatchObject({ x: 4, y: 8, facing: "south", stepRemaining: 16 });
+    expect(held).toMatchObject({ x: 4, y: 8, facing: "south", stepRemaining: LOBBY_FREE_ROAM_TILE_FRAMES - 1 });
     const arrived = advance(held, [], LOBBY_FREE_ROAM_TILE_FRAMES);
     expect(arrived).toMatchObject({ x: 4, y: 9, facing: "south" });
     expect(isFactoryLobbyIdle(arrived)).toBe(true);
@@ -274,18 +279,20 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     expect(state.x).toBe(4);
     expect(state.y).toBe(8);
   });
-
   it("womanAtTick: the wandering woman's north-walk boundary ticks (§6a/§6d)", () => {
     // ≤5184 idle SOUTH at spawn (3,11) — no override (static map-json tile).
     expect(womanAtTick(5093)).toBeNull();
     expect(womanAtTick(5184)).toBeNull();
     // 5185-5200: NORTH walk; RENDERED box-top y = 161−(T−5184) (the §6a
     // logical table lags the OAM by 1px through the walk + settle tick,
-    // pixel-verified), walk2 then stand pose.
-    expect(womanAtTick(5185)).toMatchObject({ x: 104, y: 160, frame: 6, hFlip: false });
+    // pixel-verified), walk2 then stand pose. The rendered POSE lags the RAM
+    // cmdIdx by one frame: 5185 keeps the pre-walk south standing pose,
+    // walk2 renders 5186-5193 and stand 5194-5200.
+    expect(womanAtTick(5185)).toMatchObject({ x: 104, y: 160, frame: 0, hFlip: false });
     expect(womanAtTick(5186)).toMatchObject({ y: 159, frame: 6 });
     expect(womanAtTick(5192)).toMatchObject({ y: 153, frame: 6 });
-    expect(womanAtTick(5193)).toMatchObject({ y: 152, frame: 1 });
+    expect(womanAtTick(5193)).toMatchObject({ y: 152, frame: 6 });
+    expect(womanAtTick(5194)).toMatchObject({ y: 151, frame: 1 });
     expect(womanAtTick(5199)).toMatchObject({ y: 146, frame: 1 });
     expect(womanAtTick(5200)).toMatchObject({ y: 145, frame: 1 });
     // ≥5201 idle NORTH at (3,10), world (104,144), frozen standing pose.
@@ -294,17 +301,143 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
   });
 
   it("womanAtTick: the walk fixture's south + east extra movements (§6d)", () => {
-    // SOUTH walk (3,10)→(3,11) 5296-5311: world y = 145+(T−5296).
-    expect(womanAtTick(5296)).toMatchObject({ x: 104, y: 145, frame: 3 });
-    expect(womanAtTick(5303)).toMatchObject({ y: 152, frame: 3 });
-    expect(womanAtTick(5304)).toMatchObject({ y: 153, frame: 0 });
-    expect(womanAtTick(5311)).toMatchObject({ y: 160, frame: 0 });
-    // EAST walk (3,11)→(4,11) 5407-5421: world x = 105+(T−5407), h-flipped.
-    expect(womanAtTick(5407)).toMatchObject({ x: 105, y: 160, frame: 8, hFlip: true });
-    expect(womanAtTick(5414)).toMatchObject({ x: 112, frame: 8 });
-    expect(womanAtTick(5415)).toMatchObject({ x: 113, frame: 2 });
-    expect(womanAtTick(5421)).toMatchObject({ x: 119, frame: 2 });
-    expect(womanAtTick(5422)).toMatchObject({ x: 120, y: 160, frame: 2, hFlip: true });
+    // SOUTH walk (3,10)→(3,11) 5296-5311: rendered y = 144+(T−5296) — the
+    // logical 145+(T−5296) schedule lags the drawn box by 1px (the same
+    // render-lag class as the north walk's y; docs §8c), pose one frame
+    // behind the RAM cmdIdx (5296 keeps the idle-north pose, walk1 5297-5304,
+    // stand 5305-5311).
+    expect(womanAtTick(5296)).toMatchObject({ x: 104, y: 144, frame: 1 });
+    expect(womanAtTick(5297)).toMatchObject({ x: 104, y: 145, frame: 3 });
+    expect(womanAtTick(5303)).toMatchObject({ y: 151, frame: 3 });
+    expect(womanAtTick(5304)).toMatchObject({ y: 152, frame: 3 });
+    expect(womanAtTick(5305)).toMatchObject({ y: 153, frame: 0 });
+    expect(womanAtTick(5311)).toMatchObject({ y: 159, frame: 0 });
+    // EAST walk (3,11)→(4,11) 5407-5421: rendered x = 104+(T−5407) — the
+    // logical 105+(T−5407) schedule lags the drawn box by 1px (the same
+    // render-lag class as the south walk's y; docs §8b), pose one frame
+    // behind (5407 keeps the south standing pose, walk2 5408-5415 h-flipped,
+    // stand 5416-5421 h-flipped).
+    expect(womanAtTick(5407)).toMatchObject({ x: 104, y: 160, frame: 0, hFlip: false });
+    expect(womanAtTick(5408)).toMatchObject({ x: 105, frame: 8, hFlip: true });
+    expect(womanAtTick(5414)).toMatchObject({ x: 111, frame: 8 });
+    expect(womanAtTick(5415)).toMatchObject({ x: 112, frame: 8 });
+    expect(womanAtTick(5416)).toMatchObject({ x: 113, frame: 2 });
+    expect(womanAtTick(5421)).toMatchObject({ x: 118, frame: 2 });
+    // The 5422 settle tick keeps the 1px lag (oracle drawn box 1px left of
+    // the 5430+ idle), then idle-east from 5423 at x=120.
+    expect(womanAtTick(5422)).toMatchObject({ x: 119, frame: 2, hFlip: true });
+    expect(womanAtTick(5423)).toMatchObject({ x: 120, y: 160, frame: 2, hFlip: true });
     expect(womanAtTick(5472)).toMatchObject({ x: 120, frame: 2 });
+  });
+
+  it("hold-into-block then release + re-press: the new direction is honored (§7g)", () => {
+    // Regression pin for the stale-pendingDir freeze: holding DOWN at (4,11)
+    // (blocked border) runs the act-25 bump with a monotonic 16-frame cycle
+    // (never re-buffering a press), releasing settles at the cycle boundary,
+    // and a subsequent UP press starts its turn/step on the canonical ticks.
+    const blocked = {
+      ...createFactoryLobbyFreeRoamState(),
+      x: 4,
+      y: 11,
+      facing: "south" as const,
+    };
+    // Frame 1 enters the bump; pose alternates walk-2 (cycle 0) / stand
+    // (cycle 1) between 16-frame cycles (§7b: 5229-5244 anim 4/2, 5245-5260
+    // anim 4/3 for the south hold).
+    const bumped = advance(blocked, ["south"], 1);
+    expect(bumped).toMatchObject({
+      x: 4,
+      y: 11,
+      facing: "south",
+      pendingDir: null,
+      bumpElapsed: 1,
+    });
+    // The rendered bump pose lags the RAM cycle by one frame: the first bump
+    // frame still shows the pre-bump standing pose; walk-2 renders cycle 0's
+    // remaining frames.
+    expect(lobbyFreeRoamPlayerFrame(bumped)).toBe(0);
+    const cycleLast = advance(bumped, ["south"], LOBBY_FREE_ROAM_BUMP_FRAMES - 1);
+    expect(cycleLast.bumpElapsed).toBe(LOBBY_FREE_ROAM_BUMP_FRAMES);
+    expect(lobbyFreeRoamPlayerFrame(cycleLast)).toBe(4);
+    const cycleTwo = advance(cycleLast, ["south"], 1);
+    expect(cycleTwo.bumpElapsed).toBe(LOBBY_FREE_ROAM_BUMP_FRAMES + 1);
+    expect(lobbyFreeRoamPlayerFrame(cycleTwo)).toBe(0);
+    // Held for many frames: still bumping in place, never re-armed.
+    const longHold = advance(cycleTwo, ["south"], 40);
+    expect(longHold.bumpElapsed).toBeGreaterThan(LOBBY_FREE_ROAM_BUMP_FRAMES);
+    expect(longHold).toMatchObject({ x: 4, y: 11, facing: "south", pendingDir: null });
+    expect(lobbyFreeRoamPlayerFrameHFlipped(longHold)).toBe(false);
+    // Release: the current cycle completes, then settles.
+    const stillBumping = advance(
+      longHold,
+      [],
+      LOBBY_FREE_ROAM_BUMP_FRAMES - (longHold.bumpElapsed % LOBBY_FREE_ROAM_BUMP_FRAMES) - 1,
+    );
+    expect(stillBumping.bumpElapsed).toBeGreaterThan(0);
+    const settled = advance(stillBumping, [], 2);
+    expect(settled.bumpElapsed).toBe(0);
+    expect(isFactoryLobbyIdle(settled)).toBe(true);
+    expect(settled).toMatchObject({ x: 4, y: 11, facing: "south" });
+    // The fresh NORTH press is honored on the canonical ticks: buffered on
+    // frame one, turn on frame two (8 frames), committed step at frame 10.
+    const pressed = advance(settled, ["north"], 1);
+    expect(pressed).toMatchObject({ turnRemaining: 0, pendingDir: "north" });
+    const turning = advance(pressed, ["north"], 1);
+    expect(turning).toMatchObject({ turnRemaining: LOBBY_FREE_ROAM_TURN_FRAMES });
+    const turnDone = advance(turning, ["north"], LOBBY_FREE_ROAM_TURN_FRAMES - 1);
+    expect(turnDone.turnRemaining).toBe(1);
+    const stepping = advance(turnDone, ["north"], 1);
+    expect(stepping).toMatchObject({ stepRemaining: LOBBY_FREE_ROAM_TILE_FRAMES - 1, facing: "north", x: 4, y: 11 });
+  });
+
+  it("drawNpc's h-flip mirrors the WHOLE 16px frame, not each 8px tile (§8b)", () => {
+    // The ROM OAM h-flip swaps the frame's tile columns AND mirrors within
+    // each column. The idle-east woman (tick 5423, frame 2 h-flipped) at the
+    // spawn camera renders at screen (112,104): frame row 12 (palette row 4
+    // of the top-left tile) is [0,0,0,0,13,13,12,12 | 12,12,12,13,0,0,0,0].
+    // Whole-frame flip maps dest col c -> source col 15-c:
+    //   dest [0,0,0,0,13,12,12,12,12,12,13,13,0,0,0,0]
+    // Per-tile mirror maps dest c -> tile-local 7-(c%8):
+    //   dest [12,12,13,13,0,0,0,0 | 0,0,0,0,13,12,12,12]
+    // Frame palette index 12 = (123,115,66), 13 = (57,57,24).
+    const fb = renderFactoryLobbyFreeRoam(createFactoryLobbyFreeRoamState(), 5423);
+    const pixel = (x: number, y: number): [number, number, number, number] => {
+      const i = (y * 240 + x) * 4;
+      return [fb[i]!, fb[i + 1]!, fb[i + 2]!, fb[i + 3]!];
+    };
+    // Whole-frame dest row 12: [0,0,0,0,13,12,12,12,12,12,13,13,0,0,0,0].
+    // Screen x = 112 + dest col; y = 104 + 12 = 116.
+    // dest cols 4-11 are opaque for the whole-frame flip: 13=(57,57,24),
+    // 12=(123,115,66). The per-tile mirror would leave cols 4-11 transparent
+    // (their 13/12 ink lands at cols 0-3/12-15 instead).
+    expect(pixel(116, 116)).toEqual([57, 57, 24, 255]);   // dest 4 = 13
+    expect(pixel(117, 116)).toEqual([123, 115, 66, 255]); // dest 5 = 12
+    expect(pixel(120, 116)).toEqual([123, 115, 66, 255]); // dest 8 = 12
+    expect(pixel(123, 116)).toEqual([57, 57, 24, 255]);   // dest 11 = 13
+  });
+
+  it("a refused step leaves pendingDir null and never re-arms the blocked hold (§7g)", () => {
+    // Direct pin on the stale-buffer shape: even if a press for a blocked
+    // cell is somehow buffered, the refused step clears it (startStep's
+    // refusal) and the held direction can never re-arm a future press.
+    const stale = {
+      ...createFactoryLobbyFreeRoamState(),
+      x: 4,
+      y: 11,
+      facing: "south" as const,
+      heldDir: "south" as const,
+      pendingDir: "south" as const,
+    };
+    const refused = advance(stale, ["south"], 1);
+    expect(refused.pendingDir).toBeNull();
+    expect(refused.bumpElapsed).toBe(1);
+    // Holding south at the border for many more frames keeps the press null
+    // and keeps bumping — the pre-fix behavior re-buffered every frame and
+    // swallowed the next press forever.
+    const afterHold = advance(refused, ["south"], 40);
+    expect(afterHold.pendingDir).toBeNull();
+    expect(afterHold.bumpElapsed).toBeGreaterThan(1);
+    expect(afterHold).toMatchObject({ x: 4, y: 11, facing: "south" });
+    expect(afterHold.stepRemaining).toBe(0);
   });
 });

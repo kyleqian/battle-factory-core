@@ -655,6 +655,8 @@ import battleAnimPsychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json"
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
   battlePartySelectStateForForcedParty,
+  PARTY_SELECT_OPEN_BACK_SPRITE_Y2_START,
+  PARTY_SELECT_OPEN_HEALTHBOX_Y2_START,
   renderBattlePartySelect,
 } from "./battlePartySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
@@ -7218,6 +7220,8 @@ function drawBattle2ActionMenuWindow(
   healthboxes?: BattleCommandPresentationRenderView["healthboxes"],
   fieldArt?: BattleCommandPresentationRenderView["fieldArt"],
   spriteVisibility?: Readonly<{ player: boolean; opponent: boolean }>,
+  layer: "all" | "obj-only" = "all",
+  openElapsed?: number,
 ): void {
   const age = actionMenuAge(t, handoffTick);
   const playerVisualT = playerTrainerSendOutClock(t, handoffTick, "jenson");
@@ -7225,8 +7229,28 @@ function drawBattle2ActionMenuWindow(
   const bounce = bounceOverride ?? (revealed
     ? menuIdleBounce(actionMenuBounceTick(t, handoffTick) - bounceShift)
     : { onixY2: 0, healthboxY2: 0 });
+  // `obj-only` skips the BG (tilemap) draws so a caller can render the settled
+  // scene's sprite layer into a scratch buffer. ISSUES #80 Class A blends the
+  // OBJ layer at `y_obj` (one blend step behind the BG's `y_bg`), matching
+  // the oracle's BG/OBJ palette alternation (docs/fade-layer-forensics.md
+  // §8(d)).
+  const drawBg = layer === "all";
+  // ISSUES #80 Class B (`docs/fade-layer-forensics.md` §9 RAM probe): during
+  // the party-menu open field-fade-out the player healthbox sprite's real y2
+  // steps 0→1 at openElapsed 7 (drawn one row lower) and the player back
+  // sprite's real y2 steps 1→0 at openElapsed 16 (drawn one row higher).
+  // Drawn as per-sprite draw-origin offsets gated on `openElapsed`, so each
+  // object's own edges/bevel/slanted corner move with it.
+  const healthboxShift = openElapsed !== undefined
+    && openElapsed >= PARTY_SELECT_OPEN_HEALTHBOX_Y2_START
+    ? 1
+    : 0;
+  const backSpriteShift = openElapsed !== undefined
+    && openElapsed >= PARTY_SELECT_OPEN_BACK_SPRITE_Y2_START
+    ? -1
+    : 0;
 
-  drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+  if (drawBg) drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   if (fieldArt) {
     // Post-send-out settled opponent: same elevation rule as
     // drawGeneratedOpponentRelease (ISSUES #56 item 3) - the shadow persists
@@ -7254,7 +7278,7 @@ function drawBattle2ActionMenuWindow(
           fieldArt.player.pic.tileset as Tileset,
           fieldArt.player.pic.palette as RgbColor[],
           fieldArt.player.origin.x,
-          fieldArt.player.origin.y + bounce.onixY2,
+          fieldArt.player.origin.y + bounce.onixY2 + backSpriteShift,
         );
       }
     } else {
@@ -7279,7 +7303,7 @@ function drawBattle2ActionMenuWindow(
       fb,
       composePlayerHealthbox(playerHealthboxAssets, healthboxes.player),
       0,
-      bounce.healthboxY2,
+      bounce.healthboxY2 + healthboxShift,
     );
   } else {
     drawSendOutHealthbox(fb, 0, kabutoHealthboxContent);
@@ -7288,8 +7312,10 @@ function drawBattle2ActionMenuWindow(
   // FIGHT phases need the accepted bottom base below their own source patch.
   // Action phases rebuild every interactive element in the caller from the
   // typed render view and source battle-window tiles/font.
-  if (revealed) drawTurn5SitrusSettledMenuChrome(fb);
-  else drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (drawBg) {
+    if (revealed) drawTurn5SitrusSettledMenuChrome(fb);
+    else drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  }
 }
 
 /**
@@ -18354,6 +18380,8 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
 export function renderGeneratedBattleCommandPresentation(
   fb: Uint8Array,
   presentation: BattleCommandPresentationState,
+  layer: "all" | "obj-only" = "all",
+  openElapsed?: number,
 ): void {
   const bounceTick = presentation.idleBounceElapsed
     + battleCommandBounceAgeOffset(presentation);
@@ -18374,8 +18402,12 @@ export function renderGeneratedBattleCommandPresentation(
         view.healthboxes,
         view.fieldArt,
         view.spriteVisibility,
+        layer,
+        openElapsed,
       );
-      if (revealed) drawBattleCommandActionChrome(framebuffer, view.actionMenu);
+      if (revealed && layer !== "obj-only") {
+        drawBattleCommandActionChrome(framebuffer, view.actionMenu);
+      }
     },
     drawFightMenu(framebuffer, view) {
       drawBattle2ActionMenuWindow(
@@ -18388,12 +18420,16 @@ export function renderGeneratedBattleCommandPresentation(
         view.healthboxes,
         view.fieldArt,
         view.spriteVisibility,
+        layer,
+        openElapsed,
       );
-      drawFightSubmenuChromeFromLiveState(
-        framebuffer,
-        view.fightMenu.displayCursor,
-        view.fightMenu.moveset,
-      );
+      if (layer !== "obj-only") {
+        drawFightSubmenuChromeFromLiveState(
+          framebuffer,
+          view.fightMenu.displayCursor,
+          view.fightMenu.moveset,
+        );
+      }
     },
     drawRejectionMessage(framebuffer, view) {
       drawBattle2ActionMenuWindow(
@@ -18406,9 +18442,11 @@ export function renderGeneratedBattleCommandPresentation(
         view.healthboxes,
         view.fieldArt,
         view.spriteVisibility,
+        layer,
+        openElapsed,
       );
       const rejection = view.rejectionMessage;
-      if (rejection === null) return;
+      if (rejection === null || layer === "obj-only") return;
       // The message box is the same `B_WIN_MSG` battle-window tilemap the
       // resolution seam draws below the field; the field/healthboxes above
       // it stay live (the fight-menu state continues underneath).

@@ -2703,6 +2703,47 @@ function partySelectCloseRenderAssets(
         trainerSlide: null,
       });
     },
+    // ISSUES #80 open remainder (b): the settled pre-party-menu scene the open
+    // window holds (oracle 763-781) is the battle-command action-menu frame
+    // the A-press froze into party-handoff. `renderBattleCommandPresentation`
+    // draws nothing for party-handoff, so re-render the frozen presentation as
+    // if it were still in action-menu phase -- its actionCursor/field/bounce
+    // are all still the pre-press values, and the idle bounce is settled, so
+    // this reproduces the byte-exact 762 frame through the open window.
+    drawBattleScene(fb: Uint8Array, openElapsed?: number): void {
+      renderGeneratedBattleCommandPresentation(
+        fb,
+        Object.freeze({
+          ...presentation,
+          lifecycle: Object.freeze({
+            phase: "action-menu",
+            phaseElapsed: presentation.lifecycle.phaseElapsed,
+          }),
+        }),
+        "all",
+        openElapsed,
+      );
+    },
+    // ISSUES #80 Class A: the same settled scene's OBJ (sprite) layer only --
+    // shadow, battler sprites, healthboxes -- drawn into a scratch buffer so
+    // `renderBattlePartySelect`'s open field-fade-out can blend those pixels
+    // at the OBJ coefficient `y_obj` (one blend step behind `y_bg`), matching
+    // the oracle's BG/OBJ palette alternation (docs/fade-layer-forensics.md
+    // §8(d)). The alpha-255 coverage of this scratch is the exact OBJ mask.
+    drawBattleSceneObjOnly(fb: Uint8Array, openElapsed?: number): void {
+      renderGeneratedBattleCommandPresentation(
+        fb,
+        Object.freeze({
+          ...presentation,
+          lifecycle: Object.freeze({
+            phase: "action-menu",
+            phaseElapsed: presentation.lifecycle.phaseElapsed,
+          }),
+        }),
+        "obj-only",
+        openElapsed,
+      );
+    },
   };
 }
 

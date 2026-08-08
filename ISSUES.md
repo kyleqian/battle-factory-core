@@ -17,59 +17,51 @@ backlog.
 
 # Open
 
-## #80 — Live play: in-battle party/switch menu is scaffolding-grade
+## #80 — Live play: in-battle party/switch menu — open/close windows CLOSED, one 3-frame open-edge residual left
 
 **User play-test 2026-08-05:** the party menu opened for switching "looks
-completely wrong" (layout/sprites/HP bars/message strip). Scout with a dense
-OFF window over the mid-battle party screen, inventory the visual gaps, then
-slice the binding work. Largest play-test item; sequenced after #76/#77/#78.
+completely wrong" (layout/sprites/HP bars/message strip). This was the largest
+play-test item.
 
-**2026-08-05 MAIN bind (ranks 1/3/4, `81e2db18`, PROGRESS 959):** graphical
-HP bars + real HP/level text (all three cards), gender glyphs, and the real
-`WIN_MSG`/party-menu message window are landed; oracle frame-905 diff
-15267 → 6955 px. Tier-1 pins: `tests/inbattlePartyMenuVisualBind.test.ts`.
+**Effectively closed 2026-08-07/08.** `mid-battle-switch-dense-a-off` went
+**276 → 392/392 byte-exact** across two sessions, and the spec now pins the
+whole flow: the settled menu, the open animation (763-824), the submenu window
+(926-963), the close fade (964-1018) and the field reveal (1019-1255). Also
+byte-exact and kept green: `party-menu-status-item-off` **251/251**,
+`mid-battle-switch-pacing-b-off` **153/153**.
 
-**Remainder** (rank-6 plan slices 1+4 landed 2026-08-07 — ink white +
-mon-4/5/6 empty boxes; spec `party-menu-status-item-off` red baseline now
-**7038/7110 px/frame** over 2050-2300; slice 2 was already landed
-2026-07-29, see PROGRESS 974): (slice 3) the cursor open rule + selected-card
-wash — oracle opens on slot 0, app on the active slot; biggest remaining
-class (~3200px + the icon/bounce interplay the stale slice-2 estimate
-actually belonged to). Slice 5 (pokeball/CANCEL buttons) LANDED 2026-08-07
-on the fourth cap (`a435a933`+`12a97095`+`f6f0bb7e`: cancel_button.bin
-banked, forensics-verified composite draw, in-region diff 0px on 2150+2250,
-band 1224/1270 → **757/803**; the three earlier caps died hand-deriving
-geometry — the landing brief inlined banked assets + the drawSlot idiom +
-the forensics script as an acceptance loop). **Settled band CLOSED 2026-08-07**
-(`c74ac274`+`b7df5ac7`+`3507046f`): the ~757px band was fully classified by
-the side-lane forensics (`docs/party-band-forensics.md`) as three per-slot
-menu Pokéball sprites (595px — OPEN ball on the cursor slot, CLOSED on the
-others, `CreatePartyMonPokeballSprite`/`AnimatePartySlot`; frame-1 open ball
-now banked) + the slot-2 level text (90px — the `{LV}` ligature glyph is
-charmap **hex** 0x34=52, not glyph 34) + two gender glyphs (72px — RATTATA
-genderRatio now banked across the full rental pool; the fixture's per-slot
-personalities pinned). `party-menu-status-item-off` is **251/251 byte-exact**,
-forensics probe 0px/0 unattributed on 2060/2150/2280; Tier-1 pins in
-`tests/battlePartySelect.test.ts` (cursor-following open ball + LV ligature)
-red-verified. Slice 6 (close fade pixels) LANDED 2026-08-07 (`1bedd921`):
-close now drives from closeElapsed per the rank-6 §7 schedule (menu fade-out
-965-978 y=2..14 held 2f, black 979-1018, field reveal 1019-1034);
-`mid-battle-switch-dense-a-off` extended 1035-1255 → **980-1255, 276/276
-byte-exact**. **Open remainder — fully forensics-banked 2026-08-07
-(`docs/fade-layer-forensics.md` + `tools/probe/fade-layer-forensics.ts`,
-per-frame (y_bg, y_obj) tables for both windows):** (a) close-fade frames
-964-979 — the OBJ layer trails the BG by exactly 1 blend tick
-(`objPaletteToggle`, palette.c:454 alternates BG/OBJ per tick); fix =
-layer-separated blend in the close path (battlePartySelect.ts:982-1016,
-blend BG at y_bg, OBJ at y_bg−2), predicted acceptance: extend the dense-a
-spec's captures with 964-979 → 292/292. (b) open window: the app pops the
-full menu instantly at 763 with NO open fade and NO field fade-out at all —
-oracle: field fades out 766-808, menu fades in from black 809-824 (y 14→2
-held 2f, OBJ lags 1 tick). (c) NEW: pre-fade frames 960-963 carry a
-5141-6008px message-box-region residual (oracle static, no pokeball button
-until 964; app draws its own text + CANCEL interior + button 4 frames early
-+ a one-frame box-fill flip at 963) — classified in the forensics doc,
-never spec-pinned (dense-a starts at 980).
+What was wrong and is now fixed (forensics in `docs/fade-layer-forensics.md`
+§0-§10, each with a rerunnable probe; full history in git):
+
+- graphical HP bars, real HP/level text, gender glyphs, the real party message
+  window, ink/empty-box colours, the cursor open rule and selected-card wash,
+  the per-slot Pokéball sprites, the `{LV}` ligature, the CANCEL/pokeball
+  button;
+- the **open animation did not exist** — the app popped the full menu
+  instantly at 763; it now holds the battle scene 3 frames, fades it out over
+  16, holds black 27, and fades the menu in over 16, with the BG and OBJ
+  layers blended one step apart as the hardware does;
+- the **close fade** blended all layers together; OBJ now trails BG by one
+  blend step (frame 979 is the discriminator);
+- the **message window** stayed the wide "Choose a POKéMON." box through the
+  submenu and close; it now swaps to `sDoWhatWithMonMsgWindowTemplate` with
+  "Do what with this {PKMN}?" (`{PKMN}` = charmap bytes 0x53/0x54, not a
+  nickname splice);
+- the **mon-icon clock** ran 2 frames ahead from the submenu open;
+- the **submenu window** was a scaffold 16 px too high with the cursor baked
+  into the label; it now draws the real action window (**SHIFT**/SUMMARY/
+  CANCEL — line 1 is SHIFT, the voluntary-switch action per
+  `GetPartyMenuActionsTypeInBattle`, `party_menu.c:5788-5796`) with the cursor
+  as its own glyph, and is held through frame 963.
+
+**Still open (small):** the app opens the submenu **3 frames early** — oracle
+frames **923-925** show the pre-open state while the app already draws the
+window (fast loop `--capture-range 920:965` is 43/46; those 3 frames are
+deliberately **not** in the spec). Fix = delay the submenu render to the
+oracle's 926 pop edge, then extend `captureFrames` with 923-925 → 395/395.
+The A-press is 922-923 and the window lands 3 frames later, all at once
+(`docs/fade-layer-forensics.md` §10(d)).
+
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
@@ -107,6 +99,32 @@ completed front family. Acceptance bar: program doc §7 — RAM probe of the
 settled sprite (`gBattlerSpriteIds[n]` `x2`/`y2`/`animNum`/`callback`), dense
 oracle window twice fresh, and a sibling-species spot-check per promoted
 function.
+
+**Slice A is REFUTED under Battle Scene OFF (2026-08-07, staged + RAM-probed,
+supervisor-verified).** The "at minimum apply their terminal rest offsets"
+half of item (1) above must **not** be implemented on the OFF profile. A
+side-lane worker staged a legal Level-50 RATTATA send-out through
+`mechanicLab overrides.parties`
+(`tools/battle-lab/send-out-slice-a-rattata-off.json`, two `bin/oracle lab`
+runs byte-identical across 2036 files) and probed the settled sprite every
+tick (`docs/send-out-slice-a-positive-case.md`,
+`tools/probe/dump-sendout-slice-a-rattata.py`, receipt 2640 tick rows):
+the sprite is created already at `SpriteCallbackDummy` with `animNum 0` and
+**`x2 = y2 = 0`**, and stays there for the whole battle (all 634 post ticks,
+zero deviations) — OFF takes the `SKIP_FRONT_ANIM` path (`pokemon.c:6803`)
+and never launches the animation task the terminal offset belongs to.
+The banked table nonetheless returns `{x2:1, y2:0}` for RATTATA and ONIX
+(`speciesFrontIdleRestOffset`), so wiring it at the settle hooks would have
+been a **361-px regression** over bbox (164,41)-(190,71), not an inert no-op.
+Independently corroborated: `mid-battle-switch-dense-a-off` is byte-exact
+with a settled RATTATA opponent front sprite on screen. Consequence: the
+front terminal-offset wiring is **ON-profile-only** work, and the main lane
+(whose oracle is OFF) has nothing to hook up for it. What remains genuinely
+main-lane here is Slice C of `docs/send-out-live-wiring-consumer-map.md` §5 —
+guarding the `src/engine/` back hand-fits so an uncovered species/nature
+fails loudly instead of silently drawing the wrong table. Per-tick playback
+(Slice D) is likewise ON-profile behaviour: OFF skips front and back send-out
+animations entirely.
 
 **Sequencing (updated 2026-08-03, mid-session user directive):** the hookup
 is the MAIN lane's job ("the animation supervisor works on implementing the

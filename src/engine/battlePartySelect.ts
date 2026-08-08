@@ -7,6 +7,7 @@ import partyMenuSpriteCoordsData from "../assets/gen/party-menu-sprite-coords.js
 import partyMenuPokeballData from "../assets/gen/party-menu-pokeball.json" with { type: "json" };
 import stdWindowData from "../assets/gen/prebattle-room-std-window.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
+import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import fontSmallData from "../data/gen/font-small.json" with { type: "json" };
 import speciesNamesData from "../data/gen/species-names.json" with { type: "json" };
 import summaryInfoData from "../data/gen/summary-info.json" with { type: "json" };
@@ -34,6 +35,8 @@ import { drawText, drawGlyphCodes, codeForChar, type FontData } from "./font.ts"
 import {
   drawStandardWindowFrame,
   drawStandardWindowText,
+  MESSAGE_PALETTE,
+  MESSAGE_TEXT_COLORS,
 } from "./prebattleRoomRender.ts";
 
 export const PARTY_NO_ENERGY_LINE_1_SUFFIX = " has no energy";
@@ -114,12 +117,29 @@ export type BattlePartySelectState = Readonly<{
   cursor: BattlePartySelectCursor;
   rightColumnCursor: 1 | 2;
   submenuOpen: boolean;
+  /**
+   * True once the SEND OUT submenu has ever opened (the A-press edge at
+   * frames 922-923 in the mid-battle-switch fixture). The oracle's mon-icon
+   * animation clock stalls by 2 frames during the submenu-open processing and
+   * never catches back up, so this stays set through the close
+   * (docs/fade-layer-forensics.md §7(e)) -- unlike `submenuOpen`, which clears
+   * on the confirm edge.
+   */
+  submenuOpened: boolean;
   message: string | null;
   outcome:
     | null
     | Readonly<{ kind: "cancel" }>
     | Readonly<{ kind: "select"; partyIndex: BattlePartyIndex }>;
   elapsed: number;
+  /**
+   * Frames since the POKéMON A-press that opened this selector (oracle frame
+   * 763), mirroring `closeElapsed`. Drives the open animation
+   * (`battlePartySelectOpenPhase`): bright-hold 0-2, field-fade-out 3-18,
+   * black-hold 19-45, menu-fade-in 46-61, done 62+. Increments alongside
+   * `elapsed`; ignored once `closeElapsed` is set (the close takes over).
+   */
+  openElapsed: number;
   /**
    * The `elapsed` value when the current cursor slot was last selected (the
    * party menu's `AnimatePartySlot(slot, 1)` edge). Drives the selected
@@ -149,25 +169,140 @@ export type BattlePartySelectClosePhase =
   | "done";
 
 /**
- * Measured close schedule (docs/party-menu-rank6-ground-truth.md §7,
- * oracle-verified against `mid-battle-switch-dense-a-off`): confirm A at
- * 964; menu fade-out 965-978 (standard fade-to-black, y=2..14 held 2 frames
- * each); full black 979-1018; battle field fades in from black 1019-1034
- * (16 frames); field idle 1035-1043; recall first glyph 1044. closeElapsed 0
- * is the confirm tick (fixture frame 963 per the old hold-through-1034 model
- * the app kept green on captures 1035+), so:
+ * Open schedule (docs/fade-layer-forensics.md §6(g), ISSUES #80 open remainder
+ * item (b)): the party menu's open animation. The A-press on POKéMON completes
+ * at oracle frame 763 (`openElapsed 0`); the oracle holds the settled battle
+ * scene through 765, fades the whole field out 766-781 (BG at y_bg, the OBJ
+ * layer one blend step behind -- no BG/OBJ split for the battle scene), holds
+ * solid black 782-808, then fades the party menu in from black 809-824 (BG at
+ * `y_bg`, OBJ one tick behind at `y_obj`, layer-split blend). From openElapsed
+ * 62 (frame 825) the settled menu renders exactly as before.
+ */
+export type BattlePartySelectOpenPhase =
+  | "bright-hold"
+  | "field-fade-out"
+  | "black-hold"
+  | "menu-fade-in"
+  | "done";
+
+/** Bright-hold: the settled battle scene, unfaded (frames 763-765). */
+export const PARTY_SELECT_OPEN_BRIGHT_HOLD_FRAMES = 3;
+/** Field fade-out: the battle scene blended at `y_bg` (frames 766-781). */
+export const PARTY_SELECT_OPEN_FIELD_FADE_FRAMES = 16;
+/** Full black hold (frames 782-808). */
+export const PARTY_SELECT_OPEN_BLACK_HOLD_FRAMES = 27;
+/** Menu fade-in from black (frames 809-824). */
+export const PARTY_SELECT_OPEN_MENU_FADE_FRAMES = 16;
+/** Full open span: bright-hold + field-fade-out + black-hold + menu-fade-in. */
+export const PARTY_SELECT_OPEN_TOTAL_FRAMES =
+  PARTY_SELECT_OPEN_BRIGHT_HOLD_FRAMES
+  + PARTY_SELECT_OPEN_FIELD_FADE_FRAMES
+  + PARTY_SELECT_OPEN_BLACK_HOLD_FRAMES
+  + PARTY_SELECT_OPEN_MENU_FADE_FRAMES;
+
+/**
+ * ISSUES #80 Class B (`docs/fade-layer-forensics.md` §9 RAM probe): the
+ * player healthbox sprite's real `y2` steps 0→1 at oracle frame 770
+ * (`openElapsed 7`), so from there it is drawn one row lower. Applied as a
+ * +1px draw-origin offset on the open field-fade-out's settled scene.
+ */
+export const PARTY_SELECT_OPEN_HEALTHBOX_Y2_START = 7;
+/**
+ * ISSUES #80 Class B (`docs/fade-layer-forensics.md` §9 RAM probe): the
+ * player back sprite's real `y2` steps 1→0 at oracle frame 779
+ * (`openElapsed 16`), so from there it is drawn one row higher. Applied as a
+ * −1px draw-origin offset on the open field-fade-out's settled scene.
+ */
+export const PARTY_SELECT_OPEN_BACK_SPRITE_Y2_START = 16;
+
+export function battlePartySelectOpenPhase(
+  openElapsed: number,
+): BattlePartySelectOpenPhase {
+  if (openElapsed < PARTY_SELECT_OPEN_BRIGHT_HOLD_FRAMES) return "bright-hold";
+  if (
+    openElapsed
+    < PARTY_SELECT_OPEN_BRIGHT_HOLD_FRAMES + PARTY_SELECT_OPEN_FIELD_FADE_FRAMES
+  ) {
+    return "field-fade-out";
+  }
+  if (
+    openElapsed
+    < PARTY_SELECT_OPEN_BRIGHT_HOLD_FRAMES
+      + PARTY_SELECT_OPEN_FIELD_FADE_FRAMES
+      + PARTY_SELECT_OPEN_BLACK_HOLD_FRAMES
+  ) {
+    return "black-hold";
+  }
+  if (openElapsed < PARTY_SELECT_OPEN_TOTAL_FRAMES) return "menu-fade-in";
+  return "done";
+}
+
+/**
+ * Field fade-out BG coefficient, `docs/fade-layer-forensics.md` §6(b):
+ * `y_bg(e) = min(16, 2 * max(0, floor((e - 1) / 2)))` -- steps 2,4,...,16
+ * each held 2 frames. The battle scene has no OBJ/BG split, so the whole
+ * draw is blended at `y_bg`; the OBJ pixels stay one blend step bright on
+ * the odd `e` frames (known residual, excluded from the spec).
+ */
+export function partySelectOpenFieldFadeBgY(openElapsed: number): number {
+  return Math.min(16, 2 * Math.max(0, Math.floor((openElapsed - 1) / 2)));
+}
+
+/**
+ * Field fade-out OBJ coefficient, `docs/fade-layer-forensics.md` §6(b):
+ * `y_obj(e) = min(16, 2 * max(0, floor((e - 2) / 2)))` -- the OBJ layer is
+ * exactly one blend step behind the BG (`objPaletteToggle` alternation). On
+ * the even `e` frames (766/768/.../780) `y_obj = y_bg - 2`, so a single
+ * whole-frame blend cannot be right there; the OBJ pixels must be blended
+ * at `y_obj` (ISSUES #80 Class A).
+ */
+export function partySelectOpenFieldFadeObjY(openElapsed: number): number {
+  return Math.min(16, 2 * Math.max(0, Math.floor((openElapsed - 2) / 2)));
+}
+
+/**
+ * Menu fade-in coefficients, `docs/fade-layer-forensics.md` §2, with
+ * `m = openElapsed - 46` (m = 0..15): `y_bg(m) = 14 - 2 * floor(m / 2)`
+ * (14,14,12,12,...,0,0) and the OBJ layer one blend step behind,
+ * `y_obj(m) = 16 - 2 * floor((m + 1) / 2)` (16,14,14,12,...,2,0). Both
+ * descend toward 0 (full brightness); the menu is drawn BG-then-OBJ and
+ * each layer blended at its own coefficient.
+ */
+export function partySelectOpenMenuFadeBgY(m: number): number {
+  return 14 - 2 * Math.floor(m / 2);
+}
+
+export function partySelectOpenMenuFadeObjY(m: number): number {
+  return 16 - 2 * Math.floor((m + 1) / 2);
+}
+
+/**
+ * Measured close schedule (docs/party-menu-rank6-ground-truth.md §7 +
+ * docs/fade-layer-forensics.md §1, oracle-verified against
+ * `mid-battle-switch-dense-a-off`): confirm A at 963; menu fade-out 965-979
+ * (standard fade-to-black, y=2..16 held 2 frames each -- the OBJ layer trails
+ * the BG by exactly one blend step, `objPaletteToggle`); full black 980-1018;
+ * battle field fades in from black 1019-1034 (16 frames); field idle
+ * 1035-1043; recall first glyph 1044. closeElapsed 0 is the confirm tick
+ * (fixture frame 963), so:
  *   menu-hold    0-1  = frames 963-964
- *   menu-fade    2-15 = frames 965-978
- *   black-hold   16-55 = frames 979-1018
+ *   menu-fade    2-16 = frames 965-979
+ *   black-hold   17-55 = frames 980-1018
  *   field-reveal 56-71 = frames 1019-1034
  *   field-hold   72-80 = frames 1035-1043
  *   done         81+   = frame 1044+
  */
 export const PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES = 2;
-/** Menu fade-out window 965-978 (closeElapsed 2-15, y=2..14). */
-export const PARTY_SELECT_CLOSE_MENU_FADE_FRAMES = 14;
-/** Full black hold 979-1018 (closeElapsed 16-55). */
-export const PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES = 40;
+/**
+ * Menu fade-out window 965-979 (closeElapsed 2-16, y=2..16). Per
+ * `docs/fade-layer-forensics.md` §1 the BG blend is `closeElapsed & ~1` and
+ * the OBJ blend is one step behind, `(closeElapsed - 1) & ~1` -- frame 979
+ * (closeElapsed 16) is the discriminator: BG fully black (y=16), OBJ at
+ * y=14.
+ */
+export const PARTY_SELECT_CLOSE_MENU_FADE_FRAMES = 15;
+/** Full black hold 980-1018 (closeElapsed 17-55). */
+export const PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES = 39;
 /** Battle field fade-in from black 1019-1034 (closeElapsed 56-71). */
 export const PARTY_SELECT_CLOSE_FIELD_REVEAL_FRAMES = 16;
 /** Full party-select-visible span 963-1034 (closeElapsed 0-71). */
@@ -252,9 +387,13 @@ export function battlePartySelectStateForForcedParty(
     submenuOpen:
       forced.submenuOpen
       && (forced.sendOutElapsed === null || forced.sendOutElapsed === 0),
+    submenuOpened:
+      forced.submenuOpen
+      && (forced.sendOutElapsed === null || forced.sendOutElapsed === 0),
     message: forced.message,
     outcome: null,
     elapsed: forced.elapsed,
+    openElapsed: 0,
     selectedSinceElapsed: -MON_ICON_CREATION_ELAPSED_OFFSET,
     closeElapsed: null,
   });
@@ -328,9 +467,11 @@ export function createBattlePartySelectState(
     cursor: 0,
     rightColumnCursor: 1,
     submenuOpen: false,
+    submenuOpened: false,
     message: null,
     outcome: null,
     elapsed: 0,
+    openElapsed: 0,
     selectedSinceElapsed: -MON_ICON_CREATION_ELAPSED_OFFSET,
     closeElapsed: null,
   });
@@ -372,6 +513,7 @@ export function advanceBattlePartySelect(
   const next = Object.freeze({
     ...state,
     elapsed: state.elapsed + 1,
+    openElapsed: state.openElapsed + 1,
     closeElapsed: state.closeElapsed === null ? null : state.closeElapsed + 1,
   });
   if (state.outcome !== null) return next;
@@ -393,12 +535,12 @@ export function advanceBattlePartySelect(
     }
     if (!row.legal) return next;
     // The confirm A lands while the SEND OUT submenu is open; the real menu
-    // closes the submenu on the confirm edge (oracle frame 964 has no submenu
-    // window -- it is the settled menu starting its close), so the committed
-    // state must not keep rendering it through the fade.
+    // keeps the submenu window rendered through the confirm tick (oracle frame
+    // 963) and only drops it on the next frame (964), so `submenuOpen` stays
+    // true while closeElapsed is 0; the render gates the window off from
+    // closeElapsed 1 (see `submenuVisible`).
     return Object.freeze({
       ...next,
-      submenuOpen: false,
       outcome: Object.freeze({ kind: "select", partyIndex: row.partyIndex }),
       closeElapsed: 0,
     });
@@ -410,7 +552,9 @@ export function advanceBattlePartySelect(
       closeElapsed: 0,
     });
   }
-  if (newKeys.has("A")) return Object.freeze({ ...next, submenuOpen: true });
+  if (newKeys.has("A")) {
+    return Object.freeze({ ...next, submenuOpen: true, submenuOpened: true });
+  }
   const direction = (["UP", "DOWN", "LEFT", "RIGHT"] as const)
     .find((button) => newKeys.has(button));
   if (direction === undefined) return next;
@@ -448,6 +592,7 @@ const fontSmall = {
   ...(fontSmallData as unknown as FontData),
   glyphHeight: 12,
 } satisfies FontData;
+const fontNormal = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>(
   (charmapData as { entries: [string, number][] }).entries,
 );
@@ -520,6 +665,36 @@ const MON_ICON_FRAME_CYCLE = 15;
 /** First frame-1 copy at anim-clock tick 7; frame 0's first copy at 15. */
 const MON_ICON_FRAME1_FIRST_TICK = 7;
 const MON_ICON_FRAME1_TICKS = 8;
+
+/**
+ * The oracle's mon-icon animation clock stalls by exactly 2 frames while the
+ * SEND OUT submenu opens (A-press 922-923, window lands 926), so from the
+ * submenu-open edge the displayed phase lags the raw `elapsed` clock by 2:
+ * toggles land at 930/937/945/... not 928/935/943/... and the frame-0 B phase
+ * holds 920-929 (docs/fade-layer-forensics.md §7(e)). The stall is permanent
+ * once the submenu has opened.
+ */
+export const MON_ICON_SUBMENU_OPEN_STALL = 2;
+
+/**
+ * The icon-anim clock value to feed `monIconFrameAt`/`monIconSelectedY2`,
+ * applying the §7(e) submenu-open stall to a raw `elapsed`.
+ */
+export function monIconElapsedAfterSubmenuStall(
+  elapsed: number,
+  submenuOpened: boolean,
+): number {
+  return elapsed - (submenuOpened ? MON_ICON_SUBMENU_OPEN_STALL : 0);
+}
+
+/**
+ * The rendered tail of gText_DoWhatWithPokemon = "Do what with this {PKMN}?"
+ * (strings.c:434): `{PKMN}` is NOT a nickname splice -- the ROM charmap encodes
+ * it as the two ligature glyph bytes 0x53/0x54 (PK/MN, charmap.txt:51) and the
+ * trailing "?" as 0xAC (decimal 172), drawn at FONT_NORMAL origin (8,137) one
+ * line, no wrap (docs/fade-layer-forensics.md §7(c)).
+ */
+export const DO_WHAT_WITH_MON_TAIL_CODES = [83, 84, 172] as const;
 
 /** sAnim_0 displayed frame at `elapsed` (frame 0 in [15+15k, 7+15(k+1))). */
 export function monIconFrameAt(elapsed: number): 0 | 1 {
@@ -879,8 +1054,25 @@ function drawCancelWindow(fb: Uint8Array): void {
     }
   }
   drawCancelFrameRows(fb);
-  // The 16x16 pokeball (png offset (4,4)-(19,19) of the 32x32 frame 0), blitted
-  // pixel-0 transparent so the window frame shows through its corners.
+  // "CANCEL" (sFontColorTable[0]: white ink + dark-grey shadow) centered in the
+  // window's right half; FONT_SMALL's ink lands 4px below the draw origin, so
+  // (204,137) puts the glyph bbox at the oracle's x204-233 y141-148.
+  const cancelPalette: RgbColor[] = [
+    { r: 0, g: 0, b: 0 },
+    { r: 255, g: 255, b: 255 },
+    { r: 115, g: 115, b: 115 },
+  ];
+  drawText(fb, fontSmall, charmap, "CANCEL", 204, 137, cancelPalette, { fg: 1, bg: 0, shadow: 2 });
+}
+
+/**
+ * The CANCEL window's 16x16 pokeball (png offset (4,4)-(19,19) of the 32x32
+ * frame 0), blitted pixel-0 transparent so the window frame shows through its
+ * corners. OBJ-layer sprite (sprite priority over the BG window), drawn by
+ * `drawPartySelectObjLayer` -- the close fade's layer split keys it to the
+ * OBJ blend coefficient.
+ */
+function drawCancelPokeball(fb: Uint8Array): void {
   const ball = partyMenuPokeballData as unknown as {
     frame: IconTilesetFrame;
     palette: readonly RgbColor[];
@@ -900,23 +1092,15 @@ function drawCancelWindow(fb: Uint8Array): void {
       setPixel(fb, x, y, color.r, color.g, color.b);
     }
   }
-  // "CANCEL" (sFontColorTable[0]: white ink + dark-grey shadow) centered in the
-  // window's right half; FONT_SMALL's ink lands 4px below the draw origin, so
-  // (204,137) puts the glyph bbox at the oracle's x204-233 y141-148.
-  const cancelPalette: RgbColor[] = [
-    { r: 0, g: 0, b: 0 },
-    { r: 255, g: 255, b: 255 },
-    { r: 115, g: 115, b: 115 },
-  ];
-  drawText(fb, fontSmall, charmap, "CANCEL", 204, 137, cancelPalette, { fg: 1, bg: 0, shadow: 2 });
 }
 
-/** Live voluntary party screen composed from source tiles, fonts, and icons. */
-export function renderBattlePartySelect(
-  fb: Uint8Array,
-  state: BattlePartySelectState,
-  close: PartySelectCloseRenderAssets | undefined = undefined,
-): void {
+/**
+ * BG pass of the voluntary party screen: battle-area background, the six box
+ * tiles, the per-card text/gender/HP-bar rows, the SEND OUT submenu window,
+ * the message window + text, and the CANCEL window's background/interior/
+ * frame/CANCEL-text (NOT its pokeball, which is an OBJ sprite).
+ */
+function drawPartySelectBgLayer(fb: Uint8Array, state: BattlePartySelectState): void {
   drawSourceBackground(fb);
   // LoadPartyBoxPalette (party_menu.c:2205-2280) overwrites box banks 3/4/5
   // with the same "empty slot" colors (sPartyBoxEmptySlotPalIds {52,53,54} /
@@ -937,46 +1121,282 @@ export function renderBattlePartySelect(
     drawRowText(fb, row);
     drawGenderGlyph(fb, row);
     drawHpBar(fb, row);
+  }
+
+  const submenuVisible = state.submenuOpen && (state.closeElapsed === null || state.closeElapsed === 0);
+  if (submenuVisible) {
+    // The SHIFT / SUMMARY / CANCEL action window: the party-menu action
+    // window (SELECTWINDOW_ACTIONS, DisplaySelectionWindow, party_menu.c:2534)
+    // is a 10x6-tile window whose frame overhangs the tilemap by 6px, drawing
+    // the same text_window frame tiles at outer origin (144,96) ->
+    // (145,97)-(238,159), interior white (150,102)-(233,153).
+    // docs/fade-layer-forensics.md §10(a): the old scaffold was 16px too high.
+    drawStandardWindowFrame(fb, 144, 96, 10, 6);
+    // Three option labels, FONT_NORMAL (party_menu.c:2557), printed at
+    // window-relative x=cursorDimension=8, y=(i*16)+1 -> screen origins
+    // (160,105)/(160,121)/(160,137); ink rows 108-117/124-133/140-149.
+    // Line 1 is gText_Shift: this is the voluntary mid-battle switch, whose
+    // action list is sPartyMenuAction_ShiftSummaryCancel (data/party_menu.h)
+    // because GetPartyMenuActionsTypeInBattle (party_menu.c:5788-5796) returns
+    // ACTIONS_SHIFT unless gPartyMenu.action == PARTY_ACTION_SEND_OUT.
+    drawStandardWindowText(fb, "SHIFT", 160, 105);
+    drawStandardWindowText(fb, "SUMMARY", 160, 121);
+    drawStandardWindowText(fb, "CANCEL", 160, 137);
+    // Cursor: a separate "▶" glyph (gText_SelectorArrow3, strings.c:1468)
+    // drawn by RedrawMenuCursor (menu.c:945) at window-relative (0,16*0+1) ->
+    // screen (152,105), i.e. on the SHIFT line (cursorPos 0, per
+    // InitMenuInUpperLeftCorner(...,0,TRUE)). NOT baked into the label text.
+    drawStandardWindowText(fb, "▶", 152, 105);
+  }
+
+  // ISSUES #80 open remainder (c): from the submenu-open edge through the
+  // close, the oracle swaps the message window from sDefaultPartyMsgWindowTemplate
+  // (21x2, frame to x182) to sDoWhatWithMonMsgWindowTemplate (16x2, frame to
+  // x141, data/party_menu.h:430-439) and prints gText_DoWhatWithPokemon =
+  // "Do what with this {PKMN}?" (strings.c:434) -- the {PKMN} tail is the two
+  // PK/MN ligature glyphs 0x53/0x54 + the full-width "?" 0xAC, NOT a nickname
+  // splice (docs/fade-layer-forensics.md §7). The submenu window closes on the
+  // confirm edge but the swapped message window stays through the close fade;
+  // the CANCEL window is suppressed only while the submenu window covers it.
+  const messageWindowSwapped = state.submenuOpen || state.closeElapsed !== null;
+  if (messageWindowSwapped) {
+    drawStandardWindowFrame(fb, 0, 128, 16, 2, PARTY_MESSAGE_WINDOW_PALETTE);
+    drawText(
+      fb,
+      fontNormal,
+      charmap,
+      "Do what with this ",
+      8,
+      137,
+      MESSAGE_PALETTE,
+      MESSAGE_TEXT_COLORS,
+    );
+    drawGlyphCodes(
+      fb,
+      fontNormal,
+      DO_WHAT_WITH_MON_TAIL_CODES,
+      100,
+      137,
+      MESSAGE_PALETTE,
+      MESSAGE_TEXT_COLORS,
+    );
+  } else {
+    // sDefaultPartyMsgWindowTemplate (data/party_menu.h:419-428): bg 2, tilemap
+    // (1,17), 21x2 = px (8,136)-(176,152); the frame is one tile around. Uses
+    // the party-menu message-window frame style (frame1 tiles, olive corner).
+    drawStandardWindowFrame(fb, 0, 128, 21, 2, PARTY_MESSAGE_WINDOW_PALETTE);
+    const message = state.message ?? "Choose a POKéMON.";
+    const [line1, line2] = message.split("\n");
+    drawStandardWindowText(fb, line1!, 8, 137);
+    if (line2) drawStandardWindowText(fb, line2, 8, 153);
+    if (state.cursor === "cancel") drawStandardWindowText(fb, "▶ CANCEL", 168, 145);
+  }
+  if (!submenuVisible) drawCancelWindow(fb);
+}
+
+/**
+ * OBJ (sprite) pass of the voluntary party screen: the per-slot menu Pokéball
+ * sprites, mon icons, held-item icons, and status icons, plus the CANCEL
+ * window's pokeball sprite. Drawn over the BG layer so the sprites overpaint
+ * the box/tile content exactly like the real OAM priorities. During the
+ * menu-fade close this pass is rendered into a scratch buffer and blended at
+ * its own (one-tick-trailing) coefficient.
+ */
+function drawPartySelectObjLayer(fb: Uint8Array, state: BattlePartySelectState): void {
+  // The submenu-open processing stalls the oracle's mon-icon clock by 2 frames
+  // (§7(e)), so the icon/bounce clocks feed the shifted elapsed.
+  const iconElapsed = monIconElapsedAfterSubmenuStall(state.elapsed, state.submenuOpened);
+  const iconSelectionElapsed = monIconElapsedAfterSubmenuStall(
+    state.selectedSinceElapsed,
+    state.submenuOpened,
+  );
+  for (const row of state.rows) {
     // The per-slot menu Pokéball sprite sits under the mon icon (icon
     // oam.priority 1, ball default 3), so it draws first.
     drawMenuPokeball(fb, row, state.cursor);
-    drawIcon(fb, row, state.cursor === row.partyIndex, state.elapsed, state.selectedSinceElapsed);
+    drawIcon(fb, row, state.cursor === row.partyIndex, iconElapsed, iconSelectionElapsed);
     // sPartyMenuSpriteCoords per-slot order: icon, heldItem, status, pokeball --
     // the item sprite draws on top of the mon icon's lower-left corner.
     drawHeldItemIcon(fb, row);
     drawStatusIcon(fb, row);
   }
-
-  if (state.submenuOpen) {
-    drawStandardWindowFrame(fb, 144, 80, 10, 6);
-    drawStandardWindowText(fb, "▶ SEND OUT", 152, 89);
-    drawStandardWindowText(fb, "  SUMMARY", 152, 105);
-    drawStandardWindowText(fb, "  CANCEL", 152, 121);
+  // The SHIFT submenu window replaces the CANCEL pokeball button while open
+  // (including its confirm-tick frame, closeElapsed 0).
+  if (!state.submenuOpen || (state.closeElapsed !== null && state.closeElapsed !== 0)) {
+    drawCancelPokeball(fb);
   }
+}
 
-  // sDefaultPartyMsgWindowTemplate (data/party_menu.h:419-428): bg 2, tilemap
-  // (1,17), 21x2 = px (8,136)-(176,152); the frame is one tile around. Uses
-  // the party-menu message-window frame style (frame1 tiles, olive corner).
-  drawStandardWindowFrame(fb, 0, 128, 21, 2, PARTY_MESSAGE_WINDOW_PALETTE);
-  const message = state.message ?? "Choose a POKéMON.";
-  const [line1, line2] = message.split("\n");
-  drawStandardWindowText(fb, line1!, 8, 137);
-  if (line2) drawStandardWindowText(fb, line2, 8, 153);
-  if (state.cursor === "cancel") drawStandardWindowText(fb, "▶ CANCEL", 168, 145);
-  drawCancelWindow(fb);
-  renderPartySelectClose(fb, state, close);
+/**
+ * Live voluntary party screen composed from source tiles, fonts, and icons,
+ * rendered BG-first then OBJ-on-top. The menu-fade close (ISSUES #80 open
+ * remainder item (a), `docs/fade-layer-forensics.md` §1) blends the two
+ * layers at their own coefficients: BG at `closeElapsed & ~1`, OBJ one blend
+ * step behind at `(closeElapsed - 1) & ~1`, so frame 979 shows the OBJ sprite
+ * stack at y=14 over a fully black BG.
+ */
+export function renderBattlePartySelect(
+  fb: Uint8Array,
+  state: BattlePartySelectState,
+  close: PartySelectCloseRenderAssets | undefined = undefined,
+): void {
+  const closeElapsed = state.closeElapsed;
+  const phase = closeElapsed === null
+    ? null
+    : battlePartySelectClosePhase(closeElapsed);
+  if (phase === "black-hold") {
+    fillFramebuffer(fb, 0, 0, 0);
+    return;
+  }
+  if (phase === "field-reveal" || phase === "field-hold" || phase === "done") {
+    // field-reveal draws the settled battle field (overwriting the menu) and
+    // fades it in from black; field-hold/done are unreachable here -- the
+    // orchestrator clears the selector at the field-hold edge -- and
+    // `renderPartySelectClose` leaves the caller's buffer untouched for them,
+    // matching the pre-split draw-then-noop behaviour's output.
+    renderPartySelectClose(fb, state, close);
+    return;
+  }
+  // ISSUES #80 open remainder (b): the menu's open animation. Only the live
+  // voluntary route supplies the battle-scene asset (`close`); every other
+  // caller (forced snapshots without assets) renders the menu settled,
+  // exactly as before the open-fade existed.
+  const openPhase = closeElapsed === null && close !== undefined
+    ? battlePartySelectOpenPhase(state.openElapsed)
+    : "done";
+  if (openPhase === "bright-hold" || openPhase === "field-fade-out") {
+    if (close === undefined) {
+      drawPartySelectBgLayer(fb, state);
+      drawPartySelectObjLayer(fb, state);
+      return;
+    }
+    // The oracle holds the settled action-menu battle scene through frame 765
+    // and fades it out 766-781. The scene's OBJ layer (battler sprites,
+    // shadows, healthboxes) is one blend step behind its BG layer
+    // (`objPaletteToggle`, palette.c:454): on the even `e` frames
+    // (766/768/.../780) `y_obj = y_bg - 2`, so those pixels are blended at
+    // `y_obj` while the rest go at `y_bg` -- the same scratch-buffer +
+    // alpha-coverage composite idiom as the close menu-fade. The OBJ layer is
+    // the app's own sprite-only scratch render (`drawBattleSceneObjOnly`); a
+    // scratch pixel counts only where the settled full scene still shows it
+    // (the BG message-box chrome overpaints the sprite rows it covers, and
+    // the oracle keys those to the BG palette instead --
+    // docs/fade-layer-forensics.md §8(d)).
+    close.drawBattleScene(fb, state.openElapsed);
+    if (openPhase === "field-fade-out") {
+      const yBg = partySelectOpenFieldFadeBgY(state.openElapsed);
+      const yObj = partySelectOpenFieldFadeObjY(state.openElapsed);
+      if (yBg === yObj) {
+        applyFadeToBlack(fb, yBg);
+        return;
+      }
+      const full = new Uint8Array(fb.length);
+      full.set(fb);
+      applyFadeToBlack(fb, yBg);
+      const objSettled = new Uint8Array(fb.length);
+      close.drawBattleSceneObjOnly(objSettled, state.openElapsed);
+      const obj = new Uint8Array(fb.length);
+      obj.set(objSettled);
+      applyFadeToBlack(obj, yObj);
+      for (let p = 0; p < fb.length; p += 4) {
+        if (
+          objSettled[p + 3] !== 0
+          && objSettled[p] === full[p]
+          && objSettled[p + 1] === full[p + 1]
+          && objSettled[p + 2] === full[p + 2]
+        ) {
+          fb[p] = obj[p]!;
+          fb[p + 1] = obj[p + 1]!;
+          fb[p + 2] = obj[p + 2]!;
+        }
+      }
+    }
+    return;
+  }
+  if (openPhase === "black-hold") {
+    fillFramebuffer(fb, 0, 0, 0);
+    return;
+  }
+  if (openPhase === "menu-fade-in") {
+    // Same scratch-buffer + alpha-coverage composite idiom as the close
+    // menu-fade, but descending from black: BG at `y_bg(m)`, OBJ one blend
+    // step behind at `y_obj(m)`, m = openElapsed - 46 (docs/fade-layer-
+    // forensics.md §2). At m=15 both layers are at y=0 = the settled menu.
+    const m = state.openElapsed
+      - (PARTY_SELECT_OPEN_BRIGHT_HOLD_FRAMES
+        + PARTY_SELECT_OPEN_FIELD_FADE_FRAMES
+        + PARTY_SELECT_OPEN_BLACK_HOLD_FRAMES);
+    drawPartySelectBgLayer(fb, state);
+    applyFadeToBlack(fb, partySelectOpenMenuFadeBgY(m));
+    const obj = new Uint8Array(fb.length);
+    drawPartySelectObjLayer(obj, state);
+    applyFadeToBlack(obj, partySelectOpenMenuFadeObjY(m));
+    for (let p = 0; p < fb.length; p += 4) {
+      if (obj[p + 3] !== 0) {
+        fb[p] = obj[p]!;
+        fb[p + 1] = obj[p + 1]!;
+        fb[p + 2] = obj[p + 2]!;
+      }
+    }
+    return;
+  }
+  drawPartySelectBgLayer(fb, state);
+  if (phase === "menu-fade") {
+    if (closeElapsed === null) fail("menu-fade phase requires a non-null closeElapsed");
+    // y_bg = closeElapsed & ~1 (identical to the pre-split formula); the OBJ
+    // layer is always exactly one blend step (y-2) behind, blended into a
+    // scratch buffer and composited over the faded BG. `setPixel` writes
+    // alpha 255, so alpha !== 0 is the exact sprite coverage mask.
+    applyFadeToBlack(fb, closeElapsed & ~1);
+    const obj = new Uint8Array(fb.length);
+    drawPartySelectObjLayer(obj, state);
+    applyFadeToBlack(obj, (closeElapsed - 1) & ~1);
+    for (let p = 0; p < fb.length; p += 4) {
+      if (obj[p + 3] !== 0) {
+        fb[p] = obj[p]!;
+        fb[p + 1] = obj[p + 1]!;
+        fb[p + 2] = obj[p + 2]!;
+      }
+    }
+    return;
+  }
+  drawPartySelectObjLayer(fb, state);
 }
 
 /**
  * ISSUES #80 slice 6: drive the party-menu close from `closeElapsed` instead
  * of holding the settled frame through the whole close. Measured schedule
  * (docs/party-menu-rank6-ground-truth.md §7, oracle-verified): menu fade-out
- * 965-978 (standard fade-to-black, y=2..14 held 2 frames each), full black
- * 979-1018, battle field fade-in from black 1019-1034.
+ * 965-979 (standard fade-to-black, y=2..16 held 2 frames each; the two-layer
+ * blend lives in `renderBattlePartySelect`), full black 980-1018, battle
+ * field fade-in from black 1019-1034.
  */
 export type PartySelectCloseRenderAssets = Readonly<{
   /** Draws the settled battle field (the resolution's own scene view). */
   drawField(fb: Uint8Array): void;
+  /**
+   * Draws the settled pre-party-menu battle scene the open window holds
+   * (oracle frames 763-765): the battle-command presentation frozen in
+   * party-handoff, rendered as if still in its action-menu phase (field +
+   * sprites + healthboxes + the "What will X do?" message box + the
+   * FIGHT/BAG/POKéMON/RUN action menu). The close path's `drawField` omits
+   * that bottom chrome, so the open side needs this separate drawable.
+   * `openElapsed` gates the ISSUES #80 Class B per-sprite row offsets (the
+   * player healthbox +1 from e=7, the player back sprite −1 from e=16,
+   * `docs/fade-layer-forensics.md` §9).
+   */
+  drawBattleScene(fb: Uint8Array, openElapsed?: number): void;
+  /**
+   * Draws the same settled action-menu battle scene's OBJ (sprite) layer only
+   * (shadow, battler sprites, healthboxes) into a scratch buffer. The open
+   * field-fade-out blends the full scene at `y_bg`, then blends this scratch
+   * at `y_obj` -- one blend step behind `y_bg` -- and composites it over the
+   * frame using its alpha-255 coverage, so the OBJ pixels track the oracle's
+   * own OBJ palette schedule (ISSUES #80 Class A,
+   * docs/fade-layer-forensics.md §8(d)). `openElapsed` gates the same Class B
+   * per-sprite row offsets as `drawBattleScene`.
+   */
+  drawBattleSceneObjOnly(fb: Uint8Array, openElapsed?: number): void;
 }>;
 
 function renderPartySelectClose(
@@ -986,10 +1406,7 @@ function renderPartySelectClose(
 ): void {
   if (state.closeElapsed === null) return;
   const phase = battlePartySelectClosePhase(state.closeElapsed);
-  if (phase === "menu-fade") {
-    // y = 2,4,...,14, each held 2 frames (closeElapsed 2-15).
-    applyFadeToBlack(fb, state.closeElapsed & ~1);
-  } else if (phase === "black-hold") {
+  if (phase === "black-hold") {
     fillFramebuffer(fb, 0, 0, 0);
   } else if (phase === "field-reveal") {
     if (close === undefined) {

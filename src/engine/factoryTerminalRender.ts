@@ -189,17 +189,27 @@ function drawNpc(
   hFlip = false,
 ): void {
   const frame = npc.frames[frameIndex] ?? npc.frames[0]!;
-  frame.tiles.forEach((tile, index) => {
+  // The ROM's OAM h-flip mirrors the WHOLE frame (each row's tile columns are
+  // swapped AND each column is mirrored in place), not each 8px tile alone —
+  // docs/factory-lobby-freeroam-ground-truth.md §8b (a per-tile mirror of the
+  // 16px woman frame is a 272px-different sprite).
+  frame.tiles.forEach((_tile, index) => {
+    const col = index % frame.columns;
+    const row = Math.floor(index / frame.columns);
+    const srcIndex = hFlip
+      ? row * frame.columns + (frame.columns - 1 - col)
+      : index;
+    const srcTile = frame.tiles[srcIndex]!;
     for (let py = 0; py < 8; py += 1) {
       for (let px = 0; px < 8; px += 1) {
         const sx = hFlip ? 7 - px : px;
-        const colorIndex = tile[py * 8 + sx]!;
+        const colorIndex = srcTile[py * 8 + sx]!;
         if (colorIndex === 0) continue;
         const color = fadeColor(npc.palette[colorIndex]!, fadeY);
         setPixel(
           fb,
-          pos.x + (index % frame.columns) * 8 + px,
-          pos.y + Math.floor(index / frame.columns) * 8 + py,
+          pos.x + col * 8 + px,
+          pos.y + row * 8 + py,
           color.r,
           color.g,
           color.b,

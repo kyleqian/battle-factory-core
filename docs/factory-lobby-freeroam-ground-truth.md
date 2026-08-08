@@ -550,3 +550,392 @@ python3 tools/run-mgba-probe.py /tmp/wander-verify.json -- \
 ```
 
 Verified PASS on a fresh probe run 2026-08-07 (17/17).
+
+## 7. CONTINUOUS-HOLD WALK — exact per-frame model (2026-08-07 SIDE worker)
+
+Measurement-only forensics for the `loss-lobby-walk-off` promotion (PROGRESS
+984 "hold-walk +1" finding). Dense RAM probe
+(`tools/probe/dump-lobby-hold-walk.py`, run through `tools/run-mgba-probe.py`,
+walk fixture `scratch-loss-lobby-walk-probe.json`, window 5170-5475, RAM-only,
+**twice-run byte-identical**; a second fresh probe re-verified the §7 table —
+`tools/probe/verify-lobby-hold-walk.py`, 24/24 PASS). All facts below are
+measured ticks; map coords = grid − 7 (`MAP_OFFSET`, `include/fieldmap.h:18`);
+`act` = `movementActionId` (`constants/event_object_movement.h`); `hms` =
+`heldMovementFinished` (bit 7 of `gObjectEvents[i].flags`, `global.fieldmap.h:202-203`);
+`run`/`trans` = `gPlayerAvatar.runningState`/`tileTransitionState`
+(`field_player_avatar.c:346-347` comment: 0 not moving, 1 turn, 2 moving;
+trans 0 none, 1 between tiles, 2 tile-center).
+
+**The headline answers, before the tables:** the per-step period is exactly
+**16 frames**, back-to-back with **no gap and no overlap** (step N's 16th
+pixel and step N+1's 1st pixel are on consecutive ticks); the rendered
+whole-field scroll at tick T equals the player's **tick-T−1** displacement
+(the displayed follow-cam lags the player by one frame — this is the app's
+"one frame behind"); and §3a's 15/16/17 deltas were an artifact of mixing
+step-START ticks, step-END ticks, and the border-block tick. The app's
+`factoryLobbyFreeRoam.ts` already reproduces the scroll and pose exactly for a
+clean hold (verified app-vs-oracle tick-by-tick on the DOWN hold, 100%); the
+red frames come from a **stale-input stall** at the hold→blocked→release→
+re-press transition (below, §7g).
+
+### 7a. Hold-start ledger — all four holds (canonical ticks)
+
+Legend: **reg** = first tick the button register is set (fixture segment);
+**turn** = in-place turn span (act 33/34/35, `WALK_IN_PLACE_FAST_*`); **turn
+done** = tick the turn's `heldMovementFinished` flips 1 (last turn action);
+**step n** = tick step n's first pixel + `currentCoords` flip (first step =
+turn-done + 1); **scroll first** = first tick the BG VOFS/HOFS register
+changes; **scroll stops** = last tick it changes before settling.
+
+| hold | reg | turn | turn done | step 1 | step 2 | step 3 | step 4 | scroll first | scroll stops |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| DOWN (80 f) | 5172 | 5173-5180 | 5180 | 5181 | 5197 | 5213 | — (block at 5229) | 5182 | 5229 |
+| UP (40 f) | 5272 | 5273-5280 | 5280 | 5281 | 5297 | — | — | 5282 | 5313 |
+| LEFT (60 f) | 5332 | 5333-5340 | 5340 | 5341 | 5357 | 5373 | 5389 | 5342 | 5405 |
+| UP-2 (40 f) | 5412 | 5413-5420 | 5420 | 5421 | 5437 | — | — | 5422 | 5453 |
+
+Every turn is 8 frames and begins at **reg + 1** (a deterministic 1-frame
+input latency between the button register and the game's field input — the
+game's `gMain.heldKeys` poll lags the register by one tick, measured on all
+four holds). No hold starts already-facing-its-direction, so all four turn;
+a fresh same-direction press while idle is unmeasured here but
+source-predictable (`CheckMovementInputNotOnBike`, `field_player_avatar.c:588-596`:
+`direction == GetPlayerMovementDirection()` ⇒ MOVING, straight `PlayerWalkNormal`,
+no turn — the step begins at reg + 1).
+
+### 7b. Per-frame rendered-scroll table — the DOWN hold, every tick measured
+
+`bg1hofs/bg1vofs` are the raw BG1 registers (all three BGs share one scroll,
+`FieldUpdateBgTilemapScroll`, `field_camera.c:74-86`); **net (dx,dy)** = the
+field's rendered shift vs the free-roam settled frame (5170: hofs 0, vofs 40);
+`cc` = currentCoords (map); `prev` = previousCoords; `run`/`trans` =
+runningState / tileTransitionState; `act` = movementActionId; `anim` =
+player sprite animNum/animCmdIndex; `timer` = sprite `sTimer`
+(`event_object_movement.c:8300-8313`, the step pixel counter 1..16);
+`hms` = heldMovementFinished. Player OAM stays **(112,56)** every tick.
+
+| tick | hofs vofs | net(dx,dy) | cc | prev | run trans | act | anim | timer | hms |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 5170-5172 | 0 40 | (0,0) | (4,8) | (4,8) | 0 0 | 1 | 5/1 | 0 | 1 |
+| 5173-5176 | 0 40 | (0,0) | (4,8) | (4,8) | 1 0 | 33 | 8/2 | 0 | 0 |
+| 5177-5180 | 0 40 | (0,0) | (4,8) | (4,8) | 1 0 | 33 | 8/3 | 0 | 0 (1 at 5180) |
+| **5181** | 0 40 | (0,0) | **(4,9)** | (4,8) | 2 2 | 8 | 4/0 | 1 | 0 |
+| 5182 | 0 41 | (0,1) | (4,9) | (4,8) | 2 1 | 8 | 4/0 | 2 | 0 |
+| 5183 | 0 42 | (0,2) | (4,9) | (4,8) | 2 1 | 8 | 4/0 | 3 | 0 |
+| 5184 | 0 43 | (0,3) | (4,9) | (4,8) | 2 1 | 8 | 4/0 | 4 | 0 |
+| 5185 | 0 44 | (0,4) | (4,9) | (4,8) | 2 1 | 8 | 4/0 | 5 | 0 |
+| 5186 | 0 45 | (0,5) | (4,9) | (4,8) | 2 1 | 8 | 4/0 | 6 | 0 |
+| 5187 | 0 46 | (0,6) | (4,9) | (4,8) | 2 1 | 8 | 4/0 | 7 | 0 |
+| 5188 | 0 47 | (0,7) | (4,9) | (4,8) | 2 1 | 8 | 4/0 | 8 | 0 |
+| 5189 | 0 48 | (0,8) | (4,9) | (4,8) | 2 1 | 8 | 4/1 | 9 | 0 |
+| 5190 | 0 49 | (0,9) | (4,9) | (4,8) | 2 1 | 8 | 4/1 | 10 | 0 |
+| 5191 | 0 50 | (0,10) | (4,9) | (4,8) | 2 1 | 8 | 4/1 | 11 | 0 |
+| 5192 | 0 51 | (0,11) | (4,9) | (4,8) | 2 1 | 8 | 4/1 | 12 | 0 |
+| 5193 | 0 52 | (0,12) | (4,9) | (4,8) | 2 1 | 8 | 4/1 | 13 | 0 |
+| 5194 | 0 53 | (0,13) | (4,9) | (4,8) | 2 1 | 8 | 4/1 | 14 | 0 |
+| 5195 | 0 54 | (0,14) | (4,9) | (4,8) | 2 1 | 8 | 4/1 | 15 | 0 |
+| **5196** | 0 55 | (0,15) | (4,9) | (4,9) | 2 1 | 8 | 4/1 | 16 | **1** |
+| **5197** | 0 56 | (0,16) | **(4,10)** | (4,9) | 2 2 | 8 | 4/2 | 1 | 0 |
+| 5198 | 0 57 | (0,17) | (4,10) | (4,9) | 2 1 | 8 | 4/2 | 2 | 0 |
+| … | … | … | (4,10) | (4,9) | 2 1 | 8 | 4/2 then 4/3 at 5205 | 3..15 | 0 |
+| **5212** | 0 71 | (0,31) | (4,10) | (4,10) | 2 1 | 8 | 4/3 | 16 | **1** |
+| **5213** | 0 72 | (0,32) | **(4,11)** | (4,10) | 2 2 | 8 | 4/0 | 1 | 0 |
+| 5214-5227 | 73-86 | (0,33..46) | (4,11) | (4,10) | 2 1 | 8 | 4/0 then 4/1 at 5221 | 2..15 | 0 |
+| **5228** | 0 87 | (0,47) | (4,11) | (4,11) | 2 1 | 8 | 4/1 | 16 | **1** |
+| **5229** | 0 88 | (0,48) | (4,11) | (4,11) | 2 2 | **25** | 4/2 | 16 | 0 |
+| 5230-5252 | 0 88 | (0,48) | (4,11) | (4,11) | 2 0 | 25 | 4/2 then 4/3 at 5245 | 16 | 0 |
+
+(The "…" rows follow the exact 1px/frame monotonic ramp — vofs 57..70 for
+5198-5211 and 73..86 for 5214-5227; pose alternates every 8 ticks.)
+
+Read it top to bottom: **vofs(T) = 40 + (T − 5181)** for 5181 ≤ T ≤ 5229 —
+a single unbroken 1px/frame ramp across the whole multi-step hold, including
+across the tile boundaries (5196→5197, 5212→5213). The scroll does **not**
+pause or reset at a step boundary; the tilemap slice simply advances one tile
+(`RedrawMapSlicesForCameraUpdate`, `field_camera.c:413-421`) so the net
+rendered field position keeps advancing. The DOWN hold walks exactly 3 tiles
+(48px) then blocks at the map border (map row 12 does not exist): `act` flips
+to 25 (`WALK_IN_PLACE_NORMAL_DOWN`, the bump) at 5229, `cc` freezes at (4,11),
+vofs freezes at 88, and the bump re-arms while DOWN is held (two 16-frame bump
+cycles 5229-5244 / 5245-5260).
+
+### 7c. Closed form (a renderer can evaluate this)
+
+Given "direction d held continuously; press register latched at tick H; facing
+before the hold F0" — define the **first movement tick**
+
+```
+M = H + 1 + (d == F0 ? 0 : 8)          // +1 input latency; +8 if a turn happens
+```
+
+(four measured M: 5181, 5281, 5341, 5421). Steps tile contiguously at **16
+frames each**: step n (n ≥ 1) occupies ticks `[M+16(n−1), M+16n−1]`; on a tick
+T in step n, the player's pixel index is `p = T − M − 16(n−1) + 1` (1..16).
+
+- **Player sprite:** fixed at screen (112,56) every tick
+  (`LOBBY_PLAYER_SCREEN_POS`); pose = `sAnim_Go{d}` walk cycle,
+  `animCmdIndex = ((T − M) / 8) % 4` (0,1,2,3 → [walk1, stand, walk2, stand],
+  8 ticks each; the phase **continues across steps**, it does not reset — a
+  step's start pose alternates walk1/walk2 because 16 ≡ 0 mod 8).
+- **Rendered field scroll at tick T** (the BG HOFS/VOFS the oracle displays,
+  and the app's `lobbyFreeRoamCameraOrigin` output):
+  `S(T) = D(T−1)`, where `D(t) = tilesWalked(t)·16 + pxIntoStep(t)` is the
+  player's world displacement at tick t. Equivalently, **the displayed field
+  lags the player by exactly one frame.** On a step's frames this is
+  `S = tilesWalked·16 + k` with `k = p − 1` (`p` the 1-based pixel index) —
+  exactly §5a's compositing model `spawnScroll + tilesWalked·16·d̂ + k·d̂`;
+  the app's current `lobbyFreeRoamCameraOrigin` (world − spawn tile) already
+  reproduces it **with no code change** (verified tick-by-tick: app scroll ==
+  oracle scroll on all 100 DOWN-hold ticks 5181-5280, and on the LEFT/UP
+  walks until the stall below).
+- **Period:** exactly 16 frames per tile, all four directions, for every
+  consecutive step measured (ends 5196/5212/5228; starts 5181/5197/5213 — all
+  deltas 16). The period is uniform; do not average away a 15/16/17.
+
+### 7d. Why §3a's deltas are 15/16/17 — and where `currentCoords` actually flips
+
+§3a's "tile-edge" ticks 5181 → 5196 → 5212 → 5229 are **three different
+classes of tick**, which is why their deltas (15, 16, 17) look non-uniform:
+
+- **5181** is a step-START tick: `currentCoords` flips to (4,9) and the
+  rendered tile-slice advances (phase 0). `ShiftObjectEventCoords` is called
+  from `InitNpcForMovement` during `MovementAction_WalkNormal*_Step0`
+  (`event_object_movement.c:5086-5090`, `:5354-5357`), i.e. **at the start of
+  the rendered step, not the middle or end**. The tile-slice advance fires the
+  same tick (`CameraUpdate` delta condition `curMovementOffset == 0 && moving`,
+  `field_camera.c:386-392`, phase wraps mod 16 at `:408-411`).
+- **5196 / 5212** are step-END ticks: the 16th pixel + `heldMovementFinished`
+  (`NpcTakeStep` returns TRUE, `event_object_movement.c:8300-8313`; `sTimer`
+  reaches 16). `currentCoords` is unchanged on these ticks (it already holds
+  the arrived tile since the step start).
+- **5229** is the border-block tick (the frame after step 3's real end at
+  5228): `act` → 25 bump.
+
+So the correct ledger is: step starts **5181, 5197, 5213** (deltas 16, 16),
+step ends **5196, 5212, 5228** (deltas 16, 16), border block **5229**.
+`currentCoords` flips **at the start** of each rendered step, in lockstep with
+the tile-slice advance, both 16 frames apart. §3a compared step-1's start
+(5181) against step-1/2's ends (5196, 5212) and the block (5229) — mixing
+start/end/block classes.
+
+### 7e. Input re-arm — the load-bearing answer
+
+**On the frame a step completes, the next step begins on the NEXT frame, not
+the same frame.** Consecutive steps tile perfectly (16 + 16 = 32 pixels over
+32 ticks) with the re-arm happening exactly one tick after the completion.
+
+Measured: step 1's 16th pixel on **5196** (spriteY 128, `sTimer` 16,
+`hms`=1), step 2's first pixel on **5197** (spriteY 129, `sTimer` 1); 5212→5213
+and 5228→5229 (bump) identical; the turn→step transition is the same shape
+(turn done 5180 → step 1 start 5181). No tick shows a stall or an overlap
+between steps.
+
+Source ordering (`overworld.c:1438-1457`, `DoCB1_Overworld`, runs at the top
+of every frame, *before* `AnimateSprites`):
+
+1. `UpdatePlayerAvatarTransitionState` — reads the movement's
+   `heldMovementFinished`; the finished step now yields
+   `tileTransitionState = T_TILE_CENTER` (`field_player_avatar.c:901-917`).
+2. `ProcessPlayerFieldInput` → returns 0 (no script/trainer/warp in the
+   lobby); `PlayerStep(dpadDirection, …)` runs (`:332-351`).
+3. `TryInterruptObjectEventSpecialAnim` → `ObjectEventClearHeldMovementIfFinished`
+   (`field_player_avatar.c:356`, `event_object_movement.c:4912-4919`) — the
+   just-finished WALK_NORMAL is **cleared** (`heldMovementActive`→FALSE), so
+   the avatar is no longer "anim active".
+4. `MovePlayerAvatarUsingKeypadInput` → `MovePlayerNotOnBike` →
+   `PlayerNotOnBikeMoving` → `PlayerWalkNormal(direction)`
+   (`field_player_avatar.c:975-978`); `PlayerSetAnimId` re-arms because the
+   `if (!PlayerIsAnimActive())` guard at `:968` now passes (the clear in step
+   3 happened in the same frame's PlayerStep, before this call).
+5. The fresh WALK_NORMAL `Step0` (first pixel + `currentCoords` flip) runs in
+   this same frame's `AnimateSprites` — the tick after the completion.
+
+The one-frame gap is structural: on the completion tick, `heldMovementFinished`
+only flips *during* `AnimateSprites` (after `DoCB1_Overworld` already ran), so
+the completion tick's own `PlayerStep` can neither see the finished flag nor
+re-arm. The re-arm therefore lands on tick N+1. **The app must count exactly
+16 frames per step and start the next step on the tick after the 16th pixel —
+with its first pixel on that same tick** (the app's current
+`stepRemaining: 16` + immediate `startStep` on the arrival tick does exactly
+this and is correct).
+
+### 7f. Release (button released mid-step)
+
+LEFT hold (60 f, register 5332-5391, released at 5392 mid-step 4):
+- The in-flight step **runs to completion**: step 4 spans 5389-5404 (spriteX
+  71→56, 16 px), with `hms`=1 at 5404. Release never truncates a step; it only
+  takes effect at the next re-arm point.
+- On **5405** (the re-arm tick, with no direction held) the avatar settles:
+  `runningState`→0, `act`→2 (`FACE_LEFT`), facing WEST at (0,9), pose frozen
+  at the step-16th-frame walk-cycle frame (anim 6/3). The scroll makes its
+  **final +1 catch-up on the settle tick** (hofs 193→192 = −63→−64), then
+  stops; `S(settle) = full displacement`.
+- Same shape on the UP holds: first UP released exactly at step 2's completion
+  (5312) → settles 5313 (act 1, FACE_UP); UP-2 released at step 2's completion
+  (5452) → settles 5453.
+
+The DOWN hold's "release" case is the blocked-border variant: DOWN released at
+5252 while the border bump was running → the current bump cycle completes
+(5260) → settles 5261 facing SOUTH (act 0), vofs already frozen at 88 since
+5230.
+
+### 7g. Fix plan for the MAIN bind worker
+
+The §5a compositing model (scroll = world − spawn, player at (112,56), §5b
+turn poses) and the step cadence in the current `factoryLobbyFreeRoam.ts` are
+**already byte-true** for a clean hold — the app-vs-oracle comparison passed
+every DOWN-hold tick 5181-5280 (scroll), the LEFT walk and both UP walks, up
+to the bug below. Do **not** re-architect the walk clock; the accumulating
+error the draft walk spec saw is this:
+
+**Stale-`pendingDir` stall.** The app buffers a fresh press in `pendingDir`
+for one frame (its model of the input latency). But on a held direction that
+is **blocked** (the DOWN hold reaches (4,11) at 5229 and stays there, still
+held), the idle path re-buffers `pendingDir = heldDir` **every frame**; when
+the button is released the stale `pendingDir` is never cleared; and on the
+next press (`UP` at 5272) the `pendingDir` branch fires **before** the fresh
+input, re-attempting the blocked DOWN step (`startStep` fails → state
+unchanged, `pendingDir` stays south) forever. Measured consequence: the app
+never starts the UP/LEFT/UP-2 walks — 191 red frames in the walk window
+(every tick ≥ 5282), exactly the "hold-walk behind and accumulating" signature
+(the first hold matches because nothing precedes it). The fix:
+
+1. **Clear the buffered press when its step is refused** (`startStep` returns
+   the state unchanged because the target cell is blocked) and do not re-buffer
+   a held direction while the avatar is idle-at-a-blocked-border: a held
+   direction that cannot move must not arm a future press.
+2. **The re-arm must read input once, on the re-arm tick** (the tick after a
+   step/bump completes, §7e) — a held direction that is released during a
+   step must result in NO next step (the app already does this via
+   `heldDir === null`); a fresh press must be honored on the tick after it
+   appears (the app's `pendingDir` one-frame buffer), and a direction changed
+   at the tile center must turn first (already handled).
+3. Keep the walk clock as-is (16 frames/step, next step first-pixel on the
+   completion tick + 1), the scroll as-is (`lobbyFreeRoamCameraOrigin`), and
+   add the §7b border-block pose (act 25 bump: anim 4/2 frozen south while
+   held, pose alternates 4/2→4/3 between bump cycles) for 5229-5260.
+
+Predicted acceptance: `npm run compare -- loss-beyond-boundary-off --summary`
+must stay **183/183** (its tap path is untouched — the fix only changes the
+idle-blocked-hold transition). A promoted `loss-lobby-walk-off` spec from the
+walk fixture's 5472 frames should land at the fixture's full capture count
+minus only the §6 woman-NPC residual windows (the walk fixture's woman wander
+is already covered by `womanAtTick`, §6d): the DOWN hold 5181-5229, UP
+5281-5312, LEFT 5341-5404, UP-2 5421-5452 all become byte-true once the stall
+is fixed. Rerun `tools/probe/verify-lobby-hold-walk.py` (24/24) after the
+change to confirm the model still holds.
+
+## 8. Wandering woman — sheet-frame index audit (2026-08-07 SIDE worker)
+
+Measurement-only audit answering: (1) does the app's banked wandering-woman
+sheet match the source `woman_1.png` frame-for-frame, (2) which sheet frame is
+the oracle's EAST-IDLE pose, (3) which sheet frames are the oracle's
+SOUTH-WALK poses (5296-5311). Method and fixture: dense PNG + RAM probe
+`tools/probe/dump-lobby-woman-pose.py` over the walk fixture
+(`scratch-loss-lobby-walk-probe.json`, ticks 5290-5472, once-run) + matcher
+`tools/probe/verify-lobby-woman-pose.py` (the §5b bg-subtract-and-match method
+generalized to the woman: field rendered without the woman at the per-tick
+byte-exact camera, candidate frames composited over it at the woman's OAM box,
+a 0px diff = identification). All numbers below are pixel diffs, not guesses.
+
+### 8a. The sheet — banked == source, identical, same order
+
+- **Source:** `reference/pokeemerald/graphics/object_events/pics/people/woman_1.png`
+  — 144×32, 9 frames of 16×32 (the standard overworld sheet layout, same as
+  Brendan: 0=south stand, 1=north stand, 2=west stand, 3=south walk1,
+  4=south walk2, 5=north walk1, 6=north walk2, 7=west walk1, 8=west walk2;
+  east reuses west h-flipped, `sAnim_GoEast`). Extracted at dev time by
+  `tools/extract/extract-factory-lobby-terminal.ts:180` via
+  `decodeIndexedPng` + `sliceTiles`.
+- **Banked:** `src/assets/gen/factory-lobby-terminal-npcs.json` → `woman` —
+  9 frames, each `columns:2 rows:4` (16×32), tile indices 0-15.
+- **Verdict: IDENTICAL, same order.** Index-by-index comparison of all 9
+  banked frames vs the source sheet's 9 frames: every banked frame `i` equals
+  source frame `i` with **0/512 differing pixels**, and no banked frame matches
+  any *other* source frame. Banked→source index mapping is the identity
+  (0→0, 1→1, …, 8→8). **The banked sheet is not misindexed.**
+- Palette: the banked `npc_1.pal` is the mGBA 15→24 expansion of the JASC
+  values (`gbaRoundTrip`, `tools/extract/gbaColor.ts`) — the raw JASC
+  `115 197 164` expands to the banked `(115,198,165)`, verified for all 16
+  colors. The oracle's rendered woman pixels use exactly these expanded
+  values (the §8b match confirms it), so the palette is right too.
+- The north-window "field diff of 4-8px" lead is explained by the woman's own
+  drawn pixels sitting a couple px *above* her OAM box while walking (the
+  drawn box top lags the logical schedule — see the §8c offset column) — the
+  OAM box top is not the drawn box top. The app's §6d `womanAtTick` y already
+  accounts for this on the north walk (its y uses the RENDERED box-top,
+  verified byte-exact) but the §6d south-walk/east tables carry the logical
+  schedule without the offset (see 8d).
+
+### 8b. The oracle's EAST-IDLE pose = sheet frame 2 (west stand), TRUE h-flip
+
+For the settled idle-east window (5422-5452, e.g. 5422/5430/5445/5453), the
+oracle's woman pixels (bg-subtracted over the byte-exact field) are a
+**14×20 silhouette of exactly 173 px** — frame 2's silhouette size. Matching
+every sheet frame and its h-flip, aligned to the oracle's drawn box:
+
+| tick | frame | h-flip | drawn box (screen) | diff px |
+|---:|---:|---:|---:|---:|
+| 5422 | **2** | **yes (true whole-frame)** | (175,89) | **0** |
+| 5430 | **2** | **yes** | (176,97) | **0** |
+| 5453 | **2** | **yes** | (176,120) | **0** |
+
+The h-flip that matches is a **TRUE whole-frame horizontal flip** (swap the
+two 8px columns AND mirror within each column) — not the per-tile mirror the
+app's renderer applies. `tools/probe/verify-lobby-woman-pose.py` renders the
+candidate both ways; the per-tile version differs from the true flip by
+**272px** on frame 2 (278px on frame 8), and only the true flip scores 0px
+against the oracle. **So the oracle's east-idle is exactly frame 2
+h-flipped** — matching the source reasoning — but the app's `drawNpc`
+(`factoryTerminalRender.ts:195`, `sx = hFlip ? 7 - px : px` per 8px tile,
+columns NOT swapped) renders it as a per-tile mirror, which is a different
+sprite.
+
+East-walk frames 5408-5421 are the same story: frame **8** (west walk2) TRUE
+h-flipped for 5408-5415 and frame **2** (west stand) TRUE h-flipped for
+5416-5421, each **0px** once aligned to the oracle's drawn box. So the app's
+`womanAtTick` frame indices for east (8 then 2) are right; only the h-flip
+rendering differs. (During the east walk itself the oracle's drawn box is
+also 1px LEFT of the app's x schedule — the same render-lag class as the
+south walk's y; by the settled idle-east (5430+) the app's position is
+exact, leaving the flip as the sole east-idle residual.)
+
+### 8c. The oracle's SOUTH-WALK poses (5296-5311)
+
+Same method, per tick. The oracle's south-walk woman is **byte-exact to the
+source sheet's frames 1/3/0 in the standard walk order**:
+
+| ticks | frame | h-flip | drawn-box y offset vs OAM | diff px |
+|---:|---:|---:|---:|---:|
+| 5296 | **1** (north stand — pre-step) | no | −2 | **0** |
+| 5297-5304 | **3** (south walk1) | no | −2 | **0** |
+| 5305-5311 | **0** (south stand) | no | −2 | **0** |
+
+So the south walk uses exactly the frames `womanAtTick` already picks
+(5296→1, 5297-5304→3, 5305-5311→0), no h-flip. The 5296-5311 residuals are
+therefore NOT a frame-index error: the oracle's pose is the sheet's frame
+3/0, but it is drawn 1px *above* the app's `womanAtTick` y schedule — the
+same render-lag the §6a/§6d north-walk table bakes in (`161−(T−5184)` is the
+RENDERED box-top) that the south-walk table (`145+(T−5296)` = the logical
+schedule) does not carry. A 1px vertical shift of frame 3's 212-ink
+silhouette is ~161px of pixel diff, matching the observed ~180-194px south
+residual. The fix (next step) is the y-offset, not the frame index.
+
+### 8d. Verdict — one sentence
+
+The app's banked woman sheet is the source sheet verbatim (identical frames,
+identity mapping, correct palette) and `womanAtTick` picks the **right frame
+indices** for both the south walk (3→0) and the east walk/idle (8→2); the
+south residual is the **right frame at a 1px-off position** (the oracle draws
+the walking woman 1px above the app's `womanAtTick` y schedule, which was
+corrected on the north walk but not carried to the south/east windows) and
+the east residual is the **right frame with the wrong h-flip** (the app's
+`drawNpc` mirrors each 8px tile in place while the ROM's OAM flip mirrors the
+whole 16px frame — a 272px difference on frame 2). The sheet extraction is
+not misindexed.
+
+Rerun: `python3 tools/probe/verify-lobby-woman-pose.py /tmp/woman-pose-out.json
+/tmp/woman-pose-png` (probe via `python3 tools/run-mgba-probe.py
+/tmp/woman-pose-out.json -- python3 tools/probe/dump-lobby-woman-pose.py
+/tmp/woman-pose-out.json tools/battle-lab/scratch-loss-lobby-walk-probe.json
+5290 5472 /tmp/woman-pose-png`).
