@@ -1020,6 +1020,7 @@ import {
   sceneOnSandstormView,
   sceneOnDragonClawView,
   sceneOnMetalClawView,
+  sceneOnCrunchView,
   sceneOnCrushClawView,
   sceneOnTakeDownView,
   sceneOnSingView,
@@ -1083,6 +1084,11 @@ import {
   type SceneOnAstonishConfig,
 } from "../animation/sceneOnPresentation.ts";
 import { refreshDisplayedBlendCoeffAtAge, REFRESH_BLEND_START_AGE } from "../animation/refresh.ts";
+import {
+  FADE_IN_BACK_AGE,
+  RESTORE_FADE_AGE,
+  SHAKE_1_AGE,
+} from "../animation/crunch.ts";
 import {
   extremeSpeedBackgroundVariant,
   extremeSpeedImpactAtAge,
@@ -17307,6 +17313,58 @@ const turn16DarkFieldPpu: Mode0State = {
     index === 2 ? faintAttackDarkBg.paletteBank2Bgr555 : bank
   )),
 };
+
+/** CRUNCH's `fadetobg BG_DARK` swaps the whole field + both battler OBJ
+ *  palettes to the dark bank; the dark screenblock/charblock decode to the
+ *  same `drawTileBg` representation as `battleBg.static`. */
+const crunchDarkBgTileset: Tileset = (() => {
+  const bytes = Uint8Array.from(atob(faintAttackDarkBg.charBlock2B64), (c) => c.charCodeAt(0));
+  const tiles: number[][] = [];
+  for (let tileIndex = 0; tileIndex < 256; tileIndex += 1) {
+    const tile: number[] = [];
+    for (let byte = 0; byte < 32; byte += 1) {
+      const packed = bytes[tileIndex * 32 + byte]!;
+      tile.push(packed & 0xf, packed >> 4);
+    }
+    tiles.push(tile);
+  }
+  return { columns: 16, rows: 16, tiles };
+})();
+const crunchDarkBgTilemap: Tilemap = (() => {
+  const bytes = Uint8Array.from(atob(faintAttackDarkBg.screenBlock26B64), (c) => c.charCodeAt(0));
+  const entries: Tilemap["entries"] = [];
+  for (let index = 0; index < 1024; index += 1) {
+    const value = bytes[index * 2]! | (bytes[index * 2 + 1]! << 8);
+    entries.push({ tile: value & 0x3ff, palette: 2, hFlip: false, vFlip: false });
+  }
+  return { width: 32, height: 32, entries };
+})();
+const crunchDarkBgPalette: RgbColor[] = faintAttackDarkBg.paletteBank2Bgr555.map((value) => {
+  const r5 = value & 31;
+  const g5 = (value >> 5) & 31;
+  const b5 = (value >> 10) & 31;
+  return {
+    r: (r5 << 3) | (r5 >> 2),
+    g: (g5 << 3) | (g5 >> 2),
+    b: (b5 << 3) | (b5 >> 2),
+  };
+});
+/** CRUNCH fade darken: mGBA software-renderer `_darken` on the expanded
+ *  24-bit packed color (`component - floor(component*y/16)` evaluated on
+ *  the SHIFTED component, which gives the R floor / G-B ceil rounding the
+ *  oracle actually shows) - NOT the 5-bit `blendPaletteToward` convention. */
+function crunchDarkenColor(color: RgbColor, coeff: number): RgbColor {
+  if (coeff <= 0) return color;
+  const packed = mgbaDarkenColor(
+    color.r | (color.g << 8) | (color.b << 16),
+    coeff,
+  );
+  return {
+    r: packed & 0xff,
+    g: (packed >> 8) & 0xff,
+    b: (packed >> 16) & 0xff,
+  };
+}
 
 function turn16PartyElapsedAtTick(partyElapsed: number, t: number, anchorTick: number): number {
   return partyElapsed - (t - anchorTick);
@@ -36405,6 +36463,162 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SWABLU used" : "Foe SWABLU used",
       "TAKE DOWN!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "CRUNCH") {
+    const view = sceneOnCrunchView(state);
+    // One-age display latch (uniform across the move — no TAKE_DOWN-style
+    // two-frame task case): every OAM/palette write becomes visible exactly
+    // one frame after its RAM cause (change-map confirmed,
+    // `tools/compare/evidence/crunch-changemap-*.txt`).
+    const displayed = sceneOnCrunchView({ ...state, age: state.age - 1 });
+    const displayedAge = displayed.age;
+    const playerToOpponent =
+      view.attacker.species === "HOUNDOUR"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "HOUNDOUR"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged CRUNCH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const houndour = playerToOpponent ? houndourBackSprite : houndourFrontSprite;
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // `fadetobg BG_DARK` / `restorebg` swap the field AND both battler OBJ
+    // palettes to the dark bank from display 103 (RAM 28) through the
+    // teardown fade-out (RAM 118); the whole field + battlers go pink. The
+    // darkening is the hardware BLDY blend (mGBA `_darken`, 8-bit channel
+    // `c - floor(c*y/16)`) over field + battlers only — healthboxes and the
+    // message window are outside the blend mask (change-map bbox 0,0-239,111).
+    const fadeY = displayed.fadeY;
+    let coeff: number;
+    if (fadeY === -1) coeff = 16;
+    else if (displayedAge >= RESTORE_FADE_AGE + 20) coeff = Math.max(0, fadeY - 1);
+    else if (displayedAge === RESTORE_FADE_AGE + 19) coeff = 16;
+    else coeff = Math.max(0, Math.min(16, fadeY));
+    const darkBg = displayedAge >= FADE_IN_BACK_AGE - 1
+      && displayedAge <= RESTORE_FADE_AGE + 16;
+    const darken = (color: RgbColor): RgbColor => crunchDarkenColor(color, coeff);
+    const fieldPalette = (darkBg
+      ? [battleBg.palette[0]!, battleBg.palette[1]!, crunchDarkBgPalette]
+      : battleBg.palette).map((bank) => bank.map(darken));
+    drawTileBg(
+      fb,
+      darkBg ? crunchDarkBgTileset : battleBg.static.tileset,
+      darkBg ? crunchDarkBgTilemap : battleBg.static.tilemap,
+      fieldPalette,
+    );
+    // The battlers are OBJ and sit OUTSIDE the BLDCNT 0x00E8 blend mask
+    // (BG3 + backdrop only), so they are never faded toward black, and the
+    // BG_DARK load only rewrites palette bank 2 (they use banks 0/1), so
+    // they keep their own palettes for the whole move - only the field
+    // (and its backdrop) goes pink.
+    // ShakeMon's first write also zeroes the target's front-idle x2 residual
+    // (ONIX rests at x2=1; the RAM drops to 0 from shake 1's RAM age 60).
+    const targetX2 = displayedAge >= SHAKE_1_AGE ? 0 : targetIdle.x2;
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2 + displayed.targetY2,
+    );
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      houndour.tileset,
+      houndour.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    // `monbg ANIM_TARGET` rides the target on BG1 (beneath both OBJs); the
+    // semi-transparent teeth/hitsplat OBJs blend 12/8 against the field +
+    // target copy, not the attacker, so snapshot the backdrop after the
+    // target (BITE/TAKE_DOWN convention).
+    drawTarget();
+    const effectBackdrop = fb.slice();
+    drawAttacker();
+    // Equal subpriority 28 effects resolve in reverse allocator order (slot
+    // 5 hitsplat wins over slots 3/4 teeth), so paint the teeth first.
+    for (const teeth of displayed.teeth) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        effectBackdrop,
+        biteArt.sharpTeeth.tileset,
+        biteArt.sharpTeeth.palette,
+        teeth.x + teeth.x2,
+        teeth.y + teeth.y2,
+        teeth.matrix.a,
+        teeth.matrix.b,
+        teeth.matrix.c,
+        teeth.matrix.d,
+        12,
+        8,
+        false,
+      );
+    }
+    for (const hitsplat of displayed.hitsplats) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        effectBackdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        hitsplat.x,
+        hitsplat.y,
+        303,
+        0,
+        0,
+        303,
+        12,
+        8,
+        false,
+      );
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "HOUNDOUR",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "HOUNDOUR" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "HOUNDOUR used" : "Foe HOUNDOUR used",
+      "CRUNCH!",
       99,
     );
     return;
