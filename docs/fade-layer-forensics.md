@@ -739,6 +739,18 @@ failed at the sprite's own boundary - a row-shift left 27 wrong pixels on the
 box outline and its slanted lower-left corner - which is what a coordinate
 change explains and a pixel shift cannot.
 
+**Confirmed a second time (2026-08-07, a later cap-killed MAIN worker, same
+salvage route), now with the OAM values:**
+
+- **healthbox main sprite:** `y2` 0 -> 1, `oam.y` **72 -> 73**, at tick 769 =
+  **frame 770**;
+- **player back sprite:** `y2` 1 -> 0, `oam.y` **62 -> 61**, at tick 778 =
+  **frame 779**.
+
+That worker also measured the residual's vertical extent: **row 111 is clean
+(0 diff) while rows 74-110 differ** - consistent with the healthbox moving
+down by one row rather than its rendered pixels being shifted.
+
 **Not resolved:** the exact source write site. `party_menu.c:4012` contains a
 `sprite->y2 = 1;` and the `SlidePartyMenuBoxSprites` family around
 `party_menu.c:2915` was the next thing being read when the cap hit. The fix
