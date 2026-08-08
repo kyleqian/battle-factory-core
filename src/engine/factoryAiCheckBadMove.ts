@@ -297,7 +297,7 @@ export const CHECK_BAD_MOVE_HANDLED_TABLE_EFFECTS: ReadonlySet<string> = new Set
   "EFFECT_EVASION_DOWN_2", "EFFECT_SWAGGER", "EFFECT_FLATTER", "EFFECT_KNOCK_OFF",
   "EFFECT_TRICK", "EFFECT_SLEEP_TALK", "EFFECT_ACCURACY_UP_2",
   "EFFECT_SPECIAL_ATTACK_DOWN_2", "EFFECT_MEMENTO", "EFFECT_STOCKPILE",
-  "EFFECT_SPIT_UP", "EFFECT_SWALLOW",
+  "EFFECT_SPIT_UP", "EFFECT_SWALLOW", "EFFECT_RECYCLE",
 ]);
 
 /**
@@ -2582,6 +2582,20 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_RECYCLE -> AI_CBM_Recycle
+  // (`data/battle_ai_scripts.s:201,554-557`): a single
+  // `get_used_held_item AI_USER; if_equal ITEM_NONE, Score_Minus10` --
+  // Recycle is penalized when the AI has no used item left to recycle
+  // (`gBattleStruct->usedHeldItems[AI_USER] == ITEM_NONE`).
+  if (move.effect === "EFFECT_RECYCLE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmRecycle(input.attacker.usedHeldItemId ?? 0),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -3559,4 +3573,15 @@ function runCbmSpitUpAndSwallow(
     return -10;
   }
   return attackerStockpileCount === 0 ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Recycle` (`data/battle_ai_scripts.s:554-557`, EFFECT_RECYCLE): a
+ * single `get_used_held_item AI_USER; if_equal ITEM_NONE, Score_Minus10` --
+ * Recycle is penalized when the AI has no used item left to recycle
+ * (`gBattleStruct->usedHeldItems[AI_USER] == ITEM_NONE`, read by
+ * `Cmd_get_used_held_item`). Zero ability/type reads, zero RNG.
+ */
+function runCbmRecycle(attackerUsedHeldItemId: number): number {
+  return attackerUsedHeldItemId === 0 ? -10 : 0;
 }

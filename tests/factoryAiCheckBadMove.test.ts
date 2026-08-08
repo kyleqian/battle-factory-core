@@ -4560,3 +4560,40 @@ describe("AI_CBM_SpitUpAndSwallow (data/battle_ai_scripts.s:516-520, EFFECT_SPIT
       .toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
   });
 });
+
+describe("AI_CBM_Recycle (data/battle_ai_scripts.s:554-557, EFFECT_RECYCLE)", () => {
+  const MOVE_RECYCLE = 278; // TYPE_NORMAL, power 0 -> MOVE_POWER_OTHER
+
+  const RECYCLE_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    knownAbility: "ABILITY_STURDY",
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function recycleAttacker(usedHeldItemId: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, usedHeldItemId });
+  }
+
+  it("no used held item (ITEM_NONE) JUMPs to Score_Minus10", () => {
+    expect(run(MOVE_RECYCLE, RECYCLE_TARGET, undefined, recycleAttacker(0)))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("a used held item recorded FALLS THROUGH to End at zero", () => {
+    expect(run(MOVE_RECYCLE, RECYCLE_TARGET, undefined, recycleAttacker(155)))
+      .toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("an omitted usedHeldItemId defaults to ITEM_NONE (battle-start) and scores -10", () => {
+    expect(run(MOVE_RECYCLE, RECYCLE_TARGET)).toMatchObject({
+      kind: "scored",
+      scoreDelta: -10,
+      draws: [],
+    });
+  });
+});
