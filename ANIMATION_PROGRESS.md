@@ -1,16 +1,17 @@
 # Animation coverage
 
-## Supervisor wind-down — SLASH, LICK and COUNTER exact, 127→130; DOUBLE_EDGE resurrected from dead code to a validated, pinned base; the display latch is per-TASK, not per-category (2026-08-08 animation session)
+## Supervisor wind-down — SLASH, LICK, COUNTER and DOUBLE_EDGE all exact, 127→131; DOUBLE_EDGE closed after three prior failures; the display latch is per-TASK, not per-category (2026-08-08 animation session)
 
-- **State:** coverage advanced **127→130/276 exact**, 0 partial, 0 staged, 146
+- **State:** coverage advanced **127→131/276 exact**, 0 partial, 0 staged, 145
   unsupported. `animation-main` is committed and green with no worker worktrees
-  or branches left behind. 8 worker launches, 8 productive, 1 cap-kill (salvaged
-  in full). `ANIMATION_DEFERRED.md` remains empty.
+  or branches left behind. 9 worker launches, 9 productive, 3 cap-kills (all
+  salvaged in full). `ANIMATION_DEFERRED.md` remains empty.
 - **Did:** promoted **MOVE_SLASH** (46/46 both orientations), **MOVE_LICK**
-  (73/73 both) and **MOVE_COUNTER** (88/88 both). Took **MOVE_DOUBLE_EDGE** from
-  three failed rounds and 340 lines of dead code to a validated, seam-wired,
-  11-pin staged base. Normalized `ANIMATION_COVERAGE.json` back to its canonical
-  one-space serialization after one promotion drifted it.
+  (73/73 both), **MOVE_COUNTER** (88/88 both) and **MOVE_DOUBLE_EDGE** (141/141
+  both) — the last after **three failed promotion rounds on 2026-08-07** and a
+  day spent as 340 lines of dead code that nothing imported and no test pinned.
+  Normalized `ANIMATION_COVERAGE.json` back to its canonical one-space
+  serialization after one promotion drifted it.
 - **Verified:** every promotion re-run by the supervisor rather than accepted on
   report — both portables per move, fresh, plus an **earlier move's portable as a
   control every time** (CRUNCH held at 142/142 twice with its committed hashes;
@@ -18,19 +19,26 @@
   change maps re-derived by the supervisor from independent fresh probe runs and
   diffed byte-for-byte against the committed files — **8/8 identical**. Both new
   asset extractors re-run: byte-for-byte regeneration confirmed. The DOUBLE_EDGE
-  reducer validated field-by-field against the supervisor's own probe: **all 141
-  frames × 2 orientations × 4 affine-matrix fields match with zero mismatches**.
-  Integrated `npm test` **785 files / 7626 passed / 1 established skip** and
-  `npm run build` exit 0 on the merged tree at this entry.
-- **Next:** promote **MOVE_DOUBLE_EDGE** from its now-solid base — one round. The
-  reducer, its 11 Tier-1 pins and the `SceneOnDoubleEdgeConfig`/View seam all
-  exist and the affine matrices are already proven exact; the round needs the
-  `battleScene.ts` draw case, `doubleEdgePortable.ts`, two fixtures, the evidence
-  test, the coverage entry and the inventory pin **130→131 exact / 146→145
-  unsupported**. After that, by total unit size: CRABHAMMER (35 script lines, 0
-  new components), MEGA_KICK (23 lines, 0 new, 22 components), MAGICAL_LEAF (42,
-  0 new), THUNDER (56, 0 new), then the small 1-new-component moves —
-  SUBSTITUTE, FAKE_OUT, BARRIER, HAZE.
+  reducer validated field-by-field against the supervisor's own probe **twice** —
+  once at staging and again after the promotion round edited it — matching every
+  offset and **all 141 frames × 2 orientations × 4 affine-matrix fields with zero
+  mismatches** both times. Final integrated `npm test` **786 files / 7630 passed /
+  1 established skip** and `npm run build` exit 0 on the merged tree.
+- **Next:** the remaining moves ranked by TOTAL unit size — anim-script lines
+  PLUS the lines of C in any new component, which is the number that actually
+  predicted round cost across this session and the last. Zero-new-component
+  first: **CRABHAMMER** (35 script lines), **MEGA_KICK** (23 lines but 22
+  components across several blocks), **MAGICAL_LEAF** (42), **THUNDER** (56).
+  Then the small one-new-component moves: **SUBSTITUTE** (3 script lines + 39 C,
+  but it needs the substitute-doll gfx and a mon-sprite swap, so the line count
+  understates it), **FAKE_OUT** (9 + 47), **BARRIER** (8 + 59, new
+  ANIM_TAG_GRAY_LIGHT_WALL asset), **HAZE** (8 + 86). **Avoid MOVE_DOUBLE_KICK
+  and MOVE_THRASH** despite their small size: `AnimFistOrFootRandomPos` makes
+  four `Random2()` calls and this lane does not model the Random2 stream.
+  Caveat from experience: a low total is necessary but not sufficient —
+  DOUBLE_EDGE scored 31 and still failed three rounds, because composing nine
+  already-exact components across a 141-frame window is its own kind of hard.
+  Prefer a small script AND few components together.
 - **Notes — the headline mechanism finding: the display latch is per-TASK, and
   the lane's working rule was wrong.** Before this session the lane believed
   "sprite-driven displays one frame after RAM, task-driven displays two." That
@@ -67,7 +75,16 @@
   showed the corrected reducer exact on every affine field. **The premise held:
   the missing artifact was the change map, not the difficulty of the move.**
   A follow-up round made the reducer load-bearing (pins + seam) so it cannot rot
-  as dead code again.
+  as dead code again. The promotion round that followed was also cap-killed, with
+  the draw case, portable and both fixtures committed and two test files left
+  uncommitted; the supervisor salvaged those two files unchanged, verified both
+  portables at **141/141 component and framebuffer, exit 0, both orientations**
+  with `counterPortable` held as a control at 88/88, re-validated the reducer
+  against its own probe after the worker's edits, and then wrote the coverage
+  entry and moved the inventory pin itself. **Three of this session's nine
+  launches were cap-killed and all three were salvaged in full** — the pattern
+  that makes that cheap is workers committing green intermediate state rather
+  than holding one big change.
 - **Notes — briefs that pre-supply mechanical facts keep paying.** Every round
   this session got script-pointer bounds from `arm-none-eabi-nm` (these labels are
   NOT in the linker map; `bin/oracle symbols` returns null), the move id, the
@@ -93,19 +110,27 @@
   Tier-1 pin asserting equivalence with the shared port over the observable range.
   COUNTER and DOUBLE_EDGE do import their shared ports (`slideMon.ts`,
   `shakeMon.ts`, `shakeMonInPlace.ts`) directly, which is the preferred shape.
-- **Notes — one honest non-result.** `AnimTask_ShakeMonInPlace`'s display lag is
-  **NOT DETERMINED**. Its window is fully overlapped by DOUBLE_EDGE's forward
-  rotation and BG white-blend ramp in both orientations; the best fit is RAM+1 and
-  it explains the player-back change map on every frame, but one opponent-front
-  toggle frame is static and contradicts it. Recorded as undetermined rather than
-  guessed — the promotion round should settle it from the portable.
+- **Notes — the honest non-result got settled, and the answer was neither
+  candidate.** The pin round recorded `AnimTask_ShakeMonInPlace`'s display lag as
+  **NOT DETERMINED**: its window is fully overlapped by DOUBLE_EDGE's forward
+  rotation and BG white-blend ramp, the best fit was RAM+1, and that fit explained
+  every player-back frame but contradicted one opponent-front toggle. Refusing to
+  guess was the right call, because the promotion round then measured a rule that
+  is neither RAM+1 nor RAM+2: **the shake displays PAIR-ALIGNED.** Its RAM writes
+  come in two-frame pairs at the even ages 80..100, the odd-age writes never reach
+  a displayed frame at all, so the displayed value at display age A is the RAM
+  pair containing A-1 (each value holding two displayed frames) and the RAM
+  age-101 restore shows at displayed age 103. That rule is exact on BOTH
+  orientations, and it is pinned in `tests/animation/doubleEdge.test.ts` via the
+  exported `doubleEdgeRamShakeX2` / `doubleEdgeDisplayedShakeX2` pair. A guessed
+  RAM+1 would have shipped a draw case that was wrong on one orientation.
 - **For the main program:** nothing blocking. No boundary widening, no new
   unsupported barriers, no controller or battle-state ownership taken, no
   animation deferrals opened. Engine contact stayed inside
   `src/engine/battleScene.ts` animation draw cases plus the
   `src/animation/sceneOnPresentation.ts` seam; every engine diff this session was
   purely additive with zero deletions.
-  `tests/animation/factoryAnimationInventory.test.ts` now pins **130 exact / 146
+  `tests/animation/factoryAnimationInventory.test.ts` now pins **131 exact / 145
   unsupported** — that pin moves on every promotion, so a fold that resolves
   `ANIMATION_COVERAGE.json` must re-run it. One housekeeping note for whoever
   edits that file next: it is serialized at **one space per nesting level**
