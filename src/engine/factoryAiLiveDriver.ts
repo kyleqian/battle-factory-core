@@ -68,6 +68,7 @@ const MOVE_NONE = 0;
 const SIDE_STATUS_REFLECT = 1 << 0;
 const SIDE_STATUS_LIGHTSCREEN = 1 << 1;
 const SIDE_STATUS_SAFEGUARD = 1 << 5;
+const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
 const B_WEATHER_SANDSTORM = (1 << 3) | (1 << 4);
 const B_WEATHER_SUN = (1 << 5) | (1 << 6);
@@ -357,6 +358,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       ...(target.tauntTimer !== 0 ? { isTaunted: true } : {}),
       ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) !== 0
         ? { isInfatuated: true }
+        : {}),
+      ...((target.status2 & STATUS2_ESCAPE_PREVENTION) !== 0
+        ? { isEscapePrevented: true }
         : {}),
       ...((target.status3 & BATTLE_SCRIPT_STATUS3_YAWN) !== 0
         ? { hasYawn: true }

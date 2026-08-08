@@ -3195,3 +3195,34 @@ describe("AI_CBM_DreamEater (data/battle_ai_scripts.s:242-245, EFFECT_DREAM_EATE
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
   });
 });
+
+describe("AI_CBM_CantEscape (data/battle_ai_scripts.s:430-433, EFFECT_MEAN_LOOK)", () => {
+  const MOVE_MEAN_LOOK = 212;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("target already trapped JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_MEAN_LOOK, target({ isEscapePrevented: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("target not trapped FALLS THROUGH to end at zero", () => {
+    expect(run(MOVE_MEAN_LOOK, target())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+});

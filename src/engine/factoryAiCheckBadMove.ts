@@ -308,6 +308,12 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    */
   isAsleep?: boolean;
   /**
+   * Whether `gBattleMons[AI_TARGET].status2 & STATUS2_ESCAPE_PREVENTION` is
+   * nonzero -- `AI_CBM_CantEscape`'s single gate (EFFECT_MEAN_LOOK, Block,
+   * Spider Web). Optional, defaulting to false.
+   */
+  isEscapePrevented?: boolean;
+  /**
    * `gBattleMons[AI_TARGET].level` -- `AI_CBM_OneHitKO`'s final
    * `if_level_cond 1` (less-than) gate operand. Optional, defaulting to 0
    * (the neutral "not lower" outcome when omitted, so the level gate never
@@ -1804,6 +1810,18 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_MEAN_LOOK -> AI_CBM_CantEscape
+  // (`data/battle_ai_scripts.s:161,430-433`): target already trapped rejects
+  // at -10.
+  if (move.effect === "EFFECT_MEAN_LOOK") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmCantEscape(target.isEscapePrevented ?? false),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -2296,4 +2314,15 @@ function runCbmDreamEater(
     return -8;
   }
   return computeAiEffectiveness(moveType, target.types) === 0 ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_CantEscape` (`data/battle_ai_scripts.s:430-433`, EFFECT_MEAN_LOOK/
+ * EFFECT_BLOCK/EFFECT_SPIDER_WEB): a single
+ * `if_status2 AI_TARGET, STATUS2_ESCAPE_PREVENTION, Score_Minus10` -- the
+ * trap is penalized when the target is already trapped. Zero ability/type
+ * reads.
+ */
+function runCbmCantEscape(targetEscapePrevented: boolean): number {
+  return targetEscapePrevented ? -10 : 0;
 }
