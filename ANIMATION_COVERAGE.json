@@ -606,6 +606,31 @@
    ]
   },
   {
+   "move": "MOVE_CRUNCH",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_HOUNDOUR set 119 (HOUNDOUR 228, all four active slots CRUNCH move 242 so the Factory AI has one legal choice) against legal ONIX in both orientations; both pass the complete move-owned Scene-ON window twice fresh with evidence 8aefff069fb3a7595f08e45b0e97114217e59b171499341d3e4540b5638fec32 / raw RGB bf3360b12a1810a883203bf025f370a82bcc39508a2613771ef7f47f7e516a6c for the 142-frame player-back window (frames 74-215, first frame clean) and evidence f4ebd54457d448ae2108fdbf97d325375daffb4f24b421ea0bfa8184578a3aee / raw RGB 8b7215a7116500641958b1a0345ee264458b9be86461f8451a2618273d56ee8e for the 142-frame opponent-front window (frames 78-219, structurally identical +4 on every frame, first frame clean), both isolated by sBattleAnimScriptPtr within the Move_CRUNCH..Move_CLAMP label bounds; both orientations 142/142 component AND framebuffer exact",
+    "the reducer composes only already-exact components with zero new ones: the `fadetobg BG_DARK`/`restorebg` pair (the FAINT_ATTACK dark-BG asset + hardware BLDY darken, mGBA `_darken` 8-bit-channel `c - floor(c*y/16)` evaluated on the shifted component for the R-floor/G-B-ceil rounding the oracle shows), the sharp-teeth pair + gAffineAnims_Bite rotations (MOVE_BITE/bite.ts art, 64x64 affine subpriority 28), the two basic hitsplats (IRON_TAIL/TAKE_DOWN/BODY_SLAM painter, matrix 303, x offset mirrored for a player-side target), and AnimTask_ShakeMon y2 blocks (IRON_TAIL/POISON_TAIL); the battlers are OBJ outside the BLDCNT 0x00E8 blend mask so they never fade toward black and never take the dark palette bank (banks 0/1 vs the swapped bank 2)",
+    "displayed timing is a uniform one-age latch (no TAKE_DOWN windup two-frame case): the dark fade-out/static/fade-in, the teeth, the hitsplats, and the shake y2 all render exactly one frame after their RAM cause (change-map confirmed); `setalpha 12,8` (BLDCNT 0x3f40) and `blendoff` are RAM truth only - no blend pixel step, like CRUSH_CLAW; the restore fade-in reducer value is one RAM age ahead (reducer 17..0 vs probe gPaletteFade.y 16..0), and the ShakeMon first write also zeroes the ONIX front-idle x2=1 residual",
+    "displayed frames (player-back; opponent-front +4 on every frame): fade-out 86-101, fully-dark 102-104, fade-in 105-120, dark field + battlers 121-177 (the whole field swaps to the BG_DARK pink bank, change-map 18131px each fade step), teeth round 1 123-141 gone 142, hitsplat 1 135-144 gone 145, shake round 1 y2=7 135/139-141/145-147, teeth round 2 149-168 gone 168, hitsplat 2 161-170 gone 171, shake round 2 y2=8 161/165-167 (the final RAM 169 toggle is net-zero), teardown fade 178-193 static 194-197 fade-in 198-213 static 214-215"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-crunch-player-houndour-opponent-onix.json",
+    "tools/battle-lab/mechanic-crunch-opponent-houndour-player-onix.json",
+    "tools/compare/fixtures/crunch-player-houndour-opponent-onix.json",
+    "tools/compare/fixtures/crunch-opponent-houndour-player-onix.json",
+    "tools/compare/crunchProbe.py",
+    "tools/compare/crunchPortable.ts",
+    "tools/compare/evidence/crunch-changemap-player.txt",
+    "tools/compare/evidence/crunch-changemap-opponent.txt",
+    "src/animation/crunch.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/crunch.test.ts",
+    "tests/animation/crunchEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_CRUSH_CLAW",
    "status": "exact",
    "covered": [
@@ -2975,8 +3000,8 @@
     "src/engine/battleScene.ts",
     "tests/animation/tailWhip.test.ts",
     "tests/animation/tailWhipEvidence.test.ts"
-    ]
-   },
+   ]
+  },
   {
    "move": "MOVE_TAKE_DOWN",
    "status": "exact",
