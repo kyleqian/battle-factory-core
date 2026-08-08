@@ -536,7 +536,7 @@ describe("AI_CBM_HighRiskForDamage via Endeavor (dispatch :203)", () => {
 });
 
 describe("AI_CBM_HighRiskForDamage via Superpower (dispatch :200)", () => {
-  const MOVE_SUPERPOWER = 289; // EFFECT_SUPERPOWER, TYPE_FIGHTING, power 120
+  const MOVE_SUPERPOWER = 276; // EFFECT_SUPERPOWER, TYPE_FIGHTING, power 120
 
   function superpowerTarget(
     overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
