@@ -1,5 +1,71 @@
 # Animation coverage
 
+## MOVE_DOUBLE_EDGE pinned and wired — stays unsupported, 130/276 exact unchanged (2026-08-08 worker, pin round)
+
+- **State:** DOUBLE_EDGE stays **unsupported**. Coverage unchanged at **130/276
+  exact, 0 partial, 0 staged, 146 unsupported**. Nothing promoted; no pin
+  moved; no boundary widening; no shared-helper edit. This is the pin round —
+  the 340-line dead reducer is now load-bearing; promotion to exact (both
+  orientations, a portable at full-window exact) is the NEXT round's job.
+- **Did:** wrote `tests/animation/doubleEdge.test.ts` (11 pins, modelled on
+  counter.test.ts — the shared elliptical lunge, the two gSlideMonTo* slides
+  and a basic hitsplat) and added `SceneOnDoubleEdgeConfig` /
+  `SceneOnDoubleEdgeView` / `sceneOnDoubleEdgeView` to
+  `src/animation/sceneOnPresentation.ts` following
+  `SceneOnCounterConfig`/`sceneOnCounterView` exactly (same config shape, same
+  union memberships in `SceneOnMoveConfig` and `createSceneOnMovePresentation`,
+  same view shape). HITMONTOP was already in the presentation species union
+  (COUNTER added it), so no species work. No engine file touched.
+- **Measured (from the banked change maps + the supervisor's validated probe
+  facts, no new oracle run):** window **141 frames both orientations** —
+  player-back **80..220**, opponent-front **84..224**, an **orientation shift of
+  +4**. The pins lock: the 18/6/**2**/4 two-loop lunge (via the shared `wrap.ts`
+  port, both orientations incl. the mirrored width), the attacker slide +20 and
+  target slide -32 as REUSE pins against `slideMon.ts` (the opponent-side target
+  holds **+31, not -32** — the shared port's truncating Q8.8 division; the
+  player-side target holds exactly -32), the `ShakeMonInPlace(4,0,12,1)` x2 as a
+  REUSE pin against `shakeMonInPlace.ts` (the shake is added to BOTH battlers'
+  x2 over ages 80-100 — this is what makes the change-map bbox span both
+  battlers), the `RotateMonSpriteToSide` matrices at their boundary ages
+  (forward span 256..2048, reversal 2304..3840, identity reset with the
+  persistent y2=12), the rotation-derived y2 applying only to the player-side
+  battler (dead-code correction #1), the hitsplat ages 70-78 at the mirrored
+  target-relative anchor, and the attacker-white (10 at 4-7/13-18) + BG-white
+  (16 at 63-82, ramping to 0 at 111) blend curves. The **ONIX front-idle
+  exclusion is pinned explicitly**: player-back `targetOffset.x2` reads 0 for
+  ages 0-69 while the probe reads 1 (ONIX front idle hold) — a species-idle
+  property the draw case supplies, not a reducer bug (TAKE_DOWN/SLASH/LICK/
+  COUNTER convention); opponent-front has no such hold (ONIX back rests at x2=0)
+  and mismatches zero fields.
+- **Next (exactly what a promotion round still needs):** the MOVE_DOUBLE_EDGE
+  draw case in `battleScene.ts` (must split the display latch per the two lags
+  below), a `tools/compare/doubleEdgePortable.ts` at full-window exact (141
+  frames x 2 axes x 2 orientations), the two fixtures, the evidence test
+  (`tests/animation/doubleEdgeEvidence.test.ts`), the coverage entry and the
+  inventory pin 130 -> 131 exact / 146 -> 145 unsupported. The ellipse task was
+  per-move-profiled (`wrap.ts` port, two loops vs COUNTER's one) — a promotion
+  round must verify ITS display latch, not inherit COUNTER's +2.
+- **Notes — the two display lags read off the banked change maps (first time
+  either is measured in this lane), one line each:** **`AnimTask_RotateMonSpriteToSide`
+  is TASK-driven and renders RAM + 2** — isolated restore-phase window: static
+  frames 193-200, first pixel change 201 = RAM 119 + 2, seven consecutive
+  change frames for the seven restore steps (119-125), identity reset at RAM 126
+  landing with the attacker origin slide at 208, confirmed in both orientations
+  (opponent restore 119-125 -> changes 205-211). **`AnimTask_ShakeMonInPlace` is
+  NOT DETERMINED from the change maps** — its window (RAM ages 80-100) is fully
+  overlapped in both orientations by the forward rotation (80-87) and the BG
+  white-blend ramp (83-111); its 2-frame toggle cadence reads clearly in the
+  clean half (odd displayed frames) and the best fit (RAM + 1 with the task's
+  tick 0 at RAM age 80) explains the player-back map on every frame, but the
+  opponent-front frame 185 (the last toggle) is static, so no single lag
+  reproduces both maps byte-for-byte — reported honestly as not determined
+  rather than guessed (a fresh single-axis probe is that round's first job).
+- **Notes — `npm test` green on the targeted set (doubleEdge 11/11, counter
+  9/9, boundary ratchet 3/3, inventory 6/6 at 130/146) at commit time; the
+  full-suite + build verification is this round's finish step.** No boundary
+  widening, no new unsupported-branch barrier, no shared-helper edit; the only
+  engine contact will be the promotion round's draw case.
+
 ## MOVE_COUNTER promoted to exact — 130/276, both orientations at 88/88 portable-exact (2026-08-08 worker, round B)
 
 - **State:** coverage advanced **129→130/276 exact**, 0 partial, 0 staged,
