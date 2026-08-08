@@ -819,6 +819,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     evasionStage: view.attacker.statStages.evasion,
     currentWeather: view.attacker.currentWeather,
     level: view.attacker.level,
+    isFirstTurn: view.attacker.isFirstTurn,
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [

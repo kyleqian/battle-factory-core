@@ -369,6 +369,14 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * defaulting to 0 (the neutral "not lower" outcome when omitted).
    */
   level?: number;
+  /**
+   * `gDisableStructs[AI_USER].isFirstTurn` (0-2) -- `AI_CBM_FakeOut`'s
+   * single `is_first_turn_for AI_USER` / `if_equal FALSE` gate. Optional,
+   * defaulting to 0 ("not first turn"), so Fake Out scores its penalty when
+   * the field is absent -- the same absent-defaults-to-0 convention as
+   * `battleScriptRulesContext.ts`.
+   */
+  isFirstTurn?: number;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -1613,6 +1621,17 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_FAKE_OUT -> AI_CBM_FakeOut
+  // (`data/battle_ai_scripts.s:187,506-509`).
+  if (move.effect === "EFFECT_FAKE_OUT") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmFakeOut(input.attacker.isFirstTurn ?? 0),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -1876,6 +1895,24 @@ function runCbmLeechSeed(
     draws: Object.freeze([]),
     scoreDelta: blocked ? -10 : 0,
   });
+}
+
+/**
+ * `AI_CBM_FakeOut` (`data/battle_ai_scripts.s:506-509`):
+ *
+ * ```
+ * is_first_turn_for AI_USER
+ * if_equal FALSE, Score_Minus10
+ * end
+ * ```
+ *
+ * `Cmd_is_first_turn_for` writes `funcResult = gDisableStructs[AI_USER]
+ * .isFirstTurn` (0-2); `if_equal FALSE` (0) JUMPs to Score_Minus10 when the
+ * attacker is NOT in its first turn (Fake Out only works on the first turn).
+ * Zero `get_ability` calls, zero RNG.
+ */
+function runCbmFakeOut(attackerIsFirstTurn: number): number {
+  return attackerIsFirstTurn === 0 ? -10 : 0;
 }
 
 /**

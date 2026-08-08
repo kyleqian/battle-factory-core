@@ -738,6 +738,46 @@ describe("AI_CBM_LeechSeed (data/battle_ai_scripts.s:410-416, EFFECT_LEECH_SEED)
   });
 });
 
+describe("AI_CBM_FakeOut (data/battle_ai_scripts.s:506-509, EFFECT_FAKE_OUT)", () => {
+  const MOVE_FAKE_OUT = 252; // EFFECT_FAKE_OUT, TYPE_NORMAL, power 40
+
+  // A known ability suppresses the universal Soundproof draw so the handler
+  // body's own zero-RNG shape is what the draw count isolates.
+  const FAKE_OUT_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    ...MAROWAK,
+    knownAbility: "ABILITY_ROCK_HEAD",
+  });
+
+  it("first turn (isFirstTurn nonzero) FALLS THROUGH to end at zero", () => {
+    const result = run(
+      MOVE_FAKE_OUT,
+      FAKE_OUT_TARGET,
+      undefined,
+      { atkStage: 6, defStage: 6, isFirstTurn: 2 },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("not first turn (isFirstTurn 0) JUMPs to Score_Minus10", () => {
+    const result = run(
+      MOVE_FAKE_OUT,
+      FAKE_OUT_TARGET,
+      undefined,
+      { atkStage: 6, defStage: 6, isFirstTurn: 0 },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("absent isFirstTurn defaults to 0 (not first turn) and scores the penalty", () => {
+    const result = run(MOVE_FAKE_OUT, FAKE_OUT_TARGET, undefined, { atkStage: 6, defStage: 6 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+});
+
 const MOVE_SURF = 57;
 const MOVE_ROCK_SLIDE = 157;
 const MOVE_BODY_SLAM = 34;
