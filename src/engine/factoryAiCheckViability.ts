@@ -1588,6 +1588,198 @@ function runCvTrap(input: Readonly<{
   });
 }
 
+const AI_CV_SANDSTORM_RESISTANT_TYPES: ReadonlySet<string> = new Set([
+  "TYPE_GROUND", "TYPE_ROCK", "TYPE_STEEL",
+]);
+
+/**
+ * `AI_CV_SemiInvulnerable` (`data/battle_ai_scripts.s:2197-2241`,
+ * EFFECT_SEMI_INVULNERABLE -- Fly/Dig/Dive/Bounce):
+ *
+ * ```
+ * AI_CV_SemiInvulnerable:
+ *     if_doesnt_have_move_with_effect AI_TARGET, EFFECT_PROTECT, AI_CV_SemiInvulnerable2
+ *     score -1
+ *     goto AI_CV_SemiInvulnerable_End
+ * AI_CV_SemiInvulnerable2:
+ *     if_status AI_TARGET, STATUS1_TOXIC_POISON, AI_CV_SemiInvulnerable_TryEncourage
+ *     if_status2 AI_TARGET, STATUS2_CURSED, AI_CV_SemiInvulnerable_TryEncourage
+ *     if_status3 AI_TARGET, STATUS3_LEECHSEED, AI_CV_SemiInvulnerable_TryEncourage
+ *     get_weather
+ *     if_equal AI_WEATHER_HAIL, AI_CV_SemiInvulnerable_CheckSandstormTypes   ; non-BUGFIX swap
+ *     if_equal AI_WEATHER_SANDSTORM, AI_CV_SemiInvulnerable_CheckIceType     ; non-BUGFIX swap
+ *     goto AI_CV_SemiInvulnerable5
+ * AI_CV_SemiInvulnerable_CheckSandstormTypes:
+ *     get_user_type1
+ *     if_in_bytes AI_CV_SandstormResistantTypes, AI_CV_SemiInvulnerable_TryEncourage
+ *     get_user_type2
+ *     if_in_bytes AI_CV_SandstormResistantTypes, AI_CV_SemiInvulnerable_TryEncourage
+ *     goto AI_CV_SemiInvulnerable5
+ * AI_CV_SemiInvulnerable_CheckIceType:
+ *     get_user_type1
+ *     if_equal TYPE_ICE, AI_CV_SemiInvulnerable_TryEncourage
+ *     get_user_type2
+ *     if_equal TYPE_ICE, AI_CV_SemiInvulnerable_TryEncourage
+ * AI_CV_SemiInvulnerable5:
+ *     if_target_faster AI_CV_SemiInvulnerable_End
+ *     get_last_used_bank_move AI_TARGET
+ *     get_move_effect_from_result
+ *     if_not_equal EFFECT_LOCK_ON, AI_CV_SemiInvulnerable_TryEncourage
+ *     goto AI_CV_SemiInvulnerable_End
+ * AI_CV_SemiInvulnerable_TryEncourage:
+ *     if_random_less_than 80, AI_CV_SemiInvulnerable_End
+ *     score +1
+ * AI_CV_SemiInvulnerable_End:
+ *     end
+ * ```
+ *
+ * The pinned checkout is non-BUGFIX (`include/config.h:48`), so the two
+ * weather-gate branches are the SWAPPED `#else` pair confirmed in the ROM
+ * bytes (Hail @ 0x082dda5c jumps to `CheckSandstormTypes`, Sandstorm @
+ * `0x082dda63` to `CheckIceType`) -- the AI stalls while taking Hail damage
+ * on a Ground/Rock/Steel user and while taking Sandstorm damage on an Ice
+ * user. A target with a Protect-effect move in BattleHistory scores -1 (the
+ * stall is pointless). Otherwise any target toxic/cursed/leech-seeded
+ * reaches the roll directly; weather Hail + user type in the Ground/Rock/
+ * Steel list (or Sandstorm + Ice type) reaches it too; everything else falls
+ * into `SemiInvulnerable5` whose only route to the roll is a target whose
+ * last-used move's effect is NOT Lock-On. Exactly ONE `if_random_less_than`
+ * site (the `<80` TryEncourage roll) plus the `if_target_faster` tie-break.
+ * `get_last_used_bank_move AI_TARGET` + `get_move_effect_from_result`
+ * ALWAYS overwrite funcResult once `SemiInvulnerable5`'s target-faster gate
+ * is passed (doc §27.1 writes-conditionally); earlier type/weather writes
+ * are the exit value on every path that stops before them.
+ */
+function runCvSemiInvulnerable(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  staleFuncResultFallback: AiWeatherValue | undefined;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const targetHasProtect = (input.target.knownMoves ?? []).some(
+    (moveId) => MOVES_BY_ID.get(moveId)?.effect === "EFFECT_PROTECT",
+  );
+  if (targetHasProtect) {
+    return Object.freeze({
+      rng: input.rng,
+      draws: Object.freeze([]),
+      scoreDelta: -1,
+      funcResultAfter: input.staleFuncResultFallback,
+    });
+  }
+
+  // No Protect in target history: the status gates jump straight to the roll
+  // BEFORE get_weather ever writes, so the carry survives on those exits.
+  const statusJump = (input.target.isToxicPoisoned ?? false)
+    || (input.target.isCursed ?? false)
+    || (input.target.isLeechSeeded ?? false);
+
+  const tryEncourage = (
+    rng: BattleRngState,
+    ordinal: number,
+    funcResultAfter: AiWeatherValue | undefined,
+  ): Readonly<{
+    rng: BattleRngState;
+    draws: readonly FactoryAiCheckViabilityDraw[];
+    scoreDelta: number;
+    funcResultAfter: AiWeatherValue | undefined;
+  }> => {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-semi-invulnerable-roll`);
+    const jumped = roll.randomValue % 256 < 80;
+    return Object.freeze({
+      rng: roll.after,
+      draws: Object.freeze([Object.freeze({ ...roll, kind: "semi-invulnerable-roll" as const, jumped })]),
+      scoreDelta: jumped ? 0 : 1,
+      funcResultAfter,
+    });
+  };
+
+  if (statusJump) {
+    return tryEncourage(input.rng, input.drawOrdinalStart, input.staleFuncResultFallback);
+  }
+
+  // get_weather: non-BUGFIX `Cmd_get_weather` writes only when a real weather
+  // bit is set, so the value after it is the stale-fallback formula.
+  const weather = input.attacker.currentWeather;
+  const weatherWrite = weather ?? input.staleFuncResultFallback;
+
+  const userType1 = input.attacker.types[0];
+  const userType2 = input.attacker.types[1];
+
+  if (weather === AI_WEATHER_HAIL) {
+    // Non-BUGFIX: Hail -> CheckSandstormTypes (Ground/Rock/Steel resist).
+    if (AI_CV_SANDSTORM_RESISTANT_TYPES.has(userType1)) {
+      return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType1));
+    }
+    if (AI_CV_SANDSTORM_RESISTANT_TYPES.has(userType2)) {
+      return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType2));
+    }
+    // goto SemiInvulnerable5 -- funcResult is now type2 (last get_type write).
+    return semiInvulnerable5(typeFuncResultCollision(userType2));
+  }
+
+  if (weather === AI_WEATHER_SANDSTORM) {
+    // Non-BUGFIX: Sandstorm -> CheckIceType (Ice type resist).
+    if (userType1 === "TYPE_ICE") {
+      return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType1));
+    }
+    if (userType2 === "TYPE_ICE") {
+      return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType2));
+    }
+    // falls into SemiInvulnerable5 -- funcResult is now type2.
+    return semiInvulnerable5(typeFuncResultCollision(userType2));
+  }
+
+  // Weather Sun/Rain/none: goto SemiInvulnerable5 -- funcResult is the weather
+  // write (or stale carry).
+  return semiInvulnerable5(weatherWrite);
+
+  function semiInvulnerable5(lastWriteBefore: AiWeatherValue | undefined): Readonly<{
+    rng: BattleRngState;
+    draws: readonly FactoryAiCheckViabilityDraw[];
+    scoreDelta: number;
+    funcResultAfter: AiWeatherValue | undefined;
+  }> {
+    const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+    const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+    const draws: FactoryAiCheckViabilityDraw[] = [];
+    let rng = input.rng;
+    let ordinal = input.drawOrdinalStart;
+
+    let tieRoll = 0;
+    let tieDraw: ReturnType<typeof nextDraw> | null = null;
+    if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+      tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+      rng = tieDraw.after;
+      tieRoll = tieDraw.randomValue;
+      ordinal += 1;
+    }
+    const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+    if (tieDraw) {
+      draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+    }
+    if (strikesFirst === 1) {
+      // Target faster: End with the pre-existing write value.
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0, funcResultAfter: lastWriteBefore });
+    }
+
+    // get_last_used_bank_move AI_TARGET + get_move_effect_from_result always
+    // overwrite funcResult here: the effect id of the target's last move.
+    const lastMove = MOVES_BY_ID.get(input.target.lastUsedMoveId ?? 0);
+    const lastEffect = lastMove?.effect ?? "EFFECT_HIT";
+    const funcResultAfter = EFFECT_ID_IN_WEATHER_RANGE.get(lastEffect);
+    if (lastEffect === "EFFECT_LOCK_ON") {
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0, funcResultAfter });
+    }
+    // if_not_equal EFFECT_LOCK_ON -> TryEncourage (the roll continues off the
+    // same rng state, preserving ordinal order).
+    return tryEncourage(rng, ordinal, funcResultAfter);
+  }
+}
+
 /**
  * `AI_CV_FakeOut` (`data/battle_ai_scripts.s:2249-2251`, EFFECT_FAKE_OUT):
  *
@@ -4148,6 +4340,26 @@ export function runCheckViability(input: Readonly<{
       draws: fakeOut.draws,
       scoreDelta: fakeOut.scoreDelta,
       funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_SEMI_INVULNERABLE") {
+    // AI_CV_SemiInvulnerable (data/battle_ai_scripts.s:2197-2241) -- the
+    // non-BUGFIX (swapped) weather-gate pair, confirmed in the ROM bytes.
+    const semiInvulnerable = runCvSemiInvulnerable({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      staleFuncResultFallback: funcResultCarry,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: semiInvulnerable.rng,
+      draws: semiInvulnerable.draws,
+      scoreDelta: semiInvulnerable.scoreDelta,
+      funcResultAfter: semiInvulnerable.funcResultAfter,
     });
   }
 

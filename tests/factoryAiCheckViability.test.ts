@@ -5239,3 +5239,75 @@ describe("AI_CV_FakeOut (data/battle_ai_scripts.s:2249-2251)", () => {
     expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: 2, funcResultAfter: 1 });
   });
 });
+
+describe("AI_CV_SemiInvulnerable (data/battle_ai_scripts.s:2197-2241, non-BUGFIX)", () => {
+  const MOVE_FLY = 19; // EFFECT_SEMI_INVULNERABLE
+  const MOVE_PROTECT = 182; // EFFECT_PROTECT
+  const MOVE_LOCK_ON = 199; // EFFECT_LOCK_ON
+
+  function semiRun(
+    rngValue: number,
+    attackerOverrides: Record<string, unknown> = {},
+    targetOverrides: Record<string, unknown> = {},
+  ) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_FLY,
+      attacker: { ...NEUTRAL_BATTLER, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, knownMoves: [], lastUsedMoveId: 0, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "semi",
+    });
+  }
+
+  it("target HAS a Protect-history move: deterministic -1, zero draws, carry preserved", () => {
+    const result = semiRun(1, {}, { knownMoves: [MOVE_PROTECT] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [], funcResultAfter: 2 });
+  });
+
+  it("target toxic-poisoned reaches the roll before get_weather; roll <80 JUMPs to End", () => {
+    // seed 3 -> low byte 83 (>= 80, FALL-THROUGH to +1).
+    const result = semiRun(1, {}, { isToxicPoisoned: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "semi-invulnerable-roll", jumped: false });
+  });
+
+  it("status-jump path preserves the carry (no get_weather/type/last-move write)", () => {
+    const result = semiRun(3, {}, { isLeechSeeded: true });
+    expect(result).toMatchObject({ kind: "scored", funcResultAfter: 2 });
+  });
+
+  it("non-BUGFIX swap: weather Hail + user Ground type reaches the roll (CheckSandstormTypes)", () => {
+    const result = semiRun(1, { currentWeather: 3, types: ["TYPE_GROUND", "TYPE_NORMAL"] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("non-BUGFIX swap: weather Hail + user Ice type does NOT reach the roll (falls to SemiInvulnerable5)", () => {
+    // Attacker faster (120 > 5) avoids the SemiInvulnerable5 tie-break draw;
+    // no status, last move effect != LOCK_ON, so the <80 roll still runs.
+    const result = semiRun(1, { currentWeather: 3, types: ["TYPE_ICE", "TYPE_NORMAL"], speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("non-BUGFIX swap: weather Sandstorm + user Ice type reaches the roll (CheckIceType)", () => {
+    const result = semiRun(1, { currentWeather: 2, types: ["TYPE_NORMAL", "TYPE_ICE"] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("weather Sun: falls to SemiInvulnerable5; target last move Lock-On ends at zero", () => {
+    const result = semiRun(1, { currentWeather: 0, speed: 120 }, { speed: 5, lastUsedMoveId: MOVE_LOCK_ON });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.funcResultAfter).toBe(undefined); // EFFECT_LOCK_ON (94) never collides
+  });
+
+  it("weather Sun, no status, last move effect != LOCK_ON: the <80 roll decides +1", () => {
+    const result = semiRun(1, { currentWeather: 0, speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "semi-invulnerable-roll", jumped: false });
+  });
+});
