@@ -1,5 +1,95 @@
 # Animation coverage
 
+## MOVE_CRUNCH staged — both orientations isolated at 142 frames; scenarios + dense probe + change maps banked (2026-08-08 worker)
+
+- **State:** CRUNCH stays **unsupported**. Coverage unchanged at **126/276 exact, 0
+  partial, 0 staged, 150 unsupported**. Nothing promoted; no pin moved. This is the
+  staging round; promotion to exact (both orientations, a portable at full-window
+  exact) is the NEXT round's job.
+- **Did:** staged two legal mechanicLab scenarios (HOUNDOUR `SPECIES_HOUNDOUR` 228 —
+  FRONTIER_MON_HOUNDOUR, set 119, all four active slots CRUNCH 242, vs legal ONIX
+  95; player-back `mechanic-crunch-player-houndour-opponent-onix.json` and
+  opponent-front `mechanic-crunch-opponent-houndour-player-onix.json`, both verified
+  to run with currentMove 242) and `tools/compare/crunchProbe.py` — a dense probe
+  copied from `takeDownProbe.py` with script-pointer isolation to
+  `Move_CRUNCH` (0x082d05b3)..`Move_CLAMP` (0x082d0663) capturing every
+  `gSharpTeethSpriteTemplate` bite sprite (all four, with affine animation number,
+  position, velocity and data words — `AnimBite`/`_Step1`/`_Step2`), both
+  `gBasicHitSplatSpriteTemplate` hitsplats, both `AnimTask_ShakeMon`/`_Step`
+  target-shake tasks, the `fadetobg`/`restorebg` machinery (`Task_FadeToBg` +
+  `gPaletteFade` struct + BLDCNT/BLDALPHA/BLDY + BG palettes — CRUNCH's dark fade is
+  a real palette/BG change), both battlers' sprites, all 512 palettes, software +
+  hardware OAM and matrices, per-frame raw RGB + sha256. NOTE: keeps the TRUE sprite
+  offsets `0x2a`/`0x2b`/`0x2c` for animNum/animCmdIndex/animDelayCounter like
+  takeDownProbe (never `0x18`/`0x19`). Probe run: `python3 tools/run-mgba-probe.py
+  <out.json> -- python3 tools/compare/crunchProbe.py <scenario.json> <out.json>
+  <rgb-dir> 242`. Plus the displayed-timing change maps banked under
+  `tools/compare/evidence/crunch-changemap-*.txt`.
+- **Measured (fresh runs, both orientations, deterministic): move-owned window 142
+  frames each — player-back 74..215, opponent-front 78..219** (script first
+  in-bounds .. first inactive cleanup). **Both first frames are CLEAN** — no
+  outgoing-teardown contamination: player frame 74 / opponent frame 78 are
+  pixel-identical to their next 4 frames, software OAM byte-identical to frame 2,
+  hw OAM slots 11+ off-screen y=160, no shadow sprite. (The only quirk: hw OAM
+  slots 9/10 show one-frame-stale content at the first frame — the hw OAM lags the
+  software OAM by one vblank — but it renders zero pixels; the first ~10 frames of
+  each window are the `loadspritegfx` prefix and byte-identical on screen. No
+  `skipProbeFrames` needed, unlike TAKE_DOWN's opponent-front.) Determinism: player
+  re-run byte-identical sha256 sequence (first/last `9c2b60a26f70`/`b54fa1b31c69`).
+- **RAM timeline (player-back; opponent-front is every frame +4 — the two
+  orientations are structurally identical, which the reducer must parameterize):
+  ** monbg ANIM_TARGET (target→BG1, sprite invisible) RAM 81; `fadetobg BG_DARK`
+  Task_FadeToBg + palette fade 0→16 RAM 84-100, BG_DARK load 102, fade-in 16→0 RAM
+  103-119, done 121; `setalpha 12,8` (BLDCNT 0x3f40 / BLDALPHA 0x080c) RAM 122,
+  cleared by `blendoff` RAM 171 (RAM-truth only — no blend pixel step, like
+  CRUSH_CLAW); SE_M_BITE RAM 122 and 148 (rounds 1/2). **Teeth** (gSharpTeeth
+  ANIM_TAG_SHARP_TEETH, 64x64 affine, subpriority 28): round 1 created RAM 122 at
+  target-center ∓32 with xVel +819/+819 and −819/−819 (script animation 1 / 5),
+  converge x2 3..31 over RAM 122-131, retract to 3 over 132-140, destroyed 141;
+  round 2 created RAM 148 (x=+32,−32 anim 7 vel −819/+819 and x=−32,+32 anim 3 vel
+  +819/−819), destroyed 167. The script `animation` arg is the `gAffineAnims_Bite`
+  rotation: anim1 {181,−181,181,181} 45°, anim5 {−181,181,−181,−181} 225°, anim7
+  {181,181,−181,181} −45°, anim3 {−181,−181,181,−181} 135° (256·cos/sin). **Basic
+  hitsplats** (ANIM_TAG_IMPACT, static anim cmdIndex 0, matrix 303 scale):
+  created RAM 134 at target center x=−8 (168,42) / round 2 RAM 160 x=+8 (184,42),
+  destroyed 144 / 170. The x offset **mirrors for the player-side target**
+  (opponent-front round 1 at (80,88)=72+8, round 2 at (64,88)=72−8 — BODY_SLAM
+  convention). **AnimTask_ShakeMon(0, 7/8, 5/4, 2)** on the target sprite: round 1
+  task RAM 134-146, y2=7 blocks at [134], [138-140], [144-146] (0 elsewhere),
+  destroyed 147; round 2 task RAM 160-169, y2=8 blocks at [160], [164-166],
+  destroyed 170 (num=4 makes the final toggle net-zero). `restorebg` (FadeToBg
+  bgId=−1) RAM 176, fade out 176-193 / in 196-213, done 214, `end` cleanup 215.
+- **Displayed-timing mapping (player-back; opponent-front identical +4 on every
+  frame; EVERY event displays exactly ONE frame after its RAM cause — no TAKE_DOWN
+  windup two-frame case): ** fade-out 86-101, fully-dark static 102-104, fade-in
+  105-120; teeth round 1 displayed 123-141, gone 142; hitsplat 1 displayed 135-144,
+  gone 145; shake round 1 y2=7 displayed 135, 139-141, 145-147 (isolated change-map
+  events at 145 = shake 0→7 + hitsplat1 gone, and 148 = shake 7→0 & destroy); teeth
+  round 2 displayed 149-168, gone 168 (teeth RAM 167 + shake RAM 167 combined);
+  hitsplat 2 displayed 161-170, gone 171 (the 413px change-map event); shake round 2
+  y2=8 displayed 161, 165-167 (final RAM 169 toggle is net-zero → static);
+  teardown fade 178-193 + static 194-197 + fade-in 198-213, static tails 214-215.
+  Change map and hw OAM agree on every frame; the ledger defers to the change map.
+- **Next:** promote CRUNCH to exact. Build `src/animation/crunch.ts` (RAM-truth
+  reducer at the ages above: the fade-out/static/fade-in palette darken, monbg
+  invisible, setalpha/blendoff, the two teeth pairs' x2/y2 + rotation matrices,
+  the two hitsplats with the mirrored anchor, the ShakeMon y2 1/3-frame block
+  pattern) + Tier-1 `tests/animation/crunch.test.ts`; `SceneOnCrunchConfig`/View
+  seam in `sceneOnPresentation.ts`; the CRUNCH draw case in `battleScene.ts` (dark
+  bg via the existing `faintAttackBgState`/`faintAttackDarkBg`, sharp-teeth via the
+  BITE art); a `crunchPortable.ts` at full-window exact (142 frames × 2 axes, both
+  first frames kept); the fixtures, the coverage entry and the inventory pin
+  126->127 exact / 150->149 unsupported.
+- **Notes — zero new components.** Every component is already exact elsewhere:
+  `gSharpTeethSpriteTemplate`/`AnimBite` = MOVE_BITE/`bite.ts` and MOVE_SECRET_POWER;
+  `fadetobg BG_DARK`/`waitbgfadein`/`restorebg` = MOVE_FAINT_ATTACK (the
+  `faintAttackBgState`/`faintAttackDarkBg` machinery already wired in
+  `battleScene.ts` — reuse it, do not build a second dark-BG path); basic hitsplat =
+  IRON_TAIL/TAKE_DOWN/BODY_SLAM; `AnimTask_ShakeMon` = IRON_TAIL/POISON_TAIL/MUD_SHOT;
+  monbg/setalpha/clearmonbg/blendoff = BODY_SLAM/FAINT_ATTACK. No boundary widening,
+  no new unsupported-branch barrier, no shared-helper edit; the only engine contact
+  will be the promotion round's draw case.
+
 ## MOVE_TAKE_DOWN promoted to exact — 126/276, both orientations at 98/98 and 97/97 portable-exact (2026-08-08 worker)
 
 - **State:** coverage advanced **125→126/276 exact**, 0 partial, 0 staged, **151→150
