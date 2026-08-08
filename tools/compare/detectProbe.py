@@ -20,10 +20,16 @@ import subprocess
 import sys
 from pathlib import Path
 
-if len(sys.argv) not in (4, 5):
-    raise SystemExit("usage: detectProbe.py <scenario> <output.json> <rgb-dir> [move-id]")
+if len(sys.argv) not in (5, 6):
+    raise SystemExit("usage: detectProbe.py <scenario> <output.json> <rgb-dir> [move-id] [skip-first-frames]")
 SCENARIO, OUTPUT, RGB_DIR = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
-MOVE_ID = int(sys.argv[4]) if len(sys.argv) == 5 else 197
+MOVE_ID = int(sys.argv[4]) if len(sys.argv) >= 5 else 197
+# Drop the first N in-bounds move frames before recording. Used to start the
+# accepted window at the first display the move actually owns: the outgoing
+# animation's OAM teardown (the enemy shadow) lands one display behind the
+# script-pointer boundary, so the very first in-bounds frame can still show
+# the previous animation's sprite.
+SKIP_FIRST = int(sys.argv[5]) if len(sys.argv) == 6 else 0
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(
     path for path in (ROOT, *ROOT.parents)
@@ -186,9 +192,10 @@ def main() -> None:
 
     rows = []
     stopped = False
+    in_bounds_count = 0
 
     def capture(frame: int) -> None:
-        nonlocal stopped
+        nonlocal stopped, in_bounds_count
         if stopped:
             return
         snap = lab.snapshot()
@@ -200,6 +207,9 @@ def main() -> None:
             <= live_script_ptr
             < script_bounds["Move_FRUSTRATION"]
         ):
+            return
+        in_bounds_count += 1
+        if in_bounds_count <= SKIP_FIRST:
             return
         anim_active = bool(oracle.read_u8(anim_script_active))
         rgb = oracle.screen_rgb()

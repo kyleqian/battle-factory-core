@@ -10,9 +10,11 @@
   "presentationAge": 0
  },
  "denseWindow": {
-  "startFrame": 68,
+  "startFrame": 69,
   "endFrame": 177,
-  "frameCount": 110
+  "frameCount": 109,
+  "skipProbeFrames": 1,
+  "ageOffset": 1
  },
  "fieldProfile": {
   "playerHp": 142,
@@ -68,12 +70,12 @@
  },
  "battlerHeight": 48,
  "evidenceSchema": "detect-dense-evidence/v1",
- "evidenceSha256": "047cfd8c8f866838292396a1a61ddee8d2c8383e5135117340c39c7aba72c512",
- "secondFreshEvidenceSha256": "047cfd8c8f866838292396a1a61ddee8d2c8383e5135117340c39c7aba72c512",
- "rawRgbSha256": "ae9c9c505e4e0a82c61c38aa70d7df5ca8899bc5b39a8801cade66173ec837cc",
+ "evidenceSha256": "0506c00b85c97197b62933d1579621d45770a47ad8d2e953d73f72f1c175d737",
+ "secondFreshEvidenceSha256": "0506c00b85c97197b62933d1579621d45770a47ad8d2e953d73f72f1c175d737",
+ "rawRgbSha256": "2086c05aac41c72e0f82c265d658c7d27cee9e8cf3f7ce6d93498f0eb4c39549",
  "acceptance": {
-  "status": "partial",
+  "status": "exact",
   "framebufferMatching": 109,
-  "componentMatching": 110
+  "componentMatching": 109
  }
 }

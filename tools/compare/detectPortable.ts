@@ -12,7 +12,17 @@ import { createScratchDir } from "../lib/scratch.ts";
 interface Fixture {
   readonly scenario: string;
   readonly probe: string;
-  readonly denseWindow: { readonly startFrame: number; readonly endFrame: number; readonly frameCount: number };
+  readonly denseWindow: {
+    readonly startFrame: number;
+    readonly endFrame: number;
+    readonly frameCount: number;
+    /** Leading in-bounds probe frames dropped before the accepted window
+     *  (the outgoing animation's OAM teardown shows one display late). */
+    readonly skipProbeFrames?: number;
+    /** The reducer's move-relative age of the window's first frame (0 unless
+     *  the window starts one frame later than the reducer's baseline). */
+    readonly ageOffset?: number;
+  };
   readonly appStage: { readonly presentationAge: number };
   readonly attacker: unknown;
   readonly target: unknown;
@@ -83,6 +93,7 @@ const run = spawnSync(
     output,
     rgbDir,
     "197",
+    String(fixture.denseWindow.skipProbeFrames ?? 0),
   ],
   { cwd: root, encoding: "utf8" },
 );
@@ -177,7 +188,11 @@ const sparkleTemplate = probe.sparkleTemplate;
 let sparkleBaseTile: number | null = null;
 
 for (const frame of moveFrames) {
-  const age = frame.frame - fixture.denseWindow.startFrame;
+  // The reducer's ages are calibrated to the move script's first in-bounds
+  // frame; `ageOffset` lets the accepted window start one display later
+  // (after the outgoing animation's OAM teardown) without re-baselining the
+  // reducer's ramp boundaries.
+  const age = frame.frame - fixture.denseWindow.startFrame + (fixture.denseWindow.ageOffset ?? 0);
   const view = sceneOnDetectView({ ...stage, age });
   // The reducer's blends/vt are displayed-truth at `age` directly; the
   // sparkle reducer models the DISPLAYED sparkle (software spawn +1), so it

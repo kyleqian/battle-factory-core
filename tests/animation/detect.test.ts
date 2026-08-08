@@ -63,9 +63,9 @@ describe("detectSparkleAtAge", () => {
   });
   it("sits at attacker picture + (+20,-20) on the player side and (-20,-20) on the opponent side", () => {
     const sparkle = detectSparkleAtAge(60, { x: 72, y: 92 }, "player");
-    expect(sparkle).toEqual({ x: 92, y: 72, tileOffset: 48 });
+    expect(sparkle).toEqual({ x: 92, y: 72, tileOffset: 48, subpriority: 17 });
     const opponent = detectSparkleAtAge(60, { x: 176, y: 42 }, "opponent");
-    expect(opponent).toEqual({ x: 156, y: 22, tileOffset: 48 });
+    expect(opponent).toEqual({ x: 156, y: 22, tileOffset: 48, subpriority: 27 });
   });
   it("runs the 3-tick sAnim_SpinningSparkle frame program (0,16,32,48,64)", () => {
     const off = { x: 72, y: 92 };
@@ -76,6 +76,10 @@ describe("detectSparkleAtAge", () => {
     expect(detectSparkleAtAge(60, off, "player")?.tileOffset).toBe(48);
     expect(detectSparkleAtAge(63, off, "player")?.tileOffset).toBe(64);
     expect(detectSparkleAtAge(67, off, "player")?.tileOffset).toBe(64);
+  });
+  it("carries the absolute subpriority attacker-13 (17 player-back / 27 opponent-front)", () => {
+    expect(detectSparkleAtAge(60, { x: 72, y: 92 }, "player")?.subpriority).toBe(17);
+    expect(detectSparkleAtAge(60, { x: 176, y: 42 }, "opponent")?.subpriority).toBe(27);
   });
 });
 

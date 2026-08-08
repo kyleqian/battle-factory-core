@@ -32,6 +32,8 @@ export interface DetectSparkle {
   readonly x: number;
   readonly y: number;
   readonly tileOffset: 0 | 16 | 32 | 48 | 64;
+  /** Absolute OBJ subpriority (attacker-13: 17 player-back / 27 opponent-front). */
+  readonly subpriority: number;
 }
 
 export interface DetectState {
@@ -140,6 +142,10 @@ export function detectSparkleAtAge(
     x: attackerPictureOffset.x + (side === "player" ? 20 : -20),
     y: attackerPictureOffset.y - 20,
     tileOffset: detectSparkleTileOffsetAtAge(age),
+    // Absolute OBJ subpriority = attacker's own subpriority (30 player-back
+    // / 40 opponent-front) minus 13, so the sparkle always paints in front
+    // of both battlers; the back-to-front painter order flips with side.
+    subpriority: side === "player" ? 17 : 27,
   };
 }
 
