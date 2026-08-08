@@ -331,6 +331,10 @@ import {
   type MegaPunchState,
 } from "./megaPunch.ts";
 import {
+  megaKickAtAge,
+  type MegaKickState,
+} from "./megaKick.ts";
+import {
   rollingKickAtAge,
   type RollingKickState,
 } from "./rollingKick.ts";
@@ -1369,6 +1373,13 @@ export interface SceneOnMegaPunchConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnMegaKickConfig {
+  readonly move: "MEGA_KICK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnRollingKickConfig {
   readonly move: "ROLLING_KICK";
   readonly attacker: SceneOnPresentationBattler;
@@ -2178,6 +2189,7 @@ export type SceneOnMoveConfig =
   | SceneOnPoisonFangConfig
   | SceneOnHyperFangConfig
   | SceneOnMegaPunchConfig
+  | SceneOnMegaKickConfig
   | SceneOnRollingKickConfig
   | SceneOnLowKickConfig
   | SceneOnBiteConfig
@@ -2416,6 +2428,12 @@ export interface SceneOnHyperFangView extends HyperFangEffect {
 }
 
 export interface SceneOnMegaPunchView extends MegaPunchState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnMegaKickView extends MegaKickState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4237,6 +4255,25 @@ export function sceneOnMegaPunchView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...megaPunchAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first active `Move_MEGA_KICK` source display. */
+export function sceneOnMegaKickView(
+  state: SceneOnMovePresentationState,
+): SceneOnMegaKickView {
+  if (state.config.move !== "MEGA_KICK") {
+    throw new Error(`expected MEGA_KICK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...megaKickAtAge(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,

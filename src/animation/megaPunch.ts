@@ -1,6 +1,11 @@
 import { shakeMon2OffsetAtTick } from "./shakeMon2.ts";
 
 export type MegaPunchSide = "player" | "opponent";
+export type MegaPunchKickVariant = 0 | 1;
+export type MegaPunchKickSound =
+  | "SE_M_MEGA_KICK"
+  | "SE_M_VITAL_THROW2"
+  | "SE_M_MEGA_KICK2";
 
 export interface MegaPunchAffineMatrix {
   readonly pa: number;
@@ -9,7 +14,17 @@ export interface MegaPunchAffineMatrix {
   readonly pd: number;
 }
 
-export interface MegaPunchState {
+export interface MegaPunchKickProfile {
+  /** `gBattleAnimArgs[2]`: fist (0) for Punch, wide foot (1) for Kick. */
+  readonly fistVariant: MegaPunchKickVariant;
+  /** Fresh pointer-isolated receipt: setalpha's first RAM-visible age. */
+  readonly alphaFirstAge: number;
+  /** The move body's second source-owned sound cue. */
+  readonly secondSound: Exclude<MegaPunchKickSound, "SE_M_MEGA_KICK">;
+  readonly secondSoundAge: number;
+}
+
+export interface MegaPunchKickState {
   readonly active: boolean;
   readonly impactLoaded: boolean;
   readonly handsAndFeetLoaded: boolean;
@@ -26,18 +41,40 @@ export interface MegaPunchState {
   readonly fist: Readonly<{
     x: number;
     y: number;
-    variant: 0;
+    variant: MegaPunchKickVariant;
     matrix: MegaPunchAffineMatrix;
   }> | null;
   readonly hitsplatVisible: boolean;
   readonly targetOffset: Readonly<{ x2: number; y2: number }>;
-  readonly sound: "SE_M_MEGA_KICK" | "SE_M_VITAL_THROW2" | null;
+  readonly sound: MegaPunchKickSound | null;
   readonly soundPanSide: MegaPunchSide | null;
 }
+
+/** Alias retained for existing Move_MEGA_PUNCH consumers. */
+export type MegaPunchState = MegaPunchKickState;
 
 export const MEGA_PUNCH_FRAME_COUNT = 160;
 export const MEGA_PUNCH_FIST_FIRST_AGE = 14;
 export const MEGA_PUNCH_IMPACT_FIRST_AGE = 71;
+
+export const MEGA_PUNCH_PROFILE: MegaPunchKickProfile = {
+  fistVariant: 0,
+  alphaFirstAge: 15,
+  secondSound: "SE_M_VITAL_THROW2",
+  secondSoundAge: MEGA_PUNCH_IMPACT_FIRST_AGE,
+};
+
+/**
+ * Pointer-isolated Scene-ON Mega Kick receipt, both SUDOWOODO orientations:
+ * `setalpha` appears at source age 14 and the extra `SE_M_MEGA_KICK2` lands
+ * at age 66 before SetImpactBackground. The rest remains the shared body.
+ */
+export const MEGA_KICK_PROFILE: MegaPunchKickProfile = {
+  fistVariant: 1,
+  alphaFirstAge: 14,
+  secondSound: "SE_M_MEGA_KICK2",
+  secondSoundAge: 66,
+};
 
 /**
  * `sAffineAnim_MegaPunchKick`: Q8.8 scale -4 and rotation +20 for 51
@@ -81,12 +118,17 @@ function restoreBldy(age: number): number {
   return 0;
 }
 
-/** Pure source-relative `Move_MEGA_PUNCH`; damage and RNG remain gameplay-owned. */
-export function megaPunchAtAge(
+/**
+ * Pure source-relative Mega Punch/Kick body; damage and RNG stay gameplay-owned.
+ * A move's profile is explicit so shared command shape never silently imports a
+ * cue or latch from its sibling script.
+ */
+export function megaPunchKickAtAge(
   age: number,
   targetSide: MegaPunchSide,
   targetCenter: Readonly<{ x: number; y: number }>,
-): MegaPunchState {
+  profile: MegaPunchKickProfile,
+): MegaPunchKickState {
   const fistMatrix = megaPunchFistMatrixAtAge(age);
   const impact = age >= MEGA_PUNCH_IMPACT_FIRST_AGE && age < 142;
   const complexBlack = age >= 72 && age <= 74 ? 8 : 0;
@@ -95,7 +137,7 @@ export function megaPunchAtAge(
     impactLoaded: age >= 1 && age < MEGA_PUNCH_FRAME_COUNT - 1,
     handsAndFeetLoaded: age >= 2 && age < MEGA_PUNCH_FRAME_COUNT - 1,
     targetOnMonBg: age >= 3 && age < 114,
-    alpha: age >= 15 && age < 114 ? { eva: 12, evb: 8 } : null,
+    alpha: age >= profile.alphaFirstAge && age < 114 ? { eva: 12, evb: 8 } : null,
     background: {
       variant: targetSide,
       impact,
@@ -109,7 +151,12 @@ export function megaPunchAtAge(
     targetWhiteCoefficient: targetWhiteCoefficient(age),
     battlerBlackCoefficient: complexBlack,
     fist: fistMatrix
-      ? { x: targetCenter.x, y: targetCenter.y, variant: 0, matrix: fistMatrix }
+      ? {
+          x: targetCenter.x,
+          y: targetCenter.y,
+          variant: profile.fistVariant,
+          matrix: fistMatrix,
+        }
       : null,
     hitsplatVisible: age >= MEGA_PUNCH_IMPACT_FIRST_AGE && age <= 79,
     targetOffset: age < MEGA_PUNCH_IMPACT_FIRST_AGE
@@ -123,11 +170,20 @@ export function megaPunchAtAge(
         ),
     sound: age === 14
       ? "SE_M_MEGA_KICK"
-      : age === MEGA_PUNCH_IMPACT_FIRST_AGE
-        ? "SE_M_VITAL_THROW2"
+      : age === profile.secondSoundAge
+        ? profile.secondSound
         : null,
-    soundPanSide: age === 14 || age === MEGA_PUNCH_IMPACT_FIRST_AGE
+    soundPanSide: age === 14 || age === profile.secondSoundAge
       ? targetSide
       : null,
   };
+}
+
+/** Pure source-relative `Move_MEGA_PUNCH`; damage and RNG remain gameplay-owned. */
+export function megaPunchAtAge(
+  age: number,
+  targetSide: MegaPunchSide,
+  targetCenter: Readonly<{ x: number; y: number }>,
+): MegaPunchState {
+  return megaPunchKickAtAge(age, targetSide, targetCenter, MEGA_PUNCH_PROFILE);
 }
