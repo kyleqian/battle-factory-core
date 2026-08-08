@@ -6103,3 +6103,72 @@ describe("AI_CV_DragonDance (data/battle_ai_scripts.s:2603-2614)", () => {
     expect(dragonDanceRun(1, { hp: 50, maxHp: 100, speed: 120 }, { speed: 5 })).toMatchObject({ funcResultAfter: 2 });
   });
 });
+
+describe("AI_CV_BatonPass (data/battle_ai_scripts.s:1978-2016)", () => {
+  const MOVE_BATON_PASS = 226; // EFFECT_BATON_PASS
+
+  function batonPassRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_BATON_PASS,
+      attacker: { ...NEUTRAL_BATTLER, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "baton-pass",
+    });
+  }
+
+  it("any stat > 8, target slower, HP > 60: zero score, zero draws", () => {
+    const result = batonPassRun(1, { atkStage: 9, hp: 61, maxHp: 100, speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("any stat > 8, target slower, HP <= 60: <80 roll FALL-THROUGH -> +2", () => {
+    // seed 1 -> roll low 198 (>=80, +2).
+    const result = batonPassRun(1, { atkStage: 9, hp: 60, maxHp: 100, speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["baton-pass-roll"]);
+  });
+
+  it("any stat > 8, target faster, HP <= 70: <80 roll JUMP -> 0", () => {
+    // seed 4 -> roll low 25 (<80 JUMP).
+    const result = batonPassRun(4, { atkStage: 9, hp: 70, maxHp: 100, speed: 5 }, { speed: 120 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("any stat > 8, target faster, HP > 70: zero", () => {
+    const result = batonPassRun(1, { atkStage: 9, hp: 71, maxHp: 100, speed: 5 }, { speed: 120 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("no stat > 8, no stat > 7: deterministic -2", () => {
+    const result = batonPassRun(1, { atkStage: 7, defStage: 7, spAtkStage: 7, spDefStage: 7, evasionStage: 7, speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("any stat > 7 but none > 8, target slower, HP > 60: -2", () => {
+    const result = batonPassRun(1, { atkStage: 8, hp: 61, maxHp: 100, speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -2 });
+  });
+
+  it("any stat > 7 but none > 8, target slower, HP <= 60: zero", () => {
+    const result = batonPassRun(1, { atkStage: 8, hp: 60, maxHp: 100, speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("any stat > 7 but none > 8, target faster, HP >= 70: -2", () => {
+    const result = batonPassRun(1, { atkStage: 8, hp: 70, maxHp: 100, speed: 5 }, { speed: 120 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -2 });
+  });
+
+  it("any stat > 7 but none > 8, target faster, HP < 70: zero", () => {
+    const result = batonPassRun(1, { atkStage: 8, hp: 69, maxHp: 100, speed: 5 }, { speed: 120 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+});

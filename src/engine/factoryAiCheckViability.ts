@@ -796,6 +796,16 @@ export type FactoryAiCheckViabilityDraw =
     rawRngValue: number;
     randomValue: number;
     succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "baton-pass-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
   }>;
 
 export type FactoryAiCheckViabilityResult =
@@ -4798,6 +4808,126 @@ function runCvDragonDance(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded ? -1 : 0 });
 }
 
+/**
+ * `AI_CV_BatonPass` (`data/battle_ai_scripts.s:1978-2016`,
+ * EFFECT_BATON_PASS):
+ *
+ * ```
+ * AI_CV_BatonPass:
+ *     if_stat_level_more_than AI_USER, STAT_ATK, 8, AI_CV_BatonPass2
+ *     if_stat_level_more_than AI_USER, STAT_DEF, 8, AI_CV_BatonPass2
+ *     if_stat_level_more_than AI_USER, STAT_SPATK, 8, AI_CV_BatonPass2
+ *     if_stat_level_more_than AI_USER, STAT_SPDEF, 8, AI_CV_BatonPass2
+ *     if_stat_level_more_than AI_USER, STAT_EVASION, 8, AI_CV_BatonPass2
+ *     goto AI_CV_BatonPass5
+ * AI_CV_BatonPass2:
+ *     if_target_faster AI_CV_BatonPass3
+ *     if_hp_more_than AI_USER, 60, AI_CV_BatonPass_End
+ *     goto AI_CV_BatonPass4
+ * AI_CV_BatonPass3:
+ *     if_hp_more_than AI_USER, 70, AI_CV_BatonPass_End
+ * AI_CV_BatonPass4:
+ *     if_random_less_than 80, AI_CV_BatonPass_End
+ *     score +2
+ *     goto AI_CV_BatonPass_End
+ * AI_CV_BatonPass5:
+ *     if_stat_level_more_than AI_USER, STAT_ATK, 7, AI_CV_BatonPass7
+ *     ... (DEF/SPATK/SPDEF/EVASION, same >7 gate)
+ *     goto AI_CV_BatonPass_ScoreDown2
+ * AI_CV_BatonPass7:
+ *     if_target_faster AI_CV_BatonPass8
+ *     if_hp_more_than AI_USER, 60, AI_CV_BatonPass_ScoreDown2
+ *     goto AI_CV_BatonPass_End
+ * AI_CV_BatonPass8:
+ *     if_hp_less_than AI_USER, 70, AI_CV_BatonPass_End
+ * AI_CV_BatonPass_ScoreDown2:
+ *     score -2
+ * AI_CV_BatonPass_End:
+ *     end
+ * ```
+ *
+ * Split on the user's OWN stat stages (the boosted stats are what's worth
+ * passing). Any of the five stats > 8 reaches `BatonPass2`: target NOT
+ * faster with HP > 60% is the zero `goto End`, HP <= 60% `goto`s the single
+ * `<80` roll (+2 on fall-through); target faster checks HP > 70% first (zero
+ * `goto End`), HP <= 70% falls into the same roll. All five stats <= 8
+ * reaches `BatonPass5`'s lower >7 band: any stat > 7 reaches `BatonPass7`
+ * (target not faster: HP > 60% is the deterministic -2, HP <= 60% is the
+ * zero `goto End`; target faster: HP < 70% is the zero `goto End`, HP >= 70%
+ * falls into the same -2); NO stat > 7 is the deterministic -2 with zero
+ * draws. Exactly ONE `if_random_less_than` site, only reachable from the
+ * `>8` band's HP paths, plus the usual `if_target_faster` tie-break. No
+ * command writes funcResult.
+ */
+function runCvBatonPass(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const userAnyStatAbove = (threshold: number): boolean => input.attacker.atkStage > threshold
+    || input.attacker.defStage > threshold
+    || (input.attacker.spAtkStage ?? DEFAULT_STAT_STAGE) > threshold
+    || input.attacker.spDefStage > threshold
+    || input.attacker.evasionStage > threshold;
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+
+  if (userAnyStatAbove(8)) {
+    // BatonPass2/3 -> BatonPass4's single roll (+2 on fall-through).
+    if (targetFaster) {
+      if (hpPercent > 70) {
+        return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+      }
+    } else if (hpPercent > 60) {
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+    }
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-baton-pass-roll`);
+    rng = roll.after;
+    const succeeded = roll.randomValue % 256 >= 80;
+    draws.push(Object.freeze({ ...roll, kind: "baton-pass-roll" as const, succeeded }));
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded ? 2 : 0 });
+  }
+
+  // BatonPass5: any stat > 7 reaches BatonPass7; none is the -2.
+  if (!userAnyStatAbove(7)) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -2 });
+  }
+  // BatonPass7/8 -> ScoreDown2 (-2).
+  if (targetFaster) {
+    if (hpPercent < 70) {
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+    }
+  } else if (hpPercent > 60) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -2 });
+  } else {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+  }
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -2 });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -5834,6 +5964,24 @@ export function runCheckViability(input: Readonly<{
       rng: dragonDance.rng,
       draws: dragonDance.draws,
       scoreDelta: dragonDance.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_BATON_PASS") {
+    // AI_CV_BatonPass (data/battle_ai_scripts.s:1978-2016).
+    const batonPass = runCvBatonPass({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: batonPass.rng,
+      draws: batonPass.draws,
+      scoreDelta: batonPass.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }
