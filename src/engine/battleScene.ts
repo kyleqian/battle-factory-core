@@ -882,6 +882,7 @@ import {
   sceneOnPoisonFangView,
   sceneOnHyperFangView,
   sceneOnMegaPunchView,
+  sceneOnMegaKickView,
   sceneOnRollingKickView,
   sceneOnLowKickView,
   sceneOnBiteView,
@@ -22569,24 +22570,30 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
-  if (state.config.move === "MEGA_PUNCH") {
-    const view = sceneOnMegaPunchView(state);
+  if (state.config.move === "MEGA_PUNCH" || state.config.move === "MEGA_KICK") {
+    const isMegaKick = state.config.move === "MEGA_KICK";
+    const view = isMegaKick ? sceneOnMegaKickView(state) : sceneOnMegaPunchView(state);
     // gSprites and the OBJ affine matrix are copied to hardware after the
-    // callback display on the following VBlank.
-    const displayed = sceneOnMegaPunchView({ ...state, age: state.age - 1 });
+    // callback display on the following VBlank. This includes Mega Kick's
+    // variant-1 foot: its first visible frame is RAM + 1 in both directions.
+    const displayed = isMegaKick
+      ? sceneOnMegaKickView({ ...state, age: state.age - 1 })
+      : sceneOnMegaPunchView({ ...state, age: state.age - 1 });
+    const attackerSpecies = isMegaKick ? "SUDOWOODO" : "CACTURNE";
+    const moveName = isMegaKick ? "MEGA KICK!" : "MEGA PUNCH!";
     const playerToOpponent =
-      view.attacker.species === "CACTURNE"
+      view.attacker.species === attackerSpecies
       && view.attacker.geometry.side === "player"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "CACTURNE"
+      view.attacker.species === attackerSpecies
       && view.attacker.geometry.side === "opponent"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
-        `unsupported staged MEGA_PUNCH pair ${view.attacker.species}->${view.target.species}`,
+        `unsupported staged ${view.attacker.species === "SUDOWOODO" ? "MEGA_KICK" : "MEGA_PUNCH"} pair ${view.attacker.species}->${view.target.species}`,
       );
     }
     const black = { r: 0, g: 0, b: 0 };
@@ -22628,9 +22635,16 @@ export function renderSceneOnMovePresentation(
       });
     }
 
-    const cacturne = playerToOpponent
-      ? megaPunchArt.cacturneBack
-      : megaPunchArt.cacturneFront;
+    const attacker = isMegaKick
+      ? playerToOpponent
+        ? blockArt.sudowoodoBack
+        : {
+            ...blockArt.sudowoodoFront,
+            tileset: subTileset(blockArt.sudowoodoFront.tileset, 0, 8),
+          }
+      : playerToOpponent
+        ? megaPunchArt.cacturneBack
+        : megaPunchArt.cacturneFront;
     const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetPalette = state.age === 72 || state.age === 73
       ? blendPaletteToward(onix.palette, black, 8)
@@ -22638,7 +22652,7 @@ export function renderSceneOnMovePresentation(
         ? blendPaletteToward(onix.palette, white, displayed.targetWhiteCoefficient)
         : onix.palette;
     const attackerPalette = blendPaletteToward(
-      cacturne.palette,
+      attacker.palette,
       black,
       view.battlerBlackCoefficient,
     );
@@ -22648,7 +22662,7 @@ export function renderSceneOnMovePresentation(
     const targetOffset = state.age <= 71
       ? targetIdle
       : view.targetOnMonBg
-        ? sceneOnMegaPunchView({ ...state, age: state.age - 1 }).targetOffset
+        ? displayed.targetOffset
         : { x2: 0, y2: 0 };
     drawSpriteSheet(
       fb,
@@ -22659,7 +22673,7 @@ export function renderSceneOnMovePresentation(
     );
     drawSpriteSheet(
       fb,
-      cacturne.tileset,
+      attacker.tileset,
       attackerPalette,
       view.attacker.geometry.spriteCorner.x,
       view.attacker.geometry.spriteCorner.y,
@@ -22682,7 +22696,11 @@ export function renderSceneOnMovePresentation(
     if (displayed.fist) {
       drawSpriteSheetAffineRotate(
         fb,
-        subTileset(battleAnimHandsAndFeet.tileset, 0, 4),
+        subTileset(
+          battleAnimHandsAndFeet.tileset,
+          displayed.fist.variant === 1 ? 4 : 0,
+          4,
+        ),
         battleAnimHandsAndFeet.palette,
         displayed.fist.x,
         displayed.fist.y,
@@ -22692,8 +22710,8 @@ export function renderSceneOnMovePresentation(
         displayed.fist.matrix.pd,
       );
     }
-    const opponentSpecies = playerToOpponent ? "ONIX" : "CACTURNE";
-    const playerSpecies = playerToOpponent ? "CACTURNE" : "ONIX";
+    const opponentSpecies = playerToOpponent ? "ONIX" : attackerSpecies;
+    const playerSpecies = playerToOpponent ? attackerSpecies : "ONIX";
     drawSendOutHealthbox(
       fb,
       0,
@@ -22722,8 +22740,8 @@ export function renderSceneOnMovePresentation(
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(
       fb,
-      playerToOpponent ? "CACTURNE used" : "Foe CACTURNE used",
-      "MEGA PUNCH!",
+      playerToOpponent ? `${attackerSpecies} used` : `Foe ${attackerSpecies} used`,
+      moveName,
       99,
     );
     return;
