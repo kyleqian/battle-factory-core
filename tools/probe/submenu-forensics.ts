@@ -115,7 +115,9 @@ for (let y = 98; y <= 157; y++) for (let x = 146; x <= 237; x++) {
 }
 check("window pops in one frame at 926", pop > 4500, `925→926 window-region change px: ${pop}`);
 
-// app delta: interior white top row
+// app delta: interior white top row (post-fix: matches the oracle at y102;
+// the old scaffold drew it 16px too high at y86, docs/fade-layer-forensics.md
+// §10(a))
 const app = load(927, "app");
 let appTop = 160;
 for (let y = 70; y < 160; y++) {
@@ -123,7 +125,7 @@ for (let y = 70; y < 160; y++) {
   for (let x = 150; x <= 233; x++) if (color(app, x, y) !== "255,255,255") { isWhite = false; break; }
   if (isWhite) { appTop = y; break; }
 }
-check("app window 16px too high", appTop === 86, `app interior top y=${appTop} (oracle 102)`);
+check("app submenu interior top matches oracle", appTop === 102, `app interior top y=${appTop} (oracle 102)`);
 
 console.log(fail === 0 ? "\nALL CHECKS PASS" : `\n${fail} CHECK(S) FAILED`);
 process.exit(fail === 0 ? 0 : 1);

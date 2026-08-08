@@ -95,7 +95,20 @@ twice-run**; fast loop 763:781 **19/19**; Tier-1 pins red-verified.
 **Remaining party-menu visual gap (never spec-captured):** the SEND OUT/
 SUMMARY/CANCEL submenu window geometry — the app's 10x6 standard window at
 (144,80) vs the oracle's taller window (~4461px at 926-963). A side lane is
-measuring it.
+measuring it. **CLOSED 2026-08-08 (submenu bind):** the action window (SHIFT/
+SUMMARY/CANCEL — line 1 is **SHIFT**, the voluntary-switch action per
+`GetPartyMenuActionsTypeInBattle` party_menu.c:5788-5796, not SEND OUT) now
+draws the party-menu action window at outer origin (144,96) → frame
+(145,97)-(238,159), interior white (150,102)-(233,153), labels at
+(160,105)/(160,121)/(160,137), cursor "▶" as its own glyph at (152,105); the
+confirm edge keeps the window through frame 963 (closeElapsed 0) and drops it
+at 964. Dense-a captureFrames +38 (926-963) → **392/392 byte-exact, thrice
+run**; fast loop 920:965 43/46 (the 3 red are the pre-open 923-925, not in
+spec); `tools/probe/submenu-forensics.ts` 10/10 PASS (oracle checks
+unaffected); §10 corrected (SHIFT, measured ink extents, close edge). Tier-1
+pins red-verified in `tests/inbattlePartyMenuVisualBind.test.ts` (window
+rect + 3 label origins + cursor glyph) + `tests/battlePartySelect.test.ts`
+(confirm edge keeps the submenu through closeElapsed 0). Keep-green all held.
 (c) message-box residual — **CLOSED 2026-08-07** (dense-a spec **341/341
 byte-exact**). On the submenu-open edge (A-press 922-923, window lands 926)
 the oracle swaps the message window from sDefaultPartyMsgWindowTemplate (21x2,

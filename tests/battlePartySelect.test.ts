@@ -186,18 +186,24 @@ describe("voluntary battle party selector", () => {
     expect(px(132, 51)).toEqual([255, 255, 255]);
   });
 
-  it("closes the SEND OUT submenu on the confirm edge (ISSUES #80 slice 6)", () => {
-    // docs/party-menu-rank6-ground-truth.md §7: the confirm A lands while the
-    // submenu is open; the real menu closes the submenu and starts the fade on
-    // the same edge (oracle frame 964 = settled menu, no submenu window).
+  it("closes the SHIFT submenu on the confirm edge, one frame after it lands (ISSUES #80 slice 6 + submenu bind)", () => {
+    // docs/fade-layer-forensics.md §10(e): the confirm A lands while the
+    // submenu is open; the real menu keeps the submenu window rendered through
+    // the confirm tick (oracle frame 963, closeElapsed 0) and drops it on the
+    // next frame (oracle frame 964 = settled menu, no submenu window). So
+    // submenuOpen stays true at closeElapsed 0 and is flipped by the render's
+    // submenuVisible gate from closeElapsed 1.
     let state = liveSelector();
     state = advanceBattlePartySelect(state, new Set(["DOWN"]));
     state = advanceBattlePartySelect(state, new Set(["A"]));
     expect(state.submenuOpen).toBe(true);
     state = advanceBattlePartySelect(state, new Set(["A"]));
     expect(state.outcome).toMatchObject({ kind: "select", partyIndex: 1 });
-    expect(state.submenuOpen).toBe(false);
+    expect(state.submenuOpen).toBe(true);
     expect(state.closeElapsed).toBe(0);
+    state = advanceBattlePartySelect(state, new Set());
+    expect(state.submenuOpen).toBe(true);
+    expect(state.closeElapsed).toBe(1);
   });
 
   it("blends the settled menu to black on a mid-fade close frame and holds black (ISSUES #80 slice 6)", () => {

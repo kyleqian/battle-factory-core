@@ -535,12 +535,12 @@ export function advanceBattlePartySelect(
     }
     if (!row.legal) return next;
     // The confirm A lands while the SEND OUT submenu is open; the real menu
-    // closes the submenu on the confirm edge (oracle frame 964 has no submenu
-    // window -- it is the settled menu starting its close), so the committed
-    // state must not keep rendering it through the fade.
+    // keeps the submenu window rendered through the confirm tick (oracle frame
+    // 963) and only drops it on the next frame (964), so `submenuOpen` stays
+    // true while closeElapsed is 0; the render gates the window off from
+    // closeElapsed 1 (see `submenuVisible`).
     return Object.freeze({
       ...next,
-      submenuOpen: false,
       outcome: Object.freeze({ kind: "select", partyIndex: row.partyIndex }),
       closeElapsed: 0,
     });
@@ -1123,11 +1123,30 @@ function drawPartySelectBgLayer(fb: Uint8Array, state: BattlePartySelectState): 
     drawHpBar(fb, row);
   }
 
-  if (state.submenuOpen) {
-    drawStandardWindowFrame(fb, 144, 80, 10, 6);
-    drawStandardWindowText(fb, "▶ SEND OUT", 152, 89);
-    drawStandardWindowText(fb, "  SUMMARY", 152, 105);
-    drawStandardWindowText(fb, "  CANCEL", 152, 121);
+  const submenuVisible = state.submenuOpen && (state.closeElapsed === null || state.closeElapsed === 0);
+  if (submenuVisible) {
+    // The SHIFT / SUMMARY / CANCEL action window: the party-menu action
+    // window (SELECTWINDOW_ACTIONS, DisplaySelectionWindow, party_menu.c:2534)
+    // is a 10x6-tile window whose frame overhangs the tilemap by 6px, drawing
+    // the same text_window frame tiles at outer origin (144,96) ->
+    // (145,97)-(238,159), interior white (150,102)-(233,153).
+    // docs/fade-layer-forensics.md §10(a): the old scaffold was 16px too high.
+    drawStandardWindowFrame(fb, 144, 96, 10, 6);
+    // Three option labels, FONT_NORMAL (party_menu.c:2557), printed at
+    // window-relative x=cursorDimension=8, y=(i*16)+1 -> screen origins
+    // (160,105)/(160,121)/(160,137); ink rows 108-117/124-133/140-149.
+    // Line 1 is gText_Shift: this is the voluntary mid-battle switch, whose
+    // action list is sPartyMenuAction_ShiftSummaryCancel (data/party_menu.h)
+    // because GetPartyMenuActionsTypeInBattle (party_menu.c:5788-5796) returns
+    // ACTIONS_SHIFT unless gPartyMenu.action == PARTY_ACTION_SEND_OUT.
+    drawStandardWindowText(fb, "SHIFT", 160, 105);
+    drawStandardWindowText(fb, "SUMMARY", 160, 121);
+    drawStandardWindowText(fb, "CANCEL", 160, 137);
+    // Cursor: a separate "▶" glyph (gText_SelectorArrow3, strings.c:1468)
+    // drawn by RedrawMenuCursor (menu.c:945) at window-relative (0,16*0+1) ->
+    // screen (152,105), i.e. on the SHIFT line (cursorPos 0, per
+    // InitMenuInUpperLeftCorner(...,0,TRUE)). NOT baked into the label text.
+    drawStandardWindowText(fb, "▶", 152, 105);
   }
 
   // ISSUES #80 open remainder (c): from the submenu-open edge through the
@@ -1172,7 +1191,7 @@ function drawPartySelectBgLayer(fb: Uint8Array, state: BattlePartySelectState): 
     if (line2) drawStandardWindowText(fb, line2, 8, 153);
     if (state.cursor === "cancel") drawStandardWindowText(fb, "▶ CANCEL", 168, 145);
   }
-  if (!state.submenuOpen) drawCancelWindow(fb);
+  if (!submenuVisible) drawCancelWindow(fb);
 }
 
 /**
@@ -1201,8 +1220,11 @@ function drawPartySelectObjLayer(fb: Uint8Array, state: BattlePartySelectState):
     drawHeldItemIcon(fb, row);
     drawStatusIcon(fb, row);
   }
-  // The SEND OUT submenu window replaces the CANCEL pokeball button while open.
-  if (!state.submenuOpen) drawCancelPokeball(fb);
+  // The SHIFT submenu window replaces the CANCEL pokeball button while open
+  // (including its confirm-tick frame, closeElapsed 0).
+  if (!state.submenuOpen || (state.closeElapsed !== null && state.closeElapsed !== 0)) {
+    drawCancelPokeball(fb);
+  }
 }
 
 /**

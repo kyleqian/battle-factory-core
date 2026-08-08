@@ -260,4 +260,64 @@ describe("in-battle party menu visual binds (ISSUES #80)", () => {
     expect(primaryStatusFromStatus1(0)).toBeNull();
     expect(primaryStatusFromStatus1(BATTLE_SCRIPT_STATUS1_PARALYSIS | BATTLE_SCRIPT_STATUS1_SLEEP)).toBe("sleep");
   });
+
+  it("draws the in-battle SHIFT/SUMMARY/CANCEL action window at the measured rect (ISSUES #80 submenu bind)", () => {
+    // The party-menu action window (DisplaySelectionWindow, party_menu.c:2534)
+    // drawn at outer origin (144,96): measured frame (146,98)-(237,157) (outer
+    // outline (41,49,49) at x145/x238/y97/y158), interior white
+    // (150,102)-(233,153) -- the old scaffold was 16px too high
+    // (docs/fade-layer-forensics.md §10(a)).
+    const fb = createFramebuffer();
+    renderBattlePartySelect(fb, { ...baseState(), submenuOpen: true, submenuOpened: true });
+    // Left/right frame edges and interior.
+    expect(px(fb, 145, 110)).toEqual([41, 49, 49]);
+    expect(px(fb, 146, 110)).toEqual([74, 74, 107]);
+    expect(px(fb, 149, 110)).toEqual([222, 214, 222]);
+    expect(px(fb, 150, 110)).toEqual([255, 255, 255]);
+    expect(px(fb, 233, 110)).toEqual([255, 255, 255]);
+    expect(px(fb, 237, 110)).toEqual([74, 74, 107]);
+    expect(px(fb, 238, 110)).toEqual([41, 49, 49]);
+    // Interior vertical extent: white 102-153, bevel immediately above/below.
+    expect(px(fb, 150, 102)).toEqual([255, 255, 255]);
+    expect(px(fb, 233, 153)).toEqual([255, 255, 255]);
+    expect(px(fb, 150, 101)).toEqual([173, 189, 173]);
+    expect(px(fb, 150, 154)).toEqual([173, 189, 173]);
+  });
+
+  it("draws the three submenu labels at (160,105)/(160,121)/(160,137) FONT_NORMAL (ISSUES #80 submenu bind)", () => {
+    // sPartyMenuAction_ShiftSummaryCancel: SHIFT/SUMMARY/CANCEL printed at
+    // window-relative (8, i*16+1) -> screen origins (160,105)/(160,121)/(160,137);
+    // ink lands 3px lower (rows 108-117/124-133/140-149). Line 1 is SHIFT for
+    // the voluntary mid-battle switch (GetPartyMenuActionsTypeInBattle,
+    // party_menu.c:5788-5796) -- NOT SEND OUT (docs/fade-layer-forensics.md §10(b)).
+    const fb = createFramebuffer();
+    renderBattlePartySelect(fb, { ...baseState(), submenuOpen: true, submenuOpened: true });
+    // SHIFT "S" ink at x164 on its top row; SUMMARY "S" ink at (164,124);
+    // CANCEL "C" ink at (164,140).
+    expect(px(fb, 164, 108)).toEqual([214, 214, 206]);
+    expect(px(fb, 161, 108)).toEqual([99, 99, 99]);
+    expect(px(fb, 164, 124)).toEqual([214, 214, 206]);
+    expect(px(fb, 164, 140)).toEqual([214, 214, 206]);
+    // No label ink on the rows between the labels (interior white).
+    expect(px(fb, 164, 119)).toEqual([255, 255, 255]);
+    expect(px(fb, 164, 135)).toEqual([255, 255, 255]);
+    // Line 1 is SHIFT, not SEND OUT: "SHIFT" is 5 glyphs ending at x189, so
+    // x199 stays interior white (a baked "SEND OUT" would ink the T's top bar
+    // there at rows 108+).
+    expect(px(fb, 199, 108)).toEqual([255, 255, 255]);
+  });
+
+  it("draws the cursor as its own ▶ glyph at (152,105) on the SHIFT line (ISSUES #80 submenu bind)", () => {
+    // RedrawMenuCursor (menu.c:945) prints gText_SelectorArrow3 (strings.c:1468)
+    // as a SEPARATE glyph at window-relative (0, 16*0+1) -> (152,105), ink
+    // x153-158 y108-117, cursorPos 0 -- the app no longer bakes "▶" into the
+    // SHIFT label.
+    const fb = createFramebuffer();
+    renderBattlePartySelect(fb, { ...baseState(), submenuOpen: true, submenuOpened: true });
+    expect(px(fb, 153, 108)).toEqual([99, 99, 99]);
+    expect(px(fb, 154, 108)).toEqual([214, 214, 206]);
+    expect(px(fb, 153, 117)).toEqual([214, 214, 206]);
+    // The SHIFT text starts at x160, past the arrow's own 8px glyph cell.
+    expect(px(fb, 158, 109)).toEqual([255, 255, 255]);
+  });
 });

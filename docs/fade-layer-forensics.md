@@ -793,7 +793,7 @@ frame's bottom-left; interior fill (255,255,255); text ink (214,214,206);
 text shadow (99,99,99).
 
 **App (what it draws instead).** `drawStandardWindowFrame(fb, 144, 80, 10, 6)`
-at `battlePartySelect.ts:1112` — a 10×6 **standard window at (144,80)**. Its
+at `battlePartySelect.ts` — a 10×6 **standard window at (144,80)**. Its
 measured frame is x146-237 (matches the oracle's x-extent) but **interior white
 y86-133 vs oracle y102-153 → the whole window is 16 px too high** (frame top
 y82 vs y98, interior top y86 vs y102). Same x. Exact delta: app interior
@@ -809,9 +809,20 @@ glyph ink lands 3 px lower, rows 108-117 / 124-133 / 140-149):
 
 | line | source | ink rows | measured ink x |
 | --- | --- | --- | --- |
-| SEND OUT | `gText_SendOut` (`src/strings.c:365`), `sCursorOptions[MENU_SEND_OUT]` (`data/party_menu.h:671`) | 108-117 | x160-201 |
-| SUMMARY | `gText_Summary5` (`strings.c:367`), `[MENU_SUMMARY]` (`:660`) | 124-133 | x162-220 |
-| CANCEL | `gText_Cancel2` (`strings.c:189`), `[MENU_CANCEL1]` (`:662`) | 140-149 | x161-207 |
+| SHIFT | `gText_Shift` (`src/strings.c:365`), `sCursorOptions[MENU_SHIFT]` (`data/party_menu.h:673`) | 108-117 | x160-189 |
+| SUMMARY | `gText_Summary5` (`strings.c:367`), `[MENU_SUMMARY]` (`:660`) | 124-133 | x160-201 |
+| CANCEL | `gText_Cancel2` (`strings.c:189`), `[MENU_CANCEL1]` (`:662`) | 140-149 | x160-195 |
+
+**CORRECTION (2026-08-08, in-battle submenu bind):** line 1 is **SHIFT**, not
+SEND OUT. This is the *voluntary* mid-battle switch, whose action list is
+`sPartyMenuAction_ShiftSummaryCancel` (data/party_menu.h) because
+`GetPartyMenuActionsTypeInBattle` (`party_menu.c:5788-5796`) returns
+`ACTIONS_SHIFT` unless `gPartyMenu.action == PARTY_ACTION_SEND_OUT`. The
+earlier draft attributed `gText_SendOut` from the source and its "x160-201"
+ink measurement was taken off the app's own (wrong) scaffold output; the
+oracle pixels decode unambiguously to SHIFT (each glyph a perfect FONT_NORMAL
+template match at x160/166/172/178/184). The earlier "x162-220"/"x161-207"
+columns were likewise mis-measured; the correct extents are above.
 
 (All three decoded as Latin text from pixels first — no `{PKMN}` ligature or
 katakana anywhere in the submenu window; the strings are the plain action
@@ -844,20 +855,23 @@ fully settled in its first frame). No slide, no box-grow. The A-press is
 922-923; the window lands 3 frames later, all at once, on the same frame the
 message window swaps (§7(a)).
 
-### (e) Fix plan (for a MAIN worker)
+### (e) Fix plan (for a MAIN worker) — LANDED 2026-08-08, dense-a **392/392**
 
 In `renderBattlePartySelect`'s `state.submenuOpen` branch, replace the scaffold
 `drawStandardWindowFrame(fb, 144, 80, 10, 6)` + three `drawStandardWindowText`
-calls (`battlePartySelect.ts:1112-1115`) with: (1) the party-menu action-window
-frame at rect **(146,98)-(237,157)**, frame1 palette (74,74,107)/(115,107,132)/
-(173,189,173)/(222,214,222), interior white (150,102)-(233,153); (2) the three
-labels at origins **(160,105)/(160,121)/(160,137)** FONT_NORMAL, ink
-(214,214,206), shadow (99,99,99); (3) the cursor as a separate "▶"
-(`gText_SelectorArrow3`) drawn at **(152,105)**, on the SEND OUT line
-(cursorPos 0). The window is one-frame-pop and static — no per-frame schedule.
-Predicted acceptance: extend `mid-battle-switch-dense-a-off`'s `captureFrames`
-with **926-963 (38 frames, all)** → the current 341-entry spec grows to
-**379/379 byte-exact** (the 4461 px/frame band is exactly this window; the §7
-message-window swap and mon-icon clock are already byte-exact on the same
-frames). Keep-green unchanged. Do not touch `drawCancelPokeball` / the close
-path (964+ is already byte-exact).
+calls (`battlePartySelect.ts`) with: (1) the party-menu action-window frame —
+the existing `drawStandardWindowFrame(fb, 144, 96, 10, 6)` call (the same
+`text_window` frame tiles and default palette, origin **16 px lower at y96** so
+the drawn frame is (145,97)-(238,159), interior white (150,102)-(233,153)); (2)
+the three labels at origins **(160,105)/(160,121)/(160,137)** FONT_NORMAL, ink
+(214,214,206), shadow (99,99,99) — line 1 is **SHIFT** (see §(b) correction),
+not SEND OUT; (3) the cursor as a separate "▶" (`gText_SelectorArrow3`) drawn
+at **(152,105)**, on the SHIFT line (cursorPos 0), NOT baked into the label.
+The window is one-frame-pop and static through 963. **Close edge:** the oracle
+keeps the window rendered through frame **963** (the confirm A lands 962-963)
+and drops it at **964** — the app must not flip `submenuOpen` false on the
+confirm edge; it stays true with `closeElapsed` 0 and the render gates the
+window off from closeElapsed 1 (`submenuVisible`). Acceptance landed: extend
+`mid-battle-switch-dense-a-off`'s `captureFrames` with **926-963 (38 frames,
+all)** → **392/392 byte-exact**, twice-run. Keep-green unchanged (251/251 +
+153/153 + 128/128). The close path (964+) was not touched.
