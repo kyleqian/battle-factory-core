@@ -5457,3 +5457,82 @@ describe("AI_CV_Flail (data/battle_ai_scripts.s:1817-1840)", () => {
     expect(flailRun(1, 100)).toMatchObject({ funcResultAfter: 2 });
   });
 });
+
+describe("AI_CV_DestinyBond (data/battle_ai_scripts.s:1800-1816)", () => {
+  const MOVE_DESTINY_BOND = 194; // EFFECT_DESTINY_BOND
+
+  function destinyRun(rngValue: number, hp: number, attackerSpeed = 120, targetSpeed = 5) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_DESTINY_BOND,
+      attacker: { ...NEUTRAL_BATTLER, hp, maxHp: 100, speed: attackerSpeed },
+      target: { ...NEUTRAL_BATTLER, speed: targetSpeed },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "destiny",
+    });
+  }
+
+  it("target faster: ends at the base -1 with zero draws", () => {
+    const result = destinyRun(1, 10, 5, 120);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("own HP >70: ends at the base -1 with zero draws", () => {
+    const result = destinyRun(1, 71);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("HP 60: roll1 <128 JUMPs to DB2; HP>50 ends at -1", () => {
+    // seed 3 -> low byte 83 (< 128).
+    const result = destinyRun(3, 60);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "destiny-bond-roll-1", jumped: true });
+  });
+
+  it("HP 60: roll1 >=128 applies +1 then HP>50 ends at 0", () => {
+    // seed 1 -> low byte 198 (>= 128).
+    const result = destinyRun(1, 60);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "destiny-bond-roll-1", jumped: false });
+  });
+
+  it("HP 40: both rolls fall through (+1 each) then HP>30 ends at +1", () => {
+    // seed 1 -> roll1 low byte 198, roll2 low byte 33 (both >= 128... roll2 33 < 128, JUMP).
+    const result = destinyRun(1, 40);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(2);
+    expect(result.draws[0]).toMatchObject({ kind: "destiny-bond-roll-1", jumped: false });
+    expect(result.draws[1]).toMatchObject({ kind: "destiny-bond-roll-2", jumped: true });
+  });
+
+  it("HP <=30: all three rolls, roll3 <100 ends without the +2", () => {
+    // seed 5 -> roll1 low byte 223 (>=128, +1), roll2 171 (>=128, +1), roll3 229 (>=100, +2).
+    const result = destinyRun(5, 30);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual([
+      "destiny-bond-roll-1", "destiny-bond-roll-2", "destiny-bond-roll-3",
+    ]);
+  });
+
+  it("HP <=30: roll1 and roll2 JUMP, roll3's FALL-THROUGH applies the +2", () => {
+    // seed 3 -> roll1 83 (jump), roll2 102 (jump), roll3 234 (>=100, +2): -1+2 = +1.
+    const result = destinyRun(3, 30);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(3);
+    expect(result.draws[0]).toMatchObject({ kind: "destiny-bond-roll-1", jumped: true });
+    expect(result.draws[1]).toMatchObject({ kind: "destiny-bond-roll-2", jumped: true });
+    expect(result.draws[2]).toMatchObject({ kind: "destiny-bond-roll-3", jumped: false });
+  });
+
+  it("carry preserved", () => {
+    expect(destinyRun(1, 100)).toMatchObject({ funcResultAfter: 2 });
+  });
+});

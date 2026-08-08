@@ -2090,6 +2090,96 @@ function runCvFlail(input: Readonly<{
   return flail3(0);
 }
 
+/**
+ * `AI_CV_DestinyBond` (`data/battle_ai_scripts.s:1800-1816`,
+ * EFFECT_DESTINY_BOND):
+ *
+ * ```
+ * AI_CV_DestinyBond:
+ *     score -1
+ *     if_target_faster AI_CV_DestinyBond_End
+ *     if_hp_more_than AI_USER, 70, AI_CV_DestinyBond_End
+ *     if_random_less_than 128, AI_CV_DestinyBond2
+ *     score +1
+ * AI_CV_DestinyBond2:
+ *     if_hp_more_than AI_USER, 50, AI_CV_DestinyBond_End
+ *     if_random_less_than 128, AI_CV_DestinyBond3
+ *     score +1
+ * AI_CV_DestinyBond3:
+ *     if_hp_more_than AI_USER, 30, AI_CV_DestinyBond_End
+ *     if_random_less_than 100, AI_CV_DestinyBond_End
+ *     score +2
+ * AI_CV_DestinyBond_End:
+ *     end
+ * ```
+ *
+ * Always -1 first. Target faster or own HP > 70 ends at -1 with zero draws.
+ * Otherwise up to three sequential HP-gated rolls run on AI_USER's OWN
+ * truncating percent: at 70,50,30, each gate ends at zero draws on its > HP;
+ * each `<threshold` roll that FALLS THROUGH applies its +1/+2 and continues
+ * to the next band. Net: HP <= 30 can draw all three; HP 31-50 draws two;
+ * HP 51-70 draws one; HP > 70 (or target faster) draws none. `if_target_faster`
+ * burns its usual tie-break. No command writes funcResult.
+ */
+function runCvDestinyBond(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  let score = -1;
+
+  if (targetFaster || hpPercent > 70) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+
+  const rollAt = (threshold: number, kind: "destiny-bond-roll-1" | "destiny-bond-roll-2" | "destiny-bond-roll-3", bonus: number): boolean => {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-${kind}`);
+    rng = roll.after;
+    ordinal += 1;
+    const jumped = roll.randomValue % 256 < threshold;
+    draws.push(Object.freeze({ ...roll, kind, jumped }));
+    if (!jumped) score += bonus;
+    return jumped;
+  };
+
+  // Band 1: HP <= 70. Roll < 128 jumps to DB2 (no +1); >= 128 applies +1 then falls through.
+  if (hpPercent <= 70) {
+    rollAt(128, "destiny-bond-roll-1", 1);
+    if (hpPercent <= 50) {
+      rollAt(128, "destiny-bond-roll-2", 1);
+      if (hpPercent <= 30) {
+        rollAt(100, "destiny-bond-roll-3", 2);
+      }
+    }
+  }
+
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+}
+
 const AI_EFFECTIVENESS_X0_25 = 10;
 const AI_EFFECTIVENESS_X0_5 = 20;
 const AI_EFFECTIVENESS_X1 = 40;
@@ -4598,6 +4688,24 @@ export function runCheckViability(input: Readonly<{
       rng: flail.rng,
       draws: flail.draws,
       scoreDelta: flail.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_DESTINY_BOND") {
+    // AI_CV_DestinyBond (data/battle_ai_scripts.s:1800-1816).
+    const destinyBond = runCvDestinyBond({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: destinyBond.rng,
+      draws: destinyBond.draws,
+      scoreDelta: destinyBond.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }
