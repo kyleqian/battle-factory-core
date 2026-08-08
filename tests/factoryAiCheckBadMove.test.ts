@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   MOVES_BY_ID,
   runCbmAccUp,
+  runCbmSpAtkDown,
   runCheckBadMovePreamble,
   type FactoryAiCheckBadMoveAttacker,
   type FactoryAiCheckBadMoveRoarTarget,
@@ -4077,5 +4078,63 @@ describe("AI_CBM_AccUp (data/battle_ai_scripts.s:269-271, EFFECT_ACCURACY_UP/_2)
 
   it("AI's own ACC stage at MIN_STAT_STAGE (0) FALLS THROUGH to end at zero", () => {
     expect(runCbmAccUp(0)).toBe(0);
+  });
+});
+
+describe("AI_CBM_SpAtkDown + CheckIfAbilityBlocksStatChange (data/battle_ai_scripts.s:292-294)", () => {
+  // EFFECT_SPECIAL_ATTACK_DOWN (21) and EFFECT_SPECIAL_ATTACK_DOWN_2 (61) are
+  // vestigial in Gen 3 -- no move in gMovesInfo carries either effect -- so
+  // the handler is dispatch-reachable only and is receipt-pinned directly
+  // here through its exported entry point (the shared-tail machinery itself
+  // is densely receipted via AI_CBM_SpDefDown above).
+  const RNG = Object.freeze({ value: 249_678_687, calls: 0 });
+
+  function spAtkDownTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: null,
+      realAbility: "ABILITY_STURDY",
+      ...overrides,
+    });
+  }
+
+  function runSpAtkDown(target: FactoryAiCheckBadMoveTarget): ReturnType<typeof runCbmSpAtkDown> {
+    return runCbmSpAtkDown(target, RNG, 1, "test-sp-atk-down");
+  }
+
+  it("target's SPATK stage already MIN_STAT_STAGE JUMPs to Score_Minus10 with zero draws", () => {
+    const result = runSpAtkDown(spAtkDownTarget({ spAtkStage: 0 }));
+    expect(result).toMatchObject({ scoreDelta: -10 });
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("an ambiguous two-ability target (neither ability Clear Body nor White Smoke) draws once via the shared tail and scores 0", () => {
+    const result = runSpAtkDown(spAtkDownTarget({
+      species: 193, // SPECIES_YANMA: Speed Boost / Compound Eyes, both unobserved
+      types: ["TYPE_BUG", "TYPE_FLYING"],
+    }));
+    expect(result).toMatchObject({ scoreDelta: 0 });
+    expect(result.draws.map((draw) => draw.reason)).toEqual(["test-sp-atk-down-shared-tail"]);
+  });
+
+  it("a known Clear Body target scores -10 with zero draws (shared tail's free guess)", () => {
+    const result = runSpAtkDown(spAtkDownTarget({
+      species: 72, // SPECIES_TENTACOOL: Clear Body / Liquid Ooze
+      knownAbility: "ABILITY_CLEAR_BODY",
+      realAbility: "ABILITY_CLEAR_BODY",
+    }));
+    expect(result).toMatchObject({ scoreDelta: -10 });
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("defaults an omitted spAtkStage to DEFAULT_STAT_STAGE (6), not MIN -- doesn't short-circuit", () => {
+    const result = runSpAtkDown(spAtkDownTarget());
+    // Sturdy is neither Clear Body nor White Smoke -- scores 0, proving the
+    // MIN gate did not fire on an omitted stage.
+    expect(result).toMatchObject({ scoreDelta: 0 });
   });
 });

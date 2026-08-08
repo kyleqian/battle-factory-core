@@ -2321,6 +2321,25 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_SPECIAL_ATTACK_DOWN(_2) -> AI_CBM_SpAtkDown
+  // (`data/battle_ai_scripts.s:118,143,292-294`): the same bare
+  // MIN_STAT_STAGE-gate-plus-direct-goto-to-the-shared-tail shape as
+  // `AI_CBM_DefenseDown`/`AI_CBM_SpDefDown` with `STAT_SPATK` swapped in. A
+  // vestigial effect in Gen 3 -- no move in `gMovesInfo` carries
+  // EFFECT_SPECIAL_ATTACK_DOWN or EFFECT_SPECIAL_ATTACK_DOWN_2 (Mist Ball is
+  // the distinct EFFECT_SPECIAL_ATTACK_DOWN_HIT, not table-listed) -- but the
+  // table entry is source-complete here all the same.
+  if (move.effect === "EFFECT_SPECIAL_ATTACK_DOWN" || move.effect === "EFFECT_SPECIAL_ATTACK_DOWN_2") {
+    const spAtkDown = runCbmSpAtkDown(target, rng, ordinal, `${input.reasonPrefix}-sp-atk-down`);
+    for (const draw of spAtkDown.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: spAtkDown.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: spAtkDown.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -3064,4 +3083,33 @@ function runCbmMagnitude(
  */
 export function runCbmAccUp(attackerAccStage: number): number {
   return attackerAccStage === MAX_STAT_STAGE ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_SpAtkDown` (`data/battle_ai_scripts.s:292-294`) -- the same bare
+ * MIN_STAT_STAGE-gate-plus-direct-goto-to-the-shared-tail shape as
+ * `AI_CBM_DefenseDown`/`AI_CBM_SpDefDown` (`runCbmStatDownViaSharedTail`
+ * above, doc §15.1/§16.1) with `STAT_SPATK` swapped in, so it reuses that
+ * helper unchanged:
+ *
+ * ```
+ * AI_CBM_SpAtkDown:
+ *     if_stat_level_equal AI_TARGET, STAT_SPATK, MIN_STAT_STAGE, Score_Minus10
+ *     goto CheckIfAbilityBlocksStatChange
+ * ```
+ *
+ * Dispatch: `EFFECT_SPECIAL_ATTACK_DOWN`/`EFFECT_SPECIAL_ATTACK_DOWN_2`
+ * (`data/battle_ai_scripts.s:118,143`) -- both vestigial in Gen 3 (no move
+ * carries either effect; Mist Ball is the distinct EFFECT_SPECIAL_ATTACK_
+ * DOWN_HIT, not table-listed), so this handler is dispatch-reachable only.
+ * Exported so the vestigial gate is still receipt-pinned directly (zero
+ * reachable moves to drive through the dispatcher).
+ */
+export function runCbmSpAtkDown(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckBadMoveDraw[]; scoreDelta: number }> {
+  return runCbmStatDownViaSharedTail(target.spAtkStage ?? DEFAULT_STAT_STAGE, target, rng, ordinal, reason);
 }
