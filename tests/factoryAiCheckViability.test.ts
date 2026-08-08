@@ -6415,3 +6415,221 @@ describe("AI_CV_SelfKO Memento dispatch (data/battle_ai_scripts.s:748)", () => {
     expect(result.draws.map((d) => d.kind)).toEqual(["self-ko-roll-1", "self-ko-roll-5"]);
   });
 });
+
+// data/battle_ai_scripts.s:2444-2455, EFFECT_REVENGE. The MOVE_REVENGE id 279.
+describe("AI_CV_Revenge (data/battle_ai_scripts.s:2444-2455)", () => {
+  const MOVE_REVENGE = 279; // EFFECT_REVENGE
+  function revengeRun(rngValue: number, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_REVENGE,
+      attacker: NEUTRAL_BATTLER,
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      drawOrdinalStart: 1,
+      reasonPrefix: "revenge",
+    });
+  }
+
+  it("any of sleep/infatuation/confusion is the deterministic -2, zero draws", () => {
+    for (const status of [{ isAsleep: true }, { isInfatuated: true }, { isConfused: true }]) {
+      const result = revengeRun(1, status);
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: -2, draws: [], funcResultAfter: undefined });
+    }
+  });
+
+  it("clean target: the <180 roll's JUMP is -2, FALL-THROUGH is +2 (one draw)", () => {
+    // seed 1 -> randomValue % 256 = 198 (>= 180) FALL-THROUGH +2.
+    const fellThrough = revengeRun(1);
+    if (fellThrough.kind !== "scored") throw new Error("unreachable");
+    expect(fellThrough).toMatchObject({ scoreDelta: 2 });
+    expect(fellThrough.draws[0]).toMatchObject({ kind: "revenge-roll", jumped: false });
+
+    // seed 4 -> randomValue % 256 = 25 (< 180) JUMP -2.
+    const jumped = revengeRun(4);
+    if (jumped.kind !== "scored") throw new Error("unreachable");
+    expect(jumped).toMatchObject({ scoreDelta: -2 });
+    expect(jumped.draws[0]).toMatchObject({ kind: "revenge-roll", jumped: true });
+  });
+});
+
+// data/battle_ai_scripts.s:2392-2405, EFFECT_SUPERPOWER. Move 276.
+describe("AI_CV_Superpower (data/battle_ai_scripts.s:2392-2405)", () => {
+  const MOVE_SUPERPOWER = 276; // EFFECT_SUPERPOWER
+  function superpowerRun(attackerOverrides: Record<string, unknown>, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SUPERPOWER,
+      attacker: { ...NEUTRAL_BATTLER, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      drawOrdinalStart: 1,
+      reasonPrefix: "superpower",
+    });
+  }
+
+  it("weak effectiveness (x0.25/x0.5) is the deterministic -1", () => {
+    expect(superpowerRun({}, { types: ["TYPE_FLYING", "TYPE_FLYING"] })).toMatchObject({
+      kind: "scored", scoreDelta: -1, draws: [],
+    });
+  });
+
+  it("user ATK stage below neutral is the deterministic -1", () => {
+    expect(superpowerRun({ atkStage: 5 })).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("target faster: HP < 60 is the clean zero, 60+ is -1", () => {
+    expect(superpowerRun({ hp: 50, maxHp: 100, speed: 5 }, { speed: 120 })).toMatchObject({
+      kind: "scored", scoreDelta: 0, draws: [],
+    });
+    expect(superpowerRun({ hp: 60, maxHp: 100, speed: 5 }, { speed: 120 })).toMatchObject({
+      kind: "scored", scoreDelta: -1, draws: [],
+    });
+  });
+
+  it("target NOT faster: HP > 40 is -1, 40 or below is the clean zero", () => {
+    expect(superpowerRun({ hp: 41, maxHp: 100, speed: 120 }, { speed: 5 })).toMatchObject({
+      kind: "scored", scoreDelta: -1, draws: [],
+    });
+    expect(superpowerRun({ hp: 40, maxHp: 100, speed: 120 }, { speed: 5 })).toMatchObject({
+      kind: "scored", scoreDelta: 0, draws: [],
+    });
+  });
+});
+
+// data/battle_ai_scripts.s:2407-2424, EFFECT_MAGIC_COAT. Move 277.
+describe("AI_CV_MagicCoat (data/battle_ai_scripts.s:2407-2424)", () => {
+  const MOVE_MAGIC_COAT = 277; // EFFECT_MAGIC_COAT
+  function magicCoatRun(rngValue: number, attackerOverrides: Record<string, unknown>, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_MAGIC_COAT,
+      attacker: { ...NEUTRAL_BATTLER, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "magic-coat",
+    });
+  }
+
+  it("target HP > 30 skips roll-1; first-turn attacker's <150 roll drives +1", () => {
+    // seed 1 -> 198 >= 150 FALL-THROUGH +1.
+    const result = magicCoatRun(1, { isFirstTurn: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 1 });
+    expect(result.draws.map((d) => d.kind)).toEqual(["magic-coat-roll-2"]);
+    expect(result.funcResultAfter).toBe(0); // is_first_turn_for AI_USER wrote 0
+
+    // seed 4 -> 25 < 150 JUMP, zero.
+    const jumped = magicCoatRun(4, { isFirstTurn: 0 });
+    if (jumped.kind !== "scored") throw new Error("unreachable");
+    expect(jumped).toMatchObject({ scoreDelta: 0 });
+    expect(jumped.draws.map((d) => d.kind)).toEqual(["magic-coat-roll-2"]);
+  });
+
+  it("target HP <= 30 runs the <100 roll first (FALL-THROUGH -1)", () => {
+    // seed 2 -> roll-1 %256=140 >= 100 FALL-THROUGH -1, then roll-2 %256=195
+    // >= 150 FALL-THROUGH +1: net 0.
+    const result = magicCoatRun(2, { isFirstTurn: 0 }, { hp: 30, maxHp: 100 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0 });
+    expect(result.draws.map((d) => d.kind)).toEqual(["magic-coat-roll-1", "magic-coat-roll-2"]);
+
+    // seed 1 -> roll-1 %256=198 FALL-THROUGH -1, then roll-2 %256=33 < 150
+    // JUMP (skips the +1): net -1.
+    const jumped = magicCoatRun(1, { isFirstTurn: 0 }, { hp: 30, maxHp: 100 });
+    if (jumped.kind !== "scored") throw new Error("unreachable");
+    expect(jumped).toMatchObject({ scoreDelta: -1 });
+    expect(jumped.draws.map((d) => d.kind)).toEqual(["magic-coat-roll-1", "magic-coat-roll-2"]);
+  });
+
+  it("not-first-turn attacker jumps to MagicCoat4's <30 roll (FALL-THROUGH -1), funcResult = isFirstTurn", () => {
+    // seed 1 -> 198 >= 30 FALL-THROUGH -1.
+    const result = magicCoatRun(1, { isFirstTurn: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1 });
+    expect(result.draws.map((d) => d.kind)).toEqual(["magic-coat-roll-3"]);
+    expect(result.funcResultAfter).toBe(1);
+  });
+});
+
+// data/battle_ai_scripts.s:1940-1963, EFFECT_FORESIGHT, non-BUGFIX (user-side reads).
+describe("AI_CV_Foresight (data/battle_ai_scripts.s:1940-1963, non-BUGFIX)", () => {
+  const MOVE_FORESIGHT = 193; // EFFECT_FORESIGHT
+  function foresightRun(rngValue: number, attackerOverrides: Record<string, unknown>) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_FORESIGHT,
+      attacker: { ...NEUTRAL_BATTLER, ...attackerOverrides },
+      target: NEUTRAL_BATTLER,
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "foresight",
+    });
+  }
+
+  it("non-Ghost, evasion <= 8: deterministic -2, zero draws", () => {
+    expect(foresightRun(1, {})).toMatchObject({ kind: "scored", scoreDelta: -2, draws: [] });
+  });
+
+  it("Ghost user (type1) reaches Foresight2's <80 roll", () => {
+    const jumped = foresightRun(4, { types: ["TYPE_GHOST", "TYPE_NORMAL"] });
+    if (jumped.kind !== "scored") throw new Error("unreachable");
+    expect(jumped.draws.map((d) => d.kind)).toEqual(["foresight-roll-1"]);
+    expect(jumped).toMatchObject({ scoreDelta: 0 });
+    expect(jumped.draws[0]).toMatchObject({ jumped: true });
+
+    const fellThrough = foresightRun(1, { types: ["TYPE_GHOST", "TYPE_NORMAL"] });
+    if (fellThrough.kind !== "scored") throw new Error("unreachable");
+    expect(fellThrough).toMatchObject({ scoreDelta: 2 });
+    expect(fellThrough.draws[0]).toMatchObject({ kind: "foresight-roll-1", jumped: false });
+  });
+
+  it("Ghost user (type2 only) also reaches Foresight2", () => {
+    const result = foresightRun(1, { types: ["TYPE_NORMAL", "TYPE_GHOST"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["foresight-roll-1"]);
+  });
+
+  it("high user evasion (>8) reaches Foresight3's <80 roll", () => {
+    const result = foresightRun(1, { evasionStage: 9 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 2 });
+    expect(result.draws.map((d) => d.kind)).toEqual(["foresight-roll-2"]);
+  });
+});
+
+// data/battle_ai_scripts.s:2475-2490, EFFECT_ENDEAVOR. Move 283.
+describe("AI_CV_Endeavor (data/battle_ai_scripts.s:2475-2490)", () => {
+  const MOVE_ENDEAVOR = 283; // EFFECT_ENDEAVOR
+  function endeavorRun(attackerOverrides: Record<string, unknown>, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_ENDEAVOR,
+      attacker: { ...NEUTRAL_BATTLER, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      drawOrdinalStart: 1,
+      reasonPrefix: "endeavor",
+    });
+  }
+
+  it("target HP below 70% is the deterministic -1", () => {
+    expect(endeavorRun({}, { hp: 69, maxHp: 100 })).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("target faster: user HP > 50 is -1, 50 or below is +1", () => {
+    expect(endeavorRun({ hp: 51, maxHp: 100, speed: 5 }, { speed: 120 })).toMatchObject({
+      kind: "scored", scoreDelta: -1, draws: [],
+    });
+    expect(endeavorRun({ hp: 50, maxHp: 100, speed: 5 }, { speed: 120 })).toMatchObject({
+      kind: "scored", scoreDelta: 1, draws: [],
+    });
+  });
+
+  it("target NOT faster: user HP > 40 is -1, 40 or below is +1", () => {
+    expect(endeavorRun({ hp: 41, maxHp: 100, speed: 120 }, { speed: 5 })).toMatchObject({
+      kind: "scored", scoreDelta: -1, draws: [],
+    });
+    expect(endeavorRun({ hp: 40, maxHp: 100, speed: 120 }, { speed: 5 })).toMatchObject({
+      kind: "scored", scoreDelta: 1, draws: [],
+    });
+  });
+});

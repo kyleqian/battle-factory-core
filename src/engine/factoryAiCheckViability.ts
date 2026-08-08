@@ -816,6 +816,83 @@ export type FactoryAiCheckViabilityDraw =
     rawRngValue: number;
     randomValue: number;
     succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "revenge-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the <180 JUMP lands in ScoreDown2 (raw low byte < 180). */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "magic-coat-roll-1" | "magic-coat-roll-2" | "magic-coat-roll-3";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < threshold) skips the own score. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "foresight-roll-1" | "foresight-roll-2";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < 80) skips the +2. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "encore-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < 30) skips the +3. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "change-self-ability-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < 50) skips the +2. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "trick-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < 50) skips the +2. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "substitute-roll-1" | "substitute-roll-2" | "substitute-roll-3" | "substitute-roll-4";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < 100) skips the -1. */
+    jumped: boolean;
   }>;
 
 export type FactoryAiCheckViabilityResult =
@@ -6301,6 +6378,99 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_REVENGE") {
+    // AI_CV_Revenge (data/battle_ai_scripts.s:2444-2455).
+    const revenge = runCvRevenge({
+      rng: input.rng,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: revenge.rng,
+      draws: revenge.draws,
+      scoreDelta: revenge.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_SUPERPOWER") {
+    // AI_CV_Superpower (data/battle_ai_scripts.s:2392-2405).
+    const superpower = runCvSuperpower({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      attackerTypes: input.attacker.types,
+      moveType: move.type,
+      targetTypes: input.target.types,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: superpower.rng,
+      draws: superpower.draws,
+      scoreDelta: superpower.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_MAGIC_COAT") {
+    // AI_CV_MagicCoat (data/battle_ai_scripts.s:2407-2424).
+    const magicCoat = runCvMagicCoat({
+      rng: input.rng,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+      attackerIsFirstTurn: input.attacker.isFirstTurn,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: magicCoat.rng,
+      draws: magicCoat.draws,
+      scoreDelta: magicCoat.scoreDelta,
+      funcResultAfter: magicCoat.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_FORESIGHT") {
+    // AI_CV_Foresight (data/battle_ai_scripts.s:1940-1963, non-BUGFIX).
+    const foresight = runCvForesight({
+      rng: input.rng,
+      attackerTypes: input.attacker.types,
+      attackerEvasionStage: input.attacker.evasionStage,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: foresight.rng,
+      draws: foresight.draws,
+      scoreDelta: foresight.scoreDelta,
+      funcResultAfter: foresight.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_ENDEAVOR") {
+    // AI_CV_Endeavor (data/battle_ai_scripts.s:2475-2490).
+    const endeavor = runCvEndeavor({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: endeavor.rng,
+      draws: endeavor.draws,
+      scoreDelta: endeavor.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
   if (AI_CHECK_VIABILITY_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
       kind: "unsupported-branch",
@@ -6668,5 +6838,343 @@ function runCvCounter(input: Readonly<{
     draws: Object.freeze(draws),
     scoreDelta: score,
     funcResultAfter: typeFuncResultCollision(type2),
+  });
+}
+
+/**
+ * `AI_CV_Revenge` (`data/battle_ai_scripts.s:2444-2455`, EFFECT_REVENGE):
+ *
+ * ```
+ * AI_CV_Revenge:
+ *     if_status AI_TARGET, STATUS1_SLEEP, AI_CV_Revenge_ScoreDown2
+ *     if_status2 AI_TARGET, STATUS2_INFATUATION, AI_CV_Revenge_ScoreDown2
+ *     if_status2 AI_TARGET, STATUS2_CONFUSION, AI_CV_Revenge_ScoreDown2
+ *     if_random_less_than 180, AI_CV_Revenge_ScoreDown2
+ *     score +2
+ *     goto AI_CV_Revenge_End
+ * AI_CV_Revenge_ScoreDown2:
+ *     score -2
+ * AI_CV_Revenge_End:
+ *     end
+ * ```
+ *
+ * Any of the target's three status classes (sleep / infatuation / confusion)
+ * jumps to the deterministic -2. A clean target runs the single <180 roll
+ * (JUMP, ~70%, to the same -2; FALL-THROUGH, ~30%, scores +2). No command
+ * writes funcResult.
+ */
+function runCvRevenge(input: Readonly<{
+  rng: BattleRngState;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const statusJumpsToScoreDown2 = (input.target.isAsleep ?? false)
+    || (input.target.isInfatuated ?? false)
+    || (input.target.isConfused ?? false);
+  if (statusJumpsToScoreDown2) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -2 });
+  }
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-revenge-roll`);
+  const jumped = roll.randomValue % 256 < 180;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind: "revenge-roll" as const, jumped })]),
+    scoreDelta: jumped ? -2 : 2,
+  });
+}
+
+/**
+ * `AI_CV_Superpower` (`data/battle_ai_scripts.s:2392-2405`, EFFECT_SUPERPOWER):
+ *
+ * ```
+ * AI_CV_Superpower:
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_25, AI_CV_Superpower_ScoreDown1
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_5, AI_CV_Superpower_ScoreDown1
+ *     if_stat_level_less_than AI_USER, STAT_ATK, DEFAULT_STAT_STAGE, AI_CV_Superpower_ScoreDown1
+ *     if_target_faster AI_CV_Superpower2
+ *     if_hp_more_than AI_USER, 40, AI_CV_Superpower_ScoreDown1
+ *     goto AI_CV_Superpower_End
+ * AI_CV_Superpower2:
+ *     if_hp_less_than AI_USER, 60, AI_CV_Superpower_End
+ * AI_CV_Superpower_ScoreDown1:
+ *     score -1
+ * AI_CV_Superpower_End:
+ *     end
+ * ```
+ *
+ * Zero `if_random_less_than` sites -- entirely deterministic, one branching
+ * ladder into the shared -1. Weak effectiveness (x0.25 or x0.5, the same
+ * `if_type_effectiveness` probe `runCvAbsorb`/`runCvDreamEater` share) or the
+ * user's own ATK stage below neutral (6) is the deterministic -1. Target
+ * strictly faster reaches `Superpower2`: user HP below 60% is the clean zero,
+ * 60%+ falls through to -1. Target NOT faster: user HP above 40% is -1,
+ * 40% or below is the clean zero `goto End`. The `if_target_faster` tie-break
+ * draws exactly like every other ported handler. No command writes
+ * funcResult.
+ */
+function runCvSuperpower(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  attackerTypes: readonly [string, string];
+  moveType: string;
+  targetTypes: readonly [string, string];
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  if (classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
+  }
+
+  if ((input.attacker.atkStage ?? DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
+  }
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  if (targetFaster) {
+    // Superpower2: HP < 60 is the clean zero; >= 60 falls through to -1.
+    return Object.freeze({
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: hpPercent < 60 ? 0 : -1,
+    });
+  }
+  // Target NOT faster: HP > 40 is -1; <= 40 is the clean zero goto End.
+  return Object.freeze({
+    rng,
+    draws: Object.freeze(draws),
+    scoreDelta: hpPercent > 40 ? -1 : 0,
+  });
+}
+
+/**
+ * `AI_CV_MagicCoat` (`data/battle_ai_scripts.s:2407-2424`, EFFECT_MAGIC_COAT):
+ *
+ * ```
+ * AI_CV_MagicCoat:
+ *     if_hp_more_than AI_TARGET, 30, AI_CV_MagicCoat2
+ *     if_random_less_than 100, AI_CV_MagicCoat2
+ *     score -1
+ * AI_CV_MagicCoat2:
+ *     is_first_turn_for AI_USER
+ *     if_equal FALSE, AI_CV_MagicCoat4
+ *     if_random_less_than 150, AI_CV_MagicCoat_End
+ *     score +1
+ *     goto AI_CV_MagicCoat_End
+ * AI_CV_MagicCoat3:
+ *     if_random_less_than 50, AI_CV_MagicCoat_End
+ * AI_CV_MagicCoat4:
+ *     if_random_less_than 30, AI_CV_MagicCoat_End
+ *     score -1
+ * AI_CV_MagicCoat_End:
+ *     end
+ * ```
+ *
+ * Three `if_random_less_than` sites, but the 50-threshold site lives at the
+ * dead label `AI_CV_MagicCoat3` (zero references in the compiled ROM, same
+ * class of dead label as `AI_CV_Heal2`) -- so exactly two draw sites are
+ * reachable. Target HP <= 30% runs the <100 roll first (JUMP to MagicCoat2,
+ * FALL-THROUGH -1). `MagicCoat2` is guarded by `is_first_turn_for AI_USER`
+ * (`Cmd_is_first_turn_for`, `battle_ai_script_commands.c:1017-1026`), which
+ * WRITES funcResult = the attacker's isFirstTurn (0-2, every value a valid
+ * `AI_WEATHER_*` id): a nonzero value (not first turn) jumps to `MagicCoat4`
+ * directly; a zero (first turn) reaches the <150 roll (JUMP to End at zero,
+ * FALL-THROUGH +1). `MagicCoat4` runs the <30 roll (JUMP to End at zero,
+ * FALL-THROUGH -1).
+ */
+function runCvMagicCoat(input: Readonly<{
+  rng: BattleRngState;
+  targetHp: number;
+  targetMaxHp: number;
+  attackerIsFirstTurn: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  let score = 0;
+
+  const targetHpPercent = Math.floor((100 * input.targetHp) / input.targetMaxHp);
+  if (targetHpPercent <= 30) {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-magic-coat-roll-1`);
+    rng = roll.after;
+    ordinal += 1;
+    const jumped = roll.randomValue % 256 < 100;
+    draws.push(Object.freeze({ ...roll, kind: "magic-coat-roll-1" as const, jumped }));
+    if (!jumped) score -= 1;
+  }
+
+  // is_first_turn_for AI_USER always overwrites funcResult with the
+  // attacker's isFirstTurn (0-2, all valid AI_WEATHER_* ids).
+  const funcResultAfter = input.attackerIsFirstTurn as AiWeatherValue;
+  if (input.attackerIsFirstTurn !== 0) {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-magic-coat-roll-3`);
+    rng = roll.after;
+    ordinal += 1;
+    const jumped = roll.randomValue % 256 < 30;
+    draws.push(Object.freeze({ ...roll, kind: "magic-coat-roll-3" as const, jumped }));
+    if (!jumped) score -= 1;
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+  }
+
+  const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-magic-coat-roll-2`);
+  rng = roll.after;
+  const jumped = roll.randomValue % 256 < 150;
+  draws.push(Object.freeze({ ...roll, kind: "magic-coat-roll-2" as const, jumped }));
+  if (!jumped) score += 1;
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+}
+
+/**
+ * `AI_CV_Foresight` (`data/battle_ai_scripts.s:1940-1963`, EFFECT_FORESIGHT):
+ * Emerald's non-BUGFIX build, which reads the USER's own type/evasion (the
+ * source comment at :1938-1939 flags this as a bug -- it should check the
+ * target). The source `#else` arm is what the ROM ships:
+ *
+ * ```
+ * AI_CV_Foresight:
+ *     get_user_type1
+ *     if_equal TYPE_GHOST, AI_CV_Foresight2
+ *     get_user_type2
+ *     if_equal TYPE_GHOST, AI_CV_Foresight2
+ *     if_stat_level_more_than AI_USER, STAT_EVASION, 8, AI_CV_Foresight3
+ *     score -2
+ *     goto AI_CV_Foresight_End
+ * AI_CV_Foresight2:
+ *     if_random_less_than 80, AI_CV_Foresight_End
+ * AI_CV_Foresight3:
+ *     if_random_less_than 80, AI_CV_Foresight_End
+ *     score +2
+ * AI_CV_Foresight_End:
+ *     end
+ * ```
+ *
+ * User is Ghost type (type1 or type2) OR user's own evasion stage > 8 jumps
+ * past the deterministic -2. The Ghost path reaches `Foresight2`'s <80 roll,
+ * the high-evasion path `Foresight3`'s <80 roll -- same odds, two mutually
+ * exclusive draw sites (both JUMP to End at zero, FALL-THROUGH +2). The
+ * `get_user_type1/2` reads write funcResult (the user's type, only TYPE id
+ * 0-3 ever colliding with an `AI_WEATHER_*` compare).
+ */
+function runCvForesight(input: Readonly<{
+  rng: BattleRngState;
+  attackerTypes: readonly [string, string];
+  attackerEvasionStage: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const [type1, type2] = input.attackerTypes;
+  const isGhost = type1 === "TYPE_GHOST" || type2 === "TYPE_GHOST";
+  if (!isGhost && input.attackerEvasionStage <= 8) {
+    return Object.freeze({
+      rng: input.rng,
+      draws: Object.freeze([]),
+      scoreDelta: -2,
+      funcResultAfter: typeChainFuncResultAfter(input.attackerTypes, new Set(["TYPE_GHOST"])),
+    });
+  }
+  const kind = isGhost ? ("foresight-roll-1" as const) : ("foresight-roll-2" as const);
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-${kind}`);
+  const jumped = roll.randomValue % 256 < 80;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind, jumped })]),
+    scoreDelta: jumped ? 0 : 2,
+    funcResultAfter: typeChainFuncResultAfter(input.attackerTypes, new Set(["TYPE_GHOST"])),
+  });
+}
+
+/**
+ * `AI_CV_Endeavor` (`data/battle_ai_scripts.s:2475-2490`, EFFECT_ENDEAVOR):
+ *
+ * ```
+ * AI_CV_Endeavor:
+ *     if_hp_less_than AI_TARGET, 70, AI_CV_Endeavor_ScoreDown1
+ *     if_target_faster AI_CV_Endeavor2
+ *     if_hp_more_than AI_USER, 40, AI_CV_Endeavor_ScoreDown1
+ *     score +1
+ *     goto AI_CV_Endeavor_End
+ * AI_CV_Endeavor2:
+ *     if_hp_more_than AI_USER, 50, AI_CV_Endeavor_ScoreDown1
+ *     score +1
+ *     goto AI_CV_Endeavor_End
+ * AI_CV_Endeavor_ScoreDown1:
+ *     score -1
+ * AI_CV_Endeavor_End:
+ *     end
+ * ```
+ *
+ * Zero `if_random_less_than` sites -- entirely deterministic. Target HP below
+ * 70% is the deterministic -1. Target faster reaches `Endeavor2`: user HP
+ * above 50% is -1, 50% or below scores +1. Target NOT faster: user HP above
+ * 40% is -1, 40% or below scores +1. No command writes funcResult.
+ */
+function runCvEndeavor(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const targetHpPercent = Math.floor((100 * input.target.hp) / input.target.maxHp);
+  if (targetHpPercent < 70) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
+  }
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  if (targetFaster) {
+    return Object.freeze({
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: hpPercent > 50 ? -1 : 1,
+    });
+  }
+  return Object.freeze({
+    rng,
+    draws: Object.freeze(draws),
+    scoreDelta: hpPercent > 40 ? -1 : 1,
   });
 }
