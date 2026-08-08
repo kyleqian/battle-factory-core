@@ -200,6 +200,21 @@ export const PARTY_SELECT_OPEN_TOTAL_FRAMES =
   + PARTY_SELECT_OPEN_BLACK_HOLD_FRAMES
   + PARTY_SELECT_OPEN_MENU_FADE_FRAMES;
 
+/**
+ * ISSUES #80 Class B (`docs/fade-layer-forensics.md` §9 RAM probe): the
+ * player healthbox sprite's real `y2` steps 0→1 at oracle frame 770
+ * (`openElapsed 7`), so from there it is drawn one row lower. Applied as a
+ * +1px draw-origin offset on the open field-fade-out's settled scene.
+ */
+export const PARTY_SELECT_OPEN_HEALTHBOX_Y2_START = 7;
+/**
+ * ISSUES #80 Class B (`docs/fade-layer-forensics.md` §9 RAM probe): the
+ * player back sprite's real `y2` steps 1→0 at oracle frame 779
+ * (`openElapsed 16`), so from there it is drawn one row higher. Applied as a
+ * −1px draw-origin offset on the open field-fade-out's settled scene.
+ */
+export const PARTY_SELECT_OPEN_BACK_SPRITE_Y2_START = 16;
+
 export function battlePartySelectOpenPhase(
   openElapsed: number,
 ): BattlePartySelectOpenPhase {
@@ -1245,7 +1260,7 @@ export function renderBattlePartySelect(
     // (the BG message-box chrome overpaints the sprite rows it covers, and
     // the oracle keys those to the BG palette instead --
     // docs/fade-layer-forensics.md §8(d)).
-    close.drawBattleScene(fb);
+    close.drawBattleScene(fb, state.openElapsed);
     if (openPhase === "field-fade-out") {
       const yBg = partySelectOpenFieldFadeBgY(state.openElapsed);
       const yObj = partySelectOpenFieldFadeObjY(state.openElapsed);
@@ -1257,7 +1272,7 @@ export function renderBattlePartySelect(
       full.set(fb);
       applyFadeToBlack(fb, yBg);
       const objSettled = new Uint8Array(fb.length);
-      close.drawBattleSceneObjOnly(objSettled);
+      close.drawBattleSceneObjOnly(objSettled, state.openElapsed);
       const obj = new Uint8Array(fb.length);
       obj.set(objSettled);
       applyFadeToBlack(obj, yObj);
@@ -1344,8 +1359,11 @@ export type PartySelectCloseRenderAssets = Readonly<{
    * sprites + healthboxes + the "What will X do?" message box + the
    * FIGHT/BAG/POKéMON/RUN action menu). The close path's `drawField` omits
    * that bottom chrome, so the open side needs this separate drawable.
+   * `openElapsed` gates the ISSUES #80 Class B per-sprite row offsets (the
+   * player healthbox +1 from e=7, the player back sprite −1 from e=16,
+   * `docs/fade-layer-forensics.md` §9).
    */
-  drawBattleScene(fb: Uint8Array): void;
+  drawBattleScene(fb: Uint8Array, openElapsed?: number): void;
   /**
    * Draws the same settled action-menu battle scene's OBJ (sprite) layer only
    * (shadow, battler sprites, healthboxes) into a scratch buffer. The open
@@ -1353,9 +1371,10 @@ export type PartySelectCloseRenderAssets = Readonly<{
    * at `y_obj` -- one blend step behind `y_bg` -- and composites it over the
    * frame using its alpha-255 coverage, so the OBJ pixels track the oracle's
    * own OBJ palette schedule (ISSUES #80 Class A,
-   * docs/fade-layer-forensics.md §8(d)).
+   * docs/fade-layer-forensics.md §8(d)). `openElapsed` gates the same Class B
+   * per-sprite row offsets as `drawBattleScene`.
    */
-  drawBattleSceneObjOnly(fb: Uint8Array): void;
+  drawBattleSceneObjOnly(fb: Uint8Array, openElapsed?: number): void;
 }>;
 
 function renderPartySelectClose(

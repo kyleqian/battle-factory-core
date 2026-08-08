@@ -200,12 +200,16 @@ describe("ISSUES #78 voluntary-switch presentation seam", () => {
   });
 
   it("times the party-menu close so the recall message's first glyph lands at the fixture edge", () => {
-    // docs/party-menu-rank6-ground-truth.md §7: confirm at 964, menu fade-out
-    // 965-978 (14f), black hold 979-1018 (40f), field reveal 1019-1034 (16f),
-    // field idle 1035-1043 (9f), recall printstring first glyph at 1044.
+    // docs/party-menu-rank6-ground-truth.md §7 + docs/fade-layer-forensics.md
+    // §1: confirm at 964, menu fade-out 965-979 (15f — the OBJ layer trails the
+    // BG by one blend step, so 979 still draws the menu with BG black and OBJ
+    // at y=14), black hold 980-1018 (39f), field reveal 1019-1034 (16f), field
+    // idle 1035-1043 (9f), recall printstring first glyph at 1044. The 14/40
+    // split this pinned before 2026-08-07 moved to 15/39; MENU_FRAMES (72) and
+    // TOTAL (81) are unchanged, so the reveal and the 1044 edge do not move.
     expect(PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES).toBe(2);
-    expect(PARTY_SELECT_CLOSE_MENU_FADE_FRAMES).toBe(14);
-    expect(PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES).toBe(40);
+    expect(PARTY_SELECT_CLOSE_MENU_FADE_FRAMES).toBe(15);
+    expect(PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES).toBe(39);
     expect(PARTY_SELECT_CLOSE_FIELD_REVEAL_FRAMES).toBe(16);
     expect(PARTY_SELECT_CLOSE_MENU_FRAMES).toBe(72);
     expect(PARTY_SELECT_CLOSE_FIELD_HOLD_FRAMES).toBe(9);

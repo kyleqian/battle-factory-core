@@ -655,6 +655,8 @@ import battleAnimPsychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json"
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
   battlePartySelectStateForForcedParty,
+  PARTY_SELECT_OPEN_BACK_SPRITE_Y2_START,
+  PARTY_SELECT_OPEN_HEALTHBOX_Y2_START,
   renderBattlePartySelect,
 } from "./battlePartySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
@@ -7219,6 +7221,7 @@ function drawBattle2ActionMenuWindow(
   fieldArt?: BattleCommandPresentationRenderView["fieldArt"],
   spriteVisibility?: Readonly<{ player: boolean; opponent: boolean }>,
   layer: "all" | "obj-only" = "all",
+  openElapsed?: number,
 ): void {
   const age = actionMenuAge(t, handoffTick);
   const playerVisualT = playerTrainerSendOutClock(t, handoffTick, "jenson");
@@ -7232,6 +7235,20 @@ function drawBattle2ActionMenuWindow(
   // the oracle's BG/OBJ palette alternation (docs/fade-layer-forensics.md
   // §8(d)).
   const drawBg = layer === "all";
+  // ISSUES #80 Class B (`docs/fade-layer-forensics.md` §9 RAM probe): during
+  // the party-menu open field-fade-out the player healthbox sprite's real y2
+  // steps 0→1 at openElapsed 7 (drawn one row lower) and the player back
+  // sprite's real y2 steps 1→0 at openElapsed 16 (drawn one row higher).
+  // Drawn as per-sprite draw-origin offsets gated on `openElapsed`, so each
+  // object's own edges/bevel/slanted corner move with it.
+  const healthboxShift = openElapsed !== undefined
+    && openElapsed >= PARTY_SELECT_OPEN_HEALTHBOX_Y2_START
+    ? 1
+    : 0;
+  const backSpriteShift = openElapsed !== undefined
+    && openElapsed >= PARTY_SELECT_OPEN_BACK_SPRITE_Y2_START
+    ? -1
+    : 0;
 
   if (drawBg) drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   if (fieldArt) {
@@ -7261,7 +7278,7 @@ function drawBattle2ActionMenuWindow(
           fieldArt.player.pic.tileset as Tileset,
           fieldArt.player.pic.palette as RgbColor[],
           fieldArt.player.origin.x,
-          fieldArt.player.origin.y + bounce.onixY2,
+          fieldArt.player.origin.y + bounce.onixY2 + backSpriteShift,
         );
       }
     } else {
@@ -7286,7 +7303,7 @@ function drawBattle2ActionMenuWindow(
       fb,
       composePlayerHealthbox(playerHealthboxAssets, healthboxes.player),
       0,
-      bounce.healthboxY2,
+      bounce.healthboxY2 + healthboxShift,
     );
   } else {
     drawSendOutHealthbox(fb, 0, kabutoHealthboxContent);
@@ -18364,6 +18381,7 @@ export function renderGeneratedBattleCommandPresentation(
   fb: Uint8Array,
   presentation: BattleCommandPresentationState,
   layer: "all" | "obj-only" = "all",
+  openElapsed?: number,
 ): void {
   const bounceTick = presentation.idleBounceElapsed
     + battleCommandBounceAgeOffset(presentation);
@@ -18385,6 +18403,7 @@ export function renderGeneratedBattleCommandPresentation(
         view.fieldArt,
         view.spriteVisibility,
         layer,
+        openElapsed,
       );
       if (revealed && layer !== "obj-only") {
         drawBattleCommandActionChrome(framebuffer, view.actionMenu);
@@ -18402,6 +18421,7 @@ export function renderGeneratedBattleCommandPresentation(
         view.fieldArt,
         view.spriteVisibility,
         layer,
+        openElapsed,
       );
       if (layer !== "obj-only") {
         drawFightSubmenuChromeFromLiveState(
@@ -18423,6 +18443,7 @@ export function renderGeneratedBattleCommandPresentation(
         view.fieldArt,
         view.spriteVisibility,
         layer,
+        openElapsed,
       );
       const rejection = view.rejectionMessage;
       if (rejection === null || layer === "obj-only") return;
