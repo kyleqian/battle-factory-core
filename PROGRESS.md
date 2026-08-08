@@ -18,12 +18,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   boundary; retired two bare staged facts and the species-named faint-sink API;
   made all six Family-C healthbox caches and the DOUBLE_TEAM palette cache own
   every identity-bearing render input.
-- **Next:** continue #39 with one freshly censused generic presentation owner,
-  or add another file-disjoint Factory-AI receipt. Never resume a canonical
-  Battle-2 turn/window after tick 33331.
+- **Next:** #39's audited next owner is `turn10OnixDarkPalette`: rename it and
+  key its latent singleton by source-palette identity, with a two-palette red
+  pin and 592 OFF canary captures. Do not revive the absent OFF darken pulse or
+  claim those canaries exercise it. A file-disjoint AI receipt is also safe;
+  never resume a canonical Battle-2 turn/window after tick 33331.
 - **Notes:** the separate animation supervisor remains active; its newer
   `animation-main` commits, now through Magical Leaf staging, were intentionally
-  not folded mid-session. No material decision was deferred. Shared-host
+  not folded mid-session. A final read-only source audit produced the exact
+  Family-F handoff above; no material decision was deferred. Shared-host
   full-suite contention is recorded in `PAPERCUTS.md` at hit 6.
 
 ## 1023 — [bounded MAIN worker, 2026-08-08] **#39: DOUBLE_TEAM clone-palette cache is identity-honest**

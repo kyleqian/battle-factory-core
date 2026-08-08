@@ -1580,6 +1580,19 @@ differential replay is **640/640 byte-identical** across turn-4 DOUBLE_TEAM,
 adjacent ROCK_SLIDE, and generated-command insurance. The remaining #39
 render-entry debt above is otherwise unchanged.
 
+**Next Family-F owner audited read-only (2026-08-08).** The remaining
+`turn10OnixDarkPalette` accepts a source sprite but memoizes one module-global
+palette, so it has the same latent cross-identity collision. It is not currently
+reachable from `renderSceneOffTurnView`; both canonical OFF AERIAL_ACE callers
+explicitly pass `darken=false`, while the pure coefficient-10 transform remains
+live separately in the Scene-ON renderer. The next bounded cleanup should rename
+only this wrapper, use a `WeakMap` keyed by the source palette array, and add the
+same two-palette/both-orders red pin beside `doubleTeamClonePalette`. Use the
+three turn-10 OFF traces as **592-capture canaries**, not as a claim that OFF
+currently exercises the cache; never add a staged darken field or revive the
+absent OFF palette pulse merely to manufacture dynamic acceptance. Leave the BG
+cache, pure transform, and Scene-ON callers untouched.
+
 # Settled records (not open work — see the note at the top of this file)
 
 ## #56 — [SETTLED 2026-08-03, supervisor decision] Arbitrary-trainer intro: YOSHI 700/751 + MAGNETON 703/751, every residual frame in a settled class
