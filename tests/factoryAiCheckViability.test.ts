@@ -5221,3 +5221,21 @@ describe("AI_CV_Trap (data/battle_ai_scripts.s:1436-1446)", () => {
     expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
   });
 });
+
+describe("AI_CV_FakeOut (data/battle_ai_scripts.s:2249-2251)", () => {
+  const MOVE_FAKE_OUT = 252; // EFFECT_FAKE_OUT
+
+  it("bare +2, zero draws, rng untouched, carry preserved", () => {
+    const rng = { value: 12345, calls: 3 };
+    const result = runCheckViability({
+      rng,
+      moveId: MOVE_FAKE_OUT,
+      attacker: NEUTRAL_BATTLER,
+      target: NEUTRAL_BATTLER,
+      staleFuncResultFallback: 1,
+      drawOrdinalStart: 1,
+      reasonPrefix: "fake-out",
+    });
+    expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: 2, funcResultAfter: 1 });
+  });
+});

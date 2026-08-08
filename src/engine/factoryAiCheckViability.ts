@@ -1589,6 +1589,23 @@ function runCvTrap(input: Readonly<{
 }
 
 /**
+ * `AI_CV_FakeOut` (`data/battle_ai_scripts.s:2249-2251`, EFFECT_FAKE_OUT):
+ *
+ * ```
+ * AI_CV_FakeOut:
+ *     score +2
+ *     end
+ * ```
+ *
+ * A bare +2, no gates, no draws, no funcResult write -- the whole body.
+ */
+function runCvFakeOut(input: Readonly<{
+  rng: BattleRngState;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 2 });
+}
+
+/**
  * `AI_CV_Pursuit` (`data/battle_ai_scripts.s:2018-2036`,
  * `docs/factory-ai-checkviability-ground-truth.md` §11.1):
  *
@@ -4118,6 +4135,18 @@ export function runCheckViability(input: Readonly<{
       rng: roar.rng,
       draws: roar.draws,
       scoreDelta: roar.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_FAKE_OUT") {
+    // AI_CV_FakeOut (data/battle_ai_scripts.s:2249-2251) -- a bare +2.
+    const fakeOut = runCvFakeOut({ rng: input.rng });
+    return Object.freeze({
+      kind: "scored",
+      rng: fakeOut.rng,
+      draws: fakeOut.draws,
+      scoreDelta: fakeOut.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }
