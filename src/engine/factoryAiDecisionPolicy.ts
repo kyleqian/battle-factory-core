@@ -547,6 +547,12 @@ export type FactoryAiScoredBattlerView = Readonly<{
   hasFocusEnergy?: boolean;
   /** Status1 Refresh-curable bits (POISON/BURN/PARALYSIS/TOXIC_POISON) on the AI's own battler, read by AI_CBM_Refresh. */
   hasCurableStatus?: boolean;
+  /** `gBattleMons[].status1 & STATUS1_POISON` (non-toxic) -- source-required for `AI_CV_Facade`'s target-status1 mask (the shipped ROM's non-BUGFIX `AI_TARGET` gate, `data/battle_ai_scripts.s:2283`). Optional, defaulting to `false`. */
+  isPoisoned?: boolean;
+  /** `gBattleMons[].status1 & STATUS1_BURN` -- same `AI_CV_Facade` target-status1 mask. Optional, defaulting to `false`. */
+  isBurned?: boolean;
+  /** `gBattleMons[].status1 & STATUS1_PARALYSIS` -- same `AI_CV_Facade` target-status1 mask. Optional, defaulting to `false`. */
+  isParalyzed?: boolean;
   /** `gBattleMons[].status2 & STATUS2_CURSED` -- source-required for `AI_CV_AccuracyDown`'s Gate G (target only, doc §19.1). Optional, defaulting to `false`. */
   isCursed?: boolean;
   /** `gBattleMons[].status2 & STATUS2_ESCAPE_PREVENTION` -- `AI_CBM_CantEscape`'s single gate (target only, EFFECT_MEAN_LOOK). Optional, defaulting to `false`. */
@@ -557,6 +563,16 @@ export type FactoryAiScoredBattlerView = Readonly<{
   lightScreenUp?: boolean;
   /** `gSideStatuses[] & SIDE_STATUS_REFLECT` -- source-required for `AI_CBM_Reflect`'s own gate (AI_USER's OWN side only, doc §23.1). Optional, defaulting to `false`. */
   reflectUp?: boolean;
+  /**
+   * `gSideStatuses[side] & SIDE_STATUS_REFLECT` on the TARGET's OWN side (the
+   * player's side, `Cmd_if_side_affecting AI_TARGET`, doc §23.1) --
+   * source-required for `AI_CV_BrickBreak`'s single gate
+   * (`data/battle_ai_scripts.s:2458`). Deliberately distinct from `reflectUp`
+   * above, which is AI_USER's OWN side only -- Brick Break breaks the
+   * target's screen, so its handler reads the other side. Optional,
+   * defaulting to `false`.
+   */
+  targetSideReflectUp?: boolean;
   /** `gSideStatuses[] & SIDE_STATUS_SAFEGUARD` -- source-required for `AI_CBM_Toxic`'s target-side gate. Optional, defaulting to `false`. */
   safeguardUp?: boolean;
   /**
@@ -1092,6 +1108,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           isLeechSeeded: view.attacker.isLeechSeeded,
           hasYawn: view.attacker.hasYawn,
           protectUses: view.attacker.protectUses,
+          ...(view.attacker.hasSubstitute === true ? { hasSubstitute: true } : {}),
         },
         target: {
           speed: view.target.speed,
@@ -1116,6 +1133,10 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           hasYawn: view.target.hasYawn,
           hasPerishSong: view.target.hasPerishSong,
           knownMoves: view.target.knownMoveIds,
+          ...(view.target.targetSideReflectUp === true ? { hasSideReflect: true } : {}),
+          ...(view.target.isPoisoned === true ? { isPoisoned: true } : {}),
+          ...(view.target.isBurned === true ? { isBurned: true } : {}),
+          ...(view.target.isParalyzed === true ? { isParalyzed: true } : {}),
         },
         staleFuncResultFallback,
         drawOrdinalStart: draws.length + 1,

@@ -2862,3 +2862,98 @@ describe("get_weather's own stale-funcResult carry surviving an intervening CV-p
     expect(seed99.trace.tie.index).toBe(1);
   });
 });
+
+// Live-wiring receipts for the five handler-input fields the pass-3
+// CheckViability adapter must populate (PROGRESS.md entry 1004). These drive
+// `chooseFactoryAiScoredDecision` -- NOT the handlers directly -- so a wiring
+// regression (a field read by a handler but never populated by the adapter)
+// fails loudly. Direct-handler tests cannot catch that class.
+const MOVE_BRICK_BREAK_MASK7 = 280; // EFFECT_BRICK_BREAK -- AI_CV_BrickBreak's single target-side Reflect gate
+const MOVE_FACADE_MASK7 = 263; // EFFECT_FACADE -- AI_CV_Facade's target-status1 mask
+const MOVE_FOCUS_PUNCH_MASK7 = 264; // EFFECT_FOCUS_PUNCH -- AI_CV_FocusPunch3's AI_USER substitute tail
+
+function cvWiringView(
+  moveId: number,
+  targetOverrides: Record<string, unknown>,
+  attackerOverrides: Record<string, unknown> = {},
+): FactoryAiScoredView {
+  return Object.freeze({
+    schema: "factory-ai-scored-view/v1",
+    mode: "factory-level-50-singles",
+    active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+    factory: Object.freeze({
+      levelMode: 0 as const,
+      battleMode: 0 as const,
+      factoryWinStreak: 28,
+      trainerOpponentId: 222,
+    }),
+    moves: [moveId, MOVE_SPLASH, MOVE_SPLASH, MOVE_SPLASH] as const,
+    attacker: Object.freeze({ ...ALAKAZAM, ...attackerOverrides }),
+    target: Object.freeze({ ...marowak(5), ...targetOverrides }),
+  });
+}
+
+describe("pass-3 CheckViability adapter populates the five handler-input fields end to end", () => {
+  it("hasSideReflect: view.targetSideReflectUp=true reaches AI_CV_BrickBreak's target-side gate (+1), false stays 0", () => {
+    const up = chooseFactoryAiScoredDecision({
+      view: cvWiringView(MOVE_BRICK_BREAK_MASK7, { targetSideReflectUp: true }),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(up.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 1 });
+
+    const down = chooseFactoryAiScoredDecision({
+      view: cvWiringView(MOVE_BRICK_BREAK_MASK7, {}),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(down.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 0 });
+  });
+
+  it.each([
+    ["isPoisoned", { isPoisoned: true }],
+    ["isBurned", { isBurned: true }],
+    ["isParalyzed", { isParalyzed: true }],
+  ] as const)("AI_CV_Facade's target-status1 mask: %s=true through the adapter scores +1, absent scores 0", (_field, targetOverrides) => {
+    const statused = chooseFactoryAiScoredDecision({
+      view: cvWiringView(MOVE_FACADE_MASK7, targetOverrides),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(statused.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 1 });
+
+    const clean = chooseFactoryAiScoredDecision({
+      view: cvWiringView(MOVE_FACADE_MASK7, {}),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(clean.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 0 });
+  });
+
+  it("hasSubstitute: view.attacker.hasSubstitute=true reaches AI_CV_FocusPunch3's AI_USER substitute tail (+5 vs +1)", () => {
+    const withSub = cvWiringView(MOVE_FOCUS_PUNCH_MASK7, { isInfatuated: true }, { hasSubstitute: true });
+    const withoutSub = cvWiringView(MOVE_FOCUS_PUNCH_MASK7, { isInfatuated: true }, {});
+    // The FocusPunch3 roll (jump prob 100/256) gates the +5/+1 tail, so pick
+    // the first seed whose roll falls through (succeeded) for the with-sub
+    // view, then assert the identical-seed without-sub view scores +1.
+    let foundValue: number | null = null;
+    for (let v = 1; v <= 256; v += 1) {
+      const result = chooseFactoryAiScoredDecision({
+        view: withSub,
+        request: fourSlotRequest,
+        rng: { value: v, calls: 0 },
+      });
+      if (result.trace.slotScores[0]!.checkViabilityDelta === 5) {
+        foundValue = v;
+        break;
+      }
+    }
+    expect(foundValue).not.toBeNull();
+    const without = chooseFactoryAiScoredDecision({
+      view: withoutSub,
+      request: fourSlotRequest,
+      rng: { value: foundValue!, calls: 0 },
+    });
+    expect(without.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 1 });
+  });
+});
