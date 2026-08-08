@@ -595,6 +595,104 @@ describe("AI_CBM_HighRiskForDamage via Superpower (dispatch :200)", () => {
   });
 });
 
+describe("AI_CBM_OneHitKO (data/battle_ai_scripts.s:358-362, EFFECT_OHKO)", () => {
+  const MOVE_GUILLOTINE = 12; // EFFECT_OHKO, TYPE_NORMAL, power 1
+  const MOVE_SHEER_COLD = 329; // EFFECT_OHKO, TYPE_ICE, power 1
+
+  function ohkoTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: "ABILITY_ROCK_HEAD",
+      ...overrides,
+    });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read", () => {
+    // Normal is x0 against Ghost. A two-ability species keeps the universal
+    // Soundproof draw in the receipt; the handler itself must add no draw.
+    const result = run(MOVE_GUILLOTINE, ohkoTarget({
+      species: 171,
+      types: ["TYPE_GHOST", "TYPE_GHOST"],
+      knownAbility: null,
+      realAbility: "ABILITY_VOLT_ABSORB",
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual(["test-slot-soundproof"]);
+  });
+
+  it("non-Sturdy, attacker level >= target level FALLTHROUGH reaches End at zero", () => {
+    const result = run(
+      MOVE_GUILLOTINE,
+      ohkoTarget(),
+      undefined,
+      { atkStage: 6, defStage: 6, level: 50 },
+    );
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("Sturdy JUMPs to Score_Minus10", () => {
+    const result = run(
+      MOVE_GUILLOTINE,
+      ohkoTarget({
+        species: 213,
+        knownAbility: "ABILITY_STURDY",
+        realAbility: "ABILITY_STURDY",
+      }),
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("attacker level below target level JUMPs to Score_Minus10 (if_level_cond 1)", () => {
+    // Source `Cmd_if_level_cond` case 1 = "less than": sBattler_AI.level <
+    // gBattlerTarget.level.
+    const result = run(
+      MOVE_SHEER_COLD,
+      ohkoTarget({ level: 100 }),
+      undefined,
+      { atkStage: 6, defStage: 6, level: 50 },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("Sturdy with attacker level below target level still scores exactly -10 (single gate)", () => {
+    // The two -10 gates are both Score_Minus10 JUMPs, never additive.
+    const result = run(
+      MOVE_SHEER_COLD,
+      ohkoTarget({
+        species: 213,
+        knownAbility: "ABILITY_STURDY",
+        realAbility: "ABILITY_STURDY",
+        level: 100,
+      }),
+      undefined,
+      { atkStage: 6, defStage: 6, level: 50 },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("performs the handler's fresh ability read after the universal Soundproof read", () => {
+    // Species 171 (Lanturn, Volt Absorb / Water Absorb) has two distinct
+    // abilities, so with knownAbility null both the universal Soundproof
+    // read and the handler's own get_ability draw.
+    const result = run(MOVE_GUILLOTINE, ohkoTarget({
+      species: 171,
+      knownAbility: null,
+      realAbility: "ABILITY_VOLT_ABSORB",
+    }));
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-one-hit-ko-ability",
+    ]);
+  });
+});
+
 const MOVE_SURF = 57;
 const MOVE_ROCK_SLIDE = 157;
 const MOVE_BODY_SLAM = 34;

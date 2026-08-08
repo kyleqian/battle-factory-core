@@ -15,7 +15,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | Ability | Status | L50 carriers (det.) | All | Delegate cases | Inline rules | AI | Engine refs |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | ABILITY_LEVITATE | engine-referenced | 54 (54) | 54 | — | 10 | 0 | 13 |
-| ABILITY_STURDY | engine-referenced | 42 (13) | 42 | — | 3 | 0 | 3 |
+| ABILITY_STURDY | engine-referenced | 42 (13) | 42 | — | 3 | 0 | 5 |
 | ABILITY_ROCK_HEAD | engine-referenced | 40 (3) | 40 | — | 1 | 0 | 3 |
 | ABILITY_INTIMIDATE | engine-referenced | 38 (28) | 38 | ON_SWITCHIN, INTIMIDATE1, INTIMIDATE2 | 0 | 0 | 2 |
 | ABILITY_CHLOROPHYLL | engine-referenced | 38 (32) | 38 | — | 2 | 0 | 2 |
