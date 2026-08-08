@@ -442,6 +442,11 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    */
   hp?: number;
   maxHp?: number;
+  /**
+   * `gBattleMons[AI_USER].status3 & STATUS3_ROOTED` -- `AI_CBM_Ingrain`'s
+   * single gate (EFFECT_INGRAIN). Optional, defaulting to `false`.
+   */
+  isRooted?: boolean;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -1455,6 +1460,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
       rng,
       draws: Object.freeze(draws),
       scoreDelta: -10,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_INGRAIN -> AI_CBM_Ingrain
+  // (`data/battle_ai_scripts.s:199,550-552`): a single
+  // `if_status3 AI_USER, STATUS3_ROOTED, Score_Minus10` -- Ingrain is
+  // penalized when the AI is already rooted.
+  if (move.effect === "EFFECT_INGRAIN") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmIngrain(input.attacker.isRooted ?? false),
     });
   }
 
@@ -2580,6 +2598,15 @@ function runCbmCantEscape(targetEscapePrevented: boolean): number {
  */
 function runCbmTorment(targetTormented: boolean): number {
   return targetTormented ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Ingrain` (`data/battle_ai_scripts.s:550-552`, EFFECT_INGRAIN): a
+ * single `if_status3 AI_USER, STATUS3_ROOTED, Score_Minus10` -- Ingrain is
+ * penalized when the AI is already rooted. Zero ability/type reads.
+ */
+function runCbmIngrain(attackerRooted: boolean): number {
+  return attackerRooted ? -10 : 0;
 }
 
 /**

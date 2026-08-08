@@ -845,6 +845,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     ...(view.attacker.hasSubstitute === true ? { hasSubstitute: true } : {}),
     hp: view.attacker.hp,
     maxHp: view.attacker.maxHp,
+    ...(view.attacker.isRooted === true ? { isRooted: true } : {}),
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [
