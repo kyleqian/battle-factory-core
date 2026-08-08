@@ -3008,7 +3008,7 @@ describe("AI_CBM_Explosion (data/battle_ai_scripts.s:224-235, EFFECT_EXPLOSION)"
   const MOVE_SELF_DESTRUCT = 120;
   const MOVE_EXPLOSION = 153;
 
-  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+  function target(overrides: Partial<FactoryAiCheckBadMoveRoarTarget> = {}): FactoryAiCheckBadMoveRoarTarget {
     return Object.freeze({
       species: 213,
       types: ["TYPE_BUG", "TYPE_ROCK"] as const,

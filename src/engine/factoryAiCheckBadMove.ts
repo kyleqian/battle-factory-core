@@ -2241,7 +2241,7 @@ const ABILITY_DAMP = "ABILITY_DAMP";
 
 function runCbmExplosion(
   moveType: string,
-  target: FactoryAiCheckBadMoveTarget,
+  target: FactoryAiCheckBadMoveRoarTarget,
   attackerUsablePartyMons: number,
   rng: BattleRngState,
   ordinal: number,
