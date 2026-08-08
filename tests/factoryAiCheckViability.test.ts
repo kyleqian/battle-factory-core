@@ -5311,3 +5311,31 @@ describe("AI_CV_SemiInvulnerable (data/battle_ai_scripts.s:2197-2241, non-BUGFIX
     expect(result.draws[0]).toMatchObject({ kind: "semi-invulnerable-roll", jumped: false });
   });
 });
+
+describe("AI_CV_SuperFang (data/battle_ai_scripts.s:1430-1433)", () => {
+  const MOVE_SUPER_FANG = 162; // EFFECT_SUPER_FANG
+
+  function superFangRun(targetHp: number) {
+    return runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SUPER_FANG,
+      attacker: NEUTRAL_BATTLER,
+      target: { ...NEUTRAL_BATTLER, hp: targetHp, maxHp: 100 },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "super-fang",
+    });
+  }
+
+  it("target HP >50%: deterministic zero score, zero draws", () => {
+    expect(superFangRun(51)).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("target HP 50% (not >50): scores -1", () => {
+    expect(superFangRun(50)).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("carry preserved", () => {
+    expect(superFangRun(10)).toMatchObject({ funcResultAfter: 2 });
+  });
+});

@@ -1886,6 +1886,34 @@ function runCvPursuit(input: Readonly<{
   });
 }
 
+/**
+ * `AI_CV_SuperFang` (`data/battle_ai_scripts.s:1430-1433`, EFFECT_SUPER_FANG):
+ *
+ * ```
+ * AI_CV_SuperFang:
+ *     if_hp_more_than AI_TARGET, 50, AI_CV_SuperFang_End
+ *     score -1
+ * AI_CV_SuperFang_End:
+ *     end
+ * ```
+ *
+ * A single HP gate on the TARGET's own truncating `100*hp/maxHp` percent:
+ * > 50% is the deterministic zero-score `goto End`; <= 50% scores -1. No
+ * draws, no funcResult write.
+ */
+function runCvSuperFang(input: Readonly<{
+  rng: BattleRngState;
+  targetHp: number;
+  targetMaxHp: number;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const targetHpPercent = Math.floor((100 * input.targetHp) / input.targetMaxHp);
+  return Object.freeze({
+    rng: input.rng,
+    draws: Object.freeze([]),
+    scoreDelta: targetHpPercent > 50 ? 0 : -1,
+  });
+}
+
 const AI_EFFECTIVENESS_X0_25 = 10;
 const AI_EFFECTIVENESS_X0_5 = 20;
 const AI_EFFECTIVENESS_X1 = 40;
@@ -4339,6 +4367,22 @@ export function runCheckViability(input: Readonly<{
       rng: fakeOut.rng,
       draws: fakeOut.draws,
       scoreDelta: fakeOut.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_SUPER_FANG") {
+    // AI_CV_SuperFang (data/battle_ai_scripts.s:1430-1433).
+    const superFang = runCvSuperFang({
+      rng: input.rng,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: superFang.rng,
+      draws: superFang.draws,
+      scoreDelta: superFang.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }
