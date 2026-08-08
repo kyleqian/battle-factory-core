@@ -316,6 +316,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       ...((attacker.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0
         ? { isAsleep: true }
         : {}),
+      ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_SUBSTITUTE) !== 0
+        ? { hasSubstitute: true }
+        : {}),
       ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) !== 0
         ? { isLeechSeeded: true }
         : {}),

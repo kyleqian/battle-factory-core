@@ -3103,3 +3103,56 @@ describe("AI_CBM_BatonPass (data/battle_ai_scripts.s:485-488, EFFECT_BATON_PASS)
     });
   });
 });
+
+describe("AI_CBM_Substitute (data/battle_ai_scripts.s:405-408, EFFECT_SUBSTITUTE)", () => {
+  const MOVE_SUBSTITUTE = 164;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  function attacker(overrides: Partial<FactoryAiCheckBadMoveAttacker> = {}): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({
+      ...NEUTRAL_ATTACKER,
+      hp: 100,
+      maxHp: 100,
+      ...overrides,
+    });
+  }
+
+  it("own substitute up JUMPs to Score_Minus8", () => {
+    const result = run(MOVE_SUBSTITUTE, target(), undefined, attacker({ hasSubstitute: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8, draws: [] });
+  });
+
+  it("own HP% below 26 JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_SUBSTITUTE, target(), undefined, attacker({ hp: 25 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("own HP% exactly 26 FALLS THROUGH to end at zero", () => {
+    expect(run(MOVE_SUBSTITUTE, target(), undefined, attacker({ hp: 26 }))).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+
+  it("full HP and no substitute FALLS THROUGH to end at zero", () => {
+    expect(run(MOVE_SUBSTITUTE, target(), undefined, attacker())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+});

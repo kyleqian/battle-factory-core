@@ -411,6 +411,19 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * target-side `usablePartyMons` on `FactoryAiCheckBadMoveRoarTarget`).
    */
   usablePartyMons?: number;
+  /**
+   * `gBattleMons[AI_USER].status2 & STATUS2_SUBSTITUTE` -- `AI_CBM_Substitute`'s
+   * first gate (EFFECT_SUBSTITUTE). Optional, defaulting to `false`.
+   */
+  hasSubstitute?: boolean;
+  /**
+   * `gBattleMons[AI_USER].hp`/`.maxHP` -- `AI_CBM_Substitute`'s second gate,
+   * `if_hp_less_than AI_USER, 26` (EFFECT_SUBSTITUTE). Optional, defaulting
+   * to `maxHp: 1, hp: 1` (100%, so the <26% gate never fires when absent) --
+   * the same absent-neutral convention as `level` on the target type.
+   */
+  hp?: number;
+  maxHp?: number;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -1761,6 +1774,18 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_SUBSTITUTE -> AI_CBM_Substitute
+  // (`data/battle_ai_scripts.s:150,405-408`): own substitute up rejects at
+  // -8; own HP% under 26 rejects at -10.
+  if (move.effect === "EFFECT_SUBSTITUTE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmSubstitute(input.attacker),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -2217,4 +2242,22 @@ function runCbmExplosion(
  */
 function runCbmBatonPass(attackerUsablePartyMons: number): number {
   return attackerUsablePartyMons === 0 ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Substitute` (`data/battle_ai_scripts.s:405-408`, EFFECT_SUBSTITUTE):
+ * `if_status2 AI_USER, STATUS2_SUBSTITUTE, Score_Minus8` then
+ * `if_hp_less_than AI_USER, 26, Score_Minus10`. HP percent is truncating
+ * `100*hp/maxHp`, matching `Cmd_if_hp_more_than`/`Cmd_if_hp_less_than`'s own
+ * `(u32)` cast (battle_ai_script_commands.c, same convention as
+ * `runCvVitalThrow`). Zero ability/type reads.
+ */
+function runCbmSubstitute(attacker: FactoryAiCheckBadMoveAttacker): number {
+  if (attacker.hasSubstitute ?? false) {
+    return -8;
+  }
+  const maxHp = attacker.maxHp ?? 1;
+  const hp = attacker.hp ?? 1;
+  const hpPercent = Math.floor((100 * hp) / maxHp);
+  return hpPercent < 26 ? -10 : 0;
 }

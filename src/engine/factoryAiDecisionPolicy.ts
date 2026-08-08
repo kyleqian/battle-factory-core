@@ -556,6 +556,8 @@ export type FactoryAiScoredBattlerView = Readonly<{
    * the CBM layer's conservative zero-member default.
    */
   usablePartyMons?: number;
+  /** `gBattleMons[].status2 & STATUS2_SUBSTITUTE` -- `AI_CBM_Substitute`'s own first gate (attacker's own copy only). Optional, defaulting to `false`. */
+  hasSubstitute?: boolean;
 }>;
 
 export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
@@ -833,6 +835,9 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     ...(view.attacker.usablePartyMons === undefined
       ? {}
       : { usablePartyMons: view.attacker.usablePartyMons }),
+    ...(view.attacker.hasSubstitute === true ? { hasSubstitute: true } : {}),
+    hp: view.attacker.hp,
+    maxHp: view.attacker.maxHp,
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [
