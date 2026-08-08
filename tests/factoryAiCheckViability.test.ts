@@ -7084,3 +7084,199 @@ describe("AI_CV_Disable (data/battle_ai_scripts.s:1602-1614, EFFECT_DISABLE)", (
     expect(result).toMatchObject({ scoreDelta: -1, funcResultAfter: 0 });
   });
 });
+
+describe("AI_CV_PainSplit (data/battle_ai_scripts.s:1768-1783, EFFECT_PAIN_SPLIT)", () => {
+  const MOVE_PAIN_SPLIT = 220;
+
+  function painSplitRun(rngValue: number, attackerOverrides = {}, targetOverrides = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_PAIN_SPLIT,
+      attacker: { ...NEUTRAL_BATTLER, speed: 80, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, speed: 100, ...targetOverrides },
+      drawOrdinalStart: 1,
+      reasonPrefix: "pain",
+    });
+  }
+
+  it("target HP < 80%: deterministic -1, zero draws", () => {
+    const result = painSplitRun(1, {}, { hp: 70 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
+  });
+
+  it("target HP >= 80%, target faster, user HP > 60: -1", () => {
+    const result = painSplitRun(1, { hp: 70 }, { hp: 100 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
+  });
+
+  it("target HP >= 80%, target faster, user HP <= 60: +1", () => {
+    const result = painSplitRun(1, { hp: 50 }, { hp: 100 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 1, draws: [] });
+  });
+
+  it("target HP >= 80%, user faster, user HP > 40: -1", () => {
+    const result = painSplitRun(1, { hp: 60, speed: 120 }, { hp: 100, speed: 100 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
+  });
+
+  it("target HP >= 80%, user faster, user HP <= 40: +1", () => {
+    const result = painSplitRun(1, { hp: 30, speed: 120 }, { hp: 100, speed: 100 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 1, draws: [] });
+  });
+});
+
+describe("AI_CV_BellyDrum (data/battle_ai_scripts.s:2077-2084, EFFECT_BELLY_DRUM)", () => {
+  const MOVE_BELLY_DRUM = 187;
+
+  function bellyRun(hp: number, maxHp = 100) {
+    return runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_BELLY_DRUM,
+      attacker: { ...NEUTRAL_BATTLER, hp, maxHp },
+      target: NEUTRAL_BATTLER,
+      drawOrdinalStart: 1,
+      reasonPrefix: "belly",
+    });
+  }
+
+  it("user HP < 90%: deterministic -2", () => {
+    const result = bellyRun(89);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -2, draws: [] });
+  });
+
+  it("user HP >= 90%: zero", () => {
+    const result = bellyRun(90);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [] });
+  });
+});
+
+describe("AI_CV_Refresh (data/battle_ai_scripts.s:2514-2521, EFFECT_REFRESH)", () => {
+  const MOVE_REFRESH = 287;
+
+  function refreshRun(targetHp: number) {
+    return runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_REFRESH,
+      attacker: NEUTRAL_BATTLER,
+      target: { ...NEUTRAL_BATTLER, hp: targetHp },
+      drawOrdinalStart: 1,
+      reasonPrefix: "refresh",
+    });
+  }
+
+  it("target HP < 50%: deterministic -1", () => {
+    const result = refreshRun(49);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
+  });
+
+  it("target HP >= 50%: zero", () => {
+    const result = refreshRun(50);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [] });
+  });
+});
+
+describe("AI_CV_Eruption (data/battle_ai_scripts.s:2492-2504, EFFECT_ERUPTION)", () => {
+  const MOVE_ERUPTION = 284;
+  const MOVE_WATER_SPOUT = 323;
+
+  function eruptionRun(rngValue: number, moveId: number, attackerOverrides = {}, targetOverrides = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId,
+      attacker: { ...NEUTRAL_BATTLER, speed: 80, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, speed: 100, ...targetOverrides },
+      drawOrdinalStart: 1,
+      reasonPrefix: "eruption",
+    });
+  }
+
+  it("0.25x effectiveness: deterministic -1", () => {
+    // Eruption (fire) vs a Fire+Water dual-type target (0.5x * 0.5x).
+    const result = eruptionRun(1, MOVE_ERUPTION, {}, { types: ["TYPE_FIRE", "TYPE_WATER"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
+  });
+
+  it("0.5x effectiveness: deterministic -1", () => {
+    // Water Spout (water) vs Grass target.
+    const result = eruptionRun(1, MOVE_WATER_SPOUT, {}, { types: ["TYPE_GRASS", "TYPE_GRASS"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
+  });
+
+  it("neutral, target faster, target HP > 70: zero", () => {
+    const result = eruptionRun(1, MOVE_ERUPTION, {}, { types: ["TYPE_NORMAL", "TYPE_NORMAL"], hp: 80 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [] });
+  });
+
+  it("neutral, target faster, target HP <= 70: -1", () => {
+    const result = eruptionRun(1, MOVE_ERUPTION, {}, { types: ["TYPE_NORMAL", "TYPE_NORMAL"], hp: 70 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
+  });
+
+  it("neutral, user faster, target HP > 50: zero", () => {
+    const result = eruptionRun(1, MOVE_ERUPTION, { speed: 120 }, { speed: 100, types: ["TYPE_NORMAL", "TYPE_NORMAL"], hp: 60 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [] });
+  });
+
+  it("neutral, user faster, target HP <= 50: -1", () => {
+    const result = eruptionRun(1, MOVE_ERUPTION, { speed: 120 }, { speed: 100, types: ["TYPE_NORMAL", "TYPE_NORMAL"], hp: 50 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
+  });
+});
+
+describe("AI_CV_Flatter (data/battle_ai_scripts.s:1464-1477, EFFECT_FLATTER)", () => {
+  const MOVE_FLATTER = 260;
+
+  function flatterRun(rngValue: number, targetHp = 100) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_FLATTER,
+      attacker: NEUTRAL_BATTLER,
+      target: { ...NEUTRAL_BATTLER, hp: targetHp },
+      drawOrdinalStart: 1,
+      reasonPrefix: "flatter",
+    });
+  }
+
+  it("roll < 128 JUMPs over the +1 straight into Confuse", () => {
+    // seed 3 -> low byte 83 (< 128).
+    const result = flatterRun(3, 100);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    // Confuse's own first gate (HP > 70) ends at zero.
+    expect(result).toMatchObject({ scoreDelta: 0 });
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "flatter-roll", jumped: true });
+  });
+
+  it("roll >= 128 applies +1 then enters Confuse; Confuse's HP > 70 gate keeps it zero", () => {
+    // seed 1 -> low byte 198 (>= 128).
+    const result = flatterRun(1, 100);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 1 });
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "flatter-roll", jumped: false });
+  });
+
+  it("Confuse tail at low target HP can add -1 per band", () => {
+    // seed 1 (flatter fall-through +1); Confuse: HP 30 <= 70 -> roll; seed 1's
+    // second draw low byte is the confuse roll.
+    const result = flatterRun(1, 30);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "flatter-roll" });
+    expect(result.draws[1]).toMatchObject({ kind: "confuse-roll" });
+  });
+});

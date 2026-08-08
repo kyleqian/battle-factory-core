@@ -982,6 +982,17 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "flatter-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < 128) skips the +1 and enters Confuse directly. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind: "get-ability";
     before: BattleRngState;
     after: BattleRngState;
@@ -6638,6 +6649,97 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_PAIN_SPLIT") {
+    // AI_CV_PainSplit (data/battle_ai_scripts.s:1768-1783).
+    const painSplit = runCvPainSplit({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: painSplit.rng,
+      draws: painSplit.draws,
+      scoreDelta: painSplit.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_BELLY_DRUM") {
+    // AI_CV_BellyDrum (data/battle_ai_scripts.s:2077-2084).
+    const bellyDrum = runCvBellyDrum({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: bellyDrum.rng,
+      draws: bellyDrum.draws,
+      scoreDelta: bellyDrum.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_REFRESH") {
+    // AI_CV_Refresh (data/battle_ai_scripts.s:2514-2521).
+    const refresh = runCvRefresh({
+      rng: input.rng,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: refresh.rng,
+      draws: refresh.draws,
+      scoreDelta: refresh.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_ERUPTION") {
+    // AI_CV_Eruption (data/battle_ai_scripts.s:2492-2504) -- Overheat's
+    // TARGET-HP twin.
+    const eruption = runCvEruption({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      attackerTypes: input.attacker.types,
+      moveType: move.type,
+      targetTypes: input.target.types,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: eruption.rng,
+      draws: eruption.draws,
+      scoreDelta: eruption.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_FLATTER") {
+    // AI_CV_Flatter (data/battle_ai_scripts.s:1464-1477) -- falls through
+    // into the already-ported AI_CV_Confuse body.
+    const flatter = runCvFlatter({
+      rng: input.rng,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: flatter.rng,
+      draws: flatter.draws,
+      scoreDelta: flatter.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
   if (move.effect === "EFFECT_DISABLE") {
     // AI_CV_Disable (data/battle_ai_scripts.s:1602-1614, EFFECT_DISABLE, the
     // one handler with a funcResult-POWER-collision write -- see runCvDisable).
@@ -8087,5 +8189,202 @@ function runCvDisable(input: Readonly<{
     draws: Object.freeze([...draws, Object.freeze({ ...roll, kind: "disable-roll" as const, jumped })]),
     scoreDelta: jumped ? 0 : -1,
     funcResultAfter,
+  });
+}
+
+/**
+ * `AI_CV_PainSplit` (`data/battle_ai_scripts.s:1768-1783`, EFFECT_PAIN_SPLIT):
+ *
+ * ```
+ * AI_CV_PainSplit:
+ *     if_hp_less_than AI_TARGET, 80, AI_CV_PainSplit_ScoreDown1
+ *     if_target_faster AI_CV_PainSplit2
+ *     if_hp_more_than AI_USER, 40, AI_CV_PainSplit_ScoreDown1
+ *     score +1
+ *     goto AI_CV_PainSplit_End
+ * AI_CV_PainSplit2:
+ *     if_hp_more_than AI_USER, 60, AI_CV_PainSplit_ScoreDown1
+ *     score +1
+ *     goto AI_CV_PainSplit_End
+ * AI_CV_PainSplit_ScoreDown1:
+ *     score -1
+ * AI_CV_PainSplit_End:
+ *     end
+ * ```
+ *
+ * Target HP < 80% is the deterministic -1. Otherwise target NOT faster: user
+ * HP > 40% is the -1, user HP <= 40% is +1. Target faster: user HP > 60% is
+ * the -1, user HP <= 60% is +1. Zero draws; `if_target_faster` burns the tie
+ * roll only on a tie. No command writes funcResult.
+ */
+function runCvPainSplit(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const targetHpPercent = Math.floor((100 * input.target.hp) / input.target.maxHp);
+  if (targetHpPercent < 80) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
+  }
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+
+  const userHpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  if (strikesFirst === 1) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: userHpPercent > 60 ? -1 : 1 });
+  }
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: userHpPercent > 40 ? -1 : 1 });
+}
+
+/**
+ * `AI_CV_BellyDrum` (`data/battle_ai_scripts.s:2077-2084`, EFFECT_BELLY_DRUM):
+ * user HP < 90% is the deterministic -2; >= 90% is zero. Zero draws, no
+ * funcResult write.
+ */
+function runCvBellyDrum(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  return Object.freeze({
+    rng: input.rng,
+    draws: Object.freeze([]),
+    scoreDelta: hpPercent < 90 ? -2 : 0,
+  });
+}
+
+/**
+ * `AI_CV_Refresh` (`data/battle_ai_scripts.s:2514-2521`, EFFECT_REFRESH):
+ * target HP < 50% is the deterministic -1; >= 50% is zero. Zero draws, no
+ * funcResult write.
+ */
+function runCvRefresh(input: Readonly<{
+  rng: BattleRngState;
+  targetHp: number;
+  targetMaxHp: number;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const hpPercent = Math.floor((100 * input.targetHp) / input.targetMaxHp);
+  return Object.freeze({
+    rng: input.rng,
+    draws: Object.freeze([]),
+    scoreDelta: hpPercent < 50 ? -1 : 0,
+  });
+}
+
+/**
+ * `AI_CV_Eruption` (`data/battle_ai_scripts.s:2492-2504`, EFFECT_ERUPTION,
+ * shared by Eruption and Water Spout) -- `AI_CV_Overheat`'s twin that reads
+ * the TARGET's HP instead of the user's:
+ *
+ * ```
+ * AI_CV_Eruption:
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_25, AI_CV_Eruption_ScoreDown1
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_5, AI_CV_Eruption_ScoreDown1
+ *     if_target_faster AI_CV_Eruption2
+ *     if_hp_more_than AI_TARGET, 50, AI_CV_Eruption_End
+ *     goto AI_CV_Eruption_ScoreDown1
+ * AI_CV_Eruption2:
+ *     if_hp_more_than AI_TARGET, 70, AI_CV_Eruption_End
+ * AI_CV_Eruption_ScoreDown1:
+ *     score -1
+ * AI_CV_Eruption_End:
+ *     end
+ * ```
+ *
+ * 0.25x/0.5x effectiveness scores -1 directly (never reaches the speed gate).
+ * Otherwise target NOT faster: target HP > 50% is zero; <= 50% falls into the
+ * shared -1. Target faster reaches Eruption2's band: target HP > 70% is zero;
+ * <= 70% falls into -1. No funcResult write.
+ */
+function runCvEruption(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  attackerTypes: readonly [string, string];
+  moveType: string;
+  targetTypes: readonly [string, string];
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  if (classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
+  }
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+
+  const targetHpPercent = Math.floor((100 * input.target.hp) / input.target.maxHp);
+  if (strikesFirst === 1) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: targetHpPercent > 70 ? 0 : -1 });
+  }
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: targetHpPercent > 50 ? 0 : -1 });
+}
+
+/**
+ * `AI_CV_Flatter` (`data/battle_ai_scripts.s:1464-1477`, EFFECT_FLATTER):
+ * `if_random_less_than 128, AI_CV_Confuse; score +1` then FALLS THROUGH into
+ * the already-ported AI_CV_Confuse body. The roll's JUMP (<128) skips the +1
+ * and enters Confuse; FALL-THROUGH (>=128) applies +1 then Confuse.
+ */
+function runCvFlatter(input: Readonly<{
+  rng: BattleRngState;
+  targetHp: number;
+  targetMaxHp: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-flatter-roll`);
+  const jumped = roll.randomValue % 256 < 128;
+  const confuse = runCvConfuse({
+    rng: roll.after,
+    targetHp: input.targetHp,
+    targetMaxHp: input.targetMaxHp,
+    drawOrdinalStart: input.drawOrdinalStart + 1,
+    reasonPrefix: input.reasonPrefix,
+  });
+  return Object.freeze({
+    rng: confuse.rng,
+    draws: Object.freeze([
+      Object.freeze({ ...roll, kind: "flatter-roll" as const, jumped }),
+      ...confuse.draws,
+    ]),
+    scoreDelta: (jumped ? 0 : 1) + confuse.scoreDelta,
   });
 }
