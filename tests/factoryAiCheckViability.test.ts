@@ -5083,6 +5083,60 @@ describe("AI_CV_SleepTalk (EFFECT_SLEEP_TALK, docs/executable-frontier-census.md
   });
 });
 
+describe("AI_CV_KnockOff (EFFECT_KNOCK_OFF, docs/executable-frontier-census.md 7 weighted)", () => {
+  const MOVE_KNOCK_OFF = 282;
+
+  function knockOffRun(rngValue: number, targetHp: number, attackerIsFirstTurn: number) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_KNOCK_OFF,
+      attacker: { ...NEUTRAL_BATTLER, isFirstTurn: attackerIsFirstTurn },
+      target: { ...NEUTRAL_BATTLER, hp: targetHp, maxHp: 100 },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "knock-off",
+    });
+  }
+
+  it("target HP < 30%: deterministic zero, funcResult carry preserved (is_first_turn_for never runs)", () => {
+    const result = knockOffRun(1, 25, 0);
+    expect(result).toEqual({
+      kind: "scored",
+      rng: { value: 1, calls: 0 },
+      draws: [],
+      scoreDelta: 0,
+      funcResultAfter: 2,
+    });
+  });
+
+  it("not first turn: deterministic zero, funcResultAfter = attacker isFirstTurn", () => {
+    const result = knockOffRun(1, 50, 1);
+    expect(result).toEqual({
+      kind: "scored",
+      rng: { value: 1, calls: 0 },
+      draws: [],
+      scoreDelta: 0,
+      funcResultAfter: 1,
+    });
+  });
+
+  it("first turn, target HP >= 30%: seed 1 roll FALLS THROUGH (low byte 198 >= 180) to +1", () => {
+    const result = knockOffRun(1, 50, 0);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1, funcResultAfter: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "knock-off-roll", succeeded: true });
+  });
+
+  it("first turn, target HP >= 30%: seed 2 roll JUMPS (low byte 140 < 180) to zero", () => {
+    const result = knockOffRun(2, 50, 0);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, funcResultAfter: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "knock-off-roll", succeeded: false });
+  });
+});
+
 describe("AI_CV_Endure (EFFECT_ENDURE, docs/executable-frontier-census.md 24 weighted)", () => {
   const MOVE_ENDURE = 203;
 

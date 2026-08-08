@@ -810,7 +810,7 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
-    kind: "focus-punch-roll-1" | "focus-punch-roll-2";
+    kind: "focus-punch-roll-1" | "focus-punch-roll-2" | "knock-off-roll";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -1452,6 +1452,69 @@ function runCvSleepTalk(input: Readonly<{
     rng: input.rng,
     draws: Object.freeze([]),
     scoreDelta: input.attackerIsAsleep ? 10 : -5,
+  });
+}
+
+/**
+ * `AI_CV_KnockOff` (`data/battle_ai_scripts.s:2466-2473`, EFFECT_KNOCK_OFF):
+ *
+ * ```
+ * AI_CV_KnockOff:
+ *     if_hp_less_than AI_TARGET, 30, AI_CV_KnockOff_End
+ *     is_first_turn_for AI_USER
+ *     if_more_than 0, AI_CV_KnockOff_End
+ *     if_random_less_than 180, AI_CV_KnockOff_End
+ *     score +1
+ * AI_CV_KnockOff_End:
+ *     end
+ * ```
+ *
+ * Target's truncating `100*hp/maxHp` < 30% ends before anything else, so the
+ * stale-`funcResult` carry survives untouched. Otherwise `is_first_turn_for
+ * AI_USER` writes funcResult = the attacker's isFirstTurn (0-2, all valid
+ * `AI_WEATHER_*` ids), and any nonzero value (not first turn) ends at zero.
+ * Only a first-turn attacker reaches the single roll: low byte < 180 JUMPS to
+ * End at zero, >= 180 FALLS THROUGH to +1.
+ */
+function runCvKnockOff(input: Readonly<{
+  rng: BattleRngState;
+  targetHp: number;
+  targetMaxHp: number;
+  attackerIsFirstTurn: number;
+  funcResultCarry: AiWeatherValue | undefined;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckViabilityDraw[];
+  scoreDelta: number;
+  funcResultAfter: AiWeatherValue | undefined;
+}> {
+  const targetHpPercent = Math.floor((100 * input.targetHp) / input.targetMaxHp);
+  if (targetHpPercent < 30) {
+    return Object.freeze({
+      rng: input.rng,
+      draws: Object.freeze([]),
+      scoreDelta: 0,
+      funcResultAfter: input.funcResultCarry,
+    });
+  }
+  const funcResultAfter = input.attackerIsFirstTurn as AiWeatherValue;
+  if (input.attackerIsFirstTurn !== 0) {
+    return Object.freeze({
+      rng: input.rng,
+      draws: Object.freeze([]),
+      scoreDelta: 0,
+      funcResultAfter,
+    });
+  }
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-knock-off-roll`);
+  const succeeded = roll.randomValue % 256 >= 180;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind: "knock-off-roll" as const, succeeded })]),
+    scoreDelta: succeeded ? 1 : 0,
+    funcResultAfter,
   });
 }
 
@@ -6186,6 +6249,27 @@ export function runCheckViability(input: Readonly<{
       draws: batonPass.draws,
       scoreDelta: batonPass.scoreDelta,
       funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_KNOCK_OFF") {
+    // AI_CV_KnockOff (data/battle_ai_scripts.s:2466-2473) -- target-HP gate,
+    // then AI_USER's own is_first_turn_for gate, then a single roll.
+    const knockOff = runCvKnockOff({
+      rng: input.rng,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+      attackerIsFirstTurn: input.attacker.isFirstTurn,
+      funcResultCarry,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: knockOff.rng,
+      draws: knockOff.draws,
+      scoreDelta: knockOff.scoreDelta,
+      funcResultAfter: knockOff.funcResultAfter,
     });
   }
 
