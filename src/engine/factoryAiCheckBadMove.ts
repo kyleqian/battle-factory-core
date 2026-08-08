@@ -710,6 +710,25 @@ function runCbmCalmMind(attackerSpAtkStage: number, attackerSpDefStage: number):
 }
 
 /**
+ * `AI_CBM_DragonDance` (`data/battle_ai_scripts.s:595-598`, doc §33.1):
+ *
+ * ```
+ * AI_CBM_DragonDance:
+ *     if_stat_level_equal AI_USER, STAT_ATK, MAX_STAT_STAGE, Score_Minus10
+ *     if_stat_level_equal AI_USER, STAT_SPEED, MAX_STAT_STAGE, Score_Minus8
+ *     end
+ * ```
+ *
+ * The same dual-stat shape as `AI_CBM_BulkUp`/`AI_CBM_CalmMind` above with
+ * `STAT_SPEED` as the second (lighter, -8) stat. Dispatch: `EFFECT_DRAGON_DANCE`
+ * (`data/battle_ai_scripts.s:213`). Composes `runCbmAttackUp` for the first
+ * check exactly as `runCbmBulkUp` does.
+ */
+function runCbmDragonDance(attackerAtkStage: number, attackerSpeedStage: number): number {
+  return runCbmAttackUp(attackerAtkStage) + (attackerSpeedStage === MAX_STAT_STAGE ? -8 : 0);
+}
+
+/**
  * `AI_CBM_LightScreen` (`data/battle_ai_scripts.s:354-356`, doc §23.1):
  *
  * ```
@@ -1195,6 +1214,21 @@ export function runCheckBadMovePreamble(input: Readonly<{
       scoreDelta: runCbmCalmMind(
         input.attacker.spAtkStage ?? DEFAULT_STAT_STAGE,
         input.attacker.spDefStage ?? DEFAULT_STAT_STAGE,
+      ),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_DRAGON_DANCE -> AI_CBM_DragonDance
+  // (`data/battle_ai_scripts.s:213`, doc §33.1) -- the same dual-stat shape
+  // as BulkUp/CalmMind with STAT_SPEED as the second, lighter stat.
+  if (move.effect === "EFFECT_DRAGON_DANCE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmDragonDance(
+        input.attacker.atkStage,
+        input.attacker.speedStage ?? DEFAULT_STAT_STAGE,
       ),
     });
   }

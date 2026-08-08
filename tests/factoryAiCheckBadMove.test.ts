@@ -1498,6 +1498,79 @@ describe("AI_CBM_CosmicPower / AI_CBM_CalmMind (docs/factory-ai-checkviability-g
   });
 });
 
+// data/battle_ai_scripts.s:595-598, docs/factory-ai-checkviability-ground-truth.md
+// §33.1: the same dual-stat shape as AI_CBM_BulkUp/AI_CBM_CalmMind above
+// (ATK -10 first, SPEED -8 second), reached from EFFECT_DRAGON_DANCE
+// (dispatch :213).
+describe("AI_CBM_DragonDance (docs/factory-ai-checkviability-ground-truth.md §33.1)", () => {
+  const MOVE_DRAGON_DANCE = 349; // EFFECT_DRAGON_DANCE
+
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  it("scores -18 (both gates fire independently, -10 + -8) when both ATK and SPEED are already MAX_STAT_STAGE", () => {
+    const result = run(
+      MOVE_DRAGON_DANCE,
+      SHUCKLE,
+      undefined,
+      Object.freeze({ atkStage: 12, defStage: 6, speedStage: 12 }),
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -18 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 (only the ATK gate fires) when ATK is maxed but SPEED is not", () => {
+    const result = run(
+      MOVE_DRAGON_DANCE,
+      SHUCKLE,
+      undefined,
+      Object.freeze({ atkStage: 12, defStage: 6, speedStage: 6 }),
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("scores -8 (only the SPEED gate fires) when SPEED is maxed but ATK is not", () => {
+    const result = run(
+      MOVE_DRAGON_DANCE,
+      SHUCKLE,
+      undefined,
+      Object.freeze({ atkStage: 6, defStage: 6, speedStage: 12 }),
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+  });
+
+  it("scores 0 with zero draws when neither ATK nor SPEED is maxed", () => {
+    const result = run(
+      MOVE_DRAGON_DANCE,
+      SHUCKLE,
+      undefined,
+      Object.freeze({ atkStage: 6, defStage: 6, speedStage: 6 }),
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("omitted speedStage defaults to DEFAULT_STAT_STAGE (6, not maxed) -- ATK-only gate still fires", () => {
+    const result = run(
+      MOVE_DRAGON_DANCE,
+      SHUCKLE,
+      undefined,
+      Object.freeze({ atkStage: 12, defStage: 6 }),
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+});
+
 // data/battle_ai_scripts.s:300-312, docs/factory-ai-checkviability-ground-truth.md
 // §19.1: the sixth CBM-blocked pair's own CBM half (this is the CBM side;
 // AI_CV_AccuracyDown, the CV side, is in factoryAiCheckViability.test.ts).
