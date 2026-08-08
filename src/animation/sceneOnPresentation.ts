@@ -474,6 +474,10 @@ import {
   type SlashState,
 } from "./slash.ts";
 import {
+  lickAtAge,
+  type LickState,
+} from "./lick.ts";
+import {
   poisonTailAtAge,
   type PoisonTailState,
 } from "./poisonTail.ts";
@@ -2028,6 +2032,13 @@ export interface SceneOnSlashConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnLickConfig {
+  readonly move: "LICK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSingConfig {
   readonly move: "SING";
   readonly attacker: SceneOnPresentationBattler;
@@ -2193,6 +2204,7 @@ export type SceneOnMoveConfig =
   | SceneOnTakeDownConfig
   | SceneOnCrunchConfig
   | SceneOnSlashConfig
+  | SceneOnLickConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
@@ -2696,6 +2708,12 @@ export interface SceneOnCrunchView extends CrunchState {
 }
 
 export interface SceneOnSlashView extends SlashState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnLickView extends LickState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3328,6 +3346,7 @@ export function createSceneOnMovePresentation<
   | SceneOnTakeDownConfig
   | SceneOnCrunchConfig
   | SceneOnSlashConfig
+  | SceneOnLickConfig
   | SceneOnWrapConfig,
 >(
   config: TConfig,
@@ -5438,6 +5457,25 @@ export function sceneOnSlashView(
     attacker,
     target,
     ...slashAtAge(state.age, {
+      targetSide: target.geometry.side,
+      targetCenter: target.geometry.animationCenter,
+    }),
+  };
+}
+
+export function sceneOnLickView(
+  state: SceneOnMovePresentationState,
+): SceneOnLickView {
+  if (state.config.move !== "LICK") {
+    throw new Error(`expected LICK presentation, got ${state.config.move}`);
+  }
+  const attacker = state.config.attacker;
+  const target = state.config.target;
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...lickAtAge(state.age, {
       targetSide: target.geometry.side,
       targetCenter: target.geometry.animationCenter,
     }),
