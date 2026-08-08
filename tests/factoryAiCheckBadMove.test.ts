@@ -266,6 +266,67 @@ describe("AI_CBM_HighRiskForDamage via Focus Punch (dispatch :196)", () => {
   });
 });
 
+describe("AI_CBM_HighRiskForDamage via Seismic Toss / Night Shade (dispatch :154, EFFECT_LEVEL_DAMAGE)", () => {
+  const MOVE_SEISMIC_TOSS = 69; // EFFECT_LEVEL_DAMAGE, TYPE_FIGHTING
+  const MOVE_NIGHT_SHADE = 101; // EFFECT_LEVEL_DAMAGE, TYPE_GHOST
+
+  function levelDamageTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      species: 213,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      ...overrides,
+    });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read (Seismic Toss, Fighting vs Ghost)", () => {
+    const result = run(MOVE_SEISMIC_TOSS, levelDamageTarget({
+      types: ["TYPE_GHOST", "TYPE_GHOST"],
+      knownAbility: null,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read (Night Shade, Ghost vs Normal)", () => {
+    const result = run(MOVE_NIGHT_SHADE, levelDamageTarget({
+      types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      knownAbility: null,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("non-Wonder-Guard FALLTHROUGH reaches End at zero", () => {
+    expect(run(MOVE_SEISMIC_TOSS, levelDamageTarget())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus non-x2 effectiveness reaches Score_Minus10", () => {
+    expect(run(MOVE_NIGHT_SHADE, levelDamageTarget({
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("performs the handler's fresh ability read after the universal Soundproof read", () => {
+    const result = run(MOVE_SEISMIC_TOSS, { ...MAROWAK, types: ["TYPE_ROCK", "TYPE_BUG"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-high-risk-ability",
+    ]);
+  });
+});
+
 const MOVE_SURF = 57;
 const MOVE_ROCK_SLIDE = 157;
 const MOVE_BODY_SLAM = 34;
