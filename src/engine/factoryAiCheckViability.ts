@@ -4277,6 +4277,48 @@ function runCvOverheat(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: hpPercent > 60 ? 0 : -1 });
 }
 
+/**
+ * `AI_CV_Facade` (`data/battle_ai_scripts.s:2279-2287`, EFFECT_FACADE),
+ * non-BUGFIX pin:
+ *
+ * ```
+ * AI_CV_Facade:
+ * #ifdef BUGFIX
+ *     if_not_status AI_USER, STATUS1_POISON | STATUS1_BURN | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON, AI_CV_Facade_End
+ * #else
+ *     if_not_status AI_TARGET, STATUS1_POISON | STATUS1_BURN | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON, AI_CV_Facade_End
+ * #endif
+ *     score +1
+ * AI_CV_Facade_End:
+ *     end
+ * ```
+ *
+ * The pinned checkout is non-BUGFIX, so the gate reads the TARGET's OWN
+ * status1 (`Cmd_if_not_status`, `battle_ai_script_commands.c:791-807` --
+ * jumps to End when `!(gBattleMons[target].status1 & mask)`): a target
+ * without any of Poison/Burn/Paralysis/Toxic Poison scores 0 (the source's
+ * own @ BUG comment notes Facade's boost should key on the USER's status,
+ * but the ROM ships the target-side check); a target carrying any of the
+ * four scores +1. Zero draws, no funcResult write.
+ */
+function runCvFacade(input: Readonly<{
+  rng: BattleRngState;
+  targetIsPoisoned: boolean;
+  targetIsBurned: boolean;
+  targetIsParalyzed: boolean;
+  targetIsToxicPoisoned: boolean;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const hasStatus = input.targetIsPoisoned
+    || input.targetIsBurned
+    || input.targetIsParalyzed
+    || input.targetIsToxicPoisoned;
+  return Object.freeze({
+    rng: input.rng,
+    draws: Object.freeze([]),
+    scoreDelta: hasStatus ? 1 : 0,
+  });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -5218,6 +5260,25 @@ export function runCheckViability(input: Readonly<{
       rng: overheat.rng,
       draws: overheat.draws,
       scoreDelta: overheat.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_FACADE") {
+    // AI_CV_Facade (data/battle_ai_scripts.s:2279-2287) -- non-BUGFIX
+    // target-status1 gate (the ROM ships the source's @BUG target-side check).
+    const facade = runCvFacade({
+      rng: input.rng,
+      targetIsPoisoned: input.target.isPoisoned ?? false,
+      targetIsBurned: input.target.isBurned ?? false,
+      targetIsParalyzed: input.target.isParalyzed ?? false,
+      targetIsToxicPoisoned: input.target.isToxicPoisoned ?? false,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: facade.rng,
+      draws: facade.draws,
+      scoreDelta: facade.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }

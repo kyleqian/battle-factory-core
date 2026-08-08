@@ -5792,3 +5792,42 @@ describe("AI_CV_Overheat (data/battle_ai_scripts.s:2572-2584)", () => {
     expect(overheatRun(1, { hp: 50, maxHp: 100 })).toMatchObject({ funcResultAfter: 2 });
   });
 });
+
+describe("AI_CV_Facade (data/battle_ai_scripts.s:2279-2287)", () => {
+  const MOVE_FACADE = 263; // EFFECT_FACADE
+
+  function facadeRun(targetOverrides: Record<string, unknown>) {
+    return runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_FACADE,
+      attacker: { ...NEUTRAL_BATTLER },
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "facade",
+    });
+  }
+
+  it("target statusless: zero score, zero draws (non-BUGFIX target-side gate)", () => {
+    const result = facadeRun({});
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, funcResultAfter: 2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("target poisoned: +1", () => {
+    expect(facadeRun({ isPoisoned: true })).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("target burned: +1", () => {
+    expect(facadeRun({ isBurned: true })).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("target paralyzed: +1", () => {
+    expect(facadeRun({ isParalyzed: true })).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("target toxic-poisoned: +1", () => {
+    expect(facadeRun({ isToxicPoisoned: true })).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+});
