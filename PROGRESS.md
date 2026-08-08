@@ -99,9 +99,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **State:** master at this entry's commit, clean. **Final independent union
   verification: `npm run build` exit 0 and full `npm test` 768 files /
   7284 passed / 1 skipped, exit 0** (re-run after the stale-pin fix below;
-  the first union run had found that 1 failure). A third union run was taken
-  after the submenu step — see entry 993's own numbers plus the supervisor's
-  rerun of `mid-battle-switch-dense-a-off` at **392/392**.
+  the first union run had found that 1 failure). **Re-run once more after the
+  submenu step (entry 993): `npm run build` exit 0, full `npm test` 768 files
+  / 7287 passed / 1 skipped, exit 0** — that is the final verified state, with
+  the supervisor's own rerun of `mid-battle-switch-dense-a-off` at
+  **392/392**.
   `animation-main` folded at
   wind-down (18 commits: MINIMIZE/TORMENT promoted exact, MOVE_DETECT staged);
   that lane stayed live and landed **2 further commits after the fold**, left
