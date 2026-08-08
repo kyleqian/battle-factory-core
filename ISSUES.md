@@ -1444,8 +1444,35 @@ app replays remain byte-identical (**141 + 242 + 256 + 223 = 862** captures).
 and reopen guard own production turns 5–13, including the retained FLY owner;
 it now also owns turn 1's immutable HandleInputChooseAction/DoBounceEffect
 epoch and field content. The first early state field is cut (four handoff
-fields to three). Remaining work is turn-2–4 epoch/content folds (slices 7–9)
-and final positional parameter/type cleanup (slice 10).
+fields to three).
+
+**Dispatcher ladder CLOSED — all ten slices (supervisor-verified 2026-08-08).**
+The paragraph above used to say slices 7–10 remained; that text was six days
+stale. A worker briefed on "slice 7" correctly reported the step was already
+landed, and the supervisor confirmed it independently:
+`3a3a168a` (bridge turn-2 epoch content) + `8518520b` (fold turn-2 state) are
+both ancestors of master, `tools/census-next-command-handoffs.sh` reports
+**0** `BattleSceneState` handoff fields, **0** `drawFightSubmenuWindow` handoff
+parameters and **0** `currentPPForActiveMon` parameters, `grep` finds **0**
+`turn<N>Resolved` fields and **0** `Turn<N>CompletedResolutionNextCommandHandoff`
+imports in `battleScene.ts`/`battleMenu.ts` — that is slice 10's own final-cut
+acceptance, met. `docs/battle-scene-retirement-inventory.md`'s state-field
+table still lists `turn1Resolved…turn4Resolved`/`turn9Resolved…turn13Resolved`
+as live; those rows are stale, not open work.
+
+**What is actually still open in #39.** The turn-keyed *dispatcher* is gone;
+the per-species *render entry points* are not. `battleScene.ts` is now
+**36,897 lines** (it was 17,056 at the 2026-07-24 census — it more than doubled
+while the ladder ran) with **848** remaining `turn<N>` textual references, none
+of them state fields. The bounded successor program is
+`docs/species-render-entry-point-retirement-design.md` (45 census'd entry
+points, 7 slices); its slices 3 and 4 were GATED on ladder slice 10 and are now
+ungated. **Check each slice's premise before briefing it — that dossier is also
+partly stale:** slice 1's `PIDGEOTTO_MAX_HP` literal is already
+`TURN5_SWITCHIN.replacementHp.max` (only `murkrowHealthboxContentForHp`'s
+`hp === 142` cache-miss literal remains), and slice 5's entire `turn15Onix*`
+symbol cluster no longer exists. Slice 2's six healthbox factories are
+confirmed still present and unparameterized.
 
 # Settled records (not open work — see the note at the top of this file)
 
