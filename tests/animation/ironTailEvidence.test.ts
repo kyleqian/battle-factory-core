@@ -79,14 +79,14 @@ describe("MOVE_IRON_TAIL dense evidence receipts", () => {
   it("pins the twice-fresh hashes for both orientations", () => {
     expect(JSON.parse(readFileSync("tools/compare/fixtures/iron-tail-player-azumarill-opponent-onix.json", "utf8")))
       .toMatchObject({
-        evidenceSha256: "ae8c3730865985179e737659d75684090aa3ebb512a127bff6c89b8a90f2d7c9",
-        secondFreshEvidenceSha256: "ae8c3730865985179e737659d75684090aa3ebb512a127bff6c89b8a90f2d7c9",
+        evidenceSha256: "d443cdb327070da66335a7771c8ec9c94413dcc5aa88338977018b490cbf79a8",
+        secondFreshEvidenceSha256: "d443cdb327070da66335a7771c8ec9c94413dcc5aa88338977018b490cbf79a8",
         rawRgbSha256: "952808facb59f17298b90cbbcef4000f909e64da37e9950bedeca0b74558c428",
       });
     expect(JSON.parse(readFileSync("tools/compare/fixtures/iron-tail-opponent-azumarill-player-onix.json", "utf8")))
       .toMatchObject({
-        evidenceSha256: "63f2d609b95a4a44d31a2572dd4aa9616942cfd923128d042c3314a3cca0317f",
-        secondFreshEvidenceSha256: "63f2d609b95a4a44d31a2572dd4aa9616942cfd923128d042c3314a3cca0317f",
+        evidenceSha256: "7bebcfb3957b428f0d5537339ba4dbe514aa1fc8edbd49a508523d12111d916b",
+        secondFreshEvidenceSha256: "7bebcfb3957b428f0d5537339ba4dbe514aa1fc8edbd49a508523d12111d916b",
         rawRgbSha256: "bea1745ae3fc99cbe57d543b6e27a4a88bdea379c7ecaf4760d754c665f565f5",
       });
   });

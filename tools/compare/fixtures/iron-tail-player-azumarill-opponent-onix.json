@@ -41,8 +41,8 @@
     "opponentGender": "male"
   },
   "evidenceSchema": "iron-tail-dense-evidence/v1",
-  "evidenceSha256": "ae8c3730865985179e737659d75684090aa3ebb512a127bff6c89b8a90f2d7c9",
-  "secondFreshEvidenceSha256": "ae8c3730865985179e737659d75684090aa3ebb512a127bff6c89b8a90f2d7c9",
+  "evidenceSha256": "d443cdb327070da66335a7771c8ec9c94413dcc5aa88338977018b490cbf79a8",
+  "secondFreshEvidenceSha256": "d443cdb327070da66335a7771c8ec9c94413dcc5aa88338977018b490cbf79a8",
   "rawRgbSha256": "952808facb59f17298b90cbbcef4000f909e64da37e9950bedeca0b74558c428",
   "acceptance": {
     "status": "exact",

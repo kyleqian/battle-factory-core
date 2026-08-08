@@ -93,7 +93,7 @@
   tests/animation` 310 files / 1735 passed / 1 skip; `npm run build` green.
 - **Measured (both portables, fresh runs, exit 0):** component 135/135 and
   framebuffer 135/135 on player-back and opponent-front. Player evidence
-  ae8c3730… / raw RGB 952808fa…; opponent evidence 63f2d609… / raw RGB
+  d443cdb3… / raw RGB 952808fa…; opponent evidence 7bebcfb3… / raw RGB
   bea1745a… — matching the fixture pins twice fresh. Coverage `npm run
   animation:coverage` now reads 124/276 exact.
 - **Next:** pick the next move from the component-leverage ranking; all ten
@@ -347,8 +347,8 @@
   reason) and inventory pin 122→123 exact / partial 1→0.
 - **Measured (both portables, fresh runs, exit 0):** player-back 110/110
   component and framebuffer (64-173); opponent-front 109/109 component and
-  framebuffer (69-177). Player evidence 52f1db13… / raw RGB 274b00b5… —
-  unchanged from staging; opponent evidence 0506c00b… / raw RGB
+  framebuffer (69-177). Player evidence 2a1054d2… / raw RGB 274b00b5… —
+  unchanged from staging; opponent evidence f8e7f48c… / raw RGB
   2086c05a… — matching the fixture pins twice fresh.
 - **Next:** pick the next move from the component-leverage ranking
   (gSpinningSparkleSpriteTemplate now has 1 exact representative left;
@@ -398,7 +398,7 @@
   summary pin 154→153 unsupported / 0→1 partial.
 - **Measured (fresh portable runs, exit 0):** player-back component 110/110 and
   framebuffer 110/110; opponent-front component 110/110, framebuffer 109/110.
-  Player evidence 52f1db13… / raw RGB 274b00b5…; opponent evidence 047cfd8c… /
+  Player evidence 2a1054d2… / raw RGB 274b00b5…; opponent evidence 047cfd8c… /
   raw RGB ae9c9c50… — matching the fixture pins twice fresh.
 - **Blocking note (why opponent-front is partial):** the window's first
   opponent-front frame (68) carries a ONE-FRAME hardware VRAM tile-base

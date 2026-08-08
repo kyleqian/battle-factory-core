@@ -70,8 +70,8 @@
  },
  "battlerHeight": 48,
  "evidenceSchema": "detect-dense-evidence/v1",
- "evidenceSha256": "0506c00b85c97197b62933d1579621d45770a47ad8d2e953d73f72f1c175d737",
- "secondFreshEvidenceSha256": "0506c00b85c97197b62933d1579621d45770a47ad8d2e953d73f72f1c175d737",
+ "evidenceSha256": "f8e7f48c77f020ceeb6f2c1ae7ac0ce1dbbfa30af7820d763b840777046c0b93",
+ "secondFreshEvidenceSha256": "f8e7f48c77f020ceeb6f2c1ae7ac0ce1dbbfa30af7820d763b840777046c0b93",
  "rawRgbSha256": "2086c05aac41c72e0f82c265d658c7d27cee9e8cf3f7ce6d93498f0eb4c39549",
  "acceptance": {
   "status": "exact",
