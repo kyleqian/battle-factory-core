@@ -314,11 +314,41 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    */
   isEscapePrevented?: boolean;
   /**
-   * Whether `gBattleMons[AI_TARGET].status2 & STATUS2_TORMENT` is nonzero --
+   * `gBattleMons[AI_TARGET].status2 & STATUS2_TORMENT` is nonzero --
    * `AI_CBM_Torment`'s single gate (EFFECT_TORMENT). Optional, defaulting to
    * false.
    */
   isTormented?: boolean;
+  /**
+   * `gBattleMons[AI_TARGET].status3 & STATUS3_PERISH_SONG` is nonzero --
+   * `AI_CBM_PerishSong`'s single gate (EFFECT_PERISH_SONG). Optional,
+   * defaulting to false.
+   */
+  hasPerishSong?: boolean;
+  /**
+   * `gBattleMons[AI_TARGET].status2 & STATUS2_NIGHTMARE` is nonzero --
+   * `AI_CBM_Nightmare`'s first, source-ordered rejection gate (EFFECT_
+   * NIGHTMARE). Optional, defaulting to false.
+   */
+  isNightmared?: boolean;
+  /**
+   * `gBattleMons[AI_TARGET].status2 & STATUS2_FORESIGHT` is nonzero --
+   * `AI_CBM_Foresight`'s single gate (EFFECT_FORESIGHT). Optional, defaulting
+   * to false.
+   */
+  isForesighted?: boolean;
+  /**
+   * Whether the target's side has `SIDE_STATUS_SPIKES` --
+   * `AI_CBM_Spikes`'s single gate (EFFECT_SPIKES). Optional, defaulting to
+   * false.
+   */
+  spikesUp?: boolean;
+  /**
+   * Whether the target's side has `SIDE_STATUS_FUTUREATTACK` --
+   * `AI_CBM_FutureSight`'s first gate (EFFECT_FUTURE_SIGHT). Optional,
+   * defaulting to false.
+   */
+  targetFutureAttackUp?: boolean;
   /**
    * `gBattleMons[AI_TARGET].level` -- `AI_CBM_OneHitKO`'s final
    * `if_level_cond 1` (less-than) gate operand. Optional, defaulting to 0
@@ -383,6 +413,23 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    */
   evasionStage?: number;
   /**
+   * Whether AI_USER's OWN side has `SIDE_STATUS_FUTUREATTACK` --
+   * `AI_CBM_FutureSight`'s second gate (EFFECT_FUTURE_SIGHT). Optional,
+   * defaulting to `false`, same convention as `lightScreenUp`/`reflectUp`.
+   */
+  attackerFutureAttackUp?: boolean;
+  /**
+   * `gBattleMons[AI_USER].status2 & STATUS2_FOCUS_ENERGY` -- `AI_CBM_FocusEnergy`'s
+   * single gate (EFFECT_FOCUS_ENERGY). Optional, defaulting to `false`.
+   */
+  hasFocusEnergy?: boolean;
+  /**
+   * `gBattleMons[AI_USER].status1` intersects the Refresh-curable mask
+   * (POISON/BURN/PARALYSIS/TOXIC_POISON) -- `AI_CBM_Refresh`'s single
+   * `if_not_status` gate (EFFECT_REFRESH). Optional, defaulting to `false`.
+   */
+  hasCurableStatus?: boolean;
+  /**
    * Current weather, `AI_WEATHER_*`-encoded (0=Sun/1=Rain/2=Sandstorm/3=Hail)
    * -- `AI_CBM_RainDance`/`SunnyDay`/`Hail`'s own `get_weather` read (doc
    * §25.1). Optional, defaulting to `undefined` (no weather bit set, matching
@@ -442,6 +489,11 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    */
   hp?: number;
   maxHp?: number;
+  /**
+   * `gBattleMons[AI_USER].status3 & STATUS3_ROOTED` -- `AI_CBM_Ingrain`'s
+   * single gate (EFFECT_INGRAIN). Optional, defaulting to `false`.
+   */
+  isRooted?: boolean;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -1286,6 +1338,286 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_RAZOR_WIND -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:128`), the shared high-risk body again
+  // (Razor Wind / the two-turn Normal charge move).
+  if (move.effect === "EFFECT_RAZOR_WIND") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_PSYWAVE -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:155`), the shared high-risk body again
+  // (Psywave).
+  if (move.effect === "EFFECT_PSYWAVE") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_LOW_KICK -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:206`), the shared high-risk body again
+  // (Low Kick).
+  if (move.effect === "EFFECT_LOW_KICK") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SUPER_FANG -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:129`), the shared high-risk body again
+  // (Super Fang).
+  if (move.effect === "EFFECT_SUPER_FANG") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_PRESENT -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:172`), the shared high-risk body again
+  // (Present).
+  if (move.effect === "EFFECT_PRESENT") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SONICBOOM -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:177`), the shared high-risk body again
+  // (Sonic Boom).
+  if (move.effect === "EFFECT_SONICBOOM") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_BIDE -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:123`), the shared high-risk body again
+  // (Bide).
+  if (move.effect === "EFFECT_BIDE") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SKULL_BASH -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:183`), the shared high-risk body again
+  // (Skull Bash).
+  if (move.effect === "EFFECT_SKULL_BASH") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_TELEPORT -> Score_Minus10 directly
+  // (`data/battle_ai_scripts.s:185`): the table entry is a bare Score_Minus10
+  // jump with no handler body. Teleport is penalized unconditionally.
+  if (move.effect === "EFFECT_TELEPORT") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: -10,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_INGRAIN -> AI_CBM_Ingrain
+  // (`data/battle_ai_scripts.s:199,550-552`): a single
+  // `if_status3 AI_USER, STATUS3_ROOTED, Score_Minus10` -- Ingrain is
+  // penalized when the AI is already rooted.
+  if (move.effect === "EFFECT_INGRAIN") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmIngrain(input.attacker.isRooted ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_PERISH_SONG -> AI_CBM_PerishSong
+  // (`data/battle_ai_scripts.s:167,447-449`): a single
+  // `if_status3 AI_TARGET, STATUS3_PERISH_SONG, Score_Minus10` -- Perish Song
+  // is penalized when the target is already under its effect.
+  if (move.effect === "EFFECT_PERISH_SONG") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmPerishSong(target.hasPerishSong ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_NIGHTMARE -> AI_CBM_Nightmare
+  // (`data/battle_ai_scripts.s:162,237-240`): target already under Nightmare
+  // JUMPs to -10; a not-asleep target JUMPs to -8 (the move requires Sleep).
+  // Sequential Score_Minus10 then Score_Minus8 JUMPs, never additive.
+  if (move.effect === "EFFECT_NIGHTMARE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmNightmare(target.isNightmared ?? false, target.isAsleep ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_FORESIGHT -> AI_CBM_Foresight
+  // (`data/battle_ai_scripts.s:166,443-445`): a single
+  // `if_status2 AI_TARGET, STATUS2_FORESIGHT, Score_Minus10` -- Foresight is
+  // penalized when the target is already foresighted.
+  if (move.effect === "EFFECT_FORESIGHT") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmForesight(target.isForesighted ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SPIKES -> AI_CBM_Spikes
+  // (`data/battle_ai_scripts.s:165,439-441`): a single
+  // `if_side_affecting AI_TARGET, SIDE_STATUS_SPIKES, Score_Minus10` --
+  // Spikes is penalized when the target's side already has Spikes down.
+  if (move.effect === "EFFECT_SPIKES") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmSpikes(target.spikesUp ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_FUTURE_SIGHT -> AI_CBM_FutureSight
+  // (`data/battle_ai_scripts.s:184,500-504`): either side already carrying a
+  // Future Sight attack JUMPs to -12; the all-clear path FALLS THROUGH to
+  // `score +5` (Future Sight is positively valued when unused).
+  if (move.effect === "EFFECT_FUTURE_SIGHT") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmFutureSight(
+        target.targetFutureAttackUp ?? false,
+        input.attacker.attackerFutureAttackUp ?? false,
+      ),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_FOCUS_ENERGY -> AI_CBM_FocusEnergy
+  // (`data/battle_ai_scripts.s:131,382-384`): a single
+  // `if_status2 AI_USER, STATUS2_FOCUS_ENERGY, Score_Minus10` -- Focus Energy
+  // is penalized when the AI already has it up.
+  if (move.effect === "EFFECT_FOCUS_ENERGY") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmFocusEnergy(input.attacker.hasFocusEnergy ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_REFRESH -> AI_CBM_Refresh
+  // (`data/battle_ai_scripts.s:205,563-565`): a single
+  // `if_not_status AI_USER, STATUS1_POISON | STATUS1_BURN | STATUS1_PARALYSIS |
+  // STATUS1_TOXIC_POISON, Score_Minus10` -- Refresh is penalized when the AI
+  // has none of the four curable statuses.
+  if (move.effect === "EFFECT_REFRESH") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmRefresh(input.attacker.hasCurableStatus ?? false),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_DOWN(_2) -> AI_CBM_SpeedDown,
   // one of the two handlers this port implements out of the table's ~100 entries.
   if (move.effect === "EFFECT_SPEED_DOWN" || move.effect === "EFFECT_SPEED_DOWN_2") {
@@ -1840,6 +2172,62 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_HELPING_HAND -> AI_CBM_HelpingHand
+  // (`data/battle_ai_scripts.s:197,541-543`): a single
+  // `if_not_double_battle Score_Minus10`. This engine models singles only
+  // (BATTLE_TYPE_DOUBLE is out of scope), so the check is always true and
+  // Helping Hand always scores -10 -- a faithful constant for the modeled
+  // scope, not an approximation.
+  if (move.effect === "EFFECT_HELPING_HAND") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmHelpingHand(),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_TICKLE -> AI_CBM_Tickle
+  // (`data/battle_ai_scripts.s:208,571-574`): the same dual-stat shape as
+  // AI_CBM_BulkUp/Curse but reading AI_TARGET's OWN ATK then DEF at MIN_STAT_
+  // STAGE (target lowered to floor), sequentially, no interaction.
+  if (move.effect === "EFFECT_TICKLE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmTickle(target.atkStage, target.defStage),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_BELLY_DRUM -> AI_CBM_BellyDrum
+  // (`data/battle_ai_scripts.s:180,247-251`): AI_USER's own HP% below 51
+  // JUMPs to -10, then FALLS THROUGH into AI_CBM_AttackUp's own own-ATK
+  // MAX_STAT_STAGE gate (also -10).
+  if (move.effect === "EFFECT_BELLY_DRUM") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmBellyDrum(input.attacker),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_MAGNITUDE -> AI_CBM_Magnitude
+  // (`data/battle_ai_scripts.s:175,365-367`): a fresh own ability read
+  // (Levitate -> -10), then FALLS THROUGH into AI_CBM_HighRiskForDamage's
+  // own x0/Wonder Guard body with a second fresh ability read.
+  if (move.effect === "EFFECT_MAGNITUDE") {
+    const magnitude = runCbmMagnitude(move.type, target, rng, ordinal, `${input.reasonPrefix}-magnitude`);
+    for (const draw of magnitude.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: magnitude.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: magnitude.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -2352,4 +2740,214 @@ function runCbmCantEscape(targetEscapePrevented: boolean): number {
  */
 function runCbmTorment(targetTormented: boolean): number {
   return targetTormented ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Ingrain` (`data/battle_ai_scripts.s:550-552`, EFFECT_INGRAIN): a
+ * single `if_status3 AI_USER, STATUS3_ROOTED, Score_Minus10` -- Ingrain is
+ * penalized when the AI is already rooted. Zero ability/type reads.
+ */
+function runCbmIngrain(attackerRooted: boolean): number {
+  return attackerRooted ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_PerishSong` (`data/battle_ai_scripts.s:447-449`, EFFECT_PERISH_
+ * SONG): a single `if_status3 AI_TARGET, STATUS3_PERISH_SONG, Score_Minus10`
+ * -- Perish Song is penalized when the target is already under its effect.
+ * Zero ability/type reads.
+ */
+function runCbmPerishSong(targetHasPerishSong: boolean): number {
+  return targetHasPerishSong ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Nightmare` (`data/battle_ai_scripts.s:237-240`, EFFECT_NIGHTMARE):
+ *
+ * ```
+ * AI_CBM_Nightmare:
+ *     if_status2 AI_TARGET, STATUS2_NIGHTMARE, Score_Minus10
+ *     if_not_status AI_TARGET, STATUS1_SLEEP, Score_Minus8
+ *     end
+ * ```
+ *
+ * Existing Nightmare JUMPs to -10 first; a not-asleep target then JUMPs to
+ * -8 (Nightmare needs the target asleep to take effect). Sequential Score_
+ * Minus10 then Score_Minus8 JUMPs, never additive -- a Nightmared target
+ * never reaches the sleep check. Zero ability/type reads.
+ */
+function runCbmNightmare(targetNightmared: boolean, targetAsleep: boolean): number {
+  if (targetNightmared) {
+    return -10;
+  }
+  return targetAsleep ? 0 : -8;
+}
+
+/**
+ * `AI_CBM_Foresight` (`data/battle_ai_scripts.s:443-445`, EFFECT_FORESIGHT):
+ * a single `if_status2 AI_TARGET, STATUS2_FORESIGHT, Score_Minus10` --
+ * Foresight is penalized when the target is already foresighted. Zero
+ * ability/type reads.
+ */
+function runCbmForesight(targetForesighted: boolean): number {
+  return targetForesighted ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Spikes` (`data/battle_ai_scripts.s:439-441`, EFFECT_SPIKES): a
+ * single `if_side_affecting AI_TARGET, SIDE_STATUS_SPIKES, Score_Minus10` --
+ * Spikes is penalized when the target's side already has Spikes down. Zero
+ * ability/type reads.
+ */
+function runCbmSpikes(targetSpikesUp: boolean): number {
+  return targetSpikesUp ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_FutureSight` (`data/battle_ai_scripts.s:500-504`, EFFECT_FUTURE_
+ * SIGHT):
+ *
+ * ```
+ * AI_CBM_FutureSight:
+ *     if_side_affecting AI_TARGET, SIDE_STATUS_FUTUREATTACK, Score_Minus12
+ *     if_side_affecting AI_USER, SIDE_STATUS_FUTUREATTACK, Score_Minus12
+ *     score +5
+ *     end
+ * ```
+ *
+ * Either side already carrying a Future Sight attack JUMPs to -12; the
+ * all-clear path FALLS THROUGH to `score +5`. Sequential Score_Minus12
+ * JUMPs then a Score_Plus5, never additive. Zero ability/type reads.
+ */
+function runCbmFutureSight(targetFutureAttackUp: boolean, attackerFutureAttackUp: boolean): number {
+  if (targetFutureAttackUp || attackerFutureAttackUp) {
+    return -12;
+  }
+  return 5;
+}
+
+/**
+ * `AI_CBM_FocusEnergy` (`data/battle_ai_scripts.s:382-384`, EFFECT_FOCUS_
+ * ENERGY): a single `if_status2 AI_USER, STATUS2_FOCUS_ENERGY, Score_Minus10`
+ * -- Focus Energy is penalized when the AI already has it up. Zero
+ * ability/type reads.
+ */
+function runCbmFocusEnergy(attackerHasFocusEnergy: boolean): number {
+  return attackerHasFocusEnergy ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Refresh` (`data/battle_ai_scripts.s:563-565`, EFFECT_REFRESH): a
+ * single `if_not_status AI_USER, STATUS1_POISON | STATUS1_BURN | STATUS1_
+ * PARALYSIS | STATUS1_TOXIC_POISON, Score_Minus10` -- Refresh is penalized
+ * when the AI has none of the four curable statuses. Zero ability/type reads.
+ */
+function runCbmRefresh(attackerHasCurableStatus: boolean): number {
+  return attackerHasCurableStatus ? 0 : -10;
+}
+
+/**
+ * `AI_CBM_HelpingHand` (`data/battle_ai_scripts.s:541-543`, EFFECT_HELPING_
+ * HAND): a single `if_not_double_battle Score_Minus10` -- Helping Hand is
+ * penalized whenever the battle is not doubles. This engine models Factory
+ * singles only (doubles out of scope), so the not-double-battle branch is
+ * always taken and the handler is the constant -10. Zero ability/type reads.
+ */
+function runCbmHelpingHand(): number {
+  return -10;
+}
+
+/**
+ * `AI_CBM_BellyDrum` (`data/battle_ai_scripts.s:247-251`, EFFECT_BELLY_DRUM):
+ *
+ * ```
+ * AI_CBM_BellyDrum:
+ *     if_hp_less_than AI_USER, 51, Score_Minus10
+ * AI_CBM_AttackUp:
+ *     if_stat_level_equal AI_USER, STAT_ATK, MAX_STAT_STAGE, Score_Minus10
+ *     end
+ * ```
+ *
+ * The label `AI_CBM_BellyDrum` shares `AI_CBM_AttackUp`'s body: the HP% gate
+ * is its own, then it FALLS THROUGH into AttackUp's own own-ATK gate. Both
+ * gates are Score_Minus10 JUMPs, so they are sequential, never additive --
+ * a low-HP user never reaches the ATK check (exactly like the source). HP
+ * percent is truncating `100*hp/maxHp`, matching `Cmd_if_hp_less_than` (same
+ * convention as `runCbmSubstitute`). Zero ability/type reads.
+ */
+function runCbmBellyDrum(attacker: FactoryAiCheckBadMoveAttacker): number {
+  const maxHp = attacker.maxHp ?? 1;
+  const hp = attacker.hp ?? 1;
+  const hpPercent = Math.floor((100 * hp) / maxHp);
+  if (hpPercent < 51) {
+    return -10;
+  }
+  return runCbmAttackUp(attacker.atkStage);
+}
+
+/**
+ * `AI_CBM_Tickle` (`data/battle_ai_scripts.s:571-574`, EFFECT_TICKLE):
+ *
+ * ```
+ * AI_CBM_Tickle:
+ *     if_stat_level_equal AI_TARGET, STAT_ATK, MIN_STAT_STAGE, Score_Minus10
+ *     if_stat_level_equal AI_TARGET, STAT_DEF, MIN_STAT_STAGE, Score_Minus8
+ *     end
+ * ```
+ *
+ * The same dual-stat shape as `AI_CBM_BulkUp`/`AI_CBM_Curse` with the gates
+ * flipped to the target's own ATK then DEF at MIN_STAT_STAGE (the stats
+ * Tickle lowers), sequentially, no interaction -- so both stages at floor
+ * score -18. Zero ability/type reads.
+ */
+function runCbmTickle(targetAtkStage: number, targetDefStage: number): number {
+  return (targetAtkStage === MIN_STAT_STAGE ? -10 : 0)
+    + (targetDefStage === MIN_STAT_STAGE ? -8 : 0);
+}
+
+/**
+ * `AI_CBM_Magnitude` (`data/battle_ai_scripts.s:365-367`, EFFECT_MAGNITUDE):
+ *
+ * ```
+ * AI_CBM_Magnitude:
+ *     get_ability AI_TARGET
+ *     if_equal ABILITY_LEVITATE, Score_Minus10
+ *     <fall through into AI_CBM_HighRiskForDamage>
+ * ```
+ *
+ * One fresh own ability read for the Levitate gate, then a genuine fall-through
+ * into `AI_CBM_HighRiskForDamage`'s body (its own x0 type check and its own
+ * second fresh `get_ability`). A non-Levitate result therefore draws twice
+ * inside this handler; a Levitate result returns -10 after its single draw.
+ */
+function runCbmMagnitude(
+  moveType: string,
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  const levitate = nextGetAbilityDraw(rng, ordinal, `${reason}-levitate`, target);
+  const draws: FactoryAiCheckBadMoveDraw[] = [];
+  if (levitate.draw) draws.push(levitate.draw);
+  if (levitate.ability === NEGATING_ABILITIES.levitate) {
+    return Object.freeze({
+      rng: levitate.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: -10,
+    });
+  }
+  const highRisk = runCbmHighRiskForDamage(
+    moveType,
+    target,
+    levitate.rng,
+    levitate.draw ? ordinal + 1 : ordinal,
+    `${reason}-high-risk`,
+  );
+  for (const draw of highRisk.draws) draws.push(draw);
+  return Object.freeze({ rng: highRisk.rng, draws: Object.freeze(draws), scoreDelta: highRisk.scoreDelta });
 }

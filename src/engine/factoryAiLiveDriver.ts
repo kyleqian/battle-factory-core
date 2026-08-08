@@ -29,8 +29,11 @@ import {
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import {
+  BATTLE_SCRIPT_STATUS1_REFRESH_CURE_MASK,
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS1_TOXIC_POISON,
+  BATTLE_SCRIPT_STATUS2_FORESIGHT,
+  BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY,
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS3_LEECHSEED,
   BATTLE_SCRIPT_STATUS3_PERISH_SONG,
@@ -68,6 +71,8 @@ const MOVE_NONE = 0;
 const SIDE_STATUS_REFLECT = 1 << 0;
 const SIDE_STATUS_LIGHTSCREEN = 1 << 1;
 const SIDE_STATUS_SAFEGUARD = 1 << 5;
+const SIDE_STATUS_SPIKES = 1 << 4;
+const SIDE_STATUS_FUTUREATTACK = 1 << 6;
 const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
 const B_WEATHER_SANDSTORM = (1 << 3) | (1 << 4);
@@ -308,6 +313,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       reflectUp: (input.rulesContext.sideStatuses[1] & SIDE_STATUS_REFLECT) !== 0,
       ...(weather === undefined ? {} : { currentWeather: weather }),
       isRooted: (attacker.status3 & BATTLE_SCRIPT_STATUS3_ROOTED) !== 0,
+      ...((input.rulesContext.sideStatuses[1] & SIDE_STATUS_FUTUREATTACK) !== 0
+        ? { attackerFutureAttackUp: true }
+        : {}),
       ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) !== 0
         ? { isInfatuated: true }
         : {}),
@@ -317,8 +325,14 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       ...((attacker.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0
         ? { isAsleep: true }
         : {}),
+      ...((attacker.status1 & BATTLE_SCRIPT_STATUS1_REFRESH_CURE_MASK) !== 0
+        ? { hasCurableStatus: true }
+        : {}),
       ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_SUBSTITUTE) !== 0
         ? { hasSubstitute: true }
+        : {}),
+      ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY) !== 0
+        ? { hasFocusEnergy: true }
         : {}),
       ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) !== 0
         ? { isLeechSeeded: true }
@@ -365,6 +379,12 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_TORMENT) !== 0
         ? { isTormented: true }
         : {}),
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) !== 0
+        ? { isNightmared: true }
+        : {}),
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_FORESIGHT) !== 0
+        ? { isForesighted: true }
+        : {}),
       ...((target.status3 & BATTLE_SCRIPT_STATUS3_YAWN) !== 0
         ? { hasYawn: true }
         : {}),
@@ -379,6 +399,12 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
         : {}),
       ...((input.rulesContext.sideStatuses[0] & SIDE_STATUS_SAFEGUARD) !== 0
         ? { safeguardUp: true }
+        : {}),
+      ...((input.rulesContext.sideStatuses[0] & SIDE_STATUS_SPIKES) !== 0
+        ? { spikesUp: true }
+        : {}),
+      ...((input.rulesContext.sideStatuses[0] & SIDE_STATUS_FUTUREATTACK) !== 0
+        ? { targetFutureAttackUp: true }
         : {}),
     }),
   });
