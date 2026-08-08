@@ -53,7 +53,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_SERENE_GRACE | engine-referenced | 11 (0) | 11 | — | 1 | 0 | 2 |
 | ABILITY_IMMUNITY | engine-referenced | 10 (2) | 10 | IMMUNITY | 10 | 0 | 14 |
 | ABILITY_VOLT_ABSORB | engine-referenced | 9 (4) | 9 | ABSORBING | 0 | 1 | 4 |
-| ABILITY_WATER_VEIL | engine-referenced | 9 (0) | 9 | IMMUNITY | 5 | 0 | 9 |
+| ABILITY_WATER_VEIL | engine-referenced | 9 (0) | 9 | IMMUNITY | 5 | 0 | 11 |
 | ABILITY_BATTLE_ARMOR | engine-referenced | 8 (5) | 8 | — | 1 | 0 | 2 |
 | ABILITY_EFFECT_SPORE | engine-referenced | 8 (8) | 8 | ON_DAMAGE | 0 | 0 | 6 |
 | ABILITY_FLAME_BODY | engine-referenced | 8 (5) | 8 | ON_DAMAGE | 0 | 0 | 4 |

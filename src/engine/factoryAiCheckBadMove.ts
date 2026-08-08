@@ -1632,6 +1632,25 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_WILL_O_WISP -> AI_CBM_WillOWisp
+  // (`data/battle_ai_scripts.s:194,531-539`).
+  if (move.effect === "EFFECT_WILL_O_WISP") {
+    const willOWisp = runCbmWillOWisp(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-will-o-wisp`,
+    );
+    for (const draw of willOWisp.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: willOWisp.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: willOWisp.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -1913,6 +1932,52 @@ function runCbmLeechSeed(
  */
 function runCbmFakeOut(attackerIsFirstTurn: number): number {
   return attackerIsFirstTurn === 0 ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_WillOWisp` (`data/battle_ai_scripts.s:531-539`):
+ *
+ * ```
+ * get_ability AI_TARGET
+ * if_equal ABILITY_WATER_VEIL, Score_Minus10
+ * if_status AI_TARGET, STATUS1_ANY, Score_Minus10
+ * if_type_effectiveness AI_EFFECTIVENESS_x0, Score_Minus10
+ * if_type_effectiveness AI_EFFECTIVENESS_x0_5, Score_Minus10
+ * if_type_effectiveness AI_EFFECTIVENESS_x0_25, Score_Minus10
+ * if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD, Score_Minus10
+ * end
+ * ```
+ *
+ * Unlike `AI_CBM_Paralyze`, the ability read comes FIRST and is never
+ * short-circuited by a type gate -- the x0/x0_5/x0_25 effectiveness checks
+ * (AI_EFFECTIVENESS 0/20/10, `battle_ai.h:20-25`) run only after it.
+ */
+const ABILITY_WATER_VEIL = "ABILITY_WATER_VEIL";
+
+function runCbmWillOWisp(
+  moveType: string,
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
+  const aiEffectiveness = computeAiEffectiveness(moveType, target.types);
+  const blocked = ability.ability === ABILITY_WATER_VEIL
+    || (target.hasAnyStatus ?? false)
+    || aiEffectiveness === 0
+    || aiEffectiveness === 20
+    || aiEffectiveness === 10
+    || (target.safeguardUp ?? false);
+  return Object.freeze({
+    rng: ability.rng,
+    draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
+    scoreDelta: blocked ? -10 : 0,
+  });
 }
 
 /**

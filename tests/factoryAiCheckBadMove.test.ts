@@ -778,6 +778,78 @@ describe("AI_CBM_FakeOut (data/battle_ai_scripts.s:506-509, EFFECT_FAKE_OUT)", (
   });
 });
 
+describe("AI_CBM_WillOWisp (data/battle_ai_scripts.s:531-539, EFFECT_WILL_O_WISP)", () => {
+  const MOVE_WILL_O_WISP = 261; // EFFECT_WILL_O_WISP, TYPE_FIRE, power 0
+
+  // A known ability suppresses the universal Soundproof draw so the handler's
+  // own single get_ability is what the draw count isolates.
+  const WOW_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    ...MAROWAK,
+    types: ["TYPE_ROCK", "TYPE_BUG"] as const, // Fire is x1 vs Rock/Bug
+    knownAbility: "ABILITY_ROCK_HEAD",
+  });
+
+  it("Water Veil JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_WILL_O_WISP, {
+      ...WOW_TARGET,
+      knownAbility: "ABILITY_WATER_VEIL",
+      realAbility: "ABILITY_WATER_VEIL",
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("any primary status JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_WILL_O_WISP, { ...WOW_TARGET, hasAnyStatus: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("x0 target (Fire vs Fire) JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_WILL_O_WISP, {
+      ...WOW_TARGET,
+      types: ["TYPE_FIRE", "TYPE_FIRE"] as const,
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("x0_5 target (Fire vs Water) JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_WILL_O_WISP, {
+      ...WOW_TARGET,
+      types: ["TYPE_WATER", "TYPE_WATER"] as const,
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("x0_25 target (Fire vs Fire/Water) JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_WILL_O_WISP, {
+      ...WOW_TARGET,
+      types: ["TYPE_FIRE", "TYPE_WATER"] as const,
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("target-side Safeguard JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_WILL_O_WISP, { ...WOW_TARGET, safeguardUp: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("all-clear FALLS THROUGH to end at zero with exactly one handler draw", () => {
+    const result = run(MOVE_WILL_O_WISP, {
+      ...WOW_TARGET,
+      species: 171,
+      knownAbility: null,
+      realAbility: "ABILITY_VOLT_ABSORB",
+    });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-will-o-wisp-ability",
+    ]);
+  });
+});
+
 const MOVE_SURF = 57;
 const MOVE_ROCK_SLIDE = 157;
 const MOVE_BODY_SLAM = 34;
