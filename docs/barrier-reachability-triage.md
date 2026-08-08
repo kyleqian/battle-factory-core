@@ -484,7 +484,7 @@ the engine's current resolver accepts each operand:
 >
 > | Item | State |
 > | --- | --- |
-> | 1. AI `AI_CheckBadMove` if_effect handlers | **IN PROGRESS** — **27 of 66 effects ported** (batches 1-3, one commit per effect). **39 remain**, led by ATTRACT 45 and PSYCH_UP 14 — both need gender / Haze stat-stage wiring first, so the next batch should start below them. Same recipe; just keep batching. |
+> | 1. AI `AI_CheckBadMove` if_effect handlers | **IN PROGRESS** — **44 of 66 effects ported** (batches 1-4, one commit per effect). **18 remain, blocked on MISSING STATE not transcription**: DISABLE/ENCORE need any-move-disabled + encored flags, STOCKPILE/SWALLOW/SPIT_UP a stockpile count, ATTRACT gender, PSYCH_UP Haze-style stat-stage copying. Wire the state first. |
 > | 2. `Cmd_tryKO` Focus Band | **DONE** |
 > | 3. Lightning Rod redirection | **REFUTED — (C), unreachable in singles.** Do not take it. |
 > | 4. `VARIOUS_GET_BATTLER_FAINTED` | **DONE** |

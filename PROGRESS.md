@@ -5,10 +5,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1001 — [supervisor WIND-DOWN, 2026-08-08] Session summary: 20 workers / 8 rounds — ISSUES #80 CLOSED, **8 reachable engine barriers retired**, 27/66 AI scoring effects ported, battleScene canonical split begun, 2 animation folds
+## 1001 — [supervisor WIND-DOWN, 2026-08-08] Session summary: 20 workers / 8 rounds — ISSUES #80 CLOSED, **8 reachable engine barriers retired**, 44/66 AI scoring effects ported, battleScene canonical split begun, 2 animation folds
 
 - **State:** master at this entry's commit, clean. **Final independent union
-  verification: full `npm test` 772 files / 7465 passed / 1 skipped, exit 0;
+  verification: full `npm test` 772 files / 7527 passed / 1 skipped, exit 0;
   `npm run build` exit 0** (session start was 768 / 7288). DEFERRED.md: no open
   entries — the next `run-supervisor.sh` is unblocked.
 - **Folds:** `animation-main` folded **twice** (6 commits: MOVE_DETECT exact +
@@ -35,11 +35,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   which required porting `Cmd_playanimation`'s full five-way dispatch, because
   Scene-OFF sets `HITMARKER_NO_ANIMATIONS` for the whole battle, making its
   gates the normal path. **Ratchet pins moved 51 → 46.**
-- **Opponent AI: 27 of 66 `AI_CheckBadMove` effects ported** (3 batches, one
-  commit per effect). Unported effects were scored `unsupported-branch` and
+- **Opponent AI: 44 of 66 `AI_CheckBadMove` effects ported** (4 batches, one
+  commit per effect; it was 4 at session start). Unported effects were scored `unsupported-branch` and
   discarded as failed candidates, so the AI ran with most of its reasoning off.
-  **39 remain**, led by ATTRACT 45 / PSYCH_UP 14 (both need gender or Haze
-  stat-stage wiring first).
+  **18 remain, and they have changed character**: the remainder is blocked on
+  MISSING STATE, not transcription — DISABLE/ENCORE need any-move-disabled and
+  encored flags, STOCKPILE/SWALLOW/SPIT_UP a stockpile count, ATTRACT gender,
+  PSYCH_UP Haze-style stat-stage copying. The next brief's real subject is that
+  state wiring, not another transcription batch.
 - **`battleScene.ts` canonical split begun** (user-approved): mechanical
   partition script + design doc, then 4 slices moving **293 symbols**;
   `battleScene.ts` **36,897 → 35,417** (net; the animation fold added CRUSH_CLAW
@@ -61,9 +64,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   is not the target, and flips to `BIT_FLANK`, which does not exist at
   `gBattlersCount == 2`). (5) I omitted the no-full-suite clause from one main
   brief and it cost that worker its turn to a cap-kill (work salvaged).
-- **Next (ordered):** (1) AI batch 4 — 39 effects left, proven recipe, one
-  commit each. (2) `AI_CheckViability`'s sibling table dispatch (triage A2,
-  untouched). (3) split slice 4 continuation — blocked on two cross-program
+- **Next (ordered):** (1) `AI_CheckViability`'s sibling table dispatch (triage
+  A2) — only Swagger/Counter ported, a batch was in flight at wind-down.
+  (2) The 18 remaining `AI_CheckBadMove` effects, which need the state wiring
+  above before any of them can be transcribed. (3) split slice 4 continuation — blocked on two cross-program
   decisions the worker correctly refused to make alone: a type-only export
   widening, and `drawTurn16PostSwitchField`, which would force
   `battleSceneCanonical.ts` to import `src/animation/` and trip the boundary
