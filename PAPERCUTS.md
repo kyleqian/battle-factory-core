@@ -8,6 +8,27 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Orphaned probe/compare node processes survive their session and burn CPU for days
+
+- **What:** at 2026-08-07 orient the host carried **three** orphaned
+  `node --experimental-strip-types tools/compare/probeEvolutionBasic.ts`
+  processes, all `PPID 1`, started Tue Aug 4 19:46-19:49 and still alive
+  **3 days later** at 43-81% CPU each. Load average was 12 on 16 cores before
+  any worker launched, and the supervisor's own baseline `npm test` was
+  running at roughly a fifth of its normal rate (150 of 768 files in 13 min).
+  A probe tool that waits on the oracle, or that a killed session left
+  mid-loop, is reparented to init and never reaped — nothing in the run
+  sweeps for it.
+- **Hits:** 1.
+- **Cost each:** ~15 min of degraded suite/worker throughput before it was
+  spotted, plus 3 days of background CPU tax on every session in between.
+- **Workaround:** at orient, run
+  `ps -Ao pid,ppid,etime,pcpu,command | grep -E "tools/(compare|probe)/" | grep -v grep`
+  and kill anything with `PPID 1` whose `etime` exceeds the session cap.
+  A real fix belongs in the launcher: sweep stale `PPID 1` node processes
+  rooted at this run's tools/ directory the way `sweep-scratch` handles
+  scratch dirs.
+
 ## Fresh side worktrees can start with a dangling `reference/` symlink
 
 - **What:** a side-lane worker (2026-08-07, second-RECORD scout) found the
