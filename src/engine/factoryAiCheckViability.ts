@@ -960,6 +960,17 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "accuracy-up-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < 50) skips the first -2. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind: "get-ability";
     before: BattleRngState;
     after: BattleRngState;
@@ -6616,6 +6627,27 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_ACCURACY_UP" || move.effect === "EFFECT_ACCURACY_UP_2") {
+    // AI_CV_AccuracyUp (data/battle_ai_scripts.s:1027-1035). Both effects are
+    // vestigial in Gen 3 (no move carries them), so this is dispatch-reachable
+    // only; receipt-pinned via the exported runCvAccuracyUp entry point.
+    const accuracyUp = runCvAccuracyUp({
+      rng: input.rng,
+      attackerAccStage: input.attacker.accStage,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: accuracyUp.rng,
+      draws: accuracyUp.draws,
+      scoreDelta: accuracyUp.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
   if (move.effect === "EFFECT_SNORE") {
     // AI_CV_Snore (data/battle_ai_scripts.s:1785-1787): `score +2; end` -- no
     // reads, no draws, no funcResult write. The plainest CV body in the table.
@@ -7890,4 +7922,53 @@ function runCvChangeSelfAbility(input: Readonly<{
     scoreDelta: -1,
     funcResultAfter,
   });
+}
+
+/**
+ * `AI_CV_AccuracyUp` (`data/battle_ai_scripts.s:1027-1035`, EFFECT_ACCURACY_UP
+ * /_2 -- both vestigial in Gen 3, no move carries either effect):
+ *
+ * ```
+ * AI_CV_AccuracyUp:
+ *     if_stat_level_less_than AI_USER, STAT_ACC, 9, AI_CV_AccuracyUp2
+ *     if_random_less_than 50, AI_CV_AccuracyUp2
+ *     score -2
+ * AI_CV_AccuracyUp2:
+ *     if_hp_more_than AI_USER, 70, AI_CV_AccuracyUp_End
+ *     score -2
+ * AI_CV_AccuracyUp_End:
+ *     end
+ * ```
+ *
+ * ACC stage < 9 JUMPs straight to AccuracyUp2 (no draw). ACC stage >= 9 runs
+ * the single `<50` roll: JUMP (<50) to AccuracyUp2 with no penalty,
+ * FALL-THROUGH (>=50) applies -2 and continues. AccuracyUp2's own HP gate:
+ * own HP > 70% ends at zero; HP <= 70% applies a second -2. funcResult is
+ * never written.
+ */
+export function runCvAccuracyUp(input: Readonly<{
+  rng: BattleRngState;
+  attackerAccStage: number;
+  attackerHp: number;
+  attackerMaxHp: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let score = 0;
+
+  if (input.attackerAccStage >= 9) {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-accuracy-up-roll`);
+    rng = roll.after;
+    const jumped = roll.randomValue % 256 < 50;
+    draws.push(Object.freeze({ ...roll, kind: "accuracy-up-roll" as const, jumped }));
+    if (!jumped) score -= 2;
+  }
+
+  const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  if (hpPercent <= 70) score -= 2;
+
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
 }

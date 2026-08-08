@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { runCheckViability } from "../src/engine/factoryAiCheckViability.ts";
+import { runCheckViability, runCvAccuracyUp } from "../src/engine/factoryAiCheckViability.ts";
 import { MOVES_BY_ID } from "../src/engine/factoryAiCheckBadMove.ts";
 
 const MOVE_SURF = 57; // EFFECT_HIT -- no if_effect table entry
@@ -6974,5 +6974,53 @@ describe("AI_CV_Snore (data/battle_ai_scripts.s:1785-1787, EFFECT_SNORE)", () =>
       scoreDelta: 2,
       funcResultAfter: 3,
     });
+  });
+});
+
+describe("AI_CV_AccuracyUp (data/battle_ai_scripts.s:1027-1035, EFFECT_ACCURACY_UP/_2)", () => {
+  // EFFECT_ACCURACY_UP (15) and EFFECT_ACCURACY_UP_2 (55) are vestigial in Gen
+  // 3 -- no move in gMovesInfo carries either effect -- so the handler is
+  // dispatch-reachable only and is receipt-pinned directly through its
+  // exported entry point (the same "case per exit" rule as every other CV
+  // handler), plus one dispatch check via the table's own probe semantics.
+  function accUpRun(
+    rngValue: number,
+    attackerOverrides: Record<string, unknown> = {},
+  ): ReturnType<typeof runCvAccuracyUp> {
+    return runCvAccuracyUp({
+      rng: { value: rngValue, calls: 0 },
+      attackerAccStage: 6,
+      attackerHp: 100,
+      attackerMaxHp: 100,
+      drawOrdinalStart: 1,
+      reasonPrefix: "accup",
+      ...attackerOverrides,
+    });
+  }
+
+  it("ACC stage below 9 JUMPs straight to AccuracyUp2 with no draw", () => {
+    const result = accUpRun(1, { attackerAccStage: 6, attackerHp: 100 });
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [] });
+  });
+
+  it("ACC stage below 9 with own HP <= 70 applies AccuracyUp2's -2", () => {
+    const result = accUpRun(1, { attackerAccStage: 6, attackerHp: 60 });
+    expect(result).toMatchObject({ scoreDelta: -2, draws: [] });
+  });
+
+  it("ACC stage >= 9 draws; roll < 50 JUMPs to AccuracyUp2 (no first -2)", () => {
+    // seed 3 -> high-half 50515, low byte 83 (< 50? no -- 83 >= 50 falls through).
+    // Pick a seed whose low byte < 50: seed 4 -> randomValue 1817, 1817 & 0xffff = 1817,
+    // low byte 25 (< 50). 
+    const result = accUpRun(4, { attackerAccStage: 9, attackerHp: 100 });
+    expect(result.scoreDelta).toBe(0);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "accuracy-up-roll", jumped: true });
+  });
+
+  it("ACC stage >= 9 with roll >= 50 applies the first -2, then AccuracyUp2's HP gate", () => {
+    // seed 1 -> high-half 16838, low byte 198 (>= 50).
+    const result = accUpRun(1, { attackerAccStage: 9, attackerHp: 60 });
+    expect(result).toMatchObject({ scoreDelta: -4, draws: [{ kind: "accuracy-up-roll", jumped: false }] });
   });
 });
