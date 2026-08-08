@@ -79,6 +79,20 @@
   `lickPortable.ts` at full-window exact (73 frames × 2 axes, both first frames
   kept); the fixtures, the coverage entry and the inventory pin 128->129 exact /
   148->147 unsupported.
+- **Notes — stretch items 5-6 landed.** `src/animation/lick.ts` (RAM-truth
+  reducer at the RAM ages above: the 5-frame/2-tick 16x32 sprite at target
+  center with the 5+5-step invisible flicker ladder and destroy at 71, the
+  ShakeMon2 x2 ∓1 2-frame toggle) + `tests/animation/lick.test.ts` (8 pins,
+  incl. the shake-vs-shared-port pin asserting the closed form equals
+  `shakeMon2OffsetAtTick(1, 0, 16, 1, age - 20).x2` for every age 21..51 and
+  documenting the +1 creation write at age 20 as the same-frame transient,
+  exactly the SLASH convention) are committed. `SceneOnLickConfig`/View seam
+  in `sceneOnPresentation.ts` follows `SceneOnSlashConfig`/`sceneOnSlashView`
+  exactly. Remaining for promotion: the draw case in `battleScene.ts` (must
+  split the display latch — one-age lick sprite/flicker, two-age task-driven
+  shake), a `lickPortable.ts`, the fixtures, the coverage entry and the
+  inventory pin 128->129 exact / 148->147 unsupported. No boundary widening,
+  no new unsupported-branch barrier, no shared-helper edit.
 - **Notes — two new components, both staged.** `asset:ANIM_TAG_LICK` is a brand
   new asset extracted standalone (`tools/extract/extract-lick-sprite.ts`,
   deliberately NOT folded into the bulk `extract-battle-anim-assets.ts` which has
