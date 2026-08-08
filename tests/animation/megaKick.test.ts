@@ -13,7 +13,7 @@ import {
 
 const opponent = { x: 176, y: 42 };
 
-describe("MOVE_MEGA_KICK source-relative staging reducer", () => {
+describe("MOVE_MEGA_KICK source-relative reducer", () => {
   it("pins the measured foot variant, alpha edge, and independent second cue", () => {
     expect(MEGA_KICK_FRAME_COUNT).toBe(160);
     expect(megaKickAtAge(13, "opponent", opponent).alpha).toBeNull();
@@ -50,7 +50,7 @@ describe("MOVE_MEGA_KICK source-relative staging reducer", () => {
     }
   });
 
-  it("exposes Mega Kick through the typed Scene-ON seam without a draw case", () => {
+  it("exposes Mega Kick through the typed Scene-ON seam", () => {
     const stage = createSceneOnMovePresentation({
       move: "MEGA_KICK",
       attacker: {
