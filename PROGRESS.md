@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1019 — [bounded MAIN worker, 2026-08-08] **#39: six Family-C healthbox caches now own every rendering input**
+
+- **State:** implementation `660c769f`; focused **12/12**, smoke **375/375**,
+  typecheck, full suite (**798 files / 8,028 passed / 1 skipped**), build, and
+  the committed OFF differential are green.
+- **Did:** all six slice-2 memoization keys now cover HP, identity, level,
+  max HP, gender, and status wherever variable; all three canonical preseeds
+  use the same complete keys. Added six red-verified, order-independent
+  identity/max-HP collision pins against the direct compositors. Incomplete
+  cache owners **6→0**; broad #39 inventory **1,949→1,949** lines /
+  `battleScene.ts` **36,343→36,361 LOC**.
+- **Next:** supervisor review; continue #39 only with another bounded generic
+  presentation-seam retirement.
+- **Notes:** clean-parent differential is **3,055/3,055 byte-identical** across
+  all 16 Family-C slice-2 OFF windows plus generated-round insurance; no
+  Battle-2 trace/window was run.
+
 ## 1018 — [bounded MAIN worker, 2026-08-08] **#39: two staged semantic owners replace their last bare canonical fact sources**
 
 - **State:** implementation `5de9c142`; focused Tier-1 **254/254**, smoke
@@ -42,42 +59,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   until the clock contract exists; no per-fixture cursor was promoted. The
   separate animation supervisor is still active, so newer animation commits
   remain for the next safe fold.
-
-## 1016 — [bounded MAIN worker, 2026-08-08] **AI_CV_PsychUp live receipt: legal staged reach/control twins match the OFF ROM 8/8 reruns**
-
-- **State:** implementation commit `277be8b8` plus this evidence checkpoint are
-  green. Full `npm test` passes (**796 files / 8009 passed / 1 skipped**),
-  smoke **375/375**, typecheck/build, targeted Tier-1 Psych Up and
-  `AI_CheckViability` (**603 tests**), and diff check are green.
-- **Did:** added complete three-party `overrides.parties` twins: Scizor uses
-  real Swords Dance x2 (reach ATK stage 10) or Focus Energy x2 (control stays
-  neutral), then Slash KOs a level-5 Magikarp Splash relay. Legal level-50
-  Golduck enters with `[Psych Up, Scratch, Scratch, Scratch]`. OFF verifier
-  reran each of seed 1/2 × reach/control twice: **4/4 rows**, exact slot,
-  CV/final score vectors, six draws (`BattleTurnPassed` + setup×4 + tie), and
-  endpoint RNG all match. No production handler change.
-- **Next:** supervisor review; continue the ordered hardware-receipt backlog
-  without reopening the finite Stage 8 reset or canonical Battle 2 march.
-- **Notes:** seed 2's inert Scratch slot has the observed -1 TryToFaint score
-  (`[88,100,99,100]` / `[101,100,99,100]`); it is pinned, not normalized.
-
-## 1015 — [supervisor, 2026-08-08] **Orient animation fold + generic AI turn ownership fixed + Battle-2 room re-entry presentation independently pinned**
-
-- **State:** master at this entry's commit, clean. Orient fast-forwarded the four
-  pending `animation-main` commits (`bf7df624`); union baseline and the first
-  post-merge full gates are green (**795 files / 8004 passed / 1 skipped**, build,
-  typecheck, smoke **375/375**). DEFERRED.md has no open entry.
-- **Did:** verified and accepted MAIN entry 1014: Mirror Coat live verifier
-  **PASS 4/4** with exact scores, choice, draw count and RNG cursor; ISSUES #83
-  is removed. Folded side commits `7a2417bd`/`fcbe6ce0`: a dedicated OFF trace
-  pins the generic round's next-trainer room seam at **115/115** (LILIANA,
-  School Kid F / GIRL_3, complete walk-in through held quote), independently
-  rerun by the supervisor; focused receipts **25/25**, smoke/build green.
-- **Next:** attack ISSUES #55's real remainder: replace the fixture-only adopted
-  construction cursors with an executable ambient-VBlank-aware construction
-  contract, or bank the smallest evidence checkpoint that makes the source-sized
-  implementation unambiguous. Continue hardware receipts file-disjointly.
-- **Notes:** the 115-frame side proof is an additive focused receipt; the broader
-  existing far-side trace was already **903/903**, so no canonical Battle-2 turn
-  or post-33331 window was added. The animation supervisor is still active; its
-  two newer commits remain unfolded for wind-down.

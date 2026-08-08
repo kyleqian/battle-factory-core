@@ -1,4 +1,20 @@
 
+## 1016 — [bounded MAIN worker, 2026-08-08] **AI_CV_PsychUp live receipt matched the OFF ROM**
+
+- **State/Did:** legal staged reach/control twins matched exact slot, score,
+  six-draw, and endpoint-RNG receipts across both seeds; full suite, smoke,
+  typecheck, build, focused tests, and differential were green.
+- **Next/Notes:** continue ordered hardware receipts without reopening the
+  finite Stage 8 reset. Full entry remains in git history at `PROGRESS.md`.
+
+## 1015 — [supervisor, 2026-08-08] **Animation fold, AI turn ownership, and generic room re-entry accepted**
+
+- **State/Did:** folded the pending animation work, accepted the Mirror Coat
+  receipt, and independently pinned LILIANA's generic next-trainer room seam;
+  union full gates were green.
+- **Next/Notes:** continue #55's ambient construction-clock contract and
+  file-disjoint hardware receipts. Full entry remains in git history.
+
 ## 1014 — [bounded MAIN worker, 2026-08-08] **ISSUES #83 closed: scored Factory AI owns the real turn-start draw exactly once**
 
 - **State/Did:** Scene-OFF Mirror Coat verifier passed 4/4 with exact scores,

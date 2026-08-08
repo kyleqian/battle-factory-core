@@ -37,6 +37,30 @@ const playerAssets = {
   textPalette: battleHealthboxAsset.singlesPlayer.palette,
 };
 
+type CollisionIdentity = {
+  name: string;
+  level: number;
+  maxHp: number;
+};
+
+const ONIX_COLLISION_IDENTITY: CollisionIdentity = { name: "ONIX", level: 42, maxHp: 101 };
+const MAGBY_COLLISION_IDENTITY: CollisionIdentity = { name: "MAGBY", level: 49, maxHp: 173 };
+
+function expectIdentityCollisionSafe(
+  factory: (hp: number, identity: CollisionIdentity) => unknown,
+  compose: (hp: number, identity: CollisionIdentity) => unknown,
+): void {
+  const orders = [
+    { hp: 31, identities: [ONIX_COLLISION_IDENTITY, MAGBY_COLLISION_IDENTITY] },
+    { hp: 32, identities: [MAGBY_COLLISION_IDENTITY, ONIX_COLLISION_IDENTITY] },
+  ] as const;
+  for (const { hp, identities } of orders) {
+    for (const identity of identities) {
+      expect(factory(hp, identity)).toEqual(compose(hp, identity));
+    }
+  }
+}
+
 describe("battleScene.ts family-C healthbox factories (slice 2 parameterization)", () => {
   it("kabutoHealthboxContentForHp matches composeOpponentHealthbox for KABUTO_SENDOUT_BATTLER's identity at full and partial HP", () => {
     for (const hp of [91, 47]) {
@@ -157,5 +181,91 @@ describe("battleScene.ts family-C healthbox factories (slice 2 parameterization)
         }),
       );
     }
+  });
+
+  it("kabutoHealthboxContentForHp owns every identity and max-HP cache input in either call order", () => {
+    expectIdentityCollisionSafe(
+      (hp, { name, level, maxHp }) => kabutoHealthboxContentForHp(hp, name, level, maxHp, "male"),
+      (hp, { name, level, maxHp }) => composeOpponentHealthbox(opponentAssets, {
+        name,
+        level,
+        gender: "male",
+        hpFraction: hp / maxHp,
+        status: "none",
+      }),
+    );
+  });
+
+  it("onixPlayerHealthboxContentForState owns every identity and max-HP cache input in either call order", () => {
+    expectIdentityCollisionSafe(
+      (hp, { name, level, maxHp }) => onixPlayerHealthboxContentForState(hp, "paralysis", "female", name, level, maxHp),
+      (hp, { name, level, maxHp }) => composePlayerHealthbox(playerAssets, {
+        name,
+        level,
+        gender: "female",
+        hpFraction: hp / maxHp,
+        status: "paralysis",
+        currentHp: hp,
+        maxHp,
+      }),
+    );
+  });
+
+  it("featherDanceOnixOpponentHealthbox owns every identity and max-HP cache input in either call order", () => {
+    expectIdentityCollisionSafe(
+      (hp, { name, level, maxHp }) => featherDanceOnixOpponentHealthbox(hp, "male", name, level, maxHp),
+      (hp, { name, level, maxHp }) => composeOpponentHealthbox(opponentAssets, {
+        name,
+        level,
+        gender: "male",
+        hpFraction: hp / maxHp,
+        status: "none",
+      }),
+    );
+  });
+
+  it("featherDancePidgeottoPlayerHealthbox owns every identity and max-HP cache input in either call order", () => {
+    expectIdentityCollisionSafe(
+      (hp, { name, level, maxHp }) => featherDancePidgeottoPlayerHealthbox(hp, "burn", "female", name, level, maxHp),
+      (hp, { name, level, maxHp }) => composePlayerHealthbox(playerAssets, {
+        name,
+        level,
+        gender: "female",
+        hpFraction: hp / maxHp,
+        status: "burn",
+        currentHp: hp,
+        maxHp,
+      }),
+    );
+  });
+
+  it("flyMurkrowPlayerHealthbox owns every identity and max-HP cache input in either call order", () => {
+    expectIdentityCollisionSafe(
+      (hp, { name, level, maxHp }) => flyMurkrowPlayerHealthbox(hp, "burn", "male", name, level, maxHp),
+      (hp, { name, level, maxHp }) => composePlayerHealthbox(playerAssets, {
+        name,
+        level,
+        gender: "male",
+        hpFraction: hp / maxHp,
+        status: "burn",
+        currentHp: hp,
+        maxHp,
+      }),
+    );
+  });
+
+  it("magbyPlayerHealthboxContentForHp owns every identity and max-HP cache input in either call order", () => {
+    expectIdentityCollisionSafe(
+      (hp, { name, level, maxHp }) => magbyPlayerHealthboxContentForHp(hp, name, level, maxHp, "male"),
+      (hp, { name, level, maxHp }) => composePlayerHealthbox(playerAssets, {
+        name,
+        level,
+        gender: "male",
+        hpFraction: hp / maxHp,
+        status: "none",
+        currentHp: hp,
+        maxHp,
+      }),
+    );
   });
 });

@@ -1942,10 +1942,19 @@ const kabutoHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets,
   hpFraction: KABUTO_SENDOUT_BATTLER.hp / KABUTO_SENDOUT_BATTLER.maxHP,
   status: "none",
 });
-const kabutoHealthboxContentByHp = new Map<
-  number,
+function healthboxCacheKey(...inputs: readonly (string | number)[]): string {
+  return JSON.stringify(inputs);
+}
+const kabutoHealthboxContentByInputs = new Map<
+  string,
   ReturnType<typeof composeOpponentHealthbox>
->([[KABUTO_SENDOUT_BATTLER.hp, kabutoHealthboxContent]]);
+>([[healthboxCacheKey(
+  KABUTO_SENDOUT_BATTLER.hp,
+  KABUTO_SENDOUT_BATTLER.name,
+  KABUTO_SENDOUT_BATTLER.level,
+  KABUTO_SENDOUT_BATTLER.maxHP,
+  KABUTO_SENDOUT_BATTLER.gender,
+), kabutoHealthboxContent]]);
 export function kabutoHealthboxContentForHp(
   hp: number,
   name: string,
@@ -1953,7 +1962,8 @@ export function kabutoHealthboxContentForHp(
   maxHp: number,
   gender: "male" | "female",
 ): ReturnType<typeof composeOpponentHealthbox> {
-  let cached = kabutoHealthboxContentByHp.get(hp);
+  const key = healthboxCacheKey(hp, name, level, maxHp, gender);
+  let cached = kabutoHealthboxContentByInputs.get(key);
   if (!cached) {
     cached = composeOpponentHealthbox(healthboxAssemblyAssets, {
       name,
@@ -1962,7 +1972,7 @@ export function kabutoHealthboxContentForHp(
       hpFraction: hp / maxHp,
       status: "none",
     });
-    kabutoHealthboxContentByHp.set(hp, cached);
+    kabutoHealthboxContentByInputs.set(key, cached);
   }
   return cached;
 }
@@ -1987,7 +1997,14 @@ const onixPlayerHealthboxContent = composePlayerHealthbox(playerHealthboxAssets,
 const onixPlayerHealthboxContentByState = new Map<
   string,
   ReturnType<typeof composePlayerHealthbox>
->([["117:none", onixPlayerHealthboxContent]]);
+>([[healthboxCacheKey(
+  ONIX_MENU_BATTLER.hp,
+  "none",
+  ONIX_MENU_BATTLER.gender,
+  ONIX_MENU_BATTLER.name,
+  ONIX_MENU_BATTLER.level,
+  ONIX_MENU_BATTLER.maxHP,
+), onixPlayerHealthboxContent]]);
 export function onixPlayerHealthboxContentForState(
   hp: number,
   status: "none" | "burn" | "freeze" | "paralysis",
@@ -1996,7 +2013,7 @@ export function onixPlayerHealthboxContentForState(
   level: number = ONIX_MENU_BATTLER.level,
   maxHp: number = ONIX_MENU_BATTLER.maxHP,
 ): ReturnType<typeof composePlayerHealthbox> {
-  const key = `${hp}:${status}:${gender}`;
+  const key = healthboxCacheKey(hp, status, gender, name, level, maxHp);
   let cached = onixPlayerHealthboxContentByState.get(key);
   if (!cached) {
     cached = composePlayerHealthbox(playerHealthboxAssets, {
@@ -2024,7 +2041,7 @@ export function featherDanceOnixOpponentHealthbox(
   level: number,
   maxHp: number,
 ): ReturnType<typeof composeOpponentHealthbox> {
-  const key = `${hp}:${gender}`;
+  const key = healthboxCacheKey(hp, gender, name, level, maxHp);
   let cached = featherDanceOnixOpponentHealthboxes.get(key);
   if (!cached) {
     cached = composeOpponentHealthbox(healthboxAssemblyAssets, {
@@ -2051,7 +2068,7 @@ export function featherDancePidgeottoPlayerHealthbox(
   level: number,
   maxHp: number,
 ): ReturnType<typeof composePlayerHealthbox> {
-  const key = `${hp}:${status}:${gender}`;
+  const key = healthboxCacheKey(hp, status, gender, name, level, maxHp);
   let cached = featherDancePidgeottoPlayerHealthboxes.get(key);
   if (!cached) {
     cached = composePlayerHealthbox(playerHealthboxAssets, {
@@ -2145,7 +2162,7 @@ export function flyMurkrowPlayerHealthbox(
   level: number,
   maxHp: number,
 ): ReturnType<typeof composePlayerHealthbox> {
-  const key = `${hp}:${status}:${gender}`;
+  const key = healthboxCacheKey(hp, status, gender, name, level, maxHp);
   let cached = flyMurkrowPlayerHealthboxes.get(key);
   if (!cached) {
     cached = composePlayerHealthbox(playerHealthboxAssets, {
@@ -2393,8 +2410,8 @@ const magbyPlayerHealthboxContent = composePlayerHealthbox(
   },
   { name: "MAGBY", level: 50, gender: "female", hpFraction: 1, status: "none", currentHp: 138, maxHp: 138 },
 );
-const magbyPlayerHealthboxContentByHp = new Map<number, typeof magbyPlayerHealthboxContent>([
-  [138, magbyPlayerHealthboxContent],
+const magbyPlayerHealthboxContentByInputs = new Map<string, typeof magbyPlayerHealthboxContent>([
+  [healthboxCacheKey(138, "MAGBY", 50, 138, "female"), magbyPlayerHealthboxContent],
 ]);
 
 export function magbyPlayerHealthboxContentForHp(
@@ -2404,7 +2421,8 @@ export function magbyPlayerHealthboxContentForHp(
   maxHp: number,
   gender: "male" | "female",
 ): typeof magbyPlayerHealthboxContent {
-  let cached = magbyPlayerHealthboxContentByHp.get(hp);
+  const key = healthboxCacheKey(hp, name, level, maxHp, gender);
+  let cached = magbyPlayerHealthboxContentByInputs.get(key);
   if (!cached) {
     cached = composePlayerHealthbox(
       {
@@ -2417,7 +2435,7 @@ export function magbyPlayerHealthboxContentForHp(
       },
       { name, level, gender, hpFraction: hp / maxHp, status: "none", currentHp: hp, maxHp },
     );
-    magbyPlayerHealthboxContentByHp.set(hp, cached);
+    magbyPlayerHealthboxContentByInputs.set(key, cached);
   }
   return cached;
 }
