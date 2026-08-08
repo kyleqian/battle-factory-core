@@ -3438,6 +3438,8 @@ describe("production printfromtable (Cmd_printfromtable) dispatch", () => {
   it.each([
     [B_MSG_LOAFING, "STRINGID_PKMNLOAFING"], // Truant loafing turn -- the Factory-reachable row
     [B_MSG_WONT_OBEY, "STRINGID_PKMNWONTOBEY"],
+    [B_MSG_TURNED_AWAY, "STRINGID_PKMNTURNEDAWAY"],
+    [B_MSG_PRETEND_NOT_NOTICE, "STRINGID_PKMNPRETENDNOTNOTICE"],
     [B_MSG_INCAPABLE_OF_POWER, "STRINGID_PKMNINCAPABLEOFPOWER"],
   ])("BattleScript_MoveUsedLoafingAroundMsg's own printfromtable gInobedientStringIds, MULTISTRING_CHOOSER %i: resolves %s", (chooser, messageId) => {
     const pc = program.instructions.find((i) =>
