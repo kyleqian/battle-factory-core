@@ -4668,9 +4668,15 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
-  if (move.effect === "EFFECT_RESTORE_HP" || move.effect === "EFFECT_SOFTBOILED") {
+  if (
+    move.effect === "EFFECT_RESTORE_HP"
+    || move.effect === "EFFECT_SOFTBOILED"
+    || move.effect === "EFFECT_SWALLOW"
+  ) {
     // AI_CV_Heal (data/battle_ai_scripts.s:1324-1351) -- the shared Heal body
-    // reached directly (no weather gate).
+    // reached directly (no weather gate). EFFECT_SWALLOW dispatches to the
+    // same AI_CV_Heal label in source (:745) despite being a different move
+    // family -- the handler body is already ported, this is the dispatch gap.
     const heal = runCvHeal({
       rng: input.rng,
       attacker: input.attacker,

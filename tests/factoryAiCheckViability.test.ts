@@ -5615,3 +5615,38 @@ describe("AI_CV_SelfKO (data/battle_ai_scripts.s:800-826)", () => {
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -3 });
   });
 });
+
+describe("AI_CV_Heal EFFECT_SWALLOW dispatch (data/battle_ai_scripts.s:745)", () => {
+  const MOVE_SWALLOW = 256; // EFFECT_SWALLOW -> AI_CV_Heal
+
+  it("Swallow dispatches through the identical AI_CV_Heal body (target faster, HP>=70 <30 roll)", () => {
+    // target strictly faster (speed 5 vs 120), hp 90: heal-roll-1 <30 with seed 1 -> low byte 198 (>=30, FALL-THROUGH -3).
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SWALLOW,
+      attacker: { ...NEUTRAL_BATTLER, speed: 5, hp: 90, maxHp: 100 },
+      target: { ...NEUTRAL_BATTLER, speed: 120 },
+      staleFuncResultFallback: 3,
+      drawOrdinalStart: 1,
+      reasonPrefix: "swallow-heal",
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["heal-roll-1"]);
+  });
+
+  it("Swallow at 100% HP: deterministic -3, zero draws", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SWALLOW,
+      attacker: { ...NEUTRAL_BATTLER, hp: 100, maxHp: 100 },
+      target: { ...NEUTRAL_BATTLER, speed: 120 },
+      staleFuncResultFallback: 3,
+      drawOrdinalStart: 1,
+      reasonPrefix: "swallow-heal",
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -3, funcResultAfter: 3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+});
