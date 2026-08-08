@@ -666,14 +666,16 @@ Per entry:
   the main lane and a side worker that could not complete its full-suite
   validation inside its cap at all (honestly reported "not claiming it
   passed"; supervisor reran it green post-contention).
-- **Hits:** 4 (both lanes of the same round, 2026-07-29 ~13:40; Slice-3
+- **Hits:** 5 (both lanes of the same round, 2026-07-29 ~13:40; Slice-3
   closure worker 2026-07-30 — concurrent baseline sessions left orphaned
   Vitest workers, ~2 min; main #60 verification overlapped the independent
   animation supervisor's full gate on 2026-07-31, stretching the main suite
   to 431s, ~5 min; 2026-08-08 the independent animation worker launched
   several full gates while this supervisor's main/side baselines were live,
   stretching them to ~23 minutes and killing main's healthy post-change full
-  at its 60-minute cap, ~35 minutes of wall time plus supervisor salvage).
+  at its 60-minute cap, ~35 minutes of wall time plus supervisor salvage;
+  the following healthbox worker's otherwise-green final suite still took
+  13m43s under shared-host contention, ~7 minutes lost).
 - **Cost each:** ~10 min (main retry) + ~20 min (side validation stall).
 - **Largely fixed 2026-08-01:** the root cause was that only
   `run-subagent.sh` exported `POKEBENCH_VITEST_MAX_WORKERS` (4), so bounded
