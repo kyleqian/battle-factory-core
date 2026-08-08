@@ -1395,6 +1395,43 @@ function runCvAbsorb(input: Readonly<{
 }
 
 /**
+ * `AI_CV_DreamEater` (`data/battle_ai_scripts.s:828-835`, EFFECT_DREAM_EATER):
+ *
+ * ```
+ * AI_CV_DreamEater:
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_25, AI_CV_DreamEater_ScoreDown1
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_5, AI_CV_DreamEater_ScoreDown1
+ *     goto AI_CV_DreamEater_End
+ * AI_CV_DreamEater_ScoreDown1:
+ *     score -1
+ * AI_CV_DreamEater_End:
+ *     end
+ * ```
+ *
+ * Exactly 0.25x or 0.5x type effectiveness against the target scores -1
+ * directly (the HP-drain won't cover the weak hit); every other class
+ * (immune 0x, neutral 1x, super 2x/4x, or a STAB'd one-weak-one-resist
+ * wash) is a deterministic zero score with zero draws -- the source's plain
+ * `goto End`, sharing `AI_CV_Absorb`'s `Cmd_if_type_effectiveness` probe
+ * (`classifyHighCritEffectiveness`) minus Absorb's own random site. No
+ * command writes funcResult (`end` without any preceding write).
+ */
+function runCvDreamEater(input: Readonly<{
+  rng: BattleRngState;
+  attackerTypes: readonly [string, string];
+  moveType: string;
+  targetTypes: readonly [string, string];
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  const scoreDelta = classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5 ? -1 : 0;
+  return Object.freeze({
+    rng: input.rng,
+    draws: Object.freeze([]),
+    scoreDelta,
+  });
+}
+
+/**
  * `AI_CV_Endure` (`data/battle_ai_scripts.s:1965-1973`, EFFECT_ENDURE):
  *
  * ```
@@ -5649,6 +5686,24 @@ export function runCheckViability(input: Readonly<{
       rng: absorb.rng,
       draws: absorb.draws,
       scoreDelta: absorb.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_DREAM_EATER") {
+    // AI_CV_DreamEater (data/battle_ai_scripts.s:828-835) -- the Absorb
+    // family's deterministic weak-effectiveness gate, no random site.
+    const dreamEater = runCvDreamEater({
+      rng: input.rng,
+      attackerTypes: input.attacker.types,
+      moveType: move.type,
+      targetTypes: input.target.types,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: dreamEater.rng,
+      draws: dreamEater.draws,
+      scoreDelta: dreamEater.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }

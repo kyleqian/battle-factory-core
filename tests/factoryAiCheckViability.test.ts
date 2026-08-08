@@ -4995,6 +4995,56 @@ describe("AI_CV_Absorb (EFFECT_ABSORB, docs/executable-frontier-census.md 43 wei
   });
 });
 
+describe("AI_CV_DreamEater (EFFECT_DREAM_EATER, docs/executable-frontier-census.md 6 weighted)", () => {
+  const MOVE_DREAM_EATER = 138;
+  const EXTRAS = Object.freeze({
+    speed: 100,
+    speedStage: 6,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0,
+    evasionStage: 6,
+    accStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+    hp: 100,
+    maxHp: 100,
+  });
+
+  function dreamEaterRun(rngValue: number, attackerTypes: readonly [string, string], targetTypes: readonly [string, string]) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_DREAM_EATER,
+      attacker: { ...EXTRAS, types: attackerTypes },
+      target: { ...EXTRAS, types: targetTypes },
+      drawOrdinalStart: 1,
+      reasonPrefix: "dream-eater",
+    });
+  }
+
+  it("0.5x target (Psychic), non-STAB user: deterministic -1, zero draws", () => {
+    const rng = { value: 1, calls: 0 };
+    const result = dreamEaterRun(1, ["TYPE_NORMAL", "TYPE_NORMAL"], ["TYPE_PSYCHIC", "TYPE_NORMAL"]);
+    expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: -1 });
+  });
+
+  it("neutral 1x target (Normal): deterministic zero score, zero draws", () => {
+    const rng = { value: 1, calls: 0 };
+    const result = dreamEaterRun(1, ["TYPE_NORMAL", "TYPE_NORMAL"], ["TYPE_NORMAL", "TYPE_NORMAL"]);
+    expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: 0 });
+  });
+
+  it("immune target (Dark): deterministic zero score, zero draws", () => {
+    const result = dreamEaterRun(1, ["TYPE_NORMAL", "TYPE_NORMAL"], ["TYPE_DARK", "TYPE_NORMAL"]);
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("super effective STAB target (Fighting vs Psychic user): still zero score, zero draws", () => {
+    const result = dreamEaterRun(1, ["TYPE_PSYCHIC", "TYPE_PSYCHIC"], ["TYPE_FIGHTING", "TYPE_NORMAL"]);
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+});
+
 describe("AI_CV_Endure (EFFECT_ENDURE, docs/executable-frontier-census.md 24 weighted)", () => {
   const MOVE_ENDURE = 203;
 
