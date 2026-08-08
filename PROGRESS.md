@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1022 — [supervisor WIND-DOWN, 2026-08-08] **Generic S8 presentation and Factory-AI receipts advanced; union green**
+
+- **State:** master is clean through `1601971f`. Final worker full suite is
+  **799 files / 8,033 passed / 1 skipped**; supervisor independently reran
+  Baton Pass **4/4**, focused AI **745/745**, focused presentation **237/237**,
+  faint-sink OFF differential **620/620**, and the production build.
+- **Did:** folded the orientation-time animation branch and verified the union;
+  closed #83 by giving the generic scored-AI seam single ownership of the real
+  turn-start draw; accepted exact Mirror Coat, Psych Up, and Baton Pass live
+  hardware receipts; proved the #55 construction-clock boundary; retired two
+  bare staged facts, hardened all six Family-C healthbox cache keys, and renamed
+  the shared faint-sink geometry API with executable old-name refs **22→0**.
+- **Next:** continue #39 only with one freshly censused generic presentation
+  owner at a time, or add another file-disjoint AI hardware receipt. Never
+  resume a canonical Battle-2 turn/window after tick 33331.
+- **Notes:** the separate animation supervisor remains active; commits now in
+  `master..animation-main` were intentionally not folded mid-write. No material
+  decision was deferred. Shared-host full-suite contention is recorded in
+  `PAPERCUTS.md` at hit 6.
+
 ## 1021 — [bounded MAIN worker, 2026-08-08] **#39: faint-sink geometry now has an identity-honest API name**
 
 - **State:** implementation `d2390d33`; focused **237/237**, smoke **375/375**,
@@ -38,20 +58,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** `grovyleFaintSinkRowsAndY2` is declared in
   `battleSceneCanonical.ts` and publicly re-exported by `battleScene.ts`; no
   hidden dynamic consumer was found. No trace/window or Scene-ON query ran.
-
-## 1019 — [bounded MAIN worker, 2026-08-08] **#39: six Family-C healthbox caches now own every rendering input**
-
-- **State:** implementation `660c769f`; focused **12/12**, smoke **375/375**,
-  typecheck, full suite (**798 files / 8,028 passed / 1 skipped**), build, and
-  the committed OFF differential are green.
-- **Did:** all six slice-2 memoization keys now cover HP, identity, level,
-  max HP, gender, and status wherever variable; all three canonical preseeds
-  use the same complete keys. Added six red-verified, order-independent
-  identity/max-HP collision pins against the direct compositors. Incomplete
-  cache owners **6→0**; broad #39 inventory **1,949→1,949** lines /
-  `battleScene.ts` **36,343→36,361 LOC**.
-- **Next:** supervisor review; continue #39 only with another bounded generic
-  presentation-seam retirement.
-- **Notes:** clean-parent differential is **3,055/3,055 byte-identical** across
-  all 16 Family-C slice-2 OFF windows plus generated-round insurance; no
-  Battle-2 trace/window was run.

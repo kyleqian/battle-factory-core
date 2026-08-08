@@ -1,4 +1,12 @@
 
+## 1019 — [bounded MAIN worker, 2026-08-08] **Family-C healthbox cache ownership hardened**
+
+- **State/Did:** all six parameterized healthbox caches now key every rendering
+  input; six red-verified collision pins, full suite/build/typecheck/smoke, and
+  **3,055/3,055** OFF differential captures were green.
+- **Next/Notes:** continue #39 through bounded generic presentation owners; no
+  Battle-2 window was run. Full entry remains in git history at `PROGRESS.md`.
+
 ## 1017 — [supervisor, 2026-08-08] **Psych Up receipt and #55 construction-clock boundary accepted**
 
 - **State/Did:** accepted the legal Psych Up receipt and three construction RNG
