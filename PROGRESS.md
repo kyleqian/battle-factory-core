@@ -106,8 +106,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **392/392**.
   `animation-main` folded at
   wind-down (18 commits: MINIMIZE/TORMENT promoted exact, MOVE_DETECT staged);
-  that lane stayed live and landed **2 further commits after the fold**, left
-  deliberately unfolded — the next session's orient fold takes them.
+  that lane stayed live and kept committing after the fold (6 further commits
+  by wind-down and still moving), left deliberately unfolded rather than
+  chasing a moving branch — the next session's orient fold takes them.
   **Note on ordering:** the Class-B step (entry 992, above) landed AFTER this
   summary was first written — its launcher digest was truncated and the
   supervisor briefly misread the worker as failed; git log corrected it. The
