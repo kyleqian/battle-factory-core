@@ -174,9 +174,11 @@ entry the same way the inventory doc's "4405-5467" range already flags):
 `drawGrovyleStretchEarly` (:5690), `drawKabutoHSlideWobble` (:5710).
 **6 functions.**
 
-**F. Palette factories:** `getOnixDoubleTeamClonePalette` (:6200, live —
-still called at :31866 by the surviving generic double-team clone renderer)
-and `turn10OnixDarkPalette` (:6217, live — called at :10471/:10473).
+**F. Palette factories:** the former `getOnixDoubleTeamClonePalette` is now
+the species-neutral `doubleTeamClonePalette`, memoized by its actual source-
+palette identity and called by the surviving generic double-team clone
+renderer. `turn10OnixDarkPalette` (:6217, live — called at :10471/:10473)
+remains separate and species-named.
 **2 functions.**
 
 **G. Capstone entry point:** `renderSceneOffTurnView` (battleScene.ts:34185,

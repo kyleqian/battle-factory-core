@@ -6368,18 +6368,20 @@ function blendedTile(
  * (`drawStatsBanner` below) survives.
  */
 
-let onixDoubleTeamClonePaletteCache: RgbColor[] | null = null;
-/** Threads the source sprite asset in explicitly (`docs/species-render-entry-point-retirement-design.md` §1.3F/§4 row 6) rather than closing over `onixBackSprite` by name; palette math unchanged. */
-function getOnixDoubleTeamClonePalette(sourceSprite: BattleBackSpriteAsset): RgbColor[] {
-  if (onixDoubleTeamClonePaletteCache) return onixDoubleTeamClonePaletteCache;
-  onixDoubleTeamClonePaletteCache = sourceSprite.palette.map((c) =>
+const doubleTeamClonePaletteCache = new WeakMap<readonly RgbColor[], RgbColor[]>();
+/** Derives DOUBLE_TEAM's coefficient-11 clone tint, memoized by source-palette identity. */
+export function doubleTeamClonePalette(sourcePalette: readonly RgbColor[]): RgbColor[] {
+  const cached = doubleTeamClonePaletteCache.get(sourcePalette);
+  if (cached) return cached;
+  const palette = sourcePalette.map((c) =>
     c ? {
       r: blendComponentToward(c.r, 0, 11),
       g: blendComponentToward(c.g, 0, 11),
       b: blendComponentToward(c.b, 0, 11),
     } : c,
   );
-  return onixDoubleTeamClonePaletteCache;
+  doubleTeamClonePaletteCache.set(sourcePalette, palette);
+  return palette;
 }
 
 /** S7 slice R rung (b) mechanism 4 (docs/aerial-ace-notes.md's own continuation section): `BlendPalette` toward RGB_BLACK at coefficient 10 - the exact RAM-read coefficient for the palette-pulse's own darkened plateau (`turn10AerialAcePaletteDarkenCoeff`), same shape as `getDoubleTeamClonePalette`. */
@@ -6387,7 +6389,7 @@ function darkenPaletteToward10(palette: readonly (RgbColor | undefined)[]): RgbC
   return palette.map((c) => (c ? { r: blendComponentToward(c.r, 0, 10), g: blendComponentToward(c.g, 0, 10), b: blendComponentToward(c.b, 0, 10) } : (c as unknown as RgbColor)));
 }
 let turn10OnixDarkPaletteCache: RgbColor[] | null = null;
-/** Threads the source sprite asset in explicitly, same as `getOnixDoubleTeamClonePalette` above - see that function's doc comment. */
+/** Threads the source sprite asset in explicitly; this turn-10-only cache remains separate from `doubleTeamClonePalette`. */
 function turn10OnixDarkPalette(sourceSprite: BattleBackSpriteAsset): RgbColor[] {
   return (turn10OnixDarkPaletteCache ??= darkenPaletteToward10(sourceSprite.palette));
 }
@@ -32325,7 +32327,7 @@ export function renderSceneOnMovePresentation(
       target.geometry.spriteCorner.y,
     );
     if (view.clones) {
-      const palette = getOnixDoubleTeamClonePalette(onixBackSprite);
+      const palette = doubleTeamClonePalette(onixBackSprite.palette);
       const drawClone = (offset: number) => drawSpriteSheetBlended(
         fb,
         onixBackSprite.tileset,
