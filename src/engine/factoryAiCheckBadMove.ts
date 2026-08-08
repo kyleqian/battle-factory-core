@@ -424,6 +424,12 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    */
   hasFocusEnergy?: boolean;
   /**
+   * `gBattleMons[AI_USER].status1` intersects the Refresh-curable mask
+   * (POISON/BURN/PARALYSIS/TOXIC_POISON) -- `AI_CBM_Refresh`'s single
+   * `if_not_status` gate (EFFECT_REFRESH). Optional, defaulting to `false`.
+   */
+  hasCurableStatus?: boolean;
+  /**
    * Current weather, `AI_WEATHER_*`-encoded (0=Sun/1=Rain/2=Sandstorm/3=Hail)
    * -- `AI_CBM_RainDance`/`SunnyDay`/`Hail`'s own `get_weather` read (doc
    * §25.1). Optional, defaulting to `undefined` (no weather bit set, matching
@@ -1595,6 +1601,20 @@ export function runCheckBadMovePreamble(input: Readonly<{
       rng,
       draws: Object.freeze(draws),
       scoreDelta: runCbmFocusEnergy(input.attacker.hasFocusEnergy ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_REFRESH -> AI_CBM_Refresh
+  // (`data/battle_ai_scripts.s:205,563-565`): a single
+  // `if_not_status AI_USER, STATUS1_POISON | STATUS1_BURN | STATUS1_PARALYSIS |
+  // STATUS1_TOXIC_POISON, Score_Minus10` -- Refresh is penalized when the AI
+  // has none of the four curable statuses.
+  if (move.effect === "EFFECT_REFRESH") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmRefresh(input.attacker.hasCurableStatus ?? false),
     });
   }
 
@@ -2814,6 +2834,16 @@ function runCbmFutureSight(targetFutureAttackUp: boolean, attackerFutureAttackUp
  */
 function runCbmFocusEnergy(attackerHasFocusEnergy: boolean): number {
   return attackerHasFocusEnergy ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Refresh` (`data/battle_ai_scripts.s:563-565`, EFFECT_REFRESH): a
+ * single `if_not_status AI_USER, STATUS1_POISON | STATUS1_BURN | STATUS1_
+ * PARALYSIS | STATUS1_TOXIC_POISON, Score_Minus10` -- Refresh is penalized
+ * when the AI has none of the four curable statuses. Zero ability/type reads.
+ */
+function runCbmRefresh(attackerHasCurableStatus: boolean): number {
+  return attackerHasCurableStatus ? 0 : -10;
 }
 
 /**

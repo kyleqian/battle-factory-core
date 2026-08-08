@@ -29,6 +29,7 @@ import {
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import {
+  BATTLE_SCRIPT_STATUS1_REFRESH_CURE_MASK,
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS1_TOXIC_POISON,
   BATTLE_SCRIPT_STATUS2_FORESIGHT,
@@ -323,6 +324,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
         : {}),
       ...((attacker.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0
         ? { isAsleep: true }
+        : {}),
+      ...((attacker.status1 & BATTLE_SCRIPT_STATUS1_REFRESH_CURE_MASK) !== 0
+        ? { hasCurableStatus: true }
         : {}),
       ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_SUBSTITUTE) !== 0
         ? { hasSubstitute: true }

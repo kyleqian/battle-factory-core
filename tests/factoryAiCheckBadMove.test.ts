@@ -1174,6 +1174,39 @@ describe("AI_CBM_FocusEnergy (data/battle_ai_scripts.s:382-384, EFFECT_FOCUS_ENE
   });
 });
 
+describe("AI_CBM_Refresh (data/battle_ai_scripts.s:563-565, EFFECT_REFRESH)", () => {
+  const MOVE_REFRESH = 287;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("AI with a curable status FALLS THROUGH to end at zero", () => {
+    const result = run(
+      MOVE_REFRESH,
+      target(),
+      undefined,
+      { atkStage: 6, defStage: 6, hasCurableStatus: true },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("AI without a curable status JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_REFRESH, target(), undefined, { atkStage: 6, defStage: 6 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+});
+
 describe("AI_CBM_OneHitKO (data/battle_ai_scripts.s:358-362, EFFECT_OHKO)", () => {
   const MOVE_GUILLOTINE = 12; // EFFECT_OHKO, TYPE_NORMAL, power 1
   const MOVE_SHEER_COLD = 329; // EFFECT_OHKO, TYPE_ICE, power 1
