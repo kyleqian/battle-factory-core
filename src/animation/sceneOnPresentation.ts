@@ -482,6 +482,10 @@ import {
   type CounterState,
 } from "./counter.ts";
 import {
+  crabHammerAtAge,
+  type CrabHammerState,
+} from "./crabHammer.ts";
+import {
   doubleEdgeAtAge,
   type DoubleEdgeState,
 } from "./doubleEdge.ts";
@@ -2055,6 +2059,15 @@ export interface SceneOnCounterConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Typed staging seam only; a later draw case supplies the live target idle x2. */
+export interface SceneOnCrabHammerConfig {
+  readonly move: "CRABHAMMER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly targetIdleX2: number;
+}
+
 export interface SceneOnDoubleEdgeConfig {
   readonly move: "DOUBLE_EDGE";
   readonly attacker: SceneOnPresentationBattler;
@@ -2229,6 +2242,7 @@ export type SceneOnMoveConfig =
   | SceneOnSlashConfig
   | SceneOnLickConfig
   | SceneOnCounterConfig
+  | SceneOnCrabHammerConfig
   | SceneOnDoubleEdgeConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
@@ -2745,6 +2759,12 @@ export interface SceneOnLickView extends LickState {
 }
 
 export interface SceneOnCounterView extends CounterState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnCrabHammerView extends CrabHammerState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3385,6 +3405,7 @@ export function createSceneOnMovePresentation<
   | SceneOnSlashConfig
   | SceneOnLickConfig
   | SceneOnCounterConfig
+  | SceneOnCrabHammerConfig
   | SceneOnDoubleEdgeConfig
   | SceneOnWrapConfig,
 >(
@@ -5538,6 +5559,26 @@ export function sceneOnCounterView(
       attackerCenter: attacker.geometry.animationCenter,
       targetSide: target.geometry.side,
       targetCenter: target.geometry.animationCenter,
+    }),
+  };
+}
+
+export function sceneOnCrabHammerView(
+  state: SceneOnMovePresentationState,
+): SceneOnCrabHammerView {
+  if (state.config.move !== "CRABHAMMER") {
+    throw new Error(`expected CRABHAMMER presentation, got ${state.config.move}`);
+  }
+  const attacker = state.config.attacker;
+  const target = state.config.target;
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...crabHammerAtAge(state.age, {
+      targetSide: target.geometry.side,
+      targetCenter: target.geometry.animationCenter,
+      targetIdleX2: state.config.targetIdleX2,
     }),
   };
 }
