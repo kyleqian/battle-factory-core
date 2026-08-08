@@ -4928,3 +4928,69 @@ describe("AI_CV_Rest (EFFECT_REST, docs/executable-frontier-census.md 49 weighte
     expect(gateFall.draws[1]).toMatchObject({ kind: "rest-tail-roll", succeeded: true });
   });
 });
+
+describe("AI_CV_Absorb (EFFECT_ABSORB, docs/executable-frontier-census.md 43 weighted)", () => {
+  const MOVE_ABSORB = 71;
+
+  const EXTRAS = Object.freeze({
+    speed: 100,
+    speedStage: 6,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0,
+    evasionStage: 6,
+    accStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+    hp: 100,
+    maxHp: 100,
+  });
+  const GRASS_ATTACKER = Object.freeze({ types: ["TYPE_GRASS", "TYPE_NORMAL"], ...EXTRAS });
+
+  function absorbRun(rngValue: number, targetTypes: readonly [string, string]) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_ABSORB,
+      attacker: GRASS_ATTACKER,
+      target: { ...EXTRAS, types: targetTypes },
+      drawOrdinalStart: 1,
+      reasonPrefix: "absorb",
+    });
+  }
+
+  it("neutral 1x target: deterministic zero score, zero draws", () => {
+    const rng = { value: 1, calls: 0 };
+    const result = runCheckViability({
+      rng,
+      moveId: MOVE_ABSORB,
+      attacker: GRASS_ATTACKER,
+      target: { ...EXTRAS, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const },
+      drawOrdinalStart: 1,
+      reasonPrefix: "absorb",
+    });
+    expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: 0 });
+  });
+
+  it("super effective 2x target (Water): deterministic zero score, zero draws", () => {
+    const result = absorbRun(1, ["TYPE_WATER", "TYPE_NORMAL"]);
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("0.5x target (Fire): the roll's FALL-THROUGH applies -3", () => {
+    // seed 1 -> low byte 198 (>= 50, FALL-THROUGH to -3).
+    const result = absorbRun(1, ["TYPE_FIRE", "TYPE_NORMAL"]);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "absorb-roll", succeeded: true });
+  });
+
+  it("0.5x target (Fire): the roll's JUMP ends at zero", () => {
+    // seed 4 -> low byte 25 (< 50, JUMP to End).
+    const result = absorbRun(4, ["TYPE_FIRE", "TYPE_NORMAL"]);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "absorb-roll", succeeded: false });
+  });
+});

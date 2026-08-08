@@ -424,6 +424,16 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "absorb-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind:
       | "counter-low-hp-roll"
       | "counter-mid-hp-roll"
@@ -1183,6 +1193,53 @@ function runCvRest(input: Readonly<{
   const jumped = roll.randomValue % 256 < 70;
   draws.push(Object.freeze({ ...roll, kind: "rest-roll-1" as const, succeeded: !jumped }));
   return jumped ? tail() : Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
+}
+
+/**
+ * `AI_CV_Absorb` (`data/battle_ai_scripts.s:789-797`, EFFECT_ABSORB):
+ *
+ * ```
+ * AI_CV_Absorb:
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_5, AI_CV_AbsorbEncourageMaybe
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_25, AI_CV_AbsorbEncourageMaybe
+ *     goto AI_CV_Absorb_End
+ * AI_CV_AbsorbEncourageMaybe:
+ *     if_random_less_than 50, AI_CV_Absorb_End
+ *     score -3
+ * AI_CV_Absorb_End:
+ *     end
+ * ```
+ *
+ * Exactly 0.5x or 0.25x type effectiveness against the target JUMPs into the
+ * single random site; everything else (immune 0x, neutral 1x, super 2x/4x,
+ * or a STAB'd one-weak-one-resist wash) is a deterministic zero score with
+ * zero draws (`goto End`). At the random site the roll's JUMP (low byte < 50,
+ * ~20%) ends at zero; FALL-THROUGH (>= 50, ~80%) applies -3 -- Absorb's "the
+ * heal probably won't cover the damage" penalty. The effectiveness probe is
+ * the SAME `Cmd_if_type_effectiveness` port (`classifyHighCritEffectiveness`)
+ * `AI_CV_HighCrit` already uses (this handler checks only the two weak
+ * classes, in the source's own x0_5-first order). No command writes
+ * funcResult.
+ */
+function runCvAbsorb(input: Readonly<{
+  rng: BattleRngState;
+  attackerTypes: readonly [string, string];
+  moveType: string;
+  targetTypes: readonly [string, string];
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  if (classified !== AI_EFFECTIVENESS_X0_5 && classified !== AI_EFFECTIVENESS_X0_25) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
+  }
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-absorb-roll`);
+  const succeeded = roll.randomValue % 256 >= 50;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind: "absorb-roll" as const, succeeded })]),
+    scoreDelta: succeeded ? -3 : 0,
+  });
 }
 
 /**
@@ -3605,6 +3662,24 @@ export function runCheckViability(input: Readonly<{
       rng: rest.rng,
       draws: rest.draws,
       scoreDelta: rest.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_ABSORB") {
+    const absorb = runCvAbsorb({
+      rng: input.rng,
+      attackerTypes: input.attacker.types,
+      moveType: move.type,
+      targetTypes: input.target.types,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: absorb.rng,
+      draws: absorb.draws,
+      scoreDelta: absorb.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }
