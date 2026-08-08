@@ -9219,30 +9219,12 @@ function runCvSpitUp(input: Readonly<{
   });
 }
 
-/** `AI_CV_MirrorMove_EncouragedMovesToMirror` (data/battle_ai_scripts.s:854-894) as move names. */
-const AI_CV_MIRROR_MOVE_ENCOURAGED_NAMES: ReadonlySet<string> = new Set([
-  "MOVE_SLEEP_POWDER", "MOVE_LOVELY_KISS", "MOVE_SPORE", "MOVE_HYPNOSIS",
-  "MOVE_SING", "MOVE_GRASS_WHISTLE", "MOVE_SHADOW_PUNCH", "MOVE_SAND_ATTACK",
-  "MOVE_SMOKESCREEN", "MOVE_TOXIC", "MOVE_GUILLOTINE", "MOVE_HORN_DRILL",
-  "MOVE_FISSURE", "MOVE_SHEER_COLD", "MOVE_CROSS_CHOP", "MOVE_AEROBLAST",
-  "MOVE_CONFUSE_RAY", "MOVE_SWEET_KISS", "MOVE_SCREECH", "MOVE_COTTON_SPORE",
-  "MOVE_SCARY_FACE", "MOVE_FAKE_TEARS", "MOVE_METAL_SOUND", "MOVE_THUNDER_WAVE",
-  "MOVE_GLARE", "MOVE_POISON_POWDER", "MOVE_SHADOW_BALL", "MOVE_DYNAMIC_PUNCH",
-  "MOVE_HYPER_BEAM", "MOVE_EXTREME_SPEED", "MOVE_THIEF", "MOVE_COVET",
-  "MOVE_ATTRACT", "MOVE_SWAGGER", "MOVE_TORMENT", "MOVE_FLATTER", "MOVE_TRICK",
-  "MOVE_SUPERPOWER", "MOVE_SKILL_SWAP",
+/** `AI_CV_MirrorMove_EncouragedMovesToMirror` (data/battle_ai_scripts.s:854-894) as move ids. */
+const AI_CV_MIRROR_MOVE_ENCOURAGED: ReadonlySet<number> = new Set([
+  79, 142, 147, 95, 47, 320, 325, 28, 108, 92, 12, 32, 90, 329, 238, 177,
+  109, 186, 103, 178, 184, 313, 319, 86, 137, 77, 247, 223, 63, 245, 168,
+  343, 213, 207, 259, 260, 271, 276, 285,
 ]);
-let AI_CV_MIRROR_MOVE_ENCOURAGED_IDS: ReadonlySet<number> | null = null;
-function mirrorMoveEncouragedIds(): ReadonlySet<number> {
-  if (!AI_CV_MIRROR_MOVE_ENCOURAGED_IDS) {
-    const ids = new Set<number>();
-    for (const row of MOVES_BY_ID.values()) {
-      if (AI_CV_MIRROR_MOVE_ENCOURAGED_NAMES.has(row.move)) ids.add(row.id);
-    }
-    AI_CV_MIRROR_MOVE_ENCOURAGED_IDS = ids;
-  }
-  return AI_CV_MIRROR_MOVE_ENCOURAGED_IDS;
-}
 
 /**
  * `AI_CV_MirrorMove` (`data/battle_ai_scripts.s:838-894`, EFFECT_MIRROR_MOVE):
@@ -9299,7 +9281,7 @@ function runCvMirrorMove(input: Readonly<{
 
   const lastMoveId = input.target.lastUsedMoveId ?? 0;
   const funcResultAfter = lastMoveId <= 3 ? lastMoveId as AiWeatherValue : undefined;
-  const encouraged = mirrorMoveEncouragedIds().has(lastMoveId);
+  const encouraged = AI_CV_MIRROR_MOVE_ENCOURAGED.has(lastMoveId);
 
   if (strikesFirst !== 1 && encouraged) {
     // Not target faster and last move encouraged: <128 roll, +2 on fall-through.
