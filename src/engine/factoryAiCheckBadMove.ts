@@ -2383,6 +2383,20 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_DISABLE -> AI_CBM_Disable
+  // (`data/battle_ai_scripts.s:153,418-420`): a single
+  // `if_any_move_disabled AI_TARGET, Score_Minus8` -- Disable is penalized
+  // when the target already has any move disabled
+  // (`gDisableStructs[].disabledMove != MOVE_NONE`).
+  if (move.effect === "EFFECT_DISABLE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmDisable(target.anyMoveDisabled ?? false),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -3209,4 +3223,14 @@ function runCbmHaze(attacker: FactoryAiCheckBadMoveAttacker, target: FactoryAiCh
  */
 function runCbmMist(attackerMistUp: boolean): number {
   return attackerMistUp ? -8 : 0;
+}
+
+/**
+ * `AI_CBM_Disable` (`data/battle_ai_scripts.s:418-420`, EFFECT_DISABLE): a
+ * single `if_any_move_disabled AI_TARGET, Score_Minus8` -- Disable is
+ * penalized when the target already has any move disabled
+ * (`gDisableStructs[].disabledMove != MOVE_NONE`). Zero ability/type reads.
+ */
+function runCbmDisable(targetAnyMoveDisabled: boolean): number {
+  return targetAnyMoveDisabled ? -8 : 0;
 }

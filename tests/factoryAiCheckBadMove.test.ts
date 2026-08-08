@@ -4272,3 +4272,39 @@ describe("AI_CBM_Mist (data/battle_ai_scripts.s:378-380, EFFECT_MIST)", () => {
     expect(result.draws).toHaveLength(0);
   });
 });
+
+describe("AI_CBM_Disable (data/battle_ai_scripts.s:418-420, EFFECT_DISABLE)", () => {
+  const MOVE_DISABLE = 50; // EFFECT_DISABLE, TYPE_NORMAL, power 0
+
+  function disableTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("target already has any move disabled JUMPs to Score_Minus8", () => {
+    const result = run(MOVE_DISABLE, disableTarget({ anyMoveDisabled: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8, draws: [] });
+  });
+
+  it("target has no disabled move FALLS THROUGH to end at zero", () => {
+    expect(run(MOVE_DISABLE, disableTarget())).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("zero-draw: no ability read anywhere (single-ability target means no soundproof guess either)", () => {
+    const result = run(MOVE_DISABLE, disableTarget({ knownAbility: null }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+});
