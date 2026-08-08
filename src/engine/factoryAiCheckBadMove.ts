@@ -2411,6 +2411,23 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_ATTRACT -> AI_CBM_Attract
+  // (`data/battle_ai_scripts.s:170,456-476`): target already infatuated
+  // JUMPs to -10; one fresh target ability read (Oblivious -> -10); then the
+  // user/target gender gates -- a male user needs a female target, a female
+  // user a male target, and a genderless (or unmodeled) user falls through
+  // to Score_Minus10.
+  if (move.effect === "EFFECT_ATTRACT") {
+    const attract = runCbmAttract(input.attacker, target, rng, ordinal, `${input.reasonPrefix}-attract`);
+    for (const draw of attract.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: attract.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: attract.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -3257,4 +3274,66 @@ function runCbmDisable(targetAnyMoveDisabled: boolean): number {
  */
 function runCbmEncore(targetAnyMoveEncored: boolean): number {
   return targetAnyMoveEncored ? -8 : 0;
+}
+
+/**
+ * `AI_CBM_Attract` (`data/battle_ai_scripts.s:456-476`, EFFECT_ATTRACT):
+ *
+ * ```
+ * AI_CBM_Attract:
+ *     if_status2 AI_TARGET, STATUS2_INFATUATION, Score_Minus10
+ *     get_ability AI_TARGET
+ *     if_equal ABILITY_OBLIVIOUS, Score_Minus10
+ *     get_gender AI_USER
+ *     if_equal MON_MALE, AI_CBM_Attract_CheckIfTargetIsFemale
+ *     if_equal MON_FEMALE, AI_CBM_Attract_CheckIfTargetIsMale
+ *     goto Score_Minus10
+ * AI_CBM_Attract_CheckIfTargetIsFemale:
+ *     get_gender AI_TARGET
+ *     if_equal MON_FEMALE, AI_CBM_Attract_End
+ *     goto Score_Minus10
+ * AI_CBM_Attract_CheckIfTargetIsMale:
+ *     get_gender AI_TARGET
+ *     if_equal MON_MALE, AI_CBM_Attract_End
+ *     goto Score_Minus10
+ * AI_CBM_Attract_End:
+ *     end
+ * ```
+ *
+ * The ability read comes after the infatuation gate and is a genuine fresh
+ * `get_ability` draw (same machinery as `AI_CBM_Sleep`). The two
+ * `get_gender` reads are direct field reads
+ * (`GetGenderFromSpeciesAndPersonality`, `battle_ai_script_commands.c:2088-2099`),
+ * zero RNG. Gender gates: an infatuated target, an Oblivious target, a
+ * `MON_GENDERLESS` (or unmodeled/`undefined`) user -- the source's own
+ * `goto Score_Minus10` fallthrough when the user matches neither MON_MALE nor
+ * MON_FEMALE -- and a gendered-mismatch pairing (male user vs non-female
+ * target, female user vs non-male target) all score -10.
+ */
+const ABILITY_OBLIVIOUS = "ABILITY_OBLIVIOUS";
+
+function runCbmAttract(
+  attacker: FactoryAiCheckBadMoveAttacker,
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckBadMoveDraw[]; scoreDelta: number }> {
+  if (target.isInfatuated ?? false) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
+  }
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
+  const draws = ability.draw === null ? [] : [ability.draw];
+  if (ability.ability === ABILITY_OBLIVIOUS) {
+    return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta: -10 });
+  }
+  if (attacker.gender === "MON_MALE") {
+    const scoreDelta = target.gender === "MON_FEMALE" ? 0 : -10;
+    return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta });
+  }
+  if (attacker.gender === "MON_FEMALE") {
+    const scoreDelta = target.gender === "MON_MALE" ? 0 : -10;
+    return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta });
+  }
+  return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta: -10 });
 }

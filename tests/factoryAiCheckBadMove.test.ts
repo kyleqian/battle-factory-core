@@ -4344,3 +4344,85 @@ describe("AI_CBM_Encore (data/battle_ai_scripts.s:422-424, EFFECT_ENCORE)", () =
     expect(result.draws).toHaveLength(0);
   });
 });
+
+describe("AI_CBM_Attract (data/battle_ai_scripts.s:456-476, EFFECT_ATTRACT)", () => {
+  const MOVE_ATTRACT = 213; // EFFECT_ATTRACT, TYPE_NORMAL, power 0
+
+  function attractTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  function attractAttacker(
+    overrides: Partial<FactoryAiCheckBadMoveAttacker> = {},
+  ): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ ...NEUTRAL_ATTACKER, ...overrides });
+  }
+
+  it("target already infatuated JUMPs to Score_Minus10 before the ability read", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({ isInfatuated: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("target's known ability Oblivious JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({
+      knownAbility: "ABILITY_OBLIVIOUS",
+      realAbility: "ABILITY_OBLIVIOUS",
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("a male user against a female target FALLS THROUGH to end at zero", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({ gender: "MON_FEMALE" }), undefined, attractAttacker({ gender: "MON_MALE" }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("a female user against a male target FALLS THROUGH to end at zero", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({ gender: "MON_MALE" }), undefined, attractAttacker({ gender: "MON_FEMALE" }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("a male user against a male target JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({ gender: "MON_MALE" }), undefined, attractAttacker({ gender: "MON_MALE" }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("a genderless (MON_GENDERLESS) user falls through to Score_Minus10, never treated as male or female", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({ gender: "MON_FEMALE" }), undefined, attractAttacker({ gender: "MON_GENDERLESS" }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("an unmodeled (undefined) user gender scores -10 exactly like MON_GENDERLESS", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({ gender: "MON_FEMALE" }), undefined, attractAttacker());
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("an ambiguous two-ability target draws once (the handler's own ability read) for the gender gates", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({
+      species: 171, // SPECIES_LANTURN: Volt Absorb / Water Absorb, both unobserved
+      types: ["TYPE_WATER", "TYPE_ELECTRIC"],
+      knownAbility: null,
+      gender: "MON_FEMALE",
+    }), undefined, attractAttacker({ gender: "MON_MALE" }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    // Universal preamble soundproof guess + the handler's own ability read.
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-attract-ability",
+    ]);
+  });
+});
