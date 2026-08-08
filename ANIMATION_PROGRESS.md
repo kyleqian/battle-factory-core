@@ -115,6 +115,25 @@
   extracted — no asset work at all. No boundary widening, no new
   unsupported-branch barrier, no shared-helper edit; the only engine contact
   will be the promotion round's draw case.
+- **Notes — stretch items 4-5 landed early.** `src/animation/counter.ts`
+  (RAM-truth reducer at the RAM ages above) + `tests/animation/counter.test.ts`
+  (9 pins, incl. the shared-helper reuse pins asserting the slides equal
+  `slideMonToOffsetAtTick(..., 0..3)` and the shake equals
+  `shakeMonOffsetAtTick(5, 0, 25, 1, age - 33)` for every age 34..82) are
+  committed and exhaustively verified against the probe: **0 mismatches across
+  all 88 frames x 2 orientations** for attacker x2/y2, target x2, and fist/
+  hitsplat counts. The `SceneOnCounterConfig`/View seam in
+  `sceneOnPresentation.ts` follows `SceneOnCrunchConfig`/`sceneOnCrunchView`
+  exactly, plus HITMONTOP added to the presentation species union (no draw case —
+  that is the promotion round's job). The two measured correction points the
+  Tier-1 pins lock in: the elliptical lunge's negated-width floor is
+  `-sin(phase,18) = -7` at phase 16 (not -6 — C and JS `>>` both floor toward
+  -inf), and the fist sprites' `WaitAnimForDuration` keeps the final data[0]=0
+  frame one extra age (9-age lifetime, so the fists OVERLAP like the hitsplats).
+  Remaining for promotion: the draw case in `battleScene.ts` (must split the
+  display latch — two-age lunge, one-age shake, one-age slides), a
+  `counterPortable.ts`, the fixtures, the coverage entry and the inventory pin
+  129->130 exact / 147->146 unsupported.
 - **Notes — the orientation-shift trap did NOT bite: measured, not inherited.**
   COUNTER came out at opponent-front = player-back **+0** on every frame (both
   windows 207..294, all RAM events and all change-map events frame-aligned),

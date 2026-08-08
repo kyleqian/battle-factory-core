@@ -478,6 +478,10 @@ import {
   type LickState,
 } from "./lick.ts";
 import {
+  counterAtAge,
+  type CounterState,
+} from "./counter.ts";
+import {
   poisonTailAtAge,
   type PoisonTailState,
 } from "./poisonTail.ts";
@@ -719,6 +723,7 @@ export interface SceneOnPresentationBattler {
     | "SHUCKLE"
     | "GLALIE"
     | "HITMONCHAN"
+    | "HITMONTOP"
     | "SPINDA"
     | "LINOONE"
     | "DELCATTY"
@@ -2039,6 +2044,13 @@ export interface SceneOnLickConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnCounterConfig {
+  readonly move: "COUNTER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSingConfig {
   readonly move: "SING";
   readonly attacker: SceneOnPresentationBattler;
@@ -2205,6 +2217,7 @@ export type SceneOnMoveConfig =
   | SceneOnCrunchConfig
   | SceneOnSlashConfig
   | SceneOnLickConfig
+  | SceneOnCounterConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
@@ -2714,6 +2727,12 @@ export interface SceneOnSlashView extends SlashState {
 }
 
 export interface SceneOnLickView extends LickState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnCounterView extends CounterState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3347,6 +3366,7 @@ export function createSceneOnMovePresentation<
   | SceneOnCrunchConfig
   | SceneOnSlashConfig
   | SceneOnLickConfig
+  | SceneOnCounterConfig
   | SceneOnWrapConfig,
 >(
   config: TConfig,
@@ -5476,6 +5496,27 @@ export function sceneOnLickView(
     attacker,
     target,
     ...lickAtAge(state.age, {
+      targetSide: target.geometry.side,
+      targetCenter: target.geometry.animationCenter,
+    }),
+  };
+}
+
+export function sceneOnCounterView(
+  state: SceneOnMovePresentationState,
+): SceneOnCounterView {
+  if (state.config.move !== "COUNTER") {
+    throw new Error(`expected COUNTER presentation, got ${state.config.move}`);
+  }
+  const attacker = state.config.attacker;
+  const target = state.config.target;
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...counterAtAge(state.age, {
+      attackerSide: attacker.geometry.side,
+      attackerCenter: attacker.geometry.animationCenter,
       targetSide: target.geometry.side,
       targetCenter: target.geometry.animationCenter,
     }),
