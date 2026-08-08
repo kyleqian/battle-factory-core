@@ -164,7 +164,8 @@ describe("Move_TAKE_DOWN source-relative reducer", () => {
     const at = (age: number) => takeDownAtAge(age, geo("player"));
     expect(at(TARGET_PUSH_FIRST_STEP_AGE - 1).slideToOffsetCount).toBe(0);
     expect(at(TARGET_PUSH_FIRST_STEP_AGE).slideToOffsetCount).toBe(1);
-    expect(at(TARGET_PUSH_FIRST_STEP_AGE + 4).slideToOffsetCount).toBe(0);
+    expect(at(TARGET_PUSH_FIRST_STEP_AGE + 4).slideToOffsetCount).toBe(1);
+    expect(at(TARGET_PUSH_FIRST_STEP_AGE + 5).slideToOffsetCount).toBe(0);
     expect(at(SLIDE_BACK_ATTACKER_AGE - 1).slideToOriginalCount).toBe(0);
     expect(at(SLIDE_BACK_ATTACKER_AGE).slideToOriginalCount).toBe(1);
     expect(at(SLIDE_BACK_TARGET_AGE).slideToOriginalCount).toBe(1);

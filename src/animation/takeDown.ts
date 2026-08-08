@@ -184,7 +184,7 @@ export function takeDownAtAge(
     attackerY2,
     targetX2,
     windUpActive: age >= WIND_UP_FIRST_STEP_AGE && age < 50,
-    slideToOffsetCount: age >= TARGET_PUSH_FIRST_STEP_AGE && age < TARGET_PUSH_FIRST_STEP_AGE + 4 ? 1 : 0,
+    slideToOffsetCount: age >= TARGET_PUSH_FIRST_STEP_AGE && age < TARGET_PUSH_FIRST_STEP_AGE + 5 ? 1 : 0,
     slideToOriginalCount:
       (age >= SLIDE_BACK_ATTACKER_AGE && age < SLIDE_BACK_ATTACKER_AGE + 5 ? 1 : 0)
       + (age >= SLIDE_BACK_TARGET_AGE && age < SLIDE_BACK_TARGET_AGE + 7 ? 1 : 0),
