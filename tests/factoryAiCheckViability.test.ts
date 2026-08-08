@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { runCheckViability, runCvAccuracyUp } from "../src/engine/factoryAiCheckViability.ts";
+import { runCheckViability, runCvAccuracyUp, runCvSpAtkDown } from "../src/engine/factoryAiCheckViability.ts";
 import { MOVES_BY_ID } from "../src/engine/factoryAiCheckBadMove.ts";
 
 const MOVE_SURF = 57; // EFFECT_HIT -- no if_effect table entry
@@ -7746,5 +7746,61 @@ describe("AI_CV_MirrorMove (data/battle_ai_scripts.s:838-894, EFFECT_MIRROR_MOVE
     const result = mirrorRun(1, 80, 120, MOVE_TOXIC_TEST);
     if (result.kind !== "scored") throw new Error("unreachable");
     expect(result.draws[0]).toMatchObject({ kind: "mirror-move-roll-2" });
+  });
+});
+
+describe("AI_CV_SpAtkDown (data/battle_ai_scripts.s:1153-1184, EFFECT_SPECIAL_ATTACK_DOWN/_2)", () => {
+  // EFFECT_SPECIAL_ATTACK_DOWN (21) and EFFECT_SPECIAL_ATTACK_DOWN_2 (61) are
+  // vestigial in Gen 3 -- no move in gMovesInfo carries either effect -- so
+  // the handler is dispatch-reachable only and is receipt-pinned directly
+  // through its exported entry point (the same convention as runCvAccuracyUp).
+  const SPECIAL_TYPES = ["TYPE_FIRE", "TYPE_NORMAL"] as const;
+  function spAtkDownRun(
+    rngValue: number,
+    targetOverrides: Record<string, unknown> = {},
+    attackerOverrides: Record<string, unknown> = {},
+  ) {
+    return runCvSpAtkDown({
+      rng: { value: rngValue, calls: 0 },
+      attackerHp: 100,
+      attackerMaxHp: 100,
+      targetAtkStage: 6,
+      targetSpAtkStage: 6,
+      targetHp: 100,
+      targetMaxHp: 100,
+      targetTypes: SPECIAL_TYPES,
+      drawOrdinalStart: 1,
+      reasonPrefix: "spatk",
+      ...attackerOverrides,
+      ...targetOverrides,
+    });
+  }
+
+  it("special-type target, all stages neutral: zero, no draws, funcResult=type1 (Fire id 8 -> undefined)", () => {
+    const result = spAtkDownRun(1);
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [] });
+    expect(result.funcResultAfter).toBeUndefined();
+  });
+
+  it("target ATK stage off DEFAULT with user HP <= 90: -1 -1, then roll-1 when SPATK <= 3", () => {
+    const result = spAtkDownRun(1, { targetAtkStage: 5, targetSpAtkStage: 2, targetHp: 100 });
+    // attacker HP 100 (not <= 90, no second -1); seed 1 roll-1 succeeded -> -2;
+    // Fire/Normal are special types so the type gate ends early, target HP > 70 no -2.
+    expect(result.scoreDelta).toBe(-1 - 2);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "sp-atk-down-roll-1", succeeded: true });
+  });
+
+  it("target HP <= 70 applies the shared -2 on top", () => {
+    const result = spAtkDownRun(1, { targetAtkStage: 5, targetSpAtkStage: 2, targetHp: 70 });
+    expect(result.scoreDelta).toBe(-1 - 2 - 2);
+  });
+
+  it("non-special target types run roll-2; roll >= 50 applies -2", () => {
+    const result = spAtkDownRun(1, { targetTypes: ["TYPE_NORMAL", "TYPE_NORMAL"] });
+    // target atk default: score stays 0 through gates, then roll-2 succeeded -> -2.
+    expect(result.scoreDelta).toBe(-2);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "sp-atk-down-roll-2", succeeded: true });
   });
 });

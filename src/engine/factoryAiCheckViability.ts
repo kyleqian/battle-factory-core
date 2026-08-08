@@ -1084,6 +1084,16 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "sp-atk-down-roll-1" | "sp-atk-down-roll-2";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind: "get-ability";
     before: BattleRngState;
     after: BattleRngState;
@@ -6740,6 +6750,31 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_SPECIAL_ATTACK_DOWN" || move.effect === "EFFECT_SPECIAL_ATTACK_DOWN_2") {
+    // AI_CV_SpAtkDown (data/battle_ai_scripts.s:1153-1184). Both effects are
+    // vestigial in Gen 3 (no move carries them), so this is dispatch-reachable
+    // only; receipt-pinned via the exported runCvSpAtkDown entry point.
+    const spAtkDown = runCvSpAtkDown({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      targetAtkStage: input.target.atkStage,
+      targetSpAtkStage: input.target.spAtkStage ?? DEFAULT_STAT_STAGE,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+      targetTypes: input.target.types,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: spAtkDown.rng,
+      draws: spAtkDown.draws,
+      scoreDelta: spAtkDown.scoreDelta,
+      funcResultAfter: spAtkDown.funcResultAfter,
+    });
+  }
+
   if (move.effect === "EFFECT_MIRROR_MOVE") {
     // AI_CV_MirrorMove (data/battle_ai_scripts.s:838-894).
     const mirrorMove = runCvMirrorMove({
@@ -9258,4 +9293,74 @@ function runCvMirrorMove(input: Readonly<{
     scoreDelta: jumped ? 0 : -1,
     funcResultAfter,
   });
+}
+
+/** `AI_CV_SpAtkDown_SpecialTypeList` (data/battle_ai_scripts.s:1175-1184). */
+const AI_CV_SP_ATK_DOWN_SPECIAL_TYPES: ReadonlySet<string> = new Set([
+  "TYPE_FIRE", "TYPE_WATER", "TYPE_GRASS", "TYPE_ELECTRIC",
+  "TYPE_PSYCHIC", "TYPE_ICE", "TYPE_DRAGON", "TYPE_DARK",
+]);
+
+/**
+ * `AI_CV_SpAtkDown` (`data/battle_ai_scripts.s:1153-1184`, EFFECT_SPECIAL_
+ * ATTACK_DOWN/_2 -- both vestigial in Gen 3, no move carries either effect).
+ * `AI_CV_AttackDown`'s twin with STAT_SPATK in the stage-`>3` gate and the
+ * 8-type special list; the first `STAT_ATK == DEFAULT` gate is byte-for-byte
+ * AttackDown's own. The two `<50` rolls, the shared `-1/-2/-2` ladder, and
+ * the target-type chain write (`get_target_type1/2`) all match
+ * `runCvAttackDown`; only the compared stat and the list differ.
+ */
+export function runCvSpAtkDown(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  targetAtkStage: number;
+  targetSpAtkStage: number;
+  targetHp: number;
+  targetMaxHp: number;
+  targetTypes: readonly [string, string];
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  let score = 0;
+
+  if (input.targetAtkStage !== DEFAULT_STAT_STAGE) {
+    score -= 1;
+    const attackerHpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+    if (attackerHpPercent <= 90) {
+      score -= 1;
+    }
+    if (input.targetSpAtkStage <= 3) {
+      const draw1 = nextDraw(rng, ordinal, `${input.reasonPrefix}-sp-atk-down-roll-1`);
+      rng = draw1.after;
+      ordinal += 1;
+      const succeeded1 = draw1.randomValue % 256 >= 50;
+      draws.push(Object.freeze({ ...draw1, kind: "sp-atk-down-roll-1" as const, succeeded: succeeded1 }));
+      if (succeeded1) score -= 2;
+    }
+  }
+
+  const targetHpPercent = Math.floor((100 * input.targetHp) / input.targetMaxHp);
+  if (targetHpPercent <= 70) {
+    score -= 2;
+  }
+
+  // Gates E/F always execute (AI_CV_SpAtkDown4 is reached unconditionally).
+  const funcResultAfter = typeChainFuncResultAfter(input.targetTypes, AI_CV_SP_ATK_DOWN_SPECIAL_TYPES);
+  const isSpecialType = AI_CV_SP_ATK_DOWN_SPECIAL_TYPES.has(input.targetTypes[0])
+    || AI_CV_SP_ATK_DOWN_SPECIAL_TYPES.has(input.targetTypes[1]);
+  if (isSpecialType) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+  }
+
+  const draw2 = nextDraw(rng, ordinal, `${input.reasonPrefix}-sp-atk-down-roll-2`);
+  rng = draw2.after;
+  const succeeded2 = draw2.randomValue % 256 >= 50;
+  draws.push(Object.freeze({ ...draw2, kind: "sp-atk-down-roll-2" as const, succeeded: succeeded2 }));
+  if (succeeded2) score -= 2;
+
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
 }
