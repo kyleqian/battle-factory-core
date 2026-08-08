@@ -310,6 +310,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) !== 0
         ? { isInfatuated: true }
         : {}),
+      ...((input.rulesContext.sideStatuses[1] & SIDE_STATUS_SAFEGUARD) !== 0
+        ? { safeguardUp: true }
+        : {}),
       ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) !== 0
         ? { isLeechSeeded: true }
         : {}),

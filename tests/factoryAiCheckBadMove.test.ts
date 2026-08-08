@@ -2920,3 +2920,45 @@ describe("AI_CBM_TrickAndKnockOff (data/battle_ai_scripts.s:545-548, EFFECT_KNOC
     expect(run(MOVE_TRICK, target())).toMatchObject({ kind: "scored", scoreDelta: 0 });
   });
 });
+
+describe("AI_CBM_Safeguard (data/battle_ai_scripts.s:478-480, EFFECT_SAFEGUARD)", () => {
+  const MOVE_SAFEGUARD = 219;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  function attacker(overrides: Partial<FactoryAiCheckBadMoveAttacker> = {}): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ ...NEUTRAL_ATTACKER, ...overrides });
+  }
+
+  it("AI's own Safeguard bit up JUMPs to Score_Minus8", () => {
+    const result = run(MOVE_SAFEGUARD, target(), undefined, attacker({ safeguardUp: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8, draws: [] });
+  });
+
+  it("no Safeguard on AI's own side FALLS THROUGH to end at zero", () => {
+    expect(run(MOVE_SAFEGUARD, target(), undefined, attacker())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+
+  it("zero-draw: no ability read anywhere (MOVE_POWER_OTHER skips the preamble's type reads)", () => {
+    const result = run(MOVE_SAFEGUARD, target({ knownAbility: null }), undefined, attacker());
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0); // species 213 has a single ability -- no soundproof guess draw
+  });
+});

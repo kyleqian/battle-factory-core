@@ -103,7 +103,11 @@
  * ordinary-move control path; and `EFFECT_KNOCK_OFF`/`EFFECT_TRICK` ->
  * `AI_CBM_TrickAndKnockOff` (`:545-548`, `runCbmTrickAndKnockOff` below) --
  * one fresh target ability read, single Sticky Hold rejection gate, the same
- * shape as `AI_CBM_Sleep`'s ability gate but with no status/Safeguard tail.
+ * shape as `AI_CBM_Sleep`'s ability gate but with no status/Safeguard tail;
+ * and `EFFECT_SAFEGUARD` -> `AI_CBM_Safeguard` (`:478-480`,
+ * `runCbmSafeguard` below), a bare `if_side_affecting AI_USER,
+ * SIDE_STATUS_SAFEGUARD, Score_Minus8` reading only the AI's own side -- the
+ * same shape as `AI_CBM_LightScreen`/Reflect (doc §23.1).
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -380,6 +384,13 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * `battleScriptRulesContext.ts`.
    */
   isFirstTurn?: number;
+  /**
+   * Whether AI_USER's OWN side has `SIDE_STATUS_SAFEGUARD` --
+   * `AI_CBM_Safeguard`'s single `if_side_affecting AI_USER,
+   * SIDE_STATUS_SAFEGUARD` gate (EFFECT_SAFEGUARD). Optional, defaulting to
+   * `false`, same convention as `lightScreenUp`/`reflectUp` above.
+   */
+  safeguardUp?: boolean;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -1673,6 +1684,18 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_SAFEGUARD -> AI_CBM_Safeguard
+  // (`data/battle_ai_scripts.s:174,478-480`): AI's own Safeguard bit rejects
+  // at -8, same bare shape as LightScreen/Reflect.
+  if (move.effect === "EFFECT_SAFEGUARD") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmSafeguard(input.attacker.safeguardUp ?? false),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -2056,4 +2079,15 @@ function runCbmTrickAndKnockOff(
     draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
     scoreDelta: ability.ability === ABILITY_STICKY_HOLD ? -10 : 0,
   });
+}
+
+/**
+ * `AI_CBM_Safeguard` (`data/battle_ai_scripts.s:478-480`, EFFECT_SAFEGUARD):
+ * a single `if_side_affecting AI_USER, SIDE_STATUS_SAFEGUARD, Score_Minus8`
+ * -- the same bare 2-instruction shape as `AI_CBM_LightScreen`/`AI_CBM_Reflect`
+ * (doc §23.1) with the AI's OWN Safeguard bit swapped in. Reads only AI_USER's
+ * own side; zero stat-stage/ability reads.
+ */
+function runCbmSafeguard(attackerSafeguardUp: boolean): number {
+  return attackerSafeguardUp ? -8 : 0;
 }

@@ -820,6 +820,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     currentWeather: view.attacker.currentWeather,
     level: view.attacker.level,
     isFirstTurn: view.attacker.isFirstTurn,
+    ...(view.attacker.safeguardUp === true ? { safeguardUp: true } : {}),
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [
