@@ -23,6 +23,7 @@ import {
   partySelectOpenMenuFadeBgY,
   partySelectOpenMenuFadeObjY,
   renderBattlePartySelect,
+  SUBMENU_OPEN_VISUAL_DELAY,
   type BattlePartySelectState,
   type PartySelectCloseRenderAssets,
 } from "../src/engine/battlePartySelect.ts";
@@ -461,7 +462,7 @@ describe("voluntary battle party selector", () => {
     // Settled: (141,140) is the 21x2 interior's white.
     expect(renderAt141({})).toEqual([255, 255, 255]);
     // Submenu open: (141,140) is the 16x2 frame's dark-purple bevel.
-    expect(renderAt141({ submenuOpen: true, submenuOpened: true })).toEqual([74, 74, 107]);
+    expect(renderAt141({ submenuOpen: true, submenuOpened: true, submenuOpenElapsed: SUBMENU_OPEN_VISUAL_DELAY })).toEqual([74, 74, 107]);
     // Close started (submenu window closed, message window still swapped).
     expect(renderAt141({ submenuOpen: false, closeElapsed: 0, submenuOpened: true })).toEqual([74, 74, 107]);
   });
@@ -476,7 +477,7 @@ describe("voluntary battle party selector", () => {
     // Settled: the CANCEL pokeball red is at (190,140).
     expect(ballAt({})).toEqual([181, 66, 0]);
     // Submenu open: the SEND OUT submenu window replaces the CANCEL button.
-    expect(ballAt({ submenuOpen: true, submenuOpened: true })).not.toEqual([181, 66, 0]);
+    expect(ballAt({ submenuOpen: true, submenuOpened: true, submenuOpenElapsed: SUBMENU_OPEN_VISUAL_DELAY })).not.toEqual([181, 66, 0]);
     // Close started: the submenu window closes and the CANCEL button returns.
     expect(ballAt({ submenuOpen: false, closeElapsed: 0, submenuOpened: true })).toEqual([181, 66, 0]);
   });
@@ -490,7 +491,7 @@ describe("voluntary battle party selector", () => {
     // The swapped message's tail ink matches the oracle's measured 164 px at
     // x100-121 y138-152 (docs/fade-layer-forensics.md §7(c)).
     const fb = createFramebuffer();
-    renderBattlePartySelect(fb, { ...liveSelector(), submenuOpen: true, submenuOpened: true });
+    renderBattlePartySelect(fb, { ...liveSelector(), submenuOpen: true, submenuOpened: true, submenuOpenElapsed: SUBMENU_OPEN_VISUAL_DELAY });
     let ink = 0;
     for (let y = 138; y <= 152; y += 1) for (let x = 100; x <= 121; x += 1) {
       const i = (y * 240 + x) * 4;

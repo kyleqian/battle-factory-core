@@ -126,6 +126,16 @@ export type BattlePartySelectState = Readonly<{
    * on the confirm edge.
    */
   submenuOpened: boolean;
+  /**
+   * Frames since the submenu first opened (0 on the A-press edge, then
+   * incrementing each tick while `submenuOpen`). The oracle pops the submenu
+   * window 3 frames after that edge (A-press 922-923, window + swapped message
+   * window land together at 926; docs/fade-layer-forensics.md §10(d)), so the
+   * render gates the action window + message-window swap on
+   * `>= SUBMENU_OPEN_VISUAL_DELAY` -- before that the pre-open state (wide
+   * "Choose a POKéMON." window + CANCEL button) is held.
+   */
+  submenuOpenElapsed: number;
   message: string | null;
   outcome:
     | null
@@ -390,6 +400,9 @@ export function battlePartySelectStateForForcedParty(
     submenuOpened:
       forced.submenuOpen
       && (forced.sendOutElapsed === null || forced.sendOutElapsed === 0),
+    // The forced route renders the submenu already-open (its own edge is not
+    // this lane's), so it always reads as past the open-delay window.
+    submenuOpenElapsed: forced.submenuOpen ? SUBMENU_OPEN_VISUAL_DELAY : 0,
     message: forced.message,
     outcome: null,
     elapsed: forced.elapsed,
@@ -417,6 +430,21 @@ function memberGender(species: number, personality: number): MonGender {
 function fail(message: string): never {
   throw new Error(`battle party select: ${message}`);
 }
+
+/**
+ * The oracle's in-battle party submenu pops 3 frames after the A-press that
+ * opens it: the press lands on fixture frames 922-923, yet frames 923-925
+ * still show the pre-open state (wide "Choose a POKéMON." window + CANCEL
+ * button) and the full SHIFT/SUMMARY/CANCEL window + swapped message window
+ * land together at frame 926, one-frame-pop, no animation
+ * (docs/fade-layer-forensics.md §10(d)). The app sets `submenuOpen` on the
+ * press edge (the state that renders frame 923), so the submenu visuals are
+ * gated on `submenuOpenElapsed >= SUBMENU_OPEN_VISUAL_DELAY` to hold the
+ * pre-open frame those 3 frames. Frames 926+ are byte-exact with the delay in
+ * place; the mon-icon +2 stall (`submenuOpened`) and the close edge are not
+ * part of this gate.
+ */
+export const SUBMENU_OPEN_VISUAL_DELAY = 3;
 
 /** Constructs the voluntary selector from the live party, never a faint anchor. */
 export function createBattlePartySelectState(
@@ -468,6 +496,7 @@ export function createBattlePartySelectState(
     rightColumnCursor: 1,
     submenuOpen: false,
     submenuOpened: false,
+    submenuOpenElapsed: 0,
     message: null,
     outcome: null,
     elapsed: 0,
@@ -515,6 +544,7 @@ export function advanceBattlePartySelect(
     elapsed: state.elapsed + 1,
     openElapsed: state.openElapsed + 1,
     closeElapsed: state.closeElapsed === null ? null : state.closeElapsed + 1,
+    submenuOpenElapsed: state.submenuOpen ? state.submenuOpenElapsed + 1 : 0,
   });
   if (state.outcome !== null) return next;
   if (state.message !== null) {
@@ -1100,6 +1130,30 @@ function drawCancelPokeball(fb: Uint8Array): void {
  * the message window + text, and the CANCEL window's background/interior/
  * frame/CANCEL-text (NOT its pokeball, which is an OBJ sprite).
  */
+/**
+ * The SHIFT/SUMMARY/CANCEL action window is visible only past the
+ * `SUBMENU_OPEN_VISUAL_DELAY` open hold (§10(d)) and through the confirm-tick
+ * frame (`closeElapsed` 0; the render drops it from closeElapsed 1, ISSUES #80
+ * close edge). During the 3-frame pre-open hold the oracle still shows the
+ * pre-open state -- wide "Choose a POKéMON." window + CANCEL button.
+ */
+function submenuWindowVisible(state: BattlePartySelectState): boolean {
+  return state.submenuOpen
+    && state.submenuOpenElapsed >= SUBMENU_OPEN_VISUAL_DELAY
+    && (state.closeElapsed === null || state.closeElapsed === 0);
+}
+
+/**
+ * The message window stays the wide "Choose a POKéMON." sDefaultPartyMsgWindowTemplate
+ * (21x2, frame to x182) through the submenu's 3-frame pre-open hold and only
+ * swaps to sDoWhatWithMonMsgWindowTemplate (16x2, frame to x141) together with
+ * the submenu window at the 926 pop edge; from the close it stays swapped.
+ */
+function messageWindowSwappedFor(state: BattlePartySelectState): boolean {
+  return (state.submenuOpen && submenuWindowVisible(state))
+    || state.closeElapsed !== null;
+}
+
 function drawPartySelectBgLayer(fb: Uint8Array, state: BattlePartySelectState): void {
   drawSourceBackground(fb);
   // LoadPartyBoxPalette (party_menu.c:2205-2280) overwrites box banks 3/4/5
@@ -1123,7 +1177,7 @@ function drawPartySelectBgLayer(fb: Uint8Array, state: BattlePartySelectState): 
     drawHpBar(fb, row);
   }
 
-  const submenuVisible = state.submenuOpen && (state.closeElapsed === null || state.closeElapsed === 0);
+  const submenuVisible = submenuWindowVisible(state);
   if (submenuVisible) {
     // The SHIFT / SUMMARY / CANCEL action window: the party-menu action
     // window (SELECTWINDOW_ACTIONS, DisplaySelectionWindow, party_menu.c:2534)
@@ -1158,7 +1212,7 @@ function drawPartySelectBgLayer(fb: Uint8Array, state: BattlePartySelectState): 
   // splice (docs/fade-layer-forensics.md §7). The submenu window closes on the
   // confirm edge but the swapped message window stays through the close fade;
   // the CANCEL window is suppressed only while the submenu window covers it.
-  const messageWindowSwapped = state.submenuOpen || state.closeElapsed !== null;
+  const messageWindowSwapped = messageWindowSwappedFor(state);
   if (messageWindowSwapped) {
     drawStandardWindowFrame(fb, 0, 128, 16, 2, PARTY_MESSAGE_WINDOW_PALETTE);
     drawText(
@@ -1220,9 +1274,10 @@ function drawPartySelectObjLayer(fb: Uint8Array, state: BattlePartySelectState):
     drawHeldItemIcon(fb, row);
     drawStatusIcon(fb, row);
   }
-  // The SHIFT submenu window replaces the CANCEL pokeball button while open
-  // (including its confirm-tick frame, closeElapsed 0).
-  if (!state.submenuOpen || (state.closeElapsed !== null && state.closeElapsed !== 0)) {
+  // The SHIFT submenu window replaces the CANCEL pokeball button while visible
+  // (including its confirm-tick frame, closeElapsed 0); during the 3-frame
+  // pre-open hold and from the close the button is drawn again.
+  if (!submenuWindowVisible(state)) {
     drawCancelPokeball(fb);
   }
 }
