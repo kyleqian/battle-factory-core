@@ -824,3 +824,118 @@ is already covered by `womanAtTick`, §6d): the DOWN hold 5181-5229, UP
 5281-5312, LEFT 5341-5404, UP-2 5421-5452 all become byte-true once the stall
 is fixed. Rerun `tools/probe/verify-lobby-hold-walk.py` (24/24) after the
 change to confirm the model still holds.
+
+## 8. Wandering woman — sheet-frame index audit (2026-08-07 SIDE worker)
+
+Measurement-only audit answering: (1) does the app's banked wandering-woman
+sheet match the source `woman_1.png` frame-for-frame, (2) which sheet frame is
+the oracle's EAST-IDLE pose, (3) which sheet frames are the oracle's
+SOUTH-WALK poses (5296-5311). Method and fixture: dense PNG + RAM probe
+`tools/probe/dump-lobby-woman-pose.py` over the walk fixture
+(`scratch-loss-lobby-walk-probe.json`, ticks 5290-5472, once-run) + matcher
+`tools/probe/verify-lobby-woman-pose.py` (the §5b bg-subtract-and-match method
+generalized to the woman: field rendered without the woman at the per-tick
+byte-exact camera, candidate frames composited over it at the woman's OAM box,
+a 0px diff = identification). All numbers below are pixel diffs, not guesses.
+
+### 8a. The sheet — banked == source, identical, same order
+
+- **Source:** `reference/pokeemerald/graphics/object_events/pics/people/woman_1.png`
+  — 144×32, 9 frames of 16×32 (the standard overworld sheet layout, same as
+  Brendan: 0=south stand, 1=north stand, 2=west stand, 3=south walk1,
+  4=south walk2, 5=north walk1, 6=north walk2, 7=west walk1, 8=west walk2;
+  east reuses west h-flipped, `sAnim_GoEast`). Extracted at dev time by
+  `tools/extract/extract-factory-lobby-terminal.ts:180` via
+  `decodeIndexedPng` + `sliceTiles`.
+- **Banked:** `src/assets/gen/factory-lobby-terminal-npcs.json` → `woman` —
+  9 frames, each `columns:2 rows:4` (16×32), tile indices 0-15.
+- **Verdict: IDENTICAL, same order.** Index-by-index comparison of all 9
+  banked frames vs the source sheet's 9 frames: every banked frame `i` equals
+  source frame `i` with **0/512 differing pixels**, and no banked frame matches
+  any *other* source frame. Banked→source index mapping is the identity
+  (0→0, 1→1, …, 8→8). **The banked sheet is not misindexed.**
+- Palette: the banked `npc_1.pal` is the mGBA 15→24 expansion of the JASC
+  values (`gbaRoundTrip`, `tools/extract/gbaColor.ts`) — the raw JASC
+  `115 197 164` expands to the banked `(115,198,165)`, verified for all 16
+  colors. The oracle's rendered woman pixels use exactly these expanded
+  values (the §8b match confirms it), so the palette is right too.
+- The north-window "field diff of 4-8px" lead is explained by the woman's own
+  drawn pixels sitting a couple px *above* her OAM box while walking (the
+  drawn box top lags the logical schedule — see the §8c offset column) — the
+  OAM box top is not the drawn box top. The app's §6d `womanAtTick` y already
+  accounts for this on the north walk (its y uses the RENDERED box-top,
+  verified byte-exact) but the §6d south-walk/east tables carry the logical
+  schedule without the offset (see 8d).
+
+### 8b. The oracle's EAST-IDLE pose = sheet frame 2 (west stand), TRUE h-flip
+
+For the settled idle-east window (5422-5452, e.g. 5422/5430/5445/5453), the
+oracle's woman pixels (bg-subtracted over the byte-exact field) are a
+**14×20 silhouette of exactly 173 px** — frame 2's silhouette size. Matching
+every sheet frame and its h-flip, aligned to the oracle's drawn box:
+
+| tick | frame | h-flip | drawn box (screen) | diff px |
+|---:|---:|---:|---:|---:|
+| 5422 | **2** | **yes (true whole-frame)** | (175,89) | **0** |
+| 5430 | **2** | **yes** | (176,97) | **0** |
+| 5453 | **2** | **yes** | (176,120) | **0** |
+
+The h-flip that matches is a **TRUE whole-frame horizontal flip** (swap the
+two 8px columns AND mirror within each column) — not the per-tile mirror the
+app's renderer applies. `tools/probe/verify-lobby-woman-pose.py` renders the
+candidate both ways; the per-tile version differs from the true flip by
+**272px** on frame 2 (278px on frame 8), and only the true flip scores 0px
+against the oracle. **So the oracle's east-idle is exactly frame 2
+h-flipped** — matching the source reasoning — but the app's `drawNpc`
+(`factoryTerminalRender.ts:195`, `sx = hFlip ? 7 - px : px` per 8px tile,
+columns NOT swapped) renders it as a per-tile mirror, which is a different
+sprite.
+
+East-walk frames 5408-5421 are the same story: frame **8** (west walk2) TRUE
+h-flipped for 5408-5415 and frame **2** (west stand) TRUE h-flipped for
+5416-5421, each **0px** once aligned to the oracle's drawn box. So the app's
+`womanAtTick` frame indices for east (8 then 2) are right; only the h-flip
+rendering differs. (During the east walk itself the oracle's drawn box is
+also 1px LEFT of the app's x schedule — the same render-lag class as the
+south walk's y; by the settled idle-east (5430+) the app's position is
+exact, leaving the flip as the sole east-idle residual.)
+
+### 8c. The oracle's SOUTH-WALK poses (5296-5311)
+
+Same method, per tick. The oracle's south-walk woman is **byte-exact to the
+source sheet's frames 1/3/0 in the standard walk order**:
+
+| ticks | frame | h-flip | drawn-box y offset vs OAM | diff px |
+|---:|---:|---:|---:|---:|
+| 5296 | **1** (north stand — pre-step) | no | −2 | **0** |
+| 5297-5304 | **3** (south walk1) | no | −2 | **0** |
+| 5305-5311 | **0** (south stand) | no | −2 | **0** |
+
+So the south walk uses exactly the frames `womanAtTick` already picks
+(5296→1, 5297-5304→3, 5305-5311→0), no h-flip. The 5296-5311 residuals are
+therefore NOT a frame-index error: the oracle's pose is the sheet's frame
+3/0, but it is drawn 1px *above* the app's `womanAtTick` y schedule — the
+same render-lag the §6a/§6d north-walk table bakes in (`161−(T−5184)` is the
+RENDERED box-top) that the south-walk table (`145+(T−5296)` = the logical
+schedule) does not carry. A 1px vertical shift of frame 3's 212-ink
+silhouette is ~161px of pixel diff, matching the observed ~180-194px south
+residual. The fix (next step) is the y-offset, not the frame index.
+
+### 8d. Verdict — one sentence
+
+The app's banked woman sheet is the source sheet verbatim (identical frames,
+identity mapping, correct palette) and `womanAtTick` picks the **right frame
+indices** for both the south walk (3→0) and the east walk/idle (8→2); the
+south residual is the **right frame at a 1px-off position** (the oracle draws
+the walking woman 1px above the app's `womanAtTick` y schedule, which was
+corrected on the north walk but not carried to the south/east windows) and
+the east residual is the **right frame with the wrong h-flip** (the app's
+`drawNpc` mirrors each 8px tile in place while the ROM's OAM flip mirrors the
+whole 16px frame — a 272px difference on frame 2). The sheet extraction is
+not misindexed.
+
+Rerun: `python3 tools/probe/verify-lobby-woman-pose.py /tmp/woman-pose-out.json
+/tmp/woman-pose-png` (probe via `python3 tools/run-mgba-probe.py
+/tmp/woman-pose-out.json -- python3 tools/probe/dump-lobby-woman-pose.py
+/tmp/woman-pose-out.json tools/battle-lab/scratch-loss-lobby-walk-probe.json
+5290 5472 /tmp/woman-pose-png`).
