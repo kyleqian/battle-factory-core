@@ -3757,6 +3757,20 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_OHKO") {
+    // AI_CV_OneHitKO (data/battle_ai_scripts.s:1427) is a bare `end`: a
+    // genuine, deterministic zero score / zero draws for every battle state
+    // (the OHKO move's own power is already fully scored by AI_CheckBadMove
+    // and AI_TryToFaint; CheckViability has nothing to add).
+    return Object.freeze({
+      kind: "scored",
+      rng: input.rng,
+      draws: Object.freeze([]) as readonly FactoryAiCheckViabilityDraw[],
+      scoreDelta: 0,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
   if (move.effect === "EFFECT_ROAR") {
     const roar = runCvRoar({
       rng: input.rng,

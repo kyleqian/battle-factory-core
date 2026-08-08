@@ -5051,3 +5051,20 @@ describe("AI_CV_Endure (EFFECT_ENDURE, docs/executable-frontier-census.md 24 wei
     expect(result.draws[0]).toMatchObject({ kind: "endure-roll", succeeded: false });
   });
 });
+
+describe("AI_CV_OneHitKO (EFFECT_OHKO, docs/executable-frontier-census.md 28 weighted)", () => {
+  const MOVE_FISSURE = 90;
+
+  it("AI_CV_OneHitKO is a bare end: deterministic zero score, zero draws", () => {
+    const rng = { value: 1, calls: 0 };
+    const result = runCheckViability({
+      rng,
+      moveId: MOVE_FISSURE,
+      attacker: NEUTRAL_BATTLER,
+      target: NEUTRAL_BATTLER,
+      drawOrdinalStart: 1,
+      reasonPrefix: "ohko",
+    });
+    expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: 0 });
+  });
+});
