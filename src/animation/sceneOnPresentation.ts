@@ -462,6 +462,14 @@ import {
   type CrushClawState,
 } from "./crushClaw.ts";
 import {
+  takeDownAtAge,
+  type TakeDownState,
+} from "./takeDown.ts";
+import {
+  crunchAtAge,
+  type CrunchState,
+} from "./crunch.ts";
+import {
   poisonTailAtAge,
   type PoisonTailState,
 } from "./poisonTail.ts";
@@ -729,7 +737,8 @@ export interface SceneOnPresentationBattler {
      | "TENTACOOL"
      | "GRAVELER"
      | "ROSELIA"
-     | "YANMA";
+     | "YANMA"
+     | "SWABLU";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1994,6 +2003,20 @@ export interface SceneOnCrushClawConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnTakeDownConfig {
+  readonly move: "TAKE_DOWN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnCrunchConfig {
+  readonly move: "CRUNCH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSingConfig {
   readonly move: "SING";
   readonly attacker: SceneOnPresentationBattler;
@@ -2156,6 +2179,8 @@ export type SceneOnMoveConfig =
   | SceneOnSteelWingConfig
   | SceneOnIronTailConfig
   | SceneOnCrushClawConfig
+  | SceneOnTakeDownConfig
+  | SceneOnCrunchConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
@@ -2641,6 +2666,18 @@ export interface SceneOnIronTailView extends IronTailState {
 }
 
 export interface SceneOnCrushClawView extends CrushClawState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnTakeDownView extends TakeDownState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnCrunchView extends CrunchState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3270,6 +3307,8 @@ export function createSceneOnMovePresentation<
     | SceneOnMetalClawConfig
   | SceneOnIronTailConfig
   | SceneOnCrushClawConfig
+  | SceneOnTakeDownConfig
+  | SceneOnCrunchConfig
   | SceneOnWrapConfig,
 >(
   config: TConfig,
@@ -5320,6 +5359,46 @@ export function sceneOnCrushClawView(
     attacker,
     target,
     ...crushClawAtAge(state.age, {
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      targetCenter: target.geometry.animationCenter,
+    }),
+  };
+}
+
+export function sceneOnTakeDownView(
+  state: SceneOnMovePresentationState,
+): SceneOnTakeDownView {
+  if (state.config.move !== "TAKE_DOWN") {
+    throw new Error(`expected TAKE_DOWN presentation, got ${state.config.move}`);
+  }
+  const attacker = state.config.attacker;
+  const target = state.config.target;
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...takeDownAtAge(state.age, {
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      targetCenter: target.geometry.animationCenter,
+    }),
+  };
+}
+
+export function sceneOnCrunchView(
+  state: SceneOnMovePresentationState,
+): SceneOnCrunchView {
+  if (state.config.move !== "CRUNCH") {
+    throw new Error(`expected CRUNCH presentation, got ${state.config.move}`);
+  }
+  const attacker = state.config.attacker;
+  const target = state.config.target;
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...crunchAtAge(state.age, {
       attackerSide: attacker.geometry.side,
       targetSide: target.geometry.side,
       targetCenter: target.geometry.animationCenter,

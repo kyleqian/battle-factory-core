@@ -980,6 +980,7 @@ import {
   sceneOnDragonClawView,
   sceneOnMetalClawView,
   sceneOnCrushClawView,
+  sceneOnTakeDownView,
   sceneOnSingView,
   sceneOnGrassWhistleView,
   sceneOnFutureSightView,
@@ -1067,6 +1068,10 @@ import { shakeMonOffsetAtTick } from "../animation/shakeMon.ts";
 import { encoreTargetX2AtAge } from "../animation/encore.ts";
 import { dragonClawDisplayedAttackerShakeY } from "../animation/dragonClaw.ts";
 import { SHAKE_FIRST_STEP_AGE } from "../animation/crushClaw.ts";
+import {
+  SLIDE_BACK_ATTACKER_AGE,
+  TARGET_PUSH_FIRST_STEP_AGE,
+} from "../animation/takeDown.ts";
 import { sludgeDisplayedTargetOffsetAtAge } from "../animation/sludge.ts";
 import {
   whirlwindDisplayedTargetOffsetAtAge,
@@ -1332,6 +1337,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const swabluFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SWABLU!;
 const ponytaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PONYTA!;
 const ledybaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LEDYBA!;
 const clamperlFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CLAMPERL!;
@@ -2457,6 +2463,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const swabluBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SWABLU!;
 const ponytaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PONYTA!;
 const ledybaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LEDYBA!;
 const clamperlBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CLAMPERL!;
@@ -34492,6 +34499,149 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "GROVYLE used" : "Foe GROVYLE used",
       "CRUSH CLAW!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "TAKE_DOWN") {
+    const view = sceneOnTakeDownView(state);
+    // Display latches are split: the WindUpLunge x2/y2 are written by the
+    // visual task and reach the framebuffer TWO ages after their RAM write
+    // (change-map first windup diff at display 223 for the RAM 221 write),
+    // while the sprite-driven slides, the ShakeMonInPlace toggle, the
+    // hitsplat, and the palette blend all display ONE age after their RAM
+    // cause. The attacker's return slide is itself sprite-driven, so its own
+    // latching flips to the one-age rule from SLIDE_BACK_ATTACKER_AGE on.
+    const displayed = sceneOnTakeDownView({ ...state, age: state.age - 1 });
+    const windupDisplayed = sceneOnTakeDownView({ ...state, age: state.age - 2 });
+    const displayedAge = displayed.age;
+    const playerToOpponent =
+      view.attacker.species === "SWABLU"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "SWABLU"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged TAKE_DOWN pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent ? swabluBackSprite : swabluFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const black = { r: 0, g: 0, b: 0 };
+    const darken = displayed.blendDarken;
+    // F_PAL_BG | F_PAL_BATTLERS darkens the field BG (palettes 1-3) and the
+    // two battler OBJ palettes only; healthboxes, message window, and the
+    // basic hitsplat (palette bank 7) are outside the blend mask.
+    const fieldPalette = darken
+      ? blendPaletteBanksToward(battleBg.palette, black, 10)
+      : battleBg.palette;
+    const battlerPalette = (palette: RgbColor[]): RgbColor[] => (
+      darken ? blendPaletteToward(palette, black, 10) : palette
+    );
+    const attackerX2 = displayedAge >= SLIDE_BACK_ATTACKER_AGE
+      ? displayed.attackerX2
+      : windupDisplayed.attackerX2;
+    const attackerY2 = displayedAge >= SLIDE_BACK_ATTACKER_AGE
+      ? displayed.attackerY2
+      : windupDisplayed.attackerY2;
+    // The target rests at its front-idle x2 (1px for opponent-front ONIX)
+    // until the SlideMonToOffset push's first write displays, then the
+    // displayed slide/shake x2 holds.
+    const targetX2 = displayedAge < TARGET_PUSH_FIRST_STEP_AGE
+      ? targetIdle.x2
+      : displayed.targetX2;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, fieldPalette);
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      battlerPalette(attackerSprite.palette),
+      view.attacker.geometry.spriteCorner.x + attackerX2,
+      view.attacker.geometry.spriteCorner.y + attackerY2,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      battlerPalette(targetSprite.palette),
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    // `monbg ANIM_DEF_PARTNER` moved the target to BG1 (beneath both OBJs);
+    // the semi-transparent hitsplat's target-2 backdrop is that BG stack, so
+    // snapshot it after the target but before the attacker (same as BODY_SLAM).
+    drawTarget();
+    const hitsplatBackdrop = fb.slice();
+    drawAttacker();
+    if (displayed.hitsplat) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        hitsplatBackdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        displayed.hitsplat.x,
+        displayed.hitsplat.y,
+        256,
+        0,
+        0,
+        256,
+        12,
+        8,
+        false,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "SWABLU",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "SWABLU" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "SWABLU used" : "Foe SWABLU used",
+      "TAKE DOWN!",
       99,
     );
     return;
