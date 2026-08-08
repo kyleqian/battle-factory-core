@@ -2397,6 +2397,20 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_ENCORE -> AI_CBM_Encore
+  // (`data/battle_ai_scripts.s:157,422-424`): a single
+  // `if_any_move_encored AI_TARGET, Score_Minus8` -- Encore is penalized when
+  // the target already has any move encored (`gDisableStructs[].encoredMove
+  // != MOVE_NONE`).
+  if (move.effect === "EFFECT_ENCORE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmEncore(target.anyMoveEncored ?? false),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -3233,4 +3247,14 @@ function runCbmMist(attackerMistUp: boolean): number {
  */
 function runCbmDisable(targetAnyMoveDisabled: boolean): number {
   return targetAnyMoveDisabled ? -8 : 0;
+}
+
+/**
+ * `AI_CBM_Encore` (`data/battle_ai_scripts.s:422-424`, EFFECT_ENCORE): a
+ * single `if_any_move_encored AI_TARGET, Score_Minus8` -- Encore is
+ * penalized when the target already has any move encored
+ * (`gDisableStructs[].encoredMove != MOVE_NONE`). Zero ability/type reads.
+ */
+function runCbmEncore(targetAnyMoveEncored: boolean): number {
+  return targetAnyMoveEncored ? -8 : 0;
 }
