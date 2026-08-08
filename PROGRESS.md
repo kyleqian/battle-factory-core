@@ -5,6 +5,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 996 — [bounded MAIN worker, 2026-08-08] #39 dispatcher slice 7 (turn-2 fold) ALREADY LANDED — verified, no code changes made; tree green throughout
+
+- **State:** master `e6165e8b`, clean. `npm run typecheck` + `npm run build` exit 0; `npm run test:smoke` **347/347**; all 6 touched test files **458/458** (incl. `turn2ResolutionAdapterEquivalence.test.ts` 7/7 proving the generic receipt via `resolveTurn2LatestCompletedCommandHandoff`/`turn2FightCommandPresentationFromLatest`/`turn2CompletedResolutionNextCommandHandoffFromLatest`, mirroring turn-1's slice-6 shape). Full `npm test` NOT run (worker rule).
+- **Finding — the step is mis-scoped, the fold was already landed 2026-08-02:** the turn-2 epoch/content fold was committed as `3a3a168a` (bridge) + `8518520b` (fold) and supervisor-verified the same day (archive entry 861: "six oracle pins exact (256/256, 237/237, 254/255 #61-residual, 161/161, 256/256, 128/128)"). The current tree is past the whole dispatcher migration: `tools/census-next-command-handoffs.sh` reports **BattleSceneState handoff fields 0, drawFightSubmenuWindow handoff params 0, currentPPForActiveMon handoff params 0, initial/advance handoff entries 0** — i.e. beyond even slice 10's final-cut acceptance. `turn2NextCommandHandoff` state field is gone from battleScene/core/battleMenu; generic content (`turn2FightCommandPresentationFromLatest`, `isTurn2LatestCompletedCommandLifecycleActive`, `resolveTurn2LatestCompletedCommandHandoff`) drives live state. The acceptance's differential cannot even run as prescribed: `--base e6165e8b` == HEAD, and the harness rightly refuses ("a differential against itself proves nothing").
+- **Evidence run anyway vs. the true pre-fold parent `3005e9c2`:** `turn2-endeavor-off` **256/256** and `turn2-dragonbreath-off` **237/237** byte-identical — exactly slice 7's own two turn-2 windows, confirming the fold was pixel-neutral there. `turn3-rockslide-off` 161/161 too. `turn3-endeavor-off` reads 227/255 with a persistent 41px diff — that drift is from LATER landed slices (8/9 turn-3/4 folds + typeref retirements, all post-dating the fold), not from slice 7, and matches nothing this step was asked to touch.
+- **Next:** supervisor should retire/tick #39's slice-7 row (and confirm the whole 1-10 ladder is recorded done — census is already at the final-cut target). No engine work remains for this slice.
+- **Notes:** no PAPERCUTS. No src/test edits made — the correct action was to verify and report the mis-scope, per the brief.
+
 ## 995 — [supervisor, 2026-08-08] Orient + round 1: `animation-main` folded and union-verified, ISSUES #80 CLOSED (395/395 supervisor-rerun), Castform Forecast barrier RETIRED — plus a 3-day CPU leak killed
 
 - **State:** master at this entry's commit, clean. **Union baseline verified
