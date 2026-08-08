@@ -454,6 +454,10 @@ import {
   type RazorLeafState,
 } from "./razorLeaf.ts";
 import {
+  ironTailAtAge,
+  type IronTailState,
+} from "./ironTail.ts";
+import {
   poisonTailAtAge,
   type PoisonTailState,
 } from "./poisonTail.ts";
@@ -1856,6 +1860,13 @@ export interface SceneOnRazorLeafConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnIronTailConfig {
+  readonly move: "IRON_TAIL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnPoisonTailConfig {
   readonly move: "POISON_TAIL";
   readonly attacker: SceneOnPresentationBattler;
@@ -2132,6 +2143,7 @@ export type SceneOnMoveConfig =
   | SceneOnRazorLeafConfig
   | SceneOnPoisonTailConfig
   | SceneOnSteelWingConfig
+  | SceneOnIronTailConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
@@ -2605,6 +2617,12 @@ export interface SceneOnAstonishView extends AstonishState {
 }
 
 export interface SceneOnRazorLeafView extends RazorLeafState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnIronTailView extends IronTailState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3232,6 +3250,7 @@ export function createSceneOnMovePresentation<
     | SceneOnFlashConfig
     | SceneOnFacadeConfig
     | SceneOnMetalClawConfig
+    | SceneOnIronTailConfig
     | SceneOnWrapConfig,
 >(
   config: TConfig,
@@ -5248,6 +5267,28 @@ export function sceneOnRazorLeafView(
 }
 
 /** `age=0` is the MetallicShine initializer's first displayed frame. */
+/** `age=0` is the move-owned window's first in-bounds frame; the RAM ages in
+ *  the reducer match the probe's RAM readings, so the draw case applies the
+ *  shared one-display latch itself. */
+export function sceneOnIronTailView(
+  state: SceneOnMovePresentationState,
+): SceneOnIronTailView {
+  if (state.config.move !== "IRON_TAIL") {
+    throw new Error(`expected IRON_TAIL presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...ironTailAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
 export function sceneOnPoisonTailView(
   state: SceneOnMovePresentationState,
 ): SceneOnPoisonTailView {
