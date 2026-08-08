@@ -1,5 +1,54 @@
 # Animation coverage
 
+## MOVE_TAKE_DOWN promoted to exact — 126/276, both orientations at 98/98 and 97/97 portable-exact (2026-08-08 worker)
+
+- **State:** coverage advanced **125→126/276 exact**, 0 partial, 0 staged, **151→150
+  unsupported**. TAKE_DOWN was staged last round and is now proven by an exact move
+  in both orientations through the shared seam. `takeDownPortable.ts` exits 0 at
+  **TAKE DOWN component 98/98; framebuffer 98/98** (player-back) and
+  **component 97/97; framebuffer 97/97** (opponent-front), fresh evidence hashes
+  player `5dcaff8f…`/RGB `ebe70e6c…`, opponent `79807540…`/RGB `ad9b74ed…`,
+  reproduced twice fresh.
+- **Did:** built `SceneOnTakeDownConfig`/`sceneOnTakeDownView` in
+  `sceneOnPresentation.ts` (SWABLU added to the presentation species union) and the
+  TAKE_DOWN draw case in `battleScene.ts` — SWABLU back/front and ONIX front/back,
+  the F_PAL_BG|F_PAL_BATTLERS black coeff-10 darken on the battlers + field
+  (healthboxes/message/hitsplat outside the mask), the semi-transparent 12/8 basic
+  hitsplat over the target-2 backdrop snapshot (BODY_SLAM convention), the ONIX
+  front-idle x2=1 hold until the push displays, and the split display latch (below).
+  Wrote `tools/compare/takeDownPortable.ts` + the two fixtures (opponent window via
+  `skipProbeFrames: 1` / `ageOffset: 1` like DETECT), the evidence test, the
+  coverage entry, and moved the inventory pin 125→126 exact / 151→150 unsupported.
+- **Measured (fresh, deterministic, twice-fresh hashes pinned):** the windup ramp
+  displays 223-245, hold 246-255, lunge-out 256-265; palette darken 259-261,
+  restore 262; hitsplat 259-267, teardown at 268; target slide-to-offset 262-265;
+  shake 269-290 (269 first toggle, 290 final release); attacker slide-back
+  295-299; target slide-back 300-306. **The two-frame windup latch HELD:** the
+  task-driven WindUpLunge x2/y2 render exactly two ages after their RAM write
+  (RAM 221 → display 223, change map + hw OAM x 40→38 agree), while every
+  sprite-driven event renders one age after its RAM cause — the draw case splits
+  the latch and flips the attacker back to the one-age rule at
+  SLIDE_BACK_ATTACKER_AGE. `blendoff` clears BLDCNT at RAM 307 with no pixel step
+  (RAM truth only, like CRUSH_CLAW).
+- **Next:** the settled queue (MOVE_DRAGON_BREATH / MOVE_BIND) and the ranked
+  remaining moves; TAKE_DOWN adds no new components to unproven leverage (windup
+  = SPIKE_CANNON/BRICK_BREAK, slides = BODY_SLAM/STEEL_WING, ShakeMonInPlace =
+  BODY_SLAM/SLAM, complex_palette_blend + basic hitsplat = REVERSAL/AERIAL_ACE/
+  BLAZE_KICK/EARTHQUAKE/IRON_TAIL).
+- **Notes — reducer correction found during promotion.** The staged reducer only
+  modelled the opponent-side target: `Math.max(push, 0)` clamped the player-side
+  SlideMonToOffset push (−16) to 0, the two slide-backs hardcoded `currentX2: 16`
+  (the +16 arithmetic-shift rounding does not negate cleanly for the −16/−17
+  player/opponent bases), and the lunge's sine-tail y2 1 was cut at age 50 even
+  though the last task write holds on the sprite through the return slide. All
+  fixed in `src/animation/takeDown.ts` with the Tier-1 pins extended to cover both
+  orientations (still 10 tests); verified 0 RAM mismatches across both fresh probes.
+  Also fixed the slideToOffsetCount to the dummy's real 5-age lifetime. No shared
+  helper changed this round (the shared windUpLunge nonzero-sine branch was fixed
+  by the supervisor last round); SPIKE_CANNON/BRICK_BREAK Tier-1 untouched. No
+  boundary widening, no new unsupported-branch barrier; the only engine contacts
+  are the TAKE_DOWN draw case in `battleScene.ts` and the one/two-frame seam.
+
 ## MOVE_TAKE_DOWN staged — both orientations isolated at 98/97 frames; scenarios + dense probe + change maps + RAM-truth reducer banked (2026-08-07 worker)
 
 - **State:** TAKE_DOWN stays **unsupported**. Coverage unchanged at **125/276
