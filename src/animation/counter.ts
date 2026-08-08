@@ -57,6 +57,17 @@ export interface CounterFistSprite {
 export interface CounterHitsplatSprite {
   readonly x: number;
   readonly y: number;
+  /**
+   * The ROM's OAM slot for this sprite, measured from the probe's hardware OAM
+   * (not allocator order). The allocator hands out slots 3,4,5 to the first
+   * three sprites and then reuses them cyclically, so the hitsplats land on
+   * slots 3 (h1), 5 (h2), 4 (h3) and the fists on 4 (f1), 3 (f2), 5 (f3). For
+   * equal-subpriority semi-transparent overlaps the LOWER OAM slot wins the
+   * PPU's one-selected-OBJ blend (probe-measured at the frame-247
+   * hitsplat1/hitsplat2 and frame-255 hitsplat2/hitsplat3 overlaps), so the
+   * draw case sorts the hitsplats by this slot descending.
+   */
+  readonly slot: number;
 }
 
 export interface CounterSoundEvent {
@@ -115,7 +126,7 @@ const ELLIPSE_HEIGHT = 6;
 const ELLIPSE_STEP = 16;
 const SLIDE_OFFSET_DISTANCE = 20;
 const SLIDE_OFFSET_DURATION = 4;
-const SLIDE_ORIGIN_DURATION = 5;
+export const SLIDE_ORIGIN_DURATION = 5;
 const HITSPLAT_LIFETIME = 9;
 const FIST_LIFETIME = 9;
 const SHAKE_TICK_BASE = 33; // RAM age 34 -> shakeMonSequence tick 1
@@ -250,9 +261,9 @@ function counterHitsplats(
   age: number,
   geometry: CounterGeometry,
 ): readonly CounterHitsplatSprite[] {
-  return HITSPLAT_SPECS.flatMap((spec) => {
+  return HITSPLAT_SPECS.flatMap((spec, index) => {
     if (age < spec.spawnAge || age >= spec.spawnAge + HITSPLAT_LIFETIME) return [];
-    return [mirroredAnchor(spec.xOffset, spec.yOffset, geometry)];
+    return [{ ...mirroredAnchor(spec.xOffset, spec.yOffset, geometry), slot: 3 + ((index * 2) % 3) }];
   });
 }
 
