@@ -4796,3 +4796,275 @@ describe("AI_CV_SpeedDownFromChance (docs/factory-ai-checkviability-ground-truth
     expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
   });
 });
+
+describe("AI_CV_Rest (EFFECT_REST, docs/executable-frontier-census.md 49 weighted)", () => {
+  const MOVE_REST = 156;
+  const MOVE_SNATCH = 289;
+
+  const EXTRAS = Object.freeze({
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0,
+    evasionStage: 6,
+    accStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+    hp: 100,
+    maxHp: 100,
+  });
+  const FASTER_USER = Object.freeze({ speed: 120, speedStage: 6, ...EXTRAS }); // target NOT faster
+  const SLOWER_USER = Object.freeze({ speed: 5, speedStage: 6, ...EXTRAS }); // target faster
+  const FASTER_TARGET = Object.freeze({ speed: 120, speedStage: 6, ...EXTRAS });
+  const SLOWER_TARGET = Object.freeze({ speed: 5, speedStage: 6, ...EXTRAS });
+
+  function restRun(rngValue: number, attacker: unknown, target: unknown) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_REST,
+      attacker: attacker as never,
+      target: target as never,
+      drawOrdinalStart: 1,
+      reasonPrefix: "rest",
+    });
+  }
+
+  it("target not faster + full HP: deterministic -8, zero draws", () => {
+    const rng = { value: 1, calls: 0 };
+    const result = runCheckViability({
+      rng,
+      moveId: MOVE_REST,
+      attacker: FASTER_USER, // hp 100/100
+      target: SLOWER_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "rest",
+    });
+    expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: -8 });
+  });
+
+  it("target not faster + HP 45: the <70 midband roll's FALL-THROUGH scores -3", () => {
+    // seed 1 -> high-half 16838, low byte 198 (>= 70, FALL-THROUGH scores -3).
+    const result = restRun(1, { ...FASTER_USER, hp: 45 }, SLOWER_TARGET);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "rest-roll-1", succeeded: true });
+  });
+
+  it("target not faster + HP 45: a <70 midband roll JUMPs into the Snatch-less tail; <10 there ends at 0", () => {
+    // seed 4 -> low byte 25 (< 70): JUMP to tail; tail low byte 8 (< 10): End at 0.
+    const result = restRun(4, { ...FASTER_USER, hp: 45 }, SLOWER_TARGET);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(2);
+    expect(result.draws[0]).toMatchObject({ kind: "rest-roll-1", succeeded: false });
+    expect(result.draws[1]).toMatchObject({ kind: "rest-tail-roll", succeeded: false });
+  });
+
+  it("target not faster + HP 45: a <70 midband roll JUMPs into the Snatch-less tail; >=10 there adds +3", () => {
+    // seed 8 -> low byte 50 (< 70): JUMP to tail; tail low byte 147 (>= 10): +3.
+    const result = restRun(8, { ...FASTER_USER, hp: 45 }, SLOWER_TARGET);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(2);
+    expect(result.draws[0]).toMatchObject({ kind: "rest-roll-1", succeeded: false });
+    expect(result.draws[1]).toMatchObject({ kind: "rest-tail-roll", succeeded: true });
+  });
+
+  it("target faster + HP 65: the <50 midband roll's JUMP lands in the Snatch-less tail; <10 ends at 0", () => {
+    // seed 4 -> low byte 25 (< 50): JUMP to tail; tail low byte 8 (< 10): End at 0.
+    const result = restRun(4, { ...SLOWER_USER, hp: 65 }, FASTER_TARGET);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(2);
+    expect(result.draws[0]).toMatchObject({ kind: "rest-roll-2", succeeded: false });
+    expect(result.draws[1]).toMatchObject({ kind: "rest-tail-roll", succeeded: false });
+  });
+
+  it("target faster + HP 65: the <50 midband roll's FALL-THROUGH scores -3", () => {
+    // seed 3 -> low byte 83 (>= 50, FALL-THROUGH scores -3).
+    const result = restRun(3, { ...SLOWER_USER, hp: 65 }, FASTER_TARGET);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "rest-roll-2", succeeded: true });
+  });
+
+  it("target faster + HP 50 (< 60): straight into the Snatch-less tail", () => {
+    // seed 1 -> tail low byte 198 >= 10 -> +3.
+    const result = restRun(1, { ...SLOWER_USER, hp: 50 }, FASTER_TARGET);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "rest-tail-roll", succeeded: true });
+  });
+
+  it("target faster + HP 80 (> 70): deterministic -3, zero draws", () => {
+    const rng = { value: 1, calls: 0 };
+    const result = runCheckViability({
+      rng,
+      moveId: MOVE_REST,
+      attacker: { ...SLOWER_USER, hp: 80 },
+      target: FASTER_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "rest",
+    });
+    expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: -3 });
+  });
+
+  it("Snatch-guarded tail: roll < 50 at the gate ends at 0; roll >= 50 reaches the <10 roll", () => {
+    // seed 4 -> low byte 25 (< 50): snatch gate JUMP ends at 0.
+    const gateJump = restRun(4, { ...FASTER_USER, hp: 30 }, { ...SLOWER_TARGET, knownMoves: [MOVE_SNATCH] });
+    expect(gateJump).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (gateJump.kind !== "scored") throw new Error("unreachable");
+    expect(gateJump.draws).toHaveLength(1);
+    expect(gateJump.draws[0]).toMatchObject({ kind: "rest-snatch-roll", succeeded: false });
+
+    // seed 1 -> low byte 198 (>= 50): gate falls to the <10 roll; 198 >= 10 -> +3.
+    const gateFall = restRun(1, { ...FASTER_USER, hp: 30 }, { ...SLOWER_TARGET, knownMoves: [MOVE_SNATCH] });
+    expect(gateFall).toMatchObject({ kind: "scored", scoreDelta: 3 });
+    if (gateFall.kind !== "scored") throw new Error("unreachable");
+    expect(gateFall.draws).toHaveLength(2);
+    expect(gateFall.draws[0]).toMatchObject({ kind: "rest-snatch-roll", succeeded: true });
+    expect(gateFall.draws[1]).toMatchObject({ kind: "rest-tail-roll", succeeded: true });
+  });
+});
+
+describe("AI_CV_Absorb (EFFECT_ABSORB, docs/executable-frontier-census.md 43 weighted)", () => {
+  const MOVE_ABSORB = 71;
+
+  const EXTRAS = Object.freeze({
+    speed: 100,
+    speedStage: 6,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0,
+    evasionStage: 6,
+    accStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+    hp: 100,
+    maxHp: 100,
+  });
+  const GRASS_ATTACKER = Object.freeze({ ...EXTRAS, types: ["TYPE_GRASS", "TYPE_NORMAL"] as const });
+
+  function absorbRun(rngValue: number, targetTypes: readonly [string, string]) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_ABSORB,
+      attacker: GRASS_ATTACKER,
+      target: { ...EXTRAS, types: targetTypes },
+      drawOrdinalStart: 1,
+      reasonPrefix: "absorb",
+    });
+  }
+
+  it("neutral 1x target: deterministic zero score, zero draws", () => {
+    const rng = { value: 1, calls: 0 };
+    const result = runCheckViability({
+      rng,
+      moveId: MOVE_ABSORB,
+      attacker: GRASS_ATTACKER,
+      target: { ...EXTRAS, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const },
+      drawOrdinalStart: 1,
+      reasonPrefix: "absorb",
+    });
+    expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: 0 });
+  });
+
+  it("super effective 2x target (Water): deterministic zero score, zero draws", () => {
+    const result = absorbRun(1, ["TYPE_WATER", "TYPE_NORMAL"]);
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("0.5x target (Fire): the roll's FALL-THROUGH applies -3", () => {
+    // seed 1 -> low byte 198 (>= 50, FALL-THROUGH to -3).
+    const result = absorbRun(1, ["TYPE_FIRE", "TYPE_NORMAL"]);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "absorb-roll", succeeded: true });
+  });
+
+  it("0.5x target (Fire): the roll's JUMP ends at zero", () => {
+    // seed 4 -> low byte 25 (< 50, JUMP to End).
+    const result = absorbRun(4, ["TYPE_FIRE", "TYPE_NORMAL"]);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "absorb-roll", succeeded: false });
+  });
+});
+
+describe("AI_CV_Endure (EFFECT_ENDURE, docs/executable-frontier-census.md 24 weighted)", () => {
+  const MOVE_ENDURE = 203;
+
+  const EXTRAS = Object.freeze({
+    speed: 100,
+    speedStage: 6,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0,
+    evasionStage: 6,
+    accStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+    hp: 100,
+    maxHp: 100,
+  });
+
+  function endureRun(rngValue: number, attackerHp: number) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_ENDURE,
+      attacker: { ...EXTRAS, hp: attackerHp },
+      target: EXTRAS,
+      drawOrdinalStart: 1,
+      reasonPrefix: "endure",
+    });
+  }
+
+  it("HP < 4: deterministic -1, zero draws (first gate JUMP)", () => {
+    const result = endureRun(1, 3);
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -1 });
+  });
+
+  it("HP >= 35: deterministic -1, zero draws (falls through the second gate into Endure2)", () => {
+    const result = endureRun(1, 40);
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -1 });
+  });
+
+  it("HP in [4,35): the <70 roll's FALL-THROUGH applies +1", () => {
+    // seed 1 -> low byte 198 (>= 70, FALL-THROUGH to +1).
+    const result = endureRun(1, 20);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "endure-roll", succeeded: true });
+  });
+
+  it("HP in [4,35): the <70 roll's JUMP ends at zero", () => {
+    // seed 4 -> low byte 25 (< 70, JUMP to End).
+    const result = endureRun(4, 20);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "endure-roll", succeeded: false });
+  });
+});
+
+describe("AI_CV_OneHitKO (EFFECT_OHKO, docs/executable-frontier-census.md 28 weighted)", () => {
+  const MOVE_FISSURE = 90;
+
+  it("AI_CV_OneHitKO is a bare end: deterministic zero score, zero draws", () => {
+    const rng = { value: 1, calls: 0 };
+    const result = runCheckViability({
+      rng,
+      moveId: MOVE_FISSURE,
+      attacker: NEUTRAL_BATTLER,
+      target: NEUTRAL_BATTLER,
+      drawOrdinalStart: 1,
+      reasonPrefix: "ohko",
+    });
+    expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: 0 });
+  });
+});
