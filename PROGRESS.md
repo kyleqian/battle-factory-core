@@ -5,6 +5,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 997 — [bounded MAIN worker, 2026-08-08] #39 slices 1+2: slice-1 remainder LANDED, slice 2 verified already-landed — differential 3055/3055 byte-identical
+
+- **State:** master `f3f5754c`, clean. `npm run typecheck` + `npm run build` exit 0; `npm run test:smoke` **347/347**; `tests/battleSceneHealthboxFactories.test.ts` **6/6** (one per factory, 2 HP values each — pre-existing, satisfies slice-2 acceptance). Full `npm test` NOT run (worker rule).
+- **Finding — slice 2 is mis-scoped, already landed 2026-08-02:** the six-family-C parameterization is commit `4d767598` (ancestor of HEAD): all six factories take `name`/`level`/`maxHp` (gender for kabuto/magby) and every call site threads its constant explicitly (`ONIX_MENU_BATTLER`, `KABUTO_SENDOUT_BATTLER`, `TURN5_SWITCHIN`/`TURN13_SWITCHIN` locals). No slice-2 work remains; nothing to land or change.
+- **Landing (slice-1 remainder):** the `hp === 142` literal in `murkrowHealthboxContentForHp`'s cache-miss branch (battleScene.ts:11449) now reads `TURN13_SWITCHIN.replacementHp.max` (verified `max === 142`, MURKROW Lv50) — behavior-preserving, completing slice 1's two-literal swap (`PIDGEOTTO_MAX_HP` was already adapter-derived).
+- **Differential vs clean parent `8f6f2577`:** PASS — **3055/3055 captures byte-identical across 17 traces**: turn5-switchin 241, turn5-sitrus-a 110, -b 82, -c 181, -d 133, turn13-switchin 242, turn14-fly-miss 213, turn15-fly-strike 256, turn6-rockslide-a 255, -b 105, turn7-rockslide-a/b/c/d 256/256/256/19, turn8-bind-a 256, -b 66, insurance battle-command-generated-off **128/128**. Exit 0.
+- **Next:** supervisor retires #39's slice-1+2 rows (dossier's §4 rows 1-2); nothing else open from this step.
+- **Notes:** no PAPERCUTS. Committed `f3f5754c` (the one-literal fix); slice-2 code already in history.
+
 ## 996 — [bounded MAIN worker, 2026-08-08] #39 dispatcher slice 7 (turn-2 fold) ALREADY LANDED — verified, no code changes made; tree green throughout
 
 - **State:** master `e6165e8b`, clean. `npm run typecheck` + `npm run build` exit 0; `npm run test:smoke` **347/347**; all 6 touched test files **458/458** (incl. `turn2ResolutionAdapterEquivalence.test.ts` 7/7 proving the generic receipt via `resolveTurn2LatestCompletedCommandHandoff`/`turn2FightCommandPresentationFromLatest`/`turn2CompletedResolutionNextCommandHandoffFromLatest`, mirroring turn-1's slice-6 shape). Full `npm test` NOT run (worker rule).
