@@ -68,6 +68,7 @@ const MOVE_NONE = 0;
 const SIDE_STATUS_REFLECT = 1 << 0;
 const SIDE_STATUS_LIGHTSCREEN = 1 << 1;
 const SIDE_STATUS_SAFEGUARD = 1 << 5;
+const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
 const B_WEATHER_SANDSTORM = (1 << 3) | (1 << 4);
 const B_WEATHER_SUN = (1 << 5) | (1 << 6);
@@ -310,6 +311,15 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) !== 0
         ? { isInfatuated: true }
         : {}),
+      ...((input.rulesContext.sideStatuses[1] & SIDE_STATUS_SAFEGUARD) !== 0
+        ? { safeguardUp: true }
+        : {}),
+      ...((attacker.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0
+        ? { isAsleep: true }
+        : {}),
+      ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_SUBSTITUTE) !== 0
+        ? { hasSubstitute: true }
+        : {}),
       ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) !== 0
         ? { isLeechSeeded: true }
         : {}),
@@ -348,6 +358,12 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       ...(target.tauntTimer !== 0 ? { isTaunted: true } : {}),
       ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) !== 0
         ? { isInfatuated: true }
+        : {}),
+      ...((target.status2 & STATUS2_ESCAPE_PREVENTION) !== 0
+        ? { isEscapePrevented: true }
+        : {}),
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_TORMENT) !== 0
+        ? { isTormented: true }
         : {}),
       ...((target.status3 & BATTLE_SCRIPT_STATUS3_YAWN) !== 0
         ? { hasYawn: true }

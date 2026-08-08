@@ -100,7 +100,18 @@
  * has no entry in this file; and `EFFECT_TOXIC`/`EFFECT_POISON` ->
  * `AI_CBM_Toxic` (`:341-352`, `runCbmToxic` below), whose source-ordered
  * type, ability, primary-status, and Safeguard gates complete R13-D's
- * ordinary-move control path.
+ * ordinary-move control path; and `EFFECT_KNOCK_OFF`/`EFFECT_TRICK` ->
+ * `AI_CBM_TrickAndKnockOff` (`:545-548`, `runCbmTrickAndKnockOff` below) --
+ * one fresh target ability read, single Sticky Hold rejection gate, the same
+ * shape as `AI_CBM_Sleep`'s ability gate but with no status/Safeguard tail;
+ * and `EFFECT_SAFEGUARD` -> `AI_CBM_Safeguard` (`:478-480`,
+ * `runCbmSafeguard` below), a bare `if_side_affecting AI_USER,
+ * SIDE_STATUS_SAFEGUARD, Score_Minus8` reading only the AI's own side -- the
+ * same shape as `AI_CBM_LightScreen`/Reflect (doc §23.1); and
+ * `EFFECT_SNORE`/`EFFECT_SLEEP_TALK` -> `AI_CBM_DamageDuringSleep`
+ * (`:426-428`, `runCbmDamageDuringSleep` below), a bare
+ * `if_not_status AI_USER, STATUS1_SLEEP, Score_Minus8` reading only the AI's
+ * own primary status.
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -291,6 +302,24 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    */
   isLeechSeeded?: boolean;
   /**
+   * Whether `gBattleMons[AI_TARGET].status1 & STATUS1_SLEEP` is nonzero --
+   * `AI_CBM_DreamEater`'s first, source-ordered rejection gate (EFFECT_DREAM_
+   * EATER). Optional, defaulting to false.
+   */
+  isAsleep?: boolean;
+  /**
+   * Whether `gBattleMons[AI_TARGET].status2 & STATUS2_ESCAPE_PREVENTION` is
+   * nonzero -- `AI_CBM_CantEscape`'s single gate (EFFECT_MEAN_LOOK, Block,
+   * Spider Web). Optional, defaulting to false.
+   */
+  isEscapePrevented?: boolean;
+  /**
+   * Whether `gBattleMons[AI_TARGET].status2 & STATUS2_TORMENT` is nonzero --
+   * `AI_CBM_Torment`'s single gate (EFFECT_TORMENT). Optional, defaulting to
+   * false.
+   */
+  isTormented?: boolean;
+  /**
    * `gBattleMons[AI_TARGET].level` -- `AI_CBM_OneHitKO`'s final
    * `if_level_cond 1` (less-than) gate operand. Optional, defaulting to 0
    * (the neutral "not lower" outcome when omitted, so the level gate never
@@ -377,6 +406,42 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * `battleScriptRulesContext.ts`.
    */
   isFirstTurn?: number;
+  /**
+   * Whether AI_USER's OWN side has `SIDE_STATUS_SAFEGUARD` --
+   * `AI_CBM_Safeguard`'s single `if_side_affecting AI_USER,
+   * SIDE_STATUS_SAFEGUARD` gate (EFFECT_SAFEGUARD). Optional, defaulting to
+   * `false`, same convention as `lightScreenUp`/`reflectUp` above.
+   */
+  safeguardUp?: boolean;
+  /**
+   * `gBattleMons[AI_USER].status1 & STATUS1_SLEEP` -- `AI_CBM_DamageDuringSleep`'s
+   * single `if_not_status AI_USER, STATUS1_SLEEP` gate (EFFECT_SNORE/
+   * EFFECT_SLEEP_TALK). Optional, defaulting to `false` (not asleep), so the
+   * handler's Score_Minus8 fires when the field is absent -- the same
+   * absent-defaults-to-false convention as `lightScreenUp`/`reflectUp`.
+   */
+  isAsleep?: boolean;
+  /**
+   * Alive, non-empty, non-Egg AI-side bench count produced by
+   * `count_usable_party_mons AI_USER`, excluding the active party index --
+   * `AI_CBM_Explosion`/`AI_CBM_BatonPass`'s own AI_USER count gate. Optional,
+   * defaulting to 0 (the same conservative zero-member default as the
+   * target-side `usablePartyMons` on `FactoryAiCheckBadMoveRoarTarget`).
+   */
+  usablePartyMons?: number;
+  /**
+   * `gBattleMons[AI_USER].status2 & STATUS2_SUBSTITUTE` -- `AI_CBM_Substitute`'s
+   * first gate (EFFECT_SUBSTITUTE). Optional, defaulting to `false`.
+   */
+  hasSubstitute?: boolean;
+  /**
+   * `gBattleMons[AI_USER].hp`/`.maxHP` -- `AI_CBM_Substitute`'s second gate,
+   * `if_hp_less_than AI_USER, 26` (EFFECT_SUBSTITUTE). Optional, defaulting
+   * to `maxHp: 1, hp: 1` (100%, so the <26% gate never fires when absent) --
+   * the same absent-neutral convention as `level` on the target type.
+   */
+  hp?: number;
+  maxHp?: number;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -1651,6 +1716,130 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_KNOCK_OFF/EFFECT_TRICK ->
+  // AI_CBM_TrickAndKnockOff (`data/battle_ai_scripts.s:202,198,545-548`):
+  // one target ability read; Sticky Hold rejects at -10.
+  if (move.effect === "EFFECT_KNOCK_OFF" || move.effect === "EFFECT_TRICK") {
+    const trickAndKnockOff = runCbmTrickAndKnockOff(
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-trick-and-knock-off`,
+    );
+    for (const draw of trickAndKnockOff.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: trickAndKnockOff.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: trickAndKnockOff.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SAFEGUARD -> AI_CBM_Safeguard
+  // (`data/battle_ai_scripts.s:174,478-480`): AI's own Safeguard bit rejects
+  // at -8, same bare shape as LightScreen/Reflect.
+  if (move.effect === "EFFECT_SAFEGUARD") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmSafeguard(input.attacker.safeguardUp ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SNORE/EFFECT_SLEEP_TALK ->
+  // AI_CBM_DamageDuringSleep (`data/battle_ai_scripts.s:158-159,426-428`):
+  // the user not being asleep rejects at -8.
+  if (move.effect === "EFFECT_SNORE" || move.effect === "EFFECT_SLEEP_TALK") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmDamageDuringSleep(input.attacker.isAsleep ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_EXPLOSION -> AI_CBM_Explosion
+  // (`data/battle_ai_scripts.s:106,224-235`): type x0, Damp, and the paired
+  // usable-party gates.
+  if (move.effect === "EFFECT_EXPLOSION") {
+    const explosion = runCbmExplosion(
+      move.type,
+      target,
+      input.attacker.usablePartyMons ?? 0,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-explosion`,
+    );
+    for (const draw of explosion.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: explosion.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: explosion.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_BATON_PASS -> AI_CBM_BatonPass
+  // (`data/battle_ai_scripts.s:176,485-488`): AI_USER's own usable party
+  // count zero rejects at -10.
+  if (move.effect === "EFFECT_BATON_PASS") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmBatonPass(input.attacker.usablePartyMons ?? 0),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SUBSTITUTE -> AI_CBM_Substitute
+  // (`data/battle_ai_scripts.s:150,405-408`): own substitute up rejects at
+  // -8; own HP% under 26 rejects at -10.
+  if (move.effect === "EFFECT_SUBSTITUTE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmSubstitute(input.attacker),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_DREAM_EATER -> AI_CBM_DreamEater
+  // (`data/battle_ai_scripts.s:107,242-245`): target not asleep rejects at
+  // -8; asleep-but-x0 rejects at -10.
+  if (move.effect === "EFFECT_DREAM_EATER") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmDreamEater(move.type, target),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_MEAN_LOOK -> AI_CBM_CantEscape
+  // (`data/battle_ai_scripts.s:161,430-433`): target already trapped rejects
+  // at -10.
+  if (move.effect === "EFFECT_MEAN_LOOK") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmCantEscape(target.isEscapePrevented ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_TORMENT -> AI_CBM_Torment
+  // (`data/battle_ai_scripts.s:192,527-529`): target already tormented
+  // rejects at -10.
+  if (move.effect === "EFFECT_TORMENT") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmTorment(target.isTormented ?? false),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -2007,4 +2196,160 @@ function runCbmRoar(
     draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
     scoreDelta: ability.ability === ABILITY_SUCTION_CUPS ? -10 : 0,
   });
+}
+
+/**
+ * `AI_CBM_TrickAndKnockOff` (`data/battle_ai_scripts.s:545-548`,
+ * EFFECT_KNOCK_OFF/EFFECT_TRICK): one fresh target ability read, then a
+ * single Sticky Hold rejection gate JUMPing to Score_Minus10; the all-clear
+ * path FALLS THROUGH to end at zero. Same shape as `AI_CBM_Sleep`'s ability
+ * gate (doc §29) but with no status/Safeguard tail.
+ */
+const ABILITY_STICKY_HOLD = "ABILITY_STICKY_HOLD";
+
+function runCbmTrickAndKnockOff(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
+  return Object.freeze({
+    rng: ability.rng,
+    draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
+    scoreDelta: ability.ability === ABILITY_STICKY_HOLD ? -10 : 0,
+  });
+}
+
+/**
+ * `AI_CBM_Safeguard` (`data/battle_ai_scripts.s:478-480`, EFFECT_SAFEGUARD):
+ * a single `if_side_affecting AI_USER, SIDE_STATUS_SAFEGUARD, Score_Minus8`
+ * -- the same bare 2-instruction shape as `AI_CBM_LightScreen`/`AI_CBM_Reflect`
+ * (doc §23.1) with the AI's OWN Safeguard bit swapped in. Reads only AI_USER's
+ * own side; zero stat-stage/ability reads.
+ */
+function runCbmSafeguard(attackerSafeguardUp: boolean): number {
+  return attackerSafeguardUp ? -8 : 0;
+}
+
+/**
+ * `AI_CBM_DamageDuringSleep` (`data/battle_ai_scripts.s:426-428`,
+ * EFFECT_SNORE/EFFECT_SLEEP_TALK): a single
+ * `if_not_status AI_USER, STATUS1_SLEEP, Score_Minus8` -- Snore and Sleep
+ * Talk are penalized whenever the user is NOT asleep. Reads only AI_USER's
+ * own primary status; zero ability/stat reads.
+ */
+function runCbmDamageDuringSleep(attackerIsAsleep: boolean): number {
+  return attackerIsAsleep ? 0 : -8;
+}
+
+/**
+ * `AI_CBM_Explosion` (`data/battle_ai_scripts.s:224-235`, EFFECT_EXPLOSION):
+ * type x0 JUMPs to -10 before any ability read; one fresh target ability
+ * read (Damp -> -10); then the paired usable-party gates -- AI_USER's own
+ * count nonzero means Explosion is fine (End, zero); both sides zero means
+ * both are down to their last mon (Score_Minus1); only AI_TARGET still has
+ * reserves scores -10.
+ */
+const ABILITY_DAMP = "ABILITY_DAMP";
+
+function runCbmExplosion(
+  moveType: string,
+  target: FactoryAiCheckBadMoveRoarTarget,
+  attackerUsablePartyMons: number,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  if (computeAiEffectiveness(moveType, target.types) === 0) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
+  }
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
+  const draws = ability.draw === null ? [] : [ability.draw];
+  if (ability.ability === ABILITY_DAMP) {
+    return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta: -10 });
+  }
+  const attackerCount = attackerUsablePartyMons;
+  if (attackerCount !== 0) {
+    return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta: 0 });
+  }
+  const targetCount = target.usablePartyMons ?? 0;
+  if (targetCount !== 0) {
+    return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta: -10 });
+  }
+  return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta: -1 });
+}
+
+/**
+ * `AI_CBM_BatonPass` (`data/battle_ai_scripts.s:485-488`, EFFECT_BATON_PASS):
+ * a single `count_usable_party_mons AI_USER; if_equal 0, Score_Minus10` --
+ * Baton Pass is penalized only when the AI has no usable party member left
+ * to switch to. Zero ability/type reads.
+ */
+function runCbmBatonPass(attackerUsablePartyMons: number): number {
+  return attackerUsablePartyMons === 0 ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Substitute` (`data/battle_ai_scripts.s:405-408`, EFFECT_SUBSTITUTE):
+ * `if_status2 AI_USER, STATUS2_SUBSTITUTE, Score_Minus8` then
+ * `if_hp_less_than AI_USER, 26, Score_Minus10`. HP percent is truncating
+ * `100*hp/maxHp`, matching `Cmd_if_hp_more_than`/`Cmd_if_hp_less_than`'s own
+ * `(u32)` cast (battle_ai_script_commands.c, same convention as
+ * `runCvVitalThrow`). Zero ability/type reads.
+ */
+function runCbmSubstitute(attacker: FactoryAiCheckBadMoveAttacker): number {
+  if (attacker.hasSubstitute ?? false) {
+    return -8;
+  }
+  const maxHp = attacker.maxHp ?? 1;
+  const hp = attacker.hp ?? 1;
+  const hpPercent = Math.floor((100 * hp) / maxHp);
+  return hpPercent < 26 ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_DreamEater` (`data/battle_ai_scripts.s:242-245`, EFFECT_DREAM_EATER):
+ * `if_not_status AI_TARGET, STATUS1_SLEEP, Score_Minus8` then
+ * `if_type_effectiveness AI_EFFECTIVENESS_x0, Score_Minus10` -- Dream Eater
+ * is penalized against a target that is not asleep, and doubly so (reaches
+ * -10 only if asleep, since -8 already fired for non-asleep) against a type
+ * it cannot affect. Zero ability reads.
+ */
+function runCbmDreamEater(
+  moveType: string,
+  target: FactoryAiCheckBadMoveTarget,
+): number {
+  if (!(target.isAsleep ?? false)) {
+    return -8;
+  }
+  return computeAiEffectiveness(moveType, target.types) === 0 ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_CantEscape` (`data/battle_ai_scripts.s:430-433`, EFFECT_MEAN_LOOK/
+ * EFFECT_BLOCK/EFFECT_SPIDER_WEB): a single
+ * `if_status2 AI_TARGET, STATUS2_ESCAPE_PREVENTION, Score_Minus10` -- the
+ * trap is penalized when the target is already trapped. Zero ability/type
+ * reads.
+ */
+function runCbmCantEscape(targetEscapePrevented: boolean): number {
+  return targetEscapePrevented ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Torment` (`data/battle_ai_scripts.s:527-529`, EFFECT_TORMENT): a
+ * single `if_status2 AI_TARGET, STATUS2_TORMENT, Score_Minus10` -- Torment
+ * is penalized when the target is already tormented. Zero ability/type reads.
+ */
+function runCbmTorment(targetTormented: boolean): number {
+  return targetTormented ? -10 : 0;
 }

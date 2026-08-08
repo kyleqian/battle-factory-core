@@ -40,7 +40,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_SHELL_ARMOR | engine-referenced | 21 (4) | 21 | — | 1 | 0 | 2 |
 | ABILITY_POISON_POINT | engine-referenced | 18 (14) | 18 | ON_DAMAGE | 0 | 0 | 5 |
 | ABILITY_SWARM | engine-referenced | 18 (8) | 18 | — | 1 | 0 | 2 |
-| ABILITY_DAMP | engine-referenced | 16 (0) | 16 | — | 2 | 0 | 3 |
+| ABILITY_DAMP | engine-referenced | 16 (0) | 16 | — | 2 | 0 | 5 |
 | ABILITY_OWN_TEMPO | engine-referenced | 16 (2) | 16 | IMMUNITY | 5 | 0 | 9 |
 | ABILITY_TRACE | engine-referenced | 16 (6) | 16 | ON_SWITCHIN, TRACE | 0 | 0 | 2 |
 | ABILITY_INSOMNIA | engine-referenced | 15 (10) | 15 | IMMUNITY | 5 | 0 | 13 |
@@ -57,7 +57,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_BATTLE_ARMOR | engine-referenced | 8 (5) | 8 | — | 1 | 0 | 2 |
 | ABILITY_EFFECT_SPORE | engine-referenced | 8 (8) | 8 | ON_DAMAGE | 0 | 0 | 6 |
 | ABILITY_FLAME_BODY | engine-referenced | 8 (5) | 8 | ON_DAMAGE | 0 | 0 | 4 |
-| ABILITY_STICKY_HOLD | engine-referenced | 8 (0) | 8 | — | 5 | 0 | 8 |
+| ABILITY_STICKY_HOLD | engine-referenced | 8 (0) | 8 | — | 5 | 0 | 10 |
 | ABILITY_LIQUID_OOZE | engine-referenced | 8 (0) | 8 | — | 2 | 0 | 3 |
 | ABILITY_SUCTION_CUPS | engine-referenced | 7 (7) | 7 | — | 1 | 0 | 5 |
 | ABILITY_SHIELD_DUST | engine-referenced | 6 (6) | 6 | — | 2 | 0 | 5 |

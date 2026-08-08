@@ -528,6 +528,10 @@ export type FactoryAiScoredBattlerView = Readonly<{
   isRooted?: boolean;
   /** `gBattleMons[].status2 & STATUS2_CURSED` -- source-required for `AI_CV_AccuracyDown`'s Gate G (target only, doc §19.1). Optional, defaulting to `false`. */
   isCursed?: boolean;
+  /** `gBattleMons[].status2 & STATUS2_ESCAPE_PREVENTION` -- `AI_CBM_CantEscape`'s single gate (target only, EFFECT_MEAN_LOOK). Optional, defaulting to `false`. */
+  isEscapePrevented?: boolean;
+  /** `gBattleMons[].status2 & STATUS2_TORMENT` -- `AI_CBM_Torment`'s single gate (target only, EFFECT_TORMENT). Optional, defaulting to `false`. */
+  isTormented?: boolean;
   /** `gSideStatuses[] & SIDE_STATUS_LIGHTSCREEN` -- source-required for `AI_CBM_LightScreen`'s own gate (AI_USER's OWN side only, doc §23.1). Optional, defaulting to `false`. */
   lightScreenUp?: boolean;
   /** `gSideStatuses[] & SIDE_STATUS_REFLECT` -- source-required for `AI_CBM_Reflect`'s own gate (AI_USER's OWN side only, doc §23.1). Optional, defaulting to `false`. */
@@ -548,6 +552,16 @@ export type FactoryAiScoredBattlerView = Readonly<{
    * §25.1/§25.2). Optional, defaulting to `undefined` (no weather bit set).
    */
   currentWeather?: AiWeatherValue;
+  /**
+   * Alive, non-empty, non-Egg bench count produced by
+   * `count_usable_party_mons AI_USER`, excluding the active party index --
+   * `AI_CBM_Explosion`/`AI_CBM_BatonPass`'s own AI_USER count gate. Optional
+   * (the live driver does not yet model either side's party), defaulting to
+   * the CBM layer's conservative zero-member default.
+   */
+  usablePartyMons?: number;
+  /** `gBattleMons[].status2 & STATUS2_SUBSTITUTE` -- `AI_CBM_Substitute`'s own first gate (attacker's own copy only). Optional, defaulting to `false`. */
+  hasSubstitute?: boolean;
 }>;
 
 export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
@@ -806,6 +820,9 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     safeguardUp: view.target.safeguardUp,
     usablePartyMons: view.target.usablePartyMons,
     isLeechSeeded: view.target.isLeechSeeded,
+    ...(view.target.isAsleep === true ? { isAsleep: true } : {}),
+    ...(view.target.isEscapePrevented === true ? { isEscapePrevented: true } : {}),
+    ...(view.target.isTormented === true ? { isTormented: true } : {}),
     level: view.target.level,
   });
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({
@@ -820,6 +837,14 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     currentWeather: view.attacker.currentWeather,
     level: view.attacker.level,
     isFirstTurn: view.attacker.isFirstTurn,
+    ...(view.attacker.safeguardUp === true ? { safeguardUp: true } : {}),
+    ...(view.attacker.isAsleep === true ? { isAsleep: true } : {}),
+    ...(view.attacker.usablePartyMons === undefined
+      ? {}
+      : { usablePartyMons: view.attacker.usablePartyMons }),
+    ...(view.attacker.hasSubstitute === true ? { hasSubstitute: true } : {}),
+    hp: view.attacker.hp,
+    maxHp: view.attacker.maxHp,
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [
