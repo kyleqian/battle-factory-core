@@ -4564,9 +4564,6 @@ export function sceneOnTormentView(
   }
   const config = state.config as SceneOnTormentConfig;
   return {
-    age: state.age,
-    attacker: config.attacker,
-    target: config.target,
     ...tormentAtAge(
       state.age,
       config.attackerPictureOffset,
@@ -4574,6 +4571,8 @@ export function sceneOnTormentView(
       config.target.geometry.side,
       config.targetPictureOffset,
     ),
+    attacker: config.attacker,
+    target: config.target,
   };
 }
 
