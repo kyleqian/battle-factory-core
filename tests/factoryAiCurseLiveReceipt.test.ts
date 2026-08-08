@@ -105,6 +105,8 @@ describe("AI_CV_Curse live receipt (docs/factory-ai-cv-live-receipts-curse.md)",
     // [seed, role, rngStart, expectedSlot, expectedRng, curseCvDelta, expectedRolls]
     [1, "control", 3_894_234_654, 0, 2_358_569_446, 2, 3],
     [1, "reach", 3_894_234_654, 0, 3_323_223_981, 0, 0],
+    [5, "control", 1_797_915_079, 0, 1_100_827_055, 1, 3],
+    [5, "reach", 1_797_915_079, 3, 3_001_792_242, 0, 0],
     [99, "control", 1_656_372_911, 0, 4_236_983_191, 2, 3],
     [99, "reach", 1_656_372_911, 3, 2_270_394_938, 0, 0],
   ] as const)("seed %i %s: engine reproduces the ROM's chosen slot and exact RNG endpoint", (
@@ -159,5 +161,28 @@ describe("AI_CV_Curse live receipt (docs/factory-ai-cv-live-receipts-curse.md)",
     expect(control.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 2, finalScore: 102 });
     expect(reach.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 0, finalScore: 100 });
     expect(reach.trace.bestMoveSlots).toEqual([0, 1, 2, 3]);
+  });
+
+  it("seed 5 control closes the missing roll-site polarities: site 1 falls through (+1) while sites 2 and 3 jump", () => {
+    const result = chooseFactoryAiScoredDecision({
+      view: curseView("control"),
+      request,
+      rng: { value: 1_797_915_079, calls: 0 },
+    });
+    const rolls = result.trace.draws.filter(
+      (draw) => typeof draw.kind === "string" && draw.kind.startsWith("curse-roll"),
+    );
+    // The banked seeds 1/99 only ever jumped site 1 ({20,83}) and fell
+    // through sites 2/3 ({161,225},{165,246}). This seed-5 row shows the
+    // missing polarities: site 1 roll 235 >= 128 (fall-through +1), sites 2/3
+    // rolls 71/94 < 128 (jump, no +1), scoring the never-before-seen +1.
+    const polarities = rolls.map((draw) => {
+      const d = draw as { randomValue: number; jumped: boolean };
+      return `${d.randomValue % 256}${d.jumped ? "jump" : "+1"}`;
+    });
+    expect(polarities).toEqual(["235+1", "71jump", "94jump"]);
+    expect(result.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 1, finalScore: 101 });
+    expect(result.rng.value).toBe(1_100_827_055);
+    expect(result.trace.tie.chosenDecision).toMatchObject({ kind: "use-move", moveSlot: 0 });
   });
 });

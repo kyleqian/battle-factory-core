@@ -21,7 +21,7 @@ import { oracleUrlForProfile } from "../compare/oracleProfiles.ts";
 // rentals, both staged with [Curse, Splash, Splash, Splash] behind the
 // Magikarp-relay switch-in recipe.
 
-const SEEDS = [1, 99] as const;
+const SEEDS = [1, 5, 99] as const;
 const ROLES = ["control", "reach"] as const;
 const START_PP = [10, 40, 40, 40] as const;
 const CAPTURE_START = 700;
