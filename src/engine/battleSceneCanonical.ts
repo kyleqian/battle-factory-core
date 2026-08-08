@@ -2174,3 +2174,215 @@ export function turn16PartyElapsedAtTick(partyElapsed: number, t: number, anchor
 
 export const TURN17_LOSS_TEXT_TOTAL =
   TURN17_LOSS_LINE1.length + TURN17_LOSS_LINE2.length;
+
+import { createBattle2CommandAdapterResolution } from "./battle2CommandAdapter.ts";
+import { TURN6_SUPER_EFFECTIVE_LINE } from "./battleMenu.ts";
+import menuIdleOnixBounceAsset from "../assets/gen/menu-idle-onix-bounce.json" with { type: "json" };
+import menuIdleHealthboxBounceAsset from "../assets/gen/menu-idle-healthbox-bounce.json" with { type: "json" };
+
+// --- slice 4 batch 1: leaves whose canonical-only deps already moved ---
+
+
+export const menuIdleOnixBounce = menuIdleOnixBounceAsset as MenuIdleBounceTwoStateAsset;
+
+
+export const menuIdleHealthboxBounce = menuIdleHealthboxBounceAsset as MenuIdleBounceTwoStateAsset;
+
+
+
+/**
+ * ONIX's ROCK SLIDE HP boundary for KABUTO, sourced from the real kernel
+ * resolution (battle2CommandAdapter.ts) instead of formerly-hardcoded
+ * battle2Turn1.ts constants -- same `{from, to}` shape every other turn
+ * window's own `rockSlideOpponentHp` boundary constant uses.
+ */
+export const BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP = (() => {
+  const resolution = createBattle2CommandAdapterResolution(BATTLE2_TURN1_KERNEL);
+  const hpCommand = resolution.segments[0]!.commands.find(
+    (command) => command.type === "hp" && command.battler === 1,
+  );
+  if (!hpCommand || hpCommand.type !== "hp") {
+    throw new Error(
+      "battle2CommandAdapter: expected KABUTO's ROCK SLIDE hp command",
+    );
+  }
+  return { from: hpCommand.from, to: hpCommand.to };
+})();
+
+
+
+/** Visible character count (0..DRAGONBREATH_KICKOFF_TEXT_TOTAL) of "ONIX used\nDRAGONBREATH!" at absolute trace tick `t` - same 1-tick/char mechanism as `turn2KickoffTextVisibleChars`. Oracle-confirmed exact (docs/dragon-breath-notes.md): tick 3157 (start+20) is the last still-increasing frame (21 chars), tick 3158 (start+21) shows all 22 and holds flat through 3176. */
+export function dragonBreathTextVisibleChars(t: number, pressTick: number, startDelay: number = DRAGONBREATH_TEXT_START_DELAY): number {
+  const start = dragonBreathTextStartTick(pressTick, startDelay);
+  if (t < start) return 0;
+  return Math.min(DRAGONBREATH_KICKOFF_TEXT_TOTAL, t - start + 1);
+}
+
+
+export const GROVYLE_FAINT_SINK_STEPS = GROVYLE_FAINT_SINK.steps;
+
+
+
+/** Grovyle's own opponent healthbox vanishes entirely 2 ticks after the sink's own last visible erase-step (`GROVYLE_FAINT_SINK_START_TICK + 2*GROVYLE_FAINT_SINK_STEPS + 3` = 6521) - pixel-confirmed this session (dense oracle sweep of the healthbox's own crop: byte-identical bare background from tick 6521 on, a 7064px whole-healthbox-region diff the tick before). A distinct UI element from the sprite sink above (different screen region), not itemized in docs/faint-switch-notes.md §3/§7 - this session's own re-probe answers the brief's own "what happens to Grovyle's healthbox" question directly. ISSUES #39 rank-3 flip: `healthboxVanishFrame` is now the SAME generic formula's own output (`GROVYLE_FAINT_SINK.healthboxVanishFrame`), not an independently re-stated `+19`. */
+export const GROVYLE_HEALTHBOX_VANISH_TICK = GROVYLE_FAINT_SINK_START_TICK + GROVYLE_FAINT_SINK.healthboxVanishFrame;
+
+
+
+/**
+ * S7 slice M-5 (docs/faint-switch-notes.md §15): "ONIX's SITRUS BERRY\n
+ * restored health!" (`STRINGID_ITEMHEALHP_BERRY`'s own two-line wrap) -
+ * pixel-confirmed this session via a full oracle diff scan of `battle1-
+ * sitrus-ext.json` (not committed - a scratch extension of `turn5-sitrus-
+ * b.json`'s own script with idle padding to 7325): text box redraw (a
+ * 1206px jump, not a char-sized delta) at render tick **7078**, then
+ * exactly 1 visible-char-count/tick through **7112** (35 diffs total,
+ * matching the string's own 19+16 length exactly, silent-but-charged
+ * spaces at chars 6/13/27 landing on the three flat ticks the scan found
+ * in between, 7084/7091/7105 - same mechanism/cadence as every other
+ * message in this dossier). Held flat 7112 through **7215** (104 ticks,
+ * matching §11's own "held" note, now bounded exactly) - the HP bar climbs
+ * DURING this hold (`turn5SitrusOnixHp` below), not after it. ISSUES #39
+ * rank-3 flip: line content is now `TURN5_SITRUS.healLines`, the real
+ * `STRINGID_PKMNSITEMRESTOREDHEALTH` resolution, not an independently
+ * re-stated literal pair.
+ */
+export const TURN5_SITRUS_HEAL_LINE1 = TURN5_SITRUS.healLines[0]!;
+
+
+export const TURN5_SITRUS_HEAL_LINE2 = TURN5_SITRUS.healLines[1]!;
+
+
+
+/**
+ * The message box goes blank (box stays, no text - same shape as every
+ * other turn-end transition in this file) at render tick **7216**, then
+ * hard-cuts to the interactive action menu at **7222** - both pixel-
+ * confirmed this session (full-frame diffs of 1127px then 5983px at
+ * exactly these ticks, the scan's own "big jump then HUGE jump" - a
+ * message-box-close-then-menu-reveal pair, not one atomic transition).
+ */
+
+
+
+/**
+ * Onix's own HP climb, 1->31 (`§2`'s pinned heal formula) - RAM-truthed
+ * indirectly via a byte-exact PNG crop match against `composePlayerHealth
+ * boxHpOverlay`'s own render for every candidate hp 1-31 (`tools/compare/
+ * scratch/sitrus_hp_climb_match.mjs`, not committed): **1 HP unit per
+ * tick**, starting render tick **7180** (hp=2) through **7209** (hp=31,
+ * settled) - 0px residual at every one of the 30 climbing ticks plus every
+ * held tick through 7325 once yOffset (`menuIdleBounce`'s own healthboxY2,
+ * see `turn5SitrusResettledBounceTick`) is accounted for. This is a real,
+ * useful correction to §11's own "HP digits/bar still climbing past 7306"
+ * hedge: they're NOT still climbing - hp is flat at 31 from 7209 on, and
+ * every later pixel change in that region is purely the ordinary idle-
+ * bounce y-shift (confirmed by re-matching at 9 candidate yOffsets: exact
+ * 0-diff hits at yOffset 0/1/2 only, matching `menuIdleBounce`'s own
+ * 0..2 range, never a different hp). ISSUES #39 rank-3 flip: the endpoints
+ * are now `TURN5_SITRUS.hp.from`/`.to`, the real staged Sitrus proc's own
+ * HP-change event, not independently re-stated literals.
+ */
+export const TURN5_SITRUS_HEAL_HP_START = TURN5_SITRUS.hp.from;
+
+
+export const TURN5_SITRUS_HEAL_HP_END = TURN5_SITRUS.hp.to;
+
+
+
+/**
+ * ISSUES #26 (docs/faint-switch-notes.md §16): the Sitrus proc's expanding
+ * THIN_RING (`gThinRingExpandingSpriteTemplate`, `gSprites[4]`,
+ * `matrixNum=2`) - RAM ground truth from the dedicated probe
+ * (`src/data/gen/turn5-sitrus-ring-probe.json`, twice-run byte-identical,
+ * all 32 live ticks match this closed form with zero mismatches). Unlike
+ * `onixSitrusRotateMatrix` above, this matrix is a pure isotropic scale
+ * (`b=c=0` always, `a=d` always) - never a rotation - so it does NOT
+ * inherit that mechanism's own +2 render lag (rotation-matrix-specific,
+ * per §13's own rationale and §29's independent confirmation it doesn't
+ * generalize); this one uses the dossier's ordinary **+1** lag instead
+ * (`TURN5_SITRUS_RING_RENDER_LAG` above), verified pixel-exact with zero
+ * fitted parameters at two sample ticks (6/6 opaque px at render 7042,
+ * 92/92 at render 7048). Center `(72,88)` is RAM-constant for the sprite's
+ * whole life (the ring's own sprite x/y directly - 8px below
+ * `onixSitrusRotateMatrix`'s own call-site center, from
+ * `AnimSpriteOnMonPos`'s mon-pic Y offset that Onix's own hardcoded
+ * rotation call never applies) - species-dossier slice 7: now
+ * `TURN5_SITRUS.onFieldCenter`, `turn5ResolutionAdapter.ts`'s own adapter-
+ * owned fact, not an independently hand-derived literal here.
+ */
+export const TURN5_SITRUS_RING_CENTER = TURN5_SITRUS.onFieldCenter;
+
+
+
+/** Visible character count (0..TURN6_FEATHERDANCE_TEXT_TOTAL) of "Foe PIDGEOTTO used\nFEATHERDANCE!" at absolute trace tick `t` - same 1-tick/char mechanism as `turnKickoffTextVisibleChars`, calibrated start (`turn6FeatherDanceTextStartTick`). */
+export function turn6FeatherDanceTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn6FeatherDanceTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN6_FEATHERDANCE_TEXT_TOTAL, t - start + 1);
+}
+
+
+
+export function turn9QuickAttackTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn9QuickAttackTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN9_QUICKATTACK_TEXT_TOTAL, t - start + 1);
+}
+
+
+
+export function turn9NotVeryEffectiveTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn9NotVeryEffectiveTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN9_NOTVERYEFFECTIVE_LINE.length, t - start + 1);
+}
+
+
+
+export function turn9SuperEffectiveTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn9SuperEffectiveTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN6_SUPER_EFFECTIVE_LINE.length, t - start + 1);
+}
+
+
+
+export function turn10AerialAceTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn10AerialAceTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN10_AERIALACE_TEXT_TOTAL, t - start + 1);
+}
+
+
+export function turn10NotVeryEffectiveTextVisibleChars(t: number, pressTick: number, delay: number = TURN10_NOTVERYEFFECTIVE_TEXT_DELAY): number {
+  const start = turn10NotVeryEffectiveTextStartTick(pressTick, delay);
+  if (t < start) return 0;
+  return Math.min(TURN9_NOTVERYEFFECTIVE_LINE.length, t - start + 1);
+}
+
+
+export function turn10SuperEffectiveTextVisibleChars(t: number, pressTick: number, delay: number = TURN10_SUPER_EFFECTIVE_TEXT_DELAY): number {
+  const start = turn10SuperEffectiveTextStartTick(pressTick, delay);
+  if (t < start) return 0;
+  return Math.min(TURN6_SUPER_EFFECTIVE_LINE.length, t - start + 1);
+}
+
+
+export function turn11AtkFloorTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn11AtkFloorTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN11_ATKFLOOR_TEXT_TOTAL, t - start + 1);
+}
+
+
+export function turn11SuperEffectiveTextVisibleChars(t: number, pressTick: number, delay: number = TURN11_SUPER_EFFECTIVE_TEXT_DELAY): number {
+  const start = turn11SuperEffectiveTextStartTick(pressTick, delay);
+  if (t < start) return 0;
+  return Math.min(TURN6_SUPER_EFFECTIVE_LINE.length, t - start + 1);
+}
+
+
+export const TURN14_FLYUP_TEXT_TOTAL = TURN14_FLYUP_LINE1.length + TURN14_FLYUP_LINE2.length;
+
+
+export const TURN15_FLY_STRIKE_TEXT_TOTAL = TURN15_FLY_STRIKE_LINE1.length + TURN15_FLY_STRIKE_LINE2.length;

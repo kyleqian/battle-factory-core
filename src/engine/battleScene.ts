@@ -637,8 +637,6 @@ import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import menuIdleBlankAsset from "../assets/gen/menu-idle-blank.json" with { type: "json" };
 import menuIdleBaseAsset from "../assets/gen/menu-idle-base.json" with { type: "json" };
-import menuIdleOnixBounceAsset from "../assets/gen/menu-idle-onix-bounce.json" with { type: "json" };
-import menuIdleHealthboxBounceAsset from "../assets/gen/menu-idle-healthbox-bounce.json" with { type: "json" };
 import fightSubmenuWindowAsset from "../assets/gen/fight-submenu-window.json" with { type: "json" };
 import partyMenuChromeAsset from "../assets/gen/party-menu-chrome.json" with { type: "json" };
 import partyMonIconsAsset from "../assets/gen/party-mon-icons.json" with { type: "json" };
@@ -775,7 +773,6 @@ import {
 } from "./prebattleRoomRender.ts";
 import {
   createBattle2CommandAdapterCommand,
-  createBattle2CommandAdapterResolution,
 } from "./battle2CommandAdapter.ts";
 import { drawMode0Objects, drawMode0Ppu, mgbaDarkenColor, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
@@ -1138,6 +1135,8 @@ export type { MenuIdleBounceTwoStateAsset } from "./battleSceneCanonical.ts";
 import type { MenuIdleBounceTwoStateAsset } from "./battleSceneCanonical.ts";
 import { BATTLE2_TURN1_KERNEL, DRAGONBREATH_HIT_FLASH_OFFSET, DRAGONBREATH_KICKOFF_TEXT_TOTAL, GROVYLE_FAINT_SINK, INITIAL_BATTLE_SCENE_STATE, TURN10_AERIALACE_TEXT_TOTAL, TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN10_ONIX_AFTER_AERIALACE_HP, TURN11_ATKFLOOR_TEXT_TOTAL, TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN12_ONIX_AFTER_AERIALACE_HP, TURN13_SANDATTACK_DIRT_DRAW_ORDER, TURN14_DRAGONBREATH_TEXT_TOTAL, TURN14_FLYUP_LINE1, TURN14_FLYUP_LINE2, TURN15_FLY_STRIKE_LINE1, TURN15_FLY_STRIKE_LINE2, TURN15_ONIX_SHAKE_RAM_TICKS, TURN16_FAINT_ATTACK_TEXT_TOTAL, TURN16_FIRE_PUNCH_TEXT_TOTAL, TURN17_LOSS_TEXT_TOTAL, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN1_ROCKSLIDE_HP, TURN2_ENDEAVOR_HP, TURN2_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN3_ROCKSLIDE_HP, TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN4_ROCKSLIDE_HP, TURN5_ENDEAVOR_HP, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_SITRUS, TURN6_FEATHERDANCE_TEXT_TOTAL, TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_REGIME2_TO_REGIME1_SHIFT, TURN8_REGIME3_TO_REGIME1_SHIFT, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN9_QUICKATTACK_TEXT_TOTAL, TURN9_ROCKSLIDE_ANIMATION_PROFILE, battle2RockSlideMechanismPressTick, currentEpochPresentationAgeFromLatest, dragonBreathHp, dragonBreathTextStartTick, frontSpriteAnimFrame, grovyleStretchTintCoeff, playerHealthboxHpOverlayByHp, turn10AerialAceHp, turn10AerialAceTextStartTick, turn10NotVeryEffectiveTextStartTick, turn10SuperEffectiveTextStartTick, turn11AtkFloorTextStartTick, turn11SuperEffectiveTextStartTick, turn12MissTextStartTick, turn13AccFellTextStartTick, turn13MurkrowFrame, turn13SandAttackPidgeottoX2, turn13SandAttackTextStartTick, turn14KickoffBounceTick, turn14MurkrowInvisible, turn14SimpleVisibleChars, turn15FaintSinkSkipRows, turn15SimpleVisibleChars, turn15StrikeAttackerInvisible, turn15StrikeTargetHealthboxWobbleY2, turn15StrikeTargetHp, turn15StrikeTargetInvisible, turn15StrikeTargetShakeX2, turn16PartyElapsedAtTick, turn3KickoffBounceTick, turn3SubmenuBounceTickFromPresentationEpochAge, turn5FaintedCursorYOffset, turn5FaintedTextStartTick, turn5IconBarEva, turn5PidgeottoFrame, turn5SitrusResettledBounceTick, turn6FeatherDanceTextStartTick, turn6KickoffBounceTick, turn7KickoffBounceTick, turn8BindTextStartTick, turn8KickoffBounceTick, turn8MissTextStartTick, turn9Ep2HealthboxWobbleY2, turn9Ep2OnixInvisible, turn9Hp, turn9NotVeryEffectiveTextStartTick, turn9QuickAttackTextStartTick, turn9SuperEffectiveTextStartTick } from "./battleSceneCanonical.ts";
 export { BATTLE2_TURN1_KERNEL, DRAGONBREATH_HIT_FLASH_OFFSET, DRAGONBREATH_KICKOFF_TEXT_TOTAL, GROVYLE_FAINT_SINK, INITIAL_BATTLE_SCENE_STATE, TURN10_AERIALACE_TEXT_TOTAL, TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN10_ONIX_AFTER_AERIALACE_HP, TURN11_ATKFLOOR_TEXT_TOTAL, TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN12_ONIX_AFTER_AERIALACE_HP, TURN13_SANDATTACK_DIRT_DRAW_ORDER, TURN14_DRAGONBREATH_TEXT_TOTAL, TURN14_FLYUP_LINE1, TURN14_FLYUP_LINE2, TURN15_FLY_STRIKE_LINE1, TURN15_FLY_STRIKE_LINE2, TURN15_ONIX_SHAKE_RAM_TICKS, TURN16_FAINT_ATTACK_TEXT_TOTAL, TURN16_FIRE_PUNCH_TEXT_TOTAL, TURN17_LOSS_TEXT_TOTAL, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN1_ROCKSLIDE_HP, TURN2_ENDEAVOR_HP, TURN2_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN3_ROCKSLIDE_HP, TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN4_ROCKSLIDE_HP, TURN5_ENDEAVOR_HP, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_SITRUS, TURN6_FEATHERDANCE_TEXT_TOTAL, TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_REGIME2_TO_REGIME1_SHIFT, TURN8_REGIME3_TO_REGIME1_SHIFT, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN9_QUICKATTACK_TEXT_TOTAL, TURN9_ROCKSLIDE_ANIMATION_PROFILE, battle2RockSlideMechanismPressTick, currentEpochPresentationAgeFromLatest, dragonBreathHp, dragonBreathTextStartTick, frontSpriteAnimFrame, grovyleStretchTintCoeff, playerHealthboxHpOverlayByHp, turn10AerialAceHp, turn10AerialAceTextStartTick, turn10NotVeryEffectiveTextStartTick, turn10SuperEffectiveTextStartTick, turn11AtkFloorTextStartTick, turn11SuperEffectiveTextStartTick, turn12MissTextStartTick, turn13AccFellTextStartTick, turn13MurkrowFrame, turn13SandAttackPidgeottoX2, turn13SandAttackTextStartTick, turn14KickoffBounceTick, turn14MurkrowInvisible, turn14SimpleVisibleChars, turn15FaintSinkSkipRows, turn15SimpleVisibleChars, turn15StrikeAttackerInvisible, turn15StrikeTargetHealthboxWobbleY2, turn15StrikeTargetHp, turn15StrikeTargetInvisible, turn15StrikeTargetShakeX2, turn16PartyElapsedAtTick, turn3KickoffBounceTick, turn3SubmenuBounceTickFromPresentationEpochAge, turn5FaintedCursorYOffset, turn5FaintedTextStartTick, turn5IconBarEva, turn5PidgeottoFrame, turn5SitrusResettledBounceTick, turn6FeatherDanceTextStartTick, turn6KickoffBounceTick, turn7KickoffBounceTick, turn8BindTextStartTick, turn8KickoffBounceTick, turn8MissTextStartTick, turn9Ep2HealthboxWobbleY2, turn9Ep2OnixInvisible, turn9Hp, turn9NotVeryEffectiveTextStartTick, turn9QuickAttackTextStartTick, turn9SuperEffectiveTextStartTick };
+import { BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP, GROVYLE_FAINT_SINK_STEPS, GROVYLE_HEALTHBOX_VANISH_TICK, TURN14_FLYUP_TEXT_TOTAL, TURN15_FLY_STRIKE_TEXT_TOTAL, TURN5_SITRUS_HEAL_HP_END, TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_LINE1, TURN5_SITRUS_HEAL_LINE2, TURN5_SITRUS_RING_CENTER, dragonBreathTextVisibleChars, menuIdleHealthboxBounce, menuIdleOnixBounce, turn10AerialAceTextVisibleChars, turn10NotVeryEffectiveTextVisibleChars, turn10SuperEffectiveTextVisibleChars, turn11AtkFloorTextVisibleChars, turn11SuperEffectiveTextVisibleChars, turn6FeatherDanceTextVisibleChars, turn9NotVeryEffectiveTextVisibleChars, turn9QuickAttackTextVisibleChars, turn9SuperEffectiveTextVisibleChars } from "./battleSceneCanonical.ts";
+export { BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP, GROVYLE_FAINT_SINK_STEPS, GROVYLE_HEALTHBOX_VANISH_TICK, TURN14_FLYUP_TEXT_TOTAL, TURN15_FLY_STRIKE_TEXT_TOTAL, TURN5_SITRUS_HEAL_HP_END, TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_LINE1, TURN5_SITRUS_HEAL_LINE2, TURN5_SITRUS_RING_CENTER, dragonBreathTextVisibleChars, menuIdleHealthboxBounce, menuIdleOnixBounce, turn10AerialAceTextVisibleChars, turn10NotVeryEffectiveTextVisibleChars, turn10SuperEffectiveTextVisibleChars, turn11AtkFloorTextVisibleChars, turn11SuperEffectiveTextVisibleChars, turn6FeatherDanceTextVisibleChars, turn9NotVeryEffectiveTextVisibleChars, turn9QuickAttackTextVisibleChars, turn9SuperEffectiveTextVisibleChars };
 
 interface Tileset {
   columns: number;
@@ -2469,8 +2468,6 @@ const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
 const menuIdleBlank = menuIdleBlankAsset as MenuIdleFrameAsset;
 const menuIdleBase = menuIdleBaseAsset as MenuIdleFrameAsset;
-const menuIdleOnixBounce = menuIdleOnixBounceAsset as MenuIdleBounceTwoStateAsset;
-const menuIdleHealthboxBounce = menuIdleHealthboxBounceAsset as MenuIdleBounceTwoStateAsset;
 const fightSubmenuWindow = fightSubmenuWindowAsset as FightSubmenuWindowAsset;
 
 /** This window's own trace-tick origin - `elapsed` 0 == trace tick 1040 (tools/compare/traces-groundtruth/battle1-scene-dense.json's own first captured frame). */
@@ -7309,25 +7306,6 @@ function battle2Turn1BounceTick(
   return actionMenuBounceTick(t, handoffTick) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
 }
 
-/**
- * ONIX's ROCK SLIDE HP boundary for KABUTO, sourced from the real kernel
- * resolution (battle2CommandAdapter.ts) instead of formerly-hardcoded
- * battle2Turn1.ts constants -- same `{from, to}` shape every other turn
- * window's own `rockSlideOpponentHp` boundary constant uses.
- */
-const BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP = (() => {
-  const resolution = createBattle2CommandAdapterResolution(BATTLE2_TURN1_KERNEL);
-  const hpCommand = resolution.segments[0]!.commands.find(
-    (command) => command.type === "hp" && command.battler === 1,
-  );
-  if (!hpCommand || hpCommand.type !== "hp") {
-    throw new Error(
-      "battle2CommandAdapter: expected KABUTO's ROCK SLIDE hp command",
-    );
-  }
-  return { from: hpCommand.from, to: hpCommand.to };
-})();
-
 function drawBattle2RockSlideAttack(
   fb: Uint8Array,
   t: number,
@@ -8738,13 +8716,6 @@ function drawEndeavorSquish(fb: Uint8Array, t: number, pressTick: number, oppone
   return true;
 }
 
-/** Visible character count (0..DRAGONBREATH_KICKOFF_TEXT_TOTAL) of "ONIX used\nDRAGONBREATH!" at absolute trace tick `t` - same 1-tick/char mechanism as `turn2KickoffTextVisibleChars`. Oracle-confirmed exact (docs/dragon-breath-notes.md): tick 3157 (start+20) is the last still-increasing frame (21 chars), tick 3158 (start+21) shows all 22 and holds flat through 3176. */
-function dragonBreathTextVisibleChars(t: number, pressTick: number, startDelay: number = DRAGONBREATH_TEXT_START_DELAY): number {
-  const start = dragonBreathTextStartTick(pressTick, startDelay);
-  if (t < start) return 0;
-  return Math.min(DRAGONBREATH_KICKOFF_TEXT_TOTAL, t - start + 1);
-}
-
 /**
  * ISSUES #39 rank-6 slice 2: DRAGON_BREATH's own target-side shake
  * (`AnimTask_ShakeMon2`) and red-fade blend (`AnimTask_BlendBattleAnimPal`)
@@ -9824,8 +9795,7 @@ function drawTurn5EndeavorText(
 // evaluated at Grovyle's real front-pic yOffset=4 (mon-pic-coords.json) --
 // ISSUES #39 rank-3 flip: proven equal to the former hand-fit
 // GROVYLE_FAINT_SINK_STEPS=8 constant by turn5ResolutionAdapterEquivalence
-// .test.ts, not independently re-derived.
-export const GROVYLE_FAINT_SINK_STEPS = GROVYLE_FAINT_SINK.steps; // n = 8 - floor(yOffset/8), Grovyle yOffset=4 (mon-pic-coords.json)
+// .test.ts, not independently re-derived. // n = 8 - floor(yOffset/8), Grovyle yOffset=4 (mon-pic-coords.json)
 
 /**
  * `{ keptRows, y2 }` for a fainting mon's own sink at render tick `t` -
@@ -9844,10 +9814,7 @@ export function grovyleFaintSinkRowsAndY2(t: number, startTick: number = GROVYLE
   if (d <= 0) return { keptRows: steps, y2: 0 };
   const k = Math.min(steps, Math.ceil(d / 2));
   return { keptRows: steps - k, y2: k * 8 };
-}
-
-/** Grovyle's own opponent healthbox vanishes entirely 2 ticks after the sink's own last visible erase-step (`GROVYLE_FAINT_SINK_START_TICK + 2*GROVYLE_FAINT_SINK_STEPS + 3` = 6521) - pixel-confirmed this session (dense oracle sweep of the healthbox's own crop: byte-identical bare background from tick 6521 on, a 7064px whole-healthbox-region diff the tick before). A distinct UI element from the sprite sink above (different screen region), not itemized in docs/faint-switch-notes.md §3/§7 - this session's own re-probe answers the brief's own "what happens to Grovyle's healthbox" question directly. ISSUES #39 rank-3 flip: `healthboxVanishFrame` is now the SAME generic formula's own output (`GROVYLE_FAINT_SINK.healthboxVanishFrame`), not an independently re-stated `+19`. */
-export const GROVYLE_HEALTHBOX_VANISH_TICK = GROVYLE_FAINT_SINK_START_TICK + GROVYLE_FAINT_SINK.healthboxVanishFrame; // 6521
+} // 6521
 
 /** Same tile-grid walk as `drawSpriteSheet`, but only the top `keptRows` of `tileset.rows` (the faint sink's own progressive bottom-up erase, `grovyleFaintSinkRowsAndY2`) - `oy` already includes any `y2` shift, same convention every other sprite draw in this file uses. */
 function drawSpriteSheetTopRows(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, keptRows: number): void {
@@ -10085,65 +10052,12 @@ function drawGrantingStarsAtAge(
   }
 }
 
-/**
- * S7 slice M-5 (docs/faint-switch-notes.md §15): "ONIX's SITRUS BERRY\n
- * restored health!" (`STRINGID_ITEMHEALHP_BERRY`'s own two-line wrap) -
- * pixel-confirmed this session via a full oracle diff scan of `battle1-
- * sitrus-ext.json` (not committed - a scratch extension of `turn5-sitrus-
- * b.json`'s own script with idle padding to 7325): text box redraw (a
- * 1206px jump, not a char-sized delta) at render tick **7078**, then
- * exactly 1 visible-char-count/tick through **7112** (35 diffs total,
- * matching the string's own 19+16 length exactly, silent-but-charged
- * spaces at chars 6/13/27 landing on the three flat ticks the scan found
- * in between, 7084/7091/7105 - same mechanism/cadence as every other
- * message in this dossier). Held flat 7112 through **7215** (104 ticks,
- * matching §11's own "held" note, now bounded exactly) - the HP bar climbs
- * DURING this hold (`turn5SitrusOnixHp` below), not after it. ISSUES #39
- * rank-3 flip: line content is now `TURN5_SITRUS.healLines`, the real
- * `STRINGID_PKMNSITEMRESTOREDHEALTH` resolution, not an independently
- * re-stated literal pair.
- */
-export const TURN5_SITRUS_HEAL_LINE1 = TURN5_SITRUS.healLines[0]!;
-export const TURN5_SITRUS_HEAL_LINE2 = TURN5_SITRUS.healLines[1]!;
-
 
 export function turn5SitrusHealTextVisibleChars(t: number): number {
   return sitrusHealTextVisibleCharsAtAge(
     t - ONIX_SITRUS_IDENTITY_RENDER_TICK,
   );
 }
-
-/**
- * The message box goes blank (box stays, no text - same shape as every
- * other turn-end transition in this file) at render tick **7216**, then
- * hard-cuts to the interactive action menu at **7222** - both pixel-
- * confirmed this session (full-frame diffs of 1127px then 5983px at
- * exactly these ticks, the scan's own "big jump then HUGE jump" - a
- * message-box-close-then-menu-reveal pair, not one atomic transition).
- */
-
-
-
-/**
- * Onix's own HP climb, 1->31 (`§2`'s pinned heal formula) - RAM-truthed
- * indirectly via a byte-exact PNG crop match against `composePlayerHealth
- * boxHpOverlay`'s own render for every candidate hp 1-31 (`tools/compare/
- * scratch/sitrus_hp_climb_match.mjs`, not committed): **1 HP unit per
- * tick**, starting render tick **7180** (hp=2) through **7209** (hp=31,
- * settled) - 0px residual at every one of the 30 climbing ticks plus every
- * held tick through 7325 once yOffset (`menuIdleBounce`'s own healthboxY2,
- * see `turn5SitrusResettledBounceTick`) is accounted for. This is a real,
- * useful correction to §11's own "HP digits/bar still climbing past 7306"
- * hedge: they're NOT still climbing - hp is flat at 31 from 7209 on, and
- * every later pixel change in that region is purely the ordinary idle-
- * bounce y-shift (confirmed by re-matching at 9 candidate yOffsets: exact
- * 0-diff hits at yOffset 0/1/2 only, matching `menuIdleBounce`'s own
- * 0..2 range, never a different hp). ISSUES #39 rank-3 flip: the endpoints
- * are now `TURN5_SITRUS.hp.from`/`.to`, the real staged Sitrus proc's own
- * HP-change event, not independently re-stated literals.
- */
-export const TURN5_SITRUS_HEAL_HP_START = TURN5_SITRUS.hp.from;
-export const TURN5_SITRUS_HEAL_HP_END = TURN5_SITRUS.hp.to;
 
 export function turn5SitrusOnixHp(t: number): number {
   return sitrusDisplayedHpAtAge(
@@ -10183,29 +10097,6 @@ const ONIX_SITRUS_TINT_COLOR: RgbColor = { r: 140, g: 255, b: 206 };
 export function onixSitrusTintCoeff(t: number): number {
   return sitrusTintCoeffAtAge(t - ONIX_SITRUS_IDENTITY_RENDER_TICK);
 }
-
-/**
- * ISSUES #26 (docs/faint-switch-notes.md §16): the Sitrus proc's expanding
- * THIN_RING (`gThinRingExpandingSpriteTemplate`, `gSprites[4]`,
- * `matrixNum=2`) - RAM ground truth from the dedicated probe
- * (`src/data/gen/turn5-sitrus-ring-probe.json`, twice-run byte-identical,
- * all 32 live ticks match this closed form with zero mismatches). Unlike
- * `onixSitrusRotateMatrix` above, this matrix is a pure isotropic scale
- * (`b=c=0` always, `a=d` always) - never a rotation - so it does NOT
- * inherit that mechanism's own +2 render lag (rotation-matrix-specific,
- * per §13's own rationale and §29's independent confirmation it doesn't
- * generalize); this one uses the dossier's ordinary **+1** lag instead
- * (`TURN5_SITRUS_RING_RENDER_LAG` above), verified pixel-exact with zero
- * fitted parameters at two sample ticks (6/6 opaque px at render 7042,
- * 92/92 at render 7048). Center `(72,88)` is RAM-constant for the sprite's
- * whole life (the ring's own sprite x/y directly - 8px below
- * `onixSitrusRotateMatrix`'s own call-site center, from
- * `AnimSpriteOnMonPos`'s mon-pic Y offset that Onix's own hardcoded
- * rotation call never applies) - species-dossier slice 7: now
- * `TURN5_SITRUS.onFieldCenter`, `turn5ResolutionAdapter.ts`'s own adapter-
- * owned fact, not an independently hand-derived literal here.
- */
-export const TURN5_SITRUS_RING_CENTER = TURN5_SITRUS.onFieldCenter;
 
 /**
  * `null` outside the ring's own live RAM window (`[7040,7071]`, i.e.
@@ -11039,13 +10930,6 @@ function drawTurn6ActionMenuIdleWindow(fb: Uint8Array, t: number, bounceTick: nu
   drawTurn5SitrusSettledMenuChrome(fb);
 }
 
-/** Visible character count (0..TURN6_FEATHERDANCE_TEXT_TOTAL) of "Foe PIDGEOTTO used\nFEATHERDANCE!" at absolute trace tick `t` - same 1-tick/char mechanism as `turnKickoffTextVisibleChars`, calibrated start (`turn6FeatherDanceTextStartTick`). */
-export function turn6FeatherDanceTextVisibleChars(t: number, pressTick: number): number {
-  const start = turn6FeatherDanceTextStartTick(pressTick);
-  if (t < start) return 0;
-  return Math.min(TURN6_FEATHERDANCE_TEXT_TOTAL, t - start + 1);
-}
-
 /**
  * Tick the kickoff message settles flat (`ae11c7f00fbd`, oracle-confirmed
  * held 7388-7404 before the feather animation's own first pixel change at
@@ -11871,12 +11755,6 @@ export const LEGACY_TURN9_FIELD_AND_BOUNCE_PRESENTATION = createFightCommandPres
   upcoming: null,
 });
 
-export function turn9QuickAttackTextVisibleChars(t: number, pressTick: number): number {
-  const start = turn9QuickAttackTextStartTick(pressTick);
-  if (t < start) return 0;
-  return Math.min(TURN9_QUICKATTACK_TEXT_TOTAL, t - start + 1);
-}
-
 /**
  * The lunge redraw's own ground clip - pixel-confirmed against fresh oracle
  * PNGs (this rung's own bisection, docs/battle-turn-notes.md §39): applying
@@ -12176,12 +12054,6 @@ export function drawSpriteSheetBlendedOverFbSkipping(fb: Uint8Array, tileset: Ti
  */
  // ISSUES #39 rank-5 slice 1: Scene-OFF RAM sentinel tick 10990 - pressTick(10871), dump-turn9-hitanim-off.py's own bar0Curr read (was 121 on the retired ON pin, same 2-tick shift as the wobble/flicker starts above)
 
-export function turn9NotVeryEffectiveTextVisibleChars(t: number, pressTick: number): number {
-  const start = turn9NotVeryEffectiveTextStartTick(pressTick);
-  if (t < start) return 0;
-  return Math.min(TURN9_NOTVERYEFFECTIVE_LINE.length, t - start + 1);
-}
-
 /**
  * ISSUES #39 rank-5 slice 1: turn 9's own QUICK_ATTACK-resolution window
  * under the Scene-OFF-owned presentation - `attackanimation` substitutes a
@@ -12215,12 +12087,6 @@ function drawTurn9QuickAttackWindow(fb: Uint8Array, t: number, pressTick: number
   } else {
     drawMessageTextLines(fb, TURN9_QUICKATTACK_LINE1, TURN9_QUICKATTACK_LINE2, turn9QuickAttackTextVisibleChars(t, pressTick));
   }
-}
-
-export function turn9SuperEffectiveTextVisibleChars(t: number, pressTick: number): number {
-  const start = turn9SuperEffectiveTextStartTick(pressTick);
-  if (t < start) return 0;
-  return Math.min(TURN6_SUPER_EFFECTIVE_LINE.length, t - start + 1);
 }
 
 /** ISSUES #39 rank-5 slice 1: Scene-OFF RAM sentinel tick 11205 - `TURN9_ROCKSLIDE_PRESS_TICK`(10715), `dump-turn9-hitanim-off.py`'s own `bar1Curr` read (was `ROCK_SLIDE_HP_DRAIN_START_DELAY`(597) on the retired ON pin - the fixed `Pausex20` substitute for ROCK_SLIDE's own long real animation compresses this by far more than QUICK_ATTACK's own 2-tick shift). */
@@ -12462,12 +12328,6 @@ function turn10KickoffBounceTick(t: number, pressTick: number): number {
   return TURN9_QUICKATTACK_PRESS_TICK + TURN9_MENU_REDRAW_DELAY;
 }
 
-export function turn10AerialAceTextVisibleChars(t: number, pressTick: number): number {
-  const start = turn10AerialAceTextStartTick(pressTick);
-  if (t < start) return 0;
-  return Math.min(TURN10_AERIALACE_TEXT_TOTAL, t - start + 1);
-}
-
 /**
  * S7 slice R rung (a): `sText_NotVeryEffective` ("It's not very
  * effective…", reusing `TURN9_NOTVERYEFFECTIVE_LINE` verbatim - the same
@@ -12480,11 +12340,6 @@ export function turn10AerialAceTextVisibleChars(t: number, pressTick: number): n
  * gets its own literal constant" convention.
  */
  // render 12457 - pressTick(12305)
-export function turn10NotVeryEffectiveTextVisibleChars(t: number, pressTick: number, delay: number = TURN10_NOTVERYEFFECTIVE_TEXT_DELAY): number {
-  const start = turn10NotVeryEffectiveTextStartTick(pressTick, delay);
-  if (t < start) return 0;
-  return Math.min(TURN9_NOTVERYEFFECTIVE_LINE.length, t - start + 1);
-}
 
 // --- S7 slice R rung (b): AERIAL_ACE's own animation, all 5 mechanisms
 // (docs/aerial-ace-notes.md, both dated sections - the 2026-07-21
@@ -12630,11 +12485,6 @@ function drawTurn10RockSlideAttack(fb: Uint8Array, t: number): void {
  * turn's own super-effective hit already uses).
  */
  // render 12795 - pressTick(12169)
-export function turn10SuperEffectiveTextVisibleChars(t: number, pressTick: number, delay: number = TURN10_SUPER_EFFECTIVE_TEXT_DELAY): number {
-  const start = turn10SuperEffectiveTextStartTick(pressTick, delay);
-  if (t < start) return 0;
-  return Math.min(TURN6_SUPER_EFFECTIVE_LINE.length, t - start + 1);
-}
 
 /**
  * S7 slice R rung (a): turn-end - the held "It's super effective!" text goes
@@ -12845,11 +12695,6 @@ function turn11KickoffBounceTick(t: number, pressTick: number): number {
   return TURN10_ROCKSLIDE_PRESS_TICK + TURN10_ROCKSLIDE_MENU_REDRAW_DELAY;
 }
  // render 13422 - FEATHER_PRESS_TICK(13339)
-export function turn11AtkFloorTextVisibleChars(t: number, pressTick: number): number {
-  const start = turn11AtkFloorTextStartTick(pressTick);
-  if (t < start) return 0;
-  return Math.min(TURN11_ATKFLOOR_TEXT_TOTAL, t - start + 1);
-}
 
 
 /**
@@ -12895,11 +12740,6 @@ function drawTurn11RockSlideAttack(fb: Uint8Array, t: number): void {
  * prior turn's own super-effective hit already uses).
  */
  // render 13762 - pressTick(13137)
-export function turn11SuperEffectiveTextVisibleChars(t: number, pressTick: number, delay: number = TURN11_SUPER_EFFECTIVE_TEXT_DELAY): number {
-  const start = turn11SuperEffectiveTextStartTick(pressTick, delay);
-  if (t < start) return 0;
-  return Math.min(TURN6_SUPER_EFFECTIVE_LINE.length, t - start + 1);
-}
 
 /**
  * S7 slice R rung 1: turn-end - the held "It's super effective!" text goes
@@ -14777,7 +14617,6 @@ function drawTurn14FlyBall(fb: Uint8Array, t: number): void {
     OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM,
   );
 }
-const TURN14_FLYUP_TEXT_TOTAL = TURN14_FLYUP_LINE1.length + TURN14_FLYUP_LINE2.length;
 
 /** The real button confirm press for turn 14's own DRAGON_BREATH re-selection (`TICK0+sm.confirmElapsed`, 17755 in the canonical trace - segment start 17754, the same "+1 after last press frame" convention every other confirm anchor in this file uses). Named (unlike the inline literal `TURN14_BARE_SCENE_DELAY` below already used) so `TURN14_DRAGONBREATH_MENU_REDRAW_DELAY` (docs/turn15-notes.md) can reference it directly, mirroring `TURN13_DRAGONBREATH_PRESS_TICK`'s own pattern. */
 const TURN14_DRAGONBREATH_PRESS_TICK = 17755;
@@ -14912,7 +14751,6 @@ function drawTurn14FightSubmenuWindow(
 // §5a), the strike half DOES print a real attack string - joins the normal
 // flow at BattleScript_HitFromAtkString (docs/turn15-notes.md §2, tick
 // 19003's own RNG-already-resolved accuracy roll). ---
-const TURN15_FLY_STRIKE_TEXT_TOTAL = TURN15_FLY_STRIKE_LINE1.length + TURN15_FLY_STRIKE_LINE2.length;
 
 /**
  * `turn14KickoffBounceTick`'s own turn-15 analogue - turn 15 needs NO fresh
