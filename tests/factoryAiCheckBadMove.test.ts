@@ -2872,3 +2872,51 @@ describe("AI_CBM_Sandstorm (data/battle_ai_scripts.s:451-454)", () => {
     expect(realRain).toMatchObject({ kind: "scored", scoreDelta: 0 }); // real weather != Sandstorm
   });
 });
+
+describe("AI_CBM_TrickAndKnockOff (data/battle_ai_scripts.s:545-548, EFFECT_KNOCK_OFF/EFFECT_TRICK)", () => {
+  const MOVE_KNOCK_OFF = 282;
+  const MOVE_TRICK = 271;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("target with Sticky Hold JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_KNOCK_OFF, target({ knownAbility: "ABILITY_STICKY_HOLD", realAbility: "ABILITY_STICKY_HOLD" }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("non-Sticky-Hold target FALLS THROUGH to end at zero", () => {
+    const result = run(MOVE_KNOCK_OFF, target());
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("executes the handler's own fresh get_ability after the universal preamble", () => {
+    const result = run(MOVE_KNOCK_OFF, { ...MAROWAK, species: 111, realAbility: "ABILITY_LIGHTNING_ROD" });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-negates-type",
+      "test-slot-soundproof",
+      "test-slot-trick-and-knock-off-ability",
+    ]);
+  });
+
+  it("shares the handler with EFFECT_TRICK (dispatch :198)", () => {
+    expect(run(MOVE_TRICK, target({ knownAbility: "ABILITY_STICKY_HOLD", realAbility: "ABILITY_STICKY_HOLD" })))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+    expect(run(MOVE_TRICK, target())).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+});

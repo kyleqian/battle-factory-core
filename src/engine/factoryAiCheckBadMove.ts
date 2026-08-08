@@ -100,7 +100,10 @@
  * has no entry in this file; and `EFFECT_TOXIC`/`EFFECT_POISON` ->
  * `AI_CBM_Toxic` (`:341-352`, `runCbmToxic` below), whose source-ordered
  * type, ability, primary-status, and Safeguard gates complete R13-D's
- * ordinary-move control path.
+ * ordinary-move control path; and `EFFECT_KNOCK_OFF`/`EFFECT_TRICK` ->
+ * `AI_CBM_TrickAndKnockOff` (`:545-548`, `runCbmTrickAndKnockOff` below) --
+ * one fresh target ability read, single Sticky Hold rejection gate, the same
+ * shape as `AI_CBM_Sleep`'s ability gate but with no status/Safeguard tail.
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -1651,6 +1654,25 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_KNOCK_OFF/EFFECT_TRICK ->
+  // AI_CBM_TrickAndKnockOff (`data/battle_ai_scripts.s:202,198,545-548`):
+  // one target ability read; Sticky Hold rejects at -10.
+  if (move.effect === "EFFECT_KNOCK_OFF" || move.effect === "EFFECT_TRICK") {
+    const trickAndKnockOff = runCbmTrickAndKnockOff(
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-trick-and-knock-off`,
+    );
+    for (const draw of trickAndKnockOff.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: trickAndKnockOff.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: trickAndKnockOff.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -2006,5 +2028,32 @@ function runCbmRoar(
     rng: ability.rng,
     draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
     scoreDelta: ability.ability === ABILITY_SUCTION_CUPS ? -10 : 0,
+  });
+}
+
+/**
+ * `AI_CBM_TrickAndKnockOff` (`data/battle_ai_scripts.s:545-548`,
+ * EFFECT_KNOCK_OFF/EFFECT_TRICK): one fresh target ability read, then a
+ * single Sticky Hold rejection gate JUMPing to Score_Minus10; the all-clear
+ * path FALLS THROUGH to end at zero. Same shape as `AI_CBM_Sleep`'s ability
+ * gate (doc §29) but with no status/Safeguard tail.
+ */
+const ABILITY_STICKY_HOLD = "ABILITY_STICKY_HOLD";
+
+function runCbmTrickAndKnockOff(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
+  return Object.freeze({
+    rng: ability.rng,
+    draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
+    scoreDelta: ability.ability === ABILITY_STICKY_HOLD ? -10 : 0,
   });
 }
