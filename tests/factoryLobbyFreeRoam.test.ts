@@ -301,25 +301,32 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
   });
 
   it("womanAtTick: the walk fixture's south + east extra movements (§6d)", () => {
-    // SOUTH walk (3,10)→(3,11) 5296-5311: world y = 145+(T−5296), rendered
-    // pose one frame behind the RAM cmdIdx (5296 keeps the idle-north pose,
-    // walk1 5297-5304, stand 5305-5311).
-    expect(womanAtTick(5296)).toMatchObject({ x: 104, y: 145, frame: 1 });
-    expect(womanAtTick(5297)).toMatchObject({ x: 104, y: 146, frame: 3 });
-    expect(womanAtTick(5303)).toMatchObject({ y: 152, frame: 3 });
-    expect(womanAtTick(5304)).toMatchObject({ y: 153, frame: 3 });
-    expect(womanAtTick(5305)).toMatchObject({ y: 154, frame: 0 });
-    expect(womanAtTick(5311)).toMatchObject({ y: 160, frame: 0 });
-    // EAST walk (3,11)→(4,11) 5407-5421: world x = 105+(T−5407), rendered
-    // pose one frame behind (5407 keeps the south standing pose, walk2
-    // 5408-5415 h-flipped, stand 5416-5421 h-flipped).
-    expect(womanAtTick(5407)).toMatchObject({ x: 105, y: 160, frame: 0, hFlip: false });
-    expect(womanAtTick(5408)).toMatchObject({ x: 106, frame: 8, hFlip: true });
-    expect(womanAtTick(5414)).toMatchObject({ x: 112, frame: 8 });
-    expect(womanAtTick(5415)).toMatchObject({ x: 113, frame: 8 });
-    expect(womanAtTick(5416)).toMatchObject({ x: 114, frame: 2 });
-    expect(womanAtTick(5421)).toMatchObject({ x: 119, frame: 2 });
-    expect(womanAtTick(5422)).toMatchObject({ x: 120, y: 160, frame: 2, hFlip: true });
+    // SOUTH walk (3,10)→(3,11) 5296-5311: rendered y = 144+(T−5296) — the
+    // logical 145+(T−5296) schedule lags the drawn box by 1px (the same
+    // render-lag class as the north walk's y; docs §8c), pose one frame
+    // behind the RAM cmdIdx (5296 keeps the idle-north pose, walk1 5297-5304,
+    // stand 5305-5311).
+    expect(womanAtTick(5296)).toMatchObject({ x: 104, y: 144, frame: 1 });
+    expect(womanAtTick(5297)).toMatchObject({ x: 104, y: 145, frame: 3 });
+    expect(womanAtTick(5303)).toMatchObject({ y: 151, frame: 3 });
+    expect(womanAtTick(5304)).toMatchObject({ y: 152, frame: 3 });
+    expect(womanAtTick(5305)).toMatchObject({ y: 153, frame: 0 });
+    expect(womanAtTick(5311)).toMatchObject({ y: 159, frame: 0 });
+    // EAST walk (3,11)→(4,11) 5407-5421: rendered x = 104+(T−5407) — the
+    // logical 105+(T−5407) schedule lags the drawn box by 1px (the same
+    // render-lag class as the south walk's y; docs §8b), pose one frame
+    // behind (5407 keeps the south standing pose, walk2 5408-5415 h-flipped,
+    // stand 5416-5421 h-flipped).
+    expect(womanAtTick(5407)).toMatchObject({ x: 104, y: 160, frame: 0, hFlip: false });
+    expect(womanAtTick(5408)).toMatchObject({ x: 105, frame: 8, hFlip: true });
+    expect(womanAtTick(5414)).toMatchObject({ x: 111, frame: 8 });
+    expect(womanAtTick(5415)).toMatchObject({ x: 112, frame: 8 });
+    expect(womanAtTick(5416)).toMatchObject({ x: 113, frame: 2 });
+    expect(womanAtTick(5421)).toMatchObject({ x: 118, frame: 2 });
+    // The 5422 settle tick keeps the 1px lag (oracle drawn box 1px left of
+    // the 5430+ idle), then idle-east from 5423 at x=120.
+    expect(womanAtTick(5422)).toMatchObject({ x: 119, frame: 2, hFlip: true });
+    expect(womanAtTick(5423)).toMatchObject({ x: 120, y: 160, frame: 2, hFlip: true });
     expect(womanAtTick(5472)).toMatchObject({ x: 120, frame: 2 });
   });
 
@@ -381,6 +388,32 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     expect(turnDone.turnRemaining).toBe(1);
     const stepping = advance(turnDone, ["north"], 1);
     expect(stepping).toMatchObject({ stepRemaining: LOBBY_FREE_ROAM_TILE_FRAMES - 1, facing: "north", x: 4, y: 11 });
+  });
+
+  it("drawNpc's h-flip mirrors the WHOLE 16px frame, not each 8px tile (§8b)", () => {
+    // The ROM OAM h-flip swaps the frame's tile columns AND mirrors within
+    // each column. The idle-east woman (tick 5423, frame 2 h-flipped) at the
+    // spawn camera renders at screen (112,104): frame row 12 (palette row 4
+    // of the top-left tile) is [0,0,0,0,13,13,12,12 | 12,12,12,13,0,0,0,0].
+    // Whole-frame flip maps dest col c -> source col 15-c:
+    //   dest [0,0,0,0,13,12,12,12,12,12,13,13,0,0,0,0]
+    // Per-tile mirror maps dest c -> tile-local 7-(c%8):
+    //   dest [12,12,13,13,0,0,0,0 | 0,0,0,0,13,12,12,12]
+    // Frame palette index 12 = (123,115,66), 13 = (57,57,24).
+    const fb = renderFactoryLobbyFreeRoam(createFactoryLobbyFreeRoamState(), 5423);
+    const pixel = (x: number, y: number): [number, number, number, number] => {
+      const i = (y * 240 + x) * 4;
+      return [fb[i]!, fb[i + 1]!, fb[i + 2]!, fb[i + 3]!];
+    };
+    // Whole-frame dest row 12: [0,0,0,0,13,12,12,12,12,12,13,13,0,0,0,0].
+    // Screen x = 112 + dest col; y = 104 + 12 = 116.
+    // dest cols 4-11 are opaque for the whole-frame flip: 13=(57,57,24),
+    // 12=(123,115,66). The per-tile mirror would leave cols 4-11 transparent
+    // (their 13/12 ink lands at cols 0-3/12-15 instead).
+    expect(pixel(116, 116)).toEqual([57, 57, 24, 255]);   // dest 4 = 13
+    expect(pixel(117, 116)).toEqual([123, 115, 66, 255]); // dest 5 = 12
+    expect(pixel(120, 116)).toEqual([123, 115, 66, 255]); // dest 8 = 12
+    expect(pixel(123, 116)).toEqual([57, 57, 24, 255]);   // dest 11 = 13
   });
 
   it("a refused step leaves pendingDir null and never re-arms the blocked hold (§7g)", () => {

@@ -490,19 +490,25 @@ export function womanAtTick(tick: number): WomanNpcAtTick | null {
     // South walk 5296-5311: anim4 cmdIdx 0 (sheet frame 3, walk1) then
     // cmdIdx 1 (sheet frame 0, stand), rendered one frame later: 5296 keeps
     // the pre-walk north standing pose (frame 1), walk1 renders 5297-5304 and
-    // stand 5305-5311.
+    // stand 5305-5311. Rendered y = 144+(T−5296) — the same 1px render lag
+    // the north walk carries (the oracle draws the walking woman 1px above
+    // the logical schedule; docs §8c).
     const frame = tick >= 5305 ? 0 : tick === 5296 ? 1 : 3;
-    return { x: 104, y: 145 + (tick - 5296), frame, hFlip: false };
+    return { x: 104, y: 144 + (tick - 5296), frame, hFlip: false };
   }
   if (tick <= 5406) return { x: 104, y: 160, frame: 0, hFlip: false };
-  if (tick <= 5421) {
-    // East walk 5407-5421: anim7 cmdIdx 2 (sheet frame 8, walk2 h-flipped)
+  if (tick <= 5422) {
+    // East walk 5407-5422: anim7 cmdIdx 2 (sheet frame 8, walk2 h-flipped)
     // then cmdIdx 3 (sheet frame 2, stand h-flipped), rendered one frame
     // later: 5407 keeps the pre-walk south standing pose (frame 0, not
-    // h-flipped), walk2 renders 5408-5415 and stand 5416-5421.
+    // h-flipped), walk2 renders 5408-5415, stand 5416-5422. Rendered x =
+    // 104+(T−5407) — the same 1px render lag class as the south walk's y
+    // (the oracle's drawn box is 1px left of the logical schedule; docs §8b);
+    // the lag persists through the 5422 settle tick (measured: oracle 5422
+    // drawn box x is 1px left of the 5430+ idle).
     const frame = tick >= 5416 ? 2 : tick === 5407 ? 0 : 8;
     const hFlip = tick > 5407;
-    return { x: 105 + (tick - 5407), y: 160, frame, hFlip };
+    return { x: 104 + (tick - 5407), y: 160, frame, hFlip };
   }
   return { x: 120, y: 160, frame: 2, hFlip: true };
 }
