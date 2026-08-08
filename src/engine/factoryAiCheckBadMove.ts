@@ -344,6 +344,12 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    */
   spikesUp?: boolean;
   /**
+   * Whether the target's side has `SIDE_STATUS_FUTUREATTACK` --
+   * `AI_CBM_FutureSight`'s first gate (EFFECT_FUTURE_SIGHT). Optional,
+   * defaulting to false.
+   */
+  targetFutureAttackUp?: boolean;
+  /**
    * `gBattleMons[AI_TARGET].level` -- `AI_CBM_OneHitKO`'s final
    * `if_level_cond 1` (less-than) gate operand. Optional, defaulting to 0
    * (the neutral "not lower" outcome when omitted, so the level gate never
@@ -406,6 +412,12 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * `speedStage`/`spAtkStage`/`spDefStage` above.
    */
   evasionStage?: number;
+  /**
+   * Whether AI_USER's OWN side has `SIDE_STATUS_FUTUREATTACK` --
+   * `AI_CBM_FutureSight`'s second gate (EFFECT_FUTURE_SIGHT). Optional,
+   * defaulting to `false`, same convention as `lightScreenUp`/`reflectUp`.
+   */
+  attackerFutureAttackUp?: boolean;
   /**
    * Current weather, `AI_WEATHER_*`-encoded (0=Sun/1=Rain/2=Sandstorm/3=Hail)
    * -- `AI_CBM_RainDance`/`SunnyDay`/`Hail`'s own `get_weather` read (doc
@@ -1549,6 +1561,22 @@ export function runCheckBadMovePreamble(input: Readonly<{
       rng,
       draws: Object.freeze(draws),
       scoreDelta: runCbmSpikes(target.spikesUp ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_FUTURE_SIGHT -> AI_CBM_FutureSight
+  // (`data/battle_ai_scripts.s:184,500-504`): either side already carrying a
+  // Future Sight attack JUMPs to -12; the all-clear path FALLS THROUGH to
+  // `score +5` (Future Sight is positively valued when unused).
+  if (move.effect === "EFFECT_FUTURE_SIGHT") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmFutureSight(
+        target.targetFutureAttackUp ?? false,
+        input.attacker.attackerFutureAttackUp ?? false,
+      ),
     });
   }
 
@@ -2735,6 +2763,29 @@ function runCbmForesight(targetForesighted: boolean): number {
  */
 function runCbmSpikes(targetSpikesUp: boolean): number {
   return targetSpikesUp ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_FutureSight` (`data/battle_ai_scripts.s:500-504`, EFFECT_FUTURE_
+ * SIGHT):
+ *
+ * ```
+ * AI_CBM_FutureSight:
+ *     if_side_affecting AI_TARGET, SIDE_STATUS_FUTUREATTACK, Score_Minus12
+ *     if_side_affecting AI_USER, SIDE_STATUS_FUTUREATTACK, Score_Minus12
+ *     score +5
+ *     end
+ * ```
+ *
+ * Either side already carrying a Future Sight attack JUMPs to -12; the
+ * all-clear path FALLS THROUGH to `score +5`. Sequential Score_Minus12
+ * JUMPs then a Score_Plus5, never additive. Zero ability/type reads.
+ */
+function runCbmFutureSight(targetFutureAttackUp: boolean, attackerFutureAttackUp: boolean): number {
+  if (targetFutureAttackUp || attackerFutureAttackUp) {
+    return -12;
+  }
+  return 5;
 }
 
 /**

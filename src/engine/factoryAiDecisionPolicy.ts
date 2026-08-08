@@ -522,6 +522,8 @@ export type FactoryAiScoredBattlerView = Readonly<{
   isForesighted?: boolean;
   /** SIDE_STATUS_SPIKES on the target's side, read by AI_CBM_Spikes. */
   spikesUp?: boolean;
+  /** SIDE_STATUS_FUTUREATTACK on the target's side, read by AI_CBM_FutureSight. */
+  targetFutureAttackUp?: boolean;
   /** DisableStruct::protectUses, read by AI_CV_Protect. */
   protectUses?: number;
   /**
@@ -532,6 +534,8 @@ export type FactoryAiScoredBattlerView = Readonly<{
   battleTurnCount?: number;
   /** `gStatuses3[] & STATUS3_ROOTED` (Ingrain) -- source-required for `AI_CV_AccuracyDown`'s Gate F (AI_USER's own copy only, doc §19.1). Optional, defaulting to `false`. */
   isRooted?: boolean;
+  /** SIDE_STATUS_FUTUREATTACK on the AI's own side, read by AI_CBM_FutureSight. */
+  attackerFutureAttackUp?: boolean;
   /** `gBattleMons[].status2 & STATUS2_CURSED` -- source-required for `AI_CV_AccuracyDown`'s Gate G (target only, doc §19.1). Optional, defaulting to `false`. */
   isCursed?: boolean;
   /** `gBattleMons[].status2 & STATUS2_ESCAPE_PREVENTION` -- `AI_CBM_CantEscape`'s single gate (target only, EFFECT_MEAN_LOOK). Optional, defaulting to `false`. */
@@ -833,6 +837,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     ...(view.target.isNightmared === true ? { isNightmared: true } : {}),
     ...(view.target.isForesighted === true ? { isForesighted: true } : {}),
     ...(view.target.spikesUp === true ? { spikesUp: true } : {}),
+    ...(view.target.targetFutureAttackUp === true ? { targetFutureAttackUp: true } : {}),
     level: view.target.level,
   });
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({
@@ -856,6 +861,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     hp: view.attacker.hp,
     maxHp: view.attacker.maxHp,
     ...(view.attacker.isRooted === true ? { isRooted: true } : {}),
+    ...(view.attacker.attackerFutureAttackUp === true ? { attackerFutureAttackUp: true } : {}),
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [

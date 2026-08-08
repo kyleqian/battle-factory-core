@@ -70,6 +70,7 @@ const SIDE_STATUS_REFLECT = 1 << 0;
 const SIDE_STATUS_LIGHTSCREEN = 1 << 1;
 const SIDE_STATUS_SAFEGUARD = 1 << 5;
 const SIDE_STATUS_SPIKES = 1 << 4;
+const SIDE_STATUS_FUTUREATTACK = 1 << 6;
 const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
 const B_WEATHER_SANDSTORM = (1 << 3) | (1 << 4);
@@ -310,6 +311,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       reflectUp: (input.rulesContext.sideStatuses[1] & SIDE_STATUS_REFLECT) !== 0,
       ...(weather === undefined ? {} : { currentWeather: weather }),
       isRooted: (attacker.status3 & BATTLE_SCRIPT_STATUS3_ROOTED) !== 0,
+      ...((input.rulesContext.sideStatuses[1] & SIDE_STATUS_FUTUREATTACK) !== 0
+        ? { attackerFutureAttackUp: true }
+        : {}),
       ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) !== 0
         ? { isInfatuated: true }
         : {}),
@@ -390,6 +394,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
         : {}),
       ...((input.rulesContext.sideStatuses[0] & SIDE_STATUS_SPIKES) !== 0
         ? { spikesUp: true }
+        : {}),
+      ...((input.rulesContext.sideStatuses[0] & SIDE_STATUS_FUTUREATTACK) !== 0
+        ? { targetFutureAttackUp: true }
         : {}),
     }),
   });

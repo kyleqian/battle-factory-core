@@ -1103,6 +1103,44 @@ describe("AI_CBM_Spikes (data/battle_ai_scripts.s:439-441, EFFECT_SPIKES)", () =
   });
 });
 
+describe("AI_CBM_FutureSight (data/battle_ai_scripts.s:500-504, EFFECT_FUTURE_SIGHT)", () => {
+  const MOVE_FUTURE_SIGHT = 248;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("target side carrying a Future Sight attack JUMPs to Score_Minus12", () => {
+    const result = run(MOVE_FUTURE_SIGHT, target({ targetFutureAttackUp: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -12, draws: [] });
+  });
+
+  it("AI's own side carrying a Future Sight attack JUMPs to Score_Minus12", () => {
+    const result = run(
+      MOVE_FUTURE_SIGHT,
+      target(),
+      undefined,
+      { atkStage: 6, defStage: 6, attackerFutureAttackUp: true },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -12, draws: [] });
+  });
+
+  it("neither side carrying a Future Sight attack scores +5", () => {
+    const result = run(MOVE_FUTURE_SIGHT, target());
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 5, draws: [] });
+  });
+});
+
 describe("AI_CBM_OneHitKO (data/battle_ai_scripts.s:358-362, EFFECT_OHKO)", () => {
   const MOVE_GUILLOTINE = 12; // EFFECT_OHKO, TYPE_NORMAL, power 1
   const MOVE_SHEER_COLD = 329; // EFFECT_OHKO, TYPE_ICE, power 1
