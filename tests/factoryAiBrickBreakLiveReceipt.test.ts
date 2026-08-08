@@ -39,9 +39,9 @@ function brickBreakView(targetSideReflectUp: boolean, targetMove: number): Facto
     factory: Object.freeze({
       levelMode: 0, battleMode: 0, factoryWinStreak: 28, trainerOpponentId: 222,
     }),
-    moves: [280, 150, 150, 150], // BrickBreak + Splash x3
+    moves: [280, 150, 150, 150] as const, // BrickBreak + Splash x3
     attacker: Object.freeze({
-      types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"],
+      types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"] as const,
       attack: 70, defense: 65, spAttack: 155, spDefense: 105, speed: 140,
       level: 50,
       statStages: NEUTRAL_STAGES,
@@ -51,7 +51,7 @@ function brickBreakView(targetSideReflectUp: boolean, targetMove: number): Facto
     }),
     target: Object.freeze({
       species: 134,
-      types: ["TYPE_WATER", "TYPE_WATER"],
+      types: ["TYPE_WATER", "TYPE_WATER"] as const,
       attack: 85, defense: 80, spAttack: 130, spDefense: 115, speed: 85,
       level: 50,
       statStages: NEUTRAL_STAGES,
