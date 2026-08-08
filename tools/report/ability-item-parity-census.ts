@@ -406,7 +406,7 @@ const EXPECTED_RECOVERED_STRING_SITES = [
   "src/engine/factoryAiCheckBadMove.ts:395 ABILITY_NONE",
   "src/engine/factoryAiCheckBadMove.ts:447 ABILITY_NONE",
   "src/engine/factoryAiCheckBadMove.ts:996 ABILITY_SOUNDPROOF",
-  "src/engine/factoryAiCheckBadMove.ts:1510 ABILITY_WONDER_GUARD",
+  "src/engine/factoryAiCheckBadMove.ts:1626 ABILITY_WONDER_GUARD",
   "src/engine/factoryAiCheckViability.ts:2833 ABILITY_SWIFT_SWIM",
   "src/engine/factoryAiCheckViability.ts:2890 ABILITY_SWIFT_SWIM",
   "src/engine/factoryAiCheckViability.ts:2915 ABILITY_RAIN_DISH",
