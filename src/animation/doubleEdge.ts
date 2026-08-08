@@ -1,3 +1,53 @@
+/**
+ * Complete source-relative `Move_DOUBLE_EDGE` visual body, RAM-truth.
+ *
+ * Ages are RAM ages relative to the move-owned window: player-back starts at
+ * frame 80, opponent-front at frame 84, so BOTH orientations share the same
+ * ages and differ only in the battler geometry and the mirrored x offsets
+ * (measured: player-back window 80..220 = 141 frames, opponent-front 84..224 =
+ * 141 frames, both re-run byte-identical twice each — see the staging ledger
+ * and `tools/compare/evidence/double-edge-changemap-*.txt`).
+ *
+ * This file was originally shipped as dead code by a failed promotion round
+ * (nothing imported it, no test pinned it). Every field has been re-derived
+ * from a fresh two-orientation probe. What survived validation: the elliptical
+ * lunge via the shared `wrap` port (ages 31-62, two loops of the 18/6/2/4
+ * profile), the attacker slide-to-offset +20 and slide-to-original via the
+ * shared `slideMon` ports, the `ShakeMonInPlace(4,0,12,1)` x2 toggling via the
+ * shared `shakeMonInPlace` port (tick base age 79, active ages 80-101), the
+ * `attackerWhiteCoefficient` (complex palette blend, white at ages 4-7 and
+ * 13-18) and the `bgWhiteCoefficient` curve (F_PAL_BG 16 at ages 63-82, then
+ * 16-2*(1+floor((age-83)/4)) to 0 at 111). What had to be corrected:
+ *
+ * 1. **The rotation-derived y2 belongs to whichever battler is on the PLAYER
+ *    side, not to the attacker.** `AnimTask_RotateMonSpriteToSide` calls
+ *    `SetBattlerSpriteYOffsetFromRotation` only when `data[7]` (battler side is
+ *    player). In the player-back orientation the attacker gets it; in the
+ *    opponent-front orientation the TARGET gets it (probe: opponent-front
+ *    attacker y2 stays 0 through the whole rotate block while the target's y2
+ *    tracks |c|>>3). The dead code applied it to the attacker unconditionally.
+ * 2. **The restore pass rotation sign.** The task seeds `data[3]` at
+ *    `duration * increment = 8 * -256 = -2048`, then negates it AND the
+ *    per-step increment for the player side, so the player side accumulates
+ *    +256 per step from +2048: rotation 2304, 2560, ..., 3840 (index 9..15).
+ *    The dead code computed `-2048 + step*256`, which has the wrong sign for
+ *    the player side (probe age 119 player attacker matrix [249,-56,56,249] =
+ *    rotation 2304, not -1792). The opponent side accumulates -2304..-3840.
+ *    Both restore the matrix to identity on their final (8th) step, so the
+ *    matrix is identity at age 126 but the player-side y2 stays at 12 (the
+ *    |c|>>3 of the transient rotation-4096 write).
+ * 3. **The slide mirrors were hardcoded.** The attacker holds +20/-20 and the
+ *    target holds +31/-32 by side; the two slide-to-original sprites also take
+ *    the held x2 and the player-side y2 (12, from the rotate block) as their
+ *    `currentX2`/`currentY2`.
+ * 4. The target's own y2 before/after its rotate window and the attacker's y2
+ *    during ages 127-131 (the slide-to-original drives BOTH axes back).
+ *
+ * The shake task drives x2 only (yOffset 0), so y2 during ages 80-100 is purely
+ * the rotation-derived |c|>>3, not a shake contribution. The draw case must
+ * supply the ONIX front-idle x2=1 before the target slide (a species idle, not
+ * move state — same convention as `counter.ts`).
+ */
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
 import { shakeMonInPlaceOffsetAtTick } from "./shakeMonInPlace.ts";
 import {
@@ -47,6 +97,61 @@ export interface DoubleEdgeState {
 export const DOUBLE_EDGE_FRAME_COUNT = 141;
 const IDENTITY: DoubleEdgeMatrix = { a: 256, b: 0, c: 0, d: 256 };
 
+/** RAM age of `SE_M_SWIFT` (pan attacker). */
+export const SE_M_SWIFT_AGE = 4;
+/** RAM age of the first `SE_M_SWAGGER` (pan attacker). */
+export const SE_M_SWAGGER_AGE = 32;
+/** RAM age of `SE_M_MEGA_KICK2` (pan target) / the first hitsplat. */
+export const HITSPLAT_AGE = 70;
+/** First RAM age of the attacker white complex-palette-blend window. */
+export const ATTACKER_WHITE_FIRST_AGE = 4;
+/** Last RAM age of the first attacker white window. */
+export const ATTACKER_WHITE_LAST_AGE = 7;
+/** First RAM age of the second attacker white window. */
+export const ATTACKER_WHITE2_FIRST_AGE = 13;
+/** Last RAM age of the second attacker white window. */
+export const ATTACKER_WHITE2_LAST_AGE = 18;
+/** RAM age `simple_palette_blend F_PAL_BG` first writes full white (16). */
+export const BG_WHITE_FIRST_AGE = 63;
+/** RAM age the F_PAL_BG white starts ramping back down. */
+export const BG_WHITE_RAMP_FIRST_AGE = 83;
+/** RAM age the F_PAL_BG white reaches 0. */
+export const BG_WHITE_CLEAR_AGE = 111;
+/** First RAM age of the elliptical lunge's first visible tick. */
+export const ELLIPSE_FIRST_AGE = 32;
+/** Last RAM age the lunge writes a nonzero offset (task self-destroys at 62). */
+export const ELLIPSE_LAST_AGE = 61;
+/** RAM age `SlideMonToOffset(0,20,0,0,4)` starts driving the attacker x2. */
+export const ATTACKER_SLIDE_FIRST_AGE = 63;
+/** RAM age `SlideMonToOffset(1,-32,0,0,3)` starts driving the target x2. */
+export const TARGET_SLIDE_FIRST_AGE = 70;
+/** RAM age the forward `AnimTask_RotateMonSpriteToSide` runs its first step. */
+export const ROTATE_FIRST_AGE = 80;
+/** RAM age the forward rotation reaches its 8th step (rotation 2048/-2048). */
+export const ROTATE_LAST_AGE = 87;
+/** RAM age the restore `AnimTask_RotateMonSpriteToSide` runs its first step. */
+export const RESTORE_FIRST_AGE = 119;
+/** RAM age the restore task resets the matrix to identity (y2 stays 12). */
+export const RESTORE_RESET_AGE = 126;
+/** First RAM age of the `ShakeMonInPlace(4,0,12,1)` x2 toggling. */
+export const SHAKE_FIRST_AGE = 80;
+/** Last RAM age the shake task runs (x2 restored at 101). */
+export const SHAKE_LAST_AGE = 100;
+/** RAM age `SlideMonToOriginalPos(0,0,5)` starts driving the attacker back. */
+export const ATTACKER_ORIGIN_FIRST_AGE = 127;
+/** RAM age `SlideMonToOriginalPos(1,0,7)` starts driving the target back. */
+export const TARGET_ORIGIN_FIRST_AGE = 132;
+
+const ATTACKER_SLIDE_DURATION = 4;
+const TARGET_SLIDE_DURATION = 3;
+const ATTACKER_ORIGIN_DURATION = 5;
+const TARGET_ORIGIN_DURATION = 7;
+
+/**
+ * The affine matrix written by `SetSpriteRotScale(sprite, 0x100, 0x100, rot)`
+ * for a rotation value `rot` (GBA unit: index = rot >> 8 into the 256-entry
+ * sine table, matrix = [cos, -sin, sin, cos]).
+ */
 function rotateMatrix(rotation: number): DoubleEdgeMatrix {
   const index = (rotation >> 8) & 0xff;
   const sin = GBA_SINE_TABLE_256[index]!;
@@ -55,137 +160,180 @@ function rotateMatrix(rotation: number): DoubleEdgeMatrix {
 }
 
 /**
- * `AnimTask_RotateMonSpriteToSide(8, -256, battler, 0/1)`.
- *
- * The task runs one step per animation tick; each step adds `data[4]` (the
- * per-battler rotation increment, negated for the player side per `data[7]`)
- * to the rotation accumulator and writes the affine matrix. The first pass
- * (`restore=0`) runs 8 steps from 0; the second (`restore=1`) seeds the
- * accumulator at `8 * -256` (negated for the player side) and continues 8
- * more steps before resetting the matrix.
+ * `AnimTask_RotateMonSpriteToSide(8, -256, battler, restore)` accumulator at a
+ * RAM age, per the probe's task data[3]:
+ * - forward (restore 0): data[3] starts 0 and adds +256 per step on the player
+ *   side / -256 on the opponent side (data[4] is negated for the player side):
+ *   rotation 256..2048 at ages 80-87.
+ * - restore (restore 1): data[3] starts 8*-256 = -2048, negated to +2048 on
+ *   the player side; step adds +256 (player) / -256 (opponent): rotation
+ *   2304..3840 at ages 119-125, then 4096 on the reset step (age 126).
  */
-function battlerRotation(
-  step: number,
-  side: DoubleEdgeSide,
-  restore: boolean,
-): number {
-  if (restore) {
-    return 8 * -256 + step * 256 * (side === "player" ? 1 : -1);
+function battlerRotation(age: number, side: DoubleEdgeSide): number {
+  const sign = side === "player" ? 1 : -1;
+  if (age >= ROTATE_FIRST_AGE && age <= ROTATE_LAST_AGE) {
+    return (age - ROTATE_FIRST_AGE + 1) * 256 * sign;
   }
-  return step * 256 * (side === "player" ? 1 : -1);
+  if (age > ROTATE_LAST_AGE && age < RESTORE_FIRST_AGE) {
+    return 8 * 256 * sign;
+  }
+  if (age >= RESTORE_FIRST_AGE && age < RESTORE_RESET_AGE) {
+    return (8 + (age - RESTORE_FIRST_AGE + 1)) * 256 * sign;
+  }
+  return 0;
 }
 
-function rotateWindow(
+function transformAtAge(
   age: number,
-  startAge: number,
-  duration: number,
-  restore: boolean,
   side: DoubleEdgeSide,
 ): { active: boolean; matrix: DoubleEdgeMatrix } {
-  const step = age - startAge + 1;
-  if (step < 1 || step > duration) {
-    return { active: false, matrix: IDENTITY };
+  if (age >= ROTATE_FIRST_AGE && age < RESTORE_RESET_AGE) {
+    const rotation = battlerRotation(age, side);
+    return { active: true, matrix: rotateMatrix(rotation) };
   }
-  return {
-    active: true,
-    matrix: rotateMatrix(battlerRotation(step, side, restore)),
-  };
+  return { active: false, matrix: IDENTITY };
 }
 
 /**
- * `SetBattlerSpriteYOffsetFromRotation`: only the player-side battler gets the
- * `|c| >> 3` y offset; the opponent-side battler keeps its base y2.
+ * `SetBattlerSpriteYOffsetFromRotation`: y2 = |matrix.c| >> 3, applied only to
+ * the player-side battler. The reset step (age 126) writes rotation 4096 first
+ * (c = sin(16) ≈ 98 -> y2 = 12) and resets the matrix afterwards, so the y2
+ * persists at 12 while the matrix is identity.
  */
-function battlerRotateY2(matrix: DoubleEdgeMatrix, side: DoubleEdgeSide): number {
+function rotateY2AtAge(age: number, side: DoubleEdgeSide): number {
   if (side !== "player") return 0;
-  return Math.abs(matrix.c) >> 3;
+  if (age < ROTATE_FIRST_AGE) return 0;
+  if (age >= RESTORE_RESET_AGE) return 12;
+  return Math.abs(rotateMatrix(battlerRotation(age, side)).c) >> 3;
 }
 
-function attackerOffset(
-  age: number,
-  attackerSide: DoubleEdgeSide,
-): { x2: number; y2: number } {
-  // TranslateMonEllipticalRespectSide(18, 6, 2, 4) at ages 31..62, then the
-  // +20 slide-to-offset at 63..66 freezes at x2=20. The attacker keeps 20
-  // through the rotate/shake block and slides back to 0 at 127..131.
-  if (age >= 31 && age <= 62) {
-    return wrapEllipticalOffsetAtAge(
-      age - 31,
-      attackerSide,
-      { xRadius: 18, yRadius: 6, loops: 2, speed: 4 },
-    );
-  }
-  if (age >= 63 && age <= 100) {
-    const slide = slideMonToOffsetAtTick({
+/** The attacker's held x2 after `SlideMonToOffset(0,20,0,0,4)` (mirrored). */
+function attackerHeldX2(attackerSide: DoubleEdgeSide): number {
+  return slideMonToOffsetAtTick(
+    {
       battlerSide: attackerSide,
       targetXOffset: 20,
       targetYOffset: 0,
       mirrorVertical: false,
-      durationTicks: 4,
-    }, age - 63);
-    return { x2: slide.x2, y2: 0 };
-  }
-  if (age >= 101 && age <= 126) {
-    return { x2: 20, y2: 6 };
-  }
-  if (age >= 127 && age <= 131) {
-    return slideMonToOriginalPosAtTick({
-      currentX2: 20,
-      currentY2: 12,
-      axisSnapMode: 0,
-      durationTicks: 5,
-    }, age - 127);
-  }
-  return { x2: 0, y2: 0 };
+      durationTicks: ATTACKER_SLIDE_DURATION,
+    },
+    ATTACKER_SLIDE_DURATION,
+  ).x2;
 }
 
-function targetOffset(
-  age: number,
-  targetSide: DoubleEdgeSide,
-): { x2: number; y2: number } {
-  // Target slide-to-offset -32 (mirrored to +32 for the opponent side) at
-  // ages 70..72 freezes at x2=31 through the shake, then slides back at
-  // 132..138.
-  if (age >= 70 && age <= 100) {
-    const slide = slideMonToOffsetAtTick({
+/** The target's held x2 after `SlideMonToOffset(1,-32,0,0,3)` (mirrored). */
+function targetHeldX2(targetSide: DoubleEdgeSide): number {
+  return slideMonToOffsetAtTick(
+    {
       battlerSide: targetSide,
       targetXOffset: -32,
       targetYOffset: 0,
       mirrorVertical: false,
-      durationTicks: 3,
-    }, age - 70);
-    return { x2: slide.x2, y2: 0 };
+      durationTicks: TARGET_SLIDE_DURATION,
+    },
+    TARGET_SLIDE_DURATION,
+  ).x2;
+}
+
+/** `ShakeMonInPlace(4,0,12,1)` x2 contribution (y2 always 0). */
+function shakeX2(age: number): number {
+  if (age < SHAKE_FIRST_AGE || age > SHAKE_FIRST_AGE + 21) return 0;
+  return shakeMonInPlaceOffsetAtTick(4, 0, 12, 1, age - 79).x2;
+}
+
+function attackerOffsetAtAge(
+  age: number,
+  attackerSide: DoubleEdgeSide,
+): { x2: number; y2: number } {
+  if (age >= ELLIPSE_FIRST_AGE - 1 && age <= ELLIPSE_LAST_AGE + 1) {
+    return wrapEllipticalOffsetAtAge(
+      age - (ELLIPSE_FIRST_AGE - 1),
+      attackerSide,
+      { xRadius: 18, yRadius: 6, loops: 2, speed: 4 },
+    );
   }
-  if (age >= 101 && age <= 131) {
-    return { x2: 31, y2: 0 };
+  if (age >= ATTACKER_SLIDE_FIRST_AGE && age < ATTACKER_ORIGIN_FIRST_AGE) {
+    const slide = slideMonToOffsetAtTick(
+      {
+        battlerSide: attackerSide,
+        targetXOffset: 20,
+        targetYOffset: 0,
+        mirrorVertical: false,
+        durationTicks: ATTACKER_SLIDE_DURATION,
+      },
+      age - ATTACKER_SLIDE_FIRST_AGE,
+    );
+    return {
+      x2: slide.x2 + shakeX2(age),
+      y2: rotateY2AtAge(age, attackerSide),
+    };
   }
-  if (age >= 132 && age <= 138) {
-    return slideMonToOriginalPosAtTick({
-      currentX2: 31,
-      currentY2: 0,
-      axisSnapMode: 0,
-      durationTicks: 7,
-    }, age - 132);
+  if (age >= ATTACKER_ORIGIN_FIRST_AGE && age < ATTACKER_ORIGIN_FIRST_AGE + ATTACKER_ORIGIN_DURATION) {
+    const slide = slideMonToOriginalPosAtTick(
+      {
+        currentX2: attackerHeldX2(attackerSide),
+        currentY2: attackerSide === "player" ? 12 : 0,
+        axisSnapMode: 0,
+        durationTicks: ATTACKER_ORIGIN_DURATION,
+      },
+      age - ATTACKER_ORIGIN_FIRST_AGE,
+    );
+    return { x2: slide.x2, y2: slide.y2 };
   }
   return { x2: 0, y2: 0 };
 }
 
-function shakeOffset(age: number): { x2: number; y2: number } {
-  // AnimTask_ShakeMonInPlace(4, 0, 12, 1): the initializer runs its first
-  // step at creation and the task dispatcher runs another step in the same
-  // frame, so the displayed sequence starts one helper entry in.
-  if (age < 80 || age > 101) return { x2: 0, y2: 0 };
-  return shakeMonInPlaceOffsetAtTick(4, 0, 12, 1, age - 79);
+function targetOffsetAtAge(
+  age: number,
+  targetSide: DoubleEdgeSide,
+): { x2: number; y2: number } {
+  if (age >= TARGET_SLIDE_FIRST_AGE && age < TARGET_ORIGIN_FIRST_AGE) {
+    const slide = slideMonToOffsetAtTick(
+      {
+        battlerSide: targetSide,
+        targetXOffset: -32,
+        targetYOffset: 0,
+        mirrorVertical: false,
+        durationTicks: TARGET_SLIDE_DURATION,
+      },
+      age - TARGET_SLIDE_FIRST_AGE,
+    );
+    return {
+      x2: slide.x2 + shakeX2(age),
+      y2: rotateY2AtAge(age, targetSide),
+    };
+  }
+  if (age >= TARGET_ORIGIN_FIRST_AGE && age < TARGET_ORIGIN_FIRST_AGE + TARGET_ORIGIN_DURATION) {
+    const slide = slideMonToOriginalPosAtTick(
+      {
+        currentX2: targetHeldX2(targetSide),
+        currentY2: targetSide === "player" ? 12 : 0,
+        axisSnapMode: 0,
+        durationTicks: TARGET_ORIGIN_DURATION,
+      },
+      age - TARGET_ORIGIN_FIRST_AGE,
+    );
+    return { x2: slide.x2, y2: slide.y2 };
+  }
+  return { x2: 0, y2: 0 };
+}
+
+function bgWhiteCoefficientAtAge(age: number): number {
+  if (age < BG_WHITE_FIRST_AGE) return 0;
+  if (age <= BG_WHITE_FIRST_AGE + 19) return 16;
+  if (age < BG_WHITE_CLEAR_AGE) {
+    return 16 - 2 * (1 + Math.floor((age - BG_WHITE_RAMP_FIRST_AGE) / 4));
+  }
+  return 0;
 }
 
 /**
  * Pure source-relative `Move_DOUBLE_EDGE` reducer.
  *
  * `age=0` is the first frame with the move script active; `age=140` is the
- * first inactive cleanup. The attacker OBJ palette white blend (`complex`
- * blend_y1=10 / blend_y2=0, delay=4, two blends) displays at ages 4-7 and
- * 13-18; the F_PAL_BG flat-white blend displays at 63-82 and ramps 16->0
- * (delay=2) across 83-110.
+ * first inactive cleanup. The attacker white `complex_palette_blend` shows at
+ * ages 4-7 and 13-18; the F_PAL_BG flat-white blend shows at 63-82 and ramps
+ * 16->0 across 83-110.
  */
 export function doubleEdgeAtAge(
   age: number,
@@ -193,83 +341,53 @@ export function doubleEdgeAtAge(
   targetSide: DoubleEdgeSide,
   targetCenter: Readonly<{ x: number; y: number }>,
 ): DoubleEdgeState {
-  const firstRotate = age >= 80 && age <= 87;
-  const restoreRotate = age >= 119 && age <= 126;
-  const attackerMatrix = firstRotate
-    ? rotateWindow(age, 80, 8, false, attackerSide)
-    : restoreRotate
-      ? rotateWindow(age, 119, 8, true, attackerSide)
-      : age >= 88 && age <= 118
-        ? { active: true, matrix: rotateMatrix(8 * 256 * (attackerSide === "player" ? 1 : -1)) }
-        : { active: false, matrix: IDENTITY };
-  const targetMatrix = firstRotate
-    ? rotateWindow(age, 80, 8, false, targetSide)
-    : restoreRotate
-      ? rotateWindow(age, 119, 8, true, targetSide)
-      : age >= 88 && age <= 118
-        ? { active: true, matrix: rotateMatrix(8 * -256 * (targetSide === "player" ? 1 : -1)) }
-        : { active: false, matrix: IDENTITY };
-
-  const shake = shakeOffset(age);
-  const baseAttacker = attackerOffset(age, attackerSide);
-  const baseTarget = targetOffset(age, targetSide);
-  // The shake task runs on top of the current sprite x2 during 80..101 and
-  // restores to the base at 101; the attacker additionally carries the
-  // rotate-derived y2 (`|c|>>3`) from 87 onward through the restore pass.
-  const attackerShake = age >= 80 && age <= 100
-    ? { x2: baseAttacker.x2 + shake.x2, y2: baseAttacker.y2 + shake.y2 }
-    : age >= 87 && age <= 126
-      ? { x2: baseAttacker.x2, y2: Math.max(baseAttacker.y2, battlerRotateY2(attackerMatrix.matrix, attackerSide)) }
-      : baseAttacker;
-  const targetShake = age >= 80 && age <= 100
-    ? { x2: baseTarget.x2 + shake.x2, y2: baseTarget.y2 + shake.y2 }
-    : baseTarget;
-
-  const bgWhiteCoefficient =
-    age < 63
-      ? 0
-      : age <= 82
-        ? 16
-        : age <= 110
-          ? 16 - 2 * (1 + Math.floor((age - 83) / 4))
-          : 0;
+  const firstRotate = age >= ROTATE_FIRST_AGE && age <= ROTATE_LAST_AGE;
+  const restoreRotate = age >= RESTORE_FIRST_AGE && age < RESTORE_RESET_AGE;
+  const hitSplatAge = age >= HITSPLAT_AGE && age <= HITSPLAT_AGE + 8;
+  const shakeActive = age >= SHAKE_FIRST_AGE && age <= SHAKE_LAST_AGE;
+  const ellipseActive = age >= ELLIPSE_FIRST_AGE && age <= ELLIPSE_LAST_AGE;
 
   return {
     active: age >= 0 && age < DOUBLE_EDGE_FRAME_COUNT - 1,
     impactLoaded: age >= 0 && age < DOUBLE_EDGE_FRAME_COUNT - 1,
-    attackerOffset: attackerShake,
-    targetOffset: targetShake,
-    attackerTransform: attackerMatrix,
-    targetTransform: targetMatrix,
+    attackerOffset: attackerOffsetAtAge(age, attackerSide),
+    targetOffset: targetOffsetAtAge(age, targetSide),
+    attackerTransform: transformAtAge(age, attackerSide),
+    targetTransform: transformAtAge(age, targetSide),
     attackerWhiteCoefficient:
-      (age >= 4 && age <= 7) || (age >= 13 && age <= 18) ? 10 : 0,
-    bgWhiteCoefficient,
-    hitsplat: age >= 70 && age <= 78
+      (age >= ATTACKER_WHITE_FIRST_AGE && age <= ATTACKER_WHITE_LAST_AGE) ||
+      (age >= ATTACKER_WHITE2_FIRST_AGE && age <= ATTACKER_WHITE2_LAST_AGE)
+        ? 10
+        : 0,
+    bgWhiteCoefficient: bgWhiteCoefficientAtAge(age),
+    hitsplat: hitSplatAge
       ? {
           x: targetCenter.x + (targetSide === "player" ? 10 : -10),
           y: targetCenter.y,
         }
       : null,
     slideToOffsetCount:
-      Number(age >= 63 && age <= 67) + Number(age >= 70 && age <= 73),
+      Number(age >= ATTACKER_SLIDE_FIRST_AGE && age <= ATTACKER_SLIDE_FIRST_AGE + 4) +
+      Number(age >= TARGET_SLIDE_FIRST_AGE && age <= TARGET_SLIDE_FIRST_AGE + 3),
     slideToOriginalCount:
-      Number(age >= 127 && age <= 131) + Number(age >= 132 && age <= 138),
+      Number(age >= ATTACKER_ORIGIN_FIRST_AGE && age <= ATTACKER_ORIGIN_FIRST_AGE + ATTACKER_ORIGIN_DURATION - 1) +
+      Number(age >= TARGET_ORIGIN_FIRST_AGE && age <= TARGET_ORIGIN_FIRST_AGE + TARGET_ORIGIN_DURATION - 1),
     rotateTaskCount:
       Number(firstRotate) * 2 + Number(restoreRotate) * 2,
-    shakeTaskCount: Number(age >= 80 && age <= 100) * 2,
-    ellipseTaskActive: age >= 31 && age <= 62,
-    sound: age === 4
+    shakeTaskCount: Number(shakeActive) * 2,
+    ellipseTaskActive: ellipseActive,
+    sound: age === SE_M_SWIFT_AGE
       ? "SE_M_SWIFT"
-      : age === 32
+      : age === SE_M_SWAGGER_AGE
         ? "SE_M_SWAGGER"
-        : age === 70
+        : age === HITSPLAT_AGE
           ? "SE_M_MEGA_KICK2"
           : null,
-    soundPanSide: age === 4
+    soundPanSide: age === SE_M_SWIFT_AGE
       ? attackerSide
-      : age === 32
+      : age === SE_M_SWAGGER_AGE
         ? attackerSide
-        : age === 70
+        : age === HITSPLAT_AGE
           ? targetSide
           : null,
   };

@@ -1,0 +1,52 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "LICK",
+  "pair": "FRONTIER_MON_LICKITUNG_1 set 164 (opponent-front LICKITUNG) -> legal ONIX (player-back)",
+  "orientation": "opponent-to-player",
+  "scenario": "tools/battle-lab/mechanic-lick-opponent-lickitung-player-onix.json",
+  "probe": "tools/compare/lickProbe.py",
+  "appStage": {
+    "presentationAge": 0
+  },
+  "denseWindow": {
+    "startFrame": 213,
+    "endFrame": 285,
+    "frameCount": 73
+  },
+  "attacker": {
+    "species": "LICKITUNG",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 16 },
+      "animationCenter": { "x": 176, "y": 56 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 131,
+    "playerMaxHp": 131,
+    "opponentHp": 186,
+    "opponentMaxHp": 197,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "lick-dense-evidence/v1",
+  "evidenceSha256": "2c8a668d1d14acdf7fb14eb645bfb0f6ed38d5ec5ef18729550b22a9f2bcb416",
+  "secondFreshEvidenceSha256": "2c8a668d1d14acdf7fb14eb645bfb0f6ed38d5ec5ef18729550b22a9f2bcb416",
+  "rawRgbSha256": "65f7c59555be001cbe500083b2db83e37585b9fdbec7b8302e3333dab5b18062",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 73,
+    "componentMatching": 73
+  }
+}

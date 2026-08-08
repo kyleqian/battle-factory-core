@@ -512,6 +512,7 @@ import {
   DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG,
 } from "../animation/dragonBreath.ts";
 import { flamethrowerDisplayedBattlerOffsetsAtAge } from "../animation/flamethrower.ts";
+import { shakeMon2OffsetAtTick } from "../animation/shakeMon2.ts";
 import { FACADE_BLEND_COLORS } from "../animation/facade.ts";
 import {
   dragonRageSchedule,
@@ -621,6 +622,8 @@ import battleAnimParticlesAsset from "../assets/gen/battle-anim-particles.json" 
 import battleAnimSweatDropAsset from "../assets/gen/battle-anim-sweat-drop.json" with { type: "json" };
 import battleAnimHitsplatAsset from "../assets/gen/battle-anim-hitsplat.json" with { type: "json" };
 import battleAnimCuttingSliceAsset from "../assets/gen/battle-anim-cutting-slice.json" with { type: "json" };
+import battleAnimSlashSliceAsset from "../assets/gen/battle-anim-slash-slice.json" with { type: "json" };
+import battleAnimLickAsset from "../assets/gen/battle-anim-lick.json" with { type: "json" };
 import battleAnimFlyBallAsset from "../assets/gen/battle-anim-fly-ball.json" with { type: "json" };
 import battleAnimSmallEmberAsset from "../assets/gen/battle-anim-small-ember.json" with { type: "json" };
 import battleAnimFirePlumeAsset from "../assets/gen/battle-anim-fire-plume.json" with { type: "json" };
@@ -950,6 +953,10 @@ import {
   sceneOnSandstormView,
   sceneOnDragonClawView,
   sceneOnMetalClawView,
+  sceneOnCrunchView,
+  sceneOnSlashView,
+  sceneOnLickView,
+  sceneOnCounterView,
   sceneOnCrushClawView,
   sceneOnTakeDownView,
   sceneOnSingView,
@@ -1013,6 +1020,17 @@ import {
   type SceneOnAstonishConfig,
 } from "../animation/sceneOnPresentation.ts";
 import { refreshDisplayedBlendCoeffAtAge, REFRESH_BLEND_START_AGE } from "../animation/refresh.ts";
+import {
+  FADE_IN_BACK_AGE,
+  RESTORE_FADE_AGE,
+  SHAKE_1_AGE,
+} from "../animation/crunch.ts";
+import {
+  SHAKE_FIRST_AGE,
+  SLIDE_OFFSET_FIRST_AGE,
+  SLIDE_ORIGIN_DURATION,
+  SLIDE_ORIGIN_FIRST_AGE,
+} from "../animation/counter.ts";
 import {
   extremeSpeedBackgroundVariant,
   extremeSpeedImpactAtAge,
@@ -1312,6 +1330,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const hitmontopFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HITMONTOP!;
 const swabluFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SWABLU!;
 const ponytaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PONYTA!;
 const ledybaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LEDYBA!;
@@ -1784,6 +1803,8 @@ const battleAnimWhiteFeather = battleAnimWhiteFeatherAsset as BattleAnimWhiteFea
 const battleAnimSweatDrop = battleAnimSweatDropAsset as BattleAnimSweatDropAsset;
 const battleAnimHitsplat = battleAnimHitsplatAsset as BattleAnimHitsplatAsset;
 const battleAnimCuttingSlice = battleAnimCuttingSliceAsset as BattleAnimCuttingSliceAsset;
+const battleAnimSlashSlice = battleAnimSlashSliceAsset as BattleAnimCuttingSliceAsset;
+const battleAnimLick = battleAnimLickAsset as BattleAnimCuttingSliceAsset;
 /** S7/S8 turn 13 Part A (docs/turn13-notes.md's own dirt-throw sub-section): `gSandAttackDirtSpriteTemplate`'s single static 8x8 tile - see `tools/extract/extract-sandattack-dirt.ts`. */
 const battleAnimMudSand = battleAnimMudSandAsset as {
   tileset: Tileset;
@@ -2429,6 +2450,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const hitmontopBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HITMONTOP!;
 const swabluBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SWABLU!;
 const ponytaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PONYTA!;
 const ledybaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LEDYBA!;
@@ -12379,6 +12401,16 @@ function cuttingSliceFrameTileset(frame: number): Tileset {
   return { columns: battleAnimCuttingSlice.frames.columns, rows: battleAnimCuttingSlice.frames.rows, tiles: battleAnimCuttingSlice.frames.list[frame]! };
 }
 
+/** `slash.png` (`gSlashSliceSpriteTemplate`) slice frame tileset, same shape as the cutting slice's. */
+function slashSliceFrameTileset(frame: number): Tileset {
+  return { columns: battleAnimSlashSlice.frames.columns, rows: battleAnimSlashSlice.frames.rows, tiles: battleAnimSlashSlice.frames.list[frame]! };
+}
+
+/** The 16x32 LICK sprite's frame sheet: 5 stacked frames of 8 tiles each. */
+function lickFrameTileset(frame: number): Tileset {
+  return { columns: battleAnimLick.frames.columns, rows: battleAnimLick.frames.rows, tiles: battleAnimLick.frames.list[frame]! };
+}
+
 
 /** Pidgeotto's own HP after turn 10's ROCK_SLIDE (docs/turn10-notes.md addendum §2: 61->38, -23). */
 
@@ -15472,6 +15504,58 @@ const turn16DarkFieldPpu: Mode0State = {
     index === 2 ? faintAttackDarkBg.paletteBank2Bgr555 : bank
   )),
 };
+
+/** CRUNCH's `fadetobg BG_DARK` swaps the whole field + both battler OBJ
+ *  palettes to the dark bank; the dark screenblock/charblock decode to the
+ *  same `drawTileBg` representation as `battleBg.static`. */
+const crunchDarkBgTileset: Tileset = (() => {
+  const bytes = Uint8Array.from(atob(faintAttackDarkBg.charBlock2B64), (c) => c.charCodeAt(0));
+  const tiles: number[][] = [];
+  for (let tileIndex = 0; tileIndex < 256; tileIndex += 1) {
+    const tile: number[] = [];
+    for (let byte = 0; byte < 32; byte += 1) {
+      const packed = bytes[tileIndex * 32 + byte]!;
+      tile.push(packed & 0xf, packed >> 4);
+    }
+    tiles.push(tile);
+  }
+  return { columns: 16, rows: 16, tiles };
+})();
+const crunchDarkBgTilemap: Tilemap = (() => {
+  const bytes = Uint8Array.from(atob(faintAttackDarkBg.screenBlock26B64), (c) => c.charCodeAt(0));
+  const entries: Tilemap["entries"] = [];
+  for (let index = 0; index < 1024; index += 1) {
+    const value = bytes[index * 2]! | (bytes[index * 2 + 1]! << 8);
+    entries.push({ tile: value & 0x3ff, palette: 2, hFlip: false, vFlip: false });
+  }
+  return { width: 32, height: 32, entries };
+})();
+const crunchDarkBgPalette: RgbColor[] = faintAttackDarkBg.paletteBank2Bgr555.map((value) => {
+  const r5 = value & 31;
+  const g5 = (value >> 5) & 31;
+  const b5 = (value >> 10) & 31;
+  return {
+    r: (r5 << 3) | (r5 >> 2),
+    g: (g5 << 3) | (g5 >> 2),
+    b: (b5 << 3) | (b5 >> 2),
+  };
+});
+/** CRUNCH fade darken: mGBA software-renderer `_darken` on the expanded
+ *  24-bit packed color (`component - floor(component*y/16)` evaluated on
+ *  the SHIFTED component, which gives the R floor / G-B ceil rounding the
+ *  oracle actually shows) - NOT the 5-bit `blendPaletteToward` convention. */
+function crunchDarkenColor(color: RgbColor, coeff: number): RgbColor {
+  if (coeff <= 0) return color;
+  const packed = mgbaDarkenColor(
+    color.r | (color.g << 8) | (color.b << 16),
+    coeff,
+  );
+  return {
+    r: packed & 0xff,
+    g: (packed >> 8) & 0xff,
+    b: (packed >> 16) & 0xff,
+  };
+}
 
 /** Existing FIRE_PUNCH reducer epoch, including its controller/text lead-in. */
 const TURN16_FIRE_PUNCH_FIRST_OWNED_AGE = FIRE_PUNCH_REDUCER_EPOCH_AGE;
@@ -34562,6 +34646,560 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SWABLU used" : "Foe SWABLU used",
       "TAKE DOWN!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "CRUNCH") {
+    const view = sceneOnCrunchView(state);
+    // One-age display latch (uniform across the move — no TAKE_DOWN-style
+    // two-frame task case): every OAM/palette write becomes visible exactly
+    // one frame after its RAM cause (change-map confirmed,
+    // `tools/compare/evidence/crunch-changemap-*.txt`).
+    const displayed = sceneOnCrunchView({ ...state, age: state.age - 1 });
+    const displayedAge = displayed.age;
+    const playerToOpponent =
+      view.attacker.species === "HOUNDOUR"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "HOUNDOUR"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged CRUNCH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const houndour = playerToOpponent ? houndourBackSprite : houndourFrontSprite;
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // `fadetobg BG_DARK` / `restorebg` swap the field AND both battler OBJ
+    // palettes to the dark bank from display 103 (RAM 28) through the
+    // teardown fade-out (RAM 118); the whole field + battlers go pink. The
+    // darkening is the hardware BLDY blend (mGBA `_darken`, 8-bit channel
+    // `c - floor(c*y/16)`) over field + battlers only — healthboxes and the
+    // message window are outside the blend mask (change-map bbox 0,0-239,111).
+    const fadeY = displayed.fadeY;
+    let coeff: number;
+    if (fadeY === -1) coeff = 16;
+    else if (displayedAge >= RESTORE_FADE_AGE + 20) coeff = Math.max(0, fadeY - 1);
+    else if (displayedAge === RESTORE_FADE_AGE + 19) coeff = 16;
+    else coeff = Math.max(0, Math.min(16, fadeY));
+    const darkBg = displayedAge >= FADE_IN_BACK_AGE - 1
+      && displayedAge <= RESTORE_FADE_AGE + 16;
+    const darken = (color: RgbColor): RgbColor => crunchDarkenColor(color, coeff);
+    const fieldPalette = (darkBg
+      ? [battleBg.palette[0]!, battleBg.palette[1]!, crunchDarkBgPalette]
+      : battleBg.palette).map((bank) => bank.map(darken));
+    drawTileBg(
+      fb,
+      darkBg ? crunchDarkBgTileset : battleBg.static.tileset,
+      darkBg ? crunchDarkBgTilemap : battleBg.static.tilemap,
+      fieldPalette,
+    );
+    // The battlers are OBJ and sit OUTSIDE the BLDCNT 0x00E8 blend mask
+    // (BG3 + backdrop only), so they are never faded toward black, and the
+    // BG_DARK load only rewrites palette bank 2 (they use banks 0/1), so
+    // they keep their own palettes for the whole move - only the field
+    // (and its backdrop) goes pink.
+    // ShakeMon's first write also zeroes the target's front-idle x2 residual
+    // (ONIX rests at x2=1; the RAM drops to 0 from shake 1's RAM age 60).
+    const targetX2 = displayedAge >= SHAKE_1_AGE ? 0 : targetIdle.x2;
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2 + displayed.targetY2,
+    );
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      houndour.tileset,
+      houndour.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    // `monbg ANIM_TARGET` rides the target on BG1 (beneath both OBJs); the
+    // semi-transparent teeth/hitsplat OBJs blend 12/8 against the field +
+    // target copy, not the attacker, so snapshot the backdrop after the
+    // target (BITE/TAKE_DOWN convention).
+    drawTarget();
+    const effectBackdrop = fb.slice();
+    drawAttacker();
+    // Equal subpriority 28 effects resolve in reverse allocator order (slot
+    // 5 hitsplat wins over slots 3/4 teeth), so paint the teeth first.
+    for (const teeth of displayed.teeth) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        effectBackdrop,
+        biteArt.sharpTeeth.tileset,
+        biteArt.sharpTeeth.palette,
+        teeth.x + teeth.x2,
+        teeth.y + teeth.y2,
+        teeth.matrix.a,
+        teeth.matrix.b,
+        teeth.matrix.c,
+        teeth.matrix.d,
+        12,
+        8,
+        false,
+      );
+    }
+    for (const hitsplat of displayed.hitsplats) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        effectBackdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        hitsplat.x,
+        hitsplat.y,
+        303,
+        0,
+        0,
+        303,
+        12,
+        8,
+        false,
+      );
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "HOUNDOUR",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "HOUNDOUR" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "HOUNDOUR used" : "Foe HOUNDOUR used",
+      "CRUNCH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "LICK") {
+    const view = sceneOnLickView(state);
+    // Display latches are split. The lick sprite is sprite-driven and renders
+    // ONE frame after its RAM state (`displayed`), while the target shake is
+    // task-driven (`AnimTask_ShakeMon2`, 1/0/16/1) and renders the shared
+    // sequence at display age - 22, which lands its tick-0 creation write
+    // (+1) on exactly one displayed frame: for the opponent-front ONIX back
+    // (idle x2=0) that +1 is a real one-frame pixel step (change-map frame
+    // 235 = RAM 234 + 1), while for the player-back ONIX front it coincides
+    // with the idle hold (x2=1), so the draw drives the shake from the shared
+    // sequence directly, not the reducer's RAM truth (change-map confirmed:
+    // the first shake-widened frame is 237 player-back / 236 opponent-front,
+    // and the RAM restore to 0 at age 51 displays at 267/266, outside the
+    // pre-shake idle hold).
+    const displayed = sceneOnLickView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "LICKITUNG"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LICKITUNG"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged LICK pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const lickitungSource = playerToOpponent
+      ? slamArt.lickitungBack
+      : slamArt.lickitungFront;
+    const lickitung = playerToOpponent
+      ? lickitungSource
+      : {
+          ...lickitungSource,
+          tileset: subTileset(lickitungSource.tileset, 0, 8),
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // The shake's display age is the engine age itself: the shared ShakeMon2
+    // sequence's tick 0 (the +1 creation write) lands on display age 22, so
+    // the idle hold runs through age 21 and the sequence takes over from 22.
+    const shakeX2 = state.age < 22
+      ? targetIdle.x2
+      : shakeMon2OffsetAtTick(1, 0, 16, 1, state.age - 22).x2;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + shakeX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    // The lick anchors at the TARGET's picture coordinates (X_2 / Y_PIC) and
+    // its 16x32 OAM is centered (centerToCorner -8/-16), so the drawn top-left
+    // is `lick.x - 8` / `lick.y - 16` (the change map's blink bbox 168,26-
+    // 183,57 = the (176,42) center box, byte-exact). The lick sprite's
+    // subpriority (38 player-back / 28 opponent-front) sits IN FRONT of the
+    // target in BOTH orientations (the ONIX front/back 40/30), so it paints
+    // after the target (probe-measured, not assumed).
+    if (displayed.lick && !displayed.lick.invisible) {
+      drawSpriteSheet(
+        fb,
+        lickFrameTileset(displayed.lick.tileOffset / 8),
+        battleAnimLick.palette,
+        displayed.lick.x - 8,
+        displayed.lick.y - 16,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      lickitung.tileset,
+      lickitung.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "LICKITUNG",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LICKITUNG" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LICKITUNG used" : "Foe LICKITUNG used",
+      "LICK!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SLASH") {
+    const view = sceneOnSlashView(state);
+    // Display latches are split. The slices are sprite-driven and render ONE
+    // frame after their RAM state (`displayed`), while the target shake is
+    // task-driven (`AnimTask_ShakeMon2`, 4/0/18/1) and renders TWO frames
+    // after its RAM write - the TAKE_DOWN WindUpLunge case. The shake's
+    // creation write (+4 at RAM age 9) is a same-frame transient that the
+    // reducer leaves at 0, but it does reach exactly one displayed frame
+    // (display age 11), so the draw drives the shake from the shared sequence
+    // directly instead of the reducer's RAM truth (change-map confirmed).
+    const displayed = sceneOnSlashView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "CHARMELEON"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CHARMELEON"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SLASH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? charmeleonBackSprite : charmeleonFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // The target rests at its front-idle x2 (1 for the opponent-front ONIX)
+    // through display age 10; the shared ShakeMon2 sequence takes over from
+    // display age 11 (+4, the creation write) through 45 (-4, the final
+    // toggle); the RAM restore to 0 at age 44 displays at 46, outside this
+    // 46-frame window, so the target never returns to its front-idle x2. The
+    // shake's display age is the engine age itself (the two-frame task latch
+    // already lands the creation write at display age 11), unlike the slices
+    // which display one age after their RAM state.
+    const shakeX2 = state.age < 11
+      ? targetIdle.x2
+      : state.age <= 45
+        ? shakeMon2OffsetAtTick(4, 0, 18, 1, state.age - 11).x2
+        : 0;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + shakeX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    // The slices anchor at the target's picture coordinates (X_2 / Y_PIC) and
+    // their 32x32 OAM is centered (centerToCorner -16), so the drawn top-left
+    // is `slice.x - 16` / `slice.y - 16`. Lower subpriority wins the hardware
+    // paint in BOTH orientations (the slices sit in front of the target: 38 vs
+    // the ONIX front's 40 player-back, 28 vs the ONIX back's 30
+    // opponent-front). Within the equal-subpriority pair the ROM's OAM order
+    // resolves in the SLICES' allocator order - slice 1 (slot 3) is written
+    // before slice 2 (slot 4) and, for equal priority AND equal Y, the earlier
+    // OAM entry wins, so slice 1 paints ON TOP of slice 2 (measured: the
+    // oracle's frame-3 pixels at 181,34 win over slice 2's frame-2 value
+    // there). The slash art carries its OWN embedded palette and is ObjNormal
+    // (no blend), unlike CUT's ObjBlend sharing Impact's palette.
+    for (const slice of [...displayed.slices].reverse()) {
+      if (slice.invisible) continue;
+      drawSpriteSheet(
+        fb,
+        slashSliceFrameTileset(slice.tileOffset / 16),
+        battleAnimSlashSlice.palette,
+        slice.x - 16,
+        slice.y - 16,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "CHARMELEON",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "CHARMELEON" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CHARMELEON used" : "Foe CHARMELEON used",
+      "SLASH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "COUNTER") {
+    const view = sceneOnCounterView(state);
+    // The display latch is split THREE ways (measured, change-map confirmed,
+    // `tools/compare/evidence/counter-changemap-*.txt`):
+    //  * `AnimTask_TranslateMonEllipticalRespectSide` (attacker lunge) is
+    //    TASK-driven and renders TWO frames after its RAM state (RAM 217 ->
+    //    pixels 219, peak x2 18 at RAM 220 -> pixels 222, rest RAM 231 ->
+    //    pixels 233) - the LICK/SLASH ShakeMon2 case.
+    //  * `AnimTask_ShakeMon` (target shake) is TASK-driven and renders ONE
+    //    frame after its RAM state (RAM flips at odd ages -> change-map
+    //    events at even ages 270,272,...) - NOT the +2 the lane's ShakeMon2
+    //    rounds measured; ShakeMon and ShakeMon2 are different source tasks
+    //    and latch differently.
+    //  * Both `gSlideMonTo*` dummies and all three fist/hitsplat pairs are
+    //    SPRITE-driven and render RAM + 1 (first hitsplat RAM 238 -> pixels
+    //    239, first fist RAM 241 -> pixels 242).
+    // So `displayed` (age - 1) drives the slides/fists/hitsplats and the
+    // shake, while the lunge drives from `age - 2`.
+    const displayed = sceneOnCounterView({ ...state, age: state.age - 1 });
+    const lungeDisplayed = sceneOnCounterView({ ...state, age: state.age - 2 });
+    const playerToOpponent =
+      view.attacker.species === "HITMONTOP"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "HITMONTOP"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged COUNTER pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const hitmontop = playerToOpponent ? hitmontopBackSprite : hitmontopFrontSprite;
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // The attacker's own sprite x2/y2. The slide dummies (RAM ages 25-61,
+    // sprite-driven) take the `age - 1` displayed state; the elliptical
+    // lunge (RAM ages 10-23, task-driven) takes the `age - 2` state; the
+    // slide-to-offset hold (20/-20) runs until the slide-to-original returns
+    // it to 0 at display 269.
+    const slideActive = state.age - 1 >= SLIDE_OFFSET_FIRST_AGE
+      && state.age - 1 < SLIDE_ORIGIN_FIRST_AGE + SLIDE_ORIGIN_DURATION;
+    const attackerX2 = slideActive
+      ? displayed.attackerX2
+      : lungeDisplayed.attackerX2;
+    const attackerY2 = slideActive ? 0 : lungeDisplayed.attackerY2;
+    // `AnimTask_ShakeMon(ANIM_TARGET,5,0,25,1)` displays RAM + 1. The target
+    // rests at its front-idle x2 (ONIX front x2=1) until RAM age 33; the
+    // creation write (RAM age 34, x2=0) displays at 35 and the 5/0 same-value
+    // toggles follow every two frames through the RAM restore at age 82
+    // (display 83, x2 stays 0 - it does NOT return to the front-idle 1).
+    const shakeX2 = state.age - 1 < SHAKE_FIRST_AGE
+      ? targetIdle.x2
+      : displayed.targetX2;
+    // `monbg ANIM_DEF_PARTNER` hides the target OBJ but `Task_UpdateMonBg`
+    // keeps a BG1 copy tracking the sprite's x2 (battle_anim.c:813-837), so
+    // the target stays visible for the whole move and MOVES with the shake -
+    // the change-map shake events are the ONIX region, not the field. The
+    // setalpha 12,8 (BLDCNT 0x3f40, target-1 empty) never reaches pixels and
+    // clearmonbg/blendoff are RAM-truth only, exactly like CRUNCH/CRUSH_CLAW.
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + shakeX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    // The semi-transparent basic hitsplats (ObjBlend, affine anim 0 = identity
+    // matrix, subpriority 28) blend 12/8 against the field + target backdrop
+    // (BODY_SLAM convention); the opaque fists (ObjNormal 32x32, subpriority
+    // 27) paint on top of them. Both are center-anchored OAMs, so the drawn
+    // top-left is `x - 16` / `y - 16`. Both sit IN FRONT of the target in
+    // both orientations (subpriorities 27/28 vs the ONIX 40/30), and the two
+    // orientations' changed-pixel counts still differ because the target is
+    // ONIX's front sprite in one and its back sprite in the other. Within the
+    // equal-subpriority hitsplat pair the ROM's OAM SLOT order decides the
+    // PPU's one-selected-OBJ blend: the LOWER slot wins (hitsplat1 slot 3 over
+    // hitsplat2 slot 5 at the frame-247 overlap; hitsplat3 slot 4 over
+    // hitsplat2 slot 5 at frame 255), so paint the higher-slot hitsplat first.
+    const effectBackdrop = fb.slice();
+    drawSpriteSheet(
+      fb,
+      hitmontop.tileset,
+      hitmontop.palette,
+      view.attacker.geometry.spriteCorner.x + attackerX2,
+      view.attacker.geometry.spriteCorner.y + attackerY2,
+    );
+    for (const hitsplat of [...displayed.hitsplats].sort((a, b) => b.slot - a.slot)) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        effectBackdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        hitsplat.x,
+        hitsplat.y,
+        256,
+        0,
+        0,
+        256,
+        12,
+        8,
+        false,
+      );
+    }
+    const fist = subTileset(battleAnimHandsAndFeet.tileset, 0, 4);
+    for (const fistSprite of displayed.fists) {
+      drawSpriteSheet(
+        fb,
+        fist,
+        battleAnimHandsAndFeet.palette,
+        fistSprite.x - 16,
+        fistSprite.y - 16,
+      );
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "HITMONTOP",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "HITMONTOP" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "HITMONTOP used" : "Foe HITMONTOP used",
+      "COUNTER!",
       99,
     );
     return;

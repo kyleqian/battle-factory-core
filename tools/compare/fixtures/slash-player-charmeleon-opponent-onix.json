@@ -1,0 +1,52 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "SLASH",
+  "pair": "FRONTIER_MON_CHARMELEON_1 set 175 (player-back CHARMELEON) -> legal ONIX (opponent-front)",
+  "orientation": "player-to-opponent",
+  "scenario": "tools/battle-lab/mechanic-slash-player-charmeleon-opponent-onix.json",
+  "probe": "tools/compare/slashProbe.py",
+  "appStage": {
+    "presentationAge": 0
+  },
+  "denseWindow": {
+    "startFrame": 73,
+    "endFrame": 118,
+    "frameCount": 46
+  },
+  "attacker": {
+    "species": "CHARMELEON",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 57 },
+      "animationCenter": { "x": 72, "y": 97 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 10 },
+      "animationCenter": { "x": 176, "y": 42 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 165,
+    "playerMaxHp": 165,
+    "opponentHp": 142,
+    "opponentMaxHp": 142,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "slash-dense-evidence/v1",
+  "evidenceSha256": "b1e38fbcfdc72767f1ec0caef3cda6cea5e364edcad56cdc7a8e1088183dda88",
+  "secondFreshEvidenceSha256": "b1e38fbcfdc72767f1ec0caef3cda6cea5e364edcad56cdc7a8e1088183dda88",
+  "rawRgbSha256": "df7ff7a8237190853b44e6dea7879e0154ec8762532567c97fdae84a2ffce413",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 46,
+    "componentMatching": 46
+  }
+}

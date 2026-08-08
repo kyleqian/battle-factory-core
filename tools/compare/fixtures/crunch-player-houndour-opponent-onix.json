@@ -1,0 +1,52 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "CRUNCH",
+  "pair": "FRONTIER_MON_HOUNDOUR set 119 (player-back HOUNDOUR) -> legal ONIX (opponent-front)",
+  "orientation": "player-to-opponent",
+  "scenario": "tools/battle-lab/mechanic-crunch-player-houndour-opponent-onix.json",
+  "probe": "tools/compare/crunchProbe.py",
+  "appStage": {
+    "presentationAge": 0
+  },
+  "denseWindow": {
+    "startFrame": 74,
+    "endFrame": 215,
+    "frameCount": 142
+  },
+  "attacker": {
+    "species": "HOUNDOUR",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 60 },
+      "animationCenter": { "x": 72, "y": 92 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 10 },
+      "animationCenter": { "x": 176, "y": 42 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 141,
+    "playerMaxHp": 141,
+    "opponentHp": 142,
+    "opponentMaxHp": 142,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "crunch-dense-evidence/v1",
+  "evidenceSha256": "8aefff069fb3a7595f08e45b0e97114217e59b171499341d3e4540b5638fec32",
+  "secondFreshEvidenceSha256": "8aefff069fb3a7595f08e45b0e97114217e59b171499341d3e4540b5638fec32",
+  "rawRgbSha256": "bf3360b12a1810a883203bf025f370a82bcc39508a2613771ef7f47f7e516a6c",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 142,
+    "componentMatching": 142
+  }
+}

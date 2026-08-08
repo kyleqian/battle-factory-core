@@ -552,6 +552,32 @@
    ]
   },
   {
+   "move": "MOVE_COUNTER",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_HITMONTOP_2 set 341 (HITMONTOP 237, all four active slots COUNTER move 68 so the Factory AI has one legal choice, Focus Band 196, ADAMANT, 255/255 HP/DEFENSE) against legal ONIX in both orientations; both pass the complete move-owned Scene-ON window twice fresh with evidence aeb600cddbd03ebcb0d8cf45d38d93ba03faf26e77fbfcd4951fd7dc0f6a6597 / raw RGB 858b9e0ff45947da10241dd7a61f60ab2498fac063fa8722ae3df6f765337da2 for the 88-frame player-back window (frames 207-294, first frame clean) and evidence d6c0b68ab4cecec213e6e85df12c2ba80c297658a2a195d7cbcab89716a93389 / raw RGB 85cab93f5be1eac69b53034ff645ea4ee794a131d4da5eb97df8f30027fbe14b for the 88-frame opponent-front window (frames 207-294, first frame clean), both isolated by sBattleAnimScriptPtr within the Move_COUNTER..Move_VITAL_THROW label bounds; both orientations 88/88 component AND framebuffer exact",
+    "the reducer composes only already-exact components with zero new ones: the AnimTask_TranslateMonEllipticalRespectSide 18/6/1/4 attacker lunge (one 16-phase wave at wavePeriod 1<<4, the width negated for an opponent-side attacker), the two slide dummy sprites via the shared slideMon.ts helpers (reuse, not re-port), three create_fist_sprite (gFistFootSpriteTemplate, ObjNormal 32x32, subpriority 27) and three create_basic_hitsplat_sprite (gBasicHitSplatSpriteTemplate, affine anim 0 = identity matrix, subpriority 28) pairs at target-relative anchors mirrored by SetAnimSpriteInitialXOffset, AnimTask_ShakeMon (5,0,25,1) target x2 5/0 same-value 2-age toggles via the shared shakeMon.ts port, and the monbg/setalpha 12,8/blendoff machinery (all RAM-truth only, no pixel step, like CRUNCH/CRUSH_CLAW); fist art from the already-extracted HANDS_AND_FEET sheet, hitsplat art from IMPACT, HITMONTOP/ONIX species art from the shared battle back/front bundles",
+    "displayed timing splits the latch THREE ways (measured, change-map confirmed): the elliptical lunge is task-driven and renders TWO frames after its RAM state (RAM 217 -> pixels 219, peak x2 18 at RAM 220 -> pixels 222, back to rest RAM 231 -> pixels 233), while AnimTask_ShakeMon is a DIFFERENT source task than the lane's ShakeMon2 and renders only ONE frame after its RAM state (RAM flips at odd ages -> change-map events at even ages 244,246,...,290; NOT the +2 the ShakeMon2 moves measured) - ShakeMon and ShakeMon2 latch differently, the most reusable fact this move teaches; both slide dummies and all three fist/hitsplat pairs are sprite-driven at RAM+1 (first hitsplat RAM 238 -> pixels 239, first fist RAM 241 -> pixels 242)",
+    "displayed frames (player-back; opponent-front identical on every frame +0, only the battler geometry and the mirrored x differ): lunge 219-232 (the +-18 elliptical wave with the 2-age latch), slide-to-offset 233-237 + hold 20 through 264, slide-to-original back 265-269, hitsplats 239-247 / 247-255 / 255-263, fists 242-250 / 250-258 / 258-266, ShakeMon x2 = the ONIX front-idle 1 through display 241 then 0 at 242 and the 5/0 same-value toggles every 2 frames through the 0 restore at display 290 (the target stays visible as the monbg BG1 copy that tracks the sprite x2 - Task_UpdateMonBg, battle_anim.c:813-837 - so the shake moves visible ONIX pixels and the front-idle x2 never returns to 1); monbg ANIM_DEF_PARTNER hides the target OBJ from RAM age 7, setalpha 12,8 (BLDCNT 0x3f40 with an empty target-1, so no pixel step) RAM age 10, clearmonbg/blendoff RAM age 83 - all RAM-truth only, the change map is static after 290",
+    "the portable proves 88/88 source-component frames in both orientations (attacker lunge+slide x2/y2, target idle+shake x2, the fist/hitsplat presence+positions, the single ShakeMon task across the shake span, monbg invisibility, the 0x3f40 blend register, and the SE_M_VITAL_THROW / SE_M_VITAL_THROW2 headers) and the identical shared-framebuffer 88/88 through the full engine render with healthboxes and message window untouched; the painter order is derived from the probe's hardware OAM, not assumed - within the equal-subpriority 28 hitsplat pair the LOWER OAM slot wins the PPU's one-selected-OBJ semi-transparent blend (the allocator reuses slots so the hitsplats land on 3/5/4: hitsplat1 over hitsplat2 at the frame-247 overlap, hitsplat3 over hitsplat2 at frame 255), so counter.ts reports each hitsplat's slot and the draw paints descending; no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-counter-player-hitmontop-opponent-onix.json",
+    "tools/battle-lab/mechanic-counter-opponent-hitmontop-player-onix.json",
+    "tools/compare/fixtures/counter-player-hitmontop-opponent-onix.json",
+    "tools/compare/fixtures/counter-opponent-hitmontop-player-onix.json",
+    "tools/compare/counterProbe.py",
+    "tools/compare/counterPortable.ts",
+    "tools/compare/evidence/counter-changemap-player.txt",
+    "tools/compare/evidence/counter-changemap-opponent.txt",
+    "src/animation/counter.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/counter.test.ts",
+    "tests/animation/counterEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_COVET",
    "status": "exact",
    "covered": [
@@ -603,6 +629,31 @@
     "src/engine/battleScene.ts",
     "tests/animation/crossChopEvidence.test.ts",
     "tests/animation/crossChop.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_CRUNCH",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_HOUNDOUR set 119 (HOUNDOUR 228, all four active slots CRUNCH move 242 so the Factory AI has one legal choice) against legal ONIX in both orientations; both pass the complete move-owned Scene-ON window twice fresh with evidence 8aefff069fb3a7595f08e45b0e97114217e59b171499341d3e4540b5638fec32 / raw RGB bf3360b12a1810a883203bf025f370a82bcc39508a2613771ef7f47f7e516a6c for the 142-frame player-back window (frames 74-215, first frame clean) and evidence f4ebd54457d448ae2108fdbf97d325375daffb4f24b421ea0bfa8184578a3aee / raw RGB 8b7215a7116500641958b1a0345ee264458b9be86461f8451a2618273d56ee8e for the 142-frame opponent-front window (frames 78-219, structurally identical +4 on every frame, first frame clean), both isolated by sBattleAnimScriptPtr within the Move_CRUNCH..Move_CLAMP label bounds; both orientations 142/142 component AND framebuffer exact",
+    "the reducer composes only already-exact components with zero new ones: the `fadetobg BG_DARK`/`restorebg` pair (the FAINT_ATTACK dark-BG asset + hardware BLDY darken, mGBA `_darken` 8-bit-channel `c - floor(c*y/16)` evaluated on the shifted component for the R-floor/G-B-ceil rounding the oracle shows), the sharp-teeth pair + gAffineAnims_Bite rotations (MOVE_BITE/bite.ts art, 64x64 affine subpriority 28), the two basic hitsplats (IRON_TAIL/TAKE_DOWN/BODY_SLAM painter, matrix 303, x offset mirrored for a player-side target), and AnimTask_ShakeMon y2 blocks (IRON_TAIL/POISON_TAIL); the battlers are OBJ outside the BLDCNT 0x00E8 blend mask so they never fade toward black and never take the dark palette bank (banks 0/1 vs the swapped bank 2)",
+    "displayed timing is a uniform one-age latch (no TAKE_DOWN windup two-frame case): the dark fade-out/static/fade-in, the teeth, the hitsplats, and the shake y2 all render exactly one frame after their RAM cause (change-map confirmed); `setalpha 12,8` (BLDCNT 0x3f40) and `blendoff` are RAM truth only - no blend pixel step, like CRUSH_CLAW; the restore fade-in reducer value is one RAM age ahead (reducer 17..0 vs probe gPaletteFade.y 16..0), and the ShakeMon first write also zeroes the ONIX front-idle x2=1 residual",
+    "displayed frames (player-back; opponent-front +4 on every frame): fade-out 86-101, fully-dark 102-104, fade-in 105-120, dark field + battlers 121-177 (the whole field swaps to the BG_DARK pink bank, change-map 18131px each fade step), teeth round 1 123-141 gone 142, hitsplat 1 135-144 gone 145, shake round 1 y2=7 135/139-141/145-147, teeth round 2 149-168 gone 168, hitsplat 2 161-170 gone 171, shake round 2 y2=8 161/165-167 (the final RAM 169 toggle is net-zero), teardown fade 178-193 static 194-197 fade-in 198-213 static 214-215"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-crunch-player-houndour-opponent-onix.json",
+    "tools/battle-lab/mechanic-crunch-opponent-houndour-player-onix.json",
+    "tools/compare/fixtures/crunch-player-houndour-opponent-onix.json",
+    "tools/compare/fixtures/crunch-opponent-houndour-player-onix.json",
+    "tools/compare/crunchProbe.py",
+    "tools/compare/crunchPortable.ts",
+    "tools/compare/evidence/crunch-changemap-player.txt",
+    "tools/compare/evidence/crunch-changemap-opponent.txt",
+    "src/animation/crunch.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/crunch.test.ts",
+    "tests/animation/crunchEvidence.test.ts"
    ]
   },
   {
@@ -1586,6 +1637,33 @@
    ]
   },
   {
+   "move": "MOVE_LICK",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_LICKITUNG_1 set 164 (LICKITUNG 108, all four active slots LICK move 122 so the Factory AI has one legal choice, Sitrus Berry 142, QUIRKY, 255/255 ATTACK/HP) against legal ONIX in both orientations; both pass the complete move-owned Scene-ON window twice fresh with evidence 72c763d6a39394675e42dca981c4ee3f29f4e53031ee87d14a2aec5cd40b2a18 / raw RGB 862399772b492f96f8ba6a5b84eb46cdf2881e963c554282a135c12ad2360d91 for the 73-frame player-back window (frames 214-286, first frame clean) and evidence 2c8a668d1d14acdf7fb14eb645bfb0f6ed38d5ec5ef18729550b22a9f2bcb416 / raw RGB 65f7c59555be001cbe500083b2db83e37585b9fdbec7b8302e3333dab5b18062 for the 73-frame opponent-front window (frames 213-285, structurally identical every frame -1, first frame clean), both isolated by sBattleAnimScriptPtr within the Move_LICK..Move_FOCUS_ENERGY label bounds; both orientations 73/73 component AND framebuffer exact",
+    "the reducer composes only already-exact components with zero new ones: the gLickSpriteTemplate 16x32 lick sprite (ObjNormal, NOT ObjBlend, sAnim_Lick's 5 frames of 8 tiles at 2 ticks each, no loop, own embedded gBattleAnimSpritePal_Lick) anchored at the target's X_2/Y_PIC with the AnimLick_Step invisible flicker ladder (case 0 flips every 2 ticks, case 1 every 4, DestroyAnimSprite at 71) and AnimTask_ShakeMon2 (1,0,16,1) target x2 +-1 2-age toggle (the existing shakeMon2.ts shared port); the lick art (ANIM_TAG_LICK) carries its OWN embedded palette unlike CUT's ObjBlend sharing Impact's palette, and the OAM is 16x32 NOT 32x32",
+    "displayed timing splits the latch (the TAKE_DOWN WindUpLunge case): the lick sprite is sprite-driven and renders exactly ONE frame after its RAM state (creation age 21 -> display 236, anim cmd transitions at +1), while the shake x2 is task-driven and renders the shared ShakeMon2 sequence at display age - 22, which lands its tick-0 creation write (+1) on exactly one displayed frame: a real one-frame pixel step for the opponent-front ONIX back (idle x2=0, change-map frame 235 = RAM 234 + 1) that coincides with the idle hold for the player-back ONIX front (x2=1, change-map first shake frame 237 = RAM 235 + 2); the target rests at its ONIX front-idle x2=1 through display age 21 and stays 0 after (the RAM restore at age 51 displays at 267 player / 266 opponent)",
+    "displayed frames (player-back; opponent-front every frame -1): lick sprite 236..285 (cmd0 236, cmd1 237-238, cmd2 239-240, cmd3 241-242, cmd4 243-245, animEnded + AnimLick_Step invisible ramp blinks 246, 248, 249, 251, 252, 254, 255, 257, 258, 260, 261, 265, 266, 270, 271, 275, 276, 280, 281, 285, gone 286), shake x2 = idle +1 through 236 then -1/-1/+1/+1 repeating through the 0 restore at 267 (no palette/BG work at all: BLDCNT/BLDALPHA/BLDY all 0, no monbg, no fadetobg, no setalpha/blendoff); SE_M_LICK once at the creation age",
+    "the portable proves 73/73 source-component frames in both orientations (attacker static, target idle+shake x2 with the front-idle hold, the lick sprite's presence/x/y/frame/invisible with the blink teardown, the single ShakeMon2 task across the shake span, the SE_M_LICK header at the creation age) and the identical shared-framebuffer 73/73 through the full engine render with healthboxes and message window untouched; the lick sprite's painter order is derived from the probe's hardware subpriority, not assumed - lower subpriority wins in both orientations (the lick 38/28 sits IN FRONT of the ONIX front/back 40/30, so it paints after the target; the two orientations do not have matching changed-pixel counts because the target is ONIX's front sprite in one and its back sprite in the other); no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-lick-player-lickitung-opponent-onix.json",
+    "tools/battle-lab/mechanic-lick-opponent-lickitung-player-onix.json",
+    "tools/compare/fixtures/lick-player-lickitung-opponent-onix.json",
+    "tools/compare/fixtures/lick-opponent-lickitung-player-onix.json",
+    "tools/compare/lickProbe.py",
+    "tools/compare/lickPortable.ts",
+    "tools/compare/evidence/lick-changemap-player.txt",
+    "tools/compare/evidence/lick-changemap-opponent.txt",
+    "src/assets/gen/battle-anim-lick.json",
+    "src/animation/lick.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/lick.test.ts",
+    "tests/animation/lickEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_LIGHT_SCREEN",
    "status": "exact",
    "covered": [
@@ -2545,6 +2623,33 @@
    ]
   },
   {
+   "move": "MOVE_SLASH",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_CHARMELEON_1 set 175 (CHARMELEON 5, all four active slots SLASH move 163 so the Factory AI has one legal choice, Scope Lens 198, NAUGHTY, 255/255 ATTACK/HP) against legal ONIX in both orientations; both pass the complete move-owned Scene-ON window twice fresh with evidence b1e38fbcfdc72767f1ec0caef3cda6cea5e364edcad56cdc7a8e1088183dda88 / raw RGB df7ff7a8237190853b44e6dea7879e0154ec8762532567c97fdae84a2ffce413 for the 46-frame player-back window (frames 73-118, first frame clean) and evidence b23785fb0bcf7855dba88f32fa0d0cf458feaa09be32bd3df5f7aa4c9ae4aba5 / raw RGB a08c6c22184a8b0f368e0563c58d50504d25648f8905da02f1664cd6541a9ac2 for the 46-frame opponent-front window (frames 77-122, structurally identical +4 on every frame, first frame clean), both isolated by sBattleAnimScriptPtr within the Move_SLASH..Move_STRUGGLE label bounds; both orientations 46/46 component AND framebuffer exact",
+    "the reducer composes only already-exact components with zero new ones: the two gSlashSliceSpriteTemplate slices (32x32 ObjNormal, NOT ObjBlend, gSlashSliceAnimCmds1's 4 frames of 16 tiles at 4 ticks each, no loop) anchored at the target's X_2/Y_PIC +-8, the AnimFalseSwipeSlice_Step3 invisible blink teardown, and AnimTask_ShakeMon2 (4,0,18,1) target x2 +-4 2-age toggle (the existing shakeMon2.ts shared port); the slash art (ANIM_TAG_SLASH) carries its OWN embedded palette (gBattleAnimSpritePal_Slash) unlike CUT's ObjBlend sharing Impact's palette, so the two differences the reducer must not conflate are kept distinct",
+    "displayed timing splits the latch (the TAKE_DOWN WindUpLunge case): the slices are sprite-driven and render exactly ONE frame after their RAM state (creation age 4 -> display 78, cmd transitions at +1), while the shake x2 is task-driven and renders TWO frames after its RAM write (RAM 83 -> pixels 85, change-map confirmed 85,87,...,117 vs RAM 83,85,...,115); the ShakeMon2 creation write (+4 at RAM age 9) is a same-frame transient the reducer leaves at 0 but it does reach exactly one displayed frame (display age 11), so the draw drives the shake from the shared sequence directly; the target rests at its ONIX front-idle x2=1 through display age 10 and stays 0 after (the RAM restore at age 44 displays at 46, outside the window)",
+    "displayed frames (player-back; opponent-front +4 on every frame): slice1 78..111 (cmd0 78-80, cmd1 81-84, cmd2 85-88, cmd3 89-92, teardown blinks 93..110, gone 112), slice2 84..117 (cmd0 84-86, cmd1 87-90, cmd2 91-94, cmd3 95-99, teardown blinks 100..116, gone 118), shake x2 +4 at 84 then -4/-4/+4/+4 repeating through -4 at 117-118 (no palette/BG work at all: no monbg, no fadetobg, no setalpha/blendoff); SE_M_RAZOR_WIND at slice creation",
+    "the portable proves 46/46 source-component frames in both orientations (attacker static, target idle+shake x2 with the front-idle hold, both slices' presence/x/y/frame/invisible with the blink teardown, the single ShakeMon2 task across the shake span, razor-wind SE header at the event ages) and the identical shared-framebuffer 46/46 through the full engine render with healthboxes and message window untouched; the slices' painter order is derived from the probe's hardware subpriority, not assumed - lower subpriority wins in both orientations (slices 38/28 sit in front of the ONIX front/back 40/30) and the equal-subpriority pair resolves in allocator order (slice 1, slot 3, on top of slice 2, slot 4, measured at the overlapping pixels); no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-slash-player-charmeleon-opponent-onix.json",
+    "tools/battle-lab/mechanic-slash-opponent-charmeleon-player-onix.json",
+    "tools/compare/fixtures/slash-player-charmeleon-opponent-onix.json",
+    "tools/compare/fixtures/slash-opponent-charmeleon-player-onix.json",
+    "tools/compare/slashProbe.py",
+    "tools/compare/slashPortable.ts",
+    "tools/compare/evidence/slash-changemap-player.txt",
+    "tools/compare/evidence/slash-changemap-opponent.txt",
+    "src/assets/gen/battle-anim-slash-slice.json",
+    "src/animation/slash.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/slash.test.ts",
+    "tests/animation/slashEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SLAM",
    "status": "exact",
    "covered": [
@@ -2975,8 +3080,8 @@
     "src/engine/battleScene.ts",
     "tests/animation/tailWhip.test.ts",
     "tests/animation/tailWhipEvidence.test.ts"
-    ]
-   },
+   ]
+  },
   {
    "move": "MOVE_TAKE_DOWN",
    "status": "exact",
