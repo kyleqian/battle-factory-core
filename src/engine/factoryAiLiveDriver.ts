@@ -69,6 +69,7 @@ const MOVE_NONE = 0;
 const SIDE_STATUS_REFLECT = 1 << 0;
 const SIDE_STATUS_LIGHTSCREEN = 1 << 1;
 const SIDE_STATUS_SAFEGUARD = 1 << 5;
+const SIDE_STATUS_SPIKES = 1 << 4;
 const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
 const B_WEATHER_SANDSTORM = (1 << 3) | (1 << 4);
@@ -386,6 +387,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
         : {}),
       ...((input.rulesContext.sideStatuses[0] & SIDE_STATUS_SAFEGUARD) !== 0
         ? { safeguardUp: true }
+        : {}),
+      ...((input.rulesContext.sideStatuses[0] & SIDE_STATUS_SPIKES) !== 0
+        ? { spikesUp: true }
         : {}),
     }),
   });

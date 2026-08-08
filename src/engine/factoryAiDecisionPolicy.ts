@@ -520,6 +520,8 @@ export type FactoryAiScoredBattlerView = Readonly<{
   isNightmared?: boolean;
   /** STATUS2_FORESIGHT, read by AI_CBM_Foresight. */
   isForesighted?: boolean;
+  /** SIDE_STATUS_SPIKES on the target's side, read by AI_CBM_Spikes. */
+  spikesUp?: boolean;
   /** DisableStruct::protectUses, read by AI_CV_Protect. */
   protectUses?: number;
   /**
@@ -830,6 +832,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     ...(view.target.hasPerishSong === true ? { hasPerishSong: true } : {}),
     ...(view.target.isNightmared === true ? { isNightmared: true } : {}),
     ...(view.target.isForesighted === true ? { isForesighted: true } : {}),
+    ...(view.target.spikesUp === true ? { spikesUp: true } : {}),
     level: view.target.level,
   });
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({

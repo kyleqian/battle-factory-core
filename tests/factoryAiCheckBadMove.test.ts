@@ -1072,6 +1072,37 @@ describe("AI_CBM_Foresight (data/battle_ai_scripts.s:443-445, EFFECT_FORESIGHT)"
   });
 });
 
+describe("AI_CBM_Spikes (data/battle_ai_scripts.s:439-441, EFFECT_SPIKES)", () => {
+  const MOVE_SPIKES = 191;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("target side already has Spikes JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_SPIKES, target({ spikesUp: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("target side clear FALLS THROUGH to end at zero", () => {
+    expect(run(MOVE_SPIKES, target())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+});
+
 describe("AI_CBM_OneHitKO (data/battle_ai_scripts.s:358-362, EFFECT_OHKO)", () => {
   const MOVE_GUILLOTINE = 12; // EFFECT_OHKO, TYPE_NORMAL, power 1
   const MOVE_SHEER_COLD = 329; // EFFECT_OHKO, TYPE_ICE, power 1

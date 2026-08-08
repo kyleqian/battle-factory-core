@@ -338,6 +338,12 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    */
   isForesighted?: boolean;
   /**
+   * Whether the target's side has `SIDE_STATUS_SPIKES` --
+   * `AI_CBM_Spikes`'s single gate (EFFECT_SPIKES). Optional, defaulting to
+   * false.
+   */
+  spikesUp?: boolean;
+  /**
    * `gBattleMons[AI_TARGET].level` -- `AI_CBM_OneHitKO`'s final
    * `if_level_cond 1` (less-than) gate operand. Optional, defaulting to 0
    * (the neutral "not lower" outcome when omitted, so the level gate never
@@ -1533,6 +1539,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_SPIKES -> AI_CBM_Spikes
+  // (`data/battle_ai_scripts.s:165,439-441`): a single
+  // `if_side_affecting AI_TARGET, SIDE_STATUS_SPIKES, Score_Minus10` --
+  // Spikes is penalized when the target's side already has Spikes down.
+  if (move.effect === "EFFECT_SPIKES") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmSpikes(target.spikesUp ?? false),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_DOWN(_2) -> AI_CBM_SpeedDown,
   // one of the two handlers this port implements out of the table's ~100 entries.
   if (move.effect === "EFFECT_SPEED_DOWN" || move.effect === "EFFECT_SPEED_DOWN_2") {
@@ -2706,6 +2725,16 @@ function runCbmNightmare(targetNightmared: boolean, targetAsleep: boolean): numb
  */
 function runCbmForesight(targetForesighted: boolean): number {
   return targetForesighted ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Spikes` (`data/battle_ai_scripts.s:439-441`, EFFECT_SPIKES): a
+ * single `if_side_affecting AI_TARGET, SIDE_STATUS_SPIKES, Score_Minus10` --
+ * Spikes is penalized when the target's side already has Spikes down. Zero
+ * ability/type reads.
+ */
+function runCbmSpikes(targetSpikesUp: boolean): number {
+  return targetSpikesUp ? -10 : 0;
 }
 
 /**
