@@ -674,6 +674,67 @@ export type FactoryAiCheckViabilityDraw =
     rawRngValue: number;
     randomValue: number;
     succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "heal-roll-1" | "heal-roll-2" | "heal-roll-3";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when `if_random_less_than` takes its jump (raw low byte < threshold). */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "trap-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "semi-invulnerable-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "flail-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "destiny-bond-roll-1" | "destiny-bond-roll-2" | "destiny-bond-roll-3";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "self-ko-roll-1" | "self-ko-roll-2" | "self-ko-roll-3" | "self-ko-roll-4" | "self-ko-roll-5";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    jumped: boolean;
   }>;
 
 export type FactoryAiCheckViabilityResult =
@@ -1299,6 +1360,444 @@ function runCvEndure(input: Readonly<{
 }
 
 /**
+ * `AI_CV_Heal`'s own reachable body (`data/battle_ai_scripts.s:1324-1351`,
+ * shared verbatim by `AI_CV_HealWeather` below and dispatched directly for
+ * `EFFECT_RESTORE_HP`/`EFFECT_SOFTBOILED`). The dead `AI_CV_Heal2` label
+ * (`:1330-1333`) is NOT ported: it is a byte block with zero references in
+ * the compiled ROM (pointer to `0x082dd10b` appears nowhere), so the HP
+ * 50%/80%/roll-70 band it encodes never executes.
+ *
+ * ```
+ * AI_CV_Heal:
+ *     if_hp_equal AI_USER, 100, AI_CV_Heal3
+ *     if_target_faster AI_CV_Heal4
+ *     score -8
+ *     goto AI_CV_Heal_End
+ * AI_CV_Heal3:
+ *     score -3
+ *     goto AI_CV_Heal_End
+ * AI_CV_Heal4:
+ *     if_hp_less_than AI_USER, 70, AI_CV_Heal5
+ *     if_random_less_than 30, AI_CV_Heal5
+ *     score -3
+ *     goto AI_CV_Heal_End
+ * AI_CV_Heal5:
+ *     if_doesnt_have_move_with_effect AI_TARGET, EFFECT_SNATCH, AI_CV_Heal6
+ *     if_random_less_than 100, AI_CV_Heal_End
+ * AI_CV_Heal6:
+ *     if_random_less_than 20, AI_CV_Heal_End
+ *     score +2
+ * AI_CV_Heal_End:
+ *     end
+ * ```
+ *
+ * Reachable control flow: HP exactly 100% jumps straight to the deterministic
+ * -3 (`Heal3`). Target NOT faster is the deterministic -8. Target faster
+ * reaches `Heal4`: HP < 70% jumps straight to `Heal5` (no draw); HP >= 70%
+ * runs the `<30` roll whose JUMP (roll < 30) lands in `Heal5` and whose
+ * fall-through is the deterministic -3. `Heal5` is Snatch-guarded exactly like
+ * `AI_CV_Rest`'s own tail (`if_doesnt_have_move_with_effect AI_TARGET,
+ * EFFECT_SNATCH` = plain BattleHistory membership, `Cmd_if_doesnt_have_move
+ * _with_effect` `battle_ai_script_commands.c:1940-1962`): a target WITH a
+ * Snatch-history move runs the `<100` roll (JUMP to End keeps the running
+ * score), a target without one jumps straight to `Heal6`. `Heal6`'s `<20`
+ * roll decides the final +2 (JUMP <20 keeps the score, fall-through applies
+ * +2). All HP gates read AI_USER's own truncating `100*hp/maxHp` percent. No
+ * command writes funcResult.
+ */
+function runCvHealBody(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  const targetHasSnatch = (input.target.knownMoves ?? []).some(
+    (moveId) => MOVES_BY_ID.get(moveId)?.effect === "EFFECT_SNATCH",
+  );
+
+  // Heal5/Heal6 shared tail -- reached only from Heal4's two jumps.
+  const tail = (): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> => {
+    let nextOrdinal = ordinal;
+    if (targetHasSnatch) {
+      const snatchRoll = nextDraw(rng, nextOrdinal, `${input.reasonPrefix}-heal-roll-2`);
+      rng = snatchRoll.after;
+      nextOrdinal += 1;
+      const jumped = snatchRoll.randomValue % 256 < 100;
+      draws.push(Object.freeze({ ...snatchRoll, kind: "heal-roll-2" as const, jumped }));
+      if (jumped) {
+        return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+      }
+    }
+    const tailRoll = nextDraw(rng, nextOrdinal, `${input.reasonPrefix}-heal-roll-3`);
+    rng = tailRoll.after;
+    const jumped = tailRoll.randomValue % 256 < 20;
+    draws.push(Object.freeze({ ...tailRoll, kind: "heal-roll-3" as const, jumped }));
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: jumped ? 0 : 2 });
+  };
+
+  if (hpPercent === 100) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
+  }
+
+  if (targetFaster) {
+    if (hpPercent < 70) {
+      return tail();
+    }
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-heal-roll-1`);
+    rng = roll.after;
+    ordinal += 1;
+    const jumped = roll.randomValue % 256 < 30;
+    draws.push(Object.freeze({ ...roll, kind: "heal-roll-1" as const, jumped }));
+    if (jumped) {
+      return tail();
+    }
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
+  }
+
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -8 });
+}
+
+/**
+ * `AI_CV_HealWeather` (`data/battle_ai_scripts.s:1315-1323`,
+ * `EFFECT_MORNING_SUN`/`EFFECT_SYNTHESIS`/`EFFECT_MOONLIGHT`): `get_weather`
+ * first, then a three-way weather gate over the "bad" weather values
+ * (Hail/Rain/Sandstorm), each of which jumps to a `score -2` that falls
+ * straight through into `AI_CV_Heal`'s own body -- so a heal under weather
+ * subtracts 2 AND runs the full Heal logic. Sun or no weather `goto`s the Heal
+ * body directly with no penalty. `get_weather` is the non-BUGFIX
+ * `Cmd_get_weather` (`battle_ai_script_commands.c:1644-1665`): it writes
+ * `funcResult` ONLY when a real weather bit is set, so the exit value is the
+ * stale-fallback formula `currentWeather ?? staleCarry` (same shape
+ * `weatherSetterCvScore` uses). The Heal body writes nothing further.
+ */
+function runCvHealWeather(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  staleFuncResultFallback: AiWeatherValue | undefined;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const funcResultAfter = input.attacker.currentWeather ?? input.staleFuncResultFallback;
+  const weatherPenalty = input.attacker.currentWeather !== undefined
+    && input.attacker.currentWeather !== AI_WEATHER_SUN
+    ? -2
+    : 0;
+  const body = runCvHealBody({
+    rng: input.rng,
+    attacker: input.attacker,
+    target: input.target,
+    drawOrdinalStart: input.drawOrdinalStart,
+    reasonPrefix: input.reasonPrefix,
+  });
+  return Object.freeze({ ...body, scoreDelta: body.scoreDelta + weatherPenalty, funcResultAfter });
+}
+
+/**
+ * `AI_CV_Heal` (`data/battle_ai_scripts.s:1324-1351`, `EFFECT_RESTORE_HP`/
+ * `EFFECT_SOFTBOILED`) -- the direct-dispatch entry of the shared
+ * `runCvHealBody` above. No command in this handler writes funcResult, so the
+ * incoming carry survives unchanged.
+ */
+function runCvHeal(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  funcResultCarry: AiWeatherValue | undefined;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const body = runCvHealBody({
+    rng: input.rng,
+    attacker: input.attacker,
+    target: input.target,
+    drawOrdinalStart: input.drawOrdinalStart,
+    reasonPrefix: input.reasonPrefix,
+  });
+  return Object.freeze({ ...body, funcResultAfter: input.funcResultCarry });
+}
+
+/**
+ * `AI_CV_Trap` (`data/battle_ai_scripts.s:1436-1446`, `EFFECT_TRAP`/
+ * `EFFECT_MEAN_LOOK`):
+ *
+ * ```
+ * AI_CV_Trap:
+ *     if_status AI_TARGET, STATUS1_TOXIC_POISON, AI_CV_Trap2
+ *     if_status2 AI_TARGET, STATUS2_CURSED, AI_CV_Trap2
+ *     if_status3 AI_TARGET, STATUS3_PERISH_SONG, AI_CV_Trap2
+ *     if_status2 AI_TARGET, STATUS2_INFATUATION, AI_CV_Trap2
+ *     goto AI_CV_Trap_End
+ * AI_CV_Trap2:
+ *     if_random_less_than 128, AI_CV_Trap_End
+ *     score +1
+ * AI_CV_Trap_End:
+ *     end
+ * ```
+ *
+ * Four status gates on the TARGET's own copies -- toxic poison (`Cmd_if_status`,
+ * `battle_ai_script_commands.c:773-807`, `STATUS1_TOXIC_POISON`), Cursed,
+ * Perish Song, Infatuation (`Cmd_if_status2`/`Cmd_if_status3`, same family) --
+ * any one of which jumps to the single random site. All four false:
+ * `goto End`, genuine zero score/zero draws. At the site the roll's JUMP
+ * (low byte < 128, ~50%) ends at zero; FALL-THROUGH (>= 128) applies +1.
+ * No command writes funcResult.
+ */
+function runCvTrap(input: Readonly<{
+  rng: BattleRngState;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const hasTrappableStatus = (input.target.isToxicPoisoned ?? false)
+    || (input.target.isCursed ?? false)
+    || (input.target.hasPerishSong ?? false)
+    || (input.target.isInfatuated ?? false);
+  if (!hasTrappableStatus) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
+  }
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-trap-roll`);
+  const jumped = roll.randomValue % 256 < 128;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind: "trap-roll" as const, jumped })]),
+    scoreDelta: jumped ? 0 : 1,
+  });
+}
+
+const AI_CV_SANDSTORM_RESISTANT_TYPES: ReadonlySet<string> = new Set([
+  "TYPE_GROUND", "TYPE_ROCK", "TYPE_STEEL",
+]);
+
+/**
+ * `AI_CV_SemiInvulnerable` (`data/battle_ai_scripts.s:2197-2241`,
+ * EFFECT_SEMI_INVULNERABLE -- Fly/Dig/Dive/Bounce):
+ *
+ * ```
+ * AI_CV_SemiInvulnerable:
+ *     if_doesnt_have_move_with_effect AI_TARGET, EFFECT_PROTECT, AI_CV_SemiInvulnerable2
+ *     score -1
+ *     goto AI_CV_SemiInvulnerable_End
+ * AI_CV_SemiInvulnerable2:
+ *     if_status AI_TARGET, STATUS1_TOXIC_POISON, AI_CV_SemiInvulnerable_TryEncourage
+ *     if_status2 AI_TARGET, STATUS2_CURSED, AI_CV_SemiInvulnerable_TryEncourage
+ *     if_status3 AI_TARGET, STATUS3_LEECHSEED, AI_CV_SemiInvulnerable_TryEncourage
+ *     get_weather
+ *     if_equal AI_WEATHER_HAIL, AI_CV_SemiInvulnerable_CheckSandstormTypes   ; non-BUGFIX swap
+ *     if_equal AI_WEATHER_SANDSTORM, AI_CV_SemiInvulnerable_CheckIceType     ; non-BUGFIX swap
+ *     goto AI_CV_SemiInvulnerable5
+ * AI_CV_SemiInvulnerable_CheckSandstormTypes:
+ *     get_user_type1
+ *     if_in_bytes AI_CV_SandstormResistantTypes, AI_CV_SemiInvulnerable_TryEncourage
+ *     get_user_type2
+ *     if_in_bytes AI_CV_SandstormResistantTypes, AI_CV_SemiInvulnerable_TryEncourage
+ *     goto AI_CV_SemiInvulnerable5
+ * AI_CV_SemiInvulnerable_CheckIceType:
+ *     get_user_type1
+ *     if_equal TYPE_ICE, AI_CV_SemiInvulnerable_TryEncourage
+ *     get_user_type2
+ *     if_equal TYPE_ICE, AI_CV_SemiInvulnerable_TryEncourage
+ * AI_CV_SemiInvulnerable5:
+ *     if_target_faster AI_CV_SemiInvulnerable_End
+ *     get_last_used_bank_move AI_TARGET
+ *     get_move_effect_from_result
+ *     if_not_equal EFFECT_LOCK_ON, AI_CV_SemiInvulnerable_TryEncourage
+ *     goto AI_CV_SemiInvulnerable_End
+ * AI_CV_SemiInvulnerable_TryEncourage:
+ *     if_random_less_than 80, AI_CV_SemiInvulnerable_End
+ *     score +1
+ * AI_CV_SemiInvulnerable_End:
+ *     end
+ * ```
+ *
+ * The pinned checkout is non-BUGFIX (`include/config.h:48`), so the two
+ * weather-gate branches are the SWAPPED `#else` pair confirmed in the ROM
+ * bytes (Hail @ 0x082dda5c jumps to `CheckSandstormTypes`, Sandstorm @
+ * `0x082dda63` to `CheckIceType`) -- the AI stalls while taking Hail damage
+ * on a Ground/Rock/Steel user and while taking Sandstorm damage on an Ice
+ * user. A target with a Protect-effect move in BattleHistory scores -1 (the
+ * stall is pointless). Otherwise any target toxic/cursed/leech-seeded
+ * reaches the roll directly; weather Hail + user type in the Ground/Rock/
+ * Steel list (or Sandstorm + Ice type) reaches it too; everything else falls
+ * into `SemiInvulnerable5` whose only route to the roll is a target whose
+ * last-used move's effect is NOT Lock-On. Exactly ONE `if_random_less_than`
+ * site (the `<80` TryEncourage roll) plus the `if_target_faster` tie-break.
+ * `get_last_used_bank_move AI_TARGET` + `get_move_effect_from_result`
+ * ALWAYS overwrite funcResult once `SemiInvulnerable5`'s target-faster gate
+ * is passed (doc §27.1 writes-conditionally); earlier type/weather writes
+ * are the exit value on every path that stops before them.
+ */
+function runCvSemiInvulnerable(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  staleFuncResultFallback: AiWeatherValue | undefined;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const targetHasProtect = (input.target.knownMoves ?? []).some(
+    (moveId) => MOVES_BY_ID.get(moveId)?.effect === "EFFECT_PROTECT",
+  );
+  if (targetHasProtect) {
+    return Object.freeze({
+      rng: input.rng,
+      draws: Object.freeze([]),
+      scoreDelta: -1,
+      funcResultAfter: input.staleFuncResultFallback,
+    });
+  }
+
+  // No Protect in target history: the status gates jump straight to the roll
+  // BEFORE get_weather ever writes, so the carry survives on those exits.
+  const statusJump = (input.target.isToxicPoisoned ?? false)
+    || (input.target.isCursed ?? false)
+    || (input.target.isLeechSeeded ?? false);
+
+  const tryEncourage = (
+    rng: BattleRngState,
+    ordinal: number,
+    funcResultAfter: AiWeatherValue | undefined,
+  ): Readonly<{
+    rng: BattleRngState;
+    draws: readonly FactoryAiCheckViabilityDraw[];
+    scoreDelta: number;
+    funcResultAfter: AiWeatherValue | undefined;
+  }> => {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-semi-invulnerable-roll`);
+    const jumped = roll.randomValue % 256 < 80;
+    return Object.freeze({
+      rng: roll.after,
+      draws: Object.freeze([Object.freeze({ ...roll, kind: "semi-invulnerable-roll" as const, jumped })]),
+      scoreDelta: jumped ? 0 : 1,
+      funcResultAfter,
+    });
+  };
+
+  if (statusJump) {
+    return tryEncourage(input.rng, input.drawOrdinalStart, input.staleFuncResultFallback);
+  }
+
+  // get_weather: non-BUGFIX `Cmd_get_weather` writes only when a real weather
+  // bit is set, so the value after it is the stale-fallback formula.
+  const weather = input.attacker.currentWeather;
+  const weatherWrite = weather ?? input.staleFuncResultFallback;
+
+  const userType1 = input.attacker.types[0];
+  const userType2 = input.attacker.types[1];
+
+  if (weather === AI_WEATHER_HAIL) {
+    // Non-BUGFIX: Hail -> CheckSandstormTypes (Ground/Rock/Steel resist).
+    if (AI_CV_SANDSTORM_RESISTANT_TYPES.has(userType1)) {
+      return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType1));
+    }
+    if (AI_CV_SANDSTORM_RESISTANT_TYPES.has(userType2)) {
+      return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType2));
+    }
+    // goto SemiInvulnerable5 -- funcResult is now type2 (last get_type write).
+    return semiInvulnerable5(typeFuncResultCollision(userType2));
+  }
+
+  if (weather === AI_WEATHER_SANDSTORM) {
+    // Non-BUGFIX: Sandstorm -> CheckIceType (Ice type resist).
+    if (userType1 === "TYPE_ICE") {
+      return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType1));
+    }
+    if (userType2 === "TYPE_ICE") {
+      return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType2));
+    }
+    // falls into SemiInvulnerable5 -- funcResult is now type2.
+    return semiInvulnerable5(typeFuncResultCollision(userType2));
+  }
+
+  // Weather Sun/Rain/none: goto SemiInvulnerable5 -- funcResult is the weather
+  // write (or stale carry).
+  return semiInvulnerable5(weatherWrite);
+
+  function semiInvulnerable5(lastWriteBefore: AiWeatherValue | undefined): Readonly<{
+    rng: BattleRngState;
+    draws: readonly FactoryAiCheckViabilityDraw[];
+    scoreDelta: number;
+    funcResultAfter: AiWeatherValue | undefined;
+  }> {
+    const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+    const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+    const draws: FactoryAiCheckViabilityDraw[] = [];
+    let rng = input.rng;
+    let ordinal = input.drawOrdinalStart;
+
+    let tieRoll = 0;
+    let tieDraw: ReturnType<typeof nextDraw> | null = null;
+    if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+      tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+      rng = tieDraw.after;
+      tieRoll = tieDraw.randomValue;
+      ordinal += 1;
+    }
+    const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+    if (tieDraw) {
+      draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+    }
+    if (strikesFirst === 1) {
+      // Target faster: End with the pre-existing write value.
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0, funcResultAfter: lastWriteBefore });
+    }
+
+    // get_last_used_bank_move AI_TARGET + get_move_effect_from_result always
+    // overwrite funcResult here: the effect id of the target's last move.
+    const lastMove = MOVES_BY_ID.get(input.target.lastUsedMoveId ?? 0);
+    const lastEffect = lastMove?.effect ?? "EFFECT_HIT";
+    const funcResultAfter = EFFECT_ID_IN_WEATHER_RANGE.get(lastEffect);
+    if (lastEffect === "EFFECT_LOCK_ON") {
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0, funcResultAfter });
+    }
+    // if_not_equal EFFECT_LOCK_ON -> TryEncourage (the roll continues off the
+    // same rng state, preserving ordinal order).
+    return tryEncourage(rng, ordinal, funcResultAfter);
+  }
+}
+
+/**
+ * `AI_CV_FakeOut` (`data/battle_ai_scripts.s:2249-2251`, EFFECT_FAKE_OUT):
+ *
+ * ```
+ * AI_CV_FakeOut:
+ *     score +2
+ *     end
+ * ```
+ *
+ * A bare +2, no gates, no draws, no funcResult write -- the whole body.
+ */
+function runCvFakeOut(input: Readonly<{
+  rng: BattleRngState;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 2 });
+}
+
+/**
  * `AI_CV_Pursuit` (`data/battle_ai_scripts.s:2018-2036`,
  * `docs/factory-ai-checkviability-ground-truth.md` §11.1):
  *
@@ -1387,12 +1886,434 @@ function runCvPursuit(input: Readonly<{
   });
 }
 
+/**
+ * `AI_CV_SuperFang` (`data/battle_ai_scripts.s:1430-1433`, EFFECT_SUPER_FANG):
+ *
+ * ```
+ * AI_CV_SuperFang:
+ *     if_hp_more_than AI_TARGET, 50, AI_CV_SuperFang_End
+ *     score -1
+ * AI_CV_SuperFang_End:
+ *     end
+ * ```
+ *
+ * A single HP gate on the TARGET's own truncating `100*hp/maxHp` percent:
+ * > 50% is the deterministic zero-score `goto End`; <= 50% scores -1. No
+ * draws, no funcResult write.
+ */
+function runCvSuperFang(input: Readonly<{
+  rng: BattleRngState;
+  targetHp: number;
+  targetMaxHp: number;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const targetHpPercent = Math.floor((100 * input.targetHp) / input.targetMaxHp);
+  return Object.freeze({
+    rng: input.rng,
+    draws: Object.freeze([]),
+    scoreDelta: targetHpPercent > 50 ? 0 : -1,
+  });
+}
+
+/**
+ * `AI_CV_Recharge` (`data/battle_ai_scripts.s:1588-1600`, EFFECT_RECHARGE --
+ * Hyper Beam / Blast Burn / Hydro Cannon / Frenzy Plant):
+ *
+ * ```
+ * AI_CV_Recharge:
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_25, AI_CV_Recharge_ScoreDown1
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_5, AI_CV_Recharge_ScoreDown1
+ *     if_target_faster AI_CV_Recharge2
+ *     if_hp_more_than AI_USER, 40, AI_CV_Recharge_ScoreDown1
+ *     goto AI_CV_Recharge_End
+ * AI_CV_Recharge2:
+ *     if_hp_less_than AI_USER, 60, AI_CV_Recharge_End
+ * AI_CV_Recharge_ScoreDown1:
+ *     score -1
+ * AI_CV_Recharge_End:
+ *     end
+ * ```
+ *
+ * Deterministic, zero draws (apart from the `if_target_faster` tie-break).
+ * Exactly 0.25x/0.5x effectiveness against the target scores -1 directly
+ * (the recharge waste outweighs the weak hit). Otherwise, if the target is
+ * NOT faster: HP > 40% scores -1 (wasting the recharge turn at mid HP), HP
+ * <= 40% is the zero `goto End`. If the target IS faster, `Recharge2`'s HP <
+ * 60% is the zero `goto End` -- only HP >= 60% FALLS THROUGH the second gate
+ * into the shared -1 (`ScoreDown1`, reached by fallthrough -- same source
+ * idiom as `AI_CV_Endure`'s own `Endure2`). All HP gates read AI_USER's own
+ * truncating percent. No command writes funcResult.
+ */
+function runCvRecharge(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  attackerTypes: readonly [string, string];
+  moveType: string;
+  targetTypes: readonly [string, string];
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  if (classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
+  }
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+
+  if (!targetFaster) {
+    // if_hp_more_than AI_USER, 40, AI_CV_Recharge_ScoreDown1: > 40 scores -1;
+    // else goto End (zero).
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: hpPercent > 40 ? -1 : 0 });
+  }
+
+  // Recharge2: if_hp_less_than AI_USER, 60, AI_CV_Recharge_End: < 60 ends at
+  // zero; >= 60 falls through into the shared ScoreDown1 (-1).
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: hpPercent < 60 ? 0 : -1 });
+}
+
+/**
+ * `AI_CV_Flail` (`data/battle_ai_scripts.s:1817-1840`, EFFECT_FLAIL -- Flail
+ * / Reversal):
+ *
+ * ```
+ * AI_CV_Flail:
+ *     if_target_faster AI_CV_Flail2
+ *     if_hp_more_than AI_USER, 33, AI_CV_Flail_ScoreDown1
+ *     if_hp_more_than AI_USER, 20, AI_CV_Flail_End
+ *     if_hp_less_than AI_USER, 8, AI_CV_Flail_ScoreUp1
+ *     goto AI_CV_Flail3
+ * AI_CV_Flail2:
+ *     if_hp_more_than AI_USER, 60, AI_CV_Flail_ScoreDown1
+ *     if_hp_more_than AI_USER, 40, AI_CV_Flail_End
+ *     goto AI_CV_Flail3
+ * AI_CV_Flail_ScoreUp1:
+ *     score +1
+ * AI_CV_Flail3:
+ *     if_random_less_than 100, AI_CV_Flail_End
+ *     score +1
+ *     goto AI_CV_Flail_End
+ * AI_CV_Flail_ScoreDown1:
+ *     score -1
+ * AI_CV_Flail_End:
+ *     end
+ * ```
+ *
+ * Target NOT faster reads its own HP bands in order: > 33 is the -1
+ * (`ScoreDown1`); > 20 is the zero `goto End`; < 8 is `ScoreUp1`'s +1, which
+ * FALLS THROUGH into the single random site (`Flail3`); the remaining
+ * [8,20] band `goto`s the site directly. Target faster reads ITS own HP
+ * bands: > 60 is -1; > 40 is zero; <= 40 `goto`s the site. So the site is
+ * reached at HP < 8 (with a prior +1) or in [8,20] (target not faster), or
+ * at HP <= 40 (target faster) -- one `<100` roll whose JUMP (roll < 100,
+ * ~39%) keeps the running score and whose FALL-THROUGH adds +1. Zero draws
+ * on every non-site path; `if_target_faster` burns its usual tie-break. No
+ * command writes funcResult.
+ */
+function runCvFlail(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+
+  const flail3 = (baseScore: number): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> => {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-flail-roll`);
+    const jumped = roll.randomValue % 256 < 100;
+    draws.push(Object.freeze({ ...roll, kind: "flail-roll" as const, jumped }));
+    return Object.freeze({ rng: roll.after, draws: Object.freeze(draws), scoreDelta: jumped ? baseScore : baseScore + 1 });
+  };
+
+  if (targetFaster) {
+    if (hpPercent > 60) {
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
+    }
+    if (hpPercent > 40) {
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+    }
+    return flail3(0);
+  }
+
+  if (hpPercent > 33) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
+  }
+  if (hpPercent > 20) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+  }
+  if (hpPercent < 8) {
+    // ScoreUp1: +1 falls through into Flail3.
+    return flail3(1);
+  }
+  return flail3(0);
+}
+
+/**
+ * `AI_CV_DestinyBond` (`data/battle_ai_scripts.s:1800-1816`,
+ * EFFECT_DESTINY_BOND):
+ *
+ * ```
+ * AI_CV_DestinyBond:
+ *     score -1
+ *     if_target_faster AI_CV_DestinyBond_End
+ *     if_hp_more_than AI_USER, 70, AI_CV_DestinyBond_End
+ *     if_random_less_than 128, AI_CV_DestinyBond2
+ *     score +1
+ * AI_CV_DestinyBond2:
+ *     if_hp_more_than AI_USER, 50, AI_CV_DestinyBond_End
+ *     if_random_less_than 128, AI_CV_DestinyBond3
+ *     score +1
+ * AI_CV_DestinyBond3:
+ *     if_hp_more_than AI_USER, 30, AI_CV_DestinyBond_End
+ *     if_random_less_than 100, AI_CV_DestinyBond_End
+ *     score +2
+ * AI_CV_DestinyBond_End:
+ *     end
+ * ```
+ *
+ * Always -1 first. Target faster or own HP > 70 ends at -1 with zero draws.
+ * Otherwise up to three sequential HP-gated rolls run on AI_USER's OWN
+ * truncating percent: at 70,50,30, each gate ends at zero draws on its > HP;
+ * each `<threshold` roll that FALLS THROUGH applies its +1/+2 and continues
+ * to the next band. Net: HP <= 30 can draw all three; HP 31-50 draws two;
+ * HP 51-70 draws one; HP > 70 (or target faster) draws none. `if_target_faster`
+ * burns its usual tie-break. No command writes funcResult.
+ */
+function runCvDestinyBond(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  let score = -1;
+
+  if (targetFaster || hpPercent > 70) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+
+  const rollAt = (threshold: number, kind: "destiny-bond-roll-1" | "destiny-bond-roll-2" | "destiny-bond-roll-3", bonus: number): boolean => {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-${kind}`);
+    rng = roll.after;
+    ordinal += 1;
+    const jumped = roll.randomValue % 256 < threshold;
+    draws.push(Object.freeze({ ...roll, kind, jumped }));
+    if (!jumped) score += bonus;
+    return jumped;
+  };
+
+  // Band 1: HP <= 70. Roll < 128 jumps to DB2 (no +1); >= 128 applies +1 then falls through.
+  if (hpPercent <= 70) {
+    rollAt(128, "destiny-bond-roll-1", 1);
+    if (hpPercent <= 50) {
+      rollAt(128, "destiny-bond-roll-2", 1);
+      if (hpPercent <= 30) {
+        rollAt(100, "destiny-bond-roll-3", 2);
+      }
+    }
+  }
+
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+}
+
+/**
+ * `AI_CV_SelfKO` (`data/battle_ai_scripts.s:800-826`, EFFECT_EXPLOSION):
+ *
+ * ```
+ * AI_CV_SelfKO:
+ *     if_stat_level_less_than AI_TARGET, STAT_EVASION, 7, AI_CV_SelfKO_Encourage1
+ *     score -1
+ *     if_stat_level_less_than AI_TARGET, STAT_EVASION, 10, AI_CV_SelfKO_Encourage1
+ *     if_random_less_than 128, AI_CV_SelfKO_Encourage1
+ *     score -1
+ * AI_CV_SelfKO_Encourage1:
+ *     if_hp_less_than AI_USER, 80, AI_CV_SelfKO_Encourage2
+ *     if_target_faster AI_CV_SelfKO_Encourage2
+ *     if_random_less_than 50, AI_CV_SelfKO_End
+ *     goto Score_Minus3
+ * AI_CV_SelfKO_Encourage2:
+ *     if_hp_more_than AI_USER, 50, AI_CV_SelfKO_Encourage4
+ *     if_random_less_than 128, AI_CV_SelfKO_Encourage3
+ *     score +1
+ * AI_CV_SelfKO_Encourage3:
+ *     if_hp_more_than AI_USER, 30, AI_CV_SelfKO_End
+ *     if_random_less_than 50, AI_CV_SelfKO_End
+ *     score +1
+ *     goto AI_CV_SelfKO_End
+ * AI_CV_SelfKO_Encourage4:
+ *     if_random_less_than 50, AI_CV_SelfKO_End
+ *     score -1
+ * AI_CV_SelfKO_End:
+ *     end
+ * ```
+ *
+ * Target EVASION stage gates first (stages 0-12, default 6): evasion < 7
+ * jumps straight to `Encourage1` with zero prologue score; evasion in [7,10)
+ * scores -1; evasion >= 10 scores -1 AND runs the prologue `<128` roll whose
+ * JUMP (roll < 128) skips the second -1 and whose FALL-THROUGH applies it.
+ * `Encourage1`: own HP < 80 or target faster both jump to `Encourage2`;
+ * otherwise HP >= 80 AND target not faster runs the `<50` roll (JUMP to End
+ * keeps the running score, FALL-THROUGH `goto Score_Minus3` applies -3).
+ * `Encourage2` (HP < 80 or target faster): HP > 50 jumps to `Encourage4`'s
+ * `<50` roll (FALL-THROUGH -1); HP <= 50 runs the `<128` roll (FALL-THROUGH
+ * +1) then `Encourage3`: HP > 30 ends at zero; HP <= 30 runs the `<50` roll
+ * (FALL-THROUGH +1). Four `if_random_less_than` sites in source order
+ * (prologue `<128`, Encourage1 `<50`, Encourage2 `<128`, Encourage3/4 `<50`
+ * sharing the same ordinal slot by mutually-exclusive reachability), plus the
+ * `if_target_faster` tie-break. No command writes funcResult.
+ */
+function runCvSelfKO(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  let score = 0;
+
+  const targetEvasion = input.target.evasionStage;
+  if (targetEvasion >= 7) {
+    score -= 1;
+    if (targetEvasion >= 10) {
+      const prologue = nextDraw(rng, ordinal, `${input.reasonPrefix}-self-ko-roll-1`);
+      rng = prologue.after;
+      ordinal += 1;
+      const jumped = prologue.randomValue % 256 < 128;
+      draws.push(Object.freeze({ ...prologue, kind: "self-ko-roll-1" as const, jumped }));
+      if (!jumped) score -= 1;
+    }
+  }
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  // Encourage1: HP < 80 or target faster -> Encourage2.
+  if (hpPercent < 80 || targetFaster) {
+    // Encourage2: HP > 50 -> Encourage4's <50 roll; HP <= 50 -> the <128 roll.
+    if (hpPercent > 50) {
+      const encourage4 = nextDraw(rng, ordinal, `${input.reasonPrefix}-self-ko-roll-5`);
+      rng = encourage4.after;
+      ordinal += 1;
+      const jumped = encourage4.randomValue % 256 < 50;
+      draws.push(Object.freeze({ ...encourage4, kind: "self-ko-roll-5" as const, jumped }));
+      if (!jumped) score -= 1;
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+    }
+    const encourage2 = nextDraw(rng, ordinal, `${input.reasonPrefix}-self-ko-roll-3`);
+    rng = encourage2.after;
+    ordinal += 1;
+    const jumped2 = encourage2.randomValue % 256 < 128;
+    draws.push(Object.freeze({ ...encourage2, kind: "self-ko-roll-3" as const, jumped: jumped2 }));
+    if (!jumped2) score += 1;
+    if (hpPercent <= 30) {
+      // Encourage3's <50 roll (HP > 30 ends at zero; <= 30 rolls).
+      const encourage3 = nextDraw(rng, ordinal, `${input.reasonPrefix}-self-ko-roll-4`);
+      rng = encourage3.after;
+      ordinal += 1;
+      const jumped3 = encourage3.randomValue % 256 < 50;
+      draws.push(Object.freeze({ ...encourage3, kind: "self-ko-roll-4" as const, jumped: jumped3 }));
+      if (!jumped3) score += 1;
+    }
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+
+  // HP >= 80 and target not faster: the <50 Encourage1 roll (FALL-THROUGH -3).
+  const encourage1 = nextDraw(rng, ordinal, `${input.reasonPrefix}-self-ko-roll-2`);
+  rng = encourage1.after;
+  const jumped = encourage1.randomValue % 256 < 50;
+  draws.push(Object.freeze({ ...encourage1, kind: "self-ko-roll-2" as const, jumped }));
+  if (!jumped) score -= 3;
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+}
+
 const AI_EFFECTIVENESS_X0_25 = 10;
 const AI_EFFECTIVENESS_X0_5 = 20;
 const AI_EFFECTIVENESS_X1 = 40;
 const AI_EFFECTIVENESS_X2 = 80;
 const AI_EFFECTIVENESS_X4 = 160;
-
 /**
  * `Cmd_if_type_effectiveness`'s own effectiveness-class probe
  * (`battle_ai_script_commands.c:1515-1554`), reused verbatim by all four
@@ -3722,6 +4643,51 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (
+    move.effect === "EFFECT_MORNING_SUN"
+    || move.effect === "EFFECT_SYNTHESIS"
+    || move.effect === "EFFECT_MOONLIGHT"
+  ) {
+    // AI_CV_HealWeather (data/battle_ai_scripts.s:1315-1323) -- the shared
+    // Heal body behind a get_weather gate (Hail/Rain/Sandstorm -2 then the
+    // full AI_CV_Heal flow; Sun/none no penalty).
+    const healWeather = runCvHealWeather({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      staleFuncResultFallback: funcResultCarry,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: healWeather.rng,
+      draws: healWeather.draws,
+      scoreDelta: healWeather.scoreDelta,
+      funcResultAfter: healWeather.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_RESTORE_HP" || move.effect === "EFFECT_SOFTBOILED") {
+    // AI_CV_Heal (data/battle_ai_scripts.s:1324-1351) -- the shared Heal body
+    // reached directly (no weather gate).
+    const heal = runCvHeal({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      funcResultCarry,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: heal.rng,
+      draws: heal.draws,
+      scoreDelta: heal.scoreDelta,
+      funcResultAfter: heal.funcResultAfter,
+    });
+  }
+
   if (move.effect === "EFFECT_ABSORB") {
     const absorb = runCvAbsorb({
       rng: input.rng,
@@ -3783,6 +4749,148 @@ export function runCheckViability(input: Readonly<{
       rng: roar.rng,
       draws: roar.draws,
       scoreDelta: roar.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_FAKE_OUT") {
+    // AI_CV_FakeOut (data/battle_ai_scripts.s:2249-2251) -- a bare +2.
+    const fakeOut = runCvFakeOut({ rng: input.rng });
+    return Object.freeze({
+      kind: "scored",
+      rng: fakeOut.rng,
+      draws: fakeOut.draws,
+      scoreDelta: fakeOut.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_SUPER_FANG") {
+    // AI_CV_SuperFang (data/battle_ai_scripts.s:1430-1433).
+    const superFang = runCvSuperFang({
+      rng: input.rng,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: superFang.rng,
+      draws: superFang.draws,
+      scoreDelta: superFang.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_RECHARGE") {
+    // AI_CV_Recharge (data/battle_ai_scripts.s:1588-1600).
+    const recharge = runCvRecharge({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      attackerTypes: input.attacker.types,
+      moveType: move.type,
+      targetTypes: input.target.types,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: recharge.rng,
+      draws: recharge.draws,
+      scoreDelta: recharge.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_FLAIL") {
+    // AI_CV_Flail (data/battle_ai_scripts.s:1817-1840).
+    const flail = runCvFlail({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: flail.rng,
+      draws: flail.draws,
+      scoreDelta: flail.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_DESTINY_BOND") {
+    // AI_CV_DestinyBond (data/battle_ai_scripts.s:1800-1816).
+    const destinyBond = runCvDestinyBond({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: destinyBond.rng,
+      draws: destinyBond.draws,
+      scoreDelta: destinyBond.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_EXPLOSION") {
+    // AI_CV_SelfKO (data/battle_ai_scripts.s:800-826) -- the shared handler
+    // for Explosion/Selfdestruct.
+    const selfKo = runCvSelfKO({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: selfKo.rng,
+      draws: selfKo.draws,
+      scoreDelta: selfKo.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_SEMI_INVULNERABLE") {
+    // AI_CV_SemiInvulnerable (data/battle_ai_scripts.s:2197-2241) -- the
+    // non-BUGFIX (swapped) weather-gate pair, confirmed in the ROM bytes.
+    const semiInvulnerable = runCvSemiInvulnerable({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      staleFuncResultFallback: funcResultCarry,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: semiInvulnerable.rng,
+      draws: semiInvulnerable.draws,
+      scoreDelta: semiInvulnerable.scoreDelta,
+      funcResultAfter: semiInvulnerable.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_TRAP" || move.effect === "EFFECT_MEAN_LOOK") {
+    // AI_CV_Trap (data/battle_ai_scripts.s:1436-1446) -- one shared handler
+    // for both effects.
+    const trap = runCvTrap({
+      rng: input.rng,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: trap.rng,
+      draws: trap.draws,
+      scoreDelta: trap.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }

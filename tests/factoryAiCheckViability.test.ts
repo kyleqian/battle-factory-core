@@ -5068,3 +5068,550 @@ describe("AI_CV_OneHitKO (EFFECT_OHKO, docs/executable-frontier-census.md 28 wei
     expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: 0 });
   });
 });
+
+describe("AI_CV_HealWeather / AI_CV_Heal (data/battle_ai_scripts.s:1315-1351)", () => {
+  const MOVE_MORNING_SUN = 234; // EFFECT_MORNING_SUN -> AI_CV_HealWeather
+  const MOVE_RECOVER = 105; // EFFECT_RESTORE_HP -> AI_CV_Heal
+  const MOVE_SNATCH = 289; // EFFECT_SNATCH, for the target-history Snatch gate
+
+  // if_target_faster reaches Heal4 only when the TARGET is strictly faster.
+  const SLOW_HEALER = Object.freeze({
+    ...NEUTRAL_BATTLER,
+    speed: 5,
+  });
+  const FAST_TARGET = Object.freeze({
+    ...NEUTRAL_BATTLER,
+    speed: 120,
+    knownMoves: [],
+  });
+
+  function healWeatherRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_MORNING_SUN,
+      attacker: { ...SLOW_HEALER, ...attackerOverrides },
+      target: { ...FAST_TARGET, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "heal-weather",
+    });
+  }
+
+  function healRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_RECOVER,
+      attacker: { ...SLOW_HEALER, ...attackerOverrides },
+      target: { ...FAST_TARGET, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "heal",
+    });
+  }
+
+  it("HealWeather at full HP scores -3 under Sun, with zero draws", () => {
+    const result = healWeatherRun(1, { hp: 100, maxHp: 100, currentWeather: 0 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -3, draws: [], funcResultAfter: 0 });
+  });
+
+  it("HealWeather under Hail applies the -2 weather penalty AND the full Heal flow (target faster, HP < 70 -> Heal5, no Snatch -> +2)", () => {
+    // seed 1 -> heal-roll-3 low byte 198 (>= 20, FALL-THROUGH to +2).
+    const result = healWeatherRun(1, { hp: 60, maxHp: 100, currentWeather: 3 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, funcResultAfter: 3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "heal-roll-3", jumped: false });
+  });
+
+  it("Heal target faster, HP in [70,100): the <30 roll's FALL-THROUGH scores -3", () => {
+    const result = healRun(1, { hp: 80, maxHp: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "heal-roll-1", jumped: false });
+  });
+
+  it("Heal target faster, HP in [70,100): the <30 roll's JUMP reaches the Snatch-gated tail", () => {
+    // seed 4 -> heal-roll-1 low byte 25 (< 30, JUMP to Heal5), then heal-roll-3
+    // low byte 8 (< 20, JUMP to End -> zero).
+    const result = healRun(4, { hp: 80, maxHp: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "heal-roll-1", jumped: true });
+    expect(result.draws[1]).toMatchObject({ kind: "heal-roll-3", jumped: true });
+  });
+
+  it("Heal target faster, HP < 70, target HAS Snatch history: the <100 roll's JUMP ends at zero", () => {
+    // seed 3 -> heal-roll-2 low byte 83 (< 100, JUMP to End).
+    const result = healRun(3, { hp: 60, maxHp: 100 }, { knownMoves: [MOVE_SNATCH] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "heal-roll-2", jumped: true });
+  });
+
+  it("Heal target faster, HP < 70, target HAS Snatch history: the <100 roll's FALL-THROUGH reaches Heal6's <20 roll", () => {
+    // seed 1 -> heal-roll-2 low byte 198 (>= 100, FALL-THROUGH), then heal-roll-3
+    // low byte 33 (>= 20, FALL-THROUGH to +2).
+    const result = healRun(1, { hp: 60, maxHp: 100 }, { knownMoves: [MOVE_SNATCH] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["heal-roll-2", "heal-roll-3"]);
+    expect(result.draws[0]).toMatchObject({ jumped: false });
+    expect(result.draws[1]).toMatchObject({ jumped: false });
+  });
+
+  it("Heal target NOT faster (attacker faster) scores a deterministic -8", () => {
+    // Attacker speed 120 > target 5: if_target_faster false.
+    const result = healRun(1, { hp: 60, maxHp: 100, speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8, draws: [] });
+  });
+
+  it("Heal preserves the incoming funcResult carry (no command writes funcResult)", () => {
+    const result = healRun(1, { hp: 60, maxHp: 100, speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ funcResultAfter: 2 });
+  });
+});
+
+describe("AI_CV_Trap (data/battle_ai_scripts.s:1436-1446)", () => {
+  const MOVE_BIND = 20; // EFFECT_TRAP
+  const MOVE_MEAN_LOOK = 212; // EFFECT_MEAN_LOOK -> same handler
+
+  function trapRun(rngValue: number, targetOverrides: Record<string, unknown> = {}, moveId = MOVE_BIND) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId,
+      attacker: NEUTRAL_BATTLER,
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      staleFuncResultFallback: 3,
+      drawOrdinalStart: 1,
+      reasonPrefix: "trap",
+    });
+  }
+
+  it("no trappable status: all four gates fall through, goto End -> zero score, zero draws", () => {
+    const result = trapRun(1);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [], funcResultAfter: 3 });
+  });
+
+  it.each([
+    ["toxic poison", { isToxicPoisoned: true }],
+    ["cursed", { isCursed: true }],
+    ["perish song", { hasPerishSong: true }],
+    ["infatuation", { isInfatuated: true }],
+  ])("%s reaches the roll; low byte <128 JUMPs to End at zero", (_label, targetOverrides) => {
+    // seed 3 -> low byte 83.
+    const result = trapRun(3, targetOverrides);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "trap-roll", jumped: true });
+  });
+
+  it("roll low byte >=128 FALLS THROUGH to +1", () => {
+    // seed 1 -> low byte 198.
+    const result = trapRun(1, { isToxicPoisoned: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "trap-roll", jumped: false });
+  });
+
+  it("EFFECT_MEAN_LOOK dispatches through the identical handler", () => {
+    const result = trapRun(1, { isCursed: true }, MOVE_MEAN_LOOK);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+});
+
+describe("AI_CV_FakeOut (data/battle_ai_scripts.s:2249-2251)", () => {
+  const MOVE_FAKE_OUT = 252; // EFFECT_FAKE_OUT
+
+  it("bare +2, zero draws, rng untouched, carry preserved", () => {
+    const rng = { value: 12345, calls: 3 };
+    const result = runCheckViability({
+      rng,
+      moveId: MOVE_FAKE_OUT,
+      attacker: NEUTRAL_BATTLER,
+      target: NEUTRAL_BATTLER,
+      staleFuncResultFallback: 1,
+      drawOrdinalStart: 1,
+      reasonPrefix: "fake-out",
+    });
+    expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: 2, funcResultAfter: 1 });
+  });
+});
+
+describe("AI_CV_SemiInvulnerable (data/battle_ai_scripts.s:2197-2241, non-BUGFIX)", () => {
+  const MOVE_FLY = 19; // EFFECT_SEMI_INVULNERABLE
+  const MOVE_PROTECT = 182; // EFFECT_PROTECT
+  const MOVE_LOCK_ON = 199; // EFFECT_LOCK_ON
+
+  function semiRun(
+    rngValue: number,
+    attackerOverrides: Record<string, unknown> = {},
+    targetOverrides: Record<string, unknown> = {},
+  ) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_FLY,
+      attacker: { ...NEUTRAL_BATTLER, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, knownMoves: [], lastUsedMoveId: 0, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "semi",
+    });
+  }
+
+  it("target HAS a Protect-history move: deterministic -1, zero draws, carry preserved", () => {
+    const result = semiRun(1, {}, { knownMoves: [MOVE_PROTECT] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [], funcResultAfter: 2 });
+  });
+
+  it("target toxic-poisoned reaches the roll before get_weather; roll <80 JUMPs to End", () => {
+    // seed 3 -> low byte 83 (>= 80, FALL-THROUGH to +1).
+    const result = semiRun(1, {}, { isToxicPoisoned: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "semi-invulnerable-roll", jumped: false });
+  });
+
+  it("status-jump path preserves the carry (no get_weather/type/last-move write)", () => {
+    const result = semiRun(3, {}, { isLeechSeeded: true });
+    expect(result).toMatchObject({ kind: "scored", funcResultAfter: 2 });
+  });
+
+  it("non-BUGFIX swap: weather Hail + user Ground type reaches the roll (CheckSandstormTypes)", () => {
+    const result = semiRun(1, { currentWeather: 3, types: ["TYPE_GROUND", "TYPE_NORMAL"] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("non-BUGFIX swap: weather Hail + user Ice type does NOT reach the roll (falls to SemiInvulnerable5)", () => {
+    // Attacker faster (120 > 5) avoids the SemiInvulnerable5 tie-break draw;
+    // no status, last move effect != LOCK_ON, so the <80 roll still runs.
+    const result = semiRun(1, { currentWeather: 3, types: ["TYPE_ICE", "TYPE_NORMAL"], speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("non-BUGFIX swap: weather Sandstorm + user Ice type reaches the roll (CheckIceType)", () => {
+    const result = semiRun(1, { currentWeather: 2, types: ["TYPE_NORMAL", "TYPE_ICE"] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("weather Sun: falls to SemiInvulnerable5; target last move Lock-On ends at zero", () => {
+    const result = semiRun(1, { currentWeather: 0, speed: 120 }, { speed: 5, lastUsedMoveId: MOVE_LOCK_ON });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.funcResultAfter).toBe(undefined); // EFFECT_LOCK_ON (94) never collides
+  });
+
+  it("weather Sun, no status, last move effect != LOCK_ON: the <80 roll decides +1", () => {
+    const result = semiRun(1, { currentWeather: 0, speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "semi-invulnerable-roll", jumped: false });
+  });
+});
+
+describe("AI_CV_SuperFang (data/battle_ai_scripts.s:1430-1433)", () => {
+  const MOVE_SUPER_FANG = 162; // EFFECT_SUPER_FANG
+
+  function superFangRun(targetHp: number) {
+    return runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SUPER_FANG,
+      attacker: NEUTRAL_BATTLER,
+      target: { ...NEUTRAL_BATTLER, hp: targetHp, maxHp: 100 },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "super-fang",
+    });
+  }
+
+  it("target HP >50%: deterministic zero score, zero draws", () => {
+    expect(superFangRun(51)).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("target HP 50% (not >50): scores -1", () => {
+    expect(superFangRun(50)).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("carry preserved", () => {
+    expect(superFangRun(10)).toMatchObject({ funcResultAfter: 2 });
+  });
+});
+
+describe("AI_CV_Recharge (data/battle_ai_scripts.s:1588-1600)", () => {
+  const MOVE_HYPER_BEAM = 63; // EFFECT_RECHARGE, TYPE_NORMAL
+
+  function rechargeRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_HYPER_BEAM,
+      attacker: { ...NEUTRAL_BATTLER, speed: 120, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, speed: 5, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "recharge",
+    });
+  }
+
+  it("0.25x effectiveness scores a deterministic -1 before any HP gate", () => {
+    // Hyper Beam (Normal) vs Rock+Steel -> 40*5/10*5/10 = 10 = x0_25.
+    const result = rechargeRun(1, {}, { types: ["TYPE_ROCK", "TYPE_STEEL"] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("0.5x effectiveness scores -1 (single resist)", () => {
+    // Hyper Beam (Normal) vs Rock+Ground -> 40*5/10 = 20 = x0_5.
+    const result = rechargeRun(1, {}, { types: ["TYPE_ROCK", "TYPE_GROUND"] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("neutral effectiveness, target NOT faster, own HP >40: scores -1", () => {
+    const result = rechargeRun(1, { hp: 60, maxHp: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("neutral effectiveness, target NOT faster, own HP <=40: zero (goto End)", () => {
+    const result = rechargeRun(1, { hp: 40, maxHp: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("target faster, own HP <60: Recharge2's gate ends at zero", () => {
+    const result = rechargeRun(1, { speed: 5, hp: 50, maxHp: 100 }, { speed: 120 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("target faster, own HP >=60: falls through into ScoreDown1 (-1)", () => {
+    const result = rechargeRun(1, { speed: 5, hp: 60, maxHp: 100 }, { speed: 120 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("carry preserved", () => {
+    expect(rechargeRun(1, { speed: 5, hp: 10, maxHp: 100 }, { speed: 120 })).toMatchObject({ funcResultAfter: 2 });
+  });
+});
+
+describe("AI_CV_Flail (data/battle_ai_scripts.s:1817-1840)", () => {
+  const MOVE_FLAIL = 175; // EFFECT_FLAIL
+
+  function flailRun(rngValue: number, hp: number, attackerSpeed = 120, targetSpeed = 5) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_FLAIL,
+      attacker: { ...NEUTRAL_BATTLER, hp, maxHp: 100, speed: attackerSpeed },
+      target: { ...NEUTRAL_BATTLER, speed: targetSpeed },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "flail",
+    });
+  }
+
+  it("target NOT faster, own HP >33: deterministic -1, zero draws", () => {
+    const result = flailRun(1, 40);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("target NOT faster, own HP in (20,33]: zero (goto End)", () => {
+    const result = flailRun(1, 33);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("target NOT faster, own HP in [8,20]: reaches the <100 roll (roll <100 ends at zero)", () => {
+    // seed 3 -> low byte 83 (< 100, JUMP).
+    const result = flailRun(3, 15);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "flail-roll", jumped: true });
+  });
+
+  it("target NOT faster, own HP in [8,20]: the <100 roll's FALL-THROUGH adds +1", () => {
+    // seed 1 -> low byte 198 (>= 100).
+    const result = flailRun(1, 15);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("target NOT faster, own HP <8: ScoreUp1's +1 falls into the roll", () => {
+    // seed 1 -> +1 then roll >= 100 -> +1 again = +2.
+    const result = flailRun(1, 7);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 2 });
+  });
+
+  it("target faster, own HP >60: deterministic -1", () => {
+    const result = flailRun(1, 61, 5, 120);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("target faster, own HP in (40,60]: zero", () => {
+    const result = flailRun(1, 60, 5, 120);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("target faster, own HP <=40: reaches the <100 roll", () => {
+    const result = flailRun(1, 40, 5, 120);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("carry preserved", () => {
+    expect(flailRun(1, 100)).toMatchObject({ funcResultAfter: 2 });
+  });
+});
+
+describe("AI_CV_DestinyBond (data/battle_ai_scripts.s:1800-1816)", () => {
+  const MOVE_DESTINY_BOND = 194; // EFFECT_DESTINY_BOND
+
+  function destinyRun(rngValue: number, hp: number, attackerSpeed = 120, targetSpeed = 5) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_DESTINY_BOND,
+      attacker: { ...NEUTRAL_BATTLER, hp, maxHp: 100, speed: attackerSpeed },
+      target: { ...NEUTRAL_BATTLER, speed: targetSpeed },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "destiny",
+    });
+  }
+
+  it("target faster: ends at the base -1 with zero draws", () => {
+    const result = destinyRun(1, 10, 5, 120);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("own HP >70: ends at the base -1 with zero draws", () => {
+    const result = destinyRun(1, 71);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("HP 60: roll1 <128 JUMPs to DB2; HP>50 ends at -1", () => {
+    // seed 3 -> low byte 83 (< 128).
+    const result = destinyRun(3, 60);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "destiny-bond-roll-1", jumped: true });
+  });
+
+  it("HP 60: roll1 >=128 applies +1 then HP>50 ends at 0", () => {
+    // seed 1 -> low byte 198 (>= 128).
+    const result = destinyRun(1, 60);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "destiny-bond-roll-1", jumped: false });
+  });
+
+  it("HP 40: both rolls fall through (+1 each) then HP>30 ends at +1", () => {
+    // seed 1 -> roll1 low byte 198, roll2 low byte 33 (both >= 128... roll2 33 < 128, JUMP).
+    const result = destinyRun(1, 40);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(2);
+    expect(result.draws[0]).toMatchObject({ kind: "destiny-bond-roll-1", jumped: false });
+    expect(result.draws[1]).toMatchObject({ kind: "destiny-bond-roll-2", jumped: true });
+  });
+
+  it("HP <=30: all three rolls, roll3 <100 ends without the +2", () => {
+    // seed 5 -> roll1 low byte 223 (>=128, +1), roll2 171 (>=128, +1), roll3 229 (>=100, +2).
+    const result = destinyRun(5, 30);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual([
+      "destiny-bond-roll-1", "destiny-bond-roll-2", "destiny-bond-roll-3",
+    ]);
+  });
+
+  it("HP <=30: roll1 and roll2 JUMP, roll3's FALL-THROUGH applies the +2", () => {
+    // seed 3 -> roll1 83 (jump), roll2 102 (jump), roll3 234 (>=100, +2): -1+2 = +1.
+    const result = destinyRun(3, 30);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(3);
+    expect(result.draws[0]).toMatchObject({ kind: "destiny-bond-roll-1", jumped: true });
+    expect(result.draws[1]).toMatchObject({ kind: "destiny-bond-roll-2", jumped: true });
+    expect(result.draws[2]).toMatchObject({ kind: "destiny-bond-roll-3", jumped: false });
+  });
+
+  it("carry preserved", () => {
+    expect(destinyRun(1, 100)).toMatchObject({ funcResultAfter: 2 });
+  });
+});
+
+describe("AI_CV_SelfKO (data/battle_ai_scripts.s:800-826)", () => {
+  const MOVE_EXPLOSION = 153; // EFFECT_EXPLOSION
+  const MOVE_SELF_DESTRUCT = 120; // EFFECT_EXPLOSION -> same handler
+
+  function selfKoRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_EXPLOSION,
+      attacker: { ...NEUTRAL_BATTLER, speed: 120, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, speed: 5, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "self-ko",
+    });
+  }
+
+  it("target evasion <7: no prologue score/roll; HP <80 and target slower reaches Encourage2 -> HP<=50 <128 roll", () => {
+    // seed 1 -> encourage2 low byte 198 (>= 128, +1); HP<=30 -> encourage3 low byte 33 (<50, JUMP).
+    const result = selfKoRun(1, { hp: 30, maxHp: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["self-ko-roll-3", "self-ko-roll-4"]);
+  });
+
+  it("target evasion >=10: prologue <128 roll FALL-THROUGH applies a second -1", () => {
+    // seed 1 -> prologue low byte 198 (>= 128). HP>50 -> encourage4 <50 roll low byte 33 (JUMP).
+    const result = selfKoRun(1, { hp: 60, maxHp: 100 }, { evasionStage: 10 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["self-ko-roll-1", "self-ko-roll-5"]);
+  });
+
+  it("target evasion >=10: prologue <128 roll JUMP skips the second -1", () => {
+    // seed 4 -> prologue low byte 25 (< 128). HP>50 -> encourage4 <50 roll low byte 8 (JUMP).
+    const result = selfKoRun(4, { hp: 60, maxHp: 100 }, { evasionStage: 10 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1 });
+  });
+
+  it("HP >=80 and target NOT faster: Encourage1 <50 roll FALL-THROUGH applies Score_Minus3 (-3)", () => {
+    // seed 1 -> encourage1 low byte 198 (>= 50).
+    const result = selfKoRun(1, { hp: 90, maxHp: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "self-ko-roll-2", jumped: false });
+  });
+
+  it("HP >=80, target faster: Encourage1's target-faster gate jumps straight to Encourage2", () => {
+    const result = selfKoRun(1, { hp: 90, maxHp: 100, speed: 5 }, { speed: 120 });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["self-ko-roll-5"]);
+  });
+
+  it("target evasion in [7,10): scores -1 with no prologue roll; HP>50 Encourage4 <50 roll FALLS THROUGH to a further -1", () => {
+    // seed 1 -> encourage4 low byte 198 (>= 50, FALL-THROUGH -1): total -2.
+    const result = selfKoRun(1, { hp: 60, maxHp: 100 }, { evasionStage: 7 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "self-ko-roll-5" });
+  });
+
+  it("carry preserved", () => {
+    expect(selfKoRun(1, { hp: 100, maxHp: 100 })).toMatchObject({ funcResultAfter: 2 });
+  });
+
+  it("MOVE_SELF_DESTRUCT dispatches through the identical handler", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SELF_DESTRUCT,
+      attacker: { ...NEUTRAL_BATTLER, hp: 90, maxHp: 100, speed: 120 },
+      target: { ...NEUTRAL_BATTLER, speed: 5 },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "self-ko",
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -3 });
+  });
+});

@@ -426,17 +426,17 @@ describe("Factory AI mask 7 (CheckBadMove + TryToFaint + CheckViability), scenar
   });
 
   it("halts loudly on a CheckViability unsupported-branch barrier rather than silently mis-scoring", () => {
-    // MOVE_EXPLOSION / EFFECT_EXPLOSION: ported in CheckBadMove (so the
+    // MOVE_DREAM_EATER / EFFECT_DREAM_EATER: ported in CheckBadMove (so the
     // CheckBadMove barrier does NOT fire first) but still unported in
     // CheckViability, so this isolates the check-viability barrier.
     //
     // MAINTENANCE: this move is a moving target. It was MOVE_ABSORB until
     // 2026-08-08, when EFFECT_ABSORB was ported into CheckViability and this
-    // test started failing — the assertion is "some effect still barriers",
+    // test started failing -- the assertion is "some effect still barriers",
     // and the example has to be re-chosen each time the named one is ported.
     // Pick a replacement from AI_CHECK_VIABILITY_TABLE_EFFECTS that is
     // table-listed, unported in CheckViability, and ported in CheckBadMove.
-    const view = scoredView([153 /* MOVE_EXPLOSION */, MOVE_SURF, MOVE_SURF, MOVE_SURF], 28);
+    const view = scoredView([138 /* MOVE_DREAM_EATER */, MOVE_SURF, MOVE_SURF, MOVE_SURF], 28);
     expect(() =>
       chooseFactoryAiScoredDecision({
         view,
