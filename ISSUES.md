@@ -95,20 +95,40 @@ frame 770 (§8c) and is exposed once the OBJ-lag is fixed. The 8-frame spec
 extension to 349 is therefore blocked by Class B and is NOT committed (per the
 promotion rule); dense-a stays **341/341** with the code + Tier-1 pins landed
 (y-pair helper `partySelectOpenFieldFadeObjY`, render-level per-layer blend
-pin, both red-verified). When Class B lands, dense-a can extend 766-780 → 349.
-**Class B (5 frames: 771/773/775/777/779, 1639px, 2037px at 779)** — the
-**player's healthbox**, bbox (127,74)-(229,110), carrying a **1-row-down
-content offset from frame 770**: `oracle(x,y) = blend(settled(x,y−1), y_obj)`
-for ~1612-1619px. At 779 the player back sprite joins it (1 row high).
+pin, both red-verified). When Class B lands, dense-a extends with 766, 768 and
+770-780 (13 frames) → **354/354**.
+**Class B — THE LAST OPEN DEFECT (11 frames: 770-780, 1639px each; 2037px at
+779, 1983px at 780)** — the **player's healthbox**, bbox (127,74)-(229,110),
+carrying a **1-row-down content offset from frame 770**:
+`oracle(x,y) = blend(settled(x,y−1), y_obj)` for ~1612-1619px. At 779/780 the
+player back sprite joins it (1 row high), widening the bbox to
+(49,74)-(229,111).
+**The mechanism is measured TWICE independently and banked in
+`docs/fade-layer-forensics.md` §9 — implement from these coordinates, do NOT
+fit a pixel model:** player healthbox sprite `y2` 0→1 (`oam.y` 72→73) at
+frame **770**; player back sprite `y2` 1→0 (`oam.y` 62→61) at frame **779**;
+rows 74-110 differ while row 111 is clean. **Draw the sprites at the changed
+coordinate; do not shift composited framebuffer rows** — two workers tried
+that and both failed on the sprite's own boundary (a row-shift leaves 27 bad
+pixels: the top row y=74 at x139-144/x207-216/x223-225, plus (136,76),
+(227,92), (228,92), (229,92), (132,104), (131,105), (128,108), (127,109) —
+the top edge and the slanted lower-left corner; a "frame bevel stays,
+interior shifts" refinement scored worse).
 **Two earlier labels are REFUTED, do not reinstate them:** it is not an
 "opponent idle breathing squish" (the opponent-sprite region is byte-exact on
 all five frames, and the OFF RAM receipt in
 `docs/send-out-slice-a-positive-case.md` shows that sprite settled at
 `SpriteCallbackDummy`/`animNum 0`/`{x2:0,y2:0}` with nothing to animate), and
 there is **no third fade schedule** — the healthbox interior tracks `y_obj`
-exactly. Fix (§8 item 5, moderate cost): split the settled scene into BG
-(30872px at `y_bg`) + OBJ (7528px at `y_obj`) plus the two per-sprite row
-offsets; predicted acceptance dense-a **341 → 354/354**.
+exactly. The BG/OBJ split half is now LANDED (Class A above); what remains is
+only the two per-sprite coordinate steps. Predicted acceptance: dense-a
+**341 → 354/354**.
+**Also open (never spec-pinned):** the SEND OUT/SUMMARY/CANCEL submenu window
+itself carries a **~4461px** difference across 926-963. The app draws a
+scaffold generic 10x6 standard window at (144,80) with three text lines (the
+`state.submenuOpen` branch of `renderBattlePartySelect`); the oracle's real
+template is in `reference/pokeemerald/data/party_menu.h` alongside the message
+templates. No compare spec captures 926-963, so this has never been measured.
 (c) message-box residual — **CLOSED 2026-08-07** (dense-a spec **341/341
 byte-exact**). On the submenu-open edge (A-press 922-923, window lands 926)
 the oracle swaps the message window from sDefaultPartyMsgWindowTemplate (21x2,
