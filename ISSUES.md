@@ -921,11 +921,10 @@ Tier-1-pinned; all five committed win/loss terminal traces remain
 byte-identical (3590/3590, 248/248, 213/213, 232/232, 1943/1943).
 **Remainder (still-open stream-model boundary):** live generation with a
 single `constructionRngValue` still cannot express interleaved ambient ticks;
-the scaffold sidesteps it via adoption, it does not fix the contract. And the
-battle-room far side past 10638 still renders the static generic opponent NPC
-(`battleRoomRender.ts:253`) — LILIANA's School Kid F walk-in head/hair pixels
-and the quote timing past the window need the trainer-class-specific
-overworld sprite + canonical-window extension (NEXT SESSION's step).
+the scaffold sidesteps it via adoption, it does not fix the contract. The
+former LILIANA presentation remainder is closed: the generic next-trainer room
+route is exact across the broad **903/903** window and a dedicated **115/115**
+walk-in/quote receipt (PROGRESS 1015).
 
 **Symptom:** `generateInitialFactoryRentals`'s `constructionRngValue`
 contract consumes construction draws back-to-back from one cursor, but on
@@ -948,6 +947,24 @@ gender and shininess are the real exposure. The production anchor route loads
 `anchor-state.json` directly and never calls this function today, so nothing
 user-visible is wrong now; the boundary bites any future live-generation or
 personality-exact receipt (e.g. Gate-6 seeded end-to-end rounds).
+
+**Three-case construction-clock receipt (2026-08-08, `1ee8518f`,
+supervisor rerun 11/11):** `docs/issue55-construction-rng-schedule-receipt.md`
+records gapless instruction-attributed chains for the six-rental anchor and
+two materially different three-mon `FillFactoryFrontierTrainerParty` calls.
+Inside the exact function-entry/return epochs the counts are anchor
+**242 construction + 52 ambient / 53 frames**, LILIANA **112 + 31 / 32**,
+and legal varied trainer 222 **202 + 30 / 31**; the two three-mon rejection
+vectors are `[13,7,36]` and `[59,12,30]`, with different inter-burst gaps.
+The first anchor-window ambient draw cited above occurs immediately before the
+selected function-entry cursor, explaining 53 versus the epoch's 52.
+Fixed-frame, fixed-mon-boundary, and draw-count-only insertion schedules are
+therefore refuted. The smallest source-general exact contract is an explicit
+deterministic construction clock: initial VBlank phase, source-operation cycle
+budget (including species/stat work), and an ambient callback at each crossed
+period. Until that clock exists, personality-exact live construction remains
+honestly out of model; do not promote this test-only receipt or per-fixture
+cursors into production.
 
 **New exposure (2026-08-05, #73):** after the WIN swap-decline route, room
 movement/warp timing remains pixel-exact, but the synthetic terminal stage
@@ -976,11 +993,11 @@ Receipt §7 names the scaffold wiring fields (`winTerminalWindowStage`
 `rngValue`/`playerTrainerId`/`savedRentalRecords` + the per-mon schedule);
 the wiring step is queued.
 
-**Leads:** either extend the construction contract with an explicit
-interleaving representation (per-mon start cursors or a per-frame tick
-schedule — recording-flavored, decide deliberately), or keep the clean-stream
-contract and document personality-exactness as out of model whenever
-construction spans >1 frame. Supervisor decision 2026-07-30 (entry 758):
+**Lead:** implement the deterministic construction-clock contract above only
+as a deliberate source/cycle-model slice. Per-mon cursors and per-frame fixture
+schedules are now evidence-refuted as production designs. Until then, keep the
+clean-stream contract and document personality-exactness as out of model when
+construction spans more than one frame. Supervisor decision 2026-07-30 (entry 758):
 Gate-5 clause (a) is receipt-linked at the rules level (selection byte-exact
 from the probed cursor; construction proven via filtered ledger); this entry
 tracks the remaining stream-model boundary, not a Gate-5 blocker.

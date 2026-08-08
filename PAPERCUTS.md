@@ -369,10 +369,13 @@ Per entry:
 - **What:** running the full terminal boundary-control matrix inside one
   long-lived process repeatedly hit teardown/resource instability before
   emitting valid JSON.
-- **Hits:** 1.
-- **Cost each:** ~8 min.
+- **Hits:** 2.
+- **Cost each:** ~4.5 min average.
 - **Workaround:** split each outcome/control into a fresh
   `run-mgba-probe.py` wrapper invocation and merge only the concise evidence.
+- **2026-08-08 note:** the three-case construction-clock probe still needed
+  the wrapper to contain teardown SIGSEGV/log spew; the fresh-output validation
+  worked, but added ~1 min.
 
 ## Popup evidence used “input gate” for a state handoff, not a sampled key edge
 
