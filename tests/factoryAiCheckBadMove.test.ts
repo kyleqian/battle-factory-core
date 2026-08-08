@@ -4516,3 +4516,47 @@ describe("AI_CBM_Stockpile (data/battle_ai_scripts.s:511-514, EFFECT_STOCKPILE)"
     });
   });
 });
+
+describe("AI_CBM_SpitUpAndSwallow (data/battle_ai_scripts.s:516-520, EFFECT_SPIT_UP/EFFECT_SWALLOW)", () => {
+  const MOVE_SPIT_UP = 255; // TYPE_NORMAL, power 100 (ignored-powerful effect)
+  const MOVE_SWALLOW = 256; // TYPE_NORMAL, power 0
+
+  const NORMAL_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    knownAbility: "ABILITY_STURDY",
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function spitUpAttacker(count: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, stockpileCount: count });
+  }
+
+  it.each([
+    ["Spit Up", MOVE_SPIT_UP],
+    ["Swallow", MOVE_SWALLOW],
+  ])("%s: x0 type immunity (Ghost target) JUMPs to Score_Minus10 before the count read", (_label, moveId) => {
+    expect(run(moveId, { ...NORMAL_TARGET, types: ["TYPE_GHOST", "TYPE_GHOST"] }, undefined, spitUpAttacker(2)))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it.each([
+    ["Spit Up", MOVE_SPIT_UP],
+    ["Swallow", MOVE_SWALLOW],
+  ])("%s: zero stockpile count against a non-immune target JUMPs to Score_Minus10", (_label, moveId) => {
+    expect(run(moveId, NORMAL_TARGET, undefined, spitUpAttacker(0)))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it.each([
+    ["Spit Up", MOVE_SPIT_UP],
+    ["Swallow", MOVE_SWALLOW],
+  ])("%s: nonzero count against a non-immune target FALLS THROUGH to End at zero", (_label, moveId) => {
+    expect(run(moveId, NORMAL_TARGET, undefined, spitUpAttacker(2)))
+      .toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+});

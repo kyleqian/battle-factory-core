@@ -297,6 +297,7 @@ export const CHECK_BAD_MOVE_HANDLED_TABLE_EFFECTS: ReadonlySet<string> = new Set
   "EFFECT_EVASION_DOWN_2", "EFFECT_SWAGGER", "EFFECT_FLATTER", "EFFECT_KNOCK_OFF",
   "EFFECT_TRICK", "EFFECT_SLEEP_TALK", "EFFECT_ACCURACY_UP_2",
   "EFFECT_SPECIAL_ATTACK_DOWN_2", "EFFECT_MEMENTO", "EFFECT_STOCKPILE",
+  "EFFECT_SPIT_UP", "EFFECT_SWALLOW",
 ]);
 
 /**
@@ -2567,6 +2568,20 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_SPIT_UP/EFFECT_SWALLOW ->
+  // the one shared AI_CBM_SpitUpAndSwallow body
+  // (`data/battle_ai_scripts.s:189-190,516-520`): x0 type immunity JUMPs to
+  // -10, then a zero stockpile count JUMPs to -10 -- the opposite comparison
+  // end of `AI_CBM_Stockpile`'s own `if_equal 3` on the same field.
+  if (move.effect === "EFFECT_SPIT_UP" || move.effect === "EFFECT_SWALLOW") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmSpitUpAndSwallow(move.type, target, input.attacker.stockpileCount ?? 0),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -3514,4 +3529,34 @@ function runCbmMemento(target: FactoryAiCheckBadMoveTarget, attackerUsablePartyM
  */
 function runCbmStockpile(attackerStockpileCount: number): number {
   return attackerStockpileCount === 3 ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_SpitUpAndSwallow` (`data/battle_ai_scripts.s:516-520`,
+ * EFFECT_SPIT_UP/EFFECT_SWALLOW -- ONE shared handler; both table entries
+ * dispatch to it):
+ *
+ * ```
+ * AI_CBM_SpitUpAndSwallow:
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0, Score_Minus10
+ *     get_stockpile_count AI_USER
+ *     if_equal 0, Score_Minus10
+ *     end
+ * ```
+ *
+ * x0 type immunity JUMPs to -10 before the count read; a zero stockpile
+ * count (nothing to spit up or swallow) JUMPs to -10. Sequential JUMPs,
+ * never additive. Zero `get_ability` calls, zero RNG. The count comparison
+ * end is the OPPOSITE of `AI_CBM_Stockpile`'s own `if_equal 3` -- same
+ * `stockpileCount` field, opposite bound.
+ */
+function runCbmSpitUpAndSwallow(
+  moveType: string,
+  target: FactoryAiCheckBadMoveTarget,
+  attackerStockpileCount: number,
+): number {
+  if (computeAiEffectiveness(moveType, target.types) === 0) {
+    return -10;
+  }
+  return attackerStockpileCount === 0 ? -10 : 0;
 }
