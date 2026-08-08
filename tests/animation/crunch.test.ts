@@ -94,7 +94,7 @@ describe("Move_CRUNCH source-relative reducer", () => {
   });
 
   it("anchors both hitsplats at the target center with the mirrored x offset", () => {
-    const hits = (age: number, geom: typeof GEOM_PLAYER) =>
+    const hits = (age: number, geom: typeof GEOM_PLAYER | typeof GEOM_OPPONENT) =>
       crunchAtAge(age, geom).hitsplats;
     // opponent-side target keeps the script offset signs
     expect(hits(HITSPLAT_1_AGE, GEOM_PLAYER)).toEqual([
