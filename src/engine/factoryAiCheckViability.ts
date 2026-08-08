@@ -971,6 +971,17 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "disable-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < 100) skips the -1. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind: "get-ability";
     before: BattleRngState;
     after: BattleRngState;
@@ -6627,6 +6638,26 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_DISABLE") {
+    // AI_CV_Disable (data/battle_ai_scripts.s:1602-1614, EFFECT_DISABLE, the
+    // one handler with a funcResult-POWER-collision write -- see runCvDisable).
+    const disable = runCvDisable({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      funcResultCarry,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: disable.rng,
+      draws: disable.draws,
+      scoreDelta: disable.scoreDelta,
+      funcResultAfter: disable.funcResultAfter,
+    });
+  }
+
   if (move.effect === "EFFECT_ACCURACY_UP" || move.effect === "EFFECT_ACCURACY_UP_2") {
     // AI_CV_AccuracyUp (data/battle_ai_scripts.s:1027-1035). Both effects are
     // vestigial in Gen 3 (no move carries them), so this is dispatch-reachable
@@ -7971,4 +8002,90 @@ export function runCvAccuracyUp(input: Readonly<{
   if (hpPercent <= 70) score -= 2;
 
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+}
+
+/**
+ * `AI_CV_Disable` (`data/battle_ai_scripts.s:1602-1614`, EFFECT_DISABLE) --
+ * the one CV handler whose `get_move_power_from_result` write makes the exit
+ * `funcResult` a MOVE POWER (0-250), not a type/ability/effect id:
+ *
+ * ```
+ * AI_CV_Disable:
+ *     if_target_faster AI_CV_Disable_End
+ *     get_last_used_bank_move AI_TARGET
+ *     get_move_power_from_result
+ *     if_equal 0, AI_CV_Disable2
+ *     score +1
+ *     goto AI_CV_Disable_End
+ * AI_CV_Disable2:
+ *     if_random_less_than 100, AI_CV_Disable_End
+ *     score -1
+ * AI_CV_Disable_End:
+ *     end
+ * ```
+ *
+ * funcResult modeling (the "funcResult-power-collision question"): on entry
+ * funcResult holds the incoming carry (`staleFuncResultFallback`), exactly as
+ * every other handler. If the target is faster, the jump to End happens BEFORE
+ * any write, so the carry survives untouched. Otherwise `get_last_used_bank_move
+ * AI_TARGET` then `get_move_power_from_result` ALWAYS run in sequence, so the
+ * exit value is the power of the target's last-used move (0-250), a RAW
+ * integer. Power collides with an `AI_WEATHER_*` compare exactly when it is in
+ * 0-3 (power 0 == a status move or the untouched MOVE_NONE default ==
+ * `AI_WEATHER_SUN`; power 1 == `AI_WEATHER_RAIN`; powers 2/3 don't exist in
+ * Gen 3 but the map is exhaustive below). Powers >= 4 can never collide, so
+ * they map to `undefined`. `if_equal 0` is a pure compare (no write), and the
+ * single roll writes nothing, so the exit value is the power on BOTH the
+ * `score +1` and `score -1` paths. A faster target is the one writes-never
+ * branch.
+ */
+function runCvDisable(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  funcResultCarry: AiWeatherValue | undefined;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  if (strikesFirst === 1) {
+    // Target faster: jump to End before any write -- the incoming carry
+    // survives untouched (the handler's one writes-never branch).
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0, funcResultAfter: input.funcResultCarry });
+  }
+
+  // get_last_used_bank_move + get_move_power_from_result always write here.
+  const lastMove = MOVES_BY_ID.get(input.target.lastUsedMoveId ?? 0);
+  const power = lastMove?.power ?? 0;
+  const funcResultAfter = power <= 3 ? power as AiWeatherValue : undefined;
+
+  if (power !== 0) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 1, funcResultAfter });
+  }
+
+  const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-disable-roll`);
+  const jumped = roll.randomValue % 256 < 100;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([...draws, Object.freeze({ ...roll, kind: "disable-roll" as const, jumped })]),
+    scoreDelta: jumped ? 0 : -1,
+    funcResultAfter,
+  });
 }

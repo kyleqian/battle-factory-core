@@ -7024,3 +7024,63 @@ describe("AI_CV_AccuracyUp (data/battle_ai_scripts.s:1027-1035, EFFECT_ACCURACY_
     expect(result).toMatchObject({ scoreDelta: -4, draws: [{ kind: "accuracy-up-roll", jumped: false }] });
   });
 });
+
+describe("AI_CV_Disable (data/battle_ai_scripts.s:1602-1614, EFFECT_DISABLE)", () => {
+  const MOVE_DISABLE = 50;
+  const MOVE_TACKLE = 33; // power 35
+  const MOVE_GROWL = 45; // power 0 status
+
+  function disableRun(
+    rngValue: number,
+    targetOverrides: Record<string, unknown> = {},
+  ) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_DISABLE,
+      attacker: { ...NEUTRAL_BATTLER, speed: 80 },
+      target: { ...NEUTRAL_BATTLER, speed: 100, lastUsedMoveId: MOVE_TACKLE, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "disable",
+    });
+  }
+
+  it("target faster: jumps to End before any write, carry preserved, no draw", () => {
+    const result = disableRun(1);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [], funcResultAfter: 2 });
+  });
+
+  it("target not faster, last move power != 0: score +1, funcResult = power (>=4 -> undefined)", () => {
+    const result = disableRun(1, { speed: 50 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 1, draws: [] });
+    expect(result.funcResultAfter).toBeUndefined();
+  });
+
+  it("target not faster, last move power == 0 (Growl): roll <100 JUMPs to End at zero", () => {
+    // seed 3 -> low byte 83 (< 100).
+    const result = disableRun(3, { speed: 50, lastUsedMoveId: MOVE_GROWL });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0 });
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "disable-roll", jumped: true });
+    // funcResult = power 0 == AI_WEATHER_SUN.
+    expect(result.funcResultAfter).toBe(0);
+  });
+
+  it("target not faster, last move power == 0: roll >=100 FALLS THROUGH to -1", () => {
+    // seed 1 -> low byte 198 (>= 100).
+    const result = disableRun(1, { speed: 50, lastUsedMoveId: MOVE_GROWL });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, funcResultAfter: 0 });
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "disable-roll", jumped: false });
+  });
+
+  it("target not faster, no last move recorded (MOVE_NONE power 0): rolls like a status move", () => {
+    const result = disableRun(1, { speed: 50, lastUsedMoveId: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, funcResultAfter: 0 });
+  });
+});
