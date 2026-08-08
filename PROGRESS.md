@@ -18,7 +18,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Both auto-merged clean: that lane touched only `src/animation/`,
   `tests/animation/`, `tools/`, and additive `battleScene.ts` draw cases, so it had
   no conflict surface with the main lane's AI work — even while the side lane was
-  moving symbols *out* of `battleScene.ts`. Nothing left unfolded.
+  moving symbols *out* of `battleScene.ts`. **3 further animation commits arrived
+  after my wind-down fold and are left UNFOLDED** — that lane is still committing;
+  they touch only its own files, so the next orient takes them.
 - **HEADLINE — the opponent AI can now score every move it is allowed to consider.**
   `AI_CheckBadMove` went **91 → 109/109** table effects and `AI_CheckViability`
   **53 → 122/122**, in five batches across two lanes. Before today, an effect with no
