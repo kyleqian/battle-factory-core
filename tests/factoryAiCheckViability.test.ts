@@ -6953,3 +6953,26 @@ describe("AI_CV_ChangeSelfAbility (data/battle_ai_scripts.s:2358-2390)", () => {
     expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
   });
 });
+
+describe("AI_CV_Snore (data/battle_ai_scripts.s:1785-1787, EFFECT_SNORE)", () => {
+  const MOVE_SNORE = 173;
+
+  it("always scores +2 with zero draws and no funcResult write", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SNORE,
+      attacker: NEUTRAL_BATTLER,
+      target: NEUTRAL_BATTLER,
+      staleFuncResultFallback: 3,
+      drawOrdinalStart: 1,
+      reasonPrefix: "snore",
+    });
+    expect(result).toEqual({
+      kind: "scored",
+      rng: { value: 1, calls: 0 },
+      draws: [],
+      scoreDelta: 2,
+      funcResultAfter: 3,
+    });
+  });
+});

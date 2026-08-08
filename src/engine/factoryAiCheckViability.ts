@@ -6616,6 +6616,18 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_SNORE") {
+    // AI_CV_Snore (data/battle_ai_scripts.s:1785-1787): `score +2; end` -- no
+    // reads, no draws, no funcResult write. The plainest CV body in the table.
+    return Object.freeze({
+      kind: "scored",
+      rng: input.rng,
+      draws: Object.freeze([]) as readonly FactoryAiCheckViabilityDraw[],
+      scoreDelta: 2,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
   if (move.effect === "EFFECT_SKILL_SWAP" || move.effect === "EFFECT_ROLE_PLAY") {
     // AI_CV_ChangeSelfAbility (data/battle_ai_scripts.s:2358-2390) -- shared
     // by EFFECT_SKILL_SWAP (:762) and EFFECT_ROLE_PLAY (:753).
