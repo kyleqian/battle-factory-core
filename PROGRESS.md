@@ -5,6 +5,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1002 — [bounded MAIN worker, 2026-08-08] AI_CheckBadMove batch 5 LANDED: all 10 effects, 101/109 table effects ported, 8 remain
+
+- **State:** master at `4c991a7c`, tree clean. Targeted acceptance green: **6 files / 538 passed** (factoryAiCheckBadMove 374, factoryAiScoredDecision 129, factoryAiDecisionPolicy 16, factoryAiLiveDriver 6, abilityItemParityCensus 7, executableFrontierRatchet 6); `npm run test:smoke` **375 passed**; `npm run build` exit 0; `npm run typecheck` exit 0. Full `npm test` NOT run (worker rule — supervisor after merge; a run attempt exceeded the tool cap).
+- **Did:** ported the ten remaining CheckBadMove effects, one commit each (`5a10a75b` view-state first): **AccUp** (EFFECT_ACCURACY_UP/_2), **SpAtkDown** (EFFECT_SPECIAL_ATTACK_DOWN/_2, shared `runCbmStatDownViaSharedTail` tail), **Haze** (EFFECT_HAZE + EFFECT_PSYCH_UP share `runCbmHaze`, :314-332), **Mist**, **Disable**, **Encore**, **Attract** (:456-476). 18 → **8 remain** (IMPRISON, MEMENTO, MUD_SPORT, RECYCLE, SPIT_UP, STOCKPILE, SWALLOW, WATER_SPORT). Added optional view fields: `gender` (`FactoryAiMonGender`, MON_MALE/FEMALE/GENDERLESS, undefined-is-genderless), `spAtkStage?` (target), `accStage?` (attacker), `anyMoveDisabled?`/`anyMoveEncored?` (target), `mistUp?` (attacker), `isInfatuated?` (target, CBM-side only). Wired through `targetForCbm`/`attackerForCbm`; all additive.
+- **Correction to the ledger, confirmed against source:** PROGRESS.md's claim that the remaining 18 are "blocked on MISSING STATE, not transcription" and that PSYCH_UP needs "Haze-style stat-stage copying" is wrong in detail — 6 of the 10 needed no new state, and EFFECT_PSYCH_UP dispatches to AI_CBM_Haze itself (`battle_ai_scripts.s:181`), no separate handler. **Vestigial finding:** EFFECT_ACCURACY_UP/_2 and EFFECT_SPECIAL_ATTACK_DOWN/_2 have **zero Gen-3 moves** (battle_moves.h uses effects 15/55/21/61 for nothing; the header itself marks 21 `// unused`), so those handlers are dispatch-reachable only and are receipt-pinned via exported entry points.
+- **Trap handling:** porting EFFECT_HAZE broke 13 generic-barrier pins in `tests/factoryAiCheckBadMove.test.ts` + the scored-decision CheckBadMove example — all re-pointed to MOVE_STOCKPILE (254, still-unported EFFECT_STOCKPILE), maintenance comments intact. Census re-pinned in its own commit (`4c991a7c`): recovered sites 539/591/1140/2293 → 615/667/1216/2493, ABILITY_OBLIVIOUS refs 6→8.
+- **Next:** the 8 remaining effects are the real state-laden ones (STOCKPILE/SWALLOW/SPIT_UP count, MEMENTO/RECYCLE item, IMPRISON/MUD_SPORT/WATER_SPORT) — brief with those fields, not another transcription batch. The side-lane CheckViability batch-2 is in parallel.
+- **Notes:** no PAPERCUTS of my own. Full `npm test` attempt exceeded the 10-min tool cap mid-run; all affected-area suites, smoke, build, and typecheck were verified green independently.
+
+---
+
 ## 1001 — [supervisor WIND-DOWN, 2026-08-08] Session summary: 20 workers / 8 rounds — ISSUES #80 CLOSED, **8 reachable engine barriers retired**, 44/66 CheckBadMove + first CheckViability batch, battleScene canonical split begun, 2 animation folds
 
 - **State:** master at this entry's commit, clean. **Final independent union
