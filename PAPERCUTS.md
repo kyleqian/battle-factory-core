@@ -8,6 +8,43 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## `check-oracle-freshness.sh` compares against harness HEAD, not the last `oracle/` commit
+
+- **What:** the script FAILs (exit 1) whenever an oracle process started before
+  the current harness HEAD commit — regardless of whether that commit touched
+  `oracle/` at all. At 2026-08-08 orient both services failed the check against
+  harness HEAD `2328682`, a `_template`-only commit; `git log --since` showed
+  **zero** commits touching `oracle/` since either process started, so both were
+  serving byte-identical code. The check is a commit-date heuristic wearing the
+  clothes of a schema check.
+- **Hits:** 1.
+- **Cost each:** ~5 min to disprove, plus a genuine near-miss: the documented
+  response is "restart it before staging anything", and restarting port 8012
+  would have killed the animation lane's live worker mid-round.
+- **Workaround:** before believing a FAIL, run
+  `git -C ../.. log --oneline --since=<process start date> -- oracle/`. Empty
+  output means the process is current and the failure is spurious.
+- **Real fix:** compare the process start time against the last commit that
+  touched `oracle/`, not against harness HEAD.
+
+## `tools/report/*.ts` census scripts write their generated doc with no read-only mode
+
+- **What:** running a census script to *read* a number also rewrites its
+  generated doc under `docs/`. On 2026-08-08 the supervisor ran
+  `executable-frontier-census.ts` for a coverage figure while a main-lane worker
+  was mid-step, dirtying that worker's tree with a one-line "Generated <date>"
+  diff. Caught and reverted within a minute, but the same slip in the other
+  direction has already cost this run once (a supervisor `git add -A` swept a
+  worker's in-progress file into a supervisor commit).
+- **Hits:** 1.
+- **Cost each:** ~2 min plus the risk of corrupting a live worker's commit.
+- **Workaround:** run report tools only in the gap between rounds, or with
+  `--out-dir` pointed at a scratch directory (`ability-item-parity-census.ts`
+  already supports that flag; the others do not).
+- **Real fix:** give every `tools/report/` script a `--check` / `--dry-run` mode
+  that prints the summary and writes nothing, and default the supervisor's
+  informational use to it.
+
 ## Orphaned probe/compare node processes survive their session and burn CPU for days
 
 - **What:** at 2026-08-07 orient the host carried **three** orphaned

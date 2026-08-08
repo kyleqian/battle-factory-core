@@ -94,6 +94,29 @@ why the pins still hold.
   of the table fires the barrier whenever the AI viability-scores a move.
 - **Breadth unblocked:** identical reasoning to A1 — every turn's AI scoring.
 
+> **BOTH A1 AND A2 RETIRED 2026-08-08 (supervisor-verified on the union).**
+> `AI_CheckBadMove` is **109/109** table effects ported and `AI_CheckViability` is
+> **122/122** — the complete Factory AI move-scoring stack. Neither barrier can fire
+> in ordinary play any more: every table-listed effect reaches a real handler, so
+> the AI no longer discards legal moves it could not score. Both `unsupported-branch`
+> sites remain in the code as defensive guards against a future source sync adding a
+> table effect without a port, and both are now unreachable rather than reachable —
+> treat them as (C).
+>
+> The prose above is preserved as the historical record of why this was the queue's
+> top item; its "only ROAR/SLEEP/PARALYZE/CONFUSE are ported" and "only
+> Swagger/Counter are ported" statements describe 2026-08-08 morning, not today.
+>
+> Two guards now protect the result. `unportedCheckBadMoveTableEffects()` /
+> `unportedCheckViabilityTableEffects()` derive the unported set instead of
+> hardcoding an example effect (the old pattern broke three times in two days as the
+> engine outgrew it), and the ~26 barrier-example pins were flipped to the inverted
+> property: every table effect must *score*. Separately,
+> `tests/factoryAiScoredWiringParity.test.ts` captures the objects the live adapter
+> hands each scorer and fails if a declared handler-input field is never populated —
+> added after five fields were found read-but-never-wired, and it caught a sixth
+> (`knownAbility` dropped by a conditional spread) the very next round.
+
 ### A3. `battleScriptTryKOOpcode.ts:108` — `Cmd_tryKO`'s HOLD_EFFECT_FOCUS_BAND roll
 - **Reason / citation:** `"Cmd_tryKO's HOLD_EFFECT_FOCUS_BAND roll needs gSpecialStatuses[target].focusBanded"`; `battle_script_commands.c:6841-6855`.
 - **Reachability:** Focus Band is a **Frontier held item** — the ability/item
@@ -536,7 +559,7 @@ the engine's current resolver accepts each operand:
 >
 > | Item | State |
 > | --- | --- |
-> | 1. AI `AI_CheckBadMove` if_effect handlers | **IN PROGRESS** — **44 of 66 effects ported** (batches 1-4, one commit per effect). **18 remain, blocked on MISSING STATE not transcription**: DISABLE/ENCORE need any-move-disabled + encored flags, STOCKPILE/SWALLOW/SPIT_UP a stockpile count, ATTRACT gender, PSYCH_UP Haze-style stat-stage copying. Wire the state first. **Every AI batch MUST also run `tests/factoryAiScoredDecision.test.ts`** — it hardcodes one still-unported effect as its "barrier still fires" example, so porting that effect breaks it. Absorb broke it on 2026-08-08 and only the supervisor's final full suite caught it. |
+> | 1. AI `AI_CheckBadMove` if_effect handlers | **DONE 2026-08-08 — 109/109 table effects ported.** The barrier is unreachable; see the retirement box under A1/A2. |
 > | 2. `Cmd_tryKO` Focus Band | **DONE** |
 > | 3. Lightning Rod redirection | **REFUTED — (C), unreachable in singles.** Do not take it. |
 > | 4. `VARIOUS_GET_BATTLER_FAINTED` | **DONE** |
@@ -548,7 +571,14 @@ the engine's current resolver accepts each operand:
 > | 10. `DMG_RECOIL_FROM_MISS` / `DMG_DOUBLED` | **DONE** — Struggle recoil (universal) and Beat Up. |
 > | 11. battle-outcome → `B_ACTION_FINISHED` handoff | **REFUTED 2026-08-08 (supervisor) — reclassified (C), unreachable.** `RunTurnActionsFunctions` (`battle_main.c:4939`) forces `B_ACTION_FINISHED` before dispatching any turn action, so `HandleAction_UseMove` — the only producer of a script starting with `attackcanceler` — never runs with `gBattleOutcome != 0`. The engine already models the preemption and the preflight receipt is already source-complete. **Do not take the proposed port**; all that remains is restating the barrier's (now false) reason string. See the refutation box under A12. |
 > | 12. Enigma Berry (bucket B) | **OPEN**, lowest priority. |
-> | A2. `AI_CheckViability` if_effect table | **OPEN** — the sibling of item 1, not yet started. |
+> | A2. `AI_CheckViability` if_effect table | **DONE 2026-08-08 — 122/122 table effects ported**, in five batches across two lanes. The barrier is unreachable; see the retirement box under A1/A2. Live ROM verification of the newly ported handlers is the follow-on work, starting with `AI_CV_BrickBreak` (46 weighted). |
+>
+> **STATUS after the 2026-08-08 supervised session: bucket (A) is EMPTY.** Ten of
+> the twelve (A) items are done, and two were refuted outright (item 3 Lightning
+> Rod on 2026-08-08 morning, item 11 / A12 the same evening — see its refutation
+> box). The only work left in this document is item 12, Enigma Berry, the single
+> pure-(B) site. Every barrier this triage classified as reachable in ordinary
+> Level-50 singles play has been retired.
 >
 > **Read the refutation box under A4 before trusting any remaining (A) claim.**
 > Three of the entries checked this session had defects: Lightning Rod was

@@ -992,6 +992,40 @@ of the recorded Battle 1/2 we are in*, not to what happened. Individual exact
 windows now consume kernel semantic events, but the surrounding dispatcher and
 most content remain turn-keyed.
 
+**Canonical-split program STOPPED at its natural boundary (2026-08-08,
+supervisor).** Five slice batches moved ~240 canonical-only symbols out of
+`battleScene.ts` into `battleSceneCanonical.ts`, every one verified as a pure move
+by `npm run compare:differential` at **1369/1369 byte-identical**. Batch 5 then
+found **no eligible tranche left**: all **199** remaining canonical symbols depend
+on a battleScene-local SHARED/LIVE symbol (`TURN5_SWITCHIN`, `PIDGEOTTO_MAX_HP`,
+`TURN8_MENU_REDRAW_DELAY`, `drawSpriteSheet`, `battleWindow`,
+`drawMessageTextLines`, `TICK0`, `TURN13_RESOLUTION`, …), so moving them would pull
+a runtime value import from `battleScene.ts` back into the canonical file. Slice 1
+already proved empirically that such an import forms an ESM cycle whose module-eval
+read throws TDZ.
+
+Going further needs one of two **deliberate structural decisions**, neither of which
+a slice worker may take: (a) allow canonical→`battleScene.ts` value imports via
+re-export (`docs/battlescene-canonical-split-design.md` §7 hazard 1's recommended
+option) and evaluate the TDZ risk per symbol — eval-time reads are unsafe, function-
+body reads are not; or (b) widen `tests/animation/animationBoundaryRatchet.test.ts`'s
+`allowedConsumers`, which is a cross-program decision. Four named obstacles also
+remain: the `MenuIdleFrameAsset`/`SendOutHealthboxContentAsset` type-only export
+widening, `drawTurn16PostSwitchField`'s `src/animation` import, the ONIX-Sitrus
+cluster plus its module-eval guard, and the two `let` caches.
+
+**Also worth knowing:** the selection scan's `FORBIDDEN` set was **dead code** until
+2026-08-08 (`70caf397`) — pass 1 marked forbidden roots clean, so pass 2 treated
+them as satisfied deps and falsely certified every ONIX-cluster consumer as
+SELF-CONTAINED. Fixed. Two earlier batches had already caught false positives by
+hand, which is why no bad move landed. **A `CLEAN` label from that scan is not proof
+of movability** — check each candidate's actual declaration form.
+
+**Honest scope, restated:** this was a move within one module graph. The canonical
+code still ships, and the canonical bucket is only ~5.3k lines, so the split is a
+modest reduction — not the retirement of turn-keyed presentation that this issue is
+actually about. That retirement remains the presentation-seam program's job.
+
 **Confirmed** (2026-07-24, `856b3b4`): 17,056 lines — **30% of all
 `src/engine`**. 74 `BattleSceneState` declaration lines name a specific turn
 (`turn13KoDismissElapsed`, `turn13Resolved`, `turn15PartySelect`,
