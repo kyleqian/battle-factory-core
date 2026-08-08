@@ -414,6 +414,16 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "rest-roll-1" | "rest-roll-2" | "rest-snatch-roll" | "rest-tail-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind:
       | "counter-low-hp-roll"
       | "counter-mid-hp-roll"
@@ -1039,6 +1049,140 @@ function runCvSpeedUp(input: Readonly<{
   const succeeded = rollDraw.randomValue % 256 >= 70;
   draws.push(Object.freeze({ ...rollDraw, kind: "speed-up-roll" as const, succeeded }));
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded ? 3 : 0 });
+}
+
+/**
+ * `AI_CV_Rest` (`data/battle_ai_scripts.s:1396-1425`, EFFECT_REST):
+ *
+ * ```
+ * AI_CV_Rest:
+ *     if_target_faster AI_CV_Rest4
+ *     if_hp_not_equal AI_USER, 100, AI_CV_Rest2
+ *     score -8
+ *     goto AI_CV_Rest_End
+ * AI_CV_Rest2:
+ *     if_hp_less_than AI_USER, 40, AI_CV_Rest6
+ *     if_hp_more_than AI_USER, 50, AI_CV_Rest3
+ *     if_random_less_than 70, AI_CV_Rest6
+ * AI_CV_Rest3:
+ *     score -3
+ *     goto AI_CV_Rest_End
+ * AI_CV_Rest4:
+ *     if_hp_less_than AI_USER, 60, AI_CV_Rest6
+ *     if_hp_more_than AI_USER, 70, AI_CV_Rest5
+ *     if_random_less_than 50, AI_CV_Rest6
+ * AI_CV_Rest5:
+ *     score -3
+ *     goto AI_CV_Rest_End
+ * AI_CV_Rest6:
+ *     if_doesnt_have_move_with_effect AI_TARGET, EFFECT_SNATCH, AI_CV_Rest7
+ *     if_random_less_than 50, AI_CV_Rest_End
+ * AI_CV_Rest7:
+ *     if_random_less_than 10, AI_CV_Rest_End
+ *     score +3
+ * AI_CV_Rest_End:
+ *     end
+ * ```
+ *
+ * `if_target_faster` uses the same tie-break machinery as `runCvSpeedDown`;
+ * target faster JUMPs to Rest4's own HP bands. Target not faster checks
+ * `hp != 100` first (the ==100 FALL-THROUGH is the deterministic -8), then
+ * Rest2's HP bands with a <70 midband roll; Rest4 (target faster) uses <60/
+ * >70 HP bands with a <50 midband roll. Both midband rolls' FALL-THROUGH
+ * scores -3, their JUMP lands in the shared Rest6 tail. The tail is
+ * Snatch-guarded: only if the TARGET's known-moves history holds a
+ * Snatch-effect move does the <50 gate run (its FALL-THROUGH, roll >= 50,
+ * reaches the <10 roll); a Snatch-less target jumps straight to the <10 roll.
+ * `Cmd_if_doesnt_have_move_with_effect`'s AI_TARGET branch
+ * (`battle_ai_script_commands.c:1940-1962`) scans
+ * `BATTLE_HISTORY->usedMoves[gBattlerTarget].moves[i]` -- a plain membership
+ * test, no positional gate (unlike `Cmd_if_has_move_with_effect`'s AI_TARGET
+ * bug), so `target.knownMoves` membership is the faithful model. All HP gates
+ * read AI_USER's own truncating `100*hp/maxHp` percent (`Cmd_if_hp_*`,
+ * `battle_ai_script_commands.c:713-770`). No command writes funcResult.
+ */
+function runCvRest(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const attacker: TurnOrderBattler = {
+    speed: input.attacker.speed,
+    speedStage: input.attacker.speedStage,
+    movePriority: 0,
+  };
+  const target: TurnOrderBattler = {
+    speed: input.target.speed,
+    speedStage: input.target.speedStage,
+    movePriority: 0,
+  };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  const targetHasSnatch = (input.target.knownMoves ?? []).some(
+    (moveId) => MOVES_BY_ID.get(moveId)?.effect === "EFFECT_SNATCH",
+  );
+
+  const tail = (): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> => {
+    let nextOrdinal = ordinal;
+    if (targetHasSnatch) {
+      const snatchRoll = nextDraw(rng, nextOrdinal, `${input.reasonPrefix}-rest-snatch-roll`);
+      rng = snatchRoll.after;
+      nextOrdinal += 1;
+      const jumped = snatchRoll.randomValue % 256 < 50;
+      draws.push(Object.freeze({ ...snatchRoll, kind: "rest-snatch-roll" as const, succeeded: !jumped }));
+      if (jumped) {
+        return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+      }
+    }
+    const tailRoll = nextDraw(rng, nextOrdinal, `${input.reasonPrefix}-rest-tail-roll`);
+    rng = tailRoll.after;
+    const succeeded = tailRoll.randomValue % 256 >= 10;
+    draws.push(Object.freeze({ ...tailRoll, kind: "rest-tail-roll" as const, succeeded }));
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded ? 3 : 0 });
+  };
+
+  if (targetFaster) {
+    if (hpPercent < 60) return tail();
+    if (hpPercent > 70) return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-rest-roll-2`);
+    rng = roll.after;
+    ordinal += 1;
+    const jumped = roll.randomValue % 256 < 50;
+    draws.push(Object.freeze({ ...roll, kind: "rest-roll-2" as const, succeeded: !jumped }));
+    return jumped ? tail() : Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
+  }
+
+  if (hpPercent === 100) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -8 });
+  }
+  if (hpPercent < 40) return tail();
+  if (hpPercent > 50) return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
+  const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-rest-roll-1`);
+  rng = roll.after;
+  ordinal += 1;
+  const jumped = roll.randomValue % 256 < 70;
+  draws.push(Object.freeze({ ...roll, kind: "rest-roll-1" as const, succeeded: !jumped }));
+  return jumped ? tail() : Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
 }
 
 /**
@@ -3445,6 +3589,23 @@ export function runCheckViability(input: Readonly<{
       draws: rainDance.draws,
       scoreDelta: rainDance.scoreDelta,
       funcResultAfter: rainDance.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_REST") {
+    const rest = runCvRest({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: rest.rng,
+      draws: rest.draws,
+      scoreDelta: rest.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
