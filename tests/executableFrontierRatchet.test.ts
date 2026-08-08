@@ -177,6 +177,14 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // now preserves the global-current-move/candidate-TypeCalc and u8-bestDmg
   // source quirks, so competitive multi-candidate replacements execute.
   ["src/engine/battleScriptOpenPartyScreenOpcode.ts", 1],
+  // GETEXP registration (ROADMAP S10 rung 4): Cmd_getexp's Frontier
+  // short-circuit (state 0 -> 6) is live; the general EXP/level-up/evolution
+  // machinery (states 1-5, non-Frontier only) is the one barrier. The selector
+  // barrier (docs/barrier-reachability-triage.md item 6) now resolves
+  // BS_FAINTED too (SpikesOnFaintedBattlerFainted's `getexp BS_FAINTED`,
+  // battle_script_commands.c:3264's GetBattlerForBattleScript BS_FAINTED arm)
+  // -- all five committed call sites resolve; the remaining selector barrier
+  // is a future-input guard. 2 total, unchanged.
   ["src/engine/battleScriptGetexpOpcode.ts", 2],
   ["src/engine/battleScriptCheckteamslostOpcode.ts", 3],
   // Forced-switch ground truth §4 slices 1/2/3 tail (SWITCHHANDLEORDER,

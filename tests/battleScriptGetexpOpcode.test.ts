@@ -67,7 +67,7 @@ function context(
       battler({ side: 0 }),
       battler({ side: 1 }),
     ],
-    selectorRoles: { attacker: 0, target: 1, effectBattler: 1 },
+    selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: 1 },
     scriptingBattler: 0,
     atkCancelerTracker: 0,
     battleOutcome: 0,
@@ -159,10 +159,59 @@ describe("production getexp (Cmd_getexp) dispatch -- Frontier short-circuit only
   });
 
   describe("(b) unsupported-branch barriers", () => {
-    it("halts on a literal getexp BS_FAINTED operand (BattleScript_SpikesOnFaintedBattlerFainted; unrelated to BattleScript_GiveExp's own BS_TARGET call site)", () => {
+    it("getexp BS_FAINTED (BattleScript_SpikesOnFaintedBattlerFainted) resolves to the fainted role and does not halt", () => {
       const faintedPc = findGetexpPc("BattleScript_SpikesOnFaintedBattlerFainted");
-      const rc = context(1, { giveExpState: 0 });
+      // selectorRoles.fainted = battler 0, distinct from target (battler 1), so
+      // a wrong-battler resolver cannot sneak through.
+      const rc = context(1, {
+        giveExpState: 0,
+        selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: 0 },
+      });
       const { result } = stepAtProgramCounter(faintedPc, rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(faintedPc);
+      expect(result.state.rulesContext.giveExpState).toBe(6);
+    });
+
+    it("getexp BS_FAINTED: state 6 zeroes the fainted role's item/ability, not the target's", () => {
+      const faintedPc = findGetexpPc("BattleScript_SpikesOnFaintedBattlerFainted");
+      const rc = context(1, {
+        giveExpState: 6,
+        selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: 0 },
+      });
+      const { result } = stepAtProgramCounter(faintedPc, rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(faintedPc + 1);
+      expect(result.state.rulesContext.giveExpState).toBe(0);
+      expect(result.state.rulesContext.battlers[0]!.item).toBe(0);
+      expect(result.state.rulesContext.battlers[0]!.ability).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.item).toBe(7);
+      expect(result.state.rulesContext.battlers[1]!.ability).toBe(5);
+    });
+
+    it("halts on a genuinely unsupported selector (BS_SCRIPTING) -- the guard survives", () => {
+      const instruction = program.instructions[pc]!;
+      const patched = Object.freeze({
+        ...instruction,
+        operands: Object.freeze([
+          Object.freeze({ ...instruction.operands[0]!, expression: "BS_SCRIPTING" }),
+        ]),
+      });
+      const patchedProgram = Object.freeze({
+        ...program,
+        instructions: Object.freeze(
+          program.instructions.map((i, index) => (index === pc ? patched : i)),
+        ),
+      });
+      const execution = createBattleScriptStatusRulesExecution(
+        patchedProgram,
+        "BattleScript_GiveExp",
+        context(1, { giveExpState: 0 }),
+        1,
+        externalPorts(),
+      );
+      const state = Object.freeze({ ...execution.state, programCounter: pc });
+      const result = stepBattleScriptMachine(patchedProgram, state, execution.handlers);
       expect(result.kind).toBe("halted");
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
     });
