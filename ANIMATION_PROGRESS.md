@@ -1,5 +1,85 @@
 # Animation coverage
 
+## MOVE_IRON_TAIL staged — both orientations isolated at 135 frames; scenarios + dense probe + measured window banked (2026-08-07 worker)
+
+- **State:** IRON_TAIL stays **unsupported**. Coverage unchanged at **123/276
+  exact, 0 partial, 0 staged, 153 unsupported**. Nothing promoted; no pin moved.
+- **Did:** staged two legal mechanicLab scenarios (FRONTIER_MON_AZUMARILL_2
+  set 297, AZUMARILL, all four active slots IRON_TAIL 231, vs legal ONIX;
+  player-back `mechanic-iron-tail-player-azumarill-opponent-onix.json` and
+  opponent-front `mechanic-iron-tail-opponent-azumarill-player-onix.json`) and
+  `tools/compare/ironTailProbe.py` — a dense probe copied from `detectProbe.py`
+  with script-pointer isolation to `Move_IRON_TAIL` (`082d342c`)..`Move_POISON_TAIL`
+  (`082d348a`) capturing the `AnimTask_MetallicShine`/`_Step` lifecycle with all
+  16 data words, `Task_LoopAndPlaySE`, `AnimTask_ShakeMon`/`_Step`, every
+  `gHorizontalLungeSpriteTemplate` and `gBasicHitSplatSpriteTemplate` sprite
+  (slot, template, callback, x/y/x2/y2, subpriority, attr0/1/2, animNum,
+  animCmdIndex, matrix + hardware matrix, data[0..7]), both battlers' own
+  sprites, BLDCNT/BLDALPHA/BLDY, all 512 faded/unfaded/hardware palettes,
+  software + hardware OAM, hardware matrices, per-frame raw RGB + sha256.
+  Probe run: `python3 tools/run-mgba-probe.py <out.json> -- python3
+  tools/compare/ironTailProbe.py <scenario.json> <out.json> <rgb-dir> 231`.
+- **Measured (fresh runs, both orientations, deterministic and identical):**
+  move-owned window **135 frames each — player-back frames 216..350,
+  opponent-front 215..349** (script first in-bounds .. first inactive cleanup
+  at 350/349). Both first frames are CLEAN — no outgoing-teardown
+  contamination (software OAM byte-identical to the following frame, hardware
+  OAM slot 11+ all off-screen y=160, no shadow sprite), unlike DETECT.
+  **Metallic shine** (the main unknown): task slot 1, initializer
+  `AnimTask_MetallicShine` frames 220-221 (player) / 219-220 (opp), step
+  `AnimTask_MetallicShine_Step` from 222/221; **`data[1] = 1` = the
+  `permanent=TRUE` flag** — the palette restore is SKIPPED at `data[11]==2`,
+  so the attacker's OBJ palette is grayscaled (bank0 256-271 player / bank1
+  272-287 opp, `SetGrayscaleOrOriginalPalette(FALSE)` at initializer) and
+  STAYS gray through the lunge/hitsplat/shake, restored only by the script's
+  trailing `set_original_pal` (player f342 / opp f341). STEEL_WING and
+  METAL_CLAW pass `permanent=FALSE` and restore in-task at the d11==2 sweep
+  boundary; IRON_TAIL is the differing case. Sweep: `data[10]` 4..124 by +4,
+  wraps 128 -> 0 at `data[11]` 0->1 (f253/252) then 1->2 (f285/284), third
+  sweep at d11==2 through f318/317, task destroyed f319/318, and the shine's
+  BLDCNT/BLDALPHA teardown lands f320/319 (`blendoff` regs 0). BLDCNT 0x3f42 /
+  BLDALPHA 0xc08 (EVA 8, EVB 12) held frames 220-318 player / 219-317 opp.
+  **Lunge** (`gHorizontalLungeSpriteTemplate`, invisible dummy-OAM mover that
+  translates the attacker via `TranslateSpriteLinearById`): slot 3, spawn
+  **f323 player / f322 opp**, x/y at attacker's base (176,42 / 72,88),
+  subpriority attacker-2 (28 / 38), duration 4, dx +4 (player) / -4 (opp,
+  `DoHorizontalLunge` negates for non-player side), reverse via
+  `ReverseHorizontalLungeDirection` at data[0]==0; attacker x2 ramp +4..+16
+  (f323-326), hold 16 (f327-328), -12..0 (f329-332), opp mirrored -4..-16.
+  **Hitsplat** (`gBasicHitSplatSpriteTemplate`, `AnimHitSplatBasic`,
+  animation=2 = `sAffineAnim_HitSplat_2` FRAME(0xB0,0xB0,0,0) then
+  FRAME(0,0,0,8)): slot 4, spawn **f331 player / f330 opp**, x/y at target
+  base, subpriority target-2 (38 / 28), affine matrix a/d 0x174 held the whole
+  10-frame life, `RunStoredCallbackWhenAffineAnimEnds` -> DestroyAnimSprite.
+  **ShakeMon** (target, args 3,0,6,1): slot 0, spawn f331 player / f330 opp,
+  data[0]=target spriteId (8 / 6), data[4]=3 (x), data[5]=0 (y), data[1] 6..1
+  countdown, toggles target x2 3<->0 every frame pair; displayed target x2
+  3,3,0,0,3,3,0,0 f333-340 player / f332-339 opp; task destroyed f341/340.
+  **loopsewithpan** `Task_LoopAndPlaySE` SE_M_HARDEN (song 120): slot 0, pan
+  -64 player / +63 opp, 28 iterations f220-249 player / f219-248 opp.
+  `Task_UpdateMonBg` (monbg target) present f320-348 player / f319-347 opp;
+  BLDCNT 0x3f40 / BLDALPHA 0x80c (setalpha 12,8) f323-341 player / f322-340
+  opp; clearmonbg+blendoff f342/341; BLDY 0 throughout.
+- **Next:** (d) `src/animation/ironTail.ts` reducer + `SceneOnIronTailConfig`/
+  View seam + `battleScene.ts` draw case — the metallic-shine reducer
+  (`metallicShineAtAge`) already takes the `permanent` flag (see
+  `src/animation/metallicShine.ts:59` — `attackerGrayscale: age <
+  METALLIC_SHINE_CLEAR_AGE || permanent`), so the permanent=TRUE case is
+  exactly the `permanent` param and the trailing `set_original_pal` restore
+  is the one new draw-case decision; reuse `horizontalLunge.ts`, the hitsplat
+  painter, `shakeMonInPlace.ts`/`AnimTask_ShakeMon` reducer, and the proven
+  metallic-shine consumer (steelWing/metalClaw draw cases). Then (e) portable
+  + fixtures, (f) Tier-1 + evidence tests + coverage entry + inventory pin
+  123->124 exact / 153->152 unsupported.
+- **Notes:** AZUMARILL back/front `y_offset` 12; attacker sprite paletteNum 0
+  (bank 0 player-back / bank 1 opponent-front). `permanent=TRUE` is the ONLY
+  metallic-shine distinction from STEEL_WING/METAL_CLAW (which pass FALSE and
+  restore in-task) and IRON_DEFENSE/HARDEN (which call `metallic_shine`
+  without a permanent arg — default FALSE) — the measured grayscale-until-
+  set_original_pal behavior confirms the `permanent` branch is the operative
+  one here. All ten components are proven by exact moves; no new source
+  components expected.
+
 ## MOVE_DETECT promoted to exact — 123/276 exact (2026-08-07 worker)
 
 - **State:** DETECT is **exact** — player-back 110/110 and opponent-front
