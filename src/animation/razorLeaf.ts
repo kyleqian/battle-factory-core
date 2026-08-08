@@ -62,14 +62,12 @@ function gbaSin(angle: number, amplitude: number): number {
   return (GBA_SINE_TABLE_256[angle & 0xff]! * amplitude) >> 8;
 }
 
-function particleAtAge(
-  age: number,
+export function razorLeafParticleFromLocalAge(
+  localAge: number,
   spawnIndex: number,
   attackerSide: RazorLeafSide,
   origin: Readonly<{ x: number; y: number }>,
 ): RazorLeafParticle | null {
-  const spawnAge = RAZOR_LEAF_PARTICLE_FIRST_AGE + spawnIndex * 4;
-  const localAge = age - spawnAge;
   if (localAge < 0) return null;
   const [dx, dy, duration] = PARTICLE_ARGS[spawnIndex]!;
   if (localAge > duration + 80) return null;
@@ -93,14 +91,29 @@ function particleAtAge(
   };
 }
 
-function cutterAtAge(
+function particleAtAge(
   age: number,
+  spawnIndex: number,
+  attackerSide: RazorLeafSide,
+  origin: Readonly<{ x: number; y: number }>,
+): RazorLeafParticle | null {
+  const spawnAge = RAZOR_LEAF_PARTICLE_FIRST_AGE + spawnIndex * 4;
+  return razorLeafParticleFromLocalAge(
+    age - spawnAge,
+    spawnIndex,
+    attackerSide,
+    origin,
+  );
+}
+
+export function razorLeafCutterFromLocalAge(
+  localAge: number,
   index: number,
   attackerSide: RazorLeafSide,
   attackerCenter: Readonly<{ x: number; y: number }>,
   targetCenter: Readonly<{ x: number; y: number }>,
+  duration: number,
 ): RazorLeafCutter | null {
-  const localAge = age - RAZOR_LEAF_CUTTER_FIRST_AGE;
   if (localAge < 0) return null;
   const direction = attackerSide === "player" ? 1 : -1;
   const x = attackerCenter.x + direction * 20;
@@ -108,11 +121,14 @@ function cutterAtAge(
   const targetX = targetCenter.x + direction * 20;
   const targetY = targetCenter.y;
   const callbacks = localAge + 1;
-  const dx = linearTranslationDeltaQ8(targetX - x, 22);
-  const dy = linearTranslationDeltaQ8(targetY - y, 22);
+  const dx = linearTranslationDeltaQ8(targetX - x, duration);
+  const dy = linearTranslationDeltaQ8(targetY - y, duration);
   const x2 = linearTranslationOffsetAfterCallbacks(dx, callbacks, callbacks);
   const linearY = linearTranslationOffsetAfterCallbacks(dy, callbacks, callbacks);
-  const wave = gbaSin((Math.trunc(0x8000 / 22) * callbacks) >> 8, index === 0 ? 20 : -20);
+  const wave = gbaSin(
+    (Math.trunc(0x8000 / duration) * callbacks) >> 8,
+    index === 0 ? 20 : -20,
+  );
   const y2 = linearY + wave;
   if (x + x2 > 256 || x + x2 < -16 || y + y2 > 160 || y + y2 < -16) {
     return null;
@@ -128,6 +144,23 @@ function cutterAtAge(
     hFlip: animation === 1 || animation === 2,
     vFlip: animation === 2 || animation === 3,
   };
+}
+
+function cutterAtAge(
+  age: number,
+  index: number,
+  attackerSide: RazorLeafSide,
+  attackerCenter: Readonly<{ x: number; y: number }>,
+  targetCenter: Readonly<{ x: number; y: number }>,
+): RazorLeafCutter | null {
+  return razorLeafCutterFromLocalAge(
+    age - RAZOR_LEAF_CUTTER_FIRST_AGE,
+    index,
+    attackerSide,
+    attackerCenter,
+    targetCenter,
+    22,
+  );
 }
 
 /**

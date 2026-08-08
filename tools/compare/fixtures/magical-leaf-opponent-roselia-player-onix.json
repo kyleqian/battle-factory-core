@@ -1,0 +1,22 @@
+{
+  "schema":"magical-leaf-staging-receipt/v1",
+  "profile":"battle-scene-on",
+  "orientation":"opponent-front",
+  "scenario":"tools/battle-lab/mechanic-magical-leaf-opponent-roselia-player-onix.json",
+  "sourceWindow":{"startFrame":81,"endFrame":262,"frameCount":182},
+  "probeSha256":"2ff34accc68e8650c44540a14a3dbcaadf528076bf73c0a0f11ec6218d7e2bf2",
+  "componentSequenceSha256":"2a4bf4e384a1189cb118e3d19d8051aecb7ae09f097b83b79c767131cf6e7b4a",
+  "rawRgbSequenceSha256":"1e7008151f3308e6e397640ef3e16789a0862f3ca1c5b729b1e847e74beff81f",
+  "repeatRuns":2,
+  "checkpoints":[
+    {"age":0,"sha256":"95b499337c459f7e6620c8fdf87e112cdb02cd392cb3cc4517e9ca709c22259d","counts":[0,0,0],"targetX2":0,"arg7":0,"blend":[0,0],"active":true},
+    {"age":16,"sha256":"95b499337c459f7e6620c8fdf87e112cdb02cd392cb3cc4517e9ca709c22259d","counts":[1,0,0],"targetX2":0,"arg7":0,"blend":[16192,2060],"active":true},
+    {"age":17,"sha256":"4c20f7761d29248f2b451984768f3ef567cc8a4718017ae870634dae0db9184f","counts":[1,0,0],"targetX2":0,"arg7":0,"blend":[16192,2060],"active":true},
+    {"age":114,"sha256":"c89639dc8cbf680d0588e801c6a81d754c230438253432a966f43347ab19fca5","counts":[8,2,0],"targetX2":0,"arg7":0,"blend":[16192,2060],"active":true},
+    {"age":146,"sha256":"a5842f72b14504641458dcd65dfbc61bc9997e1856f1142171be978ee26989a0","counts":[0,2,2],"targetX2":-2,"arg7":0,"blend":[16192,2060],"active":true},
+    {"age":160,"sha256":"1b52a3131bbc050119085bc062a362441281456c93a054ca2d0ea00860dce006","counts":[0,2,0],"targetX2":0,"arg7":0,"blend":[16192,2060],"active":true},
+    {"age":168,"sha256":"95b499337c459f7e6620c8fdf87e112cdb02cd392cb3cc4517e9ca709c22259d","counts":[0,0,0],"targetX2":0,"arg7":-1,"blend":[16192,2060],"active":true},
+    {"age":169,"sha256":"95b499337c459f7e6620c8fdf87e112cdb02cd392cb3cc4517e9ca709c22259d","counts":[0,0,0],"targetX2":0,"arg7":-1,"blend":[0,0],"active":true},
+    {"age":181,"sha256":"95b499337c459f7e6620c8fdf87e112cdb02cd392cb3cc4517e9ca709c22259d","counts":[0,0,0],"targetX2":0,"arg7":-1,"blend":[0,0],"active":false}
+  ]
+}

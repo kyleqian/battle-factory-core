@@ -1,5 +1,12 @@
 # Animation coverage
 
+## MOVE_MAGICAL_LEAF staged — bilateral Scene-ON round A evidence (2026-08-08 worker)
+
+- **State:** Coverage remains **133/276 exact**, 0 partial, 0 staged, **143 unsupported**. No coverage/inventory, boundary, gameplay-state, controller, or draw-case change.
+- **Did:** Proved Level-50 set **171 / ROSELIA_1** is the lowest legal carrier, staged two complete item-unique parties against set 156 ONIX, and added the pointer-isolated probe, bilateral raw-RGB change maps/receipts, source-relative reducer, reused exact Razor Leaf particle/cutter callbacks, typed no-draw Scene-ON seam, and Tier-1 pins for every measured component and display latch.
+- **Verified:** Fresh `tools/run-mgba-probe.py` runs repeated byte-for-byte twice per orientation: player-back **77..258** and opponent-front **81..262**, both **182 frames** through first inactive cleanup. Probe hashes are `30962d27…` / `2ff34acc…`; raw-RGB sequence hashes are `f4574567…` / `1e700815…`. Measured independently: sprites, palette cycle and ShakeMon2 display at RAM+1; monbg/alpha own ages 10..168/13..168; setarg kills the two 16-color palette scopes at 168; cleanup is 169; first inactive is 181; orientation shift is +4.
+- **Next:** Promotion still needs the `battleScene.ts` compositor through this seam, source-order OAM/palette/target-BG rendering, bilateral portable fixtures and fresh **182/182 component + framebuffer exact twice each**, then the evidence receipt, coverage entry, and inventory pin. `MOVE_MAGICAL_LEAF` remains independently unsupported until all of that is complete.
+
 ## MOVE_MEGA_KICK exact — dual-orientation Scene-ON promotion (2026-08-08 worker, round B)
 
 - **State:** Coverage advanced **132→133/276 exact**, 0 partial, 0 staged, **144→143 unsupported**. No boundary, controller, gameplay-state, or unsupported-barrier change.
