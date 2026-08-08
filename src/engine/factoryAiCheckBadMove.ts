@@ -296,7 +296,7 @@ export const CHECK_BAD_MOVE_HANDLED_TABLE_EFFECTS: ReadonlySet<string> = new Set
   "EFFECT_SPECIAL_DEFENSE_UP_2", "EFFECT_EVASION_UP_2", "EFFECT_MINIMIZE",
   "EFFECT_EVASION_DOWN_2", "EFFECT_SWAGGER", "EFFECT_FLATTER", "EFFECT_KNOCK_OFF",
   "EFFECT_TRICK", "EFFECT_SLEEP_TALK", "EFFECT_ACCURACY_UP_2",
-  "EFFECT_SPECIAL_ATTACK_DOWN_2",
+  "EFFECT_SPECIAL_ATTACK_DOWN_2", "EFFECT_MEMENTO",
 ]);
 
 /**
@@ -2502,6 +2502,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_MEMENTO -> AI_CBM_Memento
+  // (`data/battle_ai_scripts.s:195,482-484`): the two target stat-stage
+  // gates then a genuine fall-through into AI_CBM_BatonPass's own usable-
+  // party count gate (:485-488) -- Memento has no `end` of its own.
+  if (move.effect === "EFFECT_MEMENTO") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmMemento(target, input.attacker.usablePartyMons ?? 0),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -3410,4 +3423,33 @@ function runCbmAttract(
     return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta });
   }
   return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta: -10 });
+}
+
+/**
+ * `AI_CBM_Memento` (`data/battle_ai_scripts.s:482-484`, EFFECT_MEMENTO):
+ *
+ * ```
+ * AI_CBM_Memento:
+ *     if_stat_level_equal AI_TARGET, STAT_ATK, MIN_STAT_STAGE, Score_Minus10
+ *     if_stat_level_equal AI_TARGET, STAT_SPATK, MIN_STAT_STAGE, Score_Minus8
+ * AI_CBM_BatonPass:
+ *     count_usable_party_mons AI_USER
+ *     if_equal 0, Score_Minus10
+ *     end
+ * ```
+ *
+ * Memento has NO `end` of its own: the two target stat gates FALL THROUGH
+ * into `AI_CBM_BatonPass`'s own AI_USER usable-party count gate (the shared
+ * `runCbmBatonPass` body above), reproduced here rather than as a private
+ * copy of that tail. Sequential Score_Minus10 / Score_Minus8 / Score_Minus10
+ * JUMPs, never additive. Zero ability/type reads, zero RNG.
+ */
+function runCbmMemento(target: FactoryAiCheckBadMoveTarget, attackerUsablePartyMons: number): number {
+  if (target.atkStage === MIN_STAT_STAGE) {
+    return -10;
+  }
+  if ((target.spAtkStage ?? DEFAULT_STAT_STAGE) === MIN_STAT_STAGE) {
+    return -8;
+  }
+  return runCbmBatonPass(attackerUsablePartyMons);
 }

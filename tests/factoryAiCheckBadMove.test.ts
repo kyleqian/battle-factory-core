@@ -4434,3 +4434,46 @@ describe("AI_CBM_Attract (data/battle_ai_scripts.s:456-476, EFFECT_ATTRACT)", ()
     ]);
   });
 });
+
+describe("AI_CBM_Memento (data/battle_ai_scripts.s:482-484, EFFECT_MEMENTO)", () => {
+  const MOVE_MEMENTO = 262; // TYPE_DARK, power 0 -> MOVE_POWER_OTHER, preamble type block skipped
+
+  const MEMENTO_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    knownAbility: "ABILITY_STURDY",
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function mementoTarget(overrides: Partial<FactoryAiCheckBadMoveTarget>): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({ ...MEMENTO_TARGET, ...overrides });
+  }
+
+  function benchAttacker(usablePartyMons: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, usablePartyMons });
+  }
+
+  it("target ATK at MIN_STAT_STAGE JUMPs to Score_Minus10 before the spAtk/count gates", () => {
+    expect(run(MOVE_MEMENTO, mementoTarget({ atkStage: 0 }), undefined, benchAttacker(1)))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("target SPATK at MIN_STAT_STAGE (ATK above floor) JUMPs to Score_Minus8", () => {
+    expect(run(MOVE_MEMENTO, mementoTarget({ atkStage: 6, spAtkStage: 0 }), undefined, benchAttacker(1)))
+      .toMatchObject({ kind: "scored", scoreDelta: -8 });
+  });
+
+  it("falls through into AI_CBM_BatonPass's own count gate: zero usable party mons scores -10", () => {
+    expect(run(MOVE_MEMENTO, mementoTarget({ atkStage: 6, spAtkStage: 6 }), undefined, benchAttacker(0)))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("all-clear path (both target stages above floor, bench non-empty) reaches End at zero", () => {
+    expect(run(MOVE_MEMENTO, mementoTarget({ atkStage: 6, spAtkStage: 6 }), undefined, benchAttacker(2)))
+      .toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+});
