@@ -1346,6 +1346,26 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_SUPER_FANG -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:129`), the shared high-risk body again
+  // (Super Fang).
+  if (move.effect === "EFFECT_SUPER_FANG") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_DOWN(_2) -> AI_CBM_SpeedDown,
   // one of the two handlers this port implements out of the table's ~100 entries.
   if (move.effect === "EFFECT_SPEED_DOWN" || move.effect === "EFFECT_SPEED_DOWN_2") {
