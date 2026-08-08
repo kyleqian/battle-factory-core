@@ -3323,3 +3323,65 @@ describe("AI_CBM_Tickle (data/battle_ai_scripts.s:571-574, EFFECT_TICKLE)", () =
     expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
   });
 });
+
+describe("AI_CBM_Magnitude (data/battle_ai_scripts.s:365-367, EFFECT_MAGNITUDE)", () => {
+  const MOVE_MAGNITUDE = 222; // EFFECT_MAGNITUDE, TYPE_GROUND, power 1
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("Levitate JUMPs to Score_Minus10 after the handler's own first ability read", () => {
+    const result = run(MOVE_MAGNITUDE, target({
+      knownAbility: "ABILITY_LEVITATE",
+      realAbility: "ABILITY_LEVITATE",
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("non-Levitate FALLS THROUGH into HighRiskForDamage; x0 type JUMPs to -10", () => {
+    // Ground is x0 against Flying.
+    const result = run(MOVE_MAGNITUDE, target({
+      types: ["TYPE_FLYING", "TYPE_FLYING"],
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    // Known ability suppresses both the universal soundproof read and the
+    // handler's levitate read; the x0 short-circuit adds no draw of its own.
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("non-Levitate non-x0 non-Wonder-Guard FALLS THROUGH to end at zero", () => {
+    const result = run(MOVE_MAGNITUDE, target());
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("executes two fresh ability draws for an ambiguous non-Levitate target", () => {
+    // Species 171 (Lanturn, Volt Absorb / Water Absorb) draws at both the
+    // handler's own levitate gate and HighRisk's own get_ability.
+    const result = run(MOVE_MAGNITUDE, {
+      ...MAROWAK,
+      species: 171,
+      types: ["TYPE_ROCK", "TYPE_BUG"],
+      knownAbility: null,
+      realAbility: "ABILITY_VOLT_ABSORB",
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-magnitude-levitate",
+      "test-slot-magnitude-high-risk-ability",
+    ]);
+  });
+});

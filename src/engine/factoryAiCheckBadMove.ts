@@ -1868,6 +1868,21 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_MAGNITUDE -> AI_CBM_Magnitude
+  // (`data/battle_ai_scripts.s:175,365-367`): a fresh own ability read
+  // (Levitate -> -10), then FALLS THROUGH into AI_CBM_HighRiskForDamage's
+  // own x0/Wonder Guard body with a second fresh ability read.
+  if (move.effect === "EFFECT_MAGNITUDE") {
+    const magnitude = runCbmMagnitude(move.type, target, rng, ordinal, `${input.reasonPrefix}-magnitude`);
+    for (const draw of magnitude.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: magnitude.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: magnitude.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -2411,4 +2426,53 @@ function runCbmHelpingHand(): number {
 function runCbmTickle(targetAtkStage: number, targetDefStage: number): number {
   return (targetAtkStage === MIN_STAT_STAGE ? -10 : 0)
     + (targetDefStage === MIN_STAT_STAGE ? -8 : 0);
+}
+
+/**
+ * `AI_CBM_Magnitude` (`data/battle_ai_scripts.s:365-367`, EFFECT_MAGNITUDE):
+ *
+ * ```
+ * AI_CBM_Magnitude:
+ *     get_ability AI_TARGET
+ *     if_equal ABILITY_LEVITATE, Score_Minus10
+ *     <fall through into AI_CBM_HighRiskForDamage>
+ * ```
+ *
+ * One fresh own ability read for the Levitate gate, then a genuine fall-through
+ * into `AI_CBM_HighRiskForDamage`'s body (its own x0 type check and its own
+ * second fresh `get_ability`). A non-Levitate result therefore draws twice
+ * inside this handler; a Levitate result returns -10 after its single draw.
+ */
+const ABILITY_LEVITATE_MAGNITUDE = NEGATING_ABILITIES.levitate;
+
+function runCbmMagnitude(
+  moveType: string,
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  const levitate = nextGetAbilityDraw(rng, ordinal, `${reason}-levitate`, target);
+  const draws: FactoryAiCheckBadMoveDraw[] = [];
+  if (levitate.draw) draws.push(levitate.draw);
+  if (levitate.ability === ABILITY_LEVITATE_MAGNITUDE) {
+    return Object.freeze({
+      rng: levitate.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: -10,
+    });
+  }
+  const highRisk = runCbmHighRiskForDamage(
+    moveType,
+    target,
+    levitate.rng,
+    levitate.draw ? ordinal + 1 : ordinal,
+    `${reason}-high-risk`,
+  );
+  for (const draw of highRisk.draws) draws.push(draw);
+  return Object.freeze({ rng: highRisk.rng, draws: Object.freeze(draws), scoreDelta: highRisk.scoreDelta });
 }
