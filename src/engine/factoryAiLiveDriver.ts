@@ -32,6 +32,7 @@ import {
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS1_TOXIC_POISON,
   BATTLE_SCRIPT_STATUS2_FORESIGHT,
+  BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY,
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS3_LEECHSEED,
   BATTLE_SCRIPT_STATUS3_PERISH_SONG,
@@ -325,6 +326,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
         : {}),
       ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_SUBSTITUTE) !== 0
         ? { hasSubstitute: true }
+        : {}),
+      ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY) !== 0
+        ? { hasFocusEnergy: true }
         : {}),
       ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) !== 0
         ? { isLeechSeeded: true }

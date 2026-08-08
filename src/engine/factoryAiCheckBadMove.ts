@@ -419,6 +419,11 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    */
   attackerFutureAttackUp?: boolean;
   /**
+   * `gBattleMons[AI_USER].status2 & STATUS2_FOCUS_ENERGY` -- `AI_CBM_FocusEnergy`'s
+   * single gate (EFFECT_FOCUS_ENERGY). Optional, defaulting to `false`.
+   */
+  hasFocusEnergy?: boolean;
+  /**
    * Current weather, `AI_WEATHER_*`-encoded (0=Sun/1=Rain/2=Sandstorm/3=Hail)
    * -- `AI_CBM_RainDance`/`SunnyDay`/`Hail`'s own `get_weather` read (doc
    * §25.1). Optional, defaulting to `undefined` (no weather bit set, matching
@@ -1577,6 +1582,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
         target.targetFutureAttackUp ?? false,
         input.attacker.attackerFutureAttackUp ?? false,
       ),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_FOCUS_ENERGY -> AI_CBM_FocusEnergy
+  // (`data/battle_ai_scripts.s:131,382-384`): a single
+  // `if_status2 AI_USER, STATUS2_FOCUS_ENERGY, Score_Minus10` -- Focus Energy
+  // is penalized when the AI already has it up.
+  if (move.effect === "EFFECT_FOCUS_ENERGY") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmFocusEnergy(input.attacker.hasFocusEnergy ?? false),
     });
   }
 
@@ -2786,6 +2804,16 @@ function runCbmFutureSight(targetFutureAttackUp: boolean, attackerFutureAttackUp
     return -12;
   }
   return 5;
+}
+
+/**
+ * `AI_CBM_FocusEnergy` (`data/battle_ai_scripts.s:382-384`, EFFECT_FOCUS_
+ * ENERGY): a single `if_status2 AI_USER, STATUS2_FOCUS_ENERGY, Score_Minus10`
+ * -- Focus Energy is penalized when the AI already has it up. Zero
+ * ability/type reads.
+ */
+function runCbmFocusEnergy(attackerHasFocusEnergy: boolean): number {
+  return attackerHasFocusEnergy ? -10 : 0;
 }
 
 /**

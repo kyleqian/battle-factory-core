@@ -536,6 +536,8 @@ export type FactoryAiScoredBattlerView = Readonly<{
   isRooted?: boolean;
   /** SIDE_STATUS_FUTUREATTACK on the AI's own side, read by AI_CBM_FutureSight. */
   attackerFutureAttackUp?: boolean;
+  /** STATUS2_FOCUS_ENERGY on the AI's own battler, read by AI_CBM_FocusEnergy. */
+  hasFocusEnergy?: boolean;
   /** `gBattleMons[].status2 & STATUS2_CURSED` -- source-required for `AI_CV_AccuracyDown`'s Gate G (target only, doc §19.1). Optional, defaulting to `false`. */
   isCursed?: boolean;
   /** `gBattleMons[].status2 & STATUS2_ESCAPE_PREVENTION` -- `AI_CBM_CantEscape`'s single gate (target only, EFFECT_MEAN_LOOK). Optional, defaulting to `false`. */
@@ -862,6 +864,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     maxHp: view.attacker.maxHp,
     ...(view.attacker.isRooted === true ? { isRooted: true } : {}),
     ...(view.attacker.attackerFutureAttackUp === true ? { attackerFutureAttackUp: true } : {}),
+    ...(view.attacker.hasFocusEnergy === true ? { hasFocusEnergy: true } : {}),
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [
