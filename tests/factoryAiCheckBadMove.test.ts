@@ -3003,3 +3003,68 @@ describe("AI_CBM_DamageDuringSleep (data/battle_ai_scripts.s:426-428, EFFECT_SNO
     expect(run(MOVE_SNORE, target(), undefined, attacker({ isAsleep: true }))).toMatchObject({ kind: "scored", scoreDelta: 0 });
   });
 });
+
+describe("AI_CBM_Explosion (data/battle_ai_scripts.s:224-235, EFFECT_EXPLOSION)", () => {
+  const MOVE_SELF_DESTRUCT = 120;
+  const MOVE_EXPLOSION = 153;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      usablePartyMons: 1,
+      ...overrides,
+    });
+  }
+
+  function attacker(overrides: Partial<FactoryAiCheckBadMoveAttacker> = {}): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ ...NEUTRAL_ATTACKER, usablePartyMons: 1, ...overrides });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read", () => {
+    const result = run(MOVE_EXPLOSION, target({ types: ["TYPE_GHOST", "TYPE_GHOST"] as const }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("Damp JUMPs to Score_Minus10 after the fresh ability read", () => {
+    const result = run(MOVE_EXPLOSION, target({ knownAbility: "ABILITY_DAMP", realAbility: "ABILITY_DAMP" }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("AI_USER still has usable party mons: FALLS THROUGH to end at zero", () => {
+    expect(run(MOVE_EXPLOSION, target(), undefined, attacker())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+
+  it("AI_USER at last mon, AI_TARGET still has reserves: Score_Minus10", () => {
+    const result = run(MOVE_EXPLOSION, target(), undefined, attacker({ usablePartyMons: 0 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("both sides at last mon: goto Score_Minus1", () => {
+    const result = run(
+      MOVE_EXPLOSION,
+      target({ usablePartyMons: 0 }),
+      undefined,
+      attacker({ usablePartyMons: 0 }),
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1 });
+  });
+
+  it("dispatches both table entries (EFFECT_EXPLOSION): Selfdestruct", () => {
+    expect(run(MOVE_SELF_DESTRUCT, target(), undefined, attacker())).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    expect(run(MOVE_SELF_DESTRUCT, target(), undefined, attacker({ usablePartyMons: 0 })))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+});

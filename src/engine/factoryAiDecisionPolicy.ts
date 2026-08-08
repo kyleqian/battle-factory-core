@@ -548,6 +548,14 @@ export type FactoryAiScoredBattlerView = Readonly<{
    * §25.1/§25.2). Optional, defaulting to `undefined` (no weather bit set).
    */
   currentWeather?: AiWeatherValue;
+  /**
+   * Alive, non-empty, non-Egg bench count produced by
+   * `count_usable_party_mons AI_USER`, excluding the active party index --
+   * `AI_CBM_Explosion`/`AI_CBM_BatonPass`'s own AI_USER count gate. Optional
+   * (the live driver does not yet model either side's party), defaulting to
+   * the CBM layer's conservative zero-member default.
+   */
+  usablePartyMons?: number;
 }>;
 
 export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
@@ -822,6 +830,9 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     isFirstTurn: view.attacker.isFirstTurn,
     ...(view.attacker.safeguardUp === true ? { safeguardUp: true } : {}),
     ...(view.attacker.isAsleep === true ? { isAsleep: true } : {}),
+    ...(view.attacker.usablePartyMons === undefined
+      ? {}
+      : { usablePartyMons: view.attacker.usablePartyMons }),
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [

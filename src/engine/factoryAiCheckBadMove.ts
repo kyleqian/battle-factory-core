@@ -403,6 +403,14 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * absent-defaults-to-false convention as `lightScreenUp`/`reflectUp`.
    */
   isAsleep?: boolean;
+  /**
+   * Alive, non-empty, non-Egg AI-side bench count produced by
+   * `count_usable_party_mons AI_USER`, excluding the active party index --
+   * `AI_CBM_Explosion`/`AI_CBM_BatonPass`'s own AI_USER count gate. Optional,
+   * defaulting to 0 (the same conservative zero-member default as the
+   * target-side `usablePartyMons` on `FactoryAiCheckBadMoveRoarTarget`).
+   */
+  usablePartyMons?: number;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -1720,6 +1728,27 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_EXPLOSION -> AI_CBM_Explosion
+  // (`data/battle_ai_scripts.s:106,224-235`): type x0, Damp, and the paired
+  // usable-party gates.
+  if (move.effect === "EFFECT_EXPLOSION") {
+    const explosion = runCbmExplosion(
+      move.type,
+      target,
+      input.attacker.usablePartyMons ?? 0,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-explosion`,
+    );
+    for (const draw of explosion.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: explosion.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: explosion.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -2125,4 +2154,45 @@ function runCbmSafeguard(attackerSafeguardUp: boolean): number {
  */
 function runCbmDamageDuringSleep(attackerIsAsleep: boolean): number {
   return attackerIsAsleep ? 0 : -8;
+}
+
+/**
+ * `AI_CBM_Explosion` (`data/battle_ai_scripts.s:224-235`, EFFECT_EXPLOSION):
+ * type x0 JUMPs to -10 before any ability read; one fresh target ability
+ * read (Damp -> -10); then the paired usable-party gates -- AI_USER's own
+ * count nonzero means Explosion is fine (End, zero); both sides zero means
+ * both are down to their last mon (Score_Minus1); only AI_TARGET still has
+ * reserves scores -10.
+ */
+const ABILITY_DAMP = "ABILITY_DAMP";
+
+function runCbmExplosion(
+  moveType: string,
+  target: FactoryAiCheckBadMoveTarget,
+  attackerUsablePartyMons: number,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  if (computeAiEffectiveness(moveType, target.types) === 0) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
+  }
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
+  const draws = ability.draw === null ? [] : [ability.draw];
+  if (ability.ability === ABILITY_DAMP) {
+    return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta: -10 });
+  }
+  const attackerCount = attackerUsablePartyMons;
+  if (attackerCount !== 0) {
+    return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta: 0 });
+  }
+  const targetCount = target.usablePartyMons ?? 0;
+  if (targetCount !== 0) {
+    return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta: -10 });
+  }
+  return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta: -1 });
 }
