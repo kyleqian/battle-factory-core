@@ -5366,7 +5366,13 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
-  if (move.effect === "EFFECT_DEFENSE_DOWN" || move.effect === "EFFECT_DEFENSE_DOWN_2") {
+  if (
+    move.effect === "EFFECT_DEFENSE_DOWN"
+    || move.effect === "EFFECT_DEFENSE_DOWN_2"
+    || move.effect === "EFFECT_TICKLE"
+  ) {
+    // EFFECT_TICKLE -> AI_CV_DefenseDown too (data/battle_ai_scripts.s:769),
+    // same shared body as the DOWN pair's own CV half.
     const defenseDown = runCvDefenseDown({
       rng: input.rng,
       attackerHp: input.attacker.hp,

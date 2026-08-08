@@ -1795,6 +1795,18 @@ describe("AI_CV_DefenseDown (docs/factory-ai-checkviability-ground-truth.md §15
     expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
   });
 
+  it("EFFECT_TICKLE (move 321) dispatches to the identical handler", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: 321, // MOVE_TICKLE -- data/battle_ai_scripts.s:769 EFFECT_TICKLE -> AI_CV_DefenseDown
+      attacker: defenseDownAttacker(100),
+      target: defenseDownTarget(6, 100),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
   describe("Gate C (if_hp_more_than AI_TARGET, 70 -- the target's OWN hp, a plain fallthrough past the draw site)", () => {
     it("target HP exactly 71% (>70): skips the -2, still zero draws (Gate A/B both skip the roll)", () => {
       const result = runCheckViability({
