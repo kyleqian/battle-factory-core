@@ -6836,3 +6836,120 @@ describe("AI_CV_Substitute (data/battle_ai_scripts.s:1547-1586)", () => {
     expect(result.draws.map((d) => d.kind)).toEqual(["substitute-roll-1", "substitute-roll-2", "substitute-roll-3"]);
   });
 });
+
+// data/battle_ai_scripts.s:2322-2356, EFFECT_TRICK. Move 271.
+describe("AI_CV_Trick (data/battle_ai_scripts.s:2322-2356)", () => {
+  const MOVE_TRICK = 271; // EFFECT_TRICK
+  const HOLD_CHOICE_BAND = 29;
+  const HOLD_MACHO_BRACE = 24; // in the broad 7-list, NOT the {29} subset
+  const HOLD_NONE = 0;
+  function trickRun(rngValue: number, attackerHold: number, targetHold: number) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_TRICK,
+      attacker: { ...NEUTRAL_BATTLER, holdEffect: attackerHold },
+      target: { ...NEUTRAL_BATTLER, holdEffect: targetHold },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "trick",
+    });
+  }
+
+  it("user holds nothing encouraged: deterministic -3, funcResult = user's own hold effect (0 = AI_WEATHER_SUN)", () => {
+    const result = trickRun(1, HOLD_NONE, HOLD_MACHO_BRACE);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -3, draws: [], funcResultAfter: 0 });
+  });
+
+  it("user holds Choice Band (subset): target Choice Band is -3, anything else +5", () => {
+    const targetBand = trickRun(1, HOLD_CHOICE_BAND, HOLD_CHOICE_BAND);
+    if (targetBand.kind !== "scored") throw new Error("unreachable");
+    expect(targetBand).toMatchObject({ scoreDelta: -3, draws: [] });
+
+    const targetMacho = trickRun(1, HOLD_CHOICE_BAND, HOLD_MACHO_BRACE);
+    if (targetMacho.kind !== "scored") throw new Error("unreachable");
+    expect(targetMacho).toMatchObject({ scoreDelta: 5, draws: [] });
+  });
+
+  it("user holds a broad-list (non-subset) effect: target in the broad list is -3, otherwise the <50 roll", () => {
+    const targetMacho = trickRun(1, HOLD_MACHO_BRACE, HOLD_MACHO_BRACE);
+    if (targetMacho.kind !== "scored") throw new Error("unreachable");
+    expect(targetMacho).toMatchObject({ scoreDelta: -3, draws: [] });
+
+    // seed 1 -> %256=198 >= 50 FALL-THROUGH +2.
+    const fellThrough = trickRun(1, HOLD_MACHO_BRACE, HOLD_NONE);
+    if (fellThrough.kind !== "scored") throw new Error("unreachable");
+    expect(fellThrough).toMatchObject({ scoreDelta: 2 });
+    expect(fellThrough.draws.map((d) => d.kind)).toEqual(["trick-roll"]);
+
+    // seed 4 -> %256=25 < 50 JUMP, zero.
+    const jumped = trickRun(4, HOLD_MACHO_BRACE, HOLD_NONE);
+    if (jumped.kind !== "scored") throw new Error("unreachable");
+    expect(jumped).toMatchObject({ scoreDelta: 0 });
+    expect(jumped.draws[0]).toMatchObject({ kind: "trick-roll", jumped: true });
+  });
+});
+
+// data/battle_ai_scripts.s:2358-2390, shared by EFFECT_SKILL_SWAP and EFFECT_ROLE_PLAY.
+describe("AI_CV_ChangeSelfAbility (data/battle_ai_scripts.s:2358-2390)", () => {
+  const MOVE_SKILL_SWAP = 285; // EFFECT_SKILL_SWAP
+  const MOVE_ROLE_PLAY = 272; // EFFECT_ROLE_PLAY
+  const ENCOURAGED = "ABILITY_SPEED_BOOST"; // in the 16-entry table
+  const NOT_ENCOURAGED = "ABILITY_PRESSURE"; // not in it
+  function csaRun(
+    rngValue: number,
+    attackerAbility: string,
+    targetOverrides: Record<string, unknown> = {},
+    moveId = MOVE_SKILL_SWAP,
+  ) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId,
+      attacker: { ...NEUTRAL_BATTLER, ability: attackerAbility },
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "csa",
+    });
+  }
+
+  it("user's OWN ability in the encouraged table: deterministic -1", () => {
+    const result = csaRun(1, ENCOURAGED);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
+    // funcResult = user's own ability (ABILITY_SPEED_BOOST id 3 =
+    // AI_WEATHER_HAIL).
+    expect(result.funcResultAfter).toBe(3);
+  });
+
+  it("user clean, known target ability in the table: reaches the <50 roll (no guess draw)", () => {
+    // seed 1 -> %256=198 >= 50 FALL-THROUGH +2.
+    const result = csaRun(1, NOT_ENCOURAGED, { knownAbility: ENCOURAGED });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 2 });
+    expect(result.draws.map((d) => d.kind)).toEqual(["change-self-ability-roll"]);
+  });
+
+  it("user clean, known target ability outside the table: FALLS THROUGH to -1, no draw", () => {
+    const result = csaRun(1, NOT_ENCOURAGED, { knownAbility: NOT_ENCOURAGED });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
+  });
+
+  it("user clean, unknown two-ability target: the guessing heuristic consumes one get-ability draw", () => {
+    // speciesAbilities[0]=ENCOURAGED, [1]=NOT_ENCOURAGED. seed 4 -> randomValue
+    // %256 = 25, (25 & 1) = 1 -> abilities[0] = ENCOURAGED -> in-table ->
+    // ChangeSelfAbility3 roll. seed 4's second draw drives the <50 JUMP.
+    const result = csaRun(4, NOT_ENCOURAGED, {
+      speciesAbilities: [ENCOURAGED, NOT_ENCOURAGED] as const,
+    });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["get-ability", "change-self-ability-roll"]);
+  });
+
+  it("ROLE_PLAY dispatches through the identical handler", () => {
+    const result = csaRun(1, ENCOURAGED, {}, MOVE_ROLE_PLAY);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
+  });
+});

@@ -151,6 +151,23 @@ function abilityFuncResultCollision(abilityName: string): AiWeatherValue | undef
 }
 
 /**
+ * Type-name -> `AI_WEATHER_*` collision id for a written HOLD_EFFECT id
+ * (`get_hold_effect`, `Cmd_get_hold_effect`, `battle_ai_script_commands.c:2044
+ * -2059`) -- `HOLD_EFFECT_NONE`(0)/`HOLD_EFFECT_RESTORE_HP`(1)/
+ * `HOLD_EFFECT_CURE_PAR`(2)/`HOLD_EFFECT_CURE_SLP`(3)
+ * (`include/constants/hold_effects.h:4-7`) are the only four raw ids that
+ * can ever collide with an `if_equal AI_WEATHER_*` compare; every other hold
+ * effect (4 upward, `AI_CV_Trick`'s own encouraged items are 10-14/24/29)
+ * never can.
+ */
+const HOLD_EFFECT_ID_IN_WEATHER_RANGE: ReadonlyMap<number, AiWeatherValue> = new Map([
+  [0, AI_WEATHER_SUN],
+  [1, AI_WEATHER_RAIN],
+  [2, AI_WEATHER_SANDSTORM],
+  [3, AI_WEATHER_HAIL],
+]);
+
+/**
  * Shared value formula for every `AI_CV_*` handler whose body reads
  * `get_target_type1` then, ONLY if type1 doesn't match `matchList`,
  * `get_target_type2` (`AI_CV_AttackDown`'s Gates E/F, `AI_CV_LightScreen`/
@@ -380,6 +397,31 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
    * defaulting to `false`.
    */
   targetPartyStatusEqualsAny?: boolean;
+  /**
+   * `GetItemHoldEffect(gBattleMons[battler].item)` (`get_hold_effect`,
+   * `Cmd_get_hold_effect`, `battle_ai_script_commands.c:2044-2059`) -- the
+   * battler's held item's HOLD_EFFECT_* id. `AI_CV_Trick` reads AI_USER's
+   * own copy (`:2323`) and AI_TARGET's (`:2331,2337`). Optional, defaulting
+   * to `HOLD_EFFECT_NONE` (0) -- the real battle-start default.
+   */
+  holdEffect?: number;
+  /**
+   * The target species' two possible abilities, in slot order -- the
+   * `get_ability AI_TARGET` guessing heuristic's two-way `Random() & 1` pick
+   * (`Cmd_get_ability`, `battle_ai_script_commands.c:1382-1387`) when the
+   * known-ability cache is empty and the species has two abilities.
+   * `AI_CV_ChangeSelfAbility` reads the TARGET's copy only. Optional,
+   * defaulting to both `ABILITY_NONE`.
+   */
+  speciesAbilities?: readonly [string, string];
+  /**
+   * `get_ability AI_TARGET`'s BattleHistory-known ability
+   * (`BATTLE_HISTORY->abilities[battler]`, `Cmd_get_ability`,
+   * `battle_ai_script_commands.c:1361-1366`) -- `AI_CV_ChangeSelfAbility`'s
+   * second gate. Optional, defaulting to `undefined` (unknown -> the
+   * guessing heuristic draws).
+   */
+  knownAbility?: string | null;
 }>;
 
 export type FactoryAiCheckViabilityDraw =
@@ -914,6 +956,17 @@ export type FactoryAiCheckViabilityDraw =
     randomValue: number;
     /** True when the JUMP (raw low byte < 100) skips the -1. */
     jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "get-ability";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** The two-ability species guess (`Random() & 1`), `AI_CV_ChangeSelfAbility`. */
+    guessedAbility: string;
   }>;
 
 export type FactoryAiCheckViabilityResult =
@@ -6545,6 +6598,43 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_TRICK") {
+    // AI_CV_Trick (data/battle_ai_scripts.s:2322-2356).
+    const trick = runCvTrick({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: trick.rng,
+      draws: trick.draws,
+      scoreDelta: trick.scoreDelta,
+      funcResultAfter: trick.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_SKILL_SWAP" || move.effect === "EFFECT_ROLE_PLAY") {
+    // AI_CV_ChangeSelfAbility (data/battle_ai_scripts.s:2358-2390) -- shared
+    // by EFFECT_SKILL_SWAP (:762) and EFFECT_ROLE_PLAY (:753).
+    const changeSelfAbility = runCvChangeSelfAbility({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: changeSelfAbility.rng,
+      draws: changeSelfAbility.draws,
+      scoreDelta: changeSelfAbility.scoreDelta,
+      funcResultAfter: changeSelfAbility.funcResultAfter,
+    });
+  }
+
   if (AI_CHECK_VIABILITY_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
       kind: "unsupported-branch",
@@ -7565,4 +7655,227 @@ function runCvSubstitute(input: Readonly<{
   }
   // Any other last-move effect: goto End, zero.
   return endsAtZero();
+}
+
+/**
+ * `AI_CV_Trick`'s two hold-effect tables
+ * (`data/battle_ai_scripts.s:2344-2356`): `EffectsToEncourage` is the 7-entry
+ * broad list (five Confuse berries + Macho Brace + Choice Band), and
+ * `EffectsToEncourage2` the 1-entry {Choice Band} subset that the source
+ * checks FIRST and that alone gates Trick's +5 path. The subset ordering
+ * matters: a user holding a Choice Band must take the Trick3 branch, not the
+ * Trick4 branch the broad list would also match.
+ */
+const AI_CV_TRICK_EFFECTS_TO_ENCOURAGE: ReadonlySet<number> = new Set([
+  10, 11, 12, 13, 14, // HOLD_EFFECT_CONFUSE_SPICY/DRY/SWEET/BITTER/SOUR
+  24, // HOLD_EFFECT_MACHO_BRACE
+  29, // HOLD_EFFECT_CHOICE_BAND
+]);
+const AI_CV_TRICK_EFFECTS_TO_ENCOURAGE2: ReadonlySet<number> = new Set([29]); // CHOICE_BAND
+
+/**
+ * `AI_CV_Trick` (`data/battle_ai_scripts.s:2322-2356`, EFFECT_TRICK):
+ *
+ * ```
+ * AI_CV_Trick:
+ *     get_hold_effect AI_USER
+ *     if_in_bytes AI_CV_Trick_EffectsToEncourage2, AI_CV_Trick3
+ *     if_in_bytes AI_CV_Trick_EffectsToEncourage, AI_CV_Trick4
+ * AI_CV_Trick2:
+ *     score -3
+ *     goto AI_CV_Trick_End
+ * AI_CV_Trick3:
+ *     get_hold_effect AI_TARGET
+ *     if_in_bytes AI_CV_Trick_EffectsToEncourage2, AI_CV_Trick2
+ *     score +5
+ *     goto AI_CV_Trick_End
+ * AI_CV_Trick4:
+ *     get_hold_effect AI_TARGET
+ *     if_in_bytes AI_CV_Trick_EffectsToEncourage, AI_CV_Trick2
+ *     if_random_less_than 50, AI_CV_Trick_End
+ *     score +2
+ * AI_CV_Trick_End:
+ *     end
+ * ```
+ *
+ * Both `get_hold_effect` reads are pure field reads (no `Random()`), so the
+ * only `if_random_less_than` site is Trick4's <50 roll. A user holding a
+ * Choice Band (subset list) jumps to Trick3: a target holding a Choice Band
+ * is the -3 (`Trick2`), anything else +5. A user holding any of the other
+ * six encouraged effects jumps to Trick4: a target holding any of the broad
+ * seven is -3, otherwise the <50 roll (JUMP to End at zero, FALL-THROUGH
+ * +2). A user holding none of them is the deterministic -3. `get_hold_effect`
+ * always overwrites funcResult: the last-executed call's hold-effect id.
+ */
+function runCvTrick(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const userHoldEffect = input.attacker.holdEffect ?? 0;
+  const targetHoldEffect = input.target.holdEffect ?? 0;
+
+  if (AI_CV_TRICK_EFFECTS_TO_ENCOURAGE2.has(userHoldEffect)) {
+    // Trick3: get_hold_effect AI_TARGET overwrites funcResult.
+    const funcResultAfter = HOLD_EFFECT_ID_IN_WEATHER_RANGE.get(targetHoldEffect);
+    if (AI_CV_TRICK_EFFECTS_TO_ENCOURAGE2.has(targetHoldEffect)) {
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3, funcResultAfter });
+    }
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 5, funcResultAfter });
+  }
+
+  if (AI_CV_TRICK_EFFECTS_TO_ENCOURAGE.has(userHoldEffect)) {
+    // Trick4: get_hold_effect AI_TARGET overwrites funcResult.
+    const funcResultAfter = HOLD_EFFECT_ID_IN_WEATHER_RANGE.get(targetHoldEffect);
+    if (AI_CV_TRICK_EFFECTS_TO_ENCOURAGE.has(targetHoldEffect)) {
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3, funcResultAfter });
+    }
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-trick-roll`);
+    const jumped = roll.randomValue % 256 < 50;
+    return Object.freeze({
+      rng: roll.after,
+      draws: Object.freeze([...draws, Object.freeze({ ...roll, kind: "trick-roll" as const, jumped })]),
+      scoreDelta: jumped ? 0 : 2,
+      funcResultAfter,
+    });
+  }
+
+  // Trick2: user holds none of the encouraged effects; funcResult keeps the
+  // AI_USER-side get_hold_effect write (user's own hold effect).
+  return Object.freeze({
+    rng,
+    draws: Object.freeze(draws),
+    scoreDelta: -3,
+    funcResultAfter: HOLD_EFFECT_ID_IN_WEATHER_RANGE.get(userHoldEffect),
+  });
+}
+
+/**
+ * `AI_CV_ChangeSelfAbility`'s 16-entry ability table
+ * (`data/battle_ai_scripts.s:2373-2390`, ABILITY ids terminated by -1) --
+ * the shared encouraged list both `get_ability` gates test membership
+ * against (Skill Swap / Role Play: swap your ability for the target's).
+ */
+const AI_CV_CHANGE_SELF_ABILITY_ENCOURAGED: ReadonlySet<string> = new Set([
+  "ABILITY_SPEED_BOOST", "ABILITY_BATTLE_ARMOR", "ABILITY_SAND_VEIL", "ABILITY_STATIC",
+  "ABILITY_FLASH_FIRE", "ABILITY_WONDER_GUARD", "ABILITY_EFFECT_SPORE", "ABILITY_SWIFT_SWIM",
+  "ABILITY_HUGE_POWER", "ABILITY_RAIN_DISH", "ABILITY_CUTE_CHARM", "ABILITY_SHED_SKIN",
+  "ABILITY_MARVEL_SCALE", "ABILITY_PURE_POWER", "ABILITY_CHLOROPHYLL", "ABILITY_SHIELD_DUST",
+]);
+
+/** `Cmd_get_ability`'s "abilities that prevent fleeing" branch (source :1369-1376). */
+const AI_CV_TRAPPER_ABILITIES: ReadonlySet<string> = new Set([
+  "ABILITY_SHADOW_TAG", "ABILITY_MAGNET_PULL", "ABILITY_ARENA_TRAP",
+]);
+
+/**
+ * `AI_CV_ChangeSelfAbility` (`data/battle_ai_scripts.s:2358-2390`, shared by
+ * EFFECT_SKILL_SWAP and EFFECT_ROLE_PLAY):
+ *
+ * ```
+ * AI_CV_ChangeSelfAbility:
+ *     get_ability AI_USER
+ *     if_in_bytes AI_CV_ChangeSelfAbility_AbilitiesToEncourage, AI_CV_ChangeSelfAbility2
+ *     get_ability AI_TARGET
+ *     if_in_bytes AI_CV_ChangeSelfAbility_AbilitiesToEncourage, AI_CV_ChangeSelfAbility3
+ * AI_CV_ChangeSelfAbility2:
+ *     score -1
+ *     goto AI_CV_ChangeSelfAbility_End
+ * AI_CV_ChangeSelfAbility3:
+ *     if_random_less_than 50, AI_CV_ChangeSelfAbility_End
+ *     score +2
+ * AI_CV_ChangeSelfAbility_End:
+ *     end
+ * ```
+ *
+ * `get_ability AI_USER` is a direct field read (no RNG): a user whose OWN
+ * ability is in the 16-entry encouraged table is the deterministic -1 (don't
+ * give away a good ability). Otherwise `get_ability AI_TARGET` runs the
+ * guessing heuristic (`Cmd_get_ability`, `battle_ai_script_commands.c:1359
+ * -1402`: known-ability cache wins, then the three trapper abilities read the
+ * real field, then a two-ability species is a `Random() & 1` guess that
+ * CONSUMES ONE DRAW, a single-ability species is direct): a target whose
+ * (known-or-guessed) ability is in the table reaches `ChangeSelfAbility3`'s
+ * <50 roll (JUMP to End at zero, FALL-THROUGH +2); a target outside it FALLS
+ * THROUGH `ChangeSelfAbility2` for the same -1. funcResult is always
+ * overwritten by the last `get_ability` executed (the user's own ability, or
+ * the target's known/guessed one).
+ */
+function runCvChangeSelfAbility(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  // get_ability AI_USER: direct field read of the user's own real ability.
+  const userAbility = input.attacker.ability ?? "ABILITY_NONE";
+  const userAbilityAfter = abilityFuncResultCollision(userAbility);
+  if (AI_CV_CHANGE_SELF_ABILITY_ENCOURAGED.has(userAbility)) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1, funcResultAfter: userAbilityAfter });
+  }
+
+  // get_ability AI_TARGET: the guessing heuristic.
+  const known = input.target.knownAbility;
+  const speciesAbilities = input.target.speciesAbilities ?? ["ABILITY_NONE", "ABILITY_NONE"] as const;
+  const targetRealAbility = input.target.ability ?? "ABILITY_NONE";
+  let targetAbility: string;
+  let guessDraw: ReturnType<typeof nextDraw> | null = null;
+  if (known != null && known !== "ABILITY_NONE") {
+    targetAbility = known;
+  } else if (AI_CV_TRAPPER_ABILITIES.has(targetRealAbility)) {
+    targetAbility = targetRealAbility;
+  } else if (speciesAbilities[0] !== "ABILITY_NONE" && speciesAbilities[1] === "ABILITY_NONE") {
+    targetAbility = speciesAbilities[0];
+  } else if (speciesAbilities[0] !== "ABILITY_NONE") {
+    // Two-ability species: Random() & 1 guess, one real draw.
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-get-ability`);
+    rng = roll.after;
+    ordinal += 1;
+    targetAbility = (roll.randomValue & 1) !== 0 ? speciesAbilities[0] : speciesAbilities[1];
+    guessDraw = roll;
+  } else {
+    // Source :1393-1396: no ability 0 -- the AI reads abilities[1] (the
+    // comment notes no Gen-3 Pokemon ever has ability 2 with no ability 1).
+    targetAbility = speciesAbilities[1];
+  }
+
+  const funcResultAfter = abilityFuncResultCollision(targetAbility);
+  if (AI_CV_CHANGE_SELF_ABILITY_ENCOURAGED.has(targetAbility)) {
+    // ChangeSelfAbility3: <50 roll (JUMP to End at zero, FALL-THROUGH +2).
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-change-self-ability-roll`);
+    const jumped = roll.randomValue % 256 < 50;
+    return Object.freeze({
+      rng: roll.after,
+      draws: Object.freeze([...(guessDraw ? [Object.freeze({
+        ...guessDraw,
+        kind: "get-ability" as const,
+        guessedAbility: targetAbility,
+      })] : []), Object.freeze({ ...roll, kind: "change-self-ability-roll" as const, jumped })]),
+      scoreDelta: jumped ? 0 : 2,
+      funcResultAfter,
+    });
+  }
+
+  // Target outside the table FALLS THROUGH into ChangeSelfAbility2: -1.
+  return Object.freeze({
+    rng,
+    draws: Object.freeze([...(guessDraw ? [Object.freeze({
+      ...guessDraw,
+      kind: "get-ability" as const,
+      guessedAbility: targetAbility,
+    })] : [])]),
+    scoreDelta: -1,
+    funcResultAfter,
+  });
 }

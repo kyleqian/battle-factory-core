@@ -592,6 +592,13 @@ export type FactoryAiScoredBattlerView = Readonly<{
    */
   ability?: string;
   /**
+   * `GetItemHoldEffect(gBattleMons[battler].item)` -- the battler's held
+   * item's HOLD_EFFECT_* id, source-required for `AI_CV_Trick`'s
+   * `get_hold_effect AI_USER`/`AI_TARGET` reads. Optional, defaulting to
+   * `HOLD_EFFECT_NONE` (0).
+   */
+  holdEffect?: number;
+  /**
    * Current weather, `AI_WEATHER_*`-encoded (0=Sun/1=Rain/2=Sandstorm/
    * 3=Hail) -- source-required for `AI_CBM_RainDance`/`SunnyDay`/`Hail` and
    * `AI_CV_SunnyDay`/`Hail`/`RainDance` (attacker's own copy only, doc
@@ -634,6 +641,14 @@ export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
   ability: string;
   /** BattleHistory-style known ability for CheckBadMove's get_ability guess cache. */
   knownAbility: string | null;
+  /**
+   * The target species' two possible abilities, in slot order -- the
+   * `get_ability AI_TARGET` guessing heuristic's `Random() & 1` two-way pick
+   * (`AI_CV_ChangeSelfAbility`, `Cmd_get_ability`,
+   * `battle_ai_script_commands.c:1382-1387`). Optional; when omitted the
+   * handler's own default treats the species as ability-less.
+   */
+  speciesAbilities?: readonly [string, string];
   /** Source BattleHistory itemEffects cell (0 means no observed effect). */
   knownItemEffect?: number;
   /** BattleHistory-known move IDs, read by AI_CV_Protect's target move-effect scan. */
@@ -1119,6 +1134,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           protectUses: view.attacker.protectUses,
           ...(view.attacker.isAsleep === true ? { isAsleep: true } : {}),
           ...(view.attacker.hasSubstitute === true ? { hasSubstitute: true } : {}),
+          ...(view.attacker.holdEffect === undefined ? {} : { holdEffect: view.attacker.holdEffect }),
         },
         target: {
           speed: view.target.speed,
@@ -1150,6 +1166,9 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           ...(view.target.anyMoveDisabled === true ? { anyMoveDisabled: true } : {}),
           ...(view.target.hasAnyStatus === true ? { hasAnyStatus: true } : {}),
           ...(view.target.targetPartyStatusEqualsAny === true ? { targetPartyStatusEqualsAny: true } : {}),
+          ...(view.target.holdEffect === undefined ? {} : { holdEffect: view.target.holdEffect }),
+          ...(view.target.speciesAbilities === undefined ? {} : { speciesAbilities: view.target.speciesAbilities }),
+          knownAbility: view.target.knownAbility,
         },
         staleFuncResultFallback,
         drawOrdinalStart: draws.length + 1,

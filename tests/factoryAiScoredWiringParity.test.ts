@@ -130,6 +130,7 @@ const PROBE_ATTACKER: Required<FactoryAiScoredBattlerView> = Object.freeze({
   targetSideReflectUp: true,
   targetPartyStatusEqualsAny: true,
   ability: "ABILITY_PRESSURE",
+  holdEffect: 1,
   currentWeather: AI_WEATHER_SUN as AiWeatherValue,
   usablePartyMons: 1,
   hasSubstitute: true,
@@ -149,6 +150,7 @@ const PROBE_TARGET: Required<FactoryAiScoredTargetView> = Object.freeze({
   species: 1,
   ability: "ABILITY_PRESSURE",
   knownAbility: null,
+  speciesAbilities: ["ABILITY_PRESSURE", "ABILITY_NONE"] as const,
   knownItemEffect: 1,
   knownMoveIds: [1, 1, 1, 1],
   usablePartyMons: 1,
@@ -224,6 +226,9 @@ const CV_BATTLER_SAMPLE: Required<FactoryAiCheckViabilityBattler> = Object.freez
   anyMoveDisabled: true,
   hasAnyStatus: true,
   targetPartyStatusEqualsAny: true,
+  holdEffect: 1,
+  speciesAbilities: ["ABILITY_PRESSURE", "ABILITY_NONE"] as const,
+  knownAbility: "ABILITY_PRESSURE",
 });
 
 const CBM_TARGET_SAMPLE: Required<FactoryAiCheckBadMoveRoarTarget> = Object.freeze({

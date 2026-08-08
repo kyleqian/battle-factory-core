@@ -3051,4 +3051,55 @@ describe("AI_CV_Encore/HealBell new-field wiring through the adapter", () => {
     });
     expect(clean.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 1 });
   });
+
+  it("holdEffect: view.attacker.holdEffect=24 (Macho Brace) reaches AI_CV_Trick4's +2 roll, absent is -3", () => {
+    const MOVE_TRICK_MASK7 = 271; // EFFECT_TRICK
+    // User holds a broad-list (non-subset) effect, target holds nothing: the
+    // <50 roll decides. Scan for a seed whose roll FALLS THROUGH (+2).
+    const withHold = cvWiringView(MOVE_TRICK_MASK7, {}, { holdEffect: 24 });
+    let foundValue: number | null = null;
+    for (let v = 1; v <= 256; v += 1) {
+      const result = chooseFactoryAiScoredDecision({
+        view: withHold,
+        request: fourSlotRequest,
+        rng: { value: v, calls: 0 },
+      });
+      if (result.trace.slotScores[0]!.checkViabilityDelta === 2) {
+        foundValue = v;
+        break;
+      }
+    }
+    expect(foundValue).not.toBeNull();
+    const absent = chooseFactoryAiScoredDecision({
+      view: cvWiringView(MOVE_TRICK_MASK7, {}),
+      request: fourSlotRequest,
+      rng: { value: foundValue!, calls: 0 },
+    });
+    expect(absent.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: -3 });
+  });
+
+  it("knownAbility: view.target.knownAbility reaches AI_CV_ChangeSelfAbility's encouraged-target +2 roll, absent falls through to -1", () => {
+    const MOVE_SKILL_SWAP_MASK7 = 285; // EFFECT_SKILL_SWAP
+    const ENCOURAGED = "ABILITY_SPEED_BOOST";
+    const withKnown = cvWiringView(MOVE_SKILL_SWAP_MASK7, { knownAbility: ENCOURAGED });
+    let foundValue: number | null = null;
+    for (let v = 1; v <= 256; v += 1) {
+      const result = chooseFactoryAiScoredDecision({
+        view: withKnown,
+        request: fourSlotRequest,
+        rng: { value: v, calls: 0 },
+      });
+      if (result.trace.slotScores[0]!.checkViabilityDelta === 2) {
+        foundValue = v;
+        break;
+      }
+    }
+    expect(foundValue).not.toBeNull();
+    const unknown = chooseFactoryAiScoredDecision({
+      view: cvWiringView(MOVE_SKILL_SWAP_MASK7, {}),
+      request: fourSlotRequest,
+      rng: { value: foundValue!, calls: 0 },
+    });
+    expect(unknown.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: -1 });
+  });
 });
