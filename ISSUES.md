@@ -17,115 +17,51 @@ backlog.
 
 # Open
 
-## #80 — Live play: in-battle party/switch menu is scaffolding-grade
+## #80 — Live play: in-battle party/switch menu — open/close windows CLOSED, one 3-frame open-edge residual left
 
 **User play-test 2026-08-05:** the party menu opened for switching "looks
-completely wrong" (layout/sprites/HP bars/message strip). Scout with a dense
-OFF window over the mid-battle party screen, inventory the visual gaps, then
-slice the binding work. Largest play-test item; sequenced after #76/#77/#78.
+completely wrong" (layout/sprites/HP bars/message strip). This was the largest
+play-test item.
 
-**2026-08-05 MAIN bind (ranks 1/3/4, `81e2db18`, PROGRESS 959):** graphical
-HP bars + real HP/level text (all three cards), gender glyphs, and the real
-`WIN_MSG`/party-menu message window are landed; oracle frame-905 diff
-15267 → 6955 px. Tier-1 pins: `tests/inbattlePartyMenuVisualBind.test.ts`.
+**Effectively closed 2026-08-07/08.** `mid-battle-switch-dense-a-off` went
+**276 → 392/392 byte-exact** across two sessions, and the spec now pins the
+whole flow: the settled menu, the open animation (763-824), the submenu window
+(926-963), the close fade (964-1018) and the field reveal (1019-1255). Also
+byte-exact and kept green: `party-menu-status-item-off` **251/251**,
+`mid-battle-switch-pacing-b-off` **153/153**.
 
-**Remainder** (rank-6 plan slices 1+4 landed 2026-08-07 — ink white +
-mon-4/5/6 empty boxes; spec `party-menu-status-item-off` red baseline now
-**7038/7110 px/frame** over 2050-2300; slice 2 was already landed
-2026-07-29, see PROGRESS 974): (slice 3) the cursor open rule + selected-card
-wash — oracle opens on slot 0, app on the active slot; biggest remaining
-class (~3200px + the icon/bounce interplay the stale slice-2 estimate
-actually belonged to). Slice 5 (pokeball/CANCEL buttons) LANDED 2026-08-07
-on the fourth cap (`a435a933`+`12a97095`+`f6f0bb7e`: cancel_button.bin
-banked, forensics-verified composite draw, in-region diff 0px on 2150+2250,
-band 1224/1270 → **757/803**; the three earlier caps died hand-deriving
-geometry — the landing brief inlined banked assets + the drawSlot idiom +
-the forensics script as an acceptance loop). **Settled band CLOSED 2026-08-07**
-(`c74ac274`+`b7df5ac7`+`3507046f`): the ~757px band was fully classified by
-the side-lane forensics (`docs/party-band-forensics.md`) as three per-slot
-menu Pokéball sprites (595px — OPEN ball on the cursor slot, CLOSED on the
-others, `CreatePartyMonPokeballSprite`/`AnimatePartySlot`; frame-1 open ball
-now banked) + the slot-2 level text (90px — the `{LV}` ligature glyph is
-charmap **hex** 0x34=52, not glyph 34) + two gender glyphs (72px — RATTATA
-genderRatio now banked across the full rental pool; the fixture's per-slot
-personalities pinned). `party-menu-status-item-off` is **251/251 byte-exact**,
-forensics probe 0px/0 unattributed on 2060/2150/2280; Tier-1 pins in
-`tests/battlePartySelect.test.ts` (cursor-following open ball + LV ligature)
-red-verified. Slice 6 (close fade pixels) LANDED 2026-08-07 (`1bedd921`):
-close now drives from closeElapsed per the rank-6 §7 schedule;
-`mid-battle-switch-dense-a-off` extended 1035-1255 → **980-1255, 276/276
-byte-exact**. **Open remainder — fully forensics-banked 2026-08-07
-(`docs/fade-layer-forensics.md` + `tools/probe/fade-layer-forensics.ts`,
-per-frame (y_bg, y_obj) tables for both windows):**
-(b) open window: the app pops the full menu instantly at 763 with NO open
-fade and NO field fade-out at all — oracle: field fades out 766-808, menu
-fades in from black 809-824 (y 14→2 held 2f, OBJ lags 1 tick). **OPEN
-ANIMATION LANDED 2026-08-07**: `openElapsed` (0 at the 763 A-press) +
-`battlePartySelectOpenPhase` (bright-hold 0-2, field-fade-out 3-18,
-black-hold 19-45, menu-fade-in 46-61) render the frozen action-menu battle
-scene (`drawBattleScene`, the party-handoff presentation re-rendered in
-action-menu phase) through the field fade-out, plain black 782-808, and the
-layer-split menu fade-in 809-824. Dense-a spec extended to **980-1255 +
-763-765 + 767/769/781 + 782-808 + 809-824 = 325 frames, 325/325 byte-exact**
-(supervisor trimmed 771/773/775/777/779 out of the committed capture list
-rather than leave the spec red — same idiom as the pre-fix 964-979
-exclusion; the spec is **341/341** after item (c) closed). **Open window
-CLOSED 2026-08-08 — dense-a 354/354 byte-exact (763-824 open window fully
-pinned).** The two open-fade residual classes, both measured and attributed
-(`docs/fade-layer-forensics.md` §8/§9, 2026-08-07 SIDE):
-**Class A LANDED 2026-08-08 (`7b8eedb0`)** — the oracle's OBJ layer is one
-blend step behind its BG layer through the open field-fade-out, while the app
-blended the whole scene at a single `y_bg`. The settled scene's OBJ layer now
-blends at `y_obj(e)=min(16,2·max(0,⌊(e−2)/2⌋))` via a sprite-only scratch pass
-(`obj-only` layer mode in `drawBattle2ActionMenuWindow`/
-`renderGeneratedBattleCommandPresentation` + `PartySelectCloseRenderAssets.
-drawBattleSceneObjOnly`) composited over the `y_bg`-blended full scene using
-its alpha-255 coverage, counting only pixels the settled full scene still
-shows. **Class B LANDED 2026-08-08 (`c24f0f4e`)** — the last open defect: the
-**player healthbox** sprite's real `y2` steps 0→1 at oracle frame **770**
-(`openElapsed 7`, drawn one row lower) and the **player back sprite**'s real
-`y2` steps 1→0 at frame **779** (`openElapsed 16`, drawn one row higher),
-measured twice independently via RAM probe (probe tick 769 = frame 770, tick
-778 = frame 779, `docs/fade-layer-forensics.md` §9). Applied as per-sprite
-draw-origin offsets gated on `openElapsed` inside the open scene draw, so each
-sprite's own edges/bevel/slanted corner move with it — the two earlier
-composited-framebuffer row-shifts failed at the sprite boundary (27 bad
-pixels). Dense-a captureFrames +13 (766/768/770-780) → **354/354 byte-exact,
-twice-run**; fast loop 763:781 **19/19**; Tier-1 pins red-verified.
-**Remaining party-menu visual gap (never spec-captured):** the SEND OUT/
-SUMMARY/CANCEL submenu window geometry — the app's 10x6 standard window at
-(144,80) vs the oracle's taller window (~4461px at 926-963). A side lane is
-measuring it. **CLOSED 2026-08-08 (submenu bind):** the action window (SHIFT/
-SUMMARY/CANCEL — line 1 is **SHIFT**, the voluntary-switch action per
-`GetPartyMenuActionsTypeInBattle` party_menu.c:5788-5796, not SEND OUT) now
-draws the party-menu action window at outer origin (144,96) → frame
-(145,97)-(238,159), interior white (150,102)-(233,153), labels at
-(160,105)/(160,121)/(160,137), cursor "▶" as its own glyph at (152,105); the
-confirm edge keeps the window through frame 963 (closeElapsed 0) and drops it
-at 964. Dense-a captureFrames +38 (926-963) → **392/392 byte-exact, thrice
-run**; fast loop 920:965 43/46 (the 3 red are the pre-open 923-925, not in
-spec); `tools/probe/submenu-forensics.ts` 10/10 PASS (oracle checks
-unaffected); §10 corrected (SHIFT, measured ink extents, close edge). Tier-1
-pins red-verified in `tests/inbattlePartyMenuVisualBind.test.ts` (window
-rect + 3 label origins + cursor glyph) + `tests/battlePartySelect.test.ts`
-(confirm edge keeps the submenu through closeElapsed 0). Keep-green all held.
-(c) message-box residual — **CLOSED 2026-08-07** (dense-a spec **341/341
-byte-exact**). On the submenu-open edge (A-press 922-923, window lands 926)
-the oracle swaps the message window from sDefaultPartyMsgWindowTemplate (21x2,
-frame to x182) to **sDoWhatWithMonMsgWindowTemplate** (16x2, frame to x141,
-data/party_menu.h:430-439) and prints `gText_DoWhatWithPokemon` = "Do what
-with this {PKMN}?" (strings.c:434): the `{PKMN}` tail is the two PK/MN
-ligature glyph bytes 0x53/0x54 + the full-width "?" 0xAC (charmap.txt:51) —
-**NOT a nickname splice** (docs/fade-layer-forensics.md §7, side-branch
-`1648f56f`; probe mode 4 re-verifies). The swapped window persists through the
-close fade while the submenu window closes on the confirm edge (the CANCEL
-pokeball window returns). The mon-icon clock's 2-frame submenu-open stall is
-modeled as a permanent +2 offset from the submenu-open edge (oracle toggles
-930/937/945 vs the app's pre-fix 928/935/943; B hold 920-929), clearing the
-489px icon residual on 965/966/973/974. Tier-1 pins red-verified in
-`tests/battlePartySelect.test.ts` + `tests/partyMonIconAnim.test.ts`. Dense-a
-captureFrames extended 964-979 → **341 frames, 341/341 byte-exact**; keep-green
-251/251 + 153/153 + 128/128 all held.
+What was wrong and is now fixed (forensics in `docs/fade-layer-forensics.md`
+§0-§10, each with a rerunnable probe; full history in git):
+
+- graphical HP bars, real HP/level text, gender glyphs, the real party message
+  window, ink/empty-box colours, the cursor open rule and selected-card wash,
+  the per-slot Pokéball sprites, the `{LV}` ligature, the CANCEL/pokeball
+  button;
+- the **open animation did not exist** — the app popped the full menu
+  instantly at 763; it now holds the battle scene 3 frames, fades it out over
+  16, holds black 27, and fades the menu in over 16, with the BG and OBJ
+  layers blended one step apart as the hardware does;
+- the **close fade** blended all layers together; OBJ now trails BG by one
+  blend step (frame 979 is the discriminator);
+- the **message window** stayed the wide "Choose a POKéMON." box through the
+  submenu and close; it now swaps to `sDoWhatWithMonMsgWindowTemplate` with
+  "Do what with this {PKMN}?" (`{PKMN}` = charmap bytes 0x53/0x54, not a
+  nickname splice);
+- the **mon-icon clock** ran 2 frames ahead from the submenu open;
+- the **submenu window** was a scaffold 16 px too high with the cursor baked
+  into the label; it now draws the real action window (**SHIFT**/SUMMARY/
+  CANCEL — line 1 is SHIFT, the voluntary-switch action per
+  `GetPartyMenuActionsTypeInBattle`, `party_menu.c:5788-5796`) with the cursor
+  as its own glyph, and is held through frame 963.
+
+**Still open (small):** the app opens the submenu **3 frames early** — oracle
+frames **923-925** show the pre-open state while the app already draws the
+window (fast loop `--capture-range 920:965` is 43/46; those 3 frames are
+deliberately **not** in the spec). Fix = delay the submenu render to the
+oracle's 926 pop edge, then extend `captureFrames` with 923-925 → 395/395.
+The A-press is 922-923 and the window lands 3 frames later, all at once
+(`docs/fade-layer-forensics.md` §10(d)).
+
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
