@@ -583,3 +583,108 @@ change explains and a pixel shift cannot.
 `sprite->y2 = 1;` and the `SlidePartyMenuBoxSprites` family around
 `party_menu.c:2915` was the next thing being read when the cap hit. The fix
 does not depend on naming the line - the measured coordinates do.
+
+## 10. In-battle party submenu (926-963)
+
+MEASUREMENT-ONLY forensics for the SEND OUT / SUMMARY / CANCEL submenu window
+of `mid-battle-switch-dense-a-off`, the last known visual gap in the in-battle
+party menu (ISSUES #80 follow-up, ~4461 px at 926-962). Data source: `npm run
+compare -- mid-battle-switch-dense-a-off --capture-range 920:965 --summary` →
+**`tools/compare/out/run-2026-08-08-01-55-14Z-49578`** (5/46 matched; 925 = 7458
+px pre-open, 926-962 = **4461 px** bbox (145,81)-(238,158), 963 = 5743 px).
+Probes in `tools/probe/submenu-*.ts`. The app's scaffold is
+`renderBattlePartySelect`'s `state.submenuOpen` branch
+(`src/engine/battlePartySelect.ts:1111-1116`).
+
+### (a) Geometry
+
+**Oracle.** The submenu window is the party-menu **action window**,
+`SELECTWINDOW_ACTIONS` in `DisplaySelectionWindow`
+(`src/party_menu.c:2534`): `SetWindowTemplateFields(&window, 2, 19, 19 -
+(numActions * 2), 10, numActions * 2, 14, 0x2E9)`. For the in-battle switch the
+action list is `sPartyMenuAction_SendOutSummaryCancel` = 3 items
+(`src/data/party_menu.h:697`), so numActions=3 → tilemap (19,13), **10×6 tiles**
+→ tile*8 screen rect **(152,104)-(231,151)**. The drawn frame overhangs the
+tilemap by 6 px on every side (party-menu frame1 style): **measured frame rect
+(146,98)-(237,157), 92×60 px**; interior white **(150,102)-(233,153)**,
+84×52 px. (Not a named template in `data/party_menu.h` — the static templates
+there are the box windows (`sSinglePartyMenuWindowTemplate`) and the message
+window (`sDoWhatWithMonMsgWindowTemplate`, §7); the action window is built
+dynamically.)
+
+**Frame palette (sampled 24-bit, frame 927):** outer dark (74,74,107) column
+x146 + x237; mid (115,107,132) x147-148 + x235-236; bevel (173,189,173) x149 +
+x234; inner light (222,214,222); top edge (115,115,173)/(140,140,206)/
+(99,99,148); bottom edge (74,74,107) row y157; olive corner (140,156,41) at the
+frame's bottom-left; interior fill (255,255,255); text ink (214,214,206);
+text shadow (99,99,99).
+
+**App (what it draws instead).** `drawStandardWindowFrame(fb, 144, 80, 10, 6)`
+at `battlePartySelect.ts:1112` — a 10×6 **standard window at (144,80)**. Its
+measured frame is x146-237 (matches the oracle's x-extent) but **interior white
+y86-133 vs oracle y102-153 → the whole window is 16 px too high** (frame top
+y82 vs y98, interior top y86 vs y102). Same x. Exact delta: app interior
+(150,86)-(233,133) vs oracle (150,102)-(233,153) = **+16 px on every frame
+row**, x identical.
+
+### (b) Contents
+
+Three option strings, **FONT_NORMAL** (`party_menu.c:2557`), printed at window-
+relative x = `cursorDimension` = 8, y = `(i * 16) + 1` → screen origins
+**(160, 105), (160, 121), (160, 137)** (tile origin (152,104) + (8, 1);
+glyph ink lands 3 px lower, rows 108-117 / 124-133 / 140-149):
+
+| line | source | ink rows | measured ink x |
+| --- | --- | --- | --- |
+| SEND OUT | `gText_SendOut` (`src/strings.c:365`), `sCursorOptions[MENU_SEND_OUT]` (`data/party_menu.h:671`) | 108-117 | x160-201 |
+| SUMMARY | `gText_Summary5` (`strings.c:367`), `[MENU_SUMMARY]` (`:660`) | 124-133 | x162-220 |
+| CANCEL | `gText_Cancel2` (`strings.c:189`), `[MENU_CANCEL1]` (`:662`) | 140-149 | x161-207 |
+
+(All three decoded as Latin text from pixels first — no `{PKMN}` ligature or
+katakana anywhere in the submenu window; the strings are the plain action
+labels.)
+
+**Cursor.** The glyph is the **"▶" selector arrow** `gText_SelectorArrow3`
+(`strings.c:1468`), drawn by `RedrawMenuCursor` (`menu.c:938-945`) at window-
+relative (0, `16*cursorPos + 1`) → screen **(152, 105)**, ink x153-158,
+y108-117, i.e. **on line 1 (SEND OUT)**. Initial position is option 0 =
+SEND OUT (`InitMenuInUpperLeftCorner(windowId, numActions, 0, TRUE)`,
+`party_menu.c:2560`). It is a **separate text-printer glyph**, not part of the
+"SEND OUT" string (the app bakes "▶" into the text).
+
+### (c) Static across 926-963? Yes
+
+Full-RGB per-frame diff vs the previous frame (probe `submenu-steady.ts`):
+926 changes +6008 px (window + §7 message-window swap land together);
+**927-929 byte-static**; 930/937/945/952/960 change 489 px at **bbox
+(7,9)-(112,55)** — the §7(e) mon-icon 2-frame toggle, **outside** the submenu
+window (0 px inside x146-237/y98-157 on every frame). So the submenu window
+itself is byte-static across **926-963**; the only motion in the band is the
+icon clock. 963 = still static (the +1282 px compare delta is the app's own
+one-frame box-fill flip, §3).
+
+### (d) Animate in? No — it pops in one frame
+
+Frames 924-925 show no window in the region (0 px diff vs 923). At **926** the
+full window is present; 926 vs 927 in the window region = **0 px** (window
+fully settled in its first frame). No slide, no box-grow. The A-press is
+922-923; the window lands 3 frames later, all at once, on the same frame the
+message window swaps (§7(a)).
+
+### (e) Fix plan (for a MAIN worker)
+
+In `renderBattlePartySelect`'s `state.submenuOpen` branch, replace the scaffold
+`drawStandardWindowFrame(fb, 144, 80, 10, 6)` + three `drawStandardWindowText`
+calls (`battlePartySelect.ts:1112-1115`) with: (1) the party-menu action-window
+frame at rect **(146,98)-(237,157)**, frame1 palette (74,74,107)/(115,107,132)/
+(173,189,173)/(222,214,222), interior white (150,102)-(233,153); (2) the three
+labels at origins **(160,105)/(160,121)/(160,137)** FONT_NORMAL, ink
+(214,214,206), shadow (99,99,99); (3) the cursor as a separate "▶"
+(`gText_SelectorArrow3`) drawn at **(152,105)**, on the SEND OUT line
+(cursorPos 0). The window is one-frame-pop and static — no per-frame schedule.
+Predicted acceptance: extend `mid-battle-switch-dense-a-off`'s `captureFrames`
+with **926-963 (38 frames, all)** → the current 341-entry spec grows to
+**379/379 byte-exact** (the 4461 px/frame band is exactly this window; the §7
+message-window swap and mon-icon clock are already byte-exact on the same
+frames). Keep-green unchanged. Do not touch `drawCancelPokeball` / the close
+path (964+ is already byte-exact).
