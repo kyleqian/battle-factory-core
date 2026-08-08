@@ -821,6 +821,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     level: view.attacker.level,
     isFirstTurn: view.attacker.isFirstTurn,
     ...(view.attacker.safeguardUp === true ? { safeguardUp: true } : {}),
+    ...(view.attacker.isAsleep === true ? { isAsleep: true } : {}),
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [

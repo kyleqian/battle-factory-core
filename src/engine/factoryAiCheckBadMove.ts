@@ -107,7 +107,11 @@
  * and `EFFECT_SAFEGUARD` -> `AI_CBM_Safeguard` (`:478-480`,
  * `runCbmSafeguard` below), a bare `if_side_affecting AI_USER,
  * SIDE_STATUS_SAFEGUARD, Score_Minus8` reading only the AI's own side -- the
- * same shape as `AI_CBM_LightScreen`/Reflect (doc §23.1).
+ * same shape as `AI_CBM_LightScreen`/Reflect (doc §23.1); and
+ * `EFFECT_SNORE`/`EFFECT_SLEEP_TALK` -> `AI_CBM_DamageDuringSleep`
+ * (`:426-428`, `runCbmDamageDuringSleep` below), a bare
+ * `if_not_status AI_USER, STATUS1_SLEEP, Score_Minus8` reading only the AI's
+ * own primary status.
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -391,6 +395,14 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * `false`, same convention as `lightScreenUp`/`reflectUp` above.
    */
   safeguardUp?: boolean;
+  /**
+   * `gBattleMons[AI_USER].status1 & STATUS1_SLEEP` -- `AI_CBM_DamageDuringSleep`'s
+   * single `if_not_status AI_USER, STATUS1_SLEEP` gate (EFFECT_SNORE/
+   * EFFECT_SLEEP_TALK). Optional, defaulting to `false` (not asleep), so the
+   * handler's Score_Minus8 fires when the field is absent -- the same
+   * absent-defaults-to-false convention as `lightScreenUp`/`reflectUp`.
+   */
+  isAsleep?: boolean;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -1696,6 +1708,18 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_SNORE/EFFECT_SLEEP_TALK ->
+  // AI_CBM_DamageDuringSleep (`data/battle_ai_scripts.s:158-159,426-428`):
+  // the user not being asleep rejects at -8.
+  if (move.effect === "EFFECT_SNORE" || move.effect === "EFFECT_SLEEP_TALK") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmDamageDuringSleep(input.attacker.isAsleep ?? false),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -2090,4 +2114,15 @@ function runCbmTrickAndKnockOff(
  */
 function runCbmSafeguard(attackerSafeguardUp: boolean): number {
   return attackerSafeguardUp ? -8 : 0;
+}
+
+/**
+ * `AI_CBM_DamageDuringSleep` (`data/battle_ai_scripts.s:426-428`,
+ * EFFECT_SNORE/EFFECT_SLEEP_TALK): a single
+ * `if_not_status AI_USER, STATUS1_SLEEP, Score_Minus8` -- Snore and Sleep
+ * Talk are penalized whenever the user is NOT asleep. Reads only AI_USER's
+ * own primary status; zero ability/stat reads.
+ */
+function runCbmDamageDuringSleep(attackerIsAsleep: boolean): number {
+  return attackerIsAsleep ? 0 : -8;
 }

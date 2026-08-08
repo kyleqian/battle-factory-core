@@ -313,6 +313,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       ...((input.rulesContext.sideStatuses[1] & SIDE_STATUS_SAFEGUARD) !== 0
         ? { safeguardUp: true }
         : {}),
+      ...((attacker.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0
+        ? { isAsleep: true }
+        : {}),
       ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) !== 0
         ? { isLeechSeeded: true }
         : {}),

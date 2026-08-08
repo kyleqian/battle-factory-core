@@ -2962,3 +2962,44 @@ describe("AI_CBM_Safeguard (data/battle_ai_scripts.s:478-480, EFFECT_SAFEGUARD)"
     expect(result.draws).toHaveLength(0); // species 213 has a single ability -- no soundproof guess draw
   });
 });
+
+describe("AI_CBM_DamageDuringSleep (data/battle_ai_scripts.s:426-428, EFFECT_SNORE/EFFECT_SLEEP_TALK)", () => {
+  const MOVE_SLEEP_TALK = 214;
+  const MOVE_SNORE = 173;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  function attacker(overrides: Partial<FactoryAiCheckBadMoveAttacker> = {}): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ ...NEUTRAL_ATTACKER, ...overrides });
+  }
+
+  it("user NOT asleep JUMPs to Score_Minus8", () => {
+    const result = run(MOVE_SLEEP_TALK, target(), undefined, attacker());
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8, draws: [] });
+  });
+
+  it("user asleep FALLS THROUGH to end at zero", () => {
+    expect(run(MOVE_SLEEP_TALK, target(), undefined, attacker({ isAsleep: true }))).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+
+  it("shares the handler with EFFECT_SNORE (dispatch :158)", () => {
+    expect(run(MOVE_SNORE, target(), undefined, attacker())).toMatchObject({ kind: "scored", scoreDelta: -8 });
+    expect(run(MOVE_SNORE, target(), undefined, attacker({ isAsleep: true }))).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+});
