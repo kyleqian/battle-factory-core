@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1018 — [bounded MAIN worker, 2026-08-08] **#39: two staged semantic owners replace their last bare canonical fact sources**
+
+- **State:** implementation `5de9c142`; focused Tier-1 **254/254**, smoke
+  **375/375**, typecheck/build, and the committed OFF differential are green.
+  The post-change full suite was still healthy but was killed at the worker's
+  60-minute cap after shared-host contention; supervisor union full remains.
+- **Did:** turn 5's ENDEAVOR squish now reads `TURN4_ROCKSLIDE_HP.to`; turn
+  11's ATK-floor renderer and reveal total share the resolver-derived staged
+  lines. Deleted all three old scalar/string exports and compatibility
+  imports/re-exports. Exact old-symbol executable refs **12→0**; broad #39
+  inventory **1,950→1,949** lines / `battleScene.ts` **36,344→36,343 LOC**.
+- **Next:** supervisor review; continue #39 only with another bounded semantic
+  owner retirement. Do not resume the stopped file split or Battle-2 march.
+- **Notes:** parent differential is **2,529/2,529 byte-identical** across 14
+  OFF traces (turn3 insurance; turn4 double-team/rock-slide; all turn5
+  menu/ENDEAVOR/KO/switch/Sitrus readers; turn11 FEATHER_DANCE/ROCK_SLIDE).
+
 ## 1017 — [supervisor, 2026-08-08] **Psych Up hardware receipt accepted; #55 construction-clock boundary proven across three OFF cases**
 
 - **State:** master includes MAIN `277be8b8`/`0f7dd855` and merged Side
@@ -64,23 +81,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   existing far-side trace was already **903/903**, so no canonical Battle-2 turn
   or post-33331 window was added. The animation supervisor is still active; its
   two newer commits remain unfolded for wind-down.
-
-## 1014 — [bounded MAIN worker, 2026-08-08] **ISSUES #83 closed: scored Factory AI owns the real turn-start draw exactly once; Mirror Coat verifier PASS 4/4**
-
-- **State:** master at this entry's commit, tree clean. Scene-OFF Mirror Coat
-  verifier **PASS 4/4** (control/reach, seeds 1/99): exact score vectors,
-  chosen slots, draw kinds/counts **7/7/8/7**, and endpoint RNG. Full
-  `npm test` **795 files / 8004 passed / 1 skipped**; targeted AI receipts
-  **11 files / 792 passed**; smoke **375 passed**; typecheck/build green.
-- **Did:** added explicit scored-decision `turnStartRandomNumber` ownership.
-  Standalone pre-boundary verification consumes/attributes
-  `BattleTurnPassed gRandomTurnNumber`; production receives the kernel-stored
-  value and proves it does not replay a second draw. Modeled only the pinned
-  build's odd-address `AI_CV_Counter3` failed `if_has_move` jump, so its phantom
-  Counter bonus is gone without general odd-address emulation. Corrected the
-  newly-observable MirrorCoat7 `<50` jump exit. Tier-1 now fails on the old
-  missing pre-draw, old Counter bonus, wrong score/slot, or double-consumption.
-- **Next:** supervisor review; continue the ordered post-AI backlog. Do not
-  resume canonical Battle 2 windows (Stage 8 finite reset remains satisfied).
-- **Notes:** no new production recording import, presentation edit, absolute-
-  tick branch, or unsupported-barrier change. Final full test/build below.

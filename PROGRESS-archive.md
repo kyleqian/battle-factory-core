@@ -1,4 +1,13 @@
 
+## 1014 — [bounded MAIN worker, 2026-08-08] **ISSUES #83 closed: scored Factory AI owns the real turn-start draw exactly once**
+
+- **State/Did:** Scene-OFF Mirror Coat verifier passed 4/4 with exact scores,
+  choices, draw counts, and endpoint RNG. Production now owns the real
+  `BattleTurnPassed` turn-start draw once and models the pinned ROM's
+  odd-address Counter quirk; full suite/build/typecheck/smoke were green.
+- **Next/Notes:** continue the post-AI backlog without reopening canonical
+  Battle-2 windows. Full entry remains in git history at `PROGRESS.md`.
+
 ## 1013 — [supervisor WIND-DOWN, 2026-08-08] **Factory AI scoring tables complete; live receipts exposed and fixed the turn-start ownership seam**
 
 - **State/Did:** 21 workers across 11 rounds completed CheckBadMove 109/109
