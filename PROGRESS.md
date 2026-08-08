@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1014 — [bounded MAIN worker, 2026-08-08] **ISSUES #83 closed: scored Factory AI owns the real turn-start draw exactly once; Mirror Coat verifier PASS 4/4**
+
+- **State:** master at this entry's commit, tree clean. Scene-OFF Mirror Coat
+  verifier **PASS 4/4** (control/reach, seeds 1/99): exact score vectors,
+  chosen slots, draw kinds/counts **7/7/8/7**, and endpoint RNG. Targeted AI
+  receipts **11 files / 792 passed**; smoke **375 passed**; typecheck green.
+- **Did:** added explicit scored-decision `turnStartRandomNumber` ownership.
+  Standalone pre-boundary verification consumes/attributes
+  `BattleTurnPassed gRandomTurnNumber`; production receives the kernel-stored
+  value and proves it does not replay a second draw. Modeled only the pinned
+  build's odd-address `AI_CV_Counter3` failed `if_has_move` jump, so its phantom
+  Counter bonus is gone without general odd-address emulation. Corrected the
+  newly-observable MirrorCoat7 `<50` jump exit. Tier-1 now fails on the old
+  missing pre-draw, old Counter bonus, wrong score/slot, or double-consumption.
+- **Next:** supervisor review; continue the ordered post-AI backlog. Do not
+  resume canonical Battle 2 windows (Stage 8 finite reset remains satisfied).
+- **Notes:** no new production recording import, presentation edit, absolute-
+  tick branch, or unsupported-barrier change. Final full test/build below.
+
 ## 1013 — [supervisor WIND-DOWN, 2026-08-08] Session summary: 21 workers / 11 rounds — **the Factory AI move-scoring stack is COMPLETE and now carries hardware receipts**; triage bucket (A) emptied; one port cancelled by refutation; one real AI bug found by live-verify
 
 - **State:** master at this entry's commit, clean. **Final independent union

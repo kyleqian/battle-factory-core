@@ -125,3 +125,18 @@ cannot reproduce it without knowing script-label addresses.
    script address ⇒ if_has_move reads garbage" model — the latter is the only
    portable form). Confirm against the score-array evidence here before
    touching banked receipt numbers.
+
+## 5. Resolution (2026-08-08)
+
+Resolved by an explicit turn-start ownership receipt on the scored decision.
+Standalone pre-boundary callers consume and record `turn-start-random-number`;
+the production live driver supplies the value already stored by the generic
+`BattleTurnPassed` kernel seam and does not replay it. `AI_CV_Counter3` models
+only this pinned build's observed failed jump, without generalizing odd script
+addresses. Re-alignment also exposed a transcription error in
+`AI_CV_MirrorCoat7`: its successful `<50` jump now exits before ScoreUp4.
+
+The live verifier now reports **PASS 4/4** for control/reach at seeds 1 and 99:
+draw counts 7/7/8/7, endpoints `3323223981`/`3726110690`/`1352996645`/
+`1329715331`, slots 0/3/1/0, and score vectors exact. Tier-1 pins the full
+vectors, draw ownership/kinds/ordinals, chosen slots, and endpoint cursors.
