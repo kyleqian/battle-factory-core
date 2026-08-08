@@ -4945,7 +4945,7 @@ describe("AI_CV_Absorb (EFFECT_ABSORB, docs/executable-frontier-census.md 43 wei
     hp: 100,
     maxHp: 100,
   });
-  const GRASS_ATTACKER = Object.freeze({ types: ["TYPE_GRASS", "TYPE_NORMAL"], ...EXTRAS });
+  const GRASS_ATTACKER = Object.freeze({ ...EXTRAS, types: ["TYPE_GRASS", "TYPE_NORMAL"] as const });
 
   function absorbRun(rngValue: number, targetTypes: readonly [string, string]) {
     return runCheckViability({
