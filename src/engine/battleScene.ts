@@ -919,6 +919,7 @@ import {
   sceneOnExplosionView,
   sceneOnDynamicPunchView,
   sceneOnRazorLeafView,
+  sceneOnMagicalLeafView,
   sceneOnPoisonTailView,
   sceneOnSteelWingView,
   sceneOnIronTailView,
@@ -25743,6 +25744,201 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "WEEPINBELL used" : "Foe WEEPINBELL used",
       "RAZOR LEAF!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "MAGICAL_LEAF") {
+    const view = sceneOnMagicalLeafView(state);
+    // The particle, cutter, hitsplat, palette-cycle, and ShakeMon2 writes all
+    // arrive in the captured framebuffer one display after their measured RAM
+    // state. `monbg`, alpha setup, and its cleanup are register-side and have
+    // no extra draw latch of their own.
+    const displayed = sceneOnMagicalLeafView({
+      ...state,
+      age: state.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "ROSELIA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "ROSELIA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged MAGICAL_LEAF pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+
+    // These are the same source-derived battle pictures exercised by the
+    // exact Grass Whistle pair. Opponent fronts reserve a second animation
+    // frame below their 64px static body, so the active OAM shape is row 0-7.
+    const roseliaSource = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ROSELIA!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ROSELIA!;
+    const roselia = playerToOpponent
+      ? roseliaSource
+      : {
+          ...roseliaSource,
+          tileset: subTileset(roseliaSource.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+
+    // AnimTask_CycleMagicalLeafPal owns the two loaded 16-color OBJ scopes.
+    // The reducer carries the original RGB555 target; expand it exactly as
+    // mGBA's RGB555 framebuffer path does before applying BlendPalette's
+    // already-shared 5-bit blend helper.
+    const paletteCycle = displayed.paletteCycle;
+    const rgb5 = (channel: number) => (channel << 3) | (channel >> 2);
+    const paletteTarget = paletteCycle === null ? null : {
+      r: rgb5(paletteCycle.color & 0x1f),
+      g: rgb5((paletteCycle.color >> 5) & 0x1f),
+      b: rgb5((paletteCycle.color >> 10) & 0x1f),
+    };
+    const leafPalette = paletteCycle === null || paletteTarget === null
+      ? razorLeafArt.leaf.palette
+      : blendPaletteToward(
+        razorLeafArt.leaf.palette,
+        paletteTarget,
+        paletteCycle.coefficient,
+      );
+    const cutterPalette = paletteCycle === null || paletteTarget === null
+      ? razorLeafArt.cutter.palette
+      : blendPaletteToward(
+        razorLeafArt.cutter.palette,
+        paletteTarget,
+        paletteCycle.coefficient,
+      );
+    const cutters = [...displayed.cutters].sort(
+      (a, b) => (a.y + a.y2) - (b.y + b.y2) || b.index - a.index,
+    );
+    const leaves = [...displayed.particles].sort(
+      (a, b) =>
+        (a.y + a.y2) - (b.y + b.y2)
+        // Equal-Y leaves preserve their source slot order: later slots win.
+        || a.spawnIndex - b.spawnIndex,
+    );
+    const hitsplats = [...displayed.hitsplats].sort(
+      // Equal-subpriority OBJ ties select the lower hardware slot, so paint
+      // its competitor first and let slot 4 replace slot 7 on overlap.
+      (a, b) => b.oamSlot - a.oamSlot,
+    );
+    const drawTargetMonbg = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + displayed.targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      roselia.tileset,
+      roselia.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawLeaves = () => {
+      for (const leaf of leaves) {
+        drawSpriteSheet(
+          fb,
+          subTileset(
+            razorLeafArt.leaf.tileset,
+            leaf.tileOffset / razorLeafArt.leaf.tileset.columns,
+            2,
+          ),
+          leafPalette,
+          leaf.x + leaf.x2 - 8,
+          leaf.y + leaf.y2 - 8,
+        );
+      }
+    };
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // `monbg ANIM_DEF_PARTNER` hides ONIX's live OBJ at source age 10 but
+    // leaves this same target image in the BG stack; it remains the alpha
+    // target-2 surface until clearmonbg/blendoff at age 169.
+    drawTargetMonbg();
+    const targetBackdrop = fb.slice();
+    const drawCutters = () => {
+      for (const cutter of cutters) {
+        drawSpriteSheetFlipped(
+          fb,
+          razorLeafArt.cutter.tileset,
+          cutterPalette,
+          cutter.x + cutter.x2 - 16,
+          cutter.y + cutter.y2 - 8,
+          cutter.hFlip,
+          cutter.vFlip,
+        );
+      }
+    };
+    const drawHitsplats = () => {
+      for (const hitsplat of hitsplats) {
+        drawSpriteSheetAffineStretchBlendedOverFb(
+          fb,
+          battleAnimHitsplat.tileset,
+          battleAnimHitsplat.palette,
+          hitsplat.x - 16,
+          hitsplat.y - 16,
+          372,
+          372,
+          12,
+          8,
+          false,
+          targetBackdrop,
+        );
+      }
+    };
+
+    // Source SortSprites order is orientation-specific. In player-back the
+    // cutter/hitsplats are behind ROSELIA and leaves; in opponent-front the
+    // front ROSELIA/leaves are behind both cutters and hitsplats.
+    if (playerToOpponent) {
+      drawCutters();
+      drawHitsplats();
+      drawAttacker();
+      drawLeaves();
+    } else {
+      drawAttacker();
+      drawLeaves();
+      drawCutters();
+      drawHitsplats();
+    }
+
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "ROSELIA",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "ROSELIA" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ROSELIA used" : "Foe ROSELIA used",
+      "MAGICAL LEAF!",
       99,
     );
     return;
