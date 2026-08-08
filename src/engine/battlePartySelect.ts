@@ -1125,12 +1125,6 @@ function drawCancelPokeball(fb: Uint8Array): void {
 }
 
 /**
- * BG pass of the voluntary party screen: battle-area background, the six box
- * tiles, the per-card text/gender/HP-bar rows, the SEND OUT submenu window,
- * the message window + text, and the CANCEL window's background/interior/
- * frame/CANCEL-text (NOT its pokeball, which is an OBJ sprite).
- */
-/**
  * The SHIFT/SUMMARY/CANCEL action window is visible only past the
  * `SUBMENU_OPEN_VISUAL_DELAY` open hold (§10(d)) and through the confirm-tick
  * frame (`closeElapsed` 0; the render drops it from closeElapsed 1, ISSUES #80
@@ -1154,6 +1148,12 @@ function messageWindowSwappedFor(state: BattlePartySelectState): boolean {
     || state.closeElapsed !== null;
 }
 
+/**
+ * BG pass of the voluntary party screen: battle-area background, the six box
+ * tiles, the per-card text/gender/HP-bar rows, the SEND OUT submenu window,
+ * the message window + text, and the CANCEL window's background/interior/
+ * frame/CANCEL-text (NOT its pokeball, which is an OBJ sprite).
+ */
 function drawPartySelectBgLayer(fb: Uint8Array, state: BattlePartySelectState): void {
   drawSourceBackground(fb);
   // LoadPartyBoxPalette (party_menu.c:2205-2280) overwrites box banks 3/4/5
