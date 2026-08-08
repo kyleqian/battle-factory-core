@@ -145,6 +145,67 @@ describe("AI_CBM_HighRiskForDamage via Flail (docs/executable-frontier-census.md
   });
 });
 
+describe("AI_CBM_HighRiskForDamage via Mirror Coat (dispatch :182)", () => {
+  const MOVE_MIRROR_COAT = 243; // EFFECT_MIRROR_COAT, TYPE_PSYCHIC
+
+  function mirrorCoatTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      species: 213,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      ...overrides,
+    });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read", () => {
+    // Psychic is x0 against Dark.
+    const result = run(MOVE_MIRROR_COAT, mirrorCoatTarget({
+      types: ["TYPE_DARK", "TYPE_DARK"],
+      knownAbility: null,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("non-Wonder-Guard FALLTHROUGH reaches End at zero", () => {
+    expect(run(MOVE_MIRROR_COAT, mirrorCoatTarget())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus non-x2 effectiveness reaches Score_Minus10", () => {
+    expect(run(MOVE_MIRROR_COAT, mirrorCoatTarget({
+      types: ["TYPE_ROCK", "TYPE_BUG"],
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus x2 effectiveness JUMPs to End at zero", () => {
+    // Psychic is x2 against Fighting.
+    expect(run(MOVE_MIRROR_COAT, mirrorCoatTarget({
+      types: ["TYPE_FIGHTING", "TYPE_NORMAL"],
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("performs the handler's fresh ability read after the universal Soundproof read", () => {
+    const result = run(MOVE_MIRROR_COAT, { ...MAROWAK, types: ["TYPE_ROCK", "TYPE_BUG"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-high-risk-ability",
+    ]);
+  });
+});
+
 const MOVE_SURF = 57;
 const MOVE_ROCK_SLIDE = 157;
 const MOVE_BODY_SLAM = 34;
