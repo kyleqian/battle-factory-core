@@ -1286,6 +1286,26 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_RAZOR_WIND -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:128`), the shared high-risk body again
+  // (Razor Wind / the two-turn Normal charge move).
+  if (move.effect === "EFFECT_RAZOR_WIND") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_DOWN(_2) -> AI_CBM_SpeedDown,
   // one of the two handlers this port implements out of the table's ~100 entries.
   if (move.effect === "EFFECT_SPEED_DOWN" || move.effect === "EFFECT_SPEED_DOWN_2") {
