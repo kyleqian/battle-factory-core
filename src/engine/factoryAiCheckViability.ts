@@ -993,6 +993,28 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "lock-on-roll" | "imprison-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < 128 for LockOn / < 100 for Imprison) skips the bonus. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "conversion-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < 200) applies the Score_Minus2. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind: "get-ability";
     before: BattleRngState;
     after: BattleRngState;
@@ -6649,6 +6671,148 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_SMELLINGSALT") {
+    // AI_CV_SmellingSalt (data/battle_ai_scripts.s:2313-2320): target
+    // paralyzed -> +1, else zero. No draws, no funcResult write.
+    const smellingSalt = runCvSmellingSalt({
+      rng: input.rng,
+      targetIsParalyzed: input.target.isParalyzed ?? false,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: smellingSalt.rng,
+      draws: smellingSalt.draws,
+      scoreDelta: smellingSalt.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_MUD_SPORT") {
+    // AI_CV_MudSport (data/battle_ai_scripts.s:2555-2570).
+    const mudSport = runCvSport({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      targetTypes: input.target.types,
+      targetTypeName: "TYPE_ELECTRIC",
+      funcResultCarry,
+      kind: "mud-sport",
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: mudSport.rng,
+      draws: mudSport.draws,
+      scoreDelta: mudSport.scoreDelta,
+      funcResultAfter: mudSport.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_WATER_SPORT") {
+    // AI_CV_WaterSport (data/battle_ai_scripts.s:2586-2601).
+    const waterSport = runCvSport({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      targetTypes: input.target.types,
+      targetTypeName: "TYPE_FIRE",
+      funcResultCarry,
+      kind: "water-sport",
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: waterSport.rng,
+      draws: waterSport.draws,
+      scoreDelta: waterSport.scoreDelta,
+      funcResultAfter: waterSport.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_POISON") {
+    // AI_CV_Poison (data/battle_ai_scripts.s:1516-1522).
+    const poison = runCvPoison({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: poison.rng,
+      draws: poison.draws,
+      scoreDelta: poison.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_LOCK_ON") {
+    // AI_CV_LockOn (data/battle_ai_scripts.s:1789-1793): roll <128 -> 0, else +2.
+    const lockOn = runCvLockOn({
+      rng: input.rng,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: lockOn.rng,
+      draws: lockOn.draws,
+      scoreDelta: lockOn.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_BIDE") {
+    // AI_CV_Bide (data/battle_ai_scripts.s:1284-1288): own HP > 90 -> 0, else -2.
+    const bide = runCvBide({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: bide.rng,
+      draws: bide.draws,
+      scoreDelta: bide.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_IMPRISON") {
+    // AI_CV_Imprison (data/battle_ai_scripts.s:2506-2512).
+    const imprison = runCvImprison({
+      rng: input.rng,
+      attackerIsFirstTurn: input.attacker.isFirstTurn,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: imprison.rng,
+      draws: imprison.draws,
+      scoreDelta: imprison.scoreDelta,
+      funcResultAfter: imprison.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_CONVERSION") {
+    // AI_CV_Conversion (data/battle_ai_scripts.s:1305-1313).
+    const conversion = runCvConversion({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      battleTurnCount: input.attacker.battleTurnCount ?? 0,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: conversion.rng,
+      draws: conversion.draws,
+      scoreDelta: conversion.scoreDelta,
+      funcResultAfter: conversion.funcResultAfter,
+    });
+  }
+
   if (move.effect === "EFFECT_PAIN_SPLIT") {
     // AI_CV_PainSplit (data/battle_ai_scripts.s:1768-1783).
     const painSplit = runCvPainSplit({
@@ -8386,5 +8550,227 @@ function runCvFlatter(input: Readonly<{
       ...confuse.draws,
     ]),
     scoreDelta: (jumped ? 0 : 1) + confuse.scoreDelta,
+  });
+}
+
+/**
+ * `AI_CV_SmellingSalt` (`data/battle_ai_scripts.s:2313-2320`,
+ * EFFECT_SMELLINGSALT): target paralyzed -> +1, else zero. No draws, no
+ * funcResult write.
+ */
+function runCvSmellingSalt(input: Readonly<{
+  rng: BattleRngState;
+  targetIsParalyzed: boolean;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  return Object.freeze({
+    rng: input.rng,
+    draws: Object.freeze([]),
+    scoreDelta: input.targetIsParalyzed ? 1 : 0,
+  });
+}
+
+/**
+ * `AI_CV_MudSport` (`data/battle_ai_scripts.s:2555-2570`, EFFECT_MUD_SPORT)
+ * and `AI_CV_WaterSport` (`:2586-2601`, EFFECT_WATER_SPORT) -- byte-identical
+ * twin handlers differing only in the target type gate:
+ *
+ * ```
+ * AI_CV_MudSport:
+ *     if_hp_less_than AI_USER, 50, AI_CV_MudSport_ScoreDown1
+ *     get_target_type1
+ *     if_equal TYPE_ELECTRIC, AI_CV_MudSport2
+ *     get_target_type2
+ *     if_equal TYPE_ELECTRIC, AI_CV_MudSport2
+ *     goto AI_CV_MudSport_ScoreDown1
+ * AI_CV_MudSport2:
+ *     score +1
+ *     goto AI_CV_MudSport_End
+ * AI_CV_MudSport_ScoreDown1:
+ *     score -1
+ * AI_CV_MudSport_End:
+ *     end
+ * ```
+ *
+ * Own HP < 50% is the deterministic -1 (the type reads never run). Otherwise
+ * target type1 or type2 Electric (MudSport) / Fire (WaterSport) is +1; neither
+ * is -1. `get_target_type1`/`2` write funcResult with the target's type -- the
+ * last read (type2 if type1 isn't the gate type, else type1) is the exit
+ * value, collision-mapped via the usual TYPE collision table.
+ */
+function runCvSport(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  targetTypes: readonly [string, string];
+  targetTypeName: string;
+  funcResultCarry: AiWeatherValue | undefined;
+  kind: "mud-sport" | "water-sport";
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  if (hpPercent < 50) {
+    return Object.freeze({
+      rng: input.rng,
+      draws: Object.freeze([]),
+      scoreDelta: -1,
+      funcResultAfter: input.funcResultCarry,
+    });
+  }
+  const types = input.targetTypes;
+  const funcResultAfter = types[0] === input.targetTypeName
+    ? typeFuncResultCollision(types[0])
+    : typeFuncResultCollision(types[1]);
+  const isGateType = types[0] === input.targetTypeName || types[1] === input.targetTypeName;
+  return Object.freeze({
+    rng: input.rng,
+    draws: Object.freeze([]),
+    scoreDelta: isGateType ? 1 : -1,
+    funcResultAfter,
+  });
+}
+
+/**
+ * `AI_CV_Poison` (`data/battle_ai_scripts.s:1516-1522`, EFFECT_POISON):
+ *
+ * ```
+ * AI_CV_Poison:
+ *     if_hp_less_than AI_USER, 50, AI_CV_Poison_ScoreDown1
+ *     if_hp_more_than AI_TARGET, 50, AI_CV_Poison_End
+ * AI_CV_Poison_ScoreDown1:
+ *     score -1
+ * AI_CV_Poison_End:
+ *     end
+ * ```
+ *
+ * Own HP < 50% scores -1. Otherwise target HP > 50% ends at zero; target HP
+ * <= 50% falls into the -1. Zero draws, no funcResult write.
+ */
+function runCvPoison(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  targetHp: number;
+  targetMaxHp: number;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const userHpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  const targetHpPercent = Math.floor((100 * input.targetHp) / input.targetMaxHp);
+  const scoreDelta = userHpPercent < 50 || targetHpPercent <= 50 ? -1 : 0;
+  return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta });
+}
+
+/**
+ * `AI_CV_LockOn` (`data/battle_ai_scripts.s:1789-1793`, EFFECT_LOCK_ON):
+ * roll < 128 -> 0, roll >= 128 -> +2. One draw, no funcResult write.
+ */
+function runCvLockOn(input: Readonly<{
+  rng: BattleRngState;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-lock-on-roll`);
+  const jumped = roll.randomValue % 256 < 128;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind: "lock-on-roll" as const, jumped })]),
+    scoreDelta: jumped ? 0 : 2,
+  });
+}
+
+/**
+ * `AI_CV_Bide` (`data/battle_ai_scripts.s:1284-1288`, EFFECT_BIDE): own HP
+ * > 90% -> 0, else -2. Zero draws, no funcResult write.
+ */
+function runCvBide(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  return Object.freeze({
+    rng: input.rng,
+    draws: Object.freeze([]),
+    scoreDelta: hpPercent > 90 ? 0 : -2,
+  });
+}
+
+/**
+ * `AI_CV_Imprison` (`data/battle_ai_scripts.s:2506-2512`, EFFECT_IMPRISON):
+ *
+ * ```
+ * AI_CV_Imprison:
+ *     is_first_turn_for AI_USER
+ *     if_more_than 0, AI_CV_Imprison_End
+ *     if_random_less_than 100, AI_CV_Imprison_End
+ *     score +2
+ * AI_CV_Imprison_End:
+ *     end
+ * ```
+ *
+ * `is_first_turn_for AI_USER` ALWAYS overwrites funcResult with the user's
+ * isFirstTurn (0-2) -- the exit value. A nonzero first-turn ends at zero; a
+ * zero first-turn runs the `<100` roll (JUMP -> 0, FALL-THROUGH -> +2).
+ */
+function runCvImprison(input: Readonly<{
+  rng: BattleRngState;
+  attackerIsFirstTurn: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const funcResultAfter = input.attackerIsFirstTurn as AiWeatherValue;
+  if (input.attackerIsFirstTurn > 0) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0, funcResultAfter });
+  }
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-imprison-roll`);
+  const jumped = roll.randomValue % 256 < 100;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind: "imprison-roll" as const, jumped })]),
+    scoreDelta: jumped ? 0 : 2,
+    funcResultAfter,
+  });
+}
+
+/**
+ * `AI_CV_Conversion` (`data/battle_ai_scripts.s:1305-1313`, EFFECT_CONVERSION):
+ *
+ * ```
+ * AI_CV_Conversion:
+ *     if_hp_more_than AI_USER, 90, AI_CV_Conversion2
+ *     score -2
+ * AI_CV_Conversion2:
+ *     get_turn_count
+ *     if_equal 0, AI_CV_Conversion_End
+ *     if_random_less_than 200, Score_Minus2
+ * AI_CV_Conversion_End:
+ *     end
+ * ```
+ *
+ * Own HP > 90% jumps straight to Conversion2 (skipping the first -2); HP
+ * <= 90% applies -2 then falls into Conversion2. `get_turn_count` ALWAYS
+ * overwrites funcResult with the battle turn counter (the exit value). A
+ * zero turn count ends at zero; a nonzero turn count runs the `<200` roll:
+ * JUMP (<200) applies -2 (`Score_Minus2`), FALL-THROUGH (>=200) ends at zero.
+ */
+function runCvConversion(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  battleTurnCount: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  let score = hpPercent > 90 ? 0 : -2;
+  const turnCount = Math.max(0, Math.min(0xff, Math.trunc(input.battleTurnCount)));
+  const funcResultAfter = turnCount <= 3 ? turnCount as AiWeatherValue : undefined;
+  if (turnCount === 0) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: score, funcResultAfter });
+  }
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-conversion-roll`);
+  const jumped = roll.randomValue % 256 < 200;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind: "conversion-roll" as const, jumped })]),
+    scoreDelta: jumped ? score - 2 : score,
+    funcResultAfter,
   });
 }

@@ -7280,3 +7280,245 @@ describe("AI_CV_Flatter (data/battle_ai_scripts.s:1464-1477, EFFECT_FLATTER)", (
     expect(result.draws[1]).toMatchObject({ kind: "confuse-roll" });
   });
 });
+
+describe("AI_CV_SmellingSalt (data/battle_ai_scripts.s:2313-2320, EFFECT_SMELLINGSALT)", () => {
+  const MOVE_SMELLING_SALT = 265;
+
+  function smellingRun(targetIsParalyzed: boolean) {
+    return runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SMELLING_SALT,
+      attacker: NEUTRAL_BATTLER,
+      target: { ...NEUTRAL_BATTLER, isParalyzed: targetIsParalyzed },
+      drawOrdinalStart: 1,
+      reasonPrefix: "smelling",
+    });
+  }
+
+  it("target paralyzed: +1", () => {
+    const result = smellingRun(true);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 1, draws: [] });
+  });
+
+  it("target not paralyzed: zero", () => {
+    const result = smellingRun(false);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [] });
+  });
+});
+
+describe("AI_CV_MudSport/WaterSport (data/battle_ai_scripts.s:2555-2601)", () => {
+  const MOVE_MUD_SPORT = 300;
+  const MOVE_WATER_SPORT = 346;
+
+  function sportRun(moveId: number, attackerHp: number, targetTypes: readonly [string, string]) {
+    return runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId,
+      attacker: { ...NEUTRAL_BATTLER, hp: attackerHp },
+      target: { ...NEUTRAL_BATTLER, types: targetTypes },
+      staleFuncResultFallback: 1,
+      drawOrdinalStart: 1,
+      reasonPrefix: "sport",
+    });
+  }
+
+  it("Mud Sport: own HP < 50% is the deterministic -1", () => {
+    const result = sportRun(MOVE_MUD_SPORT, 49, ["TYPE_NORMAL", "TYPE_NORMAL"]);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
+  });
+
+  it("Mud Sport: target Electric (type1) is +1", () => {
+    const result = sportRun(MOVE_MUD_SPORT, 100, ["TYPE_ELECTRIC", "TYPE_NORMAL"]);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 1, draws: [] });
+  });
+
+  it("Mud Sport: target Electric (type2) is +1", () => {
+    const result = sportRun(MOVE_MUD_SPORT, 100, ["TYPE_NORMAL", "TYPE_ELECTRIC"]);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 1, draws: [] });
+  });
+
+  it("Mud Sport: neither type Electric is -1", () => {
+    const result = sportRun(MOVE_MUD_SPORT, 100, ["TYPE_NORMAL", "TYPE_NORMAL"]);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
+  });
+
+  it("Water Sport: target Fire is +1, else -1", () => {
+    const fire = sportRun(MOVE_WATER_SPORT, 100, ["TYPE_FIRE", "TYPE_NORMAL"]);
+    const normal = sportRun(MOVE_WATER_SPORT, 100, ["TYPE_NORMAL", "TYPE_NORMAL"]);
+    if (fire.kind !== "scored" || normal.kind !== "scored") throw new Error("unreachable");
+    expect(fire).toMatchObject({ scoreDelta: 1 });
+    expect(normal).toMatchObject({ scoreDelta: -1 });
+  });
+});
+
+describe("AI_CV_Poison (data/battle_ai_scripts.s:1516-1522, EFFECT_POISON)", () => {
+  const MOVE_POISON_POWDER = 77;
+
+  function poisonRun(attackerHp: number, targetHp: number) {
+    return runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_POISON_POWDER,
+      attacker: { ...NEUTRAL_BATTLER, hp: attackerHp },
+      target: { ...NEUTRAL_BATTLER, hp: targetHp },
+      drawOrdinalStart: 1,
+      reasonPrefix: "poison",
+    });
+  }
+
+  it("own HP < 50%: -1", () => {
+    const result = poisonRun(49, 100);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
+  });
+
+  it("target HP > 50%: zero", () => {
+    const result = poisonRun(100, 60);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [] });
+  });
+
+  it("target HP <= 50%: -1", () => {
+    const result = poisonRun(100, 50);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [] });
+  });
+});
+
+describe("AI_CV_LockOn (data/battle_ai_scripts.s:1789-1793, EFFECT_LOCK_ON)", () => {
+  const MOVE_LOCK_ON = 199;
+
+  function lockRun(rngValue: number) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_LOCK_ON,
+      attacker: NEUTRAL_BATTLER,
+      target: NEUTRAL_BATTLER,
+      drawOrdinalStart: 1,
+      reasonPrefix: "lockon",
+    });
+  }
+
+  it("roll < 128: zero", () => {
+    const result = lockRun(3);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [{ kind: "lock-on-roll", jumped: true }] });
+  });
+
+  it("roll >= 128: +2", () => {
+    const result = lockRun(1);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 2, draws: [{ kind: "lock-on-roll", jumped: false }] });
+  });
+});
+
+describe("AI_CV_Bide (data/battle_ai_scripts.s:1284-1288, EFFECT_BIDE)", () => {
+  const MOVE_BIDE = 117;
+
+  function bideRun(hp: number) {
+    return runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_BIDE,
+      attacker: { ...NEUTRAL_BATTLER, hp },
+      target: NEUTRAL_BATTLER,
+      drawOrdinalStart: 1,
+      reasonPrefix: "bide",
+    });
+  }
+
+  it("own HP > 90%: zero", () => {
+    const result = bideRun(91);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [] });
+  });
+
+  it("own HP <= 90%: -2", () => {
+    const result = bideRun(90);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -2, draws: [] });
+  });
+});
+
+describe("AI_CV_Imprison (data/battle_ai_scripts.s:2506-2512, EFFECT_IMPRISON)", () => {
+  const MOVE_IMPRISON = 286;
+
+  function imprisonRun(rngValue: number, isFirstTurn: number) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_IMPRISON,
+      attacker: { ...NEUTRAL_BATTLER, isFirstTurn },
+      target: NEUTRAL_BATTLER,
+      drawOrdinalStart: 1,
+      reasonPrefix: "imprison",
+    });
+  }
+
+  it("first turn nonzero: zero, funcResult = isFirstTurn", () => {
+    const result = imprisonRun(1, 1);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [], funcResultAfter: 1 });
+  });
+
+  it("first turn zero, roll < 100: zero", () => {
+    const result = imprisonRun(3, 0);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, funcResultAfter: 0 });
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "imprison-roll", jumped: true });
+  });
+
+  it("first turn zero, roll >= 100: +2", () => {
+    const result = imprisonRun(1, 0);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 2, funcResultAfter: 0 });
+    expect(result.draws[0]).toMatchObject({ kind: "imprison-roll", jumped: false });
+  });
+});
+
+describe("AI_CV_Conversion (data/battle_ai_scripts.s:1305-1313, EFFECT_CONVERSION)", () => {
+  const MOVE_CONVERSION = 160;
+
+  function conversionRun(rngValue: number, hp: number, battleTurnCount: number) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_CONVERSION,
+      attacker: { ...NEUTRAL_BATTLER, hp, battleTurnCount },
+      target: NEUTRAL_BATTLER,
+      drawOrdinalStart: 1,
+      reasonPrefix: "conversion",
+    });
+  }
+
+  it("turn count zero: no roll, score from HP gate only, funcResult = 0", () => {
+    const result = conversionRun(1, 100, 0);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [], funcResultAfter: 0 });
+  });
+
+  it("HP <= 90 and turn count zero: -2", () => {
+    const result = conversionRun(1, 90, 0);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -2, draws: [] });
+  });
+
+  it("turn count 2, roll < 200: -2 from Score_Minus2 on top of the HP gate", () => {
+    const result = conversionRun(3, 100, 2);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -2, funcResultAfter: 2 });
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "conversion-roll", jumped: true });
+  });
+
+  it("turn count 2, roll >= 200: HP gate score only", () => {
+    // seed 9 -> low byte 249 (>= 200).
+    const result = conversionRun(9, 100, 2);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, funcResultAfter: 2 });
+    expect(result.draws[0]).toMatchObject({ kind: "conversion-roll", jumped: false });
+  });
+});
