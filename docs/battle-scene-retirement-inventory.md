@@ -19,7 +19,7 @@ rg -n -i 'turn[0-9]+|battle2|battle 2' src/engine/battleScene.ts \
   src/engine/battle2Turn1.ts src/engine/battle2ActionMenu.ts \
   src/engine/battle2OffScenario.ts src/engine/turn17.ts
 rg -l -i 'turn[0-9]+|battle2|battle 2' src/engine --glob '*.ts' | sort
-rg -n 'grovyleFaintSinkRowsAndY2|onixSitrusRotateMatrix|turn5GrantingStarPlacement|dragonBreathGrovyleHp|draw(Grovyle|Kabuto|Turn5Pidgeotto|Turn13Murkrow|Turn15Magby|Turn16PostSwitchField)|onixPlayerHealthboxContentForState|featherDance(OnixOpponent|PidgeottoPlayer)Healthbox|flyMurkrowPlayerHealthbox' src/engine/battleScene.ts
+rg -n 'faintSinkRowsAndY2|onixSitrusRotateMatrix|turn5GrantingStarPlacement|dragonBreathHp|draw(Grovyle|Kabuto|Turn5Pidgeotto|Turn13Murkrow|Turn15Magby|Turn16PostSwitchField)|onixPlayerHealthboxContentForState|featherDance(OnixOpponent|PidgeottoPlayer)Healthbox|flyMurkrowPlayerHealthbox' src/engine/battleScene.ts
 wc -l src/engine/battleScene.ts src/engine/battle2Turn1.ts \
   src/engine/battle2ActionMenu.ts src/engine/battle2OffScenario.ts \
   src/engine/turn17.ts
@@ -78,7 +78,7 @@ The state-field census is complete:
 
 The concrete named species/episode entry points remaining in the same file
 are: GROVYLE/KABUTO intro materialize/stretch (`4405-5467`);
-`dragonBreathGrovyleHp` (`8235`); `grovyleFaintSinkRowsAndY2` (`9118`);
+`dragonBreathHp` (`8235`); `faintSinkRowsAndY2` (`9118`);
 `onixSitrusRotateMatrix` (`9253`); `turn5GrantingStarPlacement` (`9298`);
 Pidgeotto replacement (`10049-10142`); Murkrow replacement
 (`10272-10298`); MAGBY selector/send-out/field (`10509`, `15593`,

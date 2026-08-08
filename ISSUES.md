@@ -1049,8 +1049,7 @@ actually about. That retirement remains the presentation-seam program's job.
 `turn17MenuRedrawElapsed`, `turn17KoDismissElapsed`,
 `turn17OutcomeDismissElapsed`, `turn17LossDismissElapsed`); 969 lines reference
 a turn number; per-species render entry points are hardcoded
-(`grovyleFaintSinkRowsAndY2`, `onixSitrusRotateMatrix`,
-`turn5GrantingStarPlacement`, `dragonBreathGrovyleHp`). Sibling files
+(`onixSitrusRotateMatrix`, `turn5GrantingStarPlacement`). Sibling files
 `battle2Turn1.ts`, `battle2ActionMenu.ts`, `battle2OffScenario.ts`,
 `turn17.ts` share the shape.
 
@@ -1556,23 +1555,16 @@ renderer, so the reproducible broad #39 inventory honestly stays
 `battle-command-generated-off`; no canonical Battle-2 window was run. The
 remaining #39 render-entry debt above is unchanged.
 
-**Two-symbol generic-rename brief stopped as stale (2026-08-08).** The
-requested pair was `dragonBreathGrovyleHp` plus
-`grovyleFaintSinkRowsAndY2`, but `bb5289b2` had already renamed the first to
-generic `dragonBreathHp` with formulas/defaults preserved; later
-`26814e71` moved that generic implementation verbatim to
-`battleSceneCanonical.ts`. Current code-wide exact-reference lines
-(`src`/`tests`/`tools`) are `dragonBreathGrovyleHp` **0**,
-`dragonBreathHp` **34**, and `grovyleFaintSinkRowsAndY2` **22**; production
-counts are **0/8/10** respectively. The remaining faint helper is declared in
-`battleSceneCanonical.ts`, publicly re-exported by `battleScene.ts`, and has
-two parameterized production call sites; no computed/string-based consumer was
-found. Per the brief's stale-symbol stop rule, no half-scope rename was made:
-the exact requested old-name pair stays **{0,22}→{0,22}**, the reproducible
-broad #39 inventory stays **1,949→1,949**, and `battleScene.ts` stays
-**36,361→36,361 LOC**. No differential was warranted because production
-was unchanged; no trace/window or Scene-ON query ran. The remaining #39
-render-entry debt is unchanged and needs a freshly scoped bounded brief.
+**Faint-sink geometry helper renamed generically (2026-08-08).** The remaining
+species-agnostic pure helper is now `faintSinkRowsAndY2` in its existing
+`battleSceneCanonical.ts` owner and public `battleScene.ts` re-export. Its
+signature, Grovyle defaults, formula, and explicit Pidgeotto re-anchoring are
+unchanged; focused Tier-1 pins cover both distinct `startTick`/`steps`
+parameterizations without identity input. Exact old-name references across
+`src`/`tests`/`tools` move **22→0** (production **10→0**); no computed/string
+consumer was found. This ownership-only rename leaves the reproducible broad
+#39 inventory **1,949→1,949** and `battleScene.ts` **36,361→36,361 LOC**.
+The remaining #39 render-entry debt above is unchanged.
 
 # Settled records (not open work — see the note at the top of this file)
 

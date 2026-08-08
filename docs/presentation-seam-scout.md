@@ -705,7 +705,7 @@ drain, a completely separate interpolation from `drawTurn5EndeavorText`'s own
 (`:6941`, Onix's player-side healthbox). **Concretely, this means Grovyle's
 sprite is already mid-faint-sink during part of the attack branch's own
 active window**: `GROVYLE_FAINT_SINK_START_TICK` = 6502 (`:6995`,
-`grovyleFaintSinkRowsAndY2`, called unconditionally at `:7407`) falls
+`faintSinkRowsAndY2`, called unconditionally at `:7407`) falls
 *inside* the attack branch's own `[rockSlideTextStartTick(5829)=6222,
 turn5FaintedTextStartTick(5829)=6523)` window (`:6936`, `:7515-7517`) — so for
 render ticks 6502-6522 (21 of this branch's ~300 active ticks), the "ONIX

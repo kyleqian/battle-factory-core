@@ -1027,7 +1027,7 @@ export function turn5SitrusResettledBounceTick(t: number): number {
  * `drawTurn3RockSlideAttack`/`drawTurn4RockSlideAttack` (shake/rocks/hit-
  * flash mechanisms reused with ZERO code changes, only the new synthetic
  * anchor), plus the two genuinely new pieces this turn needs since Grovyle
- * actually FAINTS here: the sink (`grovyleFaintSinkRowsAndY2`) replaces the
+ * actually FAINTS here: the sink (`faintSinkRowsAndY2`) replaces the
  * plain sprite draw once active, and the opponent healthbox stops drawing
  * entirely past its own vanish tick.
  */
@@ -2403,7 +2403,7 @@ export function turn5RockSlideKoDismissEligible(t: number): boolean {
   return t >= TURN5_ROCKSLIDE_PRESS_TICK + TURN5_FAINTED_CURSOR_START_DELAY;
 }
 
-export function grovyleFaintSinkRowsAndY2(t: number, startTick: number = GROVYLE_FAINT_SINK_START_TICK, steps: number = GROVYLE_FAINT_SINK_STEPS): { keptRows: number; y2: number } {
+export function faintSinkRowsAndY2(t: number, startTick: number = GROVYLE_FAINT_SINK_START_TICK, steps: number = GROVYLE_FAINT_SINK_STEPS): { keptRows: number; y2: number } {
   const d = t - 1 - startTick;
   if (d <= 0) return { keptRows: steps, y2: 0 };
   const k = Math.min(steps, Math.ceil(d / 2));

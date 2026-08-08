@@ -160,7 +160,7 @@ reference: slot 0 ONIX (4/117 hp, the active battler), slot 1 MAGBY
 slot 1**; GROVYLE (previously unrecorded in-repo as part of DESTIN's bench)
 is **array slot 0** and was DESTIN's actual Battle-1 opening lead, fainting
 well before turn 13 (`dump-turn13-*` and `docs/battle-turn-notes.md`'s own
-"turn 2's own DRAGON_BREATH scene" / `grovyleFaintSinkRowsAndY2`'s generalized
+"turn 2's own DRAGON_BREATH scene" / `faintSinkRowsAndY2`'s generalized
 name are consistent with this — GROVYLE's own faint predates and originates
 the sink/faint dispatcher turn 13 later reuses for PIDGEOTTO).
 

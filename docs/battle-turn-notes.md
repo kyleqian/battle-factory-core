@@ -4304,7 +4304,7 @@ per the brief's own explicit instruction.
   erase-steps land at render ticks 6504,6506,...,6518 (the SAME +1 render
   lag every other ROCK_SLIDE mechanism in this file already uses - RAM step
   at `S+2k-1` first shows at render tick `S+2k`), zero further diff from
-  6519 on. Implemented as the literal closed form (`grovyleFaintSinkRowsAndY2`),
+  6519 on. Implemented as the literal closed form (`faintSinkRowsAndY2`),
   not a table: `keptRows = n - min(n, ceil(max(t-1-S,0)/2))`,
   `y2 = 8*min(n, ceil(max(t-1-S,0)/2))`.
 - **Grovyle's own opponent healthbox vanish tick** - NOT itemized in
@@ -4404,7 +4404,7 @@ value (0/143) directly, mirroring the existing hp=1/117 pin's own shape.
 
 - `TURN5_ROCKSLIDE_PRESS_TICK`, `anchorOpponentAfterTurn5Hp`(0).
 - `GROVYLE_FAINT_SINK_START_TICK`(6502)/`GROVYLE_FAINT_SINK_STEPS`(8) +
-  `grovyleFaintSinkRowsAndY2` (exported for the Tier-1 pin) - the closed
+  `faintSinkRowsAndY2` (exported for the Tier-1 pin) - the closed
   form itself.
 - `GROVYLE_HEALTHBOX_VANISH_TICK`(6521) + `drawSpriteSheetTopRows` (a
   `drawSpriteSheet` variant limited to the sink's own `keptRows`).
@@ -7044,7 +7044,7 @@ Rung 3 (DRAGON_BREATH re-targeted at Pidgeotto, HP-drain, faint sink reused from
 
 ## 49. S7/S8 turn 13 rung 3 LANDS 0-diff: DRAGON_BREATH re-targeted at Pidgeotto, HP drain 16->0, faint sink, "Foe PIDGEOTTO fainted!" + KO-gated hold, all pure reuse - one new reused mechanism (turn 2's own target hit-flash blink/wobble) needed to close the window fully
 
-**Headline**: every mechanism the REUSE MAP (`docs/turn13-notes.md` §7) predicted reused verbatim - `dragonBreathTextStartTick`/`Chars` (kickoff text, new synthetic `TURN13_DRAGONBREATH_PRESS_TICK=15516`), `dragonBreathGrovyleHp` (HP drain, unmodified, `DRAGONBREATH_HP_DRAIN_START_DELAY=353` unchanged), `grovyleFaintSinkRowsAndY2` (faint sink, generalized to take `startTick`/`steps` params - Pidgeotto's own `S=15960, n=7` vs. Grovyle's `S=6502, n=8`), `cursorState` (the fainted-message wait-cursor's own FULL perpetual 4-phase bounce, re-anchored - turn 5's own short window never got to exercise this, turn 13's ~840-tick hold does). One thing the REUSE MAP didn't itemize because §5's own DRAGON_BREATH geometry section scoped it out as "projectile-adjacent": Pidgeotto's own target-side **hit-flash blink + healthbox wobble** (`rockSlideMonBlinkInvisible`/`rockSlideHealthboxWobbleY2`, turn 2's own DRAGON_BREATH scene already reuses these for Grovyle) is ALSO needed here, oracle-bisection-found (not guessed) - see below.
+**Headline**: every mechanism the REUSE MAP (`docs/turn13-notes.md` §7) predicted reused verbatim - `dragonBreathTextStartTick`/`Chars` (kickoff text, new synthetic `TURN13_DRAGONBREATH_PRESS_TICK=15516`), `dragonBreathHp` (HP drain, unmodified, `DRAGONBREATH_HP_DRAIN_START_DELAY=353` unchanged), `faintSinkRowsAndY2` (faint sink, generalized to take `startTick`/`steps` params - Pidgeotto's own `S=15960, n=7` vs. Grovyle's `S=6502, n=8`), `cursorState` (the fainted-message wait-cursor's own FULL perpetual 4-phase bounce, re-anchored - turn 5's own short window never got to exercise this, turn 13's ~840-tick hold does). One thing the REUSE MAP didn't itemize because §5's own DRAGON_BREATH geometry section scoped it out as "projectile-adjacent": Pidgeotto's own target-side **hit-flash blink + healthbox wobble** (`rockSlideMonBlinkInvisible`/`rockSlideHealthboxWobbleY2`, turn 2's own DRAGON_BREATH scene already reuses these for Grovyle) is ALSO needed here, oracle-bisection-found (not guessed) - see below.
 
 **New state field**: `turn13KoDismissElapsed` threaded through `core.ts`'s `tick()`, mirroring `turn5KoDismissElapsed`'s pattern EXACTLY (same eligibility-gated single-set idiom, same "render path stays a pure function of `t`, this field is state-machine bookkeeping only" precedent - confirmed, not assumed: the KO-gated hold's own "locks... holds through 16824" shape falls out naturally from the live wait-cursor's own 9-tick phase boundaries, no press-driven render freeze needed).
 
@@ -7062,7 +7062,7 @@ New committed trace, reusing `battle1-turn13-dense-a.json`'s own 108-segment scr
 
 ### Verification
 
-`npm test` **986/986** (978 + 8 new Tier-1: `dragonBreathGrovyleHp`'s own turn-13-anchor endpoints, `grovyleFaintSinkRowsAndY2`'s generalization incl. a Grovyle-default-unchanged regression check, `TURN13_HEALTHBOX_VANISH_TICK`, `turn13FaintedTextStartTick`/`VisibleChars`, `turn13KoDismissEligible`, and `turn13KoDismissElapsed`'s own idle/A-press/early-press state-machine trio mirroring `turn5KoDismissElapsed`'s own test shape). `npm run build` green. `verify-turn13.ts` unchanged, 60/60 (mandatory first-step rerun). Full regression sweep 0 diff: `turn13-sandattack` **190/190**, `turn13-menu` **57/57**, `turn12-menu` **46/46**. New trace twice-run byte-identical (141/141 both times).
+`npm test` **986/986** (978 + 8 new Tier-1: `dragonBreathHp`'s own turn-13-anchor endpoints, `faintSinkRowsAndY2`'s generalization incl. a Grovyle-default-unchanged regression check, `TURN13_HEALTHBOX_VANISH_TICK`, `turn13FaintedTextStartTick`/`VisibleChars`, `turn13KoDismissEligible`, and `turn13KoDismissElapsed`'s own idle/A-press/early-press state-machine trio mirroring `turn5KoDismissElapsed`'s own test shape). `npm run build` green. `verify-turn13.ts` unchanged, 60/60 (mandatory first-step rerun). Full regression sweep 0 diff: `turn13-sandattack` **190/190**, `turn13-menu` **57/57**, `turn12-menu` **46/46**. New trace twice-run byte-identical (141/141 both times).
 
 ### Out of scope, unchanged
 

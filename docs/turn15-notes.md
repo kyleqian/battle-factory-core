@@ -721,7 +721,7 @@ established convention) and bounces through `cursorState`'s own generic
 at 19990 (out of this rung's scope).
 
 **Correction to the dossier's own §5(a)/§6c framing.** The sink is the
-**same family** as the opponent-side `grovyleFaintSinkRowsAndY2` (keep the
+**same family** as the opponent-side `faintSinkRowsAndY2` (keep the
 artwork's own top portion, shift it down, drop the bottom — the sprite's
 ground-contact edge stays fixed while it visually sinks) — §6c's "same
 faint-sink family" verdict holds — but **not at the same quantization**:
@@ -741,7 +741,7 @@ the last visible sliver before the mon fully vanishes is a ground-level
 nub, not a floating disembodied head.
 
 **New `src/` surface**: `drawSpriteSheetTopClipped` (generic primitive,
-PIXEL-granular sibling of `drawSpriteSheetTopRows`+`grovyleFaintSinkRowsAndY2`),
+PIXEL-granular sibling of `drawSpriteSheetTopRows`+`faintSinkRowsAndY2`),
 `TURN15_ONIX_SINK_START_TICK`/`TURN15_ONIX_SINK_RATE`/`turn15OnixSinkSkipRows`,
 `TURN15_ONIX_HEALTHBOX_VANISH_TICK`, `TURN15_FAINTED_LINE1`/`_LINE2`/
 `_TEXT_TOTAL`/`_TEXT_START_TICK`/`_CURSOR_X`/`_CURSOR_START_TICK`.
