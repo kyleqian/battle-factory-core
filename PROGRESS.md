@@ -8,16 +8,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ## 1019 — [bounded MAIN worker, 2026-08-08] **#39: six Family-C healthbox caches now own every rendering input**
 
 - **State:** implementation `660c769f`; focused **12/12**, smoke **375/375**,
-  typecheck, and the committed OFF differential are green. Final full-suite
-  and build gates are running next.
+  typecheck, full suite (**798 files / 8,028 passed / 1 skipped**), build, and
+  the committed OFF differential are green.
 - **Did:** all six slice-2 memoization keys now cover HP, identity, level,
   max HP, gender, and status wherever variable; all three canonical preseeds
   use the same complete keys. Added six red-verified, order-independent
   identity/max-HP collision pins against the direct compositors. Incomplete
   cache owners **6→0**; broad #39 inventory **1,949→1,949** lines /
   `battleScene.ts` **36,343→36,361 LOC**.
-- **Next:** run final full `npm test` and build, then supervisor review; continue
-  #39 only with another bounded generic presentation-seam retirement.
+- **Next:** supervisor review; continue #39 only with another bounded generic
+  presentation-seam retirement.
 - **Notes:** clean-parent differential is **3,055/3,055 byte-identical** across
   all 16 Family-C slice-2 OFF windows plus generated-round insurance; no
   Battle-2 trace/window was run.
