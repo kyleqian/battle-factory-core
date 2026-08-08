@@ -22,8 +22,6 @@ export const PIDGEOTTO_CORNER = { x: 144, y: 19 };
 
 export const MURKROW_CORNER = { x: 144, y: 19 };
 
-export const anchorOpponentAfterTurn4Hp = 1;
-
 export const LINE1 = "BUG CATCHER DESTIN";
 
 export const SUBSEQUENT_BATTLE_SUMMARY_EVA_PHASE_AGE = 14;
@@ -385,10 +383,6 @@ export const TURN10_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY = 616;
 
 export const TURN10_OFF_ROCKSLIDE_MENU_REDRAW_DELAY = 623;
 
-export const TURN11_ATKFLOOR_LINE1 = "ONIX’s ATTACK";
-
-export const TURN11_ATKFLOOR_LINE2 = "won’t go lower!";
-
 export const TURN11_ATKFLOOR_TEXT_START_DELAY = 83;
 
 export const TURN11_ROCKSLIDE_PRESS_TICK = 13137;
@@ -718,13 +712,10 @@ export interface MenuIdleBounceTwoStateAsset {
 /**
  * Presentation-seam retirement, the turn-4 settle staging gap
  * (`docs/presentation-seam-scout.md` §9.3/§9.4 step 5's own named residual,
- * entries 465/468/487): `anchorOpponentAfterTurn4Hp`'s own literal above now
- * has an independent staged proof (`turn4RockSlidePresentationStaging.ts`),
- * byte-identical (41 -> 1). Consumers below read this instead of the bare
- * literal; `anchorOpponentAfterTurn4Hp` itself stays defined and in use by
- * `drawEndeavorSquish`'s own steady-state read (`:7056` as of this pass -- a
- * different, non-drain, read §9.3's own mapping table already found needs no
- * kernel event at all).
+ * entries 465/468/487): the former bare post-turn-4 HP literal now has an
+ * independent staged proof (`turn4RockSlidePresentationStaging.ts`),
+ * byte-identical (41 -> 1). Both the drain and turn-5 steady-state consumers
+ * read this typed endpoint.
  */
 export const TURN4_ROCKSLIDE_HP = resolveTurn4RockSlideHpEndpoints();
 
@@ -1057,8 +1048,8 @@ export function turn5SitrusResettledBounceTick(t: number): number {
  * `turn5FaintPresentationStaging.ts` already stages for the fainted-branch
  * window (§7) -- this is a second, EARLIER consumption point of that
  * identical staged chain, not a new staged run. The `from` endpoint, formerly
- * the bare `anchorOpponentAfterTurn4Hp` literal (named as §9.4 rung 5's own
- * residual gap, entries 465/468/487), now reads `TURN4_ROCKSLIDE_HP.to` --
+ * a bare literal (named as §9.4 rung 5's own residual gap, entries
+ * 465/468/487), now reads `TURN4_ROCKSLIDE_HP.to` --
  * `turn4RockSlidePresentationStaging.ts`'s own independent staged proof of
  * that exact settle (41 -> 1), not circular: that module stages Grovyle's
  * PRE-turn-4 hp (41) and independently computes the turn-4 hit's own
@@ -1762,7 +1753,9 @@ export function turn10SuperEffectiveTextStartTick(pressTick: number, delay: numb
  */
 
 
-export const TURN11_ATKFLOOR_TEXT_TOTAL = TURN11_ATKFLOOR_LINE1.length + TURN11_ATKFLOOR_LINE2.length;
+export const [TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2] = resolveTurn11AtkFloorLines();
+
+export const TURN11_ATKFLOOR_TEXT_TOTAL = TURN11_ATKFLOOR_KICKOFF_LINE1.length + TURN11_ATKFLOOR_KICKOFF_LINE2.length;
 
 
 export function turn11AtkFloorTextStartTick(pressTick: number): number {
@@ -2466,8 +2459,6 @@ export const [TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2] = resolv
 export const [TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2] = resolveTurn6RockSlideAttackLines();
 
 export const [TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2] = resolveTurn7RockSlideAttackLines();
-
-export const [TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2] = resolveTurn11AtkFloorLines();
 
 export function turn5FaintedTextVisibleChars(t: number, pressTick: number): number {
   const start = turn5FaintedTextStartTick(pressTick);

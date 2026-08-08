@@ -1,9 +1,9 @@
 /**
  * Presentation-seam retirement, the turn-4 settle staging gap named as the
  * one residual item of `docs/presentation-seam-scout.md` §9 (entries
- * 465/468/487): `anchorOpponentAfterTurn4Hp` (`battleScene.ts`) has never
- * had a staged proof -- it's a bare literal (`1`) whose only paper trail is
- * an uncommitted probe run's doc comment. This module gives it one, mirroring
+ * 465/468/487): the post-turn-4 HP previously had no staged proof -- it was a
+ * bare literal (`1`) whose only paper trail was an uncommitted probe run's
+ * doc comment. This module gives it one, mirroring
  * `turn1RockSlidePresentationStaging.ts`'s own pattern verbatim: stage a real
  * hit chain through the registered kernel opcodes and capture its own
  * semantic event stream via `presentationEventWindowBridge.ts`'s existing
@@ -32,8 +32,8 @@
  * `battleScene.ts`'s own already-committed `drawTurn4KickoffText` doc comment
  * ("accuracy roll 4925+391=5316, crit roll 4925+415=5340, damage-lock
  * 4925+418=5343" -- `TURN4_CONFIRM_PRESS_TICK`-relative, bit-exact against a
- * fresh oracle probe) -- so `anchorOpponentAfterTurn4Hp`'s own settle was
- * ALREADY evidenced in a committed asset this whole time, just never wired to
+ * fresh oracle probe) -- so the settle was ALREADY evidenced in a committed
+ * asset this whole time, just never wired to
  * a staged run. Verified live this session (not guessed): staging this exact
  * seed from `BattleScript_HitFromAtkCanceler` consumes exactly 4 RNG calls
  * (accuracycheck roll 58426 -> hits, 90% base vs neutral-evasion replica;
@@ -44,7 +44,7 @@
  * byte-identical to the ledger's own 4th entry's `toValue` (tick 5569) -- and
  * computes Grovyle's HP as 41 -> 1, byte-identical to the `"4892"`/`"5926"`
  * snapshot pair's own `battler1.hp` fields (41 and 1 respectively) and to
- * `anchorOpponentAfterTurn4Hp`'s own literal. `moveEffectByte: 0` keeps
+ * the former post-turn-4 literal. `moveEffectByte: 0` keeps
  * `seteffectwithchance` on its deterministic "no secondary effect" path
  * regardless of its own roll, matching `turn1RockSlidePresentationStaging
  * .ts`'s own documented reasoning verbatim -- this staged run never reaches
@@ -252,8 +252,8 @@ export function resolveTurn4RockSlideWindowContent(): RockSlidePresentationWindo
 
 /**
  * Grovyle's real turn-4 pre-hit/post-hit HP (41 -> 1) -- the endpoint
- * `anchorOpponentAfterTurn4Hp`'s own literal previously had no staged proof
- * for. Message content is intentionally NOT re-resolved here:
+ * previously had no staged proof. Message content is intentionally NOT
+ * re-resolved here:
  * `docs/presentation-seam-scout.md` §9.3/§9.4 step 4 already established this
  * window's own "ONIX used\nROCK SLIDE!" text is byte-identical to window 2's
  * own already-resolved `TURN1_ROCKSLIDE_ATTACK_LINE1/2`

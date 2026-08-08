@@ -339,8 +339,8 @@ export function resolveTurn11FeatherDanceKickoffLines(): readonly string[] {
 }
 
 /**
- * `TURN11_ATKFLOOR_LINE1`/`LINE2`'s real content ("ONIX’s ATTACK\nwon’t go
- * lower!") -- `STRINGID_STATSWONTDECREASE`'s own template
+ * The real ATK-floor content ("ONIX’s ATTACK\nwon’t go lower!") --
+ * `STRINGID_STATSWONTDECREASE`'s own template
  * (`{B_DEF_NAME_WITH_PREFIX}'s {B_BUFF1}\nwon't go lower!`,
  * `src/data/gen/battle-message-templates.json` id 62) resolved against this
  * staged run's own real `statFellMessage` (battler 0/ONIX, ATK, floored):
