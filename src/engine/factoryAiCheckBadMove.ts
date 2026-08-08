@@ -989,6 +989,28 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_FLAIL -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:160`), the shared high-risk body already
+  // ported for Counter above. Same dispatch shape as Counter's: x0 type
+  // immunity JUMPs to Score_Minus10 before the ability read, then Wonder
+  // Guard with a non-x2 effectiveness JUMPs to Score_Minus10.
+  if (move.effect === "EFFECT_FLAIL") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_DOWN(_2) -> AI_CBM_SpeedDown,
   // one of the two handlers this port implements out of the table's ~100 entries.
   if (move.effect === "EFFECT_SPEED_DOWN" || move.effect === "EFFECT_SPEED_DOWN_2") {
