@@ -6,6 +6,10 @@ import {
   SLASH_2_SPAWN_AGE,
   crushClawAtAge,
 } from "../../src/animation/crushClaw.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnCrushClawView,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 const PLAYER = { targetCenter: { x: 176, y: 42 } };
 const OPPONENT = { targetCenter: { x: 72, y: 88 } };
@@ -116,5 +120,43 @@ describe("Move_CRUSH_CLAW source-relative reducer", () => {
     expect(crushClawAtAge(19, {
       ...OPPONENT, attackerSide: "opponent", targetSide: "player",
     }).soundEvents[0]).toMatchObject({ pan: -63 });
+  });
+
+  it("exposes the same reducer through the Scene-ON presentation seam", () => {
+    const state = createSceneOnMovePresentation({
+      move: "CRUSH_CLAW",
+      attacker: {
+        species: "GROVYLE",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 64 },
+          animationCenter: { x: 72, y: 88 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 10 },
+          animationCenter: PLAYER.targetCenter,
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 167,
+        playerMaxHp: 175,
+        opponentHp: 142,
+        opponentMaxHp: 142,
+      },
+    });
+    const view = sceneOnCrushClawView({ ...state, age: 35 });
+    expect(view).toMatchObject({
+      age: 35,
+      attackerX2: 0,
+      targetX2: -2,
+      blendOn: true,
+    });
+    expect(view.slashes).toHaveLength(4);
   });
 });
