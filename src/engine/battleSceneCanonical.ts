@@ -651,6 +651,12 @@ import { BRENDAN_THROW_START_TICK } from "./battleMenu.ts";
 import { resolveTurn5FaintSinkGeometry, resolveTurn5SitrusAdapter } from "./turn5ResolutionAdapter.ts";
 import { resolveTurn6RockSlideHpEndpoints, resolveTurn7RockSlideHpEndpoints } from "./turn67RockSlidePresentationStaging.ts";
 import { TURN9_QUICKATTACK_HP } from "./turn9ResolutionAdapter.ts";
+import { resolveTurn1RockSlideAttackLines, resolveTurn1DoubleTeamKickoffLines } from "./turn1RockSlidePresentationStaging.ts";
+import { resolveTurn2EndeavorAttackLines } from "./turn2EndeavorPresentationStaging.ts";
+import { resolveTurn4DoubleTeamKickoffLines } from "./turn4DoubleTeamPresentationStaging.ts";
+import { resolveTurn5EndeavorAttackLines } from "./turn5EndeavorPresentationStaging.ts";
+import { resolveTurn8BindKickoffLines, resolveTurn8MissLines } from "./turn8BindPresentationStaging.ts";
+import { resolveTurn13AccFellLines, resolveTurn13SandAttackKickoffLines } from "./turn13SandAttackPresentationStaging.ts";
 import { type BattleSceneState } from "./battleScene.ts";
 
 // --- slice 3: remaining canonical-only leaves (import-referencing consts + external-only function leaves) ---
@@ -2416,3 +2422,27 @@ export function playerSummaryEvaOffset(
     ? -1
     : 0;
 }
+
+// --- slice 4 batch 3: verbatim move ---
+
+export const [TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2] = resolveTurn4DoubleTeamKickoffLines();
+
+export const [TURN8_BIND_LINE1, TURN8_BIND_LINE2] = resolveTurn8BindKickoffLines();
+export const [TURN8_MISS_LINE1, TURN8_MISS_LINE2] = resolveTurn8MissLines();
+
+export const TURN8_BIND_TEXT_TOTAL = TURN8_BIND_LINE1.length + TURN8_BIND_LINE2.length;
+
+export const TURN8_MISS_TEXT_TOTAL = TURN8_MISS_LINE1.length + TURN8_MISS_LINE2.length;
+
+export const [TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2] = resolveTurn2EndeavorAttackLines();
+
+export const [TURN5_ENDEAVOR_ATTACK_LINE1, TURN5_ENDEAVOR_ATTACK_LINE2] = resolveTurn5EndeavorAttackLines();
+
+export const [TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2] = resolveTurn13SandAttackKickoffLines();
+export const TURN13_SANDATTACK_TEXT_TOTAL = TURN13_SANDATTACK_EVENT_LINE1.length + TURN13_SANDATTACK_EVENT_LINE2.length;
+
+export const [TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2] = resolveTurn13AccFellLines();
+export const TURN13_ACCFELL_TEXT_TOTAL = TURN13_ACCFELL_EVENT_LINE1.length + TURN13_ACCFELL_EVENT_LINE2.length;
+
+export const [TURN1_ROCKSLIDE_KICKOFF_LINE1, TURN1_ROCKSLIDE_KICKOFF_LINE2] = resolveTurn1DoubleTeamKickoffLines();
+export const [TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2] = resolveTurn1RockSlideAttackLines();
