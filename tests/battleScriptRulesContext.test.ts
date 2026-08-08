@@ -182,6 +182,12 @@ describe("source-shaped Battle Script rules context", () => {
     const created = createBattleScriptRulesContext(source);
     expect(Object.keys(created).sort()).toEqual([
       "absentBattlerFlags",
+      // Source u8 gActionsByTurnOrder[MAX_BATTLERS_COUNT], added with the
+      // Cmd_jumpifnopursuitswitchdmg Pursuit-interception branch
+      // (dispatch-queue item 5, 2026-08-08): the switch action rewrites the
+      // Pursuit user's turn-order slot to B_ACTION_TRY_FINISH so its own
+      // move action never dispatches.
+      "actionsByTurnOrder",
       "aiObservedAbilityIds",
       "aiObservedItemEffects",
       "alreadyStatusedMoveAttempt",
@@ -225,6 +231,11 @@ describe("source-shaped Battle Script rules context", () => {
       "dynamicBasePower",
       "dynamicMoveType",
       "enigmaBerryHoldEffects",
+      // Source u8 gBattleStruct->formToChangeInto, added with the Castform
+      // Forecast barrier retirement (ROADMAP S10 gate-4, 2026-08-08):
+      // Cmd_trycastformdatachange writes `form - 1` and
+      // Cmd_docastformchangeanimation ORs CASTFORM_SUBSTITUTE into it.
+      "formToChangeInto",
       "futureSightAttacker",
       "futureSightCounter",
       "futureSightDmg",
@@ -521,7 +532,10 @@ describe("production status rules handler and execution seam", () => {
       61, 62, 63, 65, 66, 67, 69, 70, 71, 72, 73, 74, 76, 77, 78, 79, 80, 81,
       82, 83, 84, 85, 86, 88, 92, 95, 96, 97, 98, 99, 100, 101, 102, 104,
       105, 106, 111, 115, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147,
-      148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 231, 232, 233, 234, 235, 237, 238, 246, 248,
+      148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228,
+      // 230 = B_SCR_OP_DOCASTFORMCHANGEANIMATION (0xE6), registered with the
+      // Castform Forecast barrier retirement (ROADMAP S10 gate-4, 2026-08-08).
+      230, 231, 232, 233, 234, 235, 237, 238, 246, 248,
     ]);
   });
 

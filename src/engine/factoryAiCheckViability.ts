@@ -414,6 +414,36 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "rest-roll-1" | "rest-roll-2" | "rest-snatch-roll" | "rest-tail-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "absorb-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "endure-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind:
       | "counter-low-hp-roll"
       | "counter-mid-hp-roll"
@@ -1039,6 +1069,233 @@ function runCvSpeedUp(input: Readonly<{
   const succeeded = rollDraw.randomValue % 256 >= 70;
   draws.push(Object.freeze({ ...rollDraw, kind: "speed-up-roll" as const, succeeded }));
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded ? 3 : 0 });
+}
+
+/**
+ * `AI_CV_Rest` (`data/battle_ai_scripts.s:1396-1425`, EFFECT_REST):
+ *
+ * ```
+ * AI_CV_Rest:
+ *     if_target_faster AI_CV_Rest4
+ *     if_hp_not_equal AI_USER, 100, AI_CV_Rest2
+ *     score -8
+ *     goto AI_CV_Rest_End
+ * AI_CV_Rest2:
+ *     if_hp_less_than AI_USER, 40, AI_CV_Rest6
+ *     if_hp_more_than AI_USER, 50, AI_CV_Rest3
+ *     if_random_less_than 70, AI_CV_Rest6
+ * AI_CV_Rest3:
+ *     score -3
+ *     goto AI_CV_Rest_End
+ * AI_CV_Rest4:
+ *     if_hp_less_than AI_USER, 60, AI_CV_Rest6
+ *     if_hp_more_than AI_USER, 70, AI_CV_Rest5
+ *     if_random_less_than 50, AI_CV_Rest6
+ * AI_CV_Rest5:
+ *     score -3
+ *     goto AI_CV_Rest_End
+ * AI_CV_Rest6:
+ *     if_doesnt_have_move_with_effect AI_TARGET, EFFECT_SNATCH, AI_CV_Rest7
+ *     if_random_less_than 50, AI_CV_Rest_End
+ * AI_CV_Rest7:
+ *     if_random_less_than 10, AI_CV_Rest_End
+ *     score +3
+ * AI_CV_Rest_End:
+ *     end
+ * ```
+ *
+ * `if_target_faster` uses the same tie-break machinery as `runCvSpeedDown`;
+ * target faster JUMPs to Rest4's own HP bands. Target not faster checks
+ * `hp != 100` first (the ==100 FALL-THROUGH is the deterministic -8), then
+ * Rest2's HP bands with a <70 midband roll; Rest4 (target faster) uses <60/
+ * >70 HP bands with a <50 midband roll. Both midband rolls' FALL-THROUGH
+ * scores -3, their JUMP lands in the shared Rest6 tail. The tail is
+ * Snatch-guarded: only if the TARGET's known-moves history holds a
+ * Snatch-effect move does the <50 gate run (its FALL-THROUGH, roll >= 50,
+ * reaches the <10 roll); a Snatch-less target jumps straight to the <10 roll.
+ * `Cmd_if_doesnt_have_move_with_effect`'s AI_TARGET branch
+ * (`battle_ai_script_commands.c:1940-1962`) scans
+ * `BATTLE_HISTORY->usedMoves[gBattlerTarget].moves[i]` -- a plain membership
+ * test, no positional gate (unlike `Cmd_if_has_move_with_effect`'s AI_TARGET
+ * bug), so `target.knownMoves` membership is the faithful model. All HP gates
+ * read AI_USER's own truncating `100*hp/maxHp` percent (`Cmd_if_hp_*`,
+ * `battle_ai_script_commands.c:713-770`). No command writes funcResult.
+ */
+function runCvRest(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const attacker: TurnOrderBattler = {
+    speed: input.attacker.speed,
+    speedStage: input.attacker.speedStage,
+    movePriority: 0,
+  };
+  const target: TurnOrderBattler = {
+    speed: input.target.speed,
+    speedStage: input.target.speedStage,
+    movePriority: 0,
+  };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  const targetHasSnatch = (input.target.knownMoves ?? []).some(
+    (moveId) => MOVES_BY_ID.get(moveId)?.effect === "EFFECT_SNATCH",
+  );
+
+  const tail = (): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> => {
+    let nextOrdinal = ordinal;
+    if (targetHasSnatch) {
+      const snatchRoll = nextDraw(rng, nextOrdinal, `${input.reasonPrefix}-rest-snatch-roll`);
+      rng = snatchRoll.after;
+      nextOrdinal += 1;
+      const jumped = snatchRoll.randomValue % 256 < 50;
+      draws.push(Object.freeze({ ...snatchRoll, kind: "rest-snatch-roll" as const, succeeded: !jumped }));
+      if (jumped) {
+        return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+      }
+    }
+    const tailRoll = nextDraw(rng, nextOrdinal, `${input.reasonPrefix}-rest-tail-roll`);
+    rng = tailRoll.after;
+    const succeeded = tailRoll.randomValue % 256 >= 10;
+    draws.push(Object.freeze({ ...tailRoll, kind: "rest-tail-roll" as const, succeeded }));
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded ? 3 : 0 });
+  };
+
+  if (targetFaster) {
+    if (hpPercent < 60) return tail();
+    if (hpPercent > 70) return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-rest-roll-2`);
+    rng = roll.after;
+    ordinal += 1;
+    const jumped = roll.randomValue % 256 < 50;
+    draws.push(Object.freeze({ ...roll, kind: "rest-roll-2" as const, succeeded: !jumped }));
+    return jumped ? tail() : Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
+  }
+
+  if (hpPercent === 100) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -8 });
+  }
+  if (hpPercent < 40) return tail();
+  if (hpPercent > 50) return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
+  const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-rest-roll-1`);
+  rng = roll.after;
+  ordinal += 1;
+  const jumped = roll.randomValue % 256 < 70;
+  draws.push(Object.freeze({ ...roll, kind: "rest-roll-1" as const, succeeded: !jumped }));
+  return jumped ? tail() : Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
+}
+
+/**
+ * `AI_CV_Absorb` (`data/battle_ai_scripts.s:789-797`, EFFECT_ABSORB):
+ *
+ * ```
+ * AI_CV_Absorb:
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_5, AI_CV_AbsorbEncourageMaybe
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_25, AI_CV_AbsorbEncourageMaybe
+ *     goto AI_CV_Absorb_End
+ * AI_CV_AbsorbEncourageMaybe:
+ *     if_random_less_than 50, AI_CV_Absorb_End
+ *     score -3
+ * AI_CV_Absorb_End:
+ *     end
+ * ```
+ *
+ * Exactly 0.5x or 0.25x type effectiveness against the target JUMPs into the
+ * single random site; everything else (immune 0x, neutral 1x, super 2x/4x,
+ * or a STAB'd one-weak-one-resist wash) is a deterministic zero score with
+ * zero draws (`goto End`). At the random site the roll's JUMP (low byte < 50,
+ * ~20%) ends at zero; FALL-THROUGH (>= 50, ~80%) applies -3 -- Absorb's "the
+ * heal probably won't cover the damage" penalty. The effectiveness probe is
+ * the SAME `Cmd_if_type_effectiveness` port (`classifyHighCritEffectiveness`)
+ * `AI_CV_HighCrit` already uses (this handler checks only the two weak
+ * classes, in the source's own x0_5-first order). No command writes
+ * funcResult.
+ */
+function runCvAbsorb(input: Readonly<{
+  rng: BattleRngState;
+  attackerTypes: readonly [string, string];
+  moveType: string;
+  targetTypes: readonly [string, string];
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  if (classified !== AI_EFFECTIVENESS_X0_5 && classified !== AI_EFFECTIVENESS_X0_25) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
+  }
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-absorb-roll`);
+  const succeeded = roll.randomValue % 256 >= 50;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind: "absorb-roll" as const, succeeded })]),
+    scoreDelta: succeeded ? -3 : 0,
+  });
+}
+
+/**
+ * `AI_CV_Endure` (`data/battle_ai_scripts.s:1965-1973`, EFFECT_ENDURE):
+ *
+ * ```
+ * AI_CV_Endure:
+ *     if_hp_less_than AI_USER, 4, AI_CV_Endure2
+ *     if_hp_less_than AI_USER, 35, AI_CV_Endure3
+ * AI_CV_Endure2:
+ *     score -1
+ *     goto AI_CV_Endure_End
+ * AI_CV_Endure3:
+ *     if_random_less_than 70, AI_CV_Endure_End
+ *     score +1
+ * AI_CV_Endure_End:
+ *     end
+ * ```
+ *
+ * Two HP gates on AI_USER's OWN hp percent: HP < 4 JUMPs to the deterministic
+ * -1 (`Endure2`), HP < 35 JUMPs to the single random site (`Endure3`), and
+ * HP >= 35 FALLS THROUGH the second gate directly INTO `Endure2`'s `score -1`
+ * (the label is reached by fallthrough -- a common source idiom, same shape
+ * as `AI_CV_Heal`'s own `Endure2` label). At the random site the roll's JUMP
+ * (low byte < 70, ~27%) ends at zero; FALL-THROUGH (>= 70, ~73%) applies +1.
+ * `Cmd_if_hp_less_than` is the truncating `(u32)(100*hp/maxHP)` percent read.
+ * No command writes funcResult.
+ */
+function runCvEndure(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  if (hpPercent < 4 || hpPercent >= 35) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -1 });
+  }
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-endure-roll`);
+  const succeeded = roll.randomValue % 256 >= 70;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind: "endure-roll" as const, succeeded })]),
+    scoreDelta: succeeded ? 1 : 0,
+  });
 }
 
 /**
@@ -3445,6 +3702,72 @@ export function runCheckViability(input: Readonly<{
       draws: rainDance.draws,
       scoreDelta: rainDance.scoreDelta,
       funcResultAfter: rainDance.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_REST") {
+    const rest = runCvRest({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: rest.rng,
+      draws: rest.draws,
+      scoreDelta: rest.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_ABSORB") {
+    const absorb = runCvAbsorb({
+      rng: input.rng,
+      attackerTypes: input.attacker.types,
+      moveType: move.type,
+      targetTypes: input.target.types,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: absorb.rng,
+      draws: absorb.draws,
+      scoreDelta: absorb.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_ENDURE") {
+    const endure = runCvEndure({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: endure.rng,
+      draws: endure.draws,
+      scoreDelta: endure.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_OHKO") {
+    // AI_CV_OneHitKO (data/battle_ai_scripts.s:1427) is a bare `end`: a
+    // genuine, deterministic zero score / zero draws for every battle state
+    // (the OHKO move's own power is already fully scored by AI_CheckBadMove
+    // and AI_TryToFaint; CheckViability has nothing to add).
+    return Object.freeze({
+      kind: "scored",
+      rng: input.rng,
+      draws: Object.freeze([]) as readonly FactoryAiCheckViabilityDraw[],
+      scoreDelta: 0,
+      funcResultAfter: funcResultCarry,
     });
   }
 

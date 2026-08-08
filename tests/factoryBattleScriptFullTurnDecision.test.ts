@@ -3,6 +3,7 @@ import {
   FACTORY_RUN_AWAY_NOOP_INVARIANT,
   createFactoryFullTurnBattleState,
   reduceFactoryFullTurnDecision,
+  runStagedVoluntarySwitch,
   submitFactoryFullTurnDecision,
   type FactoryFullTurnConfig,
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
@@ -18,7 +19,12 @@ import {
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS3_MINIMIZED,
 } from "../src/engine/battleScriptSourceConstants.ts";
+import type { BattleScriptBattlerId } from "../src/engine/battleScriptEvents.ts";
+import type { BattleScriptRulesContext } from "../src/engine/battleScriptRulesContext.ts";
+import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
+
+const program = loadBattleScriptProgram();
 
 const STRENGTH = 70; // EFFECT_HIT, TYPE_NORMAL -- the banked KO-scenario move (factoryBattleScriptTerminalDecision.test.ts).
 const SPIKE_CANNON = 131; // EFFECT_MULTI_HIT, TYPE_NORMAL, 2-5 hits.
@@ -45,6 +51,11 @@ const BURN_PROC_RNG_SEED = 61;
 const STATUS1_POISON = 1 << 3;
 const STATUS1_BURN = 1 << 4;
 const STATUS1_PARALYSIS = 1 << 6;
+const STATUS1_SLEEP = 0x7;
+const STATUS1_FREEZE = 1 << 5;
+const MOVE_PURSUIT = 228;
+const B_ACTION_TRY_FINISH = 11;
+const HITMARKER_ATTACKSTRING_PRINTED = 1 << 10;
 const ABILITY_CLOUD_NINE = 13;
 const ABILITY_INTIMIDATE = 22;
 const ABILITY_SHADOW_TAG = 23;
@@ -646,8 +657,131 @@ describe("factory full-turn decision -- voluntary-switch action", () => {
     expect(history.usedMoves[0]).toEqual([]);
   });
 
-  it("reaches the named Pursuit-interception unsupported-branch instead of mis-ordering an ordinary hit", () => {
-    const initial = createFactoryFullTurnBattleState(switchTurnConfig(228));
+  /**
+   * Base rules context for the Pursuit-interception guard tests: the player
+   * (0) is about to voluntarily switch while the trainer (1) has Pursuit
+   * selected. Overrides stage each guard input independently so every one of
+   * the six conditions can be flipped in isolation.
+   */
+  function pursuitStagedRules(overrides: {
+    trainerStatus1?: number;
+    trainerTruantCounter?: 0 | 1;
+    playerHp?: number;
+    hitMarker?: number;
+    trainerChosenMovePosition?: number;
+    multiHitCounter?: number;
+  } = {}): BattleScriptRulesContext {
+    const base = createFactoryFullTurnBattleState(
+      switchTurnConfig(MOVE_PURSUIT),
+    ).rules.rulesContext;
+    const trainerChosenMovePosition = overrides.trainerChosenMovePosition ?? 0;
+    return Object.freeze({
+      ...base,
+      hitMarker: overrides.hitMarker ?? 0,
+      chosenMovePositions: Object.freeze(
+        base.chosenMovePositions.map((position, battler) =>
+          battler === 1 ? trainerChosenMovePosition : position
+        ),
+      ) as unknown as BattleScriptRulesContext["chosenMovePositions"],
+      battlers: Object.freeze(
+        base.battlers.map((battler, index) => {
+          if (index === 1) {
+            return Object.freeze({
+              ...battler,
+              status1: overrides.trainerStatus1 ?? battler.status1,
+              truantCounter: overrides.trainerTruantCounter ?? battler.truantCounter,
+            });
+          }
+          if (index === 0 && overrides.playerHp !== undefined) {
+            return Object.freeze({ ...battler, hp: overrides.playerHp });
+          }
+          return battler;
+        }),
+      ) as unknown as BattleScriptRulesContext["battlers"],
+      ...(overrides.multiHitCounter === undefined
+        ? {}
+        : { multiHitCounter: overrides.multiHitCounter }),
+    });
+  }
+
+  it("intercepts a voluntary switch under Pursuit: banks the move, falls through, and cancels the Pursuit user's turn-order action", () => {
+    const rules = pursuitStagedRules({
+      hitMarker: HITMARKER_ATTACKSTRING_PRINTED,
+      trainerChosenMovePosition: 2,
+    });
+    const { atBranch, completed } = runStagedVoluntarySwitch(rules, 0, 1, MOVE_PURSUIT, 0, 1);
+    const rc = atBranch.rulesContext;
+    // gActionsByTurnOrder[turnOrderSlot] = B_ACTION_TRY_FINISH for the slot
+    // holding the Pursuit user (battler 1 = turn-order slot 1 here).
+    expect(rc.actionsByTurnOrder[1]).toBe(B_ACTION_TRY_FINISH);
+    expect(rc.actionsByTurnOrder[0]).toBe(0);
+    // gCurrentMove = MOVE_PURSUIT; gCurrMovePos = gChosenMovePos =
+    // chosenMovePositions[target] (staged as slot 2).
+    expect(rc.currentMove).toBe(MOVE_PURSUIT);
+    expect(rc.currentMovePosition).toBe(2);
+    // gBattlescriptCurrInstr += 5 (fall through, no jump): the next
+    // instruction is swapattackerwithtarget, not the DoSwitchOut jump target.
+    expect(program.instructions[atBranch.programCounter]!.opcodeName)
+      .toBe("B_SCR_OP_SWAPATTACKERWITHTARGET");
+    // gBattleScripting.animTurn = 1; gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED.
+    expect(rc.animTurn).toBe(1);
+    expect(rc.hitMarker & HITMARKER_ATTACKSTRING_PRINTED).toBe(0);
+    // The switch script completes and the double-power Pursuit hit lands on
+    // the OUTGOING mon (party slot 0 synced by datahpupdate).
+    expect(completed.rulesContext.party.player[0]!.hp).toBeLessThan(300);
+  });
+
+  it.each<readonly [string, number, BattleScriptBattlerId]>([
+    ["the opposing action is not USE_MOVE (opponent switches too)", 0, 0],
+    ["the stored move target is not the switcher", MOVE_PURSUIT, 1],
+    ["the opposing selected move is not Pursuit", STRENGTH, 0],
+  ])("takes the jump path when %s", (_name, opposingMoveId, opposingMoveTarget) => {
+    const { atBranch, completed } = runStagedVoluntarySwitch(
+      pursuitStagedRules(), 0, 1, opposingMoveId, opposingMoveTarget, 1,
+    );
+    const rc = atBranch.rulesContext;
+    expect(rc.currentMove).toBe(0);
+    expect(rc.actionsByTurnOrder[1]).toBe(0);
+    // The jump landed on BattleScript_DoSwitchOut: no Pursuit block ran.
+    expect(program.instructions[atBranch.programCounter]!.source.label)
+      .toBe("BattleScript_DoSwitchOut");
+    expect(completed.rulesContext.party.player[0]!.hp).toBe(300);
+  });
+
+  it.each<readonly [string, Readonly<{
+    trainerStatus1?: number;
+    trainerTruantCounter?: 0 | 1;
+    playerHp?: number;
+  }>]>([
+    ["the Pursuit user is asleep", { trainerStatus1: STATUS1_SLEEP }],
+    ["the Pursuit user is frozen", { trainerStatus1: STATUS1_FREEZE }],
+    ["the switching battler has no HP", { playerHp: 0 }],
+    ["the Pursuit user has a nonzero truant counter", { trainerTruantCounter: 1 }],
+  ])("takes the jump path when %s", (_name, overrides) => {
+    const { atBranch, completed } = runStagedVoluntarySwitch(
+      pursuitStagedRules(overrides), 0, 1, MOVE_PURSUIT, 0, 1,
+    );
+    const rc = atBranch.rulesContext;
+    expect(rc.currentMove).toBe(0);
+    expect(rc.actionsByTurnOrder[1]).toBe(0);
+    expect(program.instructions[atBranch.programCounter]!.source.label)
+      .toBe("BattleScript_DoSwitchOut");
+    expect(completed.rulesContext.party.player[0]!.hp).toBe(300);
+  });
+
+  it("keeps the named doubles-only barrier for the gMultiHitCounter != 1 right-flank target selection", () => {
+    const { atBranch } = runStagedVoluntarySwitch(
+      pursuitStagedRules({ multiHitCounter: 2 }), 0, 1, MOVE_PURSUIT, 0, 1,
+    );
+    expect(atBranch.haltReason).toMatchObject({
+      kind: "unsupported-branch",
+      opcodeName: "B_SCR_OP_JUMPIFNOPURSUITSWITCHDMG",
+      sourceLine: 8732,
+    });
+  });
+
+  it("resolves a player-switch-under-Pursuit turn end to end: interception cancels the trainer's own move action", () => {
+    const initial = createFactoryFullTurnBattleState(switchTurnConfig(MOVE_PURSUIT));
     const afterPlayer = submitFactoryFullTurnDecision(initial, {
       requestId: 1,
       side: "player",
@@ -659,13 +793,17 @@ describe("factory full-turn decision -- voluntary-switch action", () => {
       side: "trainer",
       decision: TRAINER_ATTACKS,
     });
-    expect(result.kind).toBe("machine-barrier");
-    if (result.kind !== "machine-barrier") throw new Error("expected pursuit barrier");
-    expect(result.barrier).toMatchObject({
-      opcodeName: "B_SCR_OP_JUMPIFNOPURSUITSWITCHDMG",
-      dispatcher: "Cmd_jumpifnopursuitswitchdmg",
-    });
-    expect(result.state.rng.calls).toBe(0);
+    if (result.kind !== "decision-required") throw new Error("expected next player command");
+    const rc = result.state.rules.rulesContext;
+    // The Pursuit user's turn-order action was rewritten to B_ACTION_TRY_FINISH,
+    // so its own move action never dispatched -- the incoming mon is at full
+    // bench HP while the outgoing mon (now in party slot 0) took the Pursuit hit.
+    expect(rc.actionsByTurnOrder[1]).toBe(B_ACTION_TRY_FINISH);
+    expect(rc.battlers[0]).toMatchObject({ species: 23, partyIndex: 1, hp: 200 });
+    expect(rc.party.player[0]!.hp).toBeLessThan(300);
+    expect(result.events).toContainEqual(expect.objectContaining({
+      payload: expect.objectContaining({ kind: "hp-change" }),
+    }));
   });
 
   function trainerSwitchTurnConfig(playerMoveId = STRENGTH): FactoryFullTurnConfig {
@@ -750,7 +888,7 @@ describe("factory full-turn decision -- voluntary-switch action", () => {
     expect(rules.moveHistory.lastMoves[0]).toBe(STRENGTH);
   });
 
-  it("symmetrically barriers when a player's selected Pursuit intercepts the trainer switch", () => {
+  it("resolves a trainer-switch-under-Pursuit turn end to end: the player's Pursuit intercepts and its own move action is cancelled", () => {
     const initial = createFactoryFullTurnBattleState(trainerSwitchTurnConfig(228));
     const afterPlayer = submitFactoryFullTurnDecision(initial, {
       requestId: 1,
@@ -763,13 +901,17 @@ describe("factory full-turn decision -- voluntary-switch action", () => {
       side: "trainer",
       decision: { kind: "switch", partyIndex: 1 },
     });
-    expect(result.kind).toBe("machine-barrier");
-    if (result.kind !== "machine-barrier") throw new Error("expected pursuit barrier");
-    expect(result.barrier).toMatchObject({
-      opcodeName: "B_SCR_OP_JUMPIFNOPURSUITSWITCHDMG",
-      dispatcher: "Cmd_jumpifnopursuitswitchdmg",
-    });
-    expect(result.state.rng.calls).toBe(0);
+    if (result.kind !== "decision-required") throw new Error("expected next player command");
+    const rc = result.state.rules.rulesContext;
+    // Trainer switch is action 1, so the player (Pursuit user) sits at
+    // turn-order slot 1 -- interception rewrote that slot to TRY_FINISH and
+    // the player's move action never dispatched.
+    expect(rc.actionsByTurnOrder[1]).toBe(B_ACTION_TRY_FINISH);
+    expect(rc.battlers[1]).toMatchObject({ species: 66, partyIndex: 1, hp: 200 });
+    expect(rc.party.opponent[0]!.hp).toBeLessThan(300);
+    expect(result.events).toContainEqual(expect.objectContaining({
+      payload: expect.objectContaining({ kind: "hp-change" }),
+    }));
   });
 
   it("orders dual switches by battler and draws only the continuing-turn boundary RNG", () => {

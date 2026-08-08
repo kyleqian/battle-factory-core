@@ -1,5 +1,231 @@
 # Progress archive
 
+## 998 — [bounded MAIN worker, 2026-08-08] battleScene.ts canonical-split PARTITION + DESIGN (no code moved): script + doc landed — LIVE 248 / CANONICAL 572 / SHARED 405, cut verified CLEAN
+
+- **State:** master `2520322b`, tree clean after this commit. `npm run typecheck` exit 0, `npm run build` exit 0 (nothing production touched). Partition script run TWICE → byte-identical output (deterministic; no network/oracle).
+- **Deliverables (re-runnable script + one design doc):** `tools/report/battlescene-split-partition.ts` + `docs/battlescene-canonical-split-design.md`. NO production code, test, or oracle change.
+- **Partition (identifier-based reachability, limitation documented in the doc):** battleScene.ts = **1,225 top-level symbols** (448 fns incl. 199 turn-named, 730 const/let, 36 iface, 11 type; 280 export decls / 282 exported syms) → **LIVE 248 / 20,588 lines**, **CANONICAL 572 / 5,302 lines** (incl. 2 unreachable-anywhere consts `BALL_WIDGETS_SETTLED_TICK`, `TURN5_SITRUS_RING_RENDER_LAG`), **SHARED 405 / 3,131 lines**. 248+572+405 = 1225 **RECONCILED** every run. **Cut feasibility = CLEAN**: no LIVE/SHARED symbol references a CANONICAL-only symbol (0 leaked edges), so moving CANONICAL into `src/engine/battleSceneCanonical.ts` is a one-way move (new file imports SHARED/LIVE from battleScene.ts; no cycle).
+- **Entry surfaces measured (two brief corrections):** 5 engine files import **44 total / 43 unique** (core 34 ✓, **summaryInfoPage 1 — brief said 8**, factoryBattleStartIntro 5 ✓, factoryRoundBattleOrchestrator 2 ✓, stagedBattleTurn 2 ✓). tests/ + tools/probe/ import **234 symbols across 31 test files + 9 probe files** (files total **46, brief said 54**). 280 export decls ✓, 199/448 turn-named ✓.
+- **Slice plan (in doc §6, standing acceptance = §5 differential):** the seven-trace differential command was verified and **one name corrected — `turn1-rockslide` → `turn1-rockslide-off`** (bare name does not resolve; the other six exist). Slices: (1) scaffold + the 2 unreachable consts + the file's only module-eval guard (battleScene.ts:10318), (2) the **281 self-contained literal consts**, (3) the remaining **41 leaves** (322 total canonical-only leaves), (4) the 248 non-leaf canonical-only in topological batches, final = entry-point flip in core.ts + ~46 caller import-path updates. Honest scope statement in doc: this is a same-module-graph move; canonical code STILL SHIPS in the bundle (no bundle-size win; the canonical branch is not injectable — out of program).
+- **Hazards called out:** (a) `tests/animation/animationBoundaryRatchet.test.ts` pins the engine/animation boundary from BOTH sides; the canonical cluster demonstrably needs `../animation/*` (e.g. onixSitrusRotateMatrix → heldItemHeal.ts), so a new src/engine file importing animation needs either re-export through battleScene.ts or a deliberate ratchet widening — a cross-program decision, not a drive-by; (b) ~46 importing files need path updates at the final slice.
+- **Next:** supervisor reviews the design; the next step makes the actual cut per the slice plan (MOVE NOTHING was this step's hard rule).
+- **Notes:** no PAPERCUTS of my own. One concurrent-harness artifact worth flagging: while I worked, the side-lane fix `cac9cda3` was committed in the main tree and **swept my in-progress script into its commit** — it is byte-identical to my final script, so no harm, but a plain `git commit` from a concurrent actor staged untracked main-tree files. PROGRESS #997's differential (3055/3055) and all my numbers re-verified unchanged after the concurrent `2520322b` merge (battleScene.ts/core.ts untouched by it).
+
+## 997 — [bounded MAIN worker, 2026-08-08] #39 slices 1+2: slice-1 remainder LANDED, slice 2 verified already-landed — differential 3055/3055 byte-identical
+
+- **State:** master `f3f5754c`, clean. `npm run typecheck` + `npm run build` exit 0; `npm run test:smoke` **347/347**; `tests/battleSceneHealthboxFactories.test.ts` **6/6** (one per factory, 2 HP values each — pre-existing, satisfies slice-2 acceptance). Full `npm test` NOT run (worker rule).
+- **Finding — slice 2 is mis-scoped, already landed 2026-08-02:** the six-family-C parameterization is commit `4d767598` (ancestor of HEAD): all six factories take `name`/`level`/`maxHp` (gender for kabuto/magby) and every call site threads its constant explicitly (`ONIX_MENU_BATTLER`, `KABUTO_SENDOUT_BATTLER`, `TURN5_SWITCHIN`/`TURN13_SWITCHIN` locals). No slice-2 work remains; nothing to land or change.
+- **Landing (slice-1 remainder):** the `hp === 142` literal in `murkrowHealthboxContentForHp`'s cache-miss branch (battleScene.ts:11449) now reads `TURN13_SWITCHIN.replacementHp.max` (verified `max === 142`, MURKROW Lv50) — behavior-preserving, completing slice 1's two-literal swap (`PIDGEOTTO_MAX_HP` was already adapter-derived).
+- **Differential vs clean parent `8f6f2577`:** PASS — **3055/3055 captures byte-identical across 17 traces**: turn5-switchin 241, turn5-sitrus-a 110, -b 82, -c 181, -d 133, turn13-switchin 242, turn14-fly-miss 213, turn15-fly-strike 256, turn6-rockslide-a 255, -b 105, turn7-rockslide-a/b/c/d 256/256/256/19, turn8-bind-a 256, -b 66, insurance battle-command-generated-off **128/128**. Exit 0.
+- **Next:** supervisor retires #39's slice-1+2 rows (dossier's §4 rows 1-2); nothing else open from this step.
+- **Notes:** no PAPERCUTS. Committed `f3f5754c` (the one-literal fix); slice-2 code already in history.
+
+## 996 — [bounded MAIN worker, 2026-08-08] #39 dispatcher slice 7 (turn-2 fold) ALREADY LANDED — verified, no code changes made; tree green throughout
+
+- **State:** master `e6165e8b`, clean. `npm run typecheck` + `npm run build` exit 0; `npm run test:smoke` **347/347**; all 6 touched test files **458/458** (incl. `turn2ResolutionAdapterEquivalence.test.ts` 7/7 proving the generic receipt via `resolveTurn2LatestCompletedCommandHandoff`/`turn2FightCommandPresentationFromLatest`/`turn2CompletedResolutionNextCommandHandoffFromLatest`, mirroring turn-1's slice-6 shape). Full `npm test` NOT run (worker rule).
+- **Finding — the step is mis-scoped, the fold was already landed 2026-08-02:** the turn-2 epoch/content fold was committed as `3a3a168a` (bridge) + `8518520b` (fold) and supervisor-verified the same day (archive entry 861: "six oracle pins exact (256/256, 237/237, 254/255 #61-residual, 161/161, 256/256, 128/128)"). The current tree is past the whole dispatcher migration: `tools/census-next-command-handoffs.sh` reports **BattleSceneState handoff fields 0, drawFightSubmenuWindow handoff params 0, currentPPForActiveMon handoff params 0, initial/advance handoff entries 0** — i.e. beyond even slice 10's final-cut acceptance. `turn2NextCommandHandoff` state field is gone from battleScene/core/battleMenu; generic content (`turn2FightCommandPresentationFromLatest`, `isTurn2LatestCompletedCommandLifecycleActive`, `resolveTurn2LatestCompletedCommandHandoff`) drives live state. The acceptance's differential cannot even run as prescribed: `--base e6165e8b` == HEAD, and the harness rightly refuses ("a differential against itself proves nothing").
+- **Evidence run anyway vs. the true pre-fold parent `3005e9c2`:** `turn2-endeavor-off` **256/256** and `turn2-dragonbreath-off` **237/237** byte-identical — exactly slice 7's own two turn-2 windows, confirming the fold was pixel-neutral there. `turn3-rockslide-off` 161/161 too. `turn3-endeavor-off` reads 227/255 with a persistent 41px diff — that drift is from LATER landed slices (8/9 turn-3/4 folds + typeref retirements, all post-dating the fold), not from slice 7, and matches nothing this step was asked to touch.
+- **Next:** supervisor should retire/tick #39's slice-7 row (and confirm the whole 1-10 ladder is recorded done — census is already at the final-cut target). No engine work remains for this slice.
+- **Notes:** no PAPERCUTS. No src/test edits made — the correct action was to verify and report the mis-scope, per the brief.
+
+## 995 — [supervisor, 2026-08-08] Orient + round 1: `animation-main` folded and union-verified, ISSUES #80 CLOSED (395/395 supervisor-rerun), Castform Forecast barrier RETIRED — plus a 3-day CPU leak killed
+
+- **State:** master at this entry's commit, clean. **Union baseline verified
+  independently after the fold: full `npm test` 768 files / 7288 passed /
+  1 skipped, exit 0; `npm run build` exit 0.** DEFERRED.md: no open entries.
+- **Fold:** `animation-main` merged into master at orient — **fast-forward**,
+  6 commits (`8fc77bdb..06077049`): MOVE_DETECT promoted exact (inventory
+  122→123), MOVE_IRON_TAIL staged with its 135-frame measured window and
+  `ironTailProbe.py`. The lane merged master into itself first, so the fold
+  needed no conflict resolution. That lane stayed live and is still
+  committing; later commits are the next orient fold's.
+- **Round 1 (2 DeepSeek workers, both productive, 0 lost):**
+  - MAIN — ISSUES #80's last gap: the app opened the party-menu action submenu
+    **3 frames early**. `SUBMENU_OPEN_VISUAL_DELAY = 3` + a `submenuOpenElapsed`
+    counter now gate the action window, the message-window swap and the CANCEL
+    suppression; the mon-icon stall and close fade are untouched. Dense-a
+    **392 → 395/395**, fast loop 920:965 46/46. **Supervisor reran the compare
+    independently: 395/395.** ISSUES #80 deleted in full.
+  - SIDE — ROADMAP S10 gate-4: the last `unsupported-branch` barrier in
+    `battleScriptTryCastformDataChangeOpcode.ts` is **retired, not narrowed**.
+    `Cmd_trycastformdatachange` now writes the durable SET_BATTLER_TYPE pair
+    and `gBattleStruct->formToChangeInto`, and pushes the real
+    `BattleScript_CastformChange` continuation (modeled as the machine's
+    `call`); `B_SCR_OP_DOCASTFORMCHANGEANIMATION` is registered alongside.
+    Ratchet pin 1 → 0. A live Forecast Castform rental (Frontier sets 204/309)
+    used to halt the kernel the moment weather turned on; it now changes form
+    and type. **Supervisor verification: 58/58 across the four acceptance
+    files, plus an independent red-verify — neutralizing the durable type
+    write turned 9 tests red across 3 files before restore.**
+- **Next:** #39 dispatcher slice 7 (turn-2 epoch/content fold, main) and the
+  `Cmd_datahpupdate` substitute-fade barrier (side, and note it carries a
+  latent bug: source re-checks `substituteHP == 0` after BOTH branches, so
+  exact-lethal damage to a Substitute must fade and today does not).
+- **Notes:** at orient the host carried **three orphaned
+  `probeEvolutionBasic.ts` node processes, PPID 1, started 2026-08-04 and
+  still running 3 days later** at 43-81% CPU each — load average 12 on 16
+  cores before any worker launched, and the baseline suite was running at
+  roughly a fifth of normal speed. Killed; PAPERCUTS entry added with the
+  orient-time detection command. Worth repeating at every orient.
+
+## 994 — [bounded MAIN worker, 2026-08-08] ISSUES #80 FULLY CLOSED: 3-frame submenu open delay landed — dense-a **392 → 395/395 byte-exact**, #80 entry deleted
+
+- **State:** master at this entry's commit, clean. Typecheck + `npm run build`
+  green, `npm run test:smoke` **347/347**, touched test files **48/48**
+  (battlePartySelect 20/20 incl. the new 3-frame open-edge pin + visual bind
+  11/11 + partySelect 17/17). Fast loop 920:965 **46/46** (was 43/46). Dense-a
+  spec extended 923-925 (+3) → **395/395 byte-exact, twice-run**. Keep-green
+  all held: party-menu-status-item-off **251/251**,
+  mid-battle-switch-pacing-b-off **153/153**, battle-command-generated-off
+  **128/128**. Full `npm test` NOT run (worker rule — supervisor after merge).
+- **Did (per `docs/fade-layer-forensics.md` §10(d)):** the A-press edge sets
+  `submenuOpen` (state rendered at 923), but oracle frames 923-925 still show
+  the pre-open state — wide "Choose a POKéMON." 21x2 window + CANCEL button,
+  no action window, no cursor — and the whole SHIFT/SUMMARY/CANCEL window +
+  swapped 16x2 "Do what with this {PKMN}?" window pop together at 926, one
+  frame, no animation. Measured at 923-925: the app-drawn extras are exactly
+  the action-window frame+interior+3 labels+cursor (144,96)-(238,159) and the
+  swapped message window (0,128)-(128,143), replacing the oracle's wide window
+  (8,136)-(176,152) and CANCEL button; icon/left/right-column regions 0 diff.
+  Added `SUBMENU_OPEN_VISUAL_DELAY = 3` + a `submenuOpenElapsed` counter
+  (0 on the A-press edge, +1/tick while `submenuOpen`); the action window
+  (`submenuWindowVisible`), the message-window swap, and the CANCEL pokeball
+  suppression are now gated on it. The mon-icon +2 stall (`submenuOpened`) and
+  the confirm-edge/close-fade are untouched — frames 926+ byte-identical.
+  Tier-1 pin red-verified: neutralizing the delay to 0 fails the new test's
+  pre-open loop (elapsed 0/1/2 render the open state, [74,74,107] at (141,140)
+  vs white). Forced projection maps open submenu to `submenuOpenElapsed = 3`.
+- **Next:** supervisor verify + full `npm test`. ISSUES #80 deleted in full —
+  the last open item (this 3-frame edge) is closed; nothing else open.
+- **Notes:** no PAPERCUTS. Commits `75bf7ce2` (the delay) + `dcef570d` (spec
+  + pin) + this docs commit.
+
+## 992 — [bounded MAIN worker, 2026-08-08] ISSUES #80 Class B LANDED (last open-fade defect): per-sprite draw-origin offsets — dense-a **341 → 354/354 byte-exact**, open window fully closed
+
+- **State:** master `8a70a108`, clean. Typecheck + `npm run build` green,
+  `npm run test:smoke` **347/347**; touched test files **37/37**
+  (battlePartySelect 19/19 incl. the new Class B pin + inbattlePartyMenuVisualBind
+  8/8 + factoryVoluntarySwitchSeam 10/10). Dense-a spec extended
+  `766/768/770-780` (341 → **354 frames**), **354/354 twice-run byte-exact**
+  (fast loop 763:781 **19/19**). Keep-green all held: party-menu-status-item-off
+  **251/251**, mid-battle-switch-pacing-b-off **153/153**,
+  battle-command-generated-off **128/128**. Full `npm test` NOT run (worker
+  rule — supervisor after merge).
+- **Did (per `docs/fade-layer-forensics.md` §9 RAM probe, re-measured fresh):**
+  the player healthbox sprite's real `y2` steps 0→1 at oracle frame **770**
+  (`openElapsed 7`) and the player back sprite's real `y2` steps 1→0 at frame
+  **779** (`openElapsed 16`) — confirmed pixel-side that the oracle's shifted
+  content = `settled(y−1)` in the box region, the newly-revealed top row 74 is
+  the app's own floor (both byte-exact), and the slanted corner pixels come out
+  right because the sprite's transparency travels with it. Applied as per-sprite
+  **draw-origin** offsets (`healthboxShift +1` / `backSpriteShift −1`) gated on
+  `openElapsed` inside `drawBattle2ActionMenuWindow` (threaded through
+  `renderGeneratedBattleCommandPresentation` → `drawBattleScene[ObjOnly]` +
+  `PartySelectCloseRenderAssets`), so both the full draw and the obj-only
+  scratch carry the same offset and the Class A alpha-coverage composite guard
+  still holds. Tier-1 pin: rendered settled action-menu scene — healthbox
+  top-frame row at 74 at e=6 → 75 at e=7 (floor revealed above), back-sprite
+  ear tip appears at (86,58) only at e=16; both constants pinned; **each
+  red-verified independently** (neutralizing one shift fails its own
+  assertions). Also swept up a latent stale pin: `factoryVoluntarySwitchSeam
+  .test.ts` asserted 14/40 for the close fade while the constants landed 15/39
+  earlier (prior worker missed it) — now aligned and green.
+- **Next:** supervisor verify + full `npm test`; the last #80 item is the
+  SEND OUT/SUMMARY/CANCEL submenu-window geometry (~4461px at 926-963, never
+  spec-captured; a side lane is measuring it).
+- **Notes:** the two prior row-shift attempts failed on the sprite's own
+  boundary (27 bad pixels); drawing at the changed coordinate resolves them by
+  construction. No PAPERCUTS.
+
+
+## 991 — [supervisor WIND-DOWN, 2026-08-07] Session summary: 19 workers / 10 rounds — ISSUES #80's in-battle party menu is EFFECTIVELY CLOSED (dense-a 276 → **392/392**), lobby input FREEZE fixed, `loss-lobby-walk-off` PROMOTED **177/177**, #71 Slice A REFUTED
+
+> **Read entries 992 and 993 above first** — two further main-lane steps
+> landed after this summary was written (Class B, then the submenu window).
+> The headline and Next list here are updated to that final state; the body
+> below describes the session as a whole.
+
+- **State:** master at this entry's commit, clean. **Final independent union
+  verification: `npm run build` exit 0 and full `npm test` 768 files /
+  7284 passed / 1 skipped, exit 0** (re-run after the stale-pin fix below;
+  the first union run had found that 1 failure). **Re-run once more after the
+  submenu step (entry 993): `npm run build` exit 0, full `npm test` 768 files
+  / 7287 passed / 1 skipped, exit 0** — that is the final verified state, with
+  the supervisor's own rerun of `mid-battle-switch-dense-a-off` at
+  **392/392**.
+  `animation-main` folded at
+  wind-down (18 commits: MINIMIZE/TORMENT promoted exact, MOVE_DETECT staged);
+  that lane stayed live and kept committing after the fold (6 further commits
+  by wind-down and still moving), left deliberately unfolded rather than
+  chasing a moving branch — the next session's orient fold takes them.
+  **Note on ordering:** the Class-B step (entry 992, above) landed AFTER this
+  summary was first written — its launcher digest was truncated and the
+  supervisor briefly misread the worker as failed; git log corrected it. The
+  numbers here are the final ones.
+  Supervisor-rerun specs this session: `mid-battle-switch-dense-a-off`
+  **392/392** (was 276/276 at session start; **+116 frames** — the whole open
+  animation, the close-fade tail and the submenu window), `loss-lobby-walk-off` **177/177**
+  (NEW spec; an earlier 129/177 draft had been deleted twice),
+  `loss-beyond-boundary-off` **183/183**, `party-menu-status-item-off`
+  251/251, `mid-battle-switch-pacing-b-off` 153/153,
+  `battle-command-generated-off` 128/128. DEFERRED.md: no open entries.
+  Oracle-freshness FAIL at orient was the documented docs-only false positive
+  (verified: no harness commit since the oracle start touched `oracle/` or `bin/`).
+- **Did (19 DeepSeek workers: 10 main, 9 side; 4 zero-commit caps, all salvaged):**
+  MAIN — close-fade BG/OBJ layer split (`61d98d88`, OBJ one blend step behind,
+  frame-979 discriminator byte-exact); the whole party-menu OPEN animation
+  (`054ab5ce`: bright-hold 3 / field-fade-out 16 / black-hold 27 / menu-fade-in
+  16, 49 of 54 frames exact first pass); submenu message-window swap +
+  icon-clock +2 stall (`9b9a74e2`, dense-a 325 → **341/341**); lobby free-roam
+  input-freeze fix + walk timing (`395fc2cc`); open-fade Class A obj-only layer
+  (`7b8eedb0`); lobby woman whole-frame h-flip + south/east 1px lag with the
+  spec promotion (`2d0f3d65`, **177/177**); open-fade Class B per-sprite
+  draw-origin offsets (`c24f0f4e`, **354/354** — open window CLOSED).
+  SIDE — fade §6 open-window field fade-out; lobby §7 continuous-hold model;
+  fade §7 message-window swap + icon phase; fade §8 open residual classes;
+  lobby §8 woman sheet audit; #71 Slice-A staged RATTATA fixture + RAM receipt.
+- **Supervisor corrections/decisions:** (1) **#71 Slice A REFUTED** — under
+  Battle Scene OFF the settled front sprite is `{x2:0,y2:0}` with
+  `SpriteCallbackDummy`, so applying the banked `{x2:1,y2:0}` terminal offset
+  would have been a **361px regression**, not an inert no-op; that wiring is
+  ON-profile-only and the OFF main lane has nothing to hook up (ISSUES #71
+  updated; Slice C guards remain the main-lane residue).
+  (2) The open-fade 5-frame residual was mislabelled "opponent idle breathing
+  squish" — it is the **player healthbox**, refuted by bbox and by the OFF RAM
+  receipt; corrected in ISSUES #80 and `docs/fade-layer-forensics.md` §8, and
+  the corrected attribution is what let Class B land.
+  (3) A worker committed dense-a red at 325/330; supervisor trimmed the 5
+  residual frames rather than leave a red spec (`980d7083`).
+  (4) `tools/probe/fade-layer-forensics.ts` reported **ALL CHECKS PASS with
+  zero frames measured** when pointed at a wrong directory — fixed to FAIL
+  (`7c7e8fe2`); every probe written afterwards had to keep that property.
+  (5) `{PKMN}` resolved as charmap bytes 0x53/0x54, not a nickname splice
+  (`charmap.txt:51`) — unblocked item (c).
+  (6) The wind-down union suite caught one **stale adjacent pin**
+  (`factoryVoluntarySwitchSeam` pinned the pre-split 14/40 close constants);
+  re-pinned to 15/39 with the reason in the comment.
+- **Next (ordered):** (1) **#80's last residual** — the app opens the submenu
+  **3 frames early**: oracle frames **923-925** still show the pre-open state
+  while the app already draws the window (fast loop 920:965 is 43/46; those 3
+  are deliberately not in the spec). Delay the submenu render to the oracle's
+  926 pop edge, then extend `captureFrames` with 923-925 → **395/395**. The
+  A-press is 922-923 and the window lands 3 frames later, all at once
+  (`docs/fade-layer-forensics.md` §10(d)). (2) #71 Slice C — guard the
+  `src/engine/` back hand-fits so an uncovered species/nature fails loudly
+  instead of drawing the wrong table (Slice A is refuted, see above; Slice D
+  is ON-profile). (3) #73 terminal-seam rung B. (4) fold `animation-main`'s
+  2 outstanding commits at orient. (5) animation lane's own ledger.
+- **Notes:** 4 of 19 workers returned zero commits; every one was salvaged from
+  its JSONL and the facts banked in docs before re-briefing, and two of those
+  salvages (the Class-B sprite coordinates, the woman sheet-index lead)
+  directly produced the next round's landing — Class B in particular was
+  measured twice independently by cap-killed workers and then implemented from
+  those coordinates in one clean round. Lesson worth keeping: **a truncated
+  launcher digest is not evidence of failure — check `git log` before
+  re-briefing.** The supervisor briefly treated a successful Class-B worker as
+  dead on that basis. No DEFERRED entries; `run-supervisor.sh` is unblocked.
+
+
 ## 990 — [bounded MAIN worker, 2026-08-08] Lobby wandering-woman renderer fixes LANDED; `loss-lobby-walk-off` PROMOTED **177/177 byte-exact** (was 129/177, 48 red)
 
 - **State:** master `2d0f3d65`, clean. Typecheck + `npm run build` green,
@@ -38025,3 +38251,48 @@ both verify scripts/census independently re-verified before this entry.)*
 - **Notes:** no PAPERCUTS. The verify script's `_verify-*` scratch dirs and the
   two pacing spec fixtures are the same battle (identical segments/parties,
   different capture windows). B_WAIT_TIME_MED (48) still unexercised.
+
+## 993 — [bounded MAIN worker, 2026-08-08] ISSUES #80 LAST GAP CLOSED: in-battle SHIFT/SUMMARY/CANCEL submenu byte-exact — dense-a **354 → 392/392**, the party-menu visual gap is fully discharged
+
+- **State:** master at this entry's commit, clean. Typecheck + `npm run build`
+  green, `npm run test:smoke` **347/347**, touched test files **63/63**
+  (battlePartySelect 19/19 incl. the re-pinned confirm-edge test +
+  inbattlePartyMenuVisualBind 11/11 incl. 3 new red-verified pins + partySelect
+  17/17 + partyMonIconAnim 6/6 + factoryVoluntarySwitchSeam 10/10). Dense-a
+  spec extended 926-963 (+38) → **392/392 byte-exact, three times**; fast loop
+  920:965 **43/46** (the 3 red are pre-open 923-925, not in spec);
+  `tools/probe/submenu-forensics.ts` **10/10 PASS** (check 10 re-pinned to the
+  corrected app geometry). Keep-green all held: party-menu-status-item-off
+  **251/251**, mid-battle-switch-pacing-b-off **153/153**,
+  battle-command-generated-off **128/128**. Full `npm test` NOT run (worker
+  rule — supervisor after merge).
+- **Did (per `docs/fade-layer-forensics.md` §10, which this bind corrects):**
+  the party-menu **action window** (`DisplaySelectionWindow`,
+  `party_menu.c:2534`) — the oracle's frame is the app's own `text_window`
+  tiles at outer origin (144,96) → (145,97)-(238,159), interior white
+  (150,102)-(233,153); the old scaffold at (144,80) was exactly **16 px too
+  high** (x-extent already matched). Replaced the three scaffold texts with
+  **SHIFT/SUMMARY/CANCEL** at (160,105)/(160,121)/(160,137) FONT_NORMAL
+  (ink 214,214,206 / shadow 99,99,99) + the **cursor "▶" as its own glyph**
+  at (152,105), no longer baked into the label. **Two findings beyond §10:**
+  (1) line 1 is **SHIFT, not SEND OUT** — this is the voluntary mid-battle
+  switch (`sPartyMenuAction_ShiftSummaryCancel`), because
+  `GetPartyMenuActionsTypeInBattle` (`party_menu.c:5788-5796`) returns
+  ACTIONS_SHIFT unless `gPartyMenu.action == PARTY_ACTION_SEND_OUT`; §10's
+  string attribution and ink extents corrected. (2) the confirm edge keeps
+  the window rendered through **frame 963** (closeElapsed 0) and drops it at
+  964 — the app used to flip `submenuOpen` false one frame early (963 red,
+  never spec-captured); the state now keeps `submenuOpen` true at
+  closeElapsed 0 and a `submenuVisible` render gate (`submenuOpen && (close
+  null || 0)`) hides it from closeElapsed 1, leaving the byte-exact close
+  fade untouched. Tier-1 pins: window-rect (frame edges + interior bounds),
+  3 label origins incl. the SHIFT-vs-SEND-OUT x199 discriminator, cursor glyph
+  at (152,105), and the re-pinned confirm-edge timing — **each red-verified
+  independently** (reverting frame y, the SHIFT string, the cursor split, and
+  the confirm-edge flip each fails its own assertions).
+- **Next:** supervisor verify + full `npm test`. ISSUES #80's remaining
+  follow-up text is discharged — the submenu bind closes the last known
+  in-battle party-menu visual gap; #80 entry updated.
+- **Notes:** no PAPERCUTS. The pre-open frames 923-925 remain red (the app
+  opens the submenu 3 frames before the oracle pops it at 926) but are not in
+  the spec — out of scope for this step and unchanged by it.

@@ -3,6 +3,7 @@ import { createFramebuffer } from "../src/engine/framebuffer.ts";
 import {
   primaryStatusFromStatus1,
   renderBattlePartySelect,
+  SUBMENU_OPEN_VISUAL_DELAY,
   type BattlePartySelectState,
 } from "../src/engine/battlePartySelect.ts";
 import {
@@ -76,6 +77,7 @@ function baseState(
     rightColumnCursor: 1,
     submenuOpen: false,
     submenuOpened: false,
+    submenuOpenElapsed: 0,
     message: "Choose a POKéMON.",
     outcome: null,
     elapsed: 0,
@@ -268,7 +270,7 @@ describe("in-battle party menu visual binds (ISSUES #80)", () => {
     // (150,102)-(233,153) -- the old scaffold was 16px too high
     // (docs/fade-layer-forensics.md §10(a)).
     const fb = createFramebuffer();
-    renderBattlePartySelect(fb, { ...baseState(), submenuOpen: true, submenuOpened: true });
+    renderBattlePartySelect(fb, { ...baseState(), submenuOpen: true, submenuOpened: true, submenuOpenElapsed: SUBMENU_OPEN_VISUAL_DELAY });
     // Left/right frame edges and interior.
     expect(px(fb, 145, 110)).toEqual([41, 49, 49]);
     expect(px(fb, 146, 110)).toEqual([74, 74, 107]);
@@ -291,7 +293,7 @@ describe("in-battle party menu visual binds (ISSUES #80)", () => {
     // the voluntary mid-battle switch (GetPartyMenuActionsTypeInBattle,
     // party_menu.c:5788-5796) -- NOT SEND OUT (docs/fade-layer-forensics.md §10(b)).
     const fb = createFramebuffer();
-    renderBattlePartySelect(fb, { ...baseState(), submenuOpen: true, submenuOpened: true });
+    renderBattlePartySelect(fb, { ...baseState(), submenuOpen: true, submenuOpened: true, submenuOpenElapsed: SUBMENU_OPEN_VISUAL_DELAY });
     // SHIFT "S" ink at x164 on its top row; SUMMARY "S" ink at (164,124);
     // CANCEL "C" ink at (164,140).
     expect(px(fb, 164, 108)).toEqual([214, 214, 206]);
@@ -313,7 +315,7 @@ describe("in-battle party menu visual binds (ISSUES #80)", () => {
     // x153-158 y108-117, cursorPos 0 -- the app no longer bakes "▶" into the
     // SHIFT label.
     const fb = createFramebuffer();
-    renderBattlePartySelect(fb, { ...baseState(), submenuOpen: true, submenuOpened: true });
+    renderBattlePartySelect(fb, { ...baseState(), submenuOpen: true, submenuOpened: true, submenuOpenElapsed: SUBMENU_OPEN_VISUAL_DELAY });
     expect(px(fb, 153, 108)).toEqual([99, 99, 99]);
     expect(px(fb, 154, 108)).toEqual([214, 214, 206]);
     expect(px(fb, 153, 117)).toEqual([214, 214, 206]);

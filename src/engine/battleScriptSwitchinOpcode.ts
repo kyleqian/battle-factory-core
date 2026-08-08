@@ -207,10 +207,11 @@ function callSwitchinScript(
  * barrier.
  */
 const VARIOUS_CANCEL_MULTI_TURN_MOVES = 0;
+const VARIOUS_SET_MAGIC_COAT_TARGET = 1;
+const VARIOUS_GET_MOVE_TARGET = 3;
+const VARIOUS_GET_BATTLER_FAINTED = 4;
 const VARIOUS_RESET_PLAYER_FAINTED = 7;
 const VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT = 23;
-const VARIOUS_GET_MOVE_TARGET = 3;
-const VARIOUS_SET_MAGIC_COAT_TARGET = 1;
 /**
  * `battle_script_commands.c:6455-6470` -- terminal-seam increment (i) LOSS
  * half (`docs/terminal-seam-loss-path-ground-truth.md` §5 item 1). Both
@@ -228,6 +229,7 @@ const NAMED_BYTE_CONSTANTS = new Map<string, number>([
   ["VARIOUS_CANCEL_MULTI_TURN_MOVES", VARIOUS_CANCEL_MULTI_TURN_MOVES],
   ["VARIOUS_SET_MAGIC_COAT_TARGET", VARIOUS_SET_MAGIC_COAT_TARGET],
   ["VARIOUS_GET_MOVE_TARGET", VARIOUS_GET_MOVE_TARGET],
+  ["VARIOUS_GET_BATTLER_FAINTED", VARIOUS_GET_BATTLER_FAINTED],
   ["VARIOUS_RETURN_OPPONENT_MON1", VARIOUS_RETURN_OPPONENT_MON1],
   ["VARIOUS_RETURN_OPPONENT_MON2", VARIOUS_RETURN_OPPONENT_MON2],
   ["VARIOUS_RESET_PLAYER_FAINTED", VARIOUS_RESET_PLAYER_FAINTED],
@@ -691,6 +693,7 @@ function cancelallactionsOpcodeHandler(
 /**
  * `Cmd_various` cases `VARIOUS_CANCEL_MULTI_TURN_MOVES` (0),
  * `VARIOUS_GET_MOVE_TARGET` (3),
+ * `VARIOUS_GET_BATTLER_FAINTED` (4),
  * `VARIOUS_RESET_PLAYER_FAINTED` (7),
  * `VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT` (23), and
  * `VARIOUS_RETURN_OPPONENT_MON1`/`MON2` (19/20, terminal-seam increment (i)
@@ -702,6 +705,15 @@ function cancelallactionsOpcodeHandler(
  * is the direct `CancelMultiTurnMoves(gActiveBattler)` call at
  * battle_script_commands.c:6327-6329; the shared helper ports its exact
  * status2/status3/timer clears from battle_util.c:877-888.
+ * GET_BATTLER_FAINTED (`:6344-6349`) is the `getbattlerfainted` macro
+ * (`asm/macros/battle_script.inc:1273-1275`, expanding to `various \battler,
+ * VARIOUS_GET_BATTLER_FAINTED`) -- `BattleScript_PursuitDmgOnSwitchOut`
+ * (data/battle_scripts_1.s:3144) calls it right after `tryfaintmon BS_TARGET`
+ * and reads the written `gBattleCommunication[0]` from the immediately
+ * following `jumpifbyte CMP_EQUAL, gBattleCommunication, FALSE, ...`; it
+ * writes TRUE when the active battler's `HITMARKER_FAINTED(battler)` bit is
+ * set, FALSE otherwise. VARIOUS_IS_RUNNING_IMPOSSIBLE (2) stays behind the
+ * generic barrier (bucket B, Teleport).
  * RETURN_OPPONENT_MON1 (`:6455-6461`) unconditionally targets battler 1 and,
  * if it is still alive (`gBattleMons[1].hp != 0`), emits the return-to-ball
  * controller receipt (recall sprite, hide healthbox --
@@ -740,8 +752,8 @@ function createVariousOpcodeHandler(
       id !== VARIOUS_SET_MAGIC_COAT_TARGET
       &&
       id !== VARIOUS_CANCEL_MULTI_TURN_MOVES
-      &&
-      id !== VARIOUS_RESET_PLAYER_FAINTED
+      && id !== VARIOUS_GET_BATTLER_FAINTED
+      && id !== VARIOUS_RESET_PLAYER_FAINTED
       && id !== VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT
       && id !== VARIOUS_RETURN_OPPONENT_MON1
       && id !== VARIOUS_RETURN_OPPONENT_MON2
@@ -784,6 +796,16 @@ function createVariousOpcodeHandler(
     if (battler === null) {
       throw new Error(
         `Cmd_various: unresolved battler selector at program counter ${context.state.programCounter}`,
+      );
+    }
+    if (id === VARIOUS_GET_BATTLER_FAINTED) {
+      const fainted = (rules.hitMarker & (1 << (28 + battler))) !== 0;
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        {
+          rulesContext: Object.freeze({ ...rules, battleCommunication0: fainted ? 1 : 0 }),
+        },
       );
     }
     if (id === VARIOUS_GET_MOVE_TARGET) {

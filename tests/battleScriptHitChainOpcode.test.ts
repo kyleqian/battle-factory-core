@@ -2248,14 +2248,107 @@ describe("production datahpupdate (Cmd_datahpupdate) dispatch -- the rung's real
     expect(result.state.events.length).toBe(0);
   });
 
-  describe("(b) unsupported-branch barriers", () => {
-    it("halts when the substitute would fade (BattleScript_SubstituteFade cutscene unmodeled)", () => {
-      const rc = context(0, {}, { battleMoveDamage: 50 }, { hp: 100, status2: 1 << 24, substituteHP: 30 });
-      const { result } = stepAtOpcode("B_SCR_OP_DATAHPUPDATE", rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 1889 });
+  // battle_script_commands.c:1868-1891 -- the three damage relationships
+  // against an active Substitute, plus the fade cutscene the zero-HP outcomes
+  // push. The old (b) barrier ("halts when the substitute would fade") is
+  // retired for real: both branches are source-complete and the fade runs.
+  describe("substitute damage relationships (battle_script_commands.c:1868-1891)", () => {
+    /** include/constants/battle.h:216. */
+    const SUBSTITUTE_STATUS2 = 1 << 24;
+    const fadePc = program.labelEntries["BattleScript_SubstituteFade"].programCounter;
+
+    function stepDatahpupdate(rulesContext: BattleScriptRulesContext) {
+      const startPc = labelPc("BattleScript_HitFromCritCalc");
+      const datahpupdate = program.instructions.find(
+        (instruction, index) => index >= startPc && instruction.opcodeName === "B_SCR_OP_DATAHPUPDATE",
+      )!;
+      const execution = createBattleScriptStatusRulesExecution(
+        program,
+        "BattleScript_HitFromCritCalc",
+        rulesContext,
+        1,
+        externalPorts(),
+      );
+      const patched = Object.freeze({ ...execution.state, programCounter: datahpupdate.programCounter });
+      const result = stepBattleScriptMachine(program, patched, execution.handlers);
+      return { result, execution, datahpupdatePc: datahpupdate.programCounter };
+    }
+
+    it("damage < substituteHP: survives, advances, no fade; gHpDealt == damage and shellBellDmg == damage on the first hit", () => {
+      const rc = context(0, {}, { battleMoveDamage: 14 }, { hp: 100, status2: SUBSTITUTE_STATUS2, substituteHP: 50 });
+      const { result, datahpupdatePc } = stepDatahpupdate(rc);
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battlers[1]!.hp).toBe(100);
+      expect(result.state.rulesContext.battlers[1]!.substituteHP).toBe(36);
+      expect(result.state.rulesContext.hpDealt).toBe(14);
+      expect(result.state.rulesContext.battlers[1]!.specialStatus.shellBellDmg).toBe(14);
+      // no fade: plain advance to the next instruction, nothing pushed.
+      expect(result.state.callStack).toEqual([]);
+      expect(result.state.programCounter).toBe(datahpupdatePc + 1);
+      expect(result.state.haltReason).toBeNull();
     });
 
+    it("shellBellDmg is written only on the first hit -- a prior receipt is preserved through a surviving substitute hit", () => {
+      const rc = context(
+        0,
+        {},
+        { battleMoveDamage: 14 },
+        { hp: 100, status2: SUBSTITUTE_STATUS2, substituteHP: 50, specialStatus: { shellBellDmg: 7 } },
+      );
+      const { result } = stepDatahpupdate(rc);
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battlers[1]!.specialStatus.shellBellDmg).toBe(7);
+    });
+
+    it("damage == substituteHP: substitute HP hits exactly 0 AND the fade path is entered (the latent off-by-boundary defect)", () => {
+      const rc = context(0, {}, { battleMoveDamage: 50 }, { hp: 100, status2: SUBSTITUTE_STATUS2, substituteHP: 50 });
+      const { result, datahpupdatePc } = stepDatahpupdate(rc);
+      if (result.kind !== "advanced") throw new Error("expected the machine to keep running");
+      expect(result.state.rulesContext.battlers[1]!.hp).toBe(100);
+      expect(result.state.rulesContext.battlers[1]!.substituteHP).toBe(0);
+      expect(result.state.rulesContext.hpDealt).toBe(50);
+      expect(result.state.rulesContext.battlers[1]!.specialStatus.shellBellDmg).toBe(50);
+      // BattleScript_SubstituteFade is entered with the post-opcode continuation pushed.
+      expect(result.state.programCounter).toBe(fadePc);
+      expect(result.state.callStack).toEqual([datahpupdatePc + 1]);
+      expect(result.state.haltReason).toBeNull();
+    });
+
+    it("damage > substituteHP: substitute HP 0, gHpDealt and shellBellDmg clamp to the REMAINING HP (not the raw damage), fade path entered", () => {
+      const rc = context(0, {}, { battleMoveDamage: 60 }, { hp: 100, status2: SUBSTITUTE_STATUS2, substituteHP: 30 });
+      const { result, datahpupdatePc } = stepDatahpupdate(rc);
+      if (result.kind !== "advanced") throw new Error("expected the machine to keep running");
+      expect(result.state.rulesContext.battlers[1]!.hp).toBe(100);
+      expect(result.state.rulesContext.battlers[1]!.substituteHP).toBe(0);
+      expect(result.state.rulesContext.hpDealt).toBe(30);
+      expect(result.state.rulesContext.battlers[1]!.specialStatus.shellBellDmg).toBe(30);
+      expect(result.state.programCounter).toBe(fadePc);
+      expect(result.state.callStack).toEqual([datahpupdatePc + 1]);
+      expect(result.state.haltReason).toBeNull();
+    });
+
+    it("the fade continuation runs to completion: playanimation SUBSTITUTE_FADE -> printstring STRINGID_PKMNSUBSTITUTEFADED -> return to the post-opcode byte", () => {
+      const rc = context(0, {}, { battleMoveDamage: 60 }, { hp: 100, status2: SUBSTITUTE_STATUS2, substituteHP: 30 });
+      const stepped = stepDatahpupdate(rc);
+      if (stepped.result.kind !== "advanced") throw new Error("expected datahpupdate to push the fade");
+      const handlers = stepped.execution.handlers;
+      const printstringPc = fadePc + 1;
+      const afterFade = stepBattleScriptMachine(program, stepped.result.state, handlers);
+      if (afterFade.kind !== "advanced") throw new Error("expected playanimation to advance");
+      expect(afterFade.state.programCounter).toBe(printstringPc);
+      const event = afterFade.state.events.at(-1);
+      expect(event).toMatchObject({ kind: "animation", animationId: "SUBSTITUTE_FADE", battler: 1 });
+      const afterPrint = stepBattleScriptMachine(program, afterFade.state, handlers);
+      if (afterPrint.kind !== "advanced") throw new Error("expected printstring to advance");
+      expect(afterPrint.state.programCounter).toBe(fadePc + 2);
+      const message = afterPrint.state.events.filter((candidate) => candidate.kind === "message").at(-1);
+      expect(message).toMatchObject({ kind: "message", messageId: "STRINGID_PKMNSUBSTITUTEFADED" });
+      const afterReturn = stepBattleScriptMachine(program, afterPrint.state, handlers);
+      if (afterReturn.kind !== "advanced") throw new Error("expected return to pop back");
+      expect(afterReturn.state.callStack).toEqual([]);
+      expect(afterReturn.state.programCounter).toBe(stepped.datahpupdatePc + 1);
+      expect(afterReturn.state.haltReason).toBeNull();
+    });
   });
 
   describe("negative damage is HP gain (Ingrain/Leech Seed's own end-turn heals -- docs/ingrain-leechseed-wrap-ground-truth.md §2a/§2b)", () => {
@@ -3316,6 +3409,61 @@ describe("production printfromtable (Cmd_printfromtable) dispatch", () => {
       }
     },
   );
+
+  // include/constants/battle_string_ids.h:582-583 (gGotDefrostedStringIds).
+  const B_MSG_DEFROSTED = 0;
+  const B_MSG_DEFROSTED_BY_MOVE = 1;
+  // include/constants/battle_string_ids.h:538-542 (gInobedientStringIds).
+  const B_MSG_LOAFING = 0;
+  const B_MSG_WONT_OBEY = 1;
+  const B_MSG_TURNED_AWAY = 2;
+  const B_MSG_PRETEND_NOT_NOTICE = 3;
+  const B_MSG_INCAPABLE_OF_POWER = 4;
+
+  it.each([
+    [B_MSG_DEFROSTED, "STRINGID_PKMNWASDEFROSTED2"],
+    [B_MSG_DEFROSTED_BY_MOVE, "STRINGID_PKMNWASDEFROSTEDBY"],
+  ])("BattleScript_MoveUsedUnfroze's own printfromtable gGotDefrostedStringIds, MULTISTRING_CHOOSER %i: resolves %s", (chooser, messageId) => {
+    const pc = program.instructions.find((i) =>
+      i.opcodeName === "B_SCR_OP_PRINTFROMTABLE" && i.operands[0]?.expression === "gGotDefrostedStringIds"
+    )!.programCounter;
+    const rc = context(0, {}, { multistringChooser: chooser });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.events).toEqual([
+      expect.objectContaining({ kind: "message", messageId }),
+    ]);
+  });
+
+  it.each([
+    [B_MSG_LOAFING, "STRINGID_PKMNLOAFING"], // Truant loafing turn -- the Factory-reachable row
+    [B_MSG_WONT_OBEY, "STRINGID_PKMNWONTOBEY"],
+    [B_MSG_TURNED_AWAY, "STRINGID_PKMNTURNEDAWAY"],
+    [B_MSG_PRETEND_NOT_NOTICE, "STRINGID_PKMNPRETENDNOTNOTICE"],
+    [B_MSG_INCAPABLE_OF_POWER, "STRINGID_PKMNINCAPABLEOFPOWER"],
+  ])("BattleScript_MoveUsedLoafingAroundMsg's own printfromtable gInobedientStringIds, MULTISTRING_CHOOSER %i: resolves %s", (chooser, messageId) => {
+    const pc = program.instructions.find((i) =>
+      i.opcodeName === "B_SCR_OP_PRINTFROMTABLE" && i.operands[0]?.expression === "gInobedientStringIds"
+    )!.programCounter;
+    const rc = context(0, {}, { multistringChooser: chooser });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.events).toEqual([
+      expect.objectContaining({ kind: "message", messageId }),
+    ]);
+  });
+
+  it("gInobedientStringIds out-of-range index (5) still halts with the named out-of-range barrier -- widened the table, not the guard", () => {
+    const pc = program.instructions.find((i) =>
+      i.opcodeName === "B_SCR_OP_PRINTFROMTABLE" && i.operands[0]?.expression === "gInobedientStringIds"
+    )!.programCounter;
+    const rc = context(0, {}, { multistringChooser: 5 });
+    const { result } = stepAtProgramCounter(pc, rc);
+    expect(result.state.haltReason).toMatchObject({
+      kind: "unsupported-branch",
+      sourceLine: 2185,
+    });
+  });
 });
 
 describe("production updatestatusicon (Cmd_updatestatusicon) dispatch", () => {

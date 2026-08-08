@@ -32,6 +32,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     side: changes.side ?? 0,
     ability: changes.ability ?? 0,
     hp: changes.hp ?? 100,
+    maxHP: changes.maxHP ?? 100,
     moves: changes.moves ?? Object.freeze([MOVE_INGRAIN, 0, 0, 0]),
     pp: changes.pp ?? Object.freeze([20, 0, 0, 0]),
     status1: changes.status1 ?? 0,
@@ -340,15 +341,6 @@ describe("(b) unsupported-branch barriers -- COPYARRAY/JUMPIFABILITY/MANIPULATED
     expect(present.state.programCounter).toBe(target!.programCounter);
   });
 
-  it("Cmd_manipulatedamage halts on any mode other than DMG_CHANGE_SIGN (e.g. Struggle's own recoil-from-miss halving)", () => {
-    const pc = program.instructions.find(
-      (instruction) => instruction.source.label === "BattleScript_MoveMissedDoDamage" && instruction.opcodeName === "B_SCR_OP_MANIPULATEDAMAGE",
-    )!.programCounter;
-    const { result } = stepAtProgramCounter(pc, context());
-    expect(result.kind).toBe("halted");
-    expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
-  });
-
   it(
     "Cmd_copyarray's widened universe (EFFECT_ENDEAVOR registration, seam-scout §9.2) also resolves "
       + "gHpDealt<-gBattleMoveDamage, the reverse of LeechSeedTurnDrain's own tuple",
@@ -379,4 +371,64 @@ describe("(b) unsupported-branch barriers -- COPYARRAY/JUMPIFABILITY/MANIPULATED
       expect(restored.state.rulesContext.battleMoveDamage).toBe(240); // restored from the stash, STAB undone
     },
   );
+});
+
+describe("Cmd_manipulatedamage (battle_script_commands.c:6740-6759), source-complete across all three modes (docs/barrier-reachability-triage.md item 10)", () => {
+  function manipulatedamagePc(mode: string): number {
+    const instruction = program.instructions.find(
+      (i) => i.opcodeName === "B_SCR_OP_MANIPULATEDAMAGE" && i.operands[0]?.expression === mode,
+    );
+    if (!instruction) throw new Error(`no B_SCR_OP_MANIPULATEDAMAGE instruction with operand ${mode}`);
+    return instruction.programCounter;
+  }
+
+  function stepAtManipulatedamage(mode: string, rulesContext: BattleScriptRulesContext) {
+    const execution = createBattleScriptStatusRulesExecution(program, "BattleScript_EffectHit", rulesContext, 1, externalPorts());
+    const patched = Object.freeze({ ...execution.state, programCounter: manipulatedamagePc(mode) });
+    return { execution, result: stepBattleScriptMachine(program, patched, execution.handlers) };
+  }
+
+  it("DMG_CHANGE_SIGN flips the sign (BattleScript_LeechSeedTurnDrain / BattleScript_AbsorbLiquidOoze), regression", () => {
+    const { result } = stepAtManipulatedamage("DMG_CHANGE_SIGN", context({}, { battleMoveDamage: 42 }));
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(-42);
+  });
+
+  it("DMG_CHANGE_SIGN flips a negative back to positive", () => {
+    const { result } = stepAtManipulatedamage("DMG_CHANGE_SIGN", context({}, { battleMoveDamage: -17 }));
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(17);
+  });
+
+  it("DMG_DOUBLED doubles (BattleScript_BeatUpLoop's own critical-hit path)", () => {
+    const { result } = stepAtManipulatedamage("DMG_DOUBLED", context({}, { battleMoveDamage: 21 }));
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(42);
+  });
+
+  it("DMG_RECOIL_FROM_MISS halves with C truncation on odd damage (7 -> 3, Struggle's recoil)", () => {
+    const { result } = stepAtManipulatedamage("DMG_RECOIL_FROM_MISS", context({}, { battleMoveDamage: 7 }, { maxHP: 200 }));
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(3);
+  });
+
+  it("DMG_RECOIL_FROM_MISS zero-clamps: a starting damage of 1 halves to 0 and must become 1", () => {
+    const { result } = stepAtManipulatedamage("DMG_RECOIL_FROM_MISS", context({}, { battleMoveDamage: 1 }, { maxHP: 200 }));
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(1);
+  });
+
+  it("DMG_RECOIL_FROM_MISS caps at half the target's max HP, truncating an odd maxHP (maxHP 15 -> cap 7)", () => {
+    const { result } = stepAtManipulatedamage("DMG_RECOIL_FROM_MISS", context({}, { battleMoveDamage: 100 }, { maxHP: 15 }));
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(7);
+  });
+
+  it("DMG_RECOIL_FROM_MISS applies the maxHP/2 cap AFTER the zero-clamp, per source order (maxHP 1: damage 1 -> clamped 1 -> capped to 0)", () => {
+    // Reversed order (cap first, then clamp) would yield 1, not 0 -- this
+    // pins the source's exact statement order, not just the arithmetic.
+    const { result } = stepAtManipulatedamage("DMG_RECOIL_FROM_MISS", context({}, { battleMoveDamage: 1 }, { maxHP: 1 }));
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(0);
+  });
 });

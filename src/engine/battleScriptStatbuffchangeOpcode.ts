@@ -3,13 +3,13 @@
  * `B_SCR_OP_STATBUFFCHANGE` (`Cmd_statbuffchange`, battle_script_commands.c:
  * 7100-7105), `B_SCR_OP_SETGRAPHICALSTATCHANGEVALUES` (`Cmd_
  * setgraphicalstatchangevalues`, :4088-4109), `B_SCR_OP_PLAYANIMATION`
- * (`Cmd_playanimation`, :4004-4040, registered for B_ANIM_STATS_CHANGE --
- * the only animType `BattleScript_EffectStatUp`/`EffectStatDown` ever pass,
- * source-confirmed the unconditional first-checked branch regardless of
- * HITMARKER_NO_ANIMATIONS/semi-invulnerability -- plus B_ANIM_RAIN_CONTINUES/
- * B_ANIM_SUN_CONTINUES for the end-turn weather field loop's own continues
- * scripts, see `createPlayanimationOpcodeHandler`'s own doc for the branch
- * this widening ports), `B_SCR_OP_JUMPIFSTATUS2`
+ * (`Cmd_playanimation`, :4004-4043, the full five-way animType dispatch
+ * ported in `PLAYANIMATION_ANIM_TYPES` below -- B_ANIM_STATS_CHANGE/
+ * B_ANIM_SNATCH_MOVE for this stat-change route (unconditional first
+ * branch), B_ANIM_RAIN_CONTINUES/B_ANIM_SUN_CONTINUES for the end-turn
+ * weather field loop's own continues scripts, and the general-path
+ * animTypes gated by the HITMARKER_NO_ANIMATIONS/semi-invulnerable
+ * branches), `B_SCR_OP_JUMPIFSTATUS2`
  * (`Cmd_jumpifstatus2`, :3093-3103, the DOWN family's Substitute early-out,
  * `EFFECT_CONFUSE`'s already-confused check, and -- docs/yawn-thrash-endturn-
  * design.md §3, Rung 4 -- `BattleScript_EffectRampage`'s own
@@ -51,6 +51,10 @@ import type {
   BattleScriptBattlerSelectorResolverPort,
 } from "./battleScriptSourceCommands.ts";
 import { unsupportedBranch } from "./battleScriptHitChainOpcode.ts";
+import {
+  BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
+  BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE,
+} from "./battleScriptSourceConstants.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 
 /** include/battle.h:309-310, include/constants/battle_script_commands.h:371-372 -- every bit a concrete statbuffchange flags operand names. */
@@ -158,47 +162,56 @@ function createSetgraphicalstatchangevaluesOpcodeHandler(): BattleScriptOpcodeHa
 
 /**
  * Widened beyond the B_ANIM_STATS_CHANGE arm (docs/end-turn-ground-truth.md
- * F7/F9, docs/screens-weather-ground-truth.md §6 slice 4) to also cover
- * B_ANIM_RAIN_CONTINUES/B_ANIM_SUN_CONTINUES -- `BattleScript_
- * RainContinuesOrEnds`/`SunlightContinues`'s own `playanimation BS_ATTACKER,
- * B_ANIM_RAIN_CONTINUES`/`SUN_CONTINUES` (no third operand supplied, so the
- * macro's `arg=NULL` default is what's actually encoded -- NOT
- * `sB_ANIM_ARG1`, confirmed against `src/data/gen/battle-script-program.json`'s
- * own parsed operands for both call sites).
+ * F7/F9, docs/screens-weather-ground-truth.md §6 slice 4) to port the FULL
+ * five-way dispatch of `Cmd_playanimation` (battle_script_commands.c:4004-
+ * 4043). Each registered animType is annotated with the source branch it
+ * enters (its `dispatchBranch`):
  *
- * Source (`battle_script_commands.c:4004-4043`) branches on animType in this
- * order: (1) STATS_CHANGE/SNATCH_MOVE/SUBSTITUTE_FADE emit unconditionally;
- * (2) else if HITMARKER_NO_ANIMATIONS, push+`BattleScript_Pausex20` (skip);
- * (3) else if RAIN_CONTINUES/SUN_CONTINUES/SANDSTORM_CONTINUES/
- * HAIL_CONTINUES, emit -- this branch is reached only when
- * HITMARKER_NO_ANIMATIONS is clear, and (unlike the final "else" branch)
- * bypasses the STATUS3_SEMI_INVULNERABLE skip entirely. This engine never
- * sets HITMARKER_NO_ANIMATIONS anywhere (no production code path ORs that
- * bit in -- confirmed by grep; docs/battle-move-anim-notes.md and
- * docs/battle-turn-notes.md disagree on whether a real save's Battle-Scene-
- * OFF option keeps it set for a whole battle, an unresolved tension this
- * registration does not need to settle), so branch (2) is unreachable given
- * this engine's current state model and branch (3) is the one this handler
- * ports -- same "emit, bypass semi-invulnerable" shape already established
- * for SANDSTORM_CONTINUES/HAIL_CONTINUES's own PLAYANIMATION_VAR handler
- * (`battleScriptDamagingWeatherOpcode.ts`'s `createPlayanimationVarHandler`).
+ *   1. STATS_CHANGE/SNATCH_MOVE/SUBSTITUTE_FADE -- emit unconditionally,
+ *      bypassing both the HITMARKER_NO_ANIMATIONS gate and the
+ *      STATUS3_SEMI_INVULNERABLE skip;
+ *   2. else if HITMARKER_NO_ANIMATIONS -- push current+7 and jump to
+ *      BattleScript_Pausex20 (skip, the engine's `"call"` directive);
+ *   3. else if RAIN/SUN/SANDSTORM/HAIL_CONTINUES -- emit, reached only when
+ *      HITMARKER_NO_ANIMATIONS is clear, bypassing the semi-invulnerable
+ *      skip entirely;
+ *   4. else if STATUS3_SEMI_INVULNERABLE on the active battler -- skip the
+ *      emission and just advance;
+ *   5. else -- emit.
+ *
+ * Branches (2) and (4) are reachable in this engine: `factoryBattleStart.ts`
+ * (the Factory battle-start option, factoryBattleStart.ts:405-407) sets
+ * HITMARKER_NO_ANIMATIONS for the whole battle on the Battle-Scene-OFF
+ * profile, and a semi-invulnerable active battler (the Fly/Dig/Dive/Bounce
+ * status3 bits folded into BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE) is a
+ * real in-battle state. Because branch (2) is checked before branch (3),
+ * the NO_ANIMATIONS gate applies to every animType outside branch (1) --
+ * including the CONTINUES emits -- exactly as source's ordering requires.
+ *
  * The animation argument (`*argumentPtr`, dereferenced from the encoded NULL
  * pointer) is decorative-only for this non-presentation engine; emitted with
- * an empty `arguments` array, matching that same sibling handler's
- * `WEATHER_VAR` precedent.
+ * an empty `arguments` array, matching the sibling PLAYANIMATION_VAR
+ * handler's `WEATHER_VAR` precedent (`battleScriptDamagingWeatherOpcode.ts`'s
+ * `createPlayanimationVarHandler`).
  *
- * Any other animType (e.g. B_ANIM_SMOKEBALL_ESCAPE) still
+ * Any animType not in the table (e.g. B_ANIM_SMOKEBALL_ESCAPE) still
  * barriers rather than approximating the other branches.
  */
 const PLAYANIMATION_ANIM_TYPES: ReadonlyMap<
   string,
-  Readonly<{ argExpression: string; animationId: string; readsAnimArg1: boolean }>
+  Readonly<{
+    argExpression: string;
+    animationId: string;
+    readsAnimArg1: boolean;
+    /** Cmd_playanimation's five-way chain (battle_script_commands.c:4004-4043): 1 = unconditional first branch, 3 = continues branch, 5 = the general else. */
+    dispatchBranch: 1 | 3 | 5;
+  }>
 > = new Map([
-  ["B_ANIM_STATS_CHANGE", { argExpression: "sB_ANIM_ARG1", animationId: "STATS_CHANGE", readsAnimArg1: true }],
-  ["B_ANIM_RAIN_CONTINUES", { argExpression: "NULL", animationId: "RAIN_CONTINUES", readsAnimArg1: false }],
-  ["B_ANIM_SUN_CONTINUES", { argExpression: "NULL", animationId: "SUN_CONTINUES", readsAnimArg1: false }],
+  ["B_ANIM_STATS_CHANGE", { argExpression: "sB_ANIM_ARG1", animationId: "STATS_CHANGE", readsAnimArg1: true, dispatchBranch: 1 }],
+  ["B_ANIM_RAIN_CONTINUES", { argExpression: "NULL", animationId: "RAIN_CONTINUES", readsAnimArg1: false, dispatchBranch: 3 }],
+  ["B_ANIM_SUN_CONTINUES", { argExpression: "NULL", animationId: "SUN_CONTINUES", readsAnimArg1: false, dispatchBranch: 3 }],
   /** BattleScript_SandstreamActivates' own switch-in continuation animation, same NULL-arg shape as its two siblings above. */
-  ["B_ANIM_SANDSTORM_CONTINUES", { argExpression: "NULL", animationId: "SANDSTORM_CONTINUES", readsAnimArg1: false }],
+  ["B_ANIM_SANDSTORM_CONTINUES", { argExpression: "NULL", animationId: "SANDSTORM_CONTINUES", readsAnimArg1: false, dispatchBranch: 3 }],
   /**
    * docs/ingrain-leechseed-wrap-ground-truth.md §2a/§2b/§2c -- Ingrain's own
    * `playanimation BS_ATTACKER, B_ANIM_INGRAIN_HEAL` (no third operand, `arg`
@@ -206,14 +219,14 @@ const PLAYANIMATION_ANIM_TYPES: ReadonlyMap<
    * Seed's/Wrap's own end-turn scripts both pass `sB_ANIM_ARG1` explicitly,
    * the same shape as B_ANIM_STATS_CHANGE.
    */
-  ["B_ANIM_INGRAIN_HEAL", { argExpression: "NULL", animationId: "INGRAIN_HEAL", readsAnimArg1: false }],
-  ["B_ANIM_LEECH_SEED_DRAIN", { argExpression: "sB_ANIM_ARG1", animationId: "LEECH_SEED_DRAIN", readsAnimArg1: true }],
-  ["B_ANIM_TURN_TRAP", { argExpression: "sB_ANIM_ARG1", animationId: "TURN_TRAP", readsAnimArg1: true }],
+  ["B_ANIM_INGRAIN_HEAL", { argExpression: "NULL", animationId: "INGRAIN_HEAL", readsAnimArg1: false, dispatchBranch: 5 }],
+  ["B_ANIM_LEECH_SEED_DRAIN", { argExpression: "sB_ANIM_ARG1", animationId: "LEECH_SEED_DRAIN", readsAnimArg1: true, dispatchBranch: 5 }],
+  ["B_ANIM_TURN_TRAP", { argExpression: "sB_ANIM_ARG1", animationId: "TURN_TRAP", readsAnimArg1: true, dispatchBranch: 5 }],
   /** BattleScript_WishComesTrue's delayed-heal presentation command. */
-  ["B_ANIM_WISH_HEAL", { argExpression: "NULL", animationId: "WISH_HEAL", readsAnimArg1: false }],
+  ["B_ANIM_WISH_HEAL", { argExpression: "NULL", animationId: "WISH_HEAL", readsAnimArg1: false, dispatchBranch: 5 }],
   /** BattleScript_MonTookFutureAttack's two delayed-hit controller commands. */
-  ["B_ANIM_FUTURE_SIGHT_HIT", { argExpression: "NULL", animationId: "FUTURE_SIGHT_HIT", readsAnimArg1: false }],
-  ["B_ANIM_DOOM_DESIRE_HIT", { argExpression: "NULL", animationId: "DOOM_DESIRE_HIT", readsAnimArg1: false }],
+  ["B_ANIM_FUTURE_SIGHT_HIT", { argExpression: "NULL", animationId: "FUTURE_SIGHT_HIT", readsAnimArg1: false, dispatchBranch: 5 }],
+  ["B_ANIM_DOOM_DESIRE_HIT", { argExpression: "NULL", animationId: "DOOM_DESIRE_HIT", readsAnimArg1: false, dispatchBranch: 5 }],
   /**
    * docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4 -- every
    * `ITEMEFFECT_NORMAL` end2 script (Leftovers/White Herb/all 8 cure
@@ -221,13 +234,38 @@ const PLAYANIMATION_ANIM_TYPES: ReadonlyMap<
    * B_ANIM_HELD_ITEM_EFFECT` (no third operand, same NULL-arg shape as
    * B_ANIM_INGRAIN_HEAL).
    */
-  ["B_ANIM_HELD_ITEM_EFFECT", { argExpression: "NULL", animationId: "HELD_ITEM_EFFECT", readsAnimArg1: false }],
+  ["B_ANIM_HELD_ITEM_EFFECT", { argExpression: "NULL", animationId: "HELD_ITEM_EFFECT", readsAnimArg1: false, dispatchBranch: 5 }],
   /** BattleScript_FocusBandActivates' hang-on semantic animation event. */
-  ["B_ANIM_FOCUS_BAND", { argExpression: "NULL", animationId: "FOCUS_BAND", readsAnimArg1: false }],
-  ["B_ANIM_ITEM_STEAL", { argExpression: "NULL", animationId: "ITEM_STEAL", readsAnimArg1: false }],
-  ["B_ANIM_ITEM_KNOCKOFF", { argExpression: "NULL", animationId: "ITEM_KNOCKOFF", readsAnimArg1: false }],
+  ["B_ANIM_FOCUS_BAND", { argExpression: "NULL", animationId: "FOCUS_BAND", readsAnimArg1: false, dispatchBranch: 5 }],
+  ["B_ANIM_ITEM_STEAL", { argExpression: "NULL", animationId: "ITEM_STEAL", readsAnimArg1: false, dispatchBranch: 5 }],
+  ["B_ANIM_ITEM_KNOCKOFF", { argExpression: "NULL", animationId: "ITEM_KNOCKOFF", readsAnimArg1: false, dispatchBranch: 5 }],
   /** BattleScript_SnatchedMove's unconditional controller animation. */
-  ["B_ANIM_SNATCH_MOVE", { argExpression: "NULL", animationId: "SNATCH_MOVE", readsAnimArg1: false }],
+  ["B_ANIM_SNATCH_MOVE", { argExpression: "NULL", animationId: "SNATCH_MOVE", readsAnimArg1: false, dispatchBranch: 1 }],
+  /**
+   * `BattleScript_SubstituteFade`'s own `playanimation BS_TARGET,
+   * B_ANIM_SUBSTITUTE_FADE` (data/battle_scripts_1.s:4258) -- like
+   * STATS_CHANGE/SNATCH_MOVE, B_ANIM_SUBSTITUTE_FADE sits in source's
+   * unconditional first branch of Cmd_playanimation
+   * (`battle_script_commands.c:4013`), so it emits without a
+   * HITMARKER_NO_ANIMATIONS gate. Registered when Cmd_datahpupdate's
+   * substitute-FADES branch (battle_script_commands.c:1884-1891) started
+   * calling into this script; NULL-arg shape confirmed against the parsed
+   * operands above.
+   */
+  ["B_ANIM_SUBSTITUTE_FADE", { argExpression: "NULL", animationId: "SUBSTITUTE_FADE", readsAnimArg1: false, dispatchBranch: 1 }],
+  /**
+   * `BattleScript_FocusPunchSetUp`'s own `playanimation BS_ATTACKER,
+   * B_ANIM_FOCUS_PUNCH_SETUP` (data/battle_scripts_1.s:3712) -- Focus Punch
+   * is Factory content (docs/executable-frontier-census.md lists
+   * EFFECT_FOCUS_PUNCH with 11 Level-50 carriers) and its charge-up script
+   * runs on every use. It is NOT in branch (1) or (3), so it enters the
+   * general else (dispatchBranch 5): both the HITMARKER_NO_ANIMATIONS gate
+   * (battle_script_commands.c:4014-4018) and the semi-invulnerable skip
+   * (:4027-4032) apply to it. No third operand supplied, so the macro's
+   * `arg=NULL` default is what's encoded -- confirmed against the parsed
+   * operands in `src/data/gen/battle-script-program.json`.
+   */
+  ["B_ANIM_FOCUS_PUNCH_SETUP", { argExpression: "NULL", animationId: "FOCUS_PUNCH_SETUP", readsAnimArg1: false, dispatchBranch: 5 }],
 ]);
 
 function createPlayanimationOpcodeHandler(
@@ -285,24 +323,62 @@ function createPlayanimationOpcodeHandler(
         }),
       );
     }
-    const eventArguments = animType.readsAnimArg1
-      ? Object.freeze([String(context.state.rulesContext.animArg1)])
-      : Object.freeze([]);
-    return transitionBattleScriptCommand(
-      context,
-      Object.freeze({ kind: "advance" }),
-      {
-        scheduler: markBattleScriptControllerPending(context.state.scheduler, battler),
-        events: Object.freeze([
-          Object.freeze({
-            kind: "animation" as const,
-            animationId: animType.animationId,
-            battler,
-            arguments: eventArguments,
-          }),
-        ]),
-      },
-    );
+    // The three emitting branches (1, 3, 5) all share this shape: mark the
+    // active battler for controller exec and advance.
+    const emitAnimation = () => {
+      const eventArguments = animType.readsAnimArg1
+        ? Object.freeze([String(context.state.rulesContext.animArg1)])
+        : Object.freeze([]);
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        {
+          scheduler: markBattleScriptControllerPending(context.state.scheduler, battler),
+          events: Object.freeze([
+            Object.freeze({
+              kind: "animation" as const,
+              animationId: animType.animationId,
+              battler,
+              arguments: eventArguments,
+            }),
+          ]),
+        },
+      );
+    };
+    // battle_script_commands.c:4009-4013 -- branch 1: STATS_CHANGE/
+    // SNATCH_MOVE/SUBSTITUTE_FADE emit unconditionally, bypassing both the
+    // HITMARKER_NO_ANIMATIONS gate and the semi-invulnerable skip.
+    if (animType.dispatchBranch === 1) {
+      return emitAnimation();
+    }
+    // battle_script_commands.c:4014-4018 -- branch 2: HITMARKER_NO_ANIMATIONS
+    // pushes the return address and jumps to BattleScript_Pausex20 (the
+    // engine's `"call"`), the same control shape Cmd_attackanimation's own
+    // gate uses (battleScriptHitChainOpcode.ts). No controller mark, no
+    // animation event -- source only does the pause.
+    if ((context.state.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) {
+      const pausex20 = resolveBattleScriptLabel(context.program, "BattleScript_Pausex20");
+      if (!pausex20) {
+        throw new Error("Cmd_playanimation: committed program has no label BattleScript_Pausex20");
+      }
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter: pausex20.programCounter }),
+      );
+    }
+    // battle_script_commands.c:4021-4026 -- branch 3: the CONTINUES animTypes
+    // emit, reached only when HITMARKER_NO_ANIMATIONS is clear, bypassing
+    // the semi-invulnerable skip.
+    if (animType.dispatchBranch === 3) {
+      return emitAnimation();
+    }
+    // battle_script_commands.c:4027-4032 -- branch 4: a semi-invulnerable
+    // active battler skips the emission and just advances.
+    if ((context.state.rulesContext.battlers[battler].status3 & BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE) !== 0) {
+      return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+    }
+    // battle_script_commands.c:4033-4038 -- branch 5: the general else emits.
+    return emitAnimation();
   };
 }
 

@@ -15,7 +15,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | Ability | Status | L50 carriers (det.) | All | Delegate cases | Inline rules | AI | Engine refs |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | ABILITY_LEVITATE | engine-referenced | 54 (54) | 54 | — | 10 | 0 | 13 |
-| ABILITY_STURDY | engine-referenced | 42 (13) | 42 | — | 3 | 0 | 3 |
+| ABILITY_STURDY | engine-referenced | 42 (13) | 42 | — | 3 | 0 | 5 |
 | ABILITY_ROCK_HEAD | engine-referenced | 40 (3) | 40 | — | 1 | 0 | 3 |
 | ABILITY_INTIMIDATE | engine-referenced | 38 (28) | 38 | ON_SWITCHIN, INTIMIDATE1, INTIMIDATE2 | 0 | 0 | 2 |
 | ABILITY_CHLOROPHYLL | engine-referenced | 38 (32) | 38 | — | 2 | 0 | 2 |
@@ -40,7 +40,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_SHELL_ARMOR | engine-referenced | 21 (4) | 21 | — | 1 | 0 | 2 |
 | ABILITY_POISON_POINT | engine-referenced | 18 (14) | 18 | ON_DAMAGE | 0 | 0 | 5 |
 | ABILITY_SWARM | engine-referenced | 18 (8) | 18 | — | 1 | 0 | 2 |
-| ABILITY_DAMP | engine-referenced | 16 (0) | 16 | — | 2 | 0 | 3 |
+| ABILITY_DAMP | engine-referenced | 16 (0) | 16 | — | 2 | 0 | 5 |
 | ABILITY_OWN_TEMPO | engine-referenced | 16 (2) | 16 | IMMUNITY | 5 | 0 | 9 |
 | ABILITY_TRACE | engine-referenced | 16 (6) | 16 | ON_SWITCHIN, TRACE | 0 | 0 | 2 |
 | ABILITY_INSOMNIA | engine-referenced | 15 (10) | 15 | IMMUNITY | 5 | 0 | 13 |
@@ -53,11 +53,11 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_SERENE_GRACE | engine-referenced | 11 (0) | 11 | — | 1 | 0 | 2 |
 | ABILITY_IMMUNITY | engine-referenced | 10 (2) | 10 | IMMUNITY | 10 | 0 | 14 |
 | ABILITY_VOLT_ABSORB | engine-referenced | 9 (4) | 9 | ABSORBING | 0 | 1 | 4 |
-| ABILITY_WATER_VEIL | engine-referenced | 9 (0) | 9 | IMMUNITY | 5 | 0 | 9 |
+| ABILITY_WATER_VEIL | engine-referenced | 9 (0) | 9 | IMMUNITY | 5 | 0 | 11 |
 | ABILITY_BATTLE_ARMOR | engine-referenced | 8 (5) | 8 | — | 1 | 0 | 2 |
 | ABILITY_EFFECT_SPORE | engine-referenced | 8 (8) | 8 | ON_DAMAGE | 0 | 0 | 6 |
 | ABILITY_FLAME_BODY | engine-referenced | 8 (5) | 8 | ON_DAMAGE | 0 | 0 | 4 |
-| ABILITY_STICKY_HOLD | engine-referenced | 8 (0) | 8 | — | 5 | 0 | 8 |
+| ABILITY_STICKY_HOLD | engine-referenced | 8 (0) | 8 | — | 5 | 0 | 10 |
 | ABILITY_LIQUID_OOZE | engine-referenced | 8 (0) | 8 | — | 2 | 0 | 3 |
 | ABILITY_SUCTION_CUPS | engine-referenced | 7 (7) | 7 | — | 1 | 0 | 5 |
 | ABILITY_SHIELD_DUST | engine-referenced | 6 (6) | 6 | — | 2 | 0 | 5 |

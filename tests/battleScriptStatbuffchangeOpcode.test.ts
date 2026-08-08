@@ -12,6 +12,10 @@ import {
   resolveBattleScriptLabel,
 } from "../src/engine/battleScriptProgram.ts";
 import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
+import {
+  BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
+  BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE,
+} from "../src/engine/battleScriptSourceConstants.ts";
 
 const program = loadBattleScriptProgram();
 
@@ -334,12 +338,90 @@ describe("primary-effect stat-change route (Cmd_statbuffchange + SETGRAPHICALSTA
     });
   });
 
+  describe("B_ANIM_FOCUS_PUNCH_SETUP (dispatch-queue item 7: Focus Punch's charge-up no longer halts the machine)", () => {
+    const FOCUS_PUNCH_SETUP_INSTRUCTION = () =>
+      program.instructions.find(
+        (i) => i.opcodeName === "B_SCR_OP_PLAYANIMATION" && i.operands[1]?.expression === "B_ANIM_FOCUS_PUNCH_SETUP",
+      );
+
+    function stepAtFocusPunchSetup(
+      attackerChanges: Partial<BattleScriptRulesBattler> = {},
+      contextChanges: Partial<BattleScriptRulesContextInput> = {},
+    ) {
+      const found = FOCUS_PUNCH_SETUP_INSTRUCTION();
+      expect(found, "BattleScript_FocusPunchSetUp's playanimation instruction").toBeDefined();
+      const rc = context(attackerChanges, contextChanges);
+      const execution = createBattleScriptStatusRulesExecution(
+        program,
+        "BattleScript_EffectAttackUp2",
+        rc,
+        1,
+        externalPorts(),
+      );
+      const patched = Object.freeze({ ...execution.state, programCounter: found!.programCounter });
+      return { found: found!, result: stepBattleScriptMachine(program, patched, execution.handlers) };
+    }
+
+    it("dispatches and advances (no halt): emits the FOCUS_PUNCH_SETUP animation event on the attacker", () => {
+      const { found, result } = stepAtFocusPunchSetup();
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      // NULL-arg shape: no third operand is encoded on this call site.
+      expect(found.operands[2]?.expression).toBe("NULL");
+      expect(result.state.programCounter).toBe(found.programCounter + 1);
+      const animEvent = result.state.events.find((e) => e.kind === "animation");
+      expect(animEvent).toMatchObject({
+        animationId: "FOCUS_PUNCH_SETUP",
+        battler: 0,
+        arguments: [],
+      });
+    });
+
+    it("HITMARKER_NO_ANIMATIONS: takes the BattleScript_Pausex20 push instead of emitting", () => {
+      const { found, result } = stepAtFocusPunchSetup({}, { hitMarker: BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS });
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_Pausex20"));
+      expect(result.state.callStack).toEqual([found.programCounter + 1]);
+      expect(result.state.events).toHaveLength(0);
+    });
+
+    it("semi-invulnerable active battler (STATUS3_SEMI_INVULNERABLE): skips the emission and just advances", () => {
+      const { found, result } = stepAtFocusPunchSetup({
+        status3: BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE,
+      });
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(found.programCounter + 1);
+      expect(result.state.events).toHaveLength(0);
+    });
+  });
+
   describe("(b) unsupported-branch barriers", () => {
     it("Cmd_playanimation halts on a non-B_ANIM_STATS_CHANGE animType", () => {
       const found = program.instructions.find(
         (i) => i.opcodeName === "B_SCR_OP_PLAYANIMATION" && i.operands[1]?.expression !== "B_ANIM_STATS_CHANGE",
       );
       expect(found).toBeDefined();
+      const rc = context();
+      const execution = createBattleScriptStatusRulesExecution(
+        program,
+        "BattleScript_EffectAttackUp2",
+        rc,
+        1,
+        externalPorts(),
+      );
+      const patched = Object.freeze({ ...execution.state, programCounter: found!.programCounter });
+      const result = stepBattleScriptMachine(program, patched, execution.handlers);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 4011 });
+    });
+
+    it("B_ANIM_SMOKEBALL_ESCAPE is still unregistered and continues to halt with the named barrier (proves B_ANIM_FOCUS_PUNCH_SETUP added a table row, not an opened guard)", () => {
+      const found = program.instructions.find(
+        (i) => i.opcodeName === "B_SCR_OP_PLAYANIMATION" && i.operands[1]?.expression === "B_ANIM_SMOKEBALL_ESCAPE",
+      );
+      expect(found, "BattleScript_SmokeBallEscape's playanimation instruction").toBeDefined();
       const rc = context();
       const execution = createBattleScriptStatusRulesExecution(
         program,

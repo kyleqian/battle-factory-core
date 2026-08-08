@@ -516,6 +516,14 @@ export type FactoryAiScoredBattlerView = Readonly<{
   hasYawn?: boolean;
   /** STATUS3_PERISH_SONG, read by AI_CV_Protect. */
   hasPerishSong?: boolean;
+  /** STATUS2_NIGHTMARE, read by AI_CBM_Nightmare. */
+  isNightmared?: boolean;
+  /** STATUS2_FORESIGHT, read by AI_CBM_Foresight. */
+  isForesighted?: boolean;
+  /** SIDE_STATUS_SPIKES on the target's side, read by AI_CBM_Spikes. */
+  spikesUp?: boolean;
+  /** SIDE_STATUS_FUTUREATTACK on the target's side, read by AI_CBM_FutureSight. */
+  targetFutureAttackUp?: boolean;
   /** DisableStruct::protectUses, read by AI_CV_Protect. */
   protectUses?: number;
   /**
@@ -526,8 +534,18 @@ export type FactoryAiScoredBattlerView = Readonly<{
   battleTurnCount?: number;
   /** `gStatuses3[] & STATUS3_ROOTED` (Ingrain) -- source-required for `AI_CV_AccuracyDown`'s Gate F (AI_USER's own copy only, doc §19.1). Optional, defaulting to `false`. */
   isRooted?: boolean;
+  /** SIDE_STATUS_FUTUREATTACK on the AI's own side, read by AI_CBM_FutureSight. */
+  attackerFutureAttackUp?: boolean;
+  /** STATUS2_FOCUS_ENERGY on the AI's own battler, read by AI_CBM_FocusEnergy. */
+  hasFocusEnergy?: boolean;
+  /** Status1 Refresh-curable bits (POISON/BURN/PARALYSIS/TOXIC_POISON) on the AI's own battler, read by AI_CBM_Refresh. */
+  hasCurableStatus?: boolean;
   /** `gBattleMons[].status2 & STATUS2_CURSED` -- source-required for `AI_CV_AccuracyDown`'s Gate G (target only, doc §19.1). Optional, defaulting to `false`. */
   isCursed?: boolean;
+  /** `gBattleMons[].status2 & STATUS2_ESCAPE_PREVENTION` -- `AI_CBM_CantEscape`'s single gate (target only, EFFECT_MEAN_LOOK). Optional, defaulting to `false`. */
+  isEscapePrevented?: boolean;
+  /** `gBattleMons[].status2 & STATUS2_TORMENT` -- `AI_CBM_Torment`'s single gate (target only, EFFECT_TORMENT). Optional, defaulting to `false`. */
+  isTormented?: boolean;
   /** `gSideStatuses[] & SIDE_STATUS_LIGHTSCREEN` -- source-required for `AI_CBM_LightScreen`'s own gate (AI_USER's OWN side only, doc §23.1). Optional, defaulting to `false`. */
   lightScreenUp?: boolean;
   /** `gSideStatuses[] & SIDE_STATUS_REFLECT` -- source-required for `AI_CBM_Reflect`'s own gate (AI_USER's OWN side only, doc §23.1). Optional, defaulting to `false`. */
@@ -548,6 +566,16 @@ export type FactoryAiScoredBattlerView = Readonly<{
    * §25.1/§25.2). Optional, defaulting to `undefined` (no weather bit set).
    */
   currentWeather?: AiWeatherValue;
+  /**
+   * Alive, non-empty, non-Egg bench count produced by
+   * `count_usable_party_mons AI_USER`, excluding the active party index --
+   * `AI_CBM_Explosion`/`AI_CBM_BatonPass`'s own AI_USER count gate. Optional
+   * (the live driver does not yet model either side's party), defaulting to
+   * the CBM layer's conservative zero-member default.
+   */
+  usablePartyMons?: number;
+  /** `gBattleMons[].status2 & STATUS2_SUBSTITUTE` -- `AI_CBM_Substitute`'s own first gate (attacker's own copy only). Optional, defaulting to `false`. */
+  hasSubstitute?: boolean;
 }>;
 
 export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
@@ -805,6 +833,16 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     isConfused: view.target.isConfused,
     safeguardUp: view.target.safeguardUp,
     usablePartyMons: view.target.usablePartyMons,
+    isLeechSeeded: view.target.isLeechSeeded,
+    ...(view.target.isAsleep === true ? { isAsleep: true } : {}),
+    ...(view.target.isEscapePrevented === true ? { isEscapePrevented: true } : {}),
+    ...(view.target.isTormented === true ? { isTormented: true } : {}),
+    ...(view.target.hasPerishSong === true ? { hasPerishSong: true } : {}),
+    ...(view.target.isNightmared === true ? { isNightmared: true } : {}),
+    ...(view.target.isForesighted === true ? { isForesighted: true } : {}),
+    ...(view.target.spikesUp === true ? { spikesUp: true } : {}),
+    ...(view.target.targetFutureAttackUp === true ? { targetFutureAttackUp: true } : {}),
+    level: view.target.level,
   });
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({
     atkStage: view.attacker.statStages.atk,
@@ -816,6 +854,20 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     reflectUp: view.attacker.reflectUp,
     evasionStage: view.attacker.statStages.evasion,
     currentWeather: view.attacker.currentWeather,
+    level: view.attacker.level,
+    isFirstTurn: view.attacker.isFirstTurn,
+    ...(view.attacker.safeguardUp === true ? { safeguardUp: true } : {}),
+    ...(view.attacker.isAsleep === true ? { isAsleep: true } : {}),
+    ...(view.attacker.usablePartyMons === undefined
+      ? {}
+      : { usablePartyMons: view.attacker.usablePartyMons }),
+    ...(view.attacker.hasSubstitute === true ? { hasSubstitute: true } : {}),
+    hp: view.attacker.hp,
+    maxHp: view.attacker.maxHp,
+    ...(view.attacker.isRooted === true ? { isRooted: true } : {}),
+    ...(view.attacker.attackerFutureAttackUp === true ? { attackerFutureAttackUp: true } : {}),
+    ...(view.attacker.hasFocusEnergy === true ? { hasFocusEnergy: true } : {}),
+    ...(view.attacker.hasCurableStatus === true ? { hasCurableStatus: true } : {}),
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [

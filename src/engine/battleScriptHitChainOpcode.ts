@@ -517,6 +517,28 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
     "STRINGID_PKMNHIDUNDERWATER",
     "STRINGID_PKMNSPRANGUP",
   ]),
+  /** battle_message.c:1102-1106 -- B_MSG_DEFROSTED(0)/DEFROSTED_BY_MOVE(1), BattleScript_MoveUsedUnfroze (frozen mon thawed by a fire move). */
+  gGotDefrostedStringIds: Object.freeze([
+    "STRINGID_PKMNWASDEFROSTED2",
+    "STRINGID_PKMNWASDEFROSTEDBY",
+  ]),
+  /**
+   * battle_message.c:1176-1183 -- BattleScript_MoveUsedLoafingAroundMsg's own
+   * table (Truant loafing) plus the traded-mon disobedience rows:
+   * B_MSG_LOAFING(0)/WONT_OBEY(1)/TURNED_AWAY(2)/PRETEND_NOT_NOTICE(3)/
+   * INCAPABLE_OF_POWER(4). Rows 1-4 need a disobedient traded mon, which
+   * Frontier rental teams never contain (no traded-mon disobedience), so only
+   * row 0 is reachable in Factory singles; all five are transcribed anyway
+   * because the table is the ROM's data and truncating it would reintroduce an
+   * index bug.
+   */
+  gInobedientStringIds: Object.freeze([
+    "STRINGID_PKMNLOAFING",
+    "STRINGID_PKMNWONTOBEY",
+    "STRINGID_PKMNTURNEDAWAY",
+    "STRINGID_PKMNPRETENDNOTNOTICE",
+    "STRINGID_PKMNINCAPABLEOFPOWER",
+  ]),
 });
 
 const MOVE_EFFECT_LABEL_BY_BYTE: Readonly<Record<number, string>> = Object.freeze({
@@ -2369,10 +2391,16 @@ function createHealthbarupdateOpcodeHandler(
 /**
  * Cmd_datahpupdate (battle_script_commands.c:1844-1986): the hit chain's real
  * HP mutation. Substitute-active damages the substitute instead (gHpDealt
- * bookkeeping matches source); the substitute-FADES sub-case
- * (BattleScriptPushCursor to BattleScript_SubstituteFade, an unrelated
- * cutscene subsystem) is barriered, gated strictly on the substitute's HP
- * actually reaching zero this hit. Negative damage (HP gain, Ingrain/Leech
+ * bookkeeping matches source); when the substitute's HP reaches exactly zero
+ * this hit -- either from overkill damage (battle_script_commands.c:1875-1882,
+ * where gHpDealt/shellBellDmg clamp to the remaining HP, not the raw damage)
+ * or from damage exactly equal to it (battle_script_commands.c:1884-1891's
+ * post-branch `substituteHP == 0` check, which the old code never reached on
+ * the `>=` path) -- the machine pushes BattleScript_SubstituteFade via the
+ * same `call` shape battleScriptTryCastformDataChangeOpcode.ts uses for
+ * BattleScriptPushCursorAndCallback: the pushed cursor is the byte after this
+ * opcode's own operand, so `return` pops back to the next instruction.
+ * Negative damage (HP gain, Ingrain/Leech
  * Seed's own end-turn ticks -- docs/ingrain-leechseed-wrap-ground-truth.md
  * §2a/§2b) is a plain HP write clamped at maxHP, with none of the positive
  * branch's bide/shellBell/physical-special bookkeeping (source has no such
@@ -2425,28 +2453,41 @@ function createDatahpupdateOpcodeHandler(
 
     if (substituteActive) {
       const remaining = battlerState.substituteHP;
-      if (remaining >= damage) {
-        const nextRulesContext = withBattler(rulesContext, battler, {
-          substituteHP: remaining - damage,
-          specialStatus: Object.freeze({
-            ...battlerState.specialStatus,
-            shellBellDmg: battlerState.specialStatus.shellBellDmg === 0
-              ? damage
-              : battlerState.specialStatus.shellBellDmg,
-          }),
-        });
+      // Source clamps both gHpDealt and shellBellDmg to the REMAINING HP when
+      // damage exceeds it (:1875-1882); min() is the exact encoding of both
+      // branches (`remaining >= damage` keeps the full damage, otherwise the
+      // remaining HP).
+      const hpDealt = Math.min(damage, remaining);
+      const shellBellDmg = battlerState.specialStatus.shellBellDmg === 0
+        ? hpDealt
+        : battlerState.specialStatus.shellBellDmg;
+      const substituteHP = remaining > damage ? remaining - damage : 0;
+      const nextRulesContext = withBattler(rulesContext, battler, {
+        substituteHP,
+        specialStatus: Object.freeze({ ...battlerState.specialStatus, shellBellDmg }),
+      });
+      if (substituteHP !== 0) {
         return transitionBattleScriptCommand(
           context,
           Object.freeze({ kind: "advance" }),
-          { rulesContext: Object.freeze({ ...nextRulesContext, hpDealt: damage }) },
+          { rulesContext: Object.freeze({ ...nextRulesContext, hpDealt }) },
         );
       }
-      return unsupportedBranch(
+      // Substitute fades (:1884-1891): gBattlescriptCurrInstr += 2;
+      // BattleScriptPushCursor(); gBattlescriptCurrInstr =
+      // BattleScript_SubstituteFade. Modeled as the machine's `call`, exactly
+      // the way battleScriptTryCastformDataChangeOpcode.ts models
+      // BattleScriptPushCursorAndCallback: the pushed cursor is the byte after
+      // this opcode's own operand, i.e. the next instruction, and the fade
+      // script's own `return` pops back to it.
+      const fade = resolveBattleScriptLabel(context.program, "BattleScript_SubstituteFade");
+      if (!fade) {
+        throw new Error("Cmd_datahpupdate: unresolved BattleScript_SubstituteFade label");
+      }
+      return transitionBattleScriptCommand(
         context,
-        "Cmd_datahpupdate's substitute-faints branch (BattleScriptPushCursor to "
-          + "BattleScript_SubstituteFade, the fade cutscene) is not modeled",
-        "battle_script_commands.c",
-        1889,
+        Object.freeze({ kind: "call", programCounter: fade.programCounter }),
+        { rulesContext: Object.freeze({ ...nextRulesContext, hpDealt }) },
       );
     }
 

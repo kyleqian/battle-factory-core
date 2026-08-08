@@ -119,7 +119,13 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // 13 -> 12 (Ability absorption): JumpIfMoveFailed now source-completely
   // redirects Volt Absorb, Water Absorb, and Flash Fire to their real
   // healing/full-HP/boost scripts instead of stopping at one shared barrier.
-  ["src/engine/battleScriptHitChainOpcode.ts", 12],
+  // 12 -> 11 (Cmd_datahpupdate substitute-FADES): the `remaining < damage`
+  // overkill branch now does source-clamped bookkeeping (gHpDealt and
+  // shellBellDmg take the remaining HP, not the raw damage) and both zero-HP
+  // outcomes (overkill, and damage exactly equal to the remaining HP) push
+  // BattleScript_SubstituteFade as a machine `call` instead of halting
+  // (battle_script_commands.c:1875-1891).
+  ["src/engine/battleScriptHitChainOpcode.ts", 11],
   // 4 -> 3 (Snatch row 5c): the action-order redirect, PressurePPLose,
   // winner-only flag consumption, and pushed BattleScript_SnatchedMove
   // continuation are now live; Lightning Rod remains the adjacent barrier.
@@ -171,6 +177,14 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // now preserves the global-current-move/candidate-TypeCalc and u8-bestDmg
   // source quirks, so competitive multi-candidate replacements execute.
   ["src/engine/battleScriptOpenPartyScreenOpcode.ts", 1],
+  // GETEXP registration (ROADMAP S10 rung 4): Cmd_getexp's Frontier
+  // short-circuit (state 0 -> 6) is live; the general EXP/level-up/evolution
+  // machinery (states 1-5, non-Frontier only) is the one barrier. The selector
+  // barrier (docs/barrier-reachability-triage.md item 6) now resolves
+  // BS_FAINTED too (SpikesOnFaintedBattlerFainted's `getexp BS_FAINTED`,
+  // battle_script_commands.c:3264's GetBattlerForBattleScript BS_FAINTED arm)
+  // -- all five committed call sites resolve; the remaining selector barrier
+  // is a future-input guard. 2 total, unchanged.
   ["src/engine/battleScriptGetexpOpcode.ts", 2],
   ["src/engine/battleScriptCheckteamslostOpcode.ts", 3],
   // Forced-switch ground truth §4 slices 1/2/3 tail (SWITCHHANDLEORDER,
@@ -180,7 +194,10 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // this script's case 2/3); SwitchInClearSetData's unconditional
   // STATUS2_WRAPPED clear; switchinanim's BATTLE_TYPE_ARENA
   // point-init call (never set for Factory); various's every id other than
-  // RESET_PLAYER_FAINTED (7). The Truant counter write and grouped
+  // RESET_PLAYER_FAINTED (7) -- now also including GET_BATTLER_FAINTED (4,
+  // docs/barrier-reachability-triage.md item 4, the Pursuit switch-out
+  // `getbattlerfainted BS_TARGET` macro expansion, written into
+  // battleCommunication0) as a live case. The Truant counter write and grouped
   // ABILITYEFFECT_ON_SWITCHIN dispatch are source-ported. 4 total, none
   // reached by the committed forced-switch fixtures;
   // the Spikes fixture now executes its shared path, while their other state
@@ -227,7 +244,19 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // SET_BATTLER_TYPE/four-form table this engine has not ported. Every
   // non-Castform battler (the vast majority of matchups) and an
   // already-correctly-typed Castform never reach it.
-  ["src/engine/battleScriptTryCastformDataChangeOpcode.ts", 1],
+  // 1 -> 0 (ROADMAP S10 gate-4, side lane): the last barrier is RETIRED, not
+  // narrowed. Cmd_trycastformdatachange now writes the durable type pair
+  // (SET_BATTLER_TYPE) via withBattler, writes gBattleStruct->formToChangeInto
+  // = form - 1, and pushes the real BattleScript_CastformChange continuation
+  // (modeled as the machine's `call`; its end3 pops back to the loop's
+  // addbyte). B_SCR_OP_DOCASTFORMCHANGEANIMATION is registered alongside
+  // (Cmd_docastformchangeanimation, battle_script_commands.c:9730-9740) and
+  // emits the B_ANIM_CASTFORM_CHANGE controller animation as a typed kernel
+  // event -- its only new guard is the shared controller-busy block, which is
+  // not an unsupported-branch barrier. Reachability-pinned by every case in
+  // tests/battleScriptTryCastformDataChangeOpcode.test.ts "(b) live form
+  // change".
+  ["src/engine/battleScriptTryCastformDataChangeOpcode.ts", 0],
   // Ingrain/Leech Seed/Wrap setter opcode registration (docs/ingrain-
   // leechseed-wrap-ground-truth.md §5): Cmd_copyarray is narrowed to
   // BattleScript_LeechSeedTurnDrain's own `gBattleMoveDamage<-gHpDealt, size
@@ -238,16 +267,18 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // other concrete call sites -- Shield Dust/Suction Cups/Own Tempo/Water
   // Veil/Rock Head/Clear Body/... -- plus the BS_ATTACKER_SIDE/
   // BS_NOT_ATTACKER_SIDE AbilityBattleEffects branches, unreached by any
-  // concrete call site). Cmd_manipulatedamage is narrowed to DMG_CHANGE_SIGN
-  // (1 barrier, DMG_RECOIL_FROM_MISS/DMG_DOUBLED -- Struggle recoil/Beat Up,
-  // out of this slice's scope). Widened, not narrowed further (EFFECT_ENDEAVOR
+  // concrete call site). Cmd_manipulatedamage used to be narrowed to
+  // DMG_CHANGE_SIGN (its third barrier, DMG_RECOIL_FROM_MISS/DMG_DOUBLED --
+  // Struggle recoil/Beat Up) but is now source-complete across all three
+  // modes (docs/barrier-reachability-triage.md item 10), retiring that
+  // barrier: 3 -> 2. Widened, not narrowed further (EFFECT_ENDEAVOR
   // registration, seam-scout §9.2): Cmd_copyarray's own accepted tuple set now
   // also covers `gHpDealt<-gBattleMoveDamage` (BattleScript_EffectEndeavor's
   // own reverse pair, stashing its set-damage across typecalc's STAB/type-
   // effectiveness multiply so Endeavor's real damage is immune to it) -- one
   // more concrete call site resolves (Endeavor no longer among the "every
   // other" rejected sites), same single barrier call site, count unchanged.
-  ["src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts", 3],
+  ["src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts", 2],
   // REMOVEITEM registration (docs/endturn-abilities-items-ground-truth.md
   // §5 slice 4): Cmd_removeitem's only unmodeled branch is a selector that
   // resolves to no live battler role at all (BS_ATTACKER before an attacker
@@ -282,7 +313,15 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // reads whatever ROM byte follows the const array on real hardware. Named
   // (b) barrier, reachability-tested in
   // tests/battleScriptProtectlikeOpcode.test.ts.
-  ["src/engine/battleScriptProtectlikeOpcode.ts", 1],
+  // 1 -> 0 (docs/protectlike-oob-adjacent-byte.md): the OOB read is MEASURED,
+  // not guessed -- the linker placed sMovesForbiddenToCopy at 0x0831c3e0
+  // immediately after the 8-byte table at 0x0831c3d8, so sProtectSuccessRates
+  // [4] == its first u16 0x0076 == MOVE_METRONOME == 118 (verified in both
+  // pokeemerald.gba and pokeemerald.elf). The barrier is RETIRED: protectUses
+  // >= 4 now reads that constant and rolls normally (~0.18% success per use),
+  // so no branch halts. Dual-outcome + notLastTurn-gate reachability-tested in
+  // tests/battleScriptProtectlikeOpcode.test.ts.
+  ["src/engine/battleScriptProtectlikeOpcode.ts", 0],
   // B_SCR_OP_TRYKO registration (EFFECT_OHKO, ranked-table row 5, alongside
   // B_SCR_OP_TRYSETDESTINYBONDTOHAPPEN/B_SCR_OP_TRYHEALHALFHEALTH which both
   // register with zero barriers): Cmd_tryKO's own HOLD_EFFECT_FOCUS_BAND
@@ -292,7 +331,18 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // Lock-On/Mind-Reader branch needs gDisableStructs[target].
   // Lock On ownership is now source-complete; only Focus Band remains. 1
   // total, reachability-tested in tests/battleScriptTryKOOpcode.test.ts.
-  ["src/engine/battleScriptTryKOOpcode.ts", 1],
+  // 1 -> 0 (ROADMAP S10 dispatch-queue item 2, side lane): the last barrier
+  // is RETIRED, not narrowed -- the reason string was stale (the hit chain
+  // models gSpecialStatuses[target].focusBanded for real since the 16 -> 13
+  // Focus Band retirement above). Cmd_tryKO now draws the holder-only
+  // %10 roll before the Sturdy check (source order, one Random() consumed
+  // whenever the target holds Focus Band -- even on a failed roll or a
+  // Sturdy short-circuit), writes focusBanded via the sibling machinery on
+  // success, and consumes it on the OHKO-lands path as the MOVE_RESULT_
+  // FOE_HUNG_ON hp-1 clamp with lastUsedItem. Reachability-pinned in
+  // tests/battleScriptTryKOOpcode.test.ts "Cmd_tryKO's Focus Band
+  // holder-only roll".
+  ["src/engine/battleScriptTryKOOpcode.ts", 0],
   // B_SCR_OP_FORCERANDOMSWITCH/SWITCHOUTABILITIES/RETURNTOBALL/FINISHACTION
   // registration (EFFECT_ROAR, docs/roar-multihit-registration-scout.md §4
   // rungs 10-14): Cmd_forcerandomswitch/Cmd_switchoutabilities/
@@ -310,10 +360,15 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // tests/battleScriptForceSwitchOpcode.test.ts.
   ["src/engine/battleScriptForceSwitchOpcode.ts", 1],
   // Voluntary switching executes before ordinary moves through the real
-  // BattleScript_ActionSwitch tail. Its Pursuit-interception arm remains a
-  // trigger-narrow barrier until the pre-switch double-power hit path is
-  // modeled; ordinary non-Pursuit switches execute the source jump and full
-  // switch-in machinery. Reachability-pinned in
+  // BattleScript_ActionSwitch tail. Cmd_jumpifnopursuitswitchdmg's Pursuit-
+  // interception arm (all six guard conditions true) is now fully modeled --
+  // it falls through into the switch script's own double-power Pursuit hit and
+  // rewrites the Pursuit user's turn-order action to B_ACTION_TRY_FINISH
+  // (dispatch-queue item 5, 2026-08-08). The one remaining barrier is the
+  // `gMultiHitCounter != 1` RIGHT-flank target selection
+  // (battle_script_commands.c:8732-8738): a doubles-only position this
+  // singles reducer's switch path never reaches (it always stages
+  // `setmultihit 1`). Reachability-pinned in
   // tests/factoryBattleScriptFullTurnDecision.test.ts.
   ["src/engine/factoryBattleScriptFullTurnDecision.ts", 1],
   // B_SCR_OP_CLEARSTATUSFROMEFFECT/SETSEMIINVULNERABLEBIT/CLEARSEMIINVULNERABLEBIT

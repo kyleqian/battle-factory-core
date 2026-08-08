@@ -16,6 +16,7 @@ import {
   stepBattleScriptMachine,
   type BattleScriptMachineState,
 } from "../src/engine/battleScriptMachine.ts";
+import { HOLD_EFFECT_ID_FOCUS_BAND } from "../src/engine/battleScriptHitChainOpcode.ts";
 
 const program = loadBattleScriptProgram();
 const FISSURE = 90; // EFFECT_OHKO, accuracy 30
@@ -176,21 +177,17 @@ describe("production tryKO (Cmd_tryKO) dispatch", () => {
     expect(result.state.rng.calls).toBe(0);
   });
 
-  it("Sturdy takes priority over Focus Band -- both an item barrier and Sturdy present would be ambiguous, so verify Sturdy alone (no item) resolves cleanly with zero rolls", () => {
-    const rc = context(0, {}, { ability: ABILITY_STURDY, item: 0 });
-    const result = stepAtTryKO(rc);
-    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
-    expect(result.state.rng.calls).toBe(0);
+  it("Sturdy takes priority over Focus Band -- the band roll is consumed first (source order) but the Sturdy block still short-circuits the accuracy path", () => {
+    const rc = context(0, {}, { ability: ABILITY_STURDY, item: HOLD_EFFECT_FOCUS_BAND_ITEM });
+    const result = stepAtTryKO(rc, 28);
+    if (result.kind !== "advanced") throw new Error(`expected advance (jump), got ${result.kind}`);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_SturdyPreventsOHKO"));
+    expect(result.state.rulesContext.moveResultFlags & 1).toBe(1); // MOVE_RESULT_MISSED
+    expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_STURDY);
+    expect(result.state.rng.calls).toBe(1); // the band draw is consumed; the accuracy draw never happens
   });
 
   describe("(b) unsupported-branch barriers", () => {
-    it("halts on the target holding a Focus Band item (gSpecialStatuses[target].focusBanded unmodeled)", () => {
-      const rc = context(0, {}, { item: HOLD_EFFECT_FOCUS_BAND_ITEM });
-      const result = stepAtTryKO(rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 7507 });
-    });
-
     it("does not barrier on a plain (no-item) target", () => {
       const rc = context(0, {}, { item: 0 });
       const result = stepAtTryKO(rc);
@@ -211,6 +208,46 @@ describe("production tryKO (Cmd_tryKO) dispatch", () => {
       }));
       if (mismatch.kind !== "advanced") throw new Error("expected advance");
       expect(mismatch.state.rng.calls).toBe(1);
+    });
+  });
+
+  describe("Cmd_tryKO's Focus Band holder-only roll (battle_script_commands.c:7507)", () => {
+    it("successful roll sets focusBanded and hangs on: execution continues into the accuracy path and survives the OHKO at hp-1 with MOVE_RESULT_FOE_HUNG_ON + lastUsedItem", () => {
+      // seed 24: band draw randomValue=10903 -> 3 % 100 < param 10 (success); accuracy draw -> 29 < 30 (hit).
+      const rc = context(0, { level: 50 }, { level: 50, hp: 37, item: HOLD_EFFECT_FOCUS_BAND_ITEM });
+      const result = stepAtTryKO(rc, 24);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1].specialStatus.focusBanded).toBe(1);
+      expect(result.state.rulesContext.aiObservedItemEffects[1]).toBe(HOLD_EFFECT_ID_FOCUS_BAND);
+      expect(result.state.rulesContext.battleMoveDamage).toBe(36); // hp - 1
+      expect(result.state.rulesContext.moveResultFlags & (1 << 7)).toBe(1 << 7); // MOVE_RESULT_FOE_HUNG_ON
+      expect(result.state.rulesContext.moveResultFlags & (1 << 4)).toBe(0); // not MOVE_RESULT_ONE_HIT_KO
+      expect(result.state.rulesContext.lastUsedItem).toBe(HOLD_EFFECT_FOCUS_BAND_ITEM);
+      expect(result.state.rng.calls).toBe(2); // band roll + accuracy roll
+    });
+
+    it("failed roll leaves the flag clear but still consumes the draw and continues to the plain OHKO", () => {
+      // seed 28: band draw randomValue=12720 -> 20 % 100 >= param 10 (fail); accuracy draw -> 28 < 30 (hit).
+      const rc = context(0, { level: 50 }, { level: 50, hp: 37, item: HOLD_EFFECT_FOCUS_BAND_ITEM });
+      const result = stepAtTryKO(rc, 28);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1].specialStatus.focusBanded).toBe(0);
+      expect(result.state.rulesContext.aiObservedItemEffects[1]).toBe(0);
+      expect(result.state.rulesContext.battleMoveDamage).toBe(37); // full HP, plain OHKO
+      expect(result.state.rulesContext.moveResultFlags & (1 << 4)).toBe(1 << 4); // MOVE_RESULT_ONE_HIT_KO
+      expect(result.state.rulesContext.moveResultFlags & (1 << 7)).toBe(0);
+      expect(result.state.rng.calls).toBe(2);
+      expect(result.state.rng.ledger.map(({ reason }) => reason)).toEqual(["tryko-focus-band", "tryko"]);
+    });
+
+    it("holder-only: a non-Focus-Band target consumes no band draw at all (RNG-ledger discriminator)", () => {
+      const plain = stepAtTryKO(context(0, { level: 50 }, { level: 50, hp: 37, item: 0 }), 28);
+      const leftovers = stepAtTryKO(context(0, { level: 50 }, { level: 50, hp: 37, item: 200 }), 28); // ITEM_LEFTOVERS
+      for (const result of [plain, leftovers]) {
+        if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+        expect(result.state.rng.calls).toBe(1); // only the accuracy roll, no band draw
+        expect(result.state.rng.ledger.map(({ reason }) => reason)).toEqual(["tryko"]);
+      }
     });
   });
 

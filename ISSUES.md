@@ -17,52 +17,6 @@ backlog.
 
 # Open
 
-## #80 — Live play: in-battle party/switch menu — open/close windows CLOSED, one 3-frame open-edge residual left
-
-**User play-test 2026-08-05:** the party menu opened for switching "looks
-completely wrong" (layout/sprites/HP bars/message strip). This was the largest
-play-test item.
-
-**Effectively closed 2026-08-07/08.** `mid-battle-switch-dense-a-off` went
-**276 → 392/392 byte-exact** across two sessions, and the spec now pins the
-whole flow: the settled menu, the open animation (763-824), the submenu window
-(926-963), the close fade (964-1018) and the field reveal (1019-1255). Also
-byte-exact and kept green: `party-menu-status-item-off` **251/251**,
-`mid-battle-switch-pacing-b-off` **153/153**.
-
-What was wrong and is now fixed (forensics in `docs/fade-layer-forensics.md`
-§0-§10, each with a rerunnable probe; full history in git):
-
-- graphical HP bars, real HP/level text, gender glyphs, the real party message
-  window, ink/empty-box colours, the cursor open rule and selected-card wash,
-  the per-slot Pokéball sprites, the `{LV}` ligature, the CANCEL/pokeball
-  button;
-- the **open animation did not exist** — the app popped the full menu
-  instantly at 763; it now holds the battle scene 3 frames, fades it out over
-  16, holds black 27, and fades the menu in over 16, with the BG and OBJ
-  layers blended one step apart as the hardware does;
-- the **close fade** blended all layers together; OBJ now trails BG by one
-  blend step (frame 979 is the discriminator);
-- the **message window** stayed the wide "Choose a POKéMON." box through the
-  submenu and close; it now swaps to `sDoWhatWithMonMsgWindowTemplate` with
-  "Do what with this {PKMN}?" (`{PKMN}` = charmap bytes 0x53/0x54, not a
-  nickname splice);
-- the **mon-icon clock** ran 2 frames ahead from the submenu open;
-- the **submenu window** was a scaffold 16 px too high with the cursor baked
-  into the label; it now draws the real action window (**SHIFT**/SUMMARY/
-  CANCEL — line 1 is SHIFT, the voluntary-switch action per
-  `GetPartyMenuActionsTypeInBattle`, `party_menu.c:5788-5796`) with the cursor
-  as its own glyph, and is held through frame 963.
-
-**Still open (small):** the app opens the submenu **3 frames early** — oracle
-frames **923-925** show the pre-open state while the app already draws the
-window (fast loop `--capture-range 920:965` is 43/46; those 3 frames are
-deliberately **not** in the spec). Fix = delay the submenu render to the
-oracle's 926 pop edge, then extend `captureFrames` with 923-925 → 395/395.
-The A-press is 922-923 and the window lands 3 frames later, all at once
-(`docs/fade-layer-forensics.md` §10(d)).
-
-
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **Symptom:** all 62 Factory-front send-out intro families (**376/376** species
@@ -1490,8 +1444,35 @@ app replays remain byte-identical (**141 + 242 + 256 + 223 = 862** captures).
 and reopen guard own production turns 5–13, including the retained FLY owner;
 it now also owns turn 1's immutable HandleInputChooseAction/DoBounceEffect
 epoch and field content. The first early state field is cut (four handoff
-fields to three). Remaining work is turn-2–4 epoch/content folds (slices 7–9)
-and final positional parameter/type cleanup (slice 10).
+fields to three).
+
+**Dispatcher ladder CLOSED — all ten slices (supervisor-verified 2026-08-08).**
+The paragraph above used to say slices 7–10 remained; that text was six days
+stale. A worker briefed on "slice 7" correctly reported the step was already
+landed, and the supervisor confirmed it independently:
+`3a3a168a` (bridge turn-2 epoch content) + `8518520b` (fold turn-2 state) are
+both ancestors of master, `tools/census-next-command-handoffs.sh` reports
+**0** `BattleSceneState` handoff fields, **0** `drawFightSubmenuWindow` handoff
+parameters and **0** `currentPPForActiveMon` parameters, `grep` finds **0**
+`turn<N>Resolved` fields and **0** `Turn<N>CompletedResolutionNextCommandHandoff`
+imports in `battleScene.ts`/`battleMenu.ts` — that is slice 10's own final-cut
+acceptance, met. `docs/battle-scene-retirement-inventory.md`'s state-field
+table still lists `turn1Resolved…turn4Resolved`/`turn9Resolved…turn13Resolved`
+as live; those rows are stale, not open work.
+
+**What is actually still open in #39.** The turn-keyed *dispatcher* is gone;
+the per-species *render entry points* are not. `battleScene.ts` is now
+**36,897 lines** (it was 17,056 at the 2026-07-24 census — it more than doubled
+while the ladder ran) with **848** remaining `turn<N>` textual references, none
+of them state fields. The bounded successor program is
+`docs/species-render-entry-point-retirement-design.md` (45 census'd entry
+points, 7 slices); its slices 3 and 4 were GATED on ladder slice 10 and are now
+ungated. **Check each slice's premise before briefing it — that dossier is also
+partly stale:** slice 1's `PIDGEOTTO_MAX_HP` literal is already
+`TURN5_SWITCHIN.replacementHp.max` (only `murkrowHealthboxContentForHp`'s
+`hp === 142` cache-miss literal remains), and slice 5's entire `turn15Onix*`
+symbol cluster no longer exists. Slice 2's six healthbox factories are
+confirmed still present and unparameterized.
 
 # Settled records (not open work — see the note at the top of this file)
 
