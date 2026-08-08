@@ -5,50 +5,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1012 — [bounded MAIN worker, 2026-08-08] **`AI_CheckBadMove` preamble live-verified 4/4 against the real ROM — the scorer's first hardware receipts (gate A x0-immune exit + gate B `get_ability` redraw quirk both confirmed)**
-
-- **State:** master `faa6702e`, tree clean. No engine edits. Full `npm test`
-  **794 files / 7998 passed / 1 skipped, exit 0**; `npm run build` exit 0;
-  `npm run typecheck` exit 0; smoke green.
-- **Did:** opened the `AI_CheckBadMove` live-verification programme (109
-  ported handlers, previously zero hardware checks) by verifying the
-  **universal preamble** (`data/battle_ai_scripts.s:51-104`) with the
-  established reach/control recipe. New fixtures
-  `tools/battle-lab/mechanic-factory-ai-cbm-preamble-{control,reach}-off.json`
-  stage Factory trainer Shuckle (TACKLE×4) vs a corpus player target through
-  `mechanicLab overrides.parties`; new
-  `tools/probe/verify-factory-ai-cbm-preamble-live.ts` prints the ROM-observed
-  decision block (seeded after the unmodeled `gRandomTurnNumber` [1], ISSUES
-  #83's known seam) beside `chooseFactoryAiScoredDecision` output, plus the
-  ROM's PP-selected slot. **4/4 MATCH across seeds 1+2**: control (LUDICOLO,
-  two abilities, Normal TACKLE not immune) 13 draws / slot 2-3 / endpoint
-  exact; reach (BANETTE, Ghost, Normal x0) 5 draws / slot 1-2 / endpoint
-  exact. **Gate A** (x0 → `Score_Minus10` before ability read #1) observable:
-  all reach slots CBM **-10**, **0** draws. **Gate B** prediction confirmed:
-  two-distinct-ability target costs exactly **2 `get_ability` draws per scored
-  slot** (8 CBM draws, the port's load-bearing redraw claim), immune exit 0.
-  Banked in `tests/factoryAiCbmPreambleLiveReceipt.test.ts` (6 tests: all four
-  ROM rows — draw/CBM-draw counts, delta & score vectors, chosen slot, endpoint
-  RNG — plus both rows' exact draw-kind sequences). Write-up in the required
-  NEW file `docs/factory-ai-cbm-live-receipts-preamble.md` (ground-truth
-  addendum structure; side lane is appending to the shared doc this round).
-  Three commits: fixtures+verifier, test+doc, type-safe test fixes.
-- **Next (ordered):** (1) more CBM hardware receipts — the preamble was the
-  highest-traffic code; per-effect handlers with random sites (e.g. the
-  high-risk family, Protect-like gates) are the natural next receipts. (2)
-  ISSUES #83's turn-seam decision (whether the scored policy models
-  `gRandomTurnNumber`). (3) The remaining unverified CV handlers
-  (`AI_CV_PsychUp` 14, `AI_CV_BatonPass` 13, `AI_CV_FocusPunch` 11).
-- **Notes:** no PAPERCUTS of my own this session. The two fixtures are
-  seed-1-committed; the verifier overrides seed to 1 and 2 (each decision
-  window rerun byte-identical).
-
----
-
-## 1011 — [supervisor WIND-DOWN, 2026-08-08] Session summary: 20 workers / 10 rounds — **the Factory AI move-scoring stack is COMPLETE and now carries hardware receipts**; triage bucket (A) emptied; one port cancelled by refutation; one real AI bug found by live-verify
+## 1013 — [supervisor WIND-DOWN, 2026-08-08] Session summary: 21 workers / 11 rounds — **the Factory AI move-scoring stack is COMPLETE and now carries hardware receipts**; triage bucket (A) emptied; one port cancelled by refutation; one real AI bug found by live-verify
 
 - **State:** master at this entry's commit, clean. **Final independent union
-  verification: full `npm test` 793 files / 7992 passed / 1 skipped, exit 0;
+  verification: full `npm test` 794 files / 7998 passed / 1 skipped, exit 0;
   `npm run build` exit 0.** Session start (after the orient fold) was
   **775 files / 7567 passed**. DEFERRED.md: **no open entries** — the next
   `run-supervisor.sh` is unblocked.
@@ -66,8 +26,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `factoryAiDecisionPolicy.ts` discarded that move as a failed candidate — the AI ran
   most of every turn with its reasoning switched off. Both barriers are now
   **unreachable**, surviving only as defensive guards against a future source sync.
-- **It is no longer only a transcription: seven handlers were run against the real
-  ROM.** The reach/control live-verification recipe produced receipts for
+- **`AI_CheckBadMove` now has a hardware receipt too — and it confirmed the port's
+  load-bearing roll-count claim.** A final round live-verified the **preamble**, the
+  highest-traffic code in the module (it runs for every candidate move of every AI
+  turn): **MATCH 4/4**, ROM and engine agreeing on draw count, per-slot CBM delta,
+  chosen slot and endpoint RNG. Both gates confirmed on hardware — the
+  `AI_EFFECTIVENESS_x0` immunity exit (all slots -10, and **zero** ability draws
+  because it exits before the first `get_ability`), and the documented
+  **`get_ability` redraw quirk**: a two-distinct-ability target (LUDICOLO) costs
+  exactly **2 draws per scored slot**, because `Cmd_get_ability` reads
+  `BATTLE_HISTORY->abilities[]` but never writes it, so both preamble call sites
+  redraw. That quirk is what the whole port's roll-count parity rests on, and it had
+  never been checked against the ROM until now.
+- **It is no longer only a transcription: seven CheckViability handlers were run
+  against the real ROM.** The reach/control live-verification recipe produced receipts for
   `AI_CV_BrickBreak` (46 weighted), `AI_CV_Overheat` (23), `AI_CV_Facade` (19),
   `AI_CV_Curse` (18), `AI_CV_ChargeUpMove` (16+2+1+0, one handler serving four
   effects), `AI_CV_DragonDance` (14) and `AI_CV_MirrorCoat` (14). **Six matched
@@ -155,13 +127,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   diagnosis doc has what it needs. (2) More live receipts for the ported CV handlers
   — the recipe is proven at ~45 min each, and one in seven found a real bug. Highest
   unverified weight: `AI_CV_PsychUp` (14), `AI_CV_BatonPass` (13),
-  `AI_CV_FocusPunch` (11), `AI_CV_Substitute` (10). **`AI_CheckBadMove` has no live
-  receipt at all** — 109 ported handlers, zero hardware checks. (3) ISSUES #39's real
+  `AI_CV_FocusPunch` (11), `AI_CV_Substitute` (10). `AI_CheckBadMove`'s
+  preamble is now receipted, but its **109 `if_effect` handler bodies** still have no
+  hardware check of their own. (3) ISSUES #39's real
   subject, retiring turn-keyed presentation, now that the mechanical split has hit its
   boundary. (4) Triage item 12 (Enigma Berry), the last classified barrier; and a
   reachability refresh of the barriers outside the AI (`battleScriptHitChainOpcode.ts`
   still pins 11) — the original 50-site sweep is now spent.
-- **Notes:** 20 workers, 10 rounds, 1 cap-kill with zero commits (my brief's fault;
+- **Notes:** 21 workers, 11 rounds, 1 cap-kill with zero commits (my brief's fault;
   rebriefed and landed), 0 lost work otherwise.
   `tools/check-oracle-freshness.sh` FAILs on both oracle ports, but `oracle/` has had
   **zero** commits since either process started — the script compares process start
@@ -170,6 +143,46 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   restart of port 8012 would have killed the animation lane's live worker. Logged in
   PAPERCUTS with the disproof command, alongside a second entry for report tools
   rewriting generated docs with no read-only mode.
+
+## 1012 — [bounded MAIN worker, 2026-08-08] **`AI_CheckBadMove` preamble live-verified 4/4 against the real ROM — the scorer's first hardware receipts (gate A x0-immune exit + gate B `get_ability` redraw quirk both confirmed)**
+
+- **State:** master `faa6702e`, tree clean. No engine edits. Full `npm test`
+  **794 files / 7998 passed / 1 skipped, exit 0**; `npm run build` exit 0;
+  `npm run typecheck` exit 0; smoke green.
+- **Did:** opened the `AI_CheckBadMove` live-verification programme (109
+  ported handlers, previously zero hardware checks) by verifying the
+  **universal preamble** (`data/battle_ai_scripts.s:51-104`) with the
+  established reach/control recipe. New fixtures
+  `tools/battle-lab/mechanic-factory-ai-cbm-preamble-{control,reach}-off.json`
+  stage Factory trainer Shuckle (TACKLE×4) vs a corpus player target through
+  `mechanicLab overrides.parties`; new
+  `tools/probe/verify-factory-ai-cbm-preamble-live.ts` prints the ROM-observed
+  decision block (seeded after the unmodeled `gRandomTurnNumber` [1], ISSUES
+  #83's known seam) beside `chooseFactoryAiScoredDecision` output, plus the
+  ROM's PP-selected slot. **4/4 MATCH across seeds 1+2**: control (LUDICOLO,
+  two abilities, Normal TACKLE not immune) 13 draws / slot 2-3 / endpoint
+  exact; reach (BANETTE, Ghost, Normal x0) 5 draws / slot 1-2 / endpoint
+  exact. **Gate A** (x0 → `Score_Minus10` before ability read #1) observable:
+  all reach slots CBM **-10**, **0** draws. **Gate B** prediction confirmed:
+  two-distinct-ability target costs exactly **2 `get_ability` draws per scored
+  slot** (8 CBM draws, the port's load-bearing redraw claim), immune exit 0.
+  Banked in `tests/factoryAiCbmPreambleLiveReceipt.test.ts` (6 tests: all four
+  ROM rows — draw/CBM-draw counts, delta & score vectors, chosen slot, endpoint
+  RNG — plus both rows' exact draw-kind sequences). Write-up in the required
+  NEW file `docs/factory-ai-cbm-live-receipts-preamble.md` (ground-truth
+  addendum structure; side lane is appending to the shared doc this round).
+  Three commits: fixtures+verifier, test+doc, type-safe test fixes.
+- **Next (ordered):** (1) more CBM hardware receipts — the preamble was the
+  highest-traffic code; per-effect handlers with random sites (e.g. the
+  high-risk family, Protect-like gates) are the natural next receipts. (2)
+  ISSUES #83's turn-seam decision (whether the scored policy models
+  `gRandomTurnNumber`). (3) The remaining unverified CV handlers
+  (`AI_CV_PsychUp` 14, `AI_CV_BatonPass` 13, `AI_CV_FocusPunch` 11).
+- **Notes:** no PAPERCUTS of my own this session. The two fixtures are
+  seed-1-committed; the verifier overrides seed to 1 and 2 (each decision
+  window rerun byte-identical).
+
+---
 
 ## 1010 — [bounded MAIN worker, 2026-08-08] **ISSUES #83 LOCATED: the unmodeled per-slot draw is `gRandomTurnNumber = Random()` at `battle_main.c:4013` (BattleTurnPassed); the reach tie divergence is that same one-step misalignment PLUS the ROM never firing `AI_CV_Counter8` — an unaligned `if_has_move` operand read**
 
