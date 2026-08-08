@@ -54,6 +54,9 @@ const MOVE_COUNTER_REAL = 68; // the real move id (`#define MOVE_COUNTER 68`)
 const MOVE_SPLASH = 150;
 
 function mirrorCoatView(reach: boolean): FactoryAiScoredView {
+  const moves: readonly [number, number, number, number] = reach
+    ? [MOVE_MIRROR_COAT, MOVE_COUNTER_REAL, MOVE_SPLASH, MOVE_SPLASH]
+    : [MOVE_MIRROR_COAT, MOVE_SPLASH, MOVE_SPLASH, MOVE_SPLASH];
   return Object.freeze({
     schema: "factory-ai-scored-view/v1",
     mode: "factory-level-50-singles",
@@ -64,9 +67,7 @@ function mirrorCoatView(reach: boolean): FactoryAiScoredView {
       factoryWinStreak: 28,
       trainerOpponentId: 222,
     }),
-    moves: reach
-      ? [MOVE_MIRROR_COAT, MOVE_COUNTER_REAL, MOVE_SPLASH, MOVE_SPLASH]
-      : [MOVE_MIRROR_COAT, MOVE_SPLASH, MOVE_SPLASH, MOVE_SPLASH],
+    moves,
     attacker: Object.freeze(
       reach
         ? {
