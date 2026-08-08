@@ -1,0 +1,52 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "DOUBLE_EDGE",
+  "pair": "FRONTIER_MON_HITMONTOP_2 set 341 (opponent-front HITMONTOP) -> legal ONIX (player-back)",
+  "orientation": "opponent-to-player",
+  "scenario": "tools/battle-lab/mechanic-double-edge-opponent-hitmontop-player-onix.json",
+  "probe": "tools/compare/doubleEdgeProbe.py",
+  "appStage": {
+    "presentationAge": 0
+  },
+  "denseWindow": {
+    "startFrame": 84,
+    "endFrame": 224,
+    "frameCount": 141
+  },
+  "attacker": {
+    "species": "HITMONTOP",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 13 },
+      "animationCenter": { "x": 176, "y": 45 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 142,
+    "playerMaxHp": 142,
+    "opponentHp": 157,
+    "opponentMaxHp": 157,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "double-edge-dense-evidence/v1",
+  "evidenceSha256": "30d84ed6f1e8c0e624536bb45bec5c30a07b1793095acc171558e5b8ec74b2d0",
+  "secondFreshEvidenceSha256": "30d84ed6f1e8c0e624536bb45bec5c30a07b1793095acc171558e5b8ec74b2d0",
+  "rawRgbSha256": "ef72361787f2b8f0f2554684a806db69c254bef755fef1ae4974c5d57ad2e9ce",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 141,
+    "componentMatching": 141
+  }
+}

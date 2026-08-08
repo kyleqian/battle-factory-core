@@ -241,6 +241,30 @@ function shakeX2(age: number): number {
   return shakeMonInPlaceOffsetAtTick(4, 0, 12, 1, age - 79).x2;
 }
 
+/**
+ * The reducer's RAM-truth `ShakeMonInPlace(4,0,12,1)` x2 at a RAM age
+ * (tick base age 79, active ages 80-101, restore to 0 at 101).
+ */
+export function doubleEdgeRamShakeX2(ramAge: number): number {
+  if (ramAge < SHAKE_FIRST_AGE || ramAge > SHAKE_FIRST_AGE + 21) return 0;
+  return shakeMonInPlaceOffsetAtTick(4, 0, 12, 1, ramAge - 79).x2;
+}
+
+/**
+ * The `ShakeMonInPlace` x2 as DISPLAYED, measured on this move's own change
+ * maps. The task's per-frame writes reach pixels one two-frame PAIR late: the
+ * RAM value written at the even ages of each pair (80,82,...,100) displays for
+ * the following two frames (displayed ages 81..102), and the RAM odd-age
+ * writes are lost, so the displayed value at display age `A` is the RAM pair
+ * containing `A - 1`. The RAM age-101 restore to 0 therefore shows at
+ * displayed age 103. (This is why "the shake is RAM+1" fit every player-back
+ * frame but one opponent-front toggle contradicted it - the pair-aligned rule
+ * is exact on both.)
+ */
+export function doubleEdgeDisplayedShakeX2(displayAge: number): number {
+  return doubleEdgeRamShakeX2(2 * Math.floor((displayAge - 1) / 2));
+}
+
 function attackerOffsetAtAge(
   age: number,
   attackerSide: DoubleEdgeSide,
@@ -341,7 +365,7 @@ export function doubleEdgeAtAge(
   targetSide: DoubleEdgeSide,
   targetCenter: Readonly<{ x: number; y: number }>,
 ): DoubleEdgeState {
-  const firstRotate = age >= ROTATE_FIRST_AGE && age <= ROTATE_LAST_AGE;
+  const firstRotate = age >= ROTATE_FIRST_AGE && age < ROTATE_LAST_AGE;
   const restoreRotate = age >= RESTORE_FIRST_AGE && age < RESTORE_RESET_AGE;
   const hitSplatAge = age >= HITSPLAT_AGE && age <= HITSPLAT_AGE + 8;
   const shakeActive = age >= SHAKE_FIRST_AGE && age <= SHAKE_LAST_AGE;

@@ -986,6 +986,7 @@ import {
   sceneOnSlashView,
   sceneOnLickView,
   sceneOnCounterView,
+  sceneOnDoubleEdgeView,
   sceneOnCrushClawView,
   sceneOnTakeDownView,
   sceneOnSingView,
@@ -1090,6 +1091,18 @@ import {
   SLIDE_BACK_ATTACKER_AGE,
   TARGET_PUSH_FIRST_STEP_AGE,
 } from "../animation/takeDown.ts";
+import {
+  BG_WHITE_RAMP_FIRST_AGE,
+  ELLIPSE_FIRST_AGE,
+  ELLIPSE_LAST_AGE,
+  RESTORE_RESET_AGE,
+  ROTATE_FIRST_AGE,
+  SHAKE_FIRST_AGE as DOUBLE_EDGE_SHAKE_FIRST_AGE,
+  TARGET_SLIDE_FIRST_AGE,
+  doubleEdgeDisplayedShakeX2,
+  doubleEdgeRamShakeX2,
+  type DoubleEdgeMatrix,
+} from "../animation/doubleEdge.ts";
 import { sludgeDisplayedTargetOffsetAtAge } from "../animation/sludge.ts";
 import {
   whirlwindDisplayedTargetOffsetAtAge,
@@ -35280,6 +35293,212 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "HITMONTOP used" : "Foe HITMONTOP used",
       "COUNTER!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "DOUBLE_EDGE") {
+    const view = sceneOnDoubleEdgeView(state);
+    // Display latches are split per task, measured from this move's own change
+    // maps (`tools/compare/evidence/double-edge-changemap-*.txt`):
+    //  * `AnimTask_TranslateMonEllipticalRespectSide` (attacker lunge) and
+    //    `AnimTask_RotateMonSpriteToSide` (both battlers) are TASK-driven and
+    //    render TWO frames after their RAM state.
+    //  * both `gSlideMonTo*` slides, the basic hitsplat, the two
+    //    `AnimTask_ShakeMonInPlace` x2 toggles and the two palette blends are
+    //    SPRITE-driven and render ONE frame after their RAM state.
+    // So `displayed` (age - 1) drives the slides/shake/hitsplat/blends and the
+    // attacker lunge + both rotation transforms drive from `age - 2`.
+    const displayed = sceneOnDoubleEdgeView({ ...state, age: state.age - 1 });
+    const task = sceneOnDoubleEdgeView({ ...state, age: state.age - 2 });
+    const playerToOpponent =
+      view.attacker.species === "HITMONTOP"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "HITMONTOP"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged DOUBLE_EDGE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const hitmontop = playerToOpponent ? hitmontopBackSprite : hitmontopFrontSprite;
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const white = { r: 255, g: 255, b: 255 };
+    // The BG-white `simple_palette_blend` (delay=0) writes the F_PAL_BG
+    // coefficient the same frame the script runs it (RAM + 0) for the flat
+    // plateau, but the later ramp task (delay=2) reaches the framebuffer one
+    // frame late: the whole ramp renders at RAM + 1 (the reducer's age-83
+    // first ramp value displays at age 84), so the displayed coefficient is
+    // the reducer's value for ages up to the ramp start and the reducer's
+    // age-1 value afterwards. The attacker-white `complex_palette_blend` is
+    // sprite-driven and renders one frame after its RAM state.
+    const bgWhite = view.age < BG_WHITE_RAMP_FIRST_AGE
+      ? view.bgWhiteCoefficient
+      : displayed.bgWhiteCoefficient;
+    const attackerWhite = displayed.attackerWhiteCoefficient;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      bgWhite > 0
+        ? blendPaletteBanksToward(battleBg.palette, white, bgWhite)
+        : battleBg.palette,
+    );
+    // The attacker-white `complex_palette_blend` reaches only the attacker's
+    // OBJ palette (F_PAL_ATTACKER); the BG-white `simple_palette_blend`
+    // reaches only the field BG palettes (F_PAL_BG). Neither touches the
+    // target, the healthboxes, or the message window.
+    const attackerPalette = attackerWhite > 0
+      ? blendPaletteToward(hitmontop.palette, white, attackerWhite)
+      : hitmontop.palette;
+    // The attacker's elliptical lunge (RAM 31-61) is task-driven and renders
+    // at +2; its last displayed frame is RAM 61 at displayed age 63 (the
+    // RAM-62 destroy write is overwritten by the slide's tick-0 before it
+    // displays). Both gSlideMonToOffset dummies, both gSlideMonToOriginalPos
+    // dummies, the ShakeMonInPlace toggles and the hitsplat are sprites and
+    // render the plain RAM+1 displayed state.
+    const attackerLungeActive = state.age - 2 >= ELLIPSE_FIRST_AGE - 1
+      && state.age - 2 <= ELLIPSE_LAST_AGE;
+    // The ShakeMonInPlace pair-latch: the +1 displayed state carries the RAM
+    // shake at displayedAge, but the task's writes display one two-frame pair
+    // late (`doubleEdgeDisplayedShakeX2`, measured on this move's change
+    // maps), so replace the RAM-shake component with the pair-aligned one
+    // inside the shake window. The slide/shake hold is constant there, so the
+    // substitution is exact.
+    const shakeCorrected = (offset: number): number => (
+      state.age > DOUBLE_EDGE_SHAKE_FIRST_AGE
+        ? offset - doubleEdgeRamShakeX2(state.age - 1) + doubleEdgeDisplayedShakeX2(state.age)
+        : offset
+    );
+    const attackerX2 = attackerLungeActive
+      ? task.attackerOffset.x2
+      : shakeCorrected(displayed.attackerOffset.x2);
+    // The rotation-derived y2 (`SetBattlerSpriteYOffsetFromRotation`) is
+    // written by the rotate TASK and renders at the same +2 latch as the
+    // matrix, so the player-side battler's y2 during the rotate span (RAM
+    // 80-126) comes from the task state, not the +1 displayed state.
+    const rotateY2Active = state.age - 2 >= ROTATE_FIRST_AGE
+      && state.age - 2 < RESTORE_RESET_AGE;
+    const attackerY2 = attackerLungeActive || rotateY2Active
+      ? task.attackerOffset.y2
+      : displayed.attackerOffset.y2;
+    // The target rests at its front-idle x2 (ONIX front x2=1) through the
+    // move-owned hold (probe RAM ages 0-69, displayed 1-70); the -32 push
+    // slide's tick-0 write (RAM 70) then displays at age 71. Opponent-front
+    // has no hold (ONIX back rests at x2=0) and the reducer matches the probe
+    // outright.
+    const targetX2 = playerToOpponent && state.age - 1 < TARGET_SLIDE_FIRST_AGE
+      ? targetIdle.x2
+      : shakeCorrected(displayed.targetOffset.x2);
+    const targetY2 = playerToOpponent ? 0 : (
+      rotateY2Active ? task.targetOffset.y2 : displayed.targetOffset.y2
+    );
+    const drawBattler = (
+      tileset: Tileset,
+      palette: RgbColor[],
+      corner: Readonly<{ x: number; y: number }>,
+      transform: Readonly<{ active: boolean; matrix: DoubleEdgeMatrix }>,
+      x2: number,
+      y2: number,
+    ): void => {
+      if (!transform.active) {
+        drawSpriteSheet(fb, tileset, palette, corner.x + x2, corner.y + y2);
+        return;
+      }
+      // `PrepareBattlerSpriteForRotScale` enters affine-double OAM mode, so
+      // the rotated battler samples the doubled window about its center.
+      const halfW = (tileset.columns * 8) / 2;
+      const halfH = (tileset.rows * 8) / 2;
+      drawSpriteSheetAffineRotate(
+        fb,
+        tileset,
+        palette,
+        corner.x + halfW + x2,
+        corner.y + halfH + y2,
+        transform.matrix.a,
+        transform.matrix.b,
+        transform.matrix.c,
+        transform.matrix.d,
+        undefined,
+        true,
+      );
+    };
+    // The rotation task turns BOTH battlers (the target through the whole
+    // rotate span too - its matrix is applied on the ONIX sprite the same way
+    // the probe's opponentSprite matrix reads). The player-side battler also
+    // picks up the rotation-derived y2 from the reducer's own offsets.
+    drawBattler(
+      hitmontop.tileset,
+      attackerPalette,
+      view.attacker.geometry.spriteCorner,
+      task.attackerTransform,
+      attackerX2,
+      attackerY2,
+    );
+    drawBattler(
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner,
+      task.targetTransform,
+      targetX2,
+      targetY2,
+    );
+    if (displayed.hitsplat) {
+      // The DOUBLE_EDGE script never runs `setalpha` (BLDCNT stays 0x0 across
+      // the whole window - probe-verified), so the basic hitsplat's ObjBlend
+      // flag has no blend to apply and it renders fully OPAQUE at its
+      // target-relative center anchor (x=-10 mirrored).
+      drawSpriteSheet(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        displayed.hitsplat.x - 16,
+        displayed.hitsplat.y - 16,
+      );
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "HITMONTOP",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "HITMONTOP" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "HITMONTOP used" : "Foe HITMONTOP used",
+      "DOUBLE-EDGE!",
       99,
     );
     return;
