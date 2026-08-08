@@ -868,6 +868,16 @@ export type BattleScriptRulesContext = Readonly<
      */
     battlerByTurnOrder: readonly [number, number, number, number];
     /**
+     * Source u8 gActionsByTurnOrder[MAX_BATTLERS_COUNT] (battle_main.c:160),
+     * keyed by turn-order slot exactly like `battlerByTurnOrder`. The
+     * full-turn reducer initializes it to the EWRAM default `{0}`; the only
+     * write in this engine is `Cmd_jumpifnopursuitswitchdmg`'s Pursuit-
+     * interception arm, which rewrites the Pursuit user's slot to
+     * B_ACTION_TRY_FINISH (battle_script_commands.c:8751-8753) so the
+     * cancelled move action never dispatches (battle_main.c:5100).
+     */
+    actionsByTurnOrder: BattleScriptMoveEndBytes;
+    /**
      * Source u8 gCurrentTurnActionNumber (battle_main.c:162) -- the action
      * index of the currently-executing battler's script. Paired with each
      * battler's own turnOrderNum (see BattleScriptRulesBattlerBase) by
@@ -994,6 +1004,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   battleTextBuff2ByteNumber?: number | null;
   battleTextBuff2Item?: number | null;
   battlerByTurnOrder?: readonly number[];
+  actionsByTurnOrder?: readonly number[];
   currentTurnActionNumber?: number;
 }>;
 
@@ -2784,6 +2795,11 @@ export function createBattleScriptRulesContext(
       requireUnsigned(input.battlerByTurnOrder?.[2] ?? 2, 3, "battlerByTurnOrder[2]"),
       requireUnsigned(input.battlerByTurnOrder?.[3] ?? 3, 3, "battlerByTurnOrder[3]"),
     ]) as unknown as readonly [number, number, number, number],
+    actionsByTurnOrder: createMoveEndArray(
+      input.actionsByTurnOrder ?? [0, 0, 0, 0],
+      0xff,
+      "actionsByTurnOrder",
+    ) as BattleScriptMoveEndBytes,
     currentTurnActionNumber: requireUnsigned(
       input.currentTurnActionNumber ?? 0,
       0xff,

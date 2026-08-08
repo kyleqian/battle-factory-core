@@ -352,10 +352,15 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // tests/battleScriptForceSwitchOpcode.test.ts.
   ["src/engine/battleScriptForceSwitchOpcode.ts", 1],
   // Voluntary switching executes before ordinary moves through the real
-  // BattleScript_ActionSwitch tail. Its Pursuit-interception arm remains a
-  // trigger-narrow barrier until the pre-switch double-power hit path is
-  // modeled; ordinary non-Pursuit switches execute the source jump and full
-  // switch-in machinery. Reachability-pinned in
+  // BattleScript_ActionSwitch tail. Cmd_jumpifnopursuitswitchdmg's Pursuit-
+  // interception arm (all six guard conditions true) is now fully modeled --
+  // it falls through into the switch script's own double-power Pursuit hit and
+  // rewrites the Pursuit user's turn-order action to B_ACTION_TRY_FINISH
+  // (dispatch-queue item 5, 2026-08-08). The one remaining barrier is the
+  // `gMultiHitCounter != 1` RIGHT-flank target selection
+  // (battle_script_commands.c:8732-8738): a doubles-only position this
+  // singles reducer's switch path never reaches (it always stages
+  // `setmultihit 1`). Reachability-pinned in
   // tests/factoryBattleScriptFullTurnDecision.test.ts.
   ["src/engine/factoryBattleScriptFullTurnDecision.ts", 1],
   // B_SCR_OP_CLEARSTATUSFROMEFFECT/SETSEMIINVULNERABLEBIT/CLEARSEMIINVULNERABLEBIT
