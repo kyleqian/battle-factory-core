@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1015 — [supervisor, 2026-08-08] **Orient animation fold + generic AI turn ownership fixed + Battle-2 room re-entry presentation independently pinned**
+
+- **State:** master at this entry's commit, clean. Orient fast-forwarded the four
+  pending `animation-main` commits (`bf7df624`); union baseline and the first
+  post-merge full gates are green (**795 files / 8004 passed / 1 skipped**, build,
+  typecheck, smoke **375/375**). DEFERRED.md has no open entry.
+- **Did:** verified and accepted MAIN entry 1014: Mirror Coat live verifier
+  **PASS 4/4** with exact scores, choice, draw count and RNG cursor; ISSUES #83
+  is removed. Folded side commits `7a2417bd`/`fcbe6ce0`: a dedicated OFF trace
+  pins the generic round's next-trainer room seam at **115/115** (LILIANA,
+  School Kid F / GIRL_3, complete walk-in through held quote), independently
+  rerun by the supervisor; focused receipts **25/25**, smoke/build green.
+- **Next:** attack ISSUES #55's real remainder: replace the fixture-only adopted
+  construction cursors with an executable ambient-VBlank-aware construction
+  contract, or bank the smallest evidence checkpoint that makes the source-sized
+  implementation unambiguous. Continue hardware receipts file-disjointly.
+- **Notes:** the 115-frame side proof is an additive focused receipt; the broader
+  existing far-side trace was already **903/903**, so no canonical Battle-2 turn
+  or post-33331 window was added. The animation supervisor is still active; its
+  two newer commits remain unfolded for wind-down.
+
 ## 1014 — [bounded MAIN worker, 2026-08-08] **ISSUES #83 closed: scored Factory AI owns the real turn-start draw exactly once; Mirror Coat verifier PASS 4/4**
 
 - **State:** master at this entry's commit, tree clean. Scene-OFF Mirror Coat
