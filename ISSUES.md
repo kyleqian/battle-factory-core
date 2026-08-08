@@ -79,6 +79,23 @@ draw). The OBJ mask is now banked oracle-side: **7528 px**, bbox
 (13,16)-(229,111) = opponent healthbox + opponent front sprite + player
 healthbox + player back sprite (§8 labels the first two "summary window /
 summary sprite"; they are the opponent's healthbox and front sprite).
+**Class A FIXED 2026-08-08 (`7b8eedb0`):** the open field-fade-out now blends
+the settled battle scene's OBJ layer at `y_obj(e)=min(16,2·max(0,⌊(e−2)/2⌋))`
+(one blend step behind `y_bg`) via a sprite-only scratch pass —
+`drawBattle2ActionMenuWindow`/`renderGeneratedBattleCommandPresentation` gained
+an `obj-only` layer mode and `partySelectCloseRenderAssets` gained
+`drawBattleSceneObjOnly`; the scratch is composited over the `y_bg`-blended
+full scene using its alpha-255 coverage, counting only pixels the settled full
+scene still shows (the message-box chrome overpaints the sprite rows it
+covers). Frames **766 and 768 are byte-exact**; the remaining 6 frames
+(770/772/774/776/778/780) now carry **only** the Class B content shift
+(1639px each, same bbox/pixels as 771-779) — §8's "8 Class A frames go
+byte-exact" prediction was wrong because the Class B 1-row offset begins at
+frame 770 (§8c) and is exposed once the OBJ-lag is fixed. The 8-frame spec
+extension to 349 is therefore blocked by Class B and is NOT committed (per the
+promotion rule); dense-a stays **341/341** with the code + Tier-1 pins landed
+(y-pair helper `partySelectOpenFieldFadeObjY`, render-level per-layer blend
+pin, both red-verified). When Class B lands, dense-a can extend 766-780 → 349.
 **Class B (5 frames: 771/773/775/777/779, 1639px, 2037px at 779)** — the
 **player's healthbox**, bbox (127,74)-(229,110), carrying a **1-row-down
 content offset from frame 770**: `oracle(x,y) = blend(settled(x,y−1), y_obj)`
