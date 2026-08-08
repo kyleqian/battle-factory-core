@@ -2,10 +2,17 @@ import { describe, expect, it } from "vitest";
 import {
   chooseFactoryAiScoredDecision,
   submitFactoryAiDecision,
+  unportedCheckViabilityTableEffects,
   type FactoryAiScoredBattlerView,
   type FactoryAiScoredTargetView,
   type FactoryAiScoredView,
 } from "../src/engine/factoryAiDecisionPolicy.ts";
+import {
+  AI_CHECK_BAD_MOVE_TABLE_EFFECTS,
+  MOVES_BY_ID,
+  firstMoveIdWithEffect,
+  unportedCheckBadMoveTableEffects,
+} from "../src/engine/factoryAiCheckBadMove.ts";
 import {
   createBattleCommandRequest,
   createBattleState,
@@ -411,12 +418,31 @@ describe("Factory AI mask 7 (CheckBadMove + TryToFaint + CheckViability), scenar
   });
 
   it("halts loudly on a CheckBadMove unsupported-branch barrier rather than silently mis-scoring", () => {
-    // MOVE_STOCKPILE / EFFECT_STOCKPILE: table-listed in CheckBadMove but
-    // still unported (as of the CBM batch-5 ports), so it hits the shared
-    // check-bad-move barrier. The example is a moving target -- it was
-    // MOVE_HAZE until EFFECT_HAZE was ported in the same batch; re-pick from
-    // AI_CHECK_BAD_MOVE_TABLE_EFFECTS whenever the named effect lands.
-    const view = scoredView([254 /* MOVE_STOCKPILE, EFFECT_STOCKPILE, not ported */, MOVE_SURF, MOVE_SURF, MOVE_SURF], 28);
+    // The example is derived dynamically -- unportedCheckBadMoveTableEffects
+    // is AI_CHECK_BAD_MOVE_TABLE_EFFECTS minus the dispatcher's handled set,
+    // so the pin can never assert an effect the engine has outgrown (it was
+    // MOVE_HAZE until EFFECT_HAZE ported, then MOVE_STOCKPILE; 2026-08-08).
+    const unported = unportedCheckBadMoveTableEffects();
+    if (unported.length === 0) {
+      // 109/109: no CheckBadMove table effect halts the machine any more.
+      // The exhaustive "every table effect scores" proof lives in the CBM
+      // unit suite (factoryAiCheckBadMove.test.ts); here we only pin that
+      // the full decision no longer throws the check-bad-move barrier for a
+      // representative table-listed move. (A check-viability barrier for the
+      // same move is fine -- it is a different, still-live barrier.)
+      const representative = firstMoveIdWithEffect([...AI_CHECK_BAD_MOVE_TABLE_EFFECTS][0]!) ?? MOVE_SURF;
+      const view = scoredView([representative, MOVE_SURF, MOVE_SURF, MOVE_SURF], 28);
+      expect(() =>
+        chooseFactoryAiScoredDecision({
+          view,
+          request: fourSlotRequest,
+          rng: { value: 0x1234_5678, calls: 0 },
+        })).not.toThrow(/check-bad-move barrier/);
+      return;
+    }
+    const moveId = firstMoveIdWithEffect(unported[0]!);
+    if (moveId === undefined) throw new Error(`no Gen-3 move carries ${unported[0]}`);
+    const view = scoredView([moveId, MOVE_SURF, MOVE_SURF, MOVE_SURF], 28);
     expect(() =>
       chooseFactoryAiScoredDecision({
         view,
@@ -426,17 +452,51 @@ describe("Factory AI mask 7 (CheckBadMove + TryToFaint + CheckViability), scenar
   });
 
   it("halts loudly on a CheckViability unsupported-branch barrier rather than silently mis-scoring", () => {
-    // MOVE_DREAM_EATER / EFFECT_DREAM_EATER: ported in CheckBadMove (so the
-    // CheckBadMove barrier does NOT fire first) but still unported in
-    // CheckViability, so this isolates the check-viability barrier.
-    //
-    // MAINTENANCE: this move is a moving target. It was MOVE_ABSORB until
-    // 2026-08-08, when EFFECT_ABSORB was ported into CheckViability and this
-    // test started failing -- the assertion is "some effect still barriers",
-    // and the example has to be re-chosen each time the named one is ported.
-    // Pick a replacement from AI_CHECK_VIABILITY_TABLE_EFFECTS that is
-    // table-listed, unported in CheckViability, and ported in CheckBadMove.
-    const view = scoredView([138 /* MOVE_DREAM_EATER */, MOVE_SURF, MOVE_SURF, MOVE_SURF], 28);
+    // The example is derived dynamically by probing the real dispatcher:
+    // every unported CheckViability effect (computed by probing
+    // runCheckViability itself) is tried as slot 0 until one actually throws
+    // the check-viability barrier -- not the check-bad-move one (the example
+    // must be ported in CheckBadMove) and not a quiet success. A side-lane
+    // worker is porting CheckViability right now; this pin never hardcodes a
+    // specific CV effect.
+    const unported = unportedCheckViabilityTableEffects();
+    if (unported.length === 0) {
+      const view = scoredView([MOVE_SURF, MOVE_SURF, MOVE_SURF, MOVE_SURF], 28);
+      expect(() =>
+        chooseFactoryAiScoredDecision({
+          view,
+          request: fourSlotRequest,
+          rng: { value: 0x1234_5678, calls: 0 },
+        })).not.toThrow(/check-viability barrier/);
+      return;
+    }
+    let exampleMoveId: number | null = null;
+    for (const effect of unported) {
+      for (const row of MOVES_BY_ID.values()) {
+        if (row.effect !== effect) continue;
+        const view = scoredView([row.id, MOVE_SURF, MOVE_SURF, MOVE_SURF], 28);
+        try {
+          chooseFactoryAiScoredDecision({
+            view,
+            request: fourSlotRequest,
+            rng: { value: 0x1234_5678, calls: 0 },
+          });
+        } catch (error) {
+          if (error instanceof Error && /check-viability barrier/.test(error.message)) {
+            exampleMoveId = row.id;
+            break;
+          }
+        }
+      }
+      if (exampleMoveId !== null) break;
+    }
+    if (exampleMoveId === null) {
+      // Every unported CV effect's first move hits the check-bad-move barrier
+      // first (unported in CBM too), so no CV-isolated example exists.
+      expect(exampleMoveId).not.toBeNull();
+      return;
+    }
+    const view = scoredView([exampleMoveId, MOVE_SURF, MOVE_SURF, MOVE_SURF], 28);
     expect(() =>
       chooseFactoryAiScoredDecision({
         view,

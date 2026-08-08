@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  AI_CHECK_BAD_MOVE_TABLE_EFFECTS,
   MOVES_BY_ID,
+  firstMoveIdWithEffect,
   runCbmAccUp,
   runCbmSpAtkDown,
   runCheckBadMovePreamble,
+  unportedCheckBadMoveTableEffects,
   type FactoryAiCheckBadMoveAttacker,
   type FactoryAiCheckBadMoveRoarTarget,
   type FactoryAiCheckBadMoveTarget,
@@ -81,11 +84,8 @@ describe("AI_CBM_HighRiskForDamage via Counter (docs/factory-ai-checkviability-g
     ]);
   });
 
-  it("leaves Haze behind the same generic CBM barrier", () => {
-    expect(run(MOVE_STOCKPILE, counterTarget())).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-    });
+  it("leaves the next unported CBM table effect behind the generic barrier (derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -139,11 +139,8 @@ describe("AI_CBM_HighRiskForDamage via Flail (docs/executable-frontier-census.md
     ]);
   });
 
-  it("leaves Haze behind the same generic CBM barrier", () => {
-    expect(run(MOVE_STOCKPILE, flailTarget())).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-    });
+  it("leaves the next unported CBM table effect behind the generic barrier (derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -1469,12 +1466,74 @@ const MOVE_ROCK_SLIDE = 157;
 const MOVE_BODY_SLAM = 34;
 const MOVE_THUNDERBOLT = 85;
 const MOVE_HAZE = 114; // EFFECT_HAZE -> AI_CBM_Haze
-const MOVE_STOCKPILE = 254; // EFFECT_STOCKPILE -- still-unported CBM table effect, the file's generic-barrier example
 const MOVE_SNORE = 173;
 const MOVE_POISON_POWDER = 77; // EFFECT_POISON -> AI_CBM_Toxic
 const MOVE_TOXIC = 92; // EFFECT_TOXIC -> AI_CBM_Toxic
 const MOVE_STRING_SHOT = 81; // EFFECT_SPEED_DOWN
 const MOVE_COTTON_SPORE = 178; // EFFECT_SPEED_DOWN_2 -- same handler, different table entry
+
+/**
+ * Canonical probe target for the file's generic-CBM-barrier pins below. A
+ * single-ability species with a known, non-negating, non-Soundproof ability
+ * (Sturdy) short-circuits every `get_ability` draw, and every still-unported
+ * CBM table effect's move is a `MOVE_POWER_OTHER` candidate (power <= 1 or
+ * an `IGNORED_POWERFUL_MOVE_EFFECTS` effect), so the preamble's
+ * type/ability-negation block is skipped and every such move reaches the
+ * `if_effect` dispatch barrier untouched.
+ */
+const GENERIC_BARRIER_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+  species: 213, // SPECIES_SHUCKLE: single ability STURDY
+  types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"] as const,
+  knownAbility: "ABILITY_STURDY",
+  realAbility: "ABILITY_STURDY",
+  speedStage: 6,
+  atkStage: 6,
+  defStage: 6,
+  spDefStage: 6,
+});
+
+/**
+ * Derives the standing "the generic CBM barrier still fires" example
+ * dynamically from the engine's own table/handled sets, so the pins can never
+ * again assert an effect the engine has outgrown -- the barring effect was
+ * EFFECT_ABSORB, then EFFECT_HAZE, then EFFECT_STOCKPILE, and each port broke
+ * the hardcoded pins. Returns `null` when the whole table is ported, which is
+ * where AI_CheckBadMove lands at 109/109.
+ */
+function genericCbmBarrierExample(): Readonly<{ effect: string; moveId: number }> | null {
+  for (const effect of unportedCheckBadMoveTableEffects()) {
+    const moveId = firstMoveIdWithEffect(effect);
+    if (moveId !== undefined) return { effect, moveId };
+  }
+  return null;
+}
+
+/**
+ * The assertion shared by every generic-barrier pin in this file. With any
+ * effect still unported it picks one dynamically and pins that its move halts
+ * with the named `unsupported-branch` barrier; when the unported set is empty
+ * (all 109/109 CheckBadMove table effects ported) the honest assertion
+ * inverts: every table-listed effect's first reachable move scores instead of
+ * halting. Effects with no Gen-3 move cannot reach the dispatcher and are
+ * skipped in both directions.
+ */
+function assertGenericCbmBarrierFires() {
+  const example = genericCbmBarrierExample();
+  if (example === null) {
+    for (const effect of AI_CHECK_BAD_MOVE_TABLE_EFFECTS) {
+      const moveId = firstMoveIdWithEffect(effect);
+      if (moveId === undefined) continue;
+      expect(run(moveId, GENERIC_BARRIER_TARGET)).toMatchObject({ kind: "scored" });
+    }
+    return;
+  }
+  expect(run(example.moveId, GENERIC_BARRIER_TARGET)).toEqual({
+    kind: "unsupported-branch",
+    barrier: "factory-ai-check-bad-move",
+    effect: example.effect,
+    moveId: example.moveId,
+  });
+}
 
 function run(
   moveId: number,
@@ -1621,13 +1680,11 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
   });
 
   it("halts with a named unsupported-branch barrier for a move whose effect has an if_effect table entry", () => {
-    const result = run(MOVE_STOCKPILE, { ...MAROWAK, knownAbility: "ABILITY_ROCK_HEAD" });
-    expect(result).toEqual({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_STOCKPILE",
-      moveId: MOVE_STOCKPILE,
-    });
+    // The example is derived dynamically (unportedCheckBadMoveTableEffects),
+    // never a hardcoded effect -- porting an effect would otherwise break
+    // this pin. When 109/109 effects are ported, `assertGenericCbmBarrierFires`
+    // inverts to "no table effect halts the machine any more".
+    assertGenericCbmBarrierFires();
   });
 
   it("reproduces the exact ground-truth Scenario A per-slot draw/score shape (docs/factory-ai-ground-truth.md §4 item 2/§0(2))", () => {
@@ -1698,13 +1755,8 @@ describe("AI_CBM_Sleep (docs/factory-ai-checkviability-ground-truth.md §29)", (
     ]);
   });
 
-  it("leaves the next unported CBM table effect behind the generic barrier", () => {
-    expect(run(MOVE_STOCKPILE, target())).toEqual({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_STOCKPILE",
-      moveId: MOVE_STOCKPILE,
-    });
+  it("leaves the next unported CBM table effect behind the generic barrier (derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -1768,12 +1820,8 @@ describe("AI_CBM_Roar (docs/factory-ai-checkviability-ground-truth.md §30)", ()
     ]);
   });
 
-  it("leaves Haze behind the same generic CBM barrier", () => {
-    expect(run(MOVE_STOCKPILE, target())).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_STOCKPILE",
-    });
+  it("leaves the next unported CBM table effect behind the generic barrier (derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -1852,12 +1900,8 @@ describe("AI_CBM_Paralyze (docs/factory-ai-checkviability-ground-truth.md §31)"
     ]);
   });
 
-  it("leaves Haze behind the same generic CBM barrier", () => {
-    expect(run(MOVE_STOCKPILE, target())).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_STOCKPILE",
-    });
+  it("leaves the next unported CBM table effect behind the generic barrier (derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -1929,12 +1973,8 @@ describe("AI_CBM_Confuse (docs/factory-ai-checkviability-ground-truth.md §32)",
     ]);
   });
 
-  it("leaves Haze behind the same generic CBM barrier", () => {
-    expect(run(MOVE_STOCKPILE, target())).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_STOCKPILE",
-    });
+  it("leaves the next unported CBM table effect behind the generic barrier (derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -2110,14 +2150,8 @@ describe("AI_CBM_SpeedDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-che
     expect(result.draws).toHaveLength(0);
   });
 
-  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_HAZE)", () => {
-    const result = run(MOVE_STOCKPILE, { ...MAROWAK, knownAbility: "ABILITY_ROCK_HEAD" });
-    expect(result).toEqual({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_STOCKPILE",
-      moveId: MOVE_STOCKPILE,
-    });
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -2245,13 +2279,8 @@ describe("AI_CBM_AttackDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-ch
     expect(result.draws).toHaveLength(0);
   });
 
-  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_HAZE)", () => {
-    const result = run(MOVE_STOCKPILE, PINSIR);
-    expect(result).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_STOCKPILE",
-    });
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -2583,13 +2612,8 @@ describe("AI_CBM_Curse (data/battle_ai_scripts.s:434-437, BulkUp-identical body)
     expect(result.draws).toHaveLength(0);
   });
 
-  it("leaves Haze behind the same generic CBM barrier", () => {
-    expect(run(MOVE_STOCKPILE, SHUCKLE)).toEqual({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_STOCKPILE",
-      moveId: MOVE_STOCKPILE,
-    });
+  it("leaves the next unported CBM table effect behind the generic barrier (derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -2713,15 +2737,9 @@ describe("AI_CBM_SpDefUp (docs/factory-ai-checkviability-ground-truth.md §28)",
     const amnesia = run(MOVE_AMNESIA, SHUCKLE);
     expect(amnesia).toMatchObject({ kind: "scored", scoreDelta: 0 });
 
-    expect(run(MOVE_STOCKPILE, SHUCKLE)).toEqual({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_STOCKPILE",
-      moveId: MOVE_STOCKPILE,
-    });
+    assertGenericCbmBarrierFires();
   });
 });
-
 // data/battle_ai_scripts.s:576-579/590-593, docs/factory-ai-checkviability-ground-truth.md
 // §22.1: the ninth CBM-blocked pair's own CBM half -- unlike every stat-UP
 // handler above, TWO SEPARATE dual-stat handlers (the AI_CBM_BulkUp/
@@ -3016,13 +3034,8 @@ describe("AI_CBM_AccDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-check
     expect(result.draws).toHaveLength(0);
   });
 
-  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_HAZE)", () => {
-    const result = run(MOVE_STOCKPILE, PIDGEOTTO);
-    expect(result).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_STOCKPILE",
-    });
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 
   it("EFFECT_ACCURACY_DOWN_2 is a vestigial constant with zero real moves (doc §19.1) -- not independently testable through a real move ID, confirmed absent from the generated move table", () => {
@@ -3250,13 +3263,8 @@ describe("AI_CBM_EvasionDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-c
     expect([...MOVES_BY_ID.values()].some((m) => m.effect === "EFFECT_EVASION_DOWN_2")).toBe(false);
   });
 
-  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_HAZE)", () => {
-    const result = run(MOVE_STOCKPILE, SHUCKLE);
-    expect(result).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_STOCKPILE",
-    });
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 

@@ -252,6 +252,80 @@ export const AI_CHECK_BAD_MOVE_TABLE_EFFECTS: ReadonlySet<string> = new Set([
 ]);
 
 /**
+ * The complement of `AI_CHECK_BAD_MOVE_TABLE_EFFECTS`: every `EFFECT_*`
+ * whose `if_effect` dispatch entry below is actually ported -- has a real
+ * `if (move.effect === ...)` block before the final table barrier check.
+ * Maintained by hand alongside the dispatcher so the test suite can derive
+ * the still-unported remainder as `AI_CHECK_BAD_MOVE_TABLE_EFFECTS` minus
+ * this set instead of hardcoding a concrete effect the engine has outgrown
+ * (EFFECT_ABSORB, then EFFECT_HAZE, then EFFECT_STOCKPILE each broke such
+ * pins on 2026-08-08). `unportedCheckBadMoveTableEffects` below is the only
+ * consumer; keep this set exactly in sync with the dispatcher's if-chains
+ * whenever an effect is ported (add the effect here in the same commit).
+ */
+export const CHECK_BAD_MOVE_HANDLED_TABLE_EFFECTS: ReadonlySet<string> = new Set([
+  "EFFECT_SLEEP", "EFFECT_EXPLOSION", "EFFECT_DREAM_EATER", "EFFECT_ATTACK_UP",
+  "EFFECT_DEFENSE_UP", "EFFECT_SPEED_UP", "EFFECT_SPECIAL_ATTACK_UP", "EFFECT_SPECIAL_DEFENSE_UP",
+  "EFFECT_ACCURACY_UP", "EFFECT_EVASION_UP", "EFFECT_ATTACK_DOWN", "EFFECT_DEFENSE_DOWN",
+  "EFFECT_SPEED_DOWN", "EFFECT_SPECIAL_ATTACK_DOWN", "EFFECT_SPECIAL_DEFENSE_DOWN", "EFFECT_ACCURACY_DOWN",
+  "EFFECT_EVASION_DOWN", "EFFECT_HAZE", "EFFECT_BIDE", "EFFECT_ROAR",
+  "EFFECT_TOXIC", "EFFECT_LIGHT_SCREEN", "EFFECT_OHKO", "EFFECT_RAZOR_WIND",
+  "EFFECT_SUPER_FANG", "EFFECT_MIST", "EFFECT_FOCUS_ENERGY", "EFFECT_CONFUSE",
+  "EFFECT_ATTACK_UP_2", "EFFECT_DEFENSE_UP_2", "EFFECT_SPEED_UP_2", "EFFECT_SPECIAL_ATTACK_UP_2",
+  "EFFECT_SPECIAL_DEFENSE_UP_2", "EFFECT_ACCURACY_UP_2", "EFFECT_EVASION_UP_2", "EFFECT_ATTACK_DOWN_2",
+  "EFFECT_DEFENSE_DOWN_2", "EFFECT_SPEED_DOWN_2", "EFFECT_SPECIAL_ATTACK_DOWN_2", "EFFECT_SPECIAL_DEFENSE_DOWN_2",
+  "EFFECT_ACCURACY_DOWN_2", "EFFECT_EVASION_DOWN_2", "EFFECT_REFLECT", "EFFECT_POISON",
+  "EFFECT_PARALYZE", "EFFECT_SUBSTITUTE", "EFFECT_RECHARGE", "EFFECT_LEECH_SEED",
+  "EFFECT_DISABLE", "EFFECT_LEVEL_DAMAGE", "EFFECT_PSYWAVE", "EFFECT_COUNTER",
+  "EFFECT_ENCORE", "EFFECT_SNORE", "EFFECT_SLEEP_TALK", "EFFECT_FLAIL",
+  "EFFECT_MEAN_LOOK", "EFFECT_NIGHTMARE", "EFFECT_MINIMIZE", "EFFECT_CURSE",
+  "EFFECT_SPIKES", "EFFECT_FORESIGHT", "EFFECT_PERISH_SONG", "EFFECT_SANDSTORM",
+  "EFFECT_SWAGGER", "EFFECT_ATTRACT", "EFFECT_RETURN", "EFFECT_PRESENT",
+  "EFFECT_FRUSTRATION", "EFFECT_SAFEGUARD", "EFFECT_MAGNITUDE", "EFFECT_BATON_PASS",
+  "EFFECT_SONICBOOM", "EFFECT_RAIN_DANCE", "EFFECT_SUNNY_DAY", "EFFECT_BELLY_DRUM",
+  "EFFECT_PSYCH_UP", "EFFECT_MIRROR_COAT", "EFFECT_SKULL_BASH", "EFFECT_FUTURE_SIGHT",
+  "EFFECT_TELEPORT", "EFFECT_DEFENSE_CURL", "EFFECT_FAKE_OUT", "EFFECT_HAIL",
+  "EFFECT_TORMENT", "EFFECT_FLATTER", "EFFECT_WILL_O_WISP", "EFFECT_FOCUS_PUNCH",
+  "EFFECT_HELPING_HAND", "EFFECT_TRICK", "EFFECT_INGRAIN", "EFFECT_SUPERPOWER",
+  "EFFECT_KNOCK_OFF", "EFFECT_ENDEAVOR", "EFFECT_REFRESH", "EFFECT_LOW_KICK",
+  "EFFECT_TICKLE", "EFFECT_COSMIC_POWER", "EFFECT_BULK_UP", "EFFECT_CALM_MIND",
+  "EFFECT_DRAGON_DANCE", "EFFECT_SPEED_DOWN_2", "EFFECT_ATTACK_DOWN_2",
+  "EFFECT_DEFENSE_DOWN_2", "EFFECT_SPECIAL_DEFENSE_DOWN_2", "EFFECT_ACCURACY_DOWN_2",
+  "EFFECT_EVASION_DOWN_2", "EFFECT_ATTACK_UP_2", "EFFECT_DEFENSE_UP_2",
+  "EFFECT_DEFENSE_CURL", "EFFECT_SPEED_UP_2", "EFFECT_SPECIAL_ATTACK_UP_2",
+  "EFFECT_SPECIAL_DEFENSE_UP_2", "EFFECT_EVASION_UP_2", "EFFECT_MINIMIZE",
+  "EFFECT_EVASION_DOWN_2", "EFFECT_SWAGGER", "EFFECT_FLATTER", "EFFECT_KNOCK_OFF",
+  "EFFECT_TRICK", "EFFECT_SLEEP_TALK", "EFFECT_ACCURACY_UP_2",
+  "EFFECT_SPECIAL_ATTACK_DOWN_2",
+]);
+
+/**
+ * The still-unported `if_effect` table effects, computed as
+ * `AI_CHECK_BAD_MOVE_TABLE_EFFECTS` minus `CHECK_BAD_MOVE_HANDLED_TABLE_EFFECTS`
+ * and sorted for determinism. Exported for the test suite's generic-barrier
+ * pins, which must never hardcode a concrete effect the engine has outgrown;
+ * when this returns `[]` (all 109/109 effects ported) the honest assertion
+ * inverts -- no CheckBadMove table effect halts the machine any more.
+ */
+export function unportedCheckBadMoveTableEffects(): readonly string[] {
+  return [...AI_CHECK_BAD_MOVE_TABLE_EFFECTS]
+    .filter((effect) => !CHECK_BAD_MOVE_HANDLED_TABLE_EFFECTS.has(effect))
+    .sort();
+}
+
+/**
+ * The first generated-moves row carrying `effect` (or `undefined` when no
+ * Gen-3 move has it) -- used by the test suite to turn an unported effect
+ * into a dispatcher-reachable move for the generic-barrier pins.
+ */
+export function firstMoveIdWithEffect(effect: string): number | undefined {
+  for (const row of MOVES_BY_ID.values()) {
+    if (row.effect === effect) return row.id;
+  }
+  return undefined;
+}
+
+/**
  * The three values `Cmd_get_gender`'s `GetGenderFromSpeciesAndPersonality`
  * can produce (`include/constants/pokemon.h:169-171`, MON_MALE=0,
  * MON_FEMALE=0xFE, MON_GENDERLESS=0xFF) -- `AI_CBM_Attract`'s own gender

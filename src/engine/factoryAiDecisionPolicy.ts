@@ -22,6 +22,7 @@ import {
 import { advanceRngValue } from "./rng.ts";
 import {
   runCheckBadMovePreamble,
+  firstMoveIdWithEffect,
   AI_WEATHER_RAIN,
   AI_WEATHER_SANDSTORM,
   AI_WEATHER_SUN,
@@ -38,7 +39,12 @@ import {
   type FactoryAiTryToFaintDraw,
   type FactoryAiTryToFaintTarget,
 } from "./factoryAiTryToFaint.ts";
-import { runCheckViability, type FactoryAiCheckViabilityDraw } from "./factoryAiCheckViability.ts";
+import {
+  AI_CHECK_VIABILITY_TABLE_EFFECTS,
+  runCheckViability,
+  type FactoryAiCheckViabilityBattler,
+  type FactoryAiCheckViabilityDraw,
+} from "./factoryAiCheckViability.ts";
 
 const U16_MAX = 0xffff;
 const U32_MAX = 0xffff_ffff;
@@ -743,6 +749,61 @@ const MOST_POWERFUL_TO_FUNC_RESULT: Readonly<Record<FactoryAiMostPowerful, AiWea
   "not-most-powerful": AI_WEATHER_RAIN,
   "most-powerful": AI_WEATHER_SANDSTORM,
 });
+
+/**
+ * Minimal `FactoryAiCheckViabilityBattler` for the unported-effect probe
+ * below -- `runCheckViability`'s unsupported-branch barrier is a pure
+ * dispatcher check with no type/ability preamble, so any valid battler with
+ * a table-listed, unported effect produces the barrier regardless of these
+ * neutral field values.
+ */
+const UNPORTED_CV_PROBE_BATTLER: FactoryAiCheckViabilityBattler = Object.freeze({
+  speed: 10,
+  speedStage: 6,
+  types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+  isFirstTurn: 2,
+  evasionStage: 6,
+  accStage: 6,
+  atkStage: 6,
+  defStage: 6,
+  spDefStage: 6,
+  hp: 100,
+  maxHp: 100,
+  // AI_CV_Toxic's source path requires the attacker's four live moves
+  // (`if_user_has_no_attacking_moves`, doc §14); any IDs satisfy its
+  // move-effect scans for the probe's purpose.
+  moves: [1, 1, 1, 1] as const,
+});
+
+/**
+ * The still-unported `AI_CheckViability` table effects, computed by probing
+ * `runCheckViability` itself for every entry of
+ * `AI_CHECK_VIABILITY_TABLE_EFFECTS` -- the dispatcher's own if-chains are
+ * the source of truth, so a side-lane port of a new CV effect flips this set
+ * with no hand-maintained handled-list to update (the sibling
+ * `factoryAiCheckViability.ts` is owned in parallel). Exported for the scored
+ * decision test suite, whose generic-barrier example must never hardcode a
+ * concrete CV effect. `runCheckViability` is a pure dispatcher with no
+ * preamble, so an unported table effect always returns `unsupported-branch`
+ * regardless of the probe battlers; sorted for determinism.
+ */
+export function unportedCheckViabilityTableEffects(): readonly string[] {
+  const unported: string[] = [];
+  for (const effect of AI_CHECK_VIABILITY_TABLE_EFFECTS) {
+    const moveId = firstMoveIdWithEffect(effect);
+    if (moveId === undefined) continue;
+    const result = runCheckViability({
+      rng: Object.freeze({ value: 0, calls: 0 }),
+      moveId,
+      attacker: UNPORTED_CV_PROBE_BATTLER,
+      target: UNPORTED_CV_PROBE_BATTLER,
+      drawOrdinalStart: 1,
+      reasonPrefix: "unported-cv-probe",
+    });
+    if (result.kind === "unsupported-branch") unported.push(effect);
+  }
+  return unported.sort();
+}
 
 /**
  * Mask-1/mask-7 Factory move chooser: setup (identical to mask 0) + three
