@@ -3257,3 +3257,31 @@ describe("AI_CBM_Torment (data/battle_ai_scripts.s:527-529, EFFECT_TORMENT)", ()
     });
   });
 });
+
+describe("AI_CBM_HelpingHand (data/battle_ai_scripts.s:541-543, EFFECT_HELPING_HAND)", () => {
+  const MOVE_HELPING_HAND = 270;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("singles-only engine always takes if_not_double_battle and scores -10", () => {
+    const result = run(MOVE_HELPING_HAND, target());
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("scores exactly -10 with a known ability (zero draws from preamble or handler)", () => {
+    const result = run(MOVE_HELPING_HAND, target({ knownAbility: "ABILITY_ROCK_HEAD" }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+});

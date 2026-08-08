@@ -1840,6 +1840,21 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_HELPING_HAND -> AI_CBM_HelpingHand
+  // (`data/battle_ai_scripts.s:197,541-543`): a single
+  // `if_not_double_battle Score_Minus10`. This engine models singles only
+  // (BATTLE_TYPE_DOUBLE is out of scope), so the check is always true and
+  // Helping Hand always scores -10 -- a faithful constant for the modeled
+  // scope, not an approximation.
+  if (move.effect === "EFFECT_HELPING_HAND") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmHelpingHand(),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -2352,4 +2367,15 @@ function runCbmCantEscape(targetEscapePrevented: boolean): number {
  */
 function runCbmTorment(targetTormented: boolean): number {
   return targetTormented ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_HelpingHand` (`data/battle_ai_scripts.s:541-543`, EFFECT_HELPING_
+ * HAND): a single `if_not_double_battle Score_Minus10` -- Helping Hand is
+ * penalized whenever the battle is not doubles. This engine models Factory
+ * singles only (doubles out of scope), so the not-double-battle branch is
+ * always taken and the handler is the constant -10. Zero ability/type reads.
+ */
+function runCbmHelpingHand(): number {
+  return -10;
 }
