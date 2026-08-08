@@ -70,7 +70,7 @@ layer-split menu fade-in 809-824. Dense-a spec extended to **980-1255 +
 (supervisor trimmed 771/773/775/777/779 out of the committed capture list
 rather than leave the spec red — same idiom as the pre-fix 964-979
 exclusion; the spec is **341/341** after item (c) closed). **Open window
-CLOSED 2026-08-08 — dense-a **354/354 byte-exact** (763-824 open window fully
+CLOSED 2026-08-08 — dense-a 354/354 byte-exact (763-824 open window fully
 pinned).** The two open-fade residual classes, both measured and attributed
 (`docs/fade-layer-forensics.md` §8/§9, 2026-08-07 SIDE):
 **Class A LANDED 2026-08-08 (`7b8eedb0`)** — the oracle's OBJ layer is one
