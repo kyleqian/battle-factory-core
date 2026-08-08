@@ -314,11 +314,17 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    */
   isEscapePrevented?: boolean;
   /**
-   * Whether `gBattleMons[AI_TARGET].status2 & STATUS2_TORMENT` is nonzero --
+   * `gBattleMons[AI_TARGET].status2 & STATUS2_TORMENT` is nonzero --
    * `AI_CBM_Torment`'s single gate (EFFECT_TORMENT). Optional, defaulting to
    * false.
    */
   isTormented?: boolean;
+  /**
+   * `gBattleMons[AI_TARGET].status3 & STATUS3_PERISH_SONG` is nonzero --
+   * `AI_CBM_PerishSong`'s single gate (EFFECT_PERISH_SONG). Optional,
+   * defaulting to false.
+   */
+  hasPerishSong?: boolean;
   /**
    * `gBattleMons[AI_TARGET].level` -- `AI_CBM_OneHitKO`'s final
    * `if_level_cond 1` (less-than) gate operand. Optional, defaulting to 0
@@ -1476,6 +1482,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_PERISH_SONG -> AI_CBM_PerishSong
+  // (`data/battle_ai_scripts.s:167,447-449`): a single
+  // `if_status3 AI_TARGET, STATUS3_PERISH_SONG, Score_Minus10` -- Perish Song
+  // is penalized when the target is already under its effect.
+  if (move.effect === "EFFECT_PERISH_SONG") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmPerishSong(target.hasPerishSong ?? false),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_DOWN(_2) -> AI_CBM_SpeedDown,
   // one of the two handlers this port implements out of the table's ~100 entries.
   if (move.effect === "EFFECT_SPEED_DOWN" || move.effect === "EFFECT_SPEED_DOWN_2") {
@@ -2607,6 +2626,16 @@ function runCbmTorment(targetTormented: boolean): number {
  */
 function runCbmIngrain(attackerRooted: boolean): number {
   return attackerRooted ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_PerishSong` (`data/battle_ai_scripts.s:447-449`, EFFECT_PERISH_
+ * SONG): a single `if_status3 AI_TARGET, STATUS3_PERISH_SONG, Score_Minus10`
+ * -- Perish Song is penalized when the target is already under its effect.
+ * Zero ability/type reads.
+ */
+function runCbmPerishSong(targetHasPerishSong: boolean): number {
+  return targetHasPerishSong ? -10 : 0;
 }
 
 /**

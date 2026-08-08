@@ -823,6 +823,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     ...(view.target.isAsleep === true ? { isAsleep: true } : {}),
     ...(view.target.isEscapePrevented === true ? { isEscapePrevented: true } : {}),
     ...(view.target.isTormented === true ? { isTormented: true } : {}),
+    ...(view.target.hasPerishSong === true ? { hasPerishSong: true } : {}),
     level: view.target.level,
   });
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({
