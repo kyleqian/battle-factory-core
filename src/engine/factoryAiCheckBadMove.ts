@@ -895,6 +895,16 @@ function runCbmHail(currentWeather: AiWeatherValue | undefined, staleAbilityGues
   return runCbmWeatherSetter(currentWeather, staleAbilityGuess, AI_WEATHER_HAIL);
 }
 
+/**
+ * `AI_CBM_Sandstorm` (`data/battle_ai_scripts.s:451-454`) -- byte-for-byte
+ * the same 3-instruction weather-setter shape as the trio above with
+ * `AI_WEATHER_SANDSTORM` swapped in. Dispatch: `EFFECT_SANDSTORM`
+ * (`data/battle_ai_scripts.s:168`). Same stale-`funcResult` bug applies.
+ */
+function runCbmSandstorm(currentWeather: AiWeatherValue | undefined, staleAbilityGuess: string): number {
+  return runCbmWeatherSetter(currentWeather, staleAbilityGuess, AI_WEATHER_SANDSTORM);
+}
+
 export function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
   const distinct = defendingTypes[0] === defendingTypes[1] ? [defendingTypes[0]] : defendingTypes;
   let mult = 10;
@@ -1342,6 +1352,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
       rng,
       draws: Object.freeze(draws),
       scoreDelta: runCbmHail(input.attacker.currentWeather, soundproofGuess),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SANDSTORM -> AI_CBM_Sandstorm
+  // (`data/battle_ai_scripts.s:168,451-454`), the weather trio's sibling
+  // fourth -- same byte-for-byte 3-instruction shape with
+  // AI_WEATHER_SANDSTORM swapped in.
+  if (move.effect === "EFFECT_SANDSTORM") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmSandstorm(input.attacker.currentWeather, soundproofGuess),
     });
   }
 

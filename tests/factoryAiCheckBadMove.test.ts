@@ -2168,3 +2168,63 @@ describe("AI_CBM_RainDance / AI_CBM_SunnyDay / AI_CBM_Hail (docs/factory-ai-chec
     });
   });
 });
+
+// data/battle_ai_scripts.s:168,451-454: AI_CBM_Sandstorm -- the weather
+// trio's sibling fourth, byte-for-byte the same 3-instruction body with
+// AI_WEATHER_SANDSTORM (id 2) swapped in. Same stale-`funcResult` channel:
+// ability id 2 (ABILITY_DRIZZLE) collides with AI_WEATHER_SANDSTORM on a
+// weatherless read.
+describe("AI_CBM_Sandstorm (data/battle_ai_scripts.s:451-454)", () => {
+  const MOVE_SANDSTORM = 201;
+
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function withWeather(currentWeather: 0 | 1 | 2 | 3 | undefined): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, currentWeather });
+  }
+
+  it("scores -8 with zero draws when current weather is already Sandstorm", () => {
+    const result = run(MOVE_SANDSTORM, SHUCKLE, undefined, withWeather(2));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores 0 when current weather is a DIFFERENT weather", () => {
+    const result = run(MOVE_SANDSTORM, SHUCKLE, undefined, withWeather(1));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("scores 0 with zero draws when currentWeather is omitted (no weather bit set)", () => {
+    const result = run(MOVE_SANDSTORM, SHUCKLE, undefined, withWeather(undefined));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -8 with zero draws when weatherless and the target's ability ID collides with AI_WEATHER_SANDSTORM (id 2 = Drizzle)", () => {
+    const result = run(MOVE_SANDSTORM, { ...SHUCKLE, knownAbility: "ABILITY_DRIZZLE" }, undefined, withWeather(undefined));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("stays 0 when weatherless and the target's colliding ability ID belongs to a DIFFERENT handler's own constant (id 1 == Rain, not Sandstorm)", () => {
+    const result = run(MOVE_SANDSTORM, { ...SHUCKLE, knownAbility: "ABILITY_STENCH" }, undefined, withWeather(undefined));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("a genuinely set weather always wins over the stale ability read, even for a colliding-ID target", () => {
+    const realRain = run(MOVE_SANDSTORM, { ...SHUCKLE, knownAbility: "ABILITY_DRIZZLE" }, undefined, withWeather(1));
+    expect(realRain).toMatchObject({ kind: "scored", scoreDelta: 0 }); // real weather != Sandstorm
+  });
+});
