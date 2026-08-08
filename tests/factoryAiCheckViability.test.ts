@@ -5068,3 +5068,107 @@ describe("AI_CV_OneHitKO (EFFECT_OHKO, docs/executable-frontier-census.md 28 wei
     expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: 0 });
   });
 });
+
+describe("AI_CV_HealWeather / AI_CV_Heal (data/battle_ai_scripts.s:1315-1351)", () => {
+  const MOVE_MORNING_SUN = 234; // EFFECT_MORNING_SUN -> AI_CV_HealWeather
+  const MOVE_RECOVER = 105; // EFFECT_RESTORE_HP -> AI_CV_Heal
+  const MOVE_SNATCH = 289; // EFFECT_SNATCH, for the target-history Snatch gate
+
+  // if_target_faster reaches Heal4 only when the TARGET is strictly faster.
+  const SLOW_HEALER = Object.freeze({
+    ...NEUTRAL_BATTLER,
+    speed: 5,
+  });
+  const FAST_TARGET = Object.freeze({
+    ...NEUTRAL_BATTLER,
+    speed: 120,
+    knownMoves: [],
+  });
+
+  function healWeatherRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_MORNING_SUN,
+      attacker: { ...SLOW_HEALER, ...attackerOverrides },
+      target: { ...FAST_TARGET, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "heal-weather",
+    });
+  }
+
+  function healRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_RECOVER,
+      attacker: { ...SLOW_HEALER, ...attackerOverrides },
+      target: { ...FAST_TARGET, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "heal",
+    });
+  }
+
+  it("HealWeather at full HP scores -3 under Sun, with zero draws", () => {
+    const result = healWeatherRun(1, { hp: 100, maxHp: 100, currentWeather: 0 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -3, draws: [], funcResultAfter: 0 });
+  });
+
+  it("HealWeather under Hail applies the -2 weather penalty AND the full Heal flow (target faster, HP < 70 -> Heal5, no Snatch -> +2)", () => {
+    // seed 1 -> heal-roll-3 low byte 198 (>= 20, FALL-THROUGH to +2).
+    const result = healWeatherRun(1, { hp: 60, maxHp: 100, currentWeather: 3 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, funcResultAfter: 3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "heal-roll-3", jumped: false });
+  });
+
+  it("Heal target faster, HP in [70,100): the <30 roll's FALL-THROUGH scores -3", () => {
+    const result = healRun(1, { hp: 80, maxHp: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "heal-roll-1", jumped: false });
+  });
+
+  it("Heal target faster, HP in [70,100): the <30 roll's JUMP reaches the Snatch-gated tail", () => {
+    // seed 4 -> heal-roll-1 low byte 25 (< 30, JUMP to Heal5), then heal-roll-3
+    // low byte 8 (< 20, JUMP to End -> zero).
+    const result = healRun(4, { hp: 80, maxHp: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "heal-roll-1", jumped: true });
+    expect(result.draws[1]).toMatchObject({ kind: "heal-roll-3", jumped: true });
+  });
+
+  it("Heal target faster, HP < 70, target HAS Snatch history: the <100 roll's JUMP ends at zero", () => {
+    // seed 3 -> heal-roll-2 low byte 83 (< 100, JUMP to End).
+    const result = healRun(3, { hp: 60, maxHp: 100 }, { knownMoves: [MOVE_SNATCH] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "heal-roll-2", jumped: true });
+  });
+
+  it("Heal target faster, HP < 70, target HAS Snatch history: the <100 roll's FALL-THROUGH reaches Heal6's <20 roll", () => {
+    // seed 1 -> heal-roll-2 low byte 198 (>= 100, FALL-THROUGH), then heal-roll-3
+    // low byte 33 (>= 20, FALL-THROUGH to +2).
+    const result = healRun(1, { hp: 60, maxHp: 100 }, { knownMoves: [MOVE_SNATCH] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["heal-roll-2", "heal-roll-3"]);
+    expect(result.draws[0]).toMatchObject({ jumped: false });
+    expect(result.draws[1]).toMatchObject({ jumped: false });
+  });
+
+  it("Heal target NOT faster (attacker faster) scores a deterministic -8", () => {
+    // Attacker speed 120 > target 5: if_target_faster false.
+    const result = healRun(1, { hp: 60, maxHp: 100, speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8, draws: [] });
+  });
+
+  it("Heal preserves the incoming funcResult carry (no command writes funcResult)", () => {
+    const result = healRun(1, { hp: 60, maxHp: 100, speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ funcResultAfter: 2 });
+  });
+});

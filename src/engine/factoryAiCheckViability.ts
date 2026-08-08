@@ -674,6 +674,67 @@ export type FactoryAiCheckViabilityDraw =
     rawRngValue: number;
     randomValue: number;
     succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "heal-roll-1" | "heal-roll-2" | "heal-roll-3";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when `if_random_less_than` takes its jump (raw low byte < threshold). */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "trap-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "semi-invulnerable-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "flail-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "destiny-bond-roll-1" | "destiny-bond-roll-2" | "destiny-bond-roll-3";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "self-ko-roll-1" | "self-ko-roll-2" | "self-ko-roll-3" | "self-ko-roll-4";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    jumped: boolean;
   }>;
 
 export type FactoryAiCheckViabilityResult =
@@ -1296,6 +1357,187 @@ function runCvEndure(input: Readonly<{
     draws: Object.freeze([Object.freeze({ ...roll, kind: "endure-roll" as const, succeeded })]),
     scoreDelta: succeeded ? 1 : 0,
   });
+}
+
+/**
+ * `AI_CV_Heal`'s own reachable body (`data/battle_ai_scripts.s:1324-1351`,
+ * shared verbatim by `AI_CV_HealWeather` below and dispatched directly for
+ * `EFFECT_RESTORE_HP`/`EFFECT_SOFTBOILED`). The dead `AI_CV_Heal2` label
+ * (`:1330-1333`) is NOT ported: it is a byte block with zero references in
+ * the compiled ROM (pointer to `0x082dd10b` appears nowhere), so the HP
+ * 50%/80%/roll-70 band it encodes never executes.
+ *
+ * ```
+ * AI_CV_Heal:
+ *     if_hp_equal AI_USER, 100, AI_CV_Heal3
+ *     if_target_faster AI_CV_Heal4
+ *     score -8
+ *     goto AI_CV_Heal_End
+ * AI_CV_Heal3:
+ *     score -3
+ *     goto AI_CV_Heal_End
+ * AI_CV_Heal4:
+ *     if_hp_less_than AI_USER, 70, AI_CV_Heal5
+ *     if_random_less_than 30, AI_CV_Heal5
+ *     score -3
+ *     goto AI_CV_Heal_End
+ * AI_CV_Heal5:
+ *     if_doesnt_have_move_with_effect AI_TARGET, EFFECT_SNATCH, AI_CV_Heal6
+ *     if_random_less_than 100, AI_CV_Heal_End
+ * AI_CV_Heal6:
+ *     if_random_less_than 20, AI_CV_Heal_End
+ *     score +2
+ * AI_CV_Heal_End:
+ *     end
+ * ```
+ *
+ * Reachable control flow: HP exactly 100% jumps straight to the deterministic
+ * -3 (`Heal3`). Target NOT faster is the deterministic -8. Target faster
+ * reaches `Heal4`: HP < 70% jumps straight to `Heal5` (no draw); HP >= 70%
+ * runs the `<30` roll whose JUMP (roll < 30) lands in `Heal5` and whose
+ * fall-through is the deterministic -3. `Heal5` is Snatch-guarded exactly like
+ * `AI_CV_Rest`'s own tail (`if_doesnt_have_move_with_effect AI_TARGET,
+ * EFFECT_SNATCH` = plain BattleHistory membership, `Cmd_if_doesnt_have_move
+ * _with_effect` `battle_ai_script_commands.c:1940-1962`): a target WITH a
+ * Snatch-history move runs the `<100` roll (JUMP to End keeps the running
+ * score), a target without one jumps straight to `Heal6`. `Heal6`'s `<20`
+ * roll decides the final +2 (JUMP <20 keeps the score, fall-through applies
+ * +2). All HP gates read AI_USER's own truncating `100*hp/maxHp` percent. No
+ * command writes funcResult.
+ */
+function runCvHealBody(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  const targetHasSnatch = (input.target.knownMoves ?? []).some(
+    (moveId) => MOVES_BY_ID.get(moveId)?.effect === "EFFECT_SNATCH",
+  );
+
+  // Heal5/Heal6 shared tail -- reached only from Heal4's two jumps.
+  const tail = (): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> => {
+    let nextOrdinal = ordinal;
+    if (targetHasSnatch) {
+      const snatchRoll = nextDraw(rng, nextOrdinal, `${input.reasonPrefix}-heal-roll-2`);
+      rng = snatchRoll.after;
+      nextOrdinal += 1;
+      const jumped = snatchRoll.randomValue % 256 < 100;
+      draws.push(Object.freeze({ ...snatchRoll, kind: "heal-roll-2" as const, jumped }));
+      if (jumped) {
+        return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+      }
+    }
+    const tailRoll = nextDraw(rng, nextOrdinal, `${input.reasonPrefix}-heal-roll-3`);
+    rng = tailRoll.after;
+    const jumped = tailRoll.randomValue % 256 < 20;
+    draws.push(Object.freeze({ ...tailRoll, kind: "heal-roll-3" as const, jumped }));
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: jumped ? 0 : 2 });
+  };
+
+  if (hpPercent === 100) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
+  }
+
+  if (targetFaster) {
+    if (hpPercent < 70) {
+      return tail();
+    }
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-heal-roll-1`);
+    rng = roll.after;
+    ordinal += 1;
+    const jumped = roll.randomValue % 256 < 30;
+    draws.push(Object.freeze({ ...roll, kind: "heal-roll-1" as const, jumped }));
+    if (jumped) {
+      return tail();
+    }
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
+  }
+
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -8 });
+}
+
+/**
+ * `AI_CV_HealWeather` (`data/battle_ai_scripts.s:1315-1323`,
+ * `EFFECT_MORNING_SUN`/`EFFECT_SYNTHESIS`/`EFFECT_MOONLIGHT`): `get_weather`
+ * first, then a three-way weather gate over the "bad" weather values
+ * (Hail/Rain/Sandstorm), each of which jumps to a `score -2` that falls
+ * straight through into `AI_CV_Heal`'s own body -- so a heal under weather
+ * subtracts 2 AND runs the full Heal logic. Sun or no weather `goto`s the Heal
+ * body directly with no penalty. `get_weather` is the non-BUGFIX
+ * `Cmd_get_weather` (`battle_ai_script_commands.c:1644-1665`): it writes
+ * `funcResult` ONLY when a real weather bit is set, so the exit value is the
+ * stale-fallback formula `currentWeather ?? staleCarry` (same shape
+ * `weatherSetterCvScore` uses). The Heal body writes nothing further.
+ */
+function runCvHealWeather(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  staleFuncResultFallback: AiWeatherValue | undefined;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const funcResultAfter = input.attacker.currentWeather ?? input.staleFuncResultFallback;
+  const weatherPenalty = input.attacker.currentWeather !== undefined
+    && input.attacker.currentWeather !== AI_WEATHER_SUN
+    ? -2
+    : 0;
+  const body = runCvHealBody({
+    rng: input.rng,
+    attacker: input.attacker,
+    target: input.target,
+    drawOrdinalStart: input.drawOrdinalStart,
+    reasonPrefix: input.reasonPrefix,
+  });
+  return Object.freeze({ ...body, scoreDelta: body.scoreDelta + weatherPenalty, funcResultAfter });
+}
+
+/**
+ * `AI_CV_Heal` (`data/battle_ai_scripts.s:1324-1351`, `EFFECT_RESTORE_HP`/
+ * `EFFECT_SOFTBOILED`) -- the direct-dispatch entry of the shared
+ * `runCvHealBody` above. No command in this handler writes funcResult, so the
+ * incoming carry survives unchanged.
+ */
+function runCvHeal(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  funcResultCarry: AiWeatherValue | undefined;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const body = runCvHealBody({
+    rng: input.rng,
+    attacker: input.attacker,
+    target: input.target,
+    drawOrdinalStart: input.drawOrdinalStart,
+    reasonPrefix: input.reasonPrefix,
+  });
+  return Object.freeze({ ...body, funcResultAfter: input.funcResultCarry });
 }
 
 /**
@@ -3719,6 +3961,51 @@ export function runCheckViability(input: Readonly<{
       draws: rest.draws,
       scoreDelta: rest.scoreDelta,
       funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (
+    move.effect === "EFFECT_MORNING_SUN"
+    || move.effect === "EFFECT_SYNTHESIS"
+    || move.effect === "EFFECT_MOONLIGHT"
+  ) {
+    // AI_CV_HealWeather (data/battle_ai_scripts.s:1315-1323) -- the shared
+    // Heal body behind a get_weather gate (Hail/Rain/Sandstorm -2 then the
+    // full AI_CV_Heal flow; Sun/none no penalty).
+    const healWeather = runCvHealWeather({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      staleFuncResultFallback: funcResultCarry,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: healWeather.rng,
+      draws: healWeather.draws,
+      scoreDelta: healWeather.scoreDelta,
+      funcResultAfter: healWeather.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_RESTORE_HP" || move.effect === "EFFECT_SOFTBOILED") {
+    // AI_CV_Heal (data/battle_ai_scripts.s:1324-1351) -- the shared Heal body
+    // reached directly (no weather gate).
+    const heal = runCvHeal({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      funcResultCarry,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: heal.rng,
+      draws: heal.draws,
+      scoreDelta: heal.scoreDelta,
+      funcResultAfter: heal.funcResultAfter,
     });
   }
 
