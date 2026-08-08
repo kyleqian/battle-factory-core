@@ -23935,7 +23935,7 @@ export function renderSceneOnMovePresentation(
     // The target rests at its front-idle x2 (1px for ONIX) until the ShakeMon
     // displacement displays (player-back frame 334 / age 118); afterwards the
     // displayed shake x2 holds.
-    const targetX2 = state.age <= 117
+    const targetX2 = state.age <= 115
       ? targetIdle.x2
       : displayed.targetX2;
     // `metallic_shine permanent=TRUE` skips the in-task palette restore, so the
@@ -23986,7 +23986,9 @@ export function renderSceneOnMovePresentation(
         poisonTailArt.impact.tileset,
         poisonTailArt.impact.palette,
         view.target.geometry.animationCenter.x - 16,
-        view.target.geometry.animationCenter.y - 16,
+        // The hitsplat anchors on the target's Y_PIC_OFFSET: the back sprite
+        // sits +8 below its sprite field (player-back ONIX front +0).
+        view.target.geometry.animationCenter.y - 16 + (playerToOpponent ? 0 : 8),
         372,
         372,
         12,
