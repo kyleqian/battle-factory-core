@@ -1,11 +1,10 @@
 # Animation coverage
 
-## MOVE_MEGA_KICK staged — pointer-isolated dual-orientation RAM truth; remains unsupported (2026-08-08 worker, round A)
+## MOVE_MEGA_KICK exact — dual-orientation Scene-ON promotion (2026-08-08 worker, round B)
 
-- **State:** Coverage remains **132/276 exact, 0 partial, 0 staged, 144 unsupported**. `MOVE_MEGA_KICK` is deliberately still unsupported: no `battleScene.ts` draw case, portable framebuffer acceptance, coverage/inventory pin, boundary widening, controller change, or barrier was added.
-- **Did:** Added complete Scene-ON SUDOWOODO/ONIX party scenarios (all active SUDOWOODO slots forced to move 25), `megaKickProbe.py`, both fresh raw-RGB change maps, source audit carrier assertion for set **298 / FRONTIER_MON_SUDOWOODO_2**, and a typed `MEGA_KICK` seam/reducer. The reducer parameterizes the reusable Mega Punch/Kick body and pins only fresh Kick facts: foot `animNum=1`, alpha RAM edge 14, and `SE_M_MEGA_KICK2` at age 66. Focused Tier-1 pins cover every distinct/reused field.
-- **Measured:** fresh pointer-isolated windows through first inactive cleanup were player-back **379..538** and opponent-front **297..456**, **160/160** each (orientation shift **−82**); the two independent runs were byte-identical. Frame-hash ledgers: player `dd29e0fd…f29ee299`, opponent `1a25163e…7ce01dd9`. Both receipts agree on: target `monbg`/`Task_UpdateMonBg` age 7..116; wide-foot sprite 14..87; target-white task 14..35 plus reset 71; alpha registers 14..113; impact/hitsplat/ShakeMon2 at 71..79/71..112; complex palette sprite 71..78; and restore fade 120..157. The maps capture every visible BG/sprite/palette edge; measured first visible foot is RAM+1 and restore fade first appears RAM+2 in both orientations.
-- **Next:** promotion must make the measured display latches load-bearing in a real `battleScene.ts` compositor, add two fixtures + full-window `megaKickPortable.ts`, and prove 160/160 component **and framebuffer** frames twice per orientation (with an existing portable control) before changing coverage to exact. Do not infer any remaining palette/shake latch from Mega Punch merely because the body is shared.
+- **State:** Coverage advanced **132→133/276 exact**, 0 partial, 0 staged, **144→143 unsupported**. No boundary, controller, gameplay-state, or unsupported-barrier change.
+- **Did:** Added the narrow parameterized Punch/Kick compositor, variant-1 foot selection, two portable fixtures, `megaKickPortable.ts`, and the Tier-1 receipt test.
+- **Verified:** Fresh probes via `tools/run-mgba-probe.py` twice each: player-back **379..538** and opponent-front **297..456** are **160/160 component and framebuffer exact**. Foot matrix is RAM+1, target monbg hardware 7..113, restore fade first visible RAM+2; player-side effect subpriority is 38 versus opponent 28. Mega Punch remained **160/160** in both orientations twice fresh as the shared-body control.
 
 ## MOVE_CRABHAMMER exact — full dual-orientation Scene-ON promotion (2026-08-08 worker, round B)
 
