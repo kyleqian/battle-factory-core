@@ -1446,6 +1446,18 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_TELEPORT -> Score_Minus10 directly
+  // (`data/battle_ai_scripts.s:185`): the table entry is a bare Score_Minus10
+  // jump with no handler body. Teleport is penalized unconditionally.
+  if (move.effect === "EFFECT_TELEPORT") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: -10,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_DOWN(_2) -> AI_CBM_SpeedDown,
   // one of the two handlers this port implements out of the table's ~100 entries.
   if (move.effect === "EFFECT_SPEED_DOWN" || move.effect === "EFFECT_SPEED_DOWN_2") {

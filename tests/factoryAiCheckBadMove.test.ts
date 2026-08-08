@@ -930,6 +930,15 @@ describe("AI_CBM_HighRiskForDamage via Skull Bash (dispatch :183, EFFECT_SKULL_B
   });
 });
 
+describe("EFFECT_TELEPORT (data/battle_ai_scripts.s:185, bare Score_Minus10)", () => {
+  const MOVE_TELEPORT = 100;
+
+  it("scores -10 unconditionally with zero draws", () => {
+    const result = run(MOVE_TELEPORT, { ...MAROWAK, knownAbility: "ABILITY_ROCK_HEAD" });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+});
+
 describe("AI_CBM_OneHitKO (data/battle_ai_scripts.s:358-362, EFFECT_OHKO)", () => {
   const MOVE_GUILLOTINE = 12; // EFFECT_OHKO, TYPE_NORMAL, power 1
   const MOVE_SHEER_COLD = 329; // EFFECT_OHKO, TYPE_ICE, power 1
