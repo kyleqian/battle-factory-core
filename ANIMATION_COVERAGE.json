@@ -1512,6 +1512,33 @@
    ]
   },
   {
+   "move": "MOVE_IRON_TAIL",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_AZUMARILL_2 (set 297, AZUMARILL, all four active slots IRON_TAIL move 231 so the Factory AI has one legal choice) against legal ONIX in both orientations; both pass the complete move-owned Scene-ON window twice fresh with evidence ae8c3730865985179e737659d75684090aa3ebb512a127bff6c89b8a90f2d7c9 / raw RGB 952808facb59f17298b90cbbcef4000f909e64da37e9950bedeca0b74558c428 for the 135-frame player-back window (frames 216-350) and evidence 63f2d609b95a4a44d31a2572dd4aa9616942cfd923128d042c3314a3cca0317f / raw RGB bea1745ae3fc99cbe57d543b6e27a4a88bdea379c7ecaf4760d754c665f565f5 for the 135-frame opponent-front window (frames 215-349), both isolated by sBattleAnimScriptPtr within the Move_IRON_TAIL..Move_POISON_TAIL label bounds",
+    "the reducer is the permanent=TRUE metallic-shine case the steelWing/metalClaw draw cases do not cover: metallic_shine permanent=TRUE skips the in-task palette restore, so the attacker stays grayscaled from the shine's first step (RAM age 6, displayed frame 223 / age 7) until the script's trailing set_original_pal (RAM age 126, displayed frame 343 / age 127) - the exact inverse write - which is the one modelling decision that differs from STEEL_WING/METAL_CLAW",
+    "the full 135-frame window is static except at the settled displayed frames: grayscale ON at 223 (1519px), metallic-shine sweep 1 at 229-253 and byte-identical sweep 2 at 261-285 (the band renders only while data10>=28; the wrap frames 254-260 and sweep 3 are static because ClearBattleAnimBg already ran, and the RAM data10 3-frame hold at 285-287 is RAM truth but never a visual), the horizontal lunge out at 324-327 / hold 328-329 / back 330-333, the hitsplat (animation=2, 372 matrix) appearing at 332 and gone at 342, the ShakeMon target x2 toggling at 334/336/338/340, and grayscale OFF at 343",
+    "the displayed-vs-RAM lags were measured against the fresh probe: every visible event displays exactly ONE frame after the RAM state that causes it (attacker x2 ramp 4..16 at f323-326, target x2 3,3,0,0,3,3,0,0 at f333-340 with the front-idle 1px until f330, hitsplat sprite RAM f331-340, grayscale hardware palette f223-342); the one orientation trap is the target Y_PIC_OFFSET: the opponent hitsplat anchors at (72,88) on the back sprite, +8 below its sprite field, while the player-back front target anchors at (176,42)",
+    "all ten components are proven by exact moves (metallicShineAtAge with the permanent param, horizontalLunge.ts, the shared hitsplat painter at 372, shakeMon.ts, the monbg/setalpha contact body); no new source components and no boundary widening - the only engine contact is the IRON_TAIL draw case in battleScene.ts",
+    "the portable proves 135/135 source-component frames in both orientations (metallic task data10/data11/presence, attacker lunge x2, target idle+shake x2, hitsplat matrix/presence, lunge-helper presence, ShakeMon task, looped-SE task, hardware grayscale palette) and the identical shared-framebuffer 135/135 through the full engine render with healthboxes and message window untouched; no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-iron-tail-player-azumarill-opponent-onix.json",
+    "tools/battle-lab/mechanic-iron-tail-opponent-azumarill-player-onix.json",
+    "tools/compare/fixtures/iron-tail-player-azumarill-opponent-onix.json",
+    "tools/compare/fixtures/iron-tail-opponent-azumarill-player-onix.json",
+    "tools/compare/ironTailProbe.py",
+    "tools/compare/ironTailPortable.ts",
+    "tools/compare/evidence/iron-tail-changemap-player.txt",
+    "tools/compare/evidence/iron-tail-changemap-opponent.txt",
+    "src/animation/ironTail.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/ironTail.test.ts",
+    "tests/animation/ironTailEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_KNOCK_OFF",
    "status": "exact",
    "covered": [
