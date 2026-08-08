@@ -1,0 +1,162 @@
+{
+  "fixture": "/tmp/mirrorcoat-control-seed99.json",
+  "seed": 99,
+  "setup": {
+    "player": [
+      366,
+      105,
+      76
+    ],
+    "opponent": [
+      143,
+      131,
+      136
+    ]
+  },
+  "pass1_fast_perFrameDeltas": [
+    {
+      "frame": 352,
+      "count": 1
+    },
+    {
+      "frame": 359,
+      "count": 4
+    },
+    {
+      "frame": 360,
+      "count": 3
+    },
+    {
+      "frame": 712,
+      "count": 1
+    },
+    {
+      "frame": 719,
+      "count": 4
+    },
+    {
+      "frame": 720,
+      "count": 2
+    },
+    {
+      "frame": 1069,
+      "count": 1
+    }
+  ],
+  "pass1_finalRandCount": 9074,
+  "decisionWindow": {
+    "start_exclusive": 100,
+    "end_inclusive": 732
+  },
+  "windowTotal_sRandCount": 15,
+  "flaggedFrames": [
+    352,
+    359,
+    360,
+    712,
+    719,
+    720
+  ],
+  "pass2_hitCount": 15,
+  "pass2_finalRandCount": 9074,
+  "orderedCallerTable": [
+    {
+      "tick": 352,
+      "callerFunction": "BattleTurnPassed+0x157",
+      "lr": "0x803bb13"
+    },
+    {
+      "tick": 359,
+      "callerFunction": "BattleAI_SetupAIData+0x83",
+      "lr": "0x81309d3"
+    },
+    {
+      "tick": 359,
+      "callerFunction": "BattleAI_SetupAIData+0x83",
+      "lr": "0x81309d3"
+    },
+    {
+      "tick": 359,
+      "callerFunction": "BattleAI_SetupAIData+0x83",
+      "lr": "0x81309d3"
+    },
+    {
+      "tick": 359,
+      "callerFunction": "BattleAI_SetupAIData+0x83",
+      "lr": "0x81309d3"
+    },
+    {
+      "tick": 360,
+      "callerFunction": "Cmd_if_random_less_than+0x7",
+      "lr": "0x813117f"
+    },
+    {
+      "tick": 360,
+      "callerFunction": "Cmd_if_random_less_than+0x7",
+      "lr": "0x813117f"
+    },
+    {
+      "tick": 360,
+      "callerFunction": "ChooseMoveOrAction_Singles+0xf7",
+      "lr": "0x8130cd3"
+    },
+    {
+      "tick": 712,
+      "callerFunction": "BattleTurnPassed+0x157",
+      "lr": "0x803bb13"
+    },
+    {
+      "tick": 719,
+      "callerFunction": "BattleAI_SetupAIData+0x83",
+      "lr": "0x81309d3"
+    },
+    {
+      "tick": 719,
+      "callerFunction": "BattleAI_SetupAIData+0x83",
+      "lr": "0x81309d3"
+    },
+    {
+      "tick": 719,
+      "callerFunction": "BattleAI_SetupAIData+0x83",
+      "lr": "0x81309d3"
+    },
+    {
+      "tick": 719,
+      "callerFunction": "BattleAI_SetupAIData+0x83",
+      "lr": "0x81309d3"
+    },
+    {
+      "tick": 720,
+      "callerFunction": "Cmd_if_random_less_than+0x7",
+      "lr": "0x813117f"
+    },
+    {
+      "tick": 720,
+      "callerFunction": "ChooseMoveOrAction_Singles+0xf7",
+      "lr": "0x8130cd3"
+    }
+  ],
+  "callerSummary": [
+    {
+      "callerFunction": "BattleAI_SetupAIData+0x83",
+      "count": 8
+    },
+    {
+      "callerFunction": "Cmd_if_random_less_than+0x7",
+      "count": 3
+    },
+    {
+      "callerFunction": "BattleTurnPassed+0x157",
+      "count": 2
+    },
+    {
+      "callerFunction": "ChooseMoveOrAction_Singles+0xf7",
+      "count": 2
+    }
+  ],
+  "reconciliation": {
+    "pass1WindowTotal": 15,
+    "pass2HitCount": 15,
+    "matches": true
+  }
+}

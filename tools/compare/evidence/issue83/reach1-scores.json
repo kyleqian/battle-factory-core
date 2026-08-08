@@ -1,0 +1,389 @@
+{
+  "fixture": "/tmp/mirrorcoat-reach-seed1.json",
+  "seed": 1,
+  "decisionWindow": {
+    "start_exclusive": 100,
+    "end_inclusive": 732
+  },
+  "windowTotal_sRandCount": 14,
+  "flaggedFrames": [
+    354,
+    361,
+    362,
+    714,
+    721,
+    722
+  ],
+  "pass2_hitCount": 14,
+  "pass2_finalRandCount": 8875,
+  "orderedDrawTable": [
+    {
+      "frame": 354,
+      "lr": 134462227,
+      "caller": "BattleTurnPassed+0x157",
+      "scores": [
+        100,
+        100,
+        100,
+        100
+      ],
+      "funcResult": 4,
+      "aiUserMoves": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "movesetIndex": 0,
+      "moveConsidered": 150,
+      "scriptPtr": 137218705
+    },
+    {
+      "frame": 361,
+      "lr": 135465427,
+      "caller": "BattleAI_SetupAIData+0x83",
+      "scores": [
+        100,
+        100,
+        100,
+        100
+      ],
+      "funcResult": 0,
+      "aiUserMoves": [
+        243,
+        68,
+        150,
+        150
+      ],
+      "movesetIndex": 0,
+      "moveConsidered": 0,
+      "scriptPtr": 137218705
+    },
+    {
+      "frame": 361,
+      "lr": 135465427,
+      "caller": "BattleAI_SetupAIData+0x83",
+      "scores": [
+        100,
+        100,
+        100,
+        100
+      ],
+      "funcResult": 0,
+      "aiUserMoves": [
+        243,
+        68,
+        150,
+        150
+      ],
+      "movesetIndex": 0,
+      "moveConsidered": 0,
+      "scriptPtr": 137218705
+    },
+    {
+      "frame": 361,
+      "lr": 135465427,
+      "caller": "BattleAI_SetupAIData+0x83",
+      "scores": [
+        100,
+        100,
+        100,
+        100
+      ],
+      "funcResult": 0,
+      "aiUserMoves": [
+        243,
+        68,
+        150,
+        150
+      ],
+      "movesetIndex": 0,
+      "moveConsidered": 0,
+      "scriptPtr": 137218705
+    },
+    {
+      "frame": 361,
+      "lr": 135465427,
+      "caller": "BattleAI_SetupAIData+0x83",
+      "scores": [
+        100,
+        100,
+        100,
+        100
+      ],
+      "funcResult": 0,
+      "aiUserMoves": [
+        243,
+        68,
+        150,
+        150
+      ],
+      "movesetIndex": 0,
+      "moveConsidered": 0,
+      "scriptPtr": 137218705
+    },
+    {
+      "frame": 362,
+      "lr": 135467391,
+      "caller": "Cmd_if_random_less_than+0x7",
+      "scores": [
+        100,
+        100,
+        100,
+        100
+      ],
+      "funcResult": 0,
+      "aiUserMoves": [
+        243,
+        68,
+        150,
+        150
+      ],
+      "movesetIndex": 0,
+      "moveConsidered": 243,
+      "scriptPtr": 137222646
+    },
+    {
+      "frame": 362,
+      "lr": 135466195,
+      "caller": "ChooseMoveOrAction_Singles+0xf7",
+      "scores": [
+        100,
+        100,
+        100,
+        100
+      ],
+      "funcResult": 4,
+      "aiUserMoves": [
+        243,
+        68,
+        150,
+        150
+      ],
+      "movesetIndex": 0,
+      "moveConsidered": 150,
+      "scriptPtr": 137218705
+    },
+    {
+      "frame": 714,
+      "lr": 134462227,
+      "caller": "BattleTurnPassed+0x157",
+      "scores": [
+        100,
+        100,
+        100,
+        100
+      ],
+      "funcResult": 4,
+      "aiUserMoves": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "movesetIndex": 0,
+      "moveConsidered": 150,
+      "scriptPtr": 137218705
+    },
+    {
+      "frame": 721,
+      "lr": 135465427,
+      "caller": "BattleAI_SetupAIData+0x83",
+      "scores": [
+        100,
+        100,
+        100,
+        100
+      ],
+      "funcResult": 0,
+      "aiUserMoves": [
+        243,
+        68,
+        150,
+        150
+      ],
+      "movesetIndex": 0,
+      "moveConsidered": 0,
+      "scriptPtr": 137218705
+    },
+    {
+      "frame": 721,
+      "lr": 135465427,
+      "caller": "BattleAI_SetupAIData+0x83",
+      "scores": [
+        100,
+        100,
+        100,
+        100
+      ],
+      "funcResult": 0,
+      "aiUserMoves": [
+        243,
+        68,
+        150,
+        150
+      ],
+      "movesetIndex": 0,
+      "moveConsidered": 0,
+      "scriptPtr": 137218705
+    },
+    {
+      "frame": 721,
+      "lr": 135465427,
+      "caller": "BattleAI_SetupAIData+0x83",
+      "scores": [
+        100,
+        100,
+        100,
+        100
+      ],
+      "funcResult": 0,
+      "aiUserMoves": [
+        243,
+        68,
+        150,
+        150
+      ],
+      "movesetIndex": 0,
+      "moveConsidered": 0,
+      "scriptPtr": 137218705
+    },
+    {
+      "frame": 721,
+      "lr": 135465427,
+      "caller": "BattleAI_SetupAIData+0x83",
+      "scores": [
+        100,
+        100,
+        100,
+        100
+      ],
+      "funcResult": 0,
+      "aiUserMoves": [
+        243,
+        68,
+        150,
+        150
+      ],
+      "movesetIndex": 0,
+      "moveConsidered": 0,
+      "scriptPtr": 137218705
+    },
+    {
+      "frame": 722,
+      "lr": 135467391,
+      "caller": "Cmd_if_random_less_than+0x7",
+      "scores": [
+        100,
+        100,
+        100,
+        100
+      ],
+      "funcResult": 0,
+      "aiUserMoves": [
+        243,
+        68,
+        150,
+        150
+      ],
+      "movesetIndex": 0,
+      "moveConsidered": 243,
+      "scriptPtr": 137222646
+    },
+    {
+      "frame": 722,
+      "lr": 135466195,
+      "caller": "ChooseMoveOrAction_Singles+0xf7",
+      "scores": [
+        104,
+        100,
+        100,
+        100
+      ],
+      "funcResult": 4,
+      "aiUserMoves": [
+        243,
+        68,
+        150,
+        150
+      ],
+      "movesetIndex": 0,
+      "moveConsidered": 150,
+      "scriptPtr": 137218705
+    }
+  ],
+  "frameScoresAtFrameEnd": [
+    {
+      "frame": 354,
+      "score": [
+        100,
+        100,
+        100,
+        100
+      ]
+    },
+    {
+      "frame": 361,
+      "score": [
+        100,
+        100,
+        100,
+        100
+      ]
+    },
+    {
+      "frame": 362,
+      "score": [
+        100,
+        100,
+        100,
+        100
+      ]
+    },
+    {
+      "frame": 714,
+      "score": [
+        100,
+        100,
+        100,
+        100
+      ]
+    },
+    {
+      "frame": 721,
+      "score": [
+        100,
+        100,
+        100,
+        100
+      ]
+    },
+    {
+      "frame": 722,
+      "score": [
+        104,
+        100,
+        100,
+        100
+      ]
+    }
+  ],
+  "callerSummary": [
+    {
+      "callerFunction": "BattleAI_SetupAIData+0x83",
+      "count": 8
+    },
+    {
+      "callerFunction": "BattleTurnPassed+0x157",
+      "count": 2
+    },
+    {
+      "callerFunction": "ChooseMoveOrAction_Singles+0xf7",
+      "count": 2
+    },
+    {
+      "callerFunction": "Cmd_if_random_less_than+0x7",
+      "count": 2
+    }
+  ]
+}

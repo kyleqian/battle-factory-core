@@ -53,11 +53,44 @@ with a differing choice means the draws are being *consumed* in the right number
 genuine 4-way ties (`Random() % 4`), so this governs which move the opponent actually
 uses whenever scores are level — which is common.
 
-**Next step:** attribute the ROM's draws per call site for the seed-99 control row
-using `tools/probe/attribute-factory-ai-random-callers.py`'s `sRandCount` +
-single-step LR technique (the same instrument that produced the banked 11/11/13
-ledgers), and compare against the engine's `draws` ledger ordinals. Do not adjust
-scoring to fit — the score vectors already agree.
+**LOCATED 2026-08-08 (diagnosis step; full write-up in
+`docs/issue83-factory-ai-random-draw-diagnosis.md`, raw evidence in
+`tools/compare/evidence/issue83/`).** Per-call-site attribution + live
+`AI_THINKING_STRUCT->score[]`/script-pointer probes on seed-modified copies of the
+committed fixtures name the cause:
+
+1. **The extra draw (seed-99 control) is `gRandomTurnNumber = Random()` at
+   `src/battle_main.c:4013` in `BattleTurnPassed`** (LR `0x803bb13`), drawn once
+   per turn *before* `HandleTurnActionSelectionState` runs the AI decision. Every
+   decision window therefore opens one LCG step earlier than the standalone scored
+   policy models (the verifier seeds it pre-draw; the battle kernel already models
+   the draw at its own turn boundary). Seed-99 control = gRTTN + setup4 + roll-6 +
+   roll-7 + tie = **8**; the engine draws only setup4 + roll-6 + roll-7 + tie = 7.
+   Control seed 1 "matches" only by coincidence (its `roll-6` jumps at the ROM's
+   step-6 value, the engine's `roll-6`@5+`roll-7`@6 produce the same 100s and the
+   same tie value).
+
+2. **The reach tie-slot divergence is the same misalignment PLUS a second cause:**
+   the ROM's `AI_CV_Counter8` counter-bonus-roll **never fires**. The reach's
+   Counter slot enters `AI_CV_Counter` but `AI_CV_Counter3`'s `if_has_move
+   AI_USER, MOVE_MIRROR_COAT` falls through to the power-0 path: `Cmd_if_has_move`
+   reads its operand through `(u16 *)(gAIScriptPtr + 2)`
+   (`battle_ai_script_commands.c:1811`, non-BUGFIX), and `AI_CV_Counter3` sits at
+   **odd** address `0x082DD46D`, so the unaligned halfword load at `0x082DD46F`
+   yields `0x010000F3` (not `0x000000F3`) and the 32-bit compare never matches.
+   The engine's `userMoves.includes(MOVE_MIRROR_COAT)`
+   (`factoryAiCheckViability.ts:7519`) can't reproduce that; its extra
+   `counter-bonus-roll` is the reach draw that the ROM spends on gRTTN instead —
+   same total, same endpoint, different CV roll values → different tie slot.
+   (MirrorCoat3's sibling check works because `0x082DD996` is even.)
+
+**Fix not attempted — not unambiguous.** (a) Porting the pre-decision draw into
+the seam is a faithful named construct but re-derives the banked control-seed-1
+ordinals; (b) the unfired Counter8 is a build-layout artifact, not a portable
+source construct. A fix worker should land (a) at the seam, re-derive control
+seed 1, and decide (b) as a hard-coded evidence-backed exception or a general
+"odd script address ⇒ if_has_move operand read is garbage" model — confirming
+against the score-array evidence first.
 
 **Banked meanwhile:** `tests/factoryAiMirrorCoatLiveReceipt.test.ts` pins the
 control-seed-1 full match, the reach-seed-1 draw/endpoint receipt, and a regression
