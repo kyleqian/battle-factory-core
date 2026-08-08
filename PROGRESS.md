@@ -111,8 +111,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   supervisor briefly misread the worker as failed; git log corrected it. The
   numbers here are the final ones.
   Supervisor-rerun specs this session: `mid-battle-switch-dense-a-off`
-  **354/354** (was 276/276 at session start; **+78 frames**, the whole open
-  animation plus the close-fade tail), `loss-lobby-walk-off` **177/177**
+  **392/392** (was 276/276 at session start; **+116 frames** — the whole open
+  animation, the close-fade tail and the submenu window), `loss-lobby-walk-off` **177/177**
   (NEW spec; an earlier 129/177 draft had been deleted twice),
   `loss-beyond-boundary-off` **183/183**, `party-menu-status-item-off`
   251/251, `mid-battle-switch-pacing-b-off` 153/153,
@@ -172,35 +172,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   launcher digest is not evidence of failure — check `git log` before
   re-briefing.** The supervisor briefly treated a successful Class-B worker as
   dead on that basis. No DEFERRED entries; `run-supervisor.sh` is unblocked.
-
-
-## 990 — [bounded MAIN worker, 2026-08-08] Lobby wandering-woman renderer fixes LANDED; `loss-lobby-walk-off` PROMOTED **177/177 byte-exact** (was 129/177, 48 red)
-
-- **State:** master `2d0f3d65`, clean. Typecheck + `npm run build` green,
-  `npm run test:smoke` **347/347**, lobby/terminal test files **23/23**
-  (factoryLobbyFreeRoam 19/19 incl. 2 new pins red-verified + factoryLobbyTerminal
-  4/4). New spec `loss-lobby-walk-off` **177/177 byte-exact, twice-run green**.
-  Keep-green all held: `loss-beyond-boundary-off` **183/183**, `postwin-record-off`
-  **204/204**, `postwin-retire-off` **211/211**, `loss-terminal-decline-continuation-off`
-  **155/155**. Full `npm test` NOT run (worker rule — supervisor after merge).
-- **Did (per `docs/factory-lobby-freeroam-ground-truth.md` §8b/§8c):** the two
-  woman residuals were both renderer defects, not sheet/frame issues. (1)
-  `drawNpc` (`factoryTerminalRender.ts`) mirrored each 8px tile in place; the
-  ROM OAM h-flip mirrors the whole 16px frame (swap tile columns + mirror within).
-  Per-tile mirror of frame 2 is a 272px-different sprite; whole-frame = the
-  east-idle. (2) south/east `womanAtTick` tables lacked the 1px render lag the
-  north walk already carried: south y = 144+(T−5296), east x = 104+(T−5407),
-  with the east lag persisting through the 5422 settle tick (measured: oracle
-  5422 drawn box x 1px left of the 5430+ idle). Tier-1 pins: a render-level
-  whole-frame-flip pin (idle-east frame-2 row 12 at (116,116)/(117,116)/
-  (120,116)/(123,116) colors — red-verified by reverting to per-tile) and the
-  updated south/east lag expectations (red-verified by reverting the offsets).
-- **Next:** supervisor verify + full `npm test`; then ISSUES #80 Class B (the
-  1-row healthbox content offset from 770, sole open-fade residual) or #71
-  send-out seam.
-- **Notes:** spec built from the walk fixture's own 58 segments with
-  `captureFrames` = the four walk windows (5181-5229, 5281-5312, 5341-5404,
-  5421-5452, 177 frames), `oracleProfile: battle-scene-off`, same
-  `loss-terminal-window-off` appStage as loss-beyond-boundary. Both measurement
-  probes re-ran clean: `verify-lobby-woman-pose` (matches §8 tables) and
-  `verify-lobby-hold-walk` **24/24**. No PAPERCUTS.
