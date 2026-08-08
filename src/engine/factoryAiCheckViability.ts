@@ -1094,6 +1094,17 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "snatch-roll-1" | "snatch-roll-2" | "snatch-roll-3" | "snatch-roll-4" | "snatch-roll-5";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (low byte < the site's threshold) skips the site's own score. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind: "get-ability";
     before: BattleRngState;
     after: BattleRngState;
@@ -6750,6 +6761,24 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_SNATCH") {
+    // AI_CV_Snatch (data/battle_ai_scripts.s:2523-2553).
+    const snatch = runCvSnatch({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: snatch.rng,
+      draws: snatch.draws,
+      scoreDelta: snatch.scoreDelta,
+      funcResultAfter: snatch.funcResultAfter,
+    });
+  }
+
   if (move.effect === "EFFECT_SPECIAL_ATTACK_DOWN" || move.effect === "EFFECT_SPECIAL_ATTACK_DOWN_2") {
     // AI_CV_SpAtkDown (data/battle_ai_scripts.s:1153-1184). Both effects are
     // vestigial in Gen 3 (no move carries them), so this is dispatch-reachable
@@ -9362,5 +9391,143 @@ export function runCvSpAtkDown(input: Readonly<{
   draws.push(Object.freeze({ ...draw2, kind: "sp-atk-down-roll-2" as const, succeeded: succeeded2 }));
   if (succeeded2) score -= 2;
 
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+}
+
+/**
+ * `AI_CV_Snatch` (`data/battle_ai_scripts.s:2523-2553`, EFFECT_SNATCH):
+ *
+ * ```
+ * AI_CV_Snatch:
+ *     is_first_turn_for AI_USER
+ *     if_equal TRUE, AI_CV_Snatch3
+ *     if_random_less_than 30, AI_CV_Snatch_End
+ *     if_target_faster AI_CV_Snatch2
+ *     if_hp_not_equal AI_USER, 100, AI_CV_Snatch5
+ *     if_hp_less_than AI_TARGET, 70, AI_CV_Snatch5
+ *     if_random_less_than 60, AI_CV_Snatch_End
+ *     goto AI_CV_Snatch5
+ * AI_CV_Snatch2:
+ *     if_hp_more_than AI_TARGET, 25, AI_CV_Snatch5
+ *     if_has_move_with_effect AI_TARGET, EFFECT_RESTORE_HP, AI_CV_Snatch3
+ *     if_has_move_with_effect AI_TARGET, EFFECT_DEFENSE_CURL, AI_CV_Snatch3
+ *     goto AI_CV_Snatch4
+ * AI_CV_Snatch3:
+ *     if_random_less_than 150, AI_CV_Snatch_End
+ *     score +2
+ *     goto AI_CV_Snatch_End
+ * AI_CV_Snatch4:
+ *     if_random_less_than 230, AI_CV_Snatch5
+ *     score +1
+ *     goto AI_CV_Snatch_End
+ * AI_CV_Snatch5:
+ *     if_random_less_than 30, AI_CV_Snatch_End
+ *     score -2
+ * AI_CV_Snatch_End:
+ *     end
+ * ```
+ *
+ * `is_first_turn_for AI_USER` ALWAYS overwrites funcResult with the user's
+ * isFirstTurn (the exit value). First turn == TRUE (1) jumps straight to the
+ * Snatch3 +2 roll. Otherwise the `<30` roll gates; user faster/equal reaches
+ * Snatch2 (target faster) or the user-HP/roll ladder; target faster reaches
+ * Snatch2's own ladder. `if_has_move_with_effect AI_TARGET` replicates
+ * `Cmd_if_has_move_with_effect`'s pinned-source AI_TARGET bug (checks AI_USER's
+ * own move slot for nonzero, reads the target's history move at that slot) --
+ * the same positional gate `runCvProtect` ports. Draws: `<30`, `<60`, `<150`,
+ * `<230`, `<30` in script order, gated by the branches above.
+ */
+function runCvSnatch(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  let score = 0;
+
+  const funcResultAfter = input.attacker.isFirstTurn as AiWeatherValue;
+
+  const roll = (kind: "snatch-roll-1" | "snatch-roll-2" | "snatch-roll-3" | "snatch-roll-4" | "snatch-roll-5", threshold: number): boolean => {
+    const draw = nextDraw(rng, ordinal, `${input.reasonPrefix}-${kind}`);
+    rng = draw.after;
+    ordinal += 1;
+    const jumped = draw.randomValue % 256 < threshold;
+    draws.push(Object.freeze({ ...draw, kind, jumped }));
+    return jumped;
+  };
+
+  if (input.attacker.isFirstTurn === 1) {
+    // Snatch3: <150 -> End (0), else +2.
+    if (!roll("snatch-roll-3", 150)) score += 2;
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+  }
+
+  // <30 -> End.
+  if (roll("snatch-roll-1", 30)) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+  }
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const userHpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  const targetHpPercent = Math.floor((100 * input.target.hp) / input.target.maxHp);
+
+  if (targetFaster) {
+    // Snatch2.
+    if (targetHpPercent > 25) {
+      // Snatch5.
+      if (!roll("snatch-roll-5", 30)) score -= 2;
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+    }
+    const knownMoves = input.target.knownMoves ?? [];
+    const userMoves = input.attacker.moves ?? [0, 0, 0, 0];
+    const targetHistoryHasEffect = (effect: string): boolean =>
+      knownMoves.some((moveId, slot) =>
+        (userMoves[slot] ?? 0) !== 0
+        && MOVES_BY_ID.get(moveId)?.effect === effect
+      );
+    if (targetHistoryHasEffect("EFFECT_RESTORE_HP") || targetHistoryHasEffect("EFFECT_DEFENSE_CURL")) {
+      // Snatch3.
+      if (!roll("snatch-roll-3", 150)) score += 2;
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+    }
+    // Snatch4: <230 -> Snatch5, else +1.
+    if (!roll("snatch-roll-4", 230)) {
+      score += 1;
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+    }
+    if (!roll("snatch-roll-5", 30)) score -= 2;
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+  }
+
+  // User faster/equal.
+  if (userHpPercent !== 100 || targetHpPercent < 70) {
+    // Snatch5.
+    if (!roll("snatch-roll-5", 30)) score -= 2;
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+  }
+  // <60 -> End, else Snatch5.
+  if (roll("snatch-roll-2", 60)) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+  }
+  if (!roll("snatch-roll-5", 30)) score -= 2;
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
 }
