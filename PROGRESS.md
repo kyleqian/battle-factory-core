@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1024 — [supervisor WIND-DOWN, 2026-08-08] **Generic S8 presentation and Factory-AI receipts advanced; final union green**
+
+- **State:** master is clean through `12be3c44`. Final worker full suite is
+  **800 files / 8,034 passed / 1 skipped**; supervisor independently reran
+  Baton Pass **4/4**, focused AI **745/745**, presentation **237/237**, clone
+  palette/ratchet **7/7**, smoke **375/375**, both OFF differentials
+  (**620/620** and **640/640**), the production build, and oracle profile check.
+- **Did:** folded the orientation-time animation branch and verified the union;
+  closed #83 with single turn-start-draw ownership; accepted exact Mirror Coat,
+  Psych Up, and Baton Pass hardware receipts; proved #55's construction-clock
+  boundary; retired two bare staged facts and the species-named faint-sink API;
+  made all six Family-C healthbox caches and the DOUBLE_TEAM palette cache own
+  every identity-bearing render input.
+- **Next:** continue #39 with one freshly censused generic presentation owner,
+  or add another file-disjoint Factory-AI receipt. Never resume a canonical
+  Battle-2 turn/window after tick 33331.
+- **Notes:** the separate animation supervisor remains active; its newer
+  `animation-main` commits, now through Magical Leaf staging, were intentionally
+  not folded mid-session. No material decision was deferred. Shared-host
+  full-suite contention is recorded in `PAPERCUTS.md` at hit 6.
+
 ## 1023 — [bounded MAIN worker, 2026-08-08] **#39: DOUBLE_TEAM clone-palette cache is identity-honest**
 
 - **State:** implementation `ba08db85`; focused **7/7**, smoke **375/375**,
@@ -21,26 +42,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   DOUBLE_TEAM cache owners **1→0**. `battleScene.ts` **36,361→36,363 LOC**.
   Clean-parent OFF differential **640/640 byte-identical** (DOUBLE_TEAM 256,
   ROCK_SLIDE 256, generated-command insurance 128); no Battle-2/Scene-ON run.
-
-## 1022 — [supervisor WIND-DOWN, 2026-08-08] **Generic S8 presentation and Factory-AI receipts advanced; union green**
-
-- **State:** master is clean through `1601971f`. Final worker full suite is
-  **799 files / 8,033 passed / 1 skipped**; supervisor independently reran
-  Baton Pass **4/4**, focused AI **745/745**, focused presentation **237/237**,
-  faint-sink OFF differential **620/620**, and the production build.
-- **Did:** folded the orientation-time animation branch and verified the union;
-  closed #83 by giving the generic scored-AI seam single ownership of the real
-  turn-start draw; accepted exact Mirror Coat, Psych Up, and Baton Pass live
-  hardware receipts; proved the #55 construction-clock boundary; retired two
-  bare staged facts, hardened all six Family-C healthbox cache keys, and renamed
-  the shared faint-sink geometry API with executable old-name refs **22→0**.
-- **Next:** continue #39 only with one freshly censused generic presentation
-  owner at a time, or add another file-disjoint AI hardware receipt. Never
-  resume a canonical Battle-2 turn/window after tick 33331.
-- **Notes:** the separate animation supervisor remains active; commits now in
-  `master..animation-main` were intentionally not folded mid-write. No material
-  decision was deferred. Shared-host full-suite contention is recorded in
-  `PAPERCUTS.md` at hit 6.
 
 ## 1021 — [bounded MAIN worker, 2026-08-08] **#39: faint-sink geometry now has an identity-honest API name**
 

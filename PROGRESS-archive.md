@@ -6,6 +6,15 @@
 - **Next/Notes:** supervisor re-scoped the remaining faint-sink-only name.
   Full entry remains in git history at `PROGRESS.md`.
 
+## 1022 — [supervisor, 2026-08-08] **Generic S8 presentation and AI receipts advanced**
+
+- **State/Did:** accepted the session's orientation animation fold, generic AI
+  turn-start ownership, three live weighted-handler receipts, construction-clock
+  evidence, two staged-fact retirements, Family-C cache hardening, and the
+  identity-honest faint-sink API; union gates were green.
+- **Next/Notes:** continue bounded #39/AI work without a canonical Battle-2
+  march. Superseded by final wind-down entry 1024; full entry remains in git.
+
 ## 1019 — [bounded MAIN worker, 2026-08-08] **Family-C healthbox cache ownership hardened**
 
 - **State/Did:** all six parameterized healthbox caches now key every rendering
