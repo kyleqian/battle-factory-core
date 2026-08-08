@@ -4140,6 +4140,68 @@ function runCvBrickBreak(input: Readonly<{
   });
 }
 
+/**
+ * `AI_CV_ChargeUpMove` (`data/battle_ai_scripts.s:2184-2195`,
+ * EFFECT_RAZOR_WIND/EFFECT_SOLAR_BEAM/EFFECT_SKY_ATTACK/EFFECT_SKULL_BASH --
+ * all four `if_effect` entries dispatch to this one handler, `:683,707,739,740`):
+ *
+ * ```
+ * AI_CV_ChargeUpMove:
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_25, AI_CV_ChargeUpMove_ScoreDown2
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_5, AI_CV_ChargeUpMove_ScoreDown2
+ *     if_has_move_with_effect AI_TARGET, EFFECT_PROTECT, AI_CV_ChargeUpMove_ScoreDown2
+ *     if_hp_more_than AI_USER, 38, AI_CV_ChargeUpMove_End
+ *     score -1
+ *     goto AI_CV_ChargeUpMove_End
+ * AI_CV_ChargeUpMove_ScoreDown2:
+ *     score -2
+ * AI_CV_ChargeUpMove_End:
+ *     end
+ * ```
+ *
+ * Zero `if_random_less_than` sites -- the whole body is deterministic. The
+ * charge-up turn is wasted when the hit would be weak (0.25x/0.5x
+ * effectiveness, same `classifyHighCritEffectiveness` probe the other
+ * effectiveness handlers use), or when the target can Protect through it
+ * (the `if_has_move_with_effect AI_TARGET, EFFECT_PROTECT` history scan uses
+ * the pinned-source non-BUGFIX positional gate -- AI_USER's live move slot
+ * nonzero before the target-history move at that same index, the same bug
+ * `AI_CV_Protect`'s own scan preserves); either way the flat `-2`. Otherwise
+ * own HP <= 38% is the `-1` (the recharge turn is survivable); HP > 38% is
+ * the zero `goto End`. No command writes funcResult.
+ */
+function runCvChargeUpMove(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  attackerTypes: readonly [string, string];
+  moveType: string;
+  targetTypes: readonly [string, string];
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  if (classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -2 });
+  }
+
+  const userMoves = input.attacker.moves ?? [0, 0, 0, 0];
+  const knownMoves = input.target.knownMoves ?? [];
+  const targetHistoryHasProtect = knownMoves.some((moveId, slot) =>
+    (userMoves[slot] ?? 0) !== 0 && MOVES_BY_ID.get(moveId)?.effect === "EFFECT_PROTECT"
+  );
+  if (targetHistoryHasProtect) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -2 });
+  }
+
+  const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  return Object.freeze({
+    rng: input.rng,
+    draws: Object.freeze([]),
+    scoreDelta: hpPercent > 38 ? 0 : -1,
+  });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -5032,6 +5094,33 @@ export function runCheckViability(input: Readonly<{
       rng: brickBreak.rng,
       draws: brickBreak.draws,
       scoreDelta: brickBreak.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (
+    move.effect === "EFFECT_SOLAR_BEAM"
+    || move.effect === "EFFECT_RAZOR_WIND"
+    || move.effect === "EFFECT_SKY_ATTACK"
+    || move.effect === "EFFECT_SKULL_BASH"
+  ) {
+    // AI_CV_ChargeUpMove (data/battle_ai_scripts.s:2184-2195) -- one shared
+    // handler for all four charge-up effects (`:683,707,739,740`).
+    const chargeUpMove = runCvChargeUpMove({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      attacker: input.attacker,
+      target: input.target,
+      attackerTypes: input.attacker.types,
+      moveType: move.type,
+      targetTypes: input.target.types,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: chargeUpMove.rng,
+      draws: chargeUpMove.draws,
+      scoreDelta: chargeUpMove.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }

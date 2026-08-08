@@ -5680,3 +5680,66 @@ describe("AI_CV_BrickBreak (data/battle_ai_scripts.s:2457-2464)", () => {
     expect(result.draws).toEqual([]);
   });
 });
+
+describe("AI_CV_ChargeUpMove (data/battle_ai_scripts.s:2184-2195)", () => {
+  const MOVE_SOLAR_BEAM = 76; // EFFECT_SOLAR_BEAM
+  const MOVE_RAZOR_WIND = 13; // EFFECT_RAZOR_WIND
+  const MOVE_SKY_ATTACK = 143; // EFFECT_SKY_ATTACK
+  const MOVE_SKULL_BASH = 130; // EFFECT_SKULL_BASH
+
+  function chargeUpRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_SOLAR_BEAM,
+      attacker: { ...NEUTRAL_BATTLER, types: ["TYPE_GRASS", "TYPE_GRASS"] as const, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, types: ["TYPE_FIRE", "TYPE_FIRE"] as const, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "charge-up",
+    });
+  }
+
+  it("0.5x effectiveness: deterministic -2, zero draws", () => {
+    // Grass vs Fire is 0.5x.
+    const result = chargeUpRun(1);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("neutral effectiveness + Protect in target history: -2 (positional bug gate)", () => {
+    const result = chargeUpRun(1, { hp: 100, maxHp: 100 }, {
+      types: ["TYPE_WATER", "TYPE_WATER"] as const,
+      knownMoves: [1, 182, 182, 182], // slot 1 gated by attacker's live move slot 1 (MOVE_ROCK_SLIDE nonzero)
+    });
+    // MOVE_182 = Detect (EFFECT_PROTECT).
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -2 });
+  });
+
+  it("neutral effectiveness, no Protect: HP > 38% is zero", () => {
+    const result = chargeUpRun(1, { hp: 50, maxHp: 100 }, { types: ["TYPE_WATER", "TYPE_WATER"] as const });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("neutral effectiveness, no Protect: HP <= 38% is -1", () => {
+    const result = chargeUpRun(1, { hp: 38, maxHp: 100 }, { types: ["TYPE_WATER", "TYPE_WATER"] as const });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1 });
+  });
+
+  it("all four charge-up effects dispatch through the identical handler", () => {
+    for (const moveId of [MOVE_SOLAR_BEAM, MOVE_RAZOR_WIND, MOVE_SKY_ATTACK, MOVE_SKULL_BASH]) {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId,
+        attacker: { ...NEUTRAL_BATTLER, hp: 20, maxHp: 100 },
+        target: { ...NEUTRAL_BATTLER, types: ["TYPE_WATER", "TYPE_WATER"] as const },
+        staleFuncResultFallback: 2,
+        drawOrdinalStart: 1,
+        reasonPrefix: "charge-up",
+      });
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: -1 });
+    }
+  });
+});
