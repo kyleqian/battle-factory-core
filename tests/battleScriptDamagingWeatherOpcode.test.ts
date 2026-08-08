@@ -234,6 +234,49 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
       if (result.kind !== "advanced") throw new Error("expected advance");
       expect(result.state.rulesContext.tripleKickPower).toBe(20);
     });
+
+    it("future-input (b) guard: Cmd_addbyte halts with unsupported-branch on an unmodeled pointer -- the shared-universe fallback, unreachable from any committed concrete call site", () => {
+      const handlers = createBattleScriptDamagingWeatherOpcodeHandlers(program, {
+        isControllerIdle: () => true,
+        resolveBattlerForBattleScript: () => 0,
+      });
+      const baseInstruction = program.instructions.find(
+        (instruction) => instruction.opcodeName === "B_SCR_OP_ADDBYTE",
+      );
+      if (!baseInstruction) throw new Error("no B_SCR_OP_ADDBYTE instruction found");
+      const syntheticInstruction = Object.freeze({
+        ...baseInstruction,
+        operands: Object.freeze([
+          Object.freeze({
+            widthBytes: 1,
+            expression: "gUnmodeledScratchPointer",
+            sourceMacro: baseInstruction.operands[0]!.sourceMacro,
+            sourceMacroLine: baseInstruction.operands[0]!.sourceMacroLine,
+            wrapperPath: baseInstruction.operands[0]!.wrapperPath,
+          }),
+          baseInstruction.operands[0]!,
+        ]),
+      });
+      const execution = createBattleScriptStatusRulesExecution(
+        program,
+        "BattleScript_WeatherFormChanges",
+        context(),
+        1,
+        externalPorts(),
+      );
+      const transition = handlers[syntheticInstruction.opcodeId]!({
+        program,
+        instruction: syntheticInstruction,
+        state: Object.freeze({
+          ...execution.state,
+          programCounter: syntheticInstruction.programCounter,
+        }),
+      });
+      expect(transition.control).toMatchObject({
+        kind: "halt",
+        reason: { kind: "unsupported-branch" },
+      });
+    });
   });
 
   describe("Cmd_bicword -- all three source sites", () => {
@@ -341,7 +384,7 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
       expect(result.state.rulesContext.weather).toBe(B_WEATHER_SANDSTORM_TEMPORARY); // untouched by this loop
     });
 
-    it("(pass-through) with a live Forecast Castform fielded at battler 1, the loop still halts at the named trycastformdatachange barrier -- reached THROUGH the loop's own battler-0 iteration, not directly", () => {
+    it("with a live Forecast Castform fielded at battler 1, the loop now runs the real form change -- battler 1 becomes Fire-typed, formToChangeInto 1, and the pushed path advances through docastformchangeanimation to the STRINGID_PKMNTRANSFORMED message (previously the named trycastformdatachange barrier, ROADMAP S10 gate-4)", () => {
       const B_WEATHER_SUN = (1 << 5) | (1 << 6);
       const rc = context({
         weather: B_WEATHER_SUN,
@@ -355,14 +398,17 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
         battleTopology: { battlersCount: 2, battleTypeFlags: (1 << 3) | (1 << 19), battlerPositions: [0, 1, 2, 3] },
       });
       const result = runWeatherFormChanges(rc);
-      expect(result.kind).toBe("halted");
-      if (result.kind !== "halted") throw new Error("expected halted");
-      expect(result.state.haltReason?.kind).toBe("unsupported-branch");
-      expect((result.state.haltReason as { opcodeName?: string }).opcodeName).toBe("B_SCR_OP_TRYCASTFORMDATACHANGE");
-      // The barrier fires for battler 1 -- proof addbyte/jumpifbytenotequal
-      // already advanced sBATTLER past battler 0's own (non-Castform) iteration.
+      expect(result.kind).toBe("blocked");
+      if (result.kind !== "blocked") throw new Error("expected to block on the message port, not halt");
+      // The loop reached battler 1's Castform through addbyte/jumpifbytenotequal --
+      // proof sBATTLER advanced past battler 0's own (non-Castform) iteration.
       expect(result.state.rulesContext.scriptingBattler).toBe(1);
+      expect(result.state.rulesContext.battlers[1].types).toEqual(["TYPE_FIRE", "TYPE_FIRE"]);
+      expect(result.state.rulesContext.formToChangeInto).toBe(1);
       expect(result.state.rng.calls).toBe(0);
+      // The block is STRINGID_PKMNTRANSFORMED's printstring (prepareMessage is a null port) --
+      // the machine ran trycastformdatachange -> call -> docastformchangeanimation -> waitstate.
+      expect(result.reason).toMatchObject({ kind: "source-context-unavailable" });
     });
   });
 

@@ -120,6 +120,27 @@ function runWeatherBallOpcode(rulesContext: BattleScriptRulesContext): BattleScr
   return stepped.state.rulesContext;
 }
 
+function runTrycastformdatachange(rulesContext: BattleScriptRulesContext): BattleScriptRulesContext {
+  const opcodePc = program.instructions.findIndex(
+    ({ opcodeName }) => opcodeName === "B_SCR_OP_TRYCASTFORMDATACHANGE",
+  );
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_WeatherFormChanges",
+    rulesContext,
+    1,
+    externalPorts(),
+  );
+  const stepped = stepBattleScriptMachine(
+    program,
+    Object.freeze({ ...execution.state, programCounter: opcodePc }),
+    execution.handlers,
+  );
+  expect(stepped.kind).toBe("advanced");
+  if (stepped.kind !== "advanced") throw new Error("expected trycastformdatachange to advance");
+  return stepped.state.rulesContext;
+}
+
 describe("Gate-6 R4: Forecast x weather", () => {
   it.each([
     ["clear", 0, 0, ["TYPE_NORMAL", "TYPE_NORMAL"]],
@@ -151,6 +172,12 @@ describe("Gate-6 R4: Forecast x weather", () => {
       types: ["TYPE_NORMAL", "TYPE_NORMAL"],
     });
   });
+
+  it("a live Forecast Castform subjected to rain through the real trycastformdatachange opcode ends up Water/Water and banks form 2", () => {
+    const after = runTrycastformdatachange(context(B_WEATHER_RAIN));
+    expect(after.battlers[0].types).toEqual(["TYPE_WATER", "TYPE_WATER"]);
+    expect(after.formToChangeInto).toBe(2);
+  });
 });
 
 describe("Gate-6 R4: Weather Ball x weather", () => {
@@ -177,7 +204,7 @@ describe("Gate-6 R4: Weather Ball x weather", () => {
     expect(after.dynamicMoveType).toBe(0);
   });
 
-  it("pins R4's source-derived clear/rain damage before the seed-specific 85-100% roll", () => {
+  it("pins R4's source-derived clear/rain damage before the seed-specific 85-100% roll -- the rain Water types follow from the executed Forecast form change, not a hand-set pair", () => {
     const attacker = {
       attack: 99,
       defense: 90,
@@ -196,6 +223,11 @@ describe("Gate-6 R4: Weather Ball x weather", () => {
       types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
       statStages: { ...NEUTRAL_STAT_STAGES },
     };
+    // The rain Water/Water STAB types are produced by running the real
+    // trycastformdatachange opcode on a Normal Castform under active rain
+    // (R4's same-turn Forecast pass), then read back from the battler state.
+    const rainCastform = runTrycastformdatachange(context(B_WEATHER_RAIN)).battlers[0];
+    expect(rainCastform.types).toEqual(["TYPE_WATER", "TYPE_WATER"]);
     const clearBase = calculateBaseDamage({
       attacker,
       defender,
@@ -204,7 +236,7 @@ describe("Gate-6 R4: Weather Ball x weather", () => {
       isCriticalHit: false,
     });
     const rainBase = calculateBaseDamage({
-      attacker: { ...attacker, types: ["TYPE_WATER", "TYPE_WATER"] },
+      attacker: { ...attacker, types: rainCastform.types },
       defender,
       movePower: 50,
       moveType: "TYPE_WATER",
@@ -216,7 +248,7 @@ describe("Gate-6 R4: Weather Ball x weather", () => {
     expect(clearBase).toBe(74);
     expect(applyStab(clearBase, attacker.types, "TYPE_NORMAL")).toBe(111);
     expect(rainBase).toBe(15);
-    expect(applyStab(rainBase * 2, ["TYPE_WATER", "TYPE_WATER"], "TYPE_WATER")).toBe(45);
+    expect(applyStab(rainBase * 2, rainCastform.types, "TYPE_WATER")).toBe(45);
     expect(new Set(Array.from({ length: 16 }, (_, roll) =>
       applyRandomDamageMultiplier(111, roll)))).toEqual(
       new Set([94, 95, 96, 97, 98, 99, 101, 102, 103, 104, 105, 106, 107, 108, 109, 111]),

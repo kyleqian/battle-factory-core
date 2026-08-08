@@ -1,23 +1,29 @@
 /**
  * `B_SCR_OP_TRYCASTFORMDATACHANGE` / `Cmd_trycastformdatachange`
- * (`battle_script_commands.c:9744-9755`), this session's supervisor-decided
- * (a)/(b) split (PROGRESS 458's own escalation, answered rather than
- * half-ported): the opcode itself just advances one byte, then computes
- * `CastformDataTypeChange(gBattleScripting.battler)` (`battle_util.c:
- * 2396-2429`) and only *diverts* into the unported form-change subsystem
- * (`BattleScriptPushCursorAndCallback(BattleScript_CastformChange)`) when
- * that call returns nonzero.
+ * (`battle_script_commands.c:9744-9755`) and
+ * `B_SCR_OP_DOCASTFORMCHANGEANIMATION` / `Cmd_docastformchangeanimation`
+ * (`battle_script_commands.c:9730-9740`) -- ROADMAP S10 gate-4's last
+ * `unsupported-branch` retirement (the side lane's own step, reported to the
+ * supervisor): a live Forecast Castform rental now actually CHANGES FORM AND
+ * TYPE in weather instead of halting the battle-script machine.
  *
- * `CastformDataTypeChange` is ported here exactly, as a pure function of the
- * rules battler state (no source line skipped, no mutation applied for the
- * barrier path -- applying only the type write without the animation/
- * species-data/message tail it comes with would be a half-port):
+ * `Cmd_trycastformdatachange` advances one byte, computes
+ * `CastformDataTypeChange(gBattleScripting.battler)` (`battle_util.c:
+ * 2396-2429`) and, when that returns nonzero, pushes the real
+ * `BattleScript_CastformChange` continuation (`BattleScriptPushCursorAndCallback`)
+ * and writes `gBattleStruct->formToChangeInto = form - 1`. The machine models
+ * that push exactly as a `call` (the pushed script cursor is the post-opcode
+ * byte, so `BattleScript_CastformChange`'s `end3` pops back to the
+ * WeatherFormChanges loop's `addbyte` -- the same script-flavor continuation
+ * `docs/end3-design.md` §1.4(b) already documents).
+ *
+ * `CastformDataTypeChange` is ported here as a pure function of the rules
+ * battler state (`computeCastformTypeChange`), and source's SET_BATTLER_TYPE
+ * side effects are the caller's durable write via `withBattler`:
  *   - `:2399` -- not a live Forecast Castform (wrong species, wrong/no
- *     ability, or fainted) returns 0 unconditionally. This is the (a) path:
- *     true for every battler in every non-Castform matchup, so this
- *     registration's only behavior for them is "advance," a real weather
- *     effect (Sandstorm/Rain Dance/Sunny Day/Hail) has nothing left to gate
- *     it on this opcode.
+ *     ability, or fainted) returns 0 unconditionally. True for every battler
+ *     in every non-Castform matchup, so this registration's only behavior
+ *     for them is "advance."
  *   - `:2401-2404` -- a live Forecast Castform with weather nullified
  *     (`WEATHER_HAS_EFFECT` false) and not already `TYPE_NORMAL` reverts to
  *     Normal. `WEATHER_HAS_EFFECT` (`include/battle_util.h:47`) is modeled
@@ -37,25 +43,28 @@
  *     load-bearing finding), so at most one of the four conditions is ever
  *     true for a real weather state.
  *
- * A nonzero form is the real (b) barrier: it is exactly the moment a live
- * Castform rental's type is stale for the weather that was just set (the
- * common case whenever Castform is drafted -- PROGRESS 458's own
- * reachability finding, `FRONTIER_MON_CASTFORM_1`/`_2`), and this engine has
- * not ported `BattleScript_CastformChange`/`SET_BATTLER_TYPE`/the four-form
- * table. A single named halt covers all four form targets: they are one
- * missing subsystem, not four independent gaps.
+ * `Cmd_docastformchangeanimation` sets `gActiveBattler` to the scripting
+ * battler, ORs `CASTFORM_SUBSTITUTE` into `formToChangeInto` when that
+ * battler is behind a Substitute (`STATUS2_SUBSTITUTE`), emits the
+ * `B_ANIM_CASTFORM_CHANGE` controller animation, and marks the battler for
+ * controller exec. On the Battle Scene OFF profile the animation itself
+ * draws nothing, so it is emitted as the same typed kernel `animation` event
+ * the neighbouring opcodes already use for controller emissions.
  */
 import {
+  markBattleScriptControllerPending,
   transitionBattleScriptCommand,
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import type { BattleScriptProgram } from "./battleScriptProgram.ts";
-import { unsupportedBranch } from "./battleScriptHitChainOpcode.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { withBattler } from "./battleScriptHitChainOpcode.ts";
+import type { BattleScriptControllerIdlePort } from "./battleScriptSourceCommands.ts";
 import type {
   BattleScriptRulesBattlerState,
   BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
+import { BATTLE_SCRIPT_STATUS2_SUBSTITUTE } from "./battleScriptRulesContext.ts";
 
 /** include/constants/species.h:391. */
 const SPECIES_CASTFORM = 385;
@@ -63,6 +72,8 @@ const SPECIES_CASTFORM = 385;
 const ABILITY_FORECAST = 59;
 /** include/constants/abilities.h -- battleScriptDamagingWeatherOpcode.ts's own WEATHER_HAS_EFFECT modeling. */
 const ABILITY_CLOUD_NINE = 13;
+/** include/constants/battle.h:333. */
+const CASTFORM_SUBSTITUTE = 1 << 7;
 
 /** include/constants/battle.h:232-244 -- same encoding as battleScriptSetWeatherOpcode.ts/battleScriptDamagingWeatherOpcode.ts. */
 const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
@@ -146,28 +157,102 @@ export function computeCastformForm(rules: BattleScriptRulesContext, battler: Ba
   return computeCastformTypeChange(rules, battler).form;
 }
 
+/**
+ * `Cmd_trycastformdatachange` (`battle_script_commands.c:9744-9755`). The
+ * source advances the cursor first, so the pushed `BattleScript_CastformChange`
+ * continuation returns to the post-opcode byte -- modeled as the machine's
+ * `call` directive. The battler's two types are written durably here because
+ * the pure `computeCastformTypeChange` port returns them instead of applying
+ * source's `SET_BATTLER_TYPE` side effect.
+ */
 function createTrycastformdatachangeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
     const rules = context.state.rulesContext;
     const battlerId = rules.scriptingBattler;
     const battler = rules.battlers[battlerId];
-    const form = computeCastformForm(rules, battler);
-    if (form === 0) {
-      return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+    const change = computeCastformTypeChange(rules, battler);
+    const withTypes = withBattler(rules, battlerId, { types: change.types });
+    if (change.form === 0) {
+      return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), {
+        rulesContext: withTypes,
+      });
     }
-    return unsupportedBranch(
+    const target = resolveBattleScriptLabel(context.program, "BattleScript_CastformChange");
+    if (!target) {
+      throw new Error("Cmd_trycastformdatachange: unresolved BattleScript_CastformChange label");
+    }
+    const nextRules = Object.freeze({
+      ...withTypes,
+      formToChangeInto: change.form - 1,
+    });
+    return transitionBattleScriptCommand(
       context,
-      `CastformDataTypeChange: live Forecast Castform battler ${battlerId} would change to form ${form - 1} `
-        + "(0=Normal, 1=Fire, 2=Water, 3=Ice) -- BattleScript_CastformChange's SET_BATTLER_TYPE/four-form "
-        + "table is not ported",
-      "battle_util.c",
-      2396,
+      Object.freeze({ kind: "call", programCounter: target.programCounter }),
+      { rulesContext: nextRules },
+    );
+  };
+}
+
+/**
+ * `Cmd_docastformchangeanimation` (`battle_script_commands.c:9730-9740`):
+ * `gActiveBattler = gBattleScripting.battler`, OR `CASTFORM_SUBSTITUTE` into
+ * `formToChangeInto` behind a Substitute, then
+ * `BtlController_EmitBattleAnimation(B_COMM_TO_CONTROLLER,
+ * B_ANIM_CASTFORM_CHANGE, formToChangeInto)` + `MarkBattlerForControllerExec`.
+ * Battle Scene OFF draws nothing, so the animation is the kernel's typed
+ * `animation` event (same idiom as `battleScriptPlaystatchangeanimationOpcode.ts`),
+ * carrying the source's raw argument (`formToChangeInto`).
+ */
+function createDocastformchangeanimationHandler(
+  isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>,
+): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
+  return (context) => {
+    if (!isControllerIdle(context)) {
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({
+          kind: "block",
+          reason: Object.freeze({
+            kind: "controller-busy",
+            programCounter: context.state.programCounter,
+            opcodeId: context.instruction.opcodeId,
+            opcodeName: context.instruction.opcodeName,
+          }),
+        }),
+      );
+    }
+    const rules = context.state.rulesContext;
+    const activeBattler = rules.scriptingBattler;
+    const formToChangeInto = (rules.battlers[activeBattler].status2 & BATTLE_SCRIPT_STATUS2_SUBSTITUTE) !== 0
+      ? (rules.formToChangeInto | CASTFORM_SUBSTITUTE) >>> 0
+      : rules.formToChangeInto;
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      {
+        scheduler: markBattleScriptControllerPending(
+          Object.freeze({ ...context.state.scheduler, activeBattler }),
+          activeBattler,
+        ),
+        rulesContext: Object.freeze({ ...rules, formToChangeInto }),
+        events: Object.freeze([
+          Object.freeze({
+            kind: "animation" as const,
+            animationId: "CASTFORM_CHANGE",
+            battler: activeBattler,
+            arguments: Object.freeze([String(formToChangeInto)]),
+          }),
+        ]),
+      },
     );
   };
 }
 
 export function createBattleScriptTryCastformDataChangeOpcodeHandlers(
   program: BattleScriptProgram,
+  externalPorts: Readonly<{
+    isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>;
+  }>,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
   const starts = program.instructions.filter(
     (instruction) => instruction.opcodeName === "B_SCR_OP_TRYCASTFORMDATACHANGE",
@@ -179,5 +264,22 @@ export function createBattleScriptTryCastformDataChangeOpcodeHandlers(
   if (instruction!.operands.length !== 0) {
     throw new Error(`invalid B_SCR_OP_TRYCASTFORMDATACHANGE shape at program counter ${instruction!.programCounter}`);
   }
-  return Object.freeze({ [instruction!.opcodeId]: createTrycastformdatachangeHandler() });
+  const docastformchangeanimationStarts = program.instructions.filter(
+    (instruction) => instruction.opcodeName === "B_SCR_OP_DOCASTFORMCHANGEANIMATION",
+  );
+  if (docastformchangeanimationStarts.length !== 1) {
+    throw new Error(`B_SCR_OP_DOCASTFORMCHANGEANIMATION requires exactly 1 concrete start, got ${docastformchangeanimationStarts.length}`);
+  }
+  const [docastformchangeanimationInstruction] = docastformchangeanimationStarts;
+  if (docastformchangeanimationInstruction!.operands.length !== 0) {
+    throw new Error(
+      `invalid B_SCR_OP_DOCASTFORMCHANGEANIMATION shape at program counter ${docastformchangeanimationInstruction!.programCounter}`,
+    );
+  }
+  return Object.freeze({
+    [instruction!.opcodeId]: createTrycastformdatachangeHandler(),
+    [docastformchangeanimationInstruction!.opcodeId]: createDocastformchangeanimationHandler(
+      externalPorts.isControllerIdle,
+    ),
+  });
 }

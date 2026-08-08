@@ -227,7 +227,19 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // SET_BATTLER_TYPE/four-form table this engine has not ported. Every
   // non-Castform battler (the vast majority of matchups) and an
   // already-correctly-typed Castform never reach it.
-  ["src/engine/battleScriptTryCastformDataChangeOpcode.ts", 1],
+  // 1 -> 0 (ROADMAP S10 gate-4, side lane): the last barrier is RETIRED, not
+  // narrowed. Cmd_trycastformdatachange now writes the durable type pair
+  // (SET_BATTLER_TYPE) via withBattler, writes gBattleStruct->formToChangeInto
+  // = form - 1, and pushes the real BattleScript_CastformChange continuation
+  // (modeled as the machine's `call`; its end3 pops back to the loop's
+  // addbyte). B_SCR_OP_DOCASTFORMCHANGEANIMATION is registered alongside
+  // (Cmd_docastformchangeanimation, battle_script_commands.c:9730-9740) and
+  // emits the B_ANIM_CASTFORM_CHANGE controller animation as a typed kernel
+  // event -- its only new guard is the shared controller-busy block, which is
+  // not an unsupported-branch barrier. Reachability-pinned by every case in
+  // tests/battleScriptTryCastformDataChangeOpcode.test.ts "(b) live form
+  // change".
+  ["src/engine/battleScriptTryCastformDataChangeOpcode.ts", 0],
   // Ingrain/Leech Seed/Wrap setter opcode registration (docs/ingrain-
   // leechseed-wrap-ground-truth.md §5): Cmd_copyarray is narrowed to
   // BattleScript_LeechSeedTurnDrain's own `gBattleMoveDamage<-gHpDealt, size
