@@ -296,7 +296,7 @@ export const CHECK_BAD_MOVE_HANDLED_TABLE_EFFECTS: ReadonlySet<string> = new Set
   "EFFECT_SPECIAL_DEFENSE_UP_2", "EFFECT_EVASION_UP_2", "EFFECT_MINIMIZE",
   "EFFECT_EVASION_DOWN_2", "EFFECT_SWAGGER", "EFFECT_FLATTER", "EFFECT_KNOCK_OFF",
   "EFFECT_TRICK", "EFFECT_SLEEP_TALK", "EFFECT_ACCURACY_UP_2",
-  "EFFECT_SPECIAL_ATTACK_DOWN_2", "EFFECT_MEMENTO",
+  "EFFECT_SPECIAL_ATTACK_DOWN_2", "EFFECT_MEMENTO", "EFFECT_STOCKPILE",
 ]);
 
 /**
@@ -2553,6 +2553,20 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_STOCKPILE -> AI_CBM_Stockpile
+  // (`data/battle_ai_scripts.s:188,511-514`): a single
+  // `get_stockpile_count AI_USER; if_equal 3, Score_Minus10` -- Stockpile is
+  // penalized when the AI's `gDisableStructs[].stockpileCounter` is already
+  // at its 3-count maximum.
+  if (move.effect === "EFFECT_STOCKPILE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmStockpile(input.attacker.stockpileCount ?? 0),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -3490,4 +3504,14 @@ function runCbmMemento(target: FactoryAiCheckBadMoveTarget, attackerUsablePartyM
     return -8;
   }
   return runCbmBatonPass(attackerUsablePartyMons);
+}
+
+/**
+ * `AI_CBM_Stockpile` (`data/battle_ai_scripts.s:511-514`, EFFECT_STOCKPILE):
+ * a single `get_stockpile_count AI_USER; if_equal 3, Score_Minus10` --
+ * Stockpile is penalized when the AI's `gDisableStructs[].stockpileCounter`
+ * is already at its maximum of 3. Zero ability/type reads, zero RNG.
+ */
+function runCbmStockpile(attackerStockpileCount: number): number {
+  return attackerStockpileCount === 3 ? -10 : 0;
 }

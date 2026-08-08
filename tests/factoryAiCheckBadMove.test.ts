@@ -4477,3 +4477,42 @@ describe("AI_CBM_Memento (data/battle_ai_scripts.s:482-484, EFFECT_MEMENTO)", ()
       .toMatchObject({ kind: "scored", scoreDelta: 0 });
   });
 });
+
+describe("AI_CBM_Stockpile (data/battle_ai_scripts.s:511-514, EFFECT_STOCKPILE)", () => {
+  const MOVE_STOCKPILE = 254; // TYPE_NORMAL, power 0 -> MOVE_POWER_OTHER
+
+  const STOCKPILE_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    knownAbility: "ABILITY_STURDY",
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function stockpileAttacker(count: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, stockpileCount: count });
+  }
+
+  it("a stockpile counter at the 3-count maximum JUMPs to Score_Minus10", () => {
+    expect(run(MOVE_STOCKPILE, STOCKPILE_TARGET, undefined, stockpileAttacker(3)))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("counts below the maximum (0/1/2) FALL THROUGH to End at zero", () => {
+    for (const count of [0, 1, 2]) {
+      expect(run(MOVE_STOCKPILE, STOCKPILE_TARGET, undefined, stockpileAttacker(count)))
+        .toMatchObject({ kind: "scored", scoreDelta: 0 });
+    }
+  });
+
+  it("an omitted stockpileCount defaults to 0 (battle-start) and scores zero", () => {
+    expect(run(MOVE_STOCKPILE, STOCKPILE_TARGET)).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+});
