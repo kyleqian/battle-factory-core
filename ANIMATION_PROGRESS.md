@@ -1,33 +1,32 @@
 # Animation coverage
 
-## Supervisor wind-down — IRON_TAIL, CRUSH_CLAW and TAKE_DOWN all exact, 123→126; CRUNCH staged; the change-map tool is the session's real output (2026-08-07 night animation session)
+## Supervisor wind-down — IRON_TAIL, CRUSH_CLAW, TAKE_DOWN and CRUNCH all exact, 123→127; the change-map tool is the session's real output (2026-08-07 night animation session)
 
-- **State:** coverage advanced **123→126/276 exact**, 0 partial, 0 staged, 150
+- **State:** coverage advanced **123→127/276 exact**, 0 partial, 0 staged, 149
   unsupported. `animation-main` is committed and green with no worker worktrees
-  or branches left behind. 6 worker launches, 5 productive, 1 cap-kill (salvaged
+  or branches left behind. 7 worker launches, 6 productive, 1 cap-kill (salvaged
   in full). `ANIMATION_DEFERRED.md` remains empty.
 - **Did:** promoted **MOVE_IRON_TAIL** (135/135 both orientations),
-  **MOVE_CRUSH_CLAW** (69/69 both) and **MOVE_TAKE_DOWN** (98/98 player-back,
-  97/97 opponent-front). Staged **MOVE_CRUNCH** (both scenarios, dense probe,
-  change maps, RAM-truth reducer and the seam — only the draw case, portable and
-  fixtures remain). Added **`tools/compare/frame-changemap.py`**. Corrected two
-  probes' sprite offsets and one shared-helper off-by-one (below).
+  **MOVE_CRUSH_CLAW** (69/69 both), **MOVE_TAKE_DOWN** (98/98 player-back, 97/97
+  opponent-front) and **MOVE_CRUNCH** (142/142 both). Added
+  **`tools/compare/frame-changemap.py`**. Corrected two probes' sprite offsets
+  and one shared-helper off-by-one (below).
 - **Verified:** every promotion re-run by the supervisor rather than accepted on
   report — both portables per move, fresh, reproducing each fixture's pinned
   evidence and raw-RGB hashes, with an earlier move's portable as a control each
   time. Both CRUSH_CLAW and CRUNCH change maps re-derived from the probe output
   by the supervisor and diffed byte-for-byte against the committed files; CRUNCH's
-  two independent fresh probe runs are identical. Integrated `npm test`
-  **774 files / 7323 passed / 1 established skip** and `npm run build` green at
-  the TAKE_DOWN merge; the only commits after it are the additive CRUNCH staging
-  (nine files, zero deletions) and this entry, re-verified by the final suite.
-- **Next:** close **MOVE_CRUNCH** from its staged base — one round. The reducer,
-  the Tier-1 pins and the `SceneOnCrunchConfig`/View seam already exist; the
-  round needs the `battleScene.ts` draw case, `crunchPortable.ts`, the two
-  fixtures, then the coverage entry and the inventory pin 126→127 exact /
-  150→149 unsupported. Both first frames are clean, so no `skipProbeFrames`.
-  After that, by script size with zero new components: COUNTER 31, DOUBLE_EDGE 32
-  (already staged), CRABHAMMER 36, MEGA_KICK 42, MAGICAL_LEAF 43, THUNDER 57.
+  two independent fresh probe runs are identical. Final integrated `npm test`
+  **776 files / 7342 passed / 1 established skip** and `npm run build` exit 0 on
+  the merged tree.
+- **Next:** the remaining zero-new-component moves by script size — COUNTER 31,
+  DOUBLE_EDGE 32 (already staged), CRABHAMMER 36, MEGA_KICK 42, MAGICAL_LEAF 43,
+  THUNDER 57. **Use the two-round cadence this session settled into:** round A
+  stages (scenarios → dense probe → `frame-changemap.py` on both orientations →
+  RAM-truth reducer + Tier-1 pins → seam), round B promotes (draw case →
+  portable + fixtures → iterate to full-window exact → coverage entry + inventory
+  pin + evidence test + ledger). Round B ran in 14-45 minutes every time the
+  change map existed.
 - **Notes — the change map is the unit of work that made this session fast.**
   `python3 tools/compare/frame-changemap.py <rgb-dir>` diffs every captured
   framebuffer against its predecessor and prints only the frames that changed,
@@ -39,7 +38,7 @@
   every round since has hit its floor. Bank one per orientation under
   `tools/compare/evidence/` as part of staging — it is cheap, mechanical, and it
   is what a promotion round consumes.
-- **Notes — the display-lag rule, now measured on four moves.** Every visible
+- **Notes — the display-lag rule, now measured on five moves.** Every visible
   event displays exactly **one frame** after the RAM state that causes it — move
   sprites, palette writes and sprite-driven `x2` alike — with one measured
   exception: TAKE_DOWN's **task-driven** WindUpLunge `x2` displays **two** frames
@@ -94,7 +93,7 @@
   animation deferrals opened. Engine contact stayed inside
   `src/engine/battleScene.ts` animation draw cases plus the
   `src/animation/sceneOnPresentation.ts` seam.
-  `tests/animation/factoryAnimationInventory.test.ts` now pins **126 exact / 150
+  `tests/animation/factoryAnimationInventory.test.ts` now pins **127 exact / 149
   unsupported** — that pin moves on every promotion, so a fold that resolves
   `ANIMATION_COVERAGE.json` must re-run it.
 
