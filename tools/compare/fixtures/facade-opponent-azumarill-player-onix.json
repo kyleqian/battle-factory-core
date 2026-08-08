@@ -1,0 +1,70 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "FACADE",
+  "pair": "FRONTIER_MON_AZUMARILL_1 (opponent-front) -> legal ONIX (player-back)",
+  "orientation": "opponent-to-player",
+  "scenario": "tools/battle-lab/mechanic-facade-opponent-azumarill-player-onix.json",
+  "probe": "tools/compare/facadeProbe.py",
+  "appStage": {
+    "presentationAge": 0
+  },
+  "denseWindow": {
+    "startFrame": 212,
+    "endFrame": 292,
+    "frameCount": 81
+  },
+  "attacker": {
+    "species": "AZUMARILL",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {
+        "x": 144,
+        "y": 17
+      },
+      "animationCenter": {
+        "x": 176,
+        "y": 49
+      },
+      "battlePositionCenter": {
+        "x": 176,
+        "y": 40
+      }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {
+        "x": 40,
+        "y": 48
+      },
+      "animationCenter": {
+        "x": 72,
+        "y": 80
+      },
+      "battlePositionCenter": {
+        "x": 72,
+        "y": 80
+      }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 142,
+    "playerMaxHp": 142,
+    "opponentHp": 167,
+    "opponentMaxHp": 175,
+    "playerGender": "male",
+    "opponentGender": "female"
+  },
+  "evidenceSchema": "facade-dense-evidence/v1",
+  "evidenceSha256": "0b6d6e52e8b38f101a9ee123f192e5ca4b6eee222980b8c30c0f4f089c6031d2",
+  "secondFreshEvidenceSha256": "0b6d6e52e8b38f101a9ee123f192e5ca4b6eee222980b8c30c0f4f089c6031d2",
+  "rawRgbSha256": "2c20c276ea3ba49466ce1c072588244273706b4e85e23bc0e47d4ec9b346ccc2",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 81,
+    "componentMatching": 81
+  }
+}

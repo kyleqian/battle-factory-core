@@ -91,6 +91,14 @@ import {
   type FlashState,
 } from "./flash.ts";
 import {
+  facadeAtAge,
+  type FacadeState,
+} from "./facade.ts";
+import {
+  minimizeAtAge,
+  type MinimizeState,
+} from "./minimize.ts";
+import {
   calmMindAtAge,
   type CalmMindState,
 } from "./calmMind.ts";
@@ -342,6 +350,14 @@ import {
   tauntAtAge,
   type TauntState,
 } from "./taunt.ts";
+import {
+  tormentAtAge,
+  type TormentState,
+} from "./torment.ts";
+import {
+  detectAtAge,
+  type DetectState,
+} from "./detect.ts";
 import {
   scaryFaceAtAge,
   type ScaryFaceState,
@@ -671,6 +687,7 @@ export interface SceneOnPresentationBattler {
     | "SABLEYE"
     | "ALTARIA"
     | "AZURILL"
+    | "AZUMARILL"
     | "CLAMPERL"
     | "SEVIPER"
     | "SUDOWOODO"
@@ -699,11 +716,12 @@ export interface SceneOnPresentationBattler {
     | "PONYTA"
     | "CHARMANDER"
     | "LEDYBA"
-    | "PRIMEAPE"
-    | "MARSHTOMP"
-    | "TENTACOOL"
-    | "GRAVELER"
-    | "ROSELIA";
+     | "PRIMEAPE"
+     | "MARSHTOMP"
+     | "TENTACOOL"
+     | "GRAVELER"
+     | "ROSELIA"
+     | "YANMA";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1518,6 +1536,26 @@ export interface SceneOnTauntConfig {
   readonly attackerHead: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnTormentConfig {
+  readonly move: "TORMENT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /**
+   * `GetBattlerSpriteCoord(attacker, X_2/Y_PIC_OFFSET)` — the six thought
+   * bubbles anchor to the attacker's picture, not its sprite centre (Y_PIC
+   * is `sprite y + 8` on the player side).
+   */
+  readonly attackerPictureOffset: Readonly<{ x: number; y: number }>;
+  /**
+   * `GetBattlerSpriteCoord(target, X_2/Y_PIC_OFFSET)` — the anger marks and
+   * the BlendMonInAndOut palette bank anchor to the target's picture.
+   */
+  readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
+  /** Attacker `MON_PIC_HEIGHT - 2*yDelta` for the wobble y2 (48 MURKROW back / 40 front). */
+  readonly battlerHeight: number;
+}
+
 export interface SceneOnScaryFaceConfig {
   readonly move: "SCARY_FACE";
   readonly attacker: SceneOnPresentationBattler;
@@ -1873,6 +1911,24 @@ export interface SceneOnFlashConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnFacadeConfig {
+  readonly move: "FACADE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Attacker `MON_PIC_HEIGHT - 2*yDelta` for the squish y2 offset. */
+  readonly battlerHeight: number;
+}
+
+export interface SceneOnMinimizeConfig {
+  readonly move: "MINIMIZE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Attacker `MON_PIC_HEIGHT - 2*yDelta` (40 for GRIMER). */
+  readonly battlerHeight: number;
+}
+
 export interface SceneOnCalmMindConfig {
   readonly move: "CALM_MIND";
   readonly attacker: SceneOnPresentationBattler;
@@ -1928,6 +1984,19 @@ export interface SceneOnGrassWhistleConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnDetectConfig {
+  readonly move: "DETECT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /**
+   * `SetSpriteCoordsToAnimAttackerCoords(attacker)` — the sparkle anchors to
+   * the attacker's picture coordinate (X_2/Y_PIC), then `AnimSpinningSparkle`
+   * shifts it +20 on the player side / -20 on the opponent side, and -20 y.
+   */
+  readonly attackerPictureOffset: Readonly<{ x: number; y: number }>;
 }
 
 export interface SceneOnFutureSightConfig {
@@ -2030,6 +2099,7 @@ export type SceneOnMoveConfig =
   | SceneOnSwaggerConfig
   | SceneOnBulkUpConfig
   | SceneOnTauntConfig
+  | SceneOnTormentConfig
   | SceneOnScaryFaceConfig
   | SceneOnSparkConfig
   | SceneOnThunderWaveConfig
@@ -2067,6 +2137,8 @@ export type SceneOnMoveConfig =
   | SceneOnHardenConfig
   | SceneOnIronDefenseConfig
   | SceneOnFlashConfig
+  | SceneOnFacadeConfig
+  | SceneOnMinimizeConfig
   | SceneOnCalmMindConfig
   | SceneOnShadowBallConfig
   | SceneOnEncoreConfig
@@ -2074,6 +2146,7 @@ export type SceneOnMoveConfig =
   | SceneOnMetalClawConfig
   | SceneOnSingConfig
   | SceneOnGrassWhistleConfig
+  | SceneOnDetectConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -2381,6 +2454,12 @@ export interface SceneOnTauntView extends TauntState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnTormentView extends TormentState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnScaryFaceView extends ScaryFaceState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -2577,6 +2656,12 @@ export interface SceneOnSingView {
   readonly targetInMonBg: boolean;
 }
 
+export interface SceneOnDetectView extends DetectState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnGrassWhistleView {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -2607,6 +2692,16 @@ export interface SceneOnIronDefenseView extends IronDefenseState {
 }
 
 export interface SceneOnFlashView extends FlashState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFacadeView extends FacadeState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnMinimizeView extends MinimizeState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -3135,6 +3230,7 @@ export function createSceneOnMovePresentation<
     | SceneOnWhirlwindConfig | SceneOnBlockConfig
     | SceneOnIronDefenseConfig
     | SceneOnFlashConfig
+    | SceneOnFacadeConfig
     | SceneOnMetalClawConfig
     | SceneOnWrapConfig,
 >(
@@ -4484,6 +4580,27 @@ export function sceneOnTauntView(
   };
 }
 
+/** `age=0` is the move script's first in-bounds frame (frame 68/72 in the fixtures). */
+export function sceneOnTormentView(
+  state: SceneOnMovePresentationState,
+): SceneOnTormentView {
+  if (state.config.move !== "TORMENT") {
+    throw new Error(`expected TORMENT presentation, got ${state.config.move}`);
+  }
+  const config = state.config as SceneOnTormentConfig;
+  return {
+    ...tormentAtAge(
+      state.age,
+      config.attackerPictureOffset,
+      config.battlerHeight,
+      config.target.geometry.side,
+      config.targetPictureOffset,
+    ),
+    attacker: config.attacker,
+    target: config.target,
+  };
+}
+
 /** `age=0` is the first move-owned to-black palette controller frame. */
 export function sceneOnScaryFaceView(
   state: SceneOnScaryFacePresentationState,
@@ -5271,6 +5388,43 @@ export function sceneOnFlashView(
   };
 }
 
+/** `age=0` is the move script's first captured frame. The squish task runs
+ *  ages 4-78, the blend task ages 4-75 (restore on 76); the affine matrix
+ *  renders two displays behind the RAM state and the palette one behind. */
+export function sceneOnFacadeView(
+  state: SceneOnMovePresentationState,
+): SceneOnFacadeView {
+  if (state.config.move !== "FACADE") {
+    throw new Error(`expected FACADE presentation, got ${state.config.move}`);
+  }
+  const config = state.config as SceneOnFacadeConfig;
+  return {
+    ...facadeAtAge(state.age, {
+      x: config.attacker.geometry.battlePositionCenter.x,
+      y: config.attacker.geometry.battlePositionCenter.y,
+    }, config.battlerHeight),
+    attacker: config.attacker,
+    target: config.target,
+  };
+}
+
+/** `age=0` is the move script's first captured frame. The minimize task runs
+ *  ages 1-150 with BLDALPHA 10/8 held through 151; the affine matrix renders
+ *  two displays behind the RAM state and the clones one behind. */
+export function sceneOnMinimizeView(
+  state: SceneOnMovePresentationState,
+): SceneOnMinimizeView {
+  if (state.config.move !== "MINIMIZE") {
+    throw new Error(`expected MINIMIZE presentation, got ${state.config.move}`);
+  }
+  const config = state.config as SceneOnMinimizeConfig;
+  return {
+    ...minimizeAtAge(state.age),
+    attacker: config.attacker,
+    target: config.target,
+  };
+}
+
 /** `age=0` is the settled field immediately before the script's `monbg`. */
 export function sceneOnCalmMindView(
   state: SceneOnMovePresentationState,
@@ -5404,6 +5558,26 @@ export function sceneOnSingView(
  * (isolated by `sBattleAnimScriptPtr` within the `Move_GRASS_WHISTLE` bytes).
  * The note body starts at age 19 (`GRASS_WHISTLE_FIRST_NOTE_AGE`).
  */
+/** `age=0` is the move script's first in-bounds frame (frame 64/68 in the fixtures). */
+export function sceneOnDetectView(
+  state: SceneOnMovePresentationState,
+): SceneOnDetectView {
+  if (state.config.move !== "DETECT") {
+    throw new Error(`expected DETECT presentation, got ${state.config.move}`);
+  }
+  const config = state.config as SceneOnDetectConfig;
+  return {
+    ...detectAtAge(
+      state.age,
+      config.attackerPictureOffset,
+      config.attacker.geometry.side,
+    ),
+    age: state.age,
+    attacker: config.attacker,
+    target: config.target,
+  };
+}
+
 export function sceneOnGrassWhistleView(
   state: SceneOnMovePresentationState,
 ): SceneOnGrassWhistleView {

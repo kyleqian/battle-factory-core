@@ -514,6 +514,7 @@ import {
   DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG,
 } from "../animation/dragonBreath.ts";
 import { flamethrowerDisplayedBattlerOffsetsAtAge } from "../animation/flamethrower.ts";
+import { FACADE_BLEND_COLORS } from "../animation/facade.ts";
 import {
   dragonRageSchedule,
   orderFirePlumesForDraw,
@@ -975,6 +976,8 @@ import {
   sceneOnSwaggerView,
   sceneOnBulkUpView,
   sceneOnTauntView,
+  sceneOnTormentView,
+  sceneOnDetectView,
   sceneOnScaryFaceView,
   sceneOnSelfDestructView,
   sceneOnExplosionView,
@@ -987,6 +990,8 @@ import {
   sceneOnHardenView,
   sceneOnIronDefenseView,
   sceneOnFlashView,
+  sceneOnFacadeView,
+  sceneOnMinimizeView,
   sceneOnCalmMindView,
   sceneOnShadowBallView,
   sceneOnEncoreView,
@@ -1077,6 +1082,7 @@ import {
   extremeSpeedBackgroundVariant,
   extremeSpeedImpactAtAge,
 } from "../animation/extremeSpeed.ts";
+import { minimizeDisplayedClonesAtAge } from "../animation/minimize.ts";
 import { futureSightBgPaletteRowAtAge } from "../animation/futureSight.ts";
 import { confusionBgPaletteRowAtAge, CONFUSION_WINDOW2_START_AGE, confusionTargetEffectAtAge } from "../animation/confusion.ts";
 import { psychicBgPaletteRowAtAge, PSYCHIC_WINDOW2_START_AGE, psychicTargetEffectAtAge, PSYCHIC_BLEND_TINT_COLOR } from "../animation/psychic.ts";
@@ -1366,6 +1372,8 @@ const chanseyFrontSprite = (opponentFrontSpritesAsset as Record<string, Opponent
 const houndourFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HOUNDOUR!;
 const delibirdFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DELIBIRD!;
 const mareepFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAREEP!;
+const azumarillFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).AZUMARILL!;
+const grimerFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GRIMER!;
 const PIDGEOTTO_CORNER = { x: 144, y: 19 };
 /** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): MURKROW's own `yOffset` (11, `mon-pic-coords.json`) is bit-identical to Pidgeotto's, so the same `(144, 8+yOffset)` formula lands on the identical corner - not a coincidence, both front pics share the same 48px-wide/11px-yOffset box. */
 const murkrowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MURKROW!;
@@ -2532,6 +2540,8 @@ const chanseyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSp
 const houndourBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HOUNDOUR!;
 const magbyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGBY!;
 const mareepBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAREEP!;
+const azumarillBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).AZUMARILL!;
+const grimerBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GRIMER!;
 const battleAnimItemHeal = battleAnimItemHealAsset as BattleAnimItemHealAsset;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
@@ -28024,6 +28034,311 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "TORMENT") {
+    const view = sceneOnTormentView(state);
+    // Sprite callbacks/palette writes mutate software OAM after the current
+    // buffer transfer: the effect sprites render TWO displays behind the
+    // reducer state (measured: bubble0 spawns at software frame 75 yet the
+    // oracle screen shows it from frame 77, and each wobble tick displays two
+    // frames late), while the palette blend is one display behind.
+    const displayed = sceneOnTormentView({ ...state, age: state.age - 2 });
+    const affineDisplayed = sceneOnTormentView({ ...state, age: state.age - 2 });
+    // BlendPalette writes gPlttBufferFaded, which reaches the hardware one
+    // display behind the task's data[2] ramp.
+    const blendDisplayed = sceneOnTormentView({ ...state, age: state.age - 1 });
+    // The bubbles need TWO render lags at once (same class as MINIMIZE's
+    // clones): a freshly created sprite's OAM reaches the display two frames
+    // after its software creation, but its removal is a plain OAM edit that
+    // lands one frame behind — intersect the age-2 paint with the age-1
+    // removal. The anger marks (script `createsprite`) display one frame
+    // behind creation, like the palette blend.
+    const paintedBubbles = displayed.bubbles;
+    const removalAlive = new Set(
+      sceneOnTormentView({ ...state, age: state.age - 1 }).bubbles.map(
+        (bubble) => bubble.spawnAge,
+      ),
+    );
+    const bubbles = paintedBubbles.filter((bubble) => removalAlive.has(bubble.spawnAge));
+    const angerDisplayed = sceneOnTormentView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "MURKROW"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MURKROW"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged TORMENT pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const murkrow = playerToOpponent
+      ? tauntArt.murkrowBack
+      : {
+          ...tauntArt.murkrowFront,
+          tileset: subTileset(tauntArt.murkrowFront.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? (speciesFrontIdleRestOffset(view.target.species) ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const black = { r: 0, g: 0, b: 0 };
+    const tormentRed: RgbColor = { r: 248, g: 0, b: 0 }; // RGB_RED (31,0,0 5-bit)
+    // The six bubbles carry EXPLICIT absolute subpriorities 6..1 (lower = in
+    // front), so the back-to-front painter order FLIPS with orientation:
+    //   player-back    ONIX target 40 -> anger 38 -> MURKROW attacker 30
+    //                  -> bubbles 6..1
+    //   opponent-front MURKROW attacker 40 -> ONIX target 30 -> anger 28
+    //                  -> bubbles 6..1
+    const drawTarget = (): void => {
+      const palette = blendDisplayed.blendCoeff > 0
+        ? blendPaletteToward(onix.palette, tormentRed, blendDisplayed.blendCoeff)
+        : onix.palette;
+      drawSpriteSheet(
+        fb,
+        onix.tileset,
+        palette,
+        view.target.geometry.spriteCorner.x + targetIdle.x2,
+        view.target.geometry.spriteCorner.y + targetIdle.y2,
+      );
+    };
+    const drawAngerMarks = (): void => {
+      for (const mark of angerDisplayed.angerMarks) {
+        const matrix = Math.trunc(0x10000 / mark.xScale);
+        drawSpriteSheetAffineRotate(
+          fb,
+          swaggerArt.anger.tileset,
+          swaggerArt.anger.palette,
+          mark.x,
+          mark.y,
+          matrix,
+          0,
+          0,
+          matrix,
+          undefined,
+          false,
+        );
+      }
+    };
+    const drawAttacker = (): void => {
+      const scale = affineDisplayed.attackerScale;
+      drawSpriteSheetAffineStretch(
+        fb,
+        murkrow.tileset,
+        murkrow.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+        scale.x,
+        scale.y,
+        affineDisplayed.attackerY2,
+        black,
+        0,
+        scale.x !== 256 || scale.y !== 256,
+      );
+    };
+    const drawBubbles = (): void => {
+      for (const bubble of bubbles) {
+        // The OAM flip is `animHFlip XOR field`. Both the default bubble anim
+        // (cmds1) and the state-4 replay (anim 2 = cmds3, the reversed program)
+        // carry hFlip=TRUE, so a bubble always displays the OPPOSITE of its
+        // `data[1] & 1` field.
+        const hFlip = !bubble.hFlip;
+        drawSpriteSheetFlipped(
+          fb,
+          subTileset(tauntArt.thoughtBubble.tileset, bubble.frame * 4, 4),
+          tauntArt.thoughtBubble.palette,
+          bubble.x - 16,
+          bubble.y - 16,
+          hFlip,
+          false,
+        );
+      }
+    };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (playerToOpponent) {
+      drawTarget();
+      drawAngerMarks();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawAngerMarks();
+    }
+    drawBubbles();
+    const opponentSpecies = playerToOpponent ? "ONIX" : "MURKROW";
+    const playerSpecies = playerToOpponent ? "MURKROW" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MURKROW used" : "Foe MURKROW used",
+      "TORMENT!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "DETECT") {
+    const view = sceneOnDetectView(state);
+    // The reducer's `bgBlendY`/`attackerPaletteY`/`sparkle` are already the
+    // DISPLAYED schedules: the software gPlttBufferFaded / gTasks data[10] /
+    // sprite spawn ramps land one display behind, and the drawn coefficients
+    // above were measured directly from the oracle's hardware palette and
+    // raw RGB. No additional lag is applied here.
+    const playerToOpponent =
+      view.attacker.species === "YANMA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "YANMA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged DETECT pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const yanmaSource = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).YANMA!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).YANMA!;
+    const yanma = playerToOpponent
+      ? yanmaSource
+      : {
+          ...yanmaSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: yanmaSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const black = { r: 0, g: 0, b: 0 };
+    const white = { r: 255, g: 255, b: 255 };
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const yanmaIdle = opponentToPlayer
+      ? speciesFrontIdleRestOffset("YANMA") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const yanmaPalette = view.attackerPaletteY > 0
+      ? blendPaletteToward(yanma.palette, white, view.attackerPaletteY)
+      : yanma.palette;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(battleBg.palette, black, view.bgBlendY),
+    );
+    // Painter order (lower subpriority draws in FRONT; the sparkle's
+    // absolute subpriority is attacker-13, flipping with orientation):
+    //   player-back    ONIX target 40 -> YANMA attacker 30 -> sparkle 17
+    //   opponent-front YANMA attacker 40 -> ONIX target 30 -> sparkle 27
+    const drawSparkle = (): void => {
+      if (!view.sparkle) return;
+      const rows = view.sparkle.tileOffset / 4;
+      drawSpriteSheet(
+        fb,
+        subTileset(reflectArt.sparkle4.tileset, rows, 4),
+        reflectArt.sparkle4.palette,
+        view.sparkle.x - 16,
+        view.sparkle.y - 16,
+      );
+    };
+    if (playerToOpponent) {
+      drawSpriteSheet(
+        fb,
+        onix.tileset,
+        onix.palette,
+        view.target.geometry.spriteCorner.x + onixIdle.x2,
+        view.target.geometry.spriteCorner.y + onixIdle.y2,
+      );
+      drawSpriteSheet(
+        fb,
+        yanma.tileset,
+        yanmaPalette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        yanma.tileset,
+        yanmaPalette,
+        view.attacker.geometry.spriteCorner.x + yanmaIdle.x2,
+        view.attacker.geometry.spriteCorner.y + yanmaIdle.y2,
+      );
+      drawSpriteSheet(
+        fb,
+        onix.tileset,
+        onix.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+      );
+    }
+    drawSparkle();
+    const fieldProfile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "YANMA",
+        level: 50,
+        gender: fieldProfile.opponentGender ?? "male",
+        hpFraction: fieldProfile.opponentHp / fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "YANMA" : "ONIX",
+        level: 50,
+        gender: fieldProfile.playerGender ?? "male",
+        hpFraction: fieldProfile.playerHp / fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: fieldProfile.playerHp,
+        maxHp: fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "YANMA used" : "Foe YANMA used",
+      "DETECT!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "POISON_FANG") {
     const view = sceneOnPoisonFangView(state);
     const displayed = sceneOnPoisonFangView({ ...state, age: state.age - 1 });
@@ -29076,6 +29391,314 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MAREEP used" : "Foe MAREEP used",
       "FLASH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FACADE") {
+    const view = sceneOnFacadeView(state);
+    // The squish affine matrix renders two displays behind the RAM state (the
+    // software gOamMatrices write shows in the framebuffer at age+2) and the
+    // sweat-drop sprites + attacker palette one display behind.
+    const affineDisplayed = sceneOnFacadeView({ ...state, age: state.age - 2 });
+    const displayed = sceneOnFacadeView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "AZUMARILL"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "AZUMARILL"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FACADE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? azumarillBackSprite : azumarillFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? (speciesFrontIdleRestOffset(view.target.species) ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // The facade color blend tints the ATTACKER's OBJ palette bank (bank 0
+    // player / bank 1 opponent) toward gFacadeBlendColors[i] at coefficient 8.
+    const blendIndex = displayed.blendColorIndex;
+    const blendColor = blendIndex === null
+      ? null
+      : FACADE_BLEND_COLORS[blendIndex]!;
+    const attackerPalette = blendColor === null
+      ? attackerSprite.palette
+      : blendPaletteToward(
+          attackerSprite.palette,
+          {
+            r: blendColor[0] << 3,
+            g: blendColor[1] << 3,
+            b: blendColor[2] << 3,
+          },
+          8,
+        );
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    // Paint strictly back-to-front by the ROM's own subpriority, where a LOWER
+    // subpriority draws in front. The droplets are always `attackerSubpriority
+    // - 5`, so the order FLIPS with the orientation:
+    //   player-back   ONIX target 40 -> AZUMARILL attacker 30 -> droplets 25
+    //   opponent-front AZUMARILL attacker 40 -> droplets 35 -> ONIX target 30
+    // The droplets therefore sit on top of everything player-back but BETWEEN
+    // the two battlers opponent-front. Painting them behind the opponent-front
+    // attacker cost exactly the 9 frames where a droplet still overlapped the
+    // attacker's opaque box (64px, 25px, 2px per lower-droplet batch).
+    const drawTarget = (): void => {
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        view.target.geometry.spriteCorner.x + targetIdle.x2,
+        view.target.geometry.spriteCorner.y + targetIdle.y2,
+      );
+    };
+    const drawAttacker = (): void => {
+      drawSpriteSheetAffineStretch(
+        fb,
+        attackerSprite.tileset,
+        attackerPalette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+        affineDisplayed.matrix.a,
+        affineDisplayed.matrix.d,
+        affineDisplayed.y2,
+        { r: 0, g: 0, b: 0 },
+        0,
+        affineDisplayed.matrix.a !== 256 || affineDisplayed.matrix.d !== 256,
+      );
+    };
+    const drawDroplets = (): void => {
+      for (const drop of displayed.droplets) {
+        if (drop.tick < 1) continue;
+        drawSpriteSheet(
+          fb,
+          battleAnimSweatDrop.tileset,
+          battleAnimSweatDrop.palette,
+          drop.x - 4,
+          drop.y - 4,
+        );
+      }
+    };
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+      drawDroplets();
+    } else {
+      drawAttacker();
+      drawDroplets();
+      drawTarget();
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "AZUMARILL";
+    const playerSpecies = playerToOpponent ? "AZUMARILL" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "AZUMARILL used" : "Foe AZUMARILL used",
+      "FACADE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "MINIMIZE") {
+    const view = sceneOnMinimizeView(state);
+    // The clones need TWO render lags at once: the two-display matrix lag for
+    // their paint and the one-display OAM lag for their removal. That dual-lag
+    // intersection rule lives in minimizeDisplayedClonesAtAge (see minimize.ts)
+    // and is pinned by the Tier-1 reducer tests.
+    const affineDisplayed = sceneOnMinimizeView({ ...state, age: state.age - 2 });
+    const displayed = { clones: minimizeDisplayedClonesAtAge(state.age) };
+    const playerToOpponent =
+      view.attacker.species === "GRIMER"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "GRIMER"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged MINIMIZE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? grimerBackSprite : grimerFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? (speciesFrontIdleRestOffset(view.target.species) ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const black = { r: 0, g: 0, b: 0 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    // Clones are `ST_OAM_OBJ_BLEND` OBJ that composite under the script's
+    // `setalpha 10, 8` BLDALPHA. The clones straddle the attacker via
+    // subpriority = attackerSubpriority - cloneIndex. A LOWER subpriority
+    // draws in front, and the stable sprite sort keeps the attacker (allocated
+    // before its clones) in front of clone0 at the equal-subpriority tie, so
+    // the full back-to-front order FLIPS with orientation:
+    //   player-back    ONIX target 40 -> clone0 30 -> GRIMER attacker 30
+    //                  -> clone1 29 -> clone2 28
+    //   opponent-front GRIMER attacker 40 -> clone0 40 -> clone1 39 -> clone2 38
+    //                  -> ONIX target 30
+    const drawTarget = (): void => {
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        view.target.geometry.spriteCorner.x + targetIdle.x2,
+        view.target.geometry.spriteCorner.y + targetIdle.y2,
+      );
+    };
+    const drawAttacker = (): void => {
+      drawSpriteSheetAffineStretch(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+        affineDisplayed.scale,
+        affineDisplayed.scale,
+        affineDisplayed.y2,
+        black,
+        0,
+        affineDisplayed.scale !== 256,
+      );
+    };
+    const drawClone = (clone: { matrix: number; y2: number } | undefined): void => {
+      if (!clone) return;
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y + clone.y2,
+        clone.matrix,
+        clone.matrix,
+        10,
+        8,
+        false,
+        "static",
+      );
+    };
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+      drawClone(displayed.clones[0]!);
+      drawClone(displayed.clones[1]!);
+      drawClone(displayed.clones[2]!);
+    } else {
+      drawAttacker();
+      drawClone(displayed.clones[0]!);
+      drawClone(displayed.clones[1]!);
+      drawClone(displayed.clones[2]!);
+      drawTarget();
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "GRIMER";
+    const playerSpecies = playerToOpponent ? "GRIMER" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "GRIMER used" : "Foe GRIMER used",
+      "MINIMIZE!",
       99,
     );
     return;

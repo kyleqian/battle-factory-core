@@ -1,0 +1,79 @@
+{
+ "schema": "scene-on-portable-evidence/v1",
+ "oracleProfile": "battle-scene-on",
+ "scenario": "tools/battle-lab/mechanic-torment-opponent-murkrow-player-onix.json",
+ "probe": "tools/compare/tormentProbe.py",
+ "move": "TORMENT",
+ "pair": "legal ONIX (player-back) -> FRONTIER_MON_MURKROW_1 record (opponent-front)",
+ "orientation": "opponent-to-player",
+ "appStage": {
+  "presentationAge": 0
+ },
+ "denseWindow": {
+  "startFrame": 72,
+  "endFrame": 248,
+  "frameCount": 177
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 156,
+  "opponentMaxHp": 156,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "attacker": {
+  "species": "MURKROW",
+  "geometry": {
+   "side": "opponent",
+   "spriteCorner": {
+    "x": 144,
+    "y": 19
+   },
+   "animationCenter": {
+    "x": 176,
+    "y": 51
+   },
+   "battlePositionCenter": {
+    "x": 176,
+    "y": 40
+   }
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player",
+   "spriteCorner": {
+    "x": 40,
+    "y": 48
+   },
+   "animationCenter": {
+    "x": 72,
+    "y": 80
+   },
+   "battlePositionCenter": {
+    "x": 72,
+    "y": 80
+   }
+  }
+ },
+ "attackerPictureOffset": {
+  "x": 176,
+  "y": 51
+ },
+ "targetPictureOffset": {
+  "x": 72,
+  "y": 88
+ },
+ "battlerHeight": 42,
+ "evidenceSchema": "torment-dense-evidence/v1",
+ "evidenceSha256": "0116cb14698bb95f5b5912d0fdd0cbdef76dc0a056edc5d56b3a0720a50c3153",
+ "secondFreshEvidenceSha256": "0116cb14698bb95f5b5912d0fdd0cbdef76dc0a056edc5d56b3a0720a50c3153",
+ "rawRgbSha256": "82f08073ddf3f4b97e6b7d46b44d4a06f0c1e2b4a786eddc63048081b8bc0612",
+ "acceptance": {
+  "status": "exact",
+  "framebufferMatching": 177,
+  "componentMatching": 177
+ }
+}

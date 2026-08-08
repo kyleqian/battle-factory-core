@@ -1,5 +1,328 @@
 # Animation coverage
 
+## MOVE_DETECT staged + reducer/seam/draw + evidence — player-back exact, opponent-front partial (2026-08-07 worker)
+
+- **State:** DETECT is **partial** — player-back **exact** (110/110 both axes),
+  opponent-front 109/110 framebuffer / 110/110 component. Coverage now
+  **122/276 exact, 1 partial, 0 staged, 153 unsupported**.
+- **Did:** staged two legal mechanicLab scenarios (FRONTIER_MON_YANMA set 161,
+  all four slots DETECT 197, vs legal ONIX; player-back + opponent-front) and
+  `tools/compare/detectProbe.py` (copied from tormentProbe.py, script-pointer
+  isolated to `Move_DETECT` `082cb3d2`..`Move_FRUSTRATION` `082cb430`).
+  **Measured window (both orientations, 110 frames — player-back 64-173,
+  opponent-front 68-177):** F_PAL_BG toward-black displayed ramp 0 (a0-7), 2
+  (8-11), 4 (12-15), 6 (16-19), 8 (20-23), 9 (24-83), 7 (84-87), 5 (88-91), 3
+  (92-95), 1 (96-99), 0 (100+); F_PAL_ATTACKER toward-white displayed ramp 0
+  (0-33), 1 (34-35), 2..9 (36-50), 9 (50-84), 8..1 (85-108), 0 (109+); the
+  sparkle (the move's ONE new component, gSpinningSparkleSpriteTemplate +
+  AnimSpinningSparkle — placed ONCE at attacker picture + (±20,-20), never
+  moves) spawns software age 51 / displayed ages 52-67 running the 3-tick
+  sAnim_SpinningSparkle FRAME 0/16/32/48/64 program; absolute subpriority
+  attacker-13 (17 player-back / 27 opponent-front) → painter order FLIPS with
+  orientation; the sparkle-4 tiles/palette reuse the proven REFLECT asset and
+  both blends reuse proven paths. Built `src/animation/detect.ts` (displayed
+  schedules + software visual-task count), the `SceneOnDetectConfig`/View seam,
+  and the battleScene DETECT draw case. `tools/compare/detectPortable.ts` +
+  both fixtures (`scene-on-portable-evidence/v1`, 110-frame dense windows,
+  hashes twice-fresh). Tier-1 `tests/animation/detect.test.ts` (9 reducer
+  tests) + `detectEvidence.test.ts`, the ANIMATION_COVERAGE.json entry
+  (MOVE_DETECT only, between DYNAMIC_PUNCH and EARTHQUAKE) and the inventory
+  summary pin 154→153 unsupported / 0→1 partial.
+- **Measured (fresh portable runs, exit 0):** player-back component 110/110 and
+  framebuffer 110/110; opponent-front component 110/110, framebuffer 109/110.
+  Player evidence 52f1db13… / raw RGB 274b00b5…; opponent evidence 047cfd8c… /
+  raw RGB ae9c9c50… — matching the fixture pins twice fresh.
+- **Blocking note (why opponent-front is partial):** the window's first
+  opponent-front frame (68) carries a ONE-FRAME hardware VRAM tile-base
+  reallocation artifact from the script's `loadspritegfx` — every hardware OAM
+  tile number shifts by 0x400, one battler sprite briefly holds its
+  rotation flag, and the field/YANMA show stale tile pixels (a solid 200px
+  block at (160-191,65-72)) that the shared sprite-tile seam does not model.
+  It is not a reducer error (component 110/110) — reproducing it needs the
+  shared seam to model the loadspritegfx VRAM transfer latch.
+- **Next:** promote MOVE_DETECT to exact by reproducing the frame-68 VRAM
+  transfer latch (then inventory 122→123 exact / partial 1→0); otherwise pick
+  the next move from the component-leverage ranking.
+- **Notes — component provenance:** asset:ANIM_TAG_SPARKLE_4 proven by
+  MOVE_REFLECT; task:AnimTask_BlendBattleAnimPal proven by SELF_DESTRUCT /
+  dragonBreath; visualCommand:simple_palette_blend proven by GRASS_WHISTLE /
+  TAIL_GLOW; sprite:gSpinningSparkleSpriteTemplate NEW. Probe gotcha: the blend
+  transition frames show PARTIAL palette reads (26/22 channel split) — decode
+  with the max-y read, not most-common, or you under-read the real coeff.
+
+## MOVE_TORMENT promoted to exact — 122/276 exact (2026-08-07 worker)
+
+- **State:** TORMENT is **exact** — 177/177 on both axes in both orientations.
+  Coverage now **122/276 exact, 0 partial, 0 staged, 154 unsupported**.
+- **Did:** `src/animation/torment.ts` reducer (source-shaped
+  `AnimTask_TormentAttacker`/`TormentAttacker_Step`: six thought bubbles at
+  move-relative ages 7/32/57/72/87/102, absolute subpriorities 6..1,
+  alternating hFlip, X_2±32/26/20 and Y_PIC−20/20/26/26/32/32; the 12-tick
+  sAffineAnims_Torment wobble restarting per bubble with y2 var 48 back / 42
+  front; BlendMonInAndOut RGB_RED coeff 1..10..1 ages 136-154; two anger marks
+  at 136/158 via the proven `swaggerAngerMarkAtAge`), the
+  `SceneOnTormentConfig`/`SceneOnTormentView` seam, and the battleScene TORMENT
+  draw case with per-orientation painter order. `tools/compare/tormentPortable.ts`
+  + both `tools/compare/fixtures/torment-*.json` (`scene-on-portable-evidence/v1`,
+  dense 177-frame windows 68-244 / 72-248, hashes twice-fresh). Added Tier-1
+  `tests/animation/torment.test.ts` (10 reducer tests) + `tormentEvidence.test.ts`
+  (dense receipt + twice-fresh hash pins), the ANIMATION_COVERAGE.json entry
+  (MOVE_TORMENT only, inserted between TOXIC and TWINEEDLE), and the inventory
+  summary pin 121→122 exact / 155→154 unsupported. `npm run animation:coverage`
+  now reads 122/276 exact. npx vitest on the four touched files green.
+- **Measured (both portables, fresh runs, exit 0):** component 177/177 and
+  framebuffer 177/177 on player-back and opponent-front, 177-frame windows
+  (player-back 68-244, opponent-front 72-248). Player evidence
+  7d0bb71d… / raw RGB 805da7f5…; opponent evidence 0116cb14… / raw RGB
+  82f08073… — matching the fixture pins twice fresh.
+- **Next:** pick the next move from the component-leverage ranking; TORMENT's
+  new `AnimTask_TormentAttacker` task is proven by an exact move and the
+  absolute-subpriority orientation trap is documented for the anger-tag track.
+- **Notes — THIRD and FOURTH display-lag findings (this lane):**
+  1. The six TORMENT bubbles carry EXPLICIT ABSOLUTE subpriorities 6..1, so
+     the back-to-front painter order FLIPS with orientation (player-back ONIX
+     40 → anger 38 → MURKROW 30 → bubbles 6..1; opponent-front MURKROW 40 →
+     ONIX 30 → anger 28 → bubbles 6..1). Drawing one order for both sides was
+     the trap.
+  2. The bubbles reuse the MINIMIZE dual-lag class but the marks/blend DON'T:
+     task-created bubbles paint at age−2 and remove at age−1 (the intersection),
+     while script-`createsprite` anger marks and the BlendPalette ramp are ONE
+     display behind and the wobble affine matrix is TWO behind. The anim
+     restart (state 4) reaches the display later than the software state-4
+     frame AND plays REVERSED: `StartSpriteAnim(sprite, 2)` is anim index 2 =
+     `gMetronomeThroughtBubbleAnimCmds3`, the 48,32,16,0 program — measured
+     display start at age 127 showing frames 2,1,0. Displayed bubble flip is
+     always `animHFlip(TRUE) XOR field`. Probe gotchas (both bitten twice):
+     template symbols need `& ~1`, hFlip lives at sprite offset `0x3f`.
+
+## MOVE_TORMENT staged — both orientations isolated at 177 frames; scenarios + dense probe + measured window banked (2026-08-07 worker)
+
+- **State:** TORMENT stays **unsupported**. Coverage unchanged at **121/276
+  exact, 0 partial, 0 staged, 155 unsupported**. Nothing promoted; no pin moved.
+- **Did:** staged two legal mechanicLab scenarios (MURKROW_1 set 184 lead vs
+  legal ONIX, all four active move slots TORMENT so the Factory AI has a single
+  legal choice; player-back `mechanic-torment-player-murkrow-opponent-onix.json`
+  and opponent-front `mechanic-torment-opponent-murkrow-player-onix.json`) and
+  `tools/compare/tormentProbe.py` — a dense probe copied from `minimizeProbe.py`
+  with script-pointer isolation to `Move_TORMENT` (`082cdcae`..`Move_MEMENTO`
+  `082cdcf2`) capturing the `AnimTask_TormentAttacker`/`TormentAttacker_Step`
+  lifecycle with all 16 data words, EVERY `gThoughtBubbleSpriteTemplate` and
+  `gAngerMarkSpriteTemplate` sprite (slot, template, callback, x/y/x2/y2,
+  subpriority, attr0/1/2, matrixNum, hFlip at `0x3f`, matrix a/b/c/d, data[0..7]),
+  the `AnimTask_BlendMonInAndOut` palette-blend task, the attacker's own matrix +
+  y2 + attrs, BLDCNT/BLDALPHA/BLDY, full palettes, hardware OAM/matrices, and
+  per-frame raw RGB + sha256. Probe run command recorded in the step brief.
+- **Measured (fresh runs, both orientations, deterministic and identical):**
+  move-owned window **177 frames each — player-back frames 68..244, opponent-front
+  72..248** (script first in-bounds .. first inactive cleanup). Task slot 0:
+  first step-visible frame is the FIRST bubble's creation (data[1] already 1 —
+  the createvisualtask setup and state-0 step run in consecutive task updates).
+  Player-back data[2]=72 (X_2), data[3]=97 (Y_PIC_OFFSET = sprite y 89 + 8);
+  opponent-front data[2]=176, data[3]=51 (sprite y, no +8 on opponent side).
+  **Six thought bubbles** with ABSOLUTE subpriorities 6..1 (6-data[1]) and
+  alternating hFlip (data[1]&1), spawn frames player-back **75/100/125/140/155/170**
+  (opponent-front +4: 79/104/129/144/159/174), positions player-back x =
+  104,40,98,46,92,52 (72±32/26/20), y = 77,77,71,71,65,65 (97−20/26/32);
+  opponent-front x = 208,144,202,150,196,156 (176±…), y = 31,31,25,25,19,19. A
+  bubble NEVER moves once placed (callback replaced by SpriteCallbackDummy).
+  **Attacker wobble** (sAffineAnims_Torment, 3 frames × 4 ticks) restarts with
+  every bubble: software matrix a/d series 244/264,232/272,220/280,208/288,
+  228/268,248/248,268/228,288/208,280/220,272/232,264/244,256/256 over 12 ticks
+  starting the frame after each bubble, y2 via SetBattlerSpriteYOffsetFromYScale
+  (var 48 back / 40 front MURKROW). Cadence: bubbles 0→1 gap 25 (12 affine +
+  10 data[6] wait), 1→2 gap 25, then 15 (12 affine + 0 wait); after the 6th
+  bubble data[6]=8 wait (state 3), state 4 at player-back f=192 sets every
+  bubble's callback + StartSpriteAnim(anim 2, forward 4×2-tick), state 5
+  countdown, all six destroyed at f=203 (task destroyed same frame). Second
+  half (TARGET): `AnimTask_BlendMonInAndOut` RGB_RED (d1=31, d3=10, d5=1, d7=1,
+  d0=273 = OBJ_PLTT_ID(target)+1) player-back f=204..222, d2 ramps 1..10 then
+  9..1; anger mark1 f=204 x=196 y=14 sub 38 (target sub 40 − 2), mark2 f=226
+  x=156 y=14 sub 38; opponent-front target is player-back ONIX → anger sub 28
+  (30 − 2), mark1 f=208 x=52 y=60, mark2 f=230 x=92 y=60 (Y_PIC_OFFSET 88 =
+  sprite y 80 + 8). Each anger mark runs the 16-tick gAngerMarkAffineAnimCmds
+  (×11/−11 per tick) then DestroySpriteAndMatrix (mark1 gone 1 frame later;
+  mark2 gone f=243, window ends f=244/248).
+- **Next:** (d) `src/animation/torment.ts` reducer + `SceneOnTormentConfig`/
+  View seam + `battleScene.ts` draw case — the back-to-front painter order
+  FLIPS with orientation (player-back: ONIX 40 → anger 38 → MURKROW 30 →
+  bubbles 6..1; opponent-front: MURKROW 40 → anger 28 → ONIX 30 → bubbles 6..1)
+  and the six bubbles' explicit absolute subpriorities are the trap — test both
+  orders, never one for both sides. Reuse `swaggerAngerMarkAtAge` for the anger
+  marks and the thought-bubble tileset from `taunt.json`. Then (e) portable +
+  fixtures, (f) Tier-1 + evidence tests + coverage entry + inventory pin
+  121→122 exact / 155→154 unsupported.
+- **Notes — probe gotcha (twice bitten):** the sprite TEMPLATE symbols
+  (`gThoughtBubbleSpriteTemplate` etc.) are data pointers — the `|1` thumb-bit
+  applied to function symbols corrupts them; and `hFlip` is the `0x3f` bitfield,
+  NOT attr1's matrix bits. Both were wrong on the first probe run.
+
+## MOVE_MINIMIZE promoted to exact — 121/276 exact (2026-08-07 worker)
+
+- **State:** MINIMIZE is **exact** — 153/153 on both axes in both orientations.
+  Coverage now **121/276 exact, 0 partial, 0 staged, 155 unsupported**.
+- **Did:** the 144/153 residual (9 clone-expiry frames) was diagnosed and FIXED
+  by the supervisor during salvage of a cap-killed worker — the fix already
+  shipped on this branch. This worker lifted it out of the draw case into the
+  reducer: exported `minimizeDisplayedClonesAtAge(age)` in `src/animation/minimize.ts`
+  (the `minimizeClonesAtAge` RAM-truth function is unchanged — the portable's
+  component axis still checks it) and the `battleScene.ts` MINIMIZE case now
+  calls it instead of computing two views inline. Both fixtures already recorded
+  `status: "exact"` with 153/153 on both axes and the twice-fresh sha pins were
+  already in `tests/animation/minimizeEvidence.test.ts`; re-ran BOTH portables
+  after the refactor — 153/153 component + framebuffer, exit 0, evidence hashes
+  byte-identical to the fixture pins (pure move, no behaviour change). Added 2
+  Tier-1 tests pinning the dual-lag displayed window for all nine clones,
+  updated the ANIMATION_COVERAGE.json entry to `exact` (shaped like FACADE,
+  nothing else touched) and the inventory summary pin 120→121 exact / 156→155
+  unsupported. `npx vitest run tests/animation` 304 files / 1697 tests green;
+  `npm run build` green.
+- **Measured (both portables, fresh runs, exit 0):** component 153/153 and
+  framebuffer 153/153 on player-back and opponent-front, 153-frame windows
+  (frames 210-362). Player evidence c044f61d… / raw RGB 54dfaf40…; opponent
+  evidence 060ee54d… / raw RGB da319b66… — matching the fixture pins twice fresh.
+- **Next:** pick the next move from the component-leverage ranking
+  (`npm run animation:coverage`); MINIMIZE's shared components (clone/OAM-blend
+  painter, SetBattlerSpriteYOffsetFromYScale) are now proven by an exact move.
+- **Notes — REUSABLE FINDING (first in this lane):** two DIFFERENT render lags
+  can meet on the SAME sprite and both are needed. A minimize clone is PAINTED
+  only once its freshly allocated OAM matrix reaches the hardware (two-display
+  lag) but its REMOVAL is a plain OAM edit (one-display lag). Measured: clone 0
+  lives RAM frames 211-226 yet shows on screen 213-227 — 15 displayed frames
+  for a 16-frame RAM life. Either lag alone fails: age-2 alone over-draws the
+  expiry frames 228/231/234, age-1 alone draws the spawn frames 212/215/218 too
+  early. The rule intersects them: clones + frozen matrices from age-2,
+  intersected with still-alive-at-age-1. The Tier-1 tests state the measured
+  frames so the rule is traceable to evidence, not a fitted constant.
+
+## MOVE_MINIMIZE reducer+seam landed at partial — component 153/153, framebuffer 144/153 (2026-08-07 worker)
+
+- **State:** MINIMIZE stays **unsupported** (partial, not promoted). Coverage
+  unchanged at **120/276 exact, 0 partial, 0 staged, 156 unsupported**.
+- **Did:** on top of the staged scenarios + `minimizeProbe.py` (previous entry),
+  landed the full rung (d): `src/animation/minimize.ts` reducer (source-shaped
+  `AnimTask_Minimize` lifecycle — three 32-frame shrink cycles at ages 1-32/
+  35-66/69-100, 33-frame hold 101-133, 16-step grow-back 134-150, clones
+  spawning ages 1/4/7 per cycle with FROZEN matrices 256/376/496 and y2 0/6/10,
+  each alive 16 frames), `SceneOnMinimizeConfig`/`SceneOnMinimizeView` seam +
+  `sceneOnMinimizeView`, and the `battleScene.ts` MINIMIZE draw case (subpriority
+  derived back-to-front per orientation). Wrote `tools/compare/minimizePortable.ts`
+  (copied from `facadePortable.ts`, clone-aware) and both
+  `tools/compare/fixtures/minimize-*.json`
+  (`scene-on-portable-evidence/v1`, dense window 210-362 = 153 frames both
+  orientations, hashes twice-fresh). Added Tier-1 `tests/animation/minimize.test.ts`
+  (7 reducer tests: task life, scale series, y2 var=40, clone spawns/frozen
+  matrices/lifetime/live-count schedule).
+- **Measured (both portables, fresh runs, exit 0):** evidence + raw-RGB sha256
+  reproduce the fixture pins in both orientations; **component axis 153/153**,
+  **framebuffer axis 144/153** — the 9 residual frames are exactly the
+  clone-expiry frames (228/231/234 per cycle), where the clone's 16-frame
+  lifetime boundary is one frame off from the ROM's OAM teardown under the
+  display-seam lag (clone disappears a frame earlier/later than modeled).
+  Fixtures honestly record `status: "partial"`, 144/153 framebuffer, 153/153
+  component (NOT exact — the portable's own exit-0 check was run to verify).
+- **Next:** fix the clone-expiry off-by-one (compare the probed `data[0]` and
+  the displayed clone slot on frames 227-228; the destroy lands one display
+  frame earlier than `spawnAge+16` under the two-frame OAM lag), re-run both
+  portables to 153/153, then promote: coverage entry to `exact`, inventory pin
+  120→121 exact / 156→155 unsupported.
+- **Notes — blend target:** the clones are `ST_OAM_OBJ_BLEND` under BLDALPHA
+  10/8; `target:"static"` (field pixel, single-spring rule) scored 144, and
+  `target:"live"` scored worse, so the residual is not the blend target. The
+  orientation-blind draw order was tested both ways (clone0 behind attacker at
+  the equal-subpriority tie) and matches the oracle; the residual is purely the
+  expiry frame.
+
+## MOVE_MINIMIZE staged — both orientations isolated at 153 frames; scenarios + dense probe + measured window banked (2026-08-07 worker)
+
+- **State:** MINIMIZE stays **unsupported**. Coverage unchanged at **120/276
+  exact, 0 partial, 0 staged, 156 unsupported**. Nothing promoted; no pin moved.
+- **Did:** staged two legal mechanicLab scenarios (FRONTIER_MON_GRIMER lead vs
+  legal ONIX, all four active move slots MINIMIZE so the Factory AI has one
+  legal choice; player-back `mechanic-minimize-player-grimer-opponent-onix.json`
+  and opponent-front `mechanic-minimize-opponent-grimer-player-onix.json`) and
+  `tools/compare/minimizeProbe.py` — a dense probe copied from
+  `facadeProbe.py` with script-pointer isolation to `Move_MINIMIZE`
+  (`082ccf52`..`Move_METRONOME` `082ccf65`) and the clone machinery's own
+  capture: EVERY `ClonedMinizeSprite_Step` clone (slot, template, callback,
+  x/y/x2/y2, subpriority, attr0/1/2, matrixNum, matrix a/b/c/d, data[0..7]),
+  the attacker's own matrix + y2 + attr words, BLDCNT/BLDALPHA/BLDY, hardware
+  OAM/matrices, full palettes, per-frame raw RGB + sha256. Probe run command
+  recorded in the probe docstring.
+- **Measured (fresh runs, both orientations, deterministic and identical):**
+  the move-owned window is **153 frames — frames 210..362 each** (task first
+  present at 211, last present at 360, destroyed by 361; blendoff lands on 362
+  where BLDCNT/BLDALPHA return to 0). Task slot 0, `AnimTask_Minimize_Step`:
+  `data[0]` attacker spriteId (6 player / 8 opponent), `data[7]` = attacker
+  subpriority (30 player / 40 opponent). Three 32-frame shrink cycles at ages
+  (window-210) 1-32, 35-66, 69-100, scale series **296→1536 in +40 steps**
+  (`0x100+0x28`), each cycle one state-1 wait frame + state-2 reset frame
+  (scale back to 256), then a 33-frame hold (state 3, ages 101-133, scale
+  pinned 1536), then state-4 grow-back ages 134-150 at **-80/frame**
+  (1536→256 in 16 steps), state-5 reset at 150, task gone at 151. Attacker
+  matrix.a == data[4]; y2 = `SetBattlerSpriteYOffsetFromYScale` with var=40
+  (`MON_PIC_HEIGHT 64 - 2*GRIMER y_offset 12`): `trunc((40 - trunc(10240/d))/2)`
+  verified 0..17 across the whole series (0 at 256 → 17 at 1536). **Clone
+  spawn frames ages 1,4,7 / 35,38,41 / 69,72,75** (data[2]==0,3,6 pre-check),
+  slots **3,4,5** per cycle (reused), subpriority = attackerSubpriority -
+  cloneIndex (30,29,28 player / 40,39,38 opponent), clone matrix FROZEN at the
+  spawn-time scale (256, 376, 496) and clone y2 = y2(cloneMatrix) (0, 6, 10),
+  each clone alive exactly **16 frames** (data[0] 16→1; `data[6]` live count
+  1,2,3 then 2 at +16, 1 at +19, 0 at +22). `setalpha 10,8` = **BLDCNT
+  0x3f40, BLDALPHA 0x80a** held frames 211-361; visual-task count 0→1 (211) /
+  1→0 (361); SE_M_MINIMIZE sound task 1 at 211..279 (0 at 280), panX -64.
+- **Next:** (d) `src/animation/minimize.ts` reducer + `SceneOnMinimizeConfig`/
+  View seam + `battleScene.ts` draw case — clone draw order FLIPS between
+  orientations (subpriority-based: player-back ONIX 40 → GRIMER 30 → clones
+  30/29/28; opponent-front GRIMER 40 → clones 40/39/38 → ONIX 30), so derive
+  the painter order from subpriority per orientation and test both; (e) the
+  portable + two fixtures; (f) Tier-1 tests, coverage entry, inventory pin
+  120→121 exact / 156→155 unsupported.
+- **Notes — variant evidence:** GRIMER was picked (FRONTIER_MON_GRIMER) with
+  all four slots MINIMIZE; back and front pic y_offset are both 12, so the y2
+  var is 40 in both orientations. `AllocOamMatrix()` returned a real matrix
+  every spawn in both runs (no 0xFF-failure clones observed in the live
+  window), but the reducer still models the failure branch from source.
+
+## MOVE_FACADE promoted to exact — 119→120; pinning and ledger only, rendering was already verified (2026-08-07 worker)
+
+- **State:** coverage advanced **119→120/276 exact**, 0 partial, 0 staged, 156
+  unsupported. This step landed the Tier-1 pinning and the ledger bookkeeping
+  only — the rendering itself was already done and oracle-verified on commit
+  16d2e52b (cap-killed worker + supervisor salvage).
+- **Did:** re-ran **both `facadePortable.ts` runs fresh on this tree**: each
+  reports `FACADE component 81/81; framebuffer 81/81` and exits 0, with
+  evidence + raw-RGB sha256 reproducing the fixture pins — player
+  `0c0069cd…`/`f053995a…`, opponent `0b6d6e52…`/`2c20c276…`, window 212-292
+  (81 frames) in both orientations. Added `tests/animation/facade.test.ts`
+  (9 reducer tests: task lifecycles ages 4-78/4-75 with the coefficient-0
+  restore at 76; blend index advancing per age and wrapping 23→0 across the
+  full 72; six droplet batches at ages 9, 21, 34, 46, 59, 71 with four
+  droplets each; droplet geometry xOffset 30/+20 vs 18/-20, xCoords
+  `[bx-off, bx-off-4, bx+off, bx+off+4]`, `yCoords[i&1]=[by+yoff, by+yoff+6]`,
+  velocX -2/+2, velocY -1, 7-tick lifetime; three 24-frame squish FRAME
+  cycles with identity resets; y2; typed seam). Added
+  `tests/animation/facadeEvidence.test.ts` (3 tests) pinning both fixtures'
+  schema, window, evidence/second-fresh/raw-RGB hashes, acceptance 81/81, and
+  legal party structure. Promoted the `MOVE_FACADE` entry in
+  `ANIMATION_COVERAGE.json` to `exact` (MOVE_FLASH entry shape) and moved the
+  inventory pin 119→120 exact / 157→156 unsupported.
+- **Measured:** `npx vitest run tests/animation` **302 files / 1685 passed / 1
+  established skip**, `npm run animation:coverage` reports **120/276 exact, 0
+  partial, 0 staged, 156 unsupported**, both portables 81/81 exit 0.
+- **Next:** resume **MOVE_DOUBLE_EDGE** from its staged base (largest remaining
+  staged unit), or the next bounded component track from
+  `npm run animation:coverage`.
+- **Notes — rendering provenance:** the rendering landed via a cap-killed
+  worker plus supervisor salvage (commit 16d2e52b); the salvage fixed an
+  orientation-blind painter order that had cost 9 opponent-front frames —
+  droplets are always `attackerSubpriority - 5` and a LOWER subpriority draws
+  in front, so the back-to-front order is ONIX 40 → AZUMARILL 30 → droplets 25
+  player-back but AZUMARILL 40 → droplets 35 → ONIX 30 opponent-front. The
+  display seam latches the squish affine matrix two displays behind the RAM
+  state and the palette + droplets one behind. No engine changes beyond the
+  existing FACADE draw case; no boundary widening; `tests/animation/factoryAnimationInventory.test.ts`
+  pin updated for this promotion.
+
 ## Supervisor wind-down — GRASS_WHISTLE + FLASH exact, 117→119; DOUBLE_EDGE and FACADE staged (2026-08-07 animation session)
 
 - **State:** coverage advanced **117→119/276 exact**, 0 partial, 0 staged, 157
@@ -58,11 +381,19 @@
   `AnimTask_FacadeColorBlend_Step` slot 1 ages **4-75 — exactly the 72 blend
   frames the source predicts** (`gBattleAnimArgs[1] = 72`). Visual-task count
   range 0-2. Schema `facade-dense-evidence/v1`.
-- **CAVEAT for the next worker:** the probe records **zero sprites across the
-  whole window**. Either it is not watching the `ANIM_TAG_SWEAT_DROP` template
-  or the droplets do not spawn in this configuration. Resolve that FIRST —
-  confirm from the framebuffer and hardware OAM whether droplet sprites are
-  visible at all before fitting a droplet reducer.
+- ~~**CAVEAT for the next worker:** the probe records **zero sprites across the
+  whole window**.~~ **CORRECTED (supervisor, 2026-08-07, both scenarios re-run
+  fresh):** that caveat is **false**. `facadeProbe.py` as committed records
+  **168 sweat-drop rows per orientation** — 6 spawn batches of 4 sprites, each
+  batch alive exactly 7 displayed frames. Spawn frames are 221, 233, 246, 258,
+  271 and 283 in both orientations; sprite slots are 3, 4, 5 and 7 (slot 6 is
+  skipped — read the slot from the probe, do not assume contiguity). Droplet
+  geometry reproduces the source exactly: `CreateSweatDroplets` at `tTimer==6`
+  uses xOffset 30 / yOffset +20 and at `tTimer==18` uses xOffset 18 /
+  yOffset -20; `xCoords = [bx-off, bx-off-4, bx+off, bx+off+4]`,
+  `yCoords[i&1] = [by+yoff, by+yoff+6]`; `velocX` is -2 for i<2 else +2,
+  `velocY` is -1; subpriority is `tSubpriority - 5`. No probe fix is needed and
+  no droplet-visibility question remains open.
 - **Next:** finish FACADE from this staged base — the reducer, the seam, the
   `battleScene.ts` draw case, the portable, two fixtures, the Tier-1 tests, and
   promotion. The new component `task:AnimTask_FacadeColorBlend` is small: blend
@@ -70,6 +401,23 @@
   `gFacadeBlendColors[i]` (24-entry table, src/battle_anim_effects_3.c:902),
   i advancing per frame and wrapping 23->0, for 72 frames, then one
   coefficient-0 restore and destroy.
+- **Supervisor-measured lifecycles (2026-08-07, both scenarios fresh):** the
+  squish task is present frames **216-290**; `data[]` is
+  `[tState, tTimer, tActiveSprites, tNumSquishes, tBaseX, tBaseY, tSubpriority,
+  tBattlerSpriteId, …]`. `tBaseX/tBaseY/tSubpriority` are **72 / 80 / 30**
+  player-back and **176 / 40 / 40** opponent-front. `tTimer` runs 1..24 per
+  squish; three squishes occupy frames 216-239, 240-264 and 265-289; frame 290
+  is `tState=1, tTimer=25` and the task is then destroyed. The blend task is
+  present frames **216-287** (72 blends); its `data[2]` palette offset is
+  **256** player (OBJ bank 0) and **272** opponent (OBJ bank 1); the
+  coefficient-0 restore lands on frame 288. The attacker's affine squish comes
+  from `gFacadeSquishAffineAnimCmds` = FRAME(-16,+16,0,6), FRAME(+16,-16,0,12),
+  FRAME(-16,+16,0,6); the probe captures the live matrix a/d and `y2` per frame,
+  so fit against those rather than re-deriving. The blend arithmetic is
+  confirmed against RAM: unfaded `0x5739` blended with
+  `gFacadeBlendColors[0] = RGB(28,25,1)` at coefficient 8 gives `0x2F3A`, which
+  is exactly what the probe reads at frame 216 — so the RAM write is same-frame
+  and only the display latch remains to be measured.
 - **Notes:** the other two components (`asset:ANIM_TAG_SWEAT_DROP`,
   `task:AnimTask_SquishAndSweatDroplets`) are credited to exact MOVE_ENDEAVOR,
   but ENDEAVOR's `sceneOnEndeavorView` seam exposes only an HP-drain view — that
