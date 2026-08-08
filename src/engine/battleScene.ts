@@ -780,16 +780,7 @@ import {
 import { drawMode0Objects, drawMode0Ppu, mgbaDarkenColor, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
 import { fakeTearsControllerDisplayAtAge } from "./fakeTearsControllerPresentation.ts";
-import {
-  resolveTurn1RockSlideAttackLines,
-  resolveTurn1DoubleTeamKickoffLines,
-} from "./turn1RockSlidePresentationStaging.ts";
-import { resolveTurn4DoubleTeamKickoffLines } from "./turn4DoubleTeamPresentationStaging.ts";
-import {
-  resolveTurn6AtkFellLines,
-  resolveTurn6FeatherDanceKickoffLines,
-  resolveTurn6FeatherDanceWindowContent,
-} from "./turn6FeatherDancePresentationStaging.ts";
+import { resolveTurn6FeatherDanceWindowContent } from "./turn6FeatherDancePresentationStaging.ts";
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.ts";
 import { mapStatus1ToBattleStatus } from "./battleResolutionAdapter.ts";
 import type {
@@ -798,30 +789,10 @@ import type {
 } from "./battleSceneResolutionOwner.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
 import {
-  resolveTurn7AtkFellLines,
-  resolveTurn7FeatherDanceKickoffLines,
   resolveTurn7FeatherDanceWindowContent,
-  resolveTurn8AtkFellLines,
-  resolveTurn8FeatherDanceKickoffLines,
   resolveTurn8FeatherDanceWindowContent,
 } from "./turn78FeatherDancePresentationStaging.ts";
-import { resolveTurn8BindKickoffLines, resolveTurn8MissLines } from "./turn8BindPresentationStaging.ts";
-import {
-  resolveTurn6RockSlideAttackLines,
-  resolveTurn7RockSlideAttackLines,
-} from "./turn67RockSlidePresentationStaging.ts";
-import {
-  resolveTurn5EndeavorAttackLines,
-} from "./turn5EndeavorPresentationStaging.ts";
-import {
-  resolveTurn2EndeavorAttackLines,
-} from "./turn2EndeavorPresentationStaging.ts";
 import { resolveBattle1PresentationHpValues } from "./battle1PresentationHpStaging.ts";
-import { resolveTurn11AtkFloorLines } from "./turn11FeatherDancePresentationStaging.ts";
-import {
-  resolveTurn13AccFellLines,
-  resolveTurn13SandAttackKickoffLines,
-} from "./turn13SandAttackPresentationStaging.ts";
 import {
   CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER,
   resolveTurn13ResolutionAdapter,
@@ -1177,6 +1148,10 @@ import { BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP, GROVYLE_FAINT_SINK_STEPS, GROVYLE_H
 export { BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP, GROVYLE_FAINT_SINK_STEPS, GROVYLE_HEALTHBOX_VANISH_TICK, TURN14_FLYUP_TEXT_TOTAL, TURN15_FLY_STRIKE_TEXT_TOTAL, TURN5_SITRUS_HEAL_HP_END, TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_LINE1, TURN5_SITRUS_HEAL_LINE2, TURN5_SITRUS_RING_CENTER, dragonBreathTextVisibleChars, menuIdleHealthboxBounce, menuIdleOnixBounce, turn10AerialAceTextVisibleChars, turn10NotVeryEffectiveTextVisibleChars, turn10SuperEffectiveTextVisibleChars, turn11AtkFloorTextVisibleChars, turn11SuperEffectiveTextVisibleChars, turn6FeatherDanceTextVisibleChars, turn9NotVeryEffectiveTextVisibleChars, turn9QuickAttackTextVisibleChars, turn9SuperEffectiveTextVisibleChars };
 import { TURN5_FAINTED_CURSOR_START_DELAY, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, TURN5_FAINTED_TEXT_TOTAL, grovyleFaintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible } from "./battleSceneCanonical.ts";
 export { TURN5_FAINTED_CURSOR_START_DELAY, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, TURN5_FAINTED_TEXT_TOTAL, grovyleFaintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible };
+import { TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, TURN1_ROCKSLIDE_KICKOFF_LINE1, TURN1_ROCKSLIDE_KICKOFF_LINE2, TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2, TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2, TURN5_ENDEAVOR_ATTACK_LINE1, TURN5_ENDEAVOR_ATTACK_LINE2, TURN8_BIND_LINE1, TURN8_BIND_LINE2, TURN8_BIND_TEXT_TOTAL, TURN8_MISS_LINE1, TURN8_MISS_LINE2, TURN8_MISS_TEXT_TOTAL, TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2, TURN13_ACCFELL_TEXT_TOTAL, TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2, TURN13_SANDATTACK_TEXT_TOTAL } from "./battleSceneCanonical.ts";
+export { TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, TURN1_ROCKSLIDE_KICKOFF_LINE1, TURN1_ROCKSLIDE_KICKOFF_LINE2, TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2, TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2, TURN5_ENDEAVOR_ATTACK_LINE1, TURN5_ENDEAVOR_ATTACK_LINE2, TURN8_BIND_LINE1, TURN8_BIND_LINE2, TURN8_BIND_TEXT_TOTAL, TURN8_MISS_LINE1, TURN8_MISS_LINE2, TURN8_MISS_TEXT_TOTAL, TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2, TURN13_ACCFELL_TEXT_TOTAL, TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2, TURN13_SANDATTACK_TEXT_TOTAL };
+import { TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2, TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2, TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2, TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2, TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2, TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2, TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2, TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2, TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2, turn12MissTextVisibleChars, turn13AccFellTextVisibleChars, turn13SandAttackTextVisibleChars, turn5FaintedTextVisibleChars, turn8BindTextVisibleChars, turn8MissTextVisibleChars } from "./battleSceneCanonical.ts";
+export { TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2, TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2, TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2, TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2, TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2, TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2, TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2, TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2, TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2, turn12MissTextVisibleChars, turn13AccFellTextVisibleChars, turn13SandAttackTextVisibleChars, turn5FaintedTextVisibleChars, turn8BindTextVisibleChars, turn8MissTextVisibleChars };
 
 interface Tileset {
   columns: number;
@@ -2306,8 +2281,6 @@ const anchorPlayerAfterTurn3Hp = BATTLE1_PRESENTATION_HP.playerAfterTurn3Hp;
  * LINE1`/`LINE2` themselves stay defined and in use by every other turn's own
  * kickoff/held-text call site in this file.
  */
-const [TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2] = resolveTurn4DoubleTeamKickoffLines();
-
 /**
  * Presentation-seam retirement (`docs/presentation-seam-scout.md` §12.3 step
  * 2): turn 6's own FEATHER_DANCE kickoff text ("Foe PIDGEOTTO used\n
@@ -2325,7 +2298,6 @@ const [TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2] = resolve
  * 7/8's own call sites were retired next, see below (ISSUES #39 rank-4
  * slice 3).
  */
-const [TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn6FeatherDanceKickoffLines();
 
 /**
  * Presentation-seam retirement (`docs/presentation-seam-scout.md` §12.3 step
@@ -2341,8 +2313,7 @@ const [TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2] = res
  * in use by turn 11's own call site -- turns 7/8's own call sites were
  * retired next, see below.
  */
-const [TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2] = resolveTurn6AtkFellLines();
-
+ 
 /**
  * ISSUES #39 rank-4 slice 3 (`docs/rank4-prep-scout.md` slice 3): turn 7's
  * own repeat FEATHER_DANCE kickoff/ATK-fell text (2nd use, real ATK stage
@@ -2352,8 +2323,6 @@ const [TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2] = resolveTurn6A
  * magnitude), but now sourced from turn 7's OWN facts, not turn 6's borrowed
  * literal (the "safe but not real" gap `docs/rank4-prep-scout.md` §1 named).
  */
-const [TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn7FeatherDanceKickoffLines();
-const [TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2] = resolveTurn7AtkFellLines();
 
 /**
  * ISSUES #39 rank-4 slice 3: turn 8's own repeat FEATHER_DANCE kickoff/
@@ -2362,8 +2331,6 @@ const [TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2] = resolveTurn7A
  * §4), now re-derived from `turn78FeatherDancePresentationStaging.ts`'s own
  * staged real event stream, same reasoning as turn 7's own pair above.
  */
-const [TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn8FeatherDanceKickoffLines();
-const [TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2] = resolveTurn8AtkFellLines();
 
 /**
  * ISSUES #39 rank-4 slice 5 (final rank-4 slice, `docs/rank4-prep-scout.md`
@@ -2382,8 +2349,7 @@ const [TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2] = resolveTurn8A
  * STATUS3_ON_AIR auto-miss window, same "no literal dies" rule already
  * established for `TURN6_ATKFELL_LINE1/2` etc.
  */
-export const [TURN8_BIND_LINE1, TURN8_BIND_LINE2] = resolveTurn8BindKickoffLines();
-export const [TURN8_MISS_LINE1, TURN8_MISS_LINE2] = resolveTurn8MissLines();
+
 
 /**
  * ISSUES #39 rank-4 slice 2 (`docs/rank4-prep-scout.md` slice 2): the
@@ -8940,7 +8906,6 @@ function drawDragonBreathTurnEndSettledMenu(
  * (`drawTurn3EndeavorText`, below) -- only THIS window's own call site is
  * superseded.
  */
-const [TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2] = resolveTurn2EndeavorAttackLines();
 
 /**
  * ISSUES #39 rank-6 slice 2: turn 2's own ENDEAVOR-half Scene-OFF re-timing
@@ -9712,8 +9677,6 @@ function turn5KickoffBounceTickFromLatest(
  * inputs are superseded, per `docs/presentation-seam-scout.md` §9.4's own
  * narrowing.
  */
-const [TURN5_ENDEAVOR_ATTACK_LINE1, TURN5_ENDEAVOR_ATTACK_LINE2] = resolveTurn5EndeavorAttackLines();
-
 /**
  * S7 slice J (docs/battle-turn-notes.md §13/§23): turn 5's own kickoff
  * message, "Foe GROVYLE used\nENDEAVOR!" a third time (Grovyle repeats its
@@ -10259,11 +10222,6 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
 const TURN5_FAINTED_CURSOR_X = LINE2_ORIGIN.x + measureText(font, charmap, TURN5_FAINTED_LINE2);
 
 /** Visible character count (0..TURN5_FAINTED_TEXT_TOTAL) at absolute trace tick `t` - same 1-tick/char mechanism as every other message in this dossier. */
-function turn5FaintedTextVisibleChars(t: number, pressTick: number): number {
-  const start = turn5FaintedTextStartTick(pressTick);
-  if (t < start) return 0;
-  return Math.min(TURN5_FAINTED_TEXT_TOTAL, t - start + 1);
-}
 
 /** Ticks from `TURN5_ROCKSLIDE_PRESS_TICK` to the fainted text's own wait-cursor first appearing - pixel-confirmed this session (dense oracle sweep: first cursor-shaped diff at trace tick 6543 = `PRESS_TICK`+714, matching `turn5FaintedTextStartTick`+`TURN5_FAINTED_TEXT_TOTAL`+1 exactly, the same "one tick after the last glyph's own text-complete tick" shape `CURSOR_START_TICK`'s own doc describes for the S6 intro). */
  // 714 -> trace tick 6543
@@ -11082,7 +11040,6 @@ function drawTurn6FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
  * defined and in use by every other turn's own ROCK_SLIDE window in this
  * file.
  */
-const [TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2] = resolveTurn6RockSlideAttackLines();
 
 /**
  * S7 slice N-4 rung (b) (docs/battle-turn-notes.md §31): turn 6's own
@@ -11312,7 +11269,6 @@ function drawTurn7FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
 }
 
 /** Turn 7's own ROCK_SLIDE attack-kickoff text, re-derived from turn 7's own staged run - same flip as `TURN6_ROCKSLIDE_ATTACK_LINE1/2` above. */
-const [TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2] = resolveTurn7RockSlideAttackLines();
 
 /**
  * S7 slice O: turn 7's own ROCK_SLIDE (Onix vs. Pidgeotto again) - every
@@ -11489,13 +11445,6 @@ function drawTurn8FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
  * follows): the fresh sweep's first tick of this transition is 9846
  * (`9846-9425=421`).
  */
-export const TURN8_BIND_TEXT_TOTAL = TURN8_BIND_LINE1.length + TURN8_BIND_LINE2.length;
-
-export function turn8BindTextVisibleChars(t: number, pressTick: number): number {
-  const start = turn8BindTextStartTick(pressTick);
-  if (t < start) return 0;
-  return Math.min(TURN8_BIND_TEXT_TOTAL, t - start + 1);
-}
 
 /**
  * `sText_AttackMissed` (`reference/pokeemerald/src/battle_message.c:68`,
@@ -11509,13 +11458,6 @@ export function turn8BindTextVisibleChars(t: number, pressTick: number): number 
  * `TURN8_BIND_TEXT_DELAY`: the fresh sweep's first tick of this transition
  * is 9896 (`9896-9425=471`).
  */
-export const TURN8_MISS_TEXT_TOTAL = TURN8_MISS_LINE1.length + TURN8_MISS_LINE2.length;
-
-export function turn8MissTextVisibleChars(t: number, pressTick: number): number {
-  const start = turn8MissTextStartTick(pressTick);
-  if (t < start) return 0;
-  return Math.min(TURN8_MISS_TEXT_TOTAL, t - start + 1);
-}
 
 /**
  * Turn-end: the held "ONIX's\nattack missed!" text goes blank at
@@ -12901,7 +12843,6 @@ function drawTurn11RockSlideWindow(fb: Uint8Array, t: number): void {
  * themselves stay defined (§14.3's own "no literal dies" note) -- this was
  * their only call site.
  */
-const [TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2] = resolveTurn11AtkFloorLines();
 
 function drawTurn11FeatherDanceWindow(fb: Uint8Array, t: number, pressTick: number): void {
   if (t >= rockSlideTextStartTick(TURN11_ROCKSLIDE_PRESS_TICK)) {
@@ -13036,11 +12977,6 @@ function drawTurn12AerialAceWindow(fb: Uint8Array, t: number, pressTick: number)
   } else {
     drawMessageTextLines(fb, TURN10_AERIALACE_LINE1, TURN10_AERIALACE_LINE2, turn10AerialAceTextVisibleChars(t, pressTick));
   }
-}
-export function turn12MissTextVisibleChars(t: number, pressTick: number): number {
-  const start = turn12MissTextStartTick(pressTick);
-  if (t < start) return 0;
-  return Math.min(TURN8_MISS_TEXT_TOTAL, t - start + 1);
 }
 
 /**
@@ -13280,14 +13216,7 @@ function drawTurn13FightSubmenuWindow(
  * drawn), so the text is fully typed one tick later (15461) and holds flat
  * through 15470 (oracle-confirmed, `turn13-sandattack.json` 185/185).
  */
-const [TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2] = resolveTurn13SandAttackKickoffLines();
-const TURN13_SANDATTACK_TEXT_TOTAL = TURN13_SANDATTACK_EVENT_LINE1.length + TURN13_SANDATTACK_EVENT_LINE2.length;
  // pressTick+13 = 15432 (first glyph) - pressTick=15419 at runtime (TICK0+sm.confirmElapsed), oracle-pixel-bisected (app was 1 tick late vs a fresh compare run before this fit)
-export function turn13SandAttackTextVisibleChars(t: number, pressTick: number): number {
-  const start = turn13SandAttackTextStartTick(pressTick);
-  if (t < start) return 0;
-  return Math.min(TURN13_SANDATTACK_TEXT_TOTAL, t - start + 1);
-}
 
 /**
  * SAND_ATTACK's own accuracy-drop banner on ONIX (the move's target) - the
@@ -13370,14 +13299,7 @@ function drawTurn13SandAttackAccBanner(fb: Uint8Array, t: number, pressTick: num
  * sha DRAGON_BREATH's own kickoff starts from - rung 3's concern, not
  * drawn here).
  */
-const [TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2] = resolveTurn13AccFellLines();
-const TURN13_ACCFELL_TEXT_TOTAL = TURN13_ACCFELL_EVENT_LINE1.length + TURN13_ACCFELL_EVENT_LINE2.length;
  // pressTick+189 = 15608 (pressTick=15419 at runtime)
-export function turn13AccFellTextVisibleChars(t: number, pressTick: number): number {
-  const start = turn13AccFellTextStartTick(pressTick);
-  if (t < start) return 0;
-  return Math.min(TURN13_ACCFELL_TEXT_TOTAL, t - start + 1);
-}
 
 /**
  * S7/S8 turn 13 Part A (docs/turn13-notes.md's own dirt-throw sub-section,
@@ -14148,8 +14070,6 @@ function drawTurn5RockSlideWindow(
  * chain merged into the same bridge, out of this step's own scope (matching
  * `docs/presentation-seam-scout.md` §8.5 step 3's own narrowing).
  */
-const [TURN1_ROCKSLIDE_KICKOFF_LINE1, TURN1_ROCKSLIDE_KICKOFF_LINE2] = resolveTurn1DoubleTeamKickoffLines();
-const [TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2] = resolveTurn1RockSlideAttackLines();
 
 /**
  * ISSUES #39 rank-6 slice 1: turn 1's own Scene-OFF re-timing. `attackanimation`

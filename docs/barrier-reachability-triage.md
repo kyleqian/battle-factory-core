@@ -94,6 +94,29 @@ why the pins still hold.
   of the table fires the barrier whenever the AI viability-scores a move.
 - **Breadth unblocked:** identical reasoning to A1 — every turn's AI scoring.
 
+> **BOTH A1 AND A2 RETIRED 2026-08-08 (supervisor-verified on the union).**
+> `AI_CheckBadMove` is **109/109** table effects ported and `AI_CheckViability` is
+> **122/122** — the complete Factory AI move-scoring stack. Neither barrier can fire
+> in ordinary play any more: every table-listed effect reaches a real handler, so
+> the AI no longer discards legal moves it could not score. Both `unsupported-branch`
+> sites remain in the code as defensive guards against a future source sync adding a
+> table effect without a port, and both are now unreachable rather than reachable —
+> treat them as (C).
+>
+> The prose above is preserved as the historical record of why this was the queue's
+> top item; its "only ROAR/SLEEP/PARALYZE/CONFUSE are ported" and "only
+> Swagger/Counter are ported" statements describe 2026-08-08 morning, not today.
+>
+> Two guards now protect the result. `unportedCheckBadMoveTableEffects()` /
+> `unportedCheckViabilityTableEffects()` derive the unported set instead of
+> hardcoding an example effect (the old pattern broke three times in two days as the
+> engine outgrew it), and the ~26 barrier-example pins were flipped to the inverted
+> property: every table effect must *score*. Separately,
+> `tests/factoryAiScoredWiringParity.test.ts` captures the objects the live adapter
+> hands each scorer and fails if a declared handler-input field is never populated —
+> added after five fields were found read-but-never-wired, and it caught a sixth
+> (`knownAbility` dropped by a conditional spread) the very next round.
+
 ### A3. `battleScriptTryKOOpcode.ts:108` — `Cmd_tryKO`'s HOLD_EFFECT_FOCUS_BAND roll
 - **Reason / citation:** `"Cmd_tryKO's HOLD_EFFECT_FOCUS_BAND roll needs gSpecialStatuses[target].focusBanded"`; `battle_script_commands.c:6841-6855`.
 - **Reachability:** Focus Band is a **Frontier held item** — the ability/item
@@ -281,6 +304,58 @@ why the pins still hold.
 - **Tier-1 test:** a battle where the opponent's last mon faints reaches a
   clean terminal decision, no unsupported-branch halt.
 - **Breadth unblocked:** every battle's end.
+
+> **REFUTED 2026-08-08 (supervisor, source-verified) — reclassified (C),
+> unreachable. Do not take the port this entry proposes.** The entry's own
+> "Honest uncertainty" line asked for exactly this check; here is the answer.
+>
+> `RunTurnActionsFunctions` (`src/battle_main.c:4937-4945`) is the **only**
+> dispatcher of the turn-action table, and it re-tests the outcome on every
+> call, *before* dispatching:
+>
+> ```c
+> static void RunTurnActionsFunctions(void)
+> {
+>     if (gBattleOutcome != 0)
+>         gCurrentActionFuncId = B_ACTION_FINISHED;
+>     ...
+>     sTurnActionsFuncsTable[gCurrentActionFuncId]();
+> ```
+>
+> `HandleAction_UseMove` (`src/battle_util.c:78`) is the only producer of a
+> fresh move script, and a move script is the only thing that begins with
+> `attackcanceler`. It runs only as `sTurnActionsFuncsTable[B_ACTION_USE_MOVE]`,
+> i.e. only through the line above. The scheduler cannot chain past that check
+> inside one frame either: `HandleAction_ActionFinished`
+> (`src/battle_util.c:658-683`) *assigns* `gCurrentActionFuncId =
+> gActionsByTurnOrder[...]` and returns — it never calls the next handler
+> itself, so the next handler is dispatched by a later
+> `RunTurnActionsFunctions` call, whose first statement overrides that
+> assignment. `BattleTurnPassed` (`src/battle_main.c:3988-3992`) does the same
+> on the end-of-turn path.
+>
+> So `Cmd_attackcanceler`'s own `if (gBattleOutcome != 0)` preflight
+> (`battle_script_commands.c:919`) is **defensive redundancy in the C source**:
+> the dispatcher one level up has already replaced the action by the time it
+> could matter. Same shape as the A4 Lightning Rod refutation — real source, but
+> it cannot fire under Level-50 singles' actual control flow.
+>
+> **This engine already models that preemption.**
+> `factoryBattleScriptFullTurnDecision.ts`'s header documents the terminal
+> second-action skip and cites `battle_main.c:4937-4943` for it. And the
+> preflight itself is already source-complete:
+> `preflightBattleScriptActionEntry` (`battleScriptActionAdmission.ts:3925-3945`)
+> returns a typed `stop` whose receipt already carries
+> `currentAction: { kind: "set", sourceConstant: "B_ACTION_FINISHED" }`, pinned
+> by `tests/battleScriptActionAdmission.test.ts:309`. Nothing is missing from
+> the receipt; the only defect is that `attackCancelerOpcodeHandler`
+> (`battleScriptAttackCancelerOpcode.ts:337-343`) discards it and raises
+> `unsupported-branch` instead.
+>
+> **Remaining work is a string, not a port:** restate the barrier as an explicit
+> (C) guard citing `battle_main.c:4939`. Its current reason string — "consumed
+> by the round controller, out of this step's scope" — is false and should not
+> survive. **Fourth barrier this run whose own reason string had decayed.**
 
 ---
 
@@ -484,7 +559,7 @@ the engine's current resolver accepts each operand:
 >
 > | Item | State |
 > | --- | --- |
-> | 1. AI `AI_CheckBadMove` if_effect handlers | **IN PROGRESS** — **44 of 66 effects ported** (batches 1-4, one commit per effect). **18 remain, blocked on MISSING STATE not transcription**: DISABLE/ENCORE need any-move-disabled + encored flags, STOCKPILE/SWALLOW/SPIT_UP a stockpile count, ATTRACT gender, PSYCH_UP Haze-style stat-stage copying. Wire the state first. **Every AI batch MUST also run `tests/factoryAiScoredDecision.test.ts`** — it hardcodes one still-unported effect as its "barrier still fires" example, so porting that effect breaks it. Absorb broke it on 2026-08-08 and only the supervisor's final full suite caught it. |
+> | 1. AI `AI_CheckBadMove` if_effect handlers | **DONE 2026-08-08 — 109/109 table effects ported.** The barrier is unreachable; see the retirement box under A1/A2. |
 > | 2. `Cmd_tryKO` Focus Band | **DONE** |
 > | 3. Lightning Rod redirection | **REFUTED — (C), unreachable in singles.** Do not take it. |
 > | 4. `VARIOUS_GET_BATTLER_FAINTED` | **DONE** |
@@ -494,9 +569,16 @@ the engine's current resolver accepts each operand:
 > | 8. `printfromtable` message tables | **DONE** — Truant Slaking's loafing turn and fire-move thaw. |
 > | 9. `sProtectSuccessRates[4]` OOB | **DONE** — measured from the ROM: the adjacent `u16` is `MOVE_METRONOME` (118), so a 5th consecutive Protect succeeds ~0.18% of the time. Evidence: `docs/protectlike-oob-adjacent-byte.md`. |
 > | 10. `DMG_RECOIL_FROM_MISS` / `DMG_DOUBLED` | **DONE** — Struggle recoil (universal) and Beat Up. |
-> | 11. battle-outcome → `B_ACTION_FINISHED` handoff | **OPEN.** Note this entry's own honest caveat: reachability was never proven. Prove it with a battle-end fixture BEFORE porting. |
+> | 11. battle-outcome → `B_ACTION_FINISHED` handoff | **REFUTED 2026-08-08 (supervisor) — reclassified (C), unreachable.** `RunTurnActionsFunctions` (`battle_main.c:4939`) forces `B_ACTION_FINISHED` before dispatching any turn action, so `HandleAction_UseMove` — the only producer of a script starting with `attackcanceler` — never runs with `gBattleOutcome != 0`. The engine already models the preemption and the preflight receipt is already source-complete. **Do not take the proposed port**; all that remains is restating the barrier's (now false) reason string. See the refutation box under A12. |
 > | 12. Enigma Berry (bucket B) | **OPEN**, lowest priority. |
-> | A2. `AI_CheckViability` if_effect table | **OPEN** — the sibling of item 1, not yet started. |
+> | A2. `AI_CheckViability` if_effect table | **DONE 2026-08-08 — 122/122 table effects ported**, in five batches across two lanes. The barrier is unreachable; see the retirement box under A1/A2. Live ROM verification of the newly ported handlers is the follow-on work, starting with `AI_CV_BrickBreak` (46 weighted). |
+>
+> **STATUS after the 2026-08-08 supervised session: bucket (A) is EMPTY.** Ten of
+> the twelve (A) items are done, and two were refuted outright (item 3 Lightning
+> Rod on 2026-08-08 morning, item 11 / A12 the same evening — see its refutation
+> box). The only work left in this document is item 12, Enigma Berry, the single
+> pure-(B) site. Every barrier this triage classified as reachable in ordinary
+> Level-50 singles play has been retired.
 >
 > **Read the refutation box under A4 before trusting any remaining (A) claim.**
 > Three of the entries checked this session had defects: Lightning Rod was

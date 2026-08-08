@@ -1,3 +1,174 @@
+
+
+## 1009 — [bounded MAIN worker, 2026-08-08] **AI_CV_DragonDance live-verified against the real ROM: the if_target_faster speed gate + per-path draw-count split confirmed correct on hardware — MATCH 4/4 across two seeds**
+
+- **State:** master `f0abf9af`, tree clean. Targeted acceptance **3 files / 745 passed** (factoryAiDragonDanceLiveReceipt **5** new, factoryAiCheckViability 598, factoryAiScoredDecision 142); `npm run test:smoke` **375 passed**; full `npm test` **782 files / 7925 passed / 1 skipped**; `npm run build` exit 0; `npm run typecheck` exit 0.
+- **Did:** live exercise of `AI_CV_DragonDance` (14 Level-50 rental carriers), reusing the reach/control twin-fixture recipe — **no staged transient state at all**; the pair differs ONLY in the player-lead's Speed (the same Gyarados AI user, `FRONTIER_MON_GYARADOS_1`, 145/99/80/120/101 @170/170, is outsped by reach target Crobat 150 or outspeeds control target Shuckle 25). Twin fixtures (`mechanic-factory-ai-cv-dragondance-{reach,control}-off.json`, `tools/probe/generate-factory-ai-dragondance-fixtures.ts`, mash extended to 96 presses so the relay + switch-in text + decision fit inside the trace): Magikarp-Lv5 Splash relay KO'd by Vital Throw (priority −1), Gyarados switches in with `[DragonDance, Splash ×3]`. Verifier (`tools/probe/verify-factory-ai-dragondance-live.ts`) ran each scenario twice (byte-identical) and matched the engine's `chooseFactoryAiScoredDecision` against the ROM's PP-selected slot + exact decision-window RNG on all four rows: **control 1/99 → 5 draws** (setup 4 + tie; full-HP `>50` exit, CV 0; slot 0 DragonDance USED at seed 1 / slot 3 at seed 99) vs **reach 1/99 → 6 draws** (setup 4 + the handler's single `<128` roll + tie; rolls %256 = 20/83, both <128 → CV +0; the 4-way tie lands Splash slot 1 both seeds). The 5-vs-6 draw-count split is the sharp receipt: it proves the `<128` roll is drawn only on the target-faster path, exactly as the port's `getWhoStrikesFirst` models `Cmd_if_target_faster`. Gyarados sat 170/170 at the decision on all rows.
+- **Next:** supervisor reviews + merge. The CV live-verification line now covers six handlers (BrickBreak, ChargeUpMove, Overheat, Facade, Curse, DragonDance) — all MATCHED 4/4; remaining unverified siblings can reuse this species-swap speed-gate recipe.
+- **Notes:** no PAPERCUTS of my own. The reach rows' +1 branch (roll ≥ 128) was not exercised live (both seeds rolled low) — named residual, hermetically unit-pinned in `factoryAiCheckViability.test.ts`. Banked receipt `tests/factoryAiDragonDanceLiveReceipt.test.ts` (5 tests) pins all four rows' slot/RNG/draw-count/draw-kind receipt plus the reach/control gate split on a shared start RNG; write-up in the **new** `docs/factory-ai-cv-live-receipts-dragondance.md` (the shared ground-truth doc untouched). No `src/engine/` edits.
+
+---
+
+## 1008 — [bounded MAIN worker, 2026-08-08] **AI_CV_Overheat live-verified against the real ROM: type-effectiveness gate confirmed correct on hardware — MATCH 4/4 across two seeds**
+
+- **State:** master `61162523`, tree clean. Targeted acceptance **3 files / 745 passed** (factoryAiOverheatLiveReceipt **5** new, factoryAiCheckViability 598, factoryAiScoredDecision 142); `npm run test:smoke` **375 passed**; full `npm test` **780 files / 7915 passed / 1 skipped**; `npm run build` exit 0; `npm run typecheck` exit 0.
+- **Did:** the step's live exercise of `AI_CV_Overheat` (23 Level-50 rental carriers, the highest-weight handler ported today without a hardware receipt), reusing the reach/control twin-fixture recipe — **no staged transient state at all**, only a different target species chosen at build time. Twin fixtures (`mechanic-factory-ai-cv-overheat-{reach,control}-off.json`, `tools/probe/generate-factory-ai-overheat-fixtures.ts`): level-5 Magikarp Splash relay KO'd by the player's Vital Throw (priority −1), then Flareon (set 636) switches in with `[Overheat, Splash ×3]`; control target Chansey (Normal, Fire x1 — both `if_type_effectiveness` gates fall through, full HP hits the zero `>60` Exit → CV 0) vs reach target Vaporeon (Water, Fire x0.5 — second check jumps to `ScoreDown1` → CV −1). Verifier (`tools/probe/verify-factory-ai-overheat-live.ts`) ran each scenario twice (byte-identical) and matched the engine's `chooseFactoryAiScoredDecision` against the ROM's PP-selected slot + exact decision-window RNG on all four rows: **control 1/99 → Overheat slot 0 (both genuine 4-way ties), reach 1/99 → Splash slot 3 (Overheat 99 < Splash 100)**. Draw counts: **reach 5** (4 setup + tie; single-ability Vaporeon → no get-ability draws) vs **control 9** (4 setup + 4 `get-ability` — Chansey's two abilities force `AI_CheckBadMove`'s per-slot soundproof ability guess, `nextGetAbilityDraw` `factoryAiCheckBadMove.ts:714-747`), both reproduced exactly. The gate draws no RNG of its own (zero `if_random_less_than` sites confirmed); the step's spec'd `if_target_faster`/HP-band exits were not exercised (both sides at full HP, Flareon always faster) — noted as the residual.
+- **Next:** supervisor reviews + merge. The CV live-verification line now covers three score-down gates (BrickBreak, ChargeUpMove, Overheat) plus the status-up gate (Facade); remaining sibling handlers (`AI_CV_Curse` being run in parallel by the side lane) can reuse this exact species-swap recipe.
+- **Notes:** one earlier cap-kill happened deriving this exact gate — this session verified the source in ~2 min, spent the budget staging/running. PAPERCUT: none of my own. Banked receipt `tests/factoryAiOverheatLiveReceipt.test.ts` (5 tests) pins all four rows' slot/RNG/score/draw-kind receipt plus the reach/control gate split; write-up in the **new** `docs/factory-ai-cv-live-receipts-overheat.md` (the shared ground-truth doc untouched — side lane appends there). No `src/engine/` edits. One fixture-authoring bug caught live (Overheat is move id **315**, not 275) before any committed claim.
+
+---
+
+## 1007 — [bounded MAIN worker, 2026-08-08] **AI_CV_Facade live-verified against the real ROM: reach/control fixture pair + verifier + Tier-1 receipt — target-side STATUS1 gate confirmed correct on hardware**
+
+- **State:** master `888b8c59`, tree clean. Targeted acceptance **3 files / 745 passed** (factoryAiFacadeLiveReceipt **5** new, factoryAiCheckViability 598, factoryAiScoredDecision 142); `npm run test:smoke` **375 passed**; full `npm test` **777 files / 7900 passed / 1 skipped**; `npm run build` exit 0; `npm run typecheck` exit 0.
+- **Did:** the step's first live exercise of the freshly-wired `isPoisoned`/`isBurned`/`isParalyzed`/`isToxicPoisoned` adapter fields. Staged the twin reach/control fixtures (`mechanic-factory-ai-cv-facade-{reach,control}-off.json`, `tools/probe/generate-factory-ai-facade-fixtures.ts`): level-5 Magikarp relay (reach: real Thunder Wave ×4; control: Splash ×4) is KO'd by the player's Vital Throw (priority −1), then real Facade carrier Metagross switches in with `[Facade, Splash ×3]`. Verify script (`tools/probe/verify-factory-ai-facade-live.ts`) ran every scenario twice (byte-identical) and matched the engine's `chooseFactoryAiScoredDecision` against the ROM's PP-selected slot + exact decision-window RNG on all four rows: **control seed 1→slot 0 / control seed 99→slot 3 (both genuine 4-way ties, `Random()%4`), reach 1/99→slot 0**, 5 draws each (setup 4 + tie 1; Facade is a pure zero-draw status gate), CV delta +1 reach / 0 control. Source (`data/battle_ai_scripts.s:2279-2287`) and port both read `AI_TARGET`; the ROM's observed behavior confirms the **non-BUGFIX target-side** attribution the port models — the freshly-wired status fields reach the handler and change the score exactly as hardware does.
+- **Next:** supervisor reviews + merge. The CV scoring stack is now table-complete (CheckBadMove 109/109 + TryToFaint + CheckViability 122/122) AND the first target-status1 handler is hardware-verified; sibling status-gated handlers (`AI_CV_Snore`, `AI_CV_Facade`'s mask siblings, etc.) can reuse this exact reach/control recipe.
+- **Notes:** no PAPERCUTS of my own. Banked receipt `tests/factoryAiFacadeLiveReceipt.test.ts` (5 tests) pins all four rows' slot/RNG/score/draw receipt plus the reach/control gate split; write-up in the **new** `docs/factory-ai-cv-live-receipts-facade.md` (the shared ground-truth doc was not touched — side lane appends there this round). No `src/engine/` edits.
+
+---
+
+## 1006 — [bounded MAIN worker, 2026-08-08] **AI_CheckViability TABLE FINISHED: all 25 remaining effects ported, 122/122 — the module's unsupported-branch barrier is now unreachable**
+
+- **State:** master `08ac4125`, tree clean. Targeted acceptance **9 files / 1185 passed** (factoryAiCheckViability **598**, factoryAiScoredDecision 140, factoryAiScoredWiringParity 4, factoryAiDecisionPolicy 16, factoryAiLiveDriver 6, factoryAiTryToFaint 10, factoryAiCheckBadMove 396, abilityItemParityCensus 7, executableFrontierRatchet 6); `npm run test:smoke` **375 passed**; `npm run build` exit 0; `npm run typecheck` exit 0. Full `npm test` NOT run (worker rule — supervisor after merge).
+- **Did:** 8 commits landing the full 25-effect tail. **DISABLE** (5) done properly per the brief's flag — the funcResult-POWER-collision model resolved: on entry funcResult is the incoming carry; target-faster exits preserve it, otherwise `get_last_used_bank_move`+`get_move_power_from_result` always write the last move's power (0-250), collision-mapped 0-3→AI_WEATHER_* else undefined; the single `<100` roll only on power==0. **PainSplit/BellyDrum/Refresh/Eruption/Flatter** (2 each): Eruption = Overheat's target-HP twin; Flatter reuses the ported Confuse body. **SmellingSalt/MudSport/WaterSport/Poison/LockOn/Bide/Imprison/Conversion** (1+0×7): Conversion's `get_turn_count` write + `Score_Minus2` `<200` roll; Imprison's isFirstTurn write. **Thief** (1) + **Haze** (1): Haze's two-gate blocks each run a `<50` roll; Thief's 7-entry hold-effect steal list + hold-effect write. **Recycle+SpitUp** (1 each) — wired **two new attacker-side fields** `usedHeldItemId` (get_used_held_item) + `stockpileCount` (get_stockpile_count), populated in the pass-3 attacker literal the same commit, each with a through-the-adapter seed-scan test; wiring-parity sample grew to keep the guard exhaustive. **MirrorMove** (0): 38-entry encouraged-move list, roll-1 (<128, +2) vs roll-2 (<80, -1). **SpAtkDown** (0, dispatch-reachable only — no Gen-3 moves carry EFFECT_SPECIAL_ATTACK_DOWN/_2; pinned via exported runCvSpAtkDown like CBM did). **Snatch** (0, last one): full 5-site roll ladder + `Cmd_if_has_move_with_effect`'s pinned AI_USER-slot positional bug, reused from Protect.
+- **Barrier retirement:** with all 122 `AI_CHECK_VIABILITY_TABLE_EFFECTS` members ported, `unportedCheckViabilityTableEffects()` reports **0**, and the `"factory-ai-check-viability"` unsupported-branch barrier is now unreachable — a defensive-only guard for a future source sync adding a new table effect. The ~26 barrier-example pins that each asserted "Snatch (or Haze before it) still halts" were **flipped to the inverted property** (the CBM 109/109 precedent): one shared `expectNoUnportedViabilityBarrier(run)` helper iterates the whole table and asserts every member scores.
+- **Next:** supervisor reviews + full `npm test` after merge. The CV scoring stack is now complete (CheckBadMove 109/109 + TryToFaint + CheckViability 122/122) — no legal Factory move is discarded for an unscored effect.
+- **Notes:** census re-pinned after every port (9 re-pins), doc byte-stable throughout. One typecheck fix (MoveRow has no name field — MirrorMove's encouraged list built as numeric ids). No PAPERCUTS of my own.
+
+---
+
+
+
+## 1005 — [bounded MAIN worker, 2026-08-08] **AI_CheckViability batch 5 LANDED: 12 effects (weight 48), incl. the flagged 10-weight SUBSTITUTE done properly; 21 of the brief's 37 remain**
+
+- **State:** master `4066cd4e`, tree clean. Targeted acceptance **9 files / 1105 passed** (factoryAiCheckViability **520**, factoryAiScoredDecision **140**, factoryAiScoredWiringParity 4, factoryAiDecisionPolicy 16, factoryAiLiveDriver 6, factoryAiTryToFaint 10, factoryAiCheckBadMove 396, abilityItemParityCensus 7, executableFrontierRatchet 6); `npm run test:smoke` **375 passed**; `npm run build` exit 0; `npm run typecheck` exit 0. Full `npm test` NOT run (worker rule — supervisor after merge).
+- **Did:** five commits, one batch each. **TICKLE** (3) was the cheapest win the brief predicted — `AI_CV_DefenseDown`'s body was already ported, only the `:769` dispatch entry was missing. **Revenge/Superpower/MagicCoat/Foresight/Endeavor** (3+3+3+3+4) — zero-new-field batch: Revenge's single <180 roll, Superpower/Endeavor's deterministic HP/type ladders (0 rolls), MagicCoat's two reachable rolls + `is_first_turn_for AI_USER` funcResult write, Foresight's non-BUGFIX user-side Ghost/evasion gates. **Encore+HealBell** (4+4) — wired `anyMoveDisabled`/`hasAnyStatus`/`targetPartyStatusEqualsAny` (target-side reads; the party field models `Cmd_if_status_in_party`'s exact-`==` scan); Encore's 62-entry encouraged last-move table gates its single <30 roll. **Substitute** (10, done properly per the brief's flag) — the three-HP-band <100 descent (roll count per band: >90 none / 70-90 roll3 / 50-70 roll2+3 / <=50 all three, each FALL-THROUGH -1) then target-faster gate then the last-move-effect dispatch to Substitute5/6/7/8's +1 roll; reused `hasAnyStatus` + existing `lastUsedMoveId`/`isConfused`/`isLeechSeeded`. **Trick+ChangeSelfAbility** (5+5+1) — Trick's Choice-Band subset vs 7-entry broad list, both `get_hold_effect` reads RNG-free; ChangeSelfAbility's `get_ability AI_TARGET` two-ability `Random()&1` guess consumes one `get-ability` draw; wired `holdEffect` (both sides) + `knownAbility`/`speciesAbilities` (target side).
+- **Wiring:** every new field populated in pass-3 CheckViability literals the same commit, via the conditional-spread shape + new scored-view fields; per-field through-the-adapter tests (seed-scan pattern for the adapter's RNG-burning passes) prove each reaches its handler and changes the score. Census re-pinned once (RainDance sites + two new ABILITY_NONE recovery sites + four new infra spellings), doc byte-stable.
+- **Next:** supervisor reviews + full `npm test` after merge. Remaining CV weight: DISABLE (5, deliberately left for its own funcResult-collision brief), BELLY_DRUM, MIRROR_MOVE, PAIN_SPLIT, POISON, THIEF, HAZE, BIDE, CONVERSION, etc. — the probe lists 21. The side-lane CV batch-2 and this batch-5 are converging; supervisor should coordinate the tail so they don't double-port.
+- **Notes:** no PAPERCUTS of my own. Every `if_random_less_than` site per handler is receipt-pinned with the exact draw kind/ordinal in the handler tests; `funcResult` writes (MagicCoat's isFirstTurn, Foresight's type reads, Encore's last-move effect, Substitute's last-move effect, Trick's hold effects, ChangeSelfAbility's ability) are each asserted through the collision map.
+
+## 1004 — [bounded MAIN worker, 2026-08-08] **The five unwired AI_CheckViability handler-input fields wired end-to-end + a structural guard that makes the defect class impossible** + 3 Part-C CV handlers
+
+- **State:** master `4aaf3fe8`, tree clean. Targeted acceptance **9 files / 1059 passed** (factoryAiCheckViability **479**, factoryAiScoredDecision **140**, factoryAiCheckBadMove 396, factoryAiDecisionPolicy 16, factoryAiLiveDriver 6, factoryAiTryToFaint 6, abilityItemParityCensus 7, executableFrontierRatchet 6, **factoryAiScoredWiringParity 4**); `npm run test:smoke` **375 passed**; `npm run build` exit 0; `npm run typecheck` exit 0. Full `npm test` NOT run (worker rule — supervisor after merge).
+- **Did (A):** confirmed the supervisor's audit exactly — all five (`hasSideReflect`, `isPoisoned`, `isBurned`, `isParalyzed`, `hasSubstitute`) had **zero** occurrences in the pass-3 CheckViability call; the fix was wiring-only, handlers were source-correct. Wired via conditional spreads (the `targetForCbm`/`attackerForCbm` shape): `hasSideReflect` ← new view field `targetSideReflectUp` (**target-side**; the existing `reflectUp` is AI_USER's own side only), `isPoisoned`/`isBurned`/`isParalyzed` ← three new view fields (target status1, `AI_CV_Facade`'s shipped non-BUGFIX AI_TARGET gate), `hasSubstitute` ← existing `view.attacker.hasSubstitute` (AI_USER's own, `AI_CV_FocusPunch3`). Five through-the-adapter tests prove each reaches the handler and changes the score; verified the BrickBreak one fails when the wiring is reverted. Commits `f63e4abe`.
+- **Did (B):** `tests/factoryAiScoredWiringParity.test.ts` makes the class impossible: `vi.mock` wraps `runCheckViability`/`runCheckBadMovePreamble`/`runTryToFaint` to capture the exact objects the adapter hands each scorer (probe view sets every optional scored-view field to its firing value so every conditional spread fires); the declared handler-input field sets are derived from compile-time-exhaustive `Required<T>` samples (typecheck enforces the samples can't rot); asserts every declared field is present on the captured input (+ no extras for CV/CBM, one-directional for TTF's view passthrough). **Catches:** a handler-input field never populated on either side — verified it names `hasSideReflect` exactly when the wiring is reverted. **Misses:** a field wired to the WRONG side when the name exists on both sides' types (needs handler-source side analysis, not mechanically derived; Part A's per-field through-the-adapter tests are the side-specific guard for today's five). Commit `f1cb14d3`.
+- **Did (C):** three more `AI_CheckViability` ports, one commit each + census re-pin commit each: **AI_CV_DreamEater** (EFFECT_DREAM_EATER, 6 weighted, deterministic weak-effectiveness gate reusing `classifyHighCritEffectiveness`, no new fields), **AI_CV_SleepTalk** (EFFECT_SLEEP_TALK, 8 weighted, AI_USER's-own STATUS1_SLEEP gate → **wired attacker-side `isAsleep`**, which the pass-3 adapter had only ever populated on the target literal), **AI_CV_KnockOff** (EFFECT_KNOCK_OFF, 7 weighted, target-HP gate → `is_first_turn_for AI_USER` funcResult write → single <180 roll; no new fields). Remaining top-weight: SUBSTITUTE (10, needs hasAnyStatus + target last-move effect + target-faster), DISABLE (5, has a funcResult-power-collision modeling question), TRICK/SKILL_SWAP (5 each).
+- **Next:** supervisor reviews + full `npm test` after merge. SUBSTITUTE (10) is the next CV port; brief it with the hasAnyStatus view field + target-last-move-effect wiring. The side-lane CV batch-2 is in parallel.
+- **Notes:** three census re-pins (4093/4150/4175 → 4130/4187/4212 → 4154/4211/4236 → 4217/4274/4299), each in its own commit per the brief; `docs/ability-item-parity-census.md` byte-stable through all three. No PAPERCUTS of my own.
+
+---
+
+## 1003 — [bounded MAIN worker, 2026-08-08] **AI_CheckBadMove 109/109 table effects ported** + the hardcoded barrier-pin trap retired permanently
+
+- **State:** master `6b1cb0ad`, tree clean. Targeted acceptance **7 files / 575 passed** (factoryAiCheckBadMove **396**, factoryAiScoredDecision 129, factoryAiDecisionPolicy 16, factoryAiLiveDriver 6, battleScriptStockpileOpcode 15, abilityItemParityCensus 7, executableFrontierRatchet 6); `npm run test:smoke` **375 passed**; `npm run build` exit 0; `npm run typecheck` exit 0. Full `npm test` NOT run (worker rule — supervisor after merge).
+- **Did:** ported the last 8 CBM effects — **Memento** (:482-484, falls THROUGH into BatonPass's count gate :485-488, reproduced via `runCbmBatonPass`), **Stockpile** (count vs 3), **SpitUpAndSwallow** (shared handler, x0 type gate then count vs 0 — the opposite comparison end of Stockpile's, same field), **Recycle** (usedHeldItemId vs ITEM_NONE), **Imprison/MudSport/WaterSport** (three identical single-`if_status3 AI_USER` gates). 8 → **0 remain (109/109)**. Added optional view fields, all defaulting to battle-start: `imprisonedOthers?`/`mudSportUp?`/`waterSportUp?` (false), `usedHeldItemId?` (0=ITEM_NONE), `stockpileCount?` (0, same 0..3 encoding as `battleScriptStockpileOpcode.test.ts`); wired additively through `attackerForCbm`.
+- **Part B (the test trap):** exported `CHECK_BAD_MOVE_HANDLED_TABLE_EFFECTS` + `unportedCheckBadMoveTableEffects()` + `firstMoveIdWithEffect()` from the engine, plus a probe-based `unportedCheckViabilityTableEffects()` (probes `runCheckViability` itself, so a side-lane CV port can't break it). All ~13 barrier pins in `factoryAiCheckBadMove.test.ts` + the two scored-decision barrier tests now derive their example dynamically; **at 109/109 the pins assert the inverted property: no CheckBadMove table effect halts the machine any more** (each iterates `AI_CHECK_BAD_MOVE_TABLE_EFFECTS`, asserts `kind: "scored"`). The `MOVE_STOCKPILE` hardcoded example is gone.
+- **Next:** supervisor reviews + full `npm test` after merge. CheckViability still has ~69 unported effects (side lane's batch-2 is in parallel); the barrier that this module's `unsupported-branch` guard still guards is now purely defensive — `AI_CHECK_BAD_MOVE_TABLE_EFFECTS` has no unported member, so the final table check is unreachable until a future source sync adds a new table effect without a port.
+- **Notes:** the three sport/imprison gates shipped as one commit (byte-identical bodies, brief's per-effect recipe bent for the trio; everything else one commit per effect). Census re-pin (729/781/1330/2701) landed in its own commit. No PAPERCUTS of my own.
+
+---
+
+## 1002 — [bounded MAIN worker, 2026-08-08] AI_CheckBadMove batch 5 LANDED: all 10 effects, 101/109 table effects ported, 8 remain
+
+- **State:** master at `4c991a7c`, tree clean. Targeted acceptance green: **6 files / 538 passed** (factoryAiCheckBadMove 374, factoryAiScoredDecision 129, factoryAiDecisionPolicy 16, factoryAiLiveDriver 6, abilityItemParityCensus 7, executableFrontierRatchet 6); `npm run test:smoke` **375 passed**; `npm run build` exit 0; `npm run typecheck` exit 0. Full `npm test` NOT run (worker rule — supervisor after merge; a run attempt exceeded the tool cap).
+- **Did:** ported the ten remaining CheckBadMove effects, one commit each (`5a10a75b` view-state first): **AccUp** (EFFECT_ACCURACY_UP/_2), **SpAtkDown** (EFFECT_SPECIAL_ATTACK_DOWN/_2, shared `runCbmStatDownViaSharedTail` tail), **Haze** (EFFECT_HAZE + EFFECT_PSYCH_UP share `runCbmHaze`, :314-332), **Mist**, **Disable**, **Encore**, **Attract** (:456-476). 18 → **8 remain** (IMPRISON, MEMENTO, MUD_SPORT, RECYCLE, SPIT_UP, STOCKPILE, SWALLOW, WATER_SPORT). Added optional view fields: `gender` (`FactoryAiMonGender`, MON_MALE/FEMALE/GENDERLESS, undefined-is-genderless), `spAtkStage?` (target), `accStage?` (attacker), `anyMoveDisabled?`/`anyMoveEncored?` (target), `mistUp?` (attacker), `isInfatuated?` (target, CBM-side only). Wired through `targetForCbm`/`attackerForCbm`; all additive.
+- **Correction to the ledger, confirmed against source:** PROGRESS.md's claim that the remaining 18 are "blocked on MISSING STATE, not transcription" and that PSYCH_UP needs "Haze-style stat-stage copying" is wrong in detail — 6 of the 10 needed no new state, and EFFECT_PSYCH_UP dispatches to AI_CBM_Haze itself (`battle_ai_scripts.s:181`), no separate handler. **Vestigial finding:** EFFECT_ACCURACY_UP/_2 and EFFECT_SPECIAL_ATTACK_DOWN/_2 have **zero Gen-3 moves** (battle_moves.h uses effects 15/55/21/61 for nothing; the header itself marks 21 `// unused`), so those handlers are dispatch-reachable only and are receipt-pinned via exported entry points.
+- **Trap handling:** porting EFFECT_HAZE broke 13 generic-barrier pins in `tests/factoryAiCheckBadMove.test.ts` + the scored-decision CheckBadMove example — all re-pointed to MOVE_STOCKPILE (254, still-unported EFFECT_STOCKPILE), maintenance comments intact. Census re-pinned in its own commit (`4c991a7c`): recovered sites 539/591/1140/2293 → 615/667/1216/2493, ABILITY_OBLIVIOUS refs 6→8.
+- **Next:** the 8 remaining effects are the real state-laden ones (STOCKPILE/SWALLOW/SPIT_UP count, MEMENTO/RECYCLE item, IMPRISON/MUD_SPORT/WATER_SPORT) — brief with those fields, not another transcription batch. The side-lane CheckViability batch-2 is in parallel.
+- **Notes:** no PAPERCUTS of my own. Full `npm test` attempt exceeded the 10-min tool cap mid-run; all affected-area suites, smoke, build, and typecheck were verified green independently.
+
+---
+
+## 1001 — [supervisor WIND-DOWN, 2026-08-08] Session summary: 20 workers / 8 rounds — ISSUES #80 CLOSED, **8 reachable engine barriers retired**, 44/66 CheckBadMove + first CheckViability batch, battleScene canonical split begun, 2 animation folds
+
+- **State:** master at this entry's commit, clean. **Final independent union
+  verification: full `npm test` 772 files / 7545 passed / 1 skipped, exit 0;
+  `npm run build` exit 0** (session start was 768 / 7288). DEFERRED.md: no open
+  entries — the next `run-supervisor.sh` is unblocked.
+- **Folds:** `animation-main` folded **twice** (6 commits: MOVE_DETECT exact +
+  IRON_TAIL staged; then 20 commits: MOVE_CRUSH_CLAW exact 124→125 + probe
+  offset fixes). The second fold's conflict surface was real — the animation
+  lane edited `battleScene.ts` while the main lane moved ~1,750 lines out of it
+  — and auto-merged cleanly. **6 further animation commits (TAKE_DOWN staging)
+  are left UNFOLDED**: that lane is still actively committing, and those
+  commits touch only `src/animation/`+`tests/animation/`+`tools/`, so there is
+  no conflict surface with the split. Next orient takes them.
+- **ISSUES #80 CLOSED and deleted.** The submenu opened 3 frames early;
+  `mid-battle-switch-dense-a-off` **392 → 395/395** byte-exact (supervisor
+  reran the compare independently). The whole in-battle party-menu program is
+  now discharged.
+- **Eight reachable engine barriers retired** — all found by the new
+  `docs/barrier-reachability-triage.md` (50 sites classified: 12 (A) reachable,
+  1 (B), 15 (C) source-cited unreachable, 22 (D) input guards). Each halted the
+  battle-script machine in ordinary play: **Castform** Forecast form/type
+  change; **Substitute** fade (plus a latent exact-lethal-damage bug — source
+  re-checks `substituteHP == 0` after BOTH branches); **Focus Band** vs OHKO
+  moves (78 L50 carriers); **Truant Slaking**'s loafing turn + fire-move thaw
+  message tables; **Struggle recoil** (universal) + Beat Up; **Pursuit** both
+  halves, now end-to-end; **Spikes** faint EXP; **Focus Punch** charge-up —
+  which required porting `Cmd_playanimation`'s full five-way dispatch, because
+  Scene-OFF sets `HITMARKER_NO_ANIMATIONS` for the whole battle, making its
+  gates the normal path. **Ratchet pins moved 51 → 46.**
+- **Opponent AI: 44 of 66 `AI_CheckBadMove` effects ported** (4 batches, one
+  commit per effect; it was 4 at session start). Unported effects were scored `unsupported-branch` and
+  discarded as failed candidates, so the AI ran with most of its reasoning off.
+  **18 remain, and they have changed character**: the remainder is blocked on
+  MISSING STATE, not transcription — DISABLE/ENCORE need any-move-disabled and
+  encored flags, STOCKPILE/SWALLOW/SPIT_UP a stockpile count, ATTRACT gender,
+  PSYCH_UP Haze-style stat-stage copying. The next brief's real subject is that
+  state wiring, not another transcription batch.
+- **`battleScene.ts` canonical split begun** (user-approved): mechanical
+  partition script + design doc, then 4 slices moving **293 symbols**;
+  `battleScene.ts` **36,897 → 35,417** (net; the animation fold added CRUSH_CLAW
+  back), `battleSceneCanonical.ts` 2,418. **Every slice differential
+  1369/1369 byte-identical**, supervisor-reran once independently. Honest
+  scope: this is a move within one module graph — the canonical code STILL
+  SHIPS; and the canonical bucket is only ~5.3k lines, so this is a ~14%
+  reduction, not the 90% the export count suggested.
+- **Supervisor corrections (mine):** (1) I merged the Castform work leaving
+  master RED — `battleScriptRulesContext.test.ts` pins exact field/handler
+  lists and the step never touched it. A worker's own full suite caught it, not
+  my merge check. Fixed, and that pin is now in `test:smoke` (~2 s) so it can
+  never repeat. (2) I ran `git add -A` mid-worker and swept its in-progress
+  563-line script into my commit (PAPERCUTS, hits 1→2, both directions now
+  observed). (3) I briefed two already-landed steps from stale docs; both
+  workers correctly reported the no-op, and #39's six-day-stale remainder text
+  is corrected. (4) I **refuted my own audit's Lightning Rod (A) claim** —
+  unreachable in singles (the redirect needs a holder on the opposite side that
+  is not the target, and flips to `BIT_FLANK`, which does not exist at
+  `gBattlersCount == 2`). (5) I omitted the no-full-suite clause from one main
+  brief and it cost that worker its turn to a cap-kill (work salvaged).
+- **`AI_CheckViability` (the sibling scorer) opened too:** Rest 49, Absorb 43,
+  OHKO 28, Endure 24 ported; **69 table-listed effects remain**, next
+  BRICK_BREAK 46 (needs target-side Reflect) and SEMI_INVULNERABLE 32 (inputs
+  already modeled). AI_CV_Endure's non-obvious fall-through is worth knowing:
+  hp% >= 35 falls INTO the -1 branch rather than skipping it.
+- **The last full suite caught a real red that targeted runs missed.**
+  `tests/factoryAiScoredDecision.test.ts` hardcodes one still-unported effect
+  as its "barrier still fires loudly" example; porting EFFECT_ABSORB silenced
+  it. Re-pointed at MOVE_EXPLOSION with a maintenance comment, and the triage
+  queue now says every AI batch must run that file. **Third instance today of
+  the same class** — an assertion about the engine that the engine quietly
+  grew past.
+- **Next (ordered):** (1) more `AI_CheckViability` batches (69 left, proven
+  recipe). (2) The 18 remaining `AI_CheckBadMove` effects — these need the
+  state wiring named above FIRST, so brief that wiring, not another
+  transcription batch. (3) split slice 4 continuation — blocked on two cross-program
+  decisions the worker correctly refused to make alone: a type-only export
+  widening, and `drawTurn16PostSwitchField`, which would force
+  `battleSceneCanonical.ts` to import `src/animation/` and trip the boundary
+  ratchet. (4) triage items 11 (prove reachability FIRST — its own entry admits
+  it was never proven) and 12.
+- **Notes:** 20 workers, 1 cap-kill (salvaged: it committed per batch, so
+  nothing was lost), 0 lost work. At orient the host carried **three orphaned
+  `probeEvolutionBasic.ts` processes, PPID 1, 3 days old**, burning ~200% CPU;
+  killed, with a detection command in PAPERCUTS — worth repeating every orient.
+  **Standing lesson from three separate finds: a barrier's own reason string
+  decays.** Focus Band, `getexp` BS_FAINTED and `Cmd_manipulatedamage` each
+  carried a comment asserting the case could not happen; all three were false
+  by the time they were read. Verify a barrier's premise against source before
+  briefing it, and update the string as part of the fix.
+
 # Progress archive
 
 ## 998 — [bounded MAIN worker, 2026-08-08] battleScene.ts canonical-split PARTITION + DESIGN (no code moved): script + doc landed — LIVE 248 / CANONICAL 572 / SHARED 405, cut verified CLEAN
@@ -38296,3 +38467,26 @@ both verify scripts/census independently re-verified before this entry.)*
 - **Notes:** no PAPERCUTS. The pre-open frames 923-925 remain red (the app
   opens the submenu 3 frames before the oracle pops it at 926) but are not in
   the spec — out of scope for this step and unchanged by it.
+
+---
+
+## 1000 — [bounded MAIN worker, 2026-08-08] slice 4 batch 2 LANDED: 7 canonical symbols moved — differential 1369/1369 byte-identical, exit 0
+
+- **State:** master `e5ba6cbf`, tree clean. `npm run typecheck` exit 0, `npm run build` exit 0, `npm run test:smoke` **366/366**, both ratchets green (animationBoundary 3/3 + executableFrontier 6/6). Full `npm test` NOT run (worker rule — supervisor after merge).
+- **Differential (exact command per design §5, `--base 4fdd6a00` = batch-2 clean parent):** **PASS — 1369/1369 byte-identical, exit 0**: turn1-rockslide-off 256, turn2-dragonbreath-off 237, turn5-faint 110, turn5-switchin 241, turn13-dragonbreath-faint 141, turn15-fly-strike 256, battle-command-generated-off 128.
+- **Did:** slice 4 batch 2 — moved **7 canonical-only symbols** verbatim into `battleSceneCanonical.ts` (commit `e6fa4772`): the turn-5 fainted-text cluster (`TURN5_FAINTED_LINE1/2` destructured pair, `TURN5_FAINTED_TEXT_TOTAL`, `TURN5_FAINTED_CURSOR_START_DELAY`, `turn5RockSlideKoDismissEligible`) + `grovyleFaintSinkRowsAndY2` + `playerSummaryEvaOffset`. Selected by a new precise reference scan (`tools/report/battlescene-split-precise.ts`, comment/string-stripped; the batch-1-style identifier scan is too noisy) — all 7 have only already-moved canonical deps or values importable from source modules (`resolveTurn5FaintWindowLines`, `BRENDAN_THROW_START_TICK`); **no battleScene.ts runtime value imports → no module-eval TDZ risk**. Canonical gains those two value imports; battleScene.ts drops the now-unused `resolveTurn5FaintWindowLines` specifier and re-exports all 7. Bodies byte-verified identical (modulo forced `export ` on private symbols).
+- **Blockers/hazards verified, not worked around:** (a) `menuIdleBlank`/`menuHealthboxPlayer` were NOT moved — their `as MenuIdleFrameAsset`/`as SendOutHealthboxContentAsset` casts reference **battleScene-local unexported types**, so canonical would need a type-only export widening; deferred, not a drive-by. (b) `ONIX_SITRUS_ROTATE_RENDER_LAG` + guard + consumers untouched (known obstacle 1); the two `let` caches (`turn10OnixDarkPaletteCache`, `menuHealthboxPlayerContentMask`) untouched (obstacle 2). (c) No `src/animation` imports introduced → animationBoundary ratchet holds; `drawTurn16PostSwitchField` flagged ANIMATION-IMPORT and left (boundary ratchet, cross-program decision). (d) `turn5RockSlideKoDismissEligible`'s trailing `// 714 -> trace tick 6543` and `grovyleFaintSinkRowsAndY2`'s `// 6521` comments stay orphaned in battleScene.ts (harmless; bodies byte-identical).
+- **Partition after batch 2 (re-run `battlescene-split-partition.ts`):** battleScene.ts **35,134** lines, canonical **2,418** lines. **LIVE 248 / CANONICAL 259 / SHARED 405 + residual 0 = 912 == 912 RECONCILED**, acyclicity still CLEAN. 919 − 7 = 912 ✓ (7 = batch-2 moves). 1,031 canonical at batch-1 → 259 remaining in battleScene.ts.
+- **Next:** supervisor review + full `npm test`. Slice 4 batch 3 candidate surface: the self-contained LINE-pair clusters (e.g. `TURN8_BIND_LINE1/2`+`TURN8_BIND_TEXT_TOTAL`, `TURN13_ACCFELL_EVENT_LINE1/2`+`TURN13_ACCFELL_TEXT_TOTAL`, the TURN1/2/4/5 attack/kickoff pairs) whose resolvers are importable from source modules — the precise script's `SELF-CONTAINED CLUSTERS` output lists them (~38 cluster symbols + 4 CLEAN).
+- **Notes:** no PAPERCUTS of my own.
+
+## 999 — [bounded MAIN worker, 2026-08-08] battleScene canonical-split slices 1+2 LANDED: 194 symbols moved to battleSceneCanonical.ts — differential 1369/1369 byte-identical (both slices)
+
+- **State:** master `c40a98a4`, tree clean. Slice 1 `4736842a` + slice 2 `c40a98a4` (a concurrent docs commit `aa8304c3` landed between them; it touched nothing under src/). `npm test` **768 files / 7298 passed / 1 skipped** exit 0, `npm run build` exit 0, `npm run typecheck` exit 0, `npm run test:smoke` **366/366**, both ratchets green (animationBoundary 3/3 + executableFrontier 6/6).
+- **Differential (app-vs-app, per slice, exact command per design §5):** slice 1 vs `4736842a^`(`95e6d156`) and slice 2 vs `c40a98a4^`(`aa8304c3`) — **BOTH 1369/1369 byte-identical, exit 0**: turn1-rockslide-off 256, turn2-dragonbreath-off 237, turn5-faint 110, turn5-switchin 241, turn13-dragonbreath-faint 141, turn15-fly-strike 256, battle-command-generated-off 128.
+- **Slice 1 (unreachable pair):** `BALL_WIDGETS_SETTLED_TICK` + `TURN5_SITRUS_RING_RENDER_LAG` moved verbatim into the new `src/engine/battleSceneCanonical.ts`, re-exported from `battleScene.ts` (zero callers; TURN5 gained `export` — the only edit, forced by the re-export). **The module-eval invariant guard did NOT move** (see blocker below).
+- **Slice 2 (self-contained literal constants):** **192 const declarations** (canonical-only, AST-pure-literal initializers — zero free value identifiers of any kind) moved verbatim + re-exported; bodies byte-identical (191/192 auto-verified; the 1 flagged block differs only by the forced `export ` insert). Canonical gains one type-only import (`RgbColor` from `./bg.ts`); **no animation imports → boundary ratchet holds.**
+- **Partition after the two slices:** battleScene.ts 36,897 → **36,658 lines** (wc); canonical 634 lines. Script reconciles at the NEW total: **LIVE 248 / CANONICAL 378 / SHARED 405 + residual 0 = 1031 == 1031 RECONCILED**, acyclicity still CLEAN. 1,225 − 194 = 1,031 ✓ (194 = 2 slice-1 + 192 slice-2).
+- **Blockers/deviations (reported per brief, not silently worked around):** (a) **The guard at old:10318 cannot move in slice 1** — it reads `ONIX_SITRUS_ROTATE_RENDER_LAG` (canonical-only, stays in battleScene.ts); moving it forces a canonical→battleScene import that, combined with battleScene's mandatory re-exports, forms an ESM cycle whose module-eval read hits **TDZ (`ReferenceError: Cannot access before initialization`)**, verified empirically in both CJS and native ESM. The guard stays ACTIVE in battleScene.ts (reads TURN5 via the new import) and can move in slice 4 when ONIX + its consumers move together. (b) **The doc's "281 zero-ref leaves" is not reproducible** — the committed partition script emits no such list, and the doc's representative `INITIAL_BATTLE_SCENE_STATE` is not zero-ref (it references imported `CLOSED_FIGHT_SUBMENU_STATE` + internal `BattleSceneState`). Under the doc's stated definition (AST, property/type-aware) the true counts are 244 zero-ref symbols / 226 const-let, of which **192 are pure-literal consts** (moved). 34 zero-ref consts reference imported values (incl. `BATTLE2_TURN1_KERNEL`→`stageBattle2Turn1Kernel`) — deferred to slice 3. (c) Deferred: `INITIAL_BATTLE_SCENE_STATE` (internal type annotation), `ONIX_SITRUS_ROTATE_RENDER_LAG` (guard dep), and the two `let` caches `turn10OnixDarkPaletteCache`/`menuHealthboxPlayerContentMask` (TS forbids reassigning an import; not literal constants).
+- **Next:** supervisor reviews; slice 3 moves the 34 import-referencing zero-ref consts + 38 AST dependency leaves (canonical imports shared/live from battleScene.ts). Watch the TDZ guard: once slice 4 moves `ONIX_SITRUS_ROTATE_RENDER_LAG` + `ONIX_SITRUS_IDENTITY_RENDER_TICK` + `onixSitrusRotateMatrix` + `turn5SitrusRingMatrix`, the guard can move too.
+- **Notes:** no PAPERCUTS of my own. One more concurrent-harness artifact: `aa8304c3` committed between my slices (docs-only, no src change, slice-2 base verified unaffected).

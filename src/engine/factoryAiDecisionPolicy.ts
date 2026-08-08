@@ -22,6 +22,7 @@ import {
 import { advanceRngValue } from "./rng.ts";
 import {
   runCheckBadMovePreamble,
+  firstMoveIdWithEffect,
   AI_WEATHER_RAIN,
   AI_WEATHER_SANDSTORM,
   AI_WEATHER_SUN,
@@ -29,6 +30,7 @@ import {
   type FactoryAiCheckBadMoveAttacker,
   type FactoryAiCheckBadMoveDraw,
   type FactoryAiCheckBadMoveRoarTarget,
+  type FactoryAiMonGender,
 } from "./factoryAiCheckBadMove.ts";
 import {
   runTryToFaint,
@@ -37,7 +39,12 @@ import {
   type FactoryAiTryToFaintDraw,
   type FactoryAiTryToFaintTarget,
 } from "./factoryAiTryToFaint.ts";
-import { runCheckViability, type FactoryAiCheckViabilityDraw } from "./factoryAiCheckViability.ts";
+import {
+  AI_CHECK_VIABILITY_TABLE_EFFECTS,
+  runCheckViability,
+  type FactoryAiCheckViabilityBattler,
+  type FactoryAiCheckViabilityDraw,
+} from "./factoryAiCheckViability.ts";
 
 const U16_MAX = 0xffff;
 const U32_MAX = 0xffff_ffff;
@@ -540,6 +547,12 @@ export type FactoryAiScoredBattlerView = Readonly<{
   hasFocusEnergy?: boolean;
   /** Status1 Refresh-curable bits (POISON/BURN/PARALYSIS/TOXIC_POISON) on the AI's own battler, read by AI_CBM_Refresh. */
   hasCurableStatus?: boolean;
+  /** `gBattleMons[].status1 & STATUS1_POISON` (non-toxic) -- source-required for `AI_CV_Facade`'s target-status1 mask (the shipped ROM's non-BUGFIX `AI_TARGET` gate, `data/battle_ai_scripts.s:2283`). Optional, defaulting to `false`. */
+  isPoisoned?: boolean;
+  /** `gBattleMons[].status1 & STATUS1_BURN` -- same `AI_CV_Facade` target-status1 mask. Optional, defaulting to `false`. */
+  isBurned?: boolean;
+  /** `gBattleMons[].status1 & STATUS1_PARALYSIS` -- same `AI_CV_Facade` target-status1 mask. Optional, defaulting to `false`. */
+  isParalyzed?: boolean;
   /** `gBattleMons[].status2 & STATUS2_CURSED` -- source-required for `AI_CV_AccuracyDown`'s Gate G (target only, doc §19.1). Optional, defaulting to `false`. */
   isCursed?: boolean;
   /** `gBattleMons[].status2 & STATUS2_ESCAPE_PREVENTION` -- `AI_CBM_CantEscape`'s single gate (target only, EFFECT_MEAN_LOOK). Optional, defaulting to `false`. */
@@ -550,6 +563,25 @@ export type FactoryAiScoredBattlerView = Readonly<{
   lightScreenUp?: boolean;
   /** `gSideStatuses[] & SIDE_STATUS_REFLECT` -- source-required for `AI_CBM_Reflect`'s own gate (AI_USER's OWN side only, doc §23.1). Optional, defaulting to `false`. */
   reflectUp?: boolean;
+  /**
+   * `gSideStatuses[side] & SIDE_STATUS_REFLECT` on the TARGET's OWN side (the
+   * player's side, `Cmd_if_side_affecting AI_TARGET`, doc §23.1) --
+   * source-required for `AI_CV_BrickBreak`'s single gate
+   * (`data/battle_ai_scripts.s:2458`). Deliberately distinct from `reflectUp`
+   * above, which is AI_USER's OWN side only -- Brick Break breaks the
+   * target's screen, so its handler reads the other side. Optional,
+   * defaulting to `false`.
+   */
+  targetSideReflectUp?: boolean;
+  /**
+   * `Cmd_if_status_in_party`'s exact-`==` party scan on the TARGET's OWN side
+   * (`battle_ai_script_commands.c:1568-1598`) -- source-required for
+   * `AI_CV_HealBell`'s second gate (`data/battle_ai_scripts.s:1843`). True
+   * when any ALIVE, non-egg/non-none party member on the target's side has a
+   * full `MON_DATA_STATUS` word EQUAL to `STATUS1_ANY` (an exact equality,
+   * not a mask). Optional, defaulting to `false`.
+   */
+  targetPartyStatusEqualsAny?: boolean;
   /** `gSideStatuses[] & SIDE_STATUS_SAFEGUARD` -- source-required for `AI_CBM_Toxic`'s target-side gate. Optional, defaulting to `false`. */
   safeguardUp?: boolean;
   /**
@@ -559,6 +591,13 @@ export type FactoryAiScoredBattlerView = Readonly<{
    * Optional, defaulting to `"ABILITY_NONE"`.
    */
   ability?: string;
+  /**
+   * `GetItemHoldEffect(gBattleMons[battler].item)` -- the battler's held
+   * item's HOLD_EFFECT_* id, source-required for `AI_CV_Trick`'s
+   * `get_hold_effect AI_USER`/`AI_TARGET` reads. Optional, defaulting to
+   * `HOLD_EFFECT_NONE` (0).
+   */
+  holdEffect?: number;
   /**
    * Current weather, `AI_WEATHER_*`-encoded (0=Sun/1=Rain/2=Sandstorm/
    * 3=Hail) -- source-required for `AI_CBM_RainDance`/`SunnyDay`/`Hail` and
@@ -576,6 +615,24 @@ export type FactoryAiScoredBattlerView = Readonly<{
   usablePartyMons?: number;
   /** `gBattleMons[].status2 & STATUS2_SUBSTITUTE` -- `AI_CBM_Substitute`'s own first gate (attacker's own copy only). Optional, defaulting to `false`. */
   hasSubstitute?: boolean;
+  /** `gDisableStructs[].disabledMove != MOVE_NONE` (any move disabled) -- `AI_CBM_Disable`'s single gate (target only, EFFECT_DISABLE). Optional, defaulting to `false`. */
+  anyMoveDisabled?: boolean;
+  /** `gDisableStructs[].encoredMove != MOVE_NONE` (any move encored) -- `AI_CBM_Encore`'s single gate (target only, EFFECT_ENCORE). Optional, defaulting to `false`. */
+  anyMoveEncored?: boolean;
+  /** `gSideStatuses[] & SIDE_STATUS_MIST` on the AI's own side -- `AI_CBM_Mist`'s single gate (attacker's own copy only, EFFECT_MIST). Optional, defaulting to `false`. */
+  mistUp?: boolean;
+  /** `GetGenderFromSpeciesAndPersonality`'s MON_MALE/MON_FEMALE/MON_GENDERLESS -- `AI_CBM_Attract`'s own user and target gender gates (EFFECT_ATTRACT). Optional; `undefined` behaves exactly like MON_GENDERLESS (the source's Score_Minus10 fallthrough), never like a gendered value. */
+  gender?: FactoryAiMonGender;
+  /** `gStatuses3[] & STATUS3_IMPRISONED_OTHERS` on the AI's own battler -- `AI_CBM_Imprison`'s single gate (attacker's own copy only, EFFECT_IMPRISON). Optional, defaulting to `false`. */
+  imprisonedOthers?: boolean;
+  /** `gStatuses3[] & STATUS3_MUDSPORT` on the AI's own battler -- `AI_CBM_MudSport`'s single gate (attacker's own copy only, EFFECT_MUD_SPORT). Optional, defaulting to `false`. */
+  mudSportUp?: boolean;
+  /** `gStatuses3[] & STATUS3_WATERSPORT` on the AI's own battler -- `AI_CBM_WaterSport`'s single gate (attacker's own copy only, EFFECT_WATER_SPORT). Optional, defaulting to `false`. */
+  waterSportUp?: boolean;
+  /** `gBattleStruct->usedHeldItems[]` on the AI's own battler, read by `get_used_held_item` -- `AI_CBM_Recycle`'s single `if_equal ITEM_NONE` gate (attacker's own copy only, EFFECT_RECYCLE). Optional, defaulting to 0 (`ITEM_NONE`, the battle-start value). */
+  usedHeldItemId?: number;
+  /** `gDisableStructs[].stockpileCounter` (0..3) on the AI's own battler, read by `get_stockpile_count` -- `AI_CBM_Stockpile`'s `if_equal 3` and `AI_CBM_SpitUpAndSwallow`'s `if_equal 0` gates (attacker's own copy only). Optional, defaulting to 0 (battle-start count). */
+  stockpileCount?: number;
 }>;
 
 export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
@@ -584,6 +641,14 @@ export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
   ability: string;
   /** BattleHistory-style known ability for CheckBadMove's get_ability guess cache. */
   knownAbility: string | null;
+  /**
+   * The target species' two possible abilities, in slot order -- the
+   * `get_ability AI_TARGET` guessing heuristic's `Random() & 1` two-way pick
+   * (`AI_CV_ChangeSelfAbility`, `Cmd_get_ability`,
+   * `battle_ai_script_commands.c:1382-1387`). Optional; when omitted the
+   * handler's own default treats the species as ability-less.
+   */
+  speciesAbilities?: readonly [string, string];
   /** Source BattleHistory itemEffects cell (0 means no observed effect). */
   knownItemEffect?: number;
   /** BattleHistory-known move IDs, read by AI_CV_Protect's target move-effect scan. */
@@ -736,6 +801,61 @@ const MOST_POWERFUL_TO_FUNC_RESULT: Readonly<Record<FactoryAiMostPowerful, AiWea
 });
 
 /**
+ * Minimal `FactoryAiCheckViabilityBattler` for the unported-effect probe
+ * below -- `runCheckViability`'s unsupported-branch barrier is a pure
+ * dispatcher check with no type/ability preamble, so any valid battler with
+ * a table-listed, unported effect produces the barrier regardless of these
+ * neutral field values.
+ */
+const UNPORTED_CV_PROBE_BATTLER: FactoryAiCheckViabilityBattler = Object.freeze({
+  speed: 10,
+  speedStage: 6,
+  types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+  isFirstTurn: 2,
+  evasionStage: 6,
+  accStage: 6,
+  atkStage: 6,
+  defStage: 6,
+  spDefStage: 6,
+  hp: 100,
+  maxHp: 100,
+  // AI_CV_Toxic's source path requires the attacker's four live moves
+  // (`if_user_has_no_attacking_moves`, doc §14); any IDs satisfy its
+  // move-effect scans for the probe's purpose.
+  moves: [1, 1, 1, 1] as const,
+});
+
+/**
+ * The still-unported `AI_CheckViability` table effects, computed by probing
+ * `runCheckViability` itself for every entry of
+ * `AI_CHECK_VIABILITY_TABLE_EFFECTS` -- the dispatcher's own if-chains are
+ * the source of truth, so a side-lane port of a new CV effect flips this set
+ * with no hand-maintained handled-list to update (the sibling
+ * `factoryAiCheckViability.ts` is owned in parallel). Exported for the scored
+ * decision test suite, whose generic-barrier example must never hardcode a
+ * concrete CV effect. `runCheckViability` is a pure dispatcher with no
+ * preamble, so an unported table effect always returns `unsupported-branch`
+ * regardless of the probe battlers; sorted for determinism.
+ */
+export function unportedCheckViabilityTableEffects(): readonly string[] {
+  const unported: string[] = [];
+  for (const effect of AI_CHECK_VIABILITY_TABLE_EFFECTS) {
+    const moveId = firstMoveIdWithEffect(effect);
+    if (moveId === undefined) continue;
+    const result = runCheckViability({
+      rng: Object.freeze({ value: 0, calls: 0 }),
+      moveId,
+      attacker: UNPORTED_CV_PROBE_BATTLER,
+      target: UNPORTED_CV_PROBE_BATTLER,
+      drawOrdinalStart: 1,
+      reasonPrefix: "unported-cv-probe",
+    });
+    if (result.kind === "unsupported-branch") unported.push(effect);
+  }
+  return unported.sort();
+}
+
+/**
  * Mask-1/mask-7 Factory move chooser: setup (identical to mask 0) + three
  * full logic-ID-major passes over all 4 movesetIndex slots -- `AI_CheckBadMove`
  * (always), then -- mask 7 only -- `AI_TryToFaint`, then `AI_CheckViability`
@@ -829,6 +949,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     spDefStage: view.target.statStages.spDef,
     accStage: view.target.statStages.acc,
     evasionStage: view.target.statStages.evasion,
+    spAtkStage: view.target.statStages.spAtk,
     hasAnyStatus: view.target.hasAnyStatus,
     isConfused: view.target.isConfused,
     safeguardUp: view.target.safeguardUp,
@@ -842,6 +963,10 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     ...(view.target.isForesighted === true ? { isForesighted: true } : {}),
     ...(view.target.spikesUp === true ? { spikesUp: true } : {}),
     ...(view.target.targetFutureAttackUp === true ? { targetFutureAttackUp: true } : {}),
+    ...(view.target.isInfatuated === true ? { isInfatuated: true } : {}),
+    ...(view.target.anyMoveDisabled === true ? { anyMoveDisabled: true } : {}),
+    ...(view.target.anyMoveEncored === true ? { anyMoveEncored: true } : {}),
+    ...(view.target.gender === undefined ? {} : { gender: view.target.gender }),
     level: view.target.level,
   });
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({
@@ -853,6 +978,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     lightScreenUp: view.attacker.lightScreenUp,
     reflectUp: view.attacker.reflectUp,
     evasionStage: view.attacker.statStages.evasion,
+    accStage: view.attacker.statStages.acc,
     currentWeather: view.attacker.currentWeather,
     level: view.attacker.level,
     isFirstTurn: view.attacker.isFirstTurn,
@@ -868,6 +994,13 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     ...(view.attacker.attackerFutureAttackUp === true ? { attackerFutureAttackUp: true } : {}),
     ...(view.attacker.hasFocusEnergy === true ? { hasFocusEnergy: true } : {}),
     ...(view.attacker.hasCurableStatus === true ? { hasCurableStatus: true } : {}),
+    ...(view.attacker.mistUp === true ? { mistUp: true } : {}),
+    ...(view.attacker.gender === undefined ? {} : { gender: view.attacker.gender }),
+    ...(view.attacker.imprisonedOthers === true ? { imprisonedOthers: true } : {}),
+    ...(view.attacker.mudSportUp === true ? { mudSportUp: true } : {}),
+    ...(view.attacker.waterSportUp === true ? { waterSportUp: true } : {}),
+    ...(view.attacker.usedHeldItemId === undefined ? {} : { usedHeldItemId: view.attacker.usedHeldItemId }),
+    ...(view.attacker.stockpileCount === undefined ? {} : { stockpileCount: view.attacker.stockpileCount }),
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [
@@ -999,6 +1132,11 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           isLeechSeeded: view.attacker.isLeechSeeded,
           hasYawn: view.attacker.hasYawn,
           protectUses: view.attacker.protectUses,
+          ...(view.attacker.isAsleep === true ? { isAsleep: true } : {}),
+          ...(view.attacker.hasSubstitute === true ? { hasSubstitute: true } : {}),
+          ...(view.attacker.holdEffect === undefined ? {} : { holdEffect: view.attacker.holdEffect }),
+          ...(view.attacker.usedHeldItemId === undefined ? {} : { usedHeldItemId: view.attacker.usedHeldItemId }),
+          ...(view.attacker.stockpileCount === undefined ? {} : { stockpileCount: view.attacker.stockpileCount }),
         },
         target: {
           speed: view.target.speed,
@@ -1023,6 +1161,16 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           hasYawn: view.target.hasYawn,
           hasPerishSong: view.target.hasPerishSong,
           knownMoves: view.target.knownMoveIds,
+          ...(view.target.targetSideReflectUp === true ? { hasSideReflect: true } : {}),
+          ...(view.target.isPoisoned === true ? { isPoisoned: true } : {}),
+          ...(view.target.isBurned === true ? { isBurned: true } : {}),
+          ...(view.target.isParalyzed === true ? { isParalyzed: true } : {}),
+          ...(view.target.anyMoveDisabled === true ? { anyMoveDisabled: true } : {}),
+          ...(view.target.hasAnyStatus === true ? { hasAnyStatus: true } : {}),
+          ...(view.target.targetPartyStatusEqualsAny === true ? { targetPartyStatusEqualsAny: true } : {}),
+          ...(view.target.holdEffect === undefined ? {} : { holdEffect: view.target.holdEffect }),
+          ...(view.target.speciesAbilities === undefined ? {} : { speciesAbilities: view.target.speciesAbilities }),
+          knownAbility: view.target.knownAbility,
         },
         staleFuncResultFallback,
         drawOrdinalStart: draws.length + 1,

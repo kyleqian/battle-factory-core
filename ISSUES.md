@@ -17,6 +17,86 @@ backlog.
 
 # Open
 
+## #83 — Factory AI decision: an unmodeled pre-decision/per-slot `Random()` draw and a tie-slot divergence
+
+**Found 2026-08-08 by the `AI_CV_MirrorCoat` live-verification round** — the first
+ROM-vs-engine divergence the AI receipt program has produced. Six sibling handlers
+(`BrickBreak`, `Overheat`, `Facade`, `Curse`, `ChargeUpMove`, `DragonDance`) matched
+hardware 4/4; this one did not, and the residual is **not** in the handler.
+
+**Evidence** (`tools/probe/verify-factory-ai-mirrorcoat-live.ts`, both fixtures
+committed; ROM = real Battle Scene OFF run, engine = `chooseFactoryAiScoredDecision`
+on the same view):
+
+| Scenario | Seed | ROM | Engine | Verdict |
+| --- | ---: | --- | --- | --- |
+| control | 1 | 7 draws, end `3323223981`, slot 0 | 7 draws, `3323223981`, slot 0 | MATCH |
+| reach | 1 | 7 draws, end `3726110690`, slot 3 | 7 draws, `3726110690`, slot 0 | draws + endpoint match, **tie slot differs** |
+| control | 99 | 8 draws, end `1352996645`, slot 1 | 7 draws, `2270394938`, slot 3 | **+1 draw**, endpoint and slot differ |
+| reach | 99 | 7 draws, end `1329715331`, slot 0 | 7 draws, `1329715331`, slot 1 | draws + endpoint match, **tie slot differs** |
+
+**What this is not.** It is not the `MOVE_COUNTER` bug found in the same round (that
+constant was 243 — Mirror Coat's own id — instead of 68; fixed, and the pre-existing
+unit test that had *codified* the wrong id was fixed with it). Control seed 1 fully
+matches after that fix. It is also not `ShouldSwitch`, which draws zero under this
+matchup, so the extra draw is a different family.
+
+**What it looks like.** Three of four rows reproduce the ROM's **draw count and
+endpoint RNG exactly** but pick a different slot among equal scores, and one row is
+short exactly one draw. That points at the *tie-break / per-slot draw accounting* in
+`factoryAiDecisionPolicy.ts` — a pre-decision or per-slot `Random()` the scored
+policy does not model — rather than at any `AI_CV_*` handler body. Matching endpoints
+with a differing choice means the draws are being *consumed* in the right number but
+*attributed* to the wrong decision point.
+
+**Why it matters.** Tie-breaking is not a corner case: several verified rows are
+genuine 4-way ties (`Random() % 4`), so this governs which move the opponent actually
+uses whenever scores are level — which is common.
+
+**LOCATED 2026-08-08 (diagnosis step; full write-up in
+`docs/issue83-factory-ai-random-draw-diagnosis.md`, raw evidence in
+`tools/compare/evidence/issue83/`).** Per-call-site attribution + live
+`AI_THINKING_STRUCT->score[]`/script-pointer probes on seed-modified copies of the
+committed fixtures name the cause:
+
+1. **The extra draw (seed-99 control) is `gRandomTurnNumber = Random()` at
+   `src/battle_main.c:4013` in `BattleTurnPassed`** (LR `0x803bb13`), drawn once
+   per turn *before* `HandleTurnActionSelectionState` runs the AI decision. Every
+   decision window therefore opens one LCG step earlier than the standalone scored
+   policy models (the verifier seeds it pre-draw; the battle kernel already models
+   the draw at its own turn boundary). Seed-99 control = gRTTN + setup4 + roll-6 +
+   roll-7 + tie = **8**; the engine draws only setup4 + roll-6 + roll-7 + tie = 7.
+   Control seed 1 "matches" only by coincidence (its `roll-6` jumps at the ROM's
+   step-6 value, the engine's `roll-6`@5+`roll-7`@6 produce the same 100s and the
+   same tie value).
+
+2. **The reach tie-slot divergence is the same misalignment PLUS a second cause:**
+   the ROM's `AI_CV_Counter8` counter-bonus-roll **never fires**. The reach's
+   Counter slot enters `AI_CV_Counter` but `AI_CV_Counter3`'s `if_has_move
+   AI_USER, MOVE_MIRROR_COAT` falls through to the power-0 path: `Cmd_if_has_move`
+   reads its operand through `(u16 *)(gAIScriptPtr + 2)`
+   (`battle_ai_script_commands.c:1811`, non-BUGFIX), and `AI_CV_Counter3` sits at
+   **odd** address `0x082DD46D`, so the unaligned halfword load at `0x082DD46F`
+   yields `0x010000F3` (not `0x000000F3`) and the 32-bit compare never matches.
+   The engine's `userMoves.includes(MOVE_MIRROR_COAT)`
+   (`factoryAiCheckViability.ts:7519`) can't reproduce that; its extra
+   `counter-bonus-roll` is the reach draw that the ROM spends on gRTTN instead —
+   same total, same endpoint, different CV roll values → different tie slot.
+   (MirrorCoat3's sibling check works because `0x082DD996` is even.)
+
+**Fix not attempted — not unambiguous.** (a) Porting the pre-decision draw into
+the seam is a faithful named construct but re-derives the banked control-seed-1
+ordinals; (b) the unfired Counter8 is a build-layout artifact, not a portable
+source construct. A fix worker should land (a) at the seam, re-derive control
+seed 1, and decide (b) as a hard-coded evidence-backed exception or a general
+"odd script address ⇒ if_has_move operand read is garbage" model — confirming
+against the score-array evidence first.
+
+**Banked meanwhile:** `tests/factoryAiMirrorCoatLiveReceipt.test.ts` pins the
+control-seed-1 full match, the reach-seed-1 draw/endpoint receipt, and a regression
+guard that a Counter-less set must not take the Counter jump (it fails on the old 243
+constant).
+
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **Symptom:** all 62 Factory-front send-out intro families (**376/376** species
@@ -991,6 +1071,40 @@ tracks the remaining stream-model boundary, not a Gate-5 blocker.
 of the recorded Battle 1/2 we are in*, not to what happened. Individual exact
 windows now consume kernel semantic events, but the surrounding dispatcher and
 most content remain turn-keyed.
+
+**Canonical-split program STOPPED at its natural boundary (2026-08-08,
+supervisor).** Five slice batches moved ~240 canonical-only symbols out of
+`battleScene.ts` into `battleSceneCanonical.ts`, every one verified as a pure move
+by `npm run compare:differential` at **1369/1369 byte-identical**. Batch 5 then
+found **no eligible tranche left**: all **199** remaining canonical symbols depend
+on a battleScene-local SHARED/LIVE symbol (`TURN5_SWITCHIN`, `PIDGEOTTO_MAX_HP`,
+`TURN8_MENU_REDRAW_DELAY`, `drawSpriteSheet`, `battleWindow`,
+`drawMessageTextLines`, `TICK0`, `TURN13_RESOLUTION`, …), so moving them would pull
+a runtime value import from `battleScene.ts` back into the canonical file. Slice 1
+already proved empirically that such an import forms an ESM cycle whose module-eval
+read throws TDZ.
+
+Going further needs one of two **deliberate structural decisions**, neither of which
+a slice worker may take: (a) allow canonical→`battleScene.ts` value imports via
+re-export (`docs/battlescene-canonical-split-design.md` §7 hazard 1's recommended
+option) and evaluate the TDZ risk per symbol — eval-time reads are unsafe, function-
+body reads are not; or (b) widen `tests/animation/animationBoundaryRatchet.test.ts`'s
+`allowedConsumers`, which is a cross-program decision. Four named obstacles also
+remain: the `MenuIdleFrameAsset`/`SendOutHealthboxContentAsset` type-only export
+widening, `drawTurn16PostSwitchField`'s `src/animation` import, the ONIX-Sitrus
+cluster plus its module-eval guard, and the two `let` caches.
+
+**Also worth knowing:** the selection scan's `FORBIDDEN` set was **dead code** until
+2026-08-08 (`70caf397`) — pass 1 marked forbidden roots clean, so pass 2 treated
+them as satisfied deps and falsely certified every ONIX-cluster consumer as
+SELF-CONTAINED. Fixed. Two earlier batches had already caught false positives by
+hand, which is why no bad move landed. **A `CLEAN` label from that scan is not proof
+of movability** — check each candidate's actual declaration form.
+
+**Honest scope, restated:** this was a move within one module graph. The canonical
+code still ships, and the canonical bucket is only ~5.3k lines, so the split is a
+modest reduction — not the retirement of turn-keyed presentation that this issue is
+actually about. That retirement remains the presentation-seam program's job.
 
 **Confirmed** (2026-07-24, `856b3b4`): 17,056 lines — **30% of all
 `src/engine`**. 74 `BattleSceneState` declaration lines name a specific turn

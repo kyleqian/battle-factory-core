@@ -258,13 +258,35 @@ function main(): void {
   const battleSceneTypes = new Set<string>();
   for (const d of decls) if (d.kind === "interface" || d.kind === "type") battleSceneTypes.add(d.name);
 
+  // Slice-4 batch-5 supervisor out-of-scope list (docs/battlescene-canonical-
+  // split-design.md §5 + the batch brief's decisions 1-5). Forbidden symbols are
+  // NEVER movable this round: they are excluded from clean-candidate pass 1,
+  // from cluster seeds, and from cluster growth, so they surface as external
+  // blockers for anything that depends on them instead of being certified
+  // clean by transitively "satisfying" their own blockers. (Before this fix the
+  // set was dead code and the scan falsely certified every ONIX-cluster
+  // consumer as SELF-CONTAINED.)
   const FORBIDDEN = new Set([
+    // 1. menuIdleBlank / menuHealthboxPlayer - battleScene-local type casts.
+    "menuIdleBlank",
+    "menuHealthboxPlayer",
+    // 4. let caches (TS forbids reassigning an import).
+    "turn10OnixDarkPaletteCache",
+    "menuHealthboxPlayerContentMask",
+    // 3 + 5. ONIX cluster + module-eval invariant guard + their consumers.
     "ONIX_SITRUS_ROTATE_RENDER_LAG",
     "ONIX_SITRUS_IDENTITY_RENDER_TICK",
     "onixSitrusRotateMatrix",
+    "onixSitrusTintCoeff",
     "turn5SitrusRingMatrix",
-    "turn10OnixDarkPaletteCache",
-    "menuHealthboxPlayerContentMask",
+    "turn5SitrusHealTextVisibleChars",
+    "turn5SitrusOnixHp",
+    "turn5GrantingStarPlacement",
+    // 5. batch-3 blockers (destructured out of the SHARED TURN13_RESOLUTION).
+    "TURN13_DRAGONBREATH_KICKOFF_LINE1",
+    "TURN13_DRAGONBREATH_KICKOFF_LINE2",
+    // 2. would force battleSceneCanonical.ts to import src/animation/.
+    "drawTurn16PostSwitchField",
   ]);
 
   // Build canonical bucket via partition script (authoritative).
@@ -311,37 +333,60 @@ function main(): void {
 
   // Find minimal self-contained clusters: a set S of canonical symbols such
   // that every s in S has blockers(s) - (already moved/importable/types) all
-  // within S (i.e. no blocker outside S). Greedy: grow from each unassigned
-  // symbol, adding any blocker; then check all blockers stay inside.
+  // within S (i.e. no blocker outside S).
+  //
+  // Pass 1: report every individually-qualified symbol (blockers empty AND a
+  // real top-level decl - NOT-PARSED destructured consts have no decl and
+  // cannot be cut on their own) as a size-1 cluster. This is essential: the
+  // greedy growth below would otherwise sweep such a clean singleton into a
+  // blocked cluster as a blocker of a blocked symbol and never report it
+  // again (the old code assigned every blocked-cluster member, defeating its
+  // own "leave unassigned" intent).
   const clusters: string[][] = [];
-  const assigned = new Set<string>();
+  const clean = new Set<string>();
   for (const name of canonicalBucket) {
-    if (assigned.has(name)) continue;
+    if (FORBIDDEN.has(name)) continue;
+    if (blockerMap.get(name)?.length === 0 && byName.has(name)) {
+      clusters.push([name]);
+      clean.add(name);
+    }
+  }
+  // Pass 2: grow clusters only among symbols not yet clean. A blocker is
+  // satisfied only if it is clean (already moved in a prior slice OR reported
+  // here) - a blocked seed stays in battleScene.ts and is NOT a satisfied dep.
+  // FORBIDDEN symbols never seed a cluster and are never absorbed as members;
+  // they stay external blockers so consumers are reported blocked, not clean.
+  const processedSeeds = new Set<string>();
+  for (const name of canonicalBucket) {
+    if (clean.has(name) || processedSeeds.has(name)) continue;
+    if (FORBIDDEN.has(name)) { processedSeeds.add(name); continue; }
+    if (!byName.has(name)) { processedSeeds.add(name); continue; }
     const cluster = new Set<string>([name]);
     let grew = true;
     while (grew) {
       grew = false;
       for (const member of [...cluster]) {
         for (const b of blockerMap.get(member) ?? []) {
-          if (canonicalBucket.has(b) && !cluster.has(b)) { cluster.add(b); grew = true; }
+          if (canonicalBucket.has(b) && !FORBIDDEN.has(b) && !cluster.has(b) && !clean.has(b)) { cluster.add(b); grew = true; }
         }
       }
     }
-    // external blockers = blockers of members not in cluster and not moved/importable/type
+    // external blockers = blockers of members not in cluster and not clean/moved/importable/type
     const external = new Set<string>();
     for (const member of cluster) {
       for (const b of blockerMap.get(member) ?? []) {
-        if (!cluster.has(b) && !moved.has(b) && !battleSceneTypes.has(b) && !importable.has(b)) external.add(b);
+        if (!cluster.has(b) && !clean.has(b) && !moved.has(b) && !battleSceneTypes.has(b) && !importable.has(b)) external.add(b);
       }
     }
     const ok = external.size === 0;
     if (ok) {
       clusters.push([...cluster]);
-      for (const m of cluster) assigned.add(m);
+      for (const m of cluster) clean.add(m);
     } else {
-      // leave unassigned - report as blocked cluster
+      // report for transparency; only the seed counts as processed so other
+      // members still get a chance to form their own clean sub-clusters
       clusters.push([...cluster, `__EXTERNAL:${[...external].join(",")}`]);
-      for (const m of cluster) assigned.add(m);
+      processedSeeds.add(name);
     }
   }
 

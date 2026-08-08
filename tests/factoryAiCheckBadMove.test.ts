@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  AI_CHECK_BAD_MOVE_TABLE_EFFECTS,
   MOVES_BY_ID,
+  firstMoveIdWithEffect,
+  runCbmAccUp,
+  runCbmSpAtkDown,
   runCheckBadMovePreamble,
+  unportedCheckBadMoveTableEffects,
   type FactoryAiCheckBadMoveAttacker,
   type FactoryAiCheckBadMoveRoarTarget,
   type FactoryAiCheckBadMoveTarget,
@@ -79,11 +84,8 @@ describe("AI_CBM_HighRiskForDamage via Counter (docs/factory-ai-checkviability-g
     ]);
   });
 
-  it("leaves Haze behind the same generic CBM barrier", () => {
-    expect(run(MOVE_HAZE, counterTarget())).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-    });
+  it("leaves the next unported CBM table effect behind the generic barrier (derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -137,11 +139,8 @@ describe("AI_CBM_HighRiskForDamage via Flail (docs/executable-frontier-census.md
     ]);
   });
 
-  it("leaves Haze behind the same generic CBM barrier", () => {
-    expect(run(MOVE_HAZE, flailTarget())).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-    });
+  it("leaves the next unported CBM table effect behind the generic barrier (derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -1466,12 +1465,75 @@ const MOVE_SURF = 57;
 const MOVE_ROCK_SLIDE = 157;
 const MOVE_BODY_SLAM = 34;
 const MOVE_THUNDERBOLT = 85;
-const MOVE_HAZE = 114; // EFFECT_HAZE -- has an if_effect table entry (AI_CBM_Haze, not ported)
+const MOVE_HAZE = 114; // EFFECT_HAZE -> AI_CBM_Haze
 const MOVE_SNORE = 173;
 const MOVE_POISON_POWDER = 77; // EFFECT_POISON -> AI_CBM_Toxic
 const MOVE_TOXIC = 92; // EFFECT_TOXIC -> AI_CBM_Toxic
 const MOVE_STRING_SHOT = 81; // EFFECT_SPEED_DOWN
 const MOVE_COTTON_SPORE = 178; // EFFECT_SPEED_DOWN_2 -- same handler, different table entry
+
+/**
+ * Canonical probe target for the file's generic-CBM-barrier pins below. A
+ * single-ability species with a known, non-negating, non-Soundproof ability
+ * (Sturdy) short-circuits every `get_ability` draw, and every still-unported
+ * CBM table effect's move is a `MOVE_POWER_OTHER` candidate (power <= 1 or
+ * an `IGNORED_POWERFUL_MOVE_EFFECTS` effect), so the preamble's
+ * type/ability-negation block is skipped and every such move reaches the
+ * `if_effect` dispatch barrier untouched.
+ */
+const GENERIC_BARRIER_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+  species: 213, // SPECIES_SHUCKLE: single ability STURDY
+  types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"] as const,
+  knownAbility: "ABILITY_STURDY",
+  realAbility: "ABILITY_STURDY",
+  speedStage: 6,
+  atkStage: 6,
+  defStage: 6,
+  spDefStage: 6,
+});
+
+/**
+ * Derives the standing "the generic CBM barrier still fires" example
+ * dynamically from the engine's own table/handled sets, so the pins can never
+ * again assert an effect the engine has outgrown -- the barring effect was
+ * EFFECT_ABSORB, then EFFECT_HAZE, then EFFECT_STOCKPILE, and each port broke
+ * the hardcoded pins. Returns `null` when the whole table is ported, which is
+ * where AI_CheckBadMove lands at 109/109.
+ */
+function genericCbmBarrierExample(): Readonly<{ effect: string; moveId: number }> | null {
+  for (const effect of unportedCheckBadMoveTableEffects()) {
+    const moveId = firstMoveIdWithEffect(effect);
+    if (moveId !== undefined) return { effect, moveId };
+  }
+  return null;
+}
+
+/**
+ * The assertion shared by every generic-barrier pin in this file. With any
+ * effect still unported it picks one dynamically and pins that its move halts
+ * with the named `unsupported-branch` barrier; when the unported set is empty
+ * (all 109/109 CheckBadMove table effects ported) the honest assertion
+ * inverts: every table-listed effect's first reachable move scores instead of
+ * halting. Effects with no Gen-3 move cannot reach the dispatcher and are
+ * skipped in both directions.
+ */
+function assertGenericCbmBarrierFires() {
+  const example = genericCbmBarrierExample();
+  if (example === null) {
+    for (const effect of AI_CHECK_BAD_MOVE_TABLE_EFFECTS) {
+      const moveId = firstMoveIdWithEffect(effect);
+      if (moveId === undefined) continue;
+      expect(run(moveId, GENERIC_BARRIER_TARGET)).toMatchObject({ kind: "scored" });
+    }
+    return;
+  }
+  expect(run(example.moveId, GENERIC_BARRIER_TARGET)).toEqual({
+    kind: "unsupported-branch",
+    barrier: "factory-ai-check-bad-move",
+    effect: example.effect,
+    moveId: example.moveId,
+  });
+}
 
 function run(
   moveId: number,
@@ -1618,13 +1680,11 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
   });
 
   it("halts with a named unsupported-branch barrier for a move whose effect has an if_effect table entry", () => {
-    const result = run(MOVE_HAZE, { ...MAROWAK, knownAbility: "ABILITY_ROCK_HEAD" });
-    expect(result).toEqual({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_HAZE",
-      moveId: MOVE_HAZE,
-    });
+    // The example is derived dynamically (unportedCheckBadMoveTableEffects),
+    // never a hardcoded effect -- porting an effect would otherwise break
+    // this pin. When 109/109 effects are ported, `assertGenericCbmBarrierFires`
+    // inverts to "no table effect halts the machine any more".
+    assertGenericCbmBarrierFires();
   });
 
   it("reproduces the exact ground-truth Scenario A per-slot draw/score shape (docs/factory-ai-ground-truth.md §4 item 2/§0(2))", () => {
@@ -1695,13 +1755,8 @@ describe("AI_CBM_Sleep (docs/factory-ai-checkviability-ground-truth.md §29)", (
     ]);
   });
 
-  it("leaves the next unported CBM table effect behind the generic barrier", () => {
-    expect(run(MOVE_HAZE, target())).toEqual({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_HAZE",
-      moveId: MOVE_HAZE,
-    });
+  it("leaves the next unported CBM table effect behind the generic barrier (derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -1765,12 +1820,8 @@ describe("AI_CBM_Roar (docs/factory-ai-checkviability-ground-truth.md §30)", ()
     ]);
   });
 
-  it("leaves Haze behind the same generic CBM barrier", () => {
-    expect(run(MOVE_HAZE, target())).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_HAZE",
-    });
+  it("leaves the next unported CBM table effect behind the generic barrier (derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -1849,12 +1900,8 @@ describe("AI_CBM_Paralyze (docs/factory-ai-checkviability-ground-truth.md §31)"
     ]);
   });
 
-  it("leaves Haze behind the same generic CBM barrier", () => {
-    expect(run(MOVE_HAZE, target())).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_HAZE",
-    });
+  it("leaves the next unported CBM table effect behind the generic barrier (derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -1926,12 +1973,8 @@ describe("AI_CBM_Confuse (docs/factory-ai-checkviability-ground-truth.md §32)",
     ]);
   });
 
-  it("leaves Haze behind the same generic CBM barrier", () => {
-    expect(run(MOVE_HAZE, target())).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_HAZE",
-    });
+  it("leaves the next unported CBM table effect behind the generic barrier (derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -2107,14 +2150,8 @@ describe("AI_CBM_SpeedDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-che
     expect(result.draws).toHaveLength(0);
   });
 
-  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_HAZE)", () => {
-    const result = run(MOVE_HAZE, { ...MAROWAK, knownAbility: "ABILITY_ROCK_HEAD" });
-    expect(result).toEqual({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_HAZE",
-      moveId: MOVE_HAZE,
-    });
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -2242,13 +2279,8 @@ describe("AI_CBM_AttackDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-ch
     expect(result.draws).toHaveLength(0);
   });
 
-  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_HAZE)", () => {
-    const result = run(MOVE_HAZE, PINSIR);
-    expect(result).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_HAZE",
-    });
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -2580,13 +2612,8 @@ describe("AI_CBM_Curse (data/battle_ai_scripts.s:434-437, BulkUp-identical body)
     expect(result.draws).toHaveLength(0);
   });
 
-  it("leaves Haze behind the same generic CBM barrier", () => {
-    expect(run(MOVE_HAZE, SHUCKLE)).toEqual({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_HAZE",
-      moveId: MOVE_HAZE,
-    });
+  it("leaves the next unported CBM table effect behind the generic barrier (derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -2710,16 +2737,9 @@ describe("AI_CBM_SpDefUp (docs/factory-ai-checkviability-ground-truth.md §28)",
     const amnesia = run(MOVE_AMNESIA, SHUCKLE);
     expect(amnesia).toMatchObject({ kind: "scored", scoreDelta: 0 });
 
-    const MOVE_HAZE = 114;
-    expect(run(MOVE_HAZE, SHUCKLE)).toEqual({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_HAZE",
-      moveId: MOVE_HAZE,
-    });
+    assertGenericCbmBarrierFires();
   });
 });
-
 // data/battle_ai_scripts.s:576-579/590-593, docs/factory-ai-checkviability-ground-truth.md
 // §22.1: the ninth CBM-blocked pair's own CBM half -- unlike every stat-UP
 // handler above, TWO SEPARATE dual-stat handlers (the AI_CBM_BulkUp/
@@ -3014,13 +3034,8 @@ describe("AI_CBM_AccDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-check
     expect(result.draws).toHaveLength(0);
   });
 
-  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_HAZE)", () => {
-    const result = run(MOVE_HAZE, PIDGEOTTO);
-    expect(result).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_HAZE",
-    });
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 
   it("EFFECT_ACCURACY_DOWN_2 is a vestigial constant with zero real moves (doc §19.1) -- not independently testable through a real move ID, confirmed absent from the generated move table", () => {
@@ -3248,13 +3263,8 @@ describe("AI_CBM_EvasionDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-c
     expect([...MOVES_BY_ID.values()].some((m) => m.effect === "EFFECT_EVASION_DOWN_2")).toBe(false);
   });
 
-  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_HAZE)", () => {
-    const result = run(MOVE_HAZE, SHUCKLE);
-    expect(result).toMatchObject({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_HAZE",
-    });
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, derived dynamically)", () => {
+    assertGenericCbmBarrierFires();
   });
 });
 
@@ -4058,5 +4068,625 @@ describe("AI_CBM_Magnitude (data/battle_ai_scripts.s:365-367, EFFECT_MAGNITUDE)"
       "test-slot-magnitude-levitate",
       "test-slot-magnitude-high-risk-ability",
     ]);
+  });
+});
+
+describe("AI_CBM_AccUp (data/battle_ai_scripts.s:269-271, EFFECT_ACCURACY_UP/_2)", () => {
+  // EFFECT_ACCURACY_UP (15) and EFFECT_ACCURACY_UP_2 (55) are vestigial in
+  // Gen 3 -- no move in gMovesInfo carries either effect -- so the handler is
+  // dispatch-reachable only and is receipt-pinned directly here, one test per
+  // exit (the same "case per exit" rule as every other CBM handler).
+  it("AI's own ACC stage at MAX_STAT_STAGE (12) JUMPs to Score_Minus10", () => {
+    expect(runCbmAccUp(12)).toBe(-10);
+  });
+
+  it("AI's own ACC stage below MAX FALLS THROUGH to end at zero", () => {
+    expect(runCbmAccUp(6)).toBe(0);
+  });
+
+  it("AI's own ACC stage at MIN_STAT_STAGE (0) FALLS THROUGH to end at zero", () => {
+    expect(runCbmAccUp(0)).toBe(0);
+  });
+});
+
+describe("AI_CBM_SpAtkDown + CheckIfAbilityBlocksStatChange (data/battle_ai_scripts.s:292-294)", () => {
+  // EFFECT_SPECIAL_ATTACK_DOWN (21) and EFFECT_SPECIAL_ATTACK_DOWN_2 (61) are
+  // vestigial in Gen 3 -- no move in gMovesInfo carries either effect -- so
+  // the handler is dispatch-reachable only and is receipt-pinned directly
+  // here through its exported entry point (the shared-tail machinery itself
+  // is densely receipted via AI_CBM_SpDefDown above).
+  const RNG = Object.freeze({ value: 249_678_687, calls: 0 });
+
+  function spAtkDownTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: null,
+      realAbility: "ABILITY_STURDY",
+      ...overrides,
+    });
+  }
+
+  function runSpAtkDown(target: FactoryAiCheckBadMoveTarget): ReturnType<typeof runCbmSpAtkDown> {
+    return runCbmSpAtkDown(target, RNG, 1, "test-sp-atk-down");
+  }
+
+  it("target's SPATK stage already MIN_STAT_STAGE JUMPs to Score_Minus10 with zero draws", () => {
+    const result = runSpAtkDown(spAtkDownTarget({ spAtkStage: 0 }));
+    expect(result).toMatchObject({ scoreDelta: -10 });
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("an ambiguous two-ability target (neither ability Clear Body nor White Smoke) draws once via the shared tail and scores 0", () => {
+    const result = runSpAtkDown(spAtkDownTarget({
+      species: 193, // SPECIES_YANMA: Speed Boost / Compound Eyes, both unobserved
+      types: ["TYPE_BUG", "TYPE_FLYING"],
+    }));
+    expect(result).toMatchObject({ scoreDelta: 0 });
+    expect(result.draws.map((draw) => draw.reason)).toEqual(["test-sp-atk-down-shared-tail"]);
+  });
+
+  it("a known Clear Body target scores -10 with zero draws (shared tail's free guess)", () => {
+    const result = runSpAtkDown(spAtkDownTarget({
+      species: 72, // SPECIES_TENTACOOL: Clear Body / Liquid Ooze
+      knownAbility: "ABILITY_CLEAR_BODY",
+      realAbility: "ABILITY_CLEAR_BODY",
+    }));
+    expect(result).toMatchObject({ scoreDelta: -10 });
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("defaults an omitted spAtkStage to DEFAULT_STAT_STAGE (6), not MIN -- doesn't short-circuit", () => {
+    const result = runSpAtkDown(spAtkDownTarget());
+    // Sturdy is neither Clear Body nor White Smoke -- scores 0, proving the
+    // MIN gate did not fire on an omitted stage.
+    expect(result).toMatchObject({ scoreDelta: 0 });
+  });
+});
+
+describe("AI_CBM_Haze (data/battle_ai_scripts.s:314-332, EFFECT_HAZE)", () => {
+  function hazeTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("all-clear path (no lowered own stat, no raised target stat) reaches Score_Minus10", () => {
+    expect(run(MOVE_HAZE, hazeTarget())).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("any of the user's own seven stages below DEFAULT JUMPs to End at zero", () => {
+    expect(run(MOVE_HAZE, hazeTarget(), undefined, { atkStage: 5, defStage: 6 })).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+
+  it("a lowered user ACC stage (optional, defaulted to 6) also JUMPs to End at zero", () => {
+    expect(run(MOVE_HAZE, hazeTarget(), undefined, { atkStage: 6, defStage: 6, accStage: 5 })).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+
+  it("a raised target ATK stage JUMPs to End at zero", () => {
+    expect(run(MOVE_HAZE, hazeTarget({ atkStage: 7 }))).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("a raised target EVASION stage JUMPs to End at zero (optional, defaulted to 6)", () => {
+    expect(run(MOVE_HAZE, hazeTarget({ evasionStage: 7 }))).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("omitted attacker stat stages default to DEFAULT_STAT_STAGE and never fire a user gate", () => {
+    // NEUTRAL_ATTACKER supplies only atk/def; speed/spAtk/spDef/acc/evasion
+    // all default to 6 and stay below the <6 user gates.
+    expect(run(MOVE_HAZE, hazeTarget())).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("zero-draw: Haze never calls get_ability (single-ability target means no soundproof guess either)", () => {
+    const result = run(MOVE_HAZE, hazeTarget());
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+});
+
+describe("EFFECT_PSYCH_UP -> AI_CBM_Haze (data/battle_ai_scripts.s:181,314-332)", () => {
+  const MOVE_PSYCH_UP = 244; // EFFECT_PSYCH_UP, TYPE_NORMAL, power 0
+
+  function psychUpTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("dispatches to the shared AI_CBM_Haze body: all-clear path reaches Score_Minus10", () => {
+    expect(run(MOVE_PSYCH_UP, psychUpTarget())).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("a raised target ATK stage JUMPs to End at zero, same as EFFECT_HAZE", () => {
+    expect(run(MOVE_PSYCH_UP, psychUpTarget({ atkStage: 7 }))).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+});
+
+describe("AI_CBM_Mist (data/battle_ai_scripts.s:378-380, EFFECT_MIST)", () => {
+  const MOVE_MIST = 54; // EFFECT_MIST, TYPE_ICE, power 0
+
+  function mistTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  function mistAttacker(
+    overrides: Partial<FactoryAiCheckBadMoveAttacker> = {},
+  ): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ ...NEUTRAL_ATTACKER, ...overrides });
+  }
+
+  it("AI's OWN side's MIST bit up JUMPs to Score_Minus8", () => {
+    const result = run(MOVE_MIST, mistTarget(), undefined, mistAttacker({ mistUp: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8, draws: [] });
+  });
+
+  it("no MIST on AI's own side FALLS THROUGH to end at zero", () => {
+    expect(run(MOVE_MIST, mistTarget(), undefined, mistAttacker())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+
+  it("zero-draw: no ability read anywhere (single-ability target means no soundproof guess either)", () => {
+    const result = run(MOVE_MIST, mistTarget({ knownAbility: null }), undefined, mistAttacker());
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+});
+
+describe("AI_CBM_Disable (data/battle_ai_scripts.s:418-420, EFFECT_DISABLE)", () => {
+  const MOVE_DISABLE = 50; // EFFECT_DISABLE, TYPE_NORMAL, power 0
+
+  function disableTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("target already has any move disabled JUMPs to Score_Minus8", () => {
+    const result = run(MOVE_DISABLE, disableTarget({ anyMoveDisabled: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8, draws: [] });
+  });
+
+  it("target has no disabled move FALLS THROUGH to end at zero", () => {
+    expect(run(MOVE_DISABLE, disableTarget())).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("zero-draw: no ability read anywhere (single-ability target means no soundproof guess either)", () => {
+    const result = run(MOVE_DISABLE, disableTarget({ knownAbility: null }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+});
+
+describe("AI_CBM_Encore (data/battle_ai_scripts.s:422-424, EFFECT_ENCORE)", () => {
+  const MOVE_ENCORE = 227; // EFFECT_ENCORE, TYPE_NORMAL, power 0
+
+  function encoreTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("target already has any move encored JUMPs to Score_Minus8", () => {
+    const result = run(MOVE_ENCORE, encoreTarget({ anyMoveEncored: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8, draws: [] });
+  });
+
+  it("target has no encored move FALLS THROUGH to end at zero", () => {
+    expect(run(MOVE_ENCORE, encoreTarget())).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("zero-draw: no ability read anywhere (single-ability target means no soundproof guess either)", () => {
+    const result = run(MOVE_ENCORE, encoreTarget({ knownAbility: null }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+});
+
+describe("AI_CBM_Attract (data/battle_ai_scripts.s:456-476, EFFECT_ATTRACT)", () => {
+  const MOVE_ATTRACT = 213; // EFFECT_ATTRACT, TYPE_NORMAL, power 0
+
+  function attractTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  function attractAttacker(
+    overrides: Partial<FactoryAiCheckBadMoveAttacker> = {},
+  ): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ ...NEUTRAL_ATTACKER, ...overrides });
+  }
+
+  it("target already infatuated JUMPs to Score_Minus10 before the ability read", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({ isInfatuated: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("target's known ability Oblivious JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({
+      knownAbility: "ABILITY_OBLIVIOUS",
+      realAbility: "ABILITY_OBLIVIOUS",
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("a male user against a female target FALLS THROUGH to end at zero", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({ gender: "MON_FEMALE" }), undefined, attractAttacker({ gender: "MON_MALE" }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("a female user against a male target FALLS THROUGH to end at zero", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({ gender: "MON_MALE" }), undefined, attractAttacker({ gender: "MON_FEMALE" }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("a male user against a male target JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({ gender: "MON_MALE" }), undefined, attractAttacker({ gender: "MON_MALE" }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("a genderless (MON_GENDERLESS) user falls through to Score_Minus10, never treated as male or female", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({ gender: "MON_FEMALE" }), undefined, attractAttacker({ gender: "MON_GENDERLESS" }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("an unmodeled (undefined) user gender scores -10 exactly like MON_GENDERLESS", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({ gender: "MON_FEMALE" }), undefined, attractAttacker());
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("an ambiguous two-ability target draws once (the handler's own ability read) for the gender gates", () => {
+    const result = run(MOVE_ATTRACT, attractTarget({
+      species: 171, // SPECIES_LANTURN: Volt Absorb / Water Absorb, both unobserved
+      types: ["TYPE_WATER", "TYPE_ELECTRIC"],
+      knownAbility: null,
+      gender: "MON_FEMALE",
+    }), undefined, attractAttacker({ gender: "MON_MALE" }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    // Universal preamble soundproof guess + the handler's own ability read.
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-attract-ability",
+    ]);
+  });
+});
+
+describe("AI_CBM_Memento (data/battle_ai_scripts.s:482-484, EFFECT_MEMENTO)", () => {
+  const MOVE_MEMENTO = 262; // TYPE_DARK, power 0 -> MOVE_POWER_OTHER, preamble type block skipped
+
+  const MEMENTO_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    knownAbility: "ABILITY_STURDY",
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function mementoTarget(overrides: Partial<FactoryAiCheckBadMoveTarget>): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({ ...MEMENTO_TARGET, ...overrides });
+  }
+
+  function benchAttacker(usablePartyMons: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, usablePartyMons });
+  }
+
+  it("target ATK at MIN_STAT_STAGE JUMPs to Score_Minus10 before the spAtk/count gates", () => {
+    expect(run(MOVE_MEMENTO, mementoTarget({ atkStage: 0 }), undefined, benchAttacker(1)))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("target SPATK at MIN_STAT_STAGE (ATK above floor) JUMPs to Score_Minus8", () => {
+    expect(run(MOVE_MEMENTO, mementoTarget({ atkStage: 6, spAtkStage: 0 }), undefined, benchAttacker(1)))
+      .toMatchObject({ kind: "scored", scoreDelta: -8 });
+  });
+
+  it("falls through into AI_CBM_BatonPass's own count gate: zero usable party mons scores -10", () => {
+    expect(run(MOVE_MEMENTO, mementoTarget({ atkStage: 6, spAtkStage: 6 }), undefined, benchAttacker(0)))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("all-clear path (both target stages above floor, bench non-empty) reaches End at zero", () => {
+    expect(run(MOVE_MEMENTO, mementoTarget({ atkStage: 6, spAtkStage: 6 }), undefined, benchAttacker(2)))
+      .toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+});
+
+describe("AI_CBM_Stockpile (data/battle_ai_scripts.s:511-514, EFFECT_STOCKPILE)", () => {
+  const MOVE_STOCKPILE = 254; // TYPE_NORMAL, power 0 -> MOVE_POWER_OTHER
+
+  const STOCKPILE_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    knownAbility: "ABILITY_STURDY",
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function stockpileAttacker(count: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, stockpileCount: count });
+  }
+
+  it("a stockpile counter at the 3-count maximum JUMPs to Score_Minus10", () => {
+    expect(run(MOVE_STOCKPILE, STOCKPILE_TARGET, undefined, stockpileAttacker(3)))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("counts below the maximum (0/1/2) FALL THROUGH to End at zero", () => {
+    for (const count of [0, 1, 2]) {
+      expect(run(MOVE_STOCKPILE, STOCKPILE_TARGET, undefined, stockpileAttacker(count)))
+        .toMatchObject({ kind: "scored", scoreDelta: 0 });
+    }
+  });
+
+  it("an omitted stockpileCount defaults to 0 (battle-start) and scores zero", () => {
+    expect(run(MOVE_STOCKPILE, STOCKPILE_TARGET)).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+});
+
+describe("AI_CBM_SpitUpAndSwallow (data/battle_ai_scripts.s:516-520, EFFECT_SPIT_UP/EFFECT_SWALLOW)", () => {
+  const MOVE_SPIT_UP = 255; // TYPE_NORMAL, power 100 (ignored-powerful effect)
+  const MOVE_SWALLOW = 256; // TYPE_NORMAL, power 0
+
+  const NORMAL_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    knownAbility: "ABILITY_STURDY",
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function spitUpAttacker(count: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, stockpileCount: count });
+  }
+
+  it.each([
+    ["Spit Up", MOVE_SPIT_UP],
+    ["Swallow", MOVE_SWALLOW],
+  ])("%s: x0 type immunity (Ghost target) JUMPs to Score_Minus10 before the count read", (_label, moveId) => {
+    expect(run(moveId, { ...NORMAL_TARGET, types: ["TYPE_GHOST", "TYPE_GHOST"] }, undefined, spitUpAttacker(2)))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it.each([
+    ["Spit Up", MOVE_SPIT_UP],
+    ["Swallow", MOVE_SWALLOW],
+  ])("%s: zero stockpile count against a non-immune target JUMPs to Score_Minus10", (_label, moveId) => {
+    expect(run(moveId, NORMAL_TARGET, undefined, spitUpAttacker(0)))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it.each([
+    ["Spit Up", MOVE_SPIT_UP],
+    ["Swallow", MOVE_SWALLOW],
+  ])("%s: nonzero count against a non-immune target FALLS THROUGH to End at zero", (_label, moveId) => {
+    expect(run(moveId, NORMAL_TARGET, undefined, spitUpAttacker(2)))
+      .toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+});
+
+describe("AI_CBM_Recycle (data/battle_ai_scripts.s:554-557, EFFECT_RECYCLE)", () => {
+  const MOVE_RECYCLE = 278; // TYPE_NORMAL, power 0 -> MOVE_POWER_OTHER
+
+  const RECYCLE_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    knownAbility: "ABILITY_STURDY",
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function recycleAttacker(usedHeldItemId: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, usedHeldItemId });
+  }
+
+  it("no used held item (ITEM_NONE) JUMPs to Score_Minus10", () => {
+    expect(run(MOVE_RECYCLE, RECYCLE_TARGET, undefined, recycleAttacker(0)))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("a used held item recorded FALLS THROUGH to End at zero", () => {
+    expect(run(MOVE_RECYCLE, RECYCLE_TARGET, undefined, recycleAttacker(155)))
+      .toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("an omitted usedHeldItemId defaults to ITEM_NONE (battle-start) and scores -10", () => {
+    expect(run(MOVE_RECYCLE, RECYCLE_TARGET)).toMatchObject({
+      kind: "scored",
+      scoreDelta: -10,
+      draws: [],
+    });
+  });
+});
+
+describe("AI_CBM_Imprison (data/battle_ai_scripts.s:559-561, EFFECT_IMPRISON)", () => {
+  const MOVE_IMPRISON = 286; // TYPE_PSYCHIC, power 0 -> MOVE_POWER_OTHER
+
+  const IMPRISON_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    knownAbility: "ABILITY_STURDY",
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  it("already imprisoning (STATUS3_IMPRISONED_OTHERS) JUMPs to Score_Minus10", () => {
+    const attacker: FactoryAiCheckBadMoveAttacker = Object.freeze({
+      atkStage: 6, defStage: 6, imprisonedOthers: true,
+    });
+    expect(run(MOVE_IMPRISON, IMPRISON_TARGET, undefined, attacker))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("not yet imprisoning FALLS THROUGH to End at zero (absent field defaults false)", () => {
+    expect(run(MOVE_IMPRISON, IMPRISON_TARGET)).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+});
+
+describe("AI_CBM_MudSport (data/battle_ai_scripts.s:567-569, EFFECT_MUD_SPORT)", () => {
+  const MOVE_MUD_SPORT = 300; // TYPE_GROUND, power 0 -> MOVE_POWER_OTHER
+
+  const MUD_SPORT_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    knownAbility: "ABILITY_STURDY",
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  it("Mud Sport already up (STATUS3_MUDSPORT) JUMPs to Score_Minus10", () => {
+    const attacker: FactoryAiCheckBadMoveAttacker = Object.freeze({
+      atkStage: 6, defStage: 6, mudSportUp: true,
+    });
+    expect(run(MOVE_MUD_SPORT, MUD_SPORT_TARGET, undefined, attacker))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("not yet up FALLS THROUGH to End at zero (absent field defaults false)", () => {
+    expect(run(MOVE_MUD_SPORT, MUD_SPORT_TARGET)).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+});
+
+describe("AI_CBM_WaterSport (data/battle_ai_scripts.s:586-588, EFFECT_WATER_SPORT)", () => {
+  const MOVE_WATER_SPORT = 346; // TYPE_WATER, power 0 -> MOVE_POWER_OTHER
+
+  const WATER_SPORT_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    knownAbility: "ABILITY_STURDY",
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  it("Water Sport already up (STATUS3_WATERSPORT) JUMPs to Score_Minus10", () => {
+    const attacker: FactoryAiCheckBadMoveAttacker = Object.freeze({
+      atkStage: 6, defStage: 6, waterSportUp: true,
+    });
+    expect(run(MOVE_WATER_SPORT, WATER_SPORT_TARGET, undefined, attacker))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("not yet up FALLS THROUGH to End at zero (absent field defaults false)", () => {
+    expect(run(MOVE_WATER_SPORT, WATER_SPORT_TARGET)).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
   });
 });

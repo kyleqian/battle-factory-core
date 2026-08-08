@@ -251,6 +251,94 @@ export const AI_CHECK_BAD_MOVE_TABLE_EFFECTS: ReadonlySet<string> = new Set([
   "EFFECT_DRAGON_DANCE",
 ]);
 
+/**
+ * The complement of `AI_CHECK_BAD_MOVE_TABLE_EFFECTS`: every `EFFECT_*`
+ * whose `if_effect` dispatch entry below is actually ported -- has a real
+ * `if (move.effect === ...)` block before the final table barrier check.
+ * Maintained by hand alongside the dispatcher so the test suite can derive
+ * the still-unported remainder as `AI_CHECK_BAD_MOVE_TABLE_EFFECTS` minus
+ * this set instead of hardcoding a concrete effect the engine has outgrown
+ * (EFFECT_ABSORB, then EFFECT_HAZE, then EFFECT_STOCKPILE each broke such
+ * pins on 2026-08-08). `unportedCheckBadMoveTableEffects` below is the only
+ * consumer; keep this set exactly in sync with the dispatcher's if-chains
+ * whenever an effect is ported (add the effect here in the same commit).
+ */
+export const CHECK_BAD_MOVE_HANDLED_TABLE_EFFECTS: ReadonlySet<string> = new Set([
+  "EFFECT_SLEEP", "EFFECT_EXPLOSION", "EFFECT_DREAM_EATER", "EFFECT_ATTACK_UP",
+  "EFFECT_DEFENSE_UP", "EFFECT_SPEED_UP", "EFFECT_SPECIAL_ATTACK_UP", "EFFECT_SPECIAL_DEFENSE_UP",
+  "EFFECT_ACCURACY_UP", "EFFECT_EVASION_UP", "EFFECT_ATTACK_DOWN", "EFFECT_DEFENSE_DOWN",
+  "EFFECT_SPEED_DOWN", "EFFECT_SPECIAL_ATTACK_DOWN", "EFFECT_SPECIAL_DEFENSE_DOWN", "EFFECT_ACCURACY_DOWN",
+  "EFFECT_EVASION_DOWN", "EFFECT_HAZE", "EFFECT_BIDE", "EFFECT_ROAR",
+  "EFFECT_TOXIC", "EFFECT_LIGHT_SCREEN", "EFFECT_OHKO", "EFFECT_RAZOR_WIND",
+  "EFFECT_SUPER_FANG", "EFFECT_MIST", "EFFECT_FOCUS_ENERGY", "EFFECT_CONFUSE",
+  "EFFECT_ATTACK_UP_2", "EFFECT_DEFENSE_UP_2", "EFFECT_SPEED_UP_2", "EFFECT_SPECIAL_ATTACK_UP_2",
+  "EFFECT_SPECIAL_DEFENSE_UP_2", "EFFECT_ACCURACY_UP_2", "EFFECT_EVASION_UP_2", "EFFECT_ATTACK_DOWN_2",
+  "EFFECT_DEFENSE_DOWN_2", "EFFECT_SPEED_DOWN_2", "EFFECT_SPECIAL_ATTACK_DOWN_2", "EFFECT_SPECIAL_DEFENSE_DOWN_2",
+  "EFFECT_ACCURACY_DOWN_2", "EFFECT_EVASION_DOWN_2", "EFFECT_REFLECT", "EFFECT_POISON",
+  "EFFECT_PARALYZE", "EFFECT_SUBSTITUTE", "EFFECT_RECHARGE", "EFFECT_LEECH_SEED",
+  "EFFECT_DISABLE", "EFFECT_LEVEL_DAMAGE", "EFFECT_PSYWAVE", "EFFECT_COUNTER",
+  "EFFECT_ENCORE", "EFFECT_SNORE", "EFFECT_SLEEP_TALK", "EFFECT_FLAIL",
+  "EFFECT_MEAN_LOOK", "EFFECT_NIGHTMARE", "EFFECT_MINIMIZE", "EFFECT_CURSE",
+  "EFFECT_SPIKES", "EFFECT_FORESIGHT", "EFFECT_PERISH_SONG", "EFFECT_SANDSTORM",
+  "EFFECT_SWAGGER", "EFFECT_ATTRACT", "EFFECT_RETURN", "EFFECT_PRESENT",
+  "EFFECT_FRUSTRATION", "EFFECT_SAFEGUARD", "EFFECT_MAGNITUDE", "EFFECT_BATON_PASS",
+  "EFFECT_SONICBOOM", "EFFECT_RAIN_DANCE", "EFFECT_SUNNY_DAY", "EFFECT_BELLY_DRUM",
+  "EFFECT_PSYCH_UP", "EFFECT_MIRROR_COAT", "EFFECT_SKULL_BASH", "EFFECT_FUTURE_SIGHT",
+  "EFFECT_TELEPORT", "EFFECT_DEFENSE_CURL", "EFFECT_FAKE_OUT", "EFFECT_HAIL",
+  "EFFECT_TORMENT", "EFFECT_FLATTER", "EFFECT_WILL_O_WISP", "EFFECT_FOCUS_PUNCH",
+  "EFFECT_HELPING_HAND", "EFFECT_TRICK", "EFFECT_INGRAIN", "EFFECT_SUPERPOWER",
+  "EFFECT_KNOCK_OFF", "EFFECT_ENDEAVOR", "EFFECT_REFRESH", "EFFECT_LOW_KICK",
+  "EFFECT_TICKLE", "EFFECT_COSMIC_POWER", "EFFECT_BULK_UP", "EFFECT_CALM_MIND",
+  "EFFECT_DRAGON_DANCE", "EFFECT_SPEED_DOWN_2", "EFFECT_ATTACK_DOWN_2",
+  "EFFECT_DEFENSE_DOWN_2", "EFFECT_SPECIAL_DEFENSE_DOWN_2", "EFFECT_ACCURACY_DOWN_2",
+  "EFFECT_EVASION_DOWN_2", "EFFECT_ATTACK_UP_2", "EFFECT_DEFENSE_UP_2",
+  "EFFECT_DEFENSE_CURL", "EFFECT_SPEED_UP_2", "EFFECT_SPECIAL_ATTACK_UP_2",
+  "EFFECT_SPECIAL_DEFENSE_UP_2", "EFFECT_EVASION_UP_2", "EFFECT_MINIMIZE",
+  "EFFECT_EVASION_DOWN_2", "EFFECT_SWAGGER", "EFFECT_FLATTER", "EFFECT_KNOCK_OFF",
+  "EFFECT_TRICK", "EFFECT_SLEEP_TALK", "EFFECT_ACCURACY_UP_2",
+  "EFFECT_SPECIAL_ATTACK_DOWN_2", "EFFECT_MEMENTO", "EFFECT_STOCKPILE",
+  "EFFECT_SPIT_UP", "EFFECT_SWALLOW", "EFFECT_RECYCLE",
+  "EFFECT_IMPRISON", "EFFECT_MUD_SPORT", "EFFECT_WATER_SPORT",
+]);
+
+/**
+ * The still-unported `if_effect` table effects, computed as
+ * `AI_CHECK_BAD_MOVE_TABLE_EFFECTS` minus `CHECK_BAD_MOVE_HANDLED_TABLE_EFFECTS`
+ * and sorted for determinism. Exported for the test suite's generic-barrier
+ * pins, which must never hardcode a concrete effect the engine has outgrown;
+ * when this returns `[]` (all 109/109 effects ported) the honest assertion
+ * inverts -- no CheckBadMove table effect halts the machine any more.
+ */
+export function unportedCheckBadMoveTableEffects(): readonly string[] {
+  return [...AI_CHECK_BAD_MOVE_TABLE_EFFECTS]
+    .filter((effect) => !CHECK_BAD_MOVE_HANDLED_TABLE_EFFECTS.has(effect))
+    .sort();
+}
+
+/**
+ * The first generated-moves row carrying `effect` (or `undefined` when no
+ * Gen-3 move has it) -- used by the test suite to turn an unported effect
+ * into a dispatcher-reachable move for the generic-barrier pins.
+ */
+export function firstMoveIdWithEffect(effect: string): number | undefined {
+  for (const row of MOVES_BY_ID.values()) {
+    if (row.effect === effect) return row.id;
+  }
+  return undefined;
+}
+
+/**
+ * The three values `Cmd_get_gender`'s `GetGenderFromSpeciesAndPersonality`
+ * can produce (`include/constants/pokemon.h:169-171`, MON_MALE=0,
+ * MON_FEMALE=0xFE, MON_GENDERLESS=0xFF) -- `AI_CBM_Attract`'s own gender
+ * gates (`data/battle_ai_scripts.s:460-473`, EFFECT_ATTRACT). The view type
+ * models a battler's gender as optional; `undefined` means "not modeled" and
+ * behaves exactly like `MON_GENDERLESS` -- the source's own
+ * `goto Score_Minus10` fallthrough when `get_gender AI_USER` is neither male
+ * nor female -- never like one of the two gendered values.
+ */
+export type FactoryAiMonGender = "MON_MALE" | "MON_FEMALE" | "MON_GENDERLESS";
+
 export type FactoryAiCheckBadMoveTarget = Readonly<{
   species: number;
   types: readonly [string, string];
@@ -356,6 +444,46 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    * fires for a literal that does not model level).
    */
   level?: number;
+  /**
+   * Current SPECIAL ATTACK stat stage, 0..12 -- `AI_CBM_SpAtkDown`'s own
+   * MIN_STAT_STAGE gate (`data/battle_ai_scripts.s:292-294`) and
+   * `AI_CBM_Haze`'s own target-side `if_stat_level_more_than` gate (:326).
+   * Optional, defaulting to `DEFAULT_STAT_STAGE` (6) -- same convention/
+   * rationale as `accStage` above.
+   */
+  spAtkStage?: number;
+  /**
+   * `gBattleMons[AI_TARGET].status2 & STATUS2_INFATUATION` is nonzero --
+   * `AI_CBM_Attract`'s first, source-ordered rejection gate
+   * (`data/battle_ai_scripts.s:457`, EFFECT_ATTRACT). Optional, defaulting
+   * to false.
+   */
+  isInfatuated?: boolean;
+  /**
+   * Whether any of `gDisableStructs[AI_TARGET]`'s four moves is disabled
+   * (`disabledMove != MOVE_NONE`) -- `AI_CBM_Disable`'s single
+   * `if_any_move_disabled AI_TARGET` gate (`data/battle_ai_scripts.s:418-420`,
+   * EFFECT_DISABLE). Optional, defaulting to false (no move disabled at
+   * battle start).
+   */
+  anyMoveDisabled?: boolean;
+  /**
+   * Whether any of `gDisableStructs[AI_TARGET]`'s four moves is encored
+   * (`encoredMove != MOVE_NONE`) -- `AI_CBM_Encore`'s single
+   * `if_any_move_encored AI_TARGET` gate (`data/battle_ai_scripts.s:422-424`,
+   * EFFECT_ENCORE). Optional, defaulting to false (no move encored at battle
+   * start).
+   */
+  anyMoveEncored?: boolean;
+  /**
+   * `Cmd_get_gender`'s `GetGenderFromSpeciesAndPersonality` result for the
+   * target -- `AI_CBM_Attract`'s own `get_gender AI_TARGET` gates
+   * (`data/battle_ai_scripts.s:466-473`). Optional; `undefined` behaves
+   * exactly like `MON_GENDERLESS` (a non-female/non-male target fails the
+   * user's gendered pairing check and scores -10), never like one of the two
+   * gendered values.
+   */
+  gender?: FactoryAiMonGender;
 }>;
 
 /**
@@ -494,6 +622,68 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * single gate (EFFECT_INGRAIN). Optional, defaulting to `false`.
    */
   isRooted?: boolean;
+  /**
+   * AI_USER's own ACCURACY stat stage, 0..12 -- `AI_CBM_AccUp`'s own
+   * MAX_STAT_STAGE gate (`data/battle_ai_scripts.s:269-271`) and
+   * `AI_CBM_Haze`'s own user-side `if_stat_level_less_than` gate (:320).
+   * Optional, defaulting to `DEFAULT_STAT_STAGE` (6) -- same convention/
+   * rationale as `speedStage` above.
+   */
+  accStage?: number;
+  /**
+   * AI_USER's OWN side's `SIDE_STATUS_MIST` bit -- `AI_CBM_Mist`'s single
+   * `if_side_affecting AI_USER, SIDE_STATUS_MIST` gate
+   * (`data/battle_ai_scripts.s:378-380`, EFFECT_MIST). Optional, defaulting
+   * to `false`, same convention as `lightScreenUp`/`reflectUp` above.
+   */
+  mistUp?: boolean;
+  /**
+   * `Cmd_get_gender`'s `GetGenderFromSpeciesAndPersonality` result for
+   * AI_USER -- `AI_CBM_Attract`'s own `get_gender AI_USER` gates
+   * (`data/battle_ai_scripts.s:460-462`). Optional; `undefined` behaves
+   * exactly like `MON_GENDERLESS` (the source's `goto Score_Minus10`
+   * fallthrough when the user is neither male nor female), never like one of
+   * the two gendered values.
+   */
+  gender?: FactoryAiMonGender;
+  /**
+   * `gStatuses3[AI_USER] & STATUS3_IMPRISONED_OTHERS` -- `AI_CBM_Imprison`'s
+   * single gate (`data/battle_ai_scripts.s:559-561`, EFFECT_IMPRISON).
+   * Optional, defaulting to `false`.
+   */
+  imprisonedOthers?: boolean;
+  /**
+   * `gStatuses3[AI_USER] & STATUS3_MUDSPORT` -- `AI_CBM_MudSport`'s single
+   * gate (`data/battle_ai_scripts.s:567-569`, EFFECT_MUD_SPORT). Optional,
+   * defaulting to `false`.
+   */
+  mudSportUp?: boolean;
+  /**
+   * `gStatuses3[AI_USER] & STATUS3_WATERSPORT` -- `AI_CBM_WaterSport`'s
+   * single gate (`data/battle_ai_scripts.s:586-588`, EFFECT_WATER_SPORT).
+   * Optional, defaulting to `false`.
+   */
+  waterSportUp?: boolean;
+  /**
+   * `gBattleStruct->usedHeldItems[AI_USER]` as read by `get_used_held_item`
+   * (`Cmd_get_used_held_item`, `battle_ai_script_commands.c:2137-2150`) --
+   * `AI_CBM_Recycle`'s single `if_equal ITEM_NONE` gate
+   * (`data/battle_ai_scripts.s:554-557`, EFFECT_RECYCLE). Optional,
+   * defaulting to 0 (`ITEM_NONE`) -- the real battle-start value, so Recycle
+   * scores its -10 when the field is absent.
+   */
+  usedHeldItemId?: number;
+  /**
+   * `gDisableStructs[AI_USER].stockpileCounter` as read by
+   * `get_stockpile_count` (`Cmd_get_stockpile_count`,
+   * `battle_ai_script_commands.c:2116-2127`) -- 0..3, the same typed counter
+   * the battle-script Stockpile opcode writes
+   * (`battleScriptStockpileOpcode.test.ts`). `AI_CBM_Stockpile`'s
+   * `if_equal 3` gate and `AI_CBM_SpitUpAndSwallow`'s `if_equal 0` gate
+   * (`data/battle_ai_scripts.s:511-514,516-520`). Optional, defaulting to 0
+   * (the real battle-start count).
+   */
+  stockpileCount?: number;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -2228,6 +2418,224 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_ACCURACY_UP(_2) -> AI_CBM_AccUp
+  // (`data/battle_ai_scripts.s:113,138,269-271`): byte-for-byte the same bare
+  // 2-instruction MAX_STAT_STAGE-on-AI_USER's-own-stage shape as
+  // `AI_CBM_AttackUp`/`AI_CBM_SpeedUp` with `STAT_ACC` swapped in. A
+  // vestigial effect in Gen 3 -- no move in `gMovesInfo` carries
+  // EFFECT_ACCURACY_UP or EFFECT_ACCURACY_UP_2 (confirmed: battle_moves.h
+  // uses effects 15/55 for nothing) -- so no real move can reach it, but the
+  // table entry is source-complete here all the same.
+  if (move.effect === "EFFECT_ACCURACY_UP" || move.effect === "EFFECT_ACCURACY_UP_2") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmAccUp(input.attacker.accStage ?? DEFAULT_STAT_STAGE),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SPECIAL_ATTACK_DOWN(_2) -> AI_CBM_SpAtkDown
+  // (`data/battle_ai_scripts.s:118,143,292-294`): the same bare
+  // MIN_STAT_STAGE-gate-plus-direct-goto-to-the-shared-tail shape as
+  // `AI_CBM_DefenseDown`/`AI_CBM_SpDefDown` with `STAT_SPATK` swapped in. A
+  // vestigial effect in Gen 3 -- no move in `gMovesInfo` carries
+  // EFFECT_SPECIAL_ATTACK_DOWN or EFFECT_SPECIAL_ATTACK_DOWN_2 (Mist Ball is
+  // the distinct EFFECT_SPECIAL_ATTACK_DOWN_HIT, not table-listed) -- but the
+  // table entry is source-complete here all the same.
+  if (move.effect === "EFFECT_SPECIAL_ATTACK_DOWN" || move.effect === "EFFECT_SPECIAL_ATTACK_DOWN_2") {
+    const spAtkDown = runCbmSpAtkDown(target, rng, ordinal, `${input.reasonPrefix}-sp-atk-down`);
+    for (const draw of spAtkDown.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: spAtkDown.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: spAtkDown.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_HAZE -> AI_CBM_Haze
+  // (`data/battle_ai_scripts.s:122,314-332`): seven
+  // `if_stat_level_less_than AI_USER, <stat>, DEFAULT_STAT_STAGE` gates then
+  // seven `if_stat_level_more_than AI_TARGET, <stat>, DEFAULT_STAT_STAGE`
+  // gates, all JUMPing to End (zero); only the all-clear path falls through
+  // to Score_Minus10 -- Haze is penalized when there is nothing to reset (no
+  // lowered own stat, no raised target stat).
+  if (move.effect === "EFFECT_HAZE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmHaze(input.attacker, target),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_PSYCH_UP -> AI_CBM_Haze
+  // (`data/battle_ai_scripts.s:181,314-332`): Psych Up has no separate
+  // handler on the CheckBadMove side -- its table entry dispatches straight
+  // to AI_CBM_Haze's own body (the same fourteen stat-stage gates).
+  if (move.effect === "EFFECT_PSYCH_UP") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmHaze(input.attacker, target),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_MIST -> AI_CBM_Mist
+  // (`data/battle_ai_scripts.s:130,378-380`): a single
+  // `if_side_affecting AI_USER, SIDE_STATUS_MIST, Score_Minus8` -- the same
+  // bare shape as `AI_CBM_LightScreen`/`Reflect`/`Safeguard` (doc §23.1) with
+  // SIDE_STATUS_MIST swapped in, reading only AI_USER's own side.
+  if (move.effect === "EFFECT_MIST") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmMist(input.attacker.mistUp ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_DISABLE -> AI_CBM_Disable
+  // (`data/battle_ai_scripts.s:153,418-420`): a single
+  // `if_any_move_disabled AI_TARGET, Score_Minus8` -- Disable is penalized
+  // when the target already has any move disabled
+  // (`gDisableStructs[].disabledMove != MOVE_NONE`).
+  if (move.effect === "EFFECT_DISABLE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmDisable(target.anyMoveDisabled ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_ENCORE -> AI_CBM_Encore
+  // (`data/battle_ai_scripts.s:157,422-424`): a single
+  // `if_any_move_encored AI_TARGET, Score_Minus8` -- Encore is penalized when
+  // the target already has any move encored (`gDisableStructs[].encoredMove
+  // != MOVE_NONE`).
+  if (move.effect === "EFFECT_ENCORE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmEncore(target.anyMoveEncored ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_ATTRACT -> AI_CBM_Attract
+  // (`data/battle_ai_scripts.s:170,456-476`): target already infatuated
+  // JUMPs to -10; one fresh target ability read (Oblivious -> -10); then the
+  // user/target gender gates -- a male user needs a female target, a female
+  // user a male target, and a genderless (or unmodeled) user falls through
+  // to Score_Minus10.
+  if (move.effect === "EFFECT_ATTRACT") {
+    const attract = runCbmAttract(input.attacker, target, rng, ordinal, `${input.reasonPrefix}-attract`);
+    for (const draw of attract.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: attract.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: attract.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_MEMENTO -> AI_CBM_Memento
+  // (`data/battle_ai_scripts.s:195,482-484`): the two target stat-stage
+  // gates then a genuine fall-through into AI_CBM_BatonPass's own usable-
+  // party count gate (:485-488) -- Memento has no `end` of its own.
+  if (move.effect === "EFFECT_MEMENTO") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmMemento(target, input.attacker.usablePartyMons ?? 0),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_STOCKPILE -> AI_CBM_Stockpile
+  // (`data/battle_ai_scripts.s:188,511-514`): a single
+  // `get_stockpile_count AI_USER; if_equal 3, Score_Minus10` -- Stockpile is
+  // penalized when the AI's `gDisableStructs[].stockpileCounter` is already
+  // at its 3-count maximum.
+  if (move.effect === "EFFECT_STOCKPILE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmStockpile(input.attacker.stockpileCount ?? 0),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SPIT_UP/EFFECT_SWALLOW ->
+  // the one shared AI_CBM_SpitUpAndSwallow body
+  // (`data/battle_ai_scripts.s:189-190,516-520`): x0 type immunity JUMPs to
+  // -10, then a zero stockpile count JUMPs to -10 -- the opposite comparison
+  // end of `AI_CBM_Stockpile`'s own `if_equal 3` on the same field.
+  if (move.effect === "EFFECT_SPIT_UP" || move.effect === "EFFECT_SWALLOW") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmSpitUpAndSwallow(move.type, target, input.attacker.stockpileCount ?? 0),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_RECYCLE -> AI_CBM_Recycle
+  // (`data/battle_ai_scripts.s:201,554-557`): a single
+  // `get_used_held_item AI_USER; if_equal ITEM_NONE, Score_Minus10` --
+  // Recycle is penalized when the AI has no used item left to recycle
+  // (`gBattleStruct->usedHeldItems[AI_USER] == ITEM_NONE`).
+  if (move.effect === "EFFECT_RECYCLE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmRecycle(input.attacker.usedHeldItemId ?? 0),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_IMPRISON -> AI_CBM_Imprison
+  // (`data/battle_ai_scripts.s:204,559-561`): a single
+  // `if_status3 AI_USER, STATUS3_IMPRISONED_OTHERS, Score_Minus10` -- Imprison
+  // is penalized when the AI is already imprisoning the target's moves.
+  if (move.effect === "EFFECT_IMPRISON") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmImprison(input.attacker.imprisonedOthers ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_MUD_SPORT -> AI_CBM_MudSport
+  // (`data/battle_ai_scripts.s:207,567-569`): a single
+  // `if_status3 AI_USER, STATUS3_MUDSPORT, Score_Minus10` -- Mud Sport is
+  // penalized when the effect is already up on the AI's side.
+  if (move.effect === "EFFECT_MUD_SPORT") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmMudSport(input.attacker.mudSportUp ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_WATER_SPORT -> AI_CBM_WaterSport
+  // (`data/battle_ai_scripts.s:211,586-588`): a single
+  // `if_status3 AI_USER, STATUS3_WATERSPORT, Score_Minus10` -- Water Sport is
+  // penalized when the effect is already up on the AI's side.
+  if (move.effect === "EFFECT_WATER_SPORT") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmWaterSport(input.attacker.waterSportUp ?? false),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -2950,4 +3358,300 @@ function runCbmMagnitude(
   );
   for (const draw of highRisk.draws) draws.push(draw);
   return Object.freeze({ rng: highRisk.rng, draws: Object.freeze(draws), scoreDelta: highRisk.scoreDelta });
+}
+
+/**
+ * `AI_CBM_AccUp` (`data/battle_ai_scripts.s:269-271`) -- byte-for-byte the
+ * same 2-instruction shape as `AI_CBM_AttackUp`/`AI_CBM_SpeedUp` with
+ * `STAT_ACC` swapped in:
+ *
+ * ```
+ * AI_CBM_AccUp:
+ *     if_stat_level_equal AI_USER, STAT_ACC, MAX_STAT_STAGE, Score_Minus10
+ *     end
+ * ```
+ *
+ * Dispatch: `EFFECT_ACCURACY_UP`/`EFFECT_ACCURACY_UP_2`
+ * (`data/battle_ai_scripts.s:113,138`) -- both vestigial in Gen 3 (no move
+ * carries either effect), so this handler is dispatch-reachable only. Exported
+ * so the vestigial gate is still receipt-pinned directly (zero reachable
+ * moves to drive through the dispatcher).
+ */
+export function runCbmAccUp(attackerAccStage: number): number {
+  return attackerAccStage === MAX_STAT_STAGE ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_SpAtkDown` (`data/battle_ai_scripts.s:292-294`) -- the same bare
+ * MIN_STAT_STAGE-gate-plus-direct-goto-to-the-shared-tail shape as
+ * `AI_CBM_DefenseDown`/`AI_CBM_SpDefDown` (`runCbmStatDownViaSharedTail`
+ * above, doc §15.1/§16.1) with `STAT_SPATK` swapped in, so it reuses that
+ * helper unchanged:
+ *
+ * ```
+ * AI_CBM_SpAtkDown:
+ *     if_stat_level_equal AI_TARGET, STAT_SPATK, MIN_STAT_STAGE, Score_Minus10
+ *     goto CheckIfAbilityBlocksStatChange
+ * ```
+ *
+ * Dispatch: `EFFECT_SPECIAL_ATTACK_DOWN`/`EFFECT_SPECIAL_ATTACK_DOWN_2`
+ * (`data/battle_ai_scripts.s:118,143`) -- both vestigial in Gen 3 (no move
+ * carries either effect; Mist Ball is the distinct EFFECT_SPECIAL_ATTACK_
+ * DOWN_HIT, not table-listed), so this handler is dispatch-reachable only.
+ * Exported so the vestigial gate is still receipt-pinned directly (zero
+ * reachable moves to drive through the dispatcher).
+ */
+export function runCbmSpAtkDown(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckBadMoveDraw[]; scoreDelta: number }> {
+  return runCbmStatDownViaSharedTail(target.spAtkStage ?? DEFAULT_STAT_STAGE, target, rng, ordinal, reason);
+}
+
+/**
+ * `AI_CBM_Haze` (`data/battle_ai_scripts.s:314-332`), shared by
+ * `EFFECT_HAZE` (`:122`) and `EFFECT_PSYCH_UP` (`:181` -- Psych Up has no
+ * separate handler on the CheckBadMove side; its table entry dispatches to
+ * this same body):
+ *
+ * ```
+ * AI_CBM_Haze:
+ *     if_stat_level_less_than AI_USER, <STAT_ATK..STAT_EVASION>, AI_CBM_Haze_End
+ *     if_stat_level_more_than AI_TARGET, <STAT_ATK..STAT_EVASION>, AI_CBM_Haze_End
+ *     goto Score_Minus10
+ * AI_CBM_Haze_End:
+ *     end
+ * ```
+ *
+ * Any of the user's own seven stages below `DEFAULT_STAT_STAGE`, or any of
+ * the target's seven stages above it, JUMPs to End (zero) -- Haze is only
+ * penalized (-10) when there is nothing to reset. Zero `get_ability` calls,
+ * zero RNG. Stat stages absent from the view default to `DEFAULT_STAT_STAGE`
+ * (6), so an omitted stage never fires a gate -- same convention as the
+ * stat-up/down handlers.
+ */
+function runCbmHaze(attacker: FactoryAiCheckBadMoveAttacker, target: FactoryAiCheckBadMoveTarget): number {
+  const userHasLoweredStat = attacker.atkStage < DEFAULT_STAT_STAGE
+    || attacker.defStage < DEFAULT_STAT_STAGE
+    || (attacker.speedStage ?? DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE
+    || (attacker.spAtkStage ?? DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE
+    || (attacker.spDefStage ?? DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE
+    || (attacker.accStage ?? DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE
+    || (attacker.evasionStage ?? DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE;
+  if (userHasLoweredStat) {
+    return 0;
+  }
+  const targetHasRaisedStat = target.atkStage > DEFAULT_STAT_STAGE
+    || target.defStage > DEFAULT_STAT_STAGE
+    || target.speedStage > DEFAULT_STAT_STAGE
+    || (target.spAtkStage ?? DEFAULT_STAT_STAGE) > DEFAULT_STAT_STAGE
+    || target.spDefStage > DEFAULT_STAT_STAGE
+    || (target.accStage ?? DEFAULT_STAT_STAGE) > DEFAULT_STAT_STAGE
+    || (target.evasionStage ?? DEFAULT_STAT_STAGE) > DEFAULT_STAT_STAGE;
+  return targetHasRaisedStat ? 0 : -10;
+}
+
+/**
+ * `AI_CBM_Mist` (`data/battle_ai_scripts.s:378-380`, EFFECT_MIST): a single
+ * `if_side_affecting AI_USER, SIDE_STATUS_MIST, Score_Minus8` -- the same
+ * bare 2-instruction shape as `AI_CBM_LightScreen`/`AI_CBM_Reflect`/
+ * `AI_CBM_Safeguard` (doc §23.1) with `SIDE_STATUS_MIST` swapped in. Reads
+ * only AI_USER's own side; zero stat-stage/ability reads.
+ */
+function runCbmMist(attackerMistUp: boolean): number {
+  return attackerMistUp ? -8 : 0;
+}
+
+/**
+ * `AI_CBM_Disable` (`data/battle_ai_scripts.s:418-420`, EFFECT_DISABLE): a
+ * single `if_any_move_disabled AI_TARGET, Score_Minus8` -- Disable is
+ * penalized when the target already has any move disabled
+ * (`gDisableStructs[].disabledMove != MOVE_NONE`). Zero ability/type reads.
+ */
+function runCbmDisable(targetAnyMoveDisabled: boolean): number {
+  return targetAnyMoveDisabled ? -8 : 0;
+}
+
+/**
+ * `AI_CBM_Encore` (`data/battle_ai_scripts.s:422-424`, EFFECT_ENCORE): a
+ * single `if_any_move_encored AI_TARGET, Score_Minus8` -- Encore is
+ * penalized when the target already has any move encored
+ * (`gDisableStructs[].encoredMove != MOVE_NONE`). Zero ability/type reads.
+ */
+function runCbmEncore(targetAnyMoveEncored: boolean): number {
+  return targetAnyMoveEncored ? -8 : 0;
+}
+
+/**
+ * `AI_CBM_Attract` (`data/battle_ai_scripts.s:456-476`, EFFECT_ATTRACT):
+ *
+ * ```
+ * AI_CBM_Attract:
+ *     if_status2 AI_TARGET, STATUS2_INFATUATION, Score_Minus10
+ *     get_ability AI_TARGET
+ *     if_equal ABILITY_OBLIVIOUS, Score_Minus10
+ *     get_gender AI_USER
+ *     if_equal MON_MALE, AI_CBM_Attract_CheckIfTargetIsFemale
+ *     if_equal MON_FEMALE, AI_CBM_Attract_CheckIfTargetIsMale
+ *     goto Score_Minus10
+ * AI_CBM_Attract_CheckIfTargetIsFemale:
+ *     get_gender AI_TARGET
+ *     if_equal MON_FEMALE, AI_CBM_Attract_End
+ *     goto Score_Minus10
+ * AI_CBM_Attract_CheckIfTargetIsMale:
+ *     get_gender AI_TARGET
+ *     if_equal MON_MALE, AI_CBM_Attract_End
+ *     goto Score_Minus10
+ * AI_CBM_Attract_End:
+ *     end
+ * ```
+ *
+ * The ability read comes after the infatuation gate and is a genuine fresh
+ * `get_ability` draw (same machinery as `AI_CBM_Sleep`). The two
+ * `get_gender` reads are direct field reads
+ * (`GetGenderFromSpeciesAndPersonality`, `battle_ai_script_commands.c:2088-2099`),
+ * zero RNG. Gender gates: an infatuated target, an Oblivious target, a
+ * `MON_GENDERLESS` (or unmodeled/`undefined`) user -- the source's own
+ * `goto Score_Minus10` fallthrough when the user matches neither MON_MALE nor
+ * MON_FEMALE -- and a gendered-mismatch pairing (male user vs non-female
+ * target, female user vs non-male target) all score -10.
+ */
+const ABILITY_OBLIVIOUS = "ABILITY_OBLIVIOUS";
+
+function runCbmAttract(
+  attacker: FactoryAiCheckBadMoveAttacker,
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckBadMoveDraw[]; scoreDelta: number }> {
+  if (target.isInfatuated ?? false) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
+  }
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
+  const draws = ability.draw === null ? [] : [ability.draw];
+  if (ability.ability === ABILITY_OBLIVIOUS) {
+    return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta: -10 });
+  }
+  if (attacker.gender === "MON_MALE") {
+    const scoreDelta = target.gender === "MON_FEMALE" ? 0 : -10;
+    return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta });
+  }
+  if (attacker.gender === "MON_FEMALE") {
+    const scoreDelta = target.gender === "MON_MALE" ? 0 : -10;
+    return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta });
+  }
+  return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta: -10 });
+}
+
+/**
+ * `AI_CBM_Memento` (`data/battle_ai_scripts.s:482-484`, EFFECT_MEMENTO):
+ *
+ * ```
+ * AI_CBM_Memento:
+ *     if_stat_level_equal AI_TARGET, STAT_ATK, MIN_STAT_STAGE, Score_Minus10
+ *     if_stat_level_equal AI_TARGET, STAT_SPATK, MIN_STAT_STAGE, Score_Minus8
+ * AI_CBM_BatonPass:
+ *     count_usable_party_mons AI_USER
+ *     if_equal 0, Score_Minus10
+ *     end
+ * ```
+ *
+ * Memento has NO `end` of its own: the two target stat gates FALL THROUGH
+ * into `AI_CBM_BatonPass`'s own AI_USER usable-party count gate (the shared
+ * `runCbmBatonPass` body above), reproduced here rather than as a private
+ * copy of that tail. Sequential Score_Minus10 / Score_Minus8 / Score_Minus10
+ * JUMPs, never additive. Zero ability/type reads, zero RNG.
+ */
+function runCbmMemento(target: FactoryAiCheckBadMoveTarget, attackerUsablePartyMons: number): number {
+  if (target.atkStage === MIN_STAT_STAGE) {
+    return -10;
+  }
+  if ((target.spAtkStage ?? DEFAULT_STAT_STAGE) === MIN_STAT_STAGE) {
+    return -8;
+  }
+  return runCbmBatonPass(attackerUsablePartyMons);
+}
+
+/**
+ * `AI_CBM_Stockpile` (`data/battle_ai_scripts.s:511-514`, EFFECT_STOCKPILE):
+ * a single `get_stockpile_count AI_USER; if_equal 3, Score_Minus10` --
+ * Stockpile is penalized when the AI's `gDisableStructs[].stockpileCounter`
+ * is already at its maximum of 3. Zero ability/type reads, zero RNG.
+ */
+function runCbmStockpile(attackerStockpileCount: number): number {
+  return attackerStockpileCount === 3 ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_SpitUpAndSwallow` (`data/battle_ai_scripts.s:516-520`,
+ * EFFECT_SPIT_UP/EFFECT_SWALLOW -- ONE shared handler; both table entries
+ * dispatch to it):
+ *
+ * ```
+ * AI_CBM_SpitUpAndSwallow:
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0, Score_Minus10
+ *     get_stockpile_count AI_USER
+ *     if_equal 0, Score_Minus10
+ *     end
+ * ```
+ *
+ * x0 type immunity JUMPs to -10 before the count read; a zero stockpile
+ * count (nothing to spit up or swallow) JUMPs to -10. Sequential JUMPs,
+ * never additive. Zero `get_ability` calls, zero RNG. The count comparison
+ * end is the OPPOSITE of `AI_CBM_Stockpile`'s own `if_equal 3` -- same
+ * `stockpileCount` field, opposite bound.
+ */
+function runCbmSpitUpAndSwallow(
+  moveType: string,
+  target: FactoryAiCheckBadMoveTarget,
+  attackerStockpileCount: number,
+): number {
+  if (computeAiEffectiveness(moveType, target.types) === 0) {
+    return -10;
+  }
+  return attackerStockpileCount === 0 ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Recycle` (`data/battle_ai_scripts.s:554-557`, EFFECT_RECYCLE): a
+ * single `get_used_held_item AI_USER; if_equal ITEM_NONE, Score_Minus10` --
+ * Recycle is penalized when the AI has no used item left to recycle
+ * (`gBattleStruct->usedHeldItems[AI_USER] == ITEM_NONE`, read by
+ * `Cmd_get_used_held_item`). Zero ability/type reads, zero RNG.
+ */
+function runCbmRecycle(attackerUsedHeldItemId: number): number {
+  return attackerUsedHeldItemId === 0 ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Imprison` (`data/battle_ai_scripts.s:559-561`, EFFECT_IMPRISON): a
+ * single `if_status3 AI_USER, STATUS3_IMPRISONED_OTHERS, Score_Minus10` --
+ * Imprison is penalized when the AI is already imprisoning the target's
+ * moves. Zero ability/type reads, zero RNG.
+ */
+function runCbmImprison(attackerImprisonedOthers: boolean): number {
+  return attackerImprisonedOthers ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_MudSport` (`data/battle_ai_scripts.s:567-569`, EFFECT_MUD_SPORT): a
+ * single `if_status3 AI_USER, STATUS3_MUDSPORT, Score_Minus10` -- Mud Sport
+ * is penalized when the effect is already up on the AI's side. Zero
+ * ability/type reads, zero RNG.
+ */
+function runCbmMudSport(attackerMudSportUp: boolean): number {
+  return attackerMudSportUp ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_WaterSport` (`data/battle_ai_scripts.s:586-588`, EFFECT_WATER_SPORT):
+ * a single `if_status3 AI_USER, STATUS3_WATERSPORT, Score_Minus10` -- Water
+ * Sport is penalized when the effect is already up on the AI's side. Zero
+ * ability/type reads, zero RNG.
+ */
+function runCbmWaterSport(attackerWaterSportUp: boolean): number {
+  return attackerWaterSportUp ? -10 : 0;
 }
