@@ -458,6 +458,10 @@ import {
   type RazorLeafState,
 } from "./razorLeaf.ts";
 import {
+  magicalLeafAtAge,
+  type MagicalLeafState,
+} from "./magicalLeaf.ts";
+import {
   ironTailAtAge,
   type IronTailState,
 } from "./ironTail.ts";
@@ -1905,6 +1909,15 @@ export interface SceneOnRazorLeafConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnMagicalLeafConfig {
+  readonly move: "MAGICAL_LEAF";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Species-idle offset measured before ShakeMon2 takes ownership. */
+  readonly targetIdleX2: number;
+}
+
 export interface SceneOnIronTailConfig {
   readonly move: "IRON_TAIL";
   readonly attacker: SceneOnPresentationBattler;
@@ -2245,6 +2258,7 @@ export type SceneOnMoveConfig =
   | SceneOnDizzyPunchConfig
   | SceneOnAstonishConfig
   | SceneOnRazorLeafConfig
+  | SceneOnMagicalLeafConfig
   | SceneOnPoisonTailConfig
   | SceneOnSteelWingConfig
   | SceneOnIronTailConfig
@@ -2300,6 +2314,8 @@ export type SceneOnDizzyPunchPresentationState =
   SceneOnMovePresentationState<SceneOnDizzyPunchConfig>;
 export type SceneOnRazorLeafPresentationState =
   SceneOnMovePresentationState<SceneOnRazorLeafConfig>;
+export type SceneOnMagicalLeafPresentationState =
+  SceneOnMovePresentationState<SceneOnMagicalLeafConfig>;
 export type SceneOnTauntPresentationState =
   SceneOnMovePresentationState<SceneOnTauntConfig>;
 export type SceneOnScaryFacePresentationState =
@@ -2735,6 +2751,12 @@ export interface SceneOnAstonishView extends AstonishState {
 }
 
 export interface SceneOnRazorLeafView extends RazorLeafState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnMagicalLeafView extends MagicalLeafState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -5456,6 +5478,28 @@ export function sceneOnRazorLeafView(
       state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
     ),
+  };
+}
+
+/** `age=0` is the first in-bounds Move_MAGICAL_LEAF script frame. */
+export function sceneOnMagicalLeafView(
+  state: SceneOnMovePresentationState,
+): SceneOnMagicalLeafView {
+  if (state.config.move !== "MAGICAL_LEAF") {
+    throw new Error(
+      `expected MAGICAL_LEAF presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...magicalLeafAtAge(state.age, {
+      attackerSide: state.config.attacker.geometry.side,
+      attackerCenter: state.config.attacker.geometry.animationCenter,
+      targetCenter: state.config.target.geometry.animationCenter,
+      targetIdleX2: state.config.targetIdleX2,
+    }),
   };
 }
 
