@@ -5,10 +5,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1001 — [supervisor WIND-DOWN, 2026-08-08] Session summary: 20 workers / 8 rounds — ISSUES #80 CLOSED, **8 reachable engine barriers retired**, 44/66 AI scoring effects ported, battleScene canonical split begun, 2 animation folds
+## 1001 — [supervisor WIND-DOWN, 2026-08-08] Session summary: 20 workers / 8 rounds — ISSUES #80 CLOSED, **8 reachable engine barriers retired**, 44/66 CheckBadMove + first CheckViability batch, battleScene canonical split begun, 2 animation folds
 
 - **State:** master at this entry's commit, clean. **Final independent union
-  verification: full `npm test` 772 files / 7527 passed / 1 skipped, exit 0;
+  verification: full `npm test` 772 files / 7545 passed / 1 skipped, exit 0;
   `npm run build` exit 0** (session start was 768 / 7288). DEFERRED.md: no open
   entries — the next `run-supervisor.sh` is unblocked.
 - **Folds:** `animation-main` folded **twice** (6 commits: MOVE_DETECT exact +
@@ -64,10 +64,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   is not the target, and flips to `BIT_FLANK`, which does not exist at
   `gBattlersCount == 2`). (5) I omitted the no-full-suite clause from one main
   brief and it cost that worker its turn to a cap-kill (work salvaged).
-- **Next (ordered):** (1) `AI_CheckViability`'s sibling table dispatch (triage
-  A2) — only Swagger/Counter ported, a batch was in flight at wind-down.
-  (2) The 18 remaining `AI_CheckBadMove` effects, which need the state wiring
-  above before any of them can be transcribed. (3) split slice 4 continuation — blocked on two cross-program
+- **`AI_CheckViability` (the sibling scorer) opened too:** Rest 49, Absorb 43,
+  OHKO 28, Endure 24 ported; **69 table-listed effects remain**, next
+  BRICK_BREAK 46 (needs target-side Reflect) and SEMI_INVULNERABLE 32 (inputs
+  already modeled). AI_CV_Endure's non-obvious fall-through is worth knowing:
+  hp% >= 35 falls INTO the -1 branch rather than skipping it.
+- **The last full suite caught a real red that targeted runs missed.**
+  `tests/factoryAiScoredDecision.test.ts` hardcodes one still-unported effect
+  as its "barrier still fires loudly" example; porting EFFECT_ABSORB silenced
+  it. Re-pointed at MOVE_EXPLOSION with a maintenance comment, and the triage
+  queue now says every AI batch must run that file. **Third instance today of
+  the same class** — an assertion about the engine that the engine quietly
+  grew past.
+- **Next (ordered):** (1) more `AI_CheckViability` batches (69 left, proven
+  recipe). (2) The 18 remaining `AI_CheckBadMove` effects — these need the
+  state wiring named above FIRST, so brief that wiring, not another
+  transcription batch. (3) split slice 4 continuation — blocked on two cross-program
   decisions the worker correctly refused to make alone: a type-only export
   widening, and `drawTurn16PostSwitchField`, which would force
   `battleSceneCanonical.ts` to import `src/animation/` and trip the boundary
