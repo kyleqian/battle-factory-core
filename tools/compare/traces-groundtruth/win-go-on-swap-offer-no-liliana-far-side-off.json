@@ -1,0 +1,16 @@
+{
+  "sourceTrace": "win-go-on-swap-offer-no-guide-dismiss-off.json",
+  "appRoute": "generated-orchestrator",
+  "oracleProfile": "battle-scene-off",
+  "appStage": {
+    "id": "win-terminal-window-off",
+    "frame": 4623
+  },
+  "oracleBattleLab": {
+    "scenario": "../../battle-lab/scratch-win-go-on-swap-offer-no-guide-dismiss-probe.json"
+  },
+  "captureWindow": {
+    "start": 10638,
+    "end": 10752
+  }
+}
