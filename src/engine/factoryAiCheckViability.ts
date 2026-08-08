@@ -1914,6 +1914,84 @@ function runCvSuperFang(input: Readonly<{
   });
 }
 
+/**
+ * `AI_CV_Recharge` (`data/battle_ai_scripts.s:1588-1600`, EFFECT_RECHARGE --
+ * Hyper Beam / Blast Burn / Hydro Cannon / Frenzy Plant):
+ *
+ * ```
+ * AI_CV_Recharge:
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_25, AI_CV_Recharge_ScoreDown1
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_5, AI_CV_Recharge_ScoreDown1
+ *     if_target_faster AI_CV_Recharge2
+ *     if_hp_more_than AI_USER, 40, AI_CV_Recharge_ScoreDown1
+ *     goto AI_CV_Recharge_End
+ * AI_CV_Recharge2:
+ *     if_hp_less_than AI_USER, 60, AI_CV_Recharge_End
+ * AI_CV_Recharge_ScoreDown1:
+ *     score -1
+ * AI_CV_Recharge_End:
+ *     end
+ * ```
+ *
+ * Deterministic, zero draws (apart from the `if_target_faster` tie-break).
+ * Exactly 0.25x/0.5x effectiveness against the target scores -1 directly
+ * (the recharge waste outweighs the weak hit). Otherwise, if the target is
+ * NOT faster: HP > 40% scores -1 (wasting the recharge turn at mid HP), HP
+ * <= 40% is the zero `goto End`. If the target IS faster, `Recharge2`'s HP <
+ * 60% is the zero `goto End` -- only HP >= 60% FALLS THROUGH the second gate
+ * into the shared -1 (`ScoreDown1`, reached by fallthrough -- same source
+ * idiom as `AI_CV_Endure`'s own `Endure2`). All HP gates read AI_USER's own
+ * truncating percent. No command writes funcResult.
+ */
+function runCvRecharge(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  attackerTypes: readonly [string, string];
+  moveType: string;
+  targetTypes: readonly [string, string];
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  if (classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
+  }
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+
+  if (!targetFaster) {
+    // if_hp_more_than AI_USER, 40, AI_CV_Recharge_ScoreDown1: > 40 scores -1;
+    // else goto End (zero).
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: hpPercent > 40 ? -1 : 0 });
+  }
+
+  // Recharge2: if_hp_less_than AI_USER, 60, AI_CV_Recharge_End: < 60 ends at
+  // zero; >= 60 falls through into the shared ScoreDown1 (-1).
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: hpPercent < 60 ? 0 : -1 });
+}
+
 const AI_EFFECTIVENESS_X0_25 = 10;
 const AI_EFFECTIVENESS_X0_5 = 20;
 const AI_EFFECTIVENESS_X1 = 40;
@@ -4383,6 +4461,27 @@ export function runCheckViability(input: Readonly<{
       rng: superFang.rng,
       draws: superFang.draws,
       scoreDelta: superFang.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_RECHARGE") {
+    // AI_CV_Recharge (data/battle_ai_scripts.s:1588-1600).
+    const recharge = runCvRecharge({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      attackerTypes: input.attacker.types,
+      moveType: move.type,
+      targetTypes: input.target.types,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: recharge.rng,
+      draws: recharge.draws,
+      scoreDelta: recharge.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }

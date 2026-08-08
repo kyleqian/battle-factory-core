@@ -5339,3 +5339,55 @@ describe("AI_CV_SuperFang (data/battle_ai_scripts.s:1430-1433)", () => {
     expect(superFangRun(10)).toMatchObject({ funcResultAfter: 2 });
   });
 });
+
+describe("AI_CV_Recharge (data/battle_ai_scripts.s:1588-1600)", () => {
+  const MOVE_HYPER_BEAM = 63; // EFFECT_RECHARGE, TYPE_NORMAL
+
+  function rechargeRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_HYPER_BEAM,
+      attacker: { ...NEUTRAL_BATTLER, speed: 120, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, speed: 5, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "recharge",
+    });
+  }
+
+  it("0.25x effectiveness scores a deterministic -1 before any HP gate", () => {
+    // Hyper Beam (Normal) vs Rock+Steel -> 40*5/10*5/10 = 10 = x0_25.
+    const result = rechargeRun(1, {}, { types: ["TYPE_ROCK", "TYPE_STEEL"] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("0.5x effectiveness scores -1 (single resist)", () => {
+    // Hyper Beam (Normal) vs Rock+Ground -> 40*5/10 = 20 = x0_5.
+    const result = rechargeRun(1, {}, { types: ["TYPE_ROCK", "TYPE_GROUND"] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("neutral effectiveness, target NOT faster, own HP >40: scores -1", () => {
+    const result = rechargeRun(1, { hp: 60, maxHp: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("neutral effectiveness, target NOT faster, own HP <=40: zero (goto End)", () => {
+    const result = rechargeRun(1, { hp: 40, maxHp: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("target faster, own HP <60: Recharge2's gate ends at zero", () => {
+    const result = rechargeRun(1, { speed: 5, hp: 50, maxHp: 100 }, { speed: 120 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("target faster, own HP >=60: falls through into ScoreDown1 (-1)", () => {
+    const result = rechargeRun(1, { speed: 5, hp: 60, maxHp: 100 }, { speed: 120 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("carry preserved", () => {
+    expect(rechargeRun(1, { speed: 5, hp: 10, maxHp: 100 }, { speed: 120 })).toMatchObject({ funcResultAfter: 2 });
+  });
+});
