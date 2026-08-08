@@ -36,9 +36,9 @@ export interface WindUpLungeState {
 function sine(index: number, amplitude: number): number {
   // `Sin(index, amplitude)` = `(amplitude * gSineTable[index]) >> 8` with the
   // signed ARM shift (negative fractions round down, unlike JS `Math.trunc`).
-  const product = amplitude * GBA_SINE_TABLE_256[index & 0xff]!;
-  const shifted = product >> 8;
-  return product < 0 && shifted * 256 !== product ? shifted - 1 : shifted;
+  // JS `>>` is already an arithmetic shift, so it floors negative products
+  // exactly like the ARM one — no extra rounding correction.
+  return (amplitude * GBA_SINE_TABLE_256[index & 0xff]!) >> 8;
 }
 
 export function windUpLungeAtTick(
