@@ -5,6 +5,44 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 991 — [bounded MAIN worker, 2026-08-08] ISSUES #80 Class B LANDED (last open-fade defect): per-sprite draw-origin offsets — dense-a **341 → 354/354 byte-exact**, open window fully closed
+
+- **State:** master `56cae965`, clean. Typecheck + `npm run build` green,
+  `npm run test:smoke` **347/347**; touched test files **37/37**
+  (battlePartySelect 19/19 incl. the new Class B pin + inbattlePartyMenuVisualBind
+  8/8 + factoryVoluntarySwitchSeam 10/10). Dense-a spec extended
+  `766/768/770-780` (341 → **354 frames**), **354/354 twice-run byte-exact**
+  (fast loop 763:781 **19/19**). Keep-green all held: party-menu-status-item-off
+  **251/251**, mid-battle-switch-pacing-b-off **153/153**,
+  battle-command-generated-off **128/128**. Full `npm test` NOT run (worker
+  rule — supervisor after merge).
+- **Did (per `docs/fade-layer-forensics.md` §9 RAM probe, re-measured fresh):**
+  the player healthbox sprite's real `y2` steps 0→1 at oracle frame **770**
+  (`openElapsed 7`) and the player back sprite's real `y2` steps 1→0 at frame
+  **779** (`openElapsed 16`) — confirmed pixel-side that the oracle's shifted
+  content = `settled(y−1)` in the box region, the newly-revealed top row 74 is
+  the app's own floor (both byte-exact), and the slanted corner pixels come out
+  right because the sprite's transparency travels with it. Applied as per-sprite
+  **draw-origin** offsets (`healthboxShift +1` / `backSpriteShift −1`) gated on
+  `openElapsed` inside `drawBattle2ActionMenuWindow` (threaded through
+  `renderGeneratedBattleCommandPresentation` → `drawBattleScene[ObjOnly]` +
+  `PartySelectCloseRenderAssets`), so both the full draw and the obj-only
+  scratch carry the same offset and the Class A alpha-coverage composite guard
+  still holds. Tier-1 pin: rendered settled action-menu scene — healthbox
+  top-frame row at 74 at e=6 → 75 at e=7 (floor revealed above), back-sprite
+  ear tip appears at (86,58) only at e=16; both constants pinned; **each
+  red-verified independently** (neutralizing one shift fails its own
+  assertions). Also swept up a latent stale pin: `factoryVoluntarySwitchSeam
+  .test.ts` asserted 14/40 for the close fade while the constants landed 15/39
+  earlier (prior worker missed it) — now aligned and green.
+- **Next:** supervisor verify + full `npm test`; the last #80 item is the
+  SEND OUT/SUMMARY/CANCEL submenu-window geometry (~4461px at 926-963, never
+  spec-captured; a side lane is measuring it).
+- **Notes:** the two prior row-shift attempts failed on the sprite's own
+  boundary (27 bad pixels); drawing at the changed coordinate resolves them by
+  construction. No PAPERCUTS.
+
+
 ## 991 — [supervisor WIND-DOWN, 2026-08-07] Session summary: 17 workers / 9 rounds — party-menu OPEN animation built (763-824), close fade layer-split, message window swapped, lobby input FREEZE fixed, `loss-lobby-walk-off` PROMOTED 177/177, #71 Slice A REFUTED
 
 - **State:** master at this entry's commit, clean. `animation-main` folded at

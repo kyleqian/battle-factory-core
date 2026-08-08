@@ -69,66 +69,33 @@ layer-split menu fade-in 809-824. Dense-a spec extended to **980-1255 +
 763-765 + 767/769/781 + 782-808 + 809-824 = 325 frames, 325/325 byte-exact**
 (supervisor trimmed 771/773/775/777/779 out of the committed capture list
 rather than leave the spec red — same idiom as the pre-fix 964-979
-exclusion; the spec is **341/341** after item (c) closed). **Open-fade
-residual — 13 frames, both classes measured and attributed
-(`docs/fade-layer-forensics.md` §8, 2026-08-07 SIDE):**
-**Class A (8 frames: 766/768/770/772/774/776/778/780, ~7400-7600px each)** —
-the oracle's OBJ layer is one blend step behind its BG layer while the app
-blends the whole scene at a single `y_bg` (`drawBattleScene` is one opaque
-draw). The OBJ mask is now banked oracle-side: **7528 px**, bbox
-(13,16)-(229,111) = opponent healthbox + opponent front sprite + player
-healthbox + player back sprite (§8 labels the first two "summary window /
-summary sprite"; they are the opponent's healthbox and front sprite).
-**Class A FIXED 2026-08-08 (`7b8eedb0`):** the open field-fade-out now blends
-the settled battle scene's OBJ layer at `y_obj(e)=min(16,2·max(0,⌊(e−2)/2⌋))`
-(one blend step behind `y_bg`) via a sprite-only scratch pass —
-`drawBattle2ActionMenuWindow`/`renderGeneratedBattleCommandPresentation` gained
-an `obj-only` layer mode and `partySelectCloseRenderAssets` gained
-`drawBattleSceneObjOnly`; the scratch is composited over the `y_bg`-blended
-full scene using its alpha-255 coverage, counting only pixels the settled full
-scene still shows (the message-box chrome overpaints the sprite rows it
-covers). Frames **766 and 768 are byte-exact**; the remaining 6 frames
-(770/772/774/776/778/780) now carry **only** the Class B content shift
-(1639px each, same bbox/pixels as 771-779) — §8's "8 Class A frames go
-byte-exact" prediction was wrong because the Class B 1-row offset begins at
-frame 770 (§8c) and is exposed once the OBJ-lag is fixed. The 8-frame spec
-extension to 349 is therefore blocked by Class B and is NOT committed (per the
-promotion rule); dense-a stays **341/341** with the code + Tier-1 pins landed
-(y-pair helper `partySelectOpenFieldFadeObjY`, render-level per-layer blend
-pin, both red-verified). When Class B lands, dense-a extends with 766, 768 and
-770-780 (13 frames) → **354/354**.
-**Class B — THE LAST OPEN DEFECT (11 frames: 770-780, 1639px each; 2037px at
-779, 1983px at 780)** — the **player's healthbox**, bbox (127,74)-(229,110),
-carrying a **1-row-down content offset from frame 770**:
-`oracle(x,y) = blend(settled(x,y−1), y_obj)` for ~1612-1619px. At 779/780 the
-player back sprite joins it (1 row high), widening the bbox to
-(49,74)-(229,111).
-**The mechanism is measured TWICE independently and banked in
-`docs/fade-layer-forensics.md` §9 — implement from these coordinates, do NOT
-fit a pixel model:** player healthbox sprite `y2` 0→1 (`oam.y` 72→73) at
-frame **770**; player back sprite `y2` 1→0 (`oam.y` 62→61) at frame **779**;
-rows 74-110 differ while row 111 is clean. **Draw the sprites at the changed
-coordinate; do not shift composited framebuffer rows** — two workers tried
-that and both failed on the sprite's own boundary (a row-shift leaves 27 bad
-pixels: the top row y=74 at x139-144/x207-216/x223-225, plus (136,76),
-(227,92), (228,92), (229,92), (132,104), (131,105), (128,108), (127,109) —
-the top edge and the slanted lower-left corner; a "frame bevel stays,
-interior shifts" refinement scored worse).
-**Two earlier labels are REFUTED, do not reinstate them:** it is not an
-"opponent idle breathing squish" (the opponent-sprite region is byte-exact on
-all five frames, and the OFF RAM receipt in
-`docs/send-out-slice-a-positive-case.md` shows that sprite settled at
-`SpriteCallbackDummy`/`animNum 0`/`{x2:0,y2:0}` with nothing to animate), and
-there is **no third fade schedule** — the healthbox interior tracks `y_obj`
-exactly. The BG/OBJ split half is now LANDED (Class A above); what remains is
-only the two per-sprite coordinate steps. Predicted acceptance: dense-a
-**341 → 354/354**.
-**Also open (never spec-pinned):** the SEND OUT/SUMMARY/CANCEL submenu window
-itself carries a **~4461px** difference across 926-963. The app draws a
-scaffold generic 10x6 standard window at (144,80) with three text lines (the
-`state.submenuOpen` branch of `renderBattlePartySelect`); the oracle's real
-template is in `reference/pokeemerald/data/party_menu.h` alongside the message
-templates. No compare spec captures 926-963, so this has never been measured.
+exclusion; the spec is **341/341** after item (c) closed). **Open window
+CLOSED 2026-08-08 — dense-a **354/354 byte-exact** (763-824 open window fully
+pinned).** The two open-fade residual classes, both measured and attributed
+(`docs/fade-layer-forensics.md` §8/§9, 2026-08-07 SIDE):
+**Class A LANDED 2026-08-08 (`7b8eedb0`)** — the oracle's OBJ layer is one
+blend step behind its BG layer through the open field-fade-out, while the app
+blended the whole scene at a single `y_bg`. The settled scene's OBJ layer now
+blends at `y_obj(e)=min(16,2·max(0,⌊(e−2)/2⌋))` via a sprite-only scratch pass
+(`obj-only` layer mode in `drawBattle2ActionMenuWindow`/
+`renderGeneratedBattleCommandPresentation` + `PartySelectCloseRenderAssets.
+drawBattleSceneObjOnly`) composited over the `y_bg`-blended full scene using
+its alpha-255 coverage, counting only pixels the settled full scene still
+shows. **Class B LANDED 2026-08-08 (`c24f0f4e`)** — the last open defect: the
+**player healthbox** sprite's real `y2` steps 0→1 at oracle frame **770**
+(`openElapsed 7`, drawn one row lower) and the **player back sprite**'s real
+`y2` steps 1→0 at frame **779** (`openElapsed 16`, drawn one row higher),
+measured twice independently via RAM probe (probe tick 769 = frame 770, tick
+778 = frame 779, `docs/fade-layer-forensics.md` §9). Applied as per-sprite
+draw-origin offsets gated on `openElapsed` inside the open scene draw, so each
+sprite's own edges/bevel/slanted corner move with it — the two earlier
+composited-framebuffer row-shifts failed at the sprite boundary (27 bad
+pixels). Dense-a captureFrames +13 (766/768/770-780) → **354/354 byte-exact,
+twice-run**; fast loop 763:781 **19/19**; Tier-1 pins red-verified.
+**Remaining party-menu visual gap (never spec-captured):** the SEND OUT/
+SUMMARY/CANCEL submenu window geometry — the app's 10x6 standard window at
+(144,80) vs the oracle's taller window (~4461px at 926-963). A side lane is
+measuring it.
 (c) message-box residual — **CLOSED 2026-08-07** (dense-a spec **341/341
 byte-exact**). On the submenu-open edge (A-press 922-923, window lands 926)
 the oracle swaps the message window from sDefaultPartyMsgWindowTemplate (21x2,
@@ -145,10 +112,7 @@ modeled as a permanent +2 offset from the submenu-open edge (oracle toggles
 489px icon residual on 965/966/973/974. Tier-1 pins red-verified in
 `tests/battlePartySelect.test.ts` + `tests/partyMonIconAnim.test.ts`. Dense-a
 captureFrames extended 964-979 → **341 frames, 341/341 byte-exact**; keep-green
-251/251 + 153/153 + 128/128 all held. **Remaining party-menu visual gap (not
-captured by any spec): the SEND OUT/SUMMARY/CANCEL submenu window geometry —
-the app's 10x6 window at (144,80) vs the oracle's taller window (~4461px at
-926-963).**
+251/251 + 153/153 + 128/128 all held.
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
