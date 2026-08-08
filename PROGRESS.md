@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1016 — [bounded MAIN worker, 2026-08-08] **AI_CV_PsychUp live receipt: legal staged reach/control twins match the OFF ROM 8/8 reruns**
+
+- **State:** implementation commit `277be8b8` plus this evidence checkpoint are
+  green. Full `npm test` passes (**796 files / 8009 passed / 1 skipped**),
+  smoke **375/375**, typecheck/build, targeted Tier-1 Psych Up and
+  `AI_CheckViability` (**603 tests**), and diff check are green.
+- **Did:** added complete three-party `overrides.parties` twins: Scizor uses
+  real Swords Dance x2 (reach ATK stage 10) or Focus Energy x2 (control stays
+  neutral), then Slash KOs a level-5 Magikarp Splash relay. Legal level-50
+  Golduck enters with `[Psych Up, Scratch, Scratch, Scratch]`. OFF verifier
+  reran each of seed 1/2 × reach/control twice: **4/4 rows**, exact slot,
+  CV/final score vectors, six draws (`BattleTurnPassed` + setup×4 + tie), and
+  endpoint RNG all match. No production handler change.
+- **Next:** supervisor review; continue the ordered hardware-receipt backlog
+  without reopening the finite Stage 8 reset or canonical Battle 2 march.
+- **Notes:** seed 2's inert Scratch slot has the observed -1 TryToFaint score
+  (`[88,100,99,100]` / `[101,100,99,100]`); it is pinned, not normalized.
+
 ## 1015 — [supervisor, 2026-08-08] **Orient animation fold + generic AI turn ownership fixed + Battle-2 room re-entry presentation independently pinned**
 
 - **State:** master at this entry's commit, clean. Orient fast-forwarded the four
