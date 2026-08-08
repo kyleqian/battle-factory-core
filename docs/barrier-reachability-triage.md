@@ -479,6 +479,31 @@ the engine's current resolver accepts each operand:
 
 ## Ranked dispatch queue
 
+> **STATUS after the 2026-08-08 session (supervisor).** Eight of the twelve (A)
+> items are DONE and merged; one was refuted. Remaining work, in order:
+>
+> | Item | State |
+> | --- | --- |
+> | 1. AI `AI_CheckBadMove` if_effect handlers | **IN PROGRESS** — 16 effects ported (batches 1-2, each its own commit). **50 effects / ~280 weighted remain**, led by ATTRACT 45, EXPLOSION 25, PSYCH_UP 14, BATON_PASS 13. Same recipe; just keep batching. |
+> | 2. `Cmd_tryKO` Focus Band | **DONE** |
+> | 3. Lightning Rod redirection | **REFUTED — (C), unreachable in singles.** Do not take it. |
+> | 4. `VARIOUS_GET_BATTLER_FAINTED` | **DONE** |
+> | 5. Pursuit pre-switch interception | **DONE** — Pursuit now works end to end. |
+> | 6. `Cmd_getexp` BS_FAINTED | **DONE** |
+> | 7. `B_ANIM_FOCUS_PUNCH_SETUP` | **DONE** — and it required porting `Cmd_playanimation`'s full five-way dispatch, because Scene-OFF sets `HITMARKER_NO_ANIMATIONS` for the whole battle, making branches 2 and 4 the normal path rather than edge cases. |
+> | 8. `printfromtable` message tables | **DONE** — Truant Slaking's loafing turn and fire-move thaw. |
+> | 9. `sProtectSuccessRates[4]` OOB | **DONE** — measured from the ROM: the adjacent `u16` is `MOVE_METRONOME` (118), so a 5th consecutive Protect succeeds ~0.18% of the time. Evidence: `docs/protectlike-oob-adjacent-byte.md`. |
+> | 10. `DMG_RECOIL_FROM_MISS` / `DMG_DOUBLED` | **DONE** — Struggle recoil (universal) and Beat Up. |
+> | 11. battle-outcome → `B_ACTION_FINISHED` handoff | **OPEN.** Note this entry's own honest caveat: reachability was never proven. Prove it with a battle-end fixture BEFORE porting. |
+> | 12. Enigma Berry (bucket B) | **OPEN**, lowest priority. |
+> | A2. `AI_CheckViability` if_effect table | **OPEN** — the sibling of item 1, not yet started. |
+>
+> **Read the refutation box under A4 before trusting any remaining (A) claim.**
+> Three of the entries checked this session had defects: Lightning Rod was
+> wrong outright, and two others (`getexp` BS_FAINTED, the Pursuit `various`
+> case) were right but for reasons the entry stated imprecisely. Carrier count
+> proves a species can appear, never that a branch can fire — open the guard.
+
 Ordered by unblocked breadth per unit of port size. A future worker can take
 line 1 and start.
 
