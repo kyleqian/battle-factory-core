@@ -5831,3 +5831,74 @@ describe("AI_CV_Facade (data/battle_ai_scripts.s:2279-2287)", () => {
     expect(facadeRun({ isToxicPoisoned: true })).toMatchObject({ kind: "scored", scoreDelta: 1 });
   });
 });
+
+describe("AI_CV_Curse (data/battle_ai_scripts.s:1870-1892)", () => {
+  const MOVE_CURSE = 174; // EFFECT_CURSE
+
+  function curseRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_CURSE,
+      attacker: { ...NEUTRAL_BATTLER, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "curse",
+    });
+  }
+
+  it("DEF 10+: zero draws, zero score", () => {
+    const result = curseRun(1, { defStage: 10 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("DEF 8: one draw; roll >= 128 adds +1 then Curse2's DEF>7 gate stops", () => {
+    // seed 1 -> roll1 low byte 198 (>= 128, +1).
+    const result = curseRun(1, { defStage: 8 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["curse-roll-1"]);
+  });
+
+  it("DEF 7: two draws; roll1 JUMP (no +1), roll2 JUMP (no +1)", () => {
+    // seed 4 -> roll1 low byte 25 (<128 JUMP), roll2 low byte 8 (<128 JUMP).
+    const result = curseRun(4, { defStage: 7 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["curse-roll-1", "curse-roll-2"]);
+  });
+
+  it("DEF 6: all three rolls; roll1/roll3 FALL-THROUGH gives +2", () => {
+    // seed 1 -> rolls 198 (>=128 +1), 33 (<128 JUMP), 238 (>=128 +1).
+    const result = curseRun(1, { defStage: 6 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["curse-roll-1", "curse-roll-2", "curse-roll-3"]);
+  });
+
+  it("DEF 6, all three rolls JUMP: zero score", () => {
+    // seed 4 -> 25 (<128), 8 (<128), 104 (<128).
+    const result = curseRun(4, { defStage: 6 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("Ghost user, HP > 80: zero score", () => {
+    const result = curseRun(1, { types: ["TYPE_GHOST", "TYPE_GHOST"] as const, hp: 81, maxHp: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("Ghost user, HP <= 80: -1", () => {
+    const result = curseRun(1, { types: ["TYPE_GHOST", "TYPE_GHOST"] as const, hp: 80, maxHp: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1 });
+  });
+
+  it("funcResult = type2 (last get_user_type write) for a non-Ghost user", () => {
+    // TYPE_FIGHTING id 1 -> AI_WEATHER_RAIN collision.
+    const result = curseRun(1, { types: ["TYPE_FIRE", "TYPE_FIGHTING"] as const, defStage: 10 });
+    expect(result).toMatchObject({ kind: "scored", funcResultAfter: 1 });
+  });
+});

@@ -749,6 +749,16 @@ export type FactoryAiCheckViabilityDraw =
     rawRngValue: number;
     randomValue: number;
     jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "curse-roll-1" | "curse-roll-2" | "curse-roll-3";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    jumped: boolean;
   }>;
 
 export type FactoryAiCheckViabilityResult =
@@ -4319,6 +4329,96 @@ function runCvFacade(input: Readonly<{
   });
 }
 
+/**
+ * `AI_CV_Curse` (`data/battle_ai_scripts.s:1870-1892`, EFFECT_CURSE):
+ *
+ * ```
+ * AI_CV_Curse:
+ *     get_user_type1
+ *     if_equal TYPE_GHOST, AI_CV_Curse4
+ *     get_user_type2
+ *     if_equal TYPE_GHOST, AI_CV_Curse4
+ *     if_stat_level_more_than AI_USER, STAT_DEF, 9, AI_CV_Curse_End
+ *     if_random_less_than 128, AI_CV_Curse2
+ *     score +1
+ * AI_CV_Curse2:
+ *     if_stat_level_more_than AI_USER, STAT_DEF, 7, AI_CV_Curse_End
+ *     if_random_less_than 128, AI_CV_Curse3
+ *     score +1
+ * AI_CV_Curse3:
+ *     if_stat_level_more_than AI_USER, STAT_DEF, DEFAULT_STAT_STAGE, AI_CV_Curse_End
+ *     if_random_less_than 128, AI_CV_Curse_End
+ *     score +1
+ *     goto AI_CV_Curse_End
+ * AI_CV_Curse4:
+ *     if_hp_more_than AI_USER, 80, AI_CV_Curse_End
+ *     score -1
+ * AI_CV_Curse_End:
+ *     end
+ * ```
+ *
+ * Split by the user's OWN type: a Ghost-type user's Curse is the 1/2-HP
+ * spectral variant -- HP > 80% is the zero `goto End`, HP <= 80% scores -1,
+ * zero draws. Non-Ghost users get the physical DEF-raise variant, gated on
+ * the user's OWN DEF stage (stored 0-12, `DEFAULT_STAT_STAGE`=6): three
+ * successive DEF bands each run a `<128` roll whose JUMP keeps the running
+ * score and whose FALL-THROUGH applies +1, and each band's DEF gate can stop
+ * the chain early. DEF 10-12: zero draws, zero score (stopped before roll1).
+ * DEF 8-9: one draw (+1 iff roll1 >= 128), then Curse2's DEF>7 gate stops.
+ * DEF 7: two draws (roll1, roll2), then Curse3's DEF>6 gate stops. DEF 0-6:
+ * all three rolls, +1 per roll >= 128. `get_user_type1`/`get_user_type2`
+ * always write funcResult: the exit value is type1 (if it is Ghost) or type2
+ * (in every other case, matched or not) -- the same type-chain shape the
+ * other type-reading handlers use, `typeChainFuncResultAfter` with the
+ * Ghost-only list.
+ */
+function runCvCurse(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  attackerTypes: readonly [string, string];
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  let score = 0;
+
+  const funcResultAfter = typeChainFuncResultAfter(input.attackerTypes, new Set(["TYPE_GHOST"]));
+
+  const isGhost = input.attackerTypes[0] === "TYPE_GHOST" || input.attackerTypes[1] === "TYPE_GHOST";
+  if (isGhost) {
+    // Curse4: HP > 80 is the zero goto End; <= 80 scores -1.
+    const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: hpPercent > 80 ? 0 : -1, funcResultAfter });
+  }
+
+  const defStage = input.attacker.defStage;
+  const roll = (kind: "curse-roll-1" | "curse-roll-2" | "curse-roll-3"): boolean => {
+    const draw = nextDraw(rng, ordinal, `${input.reasonPrefix}-${kind}`);
+    rng = draw.after;
+    ordinal += 1;
+    const jumped = draw.randomValue % 256 < 128;
+    draws.push(Object.freeze({ ...draw, kind, jumped }));
+    if (!jumped) score += 1;
+    return jumped;
+  };
+
+  if (defStage > 9) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+  }
+  roll("curse-roll-1");
+  if (defStage > 7) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+  }
+  roll("curse-roll-2");
+  if (defStage > 6) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+  }
+  roll("curse-roll-3");
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -5280,6 +5380,25 @@ export function runCheckViability(input: Readonly<{
       draws: facade.draws,
       scoreDelta: facade.scoreDelta,
       funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_CURSE") {
+    // AI_CV_Curse (data/battle_ai_scripts.s:1870-1892) -- Ghost-typed users
+    // take the 1/2-HP branch, everyone else the DEF-raise chain.
+    const curse = runCvCurse({
+      rng: input.rng,
+      attacker: input.attacker,
+      attackerTypes: input.attacker.types,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: curse.rng,
+      draws: curse.draws,
+      scoreDelta: curse.scoreDelta,
+      funcResultAfter: curse.funcResultAfter,
     });
   }
 
