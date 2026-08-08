@@ -18,9 +18,9 @@ import {
  * survival, not a faint.
  */
 describe("turn4RockSlidePresentationStaging: staged real ROCK_SLIDE hit chain (docs/presentation-seam-scout.md §9.3/§9.4)", () => {
-  it("reaches the script's own terminal end with the real recorded hit -- 41 -> 1, byte-identical to battle1-grovyle-faint-ram-dump.json's own \"4892\"/\"5926\" battler1.hp snapshots", () => {
+  it("makes the staged endpoint, rather than a copied scalar, own the script's real recorded terminal HP", () => {
     const result = stageTurn4RockSlideHitChain();
-    expect(result.targetHpAfter).toBe(1);
+    expect(result.targetHpAfter).toBe(resolveTurn4RockSlideHpEndpoints().to);
   });
 
   it("emits exactly the event-kind sequence the registered opcodes produce for a singles, no-Pressure, non-crit, neutral-effectiveness ROCK_SLIDE hit -- same shape window 2's own turn-1 chain proved, no faint-family event anywhere in this stream", () => {

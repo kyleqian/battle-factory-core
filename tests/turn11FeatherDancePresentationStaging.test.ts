@@ -69,7 +69,7 @@ describe("turn11FeatherDancePresentationStaging: staged real FEATHER_DANCE oppon
     expect(lines).toEqual(["Foe PIDGEOTTO used", "FEATHERDANCE!"]);
   });
 
-  it("resolveTurn11AtkFloorLines resolves byte-identical to TURN11_ATKFLOOR_LINE1/2 (battleScene.ts:11280-11281), curly apostrophe included -- the charmap resolver fix (entry 520) already makes this byte-identical, the KNOWN PREREQUISITE that blocked this window in docs/presentation-seam-scout.md §13's own candidates table is resolved", () => {
+  it("resolveTurn11AtkFloorLines owns the exact ATK-floor presentation text, curly apostrophe included", () => {
     const lines = resolveTurn11AtkFloorLines();
     expect(lines).toEqual(["ONIX’s ATTACK", "won’t go lower!"]);
   });

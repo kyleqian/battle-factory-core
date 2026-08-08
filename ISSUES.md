@@ -1525,6 +1525,19 @@ partly stale:** slice 1's `PIDGEOTTO_MAX_HP` literal is already
 symbol cluster no longer exists. Slice 2's six healthbox factories are
 confirmed still present and unparameterized.
 
+**Two staged bare fact sources retired (2026-08-08, `5de9c142`).** Turn 5's
+ENDEAVOR squish/field path now consumes `TURN4_ROCKSLIDE_HP.to`, the typed
+41→1 endpoint from `resolveTurn4RockSlideHpEndpoints()`. Turn 11's ATK-floor
+renderer and visible-character total now share the lines produced by
+`resolveTurn11AtkFloorLines()`. The old HP scalar plus both bare string
+exports, their compatibility imports/re-exports, and literal-only tests are
+gone: exact old-symbol executable production refs **12→0**; the reproducible
+broad #39 inventory moves **1,950→1,949** matching lines and
+`battleScene.ts` **36,344→36,343 LOC**. Differential replay against the clean
+parent is **2,529/2,529 byte-identical** across the affected turn-4, turn-5,
+turn-11 and upstream-reader OFF windows. The remaining #39 render-entry debt
+above is unchanged.
+
 # Settled records (not open work — see the note at the top of this file)
 
 ## #56 — [SETTLED 2026-08-03, supervisor decision] Arbitrary-trainer intro: YOSHI 700/751 + MAGNETON 703/751, every residual frame in a settled class

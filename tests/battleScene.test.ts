@@ -94,8 +94,9 @@ import {
   TURN11_ROCKSLIDE_PRESS_TICK,
   turn11AtkFloorTextStartTick,
   turn11AtkFloorTextVisibleChars,
-  TURN11_ATKFLOOR_LINE1,
-  TURN11_ATKFLOOR_LINE2,
+  TURN11_ATKFLOOR_KICKOFF_LINE1,
+  TURN11_ATKFLOOR_KICKOFF_LINE2,
+  TURN11_ATKFLOOR_TEXT_TOTAL,
   turn11SuperEffectiveTextStartTick,
   turn11SuperEffectiveTextVisibleChars,
   turn11RockSlideResettledBounceTick,
@@ -2344,9 +2345,10 @@ describe("S7 slice R rung 1: TURN11_ROCKSLIDE_PRESS_TICK - the synthetic anchor 
 
 describe("S7 slice R rung 1: turn11AtkFloorTextStartTick/turn11AtkFloorTextVisibleChars - the ATK-floor 'won't go any lower!' message, the ONE genuinely new mechanism this turn (docs/turn11-notes.md addendum §3), fresh-oracle-bisected against a real FEATHER_DANCE confirm press", () => {
   const pressTick = 13339; // FEATHER_PRESS_TICK, the real A-confirm press
-  it("uses the real U+2019 apostrophe, not ASCII", () => {
-    expect(TURN11_ATKFLOOR_LINE1).toBe("ONIX’s ATTACK");
-    expect(TURN11_ATKFLOOR_LINE2).toBe("won’t go lower!");
+  it("takes its reveal total from the resolver-owned staged lines", () => {
+    expect(TURN11_ATKFLOOR_TEXT_TOTAL).toBe(
+      TURN11_ATKFLOOR_KICKOFF_LINE1.length + TURN11_ATKFLOOR_KICKOFF_LINE2.length,
+    );
   });
   it("starts at render 13422 (pressTick+83)", () => {
     expect(turn11AtkFloorTextStartTick(pressTick)).toBe(13422);

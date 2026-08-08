@@ -56,9 +56,7 @@
  * `anchorPlayerAfterTurn3Hp` (`battle1-grovyle-faint-ram-dump.json`'s
  * `battlerSnapshots["4892"].battler0.hp`), the real turn-3-settled value
  * this window's own ENDEAVOR drain starts from. Grovyle (attacker) is at 1
- * HP -- `battleScene.ts`'s `anchorOpponentAfterTurn4Hp` (a hardcoded literal
- * in that file, itself sourced from an uncommitted `tools/probe/ram-probe.py`
- * run per that constant's own doc comment), the real HP Grovyle holds for
+ * HP -- the staged turn-4 ROCK_SLIDE endpoint, the real HP Grovyle holds for
  * this entire window (it is not touched again before turn 5's ENDEAVOR).
  * `setdamagetohealthdifference`'s own real formula (`target.hp - attacker.hp
  * = 88 - 1 = 87`) settles Onix at exactly 1 -- `battleScene.ts`'s
@@ -112,7 +110,7 @@ const SPECIES_GROVYLE = 278;
 const STAGED_RNG_SEED = 919694434;
 /** battleScene.ts's anchorPlayerAfterTurn3Hp -- Onix's real turn-3-settled HP, this window's own drain start. */
 const ONIX_TARGET_HP = 88;
-/** battleScene.ts's anchorOpponentAfterTurn4Hp -- Grovyle's real HP throughout this entire window. */
+/** Grovyle's real post-turn-4 HP throughout this entire window. */
 const GROVYLE_ATTACKER_HP = 1;
 
 function battler(changes: Partial<BattleScriptRulesBattler>): BattleScriptRulesBattler {
