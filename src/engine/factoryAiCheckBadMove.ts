@@ -644,6 +644,44 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * the two gendered values.
    */
   gender?: FactoryAiMonGender;
+  /**
+   * `gStatuses3[AI_USER] & STATUS3_IMPRISONED_OTHERS` -- `AI_CBM_Imprison`'s
+   * single gate (`data/battle_ai_scripts.s:559-561`, EFFECT_IMPRISON).
+   * Optional, defaulting to `false`.
+   */
+  imprisonedOthers?: boolean;
+  /**
+   * `gStatuses3[AI_USER] & STATUS3_MUDSPORT` -- `AI_CBM_MudSport`'s single
+   * gate (`data/battle_ai_scripts.s:567-569`, EFFECT_MUD_SPORT). Optional,
+   * defaulting to `false`.
+   */
+  mudSportUp?: boolean;
+  /**
+   * `gStatuses3[AI_USER] & STATUS3_WATERSPORT` -- `AI_CBM_WaterSport`'s
+   * single gate (`data/battle_ai_scripts.s:586-588`, EFFECT_WATER_SPORT).
+   * Optional, defaulting to `false`.
+   */
+  waterSportUp?: boolean;
+  /**
+   * `gBattleStruct->usedHeldItems[AI_USER]` as read by `get_used_held_item`
+   * (`Cmd_get_used_held_item`, `battle_ai_script_commands.c:2137-2150`) --
+   * `AI_CBM_Recycle`'s single `if_equal ITEM_NONE` gate
+   * (`data/battle_ai_scripts.s:554-557`, EFFECT_RECYCLE). Optional,
+   * defaulting to 0 (`ITEM_NONE`) -- the real battle-start value, so Recycle
+   * scores its -10 when the field is absent.
+   */
+  usedHeldItemId?: number;
+  /**
+   * `gDisableStructs[AI_USER].stockpileCounter` as read by
+   * `get_stockpile_count` (`Cmd_get_stockpile_count`,
+   * `battle_ai_script_commands.c:2116-2127`) -- 0..3, the same typed counter
+   * the battle-script Stockpile opcode writes
+   * (`battleScriptStockpileOpcode.test.ts`). `AI_CBM_Stockpile`'s
+   * `if_equal 3` gate and `AI_CBM_SpitUpAndSwallow`'s `if_equal 0` gate
+   * (`data/battle_ai_scripts.s:511-514,516-520`). Optional, defaulting to 0
+   * (the real battle-start count).
+   */
+  stockpileCount?: number;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{

@@ -591,6 +591,16 @@ export type FactoryAiScoredBattlerView = Readonly<{
   mistUp?: boolean;
   /** `GetGenderFromSpeciesAndPersonality`'s MON_MALE/MON_FEMALE/MON_GENDERLESS -- `AI_CBM_Attract`'s own user and target gender gates (EFFECT_ATTRACT). Optional; `undefined` behaves exactly like MON_GENDERLESS (the source's Score_Minus10 fallthrough), never like a gendered value. */
   gender?: FactoryAiMonGender;
+  /** `gStatuses3[] & STATUS3_IMPRISONED_OTHERS` on the AI's own battler -- `AI_CBM_Imprison`'s single gate (attacker's own copy only, EFFECT_IMPRISON). Optional, defaulting to `false`. */
+  imprisonedOthers?: boolean;
+  /** `gStatuses3[] & STATUS3_MUDSPORT` on the AI's own battler -- `AI_CBM_MudSport`'s single gate (attacker's own copy only, EFFECT_MUD_SPORT). Optional, defaulting to `false`. */
+  mudSportUp?: boolean;
+  /** `gStatuses3[] & STATUS3_WATERSPORT` on the AI's own battler -- `AI_CBM_WaterSport`'s single gate (attacker's own copy only, EFFECT_WATER_SPORT). Optional, defaulting to `false`. */
+  waterSportUp?: boolean;
+  /** `gBattleStruct->usedHeldItems[]` on the AI's own battler, read by `get_used_held_item` -- `AI_CBM_Recycle`'s single `if_equal ITEM_NONE` gate (attacker's own copy only, EFFECT_RECYCLE). Optional, defaulting to 0 (`ITEM_NONE`, the battle-start value). */
+  usedHeldItemId?: number;
+  /** `gDisableStructs[].stockpileCounter` (0..3) on the AI's own battler, read by `get_stockpile_count` -- `AI_CBM_Stockpile`'s `if_equal 3` and `AI_CBM_SpitUpAndSwallow`'s `if_equal 0` gates (attacker's own copy only). Optional, defaulting to 0 (battle-start count). */
+  stockpileCount?: number;
 }>;
 
 export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
@@ -946,6 +956,11 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     ...(view.attacker.hasCurableStatus === true ? { hasCurableStatus: true } : {}),
     ...(view.attacker.mistUp === true ? { mistUp: true } : {}),
     ...(view.attacker.gender === undefined ? {} : { gender: view.attacker.gender }),
+    ...(view.attacker.imprisonedOthers === true ? { imprisonedOthers: true } : {}),
+    ...(view.attacker.mudSportUp === true ? { mudSportUp: true } : {}),
+    ...(view.attacker.waterSportUp === true ? { waterSportUp: true } : {}),
+    ...(view.attacker.usedHeldItemId === undefined ? {} : { usedHeldItemId: view.attacker.usedHeldItemId }),
+    ...(view.attacker.stockpileCount === undefined ? {} : { stockpileCount: view.attacker.stockpileCount }),
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [
