@@ -7695,3 +7695,56 @@ describe("AI_CV_SpitUp (data/battle_ai_scripts.s:2253-2259, EFFECT_SPIT_UP)", ()
     expect(result).toMatchObject({ scoreDelta: 2, draws: [{ kind: "spit-up-roll", jumped: false }] });
   });
 });
+
+describe("AI_CV_MirrorMove (data/battle_ai_scripts.s:838-894, EFFECT_MIRROR_MOVE)", () => {
+  const MOVE_MIRROR_MOVE_TEST = 119;
+  const MOVE_TOXIC_TEST = 92; // encouraged list
+  const MOVE_TACKLE_TEST = 33; // not encouraged
+
+  function mirrorRun(rngValue: number, attackerSpeed: number, targetSpeed: number, lastUsedMoveId: number) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_MIRROR_MOVE_TEST,
+      attacker: { ...NEUTRAL_BATTLER, speed: attackerSpeed },
+      target: { ...NEUTRAL_BATTLER, speed: targetSpeed, lastUsedMoveId },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "mirror",
+    });
+  }
+
+  it("target slower, encouraged last move, roll < 128: zero (roll-1)", () => {
+    // seed 3 -> low byte 83 (< 128).
+    const result = mirrorRun(3, 120, 100, MOVE_TOXIC_TEST);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0 });
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "mirror-move-roll-1", jumped: true });
+  });
+
+  it("target slower, encouraged last move, roll >= 128: +2", () => {
+    // seed 1 -> low byte 198 (>= 128).
+    const result = mirrorRun(1, 120, 100, MOVE_TOXIC_TEST);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 2, draws: [{ kind: "mirror-move-roll-1", jumped: false }] });
+  });
+
+  it("target slower, NON-encouraged last move: MirrorMove2's roll-2, roll < 80 zero", () => {
+    // seed 3 -> low byte 83 (>= 80, falls through to -1). Use seed 4 -> 25 (< 80).
+    const result = mirrorRun(4, 120, 100, MOVE_TACKLE_TEST);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [{ kind: "mirror-move-roll-2", jumped: true }] });
+  });
+
+  it("target slower, NON-encouraged last move, roll >= 80: -1", () => {
+    const result = mirrorRun(3, 120, 100, MOVE_TACKLE_TEST);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [{ kind: "mirror-move-roll-2", jumped: false }] });
+  });
+
+  it("target faster: MirrorMove2's roll-2 regardless of last move", () => {
+    const result = mirrorRun(1, 80, 120, MOVE_TOXIC_TEST);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "mirror-move-roll-2" });
+  });
+});

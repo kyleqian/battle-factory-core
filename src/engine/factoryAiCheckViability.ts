@@ -1073,6 +1073,17 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "mirror-move-roll-1" | "mirror-move-roll-2";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < 128 for roll-1 / < 80 for roll-2) skips the own score. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind: "get-ability";
     before: BattleRngState;
     after: BattleRngState;
@@ -6729,6 +6740,24 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_MIRROR_MOVE") {
+    // AI_CV_MirrorMove (data/battle_ai_scripts.s:838-894).
+    const mirrorMove = runCvMirrorMove({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: mirrorMove.rng,
+      draws: mirrorMove.draws,
+      scoreDelta: mirrorMove.scoreDelta,
+      funcResultAfter: mirrorMove.funcResultAfter,
+    });
+  }
+
   if (move.effect === "EFFECT_RECYCLE") {
     // AI_CV_Recycle (data/battle_ai_scripts.s:2426-2442).
     const recycle = runCvRecycle({
@@ -9122,6 +9151,111 @@ function runCvSpitUp(input: Readonly<{
     rng: roll.after,
     draws: Object.freeze([Object.freeze({ ...roll, kind: "spit-up-roll" as const, jumped })]),
     scoreDelta: jumped ? 0 : 2,
+    funcResultAfter,
+  });
+}
+
+/** `AI_CV_MirrorMove_EncouragedMovesToMirror` (data/battle_ai_scripts.s:854-894) as move names. */
+const AI_CV_MIRROR_MOVE_ENCOURAGED_NAMES: ReadonlySet<string> = new Set([
+  "MOVE_SLEEP_POWDER", "MOVE_LOVELY_KISS", "MOVE_SPORE", "MOVE_HYPNOSIS",
+  "MOVE_SING", "MOVE_GRASS_WHISTLE", "MOVE_SHADOW_PUNCH", "MOVE_SAND_ATTACK",
+  "MOVE_SMOKESCREEN", "MOVE_TOXIC", "MOVE_GUILLOTINE", "MOVE_HORN_DRILL",
+  "MOVE_FISSURE", "MOVE_SHEER_COLD", "MOVE_CROSS_CHOP", "MOVE_AEROBLAST",
+  "MOVE_CONFUSE_RAY", "MOVE_SWEET_KISS", "MOVE_SCREECH", "MOVE_COTTON_SPORE",
+  "MOVE_SCARY_FACE", "MOVE_FAKE_TEARS", "MOVE_METAL_SOUND", "MOVE_THUNDER_WAVE",
+  "MOVE_GLARE", "MOVE_POISON_POWDER", "MOVE_SHADOW_BALL", "MOVE_DYNAMIC_PUNCH",
+  "MOVE_HYPER_BEAM", "MOVE_EXTREME_SPEED", "MOVE_THIEF", "MOVE_COVET",
+  "MOVE_ATTRACT", "MOVE_SWAGGER", "MOVE_TORMENT", "MOVE_FLATTER", "MOVE_TRICK",
+  "MOVE_SUPERPOWER", "MOVE_SKILL_SWAP",
+]);
+let AI_CV_MIRROR_MOVE_ENCOURAGED_IDS: ReadonlySet<number> | null = null;
+function mirrorMoveEncouragedIds(): ReadonlySet<number> {
+  if (!AI_CV_MIRROR_MOVE_ENCOURAGED_IDS) {
+    const ids = new Set<number>();
+    for (const row of MOVES_BY_ID.values()) {
+      if (AI_CV_MIRROR_MOVE_ENCOURAGED_NAMES.has(row.move)) ids.add(row.id);
+    }
+    AI_CV_MIRROR_MOVE_ENCOURAGED_IDS = ids;
+  }
+  return AI_CV_MIRROR_MOVE_ENCOURAGED_IDS;
+}
+
+/**
+ * `AI_CV_MirrorMove` (`data/battle_ai_scripts.s:838-894`, EFFECT_MIRROR_MOVE):
+ *
+ * ```
+ * AI_CV_MirrorMove:
+ *     if_target_faster AI_CV_MirrorMove2
+ *     get_last_used_bank_move AI_TARGET
+ *     if_not_in_hwords AI_CV_MirrorMove_EncouragedMovesToMirror, AI_CV_MirrorMove2
+ *     if_random_less_than 128, AI_CV_MirrorMove_End
+ *     score +2
+ *     goto AI_CV_MirrorMove_End
+ * AI_CV_MirrorMove2:
+ *     get_last_used_bank_move AI_TARGET
+ *     if_in_hwords AI_CV_MirrorMove_EncouragedMovesToMirror, AI_CV_MirrorMove_End
+ *     if_random_less_than 80, AI_CV_MirrorMove_End
+ *     score -1
+ * AI_CV_MirrorMove_End:
+ *     end
+ * ```
+ *
+ * `get_last_used_bank_move AI_TARGET` always writes funcResult with the
+ * target's last-used move id (the exit value). Target faster -> MirrorMove2
+ * directly. Target slower AND last move in the 38-entry encouraged list:
+ * `<128` roll, JUMP -> 0, FALL-THROUGH -> +2. Target slower with a
+ * NON-encouraged last move (or target faster): MirrorMove2's `<80` roll,
+ * JUMP -> 0, FALL-THROUGH -> -1.
+ */
+function runCvMirrorMove(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+
+  const lastMoveId = input.target.lastUsedMoveId ?? 0;
+  const funcResultAfter = lastMoveId <= 3 ? lastMoveId as AiWeatherValue : undefined;
+  const encouraged = mirrorMoveEncouragedIds().has(lastMoveId);
+
+  if (strikesFirst !== 1 && encouraged) {
+    // Not target faster and last move encouraged: <128 roll, +2 on fall-through.
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-mirror-move-roll-1`);
+    const jumped = roll.randomValue % 256 < 128;
+    return Object.freeze({
+      rng: roll.after,
+      draws: Object.freeze([...draws, Object.freeze({ ...roll, kind: "mirror-move-roll-1" as const, jumped })]),
+      scoreDelta: jumped ? 0 : 2,
+      funcResultAfter,
+    });
+  }
+
+  // MirrorMove2: <80 roll, -1 on fall-through.
+  const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-mirror-move-roll-2`);
+  const jumped = roll.randomValue % 256 < 80;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([...draws, Object.freeze({ ...roll, kind: "mirror-move-roll-2" as const, jumped })]),
+    scoreDelta: jumped ? 0 : -1,
     funcResultAfter,
   });
 }
