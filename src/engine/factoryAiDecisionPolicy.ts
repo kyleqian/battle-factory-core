@@ -805,6 +805,8 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     isConfused: view.target.isConfused,
     safeguardUp: view.target.safeguardUp,
     usablePartyMons: view.target.usablePartyMons,
+    isLeechSeeded: view.target.isLeechSeeded,
+    level: view.target.level,
   });
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({
     atkStage: view.attacker.statStages.atk,
@@ -816,6 +818,8 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     reflectUp: view.attacker.reflectUp,
     evasionStage: view.attacker.statStages.evasion,
     currentWeather: view.attacker.currentWeather,
+    level: view.attacker.level,
+    isFirstTurn: view.attacker.isFirstTurn,
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [

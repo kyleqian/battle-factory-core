@@ -15,7 +15,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | Ability | Status | L50 carriers (det.) | All | Delegate cases | Inline rules | AI | Engine refs |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | ABILITY_LEVITATE | engine-referenced | 54 (54) | 54 | — | 10 | 0 | 13 |
-| ABILITY_STURDY | engine-referenced | 42 (13) | 42 | — | 3 | 0 | 3 |
+| ABILITY_STURDY | engine-referenced | 42 (13) | 42 | — | 3 | 0 | 5 |
 | ABILITY_ROCK_HEAD | engine-referenced | 40 (3) | 40 | — | 1 | 0 | 3 |
 | ABILITY_INTIMIDATE | engine-referenced | 38 (28) | 38 | ON_SWITCHIN, INTIMIDATE1, INTIMIDATE2 | 0 | 0 | 2 |
 | ABILITY_CHLOROPHYLL | engine-referenced | 38 (32) | 38 | — | 2 | 0 | 2 |
@@ -53,7 +53,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_SERENE_GRACE | engine-referenced | 11 (0) | 11 | — | 1 | 0 | 2 |
 | ABILITY_IMMUNITY | engine-referenced | 10 (2) | 10 | IMMUNITY | 10 | 0 | 14 |
 | ABILITY_VOLT_ABSORB | engine-referenced | 9 (4) | 9 | ABSORBING | 0 | 1 | 4 |
-| ABILITY_WATER_VEIL | engine-referenced | 9 (0) | 9 | IMMUNITY | 5 | 0 | 9 |
+| ABILITY_WATER_VEIL | engine-referenced | 9 (0) | 9 | IMMUNITY | 5 | 0 | 11 |
 | ABILITY_BATTLE_ARMOR | engine-referenced | 8 (5) | 8 | — | 1 | 0 | 2 |
 | ABILITY_EFFECT_SPORE | engine-referenced | 8 (8) | 8 | ON_DAMAGE | 0 | 0 | 6 |
 | ABILITY_FLAME_BODY | engine-referenced | 8 (5) | 8 | ON_DAMAGE | 0 | 0 | 4 |

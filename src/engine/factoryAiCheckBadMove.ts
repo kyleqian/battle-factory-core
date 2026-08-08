@@ -284,6 +284,19 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    * Optional, defaulting to false.
    */
   isConfused?: boolean;
+  /**
+   * Whether `gStatuses3[AI_TARGET] & STATUS3_LEECHSEED` is nonzero --
+   * `AI_CBM_LeechSeed`'s first, source-ordered rejection gate. Optional,
+   * defaulting to false.
+   */
+  isLeechSeeded?: boolean;
+  /**
+   * `gBattleMons[AI_TARGET].level` -- `AI_CBM_OneHitKO`'s final
+   * `if_level_cond 1` (less-than) gate operand. Optional, defaulting to 0
+   * (the neutral "not lower" outcome when omitted, so the level gate never
+   * fires for a literal that does not model level).
+   */
+  level?: number;
 }>;
 
 /**
@@ -350,6 +363,20 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * own equality gate, the correct outcome for "no weather" either way.
    */
   currentWeather?: AiWeatherValue;
+  /**
+   * `gBattleMons[AI_USER].level` -- `AI_CBM_OneHitKO`'s `if_level_cond 1`
+   * (less-than) gate, `sBattler_AI.level < gBattlerTarget.level`. Optional,
+   * defaulting to 0 (the neutral "not lower" outcome when omitted).
+   */
+  level?: number;
+  /**
+   * `gDisableStructs[AI_USER].isFirstTurn` (0-2) -- `AI_CBM_FakeOut`'s
+   * single `is_first_turn_for AI_USER` / `if_equal FALSE` gate. Optional,
+   * defaulting to 0 ("not first turn"), so Fake Out scores its penalty when
+   * the field is absent -- the same absent-defaults-to-0 convention as
+   * `battleScriptRulesContext.ts`.
+   */
+  isFirstTurn?: number;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -1561,6 +1588,69 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_OHKO -> AI_CBM_OneHitKO
+  // (`data/battle_ai_scripts.s:127,358-362`), the Fissure/Sheer Cold family.
+  if (move.effect === "EFFECT_OHKO") {
+    const oneHitKo = runCbmOneHitKO(
+      move.type,
+      target,
+      input.attacker.level ?? 0,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-one-hit-ko`,
+    );
+    for (const draw of oneHitKo.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: oneHitKo.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: oneHitKo.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_LEECH_SEED -> AI_CBM_LeechSeed
+  // (`data/battle_ai_scripts.s:152,410-416`).
+  if (move.effect === "EFFECT_LEECH_SEED") {
+    const leechSeed = runCbmLeechSeed(target, rng);
+    for (const draw of leechSeed.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: leechSeed.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: leechSeed.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_FAKE_OUT -> AI_CBM_FakeOut
+  // (`data/battle_ai_scripts.s:187,506-509`).
+  if (move.effect === "EFFECT_FAKE_OUT") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmFakeOut(input.attacker.isFirstTurn ?? 0),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_WILL_O_WISP -> AI_CBM_WillOWisp
+  // (`data/battle_ai_scripts.s:194,531-539`).
+  if (move.effect === "EFFECT_WILL_O_WISP") {
+    const willOWisp = runCbmWillOWisp(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-will-o-wisp`,
+    );
+    for (const draw of willOWisp.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: willOWisp.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: willOWisp.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -1667,6 +1757,29 @@ function runCbmSleep(
 }
 
 /**
+ * `Cmd_if_type_effectiveness`'s AI effectiveness value
+ * (`battle_ai_script_commands.c:1515-1557`), shared by every CBM handler
+ * whose first gate is `if_type_effectiveness AI_EFFECTIVENESS_x0` (Paralyze,
+ * OneHitKO, ...). Initializes damage to AI_EFFECTIVENESS_x1 (40), then
+ * TypeCalc mutates it in table order. Preserve the source's
+ * no-effect-followed-by-nonzero quirk: ModulateDmgByType2 clamps a
+ * zero-damage intermediate back to 1 whenever the later multiplier is
+ * nonzero, while Cmd_if_type_effectiveness's non-BUGFIX build never copies
+ * TypeCalc's no-effect flag into gMoveResultFlags. Thus Electric against
+ * Ground/Flying is 1 here, not x0 (battle_ai_script_commands.c:1515-1557;
+ * battle_script_commands.c:1502-1506,1536-1591).
+ */
+function computeAiEffectiveness(moveType: string, types: readonly [string, string]): number {
+  let aiEffectiveness = 40;
+  for (const entry of TYPE_EFFECTIVENESS) {
+    if (entry.attackingType !== moveType || !types.includes(entry.defendingType)) continue;
+    aiEffectiveness = Math.trunc((aiEffectiveness * entry.multiplierTenths) / 10);
+    if (aiEffectiveness === 0 && entry.multiplierTenths !== 0) aiEffectiveness = 1;
+  }
+  return aiEffectiveness;
+}
+
+/**
  * `AI_CBM_Paralyze` (`data/battle_ai_scripts.s:397-403`, doc §31):
  * type immunity, one fresh target ability read, Limber, primary-status, and
  * Safeguard rejection gates in source order. Every rejection JUMPS to
@@ -1683,20 +1796,7 @@ function runCbmParalyze(
   draws: readonly FactoryAiCheckBadMoveDraw[];
   scoreDelta: number;
 }> {
-  // Cmd_if_type_effectiveness initializes damage to AI_EFFECTIVENESS_x1
-  // (40), then TypeCalc mutates it in table order. Preserve the source's
-  // no-effect-followed-by-nonzero quirk: ModulateDmgByType2 clamps a
-  // zero-damage intermediate back to 1 whenever the later multiplier is
-  // nonzero, while Cmd_if_type_effectiveness's non-BUGFIX build never copies
-  // TypeCalc's no-effect flag into gMoveResultFlags. Thus Electric against
-  // Ground/Flying is 1 here, not x0 (battle_ai_script_commands.c:1515-1557;
-  // battle_script_commands.c:1502-1506,1536-1591).
-  let aiEffectiveness = 40;
-  for (const entry of TYPE_EFFECTIVENESS) {
-    if (entry.attackingType !== moveType || !target.types.includes(entry.defendingType)) continue;
-    aiEffectiveness = Math.trunc((aiEffectiveness * entry.multiplierTenths) / 10);
-    if (aiEffectiveness === 0 && entry.multiplierTenths !== 0) aiEffectiveness = 1;
-  }
+  const aiEffectiveness = computeAiEffectiveness(moveType, target.types);
   if (aiEffectiveness === 0) {
     return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
   }
@@ -1732,6 +1832,147 @@ function runCbmConfuse(
   }
   const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
   const blocked = ability.ability === ABILITY_OWN_TEMPO || (target.safeguardUp ?? false);
+  return Object.freeze({
+    rng: ability.rng,
+    draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
+    scoreDelta: blocked ? -10 : 0,
+  });
+}
+
+/**
+ * `AI_CBM_OneHitKO` (`data/battle_ai_scripts.s:358-362`):
+ *
+ * ```
+ * if_type_effectiveness AI_EFFECTIVENESS_x0, Score_Minus10
+ * get_ability AI_TARGET
+ * if_equal ABILITY_STURDY, Score_Minus10
+ * if_level_cond 1, Score_Minus10
+ * end
+ * ```
+ *
+ * x0 type immunity JUMPs to -10 before any ability read. Otherwise one fresh
+ * target ability read runs; Sturdy JUMPs to -10, then `if_level_cond 1`
+ * ("less than", `Cmd_if_level_cond` case 1: `sBattler_AI.level <
+ * gBattlerTarget.level`) JUMPs to -10. Only the all-clear path FALLS
+ * THROUGH to end at zero.
+ */
+const ABILITY_STURDY = "ABILITY_STURDY";
+
+function runCbmOneHitKO(
+  moveType: string,
+  target: FactoryAiCheckBadMoveTarget,
+  attackerLevel: number,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  if (computeAiEffectiveness(moveType, target.types) === 0) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
+  }
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
+  const blocked = ability.ability === ABILITY_STURDY || attackerLevel < (target.level ?? 0);
+  return Object.freeze({
+    rng: ability.rng,
+    draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
+    scoreDelta: blocked ? -10 : 0,
+  });
+}
+
+/**
+ * `AI_CBM_LeechSeed` (`data/battle_ai_scripts.s:410-416`):
+ *
+ * ```
+ * if_status3 AI_TARGET, STATUS3_LEECHSEED, Score_Minus10
+ * get_target_type1
+ * if_equal TYPE_GRASS, Score_Minus10
+ * get_target_type2
+ * if_equal TYPE_GRASS, Score_Minus10
+ * end
+ * ```
+ *
+ * Leech Seed already on the target, or a Grass-typed target, JUMPs to -10.
+ * Zero `get_ability` calls -- every gate reads direct battle state
+ * (`gStatuses3[].status3`, the two type slots), no RNG.
+ */
+function runCbmLeechSeed(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  const blocked = (target.isLeechSeeded ?? false)
+    || target.types[0] === "TYPE_GRASS"
+    || target.types[1] === "TYPE_GRASS";
+  return Object.freeze({
+    rng,
+    draws: Object.freeze([]),
+    scoreDelta: blocked ? -10 : 0,
+  });
+}
+
+/**
+ * `AI_CBM_FakeOut` (`data/battle_ai_scripts.s:506-509`):
+ *
+ * ```
+ * is_first_turn_for AI_USER
+ * if_equal FALSE, Score_Minus10
+ * end
+ * ```
+ *
+ * `Cmd_is_first_turn_for` writes `funcResult = gDisableStructs[AI_USER]
+ * .isFirstTurn` (0-2); `if_equal FALSE` (0) JUMPs to Score_Minus10 when the
+ * attacker is NOT in its first turn (Fake Out only works on the first turn).
+ * Zero `get_ability` calls, zero RNG.
+ */
+function runCbmFakeOut(attackerIsFirstTurn: number): number {
+  return attackerIsFirstTurn === 0 ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_WillOWisp` (`data/battle_ai_scripts.s:531-539`):
+ *
+ * ```
+ * get_ability AI_TARGET
+ * if_equal ABILITY_WATER_VEIL, Score_Minus10
+ * if_status AI_TARGET, STATUS1_ANY, Score_Minus10
+ * if_type_effectiveness AI_EFFECTIVENESS_x0, Score_Minus10
+ * if_type_effectiveness AI_EFFECTIVENESS_x0_5, Score_Minus10
+ * if_type_effectiveness AI_EFFECTIVENESS_x0_25, Score_Minus10
+ * if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD, Score_Minus10
+ * end
+ * ```
+ *
+ * Unlike `AI_CBM_Paralyze`, the ability read comes FIRST and is never
+ * short-circuited by a type gate -- the x0/x0_5/x0_25 effectiveness checks
+ * (AI_EFFECTIVENESS 0/20/10, `battle_ai.h:20-25`) run only after it.
+ */
+const ABILITY_WATER_VEIL = "ABILITY_WATER_VEIL";
+
+function runCbmWillOWisp(
+  moveType: string,
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
+  const aiEffectiveness = computeAiEffectiveness(moveType, target.types);
+  const blocked = ability.ability === ABILITY_WATER_VEIL
+    || (target.hasAnyStatus ?? false)
+    || aiEffectiveness === 0
+    || aiEffectiveness === 20
+    || aiEffectiveness === 10
+    || (target.safeguardUp ?? false);
   return Object.freeze({
     rng: ability.rng,
     draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),

@@ -595,6 +595,261 @@ describe("AI_CBM_HighRiskForDamage via Superpower (dispatch :200)", () => {
   });
 });
 
+describe("AI_CBM_OneHitKO (data/battle_ai_scripts.s:358-362, EFFECT_OHKO)", () => {
+  const MOVE_GUILLOTINE = 12; // EFFECT_OHKO, TYPE_NORMAL, power 1
+  const MOVE_SHEER_COLD = 329; // EFFECT_OHKO, TYPE_ICE, power 1
+
+  function ohkoTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: "ABILITY_ROCK_HEAD",
+      ...overrides,
+    });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read", () => {
+    // Normal is x0 against Ghost. A two-ability species keeps the universal
+    // Soundproof draw in the receipt; the handler itself must add no draw.
+    const result = run(MOVE_GUILLOTINE, ohkoTarget({
+      species: 171,
+      types: ["TYPE_GHOST", "TYPE_GHOST"],
+      knownAbility: null,
+      realAbility: "ABILITY_VOLT_ABSORB",
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual(["test-slot-soundproof"]);
+  });
+
+  it("non-Sturdy, attacker level >= target level FALLTHROUGH reaches End at zero", () => {
+    const result = run(
+      MOVE_GUILLOTINE,
+      ohkoTarget(),
+      undefined,
+      { atkStage: 6, defStage: 6, level: 50 },
+    );
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("Sturdy JUMPs to Score_Minus10", () => {
+    const result = run(
+      MOVE_GUILLOTINE,
+      ohkoTarget({
+        species: 213,
+        knownAbility: "ABILITY_STURDY",
+        realAbility: "ABILITY_STURDY",
+      }),
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("attacker level below target level JUMPs to Score_Minus10 (if_level_cond 1)", () => {
+    // Source `Cmd_if_level_cond` case 1 = "less than": sBattler_AI.level <
+    // gBattlerTarget.level.
+    const result = run(
+      MOVE_SHEER_COLD,
+      ohkoTarget({ level: 100 }),
+      undefined,
+      { atkStage: 6, defStage: 6, level: 50 },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("Sturdy with attacker level below target level still scores exactly -10 (single gate)", () => {
+    // The two -10 gates are both Score_Minus10 JUMPs, never additive.
+    const result = run(
+      MOVE_SHEER_COLD,
+      ohkoTarget({
+        species: 213,
+        knownAbility: "ABILITY_STURDY",
+        realAbility: "ABILITY_STURDY",
+        level: 100,
+      }),
+      undefined,
+      { atkStage: 6, defStage: 6, level: 50 },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("performs the handler's fresh ability read after the universal Soundproof read", () => {
+    // Species 171 (Lanturn, Volt Absorb / Water Absorb) has two distinct
+    // abilities, so with knownAbility null both the universal Soundproof
+    // read and the handler's own get_ability draw.
+    const result = run(MOVE_GUILLOTINE, ohkoTarget({
+      species: 171,
+      knownAbility: null,
+      realAbility: "ABILITY_VOLT_ABSORB",
+    }));
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-one-hit-ko-ability",
+    ]);
+  });
+});
+
+describe("AI_CBM_LeechSeed (data/battle_ai_scripts.s:410-416, EFFECT_LEECH_SEED)", () => {
+  const MOVE_LEECH_SEED = 73; // EFFECT_LEECH_SEED, TYPE_GRASS
+
+  // A known ability suppresses the universal Soundproof draw, isolating the
+  // handler's own zero-get_ability body.
+  const LEECH_SEED_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    ...MAROWAK,
+    knownAbility: "ABILITY_ROCK_HEAD",
+  });
+
+  it("already-leech-seeded target JUMPs to Score_Minus10 with zero draws", () => {
+    const result = run(MOVE_LEECH_SEED, {
+      ...LEECH_SEED_TARGET,
+      isLeechSeeded: true,
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("Grass target type1 JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_LEECH_SEED, {
+      ...LEECH_SEED_TARGET,
+      types: ["TYPE_GRASS", "TYPE_ROCK"] as const,
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("Grass target type2 JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_LEECH_SEED, {
+      ...LEECH_SEED_TARGET,
+      types: ["TYPE_ROCK", "TYPE_GRASS"] as const,
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("non-seeded non-Grass target FALLS THROUGH to end at zero", () => {
+    const result = run(MOVE_LEECH_SEED, LEECH_SEED_TARGET);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+    expect(result.rng.calls).toBe(0);
+  });
+});
+
+describe("AI_CBM_FakeOut (data/battle_ai_scripts.s:506-509, EFFECT_FAKE_OUT)", () => {
+  const MOVE_FAKE_OUT = 252; // EFFECT_FAKE_OUT, TYPE_NORMAL, power 40
+
+  // A known ability suppresses the universal Soundproof draw so the handler
+  // body's own zero-RNG shape is what the draw count isolates.
+  const FAKE_OUT_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    ...MAROWAK,
+    knownAbility: "ABILITY_ROCK_HEAD",
+  });
+
+  it("first turn (isFirstTurn nonzero) FALLS THROUGH to end at zero", () => {
+    const result = run(
+      MOVE_FAKE_OUT,
+      FAKE_OUT_TARGET,
+      undefined,
+      { atkStage: 6, defStage: 6, isFirstTurn: 2 },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("not first turn (isFirstTurn 0) JUMPs to Score_Minus10", () => {
+    const result = run(
+      MOVE_FAKE_OUT,
+      FAKE_OUT_TARGET,
+      undefined,
+      { atkStage: 6, defStage: 6, isFirstTurn: 0 },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("absent isFirstTurn defaults to 0 (not first turn) and scores the penalty", () => {
+    const result = run(MOVE_FAKE_OUT, FAKE_OUT_TARGET, undefined, { atkStage: 6, defStage: 6 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+});
+
+describe("AI_CBM_WillOWisp (data/battle_ai_scripts.s:531-539, EFFECT_WILL_O_WISP)", () => {
+  const MOVE_WILL_O_WISP = 261; // EFFECT_WILL_O_WISP, TYPE_FIRE, power 0
+
+  // A known ability suppresses the universal Soundproof draw so the handler's
+  // own single get_ability is what the draw count isolates.
+  const WOW_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    ...MAROWAK,
+    types: ["TYPE_ROCK", "TYPE_BUG"] as const, // Fire is x1 vs Rock/Bug
+    knownAbility: "ABILITY_ROCK_HEAD",
+  });
+
+  it("Water Veil JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_WILL_O_WISP, {
+      ...WOW_TARGET,
+      knownAbility: "ABILITY_WATER_VEIL",
+      realAbility: "ABILITY_WATER_VEIL",
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("any primary status JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_WILL_O_WISP, { ...WOW_TARGET, hasAnyStatus: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("x0 target (Fire vs Fire) JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_WILL_O_WISP, {
+      ...WOW_TARGET,
+      types: ["TYPE_FIRE", "TYPE_FIRE"] as const,
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("x0_5 target (Fire vs Water) JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_WILL_O_WISP, {
+      ...WOW_TARGET,
+      types: ["TYPE_WATER", "TYPE_WATER"] as const,
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("x0_25 target (Fire vs Fire/Water) JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_WILL_O_WISP, {
+      ...WOW_TARGET,
+      types: ["TYPE_FIRE", "TYPE_WATER"] as const,
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("target-side Safeguard JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_WILL_O_WISP, { ...WOW_TARGET, safeguardUp: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("all-clear FALLS THROUGH to end at zero with exactly one handler draw", () => {
+    const result = run(MOVE_WILL_O_WISP, {
+      ...WOW_TARGET,
+      species: 171,
+      knownAbility: null,
+      realAbility: "ABILITY_VOLT_ABSORB",
+    });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-will-o-wisp-ability",
+    ]);
+  });
+});
+
 const MOVE_SURF = 57;
 const MOVE_ROCK_SLIDE = 157;
 const MOVE_BODY_SLAM = 34;
