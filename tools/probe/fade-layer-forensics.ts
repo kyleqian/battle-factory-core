@@ -1,19 +1,21 @@
 // Rerunnable forensics probe for ISSUES #80 per-layer fade (docs/fade-layer-forensics.md).
 // Reads oracle captures from a `npm run compare` out dir and prints the measured
 // per-frame (y_bg, y_obj) against the §1/§2 tables, the §3 960-963 class counts,
-// and the §6 open-window field fade-out schedule.
+// the §6 open-window field fade-out schedule, and (mode 4) the §7 message-window
+// swap + icon phase-offset facts.
 //
-// Usage: node --experimental-strip-types tools/probe/fade-layer-forensics.ts <close-out-dir> [open-out-dir] [field-out-dir]
+// Usage: node --experimental-strip-types tools/probe/fade-layer-forensics.ts <close-out-dir> [open-out-dir] [field-out-dir] [swap-out-dir]
 //   close-out-dir : must contain oracle-00958..oracle-00985.png (capture-range 958:985)
 //   open-out-dir  : must contain oracle-00803..oracle-00824.png (capture-range 803:830)
 //   field-out-dir : must contain oracle-00762..oracle-00808.png (capture-range 758:830)
+//   swap-out-dir  : must contain oracle-00900..oracle-00980.png (capture-range 900:980)
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { PNG } from "pngjs";
 
-const [closeDir, openDir, fieldDir] = process.argv.slice(2);
+const [closeDir, openDir, fieldDir, swapDir] = process.argv.slice(2);
 if (!closeDir) {
-  console.error("usage: node --experimental-strip-types tools/probe/fade-layer-forensics.ts <close-out-dir> [open-out-dir] [field-out-dir]");
+  console.error("usage: node --experimental-strip-types tools/probe/fade-layer-forensics.ts <close-out-dir> [open-out-dir] [field-out-dir] [swap-out-dir]");
   process.exit(2);
 }
 
@@ -215,6 +217,135 @@ if (fieldDir) {
     }
   }
   console.log(`  §6 ${fieldOk ? "PASS" : "FAIL"} (frames 762-808, closed forms + edges)`);
+}
+
+// ---- §7 message-window swap + icon phase offset (mode 4, capture-range 900:980) ----
+// Re-verifies the docs/fade-layer-forensics.md §7 facts from a `npm run compare --
+// mid-battle-switch-dense-a-off --capture-range 900:980` out dir:
+//   (a) the swap lands on frame 926 (the message band y124-160 first changes there);
+//   (b) the message window's right frame is x182 (settled, sDefaultPartyMsgWindowTemplate
+//       21x2) on 900-925 and x141 (sDoWhatWithMonMsgWindowTemplate 16x2) from 926;
+//   (c) the "Do what with this" ink signature (454 px at x8-98 y133-156) plus the
+//       164 px nickname tail at x100-121 on frame 930;
+//   (e) the oracle icon 2-frame clock lags the app's by exactly +2 frames from the
+//       toggle after the submenu open (oracle 930/937/945/952/960 vs app
+//       928/935/943/950/958), so the close residual is 489 px on 965/966/973/974
+//       and 0 elsewhere -- a phase offset, not a freeze.
+if (swapDir) {
+  console.log("== §7 message-window swap + icon phase offset (oracle 900-980) ==");
+  let swapOk = true;
+  const isFrame = (c: [number, number, number]): boolean => (
+    (c[0] === 222 && c[1] === 214 && c[2] === 222)
+    || (c[0] === 115 && c[1] === 107 && c[2] === 132)
+    || (c[0] === 74 && c[1] === 74 && c[2] === 107)
+    || (c[0] === 41 && c[1] === 49 && c[2] === 49)
+  );
+  const bandDiff = (a: Uint8Array, b: Uint8Array): number => {
+    let n = 0;
+    for (let y = 124; y < 160; y++) for (let x = 0; x < 240; x++) {
+      const i = (y * 240 + x) * 4;
+      if (a[i] !== b[i] || a[i + 1] !== b[i + 1] || a[i + 2] !== b[i + 2]) n++;
+    }
+    return n;
+  };
+  const iconDiff = (a: Uint8Array, b: Uint8Array): { n: number } => {
+    let n = 0;
+    for (let y = 0; y < 64; y++) for (let x = 0; x < 120; x++) {
+      const i = (y * 240 + x) * 4;
+      if (a[i] !== b[i] || a[i + 1] !== b[i + 1] || a[i + 2] !== b[i + 2]) n++;
+    }
+    return { n };
+  };
+  const pxAt = (d: Uint8Array, x: number, y: number): [number, number, number] => {
+    const i = (y * 240 + x) * 4;
+    return [d[i]!, d[i + 1]!, d[i + 2]!];
+  };
+
+  // (a) swap frame: first frame >= 900 whose message band differs from the previous by > 2000 px.
+  let prev: Uint8Array | null = loadOracle(swapDir, 900);
+  let swapFrame = -1;
+  for (let f = 901; f <= 940; f++) {
+    const d = loadOracle(swapDir, f);
+    if (!d || !prev) { prev = d; continue; }
+    if (bandDiff(prev, d) > 2000) { swapFrame = f; break; }
+    prev = d;
+  }
+  if (swapFrame !== 926) { swapOk = false; fail(`swap frame: got ${swapFrame} expected 926`); }
+  console.log(`  (a) swap frame: ${swapFrame} (expected 926) ${swapFrame === 926 ? "OK" : "MISMATCH"}`);
+
+  // (b) message-window right frame column at y142: settled <= x190, swapped <= x142.
+  const rightFrame = (f: number, maxX: number): number => {
+    const d = loadOracle(swapDir, f);
+    if (!d) return -1;
+    let last = -1;
+    for (let x = 0; x <= maxX; x++) if (isFrame(pxAt(d, x, 142))) last = x;
+    return last;
+  };
+  const settledRight = rightFrame(900, 190);
+  const swappedRight = rightFrame(930, 142);
+  if (settledRight < 180 || settledRight > 184) { swapOk = false; fail(`settled window right frame x=${settledRight} expected ~182`); }
+  if (swappedRight < 139 || swappedRight > 143) { swapOk = false; fail(`swapped window right frame x=${swappedRight} expected ~141`); }
+  console.log(`  (b) message-window right frame: settled(900) x=${settledRight} (exp ~182), swapped(930) x=${swappedRight} (exp ~141) ${settledRight >= 180 && settledRight <= 184 && swappedRight >= 139 && swappedRight <= 143 ? "OK" : "MISMATCH"}`);
+
+  // (c) "Do what with this" ink signature on frame 930 (x8-98) + nickname tail (x100-121).
+  const d930 = loadOracle(swapDir, 930);
+  if (d930) {
+    let inkMain = 0, inkTail = 0;
+    for (let y = 133; y < 156; y++) for (let x = 8; x < 98; x++) {
+      const c = pxAt(d930, x, y);
+      if ((c[0] === 99 && c[1] === 99 && c[2] === 99) || (c[0] === 214 && c[1] === 214 && c[2] === 206)) inkMain++;
+    }
+    for (let y = 133; y < 156; y++) for (let x = 100; x < 122; x++) {
+      const c = pxAt(d930, x, y);
+      if ((c[0] === 99 && c[1] === 99 && c[2] === 99) || (c[0] === 214 && c[1] === 214 && c[2] === 206)) inkTail++;
+    }
+    const mainOk = inkMain >= 440 && inkMain <= 470;
+    const tailOk = inkTail >= 150 && inkTail <= 180;
+    if (!mainOk) { swapOk = false; fail(`frame 930 "Do what with this" ink ${inkMain}px expected ~454`); }
+    if (!tailOk) { swapOk = false; fail(`frame 930 nickname-tail ink ${inkTail}px expected ~164`); }
+    console.log(`  (c) frame 930 ink: "Do what with this"=${inkMain}px (exp ~454), tail=${inkTail}px (exp ~164) ${mainOk && tailOk ? "OK" : "MISMATCH"}`);
+  } else {
+    swapOk = false;
+    fail("frame 930: no capture in swap dir (needed for the ink signature)");
+  }
+
+  // (e) icon-phase toggles: detect the ~489 px mon-icon 2-frame swaps on oracle and app
+  //     across 900-963 (pre-close, clean); verify oracle lags app by +2 from toggle #4.
+  const toggles = (prefix: "oracle" | "app"): number[] => {
+    const out: number[] = [];
+    let prevD = loadPng(swapDir, 900, prefix);
+    for (let f = 901; f <= 963; f++) {
+      const d = loadPng(swapDir, f, prefix);
+      if (!d || !prevD) { prevD = d; continue; }
+      const { n } = iconDiff(prevD, d);
+      if (n >= 300 && n <= 700) out.push(f);
+      prevD = d;
+    }
+    return out;
+  };
+  const oracleToggles = toggles("oracle");
+  const appToggles = toggles("app");
+  const expOracle = [905, 913, 920, 930, 937, 945, 952, 960];
+  const expApp = [905, 913, 920, 928, 935, 943, 950, 958];
+  const oracleOk = oracleToggles.length >= 8 && oracleToggles.every((t, i) => expOracle[i] !== undefined && t === expOracle[i]);
+  const offsetOk = appToggles.length >= 8 && appToggles.every((t, i) => expApp[i] !== undefined && t === expApp[i])
+    && expOracle.slice(3).every((t, i) => t === expApp[3 + i]! + 2);
+  if (!oracleOk) { swapOk = false; fail(`oracle icon toggles [${oracleToggles.join(",")}] expected [${expOracle.join(",")}]`); }
+  if (!offsetOk) { swapOk = false; fail(`app icon toggles [${appToggles.join(",")}] expected [${expApp.join(",")}] with oracle +2 from toggle 4`); }
+  console.log(`  (e) icon toggles oracle=[${oracleToggles.join(",")}] app=[${appToggles.join(",")}] -> oracle lags app +2 (930/937/945/952/960 vs 928/935/943/950/958) ${oracleOk && offsetOk ? "OK" : "MISMATCH"}`);
+
+  // (e) close residual: oracle-vs-app icon-region diff must be 489 on 965/966/973/974, 0 elsewhere.
+  let closeOk = true;
+  for (const f of [964, 965, 966, 967, 968, 969, 970, 971, 972, 973, 974, 975, 976, 977, 978]) {
+    const o = loadOracle(swapDir, f);
+    const a = loadPng(swapDir, f, "app");
+    if (!o || !a) { closeOk = false; swapOk = false; fail(`close frame ${f}: no capture in swap dir`); continue; }
+    const { n } = iconDiff(o, a);
+    const expect = f === 965 || f === 966 || f === 973 || f === 974 ? 489 : 0;
+    if (Math.abs(n - expect) > 3) { closeOk = false; swapOk = false; fail(`close frame ${f}: icon residual ${n}px expected ${expect}`); }
+  }
+  console.log(`  (e) close icon residual: 489 on 965/966/973/974, 0 elsewhere ${closeOk ? "OK" : "MISMATCH"}`);
+  console.log(`  §7 ${swapOk ? "PASS" : "FAIL"}`);
 }
 
 console.log(failures === 0 ? "\nALL CHECKS PASS" : `\n${failures} CHECK(S) FAILED`);

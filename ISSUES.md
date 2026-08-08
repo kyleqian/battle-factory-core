@@ -167,6 +167,32 @@ settled sprite (`gBattlerSpriteIds[n]` `x2`/`y2`/`animNum`/`callback`), dense
 oracle window twice fresh, and a sibling-species spot-check per promoted
 function.
 
+**Slice A is REFUTED under Battle Scene OFF (2026-08-07, staged + RAM-probed,
+supervisor-verified).** The "at minimum apply their terminal rest offsets"
+half of item (1) above must **not** be implemented on the OFF profile. A
+side-lane worker staged a legal Level-50 RATTATA send-out through
+`mechanicLab overrides.parties`
+(`tools/battle-lab/send-out-slice-a-rattata-off.json`, two `bin/oracle lab`
+runs byte-identical across 2036 files) and probed the settled sprite every
+tick (`docs/send-out-slice-a-positive-case.md`,
+`tools/probe/dump-sendout-slice-a-rattata.py`, receipt 2640 tick rows):
+the sprite is created already at `SpriteCallbackDummy` with `animNum 0` and
+**`x2 = y2 = 0`**, and stays there for the whole battle (all 634 post ticks,
+zero deviations) — OFF takes the `SKIP_FRONT_ANIM` path (`pokemon.c:6803`)
+and never launches the animation task the terminal offset belongs to.
+The banked table nonetheless returns `{x2:1, y2:0}` for RATTATA and ONIX
+(`speciesFrontIdleRestOffset`), so wiring it at the settle hooks would have
+been a **361-px regression** over bbox (164,41)-(190,71), not an inert no-op.
+Independently corroborated: `mid-battle-switch-dense-a-off` is byte-exact
+with a settled RATTATA opponent front sprite on screen. Consequence: the
+front terminal-offset wiring is **ON-profile-only** work, and the main lane
+(whose oracle is OFF) has nothing to hook up for it. What remains genuinely
+main-lane here is Slice C of `docs/send-out-live-wiring-consumer-map.md` §5 —
+guarding the `src/engine/` back hand-fits so an uncovered species/nature
+fails loudly instead of silently drawing the wrong table. Per-tick playback
+(Slice D) is likewise ON-profile behaviour: OFF skips front and back send-out
+animations entirely.
+
 **Sequencing (updated 2026-08-03, mid-session user directive):** the hookup
 is the MAIN lane's job ("the animation supervisor works on implementing the
 animations... it should be your job to hook those things up"). Ground truth
