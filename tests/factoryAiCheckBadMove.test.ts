@@ -1279,6 +1279,61 @@ describe("AI_CBM_AttackUp / AI_CBM_DefenseUp / AI_CBM_BulkUp (docs/factory-ai-ch
   });
 });
 
+// data/battle_ai_scripts.s:164,434-437: AI_CBM_Curse is byte-for-byte the
+// same dual-stat body as AI_CBM_BulkUp (AI_USER's own ATK -10 then DEF -8),
+// so it reuses runCbmBulkUp unchanged. Reached from EFFECT_CURSE.
+describe("AI_CBM_Curse (data/battle_ai_scripts.s:434-437, BulkUp-identical body)", () => {
+  const MOVE_CURSE = 174; // EFFECT_CURSE
+
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function withAttacker(atkStage: number, defStage: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage, defStage });
+  }
+
+  it("scores -18 (both gates fire independently, -10 + -8) when both ATK and DEF are already MAX_STAT_STAGE", () => {
+    const result = run(MOVE_CURSE, SHUCKLE, undefined, withAttacker(12, 12));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -18 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 (only the ATK gate fires) when ATK is maxed but DEF is not", () => {
+    const result = run(MOVE_CURSE, SHUCKLE, undefined, withAttacker(12, 6));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("scores -8 (only the DEF gate fires) when DEF is maxed but ATK is not", () => {
+    const result = run(MOVE_CURSE, SHUCKLE, undefined, withAttacker(6, 12));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+  });
+
+  it("scores 0 with zero draws when neither ATK nor DEF is maxed", () => {
+    const result = run(MOVE_CURSE, SHUCKLE, undefined, withAttacker(6, 6));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("leaves Haze behind the same generic CBM barrier", () => {
+    expect(run(MOVE_HAZE, SHUCKLE)).toEqual({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-bad-move",
+      effect: "EFFECT_HAZE",
+      moveId: MOVE_HAZE,
+    });
+  });
+});
+
 // data/battle_ai_scripts.s:257-259/261-263,
 // docs/factory-ai-checkviability-ground-truth.md §20.1/§21.1. Byte-for-byte
 // the same bare MAX_STAT_STAGE-on-AI_USER's-own-stage shape as

@@ -1154,6 +1154,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_CURSE -> AI_CBM_Curse
+  // (`data/battle_ai_scripts.s:164,434-437`) -- byte-for-byte the same
+  // dual-stat body as `AI_CBM_BulkUp` (AI_USER's own ATK -10 then DEF -8),
+  // so it reuses `runCbmBulkUp` unchanged.
+  if (move.effect === "EFFECT_CURSE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmBulkUp(input.attacker.atkStage, input.attacker.defStage),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_UP(_2) -> AI_CBM_SpeedUp, the
   // seventh CBM-blocked pair's own CBM half (doc §20).
   if (move.effect === "EFFECT_SPEED_UP" || move.effect === "EFFECT_SPEED_UP_2") {
