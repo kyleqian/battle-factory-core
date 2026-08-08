@@ -181,8 +181,35 @@ describe("production trycastformdatachange (Cmd_trycastformdatachange) dispatch 
     });
   });
 
-  describe("(b) unsupported-branch barrier -- a live Forecast Castform's type is stale for the active weather", () => {
-    it("halts under active Sun with a still-Normal-typed Castform (form -> Fire, the common real case)", () => {
+  // ROADMAP S10 gate-4: these five cases used to pin the (b) unsupported-branch
+  // barrier (haltReason.kind === "unsupported-branch"); the barrier is now
+  // retired for real -- a stale-typed Castform executes the pushed
+  // BattleScript_CastformChange path, writes its two types durably, and keeps
+  // the machine running. The ratchet entry drops to 0 with this step.
+  describe("(b) live form change -- a stale-typed Castform now runs BattleScript_CastformChange instead of halting", () => {
+    const castformChangePc = program.labelEntries["BattleScript_CastformChange"].programCounter;
+
+    function assertFormChange(
+      rc: BattleScriptRulesContext,
+      expectedFormToChangeInto: number,
+      expectedTypes: readonly [string, string],
+    ) {
+      const { result } = stepAtProgramCounter(rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected the machine to keep running");
+      expect(result.state.haltReason).toBeNull();
+      expect(result.state.rulesContext.formToChangeInto).toBe(expectedFormToChangeInto);
+      const battlerId = result.state.rulesContext.scriptingBattler;
+      expect(result.state.rulesContext.battlers[battlerId].types).toEqual(expectedTypes);
+      // The pushed BattleScript_CastformChange path is entered: pc is its own
+      // `call BattleScript_DoCastformChange` start and the continuation (the
+      // post-opcode byte of trycastformdatachange) is on the call stack.
+      expect(result.state.programCounter).toBe(castformChangePc);
+      expect(result.state.callStack).toContain(trycastformdatachangePc + 1);
+      return result.state;
+    }
+
+    it("under active Sun a still-Normal Castform changes to Fire (formToChangeInto 1, Fire/Fire types)", () => {
       const rc = context(
         [
           battler({ side: 0, species: SPECIES_CASTFORM, ability: ABILITY_FORECAST, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
@@ -193,13 +220,10 @@ describe("production trycastformdatachange (Cmd_trycastformdatachange) dispatch 
         0,
         B_WEATHER_SUN_TEMPORARY,
       );
-      const { result } = stepAtProgramCounter(rc);
-      expect(result.kind).toBe("halted");
-      if (result.kind !== "halted") throw new Error("expected halt");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+      assertFormChange(rc, 1, ["TYPE_FIRE", "TYPE_FIRE"]);
     });
 
-    it("halts under active Rain with a still-Normal-typed Castform (form -> Water)", () => {
+    it("under active Rain a still-Normal Castform changes to Water (formToChangeInto 2, Water/Water types)", () => {
       const rc = context(
         [
           battler({ side: 0, species: SPECIES_CASTFORM, ability: ABILITY_FORECAST, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
@@ -210,13 +234,10 @@ describe("production trycastformdatachange (Cmd_trycastformdatachange) dispatch 
         0,
         B_WEATHER_RAIN_TEMPORARY,
       );
-      const { result } = stepAtProgramCounter(rc);
-      expect(result.kind).toBe("halted");
-      if (result.kind !== "halted") throw new Error("expected halt");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+      assertFormChange(rc, 2, ["TYPE_WATER", "TYPE_WATER"]);
     });
 
-    it("halts under active Hail with a still-Normal-typed Castform (form -> Ice)", () => {
+    it("under active Hail a still-Normal Castform changes to Ice (formToChangeInto 3, Ice/Ice types)", () => {
       const rc = context(
         [
           battler({ side: 0, species: SPECIES_CASTFORM, ability: ABILITY_FORECAST, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
@@ -227,13 +248,10 @@ describe("production trycastformdatachange (Cmd_trycastformdatachange) dispatch 
         0,
         B_WEATHER_HAIL_TEMPORARY,
       );
-      const { result } = stepAtProgramCounter(rc);
-      expect(result.kind).toBe("halted");
-      if (result.kind !== "halted") throw new Error("expected halt");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+      assertFormChange(rc, 3, ["TYPE_ICE", "TYPE_ICE"]);
     });
 
-    it("halts when Cloud Nine nullifies weather and Castform is not Normal-typed (reverts to Normal)", () => {
+    it("when Cloud Nine nullifies weather, a non-Normal Castform reverts to Normal (formToChangeInto 0, Normal/Normal types)", () => {
       const rc = context(
         [
           battler({ side: 0, species: SPECIES_CASTFORM, ability: ABILITY_FORECAST, types: ["TYPE_FIRE", "TYPE_FIRE"] }),
@@ -244,13 +262,10 @@ describe("production trycastformdatachange (Cmd_trycastformdatachange) dispatch 
         0,
         B_WEATHER_SUN_TEMPORARY,
       );
-      const { result } = stepAtProgramCounter(rc);
-      expect(result.kind).toBe("halted");
-      if (result.kind !== "halted") throw new Error("expected halt");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+      assertFormChange(rc, 0, ["TYPE_NORMAL", "TYPE_NORMAL"]);
     });
 
-    it("checks the scripting battler (gBattleScripting.battler), not a fixed role -- Castform in slot 1 while slot 0 is ordinary", () => {
+    it("checks the scripting battler (gBattleScripting.battler), not a fixed role -- Castform in slot 1 changes while slot 0 stays ordinary", () => {
       const rc = context(
         [
           battler({ side: 0 }),
@@ -261,10 +276,48 @@ describe("production trycastformdatachange (Cmd_trycastformdatachange) dispatch 
         1,
         B_WEATHER_SUN_TEMPORARY,
       );
-      const { result } = stepAtProgramCounter(rc);
-      expect(result.kind).toBe("halted");
-      if (result.kind !== "halted") throw new Error("expected halt");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+      const state = assertFormChange(rc, 1, ["TYPE_FIRE", "TYPE_FIRE"]);
+      expect(state.rulesContext.battlers[0].types).toEqual(["TYPE_NORMAL", "TYPE_NORMAL"]);
+    });
+
+    it("steps the pushed path one opcode further: BattleScript_CastformChange's call -> docastformchangeanimation emits the CASTFORM_CHANGE kernel event and marks the battler's controller pending", () => {
+      const rc = context(
+        [
+          battler({ side: 0, species: SPECIES_CASTFORM, ability: ABILITY_FORECAST, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
+          battler({ side: 1 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+        0,
+        B_WEATHER_RAIN_TEMPORARY,
+      );
+      const afterTrycastform = assertFormChange(rc, 2, ["TYPE_WATER", "TYPE_WATER"]);
+      const execution = createBattleScriptStatusRulesExecution(
+        program,
+        "BattleScript_WeatherFormChanges",
+        afterTrycastform.rulesContext,
+        1,
+        externalPorts(),
+      );
+      const afterCall = stepBattleScriptMachine(program, afterTrycastform, execution.handlers);
+      expect(afterCall.kind).toBe("advanced");
+      if (afterCall.kind !== "advanced") throw new Error("expected the call to advance");
+      const docastformchangeanimationPc = program.instructions.find(
+        (instruction) => instruction.opcodeName === "B_SCR_OP_DOCASTFORMCHANGEANIMATION",
+      );
+      if (!docastformchangeanimationPc) throw new Error("no B_SCR_OP_DOCASTFORMCHANGEANIMATION instruction found");
+      const afterAnimation = stepBattleScriptMachine(program, afterCall.state, execution.handlers);
+      expect(afterAnimation.kind).toBe("advanced");
+      if (afterAnimation.kind !== "advanced") throw new Error("expected docastformchangeanimation to advance");
+      const event = afterAnimation.state.events.at(-1);
+      expect(event).toMatchObject({
+        kind: "animation",
+        animationId: "CASTFORM_CHANGE",
+        battler: 0,
+      });
+      expect(afterAnimation.state.scheduler.activeBattler).toBe(0);
+      expect(afterAnimation.state.scheduler.pendingControllerBattlers).toContain(0);
+      expect(afterAnimation.state.rulesContext.formToChangeInto).toBe(2);
     });
   });
 

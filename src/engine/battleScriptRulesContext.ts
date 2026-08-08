@@ -762,6 +762,14 @@ export type BattleScriptRulesContext = Readonly<
      * setalreadystatusedmoveattempt write is exact rather than skipped.
      */
     alreadyStatusedMoveAttempt: number;
+    /**
+     * Source u8 gBattleStruct->formToChangeInto -- Cmd_trycastformdatachange
+     * writes `form - 1` (0=Normal, 1=Fire, 2=Water, 3=Ice), and
+     * Cmd_docastformchangeanimation ORs CASTFORM_SUBSTITUTE (1<<7) into it
+     * when the battler is behind a Substitute (battle_script_commands.c:
+     * 9730-9740, 9744-9755).
+     */
+    formToChangeInto: number;
     /** Source u8 gBattleStruct->dynamicMoveType. */
     dynamicMoveType: number;
     /** Source u8 gEnigmaBerries[MAX_BATTLERS_COUNT].holdEffect values. */
@@ -925,6 +933,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   monToSwitchIntoId?: readonly number[];
   battleStructAbsentBattlerFlags?: number;
   alreadyStatusedMoveAttempt?: number;
+  formToChangeInto?: number;
   dynamicMoveType?: number;
   enigmaBerryHoldEffects?: readonly number[];
   moveHistory?: Readonly<{
@@ -2652,6 +2661,7 @@ export function createBattleScriptRulesContext(
       0x0f,
       "alreadyStatusedMoveAttempt",
     ),
+    formToChangeInto: requireUnsigned(input.formToChangeInto ?? 0, 0xff, "formToChangeInto"),
     dynamicMoveType: requireUnsigned(input.dynamicMoveType ?? 0, 0xff, "dynamicMoveType"),
     enigmaBerryHoldEffects,
     moveHistory,
@@ -2939,7 +2949,9 @@ export function createBattleScriptStatusRulesHandlers(
       isControllerIdle: sourceExternalPorts.isControllerIdle,
       resolveBattlerForBattleScript: resolveRulesBattlerForBattleScript,
     }),
-    ...createBattleScriptTryCastformDataChangeOpcodeHandlers(program),
+    ...createBattleScriptTryCastformDataChangeOpcodeHandlers(program, {
+      isControllerIdle: sourceExternalPorts.isControllerIdle,
+    }),
     ...createBattleScriptIngrainLeechSeedWrapOpcodeHandlers(program),
     ...createBattleScriptRemoveitemOpcodeHandlers(program, {
       resolveBattlerForBattleScript: resolveRulesBattlerForBattleScript,
