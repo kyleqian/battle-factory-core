@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1020 — [bounded MAIN worker, 2026-08-08] **#39 brief stopped: one requested rename already landed**
+
+- **State:** clean evidence checkpoint; focused **237/237**, smoke **375/375**,
+  typecheck, full suite (**798 files / 8,028 passed / 1 skipped**), build, and
+  Scene-OFF profile check are green.
+- **Did:** stopped before implementation because `dragonBreathGrovyleHp` was
+  already renamed to generic `dragonBreathHp` by `bb5289b2`. Exact old-name
+  code refs remain `{dragon: 0, faint-sink: 22}`; production refs `{0, 10}`;
+  broad #39 inventory **1,949→1,949** / `battleScene.ts` **36,361→36,361 LOC**.
+- **Next:** supervisor should re-scope a fresh bounded #39 seam; a faint-sink-only
+  rename was not inferred from this two-symbol brief.
+- **Notes:** `grovyleFaintSinkRowsAndY2` is declared in
+  `battleSceneCanonical.ts` and publicly re-exported by `battleScene.ts`; no
+  hidden dynamic consumer was found. No trace/window or Scene-ON query ran.
+
 ## 1019 — [bounded MAIN worker, 2026-08-08] **#39: six Family-C healthbox caches now own every rendering input**
 
 - **State:** implementation `660c769f`; focused **12/12**, smoke **375/375**,
@@ -38,24 +53,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** parent differential is **2,529/2,529 byte-identical** across 14
   OFF traces (turn3 insurance; turn4 double-team/rock-slide; all turn5
   menu/ENDEAVOR/KO/switch/Sitrus readers; turn11 FEATHER_DANCE/ROCK_SLIDE).
-
-## 1017 — [supervisor, 2026-08-08] **Psych Up hardware receipt accepted; #55 construction-clock boundary proven across three OFF cases**
-
-- **State:** master includes MAIN `277be8b8`/`0f7dd855` and merged Side
-  `1ee8518f`; clean union. Supervisor independently reproduced Psych Up
-  **4/4**, receipt tests **614/614**, construction validator **11/11**, and
-  smoke **375/375**; worker full suites/build/typecheck are green.
-- **Did:** accepted the legal Golduck Psych Up reach/control receipt with the
-  explicit `BattleTurnPassed` draw owned once. Folded three gapless construction
-  RNG ledgers; they refute fixed-frame, mon-boundary, and draw-count-only ambient
-  schedules and identify an explicit VBlank-phase/source-cycle construction
-  clock as the smallest source-general exact contract. Pruned #55's stale
-  LILIANA presentation remainder (the generic room route is already exact).
-- **Next:** resume the real #39 presentation-seam retirement program with one
-  bounded semantic-owner replacement; do not restart the mechanical canonical
-  split or any canonical Battle-2 turn/window after tick 33331. Continue AI
-  hardware receipts only in file-disjoint evidence lanes.
-- **Notes:** personality-exact live construction remains honestly out of model
-  until the clock contract exists; no per-fixture cursor was promoted. The
-  separate animation supervisor is still active, so newer animation commits
-  remain for the next safe fold.

@@ -1,4 +1,12 @@
 
+## 1017 — [supervisor, 2026-08-08] **Psych Up receipt and #55 construction-clock boundary accepted**
+
+- **State/Did:** accepted the legal Psych Up receipt and three construction RNG
+  ledgers identifying the explicit VBlank-phase/source-cycle clock boundary;
+  focused receipts, smoke, and worker full gates were green.
+- **Next/Notes:** resume bounded #39 presentation-seam retirement without a
+  canonical Battle-2 march. Full entry remains in git history at `PROGRESS.md`.
+
 ## 1016 — [bounded MAIN worker, 2026-08-08] **AI_CV_PsychUp live receipt matched the OFF ROM**
 
 - **State/Did:** legal staged reach/control twins matched exact slot, score,
