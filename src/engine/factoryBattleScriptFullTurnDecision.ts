@@ -133,10 +133,13 @@ import {
   type BattleScriptStatusRulesExternalPorts,
 } from "./battleScriptRulesContext.ts";
 import {
+  BATTLE_SCRIPT_HITMARKER_ATTACKSTRING_PRINTED,
   BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING,
   BATTLE_SCRIPT_HITMARKER_NO_PPDEDUCT,
   BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
   BATTLE_SCRIPT_MOVE_STRUGGLE,
+  BATTLE_SCRIPT_STATUS1_FREEZE,
+  BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS2_WRAPPED_MASK,
   BATTLE_SCRIPT_STATUS3_ROOTED,
@@ -272,6 +275,9 @@ const ABILITY_ARENA_TRAP = 71;
 const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 /** include/constants/moves.h. */
 const MOVE_PURSUIT = 228;
+/** include/battle.h:27-39 -- the action-kind globals gChosenActionByBattler/gActionsByTurnOrder carry. */
+const B_ACTION_USE_MOVE = 0;
+const B_ACTION_TRY_FINISH = 11;
 
 /**
  * Run Away is an honest Factory no-op at this adapter's decision boundary.
@@ -1476,16 +1482,23 @@ function runMoveAction(
 }
 
 /**
- * Voluntary-switch-only registration for Cmd_jumpifnopursuitswitchdmg
- * (`battle_script_commands.c:8723-8759`). The non-Pursuit arm is the literal
- * jump to BattleScript_DoSwitchOut. Pursuit interception remains an honest,
- * trigger-narrow barrier: silently running the ordinary move after installing
- * the incoming mon would reverse the ROM's target and double-power order.
+ * Cmd_jumpifnopursuitswitchdmg (`battle_script_commands.c:8723-8765`) --
+ * voluntary-switch-only registration. The non-Pursuit arm is the literal
+ * jump to BattleScript_DoSwitchOut. The Pursuit-interception arm (all six
+ * guard conditions true) falls through instead: it rewrites the Pursuit
+ * user's turn-order action to B_ACTION_TRY_FINISH, banks the Pursuit move
+ * values, and lets the switch script's own swapattackerwithtarget /
+ * BattleScript_PursuitDmgOnSwitchOut block land the double-power pre-switch
+ * hit. The `gMultiHitCounter != 1` RIGHT-flank target selection is the
+ * doubles-only path this singles reducer never enters (runVoluntarySwitchAction
+ * always stages `setmultihit 1`), kept as a named barrier rather than
+ * silently assuming the singles flank.
  */
 function voluntarySwitchHandlers(
   base: Handlers,
   switchingBattler: BattleSinglesBattler,
   opposingMoveId: number,
+  opposingMoveTarget: BattleScriptBattlerId,
 ): Handlers {
   const instruction = PROGRAM.instructions.find(
     (candidate) =>
@@ -1503,13 +1516,61 @@ function voluntarySwitchHandlers(
     throw new Error("assembled program has no voluntary-switch returnatktoball instruction");
   }
   const handler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (context) => {
-    if (opposingMoveId === MOVE_PURSUIT) {
+    const rules = context.state.rulesContext;
+    // gMultiHitCounter != 1 selects the opposite side's RIGHT flank
+    // (battle_script_commands.c:8732-8738) -- a doubles-only position this
+    // singles reducer's switch path never reaches.
+    if (rules.multiHitCounter !== 1) {
       return unsupportedBranch(
         context,
-        `voluntary ${switchingBattler === 0 ? "player" : "trainer"} switch while the opponent's selected move is MOVE_PURSUIT `
-          + "(pre-switch interception/double-power path)",
+        `jumpifnopursuitswitchdmg right-flank target selection (gMultiHitCounter ${rules.multiHitCounter} != 1, doubles-only)`,
         "battle_script_commands.c",
-        8723,
+        8732,
+      );
+    }
+    const opponent = (switchingBattler === 0 ? 1 : 0) as BattleSinglesBattler;
+    const opponentState = rules.battlers[opponent]!;
+    // battle_script_commands.c:8740-8745 -- all six conditions gate
+    // interception. A Truant or asleep/frozen Pursuit user does NOT
+    // intercept, and neither does a wrong move target or a fainted switcher.
+    const intercepts =
+      // gChosenActionByBattler[target] == B_ACTION_USE_MOVE (0): a nonzero
+      // opposingMoveId is exactly "the opponent's action is a move", and a
+      // zero id means it switched instead (MOVE_NONE == 0 == B_ACTION_USE_MOVE).
+      opposingMoveId !== B_ACTION_USE_MOVE
+      && opposingMoveTarget === switchingBattler
+      && (opponentState.status1 & (BATTLE_SCRIPT_STATUS1_SLEEP | BATTLE_SCRIPT_STATUS1_FREEZE)) === 0
+      && rules.battlers[switchingBattler]!.hp !== 0
+      && opponentState.truantCounter === 0
+      && opposingMoveId === MOVE_PURSUIT;
+    if (intercepts) {
+      const actionsByTurnOrder = Object.freeze(
+        rules.actionsByTurnOrder.map((action, slot) =>
+          rules.battlerByTurnOrder[slot] === opponent ? B_ACTION_TRY_FINISH : action
+        ),
+      ) as unknown as BattleScriptRulesContext["actionsByTurnOrder"];
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        {
+          rulesContext: createBattleScriptRulesContext({
+            ...rules,
+            // gCurrentMove = MOVE_PURSUIT; gCurrMovePos = gChosenMovePos =
+            // chosenMovePositions[target] (battle_script_commands.c:8755-8756).
+            // gChosenMovePos (the scalar global) is not modeled separately;
+            // currentMovePosition carries its value for the hit chain.
+            currentMove: MOVE_PURSUIT,
+            currentMovePosition: rules.chosenMovePositions[opponent]!,
+            actionsByTurnOrder,
+            // gBattlescriptCurrInstr += 5 (fall through); animTurn = 1;
+            // gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED
+            // (battle_script_commands.c:8757-8759).
+            animTurn: 1,
+            hitMarker: (
+              rules.hitMarker & ~BATTLE_SCRIPT_HITMARKER_ATTACKSTRING_PRINTED
+            ) >>> 0,
+          }),
+        },
       );
     }
     const [targetOperand] = context.instruction.operands;
@@ -1559,16 +1620,56 @@ function runVoluntarySwitchAction(
   switchingBattler: BattleSinglesBattler,
   partyIndex: BattlePartyIndex,
   opposingMoveId: number,
+  opposingMoveTarget: BattleScriptBattlerId,
   baseHandlers: Handlers,
 ): ActionResult {
+  const rulesContext = stageVoluntarySwitchRules(
+    priorState.rulesContext,
+    switchingBattler,
+    partyIndex,
+  );
+  // The skipped ActionSwitch prelude is presentation bookkeeping
+  // (hpthresholds2/RETURNMON text) plus the singles counter/setbyte writes
+  // staged above; begin at its first logical branch.
+  const started = startBattleScriptExecute(PROGRAM, "BattleScript_PursuitSwitchDmgLoop", {
+    ...priorState,
+    rulesContext,
+  });
+  const run = runScriptToOwnEnd(
+    PROGRAM,
+    voluntarySwitchHandlers(baseHandlers, switchingBattler, opposingMoveId, opposingMoveTarget),
+    started,
+  );
+  if (run.kind === "barrier") {
+    return Object.freeze({
+      kind: "barrier",
+      state: run.state,
+      instruction: run.instruction,
+    });
+  }
+  return Object.freeze({ kind: "complete", state: run.state });
+}
+
+/**
+ * BattleScript_ActionSwitch's singles prelude (battle_scripts_1.s:3088-3094):
+ * staging monToSwitchIntoId where the controller path would have left it and
+ * resetting the action-local move values, shared by the reducer's switch
+ * action and the staged Tier-1 seam below.
+ */
+function stageVoluntarySwitchRules(
+  priorRulesContext: BattleScriptRulesContext,
+  switchingBattler: BattleSinglesBattler,
+  partyIndex: BattlePartyIndex,
+  multiHitCounter: number = 1,
+): BattleScriptRulesContext {
   const opposingBattler = (switchingBattler === 0 ? 1 : 0) as BattleSinglesBattler;
   const monToSwitchIntoId = Object.freeze(
-    priorState.rulesContext.monToSwitchIntoId.map((value, battler) =>
+    priorRulesContext.monToSwitchIntoId.map((value, battler) =>
       battler === switchingBattler ? partyIndex : value
     ),
   ) as unknown as BattleScriptRulesContext["monToSwitchIntoId"];
-  const rulesContext = createBattleScriptRulesContext({
-    ...priorState.rulesContext,
+  return createBattleScriptRulesContext({
+    ...priorRulesContext,
     selectorRoles: {
       attacker: switchingBattler,
       target: opposingBattler,
@@ -1584,30 +1685,84 @@ function runVoluntarySwitchAction(
     dmgMultiplier: 1,
     moveResultFlags: 0,
     // BattleScript_ActionSwitch's singles prelude writes one before entering
-    // BattleScript_PursuitSwitchDmgLoop (battle_scripts_1.s:3093-3098).
-    multiHitCounter: 1,
+    // BattleScript_PursuitSwitchDmgLoop (battle_scripts_1.s:3093-3098). The
+    // staged seam preserves the caller's counter so the doubles right-flank
+    // barrier stays reachable with a staged `setmultihit 2`.
+    multiHitCounter,
     missType: 0,
   });
-  // The skipped ActionSwitch prelude is presentation bookkeeping
-  // (hpthresholds2/RETURNMON text) plus the singles counter/setbyte writes
-  // staged above; begin at its first logical branch.
-  const started = startBattleScriptExecute(PROGRAM, "BattleScript_PursuitSwitchDmgLoop", {
-    ...priorState,
-    rulesContext,
-  });
-  const run = runScriptToOwnEnd(
-    PROGRAM,
-    voluntarySwitchHandlers(baseHandlers, switchingBattler, opposingMoveId),
-    started,
+}
+
+export type StagedVoluntarySwitchResult = Readonly<{
+  /**
+   * Machine state immediately after `Cmd_jumpifnopursuitswitchdmg` resolves
+   * (the branch's own writes: currentMove/currentMovePosition/animTurn/
+   * hitMarker/actionsByTurnOrder, plus the program counter proving
+   * fall-through vs jump).
+   */
+  atBranch: MachineState;
+  /** State after the switch script runs to its own end (Pursuit hit + switch-in). */
+  completed: MachineState;
+}>;
+
+/**
+ * Staged Tier-1 seam over the voluntary-switch action: steps
+ * BattleScript_PursuitSwitchDmgLoop's `jumpifnopursuitswitchdmg` once, then
+ * runs the switch script to completion. Lets the interception guard and every
+ * blocking condition be asserted directly on the rules context
+ * (currentMove/currentMovePosition/animTurn/hitMarker/actionsByTurnOrder)
+ * plus the program counter, without threading a reducer decision.
+ * `opposingMoveTarget` is the source `gBattleStruct->moveTarget` of the
+ * opposing battler's selected move.
+ */
+export function runStagedVoluntarySwitch(
+  rulesContext: BattleScriptRulesContext,
+  switchingBattler: BattleSinglesBattler,
+  partyIndex: BattlePartyIndex,
+  opposingMoveId: number,
+  opposingMoveTarget: BattleScriptBattlerId,
+  rngSeed: number,
+): StagedVoluntarySwitchResult {
+  const handlers = createBattleScriptStatusRulesHandlers(PROGRAM, externalPorts());
+  const switchHandlers = voluntarySwitchHandlers(
+    handlers,
+    switchingBattler,
+    opposingMoveId,
+    opposingMoveTarget,
   );
-  if (run.kind === "barrier") {
-    return Object.freeze({
-      kind: "barrier",
-      state: run.state,
-      instruction: run.instruction,
-    });
-  }
-  return Object.freeze({ kind: "complete", state: run.state });
+  const opponent = (switchingBattler === 0 ? 1 : 0) as BattleSinglesBattler;
+  const state: MachineState = Object.freeze({
+    programCounter: 0,
+    callStack: Object.freeze([]),
+    instructionsExecuted: 0,
+    haltReason: null,
+    scheduler: createBattleScriptSchedulerState(),
+    rulesContext: withTurnOrderPositions(
+      stageVoluntarySwitchRules(
+        rulesContext,
+        switchingBattler,
+        partyIndex,
+        // The switch prelude always writes a nonzero counter before the loop
+        // (setmultihit 1 singles / 2 doubles), so an unstaged 0 means the
+        // singles default; a staged 2 keeps the doubles barrier reachable.
+        rulesContext.multiHitCounter === 0
+          ? 1
+          : rulesContext.multiHitCounter,
+      ),
+      0,
+      switchingBattler,
+      opponent,
+    ),
+    rng: createBattleScriptRngState(rngSeed),
+    events: Object.freeze([]),
+  });
+  const atBranch = stepBattleScriptMachine(
+    PROGRAM,
+    startBattleScriptExecute(PROGRAM, "BattleScript_PursuitSwitchDmgLoop", state),
+    switchHandlers,
+  ).state;
+  const completed = runScriptToOwnEnd(PROGRAM, switchHandlers, atBranch).state;
+  return Object.freeze({ atBranch, completed });
 }
 
 function movePriority(moveId: number): number {
@@ -2499,6 +2654,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       mover1 as BattleSinglesBattler,
       mover1SwitchPartyIndex,
       mover1 === 0 ? trainerMoveId : playerMoveId,
+      mover1 === 0 ? trainerTarget : playerTarget,
       handlers,
     )
     : runMoveAction(
@@ -2580,86 +2736,96 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
         & ~BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
       ) >>> 0,
     });
-    const preAction2State: MachineState = Object.freeze({
-      ...preEndTurnState,
-      rulesContext: withTurnOrderPositions(
-        betweenActionsRules,
-        1,
-        mover1,
-        mover2,
-      ),
-    });
-    const action2 = mover2SwitchPartyIndex !== null
-      ? runVoluntarySwitchAction(
-        preAction2State,
-        mover2 as BattleSinglesBattler,
-        mover2SwitchPartyIndex,
-        mover2 === 0 ? trainerMoveId : playerMoveId,
-        handlers,
-      )
-      : runMoveAction(
-        PROGRAM,
-        handlers,
-        preAction2State,
-        mover2,
-        mover2MoveId,
-        mover2MoveSlot,
-        mover2Target,
-        mover2 === 0 ? playerForcedStruggle : trainerForcedStruggle,
-      );
-    if (action2.kind === "barrier") {
-      return finishFullTurn(
-        ctx.rng, rngBefore.calls, action2.state,
-        buildRules(action2.state.rulesContext, rules.phase, rules.pendingPlayerDecision),
-        machineBarrierBoundary(action2.instruction, action2.state.instructionsExecuted),
-      );
-    }
-    const faint2 = runBattleScriptFaintedActionsOrchestration(PROGRAM, handlers, action2.state);
-    if (faint2.kind === "terminal") {
-      const finished = handleBattleActionFinished(faint2.state, mover2);
-      return finishFullTurn(
-        ctx.rng, rngBefore.calls, finished,
-        buildRules(finished.rulesContext, rules.phase, rules.pendingPlayerDecision),
-        Object.freeze({
-          kind: "terminal",
-          outcome: mapFactoryBattleOutcome(finished.rulesContext.battleOutcome),
-        }),
-      );
-    }
-    if (faint2.kind === "non-terminal-barrier") {
-      return finishFullTurn(
-        ctx.rng, rngBefore.calls, faint2.state,
-        buildRules(faint2.state.rulesContext, rules.phase, rules.pendingPlayerDecision),
-        machineBarrierBoundary(faint2.instruction, faint2.state.instructionsExecuted),
-      );
-    }
-    if (faint2.kind === "player-choice-required") {
-      // Same fork as faint1 above, just arising from the SECOND (final) action of the turn instead.
-      return finishFullTurn(
-        ctx.rng, rngBefore.calls, faint2.state,
-        buildForcedSwitchPendingRules(faint2.state.rulesContext, {
-          programCounter: faint2.state.programCounter,
-          callStack: faint2.state.callStack,
-          scheduler: faint2.state.scheduler,
-          resumeAt: "run-end-turn",
-        }),
-        Object.freeze({
-          kind: "decision-required",
-          request: Object.freeze({
-            kind: "forced-switch",
-            requestId: ctx.request.requestId + 1,
-            side: faint2.battler === 0 ? "player" as const : "trainer" as const,
-            battler: faint2.battler as BattleSinglesBattler,
-            faintedPartyIndex: faint2.faintedPartyIndex as BattlePartyIndex,
-            legalPartyIndexes: faint2.legalPartyIndexes as readonly BattlePartyIndex[],
+    if (betweenActionsRules.actionsByTurnOrder[1] === B_ACTION_TRY_FINISH) {
+      // Pursuit interception during action 1 rewrote mover2's turn-order slot
+      // to B_ACTION_TRY_FINISH (Cmd_jumpifnopursuitswitchdmg,
+      // battle_script_commands.c:8751-8753), so RunTurnActionsFunctions never
+      // dispatches mover2's own move -- the switch script already landed the
+      // double-power Pursuit hit. Skip straight to end-turn.
+      preEndTurnState = Object.freeze({ ...preEndTurnState, rulesContext: betweenActionsRules });
+    } else {
+      const preAction2State: MachineState = Object.freeze({
+        ...preEndTurnState,
+        rulesContext: withTurnOrderPositions(
+          betweenActionsRules,
+          1,
+          mover1,
+          mover2,
+        ),
+      });
+      const action2 = mover2SwitchPartyIndex !== null
+        ? runVoluntarySwitchAction(
+          preAction2State,
+          mover2 as BattleSinglesBattler,
+          mover2SwitchPartyIndex,
+          mover2 === 0 ? trainerMoveId : playerMoveId,
+          mover2 === 0 ? trainerTarget : playerTarget,
+          handlers,
+        )
+        : runMoveAction(
+          PROGRAM,
+          handlers,
+          preAction2State,
+          mover2,
+          mover2MoveId,
+          mover2MoveSlot,
+          mover2Target,
+          mover2 === 0 ? playerForcedStruggle : trainerForcedStruggle,
+        );
+      if (action2.kind === "barrier") {
+        return finishFullTurn(
+          ctx.rng, rngBefore.calls, action2.state,
+          buildRules(action2.state.rulesContext, rules.phase, rules.pendingPlayerDecision),
+          machineBarrierBoundary(action2.instruction, action2.state.instructionsExecuted),
+        );
+      }
+      const faint2 = runBattleScriptFaintedActionsOrchestration(PROGRAM, handlers, action2.state);
+      if (faint2.kind === "terminal") {
+        const finished = handleBattleActionFinished(faint2.state, mover2);
+        return finishFullTurn(
+          ctx.rng, rngBefore.calls, finished,
+          buildRules(finished.rulesContext, rules.phase, rules.pendingPlayerDecision),
+          Object.freeze({
+            kind: "terminal",
+            outcome: mapFactoryBattleOutcome(finished.rulesContext.battleOutcome),
           }),
-        }),
-      );
+        );
+      }
+      if (faint2.kind === "non-terminal-barrier") {
+        return finishFullTurn(
+          ctx.rng, rngBefore.calls, faint2.state,
+          buildRules(faint2.state.rulesContext, rules.phase, rules.pendingPlayerDecision),
+          machineBarrierBoundary(faint2.instruction, faint2.state.instructionsExecuted),
+        );
+      }
+      if (faint2.kind === "player-choice-required") {
+        // Same fork as faint1 above, just arising from the SECOND (final) action of the turn instead.
+        return finishFullTurn(
+          ctx.rng, rngBefore.calls, faint2.state,
+          buildForcedSwitchPendingRules(faint2.state.rulesContext, {
+            programCounter: faint2.state.programCounter,
+            callStack: faint2.state.callStack,
+            scheduler: faint2.state.scheduler,
+            resumeAt: "run-end-turn",
+          }),
+          Object.freeze({
+            kind: "decision-required",
+            request: Object.freeze({
+              kind: "forced-switch",
+              requestId: ctx.request.requestId + 1,
+              side: faint2.battler === 0 ? "player" as const : "trainer" as const,
+              battler: faint2.battler as BattleSinglesBattler,
+              faintedPartyIndex: faint2.faintedPartyIndex as BattlePartyIndex,
+              legalPartyIndexes: faint2.legalPartyIndexes as readonly BattlePartyIndex[],
+            }),
+          }),
+        );
+      }
+      preEndTurnState = handleBattleActionFinished(
+        faint2.state,
+        mover2,
+      ); // "no-fainted-battlers" or "resumed"
     }
-    preEndTurnState = handleBattleActionFinished(
-      faint2.state,
-      mover2,
-    ); // "no-fainted-battlers" or "resumed"
   }
 
   return runEndTurnTail(ctx.rng, rngBefore.calls, handlers, preEndTurnState, ctx.request.requestId + 1);

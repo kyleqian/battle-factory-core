@@ -177,6 +177,14 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // now preserves the global-current-move/candidate-TypeCalc and u8-bestDmg
   // source quirks, so competitive multi-candidate replacements execute.
   ["src/engine/battleScriptOpenPartyScreenOpcode.ts", 1],
+  // GETEXP registration (ROADMAP S10 rung 4): Cmd_getexp's Frontier
+  // short-circuit (state 0 -> 6) is live; the general EXP/level-up/evolution
+  // machinery (states 1-5, non-Frontier only) is the one barrier. The selector
+  // barrier (docs/barrier-reachability-triage.md item 6) now resolves
+  // BS_FAINTED too (SpikesOnFaintedBattlerFainted's `getexp BS_FAINTED`,
+  // battle_script_commands.c:3264's GetBattlerForBattleScript BS_FAINTED arm)
+  // -- all five committed call sites resolve; the remaining selector barrier
+  // is a future-input guard. 2 total, unchanged.
   ["src/engine/battleScriptGetexpOpcode.ts", 2],
   ["src/engine/battleScriptCheckteamslostOpcode.ts", 3],
   // Forced-switch ground truth §4 slices 1/2/3 tail (SWITCHHANDLEORDER,
@@ -186,7 +194,10 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // this script's case 2/3); SwitchInClearSetData's unconditional
   // STATUS2_WRAPPED clear; switchinanim's BATTLE_TYPE_ARENA
   // point-init call (never set for Factory); various's every id other than
-  // RESET_PLAYER_FAINTED (7). The Truant counter write and grouped
+  // RESET_PLAYER_FAINTED (7) -- now also including GET_BATTLER_FAINTED (4,
+  // docs/barrier-reachability-triage.md item 4, the Pursuit switch-out
+  // `getbattlerfainted BS_TARGET` macro expansion, written into
+  // battleCommunication0) as a live case. The Truant counter write and grouped
   // ABILITYEFFECT_ON_SWITCHIN dispatch are source-ported. 4 total, none
   // reached by the committed forced-switch fixtures;
   // the Spikes fixture now executes its shared path, while their other state
@@ -341,10 +352,15 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // tests/battleScriptForceSwitchOpcode.test.ts.
   ["src/engine/battleScriptForceSwitchOpcode.ts", 1],
   // Voluntary switching executes before ordinary moves through the real
-  // BattleScript_ActionSwitch tail. Its Pursuit-interception arm remains a
-  // trigger-narrow barrier until the pre-switch double-power hit path is
-  // modeled; ordinary non-Pursuit switches execute the source jump and full
-  // switch-in machinery. Reachability-pinned in
+  // BattleScript_ActionSwitch tail. Cmd_jumpifnopursuitswitchdmg's Pursuit-
+  // interception arm (all six guard conditions true) is now fully modeled --
+  // it falls through into the switch script's own double-power Pursuit hit and
+  // rewrites the Pursuit user's turn-order action to B_ACTION_TRY_FINISH
+  // (dispatch-queue item 5, 2026-08-08). The one remaining barrier is the
+  // `gMultiHitCounter != 1` RIGHT-flank target selection
+  // (battle_script_commands.c:8732-8738): a doubles-only position this
+  // singles reducer's switch path never reaches (it always stages
+  // `setmultihit 1`). Reachability-pinned in
   // tests/factoryBattleScriptFullTurnDecision.test.ts.
   ["src/engine/factoryBattleScriptFullTurnDecision.ts", 1],
   // B_SCR_OP_CLEARSTATUSFROMEFFECT/SETSEMIINVULNERABLEBIT/CLEARSEMIINVULNERABLEBIT

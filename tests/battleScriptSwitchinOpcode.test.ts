@@ -197,6 +197,8 @@ const SWITCHINDATAUPDATE_PC = pcFor("B_SCR_OP_SWITCHINDATAUPDATE", "BattleScript
 const HPTHRESHOLDS_PC = pcFor("B_SCR_OP_HPTHRESHOLDS", "BattleScript_FaintedMonSendOutNew");
 const SWITCHINANIM_PC = pcFor("B_SCR_OP_SWITCHINANIM", "BattleScript_FaintedMonSendOutNew");
 const VARIOUS_RESET_PLAYER_FAINTED_PC = pcFor("B_SCR_OP_VARIOUS", "BattleScript_FaintedMonSendOutNew");
+const VARIOUS_GET_BATTLER_FAINTED_PC = pcFor("B_SCR_OP_VARIOUS", "BattleScript_PursuitDmgOnSwitchOut");
+const PURSUIT_JUMPIFBYTE_PC = pcFor("B_SCR_OP_JUMPIFBYTE", "BattleScript_PursuitDmgOnSwitchOut");
 const SWITCHINEFFECTS_PC = pcFor("B_SCR_OP_SWITCHINEFFECTS", "BattleScript_FaintedMonSendOutNew");
 const CANCELALLACTIONS_PC = pcFor("B_SCR_OP_CANCELALLACTIONS", "BattleScript_FaintedMonSendOutNew");
 const HIDDENPOWERCALC_PC = pcFor("B_SCR_OP_HIDDENPOWERCALC", "BattleScript_EffectHiddenPower");
@@ -816,6 +818,76 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     const patched = Object.freeze({
       ...instruction,
       operands: Object.freeze([instruction.operands[0]!, Object.freeze({ ...instruction.operands[1]!, expression: "99" })]),
+    });
+    const patchedProgram = Object.freeze({
+      ...program,
+      instructions: Object.freeze(
+        program.instructions.map((i, index) => (index === VARIOUS_RESET_PLAYER_FAINTED_PC ? patched : i)),
+      ),
+    });
+    const execution = createBattleScriptStatusRulesExecution(
+      patchedProgram,
+      "BattleScript_HandleFaintedMon",
+      context(),
+      1,
+      externalPorts(),
+    );
+    const state = Object.freeze({ ...execution.state, programCounter: VARIOUS_RESET_PLAYER_FAINTED_PC });
+    const result = stepBattleScriptMachine(patchedProgram, state, execution.handlers);
+    expect(result.kind).toBe("halted");
+    expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+  });
+
+  it("various(GET_BATTLER_FAINTED): writes gBattleCommunication[0] TRUE when the active battler's HITMARKER_FAINTED bit is set", () => {
+    const HITMARKER_FAINTED_TARGET = 1 << (28 + 0); // BS_TARGET resolves to battler 0 in this fixture
+    const rc = context({ hitMarker: HITMARKER_FAINTED_TARGET });
+    const { result } = stepAtProgramCounter(VARIOUS_GET_BATTLER_FAINTED_PC, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.programCounter).toBe(VARIOUS_GET_BATTLER_FAINTED_PC + 1);
+    expect(result.state.rulesContext.battleCommunication0).toBe(1);
+  });
+
+  it("various(GET_BATTLER_FAINTED): writes gBattleCommunication[0] FALSE when the active battler's HITMARKER_FAINTED bit is clear", () => {
+    const rc = context({ hitMarker: 0 });
+    const { result } = stepAtProgramCounter(VARIOUS_GET_BATTLER_FAINTED_PC, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battleCommunication0).toBe(0);
+  });
+
+  it("various(GET_BATTLER_FAINTED) -> jumpifbyte: a following gBattleCommunication read observes the written value (the Pursuit switch-out guard)", () => {
+    // Fainted bit set -> the write lands where Cmd_jumpifbyte's
+    // readJumpifbyteMemByte looks (battleScriptJumpifbyteOpcode.ts:72), so the
+    // Pursuit script does NOT return early: CMP_EQUAL gBattleCommunication
+    // FALSE is false and the instruction advances.
+    const HITMARKER_FAINTED_TARGET = 1 << (28 + 0); // BS_TARGET resolves to battler 0 in this fixture
+    const rc = context({ hitMarker: HITMARKER_FAINTED_TARGET });
+    const { execution, result: variousResult } = stepAtProgramCounter(VARIOUS_GET_BATTLER_FAINTED_PC, rc);
+    if (variousResult.kind !== "advanced") throw new Error(`expected advance, got ${variousResult.kind}`);
+    expect(variousResult.state.rulesContext.battleCommunication0).toBe(1);
+    const jumpifbyte = stepBattleScriptMachine(program, variousResult.state, execution.handlers);
+    if (jumpifbyte.kind !== "advanced") throw new Error(`expected advance, got ${jumpifbyte.kind}`);
+    expect(jumpifbyte.state.programCounter).toBe(PURSUIT_JUMPIFBYTE_PC + 1);
+
+    // Bit clear -> gBattleCommunication[0] = FALSE (0) -> CMP_EQUAL FALSE
+    // succeeds and the script jumps to its return label.
+    const rcNotFainted = context({ hitMarker: 0 });
+    const { execution: execution2, result: variousResult2 } = stepAtProgramCounter(VARIOUS_GET_BATTLER_FAINTED_PC, rcNotFainted);
+    if (variousResult2.kind !== "advanced") throw new Error(`expected advance, got ${variousResult2.kind}`);
+    const jumpifbyte2 = stepBattleScriptMachine(program, variousResult2.state, execution2.handlers);
+    if (jumpifbyte2.kind !== "advanced") throw new Error(`expected advance, got ${jumpifbyte2.kind}`);
+    expect(jumpifbyte2.state.programCounter).toBe(
+      resolveBattleScriptLabel(program, "BattleScript_PursuitDmgOnSwitchOutRet")!.programCounter,
+    );
+  });
+
+  it("various: a real still-unmodeled id (VARIOUS_IS_RUNNING_IMPOSSIBLE) keeps the guard", () => {
+    const instruction = program.instructions[VARIOUS_RESET_PLAYER_FAINTED_PC]!;
+    const patched = Object.freeze({
+      ...instruction,
+      operands: Object.freeze([
+        instruction.operands[0]!,
+        Object.freeze({ ...instruction.operands[1]!, expression: "VARIOUS_IS_RUNNING_IMPOSSIBLE" }),
+      ]),
     });
     const patchedProgram = Object.freeze({
       ...program,

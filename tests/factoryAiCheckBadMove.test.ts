@@ -87,6 +87,514 @@ describe("AI_CBM_HighRiskForDamage via Counter (docs/factory-ai-checkviability-g
   });
 });
 
+describe("AI_CBM_HighRiskForDamage via Flail (docs/executable-frontier-census.md EFFECT_FLAIL row, dispatch :160)", () => {
+  const MOVE_FLAIL = 175; // EFFECT_FLAIL, TYPE_NORMAL
+
+  function flailTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      species: 213,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      ...overrides,
+    });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read", () => {
+    const result = run(MOVE_FLAIL, flailTarget({
+      types: ["TYPE_GHOST", "TYPE_GHOST"],
+      knownAbility: null,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("non-Wonder-Guard FALLTHROUGH reaches End at zero", () => {
+    expect(run(MOVE_FLAIL, flailTarget())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus non-x2 effectiveness reaches Score_Minus10", () => {
+    // Normal is never x2 against any type, so Wonder Guard always rejects.
+    expect(run(MOVE_FLAIL, flailTarget({
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("performs the handler's fresh ability read after the universal Soundproof read", () => {
+    const result = run(MOVE_FLAIL, { ...MAROWAK, types: ["TYPE_ROCK", "TYPE_BUG"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-high-risk-ability",
+    ]);
+  });
+
+  it("leaves Haze behind the same generic CBM barrier", () => {
+    expect(run(MOVE_HAZE, flailTarget())).toMatchObject({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-bad-move",
+    });
+  });
+});
+
+describe("AI_CBM_HighRiskForDamage via Mirror Coat (dispatch :182)", () => {
+  const MOVE_MIRROR_COAT = 243; // EFFECT_MIRROR_COAT, TYPE_PSYCHIC
+
+  function mirrorCoatTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      species: 213,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      ...overrides,
+    });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read", () => {
+    // Psychic is x0 against Dark.
+    const result = run(MOVE_MIRROR_COAT, mirrorCoatTarget({
+      types: ["TYPE_DARK", "TYPE_DARK"],
+      knownAbility: null,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("non-Wonder-Guard FALLTHROUGH reaches End at zero", () => {
+    expect(run(MOVE_MIRROR_COAT, mirrorCoatTarget())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus non-x2 effectiveness reaches Score_Minus10", () => {
+    expect(run(MOVE_MIRROR_COAT, mirrorCoatTarget({
+      types: ["TYPE_ROCK", "TYPE_BUG"],
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus x2 effectiveness JUMPs to End at zero", () => {
+    // Psychic is x2 against Fighting.
+    expect(run(MOVE_MIRROR_COAT, mirrorCoatTarget({
+      types: ["TYPE_FIGHTING", "TYPE_NORMAL"],
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("performs the handler's fresh ability read after the universal Soundproof read", () => {
+    const result = run(MOVE_MIRROR_COAT, { ...MAROWAK, types: ["TYPE_ROCK", "TYPE_BUG"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-high-risk-ability",
+    ]);
+  });
+});
+
+describe("AI_CBM_HighRiskForDamage via Focus Punch (dispatch :196)", () => {
+  const MOVE_FOCUS_PUNCH = 264; // EFFECT_FOCUS_PUNCH, TYPE_FIGHTING, power 150
+
+  function focusPunchTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      species: 213,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      ...overrides,
+    });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read", () => {
+    // Fighting is x0 against Ghost.
+    const result = run(MOVE_FOCUS_PUNCH, focusPunchTarget({
+      types: ["TYPE_GHOST", "TYPE_GHOST"],
+      knownAbility: null,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("non-Wonder-Guard FALLTHROUGH reaches End at zero", () => {
+    expect(run(MOVE_FOCUS_PUNCH, focusPunchTarget())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus non-x2 effectiveness reaches Score_Minus10", () => {
+    expect(run(MOVE_FOCUS_PUNCH, focusPunchTarget({
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus x2 effectiveness JUMPs to End at zero", () => {
+    // Fighting is x2 against Normal.
+    expect(run(MOVE_FOCUS_PUNCH, focusPunchTarget({
+      types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("performs the handler's fresh ability read after the universal Soundproof read", () => {
+    const result = run(MOVE_FOCUS_PUNCH, { ...MAROWAK, types: ["TYPE_ROCK", "TYPE_BUG"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-high-risk-ability",
+    ]);
+  });
+});
+
+describe("AI_CBM_HighRiskForDamage via Seismic Toss / Night Shade (dispatch :154, EFFECT_LEVEL_DAMAGE)", () => {
+  const MOVE_SEISMIC_TOSS = 69; // EFFECT_LEVEL_DAMAGE, TYPE_FIGHTING
+  const MOVE_NIGHT_SHADE = 101; // EFFECT_LEVEL_DAMAGE, TYPE_GHOST
+
+  function levelDamageTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      species: 213,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      ...overrides,
+    });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read (Seismic Toss, Fighting vs Ghost)", () => {
+    const result = run(MOVE_SEISMIC_TOSS, levelDamageTarget({
+      types: ["TYPE_GHOST", "TYPE_GHOST"],
+      knownAbility: null,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read (Night Shade, Ghost vs Normal)", () => {
+    const result = run(MOVE_NIGHT_SHADE, levelDamageTarget({
+      types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      knownAbility: null,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("non-Wonder-Guard FALLTHROUGH reaches End at zero", () => {
+    expect(run(MOVE_SEISMIC_TOSS, levelDamageTarget())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus non-x2 effectiveness reaches Score_Minus10", () => {
+    expect(run(MOVE_NIGHT_SHADE, levelDamageTarget({
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("performs the handler's fresh ability read after the universal Soundproof read", () => {
+    const result = run(MOVE_SEISMIC_TOSS, { ...MAROWAK, types: ["TYPE_ROCK", "TYPE_BUG"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-high-risk-ability",
+    ]);
+  });
+});
+
+describe("AI_CBM_HighRiskForDamage via Frustration (dispatch :173)", () => {
+  const MOVE_FRUSTRATION = 218; // EFFECT_FRUSTRATION, TYPE_NORMAL
+
+  function frustrationTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      species: 213,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      ...overrides,
+    });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read", () => {
+    // Normal is x0 against Ghost.
+    const result = run(MOVE_FRUSTRATION, frustrationTarget({
+      types: ["TYPE_GHOST", "TYPE_GHOST"],
+      knownAbility: null,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("non-Wonder-Guard FALLTHROUGH reaches End at zero", () => {
+    expect(run(MOVE_FRUSTRATION, frustrationTarget())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus non-x2 effectiveness reaches Score_Minus10", () => {
+    // Normal is never x2 against any type, so Wonder Guard always rejects.
+    expect(run(MOVE_FRUSTRATION, frustrationTarget({
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("performs the handler's fresh ability read after the universal Soundproof read", () => {
+    const result = run(MOVE_FRUSTRATION, { ...MAROWAK, types: ["TYPE_ROCK", "TYPE_BUG"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-high-risk-ability",
+    ]);
+  });
+});
+
+describe("AI_CBM_HighRiskForDamage via Return (dispatch :171)", () => {
+  const MOVE_RETURN = 216; // EFFECT_RETURN, TYPE_NORMAL
+
+  function returnTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      species: 213,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      ...overrides,
+    });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read", () => {
+    // Normal is x0 against Ghost.
+    const result = run(MOVE_RETURN, returnTarget({
+      types: ["TYPE_GHOST", "TYPE_GHOST"],
+      knownAbility: null,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("non-Wonder-Guard FALLTHROUGH reaches End at zero", () => {
+    expect(run(MOVE_RETURN, returnTarget())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus non-x2 effectiveness reaches Score_Minus10", () => {
+    // Normal is never x2 against any type, so Wonder Guard always rejects.
+    expect(run(MOVE_RETURN, returnTarget({
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("performs the handler's fresh ability read after the universal Soundproof read", () => {
+    const result = run(MOVE_RETURN, { ...MAROWAK, types: ["TYPE_ROCK", "TYPE_BUG"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-high-risk-ability",
+    ]);
+  });
+});
+
+describe("AI_CBM_HighRiskForDamage via Hyper Beam (dispatch :151, EFFECT_RECHARGE)", () => {
+  const MOVE_HYPER_BEAM = 63; // EFFECT_RECHARGE, TYPE_NORMAL, power 150
+
+  function rechargeTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      species: 213,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      ...overrides,
+    });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read", () => {
+    // Normal is x0 against Ghost.
+    const result = run(MOVE_HYPER_BEAM, rechargeTarget({
+      types: ["TYPE_GHOST", "TYPE_GHOST"],
+      knownAbility: null,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("non-Wonder-Guard FALLTHROUGH reaches End at zero", () => {
+    expect(run(MOVE_HYPER_BEAM, rechargeTarget())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus non-x2 effectiveness reaches Score_Minus10", () => {
+    // Normal is never x2 against any type, so Wonder Guard always rejects.
+    expect(run(MOVE_HYPER_BEAM, rechargeTarget({
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("performs the handler's fresh ability read after the universal Soundproof read", () => {
+    const result = run(MOVE_HYPER_BEAM, { ...MAROWAK, types: ["TYPE_ROCK", "TYPE_BUG"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-high-risk-ability",
+    ]);
+  });
+});
+
+describe("AI_CBM_HighRiskForDamage via Endeavor (dispatch :203)", () => {
+  const MOVE_ENDEAVOR = 283; // EFFECT_ENDEAVOR, TYPE_NORMAL
+
+  function endeavorTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      species: 213,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      ...overrides,
+    });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read", () => {
+    // Normal is x0 against Ghost.
+    const result = run(MOVE_ENDEAVOR, endeavorTarget({
+      types: ["TYPE_GHOST", "TYPE_GHOST"],
+      knownAbility: null,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("non-Wonder-Guard FALLTHROUGH reaches End at zero", () => {
+    expect(run(MOVE_ENDEAVOR, endeavorTarget())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus non-x2 effectiveness reaches Score_Minus10", () => {
+    // Normal is never x2 against any type, so Wonder Guard always rejects.
+    expect(run(MOVE_ENDEAVOR, endeavorTarget({
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("performs the handler's fresh ability read after the universal Soundproof read", () => {
+    const result = run(MOVE_ENDEAVOR, { ...MAROWAK, types: ["TYPE_ROCK", "TYPE_BUG"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-high-risk-ability",
+    ]);
+  });
+});
+
+describe("AI_CBM_HighRiskForDamage via Superpower (dispatch :200)", () => {
+  const MOVE_SUPERPOWER = 276; // EFFECT_SUPERPOWER, TYPE_FIGHTING, power 120
+
+  function superpowerTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      species: 213,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      ...overrides,
+    });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read", () => {
+    // Fighting is x0 against Ghost.
+    const result = run(MOVE_SUPERPOWER, superpowerTarget({
+      types: ["TYPE_GHOST", "TYPE_GHOST"],
+      knownAbility: null,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("non-Wonder-Guard FALLTHROUGH reaches End at zero", () => {
+    expect(run(MOVE_SUPERPOWER, superpowerTarget())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus non-x2 effectiveness reaches Score_Minus10", () => {
+    expect(run(MOVE_SUPERPOWER, superpowerTarget({
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus x2 effectiveness JUMPs to End at zero", () => {
+    // Fighting is x2 against Normal.
+    expect(run(MOVE_SUPERPOWER, superpowerTarget({
+      types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("performs the handler's fresh ability read after the universal Soundproof read", () => {
+    const result = run(MOVE_SUPERPOWER, { ...MAROWAK, types: ["TYPE_ROCK", "TYPE_BUG"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-high-risk-ability",
+    ]);
+  });
+});
+
 const MOVE_SURF = 57;
 const MOVE_ROCK_SLIDE = 157;
 const MOVE_BODY_SLAM = 34;
@@ -1160,6 +1668,61 @@ describe("AI_CBM_AttackUp / AI_CBM_DefenseUp / AI_CBM_BulkUp (docs/factory-ai-ch
   });
 });
 
+// data/battle_ai_scripts.s:164,434-437: AI_CBM_Curse is byte-for-byte the
+// same dual-stat body as AI_CBM_BulkUp (AI_USER's own ATK -10 then DEF -8),
+// so it reuses runCbmBulkUp unchanged. Reached from EFFECT_CURSE.
+describe("AI_CBM_Curse (data/battle_ai_scripts.s:434-437, BulkUp-identical body)", () => {
+  const MOVE_CURSE = 174; // EFFECT_CURSE
+
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function withAttacker(atkStage: number, defStage: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage, defStage });
+  }
+
+  it("scores -18 (both gates fire independently, -10 + -8) when both ATK and DEF are already MAX_STAT_STAGE", () => {
+    const result = run(MOVE_CURSE, SHUCKLE, undefined, withAttacker(12, 12));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -18 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 (only the ATK gate fires) when ATK is maxed but DEF is not", () => {
+    const result = run(MOVE_CURSE, SHUCKLE, undefined, withAttacker(12, 6));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("scores -8 (only the DEF gate fires) when DEF is maxed but ATK is not", () => {
+    const result = run(MOVE_CURSE, SHUCKLE, undefined, withAttacker(6, 12));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+  });
+
+  it("scores 0 with zero draws when neither ATK nor DEF is maxed", () => {
+    const result = run(MOVE_CURSE, SHUCKLE, undefined, withAttacker(6, 6));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("leaves Haze behind the same generic CBM barrier", () => {
+    expect(run(MOVE_HAZE, SHUCKLE)).toEqual({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-bad-move",
+      effect: "EFFECT_HAZE",
+      moveId: MOVE_HAZE,
+    });
+  });
+});
+
 // data/battle_ai_scripts.s:257-259/261-263,
 // docs/factory-ai-checkviability-ground-truth.md §20.1/§21.1. Byte-for-byte
 // the same bare MAX_STAT_STAGE-on-AI_USER's-own-stage shape as
@@ -1376,6 +1939,79 @@ describe("AI_CBM_CosmicPower / AI_CBM_CalmMind (docs/factory-ai-checkviability-g
   it("AI_CBM_CalmMind: omitted spAtkStage/spDefStage both default to DEFAULT_STAT_STAGE (6, not maxed) -- scores 0", () => {
     const result = run(MOVE_CALM_MIND, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6 }));
     expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+});
+
+// data/battle_ai_scripts.s:595-598, docs/factory-ai-checkviability-ground-truth.md
+// §33.1: the same dual-stat shape as AI_CBM_BulkUp/AI_CBM_CalmMind above
+// (ATK -10 first, SPEED -8 second), reached from EFFECT_DRAGON_DANCE
+// (dispatch :213).
+describe("AI_CBM_DragonDance (docs/factory-ai-checkviability-ground-truth.md §33.1)", () => {
+  const MOVE_DRAGON_DANCE = 349; // EFFECT_DRAGON_DANCE
+
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  it("scores -18 (both gates fire independently, -10 + -8) when both ATK and SPEED are already MAX_STAT_STAGE", () => {
+    const result = run(
+      MOVE_DRAGON_DANCE,
+      SHUCKLE,
+      undefined,
+      Object.freeze({ atkStage: 12, defStage: 6, speedStage: 12 }),
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -18 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 (only the ATK gate fires) when ATK is maxed but SPEED is not", () => {
+    const result = run(
+      MOVE_DRAGON_DANCE,
+      SHUCKLE,
+      undefined,
+      Object.freeze({ atkStage: 12, defStage: 6, speedStage: 6 }),
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("scores -8 (only the SPEED gate fires) when SPEED is maxed but ATK is not", () => {
+    const result = run(
+      MOVE_DRAGON_DANCE,
+      SHUCKLE,
+      undefined,
+      Object.freeze({ atkStage: 6, defStage: 6, speedStage: 12 }),
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+  });
+
+  it("scores 0 with zero draws when neither ATK nor SPEED is maxed", () => {
+    const result = run(
+      MOVE_DRAGON_DANCE,
+      SHUCKLE,
+      undefined,
+      Object.freeze({ atkStage: 6, defStage: 6, speedStage: 6 }),
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("omitted speedStage defaults to DEFAULT_STAT_STAGE (6, not maxed) -- ATK-only gate still fires", () => {
+    const result = run(
+      MOVE_DRAGON_DANCE,
+      SHUCKLE,
+      undefined,
+      Object.freeze({ atkStage: 12, defStage: 6 }),
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
   });
 });
 
@@ -1919,5 +2555,65 @@ describe("AI_CBM_RainDance / AI_CBM_SunnyDay / AI_CBM_Hail (docs/factory-ai-chec
       expect(realRain).toMatchObject({ kind: "scored", scoreDelta: -8 }); // real weather == RainDance's own type
       expect(realSandstormAgainstHail).toMatchObject({ kind: "scored", scoreDelta: 0 }); // real weather != Hail's own type
     });
+  });
+});
+
+// data/battle_ai_scripts.s:168,451-454: AI_CBM_Sandstorm -- the weather
+// trio's sibling fourth, byte-for-byte the same 3-instruction body with
+// AI_WEATHER_SANDSTORM (id 2) swapped in. Same stale-`funcResult` channel:
+// ability id 2 (ABILITY_DRIZZLE) collides with AI_WEATHER_SANDSTORM on a
+// weatherless read.
+describe("AI_CBM_Sandstorm (data/battle_ai_scripts.s:451-454)", () => {
+  const MOVE_SANDSTORM = 201;
+
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function withWeather(currentWeather: 0 | 1 | 2 | 3 | undefined): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, currentWeather });
+  }
+
+  it("scores -8 with zero draws when current weather is already Sandstorm", () => {
+    const result = run(MOVE_SANDSTORM, SHUCKLE, undefined, withWeather(2));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores 0 when current weather is a DIFFERENT weather", () => {
+    const result = run(MOVE_SANDSTORM, SHUCKLE, undefined, withWeather(1));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("scores 0 with zero draws when currentWeather is omitted (no weather bit set)", () => {
+    const result = run(MOVE_SANDSTORM, SHUCKLE, undefined, withWeather(undefined));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -8 with zero draws when weatherless and the target's ability ID collides with AI_WEATHER_SANDSTORM (id 2 = Drizzle)", () => {
+    const result = run(MOVE_SANDSTORM, { ...SHUCKLE, knownAbility: "ABILITY_DRIZZLE" }, undefined, withWeather(undefined));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("stays 0 when weatherless and the target's colliding ability ID belongs to a DIFFERENT handler's own constant (id 1 == Rain, not Sandstorm)", () => {
+    const result = run(MOVE_SANDSTORM, { ...SHUCKLE, knownAbility: "ABILITY_STENCH" }, undefined, withWeather(undefined));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("a genuinely set weather always wins over the stale ability read, even for a colliding-ID target", () => {
+    const realRain = run(MOVE_SANDSTORM, { ...SHUCKLE, knownAbility: "ABILITY_DRIZZLE" }, undefined, withWeather(1));
+    expect(realRain).toMatchObject({ kind: "scored", scoreDelta: 0 }); // real weather != Sandstorm
   });
 });

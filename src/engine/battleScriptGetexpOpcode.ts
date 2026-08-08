@@ -15,10 +15,13 @@
  * without halting on the Frontier path).
  *
  * Like Cmd_moveend and Cmd_jumpifbyte, Cmd_getexp reads
- * GetBattlerForBattleScript's selector directly; only BS_TARGET/BS_ATTACKER
- * are modeled (matching Cmd_datahpupdate's own selector scope) -- a literal
- * `getexp BS_FAINTED` operand (reachable only from the Spikes-on-faint
- * scripts, unrelated to this rung's WIN path) is the other named barrier.
+ * GetBattlerForBattleScript's selector directly; BS_TARGET/BS_ATTACKER/BS_FAINTED
+ * are modeled (matching Cmd_datahpupdate's own selector scope, including its
+ * BS_FAINTED case -- resolveHitChainBattlerOperand, battleScriptHitChainOpcode.ts
+ * :732-745). The BS_FAINTED selector is live: `getexp BS_FAINTED`
+ * (BattleScript_SpikesOnFaintedBattlerFainted, data/battle_scripts_1.s:3429 --
+ * the Spikes damage-on-switch-in path where the replacing mon faints to the
+ * Spikes) resolves through the distinct `selectorRoles.fainted` role.
  * BattleScript_GiveExp's own call site is `getexp BS_TARGET`, which the
  * fainted-actions orchestration (battleScriptFaintedActionsOrchestration.ts)
  * correctly reassigns to the currently-processing fainted battler before
@@ -91,7 +94,15 @@ function requireBattlerRole(
   return value;
 }
 
-/** Matches Cmd_datahpupdate's own resolveHitChainBattlerOperand scope. */
+/**
+ * Matches Cmd_datahpupdate's own resolveHitChainBattlerOperand scope
+ * (battleScriptHitChainOpcode.ts:732-745), including its BS_FAINTED case:
+ * the shared Spikes-on-switch script passes BS_FAINTED to the HP commands,
+ * and the same path's `getexp BS_FAINTED`
+ * (BattleScript_SpikesOnFaintedBattlerFainted, data/battle_scripts_1.s:3429)
+ * resolves through the distinct `selectorRoles.fainted` role -- never derived
+ * from `target` (ISSUES #43's closed remainder, same idiom as the hit chain).
+ */
 function resolveGetexpBattlerOperand(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
   rules: BattleScriptRulesContext,
@@ -99,6 +110,11 @@ function resolveGetexpBattlerOperand(
   const expression = context.instruction.operands[0]?.expression;
   if (expression === "BS_TARGET") return requireBattlerRole(rules, "target");
   if (expression === "BS_ATTACKER") return requireBattlerRole(rules, "attacker");
+  if (expression === "BS_FAINTED") {
+    const fainted = rules.selectorRoles.fainted;
+    if (fainted === null) throw new Error("Cmd_getexp requires a fainted role");
+    return fainted;
+  }
   return "unsupported";
 }
 
@@ -148,9 +164,10 @@ function createGetexpOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRule
       return unsupportedBranch(
         context,
         "Cmd_getexp's GetBattlerForBattleScript selector "
-          + `(${context.instruction.operands[0]?.expression ?? "<missing>"}) is not BS_TARGET/BS_ATTACKER `
-          + "(BattleScript_GiveExp's own call site is always `getexp BS_TARGET`, correctly reassigned to the "
-          + "fainted battler by the orchestration before this runs, battleScriptFaintedActionsOrchestration.ts)",
+          + `(${context.instruction.operands[0]?.expression ?? "<missing>"}) is not BS_TARGET/BS_ATTACKER/BS_FAINTED `
+          + "(all five committed getexp call sites resolve -- BattleScript_GiveExp and Pursuit use "
+          + "BS_TARGET, SpikesOnAttackerFainted BS_ATTACKER, SpikesOnFaintedBattlerFainted BS_FAINTED; "
+          + "the remaining barriered selectors are future-input guards, e.g. BS_SCRIPTING)",
         3264,
       );
     }

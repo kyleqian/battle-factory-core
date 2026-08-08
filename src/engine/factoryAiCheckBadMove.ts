@@ -710,6 +710,25 @@ function runCbmCalmMind(attackerSpAtkStage: number, attackerSpDefStage: number):
 }
 
 /**
+ * `AI_CBM_DragonDance` (`data/battle_ai_scripts.s:595-598`, doc §33.1):
+ *
+ * ```
+ * AI_CBM_DragonDance:
+ *     if_stat_level_equal AI_USER, STAT_ATK, MAX_STAT_STAGE, Score_Minus10
+ *     if_stat_level_equal AI_USER, STAT_SPEED, MAX_STAT_STAGE, Score_Minus8
+ *     end
+ * ```
+ *
+ * The same dual-stat shape as `AI_CBM_BulkUp`/`AI_CBM_CalmMind` above with
+ * `STAT_SPEED` as the second (lighter, -8) stat. Dispatch: `EFFECT_DRAGON_DANCE`
+ * (`data/battle_ai_scripts.s:213`). Composes `runCbmAttackUp` for the first
+ * check exactly as `runCbmBulkUp` does.
+ */
+function runCbmDragonDance(attackerAtkStage: number, attackerSpeedStage: number): number {
+  return runCbmAttackUp(attackerAtkStage) + (attackerSpeedStage === MAX_STAT_STAGE ? -8 : 0);
+}
+
+/**
  * `AI_CBM_LightScreen` (`data/battle_ai_scripts.s:354-356`, doc §23.1):
  *
  * ```
@@ -876,6 +895,16 @@ function runCbmHail(currentWeather: AiWeatherValue | undefined, staleAbilityGues
   return runCbmWeatherSetter(currentWeather, staleAbilityGuess, AI_WEATHER_HAIL);
 }
 
+/**
+ * `AI_CBM_Sandstorm` (`data/battle_ai_scripts.s:451-454`) -- byte-for-byte
+ * the same 3-instruction weather-setter shape as the trio above with
+ * `AI_WEATHER_SANDSTORM` swapped in. Dispatch: `EFFECT_SANDSTORM`
+ * (`data/battle_ai_scripts.s:168`). Same stale-`funcResult` bug applies.
+ */
+function runCbmSandstorm(currentWeather: AiWeatherValue | undefined, staleAbilityGuess: string): number {
+  return runCbmWeatherSetter(currentWeather, staleAbilityGuess, AI_WEATHER_SANDSTORM);
+}
+
 export function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
   const distinct = defendingTypes[0] === defendingTypes[1] ? [defendingTypes[0]] : defendingTypes;
   let mult = 10;
@@ -973,6 +1002,182 @@ export function runCheckBadMovePreamble(input: Readonly<{
   // Counter dispatches to the shared AI_CBM_HighRiskForDamage body
   // (`data/battle_ai_scripts.s:156,368-376`, doc §34).
   if (move.effect === "EFFECT_COUNTER") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_FLAIL -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:160`), the shared high-risk body already
+  // ported for Counter above. Same dispatch shape as Counter's: x0 type
+  // immunity JUMPs to Score_Minus10 before the ability read, then Wonder
+  // Guard with a non-x2 effectiveness JUMPs to Score_Minus10.
+  if (move.effect === "EFFECT_FLAIL") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_MIRROR_COAT -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:182`), the shared high-risk body again.
+  if (move.effect === "EFFECT_MIRROR_COAT") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_FOCUS_PUNCH -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:196`), the shared high-risk body again.
+  if (move.effect === "EFFECT_FOCUS_PUNCH") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_LEVEL_DAMAGE -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:154`), the shared high-risk body again
+  // (Seismic Toss / Night Shade).
+  if (move.effect === "EFFECT_LEVEL_DAMAGE") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_FRUSTRATION -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:173`), the shared high-risk body again.
+  if (move.effect === "EFFECT_FRUSTRATION") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_RETURN -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:171`), the shared high-risk body again.
+  if (move.effect === "EFFECT_RETURN") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_RECHARGE -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:151`), the shared high-risk body again
+  // (Hyper Beam / Giga Impact / etc.).
+  if (move.effect === "EFFECT_RECHARGE") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_ENDEAVOR -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:203`), the shared high-risk body again.
+  if (move.effect === "EFFECT_ENDEAVOR") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SUPERPOWER -> AI_CBM_HighRiskForDamage
+  // (`data/battle_ai_scripts.s:200`), the shared high-risk body again.
+  if (move.effect === "EFFECT_SUPERPOWER") {
     const highRisk = runCbmHighRiskForDamage(
       move.type,
       target,
@@ -1094,6 +1299,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_CURSE -> AI_CBM_Curse
+  // (`data/battle_ai_scripts.s:164,434-437`) -- byte-for-byte the same
+  // dual-stat body as `AI_CBM_BulkUp` (AI_USER's own ATK -10 then DEF -8),
+  // so it reuses `runCbmBulkUp` unchanged.
+  if (move.effect === "EFFECT_CURSE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmBulkUp(input.attacker.atkStage, input.attacker.defStage),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_UP(_2) -> AI_CBM_SpeedUp, the
   // seventh CBM-blocked pair's own CBM half (doc §20).
   if (move.effect === "EFFECT_SPEED_UP" || move.effect === "EFFECT_SPEED_UP_2") {
@@ -1154,6 +1372,21 @@ export function runCheckBadMovePreamble(input: Readonly<{
       scoreDelta: runCbmCalmMind(
         input.attacker.spAtkStage ?? DEFAULT_STAT_STAGE,
         input.attacker.spDefStage ?? DEFAULT_STAT_STAGE,
+      ),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_DRAGON_DANCE -> AI_CBM_DragonDance
+  // (`data/battle_ai_scripts.s:213`, doc §33.1) -- the same dual-stat shape
+  // as BulkUp/CalmMind with STAT_SPEED as the second, lighter stat.
+  if (move.effect === "EFFECT_DRAGON_DANCE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmDragonDance(
+        input.attacker.atkStage,
+        input.attacker.speedStage ?? DEFAULT_STAT_STAGE,
       ),
     });
   }
@@ -1254,6 +1487,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
       rng,
       draws: Object.freeze(draws),
       scoreDelta: runCbmHail(input.attacker.currentWeather, soundproofGuess),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SANDSTORM -> AI_CBM_Sandstorm
+  // (`data/battle_ai_scripts.s:168,451-454`), the weather trio's sibling
+  // fourth -- same byte-for-byte 3-instruction shape with
+  // AI_WEATHER_SANDSTORM swapped in.
+  if (move.effect === "EFFECT_SANDSTORM") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmSandstorm(input.attacker.currentWeather, soundproofGuess),
     });
   }
 

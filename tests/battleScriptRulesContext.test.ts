@@ -182,6 +182,12 @@ describe("source-shaped Battle Script rules context", () => {
     const created = createBattleScriptRulesContext(source);
     expect(Object.keys(created).sort()).toEqual([
       "absentBattlerFlags",
+      // Source u8 gActionsByTurnOrder[MAX_BATTLERS_COUNT], added with the
+      // Cmd_jumpifnopursuitswitchdmg Pursuit-interception branch
+      // (dispatch-queue item 5, 2026-08-08): the switch action rewrites the
+      // Pursuit user's turn-order slot to B_ACTION_TRY_FINISH so its own
+      // move action never dispatches.
+      "actionsByTurnOrder",
       "aiObservedAbilityIds",
       "aiObservedItemEffects",
       "alreadyStatusedMoveAttempt",
