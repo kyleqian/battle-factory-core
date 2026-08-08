@@ -334,6 +334,7 @@ function main(): void {
   const processedSeeds = new Set<string>();
   for (const name of canonicalBucket) {
     if (clean.has(name) || processedSeeds.has(name)) continue;
+    if (!byName.has(name)) { processedSeeds.add(name); continue; }
     const cluster = new Set<string>([name]);
     let grew = true;
     while (grew) {
