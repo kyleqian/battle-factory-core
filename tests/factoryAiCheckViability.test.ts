@@ -6111,8 +6111,10 @@ describe("AI_CV_MirrorCoat (data/battle_ai_scripts.s:2116-2171)", () => {
   });
 
   it("user has Counter: jumps straight to ScoreUp4's +4 roll", () => {
-    // seed 1 -> roll7 low 198 (>=100, +4).
-    const result = mirrorCoatRun(1, { moves: [243, 243, 243, 243] as const });
+    // seed 1 -> roll7 low 198 (>=100, +4). MOVE_COUNTER is 68 (moves.h:72),
+    // NOT 243 (Mirror Coat's own id -- the live-verified divergence, fixed
+    // 2026-08-08); a moveset without 68 must NOT take this jump.
+    const result = mirrorCoatRun(1, { moves: [68, 68, 68, 68] as const });
     expect(result).toMatchObject({ kind: "scored", scoreDelta: 4 });
     if (result.kind !== "scored") throw new Error("unreachable");
     expect(result.draws.map((d) => d.kind)).toEqual(["mirror-coat-roll-7"]);
