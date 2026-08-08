@@ -1,4 +1,11 @@
 
+## 1020 — [bounded MAIN worker, 2026-08-08] **#39 stale rename brief stopped honestly**
+
+- **State/Did:** `dragonBreathGrovyleHp` was already generic; no runtime change
+  was made. Focused/smoke/full suite, typecheck, build, and OFF profile passed.
+- **Next/Notes:** supervisor re-scoped the remaining faint-sink-only name.
+  Full entry remains in git history at `PROGRESS.md`.
+
 ## 1019 — [bounded MAIN worker, 2026-08-08] **Family-C healthbox cache ownership hardened**
 
 - **State/Did:** all six parameterized healthbox caches now key every rendering

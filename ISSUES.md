@@ -1566,6 +1566,20 @@ consumer was found. This ownership-only rename leaves the reproducible broad
 #39 inventory **1,949→1,949** and `battleScene.ts` **36,361→36,361 LOC**.
 The remaining #39 render-entry debt above is unchanged.
 
+**DOUBLE_TEAM clone-palette cache made identity-honest (2026-08-08,
+`ba08db85`).** `getOnixDoubleTeamClonePalette` is now the species-neutral
+`doubleTeamClonePalette`; its `WeakMap` memoizes by the actual source-palette
+array rather than returning the first palette for every later asset. A
+red-verified Tier-1 collision pin feeds two distinct synthetic palettes in both
+orders and compares each result with the direct coefficient-11 blend. Exact old
+helper/cache executable refs move **3+4→0**; Family-F species-named factories
+move **2→1**, source-accepting singleton caches **2→1**, and incomplete
+DOUBLE_TEAM cache owners **1→0**. `turn10OnixDarkPalette` and its cache are
+unchanged. `battleScene.ts` moves **36,361→36,363 LOC**; clean-parent OFF
+differential replay is **640/640 byte-identical** across turn-4 DOUBLE_TEAM,
+adjacent ROCK_SLIDE, and generated-command insurance. The remaining #39
+render-entry debt above is otherwise unchanged.
+
 # Settled records (not open work — see the note at the top of this file)
 
 ## #56 — [SETTLED 2026-08-03, supervisor decision] Arbitrary-trainer intro: YOSHI 700/751 + MAGNETON 703/751, every residual frame in a settled class
