@@ -1,0 +1,79 @@
+{
+ "schema": "scene-on-portable-evidence/v1",
+ "oracleProfile": "battle-scene-on",
+ "scenario": "tools/battle-lab/mechanic-detect-opponent-yanma-player-onix.json",
+ "probe": "tools/compare/detectProbe.py",
+ "move": "DETECT",
+ "pair": "FRONTIER_MON_YANMA set 161 (opponent-front) -> legal ONIX (player-back)",
+ "orientation": "opponent-to-player",
+ "appStage": {
+  "presentationAge": 0
+ },
+ "denseWindow": {
+  "startFrame": 68,
+  "endFrame": 177,
+  "frameCount": 110
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 161,
+  "opponentMaxHp": 161,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "attacker": {
+  "species": "YANMA",
+  "geometry": {
+   "side": "opponent",
+   "spriteCorner": {
+    "x": 144,
+    "y": 10
+   },
+   "animationCenter": {
+    "x": 176,
+    "y": 42
+   },
+   "battlePositionCenter": {
+    "x": 176,
+    "y": 40
+   }
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player",
+   "spriteCorner": {
+    "x": 40,
+    "y": 48
+   },
+   "animationCenter": {
+    "x": 72,
+    "y": 80
+   },
+   "battlePositionCenter": {
+    "x": 72,
+    "y": 80
+   }
+  }
+ },
+ "attackerPictureOffset": {
+  "x": 176,
+  "y": 42
+ },
+ "targetPictureOffset": {
+  "x": 72,
+  "y": 88
+ },
+ "battlerHeight": 48,
+ "evidenceSchema": "detect-dense-evidence/v1",
+ "evidenceSha256": "047cfd8c8f866838292396a1a61ddee8d2c8383e5135117340c39c7aba72c512",
+ "secondFreshEvidenceSha256": "047cfd8c8f866838292396a1a61ddee8d2c8383e5135117340c39c7aba72c512",
+ "rawRgbSha256": "ae9c9c505e4e0a82c61c38aa70d7df5ca8899bc5b39a8801cade66173ec837cc",
+ "acceptance": {
+  "status": "partial",
+  "framebufferMatching": 109,
+  "componentMatching": 110
+ }
+}

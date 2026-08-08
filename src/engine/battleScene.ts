@@ -977,6 +977,7 @@ import {
   sceneOnBulkUpView,
   sceneOnTauntView,
   sceneOnTormentView,
+  sceneOnDetectView,
   sceneOnScaryFaceView,
   sceneOnSelfDestructView,
   sceneOnExplosionView,
@@ -28182,6 +28183,140 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MURKROW used" : "Foe MURKROW used",
       "TORMENT!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "DETECT") {
+    const view = sceneOnDetectView(state);
+    // The reducer's `bgBlendY`/`attackerPaletteY`/`sparkle` are already the
+    // DISPLAYED schedules: the software gPlttBufferFaded / gTasks data[10] /
+    // sprite spawn ramps land one display behind, and the drawn coefficients
+    // above were measured directly from the oracle's hardware palette and
+    // raw RGB. No additional lag is applied here.
+    const playerToOpponent =
+      view.attacker.species === "YANMA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "YANMA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged DETECT pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const yanmaSource = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).YANMA!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).YANMA!;
+    const yanma = playerToOpponent
+      ? yanmaSource
+      : {
+          ...yanmaSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: yanmaSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const black = { r: 0, g: 0, b: 0 };
+    const white = { r: 255, g: 255, b: 255 };
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const yanmaIdle = opponentToPlayer
+      ? speciesFrontIdleRestOffset("YANMA") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const yanmaPalette = view.attackerPaletteY > 0
+      ? blendPaletteToward(yanma.palette, white, view.attackerPaletteY)
+      : yanma.palette;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(battleBg.palette, black, view.bgBlendY),
+    );
+    // Painter order (lower subpriority draws in FRONT; the sparkle's
+    // absolute subpriority is attacker-13, flipping with orientation):
+    //   player-back    ONIX target 40 -> YANMA attacker 30 -> sparkle 17
+    //   opponent-front YANMA attacker 40 -> ONIX target 30 -> sparkle 27
+    const drawSparkle = (): void => {
+      if (!view.sparkle) return;
+      const rows = view.sparkle.tileOffset / 4;
+      drawSpriteSheet(
+        fb,
+        subTileset(reflectArt.sparkle4.tileset, rows, 4),
+        reflectArt.sparkle4.palette,
+        view.sparkle.x - 16,
+        view.sparkle.y - 16,
+      );
+    };
+    if (playerToOpponent) {
+      drawSpriteSheet(
+        fb,
+        onix.tileset,
+        onix.palette,
+        view.target.geometry.spriteCorner.x + onixIdle.x2,
+        view.target.geometry.spriteCorner.y + onixIdle.y2,
+      );
+      drawSpriteSheet(
+        fb,
+        yanma.tileset,
+        yanmaPalette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        yanma.tileset,
+        yanmaPalette,
+        view.attacker.geometry.spriteCorner.x + yanmaIdle.x2,
+        view.attacker.geometry.spriteCorner.y + yanmaIdle.y2,
+      );
+      drawSpriteSheet(
+        fb,
+        onix.tileset,
+        onix.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+      );
+    }
+    drawSparkle();
+    const fieldProfile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "YANMA",
+        level: 50,
+        gender: fieldProfile.opponentGender ?? "male",
+        hpFraction: fieldProfile.opponentHp / fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "YANMA" : "ONIX",
+        level: 50,
+        gender: fieldProfile.playerGender ?? "male",
+        hpFraction: fieldProfile.playerHp / fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: fieldProfile.playerHp,
+        maxHp: fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "YANMA used" : "Foe YANMA used",
+      "DETECT!",
       99,
     );
     return;

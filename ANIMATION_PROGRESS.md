@@ -1,5 +1,55 @@
 # Animation coverage
 
+## MOVE_DETECT staged + reducer/seam/draw + evidence — player-back exact, opponent-front partial (2026-08-07 worker)
+
+- **State:** DETECT is **partial** — player-back **exact** (110/110 both axes),
+  opponent-front 109/110 framebuffer / 110/110 component. Coverage now
+  **122/276 exact, 1 partial, 0 staged, 153 unsupported**.
+- **Did:** staged two legal mechanicLab scenarios (FRONTIER_MON_YANMA set 161,
+  all four slots DETECT 197, vs legal ONIX; player-back + opponent-front) and
+  `tools/compare/detectProbe.py` (copied from tormentProbe.py, script-pointer
+  isolated to `Move_DETECT` `082cb3d2`..`Move_FRUSTRATION` `082cb430`).
+  **Measured window (both orientations, 110 frames — player-back 64-173,
+  opponent-front 68-177):** F_PAL_BG toward-black displayed ramp 0 (a0-7), 2
+  (8-11), 4 (12-15), 6 (16-19), 8 (20-23), 9 (24-83), 7 (84-87), 5 (88-91), 3
+  (92-95), 1 (96-99), 0 (100+); F_PAL_ATTACKER toward-white displayed ramp 0
+  (0-33), 1 (34-35), 2..9 (36-50), 9 (50-84), 8..1 (85-108), 0 (109+); the
+  sparkle (the move's ONE new component, gSpinningSparkleSpriteTemplate +
+  AnimSpinningSparkle — placed ONCE at attacker picture + (±20,-20), never
+  moves) spawns software age 51 / displayed ages 52-67 running the 3-tick
+  sAnim_SpinningSparkle FRAME 0/16/32/48/64 program; absolute subpriority
+  attacker-13 (17 player-back / 27 opponent-front) → painter order FLIPS with
+  orientation; the sparkle-4 tiles/palette reuse the proven REFLECT asset and
+  both blends reuse proven paths. Built `src/animation/detect.ts` (displayed
+  schedules + software visual-task count), the `SceneOnDetectConfig`/View seam,
+  and the battleScene DETECT draw case. `tools/compare/detectPortable.ts` +
+  both fixtures (`scene-on-portable-evidence/v1`, 110-frame dense windows,
+  hashes twice-fresh). Tier-1 `tests/animation/detect.test.ts` (9 reducer
+  tests) + `detectEvidence.test.ts`, the ANIMATION_COVERAGE.json entry
+  (MOVE_DETECT only, between DYNAMIC_PUNCH and EARTHQUAKE) and the inventory
+  summary pin 154→153 unsupported / 0→1 partial.
+- **Measured (fresh portable runs, exit 0):** player-back component 110/110 and
+  framebuffer 110/110; opponent-front component 110/110, framebuffer 109/110.
+  Player evidence 52f1db13… / raw RGB 274b00b5…; opponent evidence 047cfd8c… /
+  raw RGB ae9c9c50… — matching the fixture pins twice fresh.
+- **Blocking note (why opponent-front is partial):** the window's first
+  opponent-front frame (68) carries a ONE-FRAME hardware VRAM tile-base
+  reallocation artifact from the script's `loadspritegfx` — every hardware OAM
+  tile number shifts by 0x400, one battler sprite briefly holds its
+  rotation flag, and the field/YANMA show stale tile pixels (a solid 200px
+  block at (160-191,65-72)) that the shared sprite-tile seam does not model.
+  It is not a reducer error (component 110/110) — reproducing it needs the
+  shared seam to model the loadspritegfx VRAM transfer latch.
+- **Next:** promote MOVE_DETECT to exact by reproducing the frame-68 VRAM
+  transfer latch (then inventory 122→123 exact / partial 1→0); otherwise pick
+  the next move from the component-leverage ranking.
+- **Notes — component provenance:** asset:ANIM_TAG_SPARKLE_4 proven by
+  MOVE_REFLECT; task:AnimTask_BlendBattleAnimPal proven by SELF_DESTRUCT /
+  dragonBreath; visualCommand:simple_palette_blend proven by GRASS_WHISTLE /
+  TAIL_GLOW; sprite:gSpinningSparkleSpriteTemplate NEW. Probe gotcha: the blend
+  transition frames show PARTIAL palette reads (26/22 channel split) — decode
+  with the max-y read, not most-common, or you under-read the real coeff.
+
 ## MOVE_TORMENT promoted to exact — 122/276 exact (2026-08-07 worker)
 
 - **State:** TORMENT is **exact** — 177/177 on both axes in both orientations.

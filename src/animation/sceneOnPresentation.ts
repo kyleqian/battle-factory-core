@@ -355,6 +355,10 @@ import {
   type TormentState,
 } from "./torment.ts";
 import {
+  detectAtAge,
+  type DetectState,
+} from "./detect.ts";
+import {
   scaryFaceAtAge,
   type ScaryFaceState,
 } from "./scaryFace.ts";
@@ -712,11 +716,12 @@ export interface SceneOnPresentationBattler {
     | "PONYTA"
     | "CHARMANDER"
     | "LEDYBA"
-    | "PRIMEAPE"
-    | "MARSHTOMP"
-    | "TENTACOOL"
-    | "GRAVELER"
-    | "ROSELIA";
+     | "PRIMEAPE"
+     | "MARSHTOMP"
+     | "TENTACOOL"
+     | "GRAVELER"
+     | "ROSELIA"
+     | "YANMA";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1981,6 +1986,19 @@ export interface SceneOnGrassWhistleConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnDetectConfig {
+  readonly move: "DETECT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /**
+   * `SetSpriteCoordsToAnimAttackerCoords(attacker)` — the sparkle anchors to
+   * the attacker's picture coordinate (X_2/Y_PIC), then `AnimSpinningSparkle`
+   * shifts it +20 on the player side / -20 on the opponent side, and -20 y.
+   */
+  readonly attackerPictureOffset: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnFutureSightConfig {
   readonly move: "FUTURE_SIGHT";
   readonly attacker: SceneOnPresentationBattler;
@@ -2128,6 +2146,7 @@ export type SceneOnMoveConfig =
   | SceneOnMetalClawConfig
   | SceneOnSingConfig
   | SceneOnGrassWhistleConfig
+  | SceneOnDetectConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -2635,6 +2654,12 @@ export interface SceneOnSingView {
   readonly notes: readonly SingNote[];
   readonly pan: SingPanTask | null;
   readonly targetInMonBg: boolean;
+}
+
+export interface SceneOnDetectView extends DetectState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnGrassWhistleView {
@@ -5533,6 +5558,26 @@ export function sceneOnSingView(
  * (isolated by `sBattleAnimScriptPtr` within the `Move_GRASS_WHISTLE` bytes).
  * The note body starts at age 19 (`GRASS_WHISTLE_FIRST_NOTE_AGE`).
  */
+/** `age=0` is the move script's first in-bounds frame (frame 64/68 in the fixtures). */
+export function sceneOnDetectView(
+  state: SceneOnMovePresentationState,
+): SceneOnDetectView {
+  if (state.config.move !== "DETECT") {
+    throw new Error(`expected DETECT presentation, got ${state.config.move}`);
+  }
+  const config = state.config as SceneOnDetectConfig;
+  return {
+    ...detectAtAge(
+      state.age,
+      config.attackerPictureOffset,
+      config.attacker.geometry.side,
+    ),
+    age: state.age,
+    attacker: config.attacker,
+    target: config.target,
+  };
+}
+
 export function sceneOnGrassWhistleView(
   state: SceneOnMovePresentationState,
 ): SceneOnGrassWhistleView {
