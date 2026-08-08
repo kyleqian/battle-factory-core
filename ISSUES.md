@@ -17,6 +17,53 @@ backlog.
 
 # Open
 
+## #83 — Factory AI decision: an unmodeled pre-decision/per-slot `Random()` draw and a tie-slot divergence
+
+**Found 2026-08-08 by the `AI_CV_MirrorCoat` live-verification round** — the first
+ROM-vs-engine divergence the AI receipt program has produced. Six sibling handlers
+(`BrickBreak`, `Overheat`, `Facade`, `Curse`, `ChargeUpMove`, `DragonDance`) matched
+hardware 4/4; this one did not, and the residual is **not** in the handler.
+
+**Evidence** (`tools/probe/verify-factory-ai-mirrorcoat-live.ts`, both fixtures
+committed; ROM = real Battle Scene OFF run, engine = `chooseFactoryAiScoredDecision`
+on the same view):
+
+| Scenario | Seed | ROM | Engine | Verdict |
+| --- | ---: | --- | --- | --- |
+| control | 1 | 7 draws, end `3323223981`, slot 0 | 7 draws, `3323223981`, slot 0 | MATCH |
+| reach | 1 | 7 draws, end `3726110690`, slot 3 | 7 draws, `3726110690`, slot 0 | draws + endpoint match, **tie slot differs** |
+| control | 99 | 8 draws, end `1352996645`, slot 1 | 7 draws, `2270394938`, slot 3 | **+1 draw**, endpoint and slot differ |
+| reach | 99 | 7 draws, end `1329715331`, slot 0 | 7 draws, `1329715331`, slot 1 | draws + endpoint match, **tie slot differs** |
+
+**What this is not.** It is not the `MOVE_COUNTER` bug found in the same round (that
+constant was 243 — Mirror Coat's own id — instead of 68; fixed, and the pre-existing
+unit test that had *codified* the wrong id was fixed with it). Control seed 1 fully
+matches after that fix. It is also not `ShouldSwitch`, which draws zero under this
+matchup, so the extra draw is a different family.
+
+**What it looks like.** Three of four rows reproduce the ROM's **draw count and
+endpoint RNG exactly** but pick a different slot among equal scores, and one row is
+short exactly one draw. That points at the *tie-break / per-slot draw accounting* in
+`factoryAiDecisionPolicy.ts` — a pre-decision or per-slot `Random()` the scored
+policy does not model — rather than at any `AI_CV_*` handler body. Matching endpoints
+with a differing choice means the draws are being *consumed* in the right number but
+*attributed* to the wrong decision point.
+
+**Why it matters.** Tie-breaking is not a corner case: several verified rows are
+genuine 4-way ties (`Random() % 4`), so this governs which move the opponent actually
+uses whenever scores are level — which is common.
+
+**Next step:** attribute the ROM's draws per call site for the seed-99 control row
+using `tools/probe/attribute-factory-ai-random-callers.py`'s `sRandCount` +
+single-step LR technique (the same instrument that produced the banked 11/11/13
+ledgers), and compare against the engine's `draws` ledger ordinals. Do not adjust
+scoring to fit — the score vectors already agree.
+
+**Banked meanwhile:** `tests/factoryAiMirrorCoatLiveReceipt.test.ts` pins the
+control-seed-1 full match, the reach-seed-1 draw/endpoint receipt, and a regression
+guard that a Counter-less set must not take the Counter jump (it fails on the old 243
+constant).
+
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **Symptom:** all 62 Factory-front send-out intro families (**376/376** species
