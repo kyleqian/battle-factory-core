@@ -1,5 +1,92 @@
 # Animation coverage
 
+## Supervisor wind-down — FACADE, MINIMIZE, TORMENT and DETECT all exact, 119→123; IRON_TAIL staged (2026-08-07 evening animation session)
+
+- **State:** coverage advanced **119→123/276 exact**, 0 partial, 0 staged, 153
+  unsupported. `animation-main` is committed and green at `57fb83dd` with no
+  animation worker worktrees or branches left behind. 9 worker launches, 8
+  productive, 2 cap-kills both salvaged with zero work lost.
+- **Did:** promoted **MOVE_FACADE** (81/81 both orientations), **MOVE_MINIMIZE**
+  (153/153 both), **MOVE_TORMENT** (177/177 both, nothing to fix — one round
+  from nothing to exact) and **MOVE_DETECT** (110/110 player-back, 109/109
+  opponent-front). Staged **MOVE_IRON_TAIL** (both scenarios, dense probe,
+  135-frame windows measured at player 216-350 / opponent 215-349). Added
+  `tools/animation/rank-remaining.py`. See the entries below.
+- **Verified:** every promotion re-run by the supervisor rather than accepted on
+  report, each time with the earlier moves' portables as controls. Integrated
+  `npm test` **768 files / 7271 passed / 1 established skip** and `npm run build`
+  green at `69e03440`; the only commit after it is the additive IRON_TAIL
+  staging (four new files, zero deletions), re-checked with `npm run build` plus
+  `npx vitest run tests/animation` **308 files / 1723 passed**. The supervisor
+  also re-ran `ironTailProbe.py` independently and reproduced its 135-frame
+  player window exactly.
+- **Next:** close **MOVE_IRON_TAIL** from its staged base — it should be a
+  single round. All ten of its components are already proven by exact moves, and
+  the one open question (`metallic_shine permanent=TRUE`) is answered in the
+  staged entry below. After that, the remaining **zero-new-component** moves by
+  script size: CRUSH_CLAW 20, TAKE_DOWN 22, CRUNCH 27, COUNTER 31, DOUBLE_EDGE
+  32 (already staged), CRABHAMMER 36.
+- **Notes — size a move by component PROVENANCE, not by the coverage report's
+  rank.** Map every component to the exact move that proves it (parse
+  `ANIMATION_COVERAGE.json` against
+  `src/data/gen/battle-animation-components.json`), then read
+  `python3 tools/animation/rank-remaining.py` as a shortlist. TORMENT is 12
+  script lines yet closed in ONE round because every component except one task
+  was already proven; FACADE (6 lines) and MINIMIZE (7 lines) each needed two
+  rounds plus a supervisor fix. The moves that look cheapest by line count are
+  the expensive ones: **SUBSTITUTE** is 4 lines but needs the substitute-doll
+  sheets, which are NOT in `src/animation/assets/`; **HAZE** needs a scrolling
+  fog BG; **ACID_ARMOR** pulls in the scanline-effect subsystem; **FAKE_OUT**
+  the window registers; **DOUBLE_KICK** places its sprite with four `Random2()`
+  draws. Prefer a move whose only new component is a task or a sprite template
+  whose asset is already extracted.
+- **Notes — two render lags can meet on ONE sprite (new class).** MINIMIZE's
+  clones are painted two displays behind their creation but removed one display
+  behind their destruction: a freshly allocated OAM matrix needs two displays to
+  reach the hardware, while removal is a plain OAM edit. Clone 0 lives RAM
+  frames 211-226 yet the oracle shows it only on 213-227 — 15 displayed frames
+  for a 16-frame RAM life. Either single lag fails in a measurable direction
+  (`age-2` over-draws the expiry frames 228/231/234 by 764px/293px/354px;
+  `age-1` draws the spawn frames 212/215/218 too early by 1398px/420px/246px).
+  The rule now lives in `minimizeDisplayedClonesAtAge`
+  (`src/animation/minimize.ts`) and the TORMENT worker reused it for its thought
+  bubbles unprompted. **Diagnostic:** errors only at spawn frames = paint lag too
+  short; only at expiry frames = paint lag too long; at both ends under either
+  single lag = this class.
+- **Notes — outgoing-teardown contamination at a window's OPENING frame (new
+  class).** DETECT's opponent-front window failed only on its first frame, which
+  carried an extra 32x8 object (hardware OAM slot 11, attr0 `0x4041` / attr1
+  `0x40a0` / attr2 `0x5d2d` at (160,65)) that was gone by the next frame. It is
+  not a DETECT sprite: it is the enemy mon's shadow
+  (`gSpriteTemplate_EnemyShadow` / `SpriteCB_EnemyShadow`) tearing down one
+  display behind the script-pointer boundary. Resolved by starting that window
+  at 69 for a truthful **109/109**, using new `skipProbeFrames` / `ageOffset`
+  fixture fields so the probe drops the frame and the reducer's ages stay
+  calibrated — not by excluding a frame from a 110-frame window. The player-back
+  window keeps all 110 frames; the asymmetry and its reason are in the coverage
+  entry. IRON_TAIL's staging checked for this explicitly and found both first
+  frames clean.
+- **Notes — the fixture lies about a third of the time.** Two of five fixture
+  pairs this session claimed `acceptance.status: "exact"` on a portable that
+  actually exited 1 (FACADE opponent was really 72/81). Both were caught only by
+  running the portable. Conversely, workers that stopped honestly at `partial`
+  with real counts (MINIMIZE 144/153, DETECT 109/110) were right to, and their
+  precisely-located residuals are what made the supervisor fixes quick.
+- **Notes — launcher mechanics.** `tools/run-subagent.sh` must be started
+  detached (`nohup ... & disown` from a foreground shell, PPID 1 confirmed with
+  `ps -eo pid,ppid,command`). A launcher held by a tracked background job is
+  killed at ~600 s; that nearly cost a 45-minute worker its whole round today.
+  `setsid` does not exist on macOS. The lane lock is a pid file that
+  auto-takes-over a dead pid, so a relaunch is safe after
+  `git worktree remove --force` + `git branch -D`.
+- **For the main program:** nothing blocking. No boundary widening, no new
+  unsupported barriers, no controller or battle-state ownership taken, no
+  animation deferrals opened (`ANIMATION_DEFERRED.md` remains empty). Engine
+  contact stayed inside `src/engine/battleScene.ts` animation draw cases.
+  `tests/animation/factoryAnimationInventory.test.ts` now pins **123 exact / 153
+  unsupported** — that pin moves on every promotion, so a fold that resolves
+  `ANIMATION_COVERAGE.json` must re-run it.
+
 ## MOVE_IRON_TAIL staged — both orientations isolated at 135 frames; scenarios + dense probe + measured window banked (2026-08-07 worker)
 
 - **State:** IRON_TAIL stays **unsupported**. Coverage unchanged at **123/276
