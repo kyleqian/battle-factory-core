@@ -112,6 +112,31 @@ why the pins still hold.
   (28 weighted) currently halt whenever they hit a Focus Band user.
 
 ### A4. `battleScriptAttackCancelerOpcode.ts:274` — Lightning Rod redirection
+
+> **REFUTED by the supervisor 2026-08-08 — this is bucket (C), not (A). Do not
+> implement it.** The (A) call below is wrong: it reasons from carrier count
+> alone and never opens the redirect's own guard. The source
+> (`battle_util.c:3854-3861`) requires BOTH
+> `AbilityBattleEffects(ABILITYEFFECT_COUNT_OTHER_SIDE, …, ABILITY_LIGHTNING_ROD, …)`
+> to find a holder on the side opposite the attacker AND
+> `gBattleMons[targetBattler].ability != ABILITY_LIGHTNING_ROD`. In singles the
+> opposite side contains exactly one battler — the target itself — so the two
+> conditions are mutually exclusive: if the target holds Lightning Rod the
+> second fails, and if it does not the first counts zero. The redirect then
+> does `targetBattler ^= BIT_FLANK` (`BIT_FLANK == 2`,
+> `include/constants/battle.h:56`), selecting battler 2 or 3, which do not
+> exist when `gBattlersCount == 2`. `ABILITYEFFECT_COUNT_OTHER_SIDE` itself
+> loops `i < gBattlersCount` (`battle_util.c:3160-3165`).
+> The pre-existing ratchet comment in `battleScriptAttackCancelerOpcode.ts`
+> ("Lightning Rod remains the adjacent barrier … unreachable in singles") was
+> correct and this triage entry contradicted it without checking. Doubles is
+> out of scope, so this barrier is a legitimate permanent guard.
+>
+> **Lesson for whoever reads this file next:** carrier count proves a species
+> can appear, never that a branch can fire. Every (A) claim needs the branch's
+> own guard opened and read. The other (A) entries have not been re-audited to
+> this standard.
+
 - **Reason / citation:** `"Lightning Rod redirection: gSpecialStatuses[].lightningRodRedirected is set (RecordAbilityBattle and BattleScript_TookAttack handoff are unimplemented)"`; `battle_script_commands.c:984-987`, redirect set in `battle_util.c:3855-3860`.
 - **Reachability:** Lightning Rod is a **Factory ability** (census
   `ABILITY_LIGHTNING_ROD | 15 (0) | 15` — 15 L50 sets carry it via dual-ability
@@ -469,9 +494,9 @@ line 1 and start.
    already-modeled `focusBanded` machinery in `battleScriptHitChainOpcode.ts:1974-2012`.
    Next step: one case reusing the sibling opcodes' roll; test: Focus Band
    survives Fissure.
-3. `battleScriptAttackCancelerOpcode.ts:274` — port Lightning Rod redirection
-   (`battle_util.c:3855-3860` + `RecordAbilityBattle`/`BattleScript_TookAttack`
-   handoff). Next step: redirect state write + role swap on an Electric move.
+3. ~~`battleScriptAttackCancelerOpcode.ts:274` — Lightning Rod redirection~~
+   **REFUTED 2026-08-08 (supervisor) — reclassified (C), unreachable in
+   singles. Do not take this item.** See the refutation box under A4 above.
 4. `battleScriptSwitchinOpcode.ts:750` — add the VARIOUS_GET_BATTLER_FAINTED
    case (`battle_script_commands.c:6344-6348`). Next step: Pursuit switch-out
    fixture asserting `getbattlerfainted` resolves. (Also unblocks Teleport's two
