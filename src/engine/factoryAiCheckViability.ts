@@ -4202,6 +4202,81 @@ function runCvChargeUpMove(input: Readonly<{
   });
 }
 
+/**
+ * `AI_CV_Overheat` (`data/battle_ai_scripts.s:2572-2584`,
+ * EFFECT_OVERHEAT -- Overheat / Psycho Boost, both dispatch here via `:768`):
+ *
+ * ```
+ * AI_CV_Overheat:
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_25, AI_CV_Overheat_ScoreDown1
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_5, AI_CV_Overheat_ScoreDown1
+ *     if_target_faster AI_CV_Overheat2
+ *     if_hp_more_than AI_USER, 60, AI_CV_Overheat_End
+ *     goto AI_CV_Overheat_ScoreDown1
+ * AI_CV_Overheat2:
+ *     if_hp_more_than AI_USER, 80, AI_CV_Overheat_End
+ * AI_CV_Overheat_ScoreDown1:
+ *     score -1
+ * AI_CV_Overheat_End:
+ *     end
+ * ```
+ *
+ * The SpAtk-drop penalty makes Overheat a bad pick against a weak hit or at
+ * low own HP. Exactly 0.25x/0.5x effectiveness scores -1 directly (the
+ * `if_target_faster` gate is never even reached, so no tie-break draw on
+ * that path). Otherwise target NOT faster: own HP > 60% is the zero `goto
+ * End`; HP <= 60% falls through the strict `>` into the shared -1. Target
+ * faster reaches `Overheat2`'s own band: HP > 80% is the zero `goto End`;
+ * HP <= 80% falls through into the same -1. `if_target_faster` burns the
+ * usual tie-break `Random()` only when the effectiveness gates didn't stop
+ * first. No command writes funcResult.
+ */
+function runCvOverheat(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  attackerTypes: readonly [string, string];
+  moveType: string;
+  targetTypes: readonly [string, string];
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  if (classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
+  }
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  if (targetFaster) {
+    // Overheat2: HP > 80% is the zero goto End; <= 80% falls into -1.
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: hpPercent > 80 ? 0 : -1 });
+  }
+  // if_hp_more_than AI_USER, 60, End: > 60 is the zero goto End; <= 60
+  // falls through the strict `>` into the shared -1.
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: hpPercent > 60 ? 0 : -1 });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -5121,6 +5196,28 @@ export function runCheckViability(input: Readonly<{
       rng: chargeUpMove.rng,
       draws: chargeUpMove.draws,
       scoreDelta: chargeUpMove.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_OVERHEAT") {
+    // AI_CV_Overheat (data/battle_ai_scripts.s:2572-2584) -- Overheat /
+    // Psycho Boost's shared handler.
+    const overheat = runCvOverheat({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      attackerTypes: input.attacker.types,
+      moveType: move.type,
+      targetTypes: input.target.types,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: overheat.rng,
+      draws: overheat.draws,
+      scoreDelta: overheat.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }

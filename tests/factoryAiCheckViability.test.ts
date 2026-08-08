@@ -5743,3 +5743,52 @@ describe("AI_CV_ChargeUpMove (data/battle_ai_scripts.s:2184-2195)", () => {
     }
   });
 });
+
+describe("AI_CV_Overheat (data/battle_ai_scripts.s:2572-2584)", () => {
+  const MOVE_OVERHEAT = 315; // EFFECT_OVERHEAT
+
+  function overheatRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_OVERHEAT,
+      attacker: { ...NEUTRAL_BATTLER, types: ["TYPE_FIRE", "TYPE_FIRE"] as const, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, types: ["TYPE_WATER", "TYPE_WATER"] as const, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "overheat",
+    });
+  }
+
+  it("0.5x effectiveness (Fire vs Water): deterministic -1, zero draws, no tie-break", () => {
+    const result = overheatRun(1);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("neutral effectiveness, target slower, HP > 60%: zero", () => {
+    const result = overheatRun(1, { hp: 61, maxHp: 100, speed: 120 }, { types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const, speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("neutral effectiveness, target slower, HP == 60%: -1 (strict >)", () => {
+    const result = overheatRun(1, { hp: 60, maxHp: 100, speed: 120 }, { types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const, speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1 });
+  });
+
+  it("neutral effectiveness, target faster, HP > 80%: zero", () => {
+    const result = overheatRun(1, { hp: 81, maxHp: 100, speed: 5 }, { types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const, speed: 120 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("neutral effectiveness, target faster, HP <= 80%: -1", () => {
+    const result = overheatRun(1, { hp: 80, maxHp: 100, speed: 5 }, { types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const, speed: 120 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1 });
+  });
+
+  it("carry preserved", () => {
+    expect(overheatRun(1, { hp: 50, maxHp: 100 })).toMatchObject({ funcResultAfter: 2 });
+  });
+});
