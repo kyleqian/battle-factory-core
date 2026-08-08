@@ -1,4 +1,33 @@
 
+## 1013 — [supervisor WIND-DOWN, 2026-08-08] **Factory AI scoring tables complete; live receipts exposed and fixed the turn-start ownership seam**
+
+- **State/Did:** 21 workers across 11 rounds completed CheckBadMove 109/109
+  and CheckViability 122/122, added live receipts through Mirror Coat diagnosis,
+  and left the full suite/build green. Hardware found the wrong Counter move id,
+  missing live-adapter fields, the `BattleTurnPassed` draw, and the pinned ROM's
+  odd-address `if_has_move` quirk. The canonical-file split stopped at its real
+  ESM-cycle boundary; no Battle-2 march resumed.
+- **Next/Notes:** fix the turn-start ownership seam, then add weighted CV live
+  receipts and return to genuine #39 semantic retirement. The full forensic
+  entry remains in git history at `763e5781^:PROGRESS.md`.
+
+## 1012 — [bounded MAIN worker, 2026-08-08] **AI CheckBadMove preamble matched hardware 4/4**
+
+- **State/Did:** Scene-OFF control/reach rows pinned the immunity early exit and
+  the two-distinct-ability redraw quirk with exact score, choice, draw, and RNG
+  receipts; full suite/build/typecheck/smoke green.
+- **Next/Notes:** continue per-handler hardware receipts and resolve the
+  then-open turn-start seam. Full entry remains in git history.
+
+## 1010 — [bounded MAIN worker, 2026-08-08] **Mirror Coat divergence diagnosed to turn-start RNG plus odd-address ROM behavior**
+
+- **State/Did:** instruction-attributed probes located the once-per-turn
+  `gRandomTurnNumber = Random()` call and proved the pinned non-BUGFIX ROM's
+  unaligned `AI_CV_Counter3` operand never matches. No speculative production
+  change was made; focused gates were green.
+- **Next/Notes:** make turn-start ownership explicit and model only the pinned
+  build's observed odd-address behavior. Full entry remains in git history.
+
 
 ## 1009 — [bounded MAIN worker, 2026-08-08] **AI_CV_DragonDance live-verified against the real ROM: the if_target_faster speed gate + per-path draw-count split confirmed correct on hardware — MATCH 4/4 across two seeds**
 

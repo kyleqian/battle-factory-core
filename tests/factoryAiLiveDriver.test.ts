@@ -284,6 +284,13 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
     ]);
     expect(result.trace.draws).toEqual(expectedSuffix.trace.draws);
     expect(result.trace.draws).toHaveLength(11);
+    if (result.trace.mask === 0) throw new Error("expected scored Factory AI trace");
+    expect(result.trace.turnStartRandomNumber).toEqual({
+      owner: "battle-turn-boundary",
+      value: rulesContext.randomTurnNumber,
+    });
+    expect(result.trace.draws.map((draw) => draw.kind))
+      .not.toContain("turn-start-random-number");
     expect(result.rng).toEqual(expectedSuffix.rng);
     expect(result.rng.calls).toBe(result.switchPolicy.draws.length + 11);
     expect(result.transition.state.rng).toEqual(result.rng);

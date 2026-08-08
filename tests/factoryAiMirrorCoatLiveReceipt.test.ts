@@ -19,14 +19,11 @@ import { DEFAULT_STAT_STAGE } from "../src/engine/damageCalc.ts";
 // Splash x3] (no Counter), reach = Wobbuffet [Mirror Coat, Counter, Splash,
 // Splash].
 //
-// The turn-1 decision is drawn in the battle intro (invisible); the FIRST
-// observable decision is turn 2 (target's last move = Splash, power 0 ->
-// the power-0 path). seed 1 control fully matches the ROM: 7 draws (4 setup +
-// roll-6 + roll-7 + tie) from 3644022420 -> 3323223981 choosing Mirror Coat
-// slot 0. seed 1 reach matches draw count + endpoint RNG (7 draws,
-// 3726110690) but the ROM's tie lands on Splash slot 3 while the engine picks
-// Mirror Coat slot 0 -- the reach row's tie-slot divergence is the documented
-// residual (see the doc's verdict).
+// The captured turn-2 window starts before BattleTurnPassed's one
+// gRandomTurnNumber draw. Unlike older receipts whose start cursor is already
+// post-boundary, these rows explicitly give that draw to the decision owner.
+// The pinned build's odd-address AI_CV_Counter3 if_has_move never recognizes
+// Mirror Coat, so Counter's otherwise-reachable bonus roll is absent.
 const request = createBattleCommandRequest({
   kind: "command",
   requestId: 1,
@@ -105,65 +102,44 @@ function mirrorCoatView(reach: boolean): FactoryAiScoredView {
 }
 
 describe("AI_CV_MirrorCoat live receipt (docs/factory-ai-cv-live-receipts-mirrorcoat.md)", () => {
-  it("control (no Counter): engine reproduces the ROM's 7 draws, endpoint RNG and Mirror Coat slot-0 choice (seed 1)", () => {
+  it.each([
+    ["seed 1 control", false, 3_644_022_420, 7, 3_323_223_981, 0, [0, 0, 0, 0]],
+    ["seed 1 reach", true, 3_560_934_917, 7, 3_726_110_690, 3, [0, 0, 0, 0]],
+    ["seed 99 control", false, 963_358_333, 8, 1_352_996_645, 1, [0, 0, 0, 0]],
+    ["seed 99 reach", true, 3_643_996_146, 7, 1_329_715_331, 0, [4, 0, 0, 0]],
+  ] as const)("%s reproduces the ROM draw count, scores, slot, and endpoint", (
+    _label, reach, startRng, drawCount, endRng, chosenSlot, cvDeltas,
+  ) => {
     const result = chooseFactoryAiScoredDecision({
-      view: mirrorCoatView(false),
+      view: mirrorCoatView(reach),
       request,
-      rng: { value: 3_644_022_420, calls: 0 },
+      rng: { value: startRng, calls: 0 },
+      turnStartRandomNumber: { owner: "decision" },
     });
-    expect(result.trace.draws).toHaveLength(7);
-    expect(result.trace.draws.map((draw) => draw.kind)).toEqual([
-      "setup-simulated-rng", "setup-simulated-rng", "setup-simulated-rng", "setup-simulated-rng",
-      "mirror-coat-roll-6", "mirror-coat-roll-7", "best-move-tie",
-    ]);
-    expect(result.trace.slotScores.map((slot) => slot.checkViabilityDelta)).toEqual([0, 0, 0, 0]);
-    expect(result.trace.slotScores.map((slot) => slot.finalScore)).toEqual([100, 100, 100, 100]);
-    expect(result.trace.tie.chosenDecision).toMatchObject({ kind: "use-move", moveSlot: 0 });
-    expect(result.rng.value).toBe(3_323_223_981); // ROM-observed post-decision RNG (7 steps from 3644022420)
+    expect(result.trace.turnStartRandomNumber.owner).toBe("decision");
+    expect(result.trace.draws[0]?.kind).toBe("turn-start-random-number");
+    expect(result.trace.draws).toHaveLength(drawCount);
+    expect(result.trace.slotScores.map((slot) => slot.checkViabilityDelta)).toEqual(cvDeltas);
+    expect(result.trace.slotScores.map((slot) => slot.finalScore))
+      .toEqual(cvDeltas.map((delta) => 100 + delta));
+    expect(result.trace.draws.map((draw) => draw.kind)).not.toContain("counter-bonus-roll");
+    expect(result.trace.tie.chosenDecision).toMatchObject({ kind: "use-move", moveSlot: chosenSlot });
+    expect(result.rng).toEqual({ value: endRng, calls: drawCount });
   });
 
-  it("reach (Counter in the set): the Counter-jump path draws roll-7 + counter-bonus-roll, matching the ROM's 7 draws and endpoint (slot divergence is the documented residual)", () => {
-    const result = chooseFactoryAiScoredDecision({
-      view: mirrorCoatView(true),
-      request,
-      rng: { value: 3_560_934_917, calls: 0 },
-    });
-    expect(result.trace.draws).toHaveLength(7);
-    expect(result.trace.draws.map((draw) => draw.kind)).toEqual([
-      "setup-simulated-rng", "setup-simulated-rng", "setup-simulated-rng", "setup-simulated-rng",
-      "mirror-coat-roll-7", "counter-bonus-roll", "best-move-tie",
-    ]);
-    // The ROM's turn-2 decision had the SAME 7 draws and endpoint 3726110690,
-    // but its tie landed on Splash slot 3 (all four at 100, Random()%4) while
-    // the engine's roll-7 fell through (+4 -> 104, best slot 0). The draw/endpoint
-    // receipt is banked; the tie-slot outcome is the live-observed residual.
-    expect(result.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 4, finalScore: 104 });
-    expect(result.rng.value).toBe(3_726_110_690);
-  });
-
-  it("regression guard: MOVE_COUNTER is 68, not Mirror Coat's own id (243) -- a Counter-less set must NOT take the Counter jump", () => {
-    // The shipped bug made `includes(243)` always true for any Mirror Coat
-    // carrier, so the control set would draw only mirror-coat-roll-7 (6 draws)
-    // and pick Splash slot 3. The fixed gate keys on 68: the control set draws
-    // the power-0 control path (roll-6 + roll-7) and the reach set draws the
-    // Counter jump (roll-7 + counter-bonus-roll).
+  it("pins the seed-1 control branch ordinals: turn-start then setup, roll-6 jump, tie", () => {
     const control = chooseFactoryAiScoredDecision({
       view: mirrorCoatView(false),
       request,
       rng: { value: 3_644_022_420, calls: 0 },
+      turnStartRandomNumber: { owner: "decision" },
     });
-    expect(control.trace.draws.map((draw) => draw.kind)).toContain("mirror-coat-roll-6");
-    expect(control.trace.draws.map((draw) => draw.kind)).toContain("mirror-coat-roll-7");
-    expect(control.trace.draws.map((draw) => draw.kind)).not.toContain("counter-bonus-roll");
-    expect(control.trace.draws).toHaveLength(7);
-
-    const reach = chooseFactoryAiScoredDecision({
-      view: mirrorCoatView(true),
-      request,
-      rng: { value: 3_644_022_420, calls: 0 },
-    });
-    expect(reach.trace.draws.map((draw) => draw.kind)).toContain("mirror-coat-roll-7");
-    expect(reach.trace.draws.map((draw) => draw.kind)).toContain("counter-bonus-roll");
-    expect(reach.trace.draws.map((draw) => draw.kind)).not.toContain("mirror-coat-roll-6");
+    expect(control.trace.draws.map((draw) => draw.kind)).toEqual([
+      "turn-start-random-number",
+      "setup-simulated-rng", "setup-simulated-rng", "setup-simulated-rng", "setup-simulated-rng",
+      "mirror-coat-roll-6",
+      "best-move-tie",
+    ]);
+    expect(control.trace.draws.map((draw) => draw.ordinal)).toEqual([1, 2, 3, 4, 5, 6, 7]);
   });
 });

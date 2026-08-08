@@ -5157,7 +5157,9 @@ function runCvMirrorCoat(input: Readonly<{
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
   }
   // MirrorCoat7: <50 roll (fall-through continues into ScoreUp4 with no own score).
-  roll("mirror-coat-roll-6", 50, 0);
+  if (roll("mirror-coat-roll-6", 50, 0)) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+  }
   // ScoreUp4 tail: <100 roll (+4 on fall-through).
   roll("mirror-coat-roll-7", 100, 4);
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
@@ -7516,15 +7518,12 @@ function runCvCounter(input: Readonly<{
   if (attackerHpPercent <= 30 && !roll("counter-low-hp-roll", 10)) score -= 1;
   if (attackerHpPercent <= 50 && !roll("counter-mid-hp-roll", 100)) score -= 1;
 
-  if ((input.attacker.moves ?? [0, 0, 0, 0]).includes(243)) {
-    if (!roll("counter-bonus-roll", 100)) score += 4;
-    return Object.freeze({
-      rng,
-      draws: Object.freeze(draws),
-      scoreDelta: score,
-      funcResultAfter: input.funcResultCarry,
-    });
-  }
+  // Pinned Emerald build quirk: AI_CV_Counter3 begins at odd ROM address
+  // 0x082DD46D. Its non-BUGFIX Cmd_if_has_move halfword operand load at +2
+  // is therefore unaligned and reads 0x010000F3 rather than MOVE_MIRROR_COAT
+  // (243), so this one specific jump to AI_CV_Counter8 never fires. Model
+  // the observed command outcome, not a general odd-script-address rule:
+  // the sibling AI_CV_MirrorCoat3 command is aligned and remains ordinary.
 
   const lastMove = MOVES_BY_ID.get(input.target.lastUsedMoveId ?? 0);
   const lastPower = lastMove?.power ?? 0;

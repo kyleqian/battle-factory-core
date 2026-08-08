@@ -17,86 +17,6 @@ backlog.
 
 # Open
 
-## #83 — Factory AI decision: an unmodeled pre-decision/per-slot `Random()` draw and a tie-slot divergence
-
-**Found 2026-08-08 by the `AI_CV_MirrorCoat` live-verification round** — the first
-ROM-vs-engine divergence the AI receipt program has produced. Six sibling handlers
-(`BrickBreak`, `Overheat`, `Facade`, `Curse`, `ChargeUpMove`, `DragonDance`) matched
-hardware 4/4; this one did not, and the residual is **not** in the handler.
-
-**Evidence** (`tools/probe/verify-factory-ai-mirrorcoat-live.ts`, both fixtures
-committed; ROM = real Battle Scene OFF run, engine = `chooseFactoryAiScoredDecision`
-on the same view):
-
-| Scenario | Seed | ROM | Engine | Verdict |
-| --- | ---: | --- | --- | --- |
-| control | 1 | 7 draws, end `3323223981`, slot 0 | 7 draws, `3323223981`, slot 0 | MATCH |
-| reach | 1 | 7 draws, end `3726110690`, slot 3 | 7 draws, `3726110690`, slot 0 | draws + endpoint match, **tie slot differs** |
-| control | 99 | 8 draws, end `1352996645`, slot 1 | 7 draws, `2270394938`, slot 3 | **+1 draw**, endpoint and slot differ |
-| reach | 99 | 7 draws, end `1329715331`, slot 0 | 7 draws, `1329715331`, slot 1 | draws + endpoint match, **tie slot differs** |
-
-**What this is not.** It is not the `MOVE_COUNTER` bug found in the same round (that
-constant was 243 — Mirror Coat's own id — instead of 68; fixed, and the pre-existing
-unit test that had *codified* the wrong id was fixed with it). Control seed 1 fully
-matches after that fix. It is also not `ShouldSwitch`, which draws zero under this
-matchup, so the extra draw is a different family.
-
-**What it looks like.** Three of four rows reproduce the ROM's **draw count and
-endpoint RNG exactly** but pick a different slot among equal scores, and one row is
-short exactly one draw. That points at the *tie-break / per-slot draw accounting* in
-`factoryAiDecisionPolicy.ts` — a pre-decision or per-slot `Random()` the scored
-policy does not model — rather than at any `AI_CV_*` handler body. Matching endpoints
-with a differing choice means the draws are being *consumed* in the right number but
-*attributed* to the wrong decision point.
-
-**Why it matters.** Tie-breaking is not a corner case: several verified rows are
-genuine 4-way ties (`Random() % 4`), so this governs which move the opponent actually
-uses whenever scores are level — which is common.
-
-**LOCATED 2026-08-08 (diagnosis step; full write-up in
-`docs/issue83-factory-ai-random-draw-diagnosis.md`, raw evidence in
-`tools/compare/evidence/issue83/`).** Per-call-site attribution + live
-`AI_THINKING_STRUCT->score[]`/script-pointer probes on seed-modified copies of the
-committed fixtures name the cause:
-
-1. **The extra draw (seed-99 control) is `gRandomTurnNumber = Random()` at
-   `src/battle_main.c:4013` in `BattleTurnPassed`** (LR `0x803bb13`), drawn once
-   per turn *before* `HandleTurnActionSelectionState` runs the AI decision. Every
-   decision window therefore opens one LCG step earlier than the standalone scored
-   policy models (the verifier seeds it pre-draw; the battle kernel already models
-   the draw at its own turn boundary). Seed-99 control = gRTTN + setup4 + roll-6 +
-   roll-7 + tie = **8**; the engine draws only setup4 + roll-6 + roll-7 + tie = 7.
-   Control seed 1 "matches" only by coincidence (its `roll-6` jumps at the ROM's
-   step-6 value, the engine's `roll-6`@5+`roll-7`@6 produce the same 100s and the
-   same tie value).
-
-2. **The reach tie-slot divergence is the same misalignment PLUS a second cause:**
-   the ROM's `AI_CV_Counter8` counter-bonus-roll **never fires**. The reach's
-   Counter slot enters `AI_CV_Counter` but `AI_CV_Counter3`'s `if_has_move
-   AI_USER, MOVE_MIRROR_COAT` falls through to the power-0 path: `Cmd_if_has_move`
-   reads its operand through `(u16 *)(gAIScriptPtr + 2)`
-   (`battle_ai_script_commands.c:1811`, non-BUGFIX), and `AI_CV_Counter3` sits at
-   **odd** address `0x082DD46D`, so the unaligned halfword load at `0x082DD46F`
-   yields `0x010000F3` (not `0x000000F3`) and the 32-bit compare never matches.
-   The engine's `userMoves.includes(MOVE_MIRROR_COAT)`
-   (`factoryAiCheckViability.ts:7519`) can't reproduce that; its extra
-   `counter-bonus-roll` is the reach draw that the ROM spends on gRTTN instead —
-   same total, same endpoint, different CV roll values → different tie slot.
-   (MirrorCoat3's sibling check works because `0x082DD996` is even.)
-
-**Fix not attempted — not unambiguous.** (a) Porting the pre-decision draw into
-the seam is a faithful named construct but re-derives the banked control-seed-1
-ordinals; (b) the unfired Counter8 is a build-layout artifact, not a portable
-source construct. A fix worker should land (a) at the seam, re-derive control
-seed 1, and decide (b) as a hard-coded evidence-backed exception or a general
-"odd script address ⇒ if_has_move operand read is garbage" model — confirming
-against the score-array evidence first.
-
-**Banked meanwhile:** `tests/factoryAiMirrorCoatLiveReceipt.test.ts` pins the
-control-seed-1 full match, the reach-seed-1 draw/endpoint receipt, and a regression
-guard that a Counter-less set must not take the Counter jump (it fails on the old 243
-constant).
-
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **Symptom:** all 62 Factory-front send-out intro families (**376/376** species
@@ -1001,11 +921,10 @@ Tier-1-pinned; all five committed win/loss terminal traces remain
 byte-identical (3590/3590, 248/248, 213/213, 232/232, 1943/1943).
 **Remainder (still-open stream-model boundary):** live generation with a
 single `constructionRngValue` still cannot express interleaved ambient ticks;
-the scaffold sidesteps it via adoption, it does not fix the contract. And the
-battle-room far side past 10638 still renders the static generic opponent NPC
-(`battleRoomRender.ts:253`) — LILIANA's School Kid F walk-in head/hair pixels
-and the quote timing past the window need the trainer-class-specific
-overworld sprite + canonical-window extension (NEXT SESSION's step).
+the scaffold sidesteps it via adoption, it does not fix the contract. The
+former LILIANA presentation remainder is closed: the generic next-trainer room
+route is exact across the broad **903/903** window and a dedicated **115/115**
+walk-in/quote receipt (PROGRESS 1015).
 
 **Symptom:** `generateInitialFactoryRentals`'s `constructionRngValue`
 contract consumes construction draws back-to-back from one cursor, but on
@@ -1028,6 +947,24 @@ gender and shininess are the real exposure. The production anchor route loads
 `anchor-state.json` directly and never calls this function today, so nothing
 user-visible is wrong now; the boundary bites any future live-generation or
 personality-exact receipt (e.g. Gate-6 seeded end-to-end rounds).
+
+**Three-case construction-clock receipt (2026-08-08, `1ee8518f`,
+supervisor rerun 11/11):** `docs/issue55-construction-rng-schedule-receipt.md`
+records gapless instruction-attributed chains for the six-rental anchor and
+two materially different three-mon `FillFactoryFrontierTrainerParty` calls.
+Inside the exact function-entry/return epochs the counts are anchor
+**242 construction + 52 ambient / 53 frames**, LILIANA **112 + 31 / 32**,
+and legal varied trainer 222 **202 + 30 / 31**; the two three-mon rejection
+vectors are `[13,7,36]` and `[59,12,30]`, with different inter-burst gaps.
+The first anchor-window ambient draw cited above occurs immediately before the
+selected function-entry cursor, explaining 53 versus the epoch's 52.
+Fixed-frame, fixed-mon-boundary, and draw-count-only insertion schedules are
+therefore refuted. The smallest source-general exact contract is an explicit
+deterministic construction clock: initial VBlank phase, source-operation cycle
+budget (including species/stat work), and an ambient callback at each crossed
+period. Until that clock exists, personality-exact live construction remains
+honestly out of model; do not promote this test-only receipt or per-fixture
+cursors into production.
 
 **New exposure (2026-08-05, #73):** after the WIN swap-decline route, room
 movement/warp timing remains pixel-exact, but the synthetic terminal stage
@@ -1056,11 +993,11 @@ Receipt §7 names the scaffold wiring fields (`winTerminalWindowStage`
 `rngValue`/`playerTrainerId`/`savedRentalRecords` + the per-mon schedule);
 the wiring step is queued.
 
-**Leads:** either extend the construction contract with an explicit
-interleaving representation (per-mon start cursors or a per-frame tick
-schedule — recording-flavored, decide deliberately), or keep the clean-stream
-contract and document personality-exactness as out of model whenever
-construction spans >1 frame. Supervisor decision 2026-07-30 (entry 758):
+**Lead:** implement the deterministic construction-clock contract above only
+as a deliberate source/cycle-model slice. Per-mon cursors and per-frame fixture
+schedules are now evidence-refuted as production designs. Until then, keep the
+clean-stream contract and document personality-exactness as out of model when
+construction spans more than one frame. Supervisor decision 2026-07-30 (entry 758):
 Gate-5 clause (a) is receipt-linked at the rules level (selection byte-exact
 from the probed cursor; construction proven via filtered ledger); this entry
 tracks the remaining stream-model boundary, not a Gate-5 blocker.

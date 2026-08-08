@@ -1,5 +1,12 @@
 # `AI_CV_MirrorCoat` live receipt — real-ROM verification, and a real engine fix
 
+> **2026-08-08 resolution:** the residual described below is closed. The scored
+> decision now explicitly owns or receives `BattleTurnPassed`'s
+> `gRandomTurnNumber`, and the pinned odd-address `AI_CV_Counter3` jump remains
+> unfired. The verifier is PASS 4/4: control/reach seeds 1 and 99 match draw
+> kinds/counts, score vectors, chosen slots, and endpoint RNG. See
+> `docs/issue83-factory-ai-random-draw-diagnosis.md` §5 for the final receipt.
+
 Bounded SIDE-lane worker session, 2026-08-08, Battle Scene OFF oracle
 (`http://127.0.0.1:8014`). This is the live receipt for `AI_CV_MirrorCoat`
 (`data/battle_ai_scripts.s:2116-2171`, EFFECT_MIRROR_COAT, 14 Level-50 Factory

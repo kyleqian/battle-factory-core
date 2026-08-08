@@ -547,6 +547,13 @@ export function submitLiveFactoryAiDecision<
       view,
       request: policyRequest,
       rng: switchPolicy.rng,
+      // The generic turn kernel drew and stored this at BattleTurnPassed
+      // before publishing the command boundary. Attribute that ownership to
+      // the scored decision without advancing/replaying the cursor again.
+      turnStartRandomNumber: Object.freeze({
+        owner: "battle-turn-boundary" as const,
+        value: state.rules.rulesContext.randomTurnNumber,
+      }),
     });
   const transition = submitBattleDecision(
     state,

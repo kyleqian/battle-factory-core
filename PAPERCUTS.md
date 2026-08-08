@@ -137,7 +137,7 @@ history.
   polling. Don't reach for a workaround (backgrounding, pkill, chunking) on
   the assumption the suite cannot fit — twice now that assumption, not the
   runtime, was the thing that cost the session time.
-- **Hits:** 7 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
+- **Hits:** 8 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
   contention from concurrent side/animation runs — auto-backgrounded; worker
   recovered by pid-polling, ~5 min lost. 2026-08-03: terminal-seam scout,
   ~6 min of foreground-poll waiting. 2026-08-04 R3: two workers same round —
@@ -151,7 +151,9 @@ history.
   second stretched to ~9.4 min while the SUPERVISOR ran focused vitest
   verification in the main tree concurrently — supervisor-side lesson:
   even focused verification runs contend; batch them between rounds or
-  after sibling suites, ~4 min lost.)
+  after sibling suites, ~4 min lost. 2026-08-08: the LILIANA far-side side
+  worker lost the first full-suite exit marker after the stream detached and
+  reran the suite explicitly, ~14 min lost.)
 - **Possible durable fix:** teach the worker preamble (or the brief
   template) to pass an explicit long timeout for the final full-suite call
   (the tool accepts up to 10 min per call; the suite may soon exceed even
@@ -367,10 +369,13 @@ Per entry:
 - **What:** running the full terminal boundary-control matrix inside one
   long-lived process repeatedly hit teardown/resource instability before
   emitting valid JSON.
-- **Hits:** 1.
-- **Cost each:** ~8 min.
+- **Hits:** 2.
+- **Cost each:** ~4.5 min average.
 - **Workaround:** split each outcome/control into a fresh
   `run-mgba-probe.py` wrapper invocation and merge only the concise evidence.
+- **2026-08-08 note:** the three-case construction-clock probe still needed
+  the wrapper to contain teardown SIGSEGV/log spew; the fresh-output validation
+  worked, but added ~1 min.
 
 ## Popup evidence used “input gate” for a state handoff, not a sampled key edge
 
