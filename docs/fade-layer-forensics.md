@@ -592,7 +592,8 @@ party menu (ISSUES #80 follow-up, ~4461 px at 926-962). Data source: `npm run
 compare -- mid-battle-switch-dense-a-off --capture-range 920:965 --summary` →
 **`tools/compare/out/run-2026-08-08-01-55-14Z-49578`** (5/46 matched; 925 = 7458
 px pre-open, 926-962 = **4461 px** bbox (145,81)-(238,158), 963 = 5743 px).
-Probes in `tools/probe/submenu-*.ts`. The app's scaffold is
+Probe `tools/probe/submenu-forensics.ts` reruns every check below (PASS, exit
+0). The app's scaffold is
 `renderBattlePartySelect`'s `state.submenuOpen` branch
 (`src/engine/battlePartySelect.ts:1111-1116`).
 
@@ -654,9 +655,9 @@ SEND OUT (`InitMenuInUpperLeftCorner(windowId, numActions, 0, TRUE)`,
 
 ### (c) Static across 926-963? Yes
 
-Full-RGB per-frame diff vs the previous frame (probe `submenu-steady.ts`):
+Full-RGB per-frame diff vs the previous frame (probe `submenu-forensics.ts`):
 926 changes +6008 px (window + §7 message-window swap land together);
-**927-929 byte-static**; 930/937/945/952/960 change 489 px at **bbox
+**927-929 byte-static**; 930/937/945/952/960 change **488 px** at **bbox
 (7,9)-(112,55)** — the §7(e) mon-icon 2-frame toggle, **outside** the submenu
 window (0 px inside x146-237/y98-157 on every frame). So the submenu window
 itself is byte-static across **926-963**; the only motion in the band is the
