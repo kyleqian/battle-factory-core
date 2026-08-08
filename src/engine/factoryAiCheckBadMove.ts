@@ -1855,6 +1855,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_TICKLE -> AI_CBM_Tickle
+  // (`data/battle_ai_scripts.s:208,571-574`): the same dual-stat shape as
+  // AI_CBM_BulkUp/Curse but reading AI_TARGET's OWN ATK then DEF at MIN_STAT_
+  // STAGE (target lowered to floor), sequentially, no interaction.
+  if (move.effect === "EFFECT_TICKLE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmTickle(target.atkStage, target.defStage),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -2378,4 +2391,24 @@ function runCbmTorment(targetTormented: boolean): number {
  */
 function runCbmHelpingHand(): number {
   return -10;
+}
+
+/**
+ * `AI_CBM_Tickle` (`data/battle_ai_scripts.s:571-574`, EFFECT_TICKLE):
+ *
+ * ```
+ * AI_CBM_Tickle:
+ *     if_stat_level_equal AI_TARGET, STAT_ATK, MIN_STAT_STAGE, Score_Minus10
+ *     if_stat_level_equal AI_TARGET, STAT_DEF, MIN_STAT_STAGE, Score_Minus8
+ *     end
+ * ```
+ *
+ * The same dual-stat shape as `AI_CBM_BulkUp`/`AI_CBM_Curse` with the gates
+ * flipped to the target's own ATK then DEF at MIN_STAT_STAGE (the stats
+ * Tickle lowers), sequentially, no interaction -- so both stages at floor
+ * score -18. Zero ability/type reads.
+ */
+function runCbmTickle(targetAtkStage: number, targetDefStage: number): number {
+  return (targetAtkStage === MIN_STAT_STAGE ? -10 : 0)
+    + (targetDefStage === MIN_STAT_STAGE ? -8 : 0);
 }

@@ -3285,3 +3285,41 @@ describe("AI_CBM_HelpingHand (data/battle_ai_scripts.s:541-543, EFFECT_HELPING_H
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
   });
 });
+
+describe("AI_CBM_Tickle (data/battle_ai_scripts.s:571-574, EFFECT_TICKLE)", () => {
+  const MOVE_TICKLE = 321;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("target ATK at MIN_STAT_STAGE JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_TICKLE, target({ atkStage: 0 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("target DEF at MIN_STAT_STAGE JUMPs to Score_Minus8", () => {
+    const result = run(MOVE_TICKLE, target({ defStage: 0 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8, draws: [] });
+  });
+
+  it("both stages at floor score -18 (two sequential gates, additive)", () => {
+    const result = run(MOVE_TICKLE, target({ atkStage: 0, defStage: 0 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -18, draws: [] });
+  });
+
+  it("neither stat at floor FALLS THROUGH to end at zero", () => {
+    const result = run(MOVE_TICKLE, target());
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+});
