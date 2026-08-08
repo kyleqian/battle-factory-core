@@ -302,6 +302,12 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    */
   isLeechSeeded?: boolean;
   /**
+   * Whether `gBattleMons[AI_TARGET].status1 & STATUS1_SLEEP` is nonzero --
+   * `AI_CBM_DreamEater`'s first, source-ordered rejection gate (EFFECT_DREAM_
+   * EATER). Optional, defaulting to false.
+   */
+  isAsleep?: boolean;
+  /**
    * `gBattleMons[AI_TARGET].level` -- `AI_CBM_OneHitKO`'s final
    * `if_level_cond 1` (less-than) gate operand. Optional, defaulting to 0
    * (the neutral "not lower" outcome when omitted, so the level gate never
@@ -1786,6 +1792,18 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_DREAM_EATER -> AI_CBM_DreamEater
+  // (`data/battle_ai_scripts.s:107,242-245`): target not asleep rejects at
+  // -8; asleep-but-x0 rejects at -10.
+  if (move.effect === "EFFECT_DREAM_EATER") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmDreamEater(move.type, target),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -2260,4 +2278,22 @@ function runCbmSubstitute(attacker: FactoryAiCheckBadMoveAttacker): number {
   const hp = attacker.hp ?? 1;
   const hpPercent = Math.floor((100 * hp) / maxHp);
   return hpPercent < 26 ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_DreamEater` (`data/battle_ai_scripts.s:242-245`, EFFECT_DREAM_EATER):
+ * `if_not_status AI_TARGET, STATUS1_SLEEP, Score_Minus8` then
+ * `if_type_effectiveness AI_EFFECTIVENESS_x0, Score_Minus10` -- Dream Eater
+ * is penalized against a target that is not asleep, and doubly so (reaches
+ * -10 only if asleep, since -8 already fired for non-asleep) against a type
+ * it cannot affect. Zero ability reads.
+ */
+function runCbmDreamEater(
+  moveType: string,
+  target: FactoryAiCheckBadMoveTarget,
+): number {
+  if (!(target.isAsleep ?? false)) {
+    return -8;
+  }
+  return computeAiEffectiveness(moveType, target.types) === 0 ? -10 : 0;
 }

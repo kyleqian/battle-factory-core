@@ -3156,3 +3156,42 @@ describe("AI_CBM_Substitute (data/battle_ai_scripts.s:405-408, EFFECT_SUBSTITUTE
     });
   });
 });
+
+describe("AI_CBM_DreamEater (data/battle_ai_scripts.s:242-245, EFFECT_DREAM_EATER)", () => {
+  const MOVE_DREAM_EATER = 138;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("target NOT asleep JUMPs to Score_Minus8", () => {
+    const result = run(MOVE_DREAM_EATER, target());
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8, draws: [] });
+  });
+
+  it("target asleep FALLS THROUGH past the sleep gate to end at zero", () => {
+    expect(run(MOVE_DREAM_EATER, target({ isAsleep: true }))).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+
+  it("target asleep but type x0 JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_DREAM_EATER, target({
+      isAsleep: true,
+      types: ["TYPE_DARK", "TYPE_DARK"] as const,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+});
