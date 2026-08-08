@@ -310,7 +310,18 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // Lock-On/Mind-Reader branch needs gDisableStructs[target].
   // Lock On ownership is now source-complete; only Focus Band remains. 1
   // total, reachability-tested in tests/battleScriptTryKOOpcode.test.ts.
-  ["src/engine/battleScriptTryKOOpcode.ts", 1],
+  // 1 -> 0 (ROADMAP S10 dispatch-queue item 2, side lane): the last barrier
+  // is RETIRED, not narrowed -- the reason string was stale (the hit chain
+  // models gSpecialStatuses[target].focusBanded for real since the 16 -> 13
+  // Focus Band retirement above). Cmd_tryKO now draws the holder-only
+  // %10 roll before the Sturdy check (source order, one Random() consumed
+  // whenever the target holds Focus Band -- even on a failed roll or a
+  // Sturdy short-circuit), writes focusBanded via the sibling machinery on
+  // success, and consumes it on the OHKO-lands path as the MOVE_RESULT_
+  // FOE_HUNG_ON hp-1 clamp with lastUsedItem. Reachability-pinned in
+  // tests/battleScriptTryKOOpcode.test.ts "Cmd_tryKO's Focus Band
+  // holder-only roll".
+  ["src/engine/battleScriptTryKOOpcode.ts", 0],
   // B_SCR_OP_FORCERANDOMSWITCH/SWITCHOUTABILITIES/RETURNTOBALL/FINISHACTION
   // registration (EFFECT_ROAR, docs/roar-multihit-registration-scout.md §4
   // rungs 10-14): Cmd_forcerandomswitch/Cmd_switchoutabilities/

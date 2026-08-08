@@ -9,11 +9,15 @@
  * 1. Hold-effect resolution (`resolveBattleScriptBattlerHoldEffect`, already
  *    exact for Enigma Berry -- `gPotentialItemEffectBattler` itself is never
  *    read anywhere in this engine, so it is not modeled).
- * 2. Focus Band roll (`:7507`) -- barriered (`gSpecialStatuses[target].
- *    focusBanded` is not modeled anywhere in this engine, same named
- *    subsystem gap `Cmd_adjustnormaldamage`/`Cmd_adjustsetdamage` already
- *    barrier on), gated strictly on the target's resolved holdEffect
- *    actually being Focus Band -- never on the plain path.
+ * 2. Focus Band roll (`:7507`) -- a holder-only percent draw, exactly the
+ *    sibling roll `Cmd_adjustnormaldamage`/`Cmd_adjustsetdamage` model in
+ *    `battleScriptHitChainOpcode.ts` (see `adjustNormalDamageOpcodeHandler`).
+ *    It consumes one `Random()` whenever the target holds Focus Band --
+ *    independent of whether the roll succeeds, and even when the Sturdy block
+ *    below then short-circuits. A successful roll sets the action-lifetime
+ *    `specialStatus.focusBanded` and records the item effect reveal; a failed
+ *    one leaves both untouched. No jump either way -- falls through into the
+ *    Sturdy check.
  * 3. Sturdy (`:7513`) -- a real, fully modeled block: sets
  *    `MOVE_RESULT_MISSED` + `lastUsedAbility`, then jumps to the FIXED label
  *    `BattleScript_SturdyPreventsOHKO` directly (source assigns
@@ -36,11 +40,13 @@
  *    outcome.
  * 6. Success trichotomy (`:7546-7562`): Endure (`target.endured`, already
  *    modeled by `battleScriptProtectlikeOpcode.ts`) clips to `hp - 1` and
- *    sets `MOVE_RESULT_FOE_ENDURED`; Focus-Band-hung-on is structurally
- *    unreachable here (barriered at step 2 above, unconditionally, whenever
- *    the target holds it); otherwise plain OHKO: damage = target's full
- *    current HP, `MOVE_RESULT_ONE_HIT_KO` set. `gBattlescriptCurrInstr += 5`
- *    (skip the whole 5-byte instruction) -- an `advance`, not a jump.
+ *    sets `MOVE_RESULT_FOE_ENDURED`; a set `focusBanded` (from this opcode's
+ *    own step-2 write, or persisted from an earlier action) clips to `hp - 1`,
+ *    sets `MOVE_RESULT_FOE_HUNG_ON`, and records the item as last used --
+ *    Endure takes precedence over Focus Band, matching source; otherwise
+ *    plain OHKO: damage = target's full current HP, `MOVE_RESULT_ONE_HIT_KO`
+ *    set. `gBattlescriptCurrInstr += 5` (skip the whole 5-byte instruction)
+ *    -- an `advance`, not a jump.
  * 7. Miss (`:7565-7572`): `MOVE_RESULT_MISSED` set, `multistringChooser`
  *    picks `B_MSG_KO_MISS` (attacker level >= target level, a genuine
  *    unlucky-roll miss) or `B_MSG_KO_UNAFFECTED` (target out-levels
@@ -57,16 +63,21 @@ import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import { resolveBattleScriptLabel } from "./battleScriptProgram.ts";
 import {
   resolveBattleScriptBattlerHoldEffect,
+  resolveBattleScriptBattlerHoldEffectParam,
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
 import {
   BATTLE_SCRIPT_MOVE_RESULT_FOE_ENDURED,
+  BATTLE_SCRIPT_MOVE_RESULT_FOE_HUNG_ON,
   BATTLE_SCRIPT_MOVE_RESULT_MISSED,
   BATTLE_SCRIPT_MOVE_RESULT_ONE_HIT_KO,
   BATTLE_SCRIPT_STATUS3_ALWAYS_HITS,
 } from "./battleScriptSourceConstants.ts";
-import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
-import { HOLD_EFFECT_ID_FOCUS_BAND, unsupportedBranch } from "./battleScriptHitChainOpcode.ts";
+import {
+  recordBattleScriptAbilityReveal,
+  recordBattleScriptItemEffectReveal,
+} from "./battleScriptAiReveal.ts";
+import { HOLD_EFFECT_ID_FOCUS_BAND, withBattler } from "./battleScriptHitChainOpcode.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
 
 /** include/constants/abilities.h:9. */
@@ -103,24 +114,27 @@ function createTryKOHandler(program: BattleScriptProgram): BattleScriptOpcodeHan
     const attackerBattler = rulesContext.battlers[attacker];
     const targetBattler = rulesContext.battlers[target];
 
+    let rng = context.state.rng;
+    let nextRulesContext = rulesContext;
     const holdEffect = resolveBattleScriptBattlerHoldEffect(rulesContext, target);
     if (holdEffect === HOLD_EFFECT_ID_FOCUS_BAND) {
-      return unsupportedBranch(
-        context,
-        "Cmd_tryKO's HOLD_EFFECT_FOCUS_BAND roll needs gSpecialStatuses[target].focusBanded, which this "
-          + "engine does not model yet (same barrier Cmd_adjustnormaldamage/Cmd_adjustsetdamage already carry)",
-        "battle_script_commands.c",
-        7507,
-      );
+      const bandDraw = drawBattleScriptRng(rng, context.instruction, "tryko-focus-band");
+      rng = bandDraw.rng;
+      if ((bandDraw.randomValue % 100) < resolveBattleScriptBattlerHoldEffectParam(rulesContext, target)) {
+        nextRulesContext = withBattler(rulesContext, target, {
+          specialStatus: Object.freeze({ ...targetBattler.specialStatus, focusBanded: 1 }),
+        });
+        nextRulesContext = recordBattleScriptItemEffectReveal(nextRulesContext, target, holdEffect);
+      }
     }
 
     if (targetBattler.ability === ABILITY_STURDY) {
       const label = resolveBattleScriptLabel(program, "BattleScript_SturdyPreventsOHKO");
       if (!label) throw new Error("Cmd_tryKO: committed program has no label BattleScript_SturdyPreventsOHKO");
-      const nextRulesContext = recordBattleScriptAbilityReveal(
+      const nextSturdyContext = recordBattleScriptAbilityReveal(
         Object.freeze({
-          ...rulesContext,
-          moveResultFlags: (rulesContext.moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED) >>> 0,
+          ...nextRulesContext,
+          moveResultFlags: (nextRulesContext.moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED) >>> 0,
           lastUsedAbility: ABILITY_STURDY,
         }),
         target,
@@ -129,7 +143,7 @@ function createTryKOHandler(program: BattleScriptProgram): BattleScriptOpcodeHan
       return transitionBattleScriptCommand(
         context,
         Object.freeze({ kind: "jump", programCounter: label.programCounter }),
-        { rulesContext: nextRulesContext },
+        { rulesContext: nextSturdyContext, rng },
       );
     }
 
@@ -140,20 +154,25 @@ function createTryKOHandler(program: BattleScriptProgram): BattleScriptOpcodeHan
       && attackerBattler.level >= targetBattler.level;
     const draw = ownedSureHit
       ? null
-      : drawBattleScriptRng(context.state.rng, context.instruction, "tryko");
+      : drawBattleScriptRng(rng, context.instruction, "tryko");
     const chanceValue = moveAccuracy + (attackerBattler.level - targetBattler.level);
     const hit = ownedSureHit || (
       ((draw!.randomValue % 100) + 1 < chanceValue)
       && attackerBattler.level >= targetBattler.level
     );
-    const rng = draw?.rng ?? context.state.rng;
+    rng = draw?.rng ?? rng;
 
     if (hit) {
       let battleMoveDamage: number;
-      let moveResultFlags = rulesContext.moveResultFlags;
+      let moveResultFlags = nextRulesContext.moveResultFlags;
+      let lastUsedItem = nextRulesContext.lastUsedItem;
       if (targetBattler.endured === 1) {
         battleMoveDamage = targetBattler.hp - 1;
         moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_FOE_ENDURED) >>> 0;
+      } else if (nextRulesContext.battlers[target].specialStatus.focusBanded === 1) {
+        battleMoveDamage = targetBattler.hp - 1;
+        moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_FOE_HUNG_ON) >>> 0;
+        lastUsedItem = targetBattler.item;
       } else {
         battleMoveDamage = targetBattler.hp;
         moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_ONE_HIT_KO) >>> 0;
@@ -161,7 +180,10 @@ function createTryKOHandler(program: BattleScriptProgram): BattleScriptOpcodeHan
       return transitionBattleScriptCommand(
         context,
         Object.freeze({ kind: "advance" }),
-        { rulesContext: Object.freeze({ ...rulesContext, battleMoveDamage, moveResultFlags }), rng },
+        {
+          rulesContext: Object.freeze({ ...nextRulesContext, battleMoveDamage, moveResultFlags, lastUsedItem }),
+          rng,
+        },
       );
     }
 
@@ -169,15 +191,15 @@ function createTryKOHandler(program: BattleScriptProgram): BattleScriptOpcodeHan
     const label = resolveBattleScriptLabel(program, failOperand!.expression);
     if (!label) throw new Error(`Cmd_tryKO: unresolved jump target ${failOperand!.expression}`);
     const multistringChooser = attackerBattler.level >= targetBattler.level ? B_MSG_KO_MISS : B_MSG_KO_UNAFFECTED;
-    const nextRulesContext = Object.freeze({
-      ...rulesContext,
-      moveResultFlags: (rulesContext.moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED) >>> 0,
+    const nextMissContext = Object.freeze({
+      ...nextRulesContext,
+      moveResultFlags: (nextRulesContext.moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED) >>> 0,
       multistringChooser,
     });
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "jump", programCounter: label.programCounter }),
-      { rulesContext: nextRulesContext, rng },
+      { rulesContext: nextMissContext, rng },
     );
   };
 }
