@@ -345,6 +345,20 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
   hasPerishSong?: boolean;
   /** DisableStruct::protectUses, read by AI_CV_Protect. */
   protectUses?: number;
+  /**
+   * `gSideStatuses[side] & SIDE_STATUS_REFLECT` (`Cmd_if_side_affecting`,
+   * `battle_ai_script_commands.c:881-898`) -- AI_CV_BrickBreak's single gate
+   * on the TARGET's own side. Optional, defaulting to `false`.
+   */
+  hasSideReflect?: boolean;
+  /** STATUS1_POISON (non-toxic), read by AI_CV_Facade's status1 mask. */
+  isPoisoned?: boolean;
+  /** STATUS1_BURN, read by AI_CV_Facade's status1 mask. */
+  isBurned?: boolean;
+  /** STATUS1_PARALYSIS, read by AI_CV_Facade's status1 mask. */
+  isParalyzed?: boolean;
+  /** STATUS2_SUBSTITUTE, read by AI_CV_FocusPunch's FocusPunch3 tail. */
+  hasSubstitute?: boolean;
 }>;
 
 export type FactoryAiCheckViabilityDraw =
@@ -4094,6 +4108,38 @@ function runCvRainDance(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: rainDish ? 1 : 0, funcResultAfter });
 }
 
+/**
+ * `AI_CV_BrickBreak` (`data/battle_ai_scripts.s:2457-2464`,
+ * EFFECT_BRICK_BREAK):
+ *
+ * ```
+ * AI_CV_BrickBreak:
+ *     if_side_affecting AI_TARGET, SIDE_STATUS_REFLECT, AI_CV_BrickBreak_ScoreUp1
+ *     goto AI_CV_BrickBreak_End
+ * AI_CV_BrickBreak_ScoreUp1:
+ *     score +1
+ * AI_CV_BrickBreak_End:
+ *     end
+ * ```
+ *
+ * A single side-condition gate on the TARGET's OWN side: `if_side_affecting`
+ * (`Cmd_if_side_affecting`, `battle_ai_script_commands.c:881-898`) reads
+ * `gSideStatuses[GET_BATTLER_SIDE(gBattlerTarget)] & SIDE_STATUS_REFLECT`. A
+ * Reflect'd target side scores +1 (breaking the screen is worth it);
+ * otherwise `goto End`: genuine zero score / zero draws. No draws, no
+ * funcResult write.
+ */
+function runCvBrickBreak(input: Readonly<{
+  rng: BattleRngState;
+  targetHasSideReflect: boolean;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  return Object.freeze({
+    rng: input.rng,
+    draws: Object.freeze([]),
+    scoreDelta: input.targetHasSideReflect ? 1 : 0,
+  });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -4971,6 +5017,22 @@ export function runCheckViability(input: Readonly<{
       draws: counter.draws,
       scoreDelta: counter.scoreDelta,
       funcResultAfter: counter.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_BRICK_BREAK") {
+    // AI_CV_BrickBreak (data/battle_ai_scripts.s:2457-2464) -- a single
+    // side-condition gate on the target's own Reflect.
+    const brickBreak = runCvBrickBreak({
+      rng: input.rng,
+      targetHasSideReflect: input.target.hasSideReflect ?? false,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: brickBreak.rng,
+      draws: brickBreak.draws,
+      scoreDelta: brickBreak.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 

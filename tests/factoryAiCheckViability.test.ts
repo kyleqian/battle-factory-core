@@ -5650,3 +5650,33 @@ describe("AI_CV_Heal EFFECT_SWALLOW dispatch (data/battle_ai_scripts.s:745)", ()
     expect(result.draws).toEqual([]);
   });
 });
+
+describe("AI_CV_BrickBreak (data/battle_ai_scripts.s:2457-2464)", () => {
+  const MOVE_BRICK_BREAK = 280; // EFFECT_BRICK_BREAK
+
+  function brickBreakRun(targetHasSideReflect: boolean) {
+    return runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_BRICK_BREAK,
+      attacker: { ...NEUTRAL_BATTLER },
+      target: { ...NEUTRAL_BATTLER, hasSideReflect: targetHasSideReflect },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "brick-break",
+    });
+  }
+
+  it("target side Reflect'd: +1, zero draws, carry preserved", () => {
+    const result = brickBreakRun(true);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1, funcResultAfter: 2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("no Reflect on target side: zero score, zero draws", () => {
+    const result = brickBreakRun(false);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+});
