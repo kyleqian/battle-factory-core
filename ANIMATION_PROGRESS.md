@@ -1,6 +1,6 @@
 # Animation coverage
 
-## MOVE_TAKE_DOWN staged — both orientations isolated at 98/97 frames; scenarios + dense probe + change maps banked (2026-08-07 worker)
+## MOVE_TAKE_DOWN staged — both orientations isolated at 98/97 frames; scenarios + dense probe + change maps + RAM-truth reducer banked (2026-08-07 worker)
 
 - **State:** TAKE_DOWN stays **unsupported**. Coverage unchanged at **125/276
   exact, 0 partial, 0 staged, 151 unsupported**. Nothing promoted; no pin
@@ -80,15 +80,33 @@
   `sceneOnPresentation.ts`, the TAKE_DOWN draw case in `battleScene.ts`, the
   fixtures (`take-down-player-swablu-opponent-onix.json` /
   `take-down-opponent-swablu-player-onix.json`), the coverage entry and the
-  inventory pin 125->126 exact / 151->150 unsupported.
+  inventory pin 125->126 exact / 151->150 unsupported. **The RAM-truth reducer
+  (`src/animation/takeDown.ts`, windup/slides/shake/hitsplat/blend/monbg/SE
+  at the ages above) and its 10 Tier-1 pins already exist — the promotion
+  round consumes them as-is.**
+- **Notes — one display-lag asymmetry to watch in promotion.** The
+  task-driven WindUpLunge x2 reaches pixels TWO frames after its RAM write
+  (RAM 221 x2=-2 -> change-map first windup diff at 223; pixel left edge 38
+  = 40-2 at 223, hw OAM x 40->38 at 223), while the sprite-driven slides and
+  the ShakeMonInPlace toggle display ONE frame after their RAM cause (slide
+  RAM 294 -> display 295; shake RAM 268 -> display 269). Both were read
+  directly off the change map + hw OAM. If the portable's per-axis compare
+  keeps the shared one-display latch for everything, the windup axis will
+  drift by one — the promotion round should verify against the change map and
+  split the latch (or confirm the probe read phase absorbs it) before wiring
+  the draw case.
 - **Notes — zero new components.** TAKE_DOWN needs none of the four current
   highest-leverage-unproven components; every script component is already exact
   elsewhere (WindUpLunge = SPIKE_CANNON/BRICK_BREAK `windUpLunge.ts`,
   SlideMonToOffset/OriginalPos = BODY_SLAM/STEEL_WING/etc `slideMon.ts`,
   ShakeMonInPlace = BODY_SLAM/SLAM/etc `shakeMonInPlace.ts`,
   complex_palette_blend = REVERSAL/AERIAL_ACE/BLAZE_KICK/EARTHQUAKE, basic
-  hitsplat = IRON_TAIL). No boundary widening, no new unsupported-branch
-  barrier.
+  hitsplat = IRON_TAIL). The one extension: `windUpLunge.ts`'s nonzero
+  amplitude branch (TAKE_DOWN uses waveAmplitude 8) now computes the real GBA
+  sine via the shared `GBA_SINE_TABLE_256` imported from
+  `engine/battleMenu.ts` — the same sine seam the send-out arcs already use,
+  so it is reuse, not a new component. No boundary widening, no new
+  unsupported-branch barrier.
 
 ## MOVE_CRUSH_CLAW promoted to exact — 125/276, both orientations at 69/69 portable-exact (2026-08-07 worker)
 
