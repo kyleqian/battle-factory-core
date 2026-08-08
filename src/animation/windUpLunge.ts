@@ -6,7 +6,15 @@
  * The source task mutates the two horizontal arguments for an opponent-side
  * attacker before initializing its Q8.8 accumulators; the reducer keeps that
  * side inversion inside this shared component.
+ *
+ * The wind-up wave (`gBattleAnimArgs[2]`, via `Sin((u8)(data[10]>>8), amp)`)
+ * is the shared GBA sine table indexed by the wave accumulator's high byte —
+ * `gSineTable`, the same 256-entry table the engine's send-out arcs use. The
+ * SPIKE_CANNON/BRICK_BREAK components used amplitude zero; TAKE_DOWN is the
+ * first exact move to exercise the nonzero branch.
  */
+
+import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
 
 export type WindUpLungeSide = "player" | "opponent";
 
@@ -26,16 +34,11 @@ export interface WindUpLungeState {
 }
 
 function sine(index: number, amplitude: number): number {
-  // The selected Spike Cannon component has amplitude zero. Keep the generic
-  // source contract explicit and reject an unported sine branch rather than
-  // silently hand-fitting a sibling that needs it.
-  if (amplitude !== 0) {
-    throw new Error(
-      "WindUpLunge wave amplitudes require the shared GBA sine-table seam",
-    );
-  }
-  void index;
-  return 0;
+  // `Sin(index, amplitude)` = `(amplitude * gSineTable[index]) >> 8` with the
+  // signed ARM shift (negative fractions round down, unlike JS `Math.trunc`).
+  const product = amplitude * GBA_SINE_TABLE_256[index & 0xff]!;
+  const shifted = product >> 8;
+  return product < 0 && shifted * 256 !== product ? shifted - 1 : shifted;
 }
 
 export function windUpLungeAtTick(
