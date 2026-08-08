@@ -1992,6 +1992,104 @@ function runCvRecharge(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: hpPercent < 60 ? 0 : -1 });
 }
 
+/**
+ * `AI_CV_Flail` (`data/battle_ai_scripts.s:1817-1840`, EFFECT_FLAIL -- Flail
+ * / Reversal):
+ *
+ * ```
+ * AI_CV_Flail:
+ *     if_target_faster AI_CV_Flail2
+ *     if_hp_more_than AI_USER, 33, AI_CV_Flail_ScoreDown1
+ *     if_hp_more_than AI_USER, 20, AI_CV_Flail_End
+ *     if_hp_less_than AI_USER, 8, AI_CV_Flail_ScoreUp1
+ *     goto AI_CV_Flail3
+ * AI_CV_Flail2:
+ *     if_hp_more_than AI_USER, 60, AI_CV_Flail_ScoreDown1
+ *     if_hp_more_than AI_USER, 40, AI_CV_Flail_End
+ *     goto AI_CV_Flail3
+ * AI_CV_Flail_ScoreUp1:
+ *     score +1
+ * AI_CV_Flail3:
+ *     if_random_less_than 100, AI_CV_Flail_End
+ *     score +1
+ *     goto AI_CV_Flail_End
+ * AI_CV_Flail_ScoreDown1:
+ *     score -1
+ * AI_CV_Flail_End:
+ *     end
+ * ```
+ *
+ * Target NOT faster reads its own HP bands in order: > 33 is the -1
+ * (`ScoreDown1`); > 20 is the zero `goto End`; < 8 is `ScoreUp1`'s +1, which
+ * FALLS THROUGH into the single random site (`Flail3`); the remaining
+ * [8,20] band `goto`s the site directly. Target faster reads ITS own HP
+ * bands: > 60 is -1; > 40 is zero; <= 40 `goto`s the site. So the site is
+ * reached at HP < 8 (with a prior +1) or in [8,20] (target not faster), or
+ * at HP <= 40 (target faster) -- one `<100` roll whose JUMP (roll < 100,
+ * ~39%) keeps the running score and whose FALL-THROUGH adds +1. Zero draws
+ * on every non-site path; `if_target_faster` burns its usual tie-break. No
+ * command writes funcResult.
+ */
+function runCvFlail(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+
+  const flail3 = (baseScore: number): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> => {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-flail-roll`);
+    const jumped = roll.randomValue % 256 < 100;
+    draws.push(Object.freeze({ ...roll, kind: "flail-roll" as const, jumped }));
+    return Object.freeze({ rng: roll.after, draws: Object.freeze(draws), scoreDelta: jumped ? baseScore : baseScore + 1 });
+  };
+
+  if (targetFaster) {
+    if (hpPercent > 60) {
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
+    }
+    if (hpPercent > 40) {
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+    }
+    return flail3(0);
+  }
+
+  if (hpPercent > 33) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
+  }
+  if (hpPercent > 20) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+  }
+  if (hpPercent < 8) {
+    // ScoreUp1: +1 falls through into Flail3.
+    return flail3(1);
+  }
+  return flail3(0);
+}
+
 const AI_EFFECTIVENESS_X0_25 = 10;
 const AI_EFFECTIVENESS_X0_5 = 20;
 const AI_EFFECTIVENESS_X1 = 40;
@@ -4482,6 +4580,24 @@ export function runCheckViability(input: Readonly<{
       rng: recharge.rng,
       draws: recharge.draws,
       scoreDelta: recharge.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_FLAIL") {
+    // AI_CV_Flail (data/battle_ai_scripts.s:1817-1840).
+    const flail = runCvFlail({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: flail.rng,
+      draws: flail.draws,
+      scoreDelta: flail.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }

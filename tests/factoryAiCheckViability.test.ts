@@ -5391,3 +5391,69 @@ describe("AI_CV_Recharge (data/battle_ai_scripts.s:1588-1600)", () => {
     expect(rechargeRun(1, { speed: 5, hp: 10, maxHp: 100 }, { speed: 120 })).toMatchObject({ funcResultAfter: 2 });
   });
 });
+
+describe("AI_CV_Flail (data/battle_ai_scripts.s:1817-1840)", () => {
+  const MOVE_FLAIL = 175; // EFFECT_FLAIL
+
+  function flailRun(rngValue: number, hp: number, attackerSpeed = 120, targetSpeed = 5) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_FLAIL,
+      attacker: { ...NEUTRAL_BATTLER, hp, maxHp: 100, speed: attackerSpeed },
+      target: { ...NEUTRAL_BATTLER, speed: targetSpeed },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "flail",
+    });
+  }
+
+  it("target NOT faster, own HP >33: deterministic -1, zero draws", () => {
+    const result = flailRun(1, 40);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("target NOT faster, own HP in (20,33]: zero (goto End)", () => {
+    const result = flailRun(1, 33);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("target NOT faster, own HP in [8,20]: reaches the <100 roll (roll <100 ends at zero)", () => {
+    // seed 3 -> low byte 83 (< 100, JUMP).
+    const result = flailRun(3, 15);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "flail-roll", jumped: true });
+  });
+
+  it("target NOT faster, own HP in [8,20]: the <100 roll's FALL-THROUGH adds +1", () => {
+    // seed 1 -> low byte 198 (>= 100).
+    const result = flailRun(1, 15);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("target NOT faster, own HP <8: ScoreUp1's +1 falls into the roll", () => {
+    // seed 1 -> +1 then roll >= 100 -> +1 again = +2.
+    const result = flailRun(1, 7);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 2 });
+  });
+
+  it("target faster, own HP >60: deterministic -1", () => {
+    const result = flailRun(1, 61, 5, 120);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, draws: [] });
+  });
+
+  it("target faster, own HP in (40,60]: zero", () => {
+    const result = flailRun(1, 60, 5, 120);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("target faster, own HP <=40: reaches the <100 roll", () => {
+    const result = flailRun(1, 40, 5, 120);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("carry preserved", () => {
+    expect(flailRun(1, 100)).toMatchObject({ funcResultAfter: 2 });
+  });
+});
