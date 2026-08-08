@@ -3518,7 +3518,7 @@ function runCvSpAtkUp(input: Readonly<{
 }
 
 const MOVE_NONE = 0;
-const MOVE_COUNTER = 243;
+const MOVE_COUNTER = 68; // `#define MOVE_COUNTER 68` (include/constants/moves.h:72); the earlier 243 was MOVE_MIRROR_COAT's own id -- live-verified divergence, fixed 2026-08-08
 
 /** `AI_CV_DefenseUp_PhysicalTypes` (`data/battle_ai_scripts.s:944-954`) -- a
  * DIFFERENT, larger list than `AI_CV_AttackDown`'s own physical-type list
@@ -5045,7 +5045,9 @@ const AI_CV_MIRROR_COAT_SPECIAL_TYPES: ReadonlySet<string> = new Set([
  * HP <= 30% runs the `<10` roll (FALL-THROUGH applies -1, then continues),
  * own HP <= 50% runs the `<100` roll (FALL-THROUGH applies -1, then
  * continues) -- Mirror Coat is bad at low HP. `MirrorCoat3`: a user with
- * MOVE_COUNTER (243) jumps straight to the `ScoreUp4` tail (a single `<100`
+ * MOVE_COUNTER (68, `include/constants/moves.h:72`; the earlier 243 here was
+ * Mirror Coat's own id -- a live-verified divergence, fixed 2026-08-08) jumps
+ * straight to the `ScoreUp4` tail (a single `<100`
  * roll, +4 on fall-through); otherwise the TARGET's last move is read
  * (`get_move_power_from_result`): power 0 jumps to `MirrorCoat5`, nonzero
  * continues into the `MirrorCoat4` type scan. Both the power-0 and nonzero
