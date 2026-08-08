@@ -5902,3 +5902,52 @@ describe("AI_CV_Curse (data/battle_ai_scripts.s:1870-1892)", () => {
     expect(result).toMatchObject({ kind: "scored", funcResultAfter: 1 });
   });
 });
+
+describe("AI_CV_PsychUp (data/battle_ai_scripts.s:2086-2112)", () => {
+  const MOVE_PSYCH_UP = 244; // EFFECT_PSYCH_UP
+
+  function psychUpRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_PSYCH_UP,
+      attacker: { ...NEUTRAL_BATTLER, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "psych-up",
+    });
+  }
+
+  it("target has no raised stat: deterministic -2, zero draws", () => {
+    const result = psychUpRun(1, {}, { atkStage: 8 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("target raised + user ATK < 7: PsychUp3's bare +1", () => {
+    const result = psychUpRun(1, { atkStage: 5 }, { atkStage: 9 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("target raised + only user EVASION < 7: ScoreUp1 + PsychUp3 chained +2", () => {
+    const result = psychUpRun(1, { atkStage: 7, defStage: 7, spAtkStage: 7, spDefStage: 7, evasionStage: 5 }, { atkStage: 9 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 2 });
+  });
+
+  it("target raised + all user stages >= 7: roll < 50 is the zero jump", () => {
+    // seed 4 -> roll low byte 25 (<50, JUMP).
+    const result = psychUpRun(4, { atkStage: 7, defStage: 7, spAtkStage: 7, spDefStage: 7, evasionStage: 7 }, { atkStage: 9 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["psych-up-roll"]);
+  });
+
+  it("target raised + all user stages >= 7: roll >= 50 goes to -2", () => {
+    // seed 1 -> roll low byte 198 (>=50, goto ScoreDown2).
+    const result = psychUpRun(1, { atkStage: 7, defStage: 7, spAtkStage: 7, spDefStage: 7, evasionStage: 7 }, { atkStage: 9 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -2 });
+  });
+});

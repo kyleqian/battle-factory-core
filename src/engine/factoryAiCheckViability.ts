@@ -759,6 +759,16 @@ export type FactoryAiCheckViabilityDraw =
     rawRngValue: number;
     randomValue: number;
     jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "psych-up-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    jumped: boolean;
   }>;
 
 export type FactoryAiCheckViabilityResult =
@@ -4419,6 +4429,88 @@ function runCvCurse(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
 }
 
+/**
+ * `AI_CV_PsychUp` (`data/battle_ai_scripts.s:2086-2112`, EFFECT_PSYCH_UP):
+ *
+ * ```
+ * AI_CV_PsychUp:
+ *     if_stat_level_more_than AI_TARGET, STAT_ATK, 8, AI_CV_PsychUp2
+ *     if_stat_level_more_than AI_TARGET, STAT_DEF, 8, AI_CV_PsychUp2
+ *     if_stat_level_more_than AI_TARGET, STAT_SPATK, 8, AI_CV_PsychUp2
+ *     if_stat_level_more_than AI_TARGET, STAT_SPDEF, 8, AI_CV_PsychUp2
+ *     if_stat_level_more_than AI_TARGET, STAT_EVASION, 8, AI_CV_PsychUp2
+ *     goto AI_CV_PsychUp_ScoreDown2
+ * AI_CV_PsychUp2:
+ *     if_stat_level_less_than AI_USER, STAT_ATK, 7, AI_CV_PsychUp3
+ *     if_stat_level_less_than AI_USER, STAT_DEF, 7, AI_CV_PsychUp3
+ *     if_stat_level_less_than AI_USER, STAT_SPATK, 7, AI_CV_PsychUp3
+ *     if_stat_level_less_than AI_USER, STAT_SPDEF, 7, AI_CV_PsychUp3
+ *     if_stat_level_less_than AI_USER, STAT_EVASION, 7, AI_CV_PsychUp_ScoreUp1
+ *     if_random_less_than 50, AI_CV_PsychUp_End
+ *     goto AI_CV_PsychUp_ScoreDown2
+ * AI_CV_PsychUp_ScoreUp1:
+ *     score +1
+ * AI_CV_PsychUp3:
+ *     score +1
+ *     end
+ * AI_CV_PsychUp_ScoreDown2:
+ *     score -2
+ * AI_CV_PsychUp_End:
+ *     end
+ * ```
+ *
+ * Psych Up is worth it when the TARGET has a raised stat to copy, so the
+ * five target-stage gates (>8, stored 0-12) run first: any true jumps to
+ * `PsychUp2`, all five false is the deterministic -2 with zero draws. Inside
+ * `PsychUp2` the five USER-stage gates (<7) run in source order -- the first
+ * four (ATK/DEF/SPATK/SPDEF) each jump straight to `PsychUp3`'s bare `score
+ * +1; end`; the EVASION gate is the catch: it jumps to `ScoreUp1`, whose
+ * `score +1` FALLS THROUGH into `PsychUp3`'s own `score +1` -- a +2 total,
+ * not +1. All five user stages >= 7 reaches the single `<50` roll: JUMP
+ * (roll < 50, ~19.5%) is the zero `goto End`; FALL-THROUGH (>= 50, ~80.5%)
+ * `goto`s `ScoreDown2`'s -2. Exactly ONE `if_random_less_than` site. No
+ * command writes funcResult.
+ */
+function runCvPsychUp(input: Readonly<{
+  rng: BattleRngState;
+  target: FactoryAiCheckViabilityBattler;
+  attacker: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const targetHasRaisedStat = input.target.atkStage > 8
+    || input.target.defStage > 8
+    || (input.target.spAtkStage ?? DEFAULT_STAT_STAGE) > 8
+    || input.target.spDefStage > 8
+    || input.target.evasionStage > 8;
+  if (!targetHasRaisedStat) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -2 });
+  }
+
+  const userAtkLow = input.attacker.atkStage < 7;
+  const userDefLow = input.attacker.defStage < 7;
+  const userSpAtkLow = (input.attacker.spAtkStage ?? DEFAULT_STAT_STAGE) < 7;
+  const userSpDefLow = input.attacker.spDefStage < 7;
+  const userEvasionLow = input.attacker.evasionStage < 7;
+
+  if (userAtkLow || userDefLow || userSpAtkLow || userSpDefLow) {
+    // PsychUp3: bare +1, end.
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 1 });
+  }
+  if (userEvasionLow) {
+    // ScoreUp1's +1 falls through into PsychUp3's +1: +2 total.
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 2 });
+  }
+
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-psych-up-roll`);
+  const jumped = roll.randomValue % 256 < 50;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind: "psych-up-roll" as const, jumped })]),
+    scoreDelta: jumped ? 0 : -2,
+  });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -5399,6 +5491,24 @@ export function runCheckViability(input: Readonly<{
       draws: curse.draws,
       scoreDelta: curse.scoreDelta,
       funcResultAfter: curse.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_PSYCH_UP") {
+    // AI_CV_PsychUp (data/battle_ai_scripts.s:2086-2112).
+    const psychUp = runCvPsychUp({
+      rng: input.rng,
+      target: input.target,
+      attacker: input.attacker,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: psychUp.rng,
+      draws: psychUp.draws,
+      scoreDelta: psychUp.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
