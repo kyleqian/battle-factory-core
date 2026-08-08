@@ -4994,3 +4994,60 @@ describe("AI_CV_Absorb (EFFECT_ABSORB, docs/executable-frontier-census.md 43 wei
     expect(result.draws[0]).toMatchObject({ kind: "absorb-roll", succeeded: false });
   });
 });
+
+describe("AI_CV_Endure (EFFECT_ENDURE, docs/executable-frontier-census.md 24 weighted)", () => {
+  const MOVE_ENDURE = 203;
+
+  const EXTRAS = Object.freeze({
+    speed: 100,
+    speedStage: 6,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0,
+    evasionStage: 6,
+    accStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+    hp: 100,
+    maxHp: 100,
+  });
+
+  function endureRun(rngValue: number, attackerHp: number) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_ENDURE,
+      attacker: { ...EXTRAS, hp: attackerHp },
+      target: EXTRAS,
+      drawOrdinalStart: 1,
+      reasonPrefix: "endure",
+    });
+  }
+
+  it("HP < 4: deterministic -1, zero draws (first gate JUMP)", () => {
+    const result = endureRun(1, 3);
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -1 });
+  });
+
+  it("HP >= 35: deterministic -1, zero draws (falls through the second gate into Endure2)", () => {
+    const result = endureRun(1, 40);
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -1 });
+  });
+
+  it("HP in [4,35): the <70 roll's FALL-THROUGH applies +1", () => {
+    // seed 1 -> low byte 198 (>= 70, FALL-THROUGH to +1).
+    const result = endureRun(1, 20);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "endure-roll", succeeded: true });
+  });
+
+  it("HP in [4,35): the <70 roll's JUMP ends at zero", () => {
+    // seed 4 -> low byte 25 (< 70, JUMP to End).
+    const result = endureRun(4, 20);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "endure-roll", succeeded: false });
+  });
+});

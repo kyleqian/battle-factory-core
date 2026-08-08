@@ -434,6 +434,16 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "endure-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind:
       | "counter-low-hp-roll"
       | "counter-mid-hp-roll"
@@ -1239,6 +1249,52 @@ function runCvAbsorb(input: Readonly<{
     rng: roll.after,
     draws: Object.freeze([Object.freeze({ ...roll, kind: "absorb-roll" as const, succeeded })]),
     scoreDelta: succeeded ? -3 : 0,
+  });
+}
+
+/**
+ * `AI_CV_Endure` (`data/battle_ai_scripts.s:1965-1973`, EFFECT_ENDURE):
+ *
+ * ```
+ * AI_CV_Endure:
+ *     if_hp_less_than AI_USER, 4, AI_CV_Endure2
+ *     if_hp_less_than AI_USER, 35, AI_CV_Endure3
+ * AI_CV_Endure2:
+ *     score -1
+ *     goto AI_CV_Endure_End
+ * AI_CV_Endure3:
+ *     if_random_less_than 70, AI_CV_Endure_End
+ *     score +1
+ * AI_CV_Endure_End:
+ *     end
+ * ```
+ *
+ * Two HP gates on AI_USER's OWN hp percent: HP < 4 JUMPs to the deterministic
+ * -1 (`Endure2`), HP < 35 JUMPs to the single random site (`Endure3`), and
+ * HP >= 35 FALLS THROUGH the second gate directly INTO `Endure2`'s `score -1`
+ * (the label is reached by fallthrough -- a common source idiom, same shape
+ * as `AI_CV_Heal`'s own `Endure2` label). At the random site the roll's JUMP
+ * (low byte < 70, ~27%) ends at zero; FALL-THROUGH (>= 70, ~73%) applies +1.
+ * `Cmd_if_hp_less_than` is the truncating `(u32)(100*hp/maxHP)` percent read.
+ * No command writes funcResult.
+ */
+function runCvEndure(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  if (hpPercent < 4 || hpPercent >= 35) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -1 });
+  }
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-endure-roll`);
+  const succeeded = roll.randomValue % 256 >= 70;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind: "endure-roll" as const, succeeded })]),
+    scoreDelta: succeeded ? 1 : 0,
   });
 }
 
@@ -3680,6 +3736,23 @@ export function runCheckViability(input: Readonly<{
       rng: absorb.rng,
       draws: absorb.draws,
       scoreDelta: absorb.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_ENDURE") {
+    const endure = runCvEndure({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: endure.rng,
+      draws: endure.draws,
+      scoreDelta: endure.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }
