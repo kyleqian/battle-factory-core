@@ -1015,6 +1015,28 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "thief-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < 50) skips the +1. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "haze-roll-1" | "haze-roll-2" | "haze-roll-3";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < 50) skips the block's own score. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind: "get-ability";
     before: BattleRngState;
     after: BattleRngState;
@@ -6671,6 +6693,41 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_THIEF") {
+    // AI_CV_Thief (data/battle_ai_scripts.s:1848-1868).
+    const thief = runCvThief({
+      rng: input.rng,
+      targetHoldEffect: input.target.holdEffect ?? 0,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: thief.rng,
+      draws: thief.draws,
+      scoreDelta: thief.scoreDelta,
+      funcResultAfter: thief.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_HAZE") {
+    // AI_CV_Haze (data/battle_ai_scripts.s:1247-1282).
+    const haze = runCvHaze({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: haze.rng,
+      draws: haze.draws,
+      scoreDelta: haze.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
   if (move.effect === "EFFECT_SMELLINGSALT") {
     // AI_CV_SmellingSalt (data/battle_ai_scripts.s:2313-2320): target
     // paralyzed -> +1, else zero. No draws, no funcResult write.
@@ -8773,4 +8830,140 @@ function runCvConversion(input: Readonly<{
     scoreDelta: jumped ? score - 2 : score,
     funcResultAfter,
   });
+}
+
+/** `AI_CV_Thief_EncourageItemsToSteal` (data/battle_ai_scripts.s:1860-1868) as hold-effect ids. */
+const AI_CV_THIEF_ENCOURAGED_HOLD_EFFECTS: ReadonlySet<number> = new Set([
+  3, // HOLD_EFFECT_CURE_SLP
+  9, // HOLD_EFFECT_CURE_STATUS
+  1, // HOLD_EFFECT_RESTORE_HP
+  22, // HOLD_EFFECT_EVASION_UP
+  43, // HOLD_EFFECT_LEFTOVERS
+  45, // HOLD_EFFECT_LIGHT_BALL
+  65, // HOLD_EFFECT_THICK_CLUB
+]);
+
+/**
+ * `AI_CV_Thief` (`data/battle_ai_scripts.s:1848-1868`, EFFECT_THIEF, shared by
+ * Thief and Covet):
+ *
+ * ```
+ * AI_CV_Thief:
+ *     get_hold_effect AI_TARGET
+ *     if_not_in_bytes AI_CV_Thief_EncourageItemsToSteal, AI_CV_Thief_ScoreDown2
+ *     if_random_less_than 50, AI_CV_Thief_End
+ *     score +1
+ *     goto AI_CV_Thief_End
+ * AI_CV_Thief_ScoreDown2:
+ *     score -2
+ * AI_CV_Thief_End:
+ *     end
+ * ```
+ *
+ * `get_hold_effect AI_TARGET` ALWAYS overwrites funcResult with the target's
+ * hold-effect id (the exit value, collision-mapped for ids 0-3). A target
+ * hold effect NOT in the 7-entry steal list is the deterministic -2; a listed
+ * one runs the `<50` roll (JUMP -> 0, FALL-THROUGH -> +1).
+ */
+function runCvThief(input: Readonly<{
+  rng: BattleRngState;
+  targetHoldEffect: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const funcResultAfter = HOLD_EFFECT_ID_IN_WEATHER_RANGE.get(input.targetHoldEffect);
+  if (!AI_CV_THIEF_ENCOURAGED_HOLD_EFFECTS.has(input.targetHoldEffect)) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -2, funcResultAfter });
+  }
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-thief-roll`);
+  const jumped = roll.randomValue % 256 < 50;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind: "thief-roll" as const, jumped })]),
+    scoreDelta: jumped ? 0 : 1,
+    funcResultAfter,
+  });
+}
+
+/**
+ * `AI_CV_Haze` (`data/battle_ai_scripts.s:1247-1282`, EFFECT_HAZE):
+ *
+ * ```
+ * AI_CV_Haze:
+ *     if_stat_level_more_than AI_USER, STAT_ATK, 8, AI_CV_Haze2
+ *     ... ATK/DEF/SPATK/SPDEF/EVASION > 8 on AI_USER
+ *     if_stat_level_less_than AI_TARGET, STAT_ATK, 4, AI_CV_Haze2
+ *     ... ATK/DEF/SPATK/SPDEF/ACC < 4 on AI_TARGET
+ *     goto AI_CV_Haze3
+ * AI_CV_Haze2:
+ *     if_random_less_than 50, AI_CV_Haze3
+ *     score -3
+ * AI_CV_Haze3:
+ *     if_stat_level_more_than AI_TARGET, STAT_ATK, 8, AI_CV_Haze4
+ *     ... ATK/DEF/SPATK/SPDEF/EVASION > 8 on AI_TARGET
+ *     if_stat_level_less_than AI_USER, STAT_ATK, 4, AI_CV_Haze4
+ *     ... ATK/DEF/SPATK/SPDEF/ACC < 4 on AI_USER
+ *     if_random_less_than 50, AI_CV_Haze_End
+ *     score -1
+ *     goto AI_CV_Haze_End
+ * AI_CV_Haze4:
+ *     if_random_less_than 50, AI_CV_Haze_End
+ *     score +3
+ * AI_CV_Haze_End:
+ *     end
+ * ```
+ *
+ * Two independent 5-stage gate blocks, each running a `<50` roll when ANY of
+ * its five gates hits. Block 1 (AI_USER raised >8, or AI_TARGET lowered <4):
+ * the roll's JUMP (<50) skips the -3; FALL-THROUGH applies -3. Block 2
+ * (AI_TARGET raised >8, or AI_USER lowered <4): the roll's JUMP (<50) ends;
+ * FALL-THROUGH applies +3. Block 2 with NO gate hit runs its own `<50` roll:
+ * JUMP ends at zero, FALL-THROUGH applies -1. No command writes funcResult.
+ */
+function runCvHaze(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  let score = 0;
+
+  const userRaised = (b: FactoryAiCheckViabilityBattler): boolean =>
+    b.atkStage > 8 || b.defStage > 8 || (b.spAtkStage ?? DEFAULT_STAT_STAGE) > 8 || b.spDefStage > 8 || b.evasionStage > 8;
+  const userLowered = (b: FactoryAiCheckViabilityBattler): boolean =>
+    b.atkStage < 4 || b.defStage < 4 || (b.spAtkStage ?? DEFAULT_STAT_STAGE) < 4 || b.spDefStage < 4 || b.accStage < 4;
+  const targetRaised = (b: FactoryAiCheckViabilityBattler): boolean =>
+    b.atkStage > 8 || b.defStage > 8 || (b.spAtkStage ?? DEFAULT_STAT_STAGE) > 8 || b.spDefStage > 8 || b.evasionStage > 8;
+  const targetLowered = (b: FactoryAiCheckViabilityBattler): boolean =>
+    b.atkStage < 4 || b.defStage < 4 || (b.spAtkStage ?? DEFAULT_STAT_STAGE) < 4 || b.spDefStage < 4 || b.accStage < 4;
+
+  // Block 1: user raised OR target lowered -> Haze2.
+  if (userRaised(input.attacker) || targetLowered(input.target)) {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-haze-roll-1`);
+    rng = roll.after;
+    const jumped = roll.randomValue % 256 < 50;
+    draws.push(Object.freeze({ ...roll, kind: "haze-roll-1" as const, jumped }));
+    if (!jumped) score -= 3;
+  }
+
+  // Block 2: target raised OR user lowered -> Haze4 (+3); otherwise Haze3's -1.
+  if (targetRaised(input.target) || userLowered(input.attacker)) {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-haze-roll-2`);
+    rng = roll.after;
+    const jumped = roll.randomValue % 256 < 50;
+    draws.push(Object.freeze({ ...roll, kind: "haze-roll-2" as const, jumped }));
+    if (!jumped) score += 3;
+  } else {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-haze-roll-3`);
+    rng = roll.after;
+    const jumped = roll.randomValue % 256 < 50;
+    draws.push(Object.freeze({ ...roll, kind: "haze-roll-3" as const, jumped }));
+    if (!jumped) score -= 1;
+  }
+
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
 }

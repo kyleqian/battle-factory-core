@@ -6,7 +6,7 @@ const MOVE_SURF = 57; // EFFECT_HIT -- no if_effect table entry
 const MOVE_ROCK_SLIDE = 157; // EFFECT_FLINCH_HIT -- no entry
 const MOVE_BODY_SLAM = 34; // EFFECT_PARALYZE_HIT -- no entry
 const MOVE_THUNDERBOLT = 85; // EFFECT_PARALYZE_HIT -- no entry
-const MOVE_HAZE = 114; // EFFECT_HAZE -- has an entry (AI_CV_Haze, not ported)
+const MOVE_SNATCH_UNPORTED = 289; // EFFECT_SNATCH -- still-unported table entry (barrier example)
 const MOVE_TOXIC = 92; // EFFECT_TOXIC -> AI_CV_Toxic
 
 // Neutral speed/stage battlers for the tests above that don't exercise
@@ -178,7 +178,7 @@ describe("AI_CV_Counter (docs/factory-ai-checkviability-ground-truth.md §34)", 
   });
 
   it("leaves Haze behind the same generic CV barrier", () => {
-    expect(run({ value: 1, calls: 0 }, MOVE_HAZE)).toMatchObject({
+    expect(run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED)).toMatchObject({
       kind: "unsupported-branch",
       barrier: "factory-ai-check-viability",
     });
@@ -209,12 +209,12 @@ describe("AI_CheckViability dispatch shell (docs/factory-ai-ground-truth.md §4 
   });
 
   it("halts with a named unsupported-branch barrier for a move whose effect has an if_effect table entry", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
     expect(result).toEqual({
       kind: "unsupported-branch",
       barrier: "factory-ai-check-viability",
-      effect: "EFFECT_HAZE",
-      moveId: MOVE_HAZE,
+      effect: "EFFECT_SNATCH",
+      moveId: MOVE_SNATCH_UNPORTED,
     });
   });
 
@@ -270,10 +270,10 @@ describe("AI_CV_Sleep (docs/factory-ai-checkviability-ground-truth.md §29)", ()
   });
 
   it("leaves the next unported CV table effect behind the generic barrier", () => {
-    expect(run({ value: 1, calls: 0 }, MOVE_HAZE)).toMatchObject({
+    expect(run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED)).toMatchObject({
       kind: "unsupported-branch",
       barrier: "factory-ai-check-viability",
-      effect: "EFFECT_HAZE",
+      effect: "EFFECT_SNATCH",
     });
   });
 });
@@ -333,10 +333,10 @@ describe("AI_CV_Roar (docs/factory-ai-checkviability-ground-truth.md §30)", () 
   });
 
   it("leaves Haze behind the same generic CV barrier", () => {
-    expect(run({ value: 1, calls: 0 }, MOVE_HAZE)).toMatchObject({
+    expect(run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED)).toMatchObject({
       kind: "unsupported-branch",
       barrier: "factory-ai-check-viability",
-      effect: "EFFECT_HAZE",
+      effect: "EFFECT_SNATCH",
     });
   });
 });
@@ -400,10 +400,10 @@ describe("AI_CV_Paralyze (docs/factory-ai-checkviability-ground-truth.md §31)",
   });
 
   it("leaves Haze behind the same generic CV barrier", () => {
-    expect(run({ value: 1, calls: 0 }, MOVE_HAZE)).toMatchObject({
+    expect(run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED)).toMatchObject({
       kind: "unsupported-branch",
       barrier: "factory-ai-check-viability",
-      effect: "EFFECT_HAZE",
+      effect: "EFFECT_SNATCH",
     });
   });
 });
@@ -455,10 +455,10 @@ describe("AI_CV_Confuse (docs/factory-ai-checkviability-ground-truth.md §32)", 
   });
 
   it("leaves Haze behind the same generic CV barrier", () => {
-    expect(run({ value: 1, calls: 0 }, MOVE_HAZE)).toMatchObject({
+    expect(run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED)).toMatchObject({
       kind: "unsupported-branch",
       barrier: "factory-ai-check-viability",
-      effect: "EFFECT_HAZE",
+      effect: "EFFECT_SNATCH",
     });
   });
 });
@@ -569,10 +569,10 @@ describe("AI_CV_Swagger (docs/factory-ai-checkviability-ground-truth.md §33)", 
   });
 
   it("leaves Haze behind the same generic CV barrier", () => {
-    expect(run({ value: 1, calls: 0 }, MOVE_HAZE)).toMatchObject({
+    expect(run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED)).toMatchObject({
       kind: "unsupported-branch",
       barrier: "factory-ai-check-viability",
-      effect: "EFFECT_HAZE",
+      effect: "EFFECT_SNATCH",
     });
   });
 });
@@ -795,8 +795,8 @@ describe("AI_CV_SpeedDown (docs/factory-ai-checkviability-ground-truth.md §6)",
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -888,8 +888,8 @@ describe("AI_CV_Pursuit (docs/factory-ai-checkviability-ground-truth.md §11.1)"
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -1147,8 +1147,8 @@ describe("AI_CV_HighCrit (docs/factory-ai-checkviability-ground-truth.md §11.2)
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -1285,8 +1285,8 @@ describe("AI_CV_AlwaysHit (docs/factory-ai-checkviability-ground-truth.md §11.3
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -1514,8 +1514,8 @@ describe("AI_CV_VitalThrow (docs/factory-ai-checkviability-ground-truth.md §13)
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -1741,8 +1741,8 @@ describe("AI_CV_AttackDown (docs/factory-ai-checkviability-ground-truth.md §14.
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -1907,8 +1907,8 @@ describe("AI_CV_DefenseDown (docs/factory-ai-checkviability-ground-truth.md §15
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -2059,8 +2059,8 @@ describe("AI_CV_SpDefDown (docs/factory-ai-checkviability-ground-truth.md §16.1
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -3037,8 +3037,8 @@ describe("AI_CV_SpeedUp (docs/factory-ai-checkviability-ground-truth.md §20.1)"
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -3230,8 +3230,8 @@ describe("AI_CV_SpAtkUp (docs/factory-ai-checkviability-ground-truth.md §21.1)"
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -3477,8 +3477,8 @@ describe("AI_CV_SpDefUp (docs/factory-ai-checkviability-ground-truth.md §22.1)"
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -3649,8 +3649,8 @@ describe("AI_CV_LightScreen / AI_CV_Reflect (docs/factory-ai-checkviability-grou
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -4143,8 +4143,8 @@ describe("AI_CV_EvasionUp (docs/factory-ai-checkviability-ground-truth.md §24.1
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through, EFFECT_EVASION_UP block)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -4281,8 +4281,8 @@ describe("AI_CV_EvasionDown (docs/factory-ai-checkviability-ground-truth.md §24
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -4401,8 +4401,8 @@ describe("AI_CV_SunnyDay / AI_CV_Hail (docs/factory-ai-checkviability-ground-tru
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -4626,8 +4626,8 @@ describe("AI_CV_RainDance (docs/factory-ai-checkviability-ground-truth.md §25.2
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -4804,8 +4804,8 @@ describe("AI_CV_SpeedDownFromChance (docs/factory-ai-checkviability-ground-truth
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+    const result = run({ value: 1, calls: 0 }, MOVE_SNATCH_UNPORTED);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_SNATCH" });
   });
 });
 
@@ -7520,5 +7520,100 @@ describe("AI_CV_Conversion (data/battle_ai_scripts.s:1305-1313, EFFECT_CONVERSIO
     if (result.kind !== "scored") throw new Error("unreachable");
     expect(result).toMatchObject({ scoreDelta: 0, funcResultAfter: 2 });
     expect(result.draws[0]).toMatchObject({ kind: "conversion-roll", jumped: false });
+  });
+});
+
+describe("AI_CV_Thief (data/battle_ai_scripts.s:1848-1868, EFFECT_THIEF)", () => {
+  const MOVE_THIEF = 168;
+
+  function thiefRun(rngValue: number, targetHoldEffect: number) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_THIEF,
+      attacker: NEUTRAL_BATTLER,
+      target: { ...NEUTRAL_BATTLER, holdEffect: targetHoldEffect },
+      staleFuncResultFallback: 1,
+      drawOrdinalStart: 1,
+      reasonPrefix: "thief",
+    });
+  }
+
+  it("hold effect not in the steal list: deterministic -2", () => {
+    const result = thiefRun(1, 99);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -2, draws: [] });
+  });
+
+  it("listed hold effect, roll < 50: zero", () => {
+    const result = thiefRun(4, 1); // HOLD_EFFECT_RESTORE_HP, seed 4 low byte 25 (<50)
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0 });
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "thief-roll", jumped: true });
+  });
+
+  it("listed hold effect, roll >= 50: +1", () => {
+    const result = thiefRun(1, 43); // HOLD_EFFECT_LEFTOVERS
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 1, draws: [{ kind: "thief-roll", jumped: false }] });
+  });
+});
+
+describe("AI_CV_Haze (data/battle_ai_scripts.s:1247-1282, EFFECT_HAZE)", () => {
+  const MOVE_SNATCH_UNPORTED_CV = 114;
+
+  function hazeRun(rngValue: number, attackerOverrides = {}, targetOverrides = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_SNATCH_UNPORTED_CV,
+      attacker: { ...NEUTRAL_BATTLER, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      drawOrdinalStart: 1,
+      reasonPrefix: "haze",
+    });
+  }
+
+  it("no raised/lowered stat on either side: only block-2's Haze3 roll, roll <50 ends at zero", () => {
+    const result = hazeRun(4);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0 });
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "haze-roll-3", jumped: true });
+  });
+
+  it("no raised/lowered stat, block-2 roll >=50: -1", () => {
+    const result = hazeRun(1);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1, draws: [{ kind: "haze-roll-3", jumped: false }] });
+  });
+
+  it("user ATK > 8: block 1 draws; block-1 roll <50 skips the -3", () => {
+    const result = hazeRun(4, { atkStage: 9 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "haze-roll-1", jumped: true });
+    // Block 2 still runs its own roll.
+    expect(result.draws).toHaveLength(2);
+  });
+
+  it("user ATK > 8 with block-1 roll >=50: -3, then block 2", () => {
+    const result = hazeRun(1, { atkStage: 9 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "haze-roll-1", jumped: false });
+    expect(result.scoreDelta).toBe(-3 + 0); // block 2 roll <50 -> +0
+  });
+
+  it("target raised >8: block 2 draws the Haze4 roll, roll >=50 applies +3", () => {
+    // Block 1 fires only on target LOWERED (<4), so a raised target draws only block 2.
+    const result = hazeRun(1, {}, { atkStage: 9 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "haze-roll-2", jumped: false });
+    expect(result.scoreDelta).toBe(3);
+  });
+
+  it("target lowered <4: block 1 draws", () => {
+    const result = hazeRun(4, {}, { accStage: 3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "haze-roll-1", jumped: true });
   });
 });
