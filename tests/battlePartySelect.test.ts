@@ -482,6 +482,62 @@ describe("voluntary battle party selector", () => {
     expect(ballAt({ submenuOpen: false, closeElapsed: 0, submenuOpened: true })).toEqual([181, 66, 0]);
   });
 
+  it("holds the pre-open state 3 frames after the A-press and pops the submenu on the third frame (ISSUES #80 open edge)", () => {
+    // docs/fade-layer-forensics.md §10(d): the A-press edge sets `submenuOpen`
+    // (the state rendered at oracle frame 923), but frames 923-925 still show
+    // the pre-open state -- wide "Choose a POKéMON." window + CANCEL button --
+    // and the full SHIFT/SUMMARY/CANCEL window + swapped 16x2 message window
+    // land together at frame 926 (`submenuOpenElapsed` 3). So the submenu
+    // visuals must be absent at `submenuOpenElapsed` 0/1/2 and present at 3.
+    const at141 = (elapsed: number): readonly [number, number, number] => {
+      const fb = createFramebuffer();
+      renderBattlePartySelect(fb, {
+        ...liveSelector(),
+        submenuOpen: true,
+        submenuOpened: true,
+        submenuOpenElapsed: elapsed,
+      });
+      const i = (140 * 240 + 141) * 4;
+      return [fb[i]!, fb[i + 1]!, fb[i + 2]!] as const;
+    };
+    const ballAt = (elapsed: number): readonly [number, number, number] => {
+      const fb = createFramebuffer();
+      renderBattlePartySelect(fb, {
+        ...liveSelector(),
+        submenuOpen: true,
+        submenuOpened: true,
+        submenuOpenElapsed: elapsed,
+      });
+      const i = (140 * 240 + 190) * 4;
+      return [fb[i]!, fb[i + 1]!, fb[i + 2]!] as const;
+    };
+    const frameAt = (elapsed: number): readonly [number, number, number] => {
+      const fb = createFramebuffer();
+      renderBattlePartySelect(fb, {
+        ...liveSelector(),
+        submenuOpen: true,
+        submenuOpened: true,
+        submenuOpenElapsed: elapsed,
+      });
+      const i = (110 * 240 + 145) * 4;
+      return [fb[i]!, fb[i + 1]!, fb[i + 2]!] as const;
+    };
+    // Pre-open hold: 21x2 wide-window interior white at (141,140), CANCEL
+    // pokeball red at (190,140), no action-window frame outline at (145,110).
+    for (const elapsed of [0, 1, 2]) {
+      expect(at141(elapsed)).toEqual([255, 255, 255]);
+      expect(ballAt(elapsed)).toEqual([181, 66, 0]);
+      expect(frameAt(elapsed)).not.toEqual([41, 49, 49]);
+    }
+    // Third frame after the A-press: 16x2 swapped-window bevel at (141,140),
+    // submenu window replaces the CANCEL button, action-window frame outline
+    // present.
+    expect(SUBMENU_OPEN_VISUAL_DELAY).toBe(3);
+    expect(at141(SUBMENU_OPEN_VISUAL_DELAY)).toEqual([74, 74, 107]);
+    expect(ballAt(SUBMENU_OPEN_VISUAL_DELAY)).not.toEqual([181, 66, 0]);
+    expect(frameAt(SUBMENU_OPEN_VISUAL_DELAY)).toEqual([41, 49, 49]);
+  });
+
   it("renders the {PKMN} tail with the ROM's ligature glyph codes 83/84/172 (ISSUES #80 (c))", () => {
     // gText_DoWhatWithPokemon = "Do what with this {PKMN}?" (strings.c:434).
     // The charmap encodes {PKMN} as the two ligature glyph bytes 0x53/0x54 and
