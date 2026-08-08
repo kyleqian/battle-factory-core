@@ -57,7 +57,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_BATTLE_ARMOR | engine-referenced | 8 (5) | 8 | — | 1 | 0 | 2 |
 | ABILITY_EFFECT_SPORE | engine-referenced | 8 (8) | 8 | ON_DAMAGE | 0 | 0 | 6 |
 | ABILITY_FLAME_BODY | engine-referenced | 8 (5) | 8 | ON_DAMAGE | 0 | 0 | 4 |
-| ABILITY_STICKY_HOLD | engine-referenced | 8 (0) | 8 | — | 5 | 0 | 8 |
+| ABILITY_STICKY_HOLD | engine-referenced | 8 (0) | 8 | — | 5 | 0 | 10 |
 | ABILITY_LIQUID_OOZE | engine-referenced | 8 (0) | 8 | — | 2 | 0 | 3 |
 | ABILITY_SUCTION_CUPS | engine-referenced | 7 (7) | 7 | — | 1 | 0 | 5 |
 | ABILITY_SHIELD_DUST | engine-referenced | 6 (6) | 6 | — | 2 | 0 | 5 |
