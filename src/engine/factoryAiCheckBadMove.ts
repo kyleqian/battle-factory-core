@@ -1749,6 +1749,18 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_BATON_PASS -> AI_CBM_BatonPass
+  // (`data/battle_ai_scripts.s:176,485-488`): AI_USER's own usable party
+  // count zero rejects at -10.
+  if (move.effect === "EFFECT_BATON_PASS") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmBatonPass(input.attacker.usablePartyMons ?? 0),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -2195,4 +2207,14 @@ function runCbmExplosion(
     return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta: -10 });
   }
   return Object.freeze({ rng: ability.rng, draws: Object.freeze(draws), scoreDelta: -1 });
+}
+
+/**
+ * `AI_CBM_BatonPass` (`data/battle_ai_scripts.s:485-488`, EFFECT_BATON_PASS):
+ * a single `count_usable_party_mons AI_USER; if_equal 0, Score_Minus10` --
+ * Baton Pass is penalized only when the AI has no usable party member left
+ * to switch to. Zero ability/type reads.
+ */
+function runCbmBatonPass(attackerUsablePartyMons: number): number {
+  return attackerUsablePartyMons === 0 ? -10 : 0;
 }

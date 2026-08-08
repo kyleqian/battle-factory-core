@@ -3068,3 +3068,38 @@ describe("AI_CBM_Explosion (data/battle_ai_scripts.s:224-235, EFFECT_EXPLOSION)"
       .toMatchObject({ kind: "scored", scoreDelta: -10 });
   });
 });
+
+describe("AI_CBM_BatonPass (data/battle_ai_scripts.s:485-488, EFFECT_BATON_PASS)", () => {
+  const MOVE_BATON_PASS = 226;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  function attacker(overrides: Partial<FactoryAiCheckBadMoveAttacker> = {}): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ ...NEUTRAL_ATTACKER, usablePartyMons: 1, ...overrides });
+  }
+
+  it("AI_USER usable party count 0 JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_BATON_PASS, target(), undefined, attacker({ usablePartyMons: 0 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("positive AI_USER usable party count FALLS THROUGH to end at zero", () => {
+    expect(run(MOVE_BATON_PASS, target(), undefined, attacker())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+});
