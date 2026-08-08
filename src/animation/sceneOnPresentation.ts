@@ -351,6 +351,10 @@ import {
   type TauntState,
 } from "./taunt.ts";
 import {
+  tormentAtAge,
+  type TormentState,
+} from "./torment.ts";
+import {
   scaryFaceAtAge,
   type ScaryFaceState,
 } from "./scaryFace.ts";
@@ -1527,6 +1531,26 @@ export interface SceneOnTauntConfig {
   readonly attackerHead: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnTormentConfig {
+  readonly move: "TORMENT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /**
+   * `GetBattlerSpriteCoord(attacker, X_2/Y_PIC_OFFSET)` — the six thought
+   * bubbles anchor to the attacker's picture, not its sprite centre (Y_PIC
+   * is `sprite y + 8` on the player side).
+   */
+  readonly attackerPictureOffset: Readonly<{ x: number; y: number }>;
+  /**
+   * `GetBattlerSpriteCoord(target, X_2/Y_PIC_OFFSET)` — the anger marks and
+   * the BlendMonInAndOut palette bank anchor to the target's picture.
+   */
+  readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
+  /** Attacker `MON_PIC_HEIGHT - 2*yDelta` for the wobble y2 (48 MURKROW back / 40 front). */
+  readonly battlerHeight: number;
+}
+
 export interface SceneOnScaryFaceConfig {
   readonly move: "SCARY_FACE";
   readonly attacker: SceneOnPresentationBattler;
@@ -2057,6 +2081,7 @@ export type SceneOnMoveConfig =
   | SceneOnSwaggerConfig
   | SceneOnBulkUpConfig
   | SceneOnTauntConfig
+  | SceneOnTormentConfig
   | SceneOnScaryFaceConfig
   | SceneOnSparkConfig
   | SceneOnThunderWaveConfig
@@ -2405,6 +2430,12 @@ export interface SceneOnBulkUpView extends BulkUpState {
 }
 
 export interface SceneOnTauntView extends TauntState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnTormentView extends TormentState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4520,6 +4551,28 @@ export function sceneOnTauntView(
       state.config.attackerHead,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the move script's first in-bounds frame (frame 68/72 in the fixtures). */
+export function sceneOnTormentView(
+  state: SceneOnMovePresentationState,
+): SceneOnTormentView {
+  if (state.config.move !== "TORMENT") {
+    throw new Error(`expected TORMENT presentation, got ${state.config.move}`);
+  }
+  const config = state.config as SceneOnTormentConfig;
+  return {
+    age: state.age,
+    attacker: config.attacker,
+    target: config.target,
+    ...tormentAtAge(
+      state.age,
+      config.attackerPictureOffset,
+      config.battlerHeight,
+      config.target.geometry.side,
+      config.targetPictureOffset,
     ),
   };
 }

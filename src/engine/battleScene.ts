@@ -976,6 +976,7 @@ import {
   sceneOnSwaggerView,
   sceneOnBulkUpView,
   sceneOnTauntView,
+  sceneOnTormentView,
   sceneOnScaryFaceView,
   sceneOnSelfDestructView,
   sceneOnExplosionView,
@@ -28010,6 +28011,177 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MURKROW used" : "Foe MURKROW used",
       "TAUNT!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "TORMENT") {
+    const view = sceneOnTormentView(state);
+    // Sprite callbacks/palette writes mutate software OAM after the current
+    // buffer transfer: the effect sprites render TWO displays behind the
+    // reducer state (measured: bubble0 spawns at software frame 75 yet the
+    // oracle screen shows it from frame 77, and each wobble tick displays two
+    // frames late), while the palette blend is one display behind.
+    const displayed = sceneOnTormentView({ ...state, age: state.age - 2 });
+    const affineDisplayed = sceneOnTormentView({ ...state, age: state.age - 2 });
+    // BlendPalette writes gPlttBufferFaded, which reaches the hardware one
+    // display behind the task's data[2] ramp.
+    const blendDisplayed = sceneOnTormentView({ ...state, age: state.age - 1 });
+    // The bubbles need TWO render lags at once (same class as MINIMIZE's
+    // clones): a freshly created sprite's OAM reaches the display two frames
+    // after its software creation, but its removal is a plain OAM edit that
+    // lands one frame behind — intersect the age-2 paint with the age-1
+    // removal. The anger marks (script `createsprite`) display one frame
+    // behind creation, like the palette blend.
+    const paintedBubbles = displayed.bubbles;
+    const removalAlive = new Set(
+      sceneOnTormentView({ ...state, age: state.age - 1 }).bubbles.map(
+        (bubble) => bubble.spawnAge,
+      ),
+    );
+    const bubbles = paintedBubbles.filter((bubble) => removalAlive.has(bubble.spawnAge));
+    const angerDisplayed = sceneOnTormentView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "MURKROW"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MURKROW"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged TORMENT pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const murkrow = playerToOpponent
+      ? tauntArt.murkrowBack
+      : {
+          ...tauntArt.murkrowFront,
+          tileset: subTileset(tauntArt.murkrowFront.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? (speciesFrontIdleRestOffset(view.target.species) ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const black = { r: 0, g: 0, b: 0 };
+    const tormentRed: RgbColor = { r: 248, g: 0, b: 0 }; // RGB_RED (31,0,0 5-bit)
+    // The six bubbles carry EXPLICIT absolute subpriorities 6..1 (lower = in
+    // front), so the back-to-front painter order FLIPS with orientation:
+    //   player-back    ONIX target 40 -> anger 38 -> MURKROW attacker 30
+    //                  -> bubbles 6..1
+    //   opponent-front MURKROW attacker 40 -> ONIX target 30 -> anger 28
+    //                  -> bubbles 6..1
+    const drawTarget = (): void => {
+      const palette = blendDisplayed.blendCoeff > 0
+        ? blendPaletteToward(onix.palette, tormentRed, blendDisplayed.blendCoeff)
+        : onix.palette;
+      drawSpriteSheet(
+        fb,
+        onix.tileset,
+        palette,
+        view.target.geometry.spriteCorner.x + targetIdle.x2,
+        view.target.geometry.spriteCorner.y + targetIdle.y2,
+      );
+    };
+    const drawAngerMarks = (): void => {
+      for (const mark of angerDisplayed.angerMarks) {
+        const matrix = Math.trunc(0x10000 / mark.xScale);
+        drawSpriteSheetAffineRotate(
+          fb,
+          swaggerArt.anger.tileset,
+          swaggerArt.anger.palette,
+          mark.x,
+          mark.y,
+          matrix,
+          0,
+          0,
+          matrix,
+          undefined,
+          false,
+        );
+      }
+    };
+    const drawAttacker = (): void => {
+      const scale = affineDisplayed.attackerScale;
+      drawSpriteSheetAffineStretch(
+        fb,
+        murkrow.tileset,
+        murkrow.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+        scale.x,
+        scale.y,
+        affineDisplayed.attackerY2,
+        black,
+        0,
+        scale.x !== 256 || scale.y !== 256,
+      );
+    };
+    const drawBubbles = (): void => {
+      for (const bubble of bubbles) {
+        // The OAM flip is `animHFlip XOR field`. Both the default bubble anim
+        // (cmds1) and the state-4 replay (anim 2 = cmds3, the reversed program)
+        // carry hFlip=TRUE, so a bubble always displays the OPPOSITE of its
+        // `data[1] & 1` field.
+        const hFlip = !bubble.hFlip;
+        drawSpriteSheetFlipped(
+          fb,
+          subTileset(tauntArt.thoughtBubble.tileset, bubble.frame * 4, 4),
+          tauntArt.thoughtBubble.palette,
+          bubble.x - 16,
+          bubble.y - 16,
+          hFlip,
+          false,
+        );
+      }
+    };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (playerToOpponent) {
+      drawTarget();
+      drawAngerMarks();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawAngerMarks();
+    }
+    drawBubbles();
+    const opponentSpecies = playerToOpponent ? "ONIX" : "MURKROW";
+    const playerSpecies = playerToOpponent ? "MURKROW" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MURKROW used" : "Foe MURKROW used",
+      "TORMENT!",
       99,
     );
     return;
