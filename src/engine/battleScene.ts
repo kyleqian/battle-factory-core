@@ -957,6 +957,7 @@ import {
   sceneOnSlashView,
   sceneOnLickView,
   sceneOnCounterView,
+  sceneOnCrabHammerView,
   sceneOnDoubleEdgeView,
   sceneOnCrushClawView,
   sceneOnTakeDownView,
@@ -1019,6 +1020,7 @@ import {
   type SceneOnAgilityPresentationState,
   type SceneOnDizzyPunchConfig,
   type SceneOnAstonishConfig,
+  type SceneOnCrabHammerConfig,
 } from "../animation/sceneOnPresentation.ts";
 import { refreshDisplayedBlendCoeffAtAge, REFRESH_BLEND_START_AGE } from "../animation/refresh.ts";
 import {
@@ -35054,6 +35056,156 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "CHARMELEON used" : "Foe CHARMELEON used",
       "SLASH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "CRABHAMMER") {
+    const crabState = state as SceneOnMovePresentationState<SceneOnCrabHammerConfig>;
+    const view = sceneOnCrabHammerView(crabState);
+    // Every pixel-visible component in this move's clean body is a sprite or
+    // task write that reaches scanout one VBlank later. `monbg`, setalpha,
+    // and cleanup have no independent framebuffer edge in either orientation,
+    // so they remain RAM truth in the reducer rather than becoming a guessed
+    // generic display delay.
+    const displayed = sceneOnCrabHammerView({
+      ...crabState,
+      age: crabState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "KRABBY"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "KRABBY"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged CRABHAMMER pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const krabbySource = playerToOpponent
+      ? mudShotArt.krabbyBack
+      : mudShotArt.krabbyFront;
+    const krabby = playerToOpponent
+      ? krabbySource
+      : {
+          ...krabbySource,
+          tileset: subTileset(krabbySource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    // `complex_palette_blend F_PAL_BG | F_PAL_BATTLERS` affects the three
+    // field banks and both battler palettes, but not either healthbox, the
+    // message window, WATER_IMPACT, or ICE_CRYSTALS. Source RGB(13,21,31)
+    // expands through mGBA's 5-to-8-bit curve to RGB(107,173,255).
+    const paletteCoefficient = displayed.complexPaletteBlend?.coefficient ?? 0;
+    const waterBlue = { r: 107, g: 173, b: 255 };
+    const fieldPalette = paletteCoefficient === 0
+      ? battleBg.palette
+      : blendPaletteBanksToward(battleBg.palette, waterBlue, paletteCoefficient);
+    const battlerPalette = (palette: RgbColor[]): RgbColor[] => (
+      paletteCoefficient === 0
+        ? palette
+        : blendPaletteToward(palette, waterBlue, paletteCoefficient)
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, fieldPalette);
+    // `monbg ANIM_DEF_PARTNER` copies the target into BG1. Keep that target
+    // layer behind KRABBY and snapshot it before the OBJ blend so the
+    // WATER_IMPACT splat samples field+target only. Before `monbg` is issued
+    // the same draw has identical pixels, and after cleanup no effect remains.
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      battlerPalette(onix.palette),
+      view.target.geometry.spriteCorner.x + displayed.targetX2,
+      view.target.geometry.spriteCorner.y + displayed.targetY2,
+    );
+    const targetBackdrop = fb.slice();
+    drawSpriteSheet(
+      fb,
+      krabby.tileset,
+      battlerPalette(krabby.palette),
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.waterHitsplat) {
+      const splat = displayed.waterHitsplat;
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        targetBackdrop,
+        hydroPumpArt.waterImpact.tileset,
+        hydroPumpArt.waterImpact.palette,
+        splat.x,
+        splat.y,
+        splat.matrix.a,
+        splat.matrix.b,
+        splat.matrix.c,
+        splat.matrix.d,
+        12,
+        8,
+        false,
+      );
+    }
+    // `gSmallBubblePairSpriteTemplate` is 8x8 ObjNormal. Its `ANIMCMD_FRAME`
+    // sequence starts at tile 12 for five initial callback frames, then
+    // alternates tiles 13/12 every six frames. Lower OAM slots win equal
+    // priority overlap, so draw them last by descending slot order.
+    for (const bubble of [...displayed.bubbles].sort(
+      (left, right) => right.oamSlot - left.oamSlot,
+    )) {
+      const localAge = 19 - bubble.remaining;
+      const tile = 12 + (Math.floor((localAge + 1) / 6) & 1);
+      const bubbleTileset: Tileset = {
+        columns: 1,
+        rows: 1,
+        tiles: [battleAnimIceCrystals.tileset.tiles[tile]!],
+      };
+      drawSpriteSheet(
+        fb,
+        bubbleTileset,
+        battleAnimIceCrystals.palette,
+        bubble.x + bubble.x2 - 4,
+        bubble.y + bubble.y2 - 4,
+      );
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "KRABBY",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "KRABBY" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "KRABBY used" : "Foe KRABBY used",
+      "CRABHAMMER!",
       99,
     );
     return;

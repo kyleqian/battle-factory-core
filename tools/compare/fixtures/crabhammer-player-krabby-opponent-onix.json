@@ -1,0 +1,47 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "CRABHAMMER",
+  "pair": "FRONTIER_MON_KRABBY set 111 (player-back KRABBY) -> legal ONIX (opponent-front)",
+  "orientation": "player-to-opponent",
+  "scenario": "tools/battle-lab/mechanic-crabhammer-player-krabby-opponent-onix.json",
+  "probe": "tools/compare/crabHammerProbe.py",
+  "appStage": { "presentationAge": 0 },
+  "denseWindow": { "startFrame": 212, "endFrame": 316, "frameCount": 105 },
+  "attacker": {
+    "species": "KRABBY",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 58 },
+      "animationCenter": { "x": 72, "y": 98 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 10 },
+      "animationCenter": { "x": 176, "y": 42 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "targetIdleX2": 1,
+  "fieldProfile": {
+    "playerHp": 128,
+    "playerMaxHp": 137,
+    "opponentHp": 142,
+    "opponentMaxHp": 142,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "crabhammer-dense-evidence/v1",
+  "stableEvidenceSha256": "13518a8aea57840552d24c03ec161be22496ff776ce1b9e182c340e4e88d3907",
+  "secondFreshStableEvidenceSha256": "13518a8aea57840552d24c03ec161be22496ff776ce1b9e182c340e4e88d3907",
+  "rawRgbSha256": "92c0bd67d6a6c3e931b94c2d2e96f65727500eb722e3b3553a776698a5b9ad3d",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 105,
+    "componentMatching": 105
+  }
+}
