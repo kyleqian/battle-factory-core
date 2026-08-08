@@ -1,5 +1,129 @@
 # Animation coverage
 
+## MOVE_COUNTER staged — both orientations isolated at 88 frames; scenarios + dense probe + change maps banked (2026-08-08 worker, round A)
+
+- **State:** COUNTER stays **unsupported**. Coverage unchanged at **129/276 exact, 0
+  partial, 0 staged, 147 unsupported**. Nothing promoted; no pin moved; no
+  boundary widening; no shared-helper edit. This is the staging round;
+  promotion to exact (both orientations, a portable at full-window exact) is the
+  NEXT round's job.
+- **Did:** staged two legal mechanicLab scenarios (HITMONTOP `SPECIES_HITMONTOP`
+  237 — FRONTIER_MON_HITMONTOP_2, set 341, item Focus Band 196, nature ADAMANT 3,
+  EV spread HP|DEFENSE = 255/255, all four active slots COUNTER 68, vs legal ONIX
+  95; player-back `mechanic-counter-player-hitmontop-opponent-onix.json` and
+  opponent-front `mechanic-counter-opponent-hitmontop-player-onix.json` — exact
+  copies of the DOUBLE_EDGE pair with only HITMONTOP's four move slots changed
+  38→68, byte-identical otherwise, both verified to run with currentMove 68) and
+  `tools/compare/counterProbe.py` — a dense probe copied from `crunchProbe.py`
+  with script-pointer isolation to `Move_COUNTER` (0x082d2422)..`Move_VITAL_THROW`
+  (0x082d24f1) capturing every `gFistFootSpriteTemplate` fist (all three, with
+  animation number, position and data words — `AnimBasicFistOrFoot`/
+  `WaitAnimForDuration`), every `gBasicHitSplatSpriteTemplate` hitsplat (all
+  three, `AnimHitSplatBasic`), both `gSlideMonToOffsetSpriteTemplate`/
+  `gSlideMonToOriginalPosSpriteTemplate` dummy sprites, the
+  `AnimTask_TranslateMonEllipticalRespectSide` attacker-lunge task and the
+  `AnimTask_ShakeMon` target-shake task (each with its arguments/state), the
+  monbg/setalpha/blendoff machinery (BLDCNT/BLDALPHA/BLDY), both battlers'
+  sprites, all 512 palettes, software + hardware OAM and matrices, per-frame raw
+  RGB + sha256. NOTE: keeps the TRUE sprite offsets `0x2a`/`0x2b`/`0x2c` for
+  animNum/animCmdIndex/animDelayCounter (never `0x18`/`0x19`). Probe run:
+  `python3 tools/run-mgba-probe.py <out.json> -- python3 tools/compare/counterProbe.py
+  <scenario.json> <out.json> <rgb-dir> 68`. Plus the displayed-timing change
+  maps banked under `tools/compare/evidence/counter-changemap-player.txt` /
+  `counter-changemap-opponent.txt`.
+- **Measured (fresh runs, both orientations, deterministic): move-owned window 88
+  frames each — player-back 207..294, opponent-front 207..294** (script first
+  in-bounds .. first inactive cleanup). **Both first frames are CLEAN** — no
+  outgoing-teardown contamination: player frame 207 / opponent frame 207 are
+  pixel-identical to their next 4 frames, no move sprites, no move tasks (the
+  `loadspritegfx` prefix is 12 frames of static screen; the monbg invisible flip
+  at RAM 214 and the setalpha BLDCNT write at RAM 217 are both RAM-truth-only —
+  the BG copy shows identical pixels). **The orientations line up EXACTLY 0 on
+  every frame — NOT the +4 of CRUNCH/SLASH, NOT the -1 of LICK** — the reducer
+  can be a single age-indexed shape with only the battler geometry differing.
+  Determinism: each orientation re-run from scratch is byte-identical (player
+  sha seq first/last `5260a0e4…`/`3167d803…`, opponent `79c0de89…`/`79c0de89…`);
+  software+hardware OAM byte-identical across runs.
+- **RAM timeline (player-back; opponent-front is identical frame-for-frame, only
+  mirrored):** **Elliptical lunge** `AnimTask_TranslateMonEllipticalRespectSide
+  (ANIM_ATTACKER,18,6,1,4)` — task slot 0, width 18, height 6, loops 1,
+  wavePeriod 1<<4=16; attacker x2/y2 over RAM 217-230:
+  (6,1),(12,2),(16,4),(18,6),(16,9),(12,11),(6,12),(0,12),(-7,12),(-13,11),(-17,9),
+  (-18,6),(-17,4),(-13,2), then task destroyed RAM 231 (x2=y2=0). **Slide-to-offset
+  dummy** `gSlideMonToOffsetSpriteTemplate(0,20,0,0,4)` at (176,42) = target
+  X_2/Y_PIC, invisible, RAM 232-236 driving attacker x2 5,10,15,20,20 (data[1]=
+  1280, accumulator 1280/2560/3840/5120), destroyed 237. **Fist/hitsplat triplets**
+  at target-relative offsets (mirrored by `SetAnimSpriteInitialXOffset` for the
+  player-side target): hitsplat1 (161,60)=(176−15,42+18) RAM 238-246, fist1
+  (161,60) RAM 241-248 (data[0] 7..0 = WaitAnimForDuration 8), hitsplat2 (176,38)
+  RAM 246-254, fist2 RAM 249-256, hitsplat3 (191,51) RAM 254-262, fist3 RAM
+  257-264 — all animNum 0/animCmd 0 static, fists subpriority 27, hitsplats 28
+  (both IN FRONT of the target's 40). **`AnimTask_ShakeMon(ANIM_TARGET,5,0,25,1)`**
+  task slot 0 created RAM ~240, first observed RAM 241 (data[1]=24); x2 toggles
+  5/0 in same-value pairs, flips at odd RAM frames 243,245,…,287 (x2=5 on
+  243-244, 0 on 245-246, …), task destroyed RAM 289 (x2=0). **Slide-to-original
+  dummy** `gSlideMonToOriginalPosSpriteTemplate(0,0,5)` (currentX2 20) RAM
+  264-268 driving attacker x2 16,12,8,4,0 (data[4]=−1024 = −20<<8/5), destroyed
+  269. **monbg ANIM_DEF_PARTNER** hides the target sprite RAM 214; **setalpha
+  12,8** (BLDCNT 0x3f40 / BLDALPHA 0x080c) RAM 217; **clearmonbg + blendoff**
+  restore it RAM 290 (RAM-truth only — the change map is static after 290, no
+  blend pixel step, like CRUNCH's setalpha/blendoff). SE_M_VITAL_THROW (122)
+  plays once at the lunge start, SE_M_VITAL_THROW2 (123) three times at the
+  fist/hitsplat triplets (SE1). No palette/BG-map changes at all (no fadetobg).
+- **Displayed-timing mapping (player-back; opponent-front identical on every
+  frame; the change map wins):** **the elliptical lunge is TASK-driven and
+  displays TWO frames after its RAM state (RAM 217 → pixels 219; the peak x2 18
+  at RAM 220 → pixels 222, back-to-rest RAM 231 → pixels 233)** — the LICK/
+  SLASH/TAKE_DOWN case. **The ShakeMon x2, by contrast, displays ONE frame after
+  its RAM state (RAM flips at odd frames → change-map events at even frames
+  270,272,…,290; the first clean region 269-290 shows the 5/0 toggle reaching
+  pixels at 270) — NOT the +2 the lane's ShakeMon2 rounds measured.** **Both
+  slides are SPRITE-driven and display RAM+1** (slide-back: RAM 264→pixels 265,
+  268→269; slide-to-offset starts at pixels 233). First fist/hitsplat displayed
+  239 (hitsplat1 RAM 238 +1), first fist 242 (RAM 241 +1). The two task-driven
+  motions therefore do NOT share one lag number — the reducer/draw case must
+  split them, exactly as the brief warned. The ONIX front-idle x2=1 rest (player
+  frame 207-213) flips to 0 when the shake task's creation write lands and stays
+  0 after the task restores it (the shake restore to 0 at RAM 289 displays at
+  290, outside the moving window; the ONIX x2 does NOT return to 1).
+- **Next:** promote COUNTER to exact. Build `src/animation/counter.ts` (RAM-truth
+  reducer at the ages above: the 18/6/1/4 elliptical lunge as the phase
+  16..240/step-16 one-cycle wave with the +2 latch, the slide-to-offset (20,0,4)
+  + slide-to-original (20,0,5) via the shared `slideMon.ts` helpers, the three
+  fist/hitsplat triplets at the target-relative anchors with the mirrored x, the
+  ShakeMon 5/0 2-frame-toggle via `shakeMonSequence(5,0,25,1)`, the monbg/
+  setalpha/blendoff machinery, no palette work) + Tier-1
+  `tests/animation/counter.test.ts`; `SceneOnCounterConfig`/View seam in
+  `sceneOnPresentation.ts`; the COUNTER draw case in `battleScene.ts` (fist art
+  from `src/assets/gen/battle-anim-hands-and-feet.json`, hitsplat from
+  `battle-anim-hitsplat.json`, HITMONTOP/ONIX via existing species art); a
+  `counterPortable.ts` at full-window exact (88 frames × 2 axes, both first
+  frames kept); the fixtures, the coverage entry and the inventory pin
+  129->130 exact / 147->146 unsupported.
+- **Notes — zero new components.** Every component is already exact elsewhere:
+  `sprite:gFistFootSpriteTemplate`/`AnimBasicFistOrFoot` = FIRE_PUNCH/SHADOW_PUNCH
+  (`shadowPunch.ts` fist painter); `sprite:gBasicHitSplatSpriteTemplate` =
+  IRON_TAIL/TAKE_DOWN/BODY_SLAM; `sprite:gSlideMonToOffsetSpriteTemplate`/
+  `gSlideMonToOriginalPosSpriteTemplate` = the shared `slideMon.ts` helpers
+  (reuse, do not re-port); `task:AnimTask_ShakeMon` = IRON_TAIL/POISON_TAIL/
+  MUD_SHOT (`shakeMon.ts`); `task:AnimTask_TranslateMonEllipticalRespectSide` =
+  per-move-profiled (`faintAttack.ts`'s `faintAttackAttackerOffset` is the same
+  task with speed 3 instead of 4 — the ellipseAngleStep/wavePeriod differ and
+  must be re-derived, not inherited); monbg/setalpha/clearmonbg/blendoff =
+  BODY_SLAM/FAINT_ATTACK. Assets ANIM_TAG_IMPACT (`battle-anim-hitsplat.json`)
+  and ANIM_TAG_HANDS_AND_FEET (`battle-anim-hands-and-feet.json`) already
+  extracted — no asset work at all. No boundary widening, no new
+  unsupported-branch barrier, no shared-helper edit; the only engine contact
+  will be the promotion round's draw case.
+- **Notes — the orientation-shift trap did NOT bite: measured, not inherited.**
+  COUNTER came out at opponent-front = player-back **+0** on every frame (both
+  windows 207..294, all RAM events and all change-map events frame-aligned),
+  against CRUNCH/SLASH's +4 and LICK's −1. The two orientations' changed-pixel
+  counts still differ on the moving frames because the target is ONIX's front
+  sprite in one and its back sprite in the other (player-back ONIX front x2 rest
+  1, opponent-front ONIX back rest 0). A brief that had carried LICK's −1 (or
+  CRUNCH's +4) forward would have produced a wrong reducer.
+
 ## MOVE_LICK promoted to exact — 129/276, both orientations at 73/73 portable-exact (2026-08-08 worker, round B)
 
 - **State:** coverage advanced **128→129/276 exact**, 0 partial, 0 staged,
