@@ -5172,3 +5172,52 @@ describe("AI_CV_HealWeather / AI_CV_Heal (data/battle_ai_scripts.s:1315-1351)", 
     expect(result).toMatchObject({ funcResultAfter: 2 });
   });
 });
+
+describe("AI_CV_Trap (data/battle_ai_scripts.s:1436-1446)", () => {
+  const MOVE_BIND = 20; // EFFECT_TRAP
+  const MOVE_MEAN_LOOK = 212; // EFFECT_MEAN_LOOK -> same handler
+
+  function trapRun(rngValue: number, targetOverrides: Record<string, unknown> = {}, moveId = MOVE_BIND) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId,
+      attacker: NEUTRAL_BATTLER,
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      staleFuncResultFallback: 3,
+      drawOrdinalStart: 1,
+      reasonPrefix: "trap",
+    });
+  }
+
+  it("no trappable status: all four gates fall through, goto End -> zero score, zero draws", () => {
+    const result = trapRun(1);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [], funcResultAfter: 3 });
+  });
+
+  it.each([
+    ["toxic poison", { isToxicPoisoned: true }],
+    ["cursed", { isCursed: true }],
+    ["perish song", { hasPerishSong: true }],
+    ["infatuation", { isInfatuated: true }],
+  ])("%s reaches the roll; low byte <128 JUMPs to End at zero", (_label, targetOverrides) => {
+    // seed 3 -> low byte 83.
+    const result = trapRun(3, targetOverrides);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "trap-roll", jumped: true });
+  });
+
+  it("roll low byte >=128 FALLS THROUGH to +1", () => {
+    // seed 1 -> low byte 198.
+    const result = trapRun(1, { isToxicPoisoned: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "trap-roll", jumped: false });
+  });
+
+  it("EFFECT_MEAN_LOOK dispatches through the identical handler", () => {
+    const result = trapRun(1, { isCursed: true }, MOVE_MEAN_LOOK);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+});

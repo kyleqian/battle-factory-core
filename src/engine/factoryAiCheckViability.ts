@@ -1541,6 +1541,54 @@ function runCvHeal(input: Readonly<{
 }
 
 /**
+ * `AI_CV_Trap` (`data/battle_ai_scripts.s:1436-1446`, `EFFECT_TRAP`/
+ * `EFFECT_MEAN_LOOK`):
+ *
+ * ```
+ * AI_CV_Trap:
+ *     if_status AI_TARGET, STATUS1_TOXIC_POISON, AI_CV_Trap2
+ *     if_status2 AI_TARGET, STATUS2_CURSED, AI_CV_Trap2
+ *     if_status3 AI_TARGET, STATUS3_PERISH_SONG, AI_CV_Trap2
+ *     if_status2 AI_TARGET, STATUS2_INFATUATION, AI_CV_Trap2
+ *     goto AI_CV_Trap_End
+ * AI_CV_Trap2:
+ *     if_random_less_than 128, AI_CV_Trap_End
+ *     score +1
+ * AI_CV_Trap_End:
+ *     end
+ * ```
+ *
+ * Four status gates on the TARGET's own copies -- toxic poison (`Cmd_if_status`,
+ * `battle_ai_script_commands.c:773-807`, `STATUS1_TOXIC_POISON`), Cursed,
+ * Perish Song, Infatuation (`Cmd_if_status2`/`Cmd_if_status3`, same family) --
+ * any one of which jumps to the single random site. All four false:
+ * `goto End`, genuine zero score/zero draws. At the site the roll's JUMP
+ * (low byte < 128, ~50%) ends at zero; FALL-THROUGH (>= 128) applies +1.
+ * No command writes funcResult.
+ */
+function runCvTrap(input: Readonly<{
+  rng: BattleRngState;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const hasTrappableStatus = (input.target.isToxicPoisoned ?? false)
+    || (input.target.isCursed ?? false)
+    || (input.target.hasPerishSong ?? false)
+    || (input.target.isInfatuated ?? false);
+  if (!hasTrappableStatus) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
+  }
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-trap-roll`);
+  const jumped = roll.randomValue % 256 < 128;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind: "trap-roll" as const, jumped })]),
+    scoreDelta: jumped ? 0 : 1,
+  });
+}
+
+/**
  * `AI_CV_Pursuit` (`data/battle_ai_scripts.s:2018-2036`,
  * `docs/factory-ai-checkviability-ground-truth.md` §11.1):
  *
@@ -4070,6 +4118,24 @@ export function runCheckViability(input: Readonly<{
       rng: roar.rng,
       draws: roar.draws,
       scoreDelta: roar.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_TRAP" || move.effect === "EFFECT_MEAN_LOOK") {
+    // AI_CV_Trap (data/battle_ai_scripts.s:1436-1446) -- one shared handler
+    // for both effects.
+    const trap = runCvTrap({
+      rng: input.rng,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: trap.rng,
+      draws: trap.draws,
+      scoreDelta: trap.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }
