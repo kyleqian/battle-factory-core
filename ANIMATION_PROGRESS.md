@@ -1,5 +1,100 @@
 # Animation coverage
 
+## MOVE_LICK staged — both orientations isolated at 73 frames; scenarios + dense probe + change maps banked (2026-08-08 worker, round A)
+
+- **State:** LICK stays **unsupported**. Coverage unchanged at **128/276 exact, 0
+  partial, 0 staged, 148 unsupported**. Nothing promoted; no pin moved; no
+  boundary widening; no shared-helper edit. This is the staging round;
+  promotion to exact (both orientations, a portable at full-window exact) is the
+  NEXT round's job.
+- **Did:** staged two legal mechanicLab scenarios (LICKITUNG 108 —
+  FRONTIER_MON_LICKITUNG_1, set 164, all four active slots LICK 122, item Sitrus
+  Berry 142, nature QUIRKY 19, EV spread ATTACK|HP = 255/255, vs legal ONIX 95;
+  player-back `mechanic-lick-player-lickitung-opponent-onix.json` and
+  opponent-front `mechanic-lick-opponent-lickitung-player-onix.json` — exact
+  copies of the SLAM pair with only LICKITUNG's four move slots changed 21→122,
+  both verified to run with currentMove 122) and `tools/compare/lickProbe.py` — a
+  dense probe copied from `crunchProbe.py` with script-pointer isolation to
+  `Move_LICK` (0x082d36a8)..`Move_FOCUS_ENERGY` (0x082d36cf) capturing the
+  `gLickSpriteTemplate` sprite (position, animNum/animCmdIndex/animDelayCounter
+  at the TRUE 0x2a/0x2b/0x2c offsets, invisible, data words, subpriority, OAM),
+  the `AnimTask_ShakeMon2` task and its state, both battlers' sprites, all 512
+  palettes, software + hardware OAM and matrices, per-frame raw RGB + sha256.
+  Probe run: `python3 tools/run-mgba-probe.py <out.json> -- python3
+  tools/compare/lickProbe.py <scenario.json> <out.json> <rgb-dir> 122`. Plus the
+  displayed-timing change maps banked under
+  `tools/compare/evidence/lick-changemap-player.txt` /
+  `lick-changemap-opponent.txt`. New standalone asset extractor
+  `tools/extract/extract-lick-sprite.ts` (PAPERCUT-dodge) →
+  `src/assets/gen/battle-anim-lick.json` with the Tier-1 byte-for-byte regen pin
+  `tests/lickSpriteAsset.test.ts`.
+- **Measured (fresh runs, both orientations, deterministic): move-owned window
+  73 frames each — player-back 214..286, opponent-front 213..285** (script first
+  in-bounds .. first inactive cleanup). **Both first frames are CLEAN** — no
+  outgoing-teardown contamination: player frame 214 / opponent frame 213 are
+  pixel-identical to their next 4 frames, software OAM byte-identical to frame 1,
+  no move sprites, no move tasks (the `loadspritegfx` prefix is 21 frames of
+  static screen). Determinism: each orientation re-run from scratch is
+  byte-identical (player sha seq first/last `89b2f9c6…`/`b3ca9e95…`, opponent
+  `f9c87bc9…`/`f9c87bc9…`); software+hardware OAM byte-identical across runs.
+- **RAM timeline (player-back; opponent-front is every frame −1 — the two
+  orientations are structurally identical, which the reducer must parameterize):
+  ** **LICK** (gLickSpriteTemplate, gOamData_AffineOff_ObjNormal_16x32, 5 frames
+  of 8 tiles, 2 ticks each, no loop, subpriority 38) created RAM 21 at
+  (176,42) = target center (opponent-front (72,88) = ONIX back center; no
+  mirroring needed — both sides at target). Anim cmds: cmd0 21, cmd1 22-23,
+  cmd2 24-25, cmd3 26-27, cmd4 28-30, animEnded 31. **The flicker ladder IS the
+  move** — from RAM 31 the sprite is forced invisible then toggles on the
+  data[0]/data[1]/data[2] counter ladder (battle_anim_ghost.c:468
+  `AnimLick_Step`): case 0 flips invisible every 2 ticks (visible at 33, 36, 39,
+  42, 45), case 1 every 4 ticks (visible at 50, 55, 60, 65, 70), then
+  DestroyAnimSprite RAM 71. **AnimTask_ShakeMon2(ANIM_TARGET, 1, 0, 16, 1)**
+  created RAM 21 (task slot 0, spriteId 8 = target), drives the target sprite's
+  x2 ∓1, toggling every 2 frames: x2 = −1 at 21, +1 at 23, −1 at 25, …, −1 at
+  49, task destroyed RAM 51 and x2 restored to 0 (pre-shake ONIX front rest was
+  x2=1, so the ONIX x2 does NOT return to 1 — it stays 0). No palette/BG changes
+  at all: no monbg, no fadetobg, no setalpha/blendoff — BLDCNT/BLDALPHA/BLDY all
+  0 the whole window (the only palette write is the LICK asset load in the
+  static prefix, subpal 23 = 368-375, constant after frame 215). SE_M_LICK
+  (song header 0x088fc25c) plays once at RAM 21 (SE1).
+- **Displayed-timing mapping (player-back; opponent-front is every frame −1):
+  ** the 16x32 LICK sprite first visible 236 (RAM 21 + 1, sprite-driven — the
+  change map's 220px event); anim frame changes each display RAM+1 (cmd1→pixels
+  237, cmd2→239, cmd3→241, cmd4→243); animEnded + invisible-ramp → the flicker
+  blinks display at 246, 248, 249, 251, 252, 254, 255, 257, 258, 260, 261, 265,
+  266, 270, 271, 275, 276, 280, 281, 285 (+1 from every invisible toggle RAM
+  31-70) and the sprite is gone from pixels at 286 (destroy RAM 71 + 1). **The
+  shake x2 is TASK-driven and displays TWO frames late (RAM 21 → pixels 237),
+  the same TAKE_DOWN WindUpLunge / SLASH case — the measured change-map events
+  are at 237, 239, 241, …, 267 (odd frames), exactly the 16 x2 toggles at RAM
+  21, 23, …, 51 shifted +2.** Change map and RAM agree on every frame; the
+  ledger defers to the change map.
+- **Next:** promote LICK to exact. Build `src/animation/lick.ts` (RAM-truth
+  reducer at the ages above: the 5-frame/2-tick 16x32 sprite at target center
+  with the 5+5-step invisible flicker ladder and destroy at 71, the ShakeMon2
+  x2 ∓1 2-frame toggle with the +2 display latch) + Tier-1
+  `tests/animation/lick.test.ts`; `SceneOnLickConfig`/View seam in
+  `sceneOnPresentation.ts`; the LICK draw case in `battleScene.ts` (lick art
+  from `src/assets/gen/battle-anim-lick.json`, ONIX via existing species art); a
+  `lickPortable.ts` at full-window exact (73 frames × 2 axes, both first frames
+  kept); the fixtures, the coverage entry and the inventory pin 128->129 exact /
+  148->147 unsupported.
+- **Notes — two new components, both staged.** `asset:ANIM_TAG_LICK` is a brand
+  new asset extracted standalone (`tools/extract/extract-lick-sprite.ts`,
+  deliberately NOT folded into the bulk `extract-battle-anim-assets.ts` which has
+  the known silent-drop bug, PAPERCUTS.md) into
+  `src/assets/gen/battle-anim-lick.json` with a Tier-1 regen pin
+  (`tests/lickSpriteAsset.test.ts`): lick.png is 16x160, 4bpp, colortype 3 — 5
+  stacked 16x32 frames of 8 tiles (0x0500 bytes = 40 tiles), own embedded
+  palette. `sprite:gLickSpriteTemplate` is new: OAM is
+  `gOamData_AffineOff_ObjNormal_16x32` (16x32 NOT 32x32, NOT ObjBlend, NOT
+  affine — confirmed against the struct literal in src/data/battle_anim.h:142).
+  `task:AnimTask_ShakeMon2` is already exact (DRAGON_BREATH/SLASH etc.) — reuse
+  the existing implementation, do not re-port it. No boundary widening, no new
+  unsupported-branch barrier, no shared-helper edit; the only engine contact
+  will be the promotion round's draw case.
+
+
 ## MOVE_SLASH promoted to exact — 128/276, both orientations at 46/46 portable-exact (2026-08-08 worker, round B)
 
 - **State:** coverage advanced **127→128/276 exact**, 0 partial, 0 staged, **149→148
