@@ -119,7 +119,13 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // 13 -> 12 (Ability absorption): JumpIfMoveFailed now source-completely
   // redirects Volt Absorb, Water Absorb, and Flash Fire to their real
   // healing/full-HP/boost scripts instead of stopping at one shared barrier.
-  ["src/engine/battleScriptHitChainOpcode.ts", 12],
+  // 12 -> 11 (Cmd_datahpupdate substitute-FADES): the `remaining < damage`
+  // overkill branch now does source-clamped bookkeeping (gHpDealt and
+  // shellBellDmg take the remaining HP, not the raw damage) and both zero-HP
+  // outcomes (overkill, and damage exactly equal to the remaining HP) push
+  // BattleScript_SubstituteFade as a machine `call` instead of halting
+  // (battle_script_commands.c:1875-1891).
+  ["src/engine/battleScriptHitChainOpcode.ts", 11],
   // 4 -> 3 (Snatch row 5c): the action-order redirect, PressurePPLose,
   // winner-only flag consumption, and pushed BattleScript_SnatchedMove
   // continuation are now live; Lightning Rod remains the adjacent barrier.

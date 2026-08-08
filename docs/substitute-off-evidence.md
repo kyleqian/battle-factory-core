@@ -46,3 +46,32 @@ The manifest does not expose `substituteHP`, move damage, message chooser,
 hit-marker, script PC, or decoded text. Source pins those branches/routes; the
 ROM proves exposed HP/PP/status/RNG and the message framebuffer. This does not
 stage the handler's low-HP branch and does not implement/register the opcode.
+
+## Breaking a Substitute: `Cmd_datahpupdate`'s fade path
+
+`Cmd_datahpupdate`'s target-has-active-Substitute branch
+(`battle_script_commands.c:1868-1891`) now runs source-completely. The old
+`remaining < damage` branch barriered (`unsupported-branch`, sourceLine 1889)
+instead of doing the overkill bookkeeping, and the `remaining >= damage`
+branch always advanced -- so a hit whose damage EXACTLY equaled the remaining
+Substitute HP left it at 0 and never faded (source checks `substituteHP == 0`
+after BOTH branches, `:1884`). Now:
+
+- `remaining >= damage`: `substituteHP -= damage`, `gHpDealt = damage`,
+  `shellBellDmg = damage` on first hit.
+- `remaining < damage`: `substituteHP = 0`, `gHpDealt = shellBellDmg =
+  remaining` (clamped, NOT the raw damage), per `:1875-1882`.
+- Both zero-HP outcomes push `BattleScript_SubstituteFade` as the machine's
+  `call` (same shape `battleScriptTryCastformDataChangeOpcode.ts` uses for
+  `BattleScriptPushCursorAndCallback`): the pushed cursor is the byte after
+  `datahpupdate`'s own operand, so the fade script's `return` pops back to the
+  next instruction. `Cmd_playanimation`'s `B_ANIM_SUBSTITUTE_FADE` sits in
+  source's unconditional first branch (`battle_script_commands.c:4013`), so it
+  now emits the `SUBSTITUTE_FADE` controller animation, then
+  `STRINGID_PKMNSUBSTITUTEFADED` prints, then `return` resumes the hit chain.
+
+The Substitute-using Golem carrier is reachable in ordinary Factory play, so a
+broken Substitute no longer halts the battle-script machine. Both defects are
+Tier-1 pinned in `tests/battleScriptHitChainOpcode.test.ts` ("substitute
+damage relationships"), red-verified independently, and the ratchet count for
+`battleScriptHitChainOpcode.ts` drops 12 → 11.

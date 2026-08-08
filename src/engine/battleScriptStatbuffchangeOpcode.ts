@@ -228,6 +228,18 @@ const PLAYANIMATION_ANIM_TYPES: ReadonlyMap<
   ["B_ANIM_ITEM_KNOCKOFF", { argExpression: "NULL", animationId: "ITEM_KNOCKOFF", readsAnimArg1: false }],
   /** BattleScript_SnatchedMove's unconditional controller animation. */
   ["B_ANIM_SNATCH_MOVE", { argExpression: "NULL", animationId: "SNATCH_MOVE", readsAnimArg1: false }],
+  /**
+   * `BattleScript_SubstituteFade`'s own `playanimation BS_TARGET,
+   * B_ANIM_SUBSTITUTE_FADE` (data/battle_scripts_1.s:4258) -- like
+   * STATS_CHANGE/SNATCH_MOVE, B_ANIM_SUBSTITUTE_FADE sits in source's
+   * unconditional first branch of Cmd_playanimation
+   * (`battle_script_commands.c:4013`), so it emits without a
+   * HITMARKER_NO_ANIMATIONS gate. Registered when Cmd_datahpupdate's
+   * substitute-FADES branch (battle_script_commands.c:1884-1891) started
+   * calling into this script; NULL-arg shape confirmed against the parsed
+   * operands above.
+   */
+  ["B_ANIM_SUBSTITUTE_FADE", { argExpression: "NULL", animationId: "SUBSTITUTE_FADE", readsAnimArg1: false }],
 ]);
 
 function createPlayanimationOpcodeHandler(
