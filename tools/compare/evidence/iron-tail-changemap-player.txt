@@ -1,7 +1,10 @@
-player-back window: per-frame framebuffer change vs previous frame
+# /tmp/irontail-probe/rgb-player — 135 frames, 240x160
+# frames absent from this table are byte-identical to the previous frame
 frame  changedPx  bbox(minx,miny-maxx,maxy)
 216  (first frame)
+  static 217-222
 223  1519  41,64-101,111
+  static 224-228
 229  12  54,67-59,73
 230  36  54,64-65,78
 231  80  54,64-68,82
@@ -27,6 +30,7 @@ frame  changedPx  bbox(minx,miny-maxx,maxy)
 251  17  94,107-99,111
 252  11  98,108-102,111
 253  1  102,111-102,111
+  static 254-260
 261  12  54,67-59,73
 262  36  54,64-65,78
 263  80  54,64-68,82
@@ -52,24 +56,29 @@ frame  changedPx  bbox(minx,miny-maxx,maxy)
 283  17  94,107-99,111
 284  11  98,108-102,111
 285  1  102,111-102,111
+  static 286-323
 324  1196  41,64-106,111
 325  1196  45,64-110,111
 326  1196  49,64-114,111
 327  1196  53,64-118,111
+  static 328-329
 330  1196  53,64-118,111
 331  1196  49,64-114,111
 332  2418  45,12-204,111
 333  1196  41,64-106,111
 334  1769  149,12-206,71
+  static 335
 336  1769  149,12-206,71
+  static 337
 338  1769  149,12-206,71
+  static 339
 340  1769  149,12-206,71
+  static 341
 342  268  165,31-187,53
 343  1519  41,64-101,111
+  static 344-350
 
-# Produced by the animation supervisor 2026-08-07 night by diffing every
-# consecutive raw RGB framebuffer of the Move_IRON_TAIL window captured by
-# tools/compare/ironTailProbe.py (player-back AZUMARILL vs ONIX scenario).
-# Frames not listed are byte-identical to the previous frame.
-# Every visible event displays exactly ONE frame after the RAM state that
-# causes it — see ANIMATION_PROGRESS.md for the event-by-event mapping.
+# Produced by tools/compare/frame-changemap.py from the Move_IRON_TAIL window
+# captured by tools/compare/ironTailProbe.py (player-back AZUMARILL vs ONIX).
+# Every visible event displays exactly ONE frame after the RAM state that causes
+# it; see ANIMATION_PROGRESS.md for the event-by-event mapping.

@@ -1,6 +1,10 @@
-opponent-front window: per-frame framebuffer change vs previous frame
+# /tmp/irontail-probe/rgb-opp — 135 frames, 240x160
+# frames absent from this table are byte-identical to the previous frame
+frame  changedPx  bbox(minx,miny-maxx,maxy)
 215  (first frame)
+  static 216-221
 222  784  150,27-201,71
+  static 223-227
 228  8  150,28-163,45
 229  25  150,27-167,47
 230  54  150,27-171,49
@@ -22,6 +26,7 @@ opponent-front window: per-frame framebuffer change vs previous frame
 246  33  187,54-198,66
 247  36  191,55-201,65
 248  13  197,58-201,63
+  static 249-259
 260  8  150,28-163,45
 261  25  150,27-167,47
 262  54  150,27-171,49
@@ -43,20 +48,27 @@ opponent-front window: per-frame framebuffer change vs previous frame
 278  33  187,54-198,66
 279  36  191,55-201,65
 280  13  197,58-201,63
+  static 281-322
 323  1062  146,27-201,71
 324  1062  142,27-197,71
 325  1062  138,27-193,71
 326  1062  134,27-189,71
+  static 327-328
 329  1062  134,27-189,71
 330  1062  138,27-193,71
 331  1338  61,27-197,99
 332  1062  146,27-201,71
 333  1240  44,49-102,111
+  static 334
 335  1240  44,49-102,111
+  static 336
 337  1240  44,49-102,111
+  static 338
 339  1240  44,49-102,111
+  static 340
 341  276  61,77-83,99
 342  784  150,27-201,71
+  static 343-349
 
-# Same method, opponent-front orientation (window 215..349). Identical to the
+# Same tool, opponent-front orientation (window 215..349). Identical to the
 # player-back map with every frame number reduced by 1.
