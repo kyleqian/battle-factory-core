@@ -4226,3 +4226,49 @@ describe("EFFECT_PSYCH_UP -> AI_CBM_Haze (data/battle_ai_scripts.s:181,314-332)"
     });
   });
 });
+
+describe("AI_CBM_Mist (data/battle_ai_scripts.s:378-380, EFFECT_MIST)", () => {
+  const MOVE_MIST = 54; // EFFECT_MIST, TYPE_ICE, power 0
+
+  function mistTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  function mistAttacker(
+    overrides: Partial<FactoryAiCheckBadMoveAttacker> = {},
+  ): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ ...NEUTRAL_ATTACKER, ...overrides });
+  }
+
+  it("AI's OWN side's MIST bit up JUMPs to Score_Minus8", () => {
+    const result = run(MOVE_MIST, mistTarget(), undefined, mistAttacker({ mistUp: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8, draws: [] });
+  });
+
+  it("no MIST on AI's own side FALLS THROUGH to end at zero", () => {
+    expect(run(MOVE_MIST, mistTarget(), undefined, mistAttacker())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+
+  it("zero-draw: no ability read anywhere (single-ability target means no soundproof guess either)", () => {
+    const result = run(MOVE_MIST, mistTarget({ knownAbility: null }), undefined, mistAttacker());
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+});

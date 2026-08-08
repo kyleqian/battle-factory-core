@@ -2369,6 +2369,20 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_MIST -> AI_CBM_Mist
+  // (`data/battle_ai_scripts.s:130,378-380`): a single
+  // `if_side_affecting AI_USER, SIDE_STATUS_MIST, Score_Minus8` -- the same
+  // bare shape as `AI_CBM_LightScreen`/`Reflect`/`Safeguard` (doc §23.1) with
+  // SIDE_STATUS_MIST swapped in, reading only AI_USER's own side.
+  if (move.effect === "EFFECT_MIST") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmMist(input.attacker.mistUp ?? false),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -3184,4 +3198,15 @@ function runCbmHaze(attacker: FactoryAiCheckBadMoveAttacker, target: FactoryAiCh
     || (target.accStage ?? DEFAULT_STAT_STAGE) > DEFAULT_STAT_STAGE
     || (target.evasionStage ?? DEFAULT_STAT_STAGE) > DEFAULT_STAT_STAGE;
   return targetHasRaisedStat ? 0 : -10;
+}
+
+/**
+ * `AI_CBM_Mist` (`data/battle_ai_scripts.s:378-380`, EFFECT_MIST): a single
+ * `if_side_affecting AI_USER, SIDE_STATUS_MIST, Score_Minus8` -- the same
+ * bare 2-instruction shape as `AI_CBM_LightScreen`/`AI_CBM_Reflect`/
+ * `AI_CBM_Safeguard` (doc §23.1) with `SIDE_STATUS_MIST` swapped in. Reads
+ * only AI_USER's own side; zero stat-stage/ability reads.
+ */
+function runCbmMist(attackerMistUp: boolean): number {
+  return attackerMistUp ? -8 : 0;
 }
