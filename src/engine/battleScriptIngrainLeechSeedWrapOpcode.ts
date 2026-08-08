@@ -14,13 +14,16 @@
  *
  * COPYARRAY/JUMPIFABILITY/MANIPULATEDAMAGE are generic multi-site opcodes
  * (16/18/4 concrete call sites across the whole committed program, one
- * shared opcodeId each) -- only the exact operand tuple this doc's own
- * scope needs is modeled; later focused registrations have widened selected
- * COPYARRAY tuples (including Pain Split and Bide), while remaining
- * jumpifability-gated ability preventions and Beat Up's own damage
- * manipulation, ...) is a single named (b) barrier, the same policy
+ * shared opcodeId each) -- only the exact operand tuples this doc's own
+ * scope needs are modeled; later focused registrations have widened selected
+ * COPYARRAY tuples (including Pain Split, Bide, and Triple Kick) and
+ * JUMPIFABILITY ability ids (Liquid Ooze, Suction Cups, Rock Head, ...),
+ * while the remaining unmodeled COPYARRAY/JUMPIFABILITY operands stay a
+ * single named (b) barrier apiece, the same policy
  * `battleScriptDamagingWeatherOpcode.ts`'s ADDBYTE/BICWORD/
- * JUMPIFARRAYNOTEQUAL handlers already established.
+ * JUMPIFARRAYNOTEQUAL handlers already established. MANIPULATEDAMAGE is
+ * source-complete -- all three of its modes (`DMG_CHANGE_SIGN`,
+ * `DMG_RECOIL_FROM_MISS`, `DMG_DOUBLED`) are implemented, no barrier.
  */
 import {
   transitionBattleScriptCommand,
@@ -458,26 +461,54 @@ function createJumpifabilityHandler(): BattleScriptOpcodeHandler<BattleScriptRul
 }
 
 /**
- * `Cmd_manipulatedamage` (`battle_script_commands.c:6740-6759`), narrowed to
- * the `DMG_CHANGE_SIGN` case (`BattleScript_LeechSeedTurnDrain`'s own use,
- * and `BattleScript_AbsorbLiquidOoze`'s identical one) -- a two-line
- * arithmetic flip. `DMG_RECOIL_FROM_MISS`/`DMG_DOUBLED` (Struggle recoil,
- * Beat Up) are out of this slice's scope, the single named barrier below.
+ * `Cmd_manipulatedamage` (`battle_script_commands.c:6740-6759`), source-
+ * complete across all three modes:
+ *  - `DMG_CHANGE_SIGN` (gBattleMoveDamage *= -1) -- `BattleScript_
+ *    LeechSeedTurnDrain`'s own use, and `BattleScript_AbsorbLiquidOoze`'s
+ *    identical one, a two-line arithmetic flip.
+ *  - `DMG_RECOIL_FROM_MISS` (Struggle's own recoil, gBattleMoveDamage /= 2
+ *    clamped to 1, then capped at gBattleMons[gBattlerTarget].maxHP / 2) --
+ *    `BattleScript_MoveMissedDoDamage`. Both divisions are C int divisions
+ *    on possibly-odd values, so both truncate (`Math.trunc`); the zero-clamp
+ *    runs BEFORE the maxHP/2 cap, per source order.
+ *  - `DMG_DOUBLED` (gBattleMoveDamage *= 2) -- `BattleScript_BeatUpLoop`'s
+ *    own critical-hit doubling.
  */
 function createManipulatedamageHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
     const [modeOperand] = context.instruction.operands;
     const rulesContext = context.state.rulesContext;
-    if (modeOperand?.expression !== "DMG_CHANGE_SIGN") {
-      return unsupportedBranch(
-        context,
-        `Cmd_manipulatedamage's mode (${modeOperand?.expression ?? "<missing>"}) is not the registered DMG_CHANGE_SIGN case`,
-        "battle_script_commands.c",
-        6740,
-      );
+    switch (modeOperand?.expression) {
+      case "DMG_CHANGE_SIGN":
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "advance" }),
+          { rulesContext: Object.freeze({ ...rulesContext, battleMoveDamage: -rulesContext.battleMoveDamage }) },
+        );
+      case "DMG_RECOIL_FROM_MISS": {
+        const target = rulesContext.selectorRoles.target;
+        if (target === null) throw new Error("Cmd_manipulatedamage DMG_RECOIL_FROM_MISS requires a target role");
+        let damage = Math.trunc(rulesContext.battleMoveDamage / 2);
+        if (damage === 0) damage = 1;
+        const halfTargetMaxHp = Math.trunc(rulesContext.battlers[target].maxHP / 2);
+        if (halfTargetMaxHp < damage) damage = halfTargetMaxHp;
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "advance" }),
+          { rulesContext: Object.freeze({ ...rulesContext, battleMoveDamage: damage }) },
+        );
+      }
+      case "DMG_DOUBLED":
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "advance" }),
+          { rulesContext: Object.freeze({ ...rulesContext, battleMoveDamage: rulesContext.battleMoveDamage * 2 }) },
+        );
+      default:
+        throw new Error(
+          `Cmd_manipulatedamage's mode (${modeOperand?.expression ?? "<missing>"}) is not DMG_CHANGE_SIGN/DMG_RECOIL_FROM_MISS/DMG_DOUBLED`,
+        );
     }
-    const nextRulesContext = Object.freeze({ ...rulesContext, battleMoveDamage: -rulesContext.battleMoveDamage });
-    return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
   };
 }
 
