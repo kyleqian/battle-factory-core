@@ -41,9 +41,9 @@ const ROLE_VIEW: Record<Role, FactoryAiScoredView> = {
     factory: Object.freeze({
       levelMode: 0, battleMode: 0, factoryWinStreak: 28, trainerOpponentId: 222,
     }),
-    moves: [33, 33, 33, 33], // TACKLE x4
+    moves: [33, 33, 33, 33] as const, // TACKLE x4
     attacker: Object.freeze({
-      types: ["TYPE_BUG", "TYPE_ROCK"], // Shuckle (213)
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const, // Shuckle (213)
       attack: 30, defense: 250, spAttack: 30, spDefense: 250, speed: 25, level: 50,
       statStages: NEUTRAL_STAGES,
       isFirstTurn: 2,
@@ -52,7 +52,7 @@ const ROLE_VIEW: Record<Role, FactoryAiScoredView> = {
     }),
     target: Object.freeze({
       species: 297, // LUDICOLO -- two distinct abilities, gate-B case
-      types: ["TYPE_WATER", "TYPE_GRASS"],
+      types: ["TYPE_WATER", "TYPE_GRASS"] as const,
       attack: 90, defense: 90, spAttack: 110, spDefense: 120, speed: 90, level: 50,
       statStages: NEUTRAL_STAGES,
       isFirstTurn: 0,
@@ -70,9 +70,9 @@ const ROLE_VIEW: Record<Role, FactoryAiScoredView> = {
     factory: Object.freeze({
       levelMode: 0, battleMode: 0, factoryWinStreak: 28, trainerOpponentId: 222,
     }),
-    moves: [33, 33, 33, 33], // TACKLE x4
+    moves: [33, 33, 33, 33] as const, // TACKLE x4
     attacker: Object.freeze({
-      types: ["TYPE_BUG", "TYPE_ROCK"], // Shuckle (213)
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const, // Shuckle (213)
       attack: 30, defense: 250, spAttack: 30, spDefense: 250, speed: 25, level: 50,
       statStages: NEUTRAL_STAGES,
       isFirstTurn: 2,
@@ -81,7 +81,7 @@ const ROLE_VIEW: Record<Role, FactoryAiScoredView> = {
     }),
     target: Object.freeze({
       species: 378, // BANETTE -- Ghost, Normal x0, single ability
-      types: ["TYPE_GHOST", "TYPE_GHOST"],
+      types: ["TYPE_GHOST", "TYPE_GHOST"] as const,
       attack: 135, defense: 85, spAttack: 103, spDefense: 83, speed: 85, level: 50,
       statStages: NEUTRAL_STAGES,
       isFirstTurn: 0,
@@ -129,7 +129,7 @@ const fourSlotRequest = createBattleCommandRequest({
 describe("AI_CheckBadMove preamble live receipt (banked from the Battle Scene OFF ROM, seeds 1 & 2)", () => {
   it.each(ROWS)(
     "%s seed %s: %d draws, RNG %d -> %d, chosen slot %d (matches ROM PP decrement)",
-    (role, seed, startRng, endRng, chosenSlot, drawCount, cbmDraws, cbmDeltas, scores) => {
+    (role, _seed, startRng, endRng, chosenSlot, drawCount, cbmDraws, cbmDeltas, scores) => {
       const choice = chooseFactoryAiScoredDecision({
         view: ROLE_VIEW[role],
         request: fourSlotRequest,
@@ -138,7 +138,10 @@ describe("AI_CheckBadMove preamble live receipt (banked from the Battle Scene OF
       expect(choice.trace.draws.length).toBe(drawCount);
       expect(choice.rng.value).toBe(endRng);
       expect(choice.rng.calls).toBe(drawCount);
-      const cbm = choice.trace.draws.filter((draw) => draw.phase === "check-bad-move");
+      const cbm = choice.trace.draws.filter(
+        (draw): draw is Extract<typeof draw, { phase: "check-bad-move" }> =>
+          "phase" in draw && draw.phase === "check-bad-move",
+      );
       expect(cbm.length).toBe(cbmDraws);
       expect(cbm.every((draw) => draw.kind === "get-ability")).toBe(true);
       expect(choice.trace.slotScores.map((slot) => slot.checkBadMoveDelta)).toEqual(cbmDeltas);
@@ -154,8 +157,12 @@ describe("AI_CheckBadMove preamble live receipt (banked from the Battle Scene OF
       request: fourSlotRequest,
       rng: { value: 3323223981, calls: 0 },
     });
+    const cbmDraws = choice.trace.draws.filter(
+      (draw): draw is Extract<typeof draw, { phase: "check-bad-move" }> =>
+        "phase" in draw && draw.phase === "check-bad-move",
+    );
     const perSlot = new Map<number, number>();
-    for (const draw of choice.trace.draws.filter((draw) => draw.phase === "check-bad-move")) {
+    for (const draw of cbmDraws) {
       perSlot.set(draw.moveSlot, (perSlot.get(draw.moveSlot) ?? 0) + 1);
     }
     expect([...perSlot.values()]).toEqual([2, 2, 2, 2]);
