@@ -2975,6 +2975,33 @@
     "src/engine/battleScene.ts",
     "tests/animation/tailWhip.test.ts",
     "tests/animation/tailWhipEvidence.test.ts"
+    ]
+   },
+  {
+   "move": "MOVE_TAKE_DOWN",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_SWABLU set 93 (SWABLU 358, all four active slots TAKE_DOWN move 36 so the Factory AI has one legal choice) against legal ONIX in both orientations; both pass the complete move-owned Scene-ON window twice fresh with evidence 5dcaff8f76177ee668523d83ad99aa24fc804f032ad59a73dc2bc34c99417f05 / raw RGB ebe70e6ca26b328700539e81c79d23dfcac79399b35d21687e07c4e00e553feb for the 98-frame player-back window (frames 214-311, first frame clean) and evidence 798075401f91ce58bcf7b355866635fecc1173c34a8899a0804aba122ecab662 / raw RGB ad9b74ed4382262bdf94ae43749ead2a723e390898967ead811e3e06986095f7 for the 97-frame opponent-front window (frames 215-311, the raw probe frame 214 contaminated by the DETECT-class enemy-shadow teardown dropped via skipProbeFrames 1 / ageOffset 1), both isolated by sBattleAnimScriptPtr within the Move_TAKE_DOWN..Move_DOUBLE_EDGE label bounds",
+    "the reducer composes only already-exact components: AnimTask_WindUpLunge (shared windUpLunge.ts nonzero-amplitude branch exercising the real GBA sine at amplitude 8) ramps the attacker x2 -2..-24 over RAM ages 7-29, holds -24 through 39, lunges -20..+16 over 40-49 and the last x2/y2 writes hold on the sprite through 79 (sine-tail y2 1 held the same way), returning 12,9,6,3,0 via SlideMonToOriginalPos at 80-84 (opponent-side mirror -17 -> -14,-11,-7,-4,-1,0); SlideMonToOffset pushes the target +16 (player target mirrored -16) over 47-50, ShakeMonInPlace toggles the hold +/-4 over 54-74 restoring at 75, the target slides back 13..0 over 85-91, the basic hitsplat lives 44-52 at the target center plus the mirrored -10 x offset, complex_palette_blend darkens F_PAL_BG|F_PAL_BATTLERS toward black at y=10 over 44-46, monbg keeps the target OAM-invisible on BG1 over 4-92, and SE_M_MEGA_KICK2 fires at 44 with the target-side pan",
+    "the displayed timing splits the latch exactly as the change map demands: the task-driven WindUpLunge x2/y2 render TWO ages after their RAM write (RAM 221 x2=-2 reaches the pixels at display 223, verified by the change-map first diff and hardware OAM x 40->38 at 223), while the sprite-driven slides, the ShakeMonInPlace toggle, the hitsplat, and the palette blend render ONE age after their RAM cause (slide RAM 294 -> display 295, shake RAM 268 -> display 269, blend RAM 258 -> display 259, hitsplat RAM 258 -> display 259); a shared one-display latch would drift the windup axis by one - the draw case splits them and flips the attacker x2/y2 back to the one-age rule at SLIDE_BACK_ATTACKER_AGE",
+    "windup ramp displays 223-245, hold 246-255, lunge-out 256-265; palette darken 259-261 restore 262; hitsplat 259-267 teardown at 268; target slide-to-offset 262-265, shake 269-290 (269 first toggle, 290 final release back to 16), attacker slide-back 295-299, target slide-back 300-306; blendoff clears BLDCNT at RAM 307 with no pixel step (RAM truth only, like CRUSH_CLAW setalpha/blendoff); the opponent-front ONIX target rests at front-idle x2=1 until the push displays",
+    "zero new components: WindUpLunge = SPIKE_CANNON/BRICK_BREAK windUpLunge.ts, the slides = BODY_SLAM/STEEL_WING slideMon.ts, ShakeMonInPlace = BODY_SLAM/SLAM shakeMonInPlace.ts, complex_palette_blend and the basic hitsplat = REVERSAL/AERIAL_ACE/BLAZE_KICK/EARTHQUAKE and IRON_TAIL already-exact bodies; the shared windUpLunge nonzero-sine branch was corrected in the prior round",
+    "reducer correction found during promotion: the staged reducer only modelled the opponent-side target (Math.max clamped the player-side push to 0 and hardcoded currentX2 +16 bases); for a player-side target the SlideMonToOffset push is -16, the shake rides that -16 hold, both slide-backs return from signed -16/-17 bases (the +16 currentX2 arithmetic-shift rounding does not negate cleanly), and the lunge sine-tail y2 1 holds through the return instead of cutting at age 50 - all pinned by the extended Tier-1 tests and the opponent-front probe"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-take-down-player-swablu-opponent-onix.json",
+    "tools/battle-lab/mechanic-take-down-opponent-swablu-player-onix.json",
+    "tools/compare/fixtures/take-down-player-swablu-opponent-onix.json",
+    "tools/compare/fixtures/take-down-opponent-swablu-player-onix.json",
+    "tools/compare/takeDownProbe.py",
+    "tools/compare/takeDownPortable.ts",
+    "tools/compare/evidence/take-down-changemap-player.txt",
+    "tools/compare/evidence/take-down-changemap-opponent.txt",
+    "src/animation/takeDown.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/takeDown.test.ts",
+    "tests/animation/takeDownEvidence.test.ts"
    ]
   },
   {
