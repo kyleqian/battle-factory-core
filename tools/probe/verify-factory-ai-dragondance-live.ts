@@ -22,7 +22,7 @@ import { oracleUrlForProfile } from "../compare/oracleProfiles.ts";
 // The AI user sits at full HP the whole window (the relay's Vital Throw lands
 // only after the decision).
 
-const SEEDS = [1, 99] as const;
+const SEEDS = [1, 2, 99] as const;
 const ROLES = ["control", "reach"] as const;
 const START_PP = [20, 40, 40, 40] as const;
 const CAPTURE_START = 800;

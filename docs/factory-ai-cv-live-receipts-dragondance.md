@@ -84,50 +84,56 @@ scenario twice and asserts byte-identical reruns).
 | --- | ---: | --- | --- | --- | --- | --- |
 | control | 1 | Shuckle (25) | `[20,40,40,40]→[19,40,40,40]` | 0 | DragonDance slot 0 (4-way tie) | setup 4 + tie 1 = 5, `3693657463→3894234654→3323223981` |
 | reach | 1 | Crobat (150) | `[20,40,40,40]→[20,39,40,40]` | 0 (roll 20 < 128) | Splash slot 1 (4-way tie) | setup 4 + roll 1 + tie 1 = 6, `3693657463→3894234654→2023871260` |
+| control | 2 | Shuckle (25) | `[20,40,40,40]→[20,39,40,40]` | 0 | Splash slot 1 (4-way tie) | setup 4 + tie 1 = 5, `3387280505→3652931064→3469321887` |
+| reach | 2 | Crobat (150) | `[20,40,40,40]→[19,40,40,40]` | **+1 (roll 201 ≥ 128)** | **DragonDance slot 0 (unique best)** | setup 4 + roll 1 + tie 1 = 6, `3387280505→3652931064→3130704934` |
 | control | 99 | Shuckle (25) | `[20,40,40,40]→[20,40,40,39]` | 0 | Splash slot 3 (4-way tie) | setup 4 + tie 1 = 5, `4088512940→1656372911→2270394938` |
 | reach | 99 | Crobat (150) | `[20,40,40,40]→[20,39,40,40]` | 0 (roll 83 < 128) | Splash slot 1 (4-way tie) | setup 4 + roll 1 + tie 1 = 6, `4088512940→1656372911→1352996645` |
 
-All four rows reran byte-identically. The engine reproduces, on the same
+All six rows reran byte-identically. The engine reproduces, on the same
 scored view fed the ROM-observed start RNG (`setupTransition.before`), the
-exact PP-selected slot, score vector (`[100,100,100,100]` throughout), draw
+exact PP-selected slot, score vector (`[100,100,100,100]` throughout, plus
+`[101,100,100,100]` on the seed-2 reach row), draw
 count, and endpoint RNG on every row. The AI user sat at **170/170** HP at the
-decision on all four rows.
+decision on all six rows.
 
 The control rows are the **strong test**: the gate's full-HP exit leaves
 DragonDance at 0, tying all four moves at 100, and the ROM **uses DragonDance**
-(slot 0, seed 1) or Splash (slot 3, seed 99) purely by the decision RNG
+(slot 0, seed 1) or Splash (slots 1/3, seeds 2/99) purely by the decision RNG
 (`Random() % 4`) — confirming the handler truly scores nothing on the
-slow-target path. The reach rows are the sharp draw-count test: both consumed
-**6** draws (one more than control), and the handler's roll draw is the
-decision window's 5th (`%256` = 20 and 83 — both genuinely `< 128`), so the
-CV delta is +0 and DragonDance stays in the 4-way tie, which the ROM breaks
-onto Splash slot 1 both times. The +1 branch (roll ≥ 128, DragonDance chosen
-as unique best) was **not** exercised live — both seeds rolled low — and remains
-a named residual, hermetically unit-pinned in `tests/factoryAiCheckViability.test.ts`.
+slow-target path. The reach rows are the sharp draw-count test: all three
+consumed **6** draws (one more than control), and the handler's roll draw is the
+decision window's 5th (discriminator `%256` = 20, 201 and 83). Seed 1 and 99
+rolled low (`< 128`, CV +0, DragonDance stays in the 4-way tie, which the ROM
+breaks onto Splash slot 1 both times); **seed 2 rolled high (201 ≥ 128, CV +1,
+DragonDance becomes the unique best at 101 and the ROM uses DragonDance slot 0)
+— the `+1` branch is now exercised live**, closing the residual this receipt
+originally named (a follow-up seed sweep on the same fixture, 2026-08-08).
 
 ## 4. Verdict
 
-**MATCH.** The real ROM's `Cmd_if_target_faster` split matches the port's
+**MATCH 6/6.** The real ROM's `Cmd_if_target_faster` split matches the port's
 `getWhoStrikesFirst` on both sides of the Speed comparison (Gyarados 101 vs
 Shuckle 25 and vs Crobat 150): the outsped-target path draws zero RNG and scores
 0, and the outsped-AI-user path draws exactly one extra `<128` roll whose outcome
-(0 on rolls < 128) matches the observed behavior on both seeds. The engine
-reproduces the ROM's chosen slot, score vector, draw count, and exact
-decision-window RNG on all four rows. No `src/engine/` change was needed.
+(0 on rolls < 128, **+1 on the seed-2 roll 201 ≥ 128 — both sides of the branch
+now live-exercised**) matches the observed behavior. The engine reproduces the
+ROM's chosen slot, score vector, draw count, and exact decision-window RNG on
+all six rows. No `src/engine/` change was needed.
 
 ## 5. Tier-1 pin
 
-`tests/factoryAiDragonDanceLiveReceipt.test.ts` banks all four rows: each seed's
+`tests/factoryAiDragonDanceLiveReceipt.test.ts` banks all six rows: each seed's
 view (attacker Gyarados 145/99/80/120/101 @170/170, target Shuckle 30/250/30/250/25
 @95/95 or Crobat 110/100/90/100/150 @160/160), the ROM-observed start RNG, the
 expected chosen slot, the exact draw-count + kind receipt (control
 `4× setup-simulated-rng + best-move-tie`, reach `4× setup-simulated-rng +
-dragon-dance-roll-2 + best-move-tie`), the roll `%256` values (20/83, both
-below 128 → CV 0), the CV deltas (`[0,0,0,0]`), and the ROM-observed endpoint
-RNG. A second test pins the reach/control gate split on a shared start RNG
-(5 vs 6 draws, the extra roll only on the fast-target path). A later port that
-drops the `if_target_faster` split (or draws the roll on the wrong path, or
-scores it on the wrong threshold) fails these pins.
+dragon-dance-roll-2 + best-move-tie`), the roll discriminators (20/83, both
+below 128 → CV 0; **201, above 128 → CV +1, the live-closed branch**), the CV
+deltas (`[0,0,0,0]`, plus `[1,0,0,0]` on the seed-2 reach row), and the
+ROM-observed endpoint RNG. A second test pins the reach/control gate split on a
+shared start RNG (5 vs 6 draws, the extra roll only on the fast-target path). A
+later port that drops the `if_target_faster` split (or draws the roll on the
+wrong path, or scores it on the wrong threshold) fails these pins.
 
 ## 6. Reproduce
 

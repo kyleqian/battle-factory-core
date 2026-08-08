@@ -96,6 +96,8 @@ describe("AI_CV_DragonDance live receipt (docs/factory-ai-cv-live-receipts-drago
     // [seed, reach, rngStart, expectedSlot, expectedRng, cvDelta, draws, rollValue]
     [1, false, 3_894_234_654, 0, 3_323_223_981, 0, 5, null],
     [1, true, 3_894_234_654, 1, 2_023_871_260, 0, 6, 20],
+    [2, false, 3_652_931_064, 1, 3_469_321_887, 0, 5, null],
+    [2, true, 3_652_931_064, 0, 3_130_704_934, 1, 6, 201],
     [99, false, 1_656_372_911, 3, 2_270_394_938, 0, 5, null],
     [99, true, 1_656_372_911, 1, 1_352_996_645, 0, 6, 83],
   ] as const)("seed %i %s: engine reproduces the ROM's chosen slot and exact RNG endpoint", (
