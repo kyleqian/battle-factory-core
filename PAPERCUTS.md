@@ -446,12 +446,19 @@ Per entry:
   observe a transient `git status`/`git diff` inconsistency on a file it
   never touched and reasonably suspect repo corruption. Reported by the
   E2b-2 worker (~2 min lost) after this session's ISSUES #23 park commit.
-- **Hits:** 1 (first time observed; the supervisor has committed
-  mid-worker several times this session without a report, so the window
-  is narrow).
-- **Cost each:** ~2 min of investigation; the real risk is larger — a
-  worker running `git add -A` mid-supervisor-edit could sweep the
-  supervisor's uncommitted docs into its own commit.
+- **Hits:** 2. **2026-08-08 — the predicted sweep happened, in the
+  INVERSE direction.** The supervisor ran `git add -A` in the main tree
+  to commit a two-file test fix while a main-lane worker was mid-run,
+  and swept that worker's **in-progress 563-line
+  `tools/report/battlescene-split-partition.ts`** into the supervisor's
+  own commit (`cac9cda3`). It happened to land byte-identical to the
+  worker's final version, so nothing was lost — but a half-written file
+  would have been committed under an unrelated message, and the worker
+  had to notice and report it. This entry's own workaround ("stage those
+  paths explicitly, never `git add -A`") already said not to do it.
+- **Cost each:** ~2 min of investigation. The risk is not hypothetical:
+  it has now fired in both directions — a worker sweeping supervisor
+  docs, and the supervisor sweeping a worker's source file.
 - **Workaround:** supervisor commits mid-worker should touch only files
   no worker owns (ROADMAP.md / ISSUES.md / PAPERCUTS.md — never
   PROGRESS.md, which main-lane workers own), stage those paths
