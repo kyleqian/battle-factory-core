@@ -335,10 +335,26 @@ export const attackCancelerOpcodeHandler: BattleScriptOpcodeHandler<BattleScript
   const entry = preflightBattleScriptActionEntry(context.state.rulesContext, sourcePc);
   if (entry.kind === "stop") {
     if (entry.reason === "battle-outcome-finished") {
+      // UNREACHABLE in Level-50 singles, and the reason is one level up in the
+      // source, not here (supervisor refutation 2026-08-08; see
+      // docs/barrier-reachability-triage.md A12). RunTurnActionsFunctions
+      // (battle_main.c:4937-4945) forces gCurrentActionFuncId = B_ACTION_FINISHED
+      // BEFORE dispatching sTurnActionsFuncsTable[], and HandleAction_UseMove
+      // (battle_util.c:78) -- the only producer of a script that begins with
+      // attackcanceler -- runs only through that dispatcher. Nothing chains past
+      // the check inside one frame either: HandleAction_ActionFinished
+      // (battle_util.c:658-683) assigns the next action and returns rather than
+      // calling it. So Cmd_attackcanceler's own gBattleOutcome preflight is
+      // defensive redundancy in the C source. This engine already models the
+      // preemption (factoryBattleScriptFullTurnDecision.ts's terminal
+      // second-action skip cites the same lines), so reaching this guard would
+      // mean the turn orchestrator failed to preempt -- a real defect, which is
+      // exactly what halting loudly here should report.
       return unsupportedBranch(
         context,
-        "gBattleOutcome != 0 -> gCurrentActionFuncId = B_ACTION_FINISHED "
-          + "(consumed by the round controller, out of this step's scope)",
+        "gBattleOutcome != 0 -> gCurrentActionFuncId = B_ACTION_FINISHED; "
+          + "unreachable because RunTurnActionsFunctions (battle_main.c:4939) "
+          + "preempts the action before HandleAction_UseMove can start a script",
         "battle_script_commands.c",
         919,
       );
