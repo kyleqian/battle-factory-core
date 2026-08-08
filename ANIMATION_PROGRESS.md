@@ -1,5 +1,51 @@
 # Animation coverage
 
+## IRON_TAIL staging correction — the banked "displayed" frames were RAM frames; every visible event lags one frame (2026-08-07 night supervisor)
+
+- **State:** coverage unchanged at **123/276 exact, 0 partial, 0 staged, 153
+  unsupported**. Round 1 of this session was a cap-kill with zero commits (45 min,
+  94 bash / 31 read calls, no file written) — the worker spent its whole cap
+  re-deriving display timing the staged entry had stated as if it were displayed
+  truth. Nothing was lost: its finding is confirmed and banked below.
+- **Supervisor-measured (my own run, not the worker's claim):** I diffed every
+  consecutive raw framebuffer in both probe windows. The window itself is right —
+  player-back 216..350, opponent-front 215..349, 135 frames each — but **the
+  "displayed" frame numbers in the staged entry below are RAM frames. Every
+  visible event displays exactly ONE frame after the RAM state that causes it.**
+  The whole 135-frame window is static except at these frames (player-back;
+  subtract 1 for opponent-front, which is identical in every other respect):
+  - **223** — attacker grayscale ON, 1519px over the attacker box (41,64-101,111).
+    RAM initializer is 220-221 with the step from 222, so the grayscale palette
+    write displays at 223.
+  - **229-253** — metallic-shine sweep 1, band marching down-right across the
+    attacker (bbox walks 54,67-59,73 → 102,111-102,111, 12px growing to 384px
+    then shrinking to 1px). **254-260 static.**
+  - **261-285** — sweep 2, byte-identical pattern at exactly +32 frames.
+  - **286-323 static** — the third sweep (d11==2) is INVISIBLE: `ClearBattleAnimBg`
+    has already run, so the RAM `data10` 3-frame hold at 285-287 never reaches
+    pixels. Do not model it as a visual.
+  - **324-327** — lunge out, 1196px/frame, bbox marching right 41→118 (RAM ramp
+    323-326). **328-329 static** (RAM x2 holds 16 at 327-328).
+  - **330-333** — lunge back (RAM 329-332).
+  - **332** — hitsplat appears (RAM spawn 331); the 331→332 diff is the wide
+    2418px one spanning both boxes.
+  - **334, 336, 338, 340** — target shake, 1769px each over the target box
+    (149,12-206,71). RAM x2 toggles at 333/335/337/339.
+  - **342** — hitsplat gone (RAM last frame 340), 268px at 165,31-187,53.
+  - **343** — attacker grayscale OFF, 1519px, the exact inverse of 223. RAM
+    `set_original_pal` is 342. **So displayed grayscale = frames 223..342.**
+- **Next:** re-brief IRON_TAIL with the corrected timing and a write-first
+  structure (reducer committed before any measurement is allowed). The change
+  maps for both orientations are the specification; no further probing is needed
+  to build the reducer.
+- **Notes — brief-authoring lesson.** A staged entry that prints RAM frames under
+  a heading like "displayed" invites exactly this failure: the worker could not
+  reconcile the numbers with the pixels, and correctly refused to write code it
+  believed was wrong. **State the lag explicitly in the staging entry, or label
+  the column RAM.** This is the same one-frame display-lag family already recorded
+  for OAM edits and palette writes — it applies to move sprites, attacker/target
+  `x2` translation and palette writes alike, all at one frame.
+
 ## Supervisor wind-down — FACADE, MINIMIZE, TORMENT and DETECT all exact, 119→123; IRON_TAIL staged (2026-08-07 evening animation session)
 
 - **State:** coverage advanced **119→123/276 exact**, 0 partial, 0 staged, 153
