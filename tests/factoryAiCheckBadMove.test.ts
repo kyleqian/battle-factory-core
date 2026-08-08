@@ -3226,3 +3226,34 @@ describe("AI_CBM_CantEscape (data/battle_ai_scripts.s:430-433, EFFECT_MEAN_LOOK)
     });
   });
 });
+
+describe("AI_CBM_Torment (data/battle_ai_scripts.s:527-529, EFFECT_TORMENT)", () => {
+  const MOVE_TORMENT = 259;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("target already tormented JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_TORMENT, target({ isTormented: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("target not tormented FALLS THROUGH to end at zero", () => {
+    expect(run(MOVE_TORMENT, target())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+});

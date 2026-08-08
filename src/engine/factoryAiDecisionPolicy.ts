@@ -530,6 +530,8 @@ export type FactoryAiScoredBattlerView = Readonly<{
   isCursed?: boolean;
   /** `gBattleMons[].status2 & STATUS2_ESCAPE_PREVENTION` -- `AI_CBM_CantEscape`'s single gate (target only, EFFECT_MEAN_LOOK). Optional, defaulting to `false`. */
   isEscapePrevented?: boolean;
+  /** `gBattleMons[].status2 & STATUS2_TORMENT` -- `AI_CBM_Torment`'s single gate (target only, EFFECT_TORMENT). Optional, defaulting to `false`. */
+  isTormented?: boolean;
   /** `gSideStatuses[] & SIDE_STATUS_LIGHTSCREEN` -- source-required for `AI_CBM_LightScreen`'s own gate (AI_USER's OWN side only, doc §23.1). Optional, defaulting to `false`. */
   lightScreenUp?: boolean;
   /** `gSideStatuses[] & SIDE_STATUS_REFLECT` -- source-required for `AI_CBM_Reflect`'s own gate (AI_USER's OWN side only, doc §23.1). Optional, defaulting to `false`. */
@@ -820,6 +822,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     isLeechSeeded: view.target.isLeechSeeded,
     ...(view.target.isAsleep === true ? { isAsleep: true } : {}),
     ...(view.target.isEscapePrevented === true ? { isEscapePrevented: true } : {}),
+    ...(view.target.isTormented === true ? { isTormented: true } : {}),
     level: view.target.level,
   });
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({

@@ -314,6 +314,12 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    */
   isEscapePrevented?: boolean;
   /**
+   * Whether `gBattleMons[AI_TARGET].status2 & STATUS2_TORMENT` is nonzero --
+   * `AI_CBM_Torment`'s single gate (EFFECT_TORMENT). Optional, defaulting to
+   * false.
+   */
+  isTormented?: boolean;
+  /**
    * `gBattleMons[AI_TARGET].level` -- `AI_CBM_OneHitKO`'s final
    * `if_level_cond 1` (less-than) gate operand. Optional, defaulting to 0
    * (the neutral "not lower" outcome when omitted, so the level gate never
@@ -1822,6 +1828,18 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_TORMENT -> AI_CBM_Torment
+  // (`data/battle_ai_scripts.s:192,527-529`): target already tormented
+  // rejects at -10.
+  if (move.effect === "EFFECT_TORMENT") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmTorment(target.isTormented ?? false),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -2325,4 +2343,13 @@ function runCbmDreamEater(
  */
 function runCbmCantEscape(targetEscapePrevented: boolean): number {
   return targetEscapePrevented ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Torment` (`data/battle_ai_scripts.s:527-529`, EFFECT_TORMENT): a
+ * single `if_status2 AI_TARGET, STATUS2_TORMENT, Score_Minus10` -- Torment
+ * is penalized when the target is already tormented. Zero ability/type reads.
+ */
+function runCbmTorment(targetTormented: boolean): number {
+  return targetTormented ? -10 : 0;
 }
