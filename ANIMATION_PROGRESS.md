@@ -1,5 +1,63 @@
 # Animation coverage
 
+## MOVE_LICK promoted to exact — 129/276, both orientations at 73/73 portable-exact (2026-08-08 worker, round B)
+
+- **State:** coverage advanced **128→129/276 exact**, 0 partial, 0 staged,
+  **148→147 unsupported**. LICK was staged last round and is now proven by an
+  exact move in both orientations through the shared seam. `lickPortable.ts`
+  exits 0 at **LICK component 73/73; framebuffer 73/73** (player-back, frames
+  214-286) and **component 73/73; framebuffer 73/73** (opponent-front, frames
+  213-285), fresh evidence hashes player `72c763d6…`/RGB `86239977…`,
+  opponent `2c8a668d…`/RGB `65f7c595…`, reproduced twice fresh. The inventory
+  pin moved **128→129 exact / 148→147 unsupported**.
+- **Did:** the MOVE_LICK draw case in `battleScene.ts` — LICKITUNG back/front
+  (reusing the SLAM art) and ONIX front/back, the 16x32 lick sprite from
+  `src/assets/gen/battle-anim-lick.json` (its OWN embedded palette,
+  ObjNormal, `gOamData_AffineOff_ObjNormal_16x32`, 5 frames of 8 tiles) drawn
+  at `lick.x - 8` / `lick.y - 16` (center-anchored OAM, change-map bbox
+  byte-exact), and the split display latch (below). Wrote
+  `tools/compare/lickPortable.ts` (modelled on slashPortable.ts, probe move
+  122) + the two fixtures, the evidence test
+  (`tests/animation/lickEvidence.test.ts`), the coverage entry, and moved the
+  inventory pin.
+- **Measured (fresh, deterministic, twice-fresh hashes pinned):** the 16x32
+  lick sprite displays ONE frame after its RAM state (creation RAM 235 →
+  pixels 236, cmd transitions all at +1, `AnimLick_Step` invisible ramp
+  blinks 246/248/249/…/285, gone 286), while the task-driven ShakeMon2 target
+  x2 renders the shared sequence at display age − 22 — which lands its tick-0
+  creation write (+1) on exactly one displayed frame: a real one-frame pixel
+  step for the opponent-front ONIX back (idle x2=0, change-map 235 = RAM 234
+  + 1) that coincides with the idle hold for the player-back ONIX front
+  (x2=1, change-map first shake frame 237 = RAM 235 + 2). The target rests at
+  its ONIX front-idle x2=1 through display age 21 and stays 0 after (the RAM
+  restore at age 51 displays at 267 player / 266 opponent). **The orientations
+  line up MINUS 1 (opponent-front = player-back − 1 on every frame), not +4 —
+  a single age-indexed reducer serves both, only the battler geometry differs.**
+- **Next:** the settled queue (MOVE_DRAGON_BREATH / MOVE_BIND) and the ranked
+  remaining moves; LICK adds no new unproven components (the lick sprite =
+  CUT-shape art with its own palette + ObjNormal 16x32, ShakeMon2 already
+  exact via DRAGON_BREATH/SLASH, the target-anchored painter = SLASH).
+- **Notes — the orientation trap did NOT bite this round, but the reason is
+  probe-measured, not assumed.** The lick sprite's subpriority (38
+  player-back / 28 opponent-front) sits IN FRONT of the ONIX front/back
+  (40/30) in BOTH orientations, so it paints after the target every time; the
+  two orientations' changed-pixel counts differ because the target is ONIX's
+  front sprite in one and its back sprite in the other. **The creation-write
+  question the SLASH round raised was answered from the pixels for LICK:**
+  `AnimTask_ShakeMon2`'s tick-0 +1 creation write DOES reach exactly one
+  displayed frame (the opponent-front 235 step), so the draw drives the shake
+  from the shared `shakeMon2OffsetAtTick(1, 0, 16, 1, state.age - 22)` sequence
+  directly, not the reducer's RAM truth. No boundary widening, no new
+  unsupported-branch barrier, no shared-helper edit; the only engine contacts
+  are the LICK draw case in `battleScene.ts` and the already-landed
+  `sceneOnLickView` seam.
+- **Notes — `npm test` (782 files / 7603 passed / 1 established skip),
+  `npm run typecheck` and `npm run build` all green on the final tree.** The
+  coverage entry was inserted with `json.dumps(indent=1)` serialization (one
+  space per nesting level) — re-serialized the file rather than hand-indent an
+  entry, so no whitespace drift.
+
+
 ## MOVE_LICK staged — both orientations isolated at 73 frames; scenarios + dense probe + change maps banked (2026-08-08 worker, round A)
 
 - **State:** LICK stays **unsupported**. Coverage unchanged at **128/276 exact, 0
