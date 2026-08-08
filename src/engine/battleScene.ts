@@ -665,15 +665,7 @@ import { drawTileBg as drawExtractedTileBg } from "./bg.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbox, PLAYER_HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
 import { magbySendOutAnimation } from "./magbySendOut.ts";
 import { kabutoHSlideWobble, KABUTO_FRONT_ANIM_END_OFFSET, KABUTO_FRONT_ANIM_START_OFFSET } from "./kabutoSendOut.ts";
-/**
- * Battle 2's action-menu handoff timing (formerly battle2ActionMenu.ts,
- * retired at the #39 rank-1 flip -- docs/battle-scene-retirement-
- * inventory.md). `PlayerHandleChooseAction` is scheduled from the
- * encounter's send-out handoff. Battle 2 clears B_WIN_MSG at handoff+325,
- * waits six displayed frames for the off-screen BG0 DMA, and reveals the
- * input-ready action menu at handoff+331.
- */
-export const ACTION_MENU_BLANK_START_OFFSET = 325;
+
 export const ACTION_MENU_BLANK_END_OFFSET = 330;
 export const ACTION_MENU_REVEAL_OFFSET = 331;
 
@@ -746,7 +738,7 @@ export function battle2PreTurnRngCalls(t: number, handoffTick: number): number {
  * rock/shake/hit/drain helpers preserves their proven internal clocks while
  * placing the direct, ONIX-first animation on Battle 2's timeline.
  */
-export const BATTLE2_ROCK_SLIDE_REUSE_SHIFT = 380;
+
 
 export function battle2RockSlideMechanismPressTick(confirmTick: number): number {
   return confirmTick - BATTLE2_ROCK_SLIDE_REUSE_SHIFT;
@@ -1167,6 +1159,9 @@ import enemyMonElevationsAsset from "../data/gen/enemy-mon-elevations.json" with
 
 export { BALL_WIDGETS_SETTLED_TICK } from "./battleSceneCanonical.ts";
 import { TURN5_SITRUS_RING_RENDER_LAG } from "./battleSceneCanonical.ts";
+import { ACTION_MENU_BLANK_START_OFFSET, BALL_OAM_PRIORITY, BATTLE2_ROCK_SLIDE_REUSE_SHIFT, DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY, DRAGONBREATH_HP_DRAIN_START_DELAY, DRAGONBREATH_KICKOFF_LINE2, DRAGONBREATH_TEXT_START_DELAY, DRAGON_BREATH_MOVE_POWER, ENDEAVOR_HITSPLAT_ROUNDS, GROVYLE_CORNER, GROVYLE_FAINT_SINK_START_TICK, GROVYLE_FRONT_ANIM_START_OFFSET, GROVYLE_MATERIALIZE_TICK, GROVYLE_STRETCH_EARLY_TABLE, GROVYLE_STRETCH_TABLE, LEGACY_PIDGEOTTO_ONIX_MAX_HP, LINE1, MURKROW_CORNER, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM, PARTICLE_OAM_PRIORITY, PARTICLE_OAM_SUBPRIORITY, PIDGEOTTO_CORNER, ROCK_SLIDE_MOVE_POWER, SUBSEQUENT_BATTLE_SUMMARY_EVA_PHASE_AGE, SWITCHIN_SENTOUT_LINE1, SWITCHIN_SENTOUT_TEXT_START_TICK, TURN10_AERIALACE_HP_DRAIN_START_DELAY, TURN10_AERIALACE_LINE1, TURN10_AERIALACE_LINE2, TURN10_AERIALACE_TEXT_DELAY, TURN10_NOTVERYEFFECTIVE_TEXT_DELAY, TURN10_OFF_AERIALACE_HP_DRAIN_START_DELAY, TURN10_OFF_NOTVERYEFFECTIVE_TEXT_DELAY, TURN10_OFF_ONIX_FLICKER_START, TURN10_OFF_ONIX_HEALTHBOX_WOBBLE_START, TURN10_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY, TURN10_OFF_ROCKSLIDE_MENU_REDRAW_DELAY, TURN10_OFF_ROCKSLIDE_PRESS_TICK, TURN10_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY, TURN10_OFF_SUPER_EFFECTIVE_TEXT_DELAY, TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN10_ROCKSLIDE_PRESS_TICK, TURN10_SUPER_EFFECTIVE_TEXT_DELAY, TURN11_ATKFLOOR_LINE1, TURN11_ATKFLOOR_LINE2, TURN11_ATKFLOOR_TEXT_START_DELAY, TURN11_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY, TURN11_OFF_ROCKSLIDE_MENU_REDRAW_DELAY, TURN11_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY, TURN11_OFF_SUPER_EFFECTIVE_TEXT_DELAY, TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN11_ROCKSLIDE_PRESS_TICK, TURN11_SUPER_EFFECTIVE_TEXT_DELAY, TURN12_OFF_AERIALACE_HP_DRAIN_START_DELAY, TURN12_OFF_NOTVERYEFFECTIVE_TEXT_DELAY, TURN12_OFF_ONIX_FLICKER_START, TURN12_OFF_ONIX_HEALTHBOX_WOBBLE_START, TURN12_OFF_ROCKSLIDE_PRESS_TICK, TURN12_ROCKSLIDE_MISS_TEXT_DELAY, TURN12_ROCKSLIDE_PRESS_TICK, TURN12_ROCKSLIDE_TEXT_CLEAR_DELAY, TURN13_ACCFELL_TEXT_DELAY, TURN13_BALL_HANDOFF_AFTER_DISMISS, TURN13_FAINT_SINK_START_TICK, TURN13_ICONBAR_CREATE_AFTER_DISMISS, TURN13_ICONBAR_DESTROY_AFTER_DISMISS, TURN13_ICONBAR_FADE_START_AFTER_DISMISS, TURN13_MURKROW_FRAME_FLIP_AFTER_DISMISS, TURN13_MURKROW_SETTLE_AFTER_DISMISS, TURN13_MURKROW_STRETCH_AFTER_DISMISS, TURN13_MURKROW_WOBBLE_TABLE, TURN13_OPPONENT_ICON_STATES, TURN13_SANDATTACK_DIRT_LIFETIME, TURN13_SANDATTACK_DIRT_ORIGIN, TURN13_SANDATTACK_DIRT_SPAWN_STRIDE, TURN13_SANDATTACK_DIRT_TABLE, TURN13_SANDATTACK_DIRT_WAVE_ANCHOR_OFFSET, TURN13_SANDATTACK_SLIDE_START_OFFSET, TURN13_SANDATTACK_SLIDE_X2, TURN13_SANDATTACK_TEXT_DELAY, TURN13_SETTLED_BOUNCE_PHASE_SHIFT, TURN13_SWITCHIN_SENTOUT_TEXT_AFTER_DISMISS, TURN13_SWITCHIN_TEXT_CLEAR_AFTER_DISMISS, TURN14_DRAGONBREATH_TEXT_START_TICK, TURN14_FLYUP_TEXT_START_TICK, TURN14_FLY_BALL_RAM_START, TURN14_FLY_BALL_TABLE, TURN14_MENU_TEXT_CLEAR_TICK, TURN14_MISSED_TEXT_START_TICK, TURN15_FLY_BALL_MATRIX, TURN15_FLY_BALL_RAM_START, TURN15_FLY_BALL_TABLE, TURN15_FLY_STRIKE_TEXT_START_TICK, TURN15_HEALTHBOX_WOBBLE_RAM_START, TURN15_HEALTHBOX_WOBBLE_TICKS, TURN15_HITSPLAT_CENTER, TURN15_HITSPLAT_RAM_END, TURN15_HITSPLAT_RAM_START, TURN15_HP_DRAIN_START_TICK, TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK, TURN15_ONIX_HEALTHBOX_VANISH_TICK, TURN15_ONIX_SHAKE_X2, TURN15_ONIX_SINK_RATE, TURN15_ONIX_SINK_START_TICK, TURN15_STRIKE_ATTACKER_REVEAL_TICK, TURN15_STRIKE_RENDER_LAG, TURN15_STRIKE_TARGET_INVISIBLE_PULSE_END_TICK, TURN15_STRIKE_TARGET_INVISIBLE_PULSE_PERIOD, TURN15_STRIKE_TARGET_INVISIBLE_PULSE_START_TICK, TURN16_FAINT_ATTACK_LINE1, TURN16_FAINT_ATTACK_LINE2, TURN16_FAINT_ATTACK_TEXT_DELAY, TURN16_FIGHT_SUBMENU_REVEAL_DELAY, TURN16_FIRE_PUNCH_LINE1, TURN16_FIRE_PUNCH_LINE2, TURN17_LOSS_INPUT_READY_DELAY, TURN17_LOSS_LINE1, TURN17_LOSS_LINE2, TURN17_OUTCOME_LINE2, TURN1_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY, TURN1_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY, TURN1_OFF_ROCKSLIDE_TEXT_DELAY, TURN1_OFF_STATS_BANNER_BG1_Y_ANCHOR_DELAY, TURN1_OFF_STATS_BANNER_END_DELAY, TURN1_OFF_STATS_BANNER_START_DELAY, TURN1_OFF_STAT_ROSE_TEXT_DELAY, TURN2_OFF_DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY, TURN2_OFF_DRAGONBREATH_HP_DRAIN_START_DELAY, TURN2_OFF_DRAGONBREATH_TEXT_CLEAR_DELAY, TURN2_OFF_DRAGONBREATH_TEXT_START_DELAY, TURN2_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START, TURN2_OFF_ENDEAVOR_HP_DRAIN_START_DELAY, TURN2_OFF_ENDEAVOR_TEXT_CLEAR_DELAY, TURN3_CONFIRM_PRESS_TICK, TURN3_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START, TURN3_OFF_ENDEAVOR_HP_DRAIN_START_DELAY, TURN3_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY, TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY, TURN3_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY, TURN3_OFF_ROCKSLIDE_TEXT_DELAY, TURN3_ROCKSLIDE_PRESS_TICK, TURN4_CONFIRM_PRESS_TICK, TURN4_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY, TURN4_OFF_ROCKSLIDE_MENU_REDRAW_DELAY, TURN4_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY, TURN4_OFF_ROCKSLIDE_TEXT_DELAY, TURN4_OFF_STATS_BANNER_BG1_Y_ANCHOR_DELAY, TURN4_OFF_STATS_BANNER_END_DELAY, TURN4_OFF_STATS_BANNER_START_DELAY, TURN4_OFF_STAT_ROSE_TEXT_DELAY, TURN4_ROCKSLIDE_MENU_REDRAW_DELAY, TURN5_BG_FADE_START_TICK, TURN5_CONFIRM_PRESS_TICK, TURN5_FAINTED_TEXT_DELAY, TURN5_ICONBAR_CREATE_TICK, TURN5_ICONBAR_DESTROY_TICK, TURN5_ICONBAR_FADE_START_TICK, TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG, TURN5_OPPONENT_ICON_STATES, TURN5_ROCKSLIDE_PRESS_TICK, TURN5_SITRUS_HEAL_TEXT_START_TICK, TURN5_SITRUS_MENU_REDRAW_TICK, TURN5_SITRUS_TEXT_CLEAR_TICK, TURN5_STRETCH_TABLE, TURN5_STRETCH_TICK, TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, TURN8_BIND_PRESS_TICK, TURN8_BIND_TEXT_DELAY, TURN8_MISS_TEXT_DELAY, TURN8_TEXT_CLEAR_DELAY, TURN9_EP2_FLICKER_ON_TICKS, TURN9_EP2_FLICKER_PERIOD, TURN9_EP2_FLICKER_RENDER_LAG, TURN9_EP2_FLICKER_START, TURN9_EP2_FLICKER_TOTAL_TICKS, TURN9_EP2_HEALTHBOX_WOBBLE_RENDER_LAG, TURN9_EP2_HEALTHBOX_WOBBLE_START, TURN9_EP2_HEALTHBOX_WOBBLE_TICKS, TURN9_HP_DRAIN_START_DELAY, TURN9_NOTVERYEFFECTIVE_LINE, TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN9_QUICKATTACK_LINE1, TURN9_QUICKATTACK_LINE2, TURN9_QUICKATTACK_PRESS_TICK, TURN9_QUICKATTACK_TEXT_DELAY, TURN9_ROCKSLIDE_HP_DRAIN_START_DELAY, TURN9_ROCKSLIDE_PRESS_TICK, TURN9_ROCKSLIDE_TEXT_CLEAR_DELAY, TURN9_SUPER_EFFECTIVE_TEXT_DELAY, anchorOpponentAfterTurn4Hp } from "./battleSceneCanonical.ts";
+export { ACTION_MENU_BLANK_START_OFFSET, BALL_OAM_PRIORITY, BATTLE2_ROCK_SLIDE_REUSE_SHIFT, DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY, DRAGONBREATH_HP_DRAIN_START_DELAY, DRAGONBREATH_KICKOFF_LINE2, DRAGONBREATH_TEXT_START_DELAY, DRAGON_BREATH_MOVE_POWER, ENDEAVOR_HITSPLAT_ROUNDS, GROVYLE_CORNER, GROVYLE_FAINT_SINK_START_TICK, GROVYLE_FRONT_ANIM_START_OFFSET, GROVYLE_MATERIALIZE_TICK, GROVYLE_STRETCH_EARLY_TABLE, GROVYLE_STRETCH_TABLE, LEGACY_PIDGEOTTO_ONIX_MAX_HP, LINE1, MURKROW_CORNER, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM, PARTICLE_OAM_PRIORITY, PARTICLE_OAM_SUBPRIORITY, PIDGEOTTO_CORNER, ROCK_SLIDE_MOVE_POWER, SUBSEQUENT_BATTLE_SUMMARY_EVA_PHASE_AGE, SWITCHIN_SENTOUT_LINE1, SWITCHIN_SENTOUT_TEXT_START_TICK, TURN10_AERIALACE_HP_DRAIN_START_DELAY, TURN10_AERIALACE_LINE1, TURN10_AERIALACE_LINE2, TURN10_AERIALACE_TEXT_DELAY, TURN10_NOTVERYEFFECTIVE_TEXT_DELAY, TURN10_OFF_AERIALACE_HP_DRAIN_START_DELAY, TURN10_OFF_NOTVERYEFFECTIVE_TEXT_DELAY, TURN10_OFF_ONIX_FLICKER_START, TURN10_OFF_ONIX_HEALTHBOX_WOBBLE_START, TURN10_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY, TURN10_OFF_ROCKSLIDE_MENU_REDRAW_DELAY, TURN10_OFF_ROCKSLIDE_PRESS_TICK, TURN10_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY, TURN10_OFF_SUPER_EFFECTIVE_TEXT_DELAY, TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN10_ROCKSLIDE_PRESS_TICK, TURN10_SUPER_EFFECTIVE_TEXT_DELAY, TURN11_ATKFLOOR_LINE1, TURN11_ATKFLOOR_LINE2, TURN11_ATKFLOOR_TEXT_START_DELAY, TURN11_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY, TURN11_OFF_ROCKSLIDE_MENU_REDRAW_DELAY, TURN11_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY, TURN11_OFF_SUPER_EFFECTIVE_TEXT_DELAY, TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN11_ROCKSLIDE_PRESS_TICK, TURN11_SUPER_EFFECTIVE_TEXT_DELAY, TURN12_OFF_AERIALACE_HP_DRAIN_START_DELAY, TURN12_OFF_NOTVERYEFFECTIVE_TEXT_DELAY, TURN12_OFF_ONIX_FLICKER_START, TURN12_OFF_ONIX_HEALTHBOX_WOBBLE_START, TURN12_OFF_ROCKSLIDE_PRESS_TICK, TURN12_ROCKSLIDE_MISS_TEXT_DELAY, TURN12_ROCKSLIDE_PRESS_TICK, TURN12_ROCKSLIDE_TEXT_CLEAR_DELAY, TURN13_ACCFELL_TEXT_DELAY, TURN13_BALL_HANDOFF_AFTER_DISMISS, TURN13_FAINT_SINK_START_TICK, TURN13_ICONBAR_CREATE_AFTER_DISMISS, TURN13_ICONBAR_DESTROY_AFTER_DISMISS, TURN13_ICONBAR_FADE_START_AFTER_DISMISS, TURN13_MURKROW_FRAME_FLIP_AFTER_DISMISS, TURN13_MURKROW_SETTLE_AFTER_DISMISS, TURN13_MURKROW_STRETCH_AFTER_DISMISS, TURN13_MURKROW_WOBBLE_TABLE, TURN13_OPPONENT_ICON_STATES, TURN13_SANDATTACK_DIRT_LIFETIME, TURN13_SANDATTACK_DIRT_ORIGIN, TURN13_SANDATTACK_DIRT_SPAWN_STRIDE, TURN13_SANDATTACK_DIRT_TABLE, TURN13_SANDATTACK_DIRT_WAVE_ANCHOR_OFFSET, TURN13_SANDATTACK_SLIDE_START_OFFSET, TURN13_SANDATTACK_SLIDE_X2, TURN13_SANDATTACK_TEXT_DELAY, TURN13_SETTLED_BOUNCE_PHASE_SHIFT, TURN13_SWITCHIN_SENTOUT_TEXT_AFTER_DISMISS, TURN13_SWITCHIN_TEXT_CLEAR_AFTER_DISMISS, TURN14_DRAGONBREATH_TEXT_START_TICK, TURN14_FLYUP_TEXT_START_TICK, TURN14_FLY_BALL_RAM_START, TURN14_FLY_BALL_TABLE, TURN14_MENU_TEXT_CLEAR_TICK, TURN14_MISSED_TEXT_START_TICK, TURN15_FLY_BALL_MATRIX, TURN15_FLY_BALL_RAM_START, TURN15_FLY_BALL_TABLE, TURN15_FLY_STRIKE_TEXT_START_TICK, TURN15_HEALTHBOX_WOBBLE_RAM_START, TURN15_HEALTHBOX_WOBBLE_TICKS, TURN15_HITSPLAT_CENTER, TURN15_HITSPLAT_RAM_END, TURN15_HITSPLAT_RAM_START, TURN15_HP_DRAIN_START_TICK, TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK, TURN15_ONIX_HEALTHBOX_VANISH_TICK, TURN15_ONIX_SHAKE_X2, TURN15_ONIX_SINK_RATE, TURN15_ONIX_SINK_START_TICK, TURN15_STRIKE_ATTACKER_REVEAL_TICK, TURN15_STRIKE_RENDER_LAG, TURN15_STRIKE_TARGET_INVISIBLE_PULSE_END_TICK, TURN15_STRIKE_TARGET_INVISIBLE_PULSE_PERIOD, TURN15_STRIKE_TARGET_INVISIBLE_PULSE_START_TICK, TURN16_FAINT_ATTACK_LINE1, TURN16_FAINT_ATTACK_LINE2, TURN16_FAINT_ATTACK_TEXT_DELAY, TURN16_FIGHT_SUBMENU_REVEAL_DELAY, TURN16_FIRE_PUNCH_LINE1, TURN16_FIRE_PUNCH_LINE2, TURN17_LOSS_INPUT_READY_DELAY, TURN17_LOSS_LINE1, TURN17_LOSS_LINE2, TURN17_OUTCOME_LINE2, TURN1_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY, TURN1_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY, TURN1_OFF_ROCKSLIDE_TEXT_DELAY, TURN1_OFF_STATS_BANNER_BG1_Y_ANCHOR_DELAY, TURN1_OFF_STATS_BANNER_END_DELAY, TURN1_OFF_STATS_BANNER_START_DELAY, TURN1_OFF_STAT_ROSE_TEXT_DELAY, TURN2_OFF_DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY, TURN2_OFF_DRAGONBREATH_HP_DRAIN_START_DELAY, TURN2_OFF_DRAGONBREATH_TEXT_CLEAR_DELAY, TURN2_OFF_DRAGONBREATH_TEXT_START_DELAY, TURN2_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START, TURN2_OFF_ENDEAVOR_HP_DRAIN_START_DELAY, TURN2_OFF_ENDEAVOR_TEXT_CLEAR_DELAY, TURN3_CONFIRM_PRESS_TICK, TURN3_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START, TURN3_OFF_ENDEAVOR_HP_DRAIN_START_DELAY, TURN3_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY, TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY, TURN3_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY, TURN3_OFF_ROCKSLIDE_TEXT_DELAY, TURN3_ROCKSLIDE_PRESS_TICK, TURN4_CONFIRM_PRESS_TICK, TURN4_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY, TURN4_OFF_ROCKSLIDE_MENU_REDRAW_DELAY, TURN4_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY, TURN4_OFF_ROCKSLIDE_TEXT_DELAY, TURN4_OFF_STATS_BANNER_BG1_Y_ANCHOR_DELAY, TURN4_OFF_STATS_BANNER_END_DELAY, TURN4_OFF_STATS_BANNER_START_DELAY, TURN4_OFF_STAT_ROSE_TEXT_DELAY, TURN4_ROCKSLIDE_MENU_REDRAW_DELAY, TURN5_BG_FADE_START_TICK, TURN5_CONFIRM_PRESS_TICK, TURN5_FAINTED_TEXT_DELAY, TURN5_ICONBAR_CREATE_TICK, TURN5_ICONBAR_DESTROY_TICK, TURN5_ICONBAR_FADE_START_TICK, TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG, TURN5_OPPONENT_ICON_STATES, TURN5_ROCKSLIDE_PRESS_TICK, TURN5_SITRUS_HEAL_TEXT_START_TICK, TURN5_SITRUS_MENU_REDRAW_TICK, TURN5_SITRUS_TEXT_CLEAR_TICK, TURN5_STRETCH_TABLE, TURN5_STRETCH_TICK, TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, TURN8_BIND_PRESS_TICK, TURN8_BIND_TEXT_DELAY, TURN8_MISS_TEXT_DELAY, TURN8_TEXT_CLEAR_DELAY, TURN9_EP2_FLICKER_ON_TICKS, TURN9_EP2_FLICKER_PERIOD, TURN9_EP2_FLICKER_RENDER_LAG, TURN9_EP2_FLICKER_START, TURN9_EP2_FLICKER_TOTAL_TICKS, TURN9_EP2_HEALTHBOX_WOBBLE_RENDER_LAG, TURN9_EP2_HEALTHBOX_WOBBLE_START, TURN9_EP2_HEALTHBOX_WOBBLE_TICKS, TURN9_HP_DRAIN_START_DELAY, TURN9_NOTVERYEFFECTIVE_LINE, TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN9_QUICKATTACK_LINE1, TURN9_QUICKATTACK_LINE2, TURN9_QUICKATTACK_PRESS_TICK, TURN9_QUICKATTACK_TEXT_DELAY, TURN9_ROCKSLIDE_HP_DRAIN_START_DELAY, TURN9_ROCKSLIDE_PRESS_TICK, TURN9_ROCKSLIDE_TEXT_CLEAR_DELAY, TURN9_SUPER_EFFECTIVE_TEXT_DELAY, anchorOpponentAfterTurn4Hp };
+
 export { TURN5_SITRUS_RING_RENDER_LAG };
 
 interface Tileset {
@@ -1380,7 +1375,7 @@ const delibirdFrontSprite = (opponentFrontSpritesAsset as Record<string, Opponen
 const mareepFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAREEP!;
 const azumarillFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).AZUMARILL!;
 const grimerFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GRIMER!;
-const PIDGEOTTO_CORNER = { x: 144, y: 19 };
+
 /** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): MURKROW's own `yOffset` (11, `mon-pic-coords.json`) is bit-identical to Pidgeotto's, so the same `(144, 8+yOffset)` formula lands on the identical corner - not a coincidence, both front pics share the same 48px-wide/11px-yOffset box. */
 const murkrowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MURKROW!;
 const spoinkFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SPOINK!;
@@ -1831,7 +1826,7 @@ const singArt = singAsset as {
   azurillBack: { tileset: Tileset; palette: RgbColor[] };
   azurillFront: { tileset: Tileset; palette: RgbColor[] };
 };
-const MURKROW_CORNER = { x: 144, y: 19 };
+
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
 const battleAnimWhiteFeather = battleAnimWhiteFeatherAsset as BattleAnimWhiteFeatherAsset;
@@ -2304,7 +2299,7 @@ const anchorPlayerAfterTurn3Hp = BATTLE1_PRESENTATION_HP.playerAfterTurn3Hp;
  * a dense oracle pixel sweep of the same window (0-diff against this
  * literal in `npm run compare`).
  */
-const anchorOpponentAfterTurn4Hp = 1;
+
 
 /**
  * Presentation-seam retirement, the turn-4 settle staging gap
@@ -2810,7 +2805,7 @@ function blendChannel(tgt1: number, tgt2: number, eva: number, evb: number): num
 
 // --- §3: intro text ---------------------------------------------------
 
-const LINE1 = "BUG CATCHER DESTIN";
+
 const LINE2 = "would like to battle!";
 
 function presentationForEncounter(
@@ -3136,7 +3131,7 @@ export function playerTrainerSendOutClock(t: number, handoffTick: number, encoun
  * translations keep their ordinary age. The next callback reconverges with
  * the shared Battle-1 sequence, so this is a coefficient-only boundary.
  */
-export const SUBSEQUENT_BATTLE_SUMMARY_EVA_PHASE_AGE = 14;
+
 
 export function playerSummaryEvaOffset(
   playerVisualT: number,
@@ -3241,8 +3236,8 @@ function trainerExitX(t: number, handoffTick: number): number | null {
  * not curve-fitted" principle as the v3 pin) - see docs/battle-scene-notes.md
  * §7.11 for the full derivation and the still-open gap list.
  */
-const GROVYLE_MATERIALIZE_TICK = 1544;
-const GROVYLE_CORNER = { x: 144, y: 12 };
+
+
 
 /**
  * §7.6: opponent healthbox slide-in. The content (name/gender/level/HP bar)
@@ -5291,7 +5286,7 @@ function drawPlayerBallOpen(
  * the same two root causes across the whole window (full account in
  * `docs/battle-scene-notes.md` §7.17).
  */
-const GROVYLE_FRONT_ANIM_START_OFFSET = 35; // et (t-handoffTick) of RAM tick 1496's render (1497) - see the module doc above
+ // et (t-handoffTick) of RAM tick 1496's render (1497) - see the module doc above
 function frontSpriteAnimFrame(steps: readonly { frame: 0 | 1; duration: number }[], localOffset: number): 0 | 1 {
   let consumed = 0;
   for (const step of steps) {
@@ -5300,20 +5295,7 @@ function frontSpriteAnimFrame(steps: readonly { frame: 0 | 1; duration: number }
   }
   return steps[steps.length - 1]!.frame;
 }
-const GROVYLE_STRETCH_TABLE: readonly { xScale: number; yScale: number; y2: number }[] = [
-  { xScale: 263, yScale: 239, y2: -2 }, { xScale: 264, yScale: 236, y2: -2 }, { xScale: 265, yScale: 234, y2: -2 },
-  { xScale: 266, yScale: 231, y2: -3 }, { xScale: 267, yScale: 221, y2: -4 }, { xScale: 268, yScale: 222, y2: -4 },
-  { xScale: 268, yScale: 229, y2: -3 }, { xScale: 269, yScale: 231, y2: -3 }, { xScale: 270, yScale: 222, y2: -4 },
-  { xScale: 270, yScale: 213, y2: -5 }, { xScale: 271, yScale: 215, y2: -5 }, { xScale: 271, yScale: 223, y2: -4 },
-  { xScale: 271, yScale: 225, y2: -3 }, { xScale: 271, yScale: 218, y2: -4 }, { xScale: 272, yScale: 209, y2: -5 },
-  { xScale: 271, yScale: 212, y2: -5 }, { xScale: 271, yScale: 222, y2: -4 }, { xScale: 271, yScale: 226, y2: -3 },
-  { xScale: 271, yScale: 219, y2: -4 }, { xScale: 270, yScale: 213, y2: -5 }, { xScale: 270, yScale: 216, y2: -5 },
-  { xScale: 269, yScale: 227, y2: -3 }, { xScale: 269, yScale: 232, y2: -3 }, { xScale: 268, yScale: 227, y2: -3 },
-  { xScale: 267, yScale: 228, y2: -3 }, { xScale: 266, yScale: 230, y2: -3 }, { xScale: 265, yScale: 233, y2: -2 },
-  { xScale: 264, yScale: 235, y2: -2 }, { xScale: 263, yScale: 238, y2: -2 }, { xScale: 262, yScale: 241, y2: -1 },
-  { xScale: 261, yScale: 244, y2: -1 }, { xScale: 259, yScale: 247, y2: -1 }, { xScale: 258, yScale: 250, y2: 0 },
-  { xScale: 257, yScale: 253, y2: 0 }, { xScale: 256, yScale: 256, y2: 0 }, { xScale: 256, yScale: 256, y2: 0 },
-];
+
 /**
  * §7.22/§7.23: mechanism 5's matrix write starts 7 RAM ticks before render
  * 1504 (`GROVYLE_STRETCH_TABLE[0]`'s own tick) - RAM ticks 1496-1502 (et
@@ -5342,15 +5324,7 @@ const GROVYLE_STRETCH_TABLE: readonly { xScale: number; yScale: number; y2: numb
  * `GROVYLE_STRETCH_TABLE[0]`, confirming the two probe reads agree at the
  * seam and this table needs no 8th entry.
  */
-const GROVYLE_STRETCH_EARLY_TABLE: readonly { xScale: number; yScale: number; y2: number }[] = [
-  { xScale: 256, yScale: 256, y2: 0 }, // RAM 1496 raw (0,0,0) not yet latched - see doc comment above
-  { xScale: 256, yScale: 256, y2: 0 },
-  { xScale: 257, yScale: 254, y2: 0 },
-  { xScale: 258, yScale: 251, y2: 0 },
-  { xScale: 259, yScale: 248, y2: -1 },
-  { xScale: 260, yScale: 245, y2: -1 },
-  { xScale: 262, yScale: 241, y2: -1 },
-];
+
 /** handoffTick+42 through +56 (15 ticks): tCoeff 15 down to 1 (RAM-probed, see the module doc above); et>56 is the true normal palette. */
 function grovyleStretchTintCoeff(localOffset: number): number {
   return Math.max(0, 15 - localOffset);
@@ -6140,9 +6114,9 @@ export type AliveParticle = { i: number; age: number; dx: number; dy: number; fr
  * `drawSendOutHandoff` below (painter's-algorithm draw order = later-drawn
  * wins, matching the lower-OAM-priority-wins rule).
  */
-export const BALL_OAM_PRIORITY = 2;
-export const PARTICLE_OAM_PRIORITY = 1;
-export const PARTICLE_OAM_SUBPRIORITY = 28;
+
+
+
 
 /**
  * §7.26's real `SortSprites()` model, applied: every particle in one burst
@@ -8693,8 +8667,8 @@ function drawEndeavorDroplets(
  * DRAGON_BREATH (`.power = 60`, `battle_moves.h:2931`) -> amplitude 5 ->
  * down=2/up=3 (asymmetric, matches the RAM-probed `+3,-2,+3,-2,...`).
  */
-export const ROCK_SLIDE_MOVE_POWER = 75;
-export const DRAGON_BREATH_MOVE_POWER = 60;
+
+
 
 /** `AnimTask_ShakeTargetBasedOnMovePowerOrDmg`'s amplitude/downStep/upStep, derived from whatever `gBattleMovePower` was left holding by the last power-calculated move (see `ROCK_SLIDE_MOVE_POWER`'s own doc comment above) - a general rule, not a per-turn literal pair. Exported for a direct Tier-1 pin against all three RAM-confirmed data points (turn 2 and the turn-5 prediction both anchor on `ROCK_SLIDE_MOVE_POWER`, turn 3 on `DRAGON_BREATH_MOVE_POWER`). */
 export function endeavorShakeSteps(stalePower: number): { downStep: number; upStep: number } {
@@ -8772,10 +8746,7 @@ function endeavorShakeX2(t: number, pressTick: number, stalePower: number): numb
 const ENDEAVOR_HITSPLAT_MATRIX = 372;
 const ENDEAVOR_HITSPLAT_VISIBLE_TICKS = 10;
 const ENDEAVOR_HITSPLAT_RENDER_LAG = 1;
-const ENDEAVOR_HITSPLAT_ROUNDS: readonly { center: { x: number; y: number }; ramOffset: number }[] = [
-  { center: { x: 60, y: 76 }, ramOffset: 62 }, // round 0: RAM 3007-3016 visible (script offset (12,-12), X-flipped for the target side)
-  { center: { x: 84, y: 100 }, ramOffset: 88 }, // round 1: RAM 3033-3042 visible (script offset (-12,12), X-flipped for the target side)
-];
+
 
 /**
  * Shared `drawSpriteSheetAffineStretchBlendedOverFb` matrix for the several
@@ -8940,9 +8911,9 @@ function drawEndeavorSquish(fb: Uint8Array, t: number, pressTick: number, oppone
  * timings use (`docs/dragon-breath-notes.md`'s phase table: RAM 3136 sets
  * the busy flag, render = RAM+1 = 3137 = pressTick(2945)+192).
  */
-const DRAGONBREATH_KICKOFF_LINE2 = "DRAGONBREATH!";
+
 const DRAGONBREATH_KICKOFF_TEXT_TOTAL = ROCK_SLIDE_LINE1.length + DRAGONBREATH_KICKOFF_LINE2.length;
-const DRAGONBREATH_TEXT_START_DELAY = 192;
+
 
 function dragonBreathTextStartTick(pressTick: number, startDelay: number = DRAGONBREATH_TEXT_START_DELAY): number {
   return pressTick + startDelay;
@@ -8995,7 +8966,7 @@ const DRAGON_BREATH_BLEND_COLOR: RgbColor = { r: 248, g: 0, b: 0 }; // RGB_RED (
  * specific, same reasoning `dragonBreathShakeX2`/`dragonBreathBlendCoeff`
  * above already used.
  */
-const DRAGONBREATH_HP_DRAIN_START_DELAY = 353; // pressTick+353 = RAM 3298 (healthBar1Curr sentinel, docs/dragon-breath-notes.md phase table)
+ // pressTick+353 = RAM 3298 (healthBar1Curr sentinel, docs/dragon-breath-notes.md phase table)
 
 export function dragonBreathHp(t: number, pressTick: number, startHp: number, endHp: number, startDelay: number = DRAGONBREATH_HP_DRAIN_START_DELAY): number {
   const d = t - (pressTick + startDelay);
@@ -9017,7 +8988,7 @@ export function dragonBreathHp(t: number, pressTick: number, startHp: number, en
  * lands on DRAGON_BREATH's own anchor (RAM 3263 = `pressTick`+318) instead,
  * rather than duplicating either function's own body.
  */
-const DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY = 318; // pressTick+318 = RAM 3263 (target-side hit-flash start)
+ // pressTick+318 = RAM 3263 (target-side hit-flash start)
 const DRAGONBREATH_HIT_FLASH_OFFSET = DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY - HIT_FLASH_RAM_ANCHOR_DELAY;
 
 /**
@@ -9037,8 +9008,8 @@ const DRAGONBREATH_HIT_FLASH_OFFSET = DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY - HIT_
  * a `bin/oracle run` scout: the healthbox-wobble region first differs at
  * render 3165, matching this anchor's own `t-1` convention exactly).
  */
-const TURN2_OFF_DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY = 219; // pixel-confirmed render 3165 (pressTick+219) is the wobble's own first visible tick
-const TURN2_OFF_DRAGONBREATH_HP_DRAIN_START_DELAY = 254; // RAM tick 3199 (bar1Curr sentinel -32768), same "sentinel tick itself" convention DRAGONBREATH_HP_DRAIN_START_DELAY's own doc cites - probe-exact, no render-lag correction (same-frame CPU-copy mechanism)
+ // pixel-confirmed render 3165 (pressTick+219) is the wobble's own first visible tick
+ // RAM tick 3199 (bar1Curr sentinel -32768), same "sentinel tick itself" convention DRAGONBREATH_HP_DRAIN_START_DELAY's own doc cites - probe-exact, no render-lag correction (same-frame CPU-copy mechanism)
 
 function drawDragonBreathScene(
   fb: Uint8Array,
@@ -9089,7 +9060,7 @@ function drawDragonBreathScene(
  * resettled-menu frame - the same 7-tick clear-to-redraw gap turn 1/6/7's
  * own ROCK_SLIDE pairs already establish.
  */
-const TURN2_OFF_DRAGONBREATH_TEXT_CLEAR_DELAY = 285; // pixel-confirmed render 3230 (pressTick+285)
+ // pixel-confirmed render 3230 (pressTick+285)
 
 /**
  * Turn 3's reopened submenu consumes the immutable turn-2 choose-action
@@ -9142,7 +9113,7 @@ export function turn3SubmenuBounceTickFromPresentationEpochAge(
  * assumed here, directly oracle-confirmed for this specific window instead).
  */
 /** Turn 3's own A-confirm press tick (RAM/render 3891, the canonical A hold's last frame). */
-const TURN3_CONFIRM_PRESS_TICK = 3891;
+
 
 /**
  * The turn-3 confirm keeps the turn-2 receipt's live epoch through the
@@ -9235,8 +9206,8 @@ const TURN2_ENDEAVOR_HP = resolveTurn2EndeavorHpEndpoints();
  * `TURN2_OFF_ENDEAVOR_TEXT_CLEAR_DELAY` ==
  * `TURN2_OFF_DRAGONBREATH_TEXT_START_DELAY`, both 155.
  */
-const TURN2_OFF_ENDEAVOR_HP_DRAIN_START_DELAY = 116; // pixel/RAM-pinned tick 3061 (pressTick+116)
-const TURN2_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START = 81; // RAM/pixel-pinned: healthbox0Y2 first flip at render 3027 (pressTick+81), 1-tick lag already baked into endeavorHealthboxBounceY2's own formula
+ // pixel/RAM-pinned tick 3061 (pressTick+116)
+ // RAM/pixel-pinned: healthbox0Y2 first flip at render 3027 (pressTick+81), 1-tick lag already baked into endeavorHealthboxBounceY2's own formula
 /**
  * ISSUES #39 rank-6 slice 2: Onix's own `endeavorOnixInvisible` hit-flash
  * flicker (`struct Sprite.invisible`) is ALSO class (b), not just the
@@ -9253,8 +9224,8 @@ const TURN2_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START = 81; // RAM/pixel-pinned: healt
  * the ON fit, only the anchor moves.
  */
 const TURN2_OFF_ENDEAVOR_FLICKER_START = TURN2_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START + 1; // RAM/pixel-pinned: onixInvisible first true at render 3027 (pressTick+82)
-const TURN2_OFF_ENDEAVOR_TEXT_CLEAR_DELAY = 155; // pixel-pinned tick 3100 (pressTick+155) - held ENDEAVOR text goes blank, box stays
-const TURN2_OFF_DRAGONBREATH_TEXT_START_DELAY = 155; // pixel-pinned tick 3100 (pressTick+155) - DRAGON_BREATH's own first character, same frame ENDEAVOR's own text clears; override on the shared dragonBreathTextStartTick default (192, turn 13's own call site unaffected)
+ // pixel-pinned tick 3100 (pressTick+155) - held ENDEAVOR text goes blank, box stays
+ // pixel-pinned tick 3100 (pressTick+155) - DRAGON_BREATH's own first character, same frame ENDEAVOR's own text clears; override on the shared dragonBreathTextStartTick default (192, turn 13's own call site unaffected)
 
 function drawTurn2KickoffText(
   fb: Uint8Array,
@@ -9376,8 +9347,8 @@ function drawTurn2KickoffText(
  * here; the boundary condition below (`rockSlideTextStartTick` with the new
  * `TURN3_OFF_ROCKSLIDE_TEXT_DELAY`) already lands exactly there.
  */
-const TURN3_OFF_ENDEAVOR_HP_DRAIN_START_DELAY = 116; // pixel/RAM-pinned tick 4007 (pressTick+116), same relative offset as turn 2's own
-const TURN3_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START = 81; // RAM-pinned: healthbox0Y2 first flip at RAM tick 3972 (pressTick+81), same relative offset as turn 2's own
+ // pixel/RAM-pinned tick 4007 (pressTick+116), same relative offset as turn 2's own
+ // RAM-pinned: healthbox0Y2 first flip at RAM tick 3972 (pressTick+81), same relative offset as turn 2's own
 const TURN3_OFF_ENDEAVOR_FLICKER_START = TURN3_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START + 1; // RAM-pinned: onixInvisible first true at RAM tick 3973 (pressTick+82), same +1 pairing turn 2's own established
 
 function drawTurn3EndeavorText(
@@ -9476,7 +9447,7 @@ function drawTurn3EndeavorText(
  * reused with ZERO code changes, verified by `npm run compare`'s own 0-diff
  * result across the whole dense rock window (docs/battle-turn-notes.md §21).
  */
-const TURN3_ROCKSLIDE_PRESS_TICK = 3687; // 4080 - ROCK_SLIDE_TEXT_DELAY(393)
+ // 4080 - ROCK_SLIDE_TEXT_DELAY(393)
 
 /**
  * S7 slice H: text-clear/menu-redraw do NOT land at turn 1's own unchanged
@@ -9520,10 +9491,10 @@ const TURN3_ROCKSLIDE_PRESS_TICK = 3687; // 4080 - ROCK_SLIDE_TEXT_DELAY(393)
  * downstream shared function's default (unmodified ON) delay stays
  * irrelevant here since every call site below passes its own override.
  */
-const TURN3_OFF_ROCKSLIDE_TEXT_DELAY = 356; // pressTick+356 = 4043 (same-frame hard cut from the held ENDEAVOR text to ROCK_SLIDE's own first character, pixel-confirmed)
-const TURN3_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY = 453; // pressTick+453 = 4140 (bar1Curr sentinel, probe-exact, same convention TURN1_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY's own doc establishes)
-const TURN3_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY = 518; // pressTick+518 = 4205 (message box blanks, box stays)
-const TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY = 525; // pressTick+525 = 4212 (hard cut to the resettled action menu)
+ // pressTick+356 = 4043 (same-frame hard cut from the held ENDEAVOR text to ROCK_SLIDE's own first character, pixel-confirmed)
+ // pressTick+453 = 4140 (bar1Curr sentinel, probe-exact, same convention TURN1_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY's own doc establishes)
+ // pressTick+518 = 4205 (message box blanks, box stays)
+ // pressTick+525 = 4212 (hard cut to the resettled action menu)
 const TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE = {
   ...ROCK_SLIDE_ANIMATION_PROFILE,
   hitFlashAnchorAge: 418, // RAM tick 4105 (healthbox wobble's own first +1 write) - pressTick(3687)
@@ -9644,7 +9615,7 @@ function drawTurn3RockSlideWindow(
  * 1's), so no timing-mismatch correction is needed (see `drawTurn4KickoffText`'s
  * own doc for the fresh RAM/pixel evidence this session gathered).
  */
-const TURN4_CONFIRM_PRESS_TICK = 4925;
+
 
 /**
  * Generic sibling of the retired `turn4SubmenuBounceTick` (typeref-
@@ -9715,10 +9686,10 @@ function turn4KickoffBounceTickFromLatest(
  * past `TURN4_OFF_STATS_BANNER_END_DELAY`, the same shape turn 1's own
  * dispatcher (`drawFightSubmenuWindow`) uses inline.
  */
-const TURN4_OFF_STATS_BANNER_START_DELAY = 80; // RAM tick 5005 (BLDALPHA first write) - pressTick(4925), same relative offset as turn 1's own
-const TURN4_OFF_STATS_BANNER_END_DELAY = 146; // RAM tick 5071 (BLDALPHA back to 0) - pressTick(4925), same relative offset as turn 1's own
-const TURN4_OFF_STATS_BANNER_BG1_Y_ANCHOR_DELAY = 83; // RAM tick 5008 (BG1_Y's own first +3 write) - pressTick(4925), same relative offset as turn 1's own
-const TURN4_OFF_STAT_ROSE_TEXT_DELAY = 156; // banner end(146) + the same 10-tick gap turn 1's own OFF schedule establishes; sha-confirmed hard cut at render 5081 (pressTick+156)
+ // RAM tick 5005 (BLDALPHA first write) - pressTick(4925), same relative offset as turn 1's own
+ // RAM tick 5071 (BLDALPHA back to 0) - pressTick(4925), same relative offset as turn 1's own
+ // RAM tick 5008 (BG1_Y's own first +3 write) - pressTick(4925), same relative offset as turn 1's own
+ // banner end(146) + the same 10-tick gap turn 1's own OFF schedule establishes; sha-confirmed hard cut at render 5081 (pressTick+156)
 
 function drawTurn4KickoffText(
   fb: Uint8Array,
@@ -9764,7 +9735,7 @@ function drawTurn4KickoffText(
  * `TURN4_OFF_ROCKSLIDE_MENU_REDRAW_DELAY` below is turn 4's own rendering-
  * only sibling, passed explicitly at turn 4's own call sites only.
  */
-export const TURN4_ROCKSLIDE_MENU_REDRAW_DELAY = 661; // pressTick+661 = 5586 (hard cut to the resettled action menu) - ON-fit
+ // pressTick+661 = 5586 (hard cut to the resettled action menu) - ON-fit
 
 /**
  * ISSUES #39 rank-6 slice 4: turn 4's own ROCK_SLIDE-half Scene-OFF
@@ -9785,10 +9756,10 @@ export const TURN4_ROCKSLIDE_MENU_REDRAW_DELAY = 661; // pressTick+661 = 5586 (h
  * smaller diff drains faster, so the tail lands earlier" finding the ON-era
  * doc already made for this exact turn).
  */
-const TURN4_OFF_ROCKSLIDE_TEXT_DELAY = 265; // "ONIX used\nROCK SLIDE!" hard-cuts in, same 265 relative offset turn 1's own OFF window uses
-const TURN4_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY = 362; // RAM tick 5287 (bar1Curr's own start sentinel) - pressTick(4925), probe-exact
-const TURN4_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY = 420; // sha tick 5345 (message box blanks, box stays)
-const TURN4_OFF_ROCKSLIDE_MENU_REDRAW_DELAY = 427; // sha tick 5352 (hard cut to the resettled action menu)
+ // "ONIX used\nROCK SLIDE!" hard-cuts in, same 265 relative offset turn 1's own OFF window uses
+ // RAM tick 5287 (bar1Curr's own start sentinel) - pressTick(4925), probe-exact
+ // sha tick 5345 (message box blanks, box stays)
+ // sha tick 5352 (hard cut to the resettled action menu)
 const TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE = {
   ...ROCK_SLIDE_ANIMATION_PROFILE,
   hitFlashAnchorAge: 327, // RAM tick 5252 (healthbox wobble's own first +1 write) - pressTick(4925)
@@ -9914,7 +9885,7 @@ function drawTurn4RockSlideWindow(
  * (`TURN5_CONFIRM_PRESS_TICK`+6, matching every prior turn's own identical
  * +6 ENDEAVOR/DOUBLE_TEAM `gCurrentMove`-write offset).
  */
-const TURN5_CONFIRM_PRESS_TICK = 5959;
+
 
 /**
  * The current turn-5 renderer remains on the legacy Scene-ON continuation
@@ -9924,7 +9895,7 @@ const TURN5_CONFIRM_PRESS_TICK = 5959;
  * as a new epoch. The turn-4 settled menu itself uses the unlagged source
  * epoch above.
  */
-const TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG = 234;
+
 
 /**
  * Generic sibling of the retired `turn5LegacyResettledBounceTick` (typeref-
@@ -10095,7 +10066,7 @@ function drawTurn5EndeavorText(
  * turn shows) at `PRESS_TICK+597+1+2=6429` - bit-exact against §13's own
  * RAM-confirmed tick 6429, independently validating this anchor two ways.
  */
-const TURN5_ROCKSLIDE_PRESS_TICK = 5829; // rockSlideTextStartTick(5829) = 6222
+ // rockSlideTextStartTick(5829) = 6222
 
 /**
  * Grovyle faints this hit (1->0) - the opponent healthbox's own EMPTY bar
@@ -10134,7 +10105,7 @@ const TURN5_ROCKSLIDE_PRESS_TICK = 5829; // rockSlideTextStartTick(5829) = 6222
  * changes land at render ticks 6504, 6506, ..., 6518 (8 steps, matching `n`),
  * zero further diff from 6519 on.
  */
-export const GROVYLE_FAINT_SINK_START_TICK = 6502; // S
+ // S
 // steps: createBattleResolutionPresentation's own generic opponent-faint-
 // timing formula (opponentFaintSinkGeometry, turn13ResolutionAdapter.ts,
 // reused via turn5ResolutionAdapter.ts's own resolveTurn5FaintSinkGeometry),
@@ -10234,7 +10205,7 @@ function drawSpriteSheetTopClipped(fb: Uint8Array, tileset: Tileset, palette: Rg
  * holds white 6760-6767, ramps back down 6768-6781, settled (0, plain
  * `drawStaticBgShiftedY`) from 6782 on.
  */
-const TURN5_BG_FADE_START_TICK = 6746;
+
 const TURN5_BG_FADE_Y: readonly number[] = [
   2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16, 16, 16, 16, 16, 16, 16, 16, 14, 14, 12, 12, 10, 10, 8, 8, 6, 6, 4, 4, 2, 2,
 ];
@@ -10440,7 +10411,7 @@ function drawGrantingStarsAtAge(
  */
 export const TURN5_SITRUS_HEAL_LINE1 = TURN5_SITRUS.healLines[0]!;
 export const TURN5_SITRUS_HEAL_LINE2 = TURN5_SITRUS.healLines[1]!;
-const TURN5_SITRUS_HEAL_TEXT_START_TICK = 7078;
+
 
 export function turn5SitrusHealTextVisibleChars(t: number): number {
   return sitrusHealTextVisibleCharsAtAge(
@@ -10456,8 +10427,8 @@ export function turn5SitrusHealTextVisibleChars(t: number): number {
  * exactly these ticks, the scan's own "big jump then HUGE jump" - a
  * message-box-close-then-menu-reveal pair, not one atomic transition).
  */
-const TURN5_SITRUS_TEXT_CLEAR_TICK = 7216;
-const TURN5_SITRUS_MENU_REDRAW_TICK = 7222;
+
+
 
 /**
  * Onix's own HP climb, 1->31 (`§2`'s pinned heal formula) - RAM-truthed
@@ -10719,7 +10690,7 @@ const TURN5_FAINTED_TEXT_TOTAL = TURN5_FAINTED_LINE1.length + TURN5_FAINTED_LINE
 const TURN5_FAINTED_CURSOR_X = LINE2_ORIGIN.x + measureText(font, charmap, TURN5_FAINTED_LINE2);
 
 /** Ticks from `TURN5_ROCKSLIDE_PRESS_TICK` to this text's own clear+first-glyph tick - pixel-confirmed this session (dense oracle sweep: the message box hard-cuts from the held "ONIX used\nROCK SLIDE!" text to this one in a single tick, 1660px, at trace tick 6523 = `PRESS_TICK`+694). Unlike turns 3/4's own ROCK_SLIDE text (which auto-clears to blank via `ROCK_SLIDE_TEXT_CLEAR_DELAY` then hard-cuts to the resettled menu), this turn's text never clears to blank at all - it holds through the ENTIRE hit-flash+drain+sink window, then transitions DIRECTLY into this fainted text (still automatic, no button yet - only the fainted text's own post-print hold is button-gated, see `turn5RockSlideKoDismissEligible`). */
-const TURN5_FAINTED_TEXT_DELAY = 694;
+
 
 function turn5FaintedTextStartTick(pressTick: number): number {
   return pressTick + TURN5_FAINTED_TEXT_DELAY;
@@ -10783,7 +10754,7 @@ export function turn5RockSlideKoDismissEligible(t: number): boolean {
  * full 20-step bar curve, applied uniformly to bar AND icons alike, no new
  * table needed.
  */
-export const TURN5_ICONBAR_CREATE_TICK = 6587;
+
 
 /**
  * `switchin-iconbar-transient.json`'s own probe (this session): at RAM
@@ -10806,11 +10777,11 @@ export const TURN5_ICONBAR_CREATE_TICK = 6587;
  * palette mechanism. The freed slot 3 is reused by the open-particle
  * burst's own first spawn at RAM 6744 (docs §8d, unrelated to this bar).
  */
-export const TURN5_ICONBAR_FADE_START_TICK = 6725;
-export const TURN5_ICONBAR_DESTROY_TICK = 6742;
+
+
 
 /** GROVYLE's own former slot (index 5) flips `"Full"` -> `"Statused"` (docs §9's own pixel correction) - the other 5 slots are unchanged from `ballIcons`' own opponent-side array. */
-export const TURN5_OPPONENT_ICON_STATES: readonly string[] = ["Empty", "Empty", "Empty", "Full", "Full", "Statused"];
+
 
 export function turn5IconBarEva(t: number, fadeStartTick: number = TURN5_ICONBAR_FADE_START_TICK): number | null {
   const rt = t - 1;
@@ -10870,11 +10841,11 @@ function drawTurn5IconBar(
  * this must stay edge-relative so a later accepted A shifts the entire
  * automatic replacement rather than merely its entry gate.
  */
-export const TURN13_ICONBAR_CREATE_AFTER_DISMISS = 26;
-export const TURN13_ICONBAR_FADE_START_AFTER_DISMISS = 162;
-export const TURN13_ICONBAR_DESTROY_AFTER_DISMISS = 179;
+
+
+
 /** Pidgeotto's own former slot (index 3, DESTIN's SECOND fainted mon) flips `"Full"` -> `"Statused"` - oracle-pixel-confirmed (0-diff tile match against `battle-interface-ball-display.json`'s own 4 states at the settled tick 16900) directly against `TURN5_OPPONENT_ICON_STATES`: index 3 flips, index 4 (MURKROW, freshly sent out) stays `"Full"`, index 5 (GROVYLE) stays `"Statused"` unchanged from turn 5. */
-export const TURN13_OPPONENT_ICON_STATES: readonly string[] = ["Empty", "Empty", "Empty", "Statused", "Full", "Statused"];
+
 
 /**
  * ISSUES #39 rank-3 flip: the real switched-in-mon fact source
@@ -10887,10 +10858,10 @@ export const TURN13_OPPONENT_ICON_STATES: readonly string[] = ["Empty", "Empty",
  */
 const TURN5_SWITCHIN = resolveTurn5SwitchInAdapter();
 /** "BUG CATCHER DESTIN sent\nout PIDGEOTTO!" (docs §9, `sText_Trainer1SentOutPkmn` family, same line 1 as `SENDOUT_LINE1`) - starts printing at the oracle-pixel-confirmed absolute tick 6687, 1 char/tick. Line 2 is `TURN5_SWITCHIN.sentOutLine2`, sourced from the real forced-switch decision instead of a raw literal. */
-const SWITCHIN_SENTOUT_LINE1 = "BUG CATCHER DESTIN sent";
+
 const SWITCHIN_SENTOUT_LINE2 = TURN5_SWITCHIN.sentOutLine2;
 export const SWITCHIN_SENTOUT_TEXT_TOTAL = SWITCHIN_SENTOUT_LINE1.length + SWITCHIN_SENTOUT_LINE2.length;
-export const SWITCHIN_SENTOUT_TEXT_START_TICK = 6687;
+
 
 function switchinSentOutLine1(
   trainerPresentation?: FactoryTrainerPresentation,
@@ -11037,50 +11008,8 @@ export function turn5MaterializeCoeff(t: number): number {
   if (t < TURN5_MATERIALIZE_RAMP_RENDER_START) return TURN5_MATERIALIZE_FLAT_COEFF;
   return TURN5_MATERIALIZE_RAMP_COEFF[t - TURN5_MATERIALIZE_RAMP_RENDER_START] ?? 0;
 }
-export const TURN5_STRETCH_TICK = 6786;
-const TURN5_STRETCH_TABLE: readonly { xScale: number; yScale: number; y2: number }[] = [
-  { xScale: 256, yScale: 256, y2: 0 },
-  { xScale: 257, yScale: 254, y2: 0 },
-  { xScale: 258, yScale: 251, y2: 0 },
-  { xScale: 259, yScale: 248, y2: -1 },
-  { xScale: 260, yScale: 245, y2: -1 },
-  { xScale: 262, yScale: 241, y2: -1 },
-  { xScale: 263, yScale: 239, y2: -2 },
-  { xScale: 264, yScale: 236, y2: -2 },
-  { xScale: 265, yScale: 234, y2: -2 },
-  { xScale: 266, yScale: 231, y2: -3 },
-  { xScale: 267, yScale: 221, y2: -4 },
-  { xScale: 268, yScale: 222, y2: -4 },
-  { xScale: 268, yScale: 229, y2: -3 },
-  { xScale: 269, yScale: 231, y2: -3 },
-  { xScale: 270, yScale: 222, y2: -4 },
-  { xScale: 270, yScale: 213, y2: -5 },
-  { xScale: 271, yScale: 215, y2: -5 },
-  { xScale: 271, yScale: 223, y2: -4 },
-  { xScale: 271, yScale: 225, y2: -3 },
-  { xScale: 271, yScale: 218, y2: -4 },
-  { xScale: 272, yScale: 209, y2: -5 },
-  { xScale: 271, yScale: 212, y2: -5 },
-  { xScale: 271, yScale: 222, y2: -4 },
-  { xScale: 271, yScale: 226, y2: -3 },
-  { xScale: 271, yScale: 219, y2: -4 },
-  { xScale: 270, yScale: 213, y2: -5 },
-  { xScale: 270, yScale: 216, y2: -5 },
-  { xScale: 269, yScale: 227, y2: -3 },
-  { xScale: 269, yScale: 232, y2: -3 },
-  { xScale: 268, yScale: 227, y2: -3 },
-  { xScale: 267, yScale: 228, y2: -3 },
-  { xScale: 266, yScale: 230, y2: -3 },
-  { xScale: 265, yScale: 233, y2: -2 },
-  { xScale: 264, yScale: 235, y2: -2 },
-  { xScale: 263, yScale: 238, y2: -2 },
-  { xScale: 262, yScale: 241, y2: -1 },
-  { xScale: 261, yScale: 244, y2: -1 },
-  { xScale: 259, yScale: 247, y2: -1 },
-  { xScale: 258, yScale: 250, y2: 0 },
-  { xScale: 257, yScale: 253, y2: 0 },
-  { xScale: 256, yScale: 256, y2: 0 },
-];
+
+
 export const TURN5_PIDGEOTTO_SETTLE_TICK = TURN5_SWITCHIN.materializeSettleTick;
 
 /**
@@ -11266,7 +11195,7 @@ function drawTurn5SwitchinSprite(fb: Uint8Array, t: number, pidgeottoX2: number 
  * `TURN5_BALL_HANDOFF_TICK` uses); `materializeStart`/ramp-render-start
  * still reuse turn 5's own exact tick DELTAS off that new anchor.
  */
-export const TURN13_BALL_HANDOFF_AFTER_DISMISS = 164;
+
 const TURN13_MURKROW_MATERIALIZE_AFTER_DISMISS =
   TURN13_BALL_HANDOFF_AFTER_DISMISS + MATERIALIZE_START_OFFSET;
 const TURN13_MURKROW_RAMP_RENDER_AFTER_DISMISS =
@@ -11303,14 +11232,14 @@ function turn13MurkrowBgFadeY(continuationElapsed: number): number {
     continuationElapsed - TURN13_MURKROW_BG_FADE_START_AFTER_DISMISS
   ] ?? 0;
 }
-export const TURN13_MURKROW_SETTLE_AFTER_DISMISS = 249;
+
 /**
  * docs/turn13-notes.md, "MURKROW's own materialize/wobble table" (2026-07-21
  * worktree probe): the real double-affine wobble engages RAM 17019, visible
  * render 17020 - NOT `SETTLE_TICK`-minus-table-length (17030), which was
  * Pidgeotto's own anchor math reused without RAM confirmation.
  */
-export const TURN13_MURKROW_STRETCH_AFTER_DISMISS = 199;
+
 /**
  * RAM-read directly off `pa`/`pd`/`y2` (the literal affine-matrix registers,
  * the same representation `drawSpriteSheetAffineStretch`'s `xScale`/
@@ -11323,58 +11252,7 @@ export const TURN13_MURKROW_STRETCH_AFTER_DISMISS = 199;
  * clamp-repeating entry 48 instead regresses the final wobble frame by 1px
  * (`y2=-1` instead of the oracle's flat `0`).
  */
-const TURN13_MURKROW_WOBBLE_TABLE: readonly { xScale: number; yScale: number; y2: number }[] = [
-  { xScale: 256, yScale: 256, y2: 0 },
-  { xScale: 250, yScale: 262, y2: 0 },
-  { xScale: 244, yScale: 268, y2: 1 },
-  { xScale: 239, yScale: 273, y2: 2 },
-  { xScale: 234, yScale: 278, y2: 2 },
-  { xScale: 230, yScale: 282, y2: 3 },
-  { xScale: 227, yScale: 285, y2: 3 },
-  { xScale: 225, yScale: 287, y2: 3 },
-  { xScale: 224, yScale: 288, y2: 4 },
-  { xScale: 225, yScale: 287, y2: 3 },
-  { xScale: 227, yScale: 285, y2: 3 },
-  { xScale: 230, yScale: 282, y2: 3 },
-  { xScale: 234, yScale: 278, y2: 2 },
-  { xScale: 239, yScale: 273, y2: 2 },
-  { xScale: 244, yScale: 268, y2: 1 },
-  { xScale: 250, yScale: 262, y2: 0 },
-  { xScale: 256, yScale: 256, y2: 0 },
-  { xScale: 263, yScale: 249, y2: -1 },
-  { xScale: 269, yScale: 243, y2: -3 },
-  { xScale: 274, yScale: 238, y2: -5 },
-  { xScale: 279, yScale: 233, y2: -7 },
-  { xScale: 283, yScale: 229, y2: -8 },
-  { xScale: 286, yScale: 226, y2: -9 },
-  { xScale: 288, yScale: 224, y2: -9 },
-  { xScale: 288, yScale: 224, y2: -10 },
-  { xScale: 288, yScale: 224, y2: -9 },
-  { xScale: 286, yScale: 226, y2: -9 },
-  { xScale: 283, yScale: 229, y2: -8 },
-  { xScale: 279, yScale: 233, y2: -7 },
-  { xScale: 274, yScale: 238, y2: -5 },
-  { xScale: 269, yScale: 243, y2: -3 },
-  { xScale: 263, yScale: 249, y2: -1 },
-  { xScale: 256, yScale: 256, y2: -1 },
-  { xScale: 250, yScale: 262, y2: -1 },
-  { xScale: 244, yScale: 268, y2: 0 },
-  { xScale: 239, yScale: 273, y2: 1 },
-  { xScale: 234, yScale: 278, y2: 1 },
-  { xScale: 230, yScale: 282, y2: 2 },
-  { xScale: 227, yScale: 285, y2: 2 },
-  { xScale: 225, yScale: 287, y2: 2 },
-  { xScale: 224, yScale: 288, y2: 3 },
-  { xScale: 225, yScale: 287, y2: 2 },
-  { xScale: 227, yScale: 285, y2: 2 },
-  { xScale: 230, yScale: 282, y2: 2 },
-  { xScale: 234, yScale: 278, y2: 1 },
-  { xScale: 239, yScale: 273, y2: 1 },
-  { xScale: 244, yScale: 268, y2: 0 },
-  { xScale: 250, yScale: 262, y2: -1 },
-  { xScale: 256, yScale: 256, y2: -1 },
-  { xScale: 256, yScale: 256, y2: 0 },
-];
+
 /**
  * Front-sprite frame selection has a one-render lead over the affine/OAM
  * state: direct VRAM reads swap at RAM 17019/17034 while the table/matrix is
@@ -11382,7 +11260,7 @@ const TURN13_MURKROW_WOBBLE_TABLE: readonly { xScale: number; yScale: number; y2
  * [stretch - 1, frame-flip - 1]. This is an asset-transfer timing rule on
  * the owner continuation's local clock; see docs/turn13-murkrow-boundaries.md.
  */
-export const TURN13_MURKROW_FRAME_FLIP_AFTER_DISMISS = 213;
+
 export function turn13MurkrowFrame(continuationElapsed: number): 0 | 1 {
   return continuationElapsed >= TURN13_MURKROW_STRETCH_AFTER_DISMISS - 1
     && continuationElapsed < TURN13_MURKROW_FRAME_FLIP_AFTER_DISMISS
@@ -11464,7 +11342,7 @@ function murkrowHealthboxContentForHp(
 
 /** "BUG CATCHER DESTIN sent\nout MURKROW!" prints 126 frames after accepted dismissal. */
 const TURN13_SWITCHIN_SENTOUT_LINE2 = TURN13_SWITCHIN.sentOutLine2;
-export const TURN13_SWITCHIN_SENTOUT_TEXT_AFTER_DISMISS = 126;
+
 export function turn13SwitchinSentOutTextVisibleChars(
   continuationElapsed: number,
   trainerPresentation?: FactoryTrainerPresentation,
@@ -11561,7 +11439,7 @@ function drawTurn13SwitchinFieldBase(fb: Uint8Array, t: number, shiftedBounceTic
  * family is actually THIS blank box's own sha, not the interactive chrome's
  * (see the constant below for the real chrome-reveal tick).
  */
-const TURN13_SWITCHIN_TEXT_CLEAR_AFTER_DISMISS = 285;
+
 /** The interactive "What will ONIX do?" chrome reveals six frames after the blank hold starts. */
 export const TURN13_SWITCHIN_MENU_REDRAW_AFTER_DISMISS = 291;
 /**
@@ -11583,7 +11461,7 @@ const TURN13_SWITCHIN_RESET_AFTER_DISMISS_SHIFT =
  * and turn-15 renderers. The live turn-13 continuation above never uses it:
  * it derives its reset directly from its accepted dismiss edge.
  */
-const TURN13_SETTLED_BOUNCE_PHASE_SHIFT = -9890;
+
 
 function drawTurn13SwitchinWindow(
   fb: Uint8Array,
@@ -11758,7 +11636,7 @@ function drawTurn6ActionMenuIdleWindow(fb: Uint8Array, t: number, bounceTick: nu
  * new ticks (verified: 7348-7350 now 0-diff too, see battle-turn-notes.md
  * §28).
  */
-export const TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET = 4;
+
 
 export function turn6KickoffBounceTick(t: number, pressTick: number): number {
   if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t;
@@ -11779,8 +11657,8 @@ export function turn6KickoffBounceTick(t: number, pressTick: number): number {
  * `turn2KickoffText` chain, so there's no reason to expect the same fixed
  * offset without checking, and it doesn't match here).
  */
-export const TURN6_FEATHERDANCE_LINE1 = "Foe PIDGEOTTO used";
-export const TURN6_FEATHERDANCE_LINE2 = "FEATHERDANCE!";
+
+
 export const TURN6_FEATHERDANCE_TEXT_TOTAL = TURN6_FEATHERDANCE_LINE1.length + TURN6_FEATHERDANCE_LINE2.length;
 
 export function turn6FeatherDanceTextStartTick(pressTick: number): number {
@@ -12408,7 +12286,7 @@ function drawTurn8FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
  * (`9846-9425=421`).
  */
 export const TURN8_BIND_TEXT_TOTAL = TURN8_BIND_LINE1.length + TURN8_BIND_LINE2.length;
-export const TURN8_BIND_TEXT_DELAY = 421;
+
 
 /**
  * Turn 8's own real confirm pressTick (docs/battle-turn-notes.md §33's own
@@ -12421,7 +12299,7 @@ export const TURN8_BIND_TEXT_DELAY = 421;
  * `TURN6_ROCKSLIDE_PRESS_TICK`/`TURN7_ROCKSLIDE_PRESS_TICK` already
  * establish for ROCK_SLIDE.
  */
-export const TURN8_BIND_PRESS_TICK = 9425;
+
 
 export function turn8BindTextStartTick(pressTick: number): number {
   return pressTick + TURN8_BIND_TEXT_DELAY;
@@ -12446,7 +12324,7 @@ export function turn8BindTextVisibleChars(t: number, pressTick: number): number 
  * is 9896 (`9896-9425=471`).
  */
 export const TURN8_MISS_TEXT_TOTAL = TURN8_MISS_LINE1.length + TURN8_MISS_LINE2.length;
-export const TURN8_MISS_TEXT_DELAY = 471;
+
 
 export function turn8MissTextStartTick(pressTick: number): number {
   return pressTick + TURN8_MISS_TEXT_DELAY;
@@ -12469,7 +12347,7 @@ export function turn8MissTextVisibleChars(t: number, pressTick: number): number 
  * tick somewhere upstream of this gap, not chased further since it doesn't
  * change what to render).
  */
-export const TURN8_TEXT_CLEAR_DELAY = 566;
+
 export const TURN8_MENU_REDRAW_DELAY = 572;
 
 /** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn7RockSlideResettledBounceTick`, keyed off `TURN8_MENU_REDRAW_DELAY`. */
@@ -12568,7 +12446,7 @@ function turn9KickoffBounceTick(t: number, pressTick: number): number {
  * Slice 5 changes any dispatch. The values contain no turn/episode member
  * and never use PP to select a window.
  */
-const LEGACY_PIDGEOTTO_ONIX_MAX_HP = 117;
+
 function legacyPidgeottoField(playerHp: number, playerAttackStage: number, opponentHp: number) {
   return {
     player: {
@@ -12730,23 +12608,11 @@ export const LEGACY_TURN9_FIELD_AND_BOUNCE_PRESENTATION = createFightCommandPres
   upcoming: null,
 });
 
-/**
- * S7 slice R (docs/turn9-notes.md): "Foe PIDGEOTTO used\nQUICK ATTACK!" -
- * Pidgeotto's own move switch (NOT a 4th FEATHER_DANCE - the dossier's own
- * pinned falsifiable test came back negative this turn). Delay fit directly
- * against `tools/compare/traces/turn9-menu.json`'s own real script (this
- * turn's real confirm pressTick, `TICK0 + sm.confirmElapsed`): the fresh
- * capture's first changing tick past the settled submenu is 10878, and the
- * text settles fully-typed at 10930 (oracle-confirmed sha `6de9da748618` -
- * byte-identical to `turn6-notes.md`'s own cited sha for this exact tick in
- * an unrelated turn's own different text, a coincidence of the settled
- * "held plateau" hash region, not a content match).
- */
-export const TURN9_QUICKATTACK_LINE1 = "Foe PIDGEOTTO used";
-export const TURN9_QUICKATTACK_LINE2 = "QUICK ATTACK!";
+
+
 export const TURN9_QUICKATTACK_TEXT_TOTAL = TURN9_QUICKATTACK_LINE1.length + TURN9_QUICKATTACK_LINE2.length;
 
-export const TURN9_QUICKATTACK_TEXT_DELAY = 11;
+
 
 export function turn9QuickAttackTextStartTick(pressTick: number): number {
   return pressTick + TURN9_QUICKATTACK_TEXT_DELAY;
@@ -12776,7 +12642,7 @@ export function turn9QuickAttackTextVisibleChars(t: number, pressTick: number): 
  * source-relative cutoff first; FLY's affine-double replacement sprite is
  * subject to that layer too.
  */
-const OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM = 74;
+
 
 /**
  * Erases Pidgeotto's own real-sprite footprint (only the settled tileset's
@@ -13023,9 +12889,9 @@ export function drawSpriteSheetBlendedOverFbSkipping(fb: Uint8Array, tileset: Ti
  * genuinely independent mechanism from the flicker below - "do NOT couple
  * them" per the brief).
  */
-const TURN9_EP2_HEALTHBOX_WOBBLE_RENDER_LAG = 1;
-const TURN9_EP2_HEALTHBOX_WOBBLE_START = 84; // ISSUES #39 rank-5 slice 1: Scene-OFF RAM 10955 - pressTick(10871), dump-turn9-hitanim-off.py against factory-battle-scene-off.json (was RAM 10957/86 on the retired ON pin - Cmd_hitanimation lands 2 ticks earlier once attackanimation's own Pausex20 substitute replaces QUICK_ATTACK's real animation)
-const TURN9_EP2_HEALTHBOX_WOBBLE_TICKS = 20;
+
+ // ISSUES #39 rank-5 slice 1: Scene-OFF RAM 10955 - pressTick(10871), dump-turn9-hitanim-off.py against factory-battle-scene-off.json (was RAM 10957/86 on the retired ON pin - Cmd_hitanimation lands 2 ticks earlier once attackanimation's own Pausex20 substitute replaces QUICK_ATTACK's real animation)
+
 /** `start` defaults to turn 9's own anchor (every pre-existing caller unaffected) - see `turn9Ep2OnixInvisible`'s own doc comment for why this generalization exists (turn 10's own re-trigger of the same ENDEAVOR §15f-precedented companion mechanism). */
 export function turn9Ep2HealthboxWobbleY2(t: number, pressTick: number, start: number = TURN9_EP2_HEALTHBOX_WOBBLE_START): number {
   const ramTick = t - TURN9_EP2_HEALTHBOX_WOBBLE_RENDER_LAG;
@@ -13049,11 +12915,11 @@ export function turn9Ep2HealthboxWobbleY2(t: number, pressTick: number, start: n
  * (RAM-confirmed: `x2`/`y2` stay flat 0 for Onix's own sprite this whole
  * episode - this is a pure visibility gate, not a position shake).
  */
-const TURN9_EP2_FLICKER_RENDER_LAG = 1;
-const TURN9_EP2_FLICKER_START = 85; // ISSUES #39 rank-5 slice 1: Scene-OFF RAM 10956 - pressTick(10871), dump-turn9-hitanim-off.py (was RAM 10958/87 on the retired ON pin, same 2-tick shift as the wobble start above)
-const TURN9_EP2_FLICKER_TOTAL_TICKS = 32; // RAM 10958-10989 inclusive (4 blocks of 4-on/4-off)
-const TURN9_EP2_FLICKER_PERIOD = 8;
-const TURN9_EP2_FLICKER_ON_TICKS = 4;
+
+ // ISSUES #39 rank-5 slice 1: Scene-OFF RAM 10956 - pressTick(10871), dump-turn9-hitanim-off.py (was RAM 10958/87 on the retired ON pin, same 2-tick shift as the wobble start above)
+ // RAM 10958-10989 inclusive (4 blocks of 4-on/4-off)
+
+
 /**
  * `start` defaults to turn 9's own anchor (every pre-existing caller
  * unaffected) - S7 engine step PART 2 (docs/aerial-ace-notes.md's own
@@ -13080,7 +12946,7 @@ export function turn9Ep2OnixInvisible(t: number, pressTick: number, start: numbe
  * decrement lands the next tick (10993), matching `ENDEAVOR_HP_DRAIN_START_
  * DELAY`'s own convention.
  */
-const TURN9_HP_DRAIN_START_DELAY = 119; // ISSUES #39 rank-5 slice 1: Scene-OFF RAM sentinel tick 10990 - pressTick(10871), dump-turn9-hitanim-off.py's own bar0Curr read (was 121 on the retired ON pin, same 2-tick shift as the wobble/flicker starts above)
+ // ISSUES #39 rank-5 slice 1: Scene-OFF RAM sentinel tick 10990 - pressTick(10871), dump-turn9-hitanim-off.py's own bar0Curr read (was 121 on the retired ON pin, same 2-tick shift as the wobble/flicker starts above)
 export function turn9Hp(t: number, pressTick: number, startHp: number, endHp: number): number {
   const d = t - (pressTick + TURN9_HP_DRAIN_START_DELAY);
   return Math.max(endHp, startHp - Math.max(d, 0));
@@ -13098,7 +12964,7 @@ export function turn9Hp(t: number, pressTick: number, startHp: number, endHp: nu
  * char now at render 11003 (`pressTick+132`), fully typed at 11026 (24/24
  * chars, the `…` glyph).
  */
-export const TURN9_NOTVERYEFFECTIVE_LINE = "It’s not very effective…";
+
 
 export function turn9NotVeryEffectiveTextStartTick(pressTick: number): number {
   return pressTick + 132;
@@ -13157,7 +13023,7 @@ function drawTurn9QuickAttackWindow(fb: Uint8Array, t: number, pressTick: number
  * `TURN9_HP_DRAIN_START_DELAY` above already carry). `11108 -
  * ROCK_SLIDE_TEXT_DELAY(393) = 10715`.
  */
-export const TURN9_ROCKSLIDE_PRESS_TICK = 10715;
+
 
 /**
  * Turn-specific, NOT transferable from `TURN6_SUPER_EFFECTIVE_TEXT_DELAY`/
@@ -13170,7 +13036,7 @@ export const TURN9_ROCKSLIDE_PRESS_TICK = 10715;
  * `11232 - TURN9_ROCKSLIDE_PRESS_TICK(10715) = 517` (was `624` on the
  * retired ON pin, whose own transition landed at render 11341).
  */
-const TURN9_SUPER_EFFECTIVE_TEXT_DELAY = 517;
+
 
 export function turn9SuperEffectiveTextStartTick(pressTick: number): number {
   return pressTick + TURN9_SUPER_EFFECTIVE_TEXT_DELAY;
@@ -13199,7 +13065,7 @@ export function turn9SuperEffectiveTextVisibleChars(t: number, pressTick: number
 const TURN9_ROCKSLIDE_ANIMATION_PROFILE = { ...ROCK_SLIDE_ANIMATION_PROFILE, hitFlashAnchorAge: 455 };
 
 /** ISSUES #39 rank-5 slice 1: Scene-OFF RAM sentinel tick 11205 - `TURN9_ROCKSLIDE_PRESS_TICK`(10715), `dump-turn9-hitanim-off.py`'s own `bar1Curr` read (was `ROCK_SLIDE_HP_DRAIN_START_DELAY`(597) on the retired ON pin - the fixed `Pausex20` substitute for ROCK_SLIDE's own long real animation compresses this by far more than QUICK_ATTACK's own 2-tick shift). */
-export const TURN9_ROCKSLIDE_HP_DRAIN_START_DELAY = 490;
+
 
 /**
  * ISSUES #39 rank-5 slice 1: turn 9's own ROCK_SLIDE (Onix vs. Pidgeotto)
@@ -13251,7 +13117,7 @@ function drawTurn9RockSlideAttack(fb: Uint8Array, t: number): void {
  * oracle-confirmed (`turn9-rockslide-off.json`): render 11329
  * (`TURN9_ROCKSLIDE_PRESS_TICK`(10715)+614).
  */
-const TURN9_ROCKSLIDE_TEXT_CLEAR_DELAY = 614;
+
 
 /**
  * S7 slice R rung (d): turn 9's own ROCK_SLIDE window - kickoff text, attack
@@ -13342,7 +13208,7 @@ function drawTurn9FightSubmenuWindow(
  * turn 10's `sm` is a FRESH `FightSubmenuState` whose own `confirmElapsed`
  * is a later, different tick.
  */
-export const TURN9_QUICKATTACK_PRESS_TICK = 10871;
+
 
 /**
  * Turn 9's own turn-end menu-redraw delay - the bounce task's own reset
@@ -13392,7 +13258,7 @@ const TURN9_ONIX_AFTER_QUICKATTACK_HP = TURN9_QUICKATTACK_HP.to;
  * (-23, ROCK_SLIDE)" - the pre-hit value), turn 9's own ROCK_SLIDE drain
  * (82->61) landing during this session's own out-of-scope window.
  */
-const TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP = 61;
+
 
 /**
  * S7 slice R rung (a): turn 9's own settled action menu, as turn 10 finds
@@ -13455,11 +13321,11 @@ function turn10KickoffBounceTick(t: number, pressTick: number): number {
  * of this session's own `turn10-menu.json` (not the dossier's own loose
  * prose range, per the fresh-oracle-constants rule).
  */
-export const TURN10_AERIALACE_LINE1 = "Foe PIDGEOTTO used";
-export const TURN10_AERIALACE_LINE2 = "AERIAL ACE!";
+
+
 export const TURN10_AERIALACE_TEXT_TOTAL = TURN10_AERIALACE_LINE1.length + TURN10_AERIALACE_LINE2.length;
 
-export const TURN10_AERIALACE_TEXT_DELAY = 11;
+
 
 export function turn10AerialAceTextStartTick(pressTick: number): number {
   return pressTick + TURN10_AERIALACE_TEXT_DELAY;
@@ -13477,7 +13343,7 @@ export function turn10AerialAceTextVisibleChars(t: number, pressTick: number): n
  * (1 HP unit/tick, clamped, render tick == RAM tick directly) but its own
  * named delay - RAM sentinel `-32768` @ 12441, `pressTick`(12305)+136.
  */
-const TURN10_AERIALACE_HP_DRAIN_START_DELAY = 136;
+
 /**
  * Onix's own HP after turn 10's AERIAL_ACE hit (docs/turn10-notes.md addendum
  * §2: 24->14, -10). Sourced from `turn10ResolutionAdapter.ts`'s own
@@ -13498,7 +13364,7 @@ const TURN10_ONIX_AFTER_AERIALACE_HP = TURN10_AERIALACE_HP.to;
  * "generalize a hardcoded value into a defaulted param" idiom `rockSlideOpponentHp`'s
  * own `startDelay` override already established in slice 1.
  */
-const TURN10_OFF_AERIALACE_HP_DRAIN_START_DELAY = 117;
+
 export function turn10AerialAceHp(t: number, pressTick: number, startHp: number, endHp: number, startDelay: number = TURN10_AERIALACE_HP_DRAIN_START_DELAY): number {
   const d = t - (pressTick + startDelay);
   return Math.max(endHp, startHp - Math.max(d, 0));
@@ -13515,7 +13381,7 @@ export function turn10AerialAceHp(t: number, pressTick: number, startHp: number,
  * assumed transferable from turn 9's own `+134` value, per the "each turn
  * gets its own literal constant" convention.
  */
-const TURN10_NOTVERYEFFECTIVE_TEXT_DELAY = 152; // render 12457 - pressTick(12305)
+ // render 12457 - pressTick(12305)
 /**
  * ISSUES #39 rank-5 slice 2 (Scene-OFF): `bin/oracle run tools/compare/
  * traces/turn10-aerialace-off.json` shows the fully-typed "It's not very
@@ -13523,7 +13389,7 @@ const TURN10_NOTVERYEFFECTIVE_TEXT_DELAY = 152; // render 12457 - pressTick(1230
  * - `12438 - pressTick(12305) = 133`, was 152 on the ON-fit constant above.
  * `delay` param default preserves turn 12's own still-ON-fit call site.
  */
-const TURN10_OFF_NOTVERYEFFECTIVE_TEXT_DELAY = 133;
+
 export function turn10NotVeryEffectiveTextStartTick(pressTick: number, delay: number = TURN10_NOTVERYEFFECTIVE_TEXT_DELAY): number {
   return pressTick + delay;
 }
@@ -13615,8 +13481,8 @@ function drawTurn10AerialAceCloneWinsOverField(fb: Uint8Array, tileset: Tileset,
  * turn 12's own still-ON-fit `drawTurn12AerialAceWindow` keeps passing
  * those unchanged.
  */
-const TURN10_OFF_ONIX_HEALTHBOX_WOBBLE_START = 82;
-const TURN10_OFF_ONIX_FLICKER_START = 83;
+
+
 
 /**
  * ISSUES #39 rank-5 slice 3 (Scene-OFF): AERIAL_ACE's mechanisms 4/5 (the
@@ -13641,7 +13507,7 @@ function cuttingSliceFrameTileset(frame: number): Tileset {
  * 12731, `ROCK_SLIDE_HP_DRAIN_START_DELAY`(597)->12766 - all five land
  * exactly, 0 mismatches against fresh RAM/pixel captures).
  */
-export const TURN10_ROCKSLIDE_PRESS_TICK = 12169;
+
 
 /**
  * ISSUES #39 rank-5 slice 2 (Scene-OFF): a SEPARATE synthetic anchor from
@@ -13659,7 +13525,7 @@ export const TURN10_ROCKSLIDE_PRESS_TICK = 12169;
  * which are in scope for this slice (turns 11-12 stay Scene-ON-fit until
  * their own slice per the assigned brief).
  */
-const TURN10_OFF_ROCKSLIDE_PRESS_TICK = 12150;
+
 
 /**
  * ISSUES #39 rank-5 slice 2: RAM-confirmed (`dump-turn9-hitanim-off.py`
@@ -13675,10 +13541,10 @@ const TURN10_OFF_ROCKSLIDE_PRESS_TICK = 12150;
  * source rule (confirmed by direct RAM probe, not assumed transferable).
  */
 const TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE = { ...ROCK_SLIDE_ANIMATION_PROFILE, hitFlashAnchorAge: 455 };
-const TURN10_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY = 490;
+
 
 /** Pidgeotto's own HP after turn 10's ROCK_SLIDE (docs/turn10-notes.md addendum §2: 61->38, -23). */
-const TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP = 38;
+
 
 /**
  * ISSUES #39 rank-5 slice 2: turn 10's own ROCK_SLIDE under the Scene-OFF-
@@ -13722,7 +13588,7 @@ function drawTurn10RockSlideAttack(fb: Uint8Array, t: number): void {
  * reuses `TURN6_SUPER_EFFECTIVE_LINE` verbatim (same message ID every prior
  * turn's own super-effective hit already uses).
  */
-const TURN10_SUPER_EFFECTIVE_TEXT_DELAY = 626; // render 12795 - pressTick(12169)
+ // render 12795 - pressTick(12169)
 /**
  * ISSUES #39 rank-5 slice 2 (Scene-OFF): `bin/oracle run tools/compare/
  * traces/turn10-rockslide-off.json` shows the fully-typed "It's super
@@ -13731,7 +13597,7 @@ const TURN10_SUPER_EFFECTIVE_TEXT_DELAY = 626; // render 12795 - pressTick(12169
  * ON-fit constant above. `delay` param default (added below) preserves the
  * existing pinned test's own 2-arg call.
  */
-const TURN10_OFF_SUPER_EFFECTIVE_TEXT_DELAY = 519;
+
 export function turn10SuperEffectiveTextStartTick(pressTick: number, delay: number = TURN10_SUPER_EFFECTIVE_TEXT_DELAY): number {
   return pressTick + delay;
 }
@@ -13764,8 +13630,8 @@ export const TURN10_ROCKSLIDE_MENU_REDRAW_DELAY = 730;
  * The exported ON-fit `TURN10_ROCKSLIDE_MENU_REDRAW_DELAY` stays untouched
  * (still consumed by `core.ts`'s own real gate + turn 11's reuse below).
  */
-const TURN10_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY = 616;
-const TURN10_OFF_ROCKSLIDE_MENU_REDRAW_DELAY = 623;
+
+
 
 /** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn6RockSlideResettledBounceTick`, keyed off this turn's own `TURN10_ROCKSLIDE_MENU_REDRAW_DELAY` (or, ISSUES #39 rank-5 slice 2, an explicit `menuRedrawDelay` override - default unchanged, every pre-existing caller unaffected). */
 export function turn10RockSlideResettledBounceTick(t: number, pressTick: number, menuRedrawDelay: number = TURN10_ROCKSLIDE_MENU_REDRAW_DELAY): number {
@@ -13965,10 +13831,10 @@ function turn11KickoffBounceTick(t: number, pressTick: number): number {
  * `min(TOTAL, t-start+1)` cap - no extra lag, unlike `turn6FeatherDanceTextStartTick`'s
  * own sibling functions.
  */
-export const TURN11_ATKFLOOR_LINE1 = "ONIX’s ATTACK";
-export const TURN11_ATKFLOOR_LINE2 = "won’t go lower!";
+
+
 export const TURN11_ATKFLOOR_TEXT_TOTAL = TURN11_ATKFLOOR_LINE1.length + TURN11_ATKFLOOR_LINE2.length;
-const TURN11_ATKFLOOR_TEXT_START_DELAY = 83; // render 13422 - FEATHER_PRESS_TICK(13339)
+ // render 13422 - FEATHER_PRESS_TICK(13339)
 export function turn11AtkFloorTextStartTick(pressTick: number): number {
   return pressTick + TURN11_ATKFLOOR_TEXT_START_DELAY;
 }
@@ -13990,8 +13856,8 @@ export function turn11AtkFloorTextVisibleChars(t: number, pressTick: number): nu
  * turn, so there is no live drain to thread through, simpler than turn 10's
  * own window (docs/turn11-notes.md §4's own ledger).
  */
-export const TURN11_ROCKSLIDE_PRESS_TICK = 13137;
-const TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP = 16;
+
+
 
 /**
  * ISSUES #39 rank-5 slice 3 (Scene-OFF): unlike turns 9/10, this turn's OWN
@@ -14011,7 +13877,7 @@ const TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP = 16;
  * same fixed-offset mechanism a third time rather than assuming transfer.
  */
 const TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE = { ...ROCK_SLIDE_ANIMATION_PROFILE, hitFlashAnchorAge: 455 };
-const TURN11_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY = 490;
+
 
 /**
  * ISSUES #39 rank-5 slice 3 (Scene-OFF): turn 11's own ROCK_SLIDE under the
@@ -14055,7 +13921,7 @@ function drawTurn11RockSlideAttack(fb: Uint8Array, t: number): void {
  * - reuses `TURN6_SUPER_EFFECTIVE_LINE` verbatim (same message ID every
  * prior turn's own super-effective hit already uses).
  */
-const TURN11_SUPER_EFFECTIVE_TEXT_DELAY = 625; // render 13762 - pressTick(13137)
+ // render 13762 - pressTick(13137)
 /**
  * ISSUES #39 rank-5 slice 3 (Scene-OFF): the fixed -107-tick hit-reaction
  * shift (`TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE`'s own 562->455) applied to
@@ -14065,7 +13931,7 @@ const TURN11_SUPER_EFFECTIVE_TEXT_DELAY = 625; // render 13762 - pressTick(13137
  * window, matching turns 9/10's own established delta exactly. `delay` param
  * default (added below) preserves the existing pinned test's own 2-arg call.
  */
-const TURN11_OFF_SUPER_EFFECTIVE_TEXT_DELAY = 518;
+
 export function turn11SuperEffectiveTextStartTick(pressTick: number, delay: number = TURN11_SUPER_EFFECTIVE_TEXT_DELAY): number {
   return pressTick + delay;
 }
@@ -14108,8 +13974,8 @@ export const TURN11_ROCKSLIDE_MENU_REDRAW_DELAY = 729; // render 13866 - pressTi
  * of `drawTurn11RockSlideTurnEndSettledMenu` below) - same -107 fixed
  * hit-reaction shift as the super-effective text delay above.
  */
-const TURN11_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY = 615;
-const TURN11_OFF_ROCKSLIDE_MENU_REDRAW_DELAY = 622;
+
+
 
 /** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn10RockSlideResettledBounceTick`, keyed off this turn's own `TURN11_ROCKSLIDE_MENU_REDRAW_DELAY` (or, ISSUES #39 rank-5 slice 3, an explicit `menuRedrawDelay` override - default unchanged, every pre-existing caller unaffected). */
 export function turn11RockSlideResettledBounceTick(t: number, pressTick: number, menuRedrawDelay: number = TURN11_ROCKSLIDE_MENU_REDRAW_DELAY): number {
@@ -14295,10 +14161,10 @@ const TURN12_ONIX_AFTER_AERIALACE_HP = TURN12_AERIALACE_HP.to;
  * `TURN10_OFF_NOTVERYEFFECTIVE_TEXT_DELAY` already established for turn 10's
  * own instance of this exact mechanism.
  */
-const TURN12_OFF_ONIX_FLICKER_START = 83;
-const TURN12_OFF_ONIX_HEALTHBOX_WOBBLE_START = 82;
-const TURN12_OFF_AERIALACE_HP_DRAIN_START_DELAY = 117;
-const TURN12_OFF_NOTVERYEFFECTIVE_TEXT_DELAY = 133;
+
+
+
+
 
 /**
  * ISSUES #39 rank-5 slice 3 (Scene-OFF): turn 12's own AERIAL_ACE window
@@ -14347,7 +14213,7 @@ function drawTurn12AerialAceWindow(fb: Uint8Array, t: number, pressTick: number)
  * BIND-miss finding ("misses divert BEFORE the roll"), now confirmed on a
  * SECOND, structurally different move.
  */
-export const TURN12_ROCKSLIDE_PRESS_TICK = 14237;
+
 
 /**
  * ISSUES #39 rank-5 slice 3 (Scene-OFF): a SEPARATE synthetic anchor from
@@ -14368,7 +14234,7 @@ export const TURN12_ROCKSLIDE_PRESS_TICK = 14237;
  * forward through the shared confirm-press tick, not a new source.
  * `14237-19=14218`.
  */
-const TURN12_OFF_ROCKSLIDE_PRESS_TICK = 14218;
+
 
 /**
  * ROCK_SLIDE's own miss text (`sText_AttackMissed` resolved for Onix,
@@ -14377,7 +14243,7 @@ const TURN12_OFF_ROCKSLIDE_PRESS_TICK = 14218;
  * a different length, so its own held-window duration differs, not assumed
  * transferable).
  */
-const TURN12_ROCKSLIDE_MISS_TEXT_DELAY = 449;
+
 export function turn12MissTextStartTick(pressTick: number): number {
   return pressTick + TURN12_ROCKSLIDE_MISS_TEXT_DELAY;
 }
@@ -14396,7 +14262,7 @@ export function turn12MissTextVisibleChars(t: number, pressTick: number): number
  * at `pressTick`+551, the STANDARD 7-tick clear-to-redraw gap turns 6/7/9/10
  * all establish (turn 8's own 6-tick gap is the outlier, not this turn).
  */
-const TURN12_ROCKSLIDE_TEXT_CLEAR_DELAY = 544;
+
 export const TURN12_ROCKSLIDE_MENU_REDRAW_DELAY = 551;
 
 /** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn11RockSlideResettledBounceTick`, keyed off this turn's own `TURN12_ROCKSLIDE_MENU_REDRAW_DELAY`. */
@@ -14626,7 +14492,7 @@ function drawTurn13FightSubmenuWindow(
  */
 const [TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2] = resolveTurn13SandAttackKickoffLines();
 const TURN13_SANDATTACK_TEXT_TOTAL = TURN13_SANDATTACK_EVENT_LINE1.length + TURN13_SANDATTACK_EVENT_LINE2.length;
-const TURN13_SANDATTACK_TEXT_DELAY = 13; // pressTick+13 = 15432 (first glyph) - pressTick=15419 at runtime (TICK0+sm.confirmElapsed), oracle-pixel-bisected (app was 1 tick late vs a fresh compare run before this fit)
+ // pressTick+13 = 15432 (first glyph) - pressTick=15419 at runtime (TICK0+sm.confirmElapsed), oracle-pixel-bisected (app was 1 tick late vs a fresh compare run before this fit)
 export function turn13SandAttackTextStartTick(pressTick: number): number {
   return pressTick + TURN13_SANDATTACK_TEXT_DELAY;
 }
@@ -14719,7 +14585,7 @@ function drawTurn13SandAttackAccBanner(fb: Uint8Array, t: number, pressTick: num
  */
 const [TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2] = resolveTurn13AccFellLines();
 const TURN13_ACCFELL_TEXT_TOTAL = TURN13_ACCFELL_EVENT_LINE1.length + TURN13_ACCFELL_EVENT_LINE2.length;
-const TURN13_ACCFELL_TEXT_DELAY = 189; // pressTick+189 = 15608 (pressTick=15419 at runtime)
+ // pressTick+189 = 15608 (pressTick=15419 at runtime)
 export function turn13AccFellTextStartTick(pressTick: number): number {
   return pressTick + TURN13_ACCFELL_TEXT_DELAY;
 }
@@ -14743,8 +14609,8 @@ export function turn13AccFellTextVisibleChars(t: number, pressTick: number): num
  * a RENDER tick; RAM tick = `t-1`, same universal lag this whole dossier
  * chain uses for sprite `x2`/`y2` state.
  */
-const TURN13_SANDATTACK_SLIDE_START_OFFSET = 56; // pressTick+56 = RAM 15475 (SlideMonToOffset's own first observed step)
-const TURN13_SANDATTACK_SLIDE_X2: readonly number[] = [3, 6, 9, 9, 9, 4, 0];
+ // pressTick+56 = RAM 15475 (SlideMonToOffset's own first observed step)
+
 function turn13SandAttackPidgeottoX2(t: number, pressTick: number): number {
   const ramTick = t - 1;
   const i = ramTick - (pressTick + TURN13_SANDATTACK_SLIDE_START_OFFSET);
@@ -14772,10 +14638,10 @@ function turn13SandAttackPidgeottoX2(t: number, pressTick: number): number {
  * against RAM (`slot 4`'s own `x2=-76,y2=18` at RAM 15500, `n=21`: `floor
  * (20*985/256)=76`, `floor(20*242/256)=18`, both bit-exact).
  */
-const TURN13_SANDATTACK_DIRT_ORIGIN = { x: 161, y: 66 };
-const TURN13_SANDATTACK_DIRT_WAVE_ANCHOR_OFFSET = 61; // pressTick+61 = RAM 15480 (wave 1's own spawn tick)
-const TURN13_SANDATTACK_DIRT_SPAWN_STRIDE = 4;
-const TURN13_SANDATTACK_DIRT_LIFETIME = 21; // n in [1,21], n>20 clamped (held frame)
+
+ // pressTick+61 = RAM 15480 (wave 1's own spawn tick)
+
+ // n in [1,21], n>20 clamped (held frame)
 /**
  * `slot` is the real `gSprites[]` index each dirt sprite RAM-occupied at
  * its own spawn tick (`dump-sandattack-anim.py`'s own per-tick scan) -
@@ -14786,44 +14652,7 @@ const TURN13_SANDATTACK_DIRT_LIFETIME = 21; // n in [1,21], n>20 clamped (held f
  * scratch sprite finishing right before wave 2 spawns) - RAM-exact, not
  * assumed sequential.
  */
-const TURN13_SANDATTACK_DIRT_TABLE: readonly { slot: number; xStep: number; yStep: number }[] = [
-  // wave 1 (RAM 15480)
-  { slot: 4, xStep: 985, yStep: 242 },
-  { slot: 7, xStep: 1267, yStep: 230 },
-  { slot: 8, xStep: 1217, yStep: 256 },
-  { slot: 9, xStep: 1063, yStep: 408 },
-  { slot: 10, xStep: 1191, yStep: 216 },
-  // wave 2 (RAM 15484)
-  { slot: 3, xStep: 1089, yStep: 344 },
-  { slot: 11, xStep: 1217, yStep: 242 },
-  { slot: 12, xStep: 999, yStep: 280 },
-  { slot: 13, xStep: 1319, yStep: 216 },
-  { slot: 14, xStep: 1305, yStep: 102 },
-  // wave 3 (RAM 15488)
-  { slot: 15, xStep: 947, yStep: 192 },
-  { slot: 16, xStep: 1331, yStep: 128 },
-  { slot: 17, xStep: 1177, yStep: 306 },
-  { slot: 18, xStep: 947, yStep: 204 },
-  { slot: 19, xStep: 935, yStep: 434 },
-  // wave 4 (RAM 15492)
-  { slot: 20, xStep: 1305, yStep: 344 },
-  { slot: 21, xStep: 1037, yStep: 358 },
-  { slot: 22, xStep: 1063, yStep: 166 },
-  { slot: 23, xStep: 1229, yStep: 486 },
-  { slot: 24, xStep: 1089, yStep: 448 },
-  // wave 5 (RAM 15496)
-  { slot: 25, xStep: 1063, yStep: 128 },
-  { slot: 26, xStep: 1025, yStep: 242 },
-  { slot: 27, xStep: 1267, yStep: 320 },
-  { slot: 28, xStep: 1075, yStep: 344 },
-  { slot: 29, xStep: 1241, yStep: 486 },
-  // wave 6 (RAM 15500)
-  { slot: 30, xStep: 1127, yStep: 216 },
-  { slot: 31, xStep: 1255, yStep: 408 },
-  { slot: 32, xStep: 1011, yStep: 294 },
-  { slot: 33, xStep: 999, yStep: 472 },
-  { slot: 34, xStep: 1011, yStep: 408 },
-];
+
 /** Draw order: descending slot (painter's algorithm, last-drawn-on-top) so the lowest slot ends up visually on top - matches the real hardware's OAM order. Computed once (the table is a module constant). */
 const TURN13_SANDATTACK_DIRT_DRAW_ORDER: readonly number[] = TURN13_SANDATTACK_DIRT_TABLE.map((_, i) => i).sort(
   (a, b) => TURN13_SANDATTACK_DIRT_TABLE[b]!.slot - TURN13_SANDATTACK_DIRT_TABLE[a]!.slot,
@@ -14954,7 +14783,7 @@ const [
   TURN13_DRAGONBREATH_KICKOFF_LINE1,
   TURN13_DRAGONBREATH_KICKOFF_LINE2,
 ] = TURN13_RESOLUTION.kickoffLines;
-export const TURN13_FAINT_SINK_START_TICK = 15960; // S - oracle-pixel-bisected (first sink-visible sha change at render 15962, matching S+2 under grovyleFaintSinkRowsAndY2's own d=t-1-S formula), matches docs/turn13-notes.md §7's own RAM-derived value exactly
+ // S - oracle-pixel-bisected (first sink-visible sha change at render 15962, matching S+2 under grovyleFaintSinkRowsAndY2's own d=t-1-S formula), matches docs/turn13-notes.md §7's own RAM-derived value exactly
 // steps/healthboxVanishFrame: createBattleResolutionPresentation's own
 // generic opponent-faint-timing formula (opponentFaintSinkGeometry,
 // turn13ResolutionAdapter.ts), evaluated at Pidgeotto's real front-pic
@@ -15578,13 +15407,13 @@ const TURN1_ROCKSLIDE_HP = resolveTurn1RockSlideHpEndpoints();
  * `BLDALPHA`/`gBattle_BG1_Y` register read cross-checking the banner's own
  * schedule tick-for-tick against the ON model's own shape function).
  */
-const TURN1_OFF_STATS_BANNER_START_DELAY = 80; // RAM tick 1999 (BLDCNT eva/evb first write) - pressTick(1919)
-const TURN1_OFF_STATS_BANNER_END_DELAY = 146; // start+66, same total life as the ON schedule (RAM-confirmed: eva returns to 0 at render 2062, BLDCNT fully off by 2065)
-const TURN1_OFF_STATS_BANNER_BG1_Y_ANCHOR_DELAY = 83; // RAM tick 2001 (BG1_Y's own first +3 write) - pressTick(1919), +1 for the same BG-scroll-register render lag `STATS_BANNER_BG1_Y_ANCHOR_DELAY`'s own doc establishes (PNG(t) shows RAM(t-1))
-const TURN1_OFF_STAT_ROSE_TEXT_DELAY = 156; // banner end(146) + the same 10-tick gap the ON schedule (274->284) already establishes
-const TURN1_OFF_ROCKSLIDE_TEXT_DELAY = 265; // "ONIX used\nROCK SLIDE!" - just past Onix's own accuracy roll (RAM/sha 2182, offset 263 from pressTick)
-const TURN1_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY = 362; // RAM tick 2281 (battleBars[1]'s own start sentinel) - pressTick(1919), probe-exact
-const TURN1_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY = 422; // sha tick 2341 (this session's fresh dense-capture crop of the opponent-healthbox-name-plate bbox, HEALTHBOX_FRAME_ORIGIN-anchored - the SAME 7-tick clear-to-redraw gap turn6/turn7's own ROCK_SLIDE pairs establish (743->750, 731->738), not the coarser whole-frame-sha v3 table's own 2345 citation
+ // RAM tick 1999 (BLDCNT eva/evb first write) - pressTick(1919)
+ // start+66, same total life as the ON schedule (RAM-confirmed: eva returns to 0 at render 2062, BLDCNT fully off by 2065)
+ // RAM tick 2001 (BG1_Y's own first +3 write) - pressTick(1919), +1 for the same BG-scroll-register render lag `STATS_BANNER_BG1_Y_ANCHOR_DELAY`'s own doc establishes (PNG(t) shows RAM(t-1))
+ // banner end(146) + the same 10-tick gap the ON schedule (274->284) already establishes
+ // "ONIX used\nROCK SLIDE!" - just past Onix's own accuracy roll (RAM/sha 2182, offset 263 from pressTick)
+ // RAM tick 2281 (battleBars[1]'s own start sentinel) - pressTick(1919), probe-exact
+ // sha tick 2341 (this session's fresh dense-capture crop of the opponent-healthbox-name-plate bbox, HEALTHBOX_FRAME_ORIGIN-anchored - the SAME 7-tick clear-to-redraw gap turn6/turn7's own ROCK_SLIDE pairs establish (743->750, 731->738), not the coarser whole-frame-sha v3 table's own 2345 citation
 const TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE = {
   ...ROCK_SLIDE_ANIMATION_PROFILE,
   hitFlashAnchorAge: 327, // RAM tick 2245 (healthbox wobble's own first +1 write) - pressTick(1919), +1 for the PNG(t)=RAM(t-1) capture lag `TURN1_OFF_STATS_BANNER_BG1_Y_ANCHOR_DELAY`'s own doc establishes
@@ -16052,46 +15881,8 @@ function drawSlideScene(
 // own settled tail already established (`TURN13_SETTLED_BOUNCE_PHASE_SHIFT`), not
 // a fresh reset. ---
 
-/**
- * FLY-up ball sprite per-tick affine table (RAM-truthed,
- * `tools/probe/dump-fly-anim.py` re-run this session, docs/turn14-notes.md's
- * worktree-lane addendum). Index 0 = RAM tick 17780 (ball spawn/Murkrow's
- * own mon sprite invisible-flip, same tick, one function's own two-line
- * body per source); index 23 = RAM tick 17803 (last tick alive - destroyed
- * by RAM 17804). `x2` is always 0 (no horizontal motion) - only `a`
- * (x-scale)/`d` (y-scale)/`y2` (vertical offset) vary. Render tick `t` shows
- * RAM tick `t-1` (this session's own dense bisection: pixel first diverges
- * at render 17781, one tick after the RAM-pinned spawn at 17780 - the same
- * "render T shows RAM T-1" lag class `GROVYLE_STRETCH_TABLE`'s own doc
- * already established for a different affine mechanism).
- */
-const TURN14_FLY_BALL_RAM_START = 17780;
-const TURN14_FLY_BALL_TABLE: readonly { a: number; d: number; y2: number }[] = [
-  { a: 1170, d: 256, y2: 0 }, // RAM 17780
-  { a: 682, d: 256, y2: 0 }, // RAM 17781
-  { a: 481, d: 256, y2: 0 }, // RAM 17782
-  { a: 372, d: 256, y2: 0 }, // RAM 17783
-  { a: 303, d: 256, y2: 0 }, // RAM 17784
-  { a: 256, d: 256, y2: 0 }, // RAM 17785
-  { a: 256, d: 292, y2: 0 }, // RAM 17786
-  { a: 256, d: 341, y2: 0 }, // RAM 17787
-  { a: 256, d: 409, y2: 0 }, // RAM 17788
-  { a: 256, d: 512, y2: 0 }, // RAM 17789
-  { a: 256, d: 682, y2: 0 }, // RAM 17790
-  { a: 273, d: 512, y2: 0 }, // RAM 17791
-  { a: 292, d: 409, y2: 0 }, // RAM 17792
-  { a: 315, d: 341, y2: -1 }, // RAM 17793
-  { a: 341, d: 292, y2: -3 }, // RAM 17794
-  { a: 372, d: 256, y2: -6 }, // RAM 17795
-  { a: 409, d: 227, y2: -11 }, // RAM 17796
-  { a: 455, d: 204, y2: -17 }, // RAM 17797
-  { a: 512, d: 186, y2: -24 }, // RAM 17798
-  { a: 585, d: 170, y2: -33 }, // RAM 17799
-  { a: 682, d: 157, y2: -43 }, // RAM 17800
-  { a: 682, d: 157, y2: -54 }, // RAM 17801
-  { a: 682, d: 157, y2: -67 }, // RAM 17802
-  { a: 682, d: 157, y2: -81 }, // RAM 17803
-];
+
+
 /** Murkrow's own on-field position (`InitSpritePosToAnimAttacker`, the ball spawns at the exact same corner every tick it's alive, RAM-confirmed - reuses `MURKROW_CORNER` verbatim, same corner-vs-OAM-center convention every other affine draw in this file already uses). */
 function drawTurn14FlyBall(fb: Uint8Array, t: number): void {
   const ramTick = t - 1;
@@ -16122,14 +15913,14 @@ function turn14MurkrowInvisible(t: number): boolean {
 export const TURN14_FLYUP_LINE1 = CANONICAL_OPPONENT_FLY_RESOLUTION.chargeLines[0]!;
 export const TURN14_FLYUP_LINE2 = CANONICAL_OPPONENT_FLY_RESOLUTION.chargeLines[1]!;
 const TURN14_FLYUP_TEXT_TOTAL = TURN14_FLYUP_LINE1.length + TURN14_FLYUP_LINE2.length;
-const TURN14_FLYUP_TEXT_START_TICK = 17823;
+
 
 /** "ONIX used\nDRAGONBREATH!" (Onix's own second-half kickoff, no button press - reuses `ROCK_SLIDE_LINE1`/`DRAGONBREATH_KICKOFF_LINE2` verbatim, the SAME strings turn 13's own re-targeted DRAGON_BREATH already established). Literal start tick, oracle-pixel-bisected: settle pinned at 17949, 22 total chars, first-char tick = 17949-21 = 17928 (this tick's own sha is shared with `TURN14_MISSED_TEXT_START_TICK`'s own first-char tick below - both lines start with "ONIX", not a coincidence, both render pixel-identically for their shared first glyph). */
 const TURN14_DRAGONBREATH_TEXT_TOTAL = ROCK_SLIDE_LINE1.length + DRAGONBREATH_KICKOFF_LINE2.length;
-const TURN14_DRAGONBREATH_TEXT_START_TICK = 17928;
+
 
 /** "ONIX's\nattack missed!" (`STATUS3_ON_AIR`'s own auto-miss, §5b) - reuses `TURN8_MISS_LINE1`/`TURN8_MISS_LINE2` verbatim (the SAME `"{B_ATK_NAME_WITH_PREFIX}'s\nattack missed!"` template turn 8's own BIND-miss and turn 12's own ROCK_SLIDE-miss already established). Literal start tick, oracle-pixel-bisected: settle pinned at 18005, `TURN8_MISS_TEXT_TOTAL`(20) total chars, first-char tick = 18005-19 = 17986. */
-const TURN14_MISSED_TEXT_START_TICK = 17986;
+
 
 /** Same 1-char/tick mechanism every other message window in this file uses - a small local helper since this window's three texts are each literal-anchored (no shared pressTick-relative formula). */
 function turn14SimpleVisibleChars(t: number, start: number, total: number): number {
@@ -16148,7 +15939,7 @@ function turn14BareSceneStartTick(pressTick: number): number {
 /** First observed sha of the settled "What will ONIX do?" vs. an ABSENT Murkrow idle-cycle (docs/turn14-notes.md §4: `gBattle_BG0_Y` flips at 18085, redraw settles by 18086). */
 const TURN14_MENU_REDRAW_TICK = 18086;
 /** The miss text clears to a blank message box six ticks before its chrome reveal. */
-const TURN14_MENU_TEXT_CLEAR_TICK = 18080;
+
 /**
  * Turn 14's own menu-redraw RESETS the bounce regime fresh (does NOT
  * continue turn 13's live cycle, despite this file's own prior module doc
@@ -16290,7 +16081,7 @@ function drawTurn14FightSubmenuWindow(
 export const TURN15_FLY_STRIKE_LINE1 = CANONICAL_OPPONENT_FLY_RESOLUTION.strikeLines[0]!;
 export const TURN15_FLY_STRIKE_LINE2 = CANONICAL_OPPONENT_FLY_RESOLUTION.strikeLines[1]!;
 const TURN15_FLY_STRIKE_TEXT_TOTAL = TURN15_FLY_STRIKE_LINE1.length + TURN15_FLY_STRIKE_LINE2.length;
-const TURN15_FLY_STRIKE_TEXT_START_TICK = 19007;
+
 
 /** Same 1-char/tick mechanism every other message window in this file uses. */
 function turn15SimpleVisibleChars(t: number, start: number, total: number): number {
@@ -16336,7 +16127,7 @@ function turn15KickoffBounceTick(t: number, pressTick: number): number {
 // oracle-pixel-verified against `turn15-fly-strike.json`, not assumed
 // blind. ---
 
-const TURN15_STRIKE_RENDER_LAG = 1;
+
 
 /**
  * `AnimFlyBallAttack`'s own diagonal linear-translate ball sprite (slot 3) -
@@ -16363,40 +16154,9 @@ const TURN15_STRIKE_RENDER_LAG = 1;
  * native 64x64 box, the same `doubleSizeBox=false` rule
  * `gFallingFeatherSpriteTemplate`'s own precedent already established.
  */
-const TURN15_FLY_BALL_RAM_START = 19045;
-const TURN15_FLY_BALL_TABLE: readonly { x: number; y: number }[] = [
-  { x: 262, y: -26 }, // RAM 19045
-  { x: 252, y: -20 }, // RAM 19046
-  { x: 242, y: -14 }, // RAM 19047
-  { x: 232, y: -8 }, // RAM 19048
-  { x: 222, y: -2 }, // RAM 19049
-  { x: 212, y: 4 }, // RAM 19050
-  { x: 202, y: 10 }, // RAM 19051
-  { x: 192, y: 16 }, // RAM 19052
-  { x: 182, y: 22 }, // RAM 19053
-  { x: 172, y: 28 }, // RAM 19054
-  { x: 162, y: 34 }, // RAM 19055
-  { x: 152, y: 40 }, // RAM 19056
-  { x: 142, y: 46 }, // RAM 19057
-  { x: 132, y: 52 }, // RAM 19058
-  { x: 122, y: 58 }, // RAM 19059
-  { x: 112, y: 64 }, // RAM 19060
-  { x: 102, y: 70 }, // RAM 19061
-  { x: 92, y: 76 }, // RAM 19062
-  { x: 82, y: 82 }, // RAM 19063
-  { x: 72, y: 88 }, // RAM 19064
-  { x: 62, y: 94 }, // RAM 19065
-  { x: 52, y: 100 }, // RAM 19066
-  { x: 42, y: 106 }, // RAM 19067
-  { x: 32, y: 112 }, // RAM 19068
-  { x: 22, y: 118 }, // RAM 19069
-  { x: 12, y: 124 }, // RAM 19070
-  { x: 2, y: 130 }, // RAM 19071
-  { x: -8, y: 136 }, // RAM 19072
-  { x: -18, y: 142 }, // RAM 19073
-  { x: -28, y: 148 }, // RAM 19074
-];
-const TURN15_FLY_BALL_MATRIX = { pa: 142, pb: 212, pc: -212, pd: 142 };
+
+
+
 
 function drawTurn15FlyBallDescent(fb: Uint8Array, t: number): void {
   const ramTick = t - TURN15_STRIKE_RENDER_LAG;
@@ -16440,9 +16200,9 @@ function drawTurn15FlyBallDescent(fb: Uint8Array, t: number): void {
  * ~4-tick invisible pulses (19107-110/115-118/123-126/131-134), settling
  * visible for good at 19135.
  */
-const TURN15_STRIKE_TARGET_INVISIBLE_PULSE_START_TICK = 19107;
-const TURN15_STRIKE_TARGET_INVISIBLE_PULSE_END_TICK = 19134;
-const TURN15_STRIKE_TARGET_INVISIBLE_PULSE_PERIOD = 4;
+
+
+
 function turn15StrikeTargetInvisible(t: number, pulseStartTick: number, pulseEndTick: number, pulsePeriod: number): boolean {
   const ramTick = t - TURN15_STRIKE_RENDER_LAG;
   if (ramTick < pulseStartTick) return false;
@@ -16456,7 +16216,7 @@ function turn15StrikeTargetInvisible(t: number, pulseStartTick: number, pulseEnd
  * own source-code branch, both in the same `if` block - RAM-confirmed
  * simultaneous, §6b).
  */
-const TURN15_STRIKE_ATTACKER_REVEAL_TICK = 19075;
+
 function turn15StrikeAttackerInvisible(t: number, revealTick: number): boolean {
   return t - TURN15_STRIKE_RENDER_LAG < revealTick;
 }
@@ -16472,7 +16232,7 @@ function turn15StrikeAttackerInvisible(t: number, revealTick: number): boolean {
  * hitsplat's own live-fb blend target reads Onix's UNSHIFTED body color,
  * mismatching by ~1600px for 6 of the hitsplat's 9 live ticks).
  */
-const TURN15_ONIX_SHAKE_X2 = 6;
+
 const TURN15_ONIX_SHAKE_RAM_TICKS: ReadonlySet<number> = new Set([19069, 19070, 19073, 19074, 19077, 19078]);
 function turn15StrikeTargetShakeX2(t: number, magnitude: number, ramTicks: ReadonlySet<number>): number {
   return ramTicks.has(t - TURN15_STRIKE_RENDER_LAG) ? magnitude : 0;
@@ -16493,8 +16253,8 @@ function turn15StrikeTargetShakeX2(t: number, magnitude: number, ramTicks: Reado
  * render window directly gives RAM 19106-19125, one tick before the
  * flicker's own RAM 19107 start - exactly turn 9's own offset.
  */
-const TURN15_HEALTHBOX_WOBBLE_RAM_START = 19106;
-const TURN15_HEALTHBOX_WOBBLE_TICKS = 20;
+
+
 function turn15StrikeTargetHealthboxWobbleY2(t: number, wobbleStartTick: number, wobbleTicks: number): number {
   const ramTick = t - TURN15_STRIKE_RENDER_LAG;
   const n = ramTick - wobbleStartTick;
@@ -16522,9 +16282,9 @@ function turn15StrikeTargetHealthboxWobbleY2(t: number, wobbleStartTick: number,
  * `drawSpriteSheetBlendedOverFb` (corner-based, live-fb blend) is both
  * simpler and correct here, no rotate/scale sampling needed.
  */
-const TURN15_HITSPLAT_CENTER = { x: 72, y: 88 };
-const TURN15_HITSPLAT_RAM_START = 19067;
-const TURN15_HITSPLAT_RAM_END = 19075;
+
+
+
 function drawTurn15ImpactHitsplat(fb: Uint8Array, t: number): void {
   const ramTick = t - TURN15_STRIKE_RENDER_LAG;
   if (ramTick < TURN15_HITSPLAT_RAM_START || ramTick > TURN15_HITSPLAT_RAM_END) return;
@@ -16574,7 +16334,7 @@ function drawTurn15ImpactHitsplat(fb: Uint8Array, t: number): void {
  * already flagged as an open item in docs/turn15-notes.md §5(a) (this
  * turn's own faint-sink delay), not a new render-lag family.
  */
-const TURN15_HP_DRAIN_START_TICK = 19141;
+
 function turn15StrikeTargetHp(t: number, startHp: number): number {
   const d = t - TURN15_HP_DRAIN_START_TICK;
   return Math.max(0, startHp - Math.max(d, 0));
@@ -16595,7 +16355,7 @@ function turn15StrikeTargetHp(t: number, startHp: number): number {
  * corrected "held window starts at 19174" finding, not just fit to one
  * boundary.
  */
-const TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK = 19151;
+
 
 /**
  * Onix's own player-side faint sink (docs/turn15-notes.md §10, closing
@@ -16609,8 +16369,8 @@ const TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK = 19151;
  * own 64px height) from tick 19321 on - the last tick with any visible
  * sliver is 19320 (skip=60, a 4px remainder).
  */
-const TURN15_ONIX_SINK_START_TICK = 19308;
-const TURN15_ONIX_SINK_RATE = 5;
+
+
 function turn15FaintSinkSkipRows(t: number, sinkStartTick: number, sinkRate: number): number {
   return Math.max(0, sinkRate * (t - sinkStartTick));
 }
@@ -16625,7 +16385,7 @@ function turn15FaintSinkSkipRows(t: number, sinkStartTick: number, sinkRate: num
  * this dossier's usual "distinct sequential teardown steps, not one atomic
  * event" shape.
  */
-const TURN15_ONIX_HEALTHBOX_VANISH_TICK = 19326;
+
 
 /**
  * "ONIX\nfainted!" (no "Foe " prefix - the player's own mon, docs/
@@ -17253,17 +17013,17 @@ function drawTurn15MagbyHealthbox(fb: Uint8Array, dx: number, dy: number = 0, hp
 // FightSubmenuState stores the post-increment battle elapsed, one rendered
 // VBlank after the actual edge. The visible hardware delays below are
 // therefore encoded one lower than the edge-to-pixel counts (6 and 12).
-const TURN16_FIGHT_SUBMENU_REVEAL_DELAY = 5;
-const TURN16_FAINT_ATTACK_TEXT_DELAY = 11;
+
+
 /** The bounce controller runs four VBlanks past the confirm edge, then stops. */
 const TURN16_BOUNCE_FREEZE_DELAY = 3;
-const TURN16_FAINT_ATTACK_LINE1 = "Foe MURKROW used";
-const TURN16_FAINT_ATTACK_LINE2 = "FAINT ATTACK!";
+
+
 const TURN16_FAINT_ATTACK_TEXT_TOTAL = TURN16_FAINT_ATTACK_LINE1.length + TURN16_FAINT_ATTACK_LINE2.length;
 /** First Move_FAINT_ATTACK script-owned render, relative to stored confirm. */
 const TURN16_FAINT_ATTACK_ANIM_DELAY = 52;
-const TURN16_FIRE_PUNCH_LINE1 = "MAGBY used";
-const TURN16_FIRE_PUNCH_LINE2 = "FIRE PUNCH!";
+
+
 const TURN16_FIRE_PUNCH_TEXT_TOTAL = TURN16_FIRE_PUNCH_LINE1.length + TURN16_FIRE_PUNCH_LINE2.length;
 type FaintAttackDarkBgAsset = {
   charBlock2B64: string;
@@ -17317,7 +17077,7 @@ const FIRE_PUNCH_RED: RgbColor = { r: 248, g: 0, b: 0 };
 export const TURN17_OUTCOME_FLIP_DELAY = 17;
 export const TURN17_FIRST_OUTCOME_RENDER_DELAY = 26;
 export const TURN17_OUTCOME_LINE1 = "Player defeated";
-export const TURN17_OUTCOME_LINE2 = "BUG CATCHER DESTIN!";
+
 export const TURN17_OUTCOME_TEXT_TOTAL =
   TURN17_OUTCOME_LINE1.length + TURN17_OUTCOME_LINE2.length;
 /** The printer consumes the final glyph at +59 and can accept A immediately. */
@@ -17332,12 +17092,12 @@ export const TURN17_FIRST_TRAINER_RENDER_DELAY = 28;
 export const TURN17_TRAINER_SLIDE_SETTLE_DELAY = 53;
 /** Controller waitstate completes, then the loss printer clears and writes its first glyph. */
 export const TURN17_LOSS_TEXT_START_DELAY = 56;
-export const TURN17_LOSS_LINE1 = "PLEASE I NEED";
-export const TURN17_LOSS_LINE2 = "SOME WATER";
+
+
 export const TURN17_LOSS_TEXT_TOTAL =
   TURN17_LOSS_LINE1.length + TURN17_LOSS_LINE2.length;
 /** Final glyph is visible at +78; PAUSE_UNTIL_PRESS enters WAIT one callback later. */
-export const TURN17_LOSS_INPUT_READY_DELAY = 79;
+
 
 function turn17OutcomeLine2(
   trainerPresentation?: FactoryTrainerPresentation,
