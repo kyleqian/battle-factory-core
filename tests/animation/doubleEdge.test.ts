@@ -23,6 +23,8 @@ import {
   TARGET_ORIGIN_FIRST_AGE,
   TARGET_SLIDE_FIRST_AGE,
   doubleEdgeAtAge,
+  doubleEdgeDisplayedShakeX2,
+  doubleEdgeRamShakeX2,
 } from "../../src/animation/doubleEdge.ts";
 import { shakeMonInPlaceOffsetAtTick } from "../../src/animation/shakeMonInPlace.ts";
 import {
@@ -331,6 +333,35 @@ describe("Move_DOUBLE_EDGE source-relative reducer", () => {
     for (let age = 0; age <= 69; age += 1) {
       expect(at(age).targetOffset.x2).toBe(0);
       expect(atO(age).targetOffset.x2).toBe(0);
+    }
+  });
+
+  it("pins the DISPLAYED ShakeMonInPlace latch: one two-frame pair late", () => {
+    // The task's RAM writes come in two-frame pairs at the even ages 80..100.
+    // The promotion round measured (change-map + pixel, this move's own maps)
+    // that the odd-age writes never reach a displayed frame: the RAM pair
+    // containing `displayAge - 1` is what shows, so each value holds for two
+    // displayed frames (81-82, 83-84, ...) and the RAM age-101 restore to 0
+    // shows at displayed age 103.
+    expect(doubleEdgeRamShakeX2(79)).toBe(0);
+    expect(doubleEdgeRamShakeX2(80)).toBe(-4);
+    expect(doubleEdgeRamShakeX2(81)).toBe(4);
+    expect(doubleEdgeRamShakeX2(100)).toBe(-4);
+    expect(doubleEdgeRamShakeX2(101)).toBe(0);
+    // displayed: pair-aligned
+    expect(doubleEdgeDisplayedShakeX2(80)).toBe(0); // pre-window
+    expect(doubleEdgeDisplayedShakeX2(81)).toBe(-4);
+    expect(doubleEdgeDisplayedShakeX2(82)).toBe(-4);
+    expect(doubleEdgeDisplayedShakeX2(83)).toBe(4);
+    expect(doubleEdgeDisplayedShakeX2(84)).toBe(4);
+    expect(doubleEdgeDisplayedShakeX2(85)).toBe(-4);
+    expect(doubleEdgeDisplayedShakeX2(101)).toBe(-4);
+    expect(doubleEdgeDisplayedShakeX2(102)).toBe(-4);
+    expect(doubleEdgeDisplayedShakeX2(103)).toBe(0); // the RAM-101 restore
+    for (let age = 81; age <= 102; age += 1) {
+      expect(doubleEdgeDisplayedShakeX2(age)).toBe(
+        doubleEdgeRamShakeX2(2 * Math.floor((age - 1) / 2)),
+      );
     }
   });
 

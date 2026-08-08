@@ -712,6 +712,32 @@
    ]
   },
   {
+   "move": "MOVE_DOUBLE_EDGE",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_HITMONTOP_2 set 341 (HITMONTOP 237, all four active slots DOUBLE_EDGE move 38 so the Factory AI has one legal choice, Focus Band, ADAMANT, HP|DEFENSE EVs) against legal ONIX 95 in both orientations; both pass the complete move-owned Scene-ON window twice fresh with evidence 4a752c133a951b971045b8f521e3fc3b372a45a24ea3fd38e83e64e550d43d7b / raw RGB 0683e56fcffa8d09718a9252582888f66b617e0b56ec019057ab23037c4433d8 for the 141-frame player-back window (frames 80-220, first frame clean) and evidence 30d84ed6f1e8c0e624536bb45bec5c30a07b1793095acc171558e5b8ec74b2d0 / raw RGB ef72361787f2b8f0f2554684a806db69c254bef755fef1ae4974c5d57ad2e9ce for the 141-frame opponent-front window (frames 84-224, structurally identical +4 on every frame, first frame clean), both isolated by sBattleAnimScriptPtr within the Move_DOUBLE_EDGE..Move_POISON_STING label bounds; both orientations 141/141 component AND framebuffer exact",
+    "the reducer composes only already-exact components with zero new ones: the AnimTask_TranslateMonEllipticalRespectSide attacker lunge (18,6,2,4 - TWO loops, unlike COUNTER's one), both gSlideMonTo* slides via the shared slideMon.ts port (attacker +20 then target -32, restored at 0/5 and 0/7), one gBasicHitSplatSpriteTemplate at the mirrored target-relative anchor, AnimTask_ShakeMonInPlace (4,0,12,1) on BOTH battlers via the shared shakeMonInPlace.ts port, AnimTask_RotateMonSpriteToSide applied to BOTH battler sprites forward then reversed with an identity reset, and the complex/simple palette blends (attacker white, BG white); ANIM_TAG_IMPACT art was already extracted",
+    "displayed timing splits the latch FOUR ways and this move is where the lane's 'task-driven means RAM+2' rule finally broke down completely: the two slides and the hitsplat are sprite-driven at RAM+1, AnimTask_TranslateMonEllipticalRespectSide displays at RAM+2, AnimTask_RotateMonSpriteToSide displays at RAM+2 (isolated restore window: static 193-200, first change 201 = RAM 119 + 2, reset RAM 126 -> 208, both orientations), and AnimTask_ShakeMonInPlace displays PAIR-ALIGNED - its RAM writes come in two-frame pairs at the even ages 80..100, the odd-age writes never reach a displayed frame, so the displayed value at display age A is the RAM pair containing A-1 and the RAM age-101 restore shows at displayed age 103; that pair rule is exact on BOTH orientations where a flat RAM+1 fit player-back but contradicted one opponent-front toggle",
+    "the player-back target rests at ONIX's front-idle x2=1 for ages 0-69 until the ShakeMonInPlace first write lands; that hold is a species-idle property the draw case supplies and the reducer deliberately leaves at 0 (the TAKE_DOWN/SLASH/LICK/COUNTER convention, pinned in tests/animation/doubleEdge.test.ts). Opponent-front ONIX's back sprite has no such hold and the reducer matches its offsets on all 141 frames with zero exclusions",
+    "the portable proves 141/141 source-component frames in both orientations (both battlers' x2/y2 and affine matrices, the slide and shake spans, the hitsplat, the blend coefficients) and the identical shared-framebuffer 141/141 through the full engine render with healthboxes and message window untouched; no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-double-edge-player-hitmontop-opponent-onix.json",
+    "tools/battle-lab/mechanic-double-edge-opponent-hitmontop-player-onix.json",
+    "tools/compare/fixtures/double-edge-player-hitmontop-opponent-onix.json",
+    "tools/compare/fixtures/double-edge-opponent-hitmontop-player-onix.json",
+    "tools/compare/doubleEdgeProbe.py",
+    "tools/compare/doubleEdgePortable.ts",
+    "tools/compare/evidence/double-edge-changemap-player.txt",
+    "tools/compare/evidence/double-edge-changemap-opponent.txt",
+    "src/animation/doubleEdge.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/doubleEdge.test.ts",
+    "tests/animation/doubleEdgeEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_DOUBLE_TEAM",
    "status": "exact",
    "covered": [
