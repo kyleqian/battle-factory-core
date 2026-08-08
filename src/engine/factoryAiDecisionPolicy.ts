@@ -573,6 +573,15 @@ export type FactoryAiScoredBattlerView = Readonly<{
    * defaulting to `false`.
    */
   targetSideReflectUp?: boolean;
+  /**
+   * `Cmd_if_status_in_party`'s exact-`==` party scan on the TARGET's OWN side
+   * (`battle_ai_script_commands.c:1568-1598`) -- source-required for
+   * `AI_CV_HealBell`'s second gate (`data/battle_ai_scripts.s:1843`). True
+   * when any ALIVE, non-egg/non-none party member on the target's side has a
+   * full `MON_DATA_STATUS` word EQUAL to `STATUS1_ANY` (an exact equality,
+   * not a mask). Optional, defaulting to `false`.
+   */
+  targetPartyStatusEqualsAny?: boolean;
   /** `gSideStatuses[] & SIDE_STATUS_SAFEGUARD` -- source-required for `AI_CBM_Toxic`'s target-side gate. Optional, defaulting to `false`. */
   safeguardUp?: boolean;
   /**
@@ -1138,6 +1147,9 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           ...(view.target.isPoisoned === true ? { isPoisoned: true } : {}),
           ...(view.target.isBurned === true ? { isBurned: true } : {}),
           ...(view.target.isParalyzed === true ? { isParalyzed: true } : {}),
+          ...(view.target.anyMoveDisabled === true ? { anyMoveDisabled: true } : {}),
+          ...(view.target.hasAnyStatus === true ? { hasAnyStatus: true } : {}),
+          ...(view.target.targetPartyStatusEqualsAny === true ? { targetPartyStatusEqualsAny: true } : {}),
         },
         staleFuncResultFallback,
         drawOrdinalStart: draws.length + 1,

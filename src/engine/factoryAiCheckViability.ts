@@ -359,6 +359,27 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
   isParalyzed?: boolean;
   /** STATUS2_SUBSTITUTE, read by AI_CV_FocusPunch's FocusPunch3 tail. */
   hasSubstitute?: boolean;
+  /**
+   * Whether any of `gDisableStructs[battler]`'s four moves is disabled
+   * (`disabledMove != MOVE_NONE`) -- `AI_CV_Encore`'s `if_any_move_disabled
+   * AI_TARGET` gate (`data/battle_ai_scripts.s:1688`, the TARGET's own
+   * copy). Optional, defaulting to false (no move disabled at battle start).
+   */
+  anyMoveDisabled?: boolean;
+  /**
+   * `gBattleMons[].status1 & STATUS1_ANY` -- `AI_CV_HealBell`'s first gate
+   * (`if_status AI_TARGET, STATUS1_ANY`, the TARGET's own copy). Optional,
+   * defaulting to `false`.
+   */
+  hasAnyStatus?: boolean;
+  /**
+   * `Cmd_if_status_in_party`'s exact-`==` party scan
+   * (`battle_ai_script_commands.c:1568-1598`): any ALIVE, non-egg/non-none
+   * party member on the TARGET's side whose full `MON_DATA_STATUS` word
+   * EQUALS `STATUS1_ANY` -- `AI_CV_HealBell`'s second gate. Optional,
+   * defaulting to `false`.
+   */
+  targetPartyStatusEqualsAny?: boolean;
 }>;
 
 export type FactoryAiCheckViabilityDraw =
@@ -6471,6 +6492,40 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_ENCORE") {
+    // AI_CV_Encore (data/battle_ai_scripts.s:1687-1701).
+    const encore = runCvEncore({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      funcResultCarry,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: encore.rng,
+      draws: encore.draws,
+      scoreDelta: encore.scoreDelta,
+      funcResultAfter: encore.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_HEAL_BELL") {
+    // AI_CV_HealBell (data/battle_ai_scripts.s:1841-1846).
+    const healBell = runCvHealBell({
+      rng: input.rng,
+      target: input.target,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: healBell.rng,
+      draws: healBell.draws,
+      scoreDelta: healBell.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
   if (AI_CHECK_VIABILITY_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
       kind: "unsupported-branch",
@@ -7176,5 +7231,153 @@ function runCvEndeavor(input: Readonly<{
     rng,
     draws: Object.freeze(draws),
     scoreDelta: hpPercent > 40 ? -1 : 1,
+  });
+}
+
+/**
+ * `AI_CV_Encore`'s own encouraged-last-move-effect list
+ * (`data/battle_ai_scripts.s:1703-1766`, EFFECT ids terminated by -1), the
+ * big literal `AI_CV_Encore_EncouragedMovesToEncore` table. 62 entries,
+ * including the duplicate EFFECT_SKILL_SWAP at :1757 (a Set dedupes it
+ * harmlessly -- membership is the only thing `if_not_in_bytes` tests).
+ */
+const AI_CV_ENCORE_ENCOURAGED_EFFECTS: ReadonlySet<string> = new Set([
+  "EFFECT_DREAM_EATER", "EFFECT_ATTACK_UP", "EFFECT_DEFENSE_UP", "EFFECT_SPEED_UP",
+  "EFFECT_SPECIAL_ATTACK_UP", "EFFECT_HAZE", "EFFECT_ROAR", "EFFECT_CONVERSION",
+  "EFFECT_TOXIC", "EFFECT_LIGHT_SCREEN", "EFFECT_REST", "EFFECT_SUPER_FANG",
+  "EFFECT_SPECIAL_DEFENSE_UP_2", "EFFECT_CONFUSE", "EFFECT_POISON", "EFFECT_PARALYZE",
+  "EFFECT_LEECH_SEED", "EFFECT_SPLASH", "EFFECT_ATTACK_UP_2", "EFFECT_ENCORE",
+  "EFFECT_CONVERSION_2", "EFFECT_LOCK_ON", "EFFECT_HEAL_BELL", "EFFECT_MEAN_LOOK",
+  "EFFECT_NIGHTMARE", "EFFECT_PROTECT", "EFFECT_SKILL_SWAP", "EFFECT_FORESIGHT",
+  "EFFECT_PERISH_SONG", "EFFECT_SANDSTORM", "EFFECT_ENDURE", "EFFECT_SWAGGER",
+  "EFFECT_ATTRACT", "EFFECT_SAFEGUARD", "EFFECT_RAIN_DANCE", "EFFECT_SUNNY_DAY",
+  "EFFECT_BELLY_DRUM", "EFFECT_PSYCH_UP", "EFFECT_FUTURE_SIGHT", "EFFECT_FAKE_OUT",
+  "EFFECT_STOCKPILE", "EFFECT_SPIT_UP", "EFFECT_SWALLOW", "EFFECT_HAIL",
+  "EFFECT_TORMENT", "EFFECT_WILL_O_WISP", "EFFECT_FOLLOW_ME", "EFFECT_CHARGE",
+  "EFFECT_TRICK", "EFFECT_ROLE_PLAY", "EFFECT_INGRAIN", "EFFECT_RECYCLE",
+  "EFFECT_KNOCK_OFF", "EFFECT_IMPRISON", "EFFECT_REFRESH", "EFFECT_GRUDGE",
+  "EFFECT_TEETER_DANCE", "EFFECT_MUD_SPORT", "EFFECT_WATER_SPORT",
+  "EFFECT_DRAGON_DANCE", "EFFECT_CAMOUFLAGE",
+]);
+
+/**
+ * `AI_CV_Encore` (`data/battle_ai_scripts.s:1687-1701`, EFFECT_ENCORE):
+ *
+ * ```
+ * AI_CV_Encore:
+ *     if_any_move_disabled AI_TARGET, AI_CV_Encore2
+ *     if_target_faster AI_CV_Encore_ScoreDown2
+ *     get_last_used_bank_move AI_TARGET
+ *     get_move_effect_from_result
+ *     if_not_in_bytes AI_CV_Encore_EncouragedMovesToEncore, AI_CV_Encore_ScoreDown2
+ * AI_CV_Encore2:
+ *     if_random_less_than 30, AI_CV_Encore_End
+ *     score +3
+ *     goto AI_CV_Encore_End
+ * AI_CV_Encore_ScoreDown2:
+ *     score -2
+ * AI_CV_Encore_End:
+ *     end
+ * ```
+ *
+ * The target having ANY disabled move jumps straight to `Encore2` (the +3
+ * roll), skipping the faster/last-move gates. Otherwise target strictly
+ * faster is the deterministic -2. A target that is NOT faster has its last
+ * move's effect read (`get_last_used_bank_move` + `get_move_effect_from_result`
+ * -- which WRITES funcResult with the effect id): a last-move effect outside
+ * the 62-entry encouraged table is the deterministic -2; one inside falls to
+ * `Encore2`'s single <30 roll (JUMP to End at zero, FALL-THROUGH +3).
+ */
+function runCvEncore(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  funcResultCarry: AiWeatherValue | undefined;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  if (input.target.anyMoveDisabled ?? false) {
+    // Jump straight to Encore2: no get_last_used_bank_move executes, so
+    // funcResult keeps the incoming carry.
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-encore-roll`);
+    const jumped = roll.randomValue % 256 < 30;
+    return Object.freeze({
+      rng: roll.after,
+      draws: Object.freeze([Object.freeze({ ...roll, kind: "encore-roll" as const, jumped })]),
+      scoreDelta: jumped ? 0 : 3,
+      funcResultAfter: input.funcResultCarry,
+    });
+  }
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  if (strikesFirst === 1) {
+    // Target faster: ScoreDown2, funcResult untouched by this handler.
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -2, funcResultAfter: input.funcResultCarry });
+  }
+
+  // get_last_used_bank_move + get_move_effect_from_result always overwrite
+  // funcResult here: the effect id of the target's last move.
+  const lastMove = MOVES_BY_ID.get(input.target.lastUsedMoveId ?? 0);
+  const lastEffect = lastMove?.effect ?? "EFFECT_HIT";
+  const funcResultAfter = EFFECT_ID_IN_WEATHER_RANGE.get(lastEffect);
+  if (!AI_CV_ENCORE_ENCOURAGED_EFFECTS.has(lastEffect)) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -2, funcResultAfter });
+  }
+  const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-encore-roll`);
+  const jumped = roll.randomValue % 256 < 30;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([...draws, Object.freeze({ ...roll, kind: "encore-roll" as const, jumped })]),
+    scoreDelta: jumped ? 0 : 3,
+    funcResultAfter,
+  });
+}
+
+/**
+ * `AI_CV_HealBell` (`data/battle_ai_scripts.s:1841-1846`, EFFECT_HEAL_BELL):
+ *
+ * ```
+ * AI_CV_HealBell:
+ *     if_status AI_TARGET, STATUS1_ANY, AI_CV_HealBell_End
+ *     if_status_in_party AI_TARGET, STATUS1_ANY, AI_CV_HealBell_End
+ *     score -5
+ * AI_CV_HealBell_End:
+ *     end
+ * ```
+ *
+ * The target's own `status1 & STATUS1_ANY` nonzero jumps to the clean zero;
+ * failing that, `Cmd_if_status_in_party`'s exact-`==` party scan
+ * (`battle_ai_script_commands.c:1568-1598`, note: EQUALITY, not a mask) over
+ * every ALIVE non-egg/non-none party member on the TARGET's side also jumps
+ * to the clean zero. A target with no status and no matching party member is
+ * the deterministic -5. Zero draws, no funcResult write.
+ */
+function runCvHealBell(input: Readonly<{
+  rng: BattleRngState;
+  target: FactoryAiCheckViabilityBattler;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const targetHasAnyStatus = input.target.hasAnyStatus ?? false;
+  const partyMemberHasStatusWord = input.target.targetPartyStatusEqualsAny ?? false;
+  return Object.freeze({
+    rng: input.rng,
+    draws: Object.freeze([]),
+    scoreDelta: targetHasAnyStatus || partyMemberHasStatusWord ? 0 : -5,
   });
 }

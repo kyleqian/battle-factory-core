@@ -2974,3 +2974,45 @@ describe("pass-3 CheckViability adapter populates the five handler-input fields 
     expect(awake.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: -5 });
   });
 });
+
+describe("AI_CV_Encore/HealBell new-field wiring through the adapter", () => {
+  const MOVE_ENCORE_MASK7 = 227; // EFFECT_ENCORE
+  const MOVE_HEAL_BELL_MASK7 = 215; // EFFECT_HEAL_BELL
+
+  it("anyMoveDisabled: view.target.anyMoveDisabled=true jumps Encore's last-move gate (+3 roll, +3 on fall-through)", () => {
+    // seed 1 -> %256=198 >= 30 FALL-THROUGH +3.
+    const disabled = chooseFactoryAiScoredDecision({
+      view: cvWiringView(MOVE_ENCORE_MASK7, { anyMoveDisabled: true }),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(disabled.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 3 });
+
+    // absent -> target faster? no (marowak target outspeeds the alakazam
+    // attacker? attacker=alakazam, target=marowak level 5). Without a
+    // disabled move the last-move gate decides: marowak's last move is
+    // outside the encouraged table, so the deterministic -2.
+    const absent = chooseFactoryAiScoredDecision({
+      view: cvWiringView(MOVE_ENCORE_MASK7, {}),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(absent.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: -2 });
+  });
+
+  it("targetPartyStatusEqualsAny: view.target.targetPartyStatusEqualsAny=true is HealBell's clean zero, absent is -5", () => {
+    const party = chooseFactoryAiScoredDecision({
+      view: cvWiringView(MOVE_HEAL_BELL_MASK7, { targetPartyStatusEqualsAny: true }),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(party.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 0 });
+
+    const clean = chooseFactoryAiScoredDecision({
+      view: cvWiringView(MOVE_HEAL_BELL_MASK7, {}),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(clean.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: -5 });
+  });
+});

@@ -6633,3 +6633,93 @@ describe("AI_CV_Endeavor (data/battle_ai_scripts.s:2475-2490)", () => {
     });
   });
 });
+
+// data/battle_ai_scripts.s:1687-1701, EFFECT_ENCORE. Move 227.
+describe("AI_CV_Encore (data/battle_ai_scripts.s:1687-1701)", () => {
+  const MOVE_ENCORE = 227; // EFFECT_ENCORE
+  const ENCOURAGED_LAST_MOVE = 57; // MOVE_SURF (EFFECT_HIT) -- NOT in the encouraged table
+  const ENCOURAGED_LAST_MOVE_IN_TABLE = 92; // MOVE_TOXIC (EFFECT_TOXIC) -- in the table
+  function encoreRun(rngValue: number, attackerOverrides: Record<string, unknown>, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_ENCORE,
+      attacker: { ...NEUTRAL_BATTLER, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "encore",
+    });
+  }
+
+  it("any target move disabled jumps straight to the +3 roll, funcResult keeps the carry", () => {
+    // seed 1 -> %256=198 >= 30 FALL-THROUGH +3.
+    const result = encoreRun(1, {}, { anyMoveDisabled: true });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 3, funcResultAfter: 2 });
+    expect(result.draws.map((d) => d.kind)).toEqual(["encore-roll"]);
+
+    // seed 4 -> %256=25 < 30 JUMP, zero.
+    const jumped = encoreRun(4, {}, { anyMoveDisabled: true });
+    if (jumped.kind !== "scored") throw new Error("unreachable");
+    expect(jumped).toMatchObject({ scoreDelta: 0 });
+    expect(jumped.draws[0]).toMatchObject({ kind: "encore-roll", jumped: true });
+  });
+
+  it("target strictly faster is the deterministic -2", () => {
+    expect(encoreRun(1, { speed: 5 }, { speed: 120 })).toMatchObject({
+      kind: "scored", scoreDelta: -2, draws: [],
+    });
+  });
+
+  it("last-move effect outside the encouraged table is the deterministic -2", () => {
+    const result = encoreRun(1, { speed: 120 }, { speed: 5, lastUsedMoveId: ENCOURAGED_LAST_MOVE });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -2 });
+    expect(result.draws.map((d) => d.kind)).toEqual([]);
+    // get_move_effect_from_result wrote EFFECT_HIT (id 0 = AI_WEATHER_SUN).
+    expect(result.funcResultAfter).toBe(0);
+  });
+
+  it("last-move effect inside the encouraged table reaches the +3 roll", () => {
+    const result = encoreRun(1, { speed: 120 }, { speed: 5, lastUsedMoveId: ENCOURAGED_LAST_MOVE_IN_TABLE });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 3 });
+    expect(result.draws.map((d) => d.kind)).toEqual(["encore-roll"]);
+    // MOVE_TOXIC is EFFECT_TOXIC (id 13, >= 4 -- no AI_WEATHER_* collision).
+    expect(result.funcResultAfter).toBe(undefined);
+  });
+});
+
+// data/battle_ai_scripts.s:1841-1846, EFFECT_HEAL_BELL. Move 215.
+describe("AI_CV_HealBell (data/battle_ai_scripts.s:1841-1846)", () => {
+  const MOVE_HEAL_BELL = 215; // EFFECT_HEAL_BELL
+  function healBellRun(targetOverrides: Record<string, unknown>) {
+    return runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_HEAL_BELL,
+      attacker: NEUTRAL_BATTLER,
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "heal-bell",
+    });
+  }
+
+  it("target's own status1 & STATUS1_ANY nonzero is the clean zero", () => {
+    expect(healBellRun({ hasAnyStatus: true })).toMatchObject({
+      kind: "scored", scoreDelta: 0, draws: [], funcResultAfter: 2,
+    });
+  });
+
+  it("party member with exact STATUS1_ANY status word is the clean zero", () => {
+    expect(healBellRun({ targetPartyStatusEqualsAny: true })).toMatchObject({
+      kind: "scored", scoreDelta: 0, draws: [],
+    });
+  });
+
+  it("clean target and party is the deterministic -5", () => {
+    expect(healBellRun({})).toMatchObject({
+      kind: "scored", scoreDelta: -5, draws: [],
+    });
+  });
+});

@@ -128,6 +128,7 @@ const PROBE_ATTACKER: Required<FactoryAiScoredBattlerView> = Object.freeze({
   isBurned: true,
   isParalyzed: true,
   targetSideReflectUp: true,
+  targetPartyStatusEqualsAny: true,
   ability: "ABILITY_PRESSURE",
   currentWeather: AI_WEATHER_SUN as AiWeatherValue,
   usablePartyMons: 1,
@@ -220,6 +221,9 @@ const CV_BATTLER_SAMPLE: Required<FactoryAiCheckViabilityBattler> = Object.freez
   isBurned: true,
   isParalyzed: true,
   hasSubstitute: true,
+  anyMoveDisabled: true,
+  hasAnyStatus: true,
+  targetPartyStatusEqualsAny: true,
 });
 
 const CBM_TARGET_SAMPLE: Required<FactoryAiCheckBadMoveRoarTarget> = Object.freeze({
