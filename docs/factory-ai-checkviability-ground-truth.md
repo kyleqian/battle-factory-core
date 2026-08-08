@@ -7052,3 +7052,109 @@ moves, and 72/72 checks; regeneration changed only its embedded date, which
 was restored. Both ports replace their runtime effect halts behind the same
 two generic barrier statements: no unsupported-branch statement or canonical
 recording import was added.
+
+## 35. 2026-08-08 addendum #25: `AI_CV_BrickBreak` — the highest-weight remaining CV handler, live-verified with a real-move target-side Reflect gate
+
+Bounded side-lane implementation session, Battle Scene OFF oracle, no
+`src/`-changes contract. BrickBreak is the single biggest remaining CV
+weight (46 Level-50 Factory rental carriers per the main lane's census) and,
+until this session, its port had never been run against the real ROM. The
+established reach/control recipe is followed exactly: one fixture where the
+handler's gate does NOT fire and one where it DOES, both staged through
+`mechanicLab`'s `overrides.parties`, with a verification script comparing the
+ROM's observed decision against `chooseFactoryAiScoredDecision` on the same
+captured view.
+
+### 35.1 Source-exact body, gate, and polarity
+
+CV dispatch is `EFFECT_BRICK_BREAK -> AI_CV_BrickBreak`
+(`data/battle_ai_scripts.s:758`). The complete body is `:2457-2464`:
+
+```asm
+AI_CV_BrickBreak:
+	if_side_affecting AI_TARGET, SIDE_STATUS_REFLECT, AI_CV_BrickBreak_ScoreUp1
+	goto AI_CV_BrickBreak_End
+AI_CV_BrickBreak_ScoreUp1:
+	score +1
+AI_CV_BrickBreak_End:
+	end
+```
+
+A single side-condition gate on the TARGET's own side
+(`Cmd_if_side_affecting`, `battle_ai_script_commands.c:881-898`): Reflect up
+on the target's side scores **+1**; otherwise `goto End` at genuine **zero
+score / zero draws**. No `if_random_less_than`, no `get_ability`, no
+`funcResult` write. The port (`src/engine/factoryAiCheckViability.ts:4620`)
+is a pure `targetHasSideReflect ? 1 : 0`, and the scored-decision adapter
+feeds it the target side's own `targetSideReflectUp` view field (wired in
+PROGRESS.md entry 1004's five-field batch).
+
+### 35.2 Fixture design: the target side stages Reflect with a real move
+
+BrickBreak's gate reads the TARGET's side, i.e. the player's side (battler
+0) — so the PLAYER must set Reflect with a real move; `mechanicLab` may not
+inject side conditions. The AI's own lead is the BrickBreak user:
+
+- **`mechanic-factory-ai-cv-brickbreak-control-off.json`**: player Vaporeon
+  `[Splash, Splash, Splash, Splash]` — the target side never gets Reflect.
+- **`mechanic-factory-ai-cv-brickbreak-reach-off.json`**: player Vaporeon
+  `[Reflect, Reflect, Reflect, Reflect]` — the target side's Reflect is up
+  from turn 2.
+- Both: AI lead Alakazam `[BrickBreak, Splash, Splash, Splash]`, two
+  Bulbasaur fillers per side, `trainerId 222`, `challengeNum 7`, `battleNum
+  1` (the counter fixture's exact Factory context).
+- Generator: `tools/probe/generate-factory-ai-brickbreak-fixtures.ts`.
+
+The AI lead is **Alakazam (base speed 120) — faster than Vaporeon (65)** so
+that a turn-1 BrickBreak (if the tie picks it) lands BEFORE the player's
+Reflect that same turn and cannot break the screen the player sets after it.
+Turn 1 is therefore a control observation in both fixtures (the AI decided it
+before the user-trace frame 0 — the lab routes the pre-action checkpoint);
+**turn 2 is the observed window**: control sees `reflectTurns == 0`, reach
+sees `reflectTurns == 4`.
+
+### 35.3 Live ledger (oracle-verified, both seeds, both reruns)
+
+`tools/probe/verify-factory-ai-brickbreak-live.ts` replays each fixture twice
+at seeds 2 and 3, finds turn 2's decision as the exact `1 + 4 + 1` RNG
+footprint (ordinary battle call `BattleTurnPassed+0x157`, then
+`BattleAI_SetupAIData`'s per-slot setup x4, then `ChooseMoveOrAction_Singles`'s
+unconditional final tie — the BrickBreak CV body itself draws nothing), and
+compares the ROM's PP-selected slot and RNG endpoint against the engine on the
+same captured view (ROM-built level-50 Alakazam/Vaporeon, 31 IVs / 0 EVs /
+neutral, both at full HP — the AI used Splash on turn 1 in every run).
+
+| Seed | Fixture | Target-side Reflect | BrickBreak CV | ROM PP (start→turn 2) | Scores by slot | Engine/ROM choice | Engine draws | Exact RNG |
+| ---: | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2 | control | off | 0 | `[15,39,40,40]→[14,39,40,40]` | `[100,100,100,100]` | BrickBreak slot 0 | 5 | `1880453303 → 724084258` |
+| 2 | reach | on (4) | +1 | `[15,39,40,40]→[14,39,40,40]` | `[101,100,100,100]` | BrickBreak slot 0 | 5 | `1880453303 → 724084258` |
+| 3 | control | off | 0 | `[15,39,40,40]→[14,39,40,40]` | `[100,100,100,100]` | BrickBreak slot 0 | 5 | `2127127179 → 4200654246` |
+| 3 | reach | on (4) | +1 | `[15,39,40,40]→[14,39,40,40]` | `[101,100,100,100]` | BrickBreak slot 0 | 5 | `2127127179 → 4200654246` |
+
+All four rows reran byte-identically, and the ROM's turn-2 PP-selected slot
+matched the engine's tie-break choice exactly. Both seeds' control decisions
+were a genuine 4-way tie broken onto slot 0 by the same final draw the engine
+consumes — the control/reach pair differs **only** in the CV delta (0 vs +1)
+and the resulting score vector (all-100 vs BrickBreak 101), consuming
+**identical** RNG in both roles (5 draws, same endpoint). That is the
+handler's exact source character — a zero-draw gate whose only observable is
+the +1 — reproduced by the engine on identical input.
+
+### 35.4 Verdict and pinned receipt
+
+**MATCH — 4/4 scenarios.** No divergence from hardware: `AI_CV_BrickBreak`
+as ported (`src/engine/factoryAiCheckViability.ts:4620`) reproduces the ROM's
+decision, draw count, and RNG endpoint on both seeds and both gate states.
+The banked numbers are pinned by `tests/factoryAiBrickBreakLiveReceipt.test.ts`
+(5 tests), so a later port or a target-side-Reflect wiring regression breaks
+the suite loudly. The handler-level unit tests (`factoryAiCheckViability.test.ts`
+`AI_CV_BrickBreak`) and the pass-3 wiring test (`factoryAiScoredDecision.test.ts`
+`hasSideReflect: view.targetSideReflectUp=true`) were already in place.
+
+Reproduce with:
+
+```sh
+node --experimental-strip-types tools/probe/generate-factory-ai-brickbreak-fixtures.ts
+node --experimental-strip-types tools/probe/verify-factory-ai-brickbreak-live.ts
+npx vitest run tests/factoryAiBrickBreakLiveReceipt.test.ts
+```
