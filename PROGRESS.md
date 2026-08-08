@@ -5,6 +5,46 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 995 — [supervisor, 2026-08-08] Orient + round 1: `animation-main` folded and union-verified, ISSUES #80 CLOSED (395/395 supervisor-rerun), Castform Forecast barrier RETIRED — plus a 3-day CPU leak killed
+
+- **State:** master at this entry's commit, clean. **Union baseline verified
+  independently after the fold: full `npm test` 768 files / 7288 passed /
+  1 skipped, exit 0; `npm run build` exit 0.** DEFERRED.md: no open entries.
+- **Fold:** `animation-main` merged into master at orient — **fast-forward**,
+  6 commits (`8fc77bdb..06077049`): MOVE_DETECT promoted exact (inventory
+  122→123), MOVE_IRON_TAIL staged with its 135-frame measured window and
+  `ironTailProbe.py`. The lane merged master into itself first, so the fold
+  needed no conflict resolution. That lane stayed live and is still
+  committing; later commits are the next orient fold's.
+- **Round 1 (2 DeepSeek workers, both productive, 0 lost):**
+  - MAIN — ISSUES #80's last gap: the app opened the party-menu action submenu
+    **3 frames early**. `SUBMENU_OPEN_VISUAL_DELAY = 3` + a `submenuOpenElapsed`
+    counter now gate the action window, the message-window swap and the CANCEL
+    suppression; the mon-icon stall and close fade are untouched. Dense-a
+    **392 → 395/395**, fast loop 920:965 46/46. **Supervisor reran the compare
+    independently: 395/395.** ISSUES #80 deleted in full.
+  - SIDE — ROADMAP S10 gate-4: the last `unsupported-branch` barrier in
+    `battleScriptTryCastformDataChangeOpcode.ts` is **retired, not narrowed**.
+    `Cmd_trycastformdatachange` now writes the durable SET_BATTLER_TYPE pair
+    and `gBattleStruct->formToChangeInto`, and pushes the real
+    `BattleScript_CastformChange` continuation (modeled as the machine's
+    `call`); `B_SCR_OP_DOCASTFORMCHANGEANIMATION` is registered alongside.
+    Ratchet pin 1 → 0. A live Forecast Castform rental (Frontier sets 204/309)
+    used to halt the kernel the moment weather turned on; it now changes form
+    and type. **Supervisor verification: 58/58 across the four acceptance
+    files, plus an independent red-verify — neutralizing the durable type
+    write turned 9 tests red across 3 files before restore.**
+- **Next:** #39 dispatcher slice 7 (turn-2 epoch/content fold, main) and the
+  `Cmd_datahpupdate` substitute-fade barrier (side, and note it carries a
+  latent bug: source re-checks `substituteHP == 0` after BOTH branches, so
+  exact-lethal damage to a Substitute must fade and today does not).
+- **Notes:** at orient the host carried **three orphaned
+  `probeEvolutionBasic.ts` node processes, PPID 1, started 2026-08-04 and
+  still running 3 days later** at 43-81% CPU each — load average 12 on 16
+  cores before any worker launched, and the baseline suite was running at
+  roughly a fifth of normal speed. Killed; PAPERCUTS entry added with the
+  orient-time detection command. Worth repeating at every orient.
+
 ## 994 — [bounded MAIN worker, 2026-08-08] ISSUES #80 FULLY CLOSED: 3-frame submenu open delay landed — dense-a **392 → 395/395 byte-exact**, #80 entry deleted
 
 - **State:** master at this entry's commit, clean. Typecheck + `npm run build`
@@ -73,91 +113,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** the two prior row-shift attempts failed on the sprite's own
   boundary (27 bad pixels); drawing at the changed coordinate resolves them by
   construction. No PAPERCUTS.
-
-
-## 991 — [supervisor WIND-DOWN, 2026-08-07] Session summary: 19 workers / 10 rounds — ISSUES #80's in-battle party menu is EFFECTIVELY CLOSED (dense-a 276 → **392/392**), lobby input FREEZE fixed, `loss-lobby-walk-off` PROMOTED **177/177**, #71 Slice A REFUTED
-
-> **Read entries 992 and 993 above first** — two further main-lane steps
-> landed after this summary was written (Class B, then the submenu window).
-> The headline and Next list here are updated to that final state; the body
-> below describes the session as a whole.
-
-- **State:** master at this entry's commit, clean. **Final independent union
-  verification: `npm run build` exit 0 and full `npm test` 768 files /
-  7284 passed / 1 skipped, exit 0** (re-run after the stale-pin fix below;
-  the first union run had found that 1 failure). **Re-run once more after the
-  submenu step (entry 993): `npm run build` exit 0, full `npm test` 768 files
-  / 7287 passed / 1 skipped, exit 0** — that is the final verified state, with
-  the supervisor's own rerun of `mid-battle-switch-dense-a-off` at
-  **392/392**.
-  `animation-main` folded at
-  wind-down (18 commits: MINIMIZE/TORMENT promoted exact, MOVE_DETECT staged);
-  that lane stayed live and kept committing after the fold (6 further commits
-  by wind-down and still moving), left deliberately unfolded rather than
-  chasing a moving branch — the next session's orient fold takes them.
-  **Note on ordering:** the Class-B step (entry 992, above) landed AFTER this
-  summary was first written — its launcher digest was truncated and the
-  supervisor briefly misread the worker as failed; git log corrected it. The
-  numbers here are the final ones.
-  Supervisor-rerun specs this session: `mid-battle-switch-dense-a-off`
-  **392/392** (was 276/276 at session start; **+116 frames** — the whole open
-  animation, the close-fade tail and the submenu window), `loss-lobby-walk-off` **177/177**
-  (NEW spec; an earlier 129/177 draft had been deleted twice),
-  `loss-beyond-boundary-off` **183/183**, `party-menu-status-item-off`
-  251/251, `mid-battle-switch-pacing-b-off` 153/153,
-  `battle-command-generated-off` 128/128. DEFERRED.md: no open entries.
-  Oracle-freshness FAIL at orient was the documented docs-only false positive
-  (verified: no harness commit since the oracle start touched `oracle/` or `bin/`).
-- **Did (19 DeepSeek workers: 10 main, 9 side; 4 zero-commit caps, all salvaged):**
-  MAIN — close-fade BG/OBJ layer split (`61d98d88`, OBJ one blend step behind,
-  frame-979 discriminator byte-exact); the whole party-menu OPEN animation
-  (`054ab5ce`: bright-hold 3 / field-fade-out 16 / black-hold 27 / menu-fade-in
-  16, 49 of 54 frames exact first pass); submenu message-window swap +
-  icon-clock +2 stall (`9b9a74e2`, dense-a 325 → **341/341**); lobby free-roam
-  input-freeze fix + walk timing (`395fc2cc`); open-fade Class A obj-only layer
-  (`7b8eedb0`); lobby woman whole-frame h-flip + south/east 1px lag with the
-  spec promotion (`2d0f3d65`, **177/177**); open-fade Class B per-sprite
-  draw-origin offsets (`c24f0f4e`, **354/354** — open window CLOSED).
-  SIDE — fade §6 open-window field fade-out; lobby §7 continuous-hold model;
-  fade §7 message-window swap + icon phase; fade §8 open residual classes;
-  lobby §8 woman sheet audit; #71 Slice-A staged RATTATA fixture + RAM receipt.
-- **Supervisor corrections/decisions:** (1) **#71 Slice A REFUTED** — under
-  Battle Scene OFF the settled front sprite is `{x2:0,y2:0}` with
-  `SpriteCallbackDummy`, so applying the banked `{x2:1,y2:0}` terminal offset
-  would have been a **361px regression**, not an inert no-op; that wiring is
-  ON-profile-only and the OFF main lane has nothing to hook up (ISSUES #71
-  updated; Slice C guards remain the main-lane residue).
-  (2) The open-fade 5-frame residual was mislabelled "opponent idle breathing
-  squish" — it is the **player healthbox**, refuted by bbox and by the OFF RAM
-  receipt; corrected in ISSUES #80 and `docs/fade-layer-forensics.md` §8, and
-  the corrected attribution is what let Class B land.
-  (3) A worker committed dense-a red at 325/330; supervisor trimmed the 5
-  residual frames rather than leave a red spec (`980d7083`).
-  (4) `tools/probe/fade-layer-forensics.ts` reported **ALL CHECKS PASS with
-  zero frames measured** when pointed at a wrong directory — fixed to FAIL
-  (`7c7e8fe2`); every probe written afterwards had to keep that property.
-  (5) `{PKMN}` resolved as charmap bytes 0x53/0x54, not a nickname splice
-  (`charmap.txt:51`) — unblocked item (c).
-  (6) The wind-down union suite caught one **stale adjacent pin**
-  (`factoryVoluntarySwitchSeam` pinned the pre-split 14/40 close constants);
-  re-pinned to 15/39 with the reason in the comment.
-- **Next (ordered):** (1) **#80's last residual** — the app opens the submenu
-  **3 frames early**: oracle frames **923-925** still show the pre-open state
-  while the app already draws the window (fast loop 920:965 is 43/46; those 3
-  are deliberately not in the spec). Delay the submenu render to the oracle's
-  926 pop edge, then extend `captureFrames` with 923-925 → **395/395**. The
-  A-press is 922-923 and the window lands 3 frames later, all at once
-  (`docs/fade-layer-forensics.md` §10(d)). (2) #71 Slice C — guard the
-  `src/engine/` back hand-fits so an uncovered species/nature fails loudly
-  instead of drawing the wrong table (Slice A is refuted, see above; Slice D
-  is ON-profile). (3) #73 terminal-seam rung B. (4) fold `animation-main`'s
-  2 outstanding commits at orient. (5) animation lane's own ledger.
-- **Notes:** 4 of 19 workers returned zero commits; every one was salvaged from
-  its JSONL and the facts banked in docs before re-briefing, and two of those
-  salvages (the Class-B sprite coordinates, the woman sheet-index lead)
-  directly produced the next round's landing — Class B in particular was
-  measured twice independently by cap-killed workers and then implemented from
-  those coordinates in one clean round. Lesson worth keeping: **a truncated
-  launcher digest is not evidence of failure — check `git log` before
-  re-briefing.** The supervisor briefly treated a successful Class-B worker as
-  dead on that basis. No DEFERRED entries; `run-supervisor.sh` is unblocked.
