@@ -89,12 +89,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   construction. No PAPERCUTS.
 
 
-## 991 — [supervisor WIND-DOWN, 2026-08-07] Session summary: 17 workers / 9 rounds — the in-battle party menu's OPEN+CLOSE window is now fully byte-exact (dense-a 276 → **354/354**), lobby input FREEZE fixed, `loss-lobby-walk-off` PROMOTED **177/177**, #71 Slice A REFUTED
+## 991 — [supervisor WIND-DOWN, 2026-08-07] Session summary: 19 workers / 10 rounds — ISSUES #80's in-battle party menu is EFFECTIVELY CLOSED (dense-a 276 → **392/392**), lobby input FREEZE fixed, `loss-lobby-walk-off` PROMOTED **177/177**, #71 Slice A REFUTED
+
+> **Read entries 992 and 993 above first** — two further main-lane steps
+> landed after this summary was written (Class B, then the submenu window).
+> The headline and Next list here are updated to that final state; the body
+> below describes the session as a whole.
 
 - **State:** master at this entry's commit, clean. **Final independent union
   verification: `npm run build` exit 0 and full `npm test` 768 files /
   7284 passed / 1 skipped, exit 0** (re-run after the stale-pin fix below;
-  the first union run had found that 1 failure). `animation-main` folded at
+  the first union run had found that 1 failure). A third union run was taken
+  after the submenu step — see entry 993's own numbers plus the supervisor's
+  rerun of `mid-battle-switch-dense-a-off` at **392/392**.
+  `animation-main` folded at
   wind-down (18 commits: MINIMIZE/TORMENT promoted exact, MOVE_DETECT staged);
   that lane stayed live and landed **2 further commits after the fold**, left
   deliberately unfolded — the next session's orient fold takes them.
@@ -111,7 +119,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `battle-command-generated-off` 128/128. DEFERRED.md: no open entries.
   Oracle-freshness FAIL at orient was the documented docs-only false positive
   (verified: no harness commit since the oracle start touched `oracle/` or `bin/`).
-- **Did (17 DeepSeek workers: 8 main, 9 side; 4 zero-commit caps, all salvaged):**
+- **Did (19 DeepSeek workers: 10 main, 9 side; 4 zero-commit caps, all salvaged):**
   MAIN — close-fade BG/OBJ layer split (`61d98d88`, OBJ one blend step behind,
   frame-979 discriminator byte-exact); the whole party-menu OPEN animation
   (`054ab5ce`: bright-hold 3 / field-fade-out 16 / black-hold 27 / menu-fade-in
@@ -144,15 +152,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (6) The wind-down union suite caught one **stale adjacent pin**
   (`factoryVoluntarySwitchSeam` pinned the pre-split 14/40 close constants);
   re-pinned to 15/39 with the reason in the comment.
-- **Next (ordered):** (1) the in-battle **submenu window geometry** — the
-  SEND OUT/SUMMARY/CANCEL window carries ~4461px of difference across 926-963
-  and has never been spec-pinned; the app draws a scaffold generic 10x6 window
-  at (144,80) while the oracle's real template lives in
-  `reference/pokeemerald/data/party_menu.h`. This is the last known visual gap
-  in the party menu. (2) #71 Slice C — guard the `src/engine/` back hand-fits
-  so an uncovered species/nature fails loudly instead of drawing the wrong
-  table. (3) #73 terminal-seam rung B. (4) animation lane's own ledger.
-- **Notes:** 4 of 17 workers returned zero commits; every one was salvaged from
+- **Next (ordered):** (1) **#80's last residual** — the app opens the submenu
+  **3 frames early**: oracle frames **923-925** still show the pre-open state
+  while the app already draws the window (fast loop 920:965 is 43/46; those 3
+  are deliberately not in the spec). Delay the submenu render to the oracle's
+  926 pop edge, then extend `captureFrames` with 923-925 → **395/395**. The
+  A-press is 922-923 and the window lands 3 frames later, all at once
+  (`docs/fade-layer-forensics.md` §10(d)). (2) #71 Slice C — guard the
+  `src/engine/` back hand-fits so an uncovered species/nature fails loudly
+  instead of drawing the wrong table (Slice A is refuted, see above; Slice D
+  is ON-profile). (3) #73 terminal-seam rung B. (4) fold `animation-main`'s
+  2 outstanding commits at orient. (5) animation lane's own ledger.
+- **Notes:** 4 of 19 workers returned zero commits; every one was salvaged from
   its JSONL and the facts banked in docs before re-briefing, and two of those
   salvages (the Class-B sprite coordinates, the woman sheet-index lead)
   directly produced the next round's landing — Class B in particular was
