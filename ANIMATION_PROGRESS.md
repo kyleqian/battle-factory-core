@@ -93,6 +93,19 @@
   (DRAGON_BREATH etc.) — reuse the existing implementation, do not re-port it.
   No boundary widening, no new unsupported-branch barrier, no shared-helper
   edit; the only engine contact will be the promotion round's draw case.
+- **Notes — stretch item 5 landed early.** `src/animation/slash.ts` (RAM-truth
+  reducer at the RAM ages above) + `tests/animation/slash.test.ts` (8 pins) are
+  committed this round, exhaustively verified against the probe: all 46 slice
+  states (presence, position, tileOffset, invisible) byte-identical across the
+  full window, and `targetX2` matches for the shake ages 10-43. The pre-shake
+  x2=1 (ages 0-9) is the ONIX front-idle hold — a species-idle property the draw
+  case supplies (TAKE_DOWN convention), NOT the move's state, so the reducer
+  leaves it 0. **The shake x2 displays TWO frames late** (RAM age 10 → pixels
+  window+12, every 2-frame toggle at +2; confirmed by change-map events 85, 87,
+  ..., 117 vs RAM 83, 85, ..., 115) — the TAKE_DOWN WindUpLunge case, so the
+  promotion draw case must split the display latch (one-age slices, two-age
+  shake). Remaining for promotion: the `SceneOnSlashConfig`/View seam, the draw
+  case, the portable, fixtures, coverage entry + inventory pin.
 
 ## Supervisor wind-down — IRON_TAIL, CRUSH_CLAW, TAKE_DOWN and CRUNCH all exact, 123→127; the change-map tool is the session's real output (2026-08-07 night animation session)
 
