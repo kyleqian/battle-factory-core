@@ -4597,3 +4597,96 @@ describe("AI_CBM_Recycle (data/battle_ai_scripts.s:554-557, EFFECT_RECYCLE)", ()
     });
   });
 });
+
+describe("AI_CBM_Imprison (data/battle_ai_scripts.s:559-561, EFFECT_IMPRISON)", () => {
+  const MOVE_IMPRISON = 286; // TYPE_PSYCHIC, power 0 -> MOVE_POWER_OTHER
+
+  const IMPRISON_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    knownAbility: "ABILITY_STURDY",
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  it("already imprisoning (STATUS3_IMPRISONED_OTHERS) JUMPs to Score_Minus10", () => {
+    const attacker: FactoryAiCheckBadMoveAttacker = Object.freeze({
+      atkStage: 6, defStage: 6, imprisonedOthers: true,
+    });
+    expect(run(MOVE_IMPRISON, IMPRISON_TARGET, undefined, attacker))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("not yet imprisoning FALLS THROUGH to End at zero (absent field defaults false)", () => {
+    expect(run(MOVE_IMPRISON, IMPRISON_TARGET)).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+});
+
+describe("AI_CBM_MudSport (data/battle_ai_scripts.s:567-569, EFFECT_MUD_SPORT)", () => {
+  const MOVE_MUD_SPORT = 300; // TYPE_GROUND, power 0 -> MOVE_POWER_OTHER
+
+  const MUD_SPORT_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    knownAbility: "ABILITY_STURDY",
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  it("Mud Sport already up (STATUS3_MUDSPORT) JUMPs to Score_Minus10", () => {
+    const attacker: FactoryAiCheckBadMoveAttacker = Object.freeze({
+      atkStage: 6, defStage: 6, mudSportUp: true,
+    });
+    expect(run(MOVE_MUD_SPORT, MUD_SPORT_TARGET, undefined, attacker))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("not yet up FALLS THROUGH to End at zero (absent field defaults false)", () => {
+    expect(run(MOVE_MUD_SPORT, MUD_SPORT_TARGET)).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+});
+
+describe("AI_CBM_WaterSport (data/battle_ai_scripts.s:586-588, EFFECT_WATER_SPORT)", () => {
+  const MOVE_WATER_SPORT = 346; // TYPE_WATER, power 0 -> MOVE_POWER_OTHER
+
+  const WATER_SPORT_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    knownAbility: "ABILITY_STURDY",
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  it("Water Sport already up (STATUS3_WATERSPORT) JUMPs to Score_Minus10", () => {
+    const attacker: FactoryAiCheckBadMoveAttacker = Object.freeze({
+      atkStage: 6, defStage: 6, waterSportUp: true,
+    });
+    expect(run(MOVE_WATER_SPORT, WATER_SPORT_TARGET, undefined, attacker))
+      .toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("not yet up FALLS THROUGH to End at zero (absent field defaults false)", () => {
+    expect(run(MOVE_WATER_SPORT, WATER_SPORT_TARGET)).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+});

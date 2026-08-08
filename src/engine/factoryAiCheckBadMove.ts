@@ -298,6 +298,7 @@ export const CHECK_BAD_MOVE_HANDLED_TABLE_EFFECTS: ReadonlySet<string> = new Set
   "EFFECT_TRICK", "EFFECT_SLEEP_TALK", "EFFECT_ACCURACY_UP_2",
   "EFFECT_SPECIAL_ATTACK_DOWN_2", "EFFECT_MEMENTO", "EFFECT_STOCKPILE",
   "EFFECT_SPIT_UP", "EFFECT_SWALLOW", "EFFECT_RECYCLE",
+  "EFFECT_IMPRISON", "EFFECT_MUD_SPORT", "EFFECT_WATER_SPORT",
 ]);
 
 /**
@@ -2596,6 +2597,45 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_IMPRISON -> AI_CBM_Imprison
+  // (`data/battle_ai_scripts.s:204,559-561`): a single
+  // `if_status3 AI_USER, STATUS3_IMPRISONED_OTHERS, Score_Minus10` -- Imprison
+  // is penalized when the AI is already imprisoning the target's moves.
+  if (move.effect === "EFFECT_IMPRISON") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmImprison(input.attacker.imprisonedOthers ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_MUD_SPORT -> AI_CBM_MudSport
+  // (`data/battle_ai_scripts.s:207,567-569`): a single
+  // `if_status3 AI_USER, STATUS3_MUDSPORT, Score_Minus10` -- Mud Sport is
+  // penalized when the effect is already up on the AI's side.
+  if (move.effect === "EFFECT_MUD_SPORT") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmMudSport(input.attacker.mudSportUp ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_WATER_SPORT -> AI_CBM_WaterSport
+  // (`data/battle_ai_scripts.s:211,586-588`): a single
+  // `if_status3 AI_USER, STATUS3_WATERSPORT, Score_Minus10` -- Water Sport is
+  // penalized when the effect is already up on the AI's side.
+  if (move.effect === "EFFECT_WATER_SPORT") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmWaterSport(input.attacker.waterSportUp ?? false),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -3584,4 +3624,34 @@ function runCbmSpitUpAndSwallow(
  */
 function runCbmRecycle(attackerUsedHeldItemId: number): number {
   return attackerUsedHeldItemId === 0 ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Imprison` (`data/battle_ai_scripts.s:559-561`, EFFECT_IMPRISON): a
+ * single `if_status3 AI_USER, STATUS3_IMPRISONED_OTHERS, Score_Minus10` --
+ * Imprison is penalized when the AI is already imprisoning the target's
+ * moves. Zero ability/type reads, zero RNG.
+ */
+function runCbmImprison(attackerImprisonedOthers: boolean): number {
+  return attackerImprisonedOthers ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_MudSport` (`data/battle_ai_scripts.s:567-569`, EFFECT_MUD_SPORT): a
+ * single `if_status3 AI_USER, STATUS3_MUDSPORT, Score_Minus10` -- Mud Sport
+ * is penalized when the effect is already up on the AI's side. Zero
+ * ability/type reads, zero RNG.
+ */
+function runCbmMudSport(attackerMudSportUp: boolean): number {
+  return attackerMudSportUp ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_WaterSport` (`data/battle_ai_scripts.s:586-588`, EFFECT_WATER_SPORT):
+ * a single `if_status3 AI_USER, STATUS3_WATERSPORT, Score_Minus10` -- Water
+ * Sport is penalized when the effect is already up on the AI's side. Zero
+ * ability/type reads, zero RNG.
+ */
+function runCbmWaterSport(attackerWaterSportUp: boolean): number {
+  return attackerWaterSportUp ? -10 : 0;
 }
