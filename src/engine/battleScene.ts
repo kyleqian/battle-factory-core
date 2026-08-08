@@ -946,6 +946,7 @@ import {
   sceneOnRazorLeafView,
   sceneOnPoisonTailView,
   sceneOnSteelWingView,
+  sceneOnIronTailView,
   sceneOnToxicView,
   sceneOnEarthquakeView,
   sceneOnHardenView,
@@ -978,6 +979,7 @@ import {
   sceneOnSandstormView,
   sceneOnDragonClawView,
   sceneOnMetalClawView,
+  sceneOnCrushClawView,
   sceneOnSingView,
   sceneOnGrassWhistleView,
   sceneOnFutureSightView,
@@ -1064,6 +1066,7 @@ import { speciesFrontIdleRestOffset } from "../animation/speciesIdleAnim.ts";
 import { shakeMonOffsetAtTick } from "../animation/shakeMon.ts";
 import { encoreTargetX2AtAge } from "../animation/encore.ts";
 import { dragonClawDisplayedAttackerShakeY } from "../animation/dragonClaw.ts";
+import { SHAKE_FIRST_STEP_AGE } from "../animation/crushClaw.ts";
 import { sludgeDisplayedTargetOffsetAtAge } from "../animation/sludge.ts";
 import {
   whirlwindDisplayedTargetOffsetAtAge,
@@ -1834,6 +1837,7 @@ const charmeleonBackSprite = (battleBackSpritesAsset as Record<string, BattleBac
 const haunterBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HAUNTER!;
 const ivysaurBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).IVYSAUR!;
 const kadabraBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).KADABRA!;
+const grovyleBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GROVYLE!;
 const battleAnimGhostBg = battleAnimGhostBgAsset as {
   tileset: Tileset;
   palette: RgbColor[];
@@ -22129,6 +22133,147 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "IRON_TAIL") {
+    const view = sceneOnIronTailView(state);
+    // Task, sprite, and palette RAM transfers through the shared
+    // BuildOamBuffer/VBlank seam: every visible event displays exactly ONE
+    // frame after the RAM state that causes it (move sprites, attacker/target
+    // x2 translation and palette writes alike), so `displayed` is the
+    // age-1 view.
+    const displayed = sceneOnIronTailView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "AZUMARILL"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "AZUMARILL"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged IRON_TAIL pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? azumarillBackSprite : azumarillFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // The target rests at its front-idle x2 (1px for ONIX) until the ShakeMon
+    // displacement displays (player-back frame 334 / age 118); afterwards the
+    // displayed shake x2 holds.
+    const targetX2 = state.age <= 115
+      ? targetIdle.x2
+      : displayed.targetX2;
+    // `metallic_shine permanent=TRUE` skips the in-task palette restore, so the
+    // attacker stays grayscaled from the shine's first step (RAM age 6,
+    // displayed age 7) until the script's trailing `set_original_pal` (RAM age
+    // 126, displayed age 127) — the one IRON_TAIL difference from the
+    // non-permanent STEEL_WING/METAL_CLAW draw cases.
+    const metallicInitializerDisplay = displayed.metallic.data10 === 0
+      && displayed.metallic.data11 === 0;
+    const attackerPalette = state.age >= 2
+      && !metallicInitializerDisplay
+      && !displayed.attackerPaletteRestored
+      ? grayscalePalette(attackerSprite.palette)
+      : attackerSprite.palette;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const target2Backdrop = fb.slice();
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerPalette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerX2,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.metallic.metalBgLoaded) {
+      drawMetallicShineMasked(
+        fb,
+        attackerSprite,
+        view.attacker.geometry.spriteCorner,
+        displayed.metallic.bg1X,
+        displayed.metallic.bg1Y,
+      );
+    }
+    if (displayed.hitsplatVisible) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        poisonTailArt.impact.tileset,
+        poisonTailArt.impact.palette,
+        view.target.geometry.animationCenter.x - 16,
+        // The hitsplat anchors on the target's Y_PIC_OFFSET: the back sprite
+        // sits +8 below its sprite field (player-back ONIX front +0).
+        view.target.geometry.animationCenter.y - 16 + (playerToOpponent ? 0 : 8),
+        372,
+        372,
+        12,
+        8,
+        false,
+        target2Backdrop,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "AZUMARILL";
+    const playerSpecies = playerToOpponent ? "AZUMARILL" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "AZUMARILL used" : "Foe AZUMARILL used",
+      "IRON TAIL!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "STEEL_WING") {
     const view = sceneOnSteelWingView(state);
     // RunTasks/BuildOamBuffer and palette DMA expose callback writes on the
@@ -34209,6 +34354,144 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "CHARMANDER used" : "Foe CHARMANDER used",
       "METAL CLAW!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "CRUSH_CLAW") {
+    const view = sceneOnCrushClawView(state);
+    // OAM/BLDCNT writes become visible on the following display latch, so the
+    // lunge offset, the target shake x2, and the claw slashes all render one
+    // age behind the source state (same seam as the other claw moves).
+    const displayed = sceneOnCrushClawView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "GROVYLE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "GROVYLE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged CRUSH_CLAW pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? grovyleBackSprite : grovyleFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    // The target rests at its front-idle x2 (1px for opponent-front ONIX)
+    // until the ShakeMon2 displacement's first write displays, then the
+    // displayed shake x2 holds (settling at 0 after the final zero write).
+    const targetX2 = displayed.age < SHAKE_FIRST_STEP_AGE
+      ? targetIdle.x2
+      : displayed.targetX2;
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerX2,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    // Both battlers use OBJ priority 2; opponent-front sits below player-back.
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    const slashes = [...displayed.slashes].sort((a, b) => a.y - b.y);
+    for (const slash of slashes) {
+      const claw = subTileset(
+        dragonClawArt.clawSlash.tileset,
+        slash.animationFrame * 4,
+        4,
+      );
+      if (slash.animation === 1) {
+        drawSpriteSheetHFlip(
+          fb,
+          claw,
+          dragonClawArt.clawSlash.palette,
+          slash.x - 16,
+          slash.y - 16,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          claw,
+          dragonClawArt.clawSlash.palette,
+          slash.x - 16,
+          slash.y - 16,
+        );
+      }
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "GROVYLE";
+    const playerSpecies = playerToOpponent ? "GROVYLE" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "GROVYLE used" : "Foe GROVYLE used",
+      "CRUSH CLAW!",
       99,
     );
     return;

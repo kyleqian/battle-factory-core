@@ -1,0 +1,52 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "IRON_TAIL",
+  "pair": "FRONTIER_MON_AZUMARILL_2 set 297 (player-back AZUMARILL) -> legal ONIX (opponent-front)",
+  "orientation": "player-to-opponent",
+  "scenario": "tools/battle-lab/mechanic-iron-tail-player-azumarill-opponent-onix.json",
+  "probe": "tools/compare/ironTailProbe.py",
+  "appStage": {
+    "presentationAge": 0
+  },
+  "denseWindow": {
+    "startFrame": 216,
+    "endFrame": 350,
+    "frameCount": 135
+  },
+  "attacker": {
+    "species": "AZUMARILL",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 56 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 10 },
+      "animationCenter": { "x": 176, "y": 42 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 187,
+    "playerMaxHp": 196,
+    "opponentHp": 142,
+    "opponentMaxHp": 142,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "iron-tail-dense-evidence/v1",
+  "evidenceSha256": "d443cdb327070da66335a7771c8ec9c94413dcc5aa88338977018b490cbf79a8",
+  "secondFreshEvidenceSha256": "d443cdb327070da66335a7771c8ec9c94413dcc5aa88338977018b490cbf79a8",
+  "rawRgbSha256": "952808facb59f17298b90cbbcef4000f909e64da37e9950bedeca0b74558c428",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 135,
+    "componentMatching": 135
+  }
+}

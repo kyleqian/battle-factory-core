@@ -606,6 +606,33 @@
    ]
   },
   {
+   "move": "MOVE_CRUSH_CLAW",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_GROVYLE_2 (set 293, GROVYLE, all four active slots CRUSH_CLAW move 306 so the Factory AI has one legal choice) against legal ONIX in both orientations; both pass the complete move-owned Scene-ON window twice fresh with evidence 515abad038862c35a86d480f333560459f83bc103687837187f9448e1b7c6f06 / raw RGB 9e2c28d1edc910be89d157035334f10c234b92f4c3b3a72e240bfe922dd52508 for the 69-frame player-back window (frames 77-145) and evidence 639bdc9ad5a4809e603582a9de27b328f5c8d119707411aee4b41526411ab229 / raw RGB b61b5eb2e20bd83c44016e40b389553ca2fa068526450911b010bea110407f69 for the 69-frame opponent-front window (frames 81-149), both isolated by sBattleAnimScriptPtr within the Move_CRUSH_CLAW..Move_AROMATHERAPY label bounds",
+    "the reducer is the lunge + double claw-slash-pair + ShakeMon2 body: the horizontal lunge (duration 6, xDelta 4, opponent negated) ramps the attacker x2 4..24 over RAM ages 13-18, holds 24 at 19-20, returns 20..0 over 21-26; the first claw-slash pair (x=-10, animation 0) spawns at RAM age 19 and animates cmdIndex 0..4 (frame holds 0-2, 3-6, 7-10, 11-14, 15-20 - the probe's true AnimClawSlash cadence, one tick later than the metalClaw reducer's own) to age 39; the second pair (x=+10, animation 1) spawns at 33 and animates to 53; AnimTask_ShakeMon2 (2, 0, 18, 1) toggles the target x2 +/-2 every two ages 19..53 then zero-writes at 53",
+    "the full 69-frame window is static except at the settled displayed frames: lunge out 91-96 / hold 97-98 / back 99-104 (player-back; opponent-front identical minus 4), claw-slash pair 1 97..117 and pair 2 111..131, shake toggles 97,99,101,...,129 then 131 returns to 0; setalpha 12,8 (BLDCNT 0x3f40/BLDALPHA 0x080c) writes at RAM age 13 and blendoff clears at age 55 but neither changes a pixel in this window - modeled as RAM truth only, exactly like IRON_TAIL's invisible third metallic-shine sweep",
+    "the displayed-vs-RAM lags were measured against the fresh probe: every visible event displays exactly ONE frame after the RAM state that causes it (attacker x2 ramp at RAM ages 13-26, target x2 toggles at RAM ages 19-53 with the opponent-front ONIX resting at its front-idle x2=1 until the first toggle displays, claw-slash sprites alive RAM ages 19-39 / 33-53, lunge helper alive RAM ages 13-27, razor-wind SE restarts at RAM ages 19 and 33); the one orientation trap is the player-back target Y_PIC_OFFSET - the claw slashes anchor at (72,88) on the back ONIX, +8 below its sprite center, while the opponent-front front ONIX anchors at (176,42)",
+    "all ten components are proven by exact moves (horizontalLunge.ts, the shared dragonClaw claw-slash art, shakeMon2.ts, the monbg/setalpha contact body, SE_M_RAZOR_WIND); no new source components and no boundary widening - the only engine contacts are the CRUSH_CLAW draw case in battleScene.ts and the one-display seam in sceneOnPresentation.ts",
+    "the portable proves 69/69 source-component frames in both orientations (lunge-helper presence ages 13-27, attacker x2, target idle+shake x2 with the front-idle hold, both claw-slash pairs' x/y/anim/cmdIndex, ShakeMon2 task presence ages 19-52 with data[4]==2, razor-wind SE header at the event ages, BLDCNT/BLDALPHA blendOn truth) and the identical shared-framebuffer 69/69 through the full engine render with healthboxes and message window untouched; no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-crush-claw-player-grovyle-opponent-onix.json",
+    "tools/battle-lab/mechanic-crush-claw-opponent-grovyle-player-onix.json",
+    "tools/compare/fixtures/crush-claw-player-grovyle-opponent-onix.json",
+    "tools/compare/fixtures/crush-claw-opponent-grovyle-player-onix.json",
+    "tools/compare/crushClawProbe.py",
+    "tools/compare/crushClawPortable.ts",
+    "tools/compare/evidence/crush-claw-changemap-player.txt",
+    "tools/compare/evidence/crush-claw-changemap-opponent.txt",
+    "src/animation/crushClaw.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/crushClaw.test.ts",
+    "tests/animation/crushClawEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_DIZZY_PUNCH",
    "status": "exact",
    "covered": [
@@ -763,7 +790,7 @@
    "move": "MOVE_DETECT",
    "status": "exact",
    "covered": [
-    "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_YANMA (set 161, the DETECT carrier) against legal ONIX with all four active YANMA slots constrained to DETECT (move 197) so the Factory AI has one legal choice; both orientations pass the complete move-owned Scene-ON window twice fresh with evidence 52f1db13183e66f6a48e2ae0d08992280bb3153be5b1db19e6663a06e175ae0f / raw RGB 274b00b5e15634a4d19eb03c9cc62d8552dd02dffa4348efb927bab545ed5cb0 for the 110-frame player-back window (frames 64-173) and evidence 0506c00b85c97197b62933d1579621d45770a47ad8d2e953d73f72f1c175d737 / raw RGB 2086c05aac41c72e0f82c265d658c7d27cee9e8cf3f7ce6d93498f0eb4c39549 for the 109-frame opponent-front window (frames 69-177, isolated by sBattleAnimScriptPtr within the Move_DETECT..Move_FRUSTRATION label bounds)",
+    "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_YANMA (set 161, the DETECT carrier) against legal ONIX with all four active YANMA slots constrained to DETECT (move 197) so the Factory AI has one legal choice; both orientations pass the complete move-owned Scene-ON window twice fresh with evidence 2a1054d283c2442589eef01bbf65048e2a0ab2f59a69e63f390c6439d640e34e / raw RGB 274b00b5e15634a4d19eb03c9cc62d8552dd02dffa4348efb927bab545ed5cb0 for the 110-frame player-back window (frames 64-173) and evidence f8e7f48c77f020ceeb6f2c1ae7ac0ce1dbbfa30af7820d763b840777046c0b93 / raw RGB 2086c05aac41c72e0f82c265d658c7d27cee9e8cf3f7ce6d93498f0eb4c39549 for the 109-frame opponent-front window (frames 69-177, isolated by sBattleAnimScriptPtr within the Move_DETECT..Move_FRUSTRATION label bounds)",
     "the opponent-front window is deliberately ONE frame shorter than the player side: its first in-bounds frame (68) is not a DETECT component but the OUTGOING animation's OAM teardown landing one display behind the script-pointer boundary. The enemy mon's shadow (gSpriteTemplate_EnemyShadow / SpriteCB_EnemyShadow, hardware OAM slot 11, attr0 0x4041 / attr1 0x40a0 / attr2 0x5d2d => 32x8 at (160,65), palette bank 5, priority 1) is still in hardware OAM because its invisible flag (SpriteCB_EnemyShadow sets it when gAnimScriptActive turns true) only reaches hardware one display after the script pointer enters Move_DETECT; it is absent from frame 69 on and never returns. The engine does not model the enemy shadow, so the accepted opponent window re-pins to 69-177 (the first display the move actually owns) via the portable's skipProbeFrames/ageOffset pair, and the 110-vs-109 asymmetry with the player side is recorded rather than papered over",
     "the pure source-relative reducer ports the entire 13-line Move_DETECT script: the F_PAL_BG toward-black BeginNormalPaletteFade (deltaY 2, 0..9..0 displayed ramp: 0 for ages 0-7, 2/4/6/8 in 4-frame holds, 9 held 24-83, then 7/5/3/1/0) and the F_PAL_ATTACKER toward-white AnimTask_BlendBattleAnimPal/StartBlendAnimSpriteColor task (0..9..0 with 2-frame holds), the one NEW component gSpinningSparkleSpriteTemplate + AnimSpinningSparkle (placed ONCE at SetSpriteCoordsToAnimAttackerCoords + arg0 on the player side / -arg0 on the opponent side, + arg1 y, absolute subpriority attacker-13 = 17 player-back / 27 opponent-front, then running the 3-tick sAnim_SpinningSparkle FRAME 0/16/32/48/64 program to completion and self-destruct), and the full gAnimVisualTaskCount lifecycle",
     "both blend mechanisms are reused from exact moves: AnimTask_BlendBattleAnimPal (proven by MOVE_SELF_DESTRUCT / dragonBreath) drives the F_PAL_ATTACKER ramp and the visual-command simple_palette_blend (proven by MOVE_GRASS_WHISTLE / TAIL_GLOW) drives the F_PAL_BG ramp; the sparkle-4 tiles/palette reuse the proven MOVE_REFLECT asset; the sparkle's side-flipped x offset is the attacker picture +20 on the player side and -20 on the opponent side with y -20",
@@ -1509,6 +1536,33 @@
     "src/engine/battleScene.ts",
     "tests/animation/ironDefense.test.ts",
     "tests/animation/ironDefenseEvidence.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_IRON_TAIL",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_AZUMARILL_2 (set 297, AZUMARILL, all four active slots IRON_TAIL move 231 so the Factory AI has one legal choice) against legal ONIX in both orientations; both pass the complete move-owned Scene-ON window twice fresh with evidence d443cdb327070da66335a7771c8ec9c94413dcc5aa88338977018b490cbf79a8 / raw RGB 952808facb59f17298b90cbbcef4000f909e64da37e9950bedeca0b74558c428 for the 135-frame player-back window (frames 216-350) and evidence 7bebcfb3957b428f0d5537339ba4dbe514aa1fc8edbd49a508523d12111d916b / raw RGB bea1745ae3fc99cbe57d543b6e27a4a88bdea379c7ecaf4760d754c665f565f5 for the 135-frame opponent-front window (frames 215-349), both isolated by sBattleAnimScriptPtr within the Move_IRON_TAIL..Move_POISON_TAIL label bounds",
+    "the reducer is the permanent=TRUE metallic-shine case the steelWing/metalClaw draw cases do not cover: metallic_shine permanent=TRUE skips the in-task palette restore, so the attacker stays grayscaled from the shine's first step (RAM age 6, displayed frame 223 / age 7) until the script's trailing set_original_pal (RAM age 126, displayed frame 343 / age 127) - the exact inverse write - which is the one modelling decision that differs from STEEL_WING/METAL_CLAW",
+    "the full 135-frame window is static except at the settled displayed frames: grayscale ON at 223 (1519px), metallic-shine sweep 1 at 229-253 and byte-identical sweep 2 at 261-285 (the band renders only while data10>=28; the wrap frames 254-260 and sweep 3 are static because ClearBattleAnimBg already ran, and the RAM data10 3-frame hold at 285-287 is RAM truth but never a visual), the horizontal lunge out at 324-327 / hold 328-329 / back 330-333, the hitsplat (animation=2, 372 matrix) appearing at 332 and gone at 342, the ShakeMon target x2 toggling at 334/336/338/340, and grayscale OFF at 343",
+    "the displayed-vs-RAM lags were measured against the fresh probe: every visible event displays exactly ONE frame after the RAM state that causes it (attacker x2 ramp 4..16 at f323-326, target x2 3,3,0,0,3,3,0,0 at f333-340 with the front-idle 1px until f330, hitsplat sprite RAM f331-340, grayscale hardware palette f223-342); the one orientation trap is the target Y_PIC_OFFSET: the opponent hitsplat anchors at (72,88) on the back sprite, +8 below its sprite field, while the player-back front target anchors at (176,42)",
+    "all ten components are proven by exact moves (metallicShineAtAge with the permanent param, horizontalLunge.ts, the shared hitsplat painter at 372, shakeMon.ts, the monbg/setalpha contact body); no new source components and no boundary widening - the only engine contact is the IRON_TAIL draw case in battleScene.ts",
+    "the portable proves 135/135 source-component frames in both orientations (metallic task data10/data11/presence, attacker lunge x2, target idle+shake x2, hitsplat matrix/presence, lunge-helper presence, ShakeMon task, looped-SE task, hardware grayscale palette) and the identical shared-framebuffer 135/135 through the full engine render with healthboxes and message window untouched; no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-iron-tail-player-azumarill-opponent-onix.json",
+    "tools/battle-lab/mechanic-iron-tail-opponent-azumarill-player-onix.json",
+    "tools/compare/fixtures/iron-tail-player-azumarill-opponent-onix.json",
+    "tools/compare/fixtures/iron-tail-opponent-azumarill-player-onix.json",
+    "tools/compare/ironTailProbe.py",
+    "tools/compare/ironTailPortable.ts",
+    "tools/compare/evidence/iron-tail-changemap-player.txt",
+    "tools/compare/evidence/iron-tail-changemap-opponent.txt",
+    "src/animation/ironTail.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/ironTail.test.ts",
+    "tests/animation/ironTailEvidence.test.ts"
    ]
   },
   {

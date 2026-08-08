@@ -86,14 +86,14 @@ describe("MOVE_DETECT dense evidence receipts", () => {
   it("pins the twice-fresh hashes for both orientations", () => {
     expect(JSON.parse(readFileSync("tools/compare/fixtures/detect-player-yanma-opponent-onix.json", "utf8")))
       .toMatchObject({
-        evidenceSha256: "52f1db13183e66f6a48e2ae0d08992280bb3153be5b1db19e6663a06e175ae0f",
-        secondFreshEvidenceSha256: "52f1db13183e66f6a48e2ae0d08992280bb3153be5b1db19e6663a06e175ae0f",
+        evidenceSha256: "2a1054d283c2442589eef01bbf65048e2a0ab2f59a69e63f390c6439d640e34e",
+        secondFreshEvidenceSha256: "2a1054d283c2442589eef01bbf65048e2a0ab2f59a69e63f390c6439d640e34e",
         rawRgbSha256: "274b00b5e15634a4d19eb03c9cc62d8552dd02dffa4348efb927bab545ed5cb0",
       });
     expect(JSON.parse(readFileSync("tools/compare/fixtures/detect-opponent-yanma-player-onix.json", "utf8")))
       .toMatchObject({
-        evidenceSha256: "0506c00b85c97197b62933d1579621d45770a47ad8d2e953d73f72f1c175d737",
-        secondFreshEvidenceSha256: "0506c00b85c97197b62933d1579621d45770a47ad8d2e953d73f72f1c175d737",
+        evidenceSha256: "f8e7f48c77f020ceeb6f2c1ae7ac0ce1dbbfa30af7820d763b840777046c0b93",
+        secondFreshEvidenceSha256: "f8e7f48c77f020ceeb6f2c1ae7ac0ce1dbbfa30af7820d763b840777046c0b93",
         rawRgbSha256: "2086c05aac41c72e0f82c265d658c7d27cee9e8cf3f7ce6d93498f0eb4c39549",
       });
   });

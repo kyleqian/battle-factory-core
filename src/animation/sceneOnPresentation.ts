@@ -454,6 +454,14 @@ import {
   type RazorLeafState,
 } from "./razorLeaf.ts";
 import {
+  ironTailAtAge,
+  type IronTailState,
+} from "./ironTail.ts";
+import {
+  crushClawAtAge,
+  type CrushClawState,
+} from "./crushClaw.ts";
+import {
   poisonTailAtAge,
   type PoisonTailState,
 } from "./poisonTail.ts";
@@ -1856,6 +1864,13 @@ export interface SceneOnRazorLeafConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnIronTailConfig {
+  readonly move: "IRON_TAIL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnPoisonTailConfig {
   readonly move: "POISON_TAIL";
   readonly attacker: SceneOnPresentationBattler;
@@ -1970,6 +1985,13 @@ export interface SceneOnMetalClawConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   /** Source battler sprite `x/y`, used to initialize BG1_X/BG1_Y. */
   readonly attackerSpriteCenter: Readonly<{ x: number; y: number }>;
+}
+
+export interface SceneOnCrushClawConfig {
+  readonly move: "CRUSH_CLAW";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
 export interface SceneOnSingConfig {
@@ -2132,6 +2154,8 @@ export type SceneOnMoveConfig =
   | SceneOnRazorLeafConfig
   | SceneOnPoisonTailConfig
   | SceneOnSteelWingConfig
+  | SceneOnIronTailConfig
+  | SceneOnCrushClawConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
@@ -2605,6 +2629,18 @@ export interface SceneOnAstonishView extends AstonishState {
 }
 
 export interface SceneOnRazorLeafView extends RazorLeafState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnIronTailView extends IronTailState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnCrushClawView extends CrushClawState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3232,7 +3268,9 @@ export function createSceneOnMovePresentation<
     | SceneOnFlashConfig
     | SceneOnFacadeConfig
     | SceneOnMetalClawConfig
-    | SceneOnWrapConfig,
+  | SceneOnIronTailConfig
+  | SceneOnCrushClawConfig
+  | SceneOnWrapConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -5248,6 +5286,47 @@ export function sceneOnRazorLeafView(
 }
 
 /** `age=0` is the MetallicShine initializer's first displayed frame. */
+/** `age=0` is the move-owned window's first in-bounds frame; the RAM ages in
+ *  the reducer match the probe's RAM readings, so the draw case applies the
+ *  shared one-display latch itself. */
+export function sceneOnIronTailView(
+  state: SceneOnMovePresentationState,
+): SceneOnIronTailView {
+  if (state.config.move !== "IRON_TAIL") {
+    throw new Error(`expected IRON_TAIL presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...ironTailAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+    ),
+  };
+}
+
+export function sceneOnCrushClawView(
+  state: SceneOnMovePresentationState,
+): SceneOnCrushClawView {
+  if (state.config.move !== "CRUSH_CLAW") {
+    throw new Error(`expected CRUSH_CLAW presentation, got ${state.config.move}`);
+  }
+  const attacker = state.config.attacker;
+  const target = state.config.target;
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...crushClawAtAge(state.age, {
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      targetCenter: target.geometry.animationCenter,
+    }),
+  };
+}
+
 export function sceneOnPoisonTailView(
   state: SceneOnMovePresentationState,
 ): SceneOnPoisonTailView {

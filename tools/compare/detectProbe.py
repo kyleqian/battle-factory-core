@@ -130,9 +130,13 @@ def main() -> None:
             "callback": oracle.read_u32(base + 0x1c),
             "subpriority": oracle.read_u8(base + 0x43),
             "hFlip": bool(oracle.read_u8(base + 0x3f) & 1),
-            "animNum": oracle.read_u8(base + 0x18),
-            "animCmdIndex": oracle.read_u8(base + 0x19),
-            "animDelayCounter": oracle.read_u8(base + 0x1a),
+            # struct Sprite (reference/pokeemerald/include/sprite.h):
+            # animNum 0x2a, animCmdIndex 0x2b, animDelayCounter 0x2c.
+            # These read 0x18/0x19/0x1a until 2026-08-07 — that is
+            # subspriteTables, i.e. pointer bytes, not animation state.
+            "animNum": oracle.read_u8(base + 0x2a),
+            "animCmdIndex": oracle.read_u8(base + 0x2b),
+            "animDelayCounter": oracle.read_u8(base + 0x2c),
             "matrixNum": matrix_num,
             "matrix": {
                 "a": s16(matrix),

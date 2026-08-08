@@ -1,5 +1,200 @@
 # Animation coverage
 
+## MOVE_CRUSH_CLAW promoted to exact — 125/276, both orientations at 69/69 portable-exact (2026-08-07 worker)
+
+- **State:** coverage advanced **124→125/276 exact**, 0 partial, 0 staged, **152→151
+  unsupported**. CRUSH_CLAW was staged last round and is now proven by an exact
+  move in both orientations.
+- **Did:** built the CRUSH_CLAW draw case in `battleScene.ts` (modeled on the
+  METAL_CLAW case: one-display latch `displayed = age-1`, lunge painter on the
+  attacker spriteCorner + `displayed.attackerX2`, target idle x2 held until the
+  ShakeMon2 first toggle displays — `displayed.age < SHAKE_FIRST_STEP_AGE` —
+  then `displayed.targetX2`, and the shared dragonClaw claw-slash art for the
+  two slash pairs, animation 1 H-flipped; healthboxes/message window untouched);
+  wrote `tools/compare/crushClawPortable.ts` + the two fixtures; the evidence
+  test; the coverage entry; and moved the inventory pin 124->125 exact /
+  152->151 unsupported. **Reducer fix:** the fresh probe showed
+  `clawSlashAnimFrame` ran one tick early — `AnimClawSlash`'s cmdIndex holds
+  local 0-2 then advances every 4 ticks (3, 7, 11, 15), i.e. `Math.floor((local
+  + 1) / 4)` — not `(local + 3) / 4`; the Tier-1 pins were updated to the probe
+  truth.
+- **Measured (fresh, deterministic, twice-fresh hashes pinned):** 69/69 source
+  component AND 69/69 shared-framebuffer frames in BOTH orientations (player-back
+  window 77-145, evidence 515abad0… / RGB 9e2c28d1…; opponent-front 81-149,
+  evidence 639bdc9a… / RGB b61b5eb2…). Portable components per frame: lunge-helper
+  presence ages 13-27, attacker x2, target idle+shake x2 (opponent-front ONIX
+  rests at front-idle x2=1 until the first toggle displays), both claw-slash
+  pairs' x/y/anim/cmdIndex, ShakeMon2 task ages 19-52 with data[4]==2,
+  razor-wind SE header at ages 19/33, and BLDCNT/BLDALPHA blendOn truth. One
+  orientation trap: the player-back ONIX target's claw slashes anchor at (72,88)
+  — +8 below its sprite center — while the opponent-front front ONIX anchors at
+  (176,42); the reducer's `targetCenter` is the slash anchor, so the back-target
+  fixture carries animationCenter (72,88) with spriteCorner (40,48).
+- **Next:** the settled queue (MOVE_DRAGON_BREATH / MOVE_BIND) and the ranked
+  remaining moves; CRUSH_CLAW adds no new components to unproven leverage
+  (lunge, claw-slash art, ShakeMon2, SE all already exact elsewhere).
+- **Notes:** `setalpha 12,8` / `blendoff` stay RAM-truth only (BLDCNT 0x3f40 /
+  BLDALPHA 0x080c at RAM ages 13..54, cleared at 55; neither changes a pixel in
+  this window, exactly like IRON_TAIL's invisible third sweep). No boundary
+  widening, no new unsupported-branch barrier; the only engine contacts are the
+  CRUSH_CLAW draw case in `battleScene.ts` and the one-display seam.
+
+## MOVE_CRUSH_CLAW staged — both orientations isolated at 69 frames; scenarios + dense probe + change maps + reducer banked (2026-08-07 worker)
+
+- **State:** CRUSH_CLAW stays **unsupported**. Coverage unchanged at **124/276
+  exact, 0 partial, 0 staged, 152 unsupported**. Nothing promoted; no pin
+  moved. This is the staging round; promotion to exact (both orientations, a
+  portable at full-window exact) is the NEXT round's job.
+- **Did:** staged two legal mechanicLab scenarios (GROVYLE `SPECIES_GROVYLE`
+  278 — FRONTIER_MON_GROVYLE_2, set 293, all four active slots CRUSH_CLAW
+  306, vs legal ONIX 95; player-back
+  `mechanic-crush-claw-player-grovyle-opponent-onix.json` and opponent-front
+  `mechanic-crush-claw-opponent-grovyle-player-onix.json`, both verified to
+  run with move 306) and `tools/compare/crushClawProbe.py` — a dense probe
+  copied from `ironTailProbe.py` with script-pointer isolation to
+  `Move_CRUSH_CLAW` (`0x082ceaf7`)..`Move_AROMATHERAPY` (`0x082ceb66`)
+  capturing every `gClawSlashSpriteTemplate` claw-slash sprite
+  (`AnimClawSlash`, 5-frame anim) and `gHorizontalLungeSpriteTemplate` lunge
+  sprite (`createsprite ... 6, 4`), the `AnimTask_ShakeMon2`/`_Step` target
+  task, both battlers' sprites, BLDCNT/BLDALPHA/BLDY, all 512
+  faded/unfaded/hardware palettes, software + hardware OAM and matrices,
+  per-frame raw RGB + sha256. NOTE: this probe reads `animNum`/`animCmdIndex`
+  at the TRUE sprite offsets `0x2a`/`0x2b` (the ironTail probe read garbage
+  at `0x18`/`0x19` — those fields were never validated there, but CRUSH_CLAW's
+  slash anim frame is real evidence). Probe run: `python3
+  tools/run-mgba-probe.py <out.json> -- python3
+  tools/compare/crushClawProbe.py <scenario.json> <out.json> <rgb-dir> 306`.
+  Built `src/animation/crushClaw.ts` (RAM-truth reducer: lunge 6/4 at RAM
+  ages 13-26, the two claw-slash pairs spawning at ages 19 and 33 animating
+  5 frames each, `ShakeMon2 (2, 0, 18, 1)` target x2 toggling ±2 every two
+  ages 19..53 then zero, `setalpha` at age 13 / `blendoff` at age 55, monbg
+  ages 10-57, `SE_M_RAZOR_WIND` at ages 19 and 33) and Tier-1
+  `tests/animation/crushClaw.test.ts` (6 pins). Plus the displayed-timing
+  change maps banked under `tools/compare/evidence/crush-claw-changemap-*.txt`.
+- **Measured (fresh runs, both orientations, deterministic and identical):
+  move-owned window 69 frames each — player-back frames 77..145,
+  opponent-front 81..149** (script first in-bounds .. first inactive cleanup
+  at 145/149). Both first frames are CLEAN — no outgoing-teardown
+  contamination (software OAM byte-identical to the following frame, hardware
+  OAM slots 11+ off-screen y=160, no shadow sprite). Lunge helper created at
+  RAM 90/94, attacker x2 ramps 4,8,..,24 over ages 13-18, holds 24 at 19-20,
+  returns to 0 over 21-26 (displayed one frame later). Slash pair 1 (x=-10,
+  animation 0, subpriority 38 player / 28 opponent) spawns age 19, animates
+  cmdIndex 0..4 (4 ticks each) to age 39, destroyed 40; pair 2 (x=+10,
+  animation 1) spawns age 33, animates to age 53, destroyed 54. Shake task
+  created age 18 (initializer), first toggle write age 19, toggles every 2
+  ages to 53, zero write at 53. `blendoff` RAM 132/136 (age 55).
+- **Displayed-timing mapping (player-back; opponent-front is identical minus
+  4 on every frame):** every visible event displays exactly ONE frame after
+  its RAM cause. lunge out displayed 91-96, hold 97-98, back 99-104; claw
+  slashes pair 1 displayed 97..117, pair 2 displayed 111..131; shake toggles
+  displayed 97,99,101,...,129 then 131 returns to 0; `setalpha`/`blendoff`
+  are RAM-truth only — neither changes a pixel in this window (change map has
+  no blend step; the wide 2418px-class diffs are slash+shake). See the two
+  change-map files for the per-frame pixel receipts.
+- **Next:** promote CRUSH_CLAW to exact. Copy `ironTailPortable.ts` -> a
+  `crushClawPortable.ts` comparing the reducer against this probe's RAM on
+  both orientations at 135-style full-window exact (69 frames x 2 axes);
+  `SceneOnCrushClawConfig`/`SceneOnCrushClawView` seam in
+  `sceneOnPresentation.ts`, the CRUSH_CLAW draw case in `battleScene.ts` (use
+  the existing claw-slash art already wired for DRAGON_CLAW/METAL_CLAW), the
+  fixtures (`crush-claw-player-grovyle-opponent-onix.json` /
+  `crush-claw-opponent-grovyle-player-onix.json`), the coverage entry and the
+  inventory pin 124->125 exact / 152->151 unsupported. All ten CRUSH_CLAW
+  components are already proven by exact moves (ZERO new source components —
+  claw slash = metalClaw/dragonClaw, lunge = ironTail/dragonClaw, ShakeMon2 =
+  many, SE = dragonClaw).
+- **Notes — two small findings.** (1) The claw-slash `animNum`/`animCmdIndex`
+  live at sprite offsets 0x2a/0x2b, NOT 0x18/0x19 as ironTailProbe reads;
+  CRUSH_CLAW's probe reads the true offsets. (2) `setalpha 12, 8` +
+  `blendoff` write BLDCNT/BLDALPHA but never change pixels in this move's
+  window (no blend step in the change map) — model them as RAM truth, not
+  visuals, exactly like the invisible third sweep in IRON_TAIL.
+
+## MOVE_IRON_TAIL promoted to exact — 124/276, the permanent=TRUE metallic-shine case closed in one round (2026-08-07 worker)
+
+- **State:** coverage advanced **123→124/276 exact**, 0 partial, 0 staged, 152
+  unsupported. IRON_TAIL was the sole remaining case where the metallic-shine
+  grayscale outlives the shine task (`permanent=TRUE`), and it is now proven
+  by an exact move — the difference the steelWing/metalClaw draw cases were
+  holding open.
+- **Did:** landed `src/animation/ironTail.ts` (RAM-truth reducer: permanent
+  grayscale until `set_original_pal` at RAM age 126, the two visible band
+  sweeps gated on `data10 >= 28`, the sweep-3 3-frame data10 hold modeled for
+  RAM fidelity but never drawn, the horizontal lunge 4/4 at RAM ages 107-116,
+  the hitsplat anim 2 at RAM ages 115-124, the ShakeMon 3/0/6/1 target x2),
+  the `SceneOnIronTailConfig`/`SceneOnIronTailView` seam, the `battleScene.ts`
+  IRON_TAIL draw case, `tools/compare/ironTailPortable.ts`, both fixtures
+  (`iron-tail-player-azumarill-opponent-onix.json` / `iron-tail-opponent-azumarill-player-onix.json`,
+  dense 135-frame windows 216-350 / 215-349), Tier-1 `ironTail.test.ts` (9),
+  `ironTailEvidence.test.ts` (3), the ANIMATION_COVERAGE.json entry and the
+  inventory pin 123→124 exact / 153→152 unsupported. `npx vitest run
+  tests/animation` 310 files / 1735 passed / 1 skip; `npm run build` green.
+- **Measured (both portables, fresh runs, exit 0):** component 135/135 and
+  framebuffer 135/135 on player-back and opponent-front. Player evidence
+  d443cdb3… / raw RGB 952808fa…; opponent evidence 7bebcfb3… / raw RGB
+  bea1745a… — matching the fixture pins twice fresh. Coverage `npm run
+  animation:coverage` now reads 124/276 exact.
+- **Next:** pick the next move from the component-leverage ranking; all ten
+  IRON_TAIL components were already proven by exact moves (ZERO new source
+  components), so the component-provenance trick is closed for this track.
+- **Notes — two reusable findings.** (1) The target's idle→shake switch is a
+  draw-gate off-by-one class: the front-idle x2 (ONIX 1px) must hold through
+  displayed age 115 and the shake-display (0,0,3,3,0,0,3,3,0,0) starts at
+  age 116 — a `<=117` gate drew the shake x2 one frame late and cost exactly
+  the two shake-displacement frames (1091px each). (2) The hitsplat anchors
+  on the target's Y_PIC_OFFSET, so the opponent-front (back-sprite) target
+  needs +8 y (probe: hitsplat at (72,88) vs ONIX-back sprite (72,80)); the
+  player-back front target anchors at (176,42). The shake itself also drops
+  the front-idle x2 1px to 0 on its first two writes (displayed 116-117),
+  which is why the wide 2418px frame-332 diff spans both boxes.
+
+## IRON_TAIL staging correction — the banked "displayed" frames were RAM frames; every visible event lags one frame (2026-08-07 night supervisor)
+
+- **State:** coverage unchanged at **123/276 exact, 0 partial, 0 staged, 153
+  unsupported**. Round 1 of this session was a cap-kill with zero commits (45 min,
+  94 bash / 31 read calls, no file written) — the worker spent its whole cap
+  re-deriving display timing the staged entry had stated as if it were displayed
+  truth. Nothing was lost: its finding is confirmed and banked below.
+- **Supervisor-measured (my own run, not the worker's claim):** I diffed every
+  consecutive raw framebuffer in both probe windows. The window itself is right —
+  player-back 216..350, opponent-front 215..349, 135 frames each — but **the
+  "displayed" frame numbers in the staged entry below are RAM frames. Every
+  visible event displays exactly ONE frame after the RAM state that causes it.**
+  The whole 135-frame window is static except at these frames (player-back;
+  subtract 1 for opponent-front, which is identical in every other respect):
+  - **223** — attacker grayscale ON, 1519px over the attacker box (41,64-101,111).
+    RAM initializer is 220-221 with the step from 222, so the grayscale palette
+    write displays at 223.
+  - **229-253** — metallic-shine sweep 1, band marching down-right across the
+    attacker (bbox walks 54,67-59,73 → 102,111-102,111, 12px growing to 384px
+    then shrinking to 1px). **254-260 static.**
+  - **261-285** — sweep 2, byte-identical pattern at exactly +32 frames.
+  - **286-323 static** — the third sweep (d11==2) is INVISIBLE: `ClearBattleAnimBg`
+    has already run, so the RAM `data10` 3-frame hold at 285-287 never reaches
+    pixels. Do not model it as a visual.
+  - **324-327** — lunge out, 1196px/frame, bbox marching right 41→118 (RAM ramp
+    323-326). **328-329 static** (RAM x2 holds 16 at 327-328).
+  - **330-333** — lunge back (RAM 329-332).
+  - **332** — hitsplat appears (RAM spawn 331); the 331→332 diff is the wide
+    2418px one spanning both boxes.
+  - **334, 336, 338, 340** — target shake, 1769px each over the target box
+    (149,12-206,71). RAM x2 toggles at 333/335/337/339.
+  - **342** — hitsplat gone (RAM last frame 340), 268px at 165,31-187,53.
+  - **343** — attacker grayscale OFF, 1519px, the exact inverse of 223. RAM
+    `set_original_pal` is 342. **So displayed grayscale = frames 223..342.**
+- **Next:** re-brief IRON_TAIL with the corrected timing and a write-first
+  structure (reducer committed before any measurement is allowed). The change
+  maps for both orientations are the specification; no further probing is needed
+  to build the reducer.
+- **Notes — brief-authoring lesson.** A staged entry that prints RAM frames under
+  a heading like "displayed" invites exactly this failure: the worker could not
+  reconcile the numbers with the pixels, and correctly refused to write code it
+  believed was wrong. **State the lag explicitly in the staging entry, or label
+  the column RAM.** This is the same one-frame display-lag family already recorded
+  for OAM edits and palette writes — it applies to move sprites, attacker/target
+  `x2` translation and palette writes alike, all at one frame.
+
 ## Supervisor wind-down — FACADE, MINIMIZE, TORMENT and DETECT all exact, 119→123; IRON_TAIL staged (2026-08-07 evening animation session)
 
 - **State:** coverage advanced **119→123/276 exact**, 0 partial, 0 staged, 153
@@ -191,8 +386,8 @@
   reason) and inventory pin 122→123 exact / partial 1→0.
 - **Measured (both portables, fresh runs, exit 0):** player-back 110/110
   component and framebuffer (64-173); opponent-front 109/109 component and
-  framebuffer (69-177). Player evidence 52f1db13… / raw RGB 274b00b5… —
-  unchanged from staging; opponent evidence 0506c00b… / raw RGB
+  framebuffer (69-177). Player evidence 2a1054d2… / raw RGB 274b00b5… —
+  unchanged from staging; opponent evidence f8e7f48c… / raw RGB
   2086c05a… — matching the fixture pins twice fresh.
 - **Next:** pick the next move from the component-leverage ranking
   (gSpinningSparkleSpriteTemplate now has 1 exact representative left;
@@ -242,7 +437,7 @@
   summary pin 154→153 unsupported / 0→1 partial.
 - **Measured (fresh portable runs, exit 0):** player-back component 110/110 and
   framebuffer 110/110; opponent-front component 110/110, framebuffer 109/110.
-  Player evidence 52f1db13… / raw RGB 274b00b5…; opponent evidence 047cfd8c… /
+  Player evidence 2a1054d2… / raw RGB 274b00b5…; opponent evidence 047cfd8c… /
   raw RGB ae9c9c50… — matching the fixture pins twice fresh.
 - **Blocking note (why opponent-front is partial):** the window's first
   opponent-front frame (68) carries a ONE-FRAME hardware VRAM tile-base
