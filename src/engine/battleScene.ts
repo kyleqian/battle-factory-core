@@ -623,6 +623,7 @@ import battleAnimSweatDropAsset from "../assets/gen/battle-anim-sweat-drop.json"
 import battleAnimHitsplatAsset from "../assets/gen/battle-anim-hitsplat.json" with { type: "json" };
 import battleAnimCuttingSliceAsset from "../assets/gen/battle-anim-cutting-slice.json" with { type: "json" };
 import battleAnimSlashSliceAsset from "../assets/gen/battle-anim-slash-slice.json" with { type: "json" };
+import battleAnimLickAsset from "../assets/gen/battle-anim-lick.json" with { type: "json" };
 import battleAnimFlyBallAsset from "../assets/gen/battle-anim-fly-ball.json" with { type: "json" };
 import battleAnimSmallEmberAsset from "../assets/gen/battle-anim-small-ember.json" with { type: "json" };
 import battleAnimFirePlumeAsset from "../assets/gen/battle-anim-fire-plume.json" with { type: "json" };
@@ -983,6 +984,7 @@ import {
   sceneOnMetalClawView,
   sceneOnCrunchView,
   sceneOnSlashView,
+  sceneOnLickView,
   sceneOnCrushClawView,
   sceneOnTakeDownView,
   sceneOnSingView,
@@ -1819,6 +1821,7 @@ const battleAnimSweatDrop = battleAnimSweatDropAsset as BattleAnimSweatDropAsset
 const battleAnimHitsplat = battleAnimHitsplatAsset as BattleAnimHitsplatAsset;
 const battleAnimCuttingSlice = battleAnimCuttingSliceAsset as BattleAnimCuttingSliceAsset;
 const battleAnimSlashSlice = battleAnimSlashSliceAsset as BattleAnimCuttingSliceAsset;
+const battleAnimLick = battleAnimLickAsset as BattleAnimCuttingSliceAsset;
 /** S7/S8 turn 13 Part A (docs/turn13-notes.md's own dirt-throw sub-section): `gSandAttackDirtSpriteTemplate`'s single static 8x8 tile - see `tools/extract/extract-sandattack-dirt.ts`. */
 const battleAnimMudSand = battleAnimMudSandAsset as {
   tileset: Tileset;
@@ -12450,6 +12453,11 @@ function cuttingSliceFrameTileset(frame: number): Tileset {
 /** `slash.png` (`gSlashSliceSpriteTemplate`) slice frame tileset, same shape as the cutting slice's. */
 function slashSliceFrameTileset(frame: number): Tileset {
   return { columns: battleAnimSlashSlice.frames.columns, rows: battleAnimSlashSlice.frames.rows, tiles: battleAnimSlashSlice.frames.list[frame]! };
+}
+
+/** The 16x32 LICK sprite's frame sheet: 5 stacked frames of 8 tiles each. */
+function lickFrameTileset(frame: number): Tileset {
+  return { columns: battleAnimLick.frames.columns, rows: battleAnimLick.frames.rows, tiles: battleAnimLick.frames.list[frame]! };
 }
 
 
@@ -34865,6 +34873,125 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "HOUNDOUR used" : "Foe HOUNDOUR used",
       "CRUNCH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "LICK") {
+    const view = sceneOnLickView(state);
+    // Display latches are split. The lick sprite is sprite-driven and renders
+    // ONE frame after its RAM state (`displayed`), while the target shake is
+    // task-driven (`AnimTask_ShakeMon2`, 1/0/16/1) and renders the shared
+    // sequence at display age - 22, which lands its tick-0 creation write
+    // (+1) on exactly one displayed frame: for the opponent-front ONIX back
+    // (idle x2=0) that +1 is a real one-frame pixel step (change-map frame
+    // 235 = RAM 234 + 1), while for the player-back ONIX front it coincides
+    // with the idle hold (x2=1), so the draw drives the shake from the shared
+    // sequence directly, not the reducer's RAM truth (change-map confirmed:
+    // the first shake-widened frame is 237 player-back / 236 opponent-front,
+    // and the RAM restore to 0 at age 51 displays at 267/266, outside the
+    // pre-shake idle hold).
+    const displayed = sceneOnLickView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "LICKITUNG"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LICKITUNG"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged LICK pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const lickitungSource = playerToOpponent
+      ? slamArt.lickitungBack
+      : slamArt.lickitungFront;
+    const lickitung = playerToOpponent
+      ? lickitungSource
+      : {
+          ...lickitungSource,
+          tileset: subTileset(lickitungSource.tileset, 0, 8),
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // The shake's display age is the engine age itself: the shared ShakeMon2
+    // sequence's tick 0 (the +1 creation write) lands on display age 22, so
+    // the idle hold runs through age 21 and the sequence takes over from 22.
+    const shakeX2 = state.age < 22
+      ? targetIdle.x2
+      : shakeMon2OffsetAtTick(1, 0, 16, 1, state.age - 22).x2;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + shakeX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    // The lick anchors at the TARGET's picture coordinates (X_2 / Y_PIC) and
+    // its 16x32 OAM is centered (centerToCorner -8/-16), so the drawn top-left
+    // is `lick.x - 8` / `lick.y - 16` (the change map's blink bbox 168,26-
+    // 183,57 = the (176,42) center box, byte-exact). The lick sprite's
+    // subpriority (38 player-back / 28 opponent-front) sits IN FRONT of the
+    // target in BOTH orientations (the ONIX front/back 40/30), so it paints
+    // after the target (probe-measured, not assumed).
+    if (displayed.lick && !displayed.lick.invisible) {
+      drawSpriteSheet(
+        fb,
+        lickFrameTileset(displayed.lick.tileOffset / 8),
+        battleAnimLick.palette,
+        displayed.lick.x - 8,
+        displayed.lick.y - 16,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      lickitung.tileset,
+      lickitung.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "LICKITUNG",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LICKITUNG" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LICKITUNG used" : "Foe LICKITUNG used",
+      "LICK!",
       99,
     );
     return;

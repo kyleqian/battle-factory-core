@@ -1611,6 +1611,33 @@
    ]
   },
   {
+   "move": "MOVE_LICK",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_LICKITUNG_1 set 164 (LICKITUNG 108, all four active slots LICK move 122 so the Factory AI has one legal choice, Sitrus Berry 142, QUIRKY, 255/255 ATTACK/HP) against legal ONIX in both orientations; both pass the complete move-owned Scene-ON window twice fresh with evidence 72c763d6a39394675e42dca981c4ee3f29f4e53031ee87d14a2aec5cd40b2a18 / raw RGB 862399772b492f96f8ba6a5b84eb46cdf2881e963c554282a135c12ad2360d91 for the 73-frame player-back window (frames 214-286, first frame clean) and evidence 2c8a668d1d14acdf7fb14eb645bfb0f6ed38d5ec5ef18729550b22a9f2bcb416 / raw RGB 65f7c59555be001cbe500083b2db83e37585b9fdbec7b8302e3333dab5b18062 for the 73-frame opponent-front window (frames 213-285, structurally identical every frame -1, first frame clean), both isolated by sBattleAnimScriptPtr within the Move_LICK..Move_FOCUS_ENERGY label bounds; both orientations 73/73 component AND framebuffer exact",
+    "the reducer composes only already-exact components with zero new ones: the gLickSpriteTemplate 16x32 lick sprite (ObjNormal, NOT ObjBlend, sAnim_Lick's 5 frames of 8 tiles at 2 ticks each, no loop, own embedded gBattleAnimSpritePal_Lick) anchored at the target's X_2/Y_PIC with the AnimLick_Step invisible flicker ladder (case 0 flips every 2 ticks, case 1 every 4, DestroyAnimSprite at 71) and AnimTask_ShakeMon2 (1,0,16,1) target x2 +-1 2-age toggle (the existing shakeMon2.ts shared port); the lick art (ANIM_TAG_LICK) carries its OWN embedded palette unlike CUT's ObjBlend sharing Impact's palette, and the OAM is 16x32 NOT 32x32",
+    "displayed timing splits the latch (the TAKE_DOWN WindUpLunge case): the lick sprite is sprite-driven and renders exactly ONE frame after its RAM state (creation age 21 -> display 236, anim cmd transitions at +1), while the shake x2 is task-driven and renders the shared ShakeMon2 sequence at display age - 22, which lands its tick-0 creation write (+1) on exactly one displayed frame: a real one-frame pixel step for the opponent-front ONIX back (idle x2=0, change-map frame 235 = RAM 234 + 1) that coincides with the idle hold for the player-back ONIX front (x2=1, change-map first shake frame 237 = RAM 235 + 2); the target rests at its ONIX front-idle x2=1 through display age 21 and stays 0 after (the RAM restore at age 51 displays at 267 player / 266 opponent)",
+    "displayed frames (player-back; opponent-front every frame -1): lick sprite 236..285 (cmd0 236, cmd1 237-238, cmd2 239-240, cmd3 241-242, cmd4 243-245, animEnded + AnimLick_Step invisible ramp blinks 246, 248, 249, 251, 252, 254, 255, 257, 258, 260, 261, 265, 266, 270, 271, 275, 276, 280, 281, 285, gone 286), shake x2 = idle +1 through 236 then -1/-1/+1/+1 repeating through the 0 restore at 267 (no palette/BG work at all: BLDCNT/BLDALPHA/BLDY all 0, no monbg, no fadetobg, no setalpha/blendoff); SE_M_LICK once at the creation age",
+    "the portable proves 73/73 source-component frames in both orientations (attacker static, target idle+shake x2 with the front-idle hold, the lick sprite's presence/x/y/frame/invisible with the blink teardown, the single ShakeMon2 task across the shake span, the SE_M_LICK header at the creation age) and the identical shared-framebuffer 73/73 through the full engine render with healthboxes and message window untouched; the lick sprite's painter order is derived from the probe's hardware subpriority, not assumed - lower subpriority wins in both orientations (the lick 38/28 sits IN FRONT of the ONIX front/back 40/30, so it paints after the target; the two orientations do not have matching changed-pixel counts because the target is ONIX's front sprite in one and its back sprite in the other); no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-lick-player-lickitung-opponent-onix.json",
+    "tools/battle-lab/mechanic-lick-opponent-lickitung-player-onix.json",
+    "tools/compare/fixtures/lick-player-lickitung-opponent-onix.json",
+    "tools/compare/fixtures/lick-opponent-lickitung-player-onix.json",
+    "tools/compare/lickProbe.py",
+    "tools/compare/lickPortable.ts",
+    "tools/compare/evidence/lick-changemap-player.txt",
+    "tools/compare/evidence/lick-changemap-opponent.txt",
+    "src/assets/gen/battle-anim-lick.json",
+    "src/animation/lick.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/lick.test.ts",
+    "tests/animation/lickEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_LIGHT_SCREEN",
    "status": "exact",
    "covered": [
