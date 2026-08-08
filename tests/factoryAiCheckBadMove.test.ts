@@ -914,6 +914,22 @@ describe("AI_CBM_HighRiskForDamage via Bide (dispatch :123, EFFECT_BIDE)", () =>
   });
 });
 
+describe("AI_CBM_HighRiskForDamage via Skull Bash (dispatch :183, EFFECT_SKULL_BASH)", () => {
+  const MOVE_SKULL_BASH = 130; // EFFECT_SKULL_BASH, TYPE_NORMAL, power 100
+
+  it("non-Wonder-Guard FALLTHROUGH reaches End at zero", () => {
+    expect(run(MOVE_SKULL_BASH, { ...MAROWAK, types: ["TYPE_ROCK", "TYPE_BUG"] })).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read", () => {
+    const result = run(MOVE_SKULL_BASH, { ...MAROWAK, types: ["TYPE_GHOST", "TYPE_GHOST"] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+});
+
 describe("AI_CBM_OneHitKO (data/battle_ai_scripts.s:358-362, EFFECT_OHKO)", () => {
   const MOVE_GUILLOTINE = 12; // EFFECT_OHKO, TYPE_NORMAL, power 1
   const MOVE_SHEER_COLD = 329; // EFFECT_OHKO, TYPE_ICE, power 1
