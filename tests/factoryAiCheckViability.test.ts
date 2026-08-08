@@ -6172,3 +6172,71 @@ describe("AI_CV_BatonPass (data/battle_ai_scripts.s:1978-2016)", () => {
     expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
   });
 });
+
+describe("AI_CV_FocusPunch (data/battle_ai_scripts.s:2289-2311)", () => {
+  const MOVE_FOCUS_PUNCH = 264; // EFFECT_FOCUS_PUNCH
+
+  function focusPunchRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_FOCUS_PUNCH,
+      attacker: { ...NEUTRAL_BATTLER, types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const, ...targetOverrides },
+      staleFuncResultFallback: 3,
+      drawOrdinalStart: 1,
+      reasonPrefix: "focus-punch",
+    });
+  }
+
+  it("0.5x effectiveness (Fighting vs Flying): deterministic -1", () => {
+    const result = focusPunchRun(1, {}, { types: ["TYPE_FLYING", "TYPE_FLYING"] as const });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("target asleep: bare +1, zero draws, carry preserved", () => {
+    const result = focusPunchRun(1, {}, { isAsleep: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1, funcResultAfter: 3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("target infatuated, roll < 100: zero", () => {
+    // seed 4 -> roll1 low 25 (<100 JUMP).
+    const result = focusPunchRun(4, {}, { isInfatuated: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["focus-punch-roll-1"]);
+  });
+
+  it("target confused, roll >= 100, no Substitute: +1 (ScoreUp1)", () => {
+    // seed 1 -> roll1 low 198 (>=100).
+    const result = focusPunchRun(1, {}, { isConfused: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("target confused, roll >= 100, user has Substitute: +5 (Score_Plus5)", () => {
+    const result = focusPunchRun(1, { hasSubstitute: true }, { isConfused: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 5 });
+  });
+
+  it("statusless, isFirstTurn nonzero: zero, funcResult = isFirstTurn", () => {
+    const result = focusPunchRun(1, { isFirstTurn: 2 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, funcResultAfter: 2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("statusless, isFirstTurn 0, roll < 100: zero, funcResult = 0", () => {
+    const result = focusPunchRun(4, { isFirstTurn: 0 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, funcResultAfter: 0 });
+  });
+
+  it("statusless, isFirstTurn 0, roll >= 100: +1", () => {
+    const result = focusPunchRun(1, { isFirstTurn: 0 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["focus-punch-roll-2"]);
+  });
+});

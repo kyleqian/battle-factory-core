@@ -806,6 +806,16 @@ export type FactoryAiCheckViabilityDraw =
     rawRngValue: number;
     randomValue: number;
     succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "focus-punch-roll-1" | "focus-punch-roll-2";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
   }>;
 
 export type FactoryAiCheckViabilityResult =
@@ -4928,6 +4938,103 @@ function runCvBatonPass(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -2 });
 }
 
+/**
+ * `AI_CV_FocusPunch` (`data/battle_ai_scripts.s:2289-2311`,
+ * EFFECT_FOCUS_PUNCH):
+ *
+ * ```
+ * AI_CV_FocusPunch:
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_25, AI_CV_FocusPunch2
+ *     if_type_effectiveness AI_EFFECTIVENESS_x0_5, AI_CV_FocusPunch2
+ *     if_status AI_TARGET, STATUS1_SLEEP, AI_CV_FocusPunch_ScoreUp1
+ *     if_status2 AI_TARGET, STATUS2_INFATUATION, AI_CV_FocusPunch3
+ *     if_status2 AI_TARGET, STATUS2_CONFUSION, AI_CV_FocusPunch3
+ *     is_first_turn_for AI_USER
+ *     if_not_equal 0, AI_CV_FocusPunch_End
+ *     if_random_less_than 100, AI_CV_FocusPunch_End
+ *     score +1
+ *     goto AI_CV_FocusPunch_End
+ * AI_CV_FocusPunch2:
+ *     score -1
+ *     goto AI_CV_FocusPunch_End
+ * AI_CV_FocusPunch3:
+ *     if_random_less_than 100, AI_CV_FocusPunch_End
+ *     if_status2 AI_USER, STATUS2_SUBSTITUTE, Score_Plus5
+ * AI_CV_FocusPunch_ScoreUp1:
+ *     score +1
+ * AI_CV_FocusPunch_End:
+ *     end
+ * ```
+ *
+ * Focus Punch needs a clean charge turn, so anything that threatens the
+ * focus scores it down. Exactly 0.25x/0.5x effectiveness is the
+ * deterministic -1 (`FocusPunch2`, zero draws). A target asleep reaches
+ * `ScoreUp1`'s bare +1 (a sleeping target can't break focus), zero draws.
+ * A target infatuated/confused reaches `FocusPunch3`'s `<100` roll: JUMP
+ * (roll < 100, ~39%) is the zero `goto End`; FALL-THROUGH checks the
+ * user's OWN `STATUS2_SUBSTITUTE` -- a Substitute'd user `goto`s the shared
+ * `Score_Plus5` label (`data/battle_ai_scripts.s:644`, a bare `score +5;
+ * end`), and a Substitute-less user falls through into `ScoreUp1`'s +1. The
+ * statusless path runs `is_first_turn_for AI_USER` (`Cmd_is_first_turn_for`,
+ * writes the user's `isFirstTurn` 0-2 into funcResult): nonzero `goto`s End
+ * at zero (the Focus Punch charge only works when the user hasn't acted
+ * yet); zero runs the `<100` roll (+1 on fall-through). Two
+ * `if_random_less_than` sites, mutually exclusive by the status split.
+ * funcResult: only the statusless path writes (the `is_first_turn_for`
+ * value, 0-2 all in the `AI_WEATHER_*` collision range); the status and
+ * effectiveness paths preserve the carry.
+ */
+function runCvFocusPunch(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  attackerTypes: readonly [string, string];
+  moveType: string;
+  targetTypes: readonly [string, string];
+  funcResultCarry: AiWeatherValue | undefined;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  if (classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1, funcResultAfter: input.funcResultCarry });
+  }
+
+  if (input.target.isAsleep ?? false) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 1, funcResultAfter: input.funcResultCarry });
+  }
+
+  if ((input.target.isInfatuated ?? false) || (input.target.isConfused ?? false)) {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-focus-punch-roll-1`);
+    rng = roll.after;
+    const jumped = roll.randomValue % 256 < 100;
+    draws.push(Object.freeze({ ...roll, kind: "focus-punch-roll-1" as const, succeeded: !jumped }));
+    if (jumped) {
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0, funcResultAfter: input.funcResultCarry });
+    }
+    const hasSubstitute = input.attacker.hasSubstitute ?? false;
+    const scoreDelta = hasSubstitute ? 5 : 1;
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta, funcResultAfter: input.funcResultCarry });
+  }
+
+  // Statusless path: is_first_turn_for writes funcResult = isFirstTurn (0-2,
+  // all valid AI_WEATHER_* ids).
+  const isFirstTurn = input.attacker.isFirstTurn;
+  const funcResultAfter = isFirstTurn as AiWeatherValue;
+  if (isFirstTurn !== 0) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0, funcResultAfter });
+  }
+  const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-focus-punch-roll-2`);
+  rng = roll.after;
+  const succeeded = roll.randomValue % 256 >= 100;
+  draws.push(Object.freeze({ ...roll, kind: "focus-punch-roll-2" as const, succeeded }));
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded ? 1 : 0, funcResultAfter });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -5983,6 +6090,28 @@ export function runCheckViability(input: Readonly<{
       draws: batonPass.draws,
       scoreDelta: batonPass.scoreDelta,
       funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_FOCUS_PUNCH") {
+    // AI_CV_FocusPunch (data/battle_ai_scripts.s:2289-2311).
+    const focusPunch = runCvFocusPunch({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      attackerTypes: input.attacker.types,
+      moveType: move.type,
+      targetTypes: input.target.types,
+      funcResultCarry,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: focusPunch.rng,
+      draws: focusPunch.draws,
+      scoreDelta: focusPunch.scoreDelta,
+      funcResultAfter: focusPunch.funcResultAfter,
     });
   }
 
