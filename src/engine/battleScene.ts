@@ -34881,7 +34881,6 @@ export function renderSceneOnMovePresentation(
     // (display age 11), so the draw drives the shake from the shared sequence
     // directly instead of the reducer's RAM truth (change-map confirmed).
     const displayed = sceneOnSlashView({ ...state, age: state.age - 1 });
-    const displayedAge = displayed.age;
     const playerToOpponent =
       view.attacker.species === "CHARMELEON"
       && view.attacker.geometry.side === "player"
