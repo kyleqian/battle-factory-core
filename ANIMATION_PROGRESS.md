@@ -1,5 +1,74 @@
 # Animation coverage
 
+## MOVE_COUNTER promoted to exact — 130/276, both orientations at 88/88 portable-exact (2026-08-08 worker, round B)
+
+- **State:** coverage advanced **129→130/276 exact**, 0 partial, 0 staged,
+  **147→146 unsupported**. COUNTER was staged last round and is now proven by an
+  exact move in both orientations through the shared seam. `counterPortable.ts`
+  exits 0 at **COUNTER component 88/88; framebuffer 88/88** (player-back,
+  frames 207-294) and **component 88/88; framebuffer 88/88** (opponent-front,
+  frames 207-294), fresh evidence hashes player `aeb600cd…`/RGB `858b9e0f…`,
+  opponent `d6c0b68a…`/RGB `85cab93f…`, reproduced fresh four times each (twice
+  standalone + twice via the portable). The inventory pin moved **129→130 exact
+  / 147→146 unsupported**.
+- **Did:** the MOVE_COUNTER draw case in `battleScene.ts` — HITMONTOP
+  back/front and ONIX front/back (shared battle back/front bundles), the three
+  opaque fists (subpriority 27, `subTileset(handsAndFeet,0,4)` painter) and
+  three basic hitsplats (subpriority 28, identity matrix, blended 12/8 over the
+  field+target backdrop, BODY_SLAM convention) at the mirrored target-relative
+  anchors, the target always visible as the monbg BG1 copy that tracks the
+  sprite x2 (`Task_UpdateMonBg`, battle_anim.c:813-837), and the split display
+  latch (below). Wrote `tools/compare/counterPortable.ts` (modelled on
+  crunchPortable.ts, probe move 68) + the two fixtures, the evidence test
+  (`tests/animation/counterEvidence.test.ts`), the coverage entry, and moved
+  the inventory pin.
+- **Measured (fresh, deterministic, twice-fresh hashes pinned): the display
+  latch is split THREE ways — the first move in the lane where "task-driven
+  means +2" is FALSE as a blanket rule.** `AnimTask_TranslateMonEllipticalRespectSide`
+  (attacker lunge) is TASK-driven and renders **RAM + 2** (RAM 217 → pixels 219,
+  peak x2 18 at RAM 220 → pixels 222, rest RAM 231 → pixels 233). **`AnimTask_ShakeMon`
+  is TASK-driven but renders RAM + 1** — the RAM flips land on odd ages and the
+  change-map events are the following even ages (244,246,…,290) — **NOT the +2
+  the lane's ShakeMon2 rounds (SLASH/LICK/TAKE_DOWN) measured; ShakeMon and
+  ShakeMon2 are different source tasks and latch differently, the most reusable
+  fact this move teaches.** Both `gSlideMonTo*` dummies and all three
+  fist/hitsplat pairs are SPRITE-driven at **RAM + 1** (first hitsplat RAM 238 →
+  pixels 239, first fist RAM 241 → pixels 242). The target rests at the ONIX
+  front-idle x2=1 through display 241, drops to 0 at 242 (shake creation write),
+  then toggles 5/0 every two frames through the 0 restore at display 290 — the
+  ONIX x2 never returns to 1, and because the target stays visible (the BG copy
+  tracks the sprite x2) the shake IS visible moving pixels, unlike a hidden-OBJ
+  assumption would suggest. monbg/setalpha 12,8 (BLDCNT 0x3f40, empty target-1,
+  no pixel step)/clearmonbg/blendoff are RAM-truth only, exactly like
+  CRUNCH/CRUSH_CLAW.
+- **Notes — the orientation-shift trap did NOT bite, but the painter-order trap
+  DID, and it was the equal-subpriority semi-transparent overlap, not the
+  target-front-vs-back.** The orientations line up **+0 on every frame** (one
+  age-indexed reducer serves both; only the battler geometry and the mirrored x
+  differ). The changed-pixel counts differ because the target is ONIX's front
+  sprite in one and its back sprite in the other — expected. The real finding:
+  within the equal-subpriority 28 hitsplat pair the ROM's OAM allocator REUSES
+  slots (hitsplats land on 3/5/4, fists on 4/3/5), and the LOWER OAM slot wins
+  the PPU's one-selected-OBJ semi-transparent blend (probe-measured at the
+  frame-247 hitsplat1/hitsplat2 and frame-255 hitsplat2/hitsplat3 overlaps) —
+  so `counter.ts` now reports each hitsplat's OAM slot and the draw paints
+  descending. Blind creation-order painting cost this round two portable
+  iterations (247 then 255); slot order, not creation order, is the rule.
+- **Next:** the settled queue (MOVE_DRAGON_BREATH / MOVE_BIND) and the ranked
+  remaining moves; COUNTER adds no new unproven components (the lunge task was
+  per-move-profiled, the slides/shake are the shared `slideMon.ts`/`shakeMon.ts`
+  ports, fists/hitsplats/monbg/setalpha are all already exact elsewhere).
+- **Notes — no boundary widening, no new unsupported-branch barrier, no
+  shared-helper edit.** The only engine contacts are the COUNTER draw case in
+  `battleScene.ts` and the already-landed `sceneOnCounterView` seam; the only
+  src/animation change is exporting `SLIDE_ORIGIN_DURATION` and adding the
+  hitsplat `slot` field in `counter.ts`. The coverage entry is flipped LAST,
+  after both portables exited 0 at full-window exact (88/88 each).
+- **Notes — `npm test`, `npm run typecheck` and `npm run build` green on the
+  final tree.** The coverage entry was inserted with `json.dumps(indent=1)`
+  serialization (one space per nesting level) — re-serialized the file rather
+  than hand-indent an entry, so no whitespace drift.
+
 ## MOVE_COUNTER staged — both orientations isolated at 88 frames; scenarios + dense probe + change maps banked (2026-08-08 worker, round A)
 
 - **State:** COUNTER stays **unsupported**. Coverage unchanged at **129/276 exact, 0

@@ -552,6 +552,32 @@
    ]
   },
   {
+   "move": "MOVE_COUNTER",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_HITMONTOP_2 set 341 (HITMONTOP 237, all four active slots COUNTER move 68 so the Factory AI has one legal choice, Focus Band 196, ADAMANT, 255/255 HP/DEFENSE) against legal ONIX in both orientations; both pass the complete move-owned Scene-ON window twice fresh with evidence aeb600cddbd03ebcb0d8cf45d38d93ba03faf26e77fbfcd4951fd7dc0f6a6597 / raw RGB 858b9e0ff45947da10241dd7a61f60ab2498fac063fa8722ae3df6f765337da2 for the 88-frame player-back window (frames 207-294, first frame clean) and evidence d6c0b68ab4cecec213e6e85df12c2ba80c297658a2a195d7cbcab89716a93389 / raw RGB 85cab93f5be1eac69b53034ff645ea4ee794a131d4da5eb97df8f30027fbe14b for the 88-frame opponent-front window (frames 207-294, first frame clean), both isolated by sBattleAnimScriptPtr within the Move_COUNTER..Move_VITAL_THROW label bounds; both orientations 88/88 component AND framebuffer exact",
+    "the reducer composes only already-exact components with zero new ones: the AnimTask_TranslateMonEllipticalRespectSide 18/6/1/4 attacker lunge (one 16-phase wave at wavePeriod 1<<4, the width negated for an opponent-side attacker), the two slide dummy sprites via the shared slideMon.ts helpers (reuse, not re-port), three create_fist_sprite (gFistFootSpriteTemplate, ObjNormal 32x32, subpriority 27) and three create_basic_hitsplat_sprite (gBasicHitSplatSpriteTemplate, affine anim 0 = identity matrix, subpriority 28) pairs at target-relative anchors mirrored by SetAnimSpriteInitialXOffset, AnimTask_ShakeMon (5,0,25,1) target x2 5/0 same-value 2-age toggles via the shared shakeMon.ts port, and the monbg/setalpha 12,8/blendoff machinery (all RAM-truth only, no pixel step, like CRUNCH/CRUSH_CLAW); fist art from the already-extracted HANDS_AND_FEET sheet, hitsplat art from IMPACT, HITMONTOP/ONIX species art from the shared battle back/front bundles",
+    "displayed timing splits the latch THREE ways (measured, change-map confirmed): the elliptical lunge is task-driven and renders TWO frames after its RAM state (RAM 217 -> pixels 219, peak x2 18 at RAM 220 -> pixels 222, back to rest RAM 231 -> pixels 233), while AnimTask_ShakeMon is a DIFFERENT source task than the lane's ShakeMon2 and renders only ONE frame after its RAM state (RAM flips at odd ages -> change-map events at even ages 244,246,...,290; NOT the +2 the ShakeMon2 moves measured) - ShakeMon and ShakeMon2 latch differently, the most reusable fact this move teaches; both slide dummies and all three fist/hitsplat pairs are sprite-driven at RAM+1 (first hitsplat RAM 238 -> pixels 239, first fist RAM 241 -> pixels 242)",
+    "displayed frames (player-back; opponent-front identical on every frame +0, only the battler geometry and the mirrored x differ): lunge 219-232 (the +-18 elliptical wave with the 2-age latch), slide-to-offset 233-237 + hold 20 through 264, slide-to-original back 265-269, hitsplats 239-247 / 247-255 / 255-263, fists 242-250 / 250-258 / 258-266, ShakeMon x2 = the ONIX front-idle 1 through display 241 then 0 at 242 and the 5/0 same-value toggles every 2 frames through the 0 restore at display 290 (the target stays visible as the monbg BG1 copy that tracks the sprite x2 - Task_UpdateMonBg, battle_anim.c:813-837 - so the shake moves visible ONIX pixels and the front-idle x2 never returns to 1); monbg ANIM_DEF_PARTNER hides the target OBJ from RAM age 7, setalpha 12,8 (BLDCNT 0x3f40 with an empty target-1, so no pixel step) RAM age 10, clearmonbg/blendoff RAM age 83 - all RAM-truth only, the change map is static after 290",
+    "the portable proves 88/88 source-component frames in both orientations (attacker lunge+slide x2/y2, target idle+shake x2, the fist/hitsplat presence+positions, the single ShakeMon task across the shake span, monbg invisibility, the 0x3f40 blend register, and the SE_M_VITAL_THROW / SE_M_VITAL_THROW2 headers) and the identical shared-framebuffer 88/88 through the full engine render with healthboxes and message window untouched; the painter order is derived from the probe's hardware OAM, not assumed - within the equal-subpriority 28 hitsplat pair the LOWER OAM slot wins the PPU's one-selected-OBJ semi-transparent blend (the allocator reuses slots so the hitsplats land on 3/5/4: hitsplat1 over hitsplat2 at the frame-247 overlap, hitsplat3 over hitsplat2 at frame 255), so counter.ts reports each hitsplat's slot and the draw paints descending; no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-counter-player-hitmontop-opponent-onix.json",
+    "tools/battle-lab/mechanic-counter-opponent-hitmontop-player-onix.json",
+    "tools/compare/fixtures/counter-player-hitmontop-opponent-onix.json",
+    "tools/compare/fixtures/counter-opponent-hitmontop-player-onix.json",
+    "tools/compare/counterProbe.py",
+    "tools/compare/counterPortable.ts",
+    "tools/compare/evidence/counter-changemap-player.txt",
+    "tools/compare/evidence/counter-changemap-opponent.txt",
+    "src/animation/counter.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/counter.test.ts",
+    "tests/animation/counterEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_COVET",
    "status": "exact",
    "covered": [

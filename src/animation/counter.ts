@@ -237,7 +237,7 @@ function mirroredAnchor(
   xOffset: number,
   yOffset: number,
   geometry: CounterGeometry,
-): CounterHitsplatSprite {
+): Omit<CounterHitsplatSprite, "slot"> {
   const right = geometry.attackerCenter.x > geometry.targetCenter.x;
   return {
     x: geometry.targetCenter.x + (right ? -xOffset : xOffset),
