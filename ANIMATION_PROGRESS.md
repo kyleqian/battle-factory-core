@@ -1,5 +1,43 @@
 # Animation coverage
 
+## MOVE_IRON_TAIL promoted to exact — 124/276, the permanent=TRUE metallic-shine case closed in one round (2026-08-07 worker)
+
+- **State:** coverage advanced **123→124/276 exact**, 0 partial, 0 staged, 152
+  unsupported. IRON_TAIL was the sole remaining case where the metallic-shine
+  grayscale outlives the shine task (`permanent=TRUE`), and it is now proven
+  by an exact move — the difference the steelWing/metalClaw draw cases were
+  holding open.
+- **Did:** landed `src/animation/ironTail.ts` (RAM-truth reducer: permanent
+  grayscale until `set_original_pal` at RAM age 126, the two visible band
+  sweeps gated on `data10 >= 28`, the sweep-3 3-frame data10 hold modeled for
+  RAM fidelity but never drawn, the horizontal lunge 4/4 at RAM ages 107-116,
+  the hitsplat anim 2 at RAM ages 115-124, the ShakeMon 3/0/6/1 target x2),
+  the `SceneOnIronTailConfig`/`SceneOnIronTailView` seam, the `battleScene.ts`
+  IRON_TAIL draw case, `tools/compare/ironTailPortable.ts`, both fixtures
+  (`iron-tail-player-azumarill-opponent-onix.json` / `iron-tail-opponent-azumarill-player-onix.json`,
+  dense 135-frame windows 216-350 / 215-349), Tier-1 `ironTail.test.ts` (9),
+  `ironTailEvidence.test.ts` (3), the ANIMATION_COVERAGE.json entry and the
+  inventory pin 123→124 exact / 153→152 unsupported. `npx vitest run
+  tests/animation` 310 files / 1735 passed / 1 skip; `npm run build` green.
+- **Measured (both portables, fresh runs, exit 0):** component 135/135 and
+  framebuffer 135/135 on player-back and opponent-front. Player evidence
+  ae8c3730… / raw RGB 952808fa…; opponent evidence 63f2d609… / raw RGB
+  bea1745a… — matching the fixture pins twice fresh. Coverage `npm run
+  animation:coverage` now reads 124/276 exact.
+- **Next:** pick the next move from the component-leverage ranking; all ten
+  IRON_TAIL components were already proven by exact moves (ZERO new source
+  components), so the component-provenance trick is closed for this track.
+- **Notes — two reusable findings.** (1) The target's idle→shake switch is a
+  draw-gate off-by-one class: the front-idle x2 (ONIX 1px) must hold through
+  displayed age 115 and the shake-display (0,0,3,3,0,0,3,3,0,0) starts at
+  age 116 — a `<=117` gate drew the shake x2 one frame late and cost exactly
+  the two shake-displacement frames (1091px each). (2) The hitsplat anchors
+  on the target's Y_PIC_OFFSET, so the opponent-front (back-sprite) target
+  needs +8 y (probe: hitsplat at (72,88) vs ONIX-back sprite (72,80)); the
+  player-back front target anchors at (176,42). The shake itself also drops
+  the front-idle x2 1px to 0 on its first two writes (displayed 116-117),
+  which is why the wide 2418px frame-332 diff spans both boxes.
+
 ## IRON_TAIL staging correction — the banked "displayed" frames were RAM frames; every visible event lags one frame (2026-08-07 night supervisor)
 
 - **State:** coverage unchanged at **123/276 exact, 0 partial, 0 staged, 153
