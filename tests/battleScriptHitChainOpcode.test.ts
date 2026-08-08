@@ -3409,6 +3409,59 @@ describe("production printfromtable (Cmd_printfromtable) dispatch", () => {
       }
     },
   );
+
+  // include/constants/battle_string_ids.h:582-583 (gGotDefrostedStringIds).
+  const B_MSG_DEFROSTED = 0;
+  const B_MSG_DEFROSTED_BY_MOVE = 1;
+  // include/constants/battle_string_ids.h:538-542 (gInobedientStringIds).
+  const B_MSG_LOAFING = 0;
+  const B_MSG_WONT_OBEY = 1;
+  const B_MSG_TURNED_AWAY = 2;
+  const B_MSG_PRETEND_NOT_NOTICE = 3;
+  const B_MSG_INCAPABLE_OF_POWER = 4;
+
+  it.each([
+    [B_MSG_DEFROSTED, "STRINGID_PKMNWASDEFROSTED2"],
+    [B_MSG_DEFROSTED_BY_MOVE, "STRINGID_PKMNWASDEFROSTEDBY"],
+  ])("BattleScript_MoveUsedUnfroze's own printfromtable gGotDefrostedStringIds, MULTISTRING_CHOOSER %i: resolves %s", (chooser, messageId) => {
+    const pc = program.instructions.find((i) =>
+      i.opcodeName === "B_SCR_OP_PRINTFROMTABLE" && i.operands[0]?.expression === "gGotDefrostedStringIds"
+    )!.programCounter;
+    const rc = context(0, {}, { multistringChooser: chooser });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.events).toEqual([
+      expect.objectContaining({ kind: "message", messageId }),
+    ]);
+  });
+
+  it.each([
+    [B_MSG_LOAFING, "STRINGID_PKMNLOAFING"], // Truant loafing turn -- the Factory-reachable row
+    [B_MSG_WONT_OBEY, "STRINGID_PKMNWONTOBEY"],
+    [B_MSG_INCAPABLE_OF_POWER, "STRINGID_PKMNINCAPABLEOFPOWER"],
+  ])("BattleScript_MoveUsedLoafingAroundMsg's own printfromtable gInobedientStringIds, MULTISTRING_CHOOSER %i: resolves %s", (chooser, messageId) => {
+    const pc = program.instructions.find((i) =>
+      i.opcodeName === "B_SCR_OP_PRINTFROMTABLE" && i.operands[0]?.expression === "gInobedientStringIds"
+    )!.programCounter;
+    const rc = context(0, {}, { multistringChooser: chooser });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.events).toEqual([
+      expect.objectContaining({ kind: "message", messageId }),
+    ]);
+  });
+
+  it("gInobedientStringIds out-of-range index (5) still halts with the named out-of-range barrier -- widened the table, not the guard", () => {
+    const pc = program.instructions.find((i) =>
+      i.opcodeName === "B_SCR_OP_PRINTFROMTABLE" && i.operands[0]?.expression === "gInobedientStringIds"
+    )!.programCounter;
+    const rc = context(0, {}, { multistringChooser: 5 });
+    const { result } = stepAtProgramCounter(pc, rc);
+    expect(result.state.haltReason).toMatchObject({
+      kind: "unsupported-branch",
+      sourceLine: 2185,
+    });
+  });
 });
 
 describe("production updatestatusicon (Cmd_updatestatusicon) dispatch", () => {
