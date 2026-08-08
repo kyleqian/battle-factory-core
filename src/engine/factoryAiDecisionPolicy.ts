@@ -29,6 +29,7 @@ import {
   type FactoryAiCheckBadMoveAttacker,
   type FactoryAiCheckBadMoveDraw,
   type FactoryAiCheckBadMoveRoarTarget,
+  type FactoryAiMonGender,
 } from "./factoryAiCheckBadMove.ts";
 import {
   runTryToFaint,
@@ -576,6 +577,14 @@ export type FactoryAiScoredBattlerView = Readonly<{
   usablePartyMons?: number;
   /** `gBattleMons[].status2 & STATUS2_SUBSTITUTE` -- `AI_CBM_Substitute`'s own first gate (attacker's own copy only). Optional, defaulting to `false`. */
   hasSubstitute?: boolean;
+  /** `gDisableStructs[].disabledMove != MOVE_NONE` (any move disabled) -- `AI_CBM_Disable`'s single gate (target only, EFFECT_DISABLE). Optional, defaulting to `false`. */
+  anyMoveDisabled?: boolean;
+  /** `gDisableStructs[].encoredMove != MOVE_NONE` (any move encored) -- `AI_CBM_Encore`'s single gate (target only, EFFECT_ENCORE). Optional, defaulting to `false`. */
+  anyMoveEncored?: boolean;
+  /** `gSideStatuses[] & SIDE_STATUS_MIST` on the AI's own side -- `AI_CBM_Mist`'s single gate (attacker's own copy only, EFFECT_MIST). Optional, defaulting to `false`. */
+  mistUp?: boolean;
+  /** `GetGenderFromSpeciesAndPersonality`'s MON_MALE/MON_FEMALE/MON_GENDERLESS -- `AI_CBM_Attract`'s own user and target gender gates (EFFECT_ATTRACT). Optional; `undefined` behaves exactly like MON_GENDERLESS (the source's Score_Minus10 fallthrough), never like a gendered value. */
+  gender?: FactoryAiMonGender;
 }>;
 
 export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
@@ -829,6 +838,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     spDefStage: view.target.statStages.spDef,
     accStage: view.target.statStages.acc,
     evasionStage: view.target.statStages.evasion,
+    spAtkStage: view.target.statStages.spAtk,
     hasAnyStatus: view.target.hasAnyStatus,
     isConfused: view.target.isConfused,
     safeguardUp: view.target.safeguardUp,
@@ -842,6 +852,10 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     ...(view.target.isForesighted === true ? { isForesighted: true } : {}),
     ...(view.target.spikesUp === true ? { spikesUp: true } : {}),
     ...(view.target.targetFutureAttackUp === true ? { targetFutureAttackUp: true } : {}),
+    ...(view.target.isInfatuated === true ? { isInfatuated: true } : {}),
+    ...(view.target.anyMoveDisabled === true ? { anyMoveDisabled: true } : {}),
+    ...(view.target.anyMoveEncored === true ? { anyMoveEncored: true } : {}),
+    ...(view.target.gender === undefined ? {} : { gender: view.target.gender }),
     level: view.target.level,
   });
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({
@@ -853,6 +867,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     lightScreenUp: view.attacker.lightScreenUp,
     reflectUp: view.attacker.reflectUp,
     evasionStage: view.attacker.statStages.evasion,
+    accStage: view.attacker.statStages.acc,
     currentWeather: view.attacker.currentWeather,
     level: view.attacker.level,
     isFirstTurn: view.attacker.isFirstTurn,
@@ -868,6 +883,8 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     ...(view.attacker.attackerFutureAttackUp === true ? { attackerFutureAttackUp: true } : {}),
     ...(view.attacker.hasFocusEnergy === true ? { hasFocusEnergy: true } : {}),
     ...(view.attacker.hasCurableStatus === true ? { hasCurableStatus: true } : {}),
+    ...(view.attacker.mistUp === true ? { mistUp: true } : {}),
+    ...(view.attacker.gender === undefined ? {} : { gender: view.attacker.gender }),
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [

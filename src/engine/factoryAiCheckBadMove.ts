@@ -251,6 +251,18 @@ export const AI_CHECK_BAD_MOVE_TABLE_EFFECTS: ReadonlySet<string> = new Set([
   "EFFECT_DRAGON_DANCE",
 ]);
 
+/**
+ * The three values `Cmd_get_gender`'s `GetGenderFromSpeciesAndPersonality`
+ * can produce (`include/constants/pokemon.h:169-171`, MON_MALE=0,
+ * MON_FEMALE=0xFE, MON_GENDERLESS=0xFF) -- `AI_CBM_Attract`'s own gender
+ * gates (`data/battle_ai_scripts.s:460-473`, EFFECT_ATTRACT). The view type
+ * models a battler's gender as optional; `undefined` means "not modeled" and
+ * behaves exactly like `MON_GENDERLESS` -- the source's own
+ * `goto Score_Minus10` fallthrough when `get_gender AI_USER` is neither male
+ * nor female -- never like one of the two gendered values.
+ */
+export type FactoryAiMonGender = "MON_MALE" | "MON_FEMALE" | "MON_GENDERLESS";
+
 export type FactoryAiCheckBadMoveTarget = Readonly<{
   species: number;
   types: readonly [string, string];
@@ -356,6 +368,46 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    * fires for a literal that does not model level).
    */
   level?: number;
+  /**
+   * Current SPECIAL ATTACK stat stage, 0..12 -- `AI_CBM_SpAtkDown`'s own
+   * MIN_STAT_STAGE gate (`data/battle_ai_scripts.s:292-294`) and
+   * `AI_CBM_Haze`'s own target-side `if_stat_level_more_than` gate (:326).
+   * Optional, defaulting to `DEFAULT_STAT_STAGE` (6) -- same convention/
+   * rationale as `accStage` above.
+   */
+  spAtkStage?: number;
+  /**
+   * `gBattleMons[AI_TARGET].status2 & STATUS2_INFATUATION` is nonzero --
+   * `AI_CBM_Attract`'s first, source-ordered rejection gate
+   * (`data/battle_ai_scripts.s:457`, EFFECT_ATTRACT). Optional, defaulting
+   * to false.
+   */
+  isInfatuated?: boolean;
+  /**
+   * Whether any of `gDisableStructs[AI_TARGET]`'s four moves is disabled
+   * (`disabledMove != MOVE_NONE`) -- `AI_CBM_Disable`'s single
+   * `if_any_move_disabled AI_TARGET` gate (`data/battle_ai_scripts.s:418-420`,
+   * EFFECT_DISABLE). Optional, defaulting to false (no move disabled at
+   * battle start).
+   */
+  anyMoveDisabled?: boolean;
+  /**
+   * Whether any of `gDisableStructs[AI_TARGET]`'s four moves is encored
+   * (`encoredMove != MOVE_NONE`) -- `AI_CBM_Encore`'s single
+   * `if_any_move_encored AI_TARGET` gate (`data/battle_ai_scripts.s:422-424`,
+   * EFFECT_ENCORE). Optional, defaulting to false (no move encored at battle
+   * start).
+   */
+  anyMoveEncored?: boolean;
+  /**
+   * `Cmd_get_gender`'s `GetGenderFromSpeciesAndPersonality` result for the
+   * target -- `AI_CBM_Attract`'s own `get_gender AI_TARGET` gates
+   * (`data/battle_ai_scripts.s:466-473`). Optional; `undefined` behaves
+   * exactly like `MON_GENDERLESS` (a non-female/non-male target fails the
+   * user's gendered pairing check and scores -10), never like one of the two
+   * gendered values.
+   */
+  gender?: FactoryAiMonGender;
 }>;
 
 /**
@@ -494,6 +546,30 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * single gate (EFFECT_INGRAIN). Optional, defaulting to `false`.
    */
   isRooted?: boolean;
+  /**
+   * AI_USER's own ACCURACY stat stage, 0..12 -- `AI_CBM_AccUp`'s own
+   * MAX_STAT_STAGE gate (`data/battle_ai_scripts.s:269-271`) and
+   * `AI_CBM_Haze`'s own user-side `if_stat_level_less_than` gate (:320).
+   * Optional, defaulting to `DEFAULT_STAT_STAGE` (6) -- same convention/
+   * rationale as `speedStage` above.
+   */
+  accStage?: number;
+  /**
+   * AI_USER's OWN side's `SIDE_STATUS_MIST` bit -- `AI_CBM_Mist`'s single
+   * `if_side_affecting AI_USER, SIDE_STATUS_MIST` gate
+   * (`data/battle_ai_scripts.s:378-380`, EFFECT_MIST). Optional, defaulting
+   * to `false`, same convention as `lightScreenUp`/`reflectUp` above.
+   */
+  mistUp?: boolean;
+  /**
+   * `Cmd_get_gender`'s `GetGenderFromSpeciesAndPersonality` result for
+   * AI_USER -- `AI_CBM_Attract`'s own `get_gender AI_USER` gates
+   * (`data/battle_ai_scripts.s:460-462`). Optional; `undefined` behaves
+   * exactly like `MON_GENDERLESS` (the source's `goto Score_Minus10`
+   * fallthrough when the user is neither male nor female), never like one of
+   * the two gendered values.
+   */
+  gender?: FactoryAiMonGender;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
