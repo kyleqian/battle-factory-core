@@ -5951,3 +5951,100 @@ describe("AI_CV_PsychUp (data/battle_ai_scripts.s:2086-2112)", () => {
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -2 });
   });
 });
+
+describe("AI_CV_MirrorCoat (data/battle_ai_scripts.s:2116-2171)", () => {
+  const MOVE_MIRROR_COAT = 243; // EFFECT_MIRROR_COAT
+  const MOVE_TACKLE = 33; // nonzero-power Normal (not special-typed)
+  const MOVE_WATER_GUN = 55; // nonzero-power Water (special-typed)
+  const MOVE_NONE = 0; // lastUsedMoveId default -> power 0
+
+  function mirrorCoatRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_MIRROR_COAT,
+      attacker: { ...NEUTRAL_BATTLER, hp: 100, maxHp: 100, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const, lastUsedMoveId: MOVE_TACKLE, ...targetOverrides },
+      staleFuncResultFallback: 3,
+      drawOrdinalStart: 1,
+      reasonPrefix: "mirror-coat",
+    });
+  }
+
+  it("target asleep: deterministic -1, zero draws, carry preserved", () => {
+    const result = mirrorCoatRun(1, {}, { isAsleep: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1, funcResultAfter: 3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("target confused: deterministic -1", () => {
+    expect(mirrorCoatRun(1, {}, { isConfused: true })).toMatchObject({ kind: "scored", scoreDelta: -1 });
+  });
+
+  it("HP <= 30: <10 roll FALL-THROUGH applies -1 then MirrorCoat2's <100 roll FALL-THROUGH applies another -1", () => {
+    // seed 1 -> roll1 low 198 (>=10, -1), roll2 low 33 (<100 JUMP). HP<=50 -> -2 total.
+    const result = mirrorCoatRun(1, { hp: 30, maxHp: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["mirror-coat-roll-1", "mirror-coat-roll-2"]);
+  });
+
+  it("user has Counter: jumps straight to ScoreUp4's +4 roll", () => {
+    // seed 1 -> roll7 low 198 (>=100, +4).
+    const result = mirrorCoatRun(1, { moves: [243, 243, 243, 243] as const });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 4 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["mirror-coat-roll-7"]);
+  });
+
+  it("nonzero-power non-special last move (Tackle), not taunted: deterministic -1 (ScoreDown1)", () => {
+    const result = mirrorCoatRun(1);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("nonzero-power special last move (Water Gun), not taunted: <100 roll JUMP -> 0", () => {
+    // seed 4 -> roll4 low 8 (<100 JUMP).
+    const result = mirrorCoatRun(4, {}, { lastUsedMoveId: MOVE_WATER_GUN });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["mirror-coat-roll-4"]);
+  });
+
+  it("nonzero-power special last move (Water Gun), not taunted: <100 roll FALL-THROUGH -> +1", () => {
+    // seed 1 -> roll4 low 198 (>=100, +1).
+    const result = mirrorCoatRun(1, {}, { lastUsedMoveId: MOVE_WATER_GUN });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("taunted + nonzero-power special last move: taunt <100 roll FALL-THROUGH (+1) then type <100 roll JUMP", () => {
+    // seed 1 -> roll3 low 198 (>=100, +1), roll4 low 33 (<100 JUMP).
+    const result = mirrorCoatRun(1, {}, { lastUsedMoveId: MOVE_WATER_GUN, isTaunted: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["mirror-coat-roll-3", "mirror-coat-roll-4"]);
+  });
+
+  it("power-0 last move (MOVE_NONE), target has NO special type: MirrorCoat7 <50 roll FALL-THROUGH into ScoreUp4 -> +4 (non-BUGFIX)", () => {
+    // seed 1 -> roll6 low 198 (>=50, continue), roll7 low 33 (<100 JUMP -> 0). Actually:
+    // seed 1: roll6=198 (>=50 continue), roll7=33 (<100 JUMP) -> score 0.
+    const result = mirrorCoatRun(1, {}, { lastUsedMoveId: MOVE_NONE });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["mirror-coat-roll-6", "mirror-coat-roll-7"]);
+  });
+
+  it("power-0, target has NO special type, both rolls fall through: +4", () => {
+    // seed 2 -> roll6 low 140 (>=50), roll7 low 195 (>=100, +4).
+    const result = mirrorCoatRun(2, {}, { lastUsedMoveId: MOVE_NONE });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 4 });
+  });
+
+  it("power-0, target type IS special (Fire): MirrorCoat6 ends at zero (non-BUGFIX)", () => {
+    const result = mirrorCoatRun(1, {}, { lastUsedMoveId: MOVE_NONE, types: ["TYPE_FIRE", "TYPE_FIRE"] as const });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+});

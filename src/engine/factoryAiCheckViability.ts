@@ -769,6 +769,23 @@ export type FactoryAiCheckViabilityDraw =
     rawRngValue: number;
     randomValue: number;
     jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind:
+      | "mirror-coat-roll-1"
+      | "mirror-coat-roll-2"
+      | "mirror-coat-roll-3"
+      | "mirror-coat-roll-4"
+      | "mirror-coat-roll-5"
+      | "mirror-coat-roll-6"
+      | "mirror-coat-roll-7";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    jumped: boolean;
   }>;
 
 export type FactoryAiCheckViabilityResult =
@@ -3051,6 +3068,7 @@ function runCvSpAtkUp(input: Readonly<{
 }
 
 const MOVE_NONE = 0;
+const MOVE_COUNTER = 243;
 
 /** `AI_CV_DefenseUp_PhysicalTypes` (`data/battle_ai_scripts.s:944-954`) -- a
  * DIFFERENT, larger list than `AI_CV_AttackDown`'s own physical-type list
@@ -4511,6 +4529,188 @@ function runCvPsychUp(input: Readonly<{
   });
 }
 
+const AI_CV_MIRROR_COAT_SPECIAL_TYPES: ReadonlySet<string> = new Set([
+  "TYPE_FIRE", "TYPE_WATER", "TYPE_GRASS", "TYPE_ELECTRIC", "TYPE_PSYCHIC", "TYPE_ICE", "TYPE_DRAGON", "TYPE_DARK",
+]);
+
+/**
+ * `AI_CV_MirrorCoat` (`data/battle_ai_scripts.s:2116-2171`,
+ * EFFECT_MIRROR_COAT), non-BUGFIX pin:
+ *
+ * ```
+ * AI_CV_MirrorCoat:
+ *     if_status AI_TARGET, STATUS1_SLEEP, AI_CV_MirrorCoat_ScoreDown1
+ *     if_status2 AI_TARGET, STATUS2_INFATUATION, AI_CV_MirrorCoat_ScoreDown1
+ *     if_status2 AI_TARGET, STATUS2_CONFUSION, AI_CV_MirrorCoat_ScoreDown1
+ *     if_hp_more_than AI_USER, 30, AI_CV_MirrorCoat2
+ *     if_random_less_than 10, AI_CV_MirrorCoat2
+ *     score -1
+ * AI_CV_MirrorCoat2:
+ *     if_hp_more_than AI_USER, 50, AI_CV_MirrorCoat3
+ *     if_random_less_than 100, AI_CV_MirrorCoat3
+ *     score -1
+ * AI_CV_MirrorCoat3:
+ *     if_has_move AI_USER, MOVE_COUNTER, AI_CV_MirrorCoat_ScoreUp4
+ *     get_last_used_bank_move AI_TARGET
+ *     get_move_power_from_result
+ *     if_equal 0, AI_CV_MirrorCoat5
+ *     if_target_not_taunted AI_CV_MirrorCoat4
+ *     if_random_less_than 100, AI_CV_MirrorCoat4
+ *     score +1
+ * AI_CV_MirrorCoat4:
+ *     get_last_used_bank_move AI_TARGET
+ *     get_move_type_from_result
+ *     if_not_in_bytes AI_CV_MirrorCoat_SpecialTypeList, AI_CV_MirrorCoat_ScoreDown1
+ *     if_random_less_than 100, AI_CV_MirrorCoat_End
+ *     score +1
+ *     goto AI_CV_MirrorCoat_End
+ * AI_CV_MirrorCoat5:
+ *     if_target_not_taunted AI_CV_MirrorCoat6
+ *     if_random_less_than 100, AI_CV_MirrorCoat6
+ *     score +1
+ * AI_CV_MirrorCoat6:
+ * #ifdef BUGFIX
+ *     ... (inverted polarity, not the pinned build)
+ * #else
+ *     get_target_type1
+ *     if_in_bytes AI_CV_MirrorCoat_SpecialTypeList, AI_CV_MirrorCoat_End
+ *     get_target_type2
+ *     if_in_bytes AI_CV_MirrorCoat_SpecialTypeList, AI_CV_MirrorCoat_End
+ * #endif
+ * AI_CV_MirrorCoat7:
+ *     if_random_less_than 50, AI_CV_MirrorCoat_End
+ * AI_CV_MirrorCoat_ScoreUp4:
+ *     if_random_less_than 100, AI_CV_MirrorCoat_ScoreUp4_End
+ *     score +4
+ * AI_CV_MirrorCoat_ScoreUp4_End:
+ *     end
+ * AI_CV_MirrorCoat_ScoreDown1:
+ *     score -1
+ * AI_CV_MirrorCoat_End:
+ *     end
+ * ```
+ *
+ * Seven `if_random_less_than` sites in source order. Prologue: target
+ * asleep/infatuated/confused is the deterministic -1 with zero draws; own
+ * HP <= 30% runs the `<10` roll (FALL-THROUGH applies -1, then continues),
+ * own HP <= 50% runs the `<100` roll (FALL-THROUGH applies -1, then
+ * continues) -- Mirror Coat is bad at low HP. `MirrorCoat3`: a user with
+ * MOVE_COUNTER (243) jumps straight to the `ScoreUp4` tail (a single `<100`
+ * roll, +4 on fall-through); otherwise the TARGET's last move is read
+ * (`get_move_power_from_result`): power 0 jumps to `MirrorCoat5`, nonzero
+ * continues into the `MirrorCoat4` type scan. Both the power-0 and nonzero
+ * paths run a taunt gate first (`if_target_not_taunted` jumps when the
+ * target is NOT taunted, `Cmd_if_target_not_taunted`
+ * `battle_ai_script_commands.c:2260-2269`): a TAUNTED target burns the
+ * `<100` roll (+1 on fall-through) before proceeding. `MirrorCoat4`
+ * (nonzero power): the last move's TYPE must be in the 8-type special list
+ * to continue -- NOT in the list is the deterministic -1; in the list runs
+ * the `<100` roll (+1 on fall-through). `MirrorCoat5` (power 0) falls into
+ * `MirrorCoat6`, the non-BUGFIX target-type gate (source's own @BUG: the
+ * ROM scores up Mirror Coat when the target's types are NOT special): type1
+ * or type2 in the special list ends at zero; NEITHER in the list reaches
+ * `MirrorCoat7`'s `<50` roll, whose fall-through (>= 50) continues into the
+ * shared `ScoreUp4` tail (the +4 `<100` roll) -- the only route to the
+ * full +4 without Counter in the moveset.
+ *
+ * funcResult writes: the Counter-jump and status-prologue paths never write
+ * (carry preserved). The nonzero-power path always overwrites with the
+ * last move's TYPE id (`get_move_type_from_result`); the power-0 path first
+ * writes 0 (`get_move_power_from_result` == AI_WEATHER_SUN collision) and
+ * is then overwritten by `MirrorCoat6`'s `get_target_type1`/`2` -- the exit
+ * value is type1 (if in the special list) or type2 (last write), the same
+ * `typeChainFuncResultAfter` shape the other type-reading handlers use.
+ */
+function runCvMirrorCoat(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  funcResultCarry: AiWeatherValue | undefined;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  let score = 0;
+
+  const roll = (
+    kind: "mirror-coat-roll-1" | "mirror-coat-roll-2" | "mirror-coat-roll-3" | "mirror-coat-roll-4" | "mirror-coat-roll-5" | "mirror-coat-roll-6" | "mirror-coat-roll-7",
+    threshold: number,
+    fallThroughScore: number,
+  ): boolean => {
+    const draw = nextDraw(rng, ordinal, `${input.reasonPrefix}-${kind}`);
+    rng = draw.after;
+    ordinal += 1;
+    const jumped = draw.randomValue % 256 < threshold;
+    draws.push(Object.freeze({ ...draw, kind, jumped }));
+    if (!jumped) score += fallThroughScore;
+    return jumped;
+  };
+
+  // Prologue status gates: any true is the deterministic -1, zero draws.
+  if ((input.target.isAsleep ?? false) || (input.target.isInfatuated ?? false) || (input.target.isConfused ?? false)) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 1, funcResultAfter: input.funcResultCarry });
+  }
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  // HP <= 30: the <10 roll (fall-through -1, then MirrorCoat2).
+  if (hpPercent <= 30) {
+    roll("mirror-coat-roll-1", 10, -1);
+  }
+  // MirrorCoat2: HP <= 50: the <100 roll (fall-through -1, then MirrorCoat3).
+  if (hpPercent <= 50) {
+    roll("mirror-coat-roll-2", 100, -1);
+  }
+
+  const userMoves = input.attacker.moves ?? [0, 0, 0, 0];
+  const lastMove = MOVES_BY_ID.get(input.target.lastUsedMoveId ?? 0);
+  const lastPower = lastMove?.power ?? 0;
+
+  // MirrorCoat3: Counter in the user's live set jumps straight to ScoreUp4.
+  if (userMoves.includes(MOVE_COUNTER)) {
+    roll("mirror-coat-roll-7", 100, 4);
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter: input.funcResultCarry });
+  }
+
+  const targetIsTaunted = input.target.isTaunted ?? false;
+
+  if (lastPower !== 0) {
+    // Taunt gate: not-taunted skips the roll straight to MirrorCoat4.
+    if (targetIsTaunted) {
+      roll("mirror-coat-roll-3", 100, 1);
+    }
+    // MirrorCoat4: always writes the last move's type into funcResult.
+    const funcResultAfter = typeFuncResultCollision(lastMove?.type ?? "TYPE_NORMAL");
+    const isSpecialType = AI_CV_MIRROR_COAT_SPECIAL_TYPES.has(lastMove?.type ?? "TYPE_NORMAL");
+    if (!isSpecialType) {
+      // if_not_in_bytes -> ScoreDown1: deterministic -1.
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 1, funcResultAfter });
+    }
+    roll("mirror-coat-roll-4", 100, 1);
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+  }
+
+  // MirrorCoat5 (power 0): taunt gate first.
+  if (targetIsTaunted) {
+    roll("mirror-coat-roll-5", 100, 1);
+  }
+  // MirrorCoat6 non-BUGFIX: type1/type2 in the special list end at zero;
+  // neither reaches MirrorCoat7. funcResult is overwritten by the type reads
+  // (the earlier get_move_power write of 0 is clobbered).
+  const funcResultAfter = typeChainFuncResultAfter(input.target.types, AI_CV_MIRROR_COAT_SPECIAL_TYPES);
+  const hasSpecialType = AI_CV_MIRROR_COAT_SPECIAL_TYPES.has(input.target.types[0])
+    || AI_CV_MIRROR_COAT_SPECIAL_TYPES.has(input.target.types[1]);
+  if (hasSpecialType) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+  }
+  // MirrorCoat7: <50 roll (fall-through continues into ScoreUp4 with no own score).
+  roll("mirror-coat-roll-6", 50, 0);
+  // ScoreUp4 tail: <100 roll (+4 on fall-through).
+  roll("mirror-coat-roll-7", 100, 4);
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -5509,6 +5709,26 @@ export function runCheckViability(input: Readonly<{
       draws: psychUp.draws,
       scoreDelta: psychUp.scoreDelta,
       funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_MIRROR_COAT") {
+    // AI_CV_MirrorCoat (data/battle_ai_scripts.s:2116-2171) -- the 7-draw
+    // site special-pivot handler, non-BUGFIX target-type polarity.
+    const mirrorCoat = runCvMirrorCoat({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      funcResultCarry,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: mirrorCoat.rng,
+      draws: mirrorCoat.draws,
+      scoreDelta: mirrorCoat.scoreDelta,
+      funcResultAfter: mirrorCoat.funcResultAfter,
     });
   }
 
