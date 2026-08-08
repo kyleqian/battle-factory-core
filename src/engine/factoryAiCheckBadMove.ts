@@ -2920,8 +2920,6 @@ function runCbmTickle(targetAtkStage: number, targetDefStage: number): number {
  * second fresh `get_ability`). A non-Levitate result therefore draws twice
  * inside this handler; a Levitate result returns -10 after its single draw.
  */
-const ABILITY_LEVITATE_MAGNITUDE = NEGATING_ABILITIES.levitate;
-
 function runCbmMagnitude(
   moveType: string,
   target: FactoryAiCheckBadMoveTarget,
@@ -2936,7 +2934,7 @@ function runCbmMagnitude(
   const levitate = nextGetAbilityDraw(rng, ordinal, `${reason}-levitate`, target);
   const draws: FactoryAiCheckBadMoveDraw[] = [];
   if (levitate.draw) draws.push(levitate.draw);
-  if (levitate.ability === ABILITY_LEVITATE_MAGNITUDE) {
+  if (levitate.ability === NEGATING_ABILITIES.levitate) {
     return Object.freeze({
       rng: levitate.rng,
       draws: Object.freeze(draws),
