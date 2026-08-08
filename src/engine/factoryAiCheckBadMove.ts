@@ -2340,6 +2340,22 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_HAZE -> AI_CBM_Haze
+  // (`data/battle_ai_scripts.s:122,314-332`): seven
+  // `if_stat_level_less_than AI_USER, <stat>, DEFAULT_STAT_STAGE` gates then
+  // seven `if_stat_level_more_than AI_TARGET, <stat>, DEFAULT_STAT_STAGE`
+  // gates, all JUMPing to End (zero); only the all-clear path falls through
+  // to Score_Minus10 -- Haze is penalized when there is nothing to reset (no
+  // lowered own stat, no raised target stat).
+  if (move.effect === "EFFECT_HAZE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmHaze(input.attacker, target),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -3112,4 +3128,47 @@ export function runCbmSpAtkDown(
   reason: string,
 ): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckBadMoveDraw[]; scoreDelta: number }> {
   return runCbmStatDownViaSharedTail(target.spAtkStage ?? DEFAULT_STAT_STAGE, target, rng, ordinal, reason);
+}
+
+/**
+ * `AI_CBM_Haze` (`data/battle_ai_scripts.s:314-332`), shared by
+ * `EFFECT_HAZE` (`:122`) and `EFFECT_PSYCH_UP` (`:181` -- Psych Up has no
+ * separate handler on the CheckBadMove side; its table entry dispatches to
+ * this same body):
+ *
+ * ```
+ * AI_CBM_Haze:
+ *     if_stat_level_less_than AI_USER, <STAT_ATK..STAT_EVASION>, AI_CBM_Haze_End
+ *     if_stat_level_more_than AI_TARGET, <STAT_ATK..STAT_EVASION>, AI_CBM_Haze_End
+ *     goto Score_Minus10
+ * AI_CBM_Haze_End:
+ *     end
+ * ```
+ *
+ * Any of the user's own seven stages below `DEFAULT_STAT_STAGE`, or any of
+ * the target's seven stages above it, JUMPs to End (zero) -- Haze is only
+ * penalized (-10) when there is nothing to reset. Zero `get_ability` calls,
+ * zero RNG. Stat stages absent from the view default to `DEFAULT_STAT_STAGE`
+ * (6), so an omitted stage never fires a gate -- same convention as the
+ * stat-up/down handlers.
+ */
+function runCbmHaze(attacker: FactoryAiCheckBadMoveAttacker, target: FactoryAiCheckBadMoveTarget): number {
+  const userHasLoweredStat = attacker.atkStage < DEFAULT_STAT_STAGE
+    || attacker.defStage < DEFAULT_STAT_STAGE
+    || (attacker.speedStage ?? DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE
+    || (attacker.spAtkStage ?? DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE
+    || (attacker.spDefStage ?? DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE
+    || (attacker.accStage ?? DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE
+    || (attacker.evasionStage ?? DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE;
+  if (userHasLoweredStat) {
+    return 0;
+  }
+  const targetHasRaisedStat = target.atkStage > DEFAULT_STAT_STAGE
+    || target.defStage > DEFAULT_STAT_STAGE
+    || target.speedStage > DEFAULT_STAT_STAGE
+    || (target.spAtkStage ?? DEFAULT_STAT_STAGE) > DEFAULT_STAT_STAGE
+    || target.spDefStage > DEFAULT_STAT_STAGE
+    || (target.accStage ?? DEFAULT_STAT_STAGE) > DEFAULT_STAT_STAGE
+    || (target.evasionStage ?? DEFAULT_STAT_STAGE) > DEFAULT_STAT_STAGE;
+  return targetHasRaisedStat ? 0 : -10;
 }

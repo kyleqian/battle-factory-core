@@ -411,7 +411,12 @@ describe("Factory AI mask 7 (CheckBadMove + TryToFaint + CheckViability), scenar
   });
 
   it("halts loudly on a CheckBadMove unsupported-branch barrier rather than silently mis-scoring", () => {
-    const view = scoredView([114 /* MOVE_HAZE, EFFECT_HAZE, has an if_effect table entry, not ported */, MOVE_SURF, MOVE_SURF, MOVE_SURF], 28);
+    // MOVE_STOCKPILE / EFFECT_STOCKPILE: table-listed in CheckBadMove but
+    // still unported (as of the CBM batch-5 ports), so it hits the shared
+    // check-bad-move barrier. The example is a moving target -- it was
+    // MOVE_HAZE until EFFECT_HAZE was ported in the same batch; re-pick from
+    // AI_CHECK_BAD_MOVE_TABLE_EFFECTS whenever the named effect lands.
+    const view = scoredView([254 /* MOVE_STOCKPILE, EFFECT_STOCKPILE, not ported */, MOVE_SURF, MOVE_SURF, MOVE_SURF], 28);
     expect(() =>
       chooseFactoryAiScoredDecision({
         view,
