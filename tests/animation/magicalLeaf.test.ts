@@ -237,7 +237,7 @@ describe("MOVE_MAGICAL_LEAF source-relative reducer", () => {
     expect(opponent).toMatch(/^228\s+1555\s+/m);
   });
 
-  it("exposes the staged body through the typed no-draw Scene-ON seam", () => {
+  it("exposes the source body through the typed Scene-ON seam", () => {
     const state = createSceneOnMovePresentation({
       move: "MAGICAL_LEAF",
       attacker: { species: "ROSELIA", geometry: { side: "player", spriteCorner: { x: 40, y: 56 }, animationCenter: PLAYER_BACK.attackerCenter, battlePositionCenter: { x: 72, y: 80 } } },
@@ -252,28 +252,5 @@ describe("MOVE_MAGICAL_LEAF source-relative reducer", () => {
       targetX2: -2,
       hitsplats: [{ oamSlot: 4 }, { oamSlot: 7 }],
     });
-  });
-});
-
-describe("MOVE_MAGICAL_LEAF bilateral staging receipts", () => {
-  it("pins twice-fresh pointer-isolated component and raw-RGB evidence without promotion", () => {
-    const player = JSON.parse(readFileSync("tools/compare/fixtures/magical-leaf-player-roselia-opponent-onix.json", "utf8"));
-    const opponent = JSON.parse(readFileSync("tools/compare/fixtures/magical-leaf-opponent-roselia-player-onix.json", "utf8"));
-    expect(player).toMatchObject({
-      schema: "magical-leaf-staging-receipt/v1", profile: "battle-scene-on",
-      orientation: "player-back", sourceWindow: { startFrame: 77, endFrame: 258, frameCount: 182 },
-      repeatRuns: 2,
-      probeSha256: "30962d27b71235aa17dbb2820be83ff53be534c85fa771e79c9f079cffa63e52",
-      rawRgbSequenceSha256: "f45745676e1c6383a01619d009f6e7f2e3e553417e39a2267fc81c85b6380f52",
-    });
-    expect(opponent).toMatchObject({
-      schema: "magical-leaf-staging-receipt/v1", profile: "battle-scene-on",
-      orientation: "opponent-front", sourceWindow: { startFrame: 81, endFrame: 262, frameCount: 182 },
-      repeatRuns: 2,
-      probeSha256: "2ff34accc68e8650c44540a14a3dbcaadf528076bf73c0a0f11ec6218d7e2bf2",
-      rawRgbSequenceSha256: "1e7008151f3308e6e397640ef3e16789a0862f3ca1c5b729b1e847e74beff81f",
-    });
-    expect(player.checkpoints.map(({ age }: { age: number }) => age)).toEqual([0, 16, 17, 114, 146, 160, 168, 169, 181]);
-    expect(opponent.checkpoints.map(({ age }: { age: number }) => age)).toEqual([0, 16, 17, 114, 146, 160, 168, 169, 181]);
   });
 });

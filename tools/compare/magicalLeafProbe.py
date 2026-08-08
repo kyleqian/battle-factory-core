@@ -76,7 +76,8 @@ def main() -> None:
         "AnimRazorLeafParticle", "AnimRazorLeafParticle_Step1",
         "AnimRazorLeafParticle_Step2", "AnimTranslateLinearSingleSineWave",
         "AnimTranslateLinearSingleSineWave_Step", "AnimHitSplatBasic",
-        "DestroyAnimSprite", "DestroySpriteAndMatrix",
+        "RunStoredCallbackWhenAffineAnimEnds", "DestroyAnimSprite",
+        "DestroySpriteAndMatrix",
     )
     callbacks = {name: names[name] | 1 for name in callback_names}
 

@@ -1,22 +1,49 @@
 {
-  "schema":"magical-leaf-staging-receipt/v1",
-  "profile":"battle-scene-on",
-  "orientation":"player-back",
-  "scenario":"tools/battle-lab/mechanic-magical-leaf-player-roselia-opponent-onix.json",
-  "sourceWindow":{"startFrame":77,"endFrame":258,"frameCount":182},
-  "probeSha256":"30962d27b71235aa17dbb2820be83ff53be534c85fa771e79c9f079cffa63e52",
-  "componentSequenceSha256":"5edee99702df6744ef977cb67dbf196d930016ef57f201a801dc6780bfbca43b",
-  "rawRgbSequenceSha256":"f45745676e1c6383a01619d009f6e7f2e3e553417e39a2267fc81c85b6380f52",
-  "repeatRuns":2,
-  "checkpoints":[
-    {"age":0,"sha256":"eb7131fb0fd53e1822b1d79b8f184618610983d9939e8f2306c53cd059f216bd","counts":[0,0,0],"targetX2":1,"arg7":0,"blend":[0,0],"active":true},
-    {"age":16,"sha256":"eb7131fb0fd53e1822b1d79b8f184618610983d9939e8f2306c53cd059f216bd","counts":[1,0,0],"targetX2":1,"arg7":0,"blend":[16192,2060],"active":true},
-    {"age":17,"sha256":"9b60535b12ac099f01b22cde58cffd3e358da7671c24a49598ea599181463416","counts":[1,0,0],"targetX2":1,"arg7":0,"blend":[16192,2060],"active":true},
-    {"age":114,"sha256":"df3b8a98fd3d31014efecf8fb436d11793a2807ba34cdb871c11dcff4ade842a","counts":[8,2,0],"targetX2":1,"arg7":0,"blend":[16192,2060],"active":true},
-    {"age":146,"sha256":"a89fdaf6ecb4effcbebed8a1fe498fbe0d43aadc54867fe516031d3b7dcc76db","counts":[0,2,2],"targetX2":-2,"arg7":0,"blend":[16192,2060],"active":true},
-    {"age":160,"sha256":"df2b99a574a5c69dc370f301acf55728f6905a658d6363ac69ffdb609ea3c24f","counts":[0,2,0],"targetX2":0,"arg7":0,"blend":[16192,2060],"active":true},
-    {"age":168,"sha256":"ab569240e2489f06f3b7d078ebafa49d8c35a093da36d221ab0e297617646188","counts":[0,0,0],"targetX2":0,"arg7":-1,"blend":[16192,2060],"active":true},
-    {"age":169,"sha256":"ab569240e2489f06f3b7d078ebafa49d8c35a093da36d221ab0e297617646188","counts":[0,0,0],"targetX2":0,"arg7":-1,"blend":[0,0],"active":true},
-    {"age":181,"sha256":"ab569240e2489f06f3b7d078ebafa49d8c35a093da36d221ab0e297617646188","counts":[0,0,0],"targetX2":0,"arg7":-1,"blend":[0,0],"active":false}
-  ]
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MAGICAL_LEAF",
+  "pair": "FRONTIER_MON_ROSELIA set 171 (player-back ROSELIA) -> legal ONIX (opponent-front)",
+  "orientation": "player-back",
+  "scenario": "tools/battle-lab/mechanic-magical-leaf-player-roselia-opponent-onix.json",
+  "probe": "tools/compare/magicalLeafProbe.py",
+  "appStage": { "presentationAge": 0 },
+  "denseWindow": { "startFrame": 77, "endFrame": 258, "frameCount": 182 },
+  "attacker": {
+    "species": "ROSELIA",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 56 },
+      "animationCenter": { "x": 72, "y": 96 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 10 },
+      "animationCenter": { "x": 176, "y": 42 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "targetIdleX2": 1,
+  "fieldProfile": {
+    "playerHp": 157,
+    "playerMaxHp": 157,
+    "opponentHp": 142,
+    "opponentMaxHp": 142,
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "magical-leaf-dense-evidence/v1",
+  "evidenceSha256": "d8250aaed208f7305154855b6d44a76d2e349ee56e7f516b922aa7386b0741f9",
+  "secondFreshEvidenceSha256": "d8250aaed208f7305154855b6d44a76d2e349ee56e7f516b922aa7386b0741f9",
+  "rawRgbSequenceSha256": "f45745676e1c6383a01619d009f6e7f2e3e553417e39a2267fc81c85b6380f52",
+  "changeMap": "tools/compare/evidence/magical-leaf-changemap-player.txt",
+  "changeMapSha256": "df6be41752421612c4104aaacc73a9615ae3dea2d66cdbd58b4dec65632c8c0a",
+  "acceptance": {
+    "status": "exact",
+    "componentMatching": 182,
+    "framebufferMatching": 182
+  }
 }
