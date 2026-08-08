@@ -60,11 +60,19 @@ describe("Move_CRUSH_CLAW source-relative reducer", () => {
     expect(first[1]).toMatchObject({
       spawnAge: 19, x: 166, y: 52, animation: 0, animationFrame: 0,
     });
+    expect(slashes(21)).toEqual(
+      slashes(21).map((s) => ({ ...s, animationFrame: 0 })),
+    );
     expect(slashes(22)).toEqual(
       slashes(22).map((s) => ({ ...s, animationFrame: 1 })),
     );
     // pair 1 reaches its final frame before the second pair spawns
-    expect(slashes(32).every((s) => s.animationFrame === 4)).toBe(true);
+    expect(slashes(32).filter((s) => s.animation === 0).every(
+      (s) => s.animationFrame === 3,
+    )).toBe(true);
+    expect(slashes(35).filter((s) => s.animation === 0).every(
+      (s) => s.animationFrame === 4,
+    )).toBe(true);
     expect(slashes(40).filter((s) => s.animation === 0)).toEqual([]);
   });
 
@@ -129,7 +137,7 @@ describe("Move_CRUSH_CLAW source-relative reducer", () => {
         species: "GROVYLE",
         geometry: {
           side: "player",
-          spriteCorner: { x: 40, y: 64 },
+          spriteCorner: { x: 40, y: 56 },
           animationCenter: { x: 72, y: 88 },
           battlePositionCenter: { x: 72, y: 80 },
         },

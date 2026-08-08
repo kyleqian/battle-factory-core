@@ -1,0 +1,52 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "CRUSH_CLAW",
+  "pair": "FRONTIER_MON_GROVYLE_2 set 293 (opponent-front GROVYLE) -> legal ONIX (player-back)",
+  "orientation": "opponent-to-player",
+  "scenario": "tools/battle-lab/mechanic-crush-claw-opponent-grovyle-player-onix.json",
+  "probe": "tools/compare/crushClawProbe.py",
+  "appStage": {
+    "presentationAge": 0
+  },
+  "denseWindow": {
+    "startFrame": 81,
+    "endFrame": 149,
+    "frameCount": 69
+  },
+  "attacker": {
+    "species": "GROVYLE",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 12 },
+      "animationCenter": { "x": 176, "y": 44 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 142,
+    "playerMaxHp": 142,
+    "opponentHp": 146,
+    "opponentMaxHp": 146,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "crush-claw-dense-evidence/v1",
+  "evidenceSha256": "639bdc9ad5a4809e603582a9de27b328f5c8d119707411aee4b41526411ab229",
+  "secondFreshEvidenceSha256": "639bdc9ad5a4809e603582a9de27b328f5c8d119707411aee4b41526411ab229",
+  "rawRgbSha256": "b61b5eb2e20bd83c44016e40b389553ca2fa068526450911b010bea110407f69",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 69,
+    "componentMatching": 69
+  }
+}

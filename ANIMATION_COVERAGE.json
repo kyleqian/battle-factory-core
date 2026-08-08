@@ -606,6 +606,33 @@
    ]
   },
   {
+   "move": "MOVE_CRUSH_CLAW",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_GROVYLE_2 (set 293, GROVYLE, all four active slots CRUSH_CLAW move 306 so the Factory AI has one legal choice) against legal ONIX in both orientations; both pass the complete move-owned Scene-ON window twice fresh with evidence 515abad038862c35a86d480f333560459f83bc103687837187f9448e1b7c6f06 / raw RGB 9e2c28d1edc910be89d157035334f10c234b92f4c3b3a72e240bfe922dd52508 for the 69-frame player-back window (frames 77-145) and evidence 639bdc9ad5a4809e603582a9de27b328f5c8d119707411aee4b41526411ab229 / raw RGB b61b5eb2e20bd83c44016e40b389553ca2fa068526450911b010bea110407f69 for the 69-frame opponent-front window (frames 81-149), both isolated by sBattleAnimScriptPtr within the Move_CRUSH_CLAW..Move_AROMATHERAPY label bounds",
+    "the reducer is the lunge + double claw-slash-pair + ShakeMon2 body: the horizontal lunge (duration 6, xDelta 4, opponent negated) ramps the attacker x2 4..24 over RAM ages 13-18, holds 24 at 19-20, returns 20..0 over 21-26; the first claw-slash pair (x=-10, animation 0) spawns at RAM age 19 and animates cmdIndex 0..4 (frame holds 0-2, 3-6, 7-10, 11-14, 15-20 - the probe's true AnimClawSlash cadence, one tick later than the metalClaw reducer's own) to age 39; the second pair (x=+10, animation 1) spawns at 33 and animates to 53; AnimTask_ShakeMon2 (2, 0, 18, 1) toggles the target x2 +/-2 every two ages 19..53 then zero-writes at 53",
+    "the full 69-frame window is static except at the settled displayed frames: lunge out 91-96 / hold 97-98 / back 99-104 (player-back; opponent-front identical minus 4), claw-slash pair 1 97..117 and pair 2 111..131, shake toggles 97,99,101,...,129 then 131 returns to 0; setalpha 12,8 (BLDCNT 0x3f40/BLDALPHA 0x080c) writes at RAM age 13 and blendoff clears at age 55 but neither changes a pixel in this window - modeled as RAM truth only, exactly like IRON_TAIL's invisible third metallic-shine sweep",
+    "the displayed-vs-RAM lags were measured against the fresh probe: every visible event displays exactly ONE frame after the RAM state that causes it (attacker x2 ramp at RAM ages 13-26, target x2 toggles at RAM ages 19-53 with the opponent-front ONIX resting at its front-idle x2=1 until the first toggle displays, claw-slash sprites alive RAM ages 19-39 / 33-53, lunge helper alive RAM ages 13-27, razor-wind SE restarts at RAM ages 19 and 33); the one orientation trap is the player-back target Y_PIC_OFFSET - the claw slashes anchor at (72,88) on the back ONIX, +8 below its sprite center, while the opponent-front front ONIX anchors at (176,42)",
+    "all ten components are proven by exact moves (horizontalLunge.ts, the shared dragonClaw claw-slash art, shakeMon2.ts, the monbg/setalpha contact body, SE_M_RAZOR_WIND); no new source components and no boundary widening - the only engine contacts are the CRUSH_CLAW draw case in battleScene.ts and the one-display seam in sceneOnPresentation.ts",
+    "the portable proves 69/69 source-component frames in both orientations (lunge-helper presence ages 13-27, attacker x2, target idle+shake x2 with the front-idle hold, both claw-slash pairs' x/y/anim/cmdIndex, ShakeMon2 task presence ages 19-52 with data[4]==2, razor-wind SE header at the event ages, BLDCNT/BLDALPHA blendOn truth) and the identical shared-framebuffer 69/69 through the full engine render with healthboxes and message window untouched; no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-crush-claw-player-grovyle-opponent-onix.json",
+    "tools/battle-lab/mechanic-crush-claw-opponent-grovyle-player-onix.json",
+    "tools/compare/fixtures/crush-claw-player-grovyle-opponent-onix.json",
+    "tools/compare/fixtures/crush-claw-opponent-grovyle-player-onix.json",
+    "tools/compare/crushClawProbe.py",
+    "tools/compare/crushClawPortable.ts",
+    "tools/compare/evidence/crush-claw-changemap-player.txt",
+    "tools/compare/evidence/crush-claw-changemap-opponent.txt",
+    "src/animation/crushClaw.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/crushClaw.test.ts",
+    "tests/animation/crushClawEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_DIZZY_PUNCH",
    "status": "exact",
    "covered": [

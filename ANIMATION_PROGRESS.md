@@ -1,5 +1,44 @@
 # Animation coverage
 
+## MOVE_CRUSH_CLAW promoted to exact — 125/276, both orientations at 69/69 portable-exact (2026-08-07 worker)
+
+- **State:** coverage advanced **124→125/276 exact**, 0 partial, 0 staged, **152→151
+  unsupported**. CRUSH_CLAW was staged last round and is now proven by an exact
+  move in both orientations.
+- **Did:** built the CRUSH_CLAW draw case in `battleScene.ts` (modeled on the
+  METAL_CLAW case: one-display latch `displayed = age-1`, lunge painter on the
+  attacker spriteCorner + `displayed.attackerX2`, target idle x2 held until the
+  ShakeMon2 first toggle displays — `displayed.age < SHAKE_FIRST_STEP_AGE` —
+  then `displayed.targetX2`, and the shared dragonClaw claw-slash art for the
+  two slash pairs, animation 1 H-flipped; healthboxes/message window untouched);
+  wrote `tools/compare/crushClawPortable.ts` + the two fixtures; the evidence
+  test; the coverage entry; and moved the inventory pin 124->125 exact /
+  152->151 unsupported. **Reducer fix:** the fresh probe showed
+  `clawSlashAnimFrame` ran one tick early — `AnimClawSlash`'s cmdIndex holds
+  local 0-2 then advances every 4 ticks (3, 7, 11, 15), i.e. `Math.floor((local
+  + 1) / 4)` — not `(local + 3) / 4`; the Tier-1 pins were updated to the probe
+  truth.
+- **Measured (fresh, deterministic, twice-fresh hashes pinned):** 69/69 source
+  component AND 69/69 shared-framebuffer frames in BOTH orientations (player-back
+  window 77-145, evidence 515abad0… / RGB 9e2c28d1…; opponent-front 81-149,
+  evidence 639bdc9a… / RGB b61b5eb2…). Portable components per frame: lunge-helper
+  presence ages 13-27, attacker x2, target idle+shake x2 (opponent-front ONIX
+  rests at front-idle x2=1 until the first toggle displays), both claw-slash
+  pairs' x/y/anim/cmdIndex, ShakeMon2 task ages 19-52 with data[4]==2,
+  razor-wind SE header at ages 19/33, and BLDCNT/BLDALPHA blendOn truth. One
+  orientation trap: the player-back ONIX target's claw slashes anchor at (72,88)
+  — +8 below its sprite center — while the opponent-front front ONIX anchors at
+  (176,42); the reducer's `targetCenter` is the slash anchor, so the back-target
+  fixture carries animationCenter (72,88) with spriteCorner (40,48).
+- **Next:** the settled queue (MOVE_DRAGON_BREATH / MOVE_BIND) and the ranked
+  remaining moves; CRUSH_CLAW adds no new components to unproven leverage
+  (lunge, claw-slash art, ShakeMon2, SE all already exact elsewhere).
+- **Notes:** `setalpha 12,8` / `blendoff` stay RAM-truth only (BLDCNT 0x3f40 /
+  BLDALPHA 0x080c at RAM ages 13..54, cleared at 55; neither changes a pixel in
+  this window, exactly like IRON_TAIL's invisible third sweep). No boundary
+  widening, no new unsupported-branch barrier; the only engine contacts are the
+  CRUSH_CLAW draw case in `battleScene.ts` and the one-display seam.
+
 ## MOVE_CRUSH_CLAW staged — both orientations isolated at 69 frames; scenarios + dense probe + change maps + reducer banked (2026-08-07 worker)
 
 - **State:** CRUSH_CLAW stays **unsupported**. Coverage unchanged at **124/276
