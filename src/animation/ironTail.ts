@@ -59,7 +59,6 @@ export function ironTailAtAge(
   age: number,
   attackerSide: "player" | "opponent",
   attackerCenter: Readonly<{ x: number; y: number }>,
-  targetCenter: Readonly<{ x: number; y: number }>,
 ): IronTailState {
   const shineAge = age - METALLIC_SHINE_FIRST_STEP_AGE + 1;
   const metallic = metallicShineAtAge(

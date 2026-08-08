@@ -987,6 +987,7 @@ import {
   sceneOnRazorLeafView,
   sceneOnPoisonTailView,
   sceneOnSteelWingView,
+  sceneOnIronTailView,
   sceneOnToxicView,
   sceneOnEarthquakeView,
   sceneOnHardenView,
@@ -23887,6 +23888,145 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SEVIPER used" : "Foe SEVIPER used",
       "POISON TAIL!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "IRON_TAIL") {
+    const view = sceneOnIronTailView(state);
+    // Task, sprite, and palette RAM transfers through the shared
+    // BuildOamBuffer/VBlank seam: every visible event displays exactly ONE
+    // frame after the RAM state that causes it (move sprites, attacker/target
+    // x2 translation and palette writes alike), so `displayed` is the
+    // age-1 view.
+    const displayed = sceneOnIronTailView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "AZUMARILL"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "AZUMARILL"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged IRON_TAIL pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? azumarillBackSprite : azumarillFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // The target rests at its front-idle x2 (1px for ONIX) until the ShakeMon
+    // displacement displays (player-back frame 334 / age 118); afterwards the
+    // displayed shake x2 holds.
+    const targetX2 = state.age <= 117
+      ? targetIdle.x2
+      : displayed.targetX2;
+    // `metallic_shine permanent=TRUE` skips the in-task palette restore, so the
+    // attacker stays grayscaled from the shine's first step (RAM age 6,
+    // displayed age 7) until the script's trailing `set_original_pal` (RAM age
+    // 126, displayed age 127) — the one IRON_TAIL difference from the
+    // non-permanent STEEL_WING/METAL_CLAW draw cases.
+    const metallicInitializerDisplay = displayed.metallic.data10 === 0
+      && displayed.metallic.data11 === 0;
+    const attackerPalette = state.age >= 2
+      && !metallicInitializerDisplay
+      && !displayed.attackerPaletteRestored
+      ? grayscalePalette(attackerSprite.palette)
+      : attackerSprite.palette;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const target2Backdrop = fb.slice();
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerPalette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerX2,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.metallic.metalBgLoaded) {
+      drawMetallicShineMasked(
+        fb,
+        attackerSprite,
+        view.attacker.geometry.spriteCorner,
+        displayed.metallic.bg1X,
+        displayed.metallic.bg1Y,
+      );
+    }
+    if (displayed.hitsplatVisible) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        poisonTailArt.impact.tileset,
+        poisonTailArt.impact.palette,
+        view.target.geometry.animationCenter.x - 16,
+        view.target.geometry.animationCenter.y - 16,
+        372,
+        372,
+        12,
+        8,
+        false,
+        target2Backdrop,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "AZUMARILL";
+    const playerSpecies = playerToOpponent ? "AZUMARILL" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "AZUMARILL used" : "Foe AZUMARILL used",
+      "IRON TAIL!",
       99,
     );
     return;

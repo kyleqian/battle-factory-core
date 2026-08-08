@@ -5284,7 +5284,6 @@ export function sceneOnIronTailView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
-      state.config.target.geometry.animationCenter,
     ),
   };
 }

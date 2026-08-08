@@ -13,28 +13,28 @@ const OPPONENT = { attacker: { x: 176, y: 49 }, target: { x: 72, y: 80 } };
 
 describe("Move_IRON_TAIL source-relative reducer", () => {
   it("stays static with the original palette until the grayscale write displays", () => {
-    expect(ironTailAtAge(0, "player", PLAYER.attacker, PLAYER.target))
+    expect(ironTailAtAge(0, "player", PLAYER.attacker))
       .toMatchObject({ attackerX2: 0, targetX2: 0, hitsplatVisible: false });
-    const beforeGray = ironTailAtAge(5, "player", PLAYER.attacker, PLAYER.target);
+    const beforeGray = ironTailAtAge(5, "player", PLAYER.attacker);
     expect(beforeGray.metallic.attackerGrayscale).toBe(true);
     expect(beforeGray.metallic.maskSpriteActive).toBe(false);
-    expect(ironTailAtAge(11, "player", PLAYER.attacker, PLAYER.target)
+    expect(ironTailAtAge(11, "player", PLAYER.attacker)
       .metallic.maskSpriteActive).toBe(false);
   });
 
   it("shows the grayscale from the first step through set_original_pal", () => {
-    expect(ironTailAtAge(6, "player", PLAYER.attacker, PLAYER.target)
+    expect(ironTailAtAge(6, "player", PLAYER.attacker)
       .metallic.attackerGrayscale).toBe(true);
-    expect(ironTailAtAge(125, "player", PLAYER.attacker, PLAYER.target)
+    expect(ironTailAtAge(125, "player", PLAYER.attacker)
       .attackerPaletteRestored).toBe(false);
-    expect(ironTailAtAge(126, "player", PLAYER.attacker, PLAYER.target)
+    expect(ironTailAtAge(126, "player", PLAYER.attacker)
       .attackerPaletteRestored).toBe(true);
   });
 
   it("renders exactly the two visible metallic-shine band sweeps", () => {
     // RAM truth: sweep 1 at ages 12..36 and sweep 2 at ages 44..68; the
     // shared one-display latch moves them to displayed ages 13..37/45..69.
-    const band = (age: number) => ironTailAtAge(age, "player", PLAYER.attacker, PLAYER.target)
+    const band = (age: number) => ironTailAtAge(age, "player", PLAYER.attacker)
       .metallic.maskSpriteActive;
     expect(band(11)).toBe(false);
     expect(band(12)).toBe(true);
@@ -51,8 +51,7 @@ describe("Move_IRON_TAIL source-relative reducer", () => {
 
   it("marches the lunge out, holds, and returns, with the opponent negated", () => {
     const out = (age: number, side: "player" | "opponent") =>
-      ironTailAtAge(age, side, side === "player" ? PLAYER.attacker : OPPONENT.attacker,
-        side === "player" ? PLAYER.target : OPPONENT.target).attackerX2;
+      ironTailAtAge(age, side, side === "player" ? PLAYER.attacker : OPPONENT.attacker).attackerX2;
     expect(out(107, "player")).toBe(4);
     expect(out(110, "player")).toBe(16);
     expect(out(111, "player")).toBe(16);
@@ -65,16 +64,16 @@ describe("Move_IRON_TAIL source-relative reducer", () => {
   });
 
   it("spawns the hitsplat one RAM frame after the lunge helper and the shake on the target", () => {
-    expect(ironTailAtAge(114, "player", PLAYER.attacker, PLAYER.target)
+    expect(ironTailAtAge(114, "player", PLAYER.attacker)
       .hitsplatVisible).toBe(false);
-    expect(ironTailAtAge(115, "player", PLAYER.attacker, PLAYER.target)
+    expect(ironTailAtAge(115, "player", PLAYER.attacker)
       .hitsplatVisible).toBe(true);
-    expect(ironTailAtAge(124, "player", PLAYER.attacker, PLAYER.target)
+    expect(ironTailAtAge(124, "player", PLAYER.attacker)
       .hitsplatVisible).toBe(true);
-    expect(ironTailAtAge(125, "player", PLAYER.attacker, PLAYER.target)
+    expect(ironTailAtAge(125, "player", PLAYER.attacker)
       .hitsplatVisible).toBe(false);
     // ShakeMon (3, 0, 6, 1): RAM x2 3,3,0,0,3,3,0,0 over ages 117..124.
-    const x2 = (age: number) => ironTailAtAge(age, "player", PLAYER.attacker, PLAYER.target)
+    const x2 = (age: number) => ironTailAtAge(age, "player", PLAYER.attacker)
       .targetX2;
     expect(x2(117)).toBe(3);
     expect(x2(118)).toBe(3);
@@ -88,11 +87,11 @@ describe("Move_IRON_TAIL source-relative reducer", () => {
   });
 
   it("holds monbg/setalpha over the contact body and cleans up at set_original_pal", () => {
-    expect(ironTailAtAge(115, "player", PLAYER.attacker, PLAYER.target))
+    expect(ironTailAtAge(115, "player", PLAYER.attacker))
       .toMatchObject({ monbg: true, alpha: true });
-    expect(ironTailAtAge(126, "player", PLAYER.attacker, PLAYER.target))
+    expect(ironTailAtAge(126, "player", PLAYER.attacker))
       .toMatchObject({ monbg: true, alpha: false, attackerPaletteRestored: true });
-    expect(ironTailAtAge(133, "player", PLAYER.attacker, PLAYER.target))
+    expect(ironTailAtAge(133, "player", PLAYER.attacker))
       .toMatchObject({ monbg: false, alpha: false });
   });
 
