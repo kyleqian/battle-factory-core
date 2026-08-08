@@ -470,6 +470,10 @@ import {
   type CrunchState,
 } from "./crunch.ts";
 import {
+  slashAtAge,
+  type SlashState,
+} from "./slash.ts";
+import {
   poisonTailAtAge,
   type PoisonTailState,
 } from "./poisonTail.ts";
@@ -2017,6 +2021,13 @@ export interface SceneOnCrunchConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSlashConfig {
+  readonly move: "SLASH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSingConfig {
   readonly move: "SING";
   readonly attacker: SceneOnPresentationBattler;
@@ -2181,6 +2192,7 @@ export type SceneOnMoveConfig =
   | SceneOnCrushClawConfig
   | SceneOnTakeDownConfig
   | SceneOnCrunchConfig
+  | SceneOnSlashConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
@@ -2678,6 +2690,12 @@ export interface SceneOnTakeDownView extends TakeDownState {
 }
 
 export interface SceneOnCrunchView extends CrunchState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSlashView extends SlashState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3309,6 +3327,7 @@ export function createSceneOnMovePresentation<
   | SceneOnCrushClawConfig
   | SceneOnTakeDownConfig
   | SceneOnCrunchConfig
+  | SceneOnSlashConfig
   | SceneOnWrapConfig,
 >(
   config: TConfig,
@@ -5400,6 +5419,25 @@ export function sceneOnCrunchView(
     target,
     ...crunchAtAge(state.age, {
       attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      targetCenter: target.geometry.animationCenter,
+    }),
+  };
+}
+
+export function sceneOnSlashView(
+  state: SceneOnMovePresentationState,
+): SceneOnSlashView {
+  if (state.config.move !== "SLASH") {
+    throw new Error(`expected SLASH presentation, got ${state.config.move}`);
+  }
+  const attacker = state.config.attacker;
+  const target = state.config.target;
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...slashAtAge(state.age, {
       targetSide: target.geometry.side,
       targetCenter: target.geometry.animationCenter,
     }),

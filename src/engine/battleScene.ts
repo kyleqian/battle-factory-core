@@ -512,6 +512,7 @@ import {
   DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG,
 } from "../animation/dragonBreath.ts";
 import { flamethrowerDisplayedBattlerOffsetsAtAge } from "../animation/flamethrower.ts";
+import { shakeMon2OffsetAtTick } from "../animation/shakeMon2.ts";
 import { FACADE_BLEND_COLORS } from "../animation/facade.ts";
 import {
   dragonRageSchedule,
@@ -621,6 +622,7 @@ import battleAnimParticlesAsset from "../assets/gen/battle-anim-particles.json" 
 import battleAnimSweatDropAsset from "../assets/gen/battle-anim-sweat-drop.json" with { type: "json" };
 import battleAnimHitsplatAsset from "../assets/gen/battle-anim-hitsplat.json" with { type: "json" };
 import battleAnimCuttingSliceAsset from "../assets/gen/battle-anim-cutting-slice.json" with { type: "json" };
+import battleAnimSlashSliceAsset from "../assets/gen/battle-anim-slash-slice.json" with { type: "json" };
 import battleAnimFlyBallAsset from "../assets/gen/battle-anim-fly-ball.json" with { type: "json" };
 import battleAnimSmallEmberAsset from "../assets/gen/battle-anim-small-ember.json" with { type: "json" };
 import battleAnimFirePlumeAsset from "../assets/gen/battle-anim-fire-plume.json" with { type: "json" };
@@ -980,6 +982,7 @@ import {
   sceneOnDragonClawView,
   sceneOnMetalClawView,
   sceneOnCrunchView,
+  sceneOnSlashView,
   sceneOnCrushClawView,
   sceneOnTakeDownView,
   sceneOnSingView,
@@ -1815,6 +1818,7 @@ const battleAnimWhiteFeather = battleAnimWhiteFeatherAsset as BattleAnimWhiteFea
 const battleAnimSweatDrop = battleAnimSweatDropAsset as BattleAnimSweatDropAsset;
 const battleAnimHitsplat = battleAnimHitsplatAsset as BattleAnimHitsplatAsset;
 const battleAnimCuttingSlice = battleAnimCuttingSliceAsset as BattleAnimCuttingSliceAsset;
+const battleAnimSlashSlice = battleAnimSlashSliceAsset as BattleAnimCuttingSliceAsset;
 /** S7/S8 turn 13 Part A (docs/turn13-notes.md's own dirt-throw sub-section): `gSandAttackDirtSpriteTemplate`'s single static 8x8 tile - see `tools/extract/extract-sandattack-dirt.ts`. */
 const battleAnimMudSand = battleAnimMudSandAsset as {
   tileset: Tileset;
@@ -12441,6 +12445,11 @@ function drawTurn10AerialAceCloneWinsOverField(fb: Uint8Array, tileset: Tileset,
  */
 function cuttingSliceFrameTileset(frame: number): Tileset {
   return { columns: battleAnimCuttingSlice.frames.columns, rows: battleAnimCuttingSlice.frames.rows, tiles: battleAnimCuttingSlice.frames.list[frame]! };
+}
+
+/** `slash.png` (`gSlashSliceSpriteTemplate`) slice frame tileset, same shape as the cutting slice's. */
+function slashSliceFrameTileset(frame: number): Tileset {
+  return { columns: battleAnimSlashSlice.frames.columns, rows: battleAnimSlashSlice.frames.rows, tiles: battleAnimSlashSlice.frames.list[frame]! };
 }
 
 
@@ -34856,6 +34865,127 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "HOUNDOUR used" : "Foe HOUNDOUR used",
       "CRUNCH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SLASH") {
+    const view = sceneOnSlashView(state);
+    // Display latches are split. The slices are sprite-driven and render ONE
+    // frame after their RAM state (`displayed`), while the target shake is
+    // task-driven (`AnimTask_ShakeMon2`, 4/0/18/1) and renders TWO frames
+    // after its RAM write - the TAKE_DOWN WindUpLunge case. The shake's
+    // creation write (+4 at RAM age 9) is a same-frame transient that the
+    // reducer leaves at 0, but it does reach exactly one displayed frame
+    // (display age 11), so the draw drives the shake from the shared sequence
+    // directly instead of the reducer's RAM truth (change-map confirmed).
+    const displayed = sceneOnSlashView({ ...state, age: state.age - 1 });
+    const displayedAge = displayed.age;
+    const playerToOpponent =
+      view.attacker.species === "CHARMELEON"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CHARMELEON"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SLASH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? charmeleonBackSprite : charmeleonFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // The target rests at its front-idle x2 (1 for the opponent-front ONIX)
+    // through display age 10; the shared ShakeMon2 sequence takes over from
+    // display age 11 (+4, the creation write) through 45 (-4, the final
+    // toggle); the RAM restore to 0 at age 44 displays at 46, outside this
+    // 46-frame window, so the target never returns to its front-idle x2. The
+    // shake's display age is the engine age itself (the two-frame task latch
+    // already lands the creation write at display age 11), unlike the slices
+    // which display one age after their RAM state.
+    const shakeX2 = state.age < 11
+      ? targetIdle.x2
+      : state.age <= 45
+        ? shakeMon2OffsetAtTick(4, 0, 18, 1, state.age - 11).x2
+        : 0;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + shakeX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    // The slices anchor at the target's picture coordinates (X_2 / Y_PIC) and
+    // their 32x32 OAM is centered (centerToCorner -16), so the drawn top-left
+    // is `slice.x - 16` / `slice.y - 16`. Lower subpriority wins the hardware
+    // paint in BOTH orientations (the slices sit in front of the target: 38 vs
+    // the ONIX front's 40 player-back, 28 vs the ONIX back's 30
+    // opponent-front). Within the equal-subpriority pair the ROM's OAM order
+    // resolves in the SLICES' allocator order - slice 1 (slot 3) is written
+    // before slice 2 (slot 4) and, for equal priority AND equal Y, the earlier
+    // OAM entry wins, so slice 1 paints ON TOP of slice 2 (measured: the
+    // oracle's frame-3 pixels at 181,34 win over slice 2's frame-2 value
+    // there). The slash art carries its OWN embedded palette and is ObjNormal
+    // (no blend), unlike CUT's ObjBlend sharing Impact's palette.
+    for (const slice of [...displayed.slices].reverse()) {
+      if (slice.invisible) continue;
+      drawSpriteSheet(
+        fb,
+        slashSliceFrameTileset(slice.tileOffset / 16),
+        battleAnimSlashSlice.palette,
+        slice.x - 16,
+        slice.y - 16,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "CHARMELEON",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "CHARMELEON" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CHARMELEON used" : "Foe CHARMELEON used",
+      "SLASH!",
       99,
     );
     return;
