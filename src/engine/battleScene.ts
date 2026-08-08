@@ -7208,6 +7208,7 @@ function drawBattle2ActionMenuWindow(
   healthboxes?: BattleCommandPresentationRenderView["healthboxes"],
   fieldArt?: BattleCommandPresentationRenderView["fieldArt"],
   spriteVisibility?: Readonly<{ player: boolean; opponent: boolean }>,
+  layer: "all" | "obj-only" = "all",
 ): void {
   const age = actionMenuAge(t, handoffTick);
   const playerVisualT = playerTrainerSendOutClock(t, handoffTick, "jenson");
@@ -7215,8 +7216,14 @@ function drawBattle2ActionMenuWindow(
   const bounce = bounceOverride ?? (revealed
     ? menuIdleBounce(actionMenuBounceTick(t, handoffTick) - bounceShift)
     : { onixY2: 0, healthboxY2: 0 });
+  // `obj-only` skips the BG (tilemap) draws so a caller can render the settled
+  // scene's sprite layer into a scratch buffer. ISSUES #80 Class A blends the
+  // OBJ layer at `y_obj` (one blend step behind the BG's `y_bg`), matching
+  // the oracle's BG/OBJ palette alternation (docs/fade-layer-forensics.md
+  // §8(d)).
+  const drawBg = layer === "all";
 
-  drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+  if (drawBg) drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   if (fieldArt) {
     // Post-send-out settled opponent: same elevation rule as
     // drawGeneratedOpponentRelease (ISSUES #56 item 3) - the shadow persists
@@ -7278,8 +7285,10 @@ function drawBattle2ActionMenuWindow(
   // FIGHT phases need the accepted bottom base below their own source patch.
   // Action phases rebuild every interactive element in the caller from the
   // typed render view and source battle-window tiles/font.
-  if (revealed) drawTurn5SitrusSettledMenuChrome(fb);
-  else drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (drawBg) {
+    if (revealed) drawTurn5SitrusSettledMenuChrome(fb);
+    else drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  }
 }
 
 /**
@@ -18344,6 +18353,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
 export function renderGeneratedBattleCommandPresentation(
   fb: Uint8Array,
   presentation: BattleCommandPresentationState,
+  layer: "all" | "obj-only" = "all",
 ): void {
   const bounceTick = presentation.idleBounceElapsed
     + battleCommandBounceAgeOffset(presentation);
@@ -18364,8 +18374,11 @@ export function renderGeneratedBattleCommandPresentation(
         view.healthboxes,
         view.fieldArt,
         view.spriteVisibility,
+        layer,
       );
-      if (revealed) drawBattleCommandActionChrome(framebuffer, view.actionMenu);
+      if (revealed && layer !== "obj-only") {
+        drawBattleCommandActionChrome(framebuffer, view.actionMenu);
+      }
     },
     drawFightMenu(framebuffer, view) {
       drawBattle2ActionMenuWindow(
@@ -18378,12 +18391,15 @@ export function renderGeneratedBattleCommandPresentation(
         view.healthboxes,
         view.fieldArt,
         view.spriteVisibility,
+        layer,
       );
-      drawFightSubmenuChromeFromLiveState(
-        framebuffer,
-        view.fightMenu.displayCursor,
-        view.fightMenu.moveset,
-      );
+      if (layer !== "obj-only") {
+        drawFightSubmenuChromeFromLiveState(
+          framebuffer,
+          view.fightMenu.displayCursor,
+          view.fightMenu.moveset,
+        );
+      }
     },
     drawRejectionMessage(framebuffer, view) {
       drawBattle2ActionMenuWindow(
@@ -18396,9 +18412,10 @@ export function renderGeneratedBattleCommandPresentation(
         view.healthboxes,
         view.fieldArt,
         view.spriteVisibility,
+        layer,
       );
       const rejection = view.rejectionMessage;
-      if (rejection === null) return;
+      if (rejection === null || layer === "obj-only") return;
       // The message box is the same `B_WIN_MSG` battle-window tilemap the
       // resolution seam draws below the field; the field/healthboxes above
       // it stay live (the fight-menu state continues underneath).

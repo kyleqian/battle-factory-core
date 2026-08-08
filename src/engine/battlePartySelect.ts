@@ -234,6 +234,18 @@ export function partySelectOpenFieldFadeBgY(openElapsed: number): number {
 }
 
 /**
+ * Field fade-out OBJ coefficient, `docs/fade-layer-forensics.md` §6(b):
+ * `y_obj(e) = min(16, 2 * max(0, floor((e - 2) / 2)))` -- the OBJ layer is
+ * exactly one blend step behind the BG (`objPaletteToggle` alternation). On
+ * the even `e` frames (766/768/.../780) `y_obj = y_bg - 2`, so a single
+ * whole-frame blend cannot be right there; the OBJ pixels must be blended
+ * at `y_obj` (ISSUES #80 Class A).
+ */
+export function partySelectOpenFieldFadeObjY(openElapsed: number): number {
+  return Math.min(16, 2 * Math.max(0, Math.floor((openElapsed - 2) / 2)));
+}
+
+/**
  * Menu fade-in coefficients, `docs/fade-layer-forensics.md` §2, with
  * `m = openElapsed - 46` (m = 0..15): `y_bg(m) = 14 - 2 * floor(m / 2)`
  * (14,14,12,12,...,0,0) and the OBJ layer one blend step behind,
@@ -1222,12 +1234,45 @@ export function renderBattlePartySelect(
       return;
     }
     // The oracle holds the settled action-menu battle scene through frame 765
-    // and fades the whole scene at the BG coefficient (no BG/OBJ split for the
-    // battle scene -- the OBJ pixels trail by one blend step on the odd
-    // `e` frames, a named residual excluded from the spec).
+    // and fades it out 766-781. The scene's OBJ layer (battler sprites,
+    // shadows, healthboxes) is one blend step behind its BG layer
+    // (`objPaletteToggle`, palette.c:454): on the even `e` frames
+    // (766/768/.../780) `y_obj = y_bg - 2`, so those pixels are blended at
+    // `y_obj` while the rest go at `y_bg` -- the same scratch-buffer +
+    // alpha-coverage composite idiom as the close menu-fade. The OBJ layer is
+    // the app's own sprite-only scratch render (`drawBattleSceneObjOnly`); a
+    // scratch pixel counts only where the settled full scene still shows it
+    // (the BG message-box chrome overpaints the sprite rows it covers, and
+    // the oracle keys those to the BG palette instead --
+    // docs/fade-layer-forensics.md §8(d)).
     close.drawBattleScene(fb);
     if (openPhase === "field-fade-out") {
-      applyFadeToBlack(fb, partySelectOpenFieldFadeBgY(state.openElapsed));
+      const yBg = partySelectOpenFieldFadeBgY(state.openElapsed);
+      const yObj = partySelectOpenFieldFadeObjY(state.openElapsed);
+      if (yBg === yObj) {
+        applyFadeToBlack(fb, yBg);
+        return;
+      }
+      const full = new Uint8Array(fb.length);
+      full.set(fb);
+      applyFadeToBlack(fb, yBg);
+      const objSettled = new Uint8Array(fb.length);
+      close.drawBattleSceneObjOnly(objSettled);
+      const obj = new Uint8Array(fb.length);
+      obj.set(objSettled);
+      applyFadeToBlack(obj, yObj);
+      for (let p = 0; p < fb.length; p += 4) {
+        if (
+          objSettled[p + 3] !== 0
+          && objSettled[p] === full[p]
+          && objSettled[p + 1] === full[p + 1]
+          && objSettled[p + 2] === full[p + 2]
+        ) {
+          fb[p] = obj[p]!;
+          fb[p + 1] = obj[p + 1]!;
+          fb[p + 2] = obj[p + 2]!;
+        }
+      }
     }
     return;
   }
@@ -1301,6 +1346,16 @@ export type PartySelectCloseRenderAssets = Readonly<{
    * that bottom chrome, so the open side needs this separate drawable.
    */
   drawBattleScene(fb: Uint8Array): void;
+  /**
+   * Draws the same settled action-menu battle scene's OBJ (sprite) layer only
+   * (shadow, battler sprites, healthboxes) into a scratch buffer. The open
+   * field-fade-out blends the full scene at `y_bg`, then blends this scratch
+   * at `y_obj` -- one blend step behind `y_bg` -- and composites it over the
+   * frame using its alpha-255 coverage, so the OBJ pixels track the oracle's
+   * own OBJ palette schedule (ISSUES #80 Class A,
+   * docs/fade-layer-forensics.md §8(d)).
+   */
+  drawBattleSceneObjOnly(fb: Uint8Array): void;
 }>;
 
 function renderPartySelectClose(

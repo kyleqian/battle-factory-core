@@ -2722,6 +2722,25 @@ function partySelectCloseRenderAssets(
         }),
       );
     },
+    // ISSUES #80 Class A: the same settled scene's OBJ (sprite) layer only --
+    // shadow, battler sprites, healthboxes -- drawn into a scratch buffer so
+    // `renderBattlePartySelect`'s open field-fade-out can blend those pixels
+    // at the OBJ coefficient `y_obj` (one blend step behind `y_bg`), matching
+    // the oracle's BG/OBJ palette alternation (docs/fade-layer-forensics.md
+    // §8(d)). The alpha-255 coverage of this scratch is the exact OBJ mask.
+    drawBattleSceneObjOnly(fb: Uint8Array): void {
+      renderGeneratedBattleCommandPresentation(
+        fb,
+        Object.freeze({
+          ...presentation,
+          lifecycle: Object.freeze({
+            phase: "action-menu",
+            phaseElapsed: presentation.lifecycle.phaseElapsed,
+          }),
+        }),
+        "obj-only",
+      );
+    },
   };
 }
 

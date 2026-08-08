@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createFramebuffer } from "../src/engine/framebuffer.ts";
+import { createFramebuffer, setPixel } from "../src/engine/framebuffer.ts";
 import {
   DO_WHAT_WITH_MON_TAIL_CODES,
   PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES,
@@ -17,10 +17,12 @@ import {
   battlePartySelectOpenPhase,
   createBattlePartySelectState,
   partySelectOpenFieldFadeBgY,
+  partySelectOpenFieldFadeObjY,
   partySelectOpenMenuFadeBgY,
   partySelectOpenMenuFadeObjY,
   renderBattlePartySelect,
   type BattlePartySelectState,
+  type PartySelectCloseRenderAssets,
 } from "../src/engine/battlePartySelect.ts";
 import {
   advanceFactoryRoundPresentation,
@@ -281,17 +283,25 @@ describe("voluntary battle party selector", () => {
     expect(PARTY_SELECT_OPEN_TOTAL_FRAMES).toBe(62);
   });
 
-  it("blends the open window's field fade-out at y_bg and the menu fade-in at the §2 per-layer coefficients (ISSUES #80 open remainder (b))", () => {
-    // Field fade-out §6(b): y_bg(e) = min(16, 2*max(0,floor((e-1)/2))) --
-    // (2,0) at e=3, (2,2) at e=4, (4,2) at e=5, ... (16,14) at e=17, (16,16)
+  it("blends the open window's field fade-out at the per-layer (y_bg, y_obj) pair and the menu fade-in at the §2 per-layer coefficients (ISSUES #80 open remainder (b) + Class A)", () => {
+    // Field fade-out §6(b): y_bg(e) = min(16, 2*max(0,floor((e-1)/2))) and the
+    // OBJ layer one blend step behind, y_obj(e) = min(16, 2*max(0,floor((e-2)/2)))
+    // -- (2,0) at e=3, (2,2) at e=4, (4,2) at e=5, ... (16,14) at e=17, (16,16)
     // at e=18. Menu fade-in §2, m = e-46: y_bg(m)=14-2*floor(m/2),
     // y_obj(m)=16-2*floor((m+1)/2) -- (14,16) at m=0, (14,14) at m=1,
     // (12,14) at m=2, ... (0,2) at m=14, (0,0) at m=15.
     expect(partySelectOpenFieldFadeBgY(3)).toBe(2);
+    expect(partySelectOpenFieldFadeObjY(3)).toBe(0);
     expect(partySelectOpenFieldFadeBgY(4)).toBe(2);
+    expect(partySelectOpenFieldFadeObjY(4)).toBe(2);
     expect(partySelectOpenFieldFadeBgY(5)).toBe(4);
+    expect(partySelectOpenFieldFadeObjY(5)).toBe(2);
+    expect(partySelectOpenFieldFadeBgY(6)).toBe(4);
+    expect(partySelectOpenFieldFadeObjY(6)).toBe(4);
     expect(partySelectOpenFieldFadeBgY(17)).toBe(16);
+    expect(partySelectOpenFieldFadeObjY(17)).toBe(14);
     expect(partySelectOpenFieldFadeBgY(18)).toBe(16);
+    expect(partySelectOpenFieldFadeObjY(18)).toBe(16);
     expect(partySelectOpenMenuFadeBgY(0)).toBe(14);
     expect(partySelectOpenMenuFadeObjY(0)).toBe(16);
     expect(partySelectOpenMenuFadeBgY(1)).toBe(14);
@@ -302,6 +312,47 @@ describe("voluntary battle party selector", () => {
     expect(partySelectOpenMenuFadeObjY(14)).toBe(2);
     expect(partySelectOpenMenuFadeBgY(15)).toBe(0);
     expect(partySelectOpenMenuFadeObjY(15)).toBe(0);
+  });
+
+  it("blends the settled battle scene's BG at y_bg and its OBJ layer at y_obj through the open field fade-out (ISSUES #80 Class A)", () => {
+    // The open fade-out scene (oracle 766-781) is the settled action-menu
+    // battle scene. Its OBJ layer is one blend step behind the BG on the even
+    // `e` frames (766/768/.../780), so a whole-frame blend cannot be right
+    // there. Fake assets draw a BG pixel (white) and an OBJ pixel (pokeball
+    // red) so the two layers are distinguishable; `drawBattleSceneObjOnly`
+    // reproduces just the OBJ pixel. Reference colors match the §1/§6 tables:
+    // white at y=2 = (222,222,222), red at y=0 = (181,66,0), red at y=2 =
+    // (156,57,0) (docs/fade-layer-forensics.md §6(b)).
+    const base = liveSelector();
+    const BG_PX = [10, 10] as const;
+    const OBJ_PX = [10, 20] as const;
+    const assets: PartySelectCloseRenderAssets = {
+      drawField: () => {},
+      drawBattleScene(fb: Uint8Array): void {
+        setPixel(fb, BG_PX[0], BG_PX[1], 255, 255, 255);
+        setPixel(fb, OBJ_PX[0], OBJ_PX[1], 181, 66, 0);
+      },
+      drawBattleSceneObjOnly(fb: Uint8Array): void {
+        setPixel(fb, OBJ_PX[0], OBJ_PX[1], 181, 66, 0);
+      },
+    };
+    const px = (fb: Uint8Array, x: number, y: number) => {
+      const i = (y * 240 + x) * 4;
+      return [fb[i]!, fb[i + 1]!, fb[i + 2]!] as const;
+    };
+    const renderAt = (openElapsed: number) => {
+      const fb = createFramebuffer();
+      renderBattlePartySelect(fb, { ...base, openElapsed }, assets);
+      return { bg: px(fb, BG_PX[0], BG_PX[1]), obj: px(fb, OBJ_PX[0], OBJ_PX[1]) };
+    };
+    // e=3 (frame 766): BG at y_bg=2, OBJ untouched at y_obj=0.
+    expect(renderAt(3)).toEqual({ bg: [222, 222, 222], obj: [181, 66, 0] });
+    // e=4 (frame 767): both layers at y=2 (whole-frame blend path).
+    expect(renderAt(4)).toEqual({ bg: [222, 222, 222], obj: [156, 57, 0] });
+    // e=5 (frame 768): BG at y_bg=4, OBJ one step behind at y_obj=2.
+    expect(renderAt(5)).toEqual({ bg: [189, 189, 189], obj: [156, 57, 0] });
+    // e=6 (frame 769): both layers at y=4.
+    expect(renderAt(6)).toEqual({ bg: [189, 189, 189], obj: [132, 49, 0] });
   });
 
   it("increments openElapsed alongside elapsed and renders a field-fade-out open frame black-free when assets are absent (ISSUES #80 open remainder (b))", () => {
