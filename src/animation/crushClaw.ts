@@ -77,7 +77,7 @@ const SLASH_GROUPS = [
 /** Slash sprite cmdIndex (0..4) at `local` ticks after spawn, then destroy. */
 function clawSlashAnimFrame(local: number): number {
   if (local < 0 || local > 20) return -1;
-  return Math.min(4, Math.floor((local + 3) / 4));
+  return Math.min(4, Math.floor((local + 1) / 4));
 }
 
 export function crushClawSlashesAtAge(
