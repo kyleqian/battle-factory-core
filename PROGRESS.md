@@ -45,8 +45,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 991 — [supervisor WIND-DOWN, 2026-08-07] Session summary: 17 workers / 9 rounds — the in-battle party menu's OPEN+CLOSE window is now fully byte-exact (dense-a 276 → **354/354**), lobby input FREEZE fixed, `loss-lobby-walk-off` PROMOTED **177/177**, #71 Slice A REFUTED
 
-- **State:** master at this entry's commit, clean. `animation-main` folded at
-  wind-down (18 commits: MINIMIZE/TORMENT promoted exact, MOVE_DETECT staged).
+- **State:** master at this entry's commit, clean. **Final independent union
+  verification: `npm run build` exit 0 and full `npm test` 768 files /
+  7284 passed / 1 skipped, exit 0** (re-run after the stale-pin fix below;
+  the first union run had found that 1 failure). `animation-main` folded at
+  wind-down (18 commits: MINIMIZE/TORMENT promoted exact, MOVE_DETECT staged);
+  that lane stayed live and landed **2 further commits after the fold**, left
+  deliberately unfolded — the next session's orient fold takes them.
   **Note on ordering:** the Class-B step (entry 992, above) landed AFTER this
   summary was first written — its launcher digest was truncated and the
   supervisor briefly misread the worker as failed; git log corrected it. The
