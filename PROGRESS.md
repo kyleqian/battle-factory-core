@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 992 — [bounded MAIN worker, 2026-08-08] ISSUES #80 Class B LANDED (last open-fade defect): per-sprite draw-origin offsets — dense-a **341 → 354/354 byte-exact**, open window fully closed
 
-- **State:** master `56cae965`, clean. Typecheck + `npm run build` green,
+- **State:** master `8a70a108`, clean. Typecheck + `npm run build` green,
   `npm run test:smoke` **347/347**; touched test files **37/37**
   (battlePartySelect 19/19 incl. the new Class B pin + inbattlePartyMenuVisualBind
   8/8 + factoryVoluntarySwitchSeam 10/10). Dense-a spec extended
