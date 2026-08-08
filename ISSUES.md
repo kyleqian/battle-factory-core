@@ -1538,6 +1538,24 @@ parent is **2,529/2,529 byte-identical** across the affected turn-4, turn-5,
 turn-11 and upstream-reader OFF windows. The remaining #39 render-entry debt
 above is unchanged.
 
+**Family-C cache-key ownership hardened (2026-08-08, `660c769f`).** The six
+healthbox factories parameterized by species-render-entry-point slice 2 had
+kept their older partial memoization keys, so equal HP/status/gender could
+return pixels composed for a different name, level, or max HP. Their keys now
+include every variable compositor input (HP, name, level, max HP, gender, and
+status where exposed), and the KABUTO, ONIX, and MAGBY canonical preseeds use
+those same complete keys. Six Tier-1 collision pins call each factory with two
+identities/max-HP values under the same partial state in both orders and compare
+every result directly to `composeOpponentHealthbox`/`composePlayerHealthbox`;
+all six pins failed before the production edit and pass after it. Incomplete
+Family-C cache owners move **6→0**. This hardening does not retire a turn-keyed
+renderer, so the reproducible broad #39 inventory honestly stays
+**1,949→1,949** matching lines while `battleScene.ts` grows
+**36,343→36,361 LOC**. Clean-parent OFF differential replay is
+**3,055/3,055 byte-identical** across all 16 slice-2 windows plus
+`battle-command-generated-off`; no canonical Battle-2 window was run. The
+remaining #39 render-entry debt above is unchanged.
+
 # Settled records (not open work — see the note at the top of this file)
 
 ## #56 — [SETTLED 2026-08-03, supervisor decision] Arbitrary-trainer intro: YOSHI 700/751 + MAGNETON 703/751, every residual frame in a settled class
