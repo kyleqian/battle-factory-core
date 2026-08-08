@@ -3584,6 +3584,69 @@ describe("AI_CBM_Tickle (data/battle_ai_scripts.s:571-574, EFFECT_TICKLE)", () =
   });
 });
 
+describe("AI_CBM_BellyDrum (data/battle_ai_scripts.s:247-251, EFFECT_BELLY_DRUM)", () => {
+  const MOVE_BELLY_DRUM = 187;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("HP below 51% JUMPs to Score_Minus10 without reaching the ATK gate", () => {
+    const result = run(
+      MOVE_BELLY_DRUM,
+      target(),
+      undefined,
+      { atkStage: 12, defStage: 6, hp: 50, maxHp: 100 },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("HP at 50% (truncating 50/100) JUMPs to Score_Minus10", () => {
+    const result = run(
+      MOVE_BELLY_DRUM,
+      target(),
+      undefined,
+      { atkStage: 6, defStage: 6, hp: 50, maxHp: 100 },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("HP at 51% FALLS THROUGH to the ATK gate; non-MAX ATK ends at zero", () => {
+    const result = run(
+      MOVE_BELLY_DRUM,
+      target(),
+      undefined,
+      { atkStage: 6, defStage: 6, hp: 51, maxHp: 100 },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("HP at 51% with ATK at MAX_STAT_STAGE JUMPs to Score_Minus10", () => {
+    const result = run(
+      MOVE_BELLY_DRUM,
+      target(),
+      undefined,
+      { atkStage: 12, defStage: 6, hp: 51, maxHp: 100 },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("absent hp/maxHp defaults to 100% and reaches the ATK gate at zero", () => {
+    const result = run(MOVE_BELLY_DRUM, target(), undefined, { atkStage: 6, defStage: 6 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+});
+
 describe("AI_CBM_Magnitude (data/battle_ai_scripts.s:365-367, EFFECT_MAGNITUDE)", () => {
   const MOVE_MAGNITUDE = 222; // EFFECT_MAGNITUDE, TYPE_GROUND, power 1
 

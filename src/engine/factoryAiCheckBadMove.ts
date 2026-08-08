@@ -1968,6 +1968,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_BELLY_DRUM -> AI_CBM_BellyDrum
+  // (`data/battle_ai_scripts.s:180,247-251`): AI_USER's own HP% below 51
+  // JUMPs to -10, then FALLS THROUGH into AI_CBM_AttackUp's own own-ATK
+  // MAX_STAT_STAGE gate (also -10).
+  if (move.effect === "EFFECT_BELLY_DRUM") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmBellyDrum(input.attacker),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_MAGNITUDE -> AI_CBM_Magnitude
   // (`data/battle_ai_scripts.s:175,365-367`): a fresh own ability read
   // (Levitate -> -10), then FALLS THROUGH into AI_CBM_HighRiskForDamage's
@@ -2506,6 +2519,34 @@ function runCbmTorment(targetTormented: boolean): number {
  */
 function runCbmHelpingHand(): number {
   return -10;
+}
+
+/**
+ * `AI_CBM_BellyDrum` (`data/battle_ai_scripts.s:247-251`, EFFECT_BELLY_DRUM):
+ *
+ * ```
+ * AI_CBM_BellyDrum:
+ *     if_hp_less_than AI_USER, 51, Score_Minus10
+ * AI_CBM_AttackUp:
+ *     if_stat_level_equal AI_USER, STAT_ATK, MAX_STAT_STAGE, Score_Minus10
+ *     end
+ * ```
+ *
+ * The label `AI_CBM_BellyDrum` shares `AI_CBM_AttackUp`'s body: the HP% gate
+ * is its own, then it FALLS THROUGH into AttackUp's own own-ATK gate. Both
+ * gates are Score_Minus10 JUMPs, so they are sequential, never additive --
+ * a low-HP user never reaches the ATK check (exactly like the source). HP
+ * percent is truncating `100*hp/maxHp`, matching `Cmd_if_hp_less_than` (same
+ * convention as `runCbmSubstitute`). Zero ability/type reads.
+ */
+function runCbmBellyDrum(attacker: FactoryAiCheckBadMoveAttacker): number {
+  const maxHp = attacker.maxHp ?? 1;
+  const hp = attacker.hp ?? 1;
+  const hpPercent = Math.floor((100 * hp) / maxHp);
+  if (hpPercent < 51) {
+    return -10;
+  }
+  return runCbmAttackUp(attacker.atkStage);
 }
 
 /**
