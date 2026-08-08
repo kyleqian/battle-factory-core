@@ -1049,8 +1049,7 @@ actually about. That retirement remains the presentation-seam program's job.
 `turn17MenuRedrawElapsed`, `turn17KoDismissElapsed`,
 `turn17OutcomeDismissElapsed`, `turn17LossDismissElapsed`); 969 lines reference
 a turn number; per-species render entry points are hardcoded
-(`grovyleFaintSinkRowsAndY2`, `onixSitrusRotateMatrix`,
-`turn5GrantingStarPlacement`, `dragonBreathGrovyleHp`). Sibling files
+(`onixSitrusRotateMatrix`, `turn5GrantingStarPlacement`). Sibling files
 `battle2Turn1.ts`, `battle2ActionMenu.ts`, `battle2OffScenario.ts`,
 `turn17.ts` share the shape.
 
@@ -1555,6 +1554,17 @@ renderer, so the reproducible broad #39 inventory honestly stays
 **3,055/3,055 byte-identical** across all 16 slice-2 windows plus
 `battle-command-generated-off`; no canonical Battle-2 window was run. The
 remaining #39 render-entry debt above is unchanged.
+
+**Faint-sink geometry helper renamed generically (2026-08-08).** The remaining
+species-agnostic pure helper is now `faintSinkRowsAndY2` in its existing
+`battleSceneCanonical.ts` owner and public `battleScene.ts` re-export. Its
+signature, Grovyle defaults, formula, and explicit Pidgeotto re-anchoring are
+unchanged; focused Tier-1 pins cover both distinct `startTick`/`steps`
+parameterizations without identity input. Exact old-name references across
+`src`/`tests`/`tools` move **22→0** (production **10→0**); no computed/string
+consumer was found. This ownership-only rename leaves the reproducible broad
+#39 inventory **1,949→1,949** and `battleScene.ts` **36,361→36,361 LOC**.
+The remaining #39 render-entry debt above is unchanged.
 
 # Settled records (not open work — see the note at the top of this file)
 

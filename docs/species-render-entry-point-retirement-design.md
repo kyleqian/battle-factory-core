@@ -34,7 +34,7 @@ and are marked **GATED** where the dispatcher doc's own file list overlaps.
 rg -n -i 'grovyle|onix|magby|murkrow|pidgeotto|dragonbreath|sitrus|grantingstar' src/engine --glob '*.ts' -l | sort
 rg -n '^(export )?function [a-zA-Z0-9_]*' src/engine/battleScene.ts | rg -i 'grovyle|onix|magby|murkrow|pidgeotto|kabuto|sitrus|grantingstar|dragonbreath|faint|sink|rotate'
 rg -n '^(export )?function draw[A-Za-z0-9_]*' src/engine/battleScene.ts
-rg -n 'grovyleFaintSinkRowsAndY2|onixSitrusRotateMatrix|turn5GrantingStarPlacement|dragonBreathGrovyleHp' src/engine/battleScene.ts
+rg -n 'faintSinkRowsAndY2|onixSitrusRotateMatrix|turn5GrantingStarPlacement|dragonBreathHp' src/engine/battleScene.ts
 ```
 
 The species-name sweep touches 49 files under `src/engine` (2,290 matching
@@ -60,7 +60,7 @@ are stale — six more #39 slices landed since. Current locations:
 | Symbol | Line | Signature |
 | --- | ---: | --- |
 | `dragonBreathGrovyleHp` | 8820 | `export function dragonBreathGrovyleHp(t: number, pressTick: number, startHp: number, endHp: number, startDelay: number = DRAGONBREATH_HP_DRAIN_START_DELAY): number` |
-| `grovyleFaintSinkRowsAndY2` | 10002 | `export function grovyleFaintSinkRowsAndY2(t: number, startTick: number = GROVYLE_FAINT_SINK_START_TICK, steps: number = GROVYLE_FAINT_SINK_STEPS): { keptRows: number; y2: number }` |
+| `faintSinkRowsAndY2` | 10002 | `export function faintSinkRowsAndY2(t: number, startTick: number = GROVYLE_FAINT_SINK_START_TICK, steps: number = GROVYLE_FAINT_SINK_STEPS): { keptRows: number; y2: number }` |
 | `onixSitrusRotateMatrix` | 10132 | `export function onixSitrusRotateMatrix(t: number): { pa: number; pb: number; pc: number; pd: number; y2: number } \| null` |
 | `turn5GrantingStarPlacement` | 10177 | `export function turn5GrantingStarPlacement(t: number, spawnIndex: number): { frameIndex: number; cx: number; cy: number } \| null` |
 
@@ -69,9 +69,9 @@ are stale — six more #39 slices landed since. Current locations:
 name. `dragonBreathGrovyleHp` is called a second time at
 `battleScene.ts:14853-14858` for turn 13's Pidgeotto DRAGON_BREATH-faint
 drain (`dragonBreathGrovyleHp(t, dbPressTick, TURN13_DRAGONBREATH_HP.from,
-TURN13_DRAGONBREATH_HP.to)`), and `grovyleFaintSinkRowsAndY2` is called a
+TURN13_DRAGONBREATH_HP.to)`), and `faintSinkRowsAndY2` is called a
 second time at `battleScene.ts:14861` for the same turn-13 Pidgeotto faint
-sink (`grovyleFaintSinkRowsAndY2(t, TURN13_FAINT_SINK_START_TICK,
+sink (`faintSinkRowsAndY2(t, TURN13_FAINT_SINK_START_TICK,
 TURN13_FAINT_SINK_STEPS)`) — the function's own doc comment at
 `battleScene.ts:9990-10000` says this outright ("Pidgeotto's own faint
 reuses this same closed form verbatim, re-anchored"). Both are pure
@@ -174,9 +174,11 @@ entry the same way the inventory doc's "4405-5467" range already flags):
 `drawGrovyleStretchEarly` (:5690), `drawKabutoHSlideWobble` (:5710).
 **6 functions.**
 
-**F. Palette factories:** `getOnixDoubleTeamClonePalette` (:6200, live —
-still called at :31866 by the surviving generic double-team clone renderer)
-and `turn10OnixDarkPalette` (:6217, live — called at :10471/:10473).
+**F. Palette factories:** the former `getOnixDoubleTeamClonePalette` is now
+the species-neutral `doubleTeamClonePalette`, memoized by its actual source-
+palette identity and called by the surviving generic double-team clone
+renderer. `turn10OnixDarkPalette` (:6217, live — called at :10471/:10473)
+remains separate and species-named.
 **2 functions.**
 
 **G. Capstone entry point:** `renderSceneOffTurnView` (battleScene.ts:34185,
@@ -224,7 +226,7 @@ members, of which named):
 | A — HP-drain closed forms | 4 | 1 (`dragonBreathGrovyleHp`) | 3 |
 | B — Sitrus/held-item-heal wrappers | 7 | 2 (`onixSitrusRotateMatrix`, `turn5GrantingStarPlacement`) | 5 |
 | Slide-dx wrapper (same shape as B, different helper) | 1 | 0 | 1 |
-| `grovyleFaintSinkRowsAndY2` (standalone — no sibling shares this exact geometry) | 1 | 1 | 0 |
+| `faintSinkRowsAndY2` (standalone — no sibling shares this exact geometry) | 1 | 1 | 0 |
 | C — Identity-specific healthbox factories | 8 | 0 | 8 |
 | D — Species-named boolean/geometry gates | 15 | 0 | 15 |
 | E — Grovyle/Kabuto intro materialize/stretch | 6 | 0 | 6 |
@@ -253,7 +255,7 @@ not a function entry point, and is intentionally excluded from this count.)
 
 | Family | Generic owner to converge on | Precedent it extends |
 | --- | --- | --- |
-| A | `rockSlideOpponentHp`'s own shape (battleMenu.ts:2280) generalized so its endpoints are always adapter-read, not sometimes-literal; rename away from the species suffix once every call site supplies `(startHp, endHp)` from a resolution adapter | Rank-3's own faint-sink formula precedent (ISSUES.md #39: "faint-sink geometry from the generic formula at Grovyle's yOffset") — the same "hand a defaulted param instead of hardcoding" idiom `dragonBreathGrovyleHp`/`grovyleFaintSinkRowsAndY2` already demonstrate working for 2 species |
+| A | `rockSlideOpponentHp`'s own shape (battleMenu.ts:2280) generalized so its endpoints are always adapter-read, not sometimes-literal; rename away from the species suffix once every call site supplies `(startHp, endHp)` from a resolution adapter | Rank-3's own faint-sink formula precedent (ISSUES.md #39: "faint-sink geometry from the generic formula at Grovyle's yOffset") — the same "hand a defaulted param instead of hardcoding" idiom `dragonBreathHp`/`faintSinkRowsAndY2` already demonstrate working for 2 species |
 | B | Nothing new — the generic reducer (`src/animation/heldItemHeal.ts`) already exists. The fix is call-site: derive the age from a real semantic event (the resolution adapter's own Sitrus-proc-trigger tick) instead of `ONIX_SITRUS_IDENTITY_RENDER_TICK`, and derive the ring/star screen center from the same per-battler field-geometry source the generic route already has (per the inventory doc: "generic field-art/healthbox catalogs") instead of `TURN5_SITRUS_RING_CENTER` | The cry-duration gate precedent (semantic-event-driven timing, not a hardcoded turn tick) and rank-3's adapter-derived HP endpoints |
 | slide-dx | Same as B — `healthboxSlideDx` is already generic; only the settle-tick anchor needs to move from a hardcoded constant to an adapter-read send-out-completion tick | Same |
 | C | `composeOpponentHealthbox`/`composePlayerHealthbox` (`healthboxAssembly.ts`) already ARE the generic compositor — every one of these 8 factories already calls it. The retirement is parameterizing `name`/`level`/`maxHp` as call-time arguments (exactly the shape `extremeSpeedOpponentHealthbox`/`shadowPunchOpponentHealthbox` already prove works, §1.1) sourced from the owning resolution adapter's `replacementSpecies`/`replacementLevel`/`replacementHp.max` (already present for Pidgeotto/Murkrow, per §1.3C) — and for Onix/Kabuto/Magby/Grovyle, from the equivalent anchor-battler/menu-battler constants that already exist (`ONIX_MENU_BATTLER`, `KABUTO_SENDOUT_BATTLER`, `magbyBackSprite`'s sibling stat source) | Rank-2/rank-3's own "MURKROW/PIDGEOTTO level/healthbox/sent-out literals now adapter-derived" plus the already-parameterized extremeSpeed/shadowPunch siblings as proof-of-shape |
@@ -308,7 +310,7 @@ caps" rule: they are *included*, just not separately numbered.
    commit, not incrementally, or the ring/rotation/text/HP-climb pieces will
    visibly desync mid-window.
 2. **Shared helpers serving multiple windows.** `dragonBreathGrovyleHp` and
-   `grovyleFaintSinkRowsAndY2` already serve two call sites (turn 2 and turn
+   `faintSinkRowsAndY2` already serve two call sites (turn 2 and turn
    13). Any change to their *default* parameter values (rather than adding
    an adapter-read call-site argument) silently changes turn 13's rendering
    too — slice 3 must audit both call sites' resulting values, not just the

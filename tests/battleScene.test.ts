@@ -20,7 +20,7 @@ import {
   evaEvb,
   GROVYLE_FAINT_SINK_START_TICK,
   GROVYLE_FAINT_SINK_STEPS,
-  grovyleFaintSinkRowsAndY2,
+  faintSinkRowsAndY2,
   INITIAL_BATTLE_SCENE_STATE,
   onixSitrusRotateMatrix,
   onixSitrusTintCoeff,
@@ -1673,10 +1673,10 @@ describe("completed turn-4 receipt: turn 5 reopen consumes the retained continua
 // endpoints), independent of `tools/compare/traces/turn5-faint.json`'s own
 // pixel parity (110/110, 0 diff) which only proves the RENDER, not the
 // formula's own shape.
-describe("S7 slice K: grovyleFaintSinkRowsAndY2 (docs/faint-switch-notes.md §7a's closed form)", () => {
+describe("S7 slice K: faintSinkRowsAndY2 (docs/faint-switch-notes.md §7a's closed form)", () => {
   it("before the handoff tick S(6502), fully visible (keptRows=STEPS, y2=0)", () => {
-    expect(grovyleFaintSinkRowsAndY2(GROVYLE_FAINT_SINK_START_TICK)).toEqual({ keptRows: GROVYLE_FAINT_SINK_STEPS, y2: 0 });
-    expect(grovyleFaintSinkRowsAndY2(6000)).toEqual({ keptRows: 8, y2: 0 });
+    expect(faintSinkRowsAndY2(GROVYLE_FAINT_SINK_START_TICK)).toEqual({ keptRows: GROVYLE_FAINT_SINK_STEPS, y2: 0 });
+    expect(faintSinkRowsAndY2(6000)).toEqual({ keptRows: 8, y2: 0 });
   });
 
   it("the 8 RAM-confirmed erase steps (S+1,S+3,...,S+15 = 6503,6505,...,6517) land at render ticks S+2,S+4,...,S+16 (the same +1 render lag every other ROCK_SLIDE mechanism in this file uses) - keptRows counts down 7->0, y2 climbs 8->64", () => {
@@ -1692,14 +1692,14 @@ describe("S7 slice K: grovyleFaintSinkRowsAndY2 (docs/faint-switch-notes.md §7a
       [6518, 0, 64],
     ] as const;
     for (const [t, keptRows, y2] of expected) {
-      expect(grovyleFaintSinkRowsAndY2(t), `tick ${t}`).toEqual({ keptRows, y2 });
+      expect(faintSinkRowsAndY2(t), `tick ${t}`).toEqual({ keptRows, y2 });
     }
   });
 
   it("destroyed at S+2n+1=6519 (RAM-confirmed) - stays fully erased (keptRows=0) forever after, y2 clamped at its final 64", () => {
-    expect(grovyleFaintSinkRowsAndY2(6519)).toEqual({ keptRows: 0, y2: 64 });
-    expect(grovyleFaintSinkRowsAndY2(6560)).toEqual({ keptRows: 0, y2: 64 });
-    expect(grovyleFaintSinkRowsAndY2(9999)).toEqual({ keptRows: 0, y2: 64 });
+    expect(faintSinkRowsAndY2(6519)).toEqual({ keptRows: 0, y2: 64 });
+    expect(faintSinkRowsAndY2(6560)).toEqual({ keptRows: 0, y2: 64 });
+    expect(faintSinkRowsAndY2(9999)).toEqual({ keptRows: 0, y2: 64 });
   });
 });
 
@@ -2504,14 +2504,16 @@ describe("S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§5/§7): DRAGON_BREATH
     expect(dragonBreathHp(P + DRAIN_START_DELAY + 500, P, 16, 0)).toBe(0);
   });
 
-  it("grovyleFaintSinkRowsAndY2 re-anchored for Pidgeotto's own faint (S=15960, n=7 for yOffset=11, vs. Grovyle's own S=6502/n=8) - same closed form, new params", () => {
+  it("faintSinkRowsAndY2 is identity-independent across distinct startTick/steps parameterizations", () => {
     expect(TURN13_FAINT_SINK_STEPS).toBe(7);
     expect(TURN13_FAINT_SINK_STEPS).not.toBe(GROVYLE_FAINT_SINK_STEPS);
     expect(TURN13_FAINT_SINK_START_TICK).not.toBe(GROVYLE_FAINT_SINK_START_TICK);
-    expect(grovyleFaintSinkRowsAndY2(TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS)).toEqual({ keptRows: TURN13_FAINT_SINK_STEPS, y2: 0 });
-    expect(grovyleFaintSinkRowsAndY2(TURN13_FAINT_SINK_START_TICK + 14, TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS)).toEqual({ keptRows: 0, y2: TURN13_FAINT_SINK_STEPS * 8 });
+    expect(faintSinkRowsAndY2(TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS)).toEqual({ keptRows: TURN13_FAINT_SINK_STEPS, y2: 0 });
+    expect(faintSinkRowsAndY2(TURN13_FAINT_SINK_START_TICK + 8, TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS)).toEqual({ keptRows: 3, y2: 32 });
+    expect(faintSinkRowsAndY2(TURN13_FAINT_SINK_START_TICK + 14, TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS)).toEqual({ keptRows: 0, y2: TURN13_FAINT_SINK_STEPS * 8 });
     // still reproduces Grovyle's own turn-5 endpoints unmodified (default params) - the generalization is additive, not a behavior change.
-    expect(grovyleFaintSinkRowsAndY2(GROVYLE_FAINT_SINK_START_TICK)).toEqual({ keptRows: GROVYLE_FAINT_SINK_STEPS, y2: 0 });
+    expect(faintSinkRowsAndY2(GROVYLE_FAINT_SINK_START_TICK)).toEqual({ keptRows: GROVYLE_FAINT_SINK_STEPS, y2: 0 });
+    expect(faintSinkRowsAndY2(GROVYLE_FAINT_SINK_START_TICK + 10)).toEqual({ keptRows: 3, y2: 40 });
   });
 
   it("healthbox vanish tick (15977) lands 2 ticks after the sink's own last erase step, matching docs/turn13-notes.md §4's own 'healthbox gone' citation", () => {

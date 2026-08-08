@@ -852,7 +852,7 @@ lands on render 15708 exactly - chars=1 first visible there, chars=22/22
 flat from 15729); `TURN13_FAINT_SINK_START_TICK=15960`/`STEPS=7` (matches
 this dossier's own §7 citation exactly, now render-confirmed: first
 sink-visible sha change at 15962, matching `S+2` under
-`grovyleFaintSinkRowsAndY2`'s own `d=t-1-S` formula); healthbox vanish at
+`faintSinkRowsAndY2`'s own `d=t-1-S` formula); healthbox vanish at
 15977 (`S+2*steps+3`, the SAME formula `GROVYLE_HEALTHBOX_VANISH_TICK`
 already encodes, now generalized into `faintHealthboxVanishTick`);
 `turn13FaintedTextStartTick` lands on render **15979** exactly (15978

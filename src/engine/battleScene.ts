@@ -1149,8 +1149,8 @@ import { BATTLE2_TURN1_KERNEL, DRAGONBREATH_HIT_FLASH_OFFSET, DRAGONBREATH_KICKO
 export { BATTLE2_TURN1_KERNEL, DRAGONBREATH_HIT_FLASH_OFFSET, DRAGONBREATH_KICKOFF_TEXT_TOTAL, GROVYLE_FAINT_SINK, INITIAL_BATTLE_SCENE_STATE, TURN10_AERIALACE_TEXT_TOTAL, TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN10_ONIX_AFTER_AERIALACE_HP, TURN11_ATKFLOOR_TEXT_TOTAL, TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN12_ONIX_AFTER_AERIALACE_HP, TURN13_SANDATTACK_DIRT_DRAW_ORDER, TURN14_DRAGONBREATH_TEXT_TOTAL, TURN14_FLYUP_LINE1, TURN14_FLYUP_LINE2, TURN15_FLY_STRIKE_LINE1, TURN15_FLY_STRIKE_LINE2, TURN15_ONIX_SHAKE_RAM_TICKS, TURN16_FAINT_ATTACK_TEXT_TOTAL, TURN16_FIRE_PUNCH_TEXT_TOTAL, TURN17_LOSS_TEXT_TOTAL, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN1_ROCKSLIDE_HP, TURN2_ENDEAVOR_HP, TURN2_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN3_ROCKSLIDE_HP, TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN4_ROCKSLIDE_HP, TURN5_ENDEAVOR_HP, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_SITRUS, TURN6_FEATHERDANCE_TEXT_TOTAL, TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_REGIME2_TO_REGIME1_SHIFT, TURN8_REGIME3_TO_REGIME1_SHIFT, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN9_QUICKATTACK_TEXT_TOTAL, TURN9_ROCKSLIDE_ANIMATION_PROFILE, battle2RockSlideMechanismPressTick, currentEpochPresentationAgeFromLatest, dragonBreathHp, dragonBreathTextStartTick, frontSpriteAnimFrame, grovyleStretchTintCoeff, playerHealthboxHpOverlayByHp, turn10AerialAceHp, turn10AerialAceTextStartTick, turn10NotVeryEffectiveTextStartTick, turn10SuperEffectiveTextStartTick, turn11AtkFloorTextStartTick, turn11SuperEffectiveTextStartTick, turn12MissTextStartTick, turn13AccFellTextStartTick, turn13MurkrowFrame, turn13SandAttackPidgeottoX2, turn13SandAttackTextStartTick, turn14KickoffBounceTick, turn14MurkrowInvisible, turn14SimpleVisibleChars, turn15FaintSinkSkipRows, turn15SimpleVisibleChars, turn15StrikeAttackerInvisible, turn15StrikeTargetHealthboxWobbleY2, turn15StrikeTargetHp, turn15StrikeTargetInvisible, turn15StrikeTargetShakeX2, turn16PartyElapsedAtTick, turn3KickoffBounceTick, turn3SubmenuBounceTickFromPresentationEpochAge, turn5FaintedCursorYOffset, turn5FaintedTextStartTick, turn5IconBarEva, turn5PidgeottoFrame, turn5SitrusResettledBounceTick, turn6FeatherDanceTextStartTick, turn6KickoffBounceTick, turn7KickoffBounceTick, turn8BindTextStartTick, turn8KickoffBounceTick, turn8MissTextStartTick, turn9Ep2HealthboxWobbleY2, turn9Ep2OnixInvisible, turn9Hp, turn9NotVeryEffectiveTextStartTick, turn9QuickAttackTextStartTick, turn9SuperEffectiveTextStartTick };
 import { BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP, GROVYLE_FAINT_SINK_STEPS, GROVYLE_HEALTHBOX_VANISH_TICK, TURN14_FLYUP_TEXT_TOTAL, TURN15_FLY_STRIKE_TEXT_TOTAL, TURN5_SITRUS_HEAL_HP_END, TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_LINE1, TURN5_SITRUS_HEAL_LINE2, TURN5_SITRUS_RING_CENTER, dragonBreathTextVisibleChars, menuIdleHealthboxBounce, menuIdleOnixBounce, turn10AerialAceTextVisibleChars, turn10NotVeryEffectiveTextVisibleChars, turn10SuperEffectiveTextVisibleChars, turn11AtkFloorTextVisibleChars, turn11SuperEffectiveTextVisibleChars, turn6FeatherDanceTextVisibleChars, turn9NotVeryEffectiveTextVisibleChars, turn9QuickAttackTextVisibleChars, turn9SuperEffectiveTextVisibleChars } from "./battleSceneCanonical.ts";
 export { BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP, GROVYLE_FAINT_SINK_STEPS, GROVYLE_HEALTHBOX_VANISH_TICK, TURN14_FLYUP_TEXT_TOTAL, TURN15_FLY_STRIKE_TEXT_TOTAL, TURN5_SITRUS_HEAL_HP_END, TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_LINE1, TURN5_SITRUS_HEAL_LINE2, TURN5_SITRUS_RING_CENTER, dragonBreathTextVisibleChars, menuIdleHealthboxBounce, menuIdleOnixBounce, turn10AerialAceTextVisibleChars, turn10NotVeryEffectiveTextVisibleChars, turn10SuperEffectiveTextVisibleChars, turn11AtkFloorTextVisibleChars, turn11SuperEffectiveTextVisibleChars, turn6FeatherDanceTextVisibleChars, turn9NotVeryEffectiveTextVisibleChars, turn9QuickAttackTextVisibleChars, turn9SuperEffectiveTextVisibleChars };
-import { TURN5_FAINTED_CURSOR_START_DELAY, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, TURN5_FAINTED_TEXT_TOTAL, grovyleFaintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible } from "./battleSceneCanonical.ts";
-export { TURN5_FAINTED_CURSOR_START_DELAY, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, TURN5_FAINTED_TEXT_TOTAL, grovyleFaintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible };
+import { TURN5_FAINTED_CURSOR_START_DELAY, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, TURN5_FAINTED_TEXT_TOTAL, faintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible } from "./battleSceneCanonical.ts";
+export { TURN5_FAINTED_CURSOR_START_DELAY, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, TURN5_FAINTED_TEXT_TOTAL, faintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible };
 import { TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, TURN1_ROCKSLIDE_KICKOFF_LINE1, TURN1_ROCKSLIDE_KICKOFF_LINE2, TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2, TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2, TURN5_ENDEAVOR_ATTACK_LINE1, TURN5_ENDEAVOR_ATTACK_LINE2, TURN8_BIND_LINE1, TURN8_BIND_LINE2, TURN8_BIND_TEXT_TOTAL, TURN8_MISS_LINE1, TURN8_MISS_LINE2, TURN8_MISS_TEXT_TOTAL, TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2, TURN13_ACCFELL_TEXT_TOTAL, TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2, TURN13_SANDATTACK_TEXT_TOTAL } from "./battleSceneCanonical.ts";
 export { TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, TURN1_ROCKSLIDE_KICKOFF_LINE1, TURN1_ROCKSLIDE_KICKOFF_LINE2, TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2, TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2, TURN5_ENDEAVOR_ATTACK_LINE1, TURN5_ENDEAVOR_ATTACK_LINE2, TURN8_BIND_LINE1, TURN8_BIND_LINE2, TURN8_BIND_TEXT_TOTAL, TURN8_MISS_LINE1, TURN8_MISS_LINE2, TURN8_MISS_TEXT_TOTAL, TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2, TURN13_ACCFELL_TEXT_TOTAL, TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2, TURN13_SANDATTACK_TEXT_TOTAL };
 import { TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2, TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2, TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2, TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2, TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2, TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2, TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2, TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2, TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2, turn12MissTextVisibleChars, turn13AccFellTextVisibleChars, turn13SandAttackTextVisibleChars, turn5FaintedTextVisibleChars, turn8BindTextVisibleChars, turn8MissTextVisibleChars } from "./battleSceneCanonical.ts";
@@ -6371,18 +6371,20 @@ function blendedTile(
  * (`drawStatsBanner` below) survives.
  */
 
-let onixDoubleTeamClonePaletteCache: RgbColor[] | null = null;
-/** Threads the source sprite asset in explicitly (`docs/species-render-entry-point-retirement-design.md` §1.3F/§4 row 6) rather than closing over `onixBackSprite` by name; palette math unchanged. */
-function getOnixDoubleTeamClonePalette(sourceSprite: BattleBackSpriteAsset): RgbColor[] {
-  if (onixDoubleTeamClonePaletteCache) return onixDoubleTeamClonePaletteCache;
-  onixDoubleTeamClonePaletteCache = sourceSprite.palette.map((c) =>
+const doubleTeamClonePaletteCache = new WeakMap<readonly RgbColor[], RgbColor[]>();
+/** Derives DOUBLE_TEAM's coefficient-11 clone tint, memoized by source-palette identity. */
+export function doubleTeamClonePalette(sourcePalette: readonly RgbColor[]): RgbColor[] {
+  const cached = doubleTeamClonePaletteCache.get(sourcePalette);
+  if (cached) return cached;
+  const palette = sourcePalette.map((c) =>
     c ? {
       r: blendComponentToward(c.r, 0, 11),
       g: blendComponentToward(c.g, 0, 11),
       b: blendComponentToward(c.b, 0, 11),
     } : c,
   );
-  return onixDoubleTeamClonePaletteCache;
+  doubleTeamClonePaletteCache.set(sourcePalette, palette);
+  return palette;
 }
 
 /** S7 slice R rung (b) mechanism 4 (docs/aerial-ace-notes.md's own continuation section): `BlendPalette` toward RGB_BLACK at coefficient 10 - the exact RAM-read coefficient for the palette-pulse's own darkened plateau (`turn10AerialAcePaletteDarkenCoeff`), same shape as `getDoubleTeamClonePalette`. */
@@ -6390,7 +6392,7 @@ function darkenPaletteToward10(palette: readonly (RgbColor | undefined)[]): RgbC
   return palette.map((c) => (c ? { r: blendComponentToward(c.r, 0, 10), g: blendComponentToward(c.g, 0, 10), b: blendComponentToward(c.b, 0, 10) } : (c as unknown as RgbColor)));
 }
 let turn10OnixDarkPaletteCache: RgbColor[] | null = null;
-/** Threads the source sprite asset in explicitly, same as `getOnixDoubleTeamClonePalette` above - see that function's doc comment. */
+/** Threads the source sprite asset in explicitly; this turn-10-only cache remains separate from `doubleTeamClonePalette`. */
 function turn10OnixDarkPalette(sourceSprite: BattleBackSpriteAsset): RgbColor[] {
   return (turn10OnixDarkPaletteCache ??= darkenPaletteToward10(sourceSprite.palette));
 }
@@ -9836,7 +9838,7 @@ function drawTurn5EndeavorText(
  */
  // 6521
 
-/** Same tile-grid walk as `drawSpriteSheet`, but only the top `keptRows` of `tileset.rows` (the faint sink's own progressive bottom-up erase, `grovyleFaintSinkRowsAndY2`) - `oy` already includes any `y2` shift, same convention every other sprite draw in this file uses. */
+/** Same tile-grid walk as `drawSpriteSheet`, but only the top `keptRows` of `tileset.rows` (the faint sink's own progressive bottom-up erase, `faintSinkRowsAndY2`) - `oy` already includes any `y2` shift, same convention every other sprite draw in this file uses. */
 function drawSpriteSheetTopRows(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, keptRows: number): void {
   for (let ty = 0; ty < keptRows && ty < tileset.rows; ty += 1) {
     for (let tx = 0; tx < tileset.columns; tx += 1) {
@@ -9846,7 +9848,7 @@ function drawSpriteSheetTopRows(fb: Uint8Array, tileset: Tileset, palette: RgbCo
 }
 
 /**
- * Same shape as `grovyleFaintSinkRowsAndY2`+`drawSpriteSheetTopRows` (keep
+ * Same shape as `faintSinkRowsAndY2`+`drawSpriteSheetTopRows` (keep
  * the artwork's own TOP portion, shift it down, drop the bottom - the
  * sprite's own ground-contact edge stays fixed while it visually sinks),
  * but at PIXEL granularity instead of that pair's 8px-tile-row/2-tick
@@ -10137,7 +10139,7 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   const shiftY = rockSlideBg3Y(t, pressTick);
   drawStaticBgShiftedY(fb, shiftY, bgFadeYOverride ?? turn5BgFadeY(t), darken ? turn10BgDarkPalette() : undefined);
-  const sink = grovyleFaintSinkRowsAndY2(t);
+  const sink = faintSinkRowsAndY2(t);
   if (sink.keptRows >= GROVYLE_FAINT_SINK_STEPS) {
     if (!rockSlideMonBlinkInvisible(t, pressTick)) {
       drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y + rockSlideMonShakeY2(t, pressTick));
@@ -10484,7 +10486,7 @@ function drawTurn5PidgeottoMaterialize(fb: Uint8Array, t: number): void {
 /**
  * S7/S8 turn 13 rung 3 (docs/turn13-notes.md §7): `sink` (default `null`,
  * every pre-existing caller unaffected) lets DRAGON_BREATH's own faint
- * replace the plain sprite draw with `grovyleFaintSinkRowsAndY2`'s own
+ * replace the plain sprite draw with `faintSinkRowsAndY2`'s own
  * progressive bottom-up erase, the same "generalize into a defaulted param"
  * idiom `drawTurn5RockSlideAttack`'s own Grovyle-side sink branch already
  * established.
@@ -13487,7 +13489,7 @@ const [
   TURN13_DRAGONBREATH_KICKOFF_LINE1,
   TURN13_DRAGONBREATH_KICKOFF_LINE2,
 ] = TURN13_RESOLUTION.kickoffLines;
- // S - oracle-pixel-bisected (first sink-visible sha change at render 15962, matching S+2 under grovyleFaintSinkRowsAndY2's own d=t-1-S formula), matches docs/turn13-notes.md §7's own RAM-derived value exactly
+ // S - oracle-pixel-bisected (first sink-visible sha change at render 15962, matching S+2 under faintSinkRowsAndY2's own d=t-1-S formula), matches docs/turn13-notes.md §7's own RAM-derived value exactly
 // steps/healthboxVanishFrame: createBattleResolutionPresentation's own
 // generic opponent-faint-timing formula (opponentFaintSinkGeometry,
 // turn13ResolutionAdapter.ts), evaluated at Pidgeotto's real front-pic
@@ -13528,7 +13530,7 @@ function drawDragonBreathKoWindow(
   );
   const sink =
     t >= TURN13_FAINT_SINK_START_TICK
-      ? grovyleFaintSinkRowsAndY2(t, TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS)
+      ? faintSinkRowsAndY2(t, TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS)
       : rockSlideMonBlinkInvisible(t, TURN13_HIT_FLASH_PRESS_TICK)
         ? { keptRows: 0, y2: 0 }
         : null;
@@ -32345,7 +32347,7 @@ export function renderSceneOnMovePresentation(
       target.geometry.spriteCorner.y,
     );
     if (view.clones) {
-      const palette = getOnixDoubleTeamClonePalette(onixBackSprite);
+      const palette = doubleTeamClonePalette(onixBackSprite.palette);
       const drawClone = (offset: number) => drawSpriteSheetBlended(
         fb,
         onixBackSprite.tileset,
