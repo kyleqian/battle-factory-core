@@ -1,5 +1,95 @@
 # Animation coverage
 
+## MOVE_TAKE_DOWN staged — both orientations isolated at 98/97 frames; scenarios + dense probe + change maps banked (2026-08-07 worker)
+
+- **State:** TAKE_DOWN stays **unsupported**. Coverage unchanged at **125/276
+  exact, 0 partial, 0 staged, 151 unsupported**. Nothing promoted; no pin
+  moved. This is the staging round; promotion to exact (both orientations, a
+  portable at full-window exact) is the NEXT round's job.
+- **Did:** staged two legal mechanicLab scenarios (SWABLU `SPECIES_SWABLU`
+  358 — FRONTIER_MON_SWABLU, set 93, all four active slots TAKE_DOWN 36, vs
+  legal ONIX 95; player-back `mechanic-take-down-player-swablu-opponent-onix.json`
+  and opponent-front `mechanic-take-down-opponent-swablu-player-onix.json`, both
+  verified to run with currentMove 36) and `tools/compare/takeDownProbe.py` — a
+  dense probe copied from `crushClawProbe.py` with script-pointer isolation to
+  `Move_TAKE_DOWN` (0x082c9cea)..`Move_DOUBLE_EDGE` (0x082c9d7a) capturing the
+  `AnimTask_WindUpLunge`/`_Step1`/`_Step2` task, every
+  `gSlideMonToOffsetSpriteTemplate`/`gSlideMonToOriginalPosSpriteTemplate`
+  dummy sprite (`SlideMonToOffset`/`SlideMonToOriginalPos` and their step
+  callbacks), the basic hitsplat (`gBasicHitSplatSpriteTemplate`), the complex
+  palette-blend sprite (`gComplexPaletteBlendSpriteTemplate` with all 8 data
+  words), `AnimTask_ShakeMonInPlace`/`_Step`, both battlers' sprites,
+  BLDCNT/BLDALPHA/BLDY, all 512 faded/unfaded/hardware palettes, software +
+  hardware OAM and matrices, SE1/SE2 headers (SE_M_MEGA_KICK2 at song 141),
+  per-frame raw RGB + sha256. NOTE: reads `animNum`/`animCmdIndex` at the TRUE
+  sprite offsets `0x2a`/`0x2b`/`0x2c` like crushClawProbe (NOT `0x18`/`0x19`).
+  Probe run: `python3 tools/run-mgba-probe.py <out.json> -- python3
+  tools/compare/takeDownProbe.py <scenario.json> <out.json> <rgb-dir> 36`.
+  Plus the displayed-timing change maps banked under
+  `tools/compare/evidence/take-down-changemap-*.txt`.
+- **Measured (fresh runs, both orientations, deterministic and identical):
+  move-owned window 98 frames each — player-back 214..311, opponent-front
+  214..311 raw** (script first in-bounds .. first inactive cleanup). **Player-back
+  first frame 214 is CLEAN** (softOam byte-identical to 215, hw OAM slots 11+
+  off-screen y=160, no shadow sprite). **Opponent-front first frame 214 is
+  CONTAMINATED** with the DETECT-class enemy-shadow teardown (hw OAM slot 11
+  attr0 `0x4041`/attr1 `0x40a0`/attr2 `0x5d2d` at (160,65), present only at 214,
+  gone by 215) — the truthful opponent-front window is **215..311 (97 frames)**;
+  promotion must drop frame 214 via `skipProbeFrames`/`ageOffset` like DETECT.
+- **`ANIM_DEF_PARTNER` resolved (singles battle):** `monbg ANIM_DEF_PARTNER` =
+  `ANIM_DEF_PARTNER` (3) has bit0 = `ANIM_TARGET` (1), so `Cmd_monbg` selects
+  **the TARGET** (`gBattleAnimTarget`). Measured: the target sprite is moved to
+  BG1 — opponent sprite `invisible=TRUE` from RAM 218 (player-back) / player
+  sprite invisible from 218 (opponent-front), restored to visible at RAM 307
+  (`clearmonbg`). The target's later x2 motion therefore rides the BG1 scroll,
+  not its OAM.
+- **Wind-up lunge (the mover):** task created RAM 220, Step1 first write RAM 221
+  (x2 -2), ramps -2..-24 over RAM 221-243 (windUpDuration 23), Step2 delay
+  (data[4] 10..0) holds -24 over RAM 244-253, then Step2 lunge returns x2
+  -20..+16 over RAM 254-263 (lungeDelta 1024 = 40<<8/10) and the task is
+  destroyed at 264. Player-back attacker (SWABLU) runs +x (ramp -2..-24 then
+  -20..+16, target offset +40); opponent-front attacker mirrors to -x (ramp
+  +1..+23 then +19..-17). **The lunge task's own x2 is RAM-truth only for its
+  final +16/-17 hold: the SlideMonToOffset sprite owns the visible return.**
+- **Displayed-timing mapping (player-back; opponent-front identical on every
+  frame):** every sprite/palette/SE event displays exactly ONE frame after its
+  RAM cause; the wind-up x2 (task-driven) also displays one frame after its RAM
+  write (change map first pixel change 223, RAM x2=-2 at 221 — verified by the
+  change map + hw OAM x 40→38 at display 223; the change-map and hw-OAM agree).
+  Windup ramp visible 223-245, hold static 246-255 (RAM x2 held -24 244-253),
+  lunge-out visible 256-265; palette-blend darken visible 259 (RAM 258),
+  restore visible 262 (RAM 261); hitsplat visible 259-267 (created RAM 258,
+  destroyed 267, teardown is the 537px bbox 150,26-181,57 change at 268);
+  target slide-to-offset visible 262-265 (RAM 261-264); shake visible 269-290
+  (task RAM 268-288, x2 toggling 12/20 on a 16 base every 2 ages — the 269 frame
+  is the first toggle, the 290 frame is the final hold release back to 16);
+  attacker slide-to-original visible 295-299 (RAM 294-298), target
+  slide-to-original visible 300-306 (RAM 299-305). `blendoff` clears BLDCNT at
+  RAM 307 (age 93) but the final static tail 307-311 shows no pixel step.
+- **Hitsplat anchor measured:** created on `ANIM_ATTACKER` subpriority 4 but
+  positioned `relative_to=ANIM_TARGET` — anchor is the **target** sprite center.
+  Player-back: hitsplat at (166,42) = target ONIX front center (176,42) + x=-10.
+  Opponent-front: (82,88) = target ONIX back center (72,88) + x=+10 (offset
+  mirrored for the player-side target — same convention as BODY_SLAM's `-10 /
+  attackerSide==="player" ? -10 : 10`).
+- **Next:** promote TAKE_DOWN to exact. Copy `crushClawPortable.ts` -> a
+  `takeDownPortable.ts` comparing the reducer against this probe's RAM on both
+  orientations at full-window exact (98/97 frames x 2 axes), with the
+  opponent-front window opening at 215 (`skipProbeFrames` 1 / `ageOffset` 1).
+  Build `SceneOnTakeDownConfig`/`SceneOnTakeDownView` seam in
+  `sceneOnPresentation.ts`, the TAKE_DOWN draw case in `battleScene.ts`, the
+  fixtures (`take-down-player-swablu-opponent-onix.json` /
+  `take-down-opponent-swablu-player-onix.json`), the coverage entry and the
+  inventory pin 125->126 exact / 151->150 unsupported.
+- **Notes — zero new components.** TAKE_DOWN needs none of the four current
+  highest-leverage-unproven components; every script component is already exact
+  elsewhere (WindUpLunge = SPIKE_CANNON/BRICK_BREAK `windUpLunge.ts`,
+  SlideMonToOffset/OriginalPos = BODY_SLAM/STEEL_WING/etc `slideMon.ts`,
+  ShakeMonInPlace = BODY_SLAM/SLAM/etc `shakeMonInPlace.ts`,
+  complex_palette_blend = REVERSAL/AERIAL_ACE/BLAZE_KICK/EARTHQUAKE, basic
+  hitsplat = IRON_TAIL). No boundary widening, no new unsupported-branch
+  barrier.
+
 ## MOVE_CRUSH_CLAW promoted to exact — 125/276, both orientations at 69/69 portable-exact (2026-08-07 worker)
 
 - **State:** coverage advanced **124→125/276 exact**, 0 partial, 0 staged, **152→151
