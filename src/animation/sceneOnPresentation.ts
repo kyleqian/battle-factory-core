@@ -482,6 +482,10 @@ import {
   type CounterState,
 } from "./counter.ts";
 import {
+  doubleEdgeAtAge,
+  type DoubleEdgeState,
+} from "./doubleEdge.ts";
+import {
   poisonTailAtAge,
   type PoisonTailState,
 } from "./poisonTail.ts";
@@ -2051,6 +2055,13 @@ export interface SceneOnCounterConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnDoubleEdgeConfig {
+  readonly move: "DOUBLE_EDGE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSingConfig {
   readonly move: "SING";
   readonly attacker: SceneOnPresentationBattler;
@@ -2218,6 +2229,7 @@ export type SceneOnMoveConfig =
   | SceneOnSlashConfig
   | SceneOnLickConfig
   | SceneOnCounterConfig
+  | SceneOnDoubleEdgeConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
@@ -2733,6 +2745,12 @@ export interface SceneOnLickView extends LickState {
 }
 
 export interface SceneOnCounterView extends CounterState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnDoubleEdgeView extends DoubleEdgeState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3367,6 +3385,7 @@ export function createSceneOnMovePresentation<
   | SceneOnSlashConfig
   | SceneOnLickConfig
   | SceneOnCounterConfig
+  | SceneOnDoubleEdgeConfig
   | SceneOnWrapConfig,
 >(
   config: TConfig,
@@ -5520,6 +5539,27 @@ export function sceneOnCounterView(
       targetSide: target.geometry.side,
       targetCenter: target.geometry.animationCenter,
     }),
+  };
+}
+
+export function sceneOnDoubleEdgeView(
+  state: SceneOnMovePresentationState,
+): SceneOnDoubleEdgeView {
+  if (state.config.move !== "DOUBLE_EDGE") {
+    throw new Error(`expected DOUBLE_EDGE presentation, got ${state.config.move}`);
+  }
+  const attacker = state.config.attacker;
+  const target = state.config.target;
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...doubleEdgeAtAge(
+      state.age,
+      attacker.geometry.side,
+      target.geometry.side,
+      target.geometry.animationCenter,
+    ),
   };
 }
 
