@@ -14,6 +14,10 @@ import {
   TEETH_2_SPAWN_AGE,
   crunchAtAge,
 } from "../../src/animation/crunch.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnCrunchView,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 const PLAYER = { targetCenter: { x: 176, y: 42 } };
 const OPPONENT = { targetCenter: { x: 72, y: 88 } };
@@ -154,5 +158,45 @@ describe("Move_CRUNCH source-relative reducer", () => {
     expect(back.teeth[1]).toMatchObject({ x: 104, y: 120, x2: -32, y2: -32 });
     expect(crunchAtAge(HITSPLAT_1_AGE, GEOM_OPPONENT).hitsplats[0]).toMatchObject({ x: 80, y: 88 });
     expect(crunchAtAge(SHAKE_1_AGE + 4, GEOM_OPPONENT)).toMatchObject({ targetY2: 7 });
+  });
+
+  it("exposes the same reducer through the Scene-ON presentation seam", () => {
+    const state = createSceneOnMovePresentation({
+      move: "CRUNCH",
+      attacker: {
+        species: "HOUNDOUR",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 56 },
+          animationCenter: { x: 72, y: 88 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 10 },
+          animationCenter: PLAYER.targetCenter,
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 167,
+        playerMaxHp: 175,
+        opponentHp: 142,
+        opponentMaxHp: 142,
+      },
+    });
+    const view = sceneOnCrunchView({ ...state, age: 60 });
+    expect(view).toMatchObject({
+      age: 60,
+      monbg: true,
+      blendOn: true,
+      targetY2: 7,
+      fadeY: 0,
+    });
+    expect(view.teeth).toHaveLength(2);
+    expect(view.hitsplats).toHaveLength(1);
   });
 });
