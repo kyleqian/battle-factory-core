@@ -1135,6 +1135,8 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           ...(view.attacker.isAsleep === true ? { isAsleep: true } : {}),
           ...(view.attacker.hasSubstitute === true ? { hasSubstitute: true } : {}),
           ...(view.attacker.holdEffect === undefined ? {} : { holdEffect: view.attacker.holdEffect }),
+          ...(view.attacker.usedHeldItemId === undefined ? {} : { usedHeldItemId: view.attacker.usedHeldItemId }),
+          ...(view.attacker.stockpileCount === undefined ? {} : { stockpileCount: view.attacker.stockpileCount }),
         },
         target: {
           speed: view.target.speed,

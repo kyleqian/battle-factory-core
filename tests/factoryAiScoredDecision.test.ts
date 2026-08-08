@@ -3103,3 +3103,54 @@ describe("AI_CV_Encore/HealBell new-field wiring through the adapter", () => {
     expect(unknown.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: -1 });
   });
 });
+
+describe("pass-3 CheckViability adapter populates stockpileCount/usedHeldItemId (AI_CV_SpitUp/AI_CV_Recycle)", () => {
+  const MOVE_SPIT_UP_MASK7 = 255; // EFFECT_SPIT_UP
+  const MOVE_RECYCLE_MASK7 = 278; // EFFECT_RECYCLE
+
+  it("stockpileCount: view.attacker.stockpileCount=3 reaches AI_CV_SpitUp's count>=2 roll; absent (0) is the deterministic zero", () => {
+    const stocked = cvWiringView(MOVE_SPIT_UP_MASK7, {}, { stockpileCount: 3 });
+    let foundValue: number | null = null;
+    for (let v = 1; v <= 256; v += 1) {
+      const result = chooseFactoryAiScoredDecision({
+        view: stocked,
+        request: fourSlotRequest,
+        rng: { value: v, calls: 0 },
+      });
+      if (result.trace.slotScores[0]!.checkViabilityDelta === 2) {
+        foundValue = v;
+        break;
+      }
+    }
+    expect(foundValue).not.toBeNull();
+    const absent = chooseFactoryAiScoredDecision({
+      view: cvWiringView(MOVE_SPIT_UP_MASK7, {}),
+      request: fourSlotRequest,
+      rng: { value: foundValue!, calls: 0 },
+    });
+    expect(absent.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 0 });
+  });
+
+  it("usedHeldItemId: view.attacker.usedHeldItemId=134 (Chesto Berry) reaches AI_CV_Recycle's +1 roll; absent (0) is the -2", () => {
+    const withItem = cvWiringView(MOVE_RECYCLE_MASK7, {}, { usedHeldItemId: 134 });
+    let foundValue: number | null = null;
+    for (let v = 1; v <= 256; v += 1) {
+      const result = chooseFactoryAiScoredDecision({
+        view: withItem,
+        request: fourSlotRequest,
+        rng: { value: v, calls: 0 },
+      });
+      if (result.trace.slotScores[0]!.checkViabilityDelta === 1) {
+        foundValue = v;
+        break;
+      }
+    }
+    expect(foundValue).not.toBeNull();
+    const absent = chooseFactoryAiScoredDecision({
+      view: cvWiringView(MOVE_RECYCLE_MASK7, {}),
+      request: fourSlotRequest,
+      rng: { value: foundValue!, calls: 0 },
+    });
+    expect(absent.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: -2 });
+  });
+});

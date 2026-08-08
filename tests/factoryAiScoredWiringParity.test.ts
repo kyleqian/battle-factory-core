@@ -229,6 +229,8 @@ const CV_BATTLER_SAMPLE: Required<FactoryAiCheckViabilityBattler> = Object.freez
   holdEffect: 1,
   speciesAbilities: ["ABILITY_PRESSURE", "ABILITY_NONE"] as const,
   knownAbility: "ABILITY_PRESSURE",
+  usedHeldItemId: 1,
+  stockpileCount: 1,
 });
 
 const CBM_TARGET_SAMPLE: Required<FactoryAiCheckBadMoveRoarTarget> = Object.freeze({

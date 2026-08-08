@@ -422,6 +422,20 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
    * guessing heuristic draws).
    */
   knownAbility?: string | null;
+  /**
+   * `gBattleStruct->usedHeldItems[battler]`, read by `get_used_held_item`
+   * (`Cmd_get_used_held_item`, `battle_ai_script_commands.c:2137-2149`) --
+   * `AI_CV_Recycle`'s encouraged-item gate (`:2427`), AI_USER's own copy only.
+   * Optional, defaulting to 0 (`ITEM_NONE`, the battle-start value).
+   */
+  usedHeldItemId?: number;
+  /**
+   * `gDisableStructs[battler].stockpileCounter`, read by `get_stockpile_count`
+   * (`Cmd_get_stockpile_count`, `battle_ai_script_commands.c:2116-2128`) --
+   * `AI_CV_SpitUp`'s `if_less_than 2` gate (`:2254`), AI_USER's own copy
+   * only. Optional, defaulting to 0 (battle-start count).
+   */
+  stockpileCount?: number;
 }>;
 
 export type FactoryAiCheckViabilityDraw =
@@ -1032,6 +1046,28 @@ export type FactoryAiCheckViabilityDraw =
     rawRngValue: number;
     randomValue: number;
     /** True when the JUMP (raw low byte < 50) skips the block's own score. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "recycle-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < 50) skips the +1. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "spit-up-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when the JUMP (raw low byte < 80) skips the +2. */
     jumped: boolean;
   }>
   | Readonly<{
@@ -6693,6 +6729,40 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_RECYCLE") {
+    // AI_CV_Recycle (data/battle_ai_scripts.s:2426-2442).
+    const recycle = runCvRecycle({
+      rng: input.rng,
+      attackerUsedHeldItemId: input.attacker.usedHeldItemId ?? 0,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: recycle.rng,
+      draws: recycle.draws,
+      scoreDelta: recycle.scoreDelta,
+      funcResultAfter: recycle.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_SPIT_UP") {
+    // AI_CV_SpitUp (data/battle_ai_scripts.s:2253-2259).
+    const spitUp = runCvSpitUp({
+      rng: input.rng,
+      attackerStockpileCount: input.attacker.stockpileCount ?? 0,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: spitUp.rng,
+      draws: spitUp.draws,
+      scoreDelta: spitUp.scoreDelta,
+      funcResultAfter: spitUp.funcResultAfter,
+    });
+  }
+
   if (move.effect === "EFFECT_THIEF") {
     // AI_CV_Thief (data/battle_ai_scripts.s:1848-1868).
     const thief = runCvThief({
@@ -8966,4 +9036,92 @@ function runCvHaze(input: Readonly<{
   }
 
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+}
+
+/** `AI_CV_Recycle_ItemsToEncourage` (data/battle_ai_scripts.s:2438-2442) as item ids. */
+const AI_CV_RECYCLE_ENCOURAGED_ITEMS: ReadonlySet<number> = new Set([
+  134, // ITEM_CHESTO_BERRY
+  141, // ITEM_LUM_BERRY
+  174, // ITEM_STARF_BERRY
+]);
+
+/**
+ * `AI_CV_Recycle` (`data/battle_ai_scripts.s:2426-2442`, EFFECT_RECYCLE):
+ *
+ * ```
+ * AI_CV_Recycle:
+ *     get_used_held_item AI_USER
+ *     if_not_in_bytes AI_CV_Recycle_ItemsToEncourage, AI_CV_Recycle_ScoreDown2
+ *     if_random_less_than 50, AI_CV_Recycle_End
+ *     score +1
+ *     goto AI_CV_Recycle_End
+ * AI_CV_Recycle_ScoreDown2:
+ *     score -2
+ * AI_CV_Recycle_End:
+ *     end
+ * ```
+ *
+ * `get_used_held_item AI_USER` ALWAYS overwrites funcResult with the used
+ * item id (the exit value; only ids 0-3 can collide with an `AI_WEATHER_*`
+ * compare). A used item NOT in the 3-entry encourage list is the deterministic
+ * -2; a listed one runs the `<50` roll (JUMP -> 0, FALL-THROUGH -> +1).
+ */
+function runCvRecycle(input: Readonly<{
+  rng: BattleRngState;
+  attackerUsedHeldItemId: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const itemId = input.attackerUsedHeldItemId;
+  const funcResultAfter = itemId <= 3 ? itemId as AiWeatherValue : undefined;
+  if (!AI_CV_RECYCLE_ENCOURAGED_ITEMS.has(itemId)) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -2, funcResultAfter });
+  }
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-recycle-roll`);
+  const jumped = roll.randomValue % 256 < 50;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind: "recycle-roll" as const, jumped })]),
+    scoreDelta: jumped ? 0 : 1,
+    funcResultAfter,
+  });
+}
+
+/**
+ * `AI_CV_SpitUp` (`data/battle_ai_scripts.s:2253-2259`, EFFECT_SPIT_UP):
+ *
+ * ```
+ * AI_CV_SpitUp:
+ *     get_stockpile_count AI_USER
+ *     if_less_than 2, AI_CV_SpitUp_End
+ *     if_random_less_than 80, AI_CV_SpitUp_End
+ *     score +2
+ * AI_CV_SpitUp_End:
+ *     end
+ * ```
+ *
+ * `get_stockpile_count AI_USER` ALWAYS overwrites funcResult with the
+ * stockpile count (0-3 -- every value collides with an `AI_WEATHER_*`
+ * compare, the exit value). A count < 2 is the deterministic zero; a count
+ * >= 2 runs the `<80` roll (JUMP -> 0, FALL-THROUGH -> +2).
+ */
+function runCvSpitUp(input: Readonly<{
+  rng: BattleRngState;
+  attackerStockpileCount: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const count = Math.max(0, Math.min(3, input.attackerStockpileCount));
+  const funcResultAfter = count as AiWeatherValue;
+  if (count < 2) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0, funcResultAfter });
+  }
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-spit-up-roll`);
+  const jumped = roll.randomValue % 256 < 80;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({ ...roll, kind: "spit-up-roll" as const, jumped })]),
+    scoreDelta: jumped ? 0 : 2,
+    funcResultAfter,
+  });
 }

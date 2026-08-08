@@ -7617,3 +7617,81 @@ describe("AI_CV_Haze (data/battle_ai_scripts.s:1247-1282, EFFECT_HAZE)", () => {
     expect(result.draws[0]).toMatchObject({ kind: "haze-roll-1", jumped: true });
   });
 });
+
+describe("AI_CV_Recycle (data/battle_ai_scripts.s:2426-2442, EFFECT_RECYCLE)", () => {
+  const MOVE_RECYCLE = 278;
+
+  function recycleRun(rngValue: number, usedHeldItemId: number) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_RECYCLE,
+      attacker: { ...NEUTRAL_BATTLER, usedHeldItemId },
+      target: NEUTRAL_BATTLER,
+      staleFuncResultFallback: 1,
+      drawOrdinalStart: 1,
+      reasonPrefix: "recycle",
+    });
+  }
+
+  it("used item not in the encourage list: deterministic -2", () => {
+    const result = recycleRun(1, 99);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -2, draws: [] });
+  });
+
+  it("listed item (Lum Berry 141), roll < 50: zero", () => {
+    const result = recycleRun(4, 141);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0 });
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "recycle-roll", jumped: true });
+  });
+
+  it("listed item, roll >= 50: +1", () => {
+    const result = recycleRun(1, 134); // Chesto Berry
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 1, draws: [{ kind: "recycle-roll", jumped: false }] });
+  });
+
+  it("used item id 0 (ITEM_NONE) writes funcResult = AI_WEATHER_SUN collision", () => {
+    const result = recycleRun(1, 0);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.funcResultAfter).toBe(0);
+  });
+});
+
+describe("AI_CV_SpitUp (data/battle_ai_scripts.s:2253-2259, EFFECT_SPIT_UP)", () => {
+  const MOVE_SPIT_UP = 255;
+
+  function spitUpRun(rngValue: number, stockpileCount: number) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_SPIT_UP,
+      attacker: { ...NEUTRAL_BATTLER, stockpileCount },
+      target: NEUTRAL_BATTLER,
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "spitup",
+    });
+  }
+
+  it("stockpile count < 2: deterministic zero, funcResult = count", () => {
+    const result = spitUpRun(1, 1);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [], funcResultAfter: 1 });
+  });
+
+  it("count >= 2, roll < 80: zero", () => {
+    const result = spitUpRun(4, 2); // seed 4 low byte 25 (< 80)
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0 });
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "spit-up-roll", jumped: true });
+  });
+
+  it("count >= 2, roll >= 80: +2", () => {
+    const result = spitUpRun(9, 3);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 2, draws: [{ kind: "spit-up-roll", jumped: false }] });
+  });
+});
