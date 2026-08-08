@@ -9,8 +9,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 - **State:** master at this entry's commit, tree clean. Scene-OFF Mirror Coat
   verifier **PASS 4/4** (control/reach, seeds 1/99): exact score vectors,
-  chosen slots, draw kinds/counts **7/7/8/7**, and endpoint RNG. Targeted AI
-  receipts **11 files / 792 passed**; smoke **375 passed**; typecheck green.
+  chosen slots, draw kinds/counts **7/7/8/7**, and endpoint RNG. Full
+  `npm test` **795 files / 8004 passed / 1 skipped**; targeted AI receipts
+  **11 files / 792 passed**; smoke **375 passed**; typecheck/build green.
 - **Did:** added explicit scored-decision `turnStartRandomNumber` ownership.
   Standalone pre-boundary verification consumes/attributes
   `BattleTurnPassed gRandomTurnNumber`; production receives the kernel-stored
