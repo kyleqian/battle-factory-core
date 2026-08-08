@@ -2568,9 +2568,36 @@
     "src/engine/battleScene.ts",
     "tests/animation/sing.test.ts"
    ]
-  },
-  {
-   "move": "MOVE_SLAM",
+   },
+   {
+    "move": "MOVE_SLASH",
+    "status": "exact",
+    "covered": [
+     "complete legal Level-50 mechanicLab parties stage FRONTIER_MON_CHARMELEON_1 set 175 (CHARMELEON 5, all four active slots SLASH move 163 so the Factory AI has one legal choice, Scope Lens 198, NAUGHTY, 255/255 ATTACK/HP) against legal ONIX in both orientations; both pass the complete move-owned Scene-ON window twice fresh with evidence b1e38fbcfdc72767f1ec0caef3cda6cea5e364edcad56cdc7a8e1088183dda88 / raw RGB df7ff7a8237190853b44e6dea7879e0154ec8762532567c97fdae84a2ffce413 for the 46-frame player-back window (frames 73-118, first frame clean) and evidence b23785fb0bcf7855dba88f32fa0d0cf458feaa09be32bd3df5f7aa4c9ae4aba5 / raw RGB a08c6c22184a8b0f368e0563c58d50504d25648f8905da02f1664cd6541a9ac2 for the 46-frame opponent-front window (frames 77-122, structurally identical +4 on every frame, first frame clean), both isolated by sBattleAnimScriptPtr within the Move_SLASH..Move_STRUGGLE label bounds; both orientations 46/46 component AND framebuffer exact",
+     "the reducer composes only already-exact components with zero new ones: the two gSlashSliceSpriteTemplate slices (32x32 ObjNormal, NOT ObjBlend, gSlashSliceAnimCmds1's 4 frames of 16 tiles at 4 ticks each, no loop) anchored at the target's X_2/Y_PIC +-8, the AnimFalseSwipeSlice_Step3 invisible blink teardown, and AnimTask_ShakeMon2 (4,0,18,1) target x2 +-4 2-age toggle (the existing shakeMon2.ts shared port); the slash art (ANIM_TAG_SLASH) carries its OWN embedded palette (gBattleAnimSpritePal_Slash) unlike CUT's ObjBlend sharing Impact's palette, so the two differences the reducer must not conflate are kept distinct",
+     "displayed timing splits the latch (the TAKE_DOWN WindUpLunge case): the slices are sprite-driven and render exactly ONE frame after their RAM state (creation age 4 -> display 78, cmd transitions at +1), while the shake x2 is task-driven and renders TWO frames after its RAM write (RAM 83 -> pixels 85, change-map confirmed 85,87,...,117 vs RAM 83,85,...,115); the ShakeMon2 creation write (+4 at RAM age 9) is a same-frame transient the reducer leaves at 0 but it does reach exactly one displayed frame (display age 11), so the draw drives the shake from the shared sequence directly; the target rests at its ONIX front-idle x2=1 through display age 10 and stays 0 after (the RAM restore at age 44 displays at 46, outside the window)",
+     "displayed frames (player-back; opponent-front +4 on every frame): slice1 78..111 (cmd0 78-80, cmd1 81-84, cmd2 85-88, cmd3 89-92, teardown blinks 93..110, gone 112), slice2 84..117 (cmd0 84-86, cmd1 87-90, cmd2 91-94, cmd3 95-99, teardown blinks 100..116, gone 118), shake x2 +4 at 84 then -4/-4/+4/+4 repeating through -4 at 117-118 (no palette/BG work at all: no monbg, no fadetobg, no setalpha/blendoff); SE_M_RAZOR_WIND at slice creation",
+     "the portable proves 46/46 source-component frames in both orientations (attacker static, target idle+shake x2 with the front-idle hold, both slices' presence/x/y/frame/invisible with the blink teardown, the single ShakeMon2 task across the shake span, razor-wind SE header at the event ages) and the identical shared-framebuffer 46/46 through the full engine render with healthboxes and message window untouched; the slices' painter order is derived from the probe's hardware subpriority, not assumed - lower subpriority wins in both orientations (slices 38/28 sit in front of the ONIX front/back 40/30) and the equal-subpriority pair resolves in allocator order (slice 1, slot 3, on top of slice 2, slot 4, measured at the overlapping pixels); no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+    ],
+    "evidence": [
+     "tools/battle-lab/mechanic-slash-player-charmeleon-opponent-onix.json",
+     "tools/battle-lab/mechanic-slash-opponent-charmeleon-player-onix.json",
+     "tools/compare/fixtures/slash-player-charmeleon-opponent-onix.json",
+     "tools/compare/fixtures/slash-opponent-charmeleon-player-onix.json",
+     "tools/compare/slashProbe.py",
+     "tools/compare/slashPortable.ts",
+     "tools/compare/evidence/slash-changemap-player.txt",
+     "tools/compare/evidence/slash-changemap-opponent.txt",
+     "src/assets/gen/battle-anim-slash-slice.json",
+     "src/animation/slash.ts",
+     "src/animation/sceneOnPresentation.ts",
+     "src/engine/battleScene.ts",
+     "tests/animation/slash.test.ts",
+     "tests/animation/slashEvidence.test.ts"
+    ]
+   },
+   {
+    "move": "MOVE_SLAM",
    "status": "exact",
    "covered": [
     "fresh complete legal challenge-0 Level-50 Factory parties stage the lowest suitable carrier set-164 FRONTIER_MON_LICKITUNG_1 against ONIX in both Scene-ON orientations; all active choices are constrained to SLAM",

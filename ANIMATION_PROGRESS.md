@@ -1,5 +1,69 @@
 # Animation coverage
 
+## MOVE_SLASH promoted to exact — 128/276, both orientations at 46/46 portable-exact (2026-08-08 worker, round B)
+
+- **State:** coverage advanced **127→128/276 exact**, 0 partial, 0 staged, **149→148
+  unsupported**. SLASH was staged last round and is now proven by an exact move
+  in both orientations through the shared seam. `slashPortable.ts` exits 0 at
+  **SLASH component 46/46; framebuffer 46/46** (player-back, frames 73-118) and
+  **component 46/46; framebuffer 46/46** (opponent-front, frames 77-122), fresh
+  evidence hashes player `b1e38fbc…`/RGB `df7ff7a8…`, opponent `b23785fb…`/RGB
+  `a08c6c22…`, reproduced twice fresh. The inventory pin moved **127→128 exact /
+  149→148 unsupported**.
+- **Did:** built `SceneOnSlashConfig`/`sceneOnSlashView` in
+  `sceneOnPresentation.ts` (following the CRUNCH seam exactly) and the MOVE_SLASH
+  draw case in `battleScene.ts` — CHARMELEON back/front and ONIX front/back, the
+  two 32x32 slash slices from `src/assets/gen/battle-anim-slash-slice.json` (its
+  OWN embedded palette, ObjNormal not ObjBlend, `gOamData_AffineOff_ObjNormal_32x32`)
+  drawn at `slice.x - 16 / slice.y - 16` (center-anchored OAM), the ONIX
+  front-idle x2=1 hold through display age 10, and the split display latch
+  (below). Wrote `tools/compare/slashPortable.ts` (modelled on crunchPortable.ts,
+  probe move 163) + the two fixtures, the evidence test
+  (`tests/animation/slashEvidence.test.ts`), the coverage entry, the extra
+  Tier-1 shake-vs-shared-port pin in `tests/animation/slash.test.ts`, and moved
+  the inventory pin 127→128 exact / 149→148 unsupported.
+- **Measured (fresh, deterministic, twice-fresh hashes pinned):** the two slice
+  sprites display one frame after their RAM state (slice1 created RAM age 4 →
+  pixels 78, slice2 age 10 → pixels 84, cmd transitions all at +1, slice1 gone
+  from pixels at 112, slice2 at 118, teardown blinks 96/98/…/116), while the
+  task-driven ShakeMon2 target x2 displays TWO frames after its RAM write (RAM
+  83 → pixels 85; change-map events 85, 87, 89, …, 117 vs RAM 83, 85, …, 115).
+  **The creation write at RAM age 9 (+4) is a same-frame transient the reducer
+  leaves at 0, but it DOES reach exactly one displayed frame (pixel 84)** — so
+  the draw drives the shake from the shared `shakeMon2OffsetAtTick(4, 0, 18, 1,
+  age - 11)` sequence directly, not from the reducer's RAM truth. The target
+  rests at the ONIX front-idle x2=1 through display age 10 and stays 0 after
+  (the RAM restore to 0 at age 44 displays at 46, outside the window — the ONIX
+  x2 never returns to 1).
+- **Notes — the painter order was the round's one trap, and it was NOT the
+  "slice behind the target" one.** Lower subpriority wins in both orientations
+  (slices 38/28 sit IN FRONT of the ONIX front/back 40/30 — measured by the
+  slice's frame-0 sliver overwriting opaque ONIX pixels), so the slices paint
+  after the target. The genuine flip is WITHIN the equal-subpriority pair:
+  slice 1 (slot 3) paints ON TOP of slice 2 (slot 4) — the earlier OAM entry
+  wins for equal priority AND equal Y (measured: the oracle's frame-3 slice-1
+  pixels at 181,34 win over slice-2's frame-2 value there), opposite to the
+  CRUNCH teeth/hitsplat rule where the later slot wins. Painter is
+  target → slice2 → slice1 → attacker.
+- **Notes — deliverable #4 landed as specified, with a correction to the brief's
+  parenthetical.** The extra Tier-1 pin asserts `slash.ts`'s target-shake values
+  equal `shakeMon2OffsetAtTick(4, 0, 18, 1, age - 9).x2` for every age 10..45
+  (they agree on every RAM age the hardware reaches a frame) and documents that
+  the shared sequence's index 0 (+4) is the same-frame creation transient —
+  but that transient IS displayed (pixel 84), so the draw case special-cases it
+  rather than the reducer. `shakeMon2.ts` untouched, `slash.ts` still duplicates
+  the closed form; the pin keeps the two in sync.
+- **Next:** the settled queue (MOVE_DRAGON_BREATH / MOVE_BIND) and the ranked
+  remaining moves; SLASH adds no new unproven components (the slash slice = CUT's
+  cutting-slice shape with its own palette + ObjNormal, ShakeMon2 already exact
+  via DRAGON_BREATH, the slicing-seam painter = AERIAL_ACE/CUT).
+- **Notes — no boundary widening, no new unsupported-branch barrier, no
+  shared-helper edit.** The only engine contacts are the SLASH draw case in
+  `battleScene.ts` (plus the `slashSliceFrameTileset` helper) and the
+  `sceneOnSlashView` seam in `sceneOnPresentation.ts`. The coverage entry is
+  flipped LAST, after both portables exited 0 at full-window exact.
+
+
 ## MOVE_SLASH staged — both orientations isolated at 46 frames; scenarios + dense probe + change maps banked (2026-08-08 worker, round A)
 
 - **State:** SLASH stays **unsupported**. Coverage unchanged at **127/276 exact, 0

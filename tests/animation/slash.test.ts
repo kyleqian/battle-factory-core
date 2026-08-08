@@ -10,6 +10,7 @@ import {
   SLICE_2_TEARDOWN_AGE,
   slashAtAge,
 } from "../../src/animation/slash.ts";
+import { shakeMon2OffsetAtTick } from "../../src/animation/shakeMon2.ts";
 
 const GEOM_PLAYER = {
   targetSide: "opponent",
@@ -100,5 +101,26 @@ describe("Move_SLASH source-relative reducer", () => {
     expect(opponent.slices).toEqual([{ x: 64, y: 88, tileOffset: 0, invisible: false }]);
     expect(opponent.soundEvents[0]!.pan).toBe(-63);
     expect(player.soundEvents[0]!.pan).toBe(63);
+  });
+
+  it("keeps the duplicated shake closed form pinned to the shared ShakeMon2 port", () => {
+    // The reducer's RAM-truth targetX2 is exactly the shared
+    // `shakeMon2OffsetAtTick(4, 0, 18, 1, age - 9)` sequence on every age the
+    // hardware reaches a frame (10..45, i.e. the RAM ages through the shake's
+    // final toggle). It differs at age 9 only: the shared sequence's index 0
+    // (+4, the AnimTask_ShakeMon2 creation write) is a same-frame transient
+    // the task's immediate step overwrites to -4 before any frame is
+    // displayed, so the reducer correctly leaves age 9 at 0. The pin exists so
+    // the duplicated closed form cannot silently drift from the shared port;
+    // `shakeMon2.ts` must not be edited and `slash.ts` must not call it.
+    for (let age = SHAKE_START_AGE; age <= SHAKE_END_AGE + 1; age += 1) {
+      const shared = shakeMon2OffsetAtTick(4, 0, 18, 1, age - 9).x2;
+      expect(
+        slashAtAge(age, GEOM_PLAYER).targetX2,
+        `age ${age}: reducer ${slashAtAge(age, GEOM_PLAYER).targetX2} vs shared ${shared}`,
+      ).toBe(shared);
+    }
+    expect(shakeMon2OffsetAtTick(4, 0, 18, 1, 0).x2).toBe(4);
+    expect(slashAtAge(SHAKE_START_AGE - 1, GEOM_PLAYER).targetX2).toBe(0);
   });
 });
