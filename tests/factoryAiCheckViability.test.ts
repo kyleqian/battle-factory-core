@@ -5536,3 +5536,82 @@ describe("AI_CV_DestinyBond (data/battle_ai_scripts.s:1800-1816)", () => {
     expect(destinyRun(1, 100)).toMatchObject({ funcResultAfter: 2 });
   });
 });
+
+describe("AI_CV_SelfKO (data/battle_ai_scripts.s:800-826)", () => {
+  const MOVE_EXPLOSION = 153; // EFFECT_EXPLOSION
+  const MOVE_SELF_DESTRUCT = 120; // EFFECT_EXPLOSION -> same handler
+
+  function selfKoRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_EXPLOSION,
+      attacker: { ...NEUTRAL_BATTLER, speed: 120, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, speed: 5, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "self-ko",
+    });
+  }
+
+  it("target evasion <7: no prologue score/roll; HP <80 and target slower reaches Encourage2 -> HP<=50 <128 roll", () => {
+    // seed 1 -> encourage2 low byte 198 (>= 128, +1); HP<=30 -> encourage3 low byte 33 (<50, JUMP).
+    const result = selfKoRun(1, { hp: 30, maxHp: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["self-ko-roll-3", "self-ko-roll-4"]);
+  });
+
+  it("target evasion >=10: prologue <128 roll FALL-THROUGH applies a second -1", () => {
+    // seed 1 -> prologue low byte 198 (>= 128). HP>50 -> encourage4 <50 roll low byte 33 (JUMP).
+    const result = selfKoRun(1, { hp: 60, maxHp: 100 }, { evasionStage: 10 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["self-ko-roll-1", "self-ko-roll-5"]);
+  });
+
+  it("target evasion >=10: prologue <128 roll JUMP skips the second -1", () => {
+    // seed 4 -> prologue low byte 25 (< 128). HP>50 -> encourage4 <50 roll low byte 8 (JUMP).
+    const result = selfKoRun(4, { hp: 60, maxHp: 100 }, { evasionStage: 10 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1 });
+  });
+
+  it("HP >=80 and target NOT faster: Encourage1 <50 roll FALL-THROUGH applies Score_Minus3 (-3)", () => {
+    // seed 1 -> encourage1 low byte 198 (>= 50).
+    const result = selfKoRun(1, { hp: 90, maxHp: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "self-ko-roll-2", jumped: false });
+  });
+
+  it("HP >=80, target faster: Encourage1's target-faster gate jumps straight to Encourage2", () => {
+    const result = selfKoRun(1, { hp: 90, maxHp: 100, speed: 5 }, { speed: 120 });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["self-ko-roll-5"]);
+  });
+
+  it("target evasion in [7,10): scores -1 with no prologue roll; HP>50 Encourage4 <50 roll FALLS THROUGH to a further -1", () => {
+    // seed 1 -> encourage4 low byte 198 (>= 50, FALL-THROUGH -1): total -2.
+    const result = selfKoRun(1, { hp: 60, maxHp: 100 }, { evasionStage: 7 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "self-ko-roll-5" });
+  });
+
+  it("carry preserved", () => {
+    expect(selfKoRun(1, { hp: 100, maxHp: 100 })).toMatchObject({ funcResultAfter: 2 });
+  });
+
+  it("MOVE_SELF_DESTRUCT dispatches through the identical handler", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SELF_DESTRUCT,
+      attacker: { ...NEUTRAL_BATTLER, hp: 90, maxHp: 100, speed: 120 },
+      target: { ...NEUTRAL_BATTLER, speed: 5 },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "self-ko",
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -3 });
+  });
+});

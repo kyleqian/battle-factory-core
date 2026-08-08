@@ -729,7 +729,7 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
-    kind: "self-ko-roll-1" | "self-ko-roll-2" | "self-ko-roll-3" | "self-ko-roll-4";
+    kind: "self-ko-roll-1" | "self-ko-roll-2" | "self-ko-roll-3" | "self-ko-roll-4" | "self-ko-roll-5";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -2180,12 +2180,140 @@ function runCvDestinyBond(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
 }
 
+/**
+ * `AI_CV_SelfKO` (`data/battle_ai_scripts.s:800-826`, EFFECT_EXPLOSION):
+ *
+ * ```
+ * AI_CV_SelfKO:
+ *     if_stat_level_less_than AI_TARGET, STAT_EVASION, 7, AI_CV_SelfKO_Encourage1
+ *     score -1
+ *     if_stat_level_less_than AI_TARGET, STAT_EVASION, 10, AI_CV_SelfKO_Encourage1
+ *     if_random_less_than 128, AI_CV_SelfKO_Encourage1
+ *     score -1
+ * AI_CV_SelfKO_Encourage1:
+ *     if_hp_less_than AI_USER, 80, AI_CV_SelfKO_Encourage2
+ *     if_target_faster AI_CV_SelfKO_Encourage2
+ *     if_random_less_than 50, AI_CV_SelfKO_End
+ *     goto Score_Minus3
+ * AI_CV_SelfKO_Encourage2:
+ *     if_hp_more_than AI_USER, 50, AI_CV_SelfKO_Encourage4
+ *     if_random_less_than 128, AI_CV_SelfKO_Encourage3
+ *     score +1
+ * AI_CV_SelfKO_Encourage3:
+ *     if_hp_more_than AI_USER, 30, AI_CV_SelfKO_End
+ *     if_random_less_than 50, AI_CV_SelfKO_End
+ *     score +1
+ *     goto AI_CV_SelfKO_End
+ * AI_CV_SelfKO_Encourage4:
+ *     if_random_less_than 50, AI_CV_SelfKO_End
+ *     score -1
+ * AI_CV_SelfKO_End:
+ *     end
+ * ```
+ *
+ * Target EVASION stage gates first (stages 0-12, default 6): evasion < 7
+ * jumps straight to `Encourage1` with zero prologue score; evasion in [7,10)
+ * scores -1; evasion >= 10 scores -1 AND runs the prologue `<128` roll whose
+ * JUMP (roll < 128) skips the second -1 and whose FALL-THROUGH applies it.
+ * `Encourage1`: own HP < 80 or target faster both jump to `Encourage2`;
+ * otherwise HP >= 80 AND target not faster runs the `<50` roll (JUMP to End
+ * keeps the running score, FALL-THROUGH `goto Score_Minus3` applies -3).
+ * `Encourage2` (HP < 80 or target faster): HP > 50 jumps to `Encourage4`'s
+ * `<50` roll (FALL-THROUGH -1); HP <= 50 runs the `<128` roll (FALL-THROUGH
+ * +1) then `Encourage3`: HP > 30 ends at zero; HP <= 30 runs the `<50` roll
+ * (FALL-THROUGH +1). Four `if_random_less_than` sites in source order
+ * (prologue `<128`, Encourage1 `<50`, Encourage2 `<128`, Encourage3/4 `<50`
+ * sharing the same ordinal slot by mutually-exclusive reachability), plus the
+ * `if_target_faster` tie-break. No command writes funcResult.
+ */
+function runCvSelfKO(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  let score = 0;
+
+  const targetEvasion = input.target.evasionStage;
+  if (targetEvasion >= 7) {
+    score -= 1;
+    if (targetEvasion >= 10) {
+      const prologue = nextDraw(rng, ordinal, `${input.reasonPrefix}-self-ko-roll-1`);
+      rng = prologue.after;
+      ordinal += 1;
+      const jumped = prologue.randomValue % 256 < 128;
+      draws.push(Object.freeze({ ...prologue, kind: "self-ko-roll-1" as const, jumped }));
+      if (!jumped) score -= 1;
+    }
+  }
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  // Encourage1: HP < 80 or target faster -> Encourage2.
+  if (hpPercent < 80 || targetFaster) {
+    // Encourage2: HP > 50 -> Encourage4's <50 roll; HP <= 50 -> the <128 roll.
+    if (hpPercent > 50) {
+      const encourage4 = nextDraw(rng, ordinal, `${input.reasonPrefix}-self-ko-roll-5`);
+      rng = encourage4.after;
+      ordinal += 1;
+      const jumped = encourage4.randomValue % 256 < 50;
+      draws.push(Object.freeze({ ...encourage4, kind: "self-ko-roll-5" as const, jumped }));
+      if (!jumped) score -= 1;
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+    }
+    const encourage2 = nextDraw(rng, ordinal, `${input.reasonPrefix}-self-ko-roll-3`);
+    rng = encourage2.after;
+    ordinal += 1;
+    const jumped2 = encourage2.randomValue % 256 < 128;
+    draws.push(Object.freeze({ ...encourage2, kind: "self-ko-roll-3" as const, jumped: jumped2 }));
+    if (!jumped2) score += 1;
+    if (hpPercent <= 30) {
+      // Encourage3's <50 roll (HP > 30 ends at zero; <= 30 rolls).
+      const encourage3 = nextDraw(rng, ordinal, `${input.reasonPrefix}-self-ko-roll-4`);
+      rng = encourage3.after;
+      ordinal += 1;
+      const jumped3 = encourage3.randomValue % 256 < 50;
+      draws.push(Object.freeze({ ...encourage3, kind: "self-ko-roll-4" as const, jumped: jumped3 }));
+      if (!jumped3) score += 1;
+    }
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+
+  // HP >= 80 and target not faster: the <50 Encourage1 roll (FALL-THROUGH -3).
+  const encourage1 = nextDraw(rng, ordinal, `${input.reasonPrefix}-self-ko-roll-2`);
+  rng = encourage1.after;
+  const jumped = encourage1.randomValue % 256 < 50;
+  draws.push(Object.freeze({ ...encourage1, kind: "self-ko-roll-2" as const, jumped }));
+  if (!jumped) score -= 3;
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+}
+
 const AI_EFFECTIVENESS_X0_25 = 10;
 const AI_EFFECTIVENESS_X0_5 = 20;
 const AI_EFFECTIVENESS_X1 = 40;
 const AI_EFFECTIVENESS_X2 = 80;
 const AI_EFFECTIVENESS_X4 = 160;
-
 /**
  * `Cmd_if_type_effectiveness`'s own effectiveness-class probe
  * (`battle_ai_script_commands.c:1515-1554`), reused verbatim by all four
@@ -4706,6 +4834,25 @@ export function runCheckViability(input: Readonly<{
       rng: destinyBond.rng,
       draws: destinyBond.draws,
       scoreDelta: destinyBond.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_EXPLOSION") {
+    // AI_CV_SelfKO (data/battle_ai_scripts.s:800-826) -- the shared handler
+    // for Explosion/Selfdestruct.
+    const selfKo = runCvSelfKO({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: selfKo.rng,
+      draws: selfKo.draws,
+      scoreDelta: selfKo.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }
