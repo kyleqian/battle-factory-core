@@ -6723,3 +6723,116 @@ describe("AI_CV_HealBell (data/battle_ai_scripts.s:1841-1846)", () => {
     });
   });
 });
+
+// data/battle_ai_scripts.s:1547-1586, EFFECT_SUBSTITUTE. Move 164.
+describe("AI_CV_Substitute (data/battle_ai_scripts.s:1547-1586)", () => {
+  const MOVE_SUBSTITUTE = 164; // EFFECT_SUBSTITUTE
+  const LAST_MOVE_TOXIC = 92; // EFFECT_TOXIC (status1-inducing, reaches Substitute5)
+  const LAST_MOVE_CONFUSE = 109; // EFFECT_CONFUSE (reaches Substitute6)
+  const LAST_MOVE_LEECH_SEED = 73; // EFFECT_LEECH_SEED (reaches Substitute7)
+  const LAST_MOVE_NEUTRAL = 57; // MOVE_SURF (EFFECT_HIT -- no substitution-related effect)
+  function substituteRun(
+    rngValue: number,
+    attackerOverrides: Record<string, unknown>,
+    targetOverrides: Record<string, unknown> = {},
+  ) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_SUBSTITUTE,
+      attacker: { ...NEUTRAL_BATTLER, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "substitute",
+    });
+  }
+
+  it("HP > 90: no HP rolls; faster target ends at zero with no last-move read (carry kept)", () => {
+    const result = substituteRun(1, { hp: 91, maxHp: 100, speed: 5 }, { speed: 120 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, funcResultAfter: 2 });
+    expect(result.draws.map((d) => d.kind)).toEqual([]);
+  });
+
+  it("HP > 90, target NOT faster, neutral last move: ends at zero with the last-move effect written to funcResult", () => {
+    const result = substituteRun(1, { hp: 91, maxHp: 100, speed: 120 }, { speed: 5, lastUsedMoveId: LAST_MOVE_NEUTRAL });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0 });
+    expect(result.draws.map((d) => d.kind)).toEqual([]);
+    expect(result.funcResultAfter).toBe(0); // EFFECT_HIT (id 0 = AI_WEATHER_SUN)
+  });
+
+  it("HP > 90, target NOT faster, status-inducing last move on a CLEAN target: reaches the +1 roll", () => {
+    // seed 1 -> %256=198 >= 100 FALL-THROUGH +1.
+    const result = substituteRun(1, { hp: 91, maxHp: 100, speed: 120 }, { speed: 5, lastUsedMoveId: LAST_MOVE_TOXIC });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 1 });
+    expect(result.draws.map((d) => d.kind)).toEqual(["substitute-roll-4"]);
+  });
+
+  it("HP > 90, target NOT faster, status-inducing last move on a STATUSED target: ends at zero", () => {
+    const result = substituteRun(1, { hp: 91, maxHp: 100, speed: 120 }, {
+      speed: 5, lastUsedMoveId: LAST_MOVE_TOXIC, hasAnyStatus: true,
+    });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0 });
+    expect(result.draws.map((d) => d.kind)).toEqual([]);
+  });
+
+  it("confusion-inducing last move on a clear target reaches the +1 roll; confused target ends at zero", () => {
+    const clear = substituteRun(1, { hp: 91, maxHp: 100, speed: 120 }, { speed: 5, lastUsedMoveId: LAST_MOVE_CONFUSE });
+    if (clear.kind !== "scored") throw new Error("unreachable");
+    expect(clear).toMatchObject({ scoreDelta: 1 });
+    expect(clear.draws.map((d) => d.kind)).toEqual(["substitute-roll-4"]);
+
+    const confused = substituteRun(1, { hp: 91, maxHp: 100, speed: 120 }, {
+      speed: 5, lastUsedMoveId: LAST_MOVE_CONFUSE, isConfused: true,
+    });
+    if (confused.kind !== "scored") throw new Error("unreachable");
+    expect(confused).toMatchObject({ scoreDelta: 0 });
+    expect(confused.draws.map((d) => d.kind)).toEqual([]);
+  });
+
+  it("leech-seed last move: seeded target ends at zero, unseeded FALLS THROUGH to the +1 roll", () => {
+    const seeded = substituteRun(1, { hp: 91, maxHp: 100, speed: 120 }, {
+      speed: 5, lastUsedMoveId: LAST_MOVE_LEECH_SEED, isLeechSeeded: true,
+    });
+    if (seeded.kind !== "scored") throw new Error("unreachable");
+    expect(seeded).toMatchObject({ scoreDelta: 0 });
+    expect(seeded.draws.map((d) => d.kind)).toEqual([]);
+
+    const unseeded = substituteRun(1, { hp: 91, maxHp: 100, speed: 120 }, {
+      speed: 5, lastUsedMoveId: LAST_MOVE_LEECH_SEED,
+    });
+    if (unseeded.kind !== "scored") throw new Error("unreachable");
+    expect(unseeded).toMatchObject({ scoreDelta: 1 });
+    expect(unseeded.draws.map((d) => d.kind)).toEqual(["substitute-roll-4"]);
+  });
+
+  it("HP in (50,70] runs roll-2 then roll-3", () => {
+    // HP 60: roll-2 + roll-3. seed 1 draws: %256=198 (roll-2 FALL-THROUGH
+    // -1), then 33 (roll-3 JUMP, no -1); target NOT faster + neutral last
+    // move ends at zero. Total -1.
+    const result = substituteRun(1, { hp: 60, maxHp: 100, speed: 120 }, { speed: 5, lastUsedMoveId: LAST_MOVE_NEUTRAL });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1 });
+    expect(result.draws.map((d) => d.kind)).toEqual(["substitute-roll-2", "substitute-roll-3"]);
+  });
+
+  it("HP in (70,90] runs only roll-3", () => {
+    const result = substituteRun(1, { hp: 71, maxHp: 100, speed: 120 }, { speed: 5, lastUsedMoveId: LAST_MOVE_NEUTRAL });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -1 });
+    expect(result.draws.map((d) => d.kind)).toEqual(["substitute-roll-3"]);
+  });
+
+  it("HP <= 50 runs all three HP rolls", () => {
+    // seed 1 draws: %256=198 (roll-1 FALL-THROUGH -1), 33 (roll-2 JUMP),
+    // 238 (roll-3 FALL-THROUGH -1); target NOT faster + neutral last move
+    // ends at zero. Total -2.
+    const result = substituteRun(1, { hp: 50, maxHp: 100, speed: 120 }, { speed: 5, lastUsedMoveId: LAST_MOVE_NEUTRAL });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: -2 });
+    expect(result.draws.map((d) => d.kind)).toEqual(["substitute-roll-1", "substitute-roll-2", "substitute-roll-3"]);
+  });
+});

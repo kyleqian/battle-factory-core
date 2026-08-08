@@ -3015,4 +3015,40 @@ describe("AI_CV_Encore/HealBell new-field wiring through the adapter", () => {
     });
     expect(clean.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: -5 });
   });
+
+  it("hasAnyStatus: view.target.hasAnyStatus=true reaches AI_CV_Substitute5's statused-target zero, absent reaches the +1 roll", () => {
+    const MOVE_SUBSTITUTE_MASK7 = 164; // EFFECT_SUBSTITUTE
+    // Target's last move drives the Substitute5 gate: give the marowak target
+    // a status-inducing last move (EFFECT_TOXIC, MOVE_TOXIC 92) so a
+    // statused target ends at zero and a clean one rolls the +1. The adapter
+    // burns RNG in the setup-simulated-rng + TryToFaint passes before the CV
+    // roll, so scan for a seed whose roll-4 falls through (>= 100).
+    const cleanView = cvWiringView(MOVE_SUBSTITUTE_MASK7, { lastUsedMoveId: 92 });
+    let foundValue: number | null = null;
+    for (let v = 1; v <= 256; v += 1) {
+      const result = chooseFactoryAiScoredDecision({
+        view: cleanView,
+        request: fourSlotRequest,
+        rng: { value: v, calls: 0 },
+      });
+      if (result.trace.slotScores[0]!.checkViabilityDelta === 1) {
+        foundValue = v;
+        break;
+      }
+    }
+    expect(foundValue).not.toBeNull();
+    const statused = chooseFactoryAiScoredDecision({
+      view: cvWiringView(MOVE_SUBSTITUTE_MASK7, { lastUsedMoveId: 92, hasAnyStatus: true }),
+      request: fourSlotRequest,
+      rng: { value: foundValue!, calls: 0 },
+    });
+    expect(statused.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 0 });
+
+    const clean = chooseFactoryAiScoredDecision({
+      view: cleanView,
+      request: fourSlotRequest,
+      rng: { value: foundValue!, calls: 0 },
+    });
+    expect(clean.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 1 });
+  });
 });

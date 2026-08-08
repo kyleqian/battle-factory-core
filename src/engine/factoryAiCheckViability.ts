@@ -6526,6 +6526,25 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_SUBSTITUTE") {
+    // AI_CV_Substitute (data/battle_ai_scripts.s:1547-1586).
+    const substitute = runCvSubstitute({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      funcResultCarry,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: substitute.rng,
+      draws: substitute.draws,
+      scoreDelta: substitute.scoreDelta,
+      funcResultAfter: substitute.funcResultAfter,
+    });
+  }
+
   if (AI_CHECK_VIABILITY_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
       kind: "unsupported-branch",
@@ -7380,4 +7399,170 @@ function runCvHealBell(input: Readonly<{
     draws: Object.freeze([]),
     scoreDelta: targetHasAnyStatus || partyMemberHasStatusWord ? 0 : -5,
   });
+}
+
+/**
+ * `AI_CV_Substitute` (`data/battle_ai_scripts.s:1547-1586`, EFFECT_SUBSTITUTE):
+ *
+ * ```
+ * AI_CV_Substitute:
+ *     if_hp_more_than AI_USER, 90, AI_CV_Substitute4
+ *     if_hp_more_than AI_USER, 70, AI_CV_Substitute3
+ *     if_hp_more_than AI_USER, 50, AI_CV_Substitute2
+ *     if_random_less_than 100, AI_CV_Substitute2
+ *     score -1
+ * AI_CV_Substitute2:
+ *     if_random_less_than 100, AI_CV_Substitute3
+ *     score -1
+ * AI_CV_Substitute3:
+ *     if_random_less_than 100, AI_CV_Substitute4
+ *     score -1
+ * AI_CV_Substitute4:
+ *     if_target_faster AI_CV_Substitute_End
+ *     get_last_used_bank_move AI_TARGET
+ *     get_move_effect_from_result
+ *     if_equal EFFECT_SLEEP, AI_CV_Substitute5
+ *     if_equal EFFECT_TOXIC, AI_CV_Substitute5
+ *     if_equal EFFECT_POISON, AI_CV_Substitute5
+ *     if_equal EFFECT_PARALYZE, AI_CV_Substitute5
+ *     if_equal EFFECT_WILL_O_WISP, AI_CV_Substitute5
+ *     if_equal EFFECT_CONFUSE, AI_CV_Substitute6
+ *     if_equal EFFECT_LEECH_SEED, AI_CV_Substitute7
+ *     goto AI_CV_Substitute_End
+ * AI_CV_Substitute5:
+ *     if_not_status AI_TARGET, STATUS1_ANY, AI_CV_Substitute8
+ *     goto AI_CV_Substitute_End
+ * AI_CV_Substitute6:
+ *     if_not_status2 AI_TARGET, STATUS2_CONFUSION, AI_CV_Substitute8
+ *     goto AI_CV_Substitute_End
+ * AI_CV_Substitute7:
+ *     if_status3 AI_TARGET, STATUS3_LEECHSEED, AI_CV_Substitute_End
+ * AI_CV_Substitute8:
+ *     if_random_less_than 100, AI_CV_Substitute_End
+ *     score +1
+ * AI_CV_Substitute_End:
+ *     end
+ * ```
+ *
+ * Three `if_random_less_than` sites (all <100) gate the descent from the
+ * attacker's own HP bands into `Substitute4`, each JUMP skipping one -1 and
+ * falling one band lower: HP > 90% skips all three rolls entirely; 70% < HP
+ * <= 90% runs roll-3; 50% < HP <= 70% runs roll-2 then (on its JUMP) roll-3;
+ * HP <= 50% runs roll-1 then roll-2 then (on each JUMP) the next. All three
+ * share the substitute-roll-1/2/3 draw kinds, one draw per executed site in
+ * script order. `Substitute4`'s target-faster gate ends at zero without
+ * reading the target's last move; a NOT-faster target's last move effect is
+ * read (writing funcResult): the five status-inducing effects (sleep/toxic/
+ * poison/paralyze/will-o-wisp) reach `Substitute5` (statused target ends at
+ * zero, clean target reaches Substitute8's <100 roll, +1 on FALL-THROUGH);
+ * confusion reaches `Substitute6` (same polarity, checking STATUS2_CONFUSION);
+ * leech-seed reaches `Substitute7` (seeded target ends at zero, otherwise
+ * FALLS THROUGH into Substitute8); any other last-move effect ends at zero.
+ */
+function runCvSubstitute(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  funcResultCarry: AiWeatherValue | undefined;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  let score = 0;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+
+  const rollSubstitute = (kind: "substitute-roll-1" | "substitute-roll-2" | "substitute-roll-3" | "substitute-roll-4"): boolean => {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-${kind}`);
+    rng = roll.after;
+    ordinal += 1;
+    const jumped = roll.randomValue % 256 < 100;
+    draws.push(Object.freeze({ ...roll, kind, jumped }));
+    return jumped;
+  };
+
+  // HP-band descent. Each `if_hp_more_than` JUMP skips a band's roll; a
+  // roll's FALL-THROUGH applies its own -1 then FALLS INTO the next band's
+  // label (the next roll runs regardless of the previous roll's outcome), so
+  // the roll count per band is: >90 none; 70<HP<=90 roll-3; 50<HP<=70 roll-2
+  // then roll-3; HP<=50 roll-1 then roll-2 then roll-3. Every executed roll
+  // whose JUMP is NOT taken applies its -1.
+  if (hpPercent > 90) {
+    // straight to Substitute4, no rolls.
+  } else if (hpPercent > 70) {
+    if (!rollSubstitute("substitute-roll-3")) score -= 1;
+  } else if (hpPercent > 50) {
+    if (!rollSubstitute("substitute-roll-2")) score -= 1;
+    if (!rollSubstitute("substitute-roll-3")) score -= 1;
+  } else {
+    if (!rollSubstitute("substitute-roll-1")) score -= 1;
+    if (!rollSubstitute("substitute-roll-2")) score -= 1;
+    if (!rollSubstitute("substitute-roll-3")) score -= 1;
+  }
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  if (strikesFirst === 1) {
+    // Target faster: End at zero, funcResult keeps the incoming carry.
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter: input.funcResultCarry });
+  }
+
+  // get_last_used_bank_move + get_move_effect_from_result always overwrite
+  // funcResult here: the effect id of the target's last move.
+  const lastMove = MOVES_BY_ID.get(input.target.lastUsedMoveId ?? 0);
+  const lastEffect = lastMove?.effect ?? "EFFECT_HIT";
+  const funcResultAfter = EFFECT_ID_IN_WEATHER_RANGE.get(lastEffect);
+
+  const endsAtZero = (): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> =>
+    Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+
+  const status1Effects = new Set(["EFFECT_SLEEP", "EFFECT_TOXIC", "EFFECT_POISON", "EFFECT_PARALYZE", "EFFECT_WILL_O_WISP"]);
+  const reachesSubstitute8 = () => {
+    // Substitute8: <100 roll (JUMP to End at zero, FALL-THROUGH +1).
+    const jumped = rollSubstitute("substitute-roll-4");
+    return Object.freeze({
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: score + (jumped ? 0 : 1),
+      funcResultAfter,
+    });
+  };
+
+  if (status1Effects.has(lastEffect)) {
+    // Substitute5: statused target ends at zero, clean target -> Substitute8.
+    if (!(input.target.hasAnyStatus ?? false)) {
+      return reachesSubstitute8();
+    }
+    return endsAtZero();
+  }
+  if (lastEffect === "EFFECT_CONFUSE") {
+    // Substitute6: confused target ends at zero, clear -> Substitute8.
+    if (!(input.target.isConfused ?? false)) {
+      return reachesSubstitute8();
+    }
+    return endsAtZero();
+  }
+  if (lastEffect === "EFFECT_LEECH_SEED") {
+    // Substitute7: seeded target ends at zero, otherwise FALLS THROUGH.
+    if (input.target.isLeechSeeded ?? false) {
+      return endsAtZero();
+    }
+    return reachesSubstitute8();
+  }
+  // Any other last-move effect: goto End, zero.
+  return endsAtZero();
 }
