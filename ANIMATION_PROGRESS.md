@@ -1,5 +1,99 @@
 # Animation coverage
 
+## MOVE_SLASH staged — both orientations isolated at 46 frames; scenarios + dense probe + change maps banked (2026-08-08 worker, round A)
+
+- **State:** SLASH stays **unsupported**. Coverage unchanged at **127/276 exact, 0
+  partial, 0 staged, 149 unsupported**. Nothing promoted; no pin moved; no
+  boundary widening; no shared-helper edit. This is the staging round;
+  promotion to exact (both orientations, a portable at full-window exact) is the
+  NEXT round's job.
+- **Did:** staged two legal mechanicLab scenarios (CHARMELEON `SPECIES_CHARMELEON`
+  5 — FRONTIER_MON_CHARMELEON_1, set 175, all four active slots SLASH 163, item
+  Scope Lens 198, nature NAUGHTY, EV spread ATTACK|HP = 255/255, vs legal ONIX 95
+  with the CRUNCH file's ONIX blocks unchanged; player-back
+  `mechanic-slash-player-charmeleon-opponent-onix.json` and opponent-front
+  `mechanic-slash-opponent-charmeleon-player-onix.json`, both verified to run with
+  currentMove 163) and `tools/compare/slashProbe.py` — a dense probe copied from
+  `crunchProbe.py` with script-pointer isolation to `Move_SLASH`
+  (0x082cd3db)..`Move_STRUGGLE` (0x082cd415), capturing both
+  `gSlashSliceSpriteTemplate` slice sprites (position, animNum, animCmdIndex,
+  animDelayCounter, invisible, data words, subpriority, OAM), the
+  `AnimTask_ShakeMon2`/`AnimTask_ShakeMon2_Step` target-shake task, both battlers'
+  sprites, all 512 palettes, software + hardware OAM and matrices, per-frame raw
+  RGB + sha256. NOTE: keeps the TRUE sprite offsets `0x2a`/`0x2b`/`0x2c` for
+  animNum/animCmdIndex/animDelayCounter (never `0x18`/`0x19`). Probe run:
+  `python3 tools/run-mgba-probe.py <out.json> -- python3 tools/compare/slashProbe.py
+  <scenario.json> <out.json> <rgb-dir> 163`. Plus the displayed-timing change
+  maps banked under `tools/compare/evidence/slash-changemap-player.txt` /
+  `slash-changemap-opponent.txt`.
+- **Measured (fresh runs, both orientations, deterministic): move-owned window 46
+  frames each — player-back 73..118, opponent-front 77..122** (script first
+  in-bounds .. first inactive cleanup). **Both first frames are CLEAN** — no
+  outgoing-teardown contamination: player frame 73 / opponent frame 77 are
+  pixel-identical to their next 4 frames, software OAM byte-identical to frame 2,
+  no move sprites, no move tasks (the `loadspritegfx` prefix is 4-5 frames of
+  static screen; the hw OAM shows the same one-frame-stale vblank quirk as CRUNCH
+  at the very first frame but renders zero pixels). Determinism: player re-run
+  byte-identical sha256 sequence (first/last `2f99ba4d`/`930d04ef`), opponent
+  (`afcf16a2`/`f8213ef2`); software+hardware OAM byte-identical across runs.
+- **RAM timeline (player-back; opponent-front is every frame +4 — the two
+  orientations are structurally identical, which the reducer must parameterize):
+  ** slice1 (gSlashSlice OAM ObjNormal 32x32, subpriority 38, animNum 0 =
+  gSlashSliceAnimCmds1: 4 frames of 16 tiles, 4 ticks each, no loop) created RAM
+  77 at (168,42) = target X_2 center (176) - 8; slice2 created RAM 83 at
+  (184,42) = center + 8. (Y_PIC_OFFSET 42, so no mirroring needed — the ±8 is
+  script args, both sides at target.) Slices' anim cmd transitions: slice1
+  cmd0 77-79, cmd1 80-83, cmd2 84-87, cmd3 88-91, END 92; slice2 cmd0 83-85,
+  cmd1 86-89, cmd2 90-93, cmd3 94-97, END 98. Anim end → RunStoredCallbackWhenAnimEnds
+  → AnimFalseSwipeSlice_Step3 (battle_anim_effects_1.c:4756): data[0] counts
+  every frame, invisible toggles every 2 frames, data[1] counts to 8 then
+  DestroyAnimSprite. slice1 destroyed RAM 111 (last visible 110), slice2
+  destroyed RAM 117 (last visible 116). SE_M_RAZOR_WIND (song header 0x088fe984)
+  plays at slice1 and slice2 creation (SE1 tracks pan 14/-15 — pan X tracked, not
+  the sound player's constant pan). **AnimTask_ShakeMon2(ANIM_TARGET, 4, 0, 18,
+  1)**: created RAM 83 (task slot 0, spriteId 8 = target), drives target sprite
+  x2 ∓4, toggling every 2 frames (data[3] interval 1): x2 = 1 (rest) → -4 at 83,
+  4 at 85, -4 at 87, ..., -4 at 115, task destroyed RAM 117 and x2 restored to 0
+  (117-118; pre-shake rest was x2=1, so the ONIX x2 does NOT return to 1 — it
+  stays 0). No palette/BG changes at all: no monbg, no fadetobg, no setalpha, no
+  blendoff — BLDCNT/BLDALPHA/BLDY untouched the whole window.
+- **Displayed-timing mapping (player-back; opponent-front identical +4 on every
+  frame): ** slice1 first visible 78, slice2 first visible 84 (both sprite-driven
+  = RAM+1); slice anim frame changes each display RAM+1 (slice1 cmd0→cmd1 at 78-79
+  boundary → pixels 81; slice2's cmd frames at 84/88/92 etc. all +1). **The shake
+  x2 is TASK-driven and displays TWO frames late (RAM 83 → pixels 85), the
+  TAKE_DOWN WindUpLunge case — the measured change-map events are at 85, 87, 89,
+  ..., 117, one frame later than the sprite-driven +1 rule would place them.
+  Slice teardown blinks (Step3 invisible toggles) display at 96, 98, 100, ...,
+  116 (+1 from their RAM 95, 97, ... toggles); slice1 gone from pixels at 112
+  (RAM 111 +1), slice2 gone at 118 (RAM 117 +1); shake's final x2→0 restore at
+  RAM 117 displays at 119 (outside the 118 window, net-zero on screen). Change
+  map and RAM agree on every frame; the ledger defers to the change map.
+- **Next:** promote SLASH to exact. Build `src/animation/slash.ts` (RAM-truth
+  reducer at the ages above: two slice sprites at target X_2∓8 with the 4-frame/
+  4-tick cmds1 anim + the Step3 blink teardown, the ShakeMon2 x2 ∓4 2-frame
+  toggle on the target sprite with the +2 display latch, no palette work) +
+  Tier-1 `tests/animation/slash.test.ts`; `SceneOnSlashConfig`/View seam in
+  `sceneOnPresentation.ts`; the SLASH draw case in `battleScene.ts` (slash art
+  from `src/assets/gen/battle-anim-slash-slice.json`, ONIX via existing species
+  art); a `slashPortable.ts` at full-window exact (46 frames × 2 axes, both
+  first frames kept); the fixtures, the coverage entry and the inventory pin
+  127->128 exact / 149->148 unsupported.
+- **Notes — two new components, both staged.** `asset:ANIM_TAG_SLASH` is a brand
+  new asset extracted standalone (`tools/extract/extract-slash-slice.ts`,
+  deliberately NOT folded into the bulk `extract-battle-anim-assets.ts` which has
+  the known silent-drop bug, PAPERCUTS.md) into
+  `src/assets/gen/battle-anim-slash-slice.json` with a Tier-1 regen pin
+  (`tests/slashSliceAsset.test.ts`). `sprite:gSlashSliceSpriteTemplate` is new
+  but structurally identical to the already-exact `gCuttingSliceSpriteTemplate`
+  (same 32x128 4-frame sheet, same 16-tile frames) EXCEPT: slash.png carries its
+  OWN embedded palette (gBattleAnimSpritePal_Slash, unlike CUT which shares
+  Impact's), and the OAM is ObjNormal not ObjBlend — the two differences the
+  reducer must not conflate. `task:AnimTask_ShakeMon2` is already exact
+  (DRAGON_BREATH etc.) — reuse the existing implementation, do not re-port it.
+  No boundary widening, no new unsupported-branch barrier, no shared-helper
+  edit; the only engine contact will be the promotion round's draw case.
+
 ## Supervisor wind-down — IRON_TAIL, CRUSH_CLAW, TAKE_DOWN and CRUNCH all exact, 123→127; the change-map tool is the session's real output (2026-08-07 night animation session)
 
 - **State:** coverage advanced **123→127/276 exact**, 0 partial, 0 staged, 149
