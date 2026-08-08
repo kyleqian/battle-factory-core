@@ -677,7 +677,21 @@ export type FactoryAiScoredPhaseDraw =
   | (FactoryAiTryToFaintDraw & Readonly<{ phase: "try-to-faint"; moveSlot: BattleMoveSlot }>)
   | (FactoryAiCheckViabilityDraw & Readonly<{ phase: "check-viability"; moveSlot: BattleMoveSlot }>);
 
-export type FactoryAiScoredDraw = FactoryAiRngDraw | FactoryAiScoredPhaseDraw;
+export type FactoryAiTurnStartDraw = Readonly<{
+  ordinal: number;
+  reason: string;
+  kind: "turn-start-random-number";
+  before: BattleRngState;
+  after: BattleRngState;
+  rawRngValue: number;
+  randomValue: number;
+}>;
+
+export type FactoryAiTurnStartRandomNumber =
+  | Readonly<{ owner: "decision" }>
+  | Readonly<{ owner: "battle-turn-boundary"; value: number }>;
+
+export type FactoryAiScoredDraw = FactoryAiTurnStartDraw | FactoryAiRngDraw | FactoryAiScoredPhaseDraw;
 
 export type FactoryAiScoredSlot = Readonly<{
   moveSlot: BattleMoveSlot;
@@ -696,6 +710,10 @@ export type FactoryAiScoredTrace = Readonly<{
   mask: 1 | 7;
   maskSelection: FactoryAiMaskSelectionReceipt;
   executedScoringScripts: readonly ("check-bad-move" | "try-to-faint" | "check-viability")[];
+  turnStartRandomNumber: Readonly<{
+    owner: "decision" | "battle-turn-boundary" | "legacy-post-boundary";
+    value: number | null;
+  }>;
   draws: readonly FactoryAiScoredDraw[];
   slotScores: readonly FactoryAiScoredSlot[];
   bestMoveSlots: readonly BattleMoveSlot[];
@@ -878,9 +896,13 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
   view: FactoryAiScoredView;
   request: BattleDecisionRequest;
   rng: BattleRngState;
+  turnStartRandomNumber?: FactoryAiTurnStartRandomNumber;
 }>): FactoryAiScoredChoice {
   const choiceInput = recordAt(input, "Factory AI scored decision input");
-  exactKeys(choiceInput, ["view", "request", "rng"], "Factory AI scored decision input");
+  const inputKeys = Object.hasOwn(choiceInput, "turnStartRandomNumber")
+    ? ["view", "request", "rng", "turnStartRandomNumber"]
+    : ["view", "request", "rng"];
+  exactKeys(choiceInput, inputKeys, "Factory AI scored decision input");
   const request = commandRequestAt(choiceInput.request);
   const view = scoredViewAt(choiceInput.view);
   let rng = rngAt(choiceInput.rng);
@@ -923,6 +945,51 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
   const mask = maskSelection.mask;
 
   const draws: FactoryAiScoredDraw[] = [];
+  let turnStartRandomNumber: FactoryAiScoredTrace["turnStartRandomNumber"];
+  if (choiceInput.turnStartRandomNumber === undefined) {
+    // Compatibility for pure handler/unit callers whose supplied cursor has
+    // always meant "after BattleTurnPassed". Production and live receipts
+    // name ownership explicitly below; new lifecycle integrations should do
+    // the same instead of relying on this value-less legacy form.
+    turnStartRandomNumber = Object.freeze({
+      owner: "legacy-post-boundary" as const,
+      value: null,
+    });
+  } else {
+    const ownership = recordAt(
+      choiceInput.turnStartRandomNumber,
+      "Factory AI turn-start random-number ownership",
+    );
+    if (ownership.owner === "decision") {
+      exactKeys(ownership, ["owner"], "Factory AI turn-start random-number ownership");
+      const draw = nextDraw(
+        rng,
+        draws.length + 1,
+        "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      );
+      rng = draw.after;
+      draws.push(Object.freeze({ ...draw, kind: "turn-start-random-number" }));
+      turnStartRandomNumber = Object.freeze({
+        owner: "decision" as const,
+        value: draw.randomValue,
+      });
+    } else if (ownership.owner === "battle-turn-boundary") {
+      exactKeys(ownership, ["owner", "value"], "Factory AI turn-start random-number ownership");
+      turnStartRandomNumber = Object.freeze({
+        owner: "battle-turn-boundary" as const,
+        value: integerAt(
+          ownership.value,
+          0,
+          U16_MAX,
+          "Factory AI turn-start random number",
+        ),
+      });
+    } else {
+      throw new Error(
+        "Factory AI turn-start random-number owner must be decision or battle-turn-boundary",
+      );
+    }
+  }
   const simulatedRng: [number, number, number, number] = [0, 0, 0, 0];
   for (let slot = 0; slot < MAX_MON_MOVES; slot += 1) {
     const moveSlot = slot as BattleMoveSlot;
@@ -1241,6 +1308,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     mask,
     maskSelection: maskSelection.receipt,
     executedScoringScripts: Object.freeze(executedScoringScripts),
+    turnStartRandomNumber,
     draws: Object.freeze(draws),
     slotScores: Object.freeze(slotScores),
     bestMoveSlots,

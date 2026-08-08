@@ -115,7 +115,7 @@ describe("AI_CV_Counter (docs/factory-ai-checkviability-ground-truth.md §34)", 
     expect(fellThrough.draws[0]).toMatchObject({ kind: "counter-mid-hp-roll", jumped: false });
   });
 
-  it("Mirror Coat present JUMPs over last-move/taunt/type gates into the bonus roll", () => {
+  it("pinned odd-address Counter3 if_has_move cannot see Mirror Coat and falls through", () => {
     const result = counterRun(1, {
       moves: [MOVE_COUNTER, MOVE_MIRROR_COAT, 150, 150],
     }, {
@@ -123,11 +123,9 @@ describe("AI_CV_Counter (docs/factory-ai-checkviability-ground-truth.md §34)", 
       lastUsedMoveId: MOVE_WATER_GUN,
     });
     if (result.kind !== "scored") throw new Error("unreachable");
-    expect(result.draws.map((draw) => draw.kind)).toEqual(["counter-bonus-roll"]);
-    expect(result).toMatchObject({ scoreDelta: 4, funcResultAfter: 3 });
-    expect(counterRun(3, {
-      moves: [MOVE_COUNTER, MOVE_MIRROR_COAT, 150, 150],
-    })).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    expect(result.draws.map((draw) => draw.kind)).toEqual(["counter-taunt-roll"]);
+    expect(result).toMatchObject({ scoreDelta: 0, funcResultAfter: undefined });
+    expect(result.draws.map((draw) => draw.kind)).not.toContain("counter-bonus-roll");
   });
 
   it("nonzero-power physical last move FALLS THROUGH the type gate and drives both roll polarities", () => {

@@ -209,6 +209,7 @@ for (const seed of SEEDS) {
       view,
       request,
       rng: { value: startRng, calls: 0 },
+      turnStartRandomNumber: { owner: "decision" },
     });
     const chosen = engine.trace.tie.chosenDecision;
     assert(chosen.kind === "use-move", `${seed}/${role}: engine did not choose a move`);
