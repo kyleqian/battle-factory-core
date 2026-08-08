@@ -1108,6 +1108,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           isLeechSeeded: view.attacker.isLeechSeeded,
           hasYawn: view.attacker.hasYawn,
           protectUses: view.attacker.protectUses,
+          ...(view.attacker.isAsleep === true ? { isAsleep: true } : {}),
           ...(view.attacker.hasSubstitute === true ? { hasSubstitute: true } : {}),
         },
         target: {

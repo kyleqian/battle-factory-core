@@ -1432,6 +1432,30 @@ function runCvDreamEater(input: Readonly<{
 }
 
 /**
+ * `AI_CV_SleepTalk` (`data/battle_ai_scripts.s:1795-1798`, EFFECT_SLEEP_TALK):
+ *
+ * ```
+ * AI_CV_SleepTalk:
+ *     if_status AI_USER, STATUS1_SLEEP, Score_Plus10
+ *     score -5
+ *     end
+ * ```
+ *
+ * A single AI_USER's-own status1 gate: asleep scores +10 directly, awake
+ * falls through to -5. Deterministic, zero draws, no funcResult write.
+ */
+function runCvSleepTalk(input: Readonly<{
+  rng: BattleRngState;
+  attackerIsAsleep: boolean;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  return Object.freeze({
+    rng: input.rng,
+    draws: Object.freeze([]),
+    scoreDelta: input.attackerIsAsleep ? 10 : -5,
+  });
+}
+
+/**
  * `AI_CV_Endure` (`data/battle_ai_scripts.s:1965-1973`, EFFECT_ENDURE):
  *
  * ```
@@ -5704,6 +5728,22 @@ export function runCheckViability(input: Readonly<{
       rng: dreamEater.rng,
       draws: dreamEater.draws,
       scoreDelta: dreamEater.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_SLEEP_TALK") {
+    // AI_CV_SleepTalk (data/battle_ai_scripts.s:1795-1798) -- a single
+    // AI_USER's-own STATUS1_SLEEP gate (+10 asleep, -5 awake).
+    const sleepTalk = runCvSleepTalk({
+      rng: input.rng,
+      attackerIsAsleep: input.attacker.isAsleep ?? false,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: sleepTalk.rng,
+      draws: sleepTalk.draws,
+      scoreDelta: sleepTalk.scoreDelta,
       funcResultAfter: funcResultCarry,
     });
   }

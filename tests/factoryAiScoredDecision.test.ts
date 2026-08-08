@@ -2871,6 +2871,7 @@ describe("get_weather's own stale-funcResult carry surviving an intervening CV-p
 const MOVE_BRICK_BREAK_MASK7 = 280; // EFFECT_BRICK_BREAK -- AI_CV_BrickBreak's single target-side Reflect gate
 const MOVE_FACADE_MASK7 = 263; // EFFECT_FACADE -- AI_CV_Facade's target-status1 mask
 const MOVE_FOCUS_PUNCH_MASK7 = 264; // EFFECT_FOCUS_PUNCH -- AI_CV_FocusPunch3's AI_USER substitute tail
+const MOVE_SLEEP_TALK_MASK7 = 214; // EFFECT_SLEEP_TALK -- AI_CV_SleepTalk's AI_USER-status1 gate
 
 function cvWiringView(
   moveId: number,
@@ -2955,5 +2956,21 @@ describe("pass-3 CheckViability adapter populates the five handler-input fields 
       rng: { value: foundValue!, calls: 0 },
     });
     expect(without.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 1 });
+  });
+
+  it("AI_CV_SleepTalk's AI_USER-status1 gate reads the attacker's own isAsleep through the adapter (+10 asleep, -5 awake)", () => {
+    const asleep = chooseFactoryAiScoredDecision({
+      view: cvWiringView(MOVE_SLEEP_TALK_MASK7, {}, { isAsleep: true }),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(asleep.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 10 });
+
+    const awake = chooseFactoryAiScoredDecision({
+      view: cvWiringView(MOVE_SLEEP_TALK_MASK7, {}, {}),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(awake.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: -5 });
   });
 });

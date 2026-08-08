@@ -5045,6 +5045,44 @@ describe("AI_CV_DreamEater (EFFECT_DREAM_EATER, docs/executable-frontier-census.
   });
 });
 
+describe("AI_CV_SleepTalk (EFFECT_SLEEP_TALK, docs/executable-frontier-census.md 8 weighted)", () => {
+  const MOVE_SLEEP_TALK = 214;
+
+  function sleepTalkRun(rngValue: number, attackerIsAsleep: boolean | undefined) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_SLEEP_TALK,
+      attacker: { ...NEUTRAL_BATTLER, ...(attackerIsAsleep === undefined ? {} : { isAsleep: attackerIsAsleep }) },
+      target: { ...NEUTRAL_BATTLER },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "sleep-talk",
+    });
+  }
+
+  it("AI_USER asleep: +10, zero draws, funcResult carry preserved", () => {
+    const result = sleepTalkRun(1, true);
+    expect(result).toEqual({
+      kind: "scored",
+      rng: { value: 1, calls: 0 },
+      draws: [],
+      scoreDelta: 10,
+      funcResultAfter: 2,
+    });
+  });
+
+  it("AI_USER awake (field absent): -5, zero draws, funcResult carry preserved", () => {
+    const result = sleepTalkRun(1, false);
+    expect(result).toEqual({
+      kind: "scored",
+      rng: { value: 1, calls: 0 },
+      draws: [],
+      scoreDelta: -5,
+      funcResultAfter: 2,
+    });
+  });
+});
+
 describe("AI_CV_Endure (EFFECT_ENDURE, docs/executable-frontier-census.md 24 weighted)", () => {
   const MOVE_ENDURE = 203;
 
