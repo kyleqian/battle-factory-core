@@ -6048,3 +6048,58 @@ describe("AI_CV_MirrorCoat (data/battle_ai_scripts.s:2116-2171)", () => {
     expect(result.draws).toEqual([]);
   });
 });
+
+describe("AI_CV_DragonDance (data/battle_ai_scripts.s:2603-2614)", () => {
+  const MOVE_DRAGON_DANCE = 349; // EFFECT_DRAGON_DANCE
+
+  function dragonDanceRun(rngValue: number, attackerOverrides: Record<string, unknown> = {}, targetOverrides: Record<string, unknown> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_DRAGON_DANCE,
+      attacker: { ...NEUTRAL_BATTLER, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "dragon-dance",
+    });
+  }
+
+  it("target slower, HP > 50: zero score, zero draws", () => {
+    const result = dragonDanceRun(1, { hp: 51, maxHp: 100, speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([]);
+  });
+
+  it("target slower, HP <= 50: <70 roll JUMP -> 0", () => {
+    // seed 4 -> roll1 low 25 (<70 JUMP).
+    const result = dragonDanceRun(4, { hp: 50, maxHp: 100, speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["dragon-dance-roll-1"]);
+  });
+
+  it("target slower, HP <= 50: <70 roll FALL-THROUGH -> -1", () => {
+    // seed 1 -> roll1 low 198 (>=70, -1).
+    const result = dragonDanceRun(1, { hp: 50, maxHp: 100, speed: 120 }, { speed: 5 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1 });
+  });
+
+  it("target faster: <128 roll JUMP -> 0", () => {
+    // seed 4 -> roll2 low 25 (<128 JUMP).
+    const result = dragonDanceRun(4, { speed: 5 }, { speed: 120 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["dragon-dance-roll-2"]);
+  });
+
+  it("target faster: <128 roll FALL-THROUGH -> +1", () => {
+    // seed 1 -> roll2 low 198 (>=128, +1).
+    const result = dragonDanceRun(1, { speed: 5 }, { speed: 120 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+  });
+
+  it("carry preserved", () => {
+    expect(dragonDanceRun(1, { hp: 50, maxHp: 100, speed: 120 }, { speed: 5 })).toMatchObject({ funcResultAfter: 2 });
+  });
+});

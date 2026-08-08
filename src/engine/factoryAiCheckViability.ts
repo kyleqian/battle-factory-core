@@ -786,6 +786,16 @@ export type FactoryAiCheckViabilityDraw =
     rawRngValue: number;
     randomValue: number;
     jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "dragon-dance-roll-1" | "dragon-dance-roll-2";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
   }>;
 
 export type FactoryAiCheckViabilityResult =
@@ -4711,6 +4721,83 @@ function runCvMirrorCoat(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
 }
 
+/**
+ * `AI_CV_DragonDance` (`data/battle_ai_scripts.s:2603-2614`,
+ * EFFECT_DRAGON_DANCE, the final dispatch line `:775`):
+ *
+ * ```
+ * AI_CV_DragonDance:
+ *     if_target_faster AI_CV_DragonDance2
+ *     if_hp_more_than AI_USER, 50, AI_CV_DragonDance_End
+ *     if_random_less_than 70, AI_CV_DragonDance_End
+ *     score -1
+ *     goto AI_CV_DragonDance_End
+ * AI_CV_DragonDance2:
+ *     if_random_less_than 128, AI_CV_DragonDance_End
+ *     score +1
+ * AI_CV_DragonDance_End:
+ *     end
+ * ```
+ *
+ * Target NOT faster (attacker faster or a tie broken their way): own HP > 50%
+ * is the zero `goto End`; HP <= 50% runs the `<70` roll whose JUMP (roll <
+ * 70, ~27%) ends at zero and whose FALL-THROUGH applies -1 -- setting up
+ * while at low HP is a risk. Target STRICTLY faster jumps straight to
+ * `DragonDance2`'s `<128` roll: JUMP (roll < 128, ~50%) ends at zero,
+ * FALL-THROUGH applies +1 -- the Dance is worth committing when the target
+ * outspeeds the boosted user. Two `if_random_less_than` sites, mutually
+ * exclusive by the target-faster split, plus the usual `if_target_faster`
+ * tie-break. No command writes funcResult.
+ */
+function runCvDragonDance(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  if (targetFaster) {
+    // DragonDance2: <128 roll, +1 on fall-through.
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-dragon-dance-roll-2`);
+    rng = roll.after;
+    const succeeded = roll.randomValue % 256 >= 128;
+    draws.push(Object.freeze({ ...roll, kind: "dragon-dance-roll-2" as const, succeeded }));
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded ? 1 : 0 });
+  }
+
+  if (hpPercent > 50) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+  }
+  const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-dragon-dance-roll-1`);
+  rng = roll.after;
+  // if_random_less_than 70, End: JUMP (<70) keeps zero; FALL-THROUGH -1.
+  const succeeded = roll.randomValue % 256 >= 70;
+  draws.push(Object.freeze({ ...roll, kind: "dragon-dance-roll-1" as const, succeeded }));
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded ? -1 : 0 });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -5729,6 +5816,25 @@ export function runCheckViability(input: Readonly<{
       draws: mirrorCoat.draws,
       scoreDelta: mirrorCoat.scoreDelta,
       funcResultAfter: mirrorCoat.funcResultAfter,
+    });
+  }
+
+  if (move.effect === "EFFECT_DRAGON_DANCE") {
+    // AI_CV_DragonDance (data/battle_ai_scripts.s:2603-2614) -- the final
+    // dispatch line's handler.
+    const dragonDance = runCvDragonDance({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: dragonDance.rng,
+      draws: dragonDance.draws,
+      scoreDelta: dragonDance.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
