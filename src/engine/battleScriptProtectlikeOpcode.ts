@@ -14,17 +14,17 @@
  * are independent in source, ported the same way here) and increment
  * `protectUses`; on failure, reset `protectUses` to 0 and OR
  * `MOVE_RESULT_MISSED`. `sProtectSuccessRates` has exactly 4 entries; a 5th
- * consecutive successful Protect would index past its end (real hardware
- * reads whatever ROM byte follows the const array -- not a value this engine
- * can source-model deterministically), so `protectUses >= 4` is a named (b)
- * barrier rather than a guess at undefined behavior.
+ * consecutive successful Protect indexes one past it. On the real ROM that
+ * read is not undefined -- the linker placed `sMovesForbiddenToCopy` directly
+ * after the table, so `sProtectSuccessRates[4]` returns that array's first
+ * entry, `MOVE_METRONOME == 118` (measured from the built artifacts, see
+ * `PROTECT_SUCCESS_RATE_OOB` below). `protectUses >= 4` reads that constant,
+ * so a 5th Protect succeeds only when `Random() <= 118` (~0.18% of draws).
  */
 import {
   drawBattleScriptRng,
   transitionBattleScriptCommand,
-  type BattleScriptCommandTransition,
   type BattleScriptOpcodeHandler,
-  type BattleScriptOpcodeHandlerContext,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
@@ -55,33 +55,29 @@ const MOVE_ENDURE = 203;
 /** battle_script_commands.c:719 -- USHRT_MAX/{1,2,4,8}, C integer division. */
 const PROTECT_SUCCESS_RATES: readonly number[] = [65535, 32767, 16383, 8191];
 
+/**
+ * battle_script_commands.c:6514 indexes `sProtectSuccessRates[protectUses]`;
+ * with `protectUses` at 4 (four consecutive successful Protect-like uses) that
+ * read lands one past the table's 4 entries. This is not undefined behavior on
+ * the real ROM: measured from the built artifacts (pokeemerald.map /
+ * pokeemerald.elf / pokeemerald.gba), the linker placed `sMovesForbiddenToCopy`
+ * (battle_script_commands.c:725) immediately after the table --
+ *
+ *   sProtectSuccessRates  @ 0x0831c3d8  (8 bytes: ff ff | ff 7f | ff 3f | ff 1f
+ *                                        == 65535, 32767, 16383, 8191)
+ *   sMovesForbiddenToCopy @ 0x0831c3e0  (u16 LE bytes at 0x0831c3e0..0x0831c3e1
+ *                                        == 76 00 == 0x0076 == MOVE_METRONOME == 118)
+ *
+ * so `sProtectSuccessRates[4]` reads 118: a 5th consecutive Protect succeeds
+ * only when `Random() <= 118` (~0.18% of draws) and otherwise fails. Verified
+ * the same 2 bytes in both pokeemerald.gba and pokeemerald.elf's .rodata.
+ */
+const PROTECT_SUCCESS_RATE_OOB = 118;
+
 /** battle_message.c:943-947, include/constants/battle_string_ids.h:461-464 -- gProtectLikeUsedStringIds' own MULTISTRING_CHOOSER indices. */
 const B_MSG_PROTECTED_ITSELF = 0;
 const B_MSG_BRACED_ITSELF = 1;
 const B_MSG_PROTECT_FAILED = 2;
-
-function unsupportedBranch(
-  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
-  sourceConstruct: string,
-  sourceFile: string,
-  sourceLine: number,
-): BattleScriptCommandTransition<BattleScriptRulesContext> {
-  return transitionBattleScriptCommand(
-    context,
-    Object.freeze({
-      kind: "halt",
-      reason: Object.freeze({
-        kind: "unsupported-branch",
-        programCounter: context.state.programCounter,
-        opcodeId: context.instruction.opcodeId,
-        opcodeName: context.instruction.opcodeName,
-        sourceConstruct,
-        sourceFile,
-        sourceLine,
-      }),
-    }),
-  );
-}
 
 function createSetprotectlikeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -94,19 +90,13 @@ function createSetprotectlikeHandler(): BattleScriptOpcodeHandler<BattleScriptRu
     const mustReset = lastMove !== MOVE_PROTECT && lastMove !== MOVE_DETECT && lastMove !== MOVE_ENDURE;
     const protectUsesBeforeRoll = mustReset ? 0 : attackerBattler.protectUses;
 
-    if (protectUsesBeforeRoll >= PROTECT_SUCCESS_RATES.length) {
-      return unsupportedBranch(
-        context,
-        `sProtectSuccessRates[protectUses] OOB read: protectUses is ${protectUsesBeforeRoll} after `
-          + "4 consecutive successful Protect-like uses, one past the table's own 4 entries",
-        "battle_script_commands.c",
-        6514,
-      );
-    }
-
     const notLastTurn = rulesContext.currentTurnActionNumber !== rulesContext.battleTopology.battlersCount - 1;
     const { rng, randomValue } = drawBattleScriptRng(context.state.rng, context.instruction, "setprotectlike");
-    const succeeds = PROTECT_SUCCESS_RATES[protectUsesBeforeRoll]! >= randomValue && notLastTurn;
+    const successRate =
+      protectUsesBeforeRoll < PROTECT_SUCCESS_RATES.length
+        ? PROTECT_SUCCESS_RATES[protectUsesBeforeRoll]!
+        : PROTECT_SUCCESS_RATE_OOB;
+    const succeeds = successRate >= randomValue && notLastTurn;
 
     if (succeeds) {
       const effect = requireMoveEffect(rulesContext.currentMove);

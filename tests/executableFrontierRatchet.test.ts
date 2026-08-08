@@ -313,7 +313,15 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // reads whatever ROM byte follows the const array on real hardware. Named
   // (b) barrier, reachability-tested in
   // tests/battleScriptProtectlikeOpcode.test.ts.
-  ["src/engine/battleScriptProtectlikeOpcode.ts", 1],
+  // 1 -> 0 (docs/protectlike-oob-adjacent-byte.md): the OOB read is MEASURED,
+  // not guessed -- the linker placed sMovesForbiddenToCopy at 0x0831c3e0
+  // immediately after the 8-byte table at 0x0831c3d8, so sProtectSuccessRates
+  // [4] == its first u16 0x0076 == MOVE_METRONOME == 118 (verified in both
+  // pokeemerald.gba and pokeemerald.elf). The barrier is RETIRED: protectUses
+  // >= 4 now reads that constant and rolls normally (~0.18% success per use),
+  // so no branch halts. Dual-outcome + notLastTurn-gate reachability-tested in
+  // tests/battleScriptProtectlikeOpcode.test.ts.
+  ["src/engine/battleScriptProtectlikeOpcode.ts", 0],
   // B_SCR_OP_TRYKO registration (EFFECT_OHKO, ranked-table row 5, alongside
   // B_SCR_OP_TRYSETDESTINYBONDTOHAPPEN/B_SCR_OP_TRYHEALHALFHEALTH which both
   // register with zero barriers): Cmd_tryKO's own HOLD_EFFECT_FOCUS_BAND

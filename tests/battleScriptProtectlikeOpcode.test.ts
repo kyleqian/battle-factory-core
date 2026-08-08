@@ -262,31 +262,96 @@ describe("production setprotectlike (Cmd_setprotectlike) dispatch", () => {
     expect(result.state.rulesContext.battlers[0]!.protectUses).toBe(2); // 1 -> 2, not reset to 0 -> 1
   });
 
-  describe("(b) unsupported-branch barrier", () => {
-    it("protectUses >= 4 is an OOB sProtectSuccessRates read (4 consecutive successful Protects) -- halts before drawing any RNG", () => {
+  describe("sProtectSuccessRates regression: the four real table entries (65535, 32767, 16383, 8191) each drive the roll exactly at their boundary", () => {
+    const RATES = [65535, 32767, 16383, 8191];
+
+    it.each([0, 1, 2, 3])(
+      "protectUses %i: a draw exactly at its rate succeeds; the next draw (rate+1) fails -- pinning the exact table value",
+      (protectUses) => {
+        const rate = RATES[protectUses]!;
+
+        const { result: hit } = stepAtProtectlike(
+          context(0, { protectUses }, {
+            currentMove: MOVE_PROTECT,
+            currentTurnActionNumber: 0,
+            moveHistory: { lastResultingMoves: [MOVE_PROTECT, 0, 0, 0] },
+          }),
+          rngValueBeforeU16(rate),
+        );
+        if (hit.kind !== "advanced") throw new Error(`did not advance: ${hit.kind}`);
+        expect(hit.state.rng.ledger[0]!.randomValue).toBe(rate);
+        expect(hit.state.rulesContext.battlers[0]!.protected).toBe(1);
+        expect(hit.state.rulesContext.battlers[0]!.protectUses).toBe(protectUses + 1);
+
+        if (rate < 65535) {
+          const { result: miss } = stepAtProtectlike(
+            context(0, { protectUses }, {
+              currentMove: MOVE_PROTECT,
+              currentTurnActionNumber: 0,
+              moveHistory: { lastResultingMoves: [MOVE_PROTECT, 0, 0, 0] },
+            }),
+            rngValueBeforeU16(rate + 1),
+          );
+          if (miss.kind !== "advanced") throw new Error(`did not advance: ${miss.kind}`);
+          expect(miss.state.rng.ledger[0]!.randomValue).toBe(rate + 1);
+          expect(miss.state.rulesContext.battlers[0]!.protected).toBe(0);
+          expect(miss.state.rulesContext.battlers[0]!.protectUses).toBe(0);
+          expect(miss.state.rulesContext.multistringChooser).toBe(2);
+        }
+      },
+    );
+  });
+
+  describe("fifth consecutive Protect-like use (protectUses 4): the measured OOB constant 118 (MOVE_METRONOME, sMovesForbiddenToCopy[0] at 0x0831c3e0, per docs/protectlike-oob-adjacent-byte.md)", () => {
+    const fifthUseContext = () =>
+      context(0, { protectUses: 4 }, {
+        currentMove: MOVE_PROTECT,
+        currentTurnActionNumber: 0,
+        moveHistory: { lastResultingMoves: [MOVE_PROTECT, 0, 0, 0] },
+      });
+
+    it("Random() draw 118 (<= constant) succeeds the way the ROM would: protected=1, protectUses 4 -> 5, PROTECTED_ITSELF, no miss", () => {
+      const { result } = stepAtProtectlike(fifthUseContext(), rngValueBeforeU16(118));
+      if (result.kind !== "advanced") throw new Error(`did not advance: ${result.kind}`);
+      expect(result.state.rng.ledger[0]!.randomValue).toBe(118);
+      expect(result.state.rulesContext.battlers[0]!.protected).toBe(1);
+      expect(result.state.rulesContext.battlers[0]!.protectUses).toBe(5);
+      expect(result.state.rulesContext.multistringChooser).toBe(0);
+      expect(result.state.rulesContext.moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_MISSED).toBe(0);
+    });
+
+    it("Random() draw 119 (> constant) fails the way the ROM would: protectUses reset to 0, PROTECT_FAILED, MOVE_RESULT_MISSED", () => {
+      const { result } = stepAtProtectlike(fifthUseContext(), rngValueBeforeU16(119));
+      if (result.kind !== "advanced") throw new Error(`did not advance: ${result.kind}`);
+      expect(result.state.rng.ledger[0]!.randomValue).toBe(119);
+      expect(result.state.rulesContext.battlers[0]!.protected).toBe(0);
+      expect(result.state.rulesContext.battlers[0]!.protectUses).toBe(0);
+      expect(result.state.rulesContext.multistringChooser).toBe(2);
+      expect(result.state.rulesContext.moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_MISSED).not.toBe(0);
+    });
+
+    it("the notLastTurn gate still gates independently on the fifth use: a would-win draw (118) fails when this is the turn's last action, and the RNG call is still spent", () => {
+      const rc = context(0, { protectUses: 4 }, {
+        currentMove: MOVE_PROTECT,
+        currentTurnActionNumber: 1, // battlersCount 2 -> action 1 is the last
+        moveHistory: { lastResultingMoves: [MOVE_PROTECT, 0, 0, 0] },
+      });
+      const { result } = stepAtProtectlike(rc, rngValueBeforeU16(118));
+      if (result.kind !== "advanced") throw new Error(`did not advance: ${result.kind}`);
+      expect(result.state.rng.ledger[0]!.randomValue).toBe(118);
+      expect(result.state.rulesContext.battlers[0]!.protected).toBe(0);
+      expect(result.state.rulesContext.battlers[0]!.protectUses).toBe(0);
+      expect(result.state.rulesContext.multistringChooser).toBe(2);
+      expect(result.state.rulesContext.moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_MISSED).not.toBe(0);
+      expect(result.state.rng.calls).toBe(1); // spent despite guaranteed failure
+    });
+  });
+
+  describe("(b) unsupported-branch barrier RETIRED (the OOB read is now the measured constant, not a halt)", () => {
+    it("protectUses 4 advances and rolls normally instead of halting (old barrier site is source-exact now)", () => {
       const rc = context(
         0,
         { protectUses: 4 },
-        {
-          currentMove: MOVE_PROTECT,
-          currentTurnActionNumber: 0,
-          moveHistory: { lastResultingMoves: [MOVE_PROTECT, 0, 0, 0] },
-        },
-      );
-      const { result } = stepAtProtectlike(rc, 1);
-      expect(result.kind).toBe("halted");
-      if (result.kind !== "halted") throw new Error("expected halted");
-      expect(result.state.haltReason).toMatchObject({
-        kind: "unsupported-branch",
-        opcodeName: "B_SCR_OP_SETPROTECTLIKE",
-      });
-      expect(result.state.rng.calls).toBe(0);
-    });
-
-    it("reachable: protectUses 3 (the table's last valid index) still resolves normally, only 4 halts", () => {
-      const rc = context(
-        0,
-        { protectUses: 3 },
         {
           currentMove: MOVE_PROTECT,
           currentTurnActionNumber: 0,
