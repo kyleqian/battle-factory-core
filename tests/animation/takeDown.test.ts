@@ -60,7 +60,13 @@ describe("Move_TAKE_DOWN source-relative reducer", () => {
     expect(y2(29)).toBe(1);
     expect(y2(39)).toBe(1);
     expect(y2(49)).toBe(1);
-    expect(y2(50)).toBe(0);
+    // the sine tail 1 holds on the sprite after the task is destroyed, until
+    // the SlideMonToOriginalPos dummy returns it to rest (y2 0 from age 80)
+    expect(y2(50)).toBe(1);
+    expect(y2(75)).toBe(1);
+    expect(y2(SLIDE_BACK_ATTACKER_AGE - 1)).toBe(1);
+    expect(y2(SLIDE_BACK_ATTACKER_AGE)).toBe(0);
+    expect(y2(SLIDE_BACK_ATTACKER_AGE + 2)).toBe(0);
   });
 
   it("slides the target to +16 (SlideMonToOffset, -16 mirrored, 4 ticks)", () => {
@@ -71,6 +77,12 @@ describe("Move_TAKE_DOWN source-relative reducer", () => {
     expect(tgt(50)).toBe(16);
     expect(tgt(51)).toBe(16);
     expect(tgt(53)).toBe(16);
+    // player-side target mirrors to -16 (SlideMonToOffset's own mirror)
+    const opp = (age: number) => takeDownAtAge(age, geo("opponent")).targetX2;
+    expect(opp(TARGET_PUSH_FIRST_STEP_AGE - 1)).toBe(0);
+    expect(opp(TARGET_PUSH_FIRST_STEP_AGE)).toBe(-4);
+    expect(opp(50)).toBe(-16);
+    expect(opp(53)).toBe(-16);
   });
 
   it("shakes the target 12/20 around the 16 hold (ShakeMonInPlace 4,0,12,1)", () => {
@@ -82,6 +94,12 @@ describe("Move_TAKE_DOWN source-relative reducer", () => {
     expect(tgt(SHAKE_FIRST_STEP_AGE + 3)).toBe(12);
     expect(tgt(74)).toBe(12);
     expect(tgt(75)).toBe(16);
+    // player-side target shakes around the -16 hold: -20/-12
+    const opp = (age: number) => takeDownAtAge(age, geo("opponent")).targetX2;
+    expect(opp(SHAKE_FIRST_STEP_AGE - 1)).toBe(-16);
+    expect(opp(SHAKE_FIRST_STEP_AGE)).toBe(-20);
+    expect(opp(SHAKE_FIRST_STEP_AGE + 1)).toBe(-12);
+    expect(opp(75)).toBe(-16);
   });
 
   it("returns the attacker and target to rest with the two slide-back sprites", () => {
@@ -96,6 +114,16 @@ describe("Move_TAKE_DOWN source-relative reducer", () => {
     expect(tgt(SLIDE_BACK_TARGET_AGE + 3)).toBe(6);
     expect(tgt(SLIDE_BACK_TARGET_AGE + 6)).toBe(0);
     expect(tgt(SLIDE_BACK_TARGET_AGE + 7)).toBe(0);
+    // opponent-side attacker slides back from -17; player target from -16
+    const oppAtk = (age: number) => takeDownAtAge(age, geo("opponent")).attackerX2;
+    expect(oppAtk(SLIDE_BACK_ATTACKER_AGE)).toBe(-14);
+    expect(oppAtk(SLIDE_BACK_ATTACKER_AGE + 3)).toBe(-4);
+    expect(oppAtk(SLIDE_BACK_ATTACKER_AGE + 5)).toBe(0);
+    const oppTgt = (age: number) => takeDownAtAge(age, geo("opponent")).targetX2;
+    expect(oppTgt(SLIDE_BACK_TARGET_AGE)).toBe(-14);
+    expect(oppTgt(SLIDE_BACK_TARGET_AGE + 3)).toBe(-7);
+    expect(oppTgt(SLIDE_BACK_TARGET_AGE + 6)).toBe(-1);
+    expect(oppTgt(SLIDE_BACK_TARGET_AGE + 7)).toBe(0);
   });
 
   it("places the hitsplat at the target center with the mirrored -10 x offset", () => {

@@ -118,12 +118,16 @@ export function takeDownAtAge(
   geometry: TakeDownGeometry,
 ): TakeDownState {
   const { attackerSide, targetSide, targetCenter } = geometry;
+  // The target's slide/shake/return all mirror for a player-side target: the
+  // SlideMonToOffset script arg is `-16`, which `SlideMonToOffset` itself only
+  // negates for the opponent side, so the player-side target is pushed -16.
+  const targetSign = targetSide === "player" ? -1 : 1;
 
   const lunge = windUpLungeAtTick(LUNGE_ARGS, attackerSide, age - WIND_UP_FIRST_STEP_AGE);
 
   // The target's slide-to-offset (created by gSlideMonToOffsetSpriteTemplate,
   // -16 mirrored for the opponent side, duration 4) pushes it +16 over ages
-  // 47-50 and holds 16 until the slide-back at 85.
+  // 47-50 and holds 16 until the slide-back at 85 (or -16 for the player side).
   const push = age >= TARGET_PUSH_FIRST_STEP_AGE
     ? slideMonToOffsetAtTick({
         battlerSide: targetSide,
@@ -133,29 +137,34 @@ export function takeDownAtAge(
         durationTicks: 4,
       }, age - TARGET_PUSH_FIRST_STEP_AGE).x2
     : 0;
-  const pushedX2 = Math.max(push, 0);
 
   // ShakeMonInPlace (4, 0, 12, 1) toggles the target x2 between the pushed
-  // hold 16 +/- 4 over ages 54-74, restoring 16 at 75.
+  // hold +/-16 by +/-4 over ages 54-74, restoring at 75.
   const shake = age >= SHAKE_FIRST_STEP_AGE
     ? shakeMonInPlaceOffsetAtTick(4, 0, 12, 1, age - SHAKE_FIRST_STEP_AGE + 1).x2
     : 0;
 
+  // The lunge's own last x2/y2 writes hold on the sprite after the task is
+  // destroyed: the attacker rests at +16 (player) / -17 (opponent), y2 held at
+  // the sine tail 1, until the SlideMonToOriginalPos dummy returns it to rest.
   let attackerX2 = lunge.offset.x2;
+  let attackerY2 = age >= WIND_UP_FIRST_STEP_AGE ? lunge.offset.y2 : 0;
   let targetX2 = age < TARGET_PUSH_FIRST_STEP_AGE
     ? 0
-    : pushedX2 + (age >= SHAKE_FIRST_STEP_AGE && age < 75 ? shake : 0);
+    : push + (age >= SHAKE_FIRST_STEP_AGE && age < 75 ? shake : 0);
   if (age >= SLIDE_BACK_ATTACKER_AGE) {
-    attackerX2 = slideMonToOriginalPosAtTick({
-      currentX2: 16,
-      currentY2: 0,
+    const back = slideMonToOriginalPosAtTick({
+      currentX2: lunge.offset.x2,
+      currentY2: lunge.offset.y2,
       axisSnapMode: 0,
       durationTicks: 5,
-    }, age - SLIDE_BACK_ATTACKER_AGE).x2;
+    }, age - SLIDE_BACK_ATTACKER_AGE);
+    attackerX2 = back.x2;
+    attackerY2 = back.y2;
   }
   if (age >= SLIDE_BACK_TARGET_AGE) {
     targetX2 = slideMonToOriginalPosAtTick({
-      currentX2: 16,
+      currentX2: targetSign * 16,
       currentY2: 0,
       axisSnapMode: 0,
       durationTicks: 7,
@@ -172,7 +181,7 @@ export function takeDownAtAge(
 
   return {
     attackerX2,
-    attackerY2: age >= WIND_UP_FIRST_STEP_AGE && age < 50 ? lunge.offset.y2 : 0,
+    attackerY2,
     targetX2,
     windUpActive: age >= WIND_UP_FIRST_STEP_AGE && age < 50,
     slideToOffsetCount: age >= TARGET_PUSH_FIRST_STEP_AGE && age < TARGET_PUSH_FIRST_STEP_AGE + 4 ? 1 : 0,
