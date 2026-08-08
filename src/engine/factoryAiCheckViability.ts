@@ -5785,9 +5785,10 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
-  if (move.effect === "EFFECT_EXPLOSION") {
+  if (move.effect === "EFFECT_EXPLOSION" || move.effect === "EFFECT_MEMENTO") {
     // AI_CV_SelfKO (data/battle_ai_scripts.s:800-826) -- the shared handler
-    // for Explosion/Selfdestruct.
+    // for Explosion/Selfdestruct; EFFECT_MEMENTO also dispatches here
+    // (`:748`, a second if_effect line naming the same AI_CV_SelfKO label).
     const selfKo = runCvSelfKO({
       rng: input.rng,
       attacker: input.attacker,

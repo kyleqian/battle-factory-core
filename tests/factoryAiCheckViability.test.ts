@@ -6240,3 +6240,24 @@ describe("AI_CV_FocusPunch (data/battle_ai_scripts.s:2289-2311)", () => {
     expect(result.draws.map((d) => d.kind)).toEqual(["focus-punch-roll-2"]);
   });
 });
+
+describe("AI_CV_SelfKO Memento dispatch (data/battle_ai_scripts.s:748)", () => {
+  const MOVE_MEMENTO = 262; // EFFECT_MEMENTO -> AI_CV_SelfKO
+
+  it("Memento dispatches through the identical SelfKO handler", () => {
+    // target evasion >=10: prologue <128 roll FALL-THROUGH (-1); HP>50 ->
+    // encourage4 <50 roll FALL-THROUGH (-1): total -2.
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_MEMENTO,
+      attacker: { ...NEUTRAL_BATTLER, hp: 60, maxHp: 100, speed: 120 },
+      target: { ...NEUTRAL_BATTLER, speed: 5, evasionStage: 10 },
+      staleFuncResultFallback: 2,
+      drawOrdinalStart: 1,
+      reasonPrefix: "memento",
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((d) => d.kind)).toEqual(["self-ko-roll-1", "self-ko-roll-5"]);
+  });
+});
