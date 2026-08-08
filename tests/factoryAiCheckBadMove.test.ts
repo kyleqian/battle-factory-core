@@ -327,6 +327,58 @@ describe("AI_CBM_HighRiskForDamage via Seismic Toss / Night Shade (dispatch :154
   });
 });
 
+describe("AI_CBM_HighRiskForDamage via Frustration (dispatch :173)", () => {
+  const MOVE_FRUSTRATION = 218; // EFFECT_FRUSTRATION, TYPE_NORMAL
+
+  function frustrationTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      species: 213,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      ...overrides,
+    });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read", () => {
+    // Normal is x0 against Ghost.
+    const result = run(MOVE_FRUSTRATION, frustrationTarget({
+      types: ["TYPE_GHOST", "TYPE_GHOST"],
+      knownAbility: null,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("non-Wonder-Guard FALLTHROUGH reaches End at zero", () => {
+    expect(run(MOVE_FRUSTRATION, frustrationTarget())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus non-x2 effectiveness reaches Score_Minus10", () => {
+    // Normal is never x2 against any type, so Wonder Guard always rejects.
+    expect(run(MOVE_FRUSTRATION, frustrationTarget({
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("performs the handler's fresh ability read after the universal Soundproof read", () => {
+    const result = run(MOVE_FRUSTRATION, { ...MAROWAK, types: ["TYPE_ROCK", "TYPE_BUG"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-high-risk-ability",
+    ]);
+  });
+});
+
 const MOVE_SURF = 57;
 const MOVE_ROCK_SLIDE = 157;
 const MOVE_BODY_SLAM = 34;
