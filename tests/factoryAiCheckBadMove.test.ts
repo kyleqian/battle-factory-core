@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   MOVES_BY_ID,
+  runCbmAccUp,
   runCheckBadMovePreamble,
   type FactoryAiCheckBadMoveAttacker,
   type FactoryAiCheckBadMoveRoarTarget,
@@ -4058,5 +4059,23 @@ describe("AI_CBM_Magnitude (data/battle_ai_scripts.s:365-367, EFFECT_MAGNITUDE)"
       "test-slot-magnitude-levitate",
       "test-slot-magnitude-high-risk-ability",
     ]);
+  });
+});
+
+describe("AI_CBM_AccUp (data/battle_ai_scripts.s:269-271, EFFECT_ACCURACY_UP/_2)", () => {
+  // EFFECT_ACCURACY_UP (15) and EFFECT_ACCURACY_UP_2 (55) are vestigial in
+  // Gen 3 -- no move in gMovesInfo carries either effect -- so the handler is
+  // dispatch-reachable only and is receipt-pinned directly here, one test per
+  // exit (the same "case per exit" rule as every other CBM handler).
+  it("AI's own ACC stage at MAX_STAT_STAGE (12) JUMPs to Score_Minus10", () => {
+    expect(runCbmAccUp(12)).toBe(-10);
+  });
+
+  it("AI's own ACC stage below MAX FALLS THROUGH to end at zero", () => {
+    expect(runCbmAccUp(6)).toBe(0);
+  });
+
+  it("AI's own ACC stage at MIN_STAT_STAGE (0) FALLS THROUGH to end at zero", () => {
+    expect(runCbmAccUp(0)).toBe(0);
   });
 });

@@ -2304,6 +2304,23 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_ACCURACY_UP(_2) -> AI_CBM_AccUp
+  // (`data/battle_ai_scripts.s:113,138,269-271`): byte-for-byte the same bare
+  // 2-instruction MAX_STAT_STAGE-on-AI_USER's-own-stage shape as
+  // `AI_CBM_AttackUp`/`AI_CBM_SpeedUp` with `STAT_ACC` swapped in. A
+  // vestigial effect in Gen 3 -- no move in `gMovesInfo` carries
+  // EFFECT_ACCURACY_UP or EFFECT_ACCURACY_UP_2 (confirmed: battle_moves.h
+  // uses effects 15/55 for nothing) -- so no real move can reach it, but the
+  // table entry is source-complete here all the same.
+  if (move.effect === "EFFECT_ACCURACY_UP" || move.effect === "EFFECT_ACCURACY_UP_2") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmAccUp(input.attacker.accStage ?? DEFAULT_STAT_STAGE),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -3026,4 +3043,25 @@ function runCbmMagnitude(
   );
   for (const draw of highRisk.draws) draws.push(draw);
   return Object.freeze({ rng: highRisk.rng, draws: Object.freeze(draws), scoreDelta: highRisk.scoreDelta });
+}
+
+/**
+ * `AI_CBM_AccUp` (`data/battle_ai_scripts.s:269-271`) -- byte-for-byte the
+ * same 2-instruction shape as `AI_CBM_AttackUp`/`AI_CBM_SpeedUp` with
+ * `STAT_ACC` swapped in:
+ *
+ * ```
+ * AI_CBM_AccUp:
+ *     if_stat_level_equal AI_USER, STAT_ACC, MAX_STAT_STAGE, Score_Minus10
+ *     end
+ * ```
+ *
+ * Dispatch: `EFFECT_ACCURACY_UP`/`EFFECT_ACCURACY_UP_2`
+ * (`data/battle_ai_scripts.s:113,138`) -- both vestigial in Gen 3 (no move
+ * carries either effect), so this handler is dispatch-reachable only. Exported
+ * so the vestigial gate is still receipt-pinned directly (zero reachable
+ * moves to drive through the dispatcher).
+ */
+export function runCbmAccUp(attackerAccStage: number): number {
+  return attackerAccStage === MAX_STAT_STAGE ? -10 : 0;
 }
