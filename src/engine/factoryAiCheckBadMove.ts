@@ -332,6 +332,12 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    */
   isNightmared?: boolean;
   /**
+   * `gBattleMons[AI_TARGET].status2 & STATUS2_FORESIGHT` is nonzero --
+   * `AI_CBM_Foresight`'s single gate (EFFECT_FORESIGHT). Optional, defaulting
+   * to false.
+   */
+  isForesighted?: boolean;
+  /**
    * `gBattleMons[AI_TARGET].level` -- `AI_CBM_OneHitKO`'s final
    * `if_level_cond 1` (less-than) gate operand. Optional, defaulting to 0
    * (the neutral "not lower" outcome when omitted, so the level gate never
@@ -1514,6 +1520,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_FORESIGHT -> AI_CBM_Foresight
+  // (`data/battle_ai_scripts.s:166,443-445`): a single
+  // `if_status2 AI_TARGET, STATUS2_FORESIGHT, Score_Minus10` -- Foresight is
+  // penalized when the target is already foresighted.
+  if (move.effect === "EFFECT_FORESIGHT") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmForesight(target.isForesighted ?? false),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_DOWN(_2) -> AI_CBM_SpeedDown,
   // one of the two handlers this port implements out of the table's ~100 entries.
   if (move.effect === "EFFECT_SPEED_DOWN" || move.effect === "EFFECT_SPEED_DOWN_2") {
@@ -2677,6 +2696,16 @@ function runCbmNightmare(targetNightmared: boolean, targetAsleep: boolean): numb
     return -10;
   }
   return targetAsleep ? 0 : -8;
+}
+
+/**
+ * `AI_CBM_Foresight` (`data/battle_ai_scripts.s:443-445`, EFFECT_FORESIGHT):
+ * a single `if_status2 AI_TARGET, STATUS2_FORESIGHT, Score_Minus10` --
+ * Foresight is penalized when the target is already foresighted. Zero
+ * ability/type reads.
+ */
+function runCbmForesight(targetForesighted: boolean): number {
+  return targetForesighted ? -10 : 0;
 }
 
 /**

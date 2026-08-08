@@ -518,6 +518,8 @@ export type FactoryAiScoredBattlerView = Readonly<{
   hasPerishSong?: boolean;
   /** STATUS2_NIGHTMARE, read by AI_CBM_Nightmare. */
   isNightmared?: boolean;
+  /** STATUS2_FORESIGHT, read by AI_CBM_Foresight. */
+  isForesighted?: boolean;
   /** DisableStruct::protectUses, read by AI_CV_Protect. */
   protectUses?: number;
   /**
@@ -827,6 +829,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     ...(view.target.isTormented === true ? { isTormented: true } : {}),
     ...(view.target.hasPerishSong === true ? { hasPerishSong: true } : {}),
     ...(view.target.isNightmared === true ? { isNightmared: true } : {}),
+    ...(view.target.isForesighted === true ? { isForesighted: true } : {}),
     level: view.target.level,
   });
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({

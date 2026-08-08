@@ -31,6 +31,7 @@ import {
 import {
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS1_TOXIC_POISON,
+  BATTLE_SCRIPT_STATUS2_FORESIGHT,
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS3_LEECHSEED,
   BATTLE_SCRIPT_STATUS3_PERISH_SONG,
@@ -367,6 +368,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
         : {}),
       ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) !== 0
         ? { isNightmared: true }
+        : {}),
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_FORESIGHT) !== 0
+        ? { isForesighted: true }
         : {}),
       ...((target.status3 & BATTLE_SCRIPT_STATUS3_YAWN) !== 0
         ? { hasYawn: true }
