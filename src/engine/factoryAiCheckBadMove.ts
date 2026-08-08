@@ -2356,6 +2356,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_PSYCH_UP -> AI_CBM_Haze
+  // (`data/battle_ai_scripts.s:181,314-332`): Psych Up has no separate
+  // handler on the CheckBadMove side -- its table entry dispatches straight
+  // to AI_CBM_Haze's own body (the same fourteen stat-stage gates).
+  if (move.effect === "EFFECT_PSYCH_UP") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmHaze(input.attacker, target),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({

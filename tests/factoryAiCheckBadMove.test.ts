@@ -4195,3 +4195,34 @@ describe("AI_CBM_Haze (data/battle_ai_scripts.s:314-332, EFFECT_HAZE)", () => {
     expect(result.draws).toHaveLength(0);
   });
 });
+
+describe("EFFECT_PSYCH_UP -> AI_CBM_Haze (data/battle_ai_scripts.s:181,314-332)", () => {
+  const MOVE_PSYCH_UP = 244; // EFFECT_PSYCH_UP, TYPE_NORMAL, power 0
+
+  function psychUpTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("dispatches to the shared AI_CBM_Haze body: all-clear path reaches Score_Minus10", () => {
+    expect(run(MOVE_PSYCH_UP, psychUpTarget())).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("a raised target ATK stage JUMPs to End at zero, same as EFFECT_HAZE", () => {
+    expect(run(MOVE_PSYCH_UP, psychUpTarget({ atkStage: 7 }))).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+});
