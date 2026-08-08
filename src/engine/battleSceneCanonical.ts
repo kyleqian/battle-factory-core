@@ -646,7 +646,8 @@ import { resolveTurn2EndeavorHpEndpoints } from "./turn2EndeavorPresentationStag
 import { resolveTurn3RockSlideHpEndpoints } from "./turn3RockSlidePresentationStaging.ts";
 import { resolveTurn4RockSlideHpEndpoints } from "./turn4RockSlidePresentationStaging.ts";
 import { resolveTurn5EndeavorHpEndpoints } from "./turn5EndeavorPresentationStaging.ts";
-import { resolveTurn5FaintWindowKoHp } from "./turn5FaintPresentationStaging.ts";
+import { resolveTurn5FaintWindowKoHp, resolveTurn5FaintWindowLines } from "./turn5FaintPresentationStaging.ts";
+import { BRENDAN_THROW_START_TICK } from "./battleMenu.ts";
 import { resolveTurn5FaintSinkGeometry, resolveTurn5SitrusAdapter } from "./turn5ResolutionAdapter.ts";
 import { resolveTurn6RockSlideHpEndpoints, resolveTurn7RockSlideHpEndpoints } from "./turn67RockSlidePresentationStaging.ts";
 import { TURN9_QUICKATTACK_HP } from "./turn9ResolutionAdapter.ts";
@@ -2386,3 +2387,32 @@ export const TURN14_FLYUP_TEXT_TOTAL = TURN14_FLYUP_LINE1.length + TURN14_FLYUP_
 
 
 export const TURN15_FLY_STRIKE_TEXT_TOTAL = TURN15_FLY_STRIKE_LINE1.length + TURN15_FLY_STRIKE_LINE2.length;
+
+// --- slice 4 batch: verbatim move ---
+
+export const [TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2] = resolveTurn5FaintWindowLines();
+
+export const TURN5_FAINTED_TEXT_TOTAL = TURN5_FAINTED_LINE1.length + TURN5_FAINTED_LINE2.length;
+
+export const TURN5_FAINTED_CURSOR_START_DELAY = TURN5_FAINTED_TEXT_DELAY + TURN5_FAINTED_TEXT_TOTAL + 1;
+
+export function turn5RockSlideKoDismissEligible(t: number): boolean {
+  return t >= TURN5_ROCKSLIDE_PRESS_TICK + TURN5_FAINTED_CURSOR_START_DELAY;
+}
+
+export function grovyleFaintSinkRowsAndY2(t: number, startTick: number = GROVYLE_FAINT_SINK_START_TICK, steps: number = GROVYLE_FAINT_SINK_STEPS): { keptRows: number; y2: number } {
+  const d = t - 1 - startTick;
+  if (d <= 0) return { keptRows: steps, y2: 0 };
+  const k = Math.min(steps, Math.ceil(d / 2));
+  return { keptRows: steps - k, y2: k * 8 };
+}
+
+export function playerSummaryEvaOffset(
+  playerVisualT: number,
+  encounter: BattleSceneState["encounter"],
+): number {
+  return encounter === "jenson"
+    && playerVisualT - BRENDAN_THROW_START_TICK === SUBSEQUENT_BATTLE_SUMMARY_EVA_PHASE_AGE
+    ? -1
+    : 0;
+}

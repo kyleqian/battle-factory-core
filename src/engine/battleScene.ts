@@ -777,7 +777,6 @@ import {
 import { drawMode0Objects, drawMode0Ppu, mgbaDarkenColor, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
 import { fakeTearsControllerDisplayAtAge } from "./fakeTearsControllerPresentation.ts";
-import { resolveTurn5FaintWindowLines } from "./turn5FaintPresentationStaging.ts";
 import {
   resolveTurn1RockSlideAttackLines,
   resolveTurn1DoubleTeamKickoffLines,
@@ -1137,6 +1136,8 @@ import { BATTLE2_TURN1_KERNEL, DRAGONBREATH_HIT_FLASH_OFFSET, DRAGONBREATH_KICKO
 export { BATTLE2_TURN1_KERNEL, DRAGONBREATH_HIT_FLASH_OFFSET, DRAGONBREATH_KICKOFF_TEXT_TOTAL, GROVYLE_FAINT_SINK, INITIAL_BATTLE_SCENE_STATE, TURN10_AERIALACE_TEXT_TOTAL, TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN10_ONIX_AFTER_AERIALACE_HP, TURN11_ATKFLOOR_TEXT_TOTAL, TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN12_ONIX_AFTER_AERIALACE_HP, TURN13_SANDATTACK_DIRT_DRAW_ORDER, TURN14_DRAGONBREATH_TEXT_TOTAL, TURN14_FLYUP_LINE1, TURN14_FLYUP_LINE2, TURN15_FLY_STRIKE_LINE1, TURN15_FLY_STRIKE_LINE2, TURN15_ONIX_SHAKE_RAM_TICKS, TURN16_FAINT_ATTACK_TEXT_TOTAL, TURN16_FIRE_PUNCH_TEXT_TOTAL, TURN17_LOSS_TEXT_TOTAL, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN1_ROCKSLIDE_HP, TURN2_ENDEAVOR_HP, TURN2_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN3_ROCKSLIDE_HP, TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN4_ROCKSLIDE_HP, TURN5_ENDEAVOR_HP, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_SITRUS, TURN6_FEATHERDANCE_TEXT_TOTAL, TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_REGIME2_TO_REGIME1_SHIFT, TURN8_REGIME3_TO_REGIME1_SHIFT, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN9_QUICKATTACK_TEXT_TOTAL, TURN9_ROCKSLIDE_ANIMATION_PROFILE, battle2RockSlideMechanismPressTick, currentEpochPresentationAgeFromLatest, dragonBreathHp, dragonBreathTextStartTick, frontSpriteAnimFrame, grovyleStretchTintCoeff, playerHealthboxHpOverlayByHp, turn10AerialAceHp, turn10AerialAceTextStartTick, turn10NotVeryEffectiveTextStartTick, turn10SuperEffectiveTextStartTick, turn11AtkFloorTextStartTick, turn11SuperEffectiveTextStartTick, turn12MissTextStartTick, turn13AccFellTextStartTick, turn13MurkrowFrame, turn13SandAttackPidgeottoX2, turn13SandAttackTextStartTick, turn14KickoffBounceTick, turn14MurkrowInvisible, turn14SimpleVisibleChars, turn15FaintSinkSkipRows, turn15SimpleVisibleChars, turn15StrikeAttackerInvisible, turn15StrikeTargetHealthboxWobbleY2, turn15StrikeTargetHp, turn15StrikeTargetInvisible, turn15StrikeTargetShakeX2, turn16PartyElapsedAtTick, turn3KickoffBounceTick, turn3SubmenuBounceTickFromPresentationEpochAge, turn5FaintedCursorYOffset, turn5FaintedTextStartTick, turn5IconBarEva, turn5PidgeottoFrame, turn5SitrusResettledBounceTick, turn6FeatherDanceTextStartTick, turn6KickoffBounceTick, turn7KickoffBounceTick, turn8BindTextStartTick, turn8KickoffBounceTick, turn8MissTextStartTick, turn9Ep2HealthboxWobbleY2, turn9Ep2OnixInvisible, turn9Hp, turn9NotVeryEffectiveTextStartTick, turn9QuickAttackTextStartTick, turn9SuperEffectiveTextStartTick };
 import { BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP, GROVYLE_FAINT_SINK_STEPS, GROVYLE_HEALTHBOX_VANISH_TICK, TURN14_FLYUP_TEXT_TOTAL, TURN15_FLY_STRIKE_TEXT_TOTAL, TURN5_SITRUS_HEAL_HP_END, TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_LINE1, TURN5_SITRUS_HEAL_LINE2, TURN5_SITRUS_RING_CENTER, dragonBreathTextVisibleChars, menuIdleHealthboxBounce, menuIdleOnixBounce, turn10AerialAceTextVisibleChars, turn10NotVeryEffectiveTextVisibleChars, turn10SuperEffectiveTextVisibleChars, turn11AtkFloorTextVisibleChars, turn11SuperEffectiveTextVisibleChars, turn6FeatherDanceTextVisibleChars, turn9NotVeryEffectiveTextVisibleChars, turn9QuickAttackTextVisibleChars, turn9SuperEffectiveTextVisibleChars } from "./battleSceneCanonical.ts";
 export { BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP, GROVYLE_FAINT_SINK_STEPS, GROVYLE_HEALTHBOX_VANISH_TICK, TURN14_FLYUP_TEXT_TOTAL, TURN15_FLY_STRIKE_TEXT_TOTAL, TURN5_SITRUS_HEAL_HP_END, TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_LINE1, TURN5_SITRUS_HEAL_LINE2, TURN5_SITRUS_RING_CENTER, dragonBreathTextVisibleChars, menuIdleHealthboxBounce, menuIdleOnixBounce, turn10AerialAceTextVisibleChars, turn10NotVeryEffectiveTextVisibleChars, turn10SuperEffectiveTextVisibleChars, turn11AtkFloorTextVisibleChars, turn11SuperEffectiveTextVisibleChars, turn6FeatherDanceTextVisibleChars, turn9NotVeryEffectiveTextVisibleChars, turn9QuickAttackTextVisibleChars, turn9SuperEffectiveTextVisibleChars };
+import { TURN5_FAINTED_CURSOR_START_DELAY, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, TURN5_FAINTED_TEXT_TOTAL, grovyleFaintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible } from "./battleSceneCanonical.ts";
+export { TURN5_FAINTED_CURSOR_START_DELAY, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, TURN5_FAINTED_TEXT_TOTAL, grovyleFaintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible };
 
 interface Tileset {
   columns: number;
@@ -1791,6 +1792,7 @@ const singArt = singAsset as {
   azurillBack: { tileset: Tileset; palette: RgbColor[] };
   azurillFront: { tileset: Tileset; palette: RgbColor[] };
 };
+
 
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
@@ -2466,6 +2468,7 @@ const grimerBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpr
 const battleAnimItemHeal = battleAnimItemHealAsset as BattleAnimItemHealAsset;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
+
 const menuIdleBlank = menuIdleBlankAsset as MenuIdleFrameAsset;
 const menuIdleBase = menuIdleBaseAsset as MenuIdleFrameAsset;
 const fightSubmenuWindow = fightSubmenuWindowAsset as FightSubmenuWindowAsset;
@@ -3040,15 +3043,7 @@ export function playerTrainerSendOutClock(t: number, handoffTick: number, encoun
  */
 
 
-export function playerSummaryEvaOffset(
-  playerVisualT: number,
-  encounter: BattleSceneState["encounter"],
-): number {
-  return encounter === "jenson"
-    && playerVisualT - BRENDAN_THROW_START_TICK === SUBSEQUENT_BATTLE_SUMMARY_EVA_PHASE_AGE
-    ? -1
-    : 0;
-}
+
 
 /** Visible character count (0..35) of the "sent\nout GROVYLE!" message at trace tick `t`, given the press tick. Same 1-tick/char mechanism as `textVisibleChars` (§3.2/§7.3). */
 export function sendOutTextVisibleChars(
@@ -9809,12 +9804,7 @@ function drawTurn5EndeavorText(
  * into a defaulted param" idiom every other reused mechanism in this file
  * already uses.
  */
-export function grovyleFaintSinkRowsAndY2(t: number, startTick: number = GROVYLE_FAINT_SINK_START_TICK, steps: number = GROVYLE_FAINT_SINK_STEPS): { keptRows: number; y2: number } {
-  const d = t - 1 - startTick;
-  if (d <= 0) return { keptRows: steps, y2: 0 };
-  const k = Math.min(steps, Math.ceil(d / 2));
-  return { keptRows: steps - k, y2: k * 8 };
-} // 6521
+ // 6521
 
 /** Same tile-grid walk as `drawSpriteSheet`, but only the top `keptRows` of `tileset.rows` (the faint sink's own progressive bottom-up erase, `grovyleFaintSinkRowsAndY2`) - `oy` already includes any `y2` shift, same convention every other sprite draw in this file uses. */
 function drawSpriteSheetTopRows(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, keptRows: number): void {
@@ -10216,8 +10206,8 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
  * "fainted!" (pixel-confirmed exact line wrap, matching this window's own
  * committed 110/110 trace, `docs/battle-turn-notes.md` §24).
  */
-const [TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2] = resolveTurn5FaintWindowLines();
-const TURN5_FAINTED_TEXT_TOTAL = TURN5_FAINTED_LINE1.length + TURN5_FAINTED_LINE2.length;
+
+
 
 /** The wait-cursor's own X position for THIS text - `CURSOR_DEST_X`'s own doc explains why this isn't a fixed constant: it sits right after line 2's own last printed glyph, pixel-confirmed this session (oracle diff isolated to x=61-67, matching `LINE2_ORIGIN.x + measureText(...TURN5_FAINTED_LINE2)` = 60 exactly, not the intro's own 123). */
 const TURN5_FAINTED_CURSOR_X = LINE2_ORIGIN.x + measureText(font, charmap, TURN5_FAINTED_LINE2);
@@ -10230,7 +10220,7 @@ function turn5FaintedTextVisibleChars(t: number, pressTick: number): number {
 }
 
 /** Ticks from `TURN5_ROCKSLIDE_PRESS_TICK` to the fainted text's own wait-cursor first appearing - pixel-confirmed this session (dense oracle sweep: first cursor-shaped diff at trace tick 6543 = `PRESS_TICK`+714, matching `turn5FaintedTextStartTick`+`TURN5_FAINTED_TEXT_TOTAL`+1 exactly, the same "one tick after the last glyph's own text-complete tick" shape `CURSOR_START_TICK`'s own doc describes for the S6 intro). */
-const TURN5_FAINTED_CURSOR_START_DELAY = TURN5_FAINTED_TEXT_DELAY + TURN5_FAINTED_TEXT_TOTAL + 1; // 714 -> trace tick 6543
+ // 714 -> trace tick 6543
 
 /**
  * S7 slice K's headline mechanism (docs/battle-turn-notes.md §24): this
@@ -10244,9 +10234,7 @@ const TURN5_FAINTED_CURSOR_START_DELAY = TURN5_FAINTED_TEXT_DELAY + TURN5_FAINTE
  * remains a presentation evidence pin only; no battle-state mirror consumes
  * the dismiss edge.
  */
-export function turn5RockSlideKoDismissEligible(t: number): boolean {
-  return t >= TURN5_ROCKSLIDE_PRESS_TICK + TURN5_FAINTED_CURSOR_START_DELAY;
-}
+
 
 /**
  * Draws the switch-in icon-bar re-trigger (bar + 6 icons, uniform `x2`
