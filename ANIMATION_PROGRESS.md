@@ -1,5 +1,50 @@
 # Animation coverage
 
+## MOVE_DETECT promoted to exact — 123/276 exact (2026-08-07 worker)
+
+- **State:** DETECT is **exact** — player-back 110/110 and opponent-front
+  109/109 on both axes. Coverage now **123/276 exact, 0 partial, 0 staged,
+  153 unsupported**.
+- **Did:** resolved the opponent boundary frame and promoted. The window's
+  first in-bounds frame (68) was NOT a DETECT component — it was the outgoing
+  animation's OAM teardown one display behind the script-pointer boundary:
+  reading gSprites at the software OAM index behind hardware slot 11 found
+  `gSpriteTemplate_EnemyShadow` / `SpriteCB_EnemyShadow` (the enemy mon's
+  shadow, 32x8 at (160,65), palette bank 5, priority 1), which stays in
+  hardware OAM because its invisible flag (set when gAnimScriptActive turns
+  true) reaches hardware one display after the pointer enters Move_DETECT;
+  absent frame 69+ and never returns. The engine does not model shadows, so
+  option B: the opponent fixture's denseWindow re-pins to **69-177 (109
+  frames)** via a probe `skip-first-frames` arg (backward compatible — player
+  evidence hash unchanged) plus a portable `ageOffset` that keeps the
+  reducer's ramp boundaries calibrated to the move's first in-bounds frame.
+  Added the sparkle's absolute subpriority (attacker-13: 17 player / 27
+  opponent) to the reducer with a Tier-1 pin. Tier-1 detect tests (10) +
+  evidence receipts updated; coverage entry promoted (with the boundary
+  reason) and inventory pin 122→123 exact / partial 1→0.
+- **Measured (both portables, fresh runs, exit 0):** player-back 110/110
+  component and framebuffer (64-173); opponent-front 109/109 component and
+  framebuffer (69-177). Player evidence 52f1db13… / raw RGB 274b00b5… —
+  unchanged from staging; opponent evidence 0506c00b… / raw RGB
+  2086c05a… — matching the fixture pins twice fresh.
+- **Next:** pick the next move from the component-leverage ranking
+  (gSpinningSparkleSpriteTemplate now has 1 exact representative left;
+  gDirtPlumeSpriteTemplate/gFistFootRandomPosSpriteTemplate at 2).
+- **Notes — FIFTH display-lag finding, reusable for every future move:** the
+  outgoing animation's OAM teardown lands ONE display behind the
+  script-pointer boundary, so a window whose opening frame coincides with the
+  animation start can catch the previous animation's sprite (here the enemy
+  shadow — the player side shows no such frame only because its pre-move
+  field had nothing left over). The software OAM buffer is one frame AHEAD of
+  hardware OAM at that boundary (frame 68: software slot 11 already new,
+  hardware still old). This is field state, not a move component — when a
+  window's first frame shows it, re-pin the window to the first display the
+  move owns and write the reason down, never draw a DETECT-specific hack for
+  it. Probe gotchas: the enemy shadow template is `gSpriteTemplate_EnemyShadow`
+  (data, `& ~1`), callback `SpriteCB_EnemyShadow` (thumb); a sprite's inline
+  OAM attr0/1/2 matches the buffer slot, but the affine u32 differs (0 vs the
+  buffer's matrix param), so match on the first 6 bytes.
+
 ## MOVE_DETECT staged + reducer/seam/draw + evidence — player-back exact, opponent-front partial (2026-08-07 worker)
 
 - **State:** DETECT is **partial** — player-back **exact** (110/110 both axes),
