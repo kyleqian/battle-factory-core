@@ -1,0 +1,54 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "TAKE_DOWN",
+  "pair": "FRONTIER_MON_SWABLU set 93 (opponent-front SWABLU) -> legal ONIX (player-back)",
+  "orientation": "opponent-to-player",
+  "scenario": "tools/battle-lab/mechanic-take-down-opponent-swablu-player-onix.json",
+  "probe": "tools/compare/takeDownProbe.py",
+  "appStage": {
+    "presentationAge": 0
+  },
+  "denseWindow": {
+    "startFrame": 215,
+    "endFrame": 311,
+    "frameCount": 97,
+    "skipProbeFrames": 1,
+    "ageOffset": 1
+  },
+  "attacker": {
+    "species": "SWABLU",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 13 },
+      "animationCenter": { "x": 176, "y": 45 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 142,
+    "playerMaxHp": 142,
+    "opponentHp": 131,
+    "opponentMaxHp": 141,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "take-down-dense-evidence/v1",
+  "evidenceSha256": "798075401f91ce58bcf7b355866635fecc1173c34a8899a0804aba122ecab662",
+  "secondFreshEvidenceSha256": "798075401f91ce58bcf7b355866635fecc1173c34a8899a0804aba122ecab662",
+  "rawRgbSha256": "ad9b74ed4382262bdf94ae43749ead2a723e390898967ead811e3e06986095f7",
+  "acceptance": {
+    "status": "exact",
+    "framebufferMatching": 97,
+    "componentMatching": 97
+  }
+}
