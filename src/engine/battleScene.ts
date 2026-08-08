@@ -11446,7 +11446,7 @@ function murkrowHealthboxContentForHp(
   const key = `${hp}:${status}:${targetHp}`;
   let cached = murkrowHealthboxContentByHp.get(key);
   if (!cached) {
-    cached = hp === 142 && status === "none"
+    cached = hp === TURN13_SWITCHIN.replacementHp.max && status === "none"
       ? murkrowHealthboxContent
       : composeOpponentHealthbox(healthboxAssemblyAssets, {
           name: TURN13_SWITCHIN.replacementSpecies,
