@@ -282,6 +282,58 @@ why the pins still hold.
   clean terminal decision, no unsupported-branch halt.
 - **Breadth unblocked:** every battle's end.
 
+> **REFUTED 2026-08-08 (supervisor, source-verified) — reclassified (C),
+> unreachable. Do not take the port this entry proposes.** The entry's own
+> "Honest uncertainty" line asked for exactly this check; here is the answer.
+>
+> `RunTurnActionsFunctions` (`src/battle_main.c:4937-4945`) is the **only**
+> dispatcher of the turn-action table, and it re-tests the outcome on every
+> call, *before* dispatching:
+>
+> ```c
+> static void RunTurnActionsFunctions(void)
+> {
+>     if (gBattleOutcome != 0)
+>         gCurrentActionFuncId = B_ACTION_FINISHED;
+>     ...
+>     sTurnActionsFuncsTable[gCurrentActionFuncId]();
+> ```
+>
+> `HandleAction_UseMove` (`src/battle_util.c:78`) is the only producer of a
+> fresh move script, and a move script is the only thing that begins with
+> `attackcanceler`. It runs only as `sTurnActionsFuncsTable[B_ACTION_USE_MOVE]`,
+> i.e. only through the line above. The scheduler cannot chain past that check
+> inside one frame either: `HandleAction_ActionFinished`
+> (`src/battle_util.c:658-683`) *assigns* `gCurrentActionFuncId =
+> gActionsByTurnOrder[...]` and returns — it never calls the next handler
+> itself, so the next handler is dispatched by a later
+> `RunTurnActionsFunctions` call, whose first statement overrides that
+> assignment. `BattleTurnPassed` (`src/battle_main.c:3988-3992`) does the same
+> on the end-of-turn path.
+>
+> So `Cmd_attackcanceler`'s own `if (gBattleOutcome != 0)` preflight
+> (`battle_script_commands.c:919`) is **defensive redundancy in the C source**:
+> the dispatcher one level up has already replaced the action by the time it
+> could matter. Same shape as the A4 Lightning Rod refutation — real source, but
+> it cannot fire under Level-50 singles' actual control flow.
+>
+> **This engine already models that preemption.**
+> `factoryBattleScriptFullTurnDecision.ts`'s header documents the terminal
+> second-action skip and cites `battle_main.c:4937-4943` for it. And the
+> preflight itself is already source-complete:
+> `preflightBattleScriptActionEntry` (`battleScriptActionAdmission.ts:3925-3945`)
+> returns a typed `stop` whose receipt already carries
+> `currentAction: { kind: "set", sourceConstant: "B_ACTION_FINISHED" }`, pinned
+> by `tests/battleScriptActionAdmission.test.ts:309`. Nothing is missing from
+> the receipt; the only defect is that `attackCancelerOpcodeHandler`
+> (`battleScriptAttackCancelerOpcode.ts:337-343`) discards it and raises
+> `unsupported-branch` instead.
+>
+> **Remaining work is a string, not a port:** restate the barrier as an explicit
+> (C) guard citing `battle_main.c:4939`. Its current reason string — "consumed
+> by the round controller, out of this step's scope" — is false and should not
+> survive. **Fourth barrier this run whose own reason string had decayed.**
+
 ---
 
 ## Bucket (B) — reachable only under the widened 2026-08-05 scope
@@ -494,7 +546,7 @@ the engine's current resolver accepts each operand:
 > | 8. `printfromtable` message tables | **DONE** — Truant Slaking's loafing turn and fire-move thaw. |
 > | 9. `sProtectSuccessRates[4]` OOB | **DONE** — measured from the ROM: the adjacent `u16` is `MOVE_METRONOME` (118), so a 5th consecutive Protect succeeds ~0.18% of the time. Evidence: `docs/protectlike-oob-adjacent-byte.md`. |
 > | 10. `DMG_RECOIL_FROM_MISS` / `DMG_DOUBLED` | **DONE** — Struggle recoil (universal) and Beat Up. |
-> | 11. battle-outcome → `B_ACTION_FINISHED` handoff | **OPEN.** Note this entry's own honest caveat: reachability was never proven. Prove it with a battle-end fixture BEFORE porting. |
+> | 11. battle-outcome → `B_ACTION_FINISHED` handoff | **REFUTED 2026-08-08 (supervisor) — reclassified (C), unreachable.** `RunTurnActionsFunctions` (`battle_main.c:4939`) forces `B_ACTION_FINISHED` before dispatching any turn action, so `HandleAction_UseMove` — the only producer of a script starting with `attackcanceler` — never runs with `gBattleOutcome != 0`. The engine already models the preemption and the preflight receipt is already source-complete. **Do not take the proposed port**; all that remains is restating the barrier's (now false) reason string. See the refutation box under A12. |
 > | 12. Enigma Berry (bucket B) | **OPEN**, lowest priority. |
 > | A2. `AI_CheckViability` if_effect table | **OPEN** — the sibling of item 1, not yet started. |
 >
