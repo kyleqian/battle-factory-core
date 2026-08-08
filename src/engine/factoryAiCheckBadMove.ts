@@ -326,6 +326,12 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    */
   hasPerishSong?: boolean;
   /**
+   * `gBattleMons[AI_TARGET].status2 & STATUS2_NIGHTMARE` is nonzero --
+   * `AI_CBM_Nightmare`'s first, source-ordered rejection gate (EFFECT_
+   * NIGHTMARE). Optional, defaulting to false.
+   */
+  isNightmared?: boolean;
+  /**
    * `gBattleMons[AI_TARGET].level` -- `AI_CBM_OneHitKO`'s final
    * `if_level_cond 1` (less-than) gate operand. Optional, defaulting to 0
    * (the neutral "not lower" outcome when omitted, so the level gate never
@@ -1495,6 +1501,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_NIGHTMARE -> AI_CBM_Nightmare
+  // (`data/battle_ai_scripts.s:162,237-240`): target already under Nightmare
+  // JUMPs to -10; a not-asleep target JUMPs to -8 (the move requires Sleep).
+  // Sequential Score_Minus10 then Score_Minus8 JUMPs, never additive.
+  if (move.effect === "EFFECT_NIGHTMARE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmNightmare(target.isNightmared ?? false, target.isAsleep ?? false),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_DOWN(_2) -> AI_CBM_SpeedDown,
   // one of the two handlers this port implements out of the table's ~100 entries.
   if (move.effect === "EFFECT_SPEED_DOWN" || move.effect === "EFFECT_SPEED_DOWN_2") {
@@ -2636,6 +2655,28 @@ function runCbmIngrain(attackerRooted: boolean): number {
  */
 function runCbmPerishSong(targetHasPerishSong: boolean): number {
   return targetHasPerishSong ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Nightmare` (`data/battle_ai_scripts.s:237-240`, EFFECT_NIGHTMARE):
+ *
+ * ```
+ * AI_CBM_Nightmare:
+ *     if_status2 AI_TARGET, STATUS2_NIGHTMARE, Score_Minus10
+ *     if_not_status AI_TARGET, STATUS1_SLEEP, Score_Minus8
+ *     end
+ * ```
+ *
+ * Existing Nightmare JUMPs to -10 first; a not-asleep target then JUMPs to
+ * -8 (Nightmare needs the target asleep to take effect). Sequential Score_
+ * Minus10 then Score_Minus8 JUMPs, never additive -- a Nightmared target
+ * never reaches the sleep check. Zero ability/type reads.
+ */
+function runCbmNightmare(targetNightmared: boolean, targetAsleep: boolean): number {
+  if (targetNightmared) {
+    return -10;
+  }
+  return targetAsleep ? 0 : -8;
 }
 
 /**

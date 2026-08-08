@@ -1003,6 +1003,44 @@ describe("AI_CBM_PerishSong (data/battle_ai_scripts.s:447-449, EFFECT_PERISH_SON
   });
 });
 
+describe("AI_CBM_Nightmare (data/battle_ai_scripts.s:237-240, EFFECT_NIGHTMARE)", () => {
+  const MOVE_NIGHTMARE = 171;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("target already under Nightmare JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_NIGHTMARE, target({ isNightmared: true, isAsleep: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("Nightmared target never reaches the sleep check (sequential, not additive)", () => {
+    const result = run(MOVE_NIGHTMARE, target({ isNightmared: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("asleep but not Nightmared FALLS THROUGH to end at zero", () => {
+    const result = run(MOVE_NIGHTMARE, target({ isAsleep: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("not asleep and not Nightmared JUMPs to Score_Minus8", () => {
+    const result = run(MOVE_NIGHTMARE, target());
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8, draws: [] });
+  });
+});
+
 describe("AI_CBM_OneHitKO (data/battle_ai_scripts.s:358-362, EFFECT_OHKO)", () => {
   const MOVE_GUILLOTINE = 12; // EFFECT_OHKO, TYPE_NORMAL, power 1
   const MOVE_SHEER_COLD = 329; // EFFECT_OHKO, TYPE_ICE, power 1

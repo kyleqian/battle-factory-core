@@ -365,6 +365,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_TORMENT) !== 0
         ? { isTormented: true }
         : {}),
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) !== 0
+        ? { isNightmared: true }
+        : {}),
       ...((target.status3 & BATTLE_SCRIPT_STATUS3_YAWN) !== 0
         ? { hasYawn: true }
         : {}),
