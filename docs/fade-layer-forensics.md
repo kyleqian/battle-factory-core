@@ -552,3 +552,34 @@ Receipt for this doc:
 `tools/compare/out/run-2026-08-07-23-00-35Z-60136` (capture-range 758:790,
 `mid-battle-switch-dense-a-off`; probe PASSes; a second fresh run
 `run-2026-08-07-22-41-29Z-52643` gives identical px counts).
+
+## 9. Open-fade Class B — the mechanism, from RAM (2026-08-07, salvaged)
+
+A side-lane worker measured this with `tools/probe/dump-openfade-classb-sprites.py`
+(committed here) but was killed at its cap before writing the section. These
+facts were salvaged from its transcript and are recorded because they settle
+the mechanism; the per-frame table itself was not written out.
+
+**Tick <-> frame mapping: probe tick N corresponds to oracle frame N+1.**
+Anchored three independent ways: the back-sprite settle at tick 760 = frame
+761; the healthbox `y2` step at tick 769 = frame 770; the back-sprite `y2`
+step at tick 778 = frame 779.
+
+**What moves.** The Class-B residual is not a post-composite pixel shift and
+not a fade-level error - it is two sprite-coordinate steps:
+
+- the **player healthbox** sprite's `y2` steps to **1** at oracle frame
+  **770** (it is drawn one row lower from there on), and
+- the **player back sprite** `y2` steps at oracle frame **779**.
+
+Both match the pixel evidence in section 8 exactly (healthbox one row low
+from 770; the back sprite joining the residual at 779, one row high). Two
+earlier attempts to reproduce this by shifting composited framebuffer rows
+failed at the sprite's own boundary - a row-shift left 27 wrong pixels on the
+box outline and its slanted lower-left corner - which is what a coordinate
+change explains and a pixel shift cannot.
+
+**Not resolved:** the exact source write site. `party_menu.c:4012` contains a
+`sprite->y2 = 1;` and the `SlidePartyMenuBoxSprites` family around
+`party_menu.c:2915` was the next thing being read when the cap hit. The fix
+does not depend on naming the line - the measured coordinates do.
