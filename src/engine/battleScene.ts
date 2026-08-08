@@ -1165,6 +1165,10 @@ import speciesNamesAsset from "../data/gen/species-names.json" with { type: "jso
 import cryDurationsAsset from "../data/gen/cry-durations.json" with { type: "json" };
 import enemyMonElevationsAsset from "../data/gen/enemy-mon-elevations.json" with { type: "json" };
 
+export { BALL_WIDGETS_SETTLED_TICK } from "./battleSceneCanonical.ts";
+import { TURN5_SITRUS_RING_RENDER_LAG } from "./battleSceneCanonical.ts";
+export { TURN5_SITRUS_RING_RENDER_LAG };
+
 interface Tileset {
   columns: number;
   rows: number;
@@ -2945,8 +2949,6 @@ const OPP_CREATE_TICK = 1231;
  * needs no correction there).
  */
 const PLAYER_BAR_VISIBLE_TICK = PLAYER_CREATE_TICK + 1;
-/** Trace tick every widget's entrance slide has settled (docs/battle-interface-assets.md). */
-export const BALL_WIDGETS_SETTLED_TICK = 1292;
 
 const PLAYER_BAR_X2 = [95, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 0];
 const OPP_BAR_X2 = [-95, -90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0];
@@ -10314,7 +10316,6 @@ const TURN5_SITRUS = resolveTurn5SitrusAdapter();
  * to either constant fails loudly instead of silently drifting.
  */
 const ONIX_SITRUS_ROTATE_RENDER_LAG = 2;
-const TURN5_SITRUS_RING_RENDER_LAG = 1;
 if (ONIX_SITRUS_ROTATE_RENDER_LAG - TURN5_SITRUS_RING_RENDER_LAG !== 1) {
   throw new Error(
     "battleScene.ts: onixSitrusRotateMatrix's/turn5SitrusRingMatrix's own documented 1-tick "
