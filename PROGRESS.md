@@ -5,51 +5,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 993 — [bounded MAIN worker, 2026-08-08] ISSUES #80 LAST GAP CLOSED: in-battle SHIFT/SUMMARY/CANCEL submenu byte-exact — dense-a **354 → 392/392**, the party-menu visual gap is fully discharged
+## 994 — [bounded MAIN worker, 2026-08-08] ISSUES #80 FULLY CLOSED: 3-frame submenu open delay landed — dense-a **392 → 395/395 byte-exact**, #80 entry deleted
 
 - **State:** master at this entry's commit, clean. Typecheck + `npm run build`
-  green, `npm run test:smoke` **347/347**, touched test files **63/63**
-  (battlePartySelect 19/19 incl. the re-pinned confirm-edge test +
-  inbattlePartyMenuVisualBind 11/11 incl. 3 new red-verified pins + partySelect
-  17/17 + partyMonIconAnim 6/6 + factoryVoluntarySwitchSeam 10/10). Dense-a
-  spec extended 926-963 (+38) → **392/392 byte-exact, three times**; fast loop
-  920:965 **43/46** (the 3 red are pre-open 923-925, not in spec);
-  `tools/probe/submenu-forensics.ts` **10/10 PASS** (check 10 re-pinned to the
-  corrected app geometry). Keep-green all held: party-menu-status-item-off
-  **251/251**, mid-battle-switch-pacing-b-off **153/153**,
-  battle-command-generated-off **128/128**. Full `npm test` NOT run (worker
-  rule — supervisor after merge).
-- **Did (per `docs/fade-layer-forensics.md` §10, which this bind corrects):**
-  the party-menu **action window** (`DisplaySelectionWindow`,
-  `party_menu.c:2534`) — the oracle's frame is the app's own `text_window`
-  tiles at outer origin (144,96) → (145,97)-(238,159), interior white
-  (150,102)-(233,153); the old scaffold at (144,80) was exactly **16 px too
-  high** (x-extent already matched). Replaced the three scaffold texts with
-  **SHIFT/SUMMARY/CANCEL** at (160,105)/(160,121)/(160,137) FONT_NORMAL
-  (ink 214,214,206 / shadow 99,99,99) + the **cursor "▶" as its own glyph**
-  at (152,105), no longer baked into the label. **Two findings beyond §10:**
-  (1) line 1 is **SHIFT, not SEND OUT** — this is the voluntary mid-battle
-  switch (`sPartyMenuAction_ShiftSummaryCancel`), because
-  `GetPartyMenuActionsTypeInBattle` (`party_menu.c:5788-5796`) returns
-  ACTIONS_SHIFT unless `gPartyMenu.action == PARTY_ACTION_SEND_OUT`; §10's
-  string attribution and ink extents corrected. (2) the confirm edge keeps
-  the window rendered through **frame 963** (closeElapsed 0) and drops it at
-  964 — the app used to flip `submenuOpen` false one frame early (963 red,
-  never spec-captured); the state now keeps `submenuOpen` true at
-  closeElapsed 0 and a `submenuVisible` render gate (`submenuOpen && (close
-  null || 0)`) hides it from closeElapsed 1, leaving the byte-exact close
-  fade untouched. Tier-1 pins: window-rect (frame edges + interior bounds),
-  3 label origins incl. the SHIFT-vs-SEND-OUT x199 discriminator, cursor glyph
-  at (152,105), and the re-pinned confirm-edge timing — **each red-verified
-  independently** (reverting frame y, the SHIFT string, the cursor split, and
-  the confirm-edge flip each fails its own assertions).
-- **Next:** supervisor verify + full `npm test`. ISSUES #80's remaining
-  follow-up text is discharged — the submenu bind closes the last known
-  in-battle party-menu visual gap; #80 entry updated.
-- **Notes:** no PAPERCUTS. The pre-open frames 923-925 remain red (the app
-  opens the submenu 3 frames before the oracle pops it at 926) but are not in
-  the spec — out of scope for this step and unchanged by it.
-
+  green, `npm run test:smoke` **347/347**, touched test files **48/48**
+  (battlePartySelect 20/20 incl. the new 3-frame open-edge pin + visual bind
+  11/11 + partySelect 17/17). Fast loop 920:965 **46/46** (was 43/46). Dense-a
+  spec extended 923-925 (+3) → **395/395 byte-exact, twice-run**. Keep-green
+  all held: party-menu-status-item-off **251/251**,
+  mid-battle-switch-pacing-b-off **153/153**, battle-command-generated-off
+  **128/128**. Full `npm test` NOT run (worker rule — supervisor after merge).
+- **Did (per `docs/fade-layer-forensics.md` §10(d)):** the A-press edge sets
+  `submenuOpen` (state rendered at 923), but oracle frames 923-925 still show
+  the pre-open state — wide "Choose a POKéMON." 21x2 window + CANCEL button,
+  no action window, no cursor — and the whole SHIFT/SUMMARY/CANCEL window +
+  swapped 16x2 "Do what with this {PKMN}?" window pop together at 926, one
+  frame, no animation. Measured at 923-925: the app-drawn extras are exactly
+  the action-window frame+interior+3 labels+cursor (144,96)-(238,159) and the
+  swapped message window (0,128)-(128,143), replacing the oracle's wide window
+  (8,136)-(176,152) and CANCEL button; icon/left/right-column regions 0 diff.
+  Added `SUBMENU_OPEN_VISUAL_DELAY = 3` + a `submenuOpenElapsed` counter
+  (0 on the A-press edge, +1/tick while `submenuOpen`); the action window
+  (`submenuWindowVisible`), the message-window swap, and the CANCEL pokeball
+  suppression are now gated on it. The mon-icon +2 stall (`submenuOpened`) and
+  the confirm-edge/close-fade are untouched — frames 926+ byte-identical.
+  Tier-1 pin red-verified: neutralizing the delay to 0 fails the new test's
+  pre-open loop (elapsed 0/1/2 render the open state, [74,74,107] at (141,140)
+  vs white). Forced projection maps open submenu to `submenuOpenElapsed = 3`.
+- **Next:** supervisor verify + full `npm test`. ISSUES #80 deleted in full —
+  the last open item (this 3-frame edge) is closed; nothing else open.
+- **Notes:** no PAPERCUTS. Commits `75bf7ce2` (the delay) + `dcef570d` (spec
+  + pin) + this docs commit.
 
 ## 992 — [bounded MAIN worker, 2026-08-08] ISSUES #80 Class B LANDED (last open-fade defect): per-sprite draw-origin offsets — dense-a **341 → 354/354 byte-exact**, open window fully closed
 
