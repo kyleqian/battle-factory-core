@@ -641,6 +641,63 @@ describe("interactive battle routing", () => {
     expect(accepted.postwin!.swapDeclineElapsed).not.toBeNull();
   });
 
+  it("hands a completed kept-party swap to the generated round owner", () => {
+    const anchor = createInitialState();
+    const orchestrator = accelerateWinToSwapOffer(createFactoryAnchorSession({
+      playerRentalRecords: selectedRentalParty({
+        ...anchor.draftScreen,
+        selectedIds: selectedIdsForSlots(4, 0, 2),
+      }),
+      savedRentalRecords: anchor.draftScreen.rentals.map(({ source }) => source),
+      roomTrainer: CANONICAL_DESTIN_PRESENTATION,
+      constructionRngValues: ANCHOR_BATTLE_1_CONSTRUCTION_RNG_VALUES,
+      freshBattleRngValue: ANCHOR_BATTLE_1_HANDOFF_RNG_VALUE,
+    }));
+    const pendingSwap = createPendingFactorySwapPresentation(
+      orchestrator.round,
+    )!;
+    const partyBefore = orchestrator.round.rules.playerParty;
+    const state: EngineState = {
+      ...createInitialState({ appRoute: "generated-orchestrator" }),
+      postwin: {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: 20_000,
+        dialoguePage: 4,
+        dialoguePageEdgeElapsed: 19_000,
+        swapCursorPos: 0,
+        swapCursorDisplayPos: 0,
+      },
+      factorySwap: {
+        ...pendingSwap,
+        phaseElapsed: 22,
+        fieldHandoff: "CB2_ReturnToFieldContinueScript",
+        controller: {
+          ...pendingSwap.controller,
+          phase: "complete",
+          scriptResult: true,
+          result: "keptParty",
+        },
+      },
+      factoryRoundBattleOrchestrator: orchestrator,
+    };
+
+    const next = tick(state, new Set());
+    expect(next.factorySwap).toBeNull();
+    expect(next.factoryRoundBattleOrchestrator!.round.rules.lastSwap)
+      .toEqual({ type: "decline" });
+    expect(next.factoryRoundBattleOrchestrator!.round.rules.battleIndex)
+      .toBe(1);
+    expect(next.factoryRoundBattleOrchestrator!.round.presentation?.command.type)
+      .toBe("battleStart");
+    expect(next.factoryRoundBattleOrchestrator!.round.rules.playerParty.map(
+      ({ id, species }) => ({ id, species }),
+    )).toEqual(partyBefore.map(({ id, species }) => ({ id, species })));
+    expect(next.factoryRoundBattleOrchestrator!.round.rules.playerParty.every(
+      ({ hp, maxHp, status }) => hp === maxHp && status === "none",
+    )).toBe(true);
+    expect(next.postwin!.swapDeclineElapsed).not.toBeNull();
+  });
+
   it("pre-generates the next opponent when the generated route accepts GO ON", () => {
     const anchor = createInitialState();
     let orchestrator = createFactoryAnchorSession({

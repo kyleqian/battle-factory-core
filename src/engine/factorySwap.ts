@@ -245,14 +245,25 @@ export function commitFactorySwapMutation(
   return { ...committed, phase: "acceptExit" };
 }
 
-/** Presentation-to-round seam; unavailable until the source copy commits. */
+/**
+ * Presentation-to-round seam.  An accepted swap becomes available at the
+ * source CopySwappedMonData boundary; a kept-party exit becomes available at
+ * the later CB2_ReturnToFieldContinueScript boundary.  Keeping the latter
+ * tied to `complete` preserves the source exit window while allowing the
+ * generic round controller to consume both outcomes.
+ */
 export function factorySwapRoundDecision(
   state: FactorySwapState,
 ): {
   readonly type: "accept";
   readonly playerPartyIndex: 0 | 1 | 2;
   readonly opponentPartyIndex: 0 | 1 | 2;
+} | {
+  readonly type: "decline";
 } | null {
+  if (state.phase === "complete" && state.result === "keptParty") {
+    return { type: "decline" };
+  }
   if (
     !state.mutationCommitted ||
     state.result !== "accepted" ||

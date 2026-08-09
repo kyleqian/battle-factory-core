@@ -873,7 +873,7 @@ describe("live Factory swap presentation adapter", () => {
     expect(state.controller.playerParty).toEqual(before.playerParty);
     expect(state.controller.enemyParty).toEqual(before.enemyParty);
     expect(state.controller.rentalMons).toEqual(before.rentalMons);
-    expect(factorySwapRoundDecision(state.controller)).toBeNull();
+    expect(factorySwapRoundDecision(state.controller)).toEqual({ type: "decline" });
   });
 
   it("keeps party/rentals immutable through default-YES quit and hands off with TRUE", () => {
@@ -917,7 +917,7 @@ describe("live Factory swap presentation adapter", () => {
     });
     expect(state.controller.playerParty).toEqual(partyBefore);
     expect(state.controller.rentalMons).toEqual(rentalsBefore);
-    expect(factorySwapRoundDecision(state.controller)).toBeNull();
+    expect(factorySwapRoundDecision(state.controller)).toEqual({ type: "decline" });
   });
 
   it.each([
