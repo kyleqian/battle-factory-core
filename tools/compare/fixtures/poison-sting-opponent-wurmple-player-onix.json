@@ -1,0 +1,16 @@
+{
+  "schema": "poison-sting-portable-evidence/v1", "oracleProfile": "battle-scene-on",
+  "move": "POISON_STING", "orientation": "opponent-front",
+  "pair": "FRONTIER_MON_WURMPLE set 4 opponent-front -> legal ONIX player-back",
+  "scenario": "tools/battle-lab/mechanic-poison-sting-opponent-wurmple-player-onix.json",
+  "probe": "tools/compare/poisonStingProbe.py",
+  "attacker": { "species": "WURMPLE", "geometry": { "side": "opponent", "spriteCorner": {"x":144,"y":22}, "animationCenter": {"x":176,"y":54}, "battlePositionCenter": {"x":176,"y":40} } },
+  "target": { "species": "ONIX", "geometry": { "side": "player", "spriteCorner": {"x":40,"y":48}, "animationCenter": {"x":72,"y":88}, "battlePositionCenter": {"x":72,"y":80} } },
+  "fieldProfile": { "playerHp":128,"playerMaxHp":128,"opponentHp":138,"opponentMaxHp":138,"playerGender":"male","opponentGender":"male" },
+  "sourceWindow": {"startFrame":233,"endFrame":345,"frameCount":113},
+  "evidenceSha256": "35bc8ceeca66710062b17b2d0a1875a6bfb460e9f7826768857fef62f0d040d2",
+  "rawRgbSha256": "410f73bf8caebd1dd0e0236d1f3f3d4c350ba4d66822753bcd3c2f078a5e3873",
+  "changeMap": "tools/compare/evidence/poison-sting-changemap-opponent.txt",
+  "changeMapSha256": "af74178a94b01e88d06f98a9b0839674cc28135c334dcc1b85adddffb661e8e6",
+  "acceptance": {"status":"exact","componentMatching":113,"framebufferMatching":113}
+}

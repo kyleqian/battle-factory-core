@@ -38,6 +38,10 @@ import {
   type TwineedleEffect,
 } from "./twineedle.ts";
 import {
+  poisonStingEffectAtAge,
+  type PoisonStingEffect,
+} from "./poisonSting.ts";
+import {
   spikeCannonEffectAtAge,
   type SpikeCannonEffect,
 } from "./spikeCannon.ts";
@@ -808,6 +812,7 @@ export interface SceneOnPresentationBattler {
     | "PONYTA"
     | "CHARMANDER"
     | "LEDYBA"
+    | "WURMPLE"
      | "PRIMEAPE"
      | "MARSHTOMP"
      | "TENTACOOL"
@@ -1542,6 +1547,14 @@ export interface SceneOnSecretPowerConfig {
 
 export interface SceneOnTwineedleConfig {
   readonly move: "TWINEEDLE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+/** Narrow POISON_STING presentation seam; no damage or poison outcome enters it. */
+export interface SceneOnPoisonStingConfig {
+  readonly move: "POISON_STING";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -2370,6 +2383,7 @@ export type SceneOnMoveConfig =
   | SceneOnSlamConfig
   | SceneOnSecretPowerConfig
   | SceneOnTwineedleConfig
+  | SceneOnPoisonStingConfig
   | SceneOnSpikeCannonConfig
   | SceneOnSonicBoomConfig
   | SceneOnSmokescreenConfig
@@ -2701,6 +2715,12 @@ export interface SceneOnPresentView extends PresentState {
 }
 
 export interface SceneOnTwineedleView extends TwineedleEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnPoisonStingView extends PoisonStingEffect {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4861,6 +4881,28 @@ export function sceneOnTwineedleView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...twineedleEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_POISON_STING's first pointer-bounded source display. */
+export function sceneOnPoisonStingView(
+  state: SceneOnMovePresentationState<SceneOnPoisonStingConfig>,
+): SceneOnPoisonStingView {
+  if (state.config.move !== "POISON_STING") {
+    throw new Error(
+      `expected POISON_STING presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...poisonStingEffectAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
