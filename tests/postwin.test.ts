@@ -1075,7 +1075,40 @@ describe("S8 Battle-1 postwin transition", () => {
       // re-asked menu is a fresh menu: cursor back on GO ON, byte-identical hold
       expect(advanced.continuationCursorPos).toBe(0);
       expect(advanced.continuationCursorDisplayPos).toBe(0);
-      expect(advanced.question).not.toBeNull();
+      expect(advanced.question).toBeNull();
+      expect(advanced.questionDismissElapsed).toBeNull();
+    });
+
+    it("routes a fresh A on the re-asked GO ON menu through the public tick path", () => {
+      const edge = 6_639;
+      const dismiss = edge + POSTWIN_QUESTION_WINDOW_DELAYS.record - 1;
+      const firstReadyAge = dismiss + POSTWIN_QUESTION_MENU_READY_DELAY;
+      const engine: EngineState = {
+        ...createInitialState(),
+        postwin: {
+          ...INITIAL_POSTWIN_STATE,
+          elapsed: firstReadyAge - 1,
+          healDismissElapsed: 2_000,
+          continuationCursorPos: 1,
+          continuationCursorDisplayPos: 1,
+          question: { kind: "record", edgeElapsed: edge },
+          questionDismissElapsed: dismiss,
+        },
+      };
+
+      // tick() first advances onto the source's re-asked menu-ready frame,
+      // resets its cursor to GO ON, then must consume this genuine JOY_NEW(A)
+      // edge as AskSwapMon. Retaining the resolved question here strands the
+      // production controller forever on dialoguePage 0.
+      const advanced = tick(engine, new Set(["A"]));
+      expect(advanced.postwin).toMatchObject({
+        elapsed: firstReadyAge,
+        question: null,
+        continuationCursorPos: 0,
+        continuationConfirmElapsed: firstReadyAge,
+        dialoguePage: 1,
+        dialoguePageEdgeElapsed: firstReadyAge,
+      });
     });
 
     it("ignores UP+A after the dismiss (the YES answer is unreachable)", () => {

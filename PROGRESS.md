@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1058 — [MAIN worker, 2026-08-09] **full-policy RECORD-NO postwin hang closed**
+
+- **State:** source-generic repair and red-first public `tick` coverage are
+  green: full suite **832 files / 8,243 passed / 1 skipped**, production
+  build, focused **48/48**, smoke **375/375**, and vanilla **0:20 = 20 OK / 0
+  CRASH / 0 HANG**.
+- **Did:** source `AskRecordBattle` sends NO back through
+  `AskReadyForOpponent`; the production reducer instead retained the resolved
+  question after its re-asked continuation menu became input-ready, so
+  `core.tick` could never route GO ON. `advancePostwin` now retires that stale
+  question and its owned clocks exactly at the relative menu-ready boundary;
+  a fresh A there enters scouting page 1 with ordinary JOY_NEW semantics.
+- **Next:** seed 19 now passes the repaired postwin, swap screen, Battle 2,
+  and reaches Battle 3 before the separate existing fatal name guard reports
+  unmapped ability 14 at **b3 t12 f47319**. Supervisor should scope that
+  distinct string-coverage defect; this bounded postwin hang is closed.
+- **Notes:** full-policy seed 50 is **OK b2 t13 f28152 roundLost**. Seed 19's
+  first repaired route accepts a kept-party swap exit and reaches the Battle-2
+  intro by f17681; no driver policy, hang limit, animation, Gate-6 artifact,
+  unsupported barrier, or canonical Battle-2 window changed.
+
 ## 1057 — [MAIN worker, 2026-08-09] **#86 terminal forced-continuation closed**
 
 - **State:** source-generic repair and red-first public-path test are green;
@@ -41,22 +62,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **OK b2 t51 f48250**, while seed 27 reproduces unchanged. Unknown
   `printfromtable` table/opcode guards remain fatal; no animation, Gate-6, or
   canonical Battle-2 work changed. Commits `2798e6d3`, `36d5873f`.
-
-## 1055 — [supervisor, 2026-08-09] **Contact family and Fire Spin folded; union green**
-
-- **State:** master union is green: full suite **831 files / 8,234 passed / 1
-  skipped**, production build, Gate-6/animation focused **24/24**, and smoke
-  **375/375**. Vanilla remains **0:20 = 20 OK / 0 CRASH / 0 HANG**.
-- **Did:** accepted the hard-constrained **94/94** contact-route family and one
-  fresh Battle Scene OFF Static receipt (`808ec4fc`, merge `e053b6ac`). Every
-  candidate reaches target `datahpupdate` and `MOVEEND_ON_DAMAGE_ABILITIES`;
-  Bide keeps its charge-only alternative, with zero exceptions/blockers.
-  Corrected the receipt ledger to five non-Static contact gaps (`79fba9a1`).
-  Folded `animation-main` through Fire Spin `bb38d12d` as `379d05de`.
-- **Next:** close #87's source-selected `MoveUsedWokeUp` print-table boundary,
-  then #86's separate seed-27 no-command boundary. Rerun full-policy 0:60
-  after the next controller/string repair and use its completion headline.
-- **Notes:** contact overlaps the already promoted Color Change rows, so unique
-  hook gaps stay **111 ability / 300 item**. Static is the one direct contact
-  witness; the other five contact outcomes retain explicit receipt gaps. No
-  canonical Battle-2 window past tick 33331 or unsupported-barrier pin moved.

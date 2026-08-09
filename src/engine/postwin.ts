@@ -629,24 +629,33 @@ export function advancePostwin(state: PostwinState): PostwinState {
           : state.swapCursorDisplayPos,
     swapCursorMoveElapsed: state.swapCursorMoveElapsed,
     swapDeclineElapsed: state.swapDeclineElapsed,
-    question: state.question,
+    // A declined RECORD/RETIRE (or a dismissed RECORD-success message)
+    // returns through AskReadyForOpponent. Once that re-asked continuation
+    // menu is input-ready, the old question no longer owns input: retaining
+    // it makes core.tick permanently refuse the continuation branch.
+    question: reAskMenuReady ? null : state.question,
     // One-VBlank display handoff for the YES/NO question cursor, mirroring
     // the continuation/swap cursors: the logical pos moves on the press
     // frame, the field window copies it one tick later (the oracle's
     // visible cursor swap is the press edge + 2; the app processes the
     // press one tick later, so the copy is `elapsed > edge`).
     questionCursorDisplayPos:
-      state.questionCursorMoveElapsed !== null &&
+      reAskMenuReady
+        ? 1
+        : state.questionCursorMoveElapsed !== null &&
         elapsed > state.questionCursorMoveElapsed
         ? state.questionCursorPos
         : state.questionCursorDisplayPos,
     questionCursorPos:
-      state.question !== null ? state.questionCursorPos : 1,
-    questionCursorMoveElapsed: state.questionCursorMoveElapsed,
-    questionYesElapsed: state.questionYesElapsed,
-    questionDismissElapsed: state.questionDismissElapsed,
+      reAskMenuReady ? 1 : state.question !== null ? state.questionCursorPos : 1,
+    questionCursorMoveElapsed:
+      reAskMenuReady ? null : state.questionCursorMoveElapsed,
+    questionYesElapsed: reAskMenuReady ? null : state.questionYesElapsed,
+    questionDismissElapsed:
+      reAskMenuReady ? null : state.questionDismissElapsed,
     disableRecordBattle: state.disableRecordBattle,
-    recordedMessageDismissElapsed: state.recordedMessageDismissElapsed,
+    recordedMessageDismissElapsed:
+      reAskMenuReady ? null : state.recordedMessageDismissElapsed,
     // One-VBlank display handoff for the continuation-menu cursor, mirroring
     // the swap cursor: the logical pos moves on the press frame, the field
     // window copies it one tick later (docs/...-ground-truth.md §5).
