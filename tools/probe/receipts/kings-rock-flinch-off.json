@@ -1,0 +1,87 @@
+{
+  "static": {
+    "profile": "battle-scene-off",
+    "stimulus": "faster Swellow Pound + King's Rock -> slower durable Shuckle Tackle",
+    "orderedGuards": [
+      "if (gBattleMoveDamage)",
+      "case HOLD_EFFECT_FLINCH:",
+      "!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)",
+      "TARGET_TURN_DAMAGED",
+      "(Random() % 100) < atkHoldEffectParam",
+      "gBattleMoves[gCurrentMove].flags & FLAG_KINGS_ROCK_AFFECTED",
+      "gBattleMons[gBattlerTarget].hp",
+      "SetMoveEffect(FALSE, 0)"
+    ]
+  },
+  "oracle": {
+    "profile": "battle-scene-off",
+    "draws": [
+      {
+        "frame": 42,
+        "count": 1,
+        "rngValue": 1685777593,
+        "randomValue": 25722,
+        "roll100": 22
+      },
+      {
+        "frame": 64,
+        "count": 1,
+        "rngValue": 1284344120,
+        "randomValue": 19597,
+        "roll100": 97
+      },
+      {
+        "frame": 67,
+        "count": 1,
+        "rngValue": 291691851,
+        "randomValue": 4450,
+        "roll100": 50
+      },
+      {
+        "frame": 239,
+        "count": 1,
+        "rngValue": 3112661858,
+        "randomValue": 47495,
+        "roll100": 95
+      },
+      {
+        "frame": 244,
+        "count": 1,
+        "rngValue": 1671453997,
+        "randomValue": 25504,
+        "roll100": 4
+      },
+      {
+        "frame": 347,
+        "count": 1,
+        "rngValue": 3313091228,
+        "randomValue": 50553,
+        "roll100": 53
+      },
+      {
+        "frame": 354,
+        "count": 5,
+        "rngValue": 1931317683,
+        "randomValue": 29469,
+        "roll100": 69
+      }
+    ],
+    "status2Writes": [
+      {
+        "frame": 244,
+        "before": 0,
+        "after": 8,
+        "battleScript": 137202263
+      },
+      {
+        "frame": 250,
+        "before": 8,
+        "after": 0,
+        "battleScript": 137212571
+      }
+    ],
+    "targetTacklePpBefore": 35,
+    "targetTacklePpAfter": 35,
+    "targetMoveExecuted": false
+  }
+}

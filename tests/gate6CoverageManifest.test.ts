@@ -19,6 +19,7 @@ const SOUNDPROOF_MOVES_BLOCK_CATEGORY = "moves-block-soundproof";
 const CONTACT_CATEGORY = "moveend-contact-on-damage";
 const COLOR_CHANGE_CATEGORY = "moveend-color-change";
 const SYNCHRONIZE_CATEGORY = "moveend-synchronize-status";
+const KINGS_ROCK_CATEGORY = "moveend-kings-rock";
 const SOUNDPROOF_ROSTER_MOVES = [
   "MOVE_ROAR", "MOVE_SING", "MOVE_SUPERSONIC", "MOVE_SCREECH", "MOVE_SNORE",
   "MOVE_UPROAR", "MOVE_METAL_SOUND", "MOVE_GRASS_WHISTLE", "MOVE_HYPER_VOICE",
@@ -101,6 +102,22 @@ const SYNCHRONIZE_PROOF_PATHS = [
   "tools/probe/receipts/synchronize-off-seed-610839776.json",
   "tools/probe/receipts/synchronize-off-seed-324508639.json",
 ] as const;
+const KINGS_ROCK_PROOF_PATHS = [
+  "reference/pokeemerald/src/battle_util.c",
+  "reference/pokeemerald/src/battle_script_commands.c",
+  "reference/pokeemerald/include/constants/battle_script_commands.h",
+  "reference/pokeemerald/data/battle_scripts_1.s",
+  "src/data/gen/battle-script-graph.json",
+  "src/data/gen/battle-script-program.json",
+  "src/engine/battleScriptMoveEndOpcode.ts",
+  "tests/battleScriptMoveEndOpcode.test.ts",
+  "tests/kingsRockHookJoinBatch.test.ts",
+  "tests/kingsRockOracleEvidence.test.ts",
+  "docs/kings-rock-moveend-ground-truth.md",
+  "tools/battle-lab/mechanic-kings-rock-flinch-off.json",
+  "tools/probe/probe-kings-rock-flinch-off.py",
+  "tools/probe/receipts/kings-rock-flinch-off.json",
+] as const;
 
 const EXPLICIT_STATE_BEHAVIOR_ROWS = [
   [
@@ -179,7 +196,8 @@ function sourceProvenPathsFor(category: string): readonly string[] {
   if (category === CONTACT_CATEGORY) return CONTACT_PROOF_PATHS;
   if (category === COLOR_CHANGE_CATEGORY) return COLOR_CHANGE_PROOF_PATHS;
   if (category === SYNCHRONIZE_CATEGORY) return SYNCHRONIZE_PROOF_PATHS;
-  throw new Error(`unknown source-proven ability category ${category}`);
+  if (category === KINGS_ROCK_CATEGORY) return KINGS_ROCK_PROOF_PATHS;
+  throw new Error(`unknown source-proven hook category ${category}`);
 }
 
 function assertSourceProvenFamilyContract(
@@ -198,7 +216,7 @@ function assertSourceProvenFamilyContract(
   if (JSON.stringify(array(row.categories).map(String)) !== JSON.stringify(categories)) {
     throw new Error("manifest row categories drift from the source-proven family categories");
   }
-  if (!String(row.notes).includes("unrelated ability families")) {
+  if (!String(row.notes).includes(`unrelated ${String(row.axis)} families`)) {
     throw new Error("source-proven row must retain the unrelated-family boundary");
   }
   for (const family of families) {
@@ -293,6 +311,50 @@ function assertSourceProvenFamilyContract(
         "tools/probe/receipts/synchronize-off-seed-324508639.json",
       ]);
     }
+    if (family.category === KINGS_ROCK_CATEGORY) {
+      const selector = record(family.selector);
+      const dataHpUpdate = record(entryPath.dataHpUpdate);
+      const moveEnd = record(entryPath.moveEnd);
+      const dispatcher = record(family.dispatcher);
+      const graphRoute = array(graph.route);
+      const programRoute = array(program.route);
+      expect(selector.guard).toBe("gBattleMoves[gCurrentMove].flags & FLAG_KINGS_ROCK_AFFECTED");
+      expect(String(selector.derivedFrom)).toContain("power != 0");
+      expect(graphRoute).toEqual(programRoute);
+      expect(graphRoute).toEqual(expect.arrayContaining([
+        expect.objectContaining({ mnemonic: "datahpupdate", operands: ["BS_TARGET"] }),
+      ]));
+      expect(dataHpUpdate).toMatchObject({ mnemonic: "datahpupdate", operands: ["BS_TARGET"] });
+      expect(moveEnd).toMatchObject({ state: "MOVEEND_KINGSROCK_SHELLBELL", stateValue: 12 });
+      expect(dispatcher).toMatchObject({
+        state: "MOVEEND_KINGSROCK_SHELLBELL",
+        stateValue: 12,
+        call: "ItemBattleEffects(ITEMEFFECT_KINGSROCK_SHELLBELL, 0, FALSE)",
+      });
+      expect(array(record(family.runtimeGuardSignature).orderedGuards)).toEqual([
+        "gBattleMoveDamage != 0",
+        "atkHoldEffect == HOLD_EFFECT_FLINCH",
+        "!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)",
+        "TARGET_TURN_DAMAGED",
+        "Random() % 100 (draw occurs before the move-flag and target-HP tests)",
+        "roll < atkHoldEffectParam",
+        "gBattleMoves[gCurrentMove].flags & FLAG_KINGS_ROCK_AFFECTED",
+        "gBattleMons[gBattlerTarget].hp != 0",
+        "SetMoveEffect(FALSE, 0) with MOVE_EFFECT_FLINCH",
+      ]);
+      expect(record(record(family.runtimeGuardSignature).holdEffect)).toEqual({
+        item: "ITEM_KINGS_ROCK",
+        effect: "HOLD_EFFECT_FLINCH",
+        parameter: 10,
+      });
+      expect(record(family.familyVerification)).toMatchObject({
+        oracleReceipt: "docs/kings-rock-moveend-ground-truth.md",
+        oracleFixture: "tools/battle-lab/mechanic-kings-rock-flinch-off.json",
+        oracleProbe: "tools/probe/probe-kings-rock-flinch-off.py",
+      });
+      expect(String(record(family.familyVerification).scopeBoundary)).toMatch(/TICKLE.*Shell Bell/);
+      expect(String(record(family.runtimeGuardSignature).scopeBoundary)).toMatch(/HOLD_EFFECT_SHELL_BELL arm is not promoted/);
+    }
     for (const path of sourceProvenPathsFor(String(family.category))) {
       if (!array(row.evidence).some((item) => record(item).path === path)) {
         throw new Error(`source-proven row lacks ${path} for ${String(family.category)}`);
@@ -354,7 +416,6 @@ function assertPerMoveHookJoinContract(manifest: JsonObject): void {
         }
         unsupported += 1;
       } else if (sourceHook.status === SOURCE_PROVEN_FAMILY_STATUS) {
-        if (axis !== "ability") throw new Error(`item hook ${sourceMove.move} cannot be source-proven in this bounded family`);
         assertSourceProvenFamilyContract(sourceHook, row);
       } else {
         throw new Error(`unknown ${axis} hook-join status for ${sourceMove.move}: ${String(sourceHook.status)}`);
@@ -491,9 +552,24 @@ describe("Gate-6 mechanics coverage manifest", () => {
       const axisSummary = record(perMoveHookJoins[axis]);
       expect(rows).toHaveLength(parameterizationData.moves.length);
       expect(axisSummary).toEqual({ rows: rows.length, unsupported: sourceUnsupported, gaps: sourceUnsupported });
-      expect(sourceUnsupported).toBe(axis === "item" ? 300 : 107);
+      expect(sourceUnsupported).toBe(axis === "item" ? 195 : 107);
     }
-    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 407, gaps: 407 });
+    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 302, gaps: 302 });
+    expect(record(summary.kingsRockMoveEnd)).toEqual({
+      candidates: 106,
+      promotedRows: 105,
+      exceptions: 1,
+      blockers: 0,
+      rosterOnlyCandidates: 12,
+    });
+    expect(record(sections.kingsRockMoveEnd)).toMatchObject({
+      status: SOURCE_PROVEN_FAMILY_STATUS,
+      candidates: 106,
+      promotedRows: 105,
+      exceptions: 1,
+      blockers: 0,
+      rosterOnlyCandidates: 12,
+    });
     expect(synchronizeMoveEnd).toEqual({ candidates: 30, promotedRows: 30, exceptions: 0, blockers: 0 });
     expect(manifestSynchronizeMoveEnd).toMatchObject({
       status: SOURCE_PROVEN_FAMILY_STATUS,
@@ -573,7 +649,19 @@ describe("Gate-6 mechanics coverage manifest", () => {
       .filter((move) => !sourceSoundproof.includes(move)));
     expect(soundproofOnlyAbilityGaps - Number(record(perMoveHookJoins.ability).gaps)).toBe(uniqueNonSoundproofProven.size);
     expect(parameterizationData.moves.length + soundproofOnlyAbilityGaps).toBe(591);
-    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(407);
+    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(302);
+    const sourceKingsRock = parameterizationData.moves
+      .filter((move) => array(move.hooks.item.supportedCategories).map(String).includes(KINGS_ROCK_CATEGORY))
+      .map((move) => move.move);
+    expect(sourceKingsRock).toHaveLength(105);
+    expect(sourceKingsRock).not.toContain("MOVE_TICKLE");
+    expect(parameterizationData.moves.filter((move) =>
+      array(move.hooks.item.supportedCategories).map(String).includes(KINGS_ROCK_CATEGORY)
+      && move.battleScript.executionInventory === "level50-roster-only")).toHaveLength(12);
+    const sourceProvenItemRows = array(manifestHookJoinSections.item)
+      .map(record)
+      .filter((row) => row.status === SOURCE_PROVEN_FAMILY_STATUS);
+    expect(sourceProvenItemRows.map((row) => String(row.move)).sort()).toEqual([...sourceKingsRock].sort());
     const sourceProvenRows = array(manifestHookJoinSections.ability)
       .map(record)
       .filter((row) => row.status === SOURCE_PROVEN_FAMILY_STATUS);
@@ -747,7 +835,8 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(oracle.receiptGaps).toBe(0);
     expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*300 item join gaps\*\* and \*\*107 ability join gaps\*\*/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*195 item join gaps\*\* and \*\*107 ability join gaps\*\*/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/King's Rock checkpoint: \*\*106\*\* finite Level-50 flag selectors, \*\*105\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/193 ability rows are source-proven/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Synchronize checkpoint: \*\*30\*\* finite Level-50 candidates, \*\*30\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/ON_DAMAGE checkpoint: \*\*94\*\* contact candidates and \*\*183\*\* Color Change candidates/);

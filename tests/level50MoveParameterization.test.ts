@@ -178,9 +178,9 @@ const manifest = data as unknown as {
   coverage: {
     level50Roster: { frontierSetIds: { first: number; last: number; count: number }; moveCount: number; moveTableEffectFamilyCount: number };
     level50Executable: { moveCount: number; battleScriptEffectFamilyCount: number; rosterOnlyMoveCount: number; rosterOnlyMoveTableEffectFamilyCount: number };
-    joins: { battleScriptGraphLabels: number; battleScriptProgramLabels: number; animationScripts: number; itemHookCategories: number; abilityHookCategories: number; itemHookUnsupportedCategories: null; abilityHookUnsupportedCategories: null; itemHookUnsupportedRows: number; abilityHookUnsupportedRows: number; abilityHookSourceProvenRows: number };
+    joins: { battleScriptGraphLabels: number; battleScriptProgramLabels: number; animationScripts: number; itemHookCategories: number; abilityHookCategories: number; itemHookUnsupportedCategories: null; abilityHookUnsupportedCategories: null; itemHookUnsupportedRows: number; abilityHookUnsupportedRows: number; abilityHookSourceProvenRows: number; itemHookSourceProvenRows: number };
     hookCatalogs: {
-      item: { frontierHeldItemRows: number; explicitHoldEffectRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; catalogedDispatcherCategories: number; completeness: string; unsupportedCategories: null };
+      item: { frontierHeldItemRows: number; explicitHoldEffectRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; catalogedDispatcherCategories: number; completeness: string; unsupportedCategories: null; kingsRock: Record<string, any> };
       ability: { displayRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; catalogedDispatcherCategories: number; soundproofSourceSelectorRows: number; soundproofLevel50RosterSelectorRows: number; soundproofSourceProvenRosterRows: number; soundproofUnsupportedLevel50RosterRows: number; absorbing: Record<string, AbsorbingCoverage>; onDamage: OnDamageAudit; completeness: string; unsupportedCategories: null };
     };
   };
@@ -335,9 +335,9 @@ describe("Level-50 move parameterization manifest", () => {
     });
     expect(manifest.coverage.joins).toMatchObject({
       battleScriptGraphLabels: 300, battleScriptProgramLabels: 300, animationScripts: 300,
-      itemHookCategories: 0, abilityHookCategories: 345,
+      itemHookCategories: 105, abilityHookCategories: 345,
       itemHookUnsupportedCategories: null, abilityHookUnsupportedCategories: null,
-      itemHookUnsupportedRows: 300, abilityHookUnsupportedRows: 107, abilityHookSourceProvenRows: 193,
+      itemHookUnsupportedRows: 195, abilityHookUnsupportedRows: 107, abilityHookSourceProvenRows: 193, itemHookSourceProvenRows: 105,
     });
     expect(manifest.coverage.hookCatalogs).toMatchObject({
       item: {
@@ -884,7 +884,10 @@ describe("Level-50 move parameterization manifest", () => {
       expect(record.id).toBe(source.id);
       expect(record.moveTable.type).toBe(source.type);
       expect(record.battleScript).toMatchObject({ entryScript: expect.stringMatching(/^BattleScript_/), graphLabel: record.battleScript.entryScript, programLabel: record.battleScript.entryScript });
-      expect(record.hooks.item).toMatchObject({ status: "unsupported", supportedCategories: [] });
+      const kingsRockCandidate = source.flags.includes("FLAG_KINGS_ROCK_AFFECTED") && source.power !== 0;
+      expect(record.hooks.item).toMatchObject(kingsRockCandidate
+        ? { status: "source-proven-family", supportedCategories: ["moveend-kings-rock"] }
+        : { status: "unsupported", supportedCategories: [] });
       const expectedCategories = expectedSourceProven.get(record.move) ?? [];
       if (expectedCategories.length === 0) {
         expect(record.hooks.ability).toMatchObject({ status: "unsupported", supportedCategories: [] });
@@ -896,7 +899,7 @@ describe("Level-50 move parameterization manifest", () => {
       }
     }
     expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(107);
-    expect(manifest.moves.filter((record) => record.hooks.item.status === "unsupported")).toHaveLength(300);
+    expect(manifest.moves.filter((record) => record.hooks.item.status === "unsupported")).toHaveLength(195);
   });
 
   it("keeps zero-power Volt/Water noncandidates and Sunny Day's audited special flow unsupported", () => {
