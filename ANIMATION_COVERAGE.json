@@ -51,6 +51,33 @@
    ]
   },
   {
+   "move": "MOVE_ACID_ARMOR",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage real FRONTIER_MON_GRIMER set 110 against legal ONIX with only the four active choices constrained to ACID ARMOR/TACKLE; sBattleAnimScriptPtr bounds Move_ACID_ARMOR..Move_SHARPEN through the first inactive cleanup",
+    "fresh bilateral Scene-ON probes pass 119/119 source/task/scanline/register/monbg/OAM/matrix/palette/audio/immutable-state/raw-RGB/shared-framebuffer frames twice: player-back 214-332 evidence a94ccd9090218b868e2230299f180677b8a3474e85b92e9c3799cdb7b3b92a36 / RGB e7ddd013ffd7d7502cc7d5cd652ad15270fbe740810153ff6f225878e2289078 / change map b1763e4f0d6f5b908be656f29061a94fb3ce8c365635a4fe1e7d694a1f0f26c0; opponent-front 226-344 evidence 67183490a1c1207dc9c976e2769e4edf462afb64dfee81ebcd5cccc2313ea772 / RGB 5092275e068f51d77e2d79c5c84a1b0bf5ec0e6472cbf136898d4ab1c3dbd9dd / change map 486f39c130d923ea81aa39ff01f0bd58c4f4fc5e3ea6fe6337cb3d6c0142b2b8",
+    "the pure source-relative reducer ports all four AnimTask_AcidArmor states, signed sine/vertical compression rows, both persistent gScanlineEffect buffers, source-vs-scanout phase, BG2 player and BG1 opponent HOFS/VOFS DMA, 15:0 to 0:16 and 0:16 to 16:0 alpha ramps, state-3 stop, monbg/clearmonbg and delay-1 cleanup",
+    "the typed Scene-ON seam and narrow compositor reuse the exact SLUDGE/MINIMIZE GRIMER and ONIX art/chrome, sample the monbg sheet through per-row hardware HOFS/VOFS, preserve palette/OAM/matrix latches, and carry no defense-stage, accuracy, damage, RNG, turn-order, controller, round, or facility ownership",
+    "SE_M_ACID_ARMOR is pinned with attacker-side -64/63 pan through its complete live window; there are no move tags, and faded/unfaded/hardware palette state plus the opponent BG palette-bank transfer are dense checked",
+    "MINIMIZE and SLUDGE remain independently exact in both orientations after two fresh bilateral regression runs; no boundary, unsupported barrier, canonical recording, or sibling coverage changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-acid-armor-player-grimer-opponent-onix.json",
+    "tools/battle-lab/mechanic-acid-armor-opponent-grimer-player-onix.json",
+    "tools/compare/fixtures/acid-armor-player-grimer-opponent-onix.json",
+    "tools/compare/fixtures/acid-armor-opponent-grimer-player-onix.json",
+    "tools/compare/acidArmorProbe.py",
+    "tools/compare/acidArmorPortable.ts",
+    "tools/compare/evidence/acid-armor-changemap-player.txt",
+    "tools/compare/evidence/acid-armor-changemap-opponent.txt",
+    "src/animation/acidArmor.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/acidArmor.test.ts",
+    "tests/animation/acidArmorEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_AERIAL_ACE",
    "status": "exact",
    "covered": [
