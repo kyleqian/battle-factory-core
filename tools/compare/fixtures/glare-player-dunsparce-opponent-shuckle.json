@@ -1,0 +1,19 @@
+{
+ "schema": "scene-on-evidence-checkpoint/v1",
+ "oracleProfile": "battle-scene-on",
+ "scenario": "tools/battle-lab/mechanic-glare-player-dunsparce-opponent-shuckle.json",
+ "probe": "tools/compare/glareProbe.py",
+ "move": "GLARE", "moveId": 137,
+ "orientation": "player-back-to-opponent-front",
+ "activeSourceScriptWindow": {"startFrame":74,"endFrame":285,"frameCount":212},
+ "sourceAnimationWindow": {"startFrame":74,"endFrame":286,"frameCount":213},
+ "sourceBounds": {"start":"0x082cd0ca","endExclusive":"0x082cd133","cleanupOffset":104},
+ "probeJsonSha256": "e1e93dce38a4910604fbe29bec58906109499dc9354824b3d3481183b5aef210",
+ "evidenceSha256": "67acdfad1ac0e6ebcd4e58be993d2e3fded3979405e0eb77724142dc27ca3db5",
+ "rawRgbSha256": "676cc2a4ab462a12ab1f06c01a75d1eab1db346ed40db0eb815ba94e9bd16beb",
+ "changeMap": "tools/compare/evidence/glare-changemap-player.txt",
+ "changeMapSha256": "a566d026821e7d583f147f0cd9d351fc7c028b450509fe448a3821d02b100b2e",
+ "freshRuns": 2, "freshProbeAndRgbEquality": true,
+ "acceptance": {"status":"unsupported","evidenceOnly":true,"productionReducer":false,"productionCompositor":false},
+ "receipt": "Complete dense stock-ROM evidence through first inactive cleanup; no production pixel claim and no coverage promotion."
+}
