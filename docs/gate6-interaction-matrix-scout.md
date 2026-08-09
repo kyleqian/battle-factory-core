@@ -161,6 +161,38 @@ Poison/Steel type gates and Electric damage immunity.
 
 ## Completed receipt notes
 
+### R12b — Granbull Intimidate, Guts Machamp, and White Herb entry order
+
+`gate6-r12b-off.json` uses complete legal parties and makes Machamp's
+ability slot 0 (Guts, semantic ability id 62) hold White Herb (item 180).
+After the initial action, Granbull enters from opponent party index 1 with
+Intimidate (species 210, ability id 22). Fresh Battle Scene OFF runs on
+seeds `1` and `324508639` have the same decisive semantic boundaries:
+at frames `307→308`,
+`state.battlers.player.statStages[1]` changes `6→5` while both
+`state.battlers.player.item` and `state.parties.player[0].item` stay
+`180` (raw-RGB SHA-256
+`c2f20918319722dc38e2e6c58e0d2d3c35086a4b91f7184de2d1239ded711f82`).
+Frame 435 visibly settles
+`FOE GRANBULL's INTIMIDATE cuts MACHAMP's ATTACK!`
+(hash `722096dd71bf82d3b35e65e811b350f0462bb357aa97f99e0c5e95102f4b8c06`).
+
+Frames `505→506` then restore Attack `5→6` while both item fields remain
+`180` (raw-RGB SHA-256
+`722096dd71bf82d3b35e65e811b350f0462bb357aa97f99e0c5e95102f4b8c06`);
+frame 582 visibly settles
+`MACHAMP's WHITE HERB restored its status!`
+(hash `54730cfd667a4e21130735583c1a9ee7378d4b5a6828d446a05a02d68ed0bd45`).
+The semantic snapshots—not pixels alone—show both battle and persistent party
+item copies still `180` at frame 647, then both `0` at frame 648; the
+same raw-RGB SHA-256
+`54730cfd667a4e21130735583c1a9ee7378d4b5a6828d446a05a02d68ed0bd45`
+framebuffer persists across that final controller
+write. This receipts the source order: Intimidate's stage cut/message,
+then White Herb's normalization/message, then the shared item removal
+(`battle_main.c:3869-3894`, `battle_util.c:3003-3073,3303-3329`,
+`battle_script_commands.c:5901-5915`).
+
 ### R7 — burn, Guts Attack, Facade multiplier, and end-turn chip
 
 `gate6-r7-off.json` uses complete legal parties: the corpus has both
@@ -486,16 +518,15 @@ Each line is one bounded worker slice, not an instruction to create all traces
 at once.  Use a fresh `mktemp -d` output directory and retain only the checked
 in scenario/evidence once accepted.
 
-1. **R12b — Intimidate x White Herb x entry ordering.** R12/Pinsir is the Hyper Cutter prevention control; use Guts Machamp for the viable activation because it does not reject the Attack drop. Highest risk because it crosses three dispatch loops and item consumption.  `bin/oracle lab tools/battle-lab/gate6-r12b-off.json -o "$(mktemp -d)"; npm test -- tests/gate6EntryItemInteractions.test.ts; npm run build`
-2. **R11 — Baton Pass versus ordinary-switch volatile/stage retention.** `bin/oracle lab tools/battle-lab/gate6-r11-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts; npm run build`
-3. **R6 — Toxic x Natural Cure switch-out persistence.** `bin/oracle lab tools/battle-lab/gate6-r6-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts tests/battleScriptMoveEndOpcode.test.ts; npm run build`
-4. **R15 — Spikes switch-in x Flying/Levitate.** `bin/oracle lab tools/battle-lab/gate6-r15-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts; npm run build`
-5. **R3 — Cloud Nine removal/reactivation.** `bin/oracle lab tools/battle-lab/gate6-r3-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptDamagingWeatherOpcode.test.ts; npm run build`
-6. **R9 — Swagger x Lum versus White Herb's negative-stage guard.** `bin/oracle lab tools/battle-lab/gate6-r9-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptMoveEndOpcode.test.ts; npm run build`
-7. **R13 — Intimidate x stat-drop prevention specificity.** `bin/oracle lab tools/battle-lab/gate6-r13-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptStatbuffchangeOpcode.test.ts tests/battleScriptSwitchinOpcode.test.ts; npm run build`
-8. **R14 — CLOSED by the banked absorption program plus K7's Gate-6 pair pin.** See the completed receipt note above; intentionally no duplicate `gate6-r14-off.json`.
-9. **R5 — sleep/confusion x Chesto/Lum exact cure timing.** `bin/oracle lab tools/battle-lab/gate6-r5-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptMoveEndOpcode.test.ts; npm run build`
-10. **R1 — CLOSED by the paired sun/control fixtures, two freeze-producing seeds, exact RNG ledgers, and existing kernel pair.**
+1. **R11 — Baton Pass versus ordinary-switch volatile/stage retention.** `bin/oracle lab tools/battle-lab/gate6-r11-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts; npm run build`
+2. **R6 — Toxic x Natural Cure switch-out persistence.** `bin/oracle lab tools/battle-lab/gate6-r6-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts tests/battleScriptMoveEndOpcode.test.ts; npm run build`
+3. **R15 — Spikes switch-in x Flying/Levitate.** `bin/oracle lab tools/battle-lab/gate6-r15-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts; npm run build`
+4. **R3 — Cloud Nine removal/reactivation.** `bin/oracle lab tools/battle-lab/gate6-r3-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptDamagingWeatherOpcode.test.ts; npm run build`
+5. **R9 — Swagger x Lum versus White Herb's negative-stage guard.** `bin/oracle lab tools/battle-lab/gate6-r9-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptMoveEndOpcode.test.ts; npm run build`
+6. **R13 — Intimidate x stat-drop prevention specificity.** `bin/oracle lab tools/battle-lab/gate6-r13-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptStatbuffchangeOpcode.test.ts tests/battleScriptSwitchinOpcode.test.ts; npm run build`
+7. **R14 — CLOSED by the banked absorption program plus K7's Gate-6 pair pin.** See the completed receipt note above; intentionally no duplicate `gate6-r14-off.json`.
+8. **R5 — sleep/confusion x Chesto/Lum exact cure timing.** `bin/oracle lab tools/battle-lab/gate6-r5-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptMoveEndOpcode.test.ts; npm run build`
+9. **R1 — CLOSED by the paired sun/control fixtures, two freeze-producing seeds, exact RNG ledgers, and existing kernel pair.**
 
 All seven kernel-first cards are now closed: K1 (end-turn item/weather
 order), K2 (weather-stage accuracy — caught and fixed a real accuracy-check

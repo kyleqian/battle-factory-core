@@ -161,9 +161,14 @@ describe("Gate-6 mechanics coverage manifest", () => {
     for (const row of widened) expect(record(row).status).toBe("zero-factory-carrier-widened-scope");
 
     const oracle = record(record(manifest.summary).parameterizedOracle);
-    expect(Number(oracle.receiptGaps)).toBeGreaterThan(0);
-    expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/R12b/);
+    const scenarios = array(record(sections.parameterizedOracle).scenarios);
+    const r12b = record(scenarios.find((scenario) => record(scenario).cardId === "R12b"));
+    expect(r12b).toMatchObject({ status: "oracle-receipted", captureCount: 20 });
+    expect(oracle.receiptDocumented).toBe(18);
+    expect(oracle.receiptGaps).toBe(6);
+    expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/R11/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/18\/24.*scenario receipts documented; \*\*6\*\* request-level gaps/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/fixture-only-no-committed-receipt/);
   });
 });
