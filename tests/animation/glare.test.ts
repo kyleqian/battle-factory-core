@@ -7,6 +7,8 @@ import {
   GLARE_SOURCE_FRAME_COUNT,
   glareAtAge,
   glareFramesToWaitAtAge,
+  glareDisplayedDotsAtAge,
+  glareDisplayedSparklesAtAge,
   glareSourceOffsetAtAge,
   type GlareGeometry,
   GLARE_DISPLAYED_TARGET_X2_AGES_118_140,
@@ -121,6 +123,23 @@ describe("MOVE_GLARE source-relative reducer", () => {
     const effects = readFileSync("reference/pokeemerald/src/battle_anim_effects_3.c", "utf8");
     expect(effects).toContain("const struct SpriteTemplate gGlareEyeDotSpriteTemplate");
     expect(effects).toContain("task->tPairMax = 12");
+  });
+
+  it("pins the independently measured dot, sparkle, and palette display latches", () => {
+    const geometry = geometries[0]!;
+    expect(glareDisplayedDotsAtAge(19, geometry).map((dot) => dot.pair))
+      .not.toContain(2);
+    expect(glareDisplayedDotsAtAge(20, geometry).map((dot) => dot.pair))
+      .toEqual(expect.arrayContaining([2, 2]));
+    expect(glareDisplayedDotsAtAge(55, geometry).map((dot) => dot.pair))
+      .toEqual(expect.arrayContaining([2, 2]));
+    expect(glareDisplayedDotsAtAge(56, geometry).map((dot) => dot.pair))
+      .not.toContain(2);
+    expect(glareDisplayedSparklesAtAge(114, geometry)).toEqual([]);
+    expect(glareDisplayedSparklesAtAge(115, geometry)).toHaveLength(2);
+    expect([96, 97, 111, 112, 196, 197, 211, 212].map((age) =>
+      glareAtAge(age, geometry).palette.hardwareCoefficient))
+      .toEqual([0, 1, 15, 16, 16, 15, 1, 0]);
   });
 
   it("is load-bearing through the typed Scene-ON seam", () => {

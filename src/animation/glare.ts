@@ -337,6 +337,23 @@ function sparklesAtAge(age: number, geometry: GlareGeometry): readonly GlareEyeS
   });
 }
 
+/** Hardware-visible dot OAM: task creation is +2 displays, destruction +1. */
+export function glareDisplayedDotsAtAge(
+  age: number,
+  geometry: GlareGeometry,
+): readonly GlareEyeDot[] {
+  return dotsAtAge(age - 2, geometry)
+    .filter((dot) => age < dot.activeAge + 38);
+}
+
+/** The two script-created sparkles first scan out three displays after creation. */
+export function glareDisplayedSparklesAtAge(
+  age: number,
+  geometry: GlareGeometry,
+): readonly GlareEyeSparkle[] {
+  return age < 115 ? [] : sparklesAtAge(age - 1, geometry);
+}
+
 function paletteAtAge(age: number): GlarePaletteState {
   const blend = age >= 96 && age <= 111 ? "toBlack"
     : age >= 196 && age <= 211 ? "fromBlack" : null;
@@ -345,8 +362,8 @@ function paletteAtAge(age: number): GlarePaletteState {
     : blend === "fromBlack" ? Math.max(0, 210 - age) : age < 196 ? 16 : 0;
   const hardwareCoefficient = age < 97
     ? (age < 196 ? 0 : 16)
-    : age < 196 ? Math.min(16, age - 95)
-      : age === 196 ? 16 : Math.max(0, 211 - age);
+    : age < 196 ? Math.min(16, age - 96)
+      : age === 196 ? 16 : Math.max(0, 212 - age);
   return { blend, selector: "F_PAL_BG", color: "RGB_BLACK",
     softwareCoefficient, hardwareCoefficient };
 }
