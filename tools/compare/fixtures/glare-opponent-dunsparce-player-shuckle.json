@@ -12,7 +12,7 @@
  "evidenceSha256": "2aa1e8a7769c723575d8dff345e3629ec39d320b2185c9b16ca1790716401644",
  "rawRgbSha256": "eb5d27eadf6348be044b1b04e6b74bd887cac4ada819ef29301a311f9d7678c8",
  "changeMap": "tools/compare/evidence/glare-changemap-opponent.txt",
- "changeMapSha256": "b41ed87f0e003b4cf3d4e5aedfffde3c5055b53287e716d55bf479d56f313107",
+  "changeMapSha256": "d6d2e70e4c804abadee0c4d7ca33b6b912907a2e5226bdd9bba62b676305b500",
  "freshRuns": 2, "freshProbeAndRgbEquality": true,
  "acceptance": {"status":"unsupported","evidenceOnly":true,"productionReducer":false,"productionCompositor":false},
  "receipt": "Complete dense stock-ROM evidence through first inactive cleanup; no production pixel claim and no coverage promotion."
