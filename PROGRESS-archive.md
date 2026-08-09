@@ -39296,3 +39296,28 @@ both verify scripts/census independently re-verified before this entry.)*
   with **7 opponent generations + 7 battle RNG segments** and the `roundWon`
   record menu observed input-ready before NO. No `src/**`, canonical Battle-2,
   animation, unsupported-barrier pin, or CLI full/vanilla contract changed.
+
+## 1062 — [supervisor, 2026-08-09] **King's Rock family and Acid Armor folded; union green**
+
+- **State:** final master union is green: full suite **841 files / 8,271
+  passed / 1 skipped**, production build, OFF oracle info, and animation
+  coverage pass. Full-policy **0:60 = 60 OK / 0 CRASH / 0 HANG** and vanilla
+  **0:20 = 20 OK / 0 CRASH / 0 HANG**.
+- **Did:** accepted the source-bounded King's Rock moveend family
+  (`24af7df7`, `2da025b4`, merge `b6706e1a`): **106** finite Level-50 flag
+  selectors, **105** promoted, all **12** roster-only candidates retained,
+  and `MOVE_TICKLE` kept as the sole zero-damage exception. Item gaps move
+  **300→195**; ability gaps remain **107**. A fresh supervisor rerun reproduced
+  the seed-11 OFF receipt byte-identically (roll **4**, target flinch/cancel,
+  target PP unchanged).
+- **Did:** folded `animation-main` through exact Acid Armor (`5cfde5fa`,
+  `af226799`, `84e2b78c`; merge `567956b8`). Both orientations are **119/119**
+  dense frames exact twice fresh; Level-50 animation coverage is now
+  **146/276 exact**.
+- **Next:** continue the ordered family-level Gate-6 worklist from the verified
+  **107 ability / 195 item** hook-gap frontier, then assemble the Gate-6
+  close-out artifacts only after the remaining families are source-certified.
+- **Notes:** the seven-win live proof remains **56,556 frames / 4,228 renders**
+  through all seven battle seams. No canonical Battle-2 window past tick
+  33331, battle/turn/absolute-tick renderer branch, unsupported-barrier pin,
+  round outcome, or controller interface changed in this increment.

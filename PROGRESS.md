@@ -5,6 +5,35 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1065 — [supervisor, 2026-08-09] **Damp family certified; final union green**
+
+- **State:** final master union is green: full suite **849 files / 8,296
+  passed / 1 skipped**, production build, OFF oracle info, and animation
+  coverage pass. Full-policy **0:60 = 60 OK / 0 CRASH / 0 HANG** and vanilla
+  **0:20 = 20 OK / 0 CRASH / 0 HANG**.
+- **Did:** accepted attacker-held Damp's generic presentation-owner repair
+  (`196e0359`) and the source-bounded Explosion/Damp family (`da51e857`, merge
+  `41d59741`). The two exact candidates add ability categories **346→348**
+  while honestly leaving **106 ability / 195 item / 301 total** row gaps and
+  **194** ability source-proven rows unchanged because Color Change already
+  proved both rows.
+- **Did:** twice-fresh OFF evidence is byte-identical across no-Damp,
+  target-Damp, and attacker-Damp arms. Control spends PP **5→4**, self-KOs,
+  damages **95→44**, and owns exactly three RNG calls; either Damp holder
+  spends PP but preserves both HP values and action RNG while recording
+  ability **6** at the correct battler. Folded `animation-main` through the
+  bounded Poison Sting lower-carrier work (`b46f5f74`..`2628c57c`, merge
+  `d6f79306`) and Karate Chop source checkpoint (`008cf4f0`, merge
+  `4a2fcd59`); animation coverage remains **147/276 exact**.
+- **Next:** continue the ordered family-level Gate-6 worklist from the verified
+  **106 ability / 195 item** row-gap frontier. Shell Bell still needs its own
+  bounded successful-damage census; Poison Sting and Karate Chop remain
+  evidence checkpoints until their animation acceptance contracts are met.
+- **Notes:** the seven-win live proof remains **56,556 frames / 4,228 renders**
+  through all seven battle seams. No canonical Battle-2 window past tick
+  33331, battle/turn/absolute-tick renderer branch, unsupported-barrier pin,
+  round outcome, controller interface, or Scene-OFF logical outcome changed.
+
 ## 1064 — [MAIN worker, 2026-08-09] **Damp presentation owner snapshot fixed**
 
 - **State:** committed `196e0359` is green: focused **12/12**, smoke **8
@@ -49,28 +78,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   through all seven battle seams. No canonical Battle-2 window past tick
   33331, battle/turn/absolute-tick renderer branch, unsupported-barrier pin,
   round outcome, controller interface, or Scene-OFF logical state changed.
-
-## 1062 — [supervisor, 2026-08-09] **King's Rock family and Acid Armor folded; union green**
-
-- **State:** final master union is green: full suite **841 files / 8,271
-  passed / 1 skipped**, production build, OFF oracle info, and animation
-  coverage pass. Full-policy **0:60 = 60 OK / 0 CRASH / 0 HANG** and vanilla
-  **0:20 = 20 OK / 0 CRASH / 0 HANG**.
-- **Did:** accepted the source-bounded King's Rock moveend family
-  (`24af7df7`, `2da025b4`, merge `b6706e1a`): **106** finite Level-50 flag
-  selectors, **105** promoted, all **12** roster-only candidates retained,
-  and `MOVE_TICKLE` kept as the sole zero-damage exception. Item gaps move
-  **300→195**; ability gaps remain **107**. A fresh supervisor rerun reproduced
-  the seed-11 OFF receipt byte-identically (roll **4**, target flinch/cancel,
-  target PP unchanged).
-- **Did:** folded `animation-main` through exact Acid Armor (`5cfde5fa`,
-  `af226799`, `84e2b78c`; merge `567956b8`). Both orientations are **119/119**
-  dense frames exact twice fresh; Level-50 animation coverage is now
-  **146/276 exact**.
-- **Next:** continue the ordered family-level Gate-6 worklist from the verified
-  **107 ability / 195 item** hook-gap frontier, then assemble the Gate-6
-  close-out artifacts only after the remaining families are source-certified.
-- **Notes:** the seven-win live proof remains **56,556 frames / 4,228 renders**
-  through all seven battle seams. No canonical Battle-2 window past tick
-  33331, battle/turn/absolute-tick renderer branch, unsupported-barrier pin,
-  round outcome, or controller interface changed in this increment.
