@@ -8,6 +8,12 @@ import frontierMons from "../src/data/gen/battle-frontier-mons.json" with { type
 import movesData from "../src/data/gen/moves.json" with { type: "json" };
 
 type RoutePosition = { label: string; line: number };
+type RouteTransition = {
+  from: RoutePosition;
+  to: RoutePosition | null;
+  kind: string;
+  macro: string | null;
+};
 type RouteStep = {
   kind: "fallthrough" | "guard" | "goto" | "accuracycheck" | string;
   label: string;
@@ -24,12 +30,16 @@ type FamilyEvidence = {
   entryPath: {
     kind?: string;
     source: { path: string; entryLine: number };
-    graph: { path: string; entryLabel: string; attackCanceler?: RoutePosition; accuracyCheck?: RoutePosition; route: RouteStep[] };
-    program: { path: string; entryLabel: string; attackCanceler?: RoutePosition; accuracyCheck?: RoutePosition; route: RouteStep[] };
+    graph: { path: string; entryLabel: string; attackCanceler?: RoutePosition; accuracyCheck?: RoutePosition; route: RouteStep[]; transitions?: RouteTransition[] };
+    program: { path: string; entryLabel: string; attackCanceler?: RoutePosition; accuracyCheck?: RoutePosition; route: RouteStep[]; transitions?: RouteTransition[] };
+    dataHpUpdate?: { label: string; line: number; mnemonic: string; operands: string[] };
+    moveEnd?: { label: string; line: number; state: string; stateValue: number; [key: string]: unknown };
+    alternatives?: Array<Record<string, unknown>>;
     assumptions?: string[];
   };
   dispatcher: { path: string; locator: string; line: number; call: string; order: string; [key: string]: unknown };
   familyVerification: { scope: string; implementation: string; batchTest: string; oracleReceipt: string; [key: string]: unknown };
+  runtimeGuardSignature?: Record<string, unknown>;
 };
 type MoveRecord = {
   id: number;
@@ -104,6 +114,8 @@ type OnDamageCandidate = {
   entryScript: string;
   routeShapeId: string;
   blockerIds: string[];
+  routeWitnessId?: string;
+  routeStatus?: string;
 };
 type OnDamageAudit = {
   status: string;
@@ -126,6 +138,7 @@ type OnDamageAudit = {
       graph: { path: string; statements: Array<{ line: number; mnemonic: string; operands: string[] }> };
       program: { path: string; statements: Array<{ line: number; mnemonic: string; operands: string[] }> };
       candidates: Record<string, string[]>;
+      colorChangeRouteWitnessIds: Array<string | undefined>;
       blockerIds: string[];
     }>;
   };
@@ -133,6 +146,18 @@ type OnDamageAudit = {
   blockers: Array<{ id: string; reason: string }>;
   retiredBlockers: Array<{ id: string; reason: string; fixture: string; probe: string; receipts: string[] }>;
   promotions: { sourceProvenRows: string[]; reason: string };
+  colorChange: {
+    status: string;
+    selector: string;
+    candidateCount: number;
+    sourceProvenRows: string[];
+    sourceExceptionRows: Array<{ id: string; reason: string }>;
+    blockers: Array<{ id: string; reason: string }>;
+    retiredBlockers: Array<{ id: string; reason: string }>;
+    routeWitnesses: Array<Record<string, any>>;
+    runtimeGuardSignature: Record<string, any>;
+    promotions: { sourceProvenRows: string[]; reason: string };
+  };
 };
 const manifest = data as unknown as {
   schema: string;
@@ -274,7 +299,7 @@ describe("Level-50 move parameterization manifest", () => {
   });
 
   it("enumerates every non-NONE move used by the exact 0..849 Level-50 roster boundary", () => {
-    expect(manifest.schema).toBe("level50-move-parameterization/v3");
+    expect(manifest.schema).toBe("level50-move-parameterization/v4");
     expect(manifest.coverage.level50Roster).toEqual({
       frontierSetIds: { first: 0, last: 849, count: 850 }, moveCount: 300, moveTableEffectFamilyCount: 176,
     });
@@ -296,9 +321,9 @@ describe("Level-50 move parameterization manifest", () => {
     });
     expect(manifest.coverage.joins).toMatchObject({
       battleScriptGraphLabels: 300, battleScriptProgramLabels: 300, animationScripts: 300,
-      itemHookCategories: 0, abilityHookCategories: 39,
+      itemHookCategories: 0, abilityHookCategories: 221,
       itemHookUnsupportedCategories: null, abilityHookUnsupportedCategories: null,
-      itemHookUnsupportedRows: 300, abilityHookUnsupportedRows: 261, abilityHookSourceProvenRows: 39,
+      itemHookUnsupportedRows: 300, abilityHookUnsupportedRows: 111, abilityHookSourceProvenRows: 189,
     });
     expect(manifest.coverage.hookCatalogs).toMatchObject({
       item: {
@@ -352,7 +377,7 @@ describe("Level-50 move parameterization manifest", () => {
     }
   });
 
-  it("ratchets the finite ON_DAMAGE candidates, source guards, and blocked route-shape census without promotion", () => {
+  it("ratchets the finite ON_DAMAGE candidates and promotes the Color Change family with an explicit Future Sight exception", () => {
     const audit = manifest.coverage.hookCatalogs.ability.onDamage;
     const roster = level50RosterSymbols();
     const expectedByCategory: Record<string, string[]> = {
@@ -364,7 +389,7 @@ describe("Level-50 move parameterization manifest", () => {
         .map((move) => move.move),
     };
     const blockerIds = audit.blockers.map((blocker) => blocker.id);
-    expect(audit.status).toBe("evidence-checkpoint-no-promotion");
+    expect(audit.status).toBe("family-level-color-change-promotion-with-contact-checkpoint");
     expect(blockerIds).toEqual([
       "ordered-moveend-route-not-proven",
       "damage-state-guard-not-derived-from-selector",
@@ -379,11 +404,42 @@ describe("Level-50 move parameterization manifest", () => {
       ],
     })]);
     expect(blockerIds.every((id) => id.length > 0)).toBe(true);
-    expect(audit.promotions).toMatchObject({ sourceProvenRows: [] });
-    expect(audit.promotions.reason).toMatch(/No rows promoted/);
+    expect(audit.promotions.sourceProvenRows).toHaveLength(182);
+    expect(audit.promotions.reason).toMatch(/Color Change rows are promoted by family-level/);
+    expect(audit.colorChange).toMatchObject({
+      status: "source-proven-family",
+      selector: "moves.json power != 0",
+      candidateCount: 183,
+      sourceProvenRows: expect.arrayContaining(expectedByCategory["moveend-color-change"]!.filter((move) => move !== "MOVE_FUTURE_SIGHT")),
+      sourceExceptionRows: [expect.objectContaining({ id: "future-sight-delayed-moveend-bypass" })],
+      blockers: [],
+      retiredBlockers: [
+        expect.objectContaining({ id: "ordered-moveend-route-not-proven" }),
+        expect.objectContaining({ id: "damage-state-guard-not-derived-from-selector" }),
+      ],
+    });
+    expect(audit.colorChange.sourceProvenRows).toHaveLength(182);
+    expect(audit.colorChange.routeWitnesses).toHaveLength(183);
+    expect(audit.colorChange.runtimeGuardSignature).toMatchObject({
+      selector: { guard: "gBattleMoves[move].power != 0", derivedFrom: "moveend-color-change candidate selector moves.json power != 0" },
+      moveEnd: { state: "MOVEEND_ON_DAMAGE_ABILITIES", stateValue: 3, target: "gBattlerTarget" },
+      dataHpUpdate: { target: "BS_TARGET", writes: expect.arrayContaining([
+        "gSpecialStatuses[gActiveBattler].physicalDmg = gHpDealt",
+        "gSpecialStatuses[gActiveBattler].specialDmg = gHpDealt",
+      ]) },
+      orderedAbilityGuards: expect.arrayContaining([
+        "!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)",
+        "move != MOVE_STRUGGLE",
+        "gBattleMoves[move].power != 0",
+        "TARGET_TURN_DAMAGED",
+        "!IS_BATTLER_OF_TYPE(battler, moveType)",
+        "gBattleMons[battler].hp != 0",
+      ]),
+    });
 
     for (const [category, expectedMoves] of Object.entries(expectedByCategory)) {
       const coverage = audit.categories[category]!;
+      const expectedBlockerIds = category === "moveend-color-change" ? [] : blockerIds;
       expect(coverage.count).toBe(expectedMoves.length);
       expect(coverage.candidateRows.map((candidate) => candidate.move)).toEqual(expectedMoves);
       expect(new Set(coverage.candidateRows.map((candidate) => candidate.move)).size).toBe(expectedMoves.length);
@@ -398,9 +454,13 @@ describe("Level-50 move parameterization manifest", () => {
           makesContact: source.flags.includes("FLAG_MAKES_CONTACT"),
           entryScript: record.battleScript.entryScript,
           routeShapeId: `on-damage-entry:${record.battleScript.entryScript}`,
-          blockerIds,
+          blockerIds: expectedBlockerIds,
         });
-        expect(candidate.blockerIds.length).toBeGreaterThan(0);
+        expect(candidate.blockerIds).toEqual(expectedBlockerIds);
+        if (category === "moveend-color-change") {
+          expect(candidate.routeWitnessId).toBe(`color-change-route:${candidate.move}`);
+          expect(candidate.routeStatus).toBe(candidate.move === "MOVE_FUTURE_SIGHT" ? "source-exception" : "source-proven");
+        }
       }
     }
     expect(audit.categories["moveend-contact-on-damage"]!.count).toBe(94);
@@ -420,7 +480,7 @@ describe("Level-50 move parameterization manifest", () => {
     const { graph, program } = graphAndProgram();
     const expectedEntryScripts = [...new Set(candidates.map((candidate) => candidate.entryScript))]
       .sort((left, right) => graph.labels.find((label) => label.name === left)!.line - graph.labels.find((label) => label.name === right)!.line);
-    expect(audit.routeShapeCensus.status).toBe("entry-block-control-frontier-not-a-complete-witness");
+    expect(audit.routeShapeCensus.status).toBe("source-program-route-witness-for-color-change-with-contact-frontier");
     expect(audit.routeShapeCensus.entries.map((entry) => entry.entryScript)).toEqual(expectedEntryScripts);
     expect(audit.routeShapeCensus.entries).toHaveLength(78);
     expect(audit.routeShapeCensus.entryBlockShapeCounts).toEqual({
@@ -442,6 +502,9 @@ describe("Level-50 move parameterization manifest", () => {
         statements: programEntry.statements.map((statement) => ({ line: statement.source.line, mnemonic: statement.mnemonic, operands: statement.actualOperands })),
       });
       expect(entry.blockerIds).toEqual(blockerIds);
+      expect(entry.colorChangeRouteWitnessIds).toEqual(candidates
+        .filter((candidate) => candidate.category === "moveend-color-change" && candidate.entryScript === entry.entryScript)
+        .map((candidate) => candidate.routeWitnessId));
       for (const category of Object.keys(expectedByCategory)) {
         expect(entry.candidates[category]).toEqual(candidates
           .filter((candidate) => candidate.category === category && candidate.entryScript === entry.entryScript)
@@ -494,6 +557,124 @@ describe("Level-50 move parameterization manifest", () => {
       fixture: "tools/battle-lab/mechanic-color-change-off.json",
       probe: "tools/probe/probe-color-change-ability-off.py",
     });
+
+    const colorWitnessByMove = new Map(audit.colorChange.routeWitnesses.map((witness) => [witness.move, witness]));
+    expect(audit.colorChange.sourceExceptionRows.map((exception) => exception.id)).toEqual(["future-sight-delayed-moveend-bypass"]);
+    for (const move of expectedByCategory["moveend-color-change"]!) {
+      const witness = colorWitnessByMove.get(move)!;
+      expect(witness.id).toBe(`color-change-route:${move}`);
+      if (move === "MOVE_FUTURE_SIGHT") {
+        expect(witness).toMatchObject({ status: "source-exception", exception: {
+          id: "future-sight-delayed-moveend-bypass",
+          delayedMoveEnd: { mnemonic: "moveendfromto", operands: ["MOVEEND_ITEM_EFFECTS_ALL", "MOVEEND_UPDATE_LAST_MOVES"] },
+          bypassedState: { state: "MOVEEND_ON_DAMAGE_ABILITIES", value: 3, startsAt: "MOVEEND_ITEM_EFFECTS_ALL" },
+        } });
+        expect(witness.exception.delayedDamagePath.graph.route).toEqual(witness.exception.delayedDamagePath.program.route);
+        expect(witness.exception.delayedDamagePath.graph.route).toEqual(expect.arrayContaining([
+          expect.objectContaining({ mnemonic: "datahpupdate", operands: ["BS_TARGET"] }),
+        ]));
+        continue;
+      }
+      expect(audit.colorChange.sourceProvenRows).toContain(move);
+      const family = witness.familyEvidence as FamilyEvidence;
+      expect(family.category).toBe("moveend-color-change");
+      expect(family.entryPath.graph.route).toEqual(family.entryPath.program.route);
+      expect(family.entryPath.graph.route).toEqual(expect.arrayContaining([
+        expect.objectContaining({ mnemonic: "datahpupdate", operands: ["BS_TARGET"] }),
+      ]));
+      expect(family.entryPath.dataHpUpdate).toMatchObject({ mnemonic: "datahpupdate", operands: ["BS_TARGET"] });
+      expect(family.entryPath.moveEnd).toMatchObject({ state: "MOVEEND_ON_DAMAGE_ABILITIES", stateValue: 3 });
+      expect(family.runtimeGuardSignature).toEqual(audit.colorChange.runtimeGuardSignature);
+      expect(family.familyVerification).toMatchObject({
+        batchTest: "tests/battleScriptMoveEndOpcode.test.ts#MOVEEND_ON_DAMAGE_ABILITIES contact family",
+        oracleReceipt: "tests/colorChangeOracleEvidence.test.ts#shared ON_DAMAGE Color Change arm",
+        oracleFixture: "tools/battle-lab/mechanic-color-change-off.json",
+      });
+      if (move === "MOVE_BIDE") expect(family.entryPath.alternatives).toEqual(expect.arrayContaining([
+        expect.objectContaining({ kind: "bide-charge-no-damage" }),
+      ]));
+      if (move === "MOVE_PRESENT") expect(family.entryPath.alternatives).toEqual(expect.arrayContaining([
+        expect.objectContaining({ kind: "present-negative-damage-heal" }),
+        expect.objectContaining({ kind: "present-full-hp-heal-failure" }),
+      ]));
+      const record = manifest.moves.find((candidate) => candidate.move === move)!;
+      expect(record.hooks.ability.supportedCategories).toContain("moveend-color-change");
+    }
+  });
+
+  it("ratchets every source-proven Color Change certificate onto its successful-damage arm", () => {
+    const audit = manifest.coverage.hookCatalogs.ability.onDamage;
+    const witnesses = audit.colorChange.routeWitnesses
+      .filter((witness) => witness.status === "source-proven");
+    expect(witnesses).toHaveLength(182);
+    expect(audit.colorChange.sourceExceptionRows.map((exception) => exception.id)).toEqual([
+      "future-sight-delayed-moveend-bypass",
+    ]);
+
+    let checkedBranches = 0;
+    let missOrNoEffectBranches = 0;
+    for (const witness of witnesses) {
+      const family = witness.familyEvidence as FamilyEvidence;
+      const graph = family.entryPath.graph;
+      const program = family.entryPath.program;
+      expect(graph.transitions, `${witness.move} graph/program transition parity`).toEqual(program.transitions);
+      const transitionBySource = new Map((graph.transitions ?? []).map((transition) => [
+        `${transition.from.label}:${transition.from.line}`,
+        transition,
+      ]));
+
+      for (const step of graph.route) {
+        const isFocusPunchSetup = witness.move === "MOVE_FOCUS_PUNCH"
+          && step.label === "BattleScript_EffectFocusPunch"
+          && step.line === 2262
+          && step.mnemonic === "jumpifnodamage";
+        const requiredKind = step.mnemonic === "accuracycheck" || step.mnemonic === "jumpifmovehadnoeffect"
+          ? "fallthrough"
+          : isFocusPunchSetup ? "jump" : null;
+        if (requiredKind !== null) {
+          checkedBranches += 1;
+          if (!isFocusPunchSetup) missOrNoEffectBranches += 1;
+          const transition = transitionBySource.get(`${step.label}:${step.line}`);
+          expect(transition, `${witness.move} ${step.label}:${step.line} needs its successful arm`).toBeDefined();
+          expect(transition, `${witness.move} ${step.mnemonic} must not take its miss/no-effect arm`).toMatchObject({
+            kind: requiredKind,
+          });
+        }
+        if (step.mnemonic === "jumpifbyte"
+          && step.operands.includes("gMoveResultFlags")
+          && step.operands.some((operand) => operand.includes("MOVE_RESULT_NO_EFFECT"))) {
+          throw new Error(`${witness.move} has an unmodeled direct MOVE_RESULT_NO_EFFECT route at ${step.label}:${step.line}`);
+        }
+        if (step.mnemonic === "jumpifnodamage" && !isFocusPunchSetup) {
+          throw new Error(`${witness.move} has an unmodeled jumpifnodamage route at ${step.label}:${step.line}`);
+        }
+      }
+    }
+    // 181 accuracy checks + 19 source-spelled no-effect guards, plus Focus
+    // Punch's one explicitly inverted pre-use cancellation condition.
+    expect(checkedBranches).toBe(201);
+    expect(missOrNoEffectBranches).toBe(200);
+
+    const endeavor = witnesses.find((witness) => witness.move === "MOVE_ENDEAVOR");
+    expect(endeavor).toBeDefined();
+    const endeavorRoute = (endeavor!.familyEvidence as FamilyEvidence).entryPath.graph.route;
+    const noEffectIndex = endeavorRoute.findIndex((step) => (
+      step.label === "BattleScript_EffectEndeavor"
+      && step.line === 2487
+      && step.mnemonic === "jumpifmovehadnoeffect"
+    ));
+    expect(noEffectIndex).toBeGreaterThanOrEqual(0);
+    expect(endeavorRoute.slice(noEffectIndex, noEffectIndex + 5).map((step) => ({
+      line: step.line,
+      mnemonic: step.mnemonic,
+      operands: step.operands,
+    }))).toEqual([
+      { line: 2487, mnemonic: "jumpifmovehadnoeffect", operands: ["BattleScript_HitFromAtkAnimation"] },
+      { line: 2488, mnemonic: "bicbyte", operands: ["gMoveResultFlags", "MOVE_RESULT_SUPER_EFFECTIVE | MOVE_RESULT_NOT_VERY_EFFECTIVE"] },
+      { line: 2489, mnemonic: "copyword", operands: ["gBattleMoveDamage", "gHpDealt"] },
+      { line: 2490, mnemonic: "adjustsetdamage", operands: [] },
+      { line: 2491, mnemonic: "goto", operands: ["BattleScript_HitFromAtkAnimation"] },
+    ]);
   });
 
   it("derives the Soundproof and shared-absorbing families from source without claiming other ability joins", () => {
@@ -612,6 +793,12 @@ describe("Level-50 move parameterization manifest", () => {
       }
     }
 
+    for (const move of (movesData.moves as SourceMove[])
+      .filter((candidate) => level50RosterSymbols().has(candidate.move) && candidate.power !== 0 && candidate.move !== "MOVE_FUTURE_SIGHT")
+      .map((candidate) => candidate.move)) {
+      expectedSourceProven.set(move, [...(expectedSourceProven.get(move) ?? []), "moveend-color-change"]);
+    }
+
     const { graph, program } = graphAndProgram();
     const graphByLabel = new Map(graph.labels.map((label) => [label.name, label]));
     const programByLabel = new Map(program.blocks.map((block) => [block.label, block]));
@@ -649,18 +836,19 @@ describe("Level-50 move parameterization manifest", () => {
         expect(record.hooks.ability.evidence?.families.map((family) => family.category)).toEqual(expectedCategories);
       }
     }
-    expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(261);
+    expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(111);
     expect(manifest.moves.filter((record) => record.hooks.item.status === "unsupported")).toHaveLength(300);
   });
 
   it("keeps zero-power Volt/Water noncandidates and Sunny Day's audited special flow unsupported", () => {
     const move = (symbol: string) => manifest.moves.find((record) => record.move === symbol)!;
-    for (const symbol of ["MOVE_THUNDER_WAVE", "MOVE_WITHDRAW", "MOVE_RAIN_DANCE", "MOVE_SUNNY_DAY", "MOVE_TACKLE", "MOVE_PROTECT"]) {
+    for (const symbol of ["MOVE_THUNDER_WAVE", "MOVE_WITHDRAW", "MOVE_RAIN_DANCE", "MOVE_SUNNY_DAY", "MOVE_PROTECT"]) {
       expect(move(symbol).hooks).toMatchObject({
         item: { potentialCategories: null, status: "unsupported" },
         ability: { potentialCategories: null, status: "unsupported" },
       });
     }
+    expect(move("MOVE_TACKLE").hooks.ability.supportedCategories).toEqual(["moveend-color-change"]);
     expect(move("MOVE_WILL_O_WISP").hooks.ability.supportedCategories).toEqual(["absorbing-flash-fire"]);
   });
 });

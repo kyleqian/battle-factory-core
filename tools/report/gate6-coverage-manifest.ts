@@ -251,7 +251,9 @@ const level50EffectNames = new Set(
  * The parameterization deliberately keeps its per-move joins explicit. The
  * narrow exceptions are source-proven shared dispatcher families: exact
  * Soundproof selectors plus the audited absorbing routes have
- * graph/program/source-handoff proof.
+ * graph/program/source-handoff proof. Color Change is additionally promoted
+ * as one family-level route/guard certificate; the delayed Future Sight
+ * bypass remains an explicit source exception in the parameterization.
  * Keep the remaining finite gaps visible without copying the parameterization's
  * large move payload into this report a second time.
  */
@@ -259,6 +261,7 @@ type PerMoveHookJoinAxis = "item" | "ability";
 const PER_MOVE_HOOK_JOIN_AXES: readonly PerMoveHookJoinAxis[] = ["item", "ability"];
 const SOURCE_PROVEN_FAMILY_STATUS = "source-proven-family";
 const SOUNDPROOF_MOVES_BLOCK_CATEGORY = "moves-block-soundproof";
+const COLOR_CHANGE_CATEGORY = "moveend-color-change";
 const ABSORBING_CATEGORIES = new Set([
   "absorbing-volt-absorb",
   "absorbing-water-absorb",
@@ -278,8 +281,8 @@ if (parameterizationMoves.length !== parameterizedMoves.size) {
   throw new Error("level50 parameterization has duplicate move identities");
 }
 const onDamageAudit = parameterization.coverage?.hookCatalogs?.ability?.onDamage as AnyRecord | undefined;
-if (!onDamageAudit || onDamageAudit.status !== "evidence-checkpoint-no-promotion") {
-  throw new Error("level50 parameterization lacks the explicit ON_DAMAGE evidence checkpoint");
+if (!onDamageAudit || onDamageAudit.status !== "family-level-color-change-promotion-with-contact-checkpoint") {
+  throw new Error("level50 parameterization lacks the Color Change family promotion checkpoint");
 }
 const onDamageCategories = onDamageAudit.categories as AnyRecord | undefined;
 if (!onDamageCategories) throw new Error("ON_DAMAGE evidence checkpoint lacks categories");
@@ -298,15 +301,71 @@ if (!Array.isArray(onDamageRetiredBlockers) || onDamageRetiredBlockers.length ==
   throw new Error("ON_DAMAGE evidence checkpoint lacks the retired-blocker receipt record");
 }
 const onDamageRetiredBlockerIds = onDamageRetiredBlockers.map((blocker) => blocker.id as string);
+const onDamageColorChange = onDamageAudit.colorChange as AnyRecord | undefined;
+if (!onDamageColorChange || onDamageColorChange.status !== SOURCE_PROVEN_FAMILY_STATUS) {
+  throw new Error("ON_DAMAGE audit lacks the source-proven Color Change family");
+}
+const onDamageColorChangeSourceProvenRows = onDamageColorChange.sourceProvenRows as string[] | undefined;
+const onDamageColorChangeExceptionRows = onDamageColorChange.sourceExceptionRows as AnyRecord[] | undefined;
+const onDamageColorChangeBlockers = onDamageColorChange.blockers as AnyRecord[] | undefined;
+const onDamageColorChangeRetiredBlockers = onDamageColorChange.retiredBlockers as AnyRecord[] | undefined;
+const onDamageColorChangeRouteWitnesses = onDamageColorChange.routeWitnesses as AnyRecord[] | undefined;
+if (!Array.isArray(onDamageColorChangeSourceProvenRows)
+  || !Array.isArray(onDamageColorChangeExceptionRows)
+  || !Array.isArray(onDamageColorChangeBlockers)
+  || !Array.isArray(onDamageColorChangeRetiredBlockers)
+  || !Array.isArray(onDamageColorChangeRouteWitnesses)
+  || onDamageColorChangeSourceProvenRows.length + onDamageColorChangeExceptionRows.length !== onDamageColorChange.candidateCount
+  || onDamageColorChange.candidateCount !== onDamageColorChangeCandidates.length
+  || onDamageColorChangeSourceProvenRows.length !== 182
+  || onDamageColorChangeExceptionRows.length !== 1
+  || onDamageColorChangeBlockers.length !== 0
+  || onDamageColorChangeRetiredBlockers.length !== 2
+  || onDamageColorChangeRouteWitnesses.length !== onDamageColorChange.candidateCount) {
+  throw new Error("ON_DAMAGE Color Change family accounting is not the finite 183/182/1 contract");
+}
+const onDamageColorChangeRetiredBlockerIds = onDamageColorChangeRetiredBlockers.map((blocker) => blocker.id as string);
+const colorChangeExceptionIds = onDamageColorChangeExceptionRows.map((exception) => exception.id as string);
+for (const witness of onDamageColorChangeRouteWitnesses) {
+  if (witness.status === "source-exception") {
+    if (witness.move !== "MOVE_FUTURE_SIGHT" || !witness.exception?.id || !colorChangeExceptionIds.includes(witness.exception.id)) {
+      throw new Error("Color Change source exception is not the named Future Sight bypass");
+    }
+    continue;
+  }
+  if (witness.status !== "source-proven" || !onDamageColorChangeSourceProvenRows.includes(witness.move)) {
+    throw new Error(`Color Change route witness is not accounted for: ${String(witness.move)}`);
+  }
+  const family = witness.familyEvidence as AnyRecord | undefined;
+  const entryPath = family?.entryPath as AnyRecord | undefined;
+  const graphRoute = entryPath?.graph?.route as AnyRecord[] | undefined;
+  const programRoute = entryPath?.program?.route as AnyRecord[] | undefined;
+  const dataHpUpdate = entryPath?.dataHpUpdate as AnyRecord | undefined;
+  const moveEnd = entryPath?.moveEnd as AnyRecord | undefined;
+  if (family?.category !== COLOR_CHANGE_CATEGORY
+    || family.selector?.guard !== "gBattleMoves[move].power != 0"
+    || !Array.isArray(graphRoute)
+    || !Array.isArray(programRoute)
+    || JSON.stringify(graphRoute) !== JSON.stringify(programRoute)
+    || dataHpUpdate?.mnemonic !== "datahpupdate"
+    || JSON.stringify(dataHpUpdate.operands) !== JSON.stringify(["BS_TARGET"])
+    || moveEnd?.state !== "MOVEEND_ON_DAMAGE_ABILITIES"
+    || moveEnd?.stateValue !== 3
+    || !family.runtimeGuardSignature?.dataHpUpdate?.writes?.length
+    || !family.familyVerification?.oracleReceipt) {
+    throw new Error(`Color Change family route/guard certificate is incomplete for ${witness.move}`);
+  }
+}
 
 function assertOnDamageCheckpoint(manifest: AnyRecord): void {
   const checkpoint = manifest.sections?.onDamageMoveEnd as AnyRecord | undefined;
   const summary = manifest.summary?.onDamageMoveEnd as AnyRecord | undefined;
-  if (!checkpoint || !summary || checkpoint.status !== "evidence-checkpoint-no-promotion") {
-    throw new Error("Gate-6 manifest lacks the ON_DAMAGE evidence checkpoint");
+  if (!checkpoint || !summary || checkpoint.status !== "family-level-color-change-promotion-with-contact-checkpoint") {
+    throw new Error("Gate-6 manifest lacks the Color Change family promotion checkpoint");
   }
-  if (checkpoint.promotedRows !== 0 || !String(checkpoint.notes ?? "").includes("No per-move rows are promoted")) {
-    throw new Error("Gate-6 ON_DAMAGE checkpoint makes a false promotion claim");
+  if (checkpoint.promotedRows !== onDamageColorChangeSourceProvenRows.length
+    || !String(checkpoint.notes ?? "").includes("182 Color Change rows are promoted")) {
+    throw new Error("Gate-6 ON_DAMAGE checkpoint has a false Color Change promotion claim");
   }
   const expected = {
     contactCandidates: onDamageContactCandidates.length,
@@ -315,7 +374,11 @@ function assertOnDamageCheckpoint(manifest: AnyRecord): void {
     entryBlockShapes: (onDamageAudit.routeShapeCensus as AnyRecord).entries.length,
     blockers: onDamageBlockerIds.length,
     retiredBlockers: onDamageRetiredBlockerIds.length,
-    promotedRows: 0,
+    colorChangePromotedRows: onDamageColorChangeSourceProvenRows.length,
+    colorChangeExceptions: onDamageColorChangeExceptionRows.length,
+    colorChangeBlockers: onDamageColorChangeBlockers.length,
+    colorChangeRetiredBlockers: onDamageColorChangeRetiredBlockers.length,
+    promotedRows: onDamageColorChangeSourceProvenRows.length,
   };
   if (JSON.stringify(summary) !== JSON.stringify(expected)) {
     throw new Error("Gate-6 ON_DAMAGE checkpoint summary drift");
@@ -325,7 +388,11 @@ function assertOnDamageCheckpoint(manifest: AnyRecord): void {
     || checkpoint.overlapCandidates !== expected.overlapCandidates
     || checkpoint.entryBlockShapes !== expected.entryBlockShapes
     || JSON.stringify(checkpoint.blockerIds) !== JSON.stringify(onDamageBlockerIds)
-    || JSON.stringify(checkpoint.retiredBlockerIds) !== JSON.stringify(onDamageRetiredBlockerIds)) {
+    || JSON.stringify(checkpoint.retiredBlockerIds) !== JSON.stringify(onDamageRetiredBlockerIds)
+    || checkpoint.colorChangePromotedRows !== expected.colorChangePromotedRows
+    || checkpoint.colorChangeExceptions !== expected.colorChangeExceptions
+    || checkpoint.colorChangeBlockers !== expected.colorChangeBlockers
+    || checkpoint.colorChangeRetiredBlockers !== expected.colorChangeRetiredBlockers) {
     throw new Error("Gate-6 ON_DAMAGE checkpoint payload drift");
   }
 }
@@ -345,7 +412,9 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
   for (const family of families as AnyRecord[]) {
     if (
       typeof family.category !== "string"
-      || (family.category !== SOUNDPROOF_MOVES_BLOCK_CATEGORY && !ABSORBING_CATEGORIES.has(family.category))
+      || (family.category !== SOUNDPROOF_MOVES_BLOCK_CATEGORY
+        && family.category !== COLOR_CHANGE_CATEGORY
+        && !ABSORBING_CATEGORIES.has(family.category))
       || !family.selector?.path
       || !family.entryPath?.source?.path
       || !family.entryPath?.graph?.path
@@ -360,6 +429,23 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
     }
     if (ABSORBING_CATEGORIES.has(family.category) && !family.entryPath.graph.accuracyCheck) {
       throw new Error(`${family.category} lacks its accuracycheck witness`);
+    }
+    if (family.category === COLOR_CHANGE_CATEGORY) {
+      const graphRoute = family.entryPath.graph.route as AnyRecord[] | undefined;
+      const programRoute = family.entryPath.program.route as AnyRecord[] | undefined;
+      if (family.selector?.guard !== "gBattleMoves[move].power != 0"
+        || !family.selector?.derivedFrom
+        || !Array.isArray(graphRoute)
+        || !Array.isArray(programRoute)
+        || JSON.stringify(graphRoute) !== JSON.stringify(programRoute)
+        || !graphRoute.some((statement) => statement.mnemonic === "datahpupdate" && JSON.stringify(statement.operands) === JSON.stringify(["BS_TARGET"]))
+        || family.entryPath.dataHpUpdate?.mnemonic !== "datahpupdate"
+        || family.entryPath.moveEnd?.state !== "MOVEEND_ON_DAMAGE_ABILITIES"
+        || family.entryPath.moveEnd?.stateValue !== 3
+        || !family.runtimeGuardSignature?.orderedAbilityGuards?.includes("TARGET_TURN_DAMAGED")
+        || !family.familyVerification?.oracleReceipt) {
+        throw new Error("Color Change family lacks its ordered datahpupdate/MOVEEND/guard witness");
+      }
     }
   }
   return families as AnyRecord[];
@@ -383,18 +469,24 @@ function parameterizedHook(move: AnyRecord, axis: PerMoveHookJoinAxis): AnyRecor
     if (family.category === SOUNDPROOF_MOVES_BLOCK_CATEGORY && family.selector?.symbol !== move.move) {
       throw new Error(`${move.move} Soundproof evidence lost its source selector identity`);
     }
+    if (family.category === COLOR_CHANGE_CATEGORY && family.selector?.derivedFrom !== "moveend-color-change candidate selector moves.json power != 0") {
+      throw new Error(`${move.move} Color Change evidence lost its selector derivation`);
+    }
   }
   return hook;
 }
 
 function sourceProvenHookEvidence(hook: AnyRecord): Evidence[] {
   return uniqueEvidence(sourceProvenFamilies(hook).flatMap((proof) => {
-    const terminal = proof.entryPath.graph.accuracyCheck ?? proof.entryPath.graph.attackCanceler;
+    const terminal = proof.entryPath.graph.accuracyCheck
+      ?? proof.entryPath.graph.attackCanceler
+      ?? proof.entryPath.dataHpUpdate
+      ?? proof.entryPath.moveEnd;
     const base = [
       evidence(proof.selector.path, "source-selector", proof.selector.locator),
       evidence(proof.entryPath.source.path, "battle-script-entry-path", `${proof.entryPath.graph.entryLabel}:${proof.entryPath.source.entryLine}`),
-      evidence(proof.entryPath.graph.path, "generated-battle-script-graph", `${proof.entryPath.graph.entryLabel}->${terminal.label}`),
-      evidence(proof.entryPath.program.path, "generated-battle-script-program", `${proof.entryPath.program.entryLabel}->${terminal.label}`),
+      evidence(proof.entryPath.graph.path, "generated-battle-script-graph", `${proof.entryPath.graph.entryLabel}->${terminal?.label ?? "route"}`),
+      evidence(proof.entryPath.program.path, "generated-battle-script-program", `${proof.entryPath.program.entryLabel}->${terminal?.label ?? "route"}`),
       evidence(proof.dispatcher.path, "source-dispatcher", proof.dispatcher.locator),
     ];
     if (proof.category === SOUNDPROOF_MOVES_BLOCK_CATEGORY) {
@@ -404,6 +496,20 @@ function sourceProvenHookEvidence(hook: AnyRecord): Evidence[] {
         evidence("tests/battleScriptAbilityMovesBlock.test.ts", "tier-1-sibling-batch", "blocks every and only source sound selector in both singles orientations"),
         evidence("tests/soundproofOracleEvidence.test.ts", "battle-scene-off-evidence-test", "hyper-voice-blocked-by-soundproof"),
         evidence("tests/fixtures/soundproof-off-evidence.json", "battle-scene-off-oracle-receipt", "hyper-voice-blocked-by-soundproof"),
+      ];
+    }
+    if (proof.category === COLOR_CHANGE_CATEGORY) {
+      return [
+        ...base,
+        evidence("reference/pokeemerald/src/battle_script_commands.c", "datahpupdate-damage-state-writer", "Cmd_datahpupdate"),
+        evidence("reference/pokeemerald/include/constants/battle_script_commands.h", "moveend-state-constant", "MOVEEND_ON_DAMAGE_ABILITIES"),
+        evidence("src/engine/battleScriptMoveEndOpcode.ts", "source-shaped-family-implementation", "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)"),
+        evidence("tests/battleScriptMoveEndOpcode.test.ts", "tier-1-shared-family-batch", "MOVEEND_ON_DAMAGE_ABILITIES contact family"),
+        evidence("tests/colorChangeOracleEvidence.test.ts", "battle-scene-off-family-receipt", "shared ON_DAMAGE Color Change arm"),
+        evidence("tools/battle-lab/mechanic-color-change-off.json", "parameterized-oracle-request"),
+        evidence("tools/probe/probe-color-change-ability-off.py", "oracle-probe"),
+        evidence("tools/probe/receipts/color-change-off-seed-610839776.json", "battle-scene-off-oracle-receipt"),
+        evidence("tools/probe/receipts/color-change-off-seed-324508639.json", "battle-scene-off-oracle-receipt"),
       ];
     }
     return [
@@ -834,6 +940,20 @@ type HookReceiptInfo = {
 
 function hookReceiptInfo(kind: "ability" | "hold-effect", name: string): HookReceiptInfo {
   if (kind !== "ability") return { directReceiptIds: receiptIdsFor(kind, name), evidence: [] };
+  if (name === "ABILITY_COLOR_CHANGE") {
+    return {
+      directReceiptIds: [],
+      statusOverride: "shared-dispatcher-sibling-tier1-verified",
+      evidence: [
+        evidence(PARAMETERIZATION_PATH, "source-proven-family-promotion", "coverage.hookCatalogs.ability.onDamage.colorChange"),
+        evidence("tests/battleScriptMoveEndOpcode.test.ts", "tier-1-shared-dispatcher-family", "MOVEEND_ON_DAMAGE_ABILITIES contact family"),
+        evidence("tests/colorChangeOracleEvidence.test.ts", "battle-scene-off-family-receipt", "shared ON_DAMAGE Color Change arm"),
+        evidence("tools/probe/receipts/color-change-off-seed-610839776.json", "battle-scene-off-oracle-receipt"),
+        evidence("tools/probe/receipts/color-change-off-seed-324508639.json", "battle-scene-off-oracle-receipt"),
+      ],
+      notes: "The two-seed Battle Scene OFF Color Change receipt is reused as one shared family receipt; 182 Level-50 move siblings carry source/program route certificates, while Future Sight remains an explicit delayed-MOVEEND exception.",
+    };
+  }
   if (ON_DAMAGE_ABILITY_NAMES.has(name)) {
     return {
       directReceiptIds: [],
@@ -941,24 +1061,33 @@ const onDamageMoveEndSummary = Object.freeze({
   entryBlockShapes: ((onDamageAudit.routeShapeCensus as AnyRecord).entries as AnyRecord[]).length,
   blockers: onDamageBlockerIds.length,
   retiredBlockers: onDamageRetiredBlockerIds.length,
-  promotedRows: 0,
+  colorChangePromotedRows: onDamageColorChangeSourceProvenRows.length,
+  colorChangeExceptions: onDamageColorChangeExceptionRows.length,
+  colorChangeBlockers: onDamageColorChangeBlockers.length,
+  colorChangeRetiredBlockers: onDamageColorChangeRetiredBlockers.length,
+  promotedRows: onDamageColorChangeSourceProvenRows.length,
 });
 const onDamageMoveEndRow: Row = Object.freeze({
   id: "hook-audit:ABILITYEFFECT_ON_DAMAGE",
-  label: "ABILITYEFFECT_ON_DAMAGE Level-50 checkpoint",
-  status: "evidence-checkpoint-no-promotion",
+  label: "ABILITYEFFECT_ON_DAMAGE Level-50 family checkpoint",
+  status: "family-level-color-change-promotion-with-contact-checkpoint",
   contactCandidates: onDamageMoveEndSummary.contactCandidates,
   colorChangeCandidates: onDamageMoveEndSummary.colorChangeCandidates,
   overlapCandidates: onDamageMoveEndSummary.overlapCandidates,
   entryBlockShapes: onDamageMoveEndSummary.entryBlockShapes,
   blockerIds: onDamageBlockerIds,
   retiredBlockerIds: onDamageRetiredBlockerIds,
-  promotedRows: 0,
+  colorChangePromotedRows: onDamageMoveEndSummary.colorChangePromotedRows,
+  colorChangeExceptions: onDamageMoveEndSummary.colorChangeExceptions,
+  colorChangeBlockers: onDamageMoveEndSummary.colorChangeBlockers,
+  colorChangeRetiredBlockers: onDamageMoveEndSummary.colorChangeRetiredBlockers,
+  promotedRows: onDamageMoveEndSummary.promotedRows,
   evidence: uniqueEvidence([
     evidence(PARAMETERIZATION_PATH, "finite-candidate-guard-route-shape-audit", "coverage.hookCatalogs.ability.onDamage"),
     evidence("reference/pokeemerald/src/battle_util.c", "on-damage-source-guards", "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)"),
     evidence("reference/pokeemerald/include/battle.h", "target-turn-damaged-definition", "TARGET_TURN_DAMAGED"),
     evidence("reference/pokeemerald/src/battle_script_commands.c", "moveend-dispatcher", "MOVEEND_ON_DAMAGE_ABILITIES"),
+    evidence("reference/pokeemerald/include/constants/battle_script_commands.h", "moveend-state-constant", "MOVEEND_ON_DAMAGE_ABILITIES"),
     evidence("reference/pokeemerald/data/battle_scripts_1.s", "moveend-target-script", "BattleScript_MoveEnd"),
     evidence("src/data/gen/battle-script-graph.json", "generated-entry-block-census"),
     evidence("src/data/gen/battle-script-program.json", "generated-entry-block-census"),
@@ -972,7 +1101,7 @@ const onDamageMoveEndRow: Row = Object.freeze({
     evidence(SCOUT_PATH, "direct-receipt-scope-audit", "R8 is Immunity/Limber prevention"),
     evidence("tools/battle-lab/gate6-r8-paralysis-off.json", "incidental-static-party-not-receipt"),
   ]),
-  notes: "No per-move rows are promoted. The source artifact enumerates every flag/power selector exactly once per applicable category, source guards, and entry-block graph/program shape. The missing-direct-on-damage-off-receipt blocker is retired by two fresh Battle Scene OFF Color Change receipts; complete ordered MOVEEND witnesses and runtime damage-state guard derivation remain explicit blockers.",
+  notes: "182 Color Change rows are promoted by one shared family receipt, selector-derived runtime guards, and source/program route certificates. Future Sight is the one explicit source exception because its delayed moveendfromto starts at MOVEEND_ITEM_EFFECTS_ALL. The unrelated contact family retains the two named route/guard blockers; the shared direct Color Change receipt blocker is retired.",
 });
 
 const trainerRows: Row[] = (trainers.entries as AnyRecord[]).map((trainer) => Object.freeze({
@@ -1088,6 +1217,7 @@ const sourceInputs = [
   "reference/pokeemerald/src/battle_util.c",
   "reference/pokeemerald/src/battle_script_commands.c",
   "reference/pokeemerald/include/battle.h",
+  "reference/pokeemerald/include/constants/battle_script_commands.h",
   "reference/pokeemerald/data/battle_scripts_1.s",
   "src/data/gen/battle-script-graph.json",
   "src/data/gen/battle-script-program.json",
@@ -1100,12 +1230,19 @@ const sourceInputs = [
   "tests/damageCalc.test.ts",
   "src/engine/battleScriptMoveEndOpcode.ts",
   "tests/battleScriptMoveEndOpcode.test.ts",
+  "tests/colorChangeOracleEvidence.test.ts",
+  "tests/level50MoveParameterization.test.ts",
+  "tests/gate6CoverageManifest.test.ts",
   "tools/battle-lab/gate6-r8-paralysis-off.json",
   "docs/absorbing-abilities-ground-truth.md",
   "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
   "tools/probe/probe-absorbing-ability-off.py",
   "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
   "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+  "tools/battle-lab/mechanic-color-change-off.json",
+  "tools/probe/probe-color-change-ability-off.py",
+  "tools/probe/receipts/color-change-off-seed-610839776.json",
+  "tools/probe/receipts/color-change-off-seed-324508639.json",
 ];
 for (const path of sourceInputs) requirePath(path);
 
@@ -1180,8 +1317,8 @@ const markdown: string[] = [
   "## Headline",
   "",
   `- Effects: **${manifest.summary.effects.staticExecutable}/${manifest.summary.effects.total} static-executable**; moves: **${manifest.summary.moves.staticExecutable}/${manifest.summary.moves.total}** static-executable (**${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}** Level-50 roster moves executable, **${manifest.summary.moves.level50RosterOnly}** roster-only).`,
-  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors plus audited shared-absorbing routes, while every remaining gap retains its source-artifact locator and reason.`,
-  `- ON_DAMAGE checkpoint: **${manifest.summary.onDamageMoveEnd.contactCandidates}** contact candidates and **${manifest.summary.onDamageMoveEnd.colorChangeCandidates}** Color Change candidates (${manifest.summary.onDamageMoveEnd.overlapCandidates} overlap) are source-enumerated across ${manifest.summary.onDamageMoveEnd.entryBlockShapes} entry-block shapes. **${manifest.summary.onDamageMoveEnd.blockers}** blockers remain, **${manifest.summary.onDamageMoveEnd.retiredBlockers}** receipt blocker is retired, and **${manifest.summary.onDamageMoveEnd.promotedRows}** rows are promoted.`,
+  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors, audited shared-absorbing routes, and the Color Change family, while every remaining gap retains its source-artifact locator and reason.`,
+  `- ON_DAMAGE checkpoint: **${manifest.summary.onDamageMoveEnd.contactCandidates}** contact candidates and **${manifest.summary.onDamageMoveEnd.colorChangeCandidates}** Color Change candidates (${manifest.summary.onDamageMoveEnd.overlapCandidates} overlap) are source-enumerated across ${manifest.summary.onDamageMoveEnd.entryBlockShapes} entry-block shapes. **${manifest.summary.onDamageMoveEnd.colorChangePromotedRows}** Color Change rows are promoted, **${manifest.summary.onDamageMoveEnd.colorChangeExceptions}** Future Sight exception remains explicit, **${manifest.summary.onDamageMoveEnd.colorChangeRetiredBlockers}** Color Change blockers are retired, and **${manifest.summary.onDamageMoveEnd.blockers}** contact blockers remain.`,
   `- State/status/volatile rows: **${manifest.summary.stateFamilies.tier1Covered}/${manifest.summary.stateFamilies.total}** have focused Tier-1 evidence; source-modeled rows remain listed separately.`,
   `- Hook universes: **${manifest.summary.hooks.abilities.total} abilities** and **${manifest.summary.hooks.holdEffects.total} hold effects**, including **${manifest.summary.hooks.abilities.zeroFactoryWidened + manifest.summary.hooks.holdEffects.zeroFactoryWidened}** legal widened-scope rows with zero Level-50 Factory carriers.`,
   `- Corpus: **${manifest.summary.corpus.ordinaryTrainers}/${trainers.count} ordinary trainers** and **${manifest.summary.corpus.level50Sets}/${LEVEL50_SET_COUNT} Level-50 sets** joined; the full set catalog contains ${manifest.summary.corpus.fullSetCatalog} rows including Open-only sets.`,
@@ -1193,7 +1330,7 @@ const markdown: string[] = [
   "- `static-executable` comes only from the executable-frontier census and means opcode/operand reachability, not correct state transitions.",
   "- `engine-referenced` comes only from the ability/item census. It is a worklist fact, not semantic verification.",
   "- `catalog-joined` proves a finite source/data join. It does not provide a per-trainer or per-set oracle receipt.",
-  "- `source-proven-family` per-move hook joins name exact supported categories and carry one family witness per category. Soundproof reaches Cmd_attackcanceler; Volt/Water Absorb and Flash Fire reach accuracycheck → JumpIfMoveFailed. The shared absorber receipt is a two-seed Volt OFF trace plus all-three-arm Tier-1 siblings, not fabricated per-move receipts. No row claims unrelated families.",
+  "- `source-proven-family` per-move hook joins name exact supported categories and carry one family witness per category. Soundproof reaches Cmd_attackcanceler; Volt/Water Absorb and Flash Fire reach accuracycheck → JumpIfMoveFailed; Color Change carries a selector-specific target-datahpupdate → MOVEEND_ON_DAMAGE route certificate. The shared absorber and Color Change receipts are family-level receipts plus Tier-1 sibling batches, not fabricated per-move receipts. No row claims unrelated families.",
   "- `unsupported` per-move hook joins are intentionally not inferred from the partial dispatcher catalogs. Each row repeats only move identity, effect, entry script, reason, and a locator into `level50-move-parameterization.json`; it is not a support claim.",
   "- `oracle-receipted` requires a committed deterministic request and receipt. Incidental ability presence in an unrelated scenario is not a direct ability receipt; Water Absorb and Flash Fire retain explicit shared-dispatcher sibling status, while R8's Static party appearance is explicitly not an ON_DAMAGE receipt.",
   "- The five entries in `STATE_FAMILY_BEHAVIOR_EVIDENCE` use named behavior-test locators instead of token presence; that narrow Tier-1 override does not alter static, semantic, or oracle classifications.",
@@ -1236,8 +1373,8 @@ markdown.push(...table("Ability hook joins (all Level-50 roster moves)", ["Move"
   (row) => row.reason,
   (row) => evidenceText(row.evidence),
 ]));
-markdown.push("## ABILITYEFFECT_ON_DAMAGE evidence checkpoint\n\n");
-markdown.push(...table("Blocked per-move audit", ["Status", "Contact candidates", "Color Change candidates", "Overlap", "Entry-block shapes", "Open blockers", "Retired blockers", "Promotions", "Evidence"], [onDamageMoveEndRow], [
+markdown.push("## ABILITYEFFECT_ON_DAMAGE family checkpoint\n\n");
+markdown.push(...table("Contact checkpoint and Color Change family promotion", ["Status", "Contact candidates", "Color Change candidates", "Overlap", "Entry-block shapes", "Open contact blockers", "Retired receipt blockers", "Color Change promoted", "Color Change exceptions", "Color Change blockers retired", "Evidence"], [onDamageMoveEndRow], [
   (row) => row.status,
   (row) => String(row.contactCandidates),
   (row) => String(row.colorChangeCandidates),
@@ -1245,7 +1382,9 @@ markdown.push(...table("Blocked per-move audit", ["Status", "Contact candidates"
   (row) => String(row.entryBlockShapes),
   (row) => row.blockerIds.join(", "),
   (row) => row.retiredBlockerIds.join(", "),
-  (row) => String(row.promotedRows),
+  (row) => String(row.colorChangePromotedRows),
+  (row) => String(row.colorChangeExceptions),
+  (row) => String(row.colorChangeRetiredBlockers),
   (row) => evidenceText(row.evidence),
 ]));
 markdown.push(`${onDamageMoveEndRow.notes}\n`);
