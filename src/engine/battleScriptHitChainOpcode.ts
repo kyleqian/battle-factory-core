@@ -1181,9 +1181,7 @@ export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptR
   }
 
   const targetHoldEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, target);
-  const targetHoldEffect = targetHoldEffectId === HOLD_EFFECT_EVASION_UP_ID
-    ? "HOLD_EFFECT_EVASION_UP"
-    : null;
+  const targetHoldEffect = targetHoldEffectId === HOLD_EFFECT_EVASION_UP_ID ? "HOLD_EFFECT_EVASION_UP" : null;
   const targetHoldEffectParam = targetHoldEffect
     ? resolveBattleScriptBattlerHoldEffectParam(rulesContext, target)
     : 0;
