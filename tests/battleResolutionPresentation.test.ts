@@ -989,7 +989,7 @@ describe("battle resolution presentation receipt ownership", () => {
     });
   });
 
-  it("freezes the trainer class/name used by an opponent switch-in message", () => {
+  it("presents a forced opponent recall, send-in, then dragged-out message without an ordinary trainer send-out message", () => {
     const initial = initialBattle();
     const context = initial.rules.rulesContext;
     const incoming = context.party.player[1]!;
@@ -1043,16 +1043,11 @@ describe("battle resolution presentation receipt ownership", () => {
           toPartyIndex: 1,
         }),
         event(3, {
-          kind: "message",
-          messageId: "STRINGID_SWITCHINMON",
-          substitutions: [],
-        }),
-        event(4, {
           kind: "switch-in-animation",
           battler: 1,
           partyIndex: 1,
         }),
-        event(5, {
+        event(4, {
           kind: "message",
           messageId: "STRINGID_PKMNWASDRAGGEDOUT",
           substitutions: [],
@@ -1074,7 +1069,6 @@ describe("battle resolution presentation receipt ownership", () => {
       { type: "message", lines: ["ONIX used", "WHIRLWIND!"] },
       { type: "switch-out", battler: 1 },
       { type: "sprite-visibility", battler: 1, visible: false, recall: true },
-      { type: "message", lines: ["BUG CATCHER DESTIN sent", "out MACHOP!"] },
       { type: "switch-in", battler: 1, toPartyIndex: 1 },
       { type: "message", lines: ["Foe KABUTO was", "dragged out!"] },
       { type: "turn-end" },
@@ -1106,7 +1100,7 @@ describe("battle resolution presentation receipt ownership", () => {
     const incomingView = createBattleResolutionPresentationRenderView({
       ...summaryState,
       segments: Object.freeze([summarySegment]),
-      commandIndex: 5,
+      commandIndex: 4,
       lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 3 }),
     });
     expect(incomingView.field.opponent).toMatchObject({
@@ -1125,7 +1119,7 @@ describe("battle resolution presentation receipt ownership", () => {
     const openedView = createBattleResolutionPresentationRenderView({
       ...summaryState,
       segments: Object.freeze([summarySegment]),
-      commandIndex: 5,
+      commandIndex: 4,
       lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 18 }),
     });
     expect(openedView.midBattleSwitchIn).toMatchObject({
@@ -1139,7 +1133,7 @@ describe("battle resolution presentation receipt ownership", () => {
     const overlapView = createBattleResolutionPresentationRenderView({
       ...summaryState,
       segments: Object.freeze([summarySegment]),
-      commandIndex: 5,
+      commandIndex: 4,
       lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 20 }),
     });
     expect(overlapView.midBattleSwitchIn).toMatchObject({
@@ -1165,7 +1159,7 @@ describe("battle resolution presentation receipt ownership", () => {
     const closedBoundaryView = createBattleResolutionPresentationRenderView({
       ...summaryState,
       segments: Object.freeze([summarySegment]),
-      commandIndex: 5,
+      commandIndex: 4,
       lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 17 }),
     });
     const closedFrame = createFramebuffer();

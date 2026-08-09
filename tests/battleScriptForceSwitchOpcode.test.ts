@@ -212,6 +212,26 @@ describe("EFFECT_ROAR: full committed script walk, genuine terminal halt", () =>
         sourceLabel: "BattleScript_SuccessForceOut",
       },
     });
+    expect(result.state.events.flatMap((event) => {
+      if (
+        event.kind === "set-battler-sprite-visibility"
+        && event.provenance?.opcodeName === "B_SCR_OP_RETURNTOBALL"
+      ) return ["recall"];
+      if (event.kind === "switch") return ["switch"];
+      if (event.kind === "switch-in-animation") return ["switch-in-animation"];
+      if (event.kind === "message" && event.messageId === "STRINGID_PKMNWASDRAGGEDOUT") {
+        return ["message:dragged-out"];
+      }
+      if (event.kind === "message" && event.messageId === "STRINGID_SWITCHINMON") {
+        return ["message:ordinary-send-out"];
+      }
+      return [];
+    })).toEqual([
+      "recall",
+      "switch",
+      "switch-in-animation",
+      "message:dragged-out",
+    ]);
   });
 
   it("target out-levels attacker, level-check roll succeeds: switch-out proceeds through the real rejection-sampling pick", () => {
