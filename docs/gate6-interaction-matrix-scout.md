@@ -193,6 +193,42 @@ then White Herb's normalization/message, then the shared item removal
 (`battle_main.c:3869-3894`, `battle_util.c:3003-3073,3303-3329`,
 `battle_script_commands.c:5901-5915`).
 
+### R11 — Ninjask Baton Pass versus ordinary-switch volatile/stage lifetime
+
+`gate6-r11-off.json` uses complete legal parties and now names Ninjask by
+Emerald's internal `SPECIES_NINJASK = 302` (not the nearby Nincada id).  Its
+real Swords Dance, Substitute, and Speed Boost sequence establishes the
+source record before the real Baton Pass party choice: on both fresh Battle
+Scene OFF runs (seeds `1` and `324508639`), frame 3000 is active Ninjask at
+party index 0 with `status2 = 0x01000000` (`STATUS2_SUBSTITUTE`),
+`status3 = 0`, and stat-stage vector `[6,8,6,8,6,6,6,6]`; Baton Pass has
+spent its PP `40→39`.  The real party picker then sends the intended bench
+Bulbasaur (party index 1): frame 4000 retains that exact status2 value and
+stage vector on Bulbasaur, with raw-RGB SHA-256
+`5b03eec4d1ff2c77f836999f53db6b960b51be0b9e64631b0b4b40c4a30979ff`
+on both seeds.
+
+The same trace then chooses PKMN → Ninjask → SHIFT, rather than invoking a
+staging shortcut.  At frame 7400 the ordinary incoming Ninjask record is
+back at party index 0 with `status2 = 0`, `status3 = 0`, and every stage at
+the default `[6,6,6,6,6,6,6,6]` (hash
+`90cac917989d764920afa363c2490cfffb95759fdfccc6151a4021725d86c1e3`);
+the settled frame 7600 repeats the cleared fields (hash
+`4f0fa695bf4db9ab4bd0abe5996418660ee1d4c1cec3c00d7b82a647644a9983`).
+Those semantic snapshots, not the party-screen pixels, distinguish the two
+lifetimes; both hashes and every named state field are stable across the two
+seeds despite their distinct RNG states.
+
+This is the exact source boundary. `Cmd_switchindataupdate` overwrites the
+incoming `BattlePokemon`, then copies stat stages and status2 only for
+`EFFECT_BATON_PASS` (`battle_script_commands.c:4631-4657`).
+`SwitchInClearSetData` otherwise resets all stages and zeros status2/status3
+(`battle_main.c:3158-3172,3189-3193`); its Baton Pass branch masks status2
+to the source-retained list, which includes Substitute
+(`battle_main.c:3173-3176`).  The Tier-1 sibling now pins the corresponding
+ordinary reset and Baton Pass stage/Substitute retention against the same
+source split.
+
 ### R7 — burn, Guts Attack, Facade multiplier, and end-turn chip
 
 `gate6-r7-off.json` uses complete legal parties: the corpus has both
