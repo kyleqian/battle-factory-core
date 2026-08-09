@@ -10,7 +10,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **State:** the manifest reports **55/55** state/status/volatile rows with focused Tier-1 evidence (was **50/55**); Gate 6 remains **OPEN**, effects remain not-established-by-static-census, and OFF hook/request distinctions remain **24/24** receipted.
 - **Did:** strengthened real interpreter/end-turn behavior for crit suppression, Leech Seed marker/encoded owner/drain/Rapid Spin cleanup, Yawn countdown/expiry, and Light Screen's shared wore-off message/buffer/re-set continuation. Added a narrow, locator-validated `STATE_FAMILY_BEHAVIOR_EVIDENCE` mapping and regenerated both manifest artifacts.
 - **Next:** let the supervisor select the next finite broad Gate-6 acceptance unit. Do not resume the retired Battle-2 march.
-- **Notes:** focused state/end-turn/hit-chain/manifest/frontier checks are **7 files / 527 tests** green; smoke is **375/375**; full suite is **817 files / 8,168 passed / 1 skipped**; production build is green. No production mechanics, oracle receipts, barriers/imports, or animation files changed.
+- **Notes:** focused state/end-turn/hit-chain/manifest/frontier checks are **7 files / 525 tests** green; smoke is **375/375**; full suite is **817 files / 8,168 passed / 1 skipped**; production build is green. No production mechanics, oracle receipts, barriers/imports, or animation files changed.
 
 ---
 
@@ -55,19 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **406/406**, smoke **375/375**, full suite **814 files / 8,151 passed / 1
   skipped**, and production build green.
   No barrier/import pin, rule/RNG, party/HP/status, or completeness guard changed.
-
-## 1037 — [bounded MAIN worker, 2026-08-09] **#84 opponent send-out origin repaired**
-
-- **State:** `d02a46f5` fixed opponent-side routing and origin, but item (1)
-  remained presentation-incomplete: its open ball still returned before
-  drawing the simultaneously materializing incoming mon. Item (3)'s
-  WHIRLWIND recall/send-out seam also remained. Gate 6 stayed **23/24**.
-- **Did:** reproduced the generated opponent replacement through the public
-  resolution renderer. The typed switch-in projection now preserves battler
-  side, ball origin/pose, and healthbox owner: opponent replacements stay at
-  `(176,64)` while player replacements retain the `(24,68)` throw arc.
-- **Next:** completed by entry 1038's overlap and generic forced-recall repair.
-- **Notes:** fresh legal complete-party OFF evidence captures frames 470..630
-  densely; MACHOP proves the fix is species-independent. Full suite **813
-  files / 8,147 passed / 1 skipped** and build green. No unsupported barrier,
-  canonical import, rules/RNG, completeness guard, or ratchet pin changed.

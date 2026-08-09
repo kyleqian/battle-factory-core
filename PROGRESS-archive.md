@@ -38814,6 +38814,21 @@ both verify scripts/census independently re-verified before this entry.)*
   manifest checks are **59/59**. Worker full suites are **8,143** and
   **8,144** passed with one skip each; both builds pass. No barrier/import pin
   changed. The final union build is still required after the next pair.
+## 1037 — [bounded MAIN worker, 2026-08-09] **#84 opponent send-out origin repaired**
+
+- **State:** `d02a46f5` fixed opponent-side routing and origin, but item (1)
+  remained presentation-incomplete: its open ball still returned before
+  drawing the simultaneously materializing incoming mon. Item (3)'s
+  WHIRLWIND recall/send-out seam also remained. Gate 6 stayed **23/24**.
+- **Did:** reproduced the generated opponent replacement through the public
+  resolution renderer. The typed switch-in projection now preserves battler
+  side, ball origin/pose, and healthbox owner: opponent replacements stay at
+  `(176,64)` while player replacements retain the `(24,68)` throw arc.
+- **Next:** completed by entry 1038's overlap and generic forced-recall repair.
+- **Notes:** fresh legal complete-party OFF evidence captures frames 470..630
+  densely; MACHOP proves the fix is species-independent. Full suite **813
+  files / 8,147 passed / 1 skipped** and build green. No unsupported barrier,
+  canonical import, rules/RNG, completeness guard, or ratchet pin changed.
 ## 1035 — [bounded MAIN worker, 2026-08-08] **#84 status-message cadence repaired**
 
 - **State:** #84 items (2) and (4) are removed; only item (1)'s wrong-side
