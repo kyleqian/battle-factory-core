@@ -1,0 +1,21 @@
+# MOVE_DISABLE opponent-front — 113 frames, 240x160
+# frames absent from this table are byte-identical to the previous frame
+frame  changedPx  bbox(minx,miny-maxx,maxy)
+214  (first frame)
+  static 215-221
+222  30  146,25-157,36
+  static 223
+224  152  140,15-163,46
+  static 225-226
+227  191  140,15-163,46
+  static 228-229
+230  142  141,18-162,43
+  static 231-232
+233  96  141,20-162,41
+  static 234-237
+238  42  143,27-160,34
+239  2291  38,44-106,111
+  static 240-318
+319  2195  38,44-106,111
+320  1545  38,44-106,111
+  static 321-326
