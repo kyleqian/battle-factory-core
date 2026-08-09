@@ -1,4 +1,5 @@
 import {
+  battleCommandFieldBattlerFromPartyMember,
   createBattleCommandPresentation,
   type BattleCommandFieldBattler,
   type BattleCommandPresentationState,
@@ -957,7 +958,8 @@ function messageLines(
   events: readonly BattleKernelSemanticEvent[],
   field: BattleResolutionDisplayedField,
   switchInBattler: 0 | 1 | null,
-  afterField: BattleResolutionDisplayedField | null,
+  /** The switch-in's own display snapshot (`switchInIncomingBattler`), non-null exactly when `switchInBattler` is. */
+  switchInIncoming: BattleCommandFieldBattler | null,
   lastStatChange: Extract<
     BattleScriptSemanticEventPayload,
     { kind: "stat-stage-change" }
@@ -2193,12 +2195,12 @@ function messageLines(
     });
   }
   if (messageId === "STRINGID_SWITCHINMON") {
-    if (switchInBattler === null || afterField === null) {
+    if (switchInBattler === null || switchInIncoming === null) {
       throw new Error(
         "battle resolution switch-in message has no preceding switch/post-switch field",
       );
     }
-    const incoming = fieldBattler(afterField, switchInBattler);
+    const incoming = switchInIncoming;
     if (switchInBattler === 0) {
       return Object.freeze([`Go! ${incoming.name}!`]);
     }
@@ -2842,6 +2844,40 @@ function partyBallStates(
   }));
 }
 
+/**
+ * The incoming battler's display snapshot at switch-in time (soak signature
+ * 6, docs/soak-crash-catalog.md §6). Prefers the settled post-turn command
+ * field -- byte-identical to the long-standing derivation whenever that
+ * boundary exists and still shows the switched-in slot. When the turn
+ * instead settles on a non-command boundary (the switched-in mon fainted
+ * before the turn ended -- the next boundary is a forced switch or a
+ * terminal) there is no post-switch command field at all, yet source
+ * printed "Go! X!"/"sent out X!" at switch time regardless; the party
+ * record supplies the same typed snapshot, because the bench state IS the
+ * mon's state at the moment the kernel switches it in (nothing touches a
+ * benched mon mid-turn; hazard/attack damage lands as later hp commands).
+ */
+function switchInIncomingBattler(
+  beforeRules: BattleScriptRulesContext,
+  afterField: BattleResolutionDisplayedField | null,
+  battler: 0 | 1,
+  toPartyIndex: BattlePartyIndex,
+): BattleCommandFieldBattler {
+  if (afterField !== null) {
+    const settled = fieldBattler(afterField, battler);
+    if (settled.partyIndex === toPartyIndex) return settled;
+  }
+  const party = battler === 0
+    ? beforeRules.party.player
+    : beforeRules.party.opponent;
+  return battleCommandFieldBattlerFromPartyMember(
+    battler === 0 ? "player" : "trainer",
+    battler,
+    toPartyIndex,
+    party[toPartyIndex]!,
+  );
+}
+
 function fieldAfter(
   transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>,
 ): BattleResolutionDisplayedField | null {
@@ -2929,6 +2965,14 @@ export function projectBattleResolutionCommands(
       const switchInBattler = payload.messageId === "STRINGID_SWITCHINMON"
         ? ([...pendingSwitch.keys()].at(-1) ?? null)
         : null;
+      const switchInIncoming = switchInBattler === null
+        ? null
+        : switchInIncomingBattler(
+          beforeRules,
+          afterField,
+          switchInBattler,
+          pendingSwitch.get(switchInBattler)!.toPartyIndex,
+        );
       commands.push(Object.freeze({
         type: "message",
         eventSequence: event.sequence,
@@ -2938,7 +2982,7 @@ export function projectBattleResolutionCommands(
           events,
           field,
           switchInBattler,
-          afterField,
+          switchInIncoming,
           lastStatChange,
           lastFaintBattler,
           pendingStatusMessageBattler,
@@ -3257,20 +3301,21 @@ export function projectBattleResolutionCommands(
           `battle resolution switch-in marker for battler ${battler} has no preceding switch event`,
         );
       }
-      if (
-        payload.partyIndex !== switched.toPartyIndex
-        || afterField === null
-      ) {
+      if (payload.partyIndex !== switched.toPartyIndex) {
         throw new Error(
-          `battle resolution switch-in marker for battler ${battler} has no matching post-switch field`,
+          `battle resolution switch-in marker for battler ${battler} does not match its switch receipt`,
         );
       }
-      const incoming = fieldBattler(afterField, battler);
-      if (incoming.partyIndex !== switched.toPartyIndex) {
-        throw new Error(
-          `battle resolution post-switch field has party index ${incoming.partyIndex}, expected ${switched.toPartyIndex}`,
-        );
-      }
+      // Soak signature 6: prefers the settled post-turn command field
+      // (byte-identical to the former afterField-only derivation whenever
+      // that boundary exists), else the party record -- see
+      // switchInIncomingBattler's own doc.
+      const incoming = switchInIncomingBattler(
+        beforeRules,
+        afterField,
+        battler,
+        switched.toPartyIndex,
+      );
       pendingSwitch.delete(battler);
       commands.push(Object.freeze({
         type: "switch-in",

@@ -1124,6 +1124,103 @@ describe("battle resolution presentation receipt ownership", () => {
     )).toBe(true);
   });
 
+  it("soak signature 6: resolves the switch-in when the incoming mon faints the same turn (no post-switch command field)", () => {
+    // Seed-99 shape (docs/soak-crash-catalog.md §6): the player voluntarily
+    // switches MACHOP in, the opponent's move KOs it before the turn
+    // settles, and the next boundary is a FORCED switch -- so no post-turn
+    // command field exists. The switch-in message and typed switch-in
+    // command must resolve from the party record (the bench state IS the
+    // mon's state at switch-in time), not from the next boundary's field.
+    const initial = initialBattle();
+    const context = initial.rules.rulesContext;
+    const incoming = context.party.player[1]!;
+    const koedBattler = Object.freeze({
+      ...context.battlers[0]!,
+      ...incoming,
+      side: 0 as const,
+      partyIndex: 1,
+      species: incoming.species,
+      hp: 0,
+      types: Object.freeze(["TYPE_FIGHTING", "TYPE_FIGHTING"] as const),
+    });
+    const afterContext = Object.freeze({
+      ...context,
+      party: Object.freeze({
+        ...context.party,
+        player: Object.freeze([
+          context.party.player[0]!,
+          Object.freeze({ ...incoming, hp: 0 }),
+          context.party.player[2]!,
+          context.party.player[3]!,
+          context.party.player[4]!,
+          context.party.player[5]!,
+        ]),
+      }),
+      battlers: Object.freeze([
+        koedBattler,
+        context.battlers[1]!,
+        context.battlers[2]!,
+        context.battlers[3]!,
+      ]) as typeof context.battlers,
+    });
+    const afterRules = Object.freeze({
+      ...initial.rules,
+      rulesContext: afterContext,
+    }) as FactoryFullTurnDecisionRules;
+    const forcedSwitch: BattleBoundary = Object.freeze({
+      kind: "decision-required",
+      request: Object.freeze({
+        kind: "forced-switch",
+        requestId: 3,
+        side: "player",
+        battler: 0,
+        faintedPartyIndex: 1,
+        legalPartyIndexes: Object.freeze([0 as const]),
+      }),
+    });
+    // Threw before the fix: "battle resolution switch-in message has no
+    // preceding switch/post-switch field".
+    const resolution = createBattleResolutionPresentation(inputFor([
+      event(0, {
+        kind: "message",
+        messageId: "STRINGID_RETURNMON",
+        substitutions: [],
+        introBattler: 0,
+        introHpScale: 0,
+      }),
+      event(1, { kind: "draw-party-status-summary", battler: 0 }),
+      event(2, { kind: "switch", side: "player", fromPartyIndex: 0, toPartyIndex: 1 }),
+      event(3, { kind: "message", messageId: "STRINGID_SWITCHINMON", substitutions: [] }),
+      event(4, { kind: "hide-party-status-summary", battler: 0 }),
+      event(5, { kind: "switch-in-animation", battler: 0, partyIndex: 1 }),
+      event(6, {
+        kind: "message",
+        messageId: "STRINGID_USEDMOVE",
+        substitutions: [],
+        actionSnapshot: { attacker: 1, currentMove: 72, currentMovePosition: 0 },
+      }),
+      event(7, { kind: "health-bar-update", battler: 0, healthValue: 80 }),
+      event(8, { kind: "hp-change", battler: 0, from: 80, to: 0 }),
+    ], forcedSwitch, afterRules));
+
+    const commands = resolution.segments[0]!.commands;
+    expect(commands).toContainEqual(
+      expect.objectContaining({ type: "message", lines: ["Go! MACHOP!"] }),
+    );
+    const switchCommand = commands.find((command) => command.type === "switch-in");
+    if (switchCommand?.type !== "switch-in") {
+      throw new Error("expected a typed switch-in command");
+    }
+    // The incoming display is the party record at switch-in time -- full
+    // bench HP, not the fainted end-of-turn 0.
+    expect(switchCommand.incoming).toMatchObject({
+      partyIndex: 1,
+      name: "MACHOP",
+      hp: 80,
+      maxHP: 80,
+    });
+  });
+
   it("fails closed on unpaired HP, missing switch-in markers, and out-of-order sequences", () => {
     expect(() => createBattleResolutionPresentation(inputFor([
       event(0, { kind: "hp-change", battler: 1, from: 91, to: 80 }),

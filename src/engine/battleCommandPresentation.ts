@@ -296,27 +296,28 @@ function partyIndexFromBattler(
   return battler.partyIndex as BattlePartyIndex;
 }
 
-function fieldBattler(
+/**
+ * Builds one battler's display snapshot straight from its PARTY record --
+ * the bench state the kernel switches in. Identity fields (species, name,
+ * level, gender) and hp/status/moves all read the party mirror, which
+ * controller writes keep in sync (datahpupdate's HP sync, SetMoveEffect's
+ * status write). The resolution projector uses this for a switch-in whose
+ * post-switch command boundary never exists (the incoming mon faints the
+ * same turn, or is dragged out again) -- soak signature 6
+ * (docs/soak-crash-catalog.md §6): at switch-in time the bench record IS
+ * the mon's state, so the display never needs the next boundary's field.
+ */
+export function battleCommandFieldBattlerFromPartyMember(
   side: BattleDecisionSide,
   battlerId: BattleSinglesBattler,
-  active: BattleScriptRulesBattlerState,
-  partyMember: BattleScriptPartyMemberState,
   partyIndex: BattlePartyIndex,
+  partyMember: BattleScriptPartyMemberState,
 ): BattleCommandFieldBattler {
   if (partyMember.species === 0 || partyMember.isEgg) {
     throw new BattleCommandPresentationError(
       `${side} battler ${battlerId} points at empty or Egg party slot ${partyIndex}`,
     );
   }
-  if (
-    active.personality !== partyMember.personality
-    || active.level !== partyMember.level
-  ) {
-    throw new BattleCommandPresentationError(
-      `${side} battler ${battlerId} does not match party identity at slot ${partyIndex}`,
-    );
-  }
-
   const speciesName = SPECIES_NAMES[partyMember.species];
   const speciesStats = SPECIES_STATS_BY_ID.get(partyMember.species);
   if (
@@ -328,7 +329,6 @@ function fieldBattler(
       `${side} party slot ${partyIndex} has unresolved species ${partyMember.species}`,
     );
   }
-
   return Object.freeze({
     side,
     battler: battlerId,
@@ -337,6 +337,35 @@ function fieldBattler(
     name: battleCommandSpeciesDisplayName(partyMember.species),
     level: partyMember.level,
     gender: getMonGender(speciesStats.genderRatio, partyMember.personality),
+    hp: partyMember.hp,
+    maxHP: partyMember.maxHP,
+    status: battleCommandUiStatusFromStatus1(partyMember.status1),
+    moveIds: Object.freeze([...partyMember.moves]) as BattleCommandMoveIds,
+    currentPP: Object.freeze([...partyMember.pp]) as BattleCommandMovePp,
+    ppBonuses: partyMember.ppBonuses,
+  });
+}
+
+function fieldBattler(
+  side: BattleDecisionSide,
+  battlerId: BattleSinglesBattler,
+  active: BattleScriptRulesBattlerState,
+  partyMember: BattleScriptPartyMemberState,
+  partyIndex: BattlePartyIndex,
+): BattleCommandFieldBattler {
+  if (
+    active.personality !== partyMember.personality
+    || active.level !== partyMember.level
+  ) {
+    throw new BattleCommandPresentationError(
+      `${side} battler ${battlerId} does not match party identity at slot ${partyIndex}`,
+    );
+  }
+  // Same identity/species derivation as the party-record builder; the ACTIVE
+  // battler state overlays the live battle fields (Transform/Mimic can make
+  // these diverge from the party mirror mid-battle).
+  return Object.freeze({
+    ...battleCommandFieldBattlerFromPartyMember(side, battlerId, partyIndex, partyMember),
     hp: active.hp,
     maxHP: active.maxHP,
     status: battleCommandUiStatusFromStatus1(active.status1),
