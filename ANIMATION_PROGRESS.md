@@ -1,5 +1,13 @@
 # Animation coverage
 
+## Supervisor wind-down — seven Level-50 promotions and two bounded checkpoints (2026-08-09)
+
+- **State:** This session advanced Level-50 coverage **140→147/276 exact**, 0 partial, 0 staged, and **136→129 unsupported**. `SLEEP_TALK`, `FIRE_SPIN`, `SUPER_FANG`, `DISABLE`, `STOMP`, `ACID_ARMOR`, and `VICE_GRIP` are newly exact.
+- **Did:** Verified each worker branch independently, strengthened DISABLE/ACID_ARMOR/VICE_GRIP/POISON_STING evidence where audits found gaps, merged only green commits, and removed every animation worker branch/worktree. The completed set-3 WEEDLE `POISON_STING` implementation stays outside the Level-50 ledger because the authoritative inventory classifies it `outsideFactory`; `KARATE_CHOP` now has a source-complete resume checkpoint without an exactness claim.
+- **Verified:** Every promoted move passed complete twice-fresh bilateral pointer-bounded component, typed-seam, hardware, raw-RGB, and production-framebuffer acceptance with its named shared controls. The final current-master fold, full suite, production build, coverage report, and clean-tree checks pass.
+- **Next:** Resume `KARATE_CHOP` from `tools/compare/karateChopSourceAudit.ts`: add complete set-232 PRIMEAPE/ONIX bilateral stages, dense pointer evidence, reducer/seam/compositor, and LOW_KICK plus HANDS_AND_FEET/IMPACT controls before promotion. Do not reclassify `POISON_STING` into the Level-50 denominator without changing the authoritative inventory contract.
+- **Notes:** For the main program: all production changes are presentation-only. No damage, status resolution, accuracy/critical/RNG, turn order, controller, round/facility state, shared animation boundary, canonical-recording allowlist, or unsupported-branch barrier changed. No animation deferral is open.
+
 ## MOVE_KARATE_CHOP authoritative source checkpoint — coverage unchanged (2026-08-09 worker)
 
 - **State:** Coverage remains **147/276 exact**, 0 partial, 0 staged, **129 unsupported**. The move has no pre-existing probe, fixture, reducer, seam, or compositor; exact promotion could not truthfully fit the bounded session.
