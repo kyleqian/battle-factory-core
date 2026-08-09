@@ -1,5 +1,28 @@
 # Animation coverage
 
+## Supervisor wind-down — THUNDER exact; GLARE bilateral evidence + executable reducer/seam (2026-08-08)
+
+- **State:** This session advanced Level-50 coverage **134→135/276 exact**, 0 partial, 0 staged, **142→141 unsupported**. `MOVE_THUNDER` alone was promoted. `MOVE_GLARE` remains unsupported because it has no framebuffer compositor or pixel acceptance; `MOVE_TRI_ATTACK` remains independently unsupported.
+- **Did:** Folded master throughout; promoted THUNDER through its typed Scene-ON compositor; then banked complete bilateral GLARE evidence and made it load-bearing through a pure 213-age reducer plus typed Scene-ON seam. GLARE now models the 13 dot pairs, two sparkles, ScaryFace/shake tasks, both palette blends, registers, audio, logical/hardware battler offsets, and cleanup without drawing GLARE-specific pixels.
+- **Verified:** Supervisor-fresh THUNDER probes pass **262/262 component + framebuffer frames** in both orientations, with THUNDER_PUNCH controls **104/104** both ways. GLARE passes **213/213 reducer + seam frames**, twice fresh in both orientations: player evidence/RGB `67acdfad…` / `676cc2a4…`, opponent `2aa1e8a7…` / `eb5d27ea…`. Final integrated `npm test` is **811 files / 8,135 passed / 1 established skip**; post-final-master-fold smoke and build are green.
+- **Next:** Implement GLARE's narrow source-relative compositor and require complete bilateral framebuffer acceptance before promotion. Preserve THUNDER and SCARY_FACE as controls; do not couple TRI_ATTACK acceptance.
+- **Notes:** For the main program: animation changes are presentation-only; no gameplay, damage, RNG, turn order, facility state, shared barrier, or main-ledger contract changed. No animation deferral is open and no animation worker branch/worktree remains.
+
+## MOVE_GLARE bilateral Scene-ON evidence checkpoint — remains unsupported (2026-08-08 worker)
+
+- **State:** Coverage remains **135/276 exact**, 0 partial, 0 staged, **141 unsupported**. GLARE was not promoted; no reducer, compositor, engine, boundary, gameplay, controller, or sibling behavior changed.
+- **Did:** Added complete legal set-200 DUNSPARCE versus SHUCKLE scenarios in both orientations, a dense source-window mGBA probe, deterministic receipts/change maps, a source/component audit, and hermetic Tier-1 pins. The probe records script offsets/waits, every active task and logical sprite with data, hardware OAM/matrices, all palette buffers/tags, registers, audio state, and raw RGB.
+- **Verified:** Two fresh runs per orientation are byte-identical. Both complete windows are **213 frames** through first inactive cleanup: player-back **74..286**, evidence `67acdfad…`, RGB `676cc2a4…`; opponent-front **78..290**, evidence `2aa1e8a7…`, RGB `eb5d27ea…`. The audit distinguishes 13 `gGlareEyeDotSpriteTemplate` pairs from the two `gEyeSparkleSpriteTemplate` instances, `AnimTask_ScaryFace`, `AnimTask_ShakeTargetInPattern`, and the separate 0→16 / 16→0 BG palette blends. Focused ratchets are **13/13**, smoke **375/375**, full `npm test` **810 files / 8,130 passed / 1 established skip**, build, and final coverage report are green.
+- **Next:** A later bounded round may implement and prove the production reducer/seam/compositor. Until then GLARE remains unsupported; SCARY_FACE and THUNDER stay independently exact and TRI_ATTACK independently unsupported.
+
+## MOVE_THUNDER exact — bilateral Scene-ON promotion (2026-08-08 worker)
+
+- **State:** Coverage advanced **134→135/276 exact**, 0 partial, 0 staged, **142→141 unsupported**. Only `MOVE_THUNDER` moved; GLARE and TRI_ATTACK remain unsupported.
+- **Did:** Wired the staged source-relative reducer and BG_THUNDER art into the narrow typed Scene-ON compositor; added the hardware-OAM shake display schedule, source one-display enemy-shadow handoff, complete portable verifier, exact receipts, and focused Tier-1 pins. Renamed Lightning's `priority` field to the source-accurate `sourceSubpriorityOffset` before wiring.
+- **Verified:** Twice-fresh bilateral probes pass source/software/typed seam, tasks, Lightning and battler hardware OAM, palette/register/audio state, raw RGB, and shared framebuffer: player-back **76..337 = 262/262**, evidence `e2cbab66…`, raw RGB `bb5b5dff…`; opponent-front **80..341 = 262/262**, evidence `45a17da4…`, raw RGB `f6d879f0…`. THUNDER_PUNCH controls remain **104/104 component + framebuffer** in both orientations. Focused tests **20/20**, typecheck, full `npm test` (**809 files, 8084 passed, 1 established skip**), and `npm run build` pass.
+- **Next:** Continue the ranked queue. Do not promote GLARE or TRI_ATTACK without independent complete dense evidence.
+- **Notes:** No gameplay, RNG, controller, facility, shared-boundary, unsupported-barrier, or master-ledger change.
+
 ## MOVE_MAGICAL_LEAF exact — bilateral Scene-ON promotion (2026-08-08 worker, round B)
 
 - **State:** Coverage advanced **133→134/276 exact**, 0 partial, 0 staged, **143→142 unsupported**. Only `MOVE_MAGICAL_LEAF` moved; no gameplay, controller, boundary, or unsupported-barrier change.

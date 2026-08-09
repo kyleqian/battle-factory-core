@@ -3239,6 +3239,33 @@
    ]
   },
   {
+   "move": "MOVE_THUNDER",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 MAGNETON-to-SHUCKLE Scene-ON source windows through first inactive cleanup match 262/262 source/software/typed-seam and 262/262 shared-framebuffer frames in both orientations twice fresh: player-back frames 76..337 and opponent-front frames 80..341",
+    "portable proof pins the full Move_THUNDER pointer/wait program, all 12 gLightningSpriteTemplate lifecycles and source subpriority offsets, BG_THUNDER load/slide/restore, F_PAL_BG ramps and six screen inversions, AnimTask_ShakeTargetInPattern runtime argument overwrite and hardware display order, task counts, hardware OAM/palettes/registers, live audio identity/pan, raw RGB, and cleanup",
+    "the narrow compositor consumes only the typed relative Scene-ON seam and source assets, including the source callback's one-display elevated opponent shadow, software-to-hardware palette/OAM latches, packed mGBA brightness decrease, field chrome, healthboxes, and text; no gameplay, RNG, controller, or facility state participates",
+    "fresh bilateral MOVE_THUNDER_PUNCH controls remain exact at 104/104 source-component and 104/104 framebuffer frames per orientation; MOVE_GLARE and MOVE_TRI_ATTACK remain unsupported as source-distinct acceptance units"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-thunder-player-magneton-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-thunder-opponent-magneton-player-shuckle.json",
+    "tools/compare/fixtures/thunder-player-magneton-opponent-shuckle.json",
+    "tools/compare/fixtures/thunder-opponent-magneton-player-shuckle.json",
+    "tools/compare/thunderProbe.py",
+    "tools/compare/thunderPortable.ts",
+    "tools/compare/extractThunderAssets.ts",
+    "tools/compare/evidence/thunder-changemap-player.txt",
+    "tools/compare/evidence/thunder-changemap-opponent.txt",
+    "src/animation/assets/thunder.json",
+    "src/animation/thunder.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/thunder.test.ts",
+    "tests/animation/thunderEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_THUNDER_PUNCH",
    "status": "exact",
    "covered": [
@@ -3849,7 +3876,7 @@
     "MOVE_THUNDER",
     "MOVE_TRI_ATTACK"
    ],
-   "goal": "MOVE_SCARY_FACE is exact after 190/190 complete move-owned source/software/typed-seam, hardware OAM/palette/register, live-audio, raw-RGB, and shared-framebuffer frames passed in both orientations twice, including the stock shared-argument overwrite from literal offset1/pattern0 to runtime offset3/pattern1. Source-derived legal set-133 RHYHORN, SHUCKLE, Scary Face BG/tilemaps, and EYE_SPARKLE assets drive the narrow compositor. GLARE, THUNDER, and TRI_ATTACK have materially different bodies or task arguments and remain unsupported pending independent complete dense evidence."
+    "goal": "MOVE_SCARY_FACE is exact after 190/190 complete move-owned source/software/typed-seam, hardware OAM/palette/register, live-audio, raw-RGB, and shared-framebuffer frames passed in both orientations twice, including the stock shared-argument overwrite from literal offset1/pattern0 to runtime offset3/pattern1. MOVE_THUNDER is independently exact over both complete 262-frame windows through first inactive cleanup, including its runtime shake-argument overwrite, BG_THUNDER, all 12 lightning sprites, palette/register/audio state, and shared framebuffer twice fresh. GLARE remains unsupported because it adds SMALL_RED_EYE/EYE_SPARKLE, GlareEyeDots, ScaryFace, palette ramps, and shake args (20,1,FALSE). TRI_ATTACK remains unsupported because it adds triangle/fire/ice bodies, adjusted-panning audio, and two distinct shake/lightning phases."
   },
   {
    "id": "rock-mon-back-and-forth-magenta-heart",

@@ -367,6 +367,11 @@ import {
   type ScaryFaceState,
 } from "./scaryFace.ts";
 import {
+  glareAtAge,
+  type GlareGeometry,
+  type GlareState,
+} from "./glare.ts";
+import {
   sparkAtAge,
   type SparkState,
 } from "./spark.ts";
@@ -374,6 +379,10 @@ import {
   thunderWaveAtAge,
   type ThunderWaveState,
 } from "./thunderWave.ts";
+import {
+  thunderAtAge,
+  type ThunderState,
+} from "./thunder.ts";
 import {
   surfWaveAtAge,
   type SurfWaveState,
@@ -689,6 +698,7 @@ export interface SceneOnPresentationBattler {
     | "SPOINK"
     | "ARCANINE"
     | "DUGTRIO"
+    | "DUNSPARCE"
     | "CHARMELEON"
     | "HAUNTER"
     | "IVYSAUR"
@@ -1618,6 +1628,17 @@ export interface SceneOnScaryFaceConfig {
   readonly attackerEyeCenter: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnGlareConfig {
+  readonly move: "GLARE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source-relative coordinates supplied by the decoded battler geometry. */
+  readonly attackerEyeCenter: Readonly<{ x: number; y: number }>;
+  readonly eyeDotStart: Readonly<{ x: number; y: number }>;
+  readonly eyeDotEnd: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnSparkConfig {
   readonly move: "SPARK";
   readonly attacker: SceneOnPresentationBattler;
@@ -1642,6 +1663,15 @@ export interface SceneOnThunderWaveConfig {
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   /** `GetBattlerSpriteCoord(target, X_2/Y_2)` used by `createsprite`. */
+  readonly targetEffectCenter: Readonly<{ x: number; y: number }>;
+}
+
+export interface SceneOnThunderConfig {
+  readonly move: "THUNDER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `GetBattlerSpriteCoord(target, X_2/Y_2)` used by all bolts. */
   readonly targetEffectCenter: Readonly<{ x: number; y: number }>;
 }
 
@@ -2229,8 +2259,10 @@ export type SceneOnMoveConfig =
   | SceneOnTauntConfig
   | SceneOnTormentConfig
   | SceneOnScaryFaceConfig
+  | SceneOnGlareConfig
   | SceneOnSparkConfig
   | SceneOnThunderWaveConfig
+  | SceneOnThunderConfig
   | SceneOnSurfConfig
   | SceneOnCharmConfig
   | SceneOnCovetConfig
@@ -2320,6 +2352,8 @@ export type SceneOnTauntPresentationState =
   SceneOnMovePresentationState<SceneOnTauntConfig>;
 export type SceneOnScaryFacePresentationState =
   SceneOnMovePresentationState<SceneOnScaryFaceConfig>;
+export type SceneOnGlarePresentationState =
+  SceneOnMovePresentationState<SceneOnGlareConfig>;
 export type SceneOnAbsorbPresentationState =
   SceneOnMovePresentationState<SceneOnAbsorbConfig>;
 export type SceneOnMoonlightPresentationState =
@@ -2340,6 +2374,8 @@ export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
 export type SceneOnThunderWavePresentationState =
   SceneOnMovePresentationState<SceneOnThunderWaveConfig>;
+export type SceneOnThunderPresentationState =
+  SceneOnMovePresentationState<SceneOnThunderConfig>;
 export type SceneOnSurfPresentationState =
   SceneOnMovePresentationState<SceneOnSurfConfig>;
 export type SceneOnCharmPresentationState =
@@ -2612,6 +2648,12 @@ export interface SceneOnScaryFaceView extends ScaryFaceState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnGlareView extends GlareState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnSparkView extends SparkState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -2619,6 +2661,12 @@ export interface SceneOnSparkView extends SparkState {
 }
 
 export interface SceneOnThunderWaveView extends ThunderWaveState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnThunderView extends ThunderState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4855,6 +4903,29 @@ export function sceneOnScaryFaceView(
   };
 }
 
+/** `age=0` is the first source-relative MOVE_GLARE frame. */
+export function sceneOnGlareView(
+  state: SceneOnGlarePresentationState,
+): SceneOnGlareView {
+  if (state.config.move !== "GLARE") {
+    throw new Error(`expected GLARE presentation, got ${state.config.move}`);
+  }
+  const config = state.config;
+  const geometry: GlareGeometry = {
+    attackerSide: config.attacker.geometry.side,
+    targetSide: config.target.geometry.side,
+    attackerEyeCenter: config.attackerEyeCenter,
+    eyeDotStart: config.eyeDotStart,
+    eyeDotEnd: config.eyeDotEnd,
+  };
+  return {
+    age: state.age,
+    attacker: config.attacker,
+    target: config.target,
+    ...glareAtAge(state.age, geometry),
+  };
+}
+
 /** `age=0` is Move_SPARK's first displayed palette/sprite source tick. */
 export function sceneOnSparkView(
   state: SceneOnSparkPresentationState,
@@ -4907,6 +4978,25 @@ export function sceneOnThunderWaveView(
       state.config.attacker.geometry.side,
       state.config.targetEffectCenter,
       state.config.target.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_THUNDER's active source-script offset-zero display. */
+export function sceneOnThunderView(
+  state: SceneOnThunderPresentationState,
+): SceneOnThunderView {
+  if (state.config.move !== "THUNDER") {
+    throw new Error(`expected THUNDER presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...thunderAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.targetEffectCenter,
     ),
   };
 }

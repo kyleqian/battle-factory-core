@@ -522,6 +522,7 @@ import {
   DRAGON_RAGE_FRAMEBUFFER_FIRE_SPIT_AGE_LAG,
   DRAGON_RAGE_FRAMEBUFFER_FIRE_PLUME_AGE_LAG,
 } from "../animation/dragonRage.ts";
+import { thunderDisplayedTargetY2AtAge } from "../animation/thunder.ts";
 import {
   compositeGbaObjScanlines,
   type GbaObjRaster,
@@ -633,6 +634,7 @@ import battleAnimIceCubeAsset from "../assets/gen/battle-anim-ice-cube.json" wit
 import battleAnimLightningAsset from "../assets/gen/battle-anim-lightning.json" with { type: "json" };
 import battleAnimSpark2Asset from "../assets/gen/battle-anim-spark-2.json" with { type: "json" };
 import thunderWaveAsset from "../assets/gen/battle-anim-spark.json" with { type: "json" };
+import thunderAsset from "../animation/assets/thunder.json" with { type: "json" };
 import surfWaveAsset from "../animation/assets/surf-wave.json" with { type: "json" };
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import battleAnimItemHealAsset from "../assets/gen/battle-anim-item-heal.json" with { type: "json" };
@@ -935,6 +937,7 @@ import {
   sceneOnEncoreView,
   sceneOnSparkView,
   sceneOnThunderWaveView,
+  sceneOnThunderView,
   sceneOnSurfView,
   sceneOnCharmView,
   sceneOnCovetView,
@@ -973,6 +976,7 @@ import {
   type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
   type SceneOnThunderWavePresentationState,
+  type SceneOnThunderPresentationState,
   type SceneOnSurfPresentationState,
   type SceneOnCharmPresentationState,
   type SceneOnCovetPresentationState,
@@ -1845,6 +1849,9 @@ const battleAnimIceCube = battleAnimIceCubeAsset as {
 const battleAnimLightning = battleAnimLightningAsset as {
   tileset: Tileset;
   palette: RgbColor[];
+};
+const thunderArt = thunderAsset as {
+  background: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
 };
 const pidgeottoBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PIDGEOTTO!;
 const delibirdBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DELIBIRD!;
@@ -25744,6 +25751,207 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "WEEPINBELL used" : "Foe WEEPINBELL used",
       "RAZOR LEAF!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "THUNDER") {
+    const thunderState = state as SceneOnThunderPresentationState;
+    const view = sceneOnThunderView(thunderState);
+    // Palette writes and OBJ callbacks reach hardware one display after the
+    // source-side reducer state. Fade registers, BG scroll, and battler task
+    // offsets are already expressed at their displayed hardware age.
+    const displayed = sceneOnThunderView({
+      ...thunderState,
+      age: thunderState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "MAGNETON"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MAGNETON"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged THUNDER pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+
+    const magnetonSource = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGNETON!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAGNETON!;
+    const magneton = playerToOpponent ? magnetonSource : {
+      ...magnetonSource,
+      tileset: subTileset(magnetonSource.tileset, 0, 8),
+    };
+    const shuckleSource = playerToOpponent
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SHUCKLE!
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SHUCKLE!;
+    const shuckle = playerToOpponent ? {
+      ...shuckleSource,
+      tileset: subTileset(shuckleSource.tileset, 0, 8),
+    } : shuckleSource;
+
+    const black = { r: 0, g: 0, b: 0 };
+    // The first scenery inversion is overwritten on the next tick by the
+    // still-running to-black task. Later toggles persist until their paired
+    // toggle; the from-black task overwrites the final white scenery as it
+    // starts. Attacker/target OBJ palettes retain every toggle normally.
+    const backgroundInverted = displayed.age === 60
+      || (displayed.age >= 104 && displayed.age < 145)
+      || (displayed.age >= 152 && displayed.age < 173)
+      || (displayed.age >= 180 && displayed.age < 182);
+    const invert = (palette: readonly RgbColor[]) => palette.map((color) => ({
+      r: 255 - color.r,
+      g: 255 - color.g,
+      b: 255 - color.b,
+    }));
+    const bgPaletteTransform = (palettes: readonly (readonly RgbColor[])[]) => {
+      // BeginNormalPaletteFade leaves its terminal faded colors resident
+      // after the task ends: black persists between the two scripted ramps.
+      const persistentBlackCoefficient = state.age >= 81 && state.age <= 186
+        ? 16
+        : state.age >= 187 && state.age <= 214
+          ? 14 - Math.floor((state.age - 187) / 4) * 2
+          : displayed.palette.blend === "toBlack"
+            ? displayed.palette.blendY
+            : 0;
+      const blended = persistentBlackCoefficient === 0
+        ? palettes.map((palette) => [...palette])
+        : blendPaletteBanksToward(
+            palettes,
+            black,
+            persistentBlackCoefficient,
+          );
+      return backgroundInverted
+        ? blended.map(invert)
+        : blended;
+    };
+    // mGBA's displayed hardware brightness decrease uses the expanded
+    // 8-bit channel: `I - floor(I * EVY / 16)`. This is deliberately
+    // distinct from BlendPalette's 5-bit software ramps below.
+    const hardwareDarken = (
+      palettes: readonly (readonly RgbColor[])[],
+      coefficient: number,
+    ): RgbColor[][] => palettes.map((palette) => palette.map((color) => {
+      const packed = mgbaDarkenColor(
+        color.r | (color.g << 8) | (color.b << 16),
+        coefficient,
+      );
+      return {
+        r: packed & 0xff,
+        g: (packed >>> 8) & 0xff,
+        b: (packed >>> 16) & 0xff,
+      };
+    }));
+    const fadeY = view.background?.fade?.blendY ?? 0;
+    // `fadetobg` loads immediately but does not swap BG3 until the screen is
+    // fully black and phase 2 advances into the sliding-background task.
+    const useThunderBg = view.background?.sliding !== null
+      && view.background?.sliding !== undefined
+      && !view.background.restored;
+    if (useThunderBg) {
+      const palette = bgPaletteTransform([thunderArt.background.palette]);
+      const faded = fadeY === 0 ? palette : hardwareDarken(palette, fadeY);
+      drawExtractedTileBg(
+        fb,
+        {
+          tileset: thunderArt.background.tileset,
+          tilemap: thunderArt.background.tilemap,
+          subpalettes: faded,
+        },
+        view.background?.sliding?.hardwareX ?? 0,
+        0,
+      );
+    } else {
+      const palette = bgPaletteTransform(battleBg.palette);
+      drawTileBg(
+        fb,
+        battleBg.static.tileset,
+        battleBg.static.tilemap,
+        fadeY === 0 ? palette : hardwareDarken(palette, fadeY),
+      );
+    }
+
+    // SpriteCB_EnemyShadow observes gAnimScriptActive after the first source
+    // display reaches scanout, leaving one source-relative shadow display
+    // for an elevated opponent attacker before the callback hides it.
+    if (opponentToPlayer && state.age === 0
+      && elevatedEnemyShadowSpecies.has("SPECIES_MAGNETON")) {
+      const shadowX = view.attacker.geometry.animationCenter.x
+        - battleEnemyShadow.width / 2;
+      const shadowY = view.attacker.geometry.battlePositionCenter.y + 29
+        - battleEnemyShadow.height / 2;
+      for (const pixel of battleEnemyShadow.mask) {
+        setPixel(
+          fb,
+          shadowX + pixel % battleEnemyShadow.width,
+          shadowY + Math.floor(pixel / battleEnemyShadow.width),
+          battleEnemyShadow.color,
+        );
+      }
+    }
+    drawSpriteSheet(
+      fb,
+      shuckle.tileset,
+      displayed.palette.inverted ? invert(shuckle.palette) : shuckle.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y
+        + thunderDisplayedTargetY2AtAge(state.age),
+    );
+    for (const bolt of displayed.sprites) {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimLightning.tileset, bolt.tileFrame * 4, 4),
+        battleAnimLightning.palette,
+        bolt.x - 16,
+        bolt.y - 16,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      magneton.tileset,
+      displayed.palette.inverted ? invert(magneton.palette) : magneton.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "MAGNETON",
+        level: 50,
+        gender: playerToOpponent ? "male" : "none",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MAGNETON" : "SHUCKLE",
+        level: 50,
+        gender: playerToOpponent ? "none" : "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MAGNETON used" : "Foe MAGNETON used",
+      "THUNDER!",
       99,
     );
     return;
