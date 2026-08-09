@@ -5,6 +5,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1063 — [supervisor, 2026-08-09] **Attract/Oblivious and Vice Grip folded; union green**
+
+- **State:** final master union is green: full suite **845 files / 8,282
+  passed / 1 skipped**, production build, OFF oracle info, and animation
+  coverage pass. Full-policy **0:60 = 60 OK / 0 CRASH / 0 HANG** and vanilla
+  **0:20 = 20 OK / 0 CRASH / 0 HANG**.
+- **Did:** accepted the one-row source-bounded Attract/Oblivious family
+  (`9c9a75f9`, merge `b36f2a75`): ability gaps move **107→106**, total hook
+  gaps **302→301**, item gaps remain **195**, ability source-proven rows become
+  **194**, and joined categories become **346**. A fresh supervisor OFF probe
+  reproduced Oblivious ability reveal **12**, target `status2=0`, and Attract
+  PP **15→14**; its Own Tempo control wrote `0x20000` with PP **15→14**.
+- **Did:** folded `animation-main` through exact Vice Grip (`4f56ec54`,
+  `469019b9`, `b686df3d`, `b26c90fd`; merge `a23250a5`). Both orientations are
+  **42/42** dense frames exact twice fresh; Level-50 animation coverage is now
+  **147/276 exact**.
+- **Next:** continue the ordered family-level Gate-6 worklist from the verified
+  **106 ability / 195 item** hook-gap frontier; Shell Bell still needs its own
+  bounded successful-damage census and must not be inferred from MOVEEND state
+  12 sharing.
+- **Notes:** the seven-win live proof remains **56,556 frames / 4,228 renders**
+  through all seven battle seams. No canonical Battle-2 window past tick
+  33331, battle/turn/absolute-tick renderer branch, unsupported-barrier pin,
+  round outcome, controller interface, or Scene-OFF logical state changed.
+
 ## 1062 — [supervisor, 2026-08-09] **King's Rock family and Acid Armor folded; union green**
 
 - **State:** final master union is green: full suite **841 files / 8,271
@@ -53,22 +78,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   seven-win route owns **7 opponent generations + 7 battle RNG segments**;
   unknown ability IDs remain fatal.
 
-## 1060 — [MAIN worker, 2026-08-09] **S8 seven-win live seam proven**
-
-- **State:** committed red-first live route `d21682b8` is green at **56,556
-  frames** through public `tick()` inputs with **4,228** render samples;
-  focused random-soak **10/10**, orchestrator **45/45**, smoke **375/375**,
-  full suite **835 files / 8,253 passed / 1 skipped**, typecheck, production
-  build, and Scene-OFF oracle info all pass.
-- **Did:** added an optional tools/test-only `stateFactory` plus opt-in route
-  diagnostics and a CLI-inaccessible strong policy that reuses `RandomPlayer`.
-  Seed 21 starts at the normal generated intro boundary with source-derived
-  records 664/678/527 and follows real command, forced-switch, postwin,
-  swap-decline, and terminal default-NO UI gates to seven live wins.
-- **Next:** supervisor should accept this S8 audit recommendation as closed and
-  resume the ordered family-level Gate-6 worklist from the verified union.
-- **Notes:** terminal is `roundComplete`, battle index 6 / battle 7 turn 11,
-  with **7 opponent generations + 7 battle RNG segments** and the `roundWon`
-  record menu observed input-ready before NO. No `src/**`, canonical Battle-2,
-  animation, unsupported-barrier pin, or CLI full/vanilla contract changed.
   Vanilla **0:20** and full-policy **0:60** are each all OK / zero crash/hang.
