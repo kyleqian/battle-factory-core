@@ -11,6 +11,7 @@ import {
   THUNDER_SOURCE_FRAME_COUNT,
   THUNDER_SOURCE_OFFSET_RANGES,
   thunderAtAge,
+  thunderDisplayedTargetY2AtAge,
 } from "../../src/animation/thunder.ts";
 import {
   createSceneOnMovePresentation,
@@ -209,6 +210,15 @@ describe("MOVE_THUNDER source-relative reducer", () => {
       [91, "SE_M_THUNDER_WAVE", -63],
       [97, "SE_M_THUNDER_WAVE", -63],
       [155, "SE_M_TRI_ATTACK2", -63],
+    ]);
+  });
+
+  it("pins the bilateral hardware-OAM shake display order", () => {
+    expect(Array.from({ length: 35 }, (_, index) =>
+      thunderDisplayedTargetY2AtAge(174 + index),
+    )).toEqual([
+      0, 0, 0, 3, 0, 3, 3, 0, 0, 1, 1, 2, 2, 2, 0, 2, 2, 0,
+      0, 2, 2, 2, 2, 2, 0, 2, 2, 0, 0, 2, 2, 2, 0, 0, 0,
     ]);
   });
 

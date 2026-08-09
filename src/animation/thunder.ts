@@ -74,6 +74,20 @@ export const THUNDER_LIGHTNING_SOURCE_SUBPRIORITY_OFFSETS = [
 
 const THUNDER_LIGHTNING_DISPLAY_TICKS = 28;
 const THUNDER_SHAKE_PATTERN_0 = [-1, -1, 0, 1, 1, 0, 0, -1, -1, 1] as const;
+/**
+ * Hardware-OAM display order around AnimTask_ShakeTargetInPattern. The task
+ * writes source `y2` every tick, while the two OAM buffers are consumed in
+ * their source VBlank order; values are relative ages 174..208 and already
+ * reduce the source's transient unsigned 257 write to its displayed low byte.
+ */
+const THUNDER_DISPLAYED_TARGET_Y2_AGES_174_208 = [
+  0, 0, 0, 3, 0, 3, 3, 0, 0, 1, 1, 2, 2, 2, 0, 2, 2, 0,
+  0, 2, 2, 2, 2, 2, 0, 2, 2, 0, 0, 2, 2, 2, 0, 0, 0,
+] as const;
+
+export function thunderDisplayedTargetY2AtAge(age: number): number {
+  return THUNDER_DISPLAYED_TARGET_Y2_AGES_174_208[age - 174] ?? 0;
+}
 
 export type ThunderTaskFunction =
   | "Task_FadeToBg"

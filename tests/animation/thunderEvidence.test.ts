@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 interface Receipt {
+  readonly schema: string;
   readonly oracleProfile: string;
   readonly scenario: string;
   readonly probe: string;
@@ -15,6 +16,11 @@ interface Receipt {
   readonly evidenceSha256: string;
   readonly rawRgbSha256: string;
   readonly freshRuns: number;
+  readonly acceptance: {
+    readonly status: string;
+    readonly componentMatching: number;
+    readonly framebufferMatching: number;
+  };
 }
 
 const cases: Array<[string, string, number, number, string, string, string, string]> = [
@@ -28,18 +34,22 @@ const cases: Array<[string, string, number, number, string, string, string, stri
     "tools/compare/evidence/thunder-changemap-opponent.txt", "dae87b566d5d8a9326b178c6ed9b573f64f48066d4d585af3240fd4414f6809f"],
 ];
 
-describe("MOVE_THUNDER staged bilateral evidence", () => {
-  it.each(cases)("pins the complete unsupported source window: %s",
+describe("MOVE_THUNDER exact bilateral evidence", () => {
+  it.each(cases)("pins the complete portable-exact source window: %s",
     (name, orientation, startFrame, endFrame, evidenceSha256, rawRgbSha256, mapPath, mapSha256) => {
       const receipt = JSON.parse(readFileSync(`tools/compare/fixtures/${name}`, "utf8")) as Receipt;
       const scenario = JSON.parse(readFileSync(receipt.scenario, "utf8"));
       expect(receipt).toMatchObject({
+        schema: "scene-on-portable-evidence/v1",
         oracleProfile: "battle-scene-on", probe: "tools/compare/thunderProbe.py",
         move: "THUNDER", moveId: 87, orientation,
         activeSourceScriptWindow: { frameCount: 261 },
         sourceAnimationWindow: { startFrame, endFrame, frameCount: 262 },
         sourceBounds: { start: "0x082cf935", endExclusive: "0x082cfa8f", cleanupOffset: 345 },
         evidenceSha256, rawRgbSha256, freshRuns: 2,
+        acceptance: {
+          status: "exact", componentMatching: 262, framebufferMatching: 262,
+        },
       });
       expect(scenario).toMatchObject({ profile: "battle-scene-on", level: 50 });
       expect(scenario.overrides.parties.player).toHaveLength(3);

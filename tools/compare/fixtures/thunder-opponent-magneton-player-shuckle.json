@@ -1,11 +1,16 @@
 {
- "schema": "scene-on-thunder-evidence/v1",
+ "schema": "scene-on-portable-evidence/v1",
  "oracleProfile": "battle-scene-on",
  "scenario": "tools/battle-lab/mechanic-thunder-opponent-magneton-player-shuckle.json",
  "probe": "tools/compare/thunderProbe.py",
  "move": "THUNDER",
  "moveId": 87,
  "orientation": "opponent-front-to-player-back",
+ "appStage": {"presentationAge": 0},
+ "attacker": {"species":"MAGNETON","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":8},"animationCenter":{"x":176,"y":40},"battlePositionCenter":{"x":176,"y":40}}},
+ "target": {"species":"SHUCKLE","geometry":{"side":"player","spriteCorner":{"x":40,"y":59},"animationCenter":{"x":72,"y":91},"battlePositionCenter":{"x":72,"y":80}}},
+ "targetEffectCenter": {"x":72,"y":99},
+ "fieldProfile": {"playerHp":127,"playerMaxHp":127,"opponentHp":157,"opponentMaxHp":157},
  "activeSourceScriptWindow": {"startFrame": 80, "endFrame": 340, "frameCount": 261},
  "sourceAnimationWindow": {"startFrame": 80, "endFrame": 341, "frameCount": 262},
  "sourceBounds": {"start": "0x082cf935", "endExclusive": "0x082cfa8f", "cleanupOffset": 345},
@@ -14,5 +19,6 @@
  "firstFrameSha256": "ad75714240458ddb9e9f23b8b253698fe9786d4cba861ef75e3da674467a2d6b",
  "cleanupFrameSha256": "6a5b24b4ae6727b3a9002058c3b67572a74ad4e689ff6025339ef4426df02bb5",
  "freshRuns": 2,
- "receipt": "Complete dense source window from offset 0 through the first inactive offset-345 cleanup. Both fresh JSON probes and displayed-timing change maps are byte-identical; currentMove is 87 on every frame. The independent orientation begins four frames later and remains staged only."
+ "acceptance": {"status":"exact","componentMatching":262,"framebufferMatching":262},
+ "receipt": "Complete dense source window from offset 0 through the first inactive offset-345 cleanup; source/software/typed seam, hardware OAM/palette/register/audio, raw RGB, and shared framebuffer are exact twice fresh."
 }
