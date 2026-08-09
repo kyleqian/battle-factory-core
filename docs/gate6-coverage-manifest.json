@@ -51709,6 +51709,10 @@
             "kind": "tier-1-test"
           },
           {
+            "path": "tests/battleScriptAttackCancelerLoop.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
             "path": "tests/battleScriptRefreshOpcode.test.ts",
             "kind": "tier-1-test"
           },
@@ -51718,6 +51722,10 @@
           },
           {
             "path": "tests/factoryAiSwitchPolicy.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
+            "path": "tests/factoryBattleScriptWakeUpFullTurn.test.ts",
             "kind": "tier-1-test"
           },
           {
@@ -52934,6 +52942,10 @@
             "kind": "tier-1-test"
           },
           {
+            "path": "tests/battleScriptAttackCancelerLoop.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
             "path": "tests/battleScriptMultiTurnCancellation.test.ts",
             "kind": "tier-1-test"
           },
@@ -52946,7 +52958,7 @@
             "kind": "tier-1-test"
           },
           {
-            "path": "tests/presentationStringBatch3.test.ts",
+            "path": "tests/factoryBattleScriptWakeUpFullTurn.test.ts",
             "kind": "tier-1-test"
           }
         ],
