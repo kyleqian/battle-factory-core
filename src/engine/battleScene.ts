@@ -554,6 +554,7 @@ import brickBreakAsset from "../animation/assets/brick-break.json" with { type: 
 import lightScreenAsset from "../animation/assets/light-screen.json" with { type: "json" };
 import mirrorCoatAsset from "../animation/assets/mirror-coat.json" with { type: "json" };
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
+import substituteAsset from "../animation/assets/substitute.json" with { type: "json" };
 import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
 import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type: "json" };
 import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "json" };
@@ -916,6 +917,7 @@ import {
   sceneOnDizzyPunchView,
   sceneOnAstonishView,
   sceneOnFakeOutView,
+  sceneOnSubstituteView,
   sceneOnSwaggerView,
   sceneOnBulkUpView,
   sceneOnTauntView,
@@ -1034,6 +1036,7 @@ import {
   type SceneOnDizzyPunchConfig,
   type SceneOnAstonishConfig,
   type SceneOnFakeOutConfig,
+  type SceneOnSubstituteConfig,
   type SceneOnCrabHammerConfig,
 } from "../animation/sceneOnPresentation.ts";
 import { refreshDisplayedBlendCoeffAtAge, REFRESH_BLEND_START_AGE } from "../animation/refresh.ts";
@@ -17486,6 +17489,132 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LOUDRED used" : "Foe LOUDRED used",
       "ASTONISH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SUBSTITUTE") {
+    const substituteState =
+      state as SceneOnMovePresentationState<SceneOnSubstituteConfig>;
+    const view = sceneOnSubstituteView(substituteState);
+    const affineDisplayed = sceneOnSubstituteView({
+      ...substituteState,
+      age: substituteState.age - 2,
+    });
+    const dollDisplayed = sceneOnSubstituteView({
+      ...substituteState,
+      age: substituteState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "GOLEM"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "GOLEM"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SUBSTITUTE pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+
+    const golemSource = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GOLEM!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GOLEM!;
+    const golem = playerToOpponent ? golemSource : {
+      ...golemSource,
+      tileset: subTileset(golemSource.tileset, 0, 8),
+    };
+    const onixSource = playerToOpponent
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+    const onix = playerToOpponent ? {
+      ...onixSource,
+      tileset: subTileset(onixSource.tileset, 0, 8),
+    } : onixSource;
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+    );
+
+    if (substituteState.age <= 11) {
+      if (!affineDisplayed.sprite.invisible) {
+        if (affineDisplayed.sprite.affine) {
+          drawSpriteSheetAffineStretch(
+            fb,
+            golem.tileset,
+            golem.palette,
+            view.attacker.geometry.spriteCorner.x,
+            view.attacker.geometry.spriteCorner.y,
+            affineDisplayed.sprite.matrix.a,
+            affineDisplayed.sprite.matrix.d,
+            0,
+            { r: 0, g: 0, b: 0 },
+            0,
+            true,
+          );
+        } else {
+          drawSpriteSheet(
+            fb,
+            golem.tileset,
+            golem.palette,
+            view.attacker.geometry.spriteCorner.x,
+            view.attacker.geometry.spriteCorner.y,
+          );
+        }
+      }
+    } else if (!dollDisplayed.sprite.invisible) {
+      drawSpriteSheet(
+        fb,
+        playerToOpponent ? substituteAsset.back : substituteAsset.front,
+        substituteAsset.palette,
+        view.attacker.geometry.spriteCorner.x + dollDisplayed.sprite.x2,
+        (playerToOpponent ? 65 : 24) + dollDisplayed.sprite.y2,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "GOLEM",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "GOLEM" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "GOLEM used" : "Foe GOLEM used",
+      "SUBSTITUTE!",
       99,
     );
     return;

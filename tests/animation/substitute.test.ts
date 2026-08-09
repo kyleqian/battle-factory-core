@@ -7,6 +7,7 @@ import {
   createSceneOnMovePresentation,
   sceneOnSubstituteView,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render } from "../../src/engine/core.ts";
 
 describe("MOVE_SUBSTITUTE source reducer", () => {
   it("ports all nine shrink callbacks and the graphics-swap boundary", () => {
@@ -63,5 +64,29 @@ describe("MOVE_SUBSTITUTE source reducer", () => {
       target: { species: "ONIX" },
       sprite: { graphics: "substitute", x2: 0, y2: 0 },
     });
+  });
+
+  it("routes both source-required orientations through the live compositor", () => {
+    const stage = (side: "player" | "opponent") =>
+      createSceneOnMovePresentation({
+        move: "SUBSTITUTE",
+        attacker: { species: "GOLEM", geometry: side === "player"
+          ? { side, spriteCorner: { x: 40, y: 64 }, animationCenter: { x: 72, y: 96 }, battlePositionCenter: { x: 72, y: 80 } }
+          : { side, spriteCorner: { x: 144, y: 13 }, animationCenter: { x: 176, y: 45 }, battlePositionCenter: { x: 176, y: 40 } } },
+        target: { species: "ONIX", geometry: side === "player"
+          ? { side: "opponent" as const, spriteCorner: { x: 145, y: 10 }, animationCenter: { x: 176, y: 42 }, battlePositionCenter: { x: 176, y: 40 } }
+          : { side: "player" as const, spriteCorner: { x: 40, y: 48 }, animationCenter: { x: 72, y: 80 }, battlePositionCenter: { x: 72, y: 80 } } },
+        fieldProfile: side === "player"
+          ? { playerHp: 184, playerMaxHp: 187, opponentHp: 142, opponentMaxHp: 142 }
+          : { playerHp: 142, playerMaxHp: 142, opponentHp: 187, opponentMaxHp: 187 },
+      });
+    for (const side of ["player", "opponent"] as const) {
+      const config = stage(side);
+      const normal = render({ ...createInitialState(), sceneOnPresentation: { ...config, age: 0 } });
+      const doll = render({ ...createInitialState(), sceneOnPresentation: { ...config, age: 42 } });
+      expect(normal).toHaveLength(240 * 160 * 4);
+      expect(doll).toHaveLength(240 * 160 * 4);
+      expect(doll).not.toEqual(normal);
+    }
   });
 });

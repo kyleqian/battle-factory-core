@@ -9,21 +9,21 @@ import opponent from "../../tools/compare/fixtures/substitute-opponent-golem-pla
 import asset from "../../src/animation/assets/substitute.json" with { type: "json" };
 import frontierMons from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 
-describe("MOVE_SUBSTITUTE bilateral dense checkpoint", () => {
-  it("pins complete twice-fresh source windows without claiming pixel support", () => {
+describe("MOVE_SUBSTITUTE bilateral exact evidence", () => {
+  it("pins complete twice-fresh source and production windows", () => {
     expect(player).toMatchObject({
       oracleProfile: "battle-scene-on", moveId: 164,
       sourceWindow: { startFrame: 291, endFrame: 377, frameCount: 87 },
-      acceptance: { status: "unsupported", componentEvidence: 87,
+      acceptance: { status: "exact", componentEvidence: 87,
         productionReducer: true, typedSeam: true, relevantHardwareEvidence: 87,
-        productionCompositor: false, framebufferMatching: 0 },
+        productionCompositor: true, framebufferMatching: 87 },
     });
     expect(opponent).toMatchObject({
       oracleProfile: "battle-scene-on", moveId: 164,
       sourceWindow: { startFrame: 311, endFrame: 397, frameCount: 87 },
-      acceptance: { status: "unsupported", componentEvidence: 87,
+      acceptance: { status: "exact", componentEvidence: 87,
         productionReducer: true, typedSeam: true, relevantHardwareEvidence: 87,
-        productionCompositor: false, framebufferMatching: 0 },
+        productionCompositor: true, framebufferMatching: 87 },
     });
     for (const fixture of [player, opponent]) {
       expect(fixture.sourceBounds).toEqual({

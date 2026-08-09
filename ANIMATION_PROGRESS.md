@@ -1,5 +1,12 @@
 # Animation coverage
 
+## MOVE_SUBSTITUTE exact — bilateral 87/87 source/seam/framebuffer promotion (2026-08-09 worker)
+
+- **State:** Coverage advances **137→138/276 exact**, 0 partial, 0 staged, **139→138 unsupported**. SUBSTITUTE alone moves; the animation boundary and unsupported-branch pins remain unchanged.
+- **Did:** Added the narrow source-relative compositor behind the typed Scene-ON seam. It reuses the generated GOLEM/ONIX catalogs and source-extracted doll front/back sheets and palette to render the nine affine shrink callbacks, hide/reset and graphics swap, offscreen drop, side-relative reveal, both bounce legs, sounds, and cleanup. The framebuffer uses the measured task-to-display age-2 latch; the source horizontal threshold uses `GetSubstituteSpriteDefault_Y` 97 player / 56 opponent.
+- **Verified:** Twice fresh, player-back frames **291..377** and opponent-front frames **311..397** each pass **87/87 source/reducer, seam, hardware/palette/audio, and production framebuffer** with the committed probe/RGB/change-map receipts. Corrected FAKE_OUT remains **86/86** in both orientations twice fresh after the shared affine compositor edit. No damage, Substitute HP/result rule, RNG, controller, turn/facility state, boundary, or barrier changed.
+- **Next:** Supervisor selects the next independent acceptance unit. Do not infer SUBSTITUTE's two-display task-to-framebuffer latch or side-specific doll reveal threshold for another task.
+
 ## MOVE_SUBSTITUTE bilateral evidence/reducer/seam checkpoint — remains unsupported (2026-08-09 worker)
 
 - **State:** Coverage remains **137/276 exact, 0 partial, 0 staged, 139 unsupported**. SUBSTITUTE is not promoted; the animation boundary, unsupported barrier, gameplay, controller, and facility state are unchanged.

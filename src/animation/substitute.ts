@@ -19,7 +19,10 @@ export interface SubstituteState {
   readonly active: boolean;
 }
 
-function dollStateAtAge(age: number): Pick<SubstituteSpriteState, "x2" | "y2"> {
+function dollStateAtAge(
+  age: number,
+  attackerSide: "player" | "opponent",
+): Pick<SubstituteSpriteState, "x2" | "y2"> {
   let phase = 0;
   let velocity = 0;
   let x2 = 200;
@@ -28,8 +31,8 @@ function dollStateAtAge(age: number): Pick<SubstituteSpriteState, "x2" | "y2"> {
     if (phase === 0) {
       velocity += 112;
       y2 += velocity >> 8;
-      // GetSubstituteSpriteDefault_Y is 97 in both singles orientations.
-      if (97 + y2 >= -32) x2 = 0;
+      const defaultY = attackerSide === "player" ? 97 : 56;
+      if (defaultY + y2 >= -32) x2 = 0;
       if (y2 > 0) y2 = 0;
       if (y2 === 0) {
         velocity -= 0x800;
@@ -77,7 +80,7 @@ export function substituteAtAge(
       affine: false, matrix: { a: 256, b: 0, c: 0, d: 256 },
     };
   } else {
-    const offset = dollStateAtAge(age);
+    const offset = dollStateAtAge(age, attackerSide);
     sprite = {
       graphics: "substitute", ...offset, invisible: false,
       affine: false, matrix: { a: 256, b: 0, c: 0, d: 256 },

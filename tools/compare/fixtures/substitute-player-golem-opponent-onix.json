@@ -8,6 +8,6 @@
  "rawRgbSha256":"0bf9b4728f0e18d68a3d9ce4f476aaaa96748326cd80c0f91ae080b065d8ecfc",
  "changeMap":"tools/compare/evidence/substitute-changemap-player.txt","changeMapSha256":"78d6ac7a16b02882c4979d70f5cce52d923f0c435e2a01feda226bc9aa250d23",
  "freshRuns":2,"freshProbeAndRgbEquality":true,
- "acceptance":{"status":"unsupported","componentEvidence":87,"productionReducer":true,"typedSeam":true,"relevantHardwareEvidence":87,"productionCompositor":false,"framebufferMatching":0},
- "receipt":"Complete dense stock-ROM source/task/software sprite/hardware OAM+matrix/palette/audio/raw-RGB evidence through first inactive cleanup; production pixels remain deliberately unsupported."
+ "acceptance":{"status":"exact","componentEvidence":87,"productionReducer":true,"typedSeam":true,"relevantHardwareEvidence":87,"productionCompositor":true,"framebufferMatching":87},
+ "receipt":"Complete dense stock-ROM source/task/software sprite/hardware OAM+matrix/palette/audio/raw-RGB evidence through first inactive cleanup; exact through the typed production seam twice fresh."
 }
