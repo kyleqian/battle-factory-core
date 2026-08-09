@@ -16,6 +16,23 @@ node --experimental-strip-types tools/soak/randomRoundSoak.ts --seed <N> --verbo
 
 Runs are deterministic per seed (pinned by `tests/randomRoundSoak.test.ts`).
 
+## 2026-08-09 ability display-name frontier closed — `16ca008d`
+
+Full-policy seeds 22 (battle 2, turn 19) and 19 (battle 3, turn 12) exposed
+the same production crash: Role Play reached `STRINGID_PKMNCOPIEDFOE` with
+ability ID 14, but `factoryBattleScriptFullTurnDecision.ts` used a private
+incomplete display-name table and threw `prepareMessage: no display name
+mapped for ability 14`. The replacement generically joins canonical IDs from
+`ability-item-hooks.json` to the exact Emerald display strings already
+source-extracted in `summary-info.json` (`COMPOUNDEYES` for ID 14). Tier-1
+coverage ratchets all 71 legal non-NONE abilities across Level-50 set IDs
+110..849 and preserves the fatal guard for IDs absent from the source universe.
+
+After the repair, seed 22 is **OK b2 t32 f39888 roundLost**, seed 19 is **OK
+b3 t14 f49602 roundLost**, and a full-policy `--seeds 0:60` sweep is **60 OK /
+0 CRASH / 0 HANG**. No independent remaining signature appeared in that
+bounded sweep; vanilla `0:20` remains **20 OK / 0 CRASH / 0 HANG**.
+
 ## 2026-08-09 differential re-run — signatures 3, 4, 5, 7 closed; 6 closed to a 2-seed sibling
 
 Five fixes landed on this branch (one commit each: a4baf562 sig 3,

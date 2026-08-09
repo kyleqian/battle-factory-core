@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1059 — [MAIN worker, 2026-08-09] **full-policy ability display-name crash closed**
+
+- **State:** source-backed repair `16ca008d` is green: full suite **833 files /
+  8,245 passed / 1 skipped**, production build, focused **82/82**, smoke
+  **375/375**, vanilla **0:20 = 20 OK / 0 CRASH / 0 HANG**, and full-policy
+  **0:60 = 60 OK / 0 CRASH / 0 HANG**.
+- **Did:** replaced the private 34-entry handwritten ability display table
+  with a generic join from canonical IDs in `ability-item-hooks.json` to exact
+  Emerald names in `summary-info.json`. Red-first Role Play coverage proves
+  `STRINGID_PKMNCOPIEDFOE` renders ability 14 as exact `COMPOUNDEYES`; a
+  source-derived ratchet proves all **71** legal non-NONE abilities across
+  Level-50 set IDs 110..849 resolve, while unknown IDs remain fatal.
+- **Next:** continue the ordered family-level Gate-6 worklist; the current
+  0:60 full-policy sweep exposes no remaining crash/hang signature to cluster.
+- **Notes:** seed 22 is **OK b2 t32 f39888 roundLost** and seed 19 is **OK b3
+  t14 f49602 roundLost**. No unsupported barrier, canonical Battle-2 window,
+  animation, driver policy, or generated artifact changed.
+
 ## 1058 — [MAIN worker, 2026-08-09] **full-policy RECORD-NO postwin hang closed**
 
 - **State:** source-generic repair and red-first public `tick` coverage are
@@ -45,20 +63,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   b4 t37 f91394 / b1 t22 f12881 roundLost**. No seed/battle/turn/tick branch,
   unsupported barrier, animation, Gate-6 artifact, or canonical Battle-2
   window changed.
-
-## 1056 — [MAIN worker, 2026-08-09] **#87 wake-up print-table selector closed**
-
-- **State:** committed source-generic repair is green: full suite **831 files /
-  8,236 passed / 1 skipped**, production build, smoke **375/375**, and vanilla
-  **0:20 = 20 OK / 0 CRASH / 0 HANG**.
-- **Did:** source audit proved `AtkCanceler_UnableToUseMove` writes the ordinary
-  wake row (0) or Uproar row (1) for `gWokeUpStringIds` before handing
-  `BattleScript_MoveUsedWokeUp` to `printfromtable`, with no RNG draw. The
-  typed canceler loop now durably projects every phase-owned selector receipt;
-  Tier-1 coverage red-proved both wake rows and their real full-turn message.
-- **Next:** #86 remains the separate seed-27 no-command boundary at **b4 t16
-  f71106**; keep its fatal invariant intact while diagnosing its reducer shape.
-- **Notes:** seed 18 is now **OK b3 t18 f53730 roundLost**; seed 16 remains
-  **OK b2 t51 f48250**, while seed 27 reproduces unchanged. Unknown
-  `printfromtable` table/opcode guards remain fatal; no animation, Gate-6, or
-  canonical Battle-2 work changed. Commits `2798e6d3`, `36d5873f`.

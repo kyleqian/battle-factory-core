@@ -39177,3 +39177,19 @@ both verify scripts/census independently re-verified before this entry.)*
 - **Notes:** seed 16 is `OK b2 t51 f48250 roundLost`; 12/14/23/44/45/53 all
   retain their green endpoints. No canonical Battle-2 window, animation, or
   Gate-6 artifact changed; no unsupported-barrier pin moved.
+## 1056 — [MAIN worker, 2026-08-09] **#87 wake-up print-table selector closed**
+
+- **State:** committed source-generic repair is green: full suite **831 files /
+  8,236 passed / 1 skipped**, production build, smoke **375/375**, and vanilla
+  **0:20 = 20 OK / 0 CRASH / 0 HANG**.
+- **Did:** source audit proved `AtkCanceler_UnableToUseMove` writes the ordinary
+  wake row (0) or Uproar row (1) for `gWokeUpStringIds` before handing
+  `BattleScript_MoveUsedWokeUp` to `printfromtable`, with no RNG draw. The
+  typed canceler loop now durably projects every phase-owned selector receipt;
+  Tier-1 coverage red-proved both wake rows and their real full-turn message.
+- **Next:** #86 remains the separate seed-27 no-command boundary at **b4 t16
+  f71106**; keep its fatal invariant intact while diagnosing its reducer shape.
+- **Notes:** seed 18 is now **OK b3 t18 f53730 roundLost**; seed 16 remains
+  **OK b2 t51 f48250**, while seed 27 reproduces unchanged. Unknown
+  `printfromtable` table/opcode guards remain fatal; no animation, Gate-6, or
+  canonical Battle-2 work changed. Commits `2798e6d3`, `36d5873f`.
