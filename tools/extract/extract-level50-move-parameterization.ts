@@ -138,6 +138,8 @@ const BATTLE_SCRIPT_CONSTANTS_PATH = "reference/pokeemerald/include/constants/ba
 const ATTACK_CANCELER_MOVES_BLOCK_CALL = "AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0)";
 const ABSORBING_DISPATCHER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ABSORBING, gBattlerTarget, 0, 0, move)";
 const ON_DAMAGE_DISPATCHER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE, gBattlerTarget, 0, 0, 0)";
+const KINGS_ROCK_CATEGORY = "moveend-kings-rock";
+const KINGS_ROCK_DISPATCHER_CALL = "ItemBattleEffects(ITEMEFFECT_KINGSROCK_SHELLBELL, 0, FALSE)";
 const SYNCHRONIZE_CATEGORY = "moveend-synchronize-status";
 const SYNCHRONIZE_DISPATCHER_TARGET_CALL = "AbilityBattleEffects(ABILITYEFFECT_SYNCHRONIZE, gBattlerTarget, 0, 0, 0)";
 const SYNCHRONIZE_DISPATCHER_ATTACKER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ATK_SYNCHRONIZE, gBattlerAttacker, 0, 0, 0)";
@@ -1320,11 +1322,16 @@ function onDamageRouteToDataAndMoveEnd(startLabel: string, edgeConstraint?: OnDa
   const handoffPosition = moveEndPath.positions.at(-1)!;
   const handoff = onDamageRouteHandoff(onDamageStatement(handoffPosition));
   if (handoff === null) throw new Error(`${startLabel} route handoff disappeared`);
+  const fullPath: OnDamageRoutePath = {
+    positions: [...dataPath.positions, ...moveEndPath.positions.slice(1)],
+    transitions: [...dataPath.transitions, ...moveEndPath.transitions],
+  };
   return {
     dataPath: onDamageRouteWitnessPath(dataPath),
     moveEndPath: onDamageRouteWitnessPath(moveEndPath),
     dataHpUpdate: { label: dataPosition.label, line: dataPosition.line, mnemonic: "datahpupdate", operands: ["BS_TARGET"] },
     moveEnd: { ...handoff, label: handoffPosition.label },
+    fullPath: onDamageRouteWitnessPath(fullPath),
   };
 }
 
@@ -2328,6 +2335,165 @@ if (absorbingCandidateRows.length !== absorbingExcludedCandidates.length + [...a
   throw new Error("every source-derived absorbing candidate must be either source-proven or explicitly excluded");
 }
 
+const kingsRockMoveEndLine = sourceLine(battleScriptCommandsSource, "case MOVEEND_KINGSROCK_SHELLBELL:", "MOVEEND_KINGSROCK_SHELLBELL");
+const kingsRockStateLine = sourceLine(battleScriptConstantsSource, "#define MOVEEND_KINGSROCK_SHELLBELL", "MOVEEND_KINGSROCK_SHELLBELL");
+const kingsRockItemStart = battleUtilSource.indexOf("case ITEMEFFECT_KINGSROCK_SHELLBELL:");
+const kingsRockShellBellStart = battleUtilSource.indexOf("case HOLD_EFFECT_SHELL_BELL:", kingsRockItemStart);
+if (kingsRockItemStart < 0 || kingsRockShellBellStart < 0) throw new Error("unable to isolate the King's Rock item arm");
+const kingsRockSource = battleUtilSource.slice(kingsRockItemStart, kingsRockShellBellStart);
+const KINGS_ROCK_ORDERED_GUARDS = [
+  "gBattleMoveDamage != 0",
+  "atkHoldEffect == HOLD_EFFECT_FLINCH",
+  "!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)",
+  "TARGET_TURN_DAMAGED",
+  "Random() % 100 (draw occurs before the move-flag and target-HP tests)",
+  "roll < atkHoldEffectParam",
+  "gBattleMoves[gCurrentMove].flags & FLAG_KINGS_ROCK_AFFECTED",
+  "gBattleMons[gBattlerTarget].hp != 0",
+  "SetMoveEffect(FALSE, 0) with MOVE_EFFECT_FLINCH",
+] as const;
+const kingsRockSourceTokens = [
+  "if (gBattleMoveDamage)",
+  "case HOLD_EFFECT_FLINCH:",
+  "!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)",
+  "TARGET_TURN_DAMAGED",
+  "(Random() % 100) < atkHoldEffectParam",
+  "gBattleMoves[gCurrentMove].flags & FLAG_KINGS_ROCK_AFFECTED",
+  "gBattleMons[gBattlerTarget].hp",
+  "gBattleCommunication[MOVE_EFFECT_BYTE] = MOVE_EFFECT_FLINCH",
+  "SetMoveEffect(FALSE, 0)",
+];
+let kingsRockGuardCursor = 0;
+for (const token of kingsRockSourceTokens) {
+  const next = kingsRockSource.indexOf(token, kingsRockGuardCursor);
+  if (next < 0) throw new Error(`King's Rock source lost ordered guard ${token}`);
+  kingsRockGuardCursor = next + token.length;
+}
+if (!battleScriptCommandsSource.includes(`case MOVEEND_KINGSROCK_SHELLBELL: // king's rock and shell bell\n            if (${KINGS_ROCK_DISPATCHER_CALL})`)
+  || !battleScriptConstantsSource.includes("#define MOVEEND_KINGSROCK_SHELLBELL               12")) {
+  throw new Error("King's Rock MOVEEND state 12 dispatcher drifted");
+}
+const kingsRockItem = holdEffects.items.find((row) => row.item === "ITEM_KINGS_ROCK");
+if (!kingsRockItem || kingsRockItem.holdEffect !== "HOLD_EFFECT_FLINCH" || kingsRockItem.holdEffectParam !== 10) {
+  throw new Error("ITEM_KINGS_ROCK is no longer HOLD_EFFECT_FLINCH with parameter 10");
+}
+
+const KINGS_ROCK_CHARGE_RELEASE_MOVES = new Set([
+  "MOVE_RAZOR_WIND", "MOVE_FLY", "MOVE_SOLAR_BEAM", "MOVE_DIG", "MOVE_BIDE", "MOVE_SKY_ATTACK", "MOVE_DIVE", "MOVE_BOUNCE",
+]);
+
+function kingsRockRouteEvidence(move: Move, entryScript: string) {
+  if (!move.flags.includes("FLAG_KINGS_ROCK_AFFECTED") || move.power === 0) {
+    throw new Error(`${move.move} is not a damaging King's Rock candidate`);
+  }
+  const routeConstraint = onDamageMoveRouteConstraint(move.move);
+  const damagingEntryScript = move.move === "MOVE_BIDE"
+    ? "BattleScript_BideAttack"
+    : entryScript === "BattleScript_EffectReturn" ? "BattleScript_EffectFrustration" : entryScript;
+  const damaging = onDamageRouteToDataAndMoveEnd(damagingEntryScript, routeConstraint);
+  const moveEnd = {
+    ...damaging.moveEnd,
+    state: "MOVEEND_KINGSROCK_SHELLBELL",
+    stateValue: 12,
+    semantics: "the certified MOVEEND handoff reaches state 12 after successful target datahpupdate",
+  };
+  const alternatives: Array<Record<string, unknown>> = [];
+  if (move.move === "MOVE_BIDE") {
+    const chargePath = onDamageRoutePath("BattleScript_EffectBide", (statement) => statement.mnemonic === "moveendall", "BIDE charge MoveEnd");
+    alternatives.push({
+      kind: "bide-charge-no-damage",
+      path: onDamageRouteWitnessPath(chargePath),
+      outcome: "the charge arm reaches MoveEnd with zero target damage; only BattleScript_BideAttack's bounded release arm can qualify",
+    });
+  }
+  const runtimeGuardSignature = {
+    source: { path: SOUNDPROOF_TABLE_PATH, locator: "ItemBattleEffects ITEMEFFECT_KINGSROCK_SHELLBELL / HOLD_EFFECT_FLINCH", line: sourceLine(battleUtilSource, "case ITEMEFFECT_KINGSROCK_SHELLBELL:", "ITEMEFFECT_KINGSROCK_SHELLBELL") },
+    orderedGuards: KINGS_ROCK_ORDERED_GUARDS,
+    holdEffect: { item: "ITEM_KINGS_ROCK", effect: "HOLD_EFFECT_FLINCH", parameter: 10 },
+    dataHpUpdate: onDamageContactRuntimeGuards.dataHpUpdate,
+    scopeBoundary: "Only HOLD_EFFECT_FLINCH is certified. The adjacent HOLD_EFFECT_SHELL_BELL arm is not promoted or inferred.",
+  };
+  const familyEvidence = {
+    category: KINGS_ROCK_CATEGORY,
+    selector: {
+      path: MOVES_PATH,
+      locator: `moves:${move.move}.flags`,
+      symbol: move.move,
+      guard: "gBattleMoves[gCurrentMove].flags & FLAG_KINGS_ROCK_AFFECTED",
+      derivedFrom: "moveend-kings-rock candidate selector moves.json flags includes FLAG_KINGS_ROCK_AFFECTED and power != 0",
+    },
+    entryPath: {
+      kind: KINGS_ROCK_CHARGE_RELEASE_MOVES.has(move.move) ? "bounded-charge-release-damage-route" : "successful-target-damage-to-moveend-state-12",
+      source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: requireGraphLabel(entryScript).line },
+      declaredEntryScript: entryScript,
+      damagingEntryScript,
+      graph: damaging.fullPath.graph,
+      program: damaging.fullPath.program,
+      dataHpUpdate: damaging.dataHpUpdate,
+      moveEnd,
+      alternatives,
+    },
+    dispatcher: {
+      path: BATTLE_SCRIPT_COMMANDS_PATH,
+      locator: "Cmd_moveend MOVEEND_KINGSROCK_SHELLBELL",
+      line: kingsRockMoveEndLine,
+      call: KINGS_ROCK_DISPATCHER_CALL,
+      statePath: BATTLE_SCRIPT_CONSTANTS_PATH,
+      stateLine: kingsRockStateLine,
+      state: "MOVEEND_KINGSROCK_SHELLBELL",
+      stateValue: 12,
+    },
+    familyVerification: {
+      scope: "One complete-parties Battle Scene OFF Pound receipt proves the shared King's Rock flinch lifecycle; all 105 siblings are batch-checked against this exact selector, graph/program route, state-12 dispatcher, and ordered guard signature.",
+      implementation: "src/engine/battleScriptMoveEndOpcode.ts#MOVEEND_KINGSROCK_SHELLBELL",
+      batchTest: "tests/kingsRockHookJoinBatch.test.ts",
+      oracleReceipt: "docs/kings-rock-moveend-ground-truth.md",
+      oracleFixture: "tools/battle-lab/mechanic-kings-rock-flinch-off.json",
+      oracleProbe: "tools/probe/probe-kings-rock-flinch-off.py",
+      oracleReceiptFiles: ["tools/probe/receipts/kings-rock-flinch-off.json"],
+      scopeBoundary: "MOVE_TICKLE remains an explicit power/damage-zero source exception; Shell Bell is not claimed.",
+    },
+    runtimeGuardSignature,
+  };
+  return {
+    status: "source-proven" as const,
+    id: `kings-rock-route:${move.move}`,
+    move: move.move,
+    entryScript,
+    routeKind: familyEvidence.entryPath.kind,
+    executionInventory: executableMoveSymbols.has(move.move) ? "level50-executable" : "level50-roster-only",
+    familyEvidence,
+  };
+}
+
+const kingsRockCandidateRows = rosterMoveSymbols
+  .map((symbol) => moveBySymbol.get(symbol)!)
+  .filter((move) => move.flags.includes("FLAG_KINGS_ROCK_AFFECTED"))
+  .map((move) => ({
+    move: move.move,
+    moveId: move.id,
+    effect: move.effect,
+    power: move.power,
+    entryScript: topologyByMove.get(move.move)!.entryScript,
+    executionInventory: executableMoveSymbols.has(move.move) ? "level50-executable" : "level50-roster-only",
+  }));
+if (kingsRockCandidateRows.length !== 106
+  || kingsRockCandidateRows.filter((row) => row.executionInventory === "level50-roster-only").length !== 12) {
+  throw new Error("King's Rock selector is not the audited 106 rows with 12 roster-only candidates");
+}
+const kingsRockExceptionRows = [{
+  id: "kings-rock-zero-damage:MOVE_TICKLE",
+  move: "MOVE_TICKLE",
+  reason: "MOVE_TICKLE carries FLAG_KINGS_ROCK_AFFECTED in the source table but power is 0 and its script performs no successful target datahpupdate, so gBattleMoveDamage/TARGET_TURN_DAMAGED cannot qualify.",
+}];
+const kingsRockEvidenceByMove = new Map<string, ReturnType<typeof kingsRockRouteEvidence>>();
+for (const candidate of kingsRockCandidateRows) {
+  if (candidate.move === "MOVE_TICKLE") continue;
+  kingsRockEvidenceByMove.set(candidate.move, kingsRockRouteEvidence(moveBySymbol.get(candidate.move)!, candidate.entryScript));
+}
+const kingsRockSourceProvenRows = [...kingsRockEvidenceByMove.keys()];
+if (kingsRockSourceProvenRows.length !== 105) throw new Error("King's Rock promotion must be exactly 105 rows");
+
 const records = rosterMoveSymbols.map((symbol) => {
   const move = moveBySymbol.get(symbol)!;
   const script = topologyByMove.get(symbol) ?? null;
@@ -2400,6 +2566,26 @@ const records = rosterMoveSymbols.map((symbol) => {
       reason: `Source-proven ability family/categories: ${sourceProvenFamilies.map((family) => family.category).join(", ")}. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.`,
       evidence: { families: sourceProvenFamilies },
     };
+  const kingsRockEvidence = kingsRockEvidenceByMove.get(symbol);
+  const itemHook = kingsRockEvidence === undefined
+    ? {
+      potentialCategories: null,
+      status: "unsupported",
+      supportedCategories: [],
+      unsupportedCategories: null,
+      reason: symbol === "MOVE_TICKLE"
+        ? kingsRockExceptionRows[0]!.reason
+        : "Per-move item categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; no audited item family selects this move.",
+      ...(symbol === "MOVE_TICKLE" ? { sourceException: kingsRockExceptionRows[0] } : {}),
+    }
+    : {
+      potentialCategories: null,
+      status: "source-proven-family",
+      supportedCategories: [KINGS_ROCK_CATEGORY],
+      unsupportedCategories: null,
+      reason: "Source-proven King's Rock flinch family: exact source flag selector, successful target-datahpupdate graph/program route, MOVEEND state 12 handoff, and ordered runtime guards. This promotion does not claim unrelated item families or Shell Bell.",
+      evidence: { families: [kingsRockEvidence.familyEvidence] },
+    };
   return {
     id: move.id,
     move: move.move,
@@ -2428,13 +2614,7 @@ const records = rosterMoveSymbols.map((symbol) => {
       componentIds: animation.componentIds,
     } : { script: null, componentIds: [] },
     hooks: {
-      item: {
-        potentialCategories: null,
-        status: "unsupported",
-        supportedCategories: [],
-        unsupportedCategories: null,
-        reason: "Per-move item categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
-      },
+      item: itemHook,
       ability: abilityHook,
     },
   };
@@ -2444,6 +2624,11 @@ const rosterEffects = new Set(records.map((record) => record.moveTable.effect));
 const executableRecords = records.filter((record) => record.battleScript.executionInventory === "level50-executable");
 const executableEffects = new Set(executableRecords.map((record) => record.moveTable.effect));
 const sourceProvenAbilityRecords = records.filter((record) => record.hooks.ability.status === SOUNDPROOF_STATUS);
+const sourceProvenItemRecords = records.filter((record) => record.hooks.item.status === SOUNDPROOF_STATUS);
+if (sourceProvenItemRecords.length !== 105
+  || sourceProvenItemRecords.some((record) => !record.hooks.item.supportedCategories.includes(KINGS_ROCK_CATEGORY))) {
+  throw new Error("King's Rock source-proven item roster accounting drifted");
+}
 const soundproofRosterRecords = sourceProvenAbilityRecords.filter((record) => record.hooks.ability.supportedCategories.includes(SOUNDPROOF_CATEGORY));
 if (soundproofRosterRecords.length !== 9) {
   throw new Error(`expected nine Level-50 Soundproof selectors, got ${soundproofRosterRecords.length}`);
@@ -2492,6 +2677,24 @@ const synchronizeAudit = {
   promotions: {
     sourceProvenRows: synchronizeSourceProvenRows,
     reason: "All 30 finite candidates have complete selector, ordered graph/program route, SetMoveEffect marker/runtime guards, and ordered target/attacker MOVEEND evidence. The shared two-seed Battle Scene OFF Thunder Wave receipt and Tier-1 Synchronize batch prove the common dispatcher semantics; no per-move oracle receipts are fabricated.",
+  },
+};
+const kingsRockAudit = {
+  status: "source-proven-family",
+  scope: "Finite Level-50 FLAG_KINGS_ROCK_AFFECTED selector joined to the attacker's HOLD_EFFECT_FLINCH item arm and MOVEEND_KINGSROCK_SHELLBELL state 12, without claiming the adjacent Shell Bell arm.",
+  selector: "moves.json flags includes FLAG_KINGS_ROCK_AFFECTED",
+  candidateCount: kingsRockCandidateRows.length,
+  sourceMoveCandidates: kingsRockCandidateRows,
+  sourceProvenRows: kingsRockSourceProvenRows,
+  sourceExceptionRows: kingsRockExceptionRows,
+  blockers: [],
+  routeWitnesses: [...kingsRockEvidenceByMove.values()],
+  runtimeGuardSignature: [...kingsRockEvidenceByMove.values()][0]!.familyEvidence.runtimeGuardSignature,
+  chargeReleaseMoves: [...KINGS_ROCK_CHARGE_RELEASE_MOVES],
+  dispatcher: { path: BATTLE_SCRIPT_COMMANDS_PATH, line: kingsRockMoveEndLine, call: KINGS_ROCK_DISPATCHER_CALL, state: "MOVEEND_KINGSROCK_SHELLBELL", stateValue: 12 },
+  promotions: {
+    sourceProvenRows: kingsRockSourceProvenRows,
+    reason: "Exactly 105 of 106 selector rows have successful graph/program target-damage routes to state 12. MOVE_TICKLE remains the sole power/damage-zero source exception; all 12 roster-only candidates are retained in the finite census.",
   },
 };
 const onDamageAudit = {
@@ -2624,7 +2827,7 @@ const output = {
       BATTLE_SCRIPT_CONSTANTS_PATH,
       "reference/pokeemerald/include/constants/pokemon.h",
     ],
-    note: `Catalog join plus an intentionally partial source dispatcher inventory. All per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, and ${synchronizeSourceProvenRows.length} Synchronize status candidates carry graph/program/source-handoff evidence. Future Sight has one explicit delayed-MOVEEND exception; Synchronize has ${synchronizeCandidateRows.length} candidates with no route exceptions or blockers; no per-move oracle receipts are fabricated.`,
+    note: `Catalog join plus an intentionally partial source dispatcher inventory. ${records.filter((record) => record.hooks.item.status === "unsupported").length} per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the ${kingsRockSourceProvenRows.length}-row King's Rock family, exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, and ${synchronizeSourceProvenRows.length} Synchronize status candidates carry graph/program/source-handoff evidence. King's Rock retains Tickle as one explicit zero-damage exception and does not claim Shell Bell; no per-move oracle receipts are fabricated.`,
   },
   coverage: {
     level50Roster: {
@@ -2642,13 +2845,14 @@ const output = {
       battleScriptGraphLabels: records.filter((record) => record.battleScript.graphLabel !== null).length,
       battleScriptProgramLabels: records.filter((record) => record.battleScript.programLabel !== null).length,
       animationScripts: records.filter((record) => record.animation.script !== null).length,
-      itemHookCategories: 0,
+      itemHookCategories: sourceProvenItemRecords.length,
       abilityHookCategories: sourceProvenAbilityCategories.length,
       itemHookUnsupportedCategories: null,
       abilityHookUnsupportedCategories: null,
       itemHookUnsupportedRows: records.filter((record) => record.hooks.item.status === "unsupported").length,
       abilityHookUnsupportedRows: records.filter((record) => record.hooks.ability.status === "unsupported").length,
       abilityHookSourceProvenRows: sourceProvenAbilityRecords.length,
+      itemHookSourceProvenRows: sourceProvenItemRecords.length,
     },
     hookCatalogs: {
       item: {
@@ -2656,9 +2860,10 @@ const output = {
         explicitHoldEffectRows: holdEffects.items.length,
         moveToHookDispatchers: ITEM_HOOK_CATALOG,
         catalogedDispatcherCategories: ITEM_HOOK_CATALOG.length,
+        kingsRock: kingsRockAudit,
         completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "Only Choice Band selection, target Evasion-up accuracy, and King's Rock flag selectors are inventoried. Per-move joins and all other held-item dispatchers remain unsupported/null.",
+        reason: "The King's Rock flinch family is source-proven for 105 of 106 finite flag-selected rows with Tickle retained as the zero-damage exception. Choice Band, target Evasion-up accuracy, Shell Bell, and other held-item dispatchers remain unsupported/null per move.",
       },
       ability: {
         displayRows: Object.keys(abilityDisplay.abilities).length,
