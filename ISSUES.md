@@ -17,36 +17,45 @@ backlog.
 
 # Open
 
-## #85 — Random-play soak: resolution display-boundary family crashes ~95% of full-policy seeds; factorySwap stall gates deeper soaking
+## #85 — Random-play soak: `factorySwap:complete` stall gates winning rounds
 
 **Found 2026-08-09 (user-directed meta-audit; instrument: `npm run soak`,
 driver `tools/soak/randomRoundSoak.ts`, catalog `docs/soak-crash-catalog.md`).**
-The soak plays full generated rounds through the production path
-(createInitialState + tick + real button edges) with seeded random legal
-choices. Post-fold master, 60-seed sweep: **39/60**
-`battle resolution HP command starts at X, displayed Y`
-(`createBattleResolutionPresentationRenderView`), **18/60**
-`FactoryRoundOrchestratorError: resolution handoff battler N display does not
-match the genuine next boundary`, **1/60** HANG at `factorySwap:complete`
-(seed 55 WON battle 1, turn 28 — driver-vs-engine attribution open), 2/60
-clean lost rounds. Vanilla policy: **20/20 clean**. First crashes moved from
-turns 4-5 to turns 8-10 after the 2026-08-09 fixes — the mechanism is the
-same displayed-HP ledger drift the closed #84 item (5) fatal belonged to; the
-named user repros were fixed but the boundary ledger still drifts under
-arbitrary decision sequences.
+Winning battle 1 can leave the generated-round driver at
+`factorySwap:complete` until its 200,000-frame cap. Driver-vs-engine
+attribution remains open. After the generic resolution-display ledger repair,
+the 2026-08-09 full-policy 0:60 sweep reached this stall on **21/60** seeds;
+seed 55 remains the named repro, and seed 6 now reaches the same stall after
+passing both former display handoffs. The two former HP command-start and
+genuine-handoff crash families did not recur.
 
-**Repro:** `npm run soak -- --seed 0` (HP ledger), `--seed 6` (handoff),
-`--seed 55` (swap stall), `--seed N --verbose` for the action tail. Also
-catalogued: a narrower switch-in sibling (`BattleScript_FaintedMonSendOutNew`
-emits `STRINGID_SWITCHINMON` with no switch receipt; catalog §6, 2/500).
+**Repro:** `npm run soak -- --seed 55` (battle 1 turn 28), or `--seed 6`
+(battle 1 turn 22); both stop at frame 200,000. Vanilla policy remains 20/20
+clean. Preserve the standing ROADMAP S10 wind-down gate and do not soften the
+fatal presentation invariants.
 
-**Why this is the top play-test item:** no full-policy seed has completed a
-round; seeds that win battle 1 stall at the swap surface. Swap-approval,
-battles 2-7, and the postwin-win flow remain machine-unplayed until the two
-signatures close. Suggested standing gate (see ROADMAP S10 note): vanilla
-`--seeds 0:20` stays 20/20 OK at every wind-down; record the full-policy
-completion count. Do not soften the fatal invariants (per #72's standing
-user decision).
+## #86 — Deeper full-policy soaking exposes four post-ledger crash signatures
+
+**Found 2026-08-09 after #85's display-boundary repair.** Full-policy seeds
+0:60 now produce **32 OK / 7 CRASH / 21 HANG** and reach battle 2 on multiple
+seeds. The seven crashes are downstream of the two repaired display
+signatures and were deliberately not folded into that bounded step:
+
+- **4/60**, seeds 12/44/45/53:
+  `resolution forced-switch-in battler 1 changed party without a completed
+  switch transition`; first seed 12, battle 1 turn 26, frame 17,947.
+- **1/60**, seed 14, battle 1 turn 19, frame 9,484:
+  `battle resolution switch-in message has no preceding switch/post-switch
+  field`.
+- **1/60**, seed 23, battle 2 turn 9, frame 27,529:
+  `STRINGID_PKMNSITEMRESTOREDSTATUS` lacks the
+  `{B_SCR_ACTIVE_NAME_WITH_PREFIX}` resolver.
+- **1/60**, seed 27, battle 2 turn 33, frame 31,406:
+  `STRINGID_PKMNSITEMCUREDPOISON` lacks the same resolver.
+
+**Repro:** `npm run soak -- --seed N --verbose` for the named seed. Keep the
+forced-switch identity check fatal; diagnose and supply its missing typed
+transition rather than weakening the invariant.
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 

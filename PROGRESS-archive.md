@@ -1,3 +1,27 @@
+## 1045 — [supervisor, 2026-08-09] **Color Change receipted; Sleep Talk fold and final union green**
+
+- **State:** Gate 6 remains **OPEN** at **561** per-move hook gaps: **300 item
+  + 261 ability**. All **183** Color Change candidates remain unsupported; the
+  source-proven ability-row count stays **39**.
+- **Did:** accepted `4c56eb0b`, `87090330`, and `ed796f90`. Two independent
+  Battle Scene OFF seeds now directly observe a legal Kecleon survive
+  Thunderbolt, change both live type slots Normal→Electric, reveal Color
+  Change, print its message, and consume no RNG on the mutation frame. This
+  retires only `missing-direct-on-damage-off-receipt`; ordered MOVEEND routes
+  and runtime damage-state guard derivation remain explicit blockers. Folded
+  animation-main's bilateral Sleep Talk evidence checkpoint through
+  `da87be51` as `a8b1f7e3`; Sleep Talk truthfully remains unsupported.
+- **Next:** complete ordered damage-before-MOVEEND witnesses and guard
+  derivation for the finite Color Change set, especially BIDE, PRESENT, and
+  FUTURE SIGHT, before promoting any row. Keep contact-family proof separate.
+- **Notes:** supervisor focused verification is **5 files / 76 tests**. Final
+  union is **825 files / 8,199 passed / 1 skipped** and production build green;
+  OFF oracle healthy. The generic seven-battle controller and all five #84
+  fixes remain green. No production mechanic, canonical import, or
+  unsupported-barrier pin changed.
+
+---
+
 ## 1042 — [supervisor, 2026-08-09] **Soundproof hook family source-proven**
 
 - **State:** Gate 6 remains **OPEN**. Per-move hook gaps are now **591**:

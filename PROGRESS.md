@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1048 — [MAIN worker, 2026-08-09] **#85 display-boundary family closed generically; swap stall remains**
+
+- **State:** master green (827 files / 8,215 passed / 1 skipped). Full-policy
+  soak 0:60 is now **32 OK / 7 CRASH / 21 HANG**; neither former display
+  signature recurred. Vanilla remains **20/20 OK**.
+- **Did:** replaced whole-render replay at completed resolution commands with
+  a durable typed HP/status/switch ledger, source-boundary incoming snapshots,
+  and explicit stable turn/forced-send-out transitions. Fatal HP, identity,
+  and genuine-handoff invariants remain intact. Red-verified seed 0 and seed 6
+  Tier-1 pins cover voluntary and forced switches across both former crashes.
+- **Next:** ISSUES #85's `factorySwap:complete` stall (seed 55 or 6), then
+  follow the ROADMAP S10 ordering into family-level Gate 6. ISSUES #86 records
+  the four downstream signatures for the next full-policy play-test pass.
+- **Notes:** seed 0: OK, battle 1 turn 23, 12,930 frames; seed 6: no crash,
+  HANG at `factorySwap:complete`, battle 1 turn 22, 200,000 frames. Focused
+  regressions, smoke 375/375, full suite, typecheck, and build green. Commit
+  `909a42a8`; no barrier/import pin or canonical recording changed.
+
 ## 1047 — [interactive user session, 2026-08-09] **User decisions: #85 first; Gate-6 evidence goes family-level**
 
 - **State:** master green (827 files / 8,213 tests, ~47 s full suite).
@@ -46,27 +64,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** receipt-evidence slimming policy + soak gate recorded in ROADMAP
   (S10 block, user-directed 2026-08-09). Crash catalog:
   `docs/soak-crash-catalog.md`. Play-preview re-pinned to this fold.
-
-## 1045 — [supervisor, 2026-08-09] **Color Change receipted; Sleep Talk fold and final union green**
-
-- **State:** Gate 6 remains **OPEN** at **561** per-move hook gaps: **300 item
-  + 261 ability**. All **183** Color Change candidates remain unsupported; the
-  source-proven ability-row count stays **39**.
-- **Did:** accepted `4c56eb0b`, `87090330`, and `ed796f90`. Two independent
-  Battle Scene OFF seeds now directly observe a legal Kecleon survive
-  Thunderbolt, change both live type slots Normal→Electric, reveal Color
-  Change, print its message, and consume no RNG on the mutation frame. This
-  retires only `missing-direct-on-damage-off-receipt`; ordered MOVEEND routes
-  and runtime damage-state guard derivation remain explicit blockers. Folded
-  animation-main's bilateral Sleep Talk evidence checkpoint through
-  `da87be51` as `a8b1f7e3`; Sleep Talk truthfully remains unsupported.
-- **Next:** complete ordered damage-before-MOVEEND witnesses and guard
-  derivation for the finite Color Change set, especially BIDE, PRESENT, and
-  FUTURE SIGHT, before promoting any row. Keep contact-family proof separate.
-- **Notes:** supervisor focused verification is **5 files / 76 tests**. Final
-  union is **825 files / 8,199 passed / 1 skipped** and production build green;
-  OFF oracle healthy. The generic seven-battle controller and all five #84
-  fixes remain green. No production mechanic, canonical import, or
-  unsupported-barrier pin changed.
 
 ---
