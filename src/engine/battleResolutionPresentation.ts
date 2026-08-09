@@ -3087,15 +3087,26 @@ export function projectBattleResolutionCommands(
     if (payload.kind === "stat-stage-change") {
       const battler = singlesBattler(payload.battler, "stat change");
       lastStatChange = payload;
-      commands.push(Object.freeze({
-        type: "stat",
-        eventSequence: event.sequence,
-        battler,
-        stat: payload.stat,
-        from: payload.from,
-        to: payload.to,
-        timing: STAT_TIMING,
-      }));
+      // Soak signature 7 (docs/soak-crash-catalog.md §7): a clamped change
+      // (stage already at +-6, B_MSG_STAT_WONT_CHANGE) draws NO stat banner
+      // in source -- BattleScript_EffectStatUp/StatDown route AROUND
+      // setgraphicalstatchangevalues + playanimation B_ANIM_STATS_CHANGE
+      // straight to the print (data/battle_scripts_1.s:495-497 StatUp,
+      // :541-544 StatDown), so only STRINGID_STATSWONTINCREASE/DECREASE
+      // shows (the canonical turn-11 ATK-floor window renders exactly this
+      // way). Keep lastStatChange: that following wont-change message's
+      // battler/stat resolve from this event.
+      if (payload.from !== payload.to) {
+        commands.push(Object.freeze({
+          type: "stat",
+          eventSequence: event.sequence,
+          battler,
+          stat: payload.stat,
+          from: payload.from,
+          to: payload.to,
+          timing: STAT_TIMING,
+        }));
+      }
       continue;
     }
     if (payload.kind === "set-battler-status-data") {

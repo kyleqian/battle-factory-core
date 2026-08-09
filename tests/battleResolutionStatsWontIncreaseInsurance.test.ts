@@ -155,5 +155,19 @@ describe("SWORDS DANCE capped-stat STATSWONTINCREASE presentation (ISSUES #66a)"
       .map((cmd) => cmd.lines);
 
     expect(lines).toContainEqual(["ONIX’s ATTACK", "won’t go higher!"]);
+
+    // Soak signature 7 (docs/soak-crash-catalog.md §7): the capped change
+    // must NOT project a stat banner command -- source routes AROUND
+    // setgraphicalstatchangevalues + playanimation B_ANIM_STATS_CHANGE
+    // straight to the print when the chooser is B_MSG_STAT_WONT_INCREASE
+    // (data/battle_scripts_1.s:495-497; :541-544 for the StatDown mirror),
+    // and the Scene-OFF banner adapter (battleScene.ts
+    // sceneOffStatStageBannerView) deliberately refuses a from===to draw.
+    // Before this pin the projector emitted a 12->12 stat command here and
+    // every render of this resolution crashed.
+    const statCommands = resolution.segments
+      .flatMap((segment) => segment.commands)
+      .filter((cmd) => cmd.type === "stat");
+    expect(statCommands).toEqual([]);
   });
 });

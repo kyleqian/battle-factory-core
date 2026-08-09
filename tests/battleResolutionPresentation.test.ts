@@ -1776,8 +1776,8 @@ describe("battle resolution typed Scene-OFF renderer", () => {
     )).not.toThrow();
   });
 
-  it("ISSUES #60: rejects malformed or directionless stat banner endpoints", () => {
-    for (const [from, to] of [[6, 6], [-1, 1], [11, 13]]) {
+  it("ISSUES #60: rejects malformed stat banner endpoints", () => {
+    for (const [from, to] of [[-1, 1], [11, 13]]) {
       const resolution = createBattleResolutionPresentation(inputFor([
         event(0, { kind: "stat-stage-change", battler: 1, stat: "evasion", from, to, requestedMagnitude: 1 }),
       ], NEXT_COMMAND));
@@ -1791,6 +1791,25 @@ describe("battle resolution typed Scene-OFF renderer", () => {
         `Scene OFF typed stat adapter cannot draw battler 1 evasion ${from}->${to}`,
       );
     }
+  });
+
+  it("soak signature 7: a clamped (from===to) stat change projects no banner command at all", () => {
+    // The former [6, 6] row above conflated source's REAL clamped shape with
+    // malformed endpoints: a stage already at +-6 emits a genuine
+    // from===to stat-stage-change event (battleScriptStatBuffs.ts's
+    // B_MSG_STAT_WONT_CHANGE path), and source draws NO banner for it --
+    // BattleScript_EffectStatUp/StatDown jump AROUND
+    // setgraphicalstatchangevalues + playanimation B_ANIM_STATS_CHANGE
+    // straight to the wont-increase/decrease print
+    // (data/battle_scripts_1.s:495-497, :541-544). The banner adapter's
+    // from!==to refusal stays fatal (previous test); the projector simply
+    // never routes the clamped case there.
+    const resolution = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "stat-stage-change", battler: 1, stat: "evasion", from: 6, to: 6, requestedMagnitude: 1 }),
+    ], NEXT_COMMAND));
+    expect(
+      resolution.segments.flatMap((segment) => segment.commands).filter((cmd) => cmd.type === "stat"),
+    ).toEqual([]);
   });
 
   it("owns exactly six blank next-command handoff frames", () => {
