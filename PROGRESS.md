@@ -5,57 +5,51 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1031 — [supervisor WIND-DOWN, 2026-08-08] **Gate-6 receipts advanced to 21/24; union green**
+## 1037 — [bounded MAIN worker, 2026-08-09] **#84 opponent send-out side repaired**
 
-- **State:** master is clean through `287704e9`; Gate 6 remains **OPEN** with
-  **21/24** Battle Scene OFF receipts, **3** explicit gaps, and **R3** next.
-  The widened executable triage remains **0 A / 0 B / 22 C / 24 D**.
-- **Did:** accepted two-seed deterministic R12b White Herb, R11 Baton Pass,
-  R6 Natural Cure, and R15 three-layer Spikes receipts. R15 proves real
-  Flying/Levitate immunity plus grounded Rhydon `187→141 = floor(187/4)` in
-  source HP-update/message order. Repaired generic `Cmd_removeitem` party-slot
-  persistence for both sides while preserving Recycle/Knock Off ownership.
-- **Next:** receipt R3's legal Cloud Nine removal/reactivation sequence, then
-  R9 and R2; keep the seven-battle controller/presentation seam generic and do
-  not resume the retired canonical Battle-2 march.
-- **Notes:** final uncontended union: **807 files / 8,119 passed / 1 skipped**;
-  production build and OFF-profile oracle info green. The first union attempt
-  hit six Vitest collection timeouts under concurrent full-suite memory
-  pressure (801 files / 6,984 tests passed); all six reran **1,135/1,135**
-  before the clean full rerun. At orientation `master..animation-main` was
-  empty, so no fold was due; the separate animation supervisor later advanced
-  that branch through `0dffb48b`, which remains for the next orientation fold.
+- **State:** #84 item (1) is removed; only item (3)'s WHIRLWIND opponent
+  recall/send-out seam remains. Gate 6 stays **23/24** OFF-profile receipts.
+- **Did:** reproduced the generated opponent replacement through the public
+  resolution renderer. The typed switch-in projection now preserves battler
+  side, ball origin/pose, mon and healthbox owner: opponent replacements stay
+  at `(176,64)` while player replacements retain the `(24,68)` throw arc.
+- **Next:** repair #84 item (3)'s generic WHIRLWIND recall/send-out sequence.
+  Do not resume canonical Battle 2.
+- **Notes:** fresh legal complete-party OFF evidence captures frames 470..630
+  densely; MACHOP proves the fix is species-independent. Full suite **813
+  files / 8,147 passed / 1 skipped** and build green. No unsupported barrier,
+  canonical import, rules/RNG, completeness guard, or ratchet pin changed.
 
-## 1030 — [bounded MAIN worker, 2026-08-08] **R12b persistent item write-through repaired**
+## 1036 — [supervisor, 2026-08-09] **Status cadence and R9 receipt accepted**
 
-- **State:** generic `Cmd_removeitem` persistence repair is committed in
-  `4e252485`; Gate 6 remains **OPEN**.
-- **Did:** reproduced R12b red (`battle item 0`, player party item `180`), then
-  ported the source controller write-through by battler side + `partyIndex`.
-  Tier 1 pins the R12b White Herb result, both active-party owners, untouched
-  bench identities, and a non-White-Herb removal. Recycle/Knock Off ownership
-  and `usedHeldItems` behavior remain intact; no shared interface widened.
-- **Next:** hand the green checkpoint to the supervisor. No oracle or
-  canonical Battle-2 work.
-- **Notes:** focused item/move-end/controller suites are **244/244**;
-  executable ratchet **6/6** and smoke **375/375**. Typecheck and production
-  build are green; final full `npm test` returned exit code **0**. No
-  unsupported-barrier pin changed.
+- **State:** #84 now has two presentation defects left: the wrong-side
+  opponent ball and the WHIRLWIND recall/send-out jump. Gate 6 advanced
+  **22→23/24** OFF-profile receipts; R2 is the final compact-receipt upgrade.
+- **Did:** accepted `cab909f8`'s source-provenance `waitmessage` execution for
+  TAUNT/TORMENT/TOXIC and merged `29190849`'s twice-fresh legal Swagger item
+  receipt as `edd32963`. Lum consumes and cures confusion while preserving
+  +2 Attack; White Herb remains held with +2 Attack and confusion.
+- **Next:** repair #84's wrong-side opponent send-out ball, then the generic
+  WHIRLWIND opponent recall/send-out seam. Run R2 in the disjoint side lane.
+- **Notes:** supervisor cadence checks are **4/4** and R9 receipt/kernel/
+  manifest checks are **59/59**. Worker full suites are **8,143** and
+  **8,144** passed with one skip each; both builds pass. No barrier/import pin
+  changed. The final union build is still required after the next pair.
 
-## 1029 — [bounded MAIN worker, 2026-08-08] **S10 printfromtable source inventory complete**
+## 1035 — [bounded MAIN worker, 2026-08-08] **#84 status-message cadence repaired**
 
-- **State:** the widened `Cmd_printfromtable` family is source-complete for
-  the committed program in `4e31a1cf` + `e1d041eb`; triage is now **0 A / 0 B
-  / 22 C / 24 D**.
-- **Did:** registered exact source rows for `gWeatherStartsStringIds` (16),
-  `gNoEscapeStringIds` (5), and `gBattlePalaceFlavorTextTable` (4); Tier 1
-  pins every row, the weather continuation, and all **43/43** current pointer
-  symbols. The generic pointer guard remains a future-input D guard at the
-  existing module pin of 10. Census regenerated; no Gate-6 closure claim.
-- **Next:** hand the green commits to the supervisor for the S10 union. No
-  oracle or canonical Battle-2 work.
-- **Notes:** focused hit-chain + executable-ratchet checks are **379/379**;
-  smoke is **375/375**. The source insertion also refreshed the moved ability
-  census pin (`1184→1229`) and its regeneration ratchet is green.
-  Typecheck and production build are green; final full `npm test` returned
-  exit code **0**.
+- **State:** #84 items (2) and (4) are removed; only item (1)'s wrong-side
+  opponent ball and item (3)'s WHIRLWIND recall/send-out seam remain. Gate 6
+  stays **22/24** OFF-profile receipts.
+- **Did:** fresh dense OFF evidence separated text typing, the 64-frame source
+  `waitmessage`, Scene-OFF attack/status controller spans, and subsequent
+  dispatch. The generic round resolution now derives a direct following
+  `B_SCR_OP_WAITMESSAGE B_WAIT_TIME_LONG` from immutable print-event program
+  provenance. Public lifecycle tests pin the first formerly-wrong post-typing
+  edge and all 64 hold ages for legal TAUNT/TORMENT and TOXIC sibling routes.
+- **Next:** repair #84 item (1)'s opponent ball side, then item (3)'s
+  WHIRLWIND recall/send-out presentation. Do not resume canonical Battle 2.
+- **Notes:** focused presentation/orchestrator/ratchet **89/89**, smoke
+  **375/375**, and full suite **812 files / 8,143 passed / 1 skipped**; build
+  green. No unsupported barrier, canonical recording import, rules/RNG/event,
+  fatal completeness, or fatal status-handoff guard changed.

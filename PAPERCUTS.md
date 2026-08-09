@@ -825,3 +825,21 @@ image differs" at a glance, and workers that cannot view images must
 decompose diffs numerically with ad-hoc PIL scripts. Possible fix: a
 `--regions` mode on inspect-frame that prints per-cluster bbox + px counts
 (the cluster code already exists) so no image viewing is needed.
+
+## Concurrent full suites exceed the documented 5–7 minute verification time
+
+2026-08-09, supervised main/side workers: two main-profile full suites plus an
+independent animation-profile suite shared the machine. The main and side runs
+took about 14 minutes each despite staying green. This delayed bounded worker
+handoff by about 7–9 minutes per lane. Hits: 2. A launcher-level full-suite
+semaphore would keep disjoint implementation parallel while serializing only
+the memory-heavy finish gate.
+
+## `compare --capture-range` does not accept battle-lab request fixtures
+
+2026-08-09, main worker (#84 cadence): passing a battle-lab fixture to
+`compare --capture-range` crashes because app replay expects top-level input
+segments. The worker lost about 2 minutes before switching to dense oracle
+evidence plus the public orchestrator verifier. Possible fix: reject the shape
+with a direct error that points to `bin/oracle lab`, or teach compare to unwrap
+the nested controller trace. Hits: 1.

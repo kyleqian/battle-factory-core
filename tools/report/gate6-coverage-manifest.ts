@@ -590,6 +590,14 @@ const interactionRows = parseInteractionRows();
 const receiptGapCards = receiptFamilyRows.filter((row) => row.status !== "oracle-receipted-family");
 const rankedGap = rankedReceiptCards.map((id) => receiptGapCards.find((row) => row.label === id)).find(Boolean) ?? receiptGapCards[0];
 if (!rankedGap) throw new Error("Gate-6 manifest unexpectedly has no explicit receipt gap");
+const nextAcceptanceOverride = scout.match(/^<!-- gate6-next-acceptance: (R\d+b?) -->$/m)?.[1];
+const nextAcceptance = nextAcceptanceOverride === undefined
+  ? rankedGap
+  : receiptFamilyRows.find((row) => row.label === canonicalCardId(nextAcceptanceOverride));
+if (!nextAcceptance) throw new Error(`Gate-6 next-acceptance override is not a known card: ${nextAcceptanceOverride}`);
+const nextAcceptanceText = nextAcceptanceOverride === undefined
+  ? `${nextAcceptance.label}: add and document the missing parameterized-oracle receipt before treating this family as accepted.`
+  : `${nextAcceptance.label}: upgrade its legacy receipt note to the compact deterministic semantic workflow.`;
 
 const sourceInputs = [
   EXECUTABLE_DOC_PATH,
@@ -612,7 +620,7 @@ const manifest: AnyRecord = {
   gate6: {
     closed: false,
     verdict: "OPEN — this first manifest exposes coverage and receipt gaps; it does not claim Gate 6 closed.",
-    nextAcceptanceUnit: `${rankedGap.label}: add and document the missing parameterized-oracle receipt before treating this family as accepted.`,
+    nextAcceptanceUnit: nextAcceptanceText,
     interpretation: "Static executable reachability, engine references, Tier-1 proofs, and oracle receipts are separate evidence classes.",
   },
   generatedBy: RERUN_COMMAND,
@@ -665,7 +673,7 @@ const markdown: string[] = [
   "",
   "**Gate 6 is OPEN.** This first manifest makes coverage gaps inspectable; it does not turn static token references, opcode reachability, Tier-1 proofs, or staged lab requests into semantic/oracle acceptance.",
   "",
-  `Next bounded acceptance unit: **${rankedGap.label}** — add and document its missing parameterized-oracle receipt.`,
+  `Next bounded acceptance unit: **${nextAcceptance.label}** — ${nextAcceptanceOverride === undefined ? "add and document its missing parameterized-oracle receipt." : "upgrade its legacy receipt note to the compact deterministic semantic workflow."}`,
   "",
   "## Headline",
   "",
@@ -770,7 +778,7 @@ markdown.push(...table("Gate-6 mechanicLab requests", ["Request", "Card", "Statu
   (row) => row.effectFamilies.join(", ") || "—",
   (row) => evidenceText(row.evidence),
 ]));
-markdown.push("## Ranked next acceptance data\n\n");
+markdown.push("## Explicit receipt gaps\n\n");
 receiptGapCards.forEach((row, index) => {
   markdown.push(`${index + 1}. **${row.label}** — ${row.notes} Evidence: ${evidenceText(row.evidence)}.`);
 });
@@ -786,5 +794,5 @@ console.log(
     + `L50 moves: ${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}\n`
     + `Hooks: ${manifest.summary.hooks.abilities.total} abilities, ${manifest.summary.hooks.holdEffects.total} hold effects; `
     + `oracle receipts: ${manifest.summary.parameterizedOracle.receiptDocumented}/${manifest.summary.parameterizedOracle.scenarioRequests} scenarios\n`
-    + `Next acceptance unit: ${rankedGap.label}. Gate 6 remains OPEN.`,
+    + `Next acceptance unit: ${nextAcceptance.label}. Gate 6 remains OPEN.`,
 );

@@ -146,7 +146,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(() => assertManifestContract(falseClosure)).toThrow();
   });
 
-  it("keeps the widened zero-Factory scope and ranked receipt gap inspectable", () => {
+  it("keeps the widened zero-Factory scope and the remaining R12 receipt gap inspectable", () => {
     const manifest = readManifest();
     const sections = record(manifest.sections);
     const hookSections = record(sections.hooks);
@@ -166,15 +166,27 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const r11 = record(scenarios.find((scenario) => record(scenario).cardId === "R11"));
     const r6 = record(scenarios.find((scenario) => record(scenario).cardId === "R6"));
     const r15 = record(scenarios.find((scenario) => record(scenario).cardId === "R15"));
+    const r3 = record(scenarios.find((scenario) => record(scenario).cardId === "R3"));
+    const r9 = record(scenarios.find((scenario) => record(scenario).cardId === "R9"));
+    const r2 = scenarios
+      .filter((scenario) => record(scenario).cardId === "R2")
+      .map((scenario) => record(scenario));
+    const r12 = record(scenarios.find((scenario) => record(scenario).cardId === "R12"));
     expect(r12b).toMatchObject({ status: "oracle-receipted", captureCount: 20 });
     expect(r11).toMatchObject({ status: "oracle-receipted", captureCount: 44 });
     expect(r6).toMatchObject({ status: "oracle-receipted", captureCount: 23 });
     expect(r15).toMatchObject({ status: "oracle-receipted", captureCount: 12 });
-    expect(oracle.receiptDocumented).toBe(21);
-    expect(oracle.receiptGaps).toBe(3);
-    expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/R3/);
+    expect(r3).toMatchObject({ status: "oracle-receipted", captureCount: 18 });
+    expect(r9).toMatchObject({ status: "oracle-receipted", captureCount: 20 });
+    expect(r2).toHaveLength(2);
+    expect(r2.map((scenario) => scenario.captureCount).sort((a, b) => Number(a) - Number(b))).toEqual([14, 17]);
+    for (const scenario of r2) expect(scenario.status).toBe("oracle-receipted");
+    expect(r12).toMatchObject({ status: "fixture-only-no-committed-receipt", captureCount: 10 });
+    expect(oracle.receiptDocumented).toBe(23);
+    expect(oracle.receiptGaps).toBe(1);
+    expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^R12:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/21\/24.*scenario receipts documented; \*\*3\*\* request-level gaps/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/23\/24.*scenario receipts documented; \*\*1\*\* request-level gaps/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/fixture-only-no-committed-receipt/);
   });
 });

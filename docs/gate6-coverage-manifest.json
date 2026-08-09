@@ -3,7 +3,7 @@
   "gate6": {
     "closed": false,
     "verdict": "OPEN — this first manifest exposes coverage and receipt gaps; it does not claim Gate 6 closed.",
-    "nextAcceptanceUnit": "R3: add and document the missing parameterized-oracle receipt before treating this family as accepted.",
+    "nextAcceptanceUnit": "R12: add and document the missing parameterized-oracle receipt before treating this family as accepted.",
     "interpretation": "Static executable reachability, engine references, Tier-1 proofs, and oracle receipts are separate evidence classes."
   },
   "generatedBy": "node --experimental-strip-types tools/report/gate6-coverage-manifest.ts",
@@ -40,7 +40,7 @@
     "hooks": {
       "abilities": {
         "total": 78,
-        "oracleReceipted": 26,
+        "oracleReceipted": 27,
         "zeroFactoryWidened": 4
       },
       "holdEffects": {
@@ -57,15 +57,15 @@
     "interactions": {
       "total": 28,
       "kernelProven": 6,
-      "oracleReceipted": 14,
-      "receiptGaps": 8
+      "oracleReceipted": 19,
+      "receiptGaps": 3
     },
     "parameterizedOracle": {
       "scenarioRequests": 24,
-      "receiptDocumented": 21,
-      "receiptGaps": 3,
+      "receiptDocumented": 23,
+      "receiptGaps": 1,
       "familyCards": 16,
-      "familyReceiptGaps": 3
+      "familyReceiptGaps": 1
     }
   },
   "sections": {
@@ -17844,7 +17844,7 @@
         {
           "id": "ability:ABILITY_CLOUD_NINE",
           "label": "ABILITY_CLOUD_NINE",
-          "status": "engine-referenced-no-oracle-receipt",
+          "status": "oracle-receipted-hook",
           "universeId": 13,
           "factoryCarrierCount": 5,
           "legalCarrierCount": 2,
@@ -17855,7 +17855,9 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 18,
-          "oracleReceiptCards": [],
+          "oracleReceiptCards": [
+            "R3"
+          ],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -17874,6 +17876,11 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R3",
+              "kind": "oracle-receipt"
             }
           ],
           "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
@@ -18379,7 +18386,8 @@
           "oracleReceiptCards": [
             "R15",
             "R5",
-            "R5"
+            "R5",
+            "R9"
           ],
           "evidence": [
             {
@@ -18408,6 +18416,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R5",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R9",
               "kind": "oracle-receipt"
             }
           ],
@@ -18690,6 +18703,7 @@
             "R15",
             "R2",
             "R2",
+            "R3",
             "R4",
             "R4",
             "R5",
@@ -18699,7 +18713,8 @@
             "R8",
             "R8",
             "R8",
-            "R8"
+            "R8",
+            "R9"
           ],
           "evidence": [
             {
@@ -18752,6 +18767,11 @@
             },
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R3",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R4",
               "kind": "oracle-receipt"
             },
@@ -18773,6 +18793,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R8",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R9",
               "kind": "oracle-receipt"
             }
           ],
@@ -18802,6 +18827,7 @@
             "R15",
             "R2",
             "R2",
+            "R3",
             "R4",
             "R4",
             "R5",
@@ -18811,7 +18837,8 @@
             "R8",
             "R8",
             "R8",
-            "R8"
+            "R8",
+            "R9"
           ],
           "evidence": [
             {
@@ -18864,6 +18891,11 @@
             },
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R3",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R4",
               "kind": "oracle-receipt"
             },
@@ -18885,6 +18917,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R8",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R9",
               "kind": "oracle-receipt"
             }
           ],
@@ -19476,6 +19513,7 @@
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 4,
           "oracleReceiptCards": [
+            "R3",
             "R6"
           ],
           "evidence": [
@@ -19496,6 +19534,11 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R3",
+              "kind": "oracle-receipt"
             },
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
@@ -19823,6 +19866,7 @@
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 5,
           "oracleReceiptCards": [
+            "R3",
             "R4",
             "R4"
           ],
@@ -19844,6 +19888,11 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R3",
+              "kind": "oracle-receipt"
             },
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
@@ -19942,7 +19991,8 @@
             "R12b",
             "R5",
             "R5",
-            "R7"
+            "R7",
+            "R9"
           ],
           "evidence": [
             {
@@ -19976,6 +20026,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R7",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R9",
               "kind": "oracle-receipt"
             }
           ],
@@ -20182,6 +20237,7 @@
             "R13",
             "R2",
             "R2",
+            "R3",
             "R4",
             "R4",
             "R5",
@@ -20191,7 +20247,8 @@
             "R8",
             "R8",
             "R8",
-            "R8"
+            "R8",
+            "R9"
           ],
           "evidence": [
             {
@@ -20244,6 +20301,11 @@
             },
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R3",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R4",
               "kind": "oracle-receipt"
             },
@@ -20265,6 +20327,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R8",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R9",
               "kind": "oracle-receipt"
             }
           ],
@@ -21021,7 +21088,8 @@
           "engineReferenceCount": 4,
           "oracleReceiptCards": [
             "R5",
-            "R5"
+            "R5",
+            "R9"
           ],
           "evidence": [
             {
@@ -21045,6 +21113,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R5",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R9",
               "kind": "oracle-receipt"
             }
           ],
@@ -21534,7 +21607,8 @@
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 4,
           "oracleReceiptCards": [
-            "R12b"
+            "R12b",
+            "R9"
           ],
           "evidence": [
             {
@@ -21558,6 +21632,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R12b",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R9",
               "kind": "oracle-receipt"
             }
           ],
@@ -57160,7 +57239,7 @@
           "R2"
         ],
         "mechanism": "Sand/hail chip skips underground and underwater; weather also changes Thunder's accuracy while semi-invulnerability is checked first (`battle_script_commands.c:1062-1094`, `7602-7640`).",
-        "existingTier1Coverage": "`tests/battleScriptDamagingWeatherOpcode.test.ts` (underground weather chip); `tests/gate6WeatherVolatileInteractions.test.ts` (R2 full weather pass, damage/message order)",
+        "existingTier1Coverage": "`tests/battleScriptDamagingWeatherOpcode.test.ts` (underground weather chip); `tests/gate6WeatherVolatileInteractions.test.ts` (R2 full weather pass, damage/message order); `tests/gate6R2Receipt.test.ts` (compact OFF receipt)",
         "gapOrFirstProof": "R2 complete: Dig under Hail, then surface, paired with a grounded two-turn control.",
         "evidence": [
           {
@@ -57173,6 +57252,10 @@
           },
           {
             "path": "tests/gate6WeatherVolatileInteractions.test.ts",
+            "kind": "interaction-tier-1-or-scout"
+          },
+          {
+            "path": "tests/gate6R2Receipt.test.ts",
             "kind": "interaction-tier-1-or-scout"
           },
           {
@@ -57211,14 +57294,14 @@
       {
         "id": "interaction:weather x ability",
         "label": "weather x ability",
-        "status": "oracle-receipt-gap",
+        "status": "oracle-receipted-pair",
         "recipeIds": [
           "R4",
           "R3"
         ],
         "mechanism": "Cloud Nine/Air Lock suppress **all** `WEATHER_HAS_EFFECT`; Forecast changes Castform's type in rain/sun/hail; Rain Dish, Swift Swim and Chlorophyll read active weather; Sand Veil changes accuracy (`battle_util.h:47-48`; `battle_util.c:2396-2427,2955-2970`; `battle_script_commands.c:1152-1155`). Air Lock is UNREACHABLE; Cloud Nine/Forecast and the speed/end-turn abilities are legal.",
-        "existingTier1Coverage": "`tests/battleScriptDamagingWeatherOpcode.test.ts` (Cloud Nine, Sand Veil); `tests/battleScriptSwitchinOpcode.test.ts` (weather entry scheduling); `tests/gate6WeatherAbilityInteractions.test.ts` (R4 Forecast form/type pairs, Weather Ball type/power under every weather, exact two-seed damage)",
-        "gapOrFirstProof": "R4 complete: same-turn Rain Dance Forecast pass, Water Weather Ball, paired clear-weather damage, and five-turn expiry/revert. R3 remains the Cloud Nine removal proof.",
+        "existingTier1Coverage": "`tests/battleScriptDamagingWeatherOpcode.test.ts` (Cloud Nine, Sand Veil); `tests/battleScriptSwitchinOpcode.test.ts` (weather entry scheduling); `tests/gate6WeatherAbilityInteractions.test.ts` (R4 Forecast form/type pairs, Weather Ball type/power under every weather, exact two-seed damage); `tests/gate6R3Receipt.test.ts` (legal removal/reactivation receipt)",
+        "gapOrFirstProof": "R4 and R3 complete: same-turn Forecast/Weather Ball behavior is paired with the legal Golduck Cloud Nine → neutral Rattata switch; Castform stays Normal while Cloud Nine is present, then becomes Water and uses Weather Ball after the switch.",
         "evidence": [
           {
             "path": "docs/gate6-interaction-matrix-scout.md",
@@ -57237,6 +57320,10 @@
             "kind": "interaction-tier-1-or-scout"
           },
           {
+            "path": "tests/gate6R3Receipt.test.ts",
+            "kind": "interaction-tier-1-or-scout"
+          },
+          {
             "path": "tools/battle-lab/gate6-r4-control-off.json",
             "kind": "parameterized-oracle-request"
           },
@@ -57249,7 +57336,7 @@
             "kind": "parameterized-oracle-request"
           }
         ],
-        "notes": "Static and Tier-1 evidence remains visible, but the parameterized-oracle receipt is still an explicit gap."
+        "notes": "Pairwise evidence is not a Cartesian-product claim."
       },
       {
         "id": "interaction:weather x stat-stage",
@@ -57276,13 +57363,13 @@
       {
         "id": "interaction:weather x switching/entry",
         "label": "weather x switching/entry",
-        "status": "oracle-receipt-gap",
+        "status": "oracle-receipted-pair",
         "recipeIds": [
           "R3"
         ],
         "mechanism": "Entry weather abilities set permanent weather exactly on switch-in; subsequent same-weather entries are a no-op (`battle_util.c:2485-2558`). Drizzle/Sand Stream/Drought are **UNREACHABLE (3)** at L50; Cloud Nine is a legal entry suppression case.",
-        "existingTier1Coverage": "`tests/battleScriptSwitchinOpcode.test.ts` (Drizzle/Sand Stream/Drought unit mechanics)",
-        "gapOrFirstProof": "R3 oracle uses legal Golduck Cloud Nine against manually created Rain Dance, not unreachable setter staging.",
+        "existingTier1Coverage": "`tests/battleScriptSwitchinOpcode.test.ts` (Drizzle/Sand Stream/Drought unit mechanics); `tests/gate6R3Receipt.test.ts` (ordinary party-menu switch and preserved weather timer)",
+        "gapOrFirstProof": "R3 complete: Rain Dance sets the real field flag/timer, the player switch replaces Cloud Nine with neutral Rattata without clearing rain, and the post-switch Forecast/Weather Ball consumer sees active rain.",
         "evidence": [
           {
             "path": "docs/gate6-interaction-matrix-scout.md",
@@ -57293,23 +57380,27 @@
             "kind": "interaction-tier-1-or-scout"
           },
           {
+            "path": "tests/gate6R3Receipt.test.ts",
+            "kind": "interaction-tier-1-or-scout"
+          },
+          {
             "path": "tools/battle-lab/gate6-r3-off.json",
             "kind": "parameterized-oracle-request"
           }
         ],
-        "notes": "Static and Tier-1 evidence remains visible, but the parameterized-oracle receipt is still an explicit gap."
+        "notes": "Pairwise evidence is not a Cartesian-product claim."
       },
       {
         "id": "interaction:weather x immunity/absorb",
         "label": "weather x immunity/absorb",
-        "status": "oracle-receipt-gap",
+        "status": "oracle-receipted-pair",
         "recipeIds": [
           "R2",
           "R3"
         ],
         "mechanism": "Type immunity (Rock/Ground/Steel vs sand, Ice vs hail), Sand Veil, and underground/underwater suppress weather chip (`battle_script_commands.c:7606-7640`); Cloud Nine globally suppresses the predicate (`battle_util.h:47-48`).",
-        "existingTier1Coverage": "`tests/battleScriptDamagingWeatherOpcode.test.ts`; `tests/gate6WeatherVolatileInteractions.test.ts` (R2)",
-        "gapOrFirstProof": "R2/R3 make the pairwise boundaries explicit.",
+        "existingTier1Coverage": "`tests/battleScriptDamagingWeatherOpcode.test.ts`; `tests/gate6WeatherVolatileInteractions.test.ts` (R2); `tests/gate6R2Receipt.test.ts` (R2 compact receipt); `tests/gate6R3Receipt.test.ts` (Cloud Nine suppression/removal boundary)",
+        "gapOrFirstProof": "R2/R3 complete: R2 receipts the concrete hail immunity/underground gate, while R3 receipts the global Cloud Nine suppression and its reactivation after switching.",
         "evidence": [
           {
             "path": "docs/gate6-interaction-matrix-scout.md",
@@ -57321,6 +57412,14 @@
           },
           {
             "path": "tests/gate6WeatherVolatileInteractions.test.ts",
+            "kind": "interaction-tier-1-or-scout"
+          },
+          {
+            "path": "tests/gate6R2Receipt.test.ts",
+            "kind": "interaction-tier-1-or-scout"
+          },
+          {
+            "path": "tests/gate6R3Receipt.test.ts",
             "kind": "interaction-tier-1-or-scout"
           },
           {
@@ -57336,7 +57435,7 @@
             "kind": "parameterized-oracle-request"
           }
         ],
-        "notes": "Static and Tier-1 evidence remains visible, but the parameterized-oracle receipt is still an explicit gap."
+        "notes": "Pairwise evidence is not a Cartesian-product claim."
       },
       {
         "id": "interaction:status x volatile",
@@ -57522,13 +57621,13 @@
       {
         "id": "interaction:volatile x held-item",
         "label": "volatile x held-item",
-        "status": "oracle-receipt-gap",
+        "status": "oracle-receipted-pair",
         "recipeIds": [
           "R9"
         ],
         "mechanism": "Persim/Lum cure confusion; Mental Herb cures attraction; White Herb restores negative stages, including at move-end (`battle_util.c:3383-3398,3540-3601,3739-3755`).",
-        "existingTier1Coverage": "`tests/battleScriptMoveEndOpcode.test.ts` (Lum confusion)",
-        "gapOrFirstProof": "R9: Swagger into Lum/White Herb distinguishes volatile cure from stage restore.",
+        "existingTier1Coverage": "`tests/battleScriptMoveEndOpcode.test.ts` (Lum confusion); `tests/gate6R9Receipt.test.ts` (legal Swagger/Lum versus White Herb receipt)",
+        "gapOrFirstProof": "R9 complete: Lum cures confusion then consumes itself without undoing Swagger's +2 Attack, while White Herb has no negative stage to restore and remains held through confusion.",
         "evidence": [
           {
             "path": "docs/gate6-interaction-matrix-scout.md",
@@ -57539,11 +57638,15 @@
             "kind": "interaction-tier-1-or-scout"
           },
           {
+            "path": "tests/gate6R9Receipt.test.ts",
+            "kind": "interaction-tier-1-or-scout"
+          },
+          {
             "path": "tools/battle-lab/gate6-r9-off.json",
             "kind": "parameterized-oracle-request"
           }
         ],
-        "notes": "Static and Tier-1 evidence remains visible, but the parameterized-oracle receipt is still an explicit gap."
+        "notes": "Pairwise evidence is not a Cartesian-product claim."
       },
       {
         "id": "interaction:volatile x ability",
@@ -57643,8 +57746,8 @@
           "R2"
         ],
         "mechanism": "Semi-invulnerable state blocks ordinary targeting; it also suppresses weather chip only underground/underwater (`battle_script_commands.c:1062-1085,7606-7635`).",
-        "existingTier1Coverage": "`tests/battleScriptDamagingWeatherOpcode.test.ts`",
-        "gapOrFirstProof": "R2 oracle (shared with weather).",
+        "existingTier1Coverage": "`tests/battleScriptDamagingWeatherOpcode.test.ts`; `tests/gate6R2Receipt.test.ts`",
+        "gapOrFirstProof": "R2 compact OFF receipt (shared with weather).",
         "evidence": [
           {
             "path": "docs/gate6-interaction-matrix-scout.md",
@@ -57652,6 +57755,10 @@
           },
           {
             "path": "tests/battleScriptDamagingWeatherOpcode.test.ts",
+            "kind": "interaction-tier-1-or-scout"
+          },
+          {
+            "path": "tests/gate6R2Receipt.test.ts",
             "kind": "interaction-tier-1-or-scout"
           },
           {
@@ -57703,15 +57810,15 @@
       {
         "id": "interaction:held-item x stat-stage",
         "label": "held-item x stat-stage",
-        "status": "oracle-receipt-gap",
+        "status": "oracle-receipted-pair",
         "recipeIds": [
           "K6",
           "R9",
           "R12b"
         ],
         "mechanism": "White Herb restores every negative stage, and threshold berries raise a stage only below the cap (`battle_util.c:3383-3398,3431-3496`).",
-        "existingTier1Coverage": "`tests/battleScriptMoveEndOpcode.test.ts` (item activation); `tests/gate6KernelInteractions.test.ts` (K6: Liechi/Salac/Petaya parameterized across stages 0/5/6/10/11/12 — activation only below the +6 cap; White Herb restores all negative stages exactly once and stays held when nothing is restorable; Ganlon/Apicot stay excluded as zero-carrier)",
-        "gapOrFirstProof": "K6 complete (kernel proof, `83dfd8fd`); R9/R12b receipts already banked.",
+        "existingTier1Coverage": "`tests/battleScriptMoveEndOpcode.test.ts` (item activation); `tests/gate6KernelInteractions.test.ts` (K6: Liechi/Salac/Petaya parameterized across stages 0/5/6/10/11/12 — activation only below the +6 cap; White Herb restores all negative stages exactly once and stays held when nothing is restorable; Ganlon/Apicot stay excluded as zero-carrier); `tests/gate6R9Receipt.test.ts` (positive-stage guard)",
+        "gapOrFirstProof": "K6/R9/R12b complete: R9's +2 Swagger result proves that White Herb stays held when no negative stage exists.",
         "evidence": [
           {
             "path": "docs/gate6-interaction-matrix-scout.md",
@@ -57726,6 +57833,10 @@
             "kind": "interaction-tier-1-or-scout"
           },
           {
+            "path": "tests/gate6R9Receipt.test.ts",
+            "kind": "interaction-tier-1-or-scout"
+          },
+          {
             "path": "tools/battle-lab/gate6-r9-off.json",
             "kind": "parameterized-oracle-request"
           },
@@ -57734,7 +57845,7 @@
             "kind": "parameterized-oracle-request"
           }
         ],
-        "notes": "Static and Tier-1 evidence remains visible, but the parameterized-oracle receipt is still an explicit gap."
+        "notes": "Pairwise evidence is not a Cartesian-product claim."
       },
       {
         "id": "interaction:held-item x switching/entry",
@@ -57991,6 +58102,26 @@
     "parameterizedOracle": {
       "families": [
         {
+          "id": "receipt-family:R12",
+          "label": "R12",
+          "status": "oracle-receipt-gap",
+          "fixtureCount": 1,
+          "scenarioIds": [
+            "receipt:tools/battle-lab/gate6-r12-off.json"
+          ],
+          "evidence": [
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "kind": "interaction-card"
+            },
+            {
+              "path": "tools/battle-lab/gate6-r12-off.json",
+              "kind": "parameterized-oracle-request"
+            }
+          ],
+          "notes": "This is the next bounded oracle-backed acceptance unit until a receipt is added; kernel/static evidence does not close it."
+        },
+        {
           "id": "receipt-family:R11",
           "label": "R11",
           "status": "oracle-receipted-family",
@@ -58053,7 +58184,7 @@
         {
           "id": "receipt-family:R3",
           "label": "R3",
-          "status": "oracle-receipt-gap",
+          "status": "oracle-receipted-family",
           "fixtureCount": 1,
           "scenarioIds": [
             "receipt:tools/battle-lab/gate6-r3-off.json"
@@ -58061,19 +58192,19 @@
           "evidence": [
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "interaction-card"
+              "kind": "completed-receipt-note"
             },
             {
               "path": "tools/battle-lab/gate6-r3-off.json",
               "kind": "parameterized-oracle-request"
             }
           ],
-          "notes": "This is the next bounded oracle-backed acceptance unit until a receipt is added; kernel/static evidence does not close it."
+          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
         },
         {
           "id": "receipt-family:R9",
           "label": "R9",
-          "status": "oracle-receipt-gap",
+          "status": "oracle-receipted-family",
           "fixtureCount": 1,
           "scenarioIds": [
             "receipt:tools/battle-lab/gate6-r9-off.json"
@@ -58081,14 +58212,14 @@
           "evidence": [
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "interaction-card"
+              "kind": "completed-receipt-note"
             },
             {
               "path": "tools/battle-lab/gate6-r9-off.json",
               "kind": "parameterized-oracle-request"
             }
           ],
-          "notes": "This is the next bounded oracle-backed acceptance unit until a receipt is added; kernel/static evidence does not close it."
+          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
         },
         {
           "id": "receipt-family:R13",
@@ -58312,26 +58443,6 @@
             }
           ],
           "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
-        },
-        {
-          "id": "receipt-family:R12",
-          "label": "R12",
-          "status": "oracle-receipt-gap",
-          "fixtureCount": 1,
-          "scenarioIds": [
-            "receipt:tools/battle-lab/gate6-r12-off.json"
-          ],
-          "evidence": [
-            {
-              "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "interaction-card"
-            },
-            {
-              "path": "tools/battle-lab/gate6-r12-off.json",
-              "kind": "parameterized-oracle-request"
-            }
-          ],
-          "notes": "This is the next bounded oracle-backed acceptance unit until a receipt is added; kernel/static evidence does not close it."
         },
         {
           "id": "receipt-family:R12b",
@@ -58776,19 +58887,21 @@
           "id": "receipt:tools/battle-lab/gate6-r3-off.json",
           "label": "gate6-r3-off.json",
           "cardId": "R3",
-          "status": "fixture-only-no-committed-receipt",
+          "status": "oracle-receipted",
           "profile": "battle-scene-off",
           "mode": "mechanicLab",
           "seed": 1,
           "captureCount": 18,
           "effectFamilies": [
             "EFFECT_HIT",
-            "EFFECT_RAIN_DANCE"
+            "EFFECT_RAIN_DANCE",
+            "EFFECT_WEATHER_BALL"
           ],
           "abilities": [
             "ABILITY_BLAZE",
             "ABILITY_CHLOROPHYLL",
             "ABILITY_CLOUD_NINE",
+            "ABILITY_FORECAST",
             "ABILITY_RUN_AWAY",
             "ABILITY_SWIFT_SWIM"
           ],
@@ -58800,10 +58913,10 @@
             },
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "staging-card"
+              "kind": "completed-receipt-note"
             }
           ],
-          "notes": "Request is committed, but a deterministic receipt is not documented in the completed receipt notes."
+          "notes": "The scout's completed receipt notes document deterministic semantic observations for this request card."
         },
         {
           "id": "receipt:tools/battle-lab/gate6-r4-control-off.json",
@@ -59159,7 +59272,7 @@
           "id": "receipt:tools/battle-lab/gate6-r9-off.json",
           "label": "gate6-r9-off.json",
           "cardId": "R9",
-          "status": "fixture-only-no-committed-receipt",
+          "status": "oracle-receipted",
           "profile": "battle-scene-off",
           "mode": "mechanicLab",
           "seed": 1,
@@ -59186,10 +59299,10 @@
             },
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "staging-card"
+              "kind": "completed-receipt-note"
             }
           ],
-          "notes": "Request is committed, but a deterministic receipt is not documented in the completed receipt notes."
+          "notes": "The scout's completed receipt notes document deterministic semantic observations for this request card."
         }
       ]
     }

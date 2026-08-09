@@ -34,6 +34,7 @@ import {
   BATTLE_INTRO_STRINGS,
   type BattleIntroStringEntry,
 } from "../data/battleIntroStrings.ts";
+import { loadBattleScriptProgram } from "./battleScriptProgram.ts";
 
 const FACTORY_ITEM_NAME_BY_ID = new Map(
   (frontierHeldItemsData.entries as readonly Readonly<{
@@ -528,7 +529,10 @@ const STAT_CHANGE_MESSAGE_IDS: ReadonlySet<string> = new Set([
  * (`BattleScript_ButItFailed`, `data/battle_scripts_1.s:2058-2063`, and
  * `BattleScript_EffectSplash`, `:1172-1181`) -- measured holds 79/74 in
  * `docs/battle-message-pacing-ground-truth.md` §1/§2.
- * A future id joins the family here, not as a new literal at the call site.
+ * Real interpreter receipts now derive this cadence from their following
+ * source opcode (`messageTimingFromSourceProvenance`). This id set is the
+ * compatibility fallback for older synthetic fixtures without a real program
+ * counter; synthetic additions join the family here, never at a render site.
  */
 export const WAITMESSAGE_LONG_MESSAGE_IDS: ReadonlySet<string> = new Set([
   ...STAT_CHANGE_MESSAGE_IDS,
@@ -540,6 +544,31 @@ export const WAITMESSAGE_LONG_MESSAGE_IDS: ReadonlySet<string> = new Set([
   "STRINGID_BUTITFAILED",
   "STRINGID_BUTNOTHINGHAPPENED",
 ]);
+
+const BATTLE_SCRIPT_PROGRAM = loadBattleScriptProgram();
+
+/**
+ * Executes the cadence expressed immediately after a real source print
+ * command. This is keyed by immutable interpreter provenance, not by the
+ * rendered string or the move/species that happened to reach it. The legacy
+ * id family remains only for synthetic receipts that have no usable program
+ * counter (older focused presentation fixtures).
+ */
+function messageTimingFromSourceProvenance(
+  event: BattleKernelSemanticEvent,
+): BattleMessageTiming | null {
+  const programCounter = event.provenance?.programCounter;
+  if (programCounter === undefined || programCounter < 0) return null;
+  const following = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 1];
+  if (
+    following?.opcodeName === "B_SCR_OP_WAITMESSAGE"
+    && following.operands.length === 1
+    && following.operands[0]!.expression === "B_WAIT_TIME_LONG"
+  ) {
+    return WAITMESSAGE_LONG_TIMING;
+  }
+  return null;
+}
 /**
  * Scene-OFF hit controller lifetime:
  * setup, 32 blink callbacks, completion, and waitstate release.
@@ -2918,9 +2947,10 @@ export function projectBattleResolutionCommands(
             ? RETURN_MON_TIMING
             : payload.messageId === "STRINGID_SWITCHINMON"
               ? SWITCH_IN_MESSAGE_TIMING
-              : WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
+              : messageTimingFromSourceProvenance(event)
+                ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
                 ? WAITMESSAGE_LONG_TIMING
-                : MESSAGE_TIMING,
+                : MESSAGE_TIMING),
       }));
       pendingStatusMessageBattler = null;
       pendingHeldItemEffectBattler = null;

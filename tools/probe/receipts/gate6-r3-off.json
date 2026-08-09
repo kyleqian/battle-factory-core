@@ -1,0 +1,87 @@
+{
+  "schema": "gate6-r3-off-semantic-receipt/v1",
+  "cardId": "R3",
+  "oracleProfile": "battle-scene-off",
+  "scenario": "tools/battle-lab/gate6-r3-off.json",
+  "seed": 1,
+  "parties": {
+    "playerLead": {"species": 55, "abilitySlot": 1, "ability": 13, "moves": [240, 33, 33, 33]},
+    "playerSwitchIn": {"species": 19, "abilitySlot": 0, "ability": 50},
+    "weatherConsumer": {"species": 385, "abilitySlot": 0, "ability": 59, "moves": [311, 311, 311, 311]}
+  },
+  "determinism": {
+    "freshRunCount": 2,
+    "artifactsCompared": ["manifest.json", "frame-*.png sorted by basename"],
+    "ignoredNondeterministicPaths": [],
+    "temporaryOutputDirectoryPrefixesExcludedFromPathNames": true,
+    "manifestSha256": "e0fdd5103205c6f3313d06574dd05a9e180613562f8919a51debf3007a4bab60",
+    "capturePngBasenameSha256": "143f651f2ba31a82a1a7319b60a98c6e7982e23577ac201463a3e0a9e0b5d2b6",
+    "byteIdentical": true
+  },
+  "checkpoints": [
+    {
+      "frame": 0,
+      "framebufferSha256": "2d0a1fb6fa579436fd1cedc8497c1939be1a00e44af09319c48557b2b149e4f9",
+      "weather": 0,
+      "weatherTurns": 0,
+      "player": {"partyIndex": 0, "species": 55, "ability": 13, "types": [11, 11], "hp": 155},
+      "opponent": {"species": 385, "ability": 59, "types": [0, 0], "currentMove": 0, "pp": [10, 10, 10, 10]}
+    },
+    {
+      "frame": 258,
+      "framebufferSha256": "b1f7ca7734057022b343bdb1e9224af6967912a787b3e4c940f3ecaa627f9111",
+      "weather": 1,
+      "weatherTurns": 5,
+      "player": {"partyIndex": 0, "species": 55, "ability": 13, "types": [11, 11], "hp": 155},
+      "opponent": {"species": 385, "ability": 59, "types": [0, 0], "currentMove": 311, "pp": [10, 10, 9, 10]}
+    },
+    {
+      "frame": 500,
+      "framebufferSha256": "a737bd33b803c4c6a7f9d038cfcc3f7f314527b5f2319183f137edceeda2c5f1",
+      "weather": 1,
+      "weatherTurns": 4,
+      "player": {"partyIndex": 0, "species": 55, "ability": 13, "types": [11, 11], "hp": 127},
+      "opponent": {"species": 385, "ability": 59, "types": [0, 0], "currentMove": 0, "pp": [10, 10, 9, 10]}
+    },
+    {
+      "frame": 1050,
+      "framebufferSha256": "f1b8f5ad0ca685f53cc824528b04e00b127f71743882b1102401c18038a6e6f9",
+      "weather": 1,
+      "weatherTurns": 4,
+      "player": {"partyIndex": 0, "species": 55, "ability": 13, "types": [11, 11], "hp": 127},
+      "opponent": {"species": 385, "ability": 59, "types": [0, 0], "currentMove": 0, "pp": [10, 10, 9, 10]}
+    },
+    {
+      "frame": 1150,
+      "framebufferSha256": "10f7c0ea4bd1fb9493f5e57fe9d5ff613f1df62d71c331c81749024418882f21",
+      "weather": 1,
+      "weatherTurns": 4,
+      "player": {"partyIndex": 1, "species": 19, "ability": 50, "types": [0, 0], "hp": 105},
+      "opponent": {"species": 385, "ability": 59, "types": [0, 0], "currentMove": 0, "pp": [10, 10, 9, 10]}
+    },
+    {
+      "frame": 1300,
+      "framebufferSha256": "3234c4071f69e9a4298cebb3a413f16c2d77901fd7ac05cb42e9498bdb19fd06",
+      "weather": 1,
+      "weatherTurns": 4,
+      "player": {"partyIndex": 1, "species": 19, "ability": 50, "types": [0, 0], "hp": 105},
+      "opponent": {"species": 385, "ability": 59, "types": [11, 11], "currentMove": 0, "pp": [10, 10, 9, 10]}
+    },
+    {
+      "frame": 1500,
+      "framebufferSha256": "0744ddf21fa51cb88ddb3b759395013fe293a37cf49f04cb039b7624f3077fad",
+      "weather": 1,
+      "weatherTurns": 4,
+      "player": {"partyIndex": 1, "species": 19, "ability": 50, "types": [0, 0], "hp": 105},
+      "opponent": {"species": 385, "ability": 59, "types": [11, 11], "currentMove": 311, "pp": [10, 10, 9, 9]}
+    },
+    {
+      "frame": 1676,
+      "framebufferSha256": "26eca12f8eb087ca523af0f821a28ffd371308d04e223f88325aaf4d2742b38b",
+      "weather": 1,
+      "weatherTurns": 4,
+      "player": {"partyIndex": 1, "species": 19, "ability": 50, "types": [0, 0], "hp": 105},
+      "opponent": {"species": 385, "ability": 59, "types": [11, 11], "currentMove": 311, "pp": [10, 10, 9, 9]}
+    }
+  ]
+}

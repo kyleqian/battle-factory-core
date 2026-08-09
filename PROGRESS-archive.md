@@ -1,3 +1,70 @@
+## 1034 — [supervisor, 2026-08-08] **#84 crash fixed; R3 receipted; union green**
+
+- **State:** #84 item (5) is fixed; its four presentation defects remain open.
+  Gate 6 advanced **21→22/24** OFF-profile receipts, with R9 next.
+- **Did:** accepted the generic toxic handoff repair at `54eaaa5d`: toxic's
+  hidden counter no longer impersonates a changed PSN icon, while party index,
+  HP, and visible-status mismatches remain fatal. Merged R3's repaired legal
+  Golduck→Rattata route and twice-fresh deterministic Cloud Nine removal/rain
+  reactivation receipt.
+- **Next:** diagnose #84's shared TAUNT/TORMENT/TOXIC message pacing, then the
+  wrong-side opponent ball and WHIRLWIND recall/send-out seam. Continue R9 in
+  the disjoint side lane.
+- **Notes:** worker full suite is **8,138 passed / 1 skipped**; supervisor union
+  checks are **62/62 focused + 375/375 smoke**, and both component builds pass.
+  R3's one full-run manifest mismatch did not reproduce in two supervisor runs;
+  all other **8,136** tests in that run passed. No barrier/import pin changed.
+
+## 1033 — [bounded MAIN worker, 2026-08-08] **#84 fatal toxic-resolution handoff repaired**
+
+- **State:** #84 item (5) is removed; items (1)-(4) remain open. Gate 6 remains
+  **OPEN** at **21/24** OFF-profile receipts.
+- **Did:** reproduced the exact fatal invariant through the public generated
+  round command/resolution seam. Toxic's source-synced turn counter changes the
+  raw battler/party `status1` while the genuine displayed identity remains PSN;
+  the handoff now validates controller-owned status-icon semantics plus exact
+  party index/HP. A deliberately stale HP handoff still throws the fatal error.
+- **Next:** address #84 items (1)-(4): wrong-side opponent ball,
+  TAUNT/TORMENT/TOXIC pacing, and WHIRLWIND recall/send-out presentation.
+- **Notes:** red parent behavior reproduced the reported battler-1 exception.
+  Focused orchestrator/presentation/ratchet tests are **115/115** and smoke is
+  **375/375**. Final full suite is **811 files / 8,138 passed / 1 skipped**;
+  production build is green. No unsupported barrier or canonical recording
+  import changed.
+
+## 1032 — [supervisor ORIENT, 2026-08-08] **Folded union green; user playthrough crash is first priority**
+
+- **State:** master is clean at `a45826c8`; Gate 6 remains **OPEN** at
+  **21/24** OFF-profile receipts. New ISSUES #84 records five generated-round
+  presentation/controller failures, including a fatal resolution-handoff
+  invariant during BUTTERFREE versus MURKROW.
+- **Did:** read the S8 authoritative reset and S10 executable-frontier policy;
+  confirmed `master..animation-main` is empty, so no animation fold was needed.
+  Oracle freshness and OFF-profile info pass. The independent folded baseline
+  passes **811 files / 8,137 tests / 1 skipped** and production build.
+- **Next:** diagnose and repair #84's fatal handoff with a staged generic-round
+  reproduction and a red Tier-1 pin. Then address the wrong send-out side,
+  TAUNT/TORMENT/TOXIC pacing, and WHIRLWIND replacement seam. Resume R3, R9,
+  and R2 receipts after the user-visible blockers.
+- **Notes:** do not resume the retired canonical Battle-2 march. Use the generic
+  seven-battle controller and Battle Scene OFF presentation seam.
+
+## 1030 — [bounded MAIN worker, 2026-08-08] **R12b persistent item write-through repaired**
+
+- **State:** generic `Cmd_removeitem` persistence repair is committed in
+  `4e252485`; Gate 6 remains **OPEN**.
+- **Did:** reproduced R12b red (`battle item 0`, player party item `180`), then
+  ported the source controller write-through by battler side + `partyIndex`.
+  Tier 1 pins the R12b White Herb result, both active-party owners, untouched
+  bench identities, and a non-White-Herb removal. Recycle/Knock Off ownership
+  and `usedHeldItems` behavior remain intact; no shared interface widened.
+- **Next:** hand the green checkpoint to the supervisor. No oracle or
+  canonical Battle-2 work.
+- **Notes:** focused item/move-end/controller suites are **244/244**;
+  executable ratchet **6/6** and smoke **375/375**. Typecheck and production
+  build are green; final full `npm test` returned exit code **0**. No
+  unsupported-barrier pin changed.
+
 ## 1028 — [bounded MAIN worker, 2026-08-08] **S10 Gate-6 deterministic coverage manifest assembled**
 
 - **State:** the first authoritative, reproducible Gate-6 manifest is committed
@@ -347,6 +414,47 @@
   briefing it, and update the string as part of the fix.
 
 # Progress archive
+
+## 1031 — [supervisor WIND-DOWN, 2026-08-08] **Gate-6 receipts advanced to 21/24; union green**
+
+- **State:** the final animation fold is on master at `3cf40fe2`; Gate 6 remains **OPEN** with
+  **21/24** Battle Scene OFF receipts, **3** explicit gaps, and **R3** next.
+  The widened executable triage remains **0 A / 0 B / 22 C / 24 D**.
+- **Did:** accepted two-seed deterministic R12b White Herb, R11 Baton Pass,
+  R6 Natural Cure, and R15 three-layer Spikes receipts. R15 proves real
+  Flying/Levitate immunity plus grounded Rhydon `187→141 = floor(187/4)` in
+  source HP-update/message order. Repaired generic `Cmd_removeitem` party-slot
+  persistence for both sides while preserving Recycle/Knock Off ownership.
+- **Next:** receipt R3's legal Cloud Nine removal/reactivation sequence, then
+  R9 and R2; keep the seven-battle controller/presentation seam generic and do
+  not resume the retired canonical Battle-2 march.
+- **Notes:** the pre-fold master union is green at **807 files / 8,119 passed /
+  1 skipped**; the folded Thunder/Glare branch was independently green and the
+  post-fold production build plus OFF-profile oracle info pass. The first run
+  hit six Vitest collection timeouts under concurrent full-suite memory
+  pressure (801 files / 6,984 tests passed); all six reran **1,135/1,135**
+  before the clean full rerun. At orientation `master..animation-main` was
+  empty; after its separate supervisor exited cleanly, `0dffb48b` was folded.
+  A post-fold full rerun was stopped at wind-down when a new independent
+  supervisor began a competing full suite; no assertion failure was observed.
+
+## 1029 — [bounded MAIN worker, 2026-08-08] **S10 printfromtable source inventory complete**
+
+- **State:** the widened `Cmd_printfromtable` family is source-complete for
+  the committed program in `4e31a1cf` + `e1d041eb`; triage is now **0 A / 0 B
+  / 22 C / 24 D**.
+- **Did:** registered exact source rows for `gWeatherStartsStringIds` (16),
+  `gNoEscapeStringIds` (5), and `gBattlePalaceFlavorTextTable` (4); Tier 1
+  pins every row, the weather continuation, and all **43/43** current pointer
+  symbols. The generic pointer guard remains a future-input D guard at the
+  existing module pin of 10. Census regenerated; no Gate-6 closure claim.
+- **Next:** hand the green commits to the supervisor for the S10 union. No
+  oracle or canonical Battle-2 work.
+- **Notes:** focused hit-chain + executable-ratchet checks are **379/379**;
+  smoke is **375/375**. The source insertion also refreshed the moved ability
+  census pin (`1184→1229`) and its regeneration ratchet is green.
+  Typecheck and production build are green; final full `npm test` returned
+  exit code **0**.
 
 ## 1018 — [bounded MAIN worker, 2026-08-08] **#39: two staged semantic owners replace their last bare canonical fact sources**
 
