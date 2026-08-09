@@ -1,5 +1,12 @@
 # Animation coverage
 
+## MOVE_KARATE_CHOP authoritative source checkpoint — coverage unchanged (2026-08-09 worker)
+
+- **State:** Coverage remains **147/276 exact**, 0 partial, 0 staged, **129 unsupported**. The move has no pre-existing probe, fixture, reducer, seam, or compositor; exact promotion could not truthfully fit the bounded session.
+- **Did:** Pinned the `arm-none-eabi-nm -a` script interval `Move_KARATE_CHOP` **0x082d20b3..0x082d2105** (exclusive, 0x52 bytes), the full script/component body, `gKarateChopSpriteTemplate`/`AnimSlideHandOrFootToTarget`/`AnimTravelDiagonally`, animation-2 IMPACT affine body, and exact `AnimTask_ShakeMon` source lifecycle. The generated inventory plus authoritative Factory source prove challenge-appropriate set **232 `FRONTIER_MON_PRIMEAPE_1`** is the sole and lowest Level-50 carrier; set 81 Mankey lies below the Level-50 range.
+- **Next:** Stage complete legal Primeape/Onix parties with all four active moves constrained only in party staging; write a pointer-bounded Scene-ON probe and independently measure complete player-back/opponent-front windows through first inactive cleanup. Then implement the pure age reducer, typed seam, narrow compositor, and require twice-fresh component+seam+hardware OAM/matrix/palette/register/audio+raw-RGB+framebuffer equality. Rerun LOW_KICK bilaterally twice fresh plus the closest portable HANDS_AND_FEET/IMPACT control (prefer MEGA_PUNCH) before promotion.
+- **Notes:** No coverage, production seam, boundary, gameplay/damage/critical/accuracy/RNG, controller/round/facility state, canonical import, barrier, or absolute-tick branch changed.
+
 ## MOVE_POISON_STING set-3 Weedle bilateral exact checkpoint — coverage unchanged (2026-08-09 worker)
 
 - **State:** The Weedle replacement is complete and exact, but coverage remains **147/276 exact**, 0 partial, 0 staged, **129 unsupported**. The generated source inventory classifies POISON_STING as `outsideFactory`, while the assigned promotion requires it to change the Level-50 276-move tier; no out-of-scope inventory/tier change was made.
