@@ -8,7 +8,7 @@
  */
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { readFileSync, realpathSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   glareAtAge,
@@ -298,8 +298,14 @@ function verify(fixture: Fixture, pass: number): { evidence: string; raw: string
   if (sha256(readFileSync(resolve(root, fixture.changeMap))) !== fixture.changeMapSha256) {
     throw new Error(`change-map drift ${fixture.orientation}`);
   }
+  const sourceRgbDir = join(dirname(fresh.output), "source-rgb");
+  mkdirSync(sourceRgbDir);
+  for (const frame of sourceFrames) {
+    const name = `${String(frame.frame).padStart(5, "0")}.rgb`;
+    copyFileSync(join(fresh.rgbDir, name), join(sourceRgbDir, name));
+  }
   const changeMap = spawnSync("python3", [
-    join(root, "tools/compare/frame-changemap.py"), fresh.rgbDir,
+    join(root, "tools/compare/frame-changemap.py"), sourceRgbDir,
   ], { cwd: root, encoding: "utf8" });
   if (changeMap.status !== 0) throw new Error(
     `fresh change-map failed ${fixture.orientation}: ${changeMap.stderr}`,

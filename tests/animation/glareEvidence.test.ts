@@ -10,7 +10,7 @@ interface Receipt {
   sourceBounds: { start: string; endExclusive: string; cleanupOffset: number };
   probeJsonSha256: string; evidenceSha256: string; rawRgbSha256: string;
   changeMapSha256: string; freshRuns: number; freshProbeAndRgbEquality: boolean;
-  acceptance: { status: string; evidenceOnly: boolean; productionReducer: boolean; productionCompositor: boolean };
+  acceptance: { status: string; componentMatching: number; framebufferMatching: number; productionReducer: boolean; productionCompositor: boolean };
 }
 
 const cases = [
@@ -24,8 +24,8 @@ const cases = [
     "eb5d27eadf6348be044b1b04e6b74bd887cac4ada819ef29301a311f9d7678c8"],
 ] as const;
 
-describe("MOVE_GLARE bilateral dense evidence checkpoint", () => {
-  it.each(cases)("pins complete source evidence without promotion: %s",
+describe("MOVE_GLARE bilateral dense exact evidence", () => {
+  it.each(cases)("pins complete source and framebuffer acceptance: %s",
     (name, orientation, start, end, probeHash, evidenceHash, rgbHash) => {
       const receipt = JSON.parse(readFileSync(`tools/compare/fixtures/${name}`, "utf8")) as Receipt;
       const scenario = JSON.parse(readFileSync(receipt.scenario, "utf8"));
@@ -36,7 +36,8 @@ describe("MOVE_GLARE bilateral dense evidence checkpoint", () => {
         sourceBounds: { start: "0x082cd0ca", endExclusive: "0x082cd133", cleanupOffset: 104 },
         probeJsonSha256: probeHash, evidenceSha256: evidenceHash, rawRgbSha256: rgbHash,
         freshRuns: 2, freshProbeAndRgbEquality: true,
-        acceptance: { status: "unsupported", evidenceOnly: true, productionReducer: false, productionCompositor: false },
+        acceptance: { status: "exact", componentMatching: 213, framebufferMatching: 213,
+          productionReducer: true, productionCompositor: true },
       });
       expect(createHash("sha256").update(readFileSync(receipt.changeMap)).digest("hex"))
         .toBe(receipt.changeMapSha256);
@@ -69,10 +70,10 @@ describe("MOVE_GLARE bilateral dense evidence checkpoint", () => {
     expect(effects2).toContain(".callback = AnimEyeSparkle");
   });
 
-  it("keeps GLARE absent from exact coverage at 135 exact / 141 unsupported", () => {
-    expect(coverage.entries).toHaveLength(135);
+  it("promotes only GLARE at 136 exact / 140 unsupported", () => {
+    expect(coverage.entries).toHaveLength(136);
     expect(coverage.entries.every((entry) => entry.status === "exact")).toBe(true);
-    expect(coverage.entries.some((entry) => entry.move === "MOVE_GLARE")).toBe(false);
-    expect(276 - coverage.entries.length).toBe(141);
+    expect(coverage.entries.filter((entry) => entry.move === "MOVE_GLARE")).toHaveLength(1);
+    expect(276 - coverage.entries.length).toBe(140);
   });
 });

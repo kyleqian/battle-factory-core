@@ -1,5 +1,5 @@
 {
- "schema": "scene-on-evidence-checkpoint/v1",
+ "schema": "scene-on-portable-evidence/v1",
  "oracleProfile": "battle-scene-on",
  "scenario": "tools/battle-lab/mechanic-glare-opponent-dunsparce-player-shuckle.json",
  "probe": "tools/compare/glareProbe.py",
@@ -14,6 +14,6 @@
  "changeMap": "tools/compare/evidence/glare-changemap-opponent.txt",
   "changeMapSha256": "d6d2e70e4c804abadee0c4d7ca33b6b912907a2e5226bdd9bba62b676305b500",
  "freshRuns": 2, "freshProbeAndRgbEquality": true,
- "acceptance": {"status":"unsupported","evidenceOnly":true,"productionReducer":false,"productionCompositor":false},
- "receipt": "Complete dense stock-ROM evidence through first inactive cleanup; no production pixel claim and no coverage promotion."
+ "acceptance": {"status":"exact","componentMatching":213,"framebufferMatching":213,"productionReducer":true,"productionCompositor":true},
+ "receipt": "Complete dense stock-ROM evidence through first inactive cleanup; source/software/typed seam and full framebuffer are exact twice fresh."
 }

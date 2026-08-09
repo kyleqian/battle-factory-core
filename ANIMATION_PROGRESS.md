@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_GLARE exact — bilateral 213/213 source/seam/framebuffer promotion (2026-08-08 worker)
+
+- **State:** Level-50 coverage advanced **135→136/276 exact**, 0 partial, 0 staged, **141→140 unsupported**. Only GLARE moved; TRI_ATTACK remains unsupported.
+- **Did:** Added the narrow source-relative `battleScene.ts` compositor and source-extracted SMALL_RED_EYE art. It composes all 13 dot pairs, both sparkles, Scary Face BG/shake, BG-only black ramps, hardware battler offsets, source OAM/subpriority order, field chrome, and first inactive cleanup through the typed seam. Fresh pixels corrected the palette hardware coefficient and pinned asymmetric dot creation/destruction latches plus the sparkle creation latch.
+- **Verified:** Twice-fresh player-back **74..286** and opponent-front **78..290** windows each pass **213/213 component+seam and 213/213 framebuffer**; evidence/raw RGB are player `67acdfad…` / `676cc2a4…`, opponent `2aa1e8a7…` / `eb5d27ea…`. Both fresh change maps byte-match committed maps. THUNDER remains **262/262** bilateral and SCARY_FACE **190/190** bilateral as fresh controls. Focused GLARE/boundary/inventory is **17/17**, smoke **375/375**, typecheck and build are green.
+- **Next:** Continue the ranked queue. Do not promote TRI_ATTACK without independent complete dense acceptance.
+- **Notes:** No gameplay, damage, RNG, turn order, controller/facility state, shared animation boundary, or unsupported-barrier change. Final full-suite verification is recorded in the worker report/commit.
+
 ## Supervisor wind-down — THUNDER exact; GLARE bilateral evidence + executable reducer/seam (2026-08-08)
 
 - **State:** This session advanced Level-50 coverage **134→135/276 exact**, 0 partial, 0 staged, **142→141 unsupported**. `MOVE_THUNDER` alone was promoted. `MOVE_GLARE` remains unsupported because it has no framebuffer compositor or pixel acceptance; `MOVE_TRI_ATTACK` remains independently unsupported.
