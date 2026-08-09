@@ -17,23 +17,6 @@ backlog.
 
 # Open
 
-## #85 — Random-play soak: `factorySwap:complete` stall gates winning rounds
-
-**Found 2026-08-09 (user-directed meta-audit; instrument: `npm run soak`,
-driver `tools/soak/randomRoundSoak.ts`, catalog `docs/soak-crash-catalog.md`).**
-Winning battle 1 can leave the generated-round driver at
-`factorySwap:complete` until its 200,000-frame cap. Driver-vs-engine
-attribution remains open. After the generic resolution-display ledger repair,
-the 2026-08-09 full-policy 0:60 sweep reached this stall on **21/60** seeds;
-seed 55 remains the named repro, and seed 6 now reaches the same stall after
-passing both former display handoffs. The two former HP command-start and
-genuine-handoff crash families did not recur.
-
-**Repro:** `npm run soak -- --seed 55` (battle 1 turn 28), or `--seed 6`
-(battle 1 turn 22); both stop at frame 200,000. Vanilla policy remains 20/20
-clean. Preserve the standing ROADMAP S10 wind-down gate and do not soften the
-fatal presentation invariants.
-
 ## #86 — Deeper full-policy soaking exposes four post-ledger crash signatures
 
 **Found 2026-08-09 after #85's display-boundary repair.** Full-policy seeds
@@ -52,6 +35,14 @@ signatures and were deliberately not folded into that bounded step:
   `{B_SCR_ACTIVE_NAME_WITH_PREFIX}` resolver.
 - **1/60**, seed 27, battle 2 turn 33, frame 31,406:
   `STRINGID_PKMNSITEMCUREDPOISON` lacks the same resolver.
+
+**New frontier after #85 (out of scope):** seed 6 now crosses the former
+`factorySwap:complete` boundary and reaches battle 2 turn 13, frame 26,280,
+where it fails on
+`battleStringResolver: unsupported control segment {B_EFF_NAME_WITH_PREFIX}
+in STRINGID_PKMNFELLASLEEP` from `resolveBattleStringLines`. This is a
+downstream generated-resolution string family; keep the resolver invariant
+fatal. Seed 55 reaches battle 3 turn 13, frame 50,980 and records `roundLost`.
 
 **Repro:** `npm run soak -- --seed N --verbose` for the named seed. Keep the
 forced-switch identity check fatal; diagnose and supply its missing typed

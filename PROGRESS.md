@@ -5,23 +5,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1048 — [MAIN worker, 2026-08-09] **#85 display-boundary family closed generically; swap stall remains**
+## 1049 — [MAIN worker, 2026-08-09] **#85 `factorySwap:complete` stall closed generically**
 
-- **State:** master green (827 files / 8,215 passed / 1 skipped). Full-policy
-  soak 0:60 is now **32 OK / 7 CRASH / 21 HANG**; neither former display
-  signature recurred. Vanilla remains **20/20 OK**.
-- **Did:** replaced whole-render replay at completed resolution commands with
-  a durable typed HP/status/switch ledger, source-boundary incoming snapshots,
-  and explicit stable turn/forced-send-out transitions. Fatal HP, identity,
-  and genuine-handoff invariants remain intact. Red-verified seed 0 and seed 6
-  Tier-1 pins cover voluntary and forced switches across both former crashes.
-- **Next:** ISSUES #85's `factorySwap:complete` stall (seed 55 or 6), then
-  follow the ROADMAP S10 ordering into family-level Gate 6. ISSUES #86 records
-  the four downstream signatures for the next full-policy play-test pass.
-- **Notes:** seed 0: OK, battle 1 turn 23, 12,930 frames; seed 6: no crash,
-  HANG at `factorySwap:complete`, battle 1 turn 22, 200,000 frames. Focused
-  regressions 42/42, smoke 375/375, full suite, typecheck, and build green.
-  Commit `909a42a8`; no barrier/import pin or canonical recording changed.
+- **State:** master green (827 files / 8,216 passed / 1 skipped). Vanilla
+  soak 0:20 is **20/20 OK**; no HANG. The accepted-exit compare is **43/43**
+  byte-exact frames.
+- **Did:** reproduced seeds 6 and 55 through the real
+  `createInitialState`/`tick`/button path. Both reached a completed kept-party
+  swap with the source field handoff set while the generated round still
+  awaited a swap offer; the driver was not at fault. `factorySwapRoundDecision`
+  now exposes a typed decline only at that completed handoff, so the existing
+  generic round bridge heals/preserves the party, advances the round, and
+  publishes Battle 2 without changing accepted mutation or presentation
+  timing. Added red Tier-1 coverage for accepted and kept-party ownership
+  expiry. Declared the existing compare trace's canonical route; no fixed
+  window, seed, battle, turn, species, or fatal-invariant weakening.
+- **Next:** ISSUES #86's downstream generated battle string/switch-transition
+  signatures; continue the ROADMAP S10 family-level Gate-6 sequence.
+- **Notes:** seed 6: `CRASH b2 t13 f26280`, unsupported
+  `{B_EFF_NAME_WITH_PREFIX}` in `STRINGID_PKMNFELLASLEEP`; seed 55: `OK b3
+  t13 f50980 roundLost`. Smoke 375/375; focused swap/route tests 70 + 2;
+  full suite and build green. Commits `72e3fed6`, `ee408ab6`; #85 deleted
+  from `ISSUES.md`.
 
 ## 1047 — [interactive user session, 2026-08-09] **User decisions: #85 first; Gate-6 evidence goes family-level**
 
