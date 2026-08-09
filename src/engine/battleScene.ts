@@ -554,6 +554,7 @@ import brickBreakAsset from "../animation/assets/brick-break.json" with { type: 
 import lightScreenAsset from "../animation/assets/light-screen.json" with { type: "json" };
 import mirrorCoatAsset from "../animation/assets/mirror-coat.json" with { type: "json" };
 import barrierAsset from "../animation/assets/barrier.json" with { type: "json" };
+import hazeAsset from "../animation/assets/haze.json" with { type: "json" };
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import substituteAsset from "../animation/assets/substitute.json" with { type: "json" };
 import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
@@ -877,6 +878,7 @@ import {
   sceneOnBrickBreakView,
   sceneOnLightScreenView,
   sceneOnBarrierView,
+  sceneOnHazeView,
   sceneOnMirrorCoatView,
   sceneOnAromatherapyView,
   sceneOnSynthesisView,
@@ -1013,6 +1015,7 @@ import {
   type SceneOnBrickBreakPresentationState,
   type SceneOnLightScreenPresentationState,
   type SceneOnBarrierPresentationState,
+  type SceneOnHazePresentationState,
   type SceneOnMirrorCoatPresentationState,
   type SceneOnBiteConfig,
   type SceneOnHeadbuttConfig,
@@ -1428,6 +1431,9 @@ const barrierArt = barrierAsset as {
   drowzeeBack: { tileset: Tileset; palette: RgbColor[] };
   drowzeeFront: { tileset: Tileset; palette: RgbColor[] };
   grayLightWall: { tileset: Tileset; palette: RgbColor[] };
+};
+const hazeArt = hazeAsset as {
+  fog: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
 };
 const biteArt = biteAsset as {
   sharpTeeth: { tileset: Tileset; palette: RgbColor[] };
@@ -5364,6 +5370,41 @@ function drawScaryFaceBackgroundBlended(
       const index = tile[sy * 8 + sx]!;
       if (index === 0) continue;
       const color = scaryFaceArt.background.palette[index];
+      if (!color) continue;
+      const offset = (y * 240 + x) * 4;
+      fb[offset] = blendChannel(color.r, fb[offset]!, eva, evb);
+      fb[offset + 1] = blendChannel(color.g, fb[offset + 1]!, eva, evb);
+      fb[offset + 2] = blendChannel(color.b, fb[offset + 2]!, eva, evb);
+    }
+  }
+}
+
+/** Source BG1 HAZE layer, alpha-composited over the field at BG1HOFS. */
+function drawHazeFogBlended(
+  fb: Uint8Array,
+  scrollX: number,
+  eva: number,
+  evb: number,
+): void {
+  if (eva === 0) return;
+  const { tileset, tilemap, palette } = hazeArt.fog;
+  const mapWidth = tilemap.width * 8;
+  for (let y = 0; y < 160; y += 1) {
+    const tileRow = Math.floor(y / 8);
+    const inTileY = y % 8;
+    for (let x = 0; x < 240; x += 1) {
+      const mapX = ((x + scrollX) % mapWidth + mapWidth) % mapWidth;
+      const tileCol = Math.floor(mapX / 8);
+      const inTileX = mapX % 8;
+      const entry = tilemap.entries[tileRow * tilemap.width + tileCol];
+      if (!entry) continue;
+      const tile = tileset.tiles[entry.tile];
+      if (!tile) continue;
+      const sx = entry.hFlip ? 7 - inTileX : inTileX;
+      const sy = entry.vFlip ? 7 - inTileY : inTileY;
+      const index = tile[sy * 8 + sx]!;
+      if (index === 0) continue;
+      const color = palette[index];
       if (!color) continue;
       const offset = (y * 240 + x) * 4;
       fb[offset] = blendChannel(color.r, fb[offset]!, eva, evb);
@@ -21437,6 +21478,86 @@ export function renderSceneOnMovePresentation(
       "MIRROR COAT!",
       64,
     );
+    return;
+  }
+  if (state.config.move === "HAZE") {
+    const hazeState = state as SceneOnHazePresentationState;
+    const view = sceneOnHazeView(hazeState);
+    const paletteDisplayed = sceneOnHazeView({ ...hazeState, age: hazeState.age - 1 });
+    const playerToOpponent = view.attacker.species === "KOFFING"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "KOFFING"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(`unsupported staged HAZE pair ${view.attacker.species}->${view.target.species}`);
+    }
+    const koffingSource = playerToOpponent
+      ? smokescreenArt.koffingBack : smokescreenArt.koffingFront;
+    const koffing = playerToOpponent
+      ? koffingSource
+      : { ...koffingSource, tileset: subTileset(koffingSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const black = { r: 0, g: 0, b: 0 };
+    const koffingPalette = blendPaletteToward(
+      koffing.palette, black, paletteDisplayed.battlerBlackCoeff,
+    );
+    const onixPalette = blendPaletteToward(
+      onix.palette, black, paletteDisplayed.battlerBlackCoeff,
+    );
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // Elevated enemy shadows observe the active-script flag one display
+    // after the pointer enters this move-owned window.
+    if (opponentToPlayer && view.age === 0) {
+      drawSpriteSheet(
+        fb, sonicBoomArt.enemyShadow.tileset, sonicBoomArt.enemyShadow.palette,
+        view.attacker.geometry.animationCenter.x - 16,
+        view.attacker.geometry.battlePositionCenter.y + 25,
+      );
+    }
+    const opponent = playerToOpponent ? onix : koffing;
+    const opponentPalette = playerToOpponent ? onixPalette : koffingPalette;
+    const player = playerToOpponent ? koffing : onix;
+    const playerPalette = playerToOpponent ? koffingPalette : onixPalette;
+    drawSpriteSheet(
+      fb, opponent.tileset, opponentPalette,
+      playerToOpponent ? view.target.geometry.spriteCorner.x + onixIdle.x2 : view.attacker.geometry.spriteCorner.x,
+      playerToOpponent ? view.target.geometry.spriteCorner.y + onixIdle.y2 : view.attacker.geometry.spriteCorner.y,
+    );
+    drawSpriteSheet(
+      fb, player.tileset, playerPalette,
+      playerToOpponent ? view.attacker.geometry.spriteCorner.x : view.target.geometry.spriteCorner.x,
+      playerToOpponent ? view.attacker.geometry.spriteCorner.y : view.target.geometry.spriteCorner.y,
+    );
+    drawHazeFogBlended(fb, view.bg1X, view.fogEva, view.fogEvb);
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "KOFFING", level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "KOFFING" : "ONIX", level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp / state.config.fieldProfile.playerMaxHp,
+        status: "none", currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb, playerToOpponent ? "KOFFING used" : "Foe KOFFING used", "HAZE!", 64);
     return;
   }
   if (state.config.move === "BARRIER") {

@@ -1,5 +1,12 @@
 # Animation coverage
 
+## MOVE_HAZE exact — bilateral pointer-bounded 202/202 promotion (2026-08-09 worker)
+
+- **State:** Coverage advances **139→140/276 exact**, 0 partial, 0 staged, **137→136 unsupported**. HAZE alone moves; the animation boundary and unsupported-branch pins remain unchanged.
+- **Did:** Audited the complete script/task body, literal `sHazeBlendAmounts`, fog tiles/tilemap/palette, BG1 scroll/blend setup and BG1/BG2/register cleanup, independent bilateral battler-black ramps, `SE_M_HAZE`, and sole legal set-127 KOFFING carrier. Added complete legal KOFFING/ONIX parties, a pointer-bounded dense probe, raw-RGB receipts/change maps, reproducible fog extraction, a pure source-relative reducer, typed Scene-ON seam, and the narrow BG1 compositor. KOFFING art is reused from SMOKESCREEN only through source-identical species assets; the opponent-front enemy-shadow latch was independently measured.
+- **Verified:** Twice fresh, player-back frames **201..402** and opponent-front **289..490** each pass **202/202 source/reducer, seam, relevant hardware/register/palette/audio, and production framebuffer**. Probe/raw/map receipts are player `be17962f…` / `8acb434e…` / `56d3daf4…`, opponent `6d6514bc…` / `8a719e86…` / `4bc33da6…`. SUBSTITUTE remains bilateral **87/87** twice fresh as the earlier exact BG/palette control. Focused HAZE/coverage/source/extraction/boundary checks are **15/15**.
+- **Next:** Supervisor selects the next independent move. Do not infer HAZE's BG1 X/register latches, bilateral palette-transfer latch, or one-frame elevated enemy shadow for another fog/background task.
+
 ## MOVE_BARRIER exact — bilateral pointer-bounded 76/76 promotion (2026-08-09 worker)
 
 - **State:** Coverage advances **138→139/276 exact**, 0 partial, 0 staged, **138→137 unsupported**. BARRIER alone moves; the animation boundary and unsupported-branch pins remain unchanged.
