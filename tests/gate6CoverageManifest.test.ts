@@ -341,12 +341,12 @@ describe("Gate-6 mechanics coverage manifest", () => {
       .map((move) => move.move);
     expect(sourceProven).toHaveLength(39);
     const sourceSoundproof = parameterizationData.moves
-      .filter((move) => move.hooks.ability.supportedCategories.includes(SOUNDPROOF_MOVES_BLOCK_CATEGORY))
+      .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(SOUNDPROOF_MOVES_BLOCK_CATEGORY))
       .map((move) => move.move)
       .sort();
     expect(sourceSoundproof).toEqual([...SOUNDPROOF_ROSTER_MOVES].sort());
     const sourceAbsorbing = parameterizationData.moves
-      .filter((move) => move.hooks.ability.supportedCategories.some((category) => (ABSORBING_CATEGORIES as readonly string[]).includes(category)))
+      .filter((move) => array(move.hooks.ability.supportedCategories).map(String).some((category) => (ABSORBING_CATEGORIES as readonly string[]).includes(category)))
       .map((move) => move.move);
     expect(sourceAbsorbing).toHaveLength(30);
     const soundproofOnlyAbilityGaps = parameterizationData.moves.length - sourceSoundproof.length;
