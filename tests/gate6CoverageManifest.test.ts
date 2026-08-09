@@ -146,7 +146,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(() => assertManifestContract(falseClosure)).toThrow();
   });
 
-  it("keeps the widened zero-Factory scope and ranked receipt gap inspectable", () => {
+  it("keeps the widened zero-Factory scope and scheduled compact receipt upgrade inspectable", () => {
     const manifest = readManifest();
     const sections = record(manifest.sections);
     const hookSections = record(sections.hooks);
@@ -167,16 +167,18 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const r6 = record(scenarios.find((scenario) => record(scenario).cardId === "R6"));
     const r15 = record(scenarios.find((scenario) => record(scenario).cardId === "R15"));
     const r3 = record(scenarios.find((scenario) => record(scenario).cardId === "R3"));
+    const r9 = record(scenarios.find((scenario) => record(scenario).cardId === "R9"));
     expect(r12b).toMatchObject({ status: "oracle-receipted", captureCount: 20 });
     expect(r11).toMatchObject({ status: "oracle-receipted", captureCount: 44 });
     expect(r6).toMatchObject({ status: "oracle-receipted", captureCount: 23 });
     expect(r15).toMatchObject({ status: "oracle-receipted", captureCount: 12 });
     expect(r3).toMatchObject({ status: "oracle-receipted", captureCount: 18 });
-    expect(oracle.receiptDocumented).toBe(22);
-    expect(oracle.receiptGaps).toBe(2);
-    expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/R9/);
+    expect(r9).toMatchObject({ status: "oracle-receipted", captureCount: 20 });
+    expect(oracle.receiptDocumented).toBe(23);
+    expect(oracle.receiptGaps).toBe(1);
+    expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^R2:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/22\/24.*scenario receipts documented; \*\*2\*\* request-level gaps/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/23\/24.*scenario receipts documented; \*\*1\*\* request-level gaps/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/fixture-only-no-committed-receipt/);
   });
 });
