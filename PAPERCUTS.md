@@ -843,3 +843,20 @@ segments. The worker lost about 2 minutes before switching to dense oracle
 evidence plus the public orchestrator verifier. Possible fix: reject the shape
 with a direct error that points to `bin/oracle lab`, or teach compare to unwrap
 the nested controller trace. Hits: 1.
+
+## Yielded full-suite calls are easy to restart accidentally
+
+2026-08-09, supervised side receipt verification: a yielded execution was
+mistaken for a completed call and restarted twice, leaving three concurrent
+Vitest process groups until the supervisor identified and terminated the two
+superseded groups. Cost: about 5 minutes plus avoidable CPU contention. A
+launcher/tool response that visually distinguishes “still running; wait on
+this handle” from completion would prevent this class of mistake.
+
+## Broad formatter passes make legacy semantic patches hard to recover
+
+2026-08-09, #84 main worker: an accidental whole-file Prettier pass expanded a
+narrow battle-scene patch into a very large whitespace diff. Reversing that
+diff and reconstructing the semantic edits cost about 5 minutes. Prefer
+formatting only newly edited ranges/files whose existing style is already
+formatter-clean, or add a checked narrow-format helper.

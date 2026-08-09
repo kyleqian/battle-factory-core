@@ -38799,6 +38799,21 @@ both verify scripts/census independently re-verified before this entry.)*
   build, smoke, and **640/640** OFF differential captures passed.
 - **Next/Notes:** superseded by the S10-closure ordering decision. The full
   entry remains in git history at `PROGRESS.md`.
+## 1036 — [supervisor, 2026-08-09] **Status cadence and R9 receipt accepted**
+
+- **State:** #84 now has two presentation defects left: the wrong-side
+  opponent ball and the WHIRLWIND recall/send-out jump. Gate 6 advanced
+  **22→23/24** OFF-profile receipts; R2 is the final compact-receipt upgrade.
+- **Did:** accepted `cab909f8`'s source-provenance `waitmessage` execution for
+  TAUNT/TORMENT/TOXIC and merged `29190849`'s twice-fresh legal Swagger item
+  receipt as `edd32963`. Lum consumes and cures confusion while preserving
+  +2 Attack; White Herb remains held with +2 Attack and confusion.
+- **Next:** repair #84's wrong-side opponent send-out ball, then the generic
+  WHIRLWIND opponent recall/send-out seam. Run R2 in the disjoint side lane.
+- **Notes:** supervisor cadence checks are **4/4** and R9 receipt/kernel/
+  manifest checks are **59/59**. Worker full suites are **8,143** and
+  **8,144** passed with one skip each; both builds pass. No barrier/import pin
+  changed. The final union build is still required after the next pair.
 ## 1035 — [bounded MAIN worker, 2026-08-08] **#84 status-message cadence repaired**
 
 - **State:** #84 items (2) and (4) are removed; only item (1)'s wrong-side
