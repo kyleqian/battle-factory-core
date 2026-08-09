@@ -19,12 +19,99 @@ import {
 } from "../src/engine/battleScriptMachine.ts";
 import {
   HOLD_EFFECT_ID_FOCUS_BAND,
+  PRINTFROMTABLE_TABLES,
   SET_MOVE_EFFECT_SUPPORTED_BYTES,
   calculateBattleScriptBaseDamageForCurrentMove,
 } from "../src/engine/battleScriptHitChainOpcode.ts";
 import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 
 const program = loadBattleScriptProgram();
+
+/**
+ * Finite source inventory from data/battle_scripts_1.s. Keeping this list in
+ * Tier 1 makes a newly added current-program printfromtable pointer fail
+ * loudly until its source table is ported, without importing reference data
+ * into production.
+ */
+const CURRENT_SOURCE_PRINTFROMTABLE_POINTERS = Object.freeze([
+  "gAbsorbDrainStringIds",
+  "gBRNPreventionStringIds",
+  "gBattlePalaceFlavorTextTable",
+  "gBerryEffectStringIds",
+  "gFellAsleepStringIds",
+  "gFirstTurnOfTwoStringIds",
+  "gFlashFireStringIds",
+  "gFocusEnergyUsedStringIds",
+  "gFutureMoveUsedStringIds",
+  "gGotBurnedStringIds",
+  "gGotDefrostedStringIds",
+  "gGotFrozenStringIds",
+  "gGotParalyzedStringIds",
+  "gGotPoisonedStringIds",
+  "gInobedientStringIds",
+  "gItemSwapStringIds",
+  "gKOFailedStringIds",
+  "gLeechSeedStringIds",
+  "gMistUsedStringIds",
+  "gMoveWeatherChangeStringIds",
+  "gNoEscapeStringIds",
+  "gPRLZPreventionStringIds",
+  "gPSNPreventionStringIds",
+  "gPartyStatusHealStringIds",
+  "gProtectLikeUsedStringIds",
+  "gRainContinuesStringIds",
+  "gReflectLightScreenSafeguardStringIds",
+  "gRestUsedStringIds",
+  "gSandStormHailContinuesStringIds",
+  "gSandStormHailDmgStringIds",
+  "gSandStormHailEndStringIds",
+  "gSportsUsedStringIds",
+  "gStatDownStringIds",
+  "gStatUpStringIds",
+  "gStockpileUsedStringIds",
+  "gSubstituteUsedStringIds",
+  "gSwallowFailStringIds",
+  "gTransformUsedStringIds",
+  "gUproarAwakeStringIds",
+  "gUproarOverTurnStringIds",
+  "gWeatherStartsStringIds",
+  "gWokeUpStringIds",
+  "gWrappedStringIds",
+] as const);
+
+const WIDENED_PRINTFROMTABLE_TABLES = Object.freeze({
+  gWeatherStartsStringIds: Object.freeze([
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_SANDSTORMISRAGING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_SUNLIGHTSTRONG",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+  ]),
+  gNoEscapeStringIds: Object.freeze([
+    "STRINGID_CANTESCAPE",
+    "STRINGID_DONTLEAVEBIRCH",
+    "STRINGID_PREVENTSESCAPE",
+    "STRINGID_CANTESCAPE2",
+    "STRINGID_ATTACKERCANTESCAPE",
+  ]),
+  gBattlePalaceFlavorTextTable: Object.freeze([
+    "STRINGID_GLINTAPPEARSINEYE",
+    "STRINGID_PKMNGETTINGINTOPOSITION",
+    "STRINGID_PKMNBEGANGROWLINGDEEPLY",
+    "STRINGID_PKMNEAGERFORMORE",
+  ]),
+} as const);
 const TACKLE = 33; // EFFECT_HIT, power 35, accuracy 95, TYPE_NORMAL
 const MOVE_SURF = 57; // EFFECT_HIT, MOVE_TARGET_BOTH -- BattleScript_EffectHit's own underwater-guard move
 /** include/constants/battle.h:175. */
@@ -176,6 +263,16 @@ function findPcInLabel(opcodeName: string, sourceLabel: string): number {
     (instruction) => instruction.opcodeName === opcodeName && instruction.source.label === sourceLabel,
   );
   if (!found) throw new Error(`no matching ${opcodeName} instruction found in ${sourceLabel}`);
+  return found.programCounter;
+}
+
+function findPrintfromtablePc(tableName: string): number {
+  const found = program.instructions.find(
+    (instruction) =>
+      instruction.opcodeName === "B_SCR_OP_PRINTFROMTABLE"
+      && instruction.operands[0]?.expression === tableName,
+  );
+  if (!found) throw new Error(`no printfromtable instruction found for ${tableName}`);
   return found.programCounter;
 }
 
@@ -3355,6 +3452,56 @@ describe("SetMoveEffect stat-change family (registered) -- secondary-effect rout
 describe("production printfromtable (Cmd_printfromtable) dispatch", () => {
   it("registers B_SCR_OP_PRINTFROMTABLE", () => {
     expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_PRINTFROMTABLE")).toBeDefined();
+  });
+
+  it("registers every one of the 43 current battle_scripts_1.s pointer families", () => {
+    const programPointers = [
+      ...new Set(
+        program.instructions
+          .filter((instruction) => instruction.opcodeName === "B_SCR_OP_PRINTFROMTABLE")
+          .map((instruction) => instruction.operands[0]?.expression)
+          .filter((expression): expression is string => expression !== undefined),
+      ),
+    ].sort();
+    expect(programPointers).toHaveLength(43);
+    expect(programPointers).toEqual([...CURRENT_SOURCE_PRINTFROMTABLE_POINTERS].sort());
+    expect(Object.keys(PRINTFROMTABLE_TABLES).sort()).toEqual([...CURRENT_SOURCE_PRINTFROMTABLE_POINTERS].sort());
+  });
+
+  for (const [tableName, expectedEntries] of Object.entries(WIDENED_PRINTFROMTABLE_TABLES)) {
+    it(`${tableName} matches every source entry/index and its exact length`, () => {
+      expect(PRINTFROMTABLE_TABLES[tableName]).toEqual(expectedEntries);
+      expect(PRINTFROMTABLE_TABLES[tableName]).toHaveLength(expectedEntries.length);
+    });
+
+    for (const [index, messageId] of expectedEntries.entries()) {
+      it(`${tableName}[${index}] resolves ${messageId}`, () => {
+        const rc = context(0, {}, { multistringChooser: index });
+        const { result } = stepAtProgramCounter(findPrintfromtablePc(tableName), rc);
+        if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+        expect(result.state.events).toEqual([
+          expect.objectContaining({ kind: "message", messageId }),
+        ]);
+      });
+    }
+  }
+
+  it("gWeatherStartsStringIds retains the source legal-weather continuation", () => {
+    const pc = findPrintfromtablePc("gWeatherStartsStringIds");
+    expect(program.instructions[pc]!.source).toMatchObject({
+      label: "BattleScript_OverworldWeatherStarts",
+      statementLine: 3243,
+    });
+    expect(program.instructions.slice(pc, pc + 4).map((instruction) => instruction.opcodeName)).toEqual([
+      "B_SCR_OP_PRINTFROMTABLE",
+      "B_SCR_OP_WAITMESSAGE",
+      "B_SCR_OP_PLAYANIMATION_VAR",
+      "B_SCR_OP_END3",
+    ]);
+    expect(program.instructions.slice(pc + 1, pc + 3).map((instruction) => instruction.operands.map((operand) => operand.expression))).toEqual([
+      ["B_WAIT_TIME_LONG"],
+      ["BS_ATTACKER", "sB_ANIM_ARG1", "NULL"],
+    ]);
   });
 
   it.each([

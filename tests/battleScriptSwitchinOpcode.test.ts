@@ -21,6 +21,7 @@ import { runBattleScriptFaintedActionsOrchestration } from "../src/engine/battle
 const program = loadBattleScriptProgram();
 const TACKLE = 33;
 const KARATE_CHOP = 2;
+const TELEPORT = 100;
 /**
  * include/constants/battle.h. `BATTLE_TYPE_FRONTIER` (`:91`) is itself an OR
  * of every frontier facility's own bit, including `BATTLE_TYPE_ARENA` (`:77`)
@@ -39,6 +40,10 @@ const URSARING = 217;
 /** include/constants/abilities.h. */
 const ABILITY_GUTS = 62;
 const ABILITY_LEVITATE = 26;
+const ABILITY_SHADOW_TAG = 23;
+const ABILITY_MAGNET_PULL = 42;
+const ABILITY_RUN_AWAY = 50;
+const ABILITY_ARENA_TRAP = 71;
 const ABILITY_INTIMIDATE = 22;
 const ABILITY_TRACE = 36;
 const ABILITY_DRIZZLE = 2;
@@ -50,6 +55,13 @@ const ABILITY_WHITE_SMOKE = 73;
 const ABILITY_TRUANT = 54;
 const ITEM_WHITE_HERB = 180;
 const ITEM_LEFTOVERS = 200;
+const ITEM_SMOKE_BALL = 194;
+const ITEM_ENIGMA_BERRY = 175;
+const STATUS2_ESCAPE_PREVENTION = 1 << 26;
+const STATUS2_WRAPPED = 1 << 13;
+const STATUS3_ROOTED = 1 << 10;
+const BATTLE_TYPE_LINK = 1 << 1;
+const BATTLE_TYPE_FIRST_BATTLE = 1 << 4;
 
 function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -191,6 +203,16 @@ function pcFor(opcodeName: string, label: string): number {
   return found.programCounter;
 }
 
+function variousPc(label: string, id: string): number {
+  const found = program.instructions.find(
+    (instruction) => instruction.opcodeName === "B_SCR_OP_VARIOUS"
+      && instruction.source.label === label
+      && instruction.operands[1]?.expression === id,
+  );
+  if (!found) throw new Error(`no ${id} various instruction under ${label}`);
+  return found.programCounter;
+}
+
 const SWITCHHANDLEORDER_PC = pcFor("B_SCR_OP_SWITCHHANDLEORDER", "BattleScript_FaintedMonTryChoose");
 const GETSWITCHEDMONDATA_PC = pcFor("B_SCR_OP_GETSWITCHEDMONDATA", "BattleScript_FaintedMonSendOutNew");
 const SWITCHINDATAUPDATE_PC = pcFor("B_SCR_OP_SWITCHINDATAUPDATE", "BattleScript_FaintedMonSendOutNew");
@@ -198,6 +220,14 @@ const HPTHRESHOLDS_PC = pcFor("B_SCR_OP_HPTHRESHOLDS", "BattleScript_FaintedMonS
 const SWITCHINANIM_PC = pcFor("B_SCR_OP_SWITCHINANIM", "BattleScript_FaintedMonSendOutNew");
 const VARIOUS_RESET_PLAYER_FAINTED_PC = pcFor("B_SCR_OP_VARIOUS", "BattleScript_FaintedMonSendOutNew");
 const VARIOUS_GET_BATTLER_FAINTED_PC = pcFor("B_SCR_OP_VARIOUS", "BattleScript_PursuitDmgOnSwitchOut");
+const VARIOUS_IS_RUNNING_IMPOSSIBLE_PC = variousPc(
+  "BattleScript_EffectTeleport",
+  "VARIOUS_IS_RUNNING_IMPOSSIBLE",
+);
+const VARIOUS_SET_TELEPORT_OUTCOME_PC = variousPc(
+  "BattleScript_EffectTeleport",
+  "VARIOUS_SET_TELEPORT_OUTCOME",
+);
 const PURSUIT_JUMPIFBYTE_PC = pcFor("B_SCR_OP_JUMPIFBYTE", "BattleScript_PursuitDmgOnSwitchOut");
 const SWITCHINEFFECTS_PC = pcFor("B_SCR_OP_SWITCHINEFFECTS", "BattleScript_FaintedMonSendOutNew");
 const CANCELALLACTIONS_PC = pcFor("B_SCR_OP_CANCELALLACTIONS", "BattleScript_FaintedMonSendOutNew");
@@ -214,6 +244,48 @@ function stepAtProgramCounter(pc: number, rulesContext: BattleScriptRulesContext
   );
   const patched = Object.freeze({ ...execution.state, programCounter: pc });
   return { execution, result: stepBattleScriptMachine(program, patched, execution.handlers) };
+}
+
+function teleportRules(
+  changes: Partial<BattleScriptRulesContextInput> = {},
+): BattleScriptRulesContext {
+  return context({
+    battlers: [
+      battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
+      battler({ side: 1, species: SUNKERN, types: ["TYPE_GRASS", "TYPE_GRASS"] }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ],
+    selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: 1 },
+    scriptingBattler: 3,
+    lastUsedAbility: 99,
+    multistringChooser: 77,
+    battleCommunication0: 91,
+    ...changes,
+  });
+}
+
+function stepTeleportVarious(pc: number, rules: BattleScriptRulesContext) {
+  const { result } = stepAtProgramCounter(pc, rules);
+  if (result.kind !== "advanced") throw new Error(`expected Teleport various to advance, got ${result.kind}`);
+  return result.state.rulesContext;
+}
+
+function runScriptToHalt(entryLabel: string, rules: BattleScriptRulesContext) {
+  const execution = createBattleScriptStatusRulesExecution(program, entryLabel, rules, 1, externalPorts());
+  let state = execution.state;
+  for (let guard = 0; guard < 2_000; guard += 1) {
+    const result = stepBattleScriptMachine(program, state, execution.handlers);
+    if (result.kind === "halted") return result;
+    if (result.kind === "unsupported") {
+      throw new Error(`unexpected unsupported ${JSON.stringify(result.state.haltReason)}`);
+    }
+    state = result.state;
+    for (const pending of state.scheduler.pendingControllerBattlers) {
+      state = acknowledgeBattleScriptMachineController(state, pending);
+    }
+  }
+  throw new Error(`${entryLabel} did not halt within its source continuation budget`);
 }
 
 describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMONDATA/SWITCHINDATAUPDATE/SWITCHINANIM/HPTHRESHOLDS/CANCELALLACTIONS/VARIOUS/SWITCHINEFFECTS)", () => {
@@ -880,32 +952,194 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     );
   });
 
-  it("various: a real still-unmodeled id (VARIOUS_IS_RUNNING_IMPOSSIBLE) keeps the guard", () => {
-    const instruction = program.instructions[VARIOUS_RESET_PLAYER_FAINTED_PC]!;
-    const patched = Object.freeze({
-      ...instruction,
-      operands: Object.freeze([
-        instruction.operands[0]!,
-        Object.freeze({ ...instruction.operands[1]!, expression: "VARIOUS_IS_RUNNING_IMPOSSIBLE" }),
-      ]),
+  it("various(IS_RUNNING_IMPOSSIBLE): Smoke Ball wins before Link, Run Away, and every escape-preventer", () => {
+    const rules = stepTeleportVarious(VARIOUS_IS_RUNNING_IMPOSSIBLE_PC, teleportRules({
+      battlers: [
+        battler({ side: 0, item: ITEM_SMOKE_BALL, types: ["TYPE_STEEL", "TYPE_STEEL"] }),
+        battler({ side: 0, ability: ABILITY_SHADOW_TAG }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      battleTopology: {
+        battlersCount: 2,
+        battleTypeFlags: BATTLE_TYPE_LINK | BATTLE_TYPE_FIRST_BATTLE,
+        battlerPositions: [0, 1, 2, 3],
+      },
+    }));
+    expect(rules).toMatchObject({
+      battleCommunication0: 0,
+      scriptingBattler: 3,
+      lastUsedAbility: 99,
+      multistringChooser: 77,
     });
-    const patchedProgram = Object.freeze({
-      ...program,
-      instructions: Object.freeze(
-        program.instructions.map((i, index) => (index === VARIOUS_RESET_PLAYER_FAINTED_PC ? patched : i)),
-      ),
+  });
+
+  it("various(IS_RUNNING_IMPOSSIBLE): Link then Run Away each win before Shadow Tag", () => {
+    const link = stepTeleportVarious(VARIOUS_IS_RUNNING_IMPOSSIBLE_PC, teleportRules({
+      battlers: [battler(), battler({ ability: ABILITY_SHADOW_TAG }), battler(), battler()],
+      battleTopology: { battlersCount: 2, battleTypeFlags: BATTLE_TYPE_LINK, battlerPositions: [0, 1, 2, 3] },
+    }));
+    expect(link.battleCommunication0).toBe(0);
+    expect(link.lastUsedAbility).toBe(99);
+
+    const runAway = stepTeleportVarious(VARIOUS_IS_RUNNING_IMPOSSIBLE_PC, teleportRules({
+      battlers: [battler({ ability: ABILITY_RUN_AWAY }), battler({ ability: ABILITY_SHADOW_TAG }), battler(), battler()],
+    }));
+    expect(runAway.battleCommunication0).toBe(0);
+    expect(runAway.lastUsedAbility).toBe(99);
+  });
+
+  it("various(IS_RUNNING_IMPOSSIBLE): position-derived opposite Shadow Tag is first and writes the exact ability context", () => {
+    // Both state-side fields say player. The source only observes position 0
+    // versus 1, so the second battler is still the opposing Shadow Tag.
+    const rules = stepTeleportVarious(VARIOUS_IS_RUNNING_IMPOSSIBLE_PC, teleportRules({
+      battlers: [
+        battler({ side: 0, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
+        battler({ side: 0, ability: ABILITY_SHADOW_TAG }),
+        battler(),
+        battler(),
+      ],
+    }));
+    expect(rules).toMatchObject({
+      battleCommunication0: 2,
+      scriptingBattler: 1,
+      lastUsedAbility: ABILITY_SHADOW_TAG,
+      multistringChooser: 2,
     });
-    const execution = createBattleScriptStatusRulesExecution(
-      patchedProgram,
-      "BattleScript_HandleFaintedMon",
-      context(),
-      1,
-      externalPorts(),
-    );
-    const state = Object.freeze({ ...execution.state, programCounter: VARIOUS_RESET_PLAYER_FAINTED_PC });
-    const result = stepBattleScriptMachine(patchedProgram, state, execution.handlers);
-    expect(result.kind).toBe("halted");
-    expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+  });
+
+  it("various(IS_RUNNING_IMPOSSIBLE): grounded Arena Trap blocks, while Levitate and Flying each bypass it", () => {
+    const trapped = stepTeleportVarious(VARIOUS_IS_RUNNING_IMPOSSIBLE_PC, teleportRules({
+      battlers: [battler(), battler({ ability: ABILITY_ARENA_TRAP }), battler(), battler()],
+    }));
+    expect(trapped).toMatchObject({
+      battleCommunication0: 2,
+      scriptingBattler: 1,
+      lastUsedAbility: ABILITY_ARENA_TRAP,
+      multistringChooser: 2,
+    });
+
+    for (const active of [
+      battler({ ability: ABILITY_LEVITATE }),
+      battler({ types: ["TYPE_FLYING", "TYPE_NORMAL"] }),
+    ]) {
+      const bypass = stepTeleportVarious(VARIOUS_IS_RUNNING_IMPOSSIBLE_PC, teleportRules({
+        battlers: [active, battler({ ability: ABILITY_ARENA_TRAP }), battler(), battler()],
+      }));
+      expect(bypass).toMatchObject({
+        battleCommunication0: 0,
+        scriptingBattler: 3,
+        lastUsedAbility: 99,
+        multistringChooser: 77,
+      });
+    }
+  });
+
+  it("various(IS_RUNNING_IMPOSSIBLE): source scan order selects Arena Trap before a later Shadow Tag", () => {
+    const rules = stepTeleportVarious(VARIOUS_IS_RUNNING_IMPOSSIBLE_PC, teleportRules({
+      battlers: [
+        battler(),
+        battler({ ability: ABILITY_ARENA_TRAP }),
+        battler(),
+        battler({ ability: ABILITY_SHADOW_TAG }),
+      ],
+      battleTopology: { battlersCount: 4, battleTypeFlags: 1, battlerPositions: [0, 1, 2, 3] },
+    }));
+    expect(rules).toMatchObject({ scriptingBattler: 1, lastUsedAbility: ABILITY_ARENA_TRAP, battleCommunication0: 2 });
+  });
+
+  it("various(IS_RUNNING_IMPOSSIBLE): Magnet Pull selects the final source field match, writes it on non-Steel success, and blocks Steel", () => {
+    const nonSteel = stepTeleportVarious(VARIOUS_IS_RUNNING_IMPOSSIBLE_PC, teleportRules({
+      battlers: [battler(), battler({ ability: ABILITY_MAGNET_PULL }), battler(), battler()],
+    }));
+    expect(nonSteel).toMatchObject({
+      battleCommunication0: 0,
+      scriptingBattler: 3,
+      lastUsedAbility: ABILITY_MAGNET_PULL,
+      multistringChooser: 77,
+    });
+
+    const steel = stepTeleportVarious(VARIOUS_IS_RUNNING_IMPOSSIBLE_PC, teleportRules({
+      battlers: [
+        battler({ types: ["TYPE_STEEL", "TYPE_STEEL"] }),
+        battler({ ability: ABILITY_MAGNET_PULL }),
+        battler(),
+        battler({ ability: ABILITY_MAGNET_PULL }),
+      ],
+      battleTopology: { battlersCount: 4, battleTypeFlags: 1, battlerPositions: [0, 1, 2, 3] },
+    }));
+    expect(steel).toMatchObject({
+      battleCommunication0: 2,
+      scriptingBattler: 3,
+      lastUsedAbility: ABILITY_MAGNET_PULL,
+      multistringChooser: 2,
+    });
+  });
+
+  it("various(IS_RUNNING_IMPOSSIBLE): Enigma Berry uses the shared per-battler hold-effect resolver", () => {
+    const rules = stepTeleportVarious(VARIOUS_IS_RUNNING_IMPOSSIBLE_PC, teleportRules({
+      battlers: [battler({ item: ITEM_ENIGMA_BERRY }), battler({ ability: ABILITY_SHADOW_TAG }), battler(), battler()],
+      enigmaBerryHoldEffects: [37, 0, 0, 0],
+    }));
+    expect(rules).toMatchObject({ battleCommunication0: 0, lastUsedAbility: 99, multistringChooser: 77 });
+  });
+
+  it.each([
+    ["escape prevention", STATUS2_ESCAPE_PREVENTION, 0],
+    ["wrapped", STATUS2_WRAPPED, 0],
+    ["rooted", 0, STATUS3_ROOTED],
+  ])("various(IS_RUNNING_IMPOSSIBLE): %s is forbidden before First Battle", (_name, status2, status3) => {
+    const rules = stepTeleportVarious(VARIOUS_IS_RUNNING_IMPOSSIBLE_PC, teleportRules({
+      battlers: [battler({ status2, status3 }), battler(), battler(), battler()],
+      battleTopology: { battlersCount: 2, battleTypeFlags: BATTLE_TYPE_FIRST_BATTLE, battlerPositions: [0, 1, 2, 3] },
+    }));
+    expect(rules).toMatchObject({
+      battleCommunication0: 1,
+      scriptingBattler: 3,
+      lastUsedAbility: 99,
+      multistringChooser: 0,
+    });
+  });
+
+  it("various(IS_RUNNING_IMPOSSIBLE): First Battle alone is forbidden with its own chooser", () => {
+    const rules = stepTeleportVarious(VARIOUS_IS_RUNNING_IMPOSSIBLE_PC, teleportRules({
+      battleTopology: { battlersCount: 2, battleTypeFlags: BATTLE_TYPE_FIRST_BATTLE, battlerPositions: [0, 1, 2, 3] },
+    }));
+    expect(rules).toMatchObject({ battleCommunication0: 1, multistringChooser: 1, scriptingBattler: 3, lastUsedAbility: 99 });
+  });
+
+  it("various(SET_TELEPORT_OUTCOME): uses active battler position, not the mutable state-side field, for both outcomes", () => {
+    const player = stepTeleportVarious(VARIOUS_SET_TELEPORT_OUTCOME_PC, teleportRules({
+      battlers: [battler({ side: 1 }), battler({ side: 0 }), battler(), battler()],
+    }));
+    expect(player.battleOutcome).toBe(5);
+
+    const opponent = stepTeleportVarious(VARIOUS_SET_TELEPORT_OUTCOME_PC, teleportRules({
+      battlers: [battler({ side: 0 }), battler({ side: 1 }), battler(), battler()],
+      selectorRoles: { attacker: 1, target: 0, effectBattler: 0, fainted: 0 },
+    }));
+    expect(opponent.battleOutcome).toBe(10);
+  });
+
+  it("BattleScript_EffectTeleport: a legal non-trainer continuation reaches its own MoveEnd terminal after the source outcome write", () => {
+    const result = runScriptToHalt("BattleScript_EffectTeleport", teleportRules({
+      battlers: [
+        battler({ moves: [TELEPORT, 0, 0, 0], pp: [20, 0, 0, 0] }),
+        battler(),
+        battler(),
+        battler(),
+      ],
+      currentMove: TELEPORT,
+      chosenMove: TELEPORT,
+      currentMovePosition: 0,
+      battleTopology: { battlersCount: 2, battleTypeFlags: 0, battlerPositions: [0, 1, 2, 3] },
+    }));
+    expect(result.state.haltReason).toMatchObject({ kind: "terminal" });
+    expect(result.state.rulesContext).toMatchObject({
+      battleCommunication0: 0,
+      battleOutcome: 5,
+    });
+    expect(result.state.rulesContext.battlers[0].pp[0]).toBe(19);
   });
 
   it("switchineffects: clears HITMARKER_FAINTED(battler) and advances when no Spikes/Truant/ability-effect trigger applies", () => {

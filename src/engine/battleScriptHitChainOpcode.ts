@@ -325,8 +325,14 @@ const B_MSG_ABILITY_PREVENTS_MOVE_STATUS = 0;
 const B_MSG_ABILITY_PREVENTS_ABILITY_STATUS = 1;
 const B_MSG_STATUS_HAD_NO_EFFECT = 2;
 
-/** printfromtable's registered small constant tables, each indexed by MULTISTRING_CHOOSER. */
-const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Object.freeze({
+/**
+ * `printfromtable`'s source-defined string tables, each indexed by
+ * `MULTISTRING_CHOOSER` (or the source's equivalent selector).
+ *
+ * This is exported so the finite current-program census can assert that all
+ * source pointer families are registered without importing a recording.
+ */
+export const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Object.freeze({
   /** battle_message.c:1060-1065 -- Transform success/failure selectors. */
   gTransformUsedStringIds: Object.freeze([
     "STRINGID_PKMNTRANSFORMEDINTO",
@@ -537,6 +543,45 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
     "STRINGID_PKMNTURNEDAWAY",
     "STRINGID_PKMNPRETENDNOTNOTICE",
     "STRINGID_PKMNINCAPABLEOFPOWER",
+  ]),
+  /** battle_message.c:899-905 -- wild/no-escape failure messages. */
+  gNoEscapeStringIds: Object.freeze([
+    "STRINGID_CANTESCAPE",
+    "STRINGID_DONTLEAVEBIRCH",
+    "STRINGID_PREVENTSESCAPE",
+    "STRINGID_CANTESCAPE2",
+    "STRINGID_ATTACKERCANTESCAPE",
+  ]),
+  /**
+   * battle_message.c:1156-1174 -- overworld-weather-start messages. The
+   * source table has one entry for every WEATHER_* selector, including the
+   * legal Factory rain/sandstorm/drought callbacks and the non-battle
+   * overworld weather values.
+   */
+  gWeatherStartsStringIds: Object.freeze([
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_SANDSTORMISRAGING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_SUNLIGHTSTRONG",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+    "STRINGID_ITISRAINING",
+  ]),
+  /** battle_message.c:1388-1394 -- Battle Palace-only flavor messages. */
+  gBattlePalaceFlavorTextTable: Object.freeze([
+    "STRINGID_GLINTAPPEARSINEYE",
+    "STRINGID_PKMNGETTINGINTOPOSITION",
+    "STRINGID_PKMNBEGANGROWLINGDEEPLY",
+    "STRINGID_PKMNEAGERFORMORE",
   ]),
 });
 
@@ -4091,8 +4136,8 @@ function createPrintfromtableOpcodeHandler(
     if (!table) {
       return unsupportedBranch(
         context,
-        `Cmd_printfromtable's table pointer ${operand.expression} is outside the registered `
-          + "status-write quartet's own string tables",
+        `Cmd_printfromtable's table pointer ${operand.expression} is outside the current `
+          + "source-registered string-table universe",
         "battle_script_commands.c",
         2184,
       );

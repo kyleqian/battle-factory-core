@@ -1,4 +1,27 @@
 
+## 1026 — [supervisor, 2026-08-08] **A3 Focus Band OHKO continuation proved end to end**
+
+- **State:** master was clean through `50a89bf7`. The inherited runtime fix
+  `c808ddfe` already retired `battleScriptTryKOOpcode.ts`'s barrier **1→0**;
+  this step closed its missing full-script acceptance proof.
+- **Did:** successful and failed Focus Band rolls now run the complete OHKO
+  script in Tier 1. The success path leaves 1 HP, prints
+  `STRINGID_PKMNHUNGONWITHX`, and returns; failure prints
+  `STRINGID_ONEHITKO`. Both exact RNG ledgers are pinned.
+- **Next/Notes:** superseded by the S10 closure queue. Worker full suite
+  **806 files / 8,067 passed / 1 skipped**, typecheck, and build passed;
+  supervisor reran focused **28/28** and smoke **375/375**. No canonical
+  Battle-2 window.
+
+## 1025 — [user DECISION, 2026-08-08] **S10 closure is the headline: barrier burn-down, then Gate-6 manifest**
+
+- **State/Did:** the user replaced the filler-first queue with S10 closure:
+  retire reachable A/B barriers, preserve proved C/D guards, then assemble the
+  Gate-6 evidence artifacts. #39 and animation remain filler work.
+- **Next/Notes:** superseded by live entry 1028. The full decision remains in
+  git history at `PROGRESS.md`; canonical Battle-2 work after tick 33331 stays
+  prohibited.
+
 ## 1024 — [supervisor WIND-DOWN, 2026-08-08] **Generic S8 presentation and Factory-AI receipts advanced; final union green**
 
 - **State:** master is clean through `12be3c44`. Final worker full suite is

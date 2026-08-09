@@ -1,636 +1,301 @@
-# Barrier reachability triage — every `unsupportedBranch` call site in `src/engine/`
+# Unsupported-branch reachability triage (S10 close-out)
 
-Author: side-lane worker 2026-08-07. This document classifies all
-`unsupported-branch` barrier call sites in `src/engine/` by whether a legal
-Level-50 **singles** battle can actually hit them, under the ROADMAP S10
-2026-08-05 widened scope (all legal Gen-3 species/moves/abilities/items in
-singles; doubles / Battle Arena / link / multi / Frontier-Brain battle contexts
-remain out of scope). The original triage was read-only; the S10/B1 retirement
-receipt below records the narrowly scoped production change.
+This is the current source-audit record for every production
+`unsupported-branch` halt in the Level-50 Factory engine. It is intentionally
+about reachability, not about whether a guard is useful defensively. The
+evidence is the current production source plus the pinned
+`reference/pokeemerald` source and committed battle-script program.
 
-## Reconciliation with `PINNED_BARRIER_COUNTS`
+The current history contains the Enigma Berry retirement (`d92248bb`), so the
+live `Cmd_accuracycheck` count is 10. A/B work is not
+being re-opened here: A3, A5, A6, A7, A8, A9, A10, and A11 are implemented in
+the current source; A4 and A12 are source-refuted as unreachable in Factory
+singles. The widened-scope `printfromtable` table-pointer family is now
+source-complete for the current program; its generic pointer subcase remains
+a defensive future-input guard classified D below.
 
-Method: `grep -rn "unsupportedBranch(" src/engine/*.ts` for helper-call sites,
-plus the `{ kind: "unsupported-branch", ... }` result-literal constructions in
-the two `factoryAi*` modules that never call a helper
-(`barrierCallSitesIn` in `tests/executableFrontierRatchet.test.ts` counts those
-too). The current source inventory is **46** — 44 helper-call sites + 2 literal
-constructions. This matches the current `PINNED_BARRIER_COUNTS` sum; the
-per-module table below is the measured inventory, not a prose estimate. The
-pinned count for `battleScriptHitChainOpcode.ts` is now 10 after B1's call site
-disappeared.
+## Counting contract
 
-| Module | Pin | Found | Classified (A/B/C/D) |
-| --- | --- | --- | --- |
-| battleScriptHitChainOpcode.ts | 10 | 10 | 1A, 9D (B1 retired) |
-| battleScriptAttackCancelerOpcode.ts | 2 | 2 | 2A |
-| battleScriptCheckteamslostOpcode.ts | 3 | 3 | 3C |
-| battleScriptDamagingWeatherOpcode.ts | 4 | 4 | 4D |
-| battleScriptForceSwitchOpcode.ts | 1 | 1 | 1C |
-| battleScriptGetexpOpcode.ts | 2 | 2 | 1A, 1C |
-| battleScriptIngrainLeechSeedWrapOpcode.ts | 2 | 2 | 2D |
-| battleScriptJumpifbyteOpcode.ts | 1 | 1 | 1C |
-| battleScriptJumpifcantswitchOpcode.ts | 1 | 1 | 1C |
-| battleScriptJumpifhalfwordOpcode.ts | 1 | 1 | 1C |
-| battleScriptJumpifwordOpcode.ts | 1 | 1 | 1C |
-| battleScriptMoveEndOpcode.ts | 1 | 1 | 1C |
-| battleScriptOpenPartyScreenOpcode.ts | 1 | 1 | 1C |
-| battleScriptProtectlikeOpcode.ts | 0 | 0 | — |
-| battleScriptRemoveitemOpcode.ts | 1 | 1 | 1D |
-| battleScriptSemiInvulnerableOpcode.ts | 1 | 1 | 1D |
-| battleScriptStatbuffchangeOpcode.ts | 3 | 3 | 1A, 2D |
-| battleScriptStatusPrimaryOpcode.ts | 3 | 3 | 3D |
-| battleScriptSwitchinOpcode.ts | 4 | 4 | 1A, 3C |
-| battleScriptTargetIterationOpcode.ts | 1 | 1 | 1C |
-| battleScriptTryKOOpcode.ts | 0 | 0 | — |
-| battleScriptTryCastformDataChangeOpcode.ts | 0 | 0 | — |
-| factoryBattleScriptFullTurnDecision.ts | 1 | 1 | 1A |
-| factoryAiCheckBadMove.ts | 1 | 1 | 1A |
-| factoryAiCheckViability.ts | 1 | 1 | 1A |
-| **Total** | **46** | **46** | 9A, 0B, 18C, 19D |
+The inventory is one row per `unsupportedBranch(...)` call site, excluding the
+helper definition. The two `factoryAi*` modules have the equivalent literal
+`kind: "unsupported-branch"` site and are counted the same way. A composite
+site is assigned its strongest remaining classification once: a site with a
+live B subcase is counted as B even when another subcase at that same guard is
+proven C. This keeps the module sum and category sum machine-checkable.
 
-BUCKETS: **(A)** reachable in a legal Level-50 singles battle today (highest
-priority). **(B)** reachable only under the widened 2026-08-05 scope (needs a
-legal Gen-3 species/move/ability/item no Factory rental set carries).
-**(C)** provably unreachable in Factory singles — doubles/link/arena/multi
-contexts, or a source branch no committed Factory script path can reach, with
-citation. **(D)** malformed/future-input guard — no committed script carries the
-offending operand shape.
+```text
+BARRIER_COUNTS = {"A": 0, "B": 0, "C": 22, "D": 24, "total": 46}
+PINNED_MODULE_TOTAL = 46
+REMAINING_A = 0
+REMAINING_B = 0
+CONFIRMED_C = 22
+CONFIRMED_D = 24
+```
 
-Several `(C)`/`(D)` verdicts contradict a stale pin *narrative* (the pin
-comments describe an earlier registration state). Each is re-verified against
-the **current** source of the module; the count is unchanged either way, which is
-why the pins still hold.
+These totals must match `PINNED_BARRIER_COUNTS` and `barrierCallSitesIn` in
+`tests/executableFrontierRatchet.test.ts`. The module counts are:
 
----
+| Production module | count | classification |
+| --- | ---: | --- |
+| `battleScriptHitChainOpcode.ts` | 10 | 10 D |
+| `battleScriptAttackCancelerOpcode.ts` | 2 | 2 C |
+| `battleScriptMoveEndOpcode.ts` | 1 | 1 C |
+| `battleScriptJumpifbyteOpcode.ts` | 1 | 1 C |
+| `battleScriptJumpifwordOpcode.ts` | 1 | 1 C |
+| `battleScriptJumpifhalfwordOpcode.ts` | 1 | 1 C |
+| `battleScriptOpenPartyScreenOpcode.ts` | 1 | 1 C |
+| `battleScriptGetexpOpcode.ts` | 2 | 1 C, 1 D |
+| `battleScriptCheckteamslostOpcode.ts` | 3 | 3 C |
+| `battleScriptSwitchinOpcode.ts` | 4 | 4 C |
+| `battleScriptStatbuffchangeOpcode.ts` | 3 | 1 C, 2 D |
+| `battleScriptDamagingWeatherOpcode.ts` | 4 | 4 D |
+| `battleScriptTryCastformDataChangeOpcode.ts` | 0 | — |
+| `battleScriptIngrainLeechSeedWrapOpcode.ts` | 2 | 2 D |
+| `battleScriptRemoveitemOpcode.ts` | 1 | 1 D |
+| `battleScriptStatusPrimaryOpcode.ts` | 3 | 3 D |
+| `battleScriptTargetIterationOpcode.ts` | 1 | 1 C |
+| `battleScriptProtectlikeOpcode.ts` | 0 | — |
+| `battleScriptTryKOOpcode.ts` | 0 | — |
+| `battleScriptForceSwitchOpcode.ts` | 1 | 1 C |
+| `battleScriptSemiInvulnerableOpcode.ts` | 1 | 1 D |
+| `battleScriptJumpifcantswitchOpcode.ts` | 1 | 1 C |
+| `factoryBattleScriptFullTurnDecision.ts` | 1 | 1 C |
+| `factoryAiCheckBadMove.ts` | 1 | 1 C |
+| `factoryAiCheckViability.ts` | 1 | 1 C |
 
-## Bucket (A) — reachable in a legal Level-50 singles battle
+## A/B reconciliation
 
-### A1. `factoryAiCheckBadMove.ts:1321` — AI `AI_CheckBadMove_CheckEffect` if_effect table dispatch
-- **Reason string / citation:** `"AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup"`; `data/battle_ai_scripts.s` (the `if_effect` dispatch in `AI_CheckBadMove`).
-- **What really requires it:** every effect listed in the engine's
-  `AI_CHECK_BAD_MOVE_TABLE_EFFECTS` (~90 effects, `factoryAiCheckBadMove.ts:212-241`)
-  that has no ported handler is scored as `unsupported-branch`. The opponent AI
-  runs `AI_CheckBadMove` for every candidate move of its active mon on every
-  turn, so **any opponent move whose effect is table-listed but unported fires
-  this barrier**. Only ROAR/SLEEP/PARALYZE/CONFUSE are ported; the vast majority
-  of Factory moves (e.g. EFFECT_ATTACK_UP = Swords Dance, EFFECT_RESTORE_HP, ...)
-  are table-listed and unported. `factoryAiDecisionPolicy.ts` treats an
-  unsupported-branch result as a failed candidate, so this silently degrades the
-  opponent AI on essentially every turn.
-- **Port size / what it pulls in:** per-effect AI handler bodies from
-  `data/battle_ai_scripts.s` (each a handful of `if_*`/`Score_*` instructions,
-  already partially ported for the ROAR/SLEEP/PARALYZE/CONFUSE family). No new
-  opcode registration needed. Largest single item of the whole set.
-- **Concrete Tier-1 test:** assert that an opponent candidate with, say,
-  `EFFECT_ATTACK_UP` yields a non-halt `scored` receipt instead of
-  `unsupported-branch` (extension of `tests/factoryAiCheckBadMove.test.ts`).
-- **Breadth unblocked:** the whole AI move-scoring surface — every opponent
-  move in every Factory battle. Using the census's weighted Factory-L50 move
-  counts this touches the large majority of the 2957 weighted moves.
+### Closed A items
 
-### A2. `factoryAiCheckViability.ts:3542` — AI `AI_CheckViability` if_effect table dispatch
-- Same shape as A1 for the *second* AI scorer (`AI_CHECK_VIABILITY_TABLE_EFFECTS`,
-  `factoryAiCheckViability.ts:180-…`). Only Swagger/Counter are ported; the rest
-  of the table fires the barrier whenever the AI viability-scores a move.
-- **Breadth unblocked:** identical reasoning to A1 — every turn's AI scoring.
+- **A1, A2 — implemented.** The complete `AI_CheckBadMove` and
+  `AI_CheckViability` effect tables now dispatch through source-shaped
+  handlers. Their remaining generic guards are listed below as C because all
+  effects in the current committed tables have handlers.
+- **A3 — implemented.** Focus Band’s holder-only OHKO roll and continuation
+  are source-complete. The old `adjustnormaldamage`/`adjustsetdamage` gap is
+  not a live barrier; the source proof and both deterministic continuation
+  regressions are in `tests/battleScriptTryKOOpcode.test.ts`.
+- **A4 — source-refuted.** The pinned Lightning Rod branch in
+  `src/battle_util.c:3854-3861` requires an
+  `ABILITYEFFECT_COUNT_OTHER_SIDE` query whose target ability is not
+  Lightning Rod. In a two-battler Factory battle, the only other side is the
+  target itself; `targetBattler ^= BIT_FLANK` selects 2/3 when
+  `gBattlersCount == 2`, and the source loop is bounded by `i <
+  gBattlersCount` (`src/battle_util.c:3160-3165`). The current guard at
+  `battleScriptAttackCancelerOpcode.ts:274` is therefore C, not a live A
+  route. Doubles are outside this contract.
+- **A5 — implemented.** `VARIOUS_GET_BATTLER_FAINTED` is accepted by the
+  current handler. The same composite site remains as a C guard for excluded
+  Arena/link/general-battle IDs; it is not evidence that the fainted-battler
+  case is unreachable.
+- **A6 — implemented.** `battleScriptFullTurnDecision.ts:1524` retains only
+  the real doubles flank/multi-hit topology guard (`gMultiHitCounter != 1`).
+  Factory singles do not enter that branch.
+- **A7 — implemented.** `battleScriptGetexpOpcode.ts:106-118` resolves
+  `BS_FAINTED`, and the pinned Spikes producers are
+  `data/battle_scripts_1.s:3394-3397` and `:3424-3427`. The remaining
+  selector guard at `:164` is D (future selector input); the separate general
+  EXP guard at `:183` is C for the Frontier/Factory short-circuit.
+- **A8 — implemented.** `B_ANIM_FOCUS_PUNCH_SETUP` is registered in
+  `battleScriptStatbuffchangeOpcode.ts:257-268`, matching
+  `data/battle_scripts_1.s:3712`. The unknown-animation guard at `:293` is C:
+  the only unregistered concrete animation in the committed program is the
+  wild-only Smoke Ball escape at `data/battle_scripts_1.s:3050-3054`.
+  Argument-shape and `jumpifstatus2` guards remain D.
+- **A9 — implemented in its registered tables.** The current
+  `PRINTFROMTABLE_TABLES` includes the defrost and obedience tables
+  (`battleScriptHitChainOpcode.ts:526-546`), covering the source paths for
+  `BattleScript_MoveUsedUnfroze` (`data/battle_scripts_1.s:3761-3762`) and
+  Truant’s `BattleScript_MoveUsedLoafingAroundMsg` (`:4238-4239`, with the
+  source callback in `src/battle_util.c:2086-2093`). The current-program
+  inventory is now complete; the three formerly missing source tables are
+  receipted below, and the pointer guard is D because only a future table
+  pointer outside that finite inventory can reach it.
+- **A10 — implemented/retired.** `battleScriptProtectlikeOpcode.ts` has no
+  unsupported-branch call site. The pinned four-entry table at
+  `src/battle_script_commands.c:719-723` is now handled with the measured
+  adjacent-byte fallback; the adjacent `sMovesForbiddenToCopy` data begins at
+  `:725`. See `docs/protectlike-oob-adjacent-byte.md`.
+- **A11 — implemented/retired.** The former manipulatedamage barrier is gone.
+  The four committed producers (`data/battle_scripts_1.s:349`, `:865`,
+  `:1953`, and `:3272`) use the source’s three handled damage modes; the
+  remaining Ingrain count of two is for COPYARRAY and JUMPIFABILITY, not
+  MANIPULATEDAMAGE. Beat Up is therefore no longer a remaining B item.
+- **A12 — source-refuted.** The current outcome guard at
+  `battleScriptAttackCancelerOpcode.ts:353` is C. In the pinned source,
+  `RunTurnActionsFunctions` first forces `gCurrentActionFuncId =
+  B_ACTION_FINISHED` (`src/battle_main.c:4937-4943`), so the move-action
+  dispatch cannot recursively produce this outcome handoff. The only fresh
+  move-script producer is `HandleAction_UseMove` (`src/battle_util.c:78`), and
+  `ActionFinished` assigns the next action and returns
+  (`src/battle_util.c:658-683`); `BattleTurnPassed` has the same preemption
+  shape (`src/battle_main.c:3988-3992`).
 
-> **BOTH A1 AND A2 RETIRED 2026-08-08 (supervisor-verified on the union).**
-> `AI_CheckBadMove` is **109/109** table effects ported and `AI_CheckViability` is
-> **122/122** — the complete Factory AI move-scoring stack. Neither barrier can fire
-> in ordinary play any more: every table-listed effect reaches a real handler, so
-> the AI no longer discards legal moves it could not score. Both `unsupported-branch`
-> sites remain in the code as defensive guards against a future source sync adding a
-> table effect without a port, and both are now unreachable rather than reachable —
-> treat them as (C).
->
-> The prose above is preserved as the historical record of why this was the queue's
-> top item; its "only ROAR/SLEEP/PARALYZE/CONFUSE are ported" and "only
-> Swagger/Counter are ported" statements describe 2026-08-08 morning, not today.
->
-> Two guards now protect the result. `unportedCheckBadMoveTableEffects()` /
-> `unportedCheckViabilityTableEffects()` derive the unported set instead of
-> hardcoding an example effect (the old pattern broke three times in two days as the
-> engine outgrew it), and the ~26 barrier-example pins were flipped to the inverted
-> property: every table effect must *score*. Separately,
-> `tests/factoryAiScoredWiringParity.test.ts` captures the objects the live adapter
-> hands each scorer and fails if a declared handler-input field is never populated —
-> added after five fields were found read-but-never-wired, and it caught a sixth
-> (`knownAbility` dropped by a conditional spread) the very next round.
+### Source-complete `Cmd_printfromtable` receipt
 
-### A3. `battleScriptTryKOOpcode.ts:108` — `Cmd_tryKO`'s HOLD_EFFECT_FOCUS_BAND roll — **RETIRED 2026-08-07**
+The pinned `data/battle_scripts_1.s` inventory has 43 distinct
+`printfromtable` pointer symbols. The only three absent from the former
+registry are now transcribed directly from `src/battle_message.c`:
 
-`c808ddfe` ports the source's holder-only `Random() % 100 < param` draw before
-the Sturdy check (`battle_script_commands.c:7507-7511`), recording
-`gSpecialStatuses[target].focusBanded` and the item reveal only on success.
-The existing OHKO success trichotomy then consumes that target-owned bit as the
-1-HP `MOVE_RESULT_FOE_HUNG_ON` path with `lastUsedItem`; a failed roll continues
-to the normal OHKO result. The ratchet is therefore `1 -> 0`.
+- `gWeatherStartsStringIds` (`battle_message.c:1156-1174`): 16 entries for
+  `WEATHER_NONE` through `WEATHER_ABNORMAL`, including the source's
+  `STRINGID_SANDSTORMISRAGING` and `STRINGID_SUNLIGHTSTRONG` rows. Its
+  `BattleScript_OverworldWeatherStarts` continuation is pinned at
+  `data/battle_scripts_1.s:3242-3246`.
+- `gNoEscapeStringIds` (`battle_message.c:899-905`): 5 indexed wild/run-fail
+  entries, retained even though the current Factory scope does not enter the
+  wild escape path.
+- `gBattlePalaceFlavorTextTable` (`battle_message.c:1388-1394`): 4 indexed
+  Palace flavor entries, retained as defensive current-program completeness.
 
-`tests/battleScriptTryKOOpcode.test.ts` pins both deterministic roll outcomes,
-their exact RNG ledgers, Focus Band's full `BattleScript_FocusBandActivates`
-message/return continuation, and ordinary `STRINGID_ONEHITKO` continuation on
-a failed roll. This closes the ordinary Factory path: 78 Level-50 Focus Band
-holders versus the four Factory OHKO moves (28 weighted uses).
+`tests/battleScriptHitChainOpcode.test.ts` pins every row and length, the
+weather continuation, and the exact 43-symbol committed-program inventory.
+This is a source/Tier-1 receipt only; it makes no oracle or Gate-6 claim.
 
-### A4. `battleScriptAttackCancelerOpcode.ts:274` — Lightning Rod redirection
+### B reconciliation (none remain)
 
-> **REFUTED by the supervisor 2026-08-08 — this is bucket (C), not (A). Do not
-> implement it.** The (A) call below is wrong: it reasons from carrier count
-> alone and never opens the redirect's own guard. The source
-> (`battle_util.c:3854-3861`) requires BOTH
-> `AbilityBattleEffects(ABILITYEFFECT_COUNT_OTHER_SIDE, …, ABILITY_LIGHTNING_ROD, …)`
-> to find a holder on the side opposite the attacker AND
-> `gBattleMons[targetBattler].ability != ABILITY_LIGHTNING_ROD`. In singles the
-> opposite side contains exactly one battler — the target itself — so the two
-> conditions are mutually exclusive: if the target holds Lightning Rod the
-> second fails, and if it does not the first counts zero. The redirect then
-> does `targetBattler ^= BIT_FLANK` (`BIT_FLANK == 2`,
-> `include/constants/battle.h:56`), selecting battler 2 or 3, which do not
-> exist when `gBattlersCount == 2`. `ABILITYEFFECT_COUNT_OTHER_SIDE` itself
-> loops `i < gBattlersCount` (`battle_util.c:3160-3165`).
-> The pre-existing ratchet comment in `battleScriptAttackCancelerOpcode.ts`
-> ("Lightning Rod remains the adjacent barrier … unreachable in singles") was
-> correct and this triage entry contradicted it without checking. Doubles is
-> out of scope, so this barrier is a legitimate permanent guard.
->
-> **Lesson for whoever reads this file next:** carrier count proves a species
-> can appear, never that a branch can fire. Every (A) claim needs the branch's
-> own guard opened and read. The other (A) entries have not been re-audited to
-> this standard.
+- **B1 — retired on this branch base.** The Enigma-vs-item-table
+  `Cmd_accuracycheck` case is source-complete; the former call site is gone,
+  leaving the HitChain module at its pinned count of 10. The retirement is
+  recorded by the current history and its focused regression; no B1 guard is
+  included in the inventory below.
+- **B2 / table-pointer family — retired.** The exact source tables
+  `gWeatherStartsStringIds`, `gNoEscapeStringIds`, and
+  `gBattlePalaceFlavorTextTable` are now registered. Tier 1 pins all 16, 5,
+  and 4 indexed rows, respectively, and pins the committed program's exact
+  43-symbol `printfromtable` pointer inventory. The generic pointer guard at
+  `battleScriptHitChainOpcode.ts:4137` remains in place for future input/data,
+  but no current-program pointer is outside the registry, so this call site
+  is classified D rather than B.
+- **B2 / `VARIOUS` family — retired.** `VARIOUS_IS_RUNNING_IMPOSSIBLE` now
+  ports `IsRunningFromBattleImpossible`'s exact source precedence, including
+  Smoke Ball/Enigma, Run Away, trapping abilities, trapped/rooted state, and
+  position-derived sides. `VARIOUS_SET_TELEPORT_OUTCOME` writes source
+  outcomes 5/10. The full legal non-trainer Teleport script reaches its own
+  terminal continuation in Tier 1. The composite guard remains counted as C
+  for excluded Arena/link/general-battle IDs, so the module's call-site pin
+  correctly remains four.
 
-- **Reason / citation:** `"Lightning Rod redirection: gSpecialStatuses[].lightningRodRedirected is set (RecordAbilityBattle and BattleScript_TookAttack handoff are unimplemented)"`; `battle_script_commands.c:984-987`, redirect set in `battle_util.c:3855-3860`.
-- **Reachability:** Lightning Rod is a **Factory ability** (census
-  `ABILITY_LIGHTNING_ROD | 15 (0) | 15` — 15 L50 sets carry it via dual-ability
-  species). Any Electric move aimed at a Lightning Rod holder redirects, sets
-  `lightningRodRedirected`, and the resumed script hits this branch.
-- **Port size:** `Cmd_recordabilitybattle` + the `BattleScript_TookAttack`
-  handoff and the redirect state write (battle_util.c:3855-3860) — moderate;
-  pulls in one or two controller events and the redirect target selection.
-- **Tier-1 test:** Electric move vs a Lightning Rod holder → the move is
-  redirected, attacker role swaps, no halt.
-- **Breadth unblocked:** 15 L50 sets; plus the redirect is the same mechanic
-  `battleScriptMoveEndOpcode`'s own Lightning Rod work already half-covers.
+## Confirmed C sites (22)
 
-### A5. `battleScriptSwitchinOpcode.ts:750` — `Cmd_various` unmodeled cases (VARIOUS_GET_BATTLER_FAINTED first)
-- **Reason / citation:** `"Cmd_various case ${idOperand.expression} is not modeled"`; `battle_script_commands.c:6326`.
-- **Reachability:** the unmodeled-id set includes **VARIOUS_GET_BATTLER_FAINTED**,
-  called unconditionally by `BattleScript_PursuitDmgOnSwitchOut`
-  (`data/battle_scripts_1.s:3144`) — the Pursuit-damage-on-switch-out script.
-  Pursuit is a **Factory move** (census EFFECT_PURSUIT 1(6)). Any Pursuit hit on
-  a switching-out mon executes this `various` call and fires the barrier.
-  Also fires for VARIOUS_IS_RUNNING_IMPOSSIBLE / VARIOUS_SET_TELEPORT_OUTCOME
-  (Teleport — bucket B) and — only outside Factory — VARIOUS_RESET_INTIMIDATE_TRACE_BITS
-  (`battle_scripts_1.s:2866`, short-circuited for Factory by the
-  `jumpifbattletype BATTLE_TYPE_FRONTIER` at `:2851`; bucket C for that id).
-- **Port size:** the VARIOUS_GET_BATTLER_FAINTED case is a small source-complete
-  port (`battle_script_commands.c:6344-6348`); the same handler block would then
-  cover Teleport's two ids (B). Small.
-- **Tier-1 test:** opponent Pursuits a switching player mon and the hit lands →
-  `getbattlerfainted` resolves instead of halting.
-- **Breadth unblocked:** Pursuit (6 weighted Factory carriers) switch-out hits,
-  plus Teleport (widened scope).
+C means the guard is a legitimate defensive boundary, but the current
+Factory-single program cannot reach the guarded source branch. These are
+listed by current production call site; source line numbers in the reason
+refer to the pinned source unless marked otherwise.
 
-### A6. `factoryBattleScriptFullTurnDecision.ts:1507` — voluntary switch under Pursuit interception
-- **Reason / citation:** `"voluntary … switch while the opponent's selected move is MOVE_PURSUIT (pre-switch interception/double-power path)"`; `battle_script_commands.c:3200-3257` (Pursuit interception on the action-switch path).
-- **Reachability:** the voluntary-switch path executes in Factory; when the
-  opponent's selected move is Pursuit (a Factory move, 6 carriers) the
-  interception arm fires.
-- **Port size:** the pre-switch double-power hit + switch-in continuation
-  (`BattleScript_PursuitDmgOnSwitchOut` interplay) — moderate; related to A5.
-- **Tier-1 test:** player switches while opponent selected Pursuit → the
-  double-power hit applies to the switching mon before it leaves, no halt.
-- **Breadth unblocked:** Pursuit (6 weighted carriers) + correct switch-out
-  damage; also closes the same gap A5's `getbattlerfainted` sits behind.
+1. `battleScriptAttackCancelerOpcode.ts:274` — Lightning Rod’s
+   `COUNT_OTHER_SIDE` topology (`src/battle_util.c:3854-3861`), as proved for
+   A4 above.
+2. `battleScriptAttackCancelerOpcode.ts:353` — outcome handoff after the
+   source action scheduler (`src/battle_main.c:4937-4943`), as proved for A12.
+3. `battleScriptCheckteamslostOpcode.ts:93` — in-game partner HP-count
+   branch (`src/battle_script_commands.c:3543-3551`).
+4. `battleScriptCheckteamslostOpcode.ts:101` — Arena lost-mon exclusions
+   (`src/battle_script_commands.c:3552-3577`).
+5. `battleScriptCheckteamslostOpcode.ts:117` — link/multi empty-slot branch
+   (`src/battle_script_commands.c:3579-3590`).
+6. `battleScriptForceSwitchOpcode.ts:262` — `BattleScript_SuccessForceOut`
+   reaches the trainer continuation at `data/battle_scripts_1.s:3324-3332`;
+   Factory’s trainer bit takes the continuation rather than the
+   `setoutcomeonteleport` arm.
+7. `battleScriptGetexpOpcode.ts:183` — general EXP/evolution states
+   (`src/battle_script_commands.c:3287-3300`) are short-circuited by the
+   Frontier battle-type mask (`include/constants/battle.h:78,91`).
+8. `battleScriptJumpifbyteOpcode.ts:141` — the 65 concrete byte compares
+   are modeled except the non-Factory paths: battle-style/party-size in
+   `data/battle_scripts_1.s:2849-2863`, wild run outcomes at `:1931-1932`,
+   Dome draw at `:2958-2959`, and Arena results at `:4499-4500`.
+9. `battleScriptJumpifwordOpcode.ts:227` — current maps handle
+   `gBattleMoveDamage` and `HITMARKER_NO_ATTACKSTRING`; the remaining
+   unregistered value cases are the non-Factory loss/link scripts at
+   `data/battle_scripts_1.s:2945-2950`, `:2993`, and `:3000`. None is on
+   Factory’s own fainted-handler path.
+10. `battleScriptJumpifhalfwordOpcode.ts:165` — 14 of 15 concrete
+    comparisons resolve; the remaining `gTrainerBattleOpponent_A ==
+    TRAINER_SECRET_BASE` call is `BattleScript_LocalBattleLost` at
+    `data/battle_scripts_1.s:2950`, after the Frontier short-circuit at
+    `:2947`.
+11. `battleScriptMoveEndOpcode.ts:982` — `NEXT_TARGET` is a doubles-only
+    source branch (`src/battle_script_commands.c:6590-6612`).
+12. `battleScriptOpenPartyScreenOpcode.ts:149` — link/multi/double party
+    collection (`src/battle_script_commands.c:4876-4905`); Factory uses the
+    ordinary singles path.
+13. `battleScriptSwitchinOpcode.ts:317` — `switchhandleorder` case 0 is the
+    multi-battler collection/order case; Factory’s committed call sites do
+    not require it (`src/battle_script_commands.c:5152-5190`, with the link
+    producers at `data/battle_scripts_1.s:2902-2904`).
+14. `battleScriptSwitchinOpcode.ts:442` — cross-battler WRAPPED identity
+    (`src/battle_script_commands.c:3199-3210`) requires more than two
+    battlers.
+15. `battleScriptSwitchinOpcode.ts:676` — Arena points initialization
+    (`src/battle_script_commands.c:4674-4696`); Factory is not Arena.
+16. `battleScriptSwitchinOpcode.ts:796` — the remaining generic `Cmd_various`
+    boundary covers excluded Arena/link/general-battle IDs after the legal
+    widened-scope Teleport cases were implemented. No current Factory-singles
+    producer reaches an unmodeled ID.
+17. `battleScriptTargetIterationOpcode.ts:114` — target iteration is
+    doubles-only (`src/battle_script_commands.c:6594-6608`).
+18. `battleScriptStatbuffchangeOpcode.ts:293` — unknown animation type;
+    the only concrete unregistered use is the wild Smoke Ball escape noted
+    above (`data/battle_scripts_1.s:3050-3054`).
+19. `battleScriptJumpifcantswitchOpcode.ts:167` — the partner/multi and
+    active-party scan (`src/battle_script_commands.c:4714-4848`) is outside
+    Factory’s two-battler singles topology.
+20. `battleScriptFullTurnDecision.ts:1524` — the remaining multi-hit flank
+    rule is doubles-only (`gMultiHitCounter != 1`).
+21. `factoryAiCheckBadMove.ts:2642` — the current explicit AI effect table
+    covers all 109/109 committed entries; this generic guard is a
+    source-synchronization boundary, not a current Factory effect route.
+22. `factoryAiCheckViability.ts:7205` — the current explicit viability table
+    covers all 122/122 committed entries; this generic guard is likewise
+    defensive. Both AI sites are retained because the source census, not an
+    assumption about future data, owns their count.
 
-### A7. `battleScriptGetexpOpcode.ts:148` — `Cmd_getexp` selector `BS_FAINTED`
-- **Reason / citation:** `"Cmd_getexp's GetBattlerForBattleScript selector … is not BS_TARGET/BS_ATTACKER"`; `battle_script_commands.c:3264`.
-- **Reachability:** `BattleScript_SpikesOnFaintedBattlerFainted`
-  (`data/battle_scripts_1.s:3429`) calls `getexp BS_FAINTED` — the Spikes
-  damage-on-switch-in path when the replacing mon actually faints to the Spikes.
-  Spikes is a **Factory move** (census EFFECT_SPIKES 1(3)); a low-HP switch-in
-  onto Spikes fainting is an ordinary Factory event. The hit-chain siblings
-  (`resolveHitChainBattlerOperand`, `battleScriptHitChainOpcode.ts:710-723`)
-  already resolve BS_FAINTED via `selectorRoles.fainted`; getexp's resolver
-  (`battleScriptGetexpOpcode.ts:95-103`) does not — a genuine one-line gap.
-- **Port size:** add the BS_FAINTED case to `resolveGetexpBattlerOperand` (and
-  confirm the fainted role is populated on this path). Tiny.
-- **Tier-1 test:** Spikes faints the switching-in replacement → the fainted
-  flow runs `getexp BS_FAINTED` without halting.
-- **Breadth unblocked:** Spikes (3 weighted carriers) faint-on-switch-in; also
-  the general fainted-mon edge that all three Spikes/faint scripts share.
+## Confirmed D sites (24)
 
-### A8. `battleScriptStatbuffchangeOpcode.ts:267` — `Cmd_playanimation` unrecognized animType (B_ANIM_FOCUS_PUNCH_SETUP)
-- **Reason / citation:** `"Cmd_playanimation's animType ${…} is not registered"`; `battle_script_commands.c:4011`.
-- **Reachability:** of the 41 `playanimation` call sites, only
-  **B_ANIM_FOCUS_PUNCH_SETUP** (`BattleScript_FocusPunchSetUp`,
-  `data/battle_scripts_1.s:3712`) and B_ANIM_SMOKEBALL_ESCAPE (wild-battle
-  escape, bucket C) are unregistered. Focus Punch is a **Factory move** (census
-  EFFECT_FOCUS_PUNCH 1(11)); its charge-up script executes `playanimation` with
-  the unregistered animType and halts.
-- **Port size:** register the animType entry (a `B_ANIM_FOCUS_PUNCH_SETUP` row in
-  `PLAYANIMATION_ANIM_TYPES`, NULL-arg shape) + whatever controller animation
-  event it maps to. Small.
-- **Tier-1 test:** Focus Punch charges → the setup animation emits, no halt.
-- **Breadth unblocked:** Focus Punch (11 weighted carriers) and, per the
-  register set, all other animTypes already resolve.
+D means the guard protects malformed operands, unsupported selectors, or
+other future input/data that is not produced by the current committed Factory
+program. The guard can be reached only by changing the input/data contract.
 
-### A9. `battleScriptHitChainOpcode.ts:4086` — `Cmd_printfromtable` unrecognized table pointer
-- **Reason / citation:** `"Cmd_printfromtable's table pointer ${…} is outside the registered … string tables"`; `battle_script_commands.c:2184`.
-- **Reachability:** the barrier fires for any table outside
-  `PRINTFROMTABLE_TABLES` (~38 registered). Of the 45 tables the committed
-  program uses, five are unregistered and two of them sit on ordinary Factory
-  paths:
-  - **gInobedientStringIds** — `BattleScript_MoveUsedLoafingAroundMsg`
-    (`data/battle_scripts_1.s:4239`). Reached from the **Truant** canceler phase
-    (`battle_util.c:2092`): a Truant Slaking (census ABILITY_TRUANT 5(5) L50
-    carriers — a Factory rental!) on its loafing turn runs this exact script.
-  - **gGotDefrostedStringIds** — `BattleScript_MoveUsedUnfroze`
-    (`battle_script_commands.c:2257` via `BattleScript_MoveUsedUnfroze`): a
-    frozen mon thawing on a fire move is ordinary play.
-  - gWeatherStartsStringIds (Sand Stream/Drought/Drizzle switch-in — bucket B),
-    gNoEscapeStringIds (wild-battle run — bucket C), gBattlePalaceFlavorTextTable
-    (Battle Palace — bucket C).
-- **Port size:** the two tables are message-string arrays in
-  `battle_message.c`; add them (and the Truant/defrost message index paths) to
-  `PRINTFROMTABLE_TABLES`. Small — this is the same Truant handoff A9's sibling
-  already drives.
-- **Tier-1 test:** a Truant Slaking's loafing turn prints the loafing message
-  instead of halting.
-- **Breadth unblocked:** Truant (5 carriers), fire-move thaw messages, plus (B)
-  the weather-ability messages. **This is the reachable-gap poster child of the
-  audit: a "narrow" guard that an ordinary Factory rental triggers on its first
-  Truant turn.**
+- `battleScriptHitChainOpcode.ts:1150,2345,2390,2466,3318,4128,4137,4148,4533`
+  — accuracy move shape; hitanimation/healthbar/datahp selector shape;
+  unsupported SetMoveEffect family; printfromtable operand/pointer/index
+  shape; updatestatusicon shape; and cleareffectsonfaint selector shape. The
+  Factory call sites use the registered selectors and effect family. The
+  print-table pointer guard is the future-input D subcase at `:4137`.
+- `battleScriptDamagingWeatherOpcode.ts:258,276,327,381` — all current
+  addbyte, bicword, and jumpifarraynotequal operands are registered. In
+  particular, the current handler accepts `sTRIPLE_KICK_POWER`’s delta 10;
+  the stale rejection prose in the module comment is not the current guard
+  behavior.
+- `battleScriptGetexpOpcode.ts:164` — all five committed `getexp` selectors
+  resolve to `BS_TARGET`, `BS_ATTACKER`, or `BS_FAINTED`; the guard preserves
+  the future-selector boundary.
+- `battleScriptIngrainLeechSeedWrapOpcode.ts:327,432` — all 16 committed
+  COPYARRAY tuples and all 18 JUMPIFABILITY call sites are registered. The
+  latter includes `BS_SCRIPTING`; the implementation’s old error text naming
+  only target/attacker is stale, not a new live route.
+- `battleScriptRemoveitemOpcode.ts:45` and
+  `battleScriptSemiInvulnerableOpcode.ts:69` — selector/operand shape guards;
+  current Factory calls use the registered `BS_SCRIPTING`/`BS_ATTACKER` forms.
+- `battleScriptStatbuffchangeOpcode.ts:301,426` — playanimation argument
+  shape and `jumpifstatus2` value map. The current six status2 values are
+  `SUBSTITUTE`, `CONFUSION`, `MULTIPLETURNS`, `FOCUS_ENERGY`,
+  `ESCAPE_PREVENTION`, and `NIGHTMARE` (`:410-417`); all committed calls
+  resolve.
+- `battleScriptStatusPrimaryOpcode.ts:112,139,172` — status1, type, and
+  side-affecting value maps; all 21/5/10 committed call sites use registered
+  values.
 
-### A10. `battleScriptProtectlikeOpcode.ts:98` — `sProtectSuccessRates[protectUses]` OOB read
-- **Reason / citation:** `"sProtectSuccessRates[protectUses] OOB read: protectUses is N after 4 consecutive successful Protect-like uses"`; `battle_script_commands.c:719` (the 4-entry const table `{USHRT_MAX, /2, /4, /8}`) and `:6514` (the `sProtectSuccessRates[protectUses]` read after `protectUses` has been incremented at `:6526`).
-- **Reachability:** Protect/Detect/Endure are all Factory moves (census
-  EFFECT_PROTECT 2(37), EFFECT_ENDURE 1(24)). The 5th consecutive
-  Protect-family use (whether or not the previous ones succeeded) drives
-  `protectUses` past the table and hits this branch. Rare in practice but
-  legal and ordinary-play reachable. Already reachability-tested
-  (`tests/battleScriptProtectlikeOpcode.test.ts`).
-- **Port size:** needs the source-exact behavior of the ROM byte following the
-  table (the engine must decide the constant); small.
-- **Tier-1 test:** already exists; extend to assert the chosen OOB fallback
-  value is stable.
-- **Breadth unblocked:** the 5th+ consecutive Protect-family use for all 61
-  weighted carriers of Protect/Endure.
+The ten HitChain, four weather, one getexp, two Ingrain, two selector, two
+Statbuff, and three StatusPrimary sites above sum to 24. No source or current
+call-site evidence supports reclassifying any D site as live A/B.
 
-### A11. `battleScriptIngrainLeechSeedWrapOpcode.ts:472` — `Cmd_manipulatedamage` DMG_RECOIL_FROM_MISS (Struggle recoil)
-- **Reason / citation:** `"Cmd_manipulatedamage's mode … is not the registered DMG_CHANGE_SIGN case"`; `battle_script_commands.c:6740-6759`.
-- **Reachability:** `BattleScript_MoveMissedDoDamage` (`battle_scripts_1.s:865`)
-  uses `manipulatedamage DMG_RECOIL_FROM_MISS` — the **Struggle** recoil
-  branch. Struggle is reachable in **any** battle where a mon has no usable PP
-  (fully universal, not content-gated). The DMG_DOUBLED arm is Beat Up
-  (bucket B).
-- **Port size:** the recoil-from-miss arithmetic arm; small.
-- **Tier-1 test:** run a mon's PP to zero, use Struggle → recoil damage applies,
-  no halt.
-- **Breadth unblocked:** Struggle recoil (every battle), plus (B) Beat Up
-  (widened scope).
+## Audit boundary
 
-### A12. `battleScriptAttackCancelerOpcode.ts:338` — battle-outcome → B_ACTION_FINISHED handoff
-- **Reason / citation:** `"gBattleOutcome != 0 -> gCurrentActionFuncId = B_ACTION_FINISHED (consumed by the round controller, out of this step's scope)"`; `battle_script_commands.c:…` (the attack-canceler's outcome preflight).
-- **Reachability:** fires whenever the attack-canceler is entered with
-  `gBattleOutcome != 0`, i.e. at battle end (a side fully wiped). Ordinary
-  battle end is common — **but** the round controller may consume battle end
-  before the script machine re-enters a canceler, in which case this is latent
-  rather than fired today. **Honest uncertainty:** I did not prove which; treat
-  as (A)-reachable pending a battle-end fixture.
-- **Port size:** the typed action-scheduler receipt the round controller needs
-  (same machinery `Cmd_finishaction` defers on, see C1). Larger than the rest.
-- **Tier-1 test:** a battle where the opponent's last mon faints reaches a
-  clean terminal decision, no unsupported-branch halt.
-- **Breadth unblocked:** every battle's end.
-
-> **REFUTED 2026-08-08 (supervisor, source-verified) — reclassified (C),
-> unreachable. Do not take the port this entry proposes.** The entry's own
-> "Honest uncertainty" line asked for exactly this check; here is the answer.
->
-> `RunTurnActionsFunctions` (`src/battle_main.c:4937-4945`) is the **only**
-> dispatcher of the turn-action table, and it re-tests the outcome on every
-> call, *before* dispatching:
->
-> ```c
-> static void RunTurnActionsFunctions(void)
-> {
->     if (gBattleOutcome != 0)
->         gCurrentActionFuncId = B_ACTION_FINISHED;
->     ...
->     sTurnActionsFuncsTable[gCurrentActionFuncId]();
-> ```
->
-> `HandleAction_UseMove` (`src/battle_util.c:78`) is the only producer of a
-> fresh move script, and a move script is the only thing that begins with
-> `attackcanceler`. It runs only as `sTurnActionsFuncsTable[B_ACTION_USE_MOVE]`,
-> i.e. only through the line above. The scheduler cannot chain past that check
-> inside one frame either: `HandleAction_ActionFinished`
-> (`src/battle_util.c:658-683`) *assigns* `gCurrentActionFuncId =
-> gActionsByTurnOrder[...]` and returns — it never calls the next handler
-> itself, so the next handler is dispatched by a later
-> `RunTurnActionsFunctions` call, whose first statement overrides that
-> assignment. `BattleTurnPassed` (`src/battle_main.c:3988-3992`) does the same
-> on the end-of-turn path.
->
-> So `Cmd_attackcanceler`'s own `if (gBattleOutcome != 0)` preflight
-> (`battle_script_commands.c:919`) is **defensive redundancy in the C source**:
-> the dispatcher one level up has already replaced the action by the time it
-> could matter. Same shape as the A4 Lightning Rod refutation — real source, but
-> it cannot fire under Level-50 singles' actual control flow.
->
-> **This engine already models that preemption.**
-> `factoryBattleScriptFullTurnDecision.ts`'s header documents the terminal
-> second-action skip and cites `battle_main.c:4937-4943` for it. And the
-> preflight itself is already source-complete:
-> `preflightBattleScriptActionEntry` (`battleScriptActionAdmission.ts:3925-3945`)
-> returns a typed `stop` whose receipt already carries
-> `currentAction: { kind: "set", sourceConstant: "B_ACTION_FINISHED" }`, pinned
-> by `tests/battleScriptActionAdmission.test.ts:309`. Nothing is missing from
-> the receipt; the only defect is that `attackCancelerOpcodeHandler`
-> (`battleScriptAttackCancelerOpcode.ts:337-343`) discards it and raises
-> `unsupported-branch` instead.
->
-> **Remaining work is a string, not a port:** restate the barrier as an explicit
-> (C) guard citing `battle_main.c:4939`. Its current reason string — "consumed
-> by the round controller, out of this step's scope" — is false and should not
-> survive. **Fourth barrier this run whose own reason string had decayed.**
-
----
-
-## Bucket (B) — reachable only under the widened 2026-08-05 scope
-
-### B1. `battleScriptHitChainOpcode.ts:1169` — Enigma Berry evasion-up (`Cmd_accuracycheck`) — **RETIRED 2026-08-08**
-- **Former reason / citation:** `"the target's Enigma Berry evasion-up holdEffectParam is not modeled (gEnigmaBerries is absent)"`; `battle_script_commands.c:1160-1173`.
-- **Retired implementation:** `BattleScriptRulesContext` now owns both
-  immutable four-battler byte arrays, `enigmaBerryHoldEffects` and
-  `enigmaBerryHoldEffectParams`. The resolvers follow the source's Enigma-vs-
-  `gItems` branch (`global.berry.h:55-61`; the same per-battler lookup is
-  visible in `battle_util.c:3269-3300`), and `Cmd_accuracycheck` feeds both
-  resolved values into the existing accuracy calculation. Normal item-table
-  parameters remain unchanged.
-- **Tier-1 receipt:** `tests/battleScriptMoveEndOwnership.test.ts` pins context
-  shape/validation and Enigma ownership alongside a normal Focus Band
-  parameter; `tests/battleScriptHitChainOpcode.test.ts` pins exact-RNG Enigma
-  hit and miss outcomes with one accuracy draw and no halt.
-- **Ratchet:** `battleScriptHitChainOpcode.ts` **11 → 10**; the former call
-  site is gone, while the generic malformed accuracy-operand guard remains.
-- **Breadth unblocked:** legal Gen-3 Enigma Berry users under the widened scope.
-
-### B2. Sub-cases folded into A9 / A5 / A11 (same single barrier call site)
-- **`printfromtable` gWeatherStartsStringIds** (A9's barrier):
-  `BattleScript_OverworldWeatherStarts` is reached by the Sand Stream / Drought /
-  Drizzle switch-in weather callback (`battle_util.c:2529`). Those three
-  abilities are **zero-carrier** in Factory (census) but legal Gen-3 abilities.
-- **`manipulatedamage` DMG_DOUBLED** (A11's barrier): `BattleScript_BeatUpLoop`
-  (`battle_scripts_1.s:1953`). Beat Up is legal, 0 Factory carriers.
-- **`various` VARIOUS_IS_RUNNING_IMPOSSIBLE + VARIOUS_SET_TELEPORT_OUTCOME**
-  (A5's barrier): `BattleScript_EffectTeleport` (`battle_scripts_1.s:1930,1937`).
-  Teleport is legal, 0 Factory carriers (census EFFECT_TELEPORT 0).
-
----
-
-## Bucket (C) — provably unreachable in Factory singles (legitimate permanent guards)
-
-Each cites the exact source line that makes it impossible for the committed
-Factory-only script path.
-
-- **C. `battleScriptCheckteamslostOpcode.ts:93`** — `BATTLE_TYPE_INGAME_PARTNER`
-  Steven-partner MULTI_PARTY_SIZE HP count. Partner battles are doubles-context;
-  `battle_script_commands.c:3543` is gated on the INGAME_PARTNER battle-type bit
-  Factory never sets (`battle.h` FRONTIER bits are mutually exclusive with it).
-- **C. `battleScriptCheckteamslostOpcode.ts:101`** — `BATTLE_TYPE_ARENA` per-mon
-  HP exclusion (`battle_script_commands.c:3557/3571`). Arena is a sibling
-  Frontier facility; Factory (`BATTLE_TYPE_FACTORY`) never sets ARENA.
-- **C. `battleScriptCheckteamslostOpcode.ts:117`** — link-battle
-  empty-battler-spot counting (`battle_script_commands.c:3582`), gated on
-  `BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK`. Factory singles is never a
-  link battle.
-- **C. `battleScriptSwitchinOpcode.ts:287`** — `Cmd_switchhandleorder` case 0
-  (multi-battler collection). The only case-0 call sites are
-  `LinkHandleFaintedMonMultipleStart` (`battle_scripts_1.s:2902,2904`) — link
-  battles.
-- **C. `battleScriptSwitchinOpcode.ts:412`** — `SwitchInClearSetData`'s
-  STATUS2_WRAPPED cross-battler clear, guarded by `battlersCount !== 2`
-  (`battle_script_commands.c:3199`). Singles always has 2 battlers.
-- **C. `battleScriptSwitchinOpcode.ts:646`** — `Cmd_switchinanim`'s
-  `BATTLE_TYPE_ARENA` point-init (`battle_script_commands.c:4696`). Factory
-  never sets ARENA.
-- **C. `battleScriptGetexpOpcode.ts:166`** — general EXP/level-up/evolution
-  machinery (states 2-5). `shortCircuits` is true for any Frontier battle
-  (`battle_script_commands.c:…`, GETEXP state-0 short-circuit mask includes
-  `BATTLE_TYPE_FRONTIER`), and Factory is always Frontier. Needs a non-Frontier,
-  non-link, non-Safari, non-Trainer-Hill, non-EReader battle — a battle context,
-  not a species/move/ability/item breadth, so out of scope.
-- **C. `battleScriptMoveEndOpcode.ts:982`** — MOVEEND_NEXT_TARGET doubles replay
-  (`battle_script_commands.c:…`, `MoveValuesCleanUp` + `BattleScript_FlushMessageBox`
-  transfer under a doubles multi-target loop). Singles has one target.
-- **C. `battleScriptOpenPartyScreenOpcode.ts:149`** — `Cmd_openpartyscreen`'s
-  doubles/multi branches (BATTLE_TYPE_MULTI link-standby fan-out, and
-  `GetMostSuitableMonToSwitchInto`'s `BATTLE_TYPE_DOUBLE` flank pick). Singles
-  never reaches either.
-- **C. `battleScriptTargetIterationOpcode.ts:114`** — `Cmd_jumpifnexttargetvalid`'s
-  `BATTLE_TYPE_DOUBLE` next-target scan. Doubles only.
-- **C. `battleScriptForceSwitchOpcode.ts:262`** — `Cmd_finishaction` sits on
-  `BattleScript_SuccessForceOut`'s **not-taken** non-trainer fork arm
-  (`battle_scripts_1.s:3331-3332`, the `jumpifbattletype BATTLE_TYPE_TRAINER`
-  always taken for Factory); the counterfactual arm additionally barriers first
-  on `setoutcomeonteleport` (already-registered VARIOUS). Doubly unreachable.
-- **C. `battleScriptJumpifcantswitchOpcode.ts:167`** — the in-game-partner/MULTI/
-  two-opponents/doubles scan family (`battle_script_commands.c:4714-4848`),
-  gated on `battlersCount !== 2` or MULTI/TWO_OPPONENTS/INGAME_PARTNER bits.
-- **C. `battleScriptJumpifbyteOpcode.ts:141`** — the only unmodeled operand
-  shapes are: `sBATTLE_STYLE`/`OPTIONS_BATTLE_STYLE_SET` and `PARTY_SIZE`
-  (`BattleScript_FaintedMonTryChoose`, `battle_scripts_1.s:2852,2863` — reached
-  only *after* the `jumpifbattletype BATTLE_TYPE_FRONTIER` short-circuit at
-  `:2851`, so never in Factory); `BATTLE_RUN_FORBIDDEN`/`BATTLE_RUN_FAILURE`
-  (wild-battle run flow, `:1931-1932`); `B_OUTCOME_DREW` (`BattleScript_CheckDomeDrew`,
-  `:2959` — Dome context); `ARENA_RESULT_*` (Arena judgment, `:4499-4500`).
-  All other 65 call sites resolve (verified by enumerating every
-  `B_SCR_OP_JUMPIFBYTE` site's pointer+value against the current resolver).
-  **Residual uncertainty, stated honestly:** I exhaustively checked pointers and
-  the value set; the four unmodeled operand classes above are the only ones.
-- **C. `battleScriptJumpifhalfwordOpcode.ts:165`** — the only unmodeled operand
-  is `gTrainerBattleOpponent_A == TRAINER_SECRET_BASE`
-  (`BattleScript_LocalBattleLost`, `battle_scripts_1.s:2950`). It is reached
-  only after the `jumpifbattletype BATTLE_TYPE_FRONTIER` short-circuit at
-  `:2947`, so never in Factory. Every other call site (gCurrentMove,
-  gChosenMove×3, gBattleWeather) resolves in the current
-  `readJumpifhalfwordMemHword` (`:91-101`) — the pin's "only gCurrentMove is
-  modeled" narrative is outdated.
-- **C. `battleScriptJumpifwordOpcode.ts:227`** — the only unmodeled values are
-  `BATTLE_TYPE_TRAINER_HILL` / `BATTLE_TYPE_EREADER_TRAINER`
-  (`BattleScript_LocalBattleLost`, `:2948-2949`, after the `:2947` FRONTIER
-  short-circuit), `BATTLE_TYPE_RECORDED` (`BattleScript_FrontierLinkBattleLost`,
-  `:2993`, link), and `BATTLE_TYPE_BATTLE_TOWER`
-  (`BattleScript_LinkBattleWonOrLost` → `TowerLinkBattleWon`, `:3000-3029`,
-  link). None reachable in Factory singles.
-- **C. `battleScriptSwitchinOpcode.ts:750` sub-case** — VARIOUS_RESET_INTIMIDATE_TRACE_BITS
-  (`battle_scripts_1.s:2866`) is reached only after the `:2851` FRONTIER
-  short-circuit (non-Factory trainer battles with an opponent switch prompt);
-  VARIOUS_WAIT_CRY/VOLUME_UP/VOLUME_DOWN/EMIT_YESNOBOX and all ARENA_* ids are
-  Battle Arena scripts (`battle_scripts_1.s:4449-4549`); VARIOUS_UPDATE_CHOICE_MOVE_ON_LVL_UP
-  is a level-up script (`:3187`); VARIOUS_PLAY_TRAINER_DEFEATED_MUSIC is the
-  Battle-Tower link win (`:3010`). (The same single barrier also fires for the
-  (A) VARIOUS_GET_BATTLER_FAINTED and (B) Teleport ids — see A5/B2.)
-- **C. `battleScriptStatusPrimaryOpcode` / `Statbuffchange` Arena/Palace reachability**
-  — not barrier sites; listed for completeness only.
-
----
-
-## Bucket (D) — malformed-input / future-input guards (legitimate; each verified no committed script carries the offending operand)
-
-Verified by enumerating every committed call site of the opcode and confirming
-the engine's current resolver accepts each operand:
-
-- **D. `battleScriptHitChainOpcode.ts:1088`** — `Cmd_accuracycheck` non-ACC_CURR_MOVE
-  argument. All 66 call sites use `ACC_CURR_MOVE`, `NO_ACC_CALC`,
-  `NO_ACC_CALC_CHECK_LOCK_ON`, or the explicit `MOVE_FUTURE_SIGHT`/`MOVE_DOOM_DESIRE`
-  literals, all modeled. (The Enigma Berry sub-branch of the same opcode is B1.)
-- **D. `battleScriptHitChainOpcode.ts:2294`** — `Cmd_hitanimation` selector; all
-  14 call sites are BS_TARGET/BS_ATTACKER.
-- **D. `battleScriptHitChainOpcode.ts:2339`** — `Cmd_healthbarupdate` selector;
-  all 41 call sites (BS_TARGET/BS_ATTACKER/BS_FAINTED) resolve.
-- **D. `battleScriptHitChainOpcode.ts:2415`** — `Cmd_datahpupdate` selector;
-  all 41 call sites resolve (BS_FAINTED handled at `:717-721`).
-- **D. `battleScriptHitChainOpcode.ts:3267`** — SetMoveEffect family-B
-  (status2/misc) effectByte. All 22 committed `setmoveeffect` values are in
-  `SET_MOVE_EFFECT_SUPPORTED_BYTES` (verified by enumeration).
-- **D. `battleScriptHitChainOpcode.ts:4077`** — `Cmd_printfromtable` bad operand
-  shape. All 73 call sites are the canonical single 4-byte pointer form.
-- **D. `battleScriptHitChainOpcode.ts:4097`** — `Cmd_printfromtable`
-  MULTISTRING_CHOOSER out-of-range. The registered tables' indices are set by
-  the scripts they were registered against; no reachable script drives an
-  out-of-range index (the Truant loafing index lands on the *pointer* barrier,
-  A9, not this one). **Note:** this guard is the one to double-check first if a
-  new script reuses a registered table with a different MULTISTRING_CHOOSER
-  value.
-- **D. `battleScriptHitChainOpcode.ts:4130`** — `Cmd_updatestatusicon` bad
-  operand shape; all 18 call sites are single-byte battler operands
-  (BS_ATTACKER_WITH_PARTNER included).
-- **D. `battleScriptHitChainOpcode.ts:4482`** — `Cmd_cleareffectsonfaint`
-  selector; the non-BS_TARGET/BS_ATTACKER sites are BS_OPPONENT1/BS_PLAYER1 in
-  Arena judgment scripts only (`battle_scripts_1.s:4511-4543`); all Factory
-  sites resolve.
-- **D. `battleScriptDamagingWeatherOpcode.ts:258`** — `Cmd_addbyte`'s
-  `sMULTIHIT_STRING + 4` non-literal delta; every committed multi-hit site uses
-  the literal, modeled.
-- **D. `battleScriptDamagingWeatherOpcode.ts:276`** — `Cmd_addbyte` shared-universe
-  fallback; all 9 call sites resolve in the byte universe.
-- **D. `battleScriptDamagingWeatherOpcode.ts:327`** — `Cmd_bicword` unknown
-  operand pair; all 3 call sites are registered pairs.
-- **D. `battleScriptDamagingWeatherOpcode.ts:381`** — `Cmd_jumpifarraynotequal`
-  unknown pointer/comparand; all 7 call sites resolve.
-- **D. `battleScriptRemoveitemOpcode.ts:45`** — `Cmd_removeitem` selector
-  unavailable; all 13 call sites (BS_ATTACKER/BS_SCRIPTING) resolve.
-- **D. `battleScriptSemiInvulnerableOpcode.ts:69`** — `Cmd_clearstatusfromeffect`
-  selector unavailable; all 5 call sites use BS_ATTACKER.
-- **D. `battleScriptStatbuffchangeOpcode.ts:275`** — `Cmd_playanimation` argument
-  mismatch; every call site passes the arg its animType declares.
-- **D. `battleScriptStatbuffchangeOpcode.ts:362`** — `Cmd_jumpifstatus2` value
-  outside the registered set; all 37 call-site masks (SUBSTITUTE, CONFUSION,
-  MULTIPLETURNS, FOCUS_ENERGY, ESCAPE_PREVENTION, NIGHTMARE) are registered in
-  the current `JUMPIFSTATUS2_VALUES` (`:348-355`) — the pin's "only SUBSTITUTE
-  is registered" narrative is outdated.
-- **D. `battleScriptStatusPrimaryOpcode.ts:112`** — `Cmd_jumpifstatus` value
-  outside the registered set; all 21 call sites' status1 values resolve.
-- **D. `battleScriptStatusPrimaryOpcode.ts:139`** — `Cmd_jumpiftype` unknown
-  TYPE_*; all 5 call sites (FIRE/POISON/STEEL) resolve.
-- **D. `battleScriptStatusPrimaryOpcode.ts:172`** — `Cmd_jumpifsideaffecting`
-  value outside the registered set; all 10 call sites use SIDE_STATUS_SAFEGUARD.
-- **D. `battleScriptIngrainLeechSeedWrapOpcode.ts:324`** — `Cmd_copyarray`
-  unknown tuple; **all 16 committed call-site tuples** are now modeled
-  (gBattleMoveDamage↔gHpDealt, cEFFECT_CHOOSER←sMULTIHIT_EFFECT,
-  cMULTISTRING_CHOOSER←sTWOTURN_STRINGID, gDynamicBasePower←sTRIPLE_KICK_POWER,
-  gBattleTextBuff1←sMULTIHIT_STRING×6, gBattlerTarget←gBattlerAttacker,
-  gBattlerTarget←sBATTLER, gEffectBattler←gBattlerTarget, sBATTLER←sBATTLER_WITH_ABILITY,
-  gBattleMoveDamage←sBIDE_DMG/←sPAINSPLIT_HP).
-- **D. `battleScriptIngrainLeechSeedWrapOpcode.ts:429`** — `Cmd_jumpifability`
-  unknown tuple; all 18 call-site abilities (Liquid Ooze, Rock Head, Soundproof,
-  Clear Body, Hyper Cutter, Immunity, Insomnia, Limber, Own Tempo, Suction Cups,
-  Vital Spirit, Water Veil, White Smoke) are in `JUMPIFABILITY_VALUES`
-  (`:380-394`); the unmodeled BS_ATTACKER_SIDE/BS_NOT_ATTACKER_SIDE selector
-  branches are used by no call site.
-
----
-
-## Ranked dispatch queue
-
-> **STATUS after the 2026-08-08 session (supervisor).** Eight of the twelve (A)
-> items are DONE and merged; one was refuted. Remaining work, in order:
->
-> | Item | State |
-> | --- | --- |
-> | 1. AI `AI_CheckBadMove` if_effect handlers | **DONE 2026-08-08 — 109/109 table effects ported.** The barrier is unreachable; see the retirement box under A1/A2. |
-> | 2. `Cmd_tryKO` Focus Band | **DONE** |
-> | 3. Lightning Rod redirection | **REFUTED — (C), unreachable in singles.** Do not take it. |
-> | 4. `VARIOUS_GET_BATTLER_FAINTED` | **DONE** |
-> | 5. Pursuit pre-switch interception | **DONE** — Pursuit now works end to end. |
-> | 6. `Cmd_getexp` BS_FAINTED | **DONE** |
-> | 7. `B_ANIM_FOCUS_PUNCH_SETUP` | **DONE** — and it required porting `Cmd_playanimation`'s full five-way dispatch, because Scene-OFF sets `HITMARKER_NO_ANIMATIONS` for the whole battle, making branches 2 and 4 the normal path rather than edge cases. |
-> | 8. `printfromtable` message tables | **DONE** — Truant Slaking's loafing turn and fire-move thaw. |
-> | 9. `sProtectSuccessRates[4]` OOB | **DONE** — measured from the ROM: the adjacent `u16` is `MOVE_METRONOME` (118), so a 5th consecutive Protect succeeds ~0.18% of the time. Evidence: `docs/protectlike-oob-adjacent-byte.md`. |
-> | 10. `DMG_RECOIL_FROM_MISS` / `DMG_DOUBLED` | **DONE** — Struggle recoil (universal) and Beat Up. |
-> | 11. battle-outcome → `B_ACTION_FINISHED` handoff | **REFUTED 2026-08-08 (supervisor) — reclassified (C), unreachable.** `RunTurnActionsFunctions` (`battle_main.c:4939`) forces `B_ACTION_FINISHED` before dispatching any turn action, so `HandleAction_UseMove` — the only producer of a script starting with `attackcanceler` — never runs with `gBattleOutcome != 0`. The engine already models the preemption and the preflight receipt is already source-complete. **Do not take the proposed port**; all that remains is restating the barrier's (now false) reason string. See the refutation box under A12. |
-> | 12. Enigma Berry (bucket B) | **DONE 2026-08-08** — per-battler effect and parameter ownership now drives `Cmd_accuracycheck`; B1 retirement receipt above. |
-> | A2. `AI_CheckViability` if_effect table | **DONE 2026-08-08 — 122/122 table effects ported**, in five batches across two lanes. The barrier is unreachable; see the retirement box under A1/A2. Live ROM verification of the newly ported handlers is the follow-on work, starting with `AI_CV_BrickBreak` (46 weighted). |
->
-> **STATUS after the 2026-08-08 supervised session: bucket (A) is EMPTY.** Ten of
-> the twelve (A) items are done, and two were refuted outright (item 3 Lightning
-> Rod on 2026-08-08 morning, item 11 / A12 the same evening — see its refutation
-> box). Item 12/B1 is now retired as the single pure-(B) site. Every barrier
-> this triage classified as reachable in ordinary Level-50 singles play has
-> been retired.
->
-> **Read the refutation box under A4 before trusting any remaining (A) claim.**
-> Three of the entries checked this session had defects: Lightning Rod was
-> wrong outright, and two others (`getexp` BS_FAINTED, the Pursuit `various`
-> case) were right but for reasons the entry stated imprecisely. Carrier count
-> proves a species can appear, never that a branch can fire — open the guard.
-
-Ordered by unblocked breadth per unit of port size. A future worker can take
-line 1 and start.
-
-**(A) sites first:**
-
-1. `factoryAiCheckBadMove.ts` + `factoryAiCheckViability.ts` — port the next
-   `if_effect` AI handler bodies (start with the highest-weighted Factory
-   effects already table-listed, e.g. EFFECT_ATTACK_UP/Swords Dance); every
-   turn's AI scoring stops halting on these. Next step: add the first batch of
-   per-effect handlers to `AI_CheckBadMove_CheckEffect` and `AI_CheckViability`,
-   pinning each with a scored-receipt test.
-2. `battleScriptTryKOOpcode.ts` — wire `Cmd_tryKO`'s Focus Band roll through the
-   already-modeled `focusBanded` machinery in `battleScriptHitChainOpcode.ts:1974-2012`.
-   Next step: one case reusing the sibling opcodes' roll; test: Focus Band
-   survives Fissure.
-3. ~~`battleScriptAttackCancelerOpcode.ts:274` — Lightning Rod redirection~~
-   **REFUTED 2026-08-08 (supervisor) — reclassified (C), unreachable in
-   singles. Do not take this item.** See the refutation box under A4 above.
-4. `battleScriptSwitchinOpcode.ts:750` — add the VARIOUS_GET_BATTLER_FAINTED
-   case (`battle_script_commands.c:6344-6348`). Next step: Pursuit switch-out
-   fixture asserting `getbattlerfainted` resolves. (Also unblocks Teleport's two
-   ids, B2.)
-5. `factoryBattleScriptFullTurnDecision.ts:1507` — implement the Pursuit
-   pre-switch interception. Next step: voluntary-switch-under-Pursuit fixture.
-   (Companion to #4.)
-6. `battleScriptGetexpOpcode.ts:148` — add the `BS_FAINTED` case to
-   `resolveGetexpBattlerOperand` (mirror the hit-chain resolver). Next step:
-   Spikes-faints-replacement fixture.
-7. `battleScriptStatbuffchangeOpcode.ts:267` — register
-   `B_ANIM_FOCUS_PUNCH_SETUP`. Next step: Focus Punch charge-up fixture.
-8. `battleScriptHitChainOpcode.ts:4086` — add `gInobedientStringIds` and
-   `gGotDefrostedStringIds` to `PRINTFROMTABLE_TABLES` (+ message indices).
-   Next step: Truant Slaking loafing-turn fixture.
-9. `battleScriptProtectlikeOpcode.ts:98` — decide the source-exact OOB fallback
-   for `sProtectSuccessRates[4]`. Next step: 5th-consecutive-Protect fixture.
-10. `battleScriptIngrainLeechSeedWrapOpcode.ts:472` — implement
-    `DMG_RECOIL_FROM_MISS`. Next step: Struggle-recoil fixture.
-11. `battleScriptAttackCancelerOpcode.ts:338` — battle-outcome → typed
-    action-scheduler receipt (shared with `Cmd_finishaction`, C1). Next step:
-    a battle-end fixture proving the round controller consumes it first.
-12. `battleScriptHitChainOpcode.ts:1169` — Enigma Berry `gEnigmaBerries`
-    support (the only pure-(B) site; folded in after the (A) queue).
-
-**(B) sites (same barrier call sites, sub-cases):** the gWeatherStartsStringIds,
-Beat Up, and Teleport sub-cases are unblocked by lines 8, 10, and 4 above
-respectively; only Enigma Berry (line 12) is a standalone item.
+This close-out does not classify ordinary controller-busy blocks, explicit
+`player-choice-required` halts, or unsupported behavior that has no
+`unsupported-branch` census entry. Those are separate engine contracts. It
+also does not use emulator traces: the C/D claims above are source/topology
+claims, and the A/B ledger records only changes already present in the
+current production history.

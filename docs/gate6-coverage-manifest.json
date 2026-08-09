@@ -18240,7 +18240,7 @@
           ],
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
-          "engineReferenceCount": 2,
+          "engineReferenceCount": 4,
           "oracleReceiptCards": [],
           "evidence": [
             {
@@ -18348,7 +18348,7 @@
           ],
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
-          "engineReferenceCount": 13,
+          "engineReferenceCount": 14,
           "oracleReceiptCards": [
             "R5",
             "R5"
@@ -19073,7 +19073,7 @@
           ],
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
-          "engineReferenceCount": 2,
+          "engineReferenceCount": 4,
           "oracleReceiptCards": [],
           "evidence": [
             {
@@ -19392,7 +19392,7 @@
           ],
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
-          "engineReferenceCount": 2,
+          "engineReferenceCount": 4,
           "oracleReceiptCards": [],
           "evidence": [
             {
@@ -20295,7 +20295,7 @@
           ],
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
-          "engineReferenceCount": 2,
+          "engineReferenceCount": 4,
           "oracleReceiptCards": [],
           "evidence": [
             {
@@ -21904,7 +21904,7 @@
           ],
           "sourceHookPresent": true,
           "censusStatus": "zero-carrier",
-          "engineReferenceCount": 0,
+          "engineReferenceCount": 2,
           "oracleReceiptCards": [],
           "evidence": [
             {
