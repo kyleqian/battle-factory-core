@@ -1,0 +1,32 @@
+# stomp-changemap-player.txt raw RGB888 — 67 frames, 240x160
+# frames absent from this table are byte-identical to the previous frame
+frame  changedPx  bbox(minx,miny-maxx,maxy)
+215  (first frame)
+  static 216-225
+226  370  163,0-188,21
+  static 227-241
+242  424  163,0-188,26
+243  436  163,2-188,31
+244  436  163,7-188,36
+245  484  163,12-188,42
+246  436  163,18-188,47
+247  1295  149,12-204,71
+  static 248
+249  1488  149,12-203,73
+  static 250
+251  1488  149,12-203,73
+  static 252
+253  1488  149,12-203,73
+  static 254
+255  1488  149,12-203,73
+  static 256
+257  1545  149,12-203,73
+  static 258
+259  1488  149,12-203,73
+  static 260
+261  1488  149,12-203,73
+  static 262
+263  1488  149,12-203,73
+  static 264-265
+266  382  163,28-188,52
+  static 267-281

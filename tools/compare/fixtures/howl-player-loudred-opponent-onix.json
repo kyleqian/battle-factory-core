@@ -32,7 +32,7 @@
     "attackerAttackStage": 7
   },
   "sourceWindow": { "startFrame": 209, "endFrame": 310, "frameCount": 102 },
-  "evidenceSha256": "ac6bb4eebe0376d3441bc1e50ff4c33a4fe39f87dccb41483c440b9f167f93bb",
+  "evidenceSha256": "919211a099b285671b4e2e2afd2ed3cda267b2dc1b1c17a6c1bfbd349863f97a",
   "rawRgbSha256": "1f19b38ed924b20fb4648adc24dea85a2be05460092df83d0d7991fa7a87a269",
   "battleState": {
     "attackerSide": "player",
