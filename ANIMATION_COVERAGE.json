@@ -1652,7 +1652,7 @@
    "move": "MOVE_HOWL",
    "status": "exact",
    "covered": [
-    "fresh complete legal challenge-0 Level-50 set-144 LOUDRED versus ONIX Scene-ON parties pass the entire 102-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 209-310 reproduce evidence ac6bb4eebe0376d3441bc1e50ff4c33a4fe39f87dccb41483c440b9f167f93bb / raw RGB 1f19b38ed924b20fb4648adc24dea85a2be05460092df83d0d7991fa7a87a269 and opponent-front frames 209-310 reproduce evidence 1d08643804a400521689181b7d71431ad59a1c5a027498d7106e992d02b6e587 / raw RGB 83ad92a022ee5484e24c8e78b49996c5692443bc76e7aef430b2ae15cedf0eac",
+    "fresh complete legal challenge-0 Level-50 set-144 LOUDRED versus ONIX Scene-ON parties pass the entire 102-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 209-310 reproduce evidence 919211a099b285671b4e2e2afd2ed3cda267b2dc1b1c17a6c1bfbd349863f97a / raw RGB 1f19b38ed924b20fb4648adc24dea85a2be05460092df83d0d7991fa7a87a269 and opponent-front frames 209-310 reproduce evidence 03aa671ccf17f3978744683b1a5f4066140129d4af6042d1fa05be64df827724 / raw RGB 83ad92a022ee5484e24c8e78b49996c5692443bc76e7aef430b2ae15cedf0eac",
     "the source audit proves set 144 FRONTIER_MON_LOUDRED is the lowest suitable challenge-0 Level-50 carrier and pins species 371, move 336, Relaxed nature, Attack/HP spread, Focus Band, and complete legal three-Pokemon parties",
     "the pure source-relative reducer ports ANIM_TAG_NOISE_LINE load/free, all six gRoarNoiseLineSpriteTemplate fixed-point lifecycles and frame/flip programs, AnimTask_DeepInhale's complete affine program, back/front y-offset variants, x2 shake, high-pitch cry task/audio, script waits, OAM/matrix/display latches, allocation order, and first inactive cleanup",
     "the typed Scene-ON seam carries only resolved LOUDRED/ONIX presentation geometry and immutable Attack-stage/HP state; source-extracted Loudred front/back and NOISE_LINE art plus shared ONIX/chrome pass software task/sprite state, hardware OAM/matrices, tags/palettes/buffers, registers, audio, raw RGB, and every production framebuffer without applying Howl's stat outcome or consuming gameplay RNG",
@@ -3218,6 +3218,33 @@
     "src/engine/battleScene.ts",
     "tests/animation/steelWing.test.ts",
     "tests/animation/steelWingEvidence.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_STOMP",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Scene-ON mechanicLab parties stage FRONTIER_MON_LOUDRED set 144 (LOUDRED, Stomp/Howl/Astonish/Supersonic) against legal ONIX in both player-back and opponent-front orientations, with only the active move choices constrained",
+    "fresh pointer-bounded Move_STOMP windows cover source frames 215-281 through first inactive cleanup twice in each orientation: player-back and opponent-front each pass 67/67 source-component, typed-seam, raw-RGB, and shared production-framebuffer frames; receipts are player evidence/raw/map 09f5e153176e9b5954190cf929523f39d27587672a1ad14eb4e544357616591b / 20fefcf15094d2e764b29ba2a0194a2bd657e47e33440a1f15a82b78de9a5ac3 / 231ee382ecfdf403c8f659aa60547411097287632eaac1691d0c246b2754aae2 and opponent e99ef777beded45d45a239e50bee770a09462ac412d5a60a7ff0771823e3c864 / 9771a53ae750504f67462758057f5a25f393829370f7876720fe2d92047681ce / 88fc9e260bda6f1750363b8aae2067a83c5ed602abdb8e8f70b22033f3ed3498",
+    "the pure source-relative reducer and typed Scene-ON seam port the unique wide-foot gStompFootSpriteTemplate/AnimStompFoot 15-wait, six-step descent, and 15-tail; animation-1 IMPACT hitsplat; target AnimTask_ShakeMon; target monbg; 12:8 alpha; target-panned SE_M_DOUBLE_TEAM and SE_M_MEGA_KICK2; tag, palette, OAM/matrix, and first inactive cleanup latches",
+    "the narrow compositor reuses source-identical Loudred front/back artwork already accepted by HOWL and the shared HANDS_AND_FEET/IMPACT/chrome path. It draws the foot and hitsplat from prior OAM state, preserves Stomp's copied-ONIX x2/y2 handoff, and owns no damage, flinch/minimize effect, RNG, turn order, controller, or facility state",
+    "the portable validates source software sprites and task, palette load plus hardware-transfer phases, prior software-to-hardware OAM/matrix transfer, blend registers, live target-side audio pan, immutable battle fields, raw RGB, committed change maps, and production framebuffer. Existing exact HOWL and MEGA_KICK bilateral portables remain independently required controls; no shared-component reuse promotes another move."
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-stomp-player-loudred-opponent-onix.json",
+    "tools/battle-lab/mechanic-stomp-opponent-loudred-player-onix.json",
+    "tools/compare/fixtures/stomp-player-loudred-opponent-onix.json",
+    "tools/compare/fixtures/stomp-opponent-loudred-player-onix.json",
+    "tools/compare/evidence/stomp-changemap-player.txt",
+    "tools/compare/evidence/stomp-changemap-opponent.txt",
+    "tools/compare/stompProbe.py",
+    "tools/compare/stompPortable.ts",
+    "tools/compare/stompSourceAudit.ts",
+    "src/animation/stomp.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/stomp.test.ts",
+    "tests/animation/stompEvidence.test.ts"
    ]
   },
   {

@@ -898,6 +898,7 @@ import {
   sceneOnMegaKickView,
   sceneOnRollingKickView,
   sceneOnLowKickView,
+  sceneOnStompView,
   sceneOnBiteView,
   sceneOnHeadbuttView,
   sceneOnWhirlwindView,
@@ -989,6 +990,7 @@ import {
   sceneOnPsychicView,
   sceneOnKnockOffView,
   type SceneOnMovePresentationState,
+  type SceneOnStompConfig,
   type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
   type SceneOnThunderWavePresentationState,
@@ -23829,6 +23831,98 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? "MACHOKE used" : "Foe MACHOKE used",
       "LOW KICK!",
       99,
+    );
+    return;
+  }
+
+  if (state.config.move === "STOMP") {
+    const stompState = state as SceneOnMovePresentationState<SceneOnStompConfig>;
+    const view = sceneOnStompView(stompState);
+    // The sprite callbacks write after this display's OAM build. Both unique
+    // Stomp sprites therefore scan out one source age later; target-monbg's
+    // own copied battler position is separately measured in the reducer.
+    const displayed = sceneOnStompView({ ...stompState, age: stompState.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "LOUDRED"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LOUDRED"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(`unsupported staged STOMP pair ${view.attacker.species}->${view.target.species}`);
+    }
+    const loudredSource = playerToOpponent ? howlArt.loudredBack : howlArt.loudredFront;
+    const loudred = playerToOpponent
+      ? loudredSource
+      : { ...loudredSource, tileset: subTileset(loudredSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    // ONIX's normal front-idle residual is visible through the display frame
+    // that begins the copied-mon shake.  The copied OBJ then adopts the
+    // callback's cleared x2 on the next scanout; its y2 follows the same
+    // one-frame OAM latch as the temporary effect sprites.
+    const onixIdle = playerToOpponent && stompState.age <= 31
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const targetY2 = view.targetOnMonBg ? displayed.targetOffset.y2 : 0;
+    const drawAttacker = () => drawSpriteSheet(
+      fb, loudred.tileset, loudred.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb, onix.tileset, onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2 + targetY2,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    // `gBasicHitSplatSpriteTemplate` is OAM slot 10 while Stomp's normal
+    // foot is slot 9. The foot wins their overlap, so the sequential painter
+    // emits the semi-transparent hit first, then the opaque wide-foot tiles.
+    if (displayed.hitsplat && view.alpha) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb, battleAnimHitsplat.tileset, battleAnimHitsplat.palette,
+        displayed.hitsplat.x - 16, displayed.hitsplat.y - 16,
+        displayed.hitsplat.matrix, displayed.hitsplat.matrix,
+        view.alpha.eva, view.alpha.evb, false, "live",
+      );
+    }
+    if (displayed.foot) {
+      drawSpriteSheet(
+        fb, subTileset(battleAnimHandsAndFeet.tileset, 4, 4),
+        battleAnimHandsAndFeet.palette,
+        displayed.foot.x - 16,
+        displayed.foot.y + displayed.foot.y2 - 16,
+      );
+    }
+    const profile = stompState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "LOUDRED", level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "LOUDRED" : "ONIX", level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb, playerToOpponent ? "LOUDRED used" : "Foe LOUDRED used", "STOMP!", 99,
     );
     return;
   }

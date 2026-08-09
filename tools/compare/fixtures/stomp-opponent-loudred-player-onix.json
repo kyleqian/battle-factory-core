@@ -1,0 +1,43 @@
+{
+  "schema": "stomp-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "STOMP",
+  "pair": "FRONTIER_MON_LOUDRED set 144 (opponent-front LOUDRED) -> legal ONIX (player-back)",
+  "orientation": "opponent-front",
+  "scenario": "tools/battle-lab/mechanic-stomp-opponent-loudred-player-onix.json",
+  "probe": "tools/compare/stompProbe.py",
+  "attackerSide": "opponent",
+  "targetSide": "player",
+  "attacker": {
+    "species": "LOUDRED",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 11 },
+      "animationCenter": { "x": 176, "y": 43 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "playerMaxHp": 117,
+    "opponentHp": 164,
+    "opponentMaxHp": 177,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "sourceWindow": { "startFrame": 215, "endFrame": 281, "frameCount": 67 },
+  "evidenceSha256": "e99ef777beded45d45a239e50bee770a09462ac412d5a60a7ff0771823e3c864",
+  "rawRgbSha256": "9771a53ae750504f67462758057f5a25f393829370f7876720fe2d92047681ce",
+  "changeMap": "tools/compare/evidence/stomp-changemap-opponent.txt",
+  "changeMapSha256": "88fc9e260bda6f1750363b8aae2067a83c5ed602abdb8e8f70b22033f3ed3498",
+  "acceptance": { "status": "exact", "componentMatching": 67, "framebufferMatching": 67 }
+}
