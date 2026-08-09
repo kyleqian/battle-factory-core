@@ -17,31 +17,16 @@ backlog.
 
 # Open
 
-## #86 — Deeper full-policy soaking exposes post-ledger crash signatures
+## #86 — Slice 3 can complete without a player command boundary
 
-**Found 2026-08-09 after #85's display-boundary repair.** Full-policy seeds
-0:60 now produce **32 OK / 7 CRASH / 21 HANG** and reach battle 2 on multiple
-seeds. The seven crashes are downstream of the two repaired display
-signatures and were deliberately not folded into that bounded step:
+**Remaining after the forced-switch/string families closed 2026-08-09.** Seed
+27 reaches battle 4, turn 16, frame 71,106 and throws `Slice 3 resolution
+completed without a player command boundary`. It reproduces unchanged after
+the generic forced-switch transition repair; no evidence connects it to
+switch field ownership.
 
-- **4/60**, seeds 12/44/45/53:
-  `resolution forced-switch-in battler 1 changed party without a completed
-  switch transition`; first seed 12, battle 1 turn 26, frame 17,947.
-- **1/60**, seed 14, battle 1 turn 19, frame 9,484:
-  `battle resolution switch-in message has no preceding switch/post-switch
-  field`.
-**String-control family closed 2026-08-09:** source/charmap-driven selector
-snapshots now resolve `{B_EFF_NAME_WITH_PREFIX}` and
-`{B_SCR_ACTIVE_NAME_WITH_PREFIX}` (including the print-time last-item
-snapshot) without weakening unsupported-control failures. The named repros
-now reach later outcomes: seed 6 is `OK b2 t25 f33553 roundLost`; seed 23
-reaches `b4 t14 f57791` at the forced-switch invariant above; seed 27 reaches
-`b4 t16 f71106` at `Slice 3 resolution completed without a player command
-boundary`.
-
-**Repro:** `npm run soak -- --seed N --verbose` for the named seed. Keep the
-forced-switch identity check fatal; diagnose and supply its missing typed
-transition rather than weakening the invariant.
+**Repro:** `npm run soak -- --seed 27 --verbose`. Diagnose the reducer's actual
+terminal/continuation shape and keep the missing-command invariant fatal.
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 

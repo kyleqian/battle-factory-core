@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1053 — [MAIN worker, 2026-08-09] **#86 forced-switch transition family closed generically**
+
+- **State:** committed main step `10ad59db` is green through focused tests,
+  typecheck, smoke **375/375**, all assigned full-policy repros, and vanilla
+  **0:20 = 20 OK / 0 CRASH / 0 HANG**; full suite/build are running next.
+- **Did:** source `ChooseMonToSendOut` ownership now resets a stale completed
+  `monToSwitchIntoId` before a later fresh player choice. A forced-selection
+  handoff consumes every ordered typed switch-in receipt, including the
+  automatic opponent replacement that can share the player continuation,
+  before the stable field check. Both fatal transition invariants remain.
+- **Next:** run full `npm test` and `npm run build`. #86 retains only seed 27's
+  separate no-command boundary (`b4 t16 f71106`); do not infer a switch cause.
+- **Notes:** seeds 12/14/23/44/45/53 are all OK to round loss (deepest seed 23:
+  `b6 t24 f92800`). Seed 27 still reproduces unchanged. No canonical Battle-2
+  window or animation code changed; no unsupported-barrier pin moved.
+
 ## 1052 — [supervisor, 2026-08-09] **Color Change family promoted; second Sleep Talk fold green**
 
 - **State:** corrected main union is green: Gate-6 focused **77/77** and
@@ -40,19 +56,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** seed 6 is `OK b2 t25 f33553 roundLost`; focused family batch
   26/195 and final regression 3/20, smoke 375/375, full suite/build green.
   No canonical Battle-2 window past tick 33331 changed.
-
-## 1050 — [supervisor, 2026-08-09] **#85 closed; Sleep Talk animation fold green**
-
-- **State:** master union is green (**828 files / 8,221 passed / 1 skipped**)
-  with production build passing. Vanilla soak stays **20/20 OK**.
-- **Did:** accepted the generic display-ledger repair (`909a42a8`) and
-  kept-party swap handoff (`72e3fed6`); seed 6 now reaches Battle 2 and seed
-  55 reaches Battle 3/`roundLost`. The accepted swap exit is **43/43** exact.
-  Folded `animation-main` through `ba48a24f` as merge `e7595c81`; Sleep Talk
-  gains a typed Scene-ON reducer/seam but truthfully remains unsupported.
-- **Next:** follow the user-ordered family-level Gate-6 worklist. Keep ISSUES
-  #86's forced-switch and string-resolver failures fatal and separately
-  reproducible for the close-out soak pass.
-- **Notes:** no canonical Battle-2 work moved past tick 33331. No open
-  deferred question. Full-policy 0:60 must be rerun at wind-down for the new
-  completion headline after #85 removed all 21 former swap hangs.
