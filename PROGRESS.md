@@ -5,6 +5,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1042 — [supervisor, 2026-08-09] **Soundproof hook family source-proven**
+
+- **State:** Gate 6 remains **OPEN**. Per-move hook gaps are now **591**:
+  **300 item + 291 ability** (was 600). Exactly nine Level-50 Soundproof
+  ability rows are `source-proven-family`; all unrelated joins remain gaps.
+- **Did:** accepted `c6094026`. The extractor derives the ten source
+  `sSoundMovesTable` selectors, excludes non-roster GROWL, and proves each
+  roster entry's graph/program path into `Cmd_attackcanceler` and
+  `ABILITYEFFECT_MOVES_BLOCK`. The manifest connects the nine-move bilateral
+  sibling batch to the existing Hyper Voice/control OFF receipt without
+  fabricating per-move receipts.
+- **Next:** audit the shared Volt/Water Absorb + Flash Fire dispatcher as the
+  next source-bounded ability-hook family; promote only exact roster moves
+  whose entry path and source guards are completely proven.
+- **Notes:** supervisor focused verification is **5 files / 27 tests** green;
+  worker smoke is **375/375**, full suite and production build green. The nine
+  roster selectors are ROAR, SING, SUPERSONIC, SCREECH, SNORE, UPROAR, METAL
+  SOUND, GRASS WHISTLE, and HYPER VOICE. No production, barrier/import, oracle
+  fixture, animation, or controller file changed.
+
+---
+
 ## 1041 — [supervisor, 2026-08-09] **Gate-6 hook gaps surfaced; Substitute fold green**
 
 - **State:** Gate 6 remains **OPEN**. The manifest now exposes **300 item +
@@ -34,27 +56,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** focused state/end-turn/hit-chain/manifest/frontier checks are **7 files / 525 tests** green; smoke is **375/375**; full suite is **817 files / 8,168 passed / 1 skipped**; production build is green. No production mechanics, oracle receipts, barriers/imports, or animation files changed.
 
 ---
-
-## 1039 — [supervisor, 2026-08-09] **#84 accepted; compact Gate-6 receipts complete**
-
-- **State:** the five reported generated-round defects are repaired and #84
-  is closed. Gate 6 now has **24/24** OFF-profile request receipts and zero
-  request/family receipt gaps, but remains **OPEN** for the broader ROADMAP
-  breadth, seeded-round, unsupported-entry, and selected-UI acceptance.
-- **Did:** accepted `f404bc3e`'s generic `RETURNTOBALL` recall plus opponent
-  open-ball/materializing-mon overlap, then corrected its public proof in
-  `e09fea1e` to pin the genuine forced route with no fabricated trainer
-  send-out line. Merged compact R2 (`08dfd4b5`) and R12 (`8175079f`); R12
-  proves Hyper Cutter prevents Granbull's entry drop before White Herb can
-  activate. The orient check initially found no animation commits; after the
-  animation supervisor published nine ready commits, folded `animation-main`
-  through `2b912128` as `a0dd746e`.
-- **Next:** verify the complete union, then take one finite broader Gate-6
-  acceptance unit. Do not resume the retired canonical Battle-2 march.
-- **Notes:** #84 twice-fresh OFF evidence is byte-identical over dense frames
-  210..420; focused public forced-switch checks **406/406** and corrected
-  command-order checks **47/47** pass. R12 focused receipt/kernel/manifest
-  checks **129/129** pass. The folded union passes **817 files / 8,165 tests /
-  1 skipped** and the production build; `bin/oracle info` confirms the OFF
-  profile. No barrier/import, rules/RNG, party/HP/status, or completeness pin
-  changed.
