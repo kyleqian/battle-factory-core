@@ -187,7 +187,7 @@ describe("production tryKO (Cmd_tryKO) dispatch", () => {
     expect(result.state.rng.calls).toBe(1); // the band draw is consumed; the accuracy draw never happens
   });
 
-  describe("(b) unsupported-branch barriers", () => {
+  describe("former (b) unsupported-branch barrier: now source-complete reachable paths", () => {
     it("does not barrier on a plain (no-item) target", () => {
       const rc = context(0, {}, { item: 0 });
       const result = stepAtTryKO(rc);
@@ -309,6 +309,61 @@ describe("EFFECT_OHKO: full committed script walks (ranked-table row 5, 28 weigh
     const result = runToTerminal(rc, 3); // seed 3 -> (15%100)+1=16 < 30
     expect(result.state.rulesContext.battlers[1]!.hp).toBe(0);
     expect(result.state.rng.calls).toBe(2);
+  });
+
+  it("successful Focus Band roll reaches the real hang-on subscript, prints STRINGID_PKMNHUNGONWITHX, returns, and leaves the holder at 1 HP", () => {
+    // seed 24: Focus Band's own draw is 10903 (3 < 10); the subsequent OHKO
+    // accuracy draw succeeds. The result-message call-current must then run
+    // BattleScript_FocusBandActivates and return to the normal OHKO tail.
+    const rc = context(
+      0,
+      { level: 50, moves: [FISSURE, 0, 0, 0] as const },
+      { level: 50, hp: 42, item: HOLD_EFFECT_FOCUS_BAND_ITEM },
+    );
+    const result = runToTerminal(rc, 24);
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(1);
+    expect(result.state.rulesContext.battlers[1]!.specialStatus.focusBanded).toBe(1);
+    expect(result.state.rulesContext.lastUsedItem).toBe(HOLD_EFFECT_FOCUS_BAND_ITEM);
+    expect(result.state.callStack).toEqual([]); // FocusBandActivates returned.
+    expect(result.state.events).toContainEqual(expect.objectContaining({
+      kind: "message",
+      messageId: "STRINGID_PKMNHUNGONWITHX",
+    }));
+    expect(result.state.events).not.toContainEqual(expect.objectContaining({
+      kind: "message",
+      messageId: "STRINGID_ONEHITKO",
+    }));
+    expect(result.state.rng.ledger.map(({ reason }) => reason)).toEqual([
+      "tryko-focus-band",
+      "tryko",
+      "seteffectwithchance",
+    ]);
+  });
+
+  it("failed Focus Band roll reaches the ordinary OHKO result message after consuming the same holder-only draw", () => {
+    // seed 28: Focus Band's own draw is 12720 (20 >= 10); the following
+    // accuracy draw still succeeds, so the target faints normally.
+    const rc = context(
+      0,
+      { level: 50, moves: [FISSURE, 0, 0, 0] as const },
+      { level: 50, hp: 42, item: HOLD_EFFECT_FOCUS_BAND_ITEM },
+    );
+    const result = runToTerminal(rc, 28);
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(0);
+    expect(result.state.rulesContext.battlers[1]!.specialStatus.focusBanded).toBe(0);
+    expect(result.state.events).toContainEqual(expect.objectContaining({
+      kind: "message",
+      messageId: "STRINGID_ONEHITKO",
+    }));
+    expect(result.state.events).not.toContainEqual(expect.objectContaining({
+      kind: "message",
+      messageId: "STRINGID_PKMNHUNGONWITHX",
+    }));
+    expect(result.state.rng.ledger.map(({ reason }) => reason)).toEqual([
+      "tryko-focus-band",
+      "tryko",
+      "seteffectwithchance",
+    ]);
   });
 
   it("miss tail end to end via BattleScript_KOFail (STRINGID_ATTACKMISSED), target HP untouched, exactly 1 RNG roll", () => {
