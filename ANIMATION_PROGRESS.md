@@ -1,5 +1,12 @@
 # Animation coverage
 
+## MOVE_SLEEP_TALK reducer + typed Scene-ON seam checkpoint — remains unsupported (2026-08-09 worker)
+
+- **State:** Coverage remains **140/276 exact**, 0 partial, 0 staged, **136 unsupported**; no compositor, framebuffer claim, boundary, barrier, gameplay, controller, or facility state changed.
+- **Did:** Added the source-relative 186/189-age reducer for all nine `gLetterZSpriteTemplate`/`AnimLetterZ` lifecycles, side-specific `AnimTask_SwayMon`, affine/OAM transfer, tags/registers/audio, cleanup, and the narrow typed Scene-ON seam. Added a no-pixel dense comparator covering every receipt age and both orientations.
+- **Verified:** Fresh Scene-ON receipts pass player-back **186/186** and opponent-front **189/189** twice, including software sprites/tasks, hardware OAM/matrices, tags/registers/audio, seam state, cleanup, and raw-RGB receipt hashes; focused reducer/evidence/REST tests and typecheck pass.
+- **Next:** A later worker may add the narrow production compositor and require complete bilateral framebuffer acceptance before promotion; keep MOVE_REST exact and Sleep Talk unsupported.
+
 ## MOVE_SLEEP_TALK bilateral evidence checkpoint — remains unsupported (2026-08-09 worker)
 
 - **State:** Coverage remains **140/276 exact**, 0 partial, 0 staged, **136 unsupported**. SLEEP_TALK is not promoted; no production compositor, typed seam, animation boundary, gameplay, controller, or facility state changed.
