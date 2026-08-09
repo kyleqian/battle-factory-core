@@ -5,21 +5,42 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1028 — [bounded MAIN worker, 2026-08-08] **S10 Gate-6 deterministic coverage manifest assembled**
+
+- **State:** the first authoritative, reproducible Gate-6 manifest is committed
+  in `bbb1774b`; Gate 6 remains **OPEN**. It joins **214/214 effects** and
+  **355/355 moves** static-executable (L50: **276/300 executable**, 24
+  roster-only), **55 state families / 50 Tier-1-covered**, **78 abilities** and
+  **67 held effects**, **300 ordinary trainers / 850 L50 sets** (882 full
+  catalog), **28 interaction rows** (6 kernel-proven, 9 oracle-receipted, 13
+  gaps), and **24 parameterized scenarios** (17 receipt-documented, 7 gaps
+  across 16 family cards).
+- **Did:** added `tools/report/gate6-coverage-manifest.ts`, generated the JSON
+  and Markdown evidence views, and added a Tier-1 byte-idempotence/count/path
+  ratchet. Widened-scope legal zero-Factory-carrier rows remain explicit: 4
+  abilities and 24 held effects. Static/token references are not promoted to
+  semantic or oracle acceptance. Merged the side audit as `a7aad52b`: the live
+  source inventory is **46 = 0 A / 2 B / 21 C / 23 D**.
+- **Next:** retire the two widened-scope B families (`Cmd_various` Teleport,
+  then `Cmd_printfromtable` table pointers), then close the ranked **R12b**
+  parameterized-oracle receipt gap; do not claim Gate 6 closed.
+- **Notes:** focused manifest/census checks **17/17**, smoke **375/375**, full
+  suite **807 files / 8,073 passed / 1 skipped**, typecheck, and build green.
+
 ## 1027 — [bounded MAIN worker, 2026-08-08] **S10 B1 Enigma Berry accuracy barrier retired**
 
-- **State:** the B1 implementation is green through the focused Tier-1 set and
-  executable-frontier ratchet (**379/379 tests**); the former hit-chain barrier
-  call site is gone and its pin is **11→10**.
+- **State:** the B1 implementation is committed in `2560e40a` + `d92248bb`;
+  the former hit-chain barrier call site is gone and its pin is **11→10**.
 - **Did:** added immutable/defaulted/validated/serialized
   `enigmaBerryHoldEffectParams` ownership beside the existing Enigma effect
   bytes; resolvers now follow the source Enigma-vs-`gItems` branch; the live
   accuracy path passes both effect and parameter to the existing calculator.
   Red-first tests pin context shape, malformed arrays, normal Focus Band
   parameter behavior, Enigma ownership, and exact-RNG hit/miss outcomes.
-- **Next:** run smoke, typecheck, build, and the full `npm test`; then commit
-  the final green checkpoint and leave this entry current.
-- **Notes:** no oracle claim (the custom Enigma storage is not injectable by
-  mechanicLab); no ROADMAP/ISSUES or canonical Battle-2 work.
+- **Next:** superseded by entry 1028's audited two-family B queue.
+- **Notes:** focused Tier-1/ratchet **379/379**, smoke **375/375**, typecheck,
+  build, and the later union full suite are green. No oracle claim (the custom
+  Enigma storage is not injectable by mechanicLab); no canonical Battle-2 work.
 
 ## 1026 — [supervisor, 2026-08-08] **A3 Focus Band OHKO continuation proved end to end**
 
@@ -37,23 +58,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **375/375**. Both oracle services were restarted and pass freshness. The
   animation fold check was empty (`master..animation-main` = 0). No deferred
   decision and no canonical Battle-2 window.
-
-## 1025 — [user DECISION, 2026-08-08] **S10 closure is the headline: barrier burn-down, then Gate-6 manifest; #39 and animation demoted to filler**
-
-- **State:** master clean through `12be3c44`; docs-only entry, no code change.
-- **Did:** the user reviewed the week since Gate 5 closed and re-pointed the
-  queue at finishing S10. The recorded ordering decision is in ROADMAP.md
-  (S10 section, 2026-08-08).
-- **Next:** (1) burn down the ten remaining bucket-A barriers in
-  `docs/barrier-reachability-triage.md` (A3–A12; A1/A2 retired 2026-08-08);
-  (2) resolve the single bucket-B widened-scope item and confirm the C/D
-  citations as the prove-unreachable record; (3) assemble the Gate-6
-  close-out artifacts (coverage manifest, one parameterized-oracle trace per
-  effect family, interaction tests, seeded end-to-end rounds) with Gate-4
-  semantic verification on the same worklist, plus Gate 2's Noland scope
-  note.
-- **Notes:** this OVERRIDES entry 1024's named next owner — the
-  `turn10OnixDarkPalette` Family-F slice is deferred, not canceled, and the
-  ISSUES #39 audit stays valid for whenever a filler slot opens. The
-  animation lane keeps its separate supervisor but is likewise filler
-  relative to S10 closure.

@@ -1,4 +1,13 @@
 
+## 1025 — [user DECISION, 2026-08-08] **S10 closure is the headline: barrier burn-down, then Gate-6 manifest**
+
+- **State/Did:** the user replaced the filler-first queue with S10 closure:
+  retire reachable A/B barriers, preserve proved C/D guards, then assemble the
+  Gate-6 evidence artifacts. #39 and animation remain filler work.
+- **Next/Notes:** superseded by live entry 1028. The full decision remains in
+  git history at `PROGRESS.md`; canonical Battle-2 work after tick 33331 stays
+  prohibited.
+
 ## 1024 — [supervisor WIND-DOWN, 2026-08-08] **Generic S8 presentation and Factory-AI receipts advanced; final union green**
 
 - **State:** master is clean through `12be3c44`. Final worker full suite is
