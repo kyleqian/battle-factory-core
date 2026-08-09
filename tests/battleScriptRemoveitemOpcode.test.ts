@@ -41,6 +41,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     types: changes.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
     species: changes.species ?? 0,
     item: changes.item ?? 0,
+    partyIndex: changes.partyIndex ?? 0,
   } as BattleScriptRulesBattler);
 }
 
@@ -48,6 +49,7 @@ function context(
   battlers: readonly [BattleScriptRulesBattler, BattleScriptRulesBattler, BattleScriptRulesBattler, BattleScriptRulesBattler],
   selectorRoles: BattleScriptRulesContextInput["selectorRoles"],
   scriptingBattler: 0 | 1 | 2 | 3,
+  party?: BattleScriptRulesContextInput["party"],
 ): BattleScriptRulesContext {
   return createBattleScriptRulesContext({
     battlers,
@@ -66,6 +68,7 @@ function context(
     multiHitCounter: 0,
     weather: 0,
     battleTopology: { battlersCount: 2, battleTypeFlags: BATTLE_TYPE_FACTORY, battlerPositions: [0, 1, 0xff, 0xff] },
+    party,
   } satisfies BattleScriptRulesContextInput);
 }
 
@@ -138,6 +141,71 @@ describe("production removeitem (Cmd_removeitem) dispatch -- battle_script_comma
       expect(result.state.rulesContext.battlers[1]!.item).toBe(0);
       expect(result.state.rulesContext.usedHeldItems).toEqual([0, ITEM_HELD_FOR_TEST, 0, 0]);
       expect(result.state.scheduler.pendingControllerBattlers).toEqual([1]);
+    });
+
+    it("writes a non-White-Herb removal through to the active player's exact party slot", () => {
+      const rc = context(
+        [
+          battler({ side: 0, item: ITEM_HELD_FOR_TEST, partyIndex: 2 }),
+          battler({ side: 1 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+        { attacker: 1, target: 1, effectBattler: 1 },
+        0,
+        {
+          player: [
+            { species: 1, item: 101 },
+            { species: 2, item: 102 },
+            { species: 3, item: ITEM_HELD_FOR_TEST },
+            {},
+            {},
+            {},
+          ],
+        },
+      );
+      const { result } = stepAtProgramCounter(rc, scriptingInstance!.programCounter);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.party.player.map(({ item }) => item)).toEqual([
+        101, 102, 0, 0, 0, 0,
+      ]);
+      expect(result.state.rulesContext.party.opponent.map(({ item }) => item)).toEqual([
+        0, 0, 0, 0, 0, 0,
+      ]);
+    });
+
+    it("writes removal through to the active opponent's exact party slot", () => {
+      const rc = context(
+        [
+          battler({ side: 0 }),
+          battler({ side: 1, item: ITEM_HELD_FOR_TEST, partyIndex: 4 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+        { attacker: 1, target: 0, effectBattler: 0 },
+        0,
+        {
+          player: [{ species: 1, item: 103 }, {}, {}, {}, {}, {}],
+          opponent: [
+            { species: 1, item: 111 },
+            { species: 2, item: 112 },
+            { species: 3, item: 113 },
+            { species: 4, item: 114 },
+            { species: 5, item: ITEM_HELD_FOR_TEST },
+            {},
+          ],
+        },
+      );
+      const { result } = stepAtProgramCounter(rc, attackerInstance!.programCounter);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.party.opponent.map(({ item }) => item)).toEqual([
+        111, 112, 113, 114, 0, 0,
+      ]);
+      expect(result.state.rulesContext.party.player.map(({ item }) => item)).toEqual([
+        103, 0, 0, 0, 0, 0,
+      ]);
     });
   });
 

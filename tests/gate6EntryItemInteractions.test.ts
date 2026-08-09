@@ -386,6 +386,10 @@ describe("Gate-6 R12b and R11 entry/item interactions", () => {
       && payload.from === 6
       && payload.to === 5
     );
+    const intimidateMessage = payloads.findIndex((payload) =>
+      payload.kind === "message"
+      && payload.messageId === "STRINGID_PKMNCUTSATTACKWITH"
+    );
     const herbMessage = payloads.findIndex((payload) =>
       payload.kind === "message"
       && payload.messageId === "STRINGID_PKMNSITEMRESTOREDSTATUS"
@@ -398,12 +402,13 @@ describe("Gate-6 R12b and R11 entry/item interactions", () => {
       "STRINGID_PKMNCUTSATTACKWITH",
       "STRINGID_PKMNSITEMRESTOREDSTATUS",
     ]);
-    expect([attackCut, herbMessage, herbRemoval]).toEqual(
-      [...[attackCut, herbMessage, herbRemoval]].sort((a, b) => a - b),
+    expect([attackCut, intimidateMessage, herbMessage, herbRemoval]).toEqual(
+      [...[attackCut, intimidateMessage, herbMessage, herbRemoval]].sort((a, b) => a - b),
     );
     expect(attackCut).toBeGreaterThanOrEqual(0);
     expect(player.statStages[1]).toBe(6);
     expect(player.item).toBe(0);
+    expect(result.state.rules.rulesContext.party.player[0].item).toBe(0);
     expect(result.state.rng.calls).toBe(2);
   });
 
