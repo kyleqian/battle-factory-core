@@ -1,0 +1,26 @@
+# vice-grip-changemap-opponent.txt raw RGB888 — 42 frames, 240x160
+# frames absent from this table are byte-identical to the previous frame
+frame  changedPx  bbox(minx,miny-maxx,maxy)
+212  (first frame)
+  static 213-222
+223  145  47,62-97,111
+224  151  47,62-97,111
+225  158  46,61-97,111
+226  177  46,61-97,111
+227  162  48,64-95,111
+228  226  46,61-97,111
+  static 229-233
+234  1095  42,49-99,111
+  static 235
+236  1397  42,49-101,111
+  static 237
+238  1397  42,49-101,111
+  static 239
+240  1397  42,49-101,111
+  static 241
+242  986  44,49-101,111
+  static 243
+244  188  61,77-83,99
+  static 245-248
+249  266  46,61-97,111
+  static 250-253

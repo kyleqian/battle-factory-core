@@ -1,0 +1,45 @@
+{
+  "schema": "vice-grip-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "VICE_GRIP",
+  "pair": "FRONTIER_MON_CRAWDAUNT_1 set 249 (opponent-front) -> legal ONIX (player-back)",
+  "orientation": "opponent-front",
+  "scenario": "tools/battle-lab/mechanic-vice-grip-opponent-crawdaunt-player-onix.json",
+  "probe": "tools/compare/viceGripProbe.py",
+  "attacker": {
+    "species": "CRAWDAUNT",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 9 },
+      "animationCenter": { "x": 176, "y": 41 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "playerMaxHp": 117,
+    "opponentHp": 137,
+    "opponentMaxHp": 145,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "sourceWindow": { "startFrame": 212, "endFrame": 253, "frameCount": 42 },
+  "evidenceSha256": "f40729e448c4d2c2cea60afccb3eab7fe1aa1dea784ea93357e8f1a8fa2b99f4",
+  "rawRgbSha256": "247f3004cb45594d30909fdd3f934e55baf4d2524e8ea4434d8ebda34526e6c0",
+  "changeMap": "tools/compare/evidence/vice-grip-changemap-opponent.txt",
+  "changeMapSha256": "09282a7d0a66bd7c22421de15fc9f6d07c59ba46ce2bc88520df1fa44bc7e776",
+  "acceptance": {
+    "status": "exact",
+    "componentMatching": 42,
+    "framebufferMatching": 42
+  }
+}

@@ -362,6 +362,10 @@ import {
   type StompState,
 } from "./stomp.ts";
 import {
+  viceGripAtAge,
+  type ViceGripState,
+} from "./viceGrip.ts";
+import {
   swaggerAtAge,
   type SwaggerState,
 } from "./swagger.ts";
@@ -716,6 +720,7 @@ export interface SceneOnPresentationBattler {
     | "ONIX"
     | "DROWZEE"
     | "KRABBY"
+    | "CRAWDAUNT"
     | "SURSKIT"
     | "KOFFING"
     | "MAGNETON"
@@ -1473,6 +1478,14 @@ export interface SceneOnLowKickConfig {
 /** Narrow Scene-ON seam: only resolved presentation geometry and immutable HP. */
 export interface SceneOnStompConfig {
   readonly move: "STOMP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+/** Narrow VICE_GRIP presentation seam; battle resolution remains external. */
+export interface SceneOnViceGripConfig {
+  readonly move: "VICE_GRIP";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -2348,6 +2361,7 @@ export type SceneOnMoveConfig =
   | SceneOnRollingKickConfig
   | SceneOnLowKickConfig
   | SceneOnStompConfig
+  | SceneOnViceGripConfig
   | SceneOnBiteConfig
   | SceneOnHeadbuttConfig
   | SceneOnWhirlwindConfig
@@ -2633,6 +2647,12 @@ export interface SceneOnLowKickView extends LowKickState {
 }
 
 export interface SceneOnStompView extends StompState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnViceGripView extends ViceGripState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4659,6 +4679,25 @@ export function sceneOnStompView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...stompAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first pointer-bounded `Move_VICE_GRIP` source display. */
+export function sceneOnViceGripView(
+  state: SceneOnMovePresentationState<SceneOnViceGripConfig>,
+): SceneOnViceGripView {
+  if (state.config.move !== "VICE_GRIP") {
+    throw new Error(`expected VICE_GRIP presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...viceGripAtAge(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,

@@ -70,10 +70,10 @@ describe("MOVE_GLARE bilateral dense exact evidence", () => {
     expect(effects2).toContain(".callback = AnimEyeSparkle");
   });
 
-  it("keeps GLARE exact after the Acid Armor promotion at 146/146", () => {
-    expect(coverage.entries).toHaveLength(146);
+  it("keeps GLARE exact after the Vice Grip promotion at 147/147", () => {
+    expect(coverage.entries).toHaveLength(147);
     expect(coverage.entries.every((entry) => entry.status === "exact")).toBe(true);
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_GLARE")).toHaveLength(1);
-    expect(276 - coverage.entries.length).toBe(130);
+    expect(276 - coverage.entries.length).toBe(129);
   });
 });
