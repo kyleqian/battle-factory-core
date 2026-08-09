@@ -56,4 +56,29 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(second.outcome).toBe(first.outcome);
     expect(second.lastActions).toEqual(first.lastActions);
   });
+
+  it("ISSUES #85: keeps the genuine switched-in HP at a later damage-command start", () => {
+    // Seed 0 voluntarily switches BUTTERFREE -> BAYLEEF on turn 8, then
+    // MURKROW's same-turn FLY drains BAYLEEF 153 -> 66. The parent replayed
+    // the settled 66-HP command field as the switch-in's initial display and
+    // crashed while committing the preceding hit command at frame 4697.
+    const result = runSeed(0, { maxFrames: 4_698, renderEvery: 0 });
+    expect(result.errorMessage ?? "").not.toMatch(
+      /battle resolution HP command starts at .* displayed/,
+    );
+    expect(result.frames).toBeGreaterThan(4_697);
+  });
+
+  it("ISSUES #85: resets the display ledger when a healthy active replaces a statused one", () => {
+    // Seed 6 reaches Pidgeotto after the previously active opponent carried
+    // burn display state. The parent retained that old status across the
+    // switch and failed the genuine next-command handoff at frame 6632.
+    // The same family formerly recurred after the forced-send-out seam at
+    // frame 7797, so keep this focused pin beyond both handoffs.
+    const result = runSeed(6, { maxFrames: 7_798, renderEvery: 0 });
+    expect(result.errorMessage).not.toBe(
+      "resolution handoff battler 1 display does not match the genuine next boundary",
+    );
+    expect(result.frames).toBeGreaterThan(7_797);
+  });
 });

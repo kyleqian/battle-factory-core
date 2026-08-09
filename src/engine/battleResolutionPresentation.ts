@@ -1,6 +1,6 @@
 import {
   battleCommandFieldBattlerFromPartyMember,
-  createBattleCommandPresentation,
+  createBattleCommandDisplayedField,
   type BattleCommandFieldBattler,
   type BattleCommandPresentationState,
 } from "./battleCommandPresentation.ts";
@@ -196,6 +196,8 @@ export type BattleResolutionPresentationCommand =
       fromPartyIndex: BattlePartyIndex;
       toPartyIndex: BattlePartyIndex;
       incoming: BattleCommandFieldBattler;
+      /** Raw party status at the source switch boundary; owns the new healthbox icon. */
+      incomingStatus1: number;
       timing: BattleSwitchInTiming;
       /**
        * ISSUES #78 slice 4: the send-in's post-controller `waitstate` release
@@ -987,7 +989,7 @@ function messageLines(
   events: readonly BattleKernelSemanticEvent[],
   field: BattleResolutionDisplayedField,
   switchInBattler: 0 | 1 | null,
-  /** The switch-in's own display snapshot (`switchInIncomingBattler`), non-null exactly when `switchInBattler` is. */
+  /** The switch-in's own source-boundary display snapshot, non-null exactly when `switchInBattler` is. */
   switchInIncoming: BattleCommandFieldBattler | null,
   lastStatChange: Extract<
     BattleScriptSemanticEventPayload,
@@ -2874,37 +2876,61 @@ function partyBallStates(
 }
 
 /**
- * The incoming battler's display snapshot at switch-in time (soak signature
- * 6, docs/soak-crash-catalog.md §6). Prefers the settled post-turn command
- * field -- byte-identical to the long-standing derivation whenever that
- * boundary exists and still shows the switched-in slot. When the turn
- * instead settles on a non-command boundary (the switched-in mon fainted
- * before the turn ended -- the next boundary is a forced switch or a
- * terminal) there is no post-switch command field at all, yet source
- * printed "Go! X!"/"sent out X!" at switch time regardless; the party
- * record supplies the same typed snapshot, because the bench state IS the
- * mon's state at the moment the kernel switches it in (nothing touches a
- * benched mon mid-turn; hazard/attack damage lands as later hp commands).
+ * The incoming battler's source-boundary snapshot. Prefer the genuine next
+ * command field when it exists, because a returning party member can carry
+ * earlier HP/status/PP history that the reducer materializes while switching.
+ * Then rewind only mutations proven by later ordered receipts: the first
+ * post-switch HP command's `from` is the healthbox at switch time, and a later
+ * status-controller write means the party record owns the prior icon. This
+ * keeps a same-turn 153->66 hit from being applied before its command (ISSUES
+ * #85 seed 0), while retaining earlier damage/status on a returning battler
+ * (seed 6). With no command boundary, the pre-transition party is the only
+ * source snapshot (the incoming mon can faint in the same turn; signature 6).
  */
-function switchInIncomingBattler(
+function switchInIncomingSnapshot(
   beforeRules: BattleScriptRulesContext,
+  afterRules: BattleScriptRulesContext,
   afterField: BattleResolutionDisplayedField | null,
+  events: readonly BattleKernelSemanticEvent[],
+  eventIndex: number,
   battler: 0 | 1,
   toPartyIndex: BattlePartyIndex,
-): BattleCommandFieldBattler {
-  if (afterField !== null) {
-    const settled = fieldBattler(afterField, battler);
-    if (settled.partyIndex === toPartyIndex) return settled;
-  }
+): Readonly<{ field: BattleCommandFieldBattler; status1: number }> {
   const party = battler === 0
     ? beforeRules.party.player
     : beforeRules.party.opponent;
-  return battleCommandFieldBattlerFromPartyMember(
+  const member = party[toPartyIndex]!;
+  const partyField = battleCommandFieldBattlerFromPartyMember(
     battler === 0 ? "player" : "trainer",
     battler,
     toPartyIndex,
-    party[toPartyIndex]!,
+    member,
   );
+  const settled = afterField === null ? null : fieldBattler(afterField, battler);
+  const hasSettledIncoming = settled?.partyIndex === toPartyIndex;
+  const later = events.slice(eventIndex + 1);
+  const firstHp = later.find(({ payload }) =>
+    payload.kind === "hp-change" && payload.battler === battler
+  )?.payload;
+  const hasLaterStatusWrite = later.some(({ payload }) =>
+    (payload.kind === "set-battler-status-data"
+      || payload.kind === "status-icon-update")
+    && payload.battler === battler
+  );
+  const status1 = hasSettledIncoming && !hasLaterStatusWrite
+    ? afterRules.battlers[battler]!.status1
+    : member.status1;
+  const field = hasSettledIncoming
+    ? Object.freeze({
+        ...settled,
+        hp: firstHp?.kind === "hp-change" ? firstHp.from : settled.hp,
+        status: hasLaterStatusWrite ? partyField.status : settled.status,
+      })
+    : partyField;
+  return Object.freeze({
+    field,
+    status1,
+  });
 }
 
 function fieldAfter(
@@ -2913,12 +2939,8 @@ function fieldAfter(
   if (
     transition.state.boundary.kind !== "decision-required"
     || transition.state.boundary.request.kind !== "command"
-    || transition.state.boundary.request.side !== "player"
   ) return null;
-  return createBattleCommandPresentation(
-    transition.state.boundary.request,
-    transition.state.rules.rulesContext,
-  ).field;
+  return createBattleCommandDisplayedField(transition.state.rules.rulesContext);
 }
 
 export function projectBattleResolutionCommands(
@@ -2996,12 +3018,15 @@ export function projectBattleResolutionCommands(
         : null;
       const switchInIncoming = switchInBattler === null
         ? null
-        : switchInIncomingBattler(
+        : switchInIncomingSnapshot(
           beforeRules,
+          afterRules,
           afterField,
+          events,
+          index,
           switchInBattler,
           pendingSwitch.get(switchInBattler)!.toPartyIndex,
-        );
+        ).field;
       commands.push(Object.freeze({
         type: "message",
         eventSequence: event.sequence,
@@ -3340,13 +3365,12 @@ export function projectBattleResolutionCommands(
           `battle resolution switch-in marker for battler ${battler} does not match its switch receipt`,
         );
       }
-      // Soak signature 6: prefers the settled post-turn command field
-      // (byte-identical to the former afterField-only derivation whenever
-      // that boundary exists), else the party record -- see
-      // switchInIncomingBattler's own doc.
-      const incoming = switchInIncomingBattler(
+      const incoming = switchInIncomingSnapshot(
         beforeRules,
+        afterRules,
         afterField,
+        events,
+        index,
         battler,
         switched.toPartyIndex,
       );
@@ -3357,7 +3381,8 @@ export function projectBattleResolutionCommands(
         battler,
         fromPartyIndex: switched.fromPartyIndex,
         toPartyIndex: switched.toPartyIndex,
-        incoming,
+        incoming: incoming.field,
+        incomingStatus1: incoming.status1,
         timing: SWITCH_IN_TIMING,
         settleHoldFrames: SWITCH_IN_WAITSTATE_HOLD_FRAMES,
       }));

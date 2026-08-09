@@ -376,6 +376,48 @@ function fieldBattler(
 }
 
 /**
+ * Snapshots the two live singles battlers independently of which controller
+ * owns the next command. Resolution segments can end at a trainer command
+ * boundary before the UI ever receives a player request; that boundary still
+ * owns genuine displayed HP/status/identity (ISSUES #85).
+ */
+export function createBattleCommandDisplayedField(
+  rules: BattleScriptRulesContext,
+): BattleCommandPresentationState["field"] {
+  if (rules.battleTopology.battlersCount !== 2) {
+    throw new BattleCommandPresentationError(
+      `battle-command display field requires singles topology, got ${rules.battleTopology.battlersCount} battlers`,
+    );
+  }
+  const playerActive = rules.battlers[0];
+  const opponentActive = rules.battlers[1];
+  if (playerActive.side !== 0) {
+    throw new BattleCommandPresentationError("battler 0 is not the live player battler");
+  }
+  if (opponentActive.side !== 1) {
+    throw new BattleCommandPresentationError("battler 1 is not the live opponent battler");
+  }
+  const playerPartyIndex = partyIndexFromBattler(playerActive, "player battler");
+  const opponentPartyIndex = partyIndexFromBattler(opponentActive, "opponent battler");
+  return Object.freeze({
+    player: fieldBattler(
+      "player",
+      0,
+      playerActive,
+      rules.party.player[playerPartyIndex],
+      playerPartyIndex,
+    ),
+    opponent: fieldBattler(
+      "trainer",
+      1,
+      opponentActive,
+      rules.party.opponent[opponentPartyIndex],
+      opponentPartyIndex,
+    ),
+  });
+}
+
+/**
  * Snapshots one live player-side singles command boundary into immutable,
  * render-owned state. Lifecycle input and decision submission are deliberately
  * owned by later slices of the battle-command seam.
@@ -401,27 +443,7 @@ export function createBattleCommandPresentation(
       "battle-command presentation accepts player-side singles requests only",
     );
   }
-  if (rules.battleTopology.battlersCount !== 2) {
-    throw new BattleCommandPresentationError(
-      `battle-command presentation requires singles topology, got ${rules.battleTopology.battlersCount} battlers`,
-    );
-  }
-
-  const playerActive = rules.battlers[request.battler];
-  const opponentActive = rules.battlers[1];
-  if (playerActive.side !== 0) {
-    throw new BattleCommandPresentationError(
-      `request battler ${request.battler} is not the live player battler`,
-    );
-  }
-  if (opponentActive.side !== 1) {
-    throw new BattleCommandPresentationError("battler 1 is not the live opponent battler");
-  }
-
-  const playerPartyIndex = partyIndexFromBattler(playerActive, "player battler");
-  const opponentPartyIndex = partyIndexFromBattler(opponentActive, "opponent battler");
-  const playerPartyMember = rules.party.player[playerPartyIndex];
-  const opponentPartyMember = rules.party.opponent[opponentPartyIndex];
+  const field = createBattleCommandDisplayedField(rules);
 
   const legalMoveBySlot: [
     BattleMoveDecision | null,
@@ -465,22 +487,7 @@ export function createBattleCommandPresentation(
     bounceSchedule,
     bounceFightMenuReopened: false,
     spriteVisibility: Object.freeze({ player: true, opponent: true }),
-    field: Object.freeze({
-      player: fieldBattler(
-        "player",
-        request.battler,
-        playerActive,
-        playerPartyMember,
-        playerPartyIndex,
-      ),
-      opponent: fieldBattler(
-        "trainer",
-        1,
-        opponentActive,
-        opponentPartyMember,
-        opponentPartyIndex,
-      ),
-    }),
+    field,
     actionCursor: 0,
     fightCursor: initialFightCursor,
     fightDisplayCursor: initialFightCursor,

@@ -13,6 +13,7 @@ import {
   advanceBattleCommandPresentation,
   battleCommandUiStatusFromStatus1,
   cancelBattleCommandPartySelection,
+  createBattleCommandDisplayedField,
   createBattleCommandPresentation,
   BATTLE_COMMAND_BOUNCE_SCHEDULE_DEFAULT,
   returnBattleCommandPartySelection,
@@ -69,6 +70,7 @@ import {
 import type {
   BattleScriptPartyMemberState,
   BattleScriptPartyState,
+  BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
 import { deriveBattleResolutionFromTerminalBoundary } from "./battleResolutionAdapter.ts";
 import { mapStatus1ToBattleStatus } from "./battleResolutionAdapter.ts";
@@ -1329,48 +1331,128 @@ function completedResolutionPhase(
     : "next-command-handoff";
 }
 
-function boundaryFieldAt(
-  field: BattleResolutionPresentationState["field"],
-  battler: 0 | 1,
-) {
-  return battler === 0 ? field.player : field.opponent;
-}
-
 function commitCompletedResolutionCommand(
   boundaries: FactoryBattlePresentationBoundaries,
   resolution: BattleResolutionPresentationState,
   command: BattleResolutionPresentationCommand,
 ): FactoryBattlePresentationBoundaries {
-  const displayed = createBattleResolutionPresentationRenderView(resolution).field;
-  return Object.freeze(boundaries.map((boundary, battler) => Object.freeze({
-    ...boundary,
-    field: boundaryFieldAt(displayed, battler as 0 | 1),
-    displayedHp: boundaryFieldAt(displayed, battler as 0 | 1).hp,
-    displayedStatus1:
-      command.type === "status-icon" && command.battler === battler
-        ? command.status1
-        : boundary.displayedStatus1,
-    partyIndex:
-      command.type === "switch-in" && command.battler === battler
-        ? command.toPartyIndex
-        : boundary.partyIndex,
-    spriteVisible:
-      command.type === "faint" && command.battler === battler
-        ? false
-        : command.type === "switch-in" && command.battler === battler
-          ? true
-          : command.type === "sprite-visibility" && command.battler === battler
-            ? command.visible
-          : boundary.spriteVisible,
-    idleEpoch:
-      command.type === "switch-in" && command.battler === battler
-        ? 0
-        : boundary.idleEpoch,
-    moveCursor:
-      command.type === "switch-in" && command.battler === battler
-        ? 0
-        : boundary.moveCursor,
-  }))) as unknown as FactoryBattlePresentationBoundaries;
+  if (command.type === "turn-end") {
+    const segment = resolution.segments[resolution.segmentIndex];
+    if (segment === undefined) {
+      return fail(`resolution display ledger has no segment ${resolution.segmentIndex}`);
+    }
+    return settleBattlePresentationBoundariesAtRulesBoundary(
+      boundaries,
+      segment.afterRules.rulesContext,
+      "turn-end",
+    );
+  }
+  return Object.freeze(boundaries.map((boundary) => {
+    if (
+      boundary.partyIndex !== boundary.field.partyIndex
+      || boundary.displayedHp !== boundary.field.hp
+      || battleCommandUiStatusFromStatus1(boundary.displayedStatus1)
+        !== boundary.field.status
+    ) {
+      return fail(`resolution display ledger battler ${boundary.battler} is internally inconsistent`);
+    }
+    if (!("battler" in command) || command.battler !== boundary.battler) {
+      return boundary;
+    }
+    if (command.type === "hp") {
+      if (boundary.displayedHp !== command.from) {
+        return fail(
+          `battle resolution HP command starts at ${command.from}, displayed ${boundary.displayedHp}`,
+        );
+      }
+      const field = Object.freeze({ ...boundary.field, hp: command.to });
+      return Object.freeze({ ...boundary, field, displayedHp: command.to });
+    }
+    if (command.type === "status-icon") {
+      const field = Object.freeze({
+        ...boundary.field,
+        status: battleCommandUiStatusFromStatus1(command.status1),
+      });
+      return Object.freeze({
+        ...boundary,
+        field,
+        displayedStatus1: command.status1,
+      });
+    }
+    if (command.type === "switch-in") {
+      if (boundary.partyIndex !== command.fromPartyIndex) {
+        return fail(
+          `resolution switch-in battler ${boundary.battler} starts at party ${command.fromPartyIndex}, displayed ${boundary.partyIndex}`,
+        );
+      }
+      return Object.freeze({
+        ...boundary,
+        partyIndex: command.toPartyIndex,
+        field: command.incoming,
+        displayedHp: command.incoming.hp,
+        displayedStatus1: command.incomingStatus1,
+        spriteVisible: true,
+        idleEpoch: 0,
+        moveCursor: 0,
+      });
+    }
+    if (command.type === "faint") {
+      return Object.freeze({ ...boundary, spriteVisible: false });
+    }
+    if (command.type === "sprite-visibility") {
+      return Object.freeze({ ...boundary, spriteVisible: command.visible });
+    }
+    return boundary;
+  })) as unknown as FactoryBattlePresentationBoundaries;
+}
+
+/**
+ * Commits a source reducer/controller boundary to the durable display ledger.
+ * Command transitions own intra-segment HP/status/switch animation; this
+ * boundary transition owns the stable state after a completed turn or forced
+ * send-out. Party identity may only change through an earlier typed switch
+ * command, so a missing switch remains fatal rather than being papered over.
+ */
+function settleBattlePresentationBoundariesAtRulesBoundary(
+  boundaries: FactoryBattlePresentationBoundaries,
+  rules: BattleScriptRulesContext,
+  source: "turn-end" | "forced-switch-in",
+): FactoryBattlePresentationBoundaries {
+  const settledField = createBattleCommandDisplayedField(rules);
+  return Object.freeze(boundaries.map((boundary) => {
+    if (
+      boundary.partyIndex !== boundary.field.partyIndex
+      || boundary.displayedHp !== boundary.field.hp
+      || battleCommandUiStatusFromStatus1(boundary.displayedStatus1)
+        !== boundary.field.status
+    ) {
+      return fail(`resolution display ledger battler ${boundary.battler} is internally inconsistent`);
+    }
+    const settled = boundary.battler === 0
+      ? settledField.player
+      : settledField.opponent;
+    const active = rules.battlers[boundary.battler]!;
+    if (settled.partyIndex !== boundary.partyIndex) {
+      return fail(
+        `resolution ${source} battler ${boundary.battler} changed party without a completed switch transition`,
+      );
+    }
+    return Object.freeze({
+      ...boundary,
+      field: settled,
+      displayedHp: settled.hp,
+      // Toxic's source counter advances in status1 bits 8..11 without a new
+      // healthbox receipt. Preserve the controller-committed raw display
+      // value while its UI status is unchanged; a real icon transition (for
+      // example healthy -> burn across the forced-send-out boundary) adopts
+      // the new source value.
+      displayedStatus1:
+        battleCommandUiStatusFromStatus1(boundary.displayedStatus1)
+          === battleCommandUiStatusFromStatus1(active.status1)
+          ? boundary.displayedStatus1
+          : active.status1,
+    });
+  })) as unknown as FactoryBattlePresentationBoundaries;
 }
 
 function forcedPartyForResolution(
@@ -1751,10 +1833,15 @@ export function advanceFactoryRoundBattleResolution(
           })
         : boundary
     )) as unknown as FactoryBattlePresentationBoundaries;
+    const settledBoundaries = settleBattlePresentationBoundariesAtRulesBoundary(
+      committedBoundaries,
+      resolution.pendingBattle.rules.rulesContext,
+      "forced-switch-in",
+    );
     const handoff = settledCommandForResolutionHandoff(
       resolution.pendingBattle,
       state.moveSelectionCursors,
-      committedBoundaries,
+      settledBoundaries,
       state.usedMessageHoldFrames,
     );
     return Object.freeze({

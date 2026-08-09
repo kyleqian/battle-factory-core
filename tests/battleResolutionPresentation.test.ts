@@ -993,7 +993,7 @@ describe("battle resolution presentation receipt ownership", () => {
     const initial = initialBattle();
     const context = initial.rules.rulesContext;
     const incoming = context.party.player[1]!;
-    const afterContext = Object.freeze({
+    const beforeContext = Object.freeze({
       ...context,
       party: Object.freeze({
         ...context.party,
@@ -1006,6 +1006,13 @@ describe("battle resolution presentation receipt ownership", () => {
           context.party.opponent[5]!,
         ]),
       }),
+    });
+    const beforeRules = Object.freeze({
+      ...initial.rules,
+      rulesContext: beforeContext,
+    }) as FactoryFullTurnDecisionRules;
+    const afterContext = Object.freeze({
+      ...beforeContext,
       battlers: Object.freeze([
         context.battlers[0]!,
         Object.freeze({
@@ -1023,8 +1030,7 @@ describe("battle resolution presentation receipt ownership", () => {
       ...initial.rules,
       rulesContext: afterContext,
     }) as FactoryFullTurnDecisionRules;
-    const resolution = createBattleResolutionPresentation({
-      ...inputFor([
+    const input = inputFor([
         event(0, {
           kind: "message",
           messageId: "STRINGID_USEDMOVE",
@@ -1052,7 +1058,14 @@ describe("battle resolution presentation receipt ownership", () => {
           messageId: "STRINGID_PKMNWASDRAGGEDOUT",
           substitutions: [],
         }),
-      ], NEXT_COMMAND, afterRules),
+      ], NEXT_COMMAND, afterRules);
+    const resolution = createBattleResolutionPresentation({
+      ...input,
+      beforeRules,
+      fieldBoundary: createBattleCommandPresentation(
+        input.sourceRequest,
+        beforeRules.rulesContext,
+      ).field,
       opponentTrainer: Object.freeze({
         className: "BUG CATCHER",
         name: "DESTIN",
