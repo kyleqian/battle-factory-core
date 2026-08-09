@@ -29,7 +29,8 @@ interface Sprite {
   readonly matrix: { readonly a: number; readonly b: number; readonly c: number; readonly d: number };
 }
 interface Frame {
-  readonly frame: number; readonly sha256: string; readonly scriptOffset: number | null;
+  readonly frame: number; readonly sha256: string; readonly scriptPtr: number;
+  readonly scriptOffset: number | null;
   readonly animScriptActive: boolean; readonly player: unknown; readonly opponent: unknown;
   readonly playerSprite: Sprite; readonly opponentSprite: Sprite;
   readonly moveSprites: Readonly<Record<string, readonly Sprite[]>>;
@@ -87,11 +88,27 @@ function verify(path: string): void {
   }
   digests.set(fixture.orientation, digest);
   const probe = JSON.parse(bytes.toString()) as Probe;
+  const scriptSize = probe.scriptBounds.Move_TWINEEDLE
+    - probe.scriptBounds.Move_POISON_STING;
+  const bubbleScriptStart = probe.scriptBounds.PoisonBubblesEffect;
+  const bubbleScriptEnd = probe.scriptBounds.WaterBubblesEffectShort;
+  const activePointersBounded = probe.frames.slice(0, -1).every(
+    (frame) => frame.animScriptActive
+      && (
+        (frame.scriptOffset !== null
+          && frame.scriptOffset >= 0
+          && frame.scriptOffset < scriptSize)
+        || (frame.scriptOffset === null
+          && frame.scriptPtr >= bubbleScriptStart
+          && frame.scriptPtr < bubbleScriptEnd)
+      ),
+  );
   if (probe.schema !== "poison-sting-dense-evidence/v1"
     || probe.moveId !== 40
     || !same(probe.sourceWindow, fixture.sourceWindow)
     || probe.frames.length !== 113
     || probe.frames[0]?.scriptOffset !== 0
+    || !activePointersBounded
     || probe.frames.at(-1)?.animScriptActive !== false) {
     throw new Error(`${fixture.orientation}: pointer-bounded source window changed`);
   }
@@ -187,11 +204,17 @@ function verify(path: string): void {
     ];
     const hardware = priorSprites.every((sprite) => {
       const tuple = [sprite.attr0, sprite.attr1, sprite.attr2];
-      const softwareIndex = priorFrame!.softwareOam.findIndex((raw) => {
+      const softwareMatches = priorFrame!.softwareOam.flatMap((raw, index) => {
         const bytes = Buffer.from(raw, "hex");
-        return same([bytes.readUInt16LE(0), bytes.readUInt16LE(2), bytes.readUInt16LE(4)], tuple);
+        return same(
+          [bytes.readUInt16LE(0), bytes.readUInt16LE(2), bytes.readUInt16LE(4)],
+          tuple,
+        ) ? [index] : [];
       });
-      return softwareIndex >= 0 && same(actual.hardwareOam[softwareIndex], tuple)
+      const softwareIndex = softwareMatches[0];
+      return softwareMatches.length === 1
+        && softwareIndex !== undefined
+        && same(actual.hardwareOam[softwareIndex], tuple)
         && same(actual.hardwareMatrices[sprite.matrixNum], [
           sprite.matrix.a, sprite.matrix.b, sprite.matrix.c, sprite.matrix.d,
         ]);

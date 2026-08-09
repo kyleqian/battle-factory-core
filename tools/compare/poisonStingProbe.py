@@ -40,7 +40,7 @@ def main() -> None:
     templates = {name: names[name] for name in ("gLinearStingerSpriteTemplate", "gBasicHitSplatSpriteTemplate", "gPoisonBubbleSpriteTemplate")}
     callbacks = {name: names[name] for name in ("AnimTranslateLinear_WithFollowup", "RunStoredCallbackWhenAffineAnimEnds", "AnimBubbleEffect_Step", "DestroyAnimSprite")}
     task_funcs = {name: names[name] for name in ("AnimTask_ShakeMon2", "AnimTask_ShakeMon2_Step")}
-    bounds = {"Move_POISON_STING": names["Move_POISON_STING"], "Move_TWINEEDLE": names["Move_TWINEEDLE"], "PoisonBubblesEffect": names["PoisonBubblesEffect"]}
+    bounds = {"Move_POISON_STING": names["Move_POISON_STING"], "Move_TWINEEDLE": names["Move_TWINEEDLE"], "PoisonBubblesEffect": names["PoisonBubblesEffect"], "WaterBubblesEffectShort": names["WaterBubblesEffectShort"]}
 
     def u16(address: int) -> int:
         return oracle.read_u8(address) | oracle.read_u8(address + 1) << 8

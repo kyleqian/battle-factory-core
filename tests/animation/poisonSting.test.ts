@@ -108,4 +108,13 @@ describe("MOVE_POISON_STING source-relative presentation", () => {
       expect(fixture.changeMapSha256).toMatch(/^[0-9a-f]{64}$/);
     }
   });
+
+  it("keeps pointer bounds and unique software-OAM handoff checks load-bearing", () => {
+    const portable = readFileSync(
+      "tools/compare/poisonStingPortable.ts",
+      "utf8",
+    );
+    expect(portable).toContain("activePointersBounded");
+    expect(portable).toContain("softwareMatches.length === 1");
+  });
 });

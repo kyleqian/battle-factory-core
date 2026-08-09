@@ -8,7 +8,7 @@
   "target": { "species": "ONIX", "geometry": { "side": "opponent", "spriteCorner": {"x":144,"y":10}, "animationCenter": {"x":176,"y":42}, "battlePositionCenter": {"x":176,"y":40} } },
   "fieldProfile": { "playerHp":96,"playerMaxHp":133,"opponentHp":128,"opponentMaxHp":128,"playerGender":"male","opponentGender":"male" },
   "sourceWindow": {"startFrame":244,"endFrame":356,"frameCount":113},
-  "evidenceSha256": "bd742227f862ac2ffc59bdd65794876a4f9d62cfadf7d184fd8f99fbc69d82cc",
+  "evidenceSha256": "3ed85c2f98d1ff43e07d8c2522b1217767ba93c82d7d9e9362b215bc1b57ac1e",
   "rawRgbSha256": "13d161ae201400499aea5cff05a839fc4ba4cf9163f3a3ad1ae2c8c845c755c3",
   "changeMap": "tools/compare/evidence/poison-sting-changemap-player.txt",
   "changeMapSha256": "2c38ddb397eaf2ff96ec69cf7c9a4a11a9cd97e0075be29fc2b942a9f359cefd",
