@@ -811,6 +811,27 @@ export function resolveMoveSelectionRejectionMessageLines(
       B_CURRENT_MOVE: () => resolveMoveName(currentMove),
     });
   }
+  if (
+    stringId === "STRINGID_PKMNCANTUSEMOVETAUNT"
+    || stringId === "STRINGID_PKMNMOVEISDISABLED"
+  ) {
+    // Soak signature 4 (docs/soak-crash-catalog.md §4) -- the two live
+    // rejection ids the scout doc's §1.5 named as still-unresolved.
+    // sText_PkmnCantUseMoveTaunt (battle_message.c:261) /
+    // sText_PkmnMoveIsDisabled (battle_message.c:259):
+    // {B_ACTIVE_NAME_WITH_PREFIX} is the rejected battler;
+    // {B_CURRENT_MOVE} is gCurrentMove, which TrySetCantSelectMoveBattleScript
+    // sets to the rejected move itself for both causes (battle_util.c:1016
+    // Taunt, :986 Disabled) -- describeIllegalMoveSelection threads that
+    // through `currentMove`.
+    return resolveBattleStringLines(stringId, {
+      B_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(
+        field,
+        singlesBattler(battler, `${stringId} selection rejection`),
+      ),
+      B_CURRENT_MOVE: () => resolveMoveName(currentMove),
+    });
+  }
   throw new Error(
     `battle resolution ${stringId} has no move-selection-rejection message resolver`,
   );

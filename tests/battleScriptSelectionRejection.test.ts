@@ -465,6 +465,46 @@ describe("resolveMoveSelectionRejectionMessageLines: the 4 STRINGID resolvers (I
     }, field)).toEqual(["CHOICE BAND allows the", "use of only TACKLE!"]);
   });
 
+  it("STRINGID_PKMNCANTUSEMOVETAUNT names the taunted battler and the rejected move (soak signature 4)", () => {
+    // sText_PkmnCantUseMoveTaunt (battle_message.c:261); gCurrentMove is the
+    // rejected move itself (battle_util.c:1016).
+    expect(resolveMoveSelectionRejectionMessageLines({
+      cause: "taunt",
+      stringId: "STRINGID_PKMNCANTUSEMOVETAUNT",
+      battler: 0,
+      moveSlot: 1,
+      move: GROWL,
+      currentMove: GROWL,
+      heldItem: 0,
+    }, field)).toEqual(["BUTTERFREE can’t use", "GROWL after the TAUNT!"]);
+  });
+
+  it("STRINGID_PKMNCANTUSEMOVETAUNT prefixes the opponent's own name with Foe", () => {
+    expect(resolveMoveSelectionRejectionMessageLines({
+      cause: "taunt",
+      stringId: "STRINGID_PKMNCANTUSEMOVETAUNT",
+      battler: 1,
+      moveSlot: 0,
+      move: TORMENT_MOVE,
+      currentMove: TORMENT_MOVE,
+      heldItem: 0,
+    }, field)).toEqual(["Foe MURKROW can’t use", "TORMENT after the TAUNT!"]);
+  });
+
+  it("STRINGID_PKMNMOVEISDISABLED names the battler's own disabled move (scout §1.5's other live gap)", () => {
+    // sText_PkmnMoveIsDisabled (battle_message.c:259); gCurrentMove is the
+    // rejected move itself (battle_util.c:986).
+    expect(resolveMoveSelectionRejectionMessageLines({
+      cause: "disabled",
+      stringId: "STRINGID_PKMNMOVEISDISABLED",
+      battler: 0,
+      moveSlot: 0,
+      move: TACKLE,
+      currentMove: TACKLE,
+      heldItem: 0,
+    }, field)).toEqual(["BUTTERFREE’s TACKLE", "is disabled!"]);
+  });
+
   it("keeps the completeness guard fatal for STRINGID_PKMNCANTUSEMOVESEALED (DEAD Imprison carrier -- no fallback)", () => {
     expect(() => resolveMoveSelectionRejectionMessageLines({
       cause: "imprison",
