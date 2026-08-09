@@ -161,6 +161,41 @@ Poison/Steel type gates and Electric damage immunity.
 
 ## Completed receipt notes
 
+### R6 — Natural Cure clears the departing Starmie before ordinary reconstruction
+
+`gate6-r6-off.json` stages complete legal parties: Starmie at player party
+index 0 uses ability slot 1 (Natural Cure, semantic ability `30`), its neutral
+Rattata bench is party index 1, and Muk is constrained to four real Toxic
+slots. Fresh Battle Scene OFF runs at seeds `1` and `324508639` agree on all
+23 captured frame/hash pairs. Toxic first makes both active Starmie and
+`state.parties.player[0]` `status1 = 0x80` at frame 258 (hash
+`b4e4a7626d6f2f57ae6b6be8739dc4f76ed6dd6140c6b90375d417baaaabe930`);
+the active toxic counter later reaches `0x180` at frame 367 while the durable
+party value stays `0x80`.
+
+The voluntary party-menu switch preserves the source order. At frame 1055 the
+active Starmie is still `0x180` and its party record `0x80`; at frame 1096
+Natural Cure has made both fields `0` (hash
+`3f1a608bbf74d1c60bbd44acffd01426fe4205c973e087b9a4bc93d77e44ba84`).
+Frame 1135 then reconstructs the independent Rattata record (`species 19`,
+`partyIndex 1`, battle and party status `0`) with hash
+`4b305eebb174b42f4d5247cd9e6802f0136e817fd6876a8b850571de4c8461e1`.
+After Muk toxics that ordinary incoming mon, the return at frame 2077 rebuilds
+clean Starmie (`partyIndex 0`, battle/party status `0`) while Rattata's party
+status remains `0x80`; hash
+`bb755d91704f58e9c495625524862619bab80c9660ca4b9bfe308eb97846dcd4`.
+
+`BattleScript_EffectToxic` runs the real status route through
+`setmoveeffect`/`seteffectprimary` (`data/battle_scripts_1.s:686-705`). On
+switch-out, `Cmd_switchoutabilities` clears `gBattleMons.status1`, emits
+`REQUEST_STATUS_BATTLE`, and the player controller writes that exact value to
+the departing party slot (`battle_script_commands.c:9590-9604`,
+`battle_controller_player.c:2102-2104`); only afterward does
+`Cmd_switchindataupdate` copy the selected incoming BattlePokemon and derive
+its type/ability (`battle_script_commands.c:4621-4657`). The checked-in
+captures already hit each semantic boundary, so no fixture cadence or capture
+was altered.
+
 ### R12b — Granbull Intimidate, Guts Machamp, and White Herb entry order
 
 `gate6-r12b-off.json` uses complete legal parties and makes Machamp's
@@ -192,6 +227,42 @@ write. This receipts the source order: Intimidate's stage cut/message,
 then White Herb's normalization/message, then the shared item removal
 (`battle_main.c:3869-3894`, `battle_util.c:3003-3073,3303-3329`,
 `battle_script_commands.c:5901-5915`).
+
+### R11 — Ninjask Baton Pass versus ordinary-switch volatile/stage lifetime
+
+`gate6-r11-off.json` uses complete legal parties and now names Ninjask by
+Emerald's internal `SPECIES_NINJASK = 302` (not the nearby Nincada id).  Its
+real Swords Dance, Substitute, and Speed Boost sequence establishes the
+source record before the real Baton Pass party choice: on both fresh Battle
+Scene OFF runs (seeds `1` and `324508639`), frame 3000 is active Ninjask at
+party index 0 with `status2 = 0x01000000` (`STATUS2_SUBSTITUTE`),
+`status3 = 0`, and stat-stage vector `[6,8,6,8,6,6,6,6]`; Baton Pass has
+spent its PP `40→39`.  The real party picker then sends the intended bench
+Bulbasaur (party index 1): frame 4000 retains that exact status2 value and
+stage vector on Bulbasaur, with raw-RGB SHA-256
+`5b03eec4d1ff2c77f836999f53db6b960b51be0b9e64631b0b4b40c4a30979ff`
+on both seeds.
+
+The same trace then chooses PKMN → Ninjask → SHIFT, rather than invoking a
+staging shortcut.  At frame 7400 the ordinary incoming Ninjask record is
+back at party index 0 with `status2 = 0`, `status3 = 0`, and every stage at
+the default `[6,6,6,6,6,6,6,6]` (hash
+`90cac917989d764920afa363c2490cfffb95759fdfccc6151a4021725d86c1e3`);
+the settled frame 7600 repeats the cleared fields (hash
+`4f0fa695bf4db9ab4bd0abe5996418660ee1d4c1cec3c00d7b82a647644a9983`).
+Those semantic snapshots, not the party-screen pixels, distinguish the two
+lifetimes; both hashes and every named state field are stable across the two
+seeds despite their distinct RNG states.
+
+This is the exact source boundary. `Cmd_switchindataupdate` overwrites the
+incoming `BattlePokemon`, then copies stat stages and status2 only for
+`EFFECT_BATON_PASS` (`battle_script_commands.c:4631-4657`).
+`SwitchInClearSetData` otherwise resets all stages and zeros status2/status3
+(`battle_main.c:3158-3172,3189-3193`); its Baton Pass branch masks status2
+to the source-retained list, which includes Substitute
+(`battle_main.c:3173-3176`).  The Tier-1 sibling now pins the corresponding
+ordinary reset and Baton Pass stage/Substitute retention against the same
+source split.
 
 ### R7 — burn, Guts Attack, Facade multiplier, and end-turn chip
 

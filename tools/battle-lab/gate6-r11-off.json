@@ -13,7 +13,7 @@
     "parties": {
       "player": [
         {
-          "species": 301,
+          "species": 302,
           "level": 50,
           "nature": 5,
           "ivs": { "hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31 },
@@ -106,13 +106,17 @@
       { "frames": 2, "buttons": ["A"] },
       { "frames": 30, "buttons": [] },
       { "frames": 2, "buttons": ["A"] },
-      { "frames": 600, "buttons": [] },
+      { "frames": 850, "buttons": [] },
       { "frames": 2, "buttons": ["A"] },
       { "frames": 30, "buttons": [] },
       { "frames": 2, "buttons": ["RIGHT"] },
       { "frames": 30, "buttons": [] },
       { "frames": 2, "buttons": ["A"] },
-      { "frames": 600, "buttons": [] },
+      { "frames": 850, "buttons": [] },
+      { "frames": 2, "buttons": ["A"] },
+      { "frames": 30, "buttons": [] },
+      { "frames": 2, "buttons": ["A"] },
+      { "frames": 700, "buttons": [] },
       { "frames": 2, "buttons": ["A"] },
       { "frames": 30, "buttons": [] },
       { "frames": 2, "buttons": ["LEFT"] },
@@ -126,14 +130,30 @@
       { "frames": 2, "buttons": ["A"] },
       { "frames": 30, "buttons": [] },
       { "frames": 2, "buttons": ["A"] },
-      { "frames": 500, "buttons": [] },
+      { "frames": 1400, "buttons": [] },
+      { "frames": 2, "buttons": ["A"] },
+      { "frames": 600, "buttons": [] },
+      { "frames": 2, "buttons": ["DOWN"] },
+      { "frames": 30, "buttons": [] },
+      { "frames": 2, "buttons": ["A"] },
+      { "frames": 30, "buttons": [] },
+      { "frames": 2, "buttons": ["LEFT"] },
+      { "frames": 30, "buttons": [] },
+      { "frames": 2, "buttons": ["A"] },
+      { "frames": 30, "buttons": [] },
+      { "frames": 2, "buttons": ["A"] },
+      { "frames": 600, "buttons": [] },
+      { "frames": 2, "buttons": ["A"] },
+      { "frames": 600, "buttons": [] },
+      { "frames": 2, "buttons": ["A"] },
+      { "frames": 60, "buttons": [] },
       { "frames": 2, "buttons": ["RIGHT"] },
       { "frames": 30, "buttons": [] },
       { "frames": 2, "buttons": ["A"] },
-      { "frames": 30, "buttons": [] },
+      { "frames": 100, "buttons": [] },
       { "frames": 2, "buttons": ["A"] },
-      { "frames": 500, "buttons": [] }
+      { "frames": 600, "buttons": [] }
     ],
-    "captureFrames": [0, 200, 500, 634, 800, 1100, 1268, 1450, 1700, 1900, 2200, 2400, 2600, 2814, 3000, 3200, 3380]
+    "captureFrames": [0, 200, 500, 634, 800, 1100, 1268, 1450, 1700, 1900, 2200, 2400, 2600, 2814, 3000, 3200, 3380, 3600, 3800, 4000, 4150, 4300, 4500, 4700, 4878, 5000, 5200, 5400, 5600, 5678, 5800, 6000, 6200, 6278, 6300, 6400, 6500, 6700, 6882, 7000, 7200, 7400, 7600, 7680]
   }
 }

@@ -529,8 +529,9 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     }
   });
 
-  it("switchindataupdate clears Focus Energy ordinarily, retains it through Baton Pass, and clears Encore in both routes", () => {
+  it("switchindataupdate resets Substitute/stages ordinarily, retains their Baton Pass source subset, and clears Encore in both routes", () => {
     const STATUS2_FOCUS_ENERGY = 1 << 20;
+    const STATUS2_SUBSTITUTE = 1 << 24;
     const STATUS2_TORMENT = 1 << 31;
     const STATUS3_MUDSPORT = 1 << 16;
     const STATUS3_WATERSPORT = 1 << 17;
@@ -541,7 +542,8 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
           side: 1, species: SUNKERN, hp: 0,
           types: ["TYPE_GRASS", "TYPE_GRASS"], partyIndex: 2,
           ability: ABILITY_GUTS,
-          status2: (STATUS2_FOCUS_ENERGY | STATUS2_TORMENT) >>> 0,
+          status2: (STATUS2_FOCUS_ENERGY | STATUS2_SUBSTITUTE | STATUS2_TORMENT) >>> 0,
+          statStages: [6, 8, 6, 8, 6, 6, 6, 6],
           encoredMove: KARATE_CHOP,
           encoredMovePos: 2,
           encoreTimer: 4,
@@ -563,6 +565,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     ).result;
     if (ordinary.kind !== "advanced") throw new Error("expected ordinary advance");
     expect(ordinary.state.rulesContext.battlers[1].status2).toBe(0);
+    expect(ordinary.state.rulesContext.battlers[1].statStages).toEqual([6, 6, 6, 6, 6, 6, 6, 6]);
     expect(ordinary.state.rulesContext.battlers[1]).toMatchObject({
       encoredMove: 0, encoredMovePos: 0, encoreTimer: 0, encoreTimerStartValue: 0,
       perishSongTimer: 0, perishSongTimerStartValue: 0,
@@ -576,7 +579,8 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     ).result;
     if (batonPass.kind !== "advanced") throw new Error("expected Baton Pass advance");
     expect(batonPass.state.rulesContext.battlers[1].status2)
-      .toBe(STATUS2_FOCUS_ENERGY);
+      .toBe(STATUS2_FOCUS_ENERGY | STATUS2_SUBSTITUTE);
+    expect(batonPass.state.rulesContext.battlers[1].statStages).toEqual([6, 8, 6, 8, 6, 6, 6, 6]);
     expect(batonPass.state.rulesContext.battlers[1]).toMatchObject({
       encoredMove: 0, encoredMovePos: 0, encoreTimer: 0, encoreTimerStartValue: 0,
       perishSongTimer: 3, perishSongTimerStartValue: 3,

@@ -137,7 +137,7 @@ history.
   polling. Don't reach for a workaround (backgrounding, pkill, chunking) on
   the assumption the suite cannot fit — twice now that assumption, not the
   runtime, was the thing that cost the session time.
-- **Hits:** 8 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
+- **Hits:** 9 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
   contention from concurrent side/animation runs — auto-backgrounded; worker
   recovered by pid-polling, ~5 min lost. 2026-08-03: terminal-seam scout,
   ~6 min of foreground-poll waiting. 2026-08-04 R3: two workers same round —
@@ -153,7 +153,10 @@ history.
   even focused verification runs contend; batch them between rounds or
   after sibling suites, ~4 min lost. 2026-08-08: the LILIANA far-side side
   worker lost the first full-suite exit marker after the stream detached and
-  reran the suite explicitly, ~14 min lost.)
+  reran the suite explicitly, ~14 min lost. 2026-08-08: the printfromtable
+  worker lost two exit markers, leaving both suites alive, and started a third
+  explicit-exit run; the supervisor killed only the two duplicates, ~8 min
+  lost and heavy cross-lane contention.)
 - **Possible durable fix:** teach the worker preamble (or the brief
   template) to pass an explicit long timeout for the final full-suite call
   (the tool accepts up to 10 min per call; the suite may soon exceed even
@@ -271,7 +274,7 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
-## Codex worker waits forever for additional input after its bounded turn
+## Codex worker waits forever after its bounded turn
 
 - **What:** after the #61 worker's last completed tool event and committed
   evidence checkpoint, `codex exec` printed `Reading additional input from
@@ -279,7 +282,10 @@ Per entry:
   stdin. The event log stopped advancing and the process stayed idle until
   the supervisor terminated only the Codex child; postflight then
   misleadingly labeled exit 241 as an authentication failure.
-- **Hits:** 1.
+- **Hits:** 2. The 2026-08-08 printfromtable worker hit the same post-completion
+  wedge after its final full-suite exit `0`; stderr repeatedly reported
+  `failed to renew cache TTL: missing field base_instructions` until the
+  supervisor interrupted the otherwise-complete session.
 - **Cost each:** ~10 min.
 - **Workaround:** confirm the JSONL mtime, clean tree, and committed checkpoint
   before terminating the wedged child. (Postflight now names cap/signal exits
