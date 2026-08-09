@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_VICE_GRIP exact — bilateral 42/42 CUT-pincer promotion (2026-08-09 worker)
+
+- **State:** Coverage advances **146→147/276 exact**, 0 partial, 0 staged, **130→129 unsupported**. VICE_GRIP alone moves; no animation-boundary or unsupported-barrier change.
+- **Did:** Added complete legal set-249 CRAWDAUNT/ONIX bilateral stages, a Move_VICE_GRIP..Move_GUILLOTINE pointer-bounded Scene-ON probe, raw-RGB receipts/change maps, pure source-relative reducer, typed seam, and narrow compositor. It reuses only AERIAL_ACE's source-identical CUT sheet/palette while independently porting both flipped pincer animations/callbacks, animation-2 IMPACT, target ShakeMon2, monbg/alpha, target-panned audio, hardware latches, painter order, and cleanup; existing generated catalogs pin CRAWDAUNT front/back art.
+- **Verified:** Twice fresh, player-back and opponent-front frames **212..253** each pass **42/42 component+seam+hardware+raw-RGB+framebuffer**. Player evidence/raw/map: `9610089d…` / `2b6d3fe4…` / `9241bca1…`; opponent: `f40729e4…` / `247f3004…` / `09282a7d…`. AERIAL_ACE remains bilateral **236/236 + 232/232** twice fresh and TWINEEDLE bilateral **37/37** twice fresh with stable receipts. Focused tests and the animation boundary pass.
+- **Next:** Supervisor selects the next independent animation acceptance unit. Do not infer VICE_GRIP's age−1 ShakeMon2 latch or lower-OAM-slot semi-transparent painter order for another move.
+- **Notes:** No damage, critical/accuracy, RNG, turn order, controller/facility state, main ledger, boundary, canonical recording, or barrier changed.
+
 ## MOVE_ACID_ARMOR exact — bilateral 119/119 scanline-DMA promotion (2026-08-09 worker)
 
 - **State:** Coverage advances **145→146/276 exact**, 0 partial, 0 staged, **131→130 unsupported**. ACID_ARMOR alone moves; no animation-boundary or unsupported-barrier change.

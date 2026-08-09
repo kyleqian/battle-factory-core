@@ -3737,6 +3737,33 @@
    ]
   },
   {
+   "move": "MOVE_VICE_GRIP",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage the lowest legal carrier FRONTIER_MON_CRAWDAUNT_1 set 249 against legal ONIX with all four active choices constrained; sBattleAnimScriptPtr bounds the isolated Move_VICE_GRIP..Move_GUILLOTINE body through first inactive cleanup",
+    "fresh bilateral Scene-ON windows cover frames 212-253 twice in each orientation at 42/42 source/software, typed-seam, hardware, raw-RGB, and shared-production-framebuffer frames; player-back evidence/raw/map 9610089d5bb34fcf8c8d7397f6307b0f6ede10e2016a54fd11cd0c6aa7dea99d / 2b6d3fe452beee982ec6355e857e6407e60e90b182320d879a65f1f6e5f79631 / 9241bca16953dcdb081b0b6ca645dd84f824740e855b637c7baf53601378851a and opponent-front f40729e448c4d2c2cea60afccb3eab7fe1aa1dea784ea93357e8f1a8fa2b99f4 / 247f3004cb45594d30909fdd3f934e55baf4d2524e8ea4434d8ebda34526e6c0 / 09282a7d0a66bd7c22421de15fc9f6d07c59ba46ce2bc88520df1fa44bc7e776",
+    "the pure reducer and narrow compositor port CUT and IMPACT tag loads/frees, target monbg, 12:8 alpha, target-panned SE_M_VICEGRIP, both distinct flipped gViceGripSpriteTemplate animation programs and AnimViceGripPincer Q8.8 callbacks, animation-2 basic hitsplat, AnimTask_ShakeMon2, OAM/matrix/palette/register/audio latches, painter order, and cleanup",
+    "AERIAL_ACE's existing CUT extraction is reused only for source-identical cut.png and the source-resolved IMPACT palette; VICE_GRIP independently ports its 32x32 ObjBlend template and callback. Generated complete battle-mon catalogs already contain pinned CRAWDAUNT front/back art, and Tier-1 tests keep both keys load-bearing",
+    "AERIAL_ACE remains twice-fresh bilateral 236/236 player-target and 232/232 opponent-target exact with stable probe digests 978a44e0d504da47 / 5aad4bc50208312e; TWINEEDLE remains twice-fresh bilateral 37/37 component+framebuffer exact with stable digests 3173189381ceec394c55542a895bdd968e020dd5b1658f67631c77c7e7c09dcb / 427de85c30413a74ed37343456a616d0eb122e416966c56cbc2224a2872258f0",
+    "no damage, critical/accuracy, RNG, turn order, controller, round/facility state, animation boundary, canonical recording, or unsupported barrier changes"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-vice-grip-player-crawdaunt-opponent-onix.json",
+    "tools/battle-lab/mechanic-vice-grip-opponent-crawdaunt-player-onix.json",
+    "tools/compare/fixtures/vice-grip-player-crawdaunt-opponent-onix.json",
+    "tools/compare/fixtures/vice-grip-opponent-crawdaunt-player-onix.json",
+    "tools/compare/viceGripProbe.py",
+    "tools/compare/viceGripPortable.ts",
+    "tools/compare/evidence/vice-grip-changemap-player.txt",
+    "tools/compare/evidence/vice-grip-changemap-opponent.txt",
+    "src/animation/viceGrip.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/viceGrip.test.ts",
+    "tests/animation/viceGripEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_WATER_GUN",
    "status": "exact",
    "covered": [

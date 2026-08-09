@@ -899,6 +899,7 @@ import {
   sceneOnRollingKickView,
   sceneOnLowKickView,
   sceneOnStompView,
+  sceneOnViceGripView,
   sceneOnBiteView,
   sceneOnHeadbuttView,
   sceneOnWhirlwindView,
@@ -992,6 +993,7 @@ import {
   sceneOnKnockOffView,
   type SceneOnMovePresentationState,
   type SceneOnStompConfig,
+  type SceneOnViceGripConfig,
   type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
   type SceneOnThunderWavePresentationState,
@@ -1381,6 +1383,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const crawdauntFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CRAWDAUNT!;
 const hitmontopFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HITMONTOP!;
 const swabluFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SWABLU!;
 const ponytaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PONYTA!;
@@ -1895,6 +1898,7 @@ const thunderArt = thunderAsset as {
   background: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
 };
 const pidgeottoBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PIDGEOTTO!;
+const crawdauntBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CRAWDAUNT!;
 const delibirdBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DELIBIRD!;
 const murkrowBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MURKROW!;
 const spoinkBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SPOINK!;
@@ -12031,6 +12035,42 @@ function drawSpriteSheetBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette:
           fb[o + 3] = 255;
         }
       }
+    }
+  }
+}
+
+/** VICE_GRIP's flipped ObjBlend CUT frames against the already-selected BG/OBJ target. */
+function drawSpriteSheetFlippedBlendedOverTarget(
+  fb: Uint8Array,
+  target: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  ox: number,
+  oy: number,
+  hFlip: boolean,
+  vFlip: boolean,
+  eva: number,
+  evb: number,
+): void {
+  const width = tileset.columns * 8;
+  const height = tileset.rows * 8;
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const sourceX = hFlip ? width - 1 - x : x;
+      const sourceY = vFlip ? height - 1 - y : y;
+      const tile = tileset.tiles[
+        Math.floor(sourceY / 8) * tileset.columns + Math.floor(sourceX / 8)
+      ];
+      const index = tile?.[(sourceY % 8) * 8 + (sourceX % 8)] ?? 0;
+      const color = palette[index];
+      const dx = ox + x;
+      const dy = oy + y;
+      if (index === 0 || !color || dx < 0 || dx >= 240 || dy < 0 || dy >= 160) continue;
+      const offset = (dy * 240 + dx) * 4;
+      fb[offset] = blendChannel(color.r, target[offset]!, eva, evb);
+      fb[offset + 1] = blendChannel(color.g, target[offset + 1]!, eva, evb);
+      fb[offset + 2] = blendChannel(color.b, target[offset + 2]!, eva, evb);
+      fb[offset + 3] = 255;
     }
   }
 }
@@ -23956,6 +23996,93 @@ export function renderSceneOnMovePresentation(
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(
       fb, playerToOpponent ? "LOUDRED used" : "Foe LOUDRED used", "STOMP!", 99,
+    );
+    return;
+  }
+
+  if (state.config.move === "VICE_GRIP") {
+    const viceState = state as SceneOnMovePresentationState<SceneOnViceGripConfig>;
+    const view = sceneOnViceGripView(viceState);
+    const spriteDisplay = sceneOnViceGripView({ ...viceState, age: viceState.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "CRAWDAUNT"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CRAWDAUNT"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(`unsupported staged VICE_GRIP pair ${view.attacker.species}->${view.target.species}`);
+    }
+    const crawdauntSource = playerToOpponent ? crawdauntBackSprite : crawdauntFrontSprite;
+    const crawdaunt = playerToOpponent
+      ? crawdauntSource
+      : { ...crawdauntSource, tileset: subTileset(crawdauntSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    // This move's target ShakeMon2 and effect sprites all scan out from the
+    // preceding software-OAM build. The opponent-front idle x2 remains in
+    // the monbg copy through the frame before the hit task becomes visible.
+    const onixIdleX2 = playerToOpponent && viceState.age <= 21 ? 1 : 0;
+    const drawAttacker = () => drawSpriteSheet(
+      fb, crawdaunt.tileset, crawdaunt.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb, onix.tileset, onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdleX2 + spriteDisplay.targetOffset.x2,
+      view.target.geometry.spriteCorner.y,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    if (view.alpha) {
+      const effectTarget = fb.slice();
+      if (spriteDisplay.hitsplat) {
+        drawSpriteSheetAffineStretchBlendedOverFb(
+          fb, battleAnimHitsplat.tileset, battleAnimHitsplat.palette,
+          spriteDisplay.hitsplat.x - 16, spriteDisplay.hitsplat.y - 16,
+          spriteDisplay.hitsplat.matrix, spriteDisplay.hitsplat.matrix,
+          view.alpha.eva, view.alpha.evb, false, effectTarget,
+        );
+      }
+      for (const pincer of [...spriteDisplay.pincers].reverse()) {
+        drawSpriteSheetFlippedBlendedOverTarget(
+          fb, effectTarget, cuttingSliceFrameTileset(pincer.frame),
+          battleAnimCuttingSlice.palette,
+          pincer.x + pincer.x2 - 16,
+          pincer.y + pincer.y2 - 16,
+          pincer.hFlip, pincer.vFlip,
+          view.alpha.eva, view.alpha.evb,
+        );
+      }
+    }
+    const profile = viceState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "CRAWDAUNT", level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "CRAWDAUNT" : "ONIX", level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb, playerToOpponent ? "CRAWDAUNT used" : "Foe CRAWDAUNT used", "VICEGRIP!", 99,
     );
     return;
   }
