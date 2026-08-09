@@ -1223,6 +1223,28 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(result.state.events).toEqual([]);
   });
 
+  it.each([
+    ["Flying type", ["TYPE_FLYING", "TYPE_NORMAL"] as const, 0],
+    ["Levitate", ["TYPE_GROUND", "TYPE_GROUND"] as const, ABILITY_LEVITATE],
+  ])("switchineffects: fresh three-layer Spikes fields leave %s entrants untouched", (_name, types, ability) => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0 }),
+        battler({ side: 1, hp: 99, maxHP: 120, types, ability }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      sideStatuses: [0, 1 << 4],
+      sideTimers: [{}, { spikesAmount: 3 }],
+    });
+    const { result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.programCounter).toBe(SWITCHINEFFECTS_PC + 1);
+    expect(result.state.rulesContext.battlers[1].hp).toBe(99);
+    expect(result.state.rulesContext.sideStatuses[1]).toBe(1 << 4);
+    expect(result.state.events).toEqual([]);
+  });
+
   it("switchineffects: Truant switch-in hack writes counter 1 before the tail and draws no RNG", () => {
     const rc = context({
       battlers: [

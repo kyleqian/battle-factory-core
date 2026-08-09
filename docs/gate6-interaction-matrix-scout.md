@@ -92,7 +92,7 @@ the state transition.
 | ability x immunity/absorb | Volt/Water Absorb and Flash Fire use the absorbing handler; Levitate, Wonder Guard, Soundproof and status immunities gate effects elsewhere (`battle_util.c:2676-2747`; `battle_script_commands.c:1375-1496,2275-2425`). | `tests/battleScriptHitChainOpcode.test.ts` (all three matching/mismatched types, full/partial HP, Flash Fire state); `tests/damageCalc.test.ts` (Flash Fire damage consumer); `tests/battleScriptMoveEndOpcode.test.ts` (status immunity); `tests/battleScriptSwitchinOpcode.test.ts` (Levitate entry); `tests/battleScriptTrysetperishsongOpcode.test.ts` (Soundproof) | R14 already covered; Volt Absorb additionally has two-seed OFF-ROM receipts. R10 Soundproof is now independently receipted. |
 | stat-stage x switching/entry | Normal switch discards stages because full incoming BattlePokemon overwrites the active record; Baton Pass copies all stages first (`battle_script_commands.c:4621-4657`). | `tests/battleScriptSwitchinOpcode.test.ts` | R11 oracle. |
 | stat-stage x immunity/absorb | The stat-drop immunity family is the boundary: Clear Body/White Smoke/Keen Eye/Hyper Cutter and Shield Dust suppress eligible drops (`battle_script_commands.c:6975-7038`). | `tests/battleScriptStatbuffchangeOpcode.test.ts` | R13 oracle. |
-| switching/entry x immunity/absorb | Spikes damages only a non-Flying, non-Levitate switch-in (`battle_script_commands.c:5219-5254`); switch-in also obtains the incoming ability from species/slot (`4637-4646`). | `tests/battleScriptSwitchinOpcode.test.ts` | R15 oracle: three Spikes layers, Flying/Levitate/type control. |
+| switching/entry x immunity/absorb | Spikes damages only a non-Flying, non-Levitate switch-in (`battle_script_commands.c:5219-5254`); switch-in also obtains the incoming ability from species/slot (`4637-4646`). | `tests/battleScriptSwitchinOpcode.test.ts` | R15 complete: three layers, real Flying/Levitate entries, and a grounded three-layer control. |
 
 ## Concrete staging cards for uncovered rows
 
@@ -117,7 +117,7 @@ are legal inert duplicates with `[Tackle,Tackle,Tackle,Tackle]`.
 | R12b | A: White Herb Machamp (sole ability Guts); B enters as Granbull Intimidate with Tackle x4 after an initial action. | Viable interaction: Attack 6→5, Intimidate message, White Herb restore 5→6, herb message, then item consumption. |
 | R13 | A: Pidgeot Keen Eye with Tackle x4; B: Granbull Intimidate with Sand-Attack x4 (`gate6-r13-off.json`). | The entry hook lowers Attack 6→5; Sand-Attack then prints the Keen Eye-specific prevention message and leaves accuracy 6. Hyper Cutter×Intimidate and White Smoke×Intimidate are already kernel-pinned controls. |
 | R14 | No new fixture: `docs/absorbing-abilities-ground-truth.md` already proves the source family and banks Volt Absorb OFF-ROM receipts; the kernel has matching/nonmatching typed controls for Volt/Water Absorb and Flash Fire. | Existing pins cover zero direct damage, exact quarter-heal/minimum/cap behavior, full-HP bypass, first/repeat Flash Fire state, and later Fire damage. K7 adds the previously missing held-item dispatch boundary. |
-| R15 | A: Spikes user sets three layers; B bench switches to Pidgeot then Levitate Lunatone and a grounded control. Opponent uses Tackle x4. | Flying/Levitate avoid Spikes, grounded mon takes source fraction. |
+| R15 | `gate6-r15-off.json`: opponent Skarmory sets three layers; player Pidgeot, Levitate Lunatone, and grounded Rhydon make real party-menu switches. | Flying/Levitate avoid Spikes; grounded Rhydon takes `floor(maxHP/4)` in the source HP-update → message order. |
 
 K1--K7 are deliberately Tier-1-first: they assert pure reducer/dispatcher
 ordering, stage arithmetic, and zero-damage non-activation.  A successful
@@ -160,6 +160,46 @@ branches at `battle_script_commands.c:2396-2417,2428-2449`, distinct from
 Poison/Steel type gates and Electric damage immunity.
 
 ## Completed receipt notes
+
+### R15 — Three-layer Spikes gates Flying and Levitate before the grounded fraction
+
+`gate6-r15-off.json` was corrected from a trace that put the intended targets
+on the AI side and never performed its claimed switches.  It now uses complete
+legal parties: player Pidgeot (species 18, party index 0, Normal/Flying
+`[0,2]`, Keen Eye 51), Lunatone (348, index 1, Rock/Psychic `[5,14]`,
+Levitate 26), and Rhydon (111, index 2, Ground/Rock `[4,5]`); opponent
+Skarmory has four real Spikes slots.  Pidgeot's legal Agility keeps the setup
+RNG-free.  At frame 2202, the semantic snapshot has player-side Spikes = 3,
+`sideStatuses[0] = 0x10`, and Skarmory PP `18,19,20,20` (three real uses),
+with raw-RGB hash `56c3690272cc58f4172c84aff67ba8b3457d7c95af6693a7d04969c537bb9840`.
+
+The ordinary picker first switches Pidgeot to Lunatone: frame 2602 has the
+incoming party index 1, and frame 2603 has Lunatone with Levitate, HP
+`177/177`, and hash `900d5221b53ae3aebf9eeac566d9be216694096299188a8e6261696227a1375d`.
+The next real switch reaches Rhydon at frame 3586 (`187/187`, hash
+`9eead40b87034e0b7db7d552ac85174d5219bf071deb98e12e579faebdc17e24`);
+the fresh three-layer gate sets the transient side bit at frame 3773, then
+persists both battle and party HP `187→141` at frame 3774 (`46 = floor(187/4)`,
+hash `9c483a2e2d62a9a97aa33f669d5268167126ffeebe0ea0c895a05f7313ff73cf`).
+The hurt-by-Spikes message visibly settles at frame 3802 (hash
+`04e65d74aaddd51d435a99eab90586e98f882210e1e2fbda6ee617323810fb8e`),
+matching `healthbarupdate`, `datahpupdate`, then `BattleScript_PrintHurtBySpikes`
+in `battle_scripts_1.s:3403-3435`.  The final real return to Pidgeot changes
+the active record at frame 4527 while retaining `190/190` (hash
+`dbb438047d27dccb275f9209159dac5221f1bb0a486c2bb756e3187c5887ee55`);
+neither immune entry emits the Spikes damage/message path.
+
+Fresh Battle Scene OFF runs at seed `1` and a temporary scenario differing
+only in `.seed = 324508639` agree on every committed capture's raw-RGB hash,
+including baseline frame 0
+`f83554b6e60736e5ef71b9c4568c711286e51b2d73529a333a5cff16aac7a41f`,
+the two pre-switch records (2602
+`8a6081e28319c37d5dd65d185ee2ff9f5b6e9b563322b979149b35bf89339840`,
+3585 `2e8b280c4ef8d177eb4b98e7cff77c256ba3350c96a48f831c9fc87292197453`),
+the Pidgeot pre-record at 4526
+`b90b6b6b7e6e74d0e1a0c5bc8988bee986f753d277ace910bac502b0f8a32b95`,
+and the settled frame 5068
+`8d64991bb4520d19598f260ac90d486b384972eb563d3b65a2d4935dbf6d1bc4`.
 
 ### R6 — Natural Cure clears the departing Starmie before ordinary reconstruction
 
@@ -591,7 +631,7 @@ in scenario/evidence once accepted.
 
 1. **R11 — Baton Pass versus ordinary-switch volatile/stage retention.** `bin/oracle lab tools/battle-lab/gate6-r11-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts; npm run build`
 2. **R6 — Toxic x Natural Cure switch-out persistence.** `bin/oracle lab tools/battle-lab/gate6-r6-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts tests/battleScriptMoveEndOpcode.test.ts; npm run build`
-3. **R15 — Spikes switch-in x Flying/Levitate.** `bin/oracle lab tools/battle-lab/gate6-r15-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts; npm run build`
+3. **R15 — CLOSED by the three-layer Flying/Levitate/grounded receipt above.**
 4. **R3 — Cloud Nine removal/reactivation.** `bin/oracle lab tools/battle-lab/gate6-r3-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptDamagingWeatherOpcode.test.ts; npm run build`
 5. **R9 — Swagger x Lum versus White Herb's negative-stage guard.** `bin/oracle lab tools/battle-lab/gate6-r9-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptMoveEndOpcode.test.ts; npm run build`
 6. **R13 — Intimidate x stat-drop prevention specificity.** `bin/oracle lab tools/battle-lab/gate6-r13-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptStatbuffchangeOpcode.test.ts tests/battleScriptSwitchinOpcode.test.ts; npm run build`
