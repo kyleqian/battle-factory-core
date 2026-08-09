@@ -161,6 +161,41 @@ Poison/Steel type gates and Electric damage immunity.
 
 ## Completed receipt notes
 
+### R6 — Natural Cure clears the departing Starmie before ordinary reconstruction
+
+`gate6-r6-off.json` stages complete legal parties: Starmie at player party
+index 0 uses ability slot 1 (Natural Cure, semantic ability `30`), its neutral
+Rattata bench is party index 1, and Muk is constrained to four real Toxic
+slots. Fresh Battle Scene OFF runs at seeds `1` and `324508639` agree on all
+23 captured frame/hash pairs. Toxic first makes both active Starmie and
+`state.parties.player[0]` `status1 = 0x80` at frame 258 (hash
+`b4e4a7626d6f2f57ae6b6be8739dc4f76ed6dd6140c6b90375d417baaaabe930`);
+the active toxic counter later reaches `0x180` at frame 367 while the durable
+party value stays `0x80`.
+
+The voluntary party-menu switch preserves the source order. At frame 1055 the
+active Starmie is still `0x180` and its party record `0x80`; at frame 1096
+Natural Cure has made both fields `0` (hash
+`3f1a608bbf74d1c60bbd44acffd01426fe4205c973e087b9a4bc93d77e44ba84`).
+Frame 1135 then reconstructs the independent Rattata record (`species 19`,
+`partyIndex 1`, battle and party status `0`) with hash
+`4b305eebb174b42f4d5247cd9e6802f0136e817fd6876a8b850571de4c8461e1`.
+After Muk toxics that ordinary incoming mon, the return at frame 2077 rebuilds
+clean Starmie (`partyIndex 0`, battle/party status `0`) while Rattata's party
+status remains `0x80`; hash
+`bb755d91704f58e9c495625524862619bab80c9660ca4b9bfe308eb97846dcd4`.
+
+`BattleScript_EffectToxic` runs the real status route through
+`setmoveeffect`/`seteffectprimary` (`data/battle_scripts_1.s:686-705`). On
+switch-out, `Cmd_switchoutabilities` clears `gBattleMons.status1`, emits
+`REQUEST_STATUS_BATTLE`, and the player controller writes that exact value to
+the departing party slot (`battle_script_commands.c:9590-9604`,
+`battle_controller_player.c:2102-2104`); only afterward does
+`Cmd_switchindataupdate` copy the selected incoming BattlePokemon and derive
+its type/ability (`battle_script_commands.c:4621-4657`). The checked-in
+captures already hit each semantic boundary, so no fixture cadence or capture
+was altered.
+
 ### R12b — Granbull Intimidate, Guts Machamp, and White Herb entry order
 
 `gate6-r12b-off.json` uses complete legal parties and makes Machamp's
