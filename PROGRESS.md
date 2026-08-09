@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1030 — [bounded MAIN worker, 2026-08-08] **R12b persistent item write-through repaired**
+
+- **State:** generic `Cmd_removeitem` persistence repair is committed in
+  `4e252485`; Gate 6 remains **OPEN**.
+- **Did:** reproduced R12b red (`battle item 0`, player party item `180`), then
+  ported the source controller write-through by battler side + `partyIndex`.
+  Tier 1 pins the R12b White Herb result, both active-party owners, untouched
+  bench identities, and a non-White-Herb removal. Recycle/Knock Off ownership
+  and `usedHeldItems` behavior remain intact; no shared interface widened.
+- **Next:** run the final full `npm test`, record its result, and hand the green
+  checkpoint to the supervisor. No oracle or canonical Battle-2 work.
+- **Notes:** focused item/move-end/controller suites are **244/244**;
+  executable ratchet **6/6** and smoke **375/375**. Typecheck and production
+  build are green; no unsupported-barrier pin changed.
+
 ## 1029 — [bounded MAIN worker, 2026-08-08] **S10 printfromtable source inventory complete**
 
 - **State:** the widened `Cmd_printfromtable` family is source-complete for
@@ -44,18 +59,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   parameterized-oracle receipt gap; do not claim Gate 6 closed.
 - **Notes:** focused manifest/census checks **17/17**, smoke **375/375**, full
   suite **807 files / 8,073 passed / 1 skipped**, typecheck, and build green.
-
-## 1027 — [bounded MAIN worker, 2026-08-08] **S10 B1 Enigma Berry accuracy barrier retired**
-
-- **State:** the B1 implementation is committed in `2560e40a` + `d92248bb`;
-  the former hit-chain barrier call site is gone and its pin is **11→10**.
-- **Did:** added immutable/defaulted/validated/serialized
-  `enigmaBerryHoldEffectParams` ownership beside the existing Enigma effect
-  bytes; resolvers now follow the source Enigma-vs-`gItems` branch; the live
-  accuracy path passes both effect and parameter to the existing calculator.
-  Red-first tests pin context shape, malformed arrays, normal Focus Band
-  parameter behavior, Enigma ownership, and exact-RNG hit/miss outcomes.
-- **Next:** superseded by entry 1028's audited two-family B queue.
-- **Notes:** focused Tier-1/ratchet **379/379**, smoke **375/375**, typecheck,
-  build, and the later union full suite are green. No oracle claim (the custom
-  Enigma storage is not injectable by mechanicLab); no canonical Battle-2 work.

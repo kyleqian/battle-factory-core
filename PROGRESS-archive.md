@@ -1,3 +1,17 @@
+## 1027 — [bounded MAIN worker, 2026-08-08] **S10 B1 Enigma Berry accuracy barrier retired**
+
+- **State:** the B1 implementation is committed in `2560e40a` + `d92248bb`;
+  the former hit-chain barrier call site is gone and its pin is **11→10**.
+- **Did:** added immutable/defaulted/validated/serialized
+  `enigmaBerryHoldEffectParams` ownership beside the existing Enigma effect
+  bytes; resolvers now follow the source Enigma-vs-`gItems` branch; the live
+  accuracy path passes both effect and parameter to the existing calculator.
+  Red-first tests pin context shape, malformed arrays, normal Focus Band
+  parameter behavior, Enigma ownership, and exact-RNG hit/miss outcomes.
+- **Next:** superseded by entry 1028's audited two-family B queue.
+- **Notes:** focused Tier-1/ratchet **379/379**, smoke **375/375**, typecheck,
+  build, and the later union full suite are green. No oracle claim (the custom
+  Enigma storage is not injectable by mechanicLab); no canonical Battle-2 work.
 
 ## 1026 — [supervisor, 2026-08-08] **A3 Focus Band OHKO continuation proved end to end**
 
