@@ -5,8 +5,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-describe("MOVE_REST source presentation assets", () => {
-  it("regenerates Teddiursa and LETTER_Z byte-for-byte", () => {
+describe("letter-z track source presentation assets", () => {
+  it("regenerates Teddiursa, Seaking, and LETTER_Z byte-for-byte", () => {
     const dir = mkdtempSync(join(tmpdir(), "pokebench-rest-assets-"));
     const out = join(dir, "rest.json");
     execFileSync(process.execPath, [

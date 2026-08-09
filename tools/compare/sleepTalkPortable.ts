@@ -13,6 +13,11 @@ import {
   sceneOnSleepTalkView,
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
+import {
+  createInitialState,
+  render,
+  type EngineState,
+} from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 
 type Window = { startFrame: number; endFrame: number; frameCount: number };
@@ -349,6 +354,20 @@ function verify(fixturePath: string, runNumber: number): void {
       && oracle.soundTaskCount === component.soundTaskCount
       && sourceSprites.every((sprite) => sprite.callback.symbol === "AnimLetterZ")
       && tagsMatch;
+    const engine: EngineState = {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const app = render(engine);
+    let diff = 0;
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      if (
+        app[pixel * 4] !== rgb[pixel * 3]
+        || app[pixel * 4 + 1] !== rgb[pixel * 3 + 1]
+        || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]
+      ) diff += 1;
+    }
     const cleanup = age !== frameCount - 1
       || (!component.active
         && !oracle.gAnimScriptActive
@@ -357,7 +376,7 @@ function verify(fixturePath: string, runNumber: number): void {
       !rawFrameMatch || !seamMatch || !softwareSpritesMatch
       || !softwareOamMatch || !hardwareOamLagMatch || !hardwareMatrixMatch
       || !perLetterHardwareMatch || !taskMatch || !registerMatch
-      || !audioMatch || !frameMatch || !cleanup
+      || !audioMatch || !frameMatch || diff !== 0 || !cleanup
     ) {
       failures.push(
         `frame ${oracle.frame}/age ${age}: raw=${rawFrameMatch} `
@@ -365,7 +384,8 @@ function verify(fixturePath: string, runNumber: number): void {
         + `softwareOam=${softwareOamMatch} hardwareOam=${hardwareOamLagMatch} `
         + `matrix=${hardwareMatrixMatch && perLetterHardwareMatch} `
         + `task=${taskMatch} registers=${registerMatch} audio=${audioMatch} `
-        + `frame=${frameMatch} cleanup=${cleanup}`,
+        + `frame=${frameMatch} framebuffer=${diff === 0} diff=${diff} `
+        + `cleanup=${cleanup}`,
       );
     }
 
@@ -408,7 +428,7 @@ function verify(fixturePath: string, runNumber: number): void {
   fresh.set(fixture.orientation, { evidence, raw: rawDigest });
   console.log(
     `${fixture.orientation} run ${runNumber}: ${probe.frames.length}/${frameCount} `
-    + "source/hardware/seam/raw-RGB exact (no framebuffer claim)",
+    + "source/hardware/seam/raw-RGB/framebuffer exact",
   );
 }
 

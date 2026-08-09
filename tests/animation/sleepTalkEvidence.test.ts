@@ -2,8 +2,9 @@ import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import coverage from "../../ANIMATION_COVERAGE.json" with { type: "json" };
 
-describe("MOVE_SLEEP_TALK bilateral Scene-ON evidence checkpoint", () => {
+describe("MOVE_SLEEP_TALK bilateral Scene-ON exact acceptance", () => {
   const fixtures = ["player-seaking-opponent-onix", "opponent-seaking-player-onix"]
     .map((name) => JSON.parse(readFileSync(`tools/compare/fixtures/sleep-talk-${name}.json`, "utf8")));
 
@@ -82,14 +83,19 @@ describe("MOVE_SLEEP_TALK bilateral Scene-ON evidence checkpoint", () => {
     expect(portable).toContain("gSleepLetterZSpriteTemplate");
   });
 
-  it("makes the complete Sleep Talk reducer and seam receipt load-bearing without pixels", () => {
+  it("makes the complete Sleep Talk reducer, seam, and framebuffer receipt load-bearing", () => {
     const portable = readFileSync("tools/compare/sleepTalkPortable.ts", "utf8");
+    const compositor = readFileSync("src/engine/battleScene.ts", "utf8");
     expect(portable).toContain("sleepTalkAtAge");
     expect(portable).toContain("sceneOnSleepTalkView");
     expect(portable).toContain("hardwareOamLagMatch");
     expect(portable).toContain("hardwareMatrixMatch");
-    expect(portable).toContain("source/hardware/seam/raw-RGB exact (no framebuffer claim)");
-    expect(portable).not.toContain("from \"../../src/engine/core.ts\"");
-    expect(portable).not.toContain("framebuffer=\${");
+    expect(portable).toContain("from \"../../src/engine/core.ts\"");
+    expect(portable).toContain("source/hardware/seam/raw-RGB/framebuffer exact");
+    expect(portable).toContain("framebuffer=${diff === 0}");
+    expect(compositor).toContain('state.config.move === "SLEEP_TALK"');
+    expect(compositor).toContain("age: sleepTalkState.age - 2");
+    expect(coverage.entries.filter((entry) => entry.move === "MOVE_SLEEP_TALK"))
+      .toEqual([expect.objectContaining({ status: "exact" })]);
   });
 });
