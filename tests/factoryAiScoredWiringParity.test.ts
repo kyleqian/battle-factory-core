@@ -1,10 +1,23 @@
-import { describe, expect, it, vi } from "vitest";
-import {
-  chooseFactoryAiScoredDecision,
-  type FactoryAiScoredBattlerView,
-  type FactoryAiScoredTargetView,
-  type FactoryAiScoredView,
+import { beforeAll, describe, expect, it, vi } from "vitest";
+import type {
+  FactoryAiScoredBattlerView,
+  FactoryAiScoredTargetView,
+  FactoryAiScoredView,
 } from "../src/engine/factoryAiDecisionPolicy.ts";
+
+// The adapter is imported DYNAMICALLY after vi.resetModules() (see
+// beforeAll below): under the suite's shared-module-cache workers
+// (vite.config.ts isolate:false) a static import can bind an adapter that
+// was already evaluated unmocked by an earlier file in the same worker,
+// which silently bypasses the vi.mock capture wrappers this test is built
+// on. resetModules + fresh import guarantees the mocked graph regardless
+// of worker cache state.
+let chooseFactoryAiScoredDecision: typeof import("../src/engine/factoryAiDecisionPolicy.ts")["chooseFactoryAiScoredDecision"];
+
+beforeAll(async () => {
+  vi.resetModules();
+  ({ chooseFactoryAiScoredDecision } = await import("../src/engine/factoryAiDecisionPolicy.ts"));
+});
 import {
   AI_WEATHER_SUN,
   type AiWeatherValue,

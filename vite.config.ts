@@ -74,5 +74,15 @@ export default defineConfig({
     // ones back off so 4 sessions cannot each claim the whole machine.
     minWorkers: 1,
     maxWorkers: resolveMaxWorkers(),
+    // Reuse worker module caches across test files. The 2026-08-08 timing
+    // audit measured the suite at 97.5% collect (module import) vs 2.5%
+    // assertions — 811 isolated forks each re-imported the ~34 MB engine
+    // graph. On the 30 heaviest files, isolate:false cut wall time 41%
+    // (80s -> 47s, 1,259 tests green); it also lowers the per-fork heap
+    // churn behind the concurrent-run collection-timeout class. Tests must
+    // not rely on fresh module state per file; quarantine any offender via
+    // a per-file `// @vitest-environment` override or poolMatchGlobs shard
+    // rather than reverting this.
+    isolate: false,
   },
 });
