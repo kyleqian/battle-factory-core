@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1055 — [supervisor, 2026-08-09] **Contact family and Fire Spin folded; union green**
+
+- **State:** master union is green: full suite **831 files / 8,234 passed / 1
+  skipped**, production build, Gate-6/animation focused **24/24**, and smoke
+  **375/375**. Vanilla remains **0:20 = 20 OK / 0 CRASH / 0 HANG**.
+- **Did:** accepted the hard-constrained **94/94** contact-route family and one
+  fresh Battle Scene OFF Static receipt (`808ec4fc`, merge `e053b6ac`). Every
+  candidate reaches target `datahpupdate` and `MOVEEND_ON_DAMAGE_ABILITIES`;
+  Bide keeps its charge-only alternative, with zero exceptions/blockers.
+  Corrected the receipt ledger to five non-Static contact gaps (`79fba9a1`).
+  Folded `animation-main` through Fire Spin `bb38d12d` as `379d05de`.
+- **Next:** close #87's source-selected `MoveUsedWokeUp` print-table boundary,
+  then #86's separate seed-27 no-command boundary. Rerun full-policy 0:60
+  after the next controller/string repair and use its completion headline.
+- **Notes:** contact overlaps the already promoted Color Change rows, so unique
+  hook gaps stay **111 ability / 300 item**. Static is the one direct contact
+  witness; the other five contact outcomes retain explicit receipt gaps. No
+  canonical Battle-2 window past tick 33331 or unsupported-barrier pin moved.
+
 ## 1054 — [MAIN worker, 2026-08-09] **#86 seed-16 forced-handoff owner repaired**
 
 - **State:** committed fix `59c0182a` is green: full suite **829 files /
@@ -39,21 +58,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** seeds 12/14/23/44/45/53 are all OK to round loss (deepest seed 23:
   `b6 t24 f92800`). Seed 27 still reproduces unchanged. No canonical Battle-2
   window or animation code changed; no unsupported-barrier pin moved.
-
-## 1052 — [supervisor, 2026-08-09] **Color Change family promoted; second Sleep Talk fold green**
-
-- **State:** corrected main union is green: Gate-6 focused **77/77** and
-  smoke **375/375**. The pre-Gate-6 animation union passed the full suite
-  (**829 files / 8,224 passed / 1 skipped**) and production build.
-- **Did:** promoted **182/183** Color Change move siblings with one shared
-  OFF receipt, selector/runtime guards, and per-move ordered source routes.
-  Future Sight remains the honest delayed-MOVEEND exception. Supervisor
-  review rejected Endeavor's first soft-cost route; `2f50607b` replaces it
-  with hard success-arm constraints and proves 0 invalid witnesses. Folded
-  animation-main through `a5d15401` as merge `24a9d9bd`; Sleep Talk is now
-  exact bilaterally without changing OFF-profile logic.
-- **Next:** run the contact/on-damage family in the side lane while MAIN
-  closes #86's generic forced-switch transition and command-boundary
-  frontiers. Then rerun full-policy 0:60 and use the new signatures.
-- **Notes:** ability join gaps fall **261 -> 111**; item gaps stay 300. No
-  canonical Battle-2 window past tick 33331 changed. No deferred question.
