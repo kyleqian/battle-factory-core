@@ -11,9 +11,71 @@
 // close, extend this pin toward full rounds.
 
 import { describe, expect, it } from "vitest";
+import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
+import naturesData from "../src/data/gen/natures.json" with { type: "json" };
+import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
+import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
+import {
+  beginFactoryRoundBattleStartIntro,
+  createFactoryRoundBattleOrchestrator,
+} from "../src/engine/factoryRoundBattleOrchestrator.ts";
+import { createInitialState, type EngineState } from "../src/engine/core.ts";
 import { runSeed } from "../tools/soak/randomRoundSoakDriver.ts";
 
 const PIN_SEEDS = [0, 1, 2, 3, 4, 5, 6, 7] as const;
+
+const PLAYER_TRAINER_ID = 0x89ab_cdef;
+const natureByName = new Map(naturesData.natures.map((row) => [row.name, row.index]));
+
+function strongRouteRecord(setId: number): FactoryRentalRecord {
+  const set = frontierMonsData.entries[setId]!;
+  const personality = natureByName.get(set.nature)!;
+  const input = {
+    setId,
+    personality,
+    fixedIv: 31,
+    abilitySlot: (personality & 1) as 0 | 1,
+    otId: PLAYER_TRAINER_ID,
+  };
+  return Object.freeze({
+    ...input,
+    abilitySlot: createFactoryCorpusPartyMember(input).abilitySlot,
+  });
+}
+
+function createSevenWinLiveState(): EngineState {
+  const playerRentalRecords = [
+    strongRouteRecord(664),
+    strongRouteRecord(678),
+    strongRouteRecord(527),
+  ] as const;
+  const orchestrator = beginFactoryRoundBattleStartIntro(
+    createFactoryRoundBattleOrchestrator({
+      id: "seven-win-live-seam-seed-21",
+      rngValue: 21,
+      factoryWinStreak: 0,
+      playerTrainerId: PLAYER_TRAINER_ID,
+      battleTowerLevel50WinStreak: 0,
+      facilityState: { rentsCount: 0 },
+      rentals: {
+        type: "currentRecords",
+        playerRentalRecords,
+        savedRentalRecords: [
+          ...playerRentalRecords,
+          strongRouteRecord(1),
+          strongRouteRecord(2),
+          strongRouteRecord(3),
+        ],
+      },
+    }),
+  );
+  return {
+    ...createInitialState(),
+    factoryRoundBattleOrchestrator: orchestrator,
+    rngMode: "frontierBattle",
+    rngValue: orchestrator.round.rules.rngValue,
+  };
+}
 
 describe("random round soak driver (green milestone pin)", () => {
   it("reaches battle 1's first action menu crash-free for the pinned seeds", () => {
@@ -55,6 +117,38 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(second.frames).toBe(first.frames);
     expect(second.outcome).toBe(first.outcome);
     expect(second.lastActions).toEqual(first.lastActions);
+  });
+
+  it("earns all seven generated wins through the live tick/render and terminal seams", () => {
+    const options = {
+      maxFrames: 200_000,
+      renderEvery: 16,
+      testPolicy: "strong-route" as const,
+      stateFactory: createSevenWinLiveState,
+      collectDiagnostics: true,
+    };
+    const first = runSeed(21, options);
+    const second = runSeed(21, options);
+
+    expect(first).toMatchObject({
+      outcome: "OK",
+      endState: "roundComplete",
+      frames: 56_556,
+      battle: 7,
+      turn: 11,
+      diagnostics: {
+        roundPhase: "roundComplete",
+        battleIndex: 6,
+        lastBattleOutcome: "win",
+        opponentGenerationCount: 7,
+        battleRngSegmentCount: 7,
+        terminalOutcome: "roundWon",
+        terminalRecordMenuInputReadyReached: true,
+        terminalRecordChoice: "no",
+        renderCalls: 4_228,
+      },
+    });
+    expect(second).toEqual(first);
   });
 
   it("ISSUES #85: keeps the genuine switched-in HP at a later damage-command start", () => {

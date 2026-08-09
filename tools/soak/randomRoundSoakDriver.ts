@@ -35,6 +35,7 @@ import {
   isCursorInputReady,
   isMonPicInputReady,
 } from "../../src/engine/monPic.ts";
+import { factoryTerminalRecordMenuInputReady } from "../../src/engine/factoryTerminalPresentation.ts";
 
 // ---------------------------------------------------------------------------
 // Seeded PRNG (mulberry32)
@@ -124,7 +125,21 @@ export type SeedResult = {
   signature?: string;
   lastActions?: string[];
   hangSurface?: string;
+  /** Opt-in test diagnostics; absent from ordinary CLI/full/vanilla runs. */
+  diagnostics?: RunDiagnostics;
 };
+
+export type RunDiagnostics = Readonly<{
+  roundPhase: string | null;
+  battleIndex: number | null;
+  lastBattleOutcome: "win" | "loss" | null;
+  opponentGenerationCount: number;
+  battleRngSegmentCount: number;
+  terminalOutcome: "loss" | "roundWon" | null;
+  terminalRecordMenuInputReadyReached: boolean;
+  terminalRecordChoice: "yes" | "no" | "cancel" | null;
+  renderCalls: number;
+}>;
 
 // ---------------------------------------------------------------------------
 // Crash signature normalization
@@ -191,6 +206,8 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * declined, continuation always GO ON. Press timing stays seed-jittered.
  */
 export type SoakPolicy = "full" | "vanilla";
+/** Test-only deterministic policy for the source-proven seven-win carrier. */
+type PlayerPolicy = SoakPolicy | "strong-route";
 
 type DraftPlan = {
   picks: number[]; // slots 0..5 in rent order
@@ -213,9 +230,9 @@ class RandomPlayer {
   public turn = 0;
   private readonly rng: Rng;
   private readonly log: ActionLog;
-  private readonly policy: SoakPolicy;
+  private readonly policy: PlayerPolicy;
 
-  constructor(rng: Rng, log: ActionLog, policy: SoakPolicy) {
+  constructor(rng: Rng, log: ActionLog, policy: PlayerPolicy) {
     this.rng = rng;
     this.log = log;
     this.policy = policy;
@@ -428,7 +445,7 @@ class RandomPlayer {
       if (this.actionIntent === null || this.actionIntent.key !== this.lastCommandKey) {
         // FIGHT 0.60 / POKéMON 0.22 / BAG 0.06 / RUN 0.06 / re-roll wander 0.06
         const roll = this.rng.float();
-        const target = this.policy === "vanilla"
+        const target = this.policy !== "full"
           ? 0
           : roll < 0.60 ? 0 : roll < 0.82 ? 2 : roll < 0.88 ? 1 : roll < 0.94 ? 3 : this.rng.int(4);
         this.actionIntent = { key: this.lastCommandKey, target, futile: 0 };
@@ -458,9 +475,19 @@ class RandomPlayer {
     if (phase === "fight-menu") {
       const key = `${this.lastCommandKey}:fight`;
       if (this.fightIntent === null || this.fightIntent.key !== key) {
-        const target = this.policy === "vanilla"
-          ? Math.max(0, presentation.legalMoveBySlot.findIndex((slot) => slot !== null))
-          : this.rng.int(4);
+        const active = orch.battle?.rules.rulesContext.battlers[0];
+        const firstLegal = Math.max(
+          0,
+          presentation.legalMoveBySlot.findIndex((slot) => slot !== null),
+        );
+        const target = this.policy === "strong-route"
+          && active?.partyIndex === 1
+          && active.isFirstTurn === 2
+          && presentation.legalMoveBySlot[3] !== null
+          ? 3
+          : this.policy === "vanilla" || this.policy === "strong-route"
+            ? firstLegal
+            : this.rng.int(4);
         this.fightIntent = {
           key,
           target,
@@ -591,7 +618,7 @@ class RandomPlayer {
       && postwin.questionDismissElapsed === null
       && postwin.questionYesElapsed === null
     ) {
-      const wantYes = this.policy === "vanilla"
+      const wantYes = this.policy !== "full"
         ? false
         : postwin.question.kind === "retire"
           ? this.rng.chance(0.15)
@@ -606,7 +633,7 @@ class RandomPlayer {
     // Continuation menu (GO ON / RECORD / REST / RETIRE).
     if (postwin.question === null && postwin.continuationCursorPos !== null) {
       const roll = this.rng.float();
-      const target = this.policy === "vanilla"
+      const target = this.policy !== "full"
         ? 0
         : roll < 0.85 ? 0 : roll < 0.92 ? 1 : roll < 0.96 ? 2 : 3;
       if (postwin.continuationCursorPos !== target) {
@@ -647,6 +674,10 @@ class RandomPlayer {
   }
 
   private onTerminal(state: EngineState): ReadonlySet<GbaButton> {
+    if (this.policy === "strong-route") {
+      this.note(state, "terminal: A");
+      return this.press("A", 18);
+    }
     const roll = this.rng.float();
     const button: GbaButton = roll < 0.6
       ? "A"
@@ -669,6 +700,15 @@ export type RunOptions = {
   renderEvery: number;
   verbose: boolean;
   policy: SoakPolicy;
+  /** Test-only override; intentionally unavailable from the CLI policy flag. */
+  testPolicy?: "strong-route";
+  /**
+   * Test-only initial-state seam. The default is exactly the production
+   * draft anchor returned by createInitialState(); the CLI never supplies it.
+   */
+  stateFactory?: () => EngineState;
+  /** Opt into read-only route diagnostics without changing ordinary results. */
+  collectDiagnostics?: boolean;
   /**
    * Stop with OK ("milestone:first-action-menu") as soon as battle 1's first
    * live action menu is interactive. This is the Tier-1 pin surface: the
@@ -696,23 +736,57 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   const options: RunOptions = { ...DEFAULT_RUN_OPTIONS, ...optionsIn };
   const rng = new Rng(seed);
   const log = new ActionLog(options.verbose);
-  const player = new RandomPlayer(rng, log, options.policy);
-  let state = createInitialState();
+  const player = new RandomPlayer(rng, log, options.testPolicy ?? options.policy);
+  let state = options.stateFactory?.() ?? createInitialState();
   let frame = 0;
   let terminalGrace = -1;
   let lastSurface = "";
+  let renderCalls = 0;
+  let terminalRecordMenuInputReadyReached = false;
+  let terminalOutcome: RunDiagnostics["terminalOutcome"] = null;
 
-  const finish = (outcome: SeedOutcome, extra: Partial<SeedResult>): SeedResult => ({
-    seed,
-    outcome,
-    frames: frame,
-    battle: player.battle,
-    turn: player.turn,
-    lastActions: log.tail(15).map(
-      (entry) => `f=${entry.frame} b${entry.battle} t${entry.turn} ${entry.what}`,
-    ),
-    ...extra,
-  });
+  const observe = (): void => {
+    if (state.factoryTerminal !== null) {
+      terminalOutcome = state.factoryTerminal.profile.outcome;
+      terminalRecordMenuInputReadyReached ||=
+        factoryTerminalRecordMenuInputReady(state.factoryTerminal);
+    }
+  };
+
+  const diagnostics = (): RunDiagnostics => {
+    const orchestrator = state.factoryRoundBattleOrchestrator;
+    return Object.freeze({
+      roundPhase: orchestrator?.round.rules.phase ?? null,
+      battleIndex: orchestrator?.round.rules.battleIndex ?? null,
+      lastBattleOutcome: orchestrator?.round.rules.lastBattle?.outcome ?? null,
+      opponentGenerationCount: orchestrator?.opponentGenerations.length ?? 0,
+      battleRngSegmentCount:
+        orchestrator?.rngSegments.filter((segment) => segment.kind === "battle").length ?? 0,
+      terminalOutcome,
+      terminalRecordMenuInputReadyReached,
+      terminalRecordChoice: state.factoryTerminal?.recordChoice ?? null,
+      renderCalls,
+    });
+  };
+
+  observe();
+
+  const finish = (outcome: SeedOutcome, extra: Partial<SeedResult>): SeedResult => {
+    const result: SeedResult = {
+      seed,
+      outcome,
+      frames: frame,
+      battle: player.battle,
+      turn: player.turn,
+      lastActions: log.tail(15).map(
+        (entry) => `f=${entry.frame} b${entry.battle} t${entry.turn} ${entry.what}`,
+      ),
+      ...extra,
+    };
+    return options.collectDiagnostics === true
+      ? { ...result, diagnostics: diagnostics() }
+      : result;
+  };
 
   while (frame < options.maxFrames) {
     let phase = "tick";
@@ -720,6 +794,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
       const buttons = player.decide(state);
       state = tick(state, buttons);
       frame += 1;
+      observe();
       const surface = player.surface(state);
       const surfaceChanged = surface !== lastSurface;
       lastSurface = surface;
@@ -729,6 +804,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
       ) {
         phase = "render";
         render(state);
+        renderCalls += 1;
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));

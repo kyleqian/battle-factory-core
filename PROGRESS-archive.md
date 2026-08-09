@@ -1,3 +1,23 @@
+## 1057 — [MAIN worker, 2026-08-09] **#86 terminal forced-continuation closed**
+
+- **State:** source-generic repair and red-first public-path test are green;
+  production build, smoke **375/375**, full-policy seeds **16/18/27**, and
+  vanilla **0:20 = 20 OK / 0 CRASH / 0 HANG** pass. Full suite is **830/831
+  files, 8,236 passed / 1 skipped** with only the independently changing,
+  out-of-scope Gate-6 manifest regeneration test red.
+- **Did:** seed 27's typed receipt proves MURKROW enters at 4 HP, then the same
+  forced-switch continuation queues sandstorm damage, faint, and immutable
+  trainer-win commands. The send-out seam now returns every command after the
+  final typed switch-in to the ordinary presentation lifecycle before any
+  stable-boundary handoff; the missing-player-command invariant stays fatal.
+- **Next:** supervisor should fold the independent Gate-6 artifact update and
+  rerun `npm test`; #86 itself is closed. Continue the ordered family-level
+  Gate-6 worklist after the stable union is green.
+- **Notes:** seed 27 is **OK b2 t16 f24829 roundLost**; seeds 16/18 are **OK
+  b4 t37 f91394 / b1 t22 f12881 roundLost**. No seed/battle/turn/tick branch,
+  unsupported barrier, animation, Gate-6 artifact, or canonical Battle-2
+  window changed.
+
 ## 1055 — [supervisor, 2026-08-09] **Contact family and Fire Spin folded; union green**
 
 - **State:** master union is green: full suite **831 files / 8,234 passed / 1
