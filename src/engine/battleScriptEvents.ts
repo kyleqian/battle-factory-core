@@ -91,12 +91,10 @@ export type BattleScriptSemanticEventPayload =
     effectBattler?: BattleScriptBattlerId;
     /**
      * Source gBattlerTarget at print time (rulesContext.selectorRoles.target).
-     * ISSUES #72 batch 2: the Intimidate loop's own trygetintimidatetarget
-     * cycles BS_TARGET across every opposing battler independently of any
-     * move's real defender, so the generic requireMoveDefender(lastMoveAttacker)
-     * shape (which assumes BS_TARGET is always the last move's opposite
-     * singles battler) is wrong here. Optional for synthetic/staged receipts
-     * that predate this field.
+     * Some scripts reassign this independently of a move's ordinary defender:
+     * the Intimidate loop cycles it across opposing battlers, while
+     * Cmd_tryexplosion re-points it to the Damp holder. Optional for
+     * synthetic/staged receipts that predate this field.
      */
     targetBattler?: BattleScriptBattlerId;
     /**

@@ -1210,15 +1210,13 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
           && rules.selectorRoles.effectBattler !== null
           ? { effectBattler: rules.selectorRoles.effectBattler }
           : {}),
-        // Source gBattlerTarget at print time -- ISSUES #72 batch 2's
-        // Intimidate pair (STRINGID_PKMNCUTSATTACKWITH/PREVENTEDFROMWORKING),
-        // whose own IntimidateActivatesLoop cycles BS_TARGET across every
-        // opposing battler via trygetintimidatetarget, independent of any
-        // move's real defender. Scoped to just these 2 ids for the same
-        // reason effectBattler above is scoped.
+        // Source gBattlerTarget at print time. The Intimidate pair cycles it
+        // across opposing battlers; Cmd_tryexplosion re-points it to the Damp
+        // holder. Both differ from an ordinary move's opposite-side defender.
         ...((
           operand.expression === "STRINGID_PKMNCUTSATTACKWITH"
           || operand.expression === "STRINGID_PREVENTEDFROMWORKING"
+          || operand.expression === "STRINGID_PKMNPREVENTSUSAGE"
         ) && rules.selectorRoles.target !== null
           ? { targetBattler: rules.selectorRoles.target }
           : {}),

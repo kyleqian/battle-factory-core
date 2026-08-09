@@ -365,20 +365,53 @@ describe("presentation-string ISSUES #72 batch 2 -- ability-blocks-the-move's-ow
     expect(lines).toContainEqual([`${field.player.name}’s HYPER CUTTER`, "prevents ATTACK loss!"]);
   });
 
-  it("STRINGID_PKMNPREVENTSUSAGE resolves the Damp holder, Damp, the attacker, and the blocked move", () => {
+  it("STRINGID_PKMNPREVENTSUSAGE snapshots and resolves an ordinary target-held Damp defender", () => {
     const config: FactoryFullTurnConfig = Object.freeze({
       requestId: 1,
       rngSeed: 1,
       player: statusedTargetConfig({ ability: 6 /* ABILITY_DAMP */ }),
       trainer: ATTACKER(SELFDESTRUCT),
     });
-    const { messageIds, lines, field } = runFullTurn(config, AT(0), AT(0));
+    const { messageIds, lines, field, transition } = runFullTurn(config, AT(0), AT(0));
     expect(messageIds).toContain("STRINGID_PKMNPREVENTSUSAGE");
     expect(lines).toContainEqual([
       `${field.player.name}’s DAMP`,
       `prevents Foe ${field.opponent.name}`,
       "from using SELFDESTRUCT!",
     ]);
+    const dampEvents = transition.events.filter((event) =>
+      event.payload.kind === "message" && event.payload.messageId === "STRINGID_PKMNPREVENTSUSAGE");
+    expect(dampEvents).toHaveLength(1);
+    expect(dampEvents[0]!.payload).toMatchObject({ targetBattler: 0, substitutions: ["DAMP"] });
+  });
+
+  it("STRINGID_PKMNPREVENTSUSAGE snapshots and resolves attacker-held Damp instead of the ordinary opposing defender", () => {
+    const config: FactoryFullTurnConfig = Object.freeze({
+      requestId: 1,
+      rngSeed: 1,
+      player: ATTACKER(SELFDESTRUCT, { ability: 6 /* ABILITY_DAMP */ }),
+      trainer: statusedTargetConfig(),
+    });
+    const { messageIds, lines, field, transition } = runFullTurn(config, AT(1), AT(1));
+    expect(messageIds).toContain("STRINGID_PKMNPREVENTSUSAGE");
+    expect(lines).toContainEqual([
+      `${field.player.name}’s DAMP`,
+      `prevents ${field.player.name}`,
+      "from using SELFDESTRUCT!",
+    ]);
+    const dampEvents = transition.events.filter((event) =>
+      event.payload.kind === "message" && event.payload.messageId === "STRINGID_PKMNPREVENTSUSAGE");
+    expect(dampEvents).toHaveLength(1);
+    expect(dampEvents[0]!.payload).toMatchObject({ targetBattler: 0, substitutions: ["DAMP"] });
+
+    // The snapshot is restricted to the Damp print receipt; the unrelated
+    // move-use message retains its existing event shape.
+    const usedMoveEvents = transition.events.filter((event) =>
+      event.payload.kind === "message" && event.payload.messageId === "STRINGID_USEDMOVE");
+    expect(usedMoveEvents).toHaveLength(2);
+    for (const event of usedMoveEvents) {
+      expect(event.payload).not.toHaveProperty("targetBattler");
+    }
   });
 
   it("STRINGID_PKMNRESTOREDHPUSING resolves the Volt Absorb target healing from below-full HP", () => {

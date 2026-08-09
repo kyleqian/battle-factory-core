@@ -1434,18 +1434,22 @@ function messageLines(
   }
   if (messageId === "STRINGID_PKMNPREVENTSUSAGE") {
     // BattleScript_DampStopsExplosion: Cmd_tryexplosion re-points
-    // selectorRoles.target to the Damp holder before jumping here (the
-    // common case: the move's own opposing-singles-battler, same relationship
-    // requireMoveDefender resolves); {B_CURRENT_MOVE} is the actionSnapshot's
+    // selectorRoles.target to the Damp holder before jumping here. That holder
+    // can be the attacker itself, so its print receipt must not infer the
+    // ordinary opposing defender. {B_CURRENT_MOVE} is the actionSnapshot's
     // own currentMove, same idiom STRINGID_PKMNCANTUSEMOVETAUNT uses.
-    if (actionSnapshot === null || event.payload.substitutions.length === 0) {
-      throw new Error(`battle resolution ${messageId} message has no action snapshot/ability substitution`);
+    if (
+      actionSnapshot === null
+      || event.payload.targetBattler === undefined
+      || event.payload.substitutions.length === 0
+    ) {
+      throw new Error(`battle resolution ${messageId} message has no action snapshot/target-battler/ability substitution`);
     }
     const attacker = requireMoveAttacker(lastMoveAttacker, "prevents-usage message");
-    const defender = requireMoveDefender(lastMoveAttacker, "prevents-usage message");
+    const dampBattler = singlesBattler(event.payload.targetBattler, `${messageId} target battler`);
     const ability = event.payload.substitutions[0]!;
     return resolveBattleStringLines(messageId, {
-      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, dampBattler),
       B_DEF_ABILITY: () => ability,
       B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
       B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
