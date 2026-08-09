@@ -1662,6 +1662,36 @@ function messageLines(
       B_BUFF1: () => statusName,
     });
   }
+  if (
+    messageId === "STRINGID_PKMNSITEMRESTOREDHEALTH"
+    || messageId === "STRINGID_PKMNSITEMRESTOREDHPALITTLE"
+  ) {
+    // BattleScript_ItemHealHP_RemoveItem / BattleScript_ItemHealHP_Ret
+    // (data/battle_scripts_1.s:4356-4364,4377-4384) -- the end-turn berry
+    // heal, Leftovers, and Shell Bell. The print owner is print-time
+    // gBattleScripting.battler (battle_util.c:3604-3606 stamps the holder for
+    // every fired ITEMEFFECT_NORMAL effect; battle_message.c:2450 reads it),
+    // NOT the B_ANIM_HELD_ITEM_EFFECT receipt: Scene OFF's whole-battle
+    // HITMARKER_NO_ANIMATIONS (factoryBattleStart.ts:405-407) routes
+    // Cmd_playanimation into its BattleScript_Pausex20 branch
+    // (battle_script_commands.c:4014-4018), so the generated route never
+    // emits that animation event at all. {B_LAST_ITEM} is source's
+    // gLastUsedItem (battle_util.c:3266, the holder's item read before the
+    // effect switch); printstring runs BEFORE removeitem in both scripts, so
+    // the tracked heldItems entry still holds the fired item at print time.
+    const scriptingBattler = event.payload.scriptingBattler !== undefined
+      ? singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`)
+      : pendingHeldItemEffectBattler;
+    if (scriptingBattler === null) {
+      throw new Error(
+        `battle resolution ${messageId} message has no scripting battler/preceding held-item effect`,
+      );
+    }
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, scriptingBattler),
+      B_LAST_ITEM: () => factoryItemDisplayName(heldItems[scriptingBattler]),
+    });
+  }
   if (messageId === "STRINGID_PKMNENDUREDHIT") {
     // classifyResultMessage's MOVE_RESULT_FOE_ENDURED case
     // (battleScriptHitChainOpcode.ts:2611-2612) -- an Endure carrier takes a

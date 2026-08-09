@@ -1276,6 +1276,11 @@ function runItemsTick(
     const rc = Object.freeze({
       ...state.rulesContext,
       battleMoveDamage: -heal,
+      // battle_util.c:3604-3606: the fired-effect commit block stamps
+      // `gBattleScripting.battler = battler` for Leftovers' ITEM_HP_CHANGE
+      // too -- STRINGID_PKMNSITEMRESTOREDHPALITTLE's own
+      // {B_SCR_ACTIVE_NAME_WITH_PREFIX} print owner (battle_message.c:2450).
+      scriptingBattler: battler,
       aiObservedItemEffects: Object.freeze(
         state.rulesContext.aiObservedItemEffects.map((value, index) =>
           index === battler ? holdEffect : value
@@ -1370,7 +1375,11 @@ function runItemsTick(
     // own healthbarupdate/datahpupdate pair applies it (and syncs the party HP mirror), removeitem then consumes the berry.
     const param = resolveBattleScriptBattlerHoldEffectParam(state.rulesContext, battler);
     const heal = Math.min(param, b.maxHP - b.hp);
-    const rc = Object.freeze({ ...state.rulesContext, battleMoveDamage: -heal });
+    // battle_util.c:3604-3606: every fired ITEMEFFECT_NORMAL effect commits
+    // `gBattleScripting.battler = battler` before its script runs -- the print
+    // owner STRINGID_PKMNSITEMRESTOREDHEALTH's {B_SCR_ACTIVE_NAME_WITH_PREFIX}
+    // reads at print time (battle_message.c:2450).
+    const rc = Object.freeze({ ...state.rulesContext, battleMoveDamage: -heal, scriptingBattler: battler });
     return runTickScript(program, handlers, state, rc, battler, ITEM_HEAL_HP_REMOVE_ITEM_LABEL);
   }
   if (holdEffect === HOLD_EFFECT_RESTORE_PP) {
