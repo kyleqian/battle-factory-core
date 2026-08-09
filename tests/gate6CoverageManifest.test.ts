@@ -280,8 +280,9 @@ function assertSourceProvenFamilyContract(
       ]));
       expect(record(dispatcher.target)).toMatchObject({ state: "MOVEEND_SYNCHRONIZE_TARGET", stateValue: 2 });
       expect(record(dispatcher.attacker)).toMatchObject({ state: "MOVEEND_SYNCHRONIZE_ATTACKER", stateValue: 5 });
-      expect(array(record(family.runtimeGuardSignature).selector.effects).length).toBe(4);
-      expect(array(record(family.runtimeGuardSignature).chance.guards).length).toBeGreaterThan(0);
+      const runtimeGuardSignature = record(family.runtimeGuardSignature);
+      expect(array(record(runtimeGuardSignature.selector).effects).length).toBe(4);
+      expect(array(record(runtimeGuardSignature.chance).guards).length).toBeGreaterThan(0);
       expect(record(family.familyVerification)).toMatchObject({
         oracleReceipt: "docs/synchronize-abilities-ground-truth.md#3-two-seed-battle-scene-off-receipts",
         oracleFixture: "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",

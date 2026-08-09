@@ -913,7 +913,17 @@ describe("Level-50 move parameterization manifest", () => {
   });
 
   it("accounts Synchronize status candidates and keeps excluded status bytes explicit", () => {
-    const audit = manifest.coverage.hookCatalogs.ability.synchronize;
+    type SynchronizeAudit = {
+      status: string;
+      candidateCount: number;
+      sourceProvenRows: string[];
+      sourceExceptionRows: unknown[];
+      blockers: unknown[];
+      routeWitnesses: unknown[];
+      excludedOutcomes: Array<{ byte: string }>;
+      runtimeGuardSignature: { selector: { effects: Array<{ byte: string }> } };
+    };
+    const audit = (manifest.coverage.hookCatalogs.ability as unknown as { synchronize: SynchronizeAudit }).synchronize;
     expect(audit).toMatchObject({ status: "source-proven-family", candidateCount: 30, sourceProvenRows: expect.any(Array), sourceExceptionRows: [], blockers: [] });
     expect(audit.sourceProvenRows).toHaveLength(30);
     expect(audit.routeWitnesses).toHaveLength(30);
@@ -924,8 +934,8 @@ describe("Level-50 move parameterization manifest", () => {
     ]));
     const markerEffects = audit.runtimeGuardSignature.selector.effects.map((effect) => effect.byte);
     expect(markerEffects).toEqual(["MOVE_EFFECT_POISON", "MOVE_EFFECT_TOXIC", "MOVE_EFFECT_PARALYSIS", "MOVE_EFFECT_BURN"]);
-    expect(manifest.moves.find((candidate) => candidate.move === "MOVE_BOUNCE").hooks.ability.supportedCategories).toContain("moveend-synchronize-status");
-    expect(manifest.moves.find((candidate) => candidate.move === "MOVE_FLY").hooks.ability.supportedCategories).not.toContain("moveend-synchronize-status");
-    expect(manifest.moves.find((candidate) => candidate.move === "MOVE_TRI_ATTACK").hooks.ability.supportedCategories).toContain("moveend-synchronize-status");
+    expect(manifest.moves.find((candidate) => candidate.move === "MOVE_BOUNCE")!.hooks.ability.supportedCategories).toContain("moveend-synchronize-status");
+    expect(manifest.moves.find((candidate) => candidate.move === "MOVE_FLY")!.hooks.ability.supportedCategories).not.toContain("moveend-synchronize-status");
+    expect(manifest.moves.find((candidate) => candidate.move === "MOVE_TRI_ATTACK")!.hooks.ability.supportedCategories).toContain("moveend-synchronize-status");
   });
 });
