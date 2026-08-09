@@ -150,6 +150,8 @@ import { battleCommandSpeciesDisplayName } from "./battleCommandPresentation.ts"
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import topologyData from "../data/gen/battle-script-topology.json" with { type: "json" };
 import frontierHeldItemsData from "../data/gen/battle-frontier-held-items.json" with { type: "json" };
+import abilityItemHooksData from "../data/gen/ability-item-hooks.json" with { type: "json" };
+import summaryInfoData from "../data/gen/summary-info.json" with { type: "json" };
 import { resolveSingleBattlePosition } from "./battleScriptBattlerPositions.ts";
 
 const ADAPTER = "factory-full-turn/v1";
@@ -179,75 +181,19 @@ const FACTORY_ITEM_NAME_BY_ID = new Map(
     ({ itemId, displayName }) => [itemId, displayName],
   ),
 );
-/**
- * `gAbilityNames` display text (`reference/pokeemerald/src/data/text/
- * abilities.h:89-146`), scoped to the abilities ISSUES #70 batch 1's
- * B_DEF_ABILITY/B_SCR_ACTIVE_ABILITY presentation ids can actually reveal
- * (`docs/issue70-stringid-reachability.md` rows 2-3) -- not a full 78-entry
- * table.
- */
-const ABILITY_DISPLAY_NAME_BY_ID: Readonly<Record<number, string>> = Object.freeze({
-  9: "STATIC",
-  18: "FLASH FIRE",
-  25: "WONDER GUARD",
-  26: "LEVITATE",
-  27: "EFFECT SPORE",
-  38: "POISON POINT",
-  49: "FLAME BODY",
-  // BattleScript_StickyHoldActivates (reference/pokeemerald/data/battle_scripts_1.s:4173-4177)
-  // reuses STRINGID_PKMNSXMADEYINEFFECTIVE for Sticky Hold blocking Trick
-  // (battleScriptTryswapitemsOpcode.ts:152-177) -- the same id ISSUES #70
-  // batch 2 ported for Flash Fire's re-activation shares this ability slot.
-  60: "STICKY HOLD",
-  // ISSUES #70 batch 3's ability-prevention family (docs/issue70-stringid-
-  // reachability.md rows 6-10): the two real trigger paths --
-  // BattleScript_ImmunityProtected/WaterVeilPrevents/LimberProtected's direct
-  // jumpifability short-circuit, and Synchronize's own seteffectprimary
-  // re-application (battleScriptMoveEndOpcode.ts's executeSynchronize) --
-  // can reveal any of these five abilities.
-  7: "LIMBER",
-  15: "INSOMNIA",
-  17: "IMMUNITY",
-  28: "SYNCHRONIZE",
-  41: "WATER VEIL",
-  72: "VITAL SPIRIT",
-  // ISSUES #72 batch 1's ability-blocks-the-move's-own-effect cluster
-  // (docs/issue72-reachability-triage.md): Oblivious/Own Tempo/Clear Body,
-  // each read off the move's own target (or scripting) role at print time.
-  12: "OBLIVIOUS",
-  20: "OWN TEMPO",
-  29: "CLEAR BODY",
-  // ISSUES #72 batch 2 (docs/issue72-reachability-triage.md): Damp, Volt
-  // Absorb/Water Absorb, Suction Cups, Intimidate + its three blockers,
-  // Inner Focus, Keen Eye/Hyper Cutter.
-  6: "DAMP",
-  10: "VOLT ABSORB",
-  11: "WATER ABSORB",
-  21: "SUCTION CUPS",
-  22: "INTIMIDATE",
-  39: "INNER FOCUS",
-  51: "KEEN EYE",
-  52: "HYPER CUTTER",
-  73: "WHITE SMOKE",
-  // ISSUES #72 batch 3: Soundproof (SoundproofProtected).
-  43: "SOUNDPROOF",
-  // ISSUES #72 batch 5: Rough Skin, Cute Charm, Role Play's copied ability
-  // is arbitrary (LEVITATE reused from the existing table above).
-  24: "ROUGH SKIN",
-  56: "CUTE CHARM",
-  // ISSUES #72 batch 6: Rain Dish, Speed Boost, Shed Skin (all end-turn
-  // ability ticks).
-  44: "RAIN DISH",
-  3: "SPEED BOOST",
-  61: "SHED SKIN",
-  // ISSUES #72 batch 7: Color Change.
-  16: "COLOR CHANGE",
-  // ISSUES #72 batch 8: Sturdy (OHKO block), Sand Stream.
-  5: "STURDY",
-  45: "SAND STREAM",
-});
-function abilityDisplayName(ability: number): string {
-  const name = ABILITY_DISPLAY_NAME_BY_ID[ability];
+type AbilitySymbolIdRow = Readonly<{ name: string; id: number }>;
+type AbilitySummaryRow = Readonly<{ name: string; description: string }>;
+
+/** Source-extracted `ABILITY_*` IDs joined to exact Emerald `gAbilityNames` display text. */
+const ABILITY_DISPLAY_NAME_BY_ID = new Map(
+  (abilityItemHooksData.universes.abilities as readonly AbilitySymbolIdRow[]).map(({ id, name }) => [
+    id,
+    (summaryInfoData.abilities as Readonly<Record<string, AbilitySummaryRow>>)[name]?.name,
+  ]),
+);
+
+export function resolveFactoryAbilityDisplayName(ability: number): string {
+  const name = ABILITY_DISPLAY_NAME_BY_ID.get(ability);
   if (name === undefined) {
     throw new Error(`prepareMessage: no display name mapped for ability ${ability}`);
   }
@@ -852,7 +798,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
           || operand.expression === "STRINGID_PKMNSXCUREDYPROBLEM"
         ? (rules.battleTextBuff1Status === null
           ? []
-          : [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability), rules.battleTextBuff1Status])
+          : [resolveFactoryAbilityDisplayName(rules.battlers[rules.scriptingBattler].ability), rules.battleTextBuff1Status])
         : operand.expression === "STRINGID_PKMNOBTAINEDX"
         ? (buff1 === null ? [] : [buff1])
         : operand.expression === "STRINGID_PKMNOBTAINEDX2"
@@ -902,7 +848,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
               || operand.expression === "STRINGID_PKMNCOPIEDFOE"
               ? (rules.selectorRoles.target === null
                 ? []
-                : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
+                : [resolveFactoryAbilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
               // B_TXT_SCR_ACTIVE_ABILITY: gAbilityNames[sBattlerAbilities[
               // gBattleScripting.battler]] (battle_message.c:2519-2520) --
               // applySetMoveEffect sets scriptingBattler to the ability
@@ -918,7 +864,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                 || operand.expression === "STRINGID_PKMNWASPARALYZEDBY"
                 || operand.expression === "STRINGID_PKMNFROZENBY"
                 || operand.expression === "STRINGID_PKMNMADESLEEP"
-                ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
+                ? [resolveFactoryAbilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
                 // STRINGID_HITXTIMES's {B_BUFF1}: the multi-hit family's own
                 // hits-landed counter (battleScriptRulesContext.ts:700-710,
                 // battleScriptIngrainLeechSeedWrapOpcode.ts:308-323).
@@ -973,7 +919,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                       || operand.expression === "STRINGID_PKMNSXPREVENTSFLINCHING"
                       ? (rules.selectorRoles.effectBattler === null
                         ? []
-                        : [abilityDisplayName(rules.battlers[rules.selectorRoles.effectBattler].ability)])
+                        : [resolveFactoryAbilityDisplayName(rules.battlers[rules.selectorRoles.effectBattler].ability)])
                       // Row 7 (STRINGID_PKMNSXPREVENTSYSZ): only reachable via
                       // Synchronize's own seteffectprimary re-application
                       // (executeSynchronize, battleScriptMoveEndOpcode.ts) --
@@ -986,15 +932,15 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                         ? (rules.selectorRoles.attacker === null || rules.selectorRoles.target === null
                           ? []
                           : [
-                              abilityDisplayName(rules.battlers[rules.selectorRoles.attacker].ability),
-                              abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability),
+                              resolveFactoryAbilityDisplayName(rules.battlers[rules.selectorRoles.attacker].ability),
+                              resolveFactoryAbilityDisplayName(rules.battlers[rules.selectorRoles.target].ability),
                             ])
                         // Row 8 (STRINGID_PKMNSXHADNOEFFECTONY): same
                         // Synchronize-only reachability; {B_SCR_ACTIVE_ABILITY}
                         // reads the ability holder's (scriptingBattler's) own
                         // ability, always ABILITY_SYNCHRONIZE in practice.
                         : operand.expression === "STRINGID_PKMNSXHADNOEFFECTONY"
-                          ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
+                          ? [resolveFactoryAbilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
                           // Row 14 (STRINGID_PKMNSTAYEDAWAKEUSING):
                           // createJumpifcantmakeasleepOpcodeHandler's own
                           // Insomnia/Vital Spirit branch always targets the
@@ -1002,7 +948,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                           : operand.expression === "STRINGID_PKMNSTAYEDAWAKEUSING"
                             ? (rules.selectorRoles.target === null
                               ? []
-                              : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
+                              : [resolveFactoryAbilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
                             // Row 21 (STRINGID_PKMNSTOCKPILED): the stockpile
                             // count itself (stockpileHandler,
                             // battleScriptStockpileOpcode.ts), the same
@@ -1035,7 +981,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                 // battler blockedMessage freezes into scriptingBattler
                                 // (battleScriptStatBuffs.ts:206-271).
                                 : operand.expression === "STRINGID_PKMNPREVENTSSTATLOSSWITH"
-                                  ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
+                                  ? [resolveFactoryAbilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
                                   // {B_DEF_ABILITY} for the two ability-blocks-the-
                                   // move's-own-target-effect ids -- OwnTempoPrevents/
                                   // ObliviousPreventsAttraction each read the ability
@@ -1049,7 +995,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                     )
                                     ? (rules.selectorRoles.target === null
                                       ? []
-                                      : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
+                                      : [resolveFactoryAbilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
                                     // ISSUES #72 batch 2: BattleScript_AbilityNoSpecificStatLoss's
                                     // {B_SCR_ACTIVE_ABILITY}/{B_BUFF1} -- the
                                     // real C source calls the unconditional
@@ -1063,7 +1009,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                     // battleScriptStatBuffs.ts:272-277).
                                     : operand.expression === "STRINGID_PKMNSXPREVENTSYLOSS"
                                       ? [
-                                          abilityDisplayName(rules.battlers[rules.scriptingBattler].ability),
+                                          resolveFactoryAbilityDisplayName(rules.battlers[rules.scriptingBattler].ability),
                                           rules.battlers[rules.scriptingBattler].ability === ABILITY_KEEN_EYE
                                             ? "accuracy"
                                             : "ATTACK",
@@ -1082,7 +1028,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                       // this exact scriptingBattler-ability read.
                                       : operand.expression === "STRINGID_PKMNCUTSATTACKWITH"
                                         || operand.expression === "STRINGID_PKMNRAISEDSPEED"
-                                        ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
+                                        ? [resolveFactoryAbilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
                                         // BattleScript_IntimidatePrevented's own
                                         // {B_DEF_ABILITY} -- BS_TARGET at this
                                         // print is whichever of Clear Body/
@@ -1091,7 +1037,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                         : operand.expression === "STRINGID_PREVENTEDFROMWORKING"
                                           ? (rules.selectorRoles.target === null
                                             ? []
-                                            : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
+                                            : [resolveFactoryAbilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
                                           // BattleScript_SideStatusWoreOff's
                                           // {B_BUFF1} -- real source's
                                           // PREPARE_MOVE_BUFFER(gBattleTextBuff1,
@@ -1115,7 +1061,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                             : operand.expression === "STRINGID_PKMNSXBLOCKSY"
                                               ? (rules.selectorRoles.target === null
                                                 ? []
-                                                : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
+                                                : [resolveFactoryAbilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
                                               // BattleScript_PrintAbilityMadeIneffective's
                                               // {B_SCR_ACTIVE_ABILITY} --
                                               // BattleScript_PrintBankAbilityMadeIneffective's
@@ -1126,7 +1072,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                               // to the Insomnia/Vital Spirit
                                               // holder before this fallthrough.
                                               : operand.expression === "STRINGID_PKMNSXMADEITINEFFECTIVE"
-                                                ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
+                                                ? [resolveFactoryAbilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
                                                 // ISSUES #72 batch 6:
                                                 // BattleScript_RainDishActivates's
                                                 // {B_ATK_ABILITY} -- runAbilitiesTick's
@@ -1137,7 +1083,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                                 : operand.expression === "STRINGID_PKMNSXRESTOREDHPALITTLE2"
                                                   ? (rules.selectorRoles.attacker === null
                                                     ? []
-                                                    : [abilityDisplayName(rules.battlers[rules.selectorRoles.attacker].ability)])
+                                                    : [resolveFactoryAbilityDisplayName(rules.battlers[rules.selectorRoles.attacker].ability)])
                                                   // BattleScript_EffectDisable's own
                                                   // {B_BUFF1} -- disablelastusedattack's
                                                   // own disabledMove write on the move's
@@ -1160,7 +1106,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                                       ? (rules.selectorRoles.target === null || rules.battleTextBuff1Type === null
                                                         ? []
                                                         : [
-                                                            abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability),
+                                                            resolveFactoryAbilityDisplayName(rules.battlers[rules.selectorRoles.target].ability),
                                                             TYPE_DISPLAY_NAMES[rules.battleTextBuff1Type] ?? rules.battleTextBuff1Type,
                                                           ])
                                                       // ISSUES #72 batch 7: Cmd_tryspiteppreduce (Spite) already
@@ -1186,7 +1132,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                                           : operand.expression === "STRINGID_PKMNTRACED"
                                                             ? (rules.battleTextBuff1MonNick === null
                                                               ? []
-                                                              : [abilityDisplayName(rules.battlers[rules.battleTextBuff1MonNick.battler].ability)])
+                                                              : [resolveFactoryAbilityDisplayName(rules.battlers[rules.battleTextBuff1MonNick.battler].ability)])
                                                             // ISSUES #72 batch 8: Cmd_tryKO's own Sturdy check
                                                             // (battleScriptTryKOOpcode.ts:117-134) never reassigns
                                                             // selectorRoles -- the move's own still-current target
@@ -1194,19 +1140,19 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                                             : operand.expression === "STRINGID_PKMNPROTECTEDBY"
                                                               ? (rules.selectorRoles.target === null
                                                                 ? []
-                                                                : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
+                                                                : [resolveFactoryAbilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
                                                               // BattleScript_SandstreamActivates's {B_SCR_ACTIVE_ABILITY}
                                                               // -- Cmd_switchineffects's own Sand Stream branch sets
                                                               // scriptingBattler to the switching-in battler
                                                               // (battleScriptSwitchinOpcode.ts:973-981).
                                                               : operand.expression === "STRINGID_PKMNSXWHIPPEDUPSANDSTORM"
-                                                                ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
+                                                                ? [resolveFactoryAbilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
                                                                 // BattleScript_PerishSongNotAffected's
                                                                 // {B_SCR_ACTIVE_ABILITY} -- EffectPerishSong's own
                                                                 // per-battler Soundproof loop already threads
                                                                 // scriptingBattler through the generic sBATTLER field.
                                                                 : operand.expression === "STRINGID_PKMNSXBLOCKSY2"
-                                                                  ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
+                                                                  ? [resolveFactoryAbilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
                                                                   // BattleScript_GrudgeTakesPP's {B_BUFF1} --
                                                                   // scheduleGrudge (battleScriptHitChainOpcode.ts:
                                                                   // 4354-4376) already captures the killing battler's

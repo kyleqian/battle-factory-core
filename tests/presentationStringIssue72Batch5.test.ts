@@ -35,7 +35,7 @@ const SPECIES_CARVANHA = 330; // real ABILITY_ROUGH_SKIN slot-0 carrier.
 const ABILITY_NONE = 0;
 const ABILITY_CUTE_CHARM = 56;
 const ABILITY_ROUGH_SKIN = 24;
-const ABILITY_LEVITATE = 26;
+const ABILITY_COMPOUND_EYES = 14;
 
 const STATUS2_WRAPPED_MASK = (1 << 13) | (1 << 14) | (1 << 15);
 
@@ -355,7 +355,9 @@ describe("presentation-string ISSUES #72 batch 5 -- standalone move-effect entry
         attack: 60, defense: 60, spAttack: 85, spDefense: 60, speed: 91, hp: 190, maxHp: 190,
       },
       trainer: {
-        species: SPECIES_MURKROW, moveId: SPLASH, ability: ABILITY_LEVITATE,
+        // Full-policy seeds 22 (battle 2, turn 19) and 19 (battle 3, turn 12)
+        // both reach Role Play against this legal, previously unmapped ID.
+        species: SPECIES_MURKROW, moveId: SPLASH, ability: ABILITY_COMPOUND_EYES,
         attack: 60, defense: 60, spAttack: 60, spDefense: 90, speed: 60, hp: 200, maxHp: 200,
       },
     });
@@ -363,7 +365,7 @@ describe("presentation-string ISSUES #72 batch 5 -- standalone move-effect entry
     expect(messageIds).toContain("STRINGID_PKMNCOPIEDFOE");
     expect(lines).toContainEqual([
       `${field.player.name} copied`,
-      `Foe ${field.opponent.name}’s LEVITATE!`,
+      `Foe ${field.opponent.name}’s COMPOUNDEYES!`,
     ]);
   });
 });
