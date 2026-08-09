@@ -17,6 +17,37 @@ backlog.
 
 # Open
 
+## #85 — Random-play soak: resolution display-boundary family crashes ~95% of full-policy seeds; factorySwap stall gates deeper soaking
+
+**Found 2026-08-09 (user-directed meta-audit; instrument: `npm run soak`,
+driver `tools/soak/randomRoundSoak.ts`, catalog `docs/soak-crash-catalog.md`).**
+The soak plays full generated rounds through the production path
+(createInitialState + tick + real button edges) with seeded random legal
+choices. Post-fold master, 60-seed sweep: **39/60**
+`battle resolution HP command starts at X, displayed Y`
+(`createBattleResolutionPresentationRenderView`), **18/60**
+`FactoryRoundOrchestratorError: resolution handoff battler N display does not
+match the genuine next boundary`, **1/60** HANG at `factorySwap:complete`
+(seed 55 WON battle 1, turn 28 — driver-vs-engine attribution open), 2/60
+clean lost rounds. Vanilla policy: **20/20 clean**. First crashes moved from
+turns 4-5 to turns 8-10 after the 2026-08-09 fixes — the mechanism is the
+same displayed-HP ledger drift the closed #84 item (5) fatal belonged to; the
+named user repros were fixed but the boundary ledger still drifts under
+arbitrary decision sequences.
+
+**Repro:** `npm run soak -- --seed 0` (HP ledger), `--seed 6` (handoff),
+`--seed 55` (swap stall), `--seed N --verbose` for the action tail. Also
+catalogued: a narrower switch-in sibling (`BattleScript_FaintedMonSendOutNew`
+emits `STRINGID_SWITCHINMON` with no switch receipt; catalog §6, 2/500).
+
+**Why this is the top play-test item:** no full-policy seed has completed a
+round; seeds that win battle 1 stall at the swap surface. Swap-approval,
+battles 2-7, and the postwin-win flow remain machine-unplayed until the two
+signatures close. Suggested standing gate (see ROADMAP S10 note): vanilla
+`--seeds 0:20` stays 20/20 OK at every wind-down; record the full-policy
+completion count. Do not soften the fatal invariants (per #72's standing
+user decision).
+
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **Symptom:** all 62 Factory-front send-out intro families (**376/376** species

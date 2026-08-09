@@ -18,6 +18,32 @@
   SOUND, GRASS WHISTLE, and HYPER VOICE. No production, barrier/import, oracle
   fixture, animation, or controller file changed.
 
+## 1043 — [supervisor, 2026-08-09] **Absorbing hook family source-proven; union green**
+
+- **State:** Gate 6 remains **OPEN**. Per-move hook gaps are now **561**:
+  **300 item + 261 ability** (was 591). The manifest has **39** exact
+  `source-proven-family` ability rows: nine Soundproof plus 30 shared
+  Volt/Water Absorb and Flash Fire rows.
+- **Did:** accepted `8d8d4b7d` + typing follow-up `c7b4c223`. Source-derived
+  candidates are 6 Electric, 13 Water, and 12 Fire; all Electric/Water and 11
+  Fire routes prove ordered graph/program entry into
+  `JumpIfMoveFailed`/`ABILITYEFFECT_ABSORBING`. SUNNY DAY remains unsupported
+  with a complete weather-script exit witness. Corrected hook receipt taxonomy:
+  Volt Absorb owns the dedicated two-seed OFF receipt; Water Absorb/Flash Fire
+  are shared-dispatcher Tier-1 siblings, not incidentally oracle-receipted.
+  Folded animation-main's exact bilateral BARRIER handoff through `40cba0e5`
+  as `5af8d1e8`.
+- **Next:** take one remaining source-bounded per-move hook family, favoring
+  MOVEEND contact/on-damage plus Color Change only if ordered MOVEEND
+  reachability and the shared-family semantic evidence are complete.
+- **Notes:** supervisor post-fix typecheck, **6 files / 467 tests**, and build
+  are green. Final union is **821 files / 8,182 passed / 1 skipped** and build
+  green; OFF oracle healthy. Manifest artifacts are JSON **2,914,881 B** and
+  Markdown **825,090 B**. No production mechanics, controller, barrier/import,
+  or oracle fixture changed in the hook step.
+
+---
+
 ## 1041 — [supervisor, 2026-08-09] **Gate-6 hook gaps surfaced; Substitute fold green**
 
 - **State:** Gate 6 remains **OPEN**. The manifest now exposes **300 item +
