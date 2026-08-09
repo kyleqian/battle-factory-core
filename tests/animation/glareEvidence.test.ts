@@ -70,10 +70,10 @@ describe("MOVE_GLARE bilateral dense exact evidence", () => {
     expect(effects2).toContain(".callback = AnimEyeSparkle");
   });
 
-  it("promotes only GLARE at 136 exact / 140 unsupported", () => {
-    expect(coverage.entries).toHaveLength(136);
+  it("keeps GLARE exact after the FAKE_OUT promotion at 137/139", () => {
+    expect(coverage.entries).toHaveLength(137);
     expect(coverage.entries.every((entry) => entry.status === "exact")).toBe(true);
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_GLARE")).toHaveLength(1);
-    expect(276 - coverage.entries.length).toBe(140);
+    expect(276 - coverage.entries.length).toBe(139);
   });
 });
