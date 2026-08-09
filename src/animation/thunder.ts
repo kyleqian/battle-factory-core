@@ -65,7 +65,7 @@ export const THUNDER_LIGHTNING_Y_OFFSETS = [
   -32, -16, 16,
   -32, -16, 16,
 ] as const;
-export const THUNDER_LIGHTNING_PRIORITIES = [
+export const THUNDER_LIGHTNING_SOURCE_SUBPRIORITY_OFFSETS = [
   2, 2, 2,
   6, 6, 6,
   2, 2, 2,
@@ -112,7 +112,8 @@ export interface ThunderLightningSprite {
   readonly y: number;
   readonly x2: 0;
   readonly y2: 0;
-  readonly priority: 2 | 6;
+  /** The `createsprite` source subpriority offset, not hardware OAM priority. */
+  readonly sourceSubpriorityOffset: 2 | 6;
   readonly subpriority: number;
   readonly tileFrame: 0 | 1 | 2 | 3 | 4;
   readonly tileOffset: 0 | 16 | 32 | 48 | 64;
@@ -364,7 +365,8 @@ function lightningAtAge(
       y: targetEffectCenter.y + THUNDER_LIGHTNING_Y_OFFSETS[sourceOrder]!,
       x2: 0 as const,
       y2: 0 as const,
-      priority: THUNDER_LIGHTNING_PRIORITIES[sourceOrder]!,
+      sourceSubpriorityOffset:
+        THUNDER_LIGHTNING_SOURCE_SUBPRIORITY_OFFSETS[sourceOrder]!,
       subpriority,
       tileFrame,
       tileOffset: (tileFrame * 16) as 0 | 16 | 32 | 48 | 64,

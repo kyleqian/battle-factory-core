@@ -91,7 +91,7 @@ describe("MOVE_THUNDER source-relative reducer", () => {
           sprite!.slot,
           sprite!.x,
           sprite!.y,
-          sprite!.priority,
+          sprite!.sourceSubpriorityOffset,
           sprite!.subpriority,
           sprite!.drawOrder,
         ];
