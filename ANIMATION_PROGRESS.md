@@ -1,12 +1,12 @@
 # Animation coverage
 
-## MOVE_THUNDER reducer and typed seam staged — remains unsupported (2026-08-08 worker)
+## MOVE_THUNDER exact — bilateral Scene-ON promotion (2026-08-08 worker)
 
-- **State:** Coverage remains **134/276 exact, 0 partial, 0 staged, 142 unsupported**. THUNDER now has a tested pure source-relative reducer, regenerated BG_THUNDER asset, and typed Scene-ON seam; it remains unsupported pending battleScene wiring and bilateral full-window portable/framebuffer proof.
-- **Did:** Added `src/animation/thunder.ts` for the complete `Move_THUNDER` body (`0x082cf935..0x082cfa8f`): 262 source ages, display waits, BG fades/slide/restore, F_PAL_BG blends, six invert toggles, all 12 shared Lightning lifecycles/order/geometry, source OAM priorities, audio events/pan, runtime shake-offset overwrite, and cleanup. Added deterministic `extractThunderAssets.ts`/`thunder.json`, `SceneOnThunderConfig`/view, and exact Lightning frame-helper reuse from THUNDER_PUNCH. GLARE and TRI_ATTACK remain source-distinct and unsupported.
-- **Verified:** Fresh bilateral probes remain byte-identical: player-back **76..337, 262 frames**, evidence `e2cbab66…`, raw RGB `bb5b5dff…`; opponent-front **80..341, 262 frames**, evidence `45a17da4…`, raw RGB `f6d879f0…`; `currentMove == 87` throughout and orientation shift **+4**. Reducer audit: **262/262 ages × 2 orientations** matched source offset/wait, task data/counts, Lightning fields, fade registers, slide coordinates, shake offsets, and audio boundaries. Focused Thunder/evidence/sibling tests **14/14**; coverage **134/142** unchanged.
-- **Next:** Later compositor work must prove the full bilateral portable and framebuffer window before any promotion. Do not widen boundaries or promote GLARE/TRI_ATTACK.
-- **Notes:** No engine, gameplay, controller, facility, boundary, barrier, or master docs changed.
+- **State:** Coverage advanced **134→135/276 exact**, 0 partial, 0 staged, **142→141 unsupported**. Only `MOVE_THUNDER` moved; GLARE and TRI_ATTACK remain unsupported.
+- **Did:** Wired the staged source-relative reducer and BG_THUNDER art into the narrow typed Scene-ON compositor; added the hardware-OAM shake display schedule, source one-display enemy-shadow handoff, complete portable verifier, exact receipts, and focused Tier-1 pins. Renamed Lightning's `priority` field to the source-accurate `sourceSubpriorityOffset` before wiring.
+- **Verified:** Twice-fresh bilateral probes pass source/software/typed seam, tasks, Lightning and battler hardware OAM, palette/register/audio state, raw RGB, and shared framebuffer: player-back **76..337 = 262/262**, evidence `e2cbab66…`, raw RGB `bb5b5dff…`; opponent-front **80..341 = 262/262**, evidence `45a17da4…`, raw RGB `f6d879f0…`. THUNDER_PUNCH controls remain **104/104 component + framebuffer** in both orientations. Focused tests **20/20**, typecheck, full `npm test` (**809 files, 8084 passed, 1 established skip**), and `npm run build` pass.
+- **Next:** Continue the ranked queue. Do not promote GLARE or TRI_ATTACK without independent complete dense evidence.
+- **Notes:** No gameplay, RNG, controller, facility, shared-boundary, unsupported-barrier, or master-ledger change.
 
 ## MOVE_MAGICAL_LEAF exact — bilateral Scene-ON promotion (2026-08-08 worker, round B)
 
