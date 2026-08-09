@@ -1347,6 +1347,32 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(state.rng.calls).toBe(0);
   });
 
+  it("R12 sibling control: White Smoke likewise preserves White Herb when a later Intimidate has no negative stage to restore", () => {
+    const rc = context({ battlers: [
+      battler({
+        side: 0,
+        species: 321,
+        ability: ABILITY_WHITE_SMOKE,
+        item: ITEM_WHITE_HERB,
+        statStages: [6, 6, 6, 6, 6, 6, 6, 6],
+      }),
+      battler({ side: 1, species: 210, ability: ABILITY_INTIMIDATE }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ] });
+    const { execution, result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
+    const state = runBattleScriptFaintedActionsOrchestration(program, execution.handlers, result.state).state;
+    expect(state.rulesContext.battlers[0]).toMatchObject({
+      ability: ABILITY_WHITE_SMOKE,
+      item: ITEM_WHITE_HERB,
+      statStages: [6, 6, 6, 6, 6, 6, 6, 6],
+    });
+    expect(state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
+      .toEqual(["STRINGID_PREVENTEDFROMWORKING"]);
+    expect(state.events.filter((event) => event.kind === "set-battler-item")).toEqual([]);
+    expect(state.rng.calls).toBe(0);
+  });
+
   it("battle-start orchestration: faster Drizzle completes its weather message before the slower Intimidate stat drop", () => {
     const rc = context({
       battlers: [

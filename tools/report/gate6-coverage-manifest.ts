@@ -589,15 +589,20 @@ function parseInteractionRows(): Row[] {
 const interactionRows = parseInteractionRows();
 const receiptGapCards = receiptFamilyRows.filter((row) => row.status !== "oracle-receipted-family");
 const rankedGap = rankedReceiptCards.map((id) => receiptGapCards.find((row) => row.label === id)).find(Boolean) ?? receiptGapCards[0];
-if (!rankedGap) throw new Error("Gate-6 manifest unexpectedly has no explicit receipt gap");
 const nextAcceptanceOverride = scout.match(/^<!-- gate6-next-acceptance: (R\d+b?) -->$/m)?.[1];
 const nextAcceptance = nextAcceptanceOverride === undefined
   ? rankedGap
   : receiptFamilyRows.find((row) => row.label === canonicalCardId(nextAcceptanceOverride));
-if (!nextAcceptance) throw new Error(`Gate-6 next-acceptance override is not a known card: ${nextAcceptanceOverride}`);
-const nextAcceptanceText = nextAcceptanceOverride === undefined
-  ? `${nextAcceptance.label}: add and document the missing parameterized-oracle receipt before treating this family as accepted.`
-  : `${nextAcceptance.label}: upgrade its legacy receipt note to the compact deterministic semantic workflow.`;
+if (nextAcceptanceOverride !== undefined && !nextAcceptance) {
+  throw new Error(`Gate-6 next-acceptance override is not a known card: ${nextAcceptanceOverride}`);
+}
+const nextAcceptanceLabel = nextAcceptance?.label ?? "Broader Gate-6 breadth acceptance";
+const nextAcceptanceDetail = nextAcceptanceOverride === undefined
+  ? nextAcceptance === undefined
+    ? "All committed parameterized request cards are receipted, but that count alone does not meet ROADMAP.md:1604-1613's broader breadth acceptance (finite unsupported-entry closure, distinct effect/hook-family evidence, sibling batches, multiple seeded legal Factory rounds, and selected UI comparisons)."
+    : "Add and document the missing parameterized-oracle receipt before treating this family as accepted."
+  : "Upgrade its legacy receipt note to the compact deterministic semantic workflow.";
+const nextAcceptanceText = `${nextAcceptanceLabel}: ${nextAcceptanceDetail}`;
 
 const sourceInputs = [
   EXECUTABLE_DOC_PATH,
@@ -673,7 +678,7 @@ const markdown: string[] = [
   "",
   "**Gate 6 is OPEN.** This first manifest makes coverage gaps inspectable; it does not turn static token references, opcode reachability, Tier-1 proofs, or staged lab requests into semantic/oracle acceptance.",
   "",
-  `Next bounded acceptance unit: **${nextAcceptance.label}** — ${nextAcceptanceOverride === undefined ? "add and document its missing parameterized-oracle receipt." : "upgrade its legacy receipt note to the compact deterministic semantic workflow."}`,
+  `Next bounded acceptance unit: **${nextAcceptanceLabel}** — ${nextAcceptanceDetail}`,
   "",
   "## Headline",
   "",
@@ -682,7 +687,7 @@ const markdown: string[] = [
   `- Hook universes: **${manifest.summary.hooks.abilities.total} abilities** and **${manifest.summary.hooks.holdEffects.total} hold effects**, including **${manifest.summary.hooks.abilities.zeroFactoryWidened + manifest.summary.hooks.holdEffects.zeroFactoryWidened}** legal widened-scope rows with zero Level-50 Factory carriers.`,
   `- Corpus: **${manifest.summary.corpus.ordinaryTrainers}/${trainers.count} ordinary trainers** and **${manifest.summary.corpus.level50Sets}/${LEVEL50_SET_COUNT} Level-50 sets** joined; the full set catalog contains ${manifest.summary.corpus.fullSetCatalog} rows including Open-only sets.`,
   `- Interaction matrix: **${manifest.summary.interactions.total}** axis-pair rows; ${manifest.summary.interactions.kernelProven} kernel-proven, ${manifest.summary.interactions.oracleReceipted} oracle-receipted, ${manifest.summary.interactions.receiptGaps} receipt gaps.`,
-  `- Parameterized Battle Scene OFF requests: **${manifest.summary.parameterizedOracle.receiptDocumented}/${manifest.summary.parameterizedOracle.scenarioRequests}** scenario receipts documented; **${manifest.summary.parameterizedOracle.receiptGaps}** request-level gaps and **${manifest.summary.parameterizedOracle.familyReceiptGaps}** family-level gaps remain explicit.`,
+  `- Parameterized Battle Scene OFF requests: **${manifest.summary.parameterizedOracle.receiptDocumented}/${manifest.summary.parameterizedOracle.scenarioRequests}** scenario receipts documented; **${manifest.summary.parameterizedOracle.receiptGaps}** request-level gaps and **${manifest.summary.parameterizedOracle.familyReceiptGaps}** family-level gaps remain explicit. Receipt count alone does not close the broader Gate-6 breadth acceptance.`,
   "",
   "## Evidence rules",
   "",
@@ -779,10 +784,14 @@ markdown.push(...table("Gate-6 mechanicLab requests", ["Request", "Card", "Statu
   (row) => evidenceText(row.evidence),
 ]));
 markdown.push("## Explicit receipt gaps\n\n");
-receiptGapCards.forEach((row, index) => {
-  markdown.push(`${index + 1}. **${row.label}** — ${row.notes} Evidence: ${evidenceText(row.evidence)}.`);
-});
-markdown.push("\nThe JSON artifact is the authoritative machine-readable enumeration; this Markdown view intentionally repeats every row so a missing receipt cannot hide behind an aggregate percentage.\n");
+if (receiptGapCards.length === 0) {
+  markdown.push("None — all committed parameterized request cards have completed receipt notes. This does not close the broader Gate-6 breadth acceptance.");
+} else {
+  receiptGapCards.forEach((row, index) => {
+    markdown.push(`${index + 1}. **${row.label}** — ${row.notes} Evidence: ${evidenceText(row.evidence)}.`);
+  });
+}
+markdown.push("\nThe JSON artifact is the authoritative machine-readable enumeration; this Markdown view intentionally repeats every row so neither a missing receipt nor an all-receipted count can hide behind an aggregate percentage.\n");
 
 writeFileSync(JSON_OUTPUT, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 writeFileSync(MARKDOWN_OUTPUT, markdown.join("\n"), "utf8");
@@ -794,5 +803,5 @@ console.log(
     + `L50 moves: ${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}\n`
     + `Hooks: ${manifest.summary.hooks.abilities.total} abilities, ${manifest.summary.hooks.holdEffects.total} hold effects; `
     + `oracle receipts: ${manifest.summary.parameterizedOracle.receiptDocumented}/${manifest.summary.parameterizedOracle.scenarioRequests} scenarios\n`
-    + `Next acceptance unit: ${nextAcceptance.label}. Gate 6 remains OPEN.`,
+    + `Next acceptance unit: ${nextAcceptanceLabel}. Gate 6 remains OPEN.`,
 );

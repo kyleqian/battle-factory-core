@@ -1,0 +1,579 @@
+{
+  "schema": "gate6-r12-off-semantic-receipt/v1",
+  "cardId": "R12",
+  "fixture": "tools/battle-lab/gate6-r12-off.json",
+  "oracleProfile": "battle-scene-off",
+  "seed": 1,
+  "sampledEveryTraceFrame": true,
+  "determinism": {
+    "freshRunCount": 2,
+    "artifactsCompared": [
+      "manifest.json",
+      "frame-*.png sorted by basename",
+      "tools/run-mgba-probe.py compact semantic JSON"
+    ],
+    "ignoredNondeterministicPaths": [],
+    "temporaryOutputDirectoryPrefixesExcludedFromPathNames": true,
+    "manifestSha256": "9d1327b7584a4890fda18dc0fc00a8d33176d7a42c88acc3e5e76f55e2f3242b",
+    "capturePngBasenameSha256": "e2a60afd784484d0f6cdd511b96e938ee90a9fd45ebc591e08190379bf73b699",
+    "compactSemanticReceiptSha256": "381c6fb3aa05d7a3d4bfd90203fc52c63976fc999c60405fd8b3ff8764847ab5",
+    "byteIdentical": true
+  },
+  "parties": {
+    "whiteHerbPinsir": {
+      "species": 127,
+      "item": 180,
+      "abilitySlot": 0,
+      "ability": 52,
+      "moves": [
+        332,
+        332,
+        332,
+        332
+      ]
+    },
+    "leadOpponent": {
+      "species": 303,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 25,
+      "moves": [
+        33,
+        33,
+        33,
+        33
+      ]
+    },
+    "switchInGranbull": {
+      "species": 210,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 22,
+      "moves": [
+        33,
+        33,
+        33,
+        33
+      ]
+    }
+  },
+  "initial": {
+    "rngValue": 919694434,
+    "player": {
+      "partyIndex": 0,
+      "species": 127,
+      "ability": 52,
+      "item": 180,
+      "partyItems": [
+        180,
+        0,
+        0
+      ],
+      "attackStage": 6,
+      "hp": 172,
+      "maxHp": 172,
+      "status1": 0,
+      "status2": 0,
+      "status3": 0,
+      "pp": [
+        20,
+        20,
+        20,
+        20
+      ]
+    },
+    "opponent": {
+      "partyIndex": 0,
+      "species": 303,
+      "ability": 25,
+      "item": 0,
+      "hp": 1,
+      "maxHp": 1,
+      "status1": 0,
+      "status2": 0,
+      "status3": 0,
+      "pp": [
+        35,
+        35,
+        35,
+        35
+      ]
+    },
+    "currentMove": 0,
+    "chosenMoveByBattler": [
+      0,
+      33
+    ],
+    "displayedString": "What will\nPINSIR do?",
+    "controller": {
+      "activeBattler": 2,
+      "execFlags": 1,
+      "playerCommand": 18,
+      "opponentCommand": 53
+    },
+    "framebufferSha256": "e56200f40f98668c9bf5456802857e7d8f7ea55570df9224a51b348985af941a"
+  },
+  "messageEvents": [
+    {
+      "frame": 43,
+      "text": "PINSIR used\nAERIAL ACE!"
+    },
+    {
+      "frame": 373,
+      "text": "Foe SHEDINJA\nfainted!\n"
+    },
+    {
+      "frame": 521,
+      "text": "BLACK BELT SHIZUKA sent\nout GRANBULL!"
+    },
+    {
+      "frame": 742,
+      "text": "PINSIR\u2019s HYPER CUTTER\nprevented Foe GRANBULL\u2019s\nINTIMIDATE from working!"
+    }
+  ],
+  "controllerEvents": [
+    {
+      "frame": 517,
+      "kind": "party-index-selected-before-battle-data-copy",
+      "activeBattler": 1,
+      "execFlags": 2,
+      "playerCommand": 53,
+      "opponentCommand": 0
+    },
+    {
+      "frame": 519,
+      "kind": "incoming-granbull-battle-data-loaded",
+      "activeBattler": 2,
+      "execFlags": 0,
+      "playerCommand": 53,
+      "opponentCommand": 0
+    },
+    {
+      "frame": 742,
+      "kind": "intimidate-prevention-message",
+      "activeBattler": 2,
+      "execFlags": 1,
+      "playerCommand": 16,
+      "opponentCommand": 5
+    },
+    {
+      "frame": 826,
+      "kind": "post-entry-controller-idle",
+      "activeBattler": 2,
+      "execFlags": 0,
+      "playerCommand": 16,
+      "opponentCommand": 5
+    }
+  ],
+  "rngLedger": [
+    {
+      "frame": 68,
+      "randomCalls": 1,
+      "rngBefore": 919694434,
+      "rngAfter": 3690816045,
+      "currentMove": 332,
+      "chosenMoveByBattler": [
+        332,
+        33
+      ]
+    },
+    {
+      "frame": 71,
+      "randomCalls": 1,
+      "rngBefore": 3690816045,
+      "rngAfter": 983229340,
+      "currentMove": 332,
+      "chosenMoveByBattler": [
+        332,
+        33
+      ]
+    },
+    {
+      "frame": 287,
+      "randomCalls": 1,
+      "rngBefore": 983229340,
+      "rngAfter": 3421819359,
+      "currentMove": 332,
+      "chosenMoveByBattler": [
+        332,
+        33
+      ]
+    },
+    {
+      "frame": 901,
+      "randomCalls": 1,
+      "rngBefore": 3421819359,
+      "rngAfter": 1621732966,
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        0,
+        0
+      ]
+    },
+    {
+      "frame": 908,
+      "randomCalls": 4,
+      "rngBefore": 1621732966,
+      "rngAfter": 3034451114,
+      "currentMove": 33,
+      "chosenMoveByBattler": [
+        0,
+        0
+      ]
+    },
+    {
+      "frame": 911,
+      "randomCalls": 1,
+      "rngBefore": 3034451114,
+      "rngAfter": 2682491093,
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        0,
+        0
+      ]
+    }
+  ],
+  "checkpoints": {
+    "leadFainted": {
+      "frame": 197,
+      "rngValue": 983229340,
+      "player": {
+        "partyIndex": 0,
+        "species": 127,
+        "ability": 52,
+        "item": 180,
+        "partyItems": [
+          180,
+          0,
+          0
+        ],
+        "attackStage": 6,
+        "hp": 172,
+        "maxHp": 172,
+        "status1": 0,
+        "status2": 0,
+        "status3": 0,
+        "pp": [
+          19,
+          20,
+          20,
+          20
+        ]
+      },
+      "opponent": {
+        "partyIndex": 0,
+        "species": 303,
+        "ability": 25,
+        "item": 0,
+        "hp": 0,
+        "maxHp": 1,
+        "status1": 0,
+        "status2": 0,
+        "status3": 0,
+        "pp": [
+          35,
+          35,
+          35,
+          35
+        ]
+      },
+      "currentMove": 332,
+      "chosenMoveByBattler": [
+        332,
+        33
+      ],
+      "displayedString": "PINSIR used\nAERIAL ACE!",
+      "controller": {
+        "activeBattler": 2,
+        "execFlags": 0,
+        "playerCommand": 2,
+        "opponentCommand": 2
+      },
+      "framebufferSha256": "569afd81565d6f122839f683e4aeaa8dc2c15ebc88954d6493e3c3644efd47d0"
+    },
+    "granbullPartyIndexSelected": {
+      "frame": 517,
+      "rngValue": 3421819359,
+      "player": {
+        "partyIndex": 0,
+        "species": 127,
+        "ability": 52,
+        "item": 180,
+        "partyItems": [
+          180,
+          0,
+          0
+        ],
+        "attackStage": 6,
+        "hp": 172,
+        "maxHp": 172,
+        "status1": 0,
+        "status2": 0,
+        "status3": 0,
+        "pp": [
+          19,
+          20,
+          20,
+          20
+        ]
+      },
+      "opponent": {
+        "partyIndex": 1,
+        "species": 303,
+        "ability": 0,
+        "item": 0,
+        "hp": 0,
+        "maxHp": 1,
+        "status1": 0,
+        "status2": 0,
+        "status3": 0,
+        "pp": [
+          35,
+          35,
+          35,
+          35
+        ]
+      },
+      "currentMove": 332,
+      "chosenMoveByBattler": [
+        332,
+        33
+      ],
+      "displayedString": "Foe SHEDINJA\nfainted!\n",
+      "controller": {
+        "activeBattler": 1,
+        "execFlags": 2,
+        "playerCommand": 53,
+        "opponentCommand": 0
+      },
+      "framebufferSha256": "b77a0812a2b5dc1ae610068131421332adb47474ed04b060edde8bccc127cc32"
+    },
+    "granbullEntryDataLoaded": {
+      "frame": 519,
+      "rngValue": 3421819359,
+      "player": {
+        "partyIndex": 0,
+        "species": 127,
+        "ability": 52,
+        "item": 180,
+        "partyItems": [
+          180,
+          0,
+          0
+        ],
+        "attackStage": 6,
+        "hp": 172,
+        "maxHp": 172,
+        "status1": 0,
+        "status2": 0,
+        "status3": 0,
+        "pp": [
+          19,
+          20,
+          20,
+          20
+        ]
+      },
+      "opponent": {
+        "partyIndex": 1,
+        "species": 210,
+        "ability": 22,
+        "item": 0,
+        "hp": 165,
+        "maxHp": 165,
+        "status1": 0,
+        "status2": 0,
+        "status3": 0,
+        "pp": [
+          35,
+          35,
+          35,
+          35
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        332,
+        33
+      ],
+      "displayedString": "Foe SHEDINJA\nfainted!\n",
+      "controller": {
+        "activeBattler": 2,
+        "execFlags": 0,
+        "playerCommand": 53,
+        "opponentCommand": 0
+      },
+      "framebufferSha256": "b77a0812a2b5dc1ae610068131421332adb47474ed04b060edde8bccc127cc32"
+    },
+    "granbullIntimidatePrevention": {
+      "frame": 742,
+      "rngValue": 3421819359,
+      "player": {
+        "partyIndex": 0,
+        "species": 127,
+        "ability": 52,
+        "item": 180,
+        "partyItems": [
+          180,
+          0,
+          0
+        ],
+        "attackStage": 6,
+        "hp": 172,
+        "maxHp": 172,
+        "status1": 0,
+        "status2": 0,
+        "status3": 0,
+        "pp": [
+          19,
+          20,
+          20,
+          20
+        ]
+      },
+      "opponent": {
+        "partyIndex": 1,
+        "species": 210,
+        "ability": 22,
+        "item": 0,
+        "hp": 165,
+        "maxHp": 165,
+        "status1": 0,
+        "status2": 0,
+        "status3": 0,
+        "pp": [
+          35,
+          35,
+          35,
+          35
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        332,
+        33
+      ],
+      "displayedString": "PINSIR\u2019s HYPER CUTTER\nprevented Foe GRANBULL\u2019s\nINTIMIDATE from working!",
+      "controller": {
+        "activeBattler": 2,
+        "execFlags": 1,
+        "playerCommand": 16,
+        "opponentCommand": 5
+      },
+      "framebufferSha256": "6f271574417f7be28c8fdff746cf38af0d146d06d99ef428d43475bc11c89ebf"
+    },
+    "postEntrySettled": {
+      "frame": 826,
+      "rngValue": 3421819359,
+      "player": {
+        "partyIndex": 0,
+        "species": 127,
+        "ability": 52,
+        "item": 180,
+        "partyItems": [
+          180,
+          0,
+          0
+        ],
+        "attackStage": 6,
+        "hp": 172,
+        "maxHp": 172,
+        "status1": 0,
+        "status2": 0,
+        "status3": 0,
+        "pp": [
+          19,
+          20,
+          20,
+          20
+        ]
+      },
+      "opponent": {
+        "partyIndex": 1,
+        "species": 210,
+        "ability": 22,
+        "item": 0,
+        "hp": 165,
+        "maxHp": 165,
+        "status1": 0,
+        "status2": 0,
+        "status3": 0,
+        "pp": [
+          35,
+          35,
+          35,
+          35
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        332,
+        33
+      ],
+      "displayedString": "PINSIR\u2019s HYPER CUTTER\nprevented Foe GRANBULL\u2019s\nINTIMIDATE from working!",
+      "controller": {
+        "activeBattler": 2,
+        "execFlags": 0,
+        "playerCommand": 16,
+        "opponentCommand": 5
+      },
+      "framebufferSha256": "b98f0247107cb59bac2f2826478ab07c9e8d4f74bbade7bcfaf425791859a0c4"
+    }
+  },
+  "final": {
+    "rngValue": 2682491093,
+    "player": {
+      "partyIndex": 0,
+      "species": 127,
+      "ability": 52,
+      "item": 180,
+      "partyItems": [
+        180,
+        0,
+        0
+      ],
+      "attackStage": 6,
+      "hp": 172,
+      "maxHp": 172,
+      "status1": 0,
+      "status2": 0,
+      "status3": 0,
+      "pp": [
+        19,
+        20,
+        20,
+        20
+      ]
+    },
+    "opponent": {
+      "partyIndex": 1,
+      "species": 210,
+      "ability": 22,
+      "item": 0,
+      "hp": 165,
+      "maxHp": 165,
+      "status1": 0,
+      "status2": 0,
+      "status3": 0,
+      "pp": [
+        35,
+        35,
+        35,
+        35
+      ]
+    },
+    "currentMove": 0,
+    "chosenMoveByBattler": [
+      0,
+      33
+    ],
+    "displayedString": "What will\nPINSIR do?",
+    "controller": {
+      "activeBattler": 2,
+      "execFlags": 1,
+      "playerCommand": 18,
+      "opponentCommand": 53
+    },
+    "framebufferSha256": "8162e305ad5b373256b5ff9434f9b52299ceecf2ae073b05fca3650f9a33c40c"
+  }
+}

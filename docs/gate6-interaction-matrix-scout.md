@@ -85,7 +85,7 @@ the state transition.
 | volatile x immunity/absorb | Semi-invulnerable state blocks ordinary targeting; it also suppresses weather chip only underground/underwater (`battle_script_commands.c:1062-1085,7606-7635`). | `tests/battleScriptDamagingWeatherOpcode.test.ts`; `tests/gate6R2Receipt.test.ts` | R2 compact OFF receipt (shared with weather). |
 | held-item x ability | Entry/fainted-action orchestration invokes Intimidate/Trace before normal item effects, so an Intimidate-created negative stage can feed White Herb (`battle_util.c:1959-1964,3305-3329`). Pinsir cannot demonstrate that interaction: its sole legal ability is Hyper Cutter, which prevents Intimidate's Attack drop before the item can activate (`species_info.h:3819-3843`). | `tests/battleScriptSwitchinOpcode.test.ts` (Intimidate/Trace); `tests/battleScriptMoveEndOpcode.test.ts` (item effects) | R12 is the Pinsir prevention control; R12b uses legal White Herb Machamp (Guts) for the activation/order/consumption proof. |
 | held-item x stat-stage | White Herb restores every negative stage, and threshold berries raise a stage only below the cap (`battle_util.c:3383-3398,3431-3496`). | `tests/battleScriptMoveEndOpcode.test.ts` (item activation); `tests/gate6KernelInteractions.test.ts` (K6: Liechi/Salac/Petaya parameterized across stages 0/5/6/10/11/12 — activation only below the +6 cap; White Herb restores all negative stages exactly once and stays held when nothing is restorable; Ganlon/Apicot stay excluded as zero-carrier); `tests/gate6R9Receipt.test.ts` (positive-stage guard) | K6/R9/R12b complete: R9's +2 Swagger result proves that White Herb stays held when no negative stage exists. |
-| held-item x switching/entry | White Herb has an explicit switch-in handler that normalizes negative stages (`battle_util.c:3305-3329`); a normal switch reconstructs the party item unless Knock Off recorded it (`battle_script_commands.c:4637-4646`). | `tests/battleScriptSwitchinOpcode.test.ts` (item reconstruction) | R12 oracle. |
+| held-item x switching/entry | White Herb has an explicit switch-in handler that normalizes negative stages (`battle_util.c:3305-3329`); a normal switch reconstructs the party item unless Knock Off recorded it (`battle_script_commands.c:4637-4646`). | `tests/battleScriptSwitchinOpcode.test.ts` (item reconstruction); `tests/gate6R12Receipt.test.ts` | R12 complete: Hyper Cutter prevents Granbull's entry drop before White Herb has a negative stage to restore, so both battle and party item copies remain held. |
 | held-item x immunity/absorb | No held-item branch changes an ability/type absorb result in Gen III; item effects run only after damage/effect eligibility.  Absorb handler is ability-only (`battle_util.c:2676-2747`) and item dispatch is separate (`3257-3330`). | `tests/gate6EntryItemInteractions.test.ts` (K7: all three matching redirects preserve Sitrus before damage/item dispatch) | Closed by K7; no new ROM fixture needed. |
 | ability x stat-stage | Clear Body/White Smoke block most preventable drops; Keen Eye blocks accuracy and Hyper Cutter Attack specifically; Intimidate creates an Attack drop (`battle_script_commands.c:6975-7038`; `battle_util.c:3003-3087`). | `tests/battleScriptStatbuffchangeOpcode.test.ts` (Clear Body/White Smoke/Keen Eye/Hyper Cutter specificity); `tests/battleScriptSwitchinOpcode.test.ts` (Intimidate blockers); `tests/gate6EntryItemInteractions.test.ts` (R13 Pidgeot pair) | R13 fixture receipts the paired Keen Eye-specific block and unrelated Intimidate Attack drop. |
 | ability x switching/entry | Switch-in scan queues weather, Intimidate, Trace, and Forecast; Natural Cure is the distinct switch-out hook (`battle_util.c:1959-1964,2485-2596`; `battle_script_commands.c:9590-9604`). | `tests/battleScriptSwitchinOpcode.test.ts` | R6/R12/R13 cover legal ordered combinations. |
@@ -113,7 +113,7 @@ are legal inert duplicates with `[Tackle,Tackle,Tackle,Tackle]`.
 | R9 | `gate6-r9-off.json`: Lum Machamp takes the first Gengar Swagger, then the ordinary party picker switches to White Herb Machamp for the second. | Lum removes confusion but not the +2 Attack boost; White Herb has no negative stage to restore, so it remains held while both +2 Attack and confusion persist (`battle_util.c:3739-3755`). |
 | R10 | `gate6-r10-attract-off.json`: male Oblivious Lickitung versus female Gardevoir Attract x4; `gate6-r10-attract-control-off.json` changes only Lickitung to Own Tempo. `gate6-r10-perish-song-off.json`: Soundproof Exploud versus Lapras Perish Song x4. | Attraction is rejected with its distinct ability message while the compatible control is affected; Perish Song skips only Soundproof and still marks its ordinary user. |
 | R11 | A: Ninjask Substitute then Baton Pass; bench: recipient. B: passive Tackle x4. Repeat ordinary manual switch. | Baton Pass retains intended status2/stages; ordinary switch clears them. |
-| R12 | A: White Herb Pinsir (sole ability Hyper Cutter); B: Granbull Intimidate x4; switch Granbull in after initial player action. | Prevention control: Hyper Cutter blocks the Attack cut, so White Herb does not activate or get consumed. |
+| R12 | A: White Herb Pinsir (sole ability Hyper Cutter); initial B: one-HP Shedinja, then party-index-1 Granbull Intimidate x4 enters after the legal Aerial Ace knockout. | Compact OFF receipt: the controller selects the incoming party index before copying Granbull's battle data; Hyper Cutter then blocks the Attack cut, so White Herb does not activate or get consumed. |
 | R12b | A: White Herb Machamp (sole ability Guts); B enters as Granbull Intimidate with Tackle x4 after an initial action. | Viable interaction: Attack 6→5, Intimidate message, White Herb restore 5→6, herb message, then item consumption. |
 | R13 | A: Pidgeot Keen Eye with Tackle x4; B: Granbull Intimidate with Sand-Attack x4 (`gate6-r13-off.json`). | The entry hook lowers Attack 6→5; Sand-Attack then prints the Keen Eye-specific prevention message and leaves accuracy 6. Hyper Cutter×Intimidate and White Smoke×Intimidate are already kernel-pinned controls. |
 | R14 | No new fixture: `docs/absorbing-abilities-ground-truth.md` already proves the source family and banks Volt Absorb OFF-ROM receipts; the kernel has matching/nonmatching typed controls for Volt/Water Absorb and Flash Fire. | Existing pins cover zero direct damage, exact quarter-heal/minimum/cap behavior, full-HP bypass, first/repeat Flash Fire state, and later Fire damage. K7 adds the previously missing held-item dispatch boundary. |
@@ -235,6 +235,64 @@ the departing party slot (`battle_script_commands.c:9590-9604`,
 its type/ability (`battle_script_commands.c:4621-4657`). The checked-in
 captures already hit each semantic boundary, so no fixture cadence or capture
 was altered.
+
+### R12 — Pinsir Hyper Cutter prevention on a real Granbull replacement
+
+`gate6-r12-off.json` already has the required complete legal three-mon
+parties and ordinary stock-ROM controller staging, so its fixture was not
+altered. White Herb Pinsir is player party index 0 with its only legal ability
+slot (Hyper Cutter, semantic ability `52`) and four Aerial Ace slots. The
+one-HP lead gives that legal move a deterministic knockout; opponent party
+index 1 is Granbull (species `210`, Intimidate ability `22`) with four Tackle
+slots. No HP, stage, status, item, weather, outcome, or entry state is
+injected.
+
+Two fresh Battle Scene OFF `bin/oracle lab` trees are byte-identical over
+every generated artifact: `manifest.json` has SHA-256
+`9d1327b7584a4890fda18dc0fc00a8d33176d7a42c88acc3e5e76f55e2f3242b`,
+and the sorted `frame-*.png` basename/hash tree has SHA-256
+`e2a60afd784484d0f6cdd511b96e938ee90a9fd45ebc591e08190379bf73b699`.
+Two fresh wrapper-validated, every-frame mGBA probes are likewise
+byte-identical (`381c6fb3aa05d7a3d4bfd90203fc52c63976fc999c60405fd8b3ff8764847ab5`).
+Only fresh temporary-output directory prefixes are normalized; no artifact
+path or semantic field is excluded. The committed compact receipt is
+`tools/probe/receipts/gate6-r12-off.json`, regenerated by
+`tools/probe/probe-gate6-r12-off.py` through `tools/run-mgba-probe.py` and
+hermetically pinned in `tests/gate6R12Receipt.test.ts`.
+
+The receipt preserves the actual controller/entry order rather than reducing
+the result to an endpoint. Aerial Ace faints the initial lead at frame `197`
+with Pinsir still at Attack stage `6`, battle and party White Herb item `180`,
+HP `172/172`, and all three status fields zero. At frame `517` the stock
+controller selects opponent party index `1` before copying incoming battle
+data: its active record is still the fainted lead, while controller fields are
+`activeBattler=1`, `execFlags=2`, player command `53`, opponent command `0`.
+At frame `519` the copied record is Granbull (`species=210`,
+`ability=22`, HP `165/165`) and Pinsir still has ability `52`, Attack `6`,
+both item copies `180`, and no status.
+
+The ordered relevant messages are Aerial Ace (frame `43`), lead faint
+(`373`), Granbull send-out (`521`), then exactly
+`PINSIR’s HYPER CUTTER / prevented Foe GRANBULL’s / INTIMIDATE from working!`
+at frame `742`. That prevention snapshot has `execFlags=1`; by frame `826`
+the entry controller is idle (`execFlags=0`) with the same Granbull and the
+same Pinsir item, stage, HP, and zero-status state. No sampled message names
+White Herb, and the final frame still has both Pinsir's active and persistent
+party item fields at `180`. The complete RNG ledger is in the receipt: draws
+occur at `68`, `71`, `287`, `901`, `908`, and `911`; the entry/prevention
+window holds RNG at `3421819359`, so neither Hyper Cutter prevention nor the
+non-activation of White Herb adds a draw.
+
+This is the source condition, not merely a preserved endpoint:
+`BattleScript_IntimidateActivates` checks `ABILITY_HYPER_CUTTER` before
+`statbuffchange` and branches to `BattleScript_IntimidatePrevented`
+(`data/battle_scripts_1.s:4024-4048`). Switch-in processing runs Intimidate
+before item effects (`battle_main.c:3880-3894`), while White Herb's
+`HOLD_EFFECT_RESTORE_STATS` only becomes an item effect after it finds a stage
+below neutral (`battle_util.c:3305-3329`). Pinsir's source entry has Hyper
+Cutter as its sole ability (`species_info.h:3819-3843`). R12 is therefore the
+prevention control; R12b below remains the distinct legal Guts Machamp proof
+of the opposite activation/order/consumption path.
 
 ### R12b — Granbull Intimidate, Guts Machamp, and White Herb entry order
 
@@ -719,20 +777,16 @@ Each line is one bounded worker slice, not an instruction to create all traces
 at once.  Use a fresh `mktemp -d` output directory and retain only the checked
 in scenario/evidence once accepted.
 
-R2 now uses the compact deterministic semantic workflow used by R3 and R9.
-R12 remains the separately named fixture-only prevention-control gap; it is
-not silently classified as closed.
+R2 now uses the compact deterministic semantic workflow used by R3, R9, and
+R12. All committed parameterized R-card requests now have deterministic
+semantic receipts; R12 was the final separately named prevention-control
+gap, and it remains distinct from R12b's activation receipt.
 
-1. **R12 — Pinsir's Hyper Cutter prevention control remains fixture-only.** `bin/oracle lab tools/battle-lab/gate6-r12-off.json -o "$(mktemp -d)"; add a deterministic OFF receipt that proves the prevention branch without promoting R12b's separate White Herb activation proof.
-2. **R11 — Baton Pass versus ordinary-switch volatile/stage retention.** `bin/oracle lab tools/battle-lab/gate6-r11-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts; npm run build`
-3. **R6 — Toxic x Natural Cure switch-out persistence.** `bin/oracle lab tools/battle-lab/gate6-r6-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts tests/battleScriptMoveEndOpcode.test.ts; npm run build`
-4. **R15 — CLOSED by the three-layer Flying/Levitate/grounded receipt above.**
-5. **R3 — CLOSED by the legal Golduck → neutral Rattata switch and Castform Forecast/Weather Ball receipt.** See the completed receipt note above and `tools/probe/receipts/gate6-r3-off.json`.
-6. **R9 — CLOSED by the legal Lum cure/consumption then White Herb held-confusion receipt.** See the completed receipt note above and `tools/probe/receipts/gate6-r9-off.json`.
-7. **R13 — Intimidate x stat-drop prevention specificity.** `bin/oracle lab tools/battle-lab/gate6-r13-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptStatbuffchangeOpcode.test.ts tests/battleScriptSwitchinOpcode.test.ts; npm run build`
-8. **R14 — CLOSED by the banked absorption program plus K7's Gate-6 pair pin.** See the completed receipt note above; intentionally no duplicate `gate6-r14-off.json`.
-9. **R5 — sleep/confusion x Chesto/Lum exact cure timing.** `bin/oracle lab tools/battle-lab/gate6-r5-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptMoveEndOpcode.test.ts; npm run build`
-10. **R1 — CLOSED by the paired sun/control fixtures, two freeze-producing seeds, exact RNG ledgers, and existing kernel pair.**
+There is no next R-card acceptance unit. This is not a Gate-6 closure claim:
+the broader breadth acceptance remains the Roadmap's finite
+unsupported-entry closure, per distinct effect/hook-family evidence and
+sibling batches, multiple seeded legal Factory rounds, and selected UI
+comparisons (`ROADMAP.md:1604-1613`).
 
 All seven kernel-first cards are now closed: K1 (end-turn item/weather
 order), K2 (weather-stage accuracy — caught and fixed a real accuracy-check
@@ -740,5 +794,6 @@ weather defect, `450cf532`), K3 (major/volatile canceler ordering), K4
 (status modifiers at fixed stages), K5 (Swagger/Foresight), and K6 (White
 Herb cap/reset) all live in `tests/gate6KernelInteractions.test.ts`
 (2026-07-30); K7 was closed above without inflated oracle work. With
-R2/R3/R7/R8/R9 receipted and R4 already complete, the next acceptance unit is
-R12's separately explicit fixture-only prevention-control gap.
+R2/R3/R7/R8/R9/R12 are receipted and R4 is already complete. The compact
+receipt queue is exhausted; the broader Gate-6 breadth acceptance remains
+open for the separate Roadmap conditions above.

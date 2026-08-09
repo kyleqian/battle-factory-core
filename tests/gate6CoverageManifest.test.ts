@@ -146,7 +146,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(() => assertManifestContract(falseClosure)).toThrow();
   });
 
-  it("keeps the widened zero-Factory scope and the remaining R12 receipt gap inspectable", () => {
+  it("keeps the widened zero-Factory scope, distinct R12/R12b receipts, and broader Gate-6 gap inspectable", () => {
     const manifest = readManifest();
     const sections = record(manifest.sections);
     const hookSections = record(sections.hooks);
@@ -181,12 +181,13 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(r2).toHaveLength(2);
     expect(r2.map((scenario) => scenario.captureCount).sort((a, b) => Number(a) - Number(b))).toEqual([14, 17]);
     for (const scenario of r2) expect(scenario.status).toBe("oracle-receipted");
-    expect(r12).toMatchObject({ status: "fixture-only-no-committed-receipt", captureCount: 10 });
-    expect(oracle.receiptDocumented).toBe(23);
-    expect(oracle.receiptGaps).toBe(1);
-    expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^R12:/);
+    expect(r12).toMatchObject({ status: "oracle-receipted", captureCount: 10 });
+    expect(oracle.receiptDocumented).toBe(24);
+    expect(oracle.receiptGaps).toBe(0);
+    expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Broader Gate-6 breadth acceptance:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/23\/24.*scenario receipts documented; \*\*1\*\* request-level gaps/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/fixture-only-no-committed-receipt/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/24\/24.*scenario receipts documented; \*\*0\*\* request-level gaps/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Receipt count alone does not close the broader Gate-6 breadth acceptance/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).not.toMatch(/fixture-only-no-committed-receipt/);
   });
 });
