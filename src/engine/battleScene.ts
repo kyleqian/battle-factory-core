@@ -915,6 +915,7 @@ import {
   sceneOnAgilityView,
   sceneOnDizzyPunchView,
   sceneOnAstonishView,
+  sceneOnFakeOutView,
   sceneOnSwaggerView,
   sceneOnBulkUpView,
   sceneOnTauntView,
@@ -1032,6 +1033,7 @@ import {
   type SceneOnAgilityPresentationState,
   type SceneOnDizzyPunchConfig,
   type SceneOnAstonishConfig,
+  type SceneOnFakeOutConfig,
   type SceneOnCrabHammerConfig,
 } from "../animation/sceneOnPresentation.ts";
 import { refreshDisplayedBlendCoeffAtAge, REFRESH_BLEND_START_AGE } from "../animation/refresh.ts";
@@ -5264,6 +5266,31 @@ function blendPaletteBanksToward(
   coeff: number,
 ): RgbColor[][] {
   return palettes.map((palette) => blendPaletteToward(palette, target, coeff));
+}
+
+/**
+ * Apply a GBA WIN0 horizontal-range darken to an already-composited BG
+ * layer. `WIN_RANGE(left, right)` includes left and excludes right; an
+ * empty or wrapped range selects no pixels. Callers pass only the hardware
+ * blend target layer, so OBJ and interface layers remain unaffected.
+ */
+export function darkenOutsideHorizontalWindow(
+  bg: Uint8Array,
+  win0h: number,
+  coefficient: number,
+): void {
+  const left = (win0h >>> 8) & 0xff;
+  const right = win0h & 0xff;
+  for (let y = 0; y < 160; y += 1) {
+    for (let x = 0; x < 240; x += 1) {
+      if (left < right && x >= left && x < right) continue;
+      const offset = (y * 240 + x) * 4;
+      if (bg[offset + 3] === 0) continue;
+      bg[offset] = blendComponentToward(bg[offset]!, 0, coefficient);
+      bg[offset + 1] = blendComponentToward(bg[offset + 1]!, 0, coefficient);
+      bg[offset + 2] = blendComponentToward(bg[offset + 2]!, 0, coefficient);
+    }
+  }
 }
 
 function drawAromatherapyCureMask(
@@ -17459,6 +17486,152 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LOUDRED used" : "Foe LOUDRED used",
       "ASTONISH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FAKE_OUT") {
+    const fakeOutState =
+      state as SceneOnMovePresentationState<SceneOnFakeOutConfig>;
+    const view = sceneOnFakeOutView(fakeOutState);
+    // BuildOamBuffer precedes RunTasks. Sprite position therefore scans out
+    // from reducer age -1, while StretchTargetUp's affine matrix reaches
+    // hardware one additional display later (measured independently in both
+    // legal orientations). Background palette DMA is one display behind the
+    // source palette blend after the initial task-controlled white flash.
+    const displayed = sceneOnFakeOutView({
+      ...fakeOutState,
+      age: fakeOutState.age - 1,
+    });
+    const affineDisplayed = sceneOnFakeOutView({
+      ...fakeOutState,
+      age: fakeOutState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "MAKUHITA"
+      && view.attacker.geometry.side === "player"
+      && view.targetBattler.species === "SHUCKLE"
+      && view.targetBattler.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MAKUHITA"
+      && view.attacker.geometry.side === "opponent"
+      && view.targetBattler.species === "SHUCKLE"
+      && view.targetBattler.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FAKE_OUT pair `
+        + `${view.attacker.species}->${view.targetBattler.species}`,
+      );
+    }
+
+    const makuhitaSource = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAKUHITA!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAKUHITA!;
+    const makuhita = playerToOpponent ? makuhitaSource : {
+      ...makuhitaSource,
+      tileset: subTileset(makuhitaSource.tileset, 0, 8),
+    };
+    const shuckleSource = playerToOpponent
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SHUCKLE!
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SHUCKLE!;
+    const shuckle = playerToOpponent ? {
+      ...shuckleSource,
+      tileset: subTileset(shuckleSource.tileset, 0, 8),
+    } : shuckleSource;
+    const white = { r: 255, g: 255, b: 255 };
+    const bgWhiteCoefficient = fakeOutState.age === 16
+      ? view.bgWhiteCoeff : displayed.bgWhiteCoeff;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        white,
+        bgWhiteCoefficient,
+      ),
+    );
+    if (view.bgMode === "darken") {
+      darkenOutsideHorizontalWindow(fb, view.displayedWin0H, view.bgBldy);
+    }
+
+    if (displayed.target.stretchActive) {
+      // StretchTargetUp prepares affine-double OAM after the earlier
+      // ShakeMon2 task has written its first x2. That first setup scanout
+      // therefore carries RAM+1 x2; subsequent BuildOamBuffer scanouts carry
+      // ShakeMon2 at its independently measured RAM+2 latch.
+      const affineX2 = affineDisplayed.target.stretchActive
+        ? affineDisplayed.target.x2
+        : displayed.target.x2;
+      drawSpriteSheetAffineStretch(
+        fb,
+        shuckle.tileset,
+        shuckle.palette,
+        view.targetBattler.geometry.spriteCorner.x,
+        view.targetBattler.geometry.spriteCorner.y,
+        affineDisplayed.target.matrix.a,
+        affineDisplayed.target.matrix.d,
+        affineDisplayed.target.y2,
+        { r: 0, g: 0, b: 0 },
+        0,
+        true,
+        affineX2,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        shuckle.tileset,
+        shuckle.palette,
+        view.targetBattler.geometry.spriteCorner.x,
+        view.targetBattler.geometry.spriteCorner.y,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      makuhita.tileset,
+      makuhita.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "MAKUHITA",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MAKUHITA" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MAKUHITA used" : "Foe MAKUHITA used",
+      "FAKE OUT!",
       99,
     );
     return;

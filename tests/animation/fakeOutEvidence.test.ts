@@ -6,10 +6,10 @@ import player from "../../tools/compare/fixtures/fake-out-player-makuhita-oppone
 import opponent from "../../tools/compare/fixtures/fake-out-opponent-makuhita-player-shuckle.json" with { type: "json" };
 import frontierMons from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 
-describe("MOVE_FAKE_OUT bilateral evidence checkpoint", () => {
+describe("MOVE_FAKE_OUT bilateral exact evidence", () => {
   it("pins complete dense source windows and deterministic receipts", () => {
-    expect(player).toMatchObject({ oracleProfile:"battle-scene-on", moveId:252, targetPictureYOffset:9, sourceWindow:{startFrame:76,endFrame:161,frameCount:86}, acceptance:{status:"unsupported",componentEvidence:86,productionReducer:true,typedSeam:true,productionCompositor:false,framebufferMatching:0} });
-    expect(opponent).toMatchObject({ oracleProfile:"battle-scene-on", moveId:252, targetPictureYOffset:11, sourceWindow:{startFrame:80,endFrame:165,frameCount:86}, acceptance:{status:"unsupported",componentEvidence:86,productionReducer:true,typedSeam:true,productionCompositor:false,framebufferMatching:0} });
+    expect(player).toMatchObject({ oracleProfile:"battle-scene-on", moveId:252, targetPictureYOffset:9, sourceWindow:{startFrame:78,endFrame:163,frameCount:86}, acceptance:{status:"exact",componentEvidence:86,productionReducer:true,typedSeam:true,relevantHardware:86,productionCompositor:true,framebufferMatching:86} });
+    expect(opponent).toMatchObject({ oracleProfile:"battle-scene-on", moveId:252, targetPictureYOffset:11, sourceWindow:{startFrame:82,endFrame:167,frameCount:86}, acceptance:{status:"exact",componentEvidence:86,productionReducer:true,typedSeam:true,relevantHardware:86,productionCompositor:true,framebufferMatching:86} });
     for (const fixture of [player, opponent]) {
       expect(fixture.sourceBounds).toEqual({start:"0x082d3f2e",endExclusive:"0x082d3f69"});
       expect(createHash("sha256").update(readFileSync(fixture.changeMap)).digest("hex")).toBe(fixture.changeMapSha256);

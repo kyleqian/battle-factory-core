@@ -5,7 +5,7 @@
   "seed": 305419897,
   "overrides": {"parties": {
     "player": [
-      {"species":296,"level":50,"nature":6,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":255,"attack":255,"defense":0,"speed":0,"spAttack":0,"spDefense":0},"moves":[252,252,252,252],"ppUps":[0,0,0,0],"item":198,"abilitySlot":0,"friendship":70,"gender":"male","shiny":false},
+      {"species":335,"level":50,"nature":6,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":255,"attack":255,"defense":0,"speed":0,"spAttack":0,"spDefense":0},"moves":[252,252,252,252],"ppUps":[0,0,0,0],"item":198,"abilitySlot":0,"friendship":70,"gender":"male","shiny":false},
       {"species":67,"level":50,"nature":3,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":255,"attack":0,"defense":0,"speed":0,"spAttack":0,"spDefense":255},"moves":[252,252,252,252],"ppUps":[0,0,0,0],"item":0,"abilitySlot":0,"friendship":70,"gender":"male","shiny":false},
       {"species":159,"level":50,"nature":6,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":0,"attack":255,"defense":0,"speed":0,"spAttack":255,"spDefense":0},"moves":[252,252,252,252],"ppUps":[0,0,0,0],"item":0,"abilitySlot":0,"friendship":70,"gender":"male","shiny":false}
     ],

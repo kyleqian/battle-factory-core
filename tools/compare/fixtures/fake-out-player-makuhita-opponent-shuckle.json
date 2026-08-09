@@ -2,11 +2,11 @@
  "schema":"scene-on-portable-evidence/v1","oracleProfile":"battle-scene-on",
  "scenario":"tools/battle-lab/mechanic-fake-out-player-makuhita-opponent-shuckle.json","probe":"tools/compare/fakeOutProbe.py",
  "move":"FAKE_OUT","moveId":252,"orientation":"player-back-to-opponent-front",
- "sourceWindow":{"startFrame":76,"endFrame":161,"frameCount":86},
+ "sourceWindow":{"startFrame":78,"endFrame":163,"frameCount":86},
  "sourceBounds":{"start":"0x082d3f2e","endExclusive":"0x082d3f69"},
- "probeJsonSha256":"9c63faf759ad9e40f11e592795375b116ad364c700de314685f8cccc247cea5a",
- "rawRgbSha256":"7112a4bb9bd33d1fa303e0842b2eb12935e2e4d094032036a5ede3b67715d440",
- "changeMap":"tools/compare/evidence/fake-out-changemap-player.txt","changeMapSha256":"0d14f73088e144bf27b51438ea6228930622bb59e1b6d4ca152f597ed47d9efa",
- "freshRuns":2,"freshProbeAndRgbEquality":true,"acceptance":{"status":"unsupported","componentEvidence":86,"productionReducer":true,"typedSeam":true,"productionCompositor":false,"framebufferMatching":0},
- "targetPictureYOffset":9,"receipt":"Complete dense stock-ROM source/task/OAM/register/palette/audio/raw-RGB evidence through first inactive cleanup; reducer/seam checkpoint only."
+ "probeJsonSha256":"38f74114fad7195ea26da329214ba837b2c48da39470a08b2ef700880a3fe76e",
+ "rawRgbSha256":"e43d4eb00b1a46961d227ebab82df7555d71d48410905da8cfb2034156673c9f",
+ "changeMap":"tools/compare/evidence/fake-out-changemap-player.txt","changeMapSha256":"65db300ac18fc2118181d930920a600bfe4cd1055453f4a09218372f5d1b8082",
+ "freshRuns":2,"freshProbeAndRgbEquality":true,"acceptance":{"status":"exact","componentEvidence":86,"productionReducer":true,"typedSeam":true,"relevantHardware":86,"productionCompositor":true,"framebufferMatching":86},
+ "targetPictureYOffset":9,"receipt":"Complete dense stock-ROM source/task/OAM/register/palette/audio/raw-RGB evidence through first inactive cleanup; exact through the typed production seam."
 }

@@ -8,6 +8,7 @@ import {
   createSceneOnMovePresentation,
   sceneOnFakeOutView,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { darkenOutsideHorizontalWindow } from "../../src/engine/battleScene.ts";
 
 describe("MOVE_FAKE_OUT source reducer", () => {
   it("ports the WIN0H shutter and independently measured display latch", () => {
@@ -66,5 +67,27 @@ describe("MOVE_FAKE_OUT source reducer", () => {
       target: { x2: 0, y2: -23, matrix: { a: 356, d: 126 } },
     });
     expect(FAKE_OUT_FRAME_COUNT).toBe(86);
+  });
+
+  it("applies WIN0H's inclusive-left/exclusive-right mask to the BG layer", () => {
+    const bg = new Uint8Array(240 * 160 * 4);
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      bg.set([132, 148, 66, 255], pixel * 4);
+    }
+    darkenOutsideHorizontalWindow(bg, (13 << 8) | 227, 16);
+    const pixel = (x: number, y = 0) =>
+      [...bg.slice((y * 240 + x) * 4, (y * 240 + x) * 4 + 4)];
+    expect(pixel(12)).toEqual([0, 0, 0, 255]);
+    expect(pixel(13)).toEqual([132, 148, 66, 255]);
+    expect(pixel(226, 159)).toEqual([132, 148, 66, 255]);
+    expect(pixel(227, 159)).toEqual([0, 0, 0, 255]);
+  });
+
+  it("treats empty and wrapped WIN0H ranges as selecting no BG pixels", () => {
+    for (const win0h of [0, (227 << 8) | 13]) {
+      const bg = new Uint8Array([132, 148, 66, 255]);
+      darkenOutsideHorizontalWindow(bg, win0h, 16);
+      expect([...bg]).toEqual([0, 0, 0, 255]);
+    }
   });
 });

@@ -68,7 +68,7 @@ def main() -> None:
     observed={task["func"]["symbol"] for row in source for task in row["tasks"]}
     if not {"AnimTask_FakeOut_Step1","AnimTask_FakeOut_Step2","AnimTask_ShakeMon2_Step","AnimTask_StretchTargetUp"} <= observed: raise RuntimeError(f"missing task topology: {observed}")
     window={"startFrame":source[0]["frame"],"endFrame":source[-1]["frame"],"frameCount":len(source)}
-    OUTPUT.write_text(json.dumps({"schema":"fake-out-dense-evidence/v1","setup":setup,"sourceBounds":{"start":move_start,"endExclusive":move_end},"sourceWindow":window,"sourceSymbols":{"Move_FAKE_OUT":move_start,"Move_SCARY_FACE":move_end,**{name:symbols[name]|1 for name in tracked}},"songHeaders":{"SE_M_FLATTER":oracle.read_u32(song_table+227*8),"SE_M_SKETCH":oracle.read_u32(song_table+205*8)},"frames":rows},separators=(",",":"))+"\n")
+    OUTPUT.write_text(json.dumps({"schema":"fake-out-dense-evidence/v1","setup":setup,"sourceBounds":{"start":move_start,"endExclusive":move_end},"sourceWindow":window,"sourceSymbols":{"Move_FAKE_OUT":move_start,"Move_SCARY_FACE":move_end,**{name:symbols[name]|1 for name in tracked}},"songHeaders":{"SE_M_FLATTER":oracle.read_u32(song_table+229*8),"SE_M_SKETCH":oracle.read_u32(song_table+205*8)},"frames":rows},separators=(",",":"))+"\n")
     print(f"wrote {OUTPUT}: source {window}")
 
 main()
