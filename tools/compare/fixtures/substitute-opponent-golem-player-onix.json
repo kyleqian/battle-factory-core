@@ -1,0 +1,13 @@
+{
+ "schema":"scene-on-portable-evidence/v1","oracleProfile":"battle-scene-on",
+ "scenario":"tools/battle-lab/mechanic-substitute-opponent-golem-player-onix.json","probe":"tools/compare/substituteProbe.py",
+ "move":"SUBSTITUTE","moveId":164,"orientation":"opponent-front-to-player-back",
+ "sourceWindow":{"startFrame":311,"endFrame":397,"frameCount":87},
+ "sourceBounds":{"start":"0x082d5807","endExclusive":"0x082d5813"},
+ "probeJsonSha256":"30ef7a08d8cf21c0c8e8c1cc49b23b68f6b5b1f22d619da4dc8ecac5e79b65f1",
+ "rawRgbSha256":"e31e3d019340d182dd30f26b92bd2ca11407fba05ea584aa8607327b1ca60b6f",
+ "changeMap":"tools/compare/evidence/substitute-changemap-opponent.txt","changeMapSha256":"62e3d72e983687f64450c4d237ac43bb8562f544feb0b9e756090430deb96aee",
+ "freshRuns":2,"freshProbeAndRgbEquality":true,
+ "acceptance":{"status":"exact","componentEvidence":87,"productionReducer":true,"typedSeam":true,"relevantHardwareEvidence":87,"productionCompositor":true,"framebufferMatching":87},
+ "receipt":"Complete dense stock-ROM source/task/software sprite/hardware OAM+matrix/palette/audio/raw-RGB evidence through first inactive cleanup; exact through the typed production seam twice fresh."
+}

@@ -3065,6 +3065,35 @@
    ]
   },
   {
+   "move": "MOVE_SUBSTITUTE",
+   "status": "exact",
+   "covered": [
+    "source and generated Factory inventory pin challenge-5 set 498 FRONTIER_MON_GOLEM_2 as the lowest legal Level-50 carrier and Emerald internal SPECIES_GOLEM 76; complete legal three-Pokemon Scene-ON parties constrain GOLEM to SUBSTITUTE and a stable ONIX counterpart to TACKLE or SPLASH without transient-state injection",
+    "the complete first-active Move_SUBSTITUTE pointer through first inactive cleanup passes 87/87 source task/software sprite, typed seam, hardware OAM/matrix/palette, audio, immutable battle state, raw RGB, and shared production framebuffer frames twice fresh per orientation: player-back frames 291-377 evidence/raw/map fcfa2d1c03332287fe61797779b3a37bace350cbab1b947926632cd3e58a8fd8 / 0bf9b4728f0e18d68a3d9ce4f476aaaa96748326cd80c0f91ae080b065d8ecfc / 78d6ac7a16b02882c4979d70f5cce52d923f0c435e2a01feda226bc9aa250d23; opponent-front frames 311-397 evidence/raw/map 30ef7a08d8cf21c0c8e8c1cc49b23b68f6b5b1f22d619da4dc8ecac5e79b65f1 / e31e3d019340d182dd30f26b92bd2ca11407fba05ea584aa8607327b1ca60b6f / 62e3d72e983687f64450c4d237ac43bb8562f544feb0b9e756090430deb96aee",
+    "the pure source-relative reducer ports all nine affine shrink callbacks, hide/reset, front/back substitute graphics and battler-palette swap, x2=200/y2=-200 drop, both velocity-driven bounce legs, both SE_M_BUBBLE2 launches, SE_M_ATTRACT, task teardown, and first inactive cleanup; the side-specific horizontal reveal derives from GetSubstituteSpriteDefault_Y 97 player / 56 opponent",
+    "the narrow compositor reuses the generated GOLEM/ONIX battle sprite catalogs, renders the source-extracted substitute front/back sheets and palette, and applies the measured two-display task-to-framebuffer latch across affine shrink, invisibility, graphics swap, drop, bounce, and settle without absolute-tick, coordinate/RGB fitting, or framebuffer lookup",
+    "MOVE_FAKE_OUT remains independently exact after the shared affine compositor edit: its corrected MAKUHITA/SHUCKLE portable passes 86/86 source, seam, hardware, and framebuffer frames twice fresh in both orientations",
+    "no damage, substitute HP/result rule, battle RNG, turn order, controller, round/facility state, animation boundary list, unsupported barrier, or canonical-recording allowlist changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-substitute-player-golem-opponent-onix.json",
+    "tools/battle-lab/mechanic-substitute-opponent-golem-player-onix.json",
+    "tools/compare/fixtures/substitute-player-golem-opponent-onix.json",
+    "tools/compare/fixtures/substitute-opponent-golem-player-onix.json",
+    "tools/compare/evidence/substitute-changemap-player.txt",
+    "tools/compare/evidence/substitute-changemap-opponent.txt",
+    "tools/compare/substituteProbe.py",
+    "tools/compare/substitutePortable.ts",
+    "tools/compare/extractSubstituteAssets.ts",
+    "src/animation/assets/substitute.json",
+    "src/animation/substitute.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/substitute.test.ts",
+    "tests/animation/substituteEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SUPERSONIC",
    "status": "exact",
    "covered": [
