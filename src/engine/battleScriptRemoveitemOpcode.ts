@@ -30,7 +30,10 @@ import {
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import { unsupportedBranch, withBattler } from "./battleScriptHitChainOpcode.ts";
 import type { BattleScriptBattlerSelectorResolverPort } from "./battleScriptSourceCommands.ts";
-import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import {
+  withBattleScriptPartyMemberItem,
+  type BattleScriptRulesContext,
+} from "./battleScriptRulesContext.ts";
 
 /** include/constants/items.h:5. */
 const ITEM_NONE = 0;
@@ -56,8 +59,21 @@ function createRemoveitemOpcodeHandler(
         index === battler ? source.battlers[battler].item : item
       ),
     ) as BattleScriptRulesContext["usedHeldItems"];
+    const owner = source.battlers[battler];
+    // Cmd_removeitem emits REQUEST_HELDITEM_BATTLE with party mask 0
+    // (battle_script_commands.c:5901-5915). The player and opponent
+    // controllers resolve that to gBattlerPartyIndexes[gActiveBattler] and
+    // write MON_DATA_HELD_ITEM (battle_controller_player.c:1927-2000;
+    // battle_controller_opponent.c:888-961).
+    const party = withBattleScriptPartyMemberItem(
+      source.party,
+      owner.side,
+      owner.partyIndex,
+      ITEM_NONE,
+    );
     const rulesContext = Object.freeze({
       ...withBattler(source, battler, { item: ITEM_NONE }),
+      party,
       usedHeldItems,
     });
     const scheduler = markBattleScriptControllerPending(context.state.scheduler, battler);

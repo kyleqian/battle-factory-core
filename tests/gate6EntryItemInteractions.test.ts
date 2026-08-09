@@ -408,6 +408,7 @@ describe("Gate-6 R12b and R11 entry/item interactions", () => {
     expect(attackCut).toBeGreaterThanOrEqual(0);
     expect(player.statStages[1]).toBe(6);
     expect(player.item).toBe(0);
+    expect(result.state.rules.rulesContext.party.player[0].item).toBe(0);
     expect(result.state.rng.calls).toBe(2);
   });
 
