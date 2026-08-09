@@ -424,6 +424,10 @@ import {
   type RestState,
 } from "./rest.ts";
 import {
+  sleepTalkAtAge,
+  type SleepTalkState,
+} from "./sleepTalk.ts";
+import {
   howlAtAge,
   type HowlState,
 } from "./howl.ts";
@@ -740,6 +744,7 @@ export interface SceneOnPresentationBattler {
     | "EXEGGCUTE"
     | "CORSOLA"
     | "GLOOM"
+    | "SEAKING"
     | "TOGETIC"
     | "MACHOKE"
     | "MAKUHITA"
@@ -1807,6 +1812,13 @@ export interface SceneOnRestConfig {
   readonly fieldProfile: Readonly<SceneOnRestFieldProfile>;
 }
 
+/** Narrow Scene-ON seam for Sleep Talk's self-contained presentation body. */
+export interface SceneOnSleepTalkConfig {
+  readonly move: "SLEEP_TALK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnHowlFieldProfile extends SceneOnDragonRageFieldProfile {
   /** Immutable result of Howl's source stat-change opcode. */
   readonly attackerAttackStage: 7;
@@ -2314,6 +2326,7 @@ export type SceneOnMoveConfig =
   | SceneOnMetronomeConfig
   | SceneOnFollowMeConfig
   | SceneOnRestConfig
+  | SceneOnSleepTalkConfig
   | SceneOnHowlConfig
   | SceneOnRoarConfig
   | SceneOnSweetKissConfig
@@ -2441,6 +2454,8 @@ export type SceneOnFollowMePresentationState =
   SceneOnMovePresentationState<SceneOnFollowMeConfig>;
 export type SceneOnRestPresentationState =
   SceneOnMovePresentationState<SceneOnRestConfig>;
+export type SceneOnSleepTalkPresentationState =
+  SceneOnMovePresentationState<SceneOnSleepTalkConfig>;
 export type SceneOnHowlPresentationState =
   SceneOnMovePresentationState<SceneOnHowlConfig>;
 export type SceneOnRoarPresentationState =
@@ -2764,6 +2779,12 @@ export interface SceneOnFollowMeView extends FollowMeState {
 }
 
 export interface SceneOnRestView extends RestState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSleepTalkView extends SleepTalkState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3582,6 +3603,7 @@ export function createSceneOnMovePresentation<
     config.move !== "FLY"
     && config.move !== "BOUNCE"
     && config.move !== "DRAGON_BREATH"
+    && config.move !== "SLEEP_TALK"
     && (
       config.fieldProfile.playerHp < 0
       || config.fieldProfile.opponentHp < 0
@@ -5259,6 +5281,25 @@ export function sceneOnRestView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...restAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_SLEEP_TALK's first displayed source-script frame. */
+export function sceneOnSleepTalkView(
+  state: SceneOnSleepTalkPresentationState,
+): SceneOnSleepTalkView {
+  if (state.config.move !== "SLEEP_TALK") {
+    throw new Error(`expected SLEEP_TALK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sleepTalkAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
