@@ -51013,7 +51013,7 @@
               "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "The fresh Battle Scene OFF Static receipt is the one direct contact-family semantic witness; the other six ON_DAMAGE ability outcomes retain explicit no-direct-receipt gaps while sharing the source/Tier-1 dispatcher batch."
+          "notes": "The fresh Battle Scene OFF Static receipt is the one direct contact-family semantic witness; the other five contact ability outcomes retain explicit no-direct-receipt gaps while sharing the source/Tier-1 dispatcher batch."
         },
         {
           "id": "ability:ABILITY_VOLT_ABSORB",

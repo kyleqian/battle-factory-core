@@ -680,7 +680,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
       oracleReceiptCards: [],
     });
     expect(String(staticAbility.notes)).toMatch(/fresh Battle Scene OFF Static receipt/);
-    expect(String(staticAbility.notes)).toMatch(/other six ON_DAMAGE ability outcomes retain explicit no-direct-receipt gaps/);
+    expect(String(staticAbility.notes)).toMatch(/other five contact ability outcomes retain explicit no-direct-receipt gaps/);
     expect(oracle.receiptDocumented).toBe(24);
     expect(oracle.receiptGaps).toBe(0);
     expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);

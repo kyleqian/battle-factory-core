@@ -121,7 +121,7 @@ describe("shared ON_DAMAGE contact dispatcher arm", () => {
     ]);
   });
 
-  it("keeps the six non-Static contact outcome receipt gaps explicit", () => {
+  it("keeps the five non-Static contact outcome receipt gaps explicit", () => {
     const family = audit.contact.routeWitnesses[0]!.familyEvidence.familyVerification;
     expect(family.abilityOutcomes).toEqual(expect.arrayContaining([
       expect.stringContaining("ABILITY_ROUGH_SKIN"),
@@ -132,6 +132,7 @@ describe("shared ON_DAMAGE contact dispatcher arm", () => {
       expect.stringContaining("ABILITY_CUTE_CHARM"),
     ]));
     expect(family.abilityOutcomes).toHaveLength(6);
+    expect(family.abilityOutcomes.filter((outcome) => !outcome.includes("ABILITY_STATIC"))).toHaveLength(5);
     expect(family.scopeBoundary).toMatch(/No per-move oracle receipts are authored/);
     expect(family.scopeBoundary).toMatch(/distinct ability outcome gaps remain visible/);
   });

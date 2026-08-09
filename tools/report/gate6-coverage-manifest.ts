@@ -1066,7 +1066,7 @@ function hookReceiptInfo(kind: "ability" | "hold-effect", name: string): HookRec
         evidence("tools/probe/verify-on-damage-static.py", "oracle-probe"),
         evidence("tools/probe/receipts/on-damage-static-off.json", "battle-scene-off-oracle-receipt"),
       ],
-      notes: "The fresh Battle Scene OFF Static receipt is the one direct contact-family semantic witness; the other six ON_DAMAGE ability outcomes retain explicit no-direct-receipt gaps while sharing the source/Tier-1 dispatcher batch.",
+      notes: "The fresh Battle Scene OFF Static receipt is the one direct contact-family semantic witness; the other five contact ability outcomes retain explicit no-direct-receipt gaps while sharing the source/Tier-1 dispatcher batch.",
     };
   }
   if (ON_DAMAGE_ABILITY_NAMES.has(name)) {
@@ -1458,7 +1458,7 @@ const markdown: string[] = [
   "- `catalog-joined` proves a finite source/data join. It does not provide a per-trainer or per-set oracle receipt.",
   "- `source-proven-family` per-move hook joins name exact supported categories and carry one family witness per category. Soundproof reaches Cmd_attackcanceler; Volt/Water Absorb and Flash Fire reach accuracycheck → JumpIfMoveFailed; the contact and Color Change families carry selector-specific target-datahpupdate → MOVEEND_ON_DAMAGE route certificates. Their shared Static/Color Change receipts are family-level receipts plus Tier-1 sibling batches, not fabricated per-move receipts. No row claims unrelated families.",
   "- `unsupported` per-move hook joins are intentionally not inferred from the partial dispatcher catalogs. Each row repeats only move identity, effect, entry script, reason, and a locator into `level50-move-parameterization.json`; it is not a support claim.",
-  "- `oracle-receipted` requires a committed deterministic request and receipt. Incidental ability presence in an unrelated scenario is not a direct ability receipt; Water Absorb and Flash Fire retain explicit shared-dispatcher sibling status, and the fresh Static receipt is the one direct ON_DAMAGE contact-family witness while the six other ability outcomes retain explicit receipt gaps.",
+  "- `oracle-receipted` requires a committed deterministic request and receipt. Incidental ability presence in an unrelated scenario is not a direct ability receipt; Water Absorb and Flash Fire retain explicit shared-dispatcher sibling status, and the fresh Static receipt is the one direct ON_DAMAGE contact-family witness while the five other contact ability outcomes retain explicit receipt gaps.",
   "- The five entries in `STATE_FAMILY_BEHAVIOR_EVIDENCE` use named behavior-test locators instead of token presence; that narrow Tier-1 override does not alter static, semantic, or oracle classifications.",
   "- Zero-Factory-carrier rows remain in the widened legal Gen-3 universe. They are not silently classified as Factory-complete.",
   "",
