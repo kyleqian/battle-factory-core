@@ -1,6 +1,6 @@
 # Executable-frontier census
 
-Generated 2026-07-29. Rerun: `npx tsx tools/report/executable-frontier-census.ts`
+Generated 2026-08-09. Rerun: `npx tsx tools/report/executable-frontier-census.ts`
 
 Answers ROADMAP S10's Executable-frontier reset question directly: not "how many opcodes are registered" but **how many of the 355 moves can the kernel execute end-to-end today, and what exactly blocks each of the rest.** Every `BattleScript_Effect*` entry in the committed topology (`src/data/gen/battle-script-topology.json` + `battle-script-graph.json`) is walked for full opcode reachability (branches, goto/call targets, the shared hit-chain tail) against the opcode set the engine currently registers (read live from `src/engine/battleScriptRulesContext.ts`'s `createBattleScriptStatusRulesHandlers`, so this doc cannot drift from what the engine actually installs).
 

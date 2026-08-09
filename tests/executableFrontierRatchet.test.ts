@@ -58,11 +58,14 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // and MOVE_EFFECT_TOXIC (their own scripts call the still-unregistered
   // Cmd_seteffectprimary instead of this dispatch site) and the whole family-B
   // (status2/misc, effectByte > PRIMARY_STATUS_MOVE_EFFECT) switch, e.g. FLINCH.
-  // The two new opcodes add their own malformed/uncovered-input barriers:
-  // Cmd_printfromtable (3: bad operand shape, an unrecognized table pointer
-  // outside the quartet's own 7 tables, an out-of-range MULTISTRING_CHOOSER
-  // index) and Cmd_updatestatusicon (2: bad operand shape, the doubles-only
-  // BS_ATTACKER_WITH_PARTNER branch). Net: -2 retired + 3 + 3 + 2 = +6.
+  // The two new opcodes add their own malformed/future-input barriers:
+  // Cmd_printfromtable (3: bad operand shape, a pointer outside the complete
+  // current source-registered 43-family table universe, and an out-of-range
+  // MULTISTRING_CHOOSER index) and Cmd_updatestatusicon (2: bad operand shape,
+  // the doubles-only BS_ATTACKER_WITH_PARTNER branch). The current-program
+  // pointer universe is separately pinned in battleScriptHitChainOpcode.test.ts;
+  // the generic pointer guard remains a future-input D barrier. Net:
+  // -2 retired + 3 + 3 + 2 = +6.
   // 25 -> 23 (Ingrain/Leech Seed/Wrap registration, docs/ingrain-leechseed-
   // wrap-ground-truth.md §5): two barriers retired for real, not narrowed --
   // Cmd_datahpupdate's negative-damage (HP gain) branch is now a genuine

@@ -10,8 +10,9 @@ The current history contains the Enigma Berry retirement (`d92248bb`), so the
 live `Cmd_accuracycheck` count is 10. A/B work is not
 being re-opened here: A3, A5, A6, A7, A8, A9, A10, and A11 are implemented in
 the current source; A4 and A12 are source-refuted as unreachable in Factory
-singles. One widened-scope B site remains: the `printfromtable` composite
-guard still has an unmodeled weather-start table family.
+singles. The widened-scope `printfromtable` table-pointer family is now
+source-complete for the current program; its generic pointer subcase remains
+a defensive future-input guard classified D below.
 
 ## Counting contract
 
@@ -23,12 +24,12 @@ live B subcase is counted as B even when another subcase at that same guard is
 proven C. This keeps the module sum and category sum machine-checkable.
 
 ```text
-BARRIER_COUNTS = {"A": 0, "B": 1, "C": 22, "D": 23, "total": 46}
+BARRIER_COUNTS = {"A": 0, "B": 0, "C": 22, "D": 24, "total": 46}
 PINNED_MODULE_TOTAL = 46
 REMAINING_A = 0
-REMAINING_B = 1
+REMAINING_B = 0
 CONFIRMED_C = 22
-CONFIRMED_D = 23
+CONFIRMED_D = 24
 ```
 
 These totals must match `PINNED_BARRIER_COUNTS` and `barrierCallSitesIn` in
@@ -36,7 +37,7 @@ These totals must match `PINNED_BARRIER_COUNTS` and `barrierCallSitesIn` in
 
 | Production module | count | classification |
 | --- | ---: | --- |
-| `battleScriptHitChainOpcode.ts` | 10 | 1 B, 9 D |
+| `battleScriptHitChainOpcode.ts` | 10 | 10 D |
 | `battleScriptAttackCancelerOpcode.ts` | 2 | 2 C |
 | `battleScriptMoveEndOpcode.ts` | 1 | 1 C |
 | `battleScriptJumpifbyteOpcode.ts` | 1 | 1 C |
@@ -103,13 +104,13 @@ These totals must match `PINNED_BARRIER_COUNTS` and `barrierCallSitesIn` in
   Argument-shape and `jumpifstatus2` guards remain D.
 - **A9 — implemented in its registered tables.** The current
   `PRINTFROMTABLE_TABLES` includes the defrost and obedience tables
-  (`battleScriptHitChainOpcode.ts:519-540`), covering the source paths for
+  (`battleScriptHitChainOpcode.ts:526-546`), covering the source paths for
   `BattleScript_MoveUsedUnfroze` (`data/battle_scripts_1.s:3761-3762`) and
   Truant’s `BattleScript_MoveUsedLoafingAroundMsg` (`:4238-4239`, with the
-  source callback in `src/battle_util.c:2086-2093`). The pointer guard at
-  `:4092` remains B because the committed source also has weather and other
-  non-registered table-pointer families. Its proven C subcases are recorded
-  below without a second inventory count.
+  source callback in `src/battle_util.c:2086-2093`). The current-program
+  inventory is now complete; the three formerly missing source tables are
+  receipted below, and the pointer guard is D because only a future table
+  pointer outside that finite inventory can reach it.
 - **A10 — implemented/retired.** `battleScriptProtectlikeOpcode.ts` has no
   unsupported-branch call site. The pinned four-entry table at
   `src/battle_script_commands.c:719-723` is now handled with the measured
@@ -130,20 +131,42 @@ These totals must match `PINNED_BARRIER_COUNTS` and `barrierCallSitesIn` in
   (`src/battle_util.c:658-683`); `BattleTurnPassed` has the same preemption
   shape (`src/battle_main.c:3988-3992`).
 
-### Remaining B items
+### Source-complete `Cmd_printfromtable` receipt
+
+The pinned `data/battle_scripts_1.s` inventory has 43 distinct
+`printfromtable` pointer symbols. The only three absent from the former
+registry are now transcribed directly from `src/battle_message.c`:
+
+- `gWeatherStartsStringIds` (`battle_message.c:1156-1174`): 16 entries for
+  `WEATHER_NONE` through `WEATHER_ABNORMAL`, including the source's
+  `STRINGID_SANDSTORMISRAGING` and `STRINGID_SUNLIGHTSTRONG` rows. Its
+  `BattleScript_OverworldWeatherStarts` continuation is pinned at
+  `data/battle_scripts_1.s:3242-3246`.
+- `gNoEscapeStringIds` (`battle_message.c:899-905`): 5 indexed wild/run-fail
+  entries, retained even though the current Factory scope does not enter the
+  wild escape path.
+- `gBattlePalaceFlavorTextTable` (`battle_message.c:1388-1394`): 4 indexed
+  Palace flavor entries, retained as defensive current-program completeness.
+
+`tests/battleScriptHitChainOpcode.test.ts` pins every row and length, the
+weather continuation, and the exact 43-symbol committed-program inventory.
+This is a source/Tier-1 receipt only; it makes no oracle or Gate-6 claim.
+
+### B reconciliation (none remain)
 
 - **B1 — retired on this branch base.** The Enigma-vs-item-table
   `Cmd_accuracycheck` case is source-complete; the former call site is gone,
   leaving the HitChain module at its pinned count of 10. The retirement is
   recorded by the current history and its focused regression; no B1 guard is
   included in the inventory below.
-- **B2 / table-pointer family — 1 site.**
-  `battleScriptHitChainOpcode.ts:4092` still rejects a pointer outside the
-  registered tables. `gWeatherStartsStringIds` is a source-produced family
-  (`data/battle_scripts_1.s:3242-3246`, callback from
-  `src/battle_util.c:2529`), and the wild no-escape and Palace flavor-text
-  families are likewise outside the registered quartet. The defrost and
-  obedience subcases are implemented as noted for A9.
+- **B2 / table-pointer family — retired.** The exact source tables
+  `gWeatherStartsStringIds`, `gNoEscapeStringIds`, and
+  `gBattlePalaceFlavorTextTable` are now registered. Tier 1 pins all 16, 5,
+  and 4 indexed rows, respectively, and pins the committed program's exact
+  43-symbol `printfromtable` pointer inventory. The generic pointer guard at
+  `battleScriptHitChainOpcode.ts:4137` remains in place for future input/data,
+  but no current-program pointer is outside the registry, so this call site
+  is classified D rather than B.
 - **B2 / `VARIOUS` family — retired.** `VARIOUS_IS_RUNNING_IMPOSSIBLE` now
   ports `IsRunningFromBattleImpossible`'s exact source precedence, including
   Smoke Ball/Enigma, Run Away, trapping abilities, trapped/rooted state, and
@@ -228,18 +251,18 @@ refer to the pinned source unless marked otherwise.
     defensive. Both AI sites are retained because the source census, not an
     assumption about future data, owns their count.
 
-## Confirmed D sites (23)
+## Confirmed D sites (24)
 
 D means the guard protects malformed operands, unsupported selectors, or
 other future input/data that is not produced by the current committed Factory
 program. The guard can be reached only by changing the input/data contract.
 
-- `battleScriptHitChainOpcode.ts:1105,2300,2345,2421,3273,4083,4103,4136,4488`
+- `battleScriptHitChainOpcode.ts:1150,2345,2390,2466,3318,4128,4137,4148,4533`
   — accuracy move shape; hitanimation/healthbar/datahp selector shape;
-  unsupported SetMoveEffect family; printfromtable operand/index shape;
-  updatestatusicon shape; and cleareffectsonfaint selector shape. The Factory
-  call sites use the registered selectors and effect family. The print-table
-  pointer guard at `:4092` is the separate B site.
+  unsupported SetMoveEffect family; printfromtable operand/pointer/index
+  shape; updatestatusicon shape; and cleareffectsonfaint selector shape. The
+  Factory call sites use the registered selectors and effect family. The
+  print-table pointer guard is the future-input D subcase at `:4137`.
 - `battleScriptDamagingWeatherOpcode.ts:258,276,327,381` — all current
   addbyte, bicword, and jumpifarraynotequal operands are registered. In
   particular, the current handler accepts `sTRIPLE_KICK_POWER`’s delta 10;
@@ -264,8 +287,8 @@ program. The guard can be reached only by changing the input/data contract.
   side-affecting value maps; all 21/5/10 committed call sites use registered
   values.
 
-The nine HitChain, four weather, one getexp, two Ingrain, two selector, two
-Statbuff, and three StatusPrimary sites above sum to 23. No source or current
+The ten HitChain, four weather, one getexp, two Ingrain, two selector, two
+Statbuff, and three StatusPrimary sites above sum to 24. No source or current
 call-site evidence supports reclassifying any D site as live A/B.
 
 ## Audit boundary
