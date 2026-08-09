@@ -47,8 +47,37 @@ export function resolveMaxWorkers(): number {
   return Math.max(2, Math.floor(budget / (livePeerVitestRuns() + 1)));
 }
 
+// Stamp every served/built app with its commit so a played build's age is
+// visible on screen and inside exported session traces (the play-preview
+// worktree serves deliberately pinned checkouts; reports need attribution).
+function buildStamp(): string {
+  try {
+    const commit = execSync("git rev-parse --short HEAD", {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    const date = execSync("git show -s --format=%cs HEAD", {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    const dirty =
+      execSync("git status --porcelain", {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }).trim() === ""
+        ? ""
+        : "+dirty";
+    return `${commit}${dirty} ${date}`;
+  } catch {
+    return "unknown";
+  }
+}
+
 export default defineConfig({
   root: ".",
+  define: {
+    __POKEBENCH_BUILD_STAMP__: JSON.stringify(buildStamp()),
+  },
   build: {
     outDir: "dist",
     target: "es2022",
