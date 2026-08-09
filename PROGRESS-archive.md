@@ -1,3 +1,20 @@
+## 1032 — [supervisor ORIENT, 2026-08-08] **Folded union green; user playthrough crash is first priority**
+
+- **State:** master is clean at `a45826c8`; Gate 6 remains **OPEN** at
+  **21/24** OFF-profile receipts. New ISSUES #84 records five generated-round
+  presentation/controller failures, including a fatal resolution-handoff
+  invariant during BUTTERFREE versus MURKROW.
+- **Did:** read the S8 authoritative reset and S10 executable-frontier policy;
+  confirmed `master..animation-main` is empty, so no animation fold was needed.
+  Oracle freshness and OFF-profile info pass. The independent folded baseline
+  passes **811 files / 8,137 tests / 1 skipped** and production build.
+- **Next:** diagnose and repair #84's fatal handoff with a staged generic-round
+  reproduction and a red Tier-1 pin. Then address the wrong send-out side,
+  TAUNT/TORMENT/TOXIC pacing, and WHIRLWIND replacement seam. Resume R3, R9,
+  and R2 receipts after the user-visible blockers.
+- **Notes:** do not resume the retired canonical Battle-2 march. Use the generic
+  seven-battle controller and Battle Scene OFF presentation seam.
+
 ## 1030 — [bounded MAIN worker, 2026-08-08] **R12b persistent item write-through repaired**
 
 - **State:** generic `Cmd_removeitem` persistence repair is committed in

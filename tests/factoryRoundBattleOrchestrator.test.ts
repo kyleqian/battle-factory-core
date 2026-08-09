@@ -12,8 +12,12 @@ import { createBattleCommandPresentation } from "../src/engine/battleCommandPres
 import { PARTY_SELECT_CLOSE_MENU_FRAMES } from "../src/engine/battlePartySelect.ts";
 import { createFactoryAiBattleHistory } from "../src/engine/factoryAiLiveDriver.ts";
 import { createBattleResolutionPresentation } from "../src/engine/battleResolutionPresentation.ts";
-import { createBattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
+import {
+  battleResolutionCommandDuration,
+  createBattleResolutionPresentationRenderView,
+} from "../src/engine/battleResolutionPresentationRender.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../src/engine/battleScriptSourceConstants.ts";
+import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
 import { createFreshFactoryBattle } from "../src/engine/factoryBattleStart.ts";
 import {
@@ -277,6 +281,137 @@ function createOpponentToxicResolutionHandoffBattle(): FactoryRoundBattleOrchest
   });
 }
 
+/**
+ * Mounts one source-driven turn from legal Factory-set identities in the real
+ * generated-round resolution owner. The deliberately durable HP staging keeps
+ * the cadence isolated; commands/events still come from the ordinary reducer.
+ */
+function createStagedOpponentStatusMoveResolutionCarrier(input: Readonly<{
+  playerSetId: number;
+  playerMoveSlot: 0 | 1 | 2 | 3;
+  playerItem?: number;
+  opponentSetId: number;
+  opponentMoveSlot: 0 | 1 | 2 | 3;
+}>): FactoryRoundBattleOrchestratorState {
+  const initial = createFreshFactoryBattle({
+    requestId: 1,
+    rngSeed: 0,
+    battleScene: "off",
+    playerParty: Object.freeze(durableLockedActionParty(input.playerSetId).map((member, index) =>
+      index === 0 && input.playerItem !== undefined
+        ? Object.freeze({ ...member, item: input.playerItem })
+        : member
+    )) as unknown as BattleScriptPartyState,
+    opponentParty: durableLockedActionParty(input.opponentSetId),
+  });
+  const player = submitStagedLockedActionMove(initial, "player", input.playerMoveSlot);
+  const opponent = submitStagedLockedActionMove(
+    player.transition.state,
+    "trainer",
+    input.opponentMoveSlot,
+  );
+  const field = createBattleCommandPresentation(
+    player.request,
+    initial.rules.rulesContext,
+    player.decision.moveSlot,
+  ).field;
+  const resolution = createBattleResolutionPresentation({
+    sourceRequest: player.request,
+    sourceDecision: player.decision,
+    beforeRules: initial.rules,
+    transition: opponent.transition,
+    fieldBoundary: field,
+    confirmHandoff: { fightDisplayCursor: player.decision.moveSlot, idleBounceElapsed: 0 },
+  });
+  const carrier = createStartedGeneratedBattle(RNG_SEED);
+  const fields = [resolution.field.player, resolution.field.opponent] as const;
+  const moveSelectionCursors = Object.freeze([0, 0, 0, 0] as const);
+  const battlePresentationBoundaries = Object.freeze(fields.map((displayed, battler) =>
+    Object.freeze({
+      battler: battler as 0 | 1,
+      partyIndex: displayed.partyIndex,
+      field: displayed,
+      displayedHp: displayed.hp,
+      displayedStatus1: initial.rules.rulesContext.battlers[battler]!.status1,
+      spriteVisible: true,
+      idleEpoch: 0,
+      moveCursor: 0 as const,
+    })
+  )) as FactoryRoundBattleOrchestratorState["battlePresentationBoundaries"];
+  return Object.freeze({
+    ...carrier,
+    battle: resolution.pendingBattle,
+    battleCommandPresentation: null,
+    battleResolutionPresentation: resolution,
+    retainedLockedActionPresentationOwner: null,
+    battlePartySelect: null,
+    battleForcedPartySelect: null,
+    moveSelectionCursors,
+    battlePresentationBoundaries,
+    aiHistory: createFactoryAiBattleHistory(resolution.pendingBattle.rules.rulesContext),
+    facilityRngCalls: carrier.activeBattleCallStart! + resolution.pendingBattle.rng.calls,
+  });
+}
+
+function expectSourceWaitmessageHoldAtFirstAutomaticEdge(
+  initial: FactoryRoundBattleOrchestratorState,
+  messageId: string,
+): void {
+  const resolution = initial.battleResolutionPresentation!;
+  const commandIndex = resolution.segments[0]!.commands.findIndex((command) =>
+    command.type === "message"
+    && resolution.segments[0]!.events.some((event) =>
+      event.sequence === command.eventSequence
+      && event.payload.kind === "message"
+      && event.payload.messageId === messageId
+    )
+  );
+  expect(commandIndex).toBeGreaterThanOrEqual(0);
+  const command = resolution.segments[0]!.commands[commandIndex]!;
+  expect(command).toMatchObject({ type: "message", advance: "automatic" });
+  if (command.type !== "message") throw new Error("expected message command");
+  const event = resolution.segments[0]!.events.find(({ sequence }) =>
+    sequence === command.eventSequence
+  )!;
+  const following = loadBattleScriptProgram().instructions[
+    event.provenance!.programCounter + 1
+  ]!;
+  expect(following).toMatchObject({
+    opcodeName: "B_SCR_OP_WAITMESSAGE",
+    operands: [{ expression: "B_WAIT_TIME_LONG" }],
+  });
+  const sourceWaitDuration = battleResolutionCommandDuration(command, resolution.field);
+  expect(command.timing).toMatchObject({ holdFrames: 64 });
+
+  let state = initial;
+  for (let budget = 0; budget < 2_000; budget += 1) {
+    const live = state.battleResolutionPresentation;
+    if (
+      live?.lifecycle.phase === "presenting"
+      && live.commandIndex === commandIndex
+      && live.lifecycle.phaseElapsed === 0
+    ) break;
+    state = advanceFactoryRoundBattleResolution(state);
+  }
+  expect(state.battleResolutionPresentation?.commandIndex).toBe(commandIndex);
+
+  // The first formerly-wrong edge was the end of typing: the generic owner
+  // retired the banner here instead of entering source's 64-frame waitmessage.
+  const typingDuration = sourceWaitDuration - 64;
+  for (let age = 0; age < typingDuration; age += 1) {
+    state = advanceFactoryRoundBattleResolution(state);
+  }
+  expect(state.battleResolutionPresentation).toMatchObject({
+    commandIndex,
+    lifecycle: { phase: "presenting", phaseElapsed: typingDuration },
+  });
+
+  for (let age = typingDuration; age < sourceWaitDuration; age += 1) {
+    state = advanceFactoryRoundBattleResolution(state);
+  }
+  expect(state.battleResolutionPresentation?.commandIndex).toBe(commandIndex + 1);
+}
+
 function submitStagedLockedActionMove(
   state: BattleState<FactoryFullTurnDecisionRules>,
   side: "player" | "trainer",
@@ -499,6 +634,52 @@ function driveGeneratedRoundToCompletion(
 }
 
 describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
+  it.each([
+    ["TORMENT", 2, "STRINGID_PKMNSUBJECTEDTOTORMENT"],
+    ["TAUNT", 3, "STRINGID_PKMNFELLFORTAUNT"],
+  ] as const)(
+    "ISSUES #84(2): opponent MURKROW's %s result banner enters source's waitmessage hold",
+    (_move, opponentMoveSlot, messageId) => {
+      expectSourceWaitmessageHoldAtFirstAutomaticEdge(
+        createStagedOpponentStatusMoveResolutionCarrier({
+          playerSetId: 153, // legal BUTTERFREE rental
+          playerMoveSlot: 1, // PSYBEAM
+          opponentSetId: 184, // legal MURKROW rental
+          opponentMoveSlot,
+        }),
+        messageId,
+      );
+    },
+  );
+
+  it("ISSUES #84(4): opponent TOXIC's status banner enters source's waitmessage hold after the status/controller receipt", () => {
+    const state = createStagedOpponentStatusMoveResolutionCarrier({
+      playerSetId: 153, // legal BUTTERFREE rental
+      playerMoveSlot: 1, // PSYBEAM
+      playerItem: 0, // mechanicLab-legal no-item variant: keep poison visible.
+      opponentSetId: 134, // legal CLAMPERL rental
+      opponentMoveSlot: 1, // TOXIC
+    });
+    const commands = state.battleResolutionPresentation!.segments[0]!.commands;
+    const messageLines = commands
+      .filter((command) => command.type === "message")
+      .map((command) => command.lines.join(" / "));
+    if (!messageLines.includes("BUTTERFREE is badly / poisoned!")) {
+      throw new Error(`missing TOXIC result banner: ${JSON.stringify(messageLines)}`);
+    }
+    const messageIndex = commands.findIndex((command) =>
+      command.type === "message"
+      && command.lines.join(" ").includes("badly poisoned")
+    );
+    expect(messageIndex).toBeGreaterThan(0);
+    expect(commands.slice(0, messageIndex).some((command) => command.type === "status"))
+      .toBe(true);
+    expectSourceWaitmessageHoldAtFirstAutomaticEdge(
+      state,
+      "STRINGID_PKMNBADLYPOISONED",
+    );
+  });
+
   it("selects Battle Scene OFF at the generated fresh-battle seam without changing facility state", () => {
     const state = createStartedGeneratedBattle(RNG_SEED);
     expect(state.battle?.rules.rulesContext.hitMarker).toBe(

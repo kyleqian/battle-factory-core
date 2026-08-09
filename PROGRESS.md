@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1035 — [bounded MAIN worker, 2026-08-08] **#84 status-message cadence repaired**
+
+- **State:** #84 items (2) and (4) are removed; only item (1)'s wrong-side
+  opponent ball and item (3)'s WHIRLWIND recall/send-out seam remain. Gate 6
+  stays **22/24** OFF-profile receipts.
+- **Did:** fresh dense OFF evidence separated text typing, the 64-frame source
+  `waitmessage`, Scene-OFF attack/status controller spans, and subsequent
+  dispatch. The generic round resolution now derives a direct following
+  `B_SCR_OP_WAITMESSAGE B_WAIT_TIME_LONG` from immutable print-event program
+  provenance. Public lifecycle tests pin the first formerly-wrong post-typing
+  edge and all 64 hold ages for legal TAUNT/TORMENT and TOXIC sibling routes.
+- **Next:** repair #84 item (1)'s opponent ball side, then item (3)'s
+  WHIRLWIND recall/send-out presentation. Do not resume canonical Battle 2.
+- **Notes:** focused presentation/orchestrator/ratchet **89/89**, smoke
+  **375/375**, and full suite **812 files / 8,143 passed / 1 skipped**; build
+  green. No unsupported barrier, canonical recording import, rules/RNG/event,
+  fatal completeness, or fatal status-handoff guard changed.
+
 ## 1034 — [supervisor, 2026-08-08] **#84 crash fixed; R3 receipted; union green**
 
 - **State:** #84 item (5) is fixed; its four presentation defects remain open.
@@ -38,20 +56,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **375/375**. Final full suite is **811 files / 8,138 passed / 1 skipped**;
   production build is green. No unsupported barrier or canonical recording
   import changed.
-
-## 1032 — [supervisor ORIENT, 2026-08-08] **Folded union green; user playthrough crash is first priority**
-
-- **State:** master is clean at `a45826c8`; Gate 6 remains **OPEN** at
-  **21/24** OFF-profile receipts. New ISSUES #84 records five generated-round
-  presentation/controller failures, including a fatal resolution-handoff
-  invariant during BUTTERFREE versus MURKROW.
-- **Did:** read the S8 authoritative reset and S10 executable-frontier policy;
-  confirmed `master..animation-main` is empty, so no animation fold was needed.
-  Oracle freshness and OFF-profile info pass. The independent folded baseline
-  passes **811 files / 8,137 tests / 1 skipped** and production build.
-- **Next:** diagnose and repair #84's fatal handoff with a staged generic-round
-  reproduction and a red Tier-1 pin. Then address the wrong send-out side,
-  TAUNT/TORMENT/TOXIC pacing, and WHIRLWIND replacement seam. Resume R3, R9,
-  and R2 receipts after the user-visible blockers.
-- **Notes:** do not resume the retired canonical Battle-2 march. Use the generic
-  seven-battle controller and Battle Scene OFF presentation seam.

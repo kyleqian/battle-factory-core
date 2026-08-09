@@ -17,21 +17,19 @@ backlog.
 
 # Open
 
-## #84 — Generated-round playthrough regressions: wrong send-out side, rushed status text, and forced-switch jump
+## #84 — Generated-round playthrough regressions: wrong send-out side and forced-switch jump
 
 **Symptom (user report, 2026-08-08):** during a generated Battle Scene OFF
 round with the player's BUTTERFREE against an opponent MURKROW: (1) the
-opponent's Poké Ball sprite appears at the lower-left player throw origin;
-(2) MURKROW's TAUNT/TORMENT text advances much too quickly; (3) WHIRLWIND
-immediately replaces MURKROW with PIDGEOTTO without a faithful recall/send-out
-sequence; and (4) TOXIC has similarly wrong pacing.
+opponent's Poké Ball sprite appears at the lower-left player throw origin; and
+(3) WHIRLWIND immediately replaces MURKROW with PIDGEOTTO without a faithful
+recall/send-out sequence.
 
-**Confirmed:** this is the generic round/controller presentation path, not an
-animation-lane task. The repository baseline remains green, so existing Tier-1
-coverage does not reproduce these live route failures. Diagnose and repair each
-item against staged state and the Battle Scene OFF oracle. Keep the items split
-inside this entry as they close; delete the entry only when all four remaining
-items are fixed. Do not add canonical Battle-2/turn/tick branches.
+**Confirmed:** both remaining items are generic round/controller presentation
+paths, not animation-lane tasks. Diagnose and repair each against staged state
+and the Battle Scene OFF oracle. Keep the items split inside this entry as they
+close; delete the entry only when both are fixed. Do not add canonical
+Battle-2/turn/tick branches.
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
