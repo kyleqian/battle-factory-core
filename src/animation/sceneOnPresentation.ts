@@ -16,6 +16,7 @@ import {
   substituteAtAge,
   type SubstituteState,
 } from "./substitute.ts";
+import { hazeAtAge, type HazeState } from "./haze.ts";
 import {
   headbuttAtAge,
   type HeadbuttState,
@@ -1293,6 +1294,13 @@ export interface SceneOnBarrierConfig {
   readonly allocatorProfile: Readonly<{ readonly wall: number }>;
 }
 
+export interface SceneOnHazeConfig {
+  readonly move: "HAZE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnMirrorCoatConfig {
   readonly move: "MIRROR_COAT";
   readonly attacker: SceneOnPresentationBattler;
@@ -2252,6 +2260,7 @@ export type SceneOnMoveConfig =
   | SceneOnBrickBreakConfig
   | SceneOnLightScreenConfig
   | SceneOnBarrierConfig
+  | SceneOnHazeConfig
   | SceneOnMirrorCoatConfig
   | SceneOnSynthesisConfig
   | SceneOnAromatherapyConfig
@@ -2406,6 +2415,8 @@ export type SceneOnLightScreenPresentationState =
   SceneOnMovePresentationState<SceneOnLightScreenConfig>;
 export type SceneOnBarrierPresentationState =
   SceneOnMovePresentationState<SceneOnBarrierConfig>;
+export type SceneOnHazePresentationState =
+  SceneOnMovePresentationState<SceneOnHazeConfig>;
 export type SceneOnMirrorCoatPresentationState =
   SceneOnMovePresentationState<SceneOnMirrorCoatConfig>;
 export type SceneOnSparkPresentationState =
@@ -3529,6 +3540,7 @@ export function createSceneOnMovePresentation<
     | SceneOnScaryFaceConfig
     | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
     | SceneOnBarrierConfig
+    | SceneOnHazeConfig
     | SceneOnBiteConfig
     | SceneOnHeadbuttConfig | SceneOnBodySlamConfig | SceneOnSlamConfig
     | SceneOnSecretPowerConfig
@@ -4068,6 +4080,27 @@ export interface SceneOnBarrierView extends BarrierState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnHazeView extends HazeState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age` is relative to Move_HAZE's first in-bounds script pointer. */
+export function sceneOnHazeView(
+  state: SceneOnMovePresentationState<SceneOnHazeConfig>,
+): SceneOnHazeView {
+  if (state.config.move !== "HAZE") {
+    throw new Error(`expected HAZE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...hazeAtAge(state.age),
+  };
 }
 
 /** `age` is relative to Move_BARRIER's first in-bounds script pointer. */
