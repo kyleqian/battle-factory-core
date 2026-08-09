@@ -1,5 +1,12 @@
 # Animation coverage
 
+## MOVE_FAKE_OUT exact — corrected legal species + bilateral 86/86 promotion (2026-08-09 worker)
+
+- **State:** Coverage advanced **136→137/276 exact**, 0 partial, 0 staged, **140→139 unsupported**. FAKE_OUT alone moved; commits `e5d263cd` and `87492e0a` contain the implementation and inventory-pin follow-up.
+- **Did:** Corrected both inherited “MAKUHITA” mechanicLab parties from Emerald internal species 296 (actually LOMBRE) to 335 (MAKUHITA), refreshed dense evidence/change maps, and added the narrow source-derived compositor. It applies the WIN0H/WIN0V BG3 shutter/darken, BG white transition/restore, and SHUCKLE affine-double display through the typed seam. The measured first affine setup carries ShakeMon2 x2 at RAM+1; subsequent x2/y2/matrix displays are RAM+2. The animation boundary and unsupported-branch pins did not move.
+- **Verified:** Twice fresh per orientation, player-back **78..163** and opponent-front **82..167** each pass **86/86 source/reducer, seam, relevant hardware, and framebuffer**. Player probe/RGB/map: `38f74114fad7195ea26da329214ba837b2c48da39470a08b2ef700880a3fe76e` / `e43d4eb00b1a46961d227ebab82df7555d71d48410905da8cfb2034156673c9f` / `65db300ac18fc2118181d930920a600bfe4cd1055453f4a09218372f5d1b8082`; opponent: `1f4de9e3e5eacc224becd0df4cc37288cb570918699b0c76f79da928e1c43d74` / `890d46b5c77926c0ffcaac17f529a33f4023dddc555b620f92ae676cce12a39e` / `b0e573a5d3bafa389aa4d9cb5f6b88920027bd5ef0d0c770ac57016b5be1f629`. ASTONISH remains twice-fresh bilateral **63/63 source/seam/hardware/framebuffer** (raw `ad5dcf52…` / `ba9b56fe…`). Focused **19/19**, smoke **375/375**, typecheck, full `npm test` **813 files / 8146 passed / 1 skipped**, foreground build, and final coverage report all pass.
+- **Next:** Supervisor selects the next ranked independent move/component track. Preserve FAKE_OUT's corrected internal-species scenarios and complete bilateral portable; do not infer ShakeMon2/affine latches for another move from this one.
+
 ## MOVE_FAKE_OUT bilateral evidence/reducer/seam checkpoint — remains unsupported (2026-08-08 worker)
 
 - **State:** Coverage stays **136/276 exact, 0 partial, 0 staged, 140 unsupported**. FAKE_OUT was not promoted; no inventory pin, boundary, gameplay, controller, or shared helper changed.
