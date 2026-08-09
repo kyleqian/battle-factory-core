@@ -3,7 +3,7 @@
   "gate6": {
     "closed": false,
     "verdict": "OPEN — this first manifest exposes coverage and receipt gaps; it does not claim Gate 6 closed.",
-    "nextAcceptanceUnit": "R15: add and document the missing parameterized-oracle receipt before treating this family as accepted.",
+    "nextAcceptanceUnit": "R3: add and document the missing parameterized-oracle receipt before treating this family as accepted.",
     "interpretation": "Static executable reachability, engine references, Tier-1 proofs, and oracle receipts are separate evidence classes."
   },
   "generatedBy": "node --experimental-strip-types tools/report/gate6-coverage-manifest.ts",
@@ -40,12 +40,12 @@
     "hooks": {
       "abilities": {
         "total": 78,
-        "oracleReceipted": 25,
+        "oracleReceipted": 26,
         "zeroFactoryWidened": 4
       },
       "holdEffects": {
         "total": 67,
-        "oracleReceipted": 3,
+        "oracleReceipted": 4,
         "zeroFactoryWidened": 24
       }
     },
@@ -57,15 +57,15 @@
     "interactions": {
       "total": 28,
       "kernelProven": 6,
-      "oracleReceipted": 13,
-      "receiptGaps": 9
+      "oracleReceipted": 14,
+      "receiptGaps": 8
     },
     "parameterizedOracle": {
       "scenarioRequests": 24,
-      "receiptDocumented": 20,
-      "receiptGaps": 4,
+      "receiptDocumented": 21,
+      "receiptGaps": 3,
       "familyCards": 16,
-      "familyReceiptGaps": 4
+      "familyReceiptGaps": 3
     }
   },
   "sections": {
@@ -18377,6 +18377,7 @@
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 14,
           "oracleReceiptCards": [
+            "R15",
             "R5",
             "R5"
           ],
@@ -18398,6 +18399,11 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R15",
+              "kind": "oracle-receipt"
             },
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
@@ -18584,7 +18590,7 @@
         {
           "id": "ability:ABILITY_LIGHTNING_ROD",
           "label": "ABILITY_LIGHTNING_ROD",
-          "status": "engine-referenced-no-oracle-receipt",
+          "status": "oracle-receipted-hook",
           "universeId": 31,
           "factoryCarrierCount": 15,
           "legalCarrierCount": 6,
@@ -18594,7 +18600,9 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 3,
-          "oracleReceiptCards": [],
+          "oracleReceiptCards": [
+            "R15"
+          ],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -18613,6 +18621,11 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R15",
+              "kind": "oracle-receipt"
             }
           ],
           "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
@@ -18674,6 +18687,7 @@
             "R10",
             "R11",
             "R13",
+            "R15",
             "R2",
             "R2",
             "R4",
@@ -18724,6 +18738,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R13",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R15",
               "kind": "oracle-receipt"
             },
             {
@@ -18780,6 +18799,7 @@
             "R10",
             "R11",
             "R13",
+            "R15",
             "R2",
             "R2",
             "R4",
@@ -18830,6 +18850,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R13",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R15",
               "kind": "oracle-receipt"
             },
             {
@@ -19494,7 +19519,8 @@
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 8,
           "oracleReceiptCards": [
-            "R13"
+            "R13",
+            "R15"
           ],
           "evidence": [
             {
@@ -19518,6 +19544,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R13",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R15",
               "kind": "oracle-receipt"
             }
           ],
@@ -22218,7 +22249,7 @@
         {
           "id": "hold-effect:HOLD_EFFECT_LEFTOVERS",
           "label": "HOLD_EFFECT_LEFTOVERS",
-          "status": "engine-referenced-no-oracle-receipt",
+          "status": "oracle-receipted-hook",
           "universeId": 43,
           "factoryCarrierCount": 69,
           "legalCarrierCount": 1,
@@ -22228,7 +22259,9 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 2,
-          "oracleReceiptCards": [],
+          "oracleReceiptCards": [
+            "R15"
+          ],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -22247,6 +22280,11 @@
             {
               "path": "src/data/gen/battle-frontier-held-items.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R15",
+              "kind": "oracle-receipt"
             }
           ],
           "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
@@ -57926,13 +57964,13 @@
       {
         "id": "interaction:switching/entry x immunity/absorb",
         "label": "switching/entry x immunity/absorb",
-        "status": "oracle-receipt-gap",
+        "status": "oracle-receipted-pair",
         "recipeIds": [
           "R15"
         ],
         "mechanism": "Spikes damages only a non-Flying, non-Levitate switch-in (`battle_script_commands.c:5219-5254`); switch-in also obtains the incoming ability from species/slot (`4637-4646`).",
         "existingTier1Coverage": "`tests/battleScriptSwitchinOpcode.test.ts`",
-        "gapOrFirstProof": "R15 oracle: three Spikes layers, Flying/Levitate/type control.",
+        "gapOrFirstProof": "R15 complete: three layers, real Flying/Levitate entries, and a grounded three-layer control.",
         "evidence": [
           {
             "path": "docs/gate6-interaction-matrix-scout.md",
@@ -57947,7 +57985,7 @@
             "kind": "parameterized-oracle-request"
           }
         ],
-        "notes": "Static and Tier-1 evidence remains visible, but the parameterized-oracle receipt is still an explicit gap."
+        "notes": "Pairwise evidence is not a Cartesian-product claim."
       }
     ],
     "parameterizedOracle": {
@@ -57995,7 +58033,7 @@
         {
           "id": "receipt-family:R15",
           "label": "R15",
-          "status": "oracle-receipt-gap",
+          "status": "oracle-receipted-family",
           "fixtureCount": 1,
           "scenarioIds": [
             "receipt:tools/battle-lab/gate6-r15-off.json"
@@ -58003,14 +58041,14 @@
           "evidence": [
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "interaction-card"
+              "kind": "completed-receipt-note"
             },
             {
               "path": "tools/battle-lab/gate6-r15-off.json",
               "kind": "parameterized-oracle-request"
             }
           ],
-          "notes": "This is the next bounded oracle-backed acceptance unit until a receipt is added; kernel/static evidence does not close it."
+          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
         },
         {
           "id": "receipt-family:R3",
@@ -58632,16 +58670,14 @@
           "id": "receipt:tools/battle-lab/gate6-r15-off.json",
           "label": "gate6-r15-off.json",
           "cardId": "R15",
-          "status": "fixture-only-no-committed-receipt",
+          "status": "oracle-receipted",
           "profile": "battle-scene-off",
           "mode": "mechanicLab",
-          "seed": 4,
-          "captureCount": 23,
+          "seed": 1,
+          "captureCount": 12,
           "effectFamilies": [
             "EFFECT_HIT",
-            "EFFECT_PROTECT",
-            "EFFECT_REST",
-            "EFFECT_ROAR",
+            "EFFECT_SPEED_UP_2",
             "EFFECT_SPIKES"
           ],
           "abilities": [
@@ -58661,10 +58697,10 @@
             },
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "staging-card"
+              "kind": "completed-receipt-note"
             }
           ],
-          "notes": "Request is committed, but a deterministic receipt is not documented in the completed receipt notes."
+          "notes": "The scout's completed receipt notes document deterministic semantic observations for this request card."
         },
         {
           "id": "receipt:tools/battle-lab/gate6-r2-hail-control-off.json",
