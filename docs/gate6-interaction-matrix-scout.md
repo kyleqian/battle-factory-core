@@ -68,10 +68,10 @@ the state transition.
 | weather x status | Sun prevents a new freeze; weather itself is not a major-status cure. `seteffect` checks sun before Ice type/Magma Armor (`battle_script_commands.c:2380-2393`). | `tests/battleScriptHitChainOpcode.test.ts` (freeze applies without weather and is blocked by active sun) | R1 receipts the RNG-gated Ice Beam pair on two freeze-producing seeds. |
 | weather x volatile | Sand/hail chip skips underground and underwater; weather also changes Thunder's accuracy while semi-invulnerability is checked first (`battle_script_commands.c:1062-1094`, `7602-7640`). | `tests/battleScriptDamagingWeatherOpcode.test.ts` (underground weather chip); `tests/gate6WeatherVolatileInteractions.test.ts` (R2 full weather pass, damage/message order) | R2 complete: Dig under Hail, then surface, paired with a grounded two-turn control. |
 | weather x held-item | The only shared scheduling boundary is end-turn: abilities, normal items, then Leech Seed/poison are sequenced by `DoBattlerEndTurnEffects` (`battle_util.c:1494-1533`); weather damage is a separate script loop (`battle_scripts_1.s:3200-3222`). No weather-specific held-item branch exists. | `tests/gate6KernelInteractions.test.ts` (K1: sand chip precedes Leftovers/Sitrus activation, exact HP event sequences, Sitrus threshold crossing, no-weather controls) | K1 complete (kernel proof; event order matched source, no oracle promotion needed). |
-| weather x ability | Cloud Nine/Air Lock suppress **all** `WEATHER_HAS_EFFECT`; Forecast changes Castform's type in rain/sun/hail; Rain Dish, Swift Swim and Chlorophyll read active weather; Sand Veil changes accuracy (`battle_util.h:47-48`; `battle_util.c:2396-2427,2955-2970`; `battle_script_commands.c:1152-1155`). Air Lock is UNREACHABLE; Cloud Nine/Forecast and the speed/end-turn abilities are legal. | `tests/battleScriptDamagingWeatherOpcode.test.ts` (Cloud Nine, Sand Veil); `tests/battleScriptSwitchinOpcode.test.ts` (weather entry scheduling); `tests/gate6WeatherAbilityInteractions.test.ts` (R4 Forecast form/type pairs, Weather Ball type/power under every weather, exact two-seed damage) | R4 complete: same-turn Rain Dance Forecast pass, Water Weather Ball, paired clear-weather damage, and five-turn expiry/revert. R3 remains the Cloud Nine removal proof. |
+| weather x ability | Cloud Nine/Air Lock suppress **all** `WEATHER_HAS_EFFECT`; Forecast changes Castform's type in rain/sun/hail; Rain Dish, Swift Swim and Chlorophyll read active weather; Sand Veil changes accuracy (`battle_util.h:47-48`; `battle_util.c:2396-2427,2955-2970`; `battle_script_commands.c:1152-1155`). Air Lock is UNREACHABLE; Cloud Nine/Forecast and the speed/end-turn abilities are legal. | `tests/battleScriptDamagingWeatherOpcode.test.ts` (Cloud Nine, Sand Veil); `tests/battleScriptSwitchinOpcode.test.ts` (weather entry scheduling); `tests/gate6WeatherAbilityInteractions.test.ts` (R4 Forecast form/type pairs, Weather Ball type/power under every weather, exact two-seed damage); `tests/gate6R3Receipt.test.ts` (legal removal/reactivation receipt) | R4 and R3 complete: same-turn Forecast/Weather Ball behavior is paired with the legal Golduck Cloud Nine → neutral Rattata switch; Castform stays Normal while Cloud Nine is present, then becomes Water and uses Weather Ball after the switch. |
 | weather x stat-stage | Accuracy calculation applies accuracy/evasion stages before sun-Thunder and Sand Veil modifiers (`battle_script_commands.c:1128-1155`). | `tests/gate6KernelInteractions.test.ts` (K2: sun/rain/sand across stages -2/0/+2; sun boundaries 30/50/83, Sand Veil 33/56/92, rain Thunder zero-RNG guaranteed hit) | K2 complete — and it caught a real kernel defect: `battleScriptHitChainOpcode.ts` hardcoded weather inactive in accuracy checks (rain-Thunder bypass, sun-Thunder 50, Sand Veil all missing); fixed source-cited in `450cf532`. |
-| weather x switching/entry | Entry weather abilities set permanent weather exactly on switch-in; subsequent same-weather entries are a no-op (`battle_util.c:2485-2558`). Drizzle/Sand Stream/Drought are **UNREACHABLE (3)** at L50; Cloud Nine is a legal entry suppression case. | `tests/battleScriptSwitchinOpcode.test.ts` (Drizzle/Sand Stream/Drought unit mechanics) | R3 oracle uses legal Golduck Cloud Nine against manually created Rain Dance, not unreachable setter staging. |
-| weather x immunity/absorb | Type immunity (Rock/Ground/Steel vs sand, Ice vs hail), Sand Veil, and underground/underwater suppress weather chip (`battle_script_commands.c:7606-7640`); Cloud Nine globally suppresses the predicate (`battle_util.h:47-48`). | `tests/battleScriptDamagingWeatherOpcode.test.ts`; `tests/gate6WeatherVolatileInteractions.test.ts` (R2) | R2/R3 make the pairwise boundaries explicit. |
+| weather x switching/entry | Entry weather abilities set permanent weather exactly on switch-in; subsequent same-weather entries are a no-op (`battle_util.c:2485-2558`). Drizzle/Sand Stream/Drought are **UNREACHABLE (3)** at L50; Cloud Nine is a legal entry suppression case. | `tests/battleScriptSwitchinOpcode.test.ts` (Drizzle/Sand Stream/Drought unit mechanics); `tests/gate6R3Receipt.test.ts` (ordinary party-menu switch and preserved weather timer) | R3 complete: Rain Dance sets the real field flag/timer, the player switch replaces Cloud Nine with neutral Rattata without clearing rain, and the post-switch Forecast/Weather Ball consumer sees active rain. |
+| weather x immunity/absorb | Type immunity (Rock/Ground/Steel vs sand, Ice vs hail), Sand Veil, and underground/underwater suppress weather chip (`battle_script_commands.c:7606-7640`); Cloud Nine globally suppresses the predicate (`battle_util.h:47-48`). | `tests/battleScriptDamagingWeatherOpcode.test.ts`; `tests/gate6WeatherVolatileInteractions.test.ts` (R2); `tests/gate6R3Receipt.test.ts` (Cloud Nine suppression/removal boundary) | R2/R3 complete: R2 receipts the concrete hail immunity/underground gate, while R3 receipts the global Cloud Nine suppression and its reactivation after switching. |
 | status x volatile | Sleep clears Nightmare when cured; confusion, paralysis, and infatuation are independent ordered attack-canceler gates (`battle_util.c:2040-2054,2156-2218`). | `tests/gate6KernelInteractions.test.ts` (K3: Chesto/Lum clear sleep+Nightmare, preserve unrelated infatuation; confusion → paralysis → infatuation gate order; resumable RNG ledger with skipped draws pinned on early-outs) | K3 complete (kernel proof). |
 | status x held-item | Chesto clears sleep and Nightmare; condition berries cure their matching major status; Lum clears any major status plus confusion (`battle_util.c:3499-3591`). | `tests/battleScriptMoveEndOpcode.test.ts` (Cheri/Lum move-end activation); `tests/gate6EntryItemInteractions.test.ts` (R5 Chesto sleep+Nightmare and Lum confusion specificity) | R5 receipts exact Chesto/Lum controller timing. |
 | status x ability | Natural Cure clears major status on switch-out; Guts/Marvel Scale read status for stats; immunities reject sleep/poison/burn/freeze/paralysis and Own Tempo rejects confusion (`battle_script_commands.c:9590-9604,2360-2435,2531-2545`; `battle_util.c:2873-2945`). | `tests/battleScriptMoveEndOpcode.test.ts` (ability status cures/Own Tempo); `tests/gate6StatusAbilityInteractions.test.ts` (R7 complete burn/Guts/Facade scripts, arithmetic, and chip) | R6 complete; R7 complete with two-seed OFF-ROM receipts. |
@@ -104,7 +104,7 @@ are legal inert duplicates with `[Tackle,Tackle,Tackle,Tackle]`.
 | --- | --- | --- |
 | R1 | `gate6-r1-sun-off.json`: faster player Vileplume uses Sunny Day, then constrained Articuno uses Ice Beam. `gate6-r1-control-off.json`: the identical parties/turn use Growth, a legal non-weather move with the same zero-RNG setup shape. | On seeds selected because the control's Ice Beam secondary roll freezes, both scenarios consume the same move RNG states; only active sun prevents status `0x20`. |
 | R2 | `gate6-r2-hail-off.json`: A: Dugtrio, Dig x4; B: Articuno, Hail x4. `gate6-r2-hail-control-off.json` replaces Dig with Growl x4. Hail is required here: Dugtrio's Ground type independently makes the suggested Sandstorm pairing permanently immune. | Active underground ignores chip; surfacing re-enables exact `floor(maxHP/16)` chip; the grounded control takes it every end turn. |
-| R3 | A: Golduck abilitySlot=1 (Cloud Nine), Rain Dance; B: neutral Tackle x4. Switch Golduck out after rain is live. | Weather flag remains but chip/accuracy resumes only after Cloud Nine leaves. |
+| R3 | A: Golduck abilitySlot=1 (Cloud Nine), Rain Dance; B: Castform abilitySlot=0 (Forecast), Weather Ball x4. Switch Golduck out to the neutral Rattata bench after rain is live. | While Cloud Nine is active, rain remains `weather=1` but Forecast stays Normal; after the real switch, the timer remains live, Forecast changes Castform to Water, and a subsequent Weather Ball is selected under active rain. |
 | R4 | `gate6-r4-off.json`: A: Castform Forecast, Weather Ball x4; B: Rain Dance x4. `gate6-r4-control-off.json` changes only the opponent move to Splash x4. | Rain Dance's same-turn form pass sets Water type/form before Weather Ball; the paired control stays Normal. The long rain fixture also receipts expiry and Normal reversion. |
 | R5 | `gate6-r5-off.json`: Chesto Snorlax uses Rest twice versus Tackle x4 (the first full-HP failure stages real damage; the second Rest succeeds). `gate6-r5-lum-off.json`: Lum Machamp versus Duskull Confuse Ray x4. | Chesto clears Rest sleep/Nightmare and is consumed only after its wake message; Lum clears the RNG-duration confusion and is consumed after its distinct cure message. |
 | R6 | A: Starmie Natural Cure, Recover; bench: neutral. B: Muk Toxic x4. Apply Toxic, voluntarily switch, then return. | Departing Starmie party status becomes clear; ordinary incoming state is rebuilt. |
@@ -267,6 +267,38 @@ write. This receipts the source order: Intimidate's stage cut/message,
 then White Herb's normalization/message, then the shared item removal
 (`battle_main.c:3869-3894`, `battle_util.c:3003-3073,3303-3329`,
 `battle_script_commands.c:5901-5915`).
+
+### R3 — Cloud Nine removal/reactivation and Forecast Weather Ball
+
+`gate6-r3-off.json` now uses complete legal parties: player Golduck
+(species 55, ability slot 1 = Cloud Nine) has Rain Dance, its party-index-1
+bench is neutral Rattata, and the opponent is Castform (species 385, ability
+slot 0 = Forecast) with four Weather Ball slots.  The ordinary controller
+route performs Rain Dance and then the real party-menu switch; no weather,
+timer, type, HP, or outcome state is injected.
+
+The two fresh Battle Scene OFF runs are byte-identical: `manifest.json` has
+SHA-256 `e0fdd5103205c6f3313d06574dd05a9e180613562f8919a51debf3007a4bab60`,
+and the sorted capture-PNG basename tree has SHA-256
+`143f651f2ba31a82a1a7319b60a98c6e7982e23577ac201463a3e0a9e0b5d2b6`.
+Temporary output-directory prefixes are the only path normalization; no
+nondeterministic artifact paths or semantic fields were excluded.  The
+compact semantic/framebuffer receipt is committed at
+`tools/probe/receipts/gate6-r3-off.json`, with a hermetic pin in
+`tests/gate6R3Receipt.test.ts`.
+
+At frame 258, Rain Dance has produced `weather = 1` and timer `5`, while
+Golduck is active with Cloud Nine and Castform remains Normal/Normal
+(`types = [0,0]`), demonstrating the global weather-effect suppression.  The
+timer is `4` at frame 1150, where the ordinary switch has replaced Golduck
+with Rattata (`partyIndex = 1`, neutral ability 50); Castform is still
+Normal/Normal during the switch boundary.  At frame 1300 the same live rain
+flag/timer remains and Forecast has changed Castform to Water/Water
+(`[11,11]`).  Frame 1500 has Castform's Weather Ball (`currentMove = 311`)
+selected with PP `[10,10,9,9]`, proving a subsequent consumer sees active
+rain after Cloud Nine removal.  These are the source boundaries in
+`battle_util.h:47-48`, `battle_util.c:2396-2427`, and
+`battle_script_commands.c:9787-9805`.
 
 ### R11 — Ninjask Baton Pass versus ordinary-switch volatile/stage lifetime
 
@@ -632,7 +664,7 @@ in scenario/evidence once accepted.
 1. **R11 — Baton Pass versus ordinary-switch volatile/stage retention.** `bin/oracle lab tools/battle-lab/gate6-r11-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts; npm run build`
 2. **R6 — Toxic x Natural Cure switch-out persistence.** `bin/oracle lab tools/battle-lab/gate6-r6-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts tests/battleScriptMoveEndOpcode.test.ts; npm run build`
 3. **R15 — CLOSED by the three-layer Flying/Levitate/grounded receipt above.**
-4. **R3 — Cloud Nine removal/reactivation.** `bin/oracle lab tools/battle-lab/gate6-r3-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptDamagingWeatherOpcode.test.ts; npm run build`
+4. **R3 — CLOSED by the legal Golduck → neutral Rattata switch and Castform Forecast/Weather Ball receipt.** See the completed receipt note above and `tools/probe/receipts/gate6-r3-off.json`.
 5. **R9 — Swagger x Lum versus White Herb's negative-stage guard.** `bin/oracle lab tools/battle-lab/gate6-r9-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptMoveEndOpcode.test.ts; npm run build`
 6. **R13 — Intimidate x stat-drop prevention specificity.** `bin/oracle lab tools/battle-lab/gate6-r13-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptStatbuffchangeOpcode.test.ts tests/battleScriptSwitchinOpcode.test.ts; npm run build`
 7. **R14 — CLOSED by the banked absorption program plus K7's Gate-6 pair pin.** See the completed receipt note above; intentionally no duplicate `gate6-r14-off.json`.
@@ -645,5 +677,5 @@ weather defect, `450cf532`), K3 (major/volatile canceler ordering), K4
 (status modifiers at fixed stages), K5 (Swagger/Foresight), and K6 (White
 Herb cap/reset) all live in `tests/gate6KernelInteractions.test.ts`
 (2026-07-30); K7 was closed above without inflated oracle work. With
-R7/R8 receipted the same day, the only open card is R4 (Castform
-Forecast), in flight.
+R3/R7/R8 receipted and R4 already complete, the next ranked open card is R9
+(Swagger × Lum versus White Herb's negative-stage guard).
