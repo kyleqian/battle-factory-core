@@ -24,7 +24,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   ability **6** at the correct battler. Folded `animation-main` through the
   bounded Poison Sting lower-carrier work (`b46f5f74`..`2628c57c`, merge
   `d6f79306`) and Karate Chop source checkpoint (`008cf4f0`, merge
-  `4a2fcd59`); animation coverage remains **147/276 exact**.
+  `4a2fcd59`), plus the animation-supervisor wind-down ledger (`87bc8a8c`,
+  merge `6bf8eca9`); animation coverage remains **147/276 exact**.
 - **Next:** continue the ordered family-level Gate-6 worklist from the verified
   **106 ability / 195 item** row-gap frontier. Shell Bell still needs its own
   bounded successful-damage census; Poison Sting and Karate Chop remain
