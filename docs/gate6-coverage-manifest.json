@@ -3,7 +3,7 @@
   "gate6": {
     "closed": false,
     "verdict": "OPEN — this first manifest exposes coverage and receipt gaps; it does not claim Gate 6 closed.",
-    "nextAcceptanceUnit": "R12: add and document the missing parameterized-oracle receipt before treating this family as accepted.",
+    "nextAcceptanceUnit": "Broader Gate-6 breadth acceptance: All committed parameterized request cards are receipted, but that count alone does not meet ROADMAP.md:1604-1613's broader breadth acceptance (finite unsupported-entry closure, distinct effect/hook-family evidence, sibling batches, multiple seeded legal Factory rounds, and selected UI comparisons).",
     "interpretation": "Static executable reachability, engine references, Tier-1 proofs, and oracle receipts are separate evidence classes."
   },
   "generatedBy": "node --experimental-strip-types tools/report/gate6-coverage-manifest.ts",
@@ -40,7 +40,7 @@
     "hooks": {
       "abilities": {
         "total": 78,
-        "oracleReceipted": 27,
+        "oracleReceipted": 29,
         "zeroFactoryWidened": 4
       },
       "holdEffects": {
@@ -57,15 +57,15 @@
     "interactions": {
       "total": 28,
       "kernelProven": 6,
-      "oracleReceipted": 19,
-      "receiptGaps": 3
+      "oracleReceipted": 22,
+      "receiptGaps": 0
     },
     "parameterizedOracle": {
       "scenarioRequests": 24,
-      "receiptDocumented": 23,
-      "receiptGaps": 1,
+      "receiptDocumented": 24,
+      "receiptGaps": 0,
       "familyCards": 16,
-      "familyReceiptGaps": 1
+      "familyReceiptGaps": 0
     }
   },
   "sections": {
@@ -18227,6 +18227,7 @@
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 2,
           "oracleReceiptCards": [
+            "R12",
             "R12b",
             "R13"
           ],
@@ -18248,6 +18249,11 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R12",
+              "kind": "oracle-receipt"
             },
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
@@ -18337,7 +18343,7 @@
         {
           "id": "ability:ABILITY_WONDER_GUARD",
           "label": "ABILITY_WONDER_GUARD",
-          "status": "engine-referenced-no-oracle-receipt",
+          "status": "oracle-receipted-hook",
           "universeId": 25,
           "factoryCarrierCount": 1,
           "legalCarrierCount": 1,
@@ -18347,7 +18353,9 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 11,
-          "oracleReceiptCards": [],
+          "oracleReceiptCards": [
+            "R12"
+          ],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -18366,6 +18374,11 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R12",
+              "kind": "oracle-receipt"
             }
           ],
           "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
@@ -19600,7 +19613,7 @@
         {
           "id": "ability:ABILITY_HYPER_CUTTER",
           "label": "ABILITY_HYPER_CUTTER",
-          "status": "engine-referenced-no-oracle-receipt",
+          "status": "oracle-receipted-hook",
           "universeId": 52,
           "factoryCarrierCount": 12,
           "legalCarrierCount": 8,
@@ -19610,7 +19623,9 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 9,
-          "oracleReceiptCards": [],
+          "oracleReceiptCards": [
+            "R12"
+          ],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -19629,6 +19644,11 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R12",
+              "kind": "oracle-receipt"
             }
           ],
           "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
@@ -20128,6 +20148,7 @@
             "R10",
             "R10",
             "R11",
+            "R12",
             "R12b",
             "R13",
             "R2",
@@ -20173,6 +20194,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R11",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R12",
               "kind": "oracle-receipt"
             },
             {
@@ -21607,6 +21633,7 @@
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 4,
           "oracleReceiptCards": [
+            "R12",
             "R12b",
             "R9"
           ],
@@ -21628,6 +21655,11 @@
             {
               "path": "src/data/gen/battle-frontier-held-items.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R12",
+              "kind": "oracle-receipt"
             },
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
@@ -57775,7 +57807,7 @@
       {
         "id": "interaction:held-item x ability",
         "label": "held-item x ability",
-        "status": "oracle-receipt-gap",
+        "status": "oracle-receipted-pair",
         "recipeIds": [
           "R12",
           "R12b"
@@ -57805,7 +57837,7 @@
             "kind": "parameterized-oracle-request"
           }
         ],
-        "notes": "Static and Tier-1 evidence remains visible, but the parameterized-oracle receipt is still an explicit gap."
+        "notes": "Pairwise evidence is not a Cartesian-product claim."
       },
       {
         "id": "interaction:held-item x stat-stage",
@@ -57850,13 +57882,13 @@
       {
         "id": "interaction:held-item x switching/entry",
         "label": "held-item x switching/entry",
-        "status": "oracle-receipt-gap",
+        "status": "oracle-receipted-pair",
         "recipeIds": [
           "R12"
         ],
         "mechanism": "White Herb has an explicit switch-in handler that normalizes negative stages (`battle_util.c:3305-3329`); a normal switch reconstructs the party item unless Knock Off recorded it (`battle_script_commands.c:4637-4646`).",
-        "existingTier1Coverage": "`tests/battleScriptSwitchinOpcode.test.ts` (item reconstruction)",
-        "gapOrFirstProof": "R12 oracle.",
+        "existingTier1Coverage": "`tests/battleScriptSwitchinOpcode.test.ts` (item reconstruction); `tests/gate6R12Receipt.test.ts`",
+        "gapOrFirstProof": "R12 complete: Hyper Cutter prevents Granbull's entry drop before White Herb has a negative stage to restore, so both battle and party item copies remain held.",
         "evidence": [
           {
             "path": "docs/gate6-interaction-matrix-scout.md",
@@ -57867,11 +57899,15 @@
             "kind": "interaction-tier-1-or-scout"
           },
           {
+            "path": "tests/gate6R12Receipt.test.ts",
+            "kind": "interaction-tier-1-or-scout"
+          },
+          {
             "path": "tools/battle-lab/gate6-r12-off.json",
             "kind": "parameterized-oracle-request"
           }
         ],
-        "notes": "Static and Tier-1 evidence remains visible, but the parameterized-oracle receipt is still an explicit gap."
+        "notes": "Pairwise evidence is not a Cartesian-product claim."
       },
       {
         "id": "interaction:held-item x immunity/absorb",
@@ -57932,7 +57968,7 @@
       {
         "id": "interaction:ability x switching/entry",
         "label": "ability x switching/entry",
-        "status": "oracle-receipt-gap",
+        "status": "oracle-receipted-pair",
         "recipeIds": [
           "R6",
           "R12",
@@ -57963,7 +57999,7 @@
             "kind": "parameterized-oracle-request"
           }
         ],
-        "notes": "Static and Tier-1 evidence remains visible, but the parameterized-oracle receipt is still an explicit gap."
+        "notes": "Pairwise evidence is not a Cartesian-product claim."
       },
       {
         "id": "interaction:ability x immunity/absorb",
@@ -58102,189 +58138,6 @@
     "parameterizedOracle": {
       "families": [
         {
-          "id": "receipt-family:R12",
-          "label": "R12",
-          "status": "oracle-receipt-gap",
-          "fixtureCount": 1,
-          "scenarioIds": [
-            "receipt:tools/battle-lab/gate6-r12-off.json"
-          ],
-          "evidence": [
-            {
-              "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "interaction-card"
-            },
-            {
-              "path": "tools/battle-lab/gate6-r12-off.json",
-              "kind": "parameterized-oracle-request"
-            }
-          ],
-          "notes": "This is the next bounded oracle-backed acceptance unit until a receipt is added; kernel/static evidence does not close it."
-        },
-        {
-          "id": "receipt-family:R11",
-          "label": "R11",
-          "status": "oracle-receipted-family",
-          "fixtureCount": 1,
-          "scenarioIds": [
-            "receipt:tools/battle-lab/gate6-r11-off.json"
-          ],
-          "evidence": [
-            {
-              "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "completed-receipt-note"
-            },
-            {
-              "path": "tools/battle-lab/gate6-r11-off.json",
-              "kind": "parameterized-oracle-request"
-            }
-          ],
-          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
-        },
-        {
-          "id": "receipt-family:R6",
-          "label": "R6",
-          "status": "oracle-receipted-family",
-          "fixtureCount": 1,
-          "scenarioIds": [
-            "receipt:tools/battle-lab/gate6-r6-off.json"
-          ],
-          "evidence": [
-            {
-              "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "completed-receipt-note"
-            },
-            {
-              "path": "tools/battle-lab/gate6-r6-off.json",
-              "kind": "parameterized-oracle-request"
-            }
-          ],
-          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
-        },
-        {
-          "id": "receipt-family:R15",
-          "label": "R15",
-          "status": "oracle-receipted-family",
-          "fixtureCount": 1,
-          "scenarioIds": [
-            "receipt:tools/battle-lab/gate6-r15-off.json"
-          ],
-          "evidence": [
-            {
-              "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "completed-receipt-note"
-            },
-            {
-              "path": "tools/battle-lab/gate6-r15-off.json",
-              "kind": "parameterized-oracle-request"
-            }
-          ],
-          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
-        },
-        {
-          "id": "receipt-family:R3",
-          "label": "R3",
-          "status": "oracle-receipted-family",
-          "fixtureCount": 1,
-          "scenarioIds": [
-            "receipt:tools/battle-lab/gate6-r3-off.json"
-          ],
-          "evidence": [
-            {
-              "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "completed-receipt-note"
-            },
-            {
-              "path": "tools/battle-lab/gate6-r3-off.json",
-              "kind": "parameterized-oracle-request"
-            }
-          ],
-          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
-        },
-        {
-          "id": "receipt-family:R9",
-          "label": "R9",
-          "status": "oracle-receipted-family",
-          "fixtureCount": 1,
-          "scenarioIds": [
-            "receipt:tools/battle-lab/gate6-r9-off.json"
-          ],
-          "evidence": [
-            {
-              "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "completed-receipt-note"
-            },
-            {
-              "path": "tools/battle-lab/gate6-r9-off.json",
-              "kind": "parameterized-oracle-request"
-            }
-          ],
-          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
-        },
-        {
-          "id": "receipt-family:R13",
-          "label": "R13",
-          "status": "oracle-receipted-family",
-          "fixtureCount": 1,
-          "scenarioIds": [
-            "receipt:tools/battle-lab/gate6-r13-off.json"
-          ],
-          "evidence": [
-            {
-              "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "completed-receipt-note"
-            },
-            {
-              "path": "tools/battle-lab/gate6-r13-off.json",
-              "kind": "parameterized-oracle-request"
-            }
-          ],
-          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
-        },
-        {
-          "id": "receipt-family:R14",
-          "label": "R14",
-          "status": "oracle-receipted-family",
-          "fixtureCount": 0,
-          "scenarioIds": [],
-          "evidence": [
-            {
-              "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "completed-receipt-note"
-            },
-            {
-              "path": "docs/absorbing-abilities-ground-truth.md",
-              "kind": "banked-oracle-receipt"
-            }
-          ],
-          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
-        },
-        {
-          "id": "receipt-family:R5",
-          "label": "R5",
-          "status": "oracle-receipted-family",
-          "fixtureCount": 2,
-          "scenarioIds": [
-            "receipt:tools/battle-lab/gate6-r5-lum-off.json",
-            "receipt:tools/battle-lab/gate6-r5-off.json"
-          ],
-          "evidence": [
-            {
-              "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "completed-receipt-note"
-            },
-            {
-              "path": "tools/battle-lab/gate6-r5-lum-off.json",
-              "kind": "parameterized-oracle-request"
-            },
-            {
-              "path": "tools/battle-lab/gate6-r5-off.json",
-              "kind": "parameterized-oracle-request"
-            }
-          ],
-          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
-        },
-        {
           "id": "receipt-family:R1",
           "label": "R1",
           "status": "oracle-receipted-family",
@@ -58335,6 +58188,26 @@
           "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
         },
         {
+          "id": "receipt-family:R3",
+          "label": "R3",
+          "status": "oracle-receipted-family",
+          "fixtureCount": 1,
+          "scenarioIds": [
+            "receipt:tools/battle-lab/gate6-r3-off.json"
+          ],
+          "evidence": [
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "kind": "completed-receipt-note"
+            },
+            {
+              "path": "tools/battle-lab/gate6-r3-off.json",
+              "kind": "parameterized-oracle-request"
+            }
+          ],
+          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
+        },
+        {
           "id": "receipt-family:R4",
           "label": "R4",
           "status": "oracle-receipted-family",
@@ -58354,6 +58227,51 @@
             },
             {
               "path": "tools/battle-lab/gate6-r4-off.json",
+              "kind": "parameterized-oracle-request"
+            }
+          ],
+          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
+        },
+        {
+          "id": "receipt-family:R5",
+          "label": "R5",
+          "status": "oracle-receipted-family",
+          "fixtureCount": 2,
+          "scenarioIds": [
+            "receipt:tools/battle-lab/gate6-r5-lum-off.json",
+            "receipt:tools/battle-lab/gate6-r5-off.json"
+          ],
+          "evidence": [
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "kind": "completed-receipt-note"
+            },
+            {
+              "path": "tools/battle-lab/gate6-r5-lum-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/gate6-r5-off.json",
+              "kind": "parameterized-oracle-request"
+            }
+          ],
+          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
+        },
+        {
+          "id": "receipt-family:R6",
+          "label": "R6",
+          "status": "oracle-receipted-family",
+          "fixtureCount": 1,
+          "scenarioIds": [
+            "receipt:tools/battle-lab/gate6-r6-off.json"
+          ],
+          "evidence": [
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "kind": "completed-receipt-note"
+            },
+            {
+              "path": "tools/battle-lab/gate6-r6-off.json",
               "kind": "parameterized-oracle-request"
             }
           ],
@@ -58415,6 +58333,26 @@
           "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
         },
         {
+          "id": "receipt-family:R9",
+          "label": "R9",
+          "status": "oracle-receipted-family",
+          "fixtureCount": 1,
+          "scenarioIds": [
+            "receipt:tools/battle-lab/gate6-r9-off.json"
+          ],
+          "evidence": [
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "kind": "completed-receipt-note"
+            },
+            {
+              "path": "tools/battle-lab/gate6-r9-off.json",
+              "kind": "parameterized-oracle-request"
+            }
+          ],
+          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
+        },
+        {
           "id": "receipt-family:R10",
           "label": "R10",
           "status": "oracle-receipted-family",
@@ -58445,6 +58383,46 @@
           "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
         },
         {
+          "id": "receipt-family:R11",
+          "label": "R11",
+          "status": "oracle-receipted-family",
+          "fixtureCount": 1,
+          "scenarioIds": [
+            "receipt:tools/battle-lab/gate6-r11-off.json"
+          ],
+          "evidence": [
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "kind": "completed-receipt-note"
+            },
+            {
+              "path": "tools/battle-lab/gate6-r11-off.json",
+              "kind": "parameterized-oracle-request"
+            }
+          ],
+          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
+        },
+        {
+          "id": "receipt-family:R12",
+          "label": "R12",
+          "status": "oracle-receipted-family",
+          "fixtureCount": 1,
+          "scenarioIds": [
+            "receipt:tools/battle-lab/gate6-r12-off.json"
+          ],
+          "evidence": [
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "kind": "completed-receipt-note"
+            },
+            {
+              "path": "tools/battle-lab/gate6-r12-off.json",
+              "kind": "parameterized-oracle-request"
+            }
+          ],
+          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
+        },
+        {
           "id": "receipt-family:R12b",
           "label": "R12b",
           "status": "oracle-receipted-family",
@@ -58459,6 +58437,64 @@
             },
             {
               "path": "tools/battle-lab/gate6-r12b-off.json",
+              "kind": "parameterized-oracle-request"
+            }
+          ],
+          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
+        },
+        {
+          "id": "receipt-family:R13",
+          "label": "R13",
+          "status": "oracle-receipted-family",
+          "fixtureCount": 1,
+          "scenarioIds": [
+            "receipt:tools/battle-lab/gate6-r13-off.json"
+          ],
+          "evidence": [
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "kind": "completed-receipt-note"
+            },
+            {
+              "path": "tools/battle-lab/gate6-r13-off.json",
+              "kind": "parameterized-oracle-request"
+            }
+          ],
+          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
+        },
+        {
+          "id": "receipt-family:R14",
+          "label": "R14",
+          "status": "oracle-receipted-family",
+          "fixtureCount": 0,
+          "scenarioIds": [],
+          "evidence": [
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "kind": "completed-receipt-note"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "kind": "banked-oracle-receipt"
+            }
+          ],
+          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
+        },
+        {
+          "id": "receipt-family:R15",
+          "label": "R15",
+          "status": "oracle-receipted-family",
+          "fixtureCount": 1,
+          "scenarioIds": [
+            "receipt:tools/battle-lab/gate6-r15-off.json"
+          ],
+          "evidence": [
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "kind": "completed-receipt-note"
+            },
+            {
+              "path": "tools/battle-lab/gate6-r15-off.json",
               "kind": "parameterized-oracle-request"
             }
           ],
@@ -58678,7 +58714,7 @@
           "id": "receipt:tools/battle-lab/gate6-r12-off.json",
           "label": "gate6-r12-off.json",
           "cardId": "R12",
-          "status": "fixture-only-no-committed-receipt",
+          "status": "oracle-receipted",
           "profile": "battle-scene-off",
           "mode": "mechanicLab",
           "seed": 1,
@@ -58703,10 +58739,10 @@
             },
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "staging-card"
+              "kind": "completed-receipt-note"
             }
           ],
-          "notes": "Request is committed, but a deterministic receipt is not documented in the completed receipt notes."
+          "notes": "The scout's completed receipt notes document deterministic semantic observations for this request card."
         },
         {
           "id": "receipt:tools/battle-lab/gate6-r12b-off.json",
