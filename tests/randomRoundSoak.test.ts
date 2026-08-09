@@ -117,4 +117,16 @@ describe("random round soak driver (green milestone pin)", () => {
     );
     expect(result.frames).toBeGreaterThan(9_484);
   });
+
+  it("ISSUES #86: presents a forced replacement's terminal sandstorm continuation", () => {
+    // Seed 27 battle 4 turn 16 forces MURKROW in at 4 HP. The same genuine
+    // reducer receipt then runs sandstorm damage, faints MURKROW, and returns
+    // a terminal trainer-win boundary. Completing the send-out animation must
+    // resume those queued typed commands rather than demand a player command.
+    const result = runSeed(27, { maxFrames: 71_107, renderEvery: 0 });
+    expect(result.errorMessage ?? "").not.toMatch(
+      /Slice 3 resolution completed without a player command boundary/,
+    );
+    expect(result).toMatchObject({ outcome: "OK", endState: "roundLost" });
+  });
 });

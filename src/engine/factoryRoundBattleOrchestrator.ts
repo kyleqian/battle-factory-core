@@ -1847,6 +1847,31 @@ export function advanceFactoryRoundBattleResolution(
       (next, command) => commitCompletedResolutionCommand(next, resolution, command),
       boundaries,
     );
+    const lastSwitchCommandIndex = resolution.segments[resolution.segmentIndex]!.commands.reduce(
+      (last, command, index) => command.type === "switch-in" ? index : last,
+      -1,
+    );
+    const nextCommandIndex = lastSwitchCommandIndex + 1;
+    if (nextCommandIndex < resolution.segments[resolution.segmentIndex]!.commands.length) {
+      // The resumed fainted-actions scan can keep running after the selected
+      // replacement enters. Weather damage is one source-generic example:
+      // the incoming battler may faint and publish terminal commands in this
+      // same immutable reducer receipt. The forced-selector renderer consumed
+      // only the prefix through the final typed switch-in, so return the
+      // remaining commands to the ordinary presentation lifecycle.
+      const resumedResolution = Object.freeze({
+        ...advancedResolution,
+        commandIndex: nextCommandIndex,
+        lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
+      });
+      return Object.freeze({
+        ...state,
+        battle: resolution.pendingBattle,
+        battleResolutionPresentation: resumedResolution,
+        battleForcedPartySelect: null,
+        battlePresentationBoundaries: committedBoundaries,
+      });
+    }
     const settledBoundaries = settleBattlePresentationBoundariesAtRulesBoundary(
       committedBoundaries,
       resolution.pendingBattle.rules.rulesContext,

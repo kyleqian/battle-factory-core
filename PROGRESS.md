@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1057 — [MAIN worker, 2026-08-09] **#86 terminal forced-continuation closed**
+
+- **State:** source-generic repair and red-first public-path test are green;
+  production build, smoke **375/375**, full-policy seeds **16/18/27**, and
+  vanilla **0:20 = 20 OK / 0 CRASH / 0 HANG** pass. Full suite is **830/831
+  files, 8,236 passed / 1 skipped** with only the independently changing,
+  out-of-scope Gate-6 manifest regeneration test red.
+- **Did:** seed 27's typed receipt proves MURKROW enters at 4 HP, then the same
+  forced-switch continuation queues sandstorm damage, faint, and immutable
+  trainer-win commands. The send-out seam now returns every command after the
+  final typed switch-in to the ordinary presentation lifecycle before any
+  stable-boundary handoff; the missing-player-command invariant stays fatal.
+- **Next:** supervisor should fold the independent Gate-6 artifact update and
+  rerun `npm test`; #86 itself is closed. Continue the ordered family-level
+  Gate-6 worklist after the stable union is green.
+- **Notes:** seed 27 is **OK b2 t16 f24829 roundLost**; seeds 16/18 are **OK
+  b4 t37 f91394 / b1 t22 f12881 roundLost**. No seed/battle/turn/tick branch,
+  unsupported barrier, animation, Gate-6 artifact, or canonical Battle-2
+  window changed.
+
 ## 1056 — [MAIN worker, 2026-08-09] **#87 wake-up print-table selector closed**
 
 - **State:** committed source-generic repair is green: full suite **831 files /
@@ -40,21 +60,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   hook gaps stay **111 ability / 300 item**. Static is the one direct contact
   witness; the other five contact outcomes retain explicit receipt gaps. No
   canonical Battle-2 window past tick 33331 or unsupported-barrier pin moved.
-
-## 1054 — [MAIN worker, 2026-08-09] **#86 seed-16 forced-handoff owner repaired**
-
-- **State:** committed fix `59c0182a` is green: full suite **829 files /
-  8,229 passed / 1 skipped**, production build, smoke **375/375**, and vanilla
-  **0:20 = 20 OK / 0 CRASH / 0 HANG**.
-- **Did:** typed faint messages now retain their source battler. A pending
-  forced selector opens only on that requested battler's faint dismissal, so
-  seed 16 presents PHANPY's automatic opponent `1 -> 2` switch before
-  sandstorm's later QUILAVA faint and player selection. The fatal party-change
-  invariant is unchanged; red-verified Tier-1 coverage pins the two-faint
-  ordering.
-- **Next:** #86 retains seed 27's distinct no-command boundary (`b4 t16
-  f71106`). #87 separately records seed 18's MoveUsedWokeUp source-string
-  boundary (`b3 t9 f37531`); choose either bounded source mechanism next.
-- **Notes:** seed 16 is `OK b2 t51 f48250 roundLost`; 12/14/23/44/45/53 all
-  retain their green endpoints. No canonical Battle-2 window, animation, or
-  Gate-6 artifact changed; no unsupported-barrier pin moved.

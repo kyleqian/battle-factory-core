@@ -17,17 +17,6 @@ backlog.
 
 # Open
 
-## #86 — Slice 3 can complete without a player command boundary
-
-**Remaining after the forced-switch repairs, including seed 16's two-faint
-handoff fix (`59c0182a`).** Seed 27 reaches battle 4, turn 16, frame 71,106
-and throws `Slice 3 resolution completed without a player command boundary`.
-It reproduces unchanged after the generic transition and faint-owner repairs;
-no evidence connects it to switch field ownership.
-
-**Repro:** `npm run soak -- --seed 27 --verbose`. Diagnose the reducer's actual
-terminal/continuation shape and keep the missing-command invariant fatal.
-
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **Symptom:** all 62 Factory-front send-out intro families (**376/376** species

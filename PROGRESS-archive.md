@@ -39141,3 +39141,20 @@ both verify scripts/census independently re-verified before this entry.)*
   frontiers. Then rerun full-policy 0:60 and use the new signatures.
 - **Notes:** ability join gaps fall **261 -> 111**; item gaps stay 300. No
   canonical Battle-2 window past tick 33331 changed. No deferred question.
+## 1054 — [MAIN worker, 2026-08-09] **#86 seed-16 forced-handoff owner repaired**
+
+- **State:** committed fix `59c0182a` is green: full suite **829 files /
+  8,229 passed / 1 skipped**, production build, smoke **375/375**, and vanilla
+  **0:20 = 20 OK / 0 CRASH / 0 HANG**.
+- **Did:** typed faint messages now retain their source battler. A pending
+  forced selector opens only on that requested battler's faint dismissal, so
+  seed 16 presents PHANPY's automatic opponent `1 -> 2` switch before
+  sandstorm's later QUILAVA faint and player selection. The fatal party-change
+  invariant is unchanged; red-verified Tier-1 coverage pins the two-faint
+  ordering.
+- **Next:** #86 retains seed 27's distinct no-command boundary (`b4 t16
+  f71106`). #87 separately records seed 18's MoveUsedWokeUp source-string
+  boundary (`b3 t9 f37531`); choose either bounded source mechanism next.
+- **Notes:** seed 16 is `OK b2 t51 f48250 roundLost`; 12/14/23/44/45/53 all
+  retain their green endpoints. No canonical Battle-2 window, animation, or
+  Gate-6 artifact changed; no unsupported-barrier pin moved.
