@@ -77,6 +77,15 @@ describe("MOVE_SLEEP_TALK source reducer", () => {
       offsetX2: 1,
     });
     expect(sleepTalkAtAge(19, "player", playerCenter).swayTask).toBeNull();
+    expect(sleepTalkAtAge(25, "player", playerCenter).scriptWait).toBe(0);
+    expect(sleepTalkAtAge(33, "player", playerCenter).scriptWait).toBe(0);
+    expect(sleepTalkAtAge(41, "player", playerCenter).scriptWait).toBe(0);
+    expect(sleepTalkAtAge(63, "player", playerCenter).scriptWait).toBe(0);
+    expect(sleepTalkAtAge(71, "player", playerCenter).scriptWait).toBe(0);
+    expect(sleepTalkAtAge(79, "player", playerCenter).scriptWait).toBe(0);
+    expect(sleepTalkAtAge(101, "player", playerCenter).scriptWait).toBe(0);
+    expect(sleepTalkAtAge(109, "player", playerCenter).scriptWait).toBe(0);
+    expect(sleepTalkAtAge(117, "player", playerCenter).scriptWait).toBe(0);
     expect(sleepTalkAtAge(18, "opponent", opponentCenter).swayTask).toMatchObject({
       data: [0, -4, 4096, 1, 8, 1, 0, 0, 0, 0, -4096, 1, 0, 0, 0, 0],
       offsetX2: 1,

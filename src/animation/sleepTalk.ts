@@ -220,15 +220,15 @@ function scriptWaitAtAge(age: number, frameCount: number): number {
   if (age <= 0 || age >= frameCount - 1) return 0;
   if (age === 1) return 1;
   if (age <= 3) return 0;
-  if (age <= 25) return 20 - (age - 4);
-  if (age <= 33) return 6 - (age - 26);
-  if (age <= 41) return 6 - (age - 34);
-  if (age <= 63) return 20 - (age - 42);
-  if (age <= 71) return 6 - (age - 64);
-  if (age <= 79) return 6 - (age - 72);
-  if (age <= 101) return 20 - (age - 80);
-  if (age <= 109) return 6 - (age - 102);
-  if (age <= 117) return 6 - (age - 110);
+  if (age <= 25) return Math.max(0, 20 - (age - 4));
+  if (age <= 33) return Math.max(0, 6 - (age - 26));
+  if (age <= 41) return Math.max(0, 6 - (age - 34));
+  if (age <= 63) return Math.max(0, 20 - (age - 42));
+  if (age <= 71) return Math.max(0, 6 - (age - 64));
+  if (age <= 79) return Math.max(0, 6 - (age - 72));
+  if (age <= 101) return Math.max(0, 20 - (age - 80));
+  if (age <= 109) return Math.max(0, 6 - (age - 102));
+  if (age <= 117) return Math.max(0, 6 - (age - 110));
   return 1;
 }
 
