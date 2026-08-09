@@ -4164,7 +4164,6 @@ export function sceneOnDisableView(
     throw new Error(`expected DISABLE presentation, got ${state.config.move}`);
   }
   return {
-    age: state.age,
     attacker: state.config.attacker,
     target: state.config.target,
     ...disableAtAge(

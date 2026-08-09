@@ -943,7 +943,7 @@
     "src/animation/sceneOnPresentation.ts",
     "src/engine/battleScene.ts",
     "tests/animation/detect.test.ts",
-   "tests/animation/detectEvidence.test.ts"
+    "tests/animation/detectEvidence.test.ts"
    ]
   },
   {
