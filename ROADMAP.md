@@ -968,15 +968,12 @@ production path, full rounds) is the standing instrument for Gate 6's
 "multiple seeded legal Factory rounds run end-to-end" clause. Every
 supervisor wind-down runs `npm run soak -- --policy vanilla --seeds 0:20`
 (must stay 20/20 OK) and records the full-policy completion count; ISSUES
-#85 tracks the current crash wall. Evidence slimming for receipts going
-forward: a receipt commits the staged scenario + probe/verify script +
-compact assertion block — not raw per-tick dumps (the oracle is
-deterministic; dumps regenerate on demand and belong in a gitignored
-cache). Prefer regenerate-and-diff over committing full generated
-manifests. After the 24-card receipt set closes, author new oracle
-receipts on divergence, not by default — Tier-1 pins plus soak coverage
-are the default acceptance. Existing committed receipts stay as-is; a
-one-time slimming pass is a papercut-class cleanup step.
+#85 tracks the current crash wall. Receipt hygiene (ADVISORY —
+user-clarified 2026-08-09: worker TIME is the constraint, repo weight is
+not): prefer committing the staged scenario + probe/verify script +
+compact assertion block; a dump that is expensive to regenerate MAY be
+committed as-is. Never spend a worker step regenerating or slimming an
+existing receipt for hygiene alone.
 
 **ISSUES #39 and the animation lane are demoted to filler** until S10's six
 gates are checked. The audited `turn10OnixDarkPalette` Family-F slice is
