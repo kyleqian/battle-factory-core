@@ -16,6 +16,51 @@ node --experimental-strip-types tools/soak/randomRoundSoak.ts --seed <N> --verbo
 
 Runs are deterministic per seed (pinned by `tests/randomRoundSoak.test.ts`).
 
+## 2026-08-09 differential re-run — signatures 3, 4, 5, 7 closed; 6 closed to a 2-seed sibling
+
+Five fixes landed on this branch (one commit each: a4baf562 sig 3,
+b8407083 sig 4, 296d8664 sig 7, 44e72ae9 sig 6, a6da3d6b sig 5), then both
+sweeps re-ran identically (`--seeds 0:500`, `--policy vanilla --seeds
+0:100`).
+
+| Signature | Before | After |
+| --- | --- | --- |
+| 1. HP command starts at X, displayed Y (ISSUES #84 family) | 294/500 | 328/500 |
+| 2. Handoff battler display mismatch (ISSUES #84 item 5) | 133/500 | 153/500 |
+| 3. PKMNSITEMRESTOREDHEALTH no name resolver | 31/500 + vanilla 100/100 | **0** |
+| 4. PKMNCANTUSEMOVETAUNT no rejection resolver | 15/500 | **0** |
+| 5. Forced send-out lifecycle mismatch | 10/500 | **0** |
+| 6. Switch-in message no preceding switch field | 8/500 | **2** (see below) |
+| 7. Clamped stat change refused by banner | 4/500 | **0** |
+| OK (clean terminal) | 5/500 | **15/500** |
+| HANG | 0 | 2 (new frontier, see below) |
+| **Vanilla 0:100** | **0 OK / 100 CRASH** | **100 OK / 0 CRASH** |
+
+- **Every vanilla seed now completes battle 1** (100/100; all lose to the
+  anchor opponent and exit cleanly through the loss terminal into the
+  lobby — the plainest playthrough no longer crashes anywhere).
+- **Two full-policy seeds (151, 452) now WIN battle 1** — the first live
+  evidence past the win: postwin flows and the rental-swap screen were
+  reached via real button presses. Both then stall at the
+  `factorySwap:complete` surface for the driver's whole 200k-frame budget
+  (reported HANG). Whether that is a missing driver handler for the
+  completed-swap surface or an engine gate needs its own bounded
+  investigation; the engine did not throw.
+- Signatures 1 + 2 (the ISSUES #84 displayed-HP ledger family, owned
+  elsewhere) absorbed the survivors: seeds formerly killed early by
+  signatures 3-7 now live long enough to hit the ledger drift instead
+  (294→328 and 133→153).
+- **Signature 6 residual (seeds 135, 178):** the seed-99 voluntary-switch
+  shape is fixed, but the same throw site fires on a NARROWER sibling: a
+  mid-turn faint-replacement send-out (`BattleScript_FaintedMonSendOutNew`
+  blocks projected inside the same resolution segment) emits
+  `STRINGID_SWITCHINMON` with **no preceding `switch` receipt at all**
+  (`pendingSwitch` empty — distinct from the fixed case, where the switch
+  receipt existed but the post-switch field didn't). Needs the
+  faint-replacement seam to emit (or the projector to accept) the
+  replacement's typed party-index receipt; not attempted here because it
+  lives against the fainted-actions kernel seam.
+
 ## Headline result
 
 **500 seeds (policy `full`): 5 OK, 495 CRASH, 0 HANG. Every crash is inside
@@ -103,7 +148,7 @@ FactoryRoundOrchestratorError: resolution handoff battler 1 display does not mat
   display-ledger defect observed at two different assert points — together
   they account for 85% of all crashes.
 
-## 3. STRINGID_PKMNSITEMRESTOREDHEALTH has no B_SCR_ACTIVE_NAME_WITH_PREFIX resolver — 31/500 (6.2%); vanilla policy 100/100
+## 3. STRINGID_PKMNSITEMRESTOREDHEALTH has no B_SCR_ACTIVE_NAME_WITH_PREFIX resolver — 31/500 (6.2%); vanilla policy 100/100 — **FIXED 2026-08-09 (a4baf562)**
 
 - **Repro (plainest):** `node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy vanilla --seed 0 --verbose`
 - **Context:** vanilla — battle 1, turn 6, frame ~2771, every single seed;
@@ -129,7 +174,7 @@ Error: battleStringResolver: STRINGID_PKMNSITEMRESTOREDHEALTH references placeho
   reliably procs its berry around turn 5–6, this kills EVERY vanilla
   playthrough — the single loudest "the app cannot survive plain play" defect.
 
-## 4. STRINGID_PKMNCANTUSEMOVETAUNT has no move-selection-rejection resolver — 15/500 (3.0%)
+## 4. STRINGID_PKMNCANTUSEMOVETAUNT has no move-selection-rejection resolver — 15/500 (3.0%) — **FIXED 2026-08-09 (b8407083)**
 
 - **Repro:** `node --experimental-strip-types tools/soak/randomRoundSoak.ts --seed 1 --verbose`
 - **Context:** battle 1, turn 15, frame 8305 (a taunted player pressing the
@@ -156,7 +201,7 @@ Error: battle resolution STRINGID_PKMNCANTUSEMOVETAUNT has no move-selection-rej
   user's #84 item 2 complaint (TAUNT/TORMENT text misbehavior on the same
   route).
 
-## 5. Forced send-out render lifecycle mismatch — 10/500 (2.0%)
+## 5. Forced send-out render lifecycle mismatch — 10/500 (2.0%) — **FIXED 2026-08-09 (a6da3d6b)**
 
 - **Repro:** `node --experimental-strip-types tools/soak/randomRoundSoak.ts --seed 38 --verbose`
 - **Context:** battle 1, turn 7, frame 5184 — immediately after confirming the
@@ -182,7 +227,7 @@ Error: forced send-out render requires the matching typed player switch-in lifec
   confirm edge (a mashing player) widen the window, which is why only some
   seeds hit it.
 
-## 6. Switch-in message has no preceding switch/post-switch field — 8/500 (1.6%)
+## 6. Switch-in message has no preceding switch/post-switch field — 8/500 (1.6%) — **voluntary-switch shape FIXED 2026-08-09 (44e72ae9); 2-seed faint-replacement sibling remains (see differential section)**
 
 - **Repro:** `node --experimental-strip-types tools/soak/randomRoundSoak.ts --seed 99 --verbose`
 - **Context:** battle 1, turn 22, frame 9083 — submitting a VOLUNTARY switch
@@ -207,7 +252,7 @@ Error: battle resolution switch-in message has no preceding switch/post-switch f
   "forced-switch jump"). Rare because it needs a voluntary switch plus a
   specific opposing action.
 
-## 7. Scene-OFF stat banner refuses clamped stat changes — 4/500 (0.8%)
+## 7. Scene-OFF stat banner refuses clamped stat changes — 4/500 (0.8%) — **FIXED 2026-08-09 (296d8664)**
 
 - **Repro:** `node --experimental-strip-types tools/soak/randomRoundSoak.ts --seed 135 --verbose`
   (evasion 12->12; seed 495 is the attack variant)
