@@ -36232,6 +36232,24 @@ function drawMidBattleSwitchInSprite(
   paletteOverride?: RgbColor[],
 ): void {
   if (state.ballVisible) {
+    if (state.side === "opponent") {
+      const tileset = state.ballPose === "closed"
+        ? BALL_CLOSED_TILESET
+        : state.ballPose === "open"
+          ? BALL_OPEN_TILESET
+          : BALL_OPEN_FINAL_TILESET;
+      const palette = state.ballPose === "closed"
+        ? summaryBall.palette
+        : battleAnimBallOpen.palette;
+      drawSpriteSheet(
+        fb,
+        tileset,
+        palette,
+        state.ballPosition.x - 8,
+        state.ballPosition.y - 8,
+      );
+      return;
+    }
     // ISSUES #78 window A: the thrown ball renders from the RAM ball sprite's
     // per-tick state (center + `sAffineAnim_BallRotate_4` matrix, one tick
     // lagged), affine-sampled around the center and clipped by the player
@@ -36511,6 +36529,17 @@ export function renderBattleResolutionSceneOffView(
       0,
       composeOpponentHealthbox(healthboxAssemblyAssets, view.healthboxes.opponent),
       hit?.battler === 1 ? hit.healthboxY2 : 0,
+    );
+  }
+  if (
+    midSwitch !== null
+    && midSwitch.battler === 1
+    && midSwitch.healthboxDx !== null
+  ) {
+    drawSendOutHealthbox(
+      fb,
+      midSwitch.healthboxDx,
+      composeOpponentHealthbox(healthboxAssemblyAssets, view.healthboxes.opponent),
     );
   }
   if (

@@ -1073,7 +1073,8 @@ describe("battle resolution presentation receipt ownership", () => {
     const incomingView = createBattleResolutionPresentationRenderView({
       ...summaryState,
       segments: Object.freeze([summarySegment]),
-      commandIndex: 3,
+      commandIndex: 2,
+      lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 3 }),
     });
     expect(incomingView.field.opponent).toMatchObject({
       partyIndex: 1,
@@ -1081,6 +1082,46 @@ describe("battle resolution presentation receipt ownership", () => {
       hp: 80,
       maxHP: 80,
     });
+    expect(incomingView.midBattleSwitchIn).toMatchObject({
+      battler: 1,
+      side: "opponent",
+      ballVisible: true,
+      ballPose: "closed",
+      ballPosition: { x: 176, y: 64 },
+    });
+    const openedView = createBattleResolutionPresentationRenderView({
+      ...summaryState,
+      segments: Object.freeze([summarySegment]),
+      commandIndex: 2,
+      lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 18 }),
+    });
+    expect(openedView.midBattleSwitchIn).toMatchObject({
+      battler: 1,
+      side: "opponent",
+      ballVisible: true,
+      ballPose: "open",
+      ballPosition: { x: 176, y: 64 },
+    });
+    const closedBoundaryView = createBattleResolutionPresentationRenderView({
+      ...summaryState,
+      segments: Object.freeze([summarySegment]),
+      commandIndex: 2,
+      lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 17 }),
+    });
+    const closedFrame = createFramebuffer();
+    const openedFrame = createFramebuffer();
+    renderBattleResolutionSceneOffView(closedFrame, closedBoundaryView);
+    renderBattleResolutionSceneOffView(openedFrame, openedView);
+    const ballBox = (frame: Uint8Array): number[] => {
+      const pixels: number[] = [];
+      for (let y = 56; y < 72; y += 1) {
+        for (let x = 168; x < 184; x += 1) {
+          pixels.push(...frame.slice((y * 240 + x) * 4, (y * 240 + x) * 4 + 3));
+        }
+      }
+      return pixels;
+    };
+    expect(ballBox(openedFrame)).not.toEqual(ballBox(closedFrame));
   });
 
   it("times the voluntary mid-battle switch-in span so the send-out cadence holds (ISSUES #78)", () => {
@@ -1279,7 +1320,10 @@ describe("battle resolution presentation receipt ownership", () => {
     expect(throwing.midBattleSwitchIn).toEqual(
       expect.objectContaining({
         battler: 0,
+        side: "player",
         ballVisible: true,
+        ballPose: "closed",
+        ballPosition: { x: 43, y: 62 },
         monVisible: false,
       }),
     );
