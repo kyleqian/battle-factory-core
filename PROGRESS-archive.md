@@ -1,4 +1,12 @@
 
+## 1021 — [bounded MAIN worker, 2026-08-08] **#39: faint-sink geometry renamed `faintSinkRowsAndY2`**
+
+- **State/Did:** ownership-only rename merged as `d2390d33`; old-symbol refs
+  **22→0**, focused/smoke/full suite, typecheck, build, and the committed OFF
+  differential (**620/620**) green.
+- **Next/Notes:** superseded by the 2026-08-08 S10-closure ordering decision.
+  Full entry remains in git history at `PROGRESS.md`.
+
 ## 1020 — [bounded MAIN worker, 2026-08-08] **#39 stale rename brief stopped honestly**
 
 - **State/Did:** `dragonBreathGrovyleHp` was already generic; no runtime change

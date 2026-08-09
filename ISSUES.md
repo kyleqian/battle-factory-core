@@ -1593,6 +1593,13 @@ currently exercises the cache; never add a staged darken field or revive the
 absent OFF palette pulse merely to manufacture dynamic acceptance. Leave the BG
 cache, pure transform, and Scene-ON callers untouched.
 
+**Deferred behind S10 closure (2026-08-08, user decision).** #39 is demoted to
+filler until ROADMAP S10's six gates are checked — see the 2026-08-08 user
+ordering decision in ROADMAP.md (barrier burn-down A3–A12, then the bucket-B
+item, then the Gate-6 close-out artifacts). The audited `turn10OnixDarkPalette`
+slice above remains the next #39 owner whenever a filler slot opens; nothing
+here is canceled.
+
 # Settled records (not open work — see the note at the top of this file)
 
 ## #56 — [SETTLED 2026-08-03, supervisor decision] Arbitrary-trainer intro: YOSHI 700/751 + MAGNETON 703/751, every residual frame in a settled class

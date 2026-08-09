@@ -944,6 +944,29 @@ forbids new turn-keyed branches), so its slices fill gaps around Gate-5 work
 rather than blocking it. Gate 6's breadth sweep depends on Gate 5 landing
 first and follows it.
 
+**User ordering decision (2026-08-08): S10 closure is the headline.** Work
+the S10 remainder in this order, ahead of everything else:
+
+1. **Burn down the ten remaining bucket-A barriers** in
+   `docs/barrier-reachability-triage.md` (A3–A12; A1/A2 were retired
+   2026-08-08 by the completed AI scoring stack). Each is small and bounded.
+2. **Resolve the single bucket-B item** under the widened 2026-08-05
+   full-parity scope, and confirm the bucket-C/D citations stand as the
+   "prove unreachable" record.
+3. **Assemble the Gate-6 close-out artifacts:** the mechanics coverage
+   manifest, at least one parameterized-oracle semantic trace per distinct
+   effect/hook family, the interaction-focused pairwise/property tests, and
+   multiple seeded end-to-end Factory rounds. Gate-4 semantic verification
+   rides this same worklist — the ability/item census's "engine-referenced"
+   is not "verified". Record Gate 2's checkbox disposition explicitly: its
+   only remainder is the two Noland items, which stay out of scope by the
+   2026-07-28 ruling.
+
+**ISSUES #39 and the animation lane are demoted to filler** until S10's six
+gates are checked. The audited `turn10OnixDarkPalette` Family-F slice is
+deferred, not canceled; entry 1024's named-next-owner handoff is overridden
+by this decision.
+
 **#39 rank-7 completion (2026-08-01, `1f276c95` + `c0821a65`):** the
 opponent-owned locked action now retains one immutable charge/strike
 resolution identity through its genuine intervening command and owns the
