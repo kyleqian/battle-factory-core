@@ -78,13 +78,13 @@ the state transition.
 | status x stat-stage | Burn's physical Attack modifier and paralysis speed modifier belong in stat calculation, while status application does not itself mutate stages; stage mutation is separately clamped (`battle_script_commands.c:7085-7089`). | `tests/gate6KernelInteractions.test.ts` (K4: burn Attack-halving and paralysis speed-quartering live in stat/damage calc with fixed stages; status application never mutates stages; burn + +2 Attack combined case in source order) | K4 complete (kernel proof, `8b63e15e`). |
 | status x switching/entry | Ordinary switching rebuilds the incoming record; Natural Cure only clears the departing major status (`battle_script_commands.c:4621-4657,9590-9604`). | `tests/battleScriptSwitchinOpcode.test.ts` (rebuild semantics) | R6 oracle. |
 | status x immunity/absorb | Type/ability gates prevent status before durable mutation: Fire blocks burn, Ice blocks freeze, Limber blocks paralysis, Immunity blocks poison (`battle_script_commands.c:2360-2425`). | `tests/battleScriptMoveEndOpcode.test.ts` (immunity cure pass); `tests/gate6StatusImmunityInteractions.test.ts` (R8 complete primary-effect scripts and ordinary controls) | R8 complete with paired two-seed OFF-ROM receipts. |
-| volatile x held-item | Persim/Lum cure confusion; Mental Herb cures attraction; White Herb restores negative stages, including at move-end (`battle_util.c:3383-3398,3540-3601,3739-3755`). | `tests/battleScriptMoveEndOpcode.test.ts` (Lum confusion) | R9: Swagger into Lum/White Herb distinguishes volatile cure from stage restore. |
+| volatile x held-item | Persim/Lum cure confusion; Mental Herb cures attraction; White Herb restores negative stages, including at move-end (`battle_util.c:3383-3398,3540-3601,3739-3755`). | `tests/battleScriptMoveEndOpcode.test.ts` (Lum confusion); `tests/gate6R9Receipt.test.ts` (legal Swagger/Lum versus White Herb receipt) | R9 complete: Lum cures confusion then consumes itself without undoing Swagger's +2 Attack, while White Herb has no negative stage to restore and remains held through confusion. |
 | volatile x ability | Own Tempo blocks confusion, Oblivious blocks attraction, Soundproof blocks sound-based state effects; end-turn ability hooks run before item hooks (`battle_script_commands.c:2531-2545,7676-7695,8508-8533`; `battle_util.c:1494-1507`). | `tests/battleScriptTryinfatuatingOpcode.test.ts`; `tests/battleScriptTrysetperishsongOpcode.test.ts`; `tests/gate6VolatileAbilityInteractions.test.ts` | R10 complete: paired Attract/Oblivious receipt plus Soundproof partial-immunity receipt. |
 | volatile x stat-stage | Swagger/Flatter-like effects combine a volatile application with a stat change; accuracy/evasion stages combine with Foresight's volatile exception (`battle_script_commands.c:1128-1142`; stat application `7085-7089`). | `tests/gate6KernelInteractions.test.ts` (K5: Swagger emits exactly one 6→8 Attack change + confusion; Own Tempo still receives +2 before rejecting confusion; Foresight ignores target evasion only, attacker accuracy stays active; `battle_scripts_1.s:1608-1629`) | K5 complete (kernel proof, `f368de69`). |
 | volatile x switching/entry | Ordinary switch replaces state; Baton Pass preserves `status2` and all stat stages, then clear-set-data handles the remainder (`battle_script_commands.c:4621-4657`). | `tests/battleScriptSwitchinOpcode.test.ts` (ordinary clear/Baton Pass retain) | R11 oracle: Substitute/Focus Energy/Baton Pass versus ordinary switch. |
 | volatile x immunity/absorb | Semi-invulnerable state blocks ordinary targeting; it also suppresses weather chip only underground/underwater (`battle_script_commands.c:1062-1085,7606-7635`). | `tests/battleScriptDamagingWeatherOpcode.test.ts` | R2 oracle (shared with weather). |
 | held-item x ability | Entry/fainted-action orchestration invokes Intimidate/Trace before normal item effects, so an Intimidate-created negative stage can feed White Herb (`battle_util.c:1959-1964,3305-3329`). Pinsir cannot demonstrate that interaction: its sole legal ability is Hyper Cutter, which prevents Intimidate's Attack drop before the item can activate (`species_info.h:3819-3843`). | `tests/battleScriptSwitchinOpcode.test.ts` (Intimidate/Trace); `tests/battleScriptMoveEndOpcode.test.ts` (item effects) | R12 is the Pinsir prevention control; R12b uses legal White Herb Machamp (Guts) for the activation/order/consumption proof. |
-| held-item x stat-stage | White Herb restores every negative stage, and threshold berries raise a stage only below the cap (`battle_util.c:3383-3398,3431-3496`). | `tests/battleScriptMoveEndOpcode.test.ts` (item activation); `tests/gate6KernelInteractions.test.ts` (K6: Liechi/Salac/Petaya parameterized across stages 0/5/6/10/11/12 — activation only below the +6 cap; White Herb restores all negative stages exactly once and stays held when nothing is restorable; Ganlon/Apicot stay excluded as zero-carrier) | K6 complete (kernel proof, `83dfd8fd`); R9/R12b receipts already banked. |
+| held-item x stat-stage | White Herb restores every negative stage, and threshold berries raise a stage only below the cap (`battle_util.c:3383-3398,3431-3496`). | `tests/battleScriptMoveEndOpcode.test.ts` (item activation); `tests/gate6KernelInteractions.test.ts` (K6: Liechi/Salac/Petaya parameterized across stages 0/5/6/10/11/12 — activation only below the +6 cap; White Herb restores all negative stages exactly once and stays held when nothing is restorable; Ganlon/Apicot stay excluded as zero-carrier); `tests/gate6R9Receipt.test.ts` (positive-stage guard) | K6/R9/R12b complete: R9's +2 Swagger result proves that White Herb stays held when no negative stage exists. |
 | held-item x switching/entry | White Herb has an explicit switch-in handler that normalizes negative stages (`battle_util.c:3305-3329`); a normal switch reconstructs the party item unless Knock Off recorded it (`battle_script_commands.c:4637-4646`). | `tests/battleScriptSwitchinOpcode.test.ts` (item reconstruction) | R12 oracle. |
 | held-item x immunity/absorb | No held-item branch changes an ability/type absorb result in Gen III; item effects run only after damage/effect eligibility.  Absorb handler is ability-only (`battle_util.c:2676-2747`) and item dispatch is separate (`3257-3330`). | `tests/gate6EntryItemInteractions.test.ts` (K7: all three matching redirects preserve Sitrus before damage/item dispatch) | Closed by K7; no new ROM fixture needed. |
 | ability x stat-stage | Clear Body/White Smoke block most preventable drops; Keen Eye blocks accuracy and Hyper Cutter Attack specifically; Intimidate creates an Attack drop (`battle_script_commands.c:6975-7038`; `battle_util.c:3003-3087`). | `tests/battleScriptStatbuffchangeOpcode.test.ts` (Clear Body/White Smoke/Keen Eye/Hyper Cutter specificity); `tests/battleScriptSwitchinOpcode.test.ts` (Intimidate blockers); `tests/gate6EntryItemInteractions.test.ts` (R13 Pidgeot pair) | R13 fixture receipts the paired Keen Eye-specific block and unrelated Intimidate Attack drop. |
@@ -110,7 +110,7 @@ are legal inert duplicates with `[Tackle,Tackle,Tackle,Tackle]`.
 | R6 | A: Starmie Natural Cure, Recover; bench: neutral. B: Muk Toxic x4. Apply Toxic, voluntarily switch, then return. | Departing Starmie party status becomes clear; ordinary incoming state is rebuilt. |
 | R7 | `gate6-r7-off.json`: Ursaring Guts/Facade versus Ninetales Will-O-Wisp x4. | Burn, exact Guts + Facade damage, and the independent end-turn chip are all receipted. |
 | R8 | `gate6-r8-off.json`: Snorlax Immunity versus Roselia Toxic x4; `gate6-r8-control-off.json` changes only Snorlax to Thick Fat. `gate6-r8-paralysis-off.json`: Limber Persian versus Electrike Thunder Wave x4; `gate6-r8-paralysis-control-off.json` uses ordinary Thick Fat Snorlax. | No durable status on either immune target; exact ability-specific prevention message, PP loss, and normal control application. Muk was corrected because it has no Immunity slot. |
-| R9 | A: Lum/White Herb Machamp; B: Gengar Swagger x4. | Lum removes confusion but not the +2 Attack boost; White Herb has no negative stage to restore, so it remains held while both +2 Attack and confusion persist (`battle_util.c:3739-3755`). |
+| R9 | `gate6-r9-off.json`: Lum Machamp takes the first Gengar Swagger, then the ordinary party picker switches to White Herb Machamp for the second. | Lum removes confusion but not the +2 Attack boost; White Herb has no negative stage to restore, so it remains held while both +2 Attack and confusion persist (`battle_util.c:3739-3755`). |
 | R10 | `gate6-r10-attract-off.json`: male Oblivious Lickitung versus female Gardevoir Attract x4; `gate6-r10-attract-control-off.json` changes only Lickitung to Own Tempo. `gate6-r10-perish-song-off.json`: Soundproof Exploud versus Lapras Perish Song x4. | Attraction is rejected with its distinct ability message while the compatible control is affected; Perish Song skips only Soundproof and still marks its ordinary user. |
 | R11 | A: Ninjask Substitute then Baton Pass; bench: recipient. B: passive Tackle x4. Repeat ordinary manual switch. | Baton Pass retains intended status2/stages; ordinary switch clears them. |
 | R12 | A: White Herb Pinsir (sole ability Hyper Cutter); B: Granbull Intimidate x4; switch Granbull in after initial player action. | Prevention control: Hyper Cutter blocks the Attack cut, so White Herb does not activate or get consumed. |
@@ -299,6 +299,53 @@ selected with PP `[10,10,9,9]`, proving a subsequent consumer sees active
 rain after Cloud Nine removal.  These are the source boundaries in
 `battle_util.h:47-48`, `battle_util.c:2396-2427`, and
 `battle_script_commands.c:9787-9805`.
+
+### R9 — Swagger × Lum Berry versus White Herb's negative-stage guard
+
+`gate6-r9-off.json` already supplied the needed legal single request: its
+complete parties place Lum Berry Machamp (item 141) first, White Herb Machamp
+(180) at party index 1, and a four-Swagger Gengar (207) opposite them.  The
+ordinary controller route first completes Gengar's Swagger against Lum
+Machamp, then opens the real party picker and switches to White Herb Machamp
+before Gengar's next real Swagger.  No HP, status, stat-stage, item, weather,
+or outcome state is injected.
+
+Two fresh Battle Scene OFF `bin/oracle lab` outputs are byte-identical over
+every generated file: `manifest.json` has SHA-256
+`d9e731373bf44be85fc088f14db98478f74bd715989aa435affcbc42532bfc11`, and
+the sorted `frame-*.png` basename/hash tree has SHA-256
+`35bb8b2c46b8157bf1a4ab637b0ce3570193ccba9f3a82d5db596f96fe16a559`.
+The read-only, every-frame mGBA receipt produced through
+`tools/run-mgba-probe.py` is also byte-identical (`05fcbde6df91d4fec842783f902e816a3fa7464c18f77021e8f5d6777ac1cc04`).
+Only temporary output-directory prefixes are normalized; no artifact paths
+or semantic fields are excluded.  The compact committed receipt is
+`tools/probe/receipts/gate6-r9-off.json`, regenerated by
+`tools/probe/probe-gate6-r9-off.py` and pinned hermetically in
+`tests/gate6R9Receipt.test.ts`.
+
+The exact first-path message order is `Foe GENGAR used SWAGGER!` (frame 43),
+`MACHAMP’s ATTACK sharply rose!` (200), `MACHAMP became confused!` (300),
+then `MACHAMP’s LUM BERRY cured its confusion problem!` (429).  At frame 106
+the active and persistent Lum item copies are both 141, Attack is `6→8`, and
+confusion is already cleared; the cure message still sees both item copies at
+141.  The shared removal occurs later at frame 544, changing Lum's battle and
+party copies to 0 while retaining Attack 8 and no confusion.  The relevant
+RNG checkpoints are the first Swagger move-state draws
+`919694434→3690816045` (frame 42) and
+`3690816045→983229340` (298); the cure and removal add no draw.
+
+The real switch reaches party index 1 at frame 1135 with White Herb 180 and
+the default Attack stage 6.  Its second real Swagger repeats the use/boost/
+confusion message order at frames 1277/1434/1534.  Attack becomes 8 at frame
+1340, then the confusion state is set at frame 1532 (`status2 = 2`, duration
+2) with the White Herb still present in both battle and party records.  It is
+still 180 at the confusion message and at the frame-1976 endpoint; no White
+Herb restoration message occurs because nothing lowered a stat.  The matching
+second-Swagger RNG checkpoints are `3031698222→530917129` (frame 1276) and
+`530917129→1160559944` (1532).  This is the exact separation in
+`battle_scripts_1.s:1608-1629` and `battle_util.c:3739-3755`: Swagger's
+positive Attack stage and volatile confusion do not qualify White Herb's
+negative-stage restoration branch.
 
 ### R11 — Ninjask Baton Pass versus ordinary-switch volatile/stage lifetime
 
@@ -661,11 +708,19 @@ Each line is one bounded worker slice, not an instruction to create all traces
 at once.  Use a fresh `mktemp -d` output directory and retain only the checked
 in scenario/evidence once accepted.
 
+**Configured next acceptance unit: R2.** R2's existing two-seed note remains
+receipted under this manifest's heading-based v1 contract, but it is the next
+card to upgrade to the compact deterministic semantic workflow now used by R3
+and R9. R12 remains an explicit fixture-only prevention-control gap and is
+not silently classified as closed.
+
+<!-- gate6-next-acceptance: R2 -->
+
 1. **R11 — Baton Pass versus ordinary-switch volatile/stage retention.** `bin/oracle lab tools/battle-lab/gate6-r11-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts; npm run build`
 2. **R6 — Toxic x Natural Cure switch-out persistence.** `bin/oracle lab tools/battle-lab/gate6-r6-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts tests/battleScriptMoveEndOpcode.test.ts; npm run build`
 3. **R15 — CLOSED by the three-layer Flying/Levitate/grounded receipt above.**
 4. **R3 — CLOSED by the legal Golduck → neutral Rattata switch and Castform Forecast/Weather Ball receipt.** See the completed receipt note above and `tools/probe/receipts/gate6-r3-off.json`.
-5. **R9 — Swagger x Lum versus White Herb's negative-stage guard.** `bin/oracle lab tools/battle-lab/gate6-r9-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptMoveEndOpcode.test.ts; npm run build`
+5. **R9 — CLOSED by the legal Lum cure/consumption then White Herb held-confusion receipt.** See the completed receipt note above and `tools/probe/receipts/gate6-r9-off.json`.
 6. **R13 — Intimidate x stat-drop prevention specificity.** `bin/oracle lab tools/battle-lab/gate6-r13-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptStatbuffchangeOpcode.test.ts tests/battleScriptSwitchinOpcode.test.ts; npm run build`
 7. **R14 — CLOSED by the banked absorption program plus K7's Gate-6 pair pin.** See the completed receipt note above; intentionally no duplicate `gate6-r14-off.json`.
 8. **R5 — sleep/confusion x Chesto/Lum exact cure timing.** `bin/oracle lab tools/battle-lab/gate6-r5-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptMoveEndOpcode.test.ts; npm run build`
@@ -677,5 +732,6 @@ weather defect, `450cf532`), K3 (major/volatile canceler ordering), K4
 (status modifiers at fixed stages), K5 (Swagger/Foresight), and K6 (White
 Herb cap/reset) all live in `tests/gate6KernelInteractions.test.ts`
 (2026-07-30); K7 was closed above without inflated oracle work. With
-R3/R7/R8 receipted and R4 already complete, the next ranked open card is R9
-(Swagger × Lum versus White Herb's negative-stage guard).
+R3/R7/R8/R9 receipted and R4 already complete, the configured next acceptance
+unit is R2's compact-receipt upgrade; R12 remains separately explicit as the
+one fixture-only prevention-control gap.

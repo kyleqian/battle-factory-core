@@ -3,7 +3,7 @@
   "gate6": {
     "closed": false,
     "verdict": "OPEN — this first manifest exposes coverage and receipt gaps; it does not claim Gate 6 closed.",
-    "nextAcceptanceUnit": "R9: add and document the missing parameterized-oracle receipt before treating this family as accepted.",
+    "nextAcceptanceUnit": "R2: upgrade its legacy receipt note to the compact deterministic semantic workflow.",
     "interpretation": "Static executable reachability, engine references, Tier-1 proofs, and oracle receipts are separate evidence classes."
   },
   "generatedBy": "node --experimental-strip-types tools/report/gate6-coverage-manifest.ts",
@@ -57,15 +57,15 @@
     "interactions": {
       "total": 28,
       "kernelProven": 6,
-      "oracleReceipted": 17,
-      "receiptGaps": 5
+      "oracleReceipted": 19,
+      "receiptGaps": 3
     },
     "parameterizedOracle": {
       "scenarioRequests": 24,
-      "receiptDocumented": 22,
-      "receiptGaps": 2,
+      "receiptDocumented": 23,
+      "receiptGaps": 1,
       "familyCards": 16,
-      "familyReceiptGaps": 2
+      "familyReceiptGaps": 1
     }
   },
   "sections": {
@@ -18386,7 +18386,8 @@
           "oracleReceiptCards": [
             "R15",
             "R5",
-            "R5"
+            "R5",
+            "R9"
           ],
           "evidence": [
             {
@@ -18415,6 +18416,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R5",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R9",
               "kind": "oracle-receipt"
             }
           ],
@@ -18707,7 +18713,8 @@
             "R8",
             "R8",
             "R8",
-            "R8"
+            "R8",
+            "R9"
           ],
           "evidence": [
             {
@@ -18786,6 +18793,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R8",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R9",
               "kind": "oracle-receipt"
             }
           ],
@@ -18825,7 +18837,8 @@
             "R8",
             "R8",
             "R8",
-            "R8"
+            "R8",
+            "R9"
           ],
           "evidence": [
             {
@@ -18904,6 +18917,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R8",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R9",
               "kind": "oracle-receipt"
             }
           ],
@@ -19973,7 +19991,8 @@
             "R12b",
             "R5",
             "R5",
-            "R7"
+            "R7",
+            "R9"
           ],
           "evidence": [
             {
@@ -20007,6 +20026,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R7",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R9",
               "kind": "oracle-receipt"
             }
           ],
@@ -20223,7 +20247,8 @@
             "R8",
             "R8",
             "R8",
-            "R8"
+            "R8",
+            "R9"
           ],
           "evidence": [
             {
@@ -20302,6 +20327,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R8",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R9",
               "kind": "oracle-receipt"
             }
           ],
@@ -21058,7 +21088,8 @@
           "engineReferenceCount": 4,
           "oracleReceiptCards": [
             "R5",
-            "R5"
+            "R5",
+            "R9"
           ],
           "evidence": [
             {
@@ -21082,6 +21113,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R5",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R9",
               "kind": "oracle-receipt"
             }
           ],
@@ -21571,7 +21607,8 @@
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 4,
           "oracleReceiptCards": [
-            "R12b"
+            "R12b",
+            "R9"
           ],
           "evidence": [
             {
@@ -21595,6 +21632,11 @@
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R12b",
+              "kind": "oracle-receipt"
+            },
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "locator": "R9",
               "kind": "oracle-receipt"
             }
           ],
@@ -57571,13 +57613,13 @@
       {
         "id": "interaction:volatile x held-item",
         "label": "volatile x held-item",
-        "status": "oracle-receipt-gap",
+        "status": "oracle-receipted-pair",
         "recipeIds": [
           "R9"
         ],
         "mechanism": "Persim/Lum cure confusion; Mental Herb cures attraction; White Herb restores negative stages, including at move-end (`battle_util.c:3383-3398,3540-3601,3739-3755`).",
-        "existingTier1Coverage": "`tests/battleScriptMoveEndOpcode.test.ts` (Lum confusion)",
-        "gapOrFirstProof": "R9: Swagger into Lum/White Herb distinguishes volatile cure from stage restore.",
+        "existingTier1Coverage": "`tests/battleScriptMoveEndOpcode.test.ts` (Lum confusion); `tests/gate6R9Receipt.test.ts` (legal Swagger/Lum versus White Herb receipt)",
+        "gapOrFirstProof": "R9 complete: Lum cures confusion then consumes itself without undoing Swagger's +2 Attack, while White Herb has no negative stage to restore and remains held through confusion.",
         "evidence": [
           {
             "path": "docs/gate6-interaction-matrix-scout.md",
@@ -57588,11 +57630,15 @@
             "kind": "interaction-tier-1-or-scout"
           },
           {
+            "path": "tests/gate6R9Receipt.test.ts",
+            "kind": "interaction-tier-1-or-scout"
+          },
+          {
             "path": "tools/battle-lab/gate6-r9-off.json",
             "kind": "parameterized-oracle-request"
           }
         ],
-        "notes": "Static and Tier-1 evidence remains visible, but the parameterized-oracle receipt is still an explicit gap."
+        "notes": "Pairwise evidence is not a Cartesian-product claim."
       },
       {
         "id": "interaction:volatile x ability",
@@ -57752,15 +57798,15 @@
       {
         "id": "interaction:held-item x stat-stage",
         "label": "held-item x stat-stage",
-        "status": "oracle-receipt-gap",
+        "status": "oracle-receipted-pair",
         "recipeIds": [
           "K6",
           "R9",
           "R12b"
         ],
         "mechanism": "White Herb restores every negative stage, and threshold berries raise a stage only below the cap (`battle_util.c:3383-3398,3431-3496`).",
-        "existingTier1Coverage": "`tests/battleScriptMoveEndOpcode.test.ts` (item activation); `tests/gate6KernelInteractions.test.ts` (K6: Liechi/Salac/Petaya parameterized across stages 0/5/6/10/11/12 — activation only below the +6 cap; White Herb restores all negative stages exactly once and stays held when nothing is restorable; Ganlon/Apicot stay excluded as zero-carrier)",
-        "gapOrFirstProof": "K6 complete (kernel proof, `83dfd8fd`); R9/R12b receipts already banked.",
+        "existingTier1Coverage": "`tests/battleScriptMoveEndOpcode.test.ts` (item activation); `tests/gate6KernelInteractions.test.ts` (K6: Liechi/Salac/Petaya parameterized across stages 0/5/6/10/11/12 — activation only below the +6 cap; White Herb restores all negative stages exactly once and stays held when nothing is restorable; Ganlon/Apicot stay excluded as zero-carrier); `tests/gate6R9Receipt.test.ts` (positive-stage guard)",
+        "gapOrFirstProof": "K6/R9/R12b complete: R9's +2 Swagger result proves that White Herb stays held when no negative stage exists.",
         "evidence": [
           {
             "path": "docs/gate6-interaction-matrix-scout.md",
@@ -57775,6 +57821,10 @@
             "kind": "interaction-tier-1-or-scout"
           },
           {
+            "path": "tests/gate6R9Receipt.test.ts",
+            "kind": "interaction-tier-1-or-scout"
+          },
+          {
             "path": "tools/battle-lab/gate6-r9-off.json",
             "kind": "parameterized-oracle-request"
           },
@@ -57783,7 +57833,7 @@
             "kind": "parameterized-oracle-request"
           }
         ],
-        "notes": "Static and Tier-1 evidence remains visible, but the parameterized-oracle receipt is still an explicit gap."
+        "notes": "Pairwise evidence is not a Cartesian-product claim."
       },
       {
         "id": "interaction:held-item x switching/entry",
@@ -58122,7 +58172,7 @@
         {
           "id": "receipt-family:R9",
           "label": "R9",
-          "status": "oracle-receipt-gap",
+          "status": "oracle-receipted-family",
           "fixtureCount": 1,
           "scenarioIds": [
             "receipt:tools/battle-lab/gate6-r9-off.json"
@@ -58130,14 +58180,14 @@
           "evidence": [
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "interaction-card"
+              "kind": "completed-receipt-note"
             },
             {
               "path": "tools/battle-lab/gate6-r9-off.json",
               "kind": "parameterized-oracle-request"
             }
           ],
-          "notes": "This is the next bounded oracle-backed acceptance unit until a receipt is added; kernel/static evidence does not close it."
+          "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
         },
         {
           "id": "receipt-family:R13",
@@ -59210,7 +59260,7 @@
           "id": "receipt:tools/battle-lab/gate6-r9-off.json",
           "label": "gate6-r9-off.json",
           "cardId": "R9",
-          "status": "fixture-only-no-committed-receipt",
+          "status": "oracle-receipted",
           "profile": "battle-scene-off",
           "mode": "mechanicLab",
           "seed": 1,
@@ -59237,10 +59287,10 @@
             },
             {
               "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "staging-card"
+              "kind": "completed-receipt-note"
             }
           ],
-          "notes": "Request is committed, but a deterministic receipt is not documented in the completed receipt notes."
+          "notes": "The scout's completed receipt notes document deterministic semantic observations for this request card."
         }
       ]
     }
