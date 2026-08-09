@@ -3,7 +3,7 @@
   "gate6": {
     "closed": false,
     "verdict": "OPEN — this first manifest exposes coverage and receipt gaps; it does not claim Gate 6 closed.",
-    "nextAcceptanceUnit": "R2: upgrade its legacy receipt note to the compact deterministic semantic workflow.",
+    "nextAcceptanceUnit": "R12: add and document the missing parameterized-oracle receipt before treating this family as accepted.",
     "interpretation": "Static executable reachability, engine references, Tier-1 proofs, and oracle receipts are separate evidence classes."
   },
   "generatedBy": "node --experimental-strip-types tools/report/gate6-coverage-manifest.ts",
@@ -57239,7 +57239,7 @@
           "R2"
         ],
         "mechanism": "Sand/hail chip skips underground and underwater; weather also changes Thunder's accuracy while semi-invulnerability is checked first (`battle_script_commands.c:1062-1094`, `7602-7640`).",
-        "existingTier1Coverage": "`tests/battleScriptDamagingWeatherOpcode.test.ts` (underground weather chip); `tests/gate6WeatherVolatileInteractions.test.ts` (R2 full weather pass, damage/message order)",
+        "existingTier1Coverage": "`tests/battleScriptDamagingWeatherOpcode.test.ts` (underground weather chip); `tests/gate6WeatherVolatileInteractions.test.ts` (R2 full weather pass, damage/message order); `tests/gate6R2Receipt.test.ts` (compact OFF receipt)",
         "gapOrFirstProof": "R2 complete: Dig under Hail, then surface, paired with a grounded two-turn control.",
         "evidence": [
           {
@@ -57252,6 +57252,10 @@
           },
           {
             "path": "tests/gate6WeatherVolatileInteractions.test.ts",
+            "kind": "interaction-tier-1-or-scout"
+          },
+          {
+            "path": "tests/gate6R2Receipt.test.ts",
             "kind": "interaction-tier-1-or-scout"
           },
           {
@@ -57395,7 +57399,7 @@
           "R3"
         ],
         "mechanism": "Type immunity (Rock/Ground/Steel vs sand, Ice vs hail), Sand Veil, and underground/underwater suppress weather chip (`battle_script_commands.c:7606-7640`); Cloud Nine globally suppresses the predicate (`battle_util.h:47-48`).",
-        "existingTier1Coverage": "`tests/battleScriptDamagingWeatherOpcode.test.ts`; `tests/gate6WeatherVolatileInteractions.test.ts` (R2); `tests/gate6R3Receipt.test.ts` (Cloud Nine suppression/removal boundary)",
+        "existingTier1Coverage": "`tests/battleScriptDamagingWeatherOpcode.test.ts`; `tests/gate6WeatherVolatileInteractions.test.ts` (R2); `tests/gate6R2Receipt.test.ts` (R2 compact receipt); `tests/gate6R3Receipt.test.ts` (Cloud Nine suppression/removal boundary)",
         "gapOrFirstProof": "R2/R3 complete: R2 receipts the concrete hail immunity/underground gate, while R3 receipts the global Cloud Nine suppression and its reactivation after switching.",
         "evidence": [
           {
@@ -57408,6 +57412,10 @@
           },
           {
             "path": "tests/gate6WeatherVolatileInteractions.test.ts",
+            "kind": "interaction-tier-1-or-scout"
+          },
+          {
+            "path": "tests/gate6R2Receipt.test.ts",
             "kind": "interaction-tier-1-or-scout"
           },
           {
@@ -57738,8 +57746,8 @@
           "R2"
         ],
         "mechanism": "Semi-invulnerable state blocks ordinary targeting; it also suppresses weather chip only underground/underwater (`battle_script_commands.c:1062-1085,7606-7635`).",
-        "existingTier1Coverage": "`tests/battleScriptDamagingWeatherOpcode.test.ts`",
-        "gapOrFirstProof": "R2 oracle (shared with weather).",
+        "existingTier1Coverage": "`tests/battleScriptDamagingWeatherOpcode.test.ts`; `tests/gate6R2Receipt.test.ts`",
+        "gapOrFirstProof": "R2 compact OFF receipt (shared with weather).",
         "evidence": [
           {
             "path": "docs/gate6-interaction-matrix-scout.md",
@@ -57747,6 +57755,10 @@
           },
           {
             "path": "tests/battleScriptDamagingWeatherOpcode.test.ts",
+            "kind": "interaction-tier-1-or-scout"
+          },
+          {
+            "path": "tests/gate6R2Receipt.test.ts",
             "kind": "interaction-tier-1-or-scout"
           },
           {
@@ -58090,6 +58102,26 @@
     "parameterizedOracle": {
       "families": [
         {
+          "id": "receipt-family:R12",
+          "label": "R12",
+          "status": "oracle-receipt-gap",
+          "fixtureCount": 1,
+          "scenarioIds": [
+            "receipt:tools/battle-lab/gate6-r12-off.json"
+          ],
+          "evidence": [
+            {
+              "path": "docs/gate6-interaction-matrix-scout.md",
+              "kind": "interaction-card"
+            },
+            {
+              "path": "tools/battle-lab/gate6-r12-off.json",
+              "kind": "parameterized-oracle-request"
+            }
+          ],
+          "notes": "This is the next bounded oracle-backed acceptance unit until a receipt is added; kernel/static evidence does not close it."
+        },
+        {
           "id": "receipt-family:R11",
           "label": "R11",
           "status": "oracle-receipted-family",
@@ -58411,26 +58443,6 @@
             }
           ],
           "notes": "At least one deterministic parameterized receipt is recorded for this interaction family."
-        },
-        {
-          "id": "receipt-family:R12",
-          "label": "R12",
-          "status": "oracle-receipt-gap",
-          "fixtureCount": 1,
-          "scenarioIds": [
-            "receipt:tools/battle-lab/gate6-r12-off.json"
-          ],
-          "evidence": [
-            {
-              "path": "docs/gate6-interaction-matrix-scout.md",
-              "kind": "interaction-card"
-            },
-            {
-              "path": "tools/battle-lab/gate6-r12-off.json",
-              "kind": "parameterized-oracle-request"
-            }
-          ],
-          "notes": "This is the next bounded oracle-backed acceptance unit until a receipt is added; kernel/static evidence does not close it."
         },
         {
           "id": "receipt-family:R12b",

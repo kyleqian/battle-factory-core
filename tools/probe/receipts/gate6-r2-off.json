@@ -1,0 +1,801 @@
+{
+  "schema": "gate6-r2-off-semantic-receipt/v1",
+  "cardId": "R2",
+  "oracleProfile": "battle-scene-off",
+  "sampledEveryTraceFrame": true,
+  "scenarios": {
+    "dig": {
+      "fixture": "tools/battle-lab/gate6-r2-hail-off.json",
+      "seed": 1,
+      "parties": {
+        "playerLead": {
+          "species": 51,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 8,
+          "moves": [
+            91,
+            91,
+            91,
+            91
+          ]
+        },
+        "opponentLead": {
+          "species": 144,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 46,
+          "moves": [
+            258,
+            258,
+            258,
+            258
+          ]
+        }
+      },
+      "messageEvents": [
+        {
+          "frame": 91,
+          "text": "DUGTRIO dug a hole!"
+        },
+        {
+          "frame": 188,
+          "text": "Foe ARTICUNO used\nHAIL!"
+        },
+        {
+          "frame": 250,
+          "text": "It started to hail!"
+        },
+        {
+          "frame": 353,
+          "text": "Hail continues to fall."
+        },
+        {
+          "frame": 480,
+          "text": "DUGTRIO used\nDIG!"
+        },
+        {
+          "frame": 652,
+          "text": "Foe ARTICUNO used\nHAIL!"
+        },
+        {
+          "frame": 714,
+          "text": "But it failed!"
+        },
+        {
+          "frame": 812,
+          "text": "Hail continues to fall."
+        },
+        {
+          "frame": 906,
+          "text": "DUGTRIO is pelted\nby HAIL!"
+        }
+      ],
+      "controllerEvents": [
+        {
+          "frame": 91,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 1,
+          "playerCommand": 16,
+          "opponentCommand": 53
+        },
+        {
+          "frame": 188,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 2,
+          "playerCommand": 51,
+          "opponentCommand": 16
+        },
+        {
+          "frame": 250,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 2,
+          "playerCommand": 51,
+          "opponentCommand": 16
+        },
+        {
+          "frame": 353,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 1,
+          "playerCommand": 16,
+          "opponentCommand": 51
+        },
+        {
+          "frame": 480,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 1,
+          "playerCommand": 16,
+          "opponentCommand": 53
+        },
+        {
+          "frame": 652,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 2,
+          "playerCommand": 51,
+          "opponentCommand": 16
+        },
+        {
+          "frame": 714,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 2,
+          "playerCommand": 51,
+          "opponentCommand": 16
+        },
+        {
+          "frame": 812,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 1,
+          "playerCommand": 16,
+          "opponentCommand": 51
+        },
+        {
+          "frame": 906,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 1,
+          "playerCommand": 16,
+          "opponentCommand": 51
+        }
+      ],
+      "rngLedger": [
+        {
+          "frame": 459,
+          "randomCalls": 1,
+          "rngBefore": 1621732966,
+          "rngAfter": 2756097505,
+          "currentMove": 0,
+          "chosenMoveByBattler": [
+            0,
+            0
+          ]
+        },
+        {
+          "frame": 463,
+          "randomCalls": 9,
+          "rngBefore": 2756097505,
+          "rngAfter": 1160559944,
+          "currentMove": 0,
+          "chosenMoveByBattler": [
+            0,
+            0
+          ]
+        },
+        {
+          "frame": 477,
+          "randomCalls": 1,
+          "rngBefore": 1160559944,
+          "rngAfter": 3278432283,
+          "currentMove": 91,
+          "chosenMoveByBattler": [
+            0,
+            258
+          ]
+        },
+        {
+          "frame": 499,
+          "randomCalls": 1,
+          "rngBefore": 3278432283,
+          "rngAfter": 2319805938,
+          "currentMove": 91,
+          "chosenMoveByBattler": [
+            0,
+            258
+          ]
+        },
+        {
+          "frame": 502,
+          "randomCalls": 1,
+          "rngBefore": 2319805938,
+          "rngAfter": 2184965245,
+          "currentMove": 91,
+          "chosenMoveByBattler": [
+            0,
+            258
+          ]
+        },
+        {
+          "frame": 641,
+          "randomCalls": 1,
+          "rngBefore": 2184965245,
+          "rngAfter": 1530931116,
+          "currentMove": 91,
+          "chosenMoveByBattler": [
+            0,
+            258
+          ]
+        },
+        {
+          "frame": 1058,
+          "randomCalls": 1,
+          "rngBefore": 1530931116,
+          "rngAfter": 3245321391,
+          "currentMove": 0,
+          "chosenMoveByBattler": [
+            0,
+            0
+          ]
+        },
+        {
+          "frame": 1064,
+          "randomCalls": 9,
+          "rngBefore": 3245321391,
+          "rngAfter": 1038309310,
+          "currentMove": 0,
+          "chosenMoveByBattler": [
+            0,
+            0
+          ]
+        }
+      ],
+      "checkpoints": {
+        "undergroundEntry": {
+          "frame": 177,
+          "rngValue": 1621732966,
+          "weather": 0,
+          "weatherTurns": 0,
+          "player": {
+            "hp": 142,
+            "maxHp": 142,
+            "pp": [
+              8,
+              10,
+              10,
+              10
+            ],
+            "status3": 128,
+            "underground": true
+          },
+          "currentMove": 91,
+          "battleMoveDamage": 128,
+          "framebufferSha256": "fdd8252f3afdeeb4e5b8575fca1016ab3143561daadcad3397a96f5c37bb900b"
+        },
+        "hailActivated": {
+          "frame": 213,
+          "rngValue": 1621732966,
+          "weather": 128,
+          "weatherTurns": 5,
+          "player": {
+            "hp": 142,
+            "maxHp": 142,
+            "pp": [
+              8,
+              10,
+              10,
+              10
+            ],
+            "status3": 128,
+            "underground": true
+          },
+          "currentMove": 258,
+          "battleMoveDamage": 0,
+          "framebufferSha256": "0d1e0aaba108115cc96a0fed7ccfb4752bad0c30310f25f4c3067bad2fd280f7"
+        },
+        "undergroundWeatherPass": {
+          "frame": 352,
+          "rngValue": 1621732966,
+          "weather": 128,
+          "weatherTurns": 4,
+          "player": {
+            "hp": 142,
+            "maxHp": 142,
+            "pp": [
+              8,
+              10,
+              10,
+              10
+            ],
+            "status3": 128,
+            "underground": true
+          },
+          "currentMove": 0,
+          "battleMoveDamage": 0,
+          "framebufferSha256": "b7b1228dba0b4fd0f0defcd6321f6d7e3e10c4b20971990982bfc36860d51cd4"
+        },
+        "surfaceExit": {
+          "frame": 478,
+          "rngValue": 3278432283,
+          "weather": 128,
+          "weatherTurns": 4,
+          "player": {
+            "hp": 142,
+            "maxHp": 142,
+            "pp": [
+              8,
+              10,
+              10,
+              10
+            ],
+            "status3": 0,
+            "underground": false
+          },
+          "currentMove": 91,
+          "battleMoveDamage": 128,
+          "framebufferSha256": "17baa746a86525738c06251fa8b6ceb8677e981de952231f60d61367db234227"
+        },
+        "surfaceWeatherPass": {
+          "frame": 811,
+          "rngValue": 1530931116,
+          "weather": 128,
+          "weatherTurns": 3,
+          "player": {
+            "hp": 142,
+            "maxHp": 142,
+            "pp": [
+              8,
+              10,
+              10,
+              10
+            ],
+            "status3": 0,
+            "underground": false
+          },
+          "currentMove": 0,
+          "battleMoveDamage": 0,
+          "framebufferSha256": "1520308dfb6c233dbac6ab09dc5e995f1e69305916ea32c4bcffa0dbbc30c3ed"
+        },
+        "surfaceChip": {
+          "frame": 1043,
+          "rngValue": 1530931116,
+          "weather": 128,
+          "weatherTurns": 3,
+          "player": {
+            "hp": 134,
+            "maxHp": 142,
+            "pp": [
+              8,
+              10,
+              10,
+              10
+            ],
+            "status3": 0,
+            "underground": false
+          },
+          "currentMove": 0,
+          "battleMoveDamage": 8,
+          "framebufferSha256": "b313741f71d4f4cb40918136519441dfb99816ad185c7e20b60b5f5211a49c9c"
+        }
+      },
+      "final": {
+        "rngValue": 1038309310,
+        "weather": 128,
+        "weatherTurns": 3,
+        "player": {
+          "hp": 134,
+          "maxHp": 142,
+          "pp": [
+            8,
+            10,
+            10,
+            10
+          ],
+          "status3": 0,
+          "underground": false
+        },
+        "currentMove": 0,
+        "chosenMoveByBattler": [
+          0,
+          258
+        ],
+        "battleMoveDamage": 128,
+        "displayedString": "What will\nDUGTRIO do?",
+        "controller": {
+          "activeBattler": 2,
+          "execFlags": 1,
+          "playerCommand": 18,
+          "opponentCommand": 53
+        },
+        "framebufferSha256": "fca2c340c9b2beeb75ab42c016ca741623dd0beadd3faf3a309d4cadfac0e12d"
+      }
+    },
+    "groundedControl": {
+      "fixture": "tools/battle-lab/gate6-r2-hail-control-off.json",
+      "seed": 1,
+      "parties": {
+        "playerLead": {
+          "species": 51,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 8,
+          "moves": [
+            45,
+            45,
+            45,
+            45
+          ]
+        },
+        "opponentLead": {
+          "species": 144,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 46,
+          "moves": [
+            258,
+            258,
+            258,
+            258
+          ]
+        }
+      },
+      "messageEvents": [
+        {
+          "frame": 45,
+          "text": "DUGTRIO used\nGROWL!"
+        },
+        {
+          "frame": 181,
+          "text": "Foe ARTICUNO’s ATTACK\nfell!"
+        },
+        {
+          "frame": 283,
+          "text": "Foe ARTICUNO used\nHAIL!"
+        },
+        {
+          "frame": 345,
+          "text": "It started to hail!"
+        },
+        {
+          "frame": 448,
+          "text": "Hail continues to fall."
+        },
+        {
+          "frame": 542,
+          "text": "DUGTRIO is pelted\nby HAIL!"
+        },
+        {
+          "frame": 879,
+          "text": "DUGTRIO used\nGROWL!"
+        },
+        {
+          "frame": 1015,
+          "text": "Foe ARTICUNO’s ATTACK\nfell!"
+        },
+        {
+          "frame": 1117,
+          "text": "Foe ARTICUNO used\nHAIL!"
+        },
+        {
+          "frame": 1179,
+          "text": "But it failed!"
+        },
+        {
+          "frame": 1277,
+          "text": "Hail continues to fall."
+        },
+        {
+          "frame": 1371,
+          "text": "DUGTRIO is pelted\nby HAIL!"
+        }
+      ],
+      "controllerEvents": [
+        {
+          "frame": 45,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 1,
+          "playerCommand": 16,
+          "opponentCommand": 53
+        },
+        {
+          "frame": 181,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 1,
+          "playerCommand": 16,
+          "opponentCommand": 52
+        },
+        {
+          "frame": 283,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 2,
+          "playerCommand": 51,
+          "opponentCommand": 16
+        },
+        {
+          "frame": 345,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 2,
+          "playerCommand": 51,
+          "opponentCommand": 16
+        },
+        {
+          "frame": 448,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 1,
+          "playerCommand": 16,
+          "opponentCommand": 51
+        },
+        {
+          "frame": 542,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 1,
+          "playerCommand": 16,
+          "opponentCommand": 51
+        },
+        {
+          "frame": 879,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 1,
+          "playerCommand": 16,
+          "opponentCommand": 53
+        },
+        {
+          "frame": 1015,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 1,
+          "playerCommand": 16,
+          "opponentCommand": 52
+        },
+        {
+          "frame": 1117,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 2,
+          "playerCommand": 51,
+          "opponentCommand": 16
+        },
+        {
+          "frame": 1179,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 2,
+          "playerCommand": 51,
+          "opponentCommand": 16
+        },
+        {
+          "frame": 1277,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 1,
+          "playerCommand": 16,
+          "opponentCommand": 51
+        },
+        {
+          "frame": 1371,
+          "kind": "message-print",
+          "activeBattler": 2,
+          "execFlags": 1,
+          "playerCommand": 16,
+          "opponentCommand": 51
+        }
+      ],
+      "rngLedger": [
+        {
+          "frame": 44,
+          "randomCalls": 1,
+          "rngBefore": 1621732966,
+          "rngAfter": 2756097505,
+          "currentMove": 45,
+          "chosenMoveByBattler": [
+            45,
+            258
+          ]
+        },
+        {
+          "frame": 694,
+          "randomCalls": 1,
+          "rngBefore": 2756097505,
+          "rngAfter": 1250713408,
+          "currentMove": 0,
+          "chosenMoveByBattler": [
+            0,
+            0
+          ]
+        },
+        {
+          "frame": 700,
+          "randomCalls": 9,
+          "rngBefore": 1250713408,
+          "rngAfter": 3278432283,
+          "currentMove": 0,
+          "chosenMoveByBattler": [
+            0,
+            0
+          ]
+        },
+        {
+          "frame": 878,
+          "randomCalls": 1,
+          "rngBefore": 3278432283,
+          "rngAfter": 2319805938,
+          "currentMove": 45,
+          "chosenMoveByBattler": [
+            45,
+            258
+          ]
+        },
+        {
+          "frame": 1523,
+          "randomCalls": 1,
+          "rngBefore": 2319805938,
+          "rngAfter": 2184965245,
+          "currentMove": 0,
+          "chosenMoveByBattler": [
+            0,
+            0
+          ]
+        },
+        {
+          "frame": 1529,
+          "randomCalls": 9,
+          "rngBefore": 2184965245,
+          "rngAfter": 1630250804,
+          "currentMove": 0,
+          "chosenMoveByBattler": [
+            0,
+            0
+          ]
+        }
+      ],
+      "checkpoints": {
+        "hailActivated": {
+          "frame": 308,
+          "rngValue": 2756097505,
+          "weather": 128,
+          "weatherTurns": 5,
+          "player": {
+            "hp": 142,
+            "maxHp": 142,
+            "pp": [
+              38,
+              40,
+              40,
+              40
+            ],
+            "status3": 0,
+            "underground": false
+          },
+          "currentMove": 258,
+          "battleMoveDamage": 0,
+          "framebufferSha256": "b2e6b4cdbc73daa7f93d48407e49895ad8c4df534d641674f66f93b845454265"
+        },
+        "firstWeatherPass": {
+          "frame": 447,
+          "rngValue": 2756097505,
+          "weather": 128,
+          "weatherTurns": 4,
+          "player": {
+            "hp": 142,
+            "maxHp": 142,
+            "pp": [
+              38,
+              40,
+              40,
+              40
+            ],
+            "status3": 0,
+            "underground": false
+          },
+          "currentMove": 0,
+          "battleMoveDamage": 0,
+          "framebufferSha256": "570a61f8291494ba4a1b9db9c071198eefcc5a7c9e7d9e04fd40e5569728e365"
+        },
+        "firstChip": {
+          "frame": 679,
+          "rngValue": 2756097505,
+          "weather": 128,
+          "weatherTurns": 4,
+          "player": {
+            "hp": 134,
+            "maxHp": 142,
+            "pp": [
+              38,
+              40,
+              40,
+              40
+            ],
+            "status3": 0,
+            "underground": false
+          },
+          "currentMove": 0,
+          "battleMoveDamage": 8,
+          "framebufferSha256": "b313741f71d4f4cb40918136519441dfb99816ad185c7e20b60b5f5211a49c9c"
+        },
+        "secondWeatherPass": {
+          "frame": 1276,
+          "rngValue": 2319805938,
+          "weather": 128,
+          "weatherTurns": 3,
+          "player": {
+            "hp": 134,
+            "maxHp": 142,
+            "pp": [
+              36,
+              40,
+              40,
+              40
+            ],
+            "status3": 0,
+            "underground": false
+          },
+          "currentMove": 0,
+          "battleMoveDamage": 0,
+          "framebufferSha256": "0527b0d1ac16a01bcb4dce5f67f29179aeb6c89f67fd314e523251f845d04771"
+        },
+        "secondChip": {
+          "frame": 1508,
+          "rngValue": 2319805938,
+          "weather": 128,
+          "weatherTurns": 3,
+          "player": {
+            "hp": 126,
+            "maxHp": 142,
+            "pp": [
+              36,
+              40,
+              40,
+              40
+            ],
+            "status3": 0,
+            "underground": false
+          },
+          "currentMove": 0,
+          "battleMoveDamage": 8,
+          "framebufferSha256": "513a143cb3905b19900ed3030046ce0c93558717e0969c788beecc7b8cc58bf7"
+        }
+      },
+      "final": {
+        "rngValue": 1630250804,
+        "weather": 128,
+        "weatherTurns": 3,
+        "player": {
+          "hp": 126,
+          "maxHp": 142,
+          "pp": [
+            36,
+            40,
+            40,
+            40
+          ],
+          "status3": 0,
+          "underground": false
+        },
+        "currentMove": 0,
+        "chosenMoveByBattler": [
+          0,
+          258
+        ],
+        "battleMoveDamage": 128,
+        "displayedString": "What will\nDUGTRIO do?",
+        "controller": {
+          "activeBattler": 2,
+          "execFlags": 1,
+          "playerCommand": 18,
+          "opponentCommand": 53
+        },
+        "framebufferSha256": "85ea8015234af2fad717940bb542c5acc7c0cc2aaae891b743f49287599e078f"
+      }
+    }
+  },
+  "determinism": {
+    "freshRunCount": 2,
+    "artifactsCompared": [
+      "gate6-r2-hail-off: manifest.json",
+      "gate6-r2-hail-off: frame-*.png sorted by basename",
+      "gate6-r2-hail-control-off: manifest.json",
+      "gate6-r2-hail-control-off: frame-*.png sorted by basename",
+      "tools/run-mgba-probe.py compact semantic JSON"
+    ],
+    "ignoredNondeterministicPaths": [],
+    "temporaryOutputDirectoryPrefixesExcludedFromPathNames": true,
+    "digManifestSha256": "25925ff99b87e26cec4015d39cfa73cc3dd4a3471f444fb6b9c4cbade8d87aa2",
+    "digCapturePngBasenameSha256": "4b5126094f080961b04f55348a73f3bb02481f86021d3d724b753b80b114690d",
+    "groundedControlManifestSha256": "944bf8344af23b31f4c97391141240946178548580b2b770d39d45b2c869a356",
+    "groundedControlCapturePngBasenameSha256": "34b4ad1a884be3f6f96fd9f2109f473ded3a944d6e87188b9c2485027a28bd44",
+    "compactSemanticReceiptSha256": "78ced100a8cfdd09b8f8ca130aff4754da62d2c3593e88298966421cf217384b",
+    "byteIdentical": true
+  }
+}
