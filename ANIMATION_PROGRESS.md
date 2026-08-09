@@ -1,5 +1,12 @@
 # Animation coverage
 
+## MOVE_SUPER_FANG exact — bilateral 200/200 production promotion (2026-08-09 worker)
+
+- **State:** Coverage advances **142→143/276 exact**, 0 partial, 0 staged, **134→133 unsupported**. SUPER_FANG alone moves; animation-boundary and unsupported-barrier pins remain unchanged.
+- **Did:** Added pointer-bounded Scene-ON set-302 RATICATE/ONIX probes, bilateral fixtures/change maps, pure source-relative reducer, typed seam, and narrow compositor. It reuses `hyperFang.json` Raticate/front-back and fang art plus shared shakes/lunge, while independently implementing `gSuperFangSpriteTemplate`, BlendMonInAndOut, BG-only complex blend, and measured task display handoffs.
+- **Verified:** Twice fresh, player-back **75..274** and opponent-front **79..278** each pass **200/200 source-component and raw-RGB framebuffer** equality through cleanup. HYPER_FANG stays bilateral **107/107** and KNOCK_OFF bilateral **59/59** twice fresh. Focused tests, smoke, typecheck, production build, full `npm test`, and coverage report pass.
+- **Next:** Supervisor selects the next independent acceptance unit. Do not infer Super Fang’s unique sprite callback, palette targets, or task latches for another move.
+
 ## MOVE_FIRE_SPIN exact — bilateral 104/104 production promotion (2026-08-09 worker)
 
 - **State:** Coverage advances **141→142/276 exact**, 0 partial, 0 staged, **135→134 unsupported**. FIRE_SPIN alone moves; the animation boundary and unsupported-barrier pins remain unchanged.

@@ -70,10 +70,10 @@ describe("MOVE_GLARE bilateral dense exact evidence", () => {
     expect(effects2).toContain(".callback = AnimEyeSparkle");
   });
 
-  it("keeps GLARE exact after the Fire Spin promotion at 142/142", () => {
-    expect(coverage.entries).toHaveLength(142);
+  it("keeps GLARE exact after the Super Fang promotion at 143/143", () => {
+    expect(coverage.entries).toHaveLength(143);
     expect(coverage.entries.every((entry) => entry.status === "exact")).toBe(true);
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_GLARE")).toHaveLength(1);
-    expect(276 - coverage.entries.length).toBe(134);
+    expect(276 - coverage.entries.length).toBe(133);
   });
 });

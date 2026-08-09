@@ -892,6 +892,7 @@ import {
   sceneOnSludgeBombView,
   sceneOnPoisonFangView,
   sceneOnHyperFangView,
+  sceneOnSuperFangView,
   sceneOnMegaPunchView,
   sceneOnMegaKickView,
   sceneOnRollingKickView,
@@ -1048,6 +1049,10 @@ import {
   type SceneOnSubstituteConfig,
   type SceneOnCrabHammerConfig,
 } from "../animation/sceneOnPresentation.ts";
+import {
+  superFangDisplayedAttackerOffsetAtAge,
+  superFangDisplayedTargetOffsetAtAge,
+} from "../animation/superFang.ts";
 import { refreshDisplayedBlendCoeffAtAge, REFRESH_BLEND_START_AGE } from "../animation/refresh.ts";
 import {
   FADE_IN_BACK_AGE,
@@ -23141,6 +23146,132 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "RATICATE used" : "Foe RATICATE used",
       "HYPER FANG!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SUPER_FANG") {
+    const view = sceneOnSuperFangView(state);
+    // Sprite callbacks and palette writes are transferred on the following
+    // VBlank.  The reducer intentionally retains raw source-task state, so
+    // paint the immediately preceding state rather than tuning display ages
+    // to either orientation's trace frame.
+    const displayed = sceneOnSuperFangView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "RATICATE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "RATICATE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SUPER_FANG pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const raticateSource = playerToOpponent
+      ? hyperFangArt.raticateBack
+      : hyperFangArt.raticateFront;
+    const raticate = playerToOpponent ? raticateSource : {
+      ...raticateSource,
+      tileset: {
+        columns: 8, rows: 8, tiles: raticateSource.tileset.tiles.slice(0, 64),
+      },
+    };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const complexBlend = displayed.complexPaletteBlend;
+    const complexTarget = complexBlend?.target === "red"
+      // `RGB(31, 2, 2)` expands into this target's same 5-bit channels.
+      ? { r: 248, g: 16, b: 16 }
+      : { r: 255, g: 255, b: 255 };
+    const fieldPalette = complexBlend === null
+      ? battleBg.palette
+      : blendPaletteBanksToward(
+          battleBg.palette, complexTarget, complexBlend.coefficient,
+        );
+    const attackerPalette = displayed.attackerBlendCoefficient === 0
+      ? raticate.palette
+      : blendPaletteToward(
+          raticate.palette,
+          // `RGB(31, 6, 1)` used by AnimTask_BlendMonInAndOut.
+          { r: 255, g: 49, b: 8 },
+          displayed.attackerBlendCoefficient,
+        );
+    // ONIX front's idle has retained x2=1 until the target ShakeMon task
+    // explicitly resets x2 at the final complex-palette command.
+    const targetIdle = playerToOpponent && state.age <= 176
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, fieldPalette);
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2
+        + superFangDisplayedTargetOffsetAtAge(state.age).y2,
+    );
+    drawSpriteSheet(
+      fb,
+      raticate.tileset,
+      attackerPalette,
+      view.attacker.geometry.spriteCorner.x
+        + superFangDisplayedAttackerOffsetAtAge(state.age, view.attacker.geometry.side).x2,
+      view.attacker.geometry.spriteCorner.y
+        + superFangDisplayedAttackerOffsetAtAge(state.age, view.attacker.geometry.side).y2,
+    );
+    if (displayed.fang) {
+      drawSpriteSheet(
+        fb,
+        {
+          columns: 4,
+          rows: 4,
+          tiles: hyperFangArt.fang.tileset.tiles.slice(
+            displayed.fang.frame * 16,
+            displayed.fang.frame * 16 + 16,
+          ),
+        },
+        hyperFangArt.fang.palette,
+        displayed.fang.x - 16,
+        displayed.fang.y - 16,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "RATICATE";
+    const playerSpecies = playerToOpponent ? "RATICATE" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "RATICATE used" : "Foe RATICATE used",
+      "SUPER FANG!",
       99,
     );
     return;
