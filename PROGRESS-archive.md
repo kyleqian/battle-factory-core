@@ -1,3 +1,23 @@
+## 1042 — [supervisor, 2026-08-09] **Soundproof hook family source-proven**
+
+- **State:** Gate 6 remains **OPEN**. Per-move hook gaps are now **591**:
+  **300 item + 291 ability** (was 600). Exactly nine Level-50 Soundproof
+  ability rows are `source-proven-family`; all unrelated joins remain gaps.
+- **Did:** accepted `c6094026`. The extractor derives the ten source
+  `sSoundMovesTable` selectors, excludes non-roster GROWL, and proves each
+  roster entry's graph/program path into `Cmd_attackcanceler` and
+  `ABILITYEFFECT_MOVES_BLOCK`. The manifest connects the nine-move bilateral
+  sibling batch to the existing Hyper Voice/control OFF receipt without
+  fabricating per-move receipts.
+- **Next:** audit the shared Volt/Water Absorb + Flash Fire dispatcher as the
+  next source-bounded ability-hook family; promote only exact roster moves
+  whose entry path and source guards are completely proven.
+- **Notes:** supervisor focused verification is **5 files / 27 tests** green;
+  worker smoke is **375/375**, full suite and production build green. The nine
+  roster selectors are ROAR, SING, SUPERSONIC, SCREECH, SNORE, UPROAR, METAL
+  SOUND, GRASS WHISTLE, and HYPER VOICE. No production, barrier/import, oracle
+  fixture, animation, or controller file changed.
+
 ## 1041 — [supervisor, 2026-08-09] **Gate-6 hook gaps surfaced; Substitute fold green**
 
 - **State:** Gate 6 remains **OPEN**. The manifest now exposes **300 item +

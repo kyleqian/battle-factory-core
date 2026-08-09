@@ -5,6 +5,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1045 — [supervisor, 2026-08-09] **Color Change receipted; Sleep Talk fold and final union green**
+
+- **State:** Gate 6 remains **OPEN** at **561** per-move hook gaps: **300 item
+  + 261 ability**. All **183** Color Change candidates remain unsupported; the
+  source-proven ability-row count stays **39**.
+- **Did:** accepted `4c56eb0b`, `87090330`, and `ed796f90`. Two independent
+  Battle Scene OFF seeds now directly observe a legal Kecleon survive
+  Thunderbolt, change both live type slots Normal→Electric, reveal Color
+  Change, print its message, and consume no RNG on the mutation frame. This
+  retires only `missing-direct-on-damage-off-receipt`; ordered MOVEEND routes
+  and runtime damage-state guard derivation remain explicit blockers. Folded
+  animation-main's bilateral Sleep Talk evidence checkpoint through
+  `da87be51` as `a8b1f7e3`; Sleep Talk truthfully remains unsupported.
+- **Next:** complete ordered damage-before-MOVEEND witnesses and guard
+  derivation for the finite Color Change set, especially BIDE, PRESENT, and
+  FUTURE SIGHT, before promoting any row. Keep contact-family proof separate.
+- **Notes:** supervisor focused verification is **5 files / 76 tests**. Final
+  union is **825 files / 8,199 passed / 1 skipped** and production build green;
+  OFF oracle healthy. The generic seven-battle controller and all five #84
+  fixes remain green. No production mechanic, canonical import, or
+  unsupported-barrier pin changed.
+
+---
+
 ## 1044 — [supervisor, 2026-08-09] **ON_DAMAGE candidates ratcheted; Haze fold and union green**
 
 - **State:** Gate 6 remains **OPEN** at **561** per-move hook gaps: **300 item
@@ -54,27 +78,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   green; OFF oracle healthy. Manifest artifacts are JSON **2,914,881 B** and
   Markdown **825,090 B**. No production mechanics, controller, barrier/import,
   or oracle fixture changed in the hook step.
-
----
-
-## 1042 — [supervisor, 2026-08-09] **Soundproof hook family source-proven**
-
-- **State:** Gate 6 remains **OPEN**. Per-move hook gaps are now **591**:
-  **300 item + 291 ability** (was 600). Exactly nine Level-50 Soundproof
-  ability rows are `source-proven-family`; all unrelated joins remain gaps.
-- **Did:** accepted `c6094026`. The extractor derives the ten source
-  `sSoundMovesTable` selectors, excludes non-roster GROWL, and proves each
-  roster entry's graph/program path into `Cmd_attackcanceler` and
-  `ABILITYEFFECT_MOVES_BLOCK`. The manifest connects the nine-move bilateral
-  sibling batch to the existing Hyper Voice/control OFF receipt without
-  fabricating per-move receipts.
-- **Next:** audit the shared Volt/Water Absorb + Flash Fire dispatcher as the
-  next source-bounded ability-hook family; promote only exact roster moves
-  whose entry path and source guards are completely proven.
-- **Notes:** supervisor focused verification is **5 files / 27 tests** green;
-  worker smoke is **375/375**, full suite and production build green. The nine
-  roster selectors are ROAR, SING, SUPERSONIC, SCREECH, SNORE, UPROAR, METAL
-  SOUND, GRASS WHISTLE, and HYPER VOICE. No production, barrier/import, oracle
-  fixture, animation, or controller file changed.
 
 ---
