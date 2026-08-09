@@ -1065,8 +1065,8 @@ const THUNDERBOLT = 85;
           context(0, {}, { currentMove: THUNDERBOLT, moveendState: 3, ...contextChanges }, {
             ability: 16,
             types: ["TYPE_NORMAL", "TYPE_NORMAL"],
-            specialStatus: damaged,
             ...targetChanges,
+            specialStatus: targetChanges.specialStatus ?? damaged,
           }),
         );
         expect(quiet.state.rulesContext.battlers[1]!.types, label).toEqual(["TYPE_NORMAL", "TYPE_NORMAL"]);

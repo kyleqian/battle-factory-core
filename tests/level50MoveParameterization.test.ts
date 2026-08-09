@@ -131,6 +131,7 @@ type OnDamageAudit = {
   };
   semanticEvidence: { kernelSiblingBatch: { status: string; test: string; coverage: string }; oracleReceipt: { status: string; profile: string; checked: string } };
   blockers: Array<{ id: string; reason: string }>;
+  retiredBlockers: Array<{ id: string; reason: string; fixture: string; probe: string; receipts: string[] }>;
   promotions: { sourceProvenRows: string[]; reason: string };
 };
 const manifest = data as unknown as {
