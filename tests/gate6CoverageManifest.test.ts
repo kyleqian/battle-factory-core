@@ -31,6 +31,26 @@ const SOUNDPROOF_PROOF_PATHS = [
   "tests/soundproofOracleEvidence.test.ts",
   "tests/fixtures/soundproof-off-evidence.json",
 ] as const;
+const ABSORBING_CATEGORIES = [
+  "absorbing-volt-absorb",
+  "absorbing-water-absorb",
+  "absorbing-flash-fire",
+] as const;
+const ABSORBING_PROOF_PATHS = [
+  "reference/pokeemerald/src/battle_util.c",
+  "reference/pokeemerald/data/battle_scripts_1.s",
+  "src/data/gen/battle-script-graph.json",
+  "src/data/gen/battle-script-program.json",
+  "reference/pokeemerald/src/battle_script_commands.c",
+  "src/engine/battleScriptHitChainOpcode.ts",
+  "tests/battleScriptHitChainOpcode.test.ts",
+  "tests/damageCalc.test.ts",
+  "docs/absorbing-abilities-ground-truth.md",
+  "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+  "tools/probe/probe-absorbing-ability-off.py",
+  "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+  "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+] as const;
 
 const EXPLICIT_STATE_BEHAVIOR_ROWS = [
   [
@@ -103,6 +123,53 @@ function collectEvidenceRows(value: unknown, rows: JsonObject[] = []): JsonObjec
   return rows;
 }
 
+function sourceProvenPathsFor(category: string): readonly string[] {
+  if (category === SOUNDPROOF_MOVES_BLOCK_CATEGORY) return SOUNDPROOF_PROOF_PATHS;
+  if ((ABSORBING_CATEGORIES as readonly string[]).includes(category)) return ABSORBING_PROOF_PATHS;
+  throw new Error(`unknown source-proven ability category ${category}`);
+}
+
+function assertSourceProvenFamilyContract(
+  sourceHook: JsonObject,
+  row: JsonObject,
+): void {
+  const categories = array(sourceHook.supportedCategories).map(String);
+  const evidence = record(sourceHook.evidence);
+  const families = array(evidence.families).map(record);
+  if (categories.length === 0 || new Set(categories).size !== categories.length) {
+    throw new Error("source-proven hook categories must be nonempty and unique");
+  }
+  if (JSON.stringify(families.map((family) => family.category)) !== JSON.stringify(categories)) {
+    throw new Error("source-proven hook evidence must preserve one ordered family witness per category");
+  }
+  if (JSON.stringify(array(row.categories).map(String)) !== JSON.stringify(categories)) {
+    throw new Error("manifest row categories drift from the source-proven family categories");
+  }
+  if (!String(row.notes).includes("unrelated ability families")) {
+    throw new Error("source-proven row must retain the unrelated-family boundary");
+  }
+  for (const family of families) {
+    if (!categories.includes(String(family.category))) throw new Error("family evidence has an unclaimed category");
+    const entryPath = record(family.entryPath);
+    const graph = record(entryPath.graph);
+    const program = record(entryPath.program);
+    if (graph.path !== "src/data/gen/battle-script-graph.json" || program.path !== "src/data/gen/battle-script-program.json") {
+      throw new Error("source-proven family lost generated graph/program evidence");
+    }
+    if (family.category === SOUNDPROOF_MOVES_BLOCK_CATEGORY && !record(graph.attackCanceler).label) {
+      throw new Error("Soundproof family lacks attackcanceler evidence");
+    }
+    if ((ABSORBING_CATEGORIES as readonly string[]).includes(String(family.category)) && !record(graph.accuracyCheck).label) {
+      throw new Error("absorbing family lacks accuracycheck evidence");
+    }
+    for (const path of sourceProvenPathsFor(String(family.category))) {
+      if (!array(row.evidence).some((item) => record(item).path === path)) {
+        throw new Error(`source-proven row lacks ${path} for ${String(family.category)}`);
+      }
+    }
+  }
+}
+
 function assertPerMoveHookJoinContract(manifest: JsonObject): void {
   const summary = record(manifest.summary);
   const hookJoinSummary = record(summary.perMoveHookJoins);
@@ -157,18 +224,7 @@ function assertPerMoveHookJoinContract(manifest: JsonObject): void {
         unsupported += 1;
       } else if (sourceHook.status === SOURCE_PROVEN_FAMILY_STATUS) {
         if (axis !== "ability") throw new Error(`item hook ${sourceMove.move} cannot be source-proven in this bounded family`);
-        if (
-          JSON.stringify(array(sourceHook.supportedCategories)) !== JSON.stringify([SOUNDPROOF_MOVES_BLOCK_CATEGORY])
-          || JSON.stringify(array(row.categories)) !== JSON.stringify([SOUNDPROOF_MOVES_BLOCK_CATEGORY])
-          || !String(row.notes).includes("unrelated ability families")
-        ) {
-          throw new Error(`source-proven ${axis} hook-join row for ${sourceMove.move} overclaims coverage`);
-        }
-        for (const path of SOUNDPROOF_PROOF_PATHS) {
-          if (!array(row.evidence).some((item) => record(item).path === path)) {
-            throw new Error(`source-proven ${axis} hook-join row for ${sourceMove.move} lacks ${path}`);
-          }
-        }
+        assertSourceProvenFamilyContract(sourceHook, row);
       } else {
         throw new Error(`unknown ${axis} hook-join status for ${sourceMove.move}: ${String(sourceHook.status)}`);
       }
@@ -277,24 +333,34 @@ describe("Gate-6 mechanics coverage manifest", () => {
       const axisSummary = record(perMoveHookJoins[axis]);
       expect(rows).toHaveLength(parameterizationData.moves.length);
       expect(axisSummary).toEqual({ rows: rows.length, unsupported: sourceUnsupported, gaps: sourceUnsupported });
-      expect(sourceUnsupported).toBe(axis === "item" ? 300 : 291);
+      expect(sourceUnsupported).toBe(axis === "item" ? 300 : 261);
     }
-    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 591, gaps: 591 });
+    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 561, gaps: 561 });
     const sourceProven = parameterizationData.moves
       .filter((move) => move.hooks.ability.status === SOURCE_PROVEN_FAMILY_STATUS)
+      .map((move) => move.move);
+    expect(sourceProven).toHaveLength(39);
+    const sourceSoundproof = parameterizationData.moves
+      .filter((move) => move.hooks.ability.supportedCategories.includes(SOUNDPROOF_MOVES_BLOCK_CATEGORY))
       .map((move) => move.move)
       .sort();
-    expect(sourceProven).toEqual([...SOUNDPROOF_ROSTER_MOVES].sort());
+    expect(sourceSoundproof).toEqual([...SOUNDPROOF_ROSTER_MOVES].sort());
+    const sourceAbsorbing = parameterizationData.moves
+      .filter((move) => move.hooks.ability.supportedCategories.some((category) => (ABSORBING_CATEGORIES as readonly string[]).includes(category)))
+      .map((move) => move.move);
+    expect(sourceAbsorbing).toHaveLength(30);
+    const soundproofOnlyAbilityGaps = parameterizationData.moves.length - sourceSoundproof.length;
+    expect(soundproofOnlyAbilityGaps).toBe(291);
+    expect(soundproofOnlyAbilityGaps - Number(record(perMoveHookJoins.ability).gaps)).toBe(sourceAbsorbing.length);
+    expect(parameterizationData.moves.length + soundproofOnlyAbilityGaps).toBe(591);
+    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(561);
     const sourceProvenRows = array(manifestHookJoinSections.ability)
       .map(record)
       .filter((row) => row.status === SOURCE_PROVEN_FAMILY_STATUS);
-    expect(sourceProvenRows.map((row) => String(row.move)).sort()).toEqual([...SOUNDPROOF_ROSTER_MOVES].sort());
+    expect(sourceProvenRows.map((row) => String(row.move)).sort()).toEqual([...sourceProven].sort());
     for (const row of sourceProvenRows) {
-      expect(array(row.categories)).toEqual([SOUNDPROOF_MOVES_BLOCK_CATEGORY]);
-      expect(String(row.notes)).toMatch(/unrelated ability families/);
-      for (const path of SOUNDPROOF_PROOF_PATHS) {
-        expect(array(row.evidence).map((item) => record(item).path)).toContain(path);
-      }
+      const sourceMove = parameterizationData.moves.find((move) => move.move === row.move)!;
+      assertSourceProvenFamilyContract(record(sourceMove.hooks.ability), row);
     }
     expect(corpus.ordinaryTrainers).toBe(300);
     expect(corpus.level50Sets).toBe(850);
@@ -322,6 +388,35 @@ describe("Gate-6 mechanics coverage manifest", () => {
         })),
       ));
     }
+  });
+
+  it("keeps every family witness when a source-proven row legitimately spans multiple families", () => {
+    const manifest = readManifest();
+    const abilityRows = array(record(record(manifest.sections).perMoveHookJoins).ability).map(record);
+    const soundproofMove = parameterizationData.moves.find((move) => move.move === "MOVE_HYPER_VOICE")!;
+    const absorbingMove = parameterizationData.moves.find((move) => move.move === "MOVE_THUNDER_PUNCH")!;
+    const soundproofRow = abilityRows.find((row) => row.move === soundproofMove.move)!;
+    const absorbingRow = abilityRows.find((row) => row.move === absorbingMove.move)!;
+    const mixedSourceHook = structuredClone(record(soundproofMove.hooks.ability));
+    const mixedEvidence = record(mixedSourceHook.evidence);
+    const absorbingEvidence = record(record(absorbingMove.hooks.ability).evidence);
+    mixedSourceHook.supportedCategories = [
+      ...array(mixedSourceHook.supportedCategories),
+      ...array(record(absorbingMove.hooks.ability).supportedCategories),
+    ];
+    mixedEvidence.families = [
+      ...array(mixedEvidence.families),
+      ...array(absorbingEvidence.families),
+    ];
+    const mixedRow = structuredClone(soundproofRow);
+    mixedRow.categories = [...array(mixedRow.categories), ...array(absorbingRow.categories)];
+    mixedRow.evidence = [...array(mixedRow.evidence), ...array(absorbingRow.evidence)];
+
+    expect(mixedSourceHook.supportedCategories).toEqual([
+      SOUNDPROOF_MOVES_BLOCK_CATEGORY,
+      "absorbing-volt-absorb",
+    ]);
+    expect(() => assertSourceProvenFamilyContract(mixedSourceHook, mixedRow)).not.toThrow();
   });
 
   it("rejects unknown evidence paths, false hook-join zeroes, and false closure claims", () => {
@@ -372,6 +467,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
 
     const oracle = record(record(manifest.summary).parameterizedOracle);
     const scenarios = array(record(sections.parameterizedOracle).scenarios);
+    const abilities = array(hookSections.abilities).map(record);
     const r12b = record(scenarios.find((scenario) => record(scenario).cardId === "R12b"));
     const r11 = record(scenarios.find((scenario) => record(scenario).cardId === "R11"));
     const r6 = record(scenarios.find((scenario) => record(scenario).cardId === "R6"));
@@ -392,12 +488,29 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(r2.map((scenario) => scenario.captureCount).sort((a, b) => Number(a) - Number(b))).toEqual([14, 17]);
     for (const scenario of r2) expect(scenario.status).toBe("oracle-receipted");
     expect(r12).toMatchObject({ status: "oracle-receipted", captureCount: 10 });
+    const voltAbsorb = abilities.find((row) => row.label === "ABILITY_VOLT_ABSORB")!;
+    const waterAbsorb = abilities.find((row) => row.label === "ABILITY_WATER_ABSORB")!;
+    const flashFire = abilities.find((row) => row.label === "ABILITY_FLASH_FIRE")!;
+    expect(voltAbsorb).toMatchObject({
+      status: "oracle-receipted-hook",
+      oracleReceiptCards: ["absorbing-volt-absorb-off"],
+    });
+    expect(waterAbsorb).toMatchObject({
+      status: "shared-dispatcher-sibling-tier1-verified",
+      oracleReceiptCards: [],
+    });
+    expect(flashFire).toMatchObject({
+      status: "shared-dispatcher-sibling-tier1-verified",
+      oracleReceiptCards: [],
+    });
+    expect(String(waterAbsorb.notes)).toMatch(/R10\/R7 only happened to include those abilities/);
+    expect(String(flashFire.notes)).toMatch(/R10\/R7 only happened to include those abilities/);
     expect(oracle.receiptDocumented).toBe(24);
     expect(oracle.receiptGaps).toBe(0);
     expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*300 item join gaps\*\* and \*\*291 ability join gaps\*\*/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/9 ability rows are source-proven only for the Soundproof moves-block family/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*300 item join gaps\*\* and \*\*261 ability join gaps\*\*/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/39 ability rows are source-proven for the nine Soundproof selectors plus audited shared-absorbing routes/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/24\/24.*scenario receipts documented; \*\*0\*\* request-level gaps/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Receipt count alone does not close the broader Gate-6 breadth acceptance/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).not.toMatch(/fixture-only-no-committed-receipt/);

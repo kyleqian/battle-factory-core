@@ -3,7 +3,7 @@
   "gate6": {
     "closed": false,
     "verdict": "OPEN — this first manifest exposes coverage and receipt gaps; it does not claim Gate 6 closed.",
-    "nextAcceptanceUnit": "Per-move hook-join family: Choose one source-bounded item or ability hook-join family and account for complete Battle Script reachability, including implicit fallthrough and source branch guards. Do not promote the remaining explicit gaps: 300 item joins and 291 ability joins remain unsupported.",
+    "nextAcceptanceUnit": "Per-move hook-join family: Choose one source-bounded item or ability hook-join family and account for complete Battle Script reachability, including implicit fallthrough and source branch guards. Do not promote the remaining explicit gaps: 300 item joins and 261 ability joins remain unsupported.",
     "interpretation": "Static executable reachability, engine references, Tier-1 proofs, and oracle receipts are separate evidence classes."
   },
   "generatedBy": "node --experimental-strip-types tools/report/gate6-coverage-manifest.ts",
@@ -26,7 +26,15 @@
     "src/engine/battleScriptAbilityMovesBlock.ts",
     "tests/battleScriptAbilityMovesBlock.test.ts",
     "tests/soundproofOracleEvidence.test.ts",
-    "tests/fixtures/soundproof-off-evidence.json"
+    "tests/fixtures/soundproof-off-evidence.json",
+    "src/engine/battleScriptHitChainOpcode.ts",
+    "tests/battleScriptHitChainOpcode.test.ts",
+    "tests/damageCalc.test.ts",
+    "docs/absorbing-abilities-ground-truth.md",
+    "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+    "tools/probe/probe-absorbing-ability-off.py",
+    "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+    "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json"
   ],
   "summary": {
     "effects": {
@@ -48,13 +56,13 @@
       },
       "ability": {
         "rows": 300,
-        "unsupported": 291,
-        "gaps": 291
+        "unsupported": 261,
+        "gaps": 261
       },
       "total": {
         "rows": 600,
-        "unsupported": 591,
-        "gaps": 591
+        "unsupported": 561,
+        "gaps": 561
       }
     },
     "stateFamilies": {
@@ -64,7 +72,7 @@
     "hooks": {
       "abilities": {
         "total": 78,
-        "oracleReceipted": 29,
+        "oracleReceipted": 28,
         "zeroFactoryWidened": 4
       },
       "holdEffects": {
@@ -23318,9 +23326,11 @@
           "effect": "EFFECT_BURN_HIT",
           "effectId": 4,
           "entryScript": "BattleScript_EffectBurnHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-flash-fire"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_FIRE_PUNCH.hooks.ability"
@@ -23330,9 +23340,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_FIRE_PUNCH.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_FLASH_FIRE",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectBurnHit:362",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-flash-fire; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_ICE_PUNCH",
@@ -23368,9 +23438,11 @@
           "effect": "EFFECT_PARALYZE_HIT",
           "effectId": 6,
           "entryScript": "BattleScript_EffectParalyzeHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-volt-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-volt-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_THUNDER_PUNCH.hooks.ability"
@@ -23380,9 +23452,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_THUNDER_PUNCH.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_VOLT_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyzeHit:370",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-volt-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SCRATCH",
@@ -24147,7 +24279,7 @@
           "categories": [
             "moves-block-soundproof"
           ],
-          "reason": "Source-proven Soundproof moves-block family: this selector is in sSoundMovesTable, its exact generated Battle Script route reaches attackcanceler, and Cmd_attackcanceler calls AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK) before PP admission. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moves-block-soundproof. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_ROAR.hooks.ability"
@@ -24161,7 +24293,7 @@
             {
               "path": "reference/pokeemerald/src/battle_util.c",
               "locator": "sSoundMovesTable",
-              "kind": "source-selector-table"
+              "kind": "source-selector"
             },
             {
               "path": "reference/pokeemerald/data/battle_scripts_1.s",
@@ -24181,7 +24313,7 @@
             {
               "path": "reference/pokeemerald/src/battle_script_commands.c",
               "locator": "Cmd_attackcanceler",
-              "kind": "source-moves-block-dispatcher"
+              "kind": "source-dispatcher"
             },
             {
               "path": "src/engine/battleScriptAbilityMovesBlock.ts",
@@ -24204,7 +24336,7 @@
               "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for the moves-block-soundproof family; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moves-block-soundproof; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SING",
@@ -24219,7 +24351,7 @@
           "categories": [
             "moves-block-soundproof"
           ],
-          "reason": "Source-proven Soundproof moves-block family: this selector is in sSoundMovesTable, its exact generated Battle Script route reaches attackcanceler, and Cmd_attackcanceler calls AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK) before PP admission. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moves-block-soundproof. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SING.hooks.ability"
@@ -24233,7 +24365,7 @@
             {
               "path": "reference/pokeemerald/src/battle_util.c",
               "locator": "sSoundMovesTable",
-              "kind": "source-selector-table"
+              "kind": "source-selector"
             },
             {
               "path": "reference/pokeemerald/data/battle_scripts_1.s",
@@ -24253,7 +24385,7 @@
             {
               "path": "reference/pokeemerald/src/battle_script_commands.c",
               "locator": "Cmd_attackcanceler",
-              "kind": "source-moves-block-dispatcher"
+              "kind": "source-dispatcher"
             },
             {
               "path": "src/engine/battleScriptAbilityMovesBlock.ts",
@@ -24276,7 +24408,7 @@
               "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for the moves-block-soundproof family; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moves-block-soundproof; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SUPERSONIC",
@@ -24291,7 +24423,7 @@
           "categories": [
             "moves-block-soundproof"
           ],
-          "reason": "Source-proven Soundproof moves-block family: this selector is in sSoundMovesTable, its exact generated Battle Script route reaches attackcanceler, and Cmd_attackcanceler calls AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK) before PP admission. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moves-block-soundproof. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SUPERSONIC.hooks.ability"
@@ -24305,7 +24437,7 @@
             {
               "path": "reference/pokeemerald/src/battle_util.c",
               "locator": "sSoundMovesTable",
-              "kind": "source-selector-table"
+              "kind": "source-selector"
             },
             {
               "path": "reference/pokeemerald/data/battle_scripts_1.s",
@@ -24325,7 +24457,7 @@
             {
               "path": "reference/pokeemerald/src/battle_script_commands.c",
               "locator": "Cmd_attackcanceler",
-              "kind": "source-moves-block-dispatcher"
+              "kind": "source-dispatcher"
             },
             {
               "path": "src/engine/battleScriptAbilityMovesBlock.ts",
@@ -24348,7 +24480,7 @@
               "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for the moves-block-soundproof family; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moves-block-soundproof; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SONIC_BOOM",
@@ -24434,9 +24566,11 @@
           "effect": "EFFECT_BURN_HIT",
           "effectId": 4,
           "entryScript": "BattleScript_EffectBurnHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-flash-fire"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_EMBER.hooks.ability"
@@ -24446,9 +24580,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_EMBER.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_FLASH_FIRE",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectBurnHit:362",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-flash-fire; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_FLAMETHROWER",
@@ -24459,9 +24653,11 @@
           "effect": "EFFECT_BURN_HIT",
           "effectId": 4,
           "entryScript": "BattleScript_EffectBurnHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-flash-fire"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_FLAMETHROWER.hooks.ability"
@@ -24471,9 +24667,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_FLAMETHROWER.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_FLASH_FIRE",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectBurnHit:362",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-flash-fire; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_WATER_GUN",
@@ -24484,9 +24740,11 @@
           "effect": "EFFECT_HIT",
           "effectId": 0,
           "entryScript": "BattleScript_EffectHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-water-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-water-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_WATER_GUN.hooks.ability"
@@ -24496,9 +24754,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_WATER_GUN.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_WATER_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectHit:236",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-water-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_HYDRO_PUMP",
@@ -24509,9 +24827,11 @@
           "effect": "EFFECT_HIT",
           "effectId": 0,
           "entryScript": "BattleScript_EffectHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-water-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-water-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_HYDRO_PUMP.hooks.ability"
@@ -24521,9 +24841,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_HYDRO_PUMP.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_WATER_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectHit:236",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-water-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SURF",
@@ -24534,9 +24914,11 @@
           "effect": "EFFECT_HIT",
           "effectId": 0,
           "entryScript": "BattleScript_EffectHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-water-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-water-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SURF.hooks.ability"
@@ -24546,9 +24928,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_SURF.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_WATER_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectHit:236",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-water-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_ICE_BEAM",
@@ -24634,9 +25076,11 @@
           "effect": "EFFECT_SPEED_DOWN_HIT",
           "effectId": 70,
           "entryScript": "BattleScript_EffectSpeedDownHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-water-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-water-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_BUBBLE_BEAM.hooks.ability"
@@ -24646,9 +25090,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_BUBBLE_BEAM.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_WATER_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectSpeedDownHit:1048",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectSpeedDownHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectSpeedDownHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-water-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_AURORA_BEAM",
@@ -25134,9 +25638,11 @@
           "effect": "EFFECT_TRAP",
           "effectId": 42,
           "entryScript": "BattleScript_EffectTrap",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-flash-fire"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_FIRE_SPIN.hooks.ability"
@@ -25146,9 +25652,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_FIRE_SPIN.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_FLASH_FIRE",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectTrap:830",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectTrap->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectTrap->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-flash-fire; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_THUNDERBOLT",
@@ -25159,9 +25725,11 @@
           "effect": "EFFECT_PARALYZE_HIT",
           "effectId": 6,
           "entryScript": "BattleScript_EffectParalyzeHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-volt-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-volt-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_THUNDERBOLT.hooks.ability"
@@ -25171,9 +25739,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_THUNDERBOLT.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_VOLT_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyzeHit:370",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-volt-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_THUNDER_WAVE",
@@ -25209,9 +25837,11 @@
           "effect": "EFFECT_THUNDER",
           "effectId": 152,
           "entryScript": "BattleScript_EffectThunder",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-volt-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-volt-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_THUNDER.hooks.ability"
@@ -25221,9 +25851,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_THUNDER.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_VOLT_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectThunder:1920",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectThunder->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectThunder->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-volt-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_ROCK_THROW",
@@ -25563,7 +26253,7 @@
           "categories": [
             "moves-block-soundproof"
           ],
-          "reason": "Source-proven Soundproof moves-block family: this selector is in sSoundMovesTable, its exact generated Battle Script route reaches attackcanceler, and Cmd_attackcanceler calls AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK) before PP admission. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moves-block-soundproof. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SCREECH.hooks.ability"
@@ -25577,7 +26267,7 @@
             {
               "path": "reference/pokeemerald/src/battle_util.c",
               "locator": "sSoundMovesTable",
-              "kind": "source-selector-table"
+              "kind": "source-selector"
             },
             {
               "path": "reference/pokeemerald/data/battle_scripts_1.s",
@@ -25597,7 +26287,7 @@
             {
               "path": "reference/pokeemerald/src/battle_script_commands.c",
               "locator": "Cmd_attackcanceler",
-              "kind": "source-moves-block-dispatcher"
+              "kind": "source-dispatcher"
             },
             {
               "path": "src/engine/battleScriptAbilityMovesBlock.ts",
@@ -25620,7 +26310,7 @@
               "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for the moves-block-soundproof family; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moves-block-soundproof; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_DOUBLE_TEAM",
@@ -26156,9 +26846,11 @@
           "effect": "EFFECT_BURN_HIT",
           "effectId": 4,
           "entryScript": "BattleScript_EffectBurnHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-flash-fire"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_FIRE_BLAST.hooks.ability"
@@ -26168,9 +26860,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_FIRE_BLAST.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_FLASH_FIRE",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectBurnHit:362",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-flash-fire; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_WATERFALL",
@@ -26181,9 +26933,11 @@
           "effect": "EFFECT_HIT",
           "effectId": 0,
           "entryScript": "BattleScript_EffectHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-water-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-water-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_WATERFALL.hooks.ability"
@@ -26193,9 +26947,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_WATERFALL.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_WATER_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectHit:236",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-water-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_CLAMP",
@@ -26206,9 +27020,11 @@
           "effect": "EFFECT_TRAP",
           "effectId": 42,
           "entryScript": "BattleScript_EffectTrap",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-water-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-water-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_CLAMP.hooks.ability"
@@ -26218,9 +27034,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_CLAMP.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_WATER_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectTrap:830",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectTrap->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectTrap->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-water-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SWIFT",
@@ -26631,9 +27507,11 @@
           "effect": "EFFECT_HIGH_CRITICAL",
           "effectId": 43,
           "entryScript": "BattleScript_EffectHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-water-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-water-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_CRABHAMMER.hooks.ability"
@@ -26643,9 +27521,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_CRABHAMMER.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_WATER_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectHit:236",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-water-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_EXPLOSION",
@@ -26981,9 +27919,11 @@
           "effect": "EFFECT_THAW_HIT",
           "effectId": 125,
           "entryScript": "BattleScript_EffectThawHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-flash-fire"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_FLAME_WHEEL.hooks.ability"
@@ -26993,9 +27933,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_FLAME_WHEEL.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_FLASH_FIRE",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectThawHit:1679",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectThawHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectThawHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-flash-fire; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SNORE",
@@ -27010,7 +28010,7 @@
           "categories": [
             "moves-block-soundproof"
           ],
-          "reason": "Source-proven Soundproof moves-block family: this selector is in sSoundMovesTable, its exact generated Battle Script route reaches attackcanceler, and Cmd_attackcanceler calls AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK) before PP admission. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moves-block-soundproof. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SNORE.hooks.ability"
@@ -27024,7 +28024,7 @@
             {
               "path": "reference/pokeemerald/src/battle_util.c",
               "locator": "sSoundMovesTable",
-              "kind": "source-selector-table"
+              "kind": "source-selector"
             },
             {
               "path": "reference/pokeemerald/data/battle_scripts_1.s",
@@ -27044,7 +28044,7 @@
             {
               "path": "reference/pokeemerald/src/battle_script_commands.c",
               "locator": "Cmd_attackcanceler",
-              "kind": "source-moves-block-dispatcher"
+              "kind": "source-dispatcher"
             },
             {
               "path": "src/engine/battleScriptAbilityMovesBlock.ts",
@@ -27067,7 +28067,7 @@
               "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for the moves-block-soundproof family; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moves-block-soundproof; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_CURSE",
@@ -27403,9 +28403,11 @@
           "effect": "EFFECT_ACCURACY_DOWN_HIT",
           "effectId": 73,
           "entryScript": "BattleScript_EffectAccuracyDownHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-water-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-water-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_OCTAZOOKA.hooks.ability"
@@ -27415,9 +28417,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_OCTAZOOKA.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_WATER_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectAccuracyDownHit:1060",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectAccuracyDownHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectAccuracyDownHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-water-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SPIKES",
@@ -27453,9 +28515,11 @@
           "effect": "EFFECT_PARALYZE_HIT",
           "effectId": 6,
           "entryScript": "BattleScript_EffectParalyzeHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-volt-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-volt-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_ZAP_CANNON.hooks.ability"
@@ -27465,9 +28529,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_ZAP_CANNON.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_VOLT_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyzeHit:370",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-volt-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_FORESIGHT",
@@ -27803,9 +28927,11 @@
           "effect": "EFFECT_PARALYZE_HIT",
           "effectId": 6,
           "entryScript": "BattleScript_EffectParalyzeHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-volt-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-volt-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SPARK.hooks.ability"
@@ -27815,9 +28941,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_SPARK.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_VOLT_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyzeHit:370",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-volt-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_FURY_CUTTER",
@@ -28728,9 +29914,11 @@
           "effect": "EFFECT_TRAP",
           "effectId": 42,
           "entryScript": "BattleScript_EffectTrap",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-water-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-water-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_WHIRLPOOL.hooks.ability"
@@ -28740,9 +29928,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_WHIRLPOOL.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_WATER_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectTrap:830",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectTrap->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectTrap->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-water-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_FAKE_OUT",
@@ -28782,7 +30030,7 @@
           "categories": [
             "moves-block-soundproof"
           ],
-          "reason": "Source-proven Soundproof moves-block family: this selector is in sSoundMovesTable, its exact generated Battle Script route reaches attackcanceler, and Cmd_attackcanceler calls AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK) before PP admission. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moves-block-soundproof. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_UPROAR.hooks.ability"
@@ -28796,7 +30044,7 @@
             {
               "path": "reference/pokeemerald/src/battle_util.c",
               "locator": "sSoundMovesTable",
-              "kind": "source-selector-table"
+              "kind": "source-selector"
             },
             {
               "path": "reference/pokeemerald/data/battle_scripts_1.s",
@@ -28816,7 +30064,7 @@
             {
               "path": "reference/pokeemerald/src/battle_script_commands.c",
               "locator": "Cmd_attackcanceler",
-              "kind": "source-moves-block-dispatcher"
+              "kind": "source-dispatcher"
             },
             {
               "path": "src/engine/battleScriptAbilityMovesBlock.ts",
@@ -28839,7 +30087,7 @@
               "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for the moves-block-soundproof family; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moves-block-soundproof; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_STOCKPILE",
@@ -28925,9 +30173,11 @@
           "effect": "EFFECT_BURN_HIT",
           "effectId": 4,
           "entryScript": "BattleScript_EffectBurnHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-flash-fire"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_HEAT_WAVE.hooks.ability"
@@ -28937,9 +30187,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_HEAT_WAVE.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_FLASH_FIRE",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectBurnHit:362",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-flash-fire; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_HAIL",
@@ -29025,9 +30335,11 @@
           "effect": "EFFECT_WILL_O_WISP",
           "effectId": 167,
           "entryScript": "BattleScript_EffectWillOWisp",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-flash-fire"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_WILL_O_WISP.hooks.ability"
@@ -29037,9 +30349,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_WILL_O_WISP.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_FLASH_FIRE",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectWillOWisp:2174",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectWillOWisp->BattleScript_EffectWillOWisp",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectWillOWisp->BattleScript_EffectWillOWisp",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-flash-fire; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_MEMENTO",
@@ -29550,9 +30922,11 @@
           "effect": "EFFECT_ERUPTION",
           "effectId": 190,
           "entryScript": "BattleScript_EffectEruption",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-flash-fire"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_ERUPTION.hooks.ability"
@@ -29562,9 +30936,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_ERUPTION.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_FLASH_FIRE",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectEruption:2493",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectEruption->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectEruption->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-flash-fire; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SKILL_SWAP",
@@ -29700,9 +31134,11 @@
           "effect": "EFFECT_SEMI_INVULNERABLE",
           "effectId": 155,
           "entryScript": "BattleScript_EffectSemiInvulnerable",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-water-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-water-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_DIVE.hooks.ability"
@@ -29712,9 +31148,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_DIVE.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_WATER_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectSemiInvulnerable:1973",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectSemiInvulnerable->BattleScript_SemiInvulnerableTryHit",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectSemiInvulnerable->BattleScript_SemiInvulnerableTryHit",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-water-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_TAIL_GLOW",
@@ -29850,9 +31346,11 @@
           "effect": "EFFECT_BLAZE_KICK",
           "effectId": 200,
           "entryScript": "BattleScript_EffectBurnHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-flash-fire"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_BLAZE_KICK.hooks.ability"
@@ -29862,9 +31360,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_BLAZE_KICK.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_FLASH_FIRE",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectBurnHit:362",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-flash-fire; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_MUD_SPORT",
@@ -29954,7 +31512,7 @@
           "categories": [
             "moves-block-soundproof"
           ],
-          "reason": "Source-proven Soundproof moves-block family: this selector is in sSoundMovesTable, its exact generated Battle Script route reaches attackcanceler, and Cmd_attackcanceler calls AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK) before PP admission. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moves-block-soundproof. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_HYPER_VOICE.hooks.ability"
@@ -29968,7 +31526,7 @@
             {
               "path": "reference/pokeemerald/src/battle_util.c",
               "locator": "sSoundMovesTable",
-              "kind": "source-selector-table"
+              "kind": "source-selector"
             },
             {
               "path": "reference/pokeemerald/data/battle_scripts_1.s",
@@ -29988,7 +31546,7 @@
             {
               "path": "reference/pokeemerald/src/battle_script_commands.c",
               "locator": "Cmd_attackcanceler",
-              "kind": "source-moves-block-dispatcher"
+              "kind": "source-dispatcher"
             },
             {
               "path": "src/engine/battleScriptAbilityMovesBlock.ts",
@@ -30011,7 +31569,7 @@
               "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for the moves-block-soundproof family; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moves-block-soundproof; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_POISON_FANG",
@@ -30197,9 +31755,11 @@
           "effect": "EFFECT_OVERHEAT",
           "effectId": 204,
           "entryScript": "BattleScript_EffectOverheat",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-flash-fire"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_OVERHEAT.hooks.ability"
@@ -30209,9 +31769,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_OVERHEAT.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_FLASH_FIRE",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectOverheat:2648",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectOverheat->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectOverheat->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-flash-fire; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_ROCK_TOMB",
@@ -30276,7 +31896,7 @@
           "categories": [
             "moves-block-soundproof"
           ],
-          "reason": "Source-proven Soundproof moves-block family: this selector is in sSoundMovesTable, its exact generated Battle Script route reaches attackcanceler, and Cmd_attackcanceler calls AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK) before PP admission. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moves-block-soundproof. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_METAL_SOUND.hooks.ability"
@@ -30290,7 +31910,7 @@
             {
               "path": "reference/pokeemerald/src/battle_util.c",
               "locator": "sSoundMovesTable",
-              "kind": "source-selector-table"
+              "kind": "source-selector"
             },
             {
               "path": "reference/pokeemerald/data/battle_scripts_1.s",
@@ -30310,7 +31930,7 @@
             {
               "path": "reference/pokeemerald/src/battle_script_commands.c",
               "locator": "Cmd_attackcanceler",
-              "kind": "source-moves-block-dispatcher"
+              "kind": "source-dispatcher"
             },
             {
               "path": "src/engine/battleScriptAbilityMovesBlock.ts",
@@ -30333,7 +31953,7 @@
               "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for the moves-block-soundproof family; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moves-block-soundproof; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_GRASS_WHISTLE",
@@ -30348,7 +31968,7 @@
           "categories": [
             "moves-block-soundproof"
           ],
-          "reason": "Source-proven Soundproof moves-block family: this selector is in sSoundMovesTable, its exact generated Battle Script route reaches attackcanceler, and Cmd_attackcanceler calls AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK) before PP admission. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moves-block-soundproof. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_GRASS_WHISTLE.hooks.ability"
@@ -30362,7 +31982,7 @@
             {
               "path": "reference/pokeemerald/src/battle_util.c",
               "locator": "sSoundMovesTable",
-              "kind": "source-selector-table"
+              "kind": "source-selector"
             },
             {
               "path": "reference/pokeemerald/data/battle_scripts_1.s",
@@ -30382,7 +32002,7 @@
             {
               "path": "reference/pokeemerald/src/battle_script_commands.c",
               "locator": "Cmd_attackcanceler",
-              "kind": "source-moves-block-dispatcher"
+              "kind": "source-dispatcher"
             },
             {
               "path": "src/engine/battleScriptAbilityMovesBlock.ts",
@@ -30405,7 +32025,7 @@
               "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for the moves-block-soundproof family; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moves-block-soundproof; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_TICKLE",
@@ -30466,9 +32086,11 @@
           "effect": "EFFECT_ERUPTION",
           "effectId": 190,
           "entryScript": "BattleScript_EffectEruption",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-water-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-water-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_WATER_SPOUT.hooks.ability"
@@ -30478,9 +32100,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_WATER_SPOUT.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_WATER_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectEruption:2493",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectEruption->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectEruption->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-water-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SIGNAL_BEAM",
@@ -30641,9 +32323,11 @@
           "effect": "EFFECT_ACCURACY_DOWN_HIT",
           "effectId": 73,
           "entryScript": "BattleScript_EffectAccuracyDownHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-water-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-water-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_MUDDY_WATER.hooks.ability"
@@ -30653,9 +32337,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_MUDDY_WATER.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_WATER_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectAccuracyDownHit:1060",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectAccuracyDownHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectAccuracyDownHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-water-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_BULLET_SEED",
@@ -31091,9 +32835,11 @@
           "effect": "EFFECT_ALWAYS_HIT",
           "effectId": 17,
           "entryScript": "BattleScript_EffectHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-volt-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-volt-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SHOCK_WAVE.hooks.ability"
@@ -31103,9 +32849,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_SHOCK_WAVE.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_VOLT_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectHit:236",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-volt-absorb; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_WATER_PULSE",
@@ -31116,9 +32922,11 @@
           "effect": "EFFECT_CONFUSE_HIT",
           "effectId": 76,
           "entryScript": "BattleScript_EffectConfuseHit",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "absorbing-water-absorb"
+          ],
+          "reason": "Source-proven ability family/categories: absorbing-water-absorb. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_WATER_PULSE.hooks.ability"
@@ -31128,9 +32936,69 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_WATER_PULSE.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ABILITY_WATER_ABSORB",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectConfuseHit:1071",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectConfuseHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectConfuseHit->BattleScript_HitFromAccCheck",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "JumpIfMoveFailed",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptHitChainOpcode.ts",
+              "locator": "advancePastAccuracyCheck",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+              "kind": "tier-1-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for absorbing-water-absorb; unrelated ability families are not promoted."
         }
       ]
     },
@@ -33216,7 +35084,7 @@
         {
           "id": "ability:ABILITY_VOLT_ABSORB",
           "label": "ABILITY_VOLT_ABSORB",
-          "status": "engine-referenced-no-oracle-receipt",
+          "status": "oracle-receipted-hook",
           "universeId": 10,
           "factoryCarrierCount": 9,
           "legalCarrierCount": 3,
@@ -33227,7 +35095,9 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 4,
-          "oracleReceiptCards": [],
+          "oracleReceiptCards": [
+            "absorbing-volt-absorb-off"
+          ],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -33246,14 +35116,35 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "two-seed Volt Absorb OFF receipt",
+              "kind": "dedicated-shared-dispatcher-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-absorbing-ability-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "Dedicated two-seed Battle Scene OFF Volt Absorb receipt. This is the one shared absorbing-dispatcher semantic receipt, not a per-move receipt."
         },
         {
           "id": "ability:ABILITY_WATER_ABSORB",
           "label": "ABILITY_WATER_ABSORB",
-          "status": "oracle-receipted-hook",
+          "status": "shared-dispatcher-sibling-tier1-verified",
           "universeId": 11,
           "factoryCarrierCount": 25,
           "legalCarrierCount": 9,
@@ -33264,9 +35155,7 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 3,
-          "oracleReceiptCards": [
-            "R10"
-          ],
+          "oracleReceiptCards": [],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -33287,12 +35176,21 @@
               "kind": "factory-carrier-join"
             },
             {
-              "path": "docs/gate6-interaction-matrix-scout.md",
-              "locator": "R10",
-              "kind": "oracle-receipt"
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "Volt receipt plus source/Tier-1 siblings",
+              "kind": "shared-dispatcher-receipt-scope"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "all matching/mismatched arms and target-state guards",
+              "kind": "tier-1-absorbing-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "No direct Water Absorb/Flash Fire oracle receipt is claimed here: R10/R7 only happened to include those abilities. Their source switch arms are sibling-batch-verified under the one dedicated shared-dispatcher Volt receipt."
         },
         {
           "id": "ability:ABILITY_OBLIVIOUS",
@@ -33552,7 +35450,7 @@
         {
           "id": "ability:ABILITY_FLASH_FIRE",
           "label": "ABILITY_FLASH_FIRE",
-          "status": "oracle-receipted-hook",
+          "status": "shared-dispatcher-sibling-tier1-verified",
           "universeId": 18,
           "factoryCarrierCount": 25,
           "legalCarrierCount": 9,
@@ -33563,9 +35461,7 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 4,
-          "oracleReceiptCards": [
-            "R7"
-          ],
+          "oracleReceiptCards": [],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -33586,12 +35482,21 @@
               "kind": "factory-carrier-join"
             },
             {
-              "path": "docs/gate6-interaction-matrix-scout.md",
-              "locator": "R7",
-              "kind": "oracle-receipt"
+              "path": "docs/absorbing-abilities-ground-truth.md",
+              "locator": "Volt receipt plus source/Tier-1 siblings",
+              "kind": "shared-dispatcher-receipt-scope"
+            },
+            {
+              "path": "tests/battleScriptHitChainOpcode.test.ts",
+              "locator": "all matching/mismatched arms and target-state guards",
+              "kind": "tier-1-absorbing-sibling-batch"
+            },
+            {
+              "path": "tests/damageCalc.test.ts",
+              "kind": "tier-1-flash-fire-damage-consumer"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "No direct Water Absorb/Flash Fire oracle receipt is claimed here: R10/R7 only happened to include those abilities. Their source switch arms are sibling-batch-verified under the one dedicated shared-dispatcher Volt receipt."
         },
         {
           "id": "ability:ABILITY_SHIELD_DUST",

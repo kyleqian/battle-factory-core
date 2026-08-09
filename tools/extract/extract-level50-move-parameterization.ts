@@ -2,9 +2,9 @@
 // deliberately a catalog join, not a mechanics classifier: it preserves the
 // source-derived move table, Battle Script labels, roster usage, animation
 // dependency IDs, plus a deliberately partial catalog of source dispatcher
-// families. It does not currently classify individual moves into those hook
-// families: doing that honestly requires complete Battle Script control-flow
-// reachability, including implicit assembly fallthrough and branch guards.
+// families. It promotes only individually audited selector families with a
+// complete Battle Script control-flow witness, including implicit assembly
+// fallthrough and branch guards; every other family remains unsupported.
 //
 // Run with:
 //   node --experimental-strip-types tools/extract/extract-level50-move-parameterization.ts
@@ -52,7 +52,7 @@ type GraphStatement = {
   operandTokens: string[];
   labelOperands: string[];
 };
-type GraphLabel = { name: string; line: number; statements: GraphStatement[] };
+type GraphLabel = { name: string; line: number; nextLabel: string | null; statements: GraphStatement[] };
 type GraphEdge = {
   from: { label: string; line: number };
   to: { label: string; line: number } | null;
@@ -64,6 +64,7 @@ type ConditionalGuard = {
   command: { macro: string };
   operands: Array<{ parameter: string; token: string }>;
   takenDestination: { label: string; line: number } | null;
+  notTakenSuccessor: { label: string; line: number } | null;
 };
 type Graph = {
   labels: GraphLabel[];
@@ -77,7 +78,8 @@ type ProgramStatement = {
   mnemonic: string;
   actualOperands: string[];
 };
-type Program = { blocks: Array<{ label: string; line: number; statements: ProgramStatement[] }> };
+type ProgramBlock = { label: string; line: number; statements: ProgramStatement[] };
+type Program = { blocks: ProgramBlock[] };
 type Inventory = { tiers: { level50: { moves: Array<{ id: number; move: string; animationScript: string }> } } };
 type AnimationComponents = { moves: Array<{ id: number; move: string; rootScript: string; componentIds: string[] }> };
 type HeldItems = { count: number; entries: Array<{ itemTableId: number; holdEffect: string; holdEffectParam: number }> };
@@ -129,6 +131,47 @@ const BATTLE_SCRIPT_PROGRAM_PATH = "src/data/gen/battle-script-program.json";
 const BATTLE_SCRIPT_COMMANDS_PATH = "reference/pokeemerald/src/battle_script_commands.c";
 const SOUNDPROOF_TABLE_PATH = "reference/pokeemerald/src/battle_util.c";
 const ATTACK_CANCELER_MOVES_BLOCK_CALL = "AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0)";
+const ABSORBING_DISPATCHER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ABSORBING, gBattlerTarget, 0, 0, move)";
+
+const ABSORBING_HOOK_DEFINITIONS = [
+  {
+    id: "absorbing-volt-absorb",
+    ability: "ABILITY_VOLT_ABSORB",
+    type: "TYPE_ELECTRIC",
+    requiresNonzeroPower: true,
+    sourceGuard: "moveType == TYPE_ELECTRIC && gBattleMoves[move].power != 0",
+    targetStateGuard: "target HP chooses the drain or full-HP useless script; neither changes the dispatch predicate",
+  },
+  {
+    id: "absorbing-water-absorb",
+    ability: "ABILITY_WATER_ABSORB",
+    type: "TYPE_WATER",
+    requiresNonzeroPower: true,
+    sourceGuard: "moveType == TYPE_WATER && gBattleMoves[move].power != 0",
+    targetStateGuard: "target HP chooses the drain or full-HP useless script; neither changes the dispatch predicate",
+  },
+  {
+    id: "absorbing-flash-fire",
+    ability: "ABILITY_FLASH_FIRE",
+    type: "TYPE_FIRE",
+    requiresNonzeroPower: false,
+    sourceGuard: "moveType == TYPE_FIRE && !(gBattleMons[battler].status1 & STATUS1_FREEZE)",
+    targetStateGuard: "target must not be frozen; first/repeat activation only changes the resource flag and message selector",
+  },
+] as const;
+
+type AbsorbingHookDefinition = typeof ABSORBING_HOOK_DEFINITIONS[number];
+type RoutePosition = { label: string; line: number };
+type AbsorbingRouteStep = {
+  kind: "fallthrough" | "guard" | "goto" | "accuracycheck";
+  label: string;
+  line: number;
+  mnemonic: string;
+  operands: string[];
+  target?: RoutePosition;
+  outcome?: "taken" | "fallthrough";
+  condition?: string;
+};
 
 function requireGraphLabel(label: string): GraphLabel {
   const value = graphLabelByName.get(label);
@@ -177,6 +220,170 @@ function requireGraphEdge(
   }
 }
 
+function requireRouteStatement(label: string, line: number, mnemonic: string, operands: string[]): GraphStatement {
+  const graphStatement = requireGraphLabel(label).statements.find((candidate) => candidate.line === line);
+  const programStatement = requireProgramBlock(label).statements.find((candidate) => candidate.source.line === line);
+  if (!graphStatement || !programStatement) {
+    throw new Error(`${label}:${line} is absent from the generated Battle Script graph or program`);
+  }
+  if (
+    graphStatement.mnemonic !== mnemonic
+    || programStatement.mnemonic !== mnemonic
+    || JSON.stringify(graphStatement.operandTokens) !== JSON.stringify(operands)
+    || JSON.stringify(programStatement.actualOperands) !== JSON.stringify(operands)
+  ) {
+    throw new Error(`${label}:${line} no longer matches the exact ${mnemonic} graph/program witness`);
+  }
+  return graphStatement;
+}
+
+function requireFallthrough(from: RoutePosition, to: RoutePosition): void {
+  const found = graph.controlFlow.edges.some((edge) => (
+    edge.from.label === from.label
+    && edge.from.line === from.line
+    && edge.to?.label === to.label
+    && edge.to.line === to.line
+    && edge.kind === "fallthrough"
+  ));
+  if (!found) throw new Error(`Battle Script graph lacks ordered fallthrough ${from.label}:${from.line} -> ${to.label}:${to.line}`);
+}
+
+function appendFallthrough(
+  route: AbsorbingRouteStep[],
+  from: RoutePosition,
+  mnemonic: string,
+  operands: string[],
+  to: RoutePosition,
+): void {
+  requireRouteStatement(from.label, from.line, mnemonic, operands);
+  requireFallthrough(from, to);
+  route.push({ kind: "fallthrough", ...from, mnemonic, operands, target: to });
+}
+
+function requireConditionalGuard(
+  from: RoutePosition,
+  mnemonic: string,
+  operands: string[],
+  outcome: "taken" | "fallthrough",
+  to: RoutePosition,
+): void {
+  requireRouteStatement(from.label, from.line, mnemonic, operands);
+  const guard = graph.controlFlow.conditionalGuards.find((candidate) => (
+    candidate.from.label === from.label
+    && candidate.from.line === from.line
+    && candidate.command.macro === mnemonic
+    && JSON.stringify(candidate.operands.map((operand) => operand.token)) === JSON.stringify(operands)
+  ));
+  if (!guard) throw new Error(`${from.label}:${from.line} lacks its generated ${mnemonic} guard`);
+  const expected = outcome === "taken" ? guard.takenDestination : guard.notTakenSuccessor;
+  if (expected?.label !== to.label || expected.line !== to.line) {
+    throw new Error(`${from.label}:${from.line} ${mnemonic} ${outcome} witness does not reach ${to.label}:${to.line}`);
+  }
+  if (outcome === "taken") requireGraphEdge(from.label, from.line, to.label, to.line, "jump", mnemonic);
+  else requireFallthrough(from, to);
+}
+
+function appendGuard(
+  route: AbsorbingRouteStep[],
+  from: RoutePosition,
+  mnemonic: string,
+  operands: string[],
+  outcome: "taken" | "fallthrough",
+  to: RoutePosition,
+  condition: string,
+): void {
+  requireConditionalGuard(from, mnemonic, operands, outcome, to);
+  route.push({ kind: "guard", ...from, mnemonic, operands, outcome, target: to, condition });
+}
+
+function appendGoto(route: AbsorbingRouteStep[], from: RoutePosition, to: RoutePosition): void {
+  requireRouteStatement(from.label, from.line, "goto", [to.label]);
+  requireGraphEdge(from.label, from.line, to.label, to.line, "jump", "goto");
+  route.push({ kind: "goto", ...from, mnemonic: "goto", operands: [to.label], target: to });
+}
+
+function appendAccuracyCheck(route: AbsorbingRouteStep[], at: RoutePosition, failureLabel: string): void {
+  requireRouteStatement(at.label, at.line, "accuracycheck", [failureLabel, "ACC_CURR_MOVE"]);
+  route.push({
+    kind: "accuracycheck",
+    ...at,
+    mnemonic: "accuracycheck",
+    operands: [failureLabel, "ACC_CURR_MOVE"],
+  });
+}
+
+const LINEAR_PRELUDE_CONTROL_FLOW = /^(?:accuracycheck|call|end|goto|jump|return)/;
+
+/**
+ * This is deliberately not a generic graph walker.  A known entry block may
+ * only supply a straight, non-branching prefix followed by one exact `goto`.
+ * Every source instruction and its ordered generated edge becomes a witness.
+ */
+function appendStraightLineGoto(route: AbsorbingRouteStep[], label: string, targetLabel: string): void {
+  const block = requireGraphLabel(label);
+  if (block.statements.length < 1) throw new Error(`${label} has no source statements`);
+  const target = requireGraphLabel(targetLabel);
+  const statements = block.statements;
+  const last = statements.at(-1)!;
+  if (last.mnemonic !== "goto" || JSON.stringify(last.operandTokens) !== JSON.stringify([targetLabel])) {
+    throw new Error(`${label} is not the audited straight-line goto ${targetLabel}`);
+  }
+  for (let index = 0; index < statements.length - 1; index += 1) {
+    const statement = statements[index]!;
+    const next = statements[index + 1]!;
+    if (LINEAR_PRELUDE_CONTROL_FLOW.test(statement.mnemonic)) {
+      throw new Error(`${label}:${statement.line} is control flow, not an audited straight-line absorption prelude`);
+    }
+    appendFallthrough(
+      route,
+      { label, line: statement.line },
+      statement.mnemonic,
+      statement.operandTokens,
+      { label, line: next.line },
+    );
+  }
+  appendGoto(route, { label, line: last.line }, { label: targetLabel, line: target.statements[0]!.line });
+}
+
+/**
+ * A named, finite source block audit for an exclusion path.  This deliberately
+ * does not discover or walk arbitrary graph paths: callers give the complete
+ * expected instruction sequence, which is checked against both generated
+ * representations before it can become evidence.
+ */
+function auditExactScriptBlock(
+  label: string,
+  expected: readonly (readonly [mnemonic: string, operands: readonly string[]])[],
+) {
+  const graphLabel = requireGraphLabel(label);
+  const programBlock = requireProgramBlock(label);
+  if (graphLabel.statements.length !== expected.length || programBlock.statements.length !== expected.length) {
+    throw new Error(`${label} no longer has the exact audited statement count`);
+  }
+  const statements = expected.map(([mnemonic, expectedOperands], index) => {
+    const graphStatement = graphLabel.statements[index]!;
+    const programStatement = programBlock.statements[index]!;
+    const operands = [...expectedOperands];
+    if (graphStatement.line !== programStatement.source.line) {
+      throw new Error(`${label}:${graphStatement.line} graph/program source line disagreement`);
+    }
+    requireRouteStatement(label, graphStatement.line, mnemonic, operands);
+    return { line: graphStatement.line, mnemonic, operands };
+  });
+  return {
+    label,
+    source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: graphLabel.line },
+    graph: { path: BATTLE_SCRIPT_GRAPH_PATH, statements },
+    program: { path: BATTLE_SCRIPT_PROGRAM_PATH, statements },
+  };
+}
+
+function firstRoutePosition(label: string): RoutePosition {
+  const statement = requireGraphLabel(label).statements[0];
+  if (!statement) throw new Error(`${label} has no first source statement`);
+  return { label, line: statement.line };
+}
+
 function sourceLine(source: string, marker: string, name: string): number {
   const offset = source.indexOf(marker);
   if (offset < 0) throw new Error(`unable to locate ${name}`);
@@ -193,6 +400,42 @@ if (!attackCancelerSource.includes(`if (${ATTACK_CANCELER_MOVES_BLOCK_CALL})\n  
 }
 const soundproofTableLine = sourceLine(battleUtilSource, "static const u16 sSoundMovesTable", "sSoundMovesTable");
 const attackCancelerLine = battleScriptCommandsSource.slice(0, attackCancelerStart).split("\n").length;
+
+const accuracyCheckDeclaration = battleScriptCommandsSource.indexOf("static void Cmd_accuracycheck(void)");
+const accuracyCheckStart = battleScriptCommandsSource.indexOf("static void Cmd_accuracycheck(void)", accuracyCheckDeclaration + 1);
+const accuracyCheckEnd = battleScriptCommandsSource.indexOf("static void Cmd_attackstring(void)", accuracyCheckStart);
+if (accuracyCheckDeclaration < 0 || accuracyCheckStart < 0 || accuracyCheckEnd < 0) {
+  throw new Error("unable to isolate Cmd_accuracycheck source");
+}
+const accuracyCheckSource = battleScriptCommandsSource.slice(accuracyCheckStart, accuracyCheckEnd);
+if (!accuracyCheckSource.includes("JumpIfMoveFailed(7, move);")) {
+  throw new Error("Cmd_accuracycheck no longer hands off through JumpIfMoveFailed");
+}
+const accuracyCheckLine = battleScriptCommandsSource.slice(0, accuracyCheckStart).split("\n").length;
+
+const jumpIfMoveFailedStart = battleScriptCommandsSource.indexOf("static void JumpIfMoveFailed(u8 adder, u16 move)");
+const jumpIfMoveFailedEnd = battleScriptCommandsSource.indexOf("static void Cmd_jumpifaffectedbyprotect(void)", jumpIfMoveFailedStart);
+if (jumpIfMoveFailedStart < 0 || jumpIfMoveFailedEnd < 0) throw new Error("unable to isolate JumpIfMoveFailed source");
+const jumpIfMoveFailedSource = battleScriptCommandsSource.slice(jumpIfMoveFailedStart, jumpIfMoveFailedEnd);
+if (!jumpIfMoveFailedSource.includes(`TrySetDestinyBondToHappen();\n        if (${ABSORBING_DISPATCHER_CALL})\n            return;`)) {
+  throw new Error("JumpIfMoveFailed no longer calls the absorbing dispatcher after Destiny Bond");
+}
+const jumpIfMoveFailedLine = battleScriptCommandsSource.slice(0, jumpIfMoveFailedStart).split("\n").length;
+
+const absorbingSourceStart = battleUtilSource.indexOf("case ABILITYEFFECT_ABSORBING: // 3");
+const absorbingSourceEnd = battleUtilSource.indexOf("case ABILITYEFFECT_ON_DAMAGE:", absorbingSourceStart);
+if (absorbingSourceStart < 0 || absorbingSourceEnd < 0) throw new Error("unable to isolate AbilityBattleEffects absorbing source");
+const absorbingSource = battleUtilSource.slice(absorbingSourceStart, absorbingSourceEnd);
+for (const definition of ABSORBING_HOOK_DEFINITIONS) {
+  if (!absorbingSource.includes(`case ${definition.ability}:`)) {
+    throw new Error(`AbilityBattleEffects absorbing source lacks ${definition.ability}`);
+  }
+}
+if (!absorbingSource.includes("moveType == TYPE_ELECTRIC && gBattleMoves[move].power != 0")
+  || !absorbingSource.includes("moveType == TYPE_WATER && gBattleMoves[move].power != 0")
+  || !absorbingSource.includes("moveType == TYPE_FIRE && !(gBattleMons[battler].status1 & STATUS1_FREEZE)")) {
+  throw new Error("AbilityBattleEffects absorbing source no longer matches the audited type/power/freeze guards");
+}
 
 function soundproofEntryPath(move: string, entryScript: string) {
   const direct = directAttackCanceler(entryScript);
@@ -320,6 +563,277 @@ function soundproofEntryPath(move: string, entryScript: string) {
   throw new Error(`${move} (${entryScript}) has no source-proven route to attackcanceler`);
 }
 
+function appendEffectHitToAccuracy(route: AbsorbingRouteStep[], move: string): void {
+  const effectHit = "BattleScript_EffectHit";
+  const fromAtkCanceler = "BattleScript_HitFromAtkCanceler";
+  const fromAccCheck = "BattleScript_HitFromAccCheck";
+  if (move === "MOVE_SURF") {
+    appendGuard(
+      route,
+      { label: effectHit, line: 237 },
+      "jumpifnotmove",
+      ["MOVE_SURF", fromAtkCanceler],
+      "fallthrough",
+      { label: effectHit, line: 238 },
+      "the selected move is MOVE_SURF, so the SURF-only underwater check is evaluated",
+    );
+    appendGuard(
+      route,
+      { label: effectHit, line: 238 },
+      "jumpifnostatus3",
+      ["BS_TARGET", "STATUS3_UNDERWATER", fromAtkCanceler],
+      "taken",
+      firstRoutePosition(fromAtkCanceler),
+      "the target is not underwater",
+    );
+  } else {
+    appendGuard(
+      route,
+      { label: effectHit, line: 237 },
+      "jumpifnotmove",
+      ["MOVE_SURF", fromAtkCanceler],
+      "taken",
+      firstRoutePosition(fromAtkCanceler),
+      `the selected move ${move} is not MOVE_SURF`,
+    );
+  }
+  appendFallthrough(
+    route,
+    { label: fromAtkCanceler, line: 242 },
+    "attackcanceler",
+    [],
+    firstRoutePosition(fromAccCheck),
+  );
+  appendAccuracyCheck(route, { label: fromAccCheck, line: 244 }, "BattleScript_PrintMoveMissed");
+}
+
+function appendTrapToAccuracy(route: AbsorbingRouteStep[], move: string): void {
+  const effectTrap = "BattleScript_EffectTrap";
+  const doWrapEffect = "BattleScript_DoWrapEffect";
+  if (move === "MOVE_WHIRLPOOL") {
+    appendGuard(
+      route,
+      { label: effectTrap, line: 831 },
+      "jumpifnotmove",
+      ["MOVE_WHIRLPOOL", doWrapEffect],
+      "fallthrough",
+      { label: effectTrap, line: 832 },
+      "the selected move is MOVE_WHIRLPOOL, so the underwater bonus guard is evaluated",
+    );
+    appendGuard(
+      route,
+      { label: effectTrap, line: 832 },
+      "jumpifnostatus3",
+      ["BS_TARGET", "STATUS3_UNDERWATER", doWrapEffect],
+      "taken",
+      firstRoutePosition(doWrapEffect),
+      "the target is not underwater",
+    );
+  } else {
+    appendGuard(
+      route,
+      { label: effectTrap, line: 831 },
+      "jumpifnotmove",
+      ["MOVE_WHIRLPOOL", doWrapEffect],
+      "taken",
+      firstRoutePosition(doWrapEffect),
+      `the selected move ${move} is not MOVE_WHIRLPOOL`,
+    );
+  }
+  appendStraightLineGoto(route, doWrapEffect, "BattleScript_EffectHit");
+  appendEffectHitToAccuracy(route, move);
+}
+
+function appendDiveSecondTurnToAccuracy(route: AbsorbingRouteStep[]): void {
+  const entry = "BattleScript_EffectSemiInvulnerable";
+  const secondTurn = "BattleScript_SecondTurnSemiInvulnerable";
+  const tryHit = "BattleScript_SemiInvulnerableTryHit";
+  appendGuard(
+    route,
+    { label: entry, line: 1974 },
+    "jumpifstatus2",
+    ["BS_ATTACKER", "STATUS2_MULTIPLETURNS", secondTurn],
+    "taken",
+    firstRoutePosition(secondTurn),
+    "MOVE_DIVE is on its second semi-invulnerable turn (STATUS2_MULTIPLETURNS)",
+  );
+  const secondTurnStatements = requireGraphLabel(secondTurn).statements;
+  const jumpIndex = secondTurnStatements.findIndex((statement) => statement.line === 2003);
+  if (jumpIndex < 1) throw new Error(`${secondTurn} no longer has the audited second-turn prefix`);
+  for (let index = 0; index < jumpIndex; index += 1) {
+    const statement = secondTurnStatements[index]!;
+    const next = secondTurnStatements[index + 1]!;
+    if (LINEAR_PRELUDE_CONTROL_FLOW.test(statement.mnemonic)) {
+      throw new Error(`${secondTurn}:${statement.line} is unexpected control flow before the Dive accuracy witness`);
+    }
+    appendFallthrough(route, { label: secondTurn, line: statement.line }, statement.mnemonic, statement.operandTokens, { label: secondTurn, line: next.line });
+  }
+  appendGuard(
+    route,
+    { label: secondTurn, line: 2003 },
+    "jumpifnotmove",
+    ["MOVE_BOUNCE", tryHit],
+    "taken",
+    firstRoutePosition(tryHit),
+    "the selected move is MOVE_DIVE rather than MOVE_BOUNCE",
+  );
+  appendAccuracyCheck(route, { label: tryHit, line: 2006 }, "BattleScript_SemiInvulnerableMiss");
+}
+
+function appendWillOWispToAccuracy(route: AbsorbingRouteStep[]): void {
+  const entry = "BattleScript_EffectWillOWisp";
+  appendFallthrough(route, { label: entry, line: 2175 }, "attackcanceler", [], { label: entry, line: 2176 });
+  appendFallthrough(route, { label: entry, line: 2176 }, "attackstring", [], { label: entry, line: 2177 });
+  appendFallthrough(route, { label: entry, line: 2177 }, "ppreduce", [], { label: entry, line: 2178 });
+  appendGuard(route, { label: entry, line: 2178 }, "jumpifstatus2", ["BS_TARGET", "STATUS2_SUBSTITUTE", "BattleScript_ButItFailed"], "fallthrough", { label: entry, line: 2179 }, "the target has no Substitute");
+  appendGuard(route, { label: entry, line: 2179 }, "jumpifstatus", ["BS_TARGET", "STATUS1_BURN", "BattleScript_AlreadyBurned"], "fallthrough", { label: entry, line: 2180 }, "the target is not already burned");
+  appendGuard(route, { label: entry, line: 2180 }, "jumpiftype", ["BS_TARGET", "TYPE_FIRE", "BattleScript_NotAffected"], "fallthrough", { label: entry, line: 2181 }, "the target is not Fire-type on this route");
+  appendGuard(route, { label: entry, line: 2181 }, "jumpifability", ["BS_TARGET", "ABILITY_WATER_VEIL", "BattleScript_WaterVeilPrevents"], "fallthrough", { label: entry, line: 2182 }, "the target does not have Water Veil");
+  appendGuard(route, { label: entry, line: 2182 }, "jumpifstatus", ["BS_TARGET", "STATUS1_ANY", "BattleScript_ButItFailed"], "fallthrough", { label: entry, line: 2183 }, "the target has no major status");
+  appendAccuracyCheck(route, { label: entry, line: 2183 }, "BattleScript_ButItFailed");
+}
+
+function absorbingEntryPath(move: string, entryScript: string) {
+  const route: AbsorbingRouteStep[] = [];
+  if (entryScript === "BattleScript_EffectTrap") {
+    appendTrapToAccuracy(route, move);
+  } else if (entryScript === "BattleScript_EffectSemiInvulnerable" && move === "MOVE_DIVE") {
+    appendDiveSecondTurnToAccuracy(route);
+  } else if (entryScript === "BattleScript_EffectWillOWisp" && move === "MOVE_WILL_O_WISP") {
+    appendWillOWispToAccuracy(route);
+  } else {
+    if (entryScript !== "BattleScript_EffectHit") appendStraightLineGoto(route, entryScript, "BattleScript_EffectHit");
+    appendEffectHitToAccuracy(route, move);
+  }
+  const accuracyStep = route.at(-1);
+  if (!accuracyStep || accuracyStep.kind !== "accuracycheck") throw new Error(`${move} (${entryScript}) has no terminal accuracycheck witness`);
+  return {
+    kind: "accuracycheck-jump-if-move-failed" as const,
+    source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: requireGraphLabel(entryScript).line },
+    graph: {
+      path: BATTLE_SCRIPT_GRAPH_PATH,
+      entryLabel: entryScript,
+      accuracyCheck: { label: accuracyStep.label, line: accuracyStep.line },
+      route,
+    },
+    program: {
+      path: BATTLE_SCRIPT_PROGRAM_PATH,
+      entryLabel: entryScript,
+      accuracyCheck: { label: accuracyStep.label, line: accuracyStep.line },
+      route,
+    },
+    assumptions: [
+      "Cmd_attackcanceler takes its ordinary fallthrough for a usable selected move and a target that is not Soundproof.",
+      "Cmd_accuracycheck reaches JumpIfMoveFailed; its absorbing arm requires MOVE_RESULT_NO_EFFECT to be clear.",
+    ],
+  };
+}
+
+function sunnyDayAbsorbingExclusion(entryScript: string) {
+  if (entryScript !== "BattleScript_EffectSunnyDay") throw new Error(`MOVE_SUNNY_DAY unexpectedly maps to ${entryScript}`);
+  const route: AbsorbingRouteStep[] = [];
+  appendStraightLineGoto(route, entryScript, "BattleScript_MoveWeatherChange");
+  const weatherChange = auditExactScriptBlock("BattleScript_MoveWeatherChange", [
+    ["attackanimation", []],
+    ["waitanimation", []],
+    ["printfromtable", ["gMoveWeatherChangeStringIds"]],
+    ["waitmessage", ["B_WAIT_TIME_LONG"]],
+    ["call", ["BattleScript_WeatherFormChanges"]],
+    ["goto", ["BattleScript_MoveEnd"]],
+  ]);
+  const weatherFormChanges = auditExactScriptBlock("BattleScript_WeatherFormChanges", [
+    ["setbyte", ["sBATTLER", "0"]],
+  ]);
+  const weatherFormChangesLoop = auditExactScriptBlock("BattleScript_WeatherFormChangesLoop", [
+    ["trycastformdatachange", []],
+    ["addbyte", ["sBATTLER", "1"]],
+    ["jumpifbytenotequal", ["sBATTLER", "gBattlersCount", "BattleScript_WeatherFormChangesLoop"]],
+    ["return", []],
+  ]);
+  const weatherCall = weatherChange.graph.statements.find((statement) => statement.mnemonic === "call")!;
+  const weatherGoto = weatherChange.graph.statements.find((statement) => statement.mnemonic === "goto")!;
+  const weatherLoopGuard = weatherFormChangesLoop.graph.statements.find((statement) => statement.mnemonic === "jumpifbytenotequal")!;
+  requireGraphEdge("BattleScript_MoveWeatherChange", weatherCall.line, "BattleScript_WeatherFormChanges", weatherFormChanges.graph.statements[0]!.line, "call", "call");
+  requireGraphEdge("BattleScript_MoveWeatherChange", weatherGoto.line, "BattleScript_MoveEnd", firstRoutePosition("BattleScript_MoveEnd").line, "jump", "goto");
+  requireFallthrough(
+    { label: "BattleScript_WeatherFormChanges", line: weatherFormChanges.graph.statements[0]!.line },
+    { label: "BattleScript_WeatherFormChangesLoop", line: weatherFormChangesLoop.graph.statements[0]!.line },
+  );
+  requireConditionalGuard(
+    { label: "BattleScript_WeatherFormChangesLoop", line: weatherLoopGuard.line },
+    "jumpifbytenotequal",
+    ["sBATTLER", "gBattlersCount", "BattleScript_WeatherFormChangesLoop"],
+    "fallthrough",
+    { label: "BattleScript_WeatherFormChangesLoop", line: weatherFormChangesLoop.graph.statements.at(-1)!.line },
+  );
+  return {
+    move: "MOVE_SUNNY_DAY",
+    categories: ["absorbing-flash-fire"],
+    reason: "TYPE_FIRE makes Sunny Day a Flash Fire selector candidate, but its self-target weather script executes attackcanceler/attackstring/ppreduce/setsunny and exits through BattleScript_MoveWeatherChange to BattleScript_MoveEnd without an accuracycheck or JumpIfMoveFailed absorbing handoff.",
+    entryPath: {
+      source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: requireGraphLabel(entryScript).line },
+      graph: {
+        path: BATTLE_SCRIPT_GRAPH_PATH,
+        entryLabel: entryScript,
+        route,
+        weatherFlow: [weatherChange, weatherFormChanges, weatherFormChangesLoop],
+        exitsThrough: { label: "BattleScript_MoveWeatherChange", line: weatherGoto.line, targetLabel: "BattleScript_MoveEnd" },
+      },
+      program: {
+        path: BATTLE_SCRIPT_PROGRAM_PATH,
+        entryLabel: entryScript,
+        route,
+        weatherFlow: [weatherChange, weatherFormChanges, weatherFormChangesLoop],
+        exitsThrough: { label: "BattleScript_MoveWeatherChange", line: weatherGoto.line, targetLabel: "BattleScript_MoveEnd" },
+      },
+    },
+  };
+}
+
+function absorbingFamilyEvidence(
+  definition: AbsorbingHookDefinition,
+  move: Move,
+  entryScript: string,
+) {
+  const entryPath = absorbingEntryPath(move.move, entryScript);
+  const caseLine = sourceLine(battleUtilSource, `case ${definition.ability}:`, definition.ability);
+  return {
+    category: definition.id,
+    selector: {
+      path: SOUNDPROOF_TABLE_PATH,
+      locator: `AbilityBattleEffects(ABILITYEFFECT_ABSORBING) ${definition.ability}`,
+      ability: definition.ability,
+      moveType: definition.type,
+      requiresNonzeroPower: definition.requiresNonzeroPower,
+      sourceGuard: definition.sourceGuard,
+      line: caseLine,
+    },
+    entryPath,
+    dispatcher: {
+      path: BATTLE_SCRIPT_COMMANDS_PATH,
+      locator: "JumpIfMoveFailed",
+      line: jumpIfMoveFailedLine,
+      call: ABSORBING_DISPATCHER_CALL,
+      order: "after TrySetDestinyBondToHappen and before gBattlescriptCurrInstr = BS_ptr",
+      accuracyCheck: { locator: "Cmd_accuracycheck", line: accuracyCheckLine, call: "JumpIfMoveFailed(7, move)" },
+    },
+    familyVerification: {
+      scope: "One shared ABILITYEFFECT_ABSORBING dispatcher receipt is parameterized with Volt Absorb. Water Absorb and Flash Fire are source switch siblings covered by the all-three-arm Tier-1 batch; this does not fabricate per-move oracle receipts.",
+      implementation: "src/engine/battleScriptHitChainOpcode.ts#advancePastAccuracyCheck",
+      batchTest: "tests/battleScriptHitChainOpcode.test.ts#AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+      damageConsumerTest: "tests/damageCalc.test.ts#Flash Fire consumes its persistent resource flag after weather and before +2",
+      oracleReceipt: "docs/absorbing-abilities-ground-truth.md#3-two-seed-battle-scene-off-receipts",
+      oracleFixture: "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+      oracleProbe: "tools/probe/probe-absorbing-ability-off.py",
+      oracleReceiptFiles: [
+        "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+        "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+      ],
+      targetStateGuard: definition.targetStateGuard,
+    },
+  };
+}
+
 type HookCategory = { id: string; dispatcher: string; selector: string; ownership: string };
 const ITEM_HOOK_CATALOG: HookCategory[] = [
   { id: "selection-choice-band", dispatcher: "TrySetCantSelectMoveBattleScript / CheckMoveLimitations", selector: "HOLD_EFFECT_CHOICE_BAND; any selected move slot", ownership: "attacker held item and prior choicedMove" },
@@ -328,9 +842,12 @@ const ITEM_HOOK_CATALOG: HookCategory[] = [
 ];
 const ABILITY_HOOK_CATALOG: HookCategory[] = [
   { id: "moves-block-soundproof", dispatcher: "AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK)", selector: "sSoundMovesTable after an ATTACKCANCELER-reachable path", ownership: "target ability is ABILITY_SOUNDPROOF" },
-  { id: "absorbing-volt-absorb", dispatcher: "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)", selector: "TYPE_ELECTRIC and power != 0 after an ACCURACYCHECK-reachable path", ownership: "target ability is ABILITY_VOLT_ABSORB" },
-  { id: "absorbing-water-absorb", dispatcher: "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)", selector: "TYPE_WATER and power != 0 after an ACCURACYCHECK-reachable path", ownership: "target ability is ABILITY_WATER_ABSORB" },
-  { id: "absorbing-flash-fire", dispatcher: "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)", selector: "TYPE_FIRE after an ACCURACYCHECK-reachable path", ownership: "target ability is ABILITY_FLASH_FIRE" },
+  ...ABSORBING_HOOK_DEFINITIONS.map((definition) => ({
+    id: definition.id,
+    dispatcher: "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+    selector: `${definition.type}${definition.requiresNonzeroPower ? " and power != 0" : ""} after an ACCURACYCHECK-reachable path`,
+    ownership: `target ability is ${definition.ability}`,
+  })),
   { id: "moveend-contact-on-damage", dispatcher: "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)", selector: "FLAG_MAKES_CONTACT after a MOVEEND-reachable path", ownership: "target ability is Rough Skin, Effect Spore, Poison Point, Static, Flame Body, or Cute Charm" },
   { id: "moveend-color-change", dispatcher: "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)", selector: "power != 0 after a MOVEEND-reachable path", ownership: "target ability is ABILITY_COLOR_CHANGE" },
   { id: "accuracy-compound-eyes", dispatcher: "Cmd_accuracycheck", selector: "an ACCURACYCHECK-reachable script path", ownership: "attacker ability is ABILITY_COMPOUND_EYES" },
@@ -353,6 +870,31 @@ const executableMoveSymbols = new Set(
 );
 if (executableMoveSymbols.size !== inventory.tiers.level50.moves.length) throw new Error("topology and animation inventory disagree on executable Level-50 moves");
 
+const absorbingEvidenceByMove = new Map<string, Array<ReturnType<typeof absorbingFamilyEvidence>>>();
+const absorbingCandidateRows: Array<{ move: string; category: string; type: string; power: number; entryScript: string }> = [];
+const absorbingExcludedCandidates: Array<ReturnType<typeof sunnyDayAbsorbingExclusion>> = [];
+for (const symbol of rosterMoveSymbols) {
+  const move = moveBySymbol.get(symbol)!;
+  const script = topologyByMove.get(symbol);
+  if (!script) throw new Error(`${symbol} has no indexed Battle Script topology row for the absorbing audit`);
+  const candidates = ABSORBING_HOOK_DEFINITIONS.filter((definition) => (
+    move.type === definition.type && (!definition.requiresNonzeroPower || move.power !== 0)
+  ));
+  for (const definition of candidates) {
+    absorbingCandidateRows.push({ move: symbol, category: definition.id, type: move.type, power: move.power, entryScript: script.entryScript });
+    if (symbol === "MOVE_SUNNY_DAY") {
+      if (definition.id !== "absorbing-flash-fire") throw new Error("Sunny Day has an unexpected absorbing category");
+      absorbingExcludedCandidates.push(sunnyDayAbsorbingExclusion(script.entryScript));
+      continue;
+    }
+    const evidence = absorbingFamilyEvidence(definition, move, script.entryScript);
+    absorbingEvidenceByMove.set(symbol, [...(absorbingEvidenceByMove.get(symbol) ?? []), evidence]);
+  }
+}
+if (absorbingCandidateRows.length !== absorbingExcludedCandidates.length + [...absorbingEvidenceByMove.values()].reduce((sum, rows) => sum + rows.length, 0)) {
+  throw new Error("every source-derived absorbing candidate must be either source-proven or explicitly excluded");
+}
+
 const records = rosterMoveSymbols.map((symbol) => {
   const move = moveBySymbol.get(symbol)!;
   const script = topologyByMove.get(symbol) ?? null;
@@ -368,7 +910,36 @@ const records = rosterMoveSymbols.map((symbol) => {
   const soundproofPath = soundMoves.has(symbol)
     ? soundproofEntryPath(symbol, script.entryScript)
     : null;
-  const abilityHook = soundproofPath === null
+  const sourceProvenFamilies: Array<{ category: string; [key: string]: unknown }> = [];
+  if (soundproofPath !== null) {
+    sourceProvenFamilies.push({
+      category: SOUNDPROOF_CATEGORY,
+      selector: {
+        path: SOUNDPROOF_TABLE_PATH,
+        locator: "sSoundMovesTable",
+        symbol,
+        index: soundMoveIndexBySymbol.get(symbol),
+        tableLine: soundproofTableLine,
+      },
+      entryPath: soundproofPath,
+      dispatcher: {
+        path: BATTLE_SCRIPT_COMMANDS_PATH,
+        locator: "Cmd_attackcanceler",
+        line: attackCancelerLine,
+        call: ATTACK_CANCELER_MOVES_BLOCK_CALL,
+        order: "after AtkCanceler_UnableToUseMove and before selected-slot PP admission",
+      },
+      familyVerification: {
+        scope: "This proves only the selected-move ATTACKCANCELER route; Uproar continuation and Perish Song use separate Soundproof paths.",
+        implementation: "src/engine/battleScriptAbilityMovesBlock.ts#advanceBattleScriptMovesBlockAbility",
+        batchTest: "tests/battleScriptAbilityMovesBlock.test.ts#blocks every and only source sound selector in both singles orientations",
+        oracleReceipt: "tests/fixtures/soundproof-off-evidence.json#hyper-voice-blocked-by-soundproof",
+        oracleControl: "tests/fixtures/soundproof-off-evidence.json#tackle-control-still-hits-soundproof",
+      },
+    });
+  }
+  sourceProvenFamilies.push(...(absorbingEvidenceByMove.get(symbol) ?? []));
+  const abilityHook = sourceProvenFamilies.length === 0
     ? {
       potentialCategories: null,
       status: "unsupported",
@@ -379,34 +950,10 @@ const records = rosterMoveSymbols.map((symbol) => {
     : {
       potentialCategories: null,
       status: SOUNDPROOF_STATUS,
-      supportedCategories: [SOUNDPROOF_CATEGORY],
+      supportedCategories: sourceProvenFamilies.map((family) => family.category),
       unsupportedCategories: null,
-      reason: "Source-proven Soundproof moves-block family: this selector is in sSoundMovesTable, its exact generated Battle Script route reaches attackcanceler, and Cmd_attackcanceler calls AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK) before PP admission. This promotion does not claim unrelated ability families.",
-      evidence: {
-        category: SOUNDPROOF_CATEGORY,
-        selector: {
-          path: SOUNDPROOF_TABLE_PATH,
-          locator: "sSoundMovesTable",
-          symbol,
-          index: soundMoveIndexBySymbol.get(symbol),
-          tableLine: soundproofTableLine,
-        },
-        entryPath: soundproofPath,
-        dispatcher: {
-          path: BATTLE_SCRIPT_COMMANDS_PATH,
-          locator: "Cmd_attackcanceler",
-          line: attackCancelerLine,
-          call: ATTACK_CANCELER_MOVES_BLOCK_CALL,
-          order: "after AtkCanceler_UnableToUseMove and before selected-slot PP admission",
-        },
-        familyVerification: {
-          scope: "This proves only the selected-move ATTACKCANCELER route; Uproar continuation and Perish Song use separate Soundproof paths.",
-          implementation: "src/engine/battleScriptAbilityMovesBlock.ts#advanceBattleScriptMovesBlockAbility",
-          batchTest: "tests/battleScriptAbilityMovesBlock.test.ts#blocks every and only source sound selector in both singles orientations",
-          oracleReceipt: "tests/fixtures/soundproof-off-evidence.json#hyper-voice-blocked-by-soundproof",
-          oracleControl: "tests/fixtures/soundproof-off-evidence.json#tackle-control-still-hits-soundproof",
-        },
-      },
+      reason: `Source-proven ability family/categories: ${sourceProvenFamilies.map((family) => family.category).join(", ")}. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.`,
+      evidence: { families: sourceProvenFamilies },
     };
   return {
     id: move.id,
@@ -451,13 +998,28 @@ const records = rosterMoveSymbols.map((symbol) => {
 const rosterEffects = new Set(records.map((record) => record.moveTable.effect));
 const executableRecords = records.filter((record) => record.battleScript.executionInventory === "level50-executable");
 const executableEffects = new Set(executableRecords.map((record) => record.moveTable.effect));
-const soundproofRosterRecords = records.filter((record) => record.hooks.ability.status === SOUNDPROOF_STATUS);
+const sourceProvenAbilityRecords = records.filter((record) => record.hooks.ability.status === SOUNDPROOF_STATUS);
+const soundproofRosterRecords = sourceProvenAbilityRecords.filter((record) => record.hooks.ability.supportedCategories.includes(SOUNDPROOF_CATEGORY));
 if (soundproofRosterRecords.length !== 9) {
   throw new Error(`expected nine Level-50 Soundproof selectors, got ${soundproofRosterRecords.length}`);
 }
-if (soundproofRosterRecords.some((record) => record.hooks.ability.supportedCategories.join(",") !== SOUNDPROOF_CATEGORY)) {
+if (soundproofRosterRecords.some((record) => !record.hooks.ability.supportedCategories.includes(SOUNDPROOF_CATEGORY))) {
   throw new Error("a Soundproof roster row does not carry the exact moves-block category");
 }
+const sourceProvenAbilityCategories = sourceProvenAbilityRecords.flatMap((record) => record.hooks.ability.supportedCategories);
+const absorbingCoverageByCategory = Object.fromEntries(ABSORBING_HOOK_DEFINITIONS.map((definition) => {
+  const candidates = absorbingCandidateRows.filter((row) => row.category === definition.id);
+  const sourceProven = sourceProvenAbilityRecords.filter((record) => record.hooks.ability.supportedCategories.includes(definition.id));
+  const excluded = absorbingExcludedCandidates.filter((row) => row.categories.includes(definition.id));
+  if (candidates.length !== sourceProven.length + excluded.length) {
+    throw new Error(`${definition.id} candidate accounting is not complete`);
+  }
+  return [definition.id, {
+    sourceMoveCandidates: candidates,
+    sourceProvenRows: sourceProven.map((record) => record.move),
+    excludedCandidates: excluded,
+  }];
+}));
 const output = {
   schema: "level50-move-parameterization/v3",
   source: {
@@ -477,7 +1039,7 @@ const output = {
       "reference/pokeemerald/include/battle.h",
       "reference/pokeemerald/include/constants/pokemon.h",
     ],
-    note: "Catalog join plus an intentionally partial source dispatcher inventory. All per-move item joins and 291 per-move ability joins remain unsupported; the exact nine Level-50 sSoundMovesTable selectors carry source-proven moves-block-soundproof reachability with graph/program/source-handoff evidence.",
+    note: `Catalog join plus an intentionally partial source dispatcher inventory. All per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the exact nine Level-50 sSoundMovesTable selectors and the source-proven absorbing candidates carry graph/program/source-handoff evidence. The shared absorbing family has one Volt Absorb OFF receipt plus an all-three-arm sibling batch, not fabricated per-move receipts.`,
   },
   coverage: {
     level50Roster: {
@@ -496,12 +1058,12 @@ const output = {
       battleScriptProgramLabels: records.filter((record) => record.battleScript.programLabel !== null).length,
       animationScripts: records.filter((record) => record.animation.script !== null).length,
       itemHookCategories: 0,
-      abilityHookCategories: soundproofRosterRecords.length,
+      abilityHookCategories: sourceProvenAbilityCategories.length,
       itemHookUnsupportedCategories: null,
       abilityHookUnsupportedCategories: null,
       itemHookUnsupportedRows: records.filter((record) => record.hooks.item.status === "unsupported").length,
       abilityHookUnsupportedRows: records.filter((record) => record.hooks.ability.status === "unsupported").length,
-      abilityHookSourceProvenRows: soundproofRosterRecords.length,
+      abilityHookSourceProvenRows: sourceProvenAbilityRecords.length,
     },
     hookCatalogs: {
       item: {
@@ -521,9 +1083,10 @@ const output = {
         soundproofLevel50RosterSelectorRows: soundproofRosterRecords.length,
         soundproofSourceProvenRosterRows: soundproofRosterRecords.length,
         soundproofUnsupportedLevel50RosterRows: records.length - soundproofRosterRecords.length,
+        absorbing: absorbingCoverageByCategory,
         completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "The exact Level-50 Soundproof moves-block family is source-proven. Absorber/type, contact/on-damage, accuracy, and all other ability dispatcher families remain intentionally unsupported/null per move.",
+        reason: "The exact Level-50 Soundproof moves-block family and the audited shared absorbing dispatcher candidates are source-proven. Contact/on-damage, accuracy, and all other ability dispatcher families remain intentionally unsupported/null per move.",
       },
     },
   },

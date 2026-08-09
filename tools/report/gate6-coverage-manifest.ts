@@ -150,27 +150,11 @@ function assertManifest(manifest: AnyRecord): void {
         }
         unsupported += 1;
       } else if (row.status === SOURCE_PROVEN_FAMILY_STATUS) {
-        if (
-          axis !== "ability"
-          || !Array.isArray(row.categories)
-          || row.categories.length !== 1
-          || row.categories[0] !== SOUNDPROOF_MOVES_BLOCK_CATEGORY
-          || !String(row.notes ?? "").includes("unrelated ability families")
-        ) {
+        if (axis !== "ability" || !Array.isArray(row.categories) || row.categories.length === 0 || !String(row.notes ?? "").includes("unrelated ability families")) {
           throw new Error(`source-proven ${axis} hook-join row for ${move.move} overclaims coverage`);
         }
-        const requiredEvidencePaths = [
-          "reference/pokeemerald/src/battle_util.c",
-          "reference/pokeemerald/data/battle_scripts_1.s",
-          "src/data/gen/battle-script-graph.json",
-          "src/data/gen/battle-script-program.json",
-          "reference/pokeemerald/src/battle_script_commands.c",
-          "src/engine/battleScriptAbilityMovesBlock.ts",
-          "tests/battleScriptAbilityMovesBlock.test.ts",
-          "tests/soundproofOracleEvidence.test.ts",
-          "tests/fixtures/soundproof-off-evidence.json",
-        ];
-        for (const path of requiredEvidencePaths) {
+        const requiredEvidencePaths = sourceProvenHookEvidence(sourceHook).map((item) => item.path);
+        for (const path of new Set(requiredEvidencePaths)) {
           if (!(row.evidence as Evidence[]).some((item) => item.path === path)) {
             throw new Error(`source-proven ${axis} hook-join row for ${move.move} lacks ${path}`);
           }
@@ -264,8 +248,9 @@ const level50EffectNames = new Set(
 
 /**
  * The parameterization deliberately keeps its per-move joins explicit. The
- * one narrow exception is the source-proven Soundproof moves-block family:
- * exact sSoundMovesTable selectors have graph/program/source-handoff proof.
+ * narrow exceptions are source-proven shared dispatcher families: exact
+ * Soundproof selectors plus the audited absorbing routes have
+ * graph/program/source-handoff proof.
  * Keep the remaining finite gaps visible without copying the parameterization's
  * large move payload into this report a second time.
  */
@@ -273,9 +258,49 @@ type PerMoveHookJoinAxis = "item" | "ability";
 const PER_MOVE_HOOK_JOIN_AXES: readonly PerMoveHookJoinAxis[] = ["item", "ability"];
 const SOURCE_PROVEN_FAMILY_STATUS = "source-proven-family";
 const SOUNDPROOF_MOVES_BLOCK_CATEGORY = "moves-block-soundproof";
+const ABSORBING_CATEGORIES = new Set([
+  "absorbing-volt-absorb",
+  "absorbing-water-absorb",
+  "absorbing-flash-fire",
+]);
 const parameterizationMoves = parameterization.moves as AnyRecord[];
 if (parameterizationMoves.length !== parameterizedMoves.size) {
   throw new Error("level50 parameterization has duplicate move identities");
+}
+
+function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
+  const families = hook.evidence?.families;
+  if (!Array.isArray(families) || families.length === 0) {
+    throw new Error("source-proven hook lacks family evidence");
+  }
+  if (!Array.isArray(hook.supportedCategories) || hook.supportedCategories.length !== families.length) {
+    throw new Error("source-proven hook categories/families do not have a one-to-one mapping");
+  }
+  const categories = families.map((family: AnyRecord) => family.category);
+  if (new Set(categories).size !== categories.length || JSON.stringify(categories) !== JSON.stringify(hook.supportedCategories)) {
+    throw new Error("source-proven hook categories/families are duplicate or out of order");
+  }
+  for (const family of families as AnyRecord[]) {
+    if (
+      typeof family.category !== "string"
+      || (family.category !== SOUNDPROOF_MOVES_BLOCK_CATEGORY && !ABSORBING_CATEGORIES.has(family.category))
+      || !family.selector?.path
+      || !family.entryPath?.source?.path
+      || !family.entryPath?.graph?.path
+      || !family.entryPath?.program?.path
+      || !family.dispatcher?.path
+      || !family.familyVerification?.batchTest
+    ) {
+      throw new Error(`source-proven family is incomplete: ${String(family.category)}`);
+    }
+    if (family.category === SOUNDPROOF_MOVES_BLOCK_CATEGORY && !family.entryPath.graph.attackCanceler) {
+      throw new Error("Soundproof family lacks its attackcanceler witness");
+    }
+    if (ABSORBING_CATEGORIES.has(family.category) && !family.entryPath.graph.accuracyCheck) {
+      throw new Error(`${family.category} lacks its accuracycheck witness`);
+    }
+  }
+  return families as AnyRecord[];
 }
 
 function parameterizedHook(move: AnyRecord, axis: PerMoveHookJoinAxis): AnyRecord {
@@ -289,36 +314,48 @@ function parameterizedHook(move: AnyRecord, axis: PerMoveHookJoinAxis): AnyRecor
     }
     return hook;
   }
-  if (
-    axis !== "ability"
-    || hook.status !== SOURCE_PROVEN_FAMILY_STATUS
-    || !Array.isArray(hook.supportedCategories)
-    || hook.supportedCategories.length !== 1
-    || hook.supportedCategories[0] !== SOUNDPROOF_MOVES_BLOCK_CATEGORY
-    || hook.evidence?.category !== SOUNDPROOF_MOVES_BLOCK_CATEGORY
-    || hook.evidence?.selector?.symbol !== move.move
-    || !hook.evidence?.entryPath?.graph?.path
-    || !hook.evidence?.entryPath?.program?.path
-    || !hook.evidence?.dispatcher?.path
-  ) {
+  if (axis !== "ability" || hook.status !== SOURCE_PROVEN_FAMILY_STATUS) {
     throw new Error(`level50 parameterization ${move.move}.${axis} has an unsupported non-gap hook status`);
+  }
+  for (const family of sourceProvenFamilies(hook)) {
+    if (family.category === SOUNDPROOF_MOVES_BLOCK_CATEGORY && family.selector?.symbol !== move.move) {
+      throw new Error(`${move.move} Soundproof evidence lost its source selector identity`);
+    }
   }
   return hook;
 }
 
 function sourceProvenHookEvidence(hook: AnyRecord): Evidence[] {
-  const proof = hook.evidence as AnyRecord;
-  return uniqueEvidence([
-    evidence(proof.selector.path, "source-selector-table", proof.selector.locator),
-    evidence(proof.entryPath.source.path, "battle-script-entry-path", `${proof.entryPath.graph.entryLabel}:${proof.entryPath.source.entryLine}`),
-    evidence(proof.entryPath.graph.path, "generated-battle-script-graph", `${proof.entryPath.graph.entryLabel}->${proof.entryPath.graph.attackCanceler.label}`),
-    evidence(proof.entryPath.program.path, "generated-battle-script-program", `${proof.entryPath.program.entryLabel}->${proof.entryPath.program.attackCanceler.label}`),
-    evidence(proof.dispatcher.path, "source-moves-block-dispatcher", proof.dispatcher.locator),
-    evidence("src/engine/battleScriptAbilityMovesBlock.ts", "source-shaped-family-implementation", "advanceBattleScriptMovesBlockAbility"),
-    evidence("tests/battleScriptAbilityMovesBlock.test.ts", "tier-1-sibling-batch", "blocks every and only source sound selector in both singles orientations"),
-    evidence("tests/soundproofOracleEvidence.test.ts", "battle-scene-off-evidence-test", "hyper-voice-blocked-by-soundproof"),
-    evidence("tests/fixtures/soundproof-off-evidence.json", "battle-scene-off-oracle-receipt", "hyper-voice-blocked-by-soundproof"),
-  ]);
+  return uniqueEvidence(sourceProvenFamilies(hook).flatMap((proof) => {
+    const terminal = proof.entryPath.graph.accuracyCheck ?? proof.entryPath.graph.attackCanceler;
+    const base = [
+      evidence(proof.selector.path, "source-selector", proof.selector.locator),
+      evidence(proof.entryPath.source.path, "battle-script-entry-path", `${proof.entryPath.graph.entryLabel}:${proof.entryPath.source.entryLine}`),
+      evidence(proof.entryPath.graph.path, "generated-battle-script-graph", `${proof.entryPath.graph.entryLabel}->${terminal.label}`),
+      evidence(proof.entryPath.program.path, "generated-battle-script-program", `${proof.entryPath.program.entryLabel}->${terminal.label}`),
+      evidence(proof.dispatcher.path, "source-dispatcher", proof.dispatcher.locator),
+    ];
+    if (proof.category === SOUNDPROOF_MOVES_BLOCK_CATEGORY) {
+      return [
+        ...base,
+        evidence("src/engine/battleScriptAbilityMovesBlock.ts", "source-shaped-family-implementation", "advanceBattleScriptMovesBlockAbility"),
+        evidence("tests/battleScriptAbilityMovesBlock.test.ts", "tier-1-sibling-batch", "blocks every and only source sound selector in both singles orientations"),
+        evidence("tests/soundproofOracleEvidence.test.ts", "battle-scene-off-evidence-test", "hyper-voice-blocked-by-soundproof"),
+        evidence("tests/fixtures/soundproof-off-evidence.json", "battle-scene-off-oracle-receipt", "hyper-voice-blocked-by-soundproof"),
+      ];
+    }
+    return [
+      ...base,
+      evidence("src/engine/battleScriptHitChainOpcode.ts", "source-shaped-family-implementation", "advancePastAccuracyCheck"),
+      evidence("tests/battleScriptHitChainOpcode.test.ts", "tier-1-sibling-batch", "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)"),
+      evidence("tests/damageCalc.test.ts", "tier-1-flash-fire-damage-consumer"),
+      evidence("docs/absorbing-abilities-ground-truth.md", "shared-dispatcher-oracle-receipt", "two-seed Volt Absorb OFF receipt"),
+      evidence("tools/battle-lab/mechanic-absorbing-volt-absorb-off.json", "parameterized-oracle-request"),
+      evidence("tools/probe/probe-absorbing-ability-off.py", "oracle-probe"),
+      evidence("tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json", "battle-scene-off-oracle-receipt"),
+      evidence("tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json", "battle-scene-off-oracle-receipt"),
+    ];
+  }));
 }
 
 function makePerMoveHookJoinRows(axis: PerMoveHookJoinAxis): Row[] {
@@ -347,7 +384,7 @@ function makePerMoveHookJoinRows(axis: PerMoveHookJoinAxis): Row[] {
         ...(sourceProven ? sourceProvenHookEvidence(hook) : []),
       ]),
       notes: sourceProven
-        ? "Source-proven only for the moves-block-soundproof family; unrelated ability families are not promoted."
+        ? `Source-proven only for ${hook.supportedCategories.join(", ")}; unrelated ability families are not promoted.`
         : "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified.",
     });
   });
@@ -726,6 +763,43 @@ function receiptIdsFor(kind: "ability" | "hold-effect", name: string): string[] 
   }).map((row) => row.cardId);
 }
 
+type HookReceiptInfo = {
+  directReceiptIds: string[];
+  statusOverride?: string;
+  evidence: Evidence[];
+  notes?: string;
+};
+
+function hookReceiptInfo(kind: "ability" | "hold-effect", name: string): HookReceiptInfo {
+  if (kind !== "ability") return { directReceiptIds: receiptIdsFor(kind, name), evidence: [] };
+  if (name === "ABILITY_VOLT_ABSORB") {
+    return {
+      directReceiptIds: ["absorbing-volt-absorb-off"],
+      evidence: [
+        evidence("docs/absorbing-abilities-ground-truth.md", "dedicated-shared-dispatcher-receipt", "two-seed Volt Absorb OFF receipt"),
+        evidence("tools/battle-lab/mechanic-absorbing-volt-absorb-off.json", "parameterized-oracle-request"),
+        evidence("tools/probe/probe-absorbing-ability-off.py", "oracle-probe"),
+        evidence("tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json", "battle-scene-off-oracle-receipt"),
+        evidence("tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json", "battle-scene-off-oracle-receipt"),
+      ],
+      notes: "Dedicated two-seed Battle Scene OFF Volt Absorb receipt. This is the one shared absorbing-dispatcher semantic receipt, not a per-move receipt.",
+    };
+  }
+  if (name === "ABILITY_WATER_ABSORB" || name === "ABILITY_FLASH_FIRE") {
+    return {
+      directReceiptIds: [],
+      statusOverride: "shared-dispatcher-sibling-tier1-verified",
+      evidence: [
+        evidence("docs/absorbing-abilities-ground-truth.md", "shared-dispatcher-receipt-scope", "Volt receipt plus source/Tier-1 siblings"),
+        evidence("tests/battleScriptHitChainOpcode.test.ts", "tier-1-absorbing-sibling-batch", "all matching/mismatched arms and target-state guards"),
+        evidence("tests/damageCalc.test.ts", "tier-1-flash-fire-damage-consumer"),
+      ],
+      notes: "No direct Water Absorb/Flash Fire oracle receipt is claimed here: R10/R7 only happened to include those abilities. Their source switch arms are sibling-batch-verified under the one dedicated shared-dispatcher Volt receipt.",
+    };
+  }
+  return { directReceiptIds: receiptIdsFor(kind, name), evidence: [] };
+}
+
 function parseParityRow(name: string, kind: "ability" | "hold-effect"): AnyRecord | undefined {
   const row = (kind === "ability" ? parityAbilityRows : parityHoldRows).get(name);
   if (!row) return undefined;
@@ -745,12 +819,14 @@ function makeHookRows(kind: "ability" | "hold-effect"): Row[] {
     const factoryCarriers = kind === "ability" ? abilityCarrierCount(name, true) : holdCarrierCount(name, true);
     const legalCarriers = kind === "ability" ? legalAbilityCarrierCount(name) : legalHoldEffectCarrierCount(name);
     const hookCases = [...new Set(sourceHooks.get(name) ?? [])].sort();
-    const receiptIds = receiptIdsFor(kind, name);
+    const receipt = hookReceiptInfo(kind, name);
+    const receiptIds = receipt.directReceiptIds;
     let status = "engine-referenced-no-oracle-receipt";
     if (name.endsWith("_NONE")) status = "sentinel-not-a-hook-member";
     else if (factoryCarriers === 0 && legalCarriers > 0) status = "zero-factory-carrier-widened-scope";
     else if (census?.status === "no-battle-hooks") status = "no-battle-hooks";
     else if (hookCases.length === 0) status = "source-hook-gap";
+    else if (receipt.statusOverride) status = receipt.statusOverride;
     else if (receiptIds.length > 0) status = "oracle-receipted-hook";
     return Object.freeze({
       id: `${kind}:${name}`,
@@ -769,11 +845,12 @@ function makeHookRows(kind: "ability" | "hold-effect"): Row[] {
         evidence(ABILITY_ITEM_DOC_PATH, "ability-item-census", `${kind}:${name}`),
         evidence(kind === "ability" ? SPECIES_PATH : ITEM_HOLD_EFFECTS_PATH, "legal-widened-scope"),
         evidence(kind === "ability" ? MONS_PATH : HELD_ITEMS_PATH, "factory-carrier-join"),
-        ...receiptIds.map((cardId) => evidence(SCOUT_PATH, "oracle-receipt", cardId)),
+        ...(name === "ABILITY_VOLT_ABSORB" ? [] : receiptIds.map((cardId) => evidence(SCOUT_PATH, "oracle-receipt", cardId))),
+        ...receipt.evidence,
       ]),
-      notes: factoryCarriers === 0 && legalCarriers > 0
+      notes: receipt.notes ?? (factoryCarriers === 0 && legalCarriers > 0
         ? "Legal Gen-3 widened-scope carrier exists, but no Level-50 Factory carrier exists; this is not a Factory closure."
-        : "Engine references and source-hook presence are census facts, not semantic acceptance.",
+        : "Engine references and source-hook presence are census facts, not semantic acceptance."),
     });
   });
 }
@@ -898,6 +975,14 @@ const sourceInputs = [
   "tests/battleScriptAbilityMovesBlock.test.ts",
   "tests/soundproofOracleEvidence.test.ts",
   "tests/fixtures/soundproof-off-evidence.json",
+  "src/engine/battleScriptHitChainOpcode.ts",
+  "tests/battleScriptHitChainOpcode.test.ts",
+  "tests/damageCalc.test.ts",
+  "docs/absorbing-abilities-ground-truth.md",
+  "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+  "tools/probe/probe-absorbing-ability-off.py",
+  "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+  "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
 ];
 for (const path of sourceInputs) requirePath(path);
 
@@ -970,7 +1055,7 @@ const markdown: string[] = [
   "## Headline",
   "",
   `- Effects: **${manifest.summary.effects.staticExecutable}/${manifest.summary.effects.total} static-executable**; moves: **${manifest.summary.moves.staticExecutable}/${manifest.summary.moves.total}** static-executable (**${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}** Level-50 roster moves executable, **${manifest.summary.moves.level50RosterOnly}** roster-only).`,
-  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven only for the Soundproof moves-block family, while every remaining gap retains its source-artifact locator and reason.`,
+  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors plus audited shared-absorbing routes, while every remaining gap retains its source-artifact locator and reason.`,
   `- State/status/volatile rows: **${manifest.summary.stateFamilies.tier1Covered}/${manifest.summary.stateFamilies.total}** have focused Tier-1 evidence; source-modeled rows remain listed separately.`,
   `- Hook universes: **${manifest.summary.hooks.abilities.total} abilities** and **${manifest.summary.hooks.holdEffects.total} hold effects**, including **${manifest.summary.hooks.abilities.zeroFactoryWidened + manifest.summary.hooks.holdEffects.zeroFactoryWidened}** legal widened-scope rows with zero Level-50 Factory carriers.`,
   `- Corpus: **${manifest.summary.corpus.ordinaryTrainers}/${trainers.count} ordinary trainers** and **${manifest.summary.corpus.level50Sets}/${LEVEL50_SET_COUNT} Level-50 sets** joined; the full set catalog contains ${manifest.summary.corpus.fullSetCatalog} rows including Open-only sets.`,
@@ -982,9 +1067,9 @@ const markdown: string[] = [
   "- `static-executable` comes only from the executable-frontier census and means opcode/operand reachability, not correct state transitions.",
   "- `engine-referenced` comes only from the ability/item census. It is a worklist fact, not semantic verification.",
   "- `catalog-joined` proves a finite source/data join. It does not provide a per-trainer or per-set oracle receipt.",
-  "- `source-proven-family` per-move hook joins name their exact supported category and carry the source selector, generated graph/program route, Cmd_attackcanceler handoff, Tier-1 sibling batch, and one shared Battle Scene OFF receipt. It does not claim unrelated families.",
+  "- `source-proven-family` per-move hook joins name exact supported categories and carry one family witness per category. Soundproof reaches Cmd_attackcanceler; Volt/Water Absorb and Flash Fire reach accuracycheck → JumpIfMoveFailed. The shared absorber receipt is a two-seed Volt OFF trace plus all-three-arm Tier-1 siblings, not fabricated per-move receipts. No row claims unrelated families.",
   "- `unsupported` per-move hook joins are intentionally not inferred from the partial dispatcher catalogs. Each row repeats only move identity, effect, entry script, reason, and a locator into `level50-move-parameterization.json`; it is not a support claim.",
-  "- `oracle-receipted` requires a committed Gate-6 request card and a completed receipt-note heading in the scout. Fixture-only rows are intentionally not promoted.",
+  "- `oracle-receipted` requires a committed deterministic request and receipt. Incidental ability presence in an unrelated scenario is not a direct ability receipt; Water Absorb and Flash Fire retain explicit shared-dispatcher sibling status rather than false direct receipt labels.",
   "- The five entries in `STATE_FAMILY_BEHAVIOR_EVIDENCE` use named behavior-test locators instead of token presence; that narrow Tier-1 override does not alter static, semantic, or oracle classifications.",
   "- Zero-Factory-carrier rows remain in the widened legal Gen-3 universe. They are not silently classified as Factory-complete.",
   "",
