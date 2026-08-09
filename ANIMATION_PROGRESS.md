@@ -1,5 +1,12 @@
 # Animation coverage
 
+## MOVE_BARRIER exact — bilateral pointer-bounded 76/76 promotion (2026-08-09 worker)
+
+- **State:** Coverage advances **138→139/276 exact**, 0 partial, 0 staged, **138→137 unsupported**. BARRIER alone moves; the animation boundary and unsupported-branch pins remain unchanged.
+- **Did:** Audited the isolated eight-command body, gray wall palette/table, shared source-identical `AnimDefensiveWall` callback through destroy, BG-copy/OAM/blend path, and independent `SE_M_BARRIER` timing. Added complete legal set-114 DROWZEE versus ONIX parties, pointer-bounded bilateral probes, raw-RGB receipts/change maps, a pure source-relative reducer, typed seam, deterministic Drowzee/gray-wall assets, and the narrow shared-wall compositor.
+- **Verified:** Twice fresh, player-back frames **215..290** and opponent-front **216..291** each pass **76/76 reducer/seam, relevant software+hardware+audio, and production framebuffer**. Probe/raw/map receipts are player `2ad5e1dc…` / `12ac1d1…` / `4a0d48b9…`, opponent `1e4d8c97…` / `a3d5047f…` / `baf4be08…`. REFLECT remains **208/208** and **211/211** bilateral twice fresh; LIGHT_SCREEN raw RGB/framebuffers remain **115/115** and **119/119** twice fresh, while its pre-existing metadata-only probe hash drift was not rebaselined. Focused coverage/source/asset/boundary checks are **22/22**, smoke **375/375**, typecheck, full `npm test` **821 files / 8,181 passed / 1 skipped**, production build, and final coverage report are green.
+- **Next:** Supervisor selects the next independent move. Do not infer BARRIER's pointer-to-wall lead-in or independent no-sparkle/audio schedule for another wall move.
+
 ## MOVE_SUBSTITUTE exact — bilateral 87/87 source/seam/framebuffer promotion (2026-08-09 worker)
 
 - **State:** Coverage advances **137→138/276 exact**, 0 partial, 0 staged, **139→138 unsupported**. SUBSTITUTE alone moves; the animation boundary and unsupported-branch pins remain unchanged.

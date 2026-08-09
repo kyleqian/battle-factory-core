@@ -553,6 +553,7 @@ import reflectAsset from "../animation/assets/reflect.json" with { type: "json" 
 import brickBreakAsset from "../animation/assets/brick-break.json" with { type: "json" };
 import lightScreenAsset from "../animation/assets/light-screen.json" with { type: "json" };
 import mirrorCoatAsset from "../animation/assets/mirror-coat.json" with { type: "json" };
+import barrierAsset from "../animation/assets/barrier.json" with { type: "json" };
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import substituteAsset from "../animation/assets/substitute.json" with { type: "json" };
 import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
@@ -875,6 +876,7 @@ import {
   sceneOnReflectView,
   sceneOnBrickBreakView,
   sceneOnLightScreenView,
+  sceneOnBarrierView,
   sceneOnMirrorCoatView,
   sceneOnAromatherapyView,
   sceneOnSynthesisView,
@@ -1010,6 +1012,7 @@ import {
   type SceneOnReflectPresentationState,
   type SceneOnBrickBreakPresentationState,
   type SceneOnLightScreenPresentationState,
+  type SceneOnBarrierPresentationState,
   type SceneOnMirrorCoatPresentationState,
   type SceneOnBiteConfig,
   type SceneOnHeadbuttConfig,
@@ -1420,6 +1423,11 @@ const mirrorCoatArt = mirrorCoatAsset as {
   corsolaBack: { tileset: Tileset; palette: RgbColor[] };
   corsolaFront: { tileset: Tileset; palette: RgbColor[] };
   redLightWall: { tileset: Tileset; palette: RgbColor[] };
+};
+const barrierArt = barrierAsset as {
+  drowzeeBack: { tileset: Tileset; palette: RgbColor[] };
+  drowzeeFront: { tileset: Tileset; palette: RgbColor[] };
+  grayLightWall: { tileset: Tileset; palette: RgbColor[] };
 };
 const biteArt = biteAsset as {
   sharpTeeth: { tileset: Tileset; palette: RgbColor[] };
@@ -21427,6 +21435,111 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "CORSOLA used" : "Foe CORSOLA used",
       "MIRROR COAT!",
+      64,
+    );
+    return;
+  }
+  if (state.config.move === "BARRIER") {
+    const barrierState = state as SceneOnBarrierPresentationState;
+    const view = sceneOnBarrierView(barrierState);
+    const displayed = sceneOnBarrierView({
+      ...barrierState, age: barrierState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "DROWZEE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "DROWZEE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged BARRIER pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const drowzeeSource = playerToOpponent
+      ? barrierArt.drowzeeBack : barrierArt.drowzeeFront;
+    const drowzee = playerToOpponent
+      ? drowzeeSource
+      : { ...drowzeeSource, tileset: subTileset(drowzeeSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const opponent = playerToOpponent ? onix : drowzee;
+    const player = playerToOpponent ? drowzee : onix;
+    drawSpriteSheet(
+      fb, opponent.tileset, opponent.palette,
+      playerToOpponent
+        ? view.target.geometry.spriteCorner.x + onixIdle.x2
+        : view.attacker.geometry.spriteCorner.x,
+      playerToOpponent
+        ? view.target.geometry.spriteCorner.y + onixIdle.y2
+        : view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.wall && view.alpha && view.alpha.eva > 0) {
+      const palette = barrierArt.grayLightWall.palette.slice();
+      const rotating = palette.slice(1, 9);
+      for (let step = 0; step < displayed.wall.paletteRotationSteps; step++) {
+        rotating.unshift(rotating.pop()!);
+      }
+      palette.splice(1, 8, ...rotating);
+      drawSpriteSheetBlendedOverFb(
+        fb,
+        barrierArt.grayLightWall.tileset,
+        palette,
+        displayed.wall.x - 32,
+        displayed.wall.y - 32,
+        view.alpha.eva,
+        view.alpha.evb,
+      );
+    }
+    drawSpriteSheet(
+      fb, player.tileset, player.palette,
+      playerToOpponent
+        ? view.attacker.geometry.spriteCorner.x
+        : view.target.geometry.spriteCorner.x,
+      playerToOpponent
+        ? view.attacker.geometry.spriteCorner.y
+        : view.target.geometry.spriteCorner.y,
+    );
+    drawSendOutHealthbox(
+      fb, 0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "DROWZEE",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "DROWZEE" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "DROWZEE used" : "Foe DROWZEE used",
+      "BARRIER!",
       64,
     );
     return;
