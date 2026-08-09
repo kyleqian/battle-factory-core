@@ -104,6 +104,10 @@ import {
   type MinimizeState,
 } from "./minimize.ts";
 import {
+  acidArmorAtAge,
+  type AcidArmorState,
+} from "./acidArmor.ts";
+import {
   calmMindAtAge,
   type CalmMindState,
 } from "./calmMind.ts";
@@ -2117,6 +2121,13 @@ export interface SceneOnMinimizeConfig {
   readonly battlerHeight: number;
 }
 
+export interface SceneOnAcidArmorConfig {
+  readonly move: "ACID_ARMOR";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnCalmMindConfig {
   readonly move: "CALM_MIND";
   readonly attacker: SceneOnPresentationBattler;
@@ -2414,6 +2425,7 @@ export type SceneOnMoveConfig =
   | SceneOnFlashConfig
   | SceneOnFacadeConfig
   | SceneOnMinimizeConfig
+  | SceneOnAcidArmorConfig
   | SceneOnCalmMindConfig
   | SceneOnShadowBallConfig
   | SceneOnEncoreConfig
@@ -3109,6 +3121,11 @@ export interface SceneOnFacadeView extends FacadeState {
 }
 
 export interface SceneOnMinimizeView extends MinimizeState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnAcidArmorView extends AcidArmorState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -6257,6 +6274,21 @@ export function sceneOnMinimizeView(
   const config = state.config as SceneOnMinimizeConfig;
   return {
     ...minimizeAtAge(state.age),
+    attacker: config.attacker,
+    target: config.target,
+  };
+}
+
+/** `age=0` is Move_ACID_ARMOR's first pointer-bounded display. */
+export function sceneOnAcidArmorView(
+  state: SceneOnMovePresentationState,
+): SceneOnAcidArmorView {
+  if (state.config.move !== "ACID_ARMOR") {
+    throw new Error(`expected ACID_ARMOR presentation, got ${state.config.move}`);
+  }
+  const config = state.config as SceneOnAcidArmorConfig;
+  return {
+    ...acidArmorAtAge(state.age, config.attacker.geometry.side),
     attacker: config.attacker,
     target: config.target,
   };

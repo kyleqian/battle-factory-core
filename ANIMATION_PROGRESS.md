@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_ACID_ARMOR exact — bilateral 119/119 scanline-DMA promotion (2026-08-09 worker)
+
+- **State:** Coverage advances **145→146/276 exact**, 0 partial, 0 staged, **131→130 unsupported**. ACID_ARMOR alone moves; no animation-boundary or unsupported-barrier change.
+- **Did:** Added complete legal set-110 GRIMER/ONIX bilateral stages, a pointer-bounded Scene-ON probe, committed raw-RGB change maps, source audit, pure four-state `AnimTask_AcidArmor` reducer, typed seam, and narrow live compositor. The implementation covers both persistent scanline buffers and source/scanout phase, player BG2 vs opponent BG1 HOFS/VOFS DMA, alpha fade-out/hold/fade-in, monbg palette/OAM transfer, attacker-panned audio, and cleanup while reusing established GRIMER/ONIX art and chrome.
+- **Verified:** Twice fresh, player-back **214..332** and opponent-front **226..344** each pass **119/119 component+seam+scanline+hardware+raw-RGB+framebuffer** frames. Player evidence/raw/map: `a94ccd90…` / `e7ddd013…` / `b1763e4f…`; opponent: `67183490…` / `5092275e…` / `486f39c1…`. MINIMIZE stays bilateral **153/153** twice fresh and SLUDGE bilateral **102/102** twice fresh. Focused tests **15/15**, smoke **375/375**, typecheck/build and coverage pass.
+- **Next:** Supervisor selects the next independent animation acceptance unit. Do not infer Acid Armor's battler-priority BG choice or scanline-buffer staleness for another move without its own dense evidence.
+- **Notes:** No Acid Armor defense stage, accuracy, damage, RNG, turn order, controller/facility state, main ledger, boundary, canonical-recording allowlist, or barrier changed.
+
 ## MOVE_STOMP exact — bilateral 67/67 production promotion (2026-08-09 worker)
 
 - **State:** Coverage advances **144→145/276 exact**, 0 partial, 0 staged, **132→131 unsupported**. STOMP alone moves; no animation-boundary or unsupported-barrier change.

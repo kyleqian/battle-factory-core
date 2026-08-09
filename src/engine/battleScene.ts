@@ -947,6 +947,7 @@ import {
   sceneOnFlashView,
   sceneOnFacadeView,
   sceneOnMinimizeView,
+  sceneOnAcidArmorView,
   sceneOnCalmMindView,
   sceneOnShadowBallView,
   sceneOnEncoreView,
@@ -3612,6 +3613,38 @@ function drawTileBg(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalet
       const c = subpalettes[entry.palette]?.[idx];
       if (!c) continue;
       setPixel(fb, screenX, screenY, c);
+    }
+  }
+}
+
+function drawAcidArmorMonBg(
+  fb: Uint8Array,
+  sprite: { tileset: Tileset; palette: RgbColor[] },
+  corner: Readonly<{ x: number; y: number }>,
+  scanlines: readonly Readonly<{ hofs: number; vofs: number }>[],
+  baseHofs: number,
+  baseVofs: number,
+  eva: number,
+  evb: number,
+): void {
+  for (let y = 0; y < 160; y += 1) {
+    const scanline = scanlines[y]!;
+    const sy = y - corner.y + scanline.vofs - baseVofs;
+    if (sy < 0 || sy >= sprite.tileset.rows * 8) continue;
+    for (let x = 0; x < 240; x += 1) {
+      const sx = x - corner.x + scanline.hofs - baseHofs;
+      if (sx < 0 || sx >= sprite.tileset.columns * 8) continue;
+      const tile = sprite.tileset.tiles[
+        Math.floor(sy / 8) * sprite.tileset.columns + Math.floor(sx / 8)
+      ];
+      const index = tile?.[(sy % 8) * 8 + (sx % 8)] ?? 0;
+      if (index === 0) continue;
+      const color = sprite.palette[index];
+      if (!color) continue;
+      const offset = (y * 240 + x) * 4;
+      fb[offset] = blendChannel(color.r, fb[offset]!, eva, evb);
+      fb[offset + 1] = blendChannel(color.g, fb[offset + 1]!, eva, evb);
+      fb[offset + 2] = blendChannel(color.b, fb[offset + 2]!, eva, evb);
     }
   }
 }
@@ -29641,6 +29674,85 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? "AZUMARILL used" : "Foe AZUMARILL used",
       "FACADE!",
       99,
+    );
+    return;
+  }
+
+  if (state.config.move === "ACID_ARMOR") {
+    const view = sceneOnAcidArmorView(state);
+    const playerToOpponent =
+      view.attacker.species === "GRIMER"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "GRIMER"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ACID_ARMOR pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent ? grimerBackSprite : grimerFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : { ...attackerSource, tileset: { columns: 8, rows: 8, tiles: attackerSource.tileset.tiles.slice(0, 64) } };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? (speciesFrontIdleRestOffset(view.target.species) ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const drawAttacker = (): void => {
+      if (view.monbgActive) {
+        drawAcidArmorMonBg(
+          fb, attackerSprite, view.attacker.geometry.spriteCorner,
+          view.scanlines, playerToOpponent ? -40 : -144,
+          playerToOpponent ? -60 : -20, view.eva, view.evb,
+        );
+      } else {
+        drawSpriteSheet(
+          fb, attackerSprite.tileset, attackerSprite.palette,
+          view.attacker.geometry.spriteCorner.x,
+          view.attacker.geometry.spriteCorner.y,
+        );
+      }
+    };
+    const drawTarget = (): void => drawSpriteSheet(
+      fb, targetSprite.tileset, targetSprite.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "GRIMER";
+    const playerSpecies = playerToOpponent ? "GRIMER" : "ONIX";
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies, level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies, level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp / state.config.fieldProfile.playerMaxHp,
+        status: "none", currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb, playerToOpponent ? "GRIMER used" : "Foe GRIMER used", "ACID ARMOR!", 99,
     );
     return;
   }
