@@ -80,6 +80,64 @@ function superFangInPlaceOffsetAtAge(
 }
 
 /**
+ * The battler's in-place task writes are visible in two-display pairs: the
+ * callback's OAM update is copied to hardware on the following transfer, and
+ * the priority-2 same-frame handoff has already skipped helper tick 1.  This
+ * is a source-task display adapter, shared by both orientations rather than
+ * a trace-frame lookup.  HorizontalLunge has the ordinary one-display OAM
+ * transfer and therefore remains a simple previous-source-age read.
+ */
+export function superFangDisplayedAttackerOffsetAtAge(
+  displayAge: number,
+  attackerSide: SuperFangSide,
+): Readonly<{ x2: number; y2: number }> {
+  const displayedInPlace = (
+    startAge: number,
+    xOffset: number,
+    numShakes: number,
+  ): Readonly<{ x2: number; y2: number }> => {
+    const localAge = displayAge - (startAge + 1);
+    return shakeMonInPlaceOffsetAtTick(
+      xOffset,
+      0,
+      numShakes,
+      1,
+      localAge < 0 ? -1 : 2 * Math.floor(localAge / 2),
+    );
+  };
+  if (displayAge < SUPER_FANG_SECOND_SHAKE_AGE + 1) {
+    return displayedInPlace(SUPER_FANG_FIRST_SHAKE_AGE, 1, 20);
+  }
+  if (displayAge < SUPER_FANG_LUNGE_AGE + 1) {
+    return displayedInPlace(SUPER_FANG_SECOND_SHAKE_AGE, 3, 48);
+  }
+  return {
+    x2: horizontalLungeX2AtTick(
+      4, 4, attackerSide, displayAge - SUPER_FANG_LUNGE_AGE,
+    ),
+    y2: 0,
+  };
+}
+
+/**
+ * `AnimTask_ShakeMon`'s first target OAM row is built during the command that
+ * creates it: the baseline front-idle frame is age 176, then helper tick 0
+ * (y=7) is its first displayed task frame at age 177.  This target task has
+ * a distinct handoff from the attacker's in-place tasks above.
+ */
+export function superFangDisplayedTargetOffsetAtAge(
+  displayAge: number,
+): Readonly<{ x2: number; y2: number }> {
+  return shakeMonOffsetAtTick(
+    0,
+    7,
+    12,
+    1,
+    displayAge - (SUPER_FANG_COMPLEX_BLEND_AGE + 1),
+  );
+}
+
+/**
  * Complete `Move_SUPER_FANG` source body, `0x082cd35a..0x082cd3db`.
  *
  * Every timing is relative to the move script's first active source frame;
@@ -125,9 +183,11 @@ export function superFangAtAge(
     // The priority-2 target `AnimTask_ShakeMon` receives the same-frame
     // regular RunTasks step after its initializer, so its first readable
     // state is helper tick 1 (zero), then ticks 2..23.
-    targetOffset: shakeMonOffsetAtTick(
-      0, 7, 12, 1, age - SUPER_FANG_COMPLEX_BLEND_AGE + 1,
-    ),
+    targetOffset: age < SUPER_FANG_COMPLEX_BLEND_AGE
+      ? { x2: 0, y2: 0 }
+      : shakeMonOffsetAtTick(
+          0, 7, 12, 1, age - SUPER_FANG_COMPLEX_BLEND_AGE + 1,
+        ),
     complexPaletteBlend,
   };
 }

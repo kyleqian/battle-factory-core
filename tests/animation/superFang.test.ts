@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   superFangAtAge,
   superFangAttackerBlendCoefficientAtAge,
+  superFangDisplayedAttackerOffsetAtAge,
+  superFangDisplayedTargetOffsetAtAge,
 } from "../../src/animation/superFang.ts";
 
 describe("MOVE_SUPER_FANG source-relative reducer", () => {
@@ -33,5 +35,17 @@ describe("MOVE_SUPER_FANG source-relative reducer", () => {
     expect([176, 177, 178, 179, 180, 181, 196, 197, 198].map(
       (age) => effect(age).targetOffset.y2,
     )).toEqual([0, 0, 7, 7, 0, 0, 0, 0, 0]);
+  });
+
+  it("keeps each priority-2 in-place shake write for its two transferred displays", () => {
+    expect([4, 5, 6, 7, 8, 41, 42, 43, 44, 45, 46].map(
+      (age) => superFangDisplayedAttackerOffsetAtAge(age, "player").x2,
+    )).toEqual([0, -1, -1, 1, 1, -1, -1, -3, -3, 3, 3]);
+  });
+
+  it("keeps the target ShakeMon's independently measured OAM handoff", () => {
+    expect([176, 177, 178, 179, 180, 181, 182, 183].map(
+      (age) => superFangDisplayedTargetOffsetAtAge(age).y2,
+    )).toEqual([0, 7, 0, 0, 7, 7, 0, 0]);
   });
 });

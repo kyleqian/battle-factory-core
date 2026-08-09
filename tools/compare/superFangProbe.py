@@ -203,7 +203,7 @@ def main() -> None:
         "source": {"moveStart": MOVE_START, "moveEnd": MOVE_END,
                    "script": "Move_SUPER_FANG 0x082cd35a .. Move_SLASH 0x082cd3db"},
         "symbols": {**funcs, **templates},
-        "songHeaders": {"SE_M_DRAGON_RAGE": oracle.read_u32(song_table + 163 * 8),
+        "songHeaders": {"SE_M_DRAGON_RAGE": oracle.read_u32(song_table + 171 * 8),
                         "SE_M_BITE": oracle.read_u32(song_table + 161 * 8)},
         "sourceWindow": {"startFrame": active_rows[0]["frame"] if active_rows else None,
                          "endFrame": active_rows[-1]["frame"] if active_rows else None,

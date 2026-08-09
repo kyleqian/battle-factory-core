@@ -3241,6 +3241,32 @@
    ]
   },
   {
+   "move": "MOVE_SUPER_FANG",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Scene-ON parties stage the sole Factory carrier FRONTIER_MON_RATICATE_2 / set 302 (Adamant; Attack+Speed EVs; Focus Band; SUPER_FANG/HYPER_FANG/SHADOW_BALL/SCARY_FACE) against ONIX in both player-back and opponent-front orientations",
+    "the pointer-bounded Move_SUPER_FANG body 0x082cd35a through the first inactive cleanup passes the unthinned 200-frame windows twice fresh: player-back oracle frames 75-274 and opponent-front frames 79-278 each match 200/200 source tasks/OAM/palettes/audio, typed seam, raw RGB, and production framebuffer frames",
+    "the pure source-relative reducer and narrow compositor reuse source-identical ShakeMonInPlace, HorizontalLunge, ShakeMon, Raticate front/back, ONIX, and ANIM_TAG_FANG_ATTACK art while independently porting gSuperFangSpriteTemplate / AnimSuperFang's 0/16/32/48 four-frame body, attacker RGB(31,6,1) BlendMonInAndOut 1..12..1 ramp, BG-only RGB(31,2,2)->white complex palette writes, task-specific hardware transfer handoffs, side-panned SE_M_DRAGON_RAGE and SE_M_BITE, and cleanup",
+    "the bilateral change maps and portable pin all source frame transitions rather than trace ticks; HYPER_FANG remains 107/107 source-component and framebuffer exact in both orientations twice fresh, and KNOCK_OFF remains 59/59 in both orientations twice fresh after the shared lunge/shake seam additions",
+    "no damage, Super Fang half-HP outcome, accuracy/RNG, turn order, controller, round/facility state, animation boundary, unsupported barrier, canonical-recording allowlist, or sibling move coverage changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-poison-fang-player-zubat-opponent-onix.json",
+    "tools/battle-lab/mechanic-poison-fang-opponent-zubat-player-onix.json",
+    "tools/compare/fixtures/super-fang-player-raticate-opponent-onix.json",
+    "tools/compare/fixtures/super-fang-opponent-raticate-player-onix.json",
+    "tools/compare/evidence/super-fang-changemap-player.txt",
+    "tools/compare/evidence/super-fang-changemap-opponent.txt",
+    "tools/compare/superFangProbe.py",
+    "tools/compare/superFangPortable.ts",
+    "src/animation/assets/hyperFang.json",
+    "src/animation/superFang.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/superFang.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SURF",
    "status": "exact",
    "covered": [
@@ -4417,7 +4443,7 @@
     "MOVE_SUPER_FANG",
     "MOVE_SECRET_POWER"
    ],
-   "goal": "MOVE_KNOCK_OFF is exact through the shared Scene-ON seam in both source-required orientations: player-back PLUSLE to opponent-front ONIX and opponent-front PLUSLE to player-back ONIX are each 59/59 component/RAM and 59/59 framebuffer frames, reproduced twice. HorizontalLunge, ShakeMonInPlace, and both SlideMon helpers remain one source-relative implementation; the opposite route adds only source-selected PLUSLE front/ONIX back chrome and AnimKnockOffStrike's declared player-target affine/x-argument mirror. BIND remains 45/45 in both orientations twice as a seam regression. Sibling batch verdicts remain independent: SUPER_FANG is unsupported because its complete body additionally requires gSuperFangSpriteTemplate, AnimTask_BlendMonInAndOut, palette blend, and its own dense acceptance; SECRET_POWER is unsupported because the Factory building environment dispatches to Move_STRENGTH and other environments dispatch to distinct move bodies. Neither sibling is promoted by shared reducer coverage."
+   "goal": "MOVE_KNOCK_OFF is exact through the shared Scene-ON seam in both source-required orientations: player-back PLUSLE to opponent-front ONIX and opponent-front PLUSLE to player-back ONIX are each 59/59 component/RAM and 59/59 framebuffer frames, reproduced twice. HorizontalLunge, ShakeMonInPlace, and both SlideMon helpers remain one source-relative implementation; the opposite route adds only source-selected PLUSLE front/ONIX back chrome and AnimKnockOffStrike's declared player-target affine/x-argument mirror. BIND remains 45/45 in both orientations twice as a seam regression. SUPER_FANG is independently exact through its complete set-302 RATICATE body, gSuperFangSpriteTemplate, AnimTask_BlendMonInAndOut, palette blend, and separate bilateral 200/200 dense acceptance. SECRET_POWER remains unsupported because the Factory building environment dispatches to Move_STRENGTH and other environments dispatch to distinct move bodies."
   },
   {
    "id": "acid-poison-bubble",
