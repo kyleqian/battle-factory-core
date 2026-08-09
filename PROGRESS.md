@@ -7,21 +7,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1060 — [MAIN worker, 2026-08-09] **S8 seven-win live seam proven**
 
-- **State:** red-first live route is green at **56,556 frames** through public
-  `tick()` inputs with **4,228** render samples; focused random-soak **10/10**,
-  orchestrator **45/45**, and typecheck pass. Final smoke/full soak/suite/build
-  verification remains in progress.
+- **State:** committed red-first live route `d21682b8` is green at **56,556
+  frames** through public `tick()` inputs with **4,228** render samples;
+  focused random-soak **10/10**, orchestrator **45/45**, smoke **375/375**,
+  full suite **835 files / 8,253 passed / 1 skipped**, typecheck, production
+  build, and Scene-OFF oracle info all pass.
 - **Did:** added an optional tools/test-only `stateFactory` plus opt-in route
   diagnostics and a CLI-inaccessible strong policy that reuses `RandomPlayer`.
   Seed 21 starts at the normal generated intro boundary with source-derived
   records 664/678/527 and follows real command, forced-switch, postwin,
   swap-decline, and terminal default-NO UI gates to seven live wins.
-- **Next:** run smoke, vanilla 0:20, full-policy 0:60, full suite/build, and
-  Scene-OFF oracle info; then record the exact final verdict and clean commit.
+- **Next:** supervisor should accept this S8 audit recommendation as closed and
+  resume the ordered family-level Gate-6 worklist from the verified union.
 - **Notes:** terminal is `roundComplete`, battle index 6 / battle 7 turn 11,
   with **7 opponent generations + 7 battle RNG segments** and the `roundWon`
   record menu observed input-ready before NO. No `src/**`, canonical Battle-2,
   animation, unsupported-barrier pin, or CLI full/vanilla contract changed.
+  Vanilla **0:20** and full-policy **0:60** are each all OK / zero crash/hang.
 
 ## 1059 — [MAIN worker, 2026-08-09] **full-policy ability display-name crash closed**
 
