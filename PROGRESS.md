@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1036 — [supervisor, 2026-08-09] **Status cadence and R9 receipt accepted**
+
+- **State:** #84 now has two presentation defects left: the wrong-side
+  opponent ball and the WHIRLWIND recall/send-out jump. Gate 6 advanced
+  **22→23/24** OFF-profile receipts; R2 is the final compact-receipt upgrade.
+- **Did:** accepted `cab909f8`'s source-provenance `waitmessage` execution for
+  TAUNT/TORMENT/TOXIC and merged `29190849`'s twice-fresh legal Swagger item
+  receipt as `edd32963`. Lum consumes and cures confusion while preserving
+  +2 Attack; White Herb remains held with +2 Attack and confusion.
+- **Next:** repair #84's wrong-side opponent send-out ball, then the generic
+  WHIRLWIND opponent recall/send-out seam. Run R2 in the disjoint side lane.
+- **Notes:** supervisor cadence checks are **4/4** and R9 receipt/kernel/
+  manifest checks are **59/59**. Worker full suites are **8,143** and
+  **8,144** passed with one skip each; both builds pass. No barrier/import pin
+  changed. The final union build is still required after the next pair.
+
 ## 1035 — [bounded MAIN worker, 2026-08-08] **#84 status-message cadence repaired**
 
 - **State:** #84 items (2) and (4) are removed; only item (1)'s wrong-side
@@ -39,20 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   checks are **62/62 focused + 375/375 smoke**, and both component builds pass.
   R3's one full-run manifest mismatch did not reproduce in two supervisor runs;
   all other **8,136** tests in that run passed. No barrier/import pin changed.
-
-## 1033 — [bounded MAIN worker, 2026-08-08] **#84 fatal toxic-resolution handoff repaired**
-
-- **State:** #84 item (5) is removed; items (1)-(4) remain open. Gate 6 remains
-  **OPEN** at **21/24** OFF-profile receipts.
-- **Did:** reproduced the exact fatal invariant through the public generated
-  round command/resolution seam. Toxic's source-synced turn counter changes the
-  raw battler/party `status1` while the genuine displayed identity remains PSN;
-  the handoff now validates controller-owned status-icon semantics plus exact
-  party index/HP. A deliberately stale HP handoff still throws the fatal error.
-- **Next:** address #84 items (1)-(4): wrong-side opponent ball,
-  TAUNT/TORMENT/TOXIC pacing, and WHIRLWIND recall/send-out presentation.
-- **Notes:** red parent behavior reproduced the reported battler-1 exception.
-  Focused orchestrator/presentation/ratchet tests are **115/115** and smoke is
-  **375/375**. Final full suite is **811 files / 8,138 passed / 1 skipped**;
-  production build is green. No unsupported barrier or canonical recording
-  import changed.

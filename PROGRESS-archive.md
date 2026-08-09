@@ -1,3 +1,20 @@
+## 1033 — [bounded MAIN worker, 2026-08-08] **#84 fatal toxic-resolution handoff repaired**
+
+- **State:** #84 item (5) is removed; items (1)-(4) remain open. Gate 6 remains
+  **OPEN** at **21/24** OFF-profile receipts.
+- **Did:** reproduced the exact fatal invariant through the public generated
+  round command/resolution seam. Toxic's source-synced turn counter changes the
+  raw battler/party `status1` while the genuine displayed identity remains PSN;
+  the handoff now validates controller-owned status-icon semantics plus exact
+  party index/HP. A deliberately stale HP handoff still throws the fatal error.
+- **Next:** address #84 items (1)-(4): wrong-side opponent ball,
+  TAUNT/TORMENT/TOXIC pacing, and WHIRLWIND recall/send-out presentation.
+- **Notes:** red parent behavior reproduced the reported battler-1 exception.
+  Focused orchestrator/presentation/ratchet tests are **115/115** and smoke is
+  **375/375**. Final full suite is **811 files / 8,138 passed / 1 skipped**;
+  production build is green. No unsupported barrier or canonical recording
+  import changed.
+
 ## 1032 — [supervisor ORIENT, 2026-08-08] **Folded union green; user playthrough crash is first priority**
 
 - **State:** master is clean at `a45826c8`; Gate 6 remains **OPEN** at
