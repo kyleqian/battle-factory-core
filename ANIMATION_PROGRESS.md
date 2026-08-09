@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_KARATE_CHOP bilateral dense evidence checkpoint — coverage unchanged (2026-08-09 worker)
+
+- **State:** Coverage remains **147/276 exact**, 0 partial, 0 staged, **129 unsupported**. No reducer, typed seam, production compositor, framebuffer claim, boundary, gameplay, controller, or facility state changed.
+- **Did:** Added complete legal challenge-1 set-232 `FRONTIER_MON_PRIMEAPE_1` versus ONIX parties in both orientations, constraining only the active Primeape's four staged move slots. Extended the Scene-ON dense probe with `arm-none-eabi-nm -a` bounds `Move_KARATE_CHOP` **0x082d20b3..0x082d2105**, capture from entry through first inactive cleanup, script offsets, full software/hardware OAM and matrices/palettes/registers, HANDS_AND_FEET/animation-2 IMPACT sprite metadata/data, exact `AnimTask_ShakeMon` tuples, both audio events, battlers, and immutable fields.
+- **Verified:** Twice-fresh player-back **77..125 = 49 frames** and opponent-front **81..129 = 49 frames** are byte-identical. Player evidence/raw/map: `757e70d9…` / `89c829e0…` / `4d1eb29b…`; opponent: `fb8697fb…` / `f7762e1e…` / `10e22bae…`. Fresh change maps reproduce byte-for-byte. Focused source/evidence/boundary tests are **8/8**.
+- **Next:** Implement the pure 49-age reducer and narrow typed Scene-ON seam, validate every age against the committed source contract, then add the production compositor and require twice-fresh **49/49 bilateral framebuffer equality**. Rerun LOW_KICK bilateral and a HANDS_AND_FEET/IMPACT control before promotion; until then Karate Chop remains honestly unsupported.
+- **Notes:** Player visible events begin at frame 88; opponent at 92. `AnimTask_ShakeMon` software state spans player frames 99..108 with exact tuples and the raw maps separately expose the display schedule. No damage, critical/accuracy/RNG, turn order, round/facility state, shared animation boundary, canonical import, unsupported barrier, or coverage entry changed.
+
 ## Supervisor wind-down — seven Level-50 promotions and two bounded checkpoints (2026-08-09)
 
 - **State:** This session advanced Level-50 coverage **140→147/276 exact**, 0 partial, 0 staged, and **136→129 unsupported**. `SLEEP_TALK`, `FIRE_SPIN`, `SUPER_FANG`, `DISABLE`, `STOMP`, `ACID_ARMOR`, and `VICE_GRIP` are newly exact.

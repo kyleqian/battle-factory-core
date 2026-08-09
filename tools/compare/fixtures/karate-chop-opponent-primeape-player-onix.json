@@ -1,0 +1,19 @@
+{
+  "schema": "karate-chop-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "KARATE_CHOP",
+  "pair": "FRONTIER_MON_PRIMEAPE_1 set 232 (opponent-front) -> legal ONIX (player-back)",
+  "orientation": "opponent-front",
+  "scenario": "tools/battle-lab/mechanic-karate-chop-opponent-primeape-player-onix.json",
+  "probe": "tools/compare/poisonFangProbe.py",
+  "probeMoveId": 2,
+  "attacker": { "species": "PRIMEAPE", "side": "opponent", "center": { "x": 176, "y": 47 } },
+  "target": { "species": "ONIX", "side": "player", "center": { "x": 72, "y": 80 } },
+  "fieldProfile": { "playerHp": 117, "playerMaxHp": 117, "opponentHp": 147, "opponentMaxHp": 147 },
+  "sourceWindow": { "startFrame": 81, "endFrame": 129, "frameCount": 49 },
+  "evidenceSha256": "fb8697fbb6d098f4303f9502ddabaf52abd1ceee4ba8bc56a64b4747047a2ce3",
+  "rawRgbSha256": "f7762e1e4072f6807c6392648e5590ad6a41b59ef5def77707991cfa7a7c9396",
+  "changeMap": "tools/compare/evidence/karate-chop-changemap-opponent.txt",
+  "changeMapSha256": "10e22bae0c4fb5c77a0daeba32e40dad25727165701849f7423b0611ec67e7bf",
+  "acceptance": { "status": "unsupported", "evidenceMatching": 49, "framebufferMatching": 0 }
+}

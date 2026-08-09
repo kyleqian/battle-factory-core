@@ -1,0 +1,29 @@
+# karate-chop-changemap-player.txt raw RGB888 — 49 frames, 240x160
+# frames absent from this table are byte-identical to the previous frame
+frame  changedPx  bbox(minx,miny-maxx,maxy)
+77  (first frame)
+  static 78-87
+88  469  137,28-157,55
+89  319  137,28-160,55
+90  319  140,28-163,55
+91  319  143,28-166,55
+92  319  146,28-169,55
+93  325  149,28-173,55
+94  319  153,28-176,55
+95  319  156,28-179,55
+96  319  159,28-182,55
+97  319  162,28-185,55
+  static 98
+99  469  165,28-185,55
+100  1222  149,12-204,71
+  static 101
+102  1960  149,12-207,71
+  static 103
+104  1960  149,12-207,71
+  static 105
+106  1960  149,12-207,71
+  static 107
+108  1960  149,12-207,71
+  static 109
+110  268  165,31-187,53
+  static 111-125
