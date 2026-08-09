@@ -1,0 +1,46 @@
+{
+  "static": {
+    "sourceDispatcher": "7 cases plus Oblivious only as Cute Charm dependency",
+    "engine": "MOVEEND_ON_DAMAGE_ABILITIES state 3 implemented; seven members live",
+    "moveFlags": "shared resolver preserves FLAG_MAKES_CONTACT as bit 0",
+    "stimulus": "Swellow Pound -> Pikachu Static; opponent slots all Swift",
+    "baseSpeeds": [
+      125,
+      65,
+      30,
+      90,
+      45,
+      5
+    ]
+  },
+  "oracle": {
+    "profile": "battle-scene-off",
+    "randFrames": [
+      {
+        "frame": 42,
+        "count": 1
+      },
+      {
+        "frame": 64,
+        "count": 1
+      },
+      {
+        "frame": 67,
+        "count": 1
+      },
+      {
+        "frame": 195,
+        "count": 1
+      },
+      {
+        "frame": 198,
+        "count": 1
+      }
+    ],
+    "procRollPosition": 5,
+    "procFired": true,
+    "attackerStatus1": 64,
+    "attackerStatus": "paralysis",
+    "targetHp": 61
+  }
+}

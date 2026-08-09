@@ -138,6 +138,7 @@ type OnDamageAudit = {
       graph: { path: string; statements: Array<{ line: number; mnemonic: string; operands: string[] }> };
       program: { path: string; statements: Array<{ line: number; mnemonic: string; operands: string[] }> };
       candidates: Record<string, string[]>;
+      contactRouteWitnessIds: Array<string | undefined>;
       colorChangeRouteWitnessIds: Array<string | undefined>;
       blockerIds: string[];
     }>;
@@ -146,6 +147,18 @@ type OnDamageAudit = {
   blockers: Array<{ id: string; reason: string }>;
   retiredBlockers: Array<{ id: string; reason: string; fixture: string; probe: string; receipts: string[] }>;
   promotions: { sourceProvenRows: string[]; reason: string };
+  contact: {
+    status: string;
+    selector: string;
+    candidateCount: number;
+    sourceProvenRows: string[];
+    sourceExceptionRows: Array<{ id: string; reason: string }>;
+    blockers: Array<{ id: string; reason: string }>;
+    retiredBlockers: Array<{ id: string; reason: string }>;
+    routeWitnesses: Array<Record<string, any>>;
+    runtimeGuardSignature: Record<string, any>;
+    promotions: { sourceProvenRows: string[]; reason: string };
+  };
   colorChange: {
     status: string;
     selector: string;
@@ -321,7 +334,7 @@ describe("Level-50 move parameterization manifest", () => {
     });
     expect(manifest.coverage.joins).toMatchObject({
       battleScriptGraphLabels: 300, battleScriptProgramLabels: 300, animationScripts: 300,
-      itemHookCategories: 0, abilityHookCategories: 221,
+      itemHookCategories: 0, abilityHookCategories: 315,
       itemHookUnsupportedCategories: null, abilityHookUnsupportedCategories: null,
       itemHookUnsupportedRows: 300, abilityHookUnsupportedRows: 111, abilityHookSourceProvenRows: 189,
     });
@@ -377,7 +390,7 @@ describe("Level-50 move parameterization manifest", () => {
     }
   });
 
-  it("ratchets the finite ON_DAMAGE candidates and promotes the Color Change family with an explicit Future Sight exception", () => {
+  it("ratchets the finite ON_DAMAGE candidates and promotes contact plus Color Change with an explicit Future Sight exception", () => {
     const audit = manifest.coverage.hookCatalogs.ability.onDamage;
     const roster = level50RosterSymbols();
     const expectedByCategory: Record<string, string[]> = {
@@ -389,12 +402,9 @@ describe("Level-50 move parameterization manifest", () => {
         .map((move) => move.move),
     };
     const blockerIds = audit.blockers.map((blocker) => blocker.id);
-    expect(audit.status).toBe("family-level-color-change-promotion-with-contact-checkpoint");
-    expect(blockerIds).toEqual([
-      "ordered-moveend-route-not-proven",
-      "damage-state-guard-not-derived-from-selector",
-    ]);
-    expect(audit.retiredBlockers).toEqual([expect.objectContaining({
+    expect(audit.status).toBe("family-level-color-change-and-contact-promotion");
+    expect(blockerIds).toEqual([]);
+    expect(audit.retiredBlockers).toEqual(expect.arrayContaining([expect.objectContaining({
       id: "missing-direct-on-damage-off-receipt",
       fixture: "tools/battle-lab/mechanic-color-change-off.json",
       probe: "tools/probe/probe-color-change-ability-off.py",
@@ -402,10 +412,25 @@ describe("Level-50 move parameterization manifest", () => {
         "tools/probe/receipts/color-change-off-seed-610839776.json",
         "tools/probe/receipts/color-change-off-seed-324508639.json",
       ],
-    })]);
+    }), expect.objectContaining({ id: "ordered-moveend-route-not-proven" }), expect.objectContaining({ id: "damage-state-guard-not-derived-from-selector" })]));
+    expect(audit.retiredBlockers).toHaveLength(3);
     expect(blockerIds.every((id) => id.length > 0)).toBe(true);
     expect(audit.promotions.sourceProvenRows).toHaveLength(182);
-    expect(audit.promotions.reason).toMatch(/Color Change rows are promoted by family-level/);
+    expect(audit.promotions.reason).toMatch(/all 94 contact rows are promoted/);
+    expect(audit.contact).toMatchObject({
+      status: "source-proven-family",
+      selector: "moves.json flags includes FLAG_MAKES_CONTACT",
+      candidateCount: 94,
+      sourceProvenRows: expect.any(Array),
+      sourceExceptionRows: [],
+      blockers: [],
+      retiredBlockers: [
+        expect.objectContaining({ id: "ordered-moveend-route-not-proven" }),
+        expect.objectContaining({ id: "damage-state-guard-not-derived-from-selector" }),
+      ],
+    });
+    expect(audit.contact.sourceProvenRows).toHaveLength(94);
+    expect(audit.contact.routeWitnesses).toHaveLength(94);
     expect(audit.colorChange).toMatchObject({
       status: "source-proven-family",
       selector: "moves.json power != 0",
@@ -439,7 +464,7 @@ describe("Level-50 move parameterization manifest", () => {
 
     for (const [category, expectedMoves] of Object.entries(expectedByCategory)) {
       const coverage = audit.categories[category]!;
-      const expectedBlockerIds = category === "moveend-color-change" ? [] : blockerIds;
+      const expectedBlockerIds: string[] = [];
       expect(coverage.count).toBe(expectedMoves.length);
       expect(coverage.candidateRows.map((candidate) => candidate.move)).toEqual(expectedMoves);
       expect(new Set(coverage.candidateRows.map((candidate) => candidate.move)).size).toBe(expectedMoves.length);
@@ -460,6 +485,9 @@ describe("Level-50 move parameterization manifest", () => {
         if (category === "moveend-color-change") {
           expect(candidate.routeWitnessId).toBe(`color-change-route:${candidate.move}`);
           expect(candidate.routeStatus).toBe(candidate.move === "MOVE_FUTURE_SIGHT" ? "source-exception" : "source-proven");
+        } else {
+          expect(candidate.routeWitnessId).toBe(`contact-route:${candidate.move}`);
+          expect(candidate.routeStatus).toBe("source-proven");
         }
       }
     }
@@ -480,7 +508,7 @@ describe("Level-50 move parameterization manifest", () => {
     const { graph, program } = graphAndProgram();
     const expectedEntryScripts = [...new Set(candidates.map((candidate) => candidate.entryScript))]
       .sort((left, right) => graph.labels.find((label) => label.name === left)!.line - graph.labels.find((label) => label.name === right)!.line);
-    expect(audit.routeShapeCensus.status).toBe("source-program-route-witness-for-color-change-with-contact-frontier");
+    expect(audit.routeShapeCensus.status).toBe("source-program-route-witness-for-color-change-and-contact-families");
     expect(audit.routeShapeCensus.entries.map((entry) => entry.entryScript)).toEqual(expectedEntryScripts);
     expect(audit.routeShapeCensus.entries).toHaveLength(78);
     expect(audit.routeShapeCensus.entryBlockShapeCounts).toEqual({
@@ -501,7 +529,10 @@ describe("Level-50 move parameterization manifest", () => {
         path: "src/data/gen/battle-script-program.json",
         statements: programEntry.statements.map((statement) => ({ line: statement.source.line, mnemonic: statement.mnemonic, operands: statement.actualOperands })),
       });
-      expect(entry.blockerIds).toEqual(blockerIds);
+      expect(entry.blockerIds).toEqual([]);
+      expect(entry.contactRouteWitnessIds).toEqual(candidates
+        .filter((candidate) => candidate.category === "moveend-contact-on-damage" && candidate.entryScript === entry.entryScript)
+        .map((candidate) => candidate.routeWitnessId));
       expect(entry.colorChangeRouteWitnessIds).toEqual(candidates
         .filter((candidate) => candidate.category === "moveend-color-change" && candidate.entryScript === entry.entryScript)
         .map((candidate) => candidate.routeWitnessId));
@@ -794,6 +825,12 @@ describe("Level-50 move parameterization manifest", () => {
     }
 
     for (const move of (movesData.moves as SourceMove[])
+      .filter((candidate) => level50RosterSymbols().has(candidate.move) && candidate.flags.includes("FLAG_MAKES_CONTACT"))
+      .map((candidate) => candidate.move)) {
+      expectedSourceProven.set(move, [...(expectedSourceProven.get(move) ?? []), "moveend-contact-on-damage"]);
+    }
+
+    for (const move of (movesData.moves as SourceMove[])
       .filter((candidate) => level50RosterSymbols().has(candidate.move) && candidate.power !== 0 && candidate.move !== "MOVE_FUTURE_SIGHT")
       .map((candidate) => candidate.move)) {
       expectedSourceProven.set(move, [...(expectedSourceProven.get(move) ?? []), "moveend-color-change"]);
@@ -848,7 +885,7 @@ describe("Level-50 move parameterization manifest", () => {
         ability: { potentialCategories: null, status: "unsupported" },
       });
     }
-    expect(move("MOVE_TACKLE").hooks.ability.supportedCategories).toEqual(["moveend-color-change"]);
+    expect(move("MOVE_TACKLE").hooks.ability.supportedCategories).toEqual(["moveend-contact-on-damage", "moveend-color-change"]);
     expect(move("MOVE_WILL_O_WISP").hooks.ability.supportedCategories).toEqual(["absorbing-flash-fire"]);
   });
 });
