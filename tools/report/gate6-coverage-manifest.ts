@@ -269,6 +269,7 @@ const CONTACT_CATEGORY = "moveend-contact-on-damage";
 const COLOR_CHANGE_CATEGORY = "moveend-color-change";
 const SYNCHRONIZE_CATEGORY = "moveend-synchronize-status";
 const TRYINFATUATING_OBLIVIOUS_CATEGORY = "tryinfatuating-oblivious";
+const TRYEXPLOSION_DAMP_CATEGORY = "tryexplosion-damp";
 const KINGS_ROCK_CATEGORY = "moveend-kings-rock";
 const ABSORBING_CATEGORIES = new Set([
   "absorbing-volt-absorb",
@@ -613,6 +614,41 @@ for (const witness of tryinfatuatingObliviousRouteWitnesses) {
   }
 }
 
+const tryexplosionDampAudit = parameterization.coverage?.hookCatalogs?.ability?.tryexplosionDamp as AnyRecord | undefined;
+const tryexplosionDampCandidates = tryexplosionDampAudit?.sourceMoveCandidates as AnyRecord[] | undefined;
+const tryexplosionDampSourceProvenRows = tryexplosionDampAudit?.sourceProvenRows as string[] | undefined;
+const tryexplosionDampExceptions = tryexplosionDampAudit?.sourceExceptionRows as AnyRecord[] | undefined;
+const tryexplosionDampBlockers = tryexplosionDampAudit?.blockers as AnyRecord[] | undefined;
+const tryexplosionDampRouteWitnesses = tryexplosionDampAudit?.routeWitnesses as AnyRecord[] | undefined;
+if (!tryexplosionDampAudit
+  || tryexplosionDampAudit.status !== SOURCE_PROVEN_FAMILY_STATUS
+  || tryexplosionDampAudit.selector !== "moveTable.effect === EFFECT_EXPLOSION"
+  || tryexplosionDampAudit.candidateCount !== 2
+  || tryexplosionDampAudit.selectableSetOccurrences !== 25
+  || tryexplosionDampAudit.fullLevel50CarrierRows !== 26
+  || !Array.isArray(tryexplosionDampCandidates) || tryexplosionDampCandidates.length !== 2
+  || !Array.isArray(tryexplosionDampSourceProvenRows) || JSON.stringify(tryexplosionDampSourceProvenRows) !== JSON.stringify(["MOVE_SELF_DESTRUCT", "MOVE_EXPLOSION"])
+  || !Array.isArray(tryexplosionDampExceptions) || tryexplosionDampExceptions.length !== 0
+  || !Array.isArray(tryexplosionDampBlockers) || tryexplosionDampBlockers.length !== 0
+  || !Array.isArray(tryexplosionDampRouteWitnesses) || tryexplosionDampRouteWitnesses.length !== 2
+  || tryexplosionDampCandidates.some((candidate) => candidate.executionInventory !== "level50-executable" || candidate.entryScript !== "BattleScript_EffectExplosion")) {
+  throw new Error("Explosion/Damp family accounting is not the finite 2/2/0/0 executable 25/26 contract");
+}
+for (const witness of tryexplosionDampRouteWitnesses) {
+  const family = witness.familyEvidence as AnyRecord;
+  if (witness.status !== "source-proven"
+    || family.category !== TRYEXPLOSION_DAMP_CATEGORY
+    || family.selector?.guard !== "moveTable.effect === EFFECT_EXPLOSION"
+    || JSON.stringify(family.entryPath?.graph?.prelude) !== JSON.stringify(family.entryPath?.program?.prelude)
+    || JSON.stringify(family.entryPath?.graph?.prelude?.map((row: AnyRecord) => row.mnemonic)) !== JSON.stringify(["attackcanceler", "attackstring", "ppreduce", "tryexplosion"])
+    || family.entryPath?.graph?.dampTail?.statements?.[1]?.operands?.[0] !== "STRINGID_PKMNPREVENTSUSAGE"
+    || family.runtimeGuardSignature?.ability?.value !== 6
+    || family.runtimeGuardSignature?.damp?.destination !== "BattleScript_DampStopsExplosion"
+    || family.familyVerification?.oracleReceipt !== "tests/gate6DampExplosionReceipt.test.ts") {
+    throw new Error(`Explosion/Damp family route/guard certificate is incomplete for ${String(witness.move)}`);
+  }
+}
+
 function assertOnDamageCheckpoint(manifest: AnyRecord): void {
   const checkpoint = manifest.sections?.onDamageMoveEnd as AnyRecord | undefined;
   const summary = manifest.summary?.onDamageMoveEnd as AnyRecord | undefined;
@@ -745,6 +781,7 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
         && family.category !== COLOR_CHANGE_CATEGORY
         && family.category !== SYNCHRONIZE_CATEGORY
         && family.category !== TRYINFATUATING_OBLIVIOUS_CATEGORY
+        && family.category !== TRYEXPLOSION_DAMP_CATEGORY
         && family.category !== KINGS_ROCK_CATEGORY
         && !ABSORBING_CATEGORIES.has(family.category))
       || !family.selector?.path
@@ -843,6 +880,17 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
         throw new Error("Attract/Oblivious family lacks its exact selector/route/tail/guard witness");
       }
     }
+    if (family.category === TRYEXPLOSION_DAMP_CATEGORY) {
+      const graphPrelude = family.entryPath.graph.prelude as AnyRecord[] | undefined;
+      const programPrelude = family.entryPath.program.prelude as AnyRecord[] | undefined;
+      if (family.selector?.guard !== "moveTable.effect === EFFECT_EXPLOSION"
+        || !Array.isArray(graphPrelude) || JSON.stringify(graphPrelude) !== JSON.stringify(programPrelude)
+        || family.runtimeGuardSignature?.damp?.destination !== "BattleScript_DampStopsExplosion"
+        || family.runtimeGuardSignature?.ability?.value !== 6
+        || family.familyVerification?.oracleReceipt !== "tests/gate6DampExplosionReceipt.test.ts") {
+        throw new Error("Explosion/Damp family lacks its exact selector/route/tail/guard witness");
+      }
+    }
     if (family.category === KINGS_ROCK_CATEGORY) {
       const graphRoute = family.entryPath.graph.route as AnyRecord[] | undefined;
       const programRoute = family.entryPath.program.route as AnyRecord[] | undefined;
@@ -891,6 +939,10 @@ function parameterizedHook(move: AnyRecord, axis: PerMoveHookJoinAxis): AnyRecor
     if (family.category === TRYINFATUATING_OBLIVIOUS_CATEGORY
       && (axis !== "ability" || move.move !== "MOVE_ATTRACT" || family.selector?.symbol !== move.move)) {
       throw new Error(`${move.move} Attract/Oblivious evidence lost its finite selector identity`);
+    }
+    if (family.category === TRYEXPLOSION_DAMP_CATEGORY
+      && (axis !== "ability" || family.selector?.symbol !== move.move)) {
+      throw new Error(`${move.move} Explosion/Damp evidence lost its finite selector identity`);
     }
     if (family.category === KINGS_ROCK_CATEGORY
       && (axis !== "item" || family.selector?.symbol !== move.move)) {
@@ -983,6 +1035,20 @@ function sourceProvenHookEvidence(hook: AnyRecord): Evidence[] {
         evidence("tools/battle-lab/gate6-r10-attract-control-off.json", "paired-control-oracle-request"),
         evidence("tools/probe/probe-gate6-r10-off.py", "oracle-probe"),
         evidence("tools/probe/receipts/gate6-r10-attract-oblivious-off.json", "battle-scene-off-oracle-receipt"),
+      ];
+    }
+    if (proof.category === TRYEXPLOSION_DAMP_CATEGORY) {
+      return [
+        ...base,
+        evidence("reference/pokeemerald/include/constants/abilities.h", "ability-value", "ABILITY_DAMP=6"),
+        evidence("reference/pokeemerald/src/battle_script_commands.c", "ordered-runtime-guards", "Cmd_tryexplosion"),
+        evidence("reference/pokeemerald/data/battle_scripts_1.s", "explosion-entry-and-fixed-failure-tail", "BattleScript_DampStopsExplosion"),
+        evidence("src/engine/battleScriptExplosionOpcode.ts", "existing-source-shaped-family-implementation", "createBattleScriptExplosionOpcodeHandlers"),
+        evidence("tests/battleScriptExplosionOpcode.test.ts", "tier-1-runtime-arms", "Damp"),
+        evidence("tests/tryexplosionDampHookJoinBatch.test.ts", "tier-1-two-row-family-batch"),
+        evidence("tests/gate6DampExplosionReceipt.test.ts", "battle-scene-off-three-arm-family-receipt"),
+        evidence("tools/probe/probe-gate6-damp-explosion-off.py", "oracle-probe"),
+        evidence("tools/probe/receipts/gate6-damp-explosion-off.json", "battle-scene-off-oracle-receipt"),
       ];
     }
     if (proof.category === KINGS_ROCK_CATEGORY) {
@@ -1305,7 +1371,7 @@ for (const [name, sites] of Object.entries(hooks.inlineSites.holdEffects as AnyR
 }
 
 const scenarioPaths = readdirSync(repoPath("tools/battle-lab"))
-  .filter((name) => /^gate6-.*\.json$/.test(name))
+  .filter((name) => /^gate6-r\d+b?-.*\.json$/i.test(name))
   .sort()
   .map((name) => `tools/battle-lab/${name}`);
 const scenarioByPath = new Map(scenarioPaths.map((path) => [path, readJson(path)]));
@@ -1682,6 +1748,32 @@ const tryinfatuatingObliviousRow: Row = Object.freeze({
   notes: "MOVE_ATTRACT is the sole Level-50 EFFECT_ATTRACT selector and is promoted through BattleScript_EffectAttract's attackcanceler → attackstring → ppreduce → accuracycheck → tryinfatuating route. Cmd_tryinfatuating checks target Oblivious first (ability reveal 12), otherwise routes gender/already-infatuated guards to ButItFailed or writes STATUS2_INFATUATED_WITH(attacker) and advances five bytes. Success, ordinary failure, and Oblivious tails explicitly finish at MoveEnd. This zero-damage family does not claim datahpupdate, MOVEEND state 12, King's Rock, Shell Bell, charge, or faint behavior.",
 });
 
+const tryexplosionDampSummary = Object.freeze({
+  candidates: tryexplosionDampCandidates.length,
+  promotedRows: tryexplosionDampSourceProvenRows.length,
+  exceptions: tryexplosionDampExceptions.length,
+  blockers: tryexplosionDampBlockers.length,
+  rosterOnlyCandidates: tryexplosionDampCandidates.filter((candidate) => candidate.executionInventory === "level50-roster-only").length,
+  selectableSetOccurrences: tryexplosionDampAudit.selectableSetOccurrences,
+  fullLevel50CarrierRows: tryexplosionDampAudit.fullLevel50CarrierRows,
+});
+const tryexplosionDampRow: Row = Object.freeze({
+  id: "hook-family:tryexplosion-damp",
+  label: "Explosion / Damp Level-50 family checkpoint",
+  status: SOURCE_PROVEN_FAMILY_STATUS,
+  ...tryexplosionDampSummary,
+  candidateMoves: tryexplosionDampCandidates.map((candidate) => candidate.move),
+  evidence: uniqueEvidence([
+    evidence(PARAMETERIZATION_PATH, "finite-candidate-route-guard-audit", "coverage.hookCatalogs.ability.tryexplosionDamp"),
+    evidence("reference/pokeemerald/data/battle_scripts_1.s", "explosion-entry-and-fixed-failure-tail", "BattleScript_DampStopsExplosion"),
+    evidence("reference/pokeemerald/src/battle_script_commands.c", "ordered-first-holder-runtime-guards", "Cmd_tryexplosion"),
+    evidence("tests/tryexplosionDampHookJoinBatch.test.ts", "two-row-graph-program-batch"),
+    evidence("tests/gate6DampExplosionReceipt.test.ts", "twice-fresh-battle-scene-off-family-receipt"),
+    evidence("tools/probe/receipts/gate6-damp-explosion-off.json", "compact-deterministic-receipt"),
+  ]),
+  notes: "SELFDESTRUCT and EXPLOSION are the two executable EFFECT_EXPLOSION selectors: 25 selectable occurrences (1 + 24), 26 full 850-row carriers, with Pineco set 57 the sole nonselectable extra. Both are promoted through PP spending and Cmd_tryexplosion's first-Damp-holder scan to the fixed failure script. The Damp arm leaves HP and action RNG unchanged and does not claim datahpupdate, MOVEEND_NEXT_TARGET, Shell Bell, damage, or faint processing.",
+});
+
 const kingsRockMoveEndSummary = Object.freeze({
   candidates: kingsRockCandidates.length,
   promotedRows: kingsRockSourceProvenRows.length,
@@ -1843,6 +1935,15 @@ const sourceInputs = [
   "tools/battle-lab/gate6-r10-attract-control-off.json",
   "tools/probe/probe-gate6-r10-off.py",
   "tools/probe/receipts/gate6-r10-attract-oblivious-off.json",
+  "src/engine/battleScriptExplosionOpcode.ts",
+  "tests/battleScriptExplosionOpcode.test.ts",
+  "tests/tryexplosionDampHookJoinBatch.test.ts",
+  "tests/gate6DampExplosionReceipt.test.ts",
+  "tools/battle-lab/gate6-damp-explosion-control-off.json",
+  "tools/battle-lab/gate6-damp-explosion-target-off.json",
+  "tools/battle-lab/gate6-damp-explosion-attacker-off.json",
+  "tools/probe/probe-gate6-damp-explosion-off.py",
+  "tools/probe/receipts/gate6-damp-explosion-off.json",
   "tests/colorChangeOracleEvidence.test.ts",
   "tests/level50MoveParameterization.test.ts",
   "tests/gate6CoverageManifest.test.ts",
@@ -1902,6 +2003,7 @@ const manifest: AnyRecord = {
     onDamageMoveEnd: onDamageMoveEndSummary,
     synchronizeMoveEnd: synchronizeMoveEndSummary,
     tryinfatuatingOblivious: tryinfatuatingObliviousSummary,
+    tryexplosionDamp: tryexplosionDampSummary,
     kingsRockMoveEnd: kingsRockMoveEndSummary,
     stateFamilies: { total: stateFamilyRows.length, tier1Covered: stateFamilyRows.filter((row) => row.status === "tier1-covered").length },
     hooks: {
@@ -1918,6 +2020,7 @@ const manifest: AnyRecord = {
     onDamageMoveEnd: onDamageMoveEndRow,
     synchronizeMoveEnd: synchronizeMoveEndRow,
     tryinfatuatingOblivious: tryinfatuatingObliviousRow,
+    tryexplosionDamp: tryexplosionDampRow,
     kingsRockMoveEnd: kingsRockMoveEndRow,
     stateFamilies: stateFamilyRows,
     hooks: { abilities: abilityRows, holdEffects: holdEffectRows },
@@ -1952,10 +2055,11 @@ const markdown: string[] = [
   "## Headline",
   "",
   `- Effects: **${manifest.summary.effects.staticExecutable}/${manifest.summary.effects.total} static-executable**; moves: **${manifest.summary.moves.staticExecutable}/${manifest.summary.moves.total}** static-executable (**${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}** Level-50 roster moves executable, **${manifest.summary.moves.level50RosterOnly}** roster-only).`,
-  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors, audited shared-absorbing routes, both ON_DAMAGE families, the 30-candidate Synchronize family, and Attract's one-row Oblivious family, while every remaining gap retains its source-artifact locator and reason.`,
+  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors, audited shared-absorbing routes, both ON_DAMAGE families, the 30-candidate Synchronize family, Attract's one-row Oblivious family, and the two Explosion/Damp categories, while every remaining gap retains its source-artifact locator and reason.`,
   `- ON_DAMAGE checkpoint: **${manifest.summary.onDamageMoveEnd.contactCandidates}** contact candidates and **${manifest.summary.onDamageMoveEnd.colorChangeCandidates}** Color Change candidates (${manifest.summary.onDamageMoveEnd.overlapCandidates} overlap) are source-enumerated across ${manifest.summary.onDamageMoveEnd.entryBlockShapes} entry-block shapes. **${manifest.summary.onDamageMoveEnd.contactPromotedRows}** contact rows and **${manifest.summary.onDamageMoveEnd.colorChangePromotedRows}** Color Change rows are promoted; **${manifest.summary.onDamageMoveEnd.contactExceptions}** contact exceptions and **${manifest.summary.onDamageMoveEnd.contactBlockers}** active contact blockers remain, while **${manifest.summary.onDamageMoveEnd.contactRetiredBlockers}** contact route/guard blockers and **${manifest.summary.onDamageMoveEnd.colorChangeRetiredBlockers}** Color Change blockers are retired.`,
   `- Synchronize checkpoint: **${manifest.summary.synchronizeMoveEnd.candidates}** finite Level-50 candidates, **${manifest.summary.synchronizeMoveEnd.promotedRows}** promoted, **${manifest.summary.synchronizeMoveEnd.exceptions}** route exceptions, and **${manifest.summary.synchronizeMoveEnd.blockers}** active blockers.`,
   `- Attract/Oblivious checkpoint: **${manifest.summary.tryinfatuatingOblivious.candidates}** finite EFFECT_ATTRACT candidate, **${manifest.summary.tryinfatuatingOblivious.promotedRows}** promoted, **${manifest.summary.tryinfatuatingOblivious.exceptions}** exceptions, **${manifest.summary.tryinfatuatingOblivious.rosterOnlyCandidates}** roster-only candidates, and **${manifest.summary.tryinfatuatingOblivious.blockers}** active blockers.`,
+  `- Explosion/Damp checkpoint: **${manifest.summary.tryexplosionDamp.candidates}** finite EFFECT_EXPLOSION candidates, **${manifest.summary.tryexplosionDamp.promotedRows}** promoted, **${manifest.summary.tryexplosionDamp.exceptions}** exceptions, **${manifest.summary.tryexplosionDamp.rosterOnlyCandidates}** roster-only candidates, **${manifest.summary.tryexplosionDamp.selectableSetOccurrences}** selectable occurrences / **${manifest.summary.tryexplosionDamp.fullLevel50CarrierRows}** full carrier rows, and **${manifest.summary.tryexplosionDamp.blockers}** active blockers.`,
   `- King's Rock checkpoint: **${manifest.summary.kingsRockMoveEnd.candidates}** finite Level-50 flag selectors, **${manifest.summary.kingsRockMoveEnd.promotedRows}** promoted, **${manifest.summary.kingsRockMoveEnd.exceptions}** explicit exception, **${manifest.summary.kingsRockMoveEnd.rosterOnlyCandidates}** roster-only candidates retained, and no Shell Bell overclaim.`,
   `- State/status/volatile rows: **${manifest.summary.stateFamilies.tier1Covered}/${manifest.summary.stateFamilies.total}** have focused Tier-1 evidence; source-modeled rows remain listed separately.`,
   `- Hook universes: **${manifest.summary.hooks.abilities.total} abilities** and **${manifest.summary.hooks.holdEffects.total} hold effects**, including **${manifest.summary.hooks.abilities.zeroFactoryWidened + manifest.summary.hooks.holdEffects.zeroFactoryWidened}** legal widened-scope rows with zero Level-50 Factory carriers.`,
@@ -2049,6 +2153,17 @@ markdown.push(...table("Attract candidate and Cmd_tryinfatuating promotion", ["S
   (row) => evidenceText(row.evidence),
 ]));
 markdown.push(`${tryinfatuatingObliviousRow.notes}\n`);
+markdown.push("## Explosion / Damp ability family checkpoint\n\n");
+markdown.push(...table("Explosion candidates and Cmd_tryexplosion promotion", ["Status", "Candidates", "Promoted", "Exceptions", "Roster-only", "Blockers", "Evidence"], [tryexplosionDampRow], [
+  (row) => row.status,
+  (row) => String(row.candidates),
+  (row) => String(row.promotedRows),
+  (row) => String(row.exceptions),
+  (row) => String(row.rosterOnlyCandidates),
+  (row) => String(row.blockers),
+  (row) => evidenceText(row.evidence),
+]));
+markdown.push(`${tryexplosionDampRow.notes}\n`);
 markdown.push("## King's Rock item family checkpoint\n\n");
 markdown.push(...table("King's Rock candidate and MOVEEND state-12 promotion", ["Status", "Candidates", "Promoted", "Exceptions", "Roster-only", "Blockers", "Evidence"], [kingsRockMoveEndRow], [
   (row) => row.status,

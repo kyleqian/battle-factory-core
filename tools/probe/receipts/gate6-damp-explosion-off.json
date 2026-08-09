@@ -1,0 +1,29 @@
+{
+  "schema": "gate6-damp-explosion-off-semantic-receipt/v1",
+  "oracleProfile": "battle-scene-off",
+  "runner": "tools/run-mgba-probe.py",
+  "probe": "tools/probe/probe-gate6-damp-explosion-off.py",
+  "freshRunCountPerArm": 2,
+  "byteIdenticalAcrossFreshRuns": true,
+  "probeOutputSha256": {
+    "control": "283c22724e4d87bd65d744a5767911b1035bf2b9a6f7d90ee3206ad80a851fa9",
+    "targetDamp": "b44c606892c73db397ae83b2fb38f8a2aa956d4e705bf1b42bd7161da6698b9d",
+    "attackerDamp": "08445df86eace9d900553b6c2cb032051b72ccda24d2902bb513ead0826d5e6d"
+  },
+  "fixtures": {
+    "control": "tools/battle-lab/gate6-damp-explosion-control-off.json",
+    "targetDamp": "tools/battle-lab/gate6-damp-explosion-target-off.json",
+    "attackerDamp": "tools/battle-lab/gate6-damp-explosion-attacker-off.json"
+  },
+  "observations": {
+    "control": {"move": 153, "pp": [5, 4], "attackerHp": [155, 0], "targetHp": [95, 44], "rng": [960307641, 2797792354], "actionRngCalls": 3, "target": 1, "abilityHistory": [0, 0, 0, 0], "dampFailureScript": false},
+    "targetDamp": {"move": 153, "pp": [5, 4], "attackerHp": [155, 155], "targetHp": [125, 125], "rng": [960307641, 960307641], "actionRngCalls": 0, "target": 1, "lastUsedAbility": 6, "abilityHistory": [0, 6, 0, 0], "script": "BattleScript_DampStopsExplosion"},
+    "attackerDamp": {"move": 153, "pp": [5, 4], "attackerHp": [125, 125], "targetHp": [95, 95], "rng": [3167892961, 3167892961], "actionRngCalls": 0, "target": 0, "lastUsedAbility": 6, "abilityHistory": [6, 0, 0, 0], "script": "BattleScript_DampStopsExplosion"}
+  },
+  "publicMessageIdentityProof": "tests/presentationStringIssue72Batch2.test.ts#STRINGID_PKMNPREVENTSUSAGE snapshots and resolves attacker-held Damp",
+  "assertions": [
+    "The no-Damp control spends Explosion PP, sets attacker HP to zero, deals ordinary damage, and consumes exactly three action RNG calls.",
+    "Target-held and attacker-held Damp both spend PP, preserve both active HP values, consume zero action RNG, record the first Damp holder, retarget gBattlerTarget to that holder, and jump to the same fixed failure script.",
+    "This is semantic RAM evidence; no framebuffer fitting or runtime oracle dependency is used."
+  ]
+}

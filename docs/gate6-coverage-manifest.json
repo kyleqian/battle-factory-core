@@ -45,6 +45,15 @@
     "tools/battle-lab/gate6-r10-attract-control-off.json",
     "tools/probe/probe-gate6-r10-off.py",
     "tools/probe/receipts/gate6-r10-attract-oblivious-off.json",
+    "src/engine/battleScriptExplosionOpcode.ts",
+    "tests/battleScriptExplosionOpcode.test.ts",
+    "tests/tryexplosionDampHookJoinBatch.test.ts",
+    "tests/gate6DampExplosionReceipt.test.ts",
+    "tools/battle-lab/gate6-damp-explosion-control-off.json",
+    "tools/battle-lab/gate6-damp-explosion-target-off.json",
+    "tools/battle-lab/gate6-damp-explosion-attacker-off.json",
+    "tools/probe/probe-gate6-damp-explosion-off.py",
+    "tools/probe/receipts/gate6-damp-explosion-off.json",
     "tests/colorChangeOracleEvidence.test.ts",
     "tests/level50MoveParameterization.test.ts",
     "tests/gate6CoverageManifest.test.ts",
@@ -133,6 +142,15 @@
       "exceptions": 0,
       "blockers": 0,
       "rosterOnlyCandidates": 0
+    },
+    "tryexplosionDamp": {
+      "candidates": 2,
+      "promotedRows": 2,
+      "exceptions": 0,
+      "blockers": 0,
+      "rosterOnlyCandidates": 0,
+      "selectableSetOccurrences": 25,
+      "fullLevel50CarrierRows": 26
     },
     "kingsRockMoveEnd": {
       "candidates": 106,
@@ -41753,9 +41771,10 @@
           "entryScript": "BattleScript_EffectExplosion",
           "status": "source-proven-family",
           "categories": [
-            "moveend-color-change"
+            "moveend-color-change",
+            "tryexplosion-damp"
           ],
-          "reason": "Source-proven ability family/categories: moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moveend-color-change, tryexplosion-damp. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SELF_DESTRUCT.hooks.ability"
@@ -41831,9 +41850,70 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "src/data/gen/moves.json",
+              "locator": "moves:MOVE_SELF_DESTRUCT.effect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "undefined:374",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "undefined->route",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "undefined->route",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_tryexplosion",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/abilities.h",
+              "locator": "ABILITY_DAMP=6",
+              "kind": "ability-value"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_DampStopsExplosion",
+              "kind": "explosion-entry-and-fixed-failure-tail"
+            },
+            {
+              "path": "src/engine/battleScriptExplosionOpcode.ts",
+              "locator": "createBattleScriptExplosionOpcodeHandlers",
+              "kind": "existing-source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptExplosionOpcode.test.ts",
+              "locator": "Damp",
+              "kind": "tier-1-runtime-arms"
+            },
+            {
+              "path": "tests/tryexplosionDampHookJoinBatch.test.ts",
+              "kind": "tier-1-two-row-family-batch"
+            },
+            {
+              "path": "tests/gate6DampExplosionReceipt.test.ts",
+              "kind": "battle-scene-off-three-arm-family-receipt"
+            },
+            {
+              "path": "tools/probe/probe-gate6-damp-explosion-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/gate6-damp-explosion-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moveend-color-change, tryexplosion-damp; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_LICK",
@@ -44415,9 +44495,10 @@
           "entryScript": "BattleScript_EffectExplosion",
           "status": "source-proven-family",
           "categories": [
-            "moveend-color-change"
+            "moveend-color-change",
+            "tryexplosion-damp"
           ],
-          "reason": "Source-proven ability family/categories: moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moveend-color-change, tryexplosion-damp. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_EXPLOSION.hooks.ability"
@@ -44493,9 +44574,70 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "src/data/gen/moves.json",
+              "locator": "moves:MOVE_EXPLOSION.effect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "undefined:374",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "undefined->route",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "undefined->route",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_tryexplosion",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/abilities.h",
+              "locator": "ABILITY_DAMP=6",
+              "kind": "ability-value"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_DampStopsExplosion",
+              "kind": "explosion-entry-and-fixed-failure-tail"
+            },
+            {
+              "path": "src/engine/battleScriptExplosionOpcode.ts",
+              "locator": "createBattleScriptExplosionOpcodeHandlers",
+              "kind": "existing-source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptExplosionOpcode.test.ts",
+              "locator": "Damp",
+              "kind": "tier-1-runtime-arms"
+            },
+            {
+              "path": "tests/tryexplosionDampHookJoinBatch.test.ts",
+              "kind": "tier-1-two-row-family-batch"
+            },
+            {
+              "path": "tests/gate6DampExplosionReceipt.test.ts",
+              "kind": "battle-scene-off-three-arm-family-receipt"
+            },
+            {
+              "path": "tools/probe/probe-gate6-damp-explosion-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/gate6-damp-explosion-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moveend-color-change, tryexplosion-damp; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_FURY_SWIPES",
@@ -59534,6 +59676,52 @@
         }
       ],
       "notes": "MOVE_ATTRACT is the sole Level-50 EFFECT_ATTRACT selector and is promoted through BattleScript_EffectAttract's attackcanceler → attackstring → ppreduce → accuracycheck → tryinfatuating route. Cmd_tryinfatuating checks target Oblivious first (ability reveal 12), otherwise routes gender/already-infatuated guards to ButItFailed or writes STATUS2_INFATUATED_WITH(attacker) and advances five bytes. Success, ordinary failure, and Oblivious tails explicitly finish at MoveEnd. This zero-damage family does not claim datahpupdate, MOVEEND state 12, King's Rock, Shell Bell, charge, or faint behavior."
+    },
+    "tryexplosionDamp": {
+      "id": "hook-family:tryexplosion-damp",
+      "label": "Explosion / Damp Level-50 family checkpoint",
+      "status": "source-proven-family",
+      "candidates": 2,
+      "promotedRows": 2,
+      "exceptions": 0,
+      "blockers": 0,
+      "rosterOnlyCandidates": 0,
+      "selectableSetOccurrences": 25,
+      "fullLevel50CarrierRows": 26,
+      "candidateMoves": [
+        "MOVE_SELF_DESTRUCT",
+        "MOVE_EXPLOSION"
+      ],
+      "evidence": [
+        {
+          "path": "src/data/gen/level50-move-parameterization.json",
+          "locator": "coverage.hookCatalogs.ability.tryexplosionDamp",
+          "kind": "finite-candidate-route-guard-audit"
+        },
+        {
+          "path": "reference/pokeemerald/data/battle_scripts_1.s",
+          "locator": "BattleScript_DampStopsExplosion",
+          "kind": "explosion-entry-and-fixed-failure-tail"
+        },
+        {
+          "path": "reference/pokeemerald/src/battle_script_commands.c",
+          "locator": "Cmd_tryexplosion",
+          "kind": "ordered-first-holder-runtime-guards"
+        },
+        {
+          "path": "tests/tryexplosionDampHookJoinBatch.test.ts",
+          "kind": "two-row-graph-program-batch"
+        },
+        {
+          "path": "tests/gate6DampExplosionReceipt.test.ts",
+          "kind": "twice-fresh-battle-scene-off-family-receipt"
+        },
+        {
+          "path": "tools/probe/receipts/gate6-damp-explosion-off.json",
+          "kind": "compact-deterministic-receipt"
+        }
+      ],
+      "notes": "SELFDESTRUCT and EXPLOSION are the two executable EFFECT_EXPLOSION selectors: 25 selectable occurrences (1 + 24), 26 full 850-row carriers, with Pineco set 57 the sole nonselectable extra. Both are promoted through PP spending and Cmd_tryexplosion's first-Damp-holder scan to the fixed failure script. The Damp arm leaves HP and action RNG unchanged and does not claim datahpupdate, MOVEEND_NEXT_TARGET, Shell Bell, damage, or faint processing."
     },
     "kingsRockMoveEnd": {
       "id": "hook-family:moveend-kings-rock",
