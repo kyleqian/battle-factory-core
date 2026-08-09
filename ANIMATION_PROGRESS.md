@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_POISON_STING Wurmple exact checkpoint — remains unsupported (2026-08-09 worker)
+
+- **State:** Coverage remains **147/276 exact**, 0 partial, 0 staged, **129 unsupported**. The requested lowest carrier is `FRONTIER_MON_WEEDLE` set 3; the completed set-4 Wurmple representative therefore does not promote the move.
+- **Did:** Added complete legal Wurmple/ONIX bilateral stages, `Move_POISON_STING` pointer-bounded probe, immutable evidence/raw-RGB/change-map receipts, pure source-relative reducer, narrow typed seam, and production compositor. The checkpoint covers NEEDLE/IMPACT/POISON_BUBBLE tags and sprites, linear stinger geometry, animation-2 hitsplat, ShakeMon2, monbg/split priority/12:8 blend, both primary sounds and bubble sounds, hardware latches, painter order, and cleanup.
+- **Verified:** Twice fresh, player-back frames **241..353** and opponent-front **233..345** each pass **113/113 component+seam+hardware+raw-RGB+framebuffer**. Player evidence/raw/map: `2c014b6c…` / `4d34a129…` / `89762d5f…`; opponent: `35bc8cec…` / `410f73bf…` / `af74178a…`. TWINEEDLE remains bilateral **37/37** twice fresh and POISON_FANG bilateral **104/104** twice fresh.
+- **Next:** Replace the representative with set-3 Weedle, extract and pin its art/geometry/field profile, and require twice-fresh bilateral complete-window equality before promotion. Do not infer Wurmple scanout coordinates for Weedle.
+- **Notes:** No damage, poison mechanics, accuracy, RNG, turn order, controller/facility state, coverage, animation boundary, canonical recording, or unsupported barrier changed.
+
 ## MOVE_VICE_GRIP exact — bilateral 42/42 CUT-pincer promotion (2026-08-09 worker)
 
 - **State:** Coverage advances **146→147/276 exact**, 0 partial, 0 staged, **130→129 unsupported**. VICE_GRIP alone moves; no animation-boundary or unsupported-barrier change.
