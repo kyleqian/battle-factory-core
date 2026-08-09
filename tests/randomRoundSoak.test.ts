@@ -94,6 +94,19 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.frames).toBeGreaterThan(6_620);
   });
 
+  it("ISSUES #86: waits for the requested battler's faint message before forced selection", () => {
+    // Seed 16's turn has two faint receipts in source order: player QUILAVA
+    // KOs opponent PHANPY, the automatic opponent 1 -> 2 switch completes,
+    // then sandstorm KOs QUILAVA and requests the player's forced switch.
+    // The earlier opponent faint dismissal must not steal the later player's
+    // forced-selector handoff and strand the typed opponent switch command.
+    const result = runSeed(16, { maxFrames: 28_562, renderEvery: 0 });
+    expect(result.errorMessage ?? "").not.toMatch(
+      /forced-switch-in battler 1 changed party without a completed switch transition/,
+    );
+    expect(result.frames).toBeGreaterThan(28_561);
+  });
+
   it("ISSUES #86: a later faint resets stale forced-switch choice ownership", () => {
     // Seed 14 completes one player forced switch on turn 18. On turn 19 the
     // new active faints; source ChooseMonToSendOut resets monToSwitchIntoId

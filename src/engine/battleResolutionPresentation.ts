@@ -112,6 +112,8 @@ export type BattleResolutionPresentationCommand =
       eventSequence: number;
       lines: readonly string[];
       advance: "automatic" | "button";
+      /** Present only on a source faint message; owns a later forced-selector handoff. */
+      faintBattler?: 0 | 1;
       /**
        * True only for the two quote-placeholder ids
        * (`TERMINAL_SEAM_QUOTE_MESSAGE_IDS`) whose real printer path never
@@ -3105,6 +3107,10 @@ export function projectBattleResolutionCommands(
           || TERMINAL_SEAM_BUTTON_MESSAGE_IDS.has(payload.messageId)
             ? "button"
             : "automatic",
+        ...(payload.messageId === "STRINGID_TARGETFAINTED"
+          || payload.messageId === "STRINGID_ATTACKERFAINTED"
+          ? { faintBattler: lastFaintBattler! }
+          : {}),
         noCursor: TERMINAL_SEAM_QUOTE_MESSAGE_IDS.has(payload.messageId),
         timing: payload.messageId === "STRINGID_USEDMOVE"
           ? usedMessageHoldFrames > 0

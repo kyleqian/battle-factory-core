@@ -1331,6 +1331,21 @@ function completedResolutionPhase(
     : "next-command-handoff";
 }
 
+/**
+ * A full source turn may contain an earlier opposing faint/replacement before
+ * ending at a player forced-switch request. Only the requested battler's own
+ * typed faint message transfers presentation ownership to the party selector;
+ * earlier button messages must finish their intervening command sequence.
+ */
+function isForcedSwitchHandoffMessage(
+  resolution: BattleResolutionPresentationState,
+  command: BattleResolutionPresentationCommand,
+): boolean {
+  return resolution.forcedRequest !== null
+    && command.type === "message"
+    && command.faintBattler === resolution.forcedRequest.battler;
+}
+
 function commitCompletedResolutionCommand(
   boundaries: FactoryBattlePresentationBoundaries,
   resolution: BattleResolutionPresentationState,
@@ -1616,7 +1631,7 @@ export function advanceFactoryRoundBattleResolution(
       && isBattleResolutionButtonMessageReady(resolution)
     ) {
       if (newKeys.has("A")) {
-        if (resolution.forcedRequest === null) {
+        if (!isForcedSwitchHandoffMessage(resolution, command)) {
           const nextCommandIndex = resolution.commandIndex + 1;
           const nextResolution = withResolutionLifecycle(
             resolution,
@@ -1699,9 +1714,9 @@ export function advanceFactoryRoundBattleResolution(
         ),
       });
     }
-    if (resolution.forcedRequest === null) {
-      const segment = resolution.segments[resolution.segmentIndex]!;
-      const command = segment.commands[resolution.commandIndex]!;
+    const segment = resolution.segments[resolution.segmentIndex]!;
+    const command = segment.commands[resolution.commandIndex]!;
+    if (!isForcedSwitchHandoffMessage(resolution, command)) {
       const nextCommandIndex = resolution.commandIndex + 1;
       const nextResolution = withResolutionLifecycle(
         resolution,
