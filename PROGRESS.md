@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1029 — [bounded MAIN worker, 2026-08-08] **S10 printfromtable source inventory complete**
+
+- **State:** the widened `Cmd_printfromtable` family is source-complete for
+  the committed program in `4e31a1cf` + `e1d041eb`; triage is now **0 A / 0 B
+  / 22 C / 24 D**.
+- **Did:** registered exact source rows for `gWeatherStartsStringIds` (16),
+  `gNoEscapeStringIds` (5), and `gBattlePalaceFlavorTextTable` (4); Tier 1
+  pins every row, the weather continuation, and all **43/43** current pointer
+  symbols. The generic pointer guard remains a future-input D guard at the
+  existing module pin of 10. Census regenerated; no Gate-6 closure claim.
+- **Next:** run smoke, typecheck, build, and one final full `npm test`, then
+  leave the green ledger/commit for the supervisor. No oracle or canonical
+  Battle-2 work.
+- **Notes:** focused hit-chain + executable-ratchet checks are **379/379**.
+
 ## 1028 — [bounded MAIN worker, 2026-08-08] **S10 Gate-6 deterministic coverage manifest assembled**
 
 - **State:** the first authoritative, reproducible Gate-6 manifest is committed
@@ -41,20 +56,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** focused Tier-1/ratchet **379/379**, smoke **375/375**, typecheck,
   build, and the later union full suite are green. No oracle claim (the custom
   Enigma storage is not injectable by mechanicLab); no canonical Battle-2 work.
-
-## 1026 — [supervisor, 2026-08-08] **A3 Focus Band OHKO continuation proved end to end**
-
-- **State:** master is clean through `50a89bf7`. The inherited runtime fix
-  `c808ddfe` already retired `battleScriptTryKOOpcode.ts`'s barrier **1→0**;
-  this step closed its missing full-script acceptance proof.
-- **Did:** successful and failed Focus Band rolls now run the complete OHKO
-  script in Tier 1. The success path leaves 1 HP, prints
-  `STRINGID_PKMNHUNGONWITHX`, and returns; failure prints
-  `STRINGID_ONEHITKO`. Both exact RNG ledgers are pinned.
-- **Next:** retire A5 (`Cmd_various` / Pursuit) or the smaller independent A7
-  (`Cmd_getexp BS_FAINTED`), then continue the reachable-barrier worklist.
-- **Notes:** worker full suite **806 files / 8,067 passed / 1 skipped**,
-  typecheck, and build passed. Supervisor reran focused **28/28** and smoke
-  **375/375**. Both oracle services were restarted and pass freshness. The
-  animation fold check was empty (`master..animation-main` = 0). No deferred
-  decision and no canonical Battle-2 window.
