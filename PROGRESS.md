@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1050 — [supervisor, 2026-08-09] **#85 closed; Sleep Talk animation fold green**
+
+- **State:** master union is green (**828 files / 8,221 passed / 1 skipped**)
+  with production build passing. Vanilla soak stays **20/20 OK**.
+- **Did:** accepted the generic display-ledger repair (`909a42a8`) and
+  kept-party swap handoff (`72e3fed6`); seed 6 now reaches Battle 2 and seed
+  55 reaches Battle 3/`roundLost`. The accepted swap exit is **43/43** exact.
+  Folded `animation-main` through `ba48a24f` as merge `e7595c81`; Sleep Talk
+  gains a typed Scene-ON reducer/seam but truthfully remains unsupported.
+- **Next:** follow the user-ordered family-level Gate-6 worklist. Keep ISSUES
+  #86's forced-switch and string-resolver failures fatal and separately
+  reproducible for the close-out soak pass.
+- **Notes:** no canonical Battle-2 work moved past tick 33331. No open
+  deferred question. Full-policy 0:60 must be rerun at wind-down for the new
+  completion headline after #85 removed all 21 former swap hangs.
+
 ## 1049 — [MAIN worker, 2026-08-09] **#85 `factorySwap:complete` stall closed generically**
 
 - **State:** master green (827 files / 8,216 passed / 1 skipped). Vanilla
@@ -43,31 +59,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Then re-soak and burn the battles-2-7/postwin wave.
 - **Notes:** vanilla soak 0:20 must stay 20/20 at every wind-down (ROADMAP
   gate). Report full-policy completions/60 as the session headline number.
-
-## 1046 — [interactive user session, 2026-08-09] **Random-play soak harness folded; five display-seam crashes fixed; suite ~50 s**
-
-- **State:** master merges `wip/meta-audit-20260808` + `wip/perf-audit-20260808`
-  (rehearsed union green: 827 files / 8,213 tests in 47.7 s, typecheck and
-  production build pass). New **ISSUES #85** is the top play-test priority.
-- **Did:** built **`npm run soak`** — seeded random LEGAL play through the real
-  production path (createInitialState + tick + button edges), full rounds.
-  First sweep: 495/500 seeds crashed inside battle 1; the plainest vanilla
-  policy died 100/100 at turn 6. Fixed five signature classes same-session
-  (item-heal message resolver, Taunt/Disable rejection strings, clamped-stat
-  banner skip, switch-in display from the party record, forced send-out
-  same-tick lifecycle). **Vanilla is now 20/20 clean on master.** Live play
-  sessions record replayable traces: crash overlay + `__POKEBENCH_SESSION__()`
-  export, headless replay via `tools/replay-session-trace.ts`; builds show a
-  commit stamp under the canvas. The suite runs `isolate:false` (2026-08-08
-  timing audit: 97.5% of suite time was module import; the one vi.mock file is
-  now cache-safe).
-- **Next:** ISSUES #85 — displayed-HP ledger drift + handoff mismatch (39+18
-  of 60 full-policy seeds; same family as closed #84 item 5, now firing turns
-  8–28) and the `factorySwap:complete` stall (seed 55 WON battle 1 and hung at
-  the swap surface). Closing those unlocks machine play of swap, battles 2-7,
-  and postwin. Run the ROADMAP soak gate at every wind-down.
-- **Notes:** receipt-evidence slimming policy + soak gate recorded in ROADMAP
-  (S10 block, user-directed 2026-08-09). Crash catalog:
-  `docs/soak-crash-catalog.md`. Play-preview re-pinned to this fold.
 
 ---

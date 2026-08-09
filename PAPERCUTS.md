@@ -865,3 +865,12 @@ narrow battle-scene patch into a very large whitespace diff. Reversing that
 diff and reconstructing the semantic edits cost about 5 minutes. Prefer
 formatting only newly edited ranges/files whose existing style is already
 formatter-clean, or add a checked narrow-format helper.
+
+## Legacy canonical compare traces can silently default to the generated route
+
+2026-08-09, #85 swap-handoff worker: `battle1-swap-enemy-accept-exit.json`
+had no `appRoute`, so `npm run compare` replayed the generated route and
+wholesale-mismatched 0/43 frames before the trace declared its historical
+`canonical-recorded` owner. The metadata fix restored 43/43 and shrank the
+legacy allowlist. Hits: 1; cost: about 5 minutes. A compare trace with no
+route should fail with an actionable ambiguity error when both routes exist.
