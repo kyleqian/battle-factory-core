@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1031 — [supervisor WIND-DOWN, 2026-08-08] **Gate-6 receipts advanced to 21/24; union green**
 
-- **State:** master is clean through `287704e9`; Gate 6 remains **OPEN** with
+- **State:** the final animation fold is on master at `3cf40fe2`; Gate 6 remains **OPEN** with
   **21/24** Battle Scene OFF receipts, **3** explicit gaps, and **R3** next.
   The widened executable triage remains **0 A / 0 B / 22 C / 24 D**.
 - **Did:** accepted two-seed deterministic R12b White Herb, R11 Baton Pass,
@@ -18,13 +18,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** receipt R3's legal Cloud Nine removal/reactivation sequence, then
   R9 and R2; keep the seven-battle controller/presentation seam generic and do
   not resume the retired canonical Battle-2 march.
-- **Notes:** final uncontended union: **807 files / 8,119 passed / 1 skipped**;
-  production build and OFF-profile oracle info green. The first union attempt
+- **Notes:** the pre-fold master union is green at **807 files / 8,119 passed /
+  1 skipped**; the folded Thunder/Glare branch was independently green and the
+  post-fold production build plus OFF-profile oracle info pass. The first run
   hit six Vitest collection timeouts under concurrent full-suite memory
   pressure (801 files / 6,984 tests passed); all six reran **1,135/1,135**
   before the clean full rerun. At orientation `master..animation-main` was
-  empty, so no fold was due; the separate animation supervisor later advanced
-  that branch through `0dffb48b`, which remains for the next orientation fold.
+  empty; after its separate supervisor exited cleanly, `0dffb48b` was folded.
+  A post-fold full rerun was stopped at wind-down when a new independent
+  supervisor began a competing full suite; no assertion failure was observed.
 
 ## 1030 — [bounded MAIN worker, 2026-08-08] **R12b persistent item write-through repaired**
 
