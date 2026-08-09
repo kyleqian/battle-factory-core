@@ -1,0 +1,16 @@
+{
+  "schema": "poison-sting-portable-evidence/v1", "oracleProfile": "battle-scene-on",
+  "move": "POISON_STING", "orientation": "opponent-front",
+  "pair": "FRONTIER_MON_WEEDLE set 3 opponent-front -> legal ONIX player-back",
+  "scenario": "tools/battle-lab/mechanic-poison-sting-opponent-weedle-player-onix.json",
+  "probe": "tools/compare/poisonStingProbe.py",
+  "attacker": { "species": "WEEDLE", "geometry": { "side": "opponent", "spriteCorner": {"x":144,"y":26}, "animationCenter": {"x":176,"y":58}, "battlePositionCenter": {"x":176,"y":40} } },
+  "target": { "species": "ONIX", "geometry": { "side": "player", "spriteCorner": {"x":40,"y":48}, "animationCenter": {"x":72,"y":88}, "battlePositionCenter": {"x":72,"y":80} } },
+  "fieldProfile": { "playerHp":128,"playerMaxHp":128,"opponentHp":133,"opponentMaxHp":133,"playerGender":"male","opponentGender":"male" },
+  "sourceWindow": {"startFrame":232,"endFrame":344,"frameCount":113},
+  "evidenceSha256": "890c7d9d3b2d4399191bf09ca31a6821bfad55fda8c6e6a38bf1b0efa345bc06",
+  "rawRgbSha256": "a97b8d7f9fd8f2f0674c24da63f5a0c7e1c56bf7ac4053d44e4fcb23d6b8cbb2",
+  "changeMap": "tools/compare/evidence/poison-sting-changemap-opponent.txt",
+  "changeMapSha256": "379c44a5e9f5ebefb0e8d859bc0babe52bd91d9d7176920a5f181b2d651a2b5e",
+  "acceptance": {"status":"exact","componentMatching":113,"framebufferMatching":113}
+}

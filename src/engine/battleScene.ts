@@ -558,6 +558,7 @@ import hazeAsset from "../animation/assets/haze.json" with { type: "json" };
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import substituteAsset from "../animation/assets/substitute.json" with { type: "json" };
 import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
+import poisonStingAsset from "../animation/assets/poisonSting.json" with { type: "json" };
 import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type: "json" };
 import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "json" };
 import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
@@ -908,6 +909,7 @@ import {
   sceneOnSlamView,
   sceneOnSecretPowerView,
   sceneOnTwineedleView,
+  sceneOnPoisonStingView,
   sceneOnSpikeCannonView,
   sceneOnSonicBoomView,
   sceneOnSmokescreenView,
@@ -1036,6 +1038,7 @@ import {
   type SceneOnSlamConfig,
   type SceneOnSecretPowerConfig,
   type SceneOnTwineedleConfig,
+  type SceneOnPoisonStingConfig,
   type SceneOnSpikeCannonConfig,
   type SceneOnSonicBoomConfig,
   type SceneOnSmokescreenConfig,
@@ -1460,6 +1463,10 @@ const twineedleArt = twineedleAsset as {
   needle: { tileset: Tileset; palette: RgbColor[] };
   beedrillBack: { tileset: Tileset; palette: RgbColor[] };
   beedrillFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const poisonStingArt = poisonStingAsset as {
+  weedleBack: { tileset: Tileset; palette: RgbColor[] };
+  weedleFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const spikeCannonArt = spikeCannonAsset as {
   omastarBack: { tileset: Tileset; palette: RgbColor[] };
@@ -19278,6 +19285,119 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? "LEDYBA used" : "Foe LEDYBA used",
       "AGILITY!",
       99,
+    );
+    return;
+  }
+
+  if (state.config.move === "POISON_STING") {
+    const stingState =
+      state as SceneOnMovePresentationState<SceneOnPoisonStingConfig>;
+    const view = sceneOnPoisonStingView(stingState);
+    // BuildOamBuffer and palette transfer expose the preceding software state.
+    const displayed = sceneOnPoisonStingView({ ...stingState, age: stingState.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "WEEDLE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "WEEDLE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged POISON_STING pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const weedleSource = playerToOpponent
+      ? poisonStingArt.weedleBack : poisonStingArt.weedleFront;
+    const weedle = playerToOpponent ? weedleSource : {
+      ...weedleSource,
+      tileset: subTileset(weedleSource.tileset, 0, 8),
+    };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette,
+    );
+    const targetBaselineX2 = playerToOpponent && displayed.age < 35 ? 1 : 0;
+    drawSpriteSheet(
+      fb, onix.tileset, onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetBaselineX2 + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + displayed.targetOffset.y2,
+    );
+    const nonObjTarget2 = fb.slice();
+    const effects = displayed.sprites.slice().sort(
+      (left, right) => left.oamSlot - right.oamSlot,
+    );
+    const drawNeedle = () => {
+      for (const sprite of effects) {
+        if (sprite.kind !== "needle") continue;
+        drawSpriteSheetAffineRotate(
+          fb, twineedleArt.needle.tileset, twineedleArt.needle.palette,
+          sprite.x + sprite.x2, sprite.y + sprite.y2,
+          sprite.matrix.a, sprite.matrix.b, sprite.matrix.c, sprite.matrix.d,
+          undefined, false,
+        );
+      }
+    };
+    if (playerToOpponent) drawNeedle();
+    drawSpriteSheet(
+      fb, weedle.tileset, weedle.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (opponentToPlayer) drawNeedle();
+    for (const sprite of effects.slice().reverse()) {
+      if (sprite.kind === "poisonBubble") {
+        drawSpriteSheetAffineRotate(
+          fb,
+          { columns: 2, rows: 2,
+            tiles: poisonFangArt.poisonBubble.tileset.tiles.slice(0, 4) },
+          poisonFangArt.poisonBubble.palette,
+          sprite.x + sprite.x2, sprite.y + sprite.y2,
+          sprite.matrix.a, sprite.matrix.b, sprite.matrix.c, sprite.matrix.d,
+        );
+      }
+    }
+    for (const sprite of effects) {
+      if (sprite.kind !== "impact" || !view.alpha) continue;
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb, nonObjTarget2,
+        battleAnimHitsplat.tileset, battleAnimHitsplat.palette,
+        sprite.x, sprite.y,
+        sprite.matrix.a, sprite.matrix.b, sprite.matrix.c, sprite.matrix.d,
+        view.alpha.eva, view.alpha.evb, false,
+      );
+    }
+    drawSendOutHealthbox(
+      fb, 0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "WEEDLE", level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "WEEDLE" : "ONIX", level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none", currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb, playerToOpponent ? "WEEDLE used" : "Foe WEEDLE used",
+      "POISON STING!", 99,
     );
     return;
   }
