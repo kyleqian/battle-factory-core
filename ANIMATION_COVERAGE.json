@@ -947,6 +947,36 @@
    ]
   },
   {
+   "move": "MOVE_DISABLE",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Scene-ON mechanicLab parties stage FRONTIER_MON_DROWZEE set 114 (Quirky; HP/Attack/Sp. Attack EVs; Sitrus Berry; source moves CONFUSION/HEADBUTT/DISABLE/BARRIER) against legal ONIX in player-back and opponent-front orientations, with three complete legal records per side and only the active Drowzee slots constrained to DISABLE after a first real ONIX TACKLE establishes its last-used move",
+    "pointer-bounded Move_DISABLE through Move_RECOVER Scene-ON windows include every source frame through first inactive cleanup: player-back oracle frames 697..809 and opponent-front frames 214..326, 113/113 each, reproduced twice fresh with immutable in-window battle state",
+    "the pure source-relative reducer and typed seam port ANIM_TAG_SPARKLE_4 / gSpinningSparkleSpriteTemplate's side-relative 24,-16 geometry, 3-tick 0/16/32/48/64 tile program, target monbg/splitbgprio, alpha 8/8, target visibility, loop-SE task lifecycle, and AnimTask_GrowAndGrayscale's 0xD0 affine-double OBJ_BLEND/grayscale/80-to-minus-one/reset body without owning Disable's gameplay effect",
+    "the narrow Scene-ON compositor reuses source-identical BARRIER Drowzee/ONIX art and the exact shared sparkle-4 sheet; it draws the monbg native copy beneath the grayscale alpha-blended target, source OAM painter order, field chrome, text, and cleanup in both orientations",
+    "measured scanout behavior is pinned rather than guessed: sparkle and grow OAM/palette begin one display after RAM, while the task's final hardware tail is scaled with the restored original palette at display age 105 before neutral OAM reaches the framebuffer at 106; raw software task/OAM/matrix, hardware OAM/matrix/palette, blend registers, target monbg, SE_M_BIND task pan, and cleanup are all checked",
+    "twice-fresh stable receipts are player probe 8f7eff0e6957ed815f470d3aebb9ec5bd5edebe673527e702230f4d0f1f7ca38 / raw 352068a567a21be80acd8babd5786a34601d10e749eb9817fbd5f48800e1be63 / map 7cd84be397dfcda9f074d1aca2780d5bf044d2ad2fb9cf46e6d311f04db39636 and opponent probe de6c0403e5baa03de893cd858fbfb4eac4916699dac5d2baf7485a967da1411b / raw f621f96050f9841139667fb2fb20bdbeeec376c2abfbac093a24a8b1cfee70a9 / map 3aedbc9d0e0b7b544df548b30e62de8a50e9fcff4e59557468f3b03b05b16b55",
+    "BARRIER remains exact twice fresh at 76/76 in both Drowzee/ONIX orientations, and DETECT remains exact twice fresh at 110/110 player-back and 109/109 opponent-front as mandatory art and shared-sparkle controls; no damage, Disable status/turn effects, accuracy/RNG, turn order, controller, facility state, boundary list, unsupported barrier, or canonical-recording allowlist changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-disable-player-drowzee-opponent-onix.json",
+    "tools/battle-lab/mechanic-disable-opponent-drowzee-player-onix.json",
+    "tools/compare/fixtures/disable-player-drowzee-opponent-onix.json",
+    "tools/compare/fixtures/disable-opponent-drowzee-player-onix.json",
+    "tools/compare/disableProbe.py",
+    "tools/compare/disablePortable.ts",
+    "tools/compare/disableSourceAudit.ts",
+    "tools/compare/evidence/disable-changemap-player.txt",
+    "tools/compare/evidence/disable-changemap-opponent.txt",
+    "src/animation/assets/barrier.json",
+    "src/animation/disable.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/disable.test.ts",
+    "tests/animation/disableEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_EARTHQUAKE",
    "status": "exact",
    "covered": [
@@ -4097,6 +4127,24 @@
     "MOVE_CRUSH_CLAW"
    ],
    "goal": "MOVE_REFLECT is exact at 208/208 frames 39-246 player-back and 211/211 frames 39-249 opponent-front twice fresh through software, typed seam, hardware display, audio, raw RGB, and shared framebuffer. BRICK BREAK is exact independently: both 151-frame normal and 192-frame shattered-wall bodies pass dense semantic and production-framebuffer proof twice per orientation. CRUSH CLAW remains unsupported because it loads but never instantiates the wall and has a distinct lunge/ShakeMon2/four claw-slash body."
+  },
+  {
+   "id": "sparkle-4-grow-grayscale",
+   "components": [
+    "asset:ANIM_TAG_SPARKLE_4",
+    "sprite:gSpinningSparkleSpriteTemplate",
+    "task:AnimTask_GrowAndGrayscale",
+    "visualCommand:monbg",
+    "visualCommand:splitbgprio",
+    "visualCommand:setalpha",
+    "visualCommand:clearmonbg",
+    "visualCommand:blendoff"
+   ],
+   "representatives": [
+    "MOVE_DISABLE",
+    "MOVE_DETECT"
+   ],
+   "goal": "Track complete: MOVE_DISABLE independently proves the complete source-specific sparkle-4 plus target GrowAndGrayscale body at 113/113 source/component, typed-seam, hardware OAM/matrix/palette/register/audio, raw-RGB, and shared-framebuffer frames twice fresh in both orientations. MOVE_DETECT remains independently exact at 110/110 player-back and 109/109 opponent-front twice fresh for the shared gSpinningSparkleSpriteTemplate/AnimSpinningSparkle program; no shared component promotes any additional move without its own dense acceptance."
   },
   {
    "id": "shake-target-in-pattern-scary-face",

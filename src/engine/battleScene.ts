@@ -878,6 +878,7 @@ import {
   sceneOnBrickBreakView,
   sceneOnLightScreenView,
   sceneOnBarrierView,
+  sceneOnDisableView,
   sceneOnHazeView,
   sceneOnMirrorCoatView,
   sceneOnAromatherapyView,
@@ -1019,6 +1020,7 @@ import {
   type SceneOnBrickBreakPresentationState,
   type SceneOnLightScreenPresentationState,
   type SceneOnBarrierPresentationState,
+  type SceneOnDisableConfig,
   type SceneOnHazePresentationState,
   type SceneOnMirrorCoatPresentationState,
   type SceneOnBiteConfig,
@@ -21568,6 +21570,145 @@ export function renderSceneOnMovePresentation(
     );
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(fb, playerToOpponent ? "KOFFING used" : "Foe KOFFING used", "HAZE!", 64);
+    return;
+  }
+  if (state.config.move === "DISABLE") {
+    const disableState = state as SceneOnMovePresentationState<SceneOnDisableConfig>;
+    const view = sceneOnDisableView(disableState);
+    // Sparkle OAM scans out one display after its source creation/destruction.
+    // The grow task's OAM/matrix/palette scanout (including its distinct final
+    // scaled/original-palette tail) is represented directly by
+    // `displayedTargetScale` on the current source-relative view.
+    const displayedSparkle = sceneOnDisableView({
+      ...disableState,
+      age: disableState.age - 1,
+    }).sparkle;
+    const playerToOpponent =
+      view.attacker.species === "DROWZEE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "DROWZEE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged DISABLE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    // The established BARRIER Drowzee/Onix staging supplies the source
+    // sprites and front-pic truncation exactly; Disable only changes target
+    // monbg, OBJ blend, palette, and the shared sparkle program.
+    const drowzeeSource = playerToOpponent
+      ? barrierArt.drowzeeBack
+      : barrierArt.drowzeeFront;
+    const drowzee = playerToOpponent
+      ? drowzeeSource
+      : { ...drowzeeSource, tileset: subTileset(drowzeeSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const targetPalette = view.displayedTargetScale?.grayscale
+      ? grayscalePalette(onix.palette)
+      : onix.palette;
+    const drawTarget = (): void => {
+      // `monbg ANIM_TARGET` is a native-position copy.  Its palette bank is
+      // the same one changed by SetGrayscaleOrOriginalPalette, so it must be
+      // drawn gray alongside the live target during the scale window.
+      drawSpriteSheet(
+        fb,
+        onix.tileset,
+        targetPalette,
+        view.target.geometry.spriteCorner.x + onixIdle.x2,
+        view.target.geometry.spriteCorner.y + onixIdle.y2,
+      );
+      const scale = view.displayedTargetScale;
+      if (!scale?.objBlend) return;
+      drawSpriteSheetAffineStretchTintedBlend(
+        fb,
+        onix.tileset,
+        targetPalette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+        scale.xScale,
+        scale.yScale,
+        { r: 255, g: 255, b: 255 },
+        0,
+        8,
+        8,
+        scale.doubled,
+        onixIdle.x2,
+      );
+    };
+    const drawAttacker = (): void => {
+      drawSpriteSheet(
+        fb,
+        drowzee.tileset,
+        drowzee.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    };
+    const drawSparkle = (): void => {
+      const sparkle = displayedSparkle;
+      if (!sparkle) return;
+      drawSpriteSheet(
+        fb,
+        subTileset(reflectArt.sparkle4.tileset, sparkle.tileOffset / 4, 4),
+        reflectArt.sparkle4.palette,
+        sparkle.x - 16,
+        sparkle.y - 16,
+      );
+    };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // Lower subpriority paints in front: target 40 -> attacker 30 -> sparkle
+    // 17 on player-back, attacker 40 -> target 30 -> sparkle 27 on
+    // opponent-front.  Keep the monbg underlay directly below its target OBJ.
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    drawSparkle();
+    const fieldProfile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "DROWZEE",
+        level: 50,
+        gender: fieldProfile.opponentGender ?? "male",
+        hpFraction: fieldProfile.opponentHp / fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "DROWZEE" : "ONIX",
+        level: 50,
+        gender: fieldProfile.playerGender ?? "male",
+        hpFraction: fieldProfile.playerHp / fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: fieldProfile.playerHp,
+        maxHp: fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "DROWZEE used" : "Foe DROWZEE used",
+      "DISABLE!",
+      99,
+    );
     return;
   }
   if (state.config.move === "BARRIER") {

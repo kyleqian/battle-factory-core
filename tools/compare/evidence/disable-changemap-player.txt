@@ -1,0 +1,21 @@
+# MOVE_DISABLE player-back — 113 frames, 240x160
+# frames absent from this table are byte-identical to the previous frame
+frame  changedPx  bbox(minx,miny-maxx,maxy)
+697  (first frame)
+  static 698-704
+705  30  90,79-101,90
+  static 706
+707  146  84,69-107,99
+  static 708-709
+710  194  84,69-107,99
+  static 711-712
+713  142  85,72-106,97
+  static 714-715
+716  96  85,74-106,95
+  static 717-720
+721  42  87,81-104,88
+722  2786  144,6-211,73
+  static 723-801
+802  2629  144,6-211,73
+803  2270  144,6-211,73
+  static 804-809

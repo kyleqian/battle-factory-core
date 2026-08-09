@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_DISABLE exact — bilateral 113/113 sparkle-4-grow-grayscale promotion (2026-08-09 worker)
+
+- **State:** Coverage advances **143→144/276 exact**, 0 partial, 0 staged, **133→132 unsupported**. DISABLE alone moves; animation-boundary and unsupported-barrier pins remain unchanged.
+- **Did:** Added source-bounded legal set-114 DROWZEE/ONIX bilateral stages, dense mGBA probe/receipts/change maps, source audit, pure source-relative reducer, typed Scene-ON seam, and narrow compositor. It reuses valid BARRIER Drowzee/ONIX art and the shared sparkle-4 sheet, while independently porting `AnimTask_GrowAndGrayscale`, target monbg/OBJ blend/grayscale, and cleanup.
+- **Verified:** Twice fresh, player-back **697..809** and opponent-front **214..326** each pass **113/113 source component, seam, hardware, raw-RGB, and production framebuffer** frames. The final measured OAM tail remains scaled with restored original palette for one display, then neutralizes. BARRIER stays bilateral **76/76** twice fresh; DETECT stays **110/110** player-back and **109/109** opponent-front twice fresh as the required shared controls. Focused tests, smoke, typecheck, and build are green.
+- **Next:** Supervisor selects the next independent move acceptance unit. Do not infer Disable's target scanout tail, first-turn staging, or target grayscale blend for another move without its own dense evidence.
+- **Notes:** No Disable gameplay effect, selection/accuracy/RNG, turn order, controller/facility state, main ledger, PAPERCUTS, boundary, or canonical-recording allowlist changed.
+
 ## MOVE_SUPER_FANG exact — bilateral 200/200 production promotion (2026-08-09 worker)
 
 - **State:** Coverage advances **142→143/276 exact**, 0 partial, 0 staged, **134→133 unsupported**. SUPER_FANG alone moves; animation-boundary and unsupported-barrier pins remain unchanged.

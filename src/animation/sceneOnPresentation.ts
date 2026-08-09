@@ -262,6 +262,7 @@ import {
   type ReflectState,
 } from "./reflect.ts";
 import { barrierAtAge, type BarrierState } from "./barrier.ts";
+import { disableAtAge, type DisableState } from "./disable.ts";
 import {
   brickBreakAtAge,
   type BrickBreakBody,
@@ -1307,6 +1308,14 @@ export interface SceneOnBarrierConfig {
   readonly allocatorProfile: Readonly<{ readonly wall: number }>;
 }
 
+/** Typed Scene-ON seam for MOVE_DISABLE's target monbg/OBJ-blend task. */
+export interface SceneOnDisableConfig {
+  readonly move: "DISABLE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnHazeConfig {
   readonly move: "HAZE";
   readonly attacker: SceneOnPresentationBattler;
@@ -2295,6 +2304,7 @@ export type SceneOnMoveConfig =
   | SceneOnBrickBreakConfig
   | SceneOnLightScreenConfig
   | SceneOnBarrierConfig
+  | SceneOnDisableConfig
   | SceneOnHazeConfig
   | SceneOnMirrorCoatConfig
   | SceneOnSynthesisConfig
@@ -3029,6 +3039,12 @@ export interface SceneOnSingView {
 }
 
 export interface SceneOnDetectView extends DetectState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnDisableView extends DisableState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4138,6 +4154,24 @@ export interface SceneOnBarrierView extends BarrierState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+/** `age` is relative to Move_DISABLE's first in-bounds script pointer. */
+export function sceneOnDisableView(
+  state: SceneOnMovePresentationState<SceneOnDisableConfig>,
+): SceneOnDisableView {
+  if (state.config.move !== "DISABLE") {
+    throw new Error(`expected DISABLE presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...disableAtAge(
+      state.age,
+      state.config.attacker.geometry.animationCenter,
+      state.config.attacker.geometry.side,
+    ),
+  };
 }
 
 export interface SceneOnHazeView extends HazeState {
