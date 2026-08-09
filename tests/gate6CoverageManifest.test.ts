@@ -16,6 +16,7 @@ const MARKDOWN_PATH = "docs/gate6-coverage-manifest.md";
 const PER_MOVE_HOOK_JOIN_AXES = ["item", "ability"] as const;
 const SOURCE_PROVEN_FAMILY_STATUS = "source-proven-family";
 const SOUNDPROOF_MOVES_BLOCK_CATEGORY = "moves-block-soundproof";
+const CONTACT_CATEGORY = "moveend-contact-on-damage";
 const COLOR_CHANGE_CATEGORY = "moveend-color-change";
 const SOUNDPROOF_ROSTER_MOVES = [
   "MOVE_ROAR", "MOVE_SING", "MOVE_SUPERSONIC", "MOVE_SCREECH", "MOVE_SNORE",
@@ -66,6 +67,23 @@ const COLOR_CHANGE_PROOF_PATHS = [
   "tools/probe/probe-color-change-ability-off.py",
   "tools/probe/receipts/color-change-off-seed-610839776.json",
   "tools/probe/receipts/color-change-off-seed-324508639.json",
+] as const;
+const CONTACT_PROOF_PATHS = [
+  "reference/pokeemerald/src/battle_util.c",
+  "reference/pokeemerald/src/battle_script_commands.c",
+  "reference/pokeemerald/include/battle.h",
+  "reference/pokeemerald/include/constants/battle_script_commands.h",
+  "reference/pokeemerald/data/battle_scripts_1.s",
+  "src/data/gen/battle-script-graph.json",
+  "src/data/gen/battle-script-program.json",
+  "src/data/gen/moves.json",
+  "src/engine/battleScriptMoveEndOpcode.ts",
+  "tests/battleScriptMoveEndOpcode.test.ts",
+  "tests/onDamageContactOracleEvidence.test.ts",
+  "docs/on-damage-contact-scout.md",
+  "tools/battle-lab/mechanic-on-damage-static-off.json",
+  "tools/probe/verify-on-damage-static.py",
+  "tools/probe/receipts/on-damage-static-off.json",
 ] as const;
 
 const EXPLICIT_STATE_BEHAVIOR_ROWS = [
@@ -142,6 +160,7 @@ function collectEvidenceRows(value: unknown, rows: JsonObject[] = []): JsonObjec
 function sourceProvenPathsFor(category: string): readonly string[] {
   if (category === SOUNDPROOF_MOVES_BLOCK_CATEGORY) return SOUNDPROOF_PROOF_PATHS;
   if ((ABSORBING_CATEGORIES as readonly string[]).includes(category)) return ABSORBING_PROOF_PATHS;
+  if (category === CONTACT_CATEGORY) return CONTACT_PROOF_PATHS;
   if (category === COLOR_CHANGE_CATEGORY) return COLOR_CHANGE_PROOF_PATHS;
   throw new Error(`unknown source-proven ability category ${category}`);
 }
@@ -199,6 +218,35 @@ function assertSourceProvenFamilyContract(
         "gBattleMons[battler].hp != 0",
       ]));
       expect(record(family.familyVerification).oracleReceipt).toBe("tests/colorChangeOracleEvidence.test.ts#shared ON_DAMAGE Color Change arm");
+    }
+    if (family.category === CONTACT_CATEGORY) {
+      const selector = record(family.selector);
+      const dataHpUpdate = record(entryPath.dataHpUpdate);
+      const moveEnd = record(entryPath.moveEnd);
+      const graphRoute = array(graph.route);
+      const programRoute = array(program.route);
+      expect(selector.guard).toBe("(gBattleMoves[move].flags & FLAG_MAKES_CONTACT)");
+      expect(String(selector.derivedFrom)).toContain("moveend-contact-on-damage candidate selector");
+      expect(graphRoute).toEqual(programRoute);
+      expect(graphRoute).toEqual(expect.arrayContaining([
+        expect.objectContaining({ mnemonic: "datahpupdate", operands: ["BS_TARGET"] }),
+      ]));
+      expect(dataHpUpdate).toMatchObject({ mnemonic: "datahpupdate", operands: ["BS_TARGET"] });
+      expect(moveEnd).toMatchObject({ state: "MOVEEND_ON_DAMAGE_ABILITIES", stateValue: 3 });
+      expect(record(family.runtimeGuardSignature).orderedAbilityGuards).toEqual(expect.arrayContaining([
+        "TARGET_TURN_DAMAGED",
+        "(gBattleMoves[move].flags & FLAG_MAKES_CONTACT)",
+      ]));
+      expect(record(record(family.runtimeGuardSignature).dataHpUpdate).writes).toEqual(expect.arrayContaining([
+        "gSpecialStatuses[gActiveBattler].physicalDmg = gHpDealt",
+        "gSpecialStatuses[gActiveBattler].specialDmg = gHpDealt",
+      ]));
+      expect(record(family.familyVerification).oracleReceipt).toBe("tests/onDamageContactOracleEvidence.test.ts#shared ON_DAMAGE contact dispatcher arm");
+      expect(array(record(family.familyVerification).oracleReceiptFiles)).toEqual([
+        "tools/probe/receipts/on-damage-static-off.json",
+      ]);
+      expect(array(record(family.familyVerification).abilityOutcomes)).toHaveLength(6);
+      expect(String(record(family.familyVerification).scopeBoundary)).toMatch(/No per-move oracle receipts are authored/);
     }
     for (const path of sourceProvenPathsFor(String(family.category))) {
       if (!array(row.evidence).some((item) => record(item).path === path)) {
@@ -292,11 +340,26 @@ function assertManifestContract(manifest: JsonObject): void {
   assertPerMoveHookJoinContract(manifest);
   const onDamageSummary = record(record(manifest.summary).onDamageMoveEnd);
   const onDamageRow = record(record(manifest.sections).onDamageMoveEnd);
-  if (onDamageSummary.promotedRows !== 182 || onDamageRow.promotedRows !== 182) {
-    throw new Error("ON_DAMAGE evidence checkpoint must retain the 182-row Color Change promotion");
+  if (onDamageSummary.promotedRows !== 182
+    || onDamageSummary.contactPromotedRows !== 94
+    || onDamageSummary.contactExceptions !== 0
+    || onDamageSummary.contactBlockers !== 0
+    || onDamageSummary.contactRetiredBlockers !== 2
+    || onDamageRow.promotedRows !== 182
+    || onDamageRow.contactPromotedRows !== 94
+    || onDamageRow.contactExceptions !== 0
+    || onDamageRow.contactBlockers !== 0
+    || onDamageRow.contactRetiredBlockers !== 2) {
+    throw new Error("ON_DAMAGE evidence checkpoint must retain the 94/94 contact and 182-row Color Change promotions");
   }
-  if (!Array.isArray(onDamageRow.blockerIds) || onDamageRow.blockerIds.length === 0) {
-    throw new Error("ON_DAMAGE evidence checkpoint must retain nonempty blockers");
+  if (onDamageRow.status !== "family-level-color-change-and-contact-promotion"
+    || !Array.isArray(onDamageRow.blockerIds)
+    || onDamageRow.blockerIds.length !== 0
+    || !Array.isArray(onDamageRow.retiredBlockerIds)
+    || onDamageRow.retiredBlockerIds.length !== 3
+    || !onDamageRow.retiredBlockerIds.includes("ordered-moveend-route-not-proven")
+    || !onDamageRow.retiredBlockerIds.includes("damage-state-guard-not-derived-from-selector")) {
+    throw new Error("ON_DAMAGE evidence checkpoint must retire its two contact blockers without active blockers");
   }
   for (const row of collectEvidenceRows(manifest.sections)) {
     expect(String(row.status)).not.toMatch(/^(closed|complete)$/i);
@@ -389,8 +452,12 @@ describe("Gate-6 mechanics coverage manifest", () => {
       colorChangeCandidates: 183,
       overlapCandidates: 94,
       entryBlockShapes: 78,
-      blockers: 2,
-      retiredBlockers: 1,
+      blockers: 0,
+      retiredBlockers: 3,
+      contactPromotedRows: 94,
+      contactExceptions: 0,
+      contactBlockers: 0,
+      contactRetiredBlockers: 2,
       colorChangePromotedRows: 182,
       colorChangeExceptions: 1,
       colorChangeBlockers: 0,
@@ -398,22 +465,28 @@ describe("Gate-6 mechanics coverage manifest", () => {
       promotedRows: 182,
     });
     expect(manifestOnDamageMoveEnd).toMatchObject({
-      status: "family-level-color-change-promotion-with-contact-checkpoint",
+      status: "family-level-color-change-and-contact-promotion",
       contactCandidates: onDamageMoveEnd.contactCandidates,
       colorChangeCandidates: onDamageMoveEnd.colorChangeCandidates,
       overlapCandidates: onDamageMoveEnd.overlapCandidates,
       entryBlockShapes: onDamageMoveEnd.entryBlockShapes,
-      blockerIds: [
+      blockerIds: [],
+      retiredBlockerIds: [
+        "missing-direct-on-damage-off-receipt",
         "ordered-moveend-route-not-proven",
         "damage-state-guard-not-derived-from-selector",
       ],
-      retiredBlockerIds: ["missing-direct-on-damage-off-receipt"],
+      contactPromotedRows: 94,
+      contactExceptions: 0,
+      contactBlockers: 0,
+      contactRetiredBlockers: 2,
       colorChangePromotedRows: 182,
       colorChangeExceptions: 1,
       colorChangeBlockers: 0,
       colorChangeRetiredBlockers: 2,
       promotedRows: 182,
     });
+    expect(String(manifestOnDamageMoveEnd.notes)).toMatch(/94 contact rows are promoted/);
     expect(String(manifestOnDamageMoveEnd.notes)).toMatch(/182 Color Change rows are promoted/);
     const sourceProven = parameterizationData.moves
       .filter((move) => move.hooks.ability.status === SOURCE_PROVEN_FAMILY_STATUS)
@@ -506,6 +579,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
       SOUNDPROOF_MOVES_BLOCK_CATEGORY,
       COLOR_CHANGE_CATEGORY,
       "absorbing-volt-absorb",
+      CONTACT_CATEGORY,
     ]);
     expect(() => assertSourceProvenFamilyContract(mixedSourceHook, mixedRow)).not.toThrow();
   });
@@ -602,10 +676,11 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(String(waterAbsorb.notes)).toMatch(/R10\/R7 only happened to include those abilities/);
     expect(String(flashFire.notes)).toMatch(/R10\/R7 only happened to include those abilities/);
     expect(staticAbility).toMatchObject({
-      status: "engine-referenced-no-oracle-receipt",
+      status: "shared-dispatcher-sibling-tier1-verified",
       oracleReceiptCards: [],
     });
-    expect(String(staticAbility.notes)).toMatch(/does not observe ABILITYEFFECT_ON_DAMAGE/);
+    expect(String(staticAbility.notes)).toMatch(/fresh Battle Scene OFF Static receipt/);
+    expect(String(staticAbility.notes)).toMatch(/other six ON_DAMAGE ability outcomes retain explicit no-direct-receipt gaps/);
     expect(oracle.receiptDocumented).toBe(24);
     expect(oracle.receiptGaps).toBe(0);
     expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
