@@ -13,6 +13,10 @@ import {
   type BiteEffect,
 } from "./bite.ts";
 import {
+  substituteAtAge,
+  type SubstituteState,
+} from "./substitute.ts";
+import {
   headbuttAtAge,
   type HeadbuttState,
 } from "./headbutt.ts";
@@ -736,6 +740,7 @@ export interface SceneOnPresentationBattler {
     | "TOGETIC"
     | "MACHOKE"
     | "MAKUHITA"
+    | "GOLEM"
     | "WINGULL"
     | "TAILLOW"
     | "EEVEE"
@@ -1943,6 +1948,13 @@ export interface SceneOnFakeOutConfig {
   readonly targetPictureYOffset: number;
 }
 
+export interface SceneOnSubstituteConfig {
+  readonly move: "SUBSTITUTE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnRazorLeafConfig {
   readonly move: "RAZOR_LEAF";
   readonly attacker: SceneOnPresentationBattler;
@@ -2301,6 +2313,7 @@ export type SceneOnMoveConfig =
   | SceneOnDizzyPunchConfig
   | SceneOnAstonishConfig
   | SceneOnFakeOutConfig
+  | SceneOnSubstituteConfig
   | SceneOnRazorLeafConfig
   | SceneOnMagicalLeafConfig
   | SceneOnPoisonTailConfig
@@ -2814,6 +2827,12 @@ export interface SceneOnFakeOutView extends FakeOutState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly targetBattler: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSubstituteView extends SubstituteState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnRazorLeafView extends RazorLeafState {
@@ -5583,6 +5602,21 @@ export function sceneOnFakeOutView(
       state.config.attacker.geometry.side,
       state.config.targetPictureYOffset,
     ),
+  };
+}
+
+/** `age=0` is the first in-bounds Move_SUBSTITUTE script frame. */
+export function sceneOnSubstituteView(
+  state: SceneOnMovePresentationState<SceneOnSubstituteConfig>,
+): SceneOnSubstituteView {
+  if (state.config.move !== "SUBSTITUTE") {
+    throw new Error(`expected SUBSTITUTE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...substituteAtAge(state.age, state.config.attacker.geometry.side),
   };
 }
 
