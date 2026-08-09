@@ -1,4 +1,12 @@
 
+## 1021 — [bounded MAIN worker, 2026-08-08] **#39: faint-sink geometry renamed `faintSinkRowsAndY2`**
+
+- **State/Did:** ownership-only rename merged as `d2390d33`; old-symbol refs
+  **22→0**, focused/smoke/full suite, typecheck, build, and the committed OFF
+  differential (**620/620**) green.
+- **Next/Notes:** superseded by the 2026-08-08 S10-closure ordering decision.
+  Full entry remains in git history at `PROGRESS.md`.
+
 ## 1020 — [bounded MAIN worker, 2026-08-08] **#39 stale rename brief stopped honestly**
 
 - **State/Did:** `dragonBreathGrovyleHp` was already generic; no runtime change
@@ -38593,3 +38601,10 @@ both verify scripts/census independently re-verified before this entry.)*
 - **Blockers/deviations (reported per brief, not silently worked around):** (a) **The guard at old:10318 cannot move in slice 1** — it reads `ONIX_SITRUS_ROTATE_RENDER_LAG` (canonical-only, stays in battleScene.ts); moving it forces a canonical→battleScene import that, combined with battleScene's mandatory re-exports, forms an ESM cycle whose module-eval read hits **TDZ (`ReferenceError: Cannot access before initialization`)**, verified empirically in both CJS and native ESM. The guard stays ACTIVE in battleScene.ts (reads TURN5 via the new import) and can move in slice 4 when ONIX + its consumers move together. (b) **The doc's "281 zero-ref leaves" is not reproducible** — the committed partition script emits no such list, and the doc's representative `INITIAL_BATTLE_SCENE_STATE` is not zero-ref (it references imported `CLOSED_FIGHT_SUBMENU_STATE` + internal `BattleSceneState`). Under the doc's stated definition (AST, property/type-aware) the true counts are 244 zero-ref symbols / 226 const-let, of which **192 are pure-literal consts** (moved). 34 zero-ref consts reference imported values (incl. `BATTLE2_TURN1_KERNEL`→`stageBattle2Turn1Kernel`) — deferred to slice 3. (c) Deferred: `INITIAL_BATTLE_SCENE_STATE` (internal type annotation), `ONIX_SITRUS_ROTATE_RENDER_LAG` (guard dep), and the two `let` caches `turn10OnixDarkPaletteCache`/`menuHealthboxPlayerContentMask` (TS forbids reassigning an import; not literal constants).
 - **Next:** supervisor reviews; slice 3 moves the 34 import-referencing zero-ref consts + 38 AST dependency leaves (canonical imports shared/live from battleScene.ts). Watch the TDZ guard: once slice 4 moves `ONIX_SITRUS_ROTATE_RENDER_LAG` + `ONIX_SITRUS_IDENTITY_RENDER_TICK` + `onixSitrusRotateMatrix` + `turn5SitrusRingMatrix`, the guard can move too.
 - **Notes:** no PAPERCUTS of my own. One more concurrent-harness artifact: `aa8304c3` committed between my slices (docs-only, no src change, slice-2 base verified unaffected).
+## 1023 — [bounded MAIN worker, 2026-08-08] **#39: DOUBLE_TEAM clone-palette cache is identity-honest**
+
+- **State/Did:** `ba08db85` keyed the species-neutral clone-palette cache by
+  source-palette identity; red-first collision coverage, full suite, typecheck,
+  build, smoke, and **640/640** OFF differential captures passed.
+- **Next/Notes:** superseded by the S10-closure ordering decision. The full
+  entry remains in git history at `PROGRESS.md`.

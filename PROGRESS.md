@@ -5,6 +5,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1026 — [supervisor, 2026-08-08] **A3 Focus Band OHKO continuation proved end to end**
+
+- **State:** master is clean through `50a89bf7`. The inherited runtime fix
+  `c808ddfe` already retired `battleScriptTryKOOpcode.ts`'s barrier **1→0**;
+  this step closed its missing full-script acceptance proof.
+- **Did:** successful and failed Focus Band rolls now run the complete OHKO
+  script in Tier 1. The success path leaves 1 HP, prints
+  `STRINGID_PKMNHUNGONWITHX`, and returns; failure prints
+  `STRINGID_ONEHITKO`. Both exact RNG ledgers are pinned.
+- **Next:** retire A5 (`Cmd_various` / Pursuit) or the smaller independent A7
+  (`Cmd_getexp BS_FAINTED`), then continue the reachable-barrier worklist.
+- **Notes:** worker full suite **806 files / 8,067 passed / 1 skipped**,
+  typecheck, and build passed. Supervisor reran focused **28/28** and smoke
+  **375/375**. Both oracle services were restarted and pass freshness. The
+  animation fold check was empty (`master..animation-main` = 0). No deferred
+  decision and no canonical Battle-2 window.
+
+## 1025 — [user DECISION, 2026-08-08] **S10 closure is the headline: barrier burn-down, then Gate-6 manifest; #39 and animation demoted to filler**
+
+- **State:** master clean through `12be3c44`; docs-only entry, no code change.
+- **Did:** the user reviewed the week since Gate 5 closed and re-pointed the
+  queue at finishing S10. The recorded ordering decision is in ROADMAP.md
+  (S10 section, 2026-08-08).
+- **Next:** (1) burn down the ten remaining bucket-A barriers in
+  `docs/barrier-reachability-triage.md` (A3–A12; A1/A2 retired 2026-08-08);
+  (2) resolve the single bucket-B widened-scope item and confirm the C/D
+  citations as the prove-unreachable record; (3) assemble the Gate-6
+  close-out artifacts (coverage manifest, one parameterized-oracle trace per
+  effect family, interaction tests, seeded end-to-end rounds) with Gate-4
+  semantic verification on the same worklist, plus Gate 2's Noland scope
+  note.
+- **Notes:** this OVERRIDES entry 1024's named next owner — the
+  `turn10OnixDarkPalette` Family-F slice is deferred, not canceled, and the
+  ISSUES #39 audit stays valid for whenever a filler slot opens. The
+  animation lane keeps its separate supervisor but is likewise filler
+  relative to S10 closure.
+
 ## 1024 — [supervisor WIND-DOWN, 2026-08-08] **Generic S8 presentation and Factory-AI receipts advanced; final union green**
 
 - **State:** master is clean through `12be3c44`. Final worker full suite is
@@ -29,38 +66,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Family-F handoff above; no material decision was deferred. Shared-host
   full-suite contention is recorded in `PAPERCUTS.md` at hit 6.
 
-## 1023 — [bounded MAIN worker, 2026-08-08] **#39: DOUBLE_TEAM clone-palette cache is identity-honest**
-
-- **State:** implementation `ba08db85`; focused **7/7**, smoke **375/375**,
-  typecheck, build, and full suite (**800 files / 8,034 passed / 1 skipped**)
-  are green.
-- **Did:** renamed `getOnixDoubleTeamClonePalette` to the species-neutral
-  `doubleTeamClonePalette` and keyed memoization by the actual source-palette
-  array. A red-verified Tier-1 collision pin checks two distinct synthetic
-  palettes in both orders against direct coefficient-11 blend expectations.
-- **Next:** supervisor review; continue #39 only with another freshly bounded
-  presentation owner. `turn10OnixDarkPalette` remains explicitly untouched.
-- **Notes:** old helper/cache executable refs **3+4→0**; Family-F species-named
-  factories **2→1**, source-accepting singleton caches **2→1**, and incomplete
-  DOUBLE_TEAM cache owners **1→0**. `battleScene.ts` **36,361→36,363 LOC**.
-  Clean-parent OFF differential **640/640 byte-identical** (DOUBLE_TEAM 256,
-  ROCK_SLIDE 256, generated-command insurance 128); no Battle-2/Scene-ON run.
-
-## 1021 — [bounded MAIN worker, 2026-08-08] **#39: faint-sink geometry now has an identity-honest API name**
-
-- **State:** implementation `d2390d33`; focused **237/237**, smoke **375/375**,
-  typecheck, full suite (**799 files / 8,033 passed / 1 skipped**), build, and
-  the committed OFF differential are green.
-- **Did:** renamed only the pure geometry helper to `faintSinkRowsAndY2` in its
-  existing canonical owner and public re-export; signature, formula, Grovyle
-  defaults, and explicit Pidgeotto parameters are unchanged. Exact old-symbol
-  refs (`src`/`tests`/`tools`) **22→0**, production **10→0**; focused Tier-1
-  now pins mid-curve geometry for both distinct parameterizations.
-- **Next:** supervisor review; continue #39 only with another freshly bounded
-  presentation-seam retirement.
-- **Notes:** broad #39 census **1,949→1,949** / `battleScene.ts`
-  **36,361→36,361 LOC**. Clean-parent differential **620/620 byte-identical**
-  (`turn5-faint` 110, `turn5-switchin` 241,
-  `turn13-dragonbreath-faint` 141, generated-OFF insurance 128). No canonical
-  Battle-2 trace/window, oracle trace, or Scene-ON query ran; no hidden/dynamic
-  consumer, new unsupported barrier, or production recording import found.

@@ -117,22 +117,20 @@ why the pins still hold.
 > added after five fields were found read-but-never-wired, and it caught a sixth
 > (`knownAbility` dropped by a conditional spread) the very next round.
 
-### A3. `battleScriptTryKOOpcode.ts:108` — `Cmd_tryKO`'s HOLD_EFFECT_FOCUS_BAND roll
-- **Reason / citation:** `"Cmd_tryKO's HOLD_EFFECT_FOCUS_BAND roll needs gSpecialStatuses[target].focusBanded"`; `battle_script_commands.c:6841-6855`.
-- **Reachability:** Focus Band is a **Frontier held item** — the ability/item
-  census lists `HOLD_EFFECT_FOCUS_BAND | 78 | 80 | FOCUS_BAND` (78 L50
-  carriers). A target holding Focus Band hit by an OHKO move
-  (Fissure/Sheer Cold/Horn Drill/Guillotine, all four Factory-L50: census
-  EFFECT_OHKO 4(28)) takes the roll branch. **Ordinary Factory play.**
-- **Port size:** the `focusBanded` machinery **already exists** —
-  `battleScriptHitChainOpcode.ts:1974-2012` and `:2088-2125` model the exact
-  same roll for `Cmd_adjustnormaldamage`/`Cmd_adjustsetdamage`. This site is the
-  same call on a sibling opcode. Small.
-- **Tier-1 test:** opponent holds Focus Band, Fissure connects → survive with
-  1 HP and the expected message, not a halt (extends
-  `tests/battleScriptTryKOOpcode.test.ts`).
-- **Breadth unblocked:** 78 L50 sets carry Focus Band; the four OHKO moves
-  (28 weighted) currently halt whenever they hit a Focus Band user.
+### A3. `battleScriptTryKOOpcode.ts:108` — `Cmd_tryKO`'s HOLD_EFFECT_FOCUS_BAND roll — **RETIRED 2026-08-07**
+
+`c808ddfe` ports the source's holder-only `Random() % 100 < param` draw before
+the Sturdy check (`battle_script_commands.c:7507-7511`), recording
+`gSpecialStatuses[target].focusBanded` and the item reveal only on success.
+The existing OHKO success trichotomy then consumes that target-owned bit as the
+1-HP `MOVE_RESULT_FOE_HUNG_ON` path with `lastUsedItem`; a failed roll continues
+to the normal OHKO result. The ratchet is therefore `1 -> 0`.
+
+`tests/battleScriptTryKOOpcode.test.ts` pins both deterministic roll outcomes,
+their exact RNG ledgers, Focus Band's full `BattleScript_FocusBandActivates`
+message/return continuation, and ordinary `STRINGID_ONEHITKO` continuation on
+a failed roll. This closes the ordinary Factory path: 78 Level-50 Focus Band
+holders versus the four Factory OHKO moves (28 weighted uses).
 
 ### A4. `battleScriptAttackCancelerOpcode.ts:274` — Lightning Rod redirection
 
