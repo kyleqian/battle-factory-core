@@ -108,6 +108,57 @@ function assertManifest(manifest: AnyRecord): void {
   }
   const forbiddenClosure = JSON.stringify(manifest).match(/\bgate\s*6\s+is\s+(closed|complete)\b/i);
   if (forbiddenClosure) throw new Error(`Gate-6 manifest contains a false closure claim: ${forbiddenClosure[0]}`);
+
+  const hookJoinSection = manifest.sections?.perMoveHookJoins as AnyRecord | undefined;
+  const hookJoinSummary = manifest.summary?.perMoveHookJoins as AnyRecord | undefined;
+  if (!hookJoinSection || !hookJoinSummary) throw new Error("Gate-6 manifest lacks the per-move hook-join ratchet");
+  for (const axis of PER_MOVE_HOOK_JOIN_AXES) {
+    const rows = hookJoinSection[axis];
+    const summary = hookJoinSummary[axis] as AnyRecord | undefined;
+    if (!Array.isArray(rows) || !summary) throw new Error(`Gate-6 manifest lacks ${axis} per-move hook-join rows`);
+    if (rows.length !== parameterizationMoves.length) {
+      throw new Error(`Gate-6 manifest ${axis} hook-join row count is not derived from the Level-50 parameterization`);
+    }
+    const rowsByMove = new Map<string, AnyRecord>();
+    for (const row of rows as AnyRecord[]) {
+      if (typeof row.move !== "string" || rowsByMove.has(row.move)) {
+        throw new Error(`Gate-6 manifest ${axis} hook-join rows must enumerate each move exactly once`);
+      }
+      rowsByMove.set(row.move, row);
+    }
+    let unsupported = 0;
+    for (const move of parameterizationMoves) {
+      const sourceHook = parameterizedUnsupportedHook(move, axis);
+      const row = rowsByMove.get(move.move);
+      if (!row) throw new Error(`Gate-6 manifest lacks ${axis} hook-join row for ${move.move}`);
+      if (row.status !== sourceHook.status || !String(row.reason ?? "").trim()) {
+        throw new Error(`Gate-6 manifest ${axis} hook-join status/reason drift for ${move.move}`);
+      }
+      if (row.effect !== move.moveTable?.effect || row.entryScript !== move.battleScript?.entryScript) {
+        throw new Error(`Gate-6 manifest ${axis} hook-join identity/effect drift for ${move.move}`);
+      }
+      const sourceLocator = `moves:${move.move}.hooks.${axis}`;
+      if (row.sourceArtifact?.path !== PARAMETERIZATION_PATH || row.sourceArtifact?.locator !== sourceLocator) {
+        throw new Error(`Gate-6 manifest ${axis} hook-join source artifact drift for ${move.move}`);
+      }
+      if (!(row.evidence as Evidence[] | undefined)?.some((item) => item.path === PARAMETERIZATION_PATH && item.locator === sourceLocator)) {
+        throw new Error(`Gate-6 manifest ${axis} hook-join evidence lacks ${move.move}`);
+      }
+      if (row.status === "unsupported") unsupported += 1;
+    }
+    if (summary.rows !== rows.length || summary.unsupported !== unsupported || summary.gaps !== unsupported) {
+      throw new Error(`Gate-6 manifest ${axis} hook-join summary has a false count or zero-gap claim`);
+    }
+  }
+  if (hookJoinSummary.total?.rows !== perMoveHookJoinTotals.rows
+    || hookJoinSummary.total?.unsupported !== perMoveHookJoinTotals.unsupported
+    || hookJoinSummary.total?.gaps !== perMoveHookJoinTotals.gaps) {
+    throw new Error("Gate-6 manifest per-move hook-join total has a false count or zero-gap claim");
+  }
+  if (perMoveHookJoinTotals.gaps > 0 && !/hook-join/i.test(String(manifest.gate6?.nextAcceptanceUnit ?? ""))) {
+    throw new Error("Gate-6 manifest must name a bounded per-move hook-join acceptance unit while gaps remain");
+  }
+
   const rows: Row[] = [];
   function walk(value: unknown): void {
     if (Array.isArray(value)) {
@@ -177,6 +228,80 @@ const parameterizedMoves = new Map<string, AnyRecord>(
 const level50EffectNames = new Set(
   (parameterization.moves as AnyRecord[]).map((move) => move.moveTable.effect),
 );
+
+/**
+ * The parameterization deliberately leaves both per-move hook joins
+ * unsupported: a sound join needs Battle Script fallthrough and source guard
+ * reachability, neither of which the catalog currently models. Keep those
+ * finite gaps visible here without copying the parameterization's large move
+ * payload into this report a second time.
+ */
+type PerMoveHookJoinAxis = "item" | "ability";
+const PER_MOVE_HOOK_JOIN_AXES: readonly PerMoveHookJoinAxis[] = ["item", "ability"];
+const parameterizationMoves = parameterization.moves as AnyRecord[];
+if (parameterizationMoves.length !== parameterizedMoves.size) {
+  throw new Error("level50 parameterization has duplicate move identities");
+}
+
+function parameterizedUnsupportedHook(move: AnyRecord, axis: PerMoveHookJoinAxis): AnyRecord {
+  const hook = move.hooks?.[axis] as AnyRecord | undefined;
+  if (hook?.status !== "unsupported") {
+    throw new Error(`level50 parameterization ${move.move}.${axis} must remain explicitly unsupported`);
+  }
+  if (!String(hook.reason ?? "").trim()) {
+    throw new Error(`level50 parameterization ${move.move}.${axis} lacks an unsupported reason`);
+  }
+  return hook;
+}
+
+function makePerMoveHookJoinRows(axis: PerMoveHookJoinAxis): Row[] {
+  return parameterizationMoves.map((move) => {
+    if (typeof move.move !== "string" || !Number.isSafeInteger(move.id)) {
+      throw new Error("level50 parameterization has an invalid move identity");
+    }
+    const hook = parameterizedUnsupportedHook(move, axis);
+    const sourceLocator = `moves:${move.move}.hooks.${axis}`;
+    return Object.freeze({
+      id: `per-move-hook-join:${axis}:${move.move}`,
+      label: move.move,
+      axis,
+      move: move.move,
+      moveId: move.id,
+      effect: move.moveTable?.effect,
+      effectId: move.battleScript?.effectId,
+      entryScript: move.battleScript?.entryScript,
+      status: hook.status,
+      reason: hook.reason,
+      sourceArtifact: { path: PARAMETERIZATION_PATH, locator: sourceLocator },
+      evidence: [
+        evidence(PARAMETERIZATION_PATH, "per-move-hook-join-source", sourceLocator),
+      ],
+      notes: "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified.",
+    });
+  });
+}
+
+const perMoveHookJoinRows = {
+  item: makePerMoveHookJoinRows("item"),
+  ability: makePerMoveHookJoinRows("ability"),
+} as const;
+const perMoveHookJoinSummary = {
+  item: {
+    rows: perMoveHookJoinRows.item.length,
+    unsupported: perMoveHookJoinRows.item.filter((row) => row.status === "unsupported").length,
+    gaps: perMoveHookJoinRows.item.filter((row) => row.status === "unsupported").length,
+  },
+  ability: {
+    rows: perMoveHookJoinRows.ability.length,
+    unsupported: perMoveHookJoinRows.ability.filter((row) => row.status === "unsupported").length,
+    gaps: perMoveHookJoinRows.ability.filter((row) => row.status === "unsupported").length,
+  },
+};
+const perMoveHookJoinTotals = {
+  rows: perMoveHookJoinSummary.item.rows + perMoveHookJoinSummary.ability.rows,
+  unsupported: perMoveHookJoinSummary.item.unsupported + perMoveHookJoinSummary.ability.unsupported,
+  gaps: perMoveHookJoinSummary.item.gaps + perMoveHookJoinSummary.ability.gaps,
+};
 
 const moveEffectRows: Row[] = topologyEffects.map((effect) => {
   const census = effectCensusRows.get(effect.effect);
@@ -668,12 +793,17 @@ const nextAcceptance = nextAcceptanceOverride === undefined
 if (nextAcceptanceOverride !== undefined && !nextAcceptance) {
   throw new Error(`Gate-6 next-acceptance override is not a known card: ${nextAcceptanceOverride}`);
 }
-const nextAcceptanceLabel = nextAcceptance?.label ?? "Broader Gate-6 breadth acceptance";
-const nextAcceptanceDetail = nextAcceptanceOverride === undefined
-  ? nextAcceptance === undefined
-    ? "All committed parameterized request cards are receipted, but that count alone does not meet ROADMAP.md:1604-1613's broader breadth acceptance (finite unsupported-entry closure, distinct effect/hook-family evidence, sibling batches, multiple seeded legal Factory rounds, and selected UI comparisons)."
-    : "Add and document the missing parameterized-oracle receipt before treating this family as accepted."
-  : "Upgrade its legacy receipt note to the compact deterministic semantic workflow.";
+const hasPerMoveHookJoinGaps = perMoveHookJoinTotals.gaps > 0;
+const nextAcceptanceLabel = hasPerMoveHookJoinGaps
+  ? "Per-move hook-join family"
+  : nextAcceptance?.label ?? "Broader Gate-6 breadth acceptance";
+const nextAcceptanceDetail = hasPerMoveHookJoinGaps
+  ? `Choose one source-bounded item or ability hook-join family and account for complete Battle Script reachability, including implicit fallthrough and source branch guards. Do not promote the remaining explicit gaps: ${perMoveHookJoinSummary.item.gaps} item joins and ${perMoveHookJoinSummary.ability.gaps} ability joins remain unsupported.`
+  : nextAcceptanceOverride === undefined
+    ? nextAcceptance === undefined
+      ? "All committed parameterized request cards are receipted, but that count alone does not meet ROADMAP.md:1604-1613's broader breadth acceptance (finite unsupported-entry closure, distinct effect/hook-family evidence, sibling batches, multiple seeded legal Factory rounds, and selected UI comparisons)."
+      : "Add and document the missing parameterized-oracle receipt before treating this family as accepted."
+    : "Upgrade its legacy receipt note to the compact deterministic semantic workflow.";
 const nextAcceptanceText = `${nextAcceptanceLabel}: ${nextAcceptanceDetail}`;
 
 const sourceInputs = [
@@ -711,6 +841,11 @@ const manifest: AnyRecord = {
       level50Executable: moveRows.filter((row) => row.level50Status === "level50-executable").length,
       level50RosterOnly: moveRows.filter((row) => row.level50Status === "level50-roster-only").length,
     },
+    perMoveHookJoins: {
+      item: perMoveHookJoinSummary.item,
+      ability: perMoveHookJoinSummary.ability,
+      total: perMoveHookJoinTotals,
+    },
     stateFamilies: { total: stateFamilyRows.length, tier1Covered: stateFamilyRows.filter((row) => row.status === "tier1-covered").length },
     hooks: {
       abilities: { total: abilityRows.length, oracleReceipted: abilityRows.filter((row) => row.status === "oracle-receipted-hook").length, zeroFactoryWidened: abilityRows.filter((row) => row.status === "zero-factory-carrier-widened-scope").length },
@@ -722,6 +857,7 @@ const manifest: AnyRecord = {
   },
   sections: {
     moveEffect: { effects: moveEffectRows, moves: moveRows },
+    perMoveHookJoins: perMoveHookJoinRows,
     stateFamilies: stateFamilyRows,
     hooks: { abilities: abilityRows, holdEffects: holdEffectRows },
     corpus: { trainers: trainerRows, level50Sets: level50Rows },
@@ -755,6 +891,7 @@ const markdown: string[] = [
   "## Headline",
   "",
   `- Effects: **${manifest.summary.effects.staticExecutable}/${manifest.summary.effects.total} static-executable**; moves: **${manifest.summary.moves.staticExecutable}/${manifest.summary.moves.total}** static-executable (**${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}** Level-50 roster moves executable, **${manifest.summary.moves.level50RosterOnly}** roster-only).`,
+  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; every row remains explicitly unsupported with its source-artifact locator and reason.`,
   `- State/status/volatile rows: **${manifest.summary.stateFamilies.tier1Covered}/${manifest.summary.stateFamilies.total}** have focused Tier-1 evidence; source-modeled rows remain listed separately.`,
   `- Hook universes: **${manifest.summary.hooks.abilities.total} abilities** and **${manifest.summary.hooks.holdEffects.total} hold effects**, including **${manifest.summary.hooks.abilities.zeroFactoryWidened + manifest.summary.hooks.holdEffects.zeroFactoryWidened}** legal widened-scope rows with zero Level-50 Factory carriers.`,
   `- Corpus: **${manifest.summary.corpus.ordinaryTrainers}/${trainers.count} ordinary trainers** and **${manifest.summary.corpus.level50Sets}/${LEVEL50_SET_COUNT} Level-50 sets** joined; the full set catalog contains ${manifest.summary.corpus.fullSetCatalog} rows including Open-only sets.`,
@@ -766,6 +903,7 @@ const markdown: string[] = [
   "- `static-executable` comes only from the executable-frontier census and means opcode/operand reachability, not correct state transitions.",
   "- `engine-referenced` comes only from the ability/item census. It is a worklist fact, not semantic verification.",
   "- `catalog-joined` proves a finite source/data join. It does not provide a per-trainer or per-set oracle receipt.",
+  "- `unsupported` per-move hook joins are intentionally not inferred from the partial dispatcher catalogs. Each row repeats only move identity, effect, entry script, reason, and a locator into `level50-move-parameterization.json`; it is not a support claim.",
   "- `oracle-receipted` requires a committed Gate-6 request card and a completed receipt-note heading in the scout. Fixture-only rows are intentionally not promoted.",
   "- The five entries in `STATE_FAMILY_BEHAVIOR_EVIDENCE` use named behavior-test locators instead of token presence; that narrow Tier-1 override does not alter static, semantic, or oracle classifications.",
   "- Zero-Factory-carrier rows remain in the widened legal Gen-3 universe. They are not silently classified as Factory-complete.",
@@ -786,6 +924,23 @@ markdown.push(...table("Moves (all topology rows)", ["Move", "Effect", "Static s
   (row) => row.status,
   (row) => row.level50Status,
   (row) => row.semanticAcceptance,
+  (row) => evidenceText(row.evidence),
+]));
+markdown.push("## Per-move item and ability hook-join gaps\n\n");
+markdown.push(...table("Item hook joins (all Level-50 roster moves)", ["Move", "Effect", "Entry script", "Status", "Reason", "Source artifact evidence"], perMoveHookJoinRows.item, [
+  (row) => row.move,
+  (row) => row.effect,
+  (row) => row.entryScript,
+  (row) => row.status,
+  (row) => row.reason,
+  (row) => evidenceText(row.evidence),
+]));
+markdown.push(...table("Ability hook joins (all Level-50 roster moves)", ["Move", "Effect", "Entry script", "Status", "Reason", "Source artifact evidence"], perMoveHookJoinRows.ability, [
+  (row) => row.move,
+  (row) => row.effect,
+  (row) => row.entryScript,
+  (row) => row.status,
+  (row) => row.reason,
   (row) => evidenceText(row.evidence),
 ]));
 markdown.push("## Status, volatile, and state families\n\n");
@@ -874,6 +1029,7 @@ console.log(
     + `Effects: ${manifest.summary.effects.staticExecutable}/${manifest.summary.effects.total} static-executable; `
     + `moves: ${manifest.summary.moves.staticExecutable}/${manifest.summary.moves.total}; `
     + `L50 moves: ${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}\n`
+    + `Per-move hook joins: ${manifest.summary.perMoveHookJoins.item.gaps} item gaps, ${manifest.summary.perMoveHookJoins.ability.gaps} ability gaps\n`
     + `Hooks: ${manifest.summary.hooks.abilities.total} abilities, ${manifest.summary.hooks.holdEffects.total} hold effects; `
     + `oracle receipts: ${manifest.summary.parameterizedOracle.receiptDocumented}/${manifest.summary.parameterizedOracle.scenarioRequests} scenarios\n`
     + `Next acceptance unit: ${nextAcceptanceLabel}. Gate 6 remains OPEN.`,
