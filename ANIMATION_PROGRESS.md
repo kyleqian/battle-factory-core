@@ -1,5 +1,12 @@
 # Animation coverage
 
+## MOVE_SLEEP_TALK bilateral evidence checkpoint — remains unsupported (2026-08-09 worker)
+
+- **State:** Coverage remains **140/276 exact**, 0 partial, 0 staged, **136 unsupported**. SLEEP_TALK is not promoted; no production compositor, typed seam, animation boundary, gameplay, controller, or facility state changed.
+- **Did:** Audited the complete set-333 SEAKING body, `gLetterZSpriteTemplate` OAM/animation/affine table, `AnimLetterZ` through side-dependent offscreen destruction, and shared `AnimTask_SwayMon`. Added complete legal Scene-ON parties that stage sleep through real REST, a pointer-bounded dense probe, twice-fresh bilateral receipts, and deterministic raw-RGB change maps.
+- **Verified:** Player-back frames **1356..1541 = 186 frames**, evidence `4badf2d5…`, raw RGB `24c97994…`, map `922a9996…`; opponent-front frames **4570..4758 = 189 frames**, evidence `df68a90c…`, raw RGB `5e603acf…`, map `478ac35a…`. Each has nine independently latched Letter-Z lifecycles, all task/software-sprite/hardware OAM+matrix/palette/register/audio/raw-RGB fields, and first inactive cleanup; two fresh runs per orientation are byte-identical. Focused source/evidence/REST control/boundary/inventory tests are **17/17**, smoke **375/375**, and typecheck pass.
+- **Next:** Build the pure 186/189-age source-relative reducer and typed Scene-ON seam, then implement the narrow SEAKING/Letter-Z/SwayMon compositor. Require twice-fresh **186/186 + 189/189 reducer/seam/hardware/framebuffer equality** and rerun REST 110/110 bilaterally before promotion.
+
 ## MOVE_HAZE exact — bilateral pointer-bounded 202/202 promotion (2026-08-09 worker)
 
 - **State:** Coverage advances **139→140/276 exact**, 0 partial, 0 staged, **137→136 unsupported**. HAZE alone moves; the animation boundary and unsupported-branch pins remain unchanged.

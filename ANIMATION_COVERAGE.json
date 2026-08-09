@@ -2491,7 +2491,7 @@
     "the pure source-relative reducer ports ANIM_TAG_LETTER_Z load/free, attacker-panned SE_M_SNORE, all three staggered gSleepLetterZSpriteTemplate spawns, AnimSleepLetterZ initialization, AnimSleepLetterZ_Step fixed-point ascent, side-dependent affine programs, OAM/VBlank display latches, 60-frame callbacks, waits, and first inactive cleanup",
     "the typed Scene-ON seam carries only resolved TEDDIURSA/ONIX presentation geometry and immutable sleep/status/pending-heal field state; source-extracted Teddiursa front/back and LETTER_Z art plus shared ONIX/chrome pass source/software sprite state, hardware OAM and matrices, tags/palettes/buffers, registers, audio, raw RGB, and every production framebuffer without owning the Rest outcome",
     "restPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 110 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations through first inactive cleanup; the shared Metronome compositor control remains 127/127 exact twice fresh in both orientations",
-    "MOVE_SLEEP_TALK remains unsupported: source audit proves its distinct nine gLetterZSpriteTemplate/AnimLetterZ lifecycles plus AnimTask_SwayMon body; it lacks an independent complete legal both-orientation twice-fresh dense reducer, seam, and framebuffer acceptance",
+    "MOVE_SLEEP_TALK remains unsupported: complete legal set-333 SEAKING parties stage sleep through real REST and twice-fresh pointer-bounded Scene-ON probes prove its distinct nine gLetterZSpriteTemplate/AnimLetterZ lifecycles plus AnimTask_SwayMon body, hardware/audio/raw-RGB state, and cleanup over player-back 1356-1541 (186 frames) and opponent-front 4570-4758 (189 frames); it still lacks a pure reducer, typed seam, production compositor, and framebuffer acceptance",
     "no Rest healing, sleep outcome or duration, damage, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
    ],
    "evidence": [
@@ -2503,6 +2503,13 @@
     "tools/compare/restPortable.ts",
     "tools/compare/restSourceAudit.ts",
     "tools/compare/extractRestAssets.ts",
+    "tools/battle-lab/mechanic-sleep-talk-player-seaking-opponent-onix.json",
+    "tools/battle-lab/mechanic-sleep-talk-opponent-seaking-player-onix.json",
+    "tools/compare/fixtures/sleep-talk-player-seaking-opponent-onix.json",
+    "tools/compare/fixtures/sleep-talk-opponent-seaking-player-onix.json",
+    "tools/compare/evidence/sleep-talk-changemap-player.txt",
+    "tools/compare/evidence/sleep-talk-changemap-opponent.txt",
+    "tools/compare/sleepTalkSourceAudit.ts",
     "src/animation/assets/rest.json",
     "src/animation/rest.ts",
     "src/animation/sceneOnPresentation.ts",
@@ -3872,7 +3879,7 @@
     "MOVE_REST",
     "MOVE_SLEEP_TALK"
    ],
-   "goal": "MOVE_REST independently proves its complete 110-frame source body through first inactive cleanup at 110/110 source/component, typed-seam, software/hardware OAM and matrix, tag/palette/buffer, register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh using legal challenge-0 set-117 TEDDIURSA parties. MOVE_SLEEP_TALK remains unsupported because its distinct nine gLetterZSpriteTemplate/AnimLetterZ lifecycles and AnimTask_SwayMon body lack an independent complete legal both-orientation twice-fresh dense reducer, seam, and framebuffer acceptance."
+   "goal": "MOVE_REST independently proves its complete 110-frame source body through first inactive cleanup at 110/110 source/component, typed-seam, software/hardware OAM and matrix, tag/palette/buffer, register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh using legal challenge-0 set-117 TEDDIURSA parties. MOVE_SLEEP_TALK now has twice-fresh independent complete legal bilateral dense evidence and deterministic change maps for its nine gLetterZSpriteTemplate/AnimLetterZ lifecycles and AnimTask_SwayMon body (186 player-back / 189 opponent-front frames), but remains unsupported pending its pure reducer, typed seam, production compositor, and complete framebuffer acceptance."
   },
   {
    "id": "flying-dirt-sandstorm",
