@@ -133,7 +133,7 @@ export interface GlarePaletteState {
 
 export interface GlareRegisterState {
   readonly dispcnt: 48960;
-  readonly bg1cnt: 7169 | 7173;
+  readonly bg1cnt: 7169 | 7173 | 39936;
   readonly bg1hofs: 0;
   readonly bg1vofs: 0;
   readonly bldcnt: 0 | 16194;
@@ -239,7 +239,8 @@ function dotTaskAtAge(age: number, geometry: GlareGeometry): GlareTask | null {
   const createdPairs = age < GLARE_FIRST_DOT_AGE
     ? 0 : Math.min(GLARE_DOT_PAIR_COUNT, 1 + Math.floor((age - GLARE_FIRST_DOT_AGE) / 4));
   data[0] = createdPairs >= GLARE_DOT_PAIR_COUNT ? 1 : 0;
-  data[1] = age < GLARE_FIRST_DOT_AGE ? age - 6 : (age - GLARE_FIRST_DOT_AGE) % 4;
+  data[1] = createdPairs >= GLARE_DOT_PAIR_COUNT
+    ? 0 : age < GLARE_FIRST_DOT_AGE ? age - 6 : (age - GLARE_FIRST_DOT_AGE) % 4;
   data[2] = createdPairs;
   data[5] = 12;
   data[6] = 3;
@@ -317,7 +318,9 @@ function shakeTaskAtAge(age: number): GlareShakeTask | null {
 
 function sparklesAtAge(age: number, geometry: GlareGeometry): readonly GlareEyeSparkle[] {
   if (age < GLARE_SPARKLE_FIRST_AGE || age > GLARE_SPARKLE_LAST_AGE) return [];
-  const frame = Math.min(4, Math.floor((age - GLARE_SPARKLE_FIRST_AGE) / 4)) as 0 | 1 | 2 | 3 | 4;
+  // The sprite is created on age 112, then its first VBlank callback advances
+  // the command stream one source frame later than creation.
+  const frame = Math.min(4, Math.max(0, Math.floor((age - 113) / 4))) as 0 | 1 | 2 | 3 | 4;
   const offset = GLARE_SPARKLE_TILE_OFFSETS[frame]! as 0 | 4 | 8;
   const sign = geometry.attackerSide === "player" ? 1 : -1;
   return [0, 1].map((sourceOrder) => {
@@ -373,7 +376,7 @@ function registerStateAtAge(age: number): GlareRegisterState {
   const coefficient = scaryBlendCoefficientAtAge(age);
   return {
     dispcnt: 48960,
-    bg1cnt: age >= GLARE_RESTORE_FIRST_AGE ? 7169 : 7173,
+    bg1cnt: age >= GLARE_RESTORE_FIRST_AGE ? 7169 : age >= 113 ? 7173 : 39936,
     bg1hofs: 0, bg1vofs: 0,
     bldcnt: activeScary ? 16194 : 0,
     bldalpha: activeScary ? coefficient | ((16 - coefficient) << 8) : 0,
@@ -394,7 +397,8 @@ function soundAtAge(age: number, side: GlareSide) {
 function visualTaskCountAtAge(age: number): number {
   if (age < 7 || age === 95 || age === 111 || age >= 195 && age < 196
     || age >= 211) return 0;
-  if (age <= 94 || age <= 110 || age === 196 || age <= 210) return 1;
+  if ((age >= 7 && age <= 94) || (age >= 96 && age <= 110)
+    || (age >= 196 && age <= 210) || (age >= 136 && age <= 194)) return 1;
   if (age <= 113) return 2;
   if (age <= 117) return 3;
   if (age <= 133) return 4;

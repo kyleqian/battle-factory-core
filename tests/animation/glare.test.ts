@@ -1,7 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
-  GLARE_ACTIVE_FRAME_COUNT,
   GLARE_CLEANUP_AGE,
   GLARE_DOT_PAIR_COUNT,
   GLARE_DOT_LIFETIME,
@@ -26,13 +25,14 @@ const geometries: readonly GlareGeometry[] = [
   {
     attackerSide: "opponent", targetSide: "player",
     attackerEyeCenter: { x: 176, y: 49 }, eyeDotStart: { x: 168, y: 49 },
-    eyeDotEnd: { x: 72, y: 94 },
+    eyeDotEnd: { x: 72, y: 99 },
   },
 ];
 
 function expectedVisualTaskCount(age: number): number {
   if (age < 7 || age === 95 || age === 111 || age === 195 || age >= 211) return 0;
-  if (age <= 110 || age === 196 || age <= 210) return 1;
+  if ((age >= 7 && age <= 94) || (age >= 96 && age <= 110)
+    || (age >= 136 && age <= 194) || (age >= 196 && age <= 210)) return 1;
   if (age <= 113) return 2;
   if (age <= 117) return 3;
   if (age <= 133) return 4;
@@ -83,7 +83,7 @@ describe("MOVE_GLARE source-relative reducer", () => {
         const expectedSparkles = age >= 112 && age <= 133;
         expect(state.sparkles).toHaveLength(expectedSparkles ? 2 : 0);
         if (expectedSparkles) {
-          const frame = Math.min(4, Math.floor((age - 112) / 4));
+          const frame = Math.min(4, Math.max(0, Math.floor((age - 113) / 4)));
           expect(state.sparkles.map((sprite) => [sprite.x, sprite.y, sprite.tileFrame]))
             .toEqual(geometry.attackerSide === "player"
               ? [[56, 95, frame], [88, 95, frame]]
