@@ -73,6 +73,13 @@ export type BattleScriptSemanticEventPayload =
      */
     scriptingBattler?: BattleScriptBattlerId;
     /**
+     * Source u16 gLastUsedItem at print time. `B_TXT_LAST_ITEM` reads this
+     * scalar directly (battle_message.c:2465-2508), rather than discovering
+     * an item from a later controller mutation or an animation receipt.
+     * Optional for synthetic/staged receipts that predate this snapshot.
+     */
+    lastItem?: number;
+    /**
      * Source gEffectBattler at print time (rulesContext.selectorRoles.effectBattler).
      * ISSUES #70 batch 3's ability-prevention family: `applySetMoveEffect`
      * swaps which real battler (attacker vs target) this is depending on

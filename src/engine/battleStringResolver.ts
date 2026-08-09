@@ -38,6 +38,25 @@ const BY_SYMBOL: ReadonlyMap<string, BattleMessageTableEntry> = new Map(
 );
 
 /**
+ * Source-table lookup for a BattleStringExpandPlaceholders token.  A name
+ * selector can be encoded either as the ordinary `{B_TXT_*}` placeholder or
+ * as charmap's zero-argument control form (`B_EFF_NAME_WITH_PREFIX`), so the
+ * caller must inspect both segment shapes rather than assuming one encoding.
+ */
+export function battleStringReferencesToken(messageId: string, token: string): boolean {
+  const entry = BY_SYMBOL.get(messageId);
+  // A few source print receipts (for example STRINGID_SWITCHINMON) are
+  // deliberately resolved by the separate intro-string table rather than
+  // gBattleStringsTable. This is a capability query, not the resolver's
+  // completeness guard, so those ids simply have no token in this table.
+  if (!entry) return false;
+  return entry.segments.some((segment) =>
+    (segment.type === "placeholder" && segment.token === token)
+    || (segment.type === "control" && segment.name === token)
+  );
+}
+
+/**
  * Source `HANDLE_NICKNAME_STRING_CASE` (`battle_message.c:2286-2306`): a
  * non-player-side battler's nickname is prefixed "Foe " in a trainer battle
  * (`BATTLE_TYPE_TRAINER`) or "Wild " otherwise; the player's own side never

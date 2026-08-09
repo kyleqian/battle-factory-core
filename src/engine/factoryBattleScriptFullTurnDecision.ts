@@ -80,7 +80,7 @@ import {
   describeIllegalMoveSelection,
   type BattleScriptSelectionRejection,
 } from "./battleScriptActionAdmission.ts";
-import { resolveMoveName } from "./battleStringResolver.ts";
+import { battleStringReferencesToken, resolveMoveName } from "./battleStringResolver.ts";
 import {
   HOLD_EFFECT_NAME_BY_ID,
   unsupportedBranch,
@@ -1247,24 +1247,21 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
         // own B_TXT_SCR_ACTIVE_NAME_WITH_PREFIX selector reads this same
         // global (:2481-2482).
         scriptingBattler: rules.scriptingBattler,
-        // Source gEffectBattler at print time -- battle_message.c's own
-        // B_TXT_EFF_NAME_WITH_PREFIX selector reads this same global
-        // (:2444-2447). ISSUES #70 batch 3's ability-prevention family needs
-        // this distinct from scriptingBattler (applySetMoveEffect's own
-        // affectsUser swap sends the two to opposite real battlers,
-        // battleScriptHitChainOpcode.ts:2841-2848). Scoped to only the 4 ids
-        // that read it -- unlike scriptingBattler, selectorRoles.effectBattler
-        // is already a widely-populated generic field (Trick, Leech Seed, the
-        // wrap family, ...), so attaching it unconditionally would perturb
-        // every other message event's exact payload shape.
-        ...((
-          operand.expression === "STRINGID_PKMNPREVENTSPOISONINGWITH"
-          || operand.expression === "STRINGID_PKMNSXPREVENTSBURNS"
-          || operand.expression === "STRINGID_PKMNPREVENTSPARALYSISWITH"
-          || operand.expression === "STRINGID_PKMNSXHADNOEFFECTONY"
-          || operand.expression === "STRINGID_PKMNSXPREVENTSFLINCHING"
-          || operand.expression === "STRINGID_PKMNWASCONFUSED"
-        ) && rules.selectorRoles.effectBattler !== null
+        // B_TXT_LAST_ITEM reads gLastUsedItem directly at print time. Freeze
+        // it only when the source/charmap-extracted template references that
+        // token: a later removeitem controller receipt must not turn a Berry
+        // result into ITEM_NONE in presentation.
+        ...(battleStringReferencesToken(operand.expression, "B_LAST_ITEM")
+          ? { lastItem: rules.lastUsedItem }
+          : {}),
+        // B_TXT_EFF_NAME_WITH_PREFIX is charmap's control-form selector for
+        // gEffectBattler (battle_message.c:2444-2446). Its reachable strings
+        // are data-defined, not the old hand-maintained list: source controls
+        // and ordinary placeholders are both recognized by the shared table
+        // lookup, while messages that do not reference this selector retain
+        // their exact prior event shape.
+        ...(battleStringReferencesToken(operand.expression, "B_EFF_NAME_WITH_PREFIX")
+          && rules.selectorRoles.effectBattler !== null
           ? { effectBattler: rules.selectorRoles.effectBattler }
           : {}),
         // Source gBattlerTarget at print time -- ISSUES #72 batch 2's

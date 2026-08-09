@@ -1,3 +1,21 @@
+## 1047 — [interactive user session, 2026-08-09] **User decisions: #85 first; Gate-6 evidence goes family-level**
+
+- **State:** master green (827 files / 8,213 tests, ~47 s full suite).
+  Decisions recorded in the ROADMAP S10 block.
+- **Did:** the user ruled the 561-gap hook census closes at FAMILY
+  granularity (one receipt per effect/hook family + Tier-1 sibling batch
+  checks; per-gap receipts only on divergence), receipt hygiene is advisory
+  (worker TIME, not repo weight, is the constraint), and the sequencing is
+  #85 -> family-level Gate 6 -> close-out -> playable-round milestone ->
+  then schedule S11.
+- **Next:** ISSUES #85 — displayed-HP ledger drift (`npm run soak -- --seed
+  0`), handoff invariant (`--seed 6`), factorySwap stall (`--seed 55`).
+  Then re-soak and burn the battles-2-7/postwin wave.
+- **Notes:** vanilla soak 0:20 must stay 20/20 at every wind-down (ROADMAP
+  gate). Report full-policy completions/60 as the session headline number.
+
+---
+
 ## 1046 — [interactive user session, 2026-08-09] **Random-play soak harness folded; five display-seam crashes fixed; suite ~50 s**
 
 - **State:** master merges `wip/meta-audit-20260808` + `wip/perf-audit-20260808`

@@ -17,7 +17,7 @@ backlog.
 
 # Open
 
-## #86 — Deeper full-policy soaking exposes four post-ledger crash signatures
+## #86 — Deeper full-policy soaking exposes post-ledger crash signatures
 
 **Found 2026-08-09 after #85's display-boundary repair.** Full-policy seeds
 0:60 now produce **32 OK / 7 CRASH / 21 HANG** and reach battle 2 on multiple
@@ -30,19 +30,14 @@ signatures and were deliberately not folded into that bounded step:
 - **1/60**, seed 14, battle 1 turn 19, frame 9,484:
   `battle resolution switch-in message has no preceding switch/post-switch
   field`.
-- **1/60**, seed 23, battle 2 turn 9, frame 27,529:
-  `STRINGID_PKMNSITEMRESTOREDSTATUS` lacks the
-  `{B_SCR_ACTIVE_NAME_WITH_PREFIX}` resolver.
-- **1/60**, seed 27, battle 2 turn 33, frame 31,406:
-  `STRINGID_PKMNSITEMCUREDPOISON` lacks the same resolver.
-
-**New frontier after #85 (out of scope):** seed 6 now crosses the former
-`factorySwap:complete` boundary and reaches battle 2 turn 13, frame 26,280,
-where it fails on
-`battleStringResolver: unsupported control segment {B_EFF_NAME_WITH_PREFIX}
-in STRINGID_PKMNFELLASLEEP` from `resolveBattleStringLines`. This is a
-downstream generated-resolution string family; keep the resolver invariant
-fatal. Seed 55 reaches battle 3 turn 13, frame 50,980 and records `roundLost`.
+**String-control family closed 2026-08-09:** source/charmap-driven selector
+snapshots now resolve `{B_EFF_NAME_WITH_PREFIX}` and
+`{B_SCR_ACTIVE_NAME_WITH_PREFIX}` (including the print-time last-item
+snapshot) without weakening unsupported-control failures. The named repros
+now reach later outcomes: seed 6 is `OK b2 t25 f33553 roundLost`; seed 23
+reaches `b4 t14 f57791` at the forced-switch invariant above; seed 27 reaches
+`b4 t16 f71106` at `Slice 3 resolution completed without a player command
+boundary`.
 
 **Repro:** `npm run soak -- --seed N --verbose` for the named seed. Keep the
 forced-switch identity check fatal; diagnose and supply its missing typed

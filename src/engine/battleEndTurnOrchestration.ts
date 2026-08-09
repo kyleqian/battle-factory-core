@@ -1266,15 +1266,23 @@ function runItemsTick(
   battler: BattleScriptBattlerId,
   moveTurn: boolean,
 ): ItemsTickOutcome {
-  const b = state.rulesContext.battlers[battler];
-  if (b.hp === 0) return Object.freeze({ kind: "advance", state });
-  const holdEffect = resolveBattleScriptBattlerHoldEffect(state.rulesContext, battler);
+  // ItemBattleEffects writes gLastUsedItem before its hp/effect gates
+  // (battle_util.c:3262).  Preserve that scan result even when no script
+  // fires: a later print must observe the item that source last inspected.
+  const scannedRules = Object.freeze({
+    ...state.rulesContext,
+    lastUsedItem: state.rulesContext.battlers[battler].item,
+  });
+  const scannedState = Object.freeze({ ...state, rulesContext: scannedRules });
+  const b = scannedRules.battlers[battler];
+  if (b.hp === 0) return Object.freeze({ kind: "advance", state: scannedState });
+  const holdEffect = resolveBattleScriptBattlerHoldEffect(scannedRules, battler);
 
   if (holdEffect === HOLD_EFFECT_LEFTOVERS) {
-    if (moveTurn || b.hp >= b.maxHP) return Object.freeze({ kind: "advance", state });
+    if (moveTurn || b.hp >= b.maxHP) return Object.freeze({ kind: "advance", state: scannedState });
     const heal = Math.min(floorDivAtLeastOne(b.maxHP, 16), b.maxHP - b.hp);
     const rc = Object.freeze({
-      ...state.rulesContext,
+      ...scannedRules,
       battleMoveDamage: -heal,
       // battle_util.c:3604-3606: the fired-effect commit block stamps
       // `gBattleScripting.battler = battler` for Leftovers' ITEM_HP_CHANGE
@@ -1282,62 +1290,62 @@ function runItemsTick(
       // {B_SCR_ACTIVE_NAME_WITH_PREFIX} print owner (battle_message.c:2450).
       scriptingBattler: battler,
       aiObservedItemEffects: Object.freeze(
-        state.rulesContext.aiObservedItemEffects.map((value, index) =>
+        scannedRules.aiObservedItemEffects.map((value, index) =>
           index === battler ? holdEffect : value
         ),
       ) as BattleScriptRulesContext["aiObservedItemEffects"],
     });
-    return runTickScript(program, handlers, state, rc, battler, ITEM_HEAL_HP_END2_LABEL);
+    return runTickScript(program, handlers, scannedState, rc, battler, ITEM_HEAL_HP_END2_LABEL);
   }
 
   if (holdEffect === HOLD_EFFECT_RESTORE_STATS) {
     const stages = b.statStages;
-    if (!stages.some((stage) => stage < DEFAULT_STAT_STAGE)) return Object.freeze({ kind: "advance", state });
+    if (!stages.some((stage) => stage < DEFAULT_STAT_STAGE)) return Object.freeze({ kind: "advance", state: scannedState });
     const resetStages = Object.freeze(stages.map((stage) => (stage < DEFAULT_STAT_STAGE ? DEFAULT_STAT_STAGE : stage)));
-    const withStages = withBattler(state.rulesContext, battler, { statStages: resetStages as never });
+    const withStages = withBattler(scannedRules, battler, { statStages: resetStages as never });
     const rc = Object.freeze({ ...withStages, scriptingBattler: battler });
-    return runTickScript(program, handlers, state, rc, battler, WHITE_HERB_END2_LABEL);
+    return runTickScript(program, handlers, scannedState, rc, battler, WHITE_HERB_END2_LABEL);
   }
 
   if (holdEffect === HOLD_EFFECT_CURE_PAR) {
-    if ((b.status1 & STATUS1_PARALYSIS) === 0) return Object.freeze({ kind: "advance", state });
-    return runStatus1CureTick(program, handlers, state, battler, b.status1 & ~STATUS1_PARALYSIS, BERRY_CURE_PRLZ_END2_LABEL);
+    if ((b.status1 & STATUS1_PARALYSIS) === 0) return Object.freeze({ kind: "advance", state: scannedState });
+    return runStatus1CureTick(program, handlers, scannedState, battler, b.status1 & ~STATUS1_PARALYSIS, BERRY_CURE_PRLZ_END2_LABEL);
   }
   if (holdEffect === HOLD_EFFECT_CURE_PSN) {
-    if ((b.status1 & STATUS1_PSN_ANY) === 0) return Object.freeze({ kind: "advance", state });
-    return runStatus1CureTick(program, handlers, state, battler, b.status1 & ~(STATUS1_PSN_ANY | STATUS1_TOXIC_COUNTER), BERRY_CURE_PSN_END2_LABEL);
+    if ((b.status1 & STATUS1_PSN_ANY) === 0) return Object.freeze({ kind: "advance", state: scannedState });
+    return runStatus1CureTick(program, handlers, scannedState, battler, b.status1 & ~(STATUS1_PSN_ANY | STATUS1_TOXIC_COUNTER), BERRY_CURE_PSN_END2_LABEL);
   }
   if (holdEffect === HOLD_EFFECT_CURE_BRN) {
-    if ((b.status1 & STATUS1_BURN) === 0) return Object.freeze({ kind: "advance", state });
-    return runStatus1CureTick(program, handlers, state, battler, b.status1 & ~STATUS1_BURN, BERRY_CURE_BRN_END2_LABEL);
+    if ((b.status1 & STATUS1_BURN) === 0) return Object.freeze({ kind: "advance", state: scannedState });
+    return runStatus1CureTick(program, handlers, scannedState, battler, b.status1 & ~STATUS1_BURN, BERRY_CURE_BRN_END2_LABEL);
   }
   if (holdEffect === HOLD_EFFECT_CURE_FRZ) {
-    if ((b.status1 & STATUS1_FREEZE) === 0) return Object.freeze({ kind: "advance", state });
-    return runStatus1CureTick(program, handlers, state, battler, b.status1 & ~STATUS1_FREEZE, BERRY_CURE_FRZ_END2_LABEL);
+    if ((b.status1 & STATUS1_FREEZE) === 0) return Object.freeze({ kind: "advance", state: scannedState });
+    return runStatus1CureTick(program, handlers, scannedState, battler, b.status1 & ~STATUS1_FREEZE, BERRY_CURE_FRZ_END2_LABEL);
   }
   if (holdEffect === HOLD_EFFECT_CURE_SLP) {
-    if ((b.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) === 0) return Object.freeze({ kind: "advance", state });
+    if ((b.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) === 0) return Object.freeze({ kind: "advance", state: scannedState });
     return runStatus1CureTick(
-      program, handlers, state, battler, b.status1 & ~BATTLE_SCRIPT_STATUS1_SLEEP, BERRY_CURE_SLP_END2_LABEL,
+      program, handlers, scannedState, battler, b.status1 & ~BATTLE_SCRIPT_STATUS1_SLEEP, BERRY_CURE_SLP_END2_LABEL,
       { status2: (b.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) >>> 0 },
     );
   }
   if (holdEffect === HOLD_EFFECT_CURE_CONFUSION) {
-    if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) === 0) return Object.freeze({ kind: "advance", state });
-    const withStatus2 = withBattler(state.rulesContext, battler, {
+    if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) === 0) return Object.freeze({ kind: "advance", state: scannedState });
+    const withStatus2 = withBattler(scannedRules, battler, {
       status2: (b.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) >>> 0,
     });
     const rc = Object.freeze({ ...withStatus2, scriptingBattler: battler });
-    return runTickScript(program, handlers, state, rc, battler, BERRY_CURE_CONFUSION_END2_LABEL);
+    return runTickScript(program, handlers, scannedState, rc, battler, BERRY_CURE_CONFUSION_END2_LABEL);
   }
   if (holdEffect === HOLD_EFFECT_CURE_STATUS) {
     const hasStatus1 = (b.status1 & STATUS1_ANY) !== 0;
     const hasConfusion = (b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) !== 0;
-    if (!hasStatus1 && !hasConfusion) return Object.freeze({ kind: "advance", state });
+    if (!hasStatus1 && !hasConfusion) return Object.freeze({ kind: "advance", state: scannedState });
     const clearedStatus2 = (b.status2
       & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE
       & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) >>> 0;
-    const withStatus = withBattler(state.rulesContext, battler, { status1: 0, status2: clearedStatus2 });
+    const withStatus = withBattler(scannedRules, battler, { status1: 0, status2: clearedStatus2 });
     const synced = Object.freeze({
       ...withStatus,
       party: withBattleScriptPartyMemberStatus1(withStatus.party, b.side, b.partyIndex, 0),
@@ -1351,11 +1359,11 @@ function runItemsTick(
       // this reducer zeroes them above).
       battleTextBuff1Status: moveEndLumStatusName(b),
     });
-    return runTickScript(program, handlers, state, synced, battler, BERRY_CURE_CHOSEN_STATUS_END2_LABEL);
+    return runTickScript(program, handlers, scannedState, synced, battler, BERRY_CURE_CHOSEN_STATUS_END2_LABEL);
   }
   if (holdEffect === HOLD_EFFECT_CURE_ATTRACT) {
-    if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) === 0) return Object.freeze({ kind: "advance", state });
-    const withStatus2 = withBattler(state.rulesContext, battler, {
+    if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) === 0) return Object.freeze({ kind: "advance", state: scannedState });
+    const withStatus2 = withBattler(scannedRules, battler, {
       status2: (b.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) >>> 0,
     });
     const rc = Object.freeze({
@@ -1366,25 +1374,25 @@ function runItemsTick(
       // sibling sets the same literal (battle_util.c:3639-3640's "love").
       battleTextBuff1Status: "love" as const,
     });
-    return runTickScript(program, handlers, state, rc, battler, BERRY_CURE_CHOSEN_STATUS_END2_LABEL);
+    return runTickScript(program, handlers, scannedState, rc, battler, BERRY_CURE_CHOSEN_STATUS_END2_LABEL);
   }
 
   if (holdEffect === HOLD_EFFECT_RESTORE_HP) {
-    if (moveTurn || !restoreHpGateFires(b)) return Object.freeze({ kind: "advance", state });
+    if (moveTurn || !restoreHpGateFires(b)) return Object.freeze({ kind: "advance", state: scannedState });
     // battle_util.c:3337-3345: gBattleMoveDamage = min(param, maxHP - hp), negated -- BattleScript_ItemHealHP_RemoveItem's
     // own healthbarupdate/datahpupdate pair applies it (and syncs the party HP mirror), removeitem then consumes the berry.
-    const param = resolveBattleScriptBattlerHoldEffectParam(state.rulesContext, battler);
+    const param = resolveBattleScriptBattlerHoldEffectParam(scannedRules, battler);
     const heal = Math.min(param, b.maxHP - b.hp);
     // battle_util.c:3604-3606: every fired ITEMEFFECT_NORMAL effect commits
     // `gBattleScripting.battler = battler` before its script runs -- the print
     // owner STRINGID_PKMNSITEMRESTOREDHEALTH's {B_SCR_ACTIVE_NAME_WITH_PREFIX}
     // reads at print time (battle_message.c:2450).
-    const rc = Object.freeze({ ...state.rulesContext, battleMoveDamage: -heal, scriptingBattler: battler });
-    return runTickScript(program, handlers, state, rc, battler, ITEM_HEAL_HP_REMOVE_ITEM_LABEL);
+    const rc = Object.freeze({ ...scannedRules, battleMoveDamage: -heal, scriptingBattler: battler });
+    return runTickScript(program, handlers, scannedState, rc, battler, ITEM_HEAL_HP_REMOVE_ITEM_LABEL);
   }
   if (holdEffect === HOLD_EFFECT_RESTORE_PP) {
     const slot = moveTurn ? -1 : restorePpSlot(b);
-    if (slot === -1) return Object.freeze({ kind: "advance", state });
+    if (slot === -1) return Object.freeze({ kind: "advance", state: scannedState });
     // battle_util.c:3347-3373: changedPP = min(pp[slot] + param, CalculatePPWithBonus(move, ppBonuses, slot)); since
     // pp[slot] is 0 here (restorePpSlot's own gate) this is min(param, maxPP). Factory rentals are always built via
     // CreateMon/CreateMonWithEVSpreadNatureOTID (battle_factory.c:435,476,812), which zero ppBonuses -- ZeroMonData's
@@ -1394,29 +1402,29 @@ function runItemsTick(
     // ppreduce's own single source of truth) is patched, collapsing source's controller round trip into one atomic
     // tick, the same simplification already established for every other landed end-turn case (doc §6).
     const move = b.moves[slot]!;
-    const param = resolveBattleScriptBattlerHoldEffectParam(state.rulesContext, battler);
+    const param = resolveBattleScriptBattlerHoldEffectParam(scannedRules, battler);
     const maxPp = resolveBattleScriptMoveBasePp(move);
     const restoredPp = Math.min(param, maxPp);
     const pp = b.pp.map((value, index) => (index === slot ? restoredPp : value)) as unknown as BattleScriptRulesBattlerState["pp"];
-    const withPp = withBattler(state.rulesContext, battler, { pp });
+    const withPp = withBattler(scannedRules, battler, { pp });
     // ISSUES #72 batch 7 (STRINGID_PKMNSITEMRESTOREDPP): scriptingBattler is
     // the berry holder ({B_SCR_ACTIVE_NAME_WITH_PREFIX}/{B_LAST_ITEM}, same
     // shape the STAT_UP_BERRIES branch above already sets); battleTextBuff1Move
     // is the just-restored move ({B_BUFF1}), Spite's own tryspiteppreduceOpcode.ts
     // sibling field.
     const rc = Object.freeze({ ...withPp, scriptingBattler: battler, battleTextBuff1Move: move });
-    return runTickScript(program, handlers, state, rc, battler, BERRY_PP_HEAL_END2_LABEL);
+    return runTickScript(program, handlers, scannedState, rc, battler, BERRY_PP_HEAL_END2_LABEL);
   }
   const statUpStatId = STAT_UP_BERRIES.get(holdEffect);
   if (statUpStatId !== undefined) {
     if (moveTurn || b.hp > Math.floor(b.maxHP / STAT_UP_BERRY_HOLD_EFFECT_PARAM) || b.statStages[statUpStatId]! >= MAX_STAT_STAGE) {
-      return Object.freeze({ kind: "advance", state });
+      return Object.freeze({ kind: "advance", state: scannedState });
     }
     // battle_util.c:3244-3255/3429-3442 (SET_STATCHANGER(stat, 1, FALSE) = statId | (1 << 4)) -- Cmd_statbuffchange
     // itself reads this scratch field, so the +1 stage change happens inside the script, not here (unlike Speed
     // Boost's C-side bump: BattleScript_BerryStatRaiseEnd2 is opcode-driven).
     const rc = Object.freeze({
-      ...state.rulesContext,
+      ...scannedRules,
       statChanger: statUpStatId | (1 << 4),
       animArg1: STAT_ANIM_PLUS1 + statUpStatId,
       effectBattler: battler,
@@ -1426,17 +1434,17 @@ function runItemsTick(
       // held-item ticks above, which each set this explicitly.
       scriptingBattler: battler,
     });
-    return runTickScript(program, handlers, state, rc, battler, BERRY_STAT_RAISE_END2_LABEL);
+    return runTickScript(program, handlers, scannedState, rc, battler, BERRY_STAT_RAISE_END2_LABEL);
   }
   const zeroCarrierBarrier = ZERO_CARRIER_ITEM_BARRIERS.get(holdEffect);
   if (!moveTurn && zeroCarrierBarrier !== undefined) {
     return Object.freeze({
-      kind: "case-barrier", state,
+      kind: "case-barrier", state: scannedState,
       detail: `${zeroCarrierBarrier} (${holdEffect}): zero Factory L50 carriers in the complete 882-entry catalog `
         + "(docs/endturn-abilities-items-ground-truth.md §2b); source-real behavior intentionally barriered",
     });
   }
-  return Object.freeze({ kind: "advance", state });
+  return Object.freeze({ kind: "advance", state: scannedState });
 }
 
 /** Folds a fired/opcode-barrier `TickOutcome` into the battler loop's own result shape, uniformly across every ENDTURN_* tick. */

@@ -25,6 +25,7 @@ import type {
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import type { BattleScriptSelectionRejection } from "./battleScriptActionAdmission.ts";
 import {
+  battleStringReferencesToken,
   resolveBattleNameWithPrefix,
   resolveBattleStringLines,
   resolveMoveName,
@@ -1007,6 +1008,40 @@ function messageLines(
     throw new Error("battle resolution message resolver received a non-message event");
   }
   const { messageId } = event.payload;
+  // Keep this scalar outside resolver callbacks: TypeScript deliberately
+  // drops a discriminated-union narrowing through a captured property read.
+  const lastItemAtPrint = event.payload.lastItem;
+  // BattleStringExpandPlaceholders reads these two name selectors from
+  // independent globals at the print receipt: gEffectBattler and
+  // gBattleScripting.battler (battle_message.c:2444-2452). Build the shared
+  // overlay from the extracted source/charmap template instead of inferring a
+  // role from a nearby animation, status write, or a particular STRINGID.
+  // Branches below still own their extra substitution data; the fallback uses
+  // this overlay for every sibling whose only missing information is one of
+  // these source selectors.
+  const sourceSelectorResolvers: Record<string, () => string> = {};
+  if (
+    battleStringReferencesToken(messageId, "B_EFF_NAME_WITH_PREFIX")
+    && event.payload.effectBattler !== undefined
+  ) {
+    const effectBattler = singlesBattler(
+      event.payload.effectBattler,
+      `${messageId} effect battler`,
+    );
+    sourceSelectorResolvers.B_EFF_NAME_WITH_PREFIX = nameWithPrefixResolver(field, effectBattler);
+  }
+  if (
+    battleStringReferencesToken(messageId, "B_SCR_ACTIVE_NAME_WITH_PREFIX")
+    && event.payload.scriptingBattler !== undefined
+  ) {
+    const scriptingBattler = singlesBattler(
+      event.payload.scriptingBattler,
+      `${messageId} scripting battler`,
+    );
+    sourceSelectorResolvers.B_SCR_ACTIVE_NAME_WITH_PREFIX = nameWithPrefixResolver(field, scriptingBattler);
+  }
+  const itemNameAtPrint = (fallbackBattler: 0 | 1): string =>
+    factoryItemDisplayName(lastItemAtPrint ?? heldItems[fallbackBattler]);
   if (messageId === "STRINGID_USEDMOVE") {
     const pp = actionSnapshot === null ? ppEventAfter(events, eventIndex) : null;
     const battler = actionSnapshot === null
@@ -1613,7 +1648,7 @@ function messageLines(
     return resolveBattleStringLines(messageId, {
       B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
       B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
-      B_LAST_ITEM: () => factoryItemDisplayName(heldItems[defender]),
+      B_LAST_ITEM: () => itemNameAtPrint(defender),
     });
   }
   if (messageId === "STRINGID_PKMNSXMADEITINEFFECTIVE") {
@@ -1667,8 +1702,9 @@ function messageLines(
     // Spore's on-contact status block (battleScriptMoveEndOpcode.ts:447-608).
     // B_SCR_ACTIVE_* is the ability holder (applySetMoveEffect's
     // scriptingBattler, battleScriptHitChainOpcode.ts:2841-2848); B_EFF_* is
-    // the attacker who got statused, already tracked generically via
-    // pendingStatusMessageBattler below. ISSUES #70 batch 2 (docs/issue70-
+    // the attacker who got statused. Prefer the print-time gEffectBattler
+    // snapshot, retaining the old status-controller bridge only for staged
+    // receipts that predate it. ISSUES #70 batch 2 (docs/issue70-
     // stringid-reachability.md rows 4/23): gGotFrozenStringIds[1]/
     // gFellAsleepStringIds[1] share this exact template shape and the same
     // generic applySetMoveEffect(abilityEffectHitmarkerSet) dispatch tail
@@ -1678,20 +1714,18 @@ function messageLines(
     if (event.payload.scriptingBattler === undefined || event.payload.substitutions.length === 0) {
       throw new Error(`battle resolution ${messageId} message has no scripting-battler/ability substitution`);
     }
-    if (pendingStatusMessageBattler === null) {
-      throw new Error(`battle resolution ${messageId} message has no preceding status event`);
-    }
     const scriptingBattler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
-    const effectDisplayed = fieldBattler(field, pendingStatusMessageBattler);
+    const effectBattler = event.payload.effectBattler !== undefined
+      ? singlesBattler(event.payload.effectBattler, `${messageId} effect battler`)
+      : pendingStatusMessageBattler;
+    if (effectBattler === null) {
+      throw new Error(`battle resolution ${messageId} message has no effect-battler/preceding status event`);
+    }
     const ability = event.payload.substitutions[0]!;
     return resolveBattleStringLines(messageId, {
       B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, scriptingBattler),
       B_SCR_ACTIVE_ABILITY: () => ability,
-      B_EFF_NAME_WITH_PREFIX: () => resolveBattleNameWithPrefix({
-        side: pendingStatusMessageBattler === 0 ? "player" : "opponent",
-        isTrainerBattle: true,
-        nickname: effectDisplayed.name,
-      }),
+      B_EFF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, effectBattler),
     });
   }
   if (messageId === "STRINGID_PKMNSITEMCUREDPROBLEM") {
@@ -1703,16 +1737,19 @@ function messageLines(
     // captured pre-clear at both live call sites (battleScriptMoveEndOpcode.ts:
     // 793,811; battleEndTurnOrchestration.ts's HOLD_EFFECT_CURE_STATUS/
     // CURE_ATTRACT branches).
-    if (pendingHeldItemEffectBattler === null) {
-      throw new Error("battle resolution item-cured-problem message has no preceding held-item effect");
-    }
     if (event.payload.substitutions.length === 0) {
       throw new Error("battle resolution item-cured-problem message has no status substitution");
     }
+    const scriptingBattler = event.payload.scriptingBattler !== undefined
+      ? singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`)
+      : pendingHeldItemEffectBattler;
+    if (scriptingBattler === null) {
+      throw new Error("battle resolution item-cured-problem message has no scripting battler/preceding held-item effect");
+    }
     const statusName = event.payload.substitutions[0]!;
     return resolveBattleStringLines(messageId, {
-      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, pendingHeldItemEffectBattler),
-      B_LAST_ITEM: () => factoryItemDisplayName(heldItems[pendingHeldItemEffectBattler]),
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, scriptingBattler),
+      B_LAST_ITEM: () => itemNameAtPrint(scriptingBattler),
       B_BUFF1: () => statusName,
     });
   }
@@ -1743,7 +1780,7 @@ function messageLines(
     }
     return resolveBattleStringLines(messageId, {
       B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, scriptingBattler),
-      B_LAST_ITEM: () => factoryItemDisplayName(heldItems[scriptingBattler]),
+      B_LAST_ITEM: () => itemNameAtPrint(scriptingBattler),
     });
   }
   if (messageId === "STRINGID_PKMNENDUREDHIT") {
@@ -2058,7 +2095,7 @@ function messageLines(
       throw new Error(`battle resolution ${messageId} message has unknown stat ${lastStatChange.stat}`);
     }
     return resolveBattleStringLines(messageId, {
-      B_LAST_ITEM: () => factoryItemDisplayName(heldItems[scriptingBattler]),
+      B_LAST_ITEM: () => itemNameAtPrint(scriptingBattler),
       B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, scriptingBattler),
       B_BUFF1: () => statName,
       B_BUFF2: () => (lastStatChange.requestedMagnitude === 2 ? "sharply rose!" : "rose!"),
@@ -2592,7 +2629,7 @@ function messageLines(
     const moveName = event.payload.substitutions[0]!;
     return resolveBattleStringLines(messageId, {
       B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, scriptingBattler),
-      B_LAST_ITEM: () => factoryItemDisplayName(heldItems[scriptingBattler]),
+      B_LAST_ITEM: () => itemNameAtPrint(scriptingBattler),
       B_BUFF1: () => moveName,
     });
   }
@@ -2608,7 +2645,7 @@ function messageLines(
     return resolveBattleStringLines(messageId, {
       B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
       B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
-      B_LAST_ITEM: () => factoryItemDisplayName(heldItems[attacker]),
+      B_LAST_ITEM: () => itemNameAtPrint(attacker),
     });
   }
   if (messageId === "STRINGID_PKMNTRACED") {
@@ -2759,7 +2796,7 @@ function messageLines(
     const defender = requireMoveDefender(lastMoveAttacker, "hung-on-with message");
     return resolveBattleStringLines(messageId, {
       B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
-      B_LAST_ITEM: () => factoryItemDisplayName(heldItems[defender]),
+      B_LAST_ITEM: () => itemNameAtPrint(defender),
     });
   }
   if (messageId === "STRINGID_PKMNSAFEGUARDEXPIRED") {
@@ -2814,7 +2851,16 @@ function messageLines(
       B_BUFF1: () => magnitude,
     });
   }
-  const resolvers: Record<string, () => string> = {};
+  const resolvers: Record<string, () => string> = { ...sourceSelectorResolvers };
+  if (
+    battleStringReferencesToken(messageId, "B_LAST_ITEM")
+    && lastItemAtPrint !== undefined
+  ) {
+    // gLastUsedItem is frozen at Cmd_printstring. It is intentionally not
+    // reconstructed from a held-item animation: Scene OFF can skip that
+    // presentation receipt while the source string still prints the item.
+    resolvers.B_LAST_ITEM = () => factoryItemDisplayName(lastItemAtPrint);
+  }
   if (lastMoveAttacker !== null) {
     const displayed = fieldBattler(field, lastMoveAttacker);
     // Some effect scripts print their action-specific result after a
@@ -2827,7 +2873,10 @@ function messageLines(
       nickname: displayed.name,
     });
   }
-  if (pendingStatusMessageBattler !== null) {
+  if (
+    pendingStatusMessageBattler !== null
+    && resolvers.B_EFF_NAME_WITH_PREFIX === undefined
+  ) {
     const displayed = fieldBattler(field, pendingStatusMessageBattler);
     // SetMoveEffect's raw REQUEST_STATUS_BATTLE receipt precedes its result
     // text. Keep that target only until the next text receipt, so a
@@ -2845,17 +2894,21 @@ function messageLines(
     // for the same BS_ATTACKER/BS_SCRIPTING battler before printing its text.
     // Preserve that typed controller receipt as gBattleScripting.battler's
     // presentation owner; do not rediscover the owner from a move or species.
-    resolvers.B_SCR_ACTIVE_NAME_WITH_PREFIX = () => resolveBattleNameWithPrefix({
-      side: pendingHeldItemEffectBattler === 0 ? "player" : "opponent",
-      isTrainerBattle: true,
-      nickname: displayed.name,
-    });
+    if (resolvers.B_SCR_ACTIVE_NAME_WITH_PREFIX === undefined) {
+      resolvers.B_SCR_ACTIVE_NAME_WITH_PREFIX = () => resolveBattleNameWithPrefix({
+        side: pendingHeldItemEffectBattler === 0 ? "player" : "opponent",
+        isTrainerBattle: true,
+        nickname: displayed.name,
+      });
+    }
     // gLastUsedItem is the item which fired, before the later removeitem
     // controller receipt consumes it. `heldItems` starts at the segment's
     // reducer boundary and follows any typed item writes in event order.
-    resolvers.B_LAST_ITEM = () => factoryItemDisplayName(
-      heldItems[pendingHeldItemEffectBattler],
-    );
+    if (resolvers.B_LAST_ITEM === undefined) {
+      resolvers.B_LAST_ITEM = () => factoryItemDisplayName(
+        heldItems[pendingHeldItemEffectBattler],
+      );
+    }
   }
   return resolveBattleStringLines(messageId, resolvers);
 }
