@@ -1648,43 +1648,56 @@ export function advanceFactoryRoundBattleResolution(
     if (selector === null) {
       return fail("forced-party handoff has no request-owned selector");
     }
-    if (selector.sendOutElapsed !== null) {
-      const history = state.aiHistory;
-      if (history === null) {
-        return fail("forced-party continuation requires live AI history");
-      }
-      const submitted = submitPartySelectBattleDecision(
-        resolution.pendingBattle,
-        selector,
-        reduceFactoryFullTurnDecision,
-      );
-      if (submitted === null) {
-        return fail("confirmed forced-party selector did not submit a decision");
-      }
-      const receipt = driveTrainerBoundary(state, submitted, history);
-      const appended = appendBattleResolutionContinuation({
-        resolution,
-        transition: transitionFromDriveReceipt(receipt),
-        fieldBoundary:
-          createBattleResolutionPresentationRenderView(resolution).field,
-      });
+    // Advance the selector FIRST, then submit within the SAME tick the SEND
+    // OUT confirm registers: every rendered state must keep the selector's
+    // confirmation clock and the published switch-in lifecycle in lockstep.
+    // The former submit-one-tick-later shape left a state with
+    // `sendOutElapsed` set but no appended continuation, which
+    // `renderBattleResolutionForcedPartySelect`'s typed guard
+    // (battleScene.ts) correctly refuses to draw -- and the browser renders
+    // every tick, so every live forced-switch confirm crashed on that frame
+    // (soak signature 5, docs/soak-crash-catalog.md §5).
+    const advanced = selector.sendOutElapsed === null
+      ? advancePartySelect(selector, newKeys)
+      : selector;
+    if (advanced.sendOutElapsed === null) {
       return Object.freeze({
         ...state,
-        battle: receipt.battle,
-        battleResolutionPresentation: appended,
-        moveSelectionCursors: resetMoveSelectionCursorsForSwitchIns(
-          state.moveSelectionCursors,
-          resolution.pendingBattle,
-          receipt.battle,
-        ),
-        aiHistory: receipt.history,
-        facilityRngCalls:
-          state.activeBattleCallStart! + receipt.battle.rng.calls,
+        battleForcedPartySelect: advanced,
       });
     }
+    const history = state.aiHistory;
+    if (history === null) {
+      return fail("forced-party continuation requires live AI history");
+    }
+    const submitted = submitPartySelectBattleDecision(
+      resolution.pendingBattle,
+      advanced,
+      reduceFactoryFullTurnDecision,
+    );
+    if (submitted === null) {
+      return fail("confirmed forced-party selector did not submit a decision");
+    }
+    const receipt = driveTrainerBoundary(state, submitted, history);
+    const appended = appendBattleResolutionContinuation({
+      resolution,
+      transition: transitionFromDriveReceipt(receipt),
+      fieldBoundary:
+        createBattleResolutionPresentationRenderView(resolution).field,
+    });
     return Object.freeze({
       ...state,
-      battleForcedPartySelect: advancePartySelect(selector, newKeys),
+      battle: receipt.battle,
+      battleResolutionPresentation: appended,
+      battleForcedPartySelect: advanced,
+      moveSelectionCursors: resetMoveSelectionCursorsForSwitchIns(
+        state.moveSelectionCursors,
+        resolution.pendingBattle,
+        receipt.battle,
+      ),
+      aiHistory: receipt.history,
+      facilityRngCalls:
+        state.activeBattleCallStart! + receipt.battle.rng.calls,
     });
   }
   if (resolution.lifecycle.phase === "presenting-switch-in") {

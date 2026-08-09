@@ -13,6 +13,7 @@ import { PARTY_SELECT_CLOSE_MENU_FRAMES } from "../src/engine/battlePartySelect.
 import { createFactoryAiBattleHistory } from "../src/engine/factoryAiLiveDriver.ts";
 import { createBattleResolutionPresentation } from "../src/engine/battleResolutionPresentation.ts";
 import { createBattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
+import { renderBattleResolutionForcedPartySelect } from "../src/engine/battleScene.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../src/engine/battleScriptSourceConstants.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
 import { createFreshFactoryBattle } from "../src/engine/factoryBattleStart.ts";
@@ -783,9 +784,29 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(state.battleForcedPartySelect?.submenuOpen).toBe(true);
     state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
     expect(state.battleForcedPartySelect?.sendOutElapsed).toBe(0);
+    // Soak signature 5 (docs/soak-crash-catalog.md §5): the confirm tick
+    // itself must publish the switch-in lifecycle in lockstep with the
+    // selector's confirmation clock -- the browser renders every tick, and
+    // the former submit-one-tick-later shape made this exact state throw
+    // "forced send-out render requires the matching typed player switch-in
+    // lifecycle" on every live forced-switch confirm.
+    expect(state.battleResolutionPresentation?.lifecycle).toEqual({
+      phase: "presenting-switch-in",
+      phaseElapsed: 0,
+    });
+    expect(() => renderBattleResolutionForcedPartySelect(
+      new Uint8Array(240 * 160 * 4),
+      createBattleResolutionPresentationRenderView(
+        state.battleResolutionPresentation!,
+      ),
+      state.battleForcedPartySelect!,
+    )).not.toThrow();
     state = advanceFactoryRoundBattleResolution(state);
-    expect(state.battleResolutionPresentation?.lifecycle.phase)
-      .toBe("presenting-switch-in");
+    expect(state.battleResolutionPresentation?.lifecycle).toEqual({
+      phase: "presenting-switch-in",
+      phaseElapsed: 1,
+    });
+    expect(state.battleForcedPartySelect?.sendOutElapsed).toBe(1);
     expect(state.battleResolutionPresentation?.segments).toHaveLength(3);
     expect(state.battleResolutionPresentation?.forcedRequest).toBeNull();
 
