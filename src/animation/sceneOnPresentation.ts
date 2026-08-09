@@ -720,6 +720,7 @@ export interface SceneOnPresentationBattler {
     | "ONIX"
     | "DROWZEE"
     | "KRABBY"
+    | "CRAWDAUNT"
     | "SURSKIT"
     | "KOFFING"
     | "MAGNETON"
