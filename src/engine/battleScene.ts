@@ -970,6 +970,7 @@ import {
   sceneOnNeedleArmView,
   sceneOnSandstormView,
   sceneOnDragonClawView,
+  sceneOnFireSpinView,
   sceneOnMetalClawView,
   sceneOnCrunchView,
   sceneOnSlashView,
@@ -35531,6 +35532,114 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "ALTARIA used" : "Foe ALTARIA used",
       "DRAGON CLAW!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FIRE_SPIN") {
+    const view = sceneOnFireSpinView(state);
+    // Sprite callbacks and task OAM writes latch on the next displayed
+    // frame. The source body itself remains a source-relative reducer.
+    const displayed = sceneOnFireSpinView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "CHARMELEON"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CHARMELEON"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FIRE_SPIN pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? charmeleonBackSprite : charmeleonFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    // The target starts at its normal front-idle x2. The task claims x2 at
+    // source age 4; its x-coordinate transfer reaches scanout at age 5.
+    const targetIdle = playerToOpponent && state.age < 5
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2 + view.displayedTargetOffset.y2,
+    );
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    // `createsprite ..., ANIM_TARGET, 2` assigns target-subpriority -2.
+    // Equal-subpriority vortices sort by descending OAM Y, so draw their
+    // center Y order back-to-front before the lower-subpriority foreground.
+    const drawVortices = () => {
+      const vortices = [...displayed.fireSpin].sort((a, b) =>
+        (a.y + a.y2 - 16) - (b.y + b.y2 - 16) || a.spawnAge - b.spawnAge);
+      for (const vortex of vortices) {
+        drawSpriteSheet(
+          fb,
+          subTileset(
+            dragonClawArt.smallEmber.tileset,
+            vortex.animationFrame * 4,
+            4,
+          ),
+          dragonClawArt.smallEmber.palette,
+          vortex.x + vortex.x2 - 16,
+          vortex.y + vortex.y2 - 16,
+        );
+      }
+    };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (playerToOpponent) {
+      drawTarget();
+      drawVortices();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawVortices();
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "CHARMELEON";
+    const playerSpecies = playerToOpponent ? "CHARMELEON" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CHARMELEON used" : "Foe CHARMELEON used",
+      "FIRE SPIN!",
       99,
     );
     return;

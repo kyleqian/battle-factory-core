@@ -1278,6 +1278,33 @@
    ]
   },
   {
+   "move": "MOVE_FIRE_SPIN",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage real Factory set-175 CHARMELEON with all active choices constrained to FIRE SPIN against a legal ONIX target constrained to TACKLE, in both player-back and opponent-front orientations",
+    "pointer-bounded MOVE_FIRE_SPIN/FireSpinEffect dense windows include every move-owned active frame plus first inactive cleanup: player-back oracle frames 80-183 and opponent-front 84-187, 104/104 source/seam/component and raw-RGB framebuffer frames in each orientation",
+    "the pure source-relative reducer ports ANIM_TAG_SMALL_EMBER, SE_M_SACRED_FIRE2 target pan, all three FireSpinEffect calls and their six literal gFireSpinSpriteTemplate/AnimParticleInVortex rows, target-side AnimTask_ShakeMon(0,2,47,1), source OAM-Y painter order, source asset reuse, field chrome, text, healthboxes, and cleanup",
+    "the narrow typed Scene-ON seam and compositor preserve the distinct one-display vortex latch, the two-display ShakeMon cadence, and the task initializer's one-frame displayed {0,2} transient without absolute trace ticks or gameplay ownership",
+    "both Fire Spin portables pass twice fresh at 104/104 source/component and 104/104 full RGB framebuffer frames; the mandatory shared gFireSpinSpriteTemplate control DRAGON_CLAW remains exact at 137/137 source/component and 137/137 framebuffer frames in both orientations",
+    "no damage, trapping, RNG, turn order, controller, round/facility state, animation-boundary list, unsupported barrier, or canonical-recording allowlist changed; FIRE_BLAST remains independently unsupported"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-fire-spin-player-charmeleon-opponent-onix.json",
+    "tools/battle-lab/mechanic-fire-spin-opponent-charmeleon-player-onix.json",
+    "tools/compare/fixtures/fire-spin-player-charmeleon-opponent-onix.json",
+    "tools/compare/fixtures/fire-spin-opponent-charmeleon-player-onix.json",
+    "tools/compare/fireSpinProbe.py",
+    "tools/compare/fireSpinPortable.ts",
+    "src/animation/fireSpin.ts",
+    "src/animation/dragonClaw.ts",
+    "src/animation/assets/dragon-claw.json",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/fireSpin.test.ts",
+    "tests/animation/dragonClaw.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_FLAMETHROWER",
    "status": "exact",
    "covered": [

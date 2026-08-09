@@ -1,0 +1,36 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-fire-spin-opponent-charmeleon-player-onix.json",
+  "probe": "tools/compare/fireSpinProbe.py",
+  "pair": "CHARMELEON legal Level-50 Factory set-175 opponent-front -> ONIX player-back",
+  "move": "FIRE_SPIN",
+  "denseWindow": {"startFrame": 84, "endFrame": 187},
+  "appStage": {"presentationAge": 0},
+  "attacker": {
+    "species": "CHARMELEON",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x": 144, "y": 17},
+      "animationCenter": {"x": 176, "y": 49},
+      "battlePositionCenter": {"x": 176, "y": 40}
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x": 40, "y": 48},
+      "animationCenter": {"x": 72, "y": 88},
+      "battlePositionCenter": {"x": 72, "y": 80}
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "playerMaxHp": 117,
+    "opponentHp": 151,
+    "opponentMaxHp": 151,
+    "playerGender": "male",
+    "opponentGender": "male"
+  }
+}

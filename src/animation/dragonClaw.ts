@@ -1,5 +1,8 @@
 import { horizontalLungeX2AtTick } from "./horizontalLunge.ts";
-import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
+import {
+  fireSpinVortexSpritesAtAge,
+  type FireSpinVortexSprite,
+} from "./fireSpin.ts";
 
 export const DRAGON_CLAW_BODY_FIRST_FRAME = 82;
 export const DRAGON_CLAW_END_AGE = 136;
@@ -10,16 +13,7 @@ export interface DragonClawGeometry {
   readonly targetCenter: Readonly<{ x: number; y: number }>;
 }
 
-export interface DragonClawFireSpin {
-  readonly spawnAge: number;
-  readonly x: number;
-  readonly y: number;
-  readonly x2: number;
-  readonly y2: number;
-  readonly remaining: number;
-  readonly angle: number;
-  readonly animationFrame: number;
-}
+export type DragonClawFireSpin = FireSpinVortexSprite;
 
 export interface DragonClawSlash {
   readonly spawnAge: number;
@@ -46,55 +40,15 @@ export interface DragonClawState {
   readonly soundEvents: readonly DragonClawSoundEvent[];
 }
 
-interface FireSpawn {
-  readonly age: number;
-  readonly y: number;
-  readonly velocityY: number;
-  readonly duration: number;
-  readonly angleStep: number;
-  readonly amplitude: number;
-}
-
-const FIRE_PATTERN = [
-  { y: 28, velocityY: 528, duration: 30, angleStep: 13, amplitude: 50 },
-  { y: 32, velocityY: 480, duration: 20, angleStep: 16, amplitude: -46 },
-  { y: 33, velocityY: 576, duration: 20, angleStep: 8, amplitude: 42 },
-  { y: 31, velocityY: 400, duration: 25, angleStep: 11, amplitude: -42 },
-  { y: 28, velocityY: 512, duration: 25, angleStep: 16, amplitude: 46 },
-  { y: 33, velocityY: 464, duration: 30, angleStep: 15, amplitude: -50 },
-] as const;
-
-// Script-interpreter `delay 2` advances four captured frames in this
-// controller window. These ages are therefore derived from the command
-// sequence, not fitted from sprite coordinates.
-const FIRE_SPAWNS: readonly FireSpawn[] = [
-  ...[1, 25].flatMap((base) =>
-    FIRE_PATTERN.map((entry, index) => ({ age: base + index * 4, ...entry }))),
-  ...[49, 73].flatMap((base) =>
-    FIRE_PATTERN.map((entry, index) => ({ age: base + index * 4, ...entry }))),
-];
-
-const sin = (angle: number, amplitude: number): number =>
-  (GBA_SINE_TABLE_256[angle & 0xff]! * amplitude) >> 8;
-
 export function dragonClawFireSpinAtAge(
   age: number,
   geometry: DragonClawGeometry,
 ): readonly DragonClawFireSpin[] {
-  return FIRE_SPAWNS.flatMap((spawn) => {
-    const callback = age - spawn.age + 1;
-    if (callback <= 0 || callback > spawn.duration) return [];
-    return [{
-      spawnAge: spawn.age,
-      x: geometry.attackerCenter.x,
-      y: geometry.attackerCenter.y + spawn.y,
-      x2: sin((callback - 1) * spawn.angleStep, spawn.amplitude),
-      y2: -((callback * spawn.velocityY) >> 8),
-      remaining: spawn.duration - callback,
-      angle: (callback * spawn.angleStep) & 0xff,
-      animationFrame: Math.floor(callback / 4) % 5,
-    }];
-  });
+  return fireSpinVortexSpritesAtAge(
+    age,
+    geometry.attackerCenter,
+    [1, 25, 49, 73],
+  );
 }
 
 export function dragonClawSlashesAtAge(
