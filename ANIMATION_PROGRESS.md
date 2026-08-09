@@ -1,5 +1,12 @@
 # Animation coverage
 
+## MOVE_SLEEP_TALK exact — bilateral 186/189 production promotion (2026-08-09 worker)
+
+- **State:** Coverage advances **140→141/276 exact**, 0 partial, 0 staged, **136→135 unsupported**. Sleep Talk alone moves; the animation boundary and unsupported barrier remain unchanged.
+- **Did:** Added the narrow source-relative Scene-ON compositor for SEAKING front/back, all nine `gLetterZSpriteTemplate` sprites, source affine/OAM/subpriority/slot order, side-specific `AnimTask_SwayMon`, LETTER_Z art, field chrome, and cleanup. Independently measured Letter-Z at software age−1, SwayMon at task age−2, and the source `gMonBackPicCoords` placement; extended the existing portable with production framebuffer checks.
+- **Verified:** Twice fresh, player-back frames **1356..1541 = 186/186** and opponent-front **4570..4758 = 189/189** pass source/hardware/seam/raw-RGB/framebuffer equality. REST remains bilateral **110/110** twice fresh; its metadata receipts refresh to `747ad02e…` / `2004fa6c…` after the shared probe gained Sleep Talk fields, while raw RGB stays byte-identical. Focused **17/17** and typecheck pass.
+- **Next:** Supervisor selects the next independent move. Do not infer Sleep Talk's distinct latches or `gLetterZSpriteTemplate` affine body for REST or another move.
+
 ## MOVE_SLEEP_TALK reducer + typed Scene-ON seam checkpoint — remains unsupported (2026-08-09 worker)
 
 - **State:** Coverage remains **140/276 exact**, 0 partial, 0 staged, **136 unsupported**; no compositor, framebuffer claim, boundary, barrier, gameplay, controller, or facility state changed.

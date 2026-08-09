@@ -2486,12 +2486,12 @@
    "move": "MOVE_REST",
    "status": "exact",
    "covered": [
-    "fresh complete legal challenge-0 Level-50 set-117 TEDDIURSA versus ONIX Scene-ON parties pass the entire 110-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 334-443 reproduce evidence 8f482a75532d55a5518581b5cebe02b69741dbe913b87dafd4637dc79d68d9c6 / raw RGB 3a9f0a794e93bbb68b485748733866ed27477d59577b7a4905642dd7655f2d63 and opponent-front frames 338-447 reproduce evidence 24fd57122beb8e307e02bd6e9d427ece5c602c2188f0b47f847ba1593ea082d3 / raw RGB 6caad649f87c5bef7bc1098629addf19981c7ce4ed9d2db4dc0f1e8d25e86a67",
+    "fresh complete legal challenge-0 Level-50 set-117 TEDDIURSA versus ONIX Scene-ON parties pass the entire 110-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 334-443 reproduce evidence 747ad02e7af670dc0f33c0333d4378961e5d7a4d96ae841574190d63ec16f0ec / raw RGB 3a9f0a794e93bbb68b485748733866ed27477d59577b7a4905642dd7655f2d63 and opponent-front frames 338-447 reproduce evidence 2004fa6cd6fd01c5fd0a50558405783909984431c5d08b9433f4670c52380d03 / raw RGB 6caad649f87c5bef7bc1098629addf19981c7ce4ed9d2db4dc0f1e8d25e86a67; only the metadata receipt hashes refresh for metronomeProbe.py's later Sleep Talk fields, while both framebuffer windows remain byte-identical",
     "the source audit proves set 117 FRONTIER_MON_TEDDIURSA is the lowest suitable challenge-0 Level-50 carrier and pins species 216, move 156, Relaxed nature, Attack/HP spread, Chesto Berry, and complete legal three-Pokemon parties",
     "the pure source-relative reducer ports ANIM_TAG_LETTER_Z load/free, attacker-panned SE_M_SNORE, all three staggered gSleepLetterZSpriteTemplate spawns, AnimSleepLetterZ initialization, AnimSleepLetterZ_Step fixed-point ascent, side-dependent affine programs, OAM/VBlank display latches, 60-frame callbacks, waits, and first inactive cleanup",
     "the typed Scene-ON seam carries only resolved TEDDIURSA/ONIX presentation geometry and immutable sleep/status/pending-heal field state; source-extracted Teddiursa front/back and LETTER_Z art plus shared ONIX/chrome pass source/software sprite state, hardware OAM and matrices, tags/palettes/buffers, registers, audio, raw RGB, and every production framebuffer without owning the Rest outcome",
     "restPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 110 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations through first inactive cleanup; the shared Metronome compositor control remains 127/127 exact twice fresh in both orientations",
-    "MOVE_SLEEP_TALK remains unsupported: complete legal set-333 SEAKING parties stage sleep through real REST and twice-fresh pointer-bounded Scene-ON probes prove its distinct nine gLetterZSpriteTemplate/AnimLetterZ lifecycles plus AnimTask_SwayMon body, hardware/audio/raw-RGB state, and cleanup over player-back 1356-1541 (186 frames) and opponent-front 4570-4758 (189 frames); its pure 186/189-age reducer, typed seam, and no-pixel dense receipt comparator are now load-bearing, but it still lacks a production compositor and framebuffer acceptance",
+    "MOVE_SLEEP_TALK is now independently exact and REST remains the distinct gSleepLetterZSpriteTemplate control; restPortable.ts passes 110/110 in both orientations twice fresh after the shared LETTER_Z asset catalog gained source-derived SEAKING art",
     "no Rest healing, sleep outcome or duration, damage, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
    ],
    "evidence": [
@@ -2519,6 +2519,34 @@
     "tests/animation/restEvidence.test.ts",
     "tests/animation/restAssets.test.ts",
     "tests/animation/rest.test.ts",
+    "tests/animation/sleepTalk.test.ts",
+    "tests/animation/sleepTalkEvidence.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_SLEEP_TALK",
+   "status": "exact",
+   "covered": [
+    "complete legal challenge-2 Level-50 set-333 SEAKING parties stage sleep through real REST and pass the pointer-bounded Scene-ON body through first inactive cleanup twice fresh: player-back frames 1356-1541 are 186/186 and opponent-front frames 4570-4758 are 189/189 source, software/hardware OAM and matrix, typed seam, audio-independent raw-RGB, and shared production framebuffer exact",
+    "the pure source-relative reducer ports all nine gLetterZSpriteTemplate/AnimLetterZ lifecycles, three staggered source groups, side-relative fixed-point motion and unsigned offscreen destruction, the complete repeating affine program, source slots 3/4/5/7/9/10, ANIM_TAG_LETTER_Z lifetime, three SE_M_SNORE cues, and side-specific AnimTask_SwayMon through first inactive cleanup",
+    "the narrow battleScene compositor uses source-extracted SEAKING front/back art and shared LETTER_Z art, source SortSprites wrapped-Y/OAM order, target-relative subpriority in front of both battlers, player-back gMonBackPicCoords placement, front-species idle behavior, field chrome, and independent display latches: Letter-Z at software age minus one and SwayMon at task age minus two",
+    "sleepTalkPortable.ts retains every prior reducer, seam, hardware, register, tag, audio and raw-RGB assertion and adds all 186/189 production framebuffer comparisons without absolute battle ticks, baked sprite frames, coordinate/RGB fitting, capture thinning, or ownership of Sleep Talk move selection, status, damage, RNG, turn, round, or facility state",
+    "MOVE_REST remains independently exact at 110/110 twice fresh in both orientations; its gSleepLetterZSpriteTemplate callback, affine body, and latches were not inherited by Sleep Talk"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-sleep-talk-player-seaking-opponent-onix.json",
+    "tools/battle-lab/mechanic-sleep-talk-opponent-seaking-player-onix.json",
+    "tools/compare/fixtures/sleep-talk-player-seaking-opponent-onix.json",
+    "tools/compare/fixtures/sleep-talk-opponent-seaking-player-onix.json",
+    "tools/compare/evidence/sleep-talk-changemap-player.txt",
+    "tools/compare/evidence/sleep-talk-changemap-opponent.txt",
+    "tools/compare/sleepTalkSourceAudit.ts",
+    "tools/compare/sleepTalkPortable.ts",
+    "tools/compare/extractRestAssets.ts",
+    "src/animation/assets/rest.json",
+    "src/animation/sleepTalk.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
     "tests/animation/sleepTalk.test.ts",
     "tests/animation/sleepTalkEvidence.test.ts"
    ]
@@ -3883,7 +3911,7 @@
     "MOVE_REST",
     "MOVE_SLEEP_TALK"
    ],
-   "goal": "MOVE_REST independently proves its complete 110-frame source body through first inactive cleanup at 110/110 source/component, typed-seam, software/hardware OAM and matrix, tag/palette/buffer, register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh using legal challenge-0 set-117 TEDDIURSA parties. MOVE_SLEEP_TALK now has twice-fresh independent complete legal bilateral dense evidence, a source-relative reducer, typed seam, and deterministic no-pixel comparator for its nine gLetterZSpriteTemplate/AnimLetterZ lifecycles and AnimTask_SwayMon body (186 player-back / 189 opponent-front frames), but remains unsupported pending its production compositor and complete framebuffer acceptance."
+   "goal": "Track complete. MOVE_REST independently proves its distinct gSleepLetterZSpriteTemplate body at 110/110 in both orientations twice fresh. MOVE_SLEEP_TALK independently proves all nine gLetterZSpriteTemplate/AnimLetterZ lifecycles, side-specific AnimTask_SwayMon, source affine/OAM/subpriority/slot order, SEAKING front/back and field chrome through complete 186/186 player-back and 189/189 opponent-front source/seam/hardware/raw-RGB/shared-framebuffer windows twice fresh."
   },
   {
    "id": "flying-dirt-sandstorm",
