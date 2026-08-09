@@ -5,6 +5,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1040 — [bounded MAIN worker, 2026-08-09] **Gate-6 state-family behavior evidence in progress**
+
+- **State:** real reducers already cover the five missing manifest rows; focused Tier-1 behavior now proves them, while the generated manifest remains **50/55** until the narrow evidence mapping is added and regenerated.
+- **Did:** strengthened the real interpreter/end-turn suites for status3 crit suppression (zero-draw would-crit), Leech Seed marker/low-bit owner/drain plus Rapid Spin cleanup, Yawn countdown/expiry, and Light Screen's shared wore-off message/buffer/re-set continuation.
+- **Next:** add a transparent five-row behavior-evidence map to the report, pin its manifest contract, regenerate the artifacts, then run the required focused/smoke/full/build checks.
+- **Notes:** focused reducer suites are **4 files / 509 tests** green; the prior smoke baseline is **375/375**. No production mechanics, oracle receipts, barriers/imports, or animation files changed.
+
+---
+
 ## 1039 — [supervisor, 2026-08-09] **#84 accepted; compact Gate-6 receipts complete**
 
 - **State:** the five reported generated-round defects are repaired and #84

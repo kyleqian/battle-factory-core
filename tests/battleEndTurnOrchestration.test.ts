@@ -12,6 +12,13 @@ import {
 import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
 import { runBattleEndTurnOrchestration } from "../src/engine/battleEndTurnOrchestration.ts";
 import { resolveSingleBattlePosition } from "../src/engine/battleScriptBattlerPositions.ts";
+import {
+  BATTLE_SCRIPT_STATUS3_LEECHSEED,
+  BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK,
+  BATTLE_SCRIPT_STATUS3_YAWN,
+  BATTLE_SCRIPT_STATUS3_YAWN_TURN_1,
+  BATTLE_SCRIPT_STATUS3_YAWN_TURN_2,
+} from "../src/engine/battleScriptSourceConstants.ts";
 import frontierHeldItemsData from "../src/data/gen/battle-frontier-held-items.json" with { type: "json" };
 import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 
@@ -36,7 +43,6 @@ const STATUS3_ROOTED = 1 << 10;
 const STATUS3_CHARGED_UP = 1 << 9;
 const STATUS3_ALWAYS_HITS_TURN_1 = 1 << 3;
 const STATUS3_ALWAYS_HITS_TURN_2 = 2 << 3;
-const STATUS3_LEECHSEED = 1 << 2;
 const STATUS2_WRAPPED_MASK = (1 << 13) | (1 << 14) | (1 << 15);
 /** include/abilities.h:68. */
 const ABILITY_LIQUID_OOZE = 64;
@@ -81,9 +87,9 @@ const STAT_ATK = 1;
 const STAT_SPEED = 3;
 const STAT_SPATK = 4;
 /** include/constants/battle.h:168-169 -- STATUS3_YAWN's 2-bit turn counter (bits 11-12), docs/yawn-thrash-endturn-design.md §2. */
-const STATUS3_YAWN_MASK = (1 << 11) | (1 << 12);
-const STATUS3_YAWN_TURN_1 = (1 << 11) & STATUS3_YAWN_MASK;
-const STATUS3_YAWN_TURN_2 = (2 << 11) & STATUS3_YAWN_MASK;
+const STATUS3_YAWN_MASK = BATTLE_SCRIPT_STATUS3_YAWN;
+const STATUS3_YAWN_TURN_1 = BATTLE_SCRIPT_STATUS3_YAWN_TURN_1;
+const STATUS3_YAWN_TURN_2 = BATTLE_SCRIPT_STATUS3_YAWN_TURN_2;
 /** include/constants/abilities.h -- same ids as Rung 1's `JUMPIFABILITY_VALUES` widening. */
 const ABILITY_VITAL_SPIRIT = 72;
 const ABILITY_INSOMNIA = 15;
@@ -706,7 +712,7 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
     const rc = context({
       battlers: [
         battler({ side: 0, hp: 100, maxHP: 200, partyIndex: 0 }), // seeder (player, battler 0)
-        battler({ side: 1, hp: 170, maxHP: 170, status3: STATUS3_LEECHSEED | 0, partyIndex: 2 }), // seeded, seeder id 0
+        battler({ side: 1, hp: 170, maxHP: 170, status3: BATTLE_SCRIPT_STATUS3_LEECHSEED | 0, partyIndex: 2 }), // seeded, seeder id 0
         battler({ side: 0 }),
         battler({ side: 1 }),
       ],
@@ -718,7 +724,37 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
     expect(result.kind).toBe("next-turn");
     expect(result.state.rulesContext.battlers[1]!.hp).toBe(149); // 170 - floor(170/8) = 170 - 21
     expect(result.state.rulesContext.battlers[0]!.hp).toBe(121); // seeder gains the same 21
-    expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_LEECHSEED).not.toBe(0);
+    expect(result.state.rulesContext.battlers[1]!.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED).toBe(BATTLE_SCRIPT_STATUS3_LEECHSEED);
+    expect(result.state.rulesContext.battlers[1]!.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK).toBe(0);
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
+  });
+
+  it("Leech Seed end-turn decodes a nonzero encoded seeder owner and retains the seed lifecycle bit", () => {
+    const rc = context({
+      battlers: [
+        battler({
+          side: 0,
+          hp: 170,
+          maxHP: 170,
+          status3: BATTLE_SCRIPT_STATUS3_LEECHSEED | 1,
+          partyIndex: 0,
+        }), // seeded player battler, low bits name opponent battler 1 as its seeder
+        battler({ side: 1, hp: 100, maxHP: 200, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      party: { player: sixSlots(170), opponent: sixSlots(0, 0, 100) },
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+    const initial = scratchState(rc, 0);
+    const result = runBattleEndTurnOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("next-turn");
+    if (result.kind !== "next-turn") throw new Error("expected next-turn");
+    const seeded = result.state.rulesContext.battlers[0]!;
+    expect(seeded.hp).toBe(149); // 170 - floor(170/8)
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(121); // drain heals battler selected by low bits, not the target role
+    expect(seeded.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED).toBe(BATTLE_SCRIPT_STATUS3_LEECHSEED);
+    expect(seeded.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK).toBe(1);
     expect(result.state.rng.calls).toBe(initial.rng.calls);
   });
 
@@ -726,7 +762,7 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
     const rc = context({
       battlers: [
         battler({ side: 0, hp: 100, maxHP: 200, partyIndex: 0 }), // seeder
-        battler({ side: 1, hp: 170, maxHP: 170, status3: STATUS3_LEECHSEED | 0, ability: ABILITY_LIQUID_OOZE, partyIndex: 2 }), // seeded, has Liquid Ooze
+        battler({ side: 1, hp: 170, maxHP: 170, status3: BATTLE_SCRIPT_STATUS3_LEECHSEED | 0, ability: ABILITY_LIQUID_OOZE, partyIndex: 2 }), // seeded, has Liquid Ooze
         battler({ side: 0 }),
         battler({ side: 1 }),
       ],

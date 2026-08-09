@@ -23,6 +23,7 @@ import {
   SET_MOVE_EFFECT_SUPPORTED_BYTES,
   calculateBattleScriptBaseDamageForCurrentMove,
 } from "../src/engine/battleScriptHitChainOpcode.ts";
+import { BATTLE_SCRIPT_STATUS3_CANT_SCORE_A_CRIT } from "../src/engine/battleScriptSourceConstants.ts";
 import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 
 const program = loadBattleScriptProgram();
@@ -1071,6 +1072,16 @@ describe("production critcalc (Cmd_critcalc) dispatch", () => {
   it("Battle Armor: immune, consumes zero RNG (the C && chain short-circuits before Random())", () => {
     const rc = context(0, {}, {}, { ability: ABILITY_BATTLE_ARMOR });
     const seed = rngValueBeforeU16(3760); // would crit if rolled
+    const { result } = stepFrom("BattleScript_HitFromCritCalc", rc, seed);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rng.calls).toBe(0);
+    expect(result.state.rulesContext.critMultiplier).toBe(1);
+  });
+
+  it("STATUS3_CANT_SCORE_A_CRIT short-circuits a would-crit roll without consuming RNG", () => {
+    const rc = context(0, { status3: BATTLE_SCRIPT_STATUS3_CANT_SCORE_A_CRIT });
+    const seed = rngValueBeforeU16(3760); // would crit at the ordinary 1-in-16 stage
     const { result } = stepFrom("BattleScript_HitFromCritCalc", rc, seed);
     expect(result.kind).toBe("advanced");
     if (result.kind !== "advanced") throw new Error("expected advance");

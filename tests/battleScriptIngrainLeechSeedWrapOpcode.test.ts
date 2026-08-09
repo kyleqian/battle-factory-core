@@ -12,6 +12,10 @@ import {
   resolveBattleScriptLabel,
 } from "../src/engine/battleScriptProgram.ts";
 import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
+import {
+  BATTLE_SCRIPT_STATUS3_LEECHSEED,
+  BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK,
+} from "../src/engine/battleScriptSourceConstants.ts";
 
 const program = loadBattleScriptProgram();
 
@@ -21,7 +25,6 @@ const MOVE_LEECH_SEED = 73;
 const MOVE_WRAP = 35;
 /** include/constants/battle.h:158-159,167. */
 const STATUS3_ROOTED = 1 << 10;
-const STATUS3_LEECHSEED = 1 << 2;
 /** include/constants/battle.h:310. */
 const MOVE_EFFECT_CERTAIN = 1 << 7;
 const MOVE_EFFECT_WRAP = 13;
@@ -142,6 +145,20 @@ function runUntilLabel(
   return { execution, result, steps };
 }
 
+function stepAtOpcode(opcodeName: string, rulesContext: BattleScriptRulesContext) {
+  const instruction = program.instructions.find((candidate) => candidate.opcodeName === opcodeName);
+  if (!instruction) throw new Error(`committed Battle Script program has no ${opcodeName}`);
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_EffectHit",
+    rulesContext,
+    1,
+    externalPorts(),
+  );
+  const patched = Object.freeze({ ...execution.state, programCounter: instruction.programCounter });
+  return { execution, result: stepBattleScriptMachine(program, patched, execution.handlers) };
+}
+
 describe("Ingrain setter (BattleScript_EffectIngrain / Cmd_trysetroots)", () => {
   it("not yet rooted: trysetroots sets STATUS3_ROOTED, reaches BattleScript_MoveEnd, zero RNG", () => {
     const rc = context({ moves: [MOVE_INGRAIN, 0, 0, 0] }, { currentMove: MOVE_INGRAIN });
@@ -165,14 +182,14 @@ describe("Ingrain setter (BattleScript_EffectIngrain / Cmd_trysetroots)", () => 
 });
 
 describe("Leech Seed setter (BattleScript_DoLeechSeed / Cmd_setseeded -- entering post-accuracycheck, per the doc's own scope note)", () => {
-  it("success: seeds the target (STATUS3_LEECHSEED + seeder battler id), reaches BattleScript_MoveEnd, zero RNG", () => {
+  it("Leech Seed setter writes STATUS3_LEECHSEED plus its encoded seeder id, reaches BattleScript_MoveEnd, zero RNG", () => {
     const rc = context({ moves: [MOVE_LEECH_SEED, 0, 0, 0] }, { currentMove: MOVE_LEECH_SEED }, { status3: 0 });
     const { execution, result } = runUntilLabel("BattleScript_DoLeechSeed", "BattleScript_MoveEnd", rc);
     expect(result.kind).toBe("advanced");
     if (result.kind !== "advanced") throw new Error("expected advance");
     const targetState = result.state.rulesContext.battlers[1]!;
-    expect(targetState.status3 & STATUS3_LEECHSEED).not.toBe(0);
-    expect(targetState.status3 & 0b11).toBe(0); // attacker battler id 0
+    expect(targetState.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED).toBe(BATTLE_SCRIPT_STATUS3_LEECHSEED);
+    expect(targetState.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK).toBe(0); // attacker battler id 0
     expect(result.state.rng.calls).toBe(execution.state.rng.calls);
   });
 
@@ -190,7 +207,7 @@ describe("Leech Seed setter (BattleScript_DoLeechSeed / Cmd_setseeded -- enterin
   });
 
   it("already seeded: setseeded fails (re-seed attempt), status3 unchanged, still reaches BattleScript_MoveEnd", () => {
-    const alreadySeededStatus3 = STATUS3_LEECHSEED | 1; // seeded by battler 1
+    const alreadySeededStatus3 = BATTLE_SCRIPT_STATUS3_LEECHSEED | 1; // seeded by battler 1
     const rc = context(
       { moves: [MOVE_LEECH_SEED, 0, 0, 0] },
       { currentMove: MOVE_LEECH_SEED },
@@ -200,6 +217,24 @@ describe("Leech Seed setter (BattleScript_DoLeechSeed / Cmd_setseeded -- enterin
     expect(result.kind).toBe("advanced");
     if (result.kind !== "advanced") throw new Error("expected advance");
     expect(result.state.rulesContext.battlers[1]!.status3).toBe(alreadySeededStatus3);
+  });
+
+  it("Rapid Spin lifecycle clears STATUS3_LEECHSEED and its encoded seeder before the LeechSeedFree continuation", () => {
+    const sourceStatus3 = STATUS3_ROOTED | BATTLE_SCRIPT_STATUS3_LEECHSEED | 1;
+    const { execution, result } = stepAtOpcode(
+      "B_SCR_OP_RAPIDSPINFREE",
+      context({ status3: sourceStatus3 }),
+    );
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    const attacker = result.state.rulesContext.battlers[0]!;
+    expect(attacker.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED).toBe(0);
+    expect(attacker.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK).toBe(0);
+    expect(attacker.status3).toBe(STATUS3_ROOTED); // unrelated status3 bits survive the cleanup
+    expect(result.state.rng.calls).toBe(execution.state.rng.calls);
+    const leechSeedFree = resolveBattleScriptLabel(program, "BattleScript_LeechSeedFree");
+    expect(leechSeedFree).toBeDefined();
+    expect(result.state.programCounter).toBe(leechSeedFree!.programCounter);
   });
 });
 
