@@ -26,7 +26,6 @@ const LEGACY_TRACES_WITHOUT_APP_ROUTE = new Set([
   "battle1-postwin-scout-a.json",
   "battle1-postwin-scout-b.json",
   "battle1-swap-enemy-accept-b-return.json",
-  "battle1-swap-enemy-accept-exit.json",
   "battle1-swap-enemy-accept-no-return.json",
   "battle1-swap-enemy-accept-prompt.json",
   "battle1-swap-enemy-cancel-quit-yes.json",
