@@ -1,3 +1,19 @@
+## 1030 — [bounded MAIN worker, 2026-08-08] **R12b persistent item write-through repaired**
+
+- **State:** generic `Cmd_removeitem` persistence repair is committed in
+  `4e252485`; Gate 6 remains **OPEN**.
+- **Did:** reproduced R12b red (`battle item 0`, player party item `180`), then
+  ported the source controller write-through by battler side + `partyIndex`.
+  Tier 1 pins the R12b White Herb result, both active-party owners, untouched
+  bench identities, and a non-White-Herb removal. Recycle/Knock Off ownership
+  and `usedHeldItems` behavior remain intact; no shared interface widened.
+- **Next:** hand the green checkpoint to the supervisor. No oracle or
+  canonical Battle-2 work.
+- **Notes:** focused item/move-end/controller suites are **244/244**;
+  executable ratchet **6/6** and smoke **375/375**. Typecheck and production
+  build are green; final full `npm test` returned exit code **0**. No
+  unsupported-barrier pin changed.
+
 ## 1028 — [bounded MAIN worker, 2026-08-08] **S10 Gate-6 deterministic coverage manifest assembled**
 
 - **State:** the first authoritative, reproducible Gate-6 manifest is committed

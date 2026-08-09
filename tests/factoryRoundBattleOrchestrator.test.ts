@@ -216,6 +216,67 @@ function durableLockedActionParty(activeSetId: number): BattleScriptPartyState {
   ]) as unknown as BattleScriptPartyState;
 }
 
+/**
+ * Starts from a real toxic status but otherwise keeps both legal Factory
+ * parties durable. The live end-turn reducer owns the toxic-counter bump and
+ * HP write; the staged input does not manufacture either transition.
+ */
+function createOpponentToxicResolutionHandoffBattle(): FactoryRoundBattleOrchestratorState {
+  const toxic = 1 << 7;
+  const opponentParty = durableLockedActionParty(184).map((member, index) =>
+    index === 0 ? Object.freeze({ ...member, status1: toxic }) : member
+  ) as unknown as BattleScriptPartyState;
+  const battle = createFreshFactoryBattle({
+    requestId: 1,
+    rngSeed: 0,
+    battleScene: "off",
+    playerParty: durableLockedActionParty(8), // Metapod's HARDEN is non-terminal.
+    opponentParty,
+  });
+  if (
+    battle.boundary.kind !== "decision-required"
+    || battle.boundary.request.kind !== "command"
+    || battle.boundary.request.side !== "player"
+  ) {
+    throw new Error("expected staged toxic battle player command");
+  }
+  const battleCommandPresentation = createBattleCommandPresentation(
+    battle.boundary.request,
+    battle.rules.rulesContext,
+  );
+  const fields = [
+    battleCommandPresentation.field.player,
+    battleCommandPresentation.field.opponent,
+  ] as const;
+  const moveSelectionCursors = Object.freeze([0, 0, 0, 0] as const);
+  const battlePresentationBoundaries = Object.freeze(fields.map((field, battler) =>
+    Object.freeze({
+      battler: battler as 0 | 1,
+      partyIndex: field.partyIndex,
+      field,
+      displayedHp: field.hp,
+      displayedStatus1: battle.rules.rulesContext.battlers[battler]!.status1,
+      spriteVisible: true,
+      idleEpoch: 0,
+      moveCursor: 0 as const,
+    })
+  )) as FactoryRoundBattleOrchestratorState["battlePresentationBoundaries"];
+  const carrier = createStartedGeneratedBattle(RNG_SEED);
+  return Object.freeze({
+    ...carrier,
+    battle,
+    battleCommandPresentation,
+    battleResolutionPresentation: null,
+    retainedLockedActionPresentationOwner: null,
+    battlePartySelect: null,
+    battleForcedPartySelect: null,
+    moveSelectionCursors,
+    battlePresentationBoundaries,
+    aiHistory: createFactoryAiBattleHistory(battle.rules.rulesContext),
+    facilityRngCalls: carrier.activeBattleCallStart! + battle.rng.calls,
+  });
+}
+
 function submitStagedLockedActionMove(
   state: BattleState<FactoryFullTurnDecisionRules>,
   side: "player" | "trainer",
@@ -567,6 +628,73 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     });
     expect(state.battlePresentationBoundaries?.[1].displayedStatus1)
       .toBe(state.battle?.rules.rulesContext.battlers[1].status1);
+  });
+
+  it("ISSUES #84(5): hands a toxic-damaged opponent's genuine updated snapshot to the next public command", () => {
+    let state = createOpponentToxicResolutionHandoffBattle();
+    const before = state.battleCommandPresentation!.field.opponent;
+
+    state = advanceCommandToPhase(state, "action-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+    state = advanceCommandToPhase(state, "fight-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+
+    const resolution = state.battleResolutionPresentation;
+    if (resolution === null) throw new Error("expected toxic-damage resolution");
+    const active = resolution.pendingBattle.rules.rulesContext.battlers[1]!;
+    expect(active.partyIndex).toBe(before.partyIndex);
+    expect(active.hp).toBeLessThan(before.hp);
+    expect(active.status1 & 0xff).toBe(1 << 7);
+    expect(active.status1).toBe((1 << 7) | (1 << 8));
+    expect(resolution.pendingBattle.rules.rulesContext.party.opponent[0]!.status1)
+      .toBe(active.status1); // source syncs the counter; the icon remains PSN.
+    expect(resolution.segments.flatMap(({ events }) => events).some(({ payload }) =>
+      payload.kind === "hp-change"
+      && payload.battler === 1
+      && payload.from === before.hp
+      && payload.to === active.hp
+    )).toBe(true);
+
+    for (
+      let budget = 0;
+      budget < 2_000
+        && state.battleResolutionPresentation?.lifecycle.phase !== "next-command-handoff";
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    expect(state.battlePresentationBoundaries?.[1]).toMatchObject({
+      partyIndex: active.partyIndex,
+      displayedHp: active.hp,
+      displayedStatus1: 1 << 7,
+    });
+
+    const opponentBoundary = state.battlePresentationBoundaries![1];
+    const inconsistent = Object.freeze({
+      ...state,
+      battlePresentationBoundaries: Object.freeze([
+        state.battlePresentationBoundaries![0],
+        Object.freeze({
+          ...opponentBoundary,
+          displayedHp: opponentBoundary.displayedHp + 1,
+        }),
+      ]) as FactoryRoundBattleOrchestratorState["battlePresentationBoundaries"],
+    });
+    expect(() => {
+      let next = inconsistent;
+      for (let frame = 0; frame < 8; frame += 1) {
+        next = advanceFactoryRoundBattleResolution(next);
+      }
+    }).toThrowError(
+      "resolution handoff battler 1 display does not match the genuine next boundary",
+    );
+
+    state = advanceResolutionToNextCommand(state);
+    expect(state.battleCommandPresentation?.field.opponent).toMatchObject({
+      partyIndex: active.partyIndex,
+      hp: active.hp,
+      status: "poison",
+    });
   });
 
   it("drives an unmodified generated FLY round receipt through charge, lock, restoration, and the next player command", () => {

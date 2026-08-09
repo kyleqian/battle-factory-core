@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1033 — [bounded MAIN worker, 2026-08-08] **#84 fatal toxic-resolution handoff repaired**
+
+- **State:** #84 item (5) is removed; items (1)-(4) remain open. Gate 6 remains
+  **OPEN** at **21/24** OFF-profile receipts.
+- **Did:** reproduced the exact fatal invariant through the public generated
+  round command/resolution seam. Toxic's source-synced turn counter changes the
+  raw battler/party `status1` while the genuine displayed identity remains PSN;
+  the handoff now validates controller-owned status-icon semantics plus exact
+  party index/HP. A deliberately stale HP handoff still throws the fatal error.
+- **Next:** address #84 items (1)-(4): wrong-side opponent ball,
+  TAUNT/TORMENT/TOXIC pacing, and WHIRLWIND recall/send-out presentation.
+- **Notes:** red parent behavior reproduced the reported battler-1 exception.
+  Focused orchestrator/presentation/ratchet tests are **115/115** and smoke is
+  **375/375**. Final full suite is **811 files / 8,138 passed / 1 skipped**;
+  production build is green. No unsupported barrier or canonical recording
+  import changed.
+
 ## 1032 — [supervisor ORIENT, 2026-08-08] **Folded union green; user playthrough crash is first priority**
 
 - **State:** master is clean at `a45826c8`; Gate 6 remains **OPEN** at
@@ -44,19 +61,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   empty; after its separate supervisor exited cleanly, `0dffb48b` was folded.
   A post-fold full rerun was stopped at wind-down when a new independent
   supervisor began a competing full suite; no assertion failure was observed.
-
-## 1030 — [bounded MAIN worker, 2026-08-08] **R12b persistent item write-through repaired**
-
-- **State:** generic `Cmd_removeitem` persistence repair is committed in
-  `4e252485`; Gate 6 remains **OPEN**.
-- **Did:** reproduced R12b red (`battle item 0`, player party item `180`), then
-  ported the source controller write-through by battler side + `partyIndex`.
-  Tier 1 pins the R12b White Herb result, both active-party owners, untouched
-  bench identities, and a non-White-Herb removal. Recycle/Knock Off ownership
-  and `usedHeldItems` behavior remain intact; no shared interface widened.
-- **Next:** hand the green checkpoint to the supervisor. No oracle or
-  canonical Battle-2 work.
-- **Notes:** focused item/move-end/controller suites are **244/244**;
-  executable ratchet **6/6** and smoke **375/375**. Typecheck and production
-  build are green; final full `npm test` returned exit code **0**. No
-  unsupported-barrier pin changed.
