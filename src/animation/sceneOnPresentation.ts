@@ -638,6 +638,10 @@ import {
   type DragonClawState,
 } from "./dragonClaw.ts";
 import {
+  fireSpinAtAge,
+  type FireSpinState,
+} from "./fireSpin.ts";
+import {
   metalClawAtAge,
   type MetalClawState,
 } from "./metalClaw.ts";
@@ -2115,6 +2119,14 @@ export interface SceneOnDragonClawConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Source-relative MOVE_FIRE_SPIN seam; battle resolution remains external. */
+export interface SceneOnFireSpinConfig {
+  readonly move: "FIRE_SPIN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnMetalClawConfig {
   readonly move: "METAL_CLAW";
   readonly attacker: SceneOnPresentationBattler;
@@ -2371,6 +2383,7 @@ export type SceneOnMoveConfig =
   | SceneOnShadowBallConfig
   | SceneOnEncoreConfig
   | SceneOnDragonClawConfig
+  | SceneOnFireSpinConfig
   | SceneOnMetalClawConfig
   | SceneOnSingConfig
   | SceneOnGrassWhistleConfig
@@ -2972,6 +2985,12 @@ export interface SceneOnEncoreView extends EncoreState {
 }
 
 export interface SceneOnDragonClawView extends DragonClawState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFireSpinView extends FireSpinState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -6213,6 +6232,23 @@ export function sceneOnDragonClawView(
       attackerCenter: state.config.attacker.geometry.battlePositionCenter,
       targetCenter: state.config.target.geometry.animationCenter,
     }),
+  };
+}
+
+/** `age=0` is the first in-bounds frame of MOVE_FIRE_SPIN's script bytes. */
+export function sceneOnFireSpinView(
+  state: SceneOnMovePresentationState,
+): SceneOnFireSpinView {
+  if (state.config.move !== "FIRE_SPIN") {
+    throw new Error(`expected FIRE_SPIN presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...fireSpinAtAge(state.age, {
+      targetCenter: state.config.target.geometry.battlePositionCenter,
+    }, state.config.target.geometry.side),
   };
 }
 

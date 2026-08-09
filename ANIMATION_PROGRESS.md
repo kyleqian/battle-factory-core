@@ -1,5 +1,12 @@
 # Animation coverage
 
+## MOVE_FIRE_SPIN exact — bilateral 104/104 production promotion (2026-08-09 worker)
+
+- **State:** Coverage advances **141→142/276 exact**, 0 partial, 0 staged, **135→134 unsupported**. FIRE_SPIN alone moves; the animation boundary and unsupported-barrier pins remain unchanged.
+- **Did:** Added legal set-175 CHARMELEON versus ONIX Scene-ON stages, a pointer-bounded dense probe, bilateral fixtures/portable, and the pure source-relative Fire Spin reducer. The typed seam and narrow compositor reuse the source-identical Dragon Claw ember/vortex component and cover all 18 sprites, `AnimTask_ShakeMon`, source OAM-Y ordering, target-side sound pan, and the measured task-creation display transient.
+- **Verified:** Twice fresh, player-back frames **80..183** and opponent-front **84..187** each pass **104/104 component and raw-RGB framebuffer** equality through cleanup. DRAGON_CLAW remains a twice-fresh **137/137** bilateral shared-component control. Focused **9/9**, smoke **375/375**, typecheck, production build, full `npm test`, and final coverage report pass.
+- **Next:** Supervisor selects the next independent acceptance unit. Do not infer FIRE_SPIN's target-display latch or emitter ordering for another ember move.
+
 ## MOVE_SLEEP_TALK exact — bilateral 186/189 production promotion (2026-08-09 worker)
 
 - **State:** Coverage advances **140→141/276 exact**, 0 partial, 0 staged, **136→135 unsupported**. Sleep Talk alone moves; the animation boundary and unsupported barrier remain unchanged.
