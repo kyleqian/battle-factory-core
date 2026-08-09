@@ -125,7 +125,10 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // outcomes (overkill, and damage exactly equal to the remaining HP) push
   // BattleScript_SubstituteFade as a machine `call` instead of halting
   // (battle_script_commands.c:1875-1891).
-  ["src/engine/battleScriptHitChainOpcode.ts", 11],
+  // 11 -> 10 (S10 widened-scope B1): Cmd_accuracycheck now resolves the
+  // source Enigma-vs-item-table holdEffect/holdEffectParam branch, so the
+  // former Enigma Berry evasion-up barrier has no live call site.
+  ["src/engine/battleScriptHitChainOpcode.ts", 10],
   // 4 -> 3 (Snatch row 5c): the action-order redirect, PressurePPLose,
   // winner-only flag consumption, and pushed BattleScript_SnatchedMove
   // continuation are now live; Lightning Rod remains the adjacent barrier.

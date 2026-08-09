@@ -230,6 +230,7 @@ describe("source-shaped Battle Script rules context", () => {
       "dmgMultiplier",
       "dynamicBasePower",
       "dynamicMoveType",
+      "enigmaBerryHoldEffectParams",
       "enigmaBerryHoldEffects",
       // Source u8 gBattleStruct->formToChangeInto, added with the Castform
       // Forecast barrier retirement (ROADMAP S10 gate-4, 2026-08-08):
@@ -297,6 +298,8 @@ describe("source-shaped Battle Script rules context", () => {
     expect(Object.isFrozen(created.lockedMoves)).toBe(true);
     expect(Object.isFrozen(created.rolloutTimerStartValues)).toBe(true);
     expect(Object.isFrozen(created.enigmaBerryHoldEffects)).toBe(true);
+    expect(Object.isFrozen(created.enigmaBerryHoldEffectParams)).toBe(true);
+    expect(created.enigmaBerryHoldEffectParams).toEqual([0, 0, 0, 0]);
     expect(Object.isFrozen(created.moveHistory)).toBe(true);
     expect(Object.isFrozen(created.battleTopology)).toBe(true);
     expect(Object.isFrozen(created.battleTopology.battlerPositions)).toBe(true);

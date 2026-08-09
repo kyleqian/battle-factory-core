@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1027 — [bounded MAIN worker, 2026-08-08] **S10 B1 Enigma Berry accuracy barrier retired**
+
+- **State:** the B1 implementation is green through the focused Tier-1 set and
+  executable-frontier ratchet (**379/379 tests**); the former hit-chain barrier
+  call site is gone and its pin is **11→10**.
+- **Did:** added immutable/defaulted/validated/serialized
+  `enigmaBerryHoldEffectParams` ownership beside the existing Enigma effect
+  bytes; resolvers now follow the source Enigma-vs-`gItems` branch; the live
+  accuracy path passes both effect and parameter to the existing calculator.
+  Red-first tests pin context shape, malformed arrays, normal Focus Band
+  parameter behavior, Enigma ownership, and exact-RNG hit/miss outcomes.
+- **Next:** run smoke, typecheck, build, and the full `npm test`; then commit
+  the final green checkpoint and leave this entry current.
+- **Notes:** no oracle claim (the custom Enigma storage is not injectable by
+  mechanicLab); no ROADMAP/ISSUES or canonical Battle-2 work.
+
 ## 1026 — [supervisor, 2026-08-08] **A3 Focus Band OHKO continuation proved end to end**
 
 - **State:** master is clean through `50a89bf7`. The inherited runtime fix
@@ -41,28 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   ISSUES #39 audit stays valid for whenever a filler slot opens. The
   animation lane keeps its separate supervisor but is likewise filler
   relative to S10 closure.
-
-## 1024 — [supervisor WIND-DOWN, 2026-08-08] **Generic S8 presentation and Factory-AI receipts advanced; final union green**
-
-- **State:** master is clean through `12be3c44`. Final worker full suite is
-  **800 files / 8,034 passed / 1 skipped**; supervisor independently reran
-  Baton Pass **4/4**, focused AI **745/745**, presentation **237/237**, clone
-  palette/ratchet **7/7**, smoke **375/375**, both OFF differentials
-  (**620/620** and **640/640**), the production build, and oracle profile check.
-- **Did:** folded the orientation-time animation branch and verified the union;
-  closed #83 with single turn-start-draw ownership; accepted exact Mirror Coat,
-  Psych Up, and Baton Pass hardware receipts; proved #55's construction-clock
-  boundary; retired two bare staged facts and the species-named faint-sink API;
-  made all six Family-C healthbox caches and the DOUBLE_TEAM palette cache own
-  every identity-bearing render input.
-- **Next:** #39's audited next owner is `turn10OnixDarkPalette`: rename it and
-  key its latent singleton by source-palette identity, with a two-palette red
-  pin and 592 OFF canary captures. Do not revive the absent OFF darken pulse or
-  claim those canaries exercise it. A file-disjoint AI receipt is also safe;
-  never resume a canonical Battle-2 turn/window after tick 33331.
-- **Notes:** the separate animation supervisor remains active; its newer
-  `animation-main` commits, now through Magical Leaf staging, were intentionally
-  not folded mid-session. A final read-only source audit produced the exact
-  Family-F handoff above; no material decision was deferred. Shared-host
-  full-suite contention is recorded in `PAPERCUTS.md` at hit 6.
-

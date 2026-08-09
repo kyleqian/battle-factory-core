@@ -46,6 +46,8 @@ const ABILITY_FLASH_FIRE = 18;
 const WEATHER_BALL = 311;
 const ABILITY_CLOUD_NINE = 13;
 const ABILITY_AIR_LOCK = 77;
+const ITEM_ENIGMA_BERRY = 175;
+const HOLD_EFFECT_EVASION_UP = 22;
 
 function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -378,6 +380,35 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
     );
     expect(withForesight.state.rng.calls).toBe(1);
   });
+
+  it.each([
+    ["hit", 0, true],
+    ["miss", 99, false],
+  ] as const)(
+    "Enigma Berry evasion-up uses the per-battler effect+param for a deterministic %s",
+    (outcome, roll, hits) => {
+      const rc = context(
+        0,
+        {},
+        {
+          enigmaBerryHoldEffects: [0, HOLD_EFFECT_EVASION_UP, 0, 0],
+          enigmaBerryHoldEffectParams: [0, 50, 0, 0],
+        },
+        { item: ITEM_ENIGMA_BERRY },
+      );
+      const result = stepFrom("BattleScript_HitFromAccCheck", rc, rngValueBeforeU16(roll)).result;
+      expect(result.kind, outcome).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rng.calls).toBe(1);
+      expect(result.state.rng.value).toBe(roll * 0x1_0000);
+      expect(result.state.programCounter).toBe(
+        labelPc(hits ? "BattleScript_HitFromAtkString" : "BattleScript_PrintMoveMissed"),
+      );
+      expect(result.state.rulesContext.moveResultFlags & 1).toBe(hits ? 0 : 1);
+      expect(result.state.rulesContext.enigmaBerryHoldEffects[1]).toBe(HOLD_EFFECT_EVASION_UP);
+      expect(result.state.rulesContext.enigmaBerryHoldEffectParams[1]).toBe(50);
+    },
+  );
 
   it("Protect: jumps to the miss target with zero RNG and B_MSG_PROTECTED", () => {
     const rc = context(0, {}, {}, { protected: 1 });

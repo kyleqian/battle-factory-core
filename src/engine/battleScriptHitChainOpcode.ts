@@ -96,7 +96,6 @@ import {
   type TypeEffectivenessEntry,
 } from "./damageCalc.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
-import itemHoldEffectsData from "../data/gen/item-hold-effects.json" with { type: "json" };
 import typeEffectivenessData from "../data/gen/type-effectiveness.json" with { type: "json" };
 import {
   changeStatBuffs,
@@ -666,10 +665,6 @@ function stringOperand(expression: string, sourceMacroLine: number): BattleScrip
   });
 }
 
-type HoldEffectRow = Readonly<{ itemId: number; holdEffect: string; holdEffectParam: number }>;
-const HOLD_EFFECT_ROW_BY_ITEM = new Map<number, HoldEffectRow>(
-  (itemHoldEffectsData.items as readonly HoldEffectRow[]).map((row) => [row.itemId, row]),
-);
 const HOLD_EFFECT_EVASION_UP_ID = 22;
 
 const TYPE_EFFECTIVENESS = (typeEffectivenessData.typeEffectiveness as readonly TypeEffectivenessEntry[]);
@@ -1185,22 +1180,13 @@ export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptR
     );
   }
 
-  if (targetBattler.item === BATTLE_SCRIPT_ITEM_ENIGMA_BERRY) {
-    const holdEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, target);
-    if (holdEffectId === HOLD_EFFECT_EVASION_UP_ID) {
-      return unsupportedBranch(
-        context,
-        "the target's Enigma Berry evasion-up holdEffectParam is not modeled (gEnigmaBerries is absent)",
-        "battle_script_commands.c",
-        1163,
-      );
-    }
-  }
-  const holdEffectRow = HOLD_EFFECT_ROW_BY_ITEM.get(targetBattler.item);
-  const targetHoldEffect = holdEffectRow?.holdEffect === "HOLD_EFFECT_EVASION_UP"
+  const targetHoldEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, target);
+  const targetHoldEffect = targetHoldEffectId === HOLD_EFFECT_EVASION_UP_ID
     ? "HOLD_EFFECT_EVASION_UP"
     : null;
-  const targetHoldEffectParam = targetHoldEffect ? holdEffectRow!.holdEffectParam : 0;
+  const targetHoldEffectParam = targetHoldEffect
+    ? resolveBattleScriptBattlerHoldEffectParam(rulesContext, target)
+    : 0;
 
   const calc = calculateAccuracy({
     moveAccuracy: effectiveWeather && (rulesContext.weather & B_WEATHER_SUN) !== 0 && moveRow.effect === "EFFECT_THUNDER" ? 50 : moveRow.accuracy,

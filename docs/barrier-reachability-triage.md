@@ -1,11 +1,12 @@
 # Barrier reachability triage — every `unsupportedBranch` call site in `src/engine/`
 
-Author: side-lane worker 2026-08-07. Read-only step: this document classifies all
-50 `unsupported-branch` barrier call sites in `src/engine/` by whether a legal
+Author: side-lane worker 2026-08-07. This document classifies all
+`unsupported-branch` barrier call sites in `src/engine/` by whether a legal
 Level-50 **singles** battle can actually hit them, under the ROADMAP S10
 2026-08-05 widened scope (all legal Gen-3 species/moves/abilities/items in
 singles; doubles / Battle Arena / link / multi / Frontier-Brain battle contexts
-remain out of scope). No production code was changed.
+remain out of scope). The original triage was read-only; the S10/B1 retirement
+receipt below records the narrowly scoped production change.
 
 ## Reconciliation with `PINNED_BARRIER_COUNTS`
 
@@ -13,40 +14,40 @@ Method: `grep -rn "unsupportedBranch(" src/engine/*.ts` for helper-call sites,
 plus the `{ kind: "unsupported-branch", ... }` result-literal constructions in
 the two `factoryAi*` modules that never call a helper
 (`barrierCallSitesIn` in `tests/executableFrontierRatchet.test.ts` counts those
-too). Total found: **50** — 48 helper-call sites + 2 literal constructions.
-This reconciles exactly with the sum of `PINNED_BARRIER_COUNTS` (see the
-per-module table below). The pinned count for
-`battleScriptHitChainOpcode.ts` is 11; at the time of writing the two
-just-edited files it was 11, matching.
+too). The current source inventory is **46** — 44 helper-call sites + 2 literal
+constructions. This matches the current `PINNED_BARRIER_COUNTS` sum; the
+per-module table below is the measured inventory, not a prose estimate. The
+pinned count for `battleScriptHitChainOpcode.ts` is now 10 after B1's call site
+disappeared.
 
 | Module | Pin | Found | Classified (A/B/C/D) |
 | --- | --- | --- | --- |
-| battleScriptHitChainOpcode.ts | 11 | 11 | 1B, 1A, 9D |
+| battleScriptHitChainOpcode.ts | 10 | 10 | 1A, 9D (B1 retired) |
 | battleScriptAttackCancelerOpcode.ts | 2 | 2 | 2A |
 | battleScriptCheckteamslostOpcode.ts | 3 | 3 | 3C |
 | battleScriptDamagingWeatherOpcode.ts | 4 | 4 | 4D |
 | battleScriptForceSwitchOpcode.ts | 1 | 1 | 1C |
 | battleScriptGetexpOpcode.ts | 2 | 2 | 1A, 1C |
-| battleScriptIngrainLeechSeedWrapOpcode.ts | 3 | 3 | 1A, 2D |
+| battleScriptIngrainLeechSeedWrapOpcode.ts | 2 | 2 | 2D |
 | battleScriptJumpifbyteOpcode.ts | 1 | 1 | 1C |
 | battleScriptJumpifcantswitchOpcode.ts | 1 | 1 | 1C |
 | battleScriptJumpifhalfwordOpcode.ts | 1 | 1 | 1C |
 | battleScriptJumpifwordOpcode.ts | 1 | 1 | 1C |
 | battleScriptMoveEndOpcode.ts | 1 | 1 | 1C |
 | battleScriptOpenPartyScreenOpcode.ts | 1 | 1 | 1C |
-| battleScriptProtectlikeOpcode.ts | 1 | 1 | 1A |
+| battleScriptProtectlikeOpcode.ts | 0 | 0 | — |
 | battleScriptRemoveitemOpcode.ts | 1 | 1 | 1D |
 | battleScriptSemiInvulnerableOpcode.ts | 1 | 1 | 1D |
 | battleScriptStatbuffchangeOpcode.ts | 3 | 3 | 1A, 2D |
 | battleScriptStatusPrimaryOpcode.ts | 3 | 3 | 3D |
 | battleScriptSwitchinOpcode.ts | 4 | 4 | 1A, 3C |
 | battleScriptTargetIterationOpcode.ts | 1 | 1 | 1C |
-| battleScriptTryKOOpcode.ts | 1 | 1 | 1A |
+| battleScriptTryKOOpcode.ts | 0 | 0 | — |
 | battleScriptTryCastformDataChangeOpcode.ts | 0 | 0 | — |
 | factoryBattleScriptFullTurnDecision.ts | 1 | 1 | 1A |
 | factoryAiCheckBadMove.ts | 1 | 1 | 1A |
 | factoryAiCheckViability.ts | 1 | 1 | 1A |
-| **Total** | **50** | **50** | 12A, 1B, 15C, 22D |
+| **Total** | **46** | **46** | 9A, 0B, 18C, 19D |
 
 BUCKETS: **(A)** reachable in a legal Level-50 singles battle today (highest
 priority). **(B)** reachable only under the widened 2026-08-05 scope (needs a
@@ -359,19 +360,22 @@ holders versus the four Factory OHKO moves (28 weighted uses).
 
 ## Bucket (B) — reachable only under the widened 2026-08-05 scope
 
-### B1. `battleScriptHitChainOpcode.ts:1169` — Enigma Berry evasion-up (`Cmd_accuracycheck`)
-- **Reason / citation:** `"the target's Enigma Berry evasion-up holdEffectParam is not modeled (gEnigmaBerries is absent)"`; `battle_script_commands.c:1163`.
-- **Construct to port:** `gEnigmaBerries` table + the
-  `holdEffect == HOLD_EFFECT_EVASION_UP` param application
-  (`battle_script_commands.c:1160-1173`). Enigma Berry is a legal Gen-3 item
-  with a bespoke per-battler storage the engine lacks; no Factory set carries it
-  (Frontier evasion-up items are Bright Powder/Lax Incense, whose plain
-  `GetItemHoldEffectParam` path is modeled). Needs the `gEnigmaBerries`
-  memory block and its read/write sites.
-- **Tier-1 test:** a target holding Enigma Berry vs an accuracy roll applies the
-  evasion-up factor, no halt.
-- **Breadth unblocked:** Enigma Berry users (0 Factory carriers — the item,
-  not the HOLD_EFFECT which has 120 carriers). Low.
+### B1. `battleScriptHitChainOpcode.ts:1169` — Enigma Berry evasion-up (`Cmd_accuracycheck`) — **RETIRED 2026-08-08**
+- **Former reason / citation:** `"the target's Enigma Berry evasion-up holdEffectParam is not modeled (gEnigmaBerries is absent)"`; `battle_script_commands.c:1160-1173`.
+- **Retired implementation:** `BattleScriptRulesContext` now owns both
+  immutable four-battler byte arrays, `enigmaBerryHoldEffects` and
+  `enigmaBerryHoldEffectParams`. The resolvers follow the source's Enigma-vs-
+  `gItems` branch (`global.berry.h:55-61`; the same per-battler lookup is
+  visible in `battle_util.c:3269-3300`), and `Cmd_accuracycheck` feeds both
+  resolved values into the existing accuracy calculation. Normal item-table
+  parameters remain unchanged.
+- **Tier-1 receipt:** `tests/battleScriptMoveEndOwnership.test.ts` pins context
+  shape/validation and Enigma ownership alongside a normal Focus Band
+  parameter; `tests/battleScriptHitChainOpcode.test.ts` pins exact-RNG Enigma
+  hit and miss outcomes with one accuracy draw and no halt.
+- **Ratchet:** `battleScriptHitChainOpcode.ts` **11 → 10**; the former call
+  site is gone, while the generic malformed accuracy-operand guard remains.
+- **Breadth unblocked:** legal Gen-3 Enigma Berry users under the widened scope.
 
 ### B2. Sub-cases folded into A9 / A5 / A11 (same single barrier call site)
 - **`printfromtable` gWeatherStartsStringIds** (A9's barrier):
@@ -568,15 +572,15 @@ the engine's current resolver accepts each operand:
 > | 9. `sProtectSuccessRates[4]` OOB | **DONE** — measured from the ROM: the adjacent `u16` is `MOVE_METRONOME` (118), so a 5th consecutive Protect succeeds ~0.18% of the time. Evidence: `docs/protectlike-oob-adjacent-byte.md`. |
 > | 10. `DMG_RECOIL_FROM_MISS` / `DMG_DOUBLED` | **DONE** — Struggle recoil (universal) and Beat Up. |
 > | 11. battle-outcome → `B_ACTION_FINISHED` handoff | **REFUTED 2026-08-08 (supervisor) — reclassified (C), unreachable.** `RunTurnActionsFunctions` (`battle_main.c:4939`) forces `B_ACTION_FINISHED` before dispatching any turn action, so `HandleAction_UseMove` — the only producer of a script starting with `attackcanceler` — never runs with `gBattleOutcome != 0`. The engine already models the preemption and the preflight receipt is already source-complete. **Do not take the proposed port**; all that remains is restating the barrier's (now false) reason string. See the refutation box under A12. |
-> | 12. Enigma Berry (bucket B) | **OPEN**, lowest priority. |
+> | 12. Enigma Berry (bucket B) | **DONE 2026-08-08** — per-battler effect and parameter ownership now drives `Cmd_accuracycheck`; B1 retirement receipt above. |
 > | A2. `AI_CheckViability` if_effect table | **DONE 2026-08-08 — 122/122 table effects ported**, in five batches across two lanes. The barrier is unreachable; see the retirement box under A1/A2. Live ROM verification of the newly ported handlers is the follow-on work, starting with `AI_CV_BrickBreak` (46 weighted). |
 >
 > **STATUS after the 2026-08-08 supervised session: bucket (A) is EMPTY.** Ten of
 > the twelve (A) items are done, and two were refuted outright (item 3 Lightning
 > Rod on 2026-08-08 morning, item 11 / A12 the same evening — see its refutation
-> box). The only work left in this document is item 12, Enigma Berry, the single
-> pure-(B) site. Every barrier this triage classified as reachable in ordinary
-> Level-50 singles play has been retired.
+> box). Item 12/B1 is now retired as the single pure-(B) site. Every barrier
+> this triage classified as reachable in ordinary Level-50 singles play has
+> been retired.
 >
 > **Read the refutation box under A4 before trusting any remaining (A) claim.**
 > Three of the entries checked this session had defects: Lightning Rod was

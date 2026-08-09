@@ -12,6 +12,7 @@ import {
   BATTLE_SCRIPT_MOVE_UNAVAILABLE,
   createBattleScriptRulesContext,
   resolveBattleScriptBattlerHoldEffect,
+  resolveBattleScriptBattlerHoldEffectParam,
   resolveBattleScriptMoveType,
   type BattleScriptRulesBattler,
   type BattleScriptRulesContextInput,
@@ -84,6 +85,7 @@ function contextInput(
     battleStructAbsentBattlerFlags: 0,
     dynamicMoveType: 0,
     enigmaBerryHoldEffects: [0, 0, 0, 0],
+    enigmaBerryHoldEffectParams: [0, 0, 0, 0],
     ...changes,
   };
 }
@@ -100,6 +102,7 @@ describe("Cmd_moveend choice/change ownership dependency", () => {
       battleStructAbsentBattlerFlags: 0b1010,
       dynamicMoveType: 0xff,
       enigmaBerryHoldEffects: [0, 1, 0xfe, 0xff],
+      enigmaBerryHoldEffectParams: [0, 10, 0xfe, 0xff],
     }));
     expect(context).toMatchObject({
       chosenMove: 0xffff,
@@ -109,6 +112,7 @@ describe("Cmd_moveend choice/change ownership dependency", () => {
       battleStructAbsentBattlerFlags: 0b1010,
       dynamicMoveType: 0xff,
       enigmaBerryHoldEffects: [0, 1, 0xfe, 0xff],
+      enigmaBerryHoldEffectParams: [0, 10, 0xfe, 0xff],
     });
 
     for (const invalid of [
@@ -121,6 +125,8 @@ describe("Cmd_moveend choice/change ownership dependency", () => {
       { dynamicMoveType: 0x100 },
       { enigmaBerryHoldEffects: [0, 0, 0] },
       { enigmaBerryHoldEffects: [0, 0, 0, 0x100] },
+      { enigmaBerryHoldEffectParams: [0, 0, 0] },
+      { enigmaBerryHoldEffectParams: [0, 0, 0, 0x100] },
     ]) {
       expect(() => createBattleScriptRulesContext(contextInput(invalid))).toThrow();
     }
@@ -145,11 +151,16 @@ describe("Cmd_moveend choice/change ownership dependency", () => {
         battler({ side: 1, item: 0 }),
       ],
       enigmaBerryHoldEffects: [1, 2, 0xfe, 4],
+      enigmaBerryHoldEffectParams: [3, 4, 5, 6],
     }));
     expect(resolveBattleScriptBattlerHoldEffect(context, 0)).toBe(29);
     expect(resolveBattleScriptBattlerHoldEffect(context, 1)).toBe(39);
     expect(resolveBattleScriptBattlerHoldEffect(context, 2)).toBe(0xfe);
     expect(resolveBattleScriptBattlerHoldEffect(context, 3)).toBe(0);
+    expect(resolveBattleScriptBattlerHoldEffectParam(context, 0)).toBe(0);
+    expect(resolveBattleScriptBattlerHoldEffectParam(context, 1)).toBe(10);
+    expect(resolveBattleScriptBattlerHoldEffectParam(context, 2)).toBe(5);
+    expect(resolveBattleScriptBattlerHoldEffectParam(context, 3)).toBe(0);
     const invalidItem = createBattleScriptRulesContext(contextInput({
       battlers: [battler({ item: 0xffff }), battler({ side: 1 }), battler(), battler()],
     }));
@@ -213,6 +224,7 @@ describe("Cmd_moveend choice/change ownership dependency", () => {
     expect(Object.isFrozen(context.choicedMove)).toBe(true);
     expect(Object.isFrozen(context.changedItems)).toBe(true);
     expect(Object.isFrozen(context.enigmaBerryHoldEffects)).toBe(true);
+    expect(Object.isFrozen(context.enigmaBerryHoldEffectParams)).toBe(true);
     expect(applyBattleScriptMoveEndChoiceOwnership(context)).toBe(context);
     expect(applyBattleScriptMoveEndChangedItemOwnership(context)).toBe(context);
   });
@@ -229,6 +241,7 @@ describe("Cmd_moveend choice/change ownership dependency", () => {
         lastTakenMove: Array.from({ length: 16 }, (_, index) => index),
         lastTakenMoveFrom: Array.from({ length: 32 }, (_, index) => 0xff - index),
       },
+      enigmaBerryHoldEffectParams: [3, 4, 5, 6],
     }));
     const history = context.moveHistory;
     expect(new Set([
@@ -249,6 +262,8 @@ describe("Cmd_moveend choice/change ownership dependency", () => {
     );
     expect(replay).toEqual(context);
     expect(replay.moveHistory.lastMoves).not.toBe(context.moveHistory.lastMoves);
+    expect(replay.enigmaBerryHoldEffectParams).toEqual([3, 4, 5, 6]);
+    expect(replay.enigmaBerryHoldEffectParams).not.toBe(context.enigmaBerryHoldEffectParams);
 
     for (const invalid of [
       { lastPrintedMoves: [0, 0, 0] },
