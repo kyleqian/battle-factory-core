@@ -1,0 +1,12 @@
+{
+ "schema":"scene-on-portable-evidence/v1","oracleProfile":"battle-scene-on",
+ "scenario":"tools/battle-lab/mechanic-fake-out-opponent-makuhita-player-shuckle.json","probe":"tools/compare/fakeOutProbe.py",
+ "move":"FAKE_OUT","moveId":252,"orientation":"opponent-front-to-player-back",
+ "sourceWindow":{"startFrame":80,"endFrame":165,"frameCount":86},
+ "sourceBounds":{"start":"0x082d3f2e","endExclusive":"0x082d3f69"},
+ "probeJsonSha256":"cd5285304a2b856ea64a2bac2b668076c97d50a2f349de81644b2e711526083a",
+ "rawRgbSha256":"4357b0dd21c683abd3b81868fd6777eab77038e046a02d2b9df744a7e8cf2c12",
+ "changeMap":"tools/compare/evidence/fake-out-changemap-opponent.txt","changeMapSha256":"bff06d35068fc7cb2376e818609927987086de7db6b2e8fa8c19335fd10dce2c",
+ "freshRuns":2,"freshProbeAndRgbEquality":true,"acceptance":{"status":"unsupported","componentEvidence":86,"productionReducer":true,"typedSeam":true,"productionCompositor":false,"framebufferMatching":0},
+ "targetPictureYOffset":11,"receipt":"Complete dense stock-ROM source/task/OAM/register/palette/audio/raw-RGB evidence through first inactive cleanup; reducer/seam checkpoint only."
+}
