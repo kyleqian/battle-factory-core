@@ -7,16 +7,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1053 — [MAIN worker, 2026-08-09] **#86 forced-switch transition family closed generically**
 
-- **State:** committed main step `10ad59db` is green through focused tests,
-  typecheck, smoke **375/375**, all assigned full-policy repros, and vanilla
-  **0:20 = 20 OK / 0 CRASH / 0 HANG**; full suite/build are running next.
+- **State:** committed main step `10ad59db` is green: full suite **829 files /
+  8,228 passed / 1 skipped**, production build, typecheck, smoke **375/375**,
+  all assigned full-policy repros, and vanilla **0:20 = 20 OK / 0 CRASH / 0
+  HANG**.
 - **Did:** source `ChooseMonToSendOut` ownership now resets a stale completed
   `monToSwitchIntoId` before a later fresh player choice. A forced-selection
   handoff consumes every ordered typed switch-in receipt, including the
   automatic opponent replacement that can share the player continuation,
   before the stable field check. Both fatal transition invariants remain.
-- **Next:** run full `npm test` and `npm run build`. #86 retains only seed 27's
-  separate no-command boundary (`b4 t16 f71106`); do not infer a switch cause.
+- **Next:** #86 retains only seed 27's separate no-command boundary (`b4 t16
+  f71106`); diagnose that reducer boundary without inferring a switch cause.
 - **Notes:** seeds 12/14/23/44/45/53 are all OK to round loss (deepest seed 23:
   `b6 t24 f92800`). Seed 27 still reproduces unchanged. No canonical Battle-2
   window or animation code changed; no unsupported-barrier pin moved.
