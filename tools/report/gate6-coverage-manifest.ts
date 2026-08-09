@@ -276,6 +276,78 @@ function testEvidenceFor(...terms: string[]): Evidence[] {
     .map((path) => evidence(path, "tier-1-test"));
 }
 
+/**
+ * These five rows were source-modeled but absent from the old text-token
+ * discovery rule. Each entry names a behavior-test assertion rather than
+ * merely importing or mentioning the state constant. Keep this narrow: it
+ * is an auditable exception for state-family Tier-1 evidence, never a way to
+ * promote static reachability or an oracle receipt.
+ */
+type StateBehaviorEvidence = Readonly<{ path: string; locator: string }>;
+const STATE_FAMILY_BEHAVIOR_EVIDENCE: Readonly<Record<string, readonly StateBehaviorEvidence[]>> = Object.freeze({
+  BATTLE_SCRIPT_STATUS3_CANT_SCORE_A_CRIT: Object.freeze([
+    Object.freeze({
+      path: "tests/battleScriptHitChainOpcode.test.ts",
+      locator: "STATUS3_CANT_SCORE_A_CRIT short-circuits a would-crit roll without consuming RNG",
+    }),
+  ]),
+  BATTLE_SCRIPT_STATUS3_LEECHSEED: Object.freeze([
+    Object.freeze({
+      path: "tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts",
+      locator: "Leech Seed setter writes STATUS3_LEECHSEED plus its encoded seeder id",
+    }),
+    Object.freeze({
+      path: "tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts",
+      locator: "Rapid Spin lifecycle clears STATUS3_LEECHSEED and its encoded seeder before the LeechSeedFree continuation",
+    }),
+  ]),
+  BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK: Object.freeze([
+    Object.freeze({
+      path: "tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts",
+      locator: "Leech Seed setter writes STATUS3_LEECHSEED plus its encoded seeder id",
+    }),
+    Object.freeze({
+      path: "tests/battleEndTurnOrchestration.test.ts",
+      locator: "Leech Seed end-turn decodes a nonzero encoded seeder owner and retains the seed lifecycle bit",
+    }),
+    Object.freeze({
+      path: "tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts",
+      locator: "Rapid Spin lifecycle clears STATUS3_LEECHSEED and its encoded seeder before the LeechSeedFree continuation",
+    }),
+  ]),
+  BATTLE_SCRIPT_STATUS3_YAWN: Object.freeze([
+    Object.freeze({
+      path: "tests/battleEndTurnOrchestration.test.ts",
+      locator: "first end-turn pass only decrements the counter (TURN(2) -> TURN(1)), no sleep transition, zero RNG",
+    }),
+    Object.freeze({
+      path: "tests/battleEndTurnOrchestration.test.ts",
+      locator: "second end-turn pass empties the counter and fires the real sleep transition",
+    }),
+  ]),
+  SIDE_STATUS_WORE_OFF_LABEL: Object.freeze([
+    Object.freeze({
+      path: "tests/battleScriptScreensWeatherOrchestration.test.ts",
+      locator: "Light Screen: set -> 4 silent decrement ticks -> SideStatusWoreOff message/buffer on tick 5 -> re-set succeeds",
+    }),
+  ]),
+});
+
+function stateTestEvidenceFor(symbol: string): Evidence[] {
+  const mapped = STATE_FAMILY_BEHAVIOR_EVIDENCE[symbol];
+  if (mapped === undefined) return testEvidenceFor(symbol);
+  if (!stateRowsBySymbol.has(symbol)) {
+    throw new Error(`state behavior evidence names a non-manifest state symbol: ${symbol}`);
+  }
+  return mapped.map(({ path, locator }) => {
+    requirePath(path);
+    if (!readText(path).includes(locator)) {
+      throw new Error(`state behavior evidence locator is not present in ${path}: ${locator}`);
+    }
+    return evidence(path, "tier-1-behavior-test", locator);
+  });
+}
+
 const aggregateStateRows = [
   ["state:stat-stages", "stat-stage-array", "stat stages", "src/engine/battleScriptRulesContext.ts", "tests/gate6KernelInteractions.test.ts"],
   ["state:switching-entry", "switching-entry", "switching and entry lifecycle", "src/engine/battleScriptSwitchinOpcode.ts", "tests/gate6SwitchInteractions.test.ts"],
@@ -287,7 +359,7 @@ const aggregateStateRows = [
 
 const stateFamilyRows: Row[] = [
   ...[...stateRowsBySymbol.values()].sort((a, b) => a.symbol.localeCompare(b.symbol)).map((item) => {
-    const tests = testEvidenceFor(item.symbol);
+    const tests = stateTestEvidenceFor(item.symbol);
     return Object.freeze({
       id: `state:${item.symbol}`,
       label: item.symbol,
@@ -695,6 +767,7 @@ const markdown: string[] = [
   "- `engine-referenced` comes only from the ability/item census. It is a worklist fact, not semantic verification.",
   "- `catalog-joined` proves a finite source/data join. It does not provide a per-trainer or per-set oracle receipt.",
   "- `oracle-receipted` requires a committed Gate-6 request card and a completed receipt-note heading in the scout. Fixture-only rows are intentionally not promoted.",
+  "- The five entries in `STATE_FAMILY_BEHAVIOR_EVIDENCE` use named behavior-test locators instead of token presence; that narrow Tier-1 override does not alter static, semantic, or oracle classifications.",
   "- Zero-Factory-carrier rows remain in the widened legal Gen-3 universe. They are not silently classified as Factory-complete.",
   "",
   "## Move/effect executable coverage",

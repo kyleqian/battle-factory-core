@@ -14,6 +14,45 @@ type JsonObject = Record<string, unknown>;
 const JSON_PATH = "docs/gate6-coverage-manifest.json";
 const MARKDOWN_PATH = "docs/gate6-coverage-manifest.md";
 
+const EXPLICIT_STATE_BEHAVIOR_ROWS = [
+  [
+    "BATTLE_SCRIPT_STATUS3_CANT_SCORE_A_CRIT",
+    [[
+      "tests/battleScriptHitChainOpcode.test.ts",
+      "STATUS3_CANT_SCORE_A_CRIT short-circuits a would-crit roll without consuming RNG",
+    ]],
+  ],
+  [
+    "BATTLE_SCRIPT_STATUS3_LEECHSEED",
+    [
+      ["tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts", "Leech Seed setter writes STATUS3_LEECHSEED plus its encoded seeder id"],
+      ["tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts", "Rapid Spin lifecycle clears STATUS3_LEECHSEED and its encoded seeder before the LeechSeedFree continuation"],
+    ],
+  ],
+  [
+    "BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK",
+    [
+      ["tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts", "Leech Seed setter writes STATUS3_LEECHSEED plus its encoded seeder id"],
+      ["tests/battleEndTurnOrchestration.test.ts", "Leech Seed end-turn decodes a nonzero encoded seeder owner and retains the seed lifecycle bit"],
+      ["tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts", "Rapid Spin lifecycle clears STATUS3_LEECHSEED and its encoded seeder before the LeechSeedFree continuation"],
+    ],
+  ],
+  [
+    "BATTLE_SCRIPT_STATUS3_YAWN",
+    [
+      ["tests/battleEndTurnOrchestration.test.ts", "first end-turn pass only decrements the counter (TURN(2) -> TURN(1)), no sleep transition, zero RNG"],
+      ["tests/battleEndTurnOrchestration.test.ts", "second end-turn pass empties the counter and fires the real sleep transition"],
+    ],
+  ],
+  [
+    "SIDE_STATUS_WORE_OFF_LABEL",
+    [[
+      "tests/battleScriptScreensWeatherOrchestration.test.ts",
+      "Light Screen: set -> 4 silent decrement ticks -> SideStatusWoreOff message/buffer on tick 5 -> re-set succeeds",
+    ]],
+  ],
+] as const;
+
 function readManifest(): JsonObject {
   return JSON.parse(readFileSync(JSON_PATH, "utf8")) as JsonObject;
 }
@@ -93,6 +132,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const moveEffect = record(sections.moveEffect);
     const manifestEffects = array(moveEffect.effects);
     const manifestMoves = array(moveEffect.moves);
+    const stateFamilies = array(sections.stateFamilies);
     const manifestTrainers = array(record(sections.corpus).trainers);
     const manifestSets = array(record(sections.corpus).level50Sets);
     const manifestAbilities = array(record(sections.hooks).abilities);
@@ -109,6 +149,9 @@ describe("Gate-6 mechanics coverage manifest", () => {
       readdirSync("tools/battle-lab").filter((name) => /^gate6-.*\.json$/.test(name)).length,
     );
     expect(effects.total).toBe(manifestEffects.length);
+    for (const effect of manifestEffects) {
+      expect(record(effect).semanticAcceptance).toBe("not-established-by-static-census");
+    }
     expect(moves.total).toBe(manifestMoves.length);
     expect(moves.level50Roster).toBe(parameterizationData.moves.length);
     expect(moves.level50Executable).toBe(
@@ -128,6 +171,20 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(oracle.receiptGaps).toBe(
       manifestScenarios.filter((scenario) => record(scenario).status !== "oracle-receipted").length,
     );
+    expect(record(summary.stateFamilies)).toEqual({ total: 55, tier1Covered: 55 });
+    for (const [symbol, expectedEvidence] of EXPLICIT_STATE_BEHAVIOR_ROWS) {
+      const row = stateFamilies.find((candidate) => record(candidate).label === symbol);
+      expect(row).toBeDefined();
+      const stateRow = record(row);
+      expect(stateRow.status).toBe("tier1-covered");
+      expect(array(stateRow.evidence)).toEqual(expect.arrayContaining(
+        expectedEvidence.map(([path, locator]) => expect.objectContaining({
+          path,
+          locator,
+          kind: "tier-1-behavior-test",
+        })),
+      ));
+    }
   });
 
   it("rejects unknown evidence paths and false closure claims", () => {

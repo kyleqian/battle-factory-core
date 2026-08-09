@@ -35,7 +35,7 @@
     },
     "stateFamilies": {
       "total": 55,
-      "tier1Covered": 50
+      "tier1Covered": 55
     },
     "hooks": {
       "abilities": {
@@ -16239,12 +16239,17 @@
         "label": "BATTLE_SCRIPT_STATUS3_CANT_SCORE_A_CRIT",
         "family": "volatile-status3",
         "sourceLine": 154,
-        "status": "source-modeled-no-focused-test",
+        "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleScriptSourceConstants.ts",
             "locator": "line:154",
             "kind": "source-state-symbol"
+          },
+          {
+            "path": "tests/battleScriptHitChainOpcode.test.ts",
+            "locator": "STATUS3_CANT_SCORE_A_CRIT short-circuits a would-crit roll without consuming RNG",
+            "kind": "tier-1-behavior-test"
           }
         ],
         "notes": "State-family coverage is reported independently from move/effect reachability and oracle receipts."
@@ -16308,12 +16313,22 @@
         "label": "BATTLE_SCRIPT_STATUS3_LEECHSEED",
         "family": "volatile-status3",
         "sourceLine": 111,
-        "status": "source-modeled-no-focused-test",
+        "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleScriptSourceConstants.ts",
             "locator": "line:111",
             "kind": "source-state-symbol"
+          },
+          {
+            "path": "tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts",
+            "locator": "Leech Seed setter writes STATUS3_LEECHSEED plus its encoded seeder id",
+            "kind": "tier-1-behavior-test"
+          },
+          {
+            "path": "tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts",
+            "locator": "Rapid Spin lifecycle clears STATUS3_LEECHSEED and its encoded seeder before the LeechSeedFree continuation",
+            "kind": "tier-1-behavior-test"
           }
         ],
         "notes": "State-family coverage is reported independently from move/effect reachability and oracle receipts."
@@ -16323,12 +16338,27 @@
         "label": "BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK",
         "family": "volatile-status3",
         "sourceLine": 110,
-        "status": "source-modeled-no-focused-test",
+        "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleScriptSourceConstants.ts",
             "locator": "line:110",
             "kind": "source-state-symbol"
+          },
+          {
+            "path": "tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts",
+            "locator": "Leech Seed setter writes STATUS3_LEECHSEED plus its encoded seeder id",
+            "kind": "tier-1-behavior-test"
+          },
+          {
+            "path": "tests/battleEndTurnOrchestration.test.ts",
+            "locator": "Leech Seed end-turn decodes a nonzero encoded seeder owner and retains the seed lifecycle bit",
+            "kind": "tier-1-behavior-test"
+          },
+          {
+            "path": "tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts",
+            "locator": "Rapid Spin lifecycle clears STATUS3_LEECHSEED and its encoded seeder before the LeechSeedFree continuation",
+            "kind": "tier-1-behavior-test"
           }
         ],
         "notes": "State-family coverage is reported independently from move/effect reachability and oracle receipts."
@@ -16495,12 +16525,22 @@
         "label": "BATTLE_SCRIPT_STATUS3_YAWN",
         "family": "volatile-status3",
         "sourceLine": 102,
-        "status": "source-modeled-no-focused-test",
+        "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleScriptSourceConstants.ts",
             "locator": "line:102",
             "kind": "source-state-symbol"
+          },
+          {
+            "path": "tests/battleEndTurnOrchestration.test.ts",
+            "locator": "first end-turn pass only decrements the counter (TURN(2) -> TURN(1)), no sleep transition, zero RNG",
+            "kind": "tier-1-behavior-test"
+          },
+          {
+            "path": "tests/battleEndTurnOrchestration.test.ts",
+            "locator": "second end-turn pass empties the counter and fires the real sleep transition",
+            "kind": "tier-1-behavior-test"
           }
         ],
         "notes": "State-family coverage is reported independently from move/effect reachability and oracle receipts."
@@ -16637,12 +16677,17 @@
         "label": "SIDE_STATUS_WORE_OFF_LABEL",
         "family": "side-state",
         "sourceLine": 274,
-        "status": "source-modeled-no-focused-test",
+        "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
             "locator": "line:274",
             "kind": "source-state-symbol"
+          },
+          {
+            "path": "tests/battleScriptScreensWeatherOrchestration.test.ts",
+            "locator": "Light Screen: set -> 4 silent decrement ticks -> SideStatusWoreOff message/buffer on tick 5 -> re-set succeeds",
+            "kind": "tier-1-behavior-test"
           }
         ],
         "notes": "State-family coverage is reported independently from move/effect reachability and oracle receipts."

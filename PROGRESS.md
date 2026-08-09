@@ -5,12 +5,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1040 — [bounded MAIN worker, 2026-08-09] **Gate-6 state-family behavior evidence in progress**
+## 1040 — [bounded MAIN worker, 2026-08-09] **Gate-6 state-family Tier-1 gap closed; final verification pending**
 
-- **State:** real reducers already cover the five missing manifest rows; focused Tier-1 behavior now proves them, while the generated manifest remains **50/55** until the narrow evidence mapping is added and regenerated.
-- **Did:** strengthened the real interpreter/end-turn suites for status3 crit suppression (zero-draw would-crit), Leech Seed marker/low-bit owner/drain plus Rapid Spin cleanup, Yawn countdown/expiry, and Light Screen's shared wore-off message/buffer/re-set continuation.
-- **Next:** add a transparent five-row behavior-evidence map to the report, pin its manifest contract, regenerate the artifacts, then run the required focused/smoke/full/build checks.
-- **Notes:** focused reducer suites are **4 files / 509 tests** green; the prior smoke baseline is **375/375**. No production mechanics, oracle receipts, barriers/imports, or animation files changed.
+- **State:** the manifest now reports **55/55** state/status/volatile rows with focused Tier-1 evidence (was **50/55**); Gate 6 remains **OPEN**, effects remain static-only, and OFF requests remain **24/24** receipted.
+- **Did:** strengthened real interpreter/end-turn behavior for crit suppression, Leech Seed marker/encoded owner/drain/Rapid Spin cleanup, Yawn countdown/expiry, and Light Screen's shared wore-off message/buffer/re-set continuation. Added a narrow, locator-validated `STATE_FAMILY_BEHAVIOR_EVIDENCE` mapping and regenerated both manifest artifacts.
+- **Next:** run the final required full suite and production build, then commit the green completion/docs checkpoint. Do not resume the retired Battle-2 march.
+- **Notes:** focused state/end-turn/hit-chain/manifest/frontier checks are **7 files / 527 tests** green; smoke is **375/375**. No production mechanics, oracle receipts, barriers/imports, or animation files changed.
 
 ---
 
