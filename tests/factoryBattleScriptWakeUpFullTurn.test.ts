@@ -4,14 +4,12 @@ import {
   submitFactoryFullTurnDecision,
   type FactoryFullTurnConfig,
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
-import {
-  BATTLE_SCRIPT_STATUS1_SLEEP,
-  BATTLE_SCRIPT_STATUS2_MASKS,
-} from "../src/engine/battleScriptSourceConstants.ts";
 
 const TACKLE = 33;
 const SPLASH = 150;
 const UPROAR = 253;
+const SLEEP_COUNTER = 1;
+const UPROAR_TIMER_BITS = 0x70;
 
 const PLAYER_TACKLE = Object.freeze({
   kind: "use-move" as const,
@@ -133,11 +131,11 @@ describe("Factory full-turn sleep expiry", () => {
       ...base,
       player: {
         ...base.player,
-        status1: BATTLE_SCRIPT_STATUS1_SLEEP,
+        status1: SLEEP_COUNTER,
       },
       trainer: {
         ...base.trainer,
-        status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR,
+        status2: UPROAR_TIMER_BITS,
         // Uproar is a later multi-turn continuation; retain its source
         // gLockedMoves entry so the end-turn tail can finish honestly.
         lockedMove: UPROAR,
