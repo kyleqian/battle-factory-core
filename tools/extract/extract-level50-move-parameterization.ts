@@ -46,8 +46,38 @@ type Topology = {
   moves: TopologyMove[];
   level50FactoryReachableEffects: Array<{ id: number; effect: string; moves: Array<{ id: number; move: string }> }>;
 };
-type Graph = { labels: Array<{ name: string }> };
-type Program = { blocks: Array<{ label: string }> };
+type GraphStatement = {
+  line: number;
+  mnemonic: string;
+  operandTokens: string[];
+  labelOperands: string[];
+};
+type GraphLabel = { name: string; line: number; statements: GraphStatement[] };
+type GraphEdge = {
+  from: { label: string; line: number };
+  to: { label: string; line: number } | null;
+  kind: string;
+  provenance: { macro?: string };
+};
+type ConditionalGuard = {
+  from: { label: string; line: number };
+  command: { macro: string };
+  operands: Array<{ parameter: string; token: string }>;
+  takenDestination: { label: string; line: number } | null;
+};
+type Graph = {
+  labels: GraphLabel[];
+  controlFlow: {
+    edges: GraphEdge[];
+    conditionalGuards: ConditionalGuard[];
+  };
+};
+type ProgramStatement = {
+  source: { line: number };
+  mnemonic: string;
+  actualOperands: string[];
+};
+type Program = { blocks: Array<{ label: string; line: number; statements: ProgramStatement[] }> };
 type Inventory = { tiers: { level50: { moves: Array<{ id: number; move: string; animationScript: string }> } } };
 type AnimationComponents = { moves: Array<{ id: number; move: string; rootScript: string; componentIds: string[] }> };
 type HeldItems = { count: number; entries: Array<{ itemTableId: number; holdEffect: string; holdEffectParam: number }> };
@@ -65,6 +95,7 @@ const heldItems = readJson<HeldItems>("battle-frontier-held-items.json");
 const holdEffects = readJson<HoldEffects>("item-hold-effects.json");
 const abilityDisplay = readJson<AbilityDisplay>("summary-info.json");
 const battleUtilSource = readFileSync(join(RUN_ROOT, "reference", "pokeemerald", "src", "battle_util.c"), "utf8");
+const battleScriptCommandsSource = readFileSync(join(RUN_ROOT, "reference", "pokeemerald", "src", "battle_script_commands.c"), "utf8");
 
 if (moves.length !== 355 || moves.some((move, id) => move.id !== id)) throw new Error("moves.json must be the complete indexed move table");
 if (frontierSets.count !== 882 || frontierSets.entries.length !== 882) throw new Error("expected all 882 Frontier set rows");
@@ -75,14 +106,219 @@ const moveBySymbol = new Map(moves.map((move) => [move.move, move]));
 const topologyByMove = new Map(topology.moves.map((move) => [move.move, move]));
 const graphLabels = new Set(graph.labels.map((label) => label.name));
 const programLabels = new Set(program.blocks.map((block) => block.label));
+const graphLabelByName = new Map(graph.labels.map((label) => [label.name, label]));
+const programBlockByLabel = new Map(program.blocks.map((block) => [block.label, block]));
 const executionInventoryByMove = new Map(inventory.tiers.level50.moves.map((move) => [move.move, move]));
 const animationByMove = new Map(animationComponents.moves.map((move) => [move.move, move]));
 const soundMovesMatch = /static const u16 sSoundMovesTable\[\]\s*=\s*\{([\s\S]*?)\};/.exec(battleUtilSource);
 if (!soundMovesMatch) throw new Error("unable to locate sSoundMovesTable in battle_util.c");
-const soundMoves = new Set(
+const soundMoveSymbols = [
   [...soundMovesMatch[1]!.matchAll(/\bMOVE_[A-Z0-9_]+\b/g)].map((match) => match[0]!).filter((move) => move !== "MOVE_NONE"),
-);
-if (soundMoves.size !== 10) throw new Error(`expected ten source Soundproof move selectors, got ${soundMoves.size}`);
+].flat();
+const soundMoves = new Set(soundMoveSymbols);
+if (soundMoves.size !== 10 || soundMoveSymbols.length !== 10) {
+  throw new Error(`expected ten ordered source Soundproof move selectors, got ${soundMoveSymbols.length}/${soundMoves.size}`);
+}
+const soundMoveIndexBySymbol = new Map(soundMoveSymbols.map((move, index) => [move, index]));
+
+const SOUNDPROOF_CATEGORY = "moves-block-soundproof";
+const SOUNDPROOF_STATUS = "source-proven-family";
+const BATTLE_SCRIPT_SOURCE_PATH = "reference/pokeemerald/data/battle_scripts_1.s";
+const BATTLE_SCRIPT_GRAPH_PATH = "src/data/gen/battle-script-graph.json";
+const BATTLE_SCRIPT_PROGRAM_PATH = "src/data/gen/battle-script-program.json";
+const BATTLE_SCRIPT_COMMANDS_PATH = "reference/pokeemerald/src/battle_script_commands.c";
+const SOUNDPROOF_TABLE_PATH = "reference/pokeemerald/src/battle_util.c";
+const ATTACK_CANCELER_MOVES_BLOCK_CALL = "AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0)";
+
+function requireGraphLabel(label: string): GraphLabel {
+  const value = graphLabelByName.get(label);
+  if (!value) throw new Error(`Battle Script graph lacks ${label}`);
+  return value;
+}
+
+function requireProgramBlock(label: string): Program["blocks"][number] {
+  const value = programBlockByLabel.get(label);
+  if (!value) throw new Error(`Battle Script program lacks ${label}`);
+  return value;
+}
+
+function directAttackCanceler(label: string): { label: string; line: number } | null {
+  const graphLabel = requireGraphLabel(label);
+  const programBlock = requireProgramBlock(label);
+  const graphStatement = graphLabel.statements[0];
+  const programStatement = programBlock.statements[0];
+  if (graphStatement?.mnemonic !== "attackcanceler" || programStatement?.mnemonic !== "attackcanceler") {
+    return null;
+  }
+  if (graphStatement.line !== programStatement.source.line) {
+    throw new Error(`${label} attackcanceler graph/program line disagreement`);
+  }
+  return { label, line: graphStatement.line };
+}
+
+function requireGraphEdge(
+  fromLabel: string,
+  fromLine: number,
+  toLabel: string,
+  toLine: number,
+  kind: string,
+  macro: string,
+): void {
+  const found = graph.controlFlow.edges.some((edge) => (
+    edge.from.label === fromLabel
+    && edge.from.line === fromLine
+    && edge.to?.label === toLabel
+    && edge.to.line === toLine
+    && edge.kind === kind
+    && edge.provenance.macro === macro
+  ));
+  if (!found) {
+    throw new Error(`Battle Script graph lacks ${macro} ${fromLabel}:${fromLine} -> ${toLabel}:${toLine}`);
+  }
+}
+
+function sourceLine(source: string, marker: string, name: string): number {
+  const offset = source.indexOf(marker);
+  if (offset < 0) throw new Error(`unable to locate ${name}`);
+  return source.slice(0, offset).split("\n").length;
+}
+
+const attackCancelerDeclaration = battleScriptCommandsSource.indexOf("static void Cmd_attackcanceler(void)");
+const attackCancelerStart = battleScriptCommandsSource.indexOf("static void Cmd_attackcanceler(void)", attackCancelerDeclaration + 1);
+const attackCancelerEnd = battleScriptCommandsSource.indexOf("static void JumpIfMoveFailed", attackCancelerStart);
+if (attackCancelerDeclaration < 0 || attackCancelerStart < 0 || attackCancelerEnd < 0) throw new Error("unable to isolate Cmd_attackcanceler source");
+const attackCancelerSource = battleScriptCommandsSource.slice(attackCancelerStart, attackCancelerEnd);
+if (!attackCancelerSource.includes(`if (${ATTACK_CANCELER_MOVES_BLOCK_CALL})\n        return;`)) {
+  throw new Error("Cmd_attackcanceler no longer hands off to the source moves-block dispatcher before PP admission");
+}
+const soundproofTableLine = sourceLine(battleUtilSource, "static const u16 sSoundMovesTable", "sSoundMovesTable");
+const attackCancelerLine = battleScriptCommandsSource.slice(0, attackCancelerStart).split("\n").length;
+
+function soundproofEntryPath(move: string, entryScript: string) {
+  const direct = directAttackCanceler(entryScript);
+  if (direct) {
+    return {
+      kind: "direct-attackcanceler" as const,
+      source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: requireGraphLabel(entryScript).line },
+      graph: {
+        path: BATTLE_SCRIPT_GRAPH_PATH,
+        entryLabel: entryScript,
+        attackCanceler: direct,
+        route: [{ kind: "entry-opcode", label: entryScript, line: direct.line, mnemonic: "attackcanceler" }],
+      },
+      program: {
+        path: BATTLE_SCRIPT_PROGRAM_PATH,
+        entryLabel: entryScript,
+        attackCanceler: direct,
+        route: [{ kind: "entry-opcode", label: entryScript, line: direct.line, mnemonic: "attackcanceler" }],
+      },
+    };
+  }
+
+  const graphEntry = requireGraphLabel(entryScript);
+  const programEntry = requireProgramBlock(entryScript);
+  for (const statement of graphEntry.statements) {
+    if (statement.mnemonic !== "goto" || statement.labelOperands.length !== 1) continue;
+    const target = directAttackCanceler(statement.labelOperands[0]!);
+    if (!target) continue;
+    const programStatement = programEntry.statements.find((candidate) => (
+      candidate.source.line === statement.line
+      && candidate.mnemonic === "goto"
+      && candidate.actualOperands.length === 1
+      && candidate.actualOperands[0] === target.label
+    ));
+    if (!programStatement) throw new Error(`${entryScript}:${statement.line} goto is absent from Battle Script program`);
+    requireGraphEdge(entryScript, statement.line, target.label, target.line, "jump", "goto");
+    return {
+      kind: "goto-attackcanceler" as const,
+      source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: graphEntry.line },
+      graph: {
+        path: BATTLE_SCRIPT_GRAPH_PATH,
+        entryLabel: entryScript,
+        attackCanceler: target,
+        route: [
+          { kind: "goto", label: entryScript, line: statement.line, targetLabel: target.label },
+          { kind: "entry-opcode", label: target.label, line: target.line, mnemonic: "attackcanceler" },
+        ],
+      },
+      program: {
+        path: BATTLE_SCRIPT_PROGRAM_PATH,
+        entryLabel: entryScript,
+        attackCanceler: target,
+        route: [
+          { kind: "goto", label: entryScript, line: statement.line, targetLabel: target.label },
+          { kind: "entry-opcode", label: target.label, line: target.line, mnemonic: "attackcanceler" },
+        ],
+      },
+    };
+  }
+
+  for (const statement of graphEntry.statements) {
+    if (statement.mnemonic !== "jumpifnotmove" || statement.operandTokens.length !== 2) continue;
+    const [comparedMove, targetLabel] = statement.operandTokens;
+    if (move === comparedMove) continue;
+    const target = directAttackCanceler(targetLabel!);
+    if (!target) continue;
+    const guard = graph.controlFlow.conditionalGuards.find((candidate) => (
+      candidate.from.label === entryScript
+      && candidate.from.line === statement.line
+      && candidate.command.macro === "jumpifnotmove"
+      && candidate.operands[0]?.parameter === "move"
+      && candidate.operands[0]?.token === comparedMove
+      && candidate.takenDestination?.label === target.label
+      && candidate.takenDestination.line === target.line
+    ));
+    if (!guard) throw new Error(`${entryScript}:${statement.line} is missing its generated jumpifnotmove guard`);
+    const programStatement = programEntry.statements.find((candidate) => (
+      candidate.source.line === statement.line
+      && candidate.mnemonic === "jumpifnotmove"
+      && candidate.actualOperands[0] === comparedMove
+      && candidate.actualOperands[1] === target.label
+    ));
+    if (!programStatement) throw new Error(`${entryScript}:${statement.line} jumpifnotmove is absent from Battle Script program`);
+    requireGraphEdge(entryScript, statement.line, target.label, target.line, "jump", "jumpifnotmove");
+    return {
+      kind: "guarded-jumpifnotmove-attackcanceler" as const,
+      source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: graphEntry.line },
+      graph: {
+        path: BATTLE_SCRIPT_GRAPH_PATH,
+        entryLabel: entryScript,
+        attackCanceler: target,
+        route: [
+          {
+            kind: "jumpifnotmove",
+            label: entryScript,
+            line: statement.line,
+            currentMove: move,
+            comparedMove,
+            targetLabel: target.label,
+            satisfied: true,
+          },
+          { kind: "entry-opcode", label: target.label, line: target.line, mnemonic: "attackcanceler" },
+        ],
+      },
+      program: {
+        path: BATTLE_SCRIPT_PROGRAM_PATH,
+        entryLabel: entryScript,
+        attackCanceler: target,
+        route: [
+          {
+            kind: "jumpifnotmove",
+            label: entryScript,
+            line: statement.line,
+            currentMove: move,
+            comparedMove,
+            targetLabel: target.label,
+            satisfied: true,
+          },
+          { kind: "entry-opcode", label: target.label, line: target.line, mnemonic: "attackcanceler" },
+        ],
+      },
+    };
+  }
+
+  throw new Error(`${move} (${entryScript}) has no source-proven route to attackcanceler`);
+}
 
 type HookCategory = { id: string; dispatcher: string; selector: string; ownership: string };
 const ITEM_HOOK_CATALOG: HookCategory[] = [
@@ -129,6 +365,49 @@ const records = rosterMoveSymbols.map((symbol) => {
   if (animationInventory && (!animation || animation.rootScript !== animationInventory.animationScript)) {
     throw new Error(`${symbol} animation inventory/component graph disagreement`);
   }
+  const soundproofPath = soundMoves.has(symbol)
+    ? soundproofEntryPath(symbol, script.entryScript)
+    : null;
+  const abilityHook = soundproofPath === null
+    ? {
+      potentialCategories: null,
+      status: "unsupported",
+      supportedCategories: [],
+      unsupportedCategories: null,
+      reason: "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+    }
+    : {
+      potentialCategories: null,
+      status: SOUNDPROOF_STATUS,
+      supportedCategories: [SOUNDPROOF_CATEGORY],
+      unsupportedCategories: null,
+      reason: "Source-proven Soundproof moves-block family: this selector is in sSoundMovesTable, its exact generated Battle Script route reaches attackcanceler, and Cmd_attackcanceler calls AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK) before PP admission. This promotion does not claim unrelated ability families.",
+      evidence: {
+        category: SOUNDPROOF_CATEGORY,
+        selector: {
+          path: SOUNDPROOF_TABLE_PATH,
+          locator: "sSoundMovesTable",
+          symbol,
+          index: soundMoveIndexBySymbol.get(symbol),
+          tableLine: soundproofTableLine,
+        },
+        entryPath: soundproofPath,
+        dispatcher: {
+          path: BATTLE_SCRIPT_COMMANDS_PATH,
+          locator: "Cmd_attackcanceler",
+          line: attackCancelerLine,
+          call: ATTACK_CANCELER_MOVES_BLOCK_CALL,
+          order: "after AtkCanceler_UnableToUseMove and before selected-slot PP admission",
+        },
+        familyVerification: {
+          scope: "This proves only the selected-move ATTACKCANCELER route; Uproar continuation and Perish Song use separate Soundproof paths.",
+          implementation: "src/engine/battleScriptAbilityMovesBlock.ts#advanceBattleScriptMovesBlockAbility",
+          batchTest: "tests/battleScriptAbilityMovesBlock.test.ts#blocks every and only source sound selector in both singles orientations",
+          oracleReceipt: "tests/fixtures/soundproof-off-evidence.json#hyper-voice-blocked-by-soundproof",
+          oracleControl: "tests/fixtures/soundproof-off-evidence.json#tackle-control-still-hits-soundproof",
+        },
+      },
+    };
   return {
     id: move.id,
     move: move.move,
@@ -160,15 +439,11 @@ const records = rosterMoveSymbols.map((symbol) => {
       item: {
         potentialCategories: null,
         status: "unsupported",
+        supportedCategories: [],
         unsupportedCategories: null,
         reason: "Per-move item categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
       },
-      ability: {
-        potentialCategories: null,
-        status: "unsupported",
-        unsupportedCategories: null,
-        reason: "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
-      },
+      ability: abilityHook,
     },
   };
 });
@@ -176,8 +451,15 @@ const records = rosterMoveSymbols.map((symbol) => {
 const rosterEffects = new Set(records.map((record) => record.moveTable.effect));
 const executableRecords = records.filter((record) => record.battleScript.executionInventory === "level50-executable");
 const executableEffects = new Set(executableRecords.map((record) => record.moveTable.effect));
+const soundproofRosterRecords = records.filter((record) => record.hooks.ability.status === SOUNDPROOF_STATUS);
+if (soundproofRosterRecords.length !== 9) {
+  throw new Error(`expected nine Level-50 Soundproof selectors, got ${soundproofRosterRecords.length}`);
+}
+if (soundproofRosterRecords.some((record) => record.hooks.ability.supportedCategories.join(",") !== SOUNDPROOF_CATEGORY)) {
+  throw new Error("a Soundproof roster row does not carry the exact moves-block category");
+}
 const output = {
-  schema: "level50-move-parameterization/v2",
+  schema: "level50-move-parameterization/v3",
   source: {
     files: [
       "src/data/gen/moves.json",
@@ -195,7 +477,7 @@ const output = {
       "reference/pokeemerald/include/battle.h",
       "reference/pokeemerald/include/constants/pokemon.h",
     ],
-    note: "Catalog join plus an intentionally partial source dispatcher inventory. Per-move item/ability categories are unsupported/null until complete Battle Script control flow includes implicit fallthrough and source branch guards.",
+    note: "Catalog join plus an intentionally partial source dispatcher inventory. All per-move item joins and 291 per-move ability joins remain unsupported; the exact nine Level-50 sSoundMovesTable selectors carry source-proven moves-block-soundproof reachability with graph/program/source-handoff evidence.",
   },
   coverage: {
     level50Roster: {
@@ -214,9 +496,12 @@ const output = {
       battleScriptProgramLabels: records.filter((record) => record.battleScript.programLabel !== null).length,
       animationScripts: records.filter((record) => record.animation.script !== null).length,
       itemHookCategories: 0,
-      abilityHookCategories: 0,
+      abilityHookCategories: soundproofRosterRecords.length,
       itemHookUnsupportedCategories: null,
       abilityHookUnsupportedCategories: null,
+      itemHookUnsupportedRows: records.filter((record) => record.hooks.item.status === "unsupported").length,
+      abilityHookUnsupportedRows: records.filter((record) => record.hooks.ability.status === "unsupported").length,
+      abilityHookSourceProvenRows: soundproofRosterRecords.length,
     },
     hookCatalogs: {
       item: {
@@ -233,10 +518,12 @@ const output = {
         moveToHookDispatchers: ABILITY_HOOK_CATALOG,
         catalogedDispatcherCategories: ABILITY_HOOK_CATALOG.length,
         soundproofSourceSelectorRows: soundMoves.size,
-        soundproofLevel50RosterSelectorRows: records.filter((record) => soundMoves.has(record.move)).length,
+        soundproofLevel50RosterSelectorRows: soundproofRosterRecords.length,
+        soundproofSourceProvenRosterRows: soundproofRosterRecords.length,
+        soundproofUnsupportedLevel50RosterRows: records.length - soundproofRosterRecords.length,
         completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "Only Soundproof, absorber/type, contact/on-damage, and accuracy dispatcher selectors are inventoried. Per-move joins and all other ability dispatchers remain unsupported/null.",
+        reason: "The exact Level-50 Soundproof moves-block family is source-proven. Absorber/type, contact/on-damage, accuracy, and all other ability dispatcher families remain intentionally unsupported/null per move.",
       },
     },
   },

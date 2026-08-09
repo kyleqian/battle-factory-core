@@ -128,7 +128,7 @@ function assertManifest(manifest: AnyRecord): void {
     }
     let unsupported = 0;
     for (const move of parameterizationMoves) {
-      const sourceHook = parameterizedUnsupportedHook(move, axis);
+      const sourceHook = parameterizedHook(move, axis);
       const row = rowsByMove.get(move.move);
       if (!row) throw new Error(`Gate-6 manifest lacks ${axis} hook-join row for ${move.move}`);
       if (row.status !== sourceHook.status || !String(row.reason ?? "").trim()) {
@@ -144,7 +144,40 @@ function assertManifest(manifest: AnyRecord): void {
       if (!(row.evidence as Evidence[] | undefined)?.some((item) => item.path === PARAMETERIZATION_PATH && item.locator === sourceLocator)) {
         throw new Error(`Gate-6 manifest ${axis} hook-join evidence lacks ${move.move}`);
       }
-      if (row.status === "unsupported") unsupported += 1;
+      if (row.status === "unsupported") {
+        if (!Array.isArray(row.categories) || row.categories.length !== 0) {
+          throw new Error(`unsupported ${axis} hook-join row for ${move.move} claims a category`);
+        }
+        unsupported += 1;
+      } else if (row.status === SOURCE_PROVEN_FAMILY_STATUS) {
+        if (
+          axis !== "ability"
+          || !Array.isArray(row.categories)
+          || row.categories.length !== 1
+          || row.categories[0] !== SOUNDPROOF_MOVES_BLOCK_CATEGORY
+          || !String(row.notes ?? "").includes("unrelated ability families")
+        ) {
+          throw new Error(`source-proven ${axis} hook-join row for ${move.move} overclaims coverage`);
+        }
+        const requiredEvidencePaths = [
+          "reference/pokeemerald/src/battle_util.c",
+          "reference/pokeemerald/data/battle_scripts_1.s",
+          "src/data/gen/battle-script-graph.json",
+          "src/data/gen/battle-script-program.json",
+          "reference/pokeemerald/src/battle_script_commands.c",
+          "src/engine/battleScriptAbilityMovesBlock.ts",
+          "tests/battleScriptAbilityMovesBlock.test.ts",
+          "tests/soundproofOracleEvidence.test.ts",
+          "tests/fixtures/soundproof-off-evidence.json",
+        ];
+        for (const path of requiredEvidencePaths) {
+          if (!(row.evidence as Evidence[]).some((item) => item.path === path)) {
+            throw new Error(`source-proven ${axis} hook-join row for ${move.move} lacks ${path}`);
+          }
+        }
+      } else {
+        throw new Error(`Gate-6 manifest ${axis} hook-join row for ${move.move} has an unknown status`);
+      }
     }
     if (summary.rows !== rows.length || summary.unsupported !== unsupported || summary.gaps !== unsupported) {
       throw new Error(`Gate-6 manifest ${axis} hook-join summary has a false count or zero-gap claim`);
@@ -230,28 +263,62 @@ const level50EffectNames = new Set(
 );
 
 /**
- * The parameterization deliberately leaves both per-move hook joins
- * unsupported: a sound join needs Battle Script fallthrough and source guard
- * reachability, neither of which the catalog currently models. Keep those
- * finite gaps visible here without copying the parameterization's large move
- * payload into this report a second time.
+ * The parameterization deliberately keeps its per-move joins explicit. The
+ * one narrow exception is the source-proven Soundproof moves-block family:
+ * exact sSoundMovesTable selectors have graph/program/source-handoff proof.
+ * Keep the remaining finite gaps visible without copying the parameterization's
+ * large move payload into this report a second time.
  */
 type PerMoveHookJoinAxis = "item" | "ability";
 const PER_MOVE_HOOK_JOIN_AXES: readonly PerMoveHookJoinAxis[] = ["item", "ability"];
+const SOURCE_PROVEN_FAMILY_STATUS = "source-proven-family";
+const SOUNDPROOF_MOVES_BLOCK_CATEGORY = "moves-block-soundproof";
 const parameterizationMoves = parameterization.moves as AnyRecord[];
 if (parameterizationMoves.length !== parameterizedMoves.size) {
   throw new Error("level50 parameterization has duplicate move identities");
 }
 
-function parameterizedUnsupportedHook(move: AnyRecord, axis: PerMoveHookJoinAxis): AnyRecord {
+function parameterizedHook(move: AnyRecord, axis: PerMoveHookJoinAxis): AnyRecord {
   const hook = move.hooks?.[axis] as AnyRecord | undefined;
-  if (hook?.status !== "unsupported") {
-    throw new Error(`level50 parameterization ${move.move}.${axis} must remain explicitly unsupported`);
+  if (!hook || !String(hook.reason ?? "").trim()) {
+    throw new Error(`level50 parameterization ${move.move}.${axis} lacks an explicit hook status/reason`);
   }
-  if (!String(hook.reason ?? "").trim()) {
-    throw new Error(`level50 parameterization ${move.move}.${axis} lacks an unsupported reason`);
+  if (hook.status === "unsupported") {
+    if (!Array.isArray(hook.supportedCategories) || hook.supportedCategories.length !== 0) {
+      throw new Error(`unsupported ${move.move}.${axis} must not claim a supported category`);
+    }
+    return hook;
+  }
+  if (
+    axis !== "ability"
+    || hook.status !== SOURCE_PROVEN_FAMILY_STATUS
+    || !Array.isArray(hook.supportedCategories)
+    || hook.supportedCategories.length !== 1
+    || hook.supportedCategories[0] !== SOUNDPROOF_MOVES_BLOCK_CATEGORY
+    || hook.evidence?.category !== SOUNDPROOF_MOVES_BLOCK_CATEGORY
+    || hook.evidence?.selector?.symbol !== move.move
+    || !hook.evidence?.entryPath?.graph?.path
+    || !hook.evidence?.entryPath?.program?.path
+    || !hook.evidence?.dispatcher?.path
+  ) {
+    throw new Error(`level50 parameterization ${move.move}.${axis} has an unsupported non-gap hook status`);
   }
   return hook;
+}
+
+function sourceProvenHookEvidence(hook: AnyRecord): Evidence[] {
+  const proof = hook.evidence as AnyRecord;
+  return uniqueEvidence([
+    evidence(proof.selector.path, "source-selector-table", proof.selector.locator),
+    evidence(proof.entryPath.source.path, "battle-script-entry-path", `${proof.entryPath.graph.entryLabel}:${proof.entryPath.source.entryLine}`),
+    evidence(proof.entryPath.graph.path, "generated-battle-script-graph", `${proof.entryPath.graph.entryLabel}->${proof.entryPath.graph.attackCanceler.label}`),
+    evidence(proof.entryPath.program.path, "generated-battle-script-program", `${proof.entryPath.program.entryLabel}->${proof.entryPath.program.attackCanceler.label}`),
+    evidence(proof.dispatcher.path, "source-moves-block-dispatcher", proof.dispatcher.locator),
+    evidence("src/engine/battleScriptAbilityMovesBlock.ts", "source-shaped-family-implementation", "advanceBattleScriptMovesBlockAbility"),
+    evidence("tests/battleScriptAbilityMovesBlock.test.ts", "tier-1-sibling-batch", "blocks every and only source sound selector in both singles orientations"),
+    evidence("tests/soundproofOracleEvidence.test.ts", "battle-scene-off-evidence-test", "hyper-voice-blocked-by-soundproof"),
+    evidence("tests/fixtures/soundproof-off-evidence.json", "battle-scene-off-oracle-receipt", "hyper-voice-blocked-by-soundproof"),
+  ]);
 }
 
 function makePerMoveHookJoinRows(axis: PerMoveHookJoinAxis): Row[] {
@@ -259,8 +326,9 @@ function makePerMoveHookJoinRows(axis: PerMoveHookJoinAxis): Row[] {
     if (typeof move.move !== "string" || !Number.isSafeInteger(move.id)) {
       throw new Error("level50 parameterization has an invalid move identity");
     }
-    const hook = parameterizedUnsupportedHook(move, axis);
+    const hook = parameterizedHook(move, axis);
     const sourceLocator = `moves:${move.move}.hooks.${axis}`;
+    const sourceProven = hook.status === SOURCE_PROVEN_FAMILY_STATUS;
     return Object.freeze({
       id: `per-move-hook-join:${axis}:${move.move}`,
       label: move.move,
@@ -271,12 +339,16 @@ function makePerMoveHookJoinRows(axis: PerMoveHookJoinAxis): Row[] {
       effectId: move.battleScript?.effectId,
       entryScript: move.battleScript?.entryScript,
       status: hook.status,
+      categories: hook.supportedCategories,
       reason: hook.reason,
       sourceArtifact: { path: PARAMETERIZATION_PATH, locator: sourceLocator },
-      evidence: [
+      evidence: uniqueEvidence([
         evidence(PARAMETERIZATION_PATH, "per-move-hook-join-source", sourceLocator),
-      ],
-      notes: "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified.",
+        ...(sourceProven ? sourceProvenHookEvidence(hook) : []),
+      ]),
+      notes: sourceProven
+        ? "Source-proven only for the moves-block-soundproof family; unrelated ability families are not promoted."
+        : "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified.",
     });
   });
 }
@@ -819,6 +891,13 @@ const sourceInputs = [
   ITEM_HOLD_EFFECTS_PATH,
   MOVES_PATH,
   HOOKS_PATH,
+  "reference/pokeemerald/src/battle_util.c",
+  "reference/pokeemerald/src/battle_script_commands.c",
+  "reference/pokeemerald/data/battle_scripts_1.s",
+  "src/engine/battleScriptAbilityMovesBlock.ts",
+  "tests/battleScriptAbilityMovesBlock.test.ts",
+  "tests/soundproofOracleEvidence.test.ts",
+  "tests/fixtures/soundproof-off-evidence.json",
 ];
 for (const path of sourceInputs) requirePath(path);
 
@@ -891,7 +970,7 @@ const markdown: string[] = [
   "## Headline",
   "",
   `- Effects: **${manifest.summary.effects.staticExecutable}/${manifest.summary.effects.total} static-executable**; moves: **${manifest.summary.moves.staticExecutable}/${manifest.summary.moves.total}** static-executable (**${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}** Level-50 roster moves executable, **${manifest.summary.moves.level50RosterOnly}** roster-only).`,
-  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; every row remains explicitly unsupported with its source-artifact locator and reason.`,
+  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven only for the Soundproof moves-block family, while every remaining gap retains its source-artifact locator and reason.`,
   `- State/status/volatile rows: **${manifest.summary.stateFamilies.tier1Covered}/${manifest.summary.stateFamilies.total}** have focused Tier-1 evidence; source-modeled rows remain listed separately.`,
   `- Hook universes: **${manifest.summary.hooks.abilities.total} abilities** and **${manifest.summary.hooks.holdEffects.total} hold effects**, including **${manifest.summary.hooks.abilities.zeroFactoryWidened + manifest.summary.hooks.holdEffects.zeroFactoryWidened}** legal widened-scope rows with zero Level-50 Factory carriers.`,
   `- Corpus: **${manifest.summary.corpus.ordinaryTrainers}/${trainers.count} ordinary trainers** and **${manifest.summary.corpus.level50Sets}/${LEVEL50_SET_COUNT} Level-50 sets** joined; the full set catalog contains ${manifest.summary.corpus.fullSetCatalog} rows including Open-only sets.`,
@@ -903,6 +982,7 @@ const markdown: string[] = [
   "- `static-executable` comes only from the executable-frontier census and means opcode/operand reachability, not correct state transitions.",
   "- `engine-referenced` comes only from the ability/item census. It is a worklist fact, not semantic verification.",
   "- `catalog-joined` proves a finite source/data join. It does not provide a per-trainer or per-set oracle receipt.",
+  "- `source-proven-family` per-move hook joins name their exact supported category and carry the source selector, generated graph/program route, Cmd_attackcanceler handoff, Tier-1 sibling batch, and one shared Battle Scene OFF receipt. It does not claim unrelated families.",
   "- `unsupported` per-move hook joins are intentionally not inferred from the partial dispatcher catalogs. Each row repeats only move identity, effect, entry script, reason, and a locator into `level50-move-parameterization.json`; it is not a support claim.",
   "- `oracle-receipted` requires a committed Gate-6 request card and a completed receipt-note heading in the scout. Fixture-only rows are intentionally not promoted.",
   "- The five entries in `STATE_FAMILY_BEHAVIOR_EVIDENCE` use named behavior-test locators instead of token presence; that narrow Tier-1 override does not alter static, semantic, or oracle classifications.",
@@ -926,20 +1006,22 @@ markdown.push(...table("Moves (all topology rows)", ["Move", "Effect", "Static s
   (row) => row.semanticAcceptance,
   (row) => evidenceText(row.evidence),
 ]));
-markdown.push("## Per-move item and ability hook-join gaps\n\n");
-markdown.push(...table("Item hook joins (all Level-50 roster moves)", ["Move", "Effect", "Entry script", "Status", "Reason", "Source artifact evidence"], perMoveHookJoinRows.item, [
+markdown.push("## Per-move item and ability hook-join coverage\n\n");
+markdown.push(...table("Item hook joins (all Level-50 roster moves)", ["Move", "Effect", "Entry script", "Status", "Category", "Reason", "Source artifact evidence"], perMoveHookJoinRows.item, [
   (row) => row.move,
   (row) => row.effect,
   (row) => row.entryScript,
   (row) => row.status,
+  (row) => row.categories.length === 0 ? "—" : row.categories.join(", "),
   (row) => row.reason,
   (row) => evidenceText(row.evidence),
 ]));
-markdown.push(...table("Ability hook joins (all Level-50 roster moves)", ["Move", "Effect", "Entry script", "Status", "Reason", "Source artifact evidence"], perMoveHookJoinRows.ability, [
+markdown.push(...table("Ability hook joins (all Level-50 roster moves)", ["Move", "Effect", "Entry script", "Status", "Category", "Reason", "Source artifact evidence"], perMoveHookJoinRows.ability, [
   (row) => row.move,
   (row) => row.effect,
   (row) => row.entryScript,
   (row) => row.status,
+  (row) => row.categories.length === 0 ? "—" : row.categories.join(", "),
   (row) => row.reason,
   (row) => evidenceText(row.evidence),
 ]));

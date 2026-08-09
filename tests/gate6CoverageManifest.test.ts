@@ -14,6 +14,23 @@ type JsonObject = Record<string, unknown>;
 const JSON_PATH = "docs/gate6-coverage-manifest.json";
 const MARKDOWN_PATH = "docs/gate6-coverage-manifest.md";
 const PER_MOVE_HOOK_JOIN_AXES = ["item", "ability"] as const;
+const SOURCE_PROVEN_FAMILY_STATUS = "source-proven-family";
+const SOUNDPROOF_MOVES_BLOCK_CATEGORY = "moves-block-soundproof";
+const SOUNDPROOF_ROSTER_MOVES = [
+  "MOVE_ROAR", "MOVE_SING", "MOVE_SUPERSONIC", "MOVE_SCREECH", "MOVE_SNORE",
+  "MOVE_UPROAR", "MOVE_METAL_SOUND", "MOVE_GRASS_WHISTLE", "MOVE_HYPER_VOICE",
+] as const;
+const SOUNDPROOF_PROOF_PATHS = [
+  "reference/pokeemerald/src/battle_util.c",
+  "reference/pokeemerald/data/battle_scripts_1.s",
+  "src/data/gen/battle-script-graph.json",
+  "src/data/gen/battle-script-program.json",
+  "reference/pokeemerald/src/battle_script_commands.c",
+  "src/engine/battleScriptAbilityMovesBlock.ts",
+  "tests/battleScriptAbilityMovesBlock.test.ts",
+  "tests/soundproofOracleEvidence.test.ts",
+  "tests/fixtures/soundproof-off-evidence.json",
+] as const;
 
 const EXPLICIT_STATE_BEHAVIOR_ROWS = [
   [
@@ -113,13 +130,11 @@ function assertPerMoveHookJoinContract(manifest: JsonObject): void {
     let unsupported = 0;
     for (const sourceMove of parameterizationData.moves) {
       const sourceHook = record(record(sourceMove.hooks)[axis]);
-      if (sourceHook.status !== "unsupported" || !String(sourceHook.reason).trim()) {
-        throw new Error(`parameterization ${axis} hook for ${sourceMove.move} is no longer explicit unsupported`);
-      }
+      if (!String(sourceHook.reason).trim()) throw new Error(`parameterization ${axis} hook for ${sourceMove.move} lacks a reason`);
       const row = rowsByMove.get(sourceMove.move);
       if (!row) throw new Error(`missing ${axis} hook-join row for ${sourceMove.move}`);
-      if (row.axis !== axis || row.status !== "unsupported" || !String(row.reason).trim()) {
-        throw new Error(`${axis} hook-join row for ${sourceMove.move} is not explicit unsupported`);
+      if (row.axis !== axis || row.status !== sourceHook.status || !String(row.reason).trim()) {
+        throw new Error(`${axis} hook-join row for ${sourceMove.move} drifts from its source status/reason`);
       }
       if (row.effect !== sourceMove.moveTable.effect || row.entryScript !== sourceMove.battleScript.entryScript) {
         throw new Error(`${axis} hook-join row for ${sourceMove.move} lost its identity/effect evidence`);
@@ -135,7 +150,28 @@ function assertPerMoveHookJoinContract(manifest: JsonObject): void {
       })) {
         throw new Error(`${axis} hook-join row for ${sourceMove.move} lacks source artifact evidence`);
       }
-      unsupported += 1;
+      if (sourceHook.status === "unsupported") {
+        if (array(sourceHook.supportedCategories).length !== 0 || array(row.categories).length !== 0) {
+          throw new Error(`unsupported ${axis} hook-join row for ${sourceMove.move} claims a category`);
+        }
+        unsupported += 1;
+      } else if (sourceHook.status === SOURCE_PROVEN_FAMILY_STATUS) {
+        if (axis !== "ability") throw new Error(`item hook ${sourceMove.move} cannot be source-proven in this bounded family`);
+        if (
+          JSON.stringify(array(sourceHook.supportedCategories)) !== JSON.stringify([SOUNDPROOF_MOVES_BLOCK_CATEGORY])
+          || JSON.stringify(array(row.categories)) !== JSON.stringify([SOUNDPROOF_MOVES_BLOCK_CATEGORY])
+          || !String(row.notes).includes("unrelated ability families")
+        ) {
+          throw new Error(`source-proven ${axis} hook-join row for ${sourceMove.move} overclaims coverage`);
+        }
+        for (const path of SOUNDPROOF_PROOF_PATHS) {
+          if (!array(row.evidence).some((item) => record(item).path === path)) {
+            throw new Error(`source-proven ${axis} hook-join row for ${sourceMove.move} lacks ${path}`);
+          }
+        }
+      } else {
+        throw new Error(`unknown ${axis} hook-join status for ${sourceMove.move}: ${String(sourceHook.status)}`);
+      }
     }
 
     if (axisSummary.rows !== rows.length || axisSummary.unsupported !== unsupported || axisSummary.gaps !== unsupported) {
@@ -241,9 +277,25 @@ describe("Gate-6 mechanics coverage manifest", () => {
       const axisSummary = record(perMoveHookJoins[axis]);
       expect(rows).toHaveLength(parameterizationData.moves.length);
       expect(axisSummary).toEqual({ rows: rows.length, unsupported: sourceUnsupported, gaps: sourceUnsupported });
-      expect(sourceUnsupported).toBe(300);
+      expect(sourceUnsupported).toBe(axis === "item" ? 300 : 291);
     }
-    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 600, gaps: 600 });
+    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 591, gaps: 591 });
+    const sourceProven = parameterizationData.moves
+      .filter((move) => move.hooks.ability.status === SOURCE_PROVEN_FAMILY_STATUS)
+      .map((move) => move.move)
+      .sort();
+    expect(sourceProven).toEqual([...SOUNDPROOF_ROSTER_MOVES].sort());
+    const sourceProvenRows = array(manifestHookJoinSections.ability)
+      .map(record)
+      .filter((row) => row.status === SOURCE_PROVEN_FAMILY_STATUS);
+    expect(sourceProvenRows.map((row) => String(row.move)).sort()).toEqual([...SOUNDPROOF_ROSTER_MOVES].sort());
+    for (const row of sourceProvenRows) {
+      expect(array(row.categories)).toEqual([SOUNDPROOF_MOVES_BLOCK_CATEGORY]);
+      expect(String(row.notes)).toMatch(/unrelated ability families/);
+      for (const path of SOUNDPROOF_PROOF_PATHS) {
+        expect(array(row.evidence).map((item) => record(item).path)).toContain(path);
+      }
+    }
     expect(corpus.ordinaryTrainers).toBe(300);
     expect(corpus.level50Sets).toBe(850);
     expect(abilities.total).toBe(manifestAbilities.length);
@@ -344,7 +396,8 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(oracle.receiptGaps).toBe(0);
     expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*300 item join gaps\*\* and \*\*300 ability join gaps\*\*/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*300 item join gaps\*\* and \*\*291 ability join gaps\*\*/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/9 ability rows are source-proven only for the Soundproof moves-block family/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/24\/24.*scenario receipts documented; \*\*0\*\* request-level gaps/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Receipt count alone does not close the broader Gate-6 breadth acceptance/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).not.toMatch(/fixture-only-no-committed-receipt/);
