@@ -32,7 +32,7 @@ def main() -> None:
     setup = lab.prepare(request)
     RGB_DIR.mkdir(parents=True, exist_ok=True)
 
-    nm = subprocess.run(["arm-none-eabi-nm", str(reference / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
+    nm = subprocess.run(["arm-none-eabi-nm", "-a", str(reference / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
     symbols = {parts[2]: int(parts[0], 16) for line in nm.splitlines() if len(parts := line.split()) == 3}
     bounds = {name: symbols[name] for name in ("Move_ACID_ARMOR", "Move_SHARPEN")}
     task_funcs = {symbols[name] | 1 for name in ("AnimTask_AcidArmor", "AnimTask_AcidArmor_Step")}
@@ -47,7 +47,7 @@ def main() -> None:
     se1_info = oracle.symbols["gMPlayInfo_SE1"]
     se1_tracks = oracle.symbols["gMPlayTrack_SE1"]
     song_table = oracle.symbols["gSongTable"]
-    script_ptr = 0x020383F0  # static sBattleAnimScriptPtr
+    script_ptr = symbols["sBattleAnimScriptPtr"]
     software_oam = symbols["gMain"] + 0x38
 
     def u16(a: int) -> int:

@@ -26,8 +26,8 @@ type Fixture = SceneOnAcidArmorConfig & {
 type Frame = {
   readonly frame: number; readonly sha256: string; readonly animScriptActive: boolean; readonly scriptPtr: number;
   readonly engine: Record<string, unknown>; readonly player: Record<string, unknown>; readonly opponent: Record<string, unknown>;
-  readonly playerSprite: { readonly slot: number; readonly invisible: boolean; readonly attr: readonly number[]; readonly matrix: readonly number[]; readonly hardwareMatrix: readonly number[] };
-  readonly opponentSprite: { readonly slot: number; readonly invisible: boolean; readonly attr: readonly number[]; readonly matrix: readonly number[]; readonly hardwareMatrix: readonly number[] };
+  readonly playerSprite: { readonly slot: number; readonly invisible: boolean; readonly attr: readonly number[]; readonly matrixNum: number; readonly matrix: readonly number[]; readonly hardwareMatrix: readonly number[] };
+  readonly opponentSprite: { readonly slot: number; readonly invisible: boolean; readonly attr: readonly number[]; readonly matrixNum: number; readonly matrix: readonly number[]; readonly hardwareMatrix: readonly number[] };
   readonly tasks: readonly { readonly func: number; readonly data: readonly number[] }[];
   readonly scanline: { readonly dmaDest: number; readonly dmaControl: number; readonly srcBuffer: number; readonly state: number };
   readonly scanlineBuffers: readonly (readonly number[])[];
@@ -72,6 +72,12 @@ function framebufferDiff(app: Uint8Array, rgb: Buffer): number {
 
 function flatten(rows: readonly Readonly<{ hofs: number; vofs: number }>[]): number[] {
   return rows.flatMap(({ hofs, vofs }) => [hofs, vofs]);
+}
+
+function decodeSoftwareOam(raw: string): readonly number[] {
+  return [0, 4, 8].map((offset) => (
+    Number.parseInt(raw.slice(offset + 2, offset + 4) + raw.slice(offset, offset + 2), 16)
+  ));
 }
 
 function initializedOtherBuffer(side: "player" | "opponent"): number[] {
@@ -122,7 +128,21 @@ function verify(path: string, runNumber: number): void {
     if (row.registers.BLDCNT !== state.bldcnt || row.registers.BLDALPHA !== (state.bldcnt ? state.bldalpha : 0) || row.registers.BLDY !== 0) failures.push(`age ${age}: blend registers`);
     const paletteSource = fixture.orientation === "opponent-front" && age >= 1 ? probe.frames[1]! : first;
     if (row.fadedPalette.length !== 512 || !same(row.fadedPalette, paletteSource.fadedPalette) || !same(row.unfadedPalette, paletteSource.unfadedPalette) || !same(row.hardwarePalette, paletteSource.hardwarePalette)) failures.push(`age ${age}: palette immutability/transfer`);
-    if (row.softwareOam.length !== 128 || row.hardwareOam.length !== 128 || row.hardwareMatrices.length !== 32 || !same(attacker.matrix, attacker.hardwareMatrix)) failures.push(`age ${age}: OAM/matrix transfer`);
+    const previous = probe.frames[age - 1];
+    const oamTransfer = !previous || row.hardwareOam.every((entry, index) => (
+      same(entry, decodeSoftwareOam(previous.softwareOam[index]!))
+    ));
+    const previousAttacker = previous && (
+      fixture.attacker.geometry.side === "player" ? previous.playerSprite : previous.opponentSprite
+    );
+    const matrixTransfer = !previousAttacker || same(
+      row.hardwareMatrices[previousAttacker.matrixNum],
+      previousAttacker.matrix,
+    );
+    if (row.softwareOam.length !== 128 || row.hardwareOam.length !== 128
+      || row.hardwareMatrices.length !== 32 || !oamTransfer || !matrixTransfer) {
+      failures.push(`age ${age}: prior software-to-hardware OAM/matrix transfer`);
+    }
     if (!same(row.player, first.player) || !same(row.opponent, first.opponent)) failures.push(`age ${age}: immutable battle fields`);
     if (age >= 4 && age <= 76) {
       const pan = fixture.attacker.geometry.side === "player" ? -64 : 63;
