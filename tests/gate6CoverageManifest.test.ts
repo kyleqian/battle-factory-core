@@ -18,6 +18,7 @@ const SOURCE_PROVEN_FAMILY_STATUS = "source-proven-family";
 const SOUNDPROOF_MOVES_BLOCK_CATEGORY = "moves-block-soundproof";
 const CONTACT_CATEGORY = "moveend-contact-on-damage";
 const COLOR_CHANGE_CATEGORY = "moveend-color-change";
+const SYNCHRONIZE_CATEGORY = "moveend-synchronize-status";
 const SOUNDPROOF_ROSTER_MOVES = [
   "MOVE_ROAR", "MOVE_SING", "MOVE_SUPERSONIC", "MOVE_SCREECH", "MOVE_SNORE",
   "MOVE_UPROAR", "MOVE_METAL_SOUND", "MOVE_GRASS_WHISTLE", "MOVE_HYPER_VOICE",
@@ -84,6 +85,21 @@ const CONTACT_PROOF_PATHS = [
   "tools/battle-lab/mechanic-on-damage-static-off.json",
   "tools/probe/verify-on-damage-static.py",
   "tools/probe/receipts/on-damage-static-off.json",
+] as const;
+const SYNCHRONIZE_PROOF_PATHS = [
+  "reference/pokeemerald/src/battle_util.c",
+  "reference/pokeemerald/src/battle_script_commands.c",
+  "reference/pokeemerald/include/constants/battle_script_commands.h",
+  "reference/pokeemerald/data/battle_scripts_1.s",
+  "src/data/gen/battle-script-graph.json",
+  "src/data/gen/battle-script-program.json",
+  "src/engine/battleScriptMoveEndOpcode.ts",
+  "tests/battleScriptMoveEndOpcode.test.ts",
+  "docs/synchronize-abilities-ground-truth.md",
+  "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+  "tools/probe/probe-synchronize-off.py",
+  "tools/probe/receipts/synchronize-off-seed-610839776.json",
+  "tools/probe/receipts/synchronize-off-seed-324508639.json",
 ] as const;
 
 const EXPLICIT_STATE_BEHAVIOR_ROWS = [
@@ -162,6 +178,7 @@ function sourceProvenPathsFor(category: string): readonly string[] {
   if ((ABSORBING_CATEGORIES as readonly string[]).includes(category)) return ABSORBING_PROOF_PATHS;
   if (category === CONTACT_CATEGORY) return CONTACT_PROOF_PATHS;
   if (category === COLOR_CHANGE_CATEGORY) return COLOR_CHANGE_PROOF_PATHS;
+  if (category === SYNCHRONIZE_CATEGORY) return SYNCHRONIZE_PROOF_PATHS;
   throw new Error(`unknown source-proven ability category ${category}`);
 }
 
@@ -247,6 +264,33 @@ function assertSourceProvenFamilyContract(
       ]);
       expect(array(record(family.familyVerification).abilityOutcomes)).toHaveLength(6);
       expect(String(record(family.familyVerification).scopeBoundary)).toMatch(/No per-move oracle receipts are authored/);
+    }
+    if (family.category === SYNCHRONIZE_CATEGORY) {
+      const selector = record(family.selector);
+      const dispatcher = record(family.dispatcher);
+      const graphRoute = array(graph.route);
+      const programRoute = array(program.route);
+      expect(String(selector.entryScript)).toMatch(/^BattleScript_/);
+      expect(array(selector.selectedEffects).length).toBeGreaterThan(0);
+      expect(graphRoute).toEqual(programRoute);
+      expect(graphRoute).toEqual(expect.arrayContaining([
+        expect.objectContaining({ mnemonic: String(record(entryPath.setter).mnemonic) }),
+        expect.objectContaining({ mnemonic: String(record(entryPath.dispatch).mnemonic) }),
+        expect.objectContaining({ mnemonic: String(record(entryPath.moveEnd).mnemonic) }),
+      ]));
+      expect(record(dispatcher.target)).toMatchObject({ state: "MOVEEND_SYNCHRONIZE_TARGET", stateValue: 2 });
+      expect(record(dispatcher.attacker)).toMatchObject({ state: "MOVEEND_SYNCHRONIZE_ATTACKER", stateValue: 5 });
+      expect(array(record(family.runtimeGuardSignature).selector.effects).length).toBe(4);
+      expect(array(record(family.runtimeGuardSignature).chance.guards).length).toBeGreaterThan(0);
+      expect(record(family.familyVerification)).toMatchObject({
+        oracleReceipt: "docs/synchronize-abilities-ground-truth.md#3-two-seed-battle-scene-off-receipts",
+        oracleFixture: "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+        oracleProbe: "tools/probe/probe-synchronize-off.py",
+      });
+      expect(array(record(family.familyVerification).oracleReceiptFiles)).toEqual([
+        "tools/probe/receipts/synchronize-off-seed-610839776.json",
+        "tools/probe/receipts/synchronize-off-seed-324508639.json",
+      ]);
     }
     for (const path of sourceProvenPathsFor(String(family.category))) {
       if (!array(row.evidence).some((item) => record(item).path === path)) {
@@ -395,6 +439,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const moves = record(summary.moves);
     const perMoveHookJoins = record(summary.perMoveHookJoins);
     const onDamageMoveEnd = record(summary.onDamageMoveEnd);
+    const synchronizeMoveEnd = record(summary.synchronizeMoveEnd);
     const corpus = record(summary.corpus);
     const hooks = record(summary.hooks);
     const abilities = record(hooks.abilities);
@@ -406,6 +451,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const manifestMoves = array(moveEffect.moves);
     const manifestHookJoinSections = record(sections.perMoveHookJoins);
     const manifestOnDamageMoveEnd = record(sections.onDamageMoveEnd);
+    const manifestSynchronizeMoveEnd = record(sections.synchronizeMoveEnd);
     const stateFamilies = array(sections.stateFamilies);
     const manifestTrainers = array(record(sections.corpus).trainers);
     const manifestSets = array(record(sections.corpus).level50Sets);
@@ -444,9 +490,19 @@ describe("Gate-6 mechanics coverage manifest", () => {
       const axisSummary = record(perMoveHookJoins[axis]);
       expect(rows).toHaveLength(parameterizationData.moves.length);
       expect(axisSummary).toEqual({ rows: rows.length, unsupported: sourceUnsupported, gaps: sourceUnsupported });
-      expect(sourceUnsupported).toBe(axis === "item" ? 300 : 111);
+      expect(sourceUnsupported).toBe(axis === "item" ? 300 : 107);
     }
-    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 411, gaps: 411 });
+    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 407, gaps: 407 });
+    expect(synchronizeMoveEnd).toEqual({ candidates: 30, promotedRows: 30, exceptions: 0, blockers: 0 });
+    expect(manifestSynchronizeMoveEnd).toMatchObject({
+      status: SOURCE_PROVEN_FAMILY_STATUS,
+      candidates: 30,
+      promotedRows: 30,
+      exceptions: 0,
+      blockers: 0,
+      candidateMoves: expect.arrayContaining(["MOVE_TOXIC", "MOVE_THUNDER_WAVE", "MOVE_BOUNCE"]),
+    });
+    expect(String(manifestSynchronizeMoveEnd.notes)).toMatch(/30 candidates are promoted/);
     expect(onDamageMoveEnd).toEqual({
       contactCandidates: 94,
       colorChangeCandidates: 183,
@@ -491,7 +547,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const sourceProven = parameterizationData.moves
       .filter((move) => move.hooks.ability.status === SOURCE_PROVEN_FAMILY_STATUS)
       .map((move) => move.move);
-    expect(sourceProven).toHaveLength(189);
+    expect(sourceProven).toHaveLength(193);
     const sourceSoundproof = parameterizationData.moves
       .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(SOUNDPROOF_MOVES_BLOCK_CATEGORY))
       .map((move) => move.move)
@@ -508,11 +564,15 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(sourceColorChange).not.toContain("MOVE_FUTURE_SIGHT");
     const soundproofOnlyAbilityGaps = parameterizationData.moves.length - sourceSoundproof.length;
     expect(soundproofOnlyAbilityGaps).toBe(291);
-    const uniqueNonSoundproofProven = new Set([...sourceAbsorbing, ...sourceColorChange]
+    const sourceSynchronize = parameterizationData.moves
+      .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(SYNCHRONIZE_CATEGORY))
+      .map((move) => move.move);
+    expect(sourceSynchronize).toHaveLength(30);
+    const uniqueNonSoundproofProven = new Set([...sourceAbsorbing, ...sourceColorChange, ...sourceSynchronize]
       .filter((move) => !sourceSoundproof.includes(move)));
     expect(soundproofOnlyAbilityGaps - Number(record(perMoveHookJoins.ability).gaps)).toBe(uniqueNonSoundproofProven.size);
     expect(parameterizationData.moves.length + soundproofOnlyAbilityGaps).toBe(591);
-    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(411);
+    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(407);
     const sourceProvenRows = array(manifestHookJoinSections.ability)
       .map(record)
       .filter((row) => row.status === SOURCE_PROVEN_FAMILY_STATUS);
@@ -580,6 +640,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
       COLOR_CHANGE_CATEGORY,
       "absorbing-volt-absorb",
       CONTACT_CATEGORY,
+      SYNCHRONIZE_CATEGORY,
     ]);
     expect(() => assertSourceProvenFamilyContract(mixedSourceHook, mixedRow)).not.toThrow();
   });
@@ -685,8 +746,9 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(oracle.receiptGaps).toBe(0);
     expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*300 item join gaps\*\* and \*\*111 ability join gaps\*\*/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/189 ability rows are source-proven/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*300 item join gaps\*\* and \*\*107 ability join gaps\*\*/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/193 ability rows are source-proven/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Synchronize checkpoint: \*\*30\*\* finite Level-50 candidates, \*\*30\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/ON_DAMAGE checkpoint: \*\*94\*\* contact candidates and \*\*183\*\* Color Change candidates/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/24\/24.*scenario receipts documented; \*\*0\*\* request-level gaps/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Receipt count alone does not close the broader Gate-6 breadth acceptance/);

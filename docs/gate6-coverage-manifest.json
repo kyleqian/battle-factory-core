@@ -3,7 +3,7 @@
   "gate6": {
     "closed": false,
     "verdict": "OPEN — this first manifest exposes coverage and receipt gaps; it does not claim Gate 6 closed.",
-    "nextAcceptanceUnit": "Per-move hook-join family: Choose one source-bounded item or ability hook-join family and account for complete Battle Script reachability, including implicit fallthrough and source branch guards. Do not promote the remaining explicit gaps: 300 item joins and 111 ability joins remain unsupported.",
+    "nextAcceptanceUnit": "Per-move hook-join family: Choose one source-bounded item or ability hook-join family and account for complete Battle Script reachability, including implicit fallthrough and source branch guards. Do not promote the remaining explicit gaps: 300 item joins and 107 ability joins remain unsupported.",
     "interpretation": "Static executable reachability, engine references, Tier-1 proofs, and oracle receipts are separate evidence classes."
   },
   "generatedBy": "node --experimental-strip-types tools/report/gate6-coverage-manifest.ts",
@@ -53,7 +53,12 @@
     "tests/onDamageContactOracleEvidence.test.ts",
     "tools/battle-lab/mechanic-on-damage-static-off.json",
     "tools/probe/verify-on-damage-static.py",
-    "tools/probe/receipts/on-damage-static-off.json"
+    "tools/probe/receipts/on-damage-static-off.json",
+    "docs/synchronize-abilities-ground-truth.md",
+    "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+    "tools/probe/probe-synchronize-off.py",
+    "tools/probe/receipts/synchronize-off-seed-610839776.json",
+    "tools/probe/receipts/synchronize-off-seed-324508639.json"
   ],
   "summary": {
     "effects": {
@@ -75,13 +80,13 @@
       },
       "ability": {
         "rows": 300,
-        "unsupported": 111,
-        "gaps": 111
+        "unsupported": 107,
+        "gaps": 107
       },
       "total": {
         "rows": 600,
-        "unsupported": 411,
-        "gaps": 411
+        "unsupported": 407,
+        "gaps": 407
       }
     },
     "onDamageMoveEnd": {
@@ -100,6 +105,12 @@
       "colorChangeBlockers": 0,
       "colorChangeRetiredBlockers": 2,
       "promotedRows": 182
+    },
+    "synchronizeMoveEnd": {
+      "candidates": 30,
+      "promotedRows": 30,
+      "exceptions": 0,
+      "blockers": 0
     },
     "stateFamilies": {
       "total": 55,
@@ -23790,9 +23801,10 @@
           "categories": [
             "absorbing-flash-fire",
             "moveend-contact-on-damage",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: absorbing-flash-fire, moveend-contact-on-damage, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire, moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_FIRE_PUNCH.hooks.ability"
@@ -23960,9 +23972,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectBurnHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for absorbing-flash-fire, moveend-contact-on-damage, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for absorbing-flash-fire, moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_ICE_PUNCH",
@@ -24108,9 +24196,10 @@
           "categories": [
             "absorbing-volt-absorb",
             "moveend-contact-on-damage",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: absorbing-volt-absorb, moveend-contact-on-damage, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: absorbing-volt-absorb, moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_THUNDER_PUNCH.hooks.ability"
@@ -24278,9 +24367,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyzeHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for absorbing-volt-absorb, moveend-contact-on-damage, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for absorbing-volt-absorb, moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SCRATCH",
@@ -26389,9 +26554,10 @@
           "status": "source-proven-family",
           "categories": [
             "moveend-contact-on-damage",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: moveend-contact-on-damage, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_BODY_SLAM.hooks.ability"
@@ -26504,9 +26670,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyzeHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-contact-on-damage, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_WRAP",
@@ -27068,9 +27310,10 @@
           "entryScript": "BattleScript_EffectPoisonHit",
           "status": "source-proven-family",
           "categories": [
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_POISON_STING.hooks.ability"
@@ -27146,9 +27389,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectPoisonHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectPoisonHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectPoisonHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_TWINEEDLE",
@@ -27161,9 +27480,10 @@
           "entryScript": "BattleScript_EffectTwineedle",
           "status": "source-proven-family",
           "categories": [
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_TWINEEDLE.hooks.ability"
@@ -27239,9 +27559,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectTwineedle -> setbyte",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectTwineedle->BattleScript_MultiHitEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectTwineedle->BattleScript_MultiHitEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_PIN_MISSILE",
@@ -27931,9 +28327,10 @@
           "status": "source-proven-family",
           "categories": [
             "absorbing-flash-fire",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: absorbing-flash-fire, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_EMBER.hooks.ability"
@@ -28064,9 +28461,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectBurnHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for absorbing-flash-fire, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for absorbing-flash-fire, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_FLAMETHROWER",
@@ -28080,9 +28553,10 @@
           "status": "source-proven-family",
           "categories": [
             "absorbing-flash-fire",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: absorbing-flash-fire, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_FLAMETHROWER.hooks.ability"
@@ -28213,9 +28687,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectBurnHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for absorbing-flash-fire, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for absorbing-flash-fire, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_WATER_GUN",
@@ -30495,9 +31045,11 @@
           "effect": "EFFECT_PARALYZE",
           "effectId": 67,
           "entryScript": "BattleScript_EffectParalyze",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "moveend-synchronize-status"
+          ],
+          "reason": "Source-proven ability family/categories: moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_STUN_SPORE.hooks.ability"
@@ -30507,9 +31059,90 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_STUN_SPORE.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyze -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyze:1007",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectParalyze->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectParalyze->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SLEEP_POWDER",
@@ -30946,9 +31579,10 @@
           "status": "source-proven-family",
           "categories": [
             "absorbing-volt-absorb",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: absorbing-volt-absorb, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: absorbing-volt-absorb, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_THUNDERBOLT.hooks.ability"
@@ -31079,9 +31713,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyzeHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for absorbing-volt-absorb, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for absorbing-volt-absorb, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_THUNDER_WAVE",
@@ -31092,9 +31802,11 @@
           "effect": "EFFECT_PARALYZE",
           "effectId": 67,
           "entryScript": "BattleScript_EffectParalyze",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "moveend-synchronize-status"
+          ],
+          "reason": "Source-proven ability family/categories: moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_THUNDER_WAVE.hooks.ability"
@@ -31104,9 +31816,90 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_THUNDER_WAVE.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyze -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyze:1007",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectParalyze->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectParalyze->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_THUNDER",
@@ -31120,9 +31913,10 @@
           "status": "source-proven-family",
           "categories": [
             "absorbing-volt-absorb",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: absorbing-volt-absorb, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: absorbing-volt-absorb, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_THUNDER.hooks.ability"
@@ -31253,9 +32047,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectThunder -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectThunder->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectThunder->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for absorbing-volt-absorb, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for absorbing-volt-absorb, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_ROCK_THROW",
@@ -31676,9 +32546,11 @@
           "effect": "EFFECT_TOXIC",
           "effectId": 33,
           "entryScript": "BattleScript_EffectToxic",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "moveend-synchronize-status"
+          ],
+          "reason": "Source-proven ability family/categories: moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_TOXIC.hooks.ability"
@@ -31688,9 +32560,90 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_TOXIC.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectToxic -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectToxic:686",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectToxic->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectToxic->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_CONFUSION",
@@ -32885,9 +33838,10 @@
           "status": "source-proven-family",
           "categories": [
             "moveend-contact-on-damage",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: moveend-contact-on-damage, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_LICK.hooks.ability"
@@ -33000,9 +33954,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyzeHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-contact-on-damage, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SMOG",
@@ -33015,9 +34045,10 @@
           "entryScript": "BattleScript_EffectPoisonHit",
           "status": "source-proven-family",
           "categories": [
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SMOG.hooks.ability"
@@ -33093,9 +34124,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectPoisonHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectPoisonHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectPoisonHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SLUDGE",
@@ -33108,9 +34215,10 @@
           "entryScript": "BattleScript_EffectPoisonHit",
           "status": "source-proven-family",
           "categories": [
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SLUDGE.hooks.ability"
@@ -33186,9 +34294,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectPoisonHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectPoisonHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectPoisonHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_BONE_CLUB",
@@ -33295,9 +34479,10 @@
           "status": "source-proven-family",
           "categories": [
             "absorbing-flash-fire",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: absorbing-flash-fire, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_FIRE_BLAST.hooks.ability"
@@ -33428,9 +34613,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectBurnHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for absorbing-flash-fire, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for absorbing-flash-fire, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_WATERFALL",
@@ -34182,9 +35443,11 @@
           "effect": "EFFECT_PARALYZE",
           "effectId": 67,
           "entryScript": "BattleScript_EffectParalyze",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "moveend-synchronize-status"
+          ],
+          "reason": "Source-proven ability family/categories: moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_GLARE.hooks.ability"
@@ -34194,9 +35457,90 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_GLARE.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyze -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyze:1007",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectParalyze->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectParalyze->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_DREAM_EATER",
@@ -35628,9 +36972,10 @@
           "entryScript": "BattleScript_EffectTriAttack",
           "status": "source-proven-family",
           "categories": [
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_TRI_ATTACK.hooks.ability"
@@ -35706,9 +37051,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectTriAttack -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectTriAttack->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectTriAttack->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SUPER_FANG",
@@ -36191,9 +37612,10 @@
           "categories": [
             "absorbing-flash-fire",
             "moveend-contact-on-damage",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: absorbing-flash-fire, moveend-contact-on-damage, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire, moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_FLAME_WHEEL.hooks.ability"
@@ -36361,9 +37783,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectThawHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectThawHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectThawHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for absorbing-flash-fire, moveend-contact-on-damage, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for absorbing-flash-fire, moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SNORE",
@@ -37171,9 +38669,10 @@
           "entryScript": "BattleScript_EffectPoisonHit",
           "status": "source-proven-family",
           "categories": [
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SLUDGE_BOMB.hooks.ability"
@@ -37249,9 +38748,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectPoisonHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectPoisonHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectPoisonHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_MUD_SLAP",
@@ -37532,9 +39107,10 @@
           "status": "source-proven-family",
           "categories": [
             "absorbing-volt-absorb",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: absorbing-volt-absorb, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: absorbing-volt-absorb, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_ZAP_CANNON.hooks.ability"
@@ -37665,9 +39241,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyzeHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for absorbing-volt-absorb, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for absorbing-volt-absorb, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_FORESIGHT",
@@ -38355,9 +40007,10 @@
           "categories": [
             "absorbing-volt-absorb",
             "moveend-contact-on-damage",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: absorbing-volt-absorb, moveend-contact-on-damage, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: absorbing-volt-absorb, moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SPARK.hooks.ability"
@@ -38525,9 +40178,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyzeHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for absorbing-volt-absorb, moveend-contact-on-damage, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for absorbing-volt-absorb, moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_FURY_CUTTER",
@@ -39662,9 +41391,10 @@
           "entryScript": "BattleScript_EffectParalyzeHit",
           "status": "source-proven-family",
           "categories": [
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_DRAGON_BREATH.hooks.ability"
@@ -39740,9 +41470,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectParalyzeHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectParalyzeHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_BATON_PASS",
@@ -41920,9 +43726,10 @@
           "status": "source-proven-family",
           "categories": [
             "absorbing-flash-fire",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: absorbing-flash-fire, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_HEAT_WAVE.hooks.ability"
@@ -42053,9 +43860,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectBurnHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for absorbing-flash-fire, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for absorbing-flash-fire, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_HAIL",
@@ -42143,9 +44026,10 @@
           "entryScript": "BattleScript_EffectWillOWisp",
           "status": "source-proven-family",
           "categories": [
-            "absorbing-flash-fire"
+            "absorbing-flash-fire",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: absorbing-flash-fire. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_WILL_O_WISP.hooks.ability"
@@ -42215,9 +44099,85 @@
             {
               "path": "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectWillOWisp -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectWillOWisp->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectWillOWisp->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for absorbing-flash-fire; unrelated ability families are not promoted."
+          "notes": "Source-proven only for absorbing-flash-fire, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_MEMENTO",
@@ -43827,9 +45787,10 @@
           "entryScript": "BattleScript_EffectSecretPower",
           "status": "source-proven-family",
           "categories": [
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SECRET_POWER.hooks.ability"
@@ -43905,9 +45866,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectSecretPower -> getsecretpowereffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectSecretPower->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectSecretPower->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_DIVE",
@@ -44370,9 +46407,10 @@
           "categories": [
             "absorbing-flash-fire",
             "moveend-contact-on-damage",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: absorbing-flash-fire, moveend-contact-on-damage, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: absorbing-flash-fire, moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_BLAZE_KICK.hooks.ability"
@@ -44540,9 +46578,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectBurnHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectBurnHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for absorbing-flash-fire, moveend-contact-on-damage, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for absorbing-flash-fire, moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_MUD_SPORT",
@@ -44977,9 +47091,10 @@
           "status": "source-proven-family",
           "categories": [
             "moveend-contact-on-damage",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: moveend-contact-on-damage, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_POISON_FANG.hooks.ability"
@@ -45092,9 +47207,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectPoisonFang -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectPoisonFang->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectPoisonFang->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-contact-on-damage, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_CRUSH_CLAW",
@@ -47691,9 +49882,10 @@
           "status": "source-proven-family",
           "categories": [
             "moveend-contact-on-damage",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: moveend-contact-on-damage, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_BOUNCE.hooks.ability"
@@ -47806,9 +49998,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectSemiInvulnerable -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectSemiInvulnerable->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectSemiInvulnerable->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-contact-on-damage, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_MUD_SHOT",
@@ -47915,9 +50183,10 @@
           "status": "source-proven-family",
           "categories": [
             "moveend-contact-on-damage",
-            "moveend-color-change"
+            "moveend-color-change",
+            "moveend-synchronize-status"
           ],
-          "reason": "Source-proven ability family/categories: moveend-contact-on-damage, moveend-color-change. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "reason": "Source-proven ability family/categories: moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_POISON_TAIL.hooks.ability"
@@ -48030,9 +50299,85 @@
             {
               "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
               "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectPoisonHit -> setmoveeffect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectPoisonHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectPoisonHit->BattleScript_MoveEnd",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_util.c",
+              "locator": "ABILITYEFFECT_SYNCHRONIZE",
+              "kind": "Synchronize-dispatcher-source"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+              "kind": "SetMoveEffect-marker-selector"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_seteffectwithchance",
+              "kind": "seteffect-chance-primary-dispatch"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+              "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+              "kind": "moveend-state-constant"
+            },
+            {
+              "path": "src/engine/battleScriptMoveEndOpcode.ts",
+              "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptMoveEndOpcode.test.ts",
+              "locator": "Synchronize",
+              "kind": "tier-1-shared-family-batch"
+            },
+            {
+              "path": "docs/synchronize-abilities-ground-truth.md",
+              "locator": "two-seed Battle Scene OFF receipts",
+              "kind": "shared-dispatcher-oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-synchronize-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-contact-on-damage, moveend-color-change; unrelated ability families are not promoted."
+          "notes": "Source-proven only for moveend-contact-on-damage, moveend-color-change, moveend-synchronize-status; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_COVET",
@@ -48911,6 +51256,124 @@
         }
       ],
       "notes": "94 contact rows are promoted by one shared Static receipt, selector-derived contact/TARGET_TURN_DAMAGED guards, and source/program route certificates; 182 Color Change rows are promoted by their separate family receipt and route certificate. Future Sight is the one explicit Color Change source exception because its delayed moveendfromto starts at MOVEEND_ITEM_EFFECTS_ALL. The two contact route/guard blockers and the shared direct Color Change receipt blocker are retired; distinct non-Static contact ability outcome receipts remain explicit gaps."
+    },
+    "synchronizeMoveEnd": {
+      "id": "hook-audit:ABILITYEFFECT_SYNCHRONIZE",
+      "label": "Synchronize Level-50 family checkpoint",
+      "status": "source-proven-family",
+      "candidates": 30,
+      "promotedRows": 30,
+      "exceptions": 0,
+      "blockers": 0,
+      "candidateMoves": [
+        "MOVE_FIRE_PUNCH",
+        "MOVE_THUNDER_PUNCH",
+        "MOVE_BODY_SLAM",
+        "MOVE_POISON_STING",
+        "MOVE_TWINEEDLE",
+        "MOVE_EMBER",
+        "MOVE_FLAMETHROWER",
+        "MOVE_STUN_SPORE",
+        "MOVE_THUNDERBOLT",
+        "MOVE_THUNDER_WAVE",
+        "MOVE_THUNDER",
+        "MOVE_TOXIC",
+        "MOVE_LICK",
+        "MOVE_SMOG",
+        "MOVE_SLUDGE",
+        "MOVE_FIRE_BLAST",
+        "MOVE_GLARE",
+        "MOVE_TRI_ATTACK",
+        "MOVE_FLAME_WHEEL",
+        "MOVE_SLUDGE_BOMB",
+        "MOVE_ZAP_CANNON",
+        "MOVE_SPARK",
+        "MOVE_DRAGON_BREATH",
+        "MOVE_HEAT_WAVE",
+        "MOVE_WILL_O_WISP",
+        "MOVE_SECRET_POWER",
+        "MOVE_BLAZE_KICK",
+        "MOVE_POISON_FANG",
+        "MOVE_BOUNCE",
+        "MOVE_POISON_TAIL"
+      ],
+      "evidence": [
+        {
+          "path": "src/data/gen/level50-move-parameterization.json",
+          "locator": "coverage.hookCatalogs.ability.synchronize",
+          "kind": "finite-candidate-selector-route-audit"
+        },
+        {
+          "path": "reference/pokeemerald/src/battle_script_commands.c",
+          "locator": "HITMARKER_SYNCHRONIZE_EFFECT",
+          "kind": "SetMoveEffect-marker-selector"
+        },
+        {
+          "path": "reference/pokeemerald/src/battle_script_commands.c",
+          "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+          "kind": "moveend-dispatcher"
+        },
+        {
+          "path": "reference/pokeemerald/src/battle_script_commands.c",
+          "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+          "kind": "moveend-dispatcher"
+        },
+        {
+          "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+          "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+          "kind": "moveend-state-constant"
+        },
+        {
+          "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
+          "locator": "MOVEEND_SYNCHRONIZE_ATTACKER",
+          "kind": "moveend-state-constant"
+        },
+        {
+          "path": "reference/pokeemerald/data/battle_scripts_1.s",
+          "locator": "BattleScript_EffectPoisonHit",
+          "kind": "synchronize-entry-routes"
+        },
+        {
+          "path": "src/data/gen/battle-script-graph.json",
+          "kind": "generated-ordered-route-witness"
+        },
+        {
+          "path": "src/data/gen/battle-script-program.json",
+          "kind": "generated-ordered-route-witness"
+        },
+        {
+          "path": "src/engine/battleScriptMoveEndOpcode.ts",
+          "locator": "MOVEEND_SYNCHRONIZE_TARGET",
+          "kind": "source-shaped-family-implementation"
+        },
+        {
+          "path": "tests/battleScriptMoveEndOpcode.test.ts",
+          "locator": "Synchronize",
+          "kind": "tier-1-shared-family-batch"
+        },
+        {
+          "path": "docs/synchronize-abilities-ground-truth.md",
+          "locator": "two-seed Battle Scene OFF receipts",
+          "kind": "shared-dispatcher-oracle-receipt"
+        },
+        {
+          "path": "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+          "kind": "direct-parameterized-oracle-fixture"
+        },
+        {
+          "path": "tools/probe/probe-synchronize-off.py",
+          "kind": "direct-parameterized-oracle-probe"
+        },
+        {
+          "path": "tools/probe/receipts/synchronize-off-seed-610839776.json",
+          "kind": "direct-parameterized-oracle-receipt"
+        },
+        {
+          "path": "tools/probe/receipts/synchronize-off-seed-324508639.json",
+          "kind": "direct-parameterized-oracle-receipt"
+        }
+      ],
+      "notes": "All 30 candidates are promoted by complete selector, route, and runtime-guard evidence; 30 candidates are promoted, with 0 route exceptions and 0 active blockers. The source marker bank excludes sleep, freeze, and non-status bytes; miss/no-effect, substitute, type/ability, chance, affectsUser orientation, toxic-to-poison reflection, and ordered target/attacker MOVEEND guards remain explicit."
     },
     "stateFamilies": [
       {
