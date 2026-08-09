@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1031 — [supervisor WIND-DOWN, 2026-08-08] **Gate-6 receipts advanced to 21/24; union green**
+
+- **State:** master is clean through `287704e9`; Gate 6 remains **OPEN** with
+  **21/24** Battle Scene OFF receipts, **3** explicit gaps, and **R3** next.
+  The widened executable triage remains **0 A / 0 B / 22 C / 24 D**.
+- **Did:** accepted two-seed deterministic R12b White Herb, R11 Baton Pass,
+  R6 Natural Cure, and R15 three-layer Spikes receipts. R15 proves real
+  Flying/Levitate immunity plus grounded Rhydon `187→141 = floor(187/4)` in
+  source HP-update/message order. Repaired generic `Cmd_removeitem` party-slot
+  persistence for both sides while preserving Recycle/Knock Off ownership.
+- **Next:** receipt R3's legal Cloud Nine removal/reactivation sequence, then
+  R9 and R2; keep the seven-battle controller/presentation seam generic and do
+  not resume the retired canonical Battle-2 march.
+- **Notes:** final uncontended union: **807 files / 8,119 passed / 1 skipped**;
+  production build and OFF-profile oracle info green. The first union attempt
+  hit six Vitest collection timeouts under concurrent full-suite memory
+  pressure (801 files / 6,984 tests passed); all six reran **1,135/1,135**
+  before the clean full rerun. At orientation `master..animation-main` was
+  empty, so no fold was due; the separate animation supervisor later advanced
+  that branch through `0dffb48b`, which remains for the next orientation fold.
+
 ## 1030 — [bounded MAIN worker, 2026-08-08] **R12b persistent item write-through repaired**
 
 - **State:** generic `Cmd_removeitem` persistence repair is committed in
@@ -38,25 +59,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   census pin (`1184→1229`) and its regeneration ratchet is green.
   Typecheck and production build are green; final full `npm test` returned
   exit code **0**.
-
-## 1028 — [bounded MAIN worker, 2026-08-08] **S10 Gate-6 deterministic coverage manifest assembled**
-
-- **State:** the first authoritative, reproducible Gate-6 manifest is committed
-  in `bbb1774b`; Gate 6 remains **OPEN**. It joins **214/214 effects** and
-  **355/355 moves** static-executable (L50: **276/300 executable**, 24
-  roster-only), **55 state families / 50 Tier-1-covered**, **78 abilities** and
-  **67 held effects**, **300 ordinary trainers / 850 L50 sets** (882 full
-  catalog), **28 interaction rows** (6 kernel-proven, 9 oracle-receipted, 13
-  gaps), and **24 parameterized scenarios** (17 receipt-documented, 7 gaps
-  across 16 family cards).
-- **Did:** added `tools/report/gate6-coverage-manifest.ts`, generated the JSON
-  and Markdown evidence views, and added a Tier-1 byte-idempotence/count/path
-  ratchet. Widened-scope legal zero-Factory-carrier rows remain explicit: 4
-  abilities and 24 held effects. Static/token references are not promoted to
-  semantic or oracle acceptance. Merged the side audit as `a7aad52b`: the live
-  source inventory is **46 = 0 A / 2 B / 21 C / 23 D**.
-- **Next:** retire the two widened-scope B families (`Cmd_various` Teleport,
-  then `Cmd_printfromtable` table pointers), then close the ranked **R12b**
-  parameterized-oracle receipt gap; do not claim Gate 6 closed.
-- **Notes:** focused manifest/census checks **17/17**, smoke **375/375**, full
-  suite **807 files / 8,073 passed / 1 skipped**, typecheck, and build green.
