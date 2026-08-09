@@ -20,8 +20,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the four downstream signatures for the next full-policy play-test pass.
 - **Notes:** seed 0: OK, battle 1 turn 23, 12,930 frames; seed 6: no crash,
   HANG at `factorySwap:complete`, battle 1 turn 22, 200,000 frames. Focused
-  regressions, smoke 375/375, full suite, typecheck, and build green. Commit
-  `909a42a8`; no barrier/import pin or canonical recording changed.
+  regressions 42/42, smoke 375/375, full suite, typecheck, and build green.
+  Commit `909a42a8`; no barrier/import pin or canonical recording changed.
 
 ## 1047 — [interactive user session, 2026-08-09] **User decisions: #85 first; Gate-6 evidence goes family-level**
 
