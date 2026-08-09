@@ -367,8 +367,16 @@ describe("Level-50 move parameterization manifest", () => {
     expect(blockerIds).toEqual([
       "ordered-moveend-route-not-proven",
       "damage-state-guard-not-derived-from-selector",
-      "missing-direct-on-damage-off-receipt",
     ]);
+    expect(audit.retiredBlockers).toEqual([expect.objectContaining({
+      id: "missing-direct-on-damage-off-receipt",
+      fixture: "tools/battle-lab/mechanic-color-change-off.json",
+      probe: "tools/probe/probe-color-change-ability-off.py",
+      receipts: [
+        "tools/probe/receipts/color-change-off-seed-610839776.json",
+        "tools/probe/receipts/color-change-off-seed-324508639.json",
+      ],
+    })]);
     expect(blockerIds.every((id) => id.length > 0)).toBe(true);
     expect(audit.promotions).toMatchObject({ sourceProvenRows: [] });
     expect(audit.promotions.reason).toMatch(/No rows promoted/);
@@ -476,12 +484,14 @@ describe("Level-50 move parameterization manifest", () => {
       expect(ability.outcome.length).toBeGreaterThan(0);
     }
     expect(audit.semanticEvidence.kernelSiblingBatch).toMatchObject({
-      status: "tier1-sibling-batch-only",
+      status: "tier1-shared-dispatcher-semantics",
       test: "tests/battleScriptMoveEndOpcode.test.ts#MOVEEND_ON_DAMAGE_ABILITIES contact family",
     });
     expect(audit.semanticEvidence.oracleReceipt).toMatchObject({
-      status: "missing-direct-parameterized-oracle-receipt",
+      status: "direct-parameterized-oracle-receipt",
       profile: "battle-scene-off",
+      fixture: "tools/battle-lab/mechanic-color-change-off.json",
+      probe: "tools/probe/probe-color-change-ability-off.py",
     });
   });
 

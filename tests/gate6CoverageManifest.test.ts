@@ -351,7 +351,8 @@ describe("Gate-6 mechanics coverage manifest", () => {
       colorChangeCandidates: 183,
       overlapCandidates: 94,
       entryBlockShapes: 78,
-      blockers: 3,
+      blockers: 2,
+      retiredBlockers: 1,
       promotedRows: 0,
     });
     expect(manifestOnDamageMoveEnd).toMatchObject({
@@ -363,8 +364,8 @@ describe("Gate-6 mechanics coverage manifest", () => {
       blockerIds: [
         "ordered-moveend-route-not-proven",
         "damage-state-guard-not-derived-from-selector",
-        "missing-direct-on-damage-off-receipt",
       ],
+      retiredBlockerIds: ["missing-direct-on-damage-off-receipt"],
       promotedRows: 0,
     });
     expect(String(manifestOnDamageMoveEnd.notes)).toMatch(/No per-move rows are promoted/);

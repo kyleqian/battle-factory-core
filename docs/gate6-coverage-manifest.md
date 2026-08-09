@@ -10,7 +10,7 @@ Next bounded acceptance unit: **Per-move hook-join family** — Choose one sourc
 
 - Effects: **214/214 static-executable**; moves: **355/355** static-executable (**276/300** Level-50 roster moves executable, **24** roster-only).
 - Per-move hook joins: **300 item join gaps** and **261 ability join gaps** across 300 Level-50 roster moves; 39 ability rows are source-proven for the nine Soundproof selectors plus audited shared-absorbing routes, while every remaining gap retains its source-artifact locator and reason.
-- ON_DAMAGE checkpoint: **94** contact candidates and **183** Color Change candidates (94 overlap) are source-enumerated across 78 entry-block shapes. All **3** blockers remain and **0** rows are promoted.
+- ON_DAMAGE checkpoint: **94** contact candidates and **183** Color Change candidates (94 overlap) are source-enumerated across 78 entry-block shapes. **2** blockers remain, **1** receipt blocker is retired, and **0** rows are promoted.
 - State/status/volatile rows: **55/55** have focused Tier-1 evidence; source-modeled rows remain listed separately.
 - Hook universes: **78 abilities** and **67 hold effects**, including **28** legal widened-scope rows with zero Level-50 Factory carriers.
 - Corpus: **300/300 ordinary trainers** and **850/850 Level-50 sets** joined; the full set catalog contains 882 rows including Open-only sets.
@@ -1227,11 +1227,11 @@ Next bounded acceptance unit: **Per-move hook-join family** — Choose one sourc
 
 ### Blocked per-move audit
 
-| Status | Contact candidates | Color Change candidates | Overlap | Entry-block shapes | Blockers | Promotions | Evidence |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| evidence-checkpoint-no-promotion | 94 | 183 | 94 | 78 | ordered-moveend-route-not-proven, damage-state-guard-not-derived-from-selector, missing-direct-on-damage-off-receipt | 0 | `src/data/gen/level50-move-parameterization.json#coverage.hookCatalogs.ability.onDamage`<br>`reference/pokeemerald/src/battle_util.c#AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)`<br>`reference/pokeemerald/include/battle.h#TARGET_TURN_DAMAGED`<br>`reference/pokeemerald/src/battle_script_commands.c#MOVEEND_ON_DAMAGE_ABILITIES`<br>`reference/pokeemerald/data/battle_scripts_1.s#BattleScript_MoveEnd`<br>`src/data/gen/battle-script-graph.json`<br>`src/data/gen/battle-script-program.json`<br>`src/engine/battleScriptMoveEndOpcode.ts#AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)`<br>`tests/battleScriptMoveEndOpcode.test.ts#MOVEEND_ON_DAMAGE_ABILITIES contact family`<br>`docs/gate6-interaction-matrix-scout.md#R8 is Immunity/Limber prevention`<br>`tools/battle-lab/gate6-r8-paralysis-off.json` |
+| Status | Contact candidates | Color Change candidates | Overlap | Entry-block shapes | Open blockers | Retired blockers | Promotions | Evidence |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| evidence-checkpoint-no-promotion | 94 | 183 | 94 | 78 | ordered-moveend-route-not-proven, damage-state-guard-not-derived-from-selector | missing-direct-on-damage-off-receipt | 0 | `src/data/gen/level50-move-parameterization.json#coverage.hookCatalogs.ability.onDamage`<br>`reference/pokeemerald/src/battle_util.c#AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)`<br>`reference/pokeemerald/include/battle.h#TARGET_TURN_DAMAGED`<br>`reference/pokeemerald/src/battle_script_commands.c#MOVEEND_ON_DAMAGE_ABILITIES`<br>`reference/pokeemerald/data/battle_scripts_1.s#BattleScript_MoveEnd`<br>`src/data/gen/battle-script-graph.json`<br>`src/data/gen/battle-script-program.json`<br>`src/engine/battleScriptMoveEndOpcode.ts#AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)`<br>`tests/battleScriptMoveEndOpcode.test.ts#MOVEEND_ON_DAMAGE_ABILITIES contact family`<br>`tests/colorChangeOracleEvidence.test.ts#Battle Scene OFF Color Change semantic receipts`<br>`tools/battle-lab/mechanic-color-change-off.json`<br>`tools/probe/probe-color-change-ability-off.py`<br>`tools/probe/receipts/color-change-off-seed-610839776.json`<br>`tools/probe/receipts/color-change-off-seed-324508639.json`<br>`docs/gate6-interaction-matrix-scout.md#R8 is Immunity/Limber prevention`<br>`tools/battle-lab/gate6-r8-paralysis-off.json` |
 
-No per-move rows are promoted. The source artifact enumerates every flag/power selector exactly once per applicable category, source guards, and entry-block graph/program shape; complete ordered MOVEEND witnesses and one direct Battle Scene OFF shared-family semantic receipt remain explicit blockers.
+No per-move rows are promoted. The source artifact enumerates every flag/power selector exactly once per applicable category, source guards, and entry-block graph/program shape. The missing-direct-on-damage-off-receipt blocker is retired by two fresh Battle Scene OFF Color Change receipts; complete ordered MOVEEND witnesses and runtime damage-state guard derivation remain explicit blockers.
 
 ## Status, volatile, and state families
 

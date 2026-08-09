@@ -76,7 +76,8 @@
       "colorChangeCandidates": 183,
       "overlapCandidates": 94,
       "entryBlockShapes": 78,
-      "blockers": 3,
+      "blockers": 2,
+      "retiredBlockers": 1,
       "promotedRows": 0
     },
     "stateFamilies": {
@@ -33026,7 +33027,9 @@
       "entryBlockShapes": 78,
       "blockerIds": [
         "ordered-moveend-route-not-proven",
-        "damage-state-guard-not-derived-from-selector",
+        "damage-state-guard-not-derived-from-selector"
+      ],
+      "retiredBlockerIds": [
         "missing-direct-on-damage-off-receipt"
       ],
       "promotedRows": 0,
@@ -33075,6 +33078,27 @@
           "kind": "tier-1-sibling-batch"
         },
         {
+          "path": "tests/colorChangeOracleEvidence.test.ts",
+          "locator": "Battle Scene OFF Color Change semantic receipts",
+          "kind": "two-seed-semantic-receipt-ratchet"
+        },
+        {
+          "path": "tools/battle-lab/mechanic-color-change-off.json",
+          "kind": "direct-parameterized-oracle-fixture"
+        },
+        {
+          "path": "tools/probe/probe-color-change-ability-off.py",
+          "kind": "direct-parameterized-oracle-probe"
+        },
+        {
+          "path": "tools/probe/receipts/color-change-off-seed-610839776.json",
+          "kind": "direct-parameterized-oracle-receipt"
+        },
+        {
+          "path": "tools/probe/receipts/color-change-off-seed-324508639.json",
+          "kind": "direct-parameterized-oracle-receipt"
+        },
+        {
           "path": "docs/gate6-interaction-matrix-scout.md",
           "locator": "R8 is Immunity/Limber prevention",
           "kind": "direct-receipt-scope-audit"
@@ -33084,7 +33108,7 @@
           "kind": "incidental-static-party-not-receipt"
         }
       ],
-      "notes": "No per-move rows are promoted. The source artifact enumerates every flag/power selector exactly once per applicable category, source guards, and entry-block graph/program shape; complete ordered MOVEEND witnesses and one direct Battle Scene OFF shared-family semantic receipt remain explicit blockers."
+      "notes": "No per-move rows are promoted. The source artifact enumerates every flag/power selector exactly once per applicable category, source guards, and entry-block graph/program shape. The missing-direct-on-damage-off-receipt blocker is retired by two fresh Battle Scene OFF Color Change receipts; complete ordered MOVEEND witnesses and runtime damage-state guard derivation remain explicit blockers."
     },
     "stateFamilies": [
       {

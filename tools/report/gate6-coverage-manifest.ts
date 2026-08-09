@@ -293,6 +293,11 @@ if (!Array.isArray(onDamageBlockers) || onDamageBlockers.length === 0 || onDamag
   throw new Error("ON_DAMAGE evidence checkpoint lacks nonempty blockers");
 }
 const onDamageBlockerIds = onDamageBlockers.map((blocker) => blocker.id as string);
+const onDamageRetiredBlockers = onDamageAudit.retiredBlockers as AnyRecord[] | undefined;
+if (!Array.isArray(onDamageRetiredBlockers) || onDamageRetiredBlockers.length === 0 || onDamageRetiredBlockers.some((blocker) => !String(blocker.id ?? "").trim() || !String(blocker.reason ?? "").trim())) {
+  throw new Error("ON_DAMAGE evidence checkpoint lacks the retired-blocker receipt record");
+}
+const onDamageRetiredBlockerIds = onDamageRetiredBlockers.map((blocker) => blocker.id as string);
 
 function assertOnDamageCheckpoint(manifest: AnyRecord): void {
   const checkpoint = manifest.sections?.onDamageMoveEnd as AnyRecord | undefined;
@@ -309,6 +314,7 @@ function assertOnDamageCheckpoint(manifest: AnyRecord): void {
     overlapCandidates: (onDamageAudit.overlap as AnyRecord).count,
     entryBlockShapes: (onDamageAudit.routeShapeCensus as AnyRecord).entries.length,
     blockers: onDamageBlockerIds.length,
+    retiredBlockers: onDamageRetiredBlockerIds.length,
     promotedRows: 0,
   };
   if (JSON.stringify(summary) !== JSON.stringify(expected)) {
@@ -318,7 +324,8 @@ function assertOnDamageCheckpoint(manifest: AnyRecord): void {
     || checkpoint.colorChangeCandidates !== expected.colorChangeCandidates
     || checkpoint.overlapCandidates !== expected.overlapCandidates
     || checkpoint.entryBlockShapes !== expected.entryBlockShapes
-    || JSON.stringify(checkpoint.blockerIds) !== JSON.stringify(onDamageBlockerIds)) {
+    || JSON.stringify(checkpoint.blockerIds) !== JSON.stringify(onDamageBlockerIds)
+    || JSON.stringify(checkpoint.retiredBlockerIds) !== JSON.stringify(onDamageRetiredBlockerIds)) {
     throw new Error("Gate-6 ON_DAMAGE checkpoint payload drift");
   }
 }
@@ -933,6 +940,7 @@ const onDamageMoveEndSummary = Object.freeze({
   overlapCandidates: (onDamageAudit.overlap as AnyRecord).count,
   entryBlockShapes: ((onDamageAudit.routeShapeCensus as AnyRecord).entries as AnyRecord[]).length,
   blockers: onDamageBlockerIds.length,
+  retiredBlockers: onDamageRetiredBlockerIds.length,
   promotedRows: 0,
 });
 const onDamageMoveEndRow: Row = Object.freeze({
@@ -944,6 +952,7 @@ const onDamageMoveEndRow: Row = Object.freeze({
   overlapCandidates: onDamageMoveEndSummary.overlapCandidates,
   entryBlockShapes: onDamageMoveEndSummary.entryBlockShapes,
   blockerIds: onDamageBlockerIds,
+  retiredBlockerIds: onDamageRetiredBlockerIds,
   promotedRows: 0,
   evidence: uniqueEvidence([
     evidence(PARAMETERIZATION_PATH, "finite-candidate-guard-route-shape-audit", "coverage.hookCatalogs.ability.onDamage"),
@@ -955,10 +964,15 @@ const onDamageMoveEndRow: Row = Object.freeze({
     evidence("src/data/gen/battle-script-program.json", "generated-entry-block-census"),
     evidence("src/engine/battleScriptMoveEndOpcode.ts", "source-shaped-family-implementation", "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)"),
     evidence("tests/battleScriptMoveEndOpcode.test.ts", "tier-1-sibling-batch", "MOVEEND_ON_DAMAGE_ABILITIES contact family"),
+    evidence("tests/colorChangeOracleEvidence.test.ts", "two-seed-semantic-receipt-ratchet", "Battle Scene OFF Color Change semantic receipts"),
+    evidence("tools/battle-lab/mechanic-color-change-off.json", "direct-parameterized-oracle-fixture"),
+    evidence("tools/probe/probe-color-change-ability-off.py", "direct-parameterized-oracle-probe"),
+    evidence("tools/probe/receipts/color-change-off-seed-610839776.json", "direct-parameterized-oracle-receipt"),
+    evidence("tools/probe/receipts/color-change-off-seed-324508639.json", "direct-parameterized-oracle-receipt"),
     evidence(SCOUT_PATH, "direct-receipt-scope-audit", "R8 is Immunity/Limber prevention"),
     evidence("tools/battle-lab/gate6-r8-paralysis-off.json", "incidental-static-party-not-receipt"),
   ]),
-  notes: "No per-move rows are promoted. The source artifact enumerates every flag/power selector exactly once per applicable category, source guards, and entry-block graph/program shape; complete ordered MOVEEND witnesses and one direct Battle Scene OFF shared-family semantic receipt remain explicit blockers.",
+  notes: "No per-move rows are promoted. The source artifact enumerates every flag/power selector exactly once per applicable category, source guards, and entry-block graph/program shape. The missing-direct-on-damage-off-receipt blocker is retired by two fresh Battle Scene OFF Color Change receipts; complete ordered MOVEEND witnesses and runtime damage-state guard derivation remain explicit blockers.",
 });
 
 const trainerRows: Row[] = (trainers.entries as AnyRecord[]).map((trainer) => Object.freeze({
@@ -1167,7 +1181,7 @@ const markdown: string[] = [
   "",
   `- Effects: **${manifest.summary.effects.staticExecutable}/${manifest.summary.effects.total} static-executable**; moves: **${manifest.summary.moves.staticExecutable}/${manifest.summary.moves.total}** static-executable (**${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}** Level-50 roster moves executable, **${manifest.summary.moves.level50RosterOnly}** roster-only).`,
   `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors plus audited shared-absorbing routes, while every remaining gap retains its source-artifact locator and reason.`,
-  `- ON_DAMAGE checkpoint: **${manifest.summary.onDamageMoveEnd.contactCandidates}** contact candidates and **${manifest.summary.onDamageMoveEnd.colorChangeCandidates}** Color Change candidates (${manifest.summary.onDamageMoveEnd.overlapCandidates} overlap) are source-enumerated across ${manifest.summary.onDamageMoveEnd.entryBlockShapes} entry-block shapes. All **${manifest.summary.onDamageMoveEnd.blockers}** blockers remain and **${manifest.summary.onDamageMoveEnd.promotedRows}** rows are promoted.`,
+  `- ON_DAMAGE checkpoint: **${manifest.summary.onDamageMoveEnd.contactCandidates}** contact candidates and **${manifest.summary.onDamageMoveEnd.colorChangeCandidates}** Color Change candidates (${manifest.summary.onDamageMoveEnd.overlapCandidates} overlap) are source-enumerated across ${manifest.summary.onDamageMoveEnd.entryBlockShapes} entry-block shapes. **${manifest.summary.onDamageMoveEnd.blockers}** blockers remain, **${manifest.summary.onDamageMoveEnd.retiredBlockers}** receipt blocker is retired, and **${manifest.summary.onDamageMoveEnd.promotedRows}** rows are promoted.`,
   `- State/status/volatile rows: **${manifest.summary.stateFamilies.tier1Covered}/${manifest.summary.stateFamilies.total}** have focused Tier-1 evidence; source-modeled rows remain listed separately.`,
   `- Hook universes: **${manifest.summary.hooks.abilities.total} abilities** and **${manifest.summary.hooks.holdEffects.total} hold effects**, including **${manifest.summary.hooks.abilities.zeroFactoryWidened + manifest.summary.hooks.holdEffects.zeroFactoryWidened}** legal widened-scope rows with zero Level-50 Factory carriers.`,
   `- Corpus: **${manifest.summary.corpus.ordinaryTrainers}/${trainers.count} ordinary trainers** and **${manifest.summary.corpus.level50Sets}/${LEVEL50_SET_COUNT} Level-50 sets** joined; the full set catalog contains ${manifest.summary.corpus.fullSetCatalog} rows including Open-only sets.`,
@@ -1223,13 +1237,14 @@ markdown.push(...table("Ability hook joins (all Level-50 roster moves)", ["Move"
   (row) => evidenceText(row.evidence),
 ]));
 markdown.push("## ABILITYEFFECT_ON_DAMAGE evidence checkpoint\n\n");
-markdown.push(...table("Blocked per-move audit", ["Status", "Contact candidates", "Color Change candidates", "Overlap", "Entry-block shapes", "Blockers", "Promotions", "Evidence"], [onDamageMoveEndRow], [
+markdown.push(...table("Blocked per-move audit", ["Status", "Contact candidates", "Color Change candidates", "Overlap", "Entry-block shapes", "Open blockers", "Retired blockers", "Promotions", "Evidence"], [onDamageMoveEndRow], [
   (row) => row.status,
   (row) => String(row.contactCandidates),
   (row) => String(row.colorChangeCandidates),
   (row) => String(row.overlapCandidates),
   (row) => String(row.entryBlockShapes),
   (row) => row.blockerIds.join(", "),
+  (row) => row.retiredBlockerIds.join(", "),
   (row) => String(row.promotedRows),
   (row) => evidenceText(row.evidence),
 ]));

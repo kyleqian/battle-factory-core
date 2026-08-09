@@ -999,9 +999,18 @@ const ON_DAMAGE_BLOCKERS = [
     id: "damage-state-guard-not-derived-from-selector",
     reason: "FLAG_MAKES_CONTACT and nonzero power select candidates, but TARGET_TURN_DAMAGED, move-result flags, attacker/target survival, substitute behavior, confusion-self-damage, type/gender/Oblivious state, and chance rolls remain runtime source guards.",
   },
+] as const;
+
+const ON_DAMAGE_RETIRED_BLOCKERS = [
   {
     id: "missing-direct-on-damage-off-receipt",
-    reason: "The committed Battle Scene OFF corpus has Tier-1 sibling coverage but no deterministic parameterized-oracle receipt that observes the shared ABILITYEFFECT_ON_DAMAGE dispatcher. Incidental party ability appearances are not semantic receipts.",
+    reason: "Retired for the shared dispatcher only: two process-isolated Battle Scene OFF mechanicLab receipts observe a legal target Kecleon survive Thunderbolt, change both live type slots Normal→Electric, reveal ability 16, and consume no RNG on the mutation frame. This is not a per-move promotion and does not prove every generated route.",
+    fixture: "tools/battle-lab/mechanic-color-change-off.json",
+    probe: "tools/probe/probe-color-change-ability-off.py",
+    receipts: [
+      "tools/probe/receipts/color-change-off-seed-610839776.json",
+      "tools/probe/receipts/color-change-off-seed-324508639.json",
+    ],
   },
 ] as const;
 
@@ -1323,22 +1332,26 @@ const onDamageAudit = {
   },
   semanticEvidence: {
     kernelSiblingBatch: {
-      status: "tier1-sibling-batch-only",
+      status: "tier1-shared-dispatcher-semantics",
       implementation: "src/engine/battleScriptMoveEndOpcode.ts#AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)",
       test: "tests/battleScriptMoveEndOpcode.test.ts#MOVEEND_ON_DAMAGE_ABILITIES contact family",
-      coverage: "Color Change, Rough Skin, Effect Spore, Poison Point, Static, Flame Body, Cute Charm, non-contact, substitute-suppressed damage, and source-ordered RNG/state guards",
+      coverage: "Color Change through Fighting and non-contact Electric/Normal moves; Rough Skin, Effect Spore, Poison Point, Static, Flame Body, Cute Charm, substitute-suppressed damage, and source-ordered RNG/state guards",
     },
     oracleReceipt: {
-      status: "missing-direct-parameterized-oracle-receipt",
+      status: "direct-parameterized-oracle-receipt",
       profile: "battle-scene-off",
-      checked: "docs/gate6-interaction-matrix-scout.md#R8 is explicitly Immunity/Limber prevention; its Static party appearance does not observe this dispatcher",
-      requirement: "Gate 6 requires one deterministic parameterized-oracle semantic receipt for this shared ON_DAMAGE family plus sibling checks before any per-move promotion.",
+      fixture: "tools/battle-lab/mechanic-color-change-off.json",
+      probe: "tools/probe/probe-color-change-ability-off.py",
+      receiptFiles: ON_DAMAGE_RETIRED_BLOCKERS[0].receipts,
+      observation: "A legal target Kecleon survives real Thunderbolt damage, changes both live types Normal→Electric with gLastUsedAbility=16, emits the Color Change message, and consumes no RNG on the mutation frame in two fresh seed runs.",
+      requirement: "This retires only the direct shared-family receipt blocker. Complete ordered generated routes and runtime guard derivation still gate every per-move promotion.",
     },
   },
   blockers: ON_DAMAGE_BLOCKERS,
+  retiredBlockers: ON_DAMAGE_RETIRED_BLOCKERS,
   promotions: {
     sourceProvenRows: [],
-    reason: "No rows promoted: neither complete ordered MOVEEND witnesses nor a direct shared-family Battle Scene OFF semantic receipt are present in this bounded audit.",
+    reason: "No rows promoted: the direct shared-family Battle Scene OFF receipt is now present, but complete ordered MOVEEND witnesses and runtime damage-state guard derivation remain open for the finite family.",
   },
 };
 const output = {
