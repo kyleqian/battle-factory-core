@@ -255,6 +255,38 @@
    ]
   },
   {
+   "move": "MOVE_BARRIER",
+   "status": "exact",
+   "covered": [
+    "the complete eight-command Move_BARRIER body, gBarrierWallSpriteTemplate, all AnimDefensiveWall steps through DestroyAnimSprite, shared GREEN_LIGHT_WALL graphics, independent gray_light_wall palette, OBJ_BLEND OAM/BG-copy path, setalpha/blendoff registers, and attacker-panned SE_M_BARRIER 15-frame wait are source-audited",
+    "complete legal challenge-0 set-114 DROWZEE versus ONIX three-mon parties stage BARRIER in both orientations without transient-state injection; Emerald internal species 96, carrier sets 114/124/415/416/434, zero PP Ups, full party records, and immutable in-window battle state are pinned",
+    "pointer-bounded twice-fresh Scene-ON probes cover every source frame from first in-bounds Move_BARRIER pointer through first inactive cleanup: player-back frames 215..290 and opponent-front frames 216..291 each pass 76/76 reducer, typed seam, software wall/callback/data, opponent BG-copy/visibility, hardware OAM/matrices/palette/tags/registers, audio, raw RGB, and shared framebuffer checks",
+    "the pure source-relative reducer owns the four-frame script-to-wall lead-in, shared source-identical AnimDefensiveWall geometry/alpha/palette-rotation/visibility/cleanup, independent no-sparkle body, SE_M_BARRIER task timing, delay-1/blendoff/end tail, and inactive age 75",
+    "deterministic dev-time extraction reuses only green_light_wall.png tiles and adds gray_light_wall.pal plus legal DROWZEE front/back art; all regenerate byte-for-byte with no screenshots, per-frame lookup, coordinate/RGB fitting, absolute ticks, or canonical-turn branches",
+    "fresh stable receipts are player probe 2ad5e1dc9fe0a36d37ebc940abf420eb9b9d41e866c82cb492f4734bf3efb57d / raw 12ac1d1fac7b66e0a6768a4dbe455d311200911938f5e8414a348e48281f9e44 / map 4a0d48b988349f9dd14284235aaa6b4d55ad51f54d419a357f7511a6d83f9483 and opponent 1e4d8c972a8023ef45fe2c6882b146257ff50766aa8d95bc409090f767e87913 / a3d5047fcad7005e93ba97be8335387c2a2cd5d7e02c918b241d714013a07d3d / baf4be08ef750d554ec9cc675db67293be1b0d06511fc3b25aa9248a57e71711",
+    "REFLECT remains exact twice fresh at 208/208 player-back and 211/211 opponent-front; LIGHT_SCREEN raw RGB and framebuffer remain exact twice fresh at 115/115 and 119/119, with a pre-existing metadata-only probe receipt drift recorded rather than rebaselined",
+    "no damage, Defense-stage outcome, RNG, turn order, controller, round/facility state, animation boundary list, unsupported-branch pin, canonical-recording allowlist, or sibling coverage changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-barrier-player-drowzee-opponent-onix.json",
+    "tools/battle-lab/mechanic-barrier-opponent-drowzee-player-onix.json",
+    "tools/compare/fixtures/barrier-player-drowzee-opponent-onix.json",
+    "tools/compare/fixtures/barrier-opponent-drowzee-player-onix.json",
+    "tools/compare/barrierProbe.py",
+    "tools/compare/barrierPortable.ts",
+    "tools/compare/barrierSourceAudit.ts",
+    "tools/compare/extractBarrierAssets.ts",
+    "tools/compare/evidence/barrier-changemap-player.txt",
+    "tools/compare/evidence/barrier-changemap-opponent.txt",
+    "src/animation/assets/barrier.json",
+    "src/animation/barrier.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/barrier.test.ts",
+    "tests/animation/barrierEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_BLOCK",
    "status": "exact",
    "covered": [
