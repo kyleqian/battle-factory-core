@@ -1,5 +1,19 @@
 # Animation coverage
 
+## MOVE_SUBSTITUTE exact — bilateral 87/87 source/seam/framebuffer promotion (2026-08-09 worker)
+
+- **State:** Coverage advances **137→138/276 exact**, 0 partial, 0 staged, **139→138 unsupported**. SUBSTITUTE alone moves; the animation boundary and unsupported-branch pins remain unchanged.
+- **Did:** Added the narrow source-relative compositor behind the typed Scene-ON seam. It reuses the generated GOLEM/ONIX catalogs and source-extracted doll front/back sheets and palette to render the nine affine shrink callbacks, hide/reset and graphics swap, offscreen drop, side-relative reveal, both bounce legs, sounds, and cleanup. The framebuffer uses the measured task-to-display age-2 latch; the source horizontal threshold uses `GetSubstituteSpriteDefault_Y` 97 player / 56 opponent.
+- **Verified:** Twice fresh, player-back frames **291..377** and opponent-front frames **311..397** each pass **87/87 source/reducer, seam, hardware/palette/audio, and production framebuffer** with the committed probe/RGB/change-map receipts. Corrected FAKE_OUT remains **86/86** in both orientations twice fresh after the shared affine compositor edit. Focused **28/28**, smoke **375/375**, typecheck, full `npm test` **818 files / 8,166 passed / 1 skipped**, production build, and final coverage report pass. No damage, Substitute HP/result rule, RNG, controller, turn/facility state, boundary, or barrier changed.
+- **Next:** Supervisor selects the next independent acceptance unit. Do not infer SUBSTITUTE's two-display task-to-framebuffer latch or side-specific doll reveal threshold for another task.
+
+## MOVE_SUBSTITUTE bilateral evidence/reducer/seam checkpoint — remains unsupported (2026-08-09 worker)
+
+- **State:** Coverage remains **137/276 exact, 0 partial, 0 staged, 139 unsupported**. SUBSTITUTE is not promoted; the animation boundary, unsupported barrier, gameplay, controller, and facility state are unchanged.
+- **Did:** Audited the complete three-line `Move_SUBSTITUTE` body, `AnimTask_MonToSubstitute`/`AnimTask_MonToSubstituteDoll`, and `BattleLoadSubstituteOrMonSpriteGfx`; added legal set-498 GOLEM versus ONIX Scene-ON parties in both orientations, a pointer-bounded dense probe, raw-RGB receipts, bilateral change maps, a pure 87-age reducer, typed presentation seam, and deterministic front/back substitute-doll extraction.
+- **Verified:** Two fresh runs per orientation are byte-identical. Player-back frames **291..377** and opponent-front frames **311..397** each provide **87/87** task/software-sprite, hardware OAM/matrix/palette, audio, immutable-state, and raw-RGB evidence through first inactive cleanup. Probe/RGB/map digests are player `fcfa2d1c…` / `0bf9b472…` / `78d6ac7a…`; opponent `30ef7a08…` / `e31e3d01…` / `62e3d72e…`. Focused reducer/assets/evidence/boundary/inventory tests are **15/15** and typecheck passes.
+- **Next:** Implement the narrow source-relative GOLEM-to-doll affine/swap/bounce compositor, measure its software-to-scanout latches from the committed change maps, and require complete **87/87 framebuffer equality twice fresh in both orientations** before promotion. Rerun FAKE_OUT **86/86** both orientations after any shared compositor edit.
+
 ## MOVE_FAKE_OUT exact — corrected legal species + bilateral 86/86 promotion (2026-08-09 worker)
 
 - **State:** Coverage advanced **136→137/276 exact**, 0 partial, 0 staged, **140→139 unsupported**. FAKE_OUT alone moved; commits `e5d263cd` and `87492e0a` contain the implementation and inventory-pin follow-up.
