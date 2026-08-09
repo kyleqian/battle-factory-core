@@ -375,6 +375,10 @@ import {
   type ThunderWaveState,
 } from "./thunderWave.ts";
 import {
+  thunderAtAge,
+  type ThunderState,
+} from "./thunder.ts";
+import {
   surfWaveAtAge,
   type SurfWaveState,
 } from "./surfWave.ts";
@@ -1645,6 +1649,15 @@ export interface SceneOnThunderWaveConfig {
   readonly targetEffectCenter: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnThunderConfig {
+  readonly move: "THUNDER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `GetBattlerSpriteCoord(target, X_2/Y_2)` used by all bolts. */
+  readonly targetEffectCenter: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnSurfConfig {
   /** `Move_MUDDY_WATER` is the muddy-palette sibling of `Move_SURF`. */
   readonly move: "SURF" | "MUDDY_WATER";
@@ -2231,6 +2244,7 @@ export type SceneOnMoveConfig =
   | SceneOnScaryFaceConfig
   | SceneOnSparkConfig
   | SceneOnThunderWaveConfig
+  | SceneOnThunderConfig
   | SceneOnSurfConfig
   | SceneOnCharmConfig
   | SceneOnCovetConfig
@@ -2340,6 +2354,8 @@ export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
 export type SceneOnThunderWavePresentationState =
   SceneOnMovePresentationState<SceneOnThunderWaveConfig>;
+export type SceneOnThunderPresentationState =
+  SceneOnMovePresentationState<SceneOnThunderConfig>;
 export type SceneOnSurfPresentationState =
   SceneOnMovePresentationState<SceneOnSurfConfig>;
 export type SceneOnCharmPresentationState =
@@ -2619,6 +2635,12 @@ export interface SceneOnSparkView extends SparkState {
 }
 
 export interface SceneOnThunderWaveView extends ThunderWaveState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnThunderView extends ThunderState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4907,6 +4929,25 @@ export function sceneOnThunderWaveView(
       state.config.attacker.geometry.side,
       state.config.targetEffectCenter,
       state.config.target.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_THUNDER's active source-script offset-zero display. */
+export function sceneOnThunderView(
+  state: SceneOnThunderPresentationState,
+): SceneOnThunderView {
+  if (state.config.move !== "THUNDER") {
+    throw new Error(`expected THUNDER presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...thunderAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.targetEffectCenter,
     ),
   };
 }

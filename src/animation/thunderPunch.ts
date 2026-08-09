@@ -53,6 +53,21 @@ export interface ThunderPunchLightning {
 }
 
 /**
+ * Display-relative frame handoff for the shared `gLightningSpriteTemplate`.
+ * Thunder's probe has the same source template and the same 4/5/8/5/6
+ * visible-display spans as Thunder Punch, so both reducers use this helper.
+ */
+export function thunderPunchLightningFrameAtLocalAge(
+  localAge: number,
+): 0 | 1 | 2 | 3 | 4 {
+  return localAge < 4 ? 0
+    : localAge < 9 ? 1
+    : localAge < 17 ? 2
+    : localAge < 22 ? 3
+    : 4;
+}
+
+/**
  * Three `gLightningSpriteTemplate` instances from Move_THUNDER_PUNCH.
  *
  * The first displayed frame follows the creation callback, and the final
@@ -71,12 +86,7 @@ export function thunderPunchLightningAtAge(
     // The first source frame is visible for four displays after the
     // create-callback handoff; subsequent frames retain their AnimCmd spans,
     // and the destroyed sprite's last OAM image supplies the final display.
-    const frame =
-      localAge < 4 ? 0
-      : localAge < 9 ? 1
-      : localAge < 17 ? 2
-      : localAge < 22 ? 3
-      : 4;
+    const frame = thunderPunchLightningFrameAtLocalAge(localAge);
     return [{
       sourceSlot,
       centerX: targetCenter.x,
