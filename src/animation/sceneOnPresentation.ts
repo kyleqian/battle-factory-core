@@ -354,6 +354,10 @@ import {
   type LowKickState,
 } from "./lowKick.ts";
 import {
+  stompAtAge,
+  type StompState,
+} from "./stomp.ts";
+import {
   swaggerAtAge,
   type SwaggerState,
 } from "./swagger.ts";
@@ -1462,6 +1466,14 @@ export interface SceneOnLowKickConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Narrow Scene-ON seam: only resolved presentation geometry and immutable HP. */
+export interface SceneOnStompConfig {
+  readonly move: "STOMP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnBiteConfig {
   readonly move: "BITE";
   readonly attacker: SceneOnPresentationBattler;
@@ -2324,6 +2336,7 @@ export type SceneOnMoveConfig =
   | SceneOnMegaKickConfig
   | SceneOnRollingKickConfig
   | SceneOnLowKickConfig
+  | SceneOnStompConfig
   | SceneOnBiteConfig
   | SceneOnHeadbuttConfig
   | SceneOnWhirlwindConfig
@@ -2602,6 +2615,12 @@ export interface SceneOnRollingKickView extends RollingKickState {
 }
 
 export interface SceneOnLowKickView extends LowKickState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnStompView extends StompState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4605,6 +4624,25 @@ export function sceneOnLowKickView(
     ...lowKickAtAge(
       state.age,
       state.config.attacker.geometry.side,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first pointer-bounded `Move_STOMP` source display. */
+export function sceneOnStompView(
+  state: SceneOnMovePresentationState<SceneOnStompConfig>,
+): SceneOnStompView {
+  if (state.config.move !== "STOMP") {
+    throw new Error(`expected STOMP presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...stompAtAge(
+      state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
