@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1032 — [supervisor ORIENT, 2026-08-08] **Folded union green; user playthrough crash is first priority**
+
+- **State:** master is clean at `a45826c8`; Gate 6 remains **OPEN** at
+  **21/24** OFF-profile receipts. New ISSUES #84 records five generated-round
+  presentation/controller failures, including a fatal resolution-handoff
+  invariant during BUTTERFREE versus MURKROW.
+- **Did:** read the S8 authoritative reset and S10 executable-frontier policy;
+  confirmed `master..animation-main` is empty, so no animation fold was needed.
+  Oracle freshness and OFF-profile info pass. The independent folded baseline
+  passes **811 files / 8,137 tests / 1 skipped** and production build.
+- **Next:** diagnose and repair #84's fatal handoff with a staged generic-round
+  reproduction and a red Tier-1 pin. Then address the wrong send-out side,
+  TAUNT/TORMENT/TOXIC pacing, and WHIRLWIND replacement seam. Resume R3, R9,
+  and R2 receipts after the user-visible blockers.
+- **Notes:** do not resume the retired canonical Battle-2 march. Use the generic
+  seven-battle controller and Battle Scene OFF presentation seam.
+
 ## 1031 — [supervisor WIND-DOWN, 2026-08-08] **Gate-6 receipts advanced to 21/24; union green**
 
 - **State:** the final animation fold is on master at `3cf40fe2`; Gate 6 remains **OPEN** with
@@ -43,21 +60,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   executable ratchet **6/6** and smoke **375/375**. Typecheck and production
   build are green; final full `npm test` returned exit code **0**. No
   unsupported-barrier pin changed.
-
-## 1029 — [bounded MAIN worker, 2026-08-08] **S10 printfromtable source inventory complete**
-
-- **State:** the widened `Cmd_printfromtable` family is source-complete for
-  the committed program in `4e31a1cf` + `e1d041eb`; triage is now **0 A / 0 B
-  / 22 C / 24 D**.
-- **Did:** registered exact source rows for `gWeatherStartsStringIds` (16),
-  `gNoEscapeStringIds` (5), and `gBattlePalaceFlavorTextTable` (4); Tier 1
-  pins every row, the weather continuation, and all **43/43** current pointer
-  symbols. The generic pointer guard remains a future-input D guard at the
-  existing module pin of 10. Census regenerated; no Gate-6 closure claim.
-- **Next:** hand the green commits to the supervisor for the S10 union. No
-  oracle or canonical Battle-2 work.
-- **Notes:** focused hit-chain + executable-ratchet checks are **379/379**;
-  smoke is **375/375**. The source insertion also refreshed the moved ability
-  census pin (`1184→1229`) and its regeneration ratchet is green.
-  Typecheck and production build are green; final full `npm test` returned
-  exit code **0**.

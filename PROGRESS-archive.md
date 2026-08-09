@@ -348,6 +348,24 @@
 
 # Progress archive
 
+## 1029 — [bounded MAIN worker, 2026-08-08] **S10 printfromtable source inventory complete**
+
+- **State:** the widened `Cmd_printfromtable` family is source-complete for
+  the committed program in `4e31a1cf` + `e1d041eb`; triage is now **0 A / 0 B
+  / 22 C / 24 D**.
+- **Did:** registered exact source rows for `gWeatherStartsStringIds` (16),
+  `gNoEscapeStringIds` (5), and `gBattlePalaceFlavorTextTable` (4); Tier 1
+  pins every row, the weather continuation, and all **43/43** current pointer
+  symbols. The generic pointer guard remains a future-input D guard at the
+  existing module pin of 10. Census regenerated; no Gate-6 closure claim.
+- **Next:** hand the green commits to the supervisor for the S10 union. No
+  oracle or canonical Battle-2 work.
+- **Notes:** focused hit-chain + executable-ratchet checks are **379/379**;
+  smoke is **375/375**. The source insertion also refreshed the moved ability
+  census pin (`1184→1229`) and its regeneration ratchet is green.
+  Typecheck and production build are green; final full `npm test` returned
+  exit code **0**.
+
 ## 1018 — [bounded MAIN worker, 2026-08-08] **#39: two staged semantic owners replace their last bare canonical fact sources**
 
 - **State:** implementation `5de9c142`; focused Tier-1 **254/254**, smoke
