@@ -735,6 +735,7 @@ export interface SceneOnPresentationBattler {
     | "GLOOM"
     | "TOGETIC"
     | "MACHOKE"
+    | "MAKUHITA"
     | "WINGULL"
     | "TAILLOW"
     | "EEVEE"
