@@ -81,4 +81,27 @@ describe("random round soak driver (green milestone pin)", () => {
     );
     expect(result.frames).toBeGreaterThan(7_797);
   });
+
+  it("ISSUES #86: commits every typed switch-in in one forced continuation", () => {
+    // Seed 45's forced selection resumes through both the player's chosen
+    // replacement and the opponent's automatic replacement. The source
+    // receipt contains a complete switch transition for each battler; the
+    // display ledger must consume both before the forced-send-out handoff.
+    const result = runSeed(45, { maxFrames: 6_621, renderEvery: 0 });
+    expect(result.errorMessage ?? "").not.toMatch(
+      /forced-switch-in battler 1 changed party without a completed switch transition/,
+    );
+    expect(result.frames).toBeGreaterThan(6_620);
+  });
+
+  it("ISSUES #86: a later faint resets stale forced-switch choice ownership", () => {
+    // Seed 14 completes one player forced switch on turn 18. On turn 19 the
+    // new active faints; source ChooseMonToSendOut resets monToSwitchIntoId
+    // before opening a fresh selector instead of reusing the previous slot.
+    const result = runSeed(14, { maxFrames: 9_485, renderEvery: 0 });
+    expect(result.errorMessage ?? "").not.toMatch(
+      /switch-in message has no preceding switch\/post-switch field/,
+    );
+    expect(result.frames).toBeGreaterThan(9_484);
+  });
 });

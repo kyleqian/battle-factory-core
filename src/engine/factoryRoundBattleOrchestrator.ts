@@ -1812,27 +1812,26 @@ export function advanceFactoryRoundBattleResolution(
         battleForcedPartySelect: advancedSelector,
       });
     }
-    const switchCommand = resolution.segments[resolution.segmentIndex]!.commands
-      .find((command) => command.type === "switch-in");
-    if (switchCommand?.type !== "switch-in") {
+    const switchCommands = resolution.segments[resolution.segmentIndex]!.commands
+      .filter((command): command is Extract<BattleResolutionPresentationCommand, { type: "switch-in" }> =>
+        command.type === "switch-in"
+      );
+    const selectedSwitch = switchCommands.find((command) =>
+      command.battler === selector.request.battler
+    );
+    if (selectedSwitch === undefined) {
       return fail("switch-in lifecycle has no typed switch command");
     }
-    const active = resolution.pendingBattle.rules.rulesContext
-      .battlers[switchCommand.battler]!;
-    const committedBoundaries = Object.freeze(boundaries.map((boundary) =>
-      boundary.battler === switchCommand.battler
-        ? Object.freeze({
-            ...boundary,
-            partyIndex: switchCommand.toPartyIndex,
-            field: switchCommand.incoming,
-            displayedHp: switchCommand.incoming.hp,
-            displayedStatus1: active.status1,
-            spriteVisible: true,
-            idleEpoch: 0,
-            moveCursor: 0,
-          })
-        : boundary
-    )) as unknown as FactoryBattlePresentationBoundaries;
+    // One player confirmation can resume a fainted-actions scan that also
+    // completes an automatic opposing replacement. Every party identity
+    // change must cross its own typed switch-in command before the stable
+    // rules boundary is allowed to settle; consuming only the selector's
+    // command leaves a genuine opponent transition stranded at the fatal
+    // identity invariant.
+    const committedBoundaries = switchCommands.reduce(
+      (next, command) => commitCompletedResolutionCommand(next, resolution, command),
+      boundaries,
+    );
     const settledBoundaries = settleBattlePresentationBoundariesAtRulesBoundary(
       committedBoundaries,
       resolution.pendingBattle.rules.rulesContext,

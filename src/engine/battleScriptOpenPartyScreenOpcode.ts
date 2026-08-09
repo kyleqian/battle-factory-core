@@ -160,8 +160,22 @@ function createOpenPartyScreenOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
 
     if (side !== SIDE_OPPONENT) {
       const pendingChoice = rules.monToSwitchIntoId[battler];
-      if (pendingChoice === BATTLE_SCRIPT_PARTY_SIZE) {
+      if (
+        pendingChoice === BATTLE_SCRIPT_PARTY_SIZE
+        || pendingChoice === activePartyIndex
+      ) {
         const legalPartyIndexes = legalSwitchPartyIndexes(rules.party.player, activePartyIndex);
+        // ChooseMonToSendOut stores the outgoing slot for presentation and
+        // resets monToSwitchIntoId to PARTY_SIZE before asking the player.
+        // A completed prior switch leaves its chosen index behind, which is
+        // now equal to the active slot; that is a fresh request, not proof
+        // this opcode was resumed. The resume path is necessarily a legal
+        // non-active slot and still advances below without a second halt.
+        const monToSwitchIntoId = pendingChoice === activePartyIndex
+          ? Object.freeze(rules.monToSwitchIntoId.map((value, index) =>
+              index === battler ? BATTLE_SCRIPT_PARTY_SIZE : value
+            )) as unknown as BattleScriptRulesContext["monToSwitchIntoId"]
+          : rules.monToSwitchIntoId;
         return transitionBattleScriptCommand(
           context,
           Object.freeze({
@@ -176,6 +190,7 @@ function createOpenPartyScreenOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
               legalPartyIndexes,
             }),
           }),
+          { rulesContext: Object.freeze({ ...rules, monToSwitchIntoId }) },
         );
       }
       // The player's choice was already resolved externally (monToSwitchIntoId

@@ -222,6 +222,21 @@ describe("production openpartyscreen (Cmd_openpartyscreen) dispatch, BS_FAINTED 
         expect(result.state.rng.calls).toBe(0);
       },
     );
+
+    it("resets a prior choice equal to the newly fainted active slot before opening a fresh selector", () => {
+      const rc = playerFaintedContext({
+        party: { player: opponentBench(), opponent: [EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT] },
+        monToSwitchIntoId: [0, 6, 6, 6],
+      });
+      const { result } = stepAtProgramCounter(OPEN_PARTY_SCREEN_PC, rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({
+        kind: "player-choice-required",
+        faintedPartyIndex: 0,
+        legalPartyIndexes: [1, 2],
+      });
+      expect(result.state.rulesContext.monToSwitchIntoId[0]).toBe(6);
+    });
   });
 
   describe("(b) unsupported-branch barriers", () => {
