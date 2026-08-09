@@ -21,11 +21,11 @@ function sprite(path: string, palettePath: string) {
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify({
   source: {
-    carrier: "battle_frontier_mons.h index 4 FRONTIER_MON_WURMPLE exact checkpoint; WEEDLE index 3 remains the lower-carrier acceptance gap",
+    carrier: "battle_frontier_mons.h index 3 FRONTIER_MON_WEEDLE, the lowest Level-50 Factory POISON_STING carrier",
     script: "data/battle_anim_scripts.s Move_POISON_STING",
     reused: "NEEDLE from twineedle.json; IMPACT from battle-anim-hitsplat.json; POISON_BUBBLE from poisonFang.json, each by identical tag/template source identity",
   },
-  wurmpleBack: sprite("graphics/pokemon/wurmple/back.png", "graphics/pokemon/wurmple/normal.pal"),
-  wurmpleFront: sprite("graphics/pokemon/wurmple/anim_front.png", "graphics/pokemon/wurmple/normal.pal"),
+  weedleBack: sprite("graphics/pokemon/weedle/back.png", "graphics/pokemon/weedle/normal.pal"),
+  weedleFront: sprite("graphics/pokemon/weedle/anim_front.png", "graphics/pokemon/weedle/normal.pal"),
 })}\n`);
 console.log(`wrote ${out}`);

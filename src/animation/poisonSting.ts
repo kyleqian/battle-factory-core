@@ -35,11 +35,11 @@ export interface PoisonStingEffect {
 
 const BUBBLE_START_AGES = [46, 54, 62, 70, 78, 86] as const;
 
-/** BIOS ArcTan2Neg/ObjAffineSet receipts for the literal 20,0 -> -8,0 vector. */
+/** BIOS ArcTan2Neg/ObjAffineSet receipts for the bilateral set-3 Weedle stages. */
 export function poisonStingNeedleMatrix(side: PoisonStingSide) {
   return side === "player"
     ? { a: 152, b: 205, c: -205, d: 152 }
-    : { a: -103, b: -234, c: 234, d: -103 };
+    : { a: -92, b: -238, c: 238, d: -92 };
 }
 
 /** Complete source-relative Move_POISON_STING body, entry display through cleanup. */

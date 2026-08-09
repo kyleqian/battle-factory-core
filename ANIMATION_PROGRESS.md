@@ -1,12 +1,12 @@
 # Animation coverage
 
-## MOVE_POISON_STING Wurmple exact checkpoint — remains unsupported (2026-08-09 worker)
+## MOVE_POISON_STING set-3 Weedle bilateral exact checkpoint — coverage unchanged (2026-08-09 worker)
 
-- **State:** Coverage remains **147/276 exact**, 0 partial, 0 staged, **129 unsupported**. The requested lowest carrier is `FRONTIER_MON_WEEDLE` set 3; the completed set-4 Wurmple representative therefore does not promote the move.
-- **Did:** Added complete legal Wurmple/ONIX bilateral stages, `Move_POISON_STING` pointer-bounded probe, immutable evidence/raw-RGB/change-map receipts, pure source-relative reducer, narrow typed seam, and production compositor. The checkpoint covers NEEDLE/IMPACT/POISON_BUBBLE tags and sprites, linear stinger geometry, animation-2 hitsplat, ShakeMon2, monbg/split priority/12:8 blend, both primary sounds and bubble sounds, hardware latches, painter order, and cleanup.
-- **Verified:** Twice fresh, player-back frames **241..353** and opponent-front **233..345** each pass **113/113 component+seam+hardware+raw-RGB+framebuffer**. Player evidence/raw/map: `2c014b6c…` / `4d34a129…` / `89762d5f…`; opponent: `35bc8cec…` / `410f73bf…` / `af74178a…`. TWINEEDLE remains bilateral **37/37** twice fresh and POISON_FANG bilateral **104/104** twice fresh.
-- **Next:** Replace the representative with set-3 Weedle, extract and pin its art/geometry/field profile, and require twice-fresh bilateral complete-window equality before promotion. Do not infer Wurmple scanout coordinates for Weedle.
-- **Notes:** No damage, poison mechanics, accuracy, RNG, turn order, controller/facility state, coverage, animation boundary, canonical recording, or unsupported barrier changed.
+- **State:** The Weedle replacement is complete and exact, but coverage remains **147/276 exact**, 0 partial, 0 staged, **129 unsupported**. The generated source inventory classifies POISON_STING as `outsideFactory`, while the assigned promotion requires it to change the Level-50 276-move tier; no out-of-scope inventory/tier change was made.
+- **Did:** Replaced the obsolete set-4 Wurmple checkpoint with the true lowest carrier, legal challenge-0 `FRONTIER_MON_WEEDLE` set 3, and independently measured bilateral art, geometry, stats, chrome, timing, latches, and receipts. Strengthened the portable to pin fixture contract, pointer bounds, sprite category/callback/animation/subpriority/OAM painter metadata, exact software-to-hardware OAM/matrix/palette transfer, ShakeMon2, tags/registers/audio, immutability, raw RGB, and cleanup.
+- **Verified:** Twice fresh, player-back **244..356** and opponent-front **232..344** each pass **113/113 component+seam+hardware+raw-RGB+framebuffer**. Player evidence/raw/map: `bd742227…` / `13d161ae…` / `2c38ddb3…`; opponent: `41998b70…` / `a97b8d7f…` / `379c44a5…`. TWINEEDLE remains bilateral **37/37** and POISON_FANG bilateral **104/104**, twice fresh.
+- **Next:** Supervisor resolves the brief/inventory tier mismatch before promotion. If POISON_STING is intentionally reclassified into the Level-50 denominator, add its exact coverage entry and update the inventory ratchet together; otherwise retain this exact implementation as an outside-tier checkpoint.
+- **Notes:** No damage, poison/accuracy/RNG, controller, turn/facility state, animation boundary, canonical recording import, unsupported barrier, or absolute-tick branch changed.
 
 ## MOVE_VICE_GRIP exact — bilateral 42/42 CUT-pincer promotion (2026-08-09 worker)
 

@@ -12,6 +12,7 @@ import { createInitialState, render, type EngineState } from "../../src/engine/c
 import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture extends SceneOnPoisonStingConfig {
+  readonly schema: string; readonly oracleProfile: string;
   readonly scenario: string;
   readonly probe: string;
   readonly orientation: string;
@@ -23,6 +24,7 @@ interface Sprite {
   readonly slot: number; readonly template: number; readonly callback: number;
   readonly attr0: number; readonly attr1: number; readonly attr2: number;
   readonly x: number; readonly y: number; readonly x2: number; readonly y2: number;
+  readonly subpriority: number; readonly animNum: number; readonly animCmdIndex: number;
   readonly matrixNum: number;
   readonly matrix: { readonly a: number; readonly b: number; readonly c: number; readonly d: number };
 }
@@ -35,15 +37,17 @@ interface Frame {
   readonly visualTaskCount: number; readonly soundTaskCount: number;
   readonly fadedPalette: readonly number[]; readonly hardwarePalette: readonly number[];
   readonly paletteTags: readonly number[]; readonly tileTags: readonly number[];
+  readonly softwareOam: readonly string[];
   readonly hardwareOam: readonly (readonly number[])[];
   readonly hardwareMatrices: readonly (readonly number[])[];
   readonly registers: { readonly bldcnt: number; readonly bldalpha: number };
   readonly se1: { readonly songHeader: number; readonly status: number; readonly tracks: readonly { readonly flags: number; readonly panX: number }[] };
 }
 interface Probe {
-  readonly schema: string; readonly scriptBounds: Readonly<Record<string, number>>;
+  readonly schema: string; readonly moveId: number; readonly scriptBounds: Readonly<Record<string, number>>;
   readonly sourceWindow: Fixture["sourceWindow"];
   readonly templates: Readonly<Record<string, number>>;
+  readonly callbacks: Readonly<Record<string, number>>;
   readonly taskFuncs: Readonly<Record<string, number>>;
   readonly songHeaders: Readonly<Record<string, number>>;
   readonly frames: readonly Frame[];
@@ -57,6 +61,12 @@ const digests = new Map<string, string>();
 
 function verify(path: string): void {
   const fixture = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
+  if (fixture.schema !== "poison-sting-portable-evidence/v1"
+    || fixture.oracleProfile !== "battle-scene-on"
+    || fixture.move !== "POISON_STING"
+    || !["player-back", "opponent-front"].includes(fixture.orientation)) {
+    throw new Error(`${path}: invalid Poison Sting fixture contract`);
+  }
   const scratch = createScratchDir("pokebench-poison-sting-portable-");
   const output = join(scratch, "evidence.json");
   const rgbDir = join(scratch, "rgb");
@@ -78,6 +88,7 @@ function verify(path: string): void {
   digests.set(fixture.orientation, digest);
   const probe = JSON.parse(bytes.toString()) as Probe;
   if (probe.schema !== "poison-sting-dense-evidence/v1"
+    || probe.moveId !== 40
     || !same(probe.sourceWindow, fixture.sourceWindow)
     || probe.frames.length !== 113
     || probe.frames[0]?.scriptOffset !== 0
@@ -105,7 +116,9 @@ function verify(path: string): void {
       ...actual.moveSprites.gPoisonBubbleSpriteTemplate ?? [],
     ].map((sprite) => {
       const kind = sprite.template === probe.templates.gLinearStingerSpriteTemplate ? "needle"
-        : sprite.template === probe.templates.gBasicHitSplatSpriteTemplate ? "impact" : "poisonBubble";
+        : sprite.template === probe.templates.gBasicHitSplatSpriteTemplate ? "impact"
+        : sprite.template === probe.templates.gPoisonBubbleSpriteTemplate ? "poisonBubble" : null;
+      if (kind === null) throw new Error(`${fixture.orientation}: uncategorized sprite template ${sprite.template}`);
       return {
         kind,
         // AnimBubbleEffect retains its source anchor in x/y and emits the
@@ -124,6 +137,21 @@ function verify(path: string): void {
       matrix: sprite.matrix, oamSlot: sprite.oamSlot,
       }));
     const sprites = same(actualSprites, expectedSprites);
+    const spriteMetadata = [
+      ...actual.moveSprites.gLinearStingerSpriteTemplate ?? [],
+      ...actual.moveSprites.gBasicHitSplatSpriteTemplate ?? [],
+      ...actual.moveSprites.gPoisonBubbleSpriteTemplate ?? [],
+    ].every((sprite) => {
+      const kind = sprite.template === probe.templates.gLinearStingerSpriteTemplate ? "needle"
+        : sprite.template === probe.templates.gBasicHitSplatSpriteTemplate ? "impact" : "poisonBubble";
+      const callback = kind === "needle" ? probe.callbacks.AnimTranslateLinear_WithFollowup
+        : kind === "impact" ? probe.callbacks.RunStoredCallbackWhenAffineAnimEnds : probe.callbacks.AnimBubbleEffect_Step;
+      const expectedSubpriority = fixture.attacker.geometry.side === "player"
+        ? (kind === "impact" ? 27 : 38) : (kind === "impact" ? 37 : 28);
+      return (sprite.callback === (callback | 1) || sprite.callback === (probe.callbacks.DestroyAnimSprite | 1))
+        && sprite.animNum === 0 && sprite.animCmdIndex === 0
+        && sprite.subpriority === expectedSubpriority && sprite.slot >= 3 && sprite.slot <= 5;
+    }) && actualSprites.every((sprite, index, list) => index === 0 || list[index - 1]!.oamSlot <= sprite.oamSlot);
     const target = fixture.target.geometry.side === "player"
       ? actual.playerSprite : actual.opponentSprite;
     const baseline = fixture.target.geometry.side === "opponent" && age < 35 ? 1 : 0;
@@ -157,11 +185,17 @@ function verify(path: string): void {
       ...priorFrame.moveSprites.gBasicHitSplatSpriteTemplate ?? [],
       ...priorFrame.moveSprites.gPoisonBubbleSpriteTemplate ?? [],
     ];
-    const hardware = priorSprites.every((sprite) =>
-      actual.hardwareOam.some((oam) => same(oam, [sprite.attr0, sprite.attr1, sprite.attr2]))
-      && same(actual.hardwareMatrices[sprite.matrixNum], [
-        sprite.matrix.a, sprite.matrix.b, sprite.matrix.c, sprite.matrix.d,
-      ]));
+    const hardware = priorSprites.every((sprite) => {
+      const tuple = [sprite.attr0, sprite.attr1, sprite.attr2];
+      const softwareIndex = priorFrame!.softwareOam.findIndex((raw) => {
+        const bytes = Buffer.from(raw, "hex");
+        return same([bytes.readUInt16LE(0), bytes.readUInt16LE(2), bytes.readUInt16LE(4)], tuple);
+      });
+      return softwareIndex >= 0 && same(actual.hardwareOam[softwareIndex], tuple)
+        && same(actual.hardwareMatrices[sprite.matrixNum], [
+          sprite.matrix.a, sprite.matrix.b, sprite.matrix.c, sprite.matrix.d,
+        ]);
+    });
     const palette = priorSprites.every((sprite) => {
       const bank = sprite.attr2 >>> 12;
       const start = 256 + bank * 16;
@@ -192,7 +226,7 @@ function verify(path: string): void {
         || app[pixel * 4 + 2] !== raw[pixel * 3 + 2]) diff += 1;
     }
     if (diff === 0) framebuffers += 1;
-    const component = sprites && targetOffset && task && tagState && registers
+    const component = sprites && spriteMetadata && targetOffset && task && tagState && registers
       && sound && hardware && palette && immutable && cleanup && seamShape && rawExact;
     if (component) components += 1;
     if (!component || diff !== 0) failures.push(

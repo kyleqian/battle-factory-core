@@ -813,6 +813,7 @@ export interface SceneOnPresentationBattler {
     | "CHARMANDER"
     | "LEDYBA"
     | "WURMPLE"
+    | "WEEDLE"
      | "PRIMEAPE"
      | "MARSHTOMP"
      | "TENTACOOL"

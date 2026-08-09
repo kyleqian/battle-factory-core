@@ -1465,8 +1465,8 @@ const twineedleArt = twineedleAsset as {
   beedrillFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const poisonStingArt = poisonStingAsset as {
-  wurmpleBack: { tileset: Tileset; palette: RgbColor[] };
-  wurmpleFront: { tileset: Tileset; palette: RgbColor[] };
+  weedleBack: { tileset: Tileset; palette: RgbColor[] };
+  weedleFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const spikeCannonArt = spikeCannonAsset as {
   omastarBack: { tileset: Tileset; palette: RgbColor[] };
@@ -19296,12 +19296,12 @@ export function renderSceneOnMovePresentation(
     // BuildOamBuffer and palette transfer expose the preceding software state.
     const displayed = sceneOnPoisonStingView({ ...stingState, age: stingState.age - 1 });
     const playerToOpponent =
-      view.attacker.species === "WURMPLE"
+      view.attacker.species === "WEEDLE"
       && view.attacker.geometry.side === "player"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "WURMPLE"
+      view.attacker.species === "WEEDLE"
       && view.attacker.geometry.side === "opponent"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "player";
@@ -19311,11 +19311,11 @@ export function renderSceneOnMovePresentation(
         + `${view.attacker.species}->${view.target.species}`,
       );
     }
-    const wurmpleSource = playerToOpponent
-      ? poisonStingArt.wurmpleBack : poisonStingArt.wurmpleFront;
-    const wurmple = playerToOpponent ? wurmpleSource : {
-      ...wurmpleSource,
-      tileset: subTileset(wurmpleSource.tileset, 0, 8),
+    const weedleSource = playerToOpponent
+      ? poisonStingArt.weedleBack : poisonStingArt.weedleFront;
+    const weedle = playerToOpponent ? weedleSource : {
+      ...weedleSource,
+      tileset: subTileset(weedleSource.tileset, 0, 8),
     };
     const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(
@@ -19345,7 +19345,7 @@ export function renderSceneOnMovePresentation(
     };
     if (playerToOpponent) drawNeedle();
     drawSpriteSheet(
-      fb, wurmple.tileset, wurmple.palette,
+      fb, weedle.tileset, weedle.palette,
       view.attacker.geometry.spriteCorner.x,
       view.attacker.geometry.spriteCorner.y,
     );
@@ -19375,7 +19375,7 @@ export function renderSceneOnMovePresentation(
     drawSendOutHealthbox(
       fb, 0,
       composeOpponentHealthbox(healthboxAssemblyAssets, {
-        name: playerToOpponent ? "ONIX" : "WURMPLE", level: 50,
+        name: playerToOpponent ? "ONIX" : "WEEDLE", level: 50,
         gender: state.config.fieldProfile.opponentGender ?? "male",
         hpFraction: state.config.fieldProfile.opponentHp
           / state.config.fieldProfile.opponentMaxHp,
@@ -19384,7 +19384,7 @@ export function renderSceneOnMovePresentation(
     );
     drawComposedPlayerHealthbox(
       fb, composePlayerHealthbox(playerHealthboxAssets, {
-        name: playerToOpponent ? "WURMPLE" : "ONIX", level: 50,
+        name: playerToOpponent ? "WEEDLE" : "ONIX", level: 50,
         gender: state.config.fieldProfile.playerGender ?? "male",
         hpFraction: state.config.fieldProfile.playerHp
           / state.config.fieldProfile.playerMaxHp,
@@ -19396,7 +19396,7 @@ export function renderSceneOnMovePresentation(
       fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette,
     );
     drawMessageTextLines(
-      fb, playerToOpponent ? "WURMPLE used" : "Foe WURMPLE used",
+      fb, playerToOpponent ? "WEEDLE used" : "Foe WEEDLE used",
       "POISON STING!", 99,
     );
     return;

@@ -38,7 +38,7 @@ def main() -> None:
     palette_tags, tile_tags = names["sSpritePaletteTags"], names["sSpriteTileRangeTags"]
     software_oam = names["gMain"] + 0x38
     templates = {name: names[name] for name in ("gLinearStingerSpriteTemplate", "gBasicHitSplatSpriteTemplate", "gPoisonBubbleSpriteTemplate")}
-    callbacks = {name: names[name] for name in ("AnimTranslateStinger", "AnimHitSplatBasic", "AnimBubbleEffect")}
+    callbacks = {name: names[name] for name in ("AnimTranslateLinear_WithFollowup", "RunStoredCallbackWhenAffineAnimEnds", "AnimBubbleEffect_Step", "DestroyAnimSprite")}
     task_funcs = {name: names[name] for name in ("AnimTask_ShakeMon2", "AnimTask_ShakeMon2_Step")}
     bounds = {"Move_POISON_STING": names["Move_POISON_STING"], "Move_TWINEEDLE": names["Move_TWINEEDLE"], "PoisonBubblesEffect": names["PoisonBubblesEffect"]}
 
