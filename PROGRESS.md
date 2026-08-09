@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1047 — [interactive user session, 2026-08-09] **User decisions: #85 first; Gate-6 evidence goes family-level**
+
+- **State:** master green (827 files / 8,213 tests, ~47 s full suite).
+  Decisions recorded in the ROADMAP S10 block.
+- **Did:** the user ruled the 561-gap hook census closes at FAMILY
+  granularity (one receipt per effect/hook family + Tier-1 sibling batch
+  checks; per-gap receipts only on divergence), receipt hygiene is advisory
+  (worker TIME, not repo weight, is the constraint), and the sequencing is
+  #85 -> family-level Gate 6 -> close-out -> playable-round milestone ->
+  then schedule S11.
+- **Next:** ISSUES #85 — displayed-HP ledger drift (`npm run soak -- --seed
+  0`), handoff invariant (`--seed 6`), factorySwap stall (`--seed 55`).
+  Then re-soak and burn the battles-2-7/postwin wave.
+- **Notes:** vanilla soak 0:20 must stay 20/20 at every wind-down (ROADMAP
+  gate). Report full-policy completions/60 as the session headline number.
+
 ## 1046 — [interactive user session, 2026-08-09] **Random-play soak harness folded; five display-seam crashes fixed; suite ~50 s**
 
 - **State:** master merges `wip/meta-audit-20260808` + `wip/perf-audit-20260808`
@@ -52,31 +68,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   OFF oracle healthy. The generic seven-battle controller and all five #84
   fixes remain green. No production mechanic, canonical import, or
   unsupported-barrier pin changed.
-
----
-
-## 1044 — [supervisor, 2026-08-09] **ON_DAMAGE candidates ratcheted; Haze fold and union green**
-
-- **State:** Gate 6 remains **OPEN** at **561** per-move hook gaps: **300 item
-  + 261 ability**. The 39 existing `source-proven-family` ability rows remain
-  unchanged; no ON_DAMAGE row was promoted without complete route and oracle
-  evidence.
-- **Did:** accepted `2d55ec1b` + `089bb685`. The source-derived checkpoint
-  enumerates **94** contact and **183** Color Change candidates (**94** overlap)
-  across **78** entry-script shapes, with every row ratcheted against three
-  explicit blockers: ordered MOVEEND route not proved, damage-state guard not
-  selector-derived, and no direct OFF ON_DAMAGE semantic receipt. Corrected
-  Static from an incidental party appearance to
-  `engine-referenced-no-oracle-receipt`. Folded animation-main's independently
-  supervised bilateral exact HAZE handoff through `31632800` as `23180820`.
-- **Next:** build a complete ordered runtime MOVEEND witness and a direct
-  Battle Scene OFF parameterized receipt for one shared ON_DAMAGE family before
-  promoting any of its candidates; otherwise take another finite source-bounded
-  hook family while preserving the explicit gaps.
-- **Notes:** supervisor focused verification is **4 files / 70 tests**. Final
-  union is **823 files / 8,189 passed / 1 skipped** and production build green;
-  OFF oracle healthy. The generic seven-battle controller and all five #84
-  presentation/controller regressions remain green. No canonical import or
-  unsupported-barrier pin moved.
 
 ---

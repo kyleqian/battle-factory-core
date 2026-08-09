@@ -975,6 +975,23 @@ compact assertion block; a dump that is expensive to regenerate MAY be
 committed as-is. Never spend a worker step regenerating or slimming an
 existing receipt for hygiene alone.
 
+**Gate-6 evidence granularity + sequencing (user decision 2026-08-09):**
+the 561-item per-move hook-gap census (300 item + 261 ability) is NOT to be
+closed gap-by-gap. Re-group it into effect/hook families; each family gets
+ONE deterministic parameterized-oracle receipt on a representative member,
+and siblings get Tier-1 batch checks against the same table data. A full
+receipt for a sibling is authored only when its batch check or the soak
+finds a divergence. This is gate 6's own written standard ("every distinct
+effect/hook family has at least one deterministic parameterized-oracle
+semantic trace; table siblings are batch-checked") and leaves the
+2026-08-05 all-Gen-3 implementation-breadth ruling untouched. Ordered
+sequencing: (1) ISSUES #85 until seeded soak rounds complete end-to-end,
+reporting completions/60 at every wind-down; (2) the family-level Gate-6
+worklist; (3) close-out assembly — manifest, interaction tests, the soak
+as the seeded-rounds artifact, the Noland scope note — then tick gates
+2/3/4/6; (4) a short "playable round" user-polish milestone (#71, #73,
+session-trace-driven pacing fixes) before S11 audio is scheduled.
+
 **ISSUES #39 and the animation lane are demoted to filler** until S10's six
 gates are checked. The audited `turn10OnixDarkPalette` Family-F slice is
 deferred, not canceled; entry 1024's named-next-owner handoff is overridden
