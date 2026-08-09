@@ -13,6 +13,7 @@ type JsonObject = Record<string, unknown>;
 
 const JSON_PATH = "docs/gate6-coverage-manifest.json";
 const MARKDOWN_PATH = "docs/gate6-coverage-manifest.md";
+const PER_MOVE_HOOK_JOIN_AXES = ["item", "ability"] as const;
 
 const EXPLICIT_STATE_BEHAVIOR_ROWS = [
   [
@@ -85,12 +86,80 @@ function collectEvidenceRows(value: unknown, rows: JsonObject[] = []): JsonObjec
   return rows;
 }
 
+function assertPerMoveHookJoinContract(manifest: JsonObject): void {
+  const summary = record(manifest.summary);
+  const hookJoinSummary = record(summary.perMoveHookJoins);
+  const sections = record(manifest.sections);
+  const hookJoinSections = record(sections.perMoveHookJoins);
+  let totalRows = 0;
+  let totalUnsupported = 0;
+  let totalGaps = 0;
+
+  for (const axis of PER_MOVE_HOOK_JOIN_AXES) {
+    const rows = array(hookJoinSections[axis]);
+    const axisSummary = record(hookJoinSummary[axis]);
+    const rowsByMove = new Map<string, JsonObject>();
+    for (const candidate of rows) {
+      const row = record(candidate);
+      if (typeof row.move !== "string" || rowsByMove.has(row.move)) {
+        throw new Error(`${axis} hook-join rows must enumerate each move exactly once`);
+      }
+      rowsByMove.set(row.move, row);
+    }
+    if (rows.length !== parameterizationData.moves.length) {
+      throw new Error(`${axis} hook-join row count is not derived from the parameterization artifact`);
+    }
+
+    let unsupported = 0;
+    for (const sourceMove of parameterizationData.moves) {
+      const sourceHook = record(record(sourceMove.hooks)[axis]);
+      if (sourceHook.status !== "unsupported" || !String(sourceHook.reason).trim()) {
+        throw new Error(`parameterization ${axis} hook for ${sourceMove.move} is no longer explicit unsupported`);
+      }
+      const row = rowsByMove.get(sourceMove.move);
+      if (!row) throw new Error(`missing ${axis} hook-join row for ${sourceMove.move}`);
+      if (row.axis !== axis || row.status !== "unsupported" || !String(row.reason).trim()) {
+        throw new Error(`${axis} hook-join row for ${sourceMove.move} is not explicit unsupported`);
+      }
+      if (row.effect !== sourceMove.moveTable.effect || row.entryScript !== sourceMove.battleScript.entryScript) {
+        throw new Error(`${axis} hook-join row for ${sourceMove.move} lost its identity/effect evidence`);
+      }
+      const locator = `moves:${sourceMove.move}.hooks.${axis}`;
+      const sourceArtifact = record(row.sourceArtifact);
+      if (sourceArtifact.path !== "src/data/gen/level50-move-parameterization.json" || sourceArtifact.locator !== locator) {
+        throw new Error(`${axis} hook-join row for ${sourceMove.move} lost its source artifact locator`);
+      }
+      if (!array(row.evidence).some((item) => {
+        const evidence = record(item);
+        return evidence.path === sourceArtifact.path && evidence.locator === locator;
+      })) {
+        throw new Error(`${axis} hook-join row for ${sourceMove.move} lacks source artifact evidence`);
+      }
+      unsupported += 1;
+    }
+
+    if (axisSummary.rows !== rows.length || axisSummary.unsupported !== unsupported || axisSummary.gaps !== unsupported) {
+      throw new Error(`${axis} hook-join summary makes a false count or zero-gap claim`);
+    }
+    totalRows += rows.length;
+    totalUnsupported += unsupported;
+    totalGaps += unsupported;
+  }
+
+  const total = record(hookJoinSummary.total);
+  if (total.rows !== totalRows || total.unsupported !== totalUnsupported || total.gaps !== totalGaps) {
+    throw new Error("per-move hook-join total makes a false count or zero-gap claim");
+  }
+}
+
 function assertManifestContract(manifest: JsonObject): void {
   const gate6 = record(manifest.gate6);
   expect(gate6.closed).toBe(false);
   expect(String(gate6.verdict)).toMatch(/open/i);
   expect(String(gate6.nextAcceptanceUnit).trim().length).toBeGreaterThan(0);
   expect(JSON.stringify(manifest)).not.toMatch(/\bgate\s*6\s+is\s+(closed|complete)\b/i);
+  expect(String(gate6.nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
+  assertPerMoveHookJoinContract(manifest);
   for (const row of collectEvidenceRows(manifest.sections)) {
     expect(String(row.status)).not.toMatch(/^(closed|complete)$/i);
     for (const item of array(row.evidence)) {
@@ -123,6 +192,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const summary = record(manifest.summary);
     const effects = record(summary.effects);
     const moves = record(summary.moves);
+    const perMoveHookJoins = record(summary.perMoveHookJoins);
     const corpus = record(summary.corpus);
     const hooks = record(summary.hooks);
     const abilities = record(hooks.abilities);
@@ -132,6 +202,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const moveEffect = record(sections.moveEffect);
     const manifestEffects = array(moveEffect.effects);
     const manifestMoves = array(moveEffect.moves);
+    const manifestHookJoinSections = record(sections.perMoveHookJoins);
     const stateFamilies = array(sections.stateFamilies);
     const manifestTrainers = array(record(sections.corpus).trainers);
     const manifestSets = array(record(sections.corpus).level50Sets);
@@ -141,6 +212,13 @@ describe("Gate-6 mechanics coverage manifest", () => {
 
     expect(manifestEffects).toHaveLength(topologyData.effects.length);
     expect(manifestMoves).toHaveLength(topologyData.moves.length);
+    expect(effects).toEqual({ total: 214, staticExecutable: 214 });
+    for (const effect of manifestEffects) {
+      expect(record(effect)).toMatchObject({
+        status: "static-executable",
+        semanticAcceptance: "not-established-by-static-census",
+      });
+    }
     expect(manifestTrainers).toHaveLength(trainersData.entries.length);
     expect(manifestSets).toHaveLength(monsData.entries.filter((entry) => entry.index < 850).length);
     expect(manifestAbilities).toHaveLength(hooksData.universes.abilities.length);
@@ -149,9 +227,6 @@ describe("Gate-6 mechanics coverage manifest", () => {
       readdirSync("tools/battle-lab").filter((name) => /^gate6-.*\.json$/.test(name)).length,
     );
     expect(effects.total).toBe(manifestEffects.length);
-    for (const effect of manifestEffects) {
-      expect(record(effect).semanticAcceptance).toBe("not-established-by-static-census");
-    }
     expect(moves.total).toBe(manifestMoves.length);
     expect(moves.level50Roster).toBe(parameterizationData.moves.length);
     expect(moves.level50Executable).toBe(
@@ -160,6 +235,15 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(moves.level50RosterOnly).toBe(
       parameterizationData.moves.filter((move) => move.battleScript.executionInventory === "level50-roster-only").length,
     );
+    for (const axis of PER_MOVE_HOOK_JOIN_AXES) {
+      const rows = array(manifestHookJoinSections[axis]);
+      const sourceUnsupported = parameterizationData.moves.filter((move) => move.hooks[axis].status === "unsupported").length;
+      const axisSummary = record(perMoveHookJoins[axis]);
+      expect(rows).toHaveLength(parameterizationData.moves.length);
+      expect(axisSummary).toEqual({ rows: rows.length, unsupported: sourceUnsupported, gaps: sourceUnsupported });
+      expect(sourceUnsupported).toBe(300);
+    }
+    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 600, gaps: 600 });
     expect(corpus.ordinaryTrainers).toBe(300);
     expect(corpus.level50Sets).toBe(850);
     expect(abilities.total).toBe(manifestAbilities.length);
@@ -172,6 +256,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
       manifestScenarios.filter((scenario) => record(scenario).status !== "oracle-receipted").length,
     );
     expect(record(summary.stateFamilies)).toEqual({ total: 55, tier1Covered: 55 });
+    expect(record(summary.interactions)).toEqual({ total: 28, kernelProven: 6, oracleReceipted: 22, receiptGaps: 0 });
     for (const [symbol, expectedEvidence] of EXPLICIT_STATE_BEHAVIOR_ROWS) {
       const row = stateFamilies.find((candidate) => record(candidate).label === symbol);
       expect(row).toBeDefined();
@@ -187,7 +272,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     }
   });
 
-  it("rejects unknown evidence paths and false closure claims", () => {
+  it("rejects unknown evidence paths, false hook-join zeroes, and false closure claims", () => {
     const manifest = readManifest();
     assertManifestContract(manifest);
 
@@ -201,9 +286,25 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const falseGate6 = record(falseClosure.gate6);
     falseGate6.closed = true;
     expect(() => assertManifestContract(falseClosure)).toThrow();
+
+    const falseItemZero = structuredClone(manifest);
+    const falseItemJoins = record(record(falseItemZero.summary).perMoveHookJoins);
+    falseItemJoins.item = {
+      ...record(falseItemJoins.item),
+      gaps: 0,
+    };
+    expect(() => assertManifestContract(falseItemZero)).toThrow();
+
+    const falseTotalZero = structuredClone(manifest);
+    const falseTotalJoins = record(record(falseTotalZero.summary).perMoveHookJoins);
+    falseTotalJoins.total = {
+      ...record(falseTotalJoins.total),
+      gaps: 0,
+    };
+    expect(() => assertManifestContract(falseTotalZero)).toThrow();
   });
 
-  it("keeps the widened zero-Factory scope, distinct R12/R12b receipts, and broader Gate-6 gap inspectable", () => {
+  it("keeps widened scope and receipts unchanged while surfacing the hook-join gap", () => {
     const manifest = readManifest();
     const sections = record(manifest.sections);
     const hookSections = record(sections.hooks);
@@ -241,8 +342,9 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(r12).toMatchObject({ status: "oracle-receipted", captureCount: 10 });
     expect(oracle.receiptDocumented).toBe(24);
     expect(oracle.receiptGaps).toBe(0);
-    expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Broader Gate-6 breadth acceptance:/);
+    expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*300 item join gaps\*\* and \*\*300 ability join gaps\*\*/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/24\/24.*scenario receipts documented; \*\*0\*\* request-level gaps/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Receipt count alone does not close the broader Gate-6 breadth acceptance/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).not.toMatch(/fixture-only-no-committed-receipt/);
