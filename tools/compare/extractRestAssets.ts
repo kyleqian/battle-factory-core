@@ -33,7 +33,11 @@ writeFileSync(out, `${JSON.stringify({
     teddiursaFront:
       "graphics/pokemon/teddiursa/anim_front.png frame 0; FRONTIER_MON_TEDDIURSA set 117; SPECIES_TEDDIURSA 216",
     letterZ:
-      "graphics/battle_anims/sprites/letter_z.png; ANIM_TAG_LETTER_Z; gSleepLetterZSpriteTemplate",
+      "graphics/battle_anims/sprites/letter_z.png; ANIM_TAG_LETTER_Z; gSleepLetterZSpriteTemplate/gLetterZSpriteTemplate",
+    seakingBack:
+      "graphics/pokemon/seaking/back.png; FRONTIER_MON_SEAKING set 333; SPECIES_SEAKING 119",
+    seakingFront:
+      "graphics/pokemon/seaking/anim_front.png frame 0; FRONTIER_MON_SEAKING set 333; SPECIES_SEAKING 119",
   },
   teddiursaBack: sprite(
     "graphics/pokemon/teddiursa/back.png",
@@ -42,6 +46,14 @@ writeFileSync(out, `${JSON.stringify({
   teddiursaFront: sprite(
     "graphics/pokemon/teddiursa/anim_front.png",
     "graphics/pokemon/teddiursa/normal.pal",
+  ),
+  seakingBack: sprite(
+    "graphics/pokemon/seaking/back.png",
+    "graphics/pokemon/seaking/normal.pal",
+  ),
+  seakingFront: sprite(
+    "graphics/pokemon/seaking/anim_front.png",
+    "graphics/pokemon/seaking/normal.pal",
   ),
   letterZ: sprite("graphics/battle_anims/sprites/letter_z.png"),
 })}\n`);

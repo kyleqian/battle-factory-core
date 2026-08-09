@@ -958,6 +958,7 @@ import {
   sceneOnMetronomeView,
   sceneOnFollowMeView,
   sceneOnRestView,
+  sceneOnSleepTalkView,
   sceneOnHowlView,
   sceneOnRoarView,
   sceneOnSweetKissView,
@@ -997,6 +998,7 @@ import {
   type SceneOnMetronomePresentationState,
   type SceneOnFollowMePresentationState,
   type SceneOnRestPresentationState,
+  type SceneOnSleepTalkPresentationState,
   type SceneOnHowlPresentationState,
   type SceneOnRoarPresentationState,
   type SceneOnSweetKissPresentationState,
@@ -1781,6 +1783,8 @@ const metronomeArt = metronomeAsset as {
 const restArt = restAsset as {
   teddiursaBack: { tileset: Tileset; palette: RgbColor[] };
   teddiursaFront: { tileset: Tileset; palette: RgbColor[] };
+  seakingBack: { tileset: Tileset; palette: RgbColor[] };
+  seakingFront: { tileset: Tileset; palette: RgbColor[] };
   letterZ: { tileset: Tileset; palette: RgbColor[] };
 };
 const howlArt = howlAsset as {
@@ -24607,6 +24611,140 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "TEDDIURSA went" : "Foe TEDDIURSA went",
       "to sleep!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SLEEP_TALK") {
+    const sleepTalkState = state as SceneOnSleepTalkPresentationState;
+    const view = sceneOnSleepTalkView(sleepTalkState);
+    // AnimLetterZ reaches hardware OAM/matrices through the following
+    // VBlank. AnimTask_SwayMon's battler x2 has one additional task-to-OAM
+    // latch, measured independently from the committed Sleep Talk maps.
+    const displayedLetters = sceneOnSleepTalkView({
+      ...sleepTalkState,
+      age: sleepTalkState.age - 1,
+    });
+    const displayedSway = sceneOnSleepTalkView({
+      ...sleepTalkState,
+      age: sleepTalkState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "SEAKING"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "SEAKING"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SLEEP_TALK pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const seakingSource = playerToOpponent
+      ? restArt.seakingBack : restArt.seakingFront;
+    const seaking = playerToOpponent
+      ? seakingSource
+      : { ...seakingSource, tileset: subTileset(seakingSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const attackerX2 = displayedSway.swayTask?.offsetX2 ?? 0;
+    // gMonBackPicCoords[SEAKING].y_offset=11 is loaded at hardware OAM y=59
+    // for this resolved back-side geometry; the generic picture corner is
+    // eight pixels lower because it addresses the unclipped logical sheet.
+    const seakingSpriteY = view.attacker.geometry.spriteCorner.y
+      + (playerToOpponent ? -8 : 0);
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      seaking.tileset,
+      seaking.palette,
+      view.attacker.geometry.spriteCorner.x + attackerX2,
+      seakingSpriteY,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    const wrappedOamY = (y: number) => {
+      const byte = y & 0xff;
+      return byte >= 160 ? byte - 256 : byte;
+    };
+    // SortSprites puts larger wrapped Y at lower OAM indices. Paint the
+    // inverse order so the PPU's lower-index winner lands last; exact ties
+    // retain the inherited lower-slot winner from this source allocation.
+    const lettersBackToFront = displayedLetters.letters.slice().sort((a, b) => {
+      const byY = wrappedOamY(a.oam.attr[0]!) - wrappedOamY(b.oam.attr[0]!);
+      return byY || b.slot - a.slot;
+    });
+    const drawLetters = () => {
+      for (const letter of lettersBackToFront) {
+        drawSpriteSheetAffineRotate(
+          fb,
+          restArt.letterZ.tileset,
+          restArt.letterZ.palette,
+          letter.x + letter.x2,
+          letter.y + letter.y2,
+          letter.matrix.a,
+          letter.matrix.b,
+          letter.matrix.c,
+          letter.matrix.d,
+          undefined,
+          false,
+        );
+      }
+    };
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (playerToOpponent) {
+      // The source creates the letters at target-relative subpriority -2;
+      // in this singles layout that remains in front of both battler OBJs.
+      drawTarget();
+      drawAttacker();
+      drawLetters();
+    } else {
+      // attacker subpriority 40, target 30, letters 28
+      drawAttacker();
+      drawTarget();
+      drawLetters();
+    }
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "SEAKING",
+        level: 50,
+        gender: "male",
+        hpFraction: playerToOpponent ? 1 : 153 / 162,
+        status: playerToOpponent ? "none" : "sleep",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "SEAKING" : "ONIX",
+        level: 50,
+        gender: "male",
+        hpFraction: 1,
+        status: playerToOpponent ? "sleep" : "none",
+        currentHp: playerToOpponent ? 162 : 110,
+        maxHp: playerToOpponent ? 162 : 110,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "SEAKING used" : "Foe SEAKING used",
+      "SLEEP TALK!",
       99,
     );
     return;
