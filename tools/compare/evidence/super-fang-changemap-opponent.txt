@@ -174,4 +174,3 @@ frame  changedPx  bbox(minx,miny-maxx,maxy)
   static 276
 277  1619  44,49-99,111
   static 278
-
