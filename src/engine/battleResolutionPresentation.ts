@@ -3115,7 +3115,10 @@ export function projectBattleResolutionCommands(
       // command (the outgoing mon's scale-up + teardown, rendered from the
       // switch-out view) ahead of the recall receipt that commits the hidden
       // sprite/healthbox after the span.
-      if (event.provenance?.opcodeName === "B_SCR_OP_RETURNATKTOBALL") {
+      if (
+        event.provenance?.opcodeName === "B_SCR_OP_RETURNATKTOBALL"
+        || event.provenance?.opcodeName === "B_SCR_OP_RETURNTOBALL"
+      ) {
         commands.push(Object.freeze({
           type: "switch-out",
           eventSequence: event.sequence,
@@ -3140,7 +3143,8 @@ export function projectBattleResolutionCommands(
         // SetHealthboxSpriteInvisible). The synthesized voluntary-switch
         // receipt (ISSUES #78 seam) carries the returnatktoball provenance.
         recall: event.provenance?.opcodeName === "B_SCR_OP_VARIOUS"
-          || event.provenance?.opcodeName === "B_SCR_OP_RETURNATKTOBALL",
+          || event.provenance?.opcodeName === "B_SCR_OP_RETURNATKTOBALL"
+          || event.provenance?.opcodeName === "B_SCR_OP_RETURNTOBALL",
       }));
       continue;
     }

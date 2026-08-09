@@ -17,18 +17,6 @@ backlog.
 
 # Open
 
-## #84 — Generated-round playthrough regression: forced-switch jump
-
-**Symptom (user report, 2026-08-08):** during a generated Battle Scene OFF
-round with the player's BUTTERFREE against an opponent MURKROW, (3) WHIRLWIND
-immediately replaces MURKROW with PIDGEOTTO without a faithful recall/send-out
-sequence.
-
-**Confirmed:** the remaining item is a generic round/controller presentation
-path, not an animation-lane task. Diagnose and repair it against staged state
-and the Battle Scene OFF oracle. Do not add canonical Battle-2/turn/tick
-branches.
-
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **Symptom:** all 62 Factory-front send-out intro families (**376/376** species

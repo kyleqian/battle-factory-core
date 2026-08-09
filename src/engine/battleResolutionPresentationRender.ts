@@ -273,6 +273,8 @@ export type MidBattleSwitchInView = Readonly<{
   monVisible: boolean;
   /** `sAffineAnim_Battler_Emerge` accumulator during the ball-release scale-down. */
   emergeAccumulator: number;
+  /** Task_FadeMon_ToNormal coefficient for the opponent release silhouette. */
+  monTintCoefficient: number;
   /** Player-healthbox x2 slide offset (110 -> 0 at 5 px/frame), or null before the slide. */
   healthboxDx: number | null;
 }>;
@@ -331,6 +333,15 @@ export function midBattleSwitchInAt(
       + MID_BATTLE_SWITCH_EMERGE_ACCUMULATOR_STEP
         * (elapsed - (side === "player" ? MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED + 1 : 19)),
   );
+  const opponentMaterializeLocal = elapsed - 19;
+  // The shared release task holds the ball-open tint at 16 for 23 rendered
+  // callbacks, then fades 15 -> 0. This is the handoff-relative form of the
+  // source-derived generated-opponent release cadence in battleScene.ts.
+  const monTintCoefficient = side === "opponent"
+    ? opponentMaterializeLocal < 23
+      ? 16
+      : Math.max(0, 15 - (opponentMaterializeLocal - 23))
+    : 0;
   const healthboxSlideElapsed = side === "player"
     ? MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED
     : 33;
@@ -368,6 +379,7 @@ export function midBattleSwitchInAt(
       : Object.freeze({ pa: 256, pb: 0, pc: 0, pd: 256 }),
     monVisible,
     emergeAccumulator,
+    monTintCoefficient,
     healthboxDx,
   });
 }

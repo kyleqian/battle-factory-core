@@ -38799,3 +38799,20 @@ both verify scripts/census independently re-verified before this entry.)*
   build, smoke, and **640/640** OFF differential captures passed.
 - **Next/Notes:** superseded by the S10-closure ordering decision. The full
   entry remains in git history at `PROGRESS.md`.
+## 1035 — [bounded MAIN worker, 2026-08-08] **#84 status-message cadence repaired**
+
+- **State:** #84 items (2) and (4) are removed; only item (1)'s wrong-side
+  opponent ball and item (3)'s WHIRLWIND recall/send-out seam remain. Gate 6
+  stays **22/24** OFF-profile receipts.
+- **Did:** fresh dense OFF evidence separated text typing, the 64-frame source
+  `waitmessage`, Scene-OFF attack/status controller spans, and subsequent
+  dispatch. The generic round resolution now derives a direct following
+  `B_SCR_OP_WAITMESSAGE B_WAIT_TIME_LONG` from immutable print-event program
+  provenance. Public lifecycle tests pin the first formerly-wrong post-typing
+  edge and all 64 hold ages for legal TAUNT/TORMENT and TOXIC sibling routes.
+- **Next:** repair #84 item (1)'s opponent ball side, then item (3)'s
+  WHIRLWIND recall/send-out presentation. Do not resume canonical Battle 2.
+- **Notes:** focused presentation/orchestrator/ratchet **89/89**, smoke
+  **375/375**, and full suite **812 files / 8,143 passed / 1 skipped**; build
+  green. No unsupported barrier, canonical recording import, rules/RNG/event,
+  fatal completeness, or fatal status-handoff guard changed.

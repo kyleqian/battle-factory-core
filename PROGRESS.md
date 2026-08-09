@@ -5,16 +5,35 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1037 — [bounded MAIN worker, 2026-08-09] **#84 opponent send-out side repaired**
+## 1038 — [bounded MAIN worker, 2026-08-09] **#84 forced opponent switch presentation complete**
 
-- **State:** #84 item (1) is removed; only item (3)'s WHIRLWIND opponent
-  recall/send-out seam remains. Gate 6 stays **23/24** OFF-profile receipts.
+- **State:** #84 is closed. Gate 6 stays **23/24** OFF-profile receipts; R2
+  remains the separate final compact-receipt upgrade.
+- **Did:** `B_SCR_OP_RETURNTOBALL` now emits controller-owned typed recall
+  visibility, and generic resolution projects its 32-frame switch-out before
+  the existing opponent switch-in chain. Opponent open-ball frames now retain
+  the simultaneous elevated, affine, ball-tinted incoming mon; voluntary
+  player recall/send-out behavior remains unchanged.
+- **Next:** let the supervisor select the next Gate-6/Main increment. Do not
+  resume canonical Battle 2.
+- **Notes:** twice-fresh legal BUTTERFREE WHIRLWIND vs MURKROW OFF evidence is
+  byte-identical across dense frames 210..420; GROVYLE proves the elevated
+  incoming overlap. Focused force-switch/orchestrator/render checks are
+  **406/406**, smoke **375/375**, full suite **814 files / 8,151 passed / 1
+  skipped**, and production build green.
+  No barrier/import pin, rule/RNG, party/HP/status, or completeness guard changed.
+
+## 1037 — [bounded MAIN worker, 2026-08-09] **#84 opponent send-out origin repaired**
+
+- **State:** `d02a46f5` fixed opponent-side routing and origin, but item (1)
+  remained presentation-incomplete: its open ball still returned before
+  drawing the simultaneously materializing incoming mon. Item (3)'s
+  WHIRLWIND recall/send-out seam also remained. Gate 6 stayed **23/24**.
 - **Did:** reproduced the generated opponent replacement through the public
   resolution renderer. The typed switch-in projection now preserves battler
-  side, ball origin/pose, mon and healthbox owner: opponent replacements stay
-  at `(176,64)` while player replacements retain the `(24,68)` throw arc.
-- **Next:** repair #84 item (3)'s generic WHIRLWIND recall/send-out sequence.
-  Do not resume canonical Battle 2.
+  side, ball origin/pose, and healthbox owner: opponent replacements stay at
+  `(176,64)` while player replacements retain the `(24,68)` throw arc.
+- **Next:** completed by entry 1038's overlap and generic forced-recall repair.
 - **Notes:** fresh legal complete-party OFF evidence captures frames 470..630
   densely; MACHOP proves the fix is species-independent. Full suite **813
   files / 8,147 passed / 1 skipped** and build green. No unsupported barrier,
@@ -35,21 +54,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   manifest checks are **59/59**. Worker full suites are **8,143** and
   **8,144** passed with one skip each; both builds pass. No barrier/import pin
   changed. The final union build is still required after the next pair.
-
-## 1035 — [bounded MAIN worker, 2026-08-08] **#84 status-message cadence repaired**
-
-- **State:** #84 items (2) and (4) are removed; only item (1)'s wrong-side
-  opponent ball and item (3)'s WHIRLWIND recall/send-out seam remain. Gate 6
-  stays **22/24** OFF-profile receipts.
-- **Did:** fresh dense OFF evidence separated text typing, the 64-frame source
-  `waitmessage`, Scene-OFF attack/status controller spans, and subsequent
-  dispatch. The generic round resolution now derives a direct following
-  `B_SCR_OP_WAITMESSAGE B_WAIT_TIME_LONG` from immutable print-event program
-  provenance. Public lifecycle tests pin the first formerly-wrong post-typing
-  edge and all 64 hold ages for legal TAUNT/TORMENT and TOXIC sibling routes.
-- **Next:** repair #84 item (1)'s opponent ball side, then item (3)'s
-  WHIRLWIND recall/send-out presentation. Do not resume canonical Battle 2.
-- **Notes:** focused presentation/orchestrator/ratchet **89/89**, smoke
-  **375/375**, and full suite **812 files / 8,143 passed / 1 skipped**; build
-  green. No unsupported barrier, canonical recording import, rules/RNG/event,
-  fatal completeness, or fatal status-handoff guard changed.

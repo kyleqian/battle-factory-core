@@ -36231,25 +36231,7 @@ function drawMidBattleSwitchInSprite(
   state: MidBattleSwitchInView,
   paletteOverride?: RgbColor[],
 ): void {
-  if (state.ballVisible) {
-    if (state.side === "opponent") {
-      const tileset = state.ballPose === "closed"
-        ? BALL_CLOSED_TILESET
-        : state.ballPose === "open"
-          ? BALL_OPEN_TILESET
-          : BALL_OPEN_FINAL_TILESET;
-      const palette = state.ballPose === "closed"
-        ? summaryBall.palette
-        : battleAnimBallOpen.palette;
-      drawSpriteSheet(
-        fb,
-        tileset,
-        palette,
-        state.ballPosition.x - 8,
-        state.ballPosition.y - 8,
-      );
-      return;
-    }
+  if (state.ballVisible && state.side === "player") {
     // ISSUES #78 window A: the thrown ball renders from the RAM ball sprite's
     // per-tick state (center + `sAffineAnim_BallRotate_4` matrix, one tick
     // lagged), affine-sampled around the center and clipped by the player
@@ -36268,40 +36250,85 @@ function drawMidBattleSwitchInSprite(
     );
     return;
   }
-  if (!state.monVisible) return;
+  if (state.monVisible) {
   // ISSUES #78 residual: the oracle's RENDERED first visible emerge frame is
   // trace 1189 (elapsed 49, acc 58), not 1188 -- §10.3's "first visible at
   // 1188" is the RAM state, which renders one tick later (pixel-verified:
   // oracle 1188 has zero mon pixels, 1189 has 57). The accumulator formula
   // below yields acc 40 at elapsed 48 (the invisible 1187 RAM value), so gate
   // the draw on the accumulator reaching the visible 58.
-  if (state.emergeAccumulator < MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR) return;
-  if (state.emergeAccumulator <= MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR) {
+  if (state.emergeAccumulator >= MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR
+      && state.emergeAccumulator <= MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR) {
     const scale = Math.trunc(0x10000 / state.emergeAccumulator);
+    const materializeLocal = state.side === "opponent"
+      ? state.elapsed - 19
+      : state.elapsed - MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED - 1;
     const emergeY2 = MATERIALIZE_Y2_TABLE[
-      state.elapsed - MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED - 1
+      materializeLocal
     ] ?? 0;
-    drawSpriteSheetAffineStretch(
+    const originY = state.side === "opponent"
+      ? art.origin.y - enemyMonElevation(art.speciesSymbol)
+      : art.origin.y;
+    if (state.side === "opponent") {
+      // Same source release reducer as the generated battle-start opponent:
+      // accumulator -> inverse affine matrix, species elevation, y2 descent,
+      // and the ball-open palette ramp.
+      drawSpriteSheetAffineTintedBlend(
+        fb,
+        art.pic.tileset as Tileset,
+        art.pic.palette as RgbColor[],
+        art.origin.x,
+        originY,
+        state.emergeAccumulator,
+        MATERIALIZE_TINT_COLOR,
+        state.monTintCoefficient,
+        emergeY2,
+      );
+    } else {
+      drawSpriteSheetAffineStretch(
+        fb,
+        art.pic.tileset as Tileset,
+        paletteOverride ?? (art.pic.palette as RgbColor[]),
+        art.origin.x,
+        originY,
+        scale,
+        scale,
+        emergeY2,
+        MATERIALIZE_TINT_COLOR,
+        0,
+      );
+    }
+  } else if (state.emergeAccumulator > MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR) {
+    drawSpriteSheet(
       fb,
       art.pic.tileset as Tileset,
       paletteOverride ?? (art.pic.palette as RgbColor[]),
       art.origin.x,
-      art.origin.y,
-      scale,
-      scale,
-      emergeY2,
-      MATERIALIZE_TINT_COLOR,
-      0,
+      state.side === "opponent"
+        ? art.origin.y - enemyMonElevation(art.speciesSymbol)
+        : art.origin.y,
     );
-    return;
   }
-  drawSpriteSheet(
-    fb,
-    art.pic.tileset as Tileset,
-    paletteOverride ?? (art.pic.palette as RgbColor[]),
-    art.origin.x,
-    art.origin.y,
-  );
+  }
+  // Opponent release creates the ball after the mon sprite; its open OAM
+  // remains visible over the pink emerging mon for one boundary frame.
+  if (state.ballVisible && state.side === "opponent") {
+    const tileset = state.ballPose === "closed"
+      ? BALL_CLOSED_TILESET
+      : state.ballPose === "open"
+        ? BALL_OPEN_TILESET
+        : BALL_OPEN_FINAL_TILESET;
+    const palette = state.ballPose === "closed"
+      ? summaryBall.palette
+      : battleAnimBallOpen.palette;
+    drawSpriteSheet(
+      fb,
+      tileset,
+      palette,
+      state.ballPosition.x - 8,
+      state.ballPosition.y - 8,
+    );
+  }
 }
 
 /**

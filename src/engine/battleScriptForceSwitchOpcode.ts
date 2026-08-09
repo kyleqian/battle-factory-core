@@ -223,10 +223,11 @@ function createSwitchoutabilitiesHandler(
 }
 
 /**
- * `Cmd_returntoball` (`:5346-5352`): unconditional controller acknowledgement
- * (`BtlController_EmitReturnMonToBall`), zero logical state change -- the
- * same "acknowledge controller ownership" shape as `attackanimation`/
- * `switchinanim`.
+ * `Cmd_returntoball` (`:5346-5352`): unconditional controller-owned recall
+ * (`BtlController_EmitReturnMonToBall(..., TRUE)`). The controller destroys
+ * the battler sprite and hides its healthbox, so publish the same typed
+ * visibility receipt as the voluntary `returnatktoball` sibling. Logical
+ * party/HP/status state is unchanged here; the later switch opcodes own it.
  */
 function createReturntoballHandler(
   isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>,
@@ -253,7 +254,20 @@ function createReturntoballHandler(
     const rules = context.state.rulesContext;
     const battler = resolveSwitchBattler(rules, selectorOperand.expression);
     const scheduler = markBattleScriptControllerPending(context.state.scheduler, battler);
-    return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { scheduler });
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      {
+        scheduler,
+        events: Object.freeze([
+          Object.freeze({
+            kind: "set-battler-sprite-visibility" as const,
+            battler,
+            invisible: true,
+          }),
+        ]),
+      },
+    );
   };
 }
 
