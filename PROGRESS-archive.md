@@ -364,6 +364,29 @@
 
 # Progress archive
 
+## 1031 — [supervisor WIND-DOWN, 2026-08-08] **Gate-6 receipts advanced to 21/24; union green**
+
+- **State:** the final animation fold is on master at `3cf40fe2`; Gate 6 remains **OPEN** with
+  **21/24** Battle Scene OFF receipts, **3** explicit gaps, and **R3** next.
+  The widened executable triage remains **0 A / 0 B / 22 C / 24 D**.
+- **Did:** accepted two-seed deterministic R12b White Herb, R11 Baton Pass,
+  R6 Natural Cure, and R15 three-layer Spikes receipts. R15 proves real
+  Flying/Levitate immunity plus grounded Rhydon `187→141 = floor(187/4)` in
+  source HP-update/message order. Repaired generic `Cmd_removeitem` party-slot
+  persistence for both sides while preserving Recycle/Knock Off ownership.
+- **Next:** receipt R3's legal Cloud Nine removal/reactivation sequence, then
+  R9 and R2; keep the seven-battle controller/presentation seam generic and do
+  not resume the retired canonical Battle-2 march.
+- **Notes:** the pre-fold master union is green at **807 files / 8,119 passed /
+  1 skipped**; the folded Thunder/Glare branch was independently green and the
+  post-fold production build plus OFF-profile oracle info pass. The first run
+  hit six Vitest collection timeouts under concurrent full-suite memory
+  pressure (801 files / 6,984 tests passed); all six reran **1,135/1,135**
+  before the clean full rerun. At orientation `master..animation-main` was
+  empty; after its separate supervisor exited cleanly, `0dffb48b` was folded.
+  A post-fold full rerun was stopped at wind-down when a new independent
+  supervisor began a competing full suite; no assertion failure was observed.
+
 ## 1029 — [bounded MAIN worker, 2026-08-08] **S10 printfromtable source inventory complete**
 
 - **State:** the widened `Cmd_printfromtable` family is source-complete for

@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1034 — [supervisor, 2026-08-08] **#84 crash fixed; R3 receipted; union green**
+
+- **State:** #84 item (5) is fixed; its four presentation defects remain open.
+  Gate 6 advanced **21→22/24** OFF-profile receipts, with R9 next.
+- **Did:** accepted the generic toxic handoff repair at `54eaaa5d`: toxic's
+  hidden counter no longer impersonates a changed PSN icon, while party index,
+  HP, and visible-status mismatches remain fatal. Merged R3's repaired legal
+  Golduck→Rattata route and twice-fresh deterministic Cloud Nine removal/rain
+  reactivation receipt.
+- **Next:** diagnose #84's shared TAUNT/TORMENT/TOXIC message pacing, then the
+  wrong-side opponent ball and WHIRLWIND recall/send-out seam. Continue R9 in
+  the disjoint side lane.
+- **Notes:** worker full suite is **8,138 passed / 1 skipped**; supervisor union
+  checks are **62/62 focused + 375/375 smoke**, and both component builds pass.
+  R3's one full-run manifest mismatch did not reproduce in two supervisor runs;
+  all other **8,136** tests in that run passed. No barrier/import pin changed.
+
 ## 1033 — [bounded MAIN worker, 2026-08-08] **#84 fatal toxic-resolution handoff repaired**
 
 - **State:** #84 item (5) is removed; items (1)-(4) remain open. Gate 6 remains
@@ -38,26 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   and R2 receipts after the user-visible blockers.
 - **Notes:** do not resume the retired canonical Battle-2 march. Use the generic
   seven-battle controller and Battle Scene OFF presentation seam.
-
-## 1031 — [supervisor WIND-DOWN, 2026-08-08] **Gate-6 receipts advanced to 21/24; union green**
-
-- **State:** the final animation fold is on master at `3cf40fe2`; Gate 6 remains **OPEN** with
-  **21/24** Battle Scene OFF receipts, **3** explicit gaps, and **R3** next.
-  The widened executable triage remains **0 A / 0 B / 22 C / 24 D**.
-- **Did:** accepted two-seed deterministic R12b White Herb, R11 Baton Pass,
-  R6 Natural Cure, and R15 three-layer Spikes receipts. R15 proves real
-  Flying/Levitate immunity plus grounded Rhydon `187→141 = floor(187/4)` in
-  source HP-update/message order. Repaired generic `Cmd_removeitem` party-slot
-  persistence for both sides while preserving Recycle/Knock Off ownership.
-- **Next:** receipt R3's legal Cloud Nine removal/reactivation sequence, then
-  R9 and R2; keep the seven-battle controller/presentation seam generic and do
-  not resume the retired canonical Battle-2 march.
-- **Notes:** the pre-fold master union is green at **807 files / 8,119 passed /
-  1 skipped**; the folded Thunder/Glare branch was independently green and the
-  post-fold production build plus OFF-profile oracle info pass. The first run
-  hit six Vitest collection timeouts under concurrent full-suite memory
-  pressure (801 files / 6,984 tests passed); all six reran **1,135/1,135**
-  before the clean full rerun. At orientation `master..animation-main` was
-  empty; after its separate supervisor exited cleanly, `0dffb48b` was folded.
-  A post-fold full rerun was stopped at wind-down when a new independent
-  supervisor began a competing full suite; no assertion failure was observed.
