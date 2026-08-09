@@ -203,6 +203,31 @@ function phaseRngCalls(
 }
 
 /**
+ * `AtkCanceler_UnableToUseMove` owns writes to
+ * `gBattleCommunication[MULTISTRING_CHOOSER]` before handing a later battle
+ * script to `printfromtable`. Phase receipts preserve that source ownership;
+ * this loop is the durable rules-context seam between the source phase and
+ * the script interpreter. Project every typed selector write here instead of
+ * coupling a particular table (for example `gWokeUpStringIds`) to the loop.
+ */
+function projectPhaseMultistringChooser(
+  rulesContext: BattleScriptRulesContext,
+  decision: BattleScriptAttackCancelerPhaseDecision,
+): BattleScriptRulesContext {
+  if (!("multistringChooser" in decision.receipt)) {
+    return rulesContext;
+  }
+  const selector = decision.receipt.multistringChooser;
+  if (selector.kind !== "set" || selector.value === rulesContext.multistringChooser) {
+    return rulesContext;
+  }
+  return Object.freeze({
+    ...rulesContext,
+    multistringChooser: selector.value,
+  });
+}
+
+/**
  * Immutable composition of battle_util.c's complete
  * AtkCanceler_UnableToUseMove do/while helper.
  *
@@ -371,7 +396,10 @@ export function advanceBattleScriptAttackCancelerUnableToUseMove(
     }
 
     phases.push(decision);
-    rulesContext = decision.rulesContext;
+    rulesContext = projectPhaseMultistringChooser(
+      decision.rulesContext,
+      decision,
+    );
     rngCallsConsumed += phaseRngCalls(decision);
     effect = phaseEffect(decision);
     programCounter = phaseScript(decision, sourcePc);

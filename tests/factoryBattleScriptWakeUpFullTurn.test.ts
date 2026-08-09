@@ -4,9 +4,14 @@ import {
   submitFactoryFullTurnDecision,
   type FactoryFullTurnConfig,
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
+import {
+  BATTLE_SCRIPT_STATUS1_SLEEP,
+  BATTLE_SCRIPT_STATUS2_MASKS,
+} from "../src/engine/battleScriptSourceConstants.ts";
 
 const TACKLE = 33;
 const SPLASH = 150;
+const UPROAR = 253;
 
 const PLAYER_TACKLE = Object.freeze({
   kind: "use-move" as const,
@@ -118,6 +123,53 @@ describe("Factory full-turn sleep expiry", () => {
       payload: expect.objectContaining({
         kind: "message",
         messageId: "STRINGID_USEDMOVE",
+      }),
+    }));
+  });
+
+  it("carries the Uproar-selected gWokeUpStringIds row through the real printfromtable path", () => {
+    const base = config();
+    const initial = createFactoryFullTurnBattleState({
+      ...base,
+      player: {
+        ...base.player,
+        status1: BATTLE_SCRIPT_STATUS1_SLEEP,
+      },
+      trainer: {
+        ...base.trainer,
+        status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR,
+        // Uproar is a later multi-turn continuation; retain its source
+        // gLockedMoves entry so the end-turn tail can finish honestly.
+        lockedMove: UPROAR,
+      },
+    });
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: PLAYER_TACKLE,
+    });
+    if (afterPlayer.kind !== "decision-required") {
+      throw new Error(`expected trainer command after Uproar wake, got ${afterPlayer.kind}`);
+    }
+
+    const completedTurn = submitFactoryFullTurnDecision(afterPlayer.state, {
+      requestId: 2,
+      side: "trainer",
+      decision: TRAINER_SPLASH,
+    });
+    if (completedTurn.kind !== "decision-required") {
+      throw new Error(`expected next player command after Uproar wake, got ${completedTurn.kind}`);
+    }
+
+    expect(completedTurn.events).toContainEqual(expect.objectContaining({
+      provenance: expect.objectContaining({
+        sourceLabel: "BattleScript_MoveUsedWokeUp",
+        opcodeName: "B_SCR_OP_PRINTFROMTABLE",
+      }),
+      payload: expect.objectContaining({
+        kind: "message",
+        messageId: "STRINGID_PKMNWOKEUPINUPROAR",
+        scriptingBattler: 0,
       }),
     }));
   });

@@ -13,6 +13,7 @@ import {
   BATTLE_SCRIPT_ATTACK_CANCELER_PHASES,
   BATTLE_SCRIPT_STATUS1_FREEZE,
   BATTLE_SCRIPT_STATUS1_PARALYSIS,
+  BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS2_MASKS,
 } from "../src/engine/battleScriptSourceConstants.ts";
 
@@ -405,6 +406,51 @@ describe("complete source-shaped AtkCanceler_UnableToUseMove composition", () =>
         statusController: { kind: "none" },
       });
     }
+  });
+
+  it("projects the asleep phase's source-owned MULTISTRING_CHOOSER write before its MoveUsedWokeUp handoff", () => {
+    const ordinaryWake = advanceBattleScriptAttackCancelerUnableToUseMove(
+      state({
+        rulesContext: withSinglesAttacker(0, { status1: 1 }, {
+          // An unrelated prior table selection must not leak through either
+          // gWokeUpStringIds row.
+          multistringChooser: 9,
+        }),
+      }),
+      PC,
+    );
+    expect(ordinaryWake).toMatchObject({
+      effect: 2,
+      rngCallsConsumed: 0,
+      rulesContext: { multistringChooser: 0 },
+      receipt: {
+        programCounter: { kind: "handoff", targetLabel: "BattleScript_MoveUsedWokeUp" },
+      },
+    });
+
+    const uproarWake = advanceBattleScriptAttackCancelerUnableToUseMove(
+      state({
+        rulesContext: rules({
+          battlers: [
+            battler({ side: 0, status1: BATTLE_SCRIPT_STATUS1_SLEEP }),
+            battler({ side: 1, status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR }),
+            battler({ side: 0 }),
+            battler({ side: 1 }),
+          ],
+          selectorRoles: { attacker: 0, target: 1, effectBattler: 1 },
+          multistringChooser: 9,
+        }),
+      }),
+      PC,
+    );
+    expect(uproarWake).toMatchObject({
+      effect: 2,
+      rngCallsConsumed: 0,
+      rulesContext: { multistringChooser: 1 },
+      receipt: {
+        programCounter: { kind: "handoff", targetLabel: "BattleScript_MoveUsedWokeUp" },
+      },
+    });
   });
 
   it("resumes after effects 1 and 2 from the already advanced tracker", () => {
