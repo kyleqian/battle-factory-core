@@ -874,3 +874,16 @@ wholesale-mismatched 0/43 frames before the trace declared its historical
 `canonical-recorded` owner. The metadata fix restored 43/43 and shrank the
 legacy allowlist. Hits: 1; cost: about 5 minutes. A compare trace with no
 route should fail with an actionable ambiguity error when both routes exist.
+
+## `npm run soak -- --help` silently starts the default 0:50 sweep
+
+- **What:** the soak CLI has a detailed usage comment but no `--help` branch.
+  Asking for help therefore ignores the flag and starts the default 50-seed
+  full-policy run. The supervisor caught and stopped it only after it had
+  already consumed several seeds.
+- **Hits:** 1.
+- **Cost each:** ~3 min.
+- **Workaround:** read `tools/soak/randomRoundSoak.ts`'s header or pass only a
+  known bounded `--seed`/`--seeds` invocation.
+- **Real fix:** recognize `-h`/`--help`, print the existing option contract,
+  and exit before constructing the default seed range.

@@ -1,3 +1,24 @@
+## 1058 — [MAIN worker, 2026-08-09] **full-policy RECORD-NO postwin hang closed**
+
+- **State:** source-generic repair and red-first public `tick` coverage are
+  green: full suite **832 files / 8,243 passed / 1 skipped**, production
+  build, focused **48/48**, smoke **375/375**, and vanilla **0:20 = 20 OK / 0
+  CRASH / 0 HANG**.
+- **Did:** source `AskRecordBattle` sends NO back through
+  `AskReadyForOpponent`; the production reducer instead retained the resolved
+  question after its re-asked continuation menu became input-ready, so
+  `core.tick` could never route GO ON. `advancePostwin` now retires that stale
+  question and its owned clocks exactly at the relative menu-ready boundary;
+  a fresh A there enters scouting page 1 with ordinary JOY_NEW semantics.
+- **Next:** seed 19 now passes the repaired postwin, swap screen, Battle 2,
+  and reaches Battle 3 before the separate existing fatal name guard reports
+  unmapped ability 14 at **b3 t12 f47319**. Supervisor should scope that
+  distinct string-coverage defect; this bounded postwin hang is closed.
+- **Notes:** full-policy seed 50 is **OK b2 t13 f28152 roundLost**. Seed 19's
+  first repaired route accepts a kept-party swap exit and reaches the Battle-2
+  intro by f17681; no driver policy, hang limit, animation, Gate-6 artifact,
+  unsupported barrier, or canonical Battle-2 window changed.
+
 ## 1057 — [MAIN worker, 2026-08-09] **#86 terminal forced-continuation closed**
 
 - **State:** source-generic repair and red-first public-path test are green;
