@@ -128,7 +128,7 @@
     "the source-relative reducer and typed Scene-ON seam port SWEAT_BEAD load/free, both pan sounds, HorizontalLunge, the 25-frame delay, both Random2-owned SprayWaterDroplet callbacks, ShakeMon2 task-slot writes, both ten-frame StretchTargetUp affine legs, waitforvisualfinish, and cleanup",
     "the compositor uses source-extracted Loudred front/back and SWEAT_BEAD art, existing Onix and shared field chrome, source OAM overlap priority, and the source-owned split affine-entry scanout latch in which ShakeMon2 x2 precedes the following matrix/vertical-anchor transfer",
     "no battle logic, battle RNG advance, damage, turn order, controller, round/facility state, boundary list, or unsupported barrier changed",
-    "MOVE_FAKE_OUT remains unsupported: it adds AnimTask_FakeOut and a post-body background white blend. MOVE_TRICK remains unsupported: it adds ITEM_BAG/SPEED_DUST assets, two bag affine programs, StretchAttackerUp, repeated DOUBLE_TEAM sound cues, and Hydro Cannon beams. Neither has independent dense move acceptance."
+    "MOVE_FAKE_OUT is independently exact through its own bilateral dense acceptance. MOVE_TRICK remains unsupported: it adds ITEM_BAG/SPEED_DUST assets, two bag affine programs, StretchAttackerUp, repeated DOUBLE_TEAM sound cues, and Hydro Cannon beams."
    ],
    "evidence": [
     "tools/battle-lab/mechanic-astonish-player-loudred-opponent-onix.json",
@@ -1132,6 +1132,33 @@
    ]
   },
   {
+   "move": "MOVE_FAKE_OUT",
+   "status": "exact",
+   "covered": [
+    "corrected complete legal set-22 scenarios use Emerald internal species 335 (MAKUHITA); the inherited checkpoint used species 296 (LOMBRE) despite its filenames, so its receipts were regenerated rather than promoted under a false species label",
+    "player-back MAKUHITA to opponent-front SHUCKLE frames 78-163 and opponent-front MAKUHITA to player-back SHUCKLE frames 82-167 each pass 86/86 source/reducer, typed seam, relevant hardware, audio/register/palette, raw-RGB, and shared production-framebuffer frames twice fresh through first inactive cleanup",
+    "the source-relative compositor implements AnimTask_FakeOut's WIN0H inclusive-left/exclusive-right shutter over the BG3 darken target, the BG3 lighten and palette-white transition/restore, and the complete SHUCKLE StretchTargetUp plus ShakeMon2 affine-double display",
+    "bilateral hardware receipts measure the initial prepared affine scanout with ShakeMon2 x2 at RAM+1 and the subsequent x2, y2, and matrix scanouts at RAM+2; front/back target picture offsets remain source-derived 9 and 11",
+    "corrected evidence/raw-RGB/change-map digests are player 38f74114fad7195ea26da329214ba837b2c48da39470a08b2ef700880a3fe76e / e43d4eb00b1a46961d227ebab82df7555d71d48410905da8cfb2034156673c9f / 65db300ac18fc2118181d930920a600bfe4cd1055453f4a09218372f5d1b8082 and opponent 1f4de9e3e5eacc224becd0df4cc37288cb570918699b0c76f79da928e1c43d74 / 890d46b5c77926c0ffcaac17f529a33f4023dddc555b620f92ae676cce12a39e / b0e573a5d3bafa389aa4d9cb5f6b88920027bd5ef0d0c770ac57016b5be1f629",
+    "ASTONISH remains independently exact twice fresh at 63/63 source/seam/hardware/framebuffer in both orientations after the shared affine work; no battle logic, damage, RNG, turn order, controller, round/facility state, animation boundary list, or unsupported barrier changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-fake-out-player-makuhita-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-fake-out-opponent-makuhita-player-shuckle.json",
+    "tools/compare/fixtures/fake-out-player-makuhita-opponent-shuckle.json",
+    "tools/compare/fixtures/fake-out-opponent-makuhita-player-shuckle.json",
+    "tools/compare/evidence/fake-out-changemap-player.txt",
+    "tools/compare/evidence/fake-out-changemap-opponent.txt",
+    "tools/compare/fakeOutProbe.py",
+    "tools/compare/fakeOutEvidence.ts",
+    "src/animation/fakeOut.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/fakeOut.test.ts",
+    "tests/animation/fakeOutEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_FAKE_TEARS",
    "status": "exact",
    "covered": [
@@ -1425,6 +1452,34 @@
     "tools/compare/fixtures/growth-player-ivysaur-opponent-onix.json",
     "tools/compare/fixtures/growth-opponent-ivysaur-player-onix.json",
     "tools/extract/extract-battle-mon-pics.ts"
+   ]
+  },
+  {
+   "move": "MOVE_GLARE",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 DUNSPARCE set-200 versus SHUCKLE Scene-ON source windows pass 213/213 source/software/typed-seam and 213/213 shared-framebuffer frames in both orientations twice fresh through first inactive cleanup: player-back frames 74..286 and opponent-front frames 78..290",
+    "the pure 213-age reducer and narrow compositor reproduce all 13 gGlareEyeDotSpriteTemplate pairs, both gEyeSparkleSpriteTemplate sprites, AnimTask_ScaryFace, AnimTask_ShakeTargetInPattern, both F_PAL_BG black ramps, registers, audio, battler visibility/offsets, source OAM/subpriority painter order, healthboxes, message chrome, and cleanup",
+    "fresh pixels pin independent display rules: each task-created eye-dot scans out two displays after creation but disappears one display after destruction; the script-created sparkle pair first scans out at age 115; BG palette hardware coefficients are 1..16 at ages 97..112 and 15..0 at ages 197..212; the shake uses the reducer's separately measured hardware schedule",
+    "player evidence 67acdfad1ac0e6ebcd4e58be993d2e3fded3979405e0eb77724142dc27ca3db5 / raw RGB 676cc2a4ab462a12ab1f06c01a75d1eab1db346ed40db0eb815ba94e9bd16beb; opponent evidence 2aa1e8a7769c723575d8dff345e3629ec39d320b2185c9b16ca1790716401644 / raw RGB eb5d27eadf6348be044b1b04e6b74bd887cac4ada819ef29301a311f9d7678c8; both freshly regenerated change maps byte-match their committed maps",
+    "MOVE_THUNDER remains exact at 262/262 component and framebuffer frames in both orientations as the bilateral portable control; MOVE_SCARY_FACE remains the independently exact source-neighbor control; MOVE_TRI_ATTACK remains unsupported"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-glare-player-dunsparce-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-glare-opponent-dunsparce-player-shuckle.json",
+    "tools/compare/fixtures/glare-player-dunsparce-opponent-shuckle.json",
+    "tools/compare/fixtures/glare-opponent-dunsparce-player-shuckle.json",
+    "tools/compare/glareProbe.py",
+    "tools/compare/glarePortable.ts",
+    "tools/compare/extractScaryFaceAssets.ts",
+    "tools/compare/evidence/glare-changemap-player.txt",
+    "tools/compare/evidence/glare-changemap-opponent.txt",
+    "src/animation/assets/scary-face.json",
+    "src/animation/glare.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/glare.test.ts",
+    "tests/animation/glareEvidence.test.ts"
    ]
   },
   {
@@ -2584,7 +2639,7 @@
     "every move-owned frame pins one-display EyeSparkle OAM, two-display battler-task transfer, complete relevant hardware/faded/unfaded palettes and EYE_SPARKLE tag lifetime, BG1 and blend registers, all three live audio intervals and pans, raw RGB digest, and the shared renderer",
     "the legal complete-party field profiles are RHYHORN 187 HP and SHUCKLE 127 HP in both orientations; these replace the earlier partial-era fixture estimates and match the stock ROM healthboxes exactly",
     "dense software evidence exposes the stock shared-gBattleAnimArgs overwrite: the script literal is ShakeTargetInPattern(20,1,FALSE,pattern0), while the immediately following palette command makes the delayed task execute runtime offset 3/pattern1; both contracts and every resulting offset are pinned",
-    "GLARE, THUNDER, and TRI_ATTACK remain separate unsupported acceptance units pending their own complete dense evidence; the later generic speed-stat presentation remains outside the move-owned boundary"
+    "GLARE and THUNDER are independently exact acceptance units; TRI_ATTACK remains unsupported pending its own complete dense evidence; the later generic speed-stat presentation remains outside the move-owned boundary"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-scary-face-player-rhyhorn-opponent-shuckle.json",
@@ -3245,7 +3300,7 @@
     "complete legal Level-50 MAGNETON-to-SHUCKLE Scene-ON source windows through first inactive cleanup match 262/262 source/software/typed-seam and 262/262 shared-framebuffer frames in both orientations twice fresh: player-back frames 76..337 and opponent-front frames 80..341",
     "portable proof pins the full Move_THUNDER pointer/wait program, all 12 gLightningSpriteTemplate lifecycles and source subpriority offsets, BG_THUNDER load/slide/restore, F_PAL_BG ramps and six screen inversions, AnimTask_ShakeTargetInPattern runtime argument overwrite and hardware display order, task counts, hardware OAM/palettes/registers, live audio identity/pan, raw RGB, and cleanup",
     "the narrow compositor consumes only the typed relative Scene-ON seam and source assets, including the source callback's one-display elevated opponent shadow, software-to-hardware palette/OAM latches, packed mGBA brightness decrease, field chrome, healthboxes, and text; no gameplay, RNG, controller, or facility state participates",
-    "fresh bilateral MOVE_THUNDER_PUNCH controls remain exact at 104/104 source-component and 104/104 framebuffer frames per orientation; MOVE_GLARE and MOVE_TRI_ATTACK remain unsupported as source-distinct acceptance units"
+    "fresh bilateral MOVE_THUNDER_PUNCH controls remain exact at 104/104 source-component and 104/104 framebuffer frames per orientation; MOVE_GLARE is independently exact and MOVE_TRI_ATTACK remains unsupported as a source-distinct acceptance unit"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-thunder-player-magneton-opponent-shuckle.json",

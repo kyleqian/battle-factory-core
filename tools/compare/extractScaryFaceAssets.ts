@@ -1,5 +1,5 @@
 // Reproducible source extraction for MOVE_SCARY_FACE's real challenge-0
-// Factory set-133 RHYHORN carrier, side-selected BG1, and loaded eye tag.
+// Factory set-133 RHYHORN carrier, side-selected BG1, and loaded eye tags.
 // SHUCKLE is intentionally reused from the exact SELF_DESTRUCT compositor.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -43,6 +43,8 @@ writeFileSync(out, `${JSON.stringify({
       "graphics/battle_anims/backgrounds/scary_face.png + scary_face_{player,opponent}.bin; gBattleAnimBg{Image,Palette,Tilemap}_ScaryFace*",
     eyeSparkle:
       "graphics/battle_anims/sprites/eye_sparkle.png; ANIM_TAG_EYE_SPARKLE; gEyeSparkleSpriteTemplate",
+    smallRedEye:
+      "graphics/battle_anims/sprites/small_red_eye.png; ANIM_TAG_SMALL_RED_EYE; gGlareEyeDotSpriteTemplate",
   },
   rhyhornBack: sprite(
     "graphics/pokemon/rhyhorn/back.png",
@@ -62,5 +64,6 @@ writeFileSync(out, `${JSON.stringify({
     ), 32, 32),
   },
   eyeSparkle: sprite("graphics/battle_anims/sprites/eye_sparkle.png"),
+  smallRedEye: sprite("graphics/battle_anims/sprites/small_red_eye.png"),
 })}\n`);
 console.log(`wrote ${out}`);

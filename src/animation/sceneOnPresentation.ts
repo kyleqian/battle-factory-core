@@ -462,6 +462,7 @@ import {
   type AstonishDropletRandom,
   type AstonishState,
 } from "./astonish.ts";
+import { fakeOutAtAge, type FakeOutState } from "./fakeOut.ts";
 import {
   razorLeafAtAge,
   type RazorLeafState,
@@ -734,6 +735,7 @@ export interface SceneOnPresentationBattler {
     | "GLOOM"
     | "TOGETIC"
     | "MACHOKE"
+    | "MAKUHITA"
     | "WINGULL"
     | "TAILLOW"
     | "EEVEE"
@@ -1932,6 +1934,15 @@ export interface SceneOnAstonishConfig {
   ];
 }
 
+export interface SceneOnFakeOutConfig {
+  readonly move: "FAKE_OUT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source mon-pic coordinate consumed by SetBattlerSpriteYOffsetFromYScale. */
+  readonly targetPictureYOffset: number;
+}
+
 export interface SceneOnRazorLeafConfig {
   readonly move: "RAZOR_LEAF";
   readonly attacker: SceneOnPresentationBattler;
@@ -2289,6 +2300,7 @@ export type SceneOnMoveConfig =
   | SceneOnDynamicPunchConfig
   | SceneOnDizzyPunchConfig
   | SceneOnAstonishConfig
+  | SceneOnFakeOutConfig
   | SceneOnRazorLeafConfig
   | SceneOnMagicalLeafConfig
   | SceneOnPoisonTailConfig
@@ -2793,6 +2805,12 @@ export interface SceneOnDizzyPunchView extends DizzyPunchState {
 }
 
 export interface SceneOnAstonishView extends AstonishState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly targetBattler: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFakeOutView extends FakeOutState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly targetBattler: SceneOnPresentationBattler;
@@ -5545,6 +5563,25 @@ export function sceneOnAstonishView(
       state.config.target.geometry.animationCenter,
       state.config.targetPictureYOffset,
       state.config.dropletRandom,
+    ),
+  };
+}
+
+/** `age=0` is the first in-bounds Move_FAKE_OUT script frame. */
+export function sceneOnFakeOutView(
+  state: SceneOnMovePresentationState<SceneOnFakeOutConfig>,
+): SceneOnFakeOutView {
+  if (state.config.move !== "FAKE_OUT") {
+    throw new Error(`expected FAKE_OUT presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    targetBattler: state.config.target,
+    ...fakeOutAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.targetPictureYOffset,
     ),
   };
 }

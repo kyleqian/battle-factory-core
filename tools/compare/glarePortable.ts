@@ -1,5 +1,5 @@
 /**
- * Dense, component-only MOVE_GLARE verifier.
+ * Dense, full-frame MOVE_GLARE verifier.
  *
  * The oracle RGB stream is used only as a reproducibility/change-map receipt;
  * no framebuffer is used to construct presentation state.  Every reducer
@@ -8,7 +8,7 @@
  */
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { readFileSync, realpathSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   glareAtAge,
@@ -20,6 +20,7 @@ import {
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 
 interface Fixture {
   readonly schema: string;
@@ -113,15 +114,23 @@ function geometryFor(fixture: Fixture): GlareGeometry {
 
 function battler(side: "player" | "opponent", species: "DUNSPARCE" | "SHUCKLE"): SceneOnPresentationBattler {
   const player = side === "player";
+  const centerY = player
+    ? (species === "DUNSPARCE" ? 95 : 91)
+    : (species === "DUNSPARCE" ? 57 : 49);
   return {
     species,
     geometry: {
-      side,
-      spriteCorner: player ? { x: 40, y: species === "DUNSPARCE" ? 63 : 62 } : { x: 144, y: 17 },
-      animationCenter: player ? { x: 72, y: species === "DUNSPARCE" ? 95 : 91 } : { x: 176, y: 49 },
+      side, spriteCorner: { x: player ? 40 : 144, y: centerY - 32 },
+      animationCenter: { x: player ? 72 : 176, y: centerY },
       battlePositionCenter: player ? { x: 72, y: 80 } : { x: 176, y: 40 },
     },
   };
+}
+
+function fieldProfile(geometry: GlareGeometry) {
+  return geometry.attackerSide === "player"
+    ? { playerHp: 207, playerMaxHp: 207, opponentHp: 127, opponentMaxHp: 127 }
+    : { playerHp: 127, playerMaxHp: 127, opponentHp: 207, opponentMaxHp: 207 };
 }
 
 function runFresh(fixture: Fixture, pass: number): { probe: Probe; output: string; rgbDir: string } {
@@ -151,6 +160,20 @@ function targetHardwareX2(frame: Frame, target: Sprite): number {
   return signed9(u16(match, 2)) - signed9(target.x - 32);
 }
 
+function framebufferDifference(app: Uint8Array, oracle: Uint8Array): string | null {
+  let count = 0, minX = 240, minY = 160, maxX = -1, maxY = -1;
+  for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+    const a = pixel * 4, o = pixel * 3;
+    if (app[a] === oracle[o] && app[a + 1] === oracle[o + 1]
+      && app[a + 2] === oracle[o + 2]) continue;
+    count += 1;
+    const x = pixel % 240, y = Math.floor(pixel / 240);
+    minX = Math.min(minX, x); minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+  }
+  return count === 0 ? null : `${count}px bbox ${minX},${minY}-${maxX},${maxY}`;
+}
+
 function checkFrame(fixture: Fixture, frame: Frame, age: number, probe: Probe): void {
   const geometry = geometryFor(fixture);
   const state = glareAtAge(age, geometry);
@@ -160,7 +183,7 @@ function checkFrame(fixture: Fixture, frame: Frame, age: number, probe: Probe): 
     move: "GLARE", attacker, target,
     attackerEyeCenter: geometry.attackerEyeCenter,
     eyeDotStart: geometry.eyeDotStart, eyeDotEnd: geometry.eyeDotEnd,
-    fieldProfile: { playerHp: 177, playerMaxHp: 177, opponentHp: 95, opponentMaxHp: 95 },
+    fieldProfile: fieldProfile(geometry),
   });
   const seam = sceneOnGlareView({ ...stage, age });
   const sourceTasks = frame.tasks.filter((task) => task.func.symbol?.startsWith("AnimTask_"));
@@ -241,11 +264,29 @@ function verify(fixture: Fixture, pass: number): { evidence: string; raw: string
     && frame.frame <= fixture.sourceAnimationWindow.endFrame);
   if (sourceFrames.length !== 213) throw new Error(`expected 213 source frames for ${fixture.orientation}`);
   const raw = createHash("sha256");
+  const geometry = geometryFor(fixture);
+  const attacker = battler(geometry.attackerSide, "DUNSPARCE");
+  const target = battler(geometry.targetSide, "SHUCKLE");
+  const stage = createSceneOnMovePresentation({
+    move: "GLARE", attacker, target,
+    attackerEyeCenter: geometry.attackerEyeCenter,
+    eyeDotStart: geometry.eyeDotStart, eyeDotEnd: geometry.eyeDotEnd,
+    fieldProfile: fieldProfile(geometry),
+  });
+  const framebufferErrors: string[] = [];
   for (const [age, frame] of sourceFrames.entries()) {
     const bytes = readFileSync(join(fresh.rgbDir, `${String(frame.frame).padStart(5, "0")}.rgb`));
     if (sha256(bytes) !== frame.sha256) throw new Error(`RGB hash mismatch ${fixture.orientation} age ${age}`);
     raw.update(bytes);
     checkFrame(fixture, frame, age, probe);
+    const engine: EngineState = {
+      ...createInitialState(), rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const difference = framebufferDifference(render(engine), bytes);
+    if (difference !== null) framebufferErrors.push(
+      `frame ${frame.frame}/age ${age}: ${difference}`,
+    );
   }
   const probeJsonHash = sha256(readFileSync(fresh.output));
   const evidence = sha256(JSON.stringify(sourceFrames));
@@ -257,7 +298,29 @@ function verify(fixture: Fixture, pass: number): { evidence: string; raw: string
   if (sha256(readFileSync(resolve(root, fixture.changeMap))) !== fixture.changeMapSha256) {
     throw new Error(`change-map drift ${fixture.orientation}`);
   }
-  console.log(`${fixture.orientation} pass ${pass}: 213/213 reducer+seam frames; evidence ${evidence}; raw ${rawHash}`);
+  const sourceRgbDir = join(dirname(fresh.output), "source-rgb");
+  mkdirSync(sourceRgbDir);
+  for (const frame of sourceFrames) {
+    const name = `${String(frame.frame).padStart(5, "0")}.rgb`;
+    copyFileSync(join(fresh.rgbDir, name), join(sourceRgbDir, name));
+  }
+  const changeMap = spawnSync("python3", [
+    join(root, "tools/compare/frame-changemap.py"), sourceRgbDir,
+  ], { cwd: root, encoding: "utf8" });
+  if (changeMap.status !== 0) throw new Error(
+    `fresh change-map failed ${fixture.orientation}: ${changeMap.stderr}`,
+  );
+  const stableMapBody = (value: string) => value.split("\n").slice(1).join("\n");
+  if (stableMapBody(changeMap.stdout)
+    !== stableMapBody(readFileSync(resolve(root, fixture.changeMap), "utf8"))) {
+    throw new Error(`fresh change-map byte drift ${fixture.orientation}`);
+  }
+  if (framebufferErrors.length) {
+    throw new Error(`${fixture.orientation} pass ${pass}: framebuffer `
+      + `${213 - framebufferErrors.length}/213\n${framebufferErrors.slice(0, 40).join("\n")}`
+      + `\nscratch: ${fresh.rgbDir}`);
+  }
+  console.log(`${fixture.orientation} pass ${pass}: 213/213 component+seam; 213/213 framebuffer; evidence ${evidence}; raw ${rawHash}`);
   return { evidence, raw: rawHash };
 }
 
