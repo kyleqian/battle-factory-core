@@ -333,6 +333,10 @@ import {
   type HyperFangEffect,
 } from "./hyperFang.ts";
 import {
+  superFangAtAge,
+  type SuperFangState,
+} from "./superFang.ts";
+import {
   megaPunchAtAge,
   type MegaPunchState,
 } from "./megaPunch.ts";
@@ -1414,6 +1418,13 @@ export interface SceneOnHyperFangConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSuperFangConfig {
+  readonly move: "SUPER_FANG";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnMegaPunchConfig {
   readonly move: "MEGA_PUNCH";
   readonly attacker: SceneOnPresentationBattler;
@@ -2298,6 +2309,7 @@ export type SceneOnMoveConfig =
   | SceneOnSludgeBombConfig
   | SceneOnPoisonFangConfig
   | SceneOnHyperFangConfig
+  | SceneOnSuperFangConfig
   | SceneOnMegaPunchConfig
   | SceneOnMegaKickConfig
   | SceneOnRollingKickConfig
@@ -2552,6 +2564,11 @@ export interface SceneOnPoisonFangView {
 
 export interface SceneOnHyperFangView extends HyperFangEffect {
   readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSuperFangView extends SuperFangState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -4458,6 +4475,24 @@ export function sceneOnHyperFangView(
     ...hyperFangEffectAtAge(
       state.age,
       state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first source-active `Move_SUPER_FANG` display. */
+export function sceneOnSuperFangView(
+  state: SceneOnMovePresentationState,
+): SceneOnSuperFangView {
+  if (state.config.move !== "SUPER_FANG") {
+    throw new Error(`expected SUPER_FANG presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...superFangAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
   };

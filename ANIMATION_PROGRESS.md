@@ -1,5 +1,12 @@
 # Animation coverage
 
+## MOVE_SUPER_FANG bilateral evidence/reducer/seam checkpoint — remains unsupported (2026-08-09 worker)
+
+- **State:** Coverage remains **142/276 exact**, 0 partial, 0 staged, **134 unsupported**. SUPER_FANG is not promoted; no compositor, coverage pin, boundary/barrier, gameplay, controller, or facility state changed.
+- **Did:** Added pointer-bounded Scene-ON bilateral RATICATE set-302 versus ONIX evidence through first inactive cleanup, a pure source-relative reducer for the complete `Move_SUPER_FANG` body, and the narrow typed presentation seam. The reducer reuses ShakeMonInPlace, ShakeMon, HorizontalLunge, and the existing Raticate/fang assets; it independently owns only `gSuperFangSpriteTemplate`'s 0/16/32/48 four-frame program.
+- **Verified:** Fresh windows are player-back **75..274 = 200** frames and opponent-front **79..278 = 200** frames. The reducer pins both in-place scheduler handoffs, attacker RGB(31,6,1) 1..12..1 palette ramp, lunge, Super Fang callback lifecycle, BG-only red→white blend, target shake, and cleanup. Focused tests and typecheck pass.
+- **Next:** Add the narrow source-relative compositor and portable; require twice-fresh **200/200** source/component/raw-RGB framebuffer equality in both orientations, then rerun bilateral HYPER_FANG and KNOCK_OFF controls before any coverage promotion.
+
 ## MOVE_FIRE_SPIN exact — bilateral 104/104 production promotion (2026-08-09 worker)
 
 - **State:** Coverage advances **141→142/276 exact**, 0 partial, 0 staged, **135→134 unsupported**. FIRE_SPIN alone moves; the animation boundary and unsupported-barrier pins remain unchanged.
