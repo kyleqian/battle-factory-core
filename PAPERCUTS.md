@@ -846,11 +846,11 @@ the nested controller trace. Hits: 1.
 
 ## Yielded full-suite calls are easy to restart accidentally
 
-2026-08-09, supervised side receipt and later state-family verification: a
-yielded execution was mistaken for a completed call and restarted, leaving
-concurrent Vitest process groups until the supervisor identified and
-terminated the superseded groups. Hits: 2; cost: about 10 minutes plus
-avoidable CPU contention. A
+2026-08-09, supervised side receipt, state-family, and absorbing-family
+verification: a yielded execution was mistaken for a completed call and
+restarted, leaving concurrent or redundant Vitest process groups until the
+supervisor identified the retained process or supplied final union
+verification. Hits: 3; cost: about 22 minutes plus avoidable CPU contention. A
 launcher/tool response that visually distinguishes “still running; wait on
 this handle” from completion would prevent this class of mistake.
 

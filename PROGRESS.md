@@ -5,6 +5,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1043 — [supervisor, 2026-08-09] **Absorbing hook family source-proven; union green**
+
+- **State:** Gate 6 remains **OPEN**. Per-move hook gaps are now **561**:
+  **300 item + 261 ability** (was 591). The manifest has **39** exact
+  `source-proven-family` ability rows: nine Soundproof plus 30 shared
+  Volt/Water Absorb and Flash Fire rows.
+- **Did:** accepted `8d8d4b7d` + typing follow-up `c7b4c223`. Source-derived
+  candidates are 6 Electric, 13 Water, and 12 Fire; all Electric/Water and 11
+  Fire routes prove ordered graph/program entry into
+  `JumpIfMoveFailed`/`ABILITYEFFECT_ABSORBING`. SUNNY DAY remains unsupported
+  with a complete weather-script exit witness. Corrected hook receipt taxonomy:
+  Volt Absorb owns the dedicated two-seed OFF receipt; Water Absorb/Flash Fire
+  are shared-dispatcher Tier-1 siblings, not incidentally oracle-receipted.
+  Folded animation-main's exact bilateral BARRIER handoff through `40cba0e5`
+  as `5af8d1e8`.
+- **Next:** take one remaining source-bounded per-move hook family, favoring
+  MOVEEND contact/on-damage plus Color Change only if ordered MOVEEND
+  reachability and the shared-family semantic evidence are complete.
+- **Notes:** supervisor post-fix typecheck, **6 files / 467 tests**, and build
+  are green. Final union is **821 files / 8,182 passed / 1 skipped** and build
+  green; OFF oracle healthy. Manifest artifacts are JSON **2,914,881 B** and
+  Markdown **825,090 B**. No production mechanics, controller, barrier/import,
+  or oracle fixture changed in the hook step.
+
+---
+
 ## 1042 — [supervisor, 2026-08-09] **Soundproof hook family source-proven**
 
 - **State:** Gate 6 remains **OPEN**. Per-move hook gaps are now **591**:
@@ -45,14 +71,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   folded union is **819 files / 8,175 passed / 1 skipped** and production build
   green. Generated artifact sizes are JSON **2,798,540 B** and Markdown
   **778,944 B**. No barrier/import pin or production mechanic changed.
-
----
-
-## 1040 — [bounded MAIN worker, 2026-08-09] **Gate-6 state-family Tier-1 gap closed and verified**
-
-- **State:** the manifest reports **55/55** state/status/volatile rows with focused Tier-1 evidence (was **50/55**); Gate 6 remains **OPEN**, effects remain not-established-by-static-census, and OFF hook/request distinctions remain **24/24** receipted.
-- **Did:** strengthened real interpreter/end-turn behavior for crit suppression, Leech Seed marker/encoded owner/drain/Rapid Spin cleanup, Yawn countdown/expiry, and Light Screen's shared wore-off message/buffer/re-set continuation. Added a narrow, locator-validated `STATE_FAMILY_BEHAVIOR_EVIDENCE` mapping and regenerated both manifest artifacts.
-- **Next:** let the supervisor select the next finite broad Gate-6 acceptance unit. Do not resume the retired Battle-2 march.
-- **Notes:** focused state/end-turn/hit-chain/manifest/frontier checks are **7 files / 525 tests** green; smoke is **375/375**; full suite is **817 files / 8,168 passed / 1 skipped**; production build is green. No production mechanics, oracle receipts, barriers/imports, or animation files changed.
 
 ---
