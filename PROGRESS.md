@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1052 — [supervisor, 2026-08-09] **Color Change family promoted; second Sleep Talk fold green**
+
+- **State:** corrected main union is green: Gate-6 focused **77/77** and
+  smoke **375/375**. The pre-Gate-6 animation union passed the full suite
+  (**829 files / 8,224 passed / 1 skipped**) and production build.
+- **Did:** promoted **182/183** Color Change move siblings with one shared
+  OFF receipt, selector/runtime guards, and per-move ordered source routes.
+  Future Sight remains the honest delayed-MOVEEND exception. Supervisor
+  review rejected Endeavor's first soft-cost route; `2f50607b` replaces it
+  with hard success-arm constraints and proves 0 invalid witnesses. Folded
+  animation-main through `a5d15401` as merge `24a9d9bd`; Sleep Talk is now
+  exact bilaterally without changing OFF-profile logic.
+- **Next:** run the contact/on-damage family in the side lane while MAIN
+  closes #86's generic forced-switch transition and command-boundary
+  frontiers. Then rerun full-policy 0:60 and use the new signatures.
+- **Notes:** ability join gaps fall **261 -> 111**; item gaps stay 300. No
+  canonical Battle-2 window past tick 33331 changed. No deferred question.
+
 ## 1051 — [MAIN worker, 2026-08-09] **#86 string-control family closed source-generically**
 
 - **State:** master is green (**829 files / 8,224 passed / 1 skipped**) with
@@ -38,26 +56,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no canonical Battle-2 work moved past tick 33331. No open
   deferred question. Full-policy 0:60 must be rerun at wind-down for the new
   completion headline after #85 removed all 21 former swap hangs.
-
-## 1049 — [MAIN worker, 2026-08-09] **#85 `factorySwap:complete` stall closed generically**
-
-- **State:** master green (827 files / 8,216 passed / 1 skipped). Vanilla
-  soak 0:20 is **20/20 OK**; no HANG. The accepted-exit compare is **43/43**
-  byte-exact frames.
-- **Did:** reproduced seeds 6 and 55 through the real
-  `createInitialState`/`tick`/button path. Both reached a completed kept-party
-  swap with the source field handoff set while the generated round still
-  awaited a swap offer; the driver was not at fault. `factorySwapRoundDecision`
-  now exposes a typed decline only at that completed handoff, so the existing
-  generic round bridge heals/preserves the party, advances the round, and
-  publishes Battle 2 without changing accepted mutation or presentation
-  timing. Added red Tier-1 coverage for accepted and kept-party ownership
-  expiry. Declared the existing compare trace's canonical route; no fixed
-  window, seed, battle, turn, species, or fatal-invariant weakening.
-- **Next:** ISSUES #86's downstream generated battle string/switch-transition
-  signatures; continue the ROADMAP S10 family-level Gate-6 sequence.
-- **Notes:** seed 6: `CRASH b2 t13 f26280`, unsupported
-  `{B_EFF_NAME_WITH_PREFIX}` in `STRINGID_PKMNFELLASLEEP`; seed 55: `OK b3
-  t13 f50980 roundLost`. Smoke 375/375; focused swap/route tests 70 + 2;
-  full suite and build green. Commits `72e3fed6`, `ee408ab6`; #85 deleted
-  from `ISSUES.md`.
