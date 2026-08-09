@@ -1,0 +1,18 @@
+{
+ "schema": "scene-on-thunder-evidence/v1",
+ "oracleProfile": "battle-scene-on",
+ "scenario": "tools/battle-lab/mechanic-thunder-player-magneton-opponent-shuckle.json",
+ "probe": "tools/compare/thunderProbe.py",
+ "move": "THUNDER",
+ "moveId": 87,
+ "orientation": "player-back-to-opponent-front",
+ "activeSourceScriptWindow": {"startFrame": 76, "endFrame": 336, "frameCount": 261},
+ "sourceAnimationWindow": {"startFrame": 76, "endFrame": 337, "frameCount": 262},
+ "sourceBounds": {"start": "0x082cf935", "endExclusive": "0x082cfa8f", "cleanupOffset": 345},
+ "evidenceSha256": "e2cbab666552c493a9ac7d7d0bf38bad7ed09deac2ef93d7badb6ff0dc3fdc93",
+ "rawRgbSha256": "bb5b5dffeb62acfe4f74e57e3b64be887c685c9305f59ac63c5bbf30c28c14a2",
+ "firstFrameSha256": "69f1739effbab59b8d989fe305525b31b76ef37b9d23c1d0933edb85b05ad165",
+ "cleanupFrameSha256": "69f1739effbab59b8d989fe305525b31b76ef37b9d23c1d0933edb85b05ad165",
+ "freshRuns": 2,
+ "receipt": "Complete dense source window from offset 0 through the first inactive offset-345 cleanup. Both fresh JSON probes and displayed-timing change maps are byte-identical; currentMove is 87 on every frame. This stages evidence only and makes no pixel-exact portable claim."
+}

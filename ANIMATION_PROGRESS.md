@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_THUNDER bilateral evidence staged — remains unsupported (2026-08-08 worker)
+
+- **State:** Coverage remains **134/276 exact, 0 partial, 0 staged, 142 unsupported**. THUNDER is still unsupported: this round banks complete deterministic evidence but adds no reducer, typed seam, renderer, asset, or promotion.
+- **Did:** Added legal complete-party Scene-ON scenarios for set-349 MAGNETON using THUNDER against non-Ground SHUCKLE in both orientations, a source-bounded dense probe, two receipts, and bilateral displayed-timing change maps. The probe covers the complete `Move_THUNDER` body (`0x082cf935..0x082cfa8f`), including BG_THUNDER fades/slide, F_PAL_BG black blends, four invert phases, all 12 `gLightningSpriteTemplate` creates, both audio players/pans, `AnimTask_ShakeTargetInPattern(30,3,TRUE,0)`, restore, and first inactive cleanup.
+- **Verified:** Twice-fresh outputs are byte-identical. Player-back source window **76..337, 262 frames**: evidence `e2cbab66…`, concatenated raw RGB `bb5b5dff…`, first/cleanup RGB `69f1739e…`. Opponent-front **80..341, 262 frames**: evidence `45a17da4…`, raw RGB `f6d879f0…`, first `ad757142…`, cleanup `6a5b24b4…`. `currentMove == 87` on every frame; the independent orientation shift is **+4**. Focused boundary/inventory tests are **9/9**.
+- **Next:** A later bounded round may derive a pure source-relative reducer from these maps, then add typed presentation wiring and full bilateral portable/framebuffer proof before promotion. GLARE and TRI_ATTACK remain unsupported independent bodies.
+- **Notes:** Source sibling audit: GLARE adds SMALL_RED_EYE/EYE_SPARKLE, GlareEyeDots, ScaryFace, two BG palette ramps, and shake args `(20,1,FALSE)`; TRI_ATTACK adds triangle, adjusted-panning sound task, eight fire scatters, ICE_CRYSTALS, and two distinct shake/lightning phases. Shared shake/lightning code does not promote either sibling. No engine, gameplay, controller, boundary, barrier, or asset file changed.
+
 ## MOVE_MAGICAL_LEAF exact — bilateral Scene-ON promotion (2026-08-08 worker, round B)
 
 - **State:** Coverage advanced **133→134/276 exact**, 0 partial, 0 staged, **143→142 unsupported**. Only `MOVE_MAGICAL_LEAF` moved; no gameplay, controller, boundary, or unsupported-barrier change.
