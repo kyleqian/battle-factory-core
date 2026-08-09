@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import data from "../src/data/gen/level50-move-parameterization.json" with { type: "json" };
 import frontierMons from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import movesData from "../src/data/gen/moves.json" with { type: "json" };
+import topologyData from "../src/data/gen/battle-script-topology.json" with { type: "json" };
 
 type RoutePosition = { label: string; line: number };
 type RouteTransition = {
@@ -334,9 +335,9 @@ describe("Level-50 move parameterization manifest", () => {
     });
     expect(manifest.coverage.joins).toMatchObject({
       battleScriptGraphLabels: 300, battleScriptProgramLabels: 300, animationScripts: 300,
-      itemHookCategories: 0, abilityHookCategories: 315,
+      itemHookCategories: 0, abilityHookCategories: 345,
       itemHookUnsupportedCategories: null, abilityHookUnsupportedCategories: null,
-      itemHookUnsupportedRows: 300, abilityHookUnsupportedRows: 111, abilityHookSourceProvenRows: 189,
+      itemHookUnsupportedRows: 300, abilityHookUnsupportedRows: 107, abilityHookSourceProvenRows: 193,
     });
     expect(manifest.coverage.hookCatalogs).toMatchObject({
       item: {
@@ -346,7 +347,7 @@ describe("Level-50 move parameterization manifest", () => {
       ability: {
         // displayRows follows summary-info.json's species pool (6 anchors → full
         // 376-species rental pool on 2026-08-07, ISSUES #80 gender fix).
-        displayRows: 74, catalogedDispatcherCategories: 9, soundproofSourceSelectorRows: 10,
+        displayRows: 74, catalogedDispatcherCategories: 10, soundproofSourceSelectorRows: 10,
         soundproofLevel50RosterSelectorRows: 9, soundproofSourceProvenRosterRows: 9,
         soundproofUnsupportedLevel50RosterRows: 291, completeness: "intentionally-partial", unsupportedCategories: null,
       },
@@ -356,7 +357,9 @@ describe("Level-50 move parameterization manifest", () => {
     ]);
     expect(manifest.coverage.hookCatalogs.ability.moveToHookDispatchers.map((hook) => hook.id)).toEqual([
       "moves-block-soundproof", "absorbing-volt-absorb", "absorbing-water-absorb", "absorbing-flash-fire",
-      "moveend-contact-on-damage", "moveend-color-change", "accuracy-compound-eyes", "accuracy-sand-veil", "accuracy-hustle-physical",
+      "moveend-contact-on-damage", "moveend-color-change",
+      "moveend-synchronize-status",
+      "accuracy-compound-eyes", "accuracy-sand-veil", "accuracy-hustle-physical",
     ]);
   });
 
@@ -375,6 +378,7 @@ describe("Level-50 move parameterization manifest", () => {
       "absorbing-flash-fire": ["ABILITYEFFECT_ABSORBING", "ABILITY_FLASH_FIRE", "TYPE_FIRE"],
       "moveend-contact-on-damage": ["ABILITYEFFECT_ON_DAMAGE", "FLAG_MAKES_CONTACT", "ABILITY_ROUGH_SKIN"],
       "moveend-color-change": ["ABILITYEFFECT_ON_DAMAGE", "ABILITY_COLOR_CHANGE"],
+      "moveend-synchronize-status": ["ABILITYEFFECT_SYNCHRONIZE", "ABILITYEFFECT_ATK_SYNCHRONIZE", "HITMARKER_SYNCHRONIZE_EFFECT", "MOVEEND_SYNCHRONIZE_TARGET", "MOVEEND_SYNCHRONIZE_ATTACKER"],
       "accuracy-compound-eyes": ["Cmd_accuracycheck", "ABILITY_COMPOUND_EYES"],
       "accuracy-sand-veil": ["Cmd_accuracycheck", "ABILITY_SAND_VEIL", "B_WEATHER_SANDSTORM"],
       "accuracy-hustle-physical": ["Cmd_accuracycheck", "ABILITY_HUSTLE", "IS_TYPE_PHYSICAL(type)"],
@@ -836,6 +840,24 @@ describe("Level-50 move parameterization manifest", () => {
       expectedSourceProven.set(move, [...(expectedSourceProven.get(move) ?? []), "moveend-color-change"]);
     }
 
+    const synchronizeEntryLabels = new Set([
+      "BattleScript_EffectPoisonHit", "BattleScript_EffectBurnHit", "BattleScript_EffectParalyzeHit",
+      "BattleScript_EffectToxic", "BattleScript_EffectParalyze", "BattleScript_EffectThawHit",
+      "BattleScript_EffectThunder", "BattleScript_EffectWillOWisp", "BattleScript_EffectTriAttack",
+      "BattleScript_EffectTwineedle", "BattleScript_EffectSecretPower", "BattleScript_EffectPoisonFang",
+      "BattleScript_EffectSemiInvulnerable",
+    ]);
+    for (const move of (movesData.moves as SourceMove[])
+      .filter((candidate) => {
+        if (!level50RosterSymbols().has(candidate.move)) return false;
+        const entryScript = topologyData.moves.find((topologyMove) => topologyMove.move === candidate.move)?.entryScript;
+        return synchronizeEntryLabels.has(entryScript ?? "")
+          && (entryScript !== "BattleScript_EffectSemiInvulnerable" || candidate.move === "MOVE_BOUNCE");
+      })
+      .map((candidate) => candidate.move)) {
+      expectedSourceProven.set(move, [...(expectedSourceProven.get(move) ?? []), "moveend-synchronize-status"]);
+    }
+
     const { graph, program } = graphAndProgram();
     const graphByLabel = new Map(graph.labels.map((label) => [label.name, label]));
     const programByLabel = new Map(program.blocks.map((block) => [block.label, block]));
@@ -873,19 +895,47 @@ describe("Level-50 move parameterization manifest", () => {
         expect(record.hooks.ability.evidence?.families.map((family) => family.category)).toEqual(expectedCategories);
       }
     }
-    expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(111);
+    expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(107);
     expect(manifest.moves.filter((record) => record.hooks.item.status === "unsupported")).toHaveLength(300);
   });
 
   it("keeps zero-power Volt/Water noncandidates and Sunny Day's audited special flow unsupported", () => {
     const move = (symbol: string) => manifest.moves.find((record) => record.move === symbol)!;
-    for (const symbol of ["MOVE_THUNDER_WAVE", "MOVE_WITHDRAW", "MOVE_RAIN_DANCE", "MOVE_SUNNY_DAY", "MOVE_PROTECT"]) {
+    for (const symbol of ["MOVE_WITHDRAW", "MOVE_RAIN_DANCE", "MOVE_SUNNY_DAY", "MOVE_PROTECT"]) {
       expect(move(symbol).hooks).toMatchObject({
         item: { potentialCategories: null, status: "unsupported" },
         ability: { potentialCategories: null, status: "unsupported" },
       });
     }
     expect(move("MOVE_TACKLE").hooks.ability.supportedCategories).toEqual(["moveend-contact-on-damage", "moveend-color-change"]);
-    expect(move("MOVE_WILL_O_WISP").hooks.ability.supportedCategories).toEqual(["absorbing-flash-fire"]);
+    expect(move("MOVE_THUNDER_WAVE").hooks.ability.supportedCategories).toEqual(["moveend-synchronize-status"]);
+    expect(move("MOVE_WILL_O_WISP").hooks.ability.supportedCategories).toEqual(["absorbing-flash-fire", "moveend-synchronize-status"]);
+  });
+
+  it("accounts Synchronize status candidates and keeps excluded status bytes explicit", () => {
+    type SynchronizeAudit = {
+      status: string;
+      candidateCount: number;
+      sourceProvenRows: string[];
+      sourceExceptionRows: unknown[];
+      blockers: unknown[];
+      routeWitnesses: unknown[];
+      excludedOutcomes: Array<{ byte: string }>;
+      runtimeGuardSignature: { selector: { effects: Array<{ byte: string }> } };
+    };
+    const audit = (manifest.coverage.hookCatalogs.ability as unknown as { synchronize: SynchronizeAudit }).synchronize;
+    expect(audit).toMatchObject({ status: "source-proven-family", candidateCount: 30, sourceProvenRows: expect.any(Array), sourceExceptionRows: [], blockers: [] });
+    expect(audit.sourceProvenRows).toHaveLength(30);
+    expect(audit.routeWitnesses).toHaveLength(30);
+    expect(audit.excludedOutcomes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ byte: "MOVE_EFFECT_SLEEP" }),
+      expect.objectContaining({ byte: "MOVE_EFFECT_FREEZE" }),
+      expect.objectContaining({ byte: "all other MOVE_EFFECT_* bytes" }),
+    ]));
+    const markerEffects = audit.runtimeGuardSignature.selector.effects.map((effect) => effect.byte);
+    expect(markerEffects).toEqual(["MOVE_EFFECT_POISON", "MOVE_EFFECT_TOXIC", "MOVE_EFFECT_PARALYSIS", "MOVE_EFFECT_BURN"]);
+    expect(manifest.moves.find((candidate) => candidate.move === "MOVE_BOUNCE")!.hooks.ability.supportedCategories).toContain("moveend-synchronize-status");
+    expect(manifest.moves.find((candidate) => candidate.move === "MOVE_FLY")!.hooks.ability.supportedCategories).not.toContain("moveend-synchronize-status");
+    expect(manifest.moves.find((candidate) => candidate.move === "MOVE_TRI_ATTACK")!.hooks.ability.supportedCategories).toContain("moveend-synchronize-status");
   });
 });

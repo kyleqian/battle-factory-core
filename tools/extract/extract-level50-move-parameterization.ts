@@ -138,6 +138,20 @@ const BATTLE_SCRIPT_CONSTANTS_PATH = "reference/pokeemerald/include/constants/ba
 const ATTACK_CANCELER_MOVES_BLOCK_CALL = "AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0)";
 const ABSORBING_DISPATCHER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ABSORBING, gBattlerTarget, 0, 0, move)";
 const ON_DAMAGE_DISPATCHER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE, gBattlerTarget, 0, 0, 0)";
+const SYNCHRONIZE_CATEGORY = "moveend-synchronize-status";
+const SYNCHRONIZE_DISPATCHER_TARGET_CALL = "AbilityBattleEffects(ABILITYEFFECT_SYNCHRONIZE, gBattlerTarget, 0, 0, 0)";
+const SYNCHRONIZE_DISPATCHER_ATTACKER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ATK_SYNCHRONIZE, gBattlerAttacker, 0, 0, 0)";
+const SYNCHRONIZE_EFFECTS = [
+  { byte: "MOVE_EFFECT_POISON", status: "poison", marker: true },
+  { byte: "MOVE_EFFECT_TOXIC", status: "toxic", marker: true },
+  { byte: "MOVE_EFFECT_PARALYSIS", status: "paralysis", marker: true },
+  { byte: "MOVE_EFFECT_BURN", status: "burn", marker: true },
+] as const;
+const SYNCHRONIZE_MARKER_EXCLUSIONS = [
+  { byte: "MOVE_EFFECT_SLEEP", reason: "SetMoveEffect writes sleep but its for-synchronize selector names only poison, toxic, paralysis, and burn." },
+  { byte: "MOVE_EFFECT_FREEZE", reason: "SetMoveEffect writes freeze but its for-synchronize selector names only poison, toxic, paralysis, and burn." },
+  { byte: "all other MOVE_EFFECT_* bytes", reason: "Non-status effects write status2/stat/item/volatile state and never enter the marker selector." },
+] as const;
 
 const ABSORBING_HOOK_DEFINITIONS = [
   {
@@ -973,6 +987,7 @@ const ABILITY_HOOK_CATALOG: HookCategory[] = [
   })),
   { id: "moveend-contact-on-damage", dispatcher: "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)", selector: "FLAG_MAKES_CONTACT after a MOVEEND-reachable path", ownership: "target ability is Rough Skin, Effect Spore, Poison Point, Static, Flame Body, or Cute Charm" },
   { id: "moveend-color-change", dispatcher: "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)", selector: "power != 0 after a MOVEEND-reachable path", ownership: "target ability is ABILITY_COLOR_CHANGE" },
+  { id: SYNCHRONIZE_CATEGORY, dispatcher: "AbilityBattleEffects(ABILITYEFFECT_SYNCHRONIZE / ABILITYEFFECT_ATK_SYNCHRONIZE)", selector: "HITMARKER_SYNCHRONIZE_EFFECT after SetMoveEffect and MOVEEND states 2/5", ownership: "target or attacker ability is ABILITY_SYNCHRONIZE" },
   { id: "accuracy-compound-eyes", dispatcher: "Cmd_accuracycheck", selector: "an ACCURACYCHECK-reachable script path", ownership: "attacker ability is ABILITY_COMPOUND_EYES" },
   { id: "accuracy-sand-veil", dispatcher: "Cmd_accuracycheck", selector: "an ACCURACYCHECK-reachable script path", ownership: "target ability is ABILITY_SAND_VEIL and weather has sandstorm" },
   { id: "accuracy-hustle-physical", dispatcher: "Cmd_accuracycheck", selector: "IS_TYPE_PHYSICAL(type) and an ACCURACYCHECK-reachable script path", ownership: "attacker ability is ABILITY_HUSTLE" },
@@ -1773,6 +1788,514 @@ const onDamageMoveEndTarget = auditExactScriptBlock("BattleScript_MoveEnd", [
   ["moveendall", []],
   ["end", []],
 ]);
+
+type SynchronizeSelector = {
+  routeKind: string;
+  selectorKind: "secondary" | "primary" | "tri-attack" | "multi-hit" | "secret-power" | "bounce-second-turn";
+  setter: { mnemonic: string; operands: string[] };
+  dispatchMnemonic: "seteffectwithchance" | "seteffectprimary";
+  selectedEffects: string[];
+  selectorGuard: string;
+  procGuard: string;
+};
+
+// This is the complete finite set of source entry families that can load one
+// of the four status bytes selected by SetMoveEffect's Synchronize marker
+// branch. The roster join below, rather than a hand-maintained move list,
+// supplies the Level-50 candidates.
+const SYNCHRONIZE_ENTRY_SELECTORS = new Map<string, SynchronizeSelector>([
+  ["BattleScript_EffectPoisonHit", {
+    routeKind: "damaging-secondary-poison",
+    selectorKind: "secondary",
+    setter: { mnemonic: "setmoveeffect", operands: ["MOVE_EFFECT_POISON"] },
+    dispatchMnemonic: "seteffectwithchance",
+    selectedEffects: ["MOVE_EFFECT_POISON"],
+    selectorGuard: "setmoveeffect MOVE_EFFECT_POISON loads the secondary effect byte before the shared damaging hit path",
+    procGuard: "Cmd_seteffectwithchance uses gBattleMoves[gCurrentMove].secondaryEffectChance (doubled for Serene Grace), then requires Random() % 100 < percentChance and no MOVE_RESULT_NO_EFFECT",
+  }],
+  ["BattleScript_EffectBurnHit", {
+    routeKind: "damaging-secondary-burn",
+    selectorKind: "secondary",
+    setter: { mnemonic: "setmoveeffect", operands: ["MOVE_EFFECT_BURN"] },
+    dispatchMnemonic: "seteffectwithchance",
+    selectedEffects: ["MOVE_EFFECT_BURN"],
+    selectorGuard: "setmoveeffect MOVE_EFFECT_BURN loads the secondary effect byte before the shared damaging hit path",
+    procGuard: "Cmd_seteffectwithchance uses gBattleMoves[gCurrentMove].secondaryEffectChance (doubled for Serene Grace), then requires Random() % 100 < percentChance and no MOVE_RESULT_NO_EFFECT",
+  }],
+  ["BattleScript_EffectParalyzeHit", {
+    routeKind: "damaging-secondary-paralysis",
+    selectorKind: "secondary",
+    setter: { mnemonic: "setmoveeffect", operands: ["MOVE_EFFECT_PARALYSIS"] },
+    dispatchMnemonic: "seteffectwithchance",
+    selectedEffects: ["MOVE_EFFECT_PARALYSIS"],
+    selectorGuard: "setmoveeffect MOVE_EFFECT_PARALYSIS loads the secondary effect byte before the shared damaging hit path",
+    procGuard: "Cmd_seteffectwithchance uses gBattleMoves[gCurrentMove].secondaryEffectChance (doubled for Serene Grace), then requires Random() % 100 < percentChance and no MOVE_RESULT_NO_EFFECT",
+  }],
+  ["BattleScript_EffectToxic", {
+    routeKind: "direct-primary-toxic",
+    selectorKind: "primary",
+    setter: { mnemonic: "setmoveeffect", operands: ["MOVE_EFFECT_TOXIC"] },
+    dispatchMnemonic: "seteffectprimary",
+    selectedEffects: ["MOVE_EFFECT_TOXIC"],
+    selectorGuard: "direct primary SetMoveEffect(TRUE, 0) writes MOVE_EFFECT_TOXIC after Toxic's type/status/accuracy/Safeguard guards",
+    procGuard: "primary SetMoveEffect has no secondary chance roll; Toxic's accuracy and source guards must pass",
+  }],
+  ["BattleScript_EffectParalyze", {
+    routeKind: "direct-primary-paralysis",
+    selectorKind: "primary",
+    setter: { mnemonic: "setmoveeffect", operands: ["MOVE_EFFECT_PARALYSIS"] },
+    dispatchMnemonic: "seteffectprimary",
+    selectedEffects: ["MOVE_EFFECT_PARALYSIS"],
+    selectorGuard: "direct primary SetMoveEffect(TRUE, 0) writes MOVE_EFFECT_PARALYSIS after Limber/status/accuracy/Safeguard guards",
+    procGuard: "primary SetMoveEffect has no secondary chance roll; the entry's accuracy and source guards must pass",
+  }],
+  ["BattleScript_EffectThawHit", {
+    routeKind: "damaging-secondary-thaw-burn",
+    selectorKind: "secondary",
+    setter: { mnemonic: "setmoveeffect", operands: ["MOVE_EFFECT_BURN"] },
+    dispatchMnemonic: "seteffectwithchance",
+    selectedEffects: ["MOVE_EFFECT_BURN"],
+    selectorGuard: "setmoveeffect MOVE_EFFECT_BURN loads the thaw-hit secondary effect byte before the shared damaging hit path",
+    procGuard: "Cmd_seteffectwithchance uses gBattleMoves[gCurrentMove].secondaryEffectChance (doubled for Serene Grace), then requires Random() % 100 < percentChance and no MOVE_RESULT_NO_EFFECT",
+  }],
+  ["BattleScript_EffectThunder", {
+    routeKind: "damaging-secondary-thunder-paralysis",
+    selectorKind: "secondary",
+    setter: { mnemonic: "setmoveeffect", operands: ["MOVE_EFFECT_PARALYSIS"] },
+    dispatchMnemonic: "seteffectwithchance",
+    selectedEffects: ["MOVE_EFFECT_PARALYSIS"],
+    selectorGuard: "setmoveeffect MOVE_EFFECT_PARALYSIS plus HITMARKER_IGNORE_ON_AIR loads Thunder's secondary effect before the shared damaging hit path",
+    procGuard: "Cmd_seteffectwithchance uses Thunder's move-table secondaryEffectChance (doubled for Serene Grace), then requires Random() % 100 < percentChance and no MOVE_RESULT_NO_EFFECT",
+  }],
+  ["BattleScript_EffectWillOWisp", {
+    routeKind: "direct-primary-burn",
+    selectorKind: "primary",
+    setter: { mnemonic: "setmoveeffect", operands: ["MOVE_EFFECT_BURN"] },
+    dispatchMnemonic: "seteffectprimary",
+    selectedEffects: ["MOVE_EFFECT_BURN"],
+    selectorGuard: "direct primary SetMoveEffect(TRUE, 0) writes MOVE_EFFECT_BURN after Fire-type, Water Veil, status, accuracy, and Safeguard guards",
+    procGuard: "primary SetMoveEffect has no secondary chance roll; Will-O-Wisp's accuracy and source guards must pass",
+  }],
+  ["BattleScript_EffectTriAttack", {
+    routeKind: "damaging-secondary-tri-attack-status-reroll",
+    selectorKind: "tri-attack",
+    setter: { mnemonic: "setmoveeffect", operands: ["MOVE_EFFECT_TRI_ATTACK"] },
+    dispatchMnemonic: "seteffectwithchance",
+    selectedEffects: ["MOVE_EFFECT_BURN", "MOVE_EFFECT_PARALYSIS"],
+    selectorGuard: "SetMoveEffect's MOVE_EFFECT_TRI_ATTACK arm performs Random() % 3 + 3: 3 burn, 4 freeze, 5 paralysis; only burn and paralysis enter the Synchronize marker selector",
+    procGuard: "the outer Cmd_seteffectwithchance chance gate must pass before the MOVE_EFFECT_TRI_ATTACK arm rerolls; freeze is an explicit excluded outcome",
+  }],
+  ["BattleScript_EffectTwineedle", {
+    routeKind: "multi-hit-secondary-poison",
+    selectorKind: "multi-hit",
+    setter: { mnemonic: "setbyte", operands: ["sMULTIHIT_EFFECT", "MOVE_EFFECT_POISON"] },
+    dispatchMnemonic: "seteffectwithchance",
+    selectedEffects: ["MOVE_EFFECT_POISON"],
+    selectorGuard: "Twineedle stores MOVE_EFFECT_POISON in sMULTIHIT_EFFECT, copies it into cEFFECT_CHOOSER for each successful hit, and applies the final effect at MultiHitEnd",
+    procGuard: "each successful hit is gated by alive attacker/target, accuracy/no-effect, and the multi-hit loop; the final Cmd_seteffectwithchance uses the move-table secondary chance",
+  }],
+  ["BattleScript_EffectSecretPower", {
+    routeKind: "damaging-secondary-secret-power-environment",
+    selectorKind: "secret-power",
+    setter: { mnemonic: "getsecretpowereffect", operands: [] },
+    dispatchMnemonic: "seteffectwithchance",
+    selectedEffects: ["MOVE_EFFECT_POISON", "MOVE_EFFECT_PARALYSIS"],
+    selectorGuard: "Cmd_getsecretpowereffect selects poison in grass and paralysis in the default environment; long grass sleep and other terrain effects are excluded",
+    procGuard: "Cmd_seteffectwithchance still gates the environment-selected byte on Secret Power's secondaryEffectChance and no MOVE_RESULT_NO_EFFECT",
+  }],
+  ["BattleScript_EffectPoisonFang", {
+    routeKind: "damaging-secondary-toxic-reflects-as-poison",
+    selectorKind: "secondary",
+    setter: { mnemonic: "setmoveeffect", operands: ["MOVE_EFFECT_TOXIC"] },
+    dispatchMnemonic: "seteffectwithchance",
+    selectedEffects: ["MOVE_EFFECT_TOXIC"],
+    selectorGuard: "setmoveeffect MOVE_EFFECT_TOXIC loads Poison Fang's secondary effect; Synchronize later strips toxic to ordinary poison when reflecting",
+    procGuard: "Cmd_seteffectwithchance uses Poison Fang's secondaryEffectChance (doubled for Serene Grace), then requires Random() % 100 < percentChance and no MOVE_RESULT_NO_EFFECT",
+  }],
+  ["BattleScript_EffectSemiInvulnerable", {
+    routeKind: "bounce-second-turn-secondary-paralysis",
+    selectorKind: "bounce-second-turn",
+    setter: { mnemonic: "setmoveeffect", operands: ["MOVE_EFFECT_PARALYSIS"] },
+    dispatchMnemonic: "seteffectwithchance",
+    selectedEffects: ["MOVE_EFFECT_PARALYSIS"],
+    selectorGuard: "Bounce takes the second-turn STATUS2_MULTIPLETURNS branch and falls through the MOVE_BOUNCE-specific setter at BattleScript_SecondTurnSemiInvulnerable",
+    procGuard: "Cmd_seteffectwithchance uses Bounce's move-table secondaryEffectChance (doubled for Serene Grace), then accuracy/no-effect guards control application",
+  }],
+]);
+
+function synchronizeMoveRouteRequirement(move: string, position: OnDamageRoutePosition, statement: GraphStatement): string | null {
+  if (statement.mnemonic === "jumpifnotmove") {
+    return statement.operandTokens[0] === move ? "fallthrough" : "jump";
+  }
+  if (statement.mnemonic === "jumpifmove") {
+    return statement.operandTokens[0] === move ? "jump" : "fallthrough";
+  }
+  if (move === "MOVE_BOUNCE"
+    && position.label === "BattleScript_EffectSemiInvulnerable"
+    && position.line === 1974
+    && statement.mnemonic === "jumpifstatus2") {
+    return "jump";
+  }
+  if (move === "MOVE_BOUNCE"
+    && position.label === "BattleScript_EffectSemiInvulnerable"
+    && position.line === 1975
+    && statement.mnemonic === "jumpifword") {
+    return "jump";
+  }
+  if (statement.mnemonic === "accuracycheck" || statement.mnemonic === "jumpifmovehadnoeffect") {
+    return "fallthrough";
+  }
+  if (statement.mnemonic === "jumpifhasnohp"
+    || statement.mnemonic === "jumpifstatus"
+    || statement.mnemonic === "jumpifhalfword"
+    || statement.mnemonic === "jumpifbyte"
+    || statement.mnemonic.startsWith("jumpif")) {
+    // A source-proven positive status route takes the ordinary successor of
+    // immunity, substitute, existing-status, terrain, and loop-failure
+    // guards. The only selected jump is Bounce's second-turn entry above.
+    return "fallthrough";
+  }
+  return null;
+}
+
+function synchronizeRouteConstraint(move: string): OnDamageRouteConstraint {
+  return (position, statement, edge) => {
+    const requiredKind = synchronizeMoveRouteRequirement(move, position, statement);
+    return requiredKind === null || edge.kind === requiredKind;
+  };
+}
+
+function synchronizeRoutePath(
+  move: string,
+  startLabel: string | OnDamageRoutePosition,
+  target: (statement: GraphStatement) => boolean,
+  description: string,
+): OnDamageRoutePath {
+  return onDamageRoutePath(startLabel, target, description, synchronizeRouteConstraint(move));
+}
+
+function synchronizeJoinRoutePaths(paths: readonly OnDamageRoutePath[]): OnDamageRoutePath {
+  if (paths.length === 0) throw new Error("Synchronize route must have at least one path");
+  const positions: OnDamageRoutePosition[] = [];
+  const transitions: OnDamageRouteTransition[] = [];
+  for (const path of paths) {
+    const first = path.positions[0];
+    if (!first) throw new Error("Synchronize route path is empty");
+    const previous = positions.at(-1);
+    if (previous) {
+      const bridge = graph.controlFlow.edges.find((edge) => (
+        edge.from.label === previous.label
+        && edge.from.line === previous.line
+        && edge.to?.label === first.label
+        && edge.to.line === first.line
+      ));
+      if (!bridge) throw new Error(`Synchronize route lacks bridge ${previous.label}:${previous.line} -> ${first.label}:${first.line}`);
+      transitions.push({ from: previous, to: first, kind: bridge.kind, macro: bridge.provenance.macro ?? null });
+    }
+    positions.push(...path.positions);
+    transitions.push(...path.transitions);
+  }
+  return { positions, transitions };
+}
+
+function synchronizeRouteWitnessPath(path: OnDamageRoutePath) {
+  return onDamageRouteWitnessPath(path);
+}
+
+function synchronizeNextStatement(position: OnDamageRoutePosition): OnDamageRoutePosition | null {
+  const sameLabel = onDamageNextStatement(position);
+  if (sameLabel) return sameLabel;
+  const nextLabel = requireGraphLabel(position.label).nextLabel;
+  return nextLabel === null ? null : onDamageFirstStatement(nextLabel);
+}
+
+const synchronizeSetMoveEffectLine = sourceLine(
+  battleScriptCommandsSource,
+  "void SetMoveEffect(bool8 primary, u8 certain)",
+  "SetMoveEffect",
+);
+const synchronizeMarkerSelectorLine = sourceLine(
+  battleScriptCommandsSource,
+  "if (gBattleCommunication[MOVE_EFFECT_BYTE] == MOVE_EFFECT_POISON",
+  "SetMoveEffect Synchronize marker selector",
+);
+const synchronizeChanceLine = sourceLine(
+  battleScriptCommandsSource,
+  "static void Cmd_seteffectwithchance(void)\n{",
+  "Cmd_seteffectwithchance",
+);
+const synchronizePrimaryLine = sourceLine(
+  battleScriptCommandsSource,
+  "static void Cmd_seteffectprimary(void)\n{",
+  "Cmd_seteffectprimary",
+);
+const synchronizeTargetMoveEndLine = sourceLine(
+  battleScriptCommandsSource,
+  "case MOVEEND_SYNCHRONIZE_TARGET:",
+  "MOVEEND_SYNCHRONIZE_TARGET",
+);
+const synchronizeAttackerMoveEndLine = sourceLine(
+  battleScriptCommandsSource,
+  "case MOVEEND_SYNCHRONIZE_ATTACKER:",
+  "MOVEEND_SYNCHRONIZE_ATTACKER",
+);
+const synchronizeTargetDispatcherLine = sourceLine(
+  battleScriptCommandsSource,
+  SYNCHRONIZE_DISPATCHER_TARGET_CALL,
+  "ABILITYEFFECT_SYNCHRONIZE dispatcher call",
+);
+const synchronizeAttackerDispatcherLine = sourceLine(
+  battleScriptCommandsSource,
+  SYNCHRONIZE_DISPATCHER_ATTACKER_CALL,
+  "ABILITYEFFECT_ATK_SYNCHRONIZE dispatcher call",
+);
+const synchronizeSetMoveEffectSource = battleScriptCommandsSource.slice(
+  battleScriptCommandsSource.indexOf("void SetMoveEffect(bool8 primary, u8 certain)"),
+  battleScriptCommandsSource.indexOf("static void Cmd_seteffectwithchance(void)\n{"),
+);
+if (!synchronizeSetMoveEffectSource.includes("gEffectBattler = gBattlerTarget;")) {
+  throw new Error("SetMoveEffect no longer defaults Synchronize's initial effect battler to gBattlerTarget");
+}
+if (!synchronizeSetMoveEffectSource.includes("gEffectBattler = gBattlerAttacker;")) {
+  throw new Error("SetMoveEffect no longer handles the AFFECTS_USER orientation for Synchronize");
+}
+if (!synchronizeSetMoveEffectSource.includes("gBattleCommunication[MOVE_EFFECT_BYTE] == MOVE_EFFECT_TOXIC")) {
+  throw new Error("SetMoveEffect source no longer contains the toxic status branch needed by Synchronize");
+}
+for (const effect of SYNCHRONIZE_EFFECTS) {
+  if (!battleScriptCommandsSource.includes(`gBattleCommunication[MOVE_EFFECT_BYTE] == ${effect.byte}`)) {
+    throw new Error(`SetMoveEffect source no longer names ${effect.byte} in the Synchronize marker selector`);
+  }
+}
+const synchronizeTargetMoveEndSourceStart = battleScriptCommandsSource.indexOf("case MOVEEND_SYNCHRONIZE_TARGET:");
+const synchronizeTargetMoveEndSourceEnd = battleScriptCommandsSource.indexOf("case MOVEEND_CHOICE_MOVE:", synchronizeTargetMoveEndSourceStart);
+const synchronizeMoveEndSource = battleScriptCommandsSource.slice(synchronizeTargetMoveEndSourceStart, synchronizeTargetMoveEndSourceEnd);
+if (!synchronizeMoveEndSource.includes(SYNCHRONIZE_DISPATCHER_TARGET_CALL)
+  || !synchronizeMoveEndSource.includes(SYNCHRONIZE_DISPATCHER_ATTACKER_CALL)) {
+  throw new Error("Cmd_moveend source no longer contains both ordered Synchronize dispatcher calls");
+}
+const synchronizeRuntimeGuardSignature = {
+  selector: {
+    path: BATTLE_SCRIPT_COMMANDS_PATH,
+    locator: "SetMoveEffect for-synchronize marker selector",
+    line: synchronizeMarkerSelectorLine,
+    effects: SYNCHRONIZE_EFFECTS,
+    marker: "HITMARKER_SYNCHRONIZE_EFFECT",
+    markerLine: sourceLine(battleScriptCommandsSource, "gHitMarker |= HITMARKER_SYNCHRONIZE_EFFECT;", "HITMARKER_SYNCHRONIZE_EFFECT"),
+  },
+  setMoveEffect: {
+    path: BATTLE_SCRIPT_COMMANDS_PATH,
+    locator: "SetMoveEffect(bool8 primary, u8 certain)",
+    line: synchronizeSetMoveEffectLine,
+    orderedGuards: [
+      "AFFECTS_USER selects gBattlerAttacker as gEffectBattler and strips MOVE_EFFECT_AFFECTS_USER; otherwise gBattlerTarget is the effect battler",
+      "Shield Dust blocks non-primary status effects through MOVE_EFFECT_CERTAIN/primary guards",
+      "Safeguard blocks non-primary status effects through MOVE_EFFECT_CERTAIN/primary guards",
+      "fainted effect battlers and substitutes block ordinary target status application",
+      "the primary-status switch applies type, ability, existing-status, and status immunity guards before statusChanged",
+    ],
+    toxicReflection: "ABILITYEFFECT_SYNCHRONIZE and ABILITYEFFECT_ATK_SYNCHRONIZE both strip MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN and convert MOVE_EFFECT_TOXIC to MOVE_EFFECT_POISON before reflection",
+  },
+  chance: {
+    path: BATTLE_SCRIPT_COMMANDS_PATH,
+    locator: "Cmd_seteffectwithchance",
+    line: synchronizeChanceLine,
+    guards: [
+      "Certain effects require !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)",
+      "secondary effects require Random() % 100 < percentChance and a nonzero MOVE_EFFECT_BYTE",
+      "Serene Grace doubles the move-table secondaryEffectChance",
+      "miss/no-effect and no-effect status paths leave the effect unbanked",
+    ],
+  },
+  primary: {
+    path: BATTLE_SCRIPT_COMMANDS_PATH,
+    locator: "Cmd_seteffectprimary",
+    line: synchronizePrimaryLine,
+    call: "SetMoveEffect(TRUE, 0)",
+    chance: "primary status entries have no secondary chance roll; their source accuracy/status guards still apply",
+  },
+  moveEnd: {
+    path: BATTLE_SCRIPT_COMMANDS_PATH,
+    target: {
+      state: "MOVEEND_SYNCHRONIZE_TARGET",
+      stateValue: 2,
+      line: synchronizeTargetMoveEndLine,
+      call: SYNCHRONIZE_DISPATCHER_TARGET_CALL,
+      dispatcherLine: synchronizeTargetDispatcherLine,
+      orientation: "target helper reflects to gBattlerTarget by adding MOVE_EFFECT_AFFECTS_USER",
+    },
+    attacker: {
+      state: "MOVEEND_SYNCHRONIZE_ATTACKER",
+      stateValue: 5,
+      line: synchronizeAttackerMoveEndLine,
+      call: SYNCHRONIZE_DISPATCHER_ATTACKER_CALL,
+      dispatcherLine: synchronizeAttackerDispatcherLine,
+      orientation: "attacker helper reflects to gBattlerAttacker without AFFECTS_USER",
+    },
+    order: "Cmd_moveend runs target state 2 first, then ON_DAMAGE state 3, immunity state 4, and attacker state 5; an activating helper can pause and resume this ordered state machine",
+  },
+  outcomeBoundaries: [
+    "SetMoveEffect banks only poison, toxic, paralysis, and burn; sleep, freeze, and non-status effect bytes are excluded",
+    "source miss/no-effect, substitute, type, ability, Safeguard, Shield Dust, faint, existing-status, and status immunity guards can prevent banking or reflection",
+    "both Synchronize helpers clear the marker before applying the reflected effect; if the other helper is reached while the source marker is rearmed by a nested status route, it can activate in its own ordered state",
+  ],
+};
+
+function synchronizeFamilyEvidence(move: Move, entryScript: string, selector: SynchronizeSelector) {
+  const setterPath = synchronizeRoutePath(
+    move.move,
+    entryScript,
+    (statement) => statement.mnemonic === selector.setter.mnemonic
+      && JSON.stringify(statement.operandTokens) === JSON.stringify(selector.setter.operands),
+    `${move.move} SetMoveEffect selector setter`,
+  );
+  const setterPosition = setterPath.positions.at(-1)!;
+  const afterSetter = synchronizeNextStatement(setterPosition);
+  if (!afterSetter) throw new Error(`${move.move} Synchronize setter has no continuation`);
+  const dispatchPath = synchronizeRoutePath(
+    move.move,
+    afterSetter,
+    (statement) => statement.mnemonic === selector.dispatchMnemonic,
+    `${move.move} ${selector.dispatchMnemonic} handoff`,
+  );
+  const dispatchPosition = dispatchPath.positions.at(-1)!;
+  const afterDispatch = synchronizeNextStatement(dispatchPosition);
+  if (!afterDispatch) throw new Error(`${move.move} Synchronize dispatch has no MOVEEND continuation`);
+  const moveEndPath = synchronizeRoutePath(
+    move.move,
+    afterDispatch,
+    (statement) => move.move === "MOVE_TWINEEDLE"
+      ? statement.mnemonic === "moveendcase" && statement.operandTokens[0] === "MOVEEND_SYNCHRONIZE_TARGET"
+      : statement.mnemonic === "moveendall",
+    `${move.move} ordered MOVEEND Synchronize target/attacker handoff`,
+  );
+  const moveEndPosition = moveEndPath.positions.at(-1)!;
+  const moveEndTailPath = move.move === "MOVE_TWINEEDLE"
+    ? synchronizeRoutePath(
+      move.move,
+      synchronizeNextStatement(moveEndPosition)!,
+      (statement) => statement.mnemonic === "moveendfrom" && statement.operandTokens[0] === "MOVEEND_IMMUNITY_ABILITIES",
+      `${move.move} MOVEEND immunity-to-attacker continuation`,
+    )
+    : null;
+  if (move.move === "MOVE_TWINEEDLE" && moveEndTailPath === null) {
+    throw new Error("Twineedle Synchronize route must prove MOVEEND_IMMUNITY_ABILITIES continuation");
+  }
+  const joinedPath = synchronizeJoinRoutePaths([
+    setterPath,
+    dispatchPath,
+    moveEndPath,
+    ...(moveEndTailPath === null ? [] : [moveEndTailPath]),
+  ]);
+  const selectorLine = requireGraphLabel(entryScript).line;
+  const setterStatement = onDamageStatement(setterPosition);
+  const dispatchStatement = onDamageStatement(dispatchPosition);
+  const moveEndStatement = onDamageStatement(moveEndPosition);
+  const joinedWitness = synchronizeRouteWitnessPath(joinedPath);
+  const familyEvidence = {
+    category: SYNCHRONIZE_CATEGORY,
+    selector: {
+      path: BATTLE_SCRIPT_SOURCE_PATH,
+      locator: `${entryScript} -> ${selector.setter.mnemonic}`,
+      entryScript,
+      entryLine: selectorLine,
+      selectorKind: selector.selectorKind,
+      setter: { label: setterPosition.label, line: setterPosition.line, mnemonic: setterStatement.mnemonic, operands: setterStatement.operandTokens },
+      selectedEffects: selector.selectedEffects,
+      guard: selector.selectorGuard,
+      procGuard: selector.procGuard,
+    },
+    entryPath: {
+      kind: selector.routeKind,
+      source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: selectorLine },
+      declaredEntryScript: entryScript,
+      graph: joinedWitness.graph,
+      program: joinedWitness.program,
+      setter: { label: setterPosition.label, line: setterPosition.line, mnemonic: setterStatement.mnemonic, operands: setterStatement.operandTokens },
+      dispatch: { label: dispatchPosition.label, line: dispatchPosition.line, mnemonic: dispatchStatement.mnemonic, operands: dispatchStatement.operandTokens },
+      moveEnd: { label: moveEndPosition.label, line: moveEndPosition.line, mnemonic: moveEndStatement.mnemonic, operands: moveEndStatement.operandTokens },
+      moveEndTail: moveEndTailPath === null ? null : synchronizeRouteWitnessPath(moveEndTailPath),
+    },
+    dispatcher: {
+      path: BATTLE_SCRIPT_COMMANDS_PATH,
+      locator: "Cmd_moveend MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER",
+      target: { state: "MOVEEND_SYNCHRONIZE_TARGET", stateValue: 2, line: synchronizeTargetMoveEndLine, call: SYNCHRONIZE_DISPATCHER_TARGET_CALL },
+      attacker: { state: "MOVEEND_SYNCHRONIZE_ATTACKER", stateValue: 5, line: synchronizeAttackerMoveEndLine, call: SYNCHRONIZE_DISPATCHER_ATTACKER_CALL },
+      order: synchronizeRuntimeGuardSignature.moveEnd.order,
+    },
+    familyVerification: {
+      scope: "All source-derived Level-50 Synchronize candidates reuse this exact selector/route/runtime-guard family certificate; no per-move oracle receipts are fabricated.",
+      implementation: "src/engine/battleScriptMoveEndOpcode.ts#MOVEEND_SYNCHRONIZE_TARGET-and-ATTACKER",
+      batchTest: "tests/battleScriptMoveEndOpcode.test.ts#Synchronize marker and ordered MOVEEND states",
+      oracleReceipt: "docs/synchronize-abilities-ground-truth.md#3-two-seed-battle-scene-off-receipts",
+      oracleFixture: "tools/battle-lab/mechanic-synchronize-thunder-wave-off.json",
+      oracleProbe: "tools/probe/probe-synchronize-off.py",
+      oracleReceiptFiles: [
+        "tools/probe/receipts/synchronize-off-seed-610839776.json",
+        "tools/probe/receipts/synchronize-off-seed-324508639.json",
+      ],
+      scopeBoundary: "The two seeded receipts prove the shared Thunder Wave target reflection and controller/ability ordering. Move-specific candidate rows are promoted by the exact source/program route and guard certificate, while sleep/freeze/non-status rows and unrelated ability gaps remain excluded.",
+    },
+    runtimeGuardSignature: synchronizeRuntimeGuardSignature,
+    routeKind: selector.routeKind,
+  };
+  return {
+    status: "source-proven" as const,
+    id: `synchronize-route:${move.move}`,
+    move: move.move,
+    entryScript,
+    routeKind: selector.routeKind,
+    selectedEffects: selector.selectedEffects,
+    source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: selectorLine },
+    entryPath: joinedWitness,
+    runtimeGuardSignature: synchronizeRuntimeGuardSignature,
+    familyEvidence,
+  };
+}
+
+const synchronizeCandidateRows = rosterMoveSymbols.flatMap((symbol) => {
+  const move = moveBySymbol.get(symbol)!;
+  const script = topologyByMove.get(symbol);
+  if (!script) throw new Error(`${symbol} has no indexed Battle Script topology row for the Synchronize audit`);
+  const selector = SYNCHRONIZE_ENTRY_SELECTORS.get(script.entryScript);
+  if (!selector) return [];
+  if (selector.selectorKind === "bounce-second-turn" && symbol !== "MOVE_BOUNCE") return [];
+  return [{
+    move: symbol,
+    moveId: move.id,
+    effect: move.effect,
+    power: move.power,
+    secondaryEffectChance: move.secondaryEffectChance,
+    entryScript: script.entryScript,
+    routeKind: selector.routeKind,
+    selectorKind: selector.selectorKind,
+    selectedEffects: selector.selectedEffects,
+    blockerIds: [],
+    exceptionId: null,
+  }];
+});
+if (synchronizeCandidateRows.length !== 30) {
+  throw new Error(`expected 30 finite Level-50 Synchronize candidates, got ${synchronizeCandidateRows.length}`);
+}
+const synchronizeEvidenceByMove = new Map<string, ReturnType<typeof synchronizeFamilyEvidence>>();
+for (const candidate of synchronizeCandidateRows) {
+  const move = moveBySymbol.get(candidate.move)!;
+  const selector = SYNCHRONIZE_ENTRY_SELECTORS.get(candidate.entryScript)!;
+  const evidence = synchronizeFamilyEvidence(move, candidate.entryScript, selector);
+  synchronizeEvidenceByMove.set(candidate.move, evidence);
+}
+const synchronizeRouteEvidenceRows = [...synchronizeEvidenceByMove.values()];
+const synchronizeSourceProvenRows = synchronizeRouteEvidenceRows
+  .filter((evidence) => evidence.status === "source-proven")
+  .map((evidence) => evidence.move);
+const synchronizeExceptions: Array<Record<string, unknown>> = [];
+const synchronizeBlockers: Array<Record<string, unknown>> = [];
+if (synchronizeSourceProvenRows.length !== synchronizeCandidateRows.length
+  || synchronizeExceptions.length !== 0
+  || synchronizeBlockers.length !== 0) {
+  throw new Error("Synchronize candidate accounting is not fully source-proven");
+}
+
 if (onDamageCandidateRows.some((candidate) => candidate.blockerIds.length !== 0)) {
   throw new Error("ON_DAMAGE candidates must not retain retired family blockers");
 }
@@ -1857,6 +2380,10 @@ const records = rosterMoveSymbols.map((symbol) => {
   if (colorChangeEvidence?.status === "source-proven") {
     sourceProvenFamilies.push(colorChangeEvidence.familyEvidence);
   }
+  const synchronizeEvidence = synchronizeEvidenceByMove.get(symbol);
+  if (synchronizeEvidence?.status === "source-proven") {
+    sourceProvenFamilies.push(synchronizeEvidence.familyEvidence);
+  }
   const abilityHook = sourceProvenFamilies.length === 0
     ? {
       potentialCategories: null,
@@ -1924,6 +2451,11 @@ if (soundproofRosterRecords.length !== 9) {
 if (soundproofRosterRecords.some((record) => !record.hooks.ability.supportedCategories.includes(SOUNDPROOF_CATEGORY))) {
   throw new Error("a Soundproof roster row does not carry the exact moves-block category");
 }
+const synchronizeRosterRecords = sourceProvenAbilityRecords.filter((record) => record.hooks.ability.supportedCategories.includes(SYNCHRONIZE_CATEGORY));
+if (synchronizeRosterRecords.length !== synchronizeCandidateRows.length
+  || synchronizeRosterRecords.some((record) => !synchronizeSourceProvenRows.includes(record.move))) {
+  throw new Error("Synchronize source-proven roster accounting does not match the finite candidate census");
+}
 const sourceProvenAbilityCategories = sourceProvenAbilityRecords.flatMap((record) => record.hooks.ability.supportedCategories);
 const absorbingCoverageByCategory = Object.fromEntries(ABSORBING_HOOK_DEFINITIONS.map((definition) => {
   const candidates = absorbingCandidateRows.filter((row) => row.category === definition.id);
@@ -1938,6 +2470,30 @@ const absorbingCoverageByCategory = Object.fromEntries(ABSORBING_HOOK_DEFINITION
     excludedCandidates: excluded,
   }];
 }));
+const synchronizeAudit = {
+  status: "source-proven-family",
+  scope: "Finite Level-50 roster census for status effects that can bank HITMARKER_SYNCHRONIZE_EFFECT and reach the ordered MOVEEND_SYNCHRONIZE_TARGET/MOVEEND_SYNCHRONIZE_ATTACKER states. Each candidate has an exact graph/program route through its entry selector, SetMoveEffect loader, chance/primary dispatcher, and MOVEEND handoff.",
+  selector: "source Battle Script entries whose SetMoveEffect path can load poison, toxic, paralysis, or burn; Bounce is restricted to its second-turn setter",
+  effects: SYNCHRONIZE_EFFECTS,
+  candidateCount: synchronizeCandidateRows.length,
+  sourceMoveCandidates: synchronizeCandidateRows,
+  sourceProvenRows: synchronizeSourceProvenRows,
+  sourceExceptionRows: synchronizeExceptions,
+  blockers: synchronizeBlockers,
+  excludedOutcomes: SYNCHRONIZE_MARKER_EXCLUSIONS,
+  routeWitnesses: synchronizeRouteEvidenceRows,
+  runtimeGuardSignature: synchronizeRuntimeGuardSignature,
+  dispatcher: {
+    path: BATTLE_SCRIPT_COMMANDS_PATH,
+    target: { state: "MOVEEND_SYNCHRONIZE_TARGET", stateValue: 2, line: synchronizeTargetMoveEndLine, call: SYNCHRONIZE_DISPATCHER_TARGET_CALL },
+    attacker: { state: "MOVEEND_SYNCHRONIZE_ATTACKER", stateValue: 5, line: synchronizeAttackerMoveEndLine, call: SYNCHRONIZE_DISPATCHER_ATTACKER_CALL },
+    order: synchronizeRuntimeGuardSignature.moveEnd.order,
+  },
+  promotions: {
+    sourceProvenRows: synchronizeSourceProvenRows,
+    reason: "All 30 finite candidates have complete selector, ordered graph/program route, SetMoveEffect marker/runtime guards, and ordered target/attacker MOVEEND evidence. The shared two-seed Battle Scene OFF Thunder Wave receipt and Tier-1 Synchronize batch prove the common dispatcher semantics; no per-move oracle receipts are fabricated.",
+  },
+};
 const onDamageAudit = {
   status: "family-level-color-change-and-contact-promotion",
   scope: "Finite Level-50 selector audit for ABILITYEFFECT_ON_DAMAGE. Color Change and the contact family are source-proven at family level with separate ordered route/guard certificates; distinct ability outcome receipts remain explicit in the hook universe.",
@@ -2068,7 +2624,7 @@ const output = {
       BATTLE_SCRIPT_CONSTANTS_PATH,
       "reference/pokeemerald/include/constants/pokemon.h",
     ],
-    note: `Catalog join plus an intentionally partial source dispatcher inventory. All per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, and ${colorChangeSourceProvenRows.length} Color Change siblings carry graph/program/source-handoff evidence. Future Sight has one explicit delayed-MOVEEND exception; no per-move oracle receipts are fabricated.`,
+    note: `Catalog join plus an intentionally partial source dispatcher inventory. All per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, and ${synchronizeSourceProvenRows.length} Synchronize status candidates carry graph/program/source-handoff evidence. Future Sight has one explicit delayed-MOVEEND exception; Synchronize has ${synchronizeCandidateRows.length} candidates with no route exceptions or blockers; no per-move oracle receipts are fabricated.`,
   },
   coverage: {
     level50Roster: {
@@ -2114,9 +2670,10 @@ const output = {
         soundproofUnsupportedLevel50RosterRows: records.length - soundproofRosterRecords.length,
         absorbing: absorbingCoverageByCategory,
         onDamage: onDamageAudit,
+        synchronize: synchronizeAudit,
         completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "The exact Level-50 Soundproof moves-block family, audited absorbing dispatcher candidates, and both ON_DAMAGE families are source-proven with separate route/guard certificates. Future Sight has one explicit delayed-MOVEEND exception; Static is the only direct contact-family receipt and the other distinct ability outcome gaps remain explicit, while accuracy and all other ability dispatcher families remain intentionally unsupported/null per move.",
+        reason: "The exact Level-50 Soundproof moves-block family, audited absorbing dispatcher candidates, both ON_DAMAGE families, and the Synchronize status family are source-proven with separate route/guard certificates. Future Sight has one explicit delayed-MOVEEND exception; Synchronize has no candidate route exceptions or blockers, while distinct contact ability outcome gaps, accuracy, and all other ability dispatcher families remain intentionally unsupported/null per move.",
       },
     },
   },
