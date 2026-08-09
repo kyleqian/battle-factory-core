@@ -50,6 +50,7 @@ type Sprite = {
   readonly attr1: number;
   readonly attr2: number;
   readonly matrixNum: number;
+  readonly subpriority: number;
   readonly matrix: {
     readonly a: number;
     readonly b: number;
@@ -292,6 +293,8 @@ function verify(path: string, runNumber: number): void {
       x2: sprite.x2,
       y2: sprite.y2,
       frame: sprite.animCmdIndex,
+      animNum: sprite.animNum,
+      subpriority: sprite.subpriority,
       hFlip: ((sprite.attr1 >>> 12) & 1) !== 0,
       vFlip: ((sprite.attr1 >>> 13) & 1) !== 0,
     }));
@@ -302,6 +305,8 @@ function verify(path: string, runNumber: number): void {
       x2: sprite.x2,
       y2: sprite.y2,
       frame: sprite.frame,
+      animNum: sprite.hFlip ? 1 : 0,
+      subpriority: fixture.target.geometry.side === "opponent" ? 28 : 38,
       hFlip: sprite.hFlip,
       vFlip: sprite.vFlip,
     }));
@@ -316,7 +321,11 @@ function verify(path: string, runNumber: number): void {
           hits[0]!.y !== expected.hitsplat.y ||
           hits[0]!.matrix.a !== 372 ||
           hits[0]!.matrix.d !== 372 ||
-          hits[0]!.slot !== 5))
+          hits[0]!.slot !== 5 ||
+          hits[0]!.animNum !== 0 ||
+          hits[0]!.animCmdIndex !== 0 ||
+          hits[0]!.subpriority !==
+            (fixture.target.geometry.side === "opponent" ? 29 : 39)))
     )
       failures.push(`age ${age}: animation-2 hitsplat`);
     const targetSprite =
@@ -337,6 +346,19 @@ function verify(path: string, runNumber: number): void {
     );
     if (shake.length !== (age >= 21 && age <= 28 ? 1 : 0))
       failures.push(`age ${age}: AnimTask_ShakeMon2 lifetime`);
+    if (
+      shake.some(
+        (task) =>
+          task.data[0] !==
+            (fixture.target.geometry.side === "opponent" ? 8 : 6) ||
+          task.data[1] !== 4 - Math.floor((age - 21) / 2) ||
+          task.data[2] !== 1 ||
+          task.data[3] !== ((age - 21) % 2 === 0 ? 1 : 0) ||
+          task.data[4] !== 2 ||
+          task.data.slice(5).some((value) => value !== 0),
+      )
+    )
+      failures.push(`age ${age}: AnimTask_ShakeMon2 tuple/state`);
     if (
       oracle.visualTaskCount !== pincers.length + hits.length + shake.length ||
       oracle.soundTaskCount !== 0
