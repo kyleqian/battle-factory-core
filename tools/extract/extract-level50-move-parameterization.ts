@@ -1059,11 +1059,16 @@ type OnDamageRoutePath = {
   positions: OnDamageRoutePosition[];
   transitions: OnDamageRouteTransition[];
 };
-type OnDamageRoutePreference = (
+// A route certificate is a proof for one concrete, successful use of a move.
+// These requirements deliberately prune contradictory control-flow arms before
+// path search.  A score-based preference is not sufficient: a short no-effect
+// arm can otherwise beat the longer live-hit arm and make datahpupdate look
+// reachable even though its TARGET_TURN_DAMAGED write is guarded out.
+type OnDamageRouteConstraint = (
   position: OnDamageRoutePosition,
   statement: GraphStatement,
   edge: GraphEdge,
-) => number;
+) => boolean;
 
 const onDamageGraphEdgesByPosition = new Map<string, GraphEdge[]>();
 for (const edge of graph.controlFlow.edges) {
@@ -1106,7 +1111,7 @@ function onDamageRoutePath(
   startLabel: string | OnDamageRoutePosition,
   target: (statement: GraphStatement) => boolean,
   description: string,
-  edgePreference?: OnDamageRoutePreference,
+  edgeConstraint?: OnDamageRouteConstraint,
 ): OnDamageRoutePath {
   type QueueEntry = { position: OnDamageRoutePosition; path: OnDamageRoutePath; cost: number; sequence: number };
   const start = typeof startLabel === "string" ? onDamageFirstStatement(startLabel) : startLabel;
@@ -1121,12 +1126,11 @@ function onDamageRoutePath(
     if (current.cost !== bestCost.get(currentKey)) continue;
     const statement = onDamageStatement(current.position);
     if (target(statement)) return current.path;
-    const edges = [...(onDamageGraphEdgesByPosition.get(currentKey) ?? [])].sort((left, right) => {
-      return rank(left) + (edgePreference?.(current.position, statement, left) ?? 0)
-        - rank(right) - (edgePreference?.(current.position, statement, right) ?? 0);
-    });
+    const edges = [...(onDamageGraphEdgesByPosition.get(currentKey) ?? [])]
+      .sort((left, right) => rank(left) - rank(right));
     for (const edge of edges) {
       if (edge.to === null) continue;
+      if (edgeConstraint !== undefined && !edgeConstraint(current.position, statement, edge)) continue;
       let next: OnDamageRoutePosition | null = { label: edge.to.label, line: edge.to.line };
       let callTarget: OnDamageRoutePosition | undefined;
       let resume: OnDamageRoutePosition | undefined;
@@ -1139,7 +1143,7 @@ function onDamageRoutePath(
         next = resume ?? null;
       }
       if (next === null) continue;
-      const edgeCost = rank(edge) + (edgePreference?.(current.position, statement, edge) ?? 0);
+      const edgeCost = rank(edge);
       const nextKey = onDamagePositionKey(next);
       const nextCost = current.cost + edgeCost;
       if (nextCost >= (bestCost.get(nextKey) ?? Number.POSITIVE_INFINITY)) continue;
@@ -1166,29 +1170,52 @@ function onDamageRoutePath(
   throw new Error(`${startLabel} has no ON_DAMAGE route ${description}`);
 }
 
-function onDamageMoveRoutePreference(move: string): OnDamageRoutePreference {
-  return (_position, statement, edge) => {
-    let preferredKind: string | null = null;
-    if (statement.mnemonic === "jumpifnotmove") {
-      preferredKind = statement.operandTokens[0] === move ? "fallthrough" : "jump";
-    } else if (statement.mnemonic === "jumpifmove") {
-      preferredKind = statement.operandTokens[0] === move ? "jump" : "fallthrough";
-    } else if (statement.mnemonic === "jumpifmovehadnoeffect"
-      || statement.mnemonic === "jumpifnodamage"
-      || statement.mnemonic === "accuracycheck") {
-      // The route certificate follows a successful, damaging hit. These
-      // commands jump to the miss/no-effect/no-damage branch when their
-      // condition is true, so the fallthrough edge is the live-hit arm.
-      preferredKind = "fallthrough";
-    } else if (move === "MOVE_FUTURE_SIGHT"
-      && statement.mnemonic === "jumpifbyte"
-      && statement.operandTokens.includes("B_MSG_FUTURE_SIGHT")) {
-      // MonTookFutureAttack shares this block with Doom Desire. The Future
-      // Sight selector falls through the CMP_NOT_EQUAL guard; following the
-      // jump would certify Doom Desire's delayed branch instead.
-      preferredKind = "fallthrough";
+function onDamageMoveRouteRequirement(move: string, position: OnDamageRoutePosition, statement: GraphStatement): string | null {
+  if (statement.mnemonic === "jumpifnotmove") {
+    return statement.operandTokens[0] === move ? "fallthrough" : "jump";
+  }
+  if (statement.mnemonic === "jumpifmove") {
+    return statement.operandTokens[0] === move ? "jump" : "fallthrough";
+  }
+  if (statement.mnemonic === "accuracycheck" || statement.mnemonic === "jumpifmovehadnoeffect") {
+    // Both commands transfer to an unsuccessful arm. A Color Change route is
+    // only evidence for a real hit, so it must take the ordinary successor.
+    return "fallthrough";
+  }
+  if (statement.mnemonic === "jumpifnodamage") {
+    // This command's one reachable Level-50 use is Focus Punch's pre-use
+    // cancellation check. Its *jump* is the no-prior-damage success arm,
+    // unlike a post-hit no-effect branch; keep that source-specific semantic
+    // explicit instead of treating the mnemonic name as a generic failure.
+    if (move === "MOVE_FOCUS_PUNCH"
+      && position.label === "BattleScript_EffectFocusPunch"
+      && position.line === 2262
+      && statement.operandTokens[0] === "BattleScript_HitFromAccCheck") {
+      return "jump";
     }
-    return preferredKind === null ? 0 : edge.kind === preferredKind ? -4 : 4;
+    throw new Error(`${move} reaches unmodeled jumpifnodamage at ${position.label}:${position.line}`);
+  }
+  if (statement.mnemonic === "jumpifbyte"
+    && statement.operandTokens.includes("gMoveResultFlags")
+    && statement.operandTokens.some((token) => token.includes("MOVE_RESULT_NO_EFFECT"))) {
+    // Do not silently accept a direct spelling of a no-effect branch. Add its
+    // source semantics above before promoting a new route shape.
+    throw new Error(`${move} reaches unmodeled MOVE_RESULT_NO_EFFECT branch at ${position.label}:${position.line}`);
+  }
+  if (move === "MOVE_FUTURE_SIGHT"
+    && statement.mnemonic === "jumpifbyte"
+    && statement.operandTokens.includes("B_MSG_FUTURE_SIGHT")) {
+    // MonTookFutureAttack shares this block with Doom Desire. Future Sight
+    // falls through CMP_NOT_EQUAL; jumping would certify Doom Desire instead.
+    return "fallthrough";
+  }
+  return null;
+}
+
+function onDamageMoveRouteConstraint(move: string): OnDamageRouteConstraint {
+  return (position, statement, edge) => {
+    const requiredKind = onDamageMoveRouteRequirement(move, position, statement);
+    return requiredKind === null || edge.kind === requiredKind;
   };
 }
 
@@ -1250,12 +1277,12 @@ function onDamageRouteHandoff(statement: GraphStatement) {
   return null;
 }
 
-function onDamageRouteToDataAndMoveEnd(startLabel: string, edgePreference?: OnDamageRoutePreference) {
+function onDamageRouteToDataAndMoveEnd(startLabel: string, edgeConstraint?: OnDamageRouteConstraint) {
   const dataPath = onDamageRoutePath(
     startLabel,
     (statement) => statement.mnemonic === "datahpupdate" && statement.operandTokens[0] === "BS_TARGET",
     "target datahpupdate",
-    edgePreference,
+    edgeConstraint,
   );
   const dataPosition = dataPath.positions.at(-1)!;
   const moveEndPath = onDamageRoutePath(
@@ -1264,7 +1291,7 @@ function onDamageRouteToDataAndMoveEnd(startLabel: string, edgePreference?: OnDa
       ? false
       : onDamageRouteHandoff(statement) !== null,
     "a MOVEEND_ON_DAMAGE handoff after target datahpupdate",
-    edgePreference,
+    edgeConstraint,
   );
   const handoffPosition = moveEndPath.positions.at(-1)!;
   const handoff = onDamageRouteHandoff(onDamageStatement(handoffPosition));
@@ -1348,20 +1375,20 @@ function onDamageRuntimeGuardSignature() {
 const onDamageColorChangeRuntimeGuards = onDamageRuntimeGuardSignature();
 
 function colorChangeRouteEvidence(move: Move, entryScript: string) {
-  const routePreference = onDamageMoveRoutePreference(move.move);
+  const routeConstraint = onDamageMoveRouteConstraint(move.move);
   if (move.move === "MOVE_FUTURE_SIGHT") {
     const delayedDataPath = onDamageRoutePath(
       "BattleScript_MonTookFutureAttack",
       (statement) => statement.mnemonic === "datahpupdate" && statement.operandTokens[0] === "BS_TARGET",
       "Future Sight delayed target datahpupdate",
-      routePreference,
+      routeConstraint,
     );
     const delayedDataPosition = delayedDataPath.positions.at(-1)!;
     const delayedMoveEndPath = onDamageRoutePath(
       delayedDataPosition,
       (statement) => statement.mnemonic === "moveendfromto",
       "Future Sight delayed moveendfromto bypass",
-      routePreference,
+      routeConstraint,
     );
     const futureHandoff = requireGraphLabel("BattleScript_FutureAttackEnd").statements.find((statement) => statement.mnemonic === "moveendfromto");
     if (!futureHandoff) throw new Error("Future Sight delayed route lacks moveendfromto");
@@ -1388,15 +1415,15 @@ function colorChangeRouteEvidence(move: Move, entryScript: string) {
       ? "present-variable-damage-with-heal-branch"
       : "damaging-entry-to-target-datahpupdate";
   const damaging = move.move === "MOVE_BIDE"
-    ? onDamageRouteToDataAndMoveEnd("BattleScript_BideAttack", routePreference)
+    ? onDamageRouteToDataAndMoveEnd("BattleScript_BideAttack", routeConstraint)
     : move.move === "MOVE_PRESENT"
-      ? onDamageRouteToDataAndMoveEnd("BattleScript_HitFromCritCalc", routePreference)
-      : onDamageRouteToDataAndMoveEnd(entryScript === "BattleScript_EffectReturn" ? "BattleScript_EffectFrustration" : entryScript, routePreference);
+      ? onDamageRouteToDataAndMoveEnd("BattleScript_HitFromCritCalc", routeConstraint)
+      : onDamageRouteToDataAndMoveEnd(entryScript === "BattleScript_EffectReturn" ? "BattleScript_EffectFrustration" : entryScript, routeConstraint);
   const entryPath = onDamageRoutePath(
     entryScript === "BattleScript_EffectReturn" ? "BattleScript_EffectFrustration" : entryScript,
     (statement) => statement.mnemonic === "moveendall" || statement.mnemonic === "datahpupdate",
     "entry path anchor",
-    routePreference,
+    routeConstraint,
   );
   const alternatives: Array<Record<string, unknown>> = [];
   if (move.move === "MOVE_BIDE") {

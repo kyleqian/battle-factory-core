@@ -8,6 +8,12 @@ import frontierMons from "../src/data/gen/battle-frontier-mons.json" with { type
 import movesData from "../src/data/gen/moves.json" with { type: "json" };
 
 type RoutePosition = { label: string; line: number };
+type RouteTransition = {
+  from: RoutePosition;
+  to: RoutePosition | null;
+  kind: string;
+  macro: string | null;
+};
 type RouteStep = {
   kind: "fallthrough" | "guard" | "goto" | "accuracycheck" | string;
   label: string;
@@ -24,8 +30,8 @@ type FamilyEvidence = {
   entryPath: {
     kind?: string;
     source: { path: string; entryLine: number };
-    graph: { path: string; entryLabel: string; attackCanceler?: RoutePosition; accuracyCheck?: RoutePosition; route: RouteStep[] };
-    program: { path: string; entryLabel: string; attackCanceler?: RoutePosition; accuracyCheck?: RoutePosition; route: RouteStep[] };
+    graph: { path: string; entryLabel: string; attackCanceler?: RoutePosition; accuracyCheck?: RoutePosition; route: RouteStep[]; transitions?: RouteTransition[] };
+    program: { path: string; entryLabel: string; attackCanceler?: RoutePosition; accuracyCheck?: RoutePosition; route: RouteStep[]; transitions?: RouteTransition[] };
     dataHpUpdate?: { label: string; line: number; mnemonic: string; operands: string[] };
     moveEnd?: { label: string; line: number; state: string; stateValue: number; [key: string]: unknown };
     alternatives?: Array<Record<string, unknown>>;
@@ -594,6 +600,81 @@ describe("Level-50 move parameterization manifest", () => {
       const record = manifest.moves.find((candidate) => candidate.move === move)!;
       expect(record.hooks.ability.supportedCategories).toContain("moveend-color-change");
     }
+  });
+
+  it("ratchets every source-proven Color Change certificate onto its successful-damage arm", () => {
+    const audit = manifest.coverage.hookCatalogs.ability.onDamage;
+    const witnesses = audit.colorChange.routeWitnesses
+      .filter((witness) => witness.status === "source-proven");
+    expect(witnesses).toHaveLength(182);
+    expect(audit.colorChange.sourceExceptionRows.map((exception) => exception.id)).toEqual([
+      "future-sight-delayed-moveend-bypass",
+    ]);
+
+    let checkedBranches = 0;
+    let missOrNoEffectBranches = 0;
+    for (const witness of witnesses) {
+      const family = witness.familyEvidence as FamilyEvidence;
+      const graph = family.entryPath.graph;
+      const program = family.entryPath.program;
+      expect(graph.transitions, `${witness.move} graph/program transition parity`).toEqual(program.transitions);
+      const transitionBySource = new Map((graph.transitions ?? []).map((transition) => [
+        `${transition.from.label}:${transition.from.line}`,
+        transition,
+      ]));
+
+      for (const step of graph.route) {
+        const isFocusPunchSetup = witness.move === "MOVE_FOCUS_PUNCH"
+          && step.label === "BattleScript_EffectFocusPunch"
+          && step.line === 2262
+          && step.mnemonic === "jumpifnodamage";
+        const requiredKind = step.mnemonic === "accuracycheck" || step.mnemonic === "jumpifmovehadnoeffect"
+          ? "fallthrough"
+          : isFocusPunchSetup ? "jump" : null;
+        if (requiredKind !== null) {
+          checkedBranches += 1;
+          if (!isFocusPunchSetup) missOrNoEffectBranches += 1;
+          const transition = transitionBySource.get(`${step.label}:${step.line}`);
+          expect(transition, `${witness.move} ${step.label}:${step.line} needs its successful arm`).toBeDefined();
+          expect(transition, `${witness.move} ${step.mnemonic} must not take its miss/no-effect arm`).toMatchObject({
+            kind: requiredKind,
+          });
+        }
+        if (step.mnemonic === "jumpifbyte"
+          && step.operands.includes("gMoveResultFlags")
+          && step.operands.some((operand) => operand.includes("MOVE_RESULT_NO_EFFECT"))) {
+          throw new Error(`${witness.move} has an unmodeled direct MOVE_RESULT_NO_EFFECT route at ${step.label}:${step.line}`);
+        }
+        if (step.mnemonic === "jumpifnodamage" && !isFocusPunchSetup) {
+          throw new Error(`${witness.move} has an unmodeled jumpifnodamage route at ${step.label}:${step.line}`);
+        }
+      }
+    }
+    // 181 accuracy checks + 19 source-spelled no-effect guards, plus Focus
+    // Punch's one explicitly inverted pre-use cancellation condition.
+    expect(checkedBranches).toBe(201);
+    expect(missOrNoEffectBranches).toBe(200);
+
+    const endeavor = witnesses.find((witness) => witness.move === "MOVE_ENDEAVOR");
+    expect(endeavor).toBeDefined();
+    const endeavorRoute = (endeavor!.familyEvidence as FamilyEvidence).entryPath.graph.route;
+    const noEffectIndex = endeavorRoute.findIndex((step) => (
+      step.label === "BattleScript_EffectEndeavor"
+      && step.line === 2487
+      && step.mnemonic === "jumpifmovehadnoeffect"
+    ));
+    expect(noEffectIndex).toBeGreaterThanOrEqual(0);
+    expect(endeavorRoute.slice(noEffectIndex, noEffectIndex + 5).map((step) => ({
+      line: step.line,
+      mnemonic: step.mnemonic,
+      operands: step.operands,
+    }))).toEqual([
+      { line: 2487, mnemonic: "jumpifmovehadnoeffect", operands: ["BattleScript_HitFromAtkAnimation"] },
+      { line: 2488, mnemonic: "bicbyte", operands: ["gMoveResultFlags", "MOVE_RESULT_SUPER_EFFECTIVE | MOVE_RESULT_NOT_VERY_EFFECTIVE"] },
+      { line: 2489, mnemonic: "copyword", operands: ["gBattleMoveDamage", "gHpDealt"] },
+      { line: 2490, mnemonic: "adjustsetdamage", operands: [] },
+      { line: 2491, mnemonic: "goto", operands: ["BattleScript_HitFromAtkAnimation"] },
+    ]);
   });
 
   it("derives the Soundproof and shared-absorbing families from source without claiming other ability joins", () => {
