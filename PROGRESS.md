@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1037 — [bounded MAIN worker, 2026-08-09] **#84 opponent send-out side repaired**
+
+- **State:** #84 item (1) is removed; only item (3)'s WHIRLWIND opponent
+  recall/send-out seam remains. Gate 6 stays **23/24** OFF-profile receipts.
+- **Did:** reproduced the generated opponent replacement through the public
+  resolution renderer. The typed switch-in projection now preserves battler
+  side, ball origin/pose, mon and healthbox owner: opponent replacements stay
+  at `(176,64)` while player replacements retain the `(24,68)` throw arc.
+- **Next:** repair #84 item (3)'s generic WHIRLWIND recall/send-out sequence.
+  Do not resume canonical Battle 2.
+- **Notes:** fresh legal complete-party OFF evidence captures frames 470..630
+  densely; MACHOP proves the fix is species-independent. Full suite **813
+  files / 8,147 passed / 1 skipped** and build green. No unsupported barrier,
+  canonical import, rules/RNG, completeness guard, or ratchet pin changed.
+
 ## 1036 — [supervisor, 2026-08-09] **Status cadence and R9 receipt accepted**
 
 - **State:** #84 now has two presentation defects left: the wrong-side
@@ -38,20 +53,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **375/375**, and full suite **812 files / 8,143 passed / 1 skipped**; build
   green. No unsupported barrier, canonical recording import, rules/RNG/event,
   fatal completeness, or fatal status-handoff guard changed.
-
-## 1034 — [supervisor, 2026-08-08] **#84 crash fixed; R3 receipted; union green**
-
-- **State:** #84 item (5) is fixed; its four presentation defects remain open.
-  Gate 6 advanced **21→22/24** OFF-profile receipts, with R9 next.
-- **Did:** accepted the generic toxic handoff repair at `54eaaa5d`: toxic's
-  hidden counter no longer impersonates a changed PSN icon, while party index,
-  HP, and visible-status mismatches remain fatal. Merged R3's repaired legal
-  Golduck→Rattata route and twice-fresh deterministic Cloud Nine removal/rain
-  reactivation receipt.
-- **Next:** diagnose #84's shared TAUNT/TORMENT/TOXIC message pacing, then the
-  wrong-side opponent ball and WHIRLWIND recall/send-out seam. Continue R9 in
-  the disjoint side lane.
-- **Notes:** worker full suite is **8,138 passed / 1 skipped**; supervisor union
-  checks are **62/62 focused + 375/375 smoke**, and both component builds pass.
-  R3's one full-run manifest mismatch did not reproduce in two supervisor runs;
-  all other **8,136** tests in that run passed. No barrier/import pin changed.

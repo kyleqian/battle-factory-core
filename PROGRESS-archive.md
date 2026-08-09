@@ -1,3 +1,20 @@
+## 1034 — [supervisor, 2026-08-08] **#84 crash fixed; R3 receipted; union green**
+
+- **State:** #84 item (5) is fixed; its four presentation defects remain open.
+  Gate 6 advanced **21→22/24** OFF-profile receipts, with R9 next.
+- **Did:** accepted the generic toxic handoff repair at `54eaaa5d`: toxic's
+  hidden counter no longer impersonates a changed PSN icon, while party index,
+  HP, and visible-status mismatches remain fatal. Merged R3's repaired legal
+  Golduck→Rattata route and twice-fresh deterministic Cloud Nine removal/rain
+  reactivation receipt.
+- **Next:** diagnose #84's shared TAUNT/TORMENT/TOXIC message pacing, then the
+  wrong-side opponent ball and WHIRLWIND recall/send-out seam. Continue R9 in
+  the disjoint side lane.
+- **Notes:** worker full suite is **8,138 passed / 1 skipped**; supervisor union
+  checks are **62/62 focused + 375/375 smoke**, and both component builds pass.
+  R3's one full-run manifest mismatch did not reproduce in two supervisor runs;
+  all other **8,136** tests in that run passed. No barrier/import pin changed.
+
 ## 1033 — [bounded MAIN worker, 2026-08-08] **#84 fatal toxic-resolution handoff repaired**
 
 - **State:** #84 item (5) is removed; items (1)-(4) remain open. Gate 6 remains
