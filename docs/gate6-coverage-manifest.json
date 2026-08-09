@@ -22,7 +22,10 @@
     "src/data/gen/ability-item-hooks.json",
     "reference/pokeemerald/src/battle_util.c",
     "reference/pokeemerald/src/battle_script_commands.c",
+    "reference/pokeemerald/include/battle.h",
     "reference/pokeemerald/data/battle_scripts_1.s",
+    "src/data/gen/battle-script-graph.json",
+    "src/data/gen/battle-script-program.json",
     "src/engine/battleScriptAbilityMovesBlock.ts",
     "tests/battleScriptAbilityMovesBlock.test.ts",
     "tests/soundproofOracleEvidence.test.ts",
@@ -30,6 +33,9 @@
     "src/engine/battleScriptHitChainOpcode.ts",
     "tests/battleScriptHitChainOpcode.test.ts",
     "tests/damageCalc.test.ts",
+    "src/engine/battleScriptMoveEndOpcode.ts",
+    "tests/battleScriptMoveEndOpcode.test.ts",
+    "tools/battle-lab/gate6-r8-paralysis-off.json",
     "docs/absorbing-abilities-ground-truth.md",
     "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
     "tools/probe/probe-absorbing-ability-off.py",
@@ -65,6 +71,14 @@
         "gaps": 561
       }
     },
+    "onDamageMoveEnd": {
+      "contactCandidates": 94,
+      "colorChangeCandidates": 183,
+      "overlapCandidates": 94,
+      "entryBlockShapes": 78,
+      "blockers": 3,
+      "promotedRows": 0
+    },
     "stateFamilies": {
       "total": 55,
       "tier1Covered": 55
@@ -72,7 +86,7 @@
     "hooks": {
       "abilities": {
         "total": 78,
-        "oracleReceipted": 28,
+        "oracleReceipted": 27,
         "zeroFactoryWidened": 4
       },
       "holdEffects": {
@@ -33002,6 +33016,76 @@
         }
       ]
     },
+    "onDamageMoveEnd": {
+      "id": "hook-audit:ABILITYEFFECT_ON_DAMAGE",
+      "label": "ABILITYEFFECT_ON_DAMAGE Level-50 checkpoint",
+      "status": "evidence-checkpoint-no-promotion",
+      "contactCandidates": 94,
+      "colorChangeCandidates": 183,
+      "overlapCandidates": 94,
+      "entryBlockShapes": 78,
+      "blockerIds": [
+        "ordered-moveend-route-not-proven",
+        "damage-state-guard-not-derived-from-selector",
+        "missing-direct-on-damage-off-receipt"
+      ],
+      "promotedRows": 0,
+      "evidence": [
+        {
+          "path": "src/data/gen/level50-move-parameterization.json",
+          "locator": "coverage.hookCatalogs.ability.onDamage",
+          "kind": "finite-candidate-guard-route-shape-audit"
+        },
+        {
+          "path": "reference/pokeemerald/src/battle_util.c",
+          "locator": "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)",
+          "kind": "on-damage-source-guards"
+        },
+        {
+          "path": "reference/pokeemerald/include/battle.h",
+          "locator": "TARGET_TURN_DAMAGED",
+          "kind": "target-turn-damaged-definition"
+        },
+        {
+          "path": "reference/pokeemerald/src/battle_script_commands.c",
+          "locator": "MOVEEND_ON_DAMAGE_ABILITIES",
+          "kind": "moveend-dispatcher"
+        },
+        {
+          "path": "reference/pokeemerald/data/battle_scripts_1.s",
+          "locator": "BattleScript_MoveEnd",
+          "kind": "moveend-target-script"
+        },
+        {
+          "path": "src/data/gen/battle-script-graph.json",
+          "kind": "generated-entry-block-census"
+        },
+        {
+          "path": "src/data/gen/battle-script-program.json",
+          "kind": "generated-entry-block-census"
+        },
+        {
+          "path": "src/engine/battleScriptMoveEndOpcode.ts",
+          "locator": "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)",
+          "kind": "source-shaped-family-implementation"
+        },
+        {
+          "path": "tests/battleScriptMoveEndOpcode.test.ts",
+          "locator": "MOVEEND_ON_DAMAGE_ABILITIES contact family",
+          "kind": "tier-1-sibling-batch"
+        },
+        {
+          "path": "docs/gate6-interaction-matrix-scout.md",
+          "locator": "R8 is Immunity/Limber prevention",
+          "kind": "direct-receipt-scope-audit"
+        },
+        {
+          "path": "tools/battle-lab/gate6-r8-paralysis-off.json",
+          "kind": "incidental-static-party-not-receipt"
+        }
+      ],
+      "notes": "No per-move rows are promoted. The source artifact enumerates every flag/power selector exactly once per applicable category, source guards, and entry-block graph/program shape; complete ordered MOVEEND witnesses and one direct Battle Scene OFF shared-family semantic receipt remain explicit blockers."
+    },
     "stateFamilies": [
       {
         "id": "state:B_WEATHER_HAIL",
@@ -35040,7 +35124,7 @@
         {
           "id": "ability:ABILITY_STATIC",
           "label": "ABILITY_STATIC",
-          "status": "oracle-receipted-hook",
+          "status": "engine-referenced-no-oracle-receipt",
           "universeId": 9,
           "factoryCarrierCount": 27,
           "legalCarrierCount": 12,
@@ -35050,10 +35134,7 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 5,
-          "oracleReceiptCards": [
-            "R8",
-            "R8"
-          ],
+          "oracleReceiptCards": [],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -35074,12 +35155,17 @@
               "kind": "factory-carrier-join"
             },
             {
+              "path": "src/data/gen/level50-move-parameterization.json",
+              "locator": "ability:ABILITY_STATIC",
+              "kind": "on-damage-receipt-scope"
+            },
+            {
               "path": "docs/gate6-interaction-matrix-scout.md",
-              "locator": "R8",
-              "kind": "oracle-receipt"
+              "locator": "R8 is Immunity/Limber prevention, not Static ON_DAMAGE",
+              "kind": "incidental-receipt-rejected"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "R8's direct receipt is Immunity/Limber prevention; its Electrike Static party appearance does not observe ABILITYEFFECT_ON_DAMAGE and is not an oracle receipt for Static."
         },
         {
           "id": "ability:ABILITY_VOLT_ABSORB",
@@ -35393,9 +35479,14 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "src/data/gen/level50-move-parameterization.json",
+              "locator": "ability:ABILITY_COLOR_CHANGE",
+              "kind": "on-damage-receipt-scope"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "No direct deterministic Battle Scene OFF receipt observes this ON_DAMAGE arm; source and Tier-1 coverage remain distinct from semantic/oracle acceptance."
         },
         {
           "id": "ability:ABILITY_IMMUNITY",
@@ -35739,9 +35830,14 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "src/data/gen/level50-move-parameterization.json",
+              "locator": "ability:ABILITY_ROUGH_SKIN",
+              "kind": "on-damage-receipt-scope"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "No direct deterministic Battle Scene OFF receipt observes this ON_DAMAGE arm; source and Tier-1 coverage remain distinct from semantic/oracle acceptance."
         },
         {
           "id": "ability:ABILITY_WONDER_GUARD",
@@ -35874,9 +35970,14 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "src/data/gen/level50-move-parameterization.json",
+              "locator": "ability:ABILITY_EFFECT_SPORE",
+              "kind": "on-damage-receipt-scope"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "No direct deterministic Battle Scene OFF receipt observes this ON_DAMAGE arm; source and Tier-1 coverage remain distinct from semantic/oracle acceptance."
         },
         {
           "id": "ability:ABILITY_SYNCHRONIZE",
@@ -36482,9 +36583,14 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "src/data/gen/level50-move-parameterization.json",
+              "locator": "ability:ABILITY_POISON_POINT",
+              "kind": "on-damage-receipt-scope"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "No direct deterministic Battle Scene OFF receipt observes this ON_DAMAGE arm; source and Tier-1 coverage remain distinct from semantic/oracle acceptance."
         },
         {
           "id": "ability:ABILITY_INNER_FOCUS",
@@ -36911,9 +37017,14 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "src/data/gen/level50-move-parameterization.json",
+              "locator": "ability:ABILITY_FLAME_BODY",
+              "kind": "on-damage-receipt-scope"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "No direct deterministic Battle Scene OFF receipt observes this ON_DAMAGE arm; source and Tier-1 coverage remain distinct from semantic/oracle acceptance."
         },
         {
           "id": "ability:ABILITY_RUN_AWAY",
@@ -37197,9 +37308,14 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "src/data/gen/level50-move-parameterization.json",
+              "locator": "ability:ABILITY_CUTE_CHARM",
+              "kind": "on-damage-receipt-scope"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "No direct deterministic Battle Scene OFF receipt observes this ON_DAMAGE arm; source and Tier-1 coverage remain distinct from semantic/oracle acceptance."
         },
         {
           "id": "ability:ABILITY_PLUS",

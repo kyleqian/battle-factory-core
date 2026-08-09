@@ -252,6 +252,14 @@ function assertManifestContract(manifest: JsonObject): void {
   expect(JSON.stringify(manifest)).not.toMatch(/\bgate\s*6\s+is\s+(closed|complete)\b/i);
   expect(String(gate6.nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
   assertPerMoveHookJoinContract(manifest);
+  const onDamageSummary = record(record(manifest.summary).onDamageMoveEnd);
+  const onDamageRow = record(record(manifest.sections).onDamageMoveEnd);
+  if (onDamageSummary.promotedRows !== 0 || onDamageRow.promotedRows !== 0) {
+    throw new Error("ON_DAMAGE evidence checkpoint must not claim a promotion");
+  }
+  if (!Array.isArray(onDamageRow.blockerIds) || onDamageRow.blockerIds.length === 0) {
+    throw new Error("ON_DAMAGE evidence checkpoint must retain nonempty blockers");
+  }
   for (const row of collectEvidenceRows(manifest.sections)) {
     expect(String(row.status)).not.toMatch(/^(closed|complete)$/i);
     for (const item of array(row.evidence)) {
@@ -285,6 +293,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const effects = record(summary.effects);
     const moves = record(summary.moves);
     const perMoveHookJoins = record(summary.perMoveHookJoins);
+    const onDamageMoveEnd = record(summary.onDamageMoveEnd);
     const corpus = record(summary.corpus);
     const hooks = record(summary.hooks);
     const abilities = record(hooks.abilities);
@@ -295,6 +304,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const manifestEffects = array(moveEffect.effects);
     const manifestMoves = array(moveEffect.moves);
     const manifestHookJoinSections = record(sections.perMoveHookJoins);
+    const manifestOnDamageMoveEnd = record(sections.onDamageMoveEnd);
     const stateFamilies = array(sections.stateFamilies);
     const manifestTrainers = array(record(sections.corpus).trainers);
     const manifestSets = array(record(sections.corpus).level50Sets);
@@ -336,6 +346,28 @@ describe("Gate-6 mechanics coverage manifest", () => {
       expect(sourceUnsupported).toBe(axis === "item" ? 300 : 261);
     }
     expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 561, gaps: 561 });
+    expect(onDamageMoveEnd).toEqual({
+      contactCandidates: 94,
+      colorChangeCandidates: 183,
+      overlapCandidates: 94,
+      entryBlockShapes: 78,
+      blockers: 3,
+      promotedRows: 0,
+    });
+    expect(manifestOnDamageMoveEnd).toMatchObject({
+      status: "evidence-checkpoint-no-promotion",
+      contactCandidates: onDamageMoveEnd.contactCandidates,
+      colorChangeCandidates: onDamageMoveEnd.colorChangeCandidates,
+      overlapCandidates: onDamageMoveEnd.overlapCandidates,
+      entryBlockShapes: onDamageMoveEnd.entryBlockShapes,
+      blockerIds: [
+        "ordered-moveend-route-not-proven",
+        "damage-state-guard-not-derived-from-selector",
+        "missing-direct-on-damage-off-receipt",
+      ],
+      promotedRows: 0,
+    });
+    expect(String(manifestOnDamageMoveEnd.notes)).toMatch(/No per-move rows are promoted/);
     const sourceProven = parameterizationData.moves
       .filter((move) => move.hooks.ability.status === SOURCE_PROVEN_FAMILY_STATUS)
       .map((move) => move.move);
@@ -449,6 +481,10 @@ describe("Gate-6 mechanics coverage manifest", () => {
       gaps: 0,
     };
     expect(() => assertManifestContract(falseTotalZero)).toThrow();
+
+    const falseOnDamagePromotion = structuredClone(manifest);
+    record(record(falseOnDamagePromotion.summary).onDamageMoveEnd).promotedRows = 1;
+    expect(() => assertManifestContract(falseOnDamagePromotion)).toThrow();
   });
 
   it("keeps widened scope and receipts unchanged while surfacing the hook-join gap", () => {
@@ -491,6 +527,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const voltAbsorb = abilities.find((row) => row.label === "ABILITY_VOLT_ABSORB")!;
     const waterAbsorb = abilities.find((row) => row.label === "ABILITY_WATER_ABSORB")!;
     const flashFire = abilities.find((row) => row.label === "ABILITY_FLASH_FIRE")!;
+    const staticAbility = abilities.find((row) => row.label === "ABILITY_STATIC")!;
     expect(voltAbsorb).toMatchObject({
       status: "oracle-receipted-hook",
       oracleReceiptCards: ["absorbing-volt-absorb-off"],
@@ -505,12 +542,18 @@ describe("Gate-6 mechanics coverage manifest", () => {
     });
     expect(String(waterAbsorb.notes)).toMatch(/R10\/R7 only happened to include those abilities/);
     expect(String(flashFire.notes)).toMatch(/R10\/R7 only happened to include those abilities/);
+    expect(staticAbility).toMatchObject({
+      status: "engine-referenced-no-oracle-receipt",
+      oracleReceiptCards: [],
+    });
+    expect(String(staticAbility.notes)).toMatch(/does not observe ABILITYEFFECT_ON_DAMAGE/);
     expect(oracle.receiptDocumented).toBe(24);
     expect(oracle.receiptGaps).toBe(0);
     expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*300 item join gaps\*\* and \*\*261 ability join gaps\*\*/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/39 ability rows are source-proven for the nine Soundproof selectors plus audited shared-absorbing routes/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/ON_DAMAGE checkpoint: \*\*94\*\* contact candidates and \*\*183\*\* Color Change candidates/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/24\/24.*scenario receipts documented; \*\*0\*\* request-level gaps/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Receipt count alone does not close the broader Gate-6 breadth acceptance/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).not.toMatch(/fixture-only-no-committed-receipt/);
