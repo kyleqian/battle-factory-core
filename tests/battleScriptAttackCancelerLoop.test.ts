@@ -13,6 +13,7 @@ import {
   BATTLE_SCRIPT_ATTACK_CANCELER_PHASES,
   BATTLE_SCRIPT_STATUS1_FREEZE,
   BATTLE_SCRIPT_STATUS1_PARALYSIS,
+  BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS2_MASKS,
 } from "../src/engine/battleScriptSourceConstants.ts";
 
@@ -431,10 +432,8 @@ describe("complete source-shaped AtkCanceler_UnableToUseMove composition", () =>
       state({
         rulesContext: rules({
           battlers: [
-            battler({ side: 0, status1: 1 }),
-            // battle.h's three Uproar timer bits; any nonzero timer wakes
-            // this attacker before the ordinary sleep decrement.
-            battler({ side: 1, status2: 0x70 }),
+            battler({ side: 0, status1: BATTLE_SCRIPT_STATUS1_SLEEP }),
+            battler({ side: 1, status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR }),
             battler({ side: 0 }),
             battler({ side: 1 }),
           ],
