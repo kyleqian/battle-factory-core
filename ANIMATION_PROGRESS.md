@@ -1,5 +1,13 @@
 # Animation coverage
 
+## Supervisor wind-down — THUNDER exact; GLARE bilateral evidence + executable reducer/seam (2026-08-08)
+
+- **State:** This session advanced Level-50 coverage **134→135/276 exact**, 0 partial, 0 staged, **142→141 unsupported**. `MOVE_THUNDER` alone was promoted. `MOVE_GLARE` remains unsupported because it has no framebuffer compositor or pixel acceptance; `MOVE_TRI_ATTACK` remains independently unsupported.
+- **Did:** Folded master throughout; promoted THUNDER through its typed Scene-ON compositor; then banked complete bilateral GLARE evidence and made it load-bearing through a pure 213-age reducer plus typed Scene-ON seam. GLARE now models the 13 dot pairs, two sparkles, ScaryFace/shake tasks, both palette blends, registers, audio, logical/hardware battler offsets, and cleanup without drawing GLARE-specific pixels.
+- **Verified:** Supervisor-fresh THUNDER probes pass **262/262 component + framebuffer frames** in both orientations, with THUNDER_PUNCH controls **104/104** both ways. GLARE passes **213/213 reducer + seam frames**, twice fresh in both orientations: player evidence/RGB `67acdfad…` / `676cc2a4…`, opponent `2aa1e8a7…` / `eb5d27ea…`. Final integrated `npm test` is **811 files / 8,135 passed / 1 established skip**; post-final-master-fold smoke and build are green.
+- **Next:** Implement GLARE's narrow source-relative compositor and require complete bilateral framebuffer acceptance before promotion. Preserve THUNDER and SCARY_FACE as controls; do not couple TRI_ATTACK acceptance.
+- **Notes:** For the main program: animation changes are presentation-only; no gameplay, damage, RNG, turn order, facility state, shared barrier, or main-ledger contract changed. No animation deferral is open and no animation worker branch/worktree remains.
+
 ## MOVE_GLARE bilateral Scene-ON evidence checkpoint — remains unsupported (2026-08-08 worker)
 
 - **State:** Coverage remains **135/276 exact**, 0 partial, 0 staged, **141 unsupported**. GLARE was not promoted; no reducer, compositor, engine, boundary, gameplay, controller, or sibling behavior changed.
