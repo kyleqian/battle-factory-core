@@ -20,6 +20,7 @@ const CONTACT_CATEGORY = "moveend-contact-on-damage";
 const COLOR_CHANGE_CATEGORY = "moveend-color-change";
 const SYNCHRONIZE_CATEGORY = "moveend-synchronize-status";
 const TRYINFATUATING_OBLIVIOUS_CATEGORY = "tryinfatuating-oblivious";
+const TRYEXPLOSION_DAMP_CATEGORY = "tryexplosion-damp";
 const KINGS_ROCK_CATEGORY = "moveend-kings-rock";
 const SOUNDPROOF_ROSTER_MOVES = [
   "MOVE_ROAR", "MOVE_SING", "MOVE_SUPERSONIC", "MOVE_SCREECH", "MOVE_SNORE",
@@ -119,6 +120,20 @@ const TRYINFATUATING_OBLIVIOUS_PROOF_PATHS = [
   "tools/probe/probe-gate6-r10-off.py",
   "tools/probe/receipts/gate6-r10-attract-oblivious-off.json",
 ] as const;
+const TRYEXPLOSION_DAMP_PROOF_PATHS = [
+  "src/data/gen/moves.json",
+  "reference/pokeemerald/data/battle_scripts_1.s",
+  "src/data/gen/battle-script-graph.json",
+  "src/data/gen/battle-script-program.json",
+  "reference/pokeemerald/src/battle_script_commands.c",
+  "reference/pokeemerald/include/constants/abilities.h",
+  "src/engine/battleScriptExplosionOpcode.ts",
+  "tests/battleScriptExplosionOpcode.test.ts",
+  "tests/tryexplosionDampHookJoinBatch.test.ts",
+  "tests/gate6DampExplosionReceipt.test.ts",
+  "tools/probe/probe-gate6-damp-explosion-off.py",
+  "tools/probe/receipts/gate6-damp-explosion-off.json",
+] as const;
 const KINGS_ROCK_PROOF_PATHS = [
   "reference/pokeemerald/src/battle_util.c",
   "reference/pokeemerald/src/battle_script_commands.c",
@@ -214,6 +229,7 @@ function sourceProvenPathsFor(category: string): readonly string[] {
   if (category === COLOR_CHANGE_CATEGORY) return COLOR_CHANGE_PROOF_PATHS;
   if (category === SYNCHRONIZE_CATEGORY) return SYNCHRONIZE_PROOF_PATHS;
   if (category === TRYINFATUATING_OBLIVIOUS_CATEGORY) return TRYINFATUATING_OBLIVIOUS_PROOF_PATHS;
+  if (category === TRYEXPLOSION_DAMP_CATEGORY) return TRYEXPLOSION_DAMP_PROOF_PATHS;
   if (category === KINGS_ROCK_CATEGORY) return KINGS_ROCK_PROOF_PATHS;
   throw new Error(`unknown source-proven hook category ${category}`);
 }
@@ -613,7 +629,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(manifestAbilities).toHaveLength(hooksData.universes.abilities.length);
     expect(manifestHoldEffects).toHaveLength(hooksData.universes.holdEffects.length);
     expect(manifestScenarios).toHaveLength(
-      readdirSync("tools/battle-lab").filter((name) => /^gate6-.*\.json$/.test(name)).length,
+      readdirSync("tools/battle-lab").filter((name) => /^gate6-r\d+b?-.*\.json$/i.test(name)).length,
     );
     expect(effects.total).toBe(manifestEffects.length);
     expect(moves.total).toBe(manifestMoves.length);
@@ -933,6 +949,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/194 ability rows are source-proven/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Synchronize checkpoint: \*\*30\*\* finite Level-50 candidates, \*\*30\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Attract\/Oblivious checkpoint: \*\*1\*\* finite EFFECT_ATTRACT candidate, \*\*1\*\* promoted, \*\*0\*\* exceptions, \*\*0\*\* roster-only candidates, and \*\*0\*\* active blockers/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Explosion\/Damp checkpoint: \*\*2\*\* finite EFFECT_EXPLOSION candidates, \*\*2\*\* promoted, \*\*0\*\* exceptions, \*\*0\*\* roster-only candidates, \*\*25\*\* selectable occurrences \/ \*\*26\*\* full carrier rows, and \*\*0\*\* active blockers/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/ON_DAMAGE checkpoint: \*\*94\*\* contact candidates and \*\*183\*\* Color Change candidates/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/24\/24.*scenario receipts documented; \*\*0\*\* request-level gaps/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Receipt count alone does not close the broader Gate-6 breadth acceptance/);

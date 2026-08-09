@@ -80,7 +80,7 @@ type ProgramStatement = {
 };
 type ProgramBlock = { label: string; line: number; statements: ProgramStatement[] };
 type Program = { blocks: ProgramBlock[] };
-type Inventory = { tiers: { level50: { moves: Array<{ id: number; move: string; animationScript: string }> } } };
+type Inventory = { tiers: { level50: { moves: Array<{ id: number; move: string; animationScript: string; frontierMonCount: number }> } } };
 type AnimationComponents = { moves: Array<{ id: number; move: string; rootScript: string; componentIds: string[] }> };
 type HeldItems = { count: number; entries: Array<{ itemTableId: number; holdEffect: string; holdEffectParam: number }> };
 type HoldEffects = { items: Array<{ item: string; holdEffect: string; holdEffectParam: number }> };
@@ -144,6 +144,7 @@ const KINGS_ROCK_CATEGORY = "moveend-kings-rock";
 const KINGS_ROCK_DISPATCHER_CALL = "ItemBattleEffects(ITEMEFFECT_KINGSROCK_SHELLBELL, 0, FALSE)";
 const SYNCHRONIZE_CATEGORY = "moveend-synchronize-status";
 const TRYINFATUATING_OBLIVIOUS_CATEGORY = "tryinfatuating-oblivious";
+const TRYEXPLOSION_DAMP_CATEGORY = "tryexplosion-damp";
 const SYNCHRONIZE_DISPATCHER_TARGET_CALL = "AbilityBattleEffects(ABILITYEFFECT_SYNCHRONIZE, gBattlerTarget, 0, 0, 0)";
 const SYNCHRONIZE_DISPATCHER_ATTACKER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ATK_SYNCHRONIZE, gBattlerAttacker, 0, 0, 0)";
 const SYNCHRONIZE_EFFECTS = [
@@ -994,6 +995,7 @@ const ABILITY_HOOK_CATALOG: HookCategory[] = [
   { id: "moveend-color-change", dispatcher: "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)", selector: "power != 0 after a MOVEEND-reachable path", ownership: "target ability is ABILITY_COLOR_CHANGE" },
   { id: SYNCHRONIZE_CATEGORY, dispatcher: "AbilityBattleEffects(ABILITYEFFECT_SYNCHRONIZE / ABILITYEFFECT_ATK_SYNCHRONIZE)", selector: "HITMARKER_SYNCHRONIZE_EFFECT after SetMoveEffect and MOVEEND states 2/5", ownership: "target or attacker ability is ABILITY_SYNCHRONIZE" },
   { id: TRYINFATUATING_OBLIVIOUS_CATEGORY, dispatcher: "Cmd_tryinfatuating", selector: "moveTable.effect === EFFECT_ATTRACT after attackcanceler → accuracycheck", ownership: "target ability is ABILITY_OBLIVIOUS" },
+  { id: TRYEXPLOSION_DAMP_CATEGORY, dispatcher: "Cmd_tryexplosion", selector: "moveTable.effect === EFFECT_EXPLOSION after attackcanceler → ppreduce", ownership: "first active battler in index order with ABILITY_DAMP (including attacker)" },
   { id: "accuracy-compound-eyes", dispatcher: "Cmd_accuracycheck", selector: "an ACCURACYCHECK-reachable script path", ownership: "attacker ability is ABILITY_COMPOUND_EYES" },
   { id: "accuracy-sand-veil", dispatcher: "Cmd_accuracycheck", selector: "an ACCURACYCHECK-reachable script path", ownership: "target ability is ABILITY_SAND_VEIL and weather has sandstorm" },
   { id: "accuracy-hustle-physical", dispatcher: "Cmd_accuracycheck", selector: "IS_TYPE_PHYSICAL(type) and an ACCURACYCHECK-reachable script path", ownership: "attacker ability is ABILITY_HUSTLE" },
@@ -2550,6 +2552,156 @@ if (tryinfatuatingObliviousSourceProvenRows.length !== tryinfatuatingObliviousCa
   throw new Error("tryinfatuating/Oblivious candidate accounting is not fully source-proven");
 }
 
+const tryexplosionSourceStart = battleScriptCommandsSource.indexOf("static void Cmd_tryexplosion(void)\n{");
+const tryexplosionSourceEnd = battleScriptCommandsSource.indexOf("static void Cmd_setatkhptozero(void)", tryexplosionSourceStart);
+if (tryexplosionSourceStart < 0 || tryexplosionSourceEnd < 0) throw new Error("unable to isolate Cmd_tryexplosion");
+const tryexplosionSource = battleScriptCommandsSource.slice(tryexplosionSourceStart, tryexplosionSourceEnd);
+const tryexplosionSourceTokens = [
+  "if (gBattleControllerExecFlags)",
+  "for (gBattlerTarget = 0; gBattlerTarget < gBattlersCount; gBattlerTarget++)",
+  "if (gBattleMons[gBattlerTarget].ability == ABILITY_DAMP)",
+  "if (gBattlerTarget == gBattlersCount)",
+  "gBattleMoveDamage = gBattleMons[gActiveBattler].hp;",
+  "gBattlescriptCurrInstr++;",
+  "for (gBattlerTarget = 0; gBattlerTarget < gBattlersCount; gBattlerTarget++)",
+  "if (gBattlerTarget == gBattlerAttacker)",
+  "if (!(gAbsentBattlerFlags & gBitTable[gBattlerTarget]))",
+  "gLastUsedAbility = ABILITY_DAMP;",
+  "RecordAbilityBattle(gBattlerTarget, gBattleMons[gBattlerTarget].ability);",
+  "gBattlescriptCurrInstr = BattleScript_DampStopsExplosion;",
+];
+let tryexplosionCursor = 0;
+for (const token of tryexplosionSourceTokens) {
+  const next = tryexplosionSource.indexOf(token, tryexplosionCursor);
+  if (next < 0) throw new Error(`Cmd_tryexplosion source lost ordered token ${token}`);
+  tryexplosionCursor = next + token.length;
+}
+if (!abilityConstantsSource.includes("#define ABILITY_DAMP 6")
+  || !battleScriptConstantsSource.includes("B_SCR_OP_TRYEXPLOSION")) {
+  throw new Error("Explosion/Damp source constants drifted");
+}
+const tryexplosionLine = battleScriptCommandsSource.slice(0, tryexplosionSourceStart).split("\n").length;
+const explosionEntryAudit = auditExactScriptBlock("BattleScript_EffectExplosion", [
+  ["attackcanceler", []],
+  ["attackstring", []],
+  ["ppreduce", []],
+  ["tryexplosion", []],
+  ["setatkhptozero", []],
+  ["waitstate", []],
+  ["jumpifbyte", ["CMP_NO_COMMON_BITS", "gMoveResultFlags", "MOVE_RESULT_MISSED", "BattleScript_ExplosionDoAnimStartLoop"]],
+  ["call", ["BattleScript_PreserveMissedBitDoMoveAnim"]],
+  ["goto", ["BattleScript_ExplosionLoop"]],
+]);
+const dampTailAudit = auditExactScriptBlock("BattleScript_DampStopsExplosion", [
+  ["pause", ["B_WAIT_TIME_SHORT"]],
+  ["printstring", ["STRINGID_PKMNPREVENTSUSAGE"]],
+  ["pause", ["B_WAIT_TIME_LONG"]],
+  ["goto", ["BattleScript_MoveEnd"]],
+]);
+const explosionMoveEndAudit = auditExactScriptBlock("BattleScript_MoveEnd", [["moveendall", []], ["end", []]]);
+for (const block of [dampTailAudit, explosionMoveEndAudit]) {
+  for (let index = 0; index + 1 < block.graph.statements.length; index += 1) {
+    const from = block.graph.statements[index]!;
+    const to = block.graph.statements[index + 1]!;
+    requireFallthrough({ label: block.label, line: from.line }, { label: block.label, line: to.line });
+  }
+}
+const dampTailLast = dampTailAudit.graph.statements.at(-1)!;
+requireGraphEdge("BattleScript_DampStopsExplosion", dampTailLast.line, "BattleScript_MoveEnd", firstRoutePosition("BattleScript_MoveEnd").line, "jump", "goto");
+const dampPreludeGraph = explosionEntryAudit.graph.statements.slice(0, 4);
+const dampPreludeProgram = explosionEntryAudit.program.statements.slice(0, 4);
+if (JSON.stringify(dampPreludeGraph) !== JSON.stringify(dampPreludeProgram)
+  || JSON.stringify(dampPreludeGraph.map((row) => row.mnemonic)) !== JSON.stringify(["attackcanceler", "attackstring", "ppreduce", "tryexplosion"])) {
+  throw new Error("Explosion/Damp action prelude graph/program path drifted");
+}
+for (const forbidden of ["datahpupdate", "moveendfrom", "moveendto", "accuracycheck", "critcalc", "damagecalc", "typecalc", "tryfaintmon"]) {
+  if ([...dampPreludeGraph, ...dampTailAudit.graph.statements].some((row) => row.mnemonic === forbidden)) {
+    throw new Error(`Explosion/Damp prevention arm unexpectedly includes ${forbidden}`);
+  }
+}
+const tryexplosionRuntimeGuardSignature = {
+  source: { path: BATTLE_SCRIPT_COMMANDS_PATH, locator: "Cmd_tryexplosion", line: tryexplosionLine },
+  ability: { path: ABILITY_CONSTANTS_PATH, symbol: "ABILITY_DAMP", value: 6 },
+  orderedGuards: [
+    "gBattleControllerExecFlags == 0",
+    "scan gBattlerTarget from 0 through gBattlersCount - 1",
+    "first gBattleMons[gBattlerTarget].ability == ABILITY_DAMP wins",
+    "no absent-battler or attacker/target role filter on the Damp scan",
+  ],
+  damp: {
+    lastUsedAbility: 6,
+    record: "RecordAbilityBattle(gBattlerTarget, gBattleMons[gBattlerTarget].ability)",
+    destination: "BattleScript_DampStopsExplosion",
+    message: "STRINGID_PKMNPREVENTSUSAGE",
+  },
+  noDamp: {
+    attackerHpBarDamage: "gBattleMoveDamage = gBattleMons[gBattlerAttacker].hp",
+    firstTargetScan: "skip attacker and absent battlers only after the Damp scan succeeds with no holder",
+    successor: "setatkhptozero then ordinary critcalc/damagecalc/typecalc/accuracy/damage/faint route",
+  },
+  rng: "Cmd_tryexplosion performs no Random call; the blocked Damp arm performs no accuracy, crit, damage, or other action RNG",
+  scopeBoundary: "The Damp arm spends PP but performs no HP update, datahpupdate, MOVEEND_NEXT_TARGET, successful-damage MOVEEND state, Shell Bell, damage, or faint processing.",
+};
+const tryexplosionDampCandidateRows = rosterMoveSymbols
+  .map((symbol) => moveBySymbol.get(symbol)!)
+  .filter((move) => move.effect === "EFFECT_EXPLOSION")
+  .map((move) => ({
+    move: move.move,
+    moveId: move.id,
+    effect: move.effect,
+    power: move.power,
+    accuracy: move.accuracy,
+    pp: move.pp,
+    entryScript: topologyByMove.get(move.move)!.entryScript,
+    executionInventory: executableMoveSymbols.has(move.move) ? "level50-executable" : "level50-roster-only",
+    selectableSetOccurrences: executionInventoryByMove.get(move.move)?.frontierMonCount ?? 0,
+    fullLevel50CarrierRows: setIdsByMove.get(move.move)!.length,
+    blockerIds: [],
+    exceptionId: null,
+  }));
+if (JSON.stringify(tryexplosionDampCandidateRows.map((row) => [row.move, row.moveId, row.power, row.accuracy, row.pp, row.selectableSetOccurrences, row.fullLevel50CarrierRows]))
+    !== JSON.stringify([["MOVE_SELF_DESTRUCT", 120, 200, 100, 5, 1, 2], ["MOVE_EXPLOSION", 153, 250, 100, 5, 24, 24]])
+  || tryexplosionDampCandidateRows.some((row) => row.entryScript !== "BattleScript_EffectExplosion" || row.executionInventory !== "level50-executable")) {
+  throw new Error("Explosion/Damp selector is not the audited two-row executable 25-selectable/26-carrier family");
+}
+function tryexplosionDampEvidence(move: Move) {
+  return {
+    status: "source-proven" as const,
+    id: `tryexplosion-damp-route:${move.move}`,
+    move: move.move,
+    entryScript: "BattleScript_EffectExplosion",
+    executionInventory: "level50-executable",
+    familyEvidence: {
+      category: TRYEXPLOSION_DAMP_CATEGORY,
+      selector: { path: MOVES_PATH, locator: `moves:${move.move}.effect`, symbol: move.move, effect: move.effect, guard: "moveTable.effect === EFFECT_EXPLOSION" },
+      entryPath: {
+        kind: "attackcanceler-attackstring-ppreduce-tryexplosion-fixed-damp-tail",
+        declaredEntryScript: "BattleScript_EffectExplosion",
+        source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: explosionEntryAudit.source.entryLine },
+        graph: { path: BATTLE_SCRIPT_GRAPH_PATH, prelude: dampPreludeGraph, entry: explosionEntryAudit.graph, dampTail: dampTailAudit.graph, moveEnd: explosionMoveEndAudit.graph },
+        program: { path: BATTLE_SCRIPT_PROGRAM_PATH, prelude: dampPreludeProgram, entry: explosionEntryAudit.program, dampTail: dampTailAudit.program, moveEnd: explosionMoveEndAudit.program },
+        tails: { damp: "BattleScript_DampStopsExplosion -> BattleScript_MoveEnd", noDamp: "setatkhptozero -> ordinary Explosion damage/faint path" },
+      },
+      dispatcher: { path: BATTLE_SCRIPT_COMMANDS_PATH, locator: "Cmd_tryexplosion", line: tryexplosionLine, opcode: "B_SCR_OP_TRYEXPLOSION" },
+      runtimeGuardSignature: tryexplosionRuntimeGuardSignature,
+      familyVerification: {
+        scope: "Both finite EFFECT_EXPLOSION siblings share one complete-parties three-arm Battle Scene OFF receipt and dedicated hook-join batch; no per-move receipt is fabricated.",
+        implementation: "src/engine/battleScriptExplosionOpcode.ts#createBattleScriptExplosionOpcodeHandlers",
+        runtimeTest: "tests/battleScriptExplosionOpcode.test.ts",
+        batchTest: "tests/tryexplosionDampHookJoinBatch.test.ts",
+        oracleReceipt: "tests/gate6DampExplosionReceipt.test.ts",
+        oracleFixtures: ["tools/battle-lab/gate6-damp-explosion-control-off.json", "tools/battle-lab/gate6-damp-explosion-target-off.json", "tools/battle-lab/gate6-damp-explosion-attacker-off.json"],
+        oracleProbe: "tools/probe/probe-gate6-damp-explosion-off.py",
+        oracleReceiptFiles: ["tools/probe/receipts/gate6-damp-explosion-off.json"],
+        publicMessageProof: "tests/presentationStringIssue72Batch2.test.ts#STRINGID_PKMNPREVENTSUSAGE attacker-held Damp",
+        scopeBoundary: tryexplosionRuntimeGuardSignature.scopeBoundary,
+      },
+    },
+  };
+}
+const tryexplosionDampEvidenceRows = tryexplosionDampCandidateRows.map((row) => tryexplosionDampEvidence(moveBySymbol.get(row.move)!));
+const tryexplosionDampSourceProvenRows = tryexplosionDampEvidenceRows.map((row) => row.move);
+
 if (onDamageCandidateRows.some((candidate) => candidate.blockerIds.length !== 0)) {
   throw new Error("ON_DAMAGE candidates must not retain retired family blockers");
 }
@@ -2800,6 +2952,10 @@ const records = rosterMoveSymbols.map((symbol) => {
   if (symbol === "MOVE_ATTRACT") {
     sourceProvenFamilies.push(tryinfatuatingObliviousEvidence.familyEvidence);
   }
+  const tryexplosionDampEvidence = tryexplosionDampEvidenceRows.find((row) => row.move === symbol);
+  if (tryexplosionDampEvidence) {
+    sourceProvenFamilies.push(tryexplosionDampEvidence.familyEvidence);
+  }
   const abilityHook = sourceProvenFamilies.length === 0
     ? {
       potentialCategories: null,
@@ -2896,6 +3052,10 @@ if (tryinfatuatingObliviousRosterRecords.length !== 1
   || tryinfatuatingObliviousRosterRecords[0]?.move !== "MOVE_ATTRACT") {
   throw new Error("tryinfatuating/Oblivious source-proven roster accounting does not match the one-row Attract census");
 }
+const tryexplosionDampRosterRecords = sourceProvenAbilityRecords.filter((record) => record.hooks.ability.supportedCategories.includes(TRYEXPLOSION_DAMP_CATEGORY));
+if (JSON.stringify(tryexplosionDampRosterRecords.map((record) => record.move)) !== JSON.stringify(["MOVE_SELF_DESTRUCT", "MOVE_EXPLOSION"])) {
+  throw new Error("tryexplosion/Damp source-proven roster accounting does not match the two-row Explosion census");
+}
 const sourceProvenAbilityCategories = sourceProvenAbilityRecords.flatMap((record) => record.hooks.ability.supportedCategories);
 const absorbingCoverageByCategory = Object.fromEntries(ABSORBING_HOOK_DEFINITIONS.map((definition) => {
   const candidates = absorbingCandidateRows.filter((row) => row.category === definition.id);
@@ -2955,6 +3115,26 @@ const tryinfatuatingObliviousAudit = {
   promotions: {
     sourceProvenRows: tryinfatuatingObliviousSourceProvenRows,
     reason: "MOVE_ATTRACT is the sole finite EFFECT_ATTRACT selector and has a complete graph/program action prelude, exact Cmd_tryinfatuating guard order, explicit MoveEnd tails, focused opcode/batch tests, and a paired Battle Scene OFF semantic receipt. No damage or MOVEEND item family is inferred.",
+  },
+};
+const tryexplosionDampAudit = {
+  status: "source-proven-family",
+  scope: "Finite Level-50 moveTable.effect === EFFECT_EXPLOSION selector joined to BattleScript_EffectExplosion's PP-spending prelude and Cmd_tryexplosion's first-Damp-holder fixed failure tail.",
+  selector: "moveTable.effect === EFFECT_EXPLOSION",
+  candidateCount: tryexplosionDampCandidateRows.length,
+  selectableSetOccurrences: tryexplosionDampCandidateRows.reduce((sum, row) => sum + row.selectableSetOccurrences, 0),
+  fullLevel50CarrierRows: tryexplosionDampCandidateRows.reduce((sum, row) => sum + row.fullLevel50CarrierRows, 0),
+  nonselectableCarrierRows: [{ setId: 57, label: "FRONTIER_MON_PINECO", move: "MOVE_SELF_DESTRUCT" }],
+  sourceMoveCandidates: tryexplosionDampCandidateRows,
+  sourceProvenRows: tryexplosionDampSourceProvenRows,
+  sourceExceptionRows: [],
+  blockers: [],
+  routeWitnesses: tryexplosionDampEvidenceRows,
+  runtimeGuardSignature: tryexplosionRuntimeGuardSignature,
+  dispatcher: { path: BATTLE_SCRIPT_COMMANDS_PATH, locator: "Cmd_tryexplosion", line: tryexplosionLine, opcode: "B_SCR_OP_TRYEXPLOSION", entryScript: "BattleScript_EffectExplosion" },
+  promotions: {
+    sourceProvenRows: tryexplosionDampSourceProvenRows,
+    reason: "Both EFFECT_EXPLOSION rows have the exact graph/program prelude, first-holder Damp scan and fixed failure tail, focused opcode/batch tests, and a twice-fresh three-arm Battle Scene OFF semantic receipt. This adds two category joins but no newly source-proven row because both moves were already Color Change-proven.",
   },
 };
 const kingsRockAudit = {
@@ -3106,7 +3286,7 @@ const output = {
       ABILITY_CONSTANTS_PATH,
       "reference/pokeemerald/include/constants/pokemon.h",
     ],
-    note: `Catalog join plus an intentionally partial source dispatcher inventory. ${records.filter((record) => record.hooks.item.status === "unsupported").length} per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the ${kingsRockSourceProvenRows.length}-row King's Rock family, exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, ${synchronizeSourceProvenRows.length} Synchronize status candidates, and the one-row Attract/Oblivious Cmd_tryinfatuating family carry graph/program/source-handoff evidence. King's Rock retains Tickle as one explicit zero-damage exception and does not claim Shell Bell; no per-move oracle receipts are fabricated.`,
+    note: `Catalog join plus an intentionally partial source dispatcher inventory. ${records.filter((record) => record.hooks.item.status === "unsupported").length} per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the ${kingsRockSourceProvenRows.length}-row King's Rock family, exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, ${synchronizeSourceProvenRows.length} Synchronize status candidates, the one-row Attract/Oblivious family, and the two-row Explosion/Damp family carry graph/program/source-handoff evidence. King's Rock retains Tickle as one explicit zero-damage exception and does not claim Shell Bell; no per-move oracle receipts are fabricated.`,
   },
   coverage: {
     level50Roster: {
@@ -3156,9 +3336,10 @@ const output = {
         onDamage: onDamageAudit,
         synchronize: synchronizeAudit,
         tryinfatuatingOblivious: tryinfatuatingObliviousAudit,
+        tryexplosionDamp: tryexplosionDampAudit,
         completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "The exact Level-50 Soundproof moves-block family, audited absorbing dispatcher candidates, both ON_DAMAGE families, the Synchronize status family, and the one-row Attract/Oblivious tryinfatuating family are source-proven with separate route/guard certificates. Future Sight has one explicit delayed-MOVEEND exception; Synchronize and Attract/Oblivious have no candidate route exceptions or blockers, while distinct contact ability outcome gaps, accuracy, and all other ability dispatcher families remain intentionally unsupported/null per move.",
+        reason: "The exact Level-50 Soundproof moves-block family, audited absorbing dispatcher candidates, both ON_DAMAGE families, Synchronize, Attract/Oblivious, and Explosion/Damp are source-proven with separate route/guard certificates. Future Sight has one explicit delayed-MOVEEND exception; the newer families have no candidate route exceptions or blockers, while distinct contact ability outcome gaps, accuracy, and all other ability dispatcher families remain intentionally unsupported/null per move.",
       },
     },
   },
