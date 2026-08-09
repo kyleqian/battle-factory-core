@@ -916,9 +916,10 @@ describe("production moveend (Cmd_moveend) registration", () => {
   });
 
   describe("MOVEEND_ON_DAMAGE_ABILITIES contact family", () => {
-    const POUND = 1;
-    const SWIFT = 129;
-    const KARATE_CHOP = 2;
+const POUND = 1;
+const SWIFT = 129;
+const KARATE_CHOP = 2;
+const THUNDERBOLT = 85;
     const damaged = { physicalDmg: 4 };
 
     it.each([
@@ -1026,19 +1027,25 @@ describe("production moveend (Cmd_moveend) registration", () => {
       expect(targetFainted.state.rng.calls).toBe(0); // target survival precedes the C short-circuit roll
     });
 
-    it("Color Change needs real damage but not contact, writes both types with no RNG, and runs its full script", () => {
+    it.each([
+      ["Fighting contact", KARATE_CHOP, "TYPE_FIGHTING", ["TYPE_NORMAL", "TYPE_NORMAL"]],
+      ["Electric non-contact", THUNDERBOLT, "TYPE_ELECTRIC", ["TYPE_NORMAL", "TYPE_NORMAL"]],
+      ["Normal non-contact", SWIFT, "TYPE_NORMAL", ["TYPE_FIGHTING", "TYPE_FIGHTING"]],
+    ] as const)("Color Change mutates both type slots for a real-damage %s move with no RNG", (_kind, move, expectedType, startingTypes) => {
       const changed = runMoveendScriptToTerminal(
-        context(0, {}, { currentMove: KARATE_CHOP, moveendState: 3 }, {
+        context(0, {}, { currentMove: move, moveendState: 3 }, {
           ability: 16,
-          types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+          types: startingTypes,
           specialStatus: damaged,
         }),
       );
-      expect(changed.state.rulesContext.battlers[1]!.types).toEqual(["TYPE_FIGHTING", "TYPE_FIGHTING"]);
-      expect(changed.state.rulesContext.battleTextBuff1Type).toBe("TYPE_FIGHTING");
+      expect(changed.state.rulesContext.battlers[1]!.types).toEqual([expectedType, expectedType]);
+      expect(changed.state.rulesContext.battleTextBuff1Type).toBe(expectedType);
       expect(changed.state.rulesContext.aiObservedAbilityIds[1]).toBe(16);
       expect(changed.state.rng.calls).toBe(0);
+    });
 
+    it("Color Change keeps its source exclusions: already matching type, no real damage, no-effect, and a fainted target", () => {
       const alreadyType = runMoveendScriptToTerminal(
         context(0, {}, { currentMove: KARATE_CHOP, moveendState: 3 }, {
           ability: 16,
@@ -1048,6 +1055,24 @@ describe("production moveend (Cmd_moveend) registration", () => {
       );
       expect(alreadyType.state.rulesContext.battlers[1]!.types).toEqual(["TYPE_FIGHTING", "TYPE_NORMAL"]);
       expect(alreadyType.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
+
+      for (const [label, contextChanges, targetChanges] of [
+        ["no real damage", {}, { specialStatus: { physicalDmg: 0, specialDmg: 0 } }],
+        ["no-effect", { moveResultFlags: 1 }, {}],
+        ["target fainted", {}, { hp: 0 }],
+      ] as const) {
+        const quiet = runMoveendScriptToTerminal(
+          context(0, {}, { currentMove: THUNDERBOLT, moveendState: 3, ...contextChanges }, {
+            ability: 16,
+            types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+            ...targetChanges,
+            specialStatus: targetChanges.specialStatus ?? damaged,
+          }),
+        );
+        expect(quiet.state.rulesContext.battlers[1]!.types, label).toEqual(["TYPE_NORMAL", "TYPE_NORMAL"]);
+        expect(quiet.state.rulesContext.aiObservedAbilityIds[1], label).toBe(0);
+        expect(quiet.state.rng.calls, label).toBe(0);
+      }
     });
 
     it("Rough Skin uses max(1,maxHP/16), can faint the attacker, does not require target survival, and runs its full script", () => {

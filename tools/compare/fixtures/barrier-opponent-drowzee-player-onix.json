@@ -1,0 +1,14 @@
+{
+  "schema":"barrier-portable-evidence/v1","oracleProfile":"battle-scene-on",
+  "scenario":"tools/battle-lab/mechanic-barrier-opponent-drowzee-player-onix.json","probe":"tools/compare/barrierProbe.py",
+  "move":"BARRIER","moveId":112,"orientation":"opponent-front",
+  "sourceWindow":{"startFrame":216,"endFrame":291,"frameCount":76,"wallFrame":220},
+  "sourceBounds":{"start":"0x082d00f2","endExclusive":"0x082d010f"},
+  "probeJsonSha256":"1e4d8c972a8023ef45fe2c6882b146257ff50766aa8d95bc409090f767e87913",
+  "rawRgbSha256":"a3d5047fcad7005e93ba97be8335387c2a2cd5d7e02c918b241d714013a07d3d",
+  "changeMap":"tools/compare/evidence/barrier-changemap-opponent.txt","changeMapSha256":"baf4be08ef750d554ec9cc675db67293be1b0d06511fc3b25aa9248a57e71711",
+  "attacker":{"species":"DROWZEE","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":15},"animationCenter":{"x":176,"y":47},"battlePositionCenter":{"x":176,"y":40}}},
+  "target":{"species":"ONIX","geometry":{"side":"player","spriteCorner":{"x":40,"y":48},"animationCenter":{"x":72,"y":80},"battlePositionCenter":{"x":72,"y":80}}},
+  "allocatorProfile":{"wall":3},
+  "fieldProfile":{"playerHp":117,"playerMaxHp":117,"opponentHp":125,"opponentMaxHp":142,"playerGender":"male","opponentGender":"male"}
+}

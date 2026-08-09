@@ -13,19 +13,24 @@ from battle_lab import BattleLab, validate_request # noqa: E402
 from emerald_core import EmeraldOracle # noqa: E402
 IS_FOLLOW_ME = "follow-me" in SCENARIO.name
 IS_REST = "rest-" in SCENARIO.name
-MOVE = 156 if IS_REST else 266 if IS_FOLLOW_ME else 118
-MOVE_NAME = "Move_REST" if IS_REST else "Move_FOLLOW_ME" if IS_FOLLOW_ME else "Move_METRONOME"
-END_NAME = "Move_CONFUSION" if IS_REST else "Move_CHARGE" if IS_FOLLOW_ME else "Move_SKULL_BASH"
-EVIDENCE_SCHEMA = "rest-dense-evidence/v1" if IS_REST else "follow-me-dense-evidence/v1" if IS_FOLLOW_ME else "metronome-dense-evidence/v1"
+IS_SLEEP_TALK = "sleep-talk" in SCENARIO.name
+MOVE = 214 if IS_SLEEP_TALK else 156 if IS_REST else 266 if IS_FOLLOW_ME else 118
+MOVE_NAME = "Move_SLEEP_TALK" if IS_SLEEP_TALK else "Move_REST" if IS_REST else "Move_FOLLOW_ME" if IS_FOLLOW_ME else "Move_METRONOME"
+END_NAME = "Move_HYPER_FANG" if IS_SLEEP_TALK else "Move_CONFUSION" if IS_REST else "Move_CHARGE" if IS_FOLLOW_ME else "Move_SKULL_BASH"
+EVIDENCE_SCHEMA = "sleep-talk-dense-evidence/v1" if IS_SLEEP_TALK else "rest-dense-evidence/v1" if IS_REST else "follow-me-dense-evidence/v1" if IS_FOLLOW_ME else "metronome-dense-evidence/v1"
 TEMPLATES = (
-    ("gSleepLetterZSpriteTemplate",)
+    ("gLetterZSpriteTemplate",)
+    if IS_SLEEP_TALK
+    else ("gSleepLetterZSpriteTemplate",)
     if IS_REST
     else ("gFollowMeFingerSpriteTemplate",)
     if IS_FOLLOW_ME
     else ("gThoughtBubbleSpriteTemplate", "gMetronomeFingerSpriteTemplate")
 )
 CALLBACKS = (
-    ("AnimSleepLetterZ", "AnimSleepLetterZ_Step")
+    ("AnimLetterZ",)
+    if IS_SLEEP_TALK
+    else ("AnimSleepLetterZ", "AnimSleepLetterZ_Step")
     if IS_REST
     else ("AnimFollowMeFinger", "AnimFollowMeFinger_Step1", "AnimFollowMeFinger_Step2", "AnimMetronomeFinger_Step")
     if IS_FOLLOW_ME
@@ -33,7 +38,7 @@ CALLBACKS = (
 )
 SONGS = (
     ("se_m_snore",)
-    if IS_REST
+    if IS_SLEEP_TALK or IS_REST
     else ("se_m_metronome", "se_m_attract", "se_m_tail_whip")
     if IS_FOLLOW_ME
     else ("se_m_metronome", "se_m_tail_whip")
@@ -98,7 +103,7 @@ def main() -> None:
         for row in source:
             current={x["slot"] for x in row["sprites"] if x["template"]["symbol"] == template}; starts += len(current-prior); prior=current
         counts[template]=starts
-    expected_count = 3 if IS_REST else 1
+    expected_count = 9 if IS_SLEEP_TALK else 3 if IS_REST else 1
     if counts != {template: expected_count for template in TEMPLATES}: raise RuntimeError(f"{MOVE_NAME} lifecycle changed: {counts}")
     if source[-1]["gAnimScriptActive"] or source[-1]["visualTaskCount"]: raise RuntimeError(f"{MOVE_NAME} first cleanup retained animation")
     result={"schema":EVIDENCE_SCHEMA,"setup":setup,"sourceWindow":{"startFrame":source[0]["frame"],"endFrame":source[-1]["frame"],"frameCount":len(source)},"sourceSymbols":{MOVE_NAME:start,END_NAME:end},"templates":{n:names[n] for n in counts},"callbackSymbols":{n:names[n] for n in CALLBACKS},"songHeaders":{n:names[n] for n in SONGS},"topology":topology,"lifecycleCounts":counts,"frames":source}

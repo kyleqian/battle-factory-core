@@ -17,28 +17,6 @@ backlog.
 
 # Open
 
-## #84 — Generated-round playthrough regressions: wrong send-out side, rushed status text, forced-switch jump, and fatal next-boundary handoff
-
-**Symptom (user report, 2026-08-08):** during a generated Battle Scene OFF
-round with the player's BUTTERFREE against an opponent MURKROW: (1) the
-opponent's Poké Ball sprite appears at the lower-left player throw origin;
-(2) MURKROW's TAUNT/TORMENT text advances much too quickly; (3) WHIRLWIND
-immediately replaces MURKROW with PIDGEOTTO without a faithful recall/send-out
-sequence; (4) TOXIC has similarly wrong pacing; and (5) late in the fight the
-app stops on an empty message box and throws
-`FactoryRoundOrchestratorError: resolution handoff battler 1 display does not
-match the genuine next boundary` from `factoryRoundBattleOrchestrator.ts:352`.
-The supplied screenshot pins MURKROW at low HP with PSN and BUTTERFREE at
-64/153 when the fatal handoff occurs.
-
-**Confirmed:** this is the generic round/controller presentation path, not an
-animation-lane task. The repository baseline remains green, so existing Tier-1
-coverage does not reproduce these live route failures. Diagnose and repair each
-item against staged state and the Battle Scene OFF oracle. Keep the items split
-inside this entry as they close; delete the entry only when all five are fixed.
-Do not add canonical Battle-2/turn/tick branches or soften the fatal invariant
-with a catch/fallback.
-
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **Symptom:** all 62 Factory-front send-out intro families (**376/376** species

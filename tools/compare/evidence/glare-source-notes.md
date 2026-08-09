@@ -33,6 +33,9 @@ Component audit:
   restore after all visual tasks finish. Both audio intervals (`SE_M_PSYBEAM2`
   and `SE_M_LEER`), pans, BG/blend registers, and raw RGB are captured.
 
-This is evidence only. GLARE deliberately has no reducer, typed seam, or
-compositor and remains unsupported. SCARY_FACE and THUNDER retain independent
-exact acceptance; TRI_ATTACK remains independently unsupported.
+The source-relative reducer, typed seam, and narrow compositor now pass all
+213 source/component and framebuffer frames twice fresh in both orientations.
+Fresh pixels refine the display rules: dot creation is RAM+2 while destruction
+is RAM+1, sparkles first scan out at age 115, and each BG-palette ramp transfers
+one coefficient later than the original reducer hypothesis. SCARY_FACE and
+THUNDER retain independent exact acceptance; TRI_ATTACK remains unsupported.

@@ -24,6 +24,7 @@ const SIDE_STATUS_LIGHTSCREEN = 1 << 1;
 const SIDE_STATUS_SAFEGUARD = 1 << 5;
 const B_WEATHER_SANDSTORM_TEMPORARY = 1 << 3;
 const MOVE_RESULT_MISSED = 1 << 0;
+const MOVE_LIGHT_SCREEN = 113;
 
 function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -437,8 +438,8 @@ describe(
     + "(docs/screens-weather-ground-truth.md §3d/§3e/§3f fixture-pinned shapes)",
   () => {
     it(
-      "Light Screen: set -> 4 silent decrement ticks -> expiry message on tick 5 -> re-set succeeds "
-        + "(doc §3d: timer 5->4->3->2->1->0, sideStatuses clears only on the expiry tick)",
+      "Light Screen: set -> 4 silent decrement ticks -> SideStatusWoreOff message/buffer on tick 5 -> re-set succeeds "
+        + "(battle_util.c:1250-1263; timer 5->4->3->2->1->0, sideStatuses clears only on the expiry tick)",
       () => {
         const rc = context({
           sideStatuses: [SIDE_STATUS_LIGHTSCREEN, 0],
@@ -453,6 +454,9 @@ describe(
           if (result.kind !== "next-turn") throw new Error("expected next-turn");
           expect(result.state.rulesContext.sideTimers[0].lightscreenTimer).toBe(expectedTimerAfter);
           expect(result.state.rulesContext.sideStatuses[0] & SIDE_STATUS_LIGHTSCREEN).toBe(SIDE_STATUS_LIGHTSCREEN);
+          expect(result.state.events).not.toContainEqual(
+            expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNSXWOREOFF" }),
+          );
           expect(result.state.rng.calls).toBe(state.rng.calls); // zero Random() draws (doc §4)
           state = result.state;
         }
@@ -463,6 +467,10 @@ describe(
         if (expiry.kind !== "next-turn") throw new Error("expected next-turn");
         expect(expiry.state.rulesContext.sideTimers[0].lightscreenTimer).toBe(0);
         expect(expiry.state.rulesContext.sideStatuses[0] & SIDE_STATUS_LIGHTSCREEN).toBe(0);
+        expect(expiry.state.rulesContext.battleTextBuff1Move).toBe(MOVE_LIGHT_SCREEN);
+        expect(expiry.state.events).toContainEqual(
+          expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNSXWOREOFF" }),
+        );
         expect(expiry.state.rng.calls).toBe(state.rng.calls);
 
         // Re-set from scratch succeeds (timer 0 -> 5 again, doc §3d's final row).

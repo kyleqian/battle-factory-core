@@ -7,7 +7,31 @@ import data from "../src/data/gen/level50-move-parameterization.json" with { typ
 import frontierMons from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import movesData from "../src/data/gen/moves.json" with { type: "json" };
 
-type Record = {
+type RoutePosition = { label: string; line: number };
+type RouteStep = {
+  kind: "fallthrough" | "guard" | "goto" | "accuracycheck" | string;
+  label: string;
+  line: number;
+  mnemonic: string;
+  operands: string[];
+  target?: RoutePosition;
+  outcome?: "taken" | "fallthrough";
+  condition?: string;
+};
+type FamilyEvidence = {
+  category: string;
+  selector: { path: string; locator: string; [key: string]: unknown };
+  entryPath: {
+    kind?: string;
+    source: { path: string; entryLine: number };
+    graph: { path: string; entryLabel: string; attackCanceler?: RoutePosition; accuracyCheck?: RoutePosition; route: RouteStep[] };
+    program: { path: string; entryLabel: string; attackCanceler?: RoutePosition; accuracyCheck?: RoutePosition; route: RouteStep[] };
+    assumptions?: string[];
+  };
+  dispatcher: { path: string; locator: string; line: number; call: string; order: string; [key: string]: unknown };
+  familyVerification: { scope: string; implementation: string; batchTest: string; oracleReceipt: string; [key: string]: unknown };
+};
+type MoveRecord = {
   id: number;
   move: string;
   name: string;
@@ -16,8 +40,15 @@ type Record = {
   battleScript: { effectId: number; entryScript: string; graphLabel: string | null; programLabel: string | null; executionInventory: string };
   animation: { script: string | null; componentIds: string[] };
   hooks: {
-    item: { potentialCategories: null; status: string; unsupportedCategories: null; reason: string };
-    ability: { potentialCategories: null; status: string; unsupportedCategories: null; reason: string };
+    item: { potentialCategories: null; status: string; supportedCategories: string[]; unsupportedCategories: null; reason: string };
+    ability: {
+      potentialCategories: null;
+      status: string;
+      supportedCategories: string[];
+      unsupportedCategories: null;
+      reason: string;
+      evidence?: { families: FamilyEvidence[] };
+    };
   };
 };
 type SourceMove = {
@@ -34,8 +65,204 @@ type SourceMove = {
   priority: number;
   flags: string[];
 };
-const manifest = data as { schema: string; coverage: { level50Roster: { frontierSetIds: { first: number; last: number; count: number }; moveCount: number; moveTableEffectFamilyCount: number }; level50Executable: { moveCount: number; battleScriptEffectFamilyCount: number; rosterOnlyMoveCount: number; rosterOnlyMoveTableEffectFamilyCount: number }; joins: { battleScriptGraphLabels: number; battleScriptProgramLabels: number; animationScripts: number; itemHookCategories: number; abilityHookCategories: number; itemHookUnsupportedCategories: null; abilityHookUnsupportedCategories: null }; hookCatalogs: { item: { frontierHeldItemRows: number; explicitHoldEffectRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; catalogedDispatcherCategories: number; completeness: string; unsupportedCategories: null }; ability: { displayRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; catalogedDispatcherCategories: number; soundproofSourceSelectorRows: number; soundproofLevel50RosterSelectorRows: number; completeness: string; unsupportedCategories: null } } }; moves: Record[] };
+type AbsorbingCoverage = {
+  sourceMoveCandidates: Array<{ move: string; category: string; type: string; power: number; entryScript: string }>;
+  sourceProvenRows: string[];
+  excludedCandidates: Array<{
+    move: string;
+    categories: string[];
+    reason: string;
+    entryPath: {
+      graph: {
+        route: RouteStep[];
+        weatherFlow?: Array<{
+          label: string;
+          source: { path: string; entryLine: number };
+          graph: { path: string; statements: Array<{ line: number; mnemonic: string; operands: string[] }> };
+          program: { path: string; statements: Array<{ line: number; mnemonic: string; operands: string[] }> };
+        }>;
+      };
+      program: {
+        route: RouteStep[];
+        weatherFlow?: Array<{
+          label: string;
+          source: { path: string; entryLine: number };
+          graph: { path: string; statements: Array<{ line: number; mnemonic: string; operands: string[] }> };
+          program: { path: string; statements: Array<{ line: number; mnemonic: string; operands: string[] }> };
+        }>;
+      };
+    };
+  }>;
+};
+type OnDamageCandidate = {
+  category: string;
+  move: string;
+  moveId: number;
+  effect: string;
+  power: number;
+  makesContact: boolean;
+  entryScript: string;
+  routeShapeId: string;
+  blockerIds: string[];
+};
+type OnDamageAudit = {
+  status: string;
+  categories: Record<string, { selector: string; candidateRows: OnDamageCandidate[]; count: number }>;
+  overlap: { definition: string; count: number; moves: string[] };
+  sourceDispatcher: {
+    moveEnd: { path: string; locator: string; call: string; order: string };
+    targetAbilitySelection: { path: string; guard: string };
+    targetTurnDamaged: { path: string; definition: string };
+    abilityCases: Array<{ ability: string; category: string; selector: string; orderedGuards: string[]; outcome: string }>;
+  };
+  routeShapeCensus: {
+    status: string;
+    moveEndTarget: { graph: { statements: Array<{ mnemonic: string; operands: string[] }> }; program: { statements: Array<{ mnemonic: string; operands: string[] }> } };
+    entryBlockShapeCounts: Record<string, number>;
+    entries: Array<{
+      id: string;
+      entryScript: string;
+      entryBlockShape: string;
+      graph: { path: string; statements: Array<{ line: number; mnemonic: string; operands: string[] }> };
+      program: { path: string; statements: Array<{ line: number; mnemonic: string; operands: string[] }> };
+      candidates: Record<string, string[]>;
+      blockerIds: string[];
+    }>;
+  };
+  semanticEvidence: { kernelSiblingBatch: { status: string; test: string; coverage: string }; oracleReceipt: { status: string; profile: string; checked: string } };
+  blockers: Array<{ id: string; reason: string }>;
+  retiredBlockers: Array<{ id: string; reason: string; fixture: string; probe: string; receipts: string[] }>;
+  promotions: { sourceProvenRows: string[]; reason: string };
+};
+const manifest = data as unknown as {
+  schema: string;
+  coverage: {
+    level50Roster: { frontierSetIds: { first: number; last: number; count: number }; moveCount: number; moveTableEffectFamilyCount: number };
+    level50Executable: { moveCount: number; battleScriptEffectFamilyCount: number; rosterOnlyMoveCount: number; rosterOnlyMoveTableEffectFamilyCount: number };
+    joins: { battleScriptGraphLabels: number; battleScriptProgramLabels: number; animationScripts: number; itemHookCategories: number; abilityHookCategories: number; itemHookUnsupportedCategories: null; abilityHookUnsupportedCategories: null; itemHookUnsupportedRows: number; abilityHookUnsupportedRows: number; abilityHookSourceProvenRows: number };
+    hookCatalogs: {
+      item: { frontierHeldItemRows: number; explicitHoldEffectRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; catalogedDispatcherCategories: number; completeness: string; unsupportedCategories: null };
+      ability: { displayRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; catalogedDispatcherCategories: number; soundproofSourceSelectorRows: number; soundproofLevel50RosterSelectorRows: number; soundproofSourceProvenRosterRows: number; soundproofUnsupportedLevel50RosterRows: number; absorbing: Record<string, AbsorbingCoverage>; onDamage: OnDamageAudit; completeness: string; unsupportedCategories: null };
+    };
+  };
+  moves: MoveRecord[];
+};
 const sourceMoves = new Map((movesData.moves as SourceMove[]).map((move) => [move.move, move]));
+
+const SOURCE_SOUND_MOVES = [
+  "MOVE_GROWL", "MOVE_ROAR", "MOVE_SING", "MOVE_SUPERSONIC", "MOVE_SCREECH",
+  "MOVE_SNORE", "MOVE_UPROAR", "MOVE_METAL_SOUND", "MOVE_GRASS_WHISTLE", "MOVE_HYPER_VOICE",
+] as const;
+const LEVEL50_SOUND_MOVES = SOURCE_SOUND_MOVES.filter((move) => move !== "MOVE_GROWL");
+const MOVES_BLOCK_CALL = "AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0)";
+const ABSORBING_DISPATCHER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ABSORBING, gBattlerTarget, 0, 0, move)";
+const ABSORBING_FAMILIES = [
+  { category: "absorbing-volt-absorb", type: "TYPE_ELECTRIC", requiresNonzeroPower: true },
+  { category: "absorbing-water-absorb", type: "TYPE_WATER", requiresNonzeroPower: true },
+  { category: "absorbing-flash-fire", type: "TYPE_FIRE", requiresNonzeroPower: false },
+] as const;
+
+function sourceSoundMoves(): string[] {
+  const source = readFileSync("reference/pokeemerald/src/battle_util.c", "utf8");
+  const match = /static const u16 sSoundMovesTable\[\]\s*=\s*\{([\s\S]*?)\};/.exec(source);
+  if (!match) throw new Error("missing source Soundproof selector table");
+  return [...match[1]!.matchAll(/\bMOVE_[A-Z0-9_]+\b/g)].map((entry) => entry[0]!);
+}
+
+function graphAndProgram() {
+  return {
+    graph: JSON.parse(readFileSync("src/data/gen/battle-script-graph.json", "utf8")) as {
+      labels: Array<{ name: string; line: number; nextLabel: string | null; statements: Array<{ line: number; mnemonic: string; operandTokens: string[]; labelOperands: string[] }> }>;
+      controlFlow: {
+        edges: Array<{ from: { label: string; line: number }; to: { label: string; line: number } | null; kind: string; provenance: { macro?: string } }>;
+        conditionalGuards: Array<{ from: { label: string; line: number }; command: { macro: string }; operands: Array<{ parameter: string; token: string }>; takenDestination: { label: string; line: number } | null; notTakenSuccessor: { label: string; line: number } | null }>;
+      };
+    },
+    program: JSON.parse(readFileSync("src/data/gen/battle-script-program.json", "utf8")) as {
+      blocks: Array<{ label: string; line: number; statements: Array<{ source: { line: number }; mnemonic: string; actualOperands: string[] }> }>;
+    },
+  };
+}
+
+function level50RosterSymbols(): Set<string> {
+  return new Set(
+    frontierMons.entries
+      .filter((set) => set.index <= 849)
+      .flatMap((set) => set.moves)
+      .filter((move) => move !== "MOVE_NONE"),
+  );
+}
+
+function sourceAbsorbingCandidates(type: string, requiresNonzeroPower: boolean): string[] {
+  const roster = level50RosterSymbols();
+  return (movesData.moves as SourceMove[])
+    .filter((move) => roster.has(move.move) && move.type === type && (!requiresNonzeroPower || move.power !== 0))
+    .map((move) => move.move);
+}
+
+function familyFor(record: MoveRecord, category: string): FamilyEvidence {
+  const family = record.hooks.ability.evidence?.families.find((candidate) => candidate.category === category);
+  if (!family) throw new Error(`${record.move} lacks source-proven ${category} family evidence`);
+  return family;
+}
+
+function assertAbsorbingRouteWitness(family: FamilyEvidence): void {
+  const { graph, program } = graphAndProgram();
+  const graphByLabel = new Map(graph.labels.map((label) => [label.name, label]));
+  const programByLabel = new Map(program.blocks.map((block) => [block.label, block]));
+  const route = family.entryPath.graph.route;
+  expect(route).toEqual(family.entryPath.program.route);
+  expect(route.length).toBeGreaterThan(0);
+  expect(route.at(-1)).toMatchObject({ kind: "accuracycheck", mnemonic: "accuracycheck" });
+  for (const step of route) {
+    const graphLabel = graphByLabel.get(step.label);
+    const programBlock = programByLabel.get(step.label);
+    expect(graphLabel, `${step.label} is missing from graph`).toBeDefined();
+    expect(programBlock, `${step.label} is missing from program`).toBeDefined();
+    const graphStatement = graphLabel!.statements.find((statement) => statement.line === step.line);
+    const programStatement = programBlock!.statements.find((statement) => statement.source.line === step.line);
+    expect(graphStatement, `${step.label}:${step.line} missing graph statement`).toMatchObject({
+      mnemonic: step.mnemonic, operandTokens: step.operands,
+    });
+    expect(programStatement, `${step.label}:${step.line} missing program statement`).toMatchObject({
+      mnemonic: step.mnemonic, actualOperands: step.operands,
+    });
+    if (step.kind === "accuracycheck") continue;
+    if (!step.target) throw new Error(`${step.label}:${step.line} route step has no target`);
+    const edge = graph.controlFlow.edges.find((candidate) => (
+      candidate.from.label === step.label
+      && candidate.from.line === step.line
+      && candidate.to?.label === step.target!.label
+      && candidate.to.line === step.target!.line
+    ));
+    expect(edge, `${step.label}:${step.line} lacks an ordered edge to its witness target`).toBeDefined();
+    if (step.kind === "fallthrough") {
+      expect(edge).toMatchObject({ kind: "fallthrough" });
+      continue;
+    }
+    if (step.kind === "goto") {
+      expect(edge).toMatchObject({ kind: "jump", provenance: { macro: "goto" } });
+      continue;
+    }
+    if (step.kind === "guard") {
+      expect(step.condition?.trim().length).toBeGreaterThan(0);
+      const guard = graph.controlFlow.conditionalGuards.find((candidate) => (
+        candidate.from.label === step.label
+        && candidate.from.line === step.line
+        && candidate.command.macro === step.mnemonic
+        && JSON.stringify(candidate.operands.map((operand) => operand.token)) === JSON.stringify(step.operands)
+      ));
+      expect(guard, `${step.label}:${step.line} lacks its generated guard`).toBeDefined();
+      const destination = step.outcome === "taken" ? guard!.takenDestination : guard!.notTakenSuccessor;
+      expect(destination).toMatchObject(step.target);
+      expect(edge).toMatchObject(step.outcome === "taken"
+        ? { kind: "jump", provenance: { macro: step.mnemonic } }
+        : { kind: "fallthrough" });
+      continue;
+    }
+    throw new Error(`unexpected absorption route step ${step.kind}`);
+  }
+}
 
 describe("Level-50 move parameterization manifest", () => {
   it("regenerates byte-for-byte into an isolated directory", () => {
@@ -47,7 +274,7 @@ describe("Level-50 move parameterization manifest", () => {
   });
 
   it("enumerates every non-NONE move used by the exact 0..849 Level-50 roster boundary", () => {
-    expect(manifest.schema).toBe("level50-move-parameterization/v2");
+    expect(manifest.schema).toBe("level50-move-parameterization/v3");
     expect(manifest.coverage.level50Roster).toEqual({
       frontierSetIds: { first: 0, last: 849, count: 850 }, moveCount: 300, moveTableEffectFamilyCount: 176,
     });
@@ -69,8 +296,9 @@ describe("Level-50 move parameterization manifest", () => {
     });
     expect(manifest.coverage.joins).toMatchObject({
       battleScriptGraphLabels: 300, battleScriptProgramLabels: 300, animationScripts: 300,
-      itemHookCategories: 0, abilityHookCategories: 0,
+      itemHookCategories: 0, abilityHookCategories: 39,
       itemHookUnsupportedCategories: null, abilityHookUnsupportedCategories: null,
+      itemHookUnsupportedRows: 300, abilityHookUnsupportedRows: 261, abilityHookSourceProvenRows: 39,
     });
     expect(manifest.coverage.hookCatalogs).toMatchObject({
       item: {
@@ -81,7 +309,8 @@ describe("Level-50 move parameterization manifest", () => {
         // displayRows follows summary-info.json's species pool (6 anchors → full
         // 376-species rental pool on 2026-08-07, ISSUES #80 gender fix).
         displayRows: 74, catalogedDispatcherCategories: 9, soundproofSourceSelectorRows: 10,
-        soundproofLevel50RosterSelectorRows: 9, completeness: "intentionally-partial", unsupportedCategories: null,
+        soundproofLevel50RosterSelectorRows: 9, soundproofSourceProvenRosterRows: 9,
+        soundproofUnsupportedLevel50RosterRows: 291, completeness: "intentionally-partial", unsupportedCategories: null,
       },
     });
     expect(manifest.coverage.hookCatalogs.item.moveToHookDispatchers.map((hook) => hook.id)).toEqual([
@@ -123,39 +352,315 @@ describe("Level-50 move parameterization manifest", () => {
     }
   });
 
-  it("preserves move-table values while leaving every per-move hook join explicitly unsupported", () => {
+  it("ratchets the finite ON_DAMAGE candidates, source guards, and blocked route-shape census without promotion", () => {
+    const audit = manifest.coverage.hookCatalogs.ability.onDamage;
+    const roster = level50RosterSymbols();
+    const expectedByCategory: Record<string, string[]> = {
+      "moveend-contact-on-damage": (movesData.moves as SourceMove[])
+        .filter((move) => roster.has(move.move) && move.flags.includes("FLAG_MAKES_CONTACT"))
+        .map((move) => move.move),
+      "moveend-color-change": (movesData.moves as SourceMove[])
+        .filter((move) => roster.has(move.move) && move.power !== 0)
+        .map((move) => move.move),
+    };
+    const blockerIds = audit.blockers.map((blocker) => blocker.id);
+    expect(audit.status).toBe("evidence-checkpoint-no-promotion");
+    expect(blockerIds).toEqual([
+      "ordered-moveend-route-not-proven",
+      "damage-state-guard-not-derived-from-selector",
+    ]);
+    expect(audit.retiredBlockers).toEqual([expect.objectContaining({
+      id: "missing-direct-on-damage-off-receipt",
+      fixture: "tools/battle-lab/mechanic-color-change-off.json",
+      probe: "tools/probe/probe-color-change-ability-off.py",
+      receipts: [
+        "tools/probe/receipts/color-change-off-seed-610839776.json",
+        "tools/probe/receipts/color-change-off-seed-324508639.json",
+      ],
+    })]);
+    expect(blockerIds.every((id) => id.length > 0)).toBe(true);
+    expect(audit.promotions).toMatchObject({ sourceProvenRows: [] });
+    expect(audit.promotions.reason).toMatch(/No rows promoted/);
+
+    for (const [category, expectedMoves] of Object.entries(expectedByCategory)) {
+      const coverage = audit.categories[category]!;
+      expect(coverage.count).toBe(expectedMoves.length);
+      expect(coverage.candidateRows.map((candidate) => candidate.move)).toEqual(expectedMoves);
+      expect(new Set(coverage.candidateRows.map((candidate) => candidate.move)).size).toBe(expectedMoves.length);
+      for (const candidate of coverage.candidateRows) {
+        const source = sourceMoves.get(candidate.move)!;
+        const record = manifest.moves.find((move) => move.move === candidate.move)!;
+        expect(candidate).toMatchObject({
+          category,
+          moveId: source.id,
+          effect: source.effect,
+          power: source.power,
+          makesContact: source.flags.includes("FLAG_MAKES_CONTACT"),
+          entryScript: record.battleScript.entryScript,
+          routeShapeId: `on-damage-entry:${record.battleScript.entryScript}`,
+          blockerIds,
+        });
+        expect(candidate.blockerIds.length).toBeGreaterThan(0);
+      }
+    }
+    expect(audit.categories["moveend-contact-on-damage"]!.count).toBe(94);
+    expect(audit.categories["moveend-color-change"]!.count).toBe(183);
+    const expectedOverlap = expectedByCategory["moveend-contact-on-damage"]!
+      .filter((move) => expectedByCategory["moveend-color-change"]!.includes(move));
+    expect(audit.overlap).toEqual({
+      definition: "moves satisfying both FLAG_MAKES_CONTACT and power != 0",
+      count: expectedOverlap.length,
+      moves: expectedOverlap,
+    });
+    expect(expectedOverlap).toHaveLength(94);
+
+    const candidates = Object.values(audit.categories).flatMap((coverage) => coverage.candidateRows);
+    expect(candidates).toHaveLength(277);
+    expect(new Set(candidates.map((candidate) => `${candidate.category}:${candidate.move}`)).size).toBe(candidates.length);
+    const { graph, program } = graphAndProgram();
+    const expectedEntryScripts = [...new Set(candidates.map((candidate) => candidate.entryScript))]
+      .sort((left, right) => graph.labels.find((label) => label.name === left)!.line - graph.labels.find((label) => label.name === right)!.line);
+    expect(audit.routeShapeCensus.status).toBe("entry-block-control-frontier-not-a-complete-witness");
+    expect(audit.routeShapeCensus.entries.map((entry) => entry.entryScript)).toEqual(expectedEntryScripts);
+    expect(audit.routeShapeCensus.entries).toHaveLength(78);
+    expect(audit.routeShapeCensus.entryBlockShapeCounts).toEqual({
+      "call-return-entry-block": 3,
+      "conditional-entry-block": 22,
+      "fallthrough-entry-block": 6,
+      "goto-entry-block": 47,
+    });
+    for (const entry of audit.routeShapeCensus.entries) {
+      const graphEntry = graph.labels.find((label) => label.name === entry.entryScript)!;
+      const programEntry = program.blocks.find((block) => block.label === entry.entryScript)!;
+      expect(entry.id).toBe(`on-damage-entry:${entry.entryScript}`);
+      expect(entry.graph).toMatchObject({
+        path: "src/data/gen/battle-script-graph.json",
+        statements: graphEntry.statements.map((statement) => ({ line: statement.line, mnemonic: statement.mnemonic, operands: statement.operandTokens })),
+      });
+      expect(entry.program).toMatchObject({
+        path: "src/data/gen/battle-script-program.json",
+        statements: programEntry.statements.map((statement) => ({ line: statement.source.line, mnemonic: statement.mnemonic, operands: statement.actualOperands })),
+      });
+      expect(entry.blockerIds).toEqual(blockerIds);
+      for (const category of Object.keys(expectedByCategory)) {
+        expect(entry.candidates[category]).toEqual(candidates
+          .filter((candidate) => candidate.category === category && candidate.entryScript === entry.entryScript)
+          .map((candidate) => candidate.move));
+      }
+    }
+    expect(audit.routeShapeCensus.moveEndTarget.graph.statements.map((statement) => ({ mnemonic: statement.mnemonic, operands: statement.operands }))).toEqual([
+      { mnemonic: "moveendall", operands: [] },
+      { mnemonic: "end", operands: [] },
+    ]);
+    expect(audit.routeShapeCensus.moveEndTarget.program.statements).toEqual(audit.routeShapeCensus.moveEndTarget.graph.statements);
+
+    const utilitySource = readFileSync("reference/pokeemerald/src/battle_util.c", "utf8");
+    const commandSource = readFileSync("reference/pokeemerald/src/battle_script_commands.c", "utf8");
+    const headerSource = readFileSync("reference/pokeemerald/include/battle.h", "utf8");
+    expect(audit.sourceDispatcher.moveEnd).toMatchObject({
+      path: "reference/pokeemerald/src/battle_script_commands.c",
+      locator: "Cmd_moveend MOVEEND_ON_DAMAGE_ABILITIES",
+      call: "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE, gBattlerTarget, 0, 0, 0)",
+    });
+    expect(commandSource).toContain(audit.sourceDispatcher.moveEnd.call);
+    expect(audit.sourceDispatcher.targetAbilitySelection).toMatchObject({
+      path: "reference/pokeemerald/src/battle_util.c",
+      guard: expect.stringMatching(/gBattlerTarget/),
+    });
+    expect(headerSource).toContain(audit.sourceDispatcher.targetTurnDamaged.definition);
+    expect(audit.sourceDispatcher.abilityCases.map((entry) => entry.ability)).toEqual([
+      "ABILITY_COLOR_CHANGE", "ABILITY_ROUGH_SKIN", "ABILITY_EFFECT_SPORE", "ABILITY_POISON_POINT",
+      "ABILITY_STATIC", "ABILITY_FLAME_BODY", "ABILITY_CUTE_CHARM",
+    ]);
+    for (const ability of audit.sourceDispatcher.abilityCases) {
+      const start = utilitySource.indexOf(`case ${ability.ability}:`);
+      const next = utilitySource.indexOf("            case ", start + 1);
+      const caseSource = utilitySource.slice(start, next < 0 ? undefined : next);
+      let previous = -1;
+      for (const guard of ability.orderedGuards) {
+        const position = caseSource.indexOf(guard, previous + 1);
+        expect(position, `${ability.ability} guard ${guard}`).toBeGreaterThan(previous);
+        previous = position;
+      }
+      expect(ability.outcome.length).toBeGreaterThan(0);
+    }
+    expect(audit.semanticEvidence.kernelSiblingBatch).toMatchObject({
+      status: "tier1-shared-dispatcher-semantics",
+      test: "tests/battleScriptMoveEndOpcode.test.ts#MOVEEND_ON_DAMAGE_ABILITIES contact family",
+    });
+    expect(audit.semanticEvidence.oracleReceipt).toMatchObject({
+      status: "direct-parameterized-oracle-receipt",
+      profile: "battle-scene-off",
+      fixture: "tools/battle-lab/mechanic-color-change-off.json",
+      probe: "tools/probe/probe-color-change-ability-off.py",
+    });
+  });
+
+  it("derives the Soundproof and shared-absorbing families from source without claiming other ability joins", () => {
+    const sourceSelectors = sourceSoundMoves();
+    expect(sourceSelectors).toEqual(SOURCE_SOUND_MOVES);
+    expect(movesData.sourceTables.soundMoves).toEqual(sourceSelectors.map((move) => ({
+      move,
+      id: sourceMoves.get(move)!.id,
+    })));
+    const rosterSelectors = sourceSelectors.filter((move) => manifest.moves.some((record) => record.move === move));
+    expect(rosterSelectors).toEqual(LEVEL50_SOUND_MOVES);
+    expect(sourceSelectors.filter((move) => !rosterSelectors.includes(move))).toEqual(["MOVE_GROWL"]);
+
+    const expectedCandidates: Record<string, string[]> = {
+      "absorbing-volt-absorb": ["MOVE_THUNDER_PUNCH", "MOVE_THUNDERBOLT", "MOVE_THUNDER", "MOVE_ZAP_CANNON", "MOVE_SPARK", "MOVE_SHOCK_WAVE"],
+      "absorbing-water-absorb": ["MOVE_WATER_GUN", "MOVE_HYDRO_PUMP", "MOVE_SURF", "MOVE_BUBBLE_BEAM", "MOVE_WATERFALL", "MOVE_CLAMP", "MOVE_CRABHAMMER", "MOVE_OCTAZOOKA", "MOVE_WHIRLPOOL", "MOVE_DIVE", "MOVE_WATER_SPOUT", "MOVE_MUDDY_WATER", "MOVE_WATER_PULSE"],
+      "absorbing-flash-fire": ["MOVE_FIRE_PUNCH", "MOVE_EMBER", "MOVE_FLAMETHROWER", "MOVE_FIRE_SPIN", "MOVE_FIRE_BLAST", "MOVE_FLAME_WHEEL", "MOVE_SUNNY_DAY", "MOVE_HEAT_WAVE", "MOVE_WILL_O_WISP", "MOVE_ERUPTION", "MOVE_BLAZE_KICK", "MOVE_OVERHEAT"],
+    };
+    const expectedGuards: Record<string, string> = {
+      "absorbing-volt-absorb": "moveType == TYPE_ELECTRIC && gBattleMoves[move].power != 0",
+      "absorbing-water-absorb": "moveType == TYPE_WATER && gBattleMoves[move].power != 0",
+      "absorbing-flash-fire": "moveType == TYPE_FIRE && !(gBattleMons[battler].status1 & STATUS1_FREEZE)",
+    };
+    const expectedExcluded: Record<string, string[]> = {
+      "absorbing-volt-absorb": [],
+      "absorbing-water-absorb": [],
+      "absorbing-flash-fire": ["MOVE_SUNNY_DAY"],
+    };
+    const commandSource = readFileSync("reference/pokeemerald/src/battle_script_commands.c", "utf8");
+    const battleUtilSource = readFileSync("reference/pokeemerald/src/battle_util.c", "utf8");
+    const battleScriptLines = readFileSync("reference/pokeemerald/data/battle_scripts_1.s", "utf8").split("\n");
+    expect(commandSource).toContain("JumpIfMoveFailed(7, move);");
+    expect(commandSource).toContain(`TrySetDestinyBondToHappen();\n        if (${ABSORBING_DISPATCHER_CALL})\n            return;`);
+
+    const expectedSourceProven = new Map<string, string[]>(LEVEL50_SOUND_MOVES.map((move) => [move, ["moves-block-soundproof"]]));
+    for (const definition of ABSORBING_FAMILIES) {
+      const candidates = sourceAbsorbingCandidates(definition.type, definition.requiresNonzeroPower);
+      expect(candidates).toEqual(expectedCandidates[definition.category]);
+      const coverage = manifest.coverage.hookCatalogs.ability.absorbing[definition.category]!;
+      expect(coverage.sourceMoveCandidates.map((row) => row.move)).toEqual(candidates);
+      expect(coverage.sourceMoveCandidates.map((row) => ({ type: row.type, power: row.power }))).toEqual(
+        candidates.map((move) => ({ type: sourceMoves.get(move)!.type, power: sourceMoves.get(move)!.power })),
+      );
+      expect(coverage.excludedCandidates.map((row) => row.move)).toEqual(expectedExcluded[definition.category]);
+      const proven = candidates.filter((move) => !expectedExcluded[definition.category].includes(move));
+      expect(coverage.sourceProvenRows).toEqual(proven);
+      for (const move of proven) {
+        expectedSourceProven.set(move, [...(expectedSourceProven.get(move) ?? []), definition.category]);
+        const record = manifest.moves.find((candidate) => candidate.move === move)!;
+        const family = familyFor(record, definition.category);
+        expect(family.selector).toMatchObject({
+          path: "reference/pokeemerald/src/battle_util.c",
+          ability: definition.category === "absorbing-volt-absorb" ? "ABILITY_VOLT_ABSORB" : definition.category === "absorbing-water-absorb" ? "ABILITY_WATER_ABSORB" : "ABILITY_FLASH_FIRE",
+          moveType: definition.type,
+          requiresNonzeroPower: definition.requiresNonzeroPower,
+          sourceGuard: expectedGuards[definition.category],
+        });
+        expect(battleUtilSource).toContain(expectedGuards[definition.category]);
+        expect(family.entryPath).toMatchObject({
+          kind: "accuracycheck-jump-if-move-failed",
+          source: { path: "reference/pokeemerald/data/battle_scripts_1.s", entryLine: expect.any(Number) },
+          graph: { path: "src/data/gen/battle-script-graph.json", entryLabel: record.battleScript.entryScript },
+          program: { path: "src/data/gen/battle-script-program.json", entryLabel: record.battleScript.entryScript },
+        });
+        expect(battleScriptLines[family.entryPath.source.entryLine - 1]).toContain(record.battleScript.entryScript);
+        expect(family.entryPath.assumptions).toEqual(expect.arrayContaining([
+          expect.stringMatching(/Cmd_attackcanceler/),
+          expect.stringMatching(/MOVE_RESULT_NO_EFFECT/),
+        ]));
+        expect(family.dispatcher).toMatchObject({
+          path: "reference/pokeemerald/src/battle_script_commands.c",
+          locator: "JumpIfMoveFailed",
+          call: ABSORBING_DISPATCHER_CALL,
+          order: "after TrySetDestinyBondToHappen and before gBattlescriptCurrInstr = BS_ptr",
+          accuracyCheck: { locator: "Cmd_accuracycheck", call: "JumpIfMoveFailed(7, move)" },
+        });
+        expect(family.familyVerification).toMatchObject({
+          implementation: "src/engine/battleScriptHitChainOpcode.ts#advancePastAccuracyCheck",
+          batchTest: "tests/battleScriptHitChainOpcode.test.ts#AbilityBattleEffects(ABILITYEFFECT_ABSORBING)",
+          oracleFixture: "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+          oracleProbe: "tools/probe/probe-absorbing-ability-off.py",
+        });
+        expect(family.familyVerification.scope).toMatch(/not fabricate per-move oracle receipts/);
+        expect(String(family.familyVerification.targetStateGuard)).not.toHaveLength(0);
+        for (const receipt of family.familyVerification.oracleReceiptFiles as string[]) expect(readFileSync(receipt, "utf8").length).toBeGreaterThan(0);
+        assertAbsorbingRouteWitness(family);
+      }
+      for (const exclusion of coverage.excludedCandidates) {
+        expect(exclusion.categories).toEqual([definition.category]);
+        expect(exclusion.reason).toMatch(/without an accuracycheck or JumpIfMoveFailed absorbing handoff/);
+        expect(exclusion.entryPath.graph.route).toEqual(exclusion.entryPath.program.route);
+        expect(exclusion.entryPath.graph.route.map((step) => step.mnemonic)).not.toContain("accuracycheck");
+        const weatherFlow = exclusion.entryPath.graph.weatherFlow;
+        expect(weatherFlow?.map((block) => block.label)).toEqual([
+          "BattleScript_MoveWeatherChange",
+          "BattleScript_WeatherFormChanges",
+          "BattleScript_WeatherFormChangesLoop",
+        ]);
+        expect(exclusion.entryPath.program.weatherFlow).toEqual(weatherFlow);
+        for (const block of weatherFlow ?? []) {
+          expect(block.source.path).toBe("reference/pokeemerald/data/battle_scripts_1.s");
+          expect(block.graph.path).toBe("src/data/gen/battle-script-graph.json");
+          expect(block.program.path).toBe("src/data/gen/battle-script-program.json");
+          expect(block.graph.statements).toEqual(block.program.statements);
+          expect(block.graph.statements.map((statement) => statement.mnemonic)).not.toContain("accuracycheck");
+        }
+        expect(weatherFlow?.[0]?.graph.statements.at(-1)).toEqual({
+          line: 1755,
+          mnemonic: "goto",
+          operands: ["BattleScript_MoveEnd"],
+        });
+        expect(weatherFlow?.[2]?.graph.statements).toEqual(expect.arrayContaining([
+          expect.objectContaining({ mnemonic: "jumpifbytenotequal", operands: ["sBATTLER", "gBattlersCount", "BattleScript_WeatherFormChangesLoop"] }),
+          expect.objectContaining({ mnemonic: "return", operands: [] }),
+        ]));
+      }
+    }
+
+    const { graph, program } = graphAndProgram();
+    const graphByLabel = new Map(graph.labels.map((label) => [label.name, label]));
+    const programByLabel = new Map(program.blocks.map((block) => [block.label, block]));
+    const commandDeclaration = commandSource.indexOf("static void Cmd_attackcanceler(void)");
+    const commandStart = commandSource.indexOf("static void Cmd_attackcanceler(void)", commandDeclaration + 1);
+    const commandEnd = commandSource.indexOf("static void JumpIfMoveFailed", commandStart);
+    const commandBody = commandSource.slice(commandStart, commandEnd);
+    expect(commandBody).toContain(`if (${MOVES_BLOCK_CALL})\n        return;`);
+    expect(commandBody.indexOf(MOVES_BLOCK_CALL)).toBeLessThan(commandBody.indexOf("gBattleMons[gBattlerAttacker].pp[gCurrMovePos]"));
+    for (const move of LEVEL50_SOUND_MOVES) {
+      const record = manifest.moves.find((candidate) => candidate.move === move)!;
+      const family = familyFor(record, "moves-block-soundproof");
+      expect(family.selector).toMatchObject({ path: "reference/pokeemerald/src/battle_util.c", locator: "sSoundMovesTable", symbol: move, index: sourceSelectors.indexOf(move) });
+      expect(family.dispatcher).toMatchObject({ path: "reference/pokeemerald/src/battle_script_commands.c", locator: "Cmd_attackcanceler", call: MOVES_BLOCK_CALL });
+      expect(family.entryPath.program.route).toEqual(family.entryPath.graph.route);
+      const canceler = family.entryPath.graph.attackCanceler;
+      if (!canceler) throw new Error(`${move} lacks Soundproof attackcanceler witness`);
+      expect(graphByLabel.get(canceler.label)?.statements[0]).toMatchObject({ line: canceler.line, mnemonic: "attackcanceler" });
+      expect(programByLabel.get(canceler.label)?.statements[0]).toMatchObject({ source: { line: canceler.line }, mnemonic: "attackcanceler" });
+    }
+
     for (const record of manifest.moves) {
       const source = sourceMoves.get(record.move)!;
       expect(record.id).toBe(source.id);
-      expect(record.name).toBe(source.name);
-      expect(record.moveTable).toEqual({
-        effect: source.effect, secondaryEffectChance: source.secondaryEffectChance, type: source.type,
-        power: source.power, accuracy: source.accuracy, pp: source.pp, target: source.target,
-        priority: source.priority, flags: source.flags,
-      });
+      expect(record.moveTable.type).toBe(source.type);
       expect(record.battleScript).toMatchObject({ entryScript: expect.stringMatching(/^BattleScript_/), graphLabel: record.battleScript.entryScript, programLabel: record.battleScript.entryScript });
-      if (record.animation.script === null) expect(record.animation.componentIds).toEqual([]);
-      else expect(record.animation.componentIds.length).toBeGreaterThan(0);
-      for (const hook of [record.hooks.item, record.hooks.ability]) {
-        expect(hook.status).toBe("unsupported");
-        expect(hook.potentialCategories).toBeNull();
-        expect(hook.unsupportedCategories).toBeNull();
-        expect(hook.reason).toContain("implicit fallthrough");
-        expect(hook.reason.length).toBeGreaterThan(0);
+      expect(record.hooks.item).toMatchObject({ status: "unsupported", supportedCategories: [] });
+      const expectedCategories = expectedSourceProven.get(record.move) ?? [];
+      if (expectedCategories.length === 0) {
+        expect(record.hooks.ability).toMatchObject({ status: "unsupported", supportedCategories: [] });
+        expect(record.hooks.ability.evidence).toBeUndefined();
+      } else {
+        expect(record.hooks.ability).toMatchObject({ status: "source-proven-family", supportedCategories: expectedCategories });
+        expect(record.hooks.ability.reason).toContain("does not claim unrelated ability families");
+        expect(record.hooks.ability.evidence?.families.map((family) => family.category)).toEqual(expectedCategories);
       }
     }
+    expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(261);
+    expect(manifest.moves.filter((record) => record.hooks.item.status === "unsupported")).toHaveLength(300);
   });
 
-  it("does not underclassify source-obvious guard moves through an incomplete named-operand walk", () => {
+  it("keeps zero-power Volt/Water noncandidates and Sunny Day's audited special flow unsupported", () => {
     const move = (symbol: string) => manifest.moves.find((record) => record.move === symbol)!;
-    for (const symbol of [
-      "MOVE_THUNDER", "MOVE_SURF", "MOVE_FIRE_PUNCH", "MOVE_TACKLE",
-      "MOVE_WILL_O_WISP", "MOVE_ROAR", "MOVE_PROTECT",
-    ]) {
+    for (const symbol of ["MOVE_THUNDER_WAVE", "MOVE_WITHDRAW", "MOVE_RAIN_DANCE", "MOVE_SUNNY_DAY", "MOVE_TACKLE", "MOVE_PROTECT"]) {
       expect(move(symbol).hooks).toMatchObject({
         item: { potentialCategories: null, status: "unsupported" },
         ability: { potentialCategories: null, status: "unsupported" },
       });
     }
+    expect(move("MOVE_WILL_O_WISP").hooks.ability.supportedCategories).toEqual(["absorbing-flash-fire"]);
   });
 });

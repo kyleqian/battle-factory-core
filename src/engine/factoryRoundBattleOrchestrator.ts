@@ -11,6 +11,7 @@
 import type { GbaButton } from "../input.ts";
 import {
   advanceBattleCommandPresentation,
+  battleCommandUiStatusFromStatus1,
   cancelBattleCommandPartySelection,
   createBattleCommandPresentation,
   BATTLE_COMMAND_BOUNCE_SCHEDULE_DEFAULT,
@@ -1422,7 +1423,13 @@ function settledCommandForResolutionHandoff(
     if (
       boundary.partyIndex !== field.partyIndex
       || boundary.displayedHp !== field.hp
-      || boundary.displayedStatus1 !== active.status1
+      // `status1` is not itself a display identity: toxic's source-owned
+      // turn counter lives in bits 8..11 of gBattleMons.status1, advances at
+      // end turn, and is synced into the party record despite remaining absent
+      // from the healthbox icon. Compare the controller-committed icon
+      // semantics while retaining the fatal check for a genuinely stale icon.
+      || battleCommandUiStatusFromStatus1(boundary.displayedStatus1)
+        !== battleCommandUiStatusFromStatus1(active.status1)
     ) {
       return fail(
         `resolution handoff battler ${battler} display does not match the genuine next boundary`,

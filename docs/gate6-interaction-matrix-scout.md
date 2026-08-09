@@ -66,26 +66,26 @@ the state transition.
 | Axis pair | Distinct source mechanism(s) | Existing Tier-1 coverage | Gap / first proof |
 | --- | --- | --- | --- |
 | weather x status | Sun prevents a new freeze; weather itself is not a major-status cure. `seteffect` checks sun before Ice type/Magma Armor (`battle_script_commands.c:2380-2393`). | `tests/battleScriptHitChainOpcode.test.ts` (freeze applies without weather and is blocked by active sun) | R1 receipts the RNG-gated Ice Beam pair on two freeze-producing seeds. |
-| weather x volatile | Sand/hail chip skips underground and underwater; weather also changes Thunder's accuracy while semi-invulnerability is checked first (`battle_script_commands.c:1062-1094`, `7602-7640`). | `tests/battleScriptDamagingWeatherOpcode.test.ts` (underground weather chip); `tests/gate6WeatherVolatileInteractions.test.ts` (R2 full weather pass, damage/message order) | R2 complete: Dig under Hail, then surface, paired with a grounded two-turn control. |
+| weather x volatile | Sand/hail chip skips underground and underwater; weather also changes Thunder's accuracy while semi-invulnerability is checked first (`battle_script_commands.c:1062-1094`, `7602-7640`). | `tests/battleScriptDamagingWeatherOpcode.test.ts` (underground weather chip); `tests/gate6WeatherVolatileInteractions.test.ts` (R2 full weather pass, damage/message order); `tests/gate6R2Receipt.test.ts` (compact OFF receipt) | R2 complete: Dig under Hail, then surface, paired with a grounded two-turn control. |
 | weather x held-item | The only shared scheduling boundary is end-turn: abilities, normal items, then Leech Seed/poison are sequenced by `DoBattlerEndTurnEffects` (`battle_util.c:1494-1533`); weather damage is a separate script loop (`battle_scripts_1.s:3200-3222`). No weather-specific held-item branch exists. | `tests/gate6KernelInteractions.test.ts` (K1: sand chip precedes Leftovers/Sitrus activation, exact HP event sequences, Sitrus threshold crossing, no-weather controls) | K1 complete (kernel proof; event order matched source, no oracle promotion needed). |
-| weather x ability | Cloud Nine/Air Lock suppress **all** `WEATHER_HAS_EFFECT`; Forecast changes Castform's type in rain/sun/hail; Rain Dish, Swift Swim and Chlorophyll read active weather; Sand Veil changes accuracy (`battle_util.h:47-48`; `battle_util.c:2396-2427,2955-2970`; `battle_script_commands.c:1152-1155`). Air Lock is UNREACHABLE; Cloud Nine/Forecast and the speed/end-turn abilities are legal. | `tests/battleScriptDamagingWeatherOpcode.test.ts` (Cloud Nine, Sand Veil); `tests/battleScriptSwitchinOpcode.test.ts` (weather entry scheduling); `tests/gate6WeatherAbilityInteractions.test.ts` (R4 Forecast form/type pairs, Weather Ball type/power under every weather, exact two-seed damage) | R4 complete: same-turn Rain Dance Forecast pass, Water Weather Ball, paired clear-weather damage, and five-turn expiry/revert. R3 remains the Cloud Nine removal proof. |
+| weather x ability | Cloud Nine/Air Lock suppress **all** `WEATHER_HAS_EFFECT`; Forecast changes Castform's type in rain/sun/hail; Rain Dish, Swift Swim and Chlorophyll read active weather; Sand Veil changes accuracy (`battle_util.h:47-48`; `battle_util.c:2396-2427,2955-2970`; `battle_script_commands.c:1152-1155`). Air Lock is UNREACHABLE; Cloud Nine/Forecast and the speed/end-turn abilities are legal. | `tests/battleScriptDamagingWeatherOpcode.test.ts` (Cloud Nine, Sand Veil); `tests/battleScriptSwitchinOpcode.test.ts` (weather entry scheduling); `tests/gate6WeatherAbilityInteractions.test.ts` (R4 Forecast form/type pairs, Weather Ball type/power under every weather, exact two-seed damage); `tests/gate6R3Receipt.test.ts` (legal removal/reactivation receipt) | R4 and R3 complete: same-turn Forecast/Weather Ball behavior is paired with the legal Golduck Cloud Nine → neutral Rattata switch; Castform stays Normal while Cloud Nine is present, then becomes Water and uses Weather Ball after the switch. |
 | weather x stat-stage | Accuracy calculation applies accuracy/evasion stages before sun-Thunder and Sand Veil modifiers (`battle_script_commands.c:1128-1155`). | `tests/gate6KernelInteractions.test.ts` (K2: sun/rain/sand across stages -2/0/+2; sun boundaries 30/50/83, Sand Veil 33/56/92, rain Thunder zero-RNG guaranteed hit) | K2 complete — and it caught a real kernel defect: `battleScriptHitChainOpcode.ts` hardcoded weather inactive in accuracy checks (rain-Thunder bypass, sun-Thunder 50, Sand Veil all missing); fixed source-cited in `450cf532`. |
-| weather x switching/entry | Entry weather abilities set permanent weather exactly on switch-in; subsequent same-weather entries are a no-op (`battle_util.c:2485-2558`). Drizzle/Sand Stream/Drought are **UNREACHABLE (3)** at L50; Cloud Nine is a legal entry suppression case. | `tests/battleScriptSwitchinOpcode.test.ts` (Drizzle/Sand Stream/Drought unit mechanics) | R3 oracle uses legal Golduck Cloud Nine against manually created Rain Dance, not unreachable setter staging. |
-| weather x immunity/absorb | Type immunity (Rock/Ground/Steel vs sand, Ice vs hail), Sand Veil, and underground/underwater suppress weather chip (`battle_script_commands.c:7606-7640`); Cloud Nine globally suppresses the predicate (`battle_util.h:47-48`). | `tests/battleScriptDamagingWeatherOpcode.test.ts`; `tests/gate6WeatherVolatileInteractions.test.ts` (R2) | R2/R3 make the pairwise boundaries explicit. |
+| weather x switching/entry | Entry weather abilities set permanent weather exactly on switch-in; subsequent same-weather entries are a no-op (`battle_util.c:2485-2558`). Drizzle/Sand Stream/Drought are **UNREACHABLE (3)** at L50; Cloud Nine is a legal entry suppression case. | `tests/battleScriptSwitchinOpcode.test.ts` (Drizzle/Sand Stream/Drought unit mechanics); `tests/gate6R3Receipt.test.ts` (ordinary party-menu switch and preserved weather timer) | R3 complete: Rain Dance sets the real field flag/timer, the player switch replaces Cloud Nine with neutral Rattata without clearing rain, and the post-switch Forecast/Weather Ball consumer sees active rain. |
+| weather x immunity/absorb | Type immunity (Rock/Ground/Steel vs sand, Ice vs hail), Sand Veil, and underground/underwater suppress weather chip (`battle_script_commands.c:7606-7640`); Cloud Nine globally suppresses the predicate (`battle_util.h:47-48`). | `tests/battleScriptDamagingWeatherOpcode.test.ts`; `tests/gate6WeatherVolatileInteractions.test.ts` (R2); `tests/gate6R2Receipt.test.ts` (R2 compact receipt); `tests/gate6R3Receipt.test.ts` (Cloud Nine suppression/removal boundary) | R2/R3 complete: R2 receipts the concrete hail immunity/underground gate, while R3 receipts the global Cloud Nine suppression and its reactivation after switching. |
 | status x volatile | Sleep clears Nightmare when cured; confusion, paralysis, and infatuation are independent ordered attack-canceler gates (`battle_util.c:2040-2054,2156-2218`). | `tests/gate6KernelInteractions.test.ts` (K3: Chesto/Lum clear sleep+Nightmare, preserve unrelated infatuation; confusion → paralysis → infatuation gate order; resumable RNG ledger with skipped draws pinned on early-outs) | K3 complete (kernel proof). |
 | status x held-item | Chesto clears sleep and Nightmare; condition berries cure their matching major status; Lum clears any major status plus confusion (`battle_util.c:3499-3591`). | `tests/battleScriptMoveEndOpcode.test.ts` (Cheri/Lum move-end activation); `tests/gate6EntryItemInteractions.test.ts` (R5 Chesto sleep+Nightmare and Lum confusion specificity) | R5 receipts exact Chesto/Lum controller timing. |
 | status x ability | Natural Cure clears major status on switch-out; Guts/Marvel Scale read status for stats; immunities reject sleep/poison/burn/freeze/paralysis and Own Tempo rejects confusion (`battle_script_commands.c:9590-9604,2360-2435,2531-2545`; `battle_util.c:2873-2945`). | `tests/battleScriptMoveEndOpcode.test.ts` (ability status cures/Own Tempo); `tests/gate6StatusAbilityInteractions.test.ts` (R7 complete burn/Guts/Facade scripts, arithmetic, and chip) | R6 complete; R7 complete with two-seed OFF-ROM receipts. |
 | status x stat-stage | Burn's physical Attack modifier and paralysis speed modifier belong in stat calculation, while status application does not itself mutate stages; stage mutation is separately clamped (`battle_script_commands.c:7085-7089`). | `tests/gate6KernelInteractions.test.ts` (K4: burn Attack-halving and paralysis speed-quartering live in stat/damage calc with fixed stages; status application never mutates stages; burn + +2 Attack combined case in source order) | K4 complete (kernel proof, `8b63e15e`). |
 | status x switching/entry | Ordinary switching rebuilds the incoming record; Natural Cure only clears the departing major status (`battle_script_commands.c:4621-4657,9590-9604`). | `tests/battleScriptSwitchinOpcode.test.ts` (rebuild semantics) | R6 oracle. |
 | status x immunity/absorb | Type/ability gates prevent status before durable mutation: Fire blocks burn, Ice blocks freeze, Limber blocks paralysis, Immunity blocks poison (`battle_script_commands.c:2360-2425`). | `tests/battleScriptMoveEndOpcode.test.ts` (immunity cure pass); `tests/gate6StatusImmunityInteractions.test.ts` (R8 complete primary-effect scripts and ordinary controls) | R8 complete with paired two-seed OFF-ROM receipts. |
-| volatile x held-item | Persim/Lum cure confusion; Mental Herb cures attraction; White Herb restores negative stages, including at move-end (`battle_util.c:3383-3398,3540-3601,3739-3755`). | `tests/battleScriptMoveEndOpcode.test.ts` (Lum confusion) | R9: Swagger into Lum/White Herb distinguishes volatile cure from stage restore. |
+| volatile x held-item | Persim/Lum cure confusion; Mental Herb cures attraction; White Herb restores negative stages, including at move-end (`battle_util.c:3383-3398,3540-3601,3739-3755`). | `tests/battleScriptMoveEndOpcode.test.ts` (Lum confusion); `tests/gate6R9Receipt.test.ts` (legal Swagger/Lum versus White Herb receipt) | R9 complete: Lum cures confusion then consumes itself without undoing Swagger's +2 Attack, while White Herb has no negative stage to restore and remains held through confusion. |
 | volatile x ability | Own Tempo blocks confusion, Oblivious blocks attraction, Soundproof blocks sound-based state effects; end-turn ability hooks run before item hooks (`battle_script_commands.c:2531-2545,7676-7695,8508-8533`; `battle_util.c:1494-1507`). | `tests/battleScriptTryinfatuatingOpcode.test.ts`; `tests/battleScriptTrysetperishsongOpcode.test.ts`; `tests/gate6VolatileAbilityInteractions.test.ts` | R10 complete: paired Attract/Oblivious receipt plus Soundproof partial-immunity receipt. |
 | volatile x stat-stage | Swagger/Flatter-like effects combine a volatile application with a stat change; accuracy/evasion stages combine with Foresight's volatile exception (`battle_script_commands.c:1128-1142`; stat application `7085-7089`). | `tests/gate6KernelInteractions.test.ts` (K5: Swagger emits exactly one 6→8 Attack change + confusion; Own Tempo still receives +2 before rejecting confusion; Foresight ignores target evasion only, attacker accuracy stays active; `battle_scripts_1.s:1608-1629`) | K5 complete (kernel proof, `f368de69`). |
 | volatile x switching/entry | Ordinary switch replaces state; Baton Pass preserves `status2` and all stat stages, then clear-set-data handles the remainder (`battle_script_commands.c:4621-4657`). | `tests/battleScriptSwitchinOpcode.test.ts` (ordinary clear/Baton Pass retain) | R11 oracle: Substitute/Focus Energy/Baton Pass versus ordinary switch. |
-| volatile x immunity/absorb | Semi-invulnerable state blocks ordinary targeting; it also suppresses weather chip only underground/underwater (`battle_script_commands.c:1062-1085,7606-7635`). | `tests/battleScriptDamagingWeatherOpcode.test.ts` | R2 oracle (shared with weather). |
+| volatile x immunity/absorb | Semi-invulnerable state blocks ordinary targeting; it also suppresses weather chip only underground/underwater (`battle_script_commands.c:1062-1085,7606-7635`). | `tests/battleScriptDamagingWeatherOpcode.test.ts`; `tests/gate6R2Receipt.test.ts` | R2 compact OFF receipt (shared with weather). |
 | held-item x ability | Entry/fainted-action orchestration invokes Intimidate/Trace before normal item effects, so an Intimidate-created negative stage can feed White Herb (`battle_util.c:1959-1964,3305-3329`). Pinsir cannot demonstrate that interaction: its sole legal ability is Hyper Cutter, which prevents Intimidate's Attack drop before the item can activate (`species_info.h:3819-3843`). | `tests/battleScriptSwitchinOpcode.test.ts` (Intimidate/Trace); `tests/battleScriptMoveEndOpcode.test.ts` (item effects) | R12 is the Pinsir prevention control; R12b uses legal White Herb Machamp (Guts) for the activation/order/consumption proof. |
-| held-item x stat-stage | White Herb restores every negative stage, and threshold berries raise a stage only below the cap (`battle_util.c:3383-3398,3431-3496`). | `tests/battleScriptMoveEndOpcode.test.ts` (item activation); `tests/gate6KernelInteractions.test.ts` (K6: Liechi/Salac/Petaya parameterized across stages 0/5/6/10/11/12 — activation only below the +6 cap; White Herb restores all negative stages exactly once and stays held when nothing is restorable; Ganlon/Apicot stay excluded as zero-carrier) | K6 complete (kernel proof, `83dfd8fd`); R9/R12b receipts already banked. |
-| held-item x switching/entry | White Herb has an explicit switch-in handler that normalizes negative stages (`battle_util.c:3305-3329`); a normal switch reconstructs the party item unless Knock Off recorded it (`battle_script_commands.c:4637-4646`). | `tests/battleScriptSwitchinOpcode.test.ts` (item reconstruction) | R12 oracle. |
+| held-item x stat-stage | White Herb restores every negative stage, and threshold berries raise a stage only below the cap (`battle_util.c:3383-3398,3431-3496`). | `tests/battleScriptMoveEndOpcode.test.ts` (item activation); `tests/gate6KernelInteractions.test.ts` (K6: Liechi/Salac/Petaya parameterized across stages 0/5/6/10/11/12 — activation only below the +6 cap; White Herb restores all negative stages exactly once and stays held when nothing is restorable; Ganlon/Apicot stay excluded as zero-carrier); `tests/gate6R9Receipt.test.ts` (positive-stage guard) | K6/R9/R12b complete: R9's +2 Swagger result proves that White Herb stays held when no negative stage exists. |
+| held-item x switching/entry | White Herb has an explicit switch-in handler that normalizes negative stages (`battle_util.c:3305-3329`); a normal switch reconstructs the party item unless Knock Off recorded it (`battle_script_commands.c:4637-4646`). | `tests/battleScriptSwitchinOpcode.test.ts` (item reconstruction); `tests/gate6R12Receipt.test.ts` | R12 complete: Hyper Cutter prevents Granbull's entry drop before White Herb has a negative stage to restore, so both battle and party item copies remain held. |
 | held-item x immunity/absorb | No held-item branch changes an ability/type absorb result in Gen III; item effects run only after damage/effect eligibility.  Absorb handler is ability-only (`battle_util.c:2676-2747`) and item dispatch is separate (`3257-3330`). | `tests/gate6EntryItemInteractions.test.ts` (K7: all three matching redirects preserve Sitrus before damage/item dispatch) | Closed by K7; no new ROM fixture needed. |
 | ability x stat-stage | Clear Body/White Smoke block most preventable drops; Keen Eye blocks accuracy and Hyper Cutter Attack specifically; Intimidate creates an Attack drop (`battle_script_commands.c:6975-7038`; `battle_util.c:3003-3087`). | `tests/battleScriptStatbuffchangeOpcode.test.ts` (Clear Body/White Smoke/Keen Eye/Hyper Cutter specificity); `tests/battleScriptSwitchinOpcode.test.ts` (Intimidate blockers); `tests/gate6EntryItemInteractions.test.ts` (R13 Pidgeot pair) | R13 fixture receipts the paired Keen Eye-specific block and unrelated Intimidate Attack drop. |
 | ability x switching/entry | Switch-in scan queues weather, Intimidate, Trace, and Forecast; Natural Cure is the distinct switch-out hook (`battle_util.c:1959-1964,2485-2596`; `battle_script_commands.c:9590-9604`). | `tests/battleScriptSwitchinOpcode.test.ts` | R6/R12/R13 cover legal ordered combinations. |
@@ -103,17 +103,17 @@ are legal inert duplicates with `[Tackle,Tackle,Tackle,Tackle]`.
 | ID | Parties and controller route | Assertion |
 | --- | --- | --- |
 | R1 | `gate6-r1-sun-off.json`: faster player Vileplume uses Sunny Day, then constrained Articuno uses Ice Beam. `gate6-r1-control-off.json`: the identical parties/turn use Growth, a legal non-weather move with the same zero-RNG setup shape. | On seeds selected because the control's Ice Beam secondary roll freezes, both scenarios consume the same move RNG states; only active sun prevents status `0x20`. |
-| R2 | `gate6-r2-hail-off.json`: A: Dugtrio, Dig x4; B: Articuno, Hail x4. `gate6-r2-hail-control-off.json` replaces Dig with Growl x4. Hail is required here: Dugtrio's Ground type independently makes the suggested Sandstorm pairing permanently immune. | Active underground ignores chip; surfacing re-enables exact `floor(maxHP/16)` chip; the grounded control takes it every end turn. |
-| R3 | A: Golduck abilitySlot=1 (Cloud Nine), Rain Dance; B: neutral Tackle x4. Switch Golduck out after rain is live. | Weather flag remains but chip/accuracy resumes only after Cloud Nine leaves. |
+| R2 | `gate6-r2-hail-off.json`: A: Dugtrio, Dig x4; B: Articuno, Hail x4. `gate6-r2-hail-control-off.json` replaces Dig with Growl x4. Hail is required here: Dugtrio's Ground type independently makes the suggested Sandstorm pairing permanently immune. | Compact OFF receipt: active underground ignores chip; surfacing re-enables exact `floor(maxHP/16)` chip; the grounded control takes it every end turn. |
+| R3 | A: Golduck abilitySlot=1 (Cloud Nine), Rain Dance; B: Castform abilitySlot=0 (Forecast), Weather Ball x4. Switch Golduck out to the neutral Rattata bench after rain is live. | While Cloud Nine is active, rain remains `weather=1` but Forecast stays Normal; after the real switch, the timer remains live, Forecast changes Castform to Water, and a subsequent Weather Ball is selected under active rain. |
 | R4 | `gate6-r4-off.json`: A: Castform Forecast, Weather Ball x4; B: Rain Dance x4. `gate6-r4-control-off.json` changes only the opponent move to Splash x4. | Rain Dance's same-turn form pass sets Water type/form before Weather Ball; the paired control stays Normal. The long rain fixture also receipts expiry and Normal reversion. |
 | R5 | `gate6-r5-off.json`: Chesto Snorlax uses Rest twice versus Tackle x4 (the first full-HP failure stages real damage; the second Rest succeeds). `gate6-r5-lum-off.json`: Lum Machamp versus Duskull Confuse Ray x4. | Chesto clears Rest sleep/Nightmare and is consumed only after its wake message; Lum clears the RNG-duration confusion and is consumed after its distinct cure message. |
 | R6 | A: Starmie Natural Cure, Recover; bench: neutral. B: Muk Toxic x4. Apply Toxic, voluntarily switch, then return. | Departing Starmie party status becomes clear; ordinary incoming state is rebuilt. |
 | R7 | `gate6-r7-off.json`: Ursaring Guts/Facade versus Ninetales Will-O-Wisp x4. | Burn, exact Guts + Facade damage, and the independent end-turn chip are all receipted. |
 | R8 | `gate6-r8-off.json`: Snorlax Immunity versus Roselia Toxic x4; `gate6-r8-control-off.json` changes only Snorlax to Thick Fat. `gate6-r8-paralysis-off.json`: Limber Persian versus Electrike Thunder Wave x4; `gate6-r8-paralysis-control-off.json` uses ordinary Thick Fat Snorlax. | No durable status on either immune target; exact ability-specific prevention message, PP loss, and normal control application. Muk was corrected because it has no Immunity slot. |
-| R9 | A: Lum/White Herb Machamp; B: Gengar Swagger x4. | Lum removes confusion but not the +2 Attack boost; White Herb has no negative stage to restore, so it remains held while both +2 Attack and confusion persist (`battle_util.c:3739-3755`). |
+| R9 | `gate6-r9-off.json`: Lum Machamp takes the first Gengar Swagger, then the ordinary party picker switches to White Herb Machamp for the second. | Lum removes confusion but not the +2 Attack boost; White Herb has no negative stage to restore, so it remains held while both +2 Attack and confusion persist (`battle_util.c:3739-3755`). |
 | R10 | `gate6-r10-attract-off.json`: male Oblivious Lickitung versus female Gardevoir Attract x4; `gate6-r10-attract-control-off.json` changes only Lickitung to Own Tempo. `gate6-r10-perish-song-off.json`: Soundproof Exploud versus Lapras Perish Song x4. | Attraction is rejected with its distinct ability message while the compatible control is affected; Perish Song skips only Soundproof and still marks its ordinary user. |
 | R11 | A: Ninjask Substitute then Baton Pass; bench: recipient. B: passive Tackle x4. Repeat ordinary manual switch. | Baton Pass retains intended status2/stages; ordinary switch clears them. |
-| R12 | A: White Herb Pinsir (sole ability Hyper Cutter); B: Granbull Intimidate x4; switch Granbull in after initial player action. | Prevention control: Hyper Cutter blocks the Attack cut, so White Herb does not activate or get consumed. |
+| R12 | A: White Herb Pinsir (sole ability Hyper Cutter); initial B: one-HP Shedinja, then party-index-1 Granbull Intimidate x4 enters after the legal Aerial Ace knockout. | Compact OFF receipt: the controller selects the incoming party index before copying Granbull's battle data; Hyper Cutter then blocks the Attack cut, so White Herb does not activate or get consumed. |
 | R12b | A: White Herb Machamp (sole ability Guts); B enters as Granbull Intimidate with Tackle x4 after an initial action. | Viable interaction: Attack 6→5, Intimidate message, White Herb restore 5→6, herb message, then item consumption. |
 | R13 | A: Pidgeot Keen Eye with Tackle x4; B: Granbull Intimidate with Sand-Attack x4 (`gate6-r13-off.json`). | The entry hook lowers Attack 6→5; Sand-Attack then prints the Keen Eye-specific prevention message and leaves accuracy 6. Hyper Cutter×Intimidate and White Smoke×Intimidate are already kernel-pinned controls. |
 | R14 | No new fixture: `docs/absorbing-abilities-ground-truth.md` already proves the source family and banks Volt Absorb OFF-ROM receipts; the kernel has matching/nonmatching typed controls for Volt/Water Absorb and Flash Fire. | Existing pins cover zero direct damage, exact quarter-heal/minimum/cap behavior, full-HP bypass, first/repeat Flash Fire state, and later Fire damage. K7 adds the previously missing held-item dispatch boundary. |
@@ -236,6 +236,64 @@ its type/ability (`battle_script_commands.c:4621-4657`). The checked-in
 captures already hit each semantic boundary, so no fixture cadence or capture
 was altered.
 
+### R12 — Pinsir Hyper Cutter prevention on a real Granbull replacement
+
+`gate6-r12-off.json` already has the required complete legal three-mon
+parties and ordinary stock-ROM controller staging, so its fixture was not
+altered. White Herb Pinsir is player party index 0 with its only legal ability
+slot (Hyper Cutter, semantic ability `52`) and four Aerial Ace slots. The
+one-HP lead gives that legal move a deterministic knockout; opponent party
+index 1 is Granbull (species `210`, Intimidate ability `22`) with four Tackle
+slots. No HP, stage, status, item, weather, outcome, or entry state is
+injected.
+
+Two fresh Battle Scene OFF `bin/oracle lab` trees are byte-identical over
+every generated artifact: `manifest.json` has SHA-256
+`9d1327b7584a4890fda18dc0fc00a8d33176d7a42c88acc3e5e76f55e2f3242b`,
+and the sorted `frame-*.png` basename/hash tree has SHA-256
+`e2a60afd784484d0f6cdd511b96e938ee90a9fd45ebc591e08190379bf73b699`.
+Two fresh wrapper-validated, every-frame mGBA probes are likewise
+byte-identical (`381c6fb3aa05d7a3d4bfd90203fc52c63976fc999c60405fd8b3ff8764847ab5`).
+Only fresh temporary-output directory prefixes are normalized; no artifact
+path or semantic field is excluded. The committed compact receipt is
+`tools/probe/receipts/gate6-r12-off.json`, regenerated by
+`tools/probe/probe-gate6-r12-off.py` through `tools/run-mgba-probe.py` and
+hermetically pinned in `tests/gate6R12Receipt.test.ts`.
+
+The receipt preserves the actual controller/entry order rather than reducing
+the result to an endpoint. Aerial Ace faints the initial lead at frame `197`
+with Pinsir still at Attack stage `6`, battle and party White Herb item `180`,
+HP `172/172`, and all three status fields zero. At frame `517` the stock
+controller selects opponent party index `1` before copying incoming battle
+data: its active record is still the fainted lead, while controller fields are
+`activeBattler=1`, `execFlags=2`, player command `53`, opponent command `0`.
+At frame `519` the copied record is Granbull (`species=210`,
+`ability=22`, HP `165/165`) and Pinsir still has ability `52`, Attack `6`,
+both item copies `180`, and no status.
+
+The ordered relevant messages are Aerial Ace (frame `43`), lead faint
+(`373`), Granbull send-out (`521`), then exactly
+`PINSIR’s HYPER CUTTER / prevented Foe GRANBULL’s / INTIMIDATE from working!`
+at frame `742`. That prevention snapshot has `execFlags=1`; by frame `826`
+the entry controller is idle (`execFlags=0`) with the same Granbull and the
+same Pinsir item, stage, HP, and zero-status state. No sampled message names
+White Herb, and the final frame still has both Pinsir's active and persistent
+party item fields at `180`. The complete RNG ledger is in the receipt: draws
+occur at `68`, `71`, `287`, `901`, `908`, and `911`; the entry/prevention
+window holds RNG at `3421819359`, so neither Hyper Cutter prevention nor the
+non-activation of White Herb adds a draw.
+
+This is the source condition, not merely a preserved endpoint:
+`BattleScript_IntimidateActivates` checks `ABILITY_HYPER_CUTTER` before
+`statbuffchange` and branches to `BattleScript_IntimidatePrevented`
+(`data/battle_scripts_1.s:4024-4048`). Switch-in processing runs Intimidate
+before item effects (`battle_main.c:3880-3894`), while White Herb's
+`HOLD_EFFECT_RESTORE_STATS` only becomes an item effect after it finds a stage
+below neutral (`battle_util.c:3305-3329`). Pinsir's source entry has Hyper
+Cutter as its sole ability (`species_info.h:3819-3843`). R12 is therefore the
+prevention control; R12b below remains the distinct legal Guts Machamp proof
+of the opposite activation/order/consumption path.
+
 ### R12b — Granbull Intimidate, Guts Machamp, and White Herb entry order
 
 `gate6-r12b-off.json` uses complete legal parties and makes Machamp's
@@ -267,6 +325,85 @@ write. This receipts the source order: Intimidate's stage cut/message,
 then White Herb's normalization/message, then the shared item removal
 (`battle_main.c:3869-3894`, `battle_util.c:3003-3073,3303-3329`,
 `battle_script_commands.c:5901-5915`).
+
+### R3 — Cloud Nine removal/reactivation and Forecast Weather Ball
+
+`gate6-r3-off.json` now uses complete legal parties: player Golduck
+(species 55, ability slot 1 = Cloud Nine) has Rain Dance, its party-index-1
+bench is neutral Rattata, and the opponent is Castform (species 385, ability
+slot 0 = Forecast) with four Weather Ball slots.  The ordinary controller
+route performs Rain Dance and then the real party-menu switch; no weather,
+timer, type, HP, or outcome state is injected.
+
+The two fresh Battle Scene OFF runs are byte-identical: `manifest.json` has
+SHA-256 `e0fdd5103205c6f3313d06574dd05a9e180613562f8919a51debf3007a4bab60`,
+and the sorted capture-PNG basename tree has SHA-256
+`143f651f2ba31a82a1a7319b60a98c6e7982e23577ac201463a3e0a9e0b5d2b6`.
+Temporary output-directory prefixes are the only path normalization; no
+nondeterministic artifact paths or semantic fields were excluded.  The
+compact semantic/framebuffer receipt is committed at
+`tools/probe/receipts/gate6-r3-off.json`, with a hermetic pin in
+`tests/gate6R3Receipt.test.ts`.
+
+At frame 258, Rain Dance has produced `weather = 1` and timer `5`, while
+Golduck is active with Cloud Nine and Castform remains Normal/Normal
+(`types = [0,0]`), demonstrating the global weather-effect suppression.  The
+timer is `4` at frame 1150, where the ordinary switch has replaced Golduck
+with Rattata (`partyIndex = 1`, neutral ability 50); Castform is still
+Normal/Normal during the switch boundary.  At frame 1300 the same live rain
+flag/timer remains and Forecast has changed Castform to Water/Water
+(`[11,11]`).  Frame 1500 has Castform's Weather Ball (`currentMove = 311`)
+selected with PP `[10,10,9,9]`, proving a subsequent consumer sees active
+rain after Cloud Nine removal.  These are the source boundaries in
+`battle_util.h:47-48`, `battle_util.c:2396-2427`, and
+`battle_script_commands.c:9787-9805`.
+
+### R9 — Swagger × Lum Berry versus White Herb's negative-stage guard
+
+`gate6-r9-off.json` already supplied the needed legal single request: its
+complete parties place Lum Berry Machamp (item 141) first, White Herb Machamp
+(180) at party index 1, and a four-Swagger Gengar (207) opposite them.  The
+ordinary controller route first completes Gengar's Swagger against Lum
+Machamp, then opens the real party picker and switches to White Herb Machamp
+before Gengar's next real Swagger.  No HP, status, stat-stage, item, weather,
+or outcome state is injected.
+
+Two fresh Battle Scene OFF `bin/oracle lab` outputs are byte-identical over
+every generated file: `manifest.json` has SHA-256
+`d9e731373bf44be85fc088f14db98478f74bd715989aa435affcbc42532bfc11`, and
+the sorted `frame-*.png` basename/hash tree has SHA-256
+`35bb8b2c46b8157bf1a4ab637b0ce3570193ccba9f3a82d5db596f96fe16a559`.
+The read-only, every-frame mGBA receipt produced through
+`tools/run-mgba-probe.py` is also byte-identical (`05fcbde6df91d4fec842783f902e816a3fa7464c18f77021e8f5d6777ac1cc04`).
+Only temporary output-directory prefixes are normalized; no artifact paths
+or semantic fields are excluded.  The compact committed receipt is
+`tools/probe/receipts/gate6-r9-off.json`, regenerated by
+`tools/probe/probe-gate6-r9-off.py` and pinned hermetically in
+`tests/gate6R9Receipt.test.ts`.
+
+The exact first-path message order is `Foe GENGAR used SWAGGER!` (frame 43),
+`MACHAMP’s ATTACK sharply rose!` (200), `MACHAMP became confused!` (300),
+then `MACHAMP’s LUM BERRY cured its confusion problem!` (429).  At frame 106
+the active and persistent Lum item copies are both 141, Attack is `6→8`, and
+confusion is already cleared; the cure message still sees both item copies at
+141.  The shared removal occurs later at frame 544, changing Lum's battle and
+party copies to 0 while retaining Attack 8 and no confusion.  The relevant
+RNG checkpoints are the first Swagger move-state draws
+`919694434→3690816045` (frame 42) and
+`3690816045→983229340` (298); the cure and removal add no draw.
+
+The real switch reaches party index 1 at frame 1135 with White Herb 180 and
+the default Attack stage 6.  Its second real Swagger repeats the use/boost/
+confusion message order at frames 1277/1434/1534.  Attack becomes 8 at frame
+1340, then the confusion state is set at frame 1532 (`status2 = 2`, duration
+2) with the White Herb still present in both battle and party records.  It is
+still 180 at the confusion message and at the frame-1976 endpoint; no White
+Herb restoration message occurs because nothing lowered a stat.  The matching
+second-Swagger RNG checkpoints are `3031698222→530917129` (frame 1276) and
+`530917129→1160559944` (1532).  This is the exact separation in
+`battle_scripts_1.s:1608-1629` and `battle_util.c:3739-3755`: Swagger's
+positive Attack stage and volatile confusion do not qualify White Herb's
+negative-stage restoration branch.
 
 ### R11 — Ninjask Baton Pass versus ordinary-switch volatile/stage lifetime
 
@@ -505,27 +642,38 @@ immunity is still overall success.
 
 The card uses Hail rather than Sandstorm because Dugtrio's Ground typing is
 itself permanently sand-immune; a Dugtrio × Tyranitar fixture could not
-distinguish the volatile gate.  Both checked-in fixtures use complete legal
-parties.  Articuno's four Hail slots constrain the Factory AI; the control
-changes only Dugtrio's four Dig slots to Growl.
+distinguish the volatile gate. Both checked-in requests are `mechanicLab`,
+Battle Scene OFF, and complete legal three-mon parties with no transient
+state injection. Articuno's four Hail slots constrain the Factory AI; the
+sole staged difference is Dugtrio's four Dig slots versus four Growl slots,
+selected by ordinary controller input.
 
-Fresh Battle Scene OFF probes on seeds `1` and `324508639` agree exactly on
-the relevant state frames.  In `gate6-r2-hail-off.json`, Dig registers
-`STATUS3_UNDERGROUND` at frame 177, Hail becomes active at frame 213, and
-the first end-turn weather pass decrements its timer `5→4` at frame 352
-without changing Dugtrio's `142/142` HP.  Dig clears the underground bit on
-surfacing at frame 478.  The next weather pass decrements the timer `4→3`
-at frame 811 and applies `floor(142/16) = 8` damage at frame 1043,
-`142→134`.  Both frame-1043 receipts have raw-RGB SHA-256
-`b313741f71d4f4cb40918136519441dfb99816ad185c7e20b60b5f5211a49c9c`.
+The compact receipt is
+`tools/probe/receipts/gate6-r2-off.json`; its regeneration probe is
+`tools/probe/probe-gate6-r2-off.py`, run through `tools/run-mgba-probe.py`.
+Each request was run twice fresh with `bin/oracle lab`, with every output file
+byte-identical: Dig manifest `25925ff99b87e26cec4015d39cfa73cc3dd4a3471f444fb6b9c4cbade8d87aa2`,
+Dig capture aggregate `4b5126094f080961b04f55348a73f3bb02481f86021d3d724b753b80b114690d`,
+control manifest `944bf8344af23b31f4c97391141240946178548580b2b770d39d45b2c869a356`,
+and control capture aggregate `34b4ad1a884be3f6f96fd9f2109f473ded3a944d6e87188b9c2485027a28bd44`.
+Two fresh wrapper-validated compact probes were likewise byte-identical
+(`78ced100a8cfdd09b8f8ca130aff4754da62d2c3593e88298966421cf217384b`).
+No artifact paths are excluded; only fresh temporary-output directory prefixes
+are normalized out of path names.
 
-In `gate6-r2-hail-control-off.json`, the always-grounded Growl control takes
-the same eight HP at each end turn: `142→134` at frame 679 and `134→126`
-at frame 1508 on both seeds.  The frame-1508 hash is
-`513a143cb3905b19900ed3030046ce0c93558717e0969c788beecc7b8cc58bf7`.
-The paired Tier-1 test pins the full field pass: `HAILCONTINUES` precedes
-`PKMNPELTEDBYHAIL`, health-bar update, and HP mutation; while underground,
-the damage message and HP events are absent.
+For Dig, the receipt records `STATUS3_UNDERGROUND` entry at frame 177, Hail
+flag `0x80`/timer 5 at frame 213, then timer `5→4` at frame 352 with exact
+`142/142` HP while underground. Dig clears the bit at frame 478. The next
+pass is timer `4→3` at frame 811, followed by exact `floor(142/16) = 8`
+damage at frame 1043 (`142→134`; raw-RGB SHA-256
+`b313741f71d4f4cb40918136519441dfb99816ad185c7e20b60b5f5211a49c9c`).
+The grounded Growl control records the same 8-HP chip twice: `142→134` at
+frame 679 and `134→126` at frame 1508 (SHA-256
+`513a143cb3905b19900ed3030046ce0c93558717e0969c788beecc7b8cc58bf7`).
+The receipt pins ordered displayed messages paired to controller events and
+the complete Random()-active ledger: Hail continues while Dig is underground
+without a pelt message, then continues → pelt after surfacing; the grounded
+control has both continues → pelt passes.
 
 The exact immunity gate is not in `battle_util.c`: its field scheduler
 selects `BattleScript_DamagingWeatherContinues` at
@@ -629,15 +777,16 @@ Each line is one bounded worker slice, not an instruction to create all traces
 at once.  Use a fresh `mktemp -d` output directory and retain only the checked
 in scenario/evidence once accepted.
 
-1. **R11 — Baton Pass versus ordinary-switch volatile/stage retention.** `bin/oracle lab tools/battle-lab/gate6-r11-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts; npm run build`
-2. **R6 — Toxic x Natural Cure switch-out persistence.** `bin/oracle lab tools/battle-lab/gate6-r6-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptSwitchinOpcode.test.ts tests/battleScriptMoveEndOpcode.test.ts; npm run build`
-3. **R15 — CLOSED by the three-layer Flying/Levitate/grounded receipt above.**
-4. **R3 — Cloud Nine removal/reactivation.** `bin/oracle lab tools/battle-lab/gate6-r3-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptDamagingWeatherOpcode.test.ts; npm run build`
-5. **R9 — Swagger x Lum versus White Herb's negative-stage guard.** `bin/oracle lab tools/battle-lab/gate6-r9-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptMoveEndOpcode.test.ts; npm run build`
-6. **R13 — Intimidate x stat-drop prevention specificity.** `bin/oracle lab tools/battle-lab/gate6-r13-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptStatbuffchangeOpcode.test.ts tests/battleScriptSwitchinOpcode.test.ts; npm run build`
-7. **R14 — CLOSED by the banked absorption program plus K7's Gate-6 pair pin.** See the completed receipt note above; intentionally no duplicate `gate6-r14-off.json`.
-8. **R5 — sleep/confusion x Chesto/Lum exact cure timing.** `bin/oracle lab tools/battle-lab/gate6-r5-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptMoveEndOpcode.test.ts; npm run build`
-9. **R1 — CLOSED by the paired sun/control fixtures, two freeze-producing seeds, exact RNG ledgers, and existing kernel pair.**
+R2 now uses the compact deterministic semantic workflow used by R3, R9, and
+R12. All committed parameterized R-card requests now have deterministic
+semantic receipts; R12 was the final separately named prevention-control
+gap, and it remains distinct from R12b's activation receipt.
+
+There is no next R-card acceptance unit. This is not a Gate-6 closure claim:
+the broader breadth acceptance remains the Roadmap's finite
+unsupported-entry closure, per distinct effect/hook-family evidence and
+sibling batches, multiple seeded legal Factory rounds, and selected UI
+comparisons (`ROADMAP.md:1604-1613`).
 
 All seven kernel-first cards are now closed: K1 (end-turn item/weather
 order), K2 (weather-stage accuracy — caught and fixed a real accuracy-check
@@ -645,5 +794,6 @@ weather defect, `450cf532`), K3 (major/volatile canceler ordering), K4
 (status modifiers at fixed stages), K5 (Swagger/Foresight), and K6 (White
 Herb cap/reset) all live in `tests/gate6KernelInteractions.test.ts`
 (2026-07-30); K7 was closed above without inflated oracle work. With
-R7/R8 receipted the same day, the only open card is R4 (Castform
-Forecast), in flight.
+R2/R3/R7/R8/R9/R12 are receipted and R4 is already complete. The compact
+receipt queue is exhausted; the broader Gate-6 breadth acceptance remains
+open for the separate Roadmap conditions above.

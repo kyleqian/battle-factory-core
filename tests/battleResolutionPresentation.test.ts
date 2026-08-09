@@ -120,6 +120,18 @@ function event(
   });
 }
 
+function opcodeEvent(
+  sequence: number,
+  payload: BattleKernelSemanticEvent["payload"],
+  opcodeName: string,
+): BattleKernelSemanticEvent {
+  return Object.freeze({
+    sequence,
+    payload: Object.freeze(payload),
+    provenance: Object.freeze({ ...PROVENANCE, opcodeName }),
+  });
+}
+
 function nextState(
   rules: FactoryFullTurnDecisionRules,
   boundary: BattleBoundary,
@@ -977,7 +989,7 @@ describe("battle resolution presentation receipt ownership", () => {
     });
   });
 
-  it("freezes the trainer class/name used by an opponent switch-in message", () => {
+  it("presents a forced opponent recall, send-in, then dragged-out message without an ordinary trainer send-out message", () => {
     const initial = initialBattle();
     const context = initial.rules.rulesContext;
     const incoming = context.party.player[1]!;
@@ -1014,20 +1026,31 @@ describe("battle resolution presentation receipt ownership", () => {
     const resolution = createBattleResolutionPresentation({
       ...inputFor([
         event(0, {
+          kind: "message",
+          messageId: "STRINGID_USEDMOVE",
+          substitutions: [],
+          actionSnapshot: { attacker: 0, currentMove: 18, currentMovePosition: 0 },
+        }),
+        opcodeEvent(1, {
+          kind: "set-battler-sprite-visibility",
+          battler: 1,
+          invisible: true,
+        }, "B_SCR_OP_RETURNTOBALL"),
+        event(2, {
           kind: "switch",
           side: "opponent",
           fromPartyIndex: 0,
           toPartyIndex: 1,
         }),
-        event(1, {
-          kind: "message",
-          messageId: "STRINGID_SWITCHINMON",
-          substitutions: [],
-        }),
-        event(2, {
+        event(3, {
           kind: "switch-in-animation",
           battler: 1,
           partyIndex: 1,
+        }),
+        event(4, {
+          kind: "message",
+          messageId: "STRINGID_PKMNWASDRAGGEDOUT",
+          substitutions: [],
         }),
       ], NEXT_COMMAND, afterRules),
       opponentTrainer: Object.freeze({
@@ -1042,10 +1065,14 @@ describe("battle resolution presentation receipt ownership", () => {
       name: "DESTIN",
       speechLose: ["PLEASE I NEED", "SOME WATER"],
     });
-    expect(resolution.segments[0]!.commands[0]).toMatchObject({
-      type: "message",
-      lines: ["BUG CATCHER DESTIN sent", "out MACHOP!"],
-    });
+    expect(resolution.segments[0]!.commands).toMatchObject([
+      { type: "message", lines: ["ONIX used", "WHIRLWIND!"] },
+      { type: "switch-out", battler: 1 },
+      { type: "sprite-visibility", battler: 1, visible: false, recall: true },
+      { type: "switch-in", battler: 1, toPartyIndex: 1 },
+      { type: "message", lines: ["Foe KABUTO was", "dragged out!"] },
+      { type: "turn-end" },
+    ]);
     const summaryState = atRenderClock(resolution, 0, 0);
     const summarySegment = Object.freeze({
       ...resolution.segments[0]!,
@@ -1073,7 +1100,8 @@ describe("battle resolution presentation receipt ownership", () => {
     const incomingView = createBattleResolutionPresentationRenderView({
       ...summaryState,
       segments: Object.freeze([summarySegment]),
-      commandIndex: 3,
+      commandIndex: 4,
+      lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 3 }),
     });
     expect(incomingView.field.opponent).toMatchObject({
       partyIndex: 1,
@@ -1081,6 +1109,73 @@ describe("battle resolution presentation receipt ownership", () => {
       hp: 80,
       maxHP: 80,
     });
+    expect(incomingView.midBattleSwitchIn).toMatchObject({
+      battler: 1,
+      side: "opponent",
+      ballVisible: true,
+      ballPose: "closed",
+      ballPosition: { x: 176, y: 64 },
+    });
+    const openedView = createBattleResolutionPresentationRenderView({
+      ...summaryState,
+      segments: Object.freeze([summarySegment]),
+      commandIndex: 4,
+      lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 18 }),
+    });
+    expect(openedView.midBattleSwitchIn).toMatchObject({
+      battler: 1,
+      side: "opponent",
+      ballVisible: true,
+      ballPose: "open",
+      ballPosition: { x: 176, y: 64 },
+      monVisible: false,
+    });
+    const overlapView = createBattleResolutionPresentationRenderView({
+      ...summaryState,
+      segments: Object.freeze([summarySegment]),
+      commandIndex: 4,
+      lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 20 }),
+    });
+    expect(overlapView.midBattleSwitchIn).toMatchObject({
+      battler: 1,
+      side: "opponent",
+      ballVisible: true,
+      ballPose: "open",
+      monVisible: true,
+      emergeAccumulator: MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR + 18,
+      monTintCoefficient: 16,
+    });
+    const overlapFrame = createFramebuffer();
+    const ballOnlyFrame = createFramebuffer();
+    renderBattleResolutionSceneOffView(overlapFrame, overlapView);
+    renderBattleResolutionSceneOffView(ballOnlyFrame, Object.freeze({
+      ...overlapView,
+      midBattleSwitchIn: Object.freeze({
+        ...overlapView.midBattleSwitchIn!,
+        monVisible: false,
+      }),
+    }));
+    expect(overlapFrame).not.toEqual(ballOnlyFrame);
+    const closedBoundaryView = createBattleResolutionPresentationRenderView({
+      ...summaryState,
+      segments: Object.freeze([summarySegment]),
+      commandIndex: 4,
+      lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 17 }),
+    });
+    const closedFrame = createFramebuffer();
+    const openedFrame = createFramebuffer();
+    renderBattleResolutionSceneOffView(closedFrame, closedBoundaryView);
+    renderBattleResolutionSceneOffView(openedFrame, openedView);
+    const ballBox = (frame: Uint8Array): number[] => {
+      const pixels: number[] = [];
+      for (let y = 56; y < 72; y += 1) {
+        for (let x = 168; x < 184; x += 1) {
+          pixels.push(...frame.slice((y * 240 + x) * 4, (y * 240 + x) * 4 + 3));
+        }
+      }
+      return pixels;
+    };
+    expect(ballBox(openedFrame)).not.toEqual(ballBox(closedFrame));
   });
 
   it("times the voluntary mid-battle switch-in span so the send-out cadence holds (ISSUES #78)", () => {
@@ -1376,7 +1471,10 @@ describe("battle resolution presentation receipt ownership", () => {
     expect(throwing.midBattleSwitchIn).toEqual(
       expect.objectContaining({
         battler: 0,
+        side: "player",
         ballVisible: true,
+        ballPose: "closed",
+        ballPosition: { x: 43, y: 62 },
         monVisible: false,
       }),
     );

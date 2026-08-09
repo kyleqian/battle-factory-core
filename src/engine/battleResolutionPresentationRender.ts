@@ -252,7 +252,13 @@ export function midBattleSwitchOutAt(
 export type MidBattleSwitchInView = Readonly<{
   elapsed: number;
   battler: 0 | 1;
+  /** Controller/party owner carried from the typed singles battler. */
+  side: "player" | "opponent";
   ballVisible: boolean;
+  /** Visible send-out ball frame; null while the ball is absent. */
+  ballPose: "closed" | "open" | "open-final" | null;
+  /** Source send-out origin before any player throw translation. */
+  ballOrigin: Readonly<{ x: number; y: number }>;
   /**
    * Thrown-ball CENTER (px) + affine matrix, from the exact per-tick RAM
    * state (`MID_BATTLE_SWITCH_BALL_THROW_TABLE`, rendered one tick behind the
@@ -267,6 +273,8 @@ export type MidBattleSwitchInView = Readonly<{
   monVisible: boolean;
   /** `sAffineAnim_Battler_Emerge` accumulator during the ball-release scale-down. */
   emergeAccumulator: number;
+  /** Task_FadeMon_ToNormal coefficient for the opponent release silhouette. */
+  monTintCoefficient: number;
   /** Player-healthbox x2 slide offset (110 -> 0 at 5 px/frame), or null before the slide. */
   healthboxDx: number | null;
 }>;
@@ -283,17 +291,37 @@ export function midBattleSwitchInAt(
   elapsed: number,
   battler: 0 | 1,
 ): MidBattleSwitchInView {
+  const side = battler === 0 ? "player" : "opponent";
+  // DoPokeballSendOutAnimation routes by GetBattlerSide. Player send-outs
+  // arc from (24,68); opponent send-outs stay at the singles battler coord
+  // (176,40)+24 while SpriteCB_OpponentMonSendOut waits 16 callbacks.
+  const ballOrigin = side === "player"
+    ? Object.freeze({ x: MID_BATTLE_SWITCH_BALL_BASE_X, y: MID_BATTLE_SWITCH_BALL_BASE_Y })
+    : Object.freeze({ x: 176, y: 64 });
   // The ball's rendered state is the RAM probe one tick earlier (trace 1143 =
   // elapsed 3 first shows RAM 1142's (0,0) state; trace 1184 = elapsed 44
   // shows RAM 1183's (45,47); elapsed 45's RAM 1184 state renders no opaque
   // pixels above the terrain clip). Table entry = elapsed - 2.
   const ballEntry = elapsed - MID_BATTLE_SWITCH_BALL_FIRST_VISIBLE_ELAPSED;
-  const ballVisible = ballEntry >= 0
+  const playerBallVisible = ballEntry >= 0
     && ballEntry < MID_BATTLE_SWITCH_BALL_THROW_TABLE.length;
-  const ball = ballVisible
+  const ball = side === "player" && playerBallVisible
     ? MID_BATTLE_SWITCH_BALL_THROW_TABLE[ballEntry]!
     : null;
-  const monVisible = elapsed >= MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED;
+  const opponentBallPose = elapsed < 2 || elapsed >= 29
+    ? null
+    : elapsed < 18
+      ? "closed" as const
+      : elapsed < 23
+        ? "open" as const
+        : "open-final" as const;
+  const ballPose = side === "player"
+    ? (playerBallVisible ? "closed" as const : null)
+    : opponentBallPose;
+  const ballVisible = ballPose !== null;
+  const monVisible = elapsed >= (
+    side === "player" ? MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED : 19
+  );
   // The emerge's scale (and y2 descent) render one tick behind the §10.3
   // RAM table -- the mon becomes visible at elapsed 48 but that frame shows
   // the accumulator the probe records at 1187 (acc 40, pa 1638), and acc 58
@@ -303,32 +331,55 @@ export function midBattleSwitchInAt(
     MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR,
     MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR
       + MID_BATTLE_SWITCH_EMERGE_ACCUMULATOR_STEP
-        * (elapsed - MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED - 1),
+        * (elapsed - (side === "player" ? MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED + 1 : 19)),
   );
+  const opponentMaterializeLocal = elapsed - 19;
+  // The shared release task holds the ball-open tint at 16 for 23 rendered
+  // callbacks, then fades 15 -> 0. This is the handoff-relative form of the
+  // source-derived generated-opponent release cadence in battleScene.ts.
+  const monTintCoefficient = side === "opponent"
+    ? opponentMaterializeLocal < 23
+      ? 16
+      : Math.max(0, 15 - (opponentMaterializeLocal - 23))
+    : 0;
+  const healthboxSlideElapsed = side === "player"
+    ? MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED
+    : 33;
   const healthboxDx =
-    elapsed < MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED
+    elapsed < healthboxSlideElapsed
       ? null
-      : Math.max(
-          0,
-          MID_BATTLE_SWITCH_HEALTHBOX_START_DX
-            - MID_BATTLE_SWITCH_HEALTHBOX_STEP
-              * (elapsed - MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED),
-        );
+      : side === "player"
+        ? Math.max(
+            0,
+            MID_BATTLE_SWITCH_HEALTHBOX_START_DX
+              - MID_BATTLE_SWITCH_HEALTHBOX_STEP
+                * (elapsed - healthboxSlideElapsed),
+          )
+        : Math.min(
+            0,
+            -MID_BATTLE_SWITCH_HEALTHBOX_START_DX
+              + MID_BATTLE_SWITCH_HEALTHBOX_STEP
+                * (elapsed - healthboxSlideElapsed),
+          );
   return Object.freeze({
     elapsed,
     battler,
+    side,
     ballVisible,
+    ballPose,
+    ballOrigin,
     ballPosition: ball
       ? Object.freeze({
           x: MID_BATTLE_SWITCH_BALL_BASE_X + ball.x2,
           y: MID_BATTLE_SWITCH_BALL_BASE_Y + ball.y2,
         })
-      : Object.freeze({ x: MID_BATTLE_SWITCH_BALL_BASE_X, y: MID_BATTLE_SWITCH_BALL_BASE_Y }),
+      : ballOrigin,
     ballMatrix: ball
       ? Object.freeze({ pa: ball.pa, pb: ball.pb, pc: ball.pc, pd: ball.pd })
       : Object.freeze({ pa: 256, pb: 0, pc: 0, pd: 256 }),
     monVisible,
     emergeAccumulator,
+    monTintCoefficient,
     healthboxDx,
   });
 }

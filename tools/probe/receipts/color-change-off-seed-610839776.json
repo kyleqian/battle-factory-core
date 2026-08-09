@@ -1,0 +1,1364 @@
+{
+  "fixture": "tools/battle-lab/mechanic-color-change-off.json",
+  "profile": "battle-scene-off",
+  "seed": 610839776,
+  "initial": {
+    "rngValue": 2656568634,
+    "player": {
+      "species": 135,
+      "ability": 10,
+      "types": [
+        13,
+        13
+      ],
+      "hp": 140,
+      "pp": [
+        15,
+        15,
+        15,
+        15
+      ]
+    },
+    "opponent": {
+      "species": 317,
+      "ability": 16,
+      "types": [
+        0,
+        0
+      ],
+      "hp": 167,
+      "maxHp": 167,
+      "pp": [
+        40,
+        40,
+        40,
+        40
+      ]
+    },
+    "currentMove": 0,
+    "chosenMoveByBattler": [
+      0,
+      150
+    ],
+    "moveResultFlags": 0,
+    "lastUsedAbility": 16,
+    "displayedString": "What will\nJOLTEON do?"
+  },
+  "typeChanges": [
+    {
+      "frame": 197,
+      "from": [
+        0,
+        0
+      ],
+      "to": [
+        13,
+        13
+      ],
+      "currentMove": 85,
+      "lastUsedAbility": 16,
+      "randomCallsThisFrame": 0,
+      "targetHp": 127
+    }
+  ],
+  "colorChangeMessages": [
+    {
+      "frame": 198,
+      "displayedString": "Foe KECLEON<B4>s COLOR CHANGE\nmade it the ELECTR type!",
+      "currentMove": 85,
+      "lastUsedAbility": 16
+    }
+  ],
+  "randomFrames": [
+    {
+      "frame": 44,
+      "randomCalls": 1,
+      "rngBefore": 2656568634,
+      "rngAfter": 32392741,
+      "currentMove": 85
+    },
+    {
+      "frame": 72,
+      "randomCalls": 1,
+      "rngBefore": 32392741,
+      "rngAfter": 292652084,
+      "currentMove": 85
+    },
+    {
+      "frame": 75,
+      "randomCalls": 1,
+      "rngBefore": 292652084,
+      "rngAfter": 2010481303,
+      "currentMove": 85
+    },
+    {
+      "frame": 194,
+      "randomCalls": 1,
+      "rngBefore": 2010481303,
+      "rngAfter": 1803353278,
+      "currentMove": 85
+    },
+    {
+      "frame": 480,
+      "randomCalls": 1,
+      "rngBefore": 1803353278,
+      "rngAfter": 2452480345,
+      "currentMove": 0
+    },
+    {
+      "frame": 487,
+      "randomCalls": 5,
+      "rngBefore": 2452480345,
+      "rngAfter": 3062566076,
+      "currentMove": 0
+    }
+  ],
+  "transitions": [
+    {
+      "frame": 2,
+      "rngValue": 2656568634,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          15,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          0,
+          0
+        ],
+        "hp": 167,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        0,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "THUNDERBOLT"
+    },
+    {
+      "frame": 4,
+      "rngValue": 2656568634,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          15,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          0,
+          0
+        ],
+        "hp": 167,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        0,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "TYPE/<FC><06><01>ELECTR"
+    },
+    {
+      "frame": 34,
+      "rngValue": 2656568634,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          15,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          0,
+          0
+        ],
+        "hp": 167,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "TYPE/<FC><06><01>ELECTR"
+    },
+    {
+      "frame": 39,
+      "rngValue": 2656568634,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          15,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          0,
+          0
+        ],
+        "hp": 167,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 85,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "TYPE/<FC><06><01>ELECTR"
+    },
+    {
+      "frame": 43,
+      "rngValue": 2656568634,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          15,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          0,
+          0
+        ],
+        "hp": 167,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 85,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 16,
+      "displayedString": "TYPE/<FC><06><01>ELECTR"
+    },
+    {
+      "frame": 44,
+      "rngValue": 32392741,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          15,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          0,
+          0
+        ],
+        "hp": 167,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 85,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 16,
+      "displayedString": "TYPE/<FC><06><01>ELECTR"
+    },
+    {
+      "frame": 45,
+      "rngValue": 32392741,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          15,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          0,
+          0
+        ],
+        "hp": 167,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 85,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 16,
+      "displayedString": "JOLTEON used\nTHUNDERBOLT!"
+    },
+    {
+      "frame": 71,
+      "rngValue": 32392741,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          0,
+          0
+        ],
+        "hp": 167,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 85,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 16,
+      "displayedString": "JOLTEON used\nTHUNDERBOLT!"
+    },
+    {
+      "frame": 72,
+      "rngValue": 292652084,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          0,
+          0
+        ],
+        "hp": 167,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 85,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 16,
+      "displayedString": "JOLTEON used\nTHUNDERBOLT!"
+    },
+    {
+      "frame": 73,
+      "rngValue": 292652084,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          0,
+          0
+        ],
+        "hp": 167,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 85,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "JOLTEON used\nTHUNDERBOLT!"
+    },
+    {
+      "frame": 75,
+      "rngValue": 2010481303,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          0,
+          0
+        ],
+        "hp": 167,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 85,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "JOLTEON used\nTHUNDERBOLT!"
+    },
+    {
+      "frame": 189,
+      "rngValue": 2010481303,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          0,
+          0
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 85,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "JOLTEON used\nTHUNDERBOLT!"
+    },
+    {
+      "frame": 194,
+      "rngValue": 1803353278,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          0,
+          0
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 85,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "JOLTEON used\nTHUNDERBOLT!"
+    },
+    {
+      "frame": 197,
+      "rngValue": 1803353278,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 85,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 16,
+      "displayedString": "JOLTEON used\nTHUNDERBOLT!"
+    },
+    {
+      "frame": 198,
+      "rngValue": 1803353278,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 85,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 16,
+      "displayedString": "Foe KECLEON<B4>s COLOR CHANGE\nmade it the ELECTR type!"
+    },
+    {
+      "frame": 315,
+      "rngValue": 1803353278,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 85,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "Foe KECLEON<B4>s COLOR CHANGE\nmade it the ELECTR type!"
+    },
+    {
+      "frame": 320,
+      "rngValue": 1803353278,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "Foe KECLEON<B4>s COLOR CHANGE\nmade it the ELECTR type!"
+    },
+    {
+      "frame": 321,
+      "rngValue": 1803353278,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 150,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "Foe KECLEON<B4>s COLOR CHANGE\nmade it the ELECTR type!"
+    },
+    {
+      "frame": 322,
+      "rngValue": 1803353278,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 150,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 16,
+      "displayedString": "Foe KECLEON<B4>s COLOR CHANGE\nmade it the ELECTR type!"
+    },
+    {
+      "frame": 323,
+      "rngValue": 1803353278,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          40,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 150,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 16,
+      "displayedString": "Foe KECLEON used\nSPLASH!"
+    },
+    {
+      "frame": 348,
+      "rngValue": 1803353278,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          39,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 150,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 16,
+      "displayedString": "Foe KECLEON used\nSPLASH!"
+    },
+    {
+      "frame": 385,
+      "rngValue": 1803353278,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          39,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 150,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 16,
+      "displayedString": "But nothing happened!"
+    },
+    {
+      "frame": 477,
+      "rngValue": 1803353278,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          39,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 150,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "But nothing happened!"
+    },
+    {
+      "frame": 478,
+      "rngValue": 1803353278,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          39,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        85,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "But nothing happened!"
+    },
+    {
+      "frame": 480,
+      "rngValue": 2452480345,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          39,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        0,
+        0
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "But nothing happened!"
+    },
+    {
+      "frame": 484,
+      "rngValue": 2452480345,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          39,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        0,
+        0
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "What will\nJOLTEON do?"
+    },
+    {
+      "frame": 487,
+      "rngValue": 3062566076,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          39,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        0,
+        0
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 16,
+      "displayedString": "What will\nJOLTEON do?"
+    },
+    {
+      "frame": 488,
+      "rngValue": 3062566076,
+      "player": {
+        "species": 135,
+        "ability": 10,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 140,
+        "pp": [
+          14,
+          15,
+          15,
+          15
+        ]
+      },
+      "opponent": {
+        "species": 317,
+        "ability": 16,
+        "types": [
+          13,
+          13
+        ],
+        "hp": 127,
+        "maxHp": 167,
+        "pp": [
+          39,
+          40,
+          40,
+          40
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        0,
+        150
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 16,
+      "displayedString": "What will\nJOLTEON do?"
+    }
+  ],
+  "final": {
+    "rngValue": 3062566076,
+    "player": {
+      "species": 135,
+      "ability": 10,
+      "types": [
+        13,
+        13
+      ],
+      "hp": 140,
+      "pp": [
+        14,
+        15,
+        15,
+        15
+      ]
+    },
+    "opponent": {
+      "species": 317,
+      "ability": 16,
+      "types": [
+        13,
+        13
+      ],
+      "hp": 127,
+      "maxHp": 167,
+      "pp": [
+        39,
+        40,
+        40,
+        40
+      ]
+    },
+    "currentMove": 0,
+    "chosenMoveByBattler": [
+      0,
+      150
+    ],
+    "moveResultFlags": 0,
+    "lastUsedAbility": 16,
+    "displayedString": "What will\nJOLTEON do?"
+  }
+}

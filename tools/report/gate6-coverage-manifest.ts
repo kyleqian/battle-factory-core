@@ -108,6 +108,75 @@ function assertManifest(manifest: AnyRecord): void {
   }
   const forbiddenClosure = JSON.stringify(manifest).match(/\bgate\s*6\s+is\s+(closed|complete)\b/i);
   if (forbiddenClosure) throw new Error(`Gate-6 manifest contains a false closure claim: ${forbiddenClosure[0]}`);
+
+  const hookJoinSection = manifest.sections?.perMoveHookJoins as AnyRecord | undefined;
+  const hookJoinSummary = manifest.summary?.perMoveHookJoins as AnyRecord | undefined;
+  if (!hookJoinSection || !hookJoinSummary) throw new Error("Gate-6 manifest lacks the per-move hook-join ratchet");
+  for (const axis of PER_MOVE_HOOK_JOIN_AXES) {
+    const rows = hookJoinSection[axis];
+    const summary = hookJoinSummary[axis] as AnyRecord | undefined;
+    if (!Array.isArray(rows) || !summary) throw new Error(`Gate-6 manifest lacks ${axis} per-move hook-join rows`);
+    if (rows.length !== parameterizationMoves.length) {
+      throw new Error(`Gate-6 manifest ${axis} hook-join row count is not derived from the Level-50 parameterization`);
+    }
+    const rowsByMove = new Map<string, AnyRecord>();
+    for (const row of rows as AnyRecord[]) {
+      if (typeof row.move !== "string" || rowsByMove.has(row.move)) {
+        throw new Error(`Gate-6 manifest ${axis} hook-join rows must enumerate each move exactly once`);
+      }
+      rowsByMove.set(row.move, row);
+    }
+    let unsupported = 0;
+    for (const move of parameterizationMoves) {
+      const sourceHook = parameterizedHook(move, axis);
+      const row = rowsByMove.get(move.move);
+      if (!row) throw new Error(`Gate-6 manifest lacks ${axis} hook-join row for ${move.move}`);
+      if (row.status !== sourceHook.status || !String(row.reason ?? "").trim()) {
+        throw new Error(`Gate-6 manifest ${axis} hook-join status/reason drift for ${move.move}`);
+      }
+      if (row.effect !== move.moveTable?.effect || row.entryScript !== move.battleScript?.entryScript) {
+        throw new Error(`Gate-6 manifest ${axis} hook-join identity/effect drift for ${move.move}`);
+      }
+      const sourceLocator = `moves:${move.move}.hooks.${axis}`;
+      if (row.sourceArtifact?.path !== PARAMETERIZATION_PATH || row.sourceArtifact?.locator !== sourceLocator) {
+        throw new Error(`Gate-6 manifest ${axis} hook-join source artifact drift for ${move.move}`);
+      }
+      if (!(row.evidence as Evidence[] | undefined)?.some((item) => item.path === PARAMETERIZATION_PATH && item.locator === sourceLocator)) {
+        throw new Error(`Gate-6 manifest ${axis} hook-join evidence lacks ${move.move}`);
+      }
+      if (row.status === "unsupported") {
+        if (!Array.isArray(row.categories) || row.categories.length !== 0) {
+          throw new Error(`unsupported ${axis} hook-join row for ${move.move} claims a category`);
+        }
+        unsupported += 1;
+      } else if (row.status === SOURCE_PROVEN_FAMILY_STATUS) {
+        if (axis !== "ability" || !Array.isArray(row.categories) || row.categories.length === 0 || !String(row.notes ?? "").includes("unrelated ability families")) {
+          throw new Error(`source-proven ${axis} hook-join row for ${move.move} overclaims coverage`);
+        }
+        const requiredEvidencePaths = sourceProvenHookEvidence(sourceHook).map((item) => item.path);
+        for (const path of new Set(requiredEvidencePaths)) {
+          if (!(row.evidence as Evidence[]).some((item) => item.path === path)) {
+            throw new Error(`source-proven ${axis} hook-join row for ${move.move} lacks ${path}`);
+          }
+        }
+      } else {
+        throw new Error(`Gate-6 manifest ${axis} hook-join row for ${move.move} has an unknown status`);
+      }
+    }
+    if (summary.rows !== rows.length || summary.unsupported !== unsupported || summary.gaps !== unsupported) {
+      throw new Error(`Gate-6 manifest ${axis} hook-join summary has a false count or zero-gap claim`);
+    }
+  }
+  if (hookJoinSummary.total?.rows !== perMoveHookJoinTotals.rows
+    || hookJoinSummary.total?.unsupported !== perMoveHookJoinTotals.unsupported
+    || hookJoinSummary.total?.gaps !== perMoveHookJoinTotals.gaps) {
+    throw new Error("Gate-6 manifest per-move hook-join total has a false count or zero-gap claim");
+  }
+  if (perMoveHookJoinTotals.gaps > 0 && !/hook-join/i.test(String(manifest.gate6?.nextAcceptanceUnit ?? ""))) {
+    throw new Error("Gate-6 manifest must name a bounded per-move hook-join acceptance unit while gaps remain");
+  }
+  assertOnDamageCheckpoint(manifest);
+
   const rows: Row[] = [];
   function walk(value: unknown): void {
     if (Array.isArray(value)) {
@@ -177,6 +246,233 @@ const parameterizedMoves = new Map<string, AnyRecord>(
 const level50EffectNames = new Set(
   (parameterization.moves as AnyRecord[]).map((move) => move.moveTable.effect),
 );
+
+/**
+ * The parameterization deliberately keeps its per-move joins explicit. The
+ * narrow exceptions are source-proven shared dispatcher families: exact
+ * Soundproof selectors plus the audited absorbing routes have
+ * graph/program/source-handoff proof.
+ * Keep the remaining finite gaps visible without copying the parameterization's
+ * large move payload into this report a second time.
+ */
+type PerMoveHookJoinAxis = "item" | "ability";
+const PER_MOVE_HOOK_JOIN_AXES: readonly PerMoveHookJoinAxis[] = ["item", "ability"];
+const SOURCE_PROVEN_FAMILY_STATUS = "source-proven-family";
+const SOUNDPROOF_MOVES_BLOCK_CATEGORY = "moves-block-soundproof";
+const ABSORBING_CATEGORIES = new Set([
+  "absorbing-volt-absorb",
+  "absorbing-water-absorb",
+  "absorbing-flash-fire",
+]);
+const ON_DAMAGE_ABILITY_NAMES = new Set([
+  "ABILITY_COLOR_CHANGE",
+  "ABILITY_ROUGH_SKIN",
+  "ABILITY_EFFECT_SPORE",
+  "ABILITY_POISON_POINT",
+  "ABILITY_STATIC",
+  "ABILITY_FLAME_BODY",
+  "ABILITY_CUTE_CHARM",
+]);
+const parameterizationMoves = parameterization.moves as AnyRecord[];
+if (parameterizationMoves.length !== parameterizedMoves.size) {
+  throw new Error("level50 parameterization has duplicate move identities");
+}
+const onDamageAudit = parameterization.coverage?.hookCatalogs?.ability?.onDamage as AnyRecord | undefined;
+if (!onDamageAudit || onDamageAudit.status !== "evidence-checkpoint-no-promotion") {
+  throw new Error("level50 parameterization lacks the explicit ON_DAMAGE evidence checkpoint");
+}
+const onDamageCategories = onDamageAudit.categories as AnyRecord | undefined;
+if (!onDamageCategories) throw new Error("ON_DAMAGE evidence checkpoint lacks categories");
+const onDamageContactCandidates = onDamageCategories["moveend-contact-on-damage"]?.candidateRows as AnyRecord[] | undefined;
+const onDamageColorChangeCandidates = onDamageCategories["moveend-color-change"]?.candidateRows as AnyRecord[] | undefined;
+if (!Array.isArray(onDamageContactCandidates) || !Array.isArray(onDamageColorChangeCandidates)) {
+  throw new Error("ON_DAMAGE evidence checkpoint lacks finite candidate rows");
+}
+const onDamageBlockers = onDamageAudit.blockers as AnyRecord[] | undefined;
+if (!Array.isArray(onDamageBlockers) || onDamageBlockers.length === 0 || onDamageBlockers.some((blocker) => !String(blocker.id ?? "").trim() || !String(blocker.reason ?? "").trim())) {
+  throw new Error("ON_DAMAGE evidence checkpoint lacks nonempty blockers");
+}
+const onDamageBlockerIds = onDamageBlockers.map((blocker) => blocker.id as string);
+const onDamageRetiredBlockers = onDamageAudit.retiredBlockers as AnyRecord[] | undefined;
+if (!Array.isArray(onDamageRetiredBlockers) || onDamageRetiredBlockers.length === 0 || onDamageRetiredBlockers.some((blocker) => !String(blocker.id ?? "").trim() || !String(blocker.reason ?? "").trim())) {
+  throw new Error("ON_DAMAGE evidence checkpoint lacks the retired-blocker receipt record");
+}
+const onDamageRetiredBlockerIds = onDamageRetiredBlockers.map((blocker) => blocker.id as string);
+
+function assertOnDamageCheckpoint(manifest: AnyRecord): void {
+  const checkpoint = manifest.sections?.onDamageMoveEnd as AnyRecord | undefined;
+  const summary = manifest.summary?.onDamageMoveEnd as AnyRecord | undefined;
+  if (!checkpoint || !summary || checkpoint.status !== "evidence-checkpoint-no-promotion") {
+    throw new Error("Gate-6 manifest lacks the ON_DAMAGE evidence checkpoint");
+  }
+  if (checkpoint.promotedRows !== 0 || !String(checkpoint.notes ?? "").includes("No per-move rows are promoted")) {
+    throw new Error("Gate-6 ON_DAMAGE checkpoint makes a false promotion claim");
+  }
+  const expected = {
+    contactCandidates: onDamageContactCandidates.length,
+    colorChangeCandidates: onDamageColorChangeCandidates.length,
+    overlapCandidates: (onDamageAudit.overlap as AnyRecord).count,
+    entryBlockShapes: (onDamageAudit.routeShapeCensus as AnyRecord).entries.length,
+    blockers: onDamageBlockerIds.length,
+    retiredBlockers: onDamageRetiredBlockerIds.length,
+    promotedRows: 0,
+  };
+  if (JSON.stringify(summary) !== JSON.stringify(expected)) {
+    throw new Error("Gate-6 ON_DAMAGE checkpoint summary drift");
+  }
+  if (checkpoint.contactCandidates !== expected.contactCandidates
+    || checkpoint.colorChangeCandidates !== expected.colorChangeCandidates
+    || checkpoint.overlapCandidates !== expected.overlapCandidates
+    || checkpoint.entryBlockShapes !== expected.entryBlockShapes
+    || JSON.stringify(checkpoint.blockerIds) !== JSON.stringify(onDamageBlockerIds)
+    || JSON.stringify(checkpoint.retiredBlockerIds) !== JSON.stringify(onDamageRetiredBlockerIds)) {
+    throw new Error("Gate-6 ON_DAMAGE checkpoint payload drift");
+  }
+}
+
+function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
+  const families = hook.evidence?.families;
+  if (!Array.isArray(families) || families.length === 0) {
+    throw new Error("source-proven hook lacks family evidence");
+  }
+  if (!Array.isArray(hook.supportedCategories) || hook.supportedCategories.length !== families.length) {
+    throw new Error("source-proven hook categories/families do not have a one-to-one mapping");
+  }
+  const categories = families.map((family: AnyRecord) => family.category);
+  if (new Set(categories).size !== categories.length || JSON.stringify(categories) !== JSON.stringify(hook.supportedCategories)) {
+    throw new Error("source-proven hook categories/families are duplicate or out of order");
+  }
+  for (const family of families as AnyRecord[]) {
+    if (
+      typeof family.category !== "string"
+      || (family.category !== SOUNDPROOF_MOVES_BLOCK_CATEGORY && !ABSORBING_CATEGORIES.has(family.category))
+      || !family.selector?.path
+      || !family.entryPath?.source?.path
+      || !family.entryPath?.graph?.path
+      || !family.entryPath?.program?.path
+      || !family.dispatcher?.path
+      || !family.familyVerification?.batchTest
+    ) {
+      throw new Error(`source-proven family is incomplete: ${String(family.category)}`);
+    }
+    if (family.category === SOUNDPROOF_MOVES_BLOCK_CATEGORY && !family.entryPath.graph.attackCanceler) {
+      throw new Error("Soundproof family lacks its attackcanceler witness");
+    }
+    if (ABSORBING_CATEGORIES.has(family.category) && !family.entryPath.graph.accuracyCheck) {
+      throw new Error(`${family.category} lacks its accuracycheck witness`);
+    }
+  }
+  return families as AnyRecord[];
+}
+
+function parameterizedHook(move: AnyRecord, axis: PerMoveHookJoinAxis): AnyRecord {
+  const hook = move.hooks?.[axis] as AnyRecord | undefined;
+  if (!hook || !String(hook.reason ?? "").trim()) {
+    throw new Error(`level50 parameterization ${move.move}.${axis} lacks an explicit hook status/reason`);
+  }
+  if (hook.status === "unsupported") {
+    if (!Array.isArray(hook.supportedCategories) || hook.supportedCategories.length !== 0) {
+      throw new Error(`unsupported ${move.move}.${axis} must not claim a supported category`);
+    }
+    return hook;
+  }
+  if (axis !== "ability" || hook.status !== SOURCE_PROVEN_FAMILY_STATUS) {
+    throw new Error(`level50 parameterization ${move.move}.${axis} has an unsupported non-gap hook status`);
+  }
+  for (const family of sourceProvenFamilies(hook)) {
+    if (family.category === SOUNDPROOF_MOVES_BLOCK_CATEGORY && family.selector?.symbol !== move.move) {
+      throw new Error(`${move.move} Soundproof evidence lost its source selector identity`);
+    }
+  }
+  return hook;
+}
+
+function sourceProvenHookEvidence(hook: AnyRecord): Evidence[] {
+  return uniqueEvidence(sourceProvenFamilies(hook).flatMap((proof) => {
+    const terminal = proof.entryPath.graph.accuracyCheck ?? proof.entryPath.graph.attackCanceler;
+    const base = [
+      evidence(proof.selector.path, "source-selector", proof.selector.locator),
+      evidence(proof.entryPath.source.path, "battle-script-entry-path", `${proof.entryPath.graph.entryLabel}:${proof.entryPath.source.entryLine}`),
+      evidence(proof.entryPath.graph.path, "generated-battle-script-graph", `${proof.entryPath.graph.entryLabel}->${terminal.label}`),
+      evidence(proof.entryPath.program.path, "generated-battle-script-program", `${proof.entryPath.program.entryLabel}->${terminal.label}`),
+      evidence(proof.dispatcher.path, "source-dispatcher", proof.dispatcher.locator),
+    ];
+    if (proof.category === SOUNDPROOF_MOVES_BLOCK_CATEGORY) {
+      return [
+        ...base,
+        evidence("src/engine/battleScriptAbilityMovesBlock.ts", "source-shaped-family-implementation", "advanceBattleScriptMovesBlockAbility"),
+        evidence("tests/battleScriptAbilityMovesBlock.test.ts", "tier-1-sibling-batch", "blocks every and only source sound selector in both singles orientations"),
+        evidence("tests/soundproofOracleEvidence.test.ts", "battle-scene-off-evidence-test", "hyper-voice-blocked-by-soundproof"),
+        evidence("tests/fixtures/soundproof-off-evidence.json", "battle-scene-off-oracle-receipt", "hyper-voice-blocked-by-soundproof"),
+      ];
+    }
+    return [
+      ...base,
+      evidence("src/engine/battleScriptHitChainOpcode.ts", "source-shaped-family-implementation", "advancePastAccuracyCheck"),
+      evidence("tests/battleScriptHitChainOpcode.test.ts", "tier-1-sibling-batch", "AbilityBattleEffects(ABILITYEFFECT_ABSORBING)"),
+      evidence("tests/damageCalc.test.ts", "tier-1-flash-fire-damage-consumer"),
+      evidence("docs/absorbing-abilities-ground-truth.md", "shared-dispatcher-oracle-receipt", "two-seed Volt Absorb OFF receipt"),
+      evidence("tools/battle-lab/mechanic-absorbing-volt-absorb-off.json", "parameterized-oracle-request"),
+      evidence("tools/probe/probe-absorbing-ability-off.py", "oracle-probe"),
+      evidence("tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json", "battle-scene-off-oracle-receipt"),
+      evidence("tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json", "battle-scene-off-oracle-receipt"),
+    ];
+  }));
+}
+
+function makePerMoveHookJoinRows(axis: PerMoveHookJoinAxis): Row[] {
+  return parameterizationMoves.map((move) => {
+    if (typeof move.move !== "string" || !Number.isSafeInteger(move.id)) {
+      throw new Error("level50 parameterization has an invalid move identity");
+    }
+    const hook = parameterizedHook(move, axis);
+    const sourceLocator = `moves:${move.move}.hooks.${axis}`;
+    const sourceProven = hook.status === SOURCE_PROVEN_FAMILY_STATUS;
+    return Object.freeze({
+      id: `per-move-hook-join:${axis}:${move.move}`,
+      label: move.move,
+      axis,
+      move: move.move,
+      moveId: move.id,
+      effect: move.moveTable?.effect,
+      effectId: move.battleScript?.effectId,
+      entryScript: move.battleScript?.entryScript,
+      status: hook.status,
+      categories: hook.supportedCategories,
+      reason: hook.reason,
+      sourceArtifact: { path: PARAMETERIZATION_PATH, locator: sourceLocator },
+      evidence: uniqueEvidence([
+        evidence(PARAMETERIZATION_PATH, "per-move-hook-join-source", sourceLocator),
+        ...(sourceProven ? sourceProvenHookEvidence(hook) : []),
+      ]),
+      notes: sourceProven
+        ? `Source-proven only for ${hook.supportedCategories.join(", ")}; unrelated ability families are not promoted.`
+        : "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified.",
+    });
+  });
+}
+
+const perMoveHookJoinRows = {
+  item: makePerMoveHookJoinRows("item"),
+  ability: makePerMoveHookJoinRows("ability"),
+} as const;
+const perMoveHookJoinSummary = {
+  item: {
+    rows: perMoveHookJoinRows.item.length,
+    unsupported: perMoveHookJoinRows.item.filter((row) => row.status === "unsupported").length,
+    gaps: perMoveHookJoinRows.item.filter((row) => row.status === "unsupported").length,
+  },
+  ability: {
+    rows: perMoveHookJoinRows.ability.length,
+    unsupported: perMoveHookJoinRows.ability.filter((row) => row.status === "unsupported").length,
+    gaps: perMoveHookJoinRows.ability.filter((row) => row.status === "unsupported").length,
+  },
+};
+const perMoveHookJoinTotals = {
+  rows: perMoveHookJoinSummary.item.rows + perMoveHookJoinSummary.ability.rows,
+  unsupported: perMoveHookJoinSummary.item.unsupported + perMoveHookJoinSummary.ability.unsupported,
+  gaps: perMoveHookJoinSummary.item.gaps + perMoveHookJoinSummary.ability.gaps,
+};
 
 const moveEffectRows: Row[] = topologyEffects.map((effect) => {
   const census = effectCensusRows.get(effect.effect);
@@ -276,6 +572,78 @@ function testEvidenceFor(...terms: string[]): Evidence[] {
     .map((path) => evidence(path, "tier-1-test"));
 }
 
+/**
+ * These five rows were source-modeled but absent from the old text-token
+ * discovery rule. Each entry names a behavior-test assertion rather than
+ * merely importing or mentioning the state constant. Keep this narrow: it
+ * is an auditable exception for state-family Tier-1 evidence, never a way to
+ * promote static reachability or an oracle receipt.
+ */
+type StateBehaviorEvidence = Readonly<{ path: string; locator: string }>;
+const STATE_FAMILY_BEHAVIOR_EVIDENCE: Readonly<Record<string, readonly StateBehaviorEvidence[]>> = Object.freeze({
+  BATTLE_SCRIPT_STATUS3_CANT_SCORE_A_CRIT: Object.freeze([
+    Object.freeze({
+      path: "tests/battleScriptHitChainOpcode.test.ts",
+      locator: "STATUS3_CANT_SCORE_A_CRIT short-circuits a would-crit roll without consuming RNG",
+    }),
+  ]),
+  BATTLE_SCRIPT_STATUS3_LEECHSEED: Object.freeze([
+    Object.freeze({
+      path: "tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts",
+      locator: "Leech Seed setter writes STATUS3_LEECHSEED plus its encoded seeder id",
+    }),
+    Object.freeze({
+      path: "tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts",
+      locator: "Rapid Spin lifecycle clears STATUS3_LEECHSEED and its encoded seeder before the LeechSeedFree continuation",
+    }),
+  ]),
+  BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK: Object.freeze([
+    Object.freeze({
+      path: "tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts",
+      locator: "Leech Seed setter writes STATUS3_LEECHSEED plus its encoded seeder id",
+    }),
+    Object.freeze({
+      path: "tests/battleEndTurnOrchestration.test.ts",
+      locator: "Leech Seed end-turn decodes a nonzero encoded seeder owner and retains the seed lifecycle bit",
+    }),
+    Object.freeze({
+      path: "tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts",
+      locator: "Rapid Spin lifecycle clears STATUS3_LEECHSEED and its encoded seeder before the LeechSeedFree continuation",
+    }),
+  ]),
+  BATTLE_SCRIPT_STATUS3_YAWN: Object.freeze([
+    Object.freeze({
+      path: "tests/battleEndTurnOrchestration.test.ts",
+      locator: "first end-turn pass only decrements the counter (TURN(2) -> TURN(1)), no sleep transition, zero RNG",
+    }),
+    Object.freeze({
+      path: "tests/battleEndTurnOrchestration.test.ts",
+      locator: "second end-turn pass empties the counter and fires the real sleep transition",
+    }),
+  ]),
+  SIDE_STATUS_WORE_OFF_LABEL: Object.freeze([
+    Object.freeze({
+      path: "tests/battleScriptScreensWeatherOrchestration.test.ts",
+      locator: "Light Screen: set -> 4 silent decrement ticks -> SideStatusWoreOff message/buffer on tick 5 -> re-set succeeds",
+    }),
+  ]),
+});
+
+function stateTestEvidenceFor(symbol: string): Evidence[] {
+  const mapped = STATE_FAMILY_BEHAVIOR_EVIDENCE[symbol];
+  if (mapped === undefined) return testEvidenceFor(symbol);
+  if (!stateRowsBySymbol.has(symbol)) {
+    throw new Error(`state behavior evidence names a non-manifest state symbol: ${symbol}`);
+  }
+  return mapped.map(({ path, locator }) => {
+    requirePath(path);
+    if (!readText(path).includes(locator)) {
+      throw new Error(`state behavior evidence locator is not present in ${path}: ${locator}`);
+    }
+    return evidence(path, "tier-1-behavior-test", locator);
+  });
+}
+
 const aggregateStateRows = [
   ["state:stat-stages", "stat-stage-array", "stat stages", "src/engine/battleScriptRulesContext.ts", "tests/gate6KernelInteractions.test.ts"],
   ["state:switching-entry", "switching-entry", "switching and entry lifecycle", "src/engine/battleScriptSwitchinOpcode.ts", "tests/gate6SwitchInteractions.test.ts"],
@@ -287,7 +655,7 @@ const aggregateStateRows = [
 
 const stateFamilyRows: Row[] = [
   ...[...stateRowsBySymbol.values()].sort((a, b) => a.symbol.localeCompare(b.symbol)).map((item) => {
-    const tests = testEvidenceFor(item.symbol);
+    const tests = stateTestEvidenceFor(item.symbol);
     return Object.freeze({
       id: `state:${item.symbol}`,
       label: item.symbol,
@@ -457,6 +825,58 @@ function receiptIdsFor(kind: "ability" | "hold-effect", name: string): string[] 
   }).map((row) => row.cardId);
 }
 
+type HookReceiptInfo = {
+  directReceiptIds: string[];
+  statusOverride?: string;
+  evidence: Evidence[];
+  notes?: string;
+};
+
+function hookReceiptInfo(kind: "ability" | "hold-effect", name: string): HookReceiptInfo {
+  if (kind !== "ability") return { directReceiptIds: receiptIdsFor(kind, name), evidence: [] };
+  if (ON_DAMAGE_ABILITY_NAMES.has(name)) {
+    return {
+      directReceiptIds: [],
+      statusOverride: "engine-referenced-no-oracle-receipt",
+      evidence: uniqueEvidence([
+        evidence(PARAMETERIZATION_PATH, "on-damage-receipt-scope", `ability:${name}`),
+        ...(name === "ABILITY_STATIC"
+          ? [evidence(SCOUT_PATH, "incidental-receipt-rejected", "R8 is Immunity/Limber prevention, not Static ON_DAMAGE")]
+          : []),
+      ]),
+      notes: name === "ABILITY_STATIC"
+        ? "R8's direct receipt is Immunity/Limber prevention; its Electrike Static party appearance does not observe ABILITYEFFECT_ON_DAMAGE and is not an oracle receipt for Static."
+        : "No direct deterministic Battle Scene OFF receipt observes this ON_DAMAGE arm; source and Tier-1 coverage remain distinct from semantic/oracle acceptance.",
+    };
+  }
+  if (name === "ABILITY_VOLT_ABSORB") {
+    return {
+      directReceiptIds: ["absorbing-volt-absorb-off"],
+      evidence: [
+        evidence("docs/absorbing-abilities-ground-truth.md", "dedicated-shared-dispatcher-receipt", "two-seed Volt Absorb OFF receipt"),
+        evidence("tools/battle-lab/mechanic-absorbing-volt-absorb-off.json", "parameterized-oracle-request"),
+        evidence("tools/probe/probe-absorbing-ability-off.py", "oracle-probe"),
+        evidence("tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json", "battle-scene-off-oracle-receipt"),
+        evidence("tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json", "battle-scene-off-oracle-receipt"),
+      ],
+      notes: "Dedicated two-seed Battle Scene OFF Volt Absorb receipt. This is the one shared absorbing-dispatcher semantic receipt, not a per-move receipt.",
+    };
+  }
+  if (name === "ABILITY_WATER_ABSORB" || name === "ABILITY_FLASH_FIRE") {
+    return {
+      directReceiptIds: [],
+      statusOverride: "shared-dispatcher-sibling-tier1-verified",
+      evidence: [
+        evidence("docs/absorbing-abilities-ground-truth.md", "shared-dispatcher-receipt-scope", "Volt receipt plus source/Tier-1 siblings"),
+        evidence("tests/battleScriptHitChainOpcode.test.ts", "tier-1-absorbing-sibling-batch", "all matching/mismatched arms and target-state guards"),
+        evidence("tests/damageCalc.test.ts", "tier-1-flash-fire-damage-consumer"),
+      ],
+      notes: "No direct Water Absorb/Flash Fire oracle receipt is claimed here: R10/R7 only happened to include those abilities. Their source switch arms are sibling-batch-verified under the one dedicated shared-dispatcher Volt receipt.",
+    };
+  }
+  return { directReceiptIds: receiptIdsFor(kind, name), evidence: [] };
+}
+
 function parseParityRow(name: string, kind: "ability" | "hold-effect"): AnyRecord | undefined {
   const row = (kind === "ability" ? parityAbilityRows : parityHoldRows).get(name);
   if (!row) return undefined;
@@ -476,12 +896,14 @@ function makeHookRows(kind: "ability" | "hold-effect"): Row[] {
     const factoryCarriers = kind === "ability" ? abilityCarrierCount(name, true) : holdCarrierCount(name, true);
     const legalCarriers = kind === "ability" ? legalAbilityCarrierCount(name) : legalHoldEffectCarrierCount(name);
     const hookCases = [...new Set(sourceHooks.get(name) ?? [])].sort();
-    const receiptIds = receiptIdsFor(kind, name);
+    const receipt = hookReceiptInfo(kind, name);
+    const receiptIds = receipt.directReceiptIds;
     let status = "engine-referenced-no-oracle-receipt";
     if (name.endsWith("_NONE")) status = "sentinel-not-a-hook-member";
     else if (factoryCarriers === 0 && legalCarriers > 0) status = "zero-factory-carrier-widened-scope";
     else if (census?.status === "no-battle-hooks") status = "no-battle-hooks";
     else if (hookCases.length === 0) status = "source-hook-gap";
+    else if (receipt.statusOverride) status = receipt.statusOverride;
     else if (receiptIds.length > 0) status = "oracle-receipted-hook";
     return Object.freeze({
       id: `${kind}:${name}`,
@@ -500,17 +922,58 @@ function makeHookRows(kind: "ability" | "hold-effect"): Row[] {
         evidence(ABILITY_ITEM_DOC_PATH, "ability-item-census", `${kind}:${name}`),
         evidence(kind === "ability" ? SPECIES_PATH : ITEM_HOLD_EFFECTS_PATH, "legal-widened-scope"),
         evidence(kind === "ability" ? MONS_PATH : HELD_ITEMS_PATH, "factory-carrier-join"),
-        ...receiptIds.map((cardId) => evidence(SCOUT_PATH, "oracle-receipt", cardId)),
+        ...(name === "ABILITY_VOLT_ABSORB" ? [] : receiptIds.map((cardId) => evidence(SCOUT_PATH, "oracle-receipt", cardId))),
+        ...receipt.evidence,
       ]),
-      notes: factoryCarriers === 0 && legalCarriers > 0
+      notes: receipt.notes ?? (factoryCarriers === 0 && legalCarriers > 0
         ? "Legal Gen-3 widened-scope carrier exists, but no Level-50 Factory carrier exists; this is not a Factory closure."
-        : "Engine references and source-hook presence are census facts, not semantic acceptance.",
+        : "Engine references and source-hook presence are census facts, not semantic acceptance."),
     });
   });
 }
 
 const abilityRows = makeHookRows("ability");
 const holdEffectRows = makeHookRows("hold-effect");
+const onDamageMoveEndSummary = Object.freeze({
+  contactCandidates: onDamageContactCandidates.length,
+  colorChangeCandidates: onDamageColorChangeCandidates.length,
+  overlapCandidates: (onDamageAudit.overlap as AnyRecord).count,
+  entryBlockShapes: ((onDamageAudit.routeShapeCensus as AnyRecord).entries as AnyRecord[]).length,
+  blockers: onDamageBlockerIds.length,
+  retiredBlockers: onDamageRetiredBlockerIds.length,
+  promotedRows: 0,
+});
+const onDamageMoveEndRow: Row = Object.freeze({
+  id: "hook-audit:ABILITYEFFECT_ON_DAMAGE",
+  label: "ABILITYEFFECT_ON_DAMAGE Level-50 checkpoint",
+  status: "evidence-checkpoint-no-promotion",
+  contactCandidates: onDamageMoveEndSummary.contactCandidates,
+  colorChangeCandidates: onDamageMoveEndSummary.colorChangeCandidates,
+  overlapCandidates: onDamageMoveEndSummary.overlapCandidates,
+  entryBlockShapes: onDamageMoveEndSummary.entryBlockShapes,
+  blockerIds: onDamageBlockerIds,
+  retiredBlockerIds: onDamageRetiredBlockerIds,
+  promotedRows: 0,
+  evidence: uniqueEvidence([
+    evidence(PARAMETERIZATION_PATH, "finite-candidate-guard-route-shape-audit", "coverage.hookCatalogs.ability.onDamage"),
+    evidence("reference/pokeemerald/src/battle_util.c", "on-damage-source-guards", "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)"),
+    evidence("reference/pokeemerald/include/battle.h", "target-turn-damaged-definition", "TARGET_TURN_DAMAGED"),
+    evidence("reference/pokeemerald/src/battle_script_commands.c", "moveend-dispatcher", "MOVEEND_ON_DAMAGE_ABILITIES"),
+    evidence("reference/pokeemerald/data/battle_scripts_1.s", "moveend-target-script", "BattleScript_MoveEnd"),
+    evidence("src/data/gen/battle-script-graph.json", "generated-entry-block-census"),
+    evidence("src/data/gen/battle-script-program.json", "generated-entry-block-census"),
+    evidence("src/engine/battleScriptMoveEndOpcode.ts", "source-shaped-family-implementation", "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)"),
+    evidence("tests/battleScriptMoveEndOpcode.test.ts", "tier-1-sibling-batch", "MOVEEND_ON_DAMAGE_ABILITIES contact family"),
+    evidence("tests/colorChangeOracleEvidence.test.ts", "two-seed-semantic-receipt-ratchet", "Battle Scene OFF Color Change semantic receipts"),
+    evidence("tools/battle-lab/mechanic-color-change-off.json", "direct-parameterized-oracle-fixture"),
+    evidence("tools/probe/probe-color-change-ability-off.py", "direct-parameterized-oracle-probe"),
+    evidence("tools/probe/receipts/color-change-off-seed-610839776.json", "direct-parameterized-oracle-receipt"),
+    evidence("tools/probe/receipts/color-change-off-seed-324508639.json", "direct-parameterized-oracle-receipt"),
+    evidence(SCOUT_PATH, "direct-receipt-scope-audit", "R8 is Immunity/Limber prevention"),
+    evidence("tools/battle-lab/gate6-r8-paralysis-off.json", "incidental-static-party-not-receipt"),
+  ]),
+  notes: "No per-move rows are promoted. The source artifact enumerates every flag/power selector exactly once per applicable category, source guards, and entry-block graph/program shape. The missing-direct-on-damage-off-receipt blocker is retired by two fresh Battle Scene OFF Color Change receipts; complete ordered MOVEEND witnesses and runtime damage-state guard derivation remain explicit blockers.",
+});
 
 const trainerRows: Row[] = (trainers.entries as AnyRecord[]).map((trainer) => Object.freeze({
   id: `trainer:${trainer.id}`,
@@ -589,7 +1052,25 @@ function parseInteractionRows(): Row[] {
 const interactionRows = parseInteractionRows();
 const receiptGapCards = receiptFamilyRows.filter((row) => row.status !== "oracle-receipted-family");
 const rankedGap = rankedReceiptCards.map((id) => receiptGapCards.find((row) => row.label === id)).find(Boolean) ?? receiptGapCards[0];
-if (!rankedGap) throw new Error("Gate-6 manifest unexpectedly has no explicit receipt gap");
+const nextAcceptanceOverride = scout.match(/^<!-- gate6-next-acceptance: (R\d+b?) -->$/m)?.[1];
+const nextAcceptance = nextAcceptanceOverride === undefined
+  ? rankedGap
+  : receiptFamilyRows.find((row) => row.label === canonicalCardId(nextAcceptanceOverride));
+if (nextAcceptanceOverride !== undefined && !nextAcceptance) {
+  throw new Error(`Gate-6 next-acceptance override is not a known card: ${nextAcceptanceOverride}`);
+}
+const hasPerMoveHookJoinGaps = perMoveHookJoinTotals.gaps > 0;
+const nextAcceptanceLabel = hasPerMoveHookJoinGaps
+  ? "Per-move hook-join family"
+  : nextAcceptance?.label ?? "Broader Gate-6 breadth acceptance";
+const nextAcceptanceDetail = hasPerMoveHookJoinGaps
+  ? `Choose one source-bounded item or ability hook-join family and account for complete Battle Script reachability, including implicit fallthrough and source branch guards. Do not promote the remaining explicit gaps: ${perMoveHookJoinSummary.item.gaps} item joins and ${perMoveHookJoinSummary.ability.gaps} ability joins remain unsupported.`
+  : nextAcceptanceOverride === undefined
+    ? nextAcceptance === undefined
+      ? "All committed parameterized request cards are receipted, but that count alone does not meet ROADMAP.md:1604-1613's broader breadth acceptance (finite unsupported-entry closure, distinct effect/hook-family evidence, sibling batches, multiple seeded legal Factory rounds, and selected UI comparisons)."
+      : "Add and document the missing parameterized-oracle receipt before treating this family as accepted."
+    : "Upgrade its legacy receipt note to the compact deterministic semantic workflow.";
+const nextAcceptanceText = `${nextAcceptanceLabel}: ${nextAcceptanceDetail}`;
 
 const sourceInputs = [
   EXECUTABLE_DOC_PATH,
@@ -604,6 +1085,27 @@ const sourceInputs = [
   ITEM_HOLD_EFFECTS_PATH,
   MOVES_PATH,
   HOOKS_PATH,
+  "reference/pokeemerald/src/battle_util.c",
+  "reference/pokeemerald/src/battle_script_commands.c",
+  "reference/pokeemerald/include/battle.h",
+  "reference/pokeemerald/data/battle_scripts_1.s",
+  "src/data/gen/battle-script-graph.json",
+  "src/data/gen/battle-script-program.json",
+  "src/engine/battleScriptAbilityMovesBlock.ts",
+  "tests/battleScriptAbilityMovesBlock.test.ts",
+  "tests/soundproofOracleEvidence.test.ts",
+  "tests/fixtures/soundproof-off-evidence.json",
+  "src/engine/battleScriptHitChainOpcode.ts",
+  "tests/battleScriptHitChainOpcode.test.ts",
+  "tests/damageCalc.test.ts",
+  "src/engine/battleScriptMoveEndOpcode.ts",
+  "tests/battleScriptMoveEndOpcode.test.ts",
+  "tools/battle-lab/gate6-r8-paralysis-off.json",
+  "docs/absorbing-abilities-ground-truth.md",
+  "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+  "tools/probe/probe-absorbing-ability-off.py",
+  "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
+  "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
 ];
 for (const path of sourceInputs) requirePath(path);
 
@@ -612,7 +1114,7 @@ const manifest: AnyRecord = {
   gate6: {
     closed: false,
     verdict: "OPEN — this first manifest exposes coverage and receipt gaps; it does not claim Gate 6 closed.",
-    nextAcceptanceUnit: `${rankedGap.label}: add and document the missing parameterized-oracle receipt before treating this family as accepted.`,
+    nextAcceptanceUnit: nextAcceptanceText,
     interpretation: "Static executable reachability, engine references, Tier-1 proofs, and oracle receipts are separate evidence classes.",
   },
   generatedBy: RERUN_COMMAND,
@@ -626,6 +1128,12 @@ const manifest: AnyRecord = {
       level50Executable: moveRows.filter((row) => row.level50Status === "level50-executable").length,
       level50RosterOnly: moveRows.filter((row) => row.level50Status === "level50-roster-only").length,
     },
+    perMoveHookJoins: {
+      item: perMoveHookJoinSummary.item,
+      ability: perMoveHookJoinSummary.ability,
+      total: perMoveHookJoinTotals,
+    },
+    onDamageMoveEnd: onDamageMoveEndSummary,
     stateFamilies: { total: stateFamilyRows.length, tier1Covered: stateFamilyRows.filter((row) => row.status === "tier1-covered").length },
     hooks: {
       abilities: { total: abilityRows.length, oracleReceipted: abilityRows.filter((row) => row.status === "oracle-receipted-hook").length, zeroFactoryWidened: abilityRows.filter((row) => row.status === "zero-factory-carrier-widened-scope").length },
@@ -637,6 +1145,8 @@ const manifest: AnyRecord = {
   },
   sections: {
     moveEffect: { effects: moveEffectRows, moves: moveRows },
+    perMoveHookJoins: perMoveHookJoinRows,
+    onDamageMoveEnd: onDamageMoveEndRow,
     stateFamilies: stateFamilyRows,
     hooks: { abilities: abilityRows, holdEffects: holdEffectRows },
     corpus: { trainers: trainerRows, level50Sets: level50Rows },
@@ -665,23 +1175,28 @@ const markdown: string[] = [
   "",
   "**Gate 6 is OPEN.** This first manifest makes coverage gaps inspectable; it does not turn static token references, opcode reachability, Tier-1 proofs, or staged lab requests into semantic/oracle acceptance.",
   "",
-  `Next bounded acceptance unit: **${rankedGap.label}** — add and document its missing parameterized-oracle receipt.`,
+  `Next bounded acceptance unit: **${nextAcceptanceLabel}** — ${nextAcceptanceDetail}`,
   "",
   "## Headline",
   "",
   `- Effects: **${manifest.summary.effects.staticExecutable}/${manifest.summary.effects.total} static-executable**; moves: **${manifest.summary.moves.staticExecutable}/${manifest.summary.moves.total}** static-executable (**${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}** Level-50 roster moves executable, **${manifest.summary.moves.level50RosterOnly}** roster-only).`,
+  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors plus audited shared-absorbing routes, while every remaining gap retains its source-artifact locator and reason.`,
+  `- ON_DAMAGE checkpoint: **${manifest.summary.onDamageMoveEnd.contactCandidates}** contact candidates and **${manifest.summary.onDamageMoveEnd.colorChangeCandidates}** Color Change candidates (${manifest.summary.onDamageMoveEnd.overlapCandidates} overlap) are source-enumerated across ${manifest.summary.onDamageMoveEnd.entryBlockShapes} entry-block shapes. **${manifest.summary.onDamageMoveEnd.blockers}** blockers remain, **${manifest.summary.onDamageMoveEnd.retiredBlockers}** receipt blocker is retired, and **${manifest.summary.onDamageMoveEnd.promotedRows}** rows are promoted.`,
   `- State/status/volatile rows: **${manifest.summary.stateFamilies.tier1Covered}/${manifest.summary.stateFamilies.total}** have focused Tier-1 evidence; source-modeled rows remain listed separately.`,
   `- Hook universes: **${manifest.summary.hooks.abilities.total} abilities** and **${manifest.summary.hooks.holdEffects.total} hold effects**, including **${manifest.summary.hooks.abilities.zeroFactoryWidened + manifest.summary.hooks.holdEffects.zeroFactoryWidened}** legal widened-scope rows with zero Level-50 Factory carriers.`,
   `- Corpus: **${manifest.summary.corpus.ordinaryTrainers}/${trainers.count} ordinary trainers** and **${manifest.summary.corpus.level50Sets}/${LEVEL50_SET_COUNT} Level-50 sets** joined; the full set catalog contains ${manifest.summary.corpus.fullSetCatalog} rows including Open-only sets.`,
   `- Interaction matrix: **${manifest.summary.interactions.total}** axis-pair rows; ${manifest.summary.interactions.kernelProven} kernel-proven, ${manifest.summary.interactions.oracleReceipted} oracle-receipted, ${manifest.summary.interactions.receiptGaps} receipt gaps.`,
-  `- Parameterized Battle Scene OFF requests: **${manifest.summary.parameterizedOracle.receiptDocumented}/${manifest.summary.parameterizedOracle.scenarioRequests}** scenario receipts documented; **${manifest.summary.parameterizedOracle.receiptGaps}** request-level gaps and **${manifest.summary.parameterizedOracle.familyReceiptGaps}** family-level gaps remain explicit.`,
+  `- Parameterized Battle Scene OFF requests: **${manifest.summary.parameterizedOracle.receiptDocumented}/${manifest.summary.parameterizedOracle.scenarioRequests}** scenario receipts documented; **${manifest.summary.parameterizedOracle.receiptGaps}** request-level gaps and **${manifest.summary.parameterizedOracle.familyReceiptGaps}** family-level gaps remain explicit. Receipt count alone does not close the broader Gate-6 breadth acceptance.`,
   "",
   "## Evidence rules",
   "",
   "- `static-executable` comes only from the executable-frontier census and means opcode/operand reachability, not correct state transitions.",
   "- `engine-referenced` comes only from the ability/item census. It is a worklist fact, not semantic verification.",
   "- `catalog-joined` proves a finite source/data join. It does not provide a per-trainer or per-set oracle receipt.",
-  "- `oracle-receipted` requires a committed Gate-6 request card and a completed receipt-note heading in the scout. Fixture-only rows are intentionally not promoted.",
+  "- `source-proven-family` per-move hook joins name exact supported categories and carry one family witness per category. Soundproof reaches Cmd_attackcanceler; Volt/Water Absorb and Flash Fire reach accuracycheck → JumpIfMoveFailed. The shared absorber receipt is a two-seed Volt OFF trace plus all-three-arm Tier-1 siblings, not fabricated per-move receipts. No row claims unrelated families.",
+  "- `unsupported` per-move hook joins are intentionally not inferred from the partial dispatcher catalogs. Each row repeats only move identity, effect, entry script, reason, and a locator into `level50-move-parameterization.json`; it is not a support claim.",
+  "- `oracle-receipted` requires a committed deterministic request and receipt. Incidental ability presence in an unrelated scenario is not a direct ability receipt; Water Absorb and Flash Fire retain explicit shared-dispatcher sibling status, while R8's Static party appearance is explicitly not an ON_DAMAGE receipt.",
+  "- The five entries in `STATE_FAMILY_BEHAVIOR_EVIDENCE` use named behavior-test locators instead of token presence; that narrow Tier-1 override does not alter static, semantic, or oracle classifications.",
   "- Zero-Factory-carrier rows remain in the widened legal Gen-3 universe. They are not silently classified as Factory-complete.",
   "",
   "## Move/effect executable coverage",
@@ -702,6 +1217,38 @@ markdown.push(...table("Moves (all topology rows)", ["Move", "Effect", "Static s
   (row) => row.semanticAcceptance,
   (row) => evidenceText(row.evidence),
 ]));
+markdown.push("## Per-move item and ability hook-join coverage\n\n");
+markdown.push(...table("Item hook joins (all Level-50 roster moves)", ["Move", "Effect", "Entry script", "Status", "Category", "Reason", "Source artifact evidence"], perMoveHookJoinRows.item, [
+  (row) => row.move,
+  (row) => row.effect,
+  (row) => row.entryScript,
+  (row) => row.status,
+  (row) => row.categories.length === 0 ? "—" : row.categories.join(", "),
+  (row) => row.reason,
+  (row) => evidenceText(row.evidence),
+]));
+markdown.push(...table("Ability hook joins (all Level-50 roster moves)", ["Move", "Effect", "Entry script", "Status", "Category", "Reason", "Source artifact evidence"], perMoveHookJoinRows.ability, [
+  (row) => row.move,
+  (row) => row.effect,
+  (row) => row.entryScript,
+  (row) => row.status,
+  (row) => row.categories.length === 0 ? "—" : row.categories.join(", "),
+  (row) => row.reason,
+  (row) => evidenceText(row.evidence),
+]));
+markdown.push("## ABILITYEFFECT_ON_DAMAGE evidence checkpoint\n\n");
+markdown.push(...table("Blocked per-move audit", ["Status", "Contact candidates", "Color Change candidates", "Overlap", "Entry-block shapes", "Open blockers", "Retired blockers", "Promotions", "Evidence"], [onDamageMoveEndRow], [
+  (row) => row.status,
+  (row) => String(row.contactCandidates),
+  (row) => String(row.colorChangeCandidates),
+  (row) => String(row.overlapCandidates),
+  (row) => String(row.entryBlockShapes),
+  (row) => row.blockerIds.join(", "),
+  (row) => row.retiredBlockerIds.join(", "),
+  (row) => String(row.promotedRows),
+  (row) => evidenceText(row.evidence),
+]));
+markdown.push(`${onDamageMoveEndRow.notes}\n`);
 markdown.push("## Status, volatile, and state families\n\n");
 markdown.push(...table("State rows", ["Family", "State symbol", "Status", "Evidence"], stateFamilyRows, [
   (row) => row.family,
@@ -770,11 +1317,15 @@ markdown.push(...table("Gate-6 mechanicLab requests", ["Request", "Card", "Statu
   (row) => row.effectFamilies.join(", ") || "—",
   (row) => evidenceText(row.evidence),
 ]));
-markdown.push("## Ranked next acceptance data\n\n");
-receiptGapCards.forEach((row, index) => {
-  markdown.push(`${index + 1}. **${row.label}** — ${row.notes} Evidence: ${evidenceText(row.evidence)}.`);
-});
-markdown.push("\nThe JSON artifact is the authoritative machine-readable enumeration; this Markdown view intentionally repeats every row so a missing receipt cannot hide behind an aggregate percentage.\n");
+markdown.push("## Explicit receipt gaps\n\n");
+if (receiptGapCards.length === 0) {
+  markdown.push("None — all committed parameterized request cards have completed receipt notes. This does not close the broader Gate-6 breadth acceptance.");
+} else {
+  receiptGapCards.forEach((row, index) => {
+    markdown.push(`${index + 1}. **${row.label}** — ${row.notes} Evidence: ${evidenceText(row.evidence)}.`);
+  });
+}
+markdown.push("\nThe JSON artifact is the authoritative machine-readable enumeration; this Markdown view intentionally repeats every row so neither a missing receipt nor an all-receipted count can hide behind an aggregate percentage.\n");
 
 writeFileSync(JSON_OUTPUT, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 writeFileSync(MARKDOWN_OUTPUT, markdown.join("\n"), "utf8");
@@ -784,7 +1335,8 @@ console.log(
     + `Effects: ${manifest.summary.effects.staticExecutable}/${manifest.summary.effects.total} static-executable; `
     + `moves: ${manifest.summary.moves.staticExecutable}/${manifest.summary.moves.total}; `
     + `L50 moves: ${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}\n`
+    + `Per-move hook joins: ${manifest.summary.perMoveHookJoins.item.gaps} item gaps, ${manifest.summary.perMoveHookJoins.ability.gaps} ability gaps\n`
     + `Hooks: ${manifest.summary.hooks.abilities.total} abilities, ${manifest.summary.hooks.holdEffects.total} hold effects; `
     + `oracle receipts: ${manifest.summary.parameterizedOracle.receiptDocumented}/${manifest.summary.parameterizedOracle.scenarioRequests} scenarios\n`
-    + `Next acceptance unit: ${rankedGap.label}. Gate 6 remains OPEN.`,
+    + `Next acceptance unit: ${nextAcceptanceLabel}. Gate 6 remains OPEN.`,
 );

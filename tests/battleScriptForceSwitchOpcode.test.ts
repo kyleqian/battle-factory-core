@@ -201,6 +201,37 @@ describe("EFFECT_ROAR: full committed script walk, genuine terminal halt", () =>
     expect(target.hp).toBe(50); // rebuilt from the bench record's own HP, not the outgoing battler's
     expect(result.state.rulesContext.monToSwitchIntoId[1]).toBe(1);
     expect(result.state.rng.calls).toBe(2); // 1(ACC_CURR_MOVE) + 1(rejection-sampling pick, first draw lands)
+    expect(result.state.events.find((event) =>
+      event.kind === "set-battler-sprite-visibility"
+    )).toMatchObject({
+      kind: "set-battler-sprite-visibility",
+      battler: 1,
+      invisible: true,
+      provenance: {
+        opcodeName: "B_SCR_OP_RETURNTOBALL",
+        sourceLabel: "BattleScript_SuccessForceOut",
+      },
+    });
+    expect(result.state.events.flatMap((event) => {
+      if (
+        event.kind === "set-battler-sprite-visibility"
+        && event.provenance?.opcodeName === "B_SCR_OP_RETURNTOBALL"
+      ) return ["recall"];
+      if (event.kind === "switch") return ["switch"];
+      if (event.kind === "switch-in-animation") return ["switch-in-animation"];
+      if (event.kind === "message" && event.messageId === "STRINGID_PKMNWASDRAGGEDOUT") {
+        return ["message:dragged-out"];
+      }
+      if (event.kind === "message" && event.messageId === "STRINGID_SWITCHINMON") {
+        return ["message:ordinary-send-out"];
+      }
+      return [];
+    })).toEqual([
+      "recall",
+      "switch",
+      "switch-in-animation",
+      "message:dragged-out",
+    ]);
   });
 
   it("target out-levels attacker, level-check roll succeeds: switch-out proceeds through the real rejection-sampling pick", () => {
@@ -309,6 +340,27 @@ describe("B_SCR_OP_SWITCHOUTABILITIES dispatch (Cmd_switchoutabilities, battle_s
     expect(transition.control).toEqual({ kind: "advance" });
     expect(transition.rulesContext).toBe(initial.rulesContext);
     expect(transition.scheduler).toBe(initial.scheduler);
+  });
+});
+
+describe("B_SCR_OP_RETURNTOBALL dispatch (Cmd_returntoball, battle_script_commands.c:5346-5352)", () => {
+  const instruction = program.instructions.find(
+    (candidate) => candidate.opcodeName === "B_SCR_OP_RETURNTOBALL"
+      && candidate.source.label === "BattleScript_SuccessForceOut",
+  )!;
+
+  it("emits the target-owned recall visibility receipt without changing rules", () => {
+    const rc = context({ trainerBattle: true });
+    const initial = createBattleScriptMachine(program, instruction.source.label, rc, 1);
+    const state = Object.freeze({ ...initial, programCounter: instruction.programCounter });
+    const handlers = createBattleScriptForceSwitchOpcodeHandlers(program, { isControllerIdle: () => true });
+    const transition = handlers[instruction.opcodeId]!({ program, instruction, state });
+    expect(transition.control).toEqual({ kind: "advance" });
+    expect(transition.scheduler?.pendingControllerBattlers).toEqual([1]);
+    expect(transition.events).toEqual([
+      { kind: "set-battler-sprite-visibility", battler: 1, invisible: true },
+    ]);
+    expect(transition.rulesContext).toBe(state.rulesContext);
   });
 });
 

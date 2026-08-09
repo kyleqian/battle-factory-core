@@ -825,3 +825,43 @@ image differs" at a glance, and workers that cannot view images must
 decompose diffs numerically with ad-hoc PIL scripts. Possible fix: a
 `--regions` mode on inspect-frame that prints per-cluster bbox + px counts
 (the cluster code already exists) so no image viewing is needed.
+
+## Concurrent full suites exceed the documented 5–7 minute verification time
+
+2026-08-09, supervised main/side workers: two main-profile full suites plus an
+independent animation-profile suite shared the machine. The main and side runs
+took about 14 minutes each despite staying green. This delayed bounded worker
+handoff by about 7–9 minutes per lane. Hits: 2. A launcher-level full-suite
+semaphore would keep disjoint implementation parallel while serializing only
+the memory-heavy finish gate.
+
+## `compare --capture-range` does not accept battle-lab request fixtures
+
+2026-08-09, main worker (#84 cadence): passing a battle-lab fixture to
+`compare --capture-range` crashes because app replay expects top-level input
+segments. The worker lost about 2 minutes before switching to dense oracle
+evidence plus the public orchestrator verifier. Possible fix: reject the shape
+with a direct error that points to `bin/oracle lab`, or teach compare to unwrap
+the nested controller trace. Hits: 1.
+
+## Yielded full-suite calls are easy to restart accidentally
+
+2026-08-09, supervised side receipt, state-family, and absorbing-family
+verification: a yielded execution was mistaken for a completed call and
+restarted, leaving concurrent or redundant Vitest process groups until the
+supervisor identified the retained process or supplied final union
+verification. A fourth hit occurred when one retained side-worker session
+started two full suites while the animation supervisor was also verifying.
+The Color Change side worker then repeated a committed-tree full suite after
+a two-line type-only follow-up and hit its cap during that redundant run.
+Hits: 5; cost: about 40 minutes plus avoidable CPU contention. A
+launcher/tool response that visually distinguishes “still running; wait on
+this handle” from completion would prevent this class of mistake.
+
+## Broad formatter passes make legacy semantic patches hard to recover
+
+2026-08-09, #84 main worker: an accidental whole-file Prettier pass expanded a
+narrow battle-scene patch into a very large whitespace diff. Reversing that
+diff and reconstructing the semantic edits cost about 5 minutes. Prefer
+formatting only newly edited ranges/files whose existing style is already
+formatter-clean, or add a checked narrow-format helper.

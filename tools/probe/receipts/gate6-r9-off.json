@@ -1,0 +1,119 @@
+{
+  "schema": "gate6-r9-off-semantic-receipt/v1",
+  "cardId": "R9",
+  "oracleProfile": "battle-scene-off",
+  "scenario": "tools/battle-lab/gate6-r9-off.json",
+  "seed": 1,
+  "parties": {
+    "lumMachamp": {"species": 68, "item": 141, "abilitySlot": 0, "ability": 62, "moves": [33, 33, 33, 33]},
+    "whiteHerbMachamp": {"species": 68, "item": 180, "abilitySlot": 0, "ability": 62, "moves": [33, 33, 33, 33]},
+    "swaggerGengar": {"species": 94, "item": 0, "abilitySlot": 0, "ability": 26, "moves": [207, 207, 207, 207]}
+  },
+  "determinism": {
+    "freshRunCount": 2,
+    "artifactsCompared": ["manifest.json", "frame-*.png sorted by basename", "tools/run-mgba-probe.py compact semantic JSON"],
+    "ignoredNondeterministicPaths": [],
+    "temporaryOutputDirectoryPrefixesExcludedFromPathNames": true,
+    "manifestSha256": "d9e731373bf44be85fc088f14db98478f74bd715989aa435affcbc42532bfc11",
+    "capturePngBasenameSha256": "35bb8b2c46b8157bf1a4ab637b0ce3570193ccba9f3a82d5db596f96fe16a559",
+    "compactSemanticReceiptSha256": "05fcbde6df91d4fec842783f902e816a3fa7464c18f77021e8f5d6777ac1cc04",
+    "byteIdentical": true
+  },
+  "messageEvents": [
+    {"frame": 43, "text": "Foe GENGAR used\nSWAGGER!"},
+    {"frame": 200, "text": "MACHAMP’s ATTACK\nsharply rose!"},
+    {"frame": 300, "text": "MACHAMP became\nconfused!"},
+    {"frame": 429, "text": "MACHAMP’s LUM BERRY\ncured its confusion problem!"},
+    {"frame": 1277, "text": "Foe GENGAR used\nSWAGGER!"},
+    {"frame": 1434, "text": "MACHAMP’s ATTACK\nsharply rose!"},
+    {"frame": 1534, "text": "MACHAMP became\nconfused!"}
+  ],
+  "rngLedger": [
+    {"frame": 42, "randomCalls": 1, "rngBefore": 919694434, "rngAfter": 3690816045, "currentMove": 207, "chosenMoveByBattler": [33, 207]},
+    {"frame": 298, "randomCalls": 1, "rngBefore": 3690816045, "rngAfter": 983229340, "currentMove": 207, "chosenMoveByBattler": [33, 207]},
+    {"frame": 553, "randomCalls": 1, "rngBefore": 983229340, "rngAfter": 3421819359, "currentMove": 33, "chosenMoveByBattler": [33, 207]},
+    {"frame": 576, "randomCalls": 1, "rngBefore": 3421819359, "rngAfter": 1621732966, "currentMove": 33, "chosenMoveByBattler": [33, 207]},
+    {"frame": 579, "randomCalls": 1, "rngBefore": 1621732966, "rngAfter": 2756097505, "currentMove": 33, "chosenMoveByBattler": [33, 207]},
+    {"frame": 716, "randomCalls": 1, "rngBefore": 2756097505, "rngAfter": 1250713408, "currentMove": 33, "chosenMoveByBattler": [33, 207]},
+    {"frame": 726, "randomCalls": 1, "rngBefore": 1250713408, "rngAfter": 1850371763, "currentMove": 0, "chosenMoveByBattler": [0, 0]},
+    {"frame": 733, "randomCalls": 5, "rngBefore": 1850371763, "rngAfter": 3031698222, "currentMove": 0, "chosenMoveByBattler": [0, 0]},
+    {"frame": 1276, "randomCalls": 1, "rngBefore": 3031698222, "rngAfter": 530917129, "currentMove": 207, "chosenMoveByBattler": [0, 207]},
+    {"frame": 1532, "randomCalls": 1, "rngBefore": 530917129, "rngAfter": 1160559944, "currentMove": 207, "chosenMoveByBattler": [0, 207]},
+    {"frame": 1633, "randomCalls": 1, "rngBefore": 1160559944, "rngAfter": 3278432283, "currentMove": 0, "chosenMoveByBattler": [0, 0]},
+    {"frame": 1640, "randomCalls": 5, "rngBefore": 3278432283, "rngAfter": 1636055286, "currentMove": 0, "chosenMoveByBattler": [0, 0]}
+  ],
+  "checkpoints": {
+    "lumBoostAndCure": {
+      "frame": 106,
+      "framebufferSha256": "8f4f5093d3e29cee2cd2d6e21a77d949af355b9ea1b8f31861ad221ff8110a45",
+      "rngValue": 3690816045,
+      "player": {"partyIndex": 0, "species": 68, "item": 141, "partyItems": [141, 180, 0], "attackStage": 8, "status2": 0, "confusionTurns": 0, "pp": [35, 35, 35, 35]},
+      "opponent": {"species": 94, "item": 0, "pp": [15, 14, 15, 15]},
+      "currentMove": 207,
+      "chosenMoveByBattler": [33, 207]
+    },
+    "lumCureMessageBeforeConsumption": {
+      "frame": 429,
+      "framebufferSha256": "5eebf49240529c3facea73daacce2f9d8de41e8aa4ed016cf27729a599005461",
+      "rngValue": 983229340,
+      "player": {"partyIndex": 0, "species": 68, "item": 141, "partyItems": [141, 180, 0], "attackStage": 8, "status2": 0, "confusionTurns": 0, "pp": [35, 35, 35, 35]},
+      "opponent": {"species": 94, "item": 0, "pp": [15, 14, 15, 15]},
+      "currentMove": 207,
+      "chosenMoveByBattler": [33, 207]
+    },
+    "lumConsumed": {
+      "frame": 544,
+      "framebufferSha256": "64b535620ef2c80e6768b990d41f8c00cbb6f80e9bdebf4d3caef41efebb40e2",
+      "rngValue": 983229340,
+      "player": {"partyIndex": 0, "species": 68, "item": 0, "partyItems": [0, 180, 0], "attackStage": 8, "status2": 0, "confusionTurns": 0, "pp": [35, 35, 35, 35]},
+      "opponent": {"species": 94, "item": 0, "pp": [15, 14, 15, 15]},
+      "currentMove": 207,
+      "chosenMoveByBattler": [33, 207]
+    },
+    "whiteHerbSwitchIn": {
+      "frame": 1135,
+      "framebufferSha256": "6c6ec89165060ad5e550578bcdf1bf4ec980038ea2b9734ee5f055507ad7c491",
+      "rngValue": 3031698222,
+      "player": {"partyIndex": 1, "species": 68, "item": 180, "partyItems": [0, 180, 0], "attackStage": 6, "status2": 0, "confusionTurns": 0, "pp": [35, 35, 35, 35]},
+      "opponent": {"species": 94, "item": 0, "pp": [15, 14, 15, 15]},
+      "currentMove": 0,
+      "chosenMoveByBattler": [0, 207]
+    },
+    "whiteHerbBoost": {
+      "frame": 1340,
+      "framebufferSha256": "8f4f5093d3e29cee2cd2d6e21a77d949af355b9ea1b8f31861ad221ff8110a45",
+      "rngValue": 530917129,
+      "player": {"partyIndex": 1, "species": 68, "item": 180, "partyItems": [0, 180, 0], "attackStage": 8, "status2": 0, "confusionTurns": 0, "pp": [35, 35, 35, 35]},
+      "opponent": {"species": 94, "item": 0, "pp": [14, 14, 15, 15]},
+      "currentMove": 207,
+      "chosenMoveByBattler": [0, 207]
+    },
+    "whiteHerbConfusedAndHeld": {
+      "frame": 1532,
+      "framebufferSha256": "0633662dc91ddf3fb16f22ac047db955072d623b4badb9d051799b88c35229b7",
+      "rngValue": 1160559944,
+      "player": {"partyIndex": 1, "species": 68, "item": 180, "partyItems": [0, 180, 0], "attackStage": 8, "status2": 2, "confusionTurns": 2, "pp": [35, 35, 35, 35]},
+      "opponent": {"species": 94, "item": 0, "pp": [14, 14, 15, 15]},
+      "currentMove": 207,
+      "chosenMoveByBattler": [0, 207]
+    },
+    "whiteHerbConfusionMessageAndHeld": {
+      "frame": 1534,
+      "framebufferSha256": "0633662dc91ddf3fb16f22ac047db955072d623b4badb9d051799b88c35229b7",
+      "rngValue": 1160559944,
+      "player": {"partyIndex": 1, "species": 68, "item": 180, "partyItems": [0, 180, 0], "attackStage": 8, "status2": 2, "confusionTurns": 2, "pp": [35, 35, 35, 35]},
+      "opponent": {"species": 94, "item": 0, "pp": [14, 14, 15, 15]},
+      "currentMove": 207,
+      "chosenMoveByBattler": [0, 207]
+    }
+  },
+  "final": {
+    "frame": 1976,
+    "framebufferSha256": "b66c786150a880308cc242b8ed813af2d46fe2186e47fc95275bc4050f3d2d96",
+    "rngValue": 1636055286,
+    "player": {"partyIndex": 1, "species": 68, "item": 180, "partyItems": [0, 180, 0], "attackStage": 8, "status2": 2, "confusionTurns": 2, "pp": [35, 35, 35, 35]},
+    "opponent": {"species": 94, "item": 0, "pp": [14, 14, 15, 15]},
+    "currentMove": 0,
+    "chosenMoveByBattler": [0, 207]
+  }
+}

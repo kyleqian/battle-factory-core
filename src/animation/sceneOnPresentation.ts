@@ -13,6 +13,11 @@ import {
   type BiteEffect,
 } from "./bite.ts";
 import {
+  substituteAtAge,
+  type SubstituteState,
+} from "./substitute.ts";
+import { hazeAtAge, type HazeState } from "./haze.ts";
+import {
   headbuttAtAge,
   type HeadbuttState,
 } from "./headbutt.ts";
@@ -256,6 +261,7 @@ import {
   reflectAtAge,
   type ReflectState,
 } from "./reflect.ts";
+import { barrierAtAge, type BarrierState } from "./barrier.ts";
 import {
   brickBreakAtAge,
   type BrickBreakBody,
@@ -462,6 +468,7 @@ import {
   type AstonishDropletRandom,
   type AstonishState,
 } from "./astonish.ts";
+import { fakeOutAtAge, type FakeOutState } from "./fakeOut.ts";
 import {
   razorLeafAtAge,
   type RazorLeafState,
@@ -686,6 +693,7 @@ export interface SceneOnPresentationBattler {
     | "VILEPLUME"
     | "BUTTERFREE"
     | "ONIX"
+    | "DROWZEE"
     | "KRABBY"
     | "SURSKIT"
     | "KOFFING"
@@ -734,6 +742,8 @@ export interface SceneOnPresentationBattler {
     | "GLOOM"
     | "TOGETIC"
     | "MACHOKE"
+    | "MAKUHITA"
+    | "GOLEM"
     | "WINGULL"
     | "TAILLOW"
     | "EEVEE"
@@ -1274,6 +1284,21 @@ export interface SceneOnLightScreenConfig {
     readonly wall: number;
     readonly sparkles: readonly number[];
   }>;
+}
+
+export interface SceneOnBarrierConfig {
+  readonly move: "BARRIER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly allocatorProfile: Readonly<{ readonly wall: number }>;
+}
+
+export interface SceneOnHazeConfig {
+  readonly move: "HAZE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
 export interface SceneOnMirrorCoatConfig {
@@ -1932,6 +1957,22 @@ export interface SceneOnAstonishConfig {
   ];
 }
 
+export interface SceneOnFakeOutConfig {
+  readonly move: "FAKE_OUT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source mon-pic coordinate consumed by SetBattlerSpriteYOffsetFromYScale. */
+  readonly targetPictureYOffset: number;
+}
+
+export interface SceneOnSubstituteConfig {
+  readonly move: "SUBSTITUTE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnRazorLeafConfig {
   readonly move: "RAZOR_LEAF";
   readonly attacker: SceneOnPresentationBattler;
@@ -2218,6 +2259,8 @@ export type SceneOnMoveConfig =
   | SceneOnReflectConfig
   | SceneOnBrickBreakConfig
   | SceneOnLightScreenConfig
+  | SceneOnBarrierConfig
+  | SceneOnHazeConfig
   | SceneOnMirrorCoatConfig
   | SceneOnSynthesisConfig
   | SceneOnAromatherapyConfig
@@ -2289,6 +2332,8 @@ export type SceneOnMoveConfig =
   | SceneOnDynamicPunchConfig
   | SceneOnDizzyPunchConfig
   | SceneOnAstonishConfig
+  | SceneOnFakeOutConfig
+  | SceneOnSubstituteConfig
   | SceneOnRazorLeafConfig
   | SceneOnMagicalLeafConfig
   | SceneOnPoisonTailConfig
@@ -2368,6 +2413,10 @@ export type SceneOnBrickBreakPresentationState =
   SceneOnMovePresentationState<SceneOnBrickBreakConfig>;
 export type SceneOnLightScreenPresentationState =
   SceneOnMovePresentationState<SceneOnLightScreenConfig>;
+export type SceneOnBarrierPresentationState =
+  SceneOnMovePresentationState<SceneOnBarrierConfig>;
+export type SceneOnHazePresentationState =
+  SceneOnMovePresentationState<SceneOnHazeConfig>;
 export type SceneOnMirrorCoatPresentationState =
   SceneOnMovePresentationState<SceneOnMirrorCoatConfig>;
 export type SceneOnSparkPresentationState =
@@ -2796,6 +2845,18 @@ export interface SceneOnAstonishView extends AstonishState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly targetBattler: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFakeOutView extends FakeOutState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly targetBattler: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSubstituteView extends SubstituteState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnRazorLeafView extends RazorLeafState {
@@ -3478,6 +3539,8 @@ export function createSceneOnMovePresentation<
     | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnTailGlowConfig
     | SceneOnScaryFaceConfig
     | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
+    | SceneOnBarrierConfig
+    | SceneOnHazeConfig
     | SceneOnBiteConfig
     | SceneOnHeadbuttConfig | SceneOnBodySlamConfig | SceneOnSlamConfig
     | SceneOnSecretPowerConfig
@@ -4011,6 +4074,52 @@ export interface SceneOnLightScreenView extends LightScreenState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnBarrierView extends BarrierState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnHazeView extends HazeState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age` is relative to Move_HAZE's first in-bounds script pointer. */
+export function sceneOnHazeView(
+  state: SceneOnMovePresentationState<SceneOnHazeConfig>,
+): SceneOnHazeView {
+  if (state.config.move !== "HAZE") {
+    throw new Error(`expected HAZE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...hazeAtAge(state.age),
+  };
+}
+
+/** `age` is relative to Move_BARRIER's first in-bounds script pointer. */
+export function sceneOnBarrierView(
+  state: SceneOnMovePresentationState<SceneOnBarrierConfig>,
+): SceneOnBarrierView {
+  if (state.config.move !== "BARRIER") {
+    throw new Error(`expected BARRIER presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...barrierAtAge(
+      state.age,
+      state.config.attacker.geometry.battlePositionCenter,
+      state.config.attacker.geometry.side,
+    ),
+  };
 }
 
 /** `age` is relative to gLightScreenWallSpriteTemplate's creation pass. */
@@ -5546,6 +5655,40 @@ export function sceneOnAstonishView(
       state.config.targetPictureYOffset,
       state.config.dropletRandom,
     ),
+  };
+}
+
+/** `age=0` is the first in-bounds Move_FAKE_OUT script frame. */
+export function sceneOnFakeOutView(
+  state: SceneOnMovePresentationState<SceneOnFakeOutConfig>,
+): SceneOnFakeOutView {
+  if (state.config.move !== "FAKE_OUT") {
+    throw new Error(`expected FAKE_OUT presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    targetBattler: state.config.target,
+    ...fakeOutAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.targetPictureYOffset,
+    ),
+  };
+}
+
+/** `age=0` is the first in-bounds Move_SUBSTITUTE script frame. */
+export function sceneOnSubstituteView(
+  state: SceneOnMovePresentationState<SceneOnSubstituteConfig>,
+): SceneOnSubstituteView {
+  if (state.config.move !== "SUBSTITUTE") {
+    throw new Error(`expected SUBSTITUTE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...substituteAtAge(state.age, state.config.attacker.geometry.side),
   };
 }
 
