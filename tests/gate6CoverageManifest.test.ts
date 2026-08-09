@@ -16,6 +16,7 @@ const MARKDOWN_PATH = "docs/gate6-coverage-manifest.md";
 const PER_MOVE_HOOK_JOIN_AXES = ["item", "ability"] as const;
 const SOURCE_PROVEN_FAMILY_STATUS = "source-proven-family";
 const SOUNDPROOF_MOVES_BLOCK_CATEGORY = "moves-block-soundproof";
+const COLOR_CHANGE_CATEGORY = "moveend-color-change";
 const SOUNDPROOF_ROSTER_MOVES = [
   "MOVE_ROAR", "MOVE_SING", "MOVE_SUPERSONIC", "MOVE_SCREECH", "MOVE_SNORE",
   "MOVE_UPROAR", "MOVE_METAL_SOUND", "MOVE_GRASS_WHISTLE", "MOVE_HYPER_VOICE",
@@ -50,6 +51,21 @@ const ABSORBING_PROOF_PATHS = [
   "tools/probe/probe-absorbing-ability-off.py",
   "tools/probe/receipts/absorbing-volt-absorb-off-seed-610839776.json",
   "tools/probe/receipts/absorbing-volt-absorb-off-seed-324508639.json",
+] as const;
+const COLOR_CHANGE_PROOF_PATHS = [
+  "reference/pokeemerald/src/battle_util.c",
+  "reference/pokeemerald/src/battle_script_commands.c",
+  "reference/pokeemerald/include/constants/battle_script_commands.h",
+  "reference/pokeemerald/data/battle_scripts_1.s",
+  "src/data/gen/battle-script-graph.json",
+  "src/data/gen/battle-script-program.json",
+  "src/engine/battleScriptMoveEndOpcode.ts",
+  "tests/battleScriptMoveEndOpcode.test.ts",
+  "tests/colorChangeOracleEvidence.test.ts",
+  "tools/battle-lab/mechanic-color-change-off.json",
+  "tools/probe/probe-color-change-ability-off.py",
+  "tools/probe/receipts/color-change-off-seed-610839776.json",
+  "tools/probe/receipts/color-change-off-seed-324508639.json",
 ] as const;
 
 const EXPLICIT_STATE_BEHAVIOR_ROWS = [
@@ -126,6 +142,7 @@ function collectEvidenceRows(value: unknown, rows: JsonObject[] = []): JsonObjec
 function sourceProvenPathsFor(category: string): readonly string[] {
   if (category === SOUNDPROOF_MOVES_BLOCK_CATEGORY) return SOUNDPROOF_PROOF_PATHS;
   if ((ABSORBING_CATEGORIES as readonly string[]).includes(category)) return ABSORBING_PROOF_PATHS;
+  if (category === COLOR_CHANGE_CATEGORY) return COLOR_CHANGE_PROOF_PATHS;
   throw new Error(`unknown source-proven ability category ${category}`);
 }
 
@@ -161,6 +178,27 @@ function assertSourceProvenFamilyContract(
     }
     if ((ABSORBING_CATEGORIES as readonly string[]).includes(String(family.category)) && !record(graph.accuracyCheck).label) {
       throw new Error("absorbing family lacks accuracycheck evidence");
+    }
+    if (family.category === COLOR_CHANGE_CATEGORY) {
+      const selector = record(family.selector);
+      const dataHpUpdate = record(entryPath.dataHpUpdate);
+      const moveEnd = record(entryPath.moveEnd);
+      const graphRoute = array(graph.route);
+      const programRoute = array(program.route);
+      expect(selector.guard).toBe("gBattleMoves[move].power != 0");
+      expect(String(selector.derivedFrom)).toContain("moveend-color-change candidate selector");
+      expect(graphRoute).toEqual(programRoute);
+      expect(graphRoute).toEqual(expect.arrayContaining([
+        expect.objectContaining({ mnemonic: "datahpupdate", operands: ["BS_TARGET"] }),
+      ]));
+      expect(dataHpUpdate).toMatchObject({ mnemonic: "datahpupdate", operands: ["BS_TARGET"] });
+      expect(moveEnd).toMatchObject({ state: "MOVEEND_ON_DAMAGE_ABILITIES", stateValue: 3 });
+      expect(record(family.runtimeGuardSignature).orderedAbilityGuards).toEqual(expect.arrayContaining([
+        "TARGET_TURN_DAMAGED",
+        "!IS_BATTLER_OF_TYPE(battler, moveType)",
+        "gBattleMons[battler].hp != 0",
+      ]));
+      expect(record(family.familyVerification).oracleReceipt).toBe("tests/colorChangeOracleEvidence.test.ts#shared ON_DAMAGE Color Change arm");
     }
     for (const path of sourceProvenPathsFor(String(family.category))) {
       if (!array(row.evidence).some((item) => record(item).path === path)) {
@@ -254,8 +292,8 @@ function assertManifestContract(manifest: JsonObject): void {
   assertPerMoveHookJoinContract(manifest);
   const onDamageSummary = record(record(manifest.summary).onDamageMoveEnd);
   const onDamageRow = record(record(manifest.sections).onDamageMoveEnd);
-  if (onDamageSummary.promotedRows !== 0 || onDamageRow.promotedRows !== 0) {
-    throw new Error("ON_DAMAGE evidence checkpoint must not claim a promotion");
+  if (onDamageSummary.promotedRows !== 182 || onDamageRow.promotedRows !== 182) {
+    throw new Error("ON_DAMAGE evidence checkpoint must retain the 182-row Color Change promotion");
   }
   if (!Array.isArray(onDamageRow.blockerIds) || onDamageRow.blockerIds.length === 0) {
     throw new Error("ON_DAMAGE evidence checkpoint must retain nonempty blockers");
@@ -343,9 +381,9 @@ describe("Gate-6 mechanics coverage manifest", () => {
       const axisSummary = record(perMoveHookJoins[axis]);
       expect(rows).toHaveLength(parameterizationData.moves.length);
       expect(axisSummary).toEqual({ rows: rows.length, unsupported: sourceUnsupported, gaps: sourceUnsupported });
-      expect(sourceUnsupported).toBe(axis === "item" ? 300 : 261);
+      expect(sourceUnsupported).toBe(axis === "item" ? 300 : 111);
     }
-    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 561, gaps: 561 });
+    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 411, gaps: 411 });
     expect(onDamageMoveEnd).toEqual({
       contactCandidates: 94,
       colorChangeCandidates: 183,
@@ -353,10 +391,14 @@ describe("Gate-6 mechanics coverage manifest", () => {
       entryBlockShapes: 78,
       blockers: 2,
       retiredBlockers: 1,
-      promotedRows: 0,
+      colorChangePromotedRows: 182,
+      colorChangeExceptions: 1,
+      colorChangeBlockers: 0,
+      colorChangeRetiredBlockers: 2,
+      promotedRows: 182,
     });
     expect(manifestOnDamageMoveEnd).toMatchObject({
-      status: "evidence-checkpoint-no-promotion",
+      status: "family-level-color-change-promotion-with-contact-checkpoint",
       contactCandidates: onDamageMoveEnd.contactCandidates,
       colorChangeCandidates: onDamageMoveEnd.colorChangeCandidates,
       overlapCandidates: onDamageMoveEnd.overlapCandidates,
@@ -366,13 +408,17 @@ describe("Gate-6 mechanics coverage manifest", () => {
         "damage-state-guard-not-derived-from-selector",
       ],
       retiredBlockerIds: ["missing-direct-on-damage-off-receipt"],
-      promotedRows: 0,
+      colorChangePromotedRows: 182,
+      colorChangeExceptions: 1,
+      colorChangeBlockers: 0,
+      colorChangeRetiredBlockers: 2,
+      promotedRows: 182,
     });
-    expect(String(manifestOnDamageMoveEnd.notes)).toMatch(/No per-move rows are promoted/);
+    expect(String(manifestOnDamageMoveEnd.notes)).toMatch(/182 Color Change rows are promoted/);
     const sourceProven = parameterizationData.moves
       .filter((move) => move.hooks.ability.status === SOURCE_PROVEN_FAMILY_STATUS)
       .map((move) => move.move);
-    expect(sourceProven).toHaveLength(39);
+    expect(sourceProven).toHaveLength(189);
     const sourceSoundproof = parameterizationData.moves
       .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(SOUNDPROOF_MOVES_BLOCK_CATEGORY))
       .map((move) => move.move)
@@ -382,11 +428,18 @@ describe("Gate-6 mechanics coverage manifest", () => {
       .filter((move) => array(move.hooks.ability.supportedCategories).map(String).some((category) => (ABSORBING_CATEGORIES as readonly string[]).includes(category)))
       .map((move) => move.move);
     expect(sourceAbsorbing).toHaveLength(30);
+    const sourceColorChange = parameterizationData.moves
+      .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(COLOR_CHANGE_CATEGORY))
+      .map((move) => move.move);
+    expect(sourceColorChange).toHaveLength(182);
+    expect(sourceColorChange).not.toContain("MOVE_FUTURE_SIGHT");
     const soundproofOnlyAbilityGaps = parameterizationData.moves.length - sourceSoundproof.length;
     expect(soundproofOnlyAbilityGaps).toBe(291);
-    expect(soundproofOnlyAbilityGaps - Number(record(perMoveHookJoins.ability).gaps)).toBe(sourceAbsorbing.length);
+    const uniqueNonSoundproofProven = new Set([...sourceAbsorbing, ...sourceColorChange]
+      .filter((move) => !sourceSoundproof.includes(move)));
+    expect(soundproofOnlyAbilityGaps - Number(record(perMoveHookJoins.ability).gaps)).toBe(uniqueNonSoundproofProven.size);
     expect(parameterizationData.moves.length + soundproofOnlyAbilityGaps).toBe(591);
-    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(561);
+    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(411);
     const sourceProvenRows = array(manifestHookJoinSections.ability)
       .map(record)
       .filter((row) => row.status === SOURCE_PROVEN_FAMILY_STATUS);
@@ -433,20 +486,25 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const mixedSourceHook = structuredClone(record(soundproofMove.hooks.ability));
     const mixedEvidence = record(mixedSourceHook.evidence);
     const absorbingEvidence = record(record(absorbingMove.hooks.ability).evidence);
+    const absorbingCategories = array(record(absorbingMove.hooks.ability).supportedCategories)
+      .filter((category) => category !== COLOR_CHANGE_CATEGORY);
+    const absorbingFamilies = array(absorbingEvidence.families)
+      .filter((family) => record(family).category !== COLOR_CHANGE_CATEGORY);
     mixedSourceHook.supportedCategories = [
       ...array(mixedSourceHook.supportedCategories),
-      ...array(record(absorbingMove.hooks.ability).supportedCategories),
+      ...absorbingCategories,
     ];
     mixedEvidence.families = [
       ...array(mixedEvidence.families),
-      ...array(absorbingEvidence.families),
+      ...absorbingFamilies,
     ];
     const mixedRow = structuredClone(soundproofRow);
-    mixedRow.categories = [...array(mixedRow.categories), ...array(absorbingRow.categories)];
+    mixedRow.categories = [...array(mixedRow.categories), ...absorbingCategories];
     mixedRow.evidence = [...array(mixedRow.evidence), ...array(absorbingRow.evidence)];
 
     expect(mixedSourceHook.supportedCategories).toEqual([
       SOUNDPROOF_MOVES_BLOCK_CATEGORY,
+      COLOR_CHANGE_CATEGORY,
       "absorbing-volt-absorb",
     ]);
     expect(() => assertSourceProvenFamilyContract(mixedSourceHook, mixedRow)).not.toThrow();
@@ -552,8 +610,8 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(oracle.receiptGaps).toBe(0);
     expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*300 item join gaps\*\* and \*\*261 ability join gaps\*\*/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/39 ability rows are source-proven for the nine Soundproof selectors plus audited shared-absorbing routes/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*300 item join gaps\*\* and \*\*111 ability join gaps\*\*/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/189 ability rows are source-proven/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/ON_DAMAGE checkpoint: \*\*94\*\* contact candidates and \*\*183\*\* Color Change candidates/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/24\/24.*scenario receipts documented; \*\*0\*\* request-level gaps/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Receipt count alone does not close the broader Gate-6 breadth acceptance/);

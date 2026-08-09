@@ -99,6 +99,7 @@ const abilityDisplay = readJson<AbilityDisplay>("summary-info.json");
 const battleUtilSource = readFileSync(join(RUN_ROOT, "reference", "pokeemerald", "src", "battle_util.c"), "utf8");
 const battleScriptCommandsSource = readFileSync(join(RUN_ROOT, "reference", "pokeemerald", "src", "battle_script_commands.c"), "utf8");
 const battleHeaderSource = readFileSync(join(RUN_ROOT, "reference", "pokeemerald", "include", "battle.h"), "utf8");
+const battleScriptConstantsSource = readFileSync(join(RUN_ROOT, "reference", "pokeemerald", "include", "constants", "battle_script_commands.h"), "utf8");
 
 if (moves.length !== 355 || moves.some((move, id) => move.id !== id)) throw new Error("moves.json must be the complete indexed move table");
 if (frontierSets.count !== 882 || frontierSets.entries.length !== 882) throw new Error("expected all 882 Frontier set rows");
@@ -132,6 +133,7 @@ const BATTLE_SCRIPT_PROGRAM_PATH = "src/data/gen/battle-script-program.json";
 const BATTLE_SCRIPT_COMMANDS_PATH = "reference/pokeemerald/src/battle_script_commands.c";
 const SOUNDPROOF_TABLE_PATH = "reference/pokeemerald/src/battle_util.c";
 const BATTLE_HEADER_PATH = "reference/pokeemerald/include/battle.h";
+const BATTLE_SCRIPT_CONSTANTS_PATH = "reference/pokeemerald/include/constants/battle_script_commands.h";
 const ATTACK_CANCELER_MOVES_BLOCK_CALL = "AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0)";
 const ABSORBING_DISPATCHER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ABSORBING, gBattlerTarget, 0, 0, move)";
 const ON_DAMAGE_DISPATCHER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE, gBattlerTarget, 0, 0, 0)";
@@ -1014,6 +1016,21 @@ const ON_DAMAGE_RETIRED_BLOCKERS = [
   },
 ] as const;
 
+const COLOR_CHANGE_RETIRED_BLOCKERS = [
+  {
+    id: "ordered-moveend-route-not-proven",
+    reason: "Retired for the Color Change family: every supported Level-50 selector now carries a source/program route witness from its damaging entry (or BIDE release) through target datahpupdate to a Cmd_moveend handoff that reaches MOVEEND_ON_DAMAGE_ABILITIES. Future Sight is retained as an explicit source exception because its delayed handoff starts at MOVEEND_ITEM_EFFECTS_ALL.",
+  },
+  {
+    id: "damage-state-guard-not-derived-from-selector",
+    reason: "Retired for the Color Change family: the family witness derives the selector power != 0 together with the ordered source guards for MOVE_RESULT_NO_EFFECT, MOVE_STRUGGLE, TARGET_TURN_DAMAGED, already-matching target type, and target survival; Cmd_datahpupdate is separately pinned as the positive non-passive damage-state writer. Present healing, misses/no-effect, and faint paths are explicit non-activation outcomes.",
+  },
+] as const;
+
+const COLOR_CHANGE_EXCEPTION_IDS = {
+  futureSightMoveEndBypass: "future-sight-delayed-moveend-bypass",
+} as const;
+
 type OnDamageCandidateCategory = typeof ON_DAMAGE_CONTACT_CATEGORY | typeof ON_DAMAGE_COLOR_CHANGE_CATEGORY;
 type OnDamageCandidate = {
   category: OnDamageCandidateCategory;
@@ -1025,7 +1042,442 @@ type OnDamageCandidate = {
   entryScript: string;
   routeShapeId: string;
   blockerIds: Array<(typeof ON_DAMAGE_BLOCKERS)[number]["id"]>;
+  routeWitnessId?: string;
+  routeStatus?: "source-proven" | "source-exception";
 };
+
+type OnDamageRoutePosition = { label: string; line: number };
+type OnDamageRouteTransition = {
+  from: OnDamageRoutePosition;
+  to: OnDamageRoutePosition | null;
+  kind: string;
+  macro: string | null;
+  callTarget?: OnDamageRoutePosition;
+  resume?: OnDamageRoutePosition;
+};
+type OnDamageRoutePath = {
+  positions: OnDamageRoutePosition[];
+  transitions: OnDamageRouteTransition[];
+};
+type OnDamageRoutePreference = (
+  position: OnDamageRoutePosition,
+  statement: GraphStatement,
+  edge: GraphEdge,
+) => number;
+
+const onDamageGraphEdgesByPosition = new Map<string, GraphEdge[]>();
+for (const edge of graph.controlFlow.edges) {
+  const key = `${edge.from.label}:${edge.from.line}`;
+  onDamageGraphEdgesByPosition.set(key, [...(onDamageGraphEdgesByPosition.get(key) ?? []), edge]);
+}
+
+function onDamagePositionKey(position: OnDamageRoutePosition): string {
+  return `${position.label}:${position.line}`;
+}
+
+function onDamageStatement(position: OnDamageRoutePosition): GraphStatement {
+  const statement = requireGraphLabel(position.label).statements.find((candidate) => candidate.line === position.line);
+  if (!statement) throw new Error(`ON_DAMAGE route lacks ${position.label}:${position.line}`);
+  requireRouteStatement(position.label, position.line, statement.mnemonic, statement.operandTokens);
+  return statement;
+}
+
+function onDamageNextStatement(position: OnDamageRoutePosition): OnDamageRoutePosition | null {
+  const statements = requireGraphLabel(position.label).statements;
+  const index = statements.findIndex((statement) => statement.line === position.line);
+  if (index < 0 || index + 1 >= statements.length) return null;
+  return { label: position.label, line: statements[index + 1]!.line };
+}
+
+function onDamageFirstStatement(label: string): OnDamageRoutePosition {
+  const graphLabel = requireGraphLabel(label);
+  const first = graphLabel.statements[0];
+  if (first) return { label, line: first.line };
+  if (graphLabel.nextLabel) return onDamageFirstStatement(graphLabel.nextLabel);
+  throw new Error(`${label} has no source statement or successor for an ON_DAMAGE route`);
+}
+
+function onDamageCallReturns(label: string): boolean {
+  const statements = requireGraphLabel(label).statements;
+  return statements.at(-1)?.mnemonic === "return";
+}
+
+function onDamageRoutePath(
+  startLabel: string | OnDamageRoutePosition,
+  target: (statement: GraphStatement) => boolean,
+  description: string,
+  edgePreference?: OnDamageRoutePreference,
+): OnDamageRoutePath {
+  type QueueEntry = { position: OnDamageRoutePosition; path: OnDamageRoutePath; cost: number; sequence: number };
+  const start = typeof startLabel === "string" ? onDamageFirstStatement(startLabel) : startLabel;
+  const queue: QueueEntry[] = [{ position: start, path: { positions: [start], transitions: [] }, cost: 0, sequence: 0 }];
+  const bestCost = new Map<string, number>([[onDamagePositionKey(start), 0]]);
+  const rank = (edge: GraphEdge): number => edge.kind === "jump" ? 0 : edge.kind === "call" ? 1 : 2;
+  let nextSequence = 1;
+  while (queue.length > 0) {
+    queue.sort((left, right) => left.cost - right.cost || left.sequence - right.sequence);
+    const current = queue.shift()!;
+    const currentKey = onDamagePositionKey(current.position);
+    if (current.cost !== bestCost.get(currentKey)) continue;
+    const statement = onDamageStatement(current.position);
+    if (target(statement)) return current.path;
+    const edges = [...(onDamageGraphEdgesByPosition.get(currentKey) ?? [])].sort((left, right) => {
+      return rank(left) + (edgePreference?.(current.position, statement, left) ?? 0)
+        - rank(right) - (edgePreference?.(current.position, statement, right) ?? 0);
+    });
+    for (const edge of edges) {
+      if (edge.to === null) continue;
+      let next: OnDamageRoutePosition | null = { label: edge.to.label, line: edge.to.line };
+      let callTarget: OnDamageRoutePosition | undefined;
+      let resume: OnDamageRoutePosition | undefined;
+      if (edge.kind === "call") {
+        callTarget = next;
+        if (!onDamageCallReturns(callTarget.label)) {
+          throw new Error(`${startLabel} route call target ${callTarget.label} does not return`);
+        }
+        resume = onDamageNextStatement(current.position) ?? undefined;
+        next = resume ?? null;
+      }
+      if (next === null) continue;
+      const edgeCost = rank(edge) + (edgePreference?.(current.position, statement, edge) ?? 0);
+      const nextKey = onDamagePositionKey(next);
+      const nextCost = current.cost + edgeCost;
+      if (nextCost >= (bestCost.get(nextKey) ?? Number.POSITIVE_INFINITY)) continue;
+      const transition: OnDamageRouteTransition = {
+        from: current.position,
+        to: { label: edge.to.label, line: edge.to.line },
+        kind: edge.kind,
+        macro: edge.provenance.macro ?? null,
+        ...(callTarget === undefined ? {} : { callTarget }),
+        ...(resume === undefined ? {} : { resume }),
+      };
+      queue.push({
+        position: next,
+        path: {
+          positions: [...current.path.positions, next],
+          transitions: [...current.path.transitions, transition],
+        },
+        cost: nextCost,
+        sequence: nextSequence++,
+      });
+      bestCost.set(nextKey, nextCost);
+    }
+  }
+  throw new Error(`${startLabel} has no ON_DAMAGE route ${description}`);
+}
+
+function onDamageMoveRoutePreference(move: string): OnDamageRoutePreference {
+  return (_position, statement, edge) => {
+    let preferredKind: string | null = null;
+    if (statement.mnemonic === "jumpifnotmove") {
+      preferredKind = statement.operandTokens[0] === move ? "fallthrough" : "jump";
+    } else if (statement.mnemonic === "jumpifmove") {
+      preferredKind = statement.operandTokens[0] === move ? "jump" : "fallthrough";
+    } else if (statement.mnemonic === "jumpifmovehadnoeffect"
+      || statement.mnemonic === "jumpifnodamage"
+      || statement.mnemonic === "accuracycheck") {
+      // The route certificate follows a successful, damaging hit. These
+      // commands jump to the miss/no-effect/no-damage branch when their
+      // condition is true, so the fallthrough edge is the live-hit arm.
+      preferredKind = "fallthrough";
+    } else if (move === "MOVE_FUTURE_SIGHT"
+      && statement.mnemonic === "jumpifbyte"
+      && statement.operandTokens.includes("B_MSG_FUTURE_SIGHT")) {
+      // MonTookFutureAttack shares this block with Doom Desire. The Future
+      // Sight selector falls through the CMP_NOT_EQUAL guard; following the
+      // jump would certify Doom Desire's delayed branch instead.
+      preferredKind = "fallthrough";
+    }
+    return preferredKind === null ? 0 : edge.kind === preferredKind ? -4 : 4;
+  };
+}
+
+function onDamageRouteWitnessPath(path: OnDamageRoutePath) {
+  const route = path.positions.map((position) => {
+    const statement = onDamageStatement(position);
+    return {
+      label: position.label,
+      line: position.line,
+      mnemonic: statement.mnemonic,
+      operands: statement.operandTokens,
+    };
+  });
+  const transitions = path.transitions.map((transition) => ({
+    from: transition.from,
+    to: transition.to,
+    kind: transition.kind,
+    macro: transition.macro,
+    ...(transition.callTarget === undefined ? {} : { callTarget: transition.callTarget }),
+    ...(transition.resume === undefined ? {} : { resume: transition.resume }),
+  }));
+  return {
+    graph: { path: BATTLE_SCRIPT_GRAPH_PATH, entryLabel: path.positions[0]!.label, route, transitions },
+    program: { path: BATTLE_SCRIPT_PROGRAM_PATH, entryLabel: path.positions[0]!.label, route, transitions },
+  };
+}
+
+function onDamageRouteHandoff(statement: GraphStatement) {
+  if (statement.mnemonic === "moveendall") {
+    return {
+      kind: "moveendall",
+      label: "BattleScript_MoveEnd",
+      line: statement.line,
+      state: "MOVEEND_ON_DAMAGE_ABILITIES",
+      stateValue: 3,
+      semantics: "Cmd_moveend starts at state 0 and executes state 3 before ending the full moveendall pass",
+    };
+  }
+  if (statement.mnemonic === "moveendto" && statement.operandTokens[0] === "MOVEEND_NEXT_TARGET") {
+    return {
+      kind: "moveendto-next-target",
+      label: "Cmd_moveend",
+      line: statement.line,
+      state: "MOVEEND_ON_DAMAGE_ABILITIES",
+      stateValue: 3,
+      semantics: "Cmd_moveend endMode 2 starts at state 0 and runs through state 3 before the requested MOVEEND_NEXT_TARGET stop",
+    };
+  }
+  if (statement.mnemonic === "moveendfromto" && statement.operandTokens[0] === "MOVEEND_ON_DAMAGE_ABILITIES") {
+    return {
+      kind: "moveendfromto-on-damage",
+      label: "Cmd_moveend",
+      line: statement.line,
+      state: "MOVEEND_ON_DAMAGE_ABILITIES",
+      stateValue: 3,
+      semantics: "Cmd_moveend is explicitly entered at MOVEEND_ON_DAMAGE_ABILITIES",
+    };
+  }
+  return null;
+}
+
+function onDamageRouteToDataAndMoveEnd(startLabel: string, edgePreference?: OnDamageRoutePreference) {
+  const dataPath = onDamageRoutePath(
+    startLabel,
+    (statement) => statement.mnemonic === "datahpupdate" && statement.operandTokens[0] === "BS_TARGET",
+    "target datahpupdate",
+    edgePreference,
+  );
+  const dataPosition = dataPath.positions.at(-1)!;
+  const moveEndPath = onDamageRoutePath(
+    dataPosition,
+    (statement) => statement.line === dataPosition.line
+      ? false
+      : onDamageRouteHandoff(statement) !== null,
+    "a MOVEEND_ON_DAMAGE handoff after target datahpupdate",
+    edgePreference,
+  );
+  const handoffPosition = moveEndPath.positions.at(-1)!;
+  const handoff = onDamageRouteHandoff(onDamageStatement(handoffPosition));
+  if (handoff === null) throw new Error(`${startLabel} route handoff disappeared`);
+  return {
+    dataPath: onDamageRouteWitnessPath(dataPath),
+    moveEndPath: onDamageRouteWitnessPath(moveEndPath),
+    dataHpUpdate: { label: dataPosition.label, line: dataPosition.line, mnemonic: "datahpupdate", operands: ["BS_TARGET"] },
+    moveEnd: { ...handoff, label: handoffPosition.label },
+  };
+}
+
+function onDamageRuntimeGuardSignature() {
+  const dataHpUpdateDeclaration = battleScriptCommandsSource.indexOf("static void Cmd_datahpupdate(void)");
+  const dataHpUpdateDefinition = battleScriptCommandsSource.indexOf("static void Cmd_datahpupdate(void)", dataHpUpdateDeclaration + 1);
+  if (dataHpUpdateDeclaration < 0 || dataHpUpdateDefinition < 0) throw new Error("unable to locate Cmd_datahpupdate definition");
+  const dataHpUpdateLine = battleScriptCommandsSource.slice(0, dataHpUpdateDefinition).split("\n").length;
+  const moveEndStateLine = sourceLine(battleScriptConstantsSource, "#define MOVEEND_ON_DAMAGE_ABILITIES", "MOVEEND_ON_DAMAGE_ABILITIES");
+  const colorChangeLine = sourceLine(battleUtilSource, "case ABILITY_COLOR_CHANGE:", "ABILITY_COLOR_CHANGE");
+  const sourceNoEffect = "if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))";
+  const sourcePositiveDamage = "if (gBattleMoveDamage < 0)";
+  const sourcePassiveDamage = "!(gHitMarker & HITMARKER_PASSIVE_HP_UPDATE)";
+  if (!battleScriptCommandsSource.includes(sourceNoEffect)
+    || !battleScriptCommandsSource.includes(sourcePositiveDamage)
+    || !battleScriptCommandsSource.includes(sourcePassiveDamage)
+    || !battleScriptConstantsSource.includes("#define MOVEEND_ON_DAMAGE_ABILITIES               3")) {
+    throw new Error("Cmd_datahpupdate or MOVEEND_ON_DAMAGE_ABILITIES source guard drifted");
+  }
+  return {
+    selector: {
+      path: SOUNDPROOF_TABLE_PATH,
+      locator: "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE) ABILITY_COLOR_CHANGE",
+      line: colorChangeLine,
+      guard: "gBattleMoves[move].power != 0",
+      derivedFrom: "moveend-color-change candidate selector moves.json power != 0",
+    },
+    moveEnd: {
+      path: BATTLE_SCRIPT_COMMANDS_PATH,
+      locator: "Cmd_moveend MOVEEND_ON_DAMAGE_ABILITIES",
+      line: moveEndOnDamageCaseLine,
+      statePath: BATTLE_SCRIPT_CONSTANTS_PATH,
+      stateLine: moveEndStateLine,
+      state: "MOVEEND_ON_DAMAGE_ABILITIES",
+      stateValue: 3,
+      call: ON_DAMAGE_DISPATCHER_CALL,
+      target: "gBattlerTarget",
+    },
+    dataHpUpdate: {
+      path: BATTLE_SCRIPT_COMMANDS_PATH,
+      locator: "Cmd_datahpupdate",
+      line: dataHpUpdateLine,
+      target: "BS_TARGET",
+      noEffectGuard: sourceNoEffect,
+      positiveDamageGuard: sourcePositiveDamage,
+      passiveDamageGuard: sourcePassiveDamage,
+      writes: [
+        "gSpecialStatuses[gActiveBattler].physicalDmg = gHpDealt",
+        "gSpecialStatuses[gActiveBattler].specialDmg = gHpDealt",
+      ],
+      consequence: "positive, non-passive target datahpupdate writes physicalDmg or specialDmg, which satisfies TARGET_TURN_DAMAGED; negative healing and passive HP updates do not write that tracker",
+    },
+    orderedAbilityGuards: [
+      "!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)",
+      "move != MOVE_STRUGGLE",
+      "gBattleMoves[move].power != 0",
+      "TARGET_TURN_DAMAGED",
+      "!IS_BATTLER_OF_TYPE(battler, moveType)",
+      "gBattleMons[battler].hp != 0",
+    ],
+    outcomeBoundaries: [
+      "accuracy miss and no-effect paths either bypass target datahpupdate or leave MOVE_RESULT_NO_EFFECT set, so the dispatcher guard is quiet",
+      "a target fainted by datahpupdate is rejected by gBattleMons[battler].hp != 0",
+      "an already-matching first or second target type is rejected by !IS_BATTLER_OF_TYPE",
+      "Present's negative-damage heal path writes HP without physicalDmg/specialDmg and therefore cannot satisfy TARGET_TURN_DAMAGED",
+      "BIDE's charge entry has no target datahpupdate; its later BideAttack release is the proven damaging phase",
+      "Future Sight's delayed target datahpupdate is followed by moveendfromto starting at MOVEEND_ITEM_EFFECTS_ALL, which bypasses state 3",
+    ],
+  };
+}
+
+const onDamageColorChangeRuntimeGuards = onDamageRuntimeGuardSignature();
+
+function colorChangeRouteEvidence(move: Move, entryScript: string) {
+  const routePreference = onDamageMoveRoutePreference(move.move);
+  if (move.move === "MOVE_FUTURE_SIGHT") {
+    const delayedDataPath = onDamageRoutePath(
+      "BattleScript_MonTookFutureAttack",
+      (statement) => statement.mnemonic === "datahpupdate" && statement.operandTokens[0] === "BS_TARGET",
+      "Future Sight delayed target datahpupdate",
+      routePreference,
+    );
+    const delayedDataPosition = delayedDataPath.positions.at(-1)!;
+    const delayedMoveEndPath = onDamageRoutePath(
+      delayedDataPosition,
+      (statement) => statement.mnemonic === "moveendfromto",
+      "Future Sight delayed moveendfromto bypass",
+      routePreference,
+    );
+    const futureHandoff = requireGraphLabel("BattleScript_FutureAttackEnd").statements.find((statement) => statement.mnemonic === "moveendfromto");
+    if (!futureHandoff) throw new Error("Future Sight delayed route lacks moveendfromto");
+    return {
+      status: "source-exception" as const,
+      id: `color-change-route:${move.move}`,
+      move: move.move,
+      entryScript,
+      exception: {
+        id: COLOR_CHANGE_EXCEPTION_IDS.futureSightMoveEndBypass,
+        reason: "Future Sight's delayed hit performs target datahpupdate but BattleScript_FutureAttackEnd uses moveendfromto MOVEEND_ITEM_EFFECTS_ALL, MOVEEND_UPDATE_LAST_MOVES and therefore skips MOVEEND_ON_DAMAGE_ABILITIES state 3.",
+        source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: requireGraphLabel(entryScript).line },
+        delayedDamagePath: onDamageRouteWitnessPath(delayedDataPath),
+        delayedMoveEndPath: onDamageRouteWitnessPath(delayedMoveEndPath),
+        delayedMoveEnd: { label: "BattleScript_FutureAttackEnd", line: futureHandoff.line, mnemonic: futureHandoff.mnemonic, operands: futureHandoff.operandTokens },
+        bypassedState: { state: "MOVEEND_ON_DAMAGE_ABILITIES", value: 3, startsAt: "MOVEEND_ITEM_EFFECTS_ALL", valueStart: 11 },
+      },
+    };
+  }
+
+  const routeKind = move.move === "MOVE_BIDE"
+    ? "bide-release-after-charge"
+    : move.move === "MOVE_PRESENT"
+      ? "present-variable-damage-with-heal-branch"
+      : "damaging-entry-to-target-datahpupdate";
+  const damaging = move.move === "MOVE_BIDE"
+    ? onDamageRouteToDataAndMoveEnd("BattleScript_BideAttack", routePreference)
+    : move.move === "MOVE_PRESENT"
+      ? onDamageRouteToDataAndMoveEnd("BattleScript_HitFromCritCalc", routePreference)
+      : onDamageRouteToDataAndMoveEnd(entryScript === "BattleScript_EffectReturn" ? "BattleScript_EffectFrustration" : entryScript, routePreference);
+  const entryPath = onDamageRoutePath(
+    entryScript === "BattleScript_EffectReturn" ? "BattleScript_EffectFrustration" : entryScript,
+    (statement) => statement.mnemonic === "moveendall" || statement.mnemonic === "datahpupdate",
+    "entry path anchor",
+    routePreference,
+  );
+  const alternatives: Array<Record<string, unknown>> = [];
+  if (move.move === "MOVE_BIDE") {
+    const chargePath = onDamageRoutePath("BattleScript_EffectBide", (statement) => statement.mnemonic === "moveendall", "BIDE charge MoveEnd");
+    alternatives.push({
+      kind: "bide-charge-no-damage",
+      source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: requireGraphLabel("BattleScript_EffectBide").line },
+      path: onDamageRouteWitnessPath(chargePath),
+      outcome: "setbide reaches MoveEnd without target datahpupdate; the later source-selected BideAttack release is the damaging phase",
+    });
+  }
+  if (move.move === "MOVE_PRESENT") {
+    const healPath = onDamageRoutePath("BattleScript_PresentHealTarget", (statement) => statement.mnemonic === "moveendall", "Present heal MoveEnd");
+    const fullHpPath = onDamageRoutePath("BattleScript_AlreadyAtFullHp", (statement) => statement.mnemonic === "moveendall", "Present full-HP MoveEnd");
+    alternatives.push({
+      kind: "present-negative-damage-heal",
+      source: { path: BATTLE_SCRIPT_COMMANDS_PATH, locator: "Cmd_presentdamagecalculation", line: sourceLine(battleScriptCommandsSource, "static void Cmd_presentdamagecalculation(void)", "Cmd_presentdamagecalculation") },
+      decision: "rand >= 204 and target is not full HP selects BattleScript_PresentHealTarget with negative gBattleMoveDamage",
+      path: onDamageRouteWitnessPath(healPath),
+      outcome: "datahpupdate changes HP but does not write physicalDmg or specialDmg, so TARGET_TURN_DAMAGED remains false",
+    });
+    alternatives.push({
+      kind: "present-full-hp-heal-failure",
+      source: { path: BATTLE_SCRIPT_COMMANDS_PATH, locator: "Cmd_presentdamagecalculation", line: sourceLine(battleScriptCommandsSource, "static void Cmd_presentdamagecalculation(void)", "Cmd_presentdamagecalculation") },
+      decision: "rand >= 204 and target is already full HP selects BattleScript_AlreadyAtFullHp",
+      path: onDamageRouteWitnessPath(fullHpPath),
+      outcome: "no target datahpupdate and no Color Change dispatcher guard",
+    });
+  }
+  return {
+    status: "source-proven" as const,
+    id: `color-change-route:${move.move}`,
+    move: move.move,
+    entryScript,
+    routeKind,
+    source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: requireGraphLabel(entryScript).line },
+    entryPath: onDamageRouteWitnessPath(entryPath),
+    damagingPath: damaging,
+    runtimeGuardSignature: onDamageColorChangeRuntimeGuards,
+    alternatives,
+    familyEvidence: {
+      category: ON_DAMAGE_COLOR_CHANGE_CATEGORY,
+      selector: onDamageColorChangeRuntimeGuards.selector,
+      entryPath: {
+        kind: "datahpupdate-to-moveend-on-damage-route",
+        source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: requireGraphLabel(entryScript).line },
+        declaredEntryScript: entryScript,
+        damagingEntryScript: damaging.dataPath.graph.entryLabel,
+        graph: damaging.dataPath.graph,
+        program: damaging.dataPath.program,
+        dataHpUpdate: damaging.dataHpUpdate,
+        moveEnd: damaging.moveEnd,
+        alternatives,
+      },
+      dispatcher: {
+        path: BATTLE_SCRIPT_COMMANDS_PATH,
+        locator: "Cmd_moveend MOVEEND_ON_DAMAGE_ABILITIES",
+        line: moveEndOnDamageCaseLine,
+        call: ON_DAMAGE_DISPATCHER_CALL,
+        order: "after target datahpupdate/tryfaintmon and before the later moveend states",
+        state: "MOVEEND_ON_DAMAGE_ABILITIES",
+        stateValue: 3,
+      },
+      familyVerification: {
+        scope: "One shared Battle Scene OFF Color Change receipt plus the existing kernel sibling batch proves the selector and runtime guard family; this route certificate does not fabricate per-move oracle receipts.",
+        implementation: "src/engine/battleScriptMoveEndOpcode.ts#AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)",
+        batchTest: "tests/battleScriptMoveEndOpcode.test.ts#MOVEEND_ON_DAMAGE_ABILITIES contact family",
+        oracleReceipt: "tests/colorChangeOracleEvidence.test.ts#shared ON_DAMAGE Color Change arm",
+        oracleFixture: "tools/battle-lab/mechanic-color-change-off.json",
+        oracleProbe: "tools/probe/probe-color-change-ability-off.py",
+        oracleReceiptFiles: [
+          "tools/probe/receipts/color-change-off-seed-610839776.json",
+          "tools/probe/receipts/color-change-off-seed-324508639.json",
+        ],
+        scopeBoundary: "Move-specific receipts are intentionally not authored; table siblings reuse this family proof and the exact route/guard certificate.",
+      },
+      runtimeGuardSignature: onDamageColorChangeRuntimeGuards,
+      routeKind,
+    },
+  };
+}
 
 function onDamageEntryShape(entryScript: string, candidates: readonly OnDamageCandidate[]) {
   const graphEntry = requireGraphLabel(entryScript);
@@ -1073,6 +1525,9 @@ function onDamageEntryShape(entryScript: string, candidates: readonly OnDamageCa
       [ON_DAMAGE_CONTACT_CATEGORY]: categoryCandidates(ON_DAMAGE_CONTACT_CATEGORY),
       [ON_DAMAGE_COLOR_CHANGE_CATEGORY]: categoryCandidates(ON_DAMAGE_COLOR_CHANGE_CATEGORY),
     },
+    colorChangeRouteWitnessIds: candidates
+      .filter((candidate) => candidate.entryScript === entryScript && candidate.category === ON_DAMAGE_COLOR_CHANGE_CATEGORY)
+      .map((candidate) => candidate.routeWitnessId),
     blockerIds: ON_DAMAGE_BLOCKERS.map((blocker) => blocker.id),
   };
 }
@@ -1096,7 +1551,10 @@ for (const symbol of rosterMoveSymbols) {
       makesContact,
       entryScript: script.entryScript,
       routeShapeId: `on-damage-entry:${script.entryScript}`,
-      blockerIds: ON_DAMAGE_BLOCKERS.map((blocker) => blocker.id),
+      blockerIds: category === ON_DAMAGE_COLOR_CHANGE_CATEGORY ? [] : ON_DAMAGE_BLOCKERS.map((blocker) => blocker.id),
+      ...(category === ON_DAMAGE_COLOR_CHANGE_CATEGORY
+        ? { routeWitnessId: `color-change-route:${symbol}`, routeStatus: symbol === "MOVE_FUTURE_SIGHT" ? "source-exception" as const : "source-proven" as const }
+        : {}),
     });
   }
 }
@@ -1109,6 +1567,21 @@ const onDamageOverlapMoves = onDamageCandidatesByCategory[ON_DAMAGE_CONTACT_CATE
   .filter((move) => onDamageCandidatesByCategory[ON_DAMAGE_COLOR_CHANGE_CATEGORY].some((candidate) => candidate.move === move));
 const onDamageEntryScripts = [...new Set(onDamageCandidateRows.map((candidate) => candidate.entryScript))]
   .sort((left, right) => requireGraphLabel(left).line - requireGraphLabel(right).line);
+const colorChangeRouteEvidenceByMove = new Map<string, ReturnType<typeof colorChangeRouteEvidence>>();
+for (const candidate of onDamageCandidatesByCategory[ON_DAMAGE_COLOR_CHANGE_CATEGORY]) {
+  const move = moveBySymbol.get(candidate.move)!;
+  colorChangeRouteEvidenceByMove.set(candidate.move, colorChangeRouteEvidence(move, candidate.entryScript));
+}
+const colorChangeRouteEvidenceRows = [...colorChangeRouteEvidenceByMove.values()];
+const colorChangeSourceProvenRows = colorChangeRouteEvidenceRows
+  .filter((evidence) => evidence.status === "source-proven")
+  .map((evidence) => evidence.move);
+const colorChangeExceptions = colorChangeRouteEvidenceRows
+  .filter((evidence) => evidence.status === "source-exception")
+  .map((evidence) => evidence.exception);
+if (colorChangeSourceProvenRows.length + colorChangeExceptions.length !== onDamageCandidatesByCategory[ON_DAMAGE_COLOR_CHANGE_CATEGORY].length) {
+  throw new Error("Color Change route evidence does not account for every finite candidate");
+}
 const onDamageRouteShapeRows = onDamageEntryScripts.map((entryScript) => onDamageEntryShape(entryScript, onDamageCandidateRows));
 const onDamageEntryShapeCounts = Object.fromEntries([...new Set(onDamageRouteShapeRows.map((row) => row.entryBlockShape))]
   .sort()
@@ -1117,8 +1590,9 @@ const onDamageMoveEndTarget = auditExactScriptBlock("BattleScript_MoveEnd", [
   ["moveendall", []],
   ["end", []],
 ]);
-if (onDamageCandidateRows.some((candidate) => candidate.blockerIds.length !== ON_DAMAGE_BLOCKERS.length)) {
-  throw new Error("every ON_DAMAGE candidate must carry every explicit blocker");
+if (onDamageCandidatesByCategory[ON_DAMAGE_CONTACT_CATEGORY].some((candidate) => candidate.blockerIds.length !== ON_DAMAGE_BLOCKERS.length)
+  || onDamageCandidatesByCategory[ON_DAMAGE_COLOR_CHANGE_CATEGORY].some((candidate) => candidate.blockerIds.length !== 0)) {
+  throw new Error("ON_DAMAGE candidates must carry the checkpoint blockers only for the unpromoted contact family");
 }
 if (onDamageCandidateRows.length !== new Set(onDamageCandidateRows.map((candidate) => `${candidate.category}:${candidate.move}`)).size) {
   throw new Error("every ON_DAMAGE candidate must appear exactly once per applicable category");
@@ -1193,6 +1667,10 @@ const records = rosterMoveSymbols.map((symbol) => {
     });
   }
   sourceProvenFamilies.push(...(absorbingEvidenceByMove.get(symbol) ?? []));
+  const colorChangeEvidence = colorChangeRouteEvidenceByMove.get(symbol);
+  if (colorChangeEvidence?.status === "source-proven") {
+    sourceProvenFamilies.push(colorChangeEvidence.familyEvidence);
+  }
   const abilityHook = sourceProvenFamilies.length === 0
     ? {
       potentialCategories: null,
@@ -1275,8 +1753,8 @@ const absorbingCoverageByCategory = Object.fromEntries(ABSORBING_HOOK_DEFINITION
   }];
 }));
 const onDamageAudit = {
-  status: "evidence-checkpoint-no-promotion",
-  scope: "Finite Level-50 selector audit for ABILITYEFFECT_ON_DAMAGE. This is intentionally a blocked route-shape census, not a per-move support claim.",
+  status: "family-level-color-change-promotion-with-contact-checkpoint",
+  scope: "Finite Level-50 selector audit for ABILITYEFFECT_ON_DAMAGE. Color Change is source-proven at family level for every supported sibling route; the unrelated contact family remains an explicit blocked route-shape checkpoint.",
   categories: {
     [ON_DAMAGE_CONTACT_CATEGORY]: {
       selector: "moves.json flags includes FLAG_MAKES_CONTACT",
@@ -1324,11 +1802,26 @@ const onDamageAudit = {
     })),
   },
   routeShapeCensus: {
-    status: "entry-block-control-frontier-not-a-complete-witness",
-    reason: "Each Level-50 candidate is attached to one source-ordered graph/program entry block. The census preserves fallthrough/jump/call syntax, but does not infer runtime guard outcomes, call returns, target damage, or entry-to-MOVEEND reachability as proof.",
+    status: "source-program-route-witness-for-color-change-with-contact-frontier",
+    reason: "Each Level-50 candidate is attached to one source-ordered graph/program entry block. Color Change rows additionally carry a complete source/program route witness through target datahpupdate and a state-3-capable moveend handoff; contact rows retain the static entry-block frontier until their own family is audited.",
     moveEndTarget: onDamageMoveEndTarget,
     entryBlockShapeCounts: onDamageEntryShapeCounts,
     entries: onDamageRouteShapeRows,
+  },
+  colorChange: {
+    status: "source-proven-family",
+    selector: "moves.json power != 0",
+    candidateCount: onDamageCandidatesByCategory[ON_DAMAGE_COLOR_CHANGE_CATEGORY].length,
+    sourceProvenRows: colorChangeSourceProvenRows,
+    sourceExceptionRows: colorChangeExceptions,
+    blockers: [],
+    retiredBlockers: COLOR_CHANGE_RETIRED_BLOCKERS,
+    routeWitnesses: colorChangeRouteEvidenceRows,
+    runtimeGuardSignature: onDamageColorChangeRuntimeGuards,
+    promotions: {
+      sourceProvenRows: colorChangeSourceProvenRows,
+      reason: "The shared family receipt, kernel sibling tests, ordered source/program route witnesses, and selector-derived runtime guard signature support every Color Change candidate except the source-proven Future Sight delayed moveend bypass.",
+    },
   },
   semanticEvidence: {
     kernelSiblingBatch: {
@@ -1344,18 +1837,18 @@ const onDamageAudit = {
       probe: "tools/probe/probe-color-change-ability-off.py",
       receiptFiles: ON_DAMAGE_RETIRED_BLOCKERS[0].receipts,
       observation: "A legal target Kecleon survives real Thunderbolt damage, changes both live types Normal→Electric with gLastUsedAbility=16, emits the Color Change message, and consumes no RNG on the mutation frame in two fresh seed runs.",
-      requirement: "This retires only the direct shared-family receipt blocker. Complete ordered generated routes and runtime guard derivation still gate every per-move promotion.",
+      requirement: "This is the one shared family-level receipt reused by the Color Change promotion; no per-move oracle receipts are authored. Contact-family rows retain their separate route/guard checkpoint.",
     },
   },
   blockers: ON_DAMAGE_BLOCKERS,
   retiredBlockers: ON_DAMAGE_RETIRED_BLOCKERS,
   promotions: {
-    sourceProvenRows: [],
-    reason: "No rows promoted: the direct shared-family Battle Scene OFF receipt is now present, but complete ordered MOVEEND witnesses and runtime damage-state guard derivation remain open for the finite family.",
+    sourceProvenRows: colorChangeSourceProvenRows,
+    reason: "Color Change rows are promoted by family-level source/program route and runtime-guard evidence; the unrelated contact rows remain blocked by the two named checkpoint blockers.",
   },
 };
 const output = {
-  schema: "level50-move-parameterization/v3",
+  schema: "level50-move-parameterization/v4",
   source: {
     files: [
       "src/data/gen/moves.json",
@@ -1371,9 +1864,10 @@ const output = {
       "reference/pokeemerald/src/battle_util.c",
       "reference/pokeemerald/src/battle_script_commands.c",
       "reference/pokeemerald/include/battle.h",
+      BATTLE_SCRIPT_CONSTANTS_PATH,
       "reference/pokeemerald/include/constants/pokemon.h",
     ],
-    note: `Catalog join plus an intentionally partial source dispatcher inventory. All per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the exact nine Level-50 sSoundMovesTable selectors and the source-proven absorbing candidates carry graph/program/source-handoff evidence. The shared absorbing family has one Volt Absorb OFF receipt plus an all-three-arm sibling batch, not fabricated per-move receipts.`,
+    note: `Catalog join plus an intentionally partial source dispatcher inventory. All per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, and ${colorChangeSourceProvenRows.length} source-proven Color Change siblings carry graph/program/source-handoff evidence. Color Change has one explicit Future Sight delayed-MOVEEND exception; no per-move oracle receipts are fabricated.`,
   },
   coverage: {
     level50Roster: {
@@ -1421,7 +1915,7 @@ const output = {
         onDamage: onDamageAudit,
         completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "The exact Level-50 Soundproof moves-block family and the audited shared absorbing dispatcher candidates are source-proven. Contact/on-damage has a finite blocked candidate/guard/route-shape audit but remains unsupported per move until complete ordered MOVEEND witnesses and a direct shared-family OFF receipt exist; accuracy and all other ability dispatcher families remain intentionally unsupported/null per move.",
+        reason: "The exact Level-50 Soundproof moves-block family, audited absorbing dispatcher candidates, and the Color Change family are source-proven. Color Change has one explicit Future Sight delayed-MOVEEND exception; contact/on-damage rows retain a finite blocked candidate/guard/route-shape audit, while accuracy and all other ability dispatcher families remain intentionally unsupported/null per move.",
       },
     },
   },
