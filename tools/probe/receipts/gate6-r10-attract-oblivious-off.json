@@ -1,0 +1,58 @@
+{
+  "schema": "gate6-r10-attract-oblivious-off-semantic-receipt/v1",
+  "oracleProfile": "battle-scene-off",
+  "runner": "tools/run-mgba-probe.py",
+  "probe": "tools/probe/probe-gate6-r10-off.py",
+  "seed": 1,
+  "freshRunCount": 2,
+  "fixtures": {
+    "oblivious": "tools/battle-lab/gate6-r10-attract-off.json",
+    "control": "tools/battle-lab/gate6-r10-attract-control-off.json"
+  },
+  "semanticAgreementAcrossFreshRuns": {
+    "oblivious": {
+      "targetAbility": 12,
+      "attractMoveId": 213,
+      "attractPp": [15, 14],
+      "lastUsedAbilityAtAttractMoveEnd": 12,
+      "targetStatus2": 0
+    },
+    "control": {
+      "targetAbility": 20,
+      "attractMoveId": 213,
+      "attractPp": [15, 14],
+      "targetStatus2": 131072,
+      "targetStatus2Hex": "0x20000"
+    }
+  },
+  "observations": {
+    "oblivious": {
+      "attractSelectedFrame": 39,
+      "attractPpDeductedFrame": 69,
+      "attractMoveEndFrame": 215,
+      "targetAbility": 12,
+      "gLastUsedAbilityAtAttractMoveEnd": 12,
+      "targetStatus2Before": 0,
+      "targetStatus2After": 0,
+      "attackerAttractPpBefore": 15,
+      "attackerAttractPpAfter": 14
+    },
+    "control": {
+      "attractSelectedFrame": 39,
+      "attractPpDeductedFrame": 69,
+      "targetInfatuatedFrame": 71,
+      "attractMoveEndFrame": 202,
+      "targetAbility": 20,
+      "targetStatus2Before": 0,
+      "targetStatus2After": 131072,
+      "targetStatus2AfterHex": "0x20000",
+      "attackerAttractPpBefore": 15,
+      "attackerAttractPpAfter": 14
+    }
+  },
+  "assertions": [
+    "Against target Oblivious (12), Attract (213) deducts PP 15 to 14, reveals gLastUsedAbility 12 at Attract MoveEnd, and leaves target status2 at 0.",
+    "The paired Own Tempo (20) control uses the same Attract PP path and writes STATUS2_INFATUATED_WITH(attacker) = 0x20000 at frame 71.",
+    "This receipt records semantic RAM observations only; it does not use framebuffer matching as acceptance evidence."
+  ]
+}

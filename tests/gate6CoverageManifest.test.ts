@@ -19,6 +19,7 @@ const SOUNDPROOF_MOVES_BLOCK_CATEGORY = "moves-block-soundproof";
 const CONTACT_CATEGORY = "moveend-contact-on-damage";
 const COLOR_CHANGE_CATEGORY = "moveend-color-change";
 const SYNCHRONIZE_CATEGORY = "moveend-synchronize-status";
+const TRYINFATUATING_OBLIVIOUS_CATEGORY = "tryinfatuating-oblivious";
 const KINGS_ROCK_CATEGORY = "moveend-kings-rock";
 const SOUNDPROOF_ROSTER_MOVES = [
   "MOVE_ROAR", "MOVE_SING", "MOVE_SUPERSONIC", "MOVE_SCREECH", "MOVE_SNORE",
@@ -101,6 +102,22 @@ const SYNCHRONIZE_PROOF_PATHS = [
   "tools/probe/probe-synchronize-off.py",
   "tools/probe/receipts/synchronize-off-seed-610839776.json",
   "tools/probe/receipts/synchronize-off-seed-324508639.json",
+] as const;
+const TRYINFATUATING_OBLIVIOUS_PROOF_PATHS = [
+  "src/data/gen/moves.json",
+  "reference/pokeemerald/data/battle_scripts_1.s",
+  "src/data/gen/battle-script-graph.json",
+  "src/data/gen/battle-script-program.json",
+  "reference/pokeemerald/src/battle_script_commands.c",
+  "reference/pokeemerald/include/constants/abilities.h",
+  "src/engine/battleScriptTryinfatuatingOpcode.ts",
+  "tests/battleScriptTryinfatuatingOpcode.test.ts",
+  "tests/tryinfatuatingObliviousHookJoinBatch.test.ts",
+  "tests/gate6R10AttractObliviousReceipt.test.ts",
+  "tools/battle-lab/gate6-r10-attract-off.json",
+  "tools/battle-lab/gate6-r10-attract-control-off.json",
+  "tools/probe/probe-gate6-r10-off.py",
+  "tools/probe/receipts/gate6-r10-attract-oblivious-off.json",
 ] as const;
 const KINGS_ROCK_PROOF_PATHS = [
   "reference/pokeemerald/src/battle_util.c",
@@ -196,6 +213,7 @@ function sourceProvenPathsFor(category: string): readonly string[] {
   if (category === CONTACT_CATEGORY) return CONTACT_PROOF_PATHS;
   if (category === COLOR_CHANGE_CATEGORY) return COLOR_CHANGE_PROOF_PATHS;
   if (category === SYNCHRONIZE_CATEGORY) return SYNCHRONIZE_PROOF_PATHS;
+  if (category === TRYINFATUATING_OBLIVIOUS_CATEGORY) return TRYINFATUATING_OBLIVIOUS_PROOF_PATHS;
   if (category === KINGS_ROCK_CATEGORY) return KINGS_ROCK_PROOF_PATHS;
   throw new Error(`unknown source-proven hook category ${category}`);
 }
@@ -309,6 +327,64 @@ function assertSourceProvenFamilyContract(
       expect(array(record(family.familyVerification).oracleReceiptFiles)).toEqual([
         "tools/probe/receipts/synchronize-off-seed-610839776.json",
         "tools/probe/receipts/synchronize-off-seed-324508639.json",
+      ]);
+    }
+    if (family.category === TRYINFATUATING_OBLIVIOUS_CATEGORY) {
+      const selector = record(family.selector);
+      const runtime = record(family.runtimeGuardSignature);
+      const verification = record(family.familyVerification);
+      const graphRoute = array(graph.route);
+      const programRoute = array(program.route);
+      const tailEndsAtMoveEnd = (tail: unknown) => {
+        const statements = array(record(tail).statements).map(record);
+        expect(statements.at(-1)).toMatchObject({ mnemonic: "goto", operands: ["BattleScript_MoveEnd"] });
+      };
+      expect(selector).toMatchObject({ symbol: "MOVE_ATTRACT", effect: "EFFECT_ATTRACT", guard: "moveTable.effect === EFFECT_ATTRACT" });
+      expect(entryPath.declaredEntryScript).toBe("BattleScript_EffectAttract");
+      expect(graphRoute).toEqual(programRoute);
+      expect(graphRoute.map((step) => String(record(step).mnemonic))).toEqual([
+        "attackcanceler", "attackstring", "ppreduce", "accuracycheck", "tryinfatuating",
+        "attackanimation", "waitanimation", "printstring", "waitmessage", "goto",
+      ]);
+      expect(record(graph.attackCanceler)).toMatchObject({ mnemonic: "attackcanceler" });
+      expect(record(graph.accuracyCheck)).toMatchObject({ mnemonic: "accuracycheck", operands: ["BattleScript_ButItFailed", "ACC_CURR_MOVE"] });
+      expect(record(graph.tryInfatuating)).toMatchObject({ mnemonic: "tryinfatuating", operands: ["BattleScript_ButItFailed"] });
+      tailEndsAtMoveEnd(graph.entry);
+      tailEndsAtMoveEnd(graph.ordinaryFailureTail);
+      tailEndsAtMoveEnd(graph.obliviousTail);
+      tailEndsAtMoveEnd(program.entry);
+      tailEndsAtMoveEnd(program.ordinaryFailureTail);
+      tailEndsAtMoveEnd(program.obliviousTail);
+      expect(record(entryPath.tails)).toEqual({
+        success: "BattleScript_MoveEnd",
+        ordinaryFailure: "BattleScript_ButItFailed -> BattleScript_MoveEnd",
+        oblivious: "BattleScript_ObliviousPreventsAttraction -> BattleScript_MoveEnd",
+      });
+      expect(graphRoute).not.toEqual(expect.arrayContaining([expect.objectContaining({ mnemonic: "datahpupdate" })]));
+      expect(runtime).toMatchObject({
+        ability: { symbol: "ABILITY_OBLIVIOUS", value: 12 },
+        orderedGuards: [
+          "gBattleMons[gBattlerTarget].ability == ABILITY_OBLIVIOUS first",
+          "same attacker/target gender",
+          "gBattleMons[gBattlerTarget].status2 & STATUS2_INFATUATION",
+          "attacker gender == MON_GENDERLESS",
+          "target gender == MON_GENDERLESS",
+        ],
+        oblivious: { destination: "BattleScript_ObliviousPreventsAttraction", destinationKind: "hardcoded-not-operand-pointer", lastUsedAbility: 12 },
+        ordinaryFailure: { operandDestination: "BattleScript_ButItFailed" },
+        success: { advanceBytes: 5 },
+      });
+      expect(String(runtime.scopeBoundary)).toMatch(/no datahpupdate.*MOVEEND state 12.*King's Rock.*Shell Bell.*charge.*faint/);
+      expect(verification).toMatchObject({
+        implementation: "src/engine/battleScriptTryinfatuatingOpcode.ts#createBattleScriptTryinfatuatingOpcodeHandlers",
+        batchTest: "tests/tryinfatuatingObliviousHookJoinBatch.test.ts",
+        oracleReceipt: "tests/gate6R10AttractObliviousReceipt.test.ts",
+        oracleFixture: "tools/battle-lab/gate6-r10-attract-off.json",
+        oracleControl: "tools/battle-lab/gate6-r10-attract-control-off.json",
+        oracleProbe: "tools/probe/probe-gate6-r10-off.py",
+      });
+      expect(array(verification.oracleReceiptFiles)).toEqual([
+        "tools/probe/receipts/gate6-r10-attract-oblivious-off.json",
       ]);
     }
     if (family.category === KINGS_ROCK_CATEGORY) {
@@ -502,6 +578,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const perMoveHookJoins = record(summary.perMoveHookJoins);
     const onDamageMoveEnd = record(summary.onDamageMoveEnd);
     const synchronizeMoveEnd = record(summary.synchronizeMoveEnd);
+    const tryinfatuatingOblivious = record(summary.tryinfatuatingOblivious);
     const corpus = record(summary.corpus);
     const hooks = record(summary.hooks);
     const abilities = record(hooks.abilities);
@@ -514,6 +591,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const manifestHookJoinSections = record(sections.perMoveHookJoins);
     const manifestOnDamageMoveEnd = record(sections.onDamageMoveEnd);
     const manifestSynchronizeMoveEnd = record(sections.synchronizeMoveEnd);
+    const manifestTryinfatuatingOblivious = record(sections.tryinfatuatingOblivious);
     const stateFamilies = array(sections.stateFamilies);
     const manifestTrainers = array(record(sections.corpus).trainers);
     const manifestSets = array(record(sections.corpus).level50Sets);
@@ -552,9 +630,9 @@ describe("Gate-6 mechanics coverage manifest", () => {
       const axisSummary = record(perMoveHookJoins[axis]);
       expect(rows).toHaveLength(parameterizationData.moves.length);
       expect(axisSummary).toEqual({ rows: rows.length, unsupported: sourceUnsupported, gaps: sourceUnsupported });
-      expect(sourceUnsupported).toBe(axis === "item" ? 195 : 107);
+      expect(sourceUnsupported).toBe(axis === "item" ? 195 : 106);
     }
-    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 302, gaps: 302 });
+    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 301, gaps: 301 });
     expect(record(summary.kingsRockMoveEnd)).toEqual({
       candidates: 106,
       promotedRows: 105,
@@ -580,6 +658,17 @@ describe("Gate-6 mechanics coverage manifest", () => {
       candidateMoves: expect.arrayContaining(["MOVE_TOXIC", "MOVE_THUNDER_WAVE", "MOVE_BOUNCE"]),
     });
     expect(String(manifestSynchronizeMoveEnd.notes)).toMatch(/30 candidates are promoted/);
+    expect(tryinfatuatingOblivious).toEqual({ candidates: 1, promotedRows: 1, exceptions: 0, blockers: 0, rosterOnlyCandidates: 0 });
+    expect(manifestTryinfatuatingOblivious).toMatchObject({
+      status: SOURCE_PROVEN_FAMILY_STATUS,
+      candidates: 1,
+      promotedRows: 1,
+      exceptions: 0,
+      blockers: 0,
+      rosterOnlyCandidates: 0,
+      candidateMoves: ["MOVE_ATTRACT"],
+    });
+    expect(String(manifestTryinfatuatingOblivious.notes)).toMatch(/Oblivious.*zero-damage/);
     expect(onDamageMoveEnd).toEqual({
       contactCandidates: 94,
       colorChangeCandidates: 183,
@@ -624,7 +713,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const sourceProven = parameterizationData.moves
       .filter((move) => move.hooks.ability.status === SOURCE_PROVEN_FAMILY_STATUS)
       .map((move) => move.move);
-    expect(sourceProven).toHaveLength(193);
+    expect(sourceProven).toHaveLength(194);
     const sourceSoundproof = parameterizationData.moves
       .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(SOUNDPROOF_MOVES_BLOCK_CATEGORY))
       .map((move) => move.move)
@@ -645,11 +734,15 @@ describe("Gate-6 mechanics coverage manifest", () => {
       .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(SYNCHRONIZE_CATEGORY))
       .map((move) => move.move);
     expect(sourceSynchronize).toHaveLength(30);
-    const uniqueNonSoundproofProven = new Set([...sourceAbsorbing, ...sourceColorChange, ...sourceSynchronize]
+    const sourceAttract = parameterizationData.moves
+      .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(TRYINFATUATING_OBLIVIOUS_CATEGORY))
+      .map((move) => move.move);
+    expect(sourceAttract).toEqual(["MOVE_ATTRACT"]);
+    const uniqueNonSoundproofProven = new Set([...sourceAbsorbing, ...sourceColorChange, ...sourceSynchronize, ...sourceAttract]
       .filter((move) => !sourceSoundproof.includes(move)));
     expect(soundproofOnlyAbilityGaps - Number(record(perMoveHookJoins.ability).gaps)).toBe(uniqueNonSoundproofProven.size);
     expect(parameterizationData.moves.length + soundproofOnlyAbilityGaps).toBe(591);
-    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(302);
+    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(301);
     const sourceKingsRock = parameterizationData.moves
       .filter((move) => array(move.hooks.item.supportedCategories).map(String).includes(KINGS_ROCK_CATEGORY))
       .map((move) => move.move);
@@ -835,10 +928,11 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(oracle.receiptGaps).toBe(0);
     expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*195 item join gaps\*\* and \*\*107 ability join gaps\*\*/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*195 item join gaps\*\* and \*\*106 ability join gaps\*\*/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/King's Rock checkpoint: \*\*106\*\* finite Level-50 flag selectors, \*\*105\*\* promoted/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/193 ability rows are source-proven/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/194 ability rows are source-proven/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Synchronize checkpoint: \*\*30\*\* finite Level-50 candidates, \*\*30\*\* promoted/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Attract\/Oblivious checkpoint: \*\*1\*\* finite EFFECT_ATTRACT candidate, \*\*1\*\* promoted, \*\*0\*\* exceptions, \*\*0\*\* roster-only candidates, and \*\*0\*\* active blockers/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/ON_DAMAGE checkpoint: \*\*94\*\* contact candidates and \*\*183\*\* Color Change candidates/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/24\/24.*scenario receipts documented; \*\*0\*\* request-level gaps/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Receipt count alone does not close the broader Gate-6 breadth acceptance/);

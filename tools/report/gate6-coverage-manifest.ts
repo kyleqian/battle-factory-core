@@ -177,6 +177,7 @@ function assertManifest(manifest: AnyRecord): void {
   }
   assertOnDamageCheckpoint(manifest);
   assertSynchronizeCheckpoint(manifest);
+  assertTryinfatuatingObliviousCheckpoint(manifest);
   assertKingsRockCheckpoint(manifest);
 
   const rows: Row[] = [];
@@ -267,6 +268,7 @@ const SOUNDPROOF_MOVES_BLOCK_CATEGORY = "moves-block-soundproof";
 const CONTACT_CATEGORY = "moveend-contact-on-damage";
 const COLOR_CHANGE_CATEGORY = "moveend-color-change";
 const SYNCHRONIZE_CATEGORY = "moveend-synchronize-status";
+const TRYINFATUATING_OBLIVIOUS_CATEGORY = "tryinfatuating-oblivious";
 const KINGS_ROCK_CATEGORY = "moveend-kings-rock";
 const ABSORBING_CATEGORIES = new Set([
   "absorbing-volt-absorb",
@@ -513,6 +515,104 @@ for (const witness of kingsRockRouteWitnesses) {
   }
 }
 
+const tryinfatuatingObliviousAudit = parameterization.coverage?.hookCatalogs?.ability?.tryinfatuatingOblivious as AnyRecord | undefined;
+const tryinfatuatingObliviousCandidates = tryinfatuatingObliviousAudit?.sourceMoveCandidates as AnyRecord[] | undefined;
+const tryinfatuatingObliviousSourceProvenRows = tryinfatuatingObliviousAudit?.sourceProvenRows as string[] | undefined;
+const tryinfatuatingObliviousExceptions = tryinfatuatingObliviousAudit?.sourceExceptionRows as AnyRecord[] | undefined;
+const tryinfatuatingObliviousBlockers = tryinfatuatingObliviousAudit?.blockers as AnyRecord[] | undefined;
+const tryinfatuatingObliviousRouteWitnesses = tryinfatuatingObliviousAudit?.routeWitnesses as AnyRecord[] | undefined;
+const TRYINFATUATING_ATTRACT_ROUTE = [
+  "attackcanceler",
+  "attackstring",
+  "ppreduce",
+  "accuracycheck",
+  "tryinfatuating",
+  "attackanimation",
+  "waitanimation",
+  "printstring",
+  "waitmessage",
+  "goto",
+];
+const TRYINFATUATING_OBLIVIOUS_GUARDS = [
+  "gBattleMons[gBattlerTarget].ability == ABILITY_OBLIVIOUS first",
+  "same attacker/target gender",
+  "gBattleMons[gBattlerTarget].status2 & STATUS2_INFATUATION",
+  "attacker gender == MON_GENDERLESS",
+  "target gender == MON_GENDERLESS",
+];
+if (!tryinfatuatingObliviousAudit
+  || tryinfatuatingObliviousAudit.status !== SOURCE_PROVEN_FAMILY_STATUS
+  || tryinfatuatingObliviousAudit.selector !== "moveTable.effect === EFFECT_ATTRACT"
+  || tryinfatuatingObliviousAudit.candidateCount !== 1
+  || !Array.isArray(tryinfatuatingObliviousCandidates) || tryinfatuatingObliviousCandidates.length !== 1
+  || !Array.isArray(tryinfatuatingObliviousSourceProvenRows) || JSON.stringify(tryinfatuatingObliviousSourceProvenRows) !== JSON.stringify(["MOVE_ATTRACT"])
+  || !Array.isArray(tryinfatuatingObliviousExceptions) || tryinfatuatingObliviousExceptions.length !== 0
+  || !Array.isArray(tryinfatuatingObliviousBlockers) || tryinfatuatingObliviousBlockers.length !== 0
+  || !Array.isArray(tryinfatuatingObliviousRouteWitnesses) || tryinfatuatingObliviousRouteWitnesses.length !== 1
+  || tryinfatuatingObliviousCandidates[0]?.move !== "MOVE_ATTRACT"
+  || tryinfatuatingObliviousCandidates[0]?.moveId !== 213
+  || tryinfatuatingObliviousCandidates[0]?.effect !== "EFFECT_ATTRACT"
+  || tryinfatuatingObliviousCandidates[0]?.entryScript !== "BattleScript_EffectAttract"
+  || tryinfatuatingObliviousCandidates[0]?.executionInventory !== "level50-executable") {
+  throw new Error("Attract/Oblivious family accounting is not the finite 1/1/0/0 executable contract");
+}
+function tailEndsAtMoveEnd(tail: AnyRecord | undefined): boolean {
+  const statements = tail?.statements as AnyRecord[] | undefined;
+  const last = statements?.at(-1);
+  return Boolean(last && last.mnemonic === "goto" && JSON.stringify(last.operands) === JSON.stringify(["BattleScript_MoveEnd"]));
+}
+for (const witness of tryinfatuatingObliviousRouteWitnesses) {
+  const family = witness.familyEvidence as AnyRecord | undefined;
+  const entryPath = family?.entryPath as AnyRecord | undefined;
+  const graphRoute = entryPath?.graph?.route as AnyRecord[] | undefined;
+  const programRoute = entryPath?.program?.route as AnyRecord[] | undefined;
+  const routeMnemonics = graphRoute?.map((statement) => statement.mnemonic);
+  const runtime = family?.runtimeGuardSignature as AnyRecord | undefined;
+  if (witness.status !== "source-proven"
+    || witness.move !== "MOVE_ATTRACT"
+    || family?.category !== TRYINFATUATING_OBLIVIOUS_CATEGORY
+    || family.selector?.guard !== "moveTable.effect === EFFECT_ATTRACT"
+    || family.selector?.symbol !== "MOVE_ATTRACT"
+    || family.selector?.effect !== "EFFECT_ATTRACT"
+    || entryPath?.declaredEntryScript !== "BattleScript_EffectAttract"
+    || !Array.isArray(graphRoute) || !Array.isArray(programRoute)
+    || JSON.stringify(graphRoute) !== JSON.stringify(programRoute)
+    || JSON.stringify(routeMnemonics) !== JSON.stringify(TRYINFATUATING_ATTRACT_ROUTE)
+    || entryPath?.graph?.attackCanceler?.mnemonic !== "attackcanceler"
+    || entryPath?.graph?.accuracyCheck?.mnemonic !== "accuracycheck"
+    || entryPath?.graph?.tryInfatuating?.mnemonic !== "tryinfatuating"
+    || JSON.stringify(entryPath?.graph?.tryInfatuating?.operands) !== JSON.stringify(["BattleScript_ButItFailed"])
+    || !tailEndsAtMoveEnd(entryPath?.graph?.entry)
+    || !tailEndsAtMoveEnd(entryPath?.graph?.ordinaryFailureTail)
+    || !tailEndsAtMoveEnd(entryPath?.graph?.obliviousTail)
+    || !tailEndsAtMoveEnd(entryPath?.program?.entry)
+    || !tailEndsAtMoveEnd(entryPath?.program?.ordinaryFailureTail)
+    || !tailEndsAtMoveEnd(entryPath?.program?.obliviousTail)
+    || entryPath?.tails?.success !== "BattleScript_MoveEnd"
+    || entryPath?.tails?.ordinaryFailure !== "BattleScript_ButItFailed -> BattleScript_MoveEnd"
+    || entryPath?.tails?.oblivious !== "BattleScript_ObliviousPreventsAttraction -> BattleScript_MoveEnd"
+    || (routeMnemonics ?? []).includes("datahpupdate")
+    || runtime?.ability?.value !== 12
+    || JSON.stringify(runtime?.orderedGuards) !== JSON.stringify(TRYINFATUATING_OBLIVIOUS_GUARDS)
+    || runtime?.oblivious?.destination !== "BattleScript_ObliviousPreventsAttraction"
+    || runtime?.oblivious?.destinationKind !== "hardcoded-not-operand-pointer"
+    || runtime?.oblivious?.lastUsedAbility !== 12
+    || runtime?.ordinaryFailure?.operandDestination !== "BattleScript_ButItFailed"
+    || runtime?.success?.advanceBytes !== 5
+    || !String(runtime?.success?.write ?? "").includes("STATUS2_INFATUATED_WITH")
+    || !String(runtime?.scopeBoundary ?? "").includes("no datahpupdate")
+    || family.dispatcher?.locator !== "Cmd_tryinfatuating"
+    || family.familyVerification?.implementation !== "src/engine/battleScriptTryinfatuatingOpcode.ts#createBattleScriptTryinfatuatingOpcodeHandlers"
+    || family.familyVerification?.batchTest !== "tests/tryinfatuatingObliviousHookJoinBatch.test.ts"
+    || family.familyVerification?.oracleReceipt !== "tests/gate6R10AttractObliviousReceipt.test.ts"
+    || family.familyVerification?.oracleFixture !== "tools/battle-lab/gate6-r10-attract-off.json"
+    || family.familyVerification?.oracleControl !== "tools/battle-lab/gate6-r10-attract-control-off.json"
+    || family.familyVerification?.oracleProbe !== "tools/probe/probe-gate6-r10-off.py"
+    || JSON.stringify(family.familyVerification?.oracleReceiptFiles) !== JSON.stringify(["tools/probe/receipts/gate6-r10-attract-oblivious-off.json"])) {
+    throw new Error("Attract/Oblivious family route, explicit tails, or ordered guard certificate is incomplete");
+  }
+}
+
 function assertOnDamageCheckpoint(manifest: AnyRecord): void {
   const checkpoint = manifest.sections?.onDamageMoveEnd as AnyRecord | undefined;
   const summary = manifest.summary?.onDamageMoveEnd as AnyRecord | undefined;
@@ -588,6 +688,30 @@ function assertSynchronizeCheckpoint(manifest: AnyRecord): void {
   }
 }
 
+function assertTryinfatuatingObliviousCheckpoint(manifest: AnyRecord): void {
+  const checkpoint = manifest.sections?.tryinfatuatingOblivious as AnyRecord | undefined;
+  const summary = manifest.summary?.tryinfatuatingOblivious as AnyRecord | undefined;
+  const expected = {
+    candidates: tryinfatuatingObliviousCandidates.length,
+    promotedRows: tryinfatuatingObliviousSourceProvenRows.length,
+    exceptions: tryinfatuatingObliviousExceptions.length,
+    blockers: tryinfatuatingObliviousBlockers.length,
+    rosterOnlyCandidates: tryinfatuatingObliviousCandidates.filter((candidate) => candidate.executionInventory === "level50-roster-only").length,
+  };
+  if (!checkpoint || checkpoint.status !== SOURCE_PROVEN_FAMILY_STATUS || JSON.stringify(summary) !== JSON.stringify(expected)) {
+    throw new Error("Gate-6 manifest lacks the Attract/Oblivious family promotion checkpoint");
+  }
+  if (checkpoint.candidates !== 1
+    || checkpoint.promotedRows !== 1
+    || checkpoint.exceptions !== 0
+    || checkpoint.blockers !== 0
+    || checkpoint.rosterOnlyCandidates !== 0
+    || JSON.stringify(checkpoint.candidateMoves) !== JSON.stringify(["MOVE_ATTRACT"])
+    || !String(checkpoint.notes ?? "").includes("Oblivious")) {
+    throw new Error("Gate-6 Attract/Oblivious checkpoint payload drift");
+  }
+}
+
 function assertKingsRockCheckpoint(manifest: AnyRecord): void {
   const checkpoint = manifest.sections?.kingsRockMoveEnd as AnyRecord | undefined;
   const summary = manifest.summary?.kingsRockMoveEnd as AnyRecord | undefined;
@@ -620,6 +744,7 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
         && family.category !== CONTACT_CATEGORY
         && family.category !== COLOR_CHANGE_CATEGORY
         && family.category !== SYNCHRONIZE_CATEGORY
+        && family.category !== TRYINFATUATING_OBLIVIOUS_CATEGORY
         && family.category !== KINGS_ROCK_CATEGORY
         && !ABSORBING_CATEGORIES.has(family.category))
       || !family.selector?.path
@@ -694,6 +819,30 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
         throw new Error("Synchronize family lacks its ordered selector/MOVEEND/guard witness");
       }
     }
+    if (family.category === TRYINFATUATING_OBLIVIOUS_CATEGORY) {
+      const graphRoute = family.entryPath.graph.route as AnyRecord[] | undefined;
+      const programRoute = family.entryPath.program.route as AnyRecord[] | undefined;
+      const routeMnemonics = graphRoute?.map((statement) => statement.mnemonic);
+      if (family.selector?.guard !== "moveTable.effect === EFFECT_ATTRACT"
+        || family.selector?.symbol !== "MOVE_ATTRACT"
+        || family.selector?.effect !== "EFFECT_ATTRACT"
+        || family.entryPath?.declaredEntryScript !== "BattleScript_EffectAttract"
+        || !Array.isArray(graphRoute)
+        || !Array.isArray(programRoute)
+        || JSON.stringify(graphRoute) !== JSON.stringify(programRoute)
+        || JSON.stringify(routeMnemonics) !== JSON.stringify(TRYINFATUATING_ATTRACT_ROUTE)
+        || family.entryPath.graph?.tryInfatuating?.mnemonic !== "tryinfatuating"
+        || !tailEndsAtMoveEnd(family.entryPath.graph?.entry)
+        || !tailEndsAtMoveEnd(family.entryPath.graph?.ordinaryFailureTail)
+        || !tailEndsAtMoveEnd(family.entryPath.graph?.obliviousTail)
+        || family.runtimeGuardSignature?.oblivious?.lastUsedAbility !== 12
+        || family.runtimeGuardSignature?.oblivious?.destination !== "BattleScript_ObliviousPreventsAttraction"
+        || family.runtimeGuardSignature?.success?.advanceBytes !== 5
+        || !String(family.runtimeGuardSignature?.scopeBoundary ?? "").includes("no datahpupdate")
+        || family.familyVerification?.oracleReceipt !== "tests/gate6R10AttractObliviousReceipt.test.ts") {
+        throw new Error("Attract/Oblivious family lacks its exact selector/route/tail/guard witness");
+      }
+    }
     if (family.category === KINGS_ROCK_CATEGORY) {
       const graphRoute = family.entryPath.graph.route as AnyRecord[] | undefined;
       const programRoute = family.entryPath.program.route as AnyRecord[] | undefined;
@@ -738,6 +887,10 @@ function parameterizedHook(move: AnyRecord, axis: PerMoveHookJoinAxis): AnyRecor
     if (family.category === SYNCHRONIZE_CATEGORY
       && family.selector?.entryScript !== move.battleScript?.entryScript) {
       throw new Error(`${move.move} Synchronize evidence lost its source entry identity`);
+    }
+    if (family.category === TRYINFATUATING_OBLIVIOUS_CATEGORY
+      && (axis !== "ability" || move.move !== "MOVE_ATTRACT" || family.selector?.symbol !== move.move)) {
+      throw new Error(`${move.move} Attract/Oblivious evidence lost its finite selector identity`);
     }
     if (family.category === KINGS_ROCK_CATEGORY
       && (axis !== "item" || family.selector?.symbol !== move.move)) {
@@ -814,6 +967,22 @@ function sourceProvenHookEvidence(hook: AnyRecord): Evidence[] {
         evidence("tools/probe/probe-synchronize-off.py", "oracle-probe"),
         evidence("tools/probe/receipts/synchronize-off-seed-610839776.json", "battle-scene-off-oracle-receipt"),
         evidence("tools/probe/receipts/synchronize-off-seed-324508639.json", "battle-scene-off-oracle-receipt"),
+      ];
+    }
+    if (proof.category === TRYINFATUATING_OBLIVIOUS_CATEGORY) {
+      return [
+        ...base,
+        evidence("reference/pokeemerald/include/constants/abilities.h", "ability-value", "ABILITY_OBLIVIOUS=12"),
+        evidence("reference/pokeemerald/src/battle_script_commands.c", "ordered-runtime-guards", "Cmd_tryinfatuating"),
+        evidence("reference/pokeemerald/data/battle_scripts_1.s", "attract-entry-and-explicit-moveend-tails", "BattleScript_EffectAttract"),
+        evidence("src/engine/battleScriptTryinfatuatingOpcode.ts", "existing-source-shaped-family-implementation", "createBattleScriptTryinfatuatingOpcodeHandlers"),
+        evidence("tests/battleScriptTryinfatuatingOpcode.test.ts", "tier-1-runtime-arm", "Cmd_tryinfatuating"),
+        evidence("tests/tryinfatuatingObliviousHookJoinBatch.test.ts", "tier-1-one-row-family-batch"),
+        evidence("tests/gate6R10AttractObliviousReceipt.test.ts", "battle-scene-off-family-receipt"),
+        evidence("tools/battle-lab/gate6-r10-attract-off.json", "parameterized-oracle-request"),
+        evidence("tools/battle-lab/gate6-r10-attract-control-off.json", "paired-control-oracle-request"),
+        evidence("tools/probe/probe-gate6-r10-off.py", "oracle-probe"),
+        evidence("tools/probe/receipts/gate6-r10-attract-oblivious-off.json", "battle-scene-off-oracle-receipt"),
       ];
     }
     if (proof.category === KINGS_ROCK_CATEGORY) {
@@ -1481,6 +1650,38 @@ const synchronizeMoveEndRow: Row = Object.freeze({
   notes: "All 30 candidates are promoted by complete selector, route, and runtime-guard evidence; 30 candidates are promoted, with 0 route exceptions and 0 active blockers. The source marker bank excludes sleep, freeze, and non-status bytes; miss/no-effect, substitute, type/ability, chance, affectsUser orientation, toxic-to-poison reflection, and ordered target/attacker MOVEEND guards remain explicit.",
 });
 
+const tryinfatuatingObliviousSummary = Object.freeze({
+  candidates: tryinfatuatingObliviousCandidates.length,
+  promotedRows: tryinfatuatingObliviousSourceProvenRows.length,
+  exceptions: tryinfatuatingObliviousExceptions.length,
+  blockers: tryinfatuatingObliviousBlockers.length,
+  rosterOnlyCandidates: tryinfatuatingObliviousCandidates.filter((candidate) => candidate.executionInventory === "level50-roster-only").length,
+});
+const tryinfatuatingObliviousRow: Row = Object.freeze({
+  id: "hook-family:tryinfatuating-oblivious",
+  label: "Attract / Oblivious Level-50 family checkpoint",
+  status: SOURCE_PROVEN_FAMILY_STATUS,
+  ...tryinfatuatingObliviousSummary,
+  candidateMoves: tryinfatuatingObliviousCandidates.map((candidate) => candidate.move),
+  evidence: uniqueEvidence([
+    evidence(PARAMETERIZATION_PATH, "finite-candidate-route-guard-audit", "coverage.hookCatalogs.ability.tryinfatuatingOblivious"),
+    evidence("reference/pokeemerald/data/battle_scripts_1.s", "attract-entry-and-explicit-moveend-tails", "BattleScript_EffectAttract"),
+    evidence("reference/pokeemerald/src/battle_script_commands.c", "ordered-runtime-guards", "Cmd_tryinfatuating"),
+    evidence("reference/pokeemerald/include/constants/abilities.h", "ability-value", "ABILITY_OBLIVIOUS=12"),
+    evidence("src/data/gen/battle-script-graph.json", "generated-ordered-route-witness", "BattleScript_EffectAttract"),
+    evidence("src/data/gen/battle-script-program.json", "generated-ordered-route-witness", "BattleScript_EffectAttract"),
+    evidence("src/engine/battleScriptTryinfatuatingOpcode.ts", "existing-source-shaped-family-implementation", "createBattleScriptTryinfatuatingOpcodeHandlers"),
+    evidence("tests/battleScriptTryinfatuatingOpcode.test.ts", "tier-1-runtime-arm", "Cmd_tryinfatuating"),
+    evidence("tests/tryinfatuatingObliviousHookJoinBatch.test.ts", "one-row-graph-program-batch"),
+    evidence("tests/gate6R10AttractObliviousReceipt.test.ts", "battle-scene-off-family-receipt"),
+    evidence("tools/battle-lab/gate6-r10-attract-off.json", "direct-parameterized-oracle-fixture"),
+    evidence("tools/battle-lab/gate6-r10-attract-control-off.json", "paired-control-oracle-fixture"),
+    evidence("tools/probe/probe-gate6-r10-off.py", "direct-parameterized-oracle-probe"),
+    evidence("tools/probe/receipts/gate6-r10-attract-oblivious-off.json", "direct-parameterized-oracle-receipt"),
+  ]),
+  notes: "MOVE_ATTRACT is the sole Level-50 EFFECT_ATTRACT selector and is promoted through BattleScript_EffectAttract's attackcanceler → attackstring → ppreduce → accuracycheck → tryinfatuating route. Cmd_tryinfatuating checks target Oblivious first (ability reveal 12), otherwise routes gender/already-infatuated guards to ButItFailed or writes STATUS2_INFATUATED_WITH(attacker) and advances five bytes. Success, ordinary failure, and Oblivious tails explicitly finish at MoveEnd. This zero-damage family does not claim datahpupdate, MOVEEND state 12, King's Rock, Shell Bell, charge, or faint behavior.",
+});
+
 const kingsRockMoveEndSummary = Object.freeze({
   candidates: kingsRockCandidates.length,
   promotedRows: kingsRockSourceProvenRows.length,
@@ -1620,6 +1821,7 @@ const sourceInputs = [
   "reference/pokeemerald/src/battle_util.c",
   "reference/pokeemerald/src/battle_script_commands.c",
   "reference/pokeemerald/include/battle.h",
+  "reference/pokeemerald/include/constants/abilities.h",
   "reference/pokeemerald/include/constants/battle_script_commands.h",
   "reference/pokeemerald/data/battle_scripts_1.s",
   "src/data/gen/battle-script-graph.json",
@@ -1633,6 +1835,14 @@ const sourceInputs = [
   "tests/damageCalc.test.ts",
   "src/engine/battleScriptMoveEndOpcode.ts",
   "tests/battleScriptMoveEndOpcode.test.ts",
+  "src/engine/battleScriptTryinfatuatingOpcode.ts",
+  "tests/battleScriptTryinfatuatingOpcode.test.ts",
+  "tests/tryinfatuatingObliviousHookJoinBatch.test.ts",
+  "tests/gate6R10AttractObliviousReceipt.test.ts",
+  "tools/battle-lab/gate6-r10-attract-off.json",
+  "tools/battle-lab/gate6-r10-attract-control-off.json",
+  "tools/probe/probe-gate6-r10-off.py",
+  "tools/probe/receipts/gate6-r10-attract-oblivious-off.json",
   "tests/colorChangeOracleEvidence.test.ts",
   "tests/level50MoveParameterization.test.ts",
   "tests/gate6CoverageManifest.test.ts",
@@ -1691,6 +1901,7 @@ const manifest: AnyRecord = {
     },
     onDamageMoveEnd: onDamageMoveEndSummary,
     synchronizeMoveEnd: synchronizeMoveEndSummary,
+    tryinfatuatingOblivious: tryinfatuatingObliviousSummary,
     kingsRockMoveEnd: kingsRockMoveEndSummary,
     stateFamilies: { total: stateFamilyRows.length, tier1Covered: stateFamilyRows.filter((row) => row.status === "tier1-covered").length },
     hooks: {
@@ -1706,6 +1917,7 @@ const manifest: AnyRecord = {
     perMoveHookJoins: perMoveHookJoinRows,
     onDamageMoveEnd: onDamageMoveEndRow,
     synchronizeMoveEnd: synchronizeMoveEndRow,
+    tryinfatuatingOblivious: tryinfatuatingObliviousRow,
     kingsRockMoveEnd: kingsRockMoveEndRow,
     stateFamilies: stateFamilyRows,
     hooks: { abilities: abilityRows, holdEffects: holdEffectRows },
@@ -1740,9 +1952,10 @@ const markdown: string[] = [
   "## Headline",
   "",
   `- Effects: **${manifest.summary.effects.staticExecutable}/${manifest.summary.effects.total} static-executable**; moves: **${manifest.summary.moves.staticExecutable}/${manifest.summary.moves.total}** static-executable (**${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}** Level-50 roster moves executable, **${manifest.summary.moves.level50RosterOnly}** roster-only).`,
-  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors, audited shared-absorbing routes, both ON_DAMAGE families, and the 30-candidate Synchronize family, while every remaining gap retains its source-artifact locator and reason.`,
+  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors, audited shared-absorbing routes, both ON_DAMAGE families, the 30-candidate Synchronize family, and Attract's one-row Oblivious family, while every remaining gap retains its source-artifact locator and reason.`,
   `- ON_DAMAGE checkpoint: **${manifest.summary.onDamageMoveEnd.contactCandidates}** contact candidates and **${manifest.summary.onDamageMoveEnd.colorChangeCandidates}** Color Change candidates (${manifest.summary.onDamageMoveEnd.overlapCandidates} overlap) are source-enumerated across ${manifest.summary.onDamageMoveEnd.entryBlockShapes} entry-block shapes. **${manifest.summary.onDamageMoveEnd.contactPromotedRows}** contact rows and **${manifest.summary.onDamageMoveEnd.colorChangePromotedRows}** Color Change rows are promoted; **${manifest.summary.onDamageMoveEnd.contactExceptions}** contact exceptions and **${manifest.summary.onDamageMoveEnd.contactBlockers}** active contact blockers remain, while **${manifest.summary.onDamageMoveEnd.contactRetiredBlockers}** contact route/guard blockers and **${manifest.summary.onDamageMoveEnd.colorChangeRetiredBlockers}** Color Change blockers are retired.`,
   `- Synchronize checkpoint: **${manifest.summary.synchronizeMoveEnd.candidates}** finite Level-50 candidates, **${manifest.summary.synchronizeMoveEnd.promotedRows}** promoted, **${manifest.summary.synchronizeMoveEnd.exceptions}** route exceptions, and **${manifest.summary.synchronizeMoveEnd.blockers}** active blockers.`,
+  `- Attract/Oblivious checkpoint: **${manifest.summary.tryinfatuatingOblivious.candidates}** finite EFFECT_ATTRACT candidate, **${manifest.summary.tryinfatuatingOblivious.promotedRows}** promoted, **${manifest.summary.tryinfatuatingOblivious.exceptions}** exceptions, **${manifest.summary.tryinfatuatingOblivious.rosterOnlyCandidates}** roster-only candidates, and **${manifest.summary.tryinfatuatingOblivious.blockers}** active blockers.`,
   `- King's Rock checkpoint: **${manifest.summary.kingsRockMoveEnd.candidates}** finite Level-50 flag selectors, **${manifest.summary.kingsRockMoveEnd.promotedRows}** promoted, **${manifest.summary.kingsRockMoveEnd.exceptions}** explicit exception, **${manifest.summary.kingsRockMoveEnd.rosterOnlyCandidates}** roster-only candidates retained, and no Shell Bell overclaim.`,
   `- State/status/volatile rows: **${manifest.summary.stateFamilies.tier1Covered}/${manifest.summary.stateFamilies.total}** have focused Tier-1 evidence; source-modeled rows remain listed separately.`,
   `- Hook universes: **${manifest.summary.hooks.abilities.total} abilities** and **${manifest.summary.hooks.holdEffects.total} hold effects**, including **${manifest.summary.hooks.abilities.zeroFactoryWidened + manifest.summary.hooks.holdEffects.zeroFactoryWidened}** legal widened-scope rows with zero Level-50 Factory carriers.`,
@@ -1755,7 +1968,7 @@ const markdown: string[] = [
   "- `static-executable` comes only from the executable-frontier census and means opcode/operand reachability, not correct state transitions.",
   "- `engine-referenced` comes only from the ability/item census. It is a worklist fact, not semantic verification.",
   "- `catalog-joined` proves a finite source/data join. It does not provide a per-trainer or per-set oracle receipt.",
-  "- `source-proven-family` per-move hook joins name exact supported categories and carry one family witness per category. Soundproof reaches Cmd_attackcanceler; Volt/Water Absorb and Flash Fire reach accuracycheck → JumpIfMoveFailed; the contact and Color Change families carry selector-specific target-datahpupdate → MOVEEND_ON_DAMAGE route certificates; Synchronize carries selector-specific SetMoveEffect → chance/primary → ordered MOVEEND_SYNCHRONIZE_TARGET/ATTACKER route certificates; King's Rock carries its source flag plus power guard through target datahpupdate to MOVEEND_KINGSROCK_SHELLBELL state 12, while Tickle and Shell Bell remain explicitly outside the promotion. Their shared receipts are family-level receipts plus Tier-1 sibling batches, not fabricated per-move receipts. No row claims unrelated families.",
+  "- `source-proven-family` per-move hook joins name exact supported categories and carry one family witness per category. Soundproof reaches Cmd_attackcanceler; Volt/Water Absorb and Flash Fire reach accuracycheck → JumpIfMoveFailed; the contact and Color Change families carry selector-specific target-datahpupdate → MOVEEND_ON_DAMAGE route certificates; Synchronize carries selector-specific SetMoveEffect → chance/primary → ordered MOVEEND_SYNCHRONIZE_TARGET/ATTACKER route certificates; Attract/Oblivious carries the exact action prelude → tryinfatuating route, ordered target-Oblivious-first guard, explicit MoveEnd tails, and no datahpupdate/state-12/item/charge/faint claim; King's Rock carries its source flag plus power guard through target datahpupdate to MOVEEND_KINGSROCK_SHELLBELL state 12, while Tickle and Shell Bell remain explicitly outside the promotion. Their shared receipts are family-level receipts plus Tier-1 sibling batches, not fabricated per-move receipts. No row claims unrelated families.",
   "- `unsupported` per-move hook joins are intentionally not inferred from the partial dispatcher catalogs. Each row repeats only move identity, effect, entry script, reason, and a locator into `level50-move-parameterization.json`; it is not a support claim.",
   "- `oracle-receipted` requires a committed deterministic request and receipt. Incidental ability presence in an unrelated scenario is not a direct ability receipt; Water Absorb and Flash Fire retain explicit shared-dispatcher sibling status, and the fresh Static receipt is the one direct ON_DAMAGE contact-family witness while the five other contact ability outcomes retain explicit receipt gaps.",
   "- The five entries in `STATE_FAMILY_BEHAVIOR_EVIDENCE` use named behavior-test locators instead of token presence; that narrow Tier-1 override does not alter static, semantic, or oracle classifications.",
@@ -1825,6 +2038,17 @@ markdown.push(...table("Synchronize candidate and ordered MOVEEND promotion", ["
   (row) => evidenceText(row.evidence),
 ]));
 markdown.push(`${synchronizeMoveEndRow.notes}\n`);
+markdown.push("## Attract / Oblivious ability family checkpoint\n\n");
+markdown.push(...table("Attract candidate and Cmd_tryinfatuating promotion", ["Status", "Candidates", "Promoted", "Exceptions", "Roster-only", "Blockers", "Evidence"], [tryinfatuatingObliviousRow], [
+  (row) => row.status,
+  (row) => String(row.candidates),
+  (row) => String(row.promotedRows),
+  (row) => String(row.exceptions),
+  (row) => String(row.rosterOnlyCandidates),
+  (row) => String(row.blockers),
+  (row) => evidenceText(row.evidence),
+]));
+markdown.push(`${tryinfatuatingObliviousRow.notes}\n`);
 markdown.push("## King's Rock item family checkpoint\n\n");
 markdown.push(...table("King's Rock candidate and MOVEEND state-12 promotion", ["Status", "Candidates", "Promoted", "Exceptions", "Roster-only", "Blockers", "Evidence"], [kingsRockMoveEndRow], [
   (row) => row.status,

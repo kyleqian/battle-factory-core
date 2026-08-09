@@ -335,9 +335,9 @@ describe("Level-50 move parameterization manifest", () => {
     });
     expect(manifest.coverage.joins).toMatchObject({
       battleScriptGraphLabels: 300, battleScriptProgramLabels: 300, animationScripts: 300,
-      itemHookCategories: 105, abilityHookCategories: 345,
+      itemHookCategories: 105, abilityHookCategories: 346,
       itemHookUnsupportedCategories: null, abilityHookUnsupportedCategories: null,
-      itemHookUnsupportedRows: 195, abilityHookUnsupportedRows: 107, abilityHookSourceProvenRows: 193, itemHookSourceProvenRows: 105,
+      itemHookUnsupportedRows: 195, abilityHookUnsupportedRows: 106, abilityHookSourceProvenRows: 194, itemHookSourceProvenRows: 105,
     });
     expect(manifest.coverage.hookCatalogs).toMatchObject({
       item: {
@@ -347,7 +347,7 @@ describe("Level-50 move parameterization manifest", () => {
       ability: {
         // displayRows follows summary-info.json's species pool (6 anchors → full
         // 376-species rental pool on 2026-08-07, ISSUES #80 gender fix).
-        displayRows: 74, catalogedDispatcherCategories: 10, soundproofSourceSelectorRows: 10,
+        displayRows: 74, catalogedDispatcherCategories: 11, soundproofSourceSelectorRows: 10,
         soundproofLevel50RosterSelectorRows: 9, soundproofSourceProvenRosterRows: 9,
         soundproofUnsupportedLevel50RosterRows: 291, completeness: "intentionally-partial", unsupportedCategories: null,
       },
@@ -359,6 +359,7 @@ describe("Level-50 move parameterization manifest", () => {
       "moves-block-soundproof", "absorbing-volt-absorb", "absorbing-water-absorb", "absorbing-flash-fire",
       "moveend-contact-on-damage", "moveend-color-change",
       "moveend-synchronize-status",
+      "tryinfatuating-oblivious",
       "accuracy-compound-eyes", "accuracy-sand-veil", "accuracy-hustle-physical",
     ]);
   });
@@ -379,6 +380,7 @@ describe("Level-50 move parameterization manifest", () => {
       "moveend-contact-on-damage": ["ABILITYEFFECT_ON_DAMAGE", "FLAG_MAKES_CONTACT", "ABILITY_ROUGH_SKIN"],
       "moveend-color-change": ["ABILITYEFFECT_ON_DAMAGE", "ABILITY_COLOR_CHANGE"],
       "moveend-synchronize-status": ["ABILITYEFFECT_SYNCHRONIZE", "ABILITYEFFECT_ATK_SYNCHRONIZE", "HITMARKER_SYNCHRONIZE_EFFECT", "MOVEEND_SYNCHRONIZE_TARGET", "MOVEEND_SYNCHRONIZE_ATTACKER"],
+      "tryinfatuating-oblivious": ["Cmd_tryinfatuating", "ABILITY_OBLIVIOUS", "BattleScript_ObliviousPreventsAttraction", "STATUS2_INFATUATED_WITH"],
       "accuracy-compound-eyes": ["Cmd_accuracycheck", "ABILITY_COMPOUND_EYES"],
       "accuracy-sand-veil": ["Cmd_accuracycheck", "ABILITY_SAND_VEIL", "B_WEATHER_SANDSTORM"],
       "accuracy-hustle-physical": ["Cmd_accuracycheck", "ABILITY_HUSTLE", "IS_TYPE_PHYSICAL(type)"],
@@ -840,6 +842,12 @@ describe("Level-50 move parameterization manifest", () => {
       expectedSourceProven.set(move, [...(expectedSourceProven.get(move) ?? []), "moveend-color-change"]);
     }
 
+    for (const move of (movesData.moves as SourceMove[])
+      .filter((candidate) => level50RosterSymbols().has(candidate.move) && candidate.effect === "EFFECT_ATTRACT")
+      .map((candidate) => candidate.move)) {
+      expectedSourceProven.set(move, [...(expectedSourceProven.get(move) ?? []), "tryinfatuating-oblivious"]);
+    }
+
     const synchronizeEntryLabels = new Set([
       "BattleScript_EffectPoisonHit", "BattleScript_EffectBurnHit", "BattleScript_EffectParalyzeHit",
       "BattleScript_EffectToxic", "BattleScript_EffectParalyze", "BattleScript_EffectThawHit",
@@ -898,7 +906,7 @@ describe("Level-50 move parameterization manifest", () => {
         expect(record.hooks.ability.evidence?.families.map((family) => family.category)).toEqual(expectedCategories);
       }
     }
-    expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(107);
+    expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(106);
     expect(manifest.moves.filter((record) => record.hooks.item.status === "unsupported")).toHaveLength(195);
   });
 

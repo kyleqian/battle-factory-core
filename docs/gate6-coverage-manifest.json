@@ -3,7 +3,7 @@
   "gate6": {
     "closed": false,
     "verdict": "OPEN — this first manifest exposes coverage and receipt gaps; it does not claim Gate 6 closed.",
-    "nextAcceptanceUnit": "Per-move hook-join family: Choose one source-bounded item or ability hook-join family and account for complete Battle Script reachability, including implicit fallthrough and source branch guards. Do not promote the remaining explicit gaps: 195 item joins and 107 ability joins remain unsupported.",
+    "nextAcceptanceUnit": "Per-move hook-join family: Choose one source-bounded item or ability hook-join family and account for complete Battle Script reachability, including implicit fallthrough and source branch guards. Do not promote the remaining explicit gaps: 195 item joins and 106 ability joins remain unsupported.",
     "interpretation": "Static executable reachability, engine references, Tier-1 proofs, and oracle receipts are separate evidence classes."
   },
   "generatedBy": "node --experimental-strip-types tools/report/gate6-coverage-manifest.ts",
@@ -23,6 +23,7 @@
     "reference/pokeemerald/src/battle_util.c",
     "reference/pokeemerald/src/battle_script_commands.c",
     "reference/pokeemerald/include/battle.h",
+    "reference/pokeemerald/include/constants/abilities.h",
     "reference/pokeemerald/include/constants/battle_script_commands.h",
     "reference/pokeemerald/data/battle_scripts_1.s",
     "src/data/gen/battle-script-graph.json",
@@ -36,6 +37,14 @@
     "tests/damageCalc.test.ts",
     "src/engine/battleScriptMoveEndOpcode.ts",
     "tests/battleScriptMoveEndOpcode.test.ts",
+    "src/engine/battleScriptTryinfatuatingOpcode.ts",
+    "tests/battleScriptTryinfatuatingOpcode.test.ts",
+    "tests/tryinfatuatingObliviousHookJoinBatch.test.ts",
+    "tests/gate6R10AttractObliviousReceipt.test.ts",
+    "tools/battle-lab/gate6-r10-attract-off.json",
+    "tools/battle-lab/gate6-r10-attract-control-off.json",
+    "tools/probe/probe-gate6-r10-off.py",
+    "tools/probe/receipts/gate6-r10-attract-oblivious-off.json",
     "tests/colorChangeOracleEvidence.test.ts",
     "tests/level50MoveParameterization.test.ts",
     "tests/gate6CoverageManifest.test.ts",
@@ -86,13 +95,13 @@
       },
       "ability": {
         "rows": 300,
-        "unsupported": 107,
-        "gaps": 107
+        "unsupported": 106,
+        "gaps": 106
       },
       "total": {
         "rows": 600,
-        "unsupported": 302,
-        "gaps": 302
+        "unsupported": 301,
+        "gaps": 301
       }
     },
     "onDamageMoveEnd": {
@@ -117,6 +126,13 @@
       "promotedRows": 30,
       "exceptions": 0,
       "blockers": 0
+    },
+    "tryinfatuatingOblivious": {
+      "candidates": 1,
+      "promotedRows": 1,
+      "exceptions": 0,
+      "blockers": 0,
+      "rosterOnlyCandidates": 0
     },
     "kingsRockMoveEnd": {
       "candidates": 106,
@@ -48547,9 +48563,11 @@
           "effect": "EFFECT_ATTRACT",
           "effectId": 120,
           "entryScript": "BattleScript_EffectAttract",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "tryinfatuating-oblivious"
+          ],
+          "reason": "Source-proven ability family/categories: tryinfatuating-oblivious. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_ATTRACT.hooks.ability"
@@ -48559,9 +48577,78 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_ATTRACT.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "src/data/gen/moves.json",
+              "locator": "moves:MOVE_ATTRACT.effect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectAttract:1645",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectAttract->BattleScript_EffectAttract",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectAttract->BattleScript_EffectAttract",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_tryinfatuating",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "reference/pokeemerald/include/constants/abilities.h",
+              "locator": "ABILITY_OBLIVIOUS=12",
+              "kind": "ability-value"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectAttract",
+              "kind": "attract-entry-and-explicit-moveend-tails"
+            },
+            {
+              "path": "src/engine/battleScriptTryinfatuatingOpcode.ts",
+              "locator": "createBattleScriptTryinfatuatingOpcodeHandlers",
+              "kind": "existing-source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptTryinfatuatingOpcode.test.ts",
+              "locator": "Cmd_tryinfatuating",
+              "kind": "tier-1-runtime-arm"
+            },
+            {
+              "path": "tests/tryinfatuatingObliviousHookJoinBatch.test.ts",
+              "kind": "tier-1-one-row-family-batch"
+            },
+            {
+              "path": "tests/gate6R10AttractObliviousReceipt.test.ts",
+              "kind": "battle-scene-off-family-receipt"
+            },
+            {
+              "path": "tools/battle-lab/gate6-r10-attract-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/gate6-r10-attract-control-off.json",
+              "kind": "paired-control-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-gate6-r10-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/gate6-r10-attract-oblivious-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for tryinfatuating-oblivious; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SLEEP_TALK",
@@ -59368,6 +59455,86 @@
       ],
       "notes": "All 30 candidates are promoted by complete selector, route, and runtime-guard evidence; 30 candidates are promoted, with 0 route exceptions and 0 active blockers. The source marker bank excludes sleep, freeze, and non-status bytes; miss/no-effect, substitute, type/ability, chance, affectsUser orientation, toxic-to-poison reflection, and ordered target/attacker MOVEEND guards remain explicit."
     },
+    "tryinfatuatingOblivious": {
+      "id": "hook-family:tryinfatuating-oblivious",
+      "label": "Attract / Oblivious Level-50 family checkpoint",
+      "status": "source-proven-family",
+      "candidates": 1,
+      "promotedRows": 1,
+      "exceptions": 0,
+      "blockers": 0,
+      "rosterOnlyCandidates": 0,
+      "candidateMoves": [
+        "MOVE_ATTRACT"
+      ],
+      "evidence": [
+        {
+          "path": "src/data/gen/level50-move-parameterization.json",
+          "locator": "coverage.hookCatalogs.ability.tryinfatuatingOblivious",
+          "kind": "finite-candidate-route-guard-audit"
+        },
+        {
+          "path": "reference/pokeemerald/data/battle_scripts_1.s",
+          "locator": "BattleScript_EffectAttract",
+          "kind": "attract-entry-and-explicit-moveend-tails"
+        },
+        {
+          "path": "reference/pokeemerald/src/battle_script_commands.c",
+          "locator": "Cmd_tryinfatuating",
+          "kind": "ordered-runtime-guards"
+        },
+        {
+          "path": "reference/pokeemerald/include/constants/abilities.h",
+          "locator": "ABILITY_OBLIVIOUS=12",
+          "kind": "ability-value"
+        },
+        {
+          "path": "src/data/gen/battle-script-graph.json",
+          "locator": "BattleScript_EffectAttract",
+          "kind": "generated-ordered-route-witness"
+        },
+        {
+          "path": "src/data/gen/battle-script-program.json",
+          "locator": "BattleScript_EffectAttract",
+          "kind": "generated-ordered-route-witness"
+        },
+        {
+          "path": "src/engine/battleScriptTryinfatuatingOpcode.ts",
+          "locator": "createBattleScriptTryinfatuatingOpcodeHandlers",
+          "kind": "existing-source-shaped-family-implementation"
+        },
+        {
+          "path": "tests/battleScriptTryinfatuatingOpcode.test.ts",
+          "locator": "Cmd_tryinfatuating",
+          "kind": "tier-1-runtime-arm"
+        },
+        {
+          "path": "tests/tryinfatuatingObliviousHookJoinBatch.test.ts",
+          "kind": "one-row-graph-program-batch"
+        },
+        {
+          "path": "tests/gate6R10AttractObliviousReceipt.test.ts",
+          "kind": "battle-scene-off-family-receipt"
+        },
+        {
+          "path": "tools/battle-lab/gate6-r10-attract-off.json",
+          "kind": "direct-parameterized-oracle-fixture"
+        },
+        {
+          "path": "tools/battle-lab/gate6-r10-attract-control-off.json",
+          "kind": "paired-control-oracle-fixture"
+        },
+        {
+          "path": "tools/probe/probe-gate6-r10-off.py",
+          "kind": "direct-parameterized-oracle-probe"
+        },
+        {
+          "path": "tools/probe/receipts/gate6-r10-attract-oblivious-off.json",
+          "kind": "direct-parameterized-oracle-receipt"
+        }
+      ],
+      "notes": "MOVE_ATTRACT is the sole Level-50 EFFECT_ATTRACT selector and is promoted through BattleScript_EffectAttract's attackcanceler → attackstring → ppreduce → accuracycheck → tryinfatuating route. Cmd_tryinfatuating checks target Oblivious first (ability reveal 12), otherwise routes gender/already-infatuated guards to ButItFailed or writes STATUS2_INFATUATED_WITH(attacker) and advances five bytes. Success, ordinary failure, and Oblivious tails explicitly finish at MoveEnd. This zero-damage family does not claim datahpupdate, MOVEEND state 12, King's Rock, Shell Bell, charge, or faint behavior."
+    },
     "kingsRockMoveEnd": {
       "id": "hook-family:moveend-kings-rock",
       "label": "King's Rock Level-50 family checkpoint",
@@ -60710,7 +60877,15 @@
             "kind": "tier-1-test"
           },
           {
+            "path": "tests/gate6CoverageManifest.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
             "path": "tests/gate6KernelInteractions.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
+            "path": "tests/tryinfatuatingObliviousHookJoinBatch.test.ts",
             "kind": "tier-1-test"
           }
         ],

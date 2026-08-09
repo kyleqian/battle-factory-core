@@ -100,6 +100,7 @@ const battleUtilSource = readFileSync(join(RUN_ROOT, "reference", "pokeemerald",
 const battleScriptCommandsSource = readFileSync(join(RUN_ROOT, "reference", "pokeemerald", "src", "battle_script_commands.c"), "utf8");
 const battleHeaderSource = readFileSync(join(RUN_ROOT, "reference", "pokeemerald", "include", "battle.h"), "utf8");
 const battleScriptConstantsSource = readFileSync(join(RUN_ROOT, "reference", "pokeemerald", "include", "constants", "battle_script_commands.h"), "utf8");
+const abilityConstantsSource = readFileSync(join(RUN_ROOT, "reference", "pokeemerald", "include", "constants", "abilities.h"), "utf8");
 
 if (moves.length !== 355 || moves.some((move, id) => move.id !== id)) throw new Error("moves.json must be the complete indexed move table");
 if (frontierSets.count !== 882 || frontierSets.entries.length !== 882) throw new Error("expected all 882 Frontier set rows");
@@ -135,12 +136,14 @@ const SOUNDPROOF_TABLE_PATH = "reference/pokeemerald/src/battle_util.c";
 const MOVES_PATH = "src/data/gen/moves.json";
 const BATTLE_HEADER_PATH = "reference/pokeemerald/include/battle.h";
 const BATTLE_SCRIPT_CONSTANTS_PATH = "reference/pokeemerald/include/constants/battle_script_commands.h";
+const ABILITY_CONSTANTS_PATH = "reference/pokeemerald/include/constants/abilities.h";
 const ATTACK_CANCELER_MOVES_BLOCK_CALL = "AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0)";
 const ABSORBING_DISPATCHER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ABSORBING, gBattlerTarget, 0, 0, move)";
 const ON_DAMAGE_DISPATCHER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE, gBattlerTarget, 0, 0, 0)";
 const KINGS_ROCK_CATEGORY = "moveend-kings-rock";
 const KINGS_ROCK_DISPATCHER_CALL = "ItemBattleEffects(ITEMEFFECT_KINGSROCK_SHELLBELL, 0, FALSE)";
 const SYNCHRONIZE_CATEGORY = "moveend-synchronize-status";
+const TRYINFATUATING_OBLIVIOUS_CATEGORY = "tryinfatuating-oblivious";
 const SYNCHRONIZE_DISPATCHER_TARGET_CALL = "AbilityBattleEffects(ABILITYEFFECT_SYNCHRONIZE, gBattlerTarget, 0, 0, 0)";
 const SYNCHRONIZE_DISPATCHER_ATTACKER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ATK_SYNCHRONIZE, gBattlerAttacker, 0, 0, 0)";
 const SYNCHRONIZE_EFFECTS = [
@@ -990,6 +993,7 @@ const ABILITY_HOOK_CATALOG: HookCategory[] = [
   { id: "moveend-contact-on-damage", dispatcher: "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)", selector: "FLAG_MAKES_CONTACT after a MOVEEND-reachable path", ownership: "target ability is Rough Skin, Effect Spore, Poison Point, Static, Flame Body, or Cute Charm" },
   { id: "moveend-color-change", dispatcher: "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)", selector: "power != 0 after a MOVEEND-reachable path", ownership: "target ability is ABILITY_COLOR_CHANGE" },
   { id: SYNCHRONIZE_CATEGORY, dispatcher: "AbilityBattleEffects(ABILITYEFFECT_SYNCHRONIZE / ABILITYEFFECT_ATK_SYNCHRONIZE)", selector: "HITMARKER_SYNCHRONIZE_EFFECT after SetMoveEffect and MOVEEND states 2/5", ownership: "target or attacker ability is ABILITY_SYNCHRONIZE" },
+  { id: TRYINFATUATING_OBLIVIOUS_CATEGORY, dispatcher: "Cmd_tryinfatuating", selector: "moveTable.effect === EFFECT_ATTRACT after attackcanceler → accuracycheck", ownership: "target ability is ABILITY_OBLIVIOUS" },
   { id: "accuracy-compound-eyes", dispatcher: "Cmd_accuracycheck", selector: "an ACCURACYCHECK-reachable script path", ownership: "attacker ability is ABILITY_COMPOUND_EYES" },
   { id: "accuracy-sand-veil", dispatcher: "Cmd_accuracycheck", selector: "an ACCURACYCHECK-reachable script path", ownership: "target ability is ABILITY_SAND_VEIL and weather has sandstorm" },
   { id: "accuracy-hustle-physical", dispatcher: "Cmd_accuracycheck", selector: "IS_TYPE_PHYSICAL(type) and an ACCURACYCHECK-reachable script path", ownership: "attacker ability is ABILITY_HUSTLE" },
@@ -2303,6 +2307,249 @@ if (synchronizeSourceProvenRows.length !== synchronizeCandidateRows.length
   throw new Error("Synchronize candidate accounting is not fully source-proven");
 }
 
+// Attract is deliberately a separate, finite ability family.  It is not an
+// ON_DAMAGE or MOVEEND route: its source script reaches Cmd_tryinfatuating
+// after the normal action admission, string, PP, and accuracy commands, and
+// the opcode itself owns both the Oblivious branch and the target status2
+// write.  Keeping the whole small script/tail shape explicit prevents a
+// future broad "status move" inference from smuggling in unrelated routes.
+const TRYINFATUATING_OBLIVIOUS_ORDERED_GUARDS = [
+  "gBattleMons[gBattlerTarget].ability == ABILITY_OBLIVIOUS first",
+  "same attacker/target gender",
+  "gBattleMons[gBattlerTarget].status2 & STATUS2_INFATUATION",
+  "attacker gender == MON_GENDERLESS",
+  "target gender == MON_GENDERLESS",
+] as const;
+const tryinfatuatingSourceStart = battleScriptCommandsSource.indexOf("static void Cmd_tryinfatuating(void)\n{");
+const tryinfatuatingSourceEnd = battleScriptCommandsSource.indexOf("static void Cmd_updatestatusicon(void)", tryinfatuatingSourceStart);
+if (tryinfatuatingSourceStart < 0 || tryinfatuatingSourceEnd < 0) {
+  throw new Error("unable to isolate Cmd_tryinfatuating source");
+}
+const tryinfatuatingSource = battleScriptCommandsSource.slice(tryinfatuatingSourceStart, tryinfatuatingSourceEnd);
+const tryinfatuatingSourceTokens = [
+  "if (gBattleMons[gBattlerTarget].ability == ABILITY_OBLIVIOUS)",
+  "gBattlescriptCurrInstr = BattleScript_ObliviousPreventsAttraction;",
+  "gLastUsedAbility = ABILITY_OBLIVIOUS;",
+  "RecordAbilityBattle(gBattlerTarget, ABILITY_OBLIVIOUS);",
+  "GetGenderFromSpeciesAndPersonality(speciesAttacker, personalityAttacker) == GetGenderFromSpeciesAndPersonality(speciesTarget, personalityTarget)",
+  "gBattleMons[gBattlerTarget].status2 & STATUS2_INFATUATION",
+  "GetGenderFromSpeciesAndPersonality(speciesAttacker, personalityAttacker) == MON_GENDERLESS",
+  "GetGenderFromSpeciesAndPersonality(speciesTarget, personalityTarget) == MON_GENDERLESS",
+  "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1);",
+  "gBattleMons[gBattlerTarget].status2 |= STATUS2_INFATUATED_WITH(gBattlerAttacker);",
+  "gBattlescriptCurrInstr += 5;",
+];
+let tryinfatuatingGuardCursor = 0;
+for (const token of tryinfatuatingSourceTokens) {
+  const next = tryinfatuatingSource.indexOf(token, tryinfatuatingGuardCursor);
+  if (next < 0) throw new Error(`Cmd_tryinfatuating source lost ordered token ${token}`);
+  tryinfatuatingGuardCursor = next + token.length;
+}
+if (!abilityConstantsSource.includes("#define ABILITY_OBLIVIOUS 12")
+  || !battleScriptConstantsSource.includes("B_SCR_OP_TRYINFATUATING")) {
+  throw new Error("Attract/Oblivious source constants drifted");
+}
+const tryinfatuatingLine = battleScriptCommandsSource.slice(0, tryinfatuatingSourceStart).split("\n").length;
+const attractEntryAudit = auditExactScriptBlock("BattleScript_EffectAttract", [
+  ["attackcanceler", []],
+  ["attackstring", []],
+  ["ppreduce", []],
+  ["accuracycheck", ["BattleScript_ButItFailed", "ACC_CURR_MOVE"]],
+  ["tryinfatuating", ["BattleScript_ButItFailed"]],
+  ["attackanimation", []],
+  ["waitanimation", []],
+  ["printstring", ["STRINGID_PKMNFELLINLOVE"]],
+  ["waitmessage", ["B_WAIT_TIME_LONG"]],
+  ["goto", ["BattleScript_MoveEnd"]],
+]);
+const attractButItFailedAudit = auditExactScriptBlock("BattleScript_ButItFailed", [
+  ["pause", ["B_WAIT_TIME_SHORT"]],
+  ["orbyte", ["gMoveResultFlags", "MOVE_RESULT_FAILED"]],
+  ["resultmessage", []],
+  ["waitmessage", ["B_WAIT_TIME_LONG"]],
+  ["goto", ["BattleScript_MoveEnd"]],
+]);
+const attractObliviousTailAudit = auditExactScriptBlock("BattleScript_ObliviousPreventsAttraction", [
+  ["pause", ["B_WAIT_TIME_SHORT"]],
+  ["printstring", ["STRINGID_PKMNPREVENTSROMANCEWITH"]],
+  ["waitmessage", ["B_WAIT_TIME_LONG"]],
+  ["goto", ["BattleScript_MoveEnd"]],
+]);
+const attractMoveEndAudit = auditExactScriptBlock("BattleScript_MoveEnd", [
+  ["moveendall", []],
+  ["end", []],
+]);
+
+function assertAttractFallthrough(block: ReturnType<typeof auditExactScriptBlock>): void {
+  for (let index = 0; index + 1 < block.graph.statements.length; index += 1) {
+    const from = block.graph.statements[index]!;
+    const to = block.graph.statements[index + 1]!;
+    requireFallthrough({ label: block.label, line: from.line }, { label: block.label, line: to.line });
+  }
+}
+
+assertAttractFallthrough(attractEntryAudit);
+assertAttractFallthrough(attractButItFailedAudit);
+assertAttractFallthrough(attractObliviousTailAudit);
+assertAttractFallthrough(attractMoveEndAudit);
+const attractMoveEndFirst = firstRoutePosition("BattleScript_MoveEnd");
+for (const block of [attractEntryAudit, attractButItFailedAudit, attractObliviousTailAudit]) {
+  const tail = block.graph.statements.at(-1)!;
+  requireGraphEdge(block.label, tail.line, "BattleScript_MoveEnd", attractMoveEndFirst.line, "jump", "goto");
+}
+const attractRouteMnemonics = [
+  ...attractEntryAudit.graph.statements,
+  ...attractButItFailedAudit.graph.statements,
+  ...attractObliviousTailAudit.graph.statements,
+  ...attractMoveEndAudit.graph.statements,
+].map((statement) => statement.mnemonic);
+for (const forbiddenMnemonic of ["datahpupdate", "seteffectwithchance", "moveendfrom", "moveendto"]) {
+  if (attractRouteMnemonics.includes(forbiddenMnemonic)) {
+    throw new Error(`Attract/Oblivious zero-damage route unexpectedly includes ${forbiddenMnemonic}`);
+  }
+}
+
+const tryinfatuatingRuntimeGuardSignature = {
+  source: {
+    path: BATTLE_SCRIPT_COMMANDS_PATH,
+    locator: "Cmd_tryinfatuating",
+    line: tryinfatuatingLine,
+  },
+  ability: {
+    path: ABILITY_CONSTANTS_PATH,
+    symbol: "ABILITY_OBLIVIOUS",
+    value: 12,
+  },
+  orderedGuards: TRYINFATUATING_OBLIVIOUS_ORDERED_GUARDS,
+  oblivious: {
+    guard: "gBattleMons[gBattlerTarget].ability == ABILITY_OBLIVIOUS",
+    destination: "BattleScript_ObliviousPreventsAttraction",
+    destinationKind: "hardcoded-not-operand-pointer",
+    lastUsedAbility: 12,
+    recordAbilityBattle: "RecordAbilityBattle(gBattlerTarget, ABILITY_OBLIVIOUS)",
+  },
+  ordinaryFailure: {
+    guards: TRYINFATUATING_OBLIVIOUS_ORDERED_GUARDS.slice(1),
+    destination: "T1_READ_PTR(gBattlescriptCurrInstr + 1)",
+    operandDestination: "BattleScript_ButItFailed",
+  },
+  success: {
+    write: "gBattleMons[gBattlerTarget].status2 |= STATUS2_INFATUATED_WITH(gBattlerAttacker)",
+    advanceBytes: 5,
+  },
+  scopeBoundary: "Attract is zero-damage: no datahpupdate, MOVEEND state 12, King's Rock, Shell Bell, charge, or faint route is part of this family.",
+};
+const tryinfatuatingEntryPath = {
+  kind: "attackcanceler-attackstring-ppreduce-accuracycheck-tryinfatuating",
+  source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: attractEntryAudit.source.entryLine },
+  declaredEntryScript: "BattleScript_EffectAttract",
+  graph: {
+    path: BATTLE_SCRIPT_GRAPH_PATH,
+    entryLabel: "BattleScript_EffectAttract",
+    attackCanceler: { label: "BattleScript_EffectAttract", line: attractEntryAudit.graph.statements[0]!.line, mnemonic: "attackcanceler" },
+    accuracyCheck: { label: "BattleScript_EffectAttract", line: attractEntryAudit.graph.statements[3]!.line, mnemonic: "accuracycheck", operands: ["BattleScript_ButItFailed", "ACC_CURR_MOVE"] },
+    tryInfatuating: { label: "BattleScript_EffectAttract", line: attractEntryAudit.graph.statements[4]!.line, mnemonic: "tryinfatuating", operands: ["BattleScript_ButItFailed"] },
+    route: attractEntryAudit.graph.statements,
+    entry: attractEntryAudit.graph,
+    ordinaryFailureTail: attractButItFailedAudit.graph,
+    obliviousTail: attractObliviousTailAudit.graph,
+    moveEnd: attractMoveEndAudit.graph,
+  },
+  program: {
+    path: BATTLE_SCRIPT_PROGRAM_PATH,
+    entryLabel: "BattleScript_EffectAttract",
+    attackCanceler: { label: "BattleScript_EffectAttract", line: attractEntryAudit.program.statements[0]!.line, mnemonic: "attackcanceler" },
+    accuracyCheck: { label: "BattleScript_EffectAttract", line: attractEntryAudit.program.statements[3]!.line, mnemonic: "accuracycheck", operands: ["BattleScript_ButItFailed", "ACC_CURR_MOVE"] },
+    tryInfatuating: { label: "BattleScript_EffectAttract", line: attractEntryAudit.program.statements[4]!.line, mnemonic: "tryinfatuating", operands: ["BattleScript_ButItFailed"] },
+    route: attractEntryAudit.program.statements,
+    entry: attractEntryAudit.program,
+    ordinaryFailureTail: attractButItFailedAudit.program,
+    obliviousTail: attractObliviousTailAudit.program,
+    moveEnd: attractMoveEndAudit.program,
+  },
+  tails: {
+    success: "BattleScript_MoveEnd",
+    ordinaryFailure: "BattleScript_ButItFailed -> BattleScript_MoveEnd",
+    oblivious: "BattleScript_ObliviousPreventsAttraction -> BattleScript_MoveEnd",
+  },
+};
+
+function tryinfatuatingObliviousFamilyEvidence(move: Move, entryScript: string) {
+  if (move.move !== "MOVE_ATTRACT" || move.effect !== "EFFECT_ATTRACT" || entryScript !== "BattleScript_EffectAttract") {
+    throw new Error(`${move.move} is not the exact Attract/Oblivious selector`);
+  }
+  return {
+    status: "source-proven" as const,
+    id: "tryinfatuating-oblivious-route:MOVE_ATTRACT",
+    move: move.move,
+    entryScript,
+    executionInventory: executableMoveSymbols.has(move.move) ? "level50-executable" : "level50-roster-only",
+    familyEvidence: {
+      category: TRYINFATUATING_OBLIVIOUS_CATEGORY,
+      selector: {
+        path: MOVES_PATH,
+        locator: "moves:MOVE_ATTRACT.effect",
+        symbol: "MOVE_ATTRACT",
+        effect: "EFFECT_ATTRACT",
+        guard: "moveTable.effect === EFFECT_ATTRACT",
+        derivedFrom: "tryinfatuating-oblivious finite selector moveTable.effect === EFFECT_ATTRACT",
+      },
+      entryPath: tryinfatuatingEntryPath,
+      dispatcher: {
+        path: BATTLE_SCRIPT_COMMANDS_PATH,
+        locator: "Cmd_tryinfatuating",
+        line: tryinfatuatingLine,
+        opcode: "B_SCR_OP_TRYINFATUATING",
+        order: "after BattleScript_EffectAttract attackcanceler, attackstring, ppreduce, and accuracycheck; its success/failure/Oblivious branches all finish at explicit BattleScript_MoveEnd tails",
+      },
+      runtimeGuardSignature: tryinfatuatingRuntimeGuardSignature,
+      familyVerification: {
+        scope: "The one finite Level-50 EFFECT_ATTRACT candidate is promoted by the exact script/tail route, Cmd_tryinfatuating's ordered guard certificate, the existing opcode runtime suite, a family hook-join batch, and a paired complete-parties Battle Scene OFF receipt.",
+        implementation: "src/engine/battleScriptTryinfatuatingOpcode.ts#createBattleScriptTryinfatuatingOpcodeHandlers",
+        runtimeTest: "tests/battleScriptTryinfatuatingOpcode.test.ts",
+        batchTest: "tests/tryinfatuatingObliviousHookJoinBatch.test.ts",
+        oracleReceipt: "tests/gate6R10AttractObliviousReceipt.test.ts",
+        oracleFixture: "tools/battle-lab/gate6-r10-attract-off.json",
+        oracleControl: "tools/battle-lab/gate6-r10-attract-control-off.json",
+        oracleProbe: "tools/probe/probe-gate6-r10-off.py",
+        oracleReceiptFiles: ["tools/probe/receipts/gate6-r10-attract-oblivious-off.json"],
+        scopeBoundary: tryinfatuatingRuntimeGuardSignature.scopeBoundary,
+      },
+    },
+  };
+}
+
+const tryinfatuatingObliviousCandidateRows = rosterMoveSymbols
+  .map((symbol) => moveBySymbol.get(symbol)!)
+  .filter((move) => move.effect === "EFFECT_ATTRACT")
+  .map((move) => ({
+    move: move.move,
+    moveId: move.id,
+    effect: move.effect,
+    entryScript: topologyByMove.get(move.move)!.entryScript,
+    executionInventory: executableMoveSymbols.has(move.move) ? "level50-executable" : "level50-roster-only",
+    blockerIds: [],
+    exceptionId: null,
+  }));
+if (tryinfatuatingObliviousCandidateRows.length !== 1
+  || tryinfatuatingObliviousCandidateRows[0]?.move !== "MOVE_ATTRACT"
+  || tryinfatuatingObliviousCandidateRows[0]?.entryScript !== "BattleScript_EffectAttract"
+  || tryinfatuatingObliviousCandidateRows[0]?.executionInventory !== "level50-executable") {
+  throw new Error("tryinfatuating/Oblivious selector is not the audited one-row executable Attract family");
+}
+const tryinfatuatingObliviousEvidence = tryinfatuatingObliviousFamilyEvidence(
+  moveBySymbol.get("MOVE_ATTRACT")!,
+  tryinfatuatingObliviousCandidateRows[0]!.entryScript,
+);
+const tryinfatuatingObliviousSourceProvenRows = [tryinfatuatingObliviousEvidence.move];
+const tryinfatuatingObliviousExceptions: Array<Record<string, unknown>> = [];
+const tryinfatuatingObliviousBlockers: Array<Record<string, unknown>> = [];
+if (tryinfatuatingObliviousSourceProvenRows.length !== tryinfatuatingObliviousCandidateRows.length
+  || tryinfatuatingObliviousExceptions.length !== 0
+  || tryinfatuatingObliviousBlockers.length !== 0) {
+  throw new Error("tryinfatuating/Oblivious candidate accounting is not fully source-proven");
+}
+
 if (onDamageCandidateRows.some((candidate) => candidate.blockerIds.length !== 0)) {
   throw new Error("ON_DAMAGE candidates must not retain retired family blockers");
 }
@@ -2550,6 +2797,9 @@ const records = rosterMoveSymbols.map((symbol) => {
   if (synchronizeEvidence?.status === "source-proven") {
     sourceProvenFamilies.push(synchronizeEvidence.familyEvidence);
   }
+  if (symbol === "MOVE_ATTRACT") {
+    sourceProvenFamilies.push(tryinfatuatingObliviousEvidence.familyEvidence);
+  }
   const abilityHook = sourceProvenFamilies.length === 0
     ? {
       potentialCategories: null,
@@ -2641,6 +2891,11 @@ if (synchronizeRosterRecords.length !== synchronizeCandidateRows.length
   || synchronizeRosterRecords.some((record) => !synchronizeSourceProvenRows.includes(record.move))) {
   throw new Error("Synchronize source-proven roster accounting does not match the finite candidate census");
 }
+const tryinfatuatingObliviousRosterRecords = sourceProvenAbilityRecords.filter((record) => record.hooks.ability.supportedCategories.includes(TRYINFATUATING_OBLIVIOUS_CATEGORY));
+if (tryinfatuatingObliviousRosterRecords.length !== 1
+  || tryinfatuatingObliviousRosterRecords[0]?.move !== "MOVE_ATTRACT") {
+  throw new Error("tryinfatuating/Oblivious source-proven roster accounting does not match the one-row Attract census");
+}
 const sourceProvenAbilityCategories = sourceProvenAbilityRecords.flatMap((record) => record.hooks.ability.supportedCategories);
 const absorbingCoverageByCategory = Object.fromEntries(ABSORBING_HOOK_DEFINITIONS.map((definition) => {
   const candidates = absorbingCandidateRows.filter((row) => row.category === definition.id);
@@ -2677,6 +2932,29 @@ const synchronizeAudit = {
   promotions: {
     sourceProvenRows: synchronizeSourceProvenRows,
     reason: "All 30 finite candidates have complete selector, ordered graph/program route, SetMoveEffect marker/runtime guards, and ordered target/attacker MOVEEND evidence. The shared two-seed Battle Scene OFF Thunder Wave receipt and Tier-1 Synchronize batch prove the common dispatcher semantics; no per-move oracle receipts are fabricated.",
+  },
+};
+const tryinfatuatingObliviousAudit = {
+  status: "source-proven-family",
+  scope: "Finite Level-50 moveTable.effect === EFFECT_ATTRACT selector joined to BattleScript_EffectAttract's action prelude and Cmd_tryinfatuating's target-Oblivious branch. This is one zero-damage candidate with explicit success, ordinary-failure, and Oblivious tails.",
+  selector: "moveTable.effect === EFFECT_ATTRACT",
+  candidateCount: tryinfatuatingObliviousCandidateRows.length,
+  sourceMoveCandidates: tryinfatuatingObliviousCandidateRows,
+  sourceProvenRows: tryinfatuatingObliviousSourceProvenRows,
+  sourceExceptionRows: tryinfatuatingObliviousExceptions,
+  blockers: tryinfatuatingObliviousBlockers,
+  routeWitnesses: [tryinfatuatingObliviousEvidence],
+  runtimeGuardSignature: tryinfatuatingRuntimeGuardSignature,
+  dispatcher: {
+    path: BATTLE_SCRIPT_COMMANDS_PATH,
+    locator: "Cmd_tryinfatuating",
+    line: tryinfatuatingLine,
+    opcode: "B_SCR_OP_TRYINFATUATING",
+    entryScript: "BattleScript_EffectAttract",
+  },
+  promotions: {
+    sourceProvenRows: tryinfatuatingObliviousSourceProvenRows,
+    reason: "MOVE_ATTRACT is the sole finite EFFECT_ATTRACT selector and has a complete graph/program action prelude, exact Cmd_tryinfatuating guard order, explicit MoveEnd tails, focused opcode/batch tests, and a paired Battle Scene OFF semantic receipt. No damage or MOVEEND item family is inferred.",
   },
 };
 const kingsRockAudit = {
@@ -2825,9 +3103,10 @@ const output = {
       "reference/pokeemerald/src/battle_script_commands.c",
       "reference/pokeemerald/include/battle.h",
       BATTLE_SCRIPT_CONSTANTS_PATH,
+      ABILITY_CONSTANTS_PATH,
       "reference/pokeemerald/include/constants/pokemon.h",
     ],
-    note: `Catalog join plus an intentionally partial source dispatcher inventory. ${records.filter((record) => record.hooks.item.status === "unsupported").length} per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the ${kingsRockSourceProvenRows.length}-row King's Rock family, exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, and ${synchronizeSourceProvenRows.length} Synchronize status candidates carry graph/program/source-handoff evidence. King's Rock retains Tickle as one explicit zero-damage exception and does not claim Shell Bell; no per-move oracle receipts are fabricated.`,
+    note: `Catalog join plus an intentionally partial source dispatcher inventory. ${records.filter((record) => record.hooks.item.status === "unsupported").length} per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the ${kingsRockSourceProvenRows.length}-row King's Rock family, exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, ${synchronizeSourceProvenRows.length} Synchronize status candidates, and the one-row Attract/Oblivious Cmd_tryinfatuating family carry graph/program/source-handoff evidence. King's Rock retains Tickle as one explicit zero-damage exception and does not claim Shell Bell; no per-move oracle receipts are fabricated.`,
   },
   coverage: {
     level50Roster: {
@@ -2876,9 +3155,10 @@ const output = {
         absorbing: absorbingCoverageByCategory,
         onDamage: onDamageAudit,
         synchronize: synchronizeAudit,
+        tryinfatuatingOblivious: tryinfatuatingObliviousAudit,
         completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "The exact Level-50 Soundproof moves-block family, audited absorbing dispatcher candidates, both ON_DAMAGE families, and the Synchronize status family are source-proven with separate route/guard certificates. Future Sight has one explicit delayed-MOVEEND exception; Synchronize has no candidate route exceptions or blockers, while distinct contact ability outcome gaps, accuracy, and all other ability dispatcher families remain intentionally unsupported/null per move.",
+        reason: "The exact Level-50 Soundproof moves-block family, audited absorbing dispatcher candidates, both ON_DAMAGE families, the Synchronize status family, and the one-row Attract/Oblivious tryinfatuating family are source-proven with separate route/guard certificates. Future Sight has one explicit delayed-MOVEEND exception; Synchronize and Attract/Oblivious have no candidate route exceptions or blockers, while distinct contact ability outcome gaps, accuracy, and all other ability dispatcher families remain intentionally unsupported/null per move.",
       },
     },
   },
