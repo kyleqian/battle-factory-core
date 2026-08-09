@@ -94,6 +94,45 @@ type AbsorbingCoverage = {
     };
   }>;
 };
+type OnDamageCandidate = {
+  category: string;
+  move: string;
+  moveId: number;
+  effect: string;
+  power: number;
+  makesContact: boolean;
+  entryScript: string;
+  routeShapeId: string;
+  blockerIds: string[];
+};
+type OnDamageAudit = {
+  status: string;
+  categories: Record<string, { selector: string; candidateRows: OnDamageCandidate[]; count: number }>;
+  overlap: { definition: string; count: number; moves: string[] };
+  sourceDispatcher: {
+    moveEnd: { path: string; locator: string; call: string; order: string };
+    targetAbilitySelection: { path: string; guard: string };
+    targetTurnDamaged: { path: string; definition: string };
+    abilityCases: Array<{ ability: string; category: string; selector: string; orderedGuards: string[]; outcome: string }>;
+  };
+  routeShapeCensus: {
+    status: string;
+    moveEndTarget: { graph: { statements: Array<{ mnemonic: string; operands: string[] }> }; program: { statements: Array<{ mnemonic: string; operands: string[] }> } };
+    entryBlockShapeCounts: Record<string, number>;
+    entries: Array<{
+      id: string;
+      entryScript: string;
+      entryBlockShape: string;
+      graph: { path: string; statements: Array<{ line: number; mnemonic: string; operands: string[] }> };
+      program: { path: string; statements: Array<{ line: number; mnemonic: string; operands: string[] }> };
+      candidates: Record<string, string[]>;
+      blockerIds: string[];
+    }>;
+  };
+  semanticEvidence: { kernelSiblingBatch: { status: string; test: string; coverage: string }; oracleReceipt: { status: string; profile: string; checked: string } };
+  blockers: Array<{ id: string; reason: string }>;
+  promotions: { sourceProvenRows: string[]; reason: string };
+};
 const manifest = data as unknown as {
   schema: string;
   coverage: {
@@ -102,7 +141,7 @@ const manifest = data as unknown as {
     joins: { battleScriptGraphLabels: number; battleScriptProgramLabels: number; animationScripts: number; itemHookCategories: number; abilityHookCategories: number; itemHookUnsupportedCategories: null; abilityHookUnsupportedCategories: null; itemHookUnsupportedRows: number; abilityHookUnsupportedRows: number; abilityHookSourceProvenRows: number };
     hookCatalogs: {
       item: { frontierHeldItemRows: number; explicitHoldEffectRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; catalogedDispatcherCategories: number; completeness: string; unsupportedCategories: null };
-      ability: { displayRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; catalogedDispatcherCategories: number; soundproofSourceSelectorRows: number; soundproofLevel50RosterSelectorRows: number; soundproofSourceProvenRosterRows: number; soundproofUnsupportedLevel50RosterRows: number; absorbing: Record<string, AbsorbingCoverage>; completeness: string; unsupportedCategories: null };
+      ability: { displayRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; catalogedDispatcherCategories: number; soundproofSourceSelectorRows: number; soundproofLevel50RosterSelectorRows: number; soundproofSourceProvenRosterRows: number; soundproofUnsupportedLevel50RosterRows: number; absorbing: Record<string, AbsorbingCoverage>; onDamage: OnDamageAudit; completeness: string; unsupportedCategories: null };
     };
   };
   moves: MoveRecord[];
@@ -310,6 +349,140 @@ describe("Level-50 move parameterization manifest", () => {
       expect(requiredTokensByCategory[row.id], `missing source pin for ${row.id}`).toBeDefined();
       for (const token of requiredTokensByCategory[row.id]!) expect(source, `${row.id}: ${token}`).toContain(token);
     }
+  });
+
+  it("ratchets the finite ON_DAMAGE candidates, source guards, and blocked route-shape census without promotion", () => {
+    const audit = manifest.coverage.hookCatalogs.ability.onDamage;
+    const roster = level50RosterSymbols();
+    const expectedByCategory: Record<string, string[]> = {
+      "moveend-contact-on-damage": (movesData.moves as SourceMove[])
+        .filter((move) => roster.has(move.move) && move.flags.includes("FLAG_MAKES_CONTACT"))
+        .map((move) => move.move),
+      "moveend-color-change": (movesData.moves as SourceMove[])
+        .filter((move) => roster.has(move.move) && move.power !== 0)
+        .map((move) => move.move),
+    };
+    const blockerIds = audit.blockers.map((blocker) => blocker.id);
+    expect(audit.status).toBe("evidence-checkpoint-no-promotion");
+    expect(blockerIds).toEqual([
+      "ordered-moveend-route-not-proven",
+      "damage-state-guard-not-derived-from-selector",
+      "missing-direct-on-damage-off-receipt",
+    ]);
+    expect(blockerIds.every((id) => id.length > 0)).toBe(true);
+    expect(audit.promotions).toMatchObject({ sourceProvenRows: [] });
+    expect(audit.promotions.reason).toMatch(/No rows promoted/);
+
+    for (const [category, expectedMoves] of Object.entries(expectedByCategory)) {
+      const coverage = audit.categories[category]!;
+      expect(coverage.count).toBe(expectedMoves.length);
+      expect(coverage.candidateRows.map((candidate) => candidate.move)).toEqual(expectedMoves);
+      expect(new Set(coverage.candidateRows.map((candidate) => candidate.move)).size).toBe(expectedMoves.length);
+      for (const candidate of coverage.candidateRows) {
+        const source = sourceMoves.get(candidate.move)!;
+        const record = manifest.moves.find((move) => move.move === candidate.move)!;
+        expect(candidate).toMatchObject({
+          category,
+          moveId: source.id,
+          effect: source.effect,
+          power: source.power,
+          makesContact: source.flags.includes("FLAG_MAKES_CONTACT"),
+          entryScript: record.battleScript.entryScript,
+          routeShapeId: `on-damage-entry:${record.battleScript.entryScript}`,
+          blockerIds,
+        });
+        expect(candidate.blockerIds.length).toBeGreaterThan(0);
+      }
+    }
+    expect(audit.categories["moveend-contact-on-damage"]!.count).toBe(94);
+    expect(audit.categories["moveend-color-change"]!.count).toBe(183);
+    const expectedOverlap = expectedByCategory["moveend-contact-on-damage"]!
+      .filter((move) => expectedByCategory["moveend-color-change"]!.includes(move));
+    expect(audit.overlap).toEqual({
+      definition: "moves satisfying both FLAG_MAKES_CONTACT and power != 0",
+      count: expectedOverlap.length,
+      moves: expectedOverlap,
+    });
+    expect(expectedOverlap).toHaveLength(94);
+
+    const candidates = Object.values(audit.categories).flatMap((coverage) => coverage.candidateRows);
+    expect(candidates).toHaveLength(277);
+    expect(new Set(candidates.map((candidate) => `${candidate.category}:${candidate.move}`)).size).toBe(candidates.length);
+    const { graph, program } = graphAndProgram();
+    const expectedEntryScripts = [...new Set(candidates.map((candidate) => candidate.entryScript))]
+      .sort((left, right) => graph.labels.find((label) => label.name === left)!.line - graph.labels.find((label) => label.name === right)!.line);
+    expect(audit.routeShapeCensus.status).toBe("entry-block-control-frontier-not-a-complete-witness");
+    expect(audit.routeShapeCensus.entries.map((entry) => entry.entryScript)).toEqual(expectedEntryScripts);
+    expect(audit.routeShapeCensus.entries).toHaveLength(78);
+    expect(audit.routeShapeCensus.entryBlockShapeCounts).toEqual({
+      "call-return-entry-block": 3,
+      "conditional-entry-block": 22,
+      "fallthrough-entry-block": 6,
+      "goto-entry-block": 47,
+    });
+    for (const entry of audit.routeShapeCensus.entries) {
+      const graphEntry = graph.labels.find((label) => label.name === entry.entryScript)!;
+      const programEntry = program.blocks.find((block) => block.label === entry.entryScript)!;
+      expect(entry.id).toBe(`on-damage-entry:${entry.entryScript}`);
+      expect(entry.graph).toMatchObject({
+        path: "src/data/gen/battle-script-graph.json",
+        statements: graphEntry.statements.map((statement) => ({ line: statement.line, mnemonic: statement.mnemonic, operands: statement.operandTokens })),
+      });
+      expect(entry.program).toMatchObject({
+        path: "src/data/gen/battle-script-program.json",
+        statements: programEntry.statements.map((statement) => ({ line: statement.source.line, mnemonic: statement.mnemonic, operands: statement.actualOperands })),
+      });
+      expect(entry.blockerIds).toEqual(blockerIds);
+      for (const category of Object.keys(expectedByCategory)) {
+        expect(entry.candidates[category]).toEqual(candidates
+          .filter((candidate) => candidate.category === category && candidate.entryScript === entry.entryScript)
+          .map((candidate) => candidate.move));
+      }
+    }
+    expect(audit.routeShapeCensus.moveEndTarget.graph.statements.map((statement) => ({ mnemonic: statement.mnemonic, operands: statement.operands }))).toEqual([
+      { mnemonic: "moveendall", operands: [] },
+      { mnemonic: "end", operands: [] },
+    ]);
+    expect(audit.routeShapeCensus.moveEndTarget.program.statements).toEqual(audit.routeShapeCensus.moveEndTarget.graph.statements);
+
+    const utilitySource = readFileSync("reference/pokeemerald/src/battle_util.c", "utf8");
+    const commandSource = readFileSync("reference/pokeemerald/src/battle_script_commands.c", "utf8");
+    const headerSource = readFileSync("reference/pokeemerald/include/battle.h", "utf8");
+    expect(audit.sourceDispatcher.moveEnd).toMatchObject({
+      path: "reference/pokeemerald/src/battle_script_commands.c",
+      locator: "Cmd_moveend MOVEEND_ON_DAMAGE_ABILITIES",
+      call: "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE, gBattlerTarget, 0, 0, 0)",
+    });
+    expect(commandSource).toContain(audit.sourceDispatcher.moveEnd.call);
+    expect(audit.sourceDispatcher.targetAbilitySelection).toMatchObject({
+      path: "reference/pokeemerald/src/battle_util.c",
+      guard: expect.stringMatching(/gBattlerTarget/),
+    });
+    expect(headerSource).toContain(audit.sourceDispatcher.targetTurnDamaged.definition);
+    expect(audit.sourceDispatcher.abilityCases.map((entry) => entry.ability)).toEqual([
+      "ABILITY_COLOR_CHANGE", "ABILITY_ROUGH_SKIN", "ABILITY_EFFECT_SPORE", "ABILITY_POISON_POINT",
+      "ABILITY_STATIC", "ABILITY_FLAME_BODY", "ABILITY_CUTE_CHARM",
+    ]);
+    for (const ability of audit.sourceDispatcher.abilityCases) {
+      const start = utilitySource.indexOf(`case ${ability.ability}:`);
+      const next = utilitySource.indexOf("            case ", start + 1);
+      const caseSource = utilitySource.slice(start, next < 0 ? undefined : next);
+      let previous = -1;
+      for (const guard of ability.orderedGuards) {
+        const position = caseSource.indexOf(guard, previous + 1);
+        expect(position, `${ability.ability} guard ${guard}`).toBeGreaterThan(previous);
+        previous = position;
+      }
+      expect(ability.outcome.length).toBeGreaterThan(0);
+    }
+    expect(audit.semanticEvidence.kernelSiblingBatch).toMatchObject({
+      status: "tier1-sibling-batch-only",
+      test: "tests/battleScriptMoveEndOpcode.test.ts#MOVEEND_ON_DAMAGE_ABILITIES contact family",
+    });
+    expect(audit.semanticEvidence.oracleReceipt).toMatchObject({
+      status: "missing-direct-parameterized-oracle-receipt",
+      profile: "battle-scene-off",
+    });
   });
 
   it("derives the Soundproof and shared-absorbing families from source without claiming other ability joins", () => {

@@ -98,6 +98,7 @@ const holdEffects = readJson<HoldEffects>("item-hold-effects.json");
 const abilityDisplay = readJson<AbilityDisplay>("summary-info.json");
 const battleUtilSource = readFileSync(join(RUN_ROOT, "reference", "pokeemerald", "src", "battle_util.c"), "utf8");
 const battleScriptCommandsSource = readFileSync(join(RUN_ROOT, "reference", "pokeemerald", "src", "battle_script_commands.c"), "utf8");
+const battleHeaderSource = readFileSync(join(RUN_ROOT, "reference", "pokeemerald", "include", "battle.h"), "utf8");
 
 if (moves.length !== 355 || moves.some((move, id) => move.id !== id)) throw new Error("moves.json must be the complete indexed move table");
 if (frontierSets.count !== 882 || frontierSets.entries.length !== 882) throw new Error("expected all 882 Frontier set rows");
@@ -130,8 +131,10 @@ const BATTLE_SCRIPT_GRAPH_PATH = "src/data/gen/battle-script-graph.json";
 const BATTLE_SCRIPT_PROGRAM_PATH = "src/data/gen/battle-script-program.json";
 const BATTLE_SCRIPT_COMMANDS_PATH = "reference/pokeemerald/src/battle_script_commands.c";
 const SOUNDPROOF_TABLE_PATH = "reference/pokeemerald/src/battle_util.c";
+const BATTLE_HEADER_PATH = "reference/pokeemerald/include/battle.h";
 const ATTACK_CANCELER_MOVES_BLOCK_CALL = "AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0)";
 const ABSORBING_DISPATCHER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ABSORBING, gBattlerTarget, 0, 0, move)";
+const ON_DAMAGE_DISPATCHER_CALL = "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE, gBattlerTarget, 0, 0, 0)";
 
 const ABSORBING_HOOK_DEFINITIONS = [
   {
@@ -435,6 +438,123 @@ if (!absorbingSource.includes("moveType == TYPE_ELECTRIC && gBattleMoves[move].p
   || !absorbingSource.includes("moveType == TYPE_WATER && gBattleMoves[move].power != 0")
   || !absorbingSource.includes("moveType == TYPE_FIRE && !(gBattleMons[battler].status1 & STATUS1_FREEZE)")) {
   throw new Error("AbilityBattleEffects absorbing source no longer matches the audited type/power/freeze guards");
+}
+
+const ON_DAMAGE_CONTACT_CATEGORY = "moveend-contact-on-damage";
+const ON_DAMAGE_COLOR_CHANGE_CATEGORY = "moveend-color-change";
+const ON_DAMAGE_COMMON_CONTACT_GUARDS = [
+  "!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)",
+  "gBattleMons[gBattlerAttacker].hp != 0",
+  "!gProtectStructs[gBattlerAttacker].confusionSelfDmg",
+  "TARGET_TURN_DAMAGED",
+  "(gBattleMoves[move].flags & FLAG_MAKES_CONTACT)",
+] as const;
+const ON_DAMAGE_ABILITY_DEFINITIONS = [
+  {
+    ability: "ABILITY_COLOR_CHANGE",
+    category: ON_DAMAGE_COLOR_CHANGE_CATEGORY,
+    selector: "gBattleMoves[move].power != 0",
+    orderedGuards: [
+      "!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)",
+      "move != MOVE_STRUGGLE",
+      "gBattleMoves[move].power != 0",
+      "TARGET_TURN_DAMAGED",
+      "!IS_BATTLER_OF_TYPE(battler, moveType)",
+      "gBattleMons[battler].hp != 0",
+    ],
+    outcome: "sets both target types to moveType, buffers that type, pushes BattleScript_ColorChangeActivates",
+  },
+  {
+    ability: "ABILITY_ROUGH_SKIN",
+    category: ON_DAMAGE_CONTACT_CATEGORY,
+    selector: "gBattleMoves[move].flags & FLAG_MAKES_CONTACT",
+    orderedGuards: ON_DAMAGE_COMMON_CONTACT_GUARDS,
+    outcome: "deals max(1, attacker maxHP / 16) recoil and pushes BattleScript_RoughSkinActivates",
+  },
+  {
+    ability: "ABILITY_EFFECT_SPORE",
+    category: ON_DAMAGE_CONTACT_CATEGORY,
+    selector: "gBattleMoves[move].flags & FLAG_MAKES_CONTACT",
+    orderedGuards: [...ON_DAMAGE_COMMON_CONTACT_GUARDS, "(Random() % 10) == 0"],
+    outcome: "rolls a nonzero sleep/poison/paralysis selector, marks an ability status effect, and pushes BattleScript_ApplySecondaryEffect",
+  },
+  {
+    ability: "ABILITY_POISON_POINT",
+    category: ON_DAMAGE_CONTACT_CATEGORY,
+    selector: "gBattleMoves[move].flags & FLAG_MAKES_CONTACT",
+    orderedGuards: [...ON_DAMAGE_COMMON_CONTACT_GUARDS, "(Random() % 3) == 0"],
+    outcome: "marks attacker poison as an ability status effect and pushes BattleScript_ApplySecondaryEffect",
+  },
+  {
+    ability: "ABILITY_STATIC",
+    category: ON_DAMAGE_CONTACT_CATEGORY,
+    selector: "gBattleMoves[move].flags & FLAG_MAKES_CONTACT",
+    orderedGuards: [...ON_DAMAGE_COMMON_CONTACT_GUARDS, "(Random() % 3) == 0"],
+    outcome: "marks attacker paralysis as an ability status effect and pushes BattleScript_ApplySecondaryEffect",
+  },
+  {
+    ability: "ABILITY_FLAME_BODY",
+    category: ON_DAMAGE_CONTACT_CATEGORY,
+    selector: "gBattleMoves[move].flags & FLAG_MAKES_CONTACT",
+    orderedGuards: [
+      "!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)",
+      "gBattleMons[gBattlerAttacker].hp != 0",
+      "!gProtectStructs[gBattlerAttacker].confusionSelfDmg",
+      "(gBattleMoves[move].flags & FLAG_MAKES_CONTACT)",
+      "TARGET_TURN_DAMAGED",
+      "(Random() % 3) == 0",
+    ],
+    outcome: "marks attacker burn as an ability status effect and pushes BattleScript_ApplySecondaryEffect",
+  },
+  {
+    ability: "ABILITY_CUTE_CHARM",
+    category: ON_DAMAGE_CONTACT_CATEGORY,
+    selector: "gBattleMoves[move].flags & FLAG_MAKES_CONTACT",
+    orderedGuards: [
+      "!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)",
+      "gBattleMons[gBattlerAttacker].hp != 0",
+      "!gProtectStructs[gBattlerAttacker].confusionSelfDmg",
+      "(gBattleMoves[move].flags & FLAG_MAKES_CONTACT)",
+      "TARGET_TURN_DAMAGED",
+      "gBattleMons[gBattlerTarget].hp != 0",
+      "(Random() % 3) == 0",
+      "gBattleMons[gBattlerAttacker].ability != ABILITY_OBLIVIOUS",
+      "GetGenderFromSpeciesAndPersonality(speciesAtk, pidAtk) != GetGenderFromSpeciesAndPersonality(speciesDef, pidDef)",
+      "!(gBattleMons[gBattlerAttacker].status2 & STATUS2_INFATUATION)",
+      "GetGenderFromSpeciesAndPersonality(speciesAtk, pidAtk) != MON_GENDERLESS",
+      "GetGenderFromSpeciesAndPersonality(speciesDef, pidDef) != MON_GENDERLESS",
+    ],
+    outcome: "writes target-owned infatuation onto the attacker and pushes BattleScript_CuteCharmActivates",
+  },
+] as const;
+
+const onDamageSourceStart = battleUtilSource.indexOf("case ABILITYEFFECT_ON_DAMAGE: // Contact abilities and Color Change");
+const onDamageSourceEnd = battleUtilSource.indexOf("case ABILITYEFFECT_IMMUNITY:", onDamageSourceStart);
+if (onDamageSourceStart < 0 || onDamageSourceEnd < 0) throw new Error("unable to isolate AbilityBattleEffects ON_DAMAGE source");
+const onDamageSource = battleUtilSource.slice(onDamageSourceStart, onDamageSourceEnd);
+const targetTurnDamagedDefinition = "#define TARGET_TURN_DAMAGED ((gSpecialStatuses[gBattlerTarget].physicalDmg != 0 || gSpecialStatuses[gBattlerTarget].specialDmg != 0))";
+if (!battleHeaderSource.includes(targetTurnDamagedDefinition)) {
+  throw new Error("battle.h no longer defines TARGET_TURN_DAMAGED as the physical/special damage predicate");
+}
+for (const definition of ON_DAMAGE_ABILITY_DEFINITIONS) {
+  const caseStart = onDamageSource.indexOf(`case ${definition.ability}:`);
+  if (caseStart < 0) throw new Error(`AbilityBattleEffects ON_DAMAGE source lacks ${definition.ability}`);
+  const nextCase = onDamageSource.indexOf("            case ", caseStart + 1);
+  const caseSource = onDamageSource.slice(caseStart, nextCase < 0 ? undefined : nextCase);
+  for (const guard of definition.orderedGuards) {
+    if (!caseSource.includes(guard)) throw new Error(`${definition.ability} ON_DAMAGE source lacks ordered guard ${guard}`);
+  }
+}
+const abilityEffectsStart = battleUtilSource.indexOf("u8 AbilityBattleEffects(");
+const abilityEffectsOnDamageStart = battleUtilSource.indexOf("case ABILITYEFFECT_ON_DAMAGE:", abilityEffectsStart);
+if (abilityEffectsStart < 0 || abilityEffectsOnDamageStart < 0) throw new Error("unable to isolate AbilityBattleEffects target ability selection");
+const abilityEffectsPreamble = battleUtilSource.slice(abilityEffectsStart, abilityEffectsOnDamageStart);
+if (!abilityEffectsPreamble.includes("if (special)\n            gLastUsedAbility = special;\n        else\n            gLastUsedAbility = gBattleMons[battler].ability;")) {
+  throw new Error("AbilityBattleEffects no longer derives gLastUsedAbility from the supplied target battler");
+}
+const moveEndOnDamageCaseLine = sourceLine(battleScriptCommandsSource, "case MOVEEND_ON_DAMAGE_ABILITIES:", "MOVEEND_ON_DAMAGE_ABILITIES");
+if (!battleScriptCommandsSource.includes(`case MOVEEND_ON_DAMAGE_ABILITIES: // Such as abilities activating on contact (Effect Spore, Rough Skin, etc.).\n            if (${ON_DAMAGE_DISPATCHER_CALL})\n                effect = TRUE;\n            gBattleScripting.moveendState++;`)) {
+  throw new Error("Cmd_moveend no longer delegates MOVEEND_ON_DAMAGE_ABILITIES to AbilityBattleEffects in source order");
 }
 
 function soundproofEntryPath(move: string, entryScript: string) {
@@ -870,6 +990,131 @@ const executableMoveSymbols = new Set(
 );
 if (executableMoveSymbols.size !== inventory.tiers.level50.moves.length) throw new Error("topology and animation inventory disagree on executable Level-50 moves");
 
+const ON_DAMAGE_BLOCKERS = [
+  {
+    id: "ordered-moveend-route-not-proven",
+    reason: "This is an exact entry-block graph/program census only. A promotion needs a complete ordered runtime route through fallthrough, jumps, calls, returns, and guard outcomes into MOVEEND_ON_DAMAGE_ABILITIES; this checkpoint deliberately does not treat static syntax as that witness.",
+  },
+  {
+    id: "damage-state-guard-not-derived-from-selector",
+    reason: "FLAG_MAKES_CONTACT and nonzero power select candidates, but TARGET_TURN_DAMAGED, move-result flags, attacker/target survival, substitute behavior, confusion-self-damage, type/gender/Oblivious state, and chance rolls remain runtime source guards.",
+  },
+  {
+    id: "missing-direct-on-damage-off-receipt",
+    reason: "The committed Battle Scene OFF corpus has Tier-1 sibling coverage but no deterministic parameterized-oracle receipt that observes the shared ABILITYEFFECT_ON_DAMAGE dispatcher. Incidental party ability appearances are not semantic receipts.",
+  },
+] as const;
+
+type OnDamageCandidateCategory = typeof ON_DAMAGE_CONTACT_CATEGORY | typeof ON_DAMAGE_COLOR_CHANGE_CATEGORY;
+type OnDamageCandidate = {
+  category: OnDamageCandidateCategory;
+  move: string;
+  moveId: number;
+  effect: string;
+  power: number;
+  makesContact: boolean;
+  entryScript: string;
+  routeShapeId: string;
+  blockerIds: Array<(typeof ON_DAMAGE_BLOCKERS)[number]["id"]>;
+};
+
+function onDamageEntryShape(entryScript: string, candidates: readonly OnDamageCandidate[]) {
+  const graphEntry = requireGraphLabel(entryScript);
+  const programEntry = requireProgramBlock(entryScript);
+  if (graphEntry.statements.length !== programEntry.statements.length) {
+    throw new Error(`${entryScript} graph/program entry-block statement count disagreement`);
+  }
+  const statements = graphEntry.statements.map((statement, index) => {
+    const programStatement = programEntry.statements[index]!;
+    if (statement.line !== programStatement.source.line) {
+      throw new Error(`${entryScript}:${statement.line} graph/program entry-block source line disagreement`);
+    }
+    requireRouteStatement(entryScript, statement.line, statement.mnemonic, statement.operandTokens);
+    return { line: statement.line, mnemonic: statement.mnemonic, operands: statement.operandTokens };
+  });
+  const controlMnemonics = [...new Set(statements
+    .filter((statement) => /^(?:call|goto|jump|return|end|accuracycheck)/.test(statement.mnemonic))
+    .map((statement) => statement.mnemonic))];
+  const entryBlockShape = controlMnemonics.includes("call")
+    ? "call-return-entry-block"
+    : controlMnemonics.some((mnemonic) => mnemonic.startsWith("jump"))
+      ? "conditional-entry-block"
+      : controlMnemonics.includes("goto")
+        ? "goto-entry-block"
+        : "fallthrough-entry-block";
+  const edges = graph.controlFlow.edges
+    .filter((edge) => edge.from.label === entryScript)
+    .map((edge) => ({
+      fromLine: edge.from.line,
+      to: edge.to === null ? null : { label: edge.to.label, line: edge.to.line },
+      kind: edge.kind,
+      macro: edge.provenance.macro ?? null,
+    }));
+  const categoryCandidates = (category: OnDamageCandidateCategory) => candidates
+    .filter((candidate) => candidate.entryScript === entryScript && candidate.category === category)
+    .map((candidate) => candidate.move);
+  return {
+    id: `on-damage-entry:${entryScript}`,
+    entryScript,
+    entryBlockShape,
+    source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: graphEntry.line },
+    graph: { path: BATTLE_SCRIPT_GRAPH_PATH, statements, edges },
+    program: { path: BATTLE_SCRIPT_PROGRAM_PATH, statements },
+    candidates: {
+      [ON_DAMAGE_CONTACT_CATEGORY]: categoryCandidates(ON_DAMAGE_CONTACT_CATEGORY),
+      [ON_DAMAGE_COLOR_CHANGE_CATEGORY]: categoryCandidates(ON_DAMAGE_COLOR_CHANGE_CATEGORY),
+    },
+    blockerIds: ON_DAMAGE_BLOCKERS.map((blocker) => blocker.id),
+  };
+}
+
+const onDamageCandidateRows: OnDamageCandidate[] = [];
+for (const symbol of rosterMoveSymbols) {
+  const move = moveBySymbol.get(symbol)!;
+  const script = topologyByMove.get(symbol);
+  if (!script) throw new Error(`${symbol} has no indexed Battle Script topology row for the ON_DAMAGE audit`);
+  const makesContact = move.flags.includes("FLAG_MAKES_CONTACT");
+  const categories: OnDamageCandidateCategory[] = [];
+  if (makesContact) categories.push(ON_DAMAGE_CONTACT_CATEGORY);
+  if (move.power !== 0) categories.push(ON_DAMAGE_COLOR_CHANGE_CATEGORY);
+  for (const category of categories) {
+    onDamageCandidateRows.push({
+      category,
+      move: symbol,
+      moveId: move.id,
+      effect: move.effect,
+      power: move.power,
+      makesContact,
+      entryScript: script.entryScript,
+      routeShapeId: `on-damage-entry:${script.entryScript}`,
+      blockerIds: ON_DAMAGE_BLOCKERS.map((blocker) => blocker.id),
+    });
+  }
+}
+const onDamageCandidatesByCategory = Object.fromEntries([
+  ON_DAMAGE_CONTACT_CATEGORY,
+  ON_DAMAGE_COLOR_CHANGE_CATEGORY,
+].map((category) => [category, onDamageCandidateRows.filter((candidate) => candidate.category === category)])) as Record<OnDamageCandidateCategory, OnDamageCandidate[]>;
+const onDamageOverlapMoves = onDamageCandidatesByCategory[ON_DAMAGE_CONTACT_CATEGORY]
+  .map((candidate) => candidate.move)
+  .filter((move) => onDamageCandidatesByCategory[ON_DAMAGE_COLOR_CHANGE_CATEGORY].some((candidate) => candidate.move === move));
+const onDamageEntryScripts = [...new Set(onDamageCandidateRows.map((candidate) => candidate.entryScript))]
+  .sort((left, right) => requireGraphLabel(left).line - requireGraphLabel(right).line);
+const onDamageRouteShapeRows = onDamageEntryScripts.map((entryScript) => onDamageEntryShape(entryScript, onDamageCandidateRows));
+const onDamageEntryShapeCounts = Object.fromEntries([...new Set(onDamageRouteShapeRows.map((row) => row.entryBlockShape))]
+  .sort()
+  .map((shape) => [shape, onDamageRouteShapeRows.filter((row) => row.entryBlockShape === shape).length]));
+const onDamageMoveEndTarget = auditExactScriptBlock("BattleScript_MoveEnd", [
+  ["moveendall", []],
+  ["end", []],
+]);
+if (onDamageCandidateRows.some((candidate) => candidate.blockerIds.length !== ON_DAMAGE_BLOCKERS.length)) {
+  throw new Error("every ON_DAMAGE candidate must carry every explicit blocker");
+}
+if (onDamageCandidateRows.length !== new Set(onDamageCandidateRows.map((candidate) => `${candidate.category}:${candidate.move}`)).size) {
+  throw new Error("every ON_DAMAGE candidate must appear exactly once per applicable category");
+}
+
 const absorbingEvidenceByMove = new Map<string, Array<ReturnType<typeof absorbingFamilyEvidence>>>();
 const absorbingCandidateRows: Array<{ move: string; category: string; type: string; power: number; entryScript: string }> = [];
 const absorbingExcludedCandidates: Array<ReturnType<typeof sunnyDayAbsorbingExclusion>> = [];
@@ -1020,6 +1265,82 @@ const absorbingCoverageByCategory = Object.fromEntries(ABSORBING_HOOK_DEFINITION
     excludedCandidates: excluded,
   }];
 }));
+const onDamageAudit = {
+  status: "evidence-checkpoint-no-promotion",
+  scope: "Finite Level-50 selector audit for ABILITYEFFECT_ON_DAMAGE. This is intentionally a blocked route-shape census, not a per-move support claim.",
+  categories: {
+    [ON_DAMAGE_CONTACT_CATEGORY]: {
+      selector: "moves.json flags includes FLAG_MAKES_CONTACT",
+      candidateRows: onDamageCandidatesByCategory[ON_DAMAGE_CONTACT_CATEGORY],
+      count: onDamageCandidatesByCategory[ON_DAMAGE_CONTACT_CATEGORY].length,
+    },
+    [ON_DAMAGE_COLOR_CHANGE_CATEGORY]: {
+      selector: "moves.json power != 0",
+      candidateRows: onDamageCandidatesByCategory[ON_DAMAGE_COLOR_CHANGE_CATEGORY],
+      count: onDamageCandidatesByCategory[ON_DAMAGE_COLOR_CHANGE_CATEGORY].length,
+    },
+  },
+  overlap: {
+    definition: "moves satisfying both FLAG_MAKES_CONTACT and power != 0",
+    count: onDamageOverlapMoves.length,
+    moves: onDamageOverlapMoves,
+  },
+  sourceDispatcher: {
+    moveEnd: {
+      path: BATTLE_SCRIPT_COMMANDS_PATH,
+      locator: "Cmd_moveend MOVEEND_ON_DAMAGE_ABILITIES",
+      line: moveEndOnDamageCaseLine,
+      call: ON_DAMAGE_DISPATCHER_CALL,
+      order: "state 3 delegates to AbilityBattleEffects before incrementing gBattleScripting.moveendState",
+    },
+    targetAbilitySelection: {
+      path: SOUNDPROOF_TABLE_PATH,
+      locator: "AbilityBattleEffects special=0 target ability selection",
+      line: sourceLine(battleUtilSource, "gLastUsedAbility = gBattleMons[battler].ability;", "AbilityBattleEffects target ability selection"),
+      guard: "with special == 0, gLastUsedAbility is the supplied battler's ability; Cmd_moveend supplies gBattlerTarget",
+    },
+    targetTurnDamaged: {
+      path: BATTLE_HEADER_PATH,
+      locator: "TARGET_TURN_DAMAGED",
+      line: sourceLine(battleHeaderSource, targetTurnDamagedDefinition, "TARGET_TURN_DAMAGED"),
+      definition: targetTurnDamagedDefinition,
+    },
+    abilityCases: ON_DAMAGE_ABILITY_DEFINITIONS.map((definition) => ({
+      ability: definition.ability,
+      category: definition.category,
+      selector: definition.selector,
+      line: sourceLine(battleUtilSource, `case ${definition.ability}:`, definition.ability),
+      orderedGuards: definition.orderedGuards,
+      outcome: definition.outcome,
+    })),
+  },
+  routeShapeCensus: {
+    status: "entry-block-control-frontier-not-a-complete-witness",
+    reason: "Each Level-50 candidate is attached to one source-ordered graph/program entry block. The census preserves fallthrough/jump/call syntax, but does not infer runtime guard outcomes, call returns, target damage, or entry-to-MOVEEND reachability as proof.",
+    moveEndTarget: onDamageMoveEndTarget,
+    entryBlockShapeCounts: onDamageEntryShapeCounts,
+    entries: onDamageRouteShapeRows,
+  },
+  semanticEvidence: {
+    kernelSiblingBatch: {
+      status: "tier1-sibling-batch-only",
+      implementation: "src/engine/battleScriptMoveEndOpcode.ts#AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)",
+      test: "tests/battleScriptMoveEndOpcode.test.ts#MOVEEND_ON_DAMAGE_ABILITIES contact family",
+      coverage: "Color Change, Rough Skin, Effect Spore, Poison Point, Static, Flame Body, Cute Charm, non-contact, substitute-suppressed damage, and source-ordered RNG/state guards",
+    },
+    oracleReceipt: {
+      status: "missing-direct-parameterized-oracle-receipt",
+      profile: "battle-scene-off",
+      checked: "docs/gate6-interaction-matrix-scout.md#R8 is explicitly Immunity/Limber prevention; its Static party appearance does not observe this dispatcher",
+      requirement: "Gate 6 requires one deterministic parameterized-oracle semantic receipt for this shared ON_DAMAGE family plus sibling checks before any per-move promotion.",
+    },
+  },
+  blockers: ON_DAMAGE_BLOCKERS,
+  promotions: {
+    sourceProvenRows: [],
+    reason: "No rows promoted: neither complete ordered MOVEEND witnesses nor a direct shared-family Battle Scene OFF semantic receipt are present in this bounded audit.",
+  },
+};
 const output = {
   schema: "level50-move-parameterization/v3",
   source: {
@@ -1084,9 +1405,10 @@ const output = {
         soundproofSourceProvenRosterRows: soundproofRosterRecords.length,
         soundproofUnsupportedLevel50RosterRows: records.length - soundproofRosterRecords.length,
         absorbing: absorbingCoverageByCategory,
+        onDamage: onDamageAudit,
         completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "The exact Level-50 Soundproof moves-block family and the audited shared absorbing dispatcher candidates are source-proven. Contact/on-damage, accuracy, and all other ability dispatcher families remain intentionally unsupported/null per move.",
+        reason: "The exact Level-50 Soundproof moves-block family and the audited shared absorbing dispatcher candidates are source-proven. Contact/on-damage has a finite blocked candidate/guard/route-shape audit but remains unsupported per move until complete ordered MOVEEND witnesses and a direct shared-family OFF receipt exist; accuracy and all other ability dispatcher families remain intentionally unsupported/null per move.",
       },
     },
   },
