@@ -24,9 +24,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** #84 twice-fresh OFF evidence is byte-identical over dense frames
   210..420; focused public forced-switch checks **406/406** and corrected
   command-order checks **47/47** pass. R12 focused receipt/kernel/manifest
-  checks **129/129** pass; worker full suites/builds were green. Final union
-  suite/build remains required after this ledger commit. No barrier/import,
-  rules/RNG, party/HP/status, or completeness pin changed.
+  checks **129/129** pass. The folded union passes **817 files / 8,165 tests /
+  1 skipped** and the production build; `bin/oracle info` confirms the OFF
+  profile. No barrier/import, rules/RNG, party/HP/status, or completeness pin
+  changed.
 
 ## 1038 — [bounded MAIN worker, 2026-08-09] **#84 forced opponent switch presentation complete**
 
