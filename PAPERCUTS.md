@@ -850,7 +850,9 @@ the nested controller trace. Hits: 1.
 verification: a yielded execution was mistaken for a completed call and
 restarted, leaving concurrent or redundant Vitest process groups until the
 supervisor identified the retained process or supplied final union
-verification. Hits: 3; cost: about 22 minutes plus avoidable CPU contention. A
+verification. A fourth hit occurred when one retained side-worker session
+started two full suites while the animation supervisor was also verifying.
+Hits: 4; cost: about 30 minutes plus avoidable CPU contention. A
 launcher/tool response that visually distinguishes “still running; wait on
 this handle” from completion would prevent this class of mistake.
 

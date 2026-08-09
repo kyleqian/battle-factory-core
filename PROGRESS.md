@@ -5,6 +5,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1044 — [supervisor, 2026-08-09] **ON_DAMAGE candidates ratcheted; Haze fold and union green**
+
+- **State:** Gate 6 remains **OPEN** at **561** per-move hook gaps: **300 item
+  + 261 ability**. The 39 existing `source-proven-family` ability rows remain
+  unchanged; no ON_DAMAGE row was promoted without complete route and oracle
+  evidence.
+- **Did:** accepted `2d55ec1b` + `089bb685`. The source-derived checkpoint
+  enumerates **94** contact and **183** Color Change candidates (**94** overlap)
+  across **78** entry-script shapes, with every row ratcheted against three
+  explicit blockers: ordered MOVEEND route not proved, damage-state guard not
+  selector-derived, and no direct OFF ON_DAMAGE semantic receipt. Corrected
+  Static from an incidental party appearance to
+  `engine-referenced-no-oracle-receipt`. Folded animation-main's independently
+  supervised bilateral exact HAZE handoff through `31632800` as `23180820`.
+- **Next:** build a complete ordered runtime MOVEEND witness and a direct
+  Battle Scene OFF parameterized receipt for one shared ON_DAMAGE family before
+  promoting any of its candidates; otherwise take another finite source-bounded
+  hook family while preserving the explicit gaps.
+- **Notes:** supervisor focused verification is **4 files / 70 tests**. Final
+  union is **823 files / 8,189 passed / 1 skipped** and production build green;
+  OFF oracle healthy. The generic seven-battle controller and all five #84
+  presentation/controller regressions remain green. No canonical import or
+  unsupported-barrier pin moved.
+
+---
+
 ## 1043 — [supervisor, 2026-08-09] **Absorbing hook family source-proven; union green**
 
 - **State:** Gate 6 remains **OPEN**. Per-move hook gaps are now **561**:
@@ -50,26 +76,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   roster selectors are ROAR, SING, SUPERSONIC, SCREECH, SNORE, UPROAR, METAL
   SOUND, GRASS WHISTLE, and HYPER VOICE. No production, barrier/import, oracle
   fixture, animation, or controller file changed.
-
----
-
-## 1041 — [supervisor, 2026-08-09] **Gate-6 hook gaps surfaced; Substitute fold green**
-
-- **State:** Gate 6 remains **OPEN**. The manifest now exposes **300 item +
-  300 ability per-move hook-join gaps** instead of omitting them; all remain
-  explicitly unsupported. State families remain **55/55** Tier-1-covered and
-  OFF request receipts remain **24/24**.
-- **Did:** independently accepted and merged `928c94cc` as `e284fb29`; every
-  Level-50 move is enumerated once per hook axis with effect, entry script,
-  source locator, and nonempty reason, while false zero-gap claims fail the
-  manifest ratchet. Folded animation-main's bilateral exact Substitute handoff
-  through `ba621869` as `cb96cd9f`.
-- **Next:** take one source-bounded hook family, starting with Soundproof's nine
-  sound moves, and preserve honest unsupported status where complete Battle
-  Script fallthrough/source-guard reachability is not yet established.
-- **Notes:** supervisor hook/manifest/frontier verification is **16/16**;
-  folded union is **819 files / 8,175 passed / 1 skipped** and production build
-  green. Generated artifact sizes are JSON **2,798,540 B** and Markdown
-  **778,944 B**. No barrier/import pin or production mechanic changed.
 
 ---

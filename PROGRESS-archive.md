@@ -1,3 +1,22 @@
+## 1041 — [supervisor, 2026-08-09] **Gate-6 hook gaps surfaced; Substitute fold green**
+
+- **State:** Gate 6 remains **OPEN**. The manifest now exposes **300 item +
+  300 ability per-move hook-join gaps** instead of omitting them; all remain
+  explicitly unsupported. State families remain **55/55** Tier-1-covered and
+  OFF request receipts remain **24/24**.
+- **Did:** independently accepted and merged `928c94cc` as `e284fb29`; every
+  Level-50 move is enumerated once per hook axis with effect, entry script,
+  source locator, and nonempty reason, while false zero-gap claims fail the
+  manifest ratchet. Folded animation-main's bilateral exact Substitute handoff
+  through `ba621869` as `cb96cd9f`.
+- **Next:** take one source-bounded hook family, starting with Soundproof's nine
+  sound moves, and preserve honest unsupported status where complete Battle
+  Script fallthrough/source-guard reachability is not yet established.
+- **Notes:** supervisor hook/manifest/frontier verification is **16/16**;
+  folded union is **819 files / 8,175 passed / 1 skipped** and production build
+  green. Generated artifact sizes are JSON **2,798,540 B** and Markdown
+  **778,944 B**. No barrier/import pin or production mechanic changed.
+
 ## 1034 — [supervisor, 2026-08-08] **#84 crash fixed; R3 receipted; union green**
 
 - **State:** #84 item (5) is fixed; its four presentation defects remain open.
