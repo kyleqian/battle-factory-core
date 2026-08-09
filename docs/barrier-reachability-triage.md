@@ -10,8 +10,8 @@ The current history contains the Enigma Berry retirement (`d92248bb`), so the
 live `Cmd_accuracycheck` count is 10. A/B work is not
 being re-opened here: A3, A5, A6, A7, A8, A9, A10, and A11 are implemented in
 the current source; A4 and A12 are source-refuted as unreachable in Factory
-singles. The two remaining B sites are composite guards whose current
-call-site inventories still include an unmodeled subcase.
+singles. One widened-scope B site remains: the `printfromtable` composite
+guard still has an unmodeled weather-start table family.
 
 ## Counting contract
 
@@ -23,11 +23,11 @@ live B subcase is counted as B even when another subcase at that same guard is
 proven C. This keeps the module sum and category sum machine-checkable.
 
 ```text
-BARRIER_COUNTS = {"A": 0, "B": 2, "C": 21, "D": 23, "total": 46}
+BARRIER_COUNTS = {"A": 0, "B": 1, "C": 22, "D": 23, "total": 46}
 PINNED_MODULE_TOTAL = 46
 REMAINING_A = 0
-REMAINING_B = 2
-CONFIRMED_C = 21
+REMAINING_B = 1
+CONFIRMED_C = 22
 CONFIRMED_D = 23
 ```
 
@@ -45,7 +45,7 @@ These totals must match `PINNED_BARRIER_COUNTS` and `barrierCallSitesIn` in
 | `battleScriptOpenPartyScreenOpcode.ts` | 1 | 1 C |
 | `battleScriptGetexpOpcode.ts` | 2 | 1 C, 1 D |
 | `battleScriptCheckteamslostOpcode.ts` | 3 | 3 C |
-| `battleScriptSwitchinOpcode.ts` | 4 | 1 B, 3 C |
+| `battleScriptSwitchinOpcode.ts` | 4 | 4 C |
 | `battleScriptStatbuffchangeOpcode.ts` | 3 | 1 C, 2 D |
 | `battleScriptDamagingWeatherOpcode.ts` | 4 | 4 D |
 | `battleScriptTryCastformDataChangeOpcode.ts` | 0 | — |
@@ -84,9 +84,8 @@ These totals must match `PINNED_BARRIER_COUNTS` and `barrierCallSitesIn` in
   `battleScriptAttackCancelerOpcode.ts:274` is therefore C, not a live A
   route. Doubles are outside this contract.
 - **A5 — implemented.** `VARIOUS_GET_BATTLER_FAINTED` is accepted by the
-  current `battleScriptSwitchinOpcode.ts:749-766` handler. The one remaining
-  `VARIOUS` guard at `:762` is B because the committed program still has the
-  Teleport/force-switch subcase; it is not evidence that the fainted-battler
+  current handler. The same composite site remains as a C guard for excluded
+  Arena/link/general-battle IDs; it is not evidence that the fainted-battler
   case is unreachable.
 - **A6 — implemented.** `battleScriptFullTurnDecision.ts:1524` retains only
   the real doubles flank/multi-hit topology guard (`gMultiHitCounter != 1`).
@@ -145,14 +144,16 @@ These totals must match `PINNED_BARRIER_COUNTS` and `barrierCallSitesIn` in
   `src/battle_util.c:2529`), and the wild no-escape and Palace flavor-text
   families are likewise outside the registered quartet. The defrost and
   obedience subcases are implemented as noted for A9.
-- **B2 / `VARIOUS` family — 1 site.**
-  `battleScriptSwitchinOpcode.ts:762` still protects unregistered
-  `Cmd_various` IDs. `VARIOUS_GET_BATTLER_FAINTED` is implemented, but the
-  committed force-switch/Teleport producer remains a distinct live subcase;
-  the guard is therefore retained and counted B. The source command’s broad
-  dispatch is `src/battle_script_commands.c:6250-6330`.
+- **B2 / `VARIOUS` family — retired.** `VARIOUS_IS_RUNNING_IMPOSSIBLE` now
+  ports `IsRunningFromBattleImpossible`'s exact source precedence, including
+  Smoke Ball/Enigma, Run Away, trapping abilities, trapped/rooted state, and
+  position-derived sides. `VARIOUS_SET_TELEPORT_OUTCOME` writes source
+  outcomes 5/10. The full legal non-trainer Teleport script reaches its own
+  terminal continuation in Tier 1. The composite guard remains counted as C
+  for excluded Arena/link/general-battle IDs, so the module's call-site pin
+  correctly remains four.
 
-## Confirmed C sites (21)
+## Confirmed C sites (22)
 
 C means the guard is a legitimate defensive boundary, but the current
 Factory-single program cannot reach the guarded source branch. These are
@@ -196,29 +197,33 @@ refer to the pinned source unless marked otherwise.
 12. `battleScriptOpenPartyScreenOpcode.ts:149` — link/multi/double party
     collection (`src/battle_script_commands.c:4876-4905`); Factory uses the
     ordinary singles path.
-13. `battleScriptSwitchinOpcode.ts:289` — `switchhandleorder` case 0 is the
+13. `battleScriptSwitchinOpcode.ts:317` — `switchhandleorder` case 0 is the
     multi-battler collection/order case; Factory’s committed call sites do
     not require it (`src/battle_script_commands.c:5152-5190`, with the link
     producers at `data/battle_scripts_1.s:2902-2904`).
-14. `battleScriptSwitchinOpcode.ts:414` — cross-battler WRAPPED identity
+14. `battleScriptSwitchinOpcode.ts:442` — cross-battler WRAPPED identity
     (`src/battle_script_commands.c:3199-3210`) requires more than two
     battlers.
-15. `battleScriptSwitchinOpcode.ts:648` — Arena points initialization
+15. `battleScriptSwitchinOpcode.ts:676` — Arena points initialization
     (`src/battle_script_commands.c:4674-4696`); Factory is not Arena.
-16. `battleScriptTargetIterationOpcode.ts:114` — target iteration is
+16. `battleScriptSwitchinOpcode.ts:796` — the remaining generic `Cmd_various`
+    boundary covers excluded Arena/link/general-battle IDs after the legal
+    widened-scope Teleport cases were implemented. No current Factory-singles
+    producer reaches an unmodeled ID.
+17. `battleScriptTargetIterationOpcode.ts:114` — target iteration is
     doubles-only (`src/battle_script_commands.c:6594-6608`).
-17. `battleScriptStatbuffchangeOpcode.ts:293` — unknown animation type;
+18. `battleScriptStatbuffchangeOpcode.ts:293` — unknown animation type;
     the only concrete unregistered use is the wild Smoke Ball escape noted
     above (`data/battle_scripts_1.s:3050-3054`).
-18. `battleScriptJumpifcantswitchOpcode.ts:167` — the partner/multi and
+19. `battleScriptJumpifcantswitchOpcode.ts:167` — the partner/multi and
     active-party scan (`src/battle_script_commands.c:4714-4848`) is outside
     Factory’s two-battler singles topology.
-19. `battleScriptFullTurnDecision.ts:1524` — the remaining multi-hit flank
+20. `battleScriptFullTurnDecision.ts:1524` — the remaining multi-hit flank
     rule is doubles-only (`gMultiHitCounter != 1`).
-20. `factoryAiCheckBadMove.ts:2642` — the current explicit AI effect table
+21. `factoryAiCheckBadMove.ts:2642` — the current explicit AI effect table
     covers all 109/109 committed entries; this generic guard is a
     source-synchronization boundary, not a current Factory effect route.
-21. `factoryAiCheckViability.ts:7205` — the current explicit viability table
+22. `factoryAiCheckViability.ts:7205` — the current explicit viability table
     covers all 122/122 committed entries; this generic guard is likewise
     defensive. Both AI sites are retained because the source census, not an
     assumption about future data, owns their count.

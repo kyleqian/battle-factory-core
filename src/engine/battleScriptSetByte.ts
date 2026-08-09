@@ -58,6 +58,10 @@ export const BATTLE_SCRIPT_SETBYTE_POINTER_EXPRESSIONS = Object.freeze([
 const ATOMIC_VALUES = Object.freeze({
   FALSE: 0,
   TRUE: 1,
+  /** include/constants/battle.h:339-341 -- Teleport's two gBattleCommunication branches. */
+  BATTLE_RUN_SUCCESS: 0,
+  BATTLE_RUN_FORBIDDEN: 1,
+  BATTLE_RUN_FAILURE: 2,
   B_MSG_ABSORB: 0,
   B_MSG_ABSORB_OOZE: 1,
   B_MSG_ABILITY_PREVENTS_MOVE_STATUS: 0,

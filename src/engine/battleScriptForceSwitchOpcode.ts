@@ -39,10 +39,9 @@
  * fork always takes the trainer branch (Factory sets
  * `BATTLE_TYPE_TRAINER | BATTLE_TYPE_FRONTIER` unconditionally), and even on
  * a synthetic non-trainer rules context the preceding `setoutcomeonteleport`
- * (`various BS_ATTACKER, VARIOUS_SET_TELEPORT_OUTCOME`) already barriers
- * first via the existing generic VARIOUS dispatcher
- * (`battleScriptSwitchinOpcode.ts`) -- this handler's own barrier is
- * therefore doubly dead code, registered only so a direct call never
+ * (`various BS_ATTACKER, VARIOUS_SET_TELEPORT_OUTCOME`) now writes the
+ * source outcome and this handler is the first deferred scheduler handoff.
+ * It remains dead for Factory and is registered only so a direct call never
  * degrades to the machine's generic `unsupported-opcode` halt.
  */
 import {
@@ -264,8 +263,8 @@ function createFinishactionBarrierHandler(): BattleScriptOpcodeHandler<BattleScr
     "Cmd_finishaction's gCurrentActionFuncId = B_ACTION_FINISHED action-scheduler handoff has no typed "
       + "receipt in this engine yet (docs/script-terminal-gate3-evidence.md's own deferral) -- structurally "
       + "unreachable for Factory besides (BattleScript_SuccessForceOut's jumpifbattletype BATTLE_TYPE_TRAINER "
-      + "fork always taken; even the counterfactual non-trainer arm barriers first on the preceding "
-      + "setoutcomeonteleport/VARIOUS_SET_TELEPORT_OUTCOME)",
+      + "fork always taken; the counterfactual non-trainer arm first writes its "
+      + "setoutcomeonteleport/VARIOUS_SET_TELEPORT_OUTCOME outcome)",
     "battle_script_commands.c",
     10308,
   );

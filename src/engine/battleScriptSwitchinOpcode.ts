@@ -36,6 +36,8 @@ import type { BattleScriptBattlerId, BattleScriptSemanticEventPayload } from "./
 import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import type { BattleScriptControllerIdlePort } from "./battleScriptSourceCommands.ts";
 import {
+  resolveBattleScriptBattlerHoldEffect,
+  resolveBattleScriptBattlerPosition,
   resolveRulesBattlerForBattleScript,
   BATTLE_SCRIPT_BATTLE_TYPE_ARENA,
   BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE,
@@ -46,7 +48,11 @@ import {
   type BattleScriptRulesContext,
   type BattleScriptStatStages,
 } from "./battleScriptRulesContext.ts";
-import { BATTLE_SCRIPT_STATUS2_WRAPPED_MASK } from "./battleScriptSourceConstants.ts";
+import {
+  BATTLE_SCRIPT_BATTLE_TYPE_FIRST_BATTLE,
+  BATTLE_SCRIPT_STATUS2_WRAPPED_MASK,
+  BATTLE_SCRIPT_STATUS3_ROOTED,
+} from "./battleScriptSourceConstants.ts";
 import { cancelBattleScriptMultiTurnMoves } from "./battleScriptMultiTurnCancellation.ts";
 import { computeCastformForm } from "./battleScriptTryCastformDataChangeOpcode.ts";
 import speciesTypesData from "../data/gen/species-types.json" with { type: "json" };
@@ -67,6 +73,24 @@ const SIDE_STATUS_SPIKES_DAMAGED = 1 << 9;
 const STATUS2_DESTINY_BOND = 1 << 25;
 const HITMARKER_DESTINYBOND = 1 << 6;
 const ABILITY_LEVITATE = 26;
+/** include/constants/abilities.h. */
+const ABILITY_SHADOW_TAG = 23;
+const ABILITY_MAGNET_PULL = 42;
+const ABILITY_RUN_AWAY = 50;
+const ABILITY_ARENA_TRAP = 71;
+/** include/constants/hold_effects.h:41. */
+const HOLD_EFFECT_CAN_ALWAYS_RUN = 37;
+/** include/constants/battle.h:339-341. */
+const BATTLE_RUN_SUCCESS = 0;
+const BATTLE_RUN_FORBIDDEN = 1;
+const BATTLE_RUN_FAILURE = 2;
+/** include/constants/battle_string_ids.h:565-567. */
+const B_MSG_CANT_ESCAPE = 0;
+const B_MSG_DONT_LEAVE_BIRCH = 1;
+const B_MSG_PREVENTS_ESCAPE = 2;
+/** include/constants/battle.h:104,109. */
+const B_OUTCOME_PLAYER_TELEPORTED = 5;
+const B_OUTCOME_MON_TELEPORTED = 10;
 /** include/constants/battle.h:150/160 -- cross-battler identity status bits. */
 const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 const STATUS3_ALWAYS_HITS = (1 << 3) | (1 << 4);
@@ -208,10 +232,12 @@ function callSwitchinScript(
  */
 const VARIOUS_CANCEL_MULTI_TURN_MOVES = 0;
 const VARIOUS_SET_MAGIC_COAT_TARGET = 1;
+const VARIOUS_IS_RUNNING_IMPOSSIBLE = 2;
 const VARIOUS_GET_MOVE_TARGET = 3;
 const VARIOUS_GET_BATTLER_FAINTED = 4;
 const VARIOUS_RESET_PLAYER_FAINTED = 7;
 const VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT = 23;
+const VARIOUS_SET_TELEPORT_OUTCOME = 25;
 /**
  * `battle_script_commands.c:6455-6470` -- terminal-seam increment (i) LOSS
  * half (`docs/terminal-seam-loss-path-ground-truth.md` §5 item 1). Both
@@ -228,12 +254,14 @@ const VARIOUS_RETURN_OPPONENT_MON2 = 20;
 const NAMED_BYTE_CONSTANTS = new Map<string, number>([
   ["VARIOUS_CANCEL_MULTI_TURN_MOVES", VARIOUS_CANCEL_MULTI_TURN_MOVES],
   ["VARIOUS_SET_MAGIC_COAT_TARGET", VARIOUS_SET_MAGIC_COAT_TARGET],
+  ["VARIOUS_IS_RUNNING_IMPOSSIBLE", VARIOUS_IS_RUNNING_IMPOSSIBLE],
   ["VARIOUS_GET_MOVE_TARGET", VARIOUS_GET_MOVE_TARGET],
   ["VARIOUS_GET_BATTLER_FAINTED", VARIOUS_GET_BATTLER_FAINTED],
   ["VARIOUS_RETURN_OPPONENT_MON1", VARIOUS_RETURN_OPPONENT_MON1],
   ["VARIOUS_RETURN_OPPONENT_MON2", VARIOUS_RETURN_OPPONENT_MON2],
   ["VARIOUS_RESET_PLAYER_FAINTED", VARIOUS_RESET_PLAYER_FAINTED],
   ["VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT", VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT],
+  ["VARIOUS_SET_TELEPORT_OUTCOME", VARIOUS_SET_TELEPORT_OUTCOME],
 ]);
 
 function resolveByteLiteral(expression: string): number | null {
@@ -695,7 +723,9 @@ function cancelallactionsOpcodeHandler(
  * `VARIOUS_GET_MOVE_TARGET` (3),
  * `VARIOUS_GET_BATTLER_FAINTED` (4),
  * `VARIOUS_RESET_PLAYER_FAINTED` (7),
- * `VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT` (23), and
+ * `VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT` (23),
+ * `VARIOUS_IS_RUNNING_IMPOSSIBLE` (2),
+ * `VARIOUS_SET_TELEPORT_OUTCOME` (25), and
  * `VARIOUS_RETURN_OPPONENT_MON1`/`MON2` (19/20, terminal-seam increment (i)
  * LOSS half). GET_MOVE_TARGET's `MOVE_TARGET_SELECTED` branch is
  * source-complete for singles: it repeats `Random() % gBattlersCount` until
@@ -712,8 +742,10 @@ function cancelallactionsOpcodeHandler(
  * and reads the written `gBattleCommunication[0]` from the immediately
  * following `jumpifbyte CMP_EQUAL, gBattleCommunication, FALSE, ...`; it
  * writes TRUE when the active battler's `HITMARKER_FAINTED(battler)` bit is
- * set, FALSE otherwise. VARIOUS_IS_RUNNING_IMPOSSIBLE (2) stays behind the
- * generic barrier (bucket B, Teleport).
+ * set, FALSE otherwise. VARIOUS_IS_RUNNING_IMPOSSIBLE (2) ports
+ * IsRunningFromBattleImpossible's exact source precedence for Teleport, while
+ * VARIOUS_SET_TELEPORT_OUTCOME (25) writes the source outcome from the
+ * selected battler's position-derived side.
  * RETURN_OPPONENT_MON1 (`:6455-6461`) unconditionally targets battler 1 and,
  * if it is still alive (`gBattleMons[1].hp != 0`), emits the return-to-ball
  * controller receipt (recall sprite, hide healthbox --
@@ -752,9 +784,11 @@ function createVariousOpcodeHandler(
       id !== VARIOUS_SET_MAGIC_COAT_TARGET
       &&
       id !== VARIOUS_CANCEL_MULTI_TURN_MOVES
+      && id !== VARIOUS_IS_RUNNING_IMPOSSIBLE
       && id !== VARIOUS_GET_BATTLER_FAINTED
       && id !== VARIOUS_RESET_PLAYER_FAINTED
       && id !== VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT
+      && id !== VARIOUS_SET_TELEPORT_OUTCOME
       && id !== VARIOUS_RETURN_OPPONENT_MON1
       && id !== VARIOUS_RETURN_OPPONENT_MON2
       && !getMoveTargetSupported
@@ -796,6 +830,158 @@ function createVariousOpcodeHandler(
     if (battler === null) {
       throw new Error(
         `Cmd_various: unresolved battler selector at program counter ${context.state.programCounter}`,
+      );
+    }
+    if (id === VARIOUS_IS_RUNNING_IMPOSSIBLE) {
+      // IsRunningFromBattleImpossible (battle_main.c:4021-4079). Source's
+      // GetBattlerSide is gBattlerPositions[battler] & BIT_SIDE, deliberately
+      // not the convenient per-battler side field used by unrelated reducers.
+      const activeBattler = battler as BattleScriptBattlerId;
+      const active = rules.battlers[activeBattler];
+      const activeSide = resolveBattleScriptBattlerPosition(rules.battleTopology, activeBattler) & 1;
+      const withResult = (battleCommunication0: number) => Object.freeze({
+        ...rules,
+        battleCommunication0,
+      });
+      const preventedBy = (preventingBattler: BattleScriptBattlerId) => Object.freeze({
+        ...rules,
+        scriptingBattler: preventingBattler,
+        lastUsedAbility: rules.battlers[preventingBattler].ability,
+        multistringChooser: B_MSG_PREVENTS_ESCAPE,
+        battleCommunication0: BATTLE_RUN_FAILURE,
+      });
+
+      // `gPotentialItemEffectBattler = gActiveBattler` has no durable reader
+      // in this immutable rules context; its item-effect lookup is shared with
+      // the other source ports, including the Enigma Berry per-battler branch.
+      if (resolveBattleScriptBattlerHoldEffect(rules, activeBattler) === HOLD_EFFECT_CAN_ALWAYS_RUN) {
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "advance" }),
+          { rulesContext: withResult(BATTLE_RUN_SUCCESS) },
+        );
+      }
+      if ((rules.battleTopology.battleTypeFlags & BATTLE_TYPE_LINK) !== 0) {
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "advance" }),
+          { rulesContext: withResult(BATTLE_RUN_SUCCESS) },
+        );
+      }
+      if (active.ability === ABILITY_RUN_AWAY) {
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "advance" }),
+          { rulesContext: withResult(BATTLE_RUN_SUCCESS) },
+        );
+      }
+
+      // Keep the source's nested scan order: for each battler, Shadow Tag is
+      // checked before Arena Trap, and the first matching index wins.
+      for (let candidate = 0; candidate < rules.battleTopology.battlersCount; candidate += 1) {
+        const candidateBattler = candidate as BattleScriptBattlerId;
+        if (
+          activeSide !== (resolveBattleScriptBattlerPosition(rules.battleTopology, candidateBattler) & 1)
+          && rules.battlers[candidateBattler].ability === ABILITY_SHADOW_TAG
+        ) {
+          return transitionBattleScriptCommand(
+            context,
+            Object.freeze({ kind: "advance" }),
+            { rulesContext: preventedBy(candidateBattler) },
+          );
+        }
+        if (
+          activeSide !== (resolveBattleScriptBattlerPosition(rules.battleTopology, candidateBattler) & 1)
+          && active.ability !== ABILITY_LEVITATE
+          && !active.types.includes("TYPE_FLYING")
+          && rules.battlers[candidateBattler].ability === ABILITY_ARENA_TRAP
+        ) {
+          return transitionBattleScriptCommand(
+            context,
+            Object.freeze({ kind: "advance" }),
+            { rulesContext: preventedBy(candidateBattler) },
+          );
+        }
+      }
+
+      // AbilityBattleEffects(ABILITYEFFECT_CHECK_FIELD_EXCEPT_BATTLER) scans
+      // every non-active battler and overwrites `effect` each time, so its
+      // final (highest-index) Magnet Pull holder is the selected source
+      // battler. It writes gLastUsedAbility even when the active mon is not
+      // Steel and the function ultimately returns success.
+      let magnetPullBattler: BattleScriptBattlerId | null = null;
+      for (let candidate = 0; candidate < rules.battleTopology.battlersCount; candidate += 1) {
+        const candidateBattler = candidate as BattleScriptBattlerId;
+        if (candidateBattler !== activeBattler && rules.battlers[candidateBattler].ability === ABILITY_MAGNET_PULL) {
+          magnetPullBattler = candidateBattler;
+        }
+      }
+      const afterMagnetPull = magnetPullBattler === null
+        ? rules
+        : Object.freeze({ ...rules, lastUsedAbility: rules.battlers[magnetPullBattler].ability });
+      if (magnetPullBattler !== null && active.types.includes("TYPE_STEEL")) {
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "advance" }),
+          {
+            rulesContext: Object.freeze({
+              ...afterMagnetPull,
+              scriptingBattler: magnetPullBattler,
+              multistringChooser: B_MSG_PREVENTS_ESCAPE,
+              battleCommunication0: BATTLE_RUN_FAILURE,
+            }),
+          },
+        );
+      }
+      if (
+        (active.status2 & (STATUS2_ESCAPE_PREVENTION | BATTLE_SCRIPT_STATUS2_WRAPPED_MASK)) !== 0
+        || (active.status3 & BATTLE_SCRIPT_STATUS3_ROOTED) !== 0
+      ) {
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "advance" }),
+          {
+            rulesContext: Object.freeze({
+              ...afterMagnetPull,
+              multistringChooser: B_MSG_CANT_ESCAPE,
+              battleCommunication0: BATTLE_RUN_FORBIDDEN,
+            }),
+          },
+        );
+      }
+      if ((rules.battleTopology.battleTypeFlags & BATTLE_SCRIPT_BATTLE_TYPE_FIRST_BATTLE) !== 0) {
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "advance" }),
+          {
+            rulesContext: Object.freeze({
+              ...afterMagnetPull,
+              multistringChooser: B_MSG_DONT_LEAVE_BIRCH,
+              battleCommunication0: BATTLE_RUN_FORBIDDEN,
+            }),
+          },
+        );
+      }
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: Object.freeze({ ...afterMagnetPull, battleCommunication0: BATTLE_RUN_SUCCESS }) },
+      );
+    }
+    if (id === VARIOUS_SET_TELEPORT_OUTCOME) {
+      const side = resolveBattleScriptBattlerPosition(
+        rules.battleTopology,
+        battler as BattleScriptBattlerId,
+      ) & 1;
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        {
+          rulesContext: Object.freeze({
+            ...rules,
+            battleOutcome: side === 0 ? B_OUTCOME_PLAYER_TELEPORTED : B_OUTCOME_MON_TELEPORTED,
+          }),
+        },
       );
     }
     if (id === VARIOUS_GET_BATTLER_FAINTED) {

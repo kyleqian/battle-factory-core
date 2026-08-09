@@ -262,16 +262,16 @@ describe("EFFECT_ROAR: full committed script walk, genuine terminal halt", () =>
     expect(result.state.rng.calls).toBe(0);
   });
 
-  it("non-trainer battle: BattleScript_SuccessForceOut's own jumpifbattletype BATTLE_TYPE_TRAINER fork falls through to the pre-existing generic VARIOUS barrier (VARIOUS_SET_TELEPORT_OUTCOME) before ever reaching B_SCR_OP_FINISHACTION -- structurally unreachable for Factory twice over, per docs/script-terminal-gate3-evidence.md's own deferral", () => {
+  it("non-trainer battle: BattleScript_SuccessForceOut writes the Teleport outcome, then reaches its still-deferred B_SCR_OP_FINISHACTION barrier -- structurally unreachable for Factory", () => {
     const result = runToHalt("BattleScript_EffectRoar", context({ attackerLevel: 50, targetLevel: 50, trainerBattle: false }), 1);
     expect(result.state.haltReason).toMatchObject({
       kind: "unsupported-branch",
-      opcodeName: "B_SCR_OP_VARIOUS",
-      sourceConstruct: "Cmd_various case VARIOUS_SET_TELEPORT_OUTCOME is not modeled",
+      opcodeName: "B_SCR_OP_FINISHACTION",
     });
-    // forcerandomswitch's own success path already ran to completion here (monToSwitchIntoId written, jumped to
-    // BattleScript_SuccessForceOut) -- the barrier is downstream of it, not a symptom of forcerandomswitch itself.
+    // forcerandomswitch's own success path and setoutcomeonteleport both ran
+    // before the unrelated deferred scheduler handoff.
     expect(result.state.rulesContext.monToSwitchIntoId[1]).not.toBe(4);
+    expect(result.state.rulesContext.battleOutcome).toBe(5);
     expect(result.state.rng.calls).toBe(2); // 1(acc) + 1(pick, equal levels so zero level-check draws)
   });
 });
