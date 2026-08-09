@@ -38846,3 +38846,20 @@ both verify scripts/census independently re-verified before this entry.)*
   **375/375**, and full suite **812 files / 8,143 passed / 1 skipped**; build
   green. No unsupported barrier, canonical recording import, rules/RNG/event,
   fatal completeness, or fatal status-handoff guard changed.
+## 1038 — [bounded MAIN worker, 2026-08-09] **#84 forced opponent switch presentation complete**
+
+- **State:** #84 is closed. Gate 6 stays **23/24** OFF-profile receipts; R2
+  remains the separate final compact-receipt upgrade.
+- **Did:** `B_SCR_OP_RETURNTOBALL` now emits controller-owned typed recall
+  visibility, and generic resolution projects its 32-frame switch-out before
+  the existing opponent switch-in chain. Opponent open-ball frames now retain
+  the simultaneous elevated, affine, ball-tinted incoming mon; voluntary
+  player recall/send-out behavior remains unchanged.
+- **Next:** let the supervisor select the next Gate-6/Main increment. Do not
+  resume canonical Battle 2.
+- **Notes:** twice-fresh legal BUTTERFREE WHIRLWIND vs MURKROW OFF evidence is
+  byte-identical across dense frames 210..420; GROVYLE proves the elevated
+  incoming overlap. Focused force-switch/orchestrator/render checks are
+  **406/406**, smoke **375/375**, full suite **814 files / 8,151 passed / 1
+  skipped**, and production build green.
+  No barrier/import pin, rule/RNG, party/HP/status, or completeness guard changed.

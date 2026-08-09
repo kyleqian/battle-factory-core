@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1041 — [supervisor, 2026-08-09] **Gate-6 hook gaps surfaced; Substitute fold green**
+
+- **State:** Gate 6 remains **OPEN**. The manifest now exposes **300 item +
+  300 ability per-move hook-join gaps** instead of omitting them; all remain
+  explicitly unsupported. State families remain **55/55** Tier-1-covered and
+  OFF request receipts remain **24/24**.
+- **Did:** independently accepted and merged `928c94cc` as `e284fb29`; every
+  Level-50 move is enumerated once per hook axis with effect, entry script,
+  source locator, and nonempty reason, while false zero-gap claims fail the
+  manifest ratchet. Folded animation-main's bilateral exact Substitute handoff
+  through `ba621869` as `cb96cd9f`.
+- **Next:** take one source-bounded hook family, starting with Soundproof's nine
+  sound moves, and preserve honest unsupported status where complete Battle
+  Script fallthrough/source-guard reachability is not yet established.
+- **Notes:** supervisor hook/manifest/frontier verification is **16/16**;
+  folded union is **819 files / 8,175 passed / 1 skipped** and production build
+  green. Generated artifact sizes are JSON **2,798,540 B** and Markdown
+  **778,944 B**. No barrier/import pin or production mechanic changed.
+
+---
+
 ## 1040 — [bounded MAIN worker, 2026-08-09] **Gate-6 state-family Tier-1 gap closed and verified**
 
 - **State:** the manifest reports **55/55** state/status/volatile rows with focused Tier-1 evidence (was **50/55**); Gate 6 remains **OPEN**, effects remain not-established-by-static-census, and OFF hook/request distinctions remain **24/24** receipted.
@@ -37,21 +58,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   1 skipped** and the production build; `bin/oracle info` confirms the OFF
   profile. No barrier/import, rules/RNG, party/HP/status, or completeness pin
   changed.
-
-## 1038 — [bounded MAIN worker, 2026-08-09] **#84 forced opponent switch presentation complete**
-
-- **State:** #84 is closed. Gate 6 stays **23/24** OFF-profile receipts; R2
-  remains the separate final compact-receipt upgrade.
-- **Did:** `B_SCR_OP_RETURNTOBALL` now emits controller-owned typed recall
-  visibility, and generic resolution projects its 32-frame switch-out before
-  the existing opponent switch-in chain. Opponent open-ball frames now retain
-  the simultaneous elevated, affine, ball-tinted incoming mon; voluntary
-  player recall/send-out behavior remains unchanged.
-- **Next:** let the supervisor select the next Gate-6/Main increment. Do not
-  resume canonical Battle 2.
-- **Notes:** twice-fresh legal BUTTERFREE WHIRLWIND vs MURKROW OFF evidence is
-  byte-identical across dense frames 210..420; GROVYLE proves the elevated
-  incoming overlap. Focused force-switch/orchestrator/render checks are
-  **406/406**, smoke **375/375**, full suite **814 files / 8,151 passed / 1
-  skipped**, and production build green.
-  No barrier/import pin, rule/RNG, party/HP/status, or completeness guard changed.
