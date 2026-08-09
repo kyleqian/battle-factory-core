@@ -774,6 +774,8 @@ export type BattleScriptRulesContext = Readonly<
     dynamicMoveType: number;
     /** Source u8 gEnigmaBerries[MAX_BATTLERS_COUNT].holdEffect values. */
     enigmaBerryHoldEffects: BattleScriptMoveEndBytes;
+    /** Source u8 gEnigmaBerries[MAX_BATTLERS_COUNT].holdEffectParam values. */
+    enigmaBerryHoldEffectParams: BattleScriptMoveEndBytes;
     /** Source-shaped move histories used only by move-end states 14 and 15. */
     moveHistory: BattleScriptMoveHistory;
     /** Source gBattlersCount, gBattleTypeFlags, and gBattlerPositions[4]. */
@@ -946,6 +948,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   formToChangeInto?: number;
   dynamicMoveType?: number;
   enigmaBerryHoldEffects?: readonly number[];
+  enigmaBerryHoldEffectParams?: readonly number[];
   moveHistory?: Readonly<{
     lastPrintedMoves?: readonly number[];
     lastMoves?: readonly number[];
@@ -1629,14 +1632,10 @@ export function resolveBattleScriptBattlerHoldEffect(
 }
 
 /**
- * `battlerHoldEffectParam` (`GetItemHoldEffectParam`, `battle_util.c:3300`) --
- * the per-item amount `HOLD_EFFECT_RESTORE_HP`/`RESTORE_PP` read directly
- * (doc §2b/§5 slice 4 follow-up). No Enigma Berry special case: unlike
- * `resolveBattleScriptBattlerHoldEffect`, source's own Enigma-Berry param
- * comes from a separate in-battle struct (`gEnigmaBerries[battler]`) this
- * engine does not model at all -- moot, since no Enigma Berry is
- * Factory-legal (doc §1c), so this plain item-table lookup is exact for
- * every real carrier.
+ * `GetBattlerHoldEffectParam`'s source-shaped branch
+ * (`battle_script_commands.c:1160-1169`, backed by `BattleEnigmaBerry` in
+ * `global.berry.h:55-61`) -- Enigma Berry reads its per-battler EWRAM slot;
+ * every other item reads the generated `gItems` table.
  */
 export function resolveBattleScriptBattlerHoldEffectParam(
   context: BattleScriptRulesContext,
@@ -1646,7 +1645,9 @@ export function resolveBattleScriptBattlerHoldEffectParam(
   if (item >= BATTLE_SCRIPT_ITEMS_COUNT) {
     throw new Error(`item ${item} is outside the source gItems corpus`);
   }
-  return GENERATED_ITEM_HOLD_EFFECT_PARAMS.get(item) ?? 0;
+  return item === BATTLE_SCRIPT_ITEM_ENIGMA_BERRY
+    ? context.enigmaBerryHoldEffectParams[battler]
+    : (GENERATED_ITEM_HOLD_EFFECT_PARAMS.get(item) ?? 0);
 }
 
 /** Resolves the source u8 gBattleMoves[move].pp field (base PP, no PP Up bonus -- see resolveBattleScriptBattlerHoldEffectParam's own caller for why Factory rentals never carry one). */
@@ -2562,6 +2563,11 @@ export function createBattleScriptRulesContext(
     0xff,
     "enigmaBerryHoldEffects",
   ) as BattleScriptMoveEndBytes;
+  const enigmaBerryHoldEffectParams = createMoveEndArray(
+    input.enigmaBerryHoldEffectParams,
+    0xff,
+    "enigmaBerryHoldEffectParams",
+  ) as BattleScriptMoveEndBytes;
   const moveHistory = createBattleScriptMoveHistory(input.moveHistory);
   const aiObservedAbilityIds = createMoveEndArray(
     input.aiObservedAbilityIds,
@@ -2675,6 +2681,7 @@ export function createBattleScriptRulesContext(
     formToChangeInto: requireUnsigned(input.formToChangeInto ?? 0, 0xff, "formToChangeInto"),
     dynamicMoveType: requireUnsigned(input.dynamicMoveType ?? 0, 0xff, "dynamicMoveType"),
     enigmaBerryHoldEffects,
+    enigmaBerryHoldEffectParams,
     moveHistory,
     battleTopology,
     party,

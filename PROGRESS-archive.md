@@ -1,4 +1,28 @@
 
+## 1024 — [supervisor WIND-DOWN, 2026-08-08] **Generic S8 presentation and Factory-AI receipts advanced; final union green**
+
+- **State:** master is clean through `12be3c44`. Final worker full suite is
+  **800 files / 8,034 passed / 1 skipped**; supervisor independently reran
+  Baton Pass **4/4**, focused AI **745/745**, presentation **237/237**, clone
+  palette/ratchet **7/7**, smoke **375/375**, both OFF differentials
+  (**620/620** and **640/640**), the production build, and oracle profile check.
+- **Did:** folded the orientation-time animation branch and verified the union;
+  closed #83 with single turn-start-draw ownership; accepted exact Mirror Coat,
+  Psych Up, and Baton Pass hardware receipts; proved #55's construction-clock
+  boundary; retired two bare staged facts and the species-named faint-sink API;
+  made all six Family-C healthbox caches and the DOUBLE_TEAM palette cache own
+  every identity-bearing render input.
+- **Next:** #39's audited next owner is `turn10OnixDarkPalette`: rename it and
+  key its latent singleton by source-palette identity, with a two-palette red
+  pin and 592 OFF canary captures. Do not revive the absent OFF darken pulse or
+  claim those canaries exercise it. A file-disjoint AI receipt is also safe;
+  never resume a canonical Battle-2 turn/window after tick 33331.
+- **Notes:** the separate animation supervisor remains active; its newer
+  `animation-main` commits, now through Magical Leaf staging, were intentionally
+  not folded mid-session. A final read-only source audit produced the exact
+  Family-F handoff above; no material decision was deferred. Shared-host
+  full-suite contention is recorded in `PAPERCUTS.md` at hit 6.
+
 ## 1021 — [bounded MAIN worker, 2026-08-08] **#39: faint-sink geometry renamed `faintSinkRowsAndY2`**
 
 - **State/Did:** ownership-only rename merged as `d2390d33`; old-symbol refs

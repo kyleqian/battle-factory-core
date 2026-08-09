@@ -376,6 +376,7 @@ function createInitialRules(config: FactoryAsleepMoveConfig): FactoryBattleScrip
     battleStructAbsentBattlerFlags: 0b1100,
     dynamicMoveType: 0,
     enigmaBerryHoldEffects: [0, 0, 0, 0],
+    enigmaBerryHoldEffectParams: [0, 0, 0, 0],
     battleTopology: {
       battlersCount: 2,
       battleTypeFlags:
