@@ -5,12 +5,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1040 — [bounded MAIN worker, 2026-08-09] **Gate-6 state-family Tier-1 gap closed; final verification pending**
+## 1040 — [bounded MAIN worker, 2026-08-09] **Gate-6 state-family Tier-1 gap closed and verified**
 
-- **State:** the manifest now reports **55/55** state/status/volatile rows with focused Tier-1 evidence (was **50/55**); Gate 6 remains **OPEN**, effects remain static-only, and OFF requests remain **24/24** receipted.
+- **State:** the manifest reports **55/55** state/status/volatile rows with focused Tier-1 evidence (was **50/55**); Gate 6 remains **OPEN**, effects remain not-established-by-static-census, and OFF hook/request distinctions remain **24/24** receipted.
 - **Did:** strengthened real interpreter/end-turn behavior for crit suppression, Leech Seed marker/encoded owner/drain/Rapid Spin cleanup, Yawn countdown/expiry, and Light Screen's shared wore-off message/buffer/re-set continuation. Added a narrow, locator-validated `STATE_FAMILY_BEHAVIOR_EVIDENCE` mapping and regenerated both manifest artifacts.
-- **Next:** run the final required full suite and production build, then commit the green completion/docs checkpoint. Do not resume the retired Battle-2 march.
-- **Notes:** focused state/end-turn/hit-chain/manifest/frontier checks are **7 files / 527 tests** green; smoke is **375/375**. No production mechanics, oracle receipts, barriers/imports, or animation files changed.
+- **Next:** let the supervisor select the next finite broad Gate-6 acceptance unit. Do not resume the retired Battle-2 march.
+- **Notes:** focused state/end-turn/hit-chain/manifest/frontier checks are **7 files / 527 tests** green; smoke is **375/375**; full suite is **817 files / 8,168 passed / 1 skipped**; production build is green. No production mechanics, oracle receipts, barriers/imports, or animation files changed.
 
 ---
 
