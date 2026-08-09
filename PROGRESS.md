@@ -15,12 +15,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   pins every row, the weather continuation, and all **43/43** current pointer
   symbols. The generic pointer guard remains a future-input D guard at the
   existing module pin of 10. Census regenerated; no Gate-6 closure claim.
-- **Next:** run one final full `npm test`, then leave the green ledger/commit
-  for the supervisor. No oracle or canonical Battle-2 work.
+- **Next:** hand the green commits to the supervisor for the S10 union. No
+  oracle or canonical Battle-2 work.
 - **Notes:** focused hit-chain + executable-ratchet checks are **379/379**;
   smoke is **375/375**. The source insertion also refreshed the moved ability
   census pin (`1184→1229`) and its regeneration ratchet is green.
-  Typecheck and production build are green.
+  Typecheck and production build are green; final full `npm test` returned
+  exit code **0**.
 
 ## 1028 — [bounded MAIN worker, 2026-08-08] **S10 Gate-6 deterministic coverage manifest assembled**
 
