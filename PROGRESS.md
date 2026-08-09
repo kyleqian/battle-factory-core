@@ -14,11 +14,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Tier 1 pins the R12b White Herb result, both active-party owners, untouched
   bench identities, and a non-White-Herb removal. Recycle/Knock Off ownership
   and `usedHeldItems` behavior remain intact; no shared interface widened.
-- **Next:** run the final full `npm test`, record its result, and hand the green
-  checkpoint to the supervisor. No oracle or canonical Battle-2 work.
+- **Next:** hand the green checkpoint to the supervisor. No oracle or
+  canonical Battle-2 work.
 - **Notes:** focused item/move-end/controller suites are **244/244**;
   executable ratchet **6/6** and smoke **375/375**. Typecheck and production
-  build are green; no unsupported-barrier pin changed.
+  build are green; final full `npm test` returned exit code **0**. No
+  unsupported-barrier pin changed.
 
 ## 1029 — [bounded MAIN worker, 2026-08-08] **S10 printfromtable source inventory complete**
 
