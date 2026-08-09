@@ -28,19 +28,6 @@ no evidence connects it to switch field ownership.
 **Repro:** `npm run soak -- --seed 27 --verbose`. Diagnose the reducer's actual
 terminal/continuation shape and keep the missing-command invariant fatal.
 
-## #87 — MoveUsedWokeUp source string-table boundary
-
-Seed 18 reaches battle 3, turn 9, frame 37,531 at
-`BattleScript_MoveUsedWokeUp`, program counter 2711,
-`B_SCR_OP_PRINTFROMTABLE` / `Cmd_printfromtable`. This is a source-string
-execution boundary, separately reproducible after seed 16's forced-handoff
-repair; it does not traverse the failing forced-selector ownership shape.
-
-**Repro:** `npm run soak -- --seed 18 --verbose`. Port the source-selected
-wake-up message table through the existing typed string resolver and keep the
-unknown-opcode/source-boundary failure fatal until its table ownership is
-proved.
-
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **Symptom:** all 62 Factory-front send-out intro families (**376/376** species
