@@ -39090,3 +39090,20 @@ both verify scripts/census independently re-verified before this entry.)*
 - **Did:** strengthened real interpreter/end-turn behavior for crit suppression, Leech Seed marker/encoded owner/drain/Rapid Spin cleanup, Yawn countdown/expiry, and Light Screen's shared wore-off message/buffer/re-set continuation. Added a narrow, locator-validated `STATE_FAMILY_BEHAVIOR_EVIDENCE` mapping and regenerated both manifest artifacts.
 - **Next:** let the supervisor select the next finite broad Gate-6 acceptance unit. Do not resume the retired Battle-2 march.
 - **Notes:** focused state/end-turn/hit-chain/manifest/frontier checks are **7 files / 525 tests** green; smoke is **375/375**; full suite is **817 files / 8,168 passed / 1 skipped**; production build is green. No production mechanics, oracle receipts, barriers/imports, or animation files changed.
+## 1051 — [MAIN worker, 2026-08-09] **#86 string-control family closed source-generically**
+
+- **State:** master is green (**829 files / 8,224 passed / 1 skipped**) with
+  production build passing; vanilla soak **0:20 = 20 OK / 0 CRASH / 0 HANG**.
+- **Did:** source/charmap templates now drive the print-time
+  `{B_EFF_NAME_WITH_PREFIX}` / `{B_SCR_ACTIVE_NAME_WITH_PREFIX}` overlays;
+  message receipts freeze `gEffectBattler`, `gBattleScripting.battler`, and
+  `gLastUsedItem`, including the source item-scan write. Tier-1 batch covers
+  all **17** effect and **45** scripting siblings (both orientations), the
+  **11** simple item siblings, status/move substitutions, and fatal unknown
+  controls.
+- **Next:** keep #86's forced-switch identity invariant fatal. Seed 23 now
+  reaches `b4 t14 f57791` there; seed 27 reaches `b4 t16 f71106` at the
+  separate missing player-command boundary.
+- **Notes:** seed 6 is `OK b2 t25 f33553 roundLost`; focused family batch
+  26/195 and final regression 3/20, smoke 375/375, full suite/build green.
+  No canonical Battle-2 window past tick 33331 changed.

@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1054 — [MAIN worker, 2026-08-09] **#86 seed-16 forced-handoff owner repaired**
+
+- **State:** committed fix `59c0182a` is green: full suite **829 files /
+  8,229 passed / 1 skipped**, production build, smoke **375/375**, and vanilla
+  **0:20 = 20 OK / 0 CRASH / 0 HANG**.
+- **Did:** typed faint messages now retain their source battler. A pending
+  forced selector opens only on that requested battler's faint dismissal, so
+  seed 16 presents PHANPY's automatic opponent `1 -> 2` switch before
+  sandstorm's later QUILAVA faint and player selection. The fatal party-change
+  invariant is unchanged; red-verified Tier-1 coverage pins the two-faint
+  ordering.
+- **Next:** #86 retains seed 27's distinct no-command boundary (`b4 t16
+  f71106`). #87 separately records seed 18's MoveUsedWokeUp source-string
+  boundary (`b3 t9 f37531`); choose either bounded source mechanism next.
+- **Notes:** seed 16 is `OK b2 t51 f48250 roundLost`; 12/14/23/44/45/53 all
+  retain their green endpoints. No canonical Battle-2 window, animation, or
+  Gate-6 artifact changed; no unsupported-barrier pin moved.
+
 ## 1053 — [MAIN worker, 2026-08-09] **#86 forced-switch transition family closed generically**
 
 - **State:** committed main step `10ad59db` is green: full suite **829 files /
@@ -39,21 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   frontiers. Then rerun full-policy 0:60 and use the new signatures.
 - **Notes:** ability join gaps fall **261 -> 111**; item gaps stay 300. No
   canonical Battle-2 window past tick 33331 changed. No deferred question.
-
-## 1051 — [MAIN worker, 2026-08-09] **#86 string-control family closed source-generically**
-
-- **State:** master is green (**829 files / 8,224 passed / 1 skipped**) with
-  production build passing; vanilla soak **0:20 = 20 OK / 0 CRASH / 0 HANG**.
-- **Did:** source/charmap templates now drive the print-time
-  `{B_EFF_NAME_WITH_PREFIX}` / `{B_SCR_ACTIVE_NAME_WITH_PREFIX}` overlays;
-  message receipts freeze `gEffectBattler`, `gBattleScripting.battler`, and
-  `gLastUsedItem`, including the source item-scan write. Tier-1 batch covers
-  all **17** effect and **45** scripting siblings (both orientations), the
-  **11** simple item siblings, status/move substitutions, and fatal unknown
-  controls.
-- **Next:** keep #86's forced-switch identity invariant fatal. Seed 23 now
-  reaches `b4 t14 f57791` there; seed 27 reaches `b4 t16 f71106` at the
-  separate missing player-command boundary.
-- **Notes:** seed 6 is `OK b2 t25 f33553 roundLost`; focused family batch
-  26/195 and final regression 3/20, smoke 375/375, full suite/build green.
-  No canonical Battle-2 window past tick 33331 changed.

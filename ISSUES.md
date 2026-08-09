@@ -19,14 +19,27 @@ backlog.
 
 ## #86 — Slice 3 can complete without a player command boundary
 
-**Remaining after the forced-switch/string families closed 2026-08-09.** Seed
-27 reaches battle 4, turn 16, frame 71,106 and throws `Slice 3 resolution
-completed without a player command boundary`. It reproduces unchanged after
-the generic forced-switch transition repair; no evidence connects it to
-switch field ownership.
+**Remaining after the forced-switch repairs, including seed 16's two-faint
+handoff fix (`59c0182a`).** Seed 27 reaches battle 4, turn 16, frame 71,106
+and throws `Slice 3 resolution completed without a player command boundary`.
+It reproduces unchanged after the generic transition and faint-owner repairs;
+no evidence connects it to switch field ownership.
 
 **Repro:** `npm run soak -- --seed 27 --verbose`. Diagnose the reducer's actual
 terminal/continuation shape and keep the missing-command invariant fatal.
+
+## #87 — MoveUsedWokeUp source string-table boundary
+
+Seed 18 reaches battle 3, turn 9, frame 37,531 at
+`BattleScript_MoveUsedWokeUp`, program counter 2711,
+`B_SCR_OP_PRINTFROMTABLE` / `Cmd_printfromtable`. This is a source-string
+execution boundary, separately reproducible after seed 16's forced-handoff
+repair; it does not traverse the failing forced-selector ownership shape.
+
+**Repro:** `npm run soak -- --seed 18 --verbose`. Port the source-selected
+wake-up message table through the existing typed string resolver and keep the
+unknown-opcode/source-boundary failure fatal until its table ownership is
+proved.
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
