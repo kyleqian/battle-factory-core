@@ -29,6 +29,17 @@ import { natureFromPersonality, randomU16 } from "./opponentGen.ts";
 
 export const GBA_VBLANK_CYCLES = 280_896;
 
+/**
+ * Evidence still required before a main-lane caller can claim live exactness.
+ * These are deliberately operation-level facts, not a request for another
+ * per-trace cursor schedule.
+ */
+export const REQUIRED_FACTORY_CONSTRUCTION_CLOCK_EVIDENCE = Object.freeze([
+  "initial master-cycle phase at the first construction Random() call",
+  "source-operation cycle budget for each CreateMonWithEVSpreadNatureOTID phase",
+  "VBlank/ambient callback cycle cost and ordering at a crossed period",
+] as const);
+
 export type FactoryConstructionSourceFunction =
   | "CreateFrontierFactorySelectableMons"
   | "FillFactoryFrontierTrainerParty";
