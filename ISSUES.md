@@ -685,26 +685,23 @@ seam had masked:
   + "renders the box-clear/reopen phase…"; both fail with the old value 6
   stashed). The record-prompt transition at frame 4054+ (the next box
   clear, ~1,350 px) is slice 3's own territory, untouched here.
-- **Residual classes (documented, honest checkpoint):** (1) the **player
-  sprite** (~133 px, constant across every frame) — the oracle renders the
-  bootstrapped save's actual player character (red-brown hat + red shirt,
-  ~36 px tall), which is NOT the source-derived Brendan walking frame 1 the
-  layout asset carries (blue hat, 20 px); the game substitutes the player's
-  object graphic from the save at runtime, so the extracted Brendan asset
-  cannot match — needs the oracle's real player graphic extracted (probe:
-  `bin/oracle` RAM/save read, or a source player-pic family check). The
-  page-1 printer-pause and page-1 box-open classes above are **closed**;
-  the remaining page-2/record-prompt transition (frame 4054+, ~1,350 px)
-  belongs to slice 3. **Honest contiguous exact checkpoint therefore
-  remains frame 3345 (350/350) in the committed trace — which was NOT
-  extended** (the capture window ends before the page-0 dismiss, so a
-  red window would misrepresent it) — while the dense scratch windows prove
-  the page-1 span exact: `loss-s2-page1-window` (3534-3660) and
-  `loss-s2-page1-tail` (3590-3845) are 0-diff outside the player sprite,
-  twice-run byte-identical. Receipts: dense `bin/oracle lab` passes over
-  the committed fixture (`/tmp/loss-s2-{coarse,c1,c2,c3}.json`, 62+194+38+75
-  captures), reproduced twice; the scratch compare traces used for the
-  numbers above are not committed.
+- **Residual-class paragraph that used to live here (the "player sprite is
+  the save's real red-brown-hat character, not Brendan" theory) was WRONG
+  and is deleted, not just retracted** — kept getting re-discovered as a
+  live TODO by readers who stopped at this paragraph without reaching the
+  next one. The very next paragraph (same date) found the real cause (a
+  wrong `+1px x2` OAM sub-pixel offset) and closed it using the *existing*
+  Brendan asset unmodified. **2026-08-10 MAIN worker re-confirmed live:**
+  no player-graphic extraction exists or is needed; `factoryTerminalRender.ts`
+  resolves the player object through the same generic
+  `factory-lobby-terminal-npcs.json` + `cameraOriginPx` anchor path as every
+  other Lobby object. Fresh `npm run compare` (oracle-backed, run twice each)
+  confirms the committed windows are exact and far larger than any
+  "350/350" / "503/503" checkpoint: `loss-terminal-window-off` **1943/1943**,
+  `win-terminal-window-off` **3590/3590**, `battle-command-generated-off`
+  **128/128** — i.e. slices 2-5 below are already closed end-to-end,
+  including the record prompt, decline continuation, and most of the WIN
+  GO-ON path through the swap screen.
 - **2026-08-04 LOSS slice-2 player-sprite residual CLOSED + window extended:
   `loss-terminal-window-off` is 839/839 exact through frame 3834, twice-run
   byte-identical.** Two source-side corrections, both pure logic in the
