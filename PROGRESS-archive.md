@@ -1,3 +1,19 @@
+## 1091 — [MAIN worker, 2026-08-10] **#55 direct `GetNature` timing reduced**
+
+- **State:** implementation commit `59b13350`; focused stats/clock **25/25**,
+  smoke **375/375**, typecheck, full `npm test` **881 files / 8,428 passed /
+  1 skipped**, and production build are green. #55 remains open and the
+  construction clock remains unwired.
+- **Did:** reduced all **60/60** direct calls from accepted personality alone:
+  anchor/LILIANA/varied **29,875/14,830/15,195 = 59,900** source cycles. Raw
+  spans decompose as **57×exact + 2×(+18) + 1×(+245 VCount/audio IRQ)**.
+- **Next:** continue only with source-general encrypted Get/Set, level/growth,
+  signed-divide, and VBlank/audio timing; do not wire or claim complete stats.
+- **Notes:** fixed shell is **180** nested field-zero accessor + **42** wrapper;
+  `%25` remains personality-dependent. Fresh Scene-OFF anchor is byte-identical
+  (`cde88e8f…`); no identity/duration lookup, receipt mutation, excluded lane,
+  canonical Battle-2, animation, or unsupported-barrier change.
+
 ## 1090 — [MAIN worker, 2026-08-10] **#55 `ModifyStatByNature` direct-callee timing reduced**
 
 - **State:** committed as `76027187`; focused stats/clock **15/15**, smoke
