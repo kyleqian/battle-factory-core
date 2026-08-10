@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
 describe("MOVE_FLAME_WHEEL legal bilateral staging", () => {
@@ -30,6 +31,31 @@ describe("MOVE_FLAME_WHEEL legal bilateral staging", () => {
         .filter((mon) => mon.species === 156 && mon.moves.every((move) => move === 172)).length;
     }
     expect(carriers).toBe(2);
+  });
+
+  it("pins twice-fresh dense hardware/raw-RGB receipts without promoting coverage", () => {
+    const paths = [
+      "tools/compare/fixtures/flame-wheel-player-quilava-opponent-onix.json",
+      "tools/compare/fixtures/flame-wheel-opponent-quilava-player-onix.json",
+    ];
+    for (const path of paths) {
+      const fixture = JSON.parse(readFileSync(path, "utf8")) as {
+        oracleProfile: string;
+        denseWindow: { startFrame: number; endFrame: number; frameCount: number };
+        evidenceSha256: string;
+        secondFreshEvidenceSha256: string;
+        changeMap: string;
+        changeMapSha256: string;
+        acceptance: { status: string };
+      };
+      expect(fixture.oracleProfile).toBe("battle-scene-on");
+      expect(fixture.denseWindow.frameCount).toBe(170);
+      expect(fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1).toBe(170);
+      expect(fixture.secondFreshEvidenceSha256).toBe(fixture.evidenceSha256);
+      expect(createHash("sha256").update(readFileSync(fixture.changeMap)).digest("hex"))
+        .toBe(fixture.changeMapSha256);
+      expect(fixture.acceptance.status).toBe("unsupported");
+    }
   });
 });
 

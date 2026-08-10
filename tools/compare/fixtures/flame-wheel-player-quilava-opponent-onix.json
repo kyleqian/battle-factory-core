@@ -1,0 +1,17 @@
+{
+  "schema": "flame-wheel-evidence-checkpoint/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "FLAME_WHEEL",
+  "orientation": "player-back",
+  "pair": "set 181 Quilava (player-back) -> legal ONIX (opponent-front)",
+  "scenario": "tools/battle-lab/mechanic-flame-wheel-player-quilava-opponent-onix.json",
+  "probe": "tools/compare/flameWheelProbe.py",
+  "denseWindow": {"startFrame": 78, "endFrame": 247, "frameCount": 170},
+  "evidenceSchema": "flame-wheel-dense-evidence/v1",
+  "evidenceSha256": "c3bcc206273dfcac84bc3a833b68e690928d6599863d0465611a3322c839bfae",
+  "secondFreshEvidenceSha256": "c3bcc206273dfcac84bc3a833b68e690928d6599863d0465611a3322c839bfae",
+  "rawRgbSha256": "09da9b0deb067e3ffc03f8734e86aa0f56b1da2ede81330ce2e764c727989532",
+  "changeMap": "tools/compare/evidence/flame-wheel-changemap-player.txt",
+  "changeMapSha256": "03f52387c129a0804f7e598cbb1b260e8ad851c35ed7ebbe63b5415a5d4dd7e6",
+  "acceptance": {"status": "unsupported", "reason": "dense source/hardware/raw-RGB evidence only; reducer, typed seam, and production framebuffer remain open"}
+}
