@@ -20,6 +20,7 @@ export interface LeafBladeTargetGeometry {
 export interface LeafBladeSprite {
   readonly kind: "blade" | "trail";
   readonly spawnIndex: number;
+  readonly oamSlot: number;
   readonly animation: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   readonly tileCell: 4 | 5 | 7 | 8;
   readonly hFlip: boolean;
@@ -75,6 +76,33 @@ const FIRST_INACTIVE_AGE = 223;
 const ANIMATION = [0, 1, 2, 3, 4, 5, 6] as const;
 const TILE_CELL = [7, 8, 5, 7, 4, 4, 7] as const;
 const H_FLIP = [false, false, false, true, false, true, false] as const;
+const TRAIL_OAM_SLOTS = [4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16] as const;
+
+function trailSpawnAge(spawnIndex: number): number {
+  return ARC_FIRST_AGE
+    + Math.floor(spawnIndex / TRAILS_PER_ARC) * ARC_STRIDE
+    + spawnIndex % TRAILS_PER_ARC;
+}
+
+function trailLastAge(spawnIndex: number): number {
+  // Step2 begins alternate trails with data[0] 0/1. Both destroy after the
+  // ninth invisible toggle, yielding alternating 18/17-display lifetimes.
+  return trailSpawnAge(spawnIndex) + ((spawnIndex & 1) === 0 ? 17 : 16);
+}
+
+function buildTrailSlots(): readonly number[] {
+  const assigned: number[] = [];
+  for (let spawnIndex = 0; spawnIndex < ARC_COUNT * TRAILS_PER_ARC; spawnIndex += 1) {
+    const age = trailSpawnAge(spawnIndex);
+    const occupied = new Set(assigned.filter((_, prior) => trailLastAge(prior) >= age));
+    const slot = TRAIL_OAM_SLOTS.find((candidate) => !occupied.has(candidate));
+    if (slot === undefined) throw new Error("Leaf Blade exhausted its source OAM slots");
+    assigned.push(slot);
+  }
+  return assigned;
+}
+
+const TRAIL_SLOT = buildTrailSlots();
 
 interface Arc {
   readonly start: Readonly<{ x: number; y: number }>;
@@ -148,15 +176,24 @@ function spriteShape(
   position: Readonly<{ x: number; y: number }>,
   subpriority: number,
   elapsed = 0,
+  animationJustStarted = false,
 ): LeafBladeSprite {
   const seed = kind === "trail" ? spawnIndex & 1 : 0;
   const blinkCycles = kind === "trail" ? Math.floor((seed + elapsed) / 2) : 0;
+  // StartSpriteAnim changes animNum immediately, but the first ANIMCMD_FRAME
+  // does not replace attr2/hFlip until the following animation callback.
+  // A freshly allocated trail likewise retains template animation 0 for its
+  // creation callback before installing the selected arc's cell.
+  const oamAnimation = kind === "trail" && elapsed === 0
+    ? 0
+    : animationJustStarted ? Math.max(0, arcIndex - 1) : arcIndex;
   return {
     kind,
     spawnIndex,
+    oamSlot: kind === "blade" ? 3 : TRAIL_SLOT[spawnIndex]!,
     animation: ANIMATION[arcIndex]!,
-    tileCell: TILE_CELL[arcIndex]!,
-    hFlip: H_FLIP[arcIndex]!,
+    tileCell: TILE_CELL[oamAnimation]!,
+    hFlip: H_FLIP[oamAnimation]!,
     x: position.x,
     y: position.y,
     subpriority,
@@ -167,6 +204,79 @@ function spriteShape(
     blinkCounter: kind === "trail" ? (seed + elapsed) % 2 : 0,
     blinkCycles,
   };
+}
+
+/** Move-owned scanout latch measured from both dense Leaf Blade windows. */
+export function leafBladeDisplayedTargetX2AtAge(
+  age: number,
+  targetSide: LeafBladeSide,
+): number {
+  // Once target monbg is active, ShakeMon2 writes BG scroll before scanout;
+  // the long impact shake therefore follows the ordinary RAM+1 display path.
+  if (age >= 162 && age <= 196) {
+    return shakeAtAge(age - 1).offset.x2;
+  }
+  for (const [start, amplitude] of [[11, 2], [63, 2], [115, 2]] as const) {
+    // Task creation writes its positive first displacement after the current
+    // OAM build; it reaches scanout one display before the ordinary RAM+2
+    // ShakeMon2 body.
+    if (age === start + 1) return amplitude;
+    if (age >= start + 2) {
+      const displayed = shakeAtAge(age - 2);
+      if (displayed.active) return displayed.offset.x2;
+    }
+  }
+  // ONIX's opponent-front idle holds x2=1 until the first shake task owns
+  // and then neutralizes that field. Player-back ONIX starts at zero.
+  return targetSide === "opponent" && age <= 11 ? 1 : 0;
+}
+
+/**
+ * Front-to-back source OAM order for the Leaf Blade sprites at scanout.
+ * `SortSprites` is a stable insertion sort by priority, then descending Y;
+ * carrying its order across destroyed/reused slots matters when two trails
+ * occupy the same point.
+ */
+export function leafBladeDisplayedOamOrderAtAge(
+  age: number,
+  attackerSide: LeafBladeSide,
+  targetSide: LeafBladeSide,
+  geometry: Readonly<LeafBladeTargetGeometry>,
+): readonly number[] {
+  const order = [3, ...TRAIL_OAM_SLOTS];
+  for (let displayAge = 0; displayAge <= age; displayAge += 1) {
+    const created = leafBladeAtAge(
+      displayAge - 2,
+      attackerSide,
+      targetSide,
+      geometry,
+    ).sprites;
+    const oam = leafBladeAtAge(
+      displayAge - 1,
+      attackerSide,
+      targetSide,
+      geometry,
+    ).sprites;
+    const admitted = created.flatMap((sprite) => {
+      const transferred = oam.find((candidate) =>
+        candidate.kind === sprite.kind
+        && candidate.spawnIndex === sprite.spawnIndex
+      );
+      return transferred || sprite.kind === "blade" ? [{
+        slot: sprite.oamSlot,
+        subpriority: transferred?.subpriority ?? sprite.subpriority,
+        y: sprite.y,
+      }] : [];
+    });
+    const bySlot = new Map(admitted.map((sprite) => [sprite.slot, sprite]));
+    order.sort((left, right) => {
+      const leftSprite = bySlot.get(left);
+      const rightSprite = bySlot.get(right);
+      return (leftSprite?.subpriority ?? 0xff) - (rightSprite?.subpriority ?? 0xff)
+        || (rightSprite?.y ?? 160) - (leftSprite?.y ?? 160);
+    });
+  }
+  return order;
 }
 
 function leafSpritesAtAge(
@@ -218,6 +328,8 @@ function leafSpritesAtAge(
     animationIndex,
     position,
     activeArc.subpriority,
+    0,
+    within === 17 && arcIndex + 1 < ARC_COUNT,
   ));
   return sprites;
 }

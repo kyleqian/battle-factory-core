@@ -513,6 +513,10 @@ import {
 } from "../animation/dragonBreath.ts";
 import { flamethrowerDisplayedBattlerOffsetsAtAge } from "../animation/flamethrower.ts";
 import { shakeMon2OffsetAtTick } from "../animation/shakeMon2.ts";
+import {
+  leafBladeDisplayedOamOrderAtAge,
+  leafBladeDisplayedTargetX2AtAge,
+} from "../animation/leafBlade.ts";
 import { FACADE_BLEND_COLORS } from "../animation/facade.ts";
 import {
   dragonRageSchedule,
@@ -568,6 +572,7 @@ import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json"
 import waterOrbAsset from "../animation/assets/water-orb.json" with { type: "json" };
 import bubbleBeamAsset from "../animation/assets/bubble-beam.json" with { type: "json" };
 import crossChopAsset from "../animation/assets/cross-chop.json" with { type: "json" };
+import leafBladeAsset from "../animation/assets/leaf-blade.json" with { type: "json" };
 import focusEnergyAsset from "../animation/assets/focus-energy.json" with { type: "json" };
 import endureAsset from "../animation/assets/endure.json" with { type: "json" };
 import reversalAsset from "../animation/assets/reversal.json" with { type: "json" };
@@ -932,6 +937,7 @@ import {
   sceneOnWhirlpoolView,
   sceneOnBubbleBeamView,
   sceneOnCrossChopView,
+  sceneOnLeafBladeView,
   sceneOnFocusEnergyView,
   sceneOnEndureView,
   sceneOnReversalView,
@@ -1072,6 +1078,7 @@ import {
   type SceneOnWhirlpoolConfig,
   type SceneOnBubbleBeamConfig,
   type SceneOnCrossChopConfig,
+  type SceneOnLeafBladeConfig,
   type SceneOnFocusEnergyConfig,
   type SceneOnEndureConfig,
   type SceneOnReversalConfig,
@@ -1564,6 +1571,12 @@ const crossChopArt = crossChopAsset as {
   machokeBack: { tileset: Tileset; palette: RgbColor[] };
   machokeFront: { tileset: Tileset; palette: RgbColor[] };
   handsAndFeet: { tileset: Tileset; palette: RgbColor[] };
+  crossImpact: { tileset: Tileset; palette: RgbColor[] };
+};
+const leafBladeArt = leafBladeAsset as {
+  sceptileBack: { tileset: Tileset; palette: RgbColor[] };
+  sceptileFront: { tileset: Tileset; palette: RgbColor[] };
+  leaf: { tileset: Tileset; palette: RgbColor[] };
   crossImpact: { tileset: Tileset; palette: RgbColor[] };
 };
 const focusEnergyArt = focusEnergyAsset as {
@@ -20845,6 +20858,201 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MACHOKE used" : "Foe MACHOKE used",
       "CROSS CHOP!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "LEAF_BLADE") {
+    const leafState =
+      state as SceneOnMovePresentationState<SceneOnLeafBladeConfig>;
+    const view = sceneOnLeafBladeView(leafState);
+    // Task-owned position/creation reaches scanout after two displays, while
+    // animation/blink and destruction follow the ordinary one-display OAM
+    // transfer path.
+    const createdDisplayed = sceneOnLeafBladeView({
+      ...leafState,
+      age: state.age - 2,
+    });
+    const impactDisplayed = sceneOnLeafBladeView({
+      ...leafState,
+      age: state.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "SCEPTILE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "SCEPTILE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged LEAF_BLADE pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+
+    const sceptileSource = playerToOpponent
+      ? leafBladeArt.sceptileBack
+      : leafBladeArt.sceptileFront;
+    const sceptile = playerToOpponent
+      ? sceptileSource
+      : { ...sceptileSource, tileset: subTileset(sceptileSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const targetX2 = leafBladeDisplayedTargetX2AtAge(
+      state.age,
+      view.target.geometry.side,
+    );
+    const drawSceptile = () => drawSpriteSheet(
+      fb,
+      sceptile.tileset,
+      sceptile.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawOnix = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    const oamDisplayed = sceneOnLeafBladeView({
+      ...leafState,
+      age: state.age - 1,
+    });
+    const visibleLeaves = createdDisplayed.sprites.flatMap((created) => {
+      const oam = oamDisplayed.sprites.find((candidate) =>
+        candidate.kind === created.kind
+        && candidate.spawnIndex === created.spawnIndex
+      );
+      return (oam && !oam.invisible) || (!oam && created.kind === "blade") ? [{
+        ...created,
+        tileCell: oam?.tileCell ?? created.tileCell,
+        hFlip: oam?.hFlip ?? created.hFlip,
+        invisible: oam?.invisible ?? created.invisible,
+      }] : [];
+    });
+    const leafOamOrder = leafBladeDisplayedOamOrderAtAge(
+      state.age,
+      view.attacker.geometry.side,
+      view.target.geometry.side,
+      state.config.targetProfile,
+    );
+    const drawLeaf = (sprite: (typeof visibleLeaves)[number]) => {
+      const art = subTileset(
+        leafBladeArt.leaf.tileset,
+        sprite.tileCell * 2,
+        2,
+      );
+      const draw = sprite.hFlip ? drawSpriteSheetHFlip : drawSpriteSheet;
+      draw(
+        fb,
+        art,
+        leafBladeArt.leaf.palette,
+        sprite.x - 8,
+        sprite.y - 8,
+      );
+    };
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (view.targetMonbg) {
+      // monbg supplies the alpha target-2 copy used by CROSS_IMPACT.
+      drawOnix();
+      const targetBackdrop = fb.slice();
+      drawSceptile();
+      const impact = impactDisplayed.crossImpact;
+      if (impact && view.alpha) {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          targetBackdrop,
+          leafBladeArt.crossImpact.tileset,
+          leafBladeArt.crossImpact.palette,
+          impact.x,
+          impact.y,
+          256,
+          0,
+          0,
+          256,
+          view.alpha.eva,
+          view.alpha.evb,
+          false,
+        );
+      }
+    } else {
+      type LeafPainterItem = {
+        readonly subpriority: number;
+        readonly slot: number;
+        readonly y: number;
+        readonly oamRank: number;
+        readonly draw: () => void;
+      };
+      const items: LeafPainterItem[] = [
+        {
+          subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+          slot: view.attacker.geometry.side === "player" ? 6 : 8,
+          y: view.attacker.geometry.spriteCorner.y,
+          oamRank: 0,
+          draw: drawSceptile,
+        },
+        {
+          subpriority: view.target.geometry.side === "player" ? 30 : 40,
+          slot: view.target.geometry.side === "player" ? 6 : 8,
+          y: view.target.geometry.spriteCorner.y,
+          oamRank: 0,
+          draw: drawOnix,
+        },
+        ...visibleLeaves.map((sprite) => ({
+          subpriority: sprite.subpriority,
+          slot: sprite.oamSlot,
+          y: sprite.y - 8,
+          oamRank: leafOamOrder.indexOf(sprite.oamSlot),
+          draw: () => drawLeaf(sprite),
+        })),
+      ];
+      items.sort((left, right) =>
+        right.subpriority - left.subpriority
+        || left.y - right.y
+        || right.oamRank - left.oamRank
+      );
+      for (const item of items) item.draw();
+    }
+
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "SCEPTILE",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "SCEPTILE" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "SCEPTILE used" : "Foe SCEPTILE used",
+      "LEAF BLADE!",
       99,
     );
     return;
