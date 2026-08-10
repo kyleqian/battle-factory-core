@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1077 — [supervisor, 2026-08-10 ~08:58] **Orient: latest animation work folded; union green; #55 construction clock is next**
+
+- **State:** `animation-main` was ahead by 12 commits. The fold fast-forwarded
+  `master` to `81f89ae6`, adding Drill Peck, Submission, and Spite animation
+  work. The union is green: full suite **875 files / 8,392 passed / 1
+  skipped**, production build clean, and both oracle services are current.
+- **Did:** read the S8 authoritative reset and enforced its stop on the old
+  canonical Battle-2 march. Re-oriented the playable seven-battle loop
+  against the remaining generic OFF-profile boundary instead: ISSUES #55's
+  source/cycle construction clock, which blocks personality-exact live next-
+  opponent generation and the swap-screen ambient RNG continuation.
+- **Next:** derive and land the smallest source-general deterministic clock
+  that reproduces the committed anchor/LILIANA/varied receipts, then wire it
+  into generic round opponent construction and extend the Battle Scene OFF
+  next-opponent presentation proof. Do not add trainer, battle-number, turn,
+  or absolute-tick branches.
+- **Notes:** DEFERRED.md remains empty. The animation supervisor owns any
+  later `animation-main` commits; re-check that branch at wind-down.
+
 ## 1076 — [supervisor, 2026-08-10 ~03:00] **Session wind-down: S10 closed, 9 workers + 1 audit, all folds green**
 
 - **State:** master `019c27f2` is green: full suite **872 files / 8,384
@@ -93,34 +112,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the next worker/supervisor. Full verification run at close: `npm test`
   and `npm run build`. Archived entry 1072 to `PROGRESS-archive.md` to keep
   the ledger at 3 live entries.
-
-## 1074 — [supervisor, 2026-08-10 ~02:40] **S10 CLOSED: gates 2/3/4/6 ticked; Gate-6 family program complete**
-
-- **State:** ROADMAP S10 and all six gates are checked (supervisor commit
-  after entry 1073's audit fixes). Final manifest state: **296/300
-  source-proven per-move hook-join rows on each axis** across ten families,
-  plus the four dynamic-dispatch exception rows (`ASSIST`/`METRONOME`/
-  `MIRROR_MOVE`/`SLEEP_TALK`, both axes). ISSUES #86 (renumbered from the
-  worker's reused #82) records the `routeBranch` self-description
-  enhancement as debt.
-- **Did:** one-session family-level Gate-6 execution per the 2026-08-09
-  user decision: worklist doc → five family receipt packs (side lane) →
-  five wiring promotions (main lane) → soak artifact (vanilla 20/20, full
-  60/60) + Noland scope note → read-only opus surge audit (8 seams: 5
-  clean certifications, 3 defects) → same-session class fixes. Gate ticks
-  carry dated completion notes citing every artifact.
-- **Next:** per the user sequencing decision, the "playable round" polish
-  milestone (#71, #73, session-trace-driven pacing fixes) is the next
-  headline, BEFORE S11 audio. ISSUES #86 is optional manifest-hardening
-  filler.
-- **Notes (wind-down complete, ~03:00):** folded `animation-main`
-  (Protect, Magic Coat, Role Play promoted exact tonight by the live
-  animation supervisor; merge `f913d88a`). Final union is green: full
-  suite **870 files / 8,379 passed / 1 skipped**, production build,
-  animation coverage. Soak gates on the union: vanilla 0:20 = **20 OK /
-  0 CRASH / 0 HANG**; full-policy 0:60 = **60 OK / 0 CRASH / 0 HANG**.
-  DEFERRED.md remains empty — every choice tonight was decidable from
-  the mission, roadmap, source, or receipts. The animation supervisor
-  may still be live; any post-fold commits on `animation-main` fold next
-  session. No engine behavior, controller interface, round outcome,
-  barrier pin, or canonical window changed by the close-out itself.

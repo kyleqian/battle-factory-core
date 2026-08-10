@@ -1,3 +1,23 @@
+## 1074 — [supervisor, 2026-08-10 ~02:40] **S10 CLOSED: gates 2/3/4/6 ticked; Gate-6 family program complete**
+
+- **State:** ROADMAP S10 and all six gates are checked (supervisor commit
+  after entry 1073's audit fixes). Final manifest state: **296/300
+  source-proven per-move hook-join rows on each axis** across ten families,
+  plus the four dynamic-dispatch exception rows (`ASSIST`/`METRONOME`/
+  `MIRROR_MOVE`/`SLEEP_TALK`, both axes). ISSUES #86 (renumbered from the
+  worker's reused #82) records the `routeBranch` self-description
+  enhancement as debt.
+- **Did:** one-session family-level Gate-6 execution per the 2026-08-09
+  user decision: worklist doc → five family receipt packs (side lane) →
+  five wiring promotions (main lane) → soak artifact + Noland note → surge
+  audit → same-session fixes → gates 2/3/4/6 + stage ticked.
+- **Next:** the playable-round polish milestone (#71, #73, session-trace-
+  driven pacing fixes) comes before S11 audio. ISSUES #86 is optional
+  manifest hardening.
+- **Notes:** folded `animation-main` at `f913d88a`; final union full suite
+  **870 files / 8,379 passed / 1 skipped**, production build, animation
+  coverage, and both soak gates green. DEFERRED.md was empty.
+
 ## 1073 — [MAIN worker, 2026-08-10 night] **Gate-6 surge-audit fixes: dynamic-dispatch exception class completed (2→4 gaps/axis), "undefined" locators fixed, count wording corrected**
 
 - **State:** tree is green: full suite **864 files / 8,347 passed / 1
