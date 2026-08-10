@@ -1070,6 +1070,20 @@ hardware-service cycles. The construction clock now exposes this structural
 operation, but remains unwired while the larger costs and async workload below
 are unresolved.
 
+**VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
+probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all
+**52/31/30** construction-epoch interrupts. Within each case every measured
+VBlank-body stage except `m4aSoundMain` is constant; audio alone spans
+**23,920–52,083 / 24,732–47,917 / 24,391–41,682** cycles and accounts for the
+entire body variation. GPU/DMA queue shapes are constant. Return-to-resume is
+**41** cycles for **112/113** samples; one varied sample is **59** cycles, with
+no HBlank, VCount, Serial, Timer3, or shared `IntrDummy` ROM ISR entry observed.
+The receipt therefore narrows the remaining contract to complete dereferenced
+m4a state plus hardware interrupt-resume arbitration; it deliberately does
+not claim that the partial audio snapshot is an exact reducer. Compact raw
+receipts use relative timing/source state only and existing v2 files remained
+byte-identical.
+
 **Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
 threading now makes the first post-cycle pixel boundary observe this debt.
 The WIN YES fixture's real first callback cursor/outcomes are

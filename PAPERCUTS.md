@@ -833,7 +833,10 @@ decompose diffs numerically with ad-hoc PIL scripts. Possible fix: a
 2026-08-09, supervised main/side workers: two main-profile full suites plus an
 independent animation-profile suite shared the machine. The main and side runs
 took about 14 minutes each despite staying green. This delayed bounded worker
-handoff by about 7–9 minutes per lane. Hits: 2. A launcher-level full-suite
+handoff by about 7–9 minutes per lane. A third hit during the #55 VBlank
+receipt overlapped main, side, and animation finish gates; typecheck/build
+processes each peaked above 6 GB and added about 3 minutes of polling. Hits: 3.
+A launcher-level full-suite
 semaphore would keep disjoint implementation parallel while serializing only
 the memory-heavy finish gate.
 
@@ -856,7 +859,9 @@ verification. A fourth hit occurred when one retained side-worker session
 started two full suites while the animation supervisor was also verifying.
 The Color Change side worker then repeated a committed-tree full suite after
 a two-line type-only follow-up and hit its cap during that redundant run.
-Hits: 6; cost: about 42 minutes plus avoidable CPU contention. A
+The #55 VBlank worker then repeated green build/typecheck gates after their
+yielded sessions hid completion status. Hits: 7; cost: about 45 minutes plus
+avoidable CPU contention. A
 launcher/tool response that visually distinguishes “still running; wait on
 this handle” from completion would prevent this class of mistake.
 

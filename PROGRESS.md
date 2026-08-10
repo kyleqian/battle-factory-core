@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1083 — [supervisor, 2026-08-10] **#55 VBlank variability isolated to audio; resume residual bounded**
+
+- **State:** side commit `6df4fc19` is folded; its focused receipt test is
+  **2/2** and artifact regeneration is byte-identical under supervisor rerun.
+  Final union gates follow after the next bounded main increment.
+- **Did:** added an opt-in source-state VBlank probe plus compact receipts for
+  **52/31/30** construction-epoch interrupts. Every measured VBlank-body stage
+  except `m4aSoundMain` is constant within each case; audio accounts for the
+  full body range (**23,920–52,083 / 24,732–47,917 / 24,391–41,682** cycles).
+  Return-to-resume is **41** cycles for **112/113** samples; the sole **59**-
+  cycle sample has no observed HBlank, VCount, Serial, Timer3, or shared dummy
+  ISR entry, so its +18 remains explicitly outside the reducer.
+- **Next:** use the new receipt to port complete dereferenced m4a state timing
+  and hardware resume arbitration, while continuing CreateMon/EV/stat/post
+  source budgets. Keep the live construction clock unwired.
+- **Notes:** raw fixtures are test-only and contain relative timings plus
+  source-visible state—no frame, RNG, trainer, set, battle, tick, cursor, or
+  construction identity. Existing v2 receipts stayed byte-identical.
+
 ## 1082 — [MAIN worker, 2026-08-10] **#55 construction-entry timing landed across all 12 v2 spans**
 
 - **State:** source-general reducer and receipt pins are implemented; focused
@@ -39,21 +58,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no trainer/set/mon/tick/cursor/receipt timing selection, canonical
   Battle-2 march, live wiring, evidence regeneration, animation edit, or new
   unsupported barrier.
-
-## 1080 — [supervisor, 2026-08-10] **Gate-6 route branches classified across the full source graph**
-
-- **State:** side commit `abaec104` is folded by merge `d3faa43c`; focused
-  route/manifest coverage is **16/16**, typecheck and byte-identical artifact
-  regeneration pass. Final union gates follow after the next main increment.
-- **Did:** every one of **2,812** emitted route certificates now declares a
-  source-derived `success` (**2,664**) or `failure-tail` (**148**) branch.
-  Among **845** promoted certificates, **73** are legitimate failure tails
-  (**41** item MoveEnd, **32** immunity MoveEnd) because `Cmd_moveend` runs its
-  post-move state loop on both branches. The full dynamic-dispatch audit found
-  no missing exception: Assist, Metronome, Mirror Move, and Sleep Talk remain
-  the only four exceptions on both axes.
-- **Next:** continue #55 with one bounded, source-general CreateMon/EV/stat or
-  post/return timing component; do not wire a fitted construction cursor.
-- **Notes:** parameterization schema v5 and Gate-6 manifest v2 regenerate
-  byte-for-byte. No production controller, animation, canonical Battle-2
-  replay, unsupported barrier, or hook promotion changed.
