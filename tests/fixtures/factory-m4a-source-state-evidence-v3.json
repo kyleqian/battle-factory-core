@@ -1,0 +1,1881 @@
+{
+  "schema": "factory-m4a-source-state-evidence/v3",
+  "oracleProfile": "battle-scene-off",
+  "sourceReferences": [
+    {
+      "source": "reference/pokeemerald/src/m4a.c",
+      "lines": "925-1231,1500-1534",
+      "anchors": [
+        "void CgbSound(void)",
+        "void ply_xcmd",
+        "gXcmdTable[n]"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "20-445,1130-1466",
+      "anchors": [
+        "SoundMain:",
+        "SoundMainRAM_ChanLoop:",
+        "MPlayMain:",
+        "call_r3:"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/include/gba/m4a_internal.h",
+      "lines": "39-221,272-350",
+      "anchors": [
+        "struct WaveData",
+        "struct SoundChannel",
+        "struct MusicPlayerTrack",
+        "struct MusicPlayerInfo"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/constants/m4a_constants.inc",
+      "lines": "54-257",
+      "anchors": [
+        "o_SoundInfo_pcmBuffer",
+        "o_SoundChannel_wav",
+        "o_MusicPlayerTrack_cmdPtr",
+        "o_CgbChannel_wavePointer"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/include/gba/io_reg.h",
+      "lines": "55-126,234-273",
+      "anchors": [
+        "REG_OFFSET_NR10",
+        "REG_OFFSET_DMA1SAD",
+        "REG_ADDR_WAVE_RAM0"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/pokeemerald.map",
+      "lines": "sound symbols",
+      "anchors": [
+        "gMPlayJumpTable",
+        "gCgb3Vol",
+        "gClockTable",
+        "gXcmdTable"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/pokeemerald.elf",
+      "lines": "defined symbols",
+      "anchors": [
+        "SoundMain",
+        "SoundMainRAM",
+        "MPlayMain",
+        "CgbSound"
+      ]
+    }
+  ],
+  "measurement": {
+    "unit": "mGBA master cycles relative to m4aSoundMain entry",
+    "stateSnapshot": "m4aSoundMain call boundary",
+    "stateKey": "sourceSemanticState.stateDigest",
+    "method": "Address-free fixed-struct and dereferenced-region packet; blobs are represented by SHA-256 and all pointer targets by roles or symbols."
+  },
+  "reproducibility": {
+    "schema": "factory-m4a-source-state-repro/v1",
+    "oracleProfile": "battle-scene-off",
+    "freshRunsPerCase": 2,
+    "method": "Each case was run twice through tools/run-mgba-probe.py with a fresh mGBA instance and the sibling v3 source-state driver; SHA-256 covers the complete compact JSON packet.",
+    "cases": [
+      {
+        "case": "anchor",
+        "firstFreshSha256": "a3c7fb2baeee2cf253481086d77f9262ee8842c9595d4ff2e4a5cd2776d3fbc3",
+        "secondFreshSha256": "a3c7fb2baeee2cf253481086d77f9262ee8842c9595d4ff2e4a5cd2776d3fbc3",
+        "byteIdentical": true
+      },
+      {
+        "case": "liliana",
+        "firstFreshSha256": "24717d4e2861bc74948d23470de25e97d69b2a553962d25f303a6a48d75268d6",
+        "secondFreshSha256": "24717d4e2861bc74948d23470de25e97d69b2a553962d25f303a6a48d75268d6",
+        "byteIdentical": true
+      },
+      {
+        "case": "factory-varied",
+        "firstFreshSha256": "54426be9e6af1a9d4bd945ef2276a9a0b58da9c2bfd185ec988029fa4f9f67c1",
+        "secondFreshSha256": "54426be9e6af1a9d4bd945ef2276a9a0b58da9c2bfd185ec988029fa4f9f67c1",
+        "byteIdentical": true
+      }
+    ]
+  },
+  "sourceClassification": {
+    "sixthMPlayMain": "Full MusicPlayerInfo/Track scalar regions, channel links, tone table window, command window, pattern windows, and dispatch target symbols are captured; indirect handler transitive reads remain explicitly residual.",
+    "cgbSound": "All four CgbChannel structs, both wave-word targets, static gCgb3Vol values, dispatch symbols, and the complete audio I/O window are captured.",
+    "soundMainRam": "All twelve SoundChannel structs, complete readable WaveData samples, the complete PCM buffer, VCOUNT, and DMA source/destination roles are captured.",
+    "reducer": "Fresh deterministic repeats prove equal captured source keys have equal measured source-stage cycles. No cross-state reducer is licensed while the four residual dereference classes remain."
+  },
+  "sourceStateEquivalenceAcrossFreshRuns": {
+    "observationsPerFreshRun": 113,
+    "capturedStateKeys": 113,
+    "repeatedEqualStateKeys": 113,
+    "repeatedObservationCount": 226,
+    "repeatedKeysWithDifferentM4aCost": 0,
+    "proof": "Each committed raw packet is byte-identical to an independently fresh second run; therefore every state key and every measured m4a stage row repeats with equal cycles."
+  },
+  "sourceStateWithinFreshRuns": {
+    "capturedStateKeys": 113,
+    "repeatedCapturedStateKeys": 0,
+    "interpretation": "The three different staged cases do not repeat a complete captured source key, so only the fresh-run equality implication is established."
+  },
+  "residualDereferences": [
+    {
+      "stage": "sixth-MPlayMain",
+      "source": "reference/pokeemerald/src/m4a_1.s:1130-1466",
+      "read": "Indirect command and pattern handlers can advance cmdPtr or a pattern-stack target beyond the captured 256/128-byte windows.",
+      "captured": "Current command bytes, all three pattern-stack windows, complete track/player scalar state, and dispatch target symbols.",
+      "remainder": "The full handler-dependent command/control-flow read set is not statically bounded by this packet."
+    },
+    {
+      "stage": "sixth-MPlayMain",
+      "source": "reference/pokeemerald/src/m4a.c:1500-1534",
+      "read": "ply_xcmd/ply_xxx and gXcmdTable/gMPlayJumpTable callbacks may dereference callback-specific state.",
+      "captured": "Dispatch table target symbols and the callback-visible player/track/channel graph.",
+      "remainder": "Transitive callback reads are not instruction-traced into a complete memory-read set."
+    },
+    {
+      "stage": "CgbSound",
+      "source": "reference/pokeemerald/src/m4a.c:925-1231",
+      "read": "CgbSound reads hardware registers selected by channel number and callback/table code.",
+      "captured": "The complete 0x04000060-0x0400009F audio register window, all four CgbChannel structs, wave words, and gCgb3Vol bytes.",
+      "remainder": "No residual was observed in the fixed CgbSound body; indirect CgbOscOff/MidiKeyToCgbFreq code remains represented by target symbols rather than a transitive read proof."
+    },
+    {
+      "stage": "SoundMainRAM-channel-passes",
+      "source": "reference/pokeemerald/src/m4a_1.s:134-445",
+      "read": "The ARM mixer indexes PCM and WaveData sample bytes using mutable count/fw/current state.",
+      "captured": "All 12 SoundChannel structs, full readable WaveData sample regions, the complete 3168-byte PCM buffer, DMA source/destination roles, and VCOUNT.",
+      "remainder": "If a malformed/current sample target falls outside its captured WaveData, the target is reported as incomplete; no such target was observed in this packet."
+    }
+  ],
+  "cases": [
+    {
+      "receipt": "anchor",
+      "sourceFunction": "CreateFrontierFactorySelectableMons",
+      "sourceEpochObservationCount": 52,
+      "sourceStateKeysWithinFreshRun": {
+        "capturedStateKeys": 52,
+        "repeatedCapturedStateKeys": 0
+      },
+      "distributions": {
+        "m4aSoundMain": {
+          "count": 52,
+          "min": 23920,
+          "max": 52083,
+          "distinct": 52,
+          "histogram": [
+            {
+              "value": 23920,
+              "count": 1
+            },
+            {
+              "value": 24020,
+              "count": 1
+            },
+            {
+              "value": 24068,
+              "count": 1
+            },
+            {
+              "value": 24712,
+              "count": 1
+            },
+            {
+              "value": 24886,
+              "count": 1
+            },
+            {
+              "value": 31090,
+              "count": 1
+            },
+            {
+              "value": 31093,
+              "count": 1
+            },
+            {
+              "value": 31111,
+              "count": 1
+            },
+            {
+              "value": 31361,
+              "count": 1
+            },
+            {
+              "value": 31380,
+              "count": 1
+            },
+            {
+              "value": 31605,
+              "count": 1
+            },
+            {
+              "value": 31650,
+              "count": 1
+            },
+            {
+              "value": 31738,
+              "count": 1
+            },
+            {
+              "value": 31999,
+              "count": 1
+            },
+            {
+              "value": 34582,
+              "count": 1
+            },
+            {
+              "value": 34731,
+              "count": 1
+            },
+            {
+              "value": 35569,
+              "count": 1
+            },
+            {
+              "value": 35584,
+              "count": 1
+            },
+            {
+              "value": 35595,
+              "count": 1
+            },
+            {
+              "value": 35701,
+              "count": 1
+            },
+            {
+              "value": 35713,
+              "count": 1
+            },
+            {
+              "value": 35727,
+              "count": 1
+            },
+            {
+              "value": 35839,
+              "count": 1
+            },
+            {
+              "value": 35843,
+              "count": 1
+            },
+            {
+              "value": 36247,
+              "count": 1
+            },
+            {
+              "value": 37188,
+              "count": 1
+            },
+            {
+              "value": 37244,
+              "count": 1
+            },
+            {
+              "value": 39899,
+              "count": 1
+            },
+            {
+              "value": 40098,
+              "count": 1
+            },
+            {
+              "value": 40990,
+              "count": 1
+            },
+            {
+              "value": 40995,
+              "count": 1
+            },
+            {
+              "value": 42035,
+              "count": 1
+            },
+            {
+              "value": 42184,
+              "count": 1
+            },
+            {
+              "value": 42317,
+              "count": 1
+            },
+            {
+              "value": 42339,
+              "count": 1
+            },
+            {
+              "value": 42682,
+              "count": 1
+            },
+            {
+              "value": 43439,
+              "count": 1
+            },
+            {
+              "value": 43538,
+              "count": 1
+            },
+            {
+              "value": 43540,
+              "count": 1
+            },
+            {
+              "value": 43685,
+              "count": 1
+            },
+            {
+              "value": 43770,
+              "count": 1
+            },
+            {
+              "value": 43905,
+              "count": 1
+            },
+            {
+              "value": 45447,
+              "count": 1
+            },
+            {
+              "value": 45983,
+              "count": 1
+            },
+            {
+              "value": 46130,
+              "count": 1
+            },
+            {
+              "value": 46274,
+              "count": 1
+            },
+            {
+              "value": 46386,
+              "count": 1
+            },
+            {
+              "value": 47351,
+              "count": 1
+            },
+            {
+              "value": 48581,
+              "count": 1
+            },
+            {
+              "value": 49255,
+              "count": 1
+            },
+            {
+              "value": 50815,
+              "count": 1
+            },
+            {
+              "value": 52083,
+              "count": 1
+            }
+          ]
+        },
+        "mplaySixth": {
+          "count": 52,
+          "min": 864,
+          "max": 10825,
+          "distinct": 40,
+          "histogram": [
+            {
+              "value": 864,
+              "count": 3
+            },
+            {
+              "value": 1870,
+              "count": 1
+            },
+            {
+              "value": 1896,
+              "count": 1
+            },
+            {
+              "value": 1942,
+              "count": 2
+            },
+            {
+              "value": 1954,
+              "count": 1
+            },
+            {
+              "value": 1960,
+              "count": 6
+            },
+            {
+              "value": 1962,
+              "count": 1
+            },
+            {
+              "value": 1968,
+              "count": 1
+            },
+            {
+              "value": 1970,
+              "count": 1
+            },
+            {
+              "value": 1976,
+              "count": 1
+            },
+            {
+              "value": 1980,
+              "count": 2
+            },
+            {
+              "value": 1984,
+              "count": 1
+            },
+            {
+              "value": 1994,
+              "count": 1
+            },
+            {
+              "value": 1997,
+              "count": 1
+            },
+            {
+              "value": 2002,
+              "count": 2
+            },
+            {
+              "value": 2012,
+              "count": 2
+            },
+            {
+              "value": 2015,
+              "count": 1
+            },
+            {
+              "value": 2022,
+              "count": 1
+            },
+            {
+              "value": 2023,
+              "count": 1
+            },
+            {
+              "value": 2026,
+              "count": 1
+            },
+            {
+              "value": 2035,
+              "count": 1
+            },
+            {
+              "value": 2036,
+              "count": 1
+            },
+            {
+              "value": 2055,
+              "count": 2
+            },
+            {
+              "value": 2067,
+              "count": 1
+            },
+            {
+              "value": 2073,
+              "count": 1
+            },
+            {
+              "value": 2095,
+              "count": 1
+            },
+            {
+              "value": 2223,
+              "count": 1
+            },
+            {
+              "value": 2269,
+              "count": 1
+            },
+            {
+              "value": 2916,
+              "count": 1
+            },
+            {
+              "value": 2933,
+              "count": 1
+            },
+            {
+              "value": 2947,
+              "count": 1
+            },
+            {
+              "value": 2968,
+              "count": 1
+            },
+            {
+              "value": 4265,
+              "count": 1
+            },
+            {
+              "value": 4269,
+              "count": 1
+            },
+            {
+              "value": 4483,
+              "count": 1
+            },
+            {
+              "value": 4752,
+              "count": 1
+            },
+            {
+              "value": 5863,
+              "count": 1
+            },
+            {
+              "value": 8249,
+              "count": 1
+            },
+            {
+              "value": 8738,
+              "count": 1
+            },
+            {
+              "value": 10825,
+              "count": 1
+            }
+          ]
+        },
+        "cgbSound": {
+          "count": 52,
+          "min": 456,
+          "max": 1914,
+          "distinct": 37,
+          "histogram": [
+            {
+              "value": 456,
+              "count": 3
+            },
+            {
+              "value": 492,
+              "count": 1
+            },
+            {
+              "value": 551,
+              "count": 1
+            },
+            {
+              "value": 647,
+              "count": 1
+            },
+            {
+              "value": 649,
+              "count": 4
+            },
+            {
+              "value": 657,
+              "count": 2
+            },
+            {
+              "value": 702,
+              "count": 1
+            },
+            {
+              "value": 704,
+              "count": 4
+            },
+            {
+              "value": 721,
+              "count": 1
+            },
+            {
+              "value": 744,
+              "count": 1
+            },
+            {
+              "value": 752,
+              "count": 1
+            },
+            {
+              "value": 850,
+              "count": 3
+            },
+            {
+              "value": 881,
+              "count": 1
+            },
+            {
+              "value": 886,
+              "count": 2
+            },
+            {
+              "value": 896,
+              "count": 1
+            },
+            {
+              "value": 897,
+              "count": 2
+            },
+            {
+              "value": 905,
+              "count": 1
+            },
+            {
+              "value": 932,
+              "count": 1
+            },
+            {
+              "value": 945,
+              "count": 1
+            },
+            {
+              "value": 1034,
+              "count": 1
+            },
+            {
+              "value": 1096,
+              "count": 1
+            },
+            {
+              "value": 1098,
+              "count": 2
+            },
+            {
+              "value": 1141,
+              "count": 1
+            },
+            {
+              "value": 1144,
+              "count": 1
+            },
+            {
+              "value": 1148,
+              "count": 1
+            },
+            {
+              "value": 1215,
+              "count": 1
+            },
+            {
+              "value": 1265,
+              "count": 1
+            },
+            {
+              "value": 1272,
+              "count": 1
+            },
+            {
+              "value": 1280,
+              "count": 1
+            },
+            {
+              "value": 1299,
+              "count": 2
+            },
+            {
+              "value": 1344,
+              "count": 1
+            },
+            {
+              "value": 1487,
+              "count": 1
+            },
+            {
+              "value": 1497,
+              "count": 1
+            },
+            {
+              "value": 1514,
+              "count": 1
+            },
+            {
+              "value": 1550,
+              "count": 1
+            },
+            {
+              "value": 1670,
+              "count": 1
+            },
+            {
+              "value": 1914,
+              "count": 1
+            }
+          ]
+        },
+        "soundMainRamChannelPasses": {
+          "count": 52,
+          "min": 14743,
+          "max": 37473,
+          "distinct": 51,
+          "histogram": [
+            {
+              "value": 14743,
+              "count": 1
+            },
+            {
+              "value": 14756,
+              "count": 1
+            },
+            {
+              "value": 14782,
+              "count": 1
+            },
+            {
+              "value": 15218,
+              "count": 1
+            },
+            {
+              "value": 15233,
+              "count": 1
+            },
+            {
+              "value": 21364,
+              "count": 1
+            },
+            {
+              "value": 21439,
+              "count": 1
+            },
+            {
+              "value": 21452,
+              "count": 1
+            },
+            {
+              "value": 21465,
+              "count": 1
+            },
+            {
+              "value": 21468,
+              "count": 1
+            },
+            {
+              "value": 21476,
+              "count": 1
+            },
+            {
+              "value": 21486,
+              "count": 1
+            },
+            {
+              "value": 22190,
+              "count": 1
+            },
+            {
+              "value": 22196,
+              "count": 1
+            },
+            {
+              "value": 22229,
+              "count": 1
+            },
+            {
+              "value": 26143,
+              "count": 1
+            },
+            {
+              "value": 26144,
+              "count": 1
+            },
+            {
+              "value": 26147,
+              "count": 1
+            },
+            {
+              "value": 26150,
+              "count": 1
+            },
+            {
+              "value": 26154,
+              "count": 1
+            },
+            {
+              "value": 26160,
+              "count": 1
+            },
+            {
+              "value": 26166,
+              "count": 1
+            },
+            {
+              "value": 26171,
+              "count": 1
+            },
+            {
+              "value": 26173,
+              "count": 2
+            },
+            {
+              "value": 26178,
+              "count": 1
+            },
+            {
+              "value": 26186,
+              "count": 1
+            },
+            {
+              "value": 26257,
+              "count": 1
+            },
+            {
+              "value": 28793,
+              "count": 1
+            },
+            {
+              "value": 30111,
+              "count": 1
+            },
+            {
+              "value": 30119,
+              "count": 1
+            },
+            {
+              "value": 32612,
+              "count": 1
+            },
+            {
+              "value": 32615,
+              "count": 1
+            },
+            {
+              "value": 32625,
+              "count": 1
+            },
+            {
+              "value": 32631,
+              "count": 1
+            },
+            {
+              "value": 32647,
+              "count": 1
+            },
+            {
+              "value": 32662,
+              "count": 1
+            },
+            {
+              "value": 32694,
+              "count": 1
+            },
+            {
+              "value": 33707,
+              "count": 1
+            },
+            {
+              "value": 33775,
+              "count": 1
+            },
+            {
+              "value": 33834,
+              "count": 1
+            },
+            {
+              "value": 33852,
+              "count": 1
+            },
+            {
+              "value": 33860,
+              "count": 1
+            },
+            {
+              "value": 33871,
+              "count": 1
+            },
+            {
+              "value": 33876,
+              "count": 1
+            },
+            {
+              "value": 33877,
+              "count": 1
+            },
+            {
+              "value": 36173,
+              "count": 1
+            },
+            {
+              "value": 36187,
+              "count": 1
+            },
+            {
+              "value": 36197,
+              "count": 1
+            },
+            {
+              "value": 36203,
+              "count": 1
+            },
+            {
+              "value": 37408,
+              "count": 1
+            },
+            {
+              "value": 37473,
+              "count": 1
+            }
+          ]
+        }
+      },
+      "residualDereferences": [
+        {
+          "stage": "sixth-MPlayMain",
+          "source": "reference/pokeemerald/src/m4a_1.s:1130-1466",
+          "read": "Indirect command and pattern handlers can advance cmdPtr or a pattern-stack target beyond the captured 256/128-byte windows.",
+          "captured": "Current command bytes, all three pattern-stack windows, complete track/player scalar state, and dispatch target symbols.",
+          "remainder": "The full handler-dependent command/control-flow read set is not statically bounded by this packet."
+        },
+        {
+          "stage": "sixth-MPlayMain",
+          "source": "reference/pokeemerald/src/m4a.c:1500-1534",
+          "read": "ply_xcmd/ply_xxx and gXcmdTable/gMPlayJumpTable callbacks may dereference callback-specific state.",
+          "captured": "Dispatch table target symbols and the callback-visible player/track/channel graph.",
+          "remainder": "Transitive callback reads are not instruction-traced into a complete memory-read set."
+        },
+        {
+          "stage": "CgbSound",
+          "source": "reference/pokeemerald/src/m4a.c:925-1231",
+          "read": "CgbSound reads hardware registers selected by channel number and callback/table code.",
+          "captured": "The complete 0x04000060-0x0400009F audio register window, all four CgbChannel structs, wave words, and gCgb3Vol bytes.",
+          "remainder": "No residual was observed in the fixed CgbSound body; indirect CgbOscOff/MidiKeyToCgbFreq code remains represented by target symbols rather than a transitive read proof."
+        },
+        {
+          "stage": "SoundMainRAM-channel-passes",
+          "source": "reference/pokeemerald/src/m4a_1.s:134-445",
+          "read": "The ARM mixer indexes PCM and WaveData sample bytes using mutable count/fw/current state.",
+          "captured": "All 12 SoundChannel structs, full readable WaveData sample regions, the complete 3168-byte PCM buffer, DMA source/destination roles, and VCOUNT.",
+          "remainder": "If a malformed/current sample target falls outside its captured WaveData, the target is reported as incomplete; no such target was observed in this packet."
+        }
+      ]
+    },
+    {
+      "receipt": "liliana",
+      "sourceFunction": "FillFactoryFrontierTrainerParty",
+      "sourceEpochObservationCount": 31,
+      "sourceStateKeysWithinFreshRun": {
+        "capturedStateKeys": 31,
+        "repeatedCapturedStateKeys": 0
+      },
+      "distributions": {
+        "m4aSoundMain": {
+          "count": 31,
+          "min": 24732,
+          "max": 47917,
+          "distinct": 31,
+          "histogram": [
+            {
+              "value": 24732,
+              "count": 1
+            },
+            {
+              "value": 24827,
+              "count": 1
+            },
+            {
+              "value": 28069,
+              "count": 1
+            },
+            {
+              "value": 28203,
+              "count": 1
+            },
+            {
+              "value": 29571,
+              "count": 1
+            },
+            {
+              "value": 30214,
+              "count": 1
+            },
+            {
+              "value": 31301,
+              "count": 1
+            },
+            {
+              "value": 31415,
+              "count": 1
+            },
+            {
+              "value": 31427,
+              "count": 1
+            },
+            {
+              "value": 31550,
+              "count": 1
+            },
+            {
+              "value": 31568,
+              "count": 1
+            },
+            {
+              "value": 31569,
+              "count": 1
+            },
+            {
+              "value": 31737,
+              "count": 1
+            },
+            {
+              "value": 31777,
+              "count": 1
+            },
+            {
+              "value": 32531,
+              "count": 1
+            },
+            {
+              "value": 33213,
+              "count": 1
+            },
+            {
+              "value": 33443,
+              "count": 1
+            },
+            {
+              "value": 33911,
+              "count": 1
+            },
+            {
+              "value": 34764,
+              "count": 1
+            },
+            {
+              "value": 35195,
+              "count": 1
+            },
+            {
+              "value": 35257,
+              "count": 1
+            },
+            {
+              "value": 36827,
+              "count": 1
+            },
+            {
+              "value": 37552,
+              "count": 1
+            },
+            {
+              "value": 37813,
+              "count": 1
+            },
+            {
+              "value": 38408,
+              "count": 1
+            },
+            {
+              "value": 39558,
+              "count": 1
+            },
+            {
+              "value": 40609,
+              "count": 1
+            },
+            {
+              "value": 40832,
+              "count": 1
+            },
+            {
+              "value": 42275,
+              "count": 1
+            },
+            {
+              "value": 42318,
+              "count": 1
+            },
+            {
+              "value": 47917,
+              "count": 1
+            }
+          ]
+        },
+        "mplaySixth": {
+          "count": 31,
+          "min": 864,
+          "max": 10172,
+          "distinct": 29,
+          "histogram": [
+            {
+              "value": 864,
+              "count": 1
+            },
+            {
+              "value": 1974,
+              "count": 1
+            },
+            {
+              "value": 2000,
+              "count": 1
+            },
+            {
+              "value": 2006,
+              "count": 1
+            },
+            {
+              "value": 2012,
+              "count": 2
+            },
+            {
+              "value": 2093,
+              "count": 1
+            },
+            {
+              "value": 2099,
+              "count": 1
+            },
+            {
+              "value": 2111,
+              "count": 1
+            },
+            {
+              "value": 2141,
+              "count": 1
+            },
+            {
+              "value": 2147,
+              "count": 1
+            },
+            {
+              "value": 2153,
+              "count": 2
+            },
+            {
+              "value": 2186,
+              "count": 1
+            },
+            {
+              "value": 2224,
+              "count": 1
+            },
+            {
+              "value": 2577,
+              "count": 1
+            },
+            {
+              "value": 2603,
+              "count": 1
+            },
+            {
+              "value": 2617,
+              "count": 1
+            },
+            {
+              "value": 2696,
+              "count": 1
+            },
+            {
+              "value": 2712,
+              "count": 1
+            },
+            {
+              "value": 2738,
+              "count": 1
+            },
+            {
+              "value": 3135,
+              "count": 1
+            },
+            {
+              "value": 3165,
+              "count": 1
+            },
+            {
+              "value": 3309,
+              "count": 1
+            },
+            {
+              "value": 3730,
+              "count": 1
+            },
+            {
+              "value": 3983,
+              "count": 1
+            },
+            {
+              "value": 4533,
+              "count": 1
+            },
+            {
+              "value": 5384,
+              "count": 1
+            },
+            {
+              "value": 6549,
+              "count": 1
+            },
+            {
+              "value": 7778,
+              "count": 1
+            },
+            {
+              "value": 10172,
+              "count": 1
+            }
+          ]
+        },
+        "cgbSound": {
+          "count": 31,
+          "min": 1078,
+          "max": 2328,
+          "distinct": 25,
+          "histogram": [
+            {
+              "value": 1078,
+              "count": 1
+            },
+            {
+              "value": 1098,
+              "count": 2
+            },
+            {
+              "value": 1150,
+              "count": 1
+            },
+            {
+              "value": 1175,
+              "count": 1
+            },
+            {
+              "value": 1214,
+              "count": 1
+            },
+            {
+              "value": 1299,
+              "count": 4
+            },
+            {
+              "value": 1309,
+              "count": 1
+            },
+            {
+              "value": 1322,
+              "count": 1
+            },
+            {
+              "value": 1324,
+              "count": 1
+            },
+            {
+              "value": 1326,
+              "count": 1
+            },
+            {
+              "value": 1403,
+              "count": 2
+            },
+            {
+              "value": 1428,
+              "count": 1
+            },
+            {
+              "value": 1481,
+              "count": 1
+            },
+            {
+              "value": 1498,
+              "count": 1
+            },
+            {
+              "value": 1514,
+              "count": 1
+            },
+            {
+              "value": 1559,
+              "count": 1
+            },
+            {
+              "value": 1603,
+              "count": 1
+            },
+            {
+              "value": 1609,
+              "count": 1
+            },
+            {
+              "value": 1638,
+              "count": 1
+            },
+            {
+              "value": 1642,
+              "count": 2
+            },
+            {
+              "value": 1876,
+              "count": 1
+            },
+            {
+              "value": 1909,
+              "count": 1
+            },
+            {
+              "value": 1921,
+              "count": 1
+            },
+            {
+              "value": 2178,
+              "count": 1
+            },
+            {
+              "value": 2328,
+              "count": 1
+            }
+          ]
+        },
+        "soundMainRamChannelPasses": {
+          "count": 31,
+          "min": 14635,
+          "max": 28602,
+          "distinct": 24,
+          "histogram": [
+            {
+              "value": 14635,
+              "count": 1
+            },
+            {
+              "value": 14668,
+              "count": 1
+            },
+            {
+              "value": 17648,
+              "count": 1
+            },
+            {
+              "value": 17659,
+              "count": 1
+            },
+            {
+              "value": 19477,
+              "count": 1
+            },
+            {
+              "value": 19510,
+              "count": 1
+            },
+            {
+              "value": 21271,
+              "count": 2
+            },
+            {
+              "value": 21277,
+              "count": 4
+            },
+            {
+              "value": 21283,
+              "count": 2
+            },
+            {
+              "value": 22495,
+              "count": 1
+            },
+            {
+              "value": 22501,
+              "count": 1
+            },
+            {
+              "value": 22515,
+              "count": 1
+            },
+            {
+              "value": 22559,
+              "count": 1
+            },
+            {
+              "value": 24288,
+              "count": 1
+            },
+            {
+              "value": 24302,
+              "count": 1
+            },
+            {
+              "value": 24306,
+              "count": 1
+            },
+            {
+              "value": 25534,
+              "count": 2
+            },
+            {
+              "value": 25547,
+              "count": 2
+            },
+            {
+              "value": 26739,
+              "count": 1
+            },
+            {
+              "value": 27320,
+              "count": 1
+            },
+            {
+              "value": 27334,
+              "count": 1
+            },
+            {
+              "value": 27339,
+              "count": 1
+            },
+            {
+              "value": 28577,
+              "count": 1
+            },
+            {
+              "value": 28602,
+              "count": 1
+            }
+          ]
+        }
+      },
+      "residualDereferences": [
+        {
+          "stage": "sixth-MPlayMain",
+          "source": "reference/pokeemerald/src/m4a_1.s:1130-1466",
+          "read": "Indirect command and pattern handlers can advance cmdPtr or a pattern-stack target beyond the captured 256/128-byte windows.",
+          "captured": "Current command bytes, all three pattern-stack windows, complete track/player scalar state, and dispatch target symbols.",
+          "remainder": "The full handler-dependent command/control-flow read set is not statically bounded by this packet."
+        },
+        {
+          "stage": "sixth-MPlayMain",
+          "source": "reference/pokeemerald/src/m4a.c:1500-1534",
+          "read": "ply_xcmd/ply_xxx and gXcmdTable/gMPlayJumpTable callbacks may dereference callback-specific state.",
+          "captured": "Dispatch table target symbols and the callback-visible player/track/channel graph.",
+          "remainder": "Transitive callback reads are not instruction-traced into a complete memory-read set."
+        },
+        {
+          "stage": "CgbSound",
+          "source": "reference/pokeemerald/src/m4a.c:925-1231",
+          "read": "CgbSound reads hardware registers selected by channel number and callback/table code.",
+          "captured": "The complete 0x04000060-0x0400009F audio register window, all four CgbChannel structs, wave words, and gCgb3Vol bytes.",
+          "remainder": "No residual was observed in the fixed CgbSound body; indirect CgbOscOff/MidiKeyToCgbFreq code remains represented by target symbols rather than a transitive read proof."
+        },
+        {
+          "stage": "SoundMainRAM-channel-passes",
+          "source": "reference/pokeemerald/src/m4a_1.s:134-445",
+          "read": "The ARM mixer indexes PCM and WaveData sample bytes using mutable count/fw/current state.",
+          "captured": "All 12 SoundChannel structs, full readable WaveData sample regions, the complete 3168-byte PCM buffer, DMA source/destination roles, and VCOUNT.",
+          "remainder": "If a malformed/current sample target falls outside its captured WaveData, the target is reported as incomplete; no such target was observed in this packet."
+        }
+      ]
+    },
+    {
+      "receipt": "factory-varied",
+      "sourceFunction": "FillFactoryFrontierTrainerParty",
+      "sourceEpochObservationCount": 30,
+      "sourceStateKeysWithinFreshRun": {
+        "capturedStateKeys": 30,
+        "repeatedCapturedStateKeys": 0
+      },
+      "distributions": {
+        "m4aSoundMain": {
+          "count": 30,
+          "min": 24391,
+          "max": 41682,
+          "distinct": 28,
+          "histogram": [
+            {
+              "value": 24391,
+              "count": 1
+            },
+            {
+              "value": 24749,
+              "count": 1
+            },
+            {
+              "value": 24753,
+              "count": 3
+            },
+            {
+              "value": 24852,
+              "count": 1
+            },
+            {
+              "value": 24874,
+              "count": 1
+            },
+            {
+              "value": 24902,
+              "count": 1
+            },
+            {
+              "value": 25168,
+              "count": 1
+            },
+            {
+              "value": 25301,
+              "count": 1
+            },
+            {
+              "value": 28373,
+              "count": 1
+            },
+            {
+              "value": 29169,
+              "count": 1
+            },
+            {
+              "value": 29210,
+              "count": 1
+            },
+            {
+              "value": 29402,
+              "count": 1
+            },
+            {
+              "value": 29535,
+              "count": 1
+            },
+            {
+              "value": 29648,
+              "count": 1
+            },
+            {
+              "value": 29728,
+              "count": 1
+            },
+            {
+              "value": 29730,
+              "count": 1
+            },
+            {
+              "value": 30129,
+              "count": 1
+            },
+            {
+              "value": 30241,
+              "count": 1
+            },
+            {
+              "value": 30446,
+              "count": 1
+            },
+            {
+              "value": 30707,
+              "count": 1
+            },
+            {
+              "value": 30871,
+              "count": 1
+            },
+            {
+              "value": 31108,
+              "count": 1
+            },
+            {
+              "value": 32264,
+              "count": 1
+            },
+            {
+              "value": 32355,
+              "count": 1
+            },
+            {
+              "value": 32991,
+              "count": 1
+            },
+            {
+              "value": 33544,
+              "count": 1
+            },
+            {
+              "value": 34294,
+              "count": 1
+            },
+            {
+              "value": 41682,
+              "count": 1
+            }
+          ]
+        },
+        "mplaySixth": {
+          "count": 30,
+          "min": 864,
+          "max": 8846,
+          "distinct": 24,
+          "histogram": [
+            {
+              "value": 864,
+              "count": 1
+            },
+            {
+              "value": 1986,
+              "count": 4
+            },
+            {
+              "value": 1998,
+              "count": 1
+            },
+            {
+              "value": 2018,
+              "count": 2
+            },
+            {
+              "value": 2032,
+              "count": 1
+            },
+            {
+              "value": 2079,
+              "count": 1
+            },
+            {
+              "value": 2099,
+              "count": 1
+            },
+            {
+              "value": 2111,
+              "count": 1
+            },
+            {
+              "value": 2113,
+              "count": 2
+            },
+            {
+              "value": 2127,
+              "count": 1
+            },
+            {
+              "value": 2173,
+              "count": 1
+            },
+            {
+              "value": 2236,
+              "count": 1
+            },
+            {
+              "value": 2250,
+              "count": 1
+            },
+            {
+              "value": 3029,
+              "count": 1
+            },
+            {
+              "value": 3093,
+              "count": 2
+            },
+            {
+              "value": 3099,
+              "count": 1
+            },
+            {
+              "value": 3205,
+              "count": 1
+            },
+            {
+              "value": 3220,
+              "count": 1
+            },
+            {
+              "value": 4121,
+              "count": 1
+            },
+            {
+              "value": 4316,
+              "count": 1
+            },
+            {
+              "value": 5057,
+              "count": 1
+            },
+            {
+              "value": 5494,
+              "count": 1
+            },
+            {
+              "value": 6108,
+              "count": 1
+            },
+            {
+              "value": 8846,
+              "count": 1
+            }
+          ]
+        },
+        "cgbSound": {
+          "count": 30,
+          "min": 760,
+          "max": 2428,
+          "distinct": 24,
+          "histogram": [
+            {
+              "value": 760,
+              "count": 1
+            },
+            {
+              "value": 844,
+              "count": 1
+            },
+            {
+              "value": 1098,
+              "count": 1
+            },
+            {
+              "value": 1214,
+              "count": 1
+            },
+            {
+              "value": 1245,
+              "count": 1
+            },
+            {
+              "value": 1277,
+              "count": 1
+            },
+            {
+              "value": 1299,
+              "count": 7
+            },
+            {
+              "value": 1313,
+              "count": 1
+            },
+            {
+              "value": 1326,
+              "count": 1
+            },
+            {
+              "value": 1398,
+              "count": 1
+            },
+            {
+              "value": 1456,
+              "count": 1
+            },
+            {
+              "value": 1468,
+              "count": 1
+            },
+            {
+              "value": 1482,
+              "count": 1
+            },
+            {
+              "value": 1565,
+              "count": 1
+            },
+            {
+              "value": 1603,
+              "count": 1
+            },
+            {
+              "value": 1616,
+              "count": 1
+            },
+            {
+              "value": 1701,
+              "count": 1
+            },
+            {
+              "value": 1716,
+              "count": 1
+            },
+            {
+              "value": 1820,
+              "count": 1
+            },
+            {
+              "value": 1955,
+              "count": 1
+            },
+            {
+              "value": 2201,
+              "count": 1
+            },
+            {
+              "value": 2267,
+              "count": 1
+            },
+            {
+              "value": 2274,
+              "count": 1
+            },
+            {
+              "value": 2428,
+              "count": 1
+            }
+          ]
+        },
+        "soundMainRamChannelPasses": {
+          "count": 30,
+          "min": 14629,
+          "max": 23754,
+          "distinct": 11,
+          "histogram": [
+            {
+              "value": 14629,
+              "count": 5
+            },
+            {
+              "value": 14635,
+              "count": 5
+            },
+            {
+              "value": 18877,
+              "count": 1
+            },
+            {
+              "value": 18890,
+              "count": 2
+            },
+            {
+              "value": 18904,
+              "count": 4
+            },
+            {
+              "value": 18943,
+              "count": 2
+            },
+            {
+              "value": 19466,
+              "count": 1
+            },
+            {
+              "value": 19471,
+              "count": 3
+            },
+            {
+              "value": 19477,
+              "count": 3
+            },
+            {
+              "value": 19490,
+              "count": 3
+            },
+            {
+              "value": 23754,
+              "count": 1
+            }
+          ]
+        }
+      },
+      "residualDereferences": [
+        {
+          "stage": "sixth-MPlayMain",
+          "source": "reference/pokeemerald/src/m4a_1.s:1130-1466",
+          "read": "Indirect command and pattern handlers can advance cmdPtr or a pattern-stack target beyond the captured 256/128-byte windows.",
+          "captured": "Current command bytes, all three pattern-stack windows, complete track/player scalar state, and dispatch target symbols.",
+          "remainder": "The full handler-dependent command/control-flow read set is not statically bounded by this packet."
+        },
+        {
+          "stage": "sixth-MPlayMain",
+          "source": "reference/pokeemerald/src/m4a.c:1500-1534",
+          "read": "ply_xcmd/ply_xxx and gXcmdTable/gMPlayJumpTable callbacks may dereference callback-specific state.",
+          "captured": "Dispatch table target symbols and the callback-visible player/track/channel graph.",
+          "remainder": "Transitive callback reads are not instruction-traced into a complete memory-read set."
+        },
+        {
+          "stage": "CgbSound",
+          "source": "reference/pokeemerald/src/m4a.c:925-1231",
+          "read": "CgbSound reads hardware registers selected by channel number and callback/table code.",
+          "captured": "The complete 0x04000060-0x0400009F audio register window, all four CgbChannel structs, wave words, and gCgb3Vol bytes.",
+          "remainder": "No residual was observed in the fixed CgbSound body; indirect CgbOscOff/MidiKeyToCgbFreq code remains represented by target symbols rather than a transitive read proof."
+        },
+        {
+          "stage": "SoundMainRAM-channel-passes",
+          "source": "reference/pokeemerald/src/m4a_1.s:134-445",
+          "read": "The ARM mixer indexes PCM and WaveData sample bytes using mutable count/fw/current state.",
+          "captured": "All 12 SoundChannel structs, full readable WaveData sample regions, the complete 3168-byte PCM buffer, DMA source/destination roles, and VCOUNT.",
+          "remainder": "If a malformed/current sample target falls outside its captured WaveData, the target is reported as incomplete; no such target was observed in this packet."
+        }
+      ]
+    }
+  ],
+  "verdict": "Evidence-only checkpoint: wider source-semantic m4a state keys are reproducible and equal-key fresh repeats have equal measured source cycles; the packet deliberately reports remaining indirect/unbounded reads and implements no timing reducer."
+}
