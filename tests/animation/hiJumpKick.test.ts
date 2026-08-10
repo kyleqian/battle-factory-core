@@ -18,6 +18,7 @@ import {
 import {
   createSceneOnMovePresentation,
   sceneOnHiJumpKickView,
+  type SceneOnHiJumpKickConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 
 const PLAYER_TARGET = { x: 176, y: 42 };
@@ -102,13 +103,13 @@ describe("MOVE_HI_JUMP_KICK source-relative reducer", () => {
   });
 
   it("exposes the complete body through a typed Scene-ON seam", () => {
-    const stage = createSceneOnMovePresentation({
+    const stage = createSceneOnMovePresentation<SceneOnHiJumpKickConfig>({
       move: "HI_JUMP_KICK",
       attacker: {
         species: "MEDICHAM",
         geometry: {
-          side: "player", spriteCorner: { x: 40, y: 52 },
-          animationCenter: { x: 72, y: 84 },
+          side: "player", spriteCorner: { x: 40, y: 51 },
+          animationCenter: { x: 72, y: 83 },
           battlePositionCenter: { x: 72, y: 80 },
         },
       },
@@ -153,7 +154,7 @@ describe("MOVE_HI_JUMP_KICK source-relative reducer", () => {
       expect(scenario.profile).toBe("battle-scene-on");
       expect([...scenario.playerSetIds, ...scenario.opponentSetIds]).toContain(373);
       expect([...scenario.overrides.parties.player, ...scenario.overrides.parties.opponent]
-        .filter((mon) => mon.species === 308 && mon.moves.includes(136))).toHaveLength(1);
+        .filter((mon) => mon.species === 357 && mon.moves.includes(136))).toHaveLength(1);
       expect(scenario.overrides.parties.player).toHaveLength(3);
       expect(scenario.overrides.parties.opponent).toHaveLength(3);
     }

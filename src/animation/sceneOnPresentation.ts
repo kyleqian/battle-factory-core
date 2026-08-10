@@ -808,6 +808,7 @@ export interface SceneOnPresentationBattler {
     | "SEAKING"
     | "TOGETIC"
     | "MACHOKE"
+    | "MEDICHAM"
     | "MAKUHITA"
     | "GOLEM"
     | "WINGULL"
@@ -3894,9 +3895,10 @@ export function createSceneOnMovePresentation<
     | SceneOnSecretPowerConfig
     | SceneOnWhirlwindConfig | SceneOnBlockConfig
     | SceneOnIronDefenseConfig
-    | SceneOnFlashConfig
-    | SceneOnFacadeConfig
-    | SceneOnMetalClawConfig
+  | SceneOnFlashConfig
+  | SceneOnFacadeConfig
+  | SceneOnHiJumpKickConfig
+  | SceneOnMetalClawConfig
   | SceneOnIronTailConfig
   | SceneOnCrushClawConfig
   | SceneOnTakeDownConfig

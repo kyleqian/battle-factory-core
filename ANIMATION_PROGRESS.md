@@ -1,3 +1,11 @@
+# MOVE_HI_JUMP_KICK exact — bilateral 91/91 source-foot promotion (2026-08-10 worker)
+
+- **State:** Coverage advances **157→158/276 exact**, 0 partial, 0 staged, **119→118 unsupported**. `MOVE_HI_JUMP_KICK` alone moves; no animation-boundary or unsupported-barrier change.
+- **Did:** Corrected the legal carrier to set/index 373 `FRONTIER_MON_MEDICHAM_1` (species 357), added complete legal three-mon Scene-ON parties in both orientations, and added a pointer-bounded dense probe through first inactive cleanup. The pure reducer/seam/compositor independently ports `gJumpKickSpriteTemplate`/`AnimJumpKick`, source-relative slides/travel, animation-1 hitsplat, target `ShakeMonInPlace(3,0,11,1)`, HANDS_AND_FEET/IMPACT, monbg/alpha, target-panned audio, Medicham/ONIX art, and cleanup.
+- **Verified:** The strict portable regenerates both fixtures twice fresh: player-back **79..169** and opponent-front **83..173**, each **91/91** source/reducer/seam, software+hardware OAM/matrices, palettes/tags/registers/audio/state/raw-RGB, committed change map, and production framebuffer. Evidence/raw/map digests are player `6089e28d…` / `5fcea580…` / `6d8be6f9…`; opponent `252a8f6d…` / `29af27b0…` / `afab1870…`. HJK's own maps resolve this invocation's `ShakeMonInPlace` display at RAM+1 in both orientations; the older DOUBLE_EDGE conflict remains explicitly open.
+- **Next:** Supervisor selects the next independent animation acceptance unit. Do not generalize HJK's `ShakeMonInPlace(3,0,11,1)` latch, Medicham geometry, or its frame-stage timing to another move without its own dense evidence.
+- **Notes:** No damage, accuracy, recoil, RNG, turn order, controller/facility state, canonical recording, boundary, unsupported barrier, or sibling promotion changed.
+
 # MOVE_PIN_MISSILE exact — bilateral 93/93 source-arc promotion (2026-08-10 worker)
 
 - **State:** Coverage advances **156→157/276 exact**, 0 partial, 0 staged, **120→119 unsupported**. `MOVE_PIN_MISSILE` alone moves; no boundary, unsupported-barrier, gameplay, controller, or shared-state change.

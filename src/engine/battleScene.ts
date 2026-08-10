@@ -1008,6 +1008,7 @@ import {
   sceneOnPsychicView,
   sceneOnKnockOffView,
   type SceneOnMovePresentationState,
+  type SceneOnHiJumpKickConfig,
   type SceneOnKarateChopConfig,
   type SceneOnBatonPassConfig,
   type SceneOnRolePlayConfig,
@@ -24638,14 +24639,19 @@ export function renderSceneOnMovePresentation(
   }
 
   if (state.config.move === "HI_JUMP_KICK") {
-    const view = sceneOnHiJumpKickView(state);
+    const hiJumpKickState =
+      state as SceneOnMovePresentationState<SceneOnHiJumpKickConfig>;
+    const view = sceneOnHiJumpKickView(hiJumpKickState);
     // HJK's gSlideMonTo* dummies, foot callback, basic hitsplat, and
     // ShakeMonInPlace target writes all reach scanout one age after their
     // source RAM row. This is this move's own bilateral latch: the dense
     // window puts the first foot pixels at source age 36 for the age-35
     // creation row, and the first target shake pulse at source age 53 for
     // the age-52 task row.
-    const displayed = sceneOnHiJumpKickView({ ...state, age: state.age - 1 });
+    const displayed = sceneOnHiJumpKickView({
+      ...hiJumpKickState,
+      age: hiJumpKickState.age - 1,
+    });
     const playerToOpponent =
       view.attacker.species === "MEDICHAM"
       && view.attacker.geometry.side === "player"

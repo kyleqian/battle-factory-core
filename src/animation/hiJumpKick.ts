@@ -253,7 +253,7 @@ export function hiJumpKickAtAge(
       (age >= HI_JUMP_KICK_ATTACKER_RETURN_AGE
         && age < HI_JUMP_KICK_ATTACKER_RETURN_AGE + 3 ? 1 : 0)
       + (age >= HI_JUMP_KICK_TARGET_RETURN_AGE
-        && age < HI_JUMP_KICK_CLEAR_AGE ? 1 : 0),
+        && age < HI_JUMP_KICK_TARGET_RETURN_AGE + 6 ? 1 : 0),
     shakeTaskActive: age >= HI_JUMP_KICK_SHAKE_FIRST_AGE
       && age < HI_JUMP_KICK_TARGET_RETURN_AGE - 8,
     foot,

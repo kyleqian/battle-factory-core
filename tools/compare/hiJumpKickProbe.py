@@ -65,7 +65,9 @@ def main() -> None:
     callback_names = ("AnimJumpKick", "AnimSlideHandOrFootToTarget", "AnimTravelDiagonally",
                       "SlideMonToOffset", "TranslateSpriteLinearByIdFixedPoint",
                       "SlideMonToOriginalPos", "SlideMonToOriginalPos_Step",
+                      "AnimTranslateLinear", "AnimTranslateLinear_WithFollowup",
                       "AnimHitSplatBasic", "RunStoredCallbackWhenAnimEnds",
+                      "RunStoredCallbackWhenAffineAnimEnds",
                       "DestroyAnimSprite", "DestroySpriteAndMatrix", "SpriteCallbackDummy")
     callbacks = {name: nm[name] | 1 for name in callback_names if name in nm}
     task_names = ("AnimTask_ShakeMonInPlace", "AnimTask_ShakeMonInPlace_Step")

@@ -1729,6 +1729,32 @@
    ]
   },
   {
+   "move": "MOVE_HI_JUMP_KICK",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Scene-ON mechanicLab parties stage the sole accepted carrier FRONTIER_MON_MEDICHAM_1 set 373 (species 357, move 136) against legal ONIX in both player-back and opponent-front orientations; only the active Medicham choice is constrained and both parties contain three complete legal Pokemon",
+    "the pointer-bounded Move_HI_JUMP_KICK windows pass twice fresh: player-back frames 79-169 and opponent-front frames 83-173 each reproduce 91/91 source-component, typed-seam, software+hardware OAM/matrix, palette/tag/register/audio/state, raw-RGB, and production-framebuffer frames",
+    "the pure source-relative reducer ports HANDS_AND_FEET/IMPACT loads, attacker and target SlideMonToOffset/SlideMonToOriginalPos, source-derived AnimTravelDiagonally gJumpKickSpriteTemplate/AnimJumpKick foot movement, animation-1 basic hitsplat, target ShakeMonInPlace, monbg/12:8 alpha, target-panned JUMP_KICK/VITAL_THROW2 audio, and cleanup without inheriting sibling latches",
+    "the narrow Scene-ON seam and compositor reuse only source-identical HANDS_AND_FEET, IMPACT, Medicham/ONIX art, field chrome, healthboxes, and text; HJK's own bilateral change maps prove the independent RAM+1 display schedule for slides, foot, hitsplat, and ShakeMonInPlace, while preserving complete immutable battle state",
+    "hiJumpKickPortable.ts regenerates both fresh probes twice, byte-compares committed evidence/raw-RGB/change-map receipts, checks every captured source/hardware/register/audio/state field, and proves all 91/91 shared framebuffers without capture lookup, absolute battle ticks, gameplay state, or per-frame exceptions"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-hi-jump-kick-player-medicham-opponent-onix.json",
+    "tools/battle-lab/mechanic-hi-jump-kick-opponent-medicham-player-onix.json",
+    "tools/compare/fixtures/hi-jump-kick-player-medicham-opponent-onix.json",
+    "tools/compare/fixtures/hi-jump-kick-opponent-medicham-player-onix.json",
+    "tools/compare/hiJumpKickProbe.py",
+    "tools/compare/hiJumpKickPortable.ts",
+    "tools/compare/hiJumpKickSourceAudit.ts",
+    "tools/compare/evidence/hi-jump-kick-changemap-player.txt",
+    "tools/compare/evidence/hi-jump-kick-changemap-opponent.txt",
+    "src/animation/hiJumpKick.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/hiJumpKick.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_HOWL",
    "status": "exact",
    "covered": [

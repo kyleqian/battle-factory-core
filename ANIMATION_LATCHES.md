@@ -44,6 +44,7 @@ cites the move whose ledger entry holds the full evidence.
 | Palette writes (`gPlttBufferFaded`), incl. metallic-shine pulse and BlendPalette ramps | RAM+1 | STEEL_WING/IRON_TAIL shine; TORMENT anger-mark blend |
 | BG-palette rotation and `REG_BLDY` darken | RAM+1 | FUTURE_SIGHT-era BG work (archive, 2026-07-26) |
 | `AnimTask_ShakeMon` | RAM+1 | COUNTER (2026-08-08) — NOT +2 |
+| `AnimTask_ShakeMonInPlace(target, 3, 0, 11, 1)` | RAM+1 | HI_JUMP_KICK, both orientations, own dense change maps (2026-08-10) |
 | `AnimTask_ShakeMon2` (usual longer schedules) | RAM+2 | SLASH, LICK, TAKE_DOWN (2026-08-08) |
 | `AnimTask_ShakeMon2(target, 3, 0, 2, 1)` short burst | RAM+1 | PIN_MISSILE, all three bursts in both orientations (2026-08-10); this move-owned script schedule is distinct from the longer RAM+2 cases |
 | `AnimMissileArc_Step` Q8.8 double-advance affine sprite | live arc displays reducer age−1; its terminal destruction preserves one final matrix/OAM display from reducer age−2 | PIN_MISSILE, all three missiles in both orientations (2026-08-10); includes the initial invisible callback and affine allocation/teardown |
@@ -60,10 +61,12 @@ cites the move whose ledger entry holds the full evidence.
 | Outgoing animation's OAM teardown (incl. enemy shadow) | lands ONE display behind the script-pointer boundary; software OAM is one frame AHEAD of hardware there | DETECT (2026-08-07, "fifth finding") — if a window's first frame catches it, re-pin the window start |
 | `loadspritegfx` VRAM transfer | latches at the window's first frame | DETECT frame-68 |
 
-**Not determined:** `AnimTask_ShakeMonInPlace` — best fit RAM+1 on
-DOUBLE_EDGE's player-back map, contradicted by one opponent-front frame; its
-window there is fully overlapped by rotation + BG blend. First job of the
-DOUBLE_EDGE promotion round: a fresh single-axis probe. Do not guess.
+**Not determined:** other `AnimTask_ShakeMonInPlace` schedules remain open —
+DOUBLE_EDGE's best fit is RAM+1 on its player-back map but is contradicted by
+one opponent-front frame, and that window is fully overlapped by rotation + BG
+blend. HI_JUMP_KICK's own target invocation `(3, 0, 11, 1)` is independently
+resolved at RAM+1 in both orientations; do not generalize it to DOUBLE_EDGE
+without a fresh single-axis probe.
 
 ## Compositor rules
 

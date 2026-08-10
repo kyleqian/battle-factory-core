@@ -1,0 +1,50 @@
+{
+  "schema": "hi-jump-kick-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "HI_JUMP_KICK",
+  "pair": "set 373 Medicham (player-back) -> legal ONIX (opponent-front)",
+  "orientation": "player-back",
+  "scenario": "tools/battle-lab/mechanic-hi-jump-kick-player-medicham-opponent-onix.json",
+  "probe": "tools/compare/hiJumpKickProbe.py",
+  "appStage": { "presentationAge": 0 },
+  "denseWindow": { "startFrame": 79, "endFrame": 169, "frameCount": 91 },
+  "attackerSide": "player",
+  "targetSide": "opponent",
+  "attacker": {
+    "species": "MEDICHAM",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 51 },
+      "animationCenter": { "x": 72, "y": 83 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 10 },
+      "animationCenter": { "x": 176, "y": 42 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 135,
+    "playerMaxHp": 135,
+    "opponentHp": 110,
+    "opponentMaxHp": 110,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "hi-jump-kick-dense-evidence/v1",
+  "evidenceSha256": "6089e28dab1d4b63b37476ed47bf577dbc3ce88ef0aa5004927e0cf3cffff824",
+  "secondFreshEvidenceSha256": "6089e28dab1d4b63b37476ed47bf577dbc3ce88ef0aa5004927e0cf3cffff824",
+  "rawRgbSha256": "5fcea580d7630cc26d0651bca9044b8fa4bebcfb5773e1a5eae788882f4f230e",
+  "changeMap": "tools/compare/evidence/hi-jump-kick-changemap-player.txt",
+  "changeMapSha256": "6d8be6f93682fad1c3004d480e3352afc22ab0e23b259894991890d3e305204e",
+  "acceptance": {
+    "status": "exact",
+    "componentMatching": 91,
+    "framebufferMatching": 91
+  }
+}
