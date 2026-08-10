@@ -3759,6 +3759,372 @@ const itemManipulationAudit = {
   note: "Four independent dedicated opcodes (Cmd_seteffectwithchance's MOVE_EFFECT_STEAL_ITEM/MOVE_EFFECT_KNOCK_OFF arms, Cmd_tryswapitems, Cmd_tryrecycleitem), each certified by its own exact entry-script statement audit and ordered C guard-chain citation -- unlike every other item-axis family in this catalog, there is no single shared MOVEEND state. MOVE_COVET/MOVE_KNOCK_OFF were already Shell-Bell-claimed (power != 0) before this family; this family adds a second, independent category to those two rows and the first category to MOVE_TRICK/MOVE_RECYCLE.",
 };
 
+// Rank 4 -- the two moves whose entry script writes gBattleMons[].ability
+// directly through a dedicated opcode instead of AbilityBattleEffects. Same
+// shape as Rank-3 item-manipulation: no shared MOVEEND state, each row gets
+// its own opcode certificate, per docs/ability-manipulation-family-ground-truth.md.
+const ABILITY_MANIPULATION_ROLEPLAY_CATEGORY = "ability-manipulation-roleplay";
+const ABILITY_MANIPULATION_SKILLSWAP_CATEGORY = "ability-manipulation-skillswap";
+
+const abilityManipulationTrycopyabilityStart = battleScriptCommandsSource.indexOf("static void Cmd_trycopyability(void)\n{");
+const abilityManipulationTryswapabilitiesStart = battleScriptCommandsSource.indexOf("static void Cmd_tryswapabilities(void)\n{");
+if (abilityManipulationTrycopyabilityStart < 0 || abilityManipulationTryswapabilitiesStart < 0) {
+  throw new Error("unable to isolate Cmd_trycopyability/Cmd_tryswapabilities definitions");
+}
+const abilityManipulationTrycopyabilityLine = battleScriptCommandsSource.slice(0, abilityManipulationTrycopyabilityStart).split("\n").length;
+const abilityManipulationTryswapabilitiesLine = battleScriptCommandsSource.slice(0, abilityManipulationTryswapabilitiesStart).split("\n").length;
+
+const abilityManipulationCopyBody = battleScriptCommandsSource.slice(
+  abilityManipulationTrycopyabilityStart,
+  battleScriptCommandsSource.indexOf("static void Cmd_trywish", abilityManipulationTrycopyabilityStart),
+);
+const abilityManipulationSwapBody = battleScriptCommandsSource.slice(
+  abilityManipulationTryswapabilitiesStart,
+  battleScriptCommandsSource.indexOf("static void Cmd_tryimprison", abilityManipulationTryswapabilitiesStart),
+);
+if (abilityManipulationCopyBody.length === 0 || abilityManipulationSwapBody.length === 0) {
+  throw new Error("unable to isolate the two ability-manipulation opcode bodies");
+}
+
+const ABILITY_MANIPULATION_COPY_GUARD_TOKENS = [
+  "gBattleMons[gBattlerTarget].ability != ABILITY_NONE",
+  "gBattleMons[gBattlerTarget].ability != ABILITY_WONDER_GUARD",
+  "gBattleMons[gBattlerAttacker].ability = gBattleMons[gBattlerTarget].ability;",
+  "gLastUsedAbility = gBattleMons[gBattlerTarget].ability;",
+  "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1);",
+] as const;
+const ABILITY_MANIPULATION_SWAP_GUARD_TOKENS = [
+  "gBattleMons[gBattlerAttacker].ability == ABILITY_NONE",
+  "gBattleMons[gBattlerTarget].ability == ABILITY_NONE)",
+  "gBattleMons[gBattlerAttacker].ability == ABILITY_WONDER_GUARD",
+  "gBattleMons[gBattlerTarget].ability == ABILITY_WONDER_GUARD",
+  "gMoveResultFlags & MOVE_RESULT_NO_EFFECT",
+  "u8 abilityAtk = gBattleMons[gBattlerAttacker].ability;",
+  "gBattleMons[gBattlerAttacker].ability = gBattleMons[gBattlerTarget].ability;",
+  "gBattleMons[gBattlerTarget].ability = abilityAtk;",
+] as const;
+citeOrderedTokens(abilityManipulationCopyBody, ABILITY_MANIPULATION_COPY_GUARD_TOKENS, "Cmd_trycopyability");
+citeOrderedTokens(abilityManipulationSwapBody, ABILITY_MANIPULATION_SWAP_GUARD_TOKENS, "Cmd_tryswapabilities");
+
+const abilityManipulationRolePlayAudit = auditExactScriptBlock("BattleScript_EffectRolePlay", [
+  ["attackcanceler", []],
+  ["attackstring", []],
+  ["ppreduce", []],
+  ["accuracycheck", ["BattleScript_ButItFailed", "NO_ACC_CALC_CHECK_LOCK_ON"]],
+  ["trycopyability", ["BattleScript_ButItFailed"]],
+  ["attackanimation", []],
+  ["waitanimation", []],
+  ["printstring", ["STRINGID_PKMNCOPIEDFOE"]],
+  ["waitmessage", ["B_WAIT_TIME_LONG"]],
+  ["goto", ["BattleScript_MoveEnd"]],
+]);
+const abilityManipulationSkillSwapAudit = auditExactScriptBlock("BattleScript_EffectSkillSwap", [
+  ["attackcanceler", []],
+  ["attackstring", []],
+  ["ppreduce", []],
+  ["accuracycheck", ["BattleScript_ButItFailed", "NO_ACC_CALC_CHECK_LOCK_ON"]],
+  ["tryswapabilities", ["BattleScript_ButItFailed"]],
+  ["attackanimation", []],
+  ["waitanimation", []],
+  ["printstring", ["STRINGID_PKMNSWAPPEDABILITIES"]],
+  ["waitmessage", ["B_WAIT_TIME_LONG"]],
+  ["goto", ["BattleScript_MoveEnd"]],
+]);
+
+type AbilityManipulationDefinition = {
+  move: string;
+  category: string;
+  entryKind: string;
+  audit: ReturnType<typeof auditExactScriptBlock>;
+  dispatcher: { locator: string; line: number; call: string };
+  runtimeGuardSignature: { orderedGuards: readonly string[]; sourceTokens: readonly string[] };
+  familyVerification: Record<string, unknown>;
+};
+const ABILITY_MANIPULATION_DEFINITIONS: AbilityManipulationDefinition[] = [
+  {
+    move: "MOVE_ROLE_PLAY",
+    category: ABILITY_MANIPULATION_ROLEPLAY_CATEGORY,
+    entryKind: "accuracycheck-no-acc-calc-check-lock-on-trycopyability",
+    audit: abilityManipulationRolePlayAudit,
+    dispatcher: {
+      locator: "Cmd_trycopyability",
+      line: abilityManipulationTrycopyabilityLine,
+      call: "Cmd_trycopyability()",
+    },
+    runtimeGuardSignature: {
+      orderedGuards: [
+        "target active ability != ABILITY_NONE && target active ability != ABILITY_WONDER_GUARD -> copy executes",
+        "else -> BattleScript_ButItFailed, no-op",
+        "copy: attacker's active ability overwritten with target's current active ability; gLastUsedAbility set to the same value; only the attacker's byte is written, the target is never touched",
+      ],
+      sourceTokens: ABILITY_MANIPULATION_COPY_GUARD_TOKENS,
+    },
+    familyVerification: {
+      scope: "Fresh Battle Scene OFF receipt pair (Kadabra copies Ditto's Limber vs. Kadabra blocked by Shedinja's Wonder Guard) -- the one move in this family with no prior oracle-level evidence.",
+      implementation: "src/engine/battleScriptTrycopyabilityOpcode.ts#createBattleScriptTrycopyabilityOpcodeHandlers",
+      unitTest: "tests/battleScriptTrycopyabilityOpcode.test.ts",
+      batchTest: "tests/abilityManipulationHookJoinBatch.test.ts",
+      oracleEvidenceTest: "tests/abilityManipulationOracleEvidence.test.ts",
+      oracleReceipt: "docs/ability-manipulation-family-ground-truth.md",
+      oracleFixtures: [
+        "tools/battle-lab/mechanic-ability-manipulation-roleplay-copy-off.json",
+        "tools/battle-lab/mechanic-ability-manipulation-roleplay-control-off.json",
+      ],
+      oracleProbe: "tools/probe/verify-ability-manipulation-roleplay-off.py",
+      oracleReceiptFiles: [
+        "tools/probe/receipts/ability-manipulation-roleplay-copy-off.json",
+        "tools/probe/receipts/ability-manipulation-roleplay-control-off.json",
+      ],
+    },
+  },
+  {
+    move: "MOVE_SKILL_SWAP",
+    category: ABILITY_MANIPULATION_SKILLSWAP_CATEGORY,
+    entryKind: "accuracycheck-no-acc-calc-check-lock-on-tryswapabilities",
+    audit: abilityManipulationSkillSwapAudit,
+    dispatcher: {
+      locator: "Cmd_tryswapabilities",
+      line: abilityManipulationTryswapabilitiesLine,
+      call: "Cmd_tryswapabilities()",
+    },
+    runtimeGuardSignature: {
+      orderedGuards: [
+        "both sides' active ability == ABILITY_NONE, or either side's active ability == ABILITY_WONDER_GUARD, or gMoveResultFlags & MOVE_RESULT_NO_EFFECT -> no-op",
+        "else: swap executes -- both active ability bytes exchanged via a local temporary, no gLastUsedAbility write",
+      ],
+      sourceTokens: ABILITY_MANIPULATION_SWAP_GUARD_TOKENS,
+    },
+    familyVerification: {
+      scope: "Pre-existing evidence (not restaged): docs/skill-swap-off-evidence.md's bare-swap witness (active abilities flip 39/5 -> 5/39 at frame 150, persistent party records unchanged, zero RNG) plus mechanic-immunity-limber-skill-swap-off.json's swap-plus-downstream-cure witness (its own asserted abilitySwapped checkpoint, distinct frame from the later status-cure checkpoint).",
+      implementation: "src/engine/battleScriptTryswapabilitiesOpcode.ts#createBattleScriptTryswapabilitiesOpcodeHandlers",
+      unitTest: "tests/battleScriptTryswapabilitiesOpcode.test.ts",
+      batchTest: "tests/abilityManipulationHookJoinBatch.test.ts",
+      oracleEvidenceTest: "tests/abilityManipulationOracleEvidence.test.ts",
+      oracleReceipt: "docs/ability-manipulation-family-ground-truth.md",
+      preExistingEvidence: {
+        oracleReceipt: "docs/skill-swap-off-evidence.md",
+        test: "tests/skillSwapOracleEvidence.test.ts",
+        fixture: "tools/battle-lab/mechanic-skill-swap-girafarig-shuckle-off.json",
+        cases: ["bare-swap active-ability exchange"],
+      },
+      preExistingDownstreamEvidence: {
+        oracleReceipt: "docs/immunity-abilities-ground-truth.md",
+        fixture: "tools/battle-lab/mechanic-immunity-limber-skill-swap-off.json",
+        probe: "tools/probe/probe-immunity-limber-off.py",
+        cases: ["swap-plus-downstream-cure abilitySwapped checkpoint"],
+      },
+    },
+  },
+];
+
+function buildAbilityManipulationEvidence(definition: AbilityManipulationDefinition) {
+  const move = moveBySymbol.get(definition.move)!;
+  const familyEvidence = {
+    category: definition.category,
+    selector: {
+      path: MOVES_PATH,
+      locator: `moves:${definition.move}.effect`,
+      symbol: definition.move,
+      effect: move.effect,
+      guard: "exact Rank-4 selector membership (MOVE_ROLE_PLAY, MOVE_SKILL_SWAP)",
+      derivedFrom: "ability-manipulation-opcode candidate selector: the two Level-50 roster moves whose entry script writes gBattleMons[].ability directly rather than through AbilityBattleEffects",
+    },
+    entryPath: {
+      kind: definition.entryKind,
+      declaredEntryScript: definition.audit.label,
+      source: definition.audit.source,
+      graph: definition.audit.graph,
+      program: definition.audit.program,
+    },
+    dispatcher: {
+      path: BATTLE_SCRIPT_COMMANDS_PATH,
+      locator: definition.dispatcher.locator,
+      line: definition.dispatcher.line,
+      call: definition.dispatcher.call,
+    },
+    runtimeGuardSignature: definition.runtimeGuardSignature,
+    familyVerification: definition.familyVerification,
+  };
+  return {
+    status: "source-proven" as const,
+    id: `ability-manipulation-opcode:${definition.move}`,
+    move: definition.move,
+    entryScript: definition.audit.label,
+    routeKind: definition.entryKind,
+    executionInventory: executableMoveSymbols.has(definition.move) ? "level50-executable" : "level50-roster-only",
+    familyEvidence,
+  };
+}
+
+const abilityManipulationCandidateRows = ABILITY_MANIPULATION_DEFINITIONS.map((definition) => {
+  const move = moveBySymbol.get(definition.move)!;
+  return {
+    move: move.move,
+    moveId: move.id,
+    effect: move.effect,
+    power: move.power,
+    entryScript: topologyByMove.get(move.move)!.entryScript,
+    executionInventory: executableMoveSymbols.has(move.move) ? "level50-executable" : "level50-roster-only",
+  };
+});
+if (abilityManipulationCandidateRows.length !== 2
+  || JSON.stringify(abilityManipulationCandidateRows.map((row) => row.move)) !== JSON.stringify(["MOVE_ROLE_PLAY", "MOVE_SKILL_SWAP"])) {
+  throw new Error("Ability-manipulation selector must be exactly the two Rank-4 moves in order");
+}
+const abilityManipulationEvidenceByMove = new Map<string, ReturnType<typeof buildAbilityManipulationEvidence>>();
+for (const definition of ABILITY_MANIPULATION_DEFINITIONS) {
+  abilityManipulationEvidenceByMove.set(definition.move, buildAbilityManipulationEvidence(definition));
+}
+const abilityManipulationSourceProvenRows = [...abilityManipulationEvidenceByMove.keys()];
+if (abilityManipulationSourceProvenRows.length !== 2) {
+  throw new Error("Ability-manipulation promotion must be both rows, no exceptions");
+}
+const abilityManipulationAudit = {
+  status: "source-proven-family" as const,
+  candidateCount: abilityManipulationCandidateRows.length,
+  sourceMoveCandidates: abilityManipulationCandidateRows,
+  sourceProvenRows: abilityManipulationSourceProvenRows,
+  sourceExceptionRows: [] as unknown[],
+  blockers: [] as unknown[],
+  routeWitnesses: [...abilityManipulationEvidenceByMove.values()],
+  note: "Two independent dedicated opcodes (Cmd_trycopyability, Cmd_tryswapabilities), each certified by its own exact entry-script statement audit and ordered C guard-chain citation -- like Rank-3 item-manipulation, there is no shared MOVEEND state.",
+};
+
+// Rank 5 -- the five moves whose own entry script embeds a pre-emptive
+// jumpifability BS_TARGET, ABILITY_OWN_TEMPO guard before any generic
+// AbilityBattleEffects/Cmd_moveend involvement, per
+// docs/own-tempo-guard-family-ground-truth.md. A refinement carved out of
+// the Immunity family's candidate pool (Rank 2), not a MOVEEND state.
+const OWN_TEMPO_GUARD_CATEGORY = "own-tempo-guard";
+const ownTempoGuardDispatcherLine = sourceLine(battleScriptCommandsSource, "static void Cmd_jumpifability(void)", "Cmd_jumpifability");
+
+function ownTempoGuardHandoff(statement: GraphStatement) {
+  if (statement.mnemonic === "jumpifability"
+    && statement.operandTokens[0] === "BS_TARGET"
+    && statement.operandTokens[1] === "ABILITY_OWN_TEMPO") {
+    return {
+      kind: "jumpifability-own-tempo",
+      line: statement.line,
+      redirect: statement.operandTokens[2]!,
+    };
+  }
+  return null;
+}
+
+function ownTempoGuardRouteEvidence(move: Move, entryScript: string) {
+  const path = onDamageRoutePath(
+    entryScript,
+    (statement) => ownTempoGuardHandoff(statement) !== null,
+    "a jumpifability BS_TARGET, ABILITY_OWN_TEMPO guard",
+  );
+  const handoffPosition = path.positions.at(-1)!;
+  const handoff = ownTempoGuardHandoff(onDamageStatement(handoffPosition));
+  if (handoff === null) throw new Error(`${move.move} route handoff disappeared`);
+  const witness = onDamageRouteWitnessPath(path);
+  const isConfuseScript = move.move === "MOVE_CONFUSE_RAY" || move.move === "MOVE_SWEET_KISS";
+  const familyEvidence = {
+    category: OWN_TEMPO_GUARD_CATEGORY,
+    selector: {
+      path: BATTLE_SCRIPT_SOURCE_PATH,
+      locator: "jumpifability BS_TARGET, ABILITY_OWN_TEMPO",
+      symbol: move.move,
+      guard: "the move's own entry script reaches a jumpifability BS_TARGET, ABILITY_OWN_TEMPO, <fail-script> statement",
+      derivedFrom: "own-tempo-guard candidate selector: the exact five Level-50 roster moves (MOVE_CONFUSE_RAY, MOVE_SWEET_KISS, MOVE_SWAGGER, MOVE_FLATTER, MOVE_TEETER_DANCE) whose own entry script contains a jumpifability ABILITY_OWN_TEMPO branch, per docs/gate6-family-worklist.md Rank 5",
+    },
+    entryPath: {
+      kind: handoff.kind,
+      source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: requireGraphLabel(entryScript).line },
+      declaredEntryScript: entryScript,
+      graph: witness.graph,
+      program: witness.program,
+      guardLine: handoff.line,
+      redirect: handoff.redirect,
+    },
+    dispatcher: {
+      path: BATTLE_SCRIPT_COMMANDS_PATH,
+      locator: "Cmd_jumpifability",
+      line: ownTempoGuardDispatcherLine,
+      call: "Cmd_jumpifability() BS_TARGET operand resolution",
+    },
+    runtimeGuardSignature: {
+      redirect: handoff.redirect,
+      orderedGuards: [
+        "target active ability == ABILITY_OWN_TEMPO -> redirect to the guard's own fail script (BattleScript_OwnTempoPrevents or, for Teeter Dance, BattleScript_TeeterDanceOwnTempoPrevents)",
+        "else -> fall through to the move's own ordinary confusion-application path",
+      ],
+    },
+    familyVerification: {
+      scope: isConfuseScript
+        ? (move.move === "MOVE_CONFUSE_RAY"
+          ? "Fresh Battle Scene OFF receipt pair (Zubat's Confuse Ray blocked by Smeargle's Own Tempo vs. a Ditto/Limber control where confusion applies normally); the guard's position before accuracycheck means the block arm skips the accuracy Random() call entirely."
+          : "Shares BattleScript_EffectConfuse verbatim with MOVE_CONFUSE_RAY -- same guard, same script, no independent receipt; the Confuse Ray receipt pair is this row's own family-level evidence too.")
+        : "Not independently receipted this step (docs/own-tempo-guard-family-ground-truth.md derives the guard's exact position from source only); the Confuse Ray receipt plus this row's own route/guard certificate is the family-level evidence for the shared jumpifability opcode.",
+      implementation: "src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts#createJumpifabilityHandler",
+      unitTest: move.move === "MOVE_SWAGGER" || move.move === "MOVE_FLATTER"
+        ? "tests/battleScriptJumpifconfusedandstatmaxedOpcode.test.ts"
+        : "tests/battleScriptStatusPrimaryOpcode.test.ts",
+      batchTest: "tests/ownTempoGuardHookJoinBatch.test.ts",
+      oracleEvidenceTest: "tests/ownTempoGuardOracleEvidence.test.ts",
+      oracleReceipt: "docs/own-tempo-guard-family-ground-truth.md",
+      ...(isConfuseScript ? {
+        oracleFixtures: [
+          "tools/battle-lab/mechanic-own-tempo-guard-confuseray-block-off.json",
+          "tools/battle-lab/mechanic-own-tempo-guard-confuseray-control-off.json",
+        ],
+        oracleProbe: "tools/probe/verify-own-tempo-guard-confuseray-off.py",
+        oracleReceiptFiles: [
+          "tools/probe/receipts/own-tempo-guard-confuseray-block-off.json",
+          "tools/probe/receipts/own-tempo-guard-confuseray-control-off.json",
+        ],
+      } : {}),
+    },
+  };
+  return {
+    status: "source-proven" as const,
+    id: `own-tempo-guard:${move.move}`,
+    move: move.move,
+    entryScript,
+    routeKind: handoff.kind,
+    executionInventory: executableMoveSymbols.has(move.move) ? "level50-executable" : "level50-roster-only",
+    familyEvidence,
+  };
+}
+
+const OWN_TEMPO_GUARD_MOVES = ["MOVE_CONFUSE_RAY", "MOVE_SWEET_KISS", "MOVE_SWAGGER", "MOVE_FLATTER", "MOVE_TEETER_DANCE"];
+const ownTempoGuardCandidateRows = OWN_TEMPO_GUARD_MOVES.map((symbol) => {
+  const move = moveBySymbol.get(symbol)!;
+  return {
+    move: move.move,
+    moveId: move.id,
+    effect: move.effect,
+    power: move.power,
+    entryScript: topologyByMove.get(move.move)!.entryScript,
+    executionInventory: executableMoveSymbols.has(move.move) ? "level50-executable" : "level50-roster-only",
+  };
+});
+if (ownTempoGuardCandidateRows.length !== 5
+  || JSON.stringify(ownTempoGuardCandidateRows.map((row) => row.move)) !== JSON.stringify(OWN_TEMPO_GUARD_MOVES)) {
+  throw new Error("Own-Tempo-guard selector must be exactly the five Rank-5 moves in order");
+}
+const ownTempoGuardEvidenceByMove = new Map<string, ReturnType<typeof ownTempoGuardRouteEvidence>>();
+for (const candidate of ownTempoGuardCandidateRows) {
+  ownTempoGuardEvidenceByMove.set(candidate.move, ownTempoGuardRouteEvidence(moveBySymbol.get(candidate.move)!, candidate.entryScript));
+}
+const ownTempoGuardSourceProvenRows = [...ownTempoGuardEvidenceByMove.keys()];
+if (ownTempoGuardSourceProvenRows.length !== 5) {
+  throw new Error("Own-Tempo-guard promotion must be all five rows, no exceptions");
+}
+const ownTempoGuardAudit = {
+  status: "source-proven-family" as const,
+  candidateCount: ownTempoGuardCandidateRows.length,
+  sourceMoveCandidates: ownTempoGuardCandidateRows,
+  sourceProvenRows: ownTempoGuardSourceProvenRows,
+  sourceExceptionRows: [] as unknown[],
+  blockers: [] as unknown[],
+  routeWitnesses: [...ownTempoGuardEvidenceByMove.values()],
+  note: "Five moves whose own entry script embeds a jumpifability BS_TARGET, ABILITY_OWN_TEMPO guard before any generic AbilityBattleEffects/Cmd_moveend involvement. Confuse Ray/Sweet Kiss share one script and guard verbatim; Swagger/Flatter each gate only the confusion half behind an unconditional stat raise that precedes the guard; Teeter Dance's guard sits inside its own per-target loop, reached after an unconditional self-exclusion check that has no self-hit path (docs/own-tempo-guard-family-ground-truth.md corrects the worklist's self-hit claim).",
+};
+
 const records = rosterMoveSymbols.map((symbol) => {
   const move = moveBySymbol.get(symbol)!;
   const script = topologyByMove.get(symbol) ?? null;
@@ -3826,13 +4192,24 @@ const records = rosterMoveSymbols.map((symbol) => {
   if (immunityEvidence !== undefined) {
     sourceProvenFamilies.push(immunityEvidence.familyEvidence);
   }
+  const abilityManipulationEvidence = abilityManipulationEvidenceByMove.get(symbol);
+  if (abilityManipulationEvidence !== undefined) {
+    sourceProvenFamilies.push(abilityManipulationEvidence.familyEvidence);
+  }
+  const ownTempoGuardEvidence = ownTempoGuardEvidenceByMove.get(symbol);
+  if (ownTempoGuardEvidence !== undefined) {
+    sourceProvenFamilies.push(ownTempoGuardEvidence.familyEvidence);
+  }
+  const abilitySourceException = IMMUNITY_EXCEPTION_ROWS.find((exception) => exception.move === symbol) ?? null;
   const abilityHook = sourceProvenFamilies.length === 0
     ? {
       potentialCategories: null,
       status: "unsupported",
       supportedCategories: [],
       unsupportedCategories: null,
-      reason: "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+      reason: abilitySourceException?.reason
+        ?? "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+      ...(abilitySourceException !== null ? { sourceException: abilitySourceException } : {}),
     }
     : {
       potentialCategories: null,
@@ -3968,6 +4345,19 @@ const immunityRosterRecords = sourceProvenAbilityRecords.filter((record) => reco
 if (immunityRosterRecords.length !== immunitySourceProvenRows.length
   || immunityRosterRecords.some((record) => !immunitySourceProvenRows.includes(record.move))) {
   throw new Error("Immunity source-proven roster accounting does not match the finite candidate census");
+}
+const ABILITY_MANIPULATION_CATEGORIES = new Set([ABILITY_MANIPULATION_ROLEPLAY_CATEGORY, ABILITY_MANIPULATION_SKILLSWAP_CATEGORY]);
+const abilityManipulationRosterRecords = sourceProvenAbilityRecords.filter((record) =>
+  (record.hooks.ability.supportedCategories as string[]).some((category) => ABILITY_MANIPULATION_CATEGORIES.has(category)));
+if (abilityManipulationRosterRecords.length !== 2
+  || JSON.stringify(abilityManipulationRosterRecords.map((record) => record.move).sort()) !== JSON.stringify(["MOVE_ROLE_PLAY", "MOVE_SKILL_SWAP"])) {
+  throw new Error("Ability-manipulation source-proven roster accounting does not match the finite two-move census");
+}
+const ownTempoGuardRosterRecords = sourceProvenAbilityRecords.filter((record) => record.hooks.ability.supportedCategories.includes(OWN_TEMPO_GUARD_CATEGORY));
+if (ownTempoGuardRosterRecords.length !== 5
+  || JSON.stringify(ownTempoGuardRosterRecords.map((record) => record.move).sort())
+    !== JSON.stringify([...OWN_TEMPO_GUARD_MOVES].sort())) {
+  throw new Error("Own-Tempo-guard source-proven roster accounting does not match the finite five-move census");
 }
 const sourceProvenAbilityCategories = sourceProvenAbilityRecords.flatMap((record) => record.hooks.ability.supportedCategories);
 const absorbingCoverageByCategory = Object.fromEntries(ABSORBING_HOOK_DEFINITIONS.map((definition) => {
@@ -4248,7 +4638,7 @@ const output = {
       ABILITY_CONSTANTS_PATH,
       "reference/pokeemerald/include/constants/pokemon.h",
     ],
-    note: `Catalog join plus an intentionally partial source dispatcher inventory. ${records.filter((record) => record.hooks.item.status === "unsupported").length} per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the ${kingsRockSourceProvenRows.length}-row King's Rock family, the ${shellBellSourceProvenRows.length}-row Shell Bell family, the ${itemMoveEndSourceProvenRows.length}-row item-move-end status-cure family, the 4-row item-manipulation-opcode family, exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, ${synchronizeSourceProvenRows.length} Synchronize status candidates, the one-row Attract/Oblivious family, the two-row Explosion/Damp family, and the ${immunitySourceProvenRows.length}-row Immunity status-cure family carry graph/program/source-handoff evidence. King's Rock retains Tickle as one explicit zero-damage exception; Shell Bell retains Future Sight as a distinct IGNORE_SHELL_BELL exception; item-move-end retains Assist/Metronome as dynamic-dispatch exceptions; item-manipulation has zero exceptions (all four Rank-3 rows promoted); no per-move oracle receipts are fabricated.`,
+    note: `Catalog join plus an intentionally partial source dispatcher inventory. ${records.filter((record) => record.hooks.item.status === "unsupported").length} per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the ${kingsRockSourceProvenRows.length}-row King's Rock family, the ${shellBellSourceProvenRows.length}-row Shell Bell family, the ${itemMoveEndSourceProvenRows.length}-row item-move-end status-cure family, the 4-row item-manipulation-opcode family, exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, ${synchronizeSourceProvenRows.length} Synchronize status candidates, the one-row Attract/Oblivious family, the two-row Explosion/Damp family, the ${immunitySourceProvenRows.length}-row Immunity status-cure family, the 2-row ability-manipulation-opcode family, and the 5-row own-tempo-guard family carry graph/program/source-handoff evidence. King's Rock retains Tickle as one explicit zero-damage exception; Shell Bell retains Future Sight as a distinct IGNORE_SHELL_BELL exception; item-move-end and Immunity both retain Assist/Metronome as dynamic-dispatch exceptions (the ability axis's only two remaining gaps); item-manipulation and ability-manipulation each have zero exceptions (all rows promoted); own-tempo-guard has zero exceptions (all five rows promoted); no per-move oracle receipts are fabricated.`,
   },
   coverage: {
     level50Roster: {
@@ -4303,9 +4693,11 @@ const output = {
         tryinfatuatingOblivious: tryinfatuatingObliviousAudit,
         tryexplosionDamp: tryexplosionDampAudit,
         immunity: immunityAudit,
+        abilityManipulation: abilityManipulationAudit,
+        ownTempoGuard: ownTempoGuardAudit,
         completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "The exact Level-50 Soundproof moves-block family, audited absorbing dispatcher candidates, both ON_DAMAGE families, Synchronize, Attract/Oblivious, Explosion/Damp, and the 99-row Immunity status-cure family are source-proven with separate route/guard certificates. Future Sight has one explicit delayed-MOVEEND exception for Color Change only; the newer families have no candidate route exceptions or blockers, while distinct contact ability outcome gaps, accuracy, and all other ability dispatcher families remain intentionally unsupported/null per move.",
+        reason: "The exact Level-50 Soundproof moves-block family, audited absorbing dispatcher candidates, both ON_DAMAGE families, Synchronize, Attract/Oblivious, Explosion/Damp, the 99-row Immunity status-cure family, the 2-row ability-manipulation-opcode family (Cmd_trycopyability/Cmd_tryswapabilities), and the 5-row own-tempo-guard family (jumpifability BS_TARGET, ABILITY_OWN_TEMPO) are source-proven with separate route/guard certificates. Future Sight has one explicit delayed-MOVEEND exception for Color Change only; Assist/Metronome remain explicit dynamic-dispatch exceptions on the Immunity family (the ability axis's only two remaining gaps); the newer families have no candidate route exceptions or blockers, while distinct contact ability outcome gaps, accuracy, and all other ability dispatcher families remain intentionally unsupported/null per move.",
       },
     },
   },

@@ -335,9 +335,9 @@ describe("Level-50 move parameterization manifest", () => {
     });
     expect(manifest.coverage.joins).toMatchObject({
       battleScriptGraphLabels: 300, battleScriptProgramLabels: 300, animationScripts: 300,
-      itemHookCategories: 298, abilityHookCategories: 445,
+      itemHookCategories: 298, abilityHookCategories: 452,
       itemHookUnsupportedCategories: null, abilityHookUnsupportedCategories: null,
-      itemHookUnsupportedRows: 2, abilityHookUnsupportedRows: 9, abilityHookSourceProvenRows: 291, itemHookSourceProvenRows: 298,
+      itemHookUnsupportedRows: 2, abilityHookUnsupportedRows: 2, abilityHookSourceProvenRows: 298, itemHookSourceProvenRows: 298,
     });
     expect(manifest.coverage.hookCatalogs).toMatchObject({
       item: {
@@ -884,6 +884,16 @@ describe("Level-50 move parameterization manifest", () => {
       if (expectedSourceProven.has(move) || IMMUNITY_EXCLUDED.has(move)) continue;
       expectedSourceProven.set(move, [...(expectedSourceProven.get(move) ?? []), "moveend-immunity-abilities"]);
     }
+    const RANK4_ABILITY_MANIPULATION_CATEGORY: Record<string, string> = {
+      MOVE_ROLE_PLAY: "ability-manipulation-roleplay",
+      MOVE_SKILL_SWAP: "ability-manipulation-skillswap",
+    };
+    for (const move of Object.keys(RANK4_ABILITY_MANIPULATION_CATEGORY)) {
+      expectedSourceProven.set(move, [...(expectedSourceProven.get(move) ?? []), RANK4_ABILITY_MANIPULATION_CATEGORY[move]!]);
+    }
+    for (const move of ["MOVE_CONFUSE_RAY", "MOVE_SWEET_KISS", "MOVE_SWAGGER", "MOVE_FLATTER", "MOVE_TEETER_DANCE"]) {
+      expectedSourceProven.set(move, [...(expectedSourceProven.get(move) ?? []), "own-tempo-guard"]);
+    }
 
     const { graph, program } = graphAndProgram();
     const graphByLabel = new Map(graph.labels.map((label) => [label.name, label]));
@@ -942,7 +952,7 @@ describe("Level-50 move parameterization manifest", () => {
         expect(record.hooks.ability.evidence?.families.map((family) => family.category)).toEqual(expectedCategories);
       }
     }
-    expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(9);
+    expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(2);
     expect(manifest.moves.filter((record) => record.hooks.item.status === "unsupported")).toHaveLength(2);
   });
 

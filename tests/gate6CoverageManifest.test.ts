@@ -32,6 +32,10 @@ const ITEM_MANIPULATION_KNOCKOFF_CATEGORY = "item-manipulation-knockoff";
 const ITEM_MANIPULATION_CATEGORIES = [
   ITEM_MANIPULATION_STEAL_CATEGORY, ITEM_MANIPULATION_SWAP_CATEGORY, ITEM_MANIPULATION_RECYCLE_CATEGORY, ITEM_MANIPULATION_KNOCKOFF_CATEGORY,
 ] as const;
+const ABILITY_MANIPULATION_ROLEPLAY_CATEGORY = "ability-manipulation-roleplay";
+const ABILITY_MANIPULATION_SKILLSWAP_CATEGORY = "ability-manipulation-skillswap";
+const ABILITY_MANIPULATION_CATEGORIES = [ABILITY_MANIPULATION_ROLEPLAY_CATEGORY, ABILITY_MANIPULATION_SKILLSWAP_CATEGORY] as const;
+const OWN_TEMPO_GUARD_CATEGORY = "own-tempo-guard";
 const SOUNDPROOF_ROSTER_MOVES = [
   "MOVE_ROAR", "MOVE_SING", "MOVE_SUPERSONIC", "MOVE_SCREECH", "MOVE_SNORE",
   "MOVE_UPROAR", "MOVE_METAL_SOUND", "MOVE_GRASS_WHISTLE", "MOVE_HYPER_VOICE",
@@ -209,6 +213,18 @@ const ITEM_MANIPULATION_PROOF_PATHS = [
   "tests/itemManipulationOracleEvidence.test.ts",
   "docs/item-manipulation-family-ground-truth.md",
 ] as const;
+const ABILITY_MANIPULATION_PROOF_PATHS = [
+  "reference/pokeemerald/src/battle_script_commands.c",
+  "tests/abilityManipulationHookJoinBatch.test.ts",
+  "tests/abilityManipulationOracleEvidence.test.ts",
+  "docs/ability-manipulation-family-ground-truth.md",
+] as const;
+const OWN_TEMPO_GUARD_PROOF_PATHS = [
+  "reference/pokeemerald/src/battle_script_commands.c",
+  "tests/ownTempoGuardHookJoinBatch.test.ts",
+  "tests/ownTempoGuardOracleEvidence.test.ts",
+  "docs/own-tempo-guard-family-ground-truth.md",
+] as const;
 
 const EXPLICIT_STATE_BEHAVIOR_ROWS = [
   [
@@ -294,6 +310,8 @@ function sourceProvenPathsFor(category: string): readonly string[] {
   if (category === IMMUNITY_CATEGORY) return IMMUNITY_PROOF_PATHS;
   if (category === ITEM_MOVE_END_CATEGORY) return ITEM_MOVE_END_PROOF_PATHS;
   if ((ITEM_MANIPULATION_CATEGORIES as readonly string[]).includes(category)) return ITEM_MANIPULATION_PROOF_PATHS;
+  if ((ABILITY_MANIPULATION_CATEGORIES as readonly string[]).includes(category)) return ABILITY_MANIPULATION_PROOF_PATHS;
+  if (category === OWN_TEMPO_GUARD_CATEGORY) return OWN_TEMPO_GUARD_PROOF_PATHS;
   throw new Error(`unknown source-proven hook category ${category}`);
 }
 
@@ -768,9 +786,9 @@ describe("Gate-6 mechanics coverage manifest", () => {
       const axisSummary = record(perMoveHookJoins[axis]);
       expect(rows).toHaveLength(parameterizationData.moves.length);
       expect(axisSummary).toEqual({ rows: rows.length, unsupported: sourceUnsupported, gaps: sourceUnsupported });
-      expect(sourceUnsupported).toBe(axis === "item" ? 2 : 9);
+      expect(sourceUnsupported).toBe(2);
     }
-    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 11, gaps: 11 });
+    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 4, gaps: 4 });
     expect(record(summary.kingsRockMoveEnd)).toEqual({
       candidates: 106,
       promotedRows: 105,
@@ -865,7 +883,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const sourceProven = parameterizationData.moves
       .filter((move) => move.hooks.ability.status === SOURCE_PROVEN_FAMILY_STATUS)
       .map((move) => move.move);
-    expect(sourceProven).toHaveLength(291);
+    expect(sourceProven).toHaveLength(298);
     const sourceSoundproof = parameterizationData.moves
       .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(SOUNDPROOF_MOVES_BLOCK_CATEGORY))
       .map((move) => move.move)
@@ -894,11 +912,19 @@ describe("Gate-6 mechanics coverage manifest", () => {
       .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(IMMUNITY_CATEGORY))
       .map((move) => move.move);
     expect(sourceImmunity).toHaveLength(97);
-    const uniqueNonSoundproofProven = new Set([...sourceAbsorbing, ...sourceColorChange, ...sourceSynchronize, ...sourceAttract, ...sourceImmunity]
+    const sourceAbilityManipulation = parameterizationData.moves
+      .filter((move) => array(move.hooks.ability.supportedCategories).map(String).some((category) => (ABILITY_MANIPULATION_CATEGORIES as readonly string[]).includes(category)))
+      .map((move) => move.move);
+    expect(sourceAbilityManipulation).toEqual(["MOVE_ROLE_PLAY", "MOVE_SKILL_SWAP"]);
+    const sourceOwnTempoGuard = parameterizationData.moves
+      .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(OWN_TEMPO_GUARD_CATEGORY))
+      .map((move) => move.move);
+    expect(sourceOwnTempoGuard).toHaveLength(5);
+    const uniqueNonSoundproofProven = new Set([...sourceAbsorbing, ...sourceColorChange, ...sourceSynchronize, ...sourceAttract, ...sourceImmunity, ...sourceAbilityManipulation, ...sourceOwnTempoGuard]
       .filter((move) => !sourceSoundproof.includes(move)));
     expect(soundproofOnlyAbilityGaps - Number(record(perMoveHookJoins.ability).gaps)).toBe(uniqueNonSoundproofProven.size);
     expect(parameterizationData.moves.length + soundproofOnlyAbilityGaps).toBe(591);
-    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(11);
+    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(4);
     const sourceKingsRock = parameterizationData.moves
       .filter((move) => array(move.hooks.item.supportedCategories).map(String).includes(KINGS_ROCK_CATEGORY))
       .map((move) => move.move);
@@ -1110,14 +1136,16 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(oracle.receiptGaps).toBe(0);
     expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*2 item join gaps\*\* and \*\*9 ability join gaps\*\*/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*2 item join gaps\*\* and \*\*2 ability join gaps\*\*/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/King's Rock checkpoint: \*\*106\*\* finite Level-50 flag selectors, \*\*105\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Shell Bell checkpoint: \*\*183\*\* finite Level-50 power != 0 candidates.*\*\*182\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Item-move-end checkpoint: \*\*116\*\* finite Level-50 item-axis candidates.*\*\*114\*\* promoted to MOVEEND_ITEM_EFFECTS_ALL state 11/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Item-manipulation checkpoint: \*\*4\*\* finite Rank-3 direct-opcode candidates.*\*\*4\*\* promoted via four independent own-opcode certificates/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/298 item rows are source-proven/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/291 ability rows are source-proven/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/298 ability rows are source-proven/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Immunity checkpoint: \*\*99\*\* finite Level-50 ability-axis candidates, \*\*97\*\* promoted/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Ability-manipulation checkpoint: \*\*2\*\* finite Rank-4 direct-opcode candidates.*\*\*2\*\* promoted via two independent own-opcode certificates/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Own-Tempo-guard checkpoint: \*\*5\*\* finite Rank-5 candidates.*\*\*5\*\* promoted to a jumpifability BS_TARGET, ABILITY_OWN_TEMPO route certificate/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Synchronize checkpoint: \*\*30\*\* finite Level-50 candidates, \*\*30\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Attract\/Oblivious checkpoint: \*\*1\*\* finite EFFECT_ATTRACT candidate, \*\*1\*\* promoted, \*\*0\*\* exceptions, \*\*0\*\* roster-only candidates, and \*\*0\*\* active blockers/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Explosion\/Damp checkpoint: \*\*2\*\* finite EFFECT_EXPLOSION candidates, \*\*2\*\* promoted, \*\*0\*\* exceptions, \*\*0\*\* roster-only candidates, \*\*25\*\* selectable occurrences \/ \*\*26\*\* full carrier rows, and \*\*0\*\* active blockers/);

@@ -279,6 +279,19 @@ remainder needs a new ability family.
   a strictly self-contained opcode pair with no shared machinery, while
   Rank 5 is a refinement carved out of Rank 2's territory and is best
   staged alongside it.
+- **STATUS (2026-08-10, main worker): promoted.** Both candidates promoted
+  (ability join gaps 9 → 7 from this family alone, then 2 once Rank 5 also
+  landed same step). Each row gets its own opcode certificate (exact
+  entry-script statement audit + ordered C guard-chain citation into
+  `Cmd_trycopyability`/`Cmd_tryswapabilities`) — no shared MOVEEND state,
+  same shape as Rank 3. Evidence per `docs/ability-manipulation-family-ground-truth.md`:
+  fresh Role Play Battle Scene OFF receipt pair (Kadabra copies Ditto's
+  Limber vs. Kadabra blocked by Shedinja's Wonder Guard, both rerun live
+  this step and reproduced byte-identically); Skill Swap reuses
+  pre-existing evidence (`docs/skill-swap-off-evidence.md`'s bare-swap
+  witness plus the Immunity family's swap-plus-downstream-cure witness),
+  not restaged. Tests: `tests/abilityManipulationHookJoinBatch.test.ts`,
+  `tests/abilityManipulationOracleEvidence.test.ts`.
 
 ### Rank 5 — Ability: pre-emptive Own Tempo confusion-guard family
 
@@ -324,6 +337,32 @@ remainder needs a new ability family.
 - **Rank rationale.** Smallest count and lowest independent novelty — it is
   a refinement carved out of Rank 2's generic family, not a new engine
   surface — so it ranks last of the five despite being fully specified.
+- **STATUS (2026-08-10, main worker): promoted.** All 5 candidates promoted
+  through a graph/program route from their entry script to a `jumpifability
+  BS_TARGET, ABILITY_OWN_TEMPO` statement — a route-certificate shape (not a
+  MOVEEND state), reusing the same BFS route infra as King's Rock/Shell
+  Bell/Immunity. Two ground-truth corrections landed with the evidence, both
+  respected in the certificates: Teeter Dance has no self-hit path (its own
+  `jumpifbyteequal gBattlerAttacker, gBattlerTarget` unconditionally skips
+  the attacker's slot before the Own Tempo check ever runs, contradicting
+  this section's original self-hit claim above); Swagger/Flatter's stat
+  raise is unconditional and precedes the guard (only confusion is gated).
+  Evidence per `docs/own-tempo-guard-family-ground-truth.md`: fresh Confuse
+  Ray Battle Scene OFF receipt pair (Zubat blocked by Smeargle's Own Tempo
+  vs. a Ditto/Limber control, rerun live this step and reproduced
+  byte-identically; block=6/control=10 RNG calls, the guard's
+  before-accuracycheck position skips the accuracy roll entirely on the
+  block arm). Sweet Kiss shares `BattleScript_EffectConfuse` verbatim and
+  reuses that same receipt; Swagger/Flatter/Teeter Dance are route/guard-
+  certified from source only, not independently receipted this step. Tests:
+  `tests/ownTempoGuardHookJoinBatch.test.ts`,
+  `tests/ownTempoGuardOracleEvidence.test.ts`. With Rank 4 landed in the
+  same step, the ability axis closes to exactly 2 gaps
+  (`MOVE_ASSIST`/`MOVE_METRONOME`, the Immunity family's dynamic-dispatch
+  exceptions, not members of either Rank 4 or Rank 5's selectors) — this
+  section's "closes the ability axis completely" prediction is superseded
+  by that honest two-row remainder, the identical shape the item axis
+  landed at after Rank 3.
 
 ## 2. Exclusions — provably out of the per-move axis, not "work"
 

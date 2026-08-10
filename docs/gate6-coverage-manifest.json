@@ -3,7 +3,7 @@
   "gate6": {
     "closed": false,
     "verdict": "OPEN — this first manifest exposes coverage and receipt gaps; it does not claim Gate 6 closed.",
-    "nextAcceptanceUnit": "Per-move hook-join family: Choose one source-bounded item or ability hook-join family and account for complete Battle Script reachability, including implicit fallthrough and source branch guards. Do not promote the remaining explicit gaps: 2 item joins and 9 ability joins remain unsupported.",
+    "nextAcceptanceUnit": "Per-move hook-join family: Choose one source-bounded item or ability hook-join family and account for complete Battle Script reachability, including implicit fallthrough and source branch guards. Do not promote the remaining explicit gaps: 2 item joins and 2 ability joins remain unsupported.",
     "interpretation": "Static executable reachability, engine references, Tier-1 proofs, and oracle receipts are separate evidence classes."
   },
   "generatedBy": "node --experimental-strip-types tools/report/gate6-coverage-manifest.ts",
@@ -121,7 +121,33 @@
     "tests/battleScriptTryswapitemsOpcode.test.ts",
     "src/engine/battleScriptTryrecycleitemOpcode.ts",
     "tests/battleScriptTryrecycleitemOpcode.test.ts",
-    "tests/battleScriptFamilyBCluster4Opcode.test.ts"
+    "tests/battleScriptFamilyBCluster4Opcode.test.ts",
+    "docs/ability-manipulation-family-ground-truth.md",
+    "tests/abilityManipulationHookJoinBatch.test.ts",
+    "tests/abilityManipulationOracleEvidence.test.ts",
+    "tools/battle-lab/mechanic-ability-manipulation-roleplay-copy-off.json",
+    "tools/battle-lab/mechanic-ability-manipulation-roleplay-control-off.json",
+    "tools/probe/verify-ability-manipulation-roleplay-off.py",
+    "tools/probe/receipts/ability-manipulation-roleplay-copy-off.json",
+    "tools/probe/receipts/ability-manipulation-roleplay-control-off.json",
+    "docs/skill-swap-off-evidence.md",
+    "tests/skillSwapOracleEvidence.test.ts",
+    "tools/battle-lab/mechanic-skill-swap-girafarig-shuckle-off.json",
+    "src/engine/battleScriptTrycopyabilityOpcode.ts",
+    "tests/battleScriptTrycopyabilityOpcode.test.ts",
+    "src/engine/battleScriptTryswapabilitiesOpcode.ts",
+    "tests/battleScriptTryswapabilitiesOpcode.test.ts",
+    "docs/own-tempo-guard-family-ground-truth.md",
+    "tests/ownTempoGuardHookJoinBatch.test.ts",
+    "tests/ownTempoGuardOracleEvidence.test.ts",
+    "tools/battle-lab/mechanic-own-tempo-guard-confuseray-block-off.json",
+    "tools/battle-lab/mechanic-own-tempo-guard-confuseray-control-off.json",
+    "tools/probe/verify-own-tempo-guard-confuseray-off.py",
+    "tools/probe/receipts/own-tempo-guard-confuseray-block-off.json",
+    "tools/probe/receipts/own-tempo-guard-confuseray-control-off.json",
+    "src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts",
+    "tests/battleScriptStatusPrimaryOpcode.test.ts",
+    "tests/battleScriptJumpifconfusedandstatmaxedOpcode.test.ts"
   ],
   "summary": {
     "effects": {
@@ -143,13 +169,13 @@
       },
       "ability": {
         "rows": 300,
-        "unsupported": 9,
-        "gaps": 9
+        "unsupported": 2,
+        "gaps": 2
       },
       "total": {
         "rows": 600,
-        "unsupported": 11,
-        "gaps": 11
+        "unsupported": 4,
+        "gaps": 4
       }
     },
     "onDamageMoveEnd": {
@@ -223,6 +249,18 @@
       "exceptions": 2,
       "blockers": 0,
       "rosterOnlyCandidates": 9
+    },
+    "abilityManipulation": {
+      "candidates": 2,
+      "promotedRows": 2,
+      "exceptions": 0,
+      "blockers": 0
+    },
+    "ownTempoGuard": {
+      "candidates": 5,
+      "promotedRows": 5,
+      "exceptions": 0,
+      "blockers": 0
     },
     "stateFamilies": {
       "total": 55,
@@ -61353,9 +61391,11 @@
           "effect": "EFFECT_CONFUSE",
           "effectId": 49,
           "entryScript": "BattleScript_EffectConfuse",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "own-tempo-guard"
+          ],
+          "reason": "Source-proven ability family/categories: own-tempo-guard. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_CONFUSE_RAY.hooks.ability"
@@ -61365,9 +61405,75 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_CONFUSE_RAY.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "jumpifability BS_TARGET, ABILITY_OWN_TEMPO",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectConfuse:903",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectConfuse->route",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectConfuse->route",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_jumpifability",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts",
+              "locator": "createJumpifabilityHandler",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptStatusPrimaryOpcode.test.ts",
+              "kind": "tier-1-guard-route-unit-test"
+            },
+            {
+              "path": "tests/ownTempoGuardHookJoinBatch.test.ts",
+              "kind": "tier-1-five-row-sibling-batch"
+            },
+            {
+              "path": "tests/ownTempoGuardOracleEvidence.test.ts",
+              "kind": "battle-scene-off-family-receipt"
+            },
+            {
+              "path": "docs/own-tempo-guard-family-ground-truth.md",
+              "kind": "family-ground-truth"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-own-tempo-guard-confuseray-block-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-own-tempo-guard-confuseray-control-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/verify-own-tempo-guard-confuseray-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/own-tempo-guard-confuseray-block-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/own-tempo-guard-confuseray-control-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for own-tempo-guard; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_WITHDRAW",
@@ -62176,7 +62282,7 @@
           "entryScript": "BattleScript_EffectMetronome",
           "status": "unsupported",
           "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "reason": "BattleScript_EffectMetronome ends in the metronome opcode (battle_scripts_1.s:1155), a dynamic dispatch to a randomly selected move; the static graph/program has no moveendall/moveendto/moveendfromto node of its own to certify a route through, even though the invoked move's own script independently reaches Cmd_moveend's normal tail.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_METRONOME.hooks.ability"
@@ -68413,9 +68519,11 @@
           "effect": "EFFECT_CONFUSE",
           "effectId": 49,
           "entryScript": "BattleScript_EffectConfuse",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "own-tempo-guard"
+          ],
+          "reason": "Source-proven ability family/categories: own-tempo-guard. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SWEET_KISS.hooks.ability"
@@ -68425,9 +68533,75 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_SWEET_KISS.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "jumpifability BS_TARGET, ABILITY_OWN_TEMPO",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectConfuse:903",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectConfuse->route",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectConfuse->route",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_jumpifability",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts",
+              "locator": "createJumpifabilityHandler",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptStatusPrimaryOpcode.test.ts",
+              "kind": "tier-1-guard-route-unit-test"
+            },
+            {
+              "path": "tests/ownTempoGuardHookJoinBatch.test.ts",
+              "kind": "tier-1-five-row-sibling-batch"
+            },
+            {
+              "path": "tests/ownTempoGuardOracleEvidence.test.ts",
+              "kind": "battle-scene-off-family-receipt"
+            },
+            {
+              "path": "docs/own-tempo-guard-family-ground-truth.md",
+              "kind": "family-ground-truth"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-own-tempo-guard-confuseray-block-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-own-tempo-guard-confuseray-control-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/verify-own-tempo-guard-confuseray-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/own-tempo-guard-confuseray-block-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/own-tempo-guard-confuseray-control-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for own-tempo-guard; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_BELLY_DRUM",
@@ -70379,9 +70553,11 @@
           "effect": "EFFECT_SWAGGER",
           "effectId": 118,
           "entryScript": "BattleScript_EffectSwagger",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "own-tempo-guard"
+          ],
+          "reason": "Source-proven ability family/categories: own-tempo-guard. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SWAGGER.hooks.ability"
@@ -70391,9 +70567,55 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_SWAGGER.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "jumpifability BS_TARGET, ABILITY_OWN_TEMPO",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectSwagger:1608",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectSwagger->route",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectSwagger->route",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_jumpifability",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts",
+              "locator": "createJumpifabilityHandler",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptJumpifconfusedandstatmaxedOpcode.test.ts",
+              "kind": "tier-1-guard-route-unit-test"
+            },
+            {
+              "path": "tests/ownTempoGuardHookJoinBatch.test.ts",
+              "kind": "tier-1-five-row-sibling-batch"
+            },
+            {
+              "path": "tests/ownTempoGuardOracleEvidence.test.ts",
+              "kind": "battle-scene-off-family-receipt"
+            },
+            {
+              "path": "docs/own-tempo-guard-family-ground-truth.md",
+              "kind": "family-ground-truth"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for own-tempo-guard; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_MILK_DRINK",
@@ -75826,9 +76048,11 @@
           "effect": "EFFECT_FLATTER",
           "effectId": 166,
           "entryScript": "BattleScript_EffectFlatter",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "own-tempo-guard"
+          ],
+          "reason": "Source-proven ability family/categories: own-tempo-guard. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_FLATTER.hooks.ability"
@@ -75838,9 +76062,55 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_FLATTER.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "jumpifability BS_TARGET, ABILITY_OWN_TEMPO",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectFlatter:2151",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectFlatter->route",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectFlatter->route",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_jumpifability",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts",
+              "locator": "createJumpifabilityHandler",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptJumpifconfusedandstatmaxedOpcode.test.ts",
+              "kind": "tier-1-guard-route-unit-test"
+            },
+            {
+              "path": "tests/ownTempoGuardHookJoinBatch.test.ts",
+              "kind": "tier-1-five-row-sibling-batch"
+            },
+            {
+              "path": "tests/ownTempoGuardOracleEvidence.test.ts",
+              "kind": "battle-scene-off-family-receipt"
+            },
+            {
+              "path": "docs/own-tempo-guard-family-ground-truth.md",
+              "kind": "family-ground-truth"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for own-tempo-guard; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_WILL_O_WISP",
@@ -76883,9 +77153,11 @@
           "effect": "EFFECT_ROLE_PLAY",
           "effectId": 178,
           "entryScript": "BattleScript_EffectRolePlay",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "ability-manipulation-roleplay"
+          ],
+          "reason": "Source-proven ability family/categories: ability-manipulation-roleplay. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_ROLE_PLAY.hooks.ability"
@@ -76895,9 +77167,75 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_ROLE_PLAY.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "src/data/gen/moves.json",
+              "locator": "moves:MOVE_ROLE_PLAY.effect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "undefined:2346",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "undefined->route",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "undefined->route",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_trycopyability",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptTrycopyabilityOpcode.ts",
+              "locator": "createBattleScriptTrycopyabilityOpcodeHandlers",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptTrycopyabilityOpcode.test.ts",
+              "kind": "tier-1-opcode-unit-test"
+            },
+            {
+              "path": "tests/abilityManipulationHookJoinBatch.test.ts",
+              "kind": "tier-1-two-row-sibling-batch"
+            },
+            {
+              "path": "tests/abilityManipulationOracleEvidence.test.ts",
+              "kind": "battle-scene-off-family-receipt"
+            },
+            {
+              "path": "docs/ability-manipulation-family-ground-truth.md",
+              "kind": "family-ground-truth"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-ability-manipulation-roleplay-copy-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-ability-manipulation-roleplay-control-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/verify-ability-manipulation-roleplay-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/ability-manipulation-roleplay-copy-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tools/probe/receipts/ability-manipulation-roleplay-control-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for ability-manipulation-roleplay; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_WISH",
@@ -77005,7 +77343,7 @@
           "entryScript": "BattleScript_EffectAssist",
           "status": "unsupported",
           "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "reason": "BattleScript_EffectAssist ends in jumptocalledmove TRUE (battle_scripts_1.s:2375), a dynamic dispatch to whichever ally move assistattackselect chose at runtime; the static graph/program has no moveendall/moveendto/moveendfromto node of its own to certify a route through, even though the invoked move's own script independently reaches Cmd_moveend's normal tail.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_ASSIST.hooks.ability"
@@ -78212,9 +78550,11 @@
           "effect": "EFFECT_SKILL_SWAP",
           "effectId": 191,
           "entryScript": "BattleScript_EffectSkillSwap",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "ability-manipulation-skillswap"
+          ],
+          "reason": "Source-proven ability family/categories: ability-manipulation-skillswap. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SKILL_SWAP.hooks.ability"
@@ -78224,9 +78564,79 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_SKILL_SWAP.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "src/data/gen/moves.json",
+              "locator": "moves:MOVE_SKILL_SWAP.effect",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "undefined:2497",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "undefined->route",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "undefined->route",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_tryswapabilities",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptTryswapabilitiesOpcode.ts",
+              "locator": "createBattleScriptTryswapabilitiesOpcodeHandlers",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptTryswapabilitiesOpcode.test.ts",
+              "kind": "tier-1-opcode-unit-test"
+            },
+            {
+              "path": "tests/abilityManipulationHookJoinBatch.test.ts",
+              "kind": "tier-1-two-row-sibling-batch"
+            },
+            {
+              "path": "tests/abilityManipulationOracleEvidence.test.ts",
+              "kind": "battle-scene-off-family-receipt"
+            },
+            {
+              "path": "docs/ability-manipulation-family-ground-truth.md",
+              "kind": "family-ground-truth"
+            },
+            {
+              "path": "docs/skill-swap-off-evidence.md",
+              "kind": "pre-existing-family-ground-truth"
+            },
+            {
+              "path": "tests/skillSwapOracleEvidence.test.ts",
+              "kind": "pre-existing-battle-scene-off-family-receipt"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-skill-swap-girafarig-shuckle-off.json",
+              "kind": "pre-existing-battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "docs/immunity-abilities-ground-truth.md",
+              "kind": "pre-existing-downstream-family-ground-truth"
+            },
+            {
+              "path": "tools/battle-lab/mechanic-immunity-limber-skill-swap-off.json",
+              "kind": "pre-existing-downstream-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-immunity-limber-off.py",
+              "kind": "pre-existing-downstream-oracle-probe"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for ability-manipulation-skillswap; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_IMPRISON",
@@ -79255,9 +79665,11 @@
           "effect": "EFFECT_TEETER_DANCE",
           "effectId": 199,
           "entryScript": "BattleScript_EffectTeeterDance",
-          "status": "unsupported",
-          "categories": [],
-          "reason": "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
+          "status": "source-proven-family",
+          "categories": [
+            "own-tempo-guard"
+          ],
+          "reason": "Source-proven ability family/categories: own-tempo-guard. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_TEETER_DANCE.hooks.ability"
@@ -79267,9 +79679,55 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_TEETER_DANCE.hooks.ability",
               "kind": "per-move-hook-join-source"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "jumpifability BS_TARGET, ABILITY_OWN_TEMPO",
+              "kind": "source-selector"
+            },
+            {
+              "path": "reference/pokeemerald/data/battle_scripts_1.s",
+              "locator": "BattleScript_EffectTeeterDance:2571",
+              "kind": "battle-script-entry-path"
+            },
+            {
+              "path": "src/data/gen/battle-script-graph.json",
+              "locator": "BattleScript_EffectTeeterDance->route",
+              "kind": "generated-battle-script-graph"
+            },
+            {
+              "path": "src/data/gen/battle-script-program.json",
+              "locator": "BattleScript_EffectTeeterDance->route",
+              "kind": "generated-battle-script-program"
+            },
+            {
+              "path": "reference/pokeemerald/src/battle_script_commands.c",
+              "locator": "Cmd_jumpifability",
+              "kind": "source-dispatcher"
+            },
+            {
+              "path": "src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts",
+              "locator": "createJumpifabilityHandler",
+              "kind": "source-shaped-family-implementation"
+            },
+            {
+              "path": "tests/battleScriptStatusPrimaryOpcode.test.ts",
+              "kind": "tier-1-guard-route-unit-test"
+            },
+            {
+              "path": "tests/ownTempoGuardHookJoinBatch.test.ts",
+              "kind": "tier-1-five-row-sibling-batch"
+            },
+            {
+              "path": "tests/ownTempoGuardOracleEvidence.test.ts",
+              "kind": "battle-scene-off-family-receipt"
+            },
+            {
+              "path": "docs/own-tempo-guard-family-ground-truth.md",
+              "kind": "family-ground-truth"
             }
           ],
-          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
+          "notes": "Source-proven only for own-tempo-guard; unrelated ability families are not promoted."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_BLAZE_KICK",
@@ -85460,6 +85918,122 @@
         }
       ],
       "notes": "97 of 99 finite candidates (every ability-axis row not already claimed by Soundproof, Absorbing, ON_DAMAGE contact, Color Change, Synchronize, Attract/Oblivious, or Explosion/Damp, minus the Skill Swap/Role Play and five Own Tempo guard exclusions) are promoted through a graph/program route from their entry script to a moveendall/moveendto/moveendfromto handoff whose Cmd_moveend state range includes MOVEEND_IMMUNITY_ABILITIES (state 4). MOVE_ASSIST and MOVE_METRONOME remain explicit dynamic-dispatch exceptions (jumptocalledmove/metronome have no static moveend node of their own). The route certificate proves only that each move's own script reaches Cmd_moveend's normal tail; it does not claim the status was ever reachable while the cure ability was already active -- the shared receipt stages that via Skill Swap."
+    },
+    "abilityManipulation": {
+      "id": "hook-family:ability-manipulation-opcode",
+      "label": "Direct ability-manipulation opcode Level-50 family checkpoint",
+      "status": "source-proven-family",
+      "candidates": 2,
+      "promotedRows": 2,
+      "exceptions": 0,
+      "blockers": 0,
+      "evidence": [
+        {
+          "path": "src/data/gen/level50-move-parameterization.json",
+          "locator": "coverage.hookCatalogs.ability.abilityManipulation",
+          "kind": "finite-candidate-route-guard-audit"
+        },
+        {
+          "path": "reference/pokeemerald/src/battle_script_commands.c",
+          "locator": "Cmd_trycopyability, Cmd_tryswapabilities",
+          "kind": "ordered-per-opcode-guards"
+        },
+        {
+          "path": "tests/abilityManipulationHookJoinBatch.test.ts",
+          "kind": "two-row-graph-program-batch"
+        },
+        {
+          "path": "tests/abilityManipulationOracleEvidence.test.ts",
+          "kind": "battle-scene-off-family-receipt"
+        },
+        {
+          "path": "docs/ability-manipulation-family-ground-truth.md",
+          "kind": "family-ground-truth"
+        },
+        {
+          "path": "tools/battle-lab/mechanic-ability-manipulation-roleplay-copy-off.json",
+          "kind": "direct-parameterized-oracle-fixture"
+        },
+        {
+          "path": "tools/battle-lab/mechanic-ability-manipulation-roleplay-control-off.json",
+          "kind": "paired-control-oracle-fixture"
+        },
+        {
+          "path": "tools/probe/verify-ability-manipulation-roleplay-off.py",
+          "kind": "direct-parameterized-oracle-probe"
+        },
+        {
+          "path": "tools/probe/receipts/ability-manipulation-roleplay-copy-off.json",
+          "kind": "direct-parameterized-oracle-receipt"
+        },
+        {
+          "path": "tools/probe/receipts/ability-manipulation-roleplay-control-off.json",
+          "kind": "direct-parameterized-oracle-receipt"
+        },
+        {
+          "path": "docs/skill-swap-off-evidence.md",
+          "kind": "pre-existing-family-ground-truth"
+        },
+        {
+          "path": "tests/skillSwapOracleEvidence.test.ts",
+          "kind": "pre-existing-battle-scene-off-family-receipt"
+        }
+      ],
+      "notes": "Both finite Rank-4 candidates (MOVE_ROLE_PLAY, MOVE_SKILL_SWAP) are promoted, zero exceptions. Like Rank-3 item-manipulation, there is no shared MOVEEND state: each row is certified by its own exact entry-script statement audit plus an ordered C guard-chain citation into its own dedicated opcode (Cmd_trycopyability, Cmd_tryswapabilities). Role Play gets a fresh Battle Scene OFF receipt pair (Kadabra copies Ditto's Limber vs. Shedinja's Wonder Guard block) authored this session; Skill Swap reuses pre-existing evidence (docs/skill-swap-off-evidence.md's bare-swap witness plus the Immunity family's swap-plus-downstream-cure witness), not restaged."
+    },
+    "ownTempoGuard": {
+      "id": "hook-family:own-tempo-guard",
+      "label": "Pre-emptive Own Tempo confusion-guard Level-50 family checkpoint",
+      "status": "source-proven-family",
+      "candidates": 5,
+      "promotedRows": 5,
+      "exceptions": 0,
+      "blockers": 0,
+      "evidence": [
+        {
+          "path": "src/data/gen/level50-move-parameterization.json",
+          "locator": "coverage.hookCatalogs.ability.ownTempoGuard",
+          "kind": "finite-candidate-route-guard-audit"
+        },
+        {
+          "path": "reference/pokeemerald/src/battle_script_commands.c",
+          "locator": "Cmd_jumpifability",
+          "kind": "jumpifability-dispatcher"
+        },
+        {
+          "path": "tests/ownTempoGuardHookJoinBatch.test.ts",
+          "kind": "five-row-graph-program-batch"
+        },
+        {
+          "path": "tests/ownTempoGuardOracleEvidence.test.ts",
+          "kind": "battle-scene-off-family-receipt"
+        },
+        {
+          "path": "docs/own-tempo-guard-family-ground-truth.md",
+          "kind": "family-ground-truth"
+        },
+        {
+          "path": "tools/battle-lab/mechanic-own-tempo-guard-confuseray-block-off.json",
+          "kind": "direct-parameterized-oracle-fixture"
+        },
+        {
+          "path": "tools/battle-lab/mechanic-own-tempo-guard-confuseray-control-off.json",
+          "kind": "paired-control-oracle-fixture"
+        },
+        {
+          "path": "tools/probe/verify-own-tempo-guard-confuseray-off.py",
+          "kind": "direct-parameterized-oracle-probe"
+        },
+        {
+          "path": "tools/probe/receipts/own-tempo-guard-confuseray-block-off.json",
+          "kind": "direct-parameterized-oracle-receipt"
+        },
+        {
+          "path": "tools/probe/receipts/own-tempo-guard-confuseray-control-off.json",
+          "kind": "direct-parameterized-oracle-receipt"
+        }
+      ],
+      "notes": "All 5 finite Rank-5 candidates (MOVE_CONFUSE_RAY, MOVE_SWEET_KISS, MOVE_SWAGGER, MOVE_FLATTER, MOVE_TEETER_DANCE) are promoted through a graph/program route from their entry script to a jumpifability BS_TARGET, ABILITY_OWN_TEMPO statement, zero exceptions. A refinement carved out of the Immunity family's candidate pool (Rank 2), not a MOVEEND state. Confuse Ray gets a fresh Battle Scene OFF receipt pair (Zubat blocked by Smeargle's Own Tempo vs. a Ditto/Limber control) authored this session; Sweet Kiss shares the identical script/guard and reuses that same receipt; Swagger/Flatter/Teeter Dance are not independently receipted this step, only route/guard-certified from source (docs/own-tempo-guard-family-ground-truth.md derives Swagger/Flatter's unconditional-stat-raise-before-guard split and corrects the worklist's Teeter Dance self-hit claim)."
     },
     "stateFamilies": [
       {

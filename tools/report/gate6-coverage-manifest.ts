@@ -282,6 +282,10 @@ const ITEM_MANIPULATION_KNOCKOFF_CATEGORY = "item-manipulation-knockoff";
 const ITEM_MANIPULATION_CATEGORIES = new Set([
   ITEM_MANIPULATION_STEAL_CATEGORY, ITEM_MANIPULATION_SWAP_CATEGORY, ITEM_MANIPULATION_RECYCLE_CATEGORY, ITEM_MANIPULATION_KNOCKOFF_CATEGORY,
 ]);
+const ABILITY_MANIPULATION_ROLEPLAY_CATEGORY = "ability-manipulation-roleplay";
+const ABILITY_MANIPULATION_SKILLSWAP_CATEGORY = "ability-manipulation-skillswap";
+const ABILITY_MANIPULATION_CATEGORIES = new Set([ABILITY_MANIPULATION_ROLEPLAY_CATEGORY, ABILITY_MANIPULATION_SKILLSWAP_CATEGORY]);
+const OWN_TEMPO_GUARD_CATEGORY = "own-tempo-guard";
 const ABSORBING_CATEGORIES = new Set([
   "absorbing-volt-absorb",
   "absorbing-water-absorb",
@@ -678,6 +682,76 @@ for (const witness of immunityRouteWitnesses) {
   }
 }
 
+const abilityManipulationAudit = parameterization.coverage?.hookCatalogs?.ability?.abilityManipulation as AnyRecord | undefined;
+const abilityManipulationCandidates = abilityManipulationAudit?.sourceMoveCandidates as AnyRecord[] | undefined;
+const abilityManipulationSourceProvenRows = abilityManipulationAudit?.sourceProvenRows as string[] | undefined;
+const abilityManipulationExceptions = abilityManipulationAudit?.sourceExceptionRows as AnyRecord[] | undefined;
+const abilityManipulationBlockers = abilityManipulationAudit?.blockers as AnyRecord[] | undefined;
+const abilityManipulationRouteWitnesses = abilityManipulationAudit?.routeWitnesses as AnyRecord[] | undefined;
+const ABILITY_MANIPULATION_MOVE_CATEGORY: Record<string, string> = {
+  MOVE_ROLE_PLAY: ABILITY_MANIPULATION_ROLEPLAY_CATEGORY,
+  MOVE_SKILL_SWAP: ABILITY_MANIPULATION_SKILLSWAP_CATEGORY,
+};
+if (!abilityManipulationAudit
+  || abilityManipulationAudit.status !== SOURCE_PROVEN_FAMILY_STATUS
+  || abilityManipulationAudit.candidateCount !== 2
+  || !Array.isArray(abilityManipulationCandidates) || abilityManipulationCandidates.length !== 2
+  || !Array.isArray(abilityManipulationSourceProvenRows) || abilityManipulationSourceProvenRows.length !== 2
+  || !Array.isArray(abilityManipulationExceptions) || abilityManipulationExceptions.length !== 0
+  || !Array.isArray(abilityManipulationBlockers) || abilityManipulationBlockers.length !== 0
+  || !Array.isArray(abilityManipulationRouteWitnesses) || abilityManipulationRouteWitnesses.length !== 2
+  || JSON.stringify(abilityManipulationCandidates.map((candidate) => candidate.move)) !== JSON.stringify(["MOVE_ROLE_PLAY", "MOVE_SKILL_SWAP"])) {
+  throw new Error("Ability-manipulation family accounting is not the finite 2/2/0/0 contract over the exact Rank-4 moves");
+}
+for (const witness of abilityManipulationRouteWitnesses) {
+  const family = witness.familyEvidence as AnyRecord | undefined;
+  const expectedCategory = ABILITY_MANIPULATION_MOVE_CATEGORY[witness.move as string];
+  if (witness.status !== "source-proven"
+    || !abilityManipulationSourceProvenRows.includes(witness.move)
+    || family?.category !== expectedCategory
+    || !family.entryPath?.graph?.statements || !family.entryPath?.program?.statements
+    || JSON.stringify(family.entryPath.graph.statements) !== JSON.stringify(family.entryPath.program.statements)
+    || typeof family.dispatcher?.line !== "number"
+    || !family.familyVerification?.batchTest) {
+    throw new Error(`Ability-manipulation family route/guard certificate is incomplete for ${String(witness.move)}`);
+  }
+}
+
+const ownTempoGuardAudit = parameterization.coverage?.hookCatalogs?.ability?.ownTempoGuard as AnyRecord | undefined;
+const ownTempoGuardCandidates = ownTempoGuardAudit?.sourceMoveCandidates as AnyRecord[] | undefined;
+const ownTempoGuardSourceProvenRows = ownTempoGuardAudit?.sourceProvenRows as string[] | undefined;
+const ownTempoGuardExceptions = ownTempoGuardAudit?.sourceExceptionRows as AnyRecord[] | undefined;
+const ownTempoGuardBlockers = ownTempoGuardAudit?.blockers as AnyRecord[] | undefined;
+const ownTempoGuardRouteWitnesses = ownTempoGuardAudit?.routeWitnesses as AnyRecord[] | undefined;
+if (!ownTempoGuardAudit
+  || ownTempoGuardAudit.status !== SOURCE_PROVEN_FAMILY_STATUS
+  || ownTempoGuardAudit.candidateCount !== 5
+  || !Array.isArray(ownTempoGuardCandidates) || ownTempoGuardCandidates.length !== 5
+  || !Array.isArray(ownTempoGuardSourceProvenRows) || ownTempoGuardSourceProvenRows.length !== 5
+  || !Array.isArray(ownTempoGuardExceptions) || ownTempoGuardExceptions.length !== 0
+  || !Array.isArray(ownTempoGuardBlockers) || ownTempoGuardBlockers.length !== 0
+  || !Array.isArray(ownTempoGuardRouteWitnesses) || ownTempoGuardRouteWitnesses.length !== 5
+  || JSON.stringify(ownTempoGuardCandidates.map((candidate) => candidate.move))
+    !== JSON.stringify(["MOVE_CONFUSE_RAY", "MOVE_SWEET_KISS", "MOVE_SWAGGER", "MOVE_FLATTER", "MOVE_TEETER_DANCE"])) {
+  throw new Error("Own-Tempo-guard family accounting is not the finite 5/5/0/0 contract over the exact Rank-5 moves");
+}
+for (const witness of ownTempoGuardRouteWitnesses) {
+  const family = witness.familyEvidence as AnyRecord | undefined;
+  const graphRoute = family?.entryPath?.graph?.route as AnyRecord[] | undefined;
+  const programRoute = family?.entryPath?.program?.route as AnyRecord[] | undefined;
+  if (witness.status !== "source-proven"
+    || !ownTempoGuardSourceProvenRows.includes(witness.move)
+    || family?.category !== OWN_TEMPO_GUARD_CATEGORY
+    || !Array.isArray(graphRoute) || !Array.isArray(programRoute)
+    || JSON.stringify(graphRoute) !== JSON.stringify(programRoute)
+    || !graphRoute.some((statement) => statement.mnemonic === "jumpifability" && JSON.stringify(statement.operands).includes("ABILITY_OWN_TEMPO"))
+    || family.entryPath?.redirect !== "BattleScript_OwnTempoPrevents" && family.entryPath?.redirect !== "BattleScript_TeeterDanceOwnTempoPrevents"
+    || family.dispatcher?.locator !== "Cmd_jumpifability"
+    || !family.familyVerification?.batchTest) {
+    throw new Error(`Own-Tempo-guard family route/guard certificate is incomplete for ${String(witness.move)}`);
+  }
+}
+
 const tryinfatuatingObliviousAudit = parameterization.coverage?.hookCatalogs?.ability?.tryinfatuatingOblivious as AnyRecord | undefined;
 const tryinfatuatingObliviousCandidates = tryinfatuatingObliviousAudit?.sourceMoveCandidates as AnyRecord[] | undefined;
 const tryinfatuatingObliviousSourceProvenRows = tryinfatuatingObliviousAudit?.sourceProvenRows as string[] | undefined;
@@ -949,7 +1023,9 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
         && family.category !== ITEM_MOVE_END_CATEGORY
         && family.category !== IMMUNITY_CATEGORY
         && !ABSORBING_CATEGORIES.has(family.category)
-        && !ITEM_MANIPULATION_CATEGORIES.has(family.category))
+        && !ITEM_MANIPULATION_CATEGORIES.has(family.category)
+        && !ABILITY_MANIPULATION_CATEGORIES.has(family.category)
+        && family.category !== OWN_TEMPO_GUARD_CATEGORY)
       || !family.selector?.path
       || !family.entryPath?.source?.path
       || !family.entryPath?.graph?.path
@@ -1121,6 +1197,31 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
         throw new Error(`Item-manipulation family (${String(family.category)}) lacks its own-opcode entry-script/guard witness`);
       }
     }
+    if (ABILITY_MANIPULATION_CATEGORIES.has(family.category)) {
+      const graphStatements = family.entryPath.graph.statements as AnyRecord[] | undefined;
+      const programStatements = family.entryPath.program.statements as AnyRecord[] | undefined;
+      if (!Array.isArray(graphStatements) || !Array.isArray(programStatements)
+        || JSON.stringify(graphStatements) !== JSON.stringify(programStatements)
+        || typeof family.dispatcher?.line !== "number"
+        || !Array.isArray(family.runtimeGuardSignature?.orderedGuards) || family.runtimeGuardSignature.orderedGuards.length === 0
+        || !Array.isArray(family.runtimeGuardSignature?.sourceTokens) || family.runtimeGuardSignature.sourceTokens.length === 0
+        || family.familyVerification?.oracleReceipt !== "docs/ability-manipulation-family-ground-truth.md") {
+        throw new Error(`Ability-manipulation family (${String(family.category)}) lacks its own-opcode entry-script/guard witness`);
+      }
+    }
+    if (family.category === OWN_TEMPO_GUARD_CATEGORY) {
+      const graphRoute = family.entryPath.graph.route as AnyRecord[] | undefined;
+      const programRoute = family.entryPath.program.route as AnyRecord[] | undefined;
+      if (!Array.isArray(graphRoute) || !Array.isArray(programRoute)
+        || JSON.stringify(graphRoute) !== JSON.stringify(programRoute)
+        || !graphRoute.some((statement) => statement.mnemonic === "jumpifability")
+        || typeof family.entryPath.guardLine !== "number"
+        || typeof family.entryPath.redirect !== "string"
+        || family.dispatcher?.locator !== "Cmd_jumpifability"
+        || family.familyVerification?.oracleReceipt !== "docs/own-tempo-guard-family-ground-truth.md") {
+        throw new Error("Own-Tempo-guard family lacks its guard-line/redirect witness");
+      }
+    }
   }
   return families as AnyRecord[];
 }
@@ -1180,6 +1281,14 @@ function parameterizedHook(move: AnyRecord, axis: PerMoveHookJoinAxis): AnyRecor
     if (ITEM_MANIPULATION_CATEGORIES.has(family.category)
       && (axis !== "item" || family.selector?.symbol !== move.move)) {
       throw new Error(`${move.move} item-manipulation evidence lost its source selector identity`);
+    }
+    if (ABILITY_MANIPULATION_CATEGORIES.has(family.category)
+      && (axis !== "ability" || family.selector?.symbol !== move.move)) {
+      throw new Error(`${move.move} ability-manipulation evidence lost its source selector identity`);
+    }
+    if (family.category === OWN_TEMPO_GUARD_CATEGORY
+      && (axis !== "ability" || family.selector?.symbol !== move.move)) {
+      throw new Error(`${move.move} own-tempo-guard evidence lost its source selector identity`);
     }
   }
   return hook;
@@ -1374,6 +1483,62 @@ function sourceProvenHookEvidence(hook: AnyRecord): Evidence[] {
         if (preExisting.oracleReceipt) entries.push(evidence(String(preExisting.oracleReceipt), "pre-existing-family-ground-truth"));
         if (preExisting.test) entries.push(evidence(String(preExisting.test), "pre-existing-battle-scene-off-family-receipt"));
         if (preExisting.fixture) entries.push(evidence(String(preExisting.fixture), "pre-existing-battle-scene-off-oracle-receipt"));
+      }
+      return entries;
+    }
+    if (ABILITY_MANIPULATION_CATEGORIES.has(proof.category)) {
+      const verification = proof.familyVerification as AnyRecord;
+      const implementation = String(verification.implementation);
+      const [implementationPath, implementationLocator] = implementation.split("#");
+      const entries: Evidence[] = [
+        ...base,
+        evidence("reference/pokeemerald/src/battle_script_commands.c", "ordered-per-opcode-guards", String(proof.dispatcher?.locator ?? "")),
+        evidence(implementationPath!, "source-shaped-family-implementation", implementationLocator),
+        evidence(String(verification.unitTest), "tier-1-opcode-unit-test"),
+        evidence(String(verification.batchTest), "tier-1-two-row-sibling-batch"),
+        evidence(String(verification.oracleEvidenceTest), "battle-scene-off-family-receipt"),
+        evidence(String(verification.oracleReceipt), "family-ground-truth"),
+      ];
+      for (const fixture of (verification.oracleFixtures as string[] | undefined) ?? []) {
+        entries.push(evidence(fixture, "parameterized-oracle-request"));
+      }
+      if (verification.oracleProbe) entries.push(evidence(String(verification.oracleProbe), "oracle-probe"));
+      for (const receiptFile of (verification.oracleReceiptFiles as string[] | undefined) ?? []) {
+        entries.push(evidence(receiptFile, "battle-scene-off-oracle-receipt"));
+      }
+      const preExisting = verification.preExistingEvidence as AnyRecord | undefined;
+      if (preExisting) {
+        if (preExisting.oracleReceipt) entries.push(evidence(String(preExisting.oracleReceipt), "pre-existing-family-ground-truth"));
+        if (preExisting.test) entries.push(evidence(String(preExisting.test), "pre-existing-battle-scene-off-family-receipt"));
+        if (preExisting.fixture) entries.push(evidence(String(preExisting.fixture), "pre-existing-battle-scene-off-oracle-receipt"));
+      }
+      const preExistingDownstream = verification.preExistingDownstreamEvidence as AnyRecord | undefined;
+      if (preExistingDownstream) {
+        if (preExistingDownstream.oracleReceipt) entries.push(evidence(String(preExistingDownstream.oracleReceipt), "pre-existing-downstream-family-ground-truth"));
+        if (preExistingDownstream.fixture) entries.push(evidence(String(preExistingDownstream.fixture), "pre-existing-downstream-oracle-request"));
+        if (preExistingDownstream.probe) entries.push(evidence(String(preExistingDownstream.probe), "pre-existing-downstream-oracle-probe"));
+      }
+      return entries;
+    }
+    if (proof.category === OWN_TEMPO_GUARD_CATEGORY) {
+      const verification = proof.familyVerification as AnyRecord;
+      const implementation = String(verification.implementation);
+      const [implementationPath, implementationLocator] = implementation.split("#");
+      const entries: Evidence[] = [
+        ...base,
+        evidence("reference/pokeemerald/src/battle_script_commands.c", "jumpifability-dispatcher", String(proof.dispatcher?.locator ?? "")),
+        evidence(implementationPath!, "source-shaped-family-implementation", implementationLocator),
+        evidence(String(verification.unitTest), "tier-1-guard-route-unit-test"),
+        evidence(String(verification.batchTest), "tier-1-five-row-sibling-batch"),
+        evidence(String(verification.oracleEvidenceTest), "battle-scene-off-family-receipt"),
+        evidence(String(verification.oracleReceipt), "family-ground-truth"),
+      ];
+      for (const fixture of (verification.oracleFixtures as string[] | undefined) ?? []) {
+        entries.push(evidence(fixture, "parameterized-oracle-request"));
+      }
+      if (verification.oracleProbe) entries.push(evidence(String(verification.oracleProbe), "oracle-probe"));
+      for (const receiptFile of (verification.oracleReceiptFiles as string[] | undefined) ?? []) {
+        entries.push(evidence(receiptFile, "battle-scene-off-oracle-receipt"));
       }
       return entries;
     }
@@ -2226,6 +2391,60 @@ const itemManipulationRow: Row = Object.freeze({
   notes: "All 4 finite Rank-3 candidates (MOVE_COVET, MOVE_TRICK, MOVE_RECYCLE, MOVE_KNOCK_OFF) are promoted, zero exceptions. Unlike every other item-axis family, there is no shared MOVEEND state: each row is certified by its own exact entry-script statement audit plus an ordered C guard-chain citation into its own dedicated opcode (Cmd_seteffectwithchance's MOVE_EFFECT_STEAL_ITEM/MOVE_EFFECT_KNOCK_OFF arms, Cmd_tryswapitems, Cmd_tryrecycleitem). Covet/Knock Off were already Shell-Bell-claimed (power != 0); this family adds a second, independent category to those two rows and the first category to Trick/Recycle. Trick and Knock Off reuse pre-existing 2026-07-28 oracle evidence (not restaged); Covet and Recycle get fresh Battle Scene OFF receipts authored this session. Assist/Metronome (item-move-end's dynamic-dispatch exceptions) are not members of this family's four-move selector and remain the item axis's only gaps.",
 });
 
+const abilityManipulationSummary = Object.freeze({
+  candidates: abilityManipulationCandidates.length,
+  promotedRows: abilityManipulationSourceProvenRows.length,
+  exceptions: abilityManipulationExceptions.length,
+  blockers: abilityManipulationBlockers.length,
+});
+const abilityManipulationRow: Row = Object.freeze({
+  id: "hook-family:ability-manipulation-opcode",
+  label: "Direct ability-manipulation opcode Level-50 family checkpoint",
+  status: SOURCE_PROVEN_FAMILY_STATUS,
+  ...abilityManipulationSummary,
+  evidence: uniqueEvidence([
+    evidence(PARAMETERIZATION_PATH, "finite-candidate-route-guard-audit", "coverage.hookCatalogs.ability.abilityManipulation"),
+    evidence("reference/pokeemerald/src/battle_script_commands.c", "ordered-per-opcode-guards", "Cmd_trycopyability, Cmd_tryswapabilities"),
+    evidence("tests/abilityManipulationHookJoinBatch.test.ts", "two-row-graph-program-batch"),
+    evidence("tests/abilityManipulationOracleEvidence.test.ts", "battle-scene-off-family-receipt"),
+    evidence("docs/ability-manipulation-family-ground-truth.md", "family-ground-truth"),
+    evidence("tools/battle-lab/mechanic-ability-manipulation-roleplay-copy-off.json", "direct-parameterized-oracle-fixture"),
+    evidence("tools/battle-lab/mechanic-ability-manipulation-roleplay-control-off.json", "paired-control-oracle-fixture"),
+    evidence("tools/probe/verify-ability-manipulation-roleplay-off.py", "direct-parameterized-oracle-probe"),
+    evidence("tools/probe/receipts/ability-manipulation-roleplay-copy-off.json", "direct-parameterized-oracle-receipt"),
+    evidence("tools/probe/receipts/ability-manipulation-roleplay-control-off.json", "direct-parameterized-oracle-receipt"),
+    evidence("docs/skill-swap-off-evidence.md", "pre-existing-family-ground-truth"),
+    evidence("tests/skillSwapOracleEvidence.test.ts", "pre-existing-battle-scene-off-family-receipt"),
+  ]),
+  notes: "Both finite Rank-4 candidates (MOVE_ROLE_PLAY, MOVE_SKILL_SWAP) are promoted, zero exceptions. Like Rank-3 item-manipulation, there is no shared MOVEEND state: each row is certified by its own exact entry-script statement audit plus an ordered C guard-chain citation into its own dedicated opcode (Cmd_trycopyability, Cmd_tryswapabilities). Role Play gets a fresh Battle Scene OFF receipt pair (Kadabra copies Ditto's Limber vs. Shedinja's Wonder Guard block) authored this session; Skill Swap reuses pre-existing evidence (docs/skill-swap-off-evidence.md's bare-swap witness plus the Immunity family's swap-plus-downstream-cure witness), not restaged.",
+});
+
+const ownTempoGuardSummary = Object.freeze({
+  candidates: ownTempoGuardCandidates.length,
+  promotedRows: ownTempoGuardSourceProvenRows.length,
+  exceptions: ownTempoGuardExceptions.length,
+  blockers: ownTempoGuardBlockers.length,
+});
+const ownTempoGuardRow: Row = Object.freeze({
+  id: "hook-family:own-tempo-guard",
+  label: "Pre-emptive Own Tempo confusion-guard Level-50 family checkpoint",
+  status: SOURCE_PROVEN_FAMILY_STATUS,
+  ...ownTempoGuardSummary,
+  evidence: uniqueEvidence([
+    evidence(PARAMETERIZATION_PATH, "finite-candidate-route-guard-audit", "coverage.hookCatalogs.ability.ownTempoGuard"),
+    evidence("reference/pokeemerald/src/battle_script_commands.c", "jumpifability-dispatcher", "Cmd_jumpifability"),
+    evidence("tests/ownTempoGuardHookJoinBatch.test.ts", "five-row-graph-program-batch"),
+    evidence("tests/ownTempoGuardOracleEvidence.test.ts", "battle-scene-off-family-receipt"),
+    evidence("docs/own-tempo-guard-family-ground-truth.md", "family-ground-truth"),
+    evidence("tools/battle-lab/mechanic-own-tempo-guard-confuseray-block-off.json", "direct-parameterized-oracle-fixture"),
+    evidence("tools/battle-lab/mechanic-own-tempo-guard-confuseray-control-off.json", "paired-control-oracle-fixture"),
+    evidence("tools/probe/verify-own-tempo-guard-confuseray-off.py", "direct-parameterized-oracle-probe"),
+    evidence("tools/probe/receipts/own-tempo-guard-confuseray-block-off.json", "direct-parameterized-oracle-receipt"),
+    evidence("tools/probe/receipts/own-tempo-guard-confuseray-control-off.json", "direct-parameterized-oracle-receipt"),
+  ]),
+  notes: "All 5 finite Rank-5 candidates (MOVE_CONFUSE_RAY, MOVE_SWEET_KISS, MOVE_SWAGGER, MOVE_FLATTER, MOVE_TEETER_DANCE) are promoted through a graph/program route from their entry script to a jumpifability BS_TARGET, ABILITY_OWN_TEMPO statement, zero exceptions. A refinement carved out of the Immunity family's candidate pool (Rank 2), not a MOVEEND state. Confuse Ray gets a fresh Battle Scene OFF receipt pair (Zubat blocked by Smeargle's Own Tempo vs. a Ditto/Limber control) authored this session; Sweet Kiss shares the identical script/guard and reuses that same receipt; Swagger/Flatter/Teeter Dance are not independently receipted this step, only route/guard-certified from source (docs/own-tempo-guard-family-ground-truth.md derives Swagger/Flatter's unconditional-stat-raise-before-guard split and corrects the worklist's Teeter Dance self-hit claim).",
+});
+
 const trainerRows: Row[] = (trainers.entries as AnyRecord[]).map((trainer) => Object.freeze({
   id: `trainer:${trainer.id}`,
   label: trainer.sourceId,
@@ -2438,6 +2657,32 @@ const sourceInputs = [
   "src/engine/battleScriptTryrecycleitemOpcode.ts",
   "tests/battleScriptTryrecycleitemOpcode.test.ts",
   "tests/battleScriptFamilyBCluster4Opcode.test.ts",
+  "docs/ability-manipulation-family-ground-truth.md",
+  "tests/abilityManipulationHookJoinBatch.test.ts",
+  "tests/abilityManipulationOracleEvidence.test.ts",
+  "tools/battle-lab/mechanic-ability-manipulation-roleplay-copy-off.json",
+  "tools/battle-lab/mechanic-ability-manipulation-roleplay-control-off.json",
+  "tools/probe/verify-ability-manipulation-roleplay-off.py",
+  "tools/probe/receipts/ability-manipulation-roleplay-copy-off.json",
+  "tools/probe/receipts/ability-manipulation-roleplay-control-off.json",
+  "docs/skill-swap-off-evidence.md",
+  "tests/skillSwapOracleEvidence.test.ts",
+  "tools/battle-lab/mechanic-skill-swap-girafarig-shuckle-off.json",
+  "src/engine/battleScriptTrycopyabilityOpcode.ts",
+  "tests/battleScriptTrycopyabilityOpcode.test.ts",
+  "src/engine/battleScriptTryswapabilitiesOpcode.ts",
+  "tests/battleScriptTryswapabilitiesOpcode.test.ts",
+  "docs/own-tempo-guard-family-ground-truth.md",
+  "tests/ownTempoGuardHookJoinBatch.test.ts",
+  "tests/ownTempoGuardOracleEvidence.test.ts",
+  "tools/battle-lab/mechanic-own-tempo-guard-confuseray-block-off.json",
+  "tools/battle-lab/mechanic-own-tempo-guard-confuseray-control-off.json",
+  "tools/probe/verify-own-tempo-guard-confuseray-off.py",
+  "tools/probe/receipts/own-tempo-guard-confuseray-block-off.json",
+  "tools/probe/receipts/own-tempo-guard-confuseray-control-off.json",
+  "src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts",
+  "tests/battleScriptStatusPrimaryOpcode.test.ts",
+  "tests/battleScriptJumpifconfusedandstatmaxedOpcode.test.ts",
 ];
 for (const path of sourceInputs) requirePath(path);
 
@@ -2474,6 +2719,8 @@ const manifest: AnyRecord = {
     itemMoveEnd: itemMoveEndMoveEndSummary,
     itemManipulation: itemManipulationSummary,
     immunityMoveEnd: immunityMoveEndSummary,
+    abilityManipulation: abilityManipulationSummary,
+    ownTempoGuard: ownTempoGuardSummary,
     stateFamilies: { total: stateFamilyRows.length, tier1Covered: stateFamilyRows.filter((row) => row.status === "tier1-covered").length },
     hooks: {
       abilities: { total: abilityRows.length, oracleReceipted: abilityRows.filter((row) => row.status === "oracle-receipted-hook").length, zeroFactoryWidened: abilityRows.filter((row) => row.status === "zero-factory-carrier-widened-scope").length },
@@ -2495,6 +2742,8 @@ const manifest: AnyRecord = {
     itemMoveEnd: itemMoveEndMoveEndRow,
     itemManipulation: itemManipulationRow,
     immunityMoveEnd: immunityMoveEndRow,
+    abilityManipulation: abilityManipulationRow,
+    ownTempoGuard: ownTempoGuardRow,
     stateFamilies: stateFamilyRows,
     hooks: { abilities: abilityRows, holdEffects: holdEffectRows },
     corpus: { trainers: trainerRows, level50Sets: level50Rows },
@@ -2528,7 +2777,7 @@ const markdown: string[] = [
   "## Headline",
   "",
   `- Effects: **${manifest.summary.effects.staticExecutable}/${manifest.summary.effects.total} static-executable**; moves: **${manifest.summary.moves.staticExecutable}/${manifest.summary.moves.total}** static-executable (**${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}** Level-50 roster moves executable, **${manifest.summary.moves.level50RosterOnly}** roster-only).`,
-  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.item.rows - manifest.summary.perMoveHookJoins.item.gaps} item rows are source-proven for the King's Rock, Shell Bell, 114-row item-move-end status-cure, and 4-row item-manipulation-opcode families, and ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors, audited shared-absorbing routes, both ON_DAMAGE families, the 30-candidate Synchronize family, Attract's one-row Oblivious family, the two Explosion/Damp categories, and the 97-row Immunity status-cure family, while every remaining gap retains its source-artifact locator and reason.`,
+  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.item.rows - manifest.summary.perMoveHookJoins.item.gaps} item rows are source-proven for the King's Rock, Shell Bell, 114-row item-move-end status-cure, and 4-row item-manipulation-opcode families, and ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors, audited shared-absorbing routes, both ON_DAMAGE families, the 30-candidate Synchronize family, Attract's one-row Oblivious family, the two Explosion/Damp categories, the 97-row Immunity status-cure family, the 2-row ability-manipulation-opcode family, and the 5-row own-tempo-guard family, while every remaining gap retains its source-artifact locator and reason. Both axes' only remaining gaps are Assist/Metronome (dynamic-dispatch exceptions).`,
   `- ON_DAMAGE checkpoint: **${manifest.summary.onDamageMoveEnd.contactCandidates}** contact candidates and **${manifest.summary.onDamageMoveEnd.colorChangeCandidates}** Color Change candidates (${manifest.summary.onDamageMoveEnd.overlapCandidates} overlap) are source-enumerated across ${manifest.summary.onDamageMoveEnd.entryBlockShapes} entry-block shapes. **${manifest.summary.onDamageMoveEnd.contactPromotedRows}** contact rows and **${manifest.summary.onDamageMoveEnd.colorChangePromotedRows}** Color Change rows are promoted; **${manifest.summary.onDamageMoveEnd.contactExceptions}** contact exceptions and **${manifest.summary.onDamageMoveEnd.contactBlockers}** active contact blockers remain, while **${manifest.summary.onDamageMoveEnd.contactRetiredBlockers}** contact route/guard blockers and **${manifest.summary.onDamageMoveEnd.colorChangeRetiredBlockers}** Color Change blockers are retired.`,
   `- Synchronize checkpoint: **${manifest.summary.synchronizeMoveEnd.candidates}** finite Level-50 candidates, **${manifest.summary.synchronizeMoveEnd.promotedRows}** promoted, **${manifest.summary.synchronizeMoveEnd.exceptions}** route exceptions, and **${manifest.summary.synchronizeMoveEnd.blockers}** active blockers.`,
   `- Attract/Oblivious checkpoint: **${manifest.summary.tryinfatuatingOblivious.candidates}** finite EFFECT_ATTRACT candidate, **${manifest.summary.tryinfatuatingOblivious.promotedRows}** promoted, **${manifest.summary.tryinfatuatingOblivious.exceptions}** exceptions, **${manifest.summary.tryinfatuatingOblivious.rosterOnlyCandidates}** roster-only candidates, and **${manifest.summary.tryinfatuatingOblivious.blockers}** active blockers.`,
@@ -2538,6 +2787,8 @@ const markdown: string[] = [
   `- Item-move-end checkpoint: **${manifest.summary.itemMoveEnd.candidates}** finite Level-50 item-axis candidates (not already claimed by King's Rock/Shell Bell, minus the four Rank-3 item-manipulation moves), **${manifest.summary.itemMoveEnd.promotedRows}** promoted to MOVEEND_ITEM_EFFECTS_ALL state 11, **${manifest.summary.itemMoveEnd.exceptions}** explicit dynamic-dispatch exceptions (Assist, Metronome), and **${manifest.summary.itemMoveEnd.blockers}** active blockers.`,
   `- Item-manipulation checkpoint: **${manifest.summary.itemManipulation.candidates}** finite Rank-3 direct-opcode candidates (Covet, Trick, Recycle, Knock Off), **${manifest.summary.itemManipulation.promotedRows}** promoted via four independent own-opcode certificates (no shared MOVEEND state), **${manifest.summary.itemManipulation.exceptions}** exceptions, and **${manifest.summary.itemManipulation.blockers}** active blockers -- closes the item axis except for Assist/Metronome (item-move-end's dynamic-dispatch exceptions, not members of this family).`,
   `- Immunity checkpoint: **${manifest.summary.immunityMoveEnd.candidates}** finite Level-50 ability-axis candidates, **${manifest.summary.immunityMoveEnd.promotedRows}** promoted to MOVEEND_IMMUNITY_ABILITIES state 4, **${manifest.summary.immunityMoveEnd.exceptions}** explicit dynamic-dispatch exceptions (Assist, Metronome), and **${manifest.summary.immunityMoveEnd.blockers}** active blockers.`,
+  `- Ability-manipulation checkpoint: **${manifest.summary.abilityManipulation.candidates}** finite Rank-4 direct-opcode candidates (Role Play, Skill Swap), **${manifest.summary.abilityManipulation.promotedRows}** promoted via two independent own-opcode certificates (no shared MOVEEND state), **${manifest.summary.abilityManipulation.exceptions}** exceptions, and **${manifest.summary.abilityManipulation.blockers}** active blockers.`,
+  `- Own-Tempo-guard checkpoint: **${manifest.summary.ownTempoGuard.candidates}** finite Rank-5 candidates (Confuse Ray, Sweet Kiss, Swagger, Flatter, Teeter Dance), **${manifest.summary.ownTempoGuard.promotedRows}** promoted to a jumpifability BS_TARGET, ABILITY_OWN_TEMPO route certificate, **${manifest.summary.ownTempoGuard.exceptions}** exceptions, and **${manifest.summary.ownTempoGuard.blockers}** active blockers -- closes the ability axis except for Assist/Metronome (the Immunity family's dynamic-dispatch exceptions, not members of this family).`,
   `- State/status/volatile rows: **${manifest.summary.stateFamilies.tier1Covered}/${manifest.summary.stateFamilies.total}** have focused Tier-1 evidence; source-modeled rows remain listed separately.`,
   `- Hook universes: **${manifest.summary.hooks.abilities.total} abilities** and **${manifest.summary.hooks.holdEffects.total} hold effects**, including **${manifest.summary.hooks.abilities.zeroFactoryWidened + manifest.summary.hooks.holdEffects.zeroFactoryWidened}** legal widened-scope rows with zero Level-50 Factory carriers.`,
   `- Corpus: **${manifest.summary.corpus.ordinaryTrainers}/${trainers.count} ordinary trainers** and **${manifest.summary.corpus.level50Sets}/${LEVEL50_SET_COUNT} Level-50 sets** joined; the full set catalog contains ${manifest.summary.corpus.fullSetCatalog} rows including Open-only sets.`,
