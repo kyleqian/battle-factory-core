@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1080 — [supervisor, 2026-08-10] **Gate-6 route branches classified across the full source graph**
+
+- **State:** side commit `abaec104` is folded by merge `d3faa43c`; focused
+  route/manifest coverage is **16/16**, typecheck and byte-identical artifact
+  regeneration pass. Final union gates follow after the next main increment.
+- **Did:** every one of **2,812** emitted route certificates now declares a
+  source-derived `success` (**2,664**) or `failure-tail` (**148**) branch.
+  Among **845** promoted certificates, **73** are legitimate failure tails
+  (**41** item MoveEnd, **32** immunity MoveEnd) because `Cmd_moveend` runs its
+  post-move state loop on both branches. The full dynamic-dispatch audit found
+  no missing exception: Assist, Metronome, Mirror Move, and Sleep Talk remain
+  the only four exceptions on both axes.
+- **Next:** continue #55 with one bounded, source-general CreateMon/EV/stat or
+  post/return timing component; do not wire a fitted construction cursor.
+- **Notes:** parameterization schema v5 and Gate-6 manifest v2 regenerate
+  byte-for-byte. No production controller, animation, canonical Battle-2
+  replay, unsupported barrier, or hook promotion changed.
+
 ## 1079 — [MAIN worker, 2026-08-10] **#55 candidate-aware nature-check timing landed; async construction workload remains open**
 
 - **State:** candidate timing commits `79448547`/`a57d39b9`; focused construction **9/9**,
@@ -43,25 +61,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   frames; canonical endpoint remains **10177** per fallback. Supervisor caught
   the worker's stale build claim and added the missing `ballAnims` carry on
   nine task handoffs; typecheck/build and focused **60/60** then passed live.
-
-## 1077 — [supervisor, 2026-08-10 ~10:00] **#55 v2 cycle evidence banked; fitted construction callback refuted**
-
-- **State:** master `3916972f` is green after two side folds: smoke **375/375**,
-  construction-clock/v2 focus **19/19**, typecheck, and production build pass.
-  The v2 worker's full suite was **877 files / 8,400 passed / 1 skipped**.
-- **Did:** folded 12 pending animation commits first (Drill Peck, Submission,
-  Spite), then landed #55's source-operation construction scheduler, clean-
-  stream mode, injectable VBlank callback/cycle costs, optional mGBA master-
-  cycle probe, evidence boundary, and idempotence pins. The model contains no
-  trainer, battle, canonical-tick, or fixture schedule branch. Supervisor
-  verification caught and fixed one narrowed callback type before merge.
-- **Next:** leave personality-exact construction unwired until candidate-
-  aware instruction timing plus deterministic VBlank audio/DMA workload are
-  modeled. Continue the playable OFF-profile round seam at the independent
-  swap-screen ball callback boundary: replace the fake unconditional restart
-  after frame 10177 with source `Random()%5` state and extend the dense YES
-  fixture through its existing 10214 endpoint.
-- **Notes:** fresh v2 anchor/LILIANA/varied probes are twice byte-identical.
-  The present cost callback is refuted: nature-check cost depends on candidate
-  personality, and IRQ cost depends on live audio/DMA state. No fitted table,
-  controller wiring, or deferred user question was added.

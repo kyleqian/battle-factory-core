@@ -856,7 +856,7 @@ verification. A fourth hit occurred when one retained side-worker session
 started two full suites while the animation supervisor was also verifying.
 The Color Change side worker then repeated a committed-tree full suite after
 a two-line type-only follow-up and hit its cap during that redundant run.
-Hits: 5; cost: about 40 minutes plus avoidable CPU contention. A
+Hits: 6; cost: about 42 minutes plus avoidable CPU contention. A
 launcher/tool response that visually distinguishes “still running; wait on
 this handle” from completion would prevent this class of mistake.
 
@@ -929,8 +929,9 @@ current app stage should be rejected before replay.
   `npx vitest run tests/<census-loading>.test.ts` still gets Node's 4 GB
   default and crashes with a raw C++ stack trace — easy to misread as a
   broken test, and in a piped compound the crash silently swallows output.
-- **Hits:** 1 (supervisor verification, 2026-08-10 ~00:45).
-- **Cost each:** ~5 min.
+- **Hits:** 2 (supervisor verification and a Gate-6 route-audit worker,
+  2026-08-10).
+- **Cost each:** ~4 min.
 - **Workaround:** prefix targeted runs with
   `NODE_OPTIONS=--max-old-space-size=8192`.
 - **Real fix:** move test-only JSON out of the resolveJsonModule graph (the

@@ -40012,3 +40012,24 @@ both verify scripts/census independently re-verified before this entry.)*
   through all seven battle seams. No canonical Battle-2 window past tick
   33331, battle/turn/absolute-tick renderer branch, unsupported-barrier pin,
   round outcome, or controller interface changed in this increment.
+## 1077 — [supervisor, 2026-08-10 ~10:00] **#55 v2 cycle evidence banked; fitted construction callback refuted**
+
+- **State:** master `3916972f` is green after two side folds: smoke **375/375**,
+  construction-clock/v2 focus **19/19**, typecheck, and production build pass.
+  The v2 worker's full suite was **877 files / 8,400 passed / 1 skipped**.
+- **Did:** folded 12 pending animation commits first (Drill Peck, Submission,
+  Spite), then landed #55's source-operation construction scheduler, clean-
+  stream mode, injectable VBlank callback/cycle costs, optional mGBA master-
+  cycle probe, evidence boundary, and idempotence pins. The model contains no
+  trainer, battle, canonical-tick, or fixture schedule branch. Supervisor
+  verification caught and fixed one narrowed callback type before merge.
+- **Next:** leave personality-exact construction unwired until candidate-
+  aware instruction timing plus deterministic VBlank audio/DMA workload are
+  modeled. Continue the playable OFF-profile round seam at the independent
+  swap-screen ball callback boundary: replace the fake unconditional restart
+  after frame 10177 with source `Random()%5` state and extend the dense YES
+  fixture through its existing 10214 endpoint.
+- **Notes:** fresh v2 anchor/LILIANA/varied probes are twice byte-identical.
+  The present cost callback is refuted: nature-check cost depends on candidate
+  personality, and IRQ cost depends on live audio/DMA state. No fitted table,
+  controller wiring, or deferred user question was added.
