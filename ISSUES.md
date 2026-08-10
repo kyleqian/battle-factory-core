@@ -1100,6 +1100,18 @@ not claim that the partial audio snapshot is an exact reducer. Compact raw
 receipts use relative timing/source state only and existing v2 files remained
 byte-identical.
 
+**Internal m4a receipt (2026-08-10, `236e1fe4`):** six fresh runs add a
+versioned sibling packet that splits all **113** audio calls at compiled
+`SoundMain`, linked `MPlayMain`, `CgbSound`, and runtime-copied
+`SoundMainRAM` boundaries. The first five player spans are fixed at **55**
+cycles; player six, CGB sound, and the five direct-sound channel passes carry
+the observed variation. The bounded address-free state inventory includes
+track/channel scalar regions and command/tone/wave prefixes, but all **113**
+captured keys are unique, with zero repeated equal-state observations. It
+therefore licenses no reducer: the next evidence requirement is repeated,
+complete source-state equivalence, not a case or frame lookup. The outer
+VBlank v1 and construction v2 byte contracts remain unchanged.
+
 **Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
 threading now makes the first post-cycle pixel boundary observe this debt.
 The WIN YES fixture's real first callback cursor/outcomes are

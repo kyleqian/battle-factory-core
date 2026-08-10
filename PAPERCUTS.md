@@ -709,7 +709,8 @@ Per entry:
   probe output; when receipts are banked under `tools/probe/receipts/`,
   ~2 MB untracked logs pile up beside them and need manual relocation
   before committing.
-- **Hits:** 1 (2026-07-29, absorption-reveal worker).
+- **Hits:** 2 (2026-07-29 absorption-reveal; 2026-08-10 #55 internal-m4a
+  receipt).
 - **Cost each:** ~1 min.
 - **Workaround:** point probe outputs at scratch space and copy only the
   JSON into the repo; or teach the wrapper a `--log-dir`.

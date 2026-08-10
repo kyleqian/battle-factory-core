@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1085 — [supervisor, 2026-08-10] **#55 m4a workload split into compiled source stages**
+
+- **State:** side commit `236e1fe4` is folded; focused receipt **2/2** and
+  generated report are byte-identical under supervisor rerun. Final union
+  gates follow after the next bounded main increment.
+- **Did:** six fresh runs split all **113** `m4aSoundMain` observations into
+  `MPlayMain`, `CgbSound`, and copied-IWRAM `SoundMainRAM` channel passes. The
+  first five linked players are fixed at **55** cycles; player six, CGB sound,
+  and five direct-channel spans carry the variation. All **113** bounded,
+  address-free source-state keys are unique, so the receipt correctly makes
+  no equal-state timing claim.
+- **Next:** obtain repeated complete m4a source-state equivalence before a
+  reducer claim, or continue the independent ROM-fetch/EWRAM timing required
+  by CreateMon/EV/stat/post. Keep the live construction clock unwired.
+- **Notes:** v1 VBlank and v2 construction receipts are unchanged. Command and
+  wave prefixes remain explicitly bounded evidence, not complete audio state;
+  no runtime lookup, controller, animation, or canonical Battle-2 edit.
+
 ## 1084 — [MAIN worker, 2026-08-10] **#55 EV-spread boundary audited; accepted personality exposed**
 
 - **State:** bounded evidence checkpoint landed; focused construction **25/25**
@@ -42,21 +60,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** raw fixtures are test-only and contain relative timings plus
   source-visible state—no frame, RNG, trainer, set, battle, tick, cursor, or
   construction identity. Existing v2 receipts stayed byte-identical.
-
-## 1082 — [MAIN worker, 2026-08-10] **#55 construction-entry timing landed across all 12 v2 spans**
-
-- **State:** source-general reducer and receipt pins are implemented; focused
-  construction **13/13** (including red verification), smoke **375/375**,
-  typecheck, full `npm test` **877 files / 8,410 passed / 1 skipped**,
-  production build, and diff check are green.
-- **Did:** reduced the shared entry-to-first-`Random` path to **58** source
-  cycles: **26** sequential Thumb halfwords / **52** cycles plus one **6**-cycle
-  BL refill. All anchor/LILIANA/varied spans (**6/3/3**) have **0** contained
-  VBlank pause and **0** residual service; both compiled caller siblings are
-  LR-pinned.
-- **Next:** continue #55 with CreateMon, EV-spread, CalculateMonStats,
-  factory-post/outer-loop timing, or deterministic VBlank/audio/DMA workload;
-  keep the construction clock unwired until every remaining piece is exact.
-- **Notes:** clock remains unwired; no identity/tick/cursor/fixture selection,
-  canonical Battle-2 march, evidence regeneration, animation edit, or new
-  unsupported barrier.
