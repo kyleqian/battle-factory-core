@@ -200,6 +200,377 @@ type AbsorbingRouteStep = {
   condition?: string;
 };
 
+/**
+ * A route certificate records one concrete graph/program walk.  Its branch is
+ * deliberately a property of that walk, not a claim that every branch of the
+ * entry script reaches the same endpoint.  In particular, the generic BFS
+ * used by the MOVEEND families is allowed to find an ordinary failure tail;
+ * consumers need that fact to distinguish it from a success-arm proof.
+ */
+type RouteBranch = "success" | "failure-tail";
+type RouteBranchMarkerClass =
+  | "none"
+  | "BattleScript_ButItFailed"
+  | "MOVE_RESULT_FAILED"
+  | "*Prevents* redirect";
+type RouteBranchEvidence = {
+  markerClass: RouteBranchMarkerClass;
+  marker?: { label: string; line: number; mnemonic: string; operands: string[] };
+};
+type RouteBranchMarker = {
+  markerClass: Exclude<RouteBranchMarkerClass, "none">;
+  label: string;
+  line: number;
+  mnemonic: string;
+  operands: string[];
+};
+type RouteBranchClassification = {
+  routeBranch: RouteBranch;
+  routeBranchEvidence: RouteBranchEvidence;
+};
+
+// The source names its early-stop redirect scripts consistently.  The audit
+// name stays "*Prevents* redirect" from ISSUES #86, while this finite,
+// source-derived selector includes Damp's older `StopsExplosion` spelling.
+const FAILURE_TAIL_REDIRECT_LABELS = new Set(graph.labels
+  .map((label) => label.name)
+  .filter((label) => /(?:Prevents|Prevention|StopsExplosion)/.test(label)));
+if (!FAILURE_TAIL_REDIRECT_LABELS.has("BattleScript_DampStopsExplosion")
+  || !FAILURE_TAIL_REDIRECT_LABELS.has("BattleScript_OwnTempoPrevents")) {
+  throw new Error("Battle Script failure-tail redirect label selector drifted");
+}
+
+function routeBranchMarker(statement: unknown): RouteBranchMarker | null {
+  if (statement === null || typeof statement !== "object" || Array.isArray(statement)) return null;
+  const value = statement as Record<string, unknown>;
+  const label = typeof value.label === "string" ? value.label : "";
+  const line = typeof value.line === "number" ? value.line : -1;
+  const mnemonic = typeof value.mnemonic === "string" ? value.mnemonic : "";
+  const operands = Array.isArray(value.operands) && value.operands.every((operand) => typeof operand === "string")
+    ? value.operands as string[]
+    : [];
+  // Keep these three marker classes aligned with ISSUES #86.  The route
+  // statement itself has already taken the relevant edge; inspecting an
+  // unselected jump target would incorrectly classify e.g. an ordinary
+  // successful Own Tempo guard fallthrough as a failure tail.
+  if (label === "BattleScript_ButItFailed") {
+    return { markerClass: "BattleScript_ButItFailed", label, line, mnemonic, operands };
+  }
+  if (mnemonic === "orbyte"
+    && operands.includes("gMoveResultFlags")
+    && operands.includes("MOVE_RESULT_FAILED")) {
+    return { markerClass: "MOVE_RESULT_FAILED", label, line, mnemonic, operands };
+  }
+  if (FAILURE_TAIL_REDIRECT_LABELS.has(label)) {
+    return { markerClass: "*Prevents* redirect", label, line, mnemonic, operands };
+  }
+  return null;
+}
+
+function classifyRouteBranch(route: readonly unknown[]): RouteBranchClassification {
+  const marker = route.map(routeBranchMarker).find((candidate) => candidate !== null) ?? null;
+  if (marker === null) return { routeBranch: "success", routeBranchEvidence: { markerClass: "none" } };
+  const { markerClass, ...sourceMarker } = marker;
+  return {
+    routeBranch: "failure-tail",
+    routeBranchEvidence: { markerClass, marker: sourceMarker },
+  };
+}
+
+type RouteBranchAudit = {
+  routeCertificates: number;
+  success: number;
+  failureTail: number;
+  failureMarkers: Record<Exclude<RouteBranchMarkerClass, "none">, number>;
+};
+
+/**
+ * Annotate every serialized graph/program route pair rather than only the
+ * current MOVEEND families.  Coverage checkpoints intentionally reuse route
+ * objects in several places; walking without identity de-duplication counts
+ * the emitted JSON certificates, which is the audit surface consumers read.
+ */
+function annotateRouteBranches(value: unknown): RouteBranchAudit {
+  const audit: RouteBranchAudit = {
+    routeCertificates: 0,
+    success: 0,
+    failureTail: 0,
+    failureMarkers: {
+      "BattleScript_ButItFailed": 0,
+      "MOVE_RESULT_FAILED": 0,
+      "*Prevents* redirect": 0,
+    },
+  };
+  function walk(candidate: unknown): void {
+    if (Array.isArray(candidate)) {
+      for (const item of candidate) walk(item);
+      return;
+    }
+    if (candidate === null || typeof candidate !== "object") return;
+    const record = candidate as Record<string, unknown>;
+    const graph = record.graph as Record<string, unknown> | undefined;
+    const program = record.program as Record<string, unknown> | undefined;
+    const graphRoute = graph?.route;
+    const programRoute = program?.route;
+    if (Array.isArray(graphRoute) || Array.isArray(programRoute)) {
+      if (!Array.isArray(graphRoute) || !Array.isArray(programRoute)) {
+        throw new Error("route certificate must carry both graph and program routes");
+      }
+      const graphClassification = classifyRouteBranch(graphRoute);
+      const programClassification = classifyRouteBranch(programRoute);
+      if (JSON.stringify(graphClassification) !== JSON.stringify(programClassification)) {
+        throw new Error("graph/program route branch classification drifted");
+      }
+      record.routeBranch = graphClassification.routeBranch;
+      record.routeBranchEvidence = graphClassification.routeBranchEvidence;
+      audit.routeCertificates += 1;
+      if (graphClassification.routeBranch === "success") {
+        audit.success += 1;
+      } else {
+        audit.failureTail += 1;
+        audit.failureMarkers[graphClassification.routeBranchEvidence.markerClass as Exclude<RouteBranchMarkerClass, "none">] += 1;
+      }
+    }
+    for (const child of Object.values(record)) walk(child);
+  }
+  walk(value);
+  return audit;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
+function annotatedRouteBranch(entryPath: unknown): RouteBranchClassification | null {
+  const path = asRecord(entryPath);
+  const graphPath = asRecord(path?.graph);
+  const programPath = asRecord(path?.program);
+  const graphRoute = graphPath?.route;
+  const programRoute = programPath?.route;
+  if (graphRoute === undefined && programRoute === undefined) return null;
+  if (!Array.isArray(graphRoute) || !Array.isArray(programRoute)) {
+    throw new Error("promoted route certificate must carry both graph and program routes");
+  }
+  const graphClassification = classifyRouteBranch(graphRoute);
+  const programClassification = classifyRouteBranch(programRoute);
+  if (JSON.stringify(graphClassification) !== JSON.stringify(programClassification)) {
+    throw new Error("promoted graph/program route branch classification drifted");
+  }
+  if (path?.routeBranch !== graphClassification.routeBranch
+    || JSON.stringify(path?.routeBranchEvidence) !== JSON.stringify(graphClassification.routeBranchEvidence)) {
+    throw new Error("promoted route certificate lost its emitted route-branch evidence");
+  }
+  return graphClassification;
+}
+
+type PromotedRouteBranchAudit = {
+  routeCertificates: number;
+  success: number;
+  failureTail: number;
+  failureTailByCategory: Record<string, number>;
+};
+
+/**
+ * A failure-tail certificate is still valid for a generic MOVEEND hook only
+ * when that tail reaches the real Cmd_moveend loop.  This audit makes that
+ * boundary executable: a future pre-move/guard-only family cannot quietly
+ * inherit the generic post-move justification.
+ */
+function auditPromotedRouteBranches(records: readonly unknown[]): PromotedRouteBranchAudit {
+  const audit: PromotedRouteBranchAudit = {
+    routeCertificates: 0,
+    success: 0,
+    failureTail: 0,
+    failureTailByCategory: {},
+  };
+  for (const move of records) {
+    const hooks = asRecord(asRecord(move)?.hooks);
+    for (const axis of ["item", "ability"] as const) {
+      const hook = asRecord(hooks?.[axis]);
+      if (hook?.status !== SOUNDPROOF_STATUS) continue;
+      const families = (asRecord(hook.evidence)?.families);
+      if (!Array.isArray(families)) throw new Error(`${axis} source-proven hook lacks families for route-branch audit`);
+      for (const familyValue of families) {
+        const family = asRecord(familyValue);
+        const category = typeof family?.category === "string" ? family.category : null;
+        if (category === null) throw new Error(`${axis} source-proven family lacks category for route-branch audit`);
+        const entryPath = asRecord(family?.entryPath);
+        const classification = annotatedRouteBranch(entryPath);
+        if (classification === null) continue; // statement-audit families have no route certificate.
+        audit.routeCertificates += 1;
+        if (classification.routeBranch === "success") {
+          audit.success += 1;
+          continue;
+        }
+        const moveEnd = asRecord(entryPath?.moveEnd);
+        if (typeof moveEnd?.state !== "string" || typeof moveEnd?.stateValue !== "number") {
+          throw new Error(`${category} failure-tail certificate is not a Cmd_moveend state-loop handoff`);
+        }
+        audit.failureTail += 1;
+        audit.failureTailByCategory[category] = (audit.failureTailByCategory[category] ?? 0) + 1;
+      }
+    }
+  }
+  return audit;
+}
+
+type DynamicDispatchSuccessArmAudit = {
+  status: "source-audited";
+  source: { scriptPath: string; commandPath: string };
+  dynamicCommands: Array<{ mnemonic: string; command: string; successArmAssignments: number }>;
+  moves: Array<{
+    move: string;
+    entryScript: string;
+    reachedOpcodes: Array<{ label: string; line: number; mnemonic: string }>;
+  }>;
+  promotedSuccessArmEscapes: string[];
+  exceptionRows: { item: string[]; ability: string[] };
+  newExceptionRows: [];
+};
+
+const DYNAMIC_MOVE_DISPATCH_ASSIGNMENT = "gBattlescriptCurrInstr = gBattleScriptsForMoveEffects[gBattleMoves[gCurrentMove].effect];";
+const DYNAMIC_MOVE_DISPATCH_COMMANDS = [
+  { mnemonic: "jumptocalledmove", command: "Cmd_jumptocalledmove", successArmAssignments: 1 },
+  { mnemonic: "trymirrormove", command: "Cmd_trymirrormove", successArmAssignments: 2 },
+  { mnemonic: "metronome", command: "Cmd_metronome", successArmAssignments: 1 },
+] as const;
+const DYNAMIC_MOVE_DISPATCH_MNEMONICS = new Set(DYNAMIC_MOVE_DISPATCH_COMMANDS.map((command) => command.mnemonic));
+const DYNAMIC_MOVE_DISPATCH_CONTINUATIONS = new Set(["trychoosesleeptalkmove"]);
+
+function sourceStaticFunctionBody(name: string): string {
+  const signature = `static void ${name}(void)\n{`;
+  const start = battleScriptCommandsSource.indexOf(signature);
+  if (start < 0) throw new Error(`unable to locate ${name}`);
+  const next = battleScriptCommandsSource.indexOf("\nstatic void ", start + signature.length);
+  if (next < 0) throw new Error(`unable to isolate ${name}`);
+  return battleScriptCommandsSource.slice(start, next);
+}
+
+function firstDynamicAuditPosition(label: string, visited = new Set<string>()): { label: string; line: number } {
+  if (visited.has(label)) throw new Error(`dynamic-dispatch audit encountered an empty-label cycle at ${label}`);
+  visited.add(label);
+  const graphLabel = requireGraphLabel(label);
+  const first = graphLabel.statements[0];
+  if (first) return { label, line: first.line };
+  if (graphLabel.nextLabel) return firstDynamicAuditPosition(graphLabel.nextLabel, visited);
+  throw new Error(`${label} has no first statement for dynamic-dispatch audit`);
+}
+
+function dynamicDispatchOpcodesFromEntry(entryScript: string): Array<{ label: string; line: number; mnemonic: string }> {
+  const byPosition = new Map<string, GraphStatement>();
+  const outgoing = new Map<string, GraphEdge[]>();
+  for (const label of graph.labels) {
+    for (const statement of label.statements) byPosition.set(`${label.name}:${statement.line}`, statement);
+  }
+  for (const edge of graph.controlFlow.edges) {
+    const key = `${edge.from.label}:${edge.from.line}`;
+    outgoing.set(key, [...(outgoing.get(key) ?? []), edge]);
+  }
+  const queue: Array<{ label: string; line: number }> = [firstDynamicAuditPosition(entryScript)];
+  const seen = new Set<string>();
+  const reached: Array<{ label: string; line: number; mnemonic: string }> = [];
+  while (queue.length > 0) {
+    const position = queue.shift()!;
+    const key = `${position.label}:${position.line}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const statement = byPosition.get(key);
+    if (!statement) throw new Error(`dynamic-dispatch audit lost ${key}`);
+    if (DYNAMIC_MOVE_DISPATCH_MNEMONICS.has(statement.mnemonic)) {
+      reached.push({ ...position, mnemonic: statement.mnemonic });
+    }
+    for (const edge of outgoing.get(key) ?? []) {
+      if (edge.to !== null) queue.push({ label: edge.to.label, line: edge.to.line });
+    }
+    // `trychoosesleeptalkmove` has a C-level success continuation pointer,
+    // not a graph edge.  Its labelled operand leads to jumptocalledmove only
+    // on success, so model that explicit source operand for this audit.
+    if (DYNAMIC_MOVE_DISPATCH_CONTINUATIONS.has(statement.mnemonic)) {
+      for (const target of statement.labelOperands) {
+        queue.push(firstDynamicAuditPosition(target));
+      }
+    }
+  }
+  return reached.sort((left, right) => left.line - right.line || left.label.localeCompare(right.label));
+}
+
+function auditDynamicDispatchSuccessArms(records: readonly unknown[]): DynamicDispatchSuccessArmAudit {
+  for (const definition of DYNAMIC_MOVE_DISPATCH_COMMANDS) {
+    const body = sourceStaticFunctionBody(definition.command);
+    const assignments = body.split(DYNAMIC_MOVE_DISPATCH_ASSIGNMENT).length - 1;
+    if (assignments !== definition.successArmAssignments) {
+      throw new Error(`${definition.command} dynamic success-arm assignment count drifted`);
+    }
+  }
+  const sleepTalkSelection = sourceStaticFunctionBody("Cmd_trychoosesleeptalkmove");
+  if (!sleepTalkSelection.includes("gBattlescriptCurrInstr += 5;")
+    || !sleepTalkSelection.includes("gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1);")) {
+    throw new Error("Cmd_trychoosesleeptalkmove no longer exposes its failure/success continuation split");
+  }
+
+  const recordByMove = new Map(records.map((record) => {
+    const value = asRecord(record);
+    const move = typeof value?.move === "string" ? value.move : null;
+    if (move === null) throw new Error("dynamic-dispatch audit found a record without a move symbol");
+    return [move, value] as const;
+  }));
+  const rows = topology.moves
+    .map((topologyMove) => ({
+      move: topologyMove.move,
+      entryScript: topologyMove.entryScript,
+      reachedOpcodes: dynamicDispatchOpcodesFromEntry(topologyMove.entryScript),
+    }))
+    .filter((row) => row.reachedOpcodes.length > 0)
+    .filter((row) => recordByMove.has(row.move))
+    .sort((left, right) => left.move.localeCompare(right.move));
+  const expectedMoves = ["MOVE_ASSIST", "MOVE_METRONOME", "MOVE_MIRROR_MOVE", "MOVE_SLEEP_TALK"];
+  if (JSON.stringify(rows.map((row) => row.move)) !== JSON.stringify(expectedMoves)) {
+    throw new Error(`dynamic-dispatch success-arm source sweep drifted: ${rows.map((row) => row.move).join(", ")}`);
+  }
+
+  const exceptionRows = {
+    item: ITEM_MOVE_END_EXCEPTION_ROWS
+      .filter((exception) => exception.id.includes("dynamic-dispatch:"))
+      .map((exception) => exception.move)
+      .sort(),
+    ability: IMMUNITY_EXCEPTION_ROWS
+      .filter((exception) => exception.id.includes("dynamic-dispatch:"))
+      .map((exception) => exception.move)
+      .sort(),
+  };
+  const sortedExpectedMoves = [...expectedMoves].sort();
+  if (JSON.stringify(exceptionRows.item) !== JSON.stringify(sortedExpectedMoves)
+    || JSON.stringify(exceptionRows.ability) !== JSON.stringify(sortedExpectedMoves)) {
+    throw new Error("dynamic-dispatch exception rows no longer cover the source-derived success-arm sweep on both axes");
+  }
+  const promotedSuccessArmEscapes: string[] = [];
+  for (const row of rows) {
+    const hooks = asRecord(recordByMove.get(row.move)?.hooks);
+    for (const axis of ["item", "ability"] as const) {
+      const hook = asRecord(hooks?.[axis]);
+      if (hook?.status === SOUNDPROOF_STATUS) promotedSuccessArmEscapes.push(`${axis}:${row.move}`);
+      const exception = asRecord(hook?.sourceException);
+      if (hook?.status !== "unsupported" || typeof exception?.id !== "string" || !exception.id.includes("dynamic-dispatch:")) {
+        throw new Error(`${axis}:${row.move} must remain an explicit dynamic-dispatch exception`);
+      }
+    }
+  }
+  if (promotedSuccessArmEscapes.length > 0) {
+    throw new Error(`source-proven dynamic-dispatch success-arm escape(s): ${promotedSuccessArmEscapes.join(", ")}`);
+  }
+  return {
+    status: "source-audited",
+    source: { scriptPath: BATTLE_SCRIPT_SOURCE_PATH, commandPath: BATTLE_SCRIPT_COMMANDS_PATH },
+    dynamicCommands: DYNAMIC_MOVE_DISPATCH_COMMANDS.map((definition) => ({ ...definition })),
+    moves: rows,
+    promotedSuccessArmEscapes,
+    exceptionRows,
+    newExceptionRows: [],
+  };
+}
+
 function requireGraphLabel(label: string): GraphLabel {
   const value = graphLabelByName.get(label);
   if (!value) throw new Error(`Battle Script graph lacks ${label}`);
@@ -4647,8 +5018,8 @@ const onDamageAudit = {
     reason: "Color Change rows and all 94 contact rows are promoted by separate family-level source/program route and runtime-guard evidence; the distinct contact ability outcome receipt gaps remain explicit and the unrelated ability families are not inferred.",
   },
 };
-const output = {
-  schema: "level50-move-parameterization/v4",
+const output: Record<string, any> = {
+  schema: "level50-move-parameterization/v5",
   source: {
     files: [
       "src/data/gen/moves.json",
@@ -4656,6 +5027,7 @@ const output = {
       "src/data/gen/battle-script-topology.json",
       "src/data/gen/battle-script-graph.json",
       "src/data/gen/battle-script-program.json",
+      BATTLE_SCRIPT_SOURCE_PATH,
       "src/data/gen/factory-animation-inventory.json",
       "src/data/gen/battle-animation-components.json",
       "src/data/gen/battle-frontier-held-items.json",
@@ -4732,6 +5104,58 @@ const output = {
     },
   },
   moves: records,
+};
+
+// Classify the serialized artifact, not only the live object identities: the
+// JSON deliberately repeats family witnesses under move rows and checkpoints,
+// and each emitted certificate must carry its own branch evidence.
+const routeBranchAudit = annotateRouteBranches(output);
+const promotedRouteBranchAudit = auditPromotedRouteBranches(records);
+const dynamicDispatchSuccessArmAudit = auditDynamicDispatchSuccessArms(records);
+if (routeBranchAudit.routeCertificates !== routeBranchAudit.success + routeBranchAudit.failureTail
+  || promotedRouteBranchAudit.routeCertificates !== promotedRouteBranchAudit.success + promotedRouteBranchAudit.failureTail) {
+  throw new Error("route-branch audit totals do not reconcile");
+}
+const butItFailed = requireGraphLabel("BattleScript_ButItFailed");
+const failedFlag = butItFailed.statements.find((statement) => (
+  statement.mnemonic === "orbyte"
+  && JSON.stringify(statement.operandTokens) === JSON.stringify(["gMoveResultFlags", "MOVE_RESULT_FAILED"])
+));
+if (!failedFlag) throw new Error("BattleScript_ButItFailed lost its MOVE_RESULT_FAILED marker");
+output.coverage.routeBranches = {
+  schema: "source-route-branch/v1",
+  classifier: {
+    source: BATTLE_SCRIPT_SOURCE_PATH,
+    markerClasses: [
+      {
+        id: "BattleScript_ButItFailed",
+        source: { path: BATTLE_SCRIPT_SOURCE_PATH, locator: "BattleScript_ButItFailed", line: butItFailed.line },
+      },
+      {
+        id: "MOVE_RESULT_FAILED",
+        source: { path: BATTLE_SCRIPT_SOURCE_PATH, locator: "orbyte gMoveResultFlags, MOVE_RESULT_FAILED", line: failedFlag.line },
+      },
+      {
+        id: "*Prevents* redirect",
+        source: {
+          path: BATTLE_SCRIPT_SOURCE_PATH,
+          locator: "early-stop redirect labels",
+          labels: [...FAILURE_TAIL_REDIRECT_LABELS].sort().map((label) => ({ label, line: requireGraphLabel(label).line })),
+        },
+      },
+    ],
+  },
+  emitted: routeBranchAudit,
+  promoted: promotedRouteBranchAudit,
+  failureTailPolicy: {
+    source: {
+      path: BATTLE_SCRIPT_COMMANDS_PATH,
+      locator: "Cmd_moveend do/while state loop",
+      line: sourceLine(battleScriptCommandsSource, "static void Cmd_moveend(void)\n{", "Cmd_moveend"),
+    },
+    rule: "A failure-tail route remains valid hook-join evidence only when its certificate reaches a Cmd_moveend state handoff: after either ordinary success or ordinary failure enters Cmd_moveend, the same state loop advances through the certified state. Dynamic dispatch is excluded separately because its success arm never enters the originating script's static tail.",
+  },
+  dynamicDispatchSuccessArms: dynamicDispatchSuccessArmAudit,
 };
 
 mkdirSync(OUTPUT_DIR, { recursive: true });

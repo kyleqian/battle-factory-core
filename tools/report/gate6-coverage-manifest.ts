@@ -98,7 +98,7 @@ function requirePath(path: string): void {
 }
 
 function assertManifest(manifest: AnyRecord): void {
-  if (manifest.schema !== "gate6-coverage-manifest/v1") throw new Error("unexpected Gate-6 manifest schema");
+  if (manifest.schema !== "gate6-coverage-manifest/v2") throw new Error("unexpected Gate-6 manifest schema");
   if (manifest.gate6?.closed !== false) throw new Error("Gate-6 manifest must remain explicitly open");
   if (!String(manifest.gate6?.verdict ?? "").toLowerCase().includes("open")) {
     throw new Error("Gate-6 manifest verdict must explicitly say open");
@@ -147,6 +147,12 @@ function assertManifest(manifest: AnyRecord): void {
       if (!(row.evidence as Evidence[] | undefined)?.some((item) => item.path === PARAMETERIZATION_PATH && item.locator === sourceLocator)) {
         throw new Error(`Gate-6 manifest ${axis} hook-join evidence lacks ${move.move}`);
       }
+      const sourceRouteBranches = sourceHook.status === SOURCE_PROVEN_FAMILY_STATUS
+        ? sourceProvenRouteBranches(sourceHook)
+        : [];
+      if (!Array.isArray(row.routeBranches) || JSON.stringify(row.routeBranches) !== JSON.stringify(sourceRouteBranches)) {
+        throw new Error(`Gate-6 manifest ${axis} hook-join route-branch evidence drift for ${move.move}`);
+      }
       if (row.status === "unsupported") {
         if (!Array.isArray(row.categories) || row.categories.length !== 0) {
           throw new Error(`unsupported ${axis} hook-join row for ${move.move} claims a category`);
@@ -182,6 +188,7 @@ function assertManifest(manifest: AnyRecord): void {
   assertSynchronizeCheckpoint(manifest);
   assertTryinfatuatingObliviousCheckpoint(manifest);
   assertKingsRockCheckpoint(manifest);
+  assertRouteBranchCheckpoint(manifest);
 
   const rows: Row[] = [];
   function walk(value: unknown): void {
@@ -219,6 +226,9 @@ const abilityItemDoc = readText(ABILITY_ITEM_DOC_PATH);
 const scout = readText(SCOUT_PATH);
 const topology = readJson(TOPOLOGY_PATH);
 const parameterization = readJson(PARAMETERIZATION_PATH);
+if (parameterization.schema !== "level50-move-parameterization/v5") {
+  throw new Error("Gate-6 manifest requires the route-branch-aware Level-50 parameterization");
+}
 const trainers = readJson(TRAINERS_PATH);
 const mons = readJson(MONS_PATH);
 const heldItems = readJson(HELD_ITEMS_PATH);
@@ -229,6 +239,15 @@ const hooks = readJson(HOOKS_PATH);
 const LEVEL50_SET_COUNT = parameterization.coverage.level50Roster.frontierSetIds.count as number;
 if (!Number.isSafeInteger(LEVEL50_SET_COUNT) || LEVEL50_SET_COUNT <= 0) {
   throw new Error("level50 parameterization has no finite roster boundary");
+}
+const parameterizationRouteBranches = parameterization.coverage?.routeBranches as AnyRecord | undefined;
+if (parameterizationRouteBranches?.schema !== "source-route-branch/v1"
+  || parameterizationRouteBranches.emitted?.routeCertificates !== parameterizationRouteBranches.emitted?.success + parameterizationRouteBranches.emitted?.failureTail
+  || parameterizationRouteBranches.promoted?.routeCertificates !== parameterizationRouteBranches.promoted?.success + parameterizationRouteBranches.promoted?.failureTail
+  || parameterizationRouteBranches.dynamicDispatchSuccessArms?.status !== "source-audited"
+  || parameterizationRouteBranches.dynamicDispatchSuccessArms?.promotedSuccessArmEscapes?.length !== 0
+  || parameterizationRouteBranches.dynamicDispatchSuccessArms?.newExceptionRows?.length !== 0) {
+  throw new Error("level50 parameterization lacks a complete route-branch/dynamic-dispatch audit");
 }
 
 function parseCensusRows(text: string, prefix: string): Map<string, AnyRecord> {
@@ -1004,6 +1023,55 @@ function assertKingsRockCheckpoint(manifest: AnyRecord): void {
   }
 }
 
+type EmittedRouteBranch = Readonly<{
+  routeBranch: "success" | "failure-tail";
+  markerClass: "none" | "BattleScript_ButItFailed" | "MOVE_RESULT_FAILED" | "*Prevents* redirect";
+  marker?: Readonly<{ label: string; line: number; mnemonic: string; operands: string[] }>;
+}>;
+
+function classifyEmittedRouteBranch(route: AnyRecord[]): EmittedRouteBranch {
+  for (const statement of route) {
+    const label = typeof statement.label === "string" ? statement.label : "";
+    const line = typeof statement.line === "number" ? statement.line : -1;
+    const mnemonic = typeof statement.mnemonic === "string" ? statement.mnemonic : "";
+    const operands = Array.isArray(statement.operands) && statement.operands.every((operand: unknown) => typeof operand === "string")
+      ? statement.operands as string[]
+      : [];
+    const marker = { label, line, mnemonic, operands };
+    if (label === "BattleScript_ButItFailed") {
+      return { routeBranch: "failure-tail", markerClass: "BattleScript_ButItFailed", marker };
+    }
+    if (mnemonic === "orbyte" && operands.includes("gMoveResultFlags") && operands.includes("MOVE_RESULT_FAILED")) {
+      return { routeBranch: "failure-tail", markerClass: "MOVE_RESULT_FAILED", marker };
+    }
+    if (/(?:Prevents|Prevention|StopsExplosion)/.test(label)) {
+      return { routeBranch: "failure-tail", markerClass: "*Prevents* redirect", marker };
+    }
+  }
+  return { routeBranch: "success", markerClass: "none" };
+}
+
+function entryPathRouteBranch(entryPath: AnyRecord): EmittedRouteBranch | null {
+  const graphRoute = entryPath.graph?.route as AnyRecord[] | undefined;
+  const programRoute = entryPath.program?.route as AnyRecord[] | undefined;
+  if (graphRoute === undefined && programRoute === undefined) return null;
+  if (!Array.isArray(graphRoute) || !Array.isArray(programRoute)) {
+    throw new Error("route certificate must carry both graph and program routes");
+  }
+  const graphBranch = classifyEmittedRouteBranch(graphRoute);
+  const programBranch = classifyEmittedRouteBranch(programRoute);
+  if (JSON.stringify(graphBranch) !== JSON.stringify(programBranch)) {
+    throw new Error("route certificate graph/program branch classification drifted");
+  }
+  const emitted = entryPath.routeBranchEvidence as AnyRecord | undefined;
+  if (entryPath.routeBranch !== graphBranch.routeBranch
+    || emitted?.markerClass !== graphBranch.markerClass
+    || JSON.stringify(emitted?.marker) !== JSON.stringify(graphBranch.marker)) {
+    throw new Error("route certificate lacks deterministic emitted branch evidence");
+  }
+  return graphBranch;
+}
+
 function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
   const families = hook.evidence?.families;
   if (!Array.isArray(families) || families.length === 0) {
@@ -1048,6 +1116,7 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
     if (typeof family.entryPath.program.entryLabel !== "string" && typeof family.entryPath.declaredEntryScript !== "string") {
       throw new Error(`${family.category} entry path has neither program.entryLabel nor declaredEntryScript -- would emit an "undefined" locator`);
     }
+    entryPathRouteBranch(family.entryPath);
     if (family.category === SOUNDPROOF_MOVES_BLOCK_CATEGORY && !family.entryPath.graph.attackCanceler) {
       throw new Error("Soundproof family lacks its attackcanceler witness");
     }
@@ -1237,6 +1306,69 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
     }
   }
   return families as AnyRecord[];
+}
+
+function sourceProvenRouteBranches(hook: AnyRecord): AnyRecord[] {
+  return sourceProvenFamilies(hook).flatMap((family) => {
+    const branch = entryPathRouteBranch(family.entryPath);
+    if (branch === null) return [];
+    return [{
+      category: family.category,
+      routeBranch: branch.routeBranch,
+      markerClass: branch.markerClass,
+      ...(branch.marker === undefined ? {} : { marker: branch.marker }),
+    }];
+  });
+}
+
+function routeBranchEvidenceText(branches: readonly AnyRecord[]): string {
+  if (branches.length === 0) return "statement audit (no graph/program route certificate)";
+  return branches.map((branch) => {
+    const marker = branch.marker as AnyRecord | undefined;
+    const markerText = branch.markerClass === "none"
+      ? "no failure marker"
+      : `${branch.markerClass} at ${marker?.label}:${marker?.line}`;
+    return `${branch.category}: ${branch.routeBranch} (${markerText})`;
+  }).join("; ");
+}
+
+function assertRouteBranchCheckpoint(manifest: AnyRecord): void {
+  const summary = manifest.summary?.routeBranches as AnyRecord | undefined;
+  if (!summary || JSON.stringify(summary) !== JSON.stringify(parameterizationRouteBranches)) {
+    throw new Error("Gate-6 manifest route-branch summary drifted from the parameterization");
+  }
+  const emitted = summary.emitted as AnyRecord | undefined;
+  const promoted = summary.promoted as AnyRecord | undefined;
+  const dynamic = summary.dynamicDispatchSuccessArms as AnyRecord | undefined;
+  if (!emitted || !promoted || !dynamic
+    || emitted.routeCertificates !== emitted.success + emitted.failureTail
+    || promoted.routeCertificates !== promoted.success + promoted.failureTail
+    || dynamic.status !== "source-audited"
+    || !Array.isArray(dynamic.promotedSuccessArmEscapes) || dynamic.promotedSuccessArmEscapes.length !== 0
+    || !Array.isArray(dynamic.newExceptionRows) || dynamic.newExceptionRows.length !== 0) {
+    throw new Error("Gate-6 manifest route-branch checkpoint is incomplete");
+  }
+  const hookRows = Object.values(manifest.sections?.perMoveHookJoins ?? {}).flatMap((rows) => Array.isArray(rows) ? rows : []) as AnyRecord[];
+  const branches = hookRows.flatMap((row) => Array.isArray(row.routeBranches) ? row.routeBranches : [] as AnyRecord[]);
+  const success = branches.filter((branch) => branch.routeBranch === "success").length;
+  const failureTail = branches.filter((branch) => branch.routeBranch === "failure-tail").length;
+  if (branches.length !== promoted.routeCertificates || success !== promoted.success || failureTail !== promoted.failureTail) {
+    throw new Error("Gate-6 manifest per-move route-branch counts drifted from the promoted audit");
+  }
+  const failureTailByCategory: Record<string, number> = {};
+  for (const branch of branches.filter((branch) => branch.routeBranch === "failure-tail")) {
+    if (typeof branch.category !== "string") throw new Error("failure-tail branch lacks its family category");
+    failureTailByCategory[branch.category] = (failureTailByCategory[branch.category] ?? 0) + 1;
+  }
+  if (JSON.stringify(failureTailByCategory) !== JSON.stringify(promoted.failureTailByCategory)) {
+    throw new Error("Gate-6 manifest failure-tail category audit drifted");
+  }
+  const dynamicMoves = new Set((dynamic.moves as AnyRecord[]).map((row) => row.move));
+  for (const row of hookRows) {
+    if (row.status === SOURCE_PROVEN_FAMILY_STATUS && dynamicMoves.has(row.move)) {
+      throw new Error(`Gate-6 manifest promoted a dynamic-dispatch success-arm escape: ${row.move}`);
+    }
+  }
 }
 
 function parameterizedHook(move: AnyRecord, axis: PerMoveHookJoinAxis): AnyRecord {
@@ -1585,6 +1717,7 @@ function makePerMoveHookJoinRows(axis: PerMoveHookJoinAxis): Row[] {
     const hook = parameterizedHook(move, axis);
     const sourceLocator = `moves:${move.move}.hooks.${axis}`;
     const sourceProven = hook.status === SOURCE_PROVEN_FAMILY_STATUS;
+    const routeBranches = sourceProven ? sourceProvenRouteBranches(hook) : [];
     return Object.freeze({
       id: `per-move-hook-join:${axis}:${move.move}`,
       label: move.move,
@@ -1596,6 +1729,7 @@ function makePerMoveHookJoinRows(axis: PerMoveHookJoinAxis): Row[] {
       entryScript: move.battleScript?.entryScript,
       status: hook.status,
       categories: hook.supportedCategories,
+      routeBranches,
       reason: hook.reason,
       sourceArtifact: { path: PARAMETERIZATION_PATH, locator: sourceLocator },
       evidence: uniqueEvidence([
@@ -1603,7 +1737,7 @@ function makePerMoveHookJoinRows(axis: PerMoveHookJoinAxis): Row[] {
         ...(sourceProven ? sourceProvenHookEvidence(hook) : []),
       ]),
       notes: sourceProven
-        ? `Source-proven only for ${hook.supportedCategories.join(", ")}; unrelated ${axis} families are not promoted.`
+        ? `Source-proven only for ${hook.supportedCategories.join(", ")}; route-branch evidence: ${routeBranchEvidenceText(routeBranches)}. unrelated ${axis} families are not promoted.`
         : "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified.",
     });
   });
@@ -2708,7 +2842,7 @@ const sourceInputs = [
 for (const path of sourceInputs) requirePath(path);
 
 const manifest: AnyRecord = {
-  schema: "gate6-coverage-manifest/v1",
+  schema: "gate6-coverage-manifest/v2",
   gate6: {
     closed: false,
     verdict: "OPEN — this first manifest exposes coverage and receipt gaps; it does not claim Gate 6 closed.",
@@ -2731,6 +2865,7 @@ const manifest: AnyRecord = {
       ability: perMoveHookJoinSummary.ability,
       total: perMoveHookJoinTotals,
     },
+    routeBranches: parameterizationRouteBranches,
     onDamageMoveEnd: onDamageMoveEndSummary,
     synchronizeMoveEnd: synchronizeMoveEndSummary,
     tryinfatuatingOblivious: tryinfatuatingObliviousSummary,
@@ -2754,6 +2889,7 @@ const manifest: AnyRecord = {
   sections: {
     moveEffect: { effects: moveEffectRows, moves: moveRows },
     perMoveHookJoins: perMoveHookJoinRows,
+    routeBranches: parameterizationRouteBranches,
     onDamageMoveEnd: onDamageMoveEndRow,
     synchronizeMoveEnd: synchronizeMoveEndRow,
     tryinfatuatingOblivious: tryinfatuatingObliviousRow,
@@ -2799,6 +2935,7 @@ const markdown: string[] = [
   "",
   `- Effects: **${manifest.summary.effects.staticExecutable}/${manifest.summary.effects.total} static-executable**; moves: **${manifest.summary.moves.staticExecutable}/${manifest.summary.moves.total}** static-executable (**${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}** Level-50 roster moves executable, **${manifest.summary.moves.level50RosterOnly}** roster-only).`,
   `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.item.rows - manifest.summary.perMoveHookJoins.item.gaps} item rows are source-proven for the King's Rock, Shell Bell, 112-row item-move-end status-cure, and 4-row item-manipulation-opcode families, and ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors, audited shared-absorbing routes, both ON_DAMAGE families, the 30-candidate Synchronize family, Attract's one-row Oblivious family, the two Explosion/Damp categories, the 95-row Immunity status-cure family, the 2-row ability-manipulation-opcode family, and the 5-row own-tempo-guard family, while every remaining gap retains its source-artifact locator and reason. Both axes' only remaining gaps are Assist/Metronome/Mirror Move/Sleep Talk (dynamic-dispatch exceptions).`,
+  `- Route certificates: **${manifest.summary.routeBranches.emitted.success}/${manifest.summary.routeBranches.emitted.routeCertificates} success** and **${manifest.summary.routeBranches.emitted.failureTail} failure-tail** emitted certificates; promoted rows contain **${manifest.summary.routeBranches.promoted.success}/${manifest.summary.routeBranches.promoted.routeCertificates} success** and **${manifest.summary.routeBranches.promoted.failureTail} failure-tail** certificates. A failure-tail promotion stands only when its certificate reaches the real Cmd_moveend state loop, which advances through the certified state after either ordinary branch; Assist/Metronome/Mirror Move/Sleep Talk are separately excluded because their success arms dynamically leave the originating static script.`,
   `- ON_DAMAGE checkpoint: **${manifest.summary.onDamageMoveEnd.contactCandidates}** contact candidates and **${manifest.summary.onDamageMoveEnd.colorChangeCandidates}** Color Change candidates (${manifest.summary.onDamageMoveEnd.overlapCandidates} overlap) are source-enumerated across ${manifest.summary.onDamageMoveEnd.entryBlockShapes} entry-block shapes. **${manifest.summary.onDamageMoveEnd.contactPromotedRows}** contact rows and **${manifest.summary.onDamageMoveEnd.colorChangePromotedRows}** Color Change rows are promoted; **${manifest.summary.onDamageMoveEnd.contactExceptions}** contact exceptions and **${manifest.summary.onDamageMoveEnd.contactBlockers}** active contact blockers remain, while **${manifest.summary.onDamageMoveEnd.contactRetiredBlockers}** contact route/guard blockers and **${manifest.summary.onDamageMoveEnd.colorChangeRetiredBlockers}** Color Change blockers are retired.`,
   `- Synchronize checkpoint: **${manifest.summary.synchronizeMoveEnd.candidates}** finite Level-50 candidates, **${manifest.summary.synchronizeMoveEnd.promotedRows}** promoted, **${manifest.summary.synchronizeMoveEnd.exceptions}** route exceptions, and **${manifest.summary.synchronizeMoveEnd.blockers}** active blockers.`,
   `- Attract/Oblivious checkpoint: **${manifest.summary.tryinfatuatingOblivious.candidates}** finite EFFECT_ATTRACT candidate, **${manifest.summary.tryinfatuatingOblivious.promotedRows}** promoted, **${manifest.summary.tryinfatuatingOblivious.exceptions}** exceptions, **${manifest.summary.tryinfatuatingOblivious.rosterOnlyCandidates}** roster-only candidates, and **${manifest.summary.tryinfatuatingOblivious.blockers}** active blockers.`,
@@ -2846,21 +2983,23 @@ markdown.push(...table("Moves (all topology rows)", ["Move", "Effect", "Static s
   (row) => evidenceText(row.evidence),
 ]));
 markdown.push("## Per-move item and ability hook-join coverage\n\n");
-markdown.push(...table("Item hook joins (all Level-50 roster moves)", ["Move", "Effect", "Entry script", "Status", "Category", "Reason", "Source artifact evidence"], perMoveHookJoinRows.item, [
+markdown.push(...table("Item hook joins (all Level-50 roster moves)", ["Move", "Effect", "Entry script", "Status", "Category", "Route branch evidence", "Reason", "Source artifact evidence"], perMoveHookJoinRows.item, [
   (row) => row.move,
   (row) => row.effect,
   (row) => row.entryScript,
   (row) => row.status,
   (row) => row.categories.length === 0 ? "—" : row.categories.join(", "),
+  (row) => routeBranchEvidenceText(row.routeBranches),
   (row) => row.reason,
   (row) => evidenceText(row.evidence),
 ]));
-markdown.push(...table("Ability hook joins (all Level-50 roster moves)", ["Move", "Effect", "Entry script", "Status", "Category", "Reason", "Source artifact evidence"], perMoveHookJoinRows.ability, [
+markdown.push(...table("Ability hook joins (all Level-50 roster moves)", ["Move", "Effect", "Entry script", "Status", "Category", "Route branch evidence", "Reason", "Source artifact evidence"], perMoveHookJoinRows.ability, [
   (row) => row.move,
   (row) => row.effect,
   (row) => row.entryScript,
   (row) => row.status,
   (row) => row.categories.length === 0 ? "—" : row.categories.join(", "),
+  (row) => routeBranchEvidenceText(row.routeBranches),
   (row) => row.reason,
   (row) => evidenceText(row.evidence),
 ]));
