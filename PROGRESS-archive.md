@@ -40277,3 +40277,21 @@ both verify scripts/census independently re-verified before this entry.)*
 - **Notes:** clock remains unwired; no identity/tick/cursor/fixture selection,
   canonical Battle-2 march, evidence regeneration, animation edit, or new
   unsupported barrier.
+## 1092 — [MAIN worker, 2026-08-10] **#55 direct signed-division timing reduced**
+
+- **State:** implementation `602227bd` plus docs `7c2de833`; focused stats
+  evidence **11/11**, smoke **375/375**, typecheck, full `npm test` **881
+  files / 8,430 passed / 1 skipped**, and production build are green. #55
+  remains open and the construction clock remains unwired.
+- **Did:** reduced all **72/72** direct `__divsi3` calls from source signed-i32
+  dividend/divisor ABI values and the compiled `0x082E7542` wrapper plus exact
+  inline unsigned core. Source totals anchor/LILIANA/varied are
+  **11,252/5,630/5,700 = 22,582** cycles; raw spans decompose **71×exact +
+  1×(+18 async service)**. Tests pin zero/sign/`INT_MIN/-1` branches.
+- **Next:** continue only with another bounded #55 source-general component
+  (encrypted Get/Set, level/growth, or VBlank/audio); do not wire the
+  aggregate stats operation or construction clock.
+- **Notes:** factor is limited to the exact Loop1/2/3 body shared with
+  `__udivsi3`; setup/return boundaries remain separate. No identity/duration
+  lookup, fixture mutation, excluded lane, canonical Battle-2, animation, or
+  unsupported-barrier change.

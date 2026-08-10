@@ -220,7 +220,7 @@ executed boundaries `0x08068D0C → 0x080686EA` (mGBA pipelined PCs
 beside—not inside—the frozen v2 receipt:
 `tests/fixtures/factory-calculate-mon-stats-v1/{anchor,liliana,factory-varied}.json`.
 Fresh wrapped repeats were byte-identical at SHA-256
-`cde88e8f…`, `d338edc…`, and `e0d10a1…`, respectively. They contain no party
+`92d3feb4…`, `136efa4a…`, and `ea323d9e…`, respectively. They contain no party
 pointer, trainer/set id, frame, cursor, or duration lookup key: only scalar
 ABI inputs/results, accepted personality, direct-call PCs, and master cycles.
 
@@ -291,7 +291,7 @@ interrupt subtraction (there are no contained VBlank pauses inside these
 short calls): **52** neutral calls at **98** cycles, **3×416 + 1×418** raise
 calls, and **3×408 + 1×410** lower calls. A fresh wrapped Scene-OFF anchor
 probe reproduced its packet byte-for-byte at
-`cde88e8f2a6ab3602793648120b9d687e42ad96c6d0ad6d554f74e032e82d603`, including
+`92d3feb4686cddfdaf7a6b14be3931514f2007f59052f0f4a64deb5bba287773`, including
 the anchor's **28×98 + 416 + 410 = 3,570** nature-modification cycles.
 
 This resolves **60/480** direct-call sites (**12.5%**) and **8,396** of the
@@ -327,7 +327,7 @@ A temporary fresh instruction trace placed the +245 entirely in a nested
 `VCountIntr→m4aSoundVSync` IRQ (**80** ISR/BIOS instructions) before resuming
 `__umodsi3`; the two +18 spans are the already-classified asynchronous timing-
 service class. Neither external cost is absorbed into the source reducer. A
-fresh wrapped anchor packet remained byte-identical at `cde88e8f…`.
+fresh wrapped anchor packet remained byte-identical at `92d3feb4…`.
 
 This resolves another **60/480** direct-call sites (**12.5%**) and **59,900 /
 1,768,691 = 3.386%** of pause-subtracted direct-callee cycles. Together with
@@ -443,7 +443,7 @@ ROM jump-table word, and an ordinary EWRAM byte/halfword read:
 direct reads are exact with zero contained VBlank pauses and zero external
 service residual: anchor/LILIANA/varied **960/480/480 = 1,920** cycles. Fresh
 wrapped Battle Scene OFF packets for all three cases were byte-identical to
-the committed evidence at `cde88e8f…`, `d338edc6…`, and `e0d10a1…`.
+the committed evidence at `92d3feb4…`, `136efa4a…`, and `ea323d9e…`.
 
 The same instruction reducer covers source-general simple party fields 55–58,
 64, and 84–88. The u32 status arm executes two fewer Thumb halfwords but its
@@ -461,6 +461,48 @@ The unresolved **156** receipt reads are precisely the 13 encrypted fields
 listed above, not an undifferentiated 180-call remainder. Level/growth,
 encrypted reads/writes, and live VBlank/audio arbitration still prevent an
 aggregate `CalculateMonStats` cost or construction-clock wiring.
+
+### Direct `GetLevelFromMonExp` source-state/route checkpoint (2026-08-10)
+
+The **12/12** direct level calls are now audited at source and ELF boundaries,
+but are deliberately **not** counted as reduced. `pokemon.c:2910-2919` /
+`0x08069054..0x080690B4` first makes two encrypted `GetMonData2` calls for
+species (field 11) and experience (field 25), then walks
+`gExperienceTables[gSpeciesInfo[species].growthRate]` from level 1 through the
+first threshold above the current experience. The functional minimum is
+therefore species (or its growth-rate byte) plus experience. Complete timing
+also needs the accepted personality already carried by construction: both
+encrypted accessors route `GetSubstruct` through the full
+`__umodsi3(personality, 24)` path. The normal Factory route additionally
+assumes its freshly constructed checksum is valid; the compiled bad-egg path
+differs when it is not.
+
+The opt-in probe now records only those scalars and five exact pipelined
+boundaries, never the party pointer or decrypted storage. Twice-fresh
+Scene-OFF packets are byte-identical at full SHA-256
+`92d3feb4686cddfdaf7a6b14be3931514f2007f59052f0f4a64deb5bba287773`,
+`136efa4a46777d1e0665f0af3efd6a9ef3b694c68048d3ef46b9140532de5358`, and
+`ea323d9e8e881da6730c78af8965a579258cfd528a6a903a6c0c2dc23b005ce6`.
+All twelve source states resolve to level 50 and cover growth rates **0, 2, 3,
+5** with experiences **117,360 / 125,000 / 142,500 / 156,250**.
+
+The post-accessor path is independently instruction/fetch exact. From the EXP
+accessor return it is **43** cycles through the growth-rate load, **21** to the
+first table comparison, **2,200** for the level-50 loop, and **18** for the
+common `level - 1`/return tail: **2,282** source cycles. The loop term is
+`553×2 + 49×6 + 50×(9−2) + 50×(11−2) = 2,200`. Eight observations
+equal that path, three are **+18** external timing service, and varied mon 2
+is **+308** with explicit `VCountIntr → m4aSoundVSync → VCountIntr`
+entry/return evidence. None of those asynchronous costs is absorbed.
+
+After subtracting the two fully contained VBlank pauses, complete callee
+totals remain anchor/LILIANA/varied **123,879 / 61,954 / 61,089 = 246,922**
+cycles. The two encrypted-accessor blocks account for **110,169 / 55,090 /
+53,917 = 219,176** observed cycles; their decrypt/checksum/%24 instruction-
+fetch and EWRAM timing is still the same unresolved component as the 156
+encrypted direct stats reads. Consequently no complete `GetLevelFromMonExp`
+reducer, keyed duration, identity branch, residual absorption, aggregate
+stats cost, or construction-clock wiring landed.
 
 ### Construction-entry component (2026-08-10)
 

@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1095 — [MAIN worker, 2026-08-10] **#55 direct level route bounded; complete callee not reducible yet**
+
+- **State:** evidence commit `b8bb8306`; focused stats **17/17**, smoke
+  **375/375**, and typecheck are green. Final full suite/build verification is
+  pending. #55 remains open and the construction clock remains unwired.
+- **Did:** audited all **12/12** `GetLevelFromMonExp` calls. Twice-fresh OFF
+  packets pin personality/species/growth/EXP and exact post-accessor timing:
+  **43 + 21 + 2,200 + 18 = 2,282** source cycles; **8 exact + 3×(+18
+  service) + 1×(+308 VCount/audio IRQ)**.
+- **Next:** continue #55 only with the source-general encrypted `GetBoxMonData2`
+  body needed by the 156 direct reads and both level accessors; do not wire
+  aggregate stats or the construction clock.
+- **Notes:** complete level calls total **246,922** pause-subtracted cycles;
+  their two encrypted accessors contribute **219,176** observed cycles and
+  remain unreduced. No fitted duration, keyed/identity branch, residual
+  absorption, canonical Battle-2, animation, fixture production import, or
+  barrier change.
+
 ## 1094 — [MAIN worker, 2026-08-10] **#55 direct `GetMonData2` party reads reduced**
 
 - **State:** implementation `9a90f094`, shell correction `bf107b02`, and
@@ -45,22 +63,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   exposes only its exact 30-cycle entry and 10-cycle return shell. No
   identity/duration lookup, fixture mutation, excluded lane, canonical
   Battle-2, animation, or unsupported-barrier change.
-
-## 1092 — [MAIN worker, 2026-08-10] **#55 direct signed-division timing reduced**
-
-- **State:** implementation `602227bd` plus docs `7c2de833`; focused stats
-  evidence **11/11**, smoke **375/375**, typecheck, full `npm test` **881
-  files / 8,430 passed / 1 skipped**, and production build are green. #55
-  remains open and the construction clock remains unwired.
-- **Did:** reduced all **72/72** direct `__divsi3` calls from source signed-i32
-  dividend/divisor ABI values and the compiled `0x082E7542` wrapper plus exact
-  inline unsigned core. Source totals anchor/LILIANA/varied are
-  **11,252/5,630/5,700 = 22,582** cycles; raw spans decompose **71×exact +
-  1×(+18 async service)**. Tests pin zero/sign/`INT_MIN/-1` branches.
-- **Next:** continue only with another bounded #55 source-general component
-  (encrypted Get/Set, level/growth, or VBlank/audio); do not wire the
-  aggregate stats operation or construction clock.
-- **Notes:** factor is limited to the exact Loop1/2/3 body shared with
-  `__udivsi3`; setup/return boundaries remain separate. No identity/duration
-  lookup, fixture mutation, excluded lane, canonical Battle-2, animation, or
-  unsupported-barrier change.

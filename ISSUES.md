@@ -1127,7 +1127,7 @@ and nested `__udivsi3(...,100)` loops. All **60/60** committed calls are exact:
 **8,396** source cycles. That is **60/480** direct calls (**12.5%**) but only
 **0.475%** of their **1,768,691** pause-subtracted cycles, so it is an honest
 partial reduction rather than a complete stats claim. A fresh Scene-OFF anchor
-repeat remained byte-identical (`cde88e8f…`).
+repeat remained byte-identical (current extended receipt `92d3feb4…`).
 
 **Nested direct `GetNature` timing (2026-08-10):**
 `reduceFactoryGetNatureTiming` now reduces the complete
@@ -1139,7 +1139,7 @@ calls account for **59,900** source cycles (anchor/LILIANA/varied
 1×(+245 complete VCount/audio IRQ)**; a fresh instruction trace classified the
 245-cycle path, and neither external class is folded into the reducer. The
 existing **278-call** nature-attempt contract is unchanged; fresh anchor hash
-remains `cde88e8f…`.
+remains byte-identical (current extended receipt `92d3feb4…`).
 
 **Nested direct signed-division timing (2026-08-10, `602227bd`):**
 `reduceFactorySignedDivisionTiming` now closes all **72/72** v1 direct
@@ -1174,7 +1174,8 @@ simple party jump-table arms from the signed field alone. All **24/24**
 receipt-used HP/max-HP calls are exact at **80** cycles, totaling
 anchor/LILIANA/varied **960/480/480 = 1,920**, with no contained pause or
 async residual. Fresh wrapped Scene-OFF packets for all three cases remain
-byte-identical (`cde88e8f…` / `d338edc6…` / `e0d10a1…`). Encrypted/default
+byte-identical (current extended receipts `92d3feb4…` / `136efa4a…` /
+`ea323d9e…`). Encrypted/default
 routes retain only exact wrapper shells (**36/12** cycles for the receipt's
 compare-default fields; **68/12** for jump-table holes) and `cycles: null`;
 Deoxys-stat routes likewise retain exact **68**-cycle entry and **26/42**
@@ -1182,8 +1183,22 @@ return shells without claiming the nested body. Completed direct-call
 coverage is now **312/480**, **100,214 / 1,768,691 = 5.666%** of source
 callee cycles.
 
-The remaining **156** encrypted `%24` box-mon reads, encrypted writes, and growth/experience remain
-unresolved, so the
+**Direct `GetLevelFromMonExp` checkpoint (2026-08-10, `b8bb8306`):** all
+**12/12** calls now carry accepted personality, species, growth rate,
+experience, result, and exact post-accessor boundaries in twice-fresh
+Scene-OFF receipts. The source/ELF path from EXP-accessor return is exactly
+**43 + 21 + 2,200 + 18 = 2,282** source cycles for every level-50 case;
+observations decompose **8 exact + 3×(+18 external service) + 1×(+308
+VCount→m4aSoundVSync IRQ)**, with no asynchronous cost absorbed. The complete
+callee is not reduced: its two encrypted species/EXP accessors contribute
+**219,176** observed cycles and still require the unresolved personality-%24
+decrypt/checksum/fetch model. Complete-call net totals are
+anchor/LILIANA/varied **123,879/61,954/61,089 = 246,922**. No duration table,
+identity branch, residual fit, aggregate stats claim, or clock wiring landed.
+
+The remaining **156** encrypted `%24` box-mon reads, the two encrypted
+accessors inside each of the 12 level calls, encrypted writes, and exact
+memory/fetch timing remain unresolved, so the
 complete stats operation and live clock stay unwired. No identity/duration
 table or residual fit landed; #55 stays open. See the construction receipt's
 stats section.
