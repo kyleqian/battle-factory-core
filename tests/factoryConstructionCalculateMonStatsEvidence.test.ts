@@ -458,11 +458,11 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       directPartyWrite: true,
       valueWidth: 4,
       partyOffset: 80,
-      sequentialThumbHalfwords: 24,
+      sequentialThumbHalfwords: 25,
       pipelineRefills: 3,
       romLiteralLoads: 1,
       romJumpTableLoads: 1,
-      cycles: 84,
+      cycles: 86,
     });
     expect(reduceFactorySetMonDataTiming({ field: 56 })).toMatchObject({
       route: "party-level-u8",

@@ -394,7 +394,7 @@ within the ordinary 2-cycle instruction class at this boundary.
 
 | source selector(s) | compiled direct arm | write width / offset | Thumb halfwords / refills / ROM words | source cycles |
 | --- | --- | --- | ---: | ---: |
-| 55 | status | u32 / `0x50` | 24 / 3 / literal+table | 84 |
+| 55 | status | u32 / `0x50` | 25 / 3 / literal+table | 86 |
 | 56 | level | u8 / `0x54` | 18 / 3 / literal+table | 72 |
 | 57–63 | HP, max HP, ATK, DEF, SPEED, SPATK, SPDEF | u16 / `0x56..0x62` | 21 / 3 / literal+table | 78 |
 | 64 | mail | u8 / `0x55` | 18 / 3 / literal+table | 72 |

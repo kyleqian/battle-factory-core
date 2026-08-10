@@ -784,8 +784,8 @@ export function reduceFactorySetMonDataTiming(
       directPartyWrite = true;
       valueWidth = 4;
       partyOffset = 80;
-      // Four byte reads, shifts/adds into r1, store, then branch to epilogue.
-      selectedPathHalfwords = 11;
+      // Four byte reads, three shifts, three adds, store, then branch.
+      selectedPathHalfwords = 12;
       pipelineRefills = 3; // indirect jump, case `b`, bx
       break;
     case 56:

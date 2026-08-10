@@ -180,7 +180,7 @@ anchor/LILIANA/varied **3,708 / 1,854 / 1,854 = 7,416** source cycles with
 **96/96** exact raw spans and no contained VBlank pause or external residual.
 
 The reducer also pins the source-general non-stats switch arms: status is a
-u32 direct store (**84** cycles), mail is the byte-store sibling (**72**), and
+u32 direct store (**86** cycles), mail is the byte-store sibling (**72**), and
 `MON_DATA_SPECIES_OR_EGG` is the direct no-op (**56**). Fields outside the
 unsigned 55–65 dispatch range take `bhi` into encrypted `SetBoxMonData`; only
 the exact 30-cycle entry shell and 10-cycle return shell are exposed there,
