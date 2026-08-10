@@ -56,4 +56,3 @@ opt-in `FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1` mode that records mGBA
 `globalCycles` and `frameCycles` without changing the committed v1 receipt
 schema. That is the next source/cycle evidence needed before a main-lane live
 caller can claim personality-exact timing.
-
