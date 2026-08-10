@@ -187,5 +187,19 @@ this is proof work only, not an implementation change.
 
 Census, batch test, and oracle receipt: `src/data/gen/level50-move-parameterization.json#coverage.hookCatalogs.item.shellBell`,
 `tests/shellBellHookJoinBatch.test.ts`, `tests/shellBellOracleEvidence.test.ts`,
-`tools/battle-lab/mechanic-shell-bell-heal-off.json`, `tools/probe/probe-shell-bell-heal-off.py`,
-`tools/probe/receipts/shell-bell-heal-off.json`.
+`tools/battle-lab/mechanic-shell-bell-heal-off.json` (holder arm) and
+`tools/battle-lab/mechanic-shell-bell-control-off.json` (no-item control arm, identical parties/trace, holder
+item 0), `tools/probe/probe-shell-bell-heal-off.py`, `tools/probe/receipts/shell-bell-heal-off.json`.
+
+The receipt stages a slower, defensively-invested Shuckle (player, Shell Bell holder) against a faster
+no-item Swellow (opponent), both locked to Pound (100% accuracy, so neither side's hit can miss and leave the
+seed's outcome ambiguous): Swellow's earlier action this same turn damages Shuckle (127→122 HP) *before*
+Shuckle's own Pound lands on Swellow, satisfying the `gBattlerAttacker != gBattlerTarget` /
+`hp != maxHP` / `hp != 0` runtime guards on the qualifying hit (`battle_util.c:3789-3793`) without needing a
+second turn. Shuckle's hit records `gSpecialStatuses[Swellow].shellBellDmg = 7` (`battle_script_commands.c:1932-1933`)
+then Shell Bell heals `max(1, floor(7/8)) = 1` HP (122→123) only in the holder arm; the no-item control arm's
+holder HP never moves past the incoming Pound. Both arms consume byte-identical action-RNG values/order/counts
+(only the wall-clock frame of later same-content draws differs, shifted by the heal arm's extra "restored HP a
+little" message), and both sides spend exactly 1 PP in both arms. The full two-arm run (one `EmeraldOracle`
+instance per arm via `tools/run-mgba-probe.py`, merged by a pure-Python pass with no emulator access) reproduced
+byte-identically across two independent fresh runs.

@@ -1,0 +1,209 @@
+{
+  "static": {
+    "profile": "battle-scene-off",
+    "stimulus": "faster no-item Swellow Pound damages a slower durable Shuckle first; Shuckle's own Pound this same turn then records shellBellDmg on Swellow and heals Shuckle if it holds Shell Bell",
+    "orderedGuards": [
+      "if (gBattleMoveDamage)",
+      "case HOLD_EFFECT_SHELL_BELL:",
+      "!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)",
+      "gSpecialStatuses[gBattlerTarget].shellBellDmg != 0",
+      "gSpecialStatuses[gBattlerTarget].shellBellDmg != IGNORE_SHELL_BELL",
+      "gBattlerAttacker != gBattlerTarget",
+      "gBattleMons[gBattlerAttacker].hp != gBattleMons[gBattlerAttacker].maxHP",
+      "gBattleMons[gBattlerAttacker].hp != 0"
+    ]
+  },
+  "oracle": {
+    "heal": {
+      "profile": "battle-scene-off",
+      "holderItem": 219,
+      "holderMaxHp": 127,
+      "holderHpBefore": 127,
+      "holderHpAfter": 123,
+      "holderPpBefore": 140,
+      "holderPpAfter": 139,
+      "targetPpBefore": 140,
+      "targetPpAfter": 139,
+      "draws": [
+        {
+          "frame": 42,
+          "count": 1,
+          "rngValue": 1685777593,
+          "randomValue": 25722
+        },
+        {
+          "frame": 68,
+          "count": 1,
+          "rngValue": 1284344120,
+          "randomValue": 19597
+        },
+        {
+          "frame": 71,
+          "count": 1,
+          "rngValue": 291691851,
+          "randomValue": 4450
+        },
+        {
+          "frame": 243,
+          "count": 1,
+          "rngValue": 3112661858,
+          "randomValue": 47495
+        },
+        {
+          "frame": 255,
+          "count": 1,
+          "rngValue": 1671453997,
+          "randomValue": 25504
+        },
+        {
+          "frame": 277,
+          "count": 1,
+          "rngValue": 3313091228,
+          "randomValue": 50553
+        },
+        {
+          "frame": 280,
+          "count": 1,
+          "rngValue": 1321977055,
+          "randomValue": 20171
+        },
+        {
+          "frame": 366,
+          "count": 1,
+          "rngValue": 2251892070,
+          "randomValue": 34361
+        },
+        {
+          "frame": 528,
+          "count": 1,
+          "rngValue": 1654546657,
+          "randomValue": 25246
+        },
+        {
+          "frame": 536,
+          "count": 5,
+          "rngValue": 297775140,
+          "randomValue": 4543
+        }
+      ],
+      "holderHpWrites": [
+        {
+          "frame": 150,
+          "before": 127,
+          "after": 122
+        },
+        {
+          "frame": 521,
+          "before": 122,
+          "after": 123
+        }
+      ],
+      "targetShellBellDmgWrites": [
+        {
+          "frame": 361,
+          "before": 0,
+          "after": 7
+        },
+        {
+          "frame": 371,
+          "before": 7,
+          "after": 0
+        }
+      ]
+    },
+    "control": {
+      "profile": "battle-scene-off",
+      "holderItem": 0,
+      "holderMaxHp": 127,
+      "holderHpBefore": 127,
+      "holderHpAfter": 122,
+      "holderPpBefore": 140,
+      "holderPpAfter": 139,
+      "targetPpBefore": 140,
+      "targetPpAfter": 139,
+      "draws": [
+        {
+          "frame": 42,
+          "count": 1,
+          "rngValue": 1685777593,
+          "randomValue": 25722
+        },
+        {
+          "frame": 68,
+          "count": 1,
+          "rngValue": 1284344120,
+          "randomValue": 19597
+        },
+        {
+          "frame": 71,
+          "count": 1,
+          "rngValue": 291691851,
+          "randomValue": 4450
+        },
+        {
+          "frame": 243,
+          "count": 1,
+          "rngValue": 3112661858,
+          "randomValue": 47495
+        },
+        {
+          "frame": 255,
+          "count": 1,
+          "rngValue": 1671453997,
+          "randomValue": 25504
+        },
+        {
+          "frame": 277,
+          "count": 1,
+          "rngValue": 3313091228,
+          "randomValue": 50553
+        },
+        {
+          "frame": 280,
+          "count": 1,
+          "rngValue": 1321977055,
+          "randomValue": 20171
+        },
+        {
+          "frame": 366,
+          "count": 1,
+          "rngValue": 2251892070,
+          "randomValue": 34361
+        },
+        {
+          "frame": 376,
+          "count": 1,
+          "rngValue": 1654546657,
+          "randomValue": 25246
+        },
+        {
+          "frame": 384,
+          "count": 5,
+          "rngValue": 297775140,
+          "randomValue": 4543
+        }
+      ],
+      "holderHpWrites": [
+        {
+          "frame": 150,
+          "before": 127,
+          "after": 122
+        }
+      ],
+      "targetShellBellDmgWrites": [
+        {
+          "frame": 361,
+          "before": 0,
+          "after": 7
+        },
+        {
+          "frame": 374,
+          "before": 7,
+          "after": 0
+        }
+      ]
+    },
+    "expectedHeal": 1,
+    "actualHeal": 1
+  }
+}
