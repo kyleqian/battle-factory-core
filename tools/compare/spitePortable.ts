@@ -173,6 +173,9 @@ for (let runNumber = 1; runNumber <= 2; runNumber++) for (const fixturePath of p
   console.log(`${fixture.orientation} run ${runNumber}: reducer ${reducer}/221; seam ${seam}/221; hardware ${hardware}/221; framebuffer ${framebuffer}/221`);
   if (failures.length && !checkpoint) throw new Error(failures.slice(0, 50).join("\n"));
   if (failures.length && checkpoint) {
-    console.log(`${fixture.orientation} checkpoint remains partial: ${failures.length}/221 frames differ`);
+    console.log(
+      `${fixture.orientation} checkpoint remains partial: ${failures.length}/221 acceptance failures; `
+      + `${221 - framebuffer}/221 framebuffer frames differ`,
+    );
   }
 }

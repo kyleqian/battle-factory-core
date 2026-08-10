@@ -39,7 +39,8 @@ describe("MOVE_SPITE bilateral compositor checkpoint", () => {
     expect(portable).toContain("runNumber <= 2");
     expect(portable).toContain("tools/run-mgba-probe.py");
     expect(portable).toContain("framebuffer ${framebuffer}/221");
-    expect(portable).toContain("checkpoint remains partial");
+    expect(portable).toContain("checkpoint remains partial: ${failures.length}/221 acceptance failures");
+    expect(portable).toContain("${221 - framebuffer}/221 framebuffer frames differ");
     expect(portable).toContain("if (failures.length && !checkpoint) throw");
   });
 
