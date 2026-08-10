@@ -3,7 +3,7 @@
   "gate6": {
     "closed": false,
     "verdict": "OPEN — this first manifest exposes coverage and receipt gaps; it does not claim Gate 6 closed.",
-    "nextAcceptanceUnit": "Per-move hook-join family: Choose one source-bounded item or ability hook-join family and account for complete Battle Script reachability, including implicit fallthrough and source branch guards. Do not promote the remaining explicit gaps: 2 item joins and 2 ability joins remain unsupported.",
+    "nextAcceptanceUnit": "Per-move hook-join family: Choose one source-bounded item or ability hook-join family and account for complete Battle Script reachability, including implicit fallthrough and source branch guards. Do not promote the remaining explicit gaps: 4 item joins and 4 ability joins remain unsupported.",
     "interpretation": "Static executable reachability, engine references, Tier-1 proofs, and oracle receipts are separate evidence classes."
   },
   "generatedBy": "node --experimental-strip-types tools/report/gate6-coverage-manifest.ts",
@@ -164,18 +164,18 @@
     "perMoveHookJoins": {
       "item": {
         "rows": 300,
-        "unsupported": 2,
-        "gaps": 2
+        "unsupported": 4,
+        "gaps": 4
       },
       "ability": {
         "rows": 300,
-        "unsupported": 2,
-        "gaps": 2
+        "unsupported": 4,
+        "gaps": 4
       },
       "total": {
         "rows": 600,
-        "unsupported": 4,
-        "gaps": 4
+        "unsupported": 8,
+        "gaps": 8
       }
     },
     "onDamageMoveEnd": {
@@ -232,8 +232,8 @@
     },
     "itemMoveEnd": {
       "candidates": 116,
-      "promotedRows": 114,
-      "exceptions": 2,
+      "promotedRows": 112,
+      "exceptions": 4,
       "blockers": 0,
       "rosterOnlyCandidates": 9
     },
@@ -245,8 +245,8 @@
     },
     "immunityMoveEnd": {
       "candidates": 99,
-      "promotedRows": 97,
-      "exceptions": 2,
+      "promotedRows": 95,
+      "exceptions": 4,
       "blockers": 0,
       "rosterOnlyCandidates": 9
     },
@@ -27892,11 +27892,9 @@
           "effect": "EFFECT_MIRROR_MOVE",
           "effectId": 9,
           "entryScript": "BattleScript_EffectMirrorMove",
-          "status": "source-proven-family",
-          "categories": [
-            "moveend-item-effects-all"
-          ],
-          "reason": "Source-proven item family/categories: moveend-item-effects-all. Each named family carries its exact source selector, generated Battle Script route, MOVEEND state 12 dispatcher handoff, and ordered runtime guards. This promotion does not claim unrelated item families.",
+          "status": "unsupported",
+          "categories": [],
+          "reason": "Cmd_trymirrormove's two success arms (battle_script_commands.c:6664, found last-taken move; and :6672, random fallback among valid taken moves) both reassign gCurrentMove and jump gBattlescriptCurrInstr straight to gBattleScriptsForMoveEffects[gBattleMoves[gCurrentMove].effect], bypassing BattleScript_EffectMirrorMove's own ppreduce/orbyte/goto tail entirely; that tail (battle_scripts_1.s:469-473) is reached only on the no-valid-moves failure arm (Cmd_trymirrormove's else branch, gBattlescriptCurrInstr++), so the row's previous static route certificate proved only the ordinary-failure path (orbyte gMoveResultFlags, MOVE_RESULT_FAILED -> goto BattleScript_MoveEnd), never the reflected move's own script.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_MIRROR_MOVE.hooks.item"
@@ -27906,81 +27904,9 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_MIRROR_MOVE.hooks.item",
               "kind": "per-move-hook-join-source"
-            },
-            {
-              "path": "reference/pokeemerald/src/battle_script_commands.c",
-              "locator": "Cmd_moveend MOVEEND_ITEM_EFFECTS_ALL",
-              "kind": "source-selector"
-            },
-            {
-              "path": "reference/pokeemerald/data/battle_scripts_1.s",
-              "locator": "BattleScript_EffectMirrorMove:464",
-              "kind": "battle-script-entry-path"
-            },
-            {
-              "path": "src/data/gen/battle-script-graph.json",
-              "locator": "BattleScript_EffectMirrorMove->BattleScript_MoveEnd",
-              "kind": "generated-battle-script-graph"
-            },
-            {
-              "path": "src/data/gen/battle-script-program.json",
-              "locator": "BattleScript_EffectMirrorMove->BattleScript_MoveEnd",
-              "kind": "generated-battle-script-program"
-            },
-            {
-              "path": "reference/pokeemerald/src/battle_util.c",
-              "locator": "ItemBattleEffects(ITEMEFFECT_MOVE_END)",
-              "kind": "ordered-hold-effect-arms"
-            },
-            {
-              "path": "reference/pokeemerald/src/battle_script_commands.c",
-              "locator": "MOVEEND_ITEM_EFFECTS_ALL",
-              "kind": "unconditional-moveend-dispatcher"
-            },
-            {
-              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
-              "locator": "MOVEEND_ITEM_EFFECTS_ALL=11",
-              "kind": "moveend-state-constant"
-            },
-            {
-              "path": "src/engine/battleScriptMoveEndOpcode.ts",
-              "locator": "MOVEEND_ITEM_EFFECTS_ALL",
-              "kind": "existing-source-shaped-family-implementation"
-            },
-            {
-              "path": "tests/itemMoveEndHookJoinBatch.test.ts",
-              "kind": "tier-1-114-row-sibling-batch"
-            },
-            {
-              "path": "tests/itemMoveEndOracleEvidence.test.ts",
-              "kind": "battle-scene-off-family-receipt"
-            },
-            {
-              "path": "docs/item-move-end-family-ground-truth.md",
-              "kind": "family-ground-truth"
-            },
-            {
-              "path": "tools/battle-lab/mechanic-item-move-end-paralysis-cheri-off.json",
-              "kind": "parameterized-oracle-request"
-            },
-            {
-              "path": "tools/battle-lab/mechanic-item-move-end-paralysis-control-off.json",
-              "kind": "paired-control-oracle-request"
-            },
-            {
-              "path": "tools/probe/verify-item-move-end-paralysis-off.py",
-              "kind": "oracle-probe"
-            },
-            {
-              "path": "tools/probe/receipts/item-move-end-paralysis-cheri-off.json",
-              "kind": "battle-scene-off-oracle-receipt"
-            },
-            {
-              "path": "tools/probe/receipts/item-move-end-paralysis-control-off.json",
-              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-item-effects-all; unrelated item families are not promoted."
+          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
         },
         {
           "id": "per-move-hook-join:item:MOVE_SELF_DESTRUCT",
@@ -36280,11 +36206,9 @@
           "effect": "EFFECT_SLEEP_TALK",
           "effectId": 97,
           "entryScript": "BattleScript_EffectSleepTalk",
-          "status": "source-proven-family",
-          "categories": [
-            "moveend-item-effects-all"
-          ],
-          "reason": "Source-proven item family/categories: moveend-item-effects-all. Each named family carries its exact source selector, generated Battle Script route, MOVEEND state 12 dispatcher handoff, and ordered runtime guards. This promotion does not claim unrelated item families.",
+          "status": "unsupported",
+          "categories": [],
+          "reason": "BattleScript_SleepTalkUsingMove's only statement is jumptocalledmove TRUE (battle_scripts_1.s:1332), which Cmd_jumptocalledmove (battle_script_commands.c:5750) dispatches dynamically to gBattleScriptsForMoveEffects[gBattleMoves[gCurrentMove].effect] for whichever move Cmd_trychoosesleeptalkmove selected at runtime -- the same dynamic-dispatch gap as Assist. The row's previous static route certificate reached BattleScript_ButItFailed only via the two ordinary-failure arms (not-asleep, battle_scripts_1.s:1313-1316; and trychoosesleeptalkmove finding all four moves unusable, battle_scripts_1.s:1324-1326), never the chosen move's own script.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SLEEP_TALK.hooks.item"
@@ -36294,81 +36218,9 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_SLEEP_TALK.hooks.item",
               "kind": "per-move-hook-join-source"
-            },
-            {
-              "path": "reference/pokeemerald/src/battle_script_commands.c",
-              "locator": "Cmd_moveend MOVEEND_ITEM_EFFECTS_ALL",
-              "kind": "source-selector"
-            },
-            {
-              "path": "reference/pokeemerald/data/battle_scripts_1.s",
-              "locator": "BattleScript_EffectSleepTalk:1311",
-              "kind": "battle-script-entry-path"
-            },
-            {
-              "path": "src/data/gen/battle-script-graph.json",
-              "locator": "BattleScript_EffectSleepTalk->BattleScript_MoveEnd",
-              "kind": "generated-battle-script-graph"
-            },
-            {
-              "path": "src/data/gen/battle-script-program.json",
-              "locator": "BattleScript_EffectSleepTalk->BattleScript_MoveEnd",
-              "kind": "generated-battle-script-program"
-            },
-            {
-              "path": "reference/pokeemerald/src/battle_util.c",
-              "locator": "ItemBattleEffects(ITEMEFFECT_MOVE_END)",
-              "kind": "ordered-hold-effect-arms"
-            },
-            {
-              "path": "reference/pokeemerald/src/battle_script_commands.c",
-              "locator": "MOVEEND_ITEM_EFFECTS_ALL",
-              "kind": "unconditional-moveend-dispatcher"
-            },
-            {
-              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
-              "locator": "MOVEEND_ITEM_EFFECTS_ALL=11",
-              "kind": "moveend-state-constant"
-            },
-            {
-              "path": "src/engine/battleScriptMoveEndOpcode.ts",
-              "locator": "MOVEEND_ITEM_EFFECTS_ALL",
-              "kind": "existing-source-shaped-family-implementation"
-            },
-            {
-              "path": "tests/itemMoveEndHookJoinBatch.test.ts",
-              "kind": "tier-1-114-row-sibling-batch"
-            },
-            {
-              "path": "tests/itemMoveEndOracleEvidence.test.ts",
-              "kind": "battle-scene-off-family-receipt"
-            },
-            {
-              "path": "docs/item-move-end-family-ground-truth.md",
-              "kind": "family-ground-truth"
-            },
-            {
-              "path": "tools/battle-lab/mechanic-item-move-end-paralysis-cheri-off.json",
-              "kind": "parameterized-oracle-request"
-            },
-            {
-              "path": "tools/battle-lab/mechanic-item-move-end-paralysis-control-off.json",
-              "kind": "paired-control-oracle-request"
-            },
-            {
-              "path": "tools/probe/verify-item-move-end-paralysis-off.py",
-              "kind": "oracle-probe"
-            },
-            {
-              "path": "tools/probe/receipts/item-move-end-paralysis-cheri-off.json",
-              "kind": "battle-scene-off-oracle-receipt"
-            },
-            {
-              "path": "tools/probe/receipts/item-move-end-paralysis-control-off.json",
-              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-item-effects-all; unrelated item families are not promoted."
+          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
         },
         {
           "id": "per-move-hook-join:item:MOVE_HEAL_BELL",
@@ -41799,17 +41651,17 @@
             },
             {
               "path": "reference/pokeemerald/data/battle_scripts_1.s",
-              "locator": "undefined:2331",
+              "locator": "BattleScript_EffectTrick:2331",
               "kind": "battle-script-entry-path"
             },
             {
               "path": "src/data/gen/battle-script-graph.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectTrick->statements",
               "kind": "generated-battle-script-graph"
             },
             {
               "path": "src/data/gen/battle-script-program.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectTrick->statements",
               "kind": "generated-battle-script-program"
             },
             {
@@ -42404,17 +42256,17 @@
             },
             {
               "path": "reference/pokeemerald/data/battle_scripts_1.s",
-              "locator": "undefined:2403",
+              "locator": "BattleScript_EffectRecycle:2403",
               "kind": "battle-script-entry-path"
             },
             {
               "path": "src/data/gen/battle-script-graph.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectRecycle->statements",
               "kind": "generated-battle-script-graph"
             },
             {
               "path": "src/data/gen/battle-script-program.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectRecycle->statements",
               "kind": "generated-battle-script-program"
             },
             {
@@ -42948,18 +42800,13 @@
               "kind": "source-selector"
             },
             {
-              "path": "reference/pokeemerald/data/battle_scripts_1.s",
-              "locator": "undefined:2475",
-              "kind": "battle-script-entry-path"
-            },
-            {
               "path": "src/data/gen/battle-script-graph.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectKnockOff->statements",
               "kind": "generated-battle-script-graph"
             },
             {
               "path": "src/data/gen/battle-script-program.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectKnockOff->statements",
               "kind": "generated-battle-script-program"
             },
             {
@@ -48989,18 +48836,13 @@
               "kind": "source-selector"
             },
             {
-              "path": "reference/pokeemerald/data/battle_scripts_1.s",
-              "locator": "undefined:1440",
-              "kind": "battle-script-entry-path"
-            },
-            {
               "path": "src/data/gen/battle-script-graph.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectThief->statements",
               "kind": "generated-battle-script-graph"
             },
             {
               "path": "src/data/gen/battle-script-program.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectThief->statements",
               "kind": "generated-battle-script-program"
             },
             {
@@ -62305,11 +62147,9 @@
           "effect": "EFFECT_MIRROR_MOVE",
           "effectId": 9,
           "entryScript": "BattleScript_EffectMirrorMove",
-          "status": "source-proven-family",
-          "categories": [
-            "moveend-immunity-abilities"
-          ],
-          "reason": "Source-proven ability family/categories: moveend-immunity-abilities. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "status": "unsupported",
+          "categories": [],
+          "reason": "Cmd_trymirrormove's two success arms (battle_script_commands.c:6664, found last-taken move; and :6672, random fallback among valid taken moves) both reassign gCurrentMove and jump gBattlescriptCurrInstr straight to gBattleScriptsForMoveEffects[gBattleMoves[gCurrentMove].effect], bypassing BattleScript_EffectMirrorMove's own ppreduce/orbyte/goto tail entirely; that tail (battle_scripts_1.s:469-473) is reached only on the no-valid-moves failure arm (Cmd_trymirrormove's else branch, gBattlescriptCurrInstr++), so the row's previous static route certificate proved only the ordinary-failure path (orbyte gMoveResultFlags, MOVE_RESULT_FAILED -> goto BattleScript_MoveEnd), never the reflected move's own script.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_MIRROR_MOVE.hooks.ability"
@@ -62319,77 +62159,9 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_MIRROR_MOVE.hooks.ability",
               "kind": "per-move-hook-join-source"
-            },
-            {
-              "path": "reference/pokeemerald/src/battle_script_commands.c",
-              "locator": "Cmd_moveend MOVEEND_IMMUNITY_ABILITIES",
-              "kind": "source-selector"
-            },
-            {
-              "path": "reference/pokeemerald/data/battle_scripts_1.s",
-              "locator": "BattleScript_EffectMirrorMove:464",
-              "kind": "battle-script-entry-path"
-            },
-            {
-              "path": "src/data/gen/battle-script-graph.json",
-              "locator": "BattleScript_EffectMirrorMove->BattleScript_MoveEnd",
-              "kind": "generated-battle-script-graph"
-            },
-            {
-              "path": "src/data/gen/battle-script-program.json",
-              "locator": "BattleScript_EffectMirrorMove->BattleScript_MoveEnd",
-              "kind": "generated-battle-script-program"
-            },
-            {
-              "path": "reference/pokeemerald/src/battle_util.c",
-              "locator": "AbilityBattleEffects(ABILITYEFFECT_IMMUNITY)",
-              "kind": "ordered-status-immunity-guards"
-            },
-            {
-              "path": "reference/pokeemerald/src/battle_script_commands.c",
-              "locator": "MOVEEND_IMMUNITY_ABILITIES",
-              "kind": "unconditional-moveend-dispatcher"
-            },
-            {
-              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
-              "locator": "MOVEEND_IMMUNITY_ABILITIES=4",
-              "kind": "moveend-state-constant"
-            },
-            {
-              "path": "src/engine/battleScriptMoveEndOpcode.ts",
-              "locator": "MOVEEND_IMMUNITY_ABILITIES",
-              "kind": "existing-source-shaped-family-implementation"
-            },
-            {
-              "path": "tests/statusImmunityHookJoinBatch.test.ts",
-              "kind": "tier-1-97-row-sibling-batch"
-            },
-            {
-              "path": "tests/statusImmunityOracleEvidence.test.ts",
-              "kind": "battle-scene-off-family-receipt"
-            },
-            {
-              "path": "docs/immunity-abilities-ground-truth.md",
-              "kind": "family-ground-truth"
-            },
-            {
-              "path": "tools/battle-lab/mechanic-immunity-limber-skill-swap-off.json",
-              "kind": "parameterized-oracle-request"
-            },
-            {
-              "path": "tools/probe/probe-immunity-limber-off.py",
-              "kind": "oracle-probe"
-            },
-            {
-              "path": "tools/probe/receipts/immunity-limber-off-seed-610839776.json",
-              "kind": "battle-scene-off-oracle-receipt"
-            },
-            {
-              "path": "tools/probe/receipts/immunity-limber-off-seed-324508639.json",
-              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-immunity-abilities; unrelated ability families are not promoted."
+          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_SELF_DESTRUCT",
@@ -62488,18 +62260,13 @@
               "kind": "source-selector"
             },
             {
-              "path": "reference/pokeemerald/data/battle_scripts_1.s",
-              "locator": "undefined:374",
-              "kind": "battle-script-entry-path"
-            },
-            {
               "path": "src/data/gen/battle-script-graph.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectExplosion->statements",
               "kind": "generated-battle-script-graph"
             },
             {
               "path": "src/data/gen/battle-script-program.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectExplosion->statements",
               "kind": "generated-battle-script-program"
             },
             {
@@ -65702,18 +65469,13 @@
               "kind": "source-selector"
             },
             {
-              "path": "reference/pokeemerald/data/battle_scripts_1.s",
-              "locator": "undefined:374",
-              "kind": "battle-script-entry-path"
-            },
-            {
               "path": "src/data/gen/battle-script-graph.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectExplosion->statements",
               "kind": "generated-battle-script-graph"
             },
             {
               "path": "src/data/gen/battle-script-program.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectExplosion->statements",
               "kind": "generated-battle-script-program"
             },
             {
@@ -71438,11 +71200,9 @@
           "effect": "EFFECT_SLEEP_TALK",
           "effectId": 97,
           "entryScript": "BattleScript_EffectSleepTalk",
-          "status": "source-proven-family",
-          "categories": [
-            "moveend-immunity-abilities"
-          ],
-          "reason": "Source-proven ability family/categories: moveend-immunity-abilities. Each named family carries its exact source selector, generated Battle Script route, dispatcher handoff, and bounded family-level verification. This promotion does not claim unrelated ability families.",
+          "status": "unsupported",
+          "categories": [],
+          "reason": "BattleScript_SleepTalkUsingMove's only statement is jumptocalledmove TRUE (battle_scripts_1.s:1332), which Cmd_jumptocalledmove (battle_script_commands.c:5750) dispatches dynamically to gBattleScriptsForMoveEffects[gBattleMoves[gCurrentMove].effect] for whichever move Cmd_trychoosesleeptalkmove selected at runtime -- the same dynamic-dispatch gap as Assist. The row's previous static route certificate reached BattleScript_ButItFailed only via the two ordinary-failure arms (not-asleep, battle_scripts_1.s:1313-1316; and trychoosesleeptalkmove finding all four moves unusable, battle_scripts_1.s:1324-1326), never the chosen move's own script.",
           "sourceArtifact": {
             "path": "src/data/gen/level50-move-parameterization.json",
             "locator": "moves:MOVE_SLEEP_TALK.hooks.ability"
@@ -71452,77 +71212,9 @@
               "path": "src/data/gen/level50-move-parameterization.json",
               "locator": "moves:MOVE_SLEEP_TALK.hooks.ability",
               "kind": "per-move-hook-join-source"
-            },
-            {
-              "path": "reference/pokeemerald/src/battle_script_commands.c",
-              "locator": "Cmd_moveend MOVEEND_IMMUNITY_ABILITIES",
-              "kind": "source-selector"
-            },
-            {
-              "path": "reference/pokeemerald/data/battle_scripts_1.s",
-              "locator": "BattleScript_EffectSleepTalk:1311",
-              "kind": "battle-script-entry-path"
-            },
-            {
-              "path": "src/data/gen/battle-script-graph.json",
-              "locator": "BattleScript_EffectSleepTalk->BattleScript_MoveEnd",
-              "kind": "generated-battle-script-graph"
-            },
-            {
-              "path": "src/data/gen/battle-script-program.json",
-              "locator": "BattleScript_EffectSleepTalk->BattleScript_MoveEnd",
-              "kind": "generated-battle-script-program"
-            },
-            {
-              "path": "reference/pokeemerald/src/battle_util.c",
-              "locator": "AbilityBattleEffects(ABILITYEFFECT_IMMUNITY)",
-              "kind": "ordered-status-immunity-guards"
-            },
-            {
-              "path": "reference/pokeemerald/src/battle_script_commands.c",
-              "locator": "MOVEEND_IMMUNITY_ABILITIES",
-              "kind": "unconditional-moveend-dispatcher"
-            },
-            {
-              "path": "reference/pokeemerald/include/constants/battle_script_commands.h",
-              "locator": "MOVEEND_IMMUNITY_ABILITIES=4",
-              "kind": "moveend-state-constant"
-            },
-            {
-              "path": "src/engine/battleScriptMoveEndOpcode.ts",
-              "locator": "MOVEEND_IMMUNITY_ABILITIES",
-              "kind": "existing-source-shaped-family-implementation"
-            },
-            {
-              "path": "tests/statusImmunityHookJoinBatch.test.ts",
-              "kind": "tier-1-97-row-sibling-batch"
-            },
-            {
-              "path": "tests/statusImmunityOracleEvidence.test.ts",
-              "kind": "battle-scene-off-family-receipt"
-            },
-            {
-              "path": "docs/immunity-abilities-ground-truth.md",
-              "kind": "family-ground-truth"
-            },
-            {
-              "path": "tools/battle-lab/mechanic-immunity-limber-skill-swap-off.json",
-              "kind": "parameterized-oracle-request"
-            },
-            {
-              "path": "tools/probe/probe-immunity-limber-off.py",
-              "kind": "oracle-probe"
-            },
-            {
-              "path": "tools/probe/receipts/immunity-limber-off-seed-610839776.json",
-              "kind": "battle-scene-off-oracle-receipt"
-            },
-            {
-              "path": "tools/probe/receipts/immunity-limber-off-seed-324508639.json",
-              "kind": "battle-scene-off-oracle-receipt"
             }
           ],
-          "notes": "Source-proven only for moveend-immunity-abilities; unrelated ability families are not promoted."
+          "notes": "Explicit unsupported join; complete Battle Script fallthrough and source branch guards are required before this row can be classified."
         },
         {
           "id": "per-move-hook-join:ability:MOVE_HEAL_BELL",
@@ -77175,17 +76867,17 @@
             },
             {
               "path": "reference/pokeemerald/data/battle_scripts_1.s",
-              "locator": "undefined:2346",
+              "locator": "BattleScript_EffectRolePlay:2346",
               "kind": "battle-script-entry-path"
             },
             {
               "path": "src/data/gen/battle-script-graph.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectRolePlay->statements",
               "kind": "generated-battle-script-graph"
             },
             {
               "path": "src/data/gen/battle-script-program.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectRolePlay->statements",
               "kind": "generated-battle-script-program"
             },
             {
@@ -78572,17 +78264,17 @@
             },
             {
               "path": "reference/pokeemerald/data/battle_scripts_1.s",
-              "locator": "undefined:2497",
+              "locator": "BattleScript_EffectSkillSwap:2497",
               "kind": "battle-script-entry-path"
             },
             {
               "path": "src/data/gen/battle-script-graph.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectSkillSwap->statements",
               "kind": "generated-battle-script-graph"
             },
             {
               "path": "src/data/gen/battle-script-program.json",
-              "locator": "undefined->route",
+              "locator": "BattleScript_EffectSkillSwap->statements",
               "kind": "generated-battle-script-program"
             },
             {
@@ -85718,8 +85410,8 @@
       "label": "Item post-move status-cure/stat-restore Level-50 family checkpoint",
       "status": "source-proven-family",
       "candidates": 116,
-      "promotedRows": 114,
-      "exceptions": 2,
+      "promotedRows": 112,
+      "exceptions": 4,
       "blockers": 0,
       "rosterOnlyCandidates": 9,
       "evidence": [
@@ -85740,7 +85432,7 @@
         },
         {
           "path": "tests/itemMoveEndHookJoinBatch.test.ts",
-          "kind": "114-row-graph-program-batch"
+          "kind": "112-row-graph-program-batch"
         },
         {
           "path": "tests/itemMoveEndOracleEvidence.test.ts",
@@ -85771,7 +85463,7 @@
           "kind": "direct-parameterized-oracle-receipt"
         }
       ],
-      "notes": "114 of 116 finite candidates (every item-axis row not already claimed by King's Rock or Shell Bell, minus the four Rank-3 direct item-manipulation moves) are promoted through a graph/program route from their entry script to a moveendall/moveendto/moveendfromto handoff whose Cmd_moveend state range includes MOVEEND_ITEM_EFFECTS_ALL (state 11). MOVE_ASSIST and MOVE_METRONOME remain explicit dynamic-dispatch exceptions (jumptocalledmove/metronome have no static moveend node of their own), the same structural gap already found for the Immunity family's state-4 search. The route certificate proves only that each move's own script reaches Cmd_moveend's normal tail, which unconditionally runs ItemBattleEffects(ITEMEFFECT_MOVE_END) for every battler regardless of which (if any) of the nine HOLD_EFFECT_CURE_*/HOLD_EFFECT_RESTORE_STATS arms fires; the shared receipt stages the Cheri Berry HOLD_EFFECT_CURE_PAR arm specifically."
+      "notes": "112 of 116 finite candidates (every item-axis row not already claimed by King's Rock or Shell Bell, minus the four Rank-3 direct item-manipulation moves) are promoted through a graph/program route from their entry script to a moveendall/moveendto/moveendfromto handoff whose Cmd_moveend state range includes MOVEEND_ITEM_EFFECTS_ALL (state 11). MOVE_ASSIST, MOVE_METRONOME, MOVE_MIRROR_MOVE, and MOVE_SLEEP_TALK remain explicit dynamic-dispatch exceptions (jumptocalledmove/metronome/trymirrormove's two success arms/trychoosesleeptalkmove's jumptocalledmove tail have no static moveend node of their own), the same structural gap already found for the Immunity family's state-4 search. The route certificate proves only that each move's own script reaches Cmd_moveend's normal tail, which unconditionally runs ItemBattleEffects(ITEMEFFECT_MOVE_END) for every battler regardless of which (if any) of the nine HOLD_EFFECT_CURE_*/HOLD_EFFECT_RESTORE_STATS arms fires; the shared receipt stages the Cheri Berry HOLD_EFFECT_CURE_PAR arm specifically."
     },
     "itemManipulation": {
       "id": "hook-family:item-manipulation-opcode",
@@ -85861,15 +85553,15 @@
           "kind": "pre-existing-battle-scene-off-family-receipt"
         }
       ],
-      "notes": "All 4 finite Rank-3 candidates (MOVE_COVET, MOVE_TRICK, MOVE_RECYCLE, MOVE_KNOCK_OFF) are promoted, zero exceptions. Unlike every other item-axis family, there is no shared MOVEEND state: each row is certified by its own exact entry-script statement audit plus an ordered C guard-chain citation into its own dedicated opcode (Cmd_seteffectwithchance's MOVE_EFFECT_STEAL_ITEM/MOVE_EFFECT_KNOCK_OFF arms, Cmd_tryswapitems, Cmd_tryrecycleitem). Covet/Knock Off were already Shell-Bell-claimed (power != 0); this family adds a second, independent category to those two rows and the first category to Trick/Recycle. Trick and Knock Off reuse pre-existing 2026-07-28 oracle evidence (not restaged); Covet and Recycle get fresh Battle Scene OFF receipts authored this session. Assist/Metronome (item-move-end's dynamic-dispatch exceptions) are not members of this family's four-move selector and remain the item axis's only gaps."
+      "notes": "All 4 finite Rank-3 candidates (MOVE_COVET, MOVE_TRICK, MOVE_RECYCLE, MOVE_KNOCK_OFF) are promoted, zero exceptions. Unlike every other item-axis family, there is no shared MOVEEND state: each row is certified by its own exact entry-script statement audit plus an ordered C guard-chain citation into its own dedicated opcode (Cmd_seteffectwithchance's MOVE_EFFECT_STEAL_ITEM/MOVE_EFFECT_KNOCK_OFF arms, Cmd_tryswapitems, Cmd_tryrecycleitem). Covet/Knock Off were already Shell-Bell-claimed (power != 0); this family adds a second, independent category to those two rows and the first category to Trick/Recycle. Trick and Knock Off reuse pre-existing 2026-07-28 oracle evidence (not restaged); Covet and Recycle get fresh Battle Scene OFF receipts authored this session. Assist/Metronome/Mirror Move/Sleep Talk (item-move-end's dynamic-dispatch exceptions) are not members of this family's four-move selector and remain the item axis's only gaps."
     },
     "immunityMoveEnd": {
       "id": "hook-family:moveend-immunity-abilities",
       "label": "Status-immunity ability Level-50 family checkpoint",
       "status": "source-proven-family",
       "candidates": 99,
-      "promotedRows": 97,
-      "exceptions": 2,
+      "promotedRows": 95,
+      "exceptions": 4,
       "blockers": 0,
       "rosterOnlyCandidates": 9,
       "evidence": [
@@ -85890,7 +85582,7 @@
         },
         {
           "path": "tests/statusImmunityHookJoinBatch.test.ts",
-          "kind": "97-row-graph-program-batch"
+          "kind": "95-row-graph-program-batch"
         },
         {
           "path": "tests/statusImmunityOracleEvidence.test.ts",
@@ -85917,7 +85609,7 @@
           "kind": "direct-parameterized-oracle-receipt"
         }
       ],
-      "notes": "97 of 99 finite candidates (every ability-axis row not already claimed by Soundproof, Absorbing, ON_DAMAGE contact, Color Change, Synchronize, Attract/Oblivious, or Explosion/Damp, minus the Skill Swap/Role Play and five Own Tempo guard exclusions) are promoted through a graph/program route from their entry script to a moveendall/moveendto/moveendfromto handoff whose Cmd_moveend state range includes MOVEEND_IMMUNITY_ABILITIES (state 4). MOVE_ASSIST and MOVE_METRONOME remain explicit dynamic-dispatch exceptions (jumptocalledmove/metronome have no static moveend node of their own). The route certificate proves only that each move's own script reaches Cmd_moveend's normal tail; it does not claim the status was ever reachable while the cure ability was already active -- the shared receipt stages that via Skill Swap."
+      "notes": "95 of 99 finite candidates (every ability-axis row not already claimed by Soundproof, Absorbing, ON_DAMAGE contact, Color Change, Synchronize, Attract/Oblivious, or Explosion/Damp, minus the Skill Swap/Role Play and five Own Tempo guard exclusions) are promoted through a graph/program route from their entry script to a moveendall/moveendto/moveendfromto handoff whose Cmd_moveend state range includes MOVEEND_IMMUNITY_ABILITIES (state 4). MOVE_ASSIST, MOVE_METRONOME, MOVE_MIRROR_MOVE, and MOVE_SLEEP_TALK remain explicit dynamic-dispatch exceptions (jumptocalledmove/metronome/trymirrormove's two success arms/trychoosesleeptalkmove's jumptocalledmove tail have no static moveend node of their own). The route certificate proves only that each move's own script reaches Cmd_moveend's normal tail; it does not claim the status was ever reachable while the cure ability was already active -- the shared receipt stages that via Skill Swap."
     },
     "abilityManipulation": {
       "id": "hook-family:ability-manipulation-opcode",

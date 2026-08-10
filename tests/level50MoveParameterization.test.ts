@@ -335,9 +335,9 @@ describe("Level-50 move parameterization manifest", () => {
     });
     expect(manifest.coverage.joins).toMatchObject({
       battleScriptGraphLabels: 300, battleScriptProgramLabels: 300, animationScripts: 300,
-      itemHookCategories: 298, abilityHookCategories: 452,
+      itemHookCategories: 296, abilityHookCategories: 450,
       itemHookUnsupportedCategories: null, abilityHookUnsupportedCategories: null,
-      itemHookUnsupportedRows: 2, abilityHookUnsupportedRows: 2, abilityHookSourceProvenRows: 298, itemHookSourceProvenRows: 298,
+      itemHookUnsupportedRows: 4, abilityHookUnsupportedRows: 4, abilityHookSourceProvenRows: 296, itemHookSourceProvenRows: 296,
     });
     expect(manifest.coverage.hookCatalogs).toMatchObject({
       item: {
@@ -878,7 +878,7 @@ describe("Level-50 move parameterization manifest", () => {
     const IMMUNITY_EXCLUDED = new Set([
       "MOVE_SKILL_SWAP", "MOVE_ROLE_PLAY",
       "MOVE_CONFUSE_RAY", "MOVE_SWEET_KISS", "MOVE_SWAGGER", "MOVE_FLATTER", "MOVE_TEETER_DANCE",
-      "MOVE_ASSIST", "MOVE_METRONOME",
+      "MOVE_ASSIST", "MOVE_METRONOME", "MOVE_MIRROR_MOVE", "MOVE_SLEEP_TALK",
     ]);
     for (const move of level50RosterSymbols()) {
       if (expectedSourceProven.has(move) || IMMUNITY_EXCLUDED.has(move)) continue;
@@ -932,7 +932,8 @@ describe("Level-50 move parameterization manifest", () => {
       const itemManipulationCandidate = record.move in RANK3_ITEM_MANIPULATION_CATEGORY;
       const itemMoveEndPromoted = !kingsRockCandidate && !shellBellCandidate
         && !itemManipulationCandidate
-        && record.move !== "MOVE_ASSIST" && record.move !== "MOVE_METRONOME";
+        && record.move !== "MOVE_ASSIST" && record.move !== "MOVE_METRONOME"
+        && record.move !== "MOVE_MIRROR_MOVE" && record.move !== "MOVE_SLEEP_TALK";
       const expectedItemCategories = [
         ...(kingsRockCandidate ? ["moveend-kings-rock"] : []),
         ...(shellBellCandidate ? ["moveend-shell-bell"] : []),
@@ -952,8 +953,8 @@ describe("Level-50 move parameterization manifest", () => {
         expect(record.hooks.ability.evidence?.families.map((family) => family.category)).toEqual(expectedCategories);
       }
     }
-    expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(2);
-    expect(manifest.moves.filter((record) => record.hooks.item.status === "unsupported")).toHaveLength(2);
+    expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(4);
+    expect(manifest.moves.filter((record) => record.hooks.item.status === "unsupported")).toHaveLength(4);
   });
 
   it("promotes zero-power Volt/Water noncandidates through the item-move-end family while the Immunity family closes their ability axis", () => {

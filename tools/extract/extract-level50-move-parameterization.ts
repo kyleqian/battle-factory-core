@@ -3202,8 +3202,15 @@ if (immunityCandidateRows.length !== 99) {
 // BattleScript_EffectAssist/Metronome end in a dynamic-dispatch opcode
 // (jumptocalledmove/metronome) with no static fallthrough tail of their own,
 // so the graph/program has no direct moveend node to certify a route
-// through -- distinct from e.g. Mirror Move, whose failure fallthrough does
-// reach a real moveendall.
+// through. Mirror Move and Sleep Talk have the same gap even though each
+// has a *failure*-tail route reaching a real moveendall: Cmd_trymirrormove's
+// two success arms (battle_script_commands.c:6664, :6672) and
+// Cmd_trychoosesleeptalkmove's success arm (battle_scripts_1.s:1332,
+// jumptocalledmove TRUE -> Cmd_jumptocalledmove at battle_script_commands.c:5750)
+// each reassign gCurrentMove/dispatch dynamically, bypassing their own
+// script's static ppreduce/orbyte/goto tail entirely -- so a route
+// certificate built from that tail only ever proves the ordinary-failure
+// branch, never the actual dispatched move.
 const IMMUNITY_EXCEPTION_ROWS = [
   {
     id: "immunity-dynamic-dispatch:MOVE_ASSIST",
@@ -3214,6 +3221,16 @@ const IMMUNITY_EXCEPTION_ROWS = [
     id: "immunity-dynamic-dispatch:MOVE_METRONOME",
     move: "MOVE_METRONOME",
     reason: "BattleScript_EffectMetronome ends in the metronome opcode (battle_scripts_1.s:1155), a dynamic dispatch to a randomly selected move; the static graph/program has no moveendall/moveendto/moveendfromto node of its own to certify a route through, even though the invoked move's own script independently reaches Cmd_moveend's normal tail.",
+  },
+  {
+    id: "immunity-dynamic-dispatch:MOVE_MIRROR_MOVE",
+    move: "MOVE_MIRROR_MOVE",
+    reason: "Cmd_trymirrormove's two success arms (battle_script_commands.c:6664, found last-taken move; and :6672, random fallback among valid taken moves) both reassign gCurrentMove and jump gBattlescriptCurrInstr straight to gBattleScriptsForMoveEffects[gBattleMoves[gCurrentMove].effect], bypassing BattleScript_EffectMirrorMove's own ppreduce/orbyte/goto tail entirely; that tail (battle_scripts_1.s:469-473) is reached only on the no-valid-moves failure arm (Cmd_trymirrormove's else branch, gBattlescriptCurrInstr++), so the row's previous static route certificate proved only the ordinary-failure path (orbyte gMoveResultFlags, MOVE_RESULT_FAILED -> goto BattleScript_MoveEnd), never the reflected move's own script.",
+  },
+  {
+    id: "immunity-dynamic-dispatch:MOVE_SLEEP_TALK",
+    move: "MOVE_SLEEP_TALK",
+    reason: "BattleScript_SleepTalkUsingMove's only statement is jumptocalledmove TRUE (battle_scripts_1.s:1332), which Cmd_jumptocalledmove (battle_script_commands.c:5750) dispatches dynamically to gBattleScriptsForMoveEffects[gBattleMoves[gCurrentMove].effect] for whichever move Cmd_trychoosesleeptalkmove selected at runtime -- the same dynamic-dispatch gap as Assist. The row's previous static route certificate reached BattleScript_ButItFailed only via the two ordinary-failure arms (not-asleep, battle_scripts_1.s:1313-1316; and trychoosesleeptalkmove finding all four moves unusable, battle_scripts_1.s:1324-1326), never the chosen move's own script.",
   },
 ];
 const immunityEvidenceByMove = new Map<string, ReturnType<typeof immunityRouteEvidence>>();
@@ -3364,7 +3381,10 @@ if (itemMoveEndCandidateRows.length !== 116) {
 // (jumptocalledmove/metronome) with no static fallthrough tail of their own --
 // the same structural gap already found for the Immunity family (state 4),
 // which is not state-specific: neither script has any moveendall/moveendto/
-// moveendfromto node in its own static graph for state 11 either.
+// moveendfromto node in its own static graph for state 11 either. Mirror
+// Move and Sleep Talk share the gap for the same reason as the Immunity
+// family's exceptions above (each row's only static moveend route is its
+// ordinary-failure tail, not the dynamically dispatched move).
 const ITEM_MOVE_END_EXCEPTION_ROWS = [
   {
     id: "item-move-end-dynamic-dispatch:MOVE_ASSIST",
@@ -3375,6 +3395,16 @@ const ITEM_MOVE_END_EXCEPTION_ROWS = [
     id: "item-move-end-dynamic-dispatch:MOVE_METRONOME",
     move: "MOVE_METRONOME",
     reason: "BattleScript_EffectMetronome ends in the metronome opcode (battle_scripts_1.s:1155), a dynamic dispatch to a randomly selected move; the static graph/program has no moveendall/moveendto/moveendfromto node of its own to certify a route through, even though the invoked move's own script independently reaches Cmd_moveend's normal tail.",
+  },
+  {
+    id: "item-move-end-dynamic-dispatch:MOVE_MIRROR_MOVE",
+    move: "MOVE_MIRROR_MOVE",
+    reason: "Cmd_trymirrormove's two success arms (battle_script_commands.c:6664, found last-taken move; and :6672, random fallback among valid taken moves) both reassign gCurrentMove and jump gBattlescriptCurrInstr straight to gBattleScriptsForMoveEffects[gBattleMoves[gCurrentMove].effect], bypassing BattleScript_EffectMirrorMove's own ppreduce/orbyte/goto tail entirely; that tail (battle_scripts_1.s:469-473) is reached only on the no-valid-moves failure arm (Cmd_trymirrormove's else branch, gBattlescriptCurrInstr++), so the row's previous static route certificate proved only the ordinary-failure path (orbyte gMoveResultFlags, MOVE_RESULT_FAILED -> goto BattleScript_MoveEnd), never the reflected move's own script.",
+  },
+  {
+    id: "item-move-end-dynamic-dispatch:MOVE_SLEEP_TALK",
+    move: "MOVE_SLEEP_TALK",
+    reason: "BattleScript_SleepTalkUsingMove's only statement is jumptocalledmove TRUE (battle_scripts_1.s:1332), which Cmd_jumptocalledmove (battle_script_commands.c:5750) dispatches dynamically to gBattleScriptsForMoveEffects[gBattleMoves[gCurrentMove].effect] for whichever move Cmd_trychoosesleeptalkmove selected at runtime -- the same dynamic-dispatch gap as Assist. The row's previous static route certificate reached BattleScript_ButItFailed only via the two ordinary-failure arms (not-asleep, battle_scripts_1.s:1313-1316; and trychoosesleeptalkmove finding all four moves unusable, battle_scripts_1.s:1324-1326), never the chosen move's own script.",
   },
 ];
 const itemMoveEndEvidenceByMove = new Map<string, ReturnType<typeof itemMoveEndRouteEvidence>>();
@@ -4488,7 +4518,7 @@ const itemMoveEndAudit = {
   dispatcher: { path: BATTLE_SCRIPT_COMMANDS_PATH, line: itemMoveEndCaseLine, call: ITEM_MOVE_END_DISPATCHER_CALL, state: "MOVEEND_ITEM_EFFECTS_ALL", stateValue: 11 },
   promotions: {
     sourceProvenRows: itemMoveEndSourceProvenRows,
-    reason: `${itemMoveEndSourceProvenRows.length} of ${itemMoveEndCandidateRows.length} finite candidates have a source/program graph route from their entry script to a moveendall/moveendto/moveendfromto handoff whose Cmd_moveend state range includes state 11. MOVE_ASSIST and MOVE_METRONOME remain explicit dynamic-dispatch exceptions (the same structural gap as the Immunity family's state-4 search). The shared Pichu/Zubat Thunder-Wave/Cheri-Berry Battle Scene OFF receipt (holder + itemless control) and Tier-1 batch prove the common dispatcher semantics; no per-move oracle receipts are fabricated.`,
+    reason: `${itemMoveEndSourceProvenRows.length} of ${itemMoveEndCandidateRows.length} finite candidates have a source/program graph route from their entry script to a moveendall/moveendto/moveendfromto handoff whose Cmd_moveend state range includes state 11. MOVE_ASSIST, MOVE_METRONOME, MOVE_MIRROR_MOVE, and MOVE_SLEEP_TALK remain explicit dynamic-dispatch exceptions (the same structural gap as the Immunity family's state-4 search; Mirror Move and Sleep Talk's only static moveend route is their own ordinary-failure tail, not the dynamically dispatched move). The shared Pichu/Zubat Thunder-Wave/Cheri-Berry Battle Scene OFF receipt (holder + itemless control) and Tier-1 batch prove the common dispatcher semantics; no per-move oracle receipts are fabricated.`,
   },
 };
 const immunityAudit = {
@@ -4504,7 +4534,7 @@ const immunityAudit = {
   dispatcher: { path: BATTLE_SCRIPT_COMMANDS_PATH, line: immunityMoveEndCaseLine, call: IMMUNITY_DISPATCHER_CALL, state: "MOVEEND_IMMUNITY_ABILITIES", stateValue: 4 },
   promotions: {
     sourceProvenRows: immunitySourceProvenRows,
-    reason: `${immunitySourceProvenRows.length} of ${immunityCandidateRows.length} finite candidates have a source/program graph route from their entry script to a moveendall/moveendto/moveendfromto handoff whose Cmd_moveend state range includes state 4. MOVE_ASSIST and MOVE_METRONOME remain explicit dynamic-dispatch exceptions. The shared two-seed Skill-Swap-staged Battle Scene OFF receipt and Tier-1 batch prove the common dispatcher semantics; no per-move oracle receipts are fabricated.`,
+    reason: `${immunitySourceProvenRows.length} of ${immunityCandidateRows.length} finite candidates have a source/program graph route from their entry script to a moveendall/moveendto/moveendfromto handoff whose Cmd_moveend state range includes state 4. MOVE_ASSIST, MOVE_METRONOME, MOVE_MIRROR_MOVE, and MOVE_SLEEP_TALK remain explicit dynamic-dispatch exceptions (Mirror Move and Sleep Talk's only static moveend route is their own ordinary-failure tail, not the dynamically dispatched move). The shared two-seed Skill-Swap-staged Battle Scene OFF receipt and Tier-1 batch prove the common dispatcher semantics; no per-move oracle receipts are fabricated.`,
   },
 };
 const onDamageAudit = {
@@ -4638,7 +4668,7 @@ const output = {
       ABILITY_CONSTANTS_PATH,
       "reference/pokeemerald/include/constants/pokemon.h",
     ],
-    note: `Catalog join plus an intentionally partial source dispatcher inventory. ${records.filter((record) => record.hooks.item.status === "unsupported").length} per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the ${kingsRockSourceProvenRows.length}-row King's Rock family, the ${shellBellSourceProvenRows.length}-row Shell Bell family, the ${itemMoveEndSourceProvenRows.length}-row item-move-end status-cure family, the 4-row item-manipulation-opcode family, exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, ${synchronizeSourceProvenRows.length} Synchronize status candidates, the one-row Attract/Oblivious family, the two-row Explosion/Damp family, the ${immunitySourceProvenRows.length}-row Immunity status-cure family, the 2-row ability-manipulation-opcode family, and the 5-row own-tempo-guard family carry graph/program/source-handoff evidence. King's Rock retains Tickle as one explicit zero-damage exception; Shell Bell retains Future Sight as a distinct IGNORE_SHELL_BELL exception; item-move-end and Immunity both retain Assist/Metronome as dynamic-dispatch exceptions (the ability axis's only two remaining gaps); item-manipulation and ability-manipulation each have zero exceptions (all rows promoted); own-tempo-guard has zero exceptions (all five rows promoted); no per-move oracle receipts are fabricated.`,
+    note: `Catalog join plus an intentionally partial source dispatcher inventory. ${records.filter((record) => record.hooks.item.status === "unsupported").length} per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the ${kingsRockSourceProvenRows.length}-row King's Rock family, the ${shellBellSourceProvenRows.length}-row Shell Bell family, the ${itemMoveEndSourceProvenRows.length}-row item-move-end status-cure family, the 4-row item-manipulation-opcode family, exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, ${synchronizeSourceProvenRows.length} Synchronize status candidates, the one-row Attract/Oblivious family, the two-row Explosion/Damp family, the ${immunitySourceProvenRows.length}-row Immunity status-cure family, the 2-row ability-manipulation-opcode family, and the 5-row own-tempo-guard family carry graph/program/source-handoff evidence. King's Rock retains Tickle as one explicit zero-damage exception; Shell Bell retains Future Sight as a distinct IGNORE_SHELL_BELL exception; item-move-end and Immunity both retain Assist/Metronome/Mirror Move/Sleep Talk as dynamic-dispatch exceptions (both axes' only four remaining gaps); item-manipulation and ability-manipulation each have zero exceptions (all rows promoted); own-tempo-guard has zero exceptions (all five rows promoted); no per-move oracle receipts are fabricated.`,
   },
   coverage: {
     level50Roster: {
@@ -4677,7 +4707,7 @@ const output = {
         itemManipulation: itemManipulationAudit,
         completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "The King's Rock flinch family is source-proven for 105 of 106 finite flag-selected rows with Tickle retained as the zero-damage exception, the Shell Bell heal family is source-proven for 182 of 183 finite power != 0 rows with Future Sight retained as the IGNORE_SHELL_BELL exception, the item-move-end status-cure family is source-proven for the remaining not-already-claimed rows minus the four Rank-3 item-manipulation moves (with Assist/Metronome retained as dynamic-dispatch exceptions), and the item-manipulation family is source-proven for all four Rank-3 rows (Covet, Trick, Recycle, Knock Off) via four independent dedicated-opcode certificates, closing the item axis except for Assist/Metronome. Choice Band, target Evasion-up accuracy, and other held-item dispatchers remain unsupported/null per move.",
+        reason: "The King's Rock flinch family is source-proven for 105 of 106 finite flag-selected rows with Tickle retained as the zero-damage exception, the Shell Bell heal family is source-proven for 182 of 183 finite power != 0 rows with Future Sight retained as the IGNORE_SHELL_BELL exception, the item-move-end status-cure family is source-proven for the remaining not-already-claimed rows minus the four Rank-3 item-manipulation moves (with Assist/Metronome/Mirror Move/Sleep Talk retained as dynamic-dispatch exceptions), and the item-manipulation family is source-proven for all four Rank-3 rows (Covet, Trick, Recycle, Knock Off) via four independent dedicated-opcode certificates, closing the item axis except for Assist/Metronome/Mirror Move/Sleep Talk. Choice Band, target Evasion-up accuracy, and other held-item dispatchers remain unsupported/null per move.",
       },
       ability: {
         displayRows: Object.keys(abilityDisplay.abilities).length,
@@ -4697,7 +4727,7 @@ const output = {
         ownTempoGuard: ownTempoGuardAudit,
         completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "The exact Level-50 Soundproof moves-block family, audited absorbing dispatcher candidates, both ON_DAMAGE families, Synchronize, Attract/Oblivious, Explosion/Damp, the 99-row Immunity status-cure family, the 2-row ability-manipulation-opcode family (Cmd_trycopyability/Cmd_tryswapabilities), and the 5-row own-tempo-guard family (jumpifability BS_TARGET, ABILITY_OWN_TEMPO) are source-proven with separate route/guard certificates. Future Sight has one explicit delayed-MOVEEND exception for Color Change only; Assist/Metronome remain explicit dynamic-dispatch exceptions on the Immunity family (the ability axis's only two remaining gaps); the newer families have no candidate route exceptions or blockers, while distinct contact ability outcome gaps, accuracy, and all other ability dispatcher families remain intentionally unsupported/null per move.",
+        reason: "The exact Level-50 Soundproof moves-block family, audited absorbing dispatcher candidates, both ON_DAMAGE families, Synchronize, Attract/Oblivious, Explosion/Damp, the 95-row Immunity status-cure family (99 candidates minus the four dynamic-dispatch exceptions), the 2-row ability-manipulation-opcode family (Cmd_trycopyability/Cmd_tryswapabilities), and the 5-row own-tempo-guard family (jumpifability BS_TARGET, ABILITY_OWN_TEMPO) are source-proven with separate route/guard certificates. Future Sight has one explicit delayed-MOVEEND exception for Color Change only; Assist/Metronome/Mirror Move/Sleep Talk remain explicit dynamic-dispatch exceptions on the Immunity family (the ability axis's only four remaining gaps); the newer families have no candidate route exceptions or blockers, while distinct contact ability outcome gaps, accuracy, and all other ability dispatcher families remain intentionally unsupported/null per move.",
       },
     },
   },

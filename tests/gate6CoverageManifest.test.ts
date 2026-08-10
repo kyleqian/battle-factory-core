@@ -786,9 +786,9 @@ describe("Gate-6 mechanics coverage manifest", () => {
       const axisSummary = record(perMoveHookJoins[axis]);
       expect(rows).toHaveLength(parameterizationData.moves.length);
       expect(axisSummary).toEqual({ rows: rows.length, unsupported: sourceUnsupported, gaps: sourceUnsupported });
-      expect(sourceUnsupported).toBe(2);
+      expect(sourceUnsupported).toBe(4);
     }
-    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 4, gaps: 4 });
+    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 8, gaps: 8 });
     expect(record(summary.kingsRockMoveEnd)).toEqual({
       candidates: 106,
       promotedRows: 105,
@@ -883,7 +883,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const sourceProven = parameterizationData.moves
       .filter((move) => move.hooks.ability.status === SOURCE_PROVEN_FAMILY_STATUS)
       .map((move) => move.move);
-    expect(sourceProven).toHaveLength(298);
+    expect(sourceProven).toHaveLength(296);
     const sourceSoundproof = parameterizationData.moves
       .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(SOUNDPROOF_MOVES_BLOCK_CATEGORY))
       .map((move) => move.move)
@@ -911,7 +911,11 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const sourceImmunity = parameterizationData.moves
       .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(IMMUNITY_CATEGORY))
       .map((move) => move.move);
-    expect(sourceImmunity).toHaveLength(97);
+    expect(sourceImmunity).toHaveLength(95);
+    expect(sourceImmunity).not.toContain("MOVE_ASSIST");
+    expect(sourceImmunity).not.toContain("MOVE_METRONOME");
+    expect(sourceImmunity).not.toContain("MOVE_MIRROR_MOVE");
+    expect(sourceImmunity).not.toContain("MOVE_SLEEP_TALK");
     const sourceAbilityManipulation = parameterizationData.moves
       .filter((move) => array(move.hooks.ability.supportedCategories).map(String).some((category) => (ABILITY_MANIPULATION_CATEGORIES as readonly string[]).includes(category)))
       .map((move) => move.move);
@@ -924,7 +928,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
       .filter((move) => !sourceSoundproof.includes(move)));
     expect(soundproofOnlyAbilityGaps - Number(record(perMoveHookJoins.ability).gaps)).toBe(uniqueNonSoundproofProven.size);
     expect(parameterizationData.moves.length + soundproofOnlyAbilityGaps).toBe(591);
-    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(4);
+    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(8);
     const sourceKingsRock = parameterizationData.moves
       .filter((move) => array(move.hooks.item.supportedCategories).map(String).includes(KINGS_ROCK_CATEGORY))
       .map((move) => move.move);
@@ -942,9 +946,11 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const sourceItemMoveEnd = parameterizationData.moves
       .filter((move) => array(move.hooks.item.supportedCategories).map(String).includes(ITEM_MOVE_END_CATEGORY))
       .map((move) => move.move);
-    expect(sourceItemMoveEnd).toHaveLength(114);
+    expect(sourceItemMoveEnd).toHaveLength(112);
     expect(sourceItemMoveEnd).not.toContain("MOVE_ASSIST");
     expect(sourceItemMoveEnd).not.toContain("MOVE_METRONOME");
+    expect(sourceItemMoveEnd).not.toContain("MOVE_MIRROR_MOVE");
+    expect(sourceItemMoveEnd).not.toContain("MOVE_SLEEP_TALK");
     expect(sourceItemMoveEnd.some((move) => sourceShellBell.includes(move))).toBe(false);
     const sourceItemManipulation = parameterizationData.moves
       .filter((move) => array(move.hooks.item.supportedCategories).map(String).some((category) => (ITEM_MANIPULATION_CATEGORIES as readonly string[]).includes(category)))
@@ -1136,14 +1142,14 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(oracle.receiptGaps).toBe(0);
     expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*2 item join gaps\*\* and \*\*2 ability join gaps\*\*/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*4 item join gaps\*\* and \*\*4 ability join gaps\*\*/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/King's Rock checkpoint: \*\*106\*\* finite Level-50 flag selectors, \*\*105\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Shell Bell checkpoint: \*\*183\*\* finite Level-50 power != 0 candidates.*\*\*182\*\* promoted/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Item-move-end checkpoint: \*\*116\*\* finite Level-50 item-axis candidates.*\*\*114\*\* promoted to MOVEEND_ITEM_EFFECTS_ALL state 11/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Item-move-end checkpoint: \*\*116\*\* finite Level-50 item-axis candidates.*\*\*112\*\* promoted to MOVEEND_ITEM_EFFECTS_ALL state 11/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Item-manipulation checkpoint: \*\*4\*\* finite Rank-3 direct-opcode candidates.*\*\*4\*\* promoted via four independent own-opcode certificates/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/298 item rows are source-proven/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/298 ability rows are source-proven/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Immunity checkpoint: \*\*99\*\* finite Level-50 ability-axis candidates, \*\*97\*\* promoted/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/296 item rows are source-proven/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/296 ability rows are source-proven/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Immunity checkpoint: \*\*99\*\* finite Level-50 ability-axis candidates, \*\*95\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Ability-manipulation checkpoint: \*\*2\*\* finite Rank-4 direct-opcode candidates.*\*\*2\*\* promoted via two independent own-opcode certificates/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Own-Tempo-guard checkpoint: \*\*5\*\* finite Rank-5 candidates.*\*\*5\*\* promoted to a jumpifability BS_TARGET, ABILITY_OWN_TEMPO route certificate/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Synchronize checkpoint: \*\*30\*\* finite Level-50 candidates, \*\*30\*\* promoted/);

@@ -363,6 +363,38 @@ remainder needs a new ability family.
   section's "closes the ability axis completely" prediction is superseded
   by that honest two-row remainder, the identical shape the item axis
   landed at after Rank 3.
+- **STATUS (2026-08-10 night, Gate-6 surge audit): the "2 gaps" figure above
+  was incomplete, not the honest final state.** A supervisor-verified,
+  source-spot-checked read-only audit found the dynamic-dispatch exception
+  class itself incomplete: `MOVE_MIRROR_MOVE` and `MOVE_SLEEP_TALK` were
+  still counted as source-proven on both axes, but each row's static
+  moveend route certificate was reachable only through its own
+  ordinary-*failure* tail (Mirror Move: `orbyte gMoveResultFlags,
+  MOVE_RESULT_FAILED` -> `goto BattleScript_MoveEnd`, reached only when
+  `Cmd_trymirrormove` finds no valid last-taken move; Sleep Talk: `goto
+  BattleScript_ButItFailed`, reached only when not asleep or when
+  `trychoosesleeptalkmove` finds all four moves unusable) — never through
+  the actual dispatched move. On both moves' *success* arms,
+  `gBattlescriptCurrInstr` is reassigned dynamically exactly like
+  Assist/Metronome: `Cmd_trymirrormove`'s two success arms
+  (`battle_script_commands.c:6664`, `:6672`) jump straight to
+  `gBattleScriptsForMoveEffects[gBattleMoves[gCurrentMove].effect]`, and
+  Sleep Talk's `BattleScript_SleepTalkUsingMove` ends in `jumptocalledmove
+  TRUE` (`battle_scripts_1.s:1332`), the same `Cmd_jumptocalledmove` site
+  Assist uses (`battle_script_commands.c:5750`). Both rows converted to
+  explicit dynamic-dispatch exception rows on **both axes**
+  (`IMMUNITY_EXCEPTION_ROWS`/`ITEM_MOVE_END_EXCEPTION_ROWS` in
+  `tools/extract/extract-level50-move-parameterization.ts`). Corrected
+  headline: **4 gaps per axis**
+  (`MOVE_ASSIST`/`MOVE_METRONOME`/`MOVE_MIRROR_MOVE`/`MOVE_SLEEP_TALK`),
+  not 2. Immunity family: 99 candidates, **95** promoted (was 97).
+  Item-move-end family: 116 candidates, **112** promoted (was 114). This is
+  the true final state of the Rank 1-5 worklist; no further family-level
+  promotion is possible on either axis without a new engine capability (a
+  runtime trace of the dynamically selected move). The `routeBranch`
+  success/failure-tail self-description the audit also requested was not
+  landed this step within the session cap — see `ISSUES.md` for the
+  deferred marker-set design and evidence.
 
 ## 2. Exclusions — provably out of the per-move axis, not "work"
 

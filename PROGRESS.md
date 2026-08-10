@@ -5,6 +5,116 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1073 — [MAIN worker, 2026-08-10 night] **Gate-6 surge-audit fixes: dynamic-dispatch exception class completed (2→4 gaps/axis), "undefined" locators fixed, count wording corrected**
+
+- **State:** tree is green: full suite **864 files / 8,347 passed / 1
+  skipped**, production build, `npm run typecheck` clean.
+  `docs/gate6-coverage-manifest.md`/`.json` regenerate byte-idempotent
+  (identical `git diff --stat` before/after a fresh rerun of both
+  generators on the unchanged tree) and now read **4 item join gaps / 4
+  ability join gaps** (was **2 item / 2 ability** at entry 1072 — that
+  headline was incomplete, not final, per tonight's supervisor-verified
+  read-only audit). `grep -c "undefined" docs/gate6-coverage-manifest.md`
+  and `.json` both **0** (were 8 md occurrences across 4 rows / matching
+  json occurrences before this step).
+- **Did:** fixed all three defects the audit named, each as a class fix,
+  not a spot patch. **(1) Dynamic-dispatch exception class (the
+  substantive fix):** mapped all five `gBattleScriptsForMoveEffects`
+  dispatch sites in `battle_script_commands.c` (jump-semantics
+  `gBattlescriptCurrInstr` assignments at `Cmd_jumptocalledmove` :5750,
+  `Cmd_trymirrormove`'s two success arms :6664/:6672, `Cmd_metronome`
+  :7919; call-semantics `BattleScriptPush` at `Cmd_moveend`'s
+  `MOVEEND_NEXT_TARGET` :4474 and `Cmd_callenvironmentattack`/Nature Power
+  :9114 — confirmed push-class moves are NOT exceptions, since
+  `BattleScriptPush` returns control to the original script's own moveend
+  tail after the pushed script ends, unlike a jump which abandons that
+  tail). Found `MOVE_MIRROR_MOVE` and `MOVE_SLEEP_TALK` were still counted
+  source-proven on both axes even though each row's static moveend route
+  certificate was reachable only through its own ordinary-*failure* tail
+  (Mirror Move: `orbyte gMoveResultFlags, MOVE_RESULT_FAILED` → `goto
+  BattleScript_MoveEnd`, taken only when `Cmd_trymirrormove` finds no
+  valid last-taken move; Sleep Talk: `goto BattleScript_ButItFailed`,
+  taken only when not asleep or when `trychoosesleeptalkmove` finds all
+  four moves unusable) — never through the actually-dispatched move,
+  which on both moves' success arms reassigns `gBattlescriptCurrInstr`
+  dynamically exactly like Assist/Metronome. Converted both to explicit
+  dynamic-dispatch exception rows on **both axes**
+  (`IMMUNITY_EXCEPTION_ROWS`/`ITEM_MOVE_END_EXCEPTION_ROWS` in
+  `tools/extract/extract-level50-move-parameterization.ts`), each reason
+  citing the exact success-branch reassignment site and the fact that the
+  prior route certificate existed only via the failure tail. Immunity
+  family: 99 candidates, promoted 97→**95**. Item-move-end family: 116
+  candidates, promoted 114→**112**. `routeBranch` success/failure-tail
+  self-description was **not** landed this step (honest-stop clause,
+  session cap) — filed as `ISSUES.md` #82 with the full marker-set design
+  (`BattleScript_ButItFailed`, `orbyte ... MOVE_RESULT_FAILED`,
+  `*Prevents*` redirects) and the counter-argument for why most
+  failure-tail routes (Roar/Whirlwind/Substitute-shaped, reaching
+  `Cmd_moveend`'s unconditional post-move state loop on both branches)
+  remain valid evidence regardless of branch. **(2) Undefined evidence
+  locators:** `tools/report/gate6-coverage-manifest.ts`'s
+  `sourceProvenHookEvidence` built citation locators from
+  `proof.entryPath.graph.entryLabel`/`program.entryLabel` and a route
+  terminal, both absent for the opcode-family shape (Rank-3/4
+  item-/ability-manipulation, `auditExactScriptBlock`'s `{label, source,
+  graph: {path, statements}, program: {path, statements}}` has no
+  `entryLabel`/`route`), so those rows and the older Explosion/Damp rows
+  emitted literal `"undefined"` in locators. Fixed with a fallback to
+  `proof.entryPath.declaredEntryScript` for the entry label and to the
+  word `"statements"` (instead of fabricating `"route"`) when
+  `entryPath.graph.route` is absent; added a hard per-family assertion in
+  `sourceProvenFamilies` that throws if neither `entryLabel` nor
+  `declaredEntryScript` is a string, plus a blanket
+  `JSON.stringify(manifest).match(/undefined/)` assertion in
+  `assertManifest` as a second line of defense. Verified this also healed
+  the six pre-existing Explosion/Damp occurrences (all three fix sites are
+  general, not per-family special-cased). **(3) Count wording:**
+  `tools/extract/extract-level50-move-parameterization.ts`'s ability-axis
+  coverage note said "99-row Immunity status-cure family" when promoted
+  membership was 97 (now 95) — the phrase described the candidate count,
+  not the promoted count. Fixed to "95-row" (**not** the audit's literally
+  quoted "97-row" — that number was accurate at the moment the audit was
+  written but Rung 1's own exception-conversion fix supersedes it before
+  Rung 3 is applied, per the brief's own THEN clause requiring re-pinned
+  counts after membership changes; shipping "97-row" would have been a
+  fresh overstatement one rung later). All touched reason/note strings
+  across both extractor and report now say "4 remaining gaps" /
+  "Assist/Metronome/Mirror Move/Sleep Talk" consistently (no lingering
+  "two gaps" or bare "Assist/Metronome" text on either axis).
+- **Next:** ISSUES #82 (`routeBranch` classifier) is the natural
+  continuation — read-only sweep across all ~296 currently-promoted rows
+  per axis for other failure-tail-only routes before deciding whether any
+  need exception-row conversion. Otherwise the Gate-6 hook-family worklist
+  is at its true final state: **4 item / 4 ability gaps**
+  (`MOVE_ASSIST`/`MOVE_METRONOME`/`MOVE_MIRROR_MOVE`/`MOVE_SLEEP_TALK`,
+  identical set on both axes), no further family-level promotion possible
+  without a new engine capability (a runtime trace of the dynamically
+  selected move).
+- **Notes:** no engine, controller, round outcome, barrier pin, or
+  canonical window changed — this step was extractor/report/docs/test
+  fixes only, as scoped. Re-pinned counts in
+  `tests/level50MoveParameterization.test.ts` (298→296 item/ability
+  source-proven and hook-category counts, 2→4 unsupported both axes),
+  `tests/gate6CoverageManifest.test.ts` (97→95 immunity, 114→112
+  item-move-end, 2→4 unsupported per axis, 4→8 total gaps, 298→296
+  source-proven, all markdown-regex assertions), `tests/statusImmunityHookJoinBatch.test.ts`
+  and `tests/itemMoveEndHookJoinBatch.test.ts` (97→95/114→112 promoted,
+  both new exception rows asserted with their reason text). Neither
+  `tests/abilityManipulationHookJoinBatch.test.ts` nor
+  `tests/ownTempoGuardHookJoinBatch.test.ts` (ability-manipulation/
+  own-tempo-guard batches) changed membership — Mirror Move and Sleep Talk
+  were never members of either family. Added a dated STATUS note to
+  `docs/gate6-family-worklist.md` under the Rank 5 section (the audit's
+  correction target) rather than rewriting the document's historical
+  narrative. `src/engine/battleScriptLastMoveOpcode.ts` (Mirror Move) and
+  `src/engine/battleScriptSleepTalkOpcode.ts` were read, not edited
+  (already faithful; this was a report/extractor-side accounting gap, not
+  an engine bug). Full acceptance run this step: `npm run
+  test:smoke` (375/375), `npm run typecheck` (clean), full `npm test`
+  (864 files / 8,347 passed / 1 skipped), `npm run build` (green, one
+  pre-existing unrelated chunk-size warning). Moved entry 1070 to
+  `PROGRESS-archive.md` to keep the ledger at 3 live entries.
+
 ## 1072 — [MAIN worker, 2026-08-10 night] **Rank-4/5 ability families (opcode manipulation + Own Tempo guard) promoted: ability axis closed to 2 gaps — both axes now match**
 
 - **State:** tree is green: full suite **864 files / 8,347 passed / 1
@@ -181,78 +291,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `tools/battle-lab/mechanic-own-tempo-guard-*` untouched (side-lane
   ownership, explicit brief exclusion). Moved entry 1068 to
   `PROGRESS-archive.md` to keep the ledger at 3 live entries.
-
-
-## 1070 — [MAIN worker, 2026-08-10 night] **Rank-1 item family (generic post-move status-cure/stat-restore) promoted: 118 → 4 item gaps**
-
-- **State:** tree is green: full suite **858 files / 8,324 passed / 1
-  skipped**, production build, `npm run typecheck` clean. `docs/gate6-coverage-manifest.md`
-  regenerates byte-idempotent and now reads **4 item join gaps / 9 ability
-  join gaps** (was **118 item / 9 ability** at entry 1069 — ability axis
-  untouched, out of scope). Baseline checked live first, matching entry
-  1069's headline exactly (118/9), not the worklist's stale 191/195.
-- **Did:** consumed the already-banked evidence from tonight's prep pass
-  (`docs/item-move-end-family-ground-truth.md`,
-  `tools/battle-lab/mechanic-item-move-end-paralysis-{cheri,control}-off.json`,
-  `tools/probe/verify-item-move-end-paralysis-off.py`, both receipts) — no
-  new oracle receipts authored. `tools/extract/extract-level50-move-parameterization.ts`
-  adds `itemMoveEndRouteEvidence` (same graph/program BFS infra as King's
-  Rock/Shell Bell/Immunity) proving each candidate's entry script reaches a
-  `moveendall`/`moveendto`/`moveendfromto` handoff whose `Cmd_moveend` state
-  range includes state 11 (`MOVEEND_ITEM_EFFECTS_ALL`), unconditional per
-  battler regardless of which (if any) of the nine `HOLD_EFFECT_CURE_*`/
-  `HOLD_EFFECT_RESTORE_STATS` arms fires. Selector: every item-axis
-  unsupported row except the four Rank-3 moves (`MOVE_COVET`, `MOVE_TRICK`,
-  `MOVE_RECYCLE`, `MOVE_KNOCK_OFF`), explicitly excluded regardless of their
-  current claim status. Live candidate count is **116**, not the worklist's
-  stale ~114 guess — re-ran the worklist's quoted python command against the
-  live manifest and found only `MOVE_TRICK`/`MOVE_RECYCLE` still unsupported
-  among the four Rank-3 moves (`MOVE_COVET`/`MOVE_KNOCK_OFF` were already
-  Shell-Bell-claimed by their nonzero power before this step, since Shell
-  Bell's selector is power != 0 with no item-manipulation awareness), so only
-  2 of the 4 needed subtracting from the 118 pool: 118 − 2 = 116. Promoted
-  **114**, two exceptions — `MOVE_ASSIST`/`MOVE_METRONOME` end in a
-  dynamic-dispatch opcode (`jumptocalledmove`/`metronome`) with no static
-  moveend node of their own, the identical structural gap entry 1069 found
-  for the Immunity family's state-4 search (confirmed by first running with
-  no hardcoded exceptions and observing the generator throw on exactly these
-  two moves). Explicit honest-modeling call: did **not** retroactively
-  annotate the 182 rows already proven by King's Rock/Shell Bell with this
-  new category, even though those rows' scripts also structurally pass
-  through state 11 en route to state 12 in the same moveend sweep — the
-  brief's selector is "every unsupported row," annotating already-proven
-  rows would need a separate state-11 route derivation per row (not reuse)
-  for zero additional gap closure, and it risked the 60-minute cap.
-  `tools/report/gate6-coverage-manifest.ts` adds a parallel `itemMoveEndAudit`/
-  `itemMoveEndMoveEndRow` checkpoint (King's Rock's shape) plus category
-  validation in `sourceProvenFamilies`/`parameterizedHook`/
-  `sourceProvenHookEvidence`, and adds the eight new receipt/doc paths to
-  `sourceInputs` (`requirePath`-verified; entry 1069's Immunity family did
-  not add its own paths there, an existing gap left as-is, not fixed here).
-  `tests/itemMoveEndHookJoinBatch.test.ts` (Tier-1, `kingsRockHookJoinBatch`
-  shape) and `tests/itemMoveEndOracleEvidence.test.ts` (pins the banked
-  receipt pair, `kingsRockOracleEvidence` shape) are new and green. Reran
-  `verify-item-move-end-paralysis-off.py`'s live-check arm fresh once via
-  `tools/run-mgba-probe.py` — reproduced byte-identically: paralysis
-  applied@111 both arms, holder cured@238/item consumed@380/status1 ends 0,
-  control persists 0x40, RNG holder=12/control=13. Updated pinned counts in
-  `tests/level50MoveParameterization.test.ts` (182→296 item categories/
-  source-proven rows, 118→4 unsupported; `MOVE_WITHDRAW`/`MOVE_RAIN_DANCE`/
-  `MOVE_SUNNY_DAY`/`MOVE_PROTECT` flip from item-unsupported to
-  item-move-end-family-proven, renamed that test's title accordingly) and
-  `tests/gate6CoverageManifest.test.ts` (adds `ITEM_MOVE_END_PROOF_PATHS`,
-  re-pins `perMoveHookJoins` totals 127→13, adds `sourceItemMoveEnd`
-  set-membership check alongside the existing `sourceKingsRock`/
-  `sourceShellBell` ones).
-- **Next:** continue the ordered family-level Gate-6 worklist from the
-  verified **4 item / 9 ability** row-gap frontier. Remaining item gaps:
-  `MOVE_ASSIST`, `MOVE_METRONOME`, plus Rank 3's `MOVE_TRICK`/`MOVE_RECYCLE`
-  (side lane, in flight — do not touch). Remaining ability gaps: Rank 4 (2
-  rows, Skill Swap/Role Play) and Rank 5 (5 rows, Own Tempo guards).
-- **Notes:** no engine, controller, round outcome, barrier pin, or canonical
-  window changed; `src/engine/battleScriptMoveEndOpcode.ts` was read, not
-  edited (already audited faithful per the ground-truth doc). Rank-3 rows,
-  their ground-truth doc, and `tools/battle-lab/mechanic-item-manipulation-*`
-  untouched (side-lane ownership, explicit brief exclusion). Moved entry
-  1067 to `PROGRESS-archive.md` to keep the ledger at 3 live entries.
-

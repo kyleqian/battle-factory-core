@@ -6,11 +6,11 @@ const manifest = data as unknown as Row;
 const audit = manifest.coverage.hookCatalogs.ability.immunity as Row;
 
 describe("Status-immunity ability Level-50 hook-join family", () => {
-  it("enumerates all 99 selectors, promotes exactly 97, and leaves Assist/Metronome explicit", () => {
+  it("enumerates all 99 selectors, promotes exactly 95, and leaves Assist/Metronome/Mirror Move/Sleep Talk explicit", () => {
     expect(audit).toMatchObject({ status: "source-proven-family", candidateCount: 99, blockers: [] });
     expect(audit.sourceMoveCandidates).toHaveLength(99);
-    expect(audit.sourceProvenRows).toHaveLength(97);
-    expect(audit.routeWitnesses).toHaveLength(97);
+    expect(audit.sourceProvenRows).toHaveLength(95);
+    expect(audit.routeWitnesses).toHaveLength(95);
     expect(audit.sourceExceptionRows).toEqual([
       expect.objectContaining({
         id: "immunity-dynamic-dispatch:MOVE_ASSIST",
@@ -22,8 +22,21 @@ describe("Status-immunity ability Level-50 hook-join family", () => {
         move: "MOVE_METRONOME",
         reason: expect.stringMatching(/metronome opcode/),
       }),
+      expect.objectContaining({
+        id: "immunity-dynamic-dispatch:MOVE_MIRROR_MOVE",
+        move: "MOVE_MIRROR_MOVE",
+        reason: expect.stringMatching(/Cmd_trymirrormove/),
+      }),
+      expect.objectContaining({
+        id: "immunity-dynamic-dispatch:MOVE_SLEEP_TALK",
+        move: "MOVE_SLEEP_TALK",
+        reason: expect.stringMatching(/jumptocalledmove/),
+      }),
     ]);
     expect(audit.sourceProvenRows).not.toContain("MOVE_ASSIST");
+    expect(audit.sourceProvenRows).not.toContain("MOVE_METRONOME");
+    expect(audit.sourceProvenRows).not.toContain("MOVE_MIRROR_MOVE");
+    expect(audit.sourceProvenRows).not.toContain("MOVE_SLEEP_TALK");
     expect(audit.sourceProvenRows).not.toContain("MOVE_SKILL_SWAP");
     expect(audit.sourceProvenRows).not.toContain("MOVE_ROLE_PLAY");
     expect(audit.sourceProvenRows).not.toContain("MOVE_CONFUSE_RAY");
