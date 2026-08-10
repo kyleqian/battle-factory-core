@@ -88,3 +88,43 @@ This is still not a production construction schedule. Live VBlank/audio/DMA
 state, interrupt/event-entry latency, and the other construction operations'
 source budgets remain missing. None may be selected by trainer, set, battle,
 tick, or receipt cursor.
+
+### Source-return component (2026-08-10)
+
+The non-nature v2 boundary inventory below is computed after subtracting every
+fully contained recorded VBlank entry-to-resume pause. Except for the resolved
+rows, these net spans may still include the same separately classified
+asynchronous hardware-service cycles seen by the nature receipt; the ranges
+are evidence boundaries, not adopted reducer constants.
+
+| boundary family | spans | net source-cycle range | disposition |
+| --- | ---: | ---: | --- |
+| construction entry → first `Random` | 12 | 58 | unresolved operation entry |
+| `CreateMon` entry → return | 12 | 1,238,617–2,361,713 | unresolved |
+| `CreateMon` return → `CalculateMonStats` entry | 12 | 26,672–41,256 | unresolved EV-spread |
+| `CalculateMonStats` entry → return | 12 | 140,999–154,160 | unresolved |
+| stats return → construction return | 12 | 22 | exact sub-boundary; retained with the unresolved stats operation |
+| construction return → factory post-mon end | 12 | 127,759–140,592 | unresolved |
+| post-mon end → next construction entry | 9 | 130–279 | unresolved outer-loop path; one 261→279 span carries +18 service |
+| final post-mon end → source return | 3 | 32–40 | resolved below |
+
+`reduceFactorySourceReturnTiming` now covers the complete `source-return`
+operation after the final mon. The probe boundaries are the instruction after
+the final held-item write through the first resumed caller instruction
+(`battle_factory_screen.c:1757-1778`, `battle_tower.c:1867-1885`):
+
+| source function | executed Thumb boundary | v2 cases | measured source cycles | VBlank pause / residual service |
+| --- | --- | ---: | ---: | ---: |
+| `CreateFrontierFactorySelectableMons` | `0x0819B612` → `0x0819A9FE` | anchor | 40 | 0 / 0 |
+| `FillFactoryFrontierTrainerParty` | `0x0816376C` → `0x081635B2` | LILIANA + varied | 32 each | 0 / 0 |
+
+The first tail takes the final `bhi` after its six-mon loop; the second lets
+the final `bls` fall through after its three-mon loop. Both then restore the
+same saved-register set and return via `bx`. At retail WS0 timing this is
+respectively 14 sequential Thumb instructions plus two pipeline refills, and
+13 sequential instructions plus one refill. All **3/3** applicable v2 spans
+match directly. This reducer selects only the compiled source function; it
+does not inspect trainer, set, mon, frame, cursor, or receipt identity.
+
+CreateMon, EV-spread, CalculateMonStats, factory-post-mon, and the live
+VBlank/audio/DMA workload remain unresolved, so the clock remains unwired.

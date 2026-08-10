@@ -1,7 +1,10 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { reduceFactoryNatureAttemptTiming } from "../src/engine/factoryConstructionClock.ts";
+import {
+  reduceFactoryNatureAttemptTiming,
+  reduceFactorySourceReturnTiming,
+} from "../src/engine/factoryConstructionClock.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
 
 type CycleEvent = {
@@ -9,6 +12,7 @@ type CycleEvent = {
   frame: number;
   masterCycles: number;
   cyclePhase: number;
+  pc: string;
   monIndex?: number | null;
   attempt?: number | null;
   half?: "low" | "high" | null;
@@ -30,7 +34,7 @@ type SequenceEvent = {
 type ProbeCase = {
   case: "anchor" | "liliana" | "factory-varied";
   oracleProfile: string;
-  sourceFunction: string;
+  sourceFunction: "CreateFrontierFactorySelectableMons" | "FillFactoryFrontierTrainerParty";
   sourceSetIds: number[];
   entry: { rngValue: number; masterCycles: number };
   return: { rngValue: number; masterCycles: number };
@@ -213,5 +217,34 @@ describe("Factory construction v2 source/cycle receipt", () => {
     expect(acceptedChecks).toBe(12);
     expect(rejectedChecks).toBe(266);
     expect(asynchronousStallsByCase).toEqual([5, 2, 4]);
+  });
+
+  it("replays every final source-return boundary from its compiled loop tail", () => {
+    const measuredByCase: number[] = [];
+    const vblankPausesByCase: number[] = [];
+    const externalCyclesByCase: number[] = [];
+
+    for (const { value } of probes) {
+      const events = value.cycleEvidence.events;
+      const finalPost = events.filter((event) => event.kind === "factory-post-mon-end").at(-1)!;
+      const returned = events.find((event) => event.kind === "source-function-return")!;
+      const pauses = interruptPauses(events).filter(([entry, resume]) => (
+        finalPost.masterCycles <= entry && resume <= returned.masterCycles
+      ));
+      const timing = reduceFactorySourceReturnTiming(value.sourceFunction);
+      const measured = sourceCycles(finalPost, returned, pauses);
+
+      // mGBA exposes its pipelined Thumb PC two bytes beyond the instruction
+      // executing at each probe boundary.
+      expect(finalPost.pc).toBe(`0x${(timing.startPc + 2).toString(16).padStart(8, "0")}`);
+      expect(returned.pc).toBe(`0x${(timing.callerResumePc + 2).toString(16).padStart(8, "0")}`);
+      measuredByCase.push(measured);
+      vblankPausesByCase.push(pauses.reduce((sum, [entry, resume]) => sum + resume - entry, 0));
+      externalCyclesByCase.push(measured - timing.cycles);
+    }
+
+    expect(measuredByCase).toEqual([40, 32, 32]);
+    expect(vblankPausesByCase).toEqual([0, 0, 0]);
+    expect(externalCyclesByCase).toEqual([0, 0, 0]);
   });
 });

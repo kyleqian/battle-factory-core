@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1081 — [MAIN worker, 2026-08-10] **#55 compiled source-return timing landed across all v2 cases**
+
+- **State:** `source-return` is resolved source-generally: committed v2
+  decomposition **3/3**, focused construction **11/11**, and red verification
+  pass. Smoke **375/375**, typecheck, full `npm test` **877 files / 8,408
+  passed / 1 skipped**, production build, and diff check are green.
+- **Did:** added `reduceFactorySourceReturnTiming` for the exact pret/Thumb
+  final-loop and epilogue paths. Anchor is **40** source cycles; LILIANA and
+  varied are **32** each, with **0** contained VBlank pause and **0** residual
+  service cycles. Both source-function siblings are pinned.
+- **Next:** continue #55 with one bounded CreateMon/EV/CalculateMonStats/
+  factory-post source budget or the deterministic VBlank/audio/DMA workload;
+  keep the construction clock unwired until those remaining pieces are exact.
+- **Notes:** no trainer/set/mon/tick/cursor/receipt timing selection, canonical
+  Battle-2 march, live wiring, evidence regeneration, animation edit, or new
+  unsupported barrier.
+
 ## 1080 — [supervisor, 2026-08-10] **Gate-6 route branches classified across the full source graph**
 
 - **State:** side commit `abaec104` is folded by merge `d3faa43c`; focused
@@ -37,27 +54,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   deterministic VBlank/audio/DMA event workload before any live wiring.
 - **Notes:** no trainer/set/tick/cursor/fixture schedule, live-controller
   wiring, swap-tail extension, canonical Battle-2 march, or animation edit.
-
-## 1078 — [MAIN worker, 2026-08-10] **Generic swap-screen SpriteCB_Pokeball state landed; exact tail remains bounded by #55 construction-clock RNG**
-
-- **State:** all finish gates are green: smoke **375/375**, ball/swap focus
-  **60/60**, typecheck, full `npm test`, build, and runnable #73 regressions
-  **115/115 + 213/213 + 903/903 + 248/248 twice + 128/128**.
-- **Did:** removed the shared elapsed-based unconditional ball restart. The
-  generic swap presentation now owns three `ballAnim.ts` states, threads RNG
-  after core's ambient VBlank in sprite order, models fresh-moving/no-initial-
-  roll and the source success-start delay, renders actual per-ball tiles, and
-  reconstructs fresh callbacks after normal summary. Tier-1 pins independent
-  state/order, first success/failure/rest boundaries, immutable round/party/
-  controller outcome, and summary reconstruction. Updated the ability/item
-  census's exact recovered-site line pin **116→130** after imports shifted it;
-  no support/barrier set changed.
-- **Next:** #55 must first gain the already-specified candidate/audio-aware
-  construction clock before the dense YES fixture can truthfully extend from
-  10177 through 10214. Do not fit a cursor or wire the refuted v2 clock.
-- **Notes:** fresh mGBA probe: oracle first anim-end ambient/callback stream
-  `A77397C1→33DA400A`, rolls F/S/F, `data[0]=[0,32,0]`; app unresolved stream
-  `8FF192D9`, rolls F/S/S. Honest extension **277/285**, eight ball-2-only
-  frames; canonical endpoint remains **10177** per fallback. Supervisor caught
-  the worker's stale build claim and added the missing `ballAnims` carry on
-  nine task handoffs; typecheck/build and focused **60/60** then passed live.

@@ -1,3 +1,27 @@
+## 1078 — [MAIN worker, 2026-08-10] **Generic swap-screen SpriteCB_Pokeball state landed; exact tail remains bounded by #55 construction-clock RNG**
+
+- **State:** all finish gates are green: smoke **375/375**, ball/swap focus
+  **60/60**, typecheck, full `npm test`, build, and runnable #73 regressions
+  **115/115 + 213/213 + 903/903 + 248/248 twice + 128/128**.
+- **Did:** removed the shared elapsed-based unconditional ball restart. The
+  generic swap presentation now owns three `ballAnim.ts` states, threads RNG
+  after core's ambient VBlank in sprite order, models fresh-moving/no-initial-
+  roll and the source success-start delay, renders actual per-ball tiles, and
+  reconstructs fresh callbacks after normal summary. Tier-1 pins independent
+  state/order, first success/failure/rest boundaries, immutable round/party/
+  controller outcome, and summary reconstruction. Updated the ability/item
+  census's exact recovered-site line pin **116→130** after imports shifted it;
+  no support/barrier set changed.
+- **Next:** #55 must first gain the already-specified candidate/audio-aware
+  construction clock before the dense YES fixture can truthfully extend from
+  10177 through 10214. Do not fit a cursor or wire the refuted v2 clock.
+- **Notes:** fresh mGBA probe: oracle first anim-end ambient/callback stream
+  `A77397C1→33DA400A`, rolls F/S/F, `data[0]=[0,32,0]`; app unresolved stream
+  `8FF192D9`, rolls F/S/S. Honest extension **277/285**, eight ball-2-only
+  frames; canonical endpoint remains **10177** per fallback. Supervisor caught
+  the worker's stale build claim and added the missing `ballAnims` carry on
+  nine task handoffs; typecheck/build and focused **60/60** then passed live.
+
 ## 1076 — [supervisor, 2026-08-10 ~03:00] **Session wind-down: S10 closed, 9 workers + 1 audit, all folds green**
 
 - **State:** master `019c27f2` is green: full suite **872 files / 8,384

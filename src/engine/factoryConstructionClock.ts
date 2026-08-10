@@ -99,6 +99,16 @@ export interface FactoryNatureAttemptTiming {
   cycles: number;
 }
 
+export interface FactorySourceReturnTiming {
+  sourceFunction: FactoryConstructionSourceFunction;
+  /** First executed Thumb instruction after the final mon's held-item write. */
+  startPc: number;
+  /** First caller instruction reached after the source function returns. */
+  callerResumePc: number;
+  /** Source-owned master cycles between those two instruction boundaries. */
+  cycles: number;
+}
+
 const THUMB_SEQUENTIAL_CYCLES = 2;
 const THUMB_PIPELINE_REFILL_CYCLES = 6;
 
@@ -385,6 +395,56 @@ export function reduceFactoryNatureAttemptTiming(
     accepted,
     cycles,
   });
+}
+
+/**
+ * Reduce the final loop-test and return path of a Factory construction source.
+ *
+ * The boundary begins after the final held-item `SetMonData` and ends when the
+ * caller resumes. `CreateFrontierFactorySelectableMons` executes its final
+ * six-mon loop test at `battle_factory_screen.c:1757-1778` (ROM
+ * 0x0819b612), takes `bhi`, restores the saved high registers, and returns to
+ * 0x0819a9fe. `FillFactoryFrontierTrainerParty` executes the corresponding
+ * three-mon loop test at `battle_tower.c:1867-1885` (ROM 0x0816376c), lets
+ * `bls` fall through, restores the same register set, and returns to
+ * 0x081635b2.
+ *
+ * Both paths use the retail WS0 timing already established for the nature
+ * reducer: two master cycles per sequential Thumb instruction and six extra
+ * cycles for each taken control-flow pipeline refill. No trainer, set, mon,
+ * frame, cursor, or receipt identity selects this path; only the compiled
+ * source function does.
+ */
+export function reduceFactorySourceReturnTiming(
+  sourceFunction: FactoryConstructionSourceFunction,
+): FactorySourceReturnTiming {
+  let cycles = 0;
+  const instruction = (count = 1): void => {
+    cycles += THUMB_SEQUENTIAL_CYCLES * count;
+  };
+  const branch = (taken: boolean): void => {
+    instruction();
+    if (taken) cycles += THUMB_PIPELINE_REFILL_CYCLES;
+  };
+
+  let startPc: number;
+  let callerResumePc: number;
+  if (sourceFunction === "CreateFrontierFactorySelectableMons") {
+    startPc = 0x0819_b612;
+    callerResumePc = 0x0819_a9fe;
+    instruction(5); // mov, lsl, lsr, mov, cmp
+    branch(true); // final `bhi` exits the six-mon loop
+  } else {
+    startPc = 0x0816_376c;
+    callerResumePc = 0x0816_35b2;
+    instruction(4); // mov, lsl, lsr, cmp
+    branch(false); // final `bls` falls through after three mons
+  }
+
+  instruction(7); // stack release and saved-register restoration
+  branch(true); // bx to the caller
+
+  return Object.freeze({ sourceFunction, startPc, callerResumePc, cycles });
 }
 
 /**

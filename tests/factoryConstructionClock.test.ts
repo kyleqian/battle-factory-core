@@ -5,6 +5,7 @@ import {
   GBA_VBLANK_CYCLES,
   REQUIRED_FACTORY_CONSTRUCTION_CLOCK_EVIDENCE,
   reduceFactoryNatureAttemptTiming,
+  reduceFactorySourceReturnTiming,
   scheduleFactoryConstruction,
   scheduleFactoryConstructionCleanStream,
   vblankRandom,
@@ -242,6 +243,37 @@ describe("Factory construction source-operation clock", () => {
       expect(entry.sequence.some((event) => event.some((value) => value === "globalCycles"))).toBe(false);
     }
     expect(GBA_VBLANK_CYCLES).toBe(280_896);
+  });
+
+  it("reduces both compiled source-return siblings without mon or set identity", () => {
+    expect(reduceFactorySourceReturnTiming("CreateFrontierFactorySelectableMons")).toEqual({
+      sourceFunction: "CreateFrontierFactorySelectableMons",
+      startPc: 0x0819_b612,
+      callerResumePc: 0x0819_a9fe,
+      cycles: 40,
+    });
+    expect(reduceFactorySourceReturnTiming("FillFactoryFrontierTrainerParty")).toEqual({
+      sourceFunction: "FillFactoryFrontierTrainerParty",
+      startPc: 0x0816_376c,
+      callerResumePc: 0x0816_35b2,
+      cycles: 32,
+    });
+
+    const entry = receipt.cases.find((candidate) => candidate.case === "liliana")!;
+    const mons = entry.sourceSetIds.map((setId) => (
+      factoryMonConstructionInputFromSet(setId, entry.sourceFunction)
+    ));
+    const scheduled = scheduleFactoryConstructionCleanStream({
+      sourceFunction: entry.sourceFunction,
+      mons,
+      clock: {
+        start: { frame: 0, cycle: 0, rngValue: entry.epoch.startCursor },
+        cycleCost: (operation) => operation.kind === "source-return"
+          ? reduceFactorySourceReturnTiming(operation.sourceFunction).cycles
+          : 0,
+      },
+    });
+    expect(scheduled.end.cycle).toBe(32);
   });
 
   it("is idempotent for repeated source inputs and a pure operation-cost callback", () => {

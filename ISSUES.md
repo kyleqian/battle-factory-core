@@ -1049,6 +1049,15 @@ exactly into candidate path plus external hardware service. Candidate timing
 is therefore resolved; the async workload is not. A fresh wrapped anchor v2
 probe was byte-identical (`631bd214…`). Focused **9/9** and typecheck pass.
 
+**Source-return timing (2026-08-10):** `reduceFactorySourceReturnTiming`
+replays the two compiled final-loop/epilogue paths using only
+`sourceFunction`. The anchor six-mon tail (`0x0819B612→0x0819A9FE`) is exactly
+40 source cycles; the LILIANA and varied three-mon tails
+(`0x0816376C→0x081635B2`) are exactly 32 each. All **3/3** v2 source-return
+spans decompose directly with zero contained VBlank pause and zero residual
+hardware-service cycles. Source cites and instruction accounting are in the
+v2 receipt; no live wiring or cursor adoption changed.
+
 **Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
 threading now makes the first post-cycle pixel boundary observe this debt.
 The WIN YES fixture's real first callback cursor/outcomes are
@@ -1061,7 +1070,7 @@ clock wiring was landed. The canonical window therefore remains 248/248
 through 10177; its attempted 10214 extension is 277/285, ball 2 only.
 
 **Lead:** continue only with source/cycle-model slices for the remaining
-CreateMon/EV/stat/post/return budgets and deterministic VBlank/audio/DMA
+CreateMon/EV/stat/post budgets and deterministic VBlank/audio/DMA
 workload plus interrupt/event-entry latency. Do not wire the clock until those
 are source-general. Per-mon cursors and per-frame fixture schedules are
 evidence-refuted as production designs. Until then, keep the clean-stream
