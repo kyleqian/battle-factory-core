@@ -106,6 +106,24 @@ export interface FactoryNatureAttemptTiming {
   cycles: number;
 }
 
+export interface FactoryGetNatureTiming {
+  /** Full source personality returned by MON_DATA_PERSONALITY. */
+  personality: number;
+  /** `personality % NUM_NATURES`, narrowed to the source u8 return type. */
+  nature: number;
+  entryPc: number;
+  getMonDataEntryPc: number;
+  divisionEntryPc: number;
+  /** Complete nested GetMonData2 -> GetBoxMonData2 field-zero path. */
+  getMonDataCycles: number;
+  /** GetNature instructions/call refills outside the two nested callees. */
+  wrapperCycles: number;
+  /** Complete personality-dependent `__umodsi3(personality, 25)` path. */
+  moduloCycles: number;
+  /** Complete direct-callee source cost; asynchronous IRQ/service is excluded. */
+  cycles: number;
+}
+
 export interface FactoryConstructionEntryTiming {
   sourceFunction: FactoryConstructionSourceFunction;
   /** Compiled BL in the selected Factory source-function sibling. */
@@ -1191,6 +1209,43 @@ export function reduceFactoryNatureAttemptTiming(
 }
 
 /**
+ * Reduce the complete direct `GetNature` callee used by `CalculateMonStats`.
+ *
+ * This boundary is `0x0806d070..0x0806d088`, not the construction rejection
+ * loop's `GetNatureFromPersonality+2` boundary. The wrapper first executes the
+ * compiled field-zero `GetMonData2 -> GetBoxMonData2` route. That fixed route
+ * is 54 sequential Thumb halfwords, nine refills, one ROM literal read, one
+ * ROM jump-table read, and one 32-bit EWRAM personality read: 180 cycles. The
+ * wrapper itself contributes another 42 cycles around the nested calls.
+ *
+ * The personality-dependent modulo body is shared with the already-accepted
+ * 278-call nature-attempt reducer without changing that reducer's boundary or
+ * result. Its accepted route contains 66 fixed cycles outside `__umodsi3`
+ * (26 in GetNatureFromPersonality and 40 in the accepted caller tail), so only
+ * that explicitly named fixed shell is removed here. No mon/set/case/frame/
+ * tick/cursor/receipt identity or observed duration enters this reduction.
+ */
+export function reduceFactoryGetNatureTiming(personalityValue: number): FactoryGetNatureTiming {
+  const personality = requireU32(personalityValue, "personality");
+  const nature = personality % 25;
+  const acceptedAttempt = reduceFactoryNatureAttemptTiming(personality, nature);
+  const moduloCycles = acceptedAttempt.cycles - 66;
+  const getMonDataCycles = 180;
+  const wrapperCycles = 42;
+  return Object.freeze({
+    personality,
+    nature,
+    entryPc: 0x0806_d070,
+    getMonDataEntryPc: 0x0806_a518,
+    divisionEntryPc: 0x082e_7be0,
+    getMonDataCycles,
+    wrapperCycles,
+    moduloCycles,
+    cycles: getMonDataCycles + wrapperCycles + moduloCycles,
+  });
+}
+
+/**
  * Reduce the final loop-test and return path of a Factory construction source.
  *
  * The boundary begins after the final held-item `SetMonData` and ends when the
@@ -1328,7 +1383,6 @@ type FrontierMonRow = Readonly<{
   evSpread: number;
 }>;
 const NATURE_STAT_FIELDS = ["attack", "defense", "speed", "spAttack", "spDefense"] as const;
-type NatureStatField = (typeof NATURE_STAT_FIELDS)[number];
 type NatureRow = Readonly<{
   index: number;
   name: string;

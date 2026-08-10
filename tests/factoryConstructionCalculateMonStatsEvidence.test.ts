@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   reduceFactoryCalculateMonStatsParentTiming,
+  reduceFactoryGetNatureTiming,
   reduceFactoryModifyStatByNatureTiming,
 } from "../src/engine/factoryConstructionClock.ts";
 
@@ -206,6 +207,89 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
         expect(modifications.map((call) => call.arguments.statIndex)).toEqual([1, 2, 3, 4, 5]);
       }
     }
+  });
+
+  it("source-reduces all 60 direct GetNature spans from the accepted personality", () => {
+    const sourceByCase: Record<string, number> = {};
+    const externalCycles: number[] = [];
+
+    for (const { value } of probes) {
+      let caseCycles = 0;
+      for (const mon of value.mons) {
+        const rows = value.directCalls.filter((call) => (
+          call.monIndex === mon.monIndex && call.operation === "get-nature"
+        ));
+        for (const call of rows) {
+          const timing = reduceFactoryGetNatureTiming(mon.acceptedPersonality);
+          const measured = sourceCycles(
+            call.entryMasterCycles,
+            call.returnMasterCycles,
+            value.interruptPauses,
+          );
+          expect(timing).toMatchObject({
+            personality: mon.acceptedPersonality,
+            nature: mon.acceptedPersonality % 25,
+            entryPc: 0x0806_d070,
+            getMonDataEntryPc: 0x0806_a518,
+            divisionEntryPc: 0x082e_7be0,
+            getMonDataCycles: 180,
+            wrapperCycles: 42,
+          });
+          expect(timing.nature).toBe(call.result);
+          caseCycles += timing.cycles;
+          externalCycles.push(measured - timing.cycles);
+        }
+      }
+      sourceByCase[value.case] = caseCycles;
+    }
+
+    expect(externalCycles).toHaveLength(60);
+    expect(externalCycles.filter((cycles) => cycles === 0)).toHaveLength(57);
+    expect(externalCycles.filter((cycles) => cycles === 18)).toHaveLength(2);
+    expect(externalCycles.filter((cycles) => cycles === 245)).toHaveLength(1);
+    expect(externalCycles.reduce((total, cycles) => total + cycles, 0)).toBe(281);
+    expect(sourceByCase).toEqual({ anchor: 29_875, liliana: 14_830, "factory-varied": 15_195 });
+    expect(Object.values(sourceByCase).reduce((total, cycles) => total + cycles, 0)).toBe(59_900);
+  });
+
+  it("follows GetNature's nested field-zero accessor and %25 division branch variants", () => {
+    expect(reduceFactoryGetNatureTiming(0)).toMatchObject({
+      nature: 0,
+      moduloCycles: 18,
+      cycles: 240,
+    });
+    expect(reduceFactoryGetNatureTiming(24)).toMatchObject({
+      nature: 24,
+      moduloCycles: 18,
+      cycles: 240,
+    });
+    expect(reduceFactoryGetNatureTiming(25)).toMatchObject({
+      nature: 0,
+      moduloCycles: 126,
+      cycles: 348,
+    });
+    expect(reduceFactoryGetNatureTiming(26)).toMatchObject({
+      nature: 1,
+      moduloCycles: 218,
+      cycles: 440,
+    });
+    expect(reduceFactoryGetNatureTiming(49)).toMatchObject({
+      nature: 24,
+      moduloCycles: 290,
+      cycles: 512,
+    });
+    expect(reduceFactoryGetNatureTiming(50)).toMatchObject({
+      nature: 0,
+      moduloCycles: 157,
+      cycles: 379,
+    });
+    expect(reduceFactoryGetNatureTiming(0xffff_ffff)).toMatchObject({
+      nature: 20,
+      moduloCycles: 779,
+      cycles: 1_001,
+    });
+    expect(() => reduceFactoryGetNatureTiming(-1)).toThrow("personality must be a source u32");
+    expect(() => reduceFactoryGetNatureTiming(0x1_0000_0000)).toThrow("personality must be a source u32");
   });
 
   it("source-reduces every direct ModifyStatByNature span from its ABI inputs", () => {
