@@ -724,7 +724,7 @@
     "the pure source-relative reducer ports HANDS_AND_FEET and CROSS_IMPACT load/free, target monbg and 12:8 alpha, both gCrossChopHandSpriteTemplate two-stage linear translations, the 40-frame delay, target-panned MEGA_KICK and RAZOR_WIND, complex white/black palette blend, the 20-frame gCrossImpactSpriteTemplate, target AnimTask_ShakeMon(7,0,9,1), clear-monbg tasks, and first inactive cleanup",
     "the typed Scene-ON seam exposes only resolved target presentation geometry; source-extracted MACHOKE front/back, HANDS_AND_FEET, and CROSS_IMPACT plus shared ONIX/chrome feed the production compositor with source OAM/palette display lag, task/sprite order, tagged palettes, registers, both audio players, and no absolute ticks, battle clocks, move/input/battle numbers, coordinate/RGB fitting, pixel exceptions, canonical recordings, or battle calculation",
     "crossChopPortable.ts runs the committed probe through tools/run-mgba-probe.py and proves every reducer/component state, typed seam, task/sprite callback, software/hardware OAM, matrices, tagged palettes, registers, both audio players and pans, raw RGB, and application framebuffer frame twice fresh in both orientations",
-    "MOVE_LEAF_BLADE remains unsupported: sharing CROSS_IMPACT does not accept its distinct LEAF asset, create_leaf_blade_task body, ShakeMon2 task, timing, and audio without independent complete dense move evidence",
+    "MOVE_LEAF_BLADE is independently exact from its own complete 224-frame bilateral source/component/hardware/state/raw-RGB/production-framebuffer proof; CROSS_IMPACT remains separately controlled by this Cross Chop acceptance",
     "no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
    ],
    "evidence": [
@@ -742,6 +742,35 @@
     "src/engine/battleScene.ts",
     "tests/animation/crossChopEvidence.test.ts",
     "tests/animation/crossChop.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_LEAF_BLADE",
+   "status": "exact",
+   "covered": [
+    "fresh complete legal Level-50 Factory set-453 SCEPTILE versus ONIX Scene-ON parties pass the complete 224-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 76-299 evidence/raw/change-map 5dcb5555738c51baf01032b7be3e67fa2f65c43ee133d7a440ae3f921c741369 / 6ba2d80fc47d05832114a857ab1bacbed1e69352d577adadfbcd26d49e74f4ad / ec5984b0761e0c724bbbf6d2c10ba069035ac495db876e4a2ef249dfd3313cbd; opponent-front frames 80-303 c2a599b0d4adaf7f807100908cf4d2a79210ccf38c00acc2aa88181db43578b5 / b85563f61d8681263728ac4becdf524b329854db31ca3a122257590e00285bed / 8a776614bf459d95e0b6de17f4253813f7400ef2583ae80a91acca34e69e333b",
+    "the pure source-relative reducer ports all seven horizontal arc states (0/2/4/6/8/10/12), 77 blinking trail lifecycles plus the primary blade, source fixed-point geometry, OAM allocation/reuse and stable priority/Y ordering, three short and one monbg ShakeMon2 schedule, side-relative CUT/LEER audio, LEAF/CROSS_IMPACT tags, 12:8 target monbg blend, and cleanup",
+    "the typed Scene-ON seam and narrow legal SCEPTILE/ONIX compositor use source-extracted Sceptile, LEAF, and CROSS_IMPACT assets with field/healthbox/text chrome; display behavior derives from source OAM sorting and measured creation, animation/blink, destruction, battler-sprite, monbg-scroll, palette, and impact latches without frame/RGB lookup, absolute battle ticks, or gameplay/controller state",
+    "leafBladePortable.ts regenerates both normalized source-window change maps and proves 224/224 reducer/seam/task/sprite, live battler, software/hardware OAM and matrix, faded/unfaded/hardware palette and tags, registers/audio, immutable gameplay state, raw RGB, and production framebuffer frames twice fresh in each orientation",
+    "the exact MOVE_CROSS_CHOP shared CROSS_IMPACT control independently remains twice-fresh bilateral 88/88 component and 88/88 production-framebuffer exact with immutable evidence/raw receipts 7be7a5bb02c477873c77bec6162f0c9dc0f92e3f1ec3ec8572037c4a44888bc7 / 9d38ec1582d17fea8c5103c90f904fbf983793b0e3aa26e2cf1df2cec5cd3d04 and a556199025d17c28ddc9429216daff80afad1f29d92f15324dd563092010d23f / 528e9ed15d9e9926f92e5e6e4ce8bbc0d157f34c8e6a05372561d004b76f900f",
+    "no damage, RNG, turn order, controller, round/facility state, animation boundary, unsupported barrier, canonical recording import, or sibling acceptance changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-leaf-blade-player-sceptile-opponent-onix.json",
+    "tools/battle-lab/mechanic-leaf-blade-opponent-sceptile-player-onix.json",
+    "tools/compare/fixtures/leaf-blade-player-sceptile-opponent-onix.json",
+    "tools/compare/fixtures/leaf-blade-opponent-sceptile-player-onix.json",
+    "tools/compare/leafBladeProbe.py",
+    "tools/compare/leafBladePortable.ts",
+    "tools/compare/leafBladeSourceAudit.ts",
+    "tools/compare/evidence/leaf-blade-changemap-player.txt",
+    "tools/compare/evidence/leaf-blade-changemap-opponent.txt",
+    "src/animation/assets/leaf-blade.json",
+    "src/animation/leafBlade.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/leafBlade.test.ts",
+    "tests/animation/leafBladeEvidence.test.ts"
    ]
   },
   {
@@ -4458,7 +4487,7 @@
     "MOVE_CROSS_CHOP",
     "MOVE_LEAF_BLADE"
    ],
-   "goal": "MOVE_CROSS_CHOP independently proves its complete 88-frame source body through first inactive cleanup at 88/88 reducer/component, typed-seam, software/hardware OAM, matrices, palettes, registers, both audio players and pans, raw-RGB, and shared-framebuffer frames 216-303 player-back and 217-304 opponent-front, twice fresh. MOVE_LEAF_BLADE now has independent dense Scene-ON ROM evidence only: legal set-453 Sceptile bodies are 224/224 frames 76-299 player-back and 80-303 opponent-front, twice fresh, byte-pinning LEAF/CROSS_IMPACT assets, 45 LeafBlade and one cross-impact lifecycle, task/template/callback state, software/hardware OAM, matrices, palettes/tags/buffers, registers, both audio players/pans, raw RGB, and first inactive cleanup. It remains unsupported pending an independent source-relative reducer and typed presentation seam; sharing CROSS_IMPACT never promotes it."
+   "goal": "Track closed. MOVE_CROSS_CHOP independently proves its complete 88-frame bilateral body twice fresh. MOVE_LEAF_BLADE independently proves its distinct complete 224-frame bilateral seven-arc Leaf task, ShakeMon2/monbg, LEAF/CROSS_IMPACT, audio, immutable-state, hardware, raw-RGB, normalized-map, and production-framebuffer body twice fresh; the shared impact asset does not substitute for either move's acceptance."
   },
   {
    "id": "brown-orb-mud-shot",
@@ -4582,7 +4611,7 @@
     "MOVE_MAGICAL_LEAF",
     "MOVE_LEAF_BLADE"
    ],
-   "goal": "MOVE_RAZOR_LEAF is exact: its complete 139-frame source-component, typed-seam, hardware-transfer, and raw-RGB framebuffer body matches in both orientations twice fresh, including reproducible WEEPINBELL/leaf/cutter assets, ten leaf particles, both target_both TRUE singles cutters, target plus aborted absent-partner ShakeMon2 requests, sounds, source OAM ordering, alpha/register lifetime, field chrome, and teardown. MOVE_MAGICAL_LEAF independently proves its complete 182-frame bilateral ROSELIA/ONIX body, including its own palette cycle, duration-32 cutters, paired hitsplats, per-move ShakeMon2, OAM ordering, source/hardware display latches, and raw-RGB framebuffer receipts twice fresh. SECRET POWER, LEAF BLADE, and TWISTER remain unsupported pending independent complete dense evidence."
+   "goal": "MOVE_RAZOR_LEAF is exact: its complete 139-frame source-component, typed-seam, hardware-transfer, and raw-RGB framebuffer body matches in both orientations twice fresh, including reproducible WEEPINBELL/leaf/cutter assets, ten leaf particles, both target_both TRUE singles cutters, target plus aborted absent-partner ShakeMon2 requests, sounds, source OAM ordering, alpha/register lifetime, field chrome, and teardown. MOVE_MAGICAL_LEAF independently proves its complete 182-frame bilateral ROSELIA/ONIX body, including its own palette cycle, duration-32 cutters, paired hitsplats, per-move ShakeMon2, OAM ordering, source/hardware display latches, and raw-RGB framebuffer receipts twice fresh. MOVE_LEAF_BLADE independently proves its distinct seven-arc LEAF task and CROSS_IMPACT body at 224/224 bilateral frames twice fresh. SECRET POWER and TWISTER remain unsupported pending independent complete dense evidence."
   },
   {
    "id": "explosion-sprite-self-destruct",

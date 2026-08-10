@@ -60,6 +60,10 @@ cites the move whose ledger entry holds the full evidence.
 | Send-out intro (back) | TWO displays behind the dense index | rung-3 BACK dispatcher (2026-08-04) |
 | Outgoing animation's OAM teardown (incl. enemy shadow) | lands ONE display behind the script-pointer boundary; software OAM is one frame AHEAD of hardware there | DETECT (2026-08-07, "fifth finding") — if a window's first frame catches it, re-pin the window start |
 | `loadspritegfx` VRAM transfer | latches at the window's first frame | DETECT frame-68 |
+| `AnimTask_LeafBlade` primary + child sprites | task-owned position/creation RAM+2; animation cell/hFlip/blink and ordinary trail destruction RAM+1; the task-owned primary terminal destruction retains its RAM+2 display | LEAF_BLADE, all seven arcs in both 224-frame orientations (2026-08-10); source `SortSprites` stable priority/descending-Y order is carried across reused slots |
+| Leaf Blade short `AnimTask_ShakeMon2(target,2,0,8,1)` bursts | creation display is the positive amplitude at RAM+1, then the ordinary body is RAM+2 | LEAF_BLADE, all three short bursts in both orientations (2026-08-10); do not generalize beyond this invocation |
+| Leaf Blade monbg `AnimTask_ShakeMon2(target,8,0,18,1)` | BG-scroll target motion RAM+1, including terminal return | LEAF_BLADE impact phase, both orientations (2026-08-10); distinct from live-OBJ ShakeMon2 schedules |
+| script `create_cross_impact_sprite` during target monbg | sprite and terminal destroy-callback display RAM+1 | LEAF_BLADE independently, both orientations (2026-08-10); CROSS_CHOP remains the independent shared-asset control |
 
 **Not determined:** other `AnimTask_ShakeMonInPlace` schedules remain open —
 DOUBLE_EDGE's best fit is RAM+1 on its player-back map but is contradicted by

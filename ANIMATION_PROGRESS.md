@@ -1,3 +1,11 @@
+# MOVE_LEAF_BLADE exact — bilateral 224/224 seven-arc promotion (2026-08-10 worker)
+
+- **State:** Coverage advances **158→159/276 exact**, 0 partial, 0 staged, **118→117 unsupported**. `MOVE_LEAF_BLADE` alone moves; no animation-boundary or unsupported-barrier change.
+- **Did:** Reconciled the apparent oracle drift to the additive empty `preCheckpointCaptures` transport field while preserving the original semantic receipt audit, then completed the pure seven-arc `AnimTask_LeafBlade` reducer, typed Scene-ON seam, hardened v2 probe/portable, normalized change maps, and narrow legal set-453 SCEPTILE/ONIX production compositor. The port covers all 77 trail spawns, primary blade, source stable priority/Y OAM ordering and slot reuse, three short plus one monbg ShakeMon2 schedules, LEAF/CROSS_IMPACT, 12:8 blend, audio, target monbg, and cleanup without capture/frame/RGB lookup or gameplay/controller changes.
+- **Verified:** Twice fresh per orientation, player-back **76..299** and opponent-front **80..303** each pass **224/224 reducer/component/seam, live battlers, software+hardware OAM/matrices, palettes/tags/registers/audio/immutable-state/raw-RGB/normalized-map, and production framebuffer**. Evidence/raw/map are player `5dcb5555…` / `6ba2d80f…` / `ec5984b0…`; opponent `c2a599b0…` / `b85563f6…` / `8a776614…`. Independent `MOVE_CROSS_CHOP` remains twice-fresh bilateral **88/88 component + framebuffer** exact with its committed receipts. Focused tests, smoke, typecheck, build, coverage, and diff check pass; final full-suite/build verification follows this ledger commit.
+- **Next:** Supervisor selects the next independent animation acceptance unit. Do not generalize Leaf Blade's split child/OAM, short-shake, monbg-scroll, or stable-sort latches without move-owned evidence.
+- **Notes:** Source confirms **seven** arcs at cases 0/2/4/6/8/10/12. No damage, RNG, turn order, controller, facility state, canonical production recording, boundary widening, unsupported barrier, or sibling promotion changed.
+
 # MOVE_LEAF_BLADE receipt-drift diagnosis — transport schema only (2026-08-10 worker)
 
 - **State:** Coverage remains **158/276 exact**, 0 partial, 0 staged, **118 unsupported**. The Leaf Blade compositor/framebuffer proof is still open; no move, boundary, barrier, or gameplay state changed.

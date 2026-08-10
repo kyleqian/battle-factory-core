@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { leafBladeAtAge } from "../../src/animation/leafBlade.ts";
+import {
+  leafBladeAtAge,
+  leafBladeDisplayedOamOrderAtAge,
+  leafBladeDisplayedTargetX2AtAge,
+} from "../../src/animation/leafBlade.ts";
 import {
   createSceneOnMovePresentation,
   sceneOnLeafBladeView,
@@ -94,6 +98,15 @@ describe("MOVE_LEAF_BLADE source-relative reducer", () => {
       assetsLoaded: { leaf: false, crossImpact: false },
       visualTaskCount: 0,
     });
+  });
+
+  it("ports Leaf Blade's measured split display latches and stable OAM sort", () => {
+    expect([11, 12, 13, 161, 162, 163, 164, 195, 196].map((age) =>
+      leafBladeDisplayedTargetX2AtAge(age, "opponent")
+    )).toEqual([1, 2, -2, 0, -8, -8, 8, -8, 0]);
+    const order = leafBladeDisplayedOamOrderAtAge(44, "player", "opponent", TARGET);
+    expect(order.indexOf(3)).toBeLessThan(order.indexOf(16));
+    expect(order.slice(0, 2)).toEqual([5, 7]);
   });
 
   it("keeps side geometry and target-panned audio inside the typed seam", () => {
