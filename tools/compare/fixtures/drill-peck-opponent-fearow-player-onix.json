@@ -1,0 +1,18 @@
+{
+  "schema": "drill-peck-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "DRILL_PECK",
+  "moveId": 65,
+  "orientation": "opponent-front",
+  "scenario": "tools/battle-lab/mechanic-drill-peck-opponent-fearow-player-onix.json",
+  "probe": "tools/compare/drillPeckProbe.py",
+  "sourceWindow": {"startFrame": 78, "endFrame": 168, "frameCount": 91},
+  "sourceBounds": {"start": "0x082cafc8", "endExclusive": "0x082cb020"},
+  "probeJsonSha256": "48356792c71cac7f1e4ed9d07e0b3600d5a60f0b443f349385e7279b11ea7588",
+  "rawRgbSha256": "ab2adf5fa78bdef4d5a5d7b753fae916f90ea5ef4120c2263c8cb103d723bdb4",
+  "changeMap": "tools/compare/evidence/drill-peck-changemap-opponent.txt",
+  "changeMapSha256": "ada68549dd235039d2e75b021c86b11b7621a6b0cd766a9220e3076faf0f406f",
+  "attacker": {"species": "FEAROW", "side": "opponent", "art": "front"},
+  "target": {"species": "ONIX", "side": "player", "art": "back"},
+  "acceptance": {"status": "evidence-only", "completeDenseWindow": 91, "reducer": 0, "typedSeam": 0, "framebuffer": 0}
+}
