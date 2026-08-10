@@ -3057,7 +3057,7 @@
     "the pure relative reducer ports ANIM_TAG_FLYING_DIRT and sandstorm BG load/free state, priority-1 BG1 tile/palette transfer, -6/-1 wrapped scroll, 0-to-7 alpha ramp, 101-count hold, fade and reset, plus all seven staggered gFlyingSandCrescentSpriteTemplate fixed-point translations and cleanup",
     "the typed Scene-ON seam carries only resolved PHANPY/ONIX geometry and field state; source-extracted Phanpy front/back, FLYING_DIRT, sandstorm background art and shared ONIX/chrome pass software task/sprite state, OAM/matrices, palettes/tags, registers, both audio players, raw RGB, and every production framebuffer",
     "sandstormPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 168 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations through first inactive cleanup",
-    "MOVE_HEAT_WAVE remains unsupported: source audit proves it has distinct red BlendParticle and BlendBackground calls, mirrored sandstorm background, pan sweep, AnimTask_MoveHeatWaveTargets, and its own seven crescent calls; it lacks independent complete legal both-orientation twice-fresh dense acceptance",
+    "MOVE_HEAT_WAVE remains unsupported: its independent legal set-526 NINETALES checkpoint now banks twice-fresh bilateral 168-frame pointer-bounded source/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/change-map evidence through first inactive cleanup, but it has no reducer, typed seam, production compositor, or framebuffer acceptance",
     "no damage, weather outcome, RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
    ],
    "evidence": [
@@ -4450,7 +4450,7 @@
     "MOVE_SANDSTORM",
     "MOVE_HEAT_WAVE"
    ],
-   "goal": "MOVE_SANDSTORM independently proves its complete 168-frame background-load/scroll/alpha and seven-crescent body through first inactive cleanup at 168/168 reducer/component, typed-seam, software/hardware state, registers/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh using legal challenge-0 set-120 PHANPY parties. MOVE_HEAT_WAVE remains unsupported because its red BlendParticle/BlendBackground, mirrored background, pan sweep, AnimTask_MoveHeatWaveTargets, and independent seven-crescent schedule lack their own complete legal both-orientation twice-fresh dense acceptance."
+   "goal": "MOVE_SANDSTORM independently proves its complete 168-frame background-load/scroll/alpha and seven-crescent body through first inactive cleanup at 168/168 reducer/component, typed-seam, software/hardware state, registers/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh using legal challenge-0 set-120 PHANPY parties. MOVE_HEAT_WAVE independently banks complete legal set-526 NINETALES bilateral 168-frame source/task/sprite/hardware/audio/state/raw-RGB/change-map evidence twice fresh, but remains unsupported until its distinct red BlendParticle/BlendBackground, mirrored background, pan sweep, target-motion, and seven-crescent schedule have a reducer, typed seam, production compositor, and bilateral framebuffer acceptance."
   },
   {
    "id": "green-spike-needle-arm",
