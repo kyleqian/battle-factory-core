@@ -94,6 +94,11 @@ import {
   type CrossChopState,
 } from "./crossChop.ts";
 import {
+  leafBladeAtAge,
+  type LeafBladeState,
+  type LeafBladeTargetGeometry,
+} from "./leafBlade.ts";
+import {
   focusEnergyAtAge,
   type FocusEnergyState,
 } from "./focusEnergy.ts";
@@ -765,6 +770,7 @@ export interface SceneOnPresentationBattler {
     | "MAGBY"
     | "MAREEP"
     | "GROVYLE"
+    | "SCEPTILE"
     | "PIDGEOTTO"
     | "MURKROW"
     | "SPOINK"
@@ -1759,6 +1765,15 @@ export interface SceneOnCrossChopConfig {
   readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnLeafBladeConfig {
+  readonly move: "LEAF_BLADE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source-resolved target geometry consumed by AnimTask_LeafBlade. */
+  readonly targetProfile: Readonly<LeafBladeTargetGeometry>;
+}
+
 export interface SceneOnFocusEnergyConfig {
   readonly move: "FOCUS_ENERGY";
   readonly attacker: SceneOnPresentationBattler;
@@ -2533,6 +2548,7 @@ export type SceneOnMoveConfig =
   | SceneOnWhirlpoolConfig
   | SceneOnBubbleBeamConfig
   | SceneOnCrossChopConfig
+  | SceneOnLeafBladeConfig
   | SceneOnFocusEnergyConfig
   | SceneOnEndureConfig
   | SceneOnReversalConfig
@@ -2635,6 +2651,8 @@ export type SceneOnRazorLeafPresentationState =
   SceneOnMovePresentationState<SceneOnRazorLeafConfig>;
 export type SceneOnMagicalLeafPresentationState =
   SceneOnMovePresentationState<SceneOnMagicalLeafConfig>;
+export type SceneOnLeafBladePresentationState =
+  SceneOnMovePresentationState<SceneOnLeafBladeConfig>;
 export type SceneOnTauntPresentationState =
   SceneOnMovePresentationState<SceneOnTauntConfig>;
 export type SceneOnScaryFacePresentationState =
@@ -2968,6 +2986,12 @@ export interface SceneOnBubbleBeamView extends BubbleBeamState {
 }
 
 export interface SceneOnCrossChopView extends CrossChopState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnLeafBladeView extends LeafBladeState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -5518,6 +5542,28 @@ export function sceneOnCrossChopView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.targetPictureOffset,
+    ),
+  };
+}
+
+/** `age=0` is Move_LEAF_BLADE's first LEAF load display. */
+export function sceneOnLeafBladeView(
+  state: SceneOnMovePresentationState<SceneOnLeafBladeConfig>,
+): SceneOnLeafBladeView {
+  if (state.config.move !== "LEAF_BLADE") {
+    throw new Error(
+      `expected LEAF_BLADE presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...leafBladeAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.side,
+      state.config.targetProfile,
     ),
   };
 }
