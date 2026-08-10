@@ -25,7 +25,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** fresh mGBA probe: oracle first anim-end ambient/callback stream
   `A77397C1→33DA400A`, rolls F/S/F, `data[0]=[0,32,0]`; app unresolved stream
   `8FF192D9`, rolls F/S/S. Honest extension **277/285**, eight ball-2-only
-  frames; canonical endpoint remains **10177** per fallback.
+  frames; canonical endpoint remains **10177** per fallback. Supervisor caught
+  the worker's stale build claim and added the missing `ballAnims` carry on
+  nine task handoffs; typecheck/build and focused **60/60** then passed live.
 
 ## 1077 — [supervisor, 2026-08-10 ~10:00] **#55 v2 cycle evidence banked; fitted construction callback refuted**
 

@@ -504,6 +504,7 @@ function advanceFactorySwapPresentationClocks(
       returnedFromSummary = true;
       return {
         controller,
+        ballAnims: state.ballAnims,
         elapsed,
         phaseElapsed: 0,
         selectedBallClock: null,
@@ -546,6 +547,7 @@ function advanceFactorySwapPresentationClocks(
     });
     return {
       controller,
+      ballAnims: state.ballAnims,
       elapsed,
       phaseElapsed: 2,
       selectedBallClock,
@@ -578,6 +580,7 @@ function advanceFactorySwapPresentationClocks(
     });
     return {
       controller,
+      ballAnims: state.ballAnims,
       elapsed,
       // Unlike the enemy-screen switch, this handoff has already restored
       // the cursor/species windows in transition state 7/8. Render it as the
@@ -606,6 +609,7 @@ function advanceFactorySwapPresentationClocks(
     returnedFromDuplicate = true;
     return {
       controller,
+      ballAnims: state.ballAnims,
       elapsed,
       phaseElapsed: 0,
       selectedBallClock,
@@ -652,6 +656,7 @@ function advanceFactorySwapPresentationClocks(
     });
     return {
       controller,
+      ballAnims: state.ballAnims,
       elapsed,
       phaseElapsed: 0,
       selectedBallClock,
@@ -702,6 +707,7 @@ function advanceFactorySwapPresentationClocks(
     };
     return {
       controller,
+      ballAnims: state.ballAnims,
       elapsed,
       phaseElapsed: 0,
       selectedBallClock,
@@ -727,6 +733,7 @@ function advanceFactorySwapPresentationClocks(
     };
     return {
       controller,
+      ballAnims: state.ballAnims,
       elapsed,
       phaseElapsed: 0,
       selectedBallClock,
@@ -748,6 +755,7 @@ function advanceFactorySwapPresentationClocks(
   }
   const advanced = {
     controller,
+    ballAnims: state.ballAnims,
     elapsed,
     phaseElapsed,
     selectedBallClock,
