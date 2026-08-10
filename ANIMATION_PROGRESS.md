@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_ROLE_PLAY source + bilateral legal-staging checkpoint — remains unsupported (2026-08-10 worker)
+
+- **State:** Coverage remains **151/276 exact**, 0 partial, 0 staged, **125 unsupported**. Role Play has no reducer, typed seam, compositor, dense hardware/raw-RGB evidence, or promotion.
+- **Did:** Pinned the exact even ROM interval `0x082d4fae..0x082d500a` (0x5c bytes), all 13 commands, the five-component generated graph, shared exact MEGA_PUNCH intersection, `AnimTask_RolePlaySilhouette` and additional-mon source lifecycles, success-route boundary, and sole/lowest Level-50 carrier set 169 KADABRA. Added complete legal bilateral set-169 KADABRA/set-156 ONIX Scene-ON parties; only active KADABRA is constrained to ROLE_PLAY and both benches plus ONIX's legal moves remain intact.
+- **Verified:** Both orientations run twice fresh with byte-stable endpoint hashes. KADABRA starts Synchronize (28) and finishes Rock Head (69), proving legal successful staging without giving presentation ownership of ability-copy semantics. The receipt pins source-derived target personality/OT identity, back/front art choice, and ±20 offset hypotheses but explicitly records that endpoint staging is not dense acceptance. Focused source/staging + animation-boundary tests pass.
+- **Next:** Build a pointer-bounded dense probe from first in-bounds script frame through first inactive cleanup; capture script/tasks, additional-mon software/hardware OAM/matrix/palette/resource lifetime, monbg, both palette tasks, registers/audio, immutable state, raw RGB, and change maps twice fresh per orientation. Then implement the pure reducer, typed seam, and compositor; rerun MEGA_PUNCH and, if an affine/additional-mon helper changes, MINIMIZE or BATON_PASS. Promote only after complete bilateral equality.
+- **Notes:** `ANIMATION_LATCHES.md` is unchanged: endpoint staging cannot establish the additional-mon sprite's display latch. No engine, boundary, gameplay/controller/facility state, canonical recording, unsupported barrier, REFRESH, sibling coverage, or absolute-tick branch changed.
+
 ## MOVE_PROTECT exact — bilateral 123/123 sliding OBJ-blend shield promotion (2026-08-10 worker)
 
 - **State:** Coverage advances **150→151/276 exact**, 0 partial, 0 staged, **126→125 unsupported**. Protect alone moves; boundary, unsupported-barrier, and latch pins are unchanged.
