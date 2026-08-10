@@ -183,4 +183,37 @@ describe("Factory construction source-operation clock", () => {
     }
     expect(GBA_VBLANK_CYCLES).toBe(280_896);
   });
+
+  it("is idempotent for repeated source inputs and a pure operation-cost callback", () => {
+    const entry = receipt.cases.find((candidate) => candidate.case === "liliana")!;
+    const mons = entry.sourceSetIds.map((setId) => (
+      factoryMonConstructionInputFromSet(setId, entry.sourceFunction)
+    ));
+    const cycleCost = (operation: FactoryConstructionOperation): number => {
+      if (operation.kind === "personality-random") return operation.half === "low" ? 3 : 2;
+      if (operation.kind === "personality-attempt") return (operation.attempt ?? 0) + 1;
+      if (operation.kind === "ev-spread") return operation.input!.evStatCount;
+      if (operation.kind === "calculate-mon-stats") return operation.input!.speciesId % 17;
+      if (operation.kind === "create-mon") return operation.input!.speciesId % 13;
+      if (operation.kind === "factory-post-mon") return operation.input!.evSpread;
+      return 5;
+    };
+    const clock = {
+      start: { frame: 7, cycle: 11, rngValue: entry.epoch.startCursor },
+      frameCycles: 97,
+      cycleCost,
+      ambientRandom: vblankRandom,
+    } as const;
+    const first = scheduleFactoryConstruction({
+      sourceFunction: entry.sourceFunction,
+      mons,
+      clock,
+    });
+    const second = scheduleFactoryConstruction({
+      sourceFunction: entry.sourceFunction,
+      mons,
+      clock,
+    });
+    expect(second).toEqual(first);
+  });
 });
