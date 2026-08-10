@@ -7,7 +7,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1094 — [MAIN worker, 2026-08-10] **#55 direct `GetMonData2` party reads reduced**
 
-- **State:** implementation `9a90f094` plus evidence/docs `3b95eb30`; focused
+- **State:** implementation `9a90f094`, shell correction `bf107b02`, and
+  evidence/docs `3b95eb30`; focused
   stats **16/16**, smoke **375/375**, typecheck, full `npm test` **881 files /
   8,435 passed / 1 skipped**, and production build are green. #55 remains open
   and the construction clock remains unwired.
@@ -19,7 +20,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `GetBoxMonData2` body or level/growth component; do not wire the aggregate
   stats operation or construction clock.
 - **Notes:** encrypted/default and Deoxys routes retain only exact compiled
-  entry/return shells with `cycles: null`; all three fresh Scene-OFF packets
+  entry/return shells with `cycles: null`; the correction includes the opening
+  `push` represented by mGBA's pipelined entry PC. All three Scene-OFF packets
   match committed hashes. Completed direct-call coverage is **312/480** and
   **100,214/1,768,691 = 5.666%** of source callee cycles. No duration/identity
   fit, fixture mutation, canonical Battle-2, animation, or barrier change.
