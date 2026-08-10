@@ -887,3 +887,17 @@ route should fail with an actionable ambiguity error when both routes exist.
   known bounded `--seed`/`--seeds` invocation.
 - **Real fix:** recognize `-h`/`--help`, print the existing option contract,
   and exit before constructing the default seed range.
+
+## `run-subagent.sh` raw-log filename collides on same-second parallel launches
+
+- **What:** the JSONL log path is timestamped to the second
+  (`emerald-factory-subagent-YYYYMMDD-HHMMSS.jsonl`). Two lanes launched in
+  the same shell command share one file and interleave both event streams
+  (distinguishable only by `session_id`), which slows post-hoc review and
+  salvage forensics.
+- **Hits:** 1 (2026-08-09 night, round-1 main+side pair).
+- **Cost each:** ~3 min of review friction.
+- **Workaround:** stagger parallel launches by 1-2 s, or pass distinct
+  `--log` paths explicitly.
+- **Real fix:** include the lane name and/or `$$` in the default log
+  filename.
