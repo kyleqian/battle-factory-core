@@ -122,7 +122,7 @@ describe("MOVE_SUBMISSION source reducer", () => {
     });
     expect(submissionAtAge(102, target)).toMatchObject({
       alpha: null,
-      monbgTaskActive: false,
+      monbgTaskActive: true,
       clearMonbgTaskActive: true,
     });
     expect(submissionAtAge(122, target).active).toBe(true);
@@ -178,13 +178,25 @@ describe("MOVE_SUBMISSION source reducer", () => {
           ...playerToOpponent.config.target.geometry,
           side: "player",
           spriteCorner: { x: 40, y: 62 },
-          animationCenter: { x: 72, y: 88 },
+          // `GetBattlerSpriteCoord` for Lickitung's back art is (72,102),
+          // while its rendered 64px sheet remains cornered at y=62.
+          animationCenter: { x: 72, y: 102 },
         },
       },
     });
     expect(sceneOnSubmissionView({ ...playerToOpponent, age: 7 }))
       .toMatchObject({ attackerOffset: { x2: -7, y2: 1 }, targetOffset: { x2: 6, y2: 1 } });
     expect(sceneOnSubmissionView({ ...opponentToPlayer, age: 7 }))
-      .toMatchObject({ attackerOffset: { x2: -7, y2: 1 }, targetOffset: { x2: 6, y2: 1 } });
+      .toMatchObject({
+        attackerOffset: { x2: -7, y2: 1 },
+        targetOffset: { x2: 6, y2: 1 },
+        impacts: [{ x: 72, y: 90, animation: 1 }],
+      });
+    expect(sceneOnSubmissionView({ ...opponentToPlayer, age: 17 }))
+      .toMatchObject({
+        // The hit-splat X argument mirrors with attacker side, while the
+        // literal ellipse widths above intentionally do not.
+        impacts: [{ x: 84, y: 110, animation: 1, slot: 4 }],
+      });
   });
 });

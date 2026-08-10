@@ -3449,6 +3449,31 @@
    ]
   },
   {
+   "move": "MOVE_SUBMISSION",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Factory parties stage the lowest carrier set 262 FRONTIER_MON_POLIWRATH_1 against legal LICKITUNG, with only the active Poliwrath's four choices constrained to Submission; both player-back and opponent-front orientations cover the full pointer-bounded Move_SUBMISSION body through first inactive cleanup",
+    "twice-fresh Scene-ON receipts pass 124/124 source/component, typed-seam, software+hardware OAM/matrix/palette/register/audio, immutable-state, raw-RGB, and production-framebuffer frames in each orientation: player-back 79-202 evidence/raw/map 73674bbff335dd01359513d6e5310868617c3816e1579c523fd833d08789321c / de3d3e170072be195632309a6580a88f8288d4f5c1d696c3332690e5a5fba863 / 1bc873cefbe48638764ac754cc7f4c90bbc4e32d63018e47ebc5df85df6d13a9; opponent-front 83-206 a68719438312b2e709ecafec96784c97cdc1f533f8121b0473c85460864bb111 / a19a8919aff7f4da836d8112eab3e11abf927ae3a0658668eb9550045a870865 / 88013df24d0421f7b10e5851dde46d3a2814e9330844f78037089b7c6d76d79b",
+    "the pure source-relative reducer and narrow Scene-ON seam port ANIM_TAG_IMPACT, all nine SubmissionHit animation-1 affine splats and source slot reuse, target monbg, 12:8 alpha, both literal-width AnimTask_TranslateMonElliptical loops, clear/blend teardown, and first inactive cleanup; hit-splat X mirrors by attacker side while the two ellipse widths deliberately remain -18/+18 in both orientations",
+    "Submission's own maps establish non-inherited display timing: script-created affine IMPACT and the second target ellipse display RAM+1, while the first attacker ellipse displays RAM+2; Task_UpdateMonBg remains concurrently live with Task_ClearMonBg through clear age 104. The opponent LICKITUNG back effect anchor is its source GetBattlerSpriteCoord (72,102), distinct from the rendered sheet center",
+    "submissionEvidence.ts validates the complete receipts twice fresh and MOVE_STEEL_WING's independent bilateral 197/197 exact portable remains green twice fresh after the shared presentation additions; no sibling move is promoted"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-submission-player-poliwrath-opponent-lickitung.json",
+    "tools/battle-lab/mechanic-submission-opponent-poliwrath-player-lickitung.json",
+    "tools/compare/fixtures/submission-player-poliwrath-opponent-lickitung.json",
+    "tools/compare/fixtures/submission-opponent-poliwrath-player-lickitung.json",
+    "tools/compare/evidence/submission-changemap-player.txt",
+    "tools/compare/evidence/submission-changemap-opponent.txt",
+    "tools/compare/submissionProbe.py",
+    "tools/compare/submissionEvidence.ts",
+    "src/animation/submission.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/submission.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SUBSTITUTE",
    "status": "exact",
    "covered": [

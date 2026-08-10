@@ -911,6 +911,7 @@ import {
   sceneOnViceGripView,
   sceneOnBiteView,
   sceneOnHeadbuttView,
+  sceneOnSubmissionView,
   sceneOnDrillPeckView,
   sceneOnWhirlwindView,
   sceneOnBlockView,
@@ -1046,6 +1047,7 @@ import {
   type SceneOnMirrorCoatPresentationState,
   type SceneOnBiteConfig,
   type SceneOnHeadbuttConfig,
+  type SceneOnSubmissionConfig,
   type SceneOnDrillPeckConfig,
   type SceneOnWhirlwindConfig,
   type SceneOnBlockConfig,
@@ -1402,6 +1404,8 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const poliwrathFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).POLIWRATH!;
+const lickitungFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LICKITUNG!;
 const aipomFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).AIPOM!;
 const crawdauntFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CRAWDAUNT!;
 const hitmontopFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HITMONTOP!;
@@ -2574,6 +2578,8 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const poliwrathBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).POLIWRATH!;
+const lickitungBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LICKITUNG!;
 const hitmontopBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HITMONTOP!;
 const swabluBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SWABLU!;
 const ponytaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PONYTA!;
@@ -18632,6 +18638,131 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LICKITUNG used" : "Foe LICKITUNG used",
       "BODY SLAM!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SUBMISSION") {
+    const submissionState =
+      state as SceneOnMovePresentationState<SceneOnSubmissionConfig>;
+    const view = sceneOnSubmissionView(submissionState);
+    // Submission's script-created affine IMPACT and second (target) task
+    // reach scanout one display after RAM. The first (attacker) task is
+    // created before the second in the same script pass and reaches scanout
+    // two displays after its first RAM write. These are Submission's own
+    // bilateral latches, not a Steel Wing inheritance.
+    const displayedImpact = sceneOnSubmissionView({
+      ...submissionState,
+      age: submissionState.age - 1,
+    });
+    const displayedTargetTranslation = sceneOnSubmissionView({
+      ...submissionState,
+      age: submissionState.age - 1,
+    });
+    const displayedAttackerTranslation = sceneOnSubmissionView({
+      ...submissionState,
+      age: submissionState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "POLIWRATH"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "LICKITUNG"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "POLIWRATH"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "LICKITUNG"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SUBMISSION pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const poliwrath = playerToOpponent ? poliwrathBackSprite : poliwrathFrontSprite;
+    const lickitung = playerToOpponent ? lickitungFrontSprite : lickitungBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const drawAttacker = (): void => drawSpriteSheet(
+      fb,
+      poliwrath.tileset,
+      poliwrath.palette,
+      view.attacker.geometry.spriteCorner.x + displayedAttackerTranslation.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y + displayedAttackerTranslation.attackerOffset.y2,
+    );
+    const drawTarget = (): void => drawSpriteSheet(
+      fb,
+      lickitung.tileset,
+      lickitung.palette,
+      view.target.geometry.spriteCorner.x + displayedTargetTranslation.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + displayedTargetTranslation.targetOffset.y2,
+    );
+
+    // `monbg ANIM_DEF_PARTNER` puts the target into target-2 before the
+    // first IMPACT reaches scanout. Snapshot that non-OBJ stack before the
+    // attacker so OBJ-mode-1 uses the PPU's selected target rather than a
+    // later OBJ pixel.
+    drawTarget();
+    const target2Backdrop = fb.slice();
+    drawAttacker();
+    for (const impact of displayedImpact.impacts) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        target2Backdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        impact.x,
+        impact.y,
+        impact.matrix.a,
+        impact.matrix.b,
+        impact.matrix.c,
+        impact.matrix.d,
+        12,
+        8,
+        false,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "LICKITUNG" : "POLIWRATH",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "POLIWRATH" : "LICKITUNG",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "POLIWRATH used" : "Foe POLIWRATH used",
+      "SUBMISSION!",
       99,
     );
     return;

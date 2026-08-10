@@ -5007,7 +5007,11 @@ export function sceneOnSubmissionView(
     age: state.age,
     attacker: state.config.attacker,
     target: state.config.target,
-    ...submissionAtAge(state.age, state.config.target.geometry.animationCenter),
+    ...submissionAtAge(
+      state.age,
+      state.config.target.geometry.animationCenter,
+      state.config.attacker.geometry.side,
+    ),
   };
 }
 

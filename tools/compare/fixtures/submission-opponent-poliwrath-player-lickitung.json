@@ -1,0 +1,16 @@
+{
+  "schema": "submission-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "SUBMISSION",
+  "moveId": 66,
+  "orientation": "opponent-front",
+  "scenario": "tools/battle-lab/mechanic-submission-opponent-poliwrath-player-lickitung.json",
+  "probe": "tools/compare/submissionProbe.py",
+  "sourceWindow": {"startFrame": 83, "endFrame": 206, "frameCount": 124},
+  "sourceBounds": {"start": "0x082d2664", "endExclusive": "0x082d2707"},
+  "probeJsonSha256": "a68719438312b2e709ecafec96784c97cdc1f533f8121b0473c85460864bb111",
+  "rawRgbSha256": "a19a8919aff7f4da836d8112eab3e11abf927ae3a0658668eb9550045a870865",
+  "changeMap": "tools/compare/evidence/submission-changemap-opponent.txt",
+  "changeMapSha256": "88013df24d0421f7b10e5851dde46d3a2814e9330844f78037089b7c6d76d79b",
+  "acceptance": {"status": "exact", "completeDenseWindow": 124, "reducer": 124, "typedSeam": 124, "framebuffer": 124}
+}

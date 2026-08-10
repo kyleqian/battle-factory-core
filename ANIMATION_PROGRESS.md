@@ -1,12 +1,12 @@
 # Animation coverage
 
-## MOVE_SUBMISSION bilateral source/reducer checkpoint — coverage unchanged (2026-08-10 worker)
+## MOVE_SUBMISSION exact — bilateral 124/124 Scene-ON promotion (2026-08-10 worker)
 
-- **State:** Coverage remains **153/276 exact**, 0 partial, 0 staged, **123 unsupported**. `ANIMATION_COVERAGE.json` is intentionally unchanged: Submission has no production framebuffer receipt or exactness claim yet.
-- **Did:** Pinned source `Move_SUBMISSION` / `SubmissionHit`, lowest Level-50 set **262 `FRONTIER_MON_POLIWRATH_1`**, complete legal POLIWRATH/LICKITUNG parties in both orientations, and a pointer-bounded Scene-ON source probe. Added a pure source-age reducer plus narrow typed seam for the two literal-width `AnimTask_TranslateMonElliptical` tasks, affine IMPACT sequence, monbg, alpha, and first inactive cleanup.
-- **Verified:** Fresh bilateral source windows are player-back **79..202** and opponent-front **83..206**, **124 frames** each. Submission itself establishes RAM+1 display timing for both translation tasks and the affine IMPACT (first source change age 7, first visible age 8); source tasks reset at age 101, blend clears at 102, and the first inactive cleanup is age 123. Focused reducer tests and typecheck pass.
-- **Next:** Add the narrow POLIWRATH/LICKITUNG compositor and portable receipt; require twice-fresh 124/124 bilateral component/seam/software+hardware OAM/matrix/palette/register/audio/raw-RGB/framebuffer equality, then rerun exact STEEL_WING twice fresh before any Submission-only promotion.
-- **Notes:** No gameplay/damage/RNG/turn/controller/facility state, shared animation boundary, canonical recording, unsupported barrier, sibling coverage, or absolute-tick framebuffer branch changed.
+- **State:** Coverage advances **153→154/276 exact**, 0 partial, 0 staged, **123→122 unsupported**. Only Submission moved.
+- **Did:** Added the source-age `Move_SUBMISSION`/`SubmissionHit` reducer, typed relative seam, narrow POLIWRATH/LICKITUNG compositor, legal lowest-carrier set **262** bilateral parties, pointer-bounded probe, exact fixture receipts, and change maps. The port covers all nine affine IMPACT allocations/slot reuse, literal -18/+18 elliptical tasks, monbg, 12:8 alpha, audio receipts, and cleanup.
+- **Verified:** `submissionEvidence.ts` passes both **124/124** player-back **79..202** and opponent-front **83..206** windows twice fresh for component, seam, software+hardware OAM/matrix/palette/register/audio/state/raw-RGB, and production framebuffer equality. Stable evidence/raw/map digests are player `73674bbf…` / `de3d3e17…` / `1bc873ce…`, opponent `a6871943…` / `a19a891…` / `88013df2…`. Exact STEEL_WING remains bilateral **197/197**, twice fresh.
+- **Next:** Supervisor selects the next independent acceptance unit. Do not promote a sibling from these shared commands/components.
+- **Notes:** Submission's own maps split the latches: affine IMPACT and target ellipse display RAM+1, attacker ellipse RAM+2; `Task_UpdateMonBg` overlaps `Task_ClearMonBg` through clear age 104. No gameplay/damage/RNG/turn/controller/facility state, shared boundary, canonical recording, barrier, sibling coverage, or absolute-tick framebuffer branch changed.
 
 ## MOVE_DRILL_PECK exact — bilateral 91/91 Scene-ON promotion (2026-08-10 worker)
 

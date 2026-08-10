@@ -1,5 +1,7 @@
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
 
+export type SubmissionSide = "player" | "opponent";
+
 export interface SubmissionMatrix {
   readonly a: number;
   readonly b: number;
@@ -67,6 +69,7 @@ function ellipseOffset(
 export function submissionAtAge(
   age: number,
   targetCenter: Readonly<{ x: number; y: number }>,
+  attackerSide: SubmissionSide = "player",
 ): SubmissionState {
   const translationTasksActive = age >= 7 && age <= 100;
   const impactIndex = IMPACT_START_AGES.findIndex(
@@ -80,7 +83,11 @@ export function submissionAtAge(
           index: impactIndex,
           // The source allocator reuses these two affine slots in sequence.
           slot: impactIndex % 2 === 0 ? 3 : 4,
-          x: targetCenter.x + offset.x,
+          // `create_basic_hitsplat_sprite` resolves this script-relative X
+          // against the attacker's side. The task widths above remain literal
+          // by contrast because this move does not use RespectSide.
+          x: targetCenter.x
+            + (attackerSide === "player" ? offset.x : -offset.x),
           y: targetCenter.y + offset.y,
           animation: 1,
           matrix: IMPACT_MATRIX,
@@ -91,7 +98,9 @@ export function submissionAtAge(
     age,
     active: age >= 0 && age <= 122,
     impactGfxLoaded: age >= 1 && age <= 122,
-    monbgTaskActive: age >= 4 && age <= 101,
+    // `clearmonbg` spawns Task_ClearMonBg at age 102, but its resident
+    // Task_UpdateMonBg remains live concurrently through clear age 104.
+    monbgTaskActive: age >= 4 && age <= 104,
     clearMonbgTaskActive: age >= 102 && age <= 104,
     alpha: age >= 7 && age <= 101 ? { eva: 12, evb: 8 } : null,
     translationTasksActive,
