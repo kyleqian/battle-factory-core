@@ -23,6 +23,7 @@ const TRYINFATUATING_OBLIVIOUS_CATEGORY = "tryinfatuating-oblivious";
 const TRYEXPLOSION_DAMP_CATEGORY = "tryexplosion-damp";
 const KINGS_ROCK_CATEGORY = "moveend-kings-rock";
 const SHELL_BELL_CATEGORY = "moveend-shell-bell";
+const IMMUNITY_CATEGORY = "moveend-immunity-abilities";
 const SOUNDPROOF_ROSTER_MOVES = [
   "MOVE_ROAR", "MOVE_SING", "MOVE_SUPERSONIC", "MOVE_SCREECH", "MOVE_SNORE",
   "MOVE_UPROAR", "MOVE_METAL_SOUND", "MOVE_GRASS_WHISTLE", "MOVE_HYPER_VOICE",
@@ -167,6 +168,19 @@ const SHELL_BELL_PROOF_PATHS = [
   "tools/probe/probe-shell-bell-heal-off.py",
   "tools/probe/receipts/shell-bell-heal-off.json",
 ] as const;
+const IMMUNITY_PROOF_PATHS = [
+  "reference/pokeemerald/src/battle_util.c",
+  "reference/pokeemerald/src/battle_script_commands.c",
+  "reference/pokeemerald/include/constants/battle_script_commands.h",
+  "src/engine/battleScriptMoveEndOpcode.ts",
+  "tests/statusImmunityHookJoinBatch.test.ts",
+  "tests/statusImmunityOracleEvidence.test.ts",
+  "docs/immunity-abilities-ground-truth.md",
+  "tools/battle-lab/mechanic-immunity-limber-skill-swap-off.json",
+  "tools/probe/probe-immunity-limber-off.py",
+  "tools/probe/receipts/immunity-limber-off-seed-610839776.json",
+  "tools/probe/receipts/immunity-limber-off-seed-324508639.json",
+] as const;
 
 const EXPLICIT_STATE_BEHAVIOR_ROWS = [
   [
@@ -249,6 +263,7 @@ function sourceProvenPathsFor(category: string): readonly string[] {
   if (category === TRYEXPLOSION_DAMP_CATEGORY) return TRYEXPLOSION_DAMP_PROOF_PATHS;
   if (category === KINGS_ROCK_CATEGORY) return KINGS_ROCK_PROOF_PATHS;
   if (category === SHELL_BELL_CATEGORY) return SHELL_BELL_PROOF_PATHS;
+  if (category === IMMUNITY_CATEGORY) return IMMUNITY_PROOF_PATHS;
   throw new Error(`unknown source-proven hook category ${category}`);
 }
 
@@ -707,9 +722,9 @@ describe("Gate-6 mechanics coverage manifest", () => {
       const axisSummary = record(perMoveHookJoins[axis]);
       expect(rows).toHaveLength(parameterizationData.moves.length);
       expect(axisSummary).toEqual({ rows: rows.length, unsupported: sourceUnsupported, gaps: sourceUnsupported });
-      expect(sourceUnsupported).toBe(axis === "item" ? 118 : 106);
+      expect(sourceUnsupported).toBe(axis === "item" ? 118 : 9);
     }
-    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 224, gaps: 224 });
+    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 127, gaps: 127 });
     expect(record(summary.kingsRockMoveEnd)).toEqual({
       candidates: 106,
       promotedRows: 105,
@@ -804,7 +819,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const sourceProven = parameterizationData.moves
       .filter((move) => move.hooks.ability.status === SOURCE_PROVEN_FAMILY_STATUS)
       .map((move) => move.move);
-    expect(sourceProven).toHaveLength(194);
+    expect(sourceProven).toHaveLength(291);
     const sourceSoundproof = parameterizationData.moves
       .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(SOUNDPROOF_MOVES_BLOCK_CATEGORY))
       .map((move) => move.move)
@@ -829,11 +844,15 @@ describe("Gate-6 mechanics coverage manifest", () => {
       .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(TRYINFATUATING_OBLIVIOUS_CATEGORY))
       .map((move) => move.move);
     expect(sourceAttract).toEqual(["MOVE_ATTRACT"]);
-    const uniqueNonSoundproofProven = new Set([...sourceAbsorbing, ...sourceColorChange, ...sourceSynchronize, ...sourceAttract]
+    const sourceImmunity = parameterizationData.moves
+      .filter((move) => array(move.hooks.ability.supportedCategories).map(String).includes(IMMUNITY_CATEGORY))
+      .map((move) => move.move);
+    expect(sourceImmunity).toHaveLength(97);
+    const uniqueNonSoundproofProven = new Set([...sourceAbsorbing, ...sourceColorChange, ...sourceSynchronize, ...sourceAttract, ...sourceImmunity]
       .filter((move) => !sourceSoundproof.includes(move)));
     expect(soundproofOnlyAbilityGaps - Number(record(perMoveHookJoins.ability).gaps)).toBe(uniqueNonSoundproofProven.size);
     expect(parameterizationData.moves.length + soundproofOnlyAbilityGaps).toBe(591);
-    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(224);
+    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(127);
     const sourceKingsRock = parameterizationData.moves
       .filter((move) => array(move.hooks.item.supportedCategories).map(String).includes(KINGS_ROCK_CATEGORY))
       .map((move) => move.move);
@@ -1029,10 +1048,11 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(oracle.receiptGaps).toBe(0);
     expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*118 item join gaps\*\* and \*\*106 ability join gaps\*\*/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*118 item join gaps\*\* and \*\*9 ability join gaps\*\*/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/King's Rock checkpoint: \*\*106\*\* finite Level-50 flag selectors, \*\*105\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Shell Bell checkpoint: \*\*183\*\* finite Level-50 power != 0 candidates.*\*\*182\*\* promoted/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/194 ability rows are source-proven/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/291 ability rows are source-proven/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Immunity checkpoint: \*\*99\*\* finite Level-50 ability-axis candidates, \*\*97\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Synchronize checkpoint: \*\*30\*\* finite Level-50 candidates, \*\*30\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Attract\/Oblivious checkpoint: \*\*1\*\* finite EFFECT_ATTRACT candidate, \*\*1\*\* promoted, \*\*0\*\* exceptions, \*\*0\*\* roster-only candidates, and \*\*0\*\* active blockers/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Explosion\/Damp checkpoint: \*\*2\*\* finite EFFECT_EXPLOSION candidates, \*\*2\*\* promoted, \*\*0\*\* exceptions, \*\*0\*\* roster-only candidates, \*\*25\*\* selectable occurrences \/ \*\*26\*\* full carrier rows, and \*\*0\*\* active blockers/);

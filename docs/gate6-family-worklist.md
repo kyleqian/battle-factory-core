@@ -160,6 +160,19 @@ remainder needs a new ability family.
   it reuses the already-proven `MOVEEND_*`-state-machine pattern rather
   than exercising a new opcode family — but its sheer row count still earns
   it Rank 2 overall under the stated closure-per-cost criterion.
+- **STATUS (2026-08-10, main worker): promoted.** 97 of the 99 candidates
+  promoted (ability join gaps 106 → 9); `MOVE_ASSIST` and `MOVE_METRONOME`
+  are explicit dynamic-dispatch exceptions (`jumptocalledmove`/`metronome`
+  have no static moveend node of their own for the graph/program route
+  certificate to terminate on), a difference from this section's predicted
+  99/99 that the worklist's own candidate-count command did not anticipate.
+  Receipts: `docs/immunity-abilities-ground-truth.md`,
+  `tools/battle-lab/mechanic-immunity-limber-skill-swap-off.json`,
+  `tools/probe/probe-immunity-limber-off.py`,
+  `tools/probe/receipts/immunity-limber-off-seed-610839776.json` and
+  `-324508639.json` (both reproduced fresh, byte-identical). Tests:
+  `tests/statusImmunityHookJoinBatch.test.ts`,
+  `tests/statusImmunityOracleEvidence.test.ts`.
 
 ### Rank 3 — Item: direct item-manipulation opcode family
 

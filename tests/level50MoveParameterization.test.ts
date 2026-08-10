@@ -335,9 +335,9 @@ describe("Level-50 move parameterization manifest", () => {
     });
     expect(manifest.coverage.joins).toMatchObject({
       battleScriptGraphLabels: 300, battleScriptProgramLabels: 300, animationScripts: 300,
-      itemHookCategories: 182, abilityHookCategories: 348,
+      itemHookCategories: 182, abilityHookCategories: 445,
       itemHookUnsupportedCategories: null, abilityHookUnsupportedCategories: null,
-      itemHookUnsupportedRows: 118, abilityHookUnsupportedRows: 106, abilityHookSourceProvenRows: 194, itemHookSourceProvenRows: 182,
+      itemHookUnsupportedRows: 118, abilityHookUnsupportedRows: 9, abilityHookSourceProvenRows: 291, itemHookSourceProvenRows: 182,
     });
     expect(manifest.coverage.hookCatalogs).toMatchObject({
       item: {
@@ -875,6 +875,16 @@ describe("Level-50 move parameterization manifest", () => {
       expectedSourceProven.set(move, [...(expectedSourceProven.get(move) ?? []), "moveend-synchronize-status"]);
     }
 
+    const IMMUNITY_EXCLUDED = new Set([
+      "MOVE_SKILL_SWAP", "MOVE_ROLE_PLAY",
+      "MOVE_CONFUSE_RAY", "MOVE_SWEET_KISS", "MOVE_SWAGGER", "MOVE_FLATTER", "MOVE_TEETER_DANCE",
+      "MOVE_ASSIST", "MOVE_METRONOME",
+    ]);
+    for (const move of level50RosterSymbols()) {
+      if (expectedSourceProven.has(move) || IMMUNITY_EXCLUDED.has(move)) continue;
+      expectedSourceProven.set(move, [...(expectedSourceProven.get(move) ?? []), "moveend-immunity-abilities"]);
+    }
+
     const { graph, program } = graphAndProgram();
     const graphByLabel = new Map(graph.labels.map((label) => [label.name, label]));
     const programByLabel = new Map(program.blocks.map((block) => [block.label, block]));
@@ -920,16 +930,16 @@ describe("Level-50 move parameterization manifest", () => {
         expect(record.hooks.ability.evidence?.families.map((family) => family.category)).toEqual(expectedCategories);
       }
     }
-    expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(106);
+    expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(9);
     expect(manifest.moves.filter((record) => record.hooks.item.status === "unsupported")).toHaveLength(118);
   });
 
-  it("keeps zero-power Volt/Water noncandidates and Sunny Day's audited special flow unsupported", () => {
+  it("keeps zero-power Volt/Water noncandidates item-unsupported while the Immunity family closes their ability axis", () => {
     const move = (symbol: string) => manifest.moves.find((record) => record.move === symbol)!;
     for (const symbol of ["MOVE_WITHDRAW", "MOVE_RAIN_DANCE", "MOVE_SUNNY_DAY", "MOVE_PROTECT"]) {
       expect(move(symbol).hooks).toMatchObject({
         item: { potentialCategories: null, status: "unsupported" },
-        ability: { potentialCategories: null, status: "unsupported" },
+        ability: { potentialCategories: null, status: "source-proven-family", supportedCategories: ["moveend-immunity-abilities"] },
       });
     }
     expect(move("MOVE_TACKLE").hooks.ability.supportedCategories).toEqual(["moveend-contact-on-damage", "moveend-color-change"]);
