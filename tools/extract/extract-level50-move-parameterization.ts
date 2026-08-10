@@ -1138,7 +1138,27 @@ function onDamageFirstStatement(label: string): OnDamageRoutePosition {
 
 function onDamageCallReturns(label: string): boolean {
   const statements = requireGraphLabel(label).statements;
-  return statements.at(-1)?.mnemonic === "return";
+  if (statements.at(-1)?.mnemonic === "return") return true;
+  // A call target's own last statement is not always the return -- e.g.
+  // BattleScript_WeatherFormChanges falls through into a same-battler loop
+  // label before its eventual return. Search the full reachable subgraph
+  // rather than only the entry label's own statement list.
+  const start = onDamageFirstStatement(label);
+  const queue: OnDamageRoutePosition[] = [start];
+  const seen = new Set<string>([onDamagePositionKey(start)]);
+  while (queue.length > 0) {
+    const position = queue.shift()!;
+    if (onDamageStatement(position).mnemonic === "return") return true;
+    for (const edge of onDamageGraphEdgesByPosition.get(onDamagePositionKey(position)) ?? []) {
+      if (edge.to === null) continue;
+      const next: OnDamageRoutePosition = { label: edge.to.label, line: edge.to.line };
+      const key = onDamagePositionKey(next);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      queue.push(next);
+    }
+  }
+  return false;
 }
 
 function onDamageRoutePath(
@@ -3030,6 +3050,182 @@ for (const candidate of shellBellCandidateRows) {
 const shellBellSourceProvenRows = [...shellBellEvidenceByMove.keys()];
 if (shellBellSourceProvenRows.length !== 182) throw new Error("Shell Bell promotion must be exactly 182 rows");
 
+const IMMUNITY_CATEGORY = "moveend-immunity-abilities";
+const IMMUNITY_DISPATCHER_CALL = "AbilityBattleEffects(ABILITYEFFECT_IMMUNITY, 0, 0, 0, 0)";
+const immunityMoveEndCaseLine = sourceLine(battleScriptCommandsSource, "case MOVEEND_IMMUNITY_ABILITIES:", "MOVEEND_IMMUNITY_ABILITIES");
+const immunityMoveEndStateLine = sourceLine(battleScriptConstantsSource, "#define MOVEEND_IMMUNITY_ABILITIES", "MOVEEND_IMMUNITY_ABILITIES");
+if (!battleScriptCommandsSource.includes("case MOVEEND_IMMUNITY_ABILITIES: // status immunities\n            if (AbilityBattleEffects(ABILITYEFFECT_IMMUNITY, 0, 0, 0, 0))")
+  || !battleScriptConstantsSource.includes("#define MOVEEND_IMMUNITY_ABILITIES                4")) {
+  throw new Error("Immunity MOVEEND state 4 dispatcher drifted");
+}
+const MOVEEND_STATE_VALUES = new Map<string, number>();
+for (const match of battleScriptConstantsSource.matchAll(/#define (MOVEEND_\w+)\s+(\d+)/g)) {
+  MOVEEND_STATE_VALUES.set(match[1]!, Number(match[2]));
+}
+if (MOVEEND_STATE_VALUES.get("MOVEEND_IMMUNITY_ABILITIES") !== 4 || MOVEEND_STATE_VALUES.size !== 18) {
+  throw new Error("Cmd_moveend state constant table drifted");
+}
+
+// A handoff qualifies only when the Cmd_moveend state range it enters
+// actually includes state 4 -- moveendfromto can start past it (e.g. Future
+// Sight's delayed MOVEEND_ITEM_EFFECTS_ALL hit), which must not count.
+function immunityRouteHandoff(statement: GraphStatement) {
+  if (statement.mnemonic === "moveendall") {
+    return {
+      kind: "moveendall",
+      label: "BattleScript_MoveEnd",
+      line: statement.line,
+      state: "MOVEEND_IMMUNITY_ABILITIES",
+      stateValue: 4,
+      semantics: "Cmd_moveend starts at state 0 and executes state 4 before ending the full moveendall pass",
+    };
+  }
+  if (statement.mnemonic === "moveendto" && statement.operandTokens[0] === "MOVEEND_NEXT_TARGET") {
+    return {
+      kind: "moveendto-next-target",
+      label: "Cmd_moveend",
+      line: statement.line,
+      state: "MOVEEND_IMMUNITY_ABILITIES",
+      stateValue: 4,
+      semantics: "Cmd_moveend endMode 2 starts at state 0 and runs through state 4 before the requested MOVEEND_NEXT_TARGET stop",
+    };
+  }
+  if (statement.mnemonic === "moveendfromto") {
+    const from = MOVEEND_STATE_VALUES.get(statement.operandTokens[0]!);
+    const to = MOVEEND_STATE_VALUES.get(statement.operandTokens[1]!);
+    if (from !== undefined && to !== undefined && from <= 4 && 4 < to) {
+      return {
+        kind: "moveendfromto",
+        label: "Cmd_moveend",
+        line: statement.line,
+        state: "MOVEEND_IMMUNITY_ABILITIES",
+        stateValue: 4,
+        semantics: `Cmd_moveend is explicitly entered at ${statement.operandTokens[0]} and bounded before ${statement.operandTokens[1]}, a range that covers state 4`,
+      };
+    }
+    return null;
+  }
+  return null;
+}
+
+function immunityRouteEvidence(move: Move, entryScript: string) {
+  const path = onDamageRoutePath(
+    entryScript,
+    (statement) => immunityRouteHandoff(statement) !== null,
+    "a MOVEEND_IMMUNITY_ABILITIES-capable moveend handoff",
+  );
+  const handoffPosition = path.positions.at(-1)!;
+  const handoff = immunityRouteHandoff(onDamageStatement(handoffPosition));
+  if (handoff === null) throw new Error(`${move.move} route handoff disappeared`);
+  const witness = onDamageRouteWitnessPath(path);
+  const familyEvidence = {
+    category: IMMUNITY_CATEGORY,
+    selector: {
+      path: BATTLE_SCRIPT_COMMANDS_PATH,
+      locator: "Cmd_moveend MOVEEND_IMMUNITY_ABILITIES",
+      symbol: move.move,
+      guard: "reaches a moveendall/moveendto/moveendfromto handoff whose Cmd_moveend state range includes MOVEEND_IMMUNITY_ABILITIES (state 4)",
+      derivedFrom: "moveend-immunity-abilities candidate selector: Level-50 ability-axis rows not already claimed by Soundproof, Absorbing, ON_DAMAGE contact, Color Change, Synchronize, Attract/Oblivious, or Explosion/Damp, excluding the two Rank-4 ability-manipulation moves and the five Rank-5 pre-emptive Own Tempo guard moves",
+    },
+    entryPath: {
+      kind: handoff.kind,
+      source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: requireGraphLabel(entryScript).line },
+      declaredEntryScript: entryScript,
+      graph: witness.graph,
+      program: witness.program,
+      moveEnd: handoff,
+    },
+    dispatcher: {
+      path: BATTLE_SCRIPT_COMMANDS_PATH,
+      locator: "Cmd_moveend MOVEEND_IMMUNITY_ABILITIES",
+      line: immunityMoveEndCaseLine,
+      call: IMMUNITY_DISPATCHER_CALL,
+      statePath: BATTLE_SCRIPT_CONSTANTS_PATH,
+      stateLine: immunityMoveEndStateLine,
+      state: "MOVEEND_IMMUNITY_ABILITIES",
+      stateValue: 4,
+    },
+    familyVerification: {
+      scope: "One Skill-Swap-staged Battle Scene OFF Girafarig/Hitmonlee receipt (two independent seeds) proves the shared status-immunity cure lifecycle at MOVEEND_IMMUNITY_ABILITIES; all siblings are batch-checked against this exact selector, graph/program moveend route, and state-4 dispatcher. The receipt uses Skill Swap because the eight cure abilities each block their own matching status from applying while already active, so reachability requires the ability to arrive after the status -- but the per-move family claim proven here is only that the move's own script reaches Cmd_moveend's normal tail, which passes through state 4 unconditionally; the two claims are not conflated.",
+      implementation: "src/engine/battleScriptMoveEndOpcode.ts#MOVEEND_IMMUNITY_ABILITIES",
+      batchTest: "tests/statusImmunityHookJoinBatch.test.ts",
+      oracleReceipt: "docs/immunity-abilities-ground-truth.md",
+      oracleFixture: "tools/battle-lab/mechanic-immunity-limber-skill-swap-off.json",
+      oracleProbe: "tools/probe/probe-immunity-limber-off.py",
+      oracleReceiptFiles: [
+        "tools/probe/receipts/immunity-limber-off-seed-610839776.json",
+        "tools/probe/receipts/immunity-limber-off-seed-324508639.json",
+      ],
+      scopeBoundary: "MOVE_SKILL_SWAP and MOVE_ROLE_PLAY (the ability-manipulation opcode family) and the five moves with their own pre-emptive Own Tempo jumpifability guard are not claimed by this family.",
+    },
+  };
+  return {
+    status: "source-proven" as const,
+    id: `immunity-route:${move.move}`,
+    move: move.move,
+    entryScript,
+    routeKind: handoff.kind,
+    executionInventory: executableMoveSymbols.has(move.move) ? "level50-executable" : "level50-roster-only",
+    familyEvidence,
+  };
+}
+
+const IMMUNITY_MANIPULATION_EXCLUSIONS = new Set(["MOVE_SKILL_SWAP", "MOVE_ROLE_PLAY"]);
+const IMMUNITY_OWN_TEMPO_GUARD_EXCLUSIONS = new Set([
+  "MOVE_CONFUSE_RAY", "MOVE_SWEET_KISS", "MOVE_SWAGGER", "MOVE_FLATTER", "MOVE_TEETER_DANCE",
+]);
+function abilityAxisAlreadyClaimed(symbol: string): boolean {
+  if (soundMoves.has(symbol)) return true;
+  if ((absorbingEvidenceByMove.get(symbol) ?? []).length > 0) return true;
+  if (contactRouteEvidenceByMove.get(symbol)?.status === "source-proven") return true;
+  if (colorChangeRouteEvidenceByMove.get(symbol)?.status === "source-proven") return true;
+  if (synchronizeEvidenceByMove.get(symbol)?.status === "source-proven") return true;
+  if (symbol === "MOVE_ATTRACT") return true;
+  if (tryexplosionDampEvidenceRows.some((row) => row.move === symbol)) return true;
+  return false;
+}
+const immunityCandidateRows = rosterMoveSymbols
+  .map((symbol) => moveBySymbol.get(symbol)!)
+  .filter((move) => !abilityAxisAlreadyClaimed(move.move))
+  .filter((move) => !IMMUNITY_MANIPULATION_EXCLUSIONS.has(move.move) && !IMMUNITY_OWN_TEMPO_GUARD_EXCLUSIONS.has(move.move))
+  .map((move) => ({
+    move: move.move,
+    moveId: move.id,
+    effect: move.effect,
+    power: move.power,
+    entryScript: topologyByMove.get(move.move)!.entryScript,
+    executionInventory: executableMoveSymbols.has(move.move) ? "level50-executable" : "level50-roster-only",
+  }));
+if (immunityCandidateRows.length !== 99) {
+  throw new Error(`expected 99 Level-50 Immunity-family candidates, got ${immunityCandidateRows.length}`);
+}
+// BattleScript_EffectAssist/Metronome end in a dynamic-dispatch opcode
+// (jumptocalledmove/metronome) with no static fallthrough tail of their own,
+// so the graph/program has no direct moveend node to certify a route
+// through -- distinct from e.g. Mirror Move, whose failure fallthrough does
+// reach a real moveendall.
+const IMMUNITY_EXCEPTION_ROWS = [
+  {
+    id: "immunity-dynamic-dispatch:MOVE_ASSIST",
+    move: "MOVE_ASSIST",
+    reason: "BattleScript_EffectAssist ends in jumptocalledmove TRUE (battle_scripts_1.s:2375), a dynamic dispatch to whichever ally move assistattackselect chose at runtime; the static graph/program has no moveendall/moveendto/moveendfromto node of its own to certify a route through, even though the invoked move's own script independently reaches Cmd_moveend's normal tail.",
+  },
+  {
+    id: "immunity-dynamic-dispatch:MOVE_METRONOME",
+    move: "MOVE_METRONOME",
+    reason: "BattleScript_EffectMetronome ends in the metronome opcode (battle_scripts_1.s:1155), a dynamic dispatch to a randomly selected move; the static graph/program has no moveendall/moveendto/moveendfromto node of its own to certify a route through, even though the invoked move's own script independently reaches Cmd_moveend's normal tail.",
+  },
+];
+const immunityEvidenceByMove = new Map<string, ReturnType<typeof immunityRouteEvidence>>();
+for (const candidate of immunityCandidateRows) {
+  if (IMMUNITY_EXCEPTION_ROWS.some((exception) => exception.move === candidate.move)) continue;
+  immunityEvidenceByMove.set(candidate.move, immunityRouteEvidence(moveBySymbol.get(candidate.move)!, candidate.entryScript));
+}
+const immunitySourceProvenRows = [...immunityEvidenceByMove.keys()];
+if (immunitySourceProvenRows.length !== immunityCandidateRows.length - IMMUNITY_EXCEPTION_ROWS.length) {
+  throw new Error("Immunity promotion accounting drifted from candidates minus exceptions");
+}
+
 const records = rosterMoveSymbols.map((symbol) => {
   const move = moveBySymbol.get(symbol)!;
   const script = topologyByMove.get(symbol) ?? null;
@@ -3092,6 +3288,10 @@ const records = rosterMoveSymbols.map((symbol) => {
   const tryexplosionDampEvidence = tryexplosionDampEvidenceRows.find((row) => row.move === symbol);
   if (tryexplosionDampEvidence) {
     sourceProvenFamilies.push(tryexplosionDampEvidence.familyEvidence);
+  }
+  const immunityEvidence = immunityEvidenceByMove.get(symbol);
+  if (immunityEvidence !== undefined) {
+    sourceProvenFamilies.push(immunityEvidence.familyEvidence);
   }
   const abilityHook = sourceProvenFamilies.length === 0
     ? {
@@ -3204,6 +3404,11 @@ if (tryinfatuatingObliviousRosterRecords.length !== 1
 const tryexplosionDampRosterRecords = sourceProvenAbilityRecords.filter((record) => record.hooks.ability.supportedCategories.includes(TRYEXPLOSION_DAMP_CATEGORY));
 if (JSON.stringify(tryexplosionDampRosterRecords.map((record) => record.move)) !== JSON.stringify(["MOVE_SELF_DESTRUCT", "MOVE_EXPLOSION"])) {
   throw new Error("tryexplosion/Damp source-proven roster accounting does not match the two-row Explosion census");
+}
+const immunityRosterRecords = sourceProvenAbilityRecords.filter((record) => record.hooks.ability.supportedCategories.includes(IMMUNITY_CATEGORY));
+if (immunityRosterRecords.length !== immunitySourceProvenRows.length
+  || immunityRosterRecords.some((record) => !immunitySourceProvenRows.includes(record.move))) {
+  throw new Error("Immunity source-proven roster accounting does not match the finite candidate census");
 }
 const sourceProvenAbilityCategories = sourceProvenAbilityRecords.flatMap((record) => record.hooks.ability.supportedCategories);
 const absorbingCoverageByCategory = Object.fromEntries(ABSORBING_HOOK_DEFINITIONS.map((definition) => {
@@ -3319,6 +3524,22 @@ const shellBellAudit = {
   promotions: {
     sourceProvenRows: shellBellSourceProvenRows,
     reason: "182 of 183 power != 0 candidates retarget the already-proven moveend-color-change graph/program route to MOVEEND_KINGSROCK_SHELLBELL state 12 (same unbroken Cmd_moveend do-while sweep, no recomputation). MOVE_FUTURE_SIGHT remains the sole source exception, excluded by its own battle_util.c:1816 IGNORE_SHELL_BELL poison rather than Color Change's state-3 moveendfromto skip.",
+  },
+};
+const immunityAudit = {
+  status: "source-proven-family",
+  scope: "Every Level-50 ability-axis row not already claimed by Soundproof, Absorbing, ON_DAMAGE contact, Color Change, Synchronize, Attract/Oblivious, or Explosion/Damp is joined to AbilityBattleEffects(ABILITYEFFECT_IMMUNITY)'s unconditional Cmd_moveend state-4 dispatch, excluding the two Rank-4 ability-manipulation moves and the five Rank-5 pre-emptive Own Tempo guard moves.",
+  selector: "Level-50 roster moves whose ability axis is otherwise unclaimed, minus MOVE_SKILL_SWAP/MOVE_ROLE_PLAY and the five Own Tempo guard moves",
+  candidateCount: immunityCandidateRows.length,
+  sourceMoveCandidates: immunityCandidateRows,
+  sourceProvenRows: immunitySourceProvenRows,
+  sourceExceptionRows: IMMUNITY_EXCEPTION_ROWS,
+  blockers: [],
+  routeWitnesses: [...immunityEvidenceByMove.values()],
+  dispatcher: { path: BATTLE_SCRIPT_COMMANDS_PATH, line: immunityMoveEndCaseLine, call: IMMUNITY_DISPATCHER_CALL, state: "MOVEEND_IMMUNITY_ABILITIES", stateValue: 4 },
+  promotions: {
+    sourceProvenRows: immunitySourceProvenRows,
+    reason: `${immunitySourceProvenRows.length} of ${immunityCandidateRows.length} finite candidates have a source/program graph route from their entry script to a moveendall/moveendto/moveendfromto handoff whose Cmd_moveend state range includes state 4. MOVE_ASSIST and MOVE_METRONOME remain explicit dynamic-dispatch exceptions. The shared two-seed Skill-Swap-staged Battle Scene OFF receipt and Tier-1 batch prove the common dispatcher semantics; no per-move oracle receipts are fabricated.`,
   },
 };
 const onDamageAudit = {
@@ -3452,7 +3673,7 @@ const output = {
       ABILITY_CONSTANTS_PATH,
       "reference/pokeemerald/include/constants/pokemon.h",
     ],
-    note: `Catalog join plus an intentionally partial source dispatcher inventory. ${records.filter((record) => record.hooks.item.status === "unsupported").length} per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the ${kingsRockSourceProvenRows.length}-row King's Rock family, the ${shellBellSourceProvenRows.length}-row Shell Bell family, exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, ${synchronizeSourceProvenRows.length} Synchronize status candidates, the one-row Attract/Oblivious family, and the two-row Explosion/Damp family carry graph/program/source-handoff evidence. King's Rock retains Tickle as one explicit zero-damage exception; Shell Bell retains Future Sight as a distinct IGNORE_SHELL_BELL exception; no per-move oracle receipts are fabricated.`,
+    note: `Catalog join plus an intentionally partial source dispatcher inventory. ${records.filter((record) => record.hooks.item.status === "unsupported").length} per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the ${kingsRockSourceProvenRows.length}-row King's Rock family, the ${shellBellSourceProvenRows.length}-row Shell Bell family, exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, ${synchronizeSourceProvenRows.length} Synchronize status candidates, the one-row Attract/Oblivious family, the two-row Explosion/Damp family, and the ${immunitySourceProvenRows.length}-row Immunity status-cure family carry graph/program/source-handoff evidence. King's Rock retains Tickle as one explicit zero-damage exception; Shell Bell retains Future Sight as a distinct IGNORE_SHELL_BELL exception; no per-move oracle receipts are fabricated.`,
   },
   coverage: {
     level50Roster: {
@@ -3504,9 +3725,10 @@ const output = {
         synchronize: synchronizeAudit,
         tryinfatuatingOblivious: tryinfatuatingObliviousAudit,
         tryexplosionDamp: tryexplosionDampAudit,
+        immunity: immunityAudit,
         completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "The exact Level-50 Soundproof moves-block family, audited absorbing dispatcher candidates, both ON_DAMAGE families, Synchronize, Attract/Oblivious, and Explosion/Damp are source-proven with separate route/guard certificates. Future Sight has one explicit delayed-MOVEEND exception; the newer families have no candidate route exceptions or blockers, while distinct contact ability outcome gaps, accuracy, and all other ability dispatcher families remain intentionally unsupported/null per move.",
+        reason: "The exact Level-50 Soundproof moves-block family, audited absorbing dispatcher candidates, both ON_DAMAGE families, Synchronize, Attract/Oblivious, Explosion/Damp, and the 99-row Immunity status-cure family are source-proven with separate route/guard certificates. Future Sight has one explicit delayed-MOVEEND exception for Color Change only; the newer families have no candidate route exceptions or blockers, while distinct contact ability outcome gaps, accuracy, and all other ability dispatcher families remain intentionally unsupported/null per move.",
       },
     },
   },
