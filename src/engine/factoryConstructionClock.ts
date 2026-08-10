@@ -296,7 +296,7 @@ class ConstructionClock {
   private frameValue: number;
   private cycleValue: number;
   private rngValueValue: number;
-  private readonly ambientRandom: ((rngValue: number, frame: number) => number) | undefined;
+  private readonly ambientRandom: FactoryConstructionClockOptions["ambientRandom"];
   private readonly cycleCost: FactoryConstructionCycleCost;
 
   constructor(options: FactoryConstructionClockOptions) {
