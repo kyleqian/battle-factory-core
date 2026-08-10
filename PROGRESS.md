@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1089 — [supervisor, 2026-08-10] **#55 m4a source-state boundary extended and reproduced**
+
+- **State:** squashed side fold `28f7a5c8`; focused union **15/15** and smoke
+  **375/375** pass. Final union typecheck/full suite/build follow after the next
+  bounded main increment.
+- **Did:** two fresh Scene-OFF runs per case reproduce all **113** audio
+  observations byte-for-byte: **113** equal captured-state keys and **0**
+  differing m4a costs. The v3 packet removes frame/tick/cursor/address identity
+  and adds full fixed structs, normalized graph links, blob digests, dispatch
+  targets, and audio I/O state.
+- **Next:** instruction-trace the remaining indirect MPlayMain callbacks and
+  malformed/dynamic sample targets before any cross-state audio reducer; keep
+  VBlank arbitration and the live construction clock unwired.
+- **Notes:** coverage remains explicitly incomplete with four residual
+  dereference classes; no production reducer, canonical Battle-2, animation,
+  or unsupported-barrier change. Side commits were squashed so transient mGBA
+  log blobs did not enter master history.
+
 ## 1088 — [MAIN worker, 2026-08-10] **#55 `CalculateMonStats` parent timing reduced**
 
 - **State:** exact parent-only reducer landed; focused stats/clock **13/13**,
@@ -36,18 +54,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** existing `calculate-mon-stats` emission and accepted-personality
   propagation are tested; no identity/duration table, receipt mutation, live
   wiring, canonical Battle-2, animation, or unsupported-barrier change.
-
-## 1086 — [MAIN worker, 2026-08-10] **#55 non-final Factory outer-loop timing reduced**
-
-- **State:** source reducer and all **9/9** v2 outer-loop spans are green;
-  focused construction **16/16**, smoke **375/375**, typecheck, full `npm test`
-  **879 files / 8,417 passed / 1 skipped**, and production build pass.
-- **Did:** reduced the selectable sibling to **261** cycles (**5** spans) and
-  trainer-party sibling to **130** (**4** spans) from compiled Thumb/bus classes.
-  Eight match directly; anchor mon 3 is **261 + 18** async service. All nine
-  contain zero complete VBlank pauses. Added the non-final clock operation and
-  source-only selectable rental-rank/challenge branches.
-- **Next:** resume exact CreateMon/EV/stat/Factory-post and VBlank/audio
-  arbitration. Keep #55 open and the live clock unwired.
-- **Notes:** no identity/duration table, evidence mutation, live wiring,
-  canonical Battle-2, animation, or unsupported-barrier change.

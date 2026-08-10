@@ -1,3 +1,18 @@
+## 1086 — [MAIN worker, 2026-08-10] **#55 non-final Factory outer-loop timing reduced**
+
+- **State:** source reducer and all **9/9** v2 outer-loop spans are green;
+  focused construction **16/16**, smoke **375/375**, typecheck, full `npm test`
+  **879 files / 8,417 passed / 1 skipped**, and production build pass.
+- **Did:** reduced the selectable sibling to **261** cycles (**5** spans) and
+  trainer-party sibling to **130** (**4** spans) from compiled Thumb/bus classes.
+  Eight match directly; anchor mon 3 is **261 + 18** async service. All nine
+  contain zero complete VBlank pauses. Added the non-final clock operation and
+  source-only selectable rental-rank/challenge branches.
+- **Next:** resume exact CreateMon/EV/stat/Factory-post and VBlank/audio
+  arbitration. Keep #55 open and the live clock unwired.
+- **Notes:** no identity/duration table, evidence mutation, live wiring,
+  canonical Battle-2, animation, or unsupported-barrier change.
+
 ## 1085 — [supervisor, 2026-08-10] **#55 m4a workload split into compiled source stages**
 
 - **State:** side commit `236e1fe4` is folded; focused receipt **2/2** and

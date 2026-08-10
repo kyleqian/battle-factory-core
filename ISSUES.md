@@ -1147,6 +1147,21 @@ therefore licenses no reducer: the next evidence requirement is repeated,
 complete source-state equivalence, not a case or frame lookup. The outer
 VBlank v1 and construction v2 byte contracts remain unchanged.
 
+**Extended m4a source-state receipt (2026-08-10, `28f7a5c8`):** a separate v3
+probe now captures full fixed SoundInfo/player/track/channel/CGB structs with
+pointer bytes normalized, reachable graph state, complete readable wave and
+PCM regions by digest, wider command/pattern/tone windows, dispatch targets,
+and relevant audio I/O state. Two fresh Scene-OFF runs per case are byte-
+identical: all **113** captured keys repeat with **0** unequal m4a costs. The
+packet contains no frame, tick, RNG cursor, address, construction identity, or
+absolute-cycle lookup. This remains an evidence boundary, not a reducer:
+`coverage.complete` is false for four residual dereference classes covering
+handler-dependent/unbounded MPlayMain command and callback reads, transitive
+CgbSound callback reads, and malformed/dynamic SoundMainRAM sample targets.
+The next admissible audio step is a complete instruction-traced indirect-read
+contract or controlled repeated cross-state equivalence—not a state-duration
+table. See `docs/issue55-m4a-source-state-receipt-v3.md`.
+
 **Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
 threading now makes the first post-cycle pixel boundary observe this debt.
 The WIN YES fixture's real first callback cursor/outcomes are
