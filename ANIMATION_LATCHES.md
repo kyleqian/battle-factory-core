@@ -44,7 +44,9 @@ cites the move whose ledger entry holds the full evidence.
 | Palette writes (`gPlttBufferFaded`), incl. metallic-shine pulse and BlendPalette ramps | RAM+1 | STEEL_WING/IRON_TAIL shine; TORMENT anger-mark blend |
 | BG-palette rotation and `REG_BLDY` darken | RAM+1 | FUTURE_SIGHT-era BG work (archive, 2026-07-26) |
 | `AnimTask_ShakeMon` | RAM+1 | COUNTER (2026-08-08) — NOT +2 |
-| `AnimTask_ShakeMon2` | RAM+2 | SLASH, LICK, TAKE_DOWN (2026-08-08) |
+| `AnimTask_ShakeMon2` (usual longer schedules) | RAM+2 | SLASH, LICK, TAKE_DOWN (2026-08-08) |
+| `AnimTask_ShakeMon2(target, 3, 0, 2, 1)` short burst | RAM+1 | PIN_MISSILE, all three bursts in both orientations (2026-08-10); this move-owned script schedule is distinct from the longer RAM+2 cases |
+| `AnimMissileArc_Step` Q8.8 double-advance affine sprite | live arc displays reducer age−1; its terminal destruction preserves one final matrix/OAM display from reducer age−2 | PIN_MISSILE, all three missiles in both orientations (2026-08-10); includes the initial invisible callback and affine allocation/teardown |
 | `AnimTask_TranslateMonElliptical(RespectSide)` (windUpLunge) | RAM+2 | COUNTER (RAM 217 → pixels 219); TAKE_DOWN windUpLunge (RAM 221 → pixels 223, confirmed by change map + hardware OAM) |
 | `AnimTask_RotateMonSpriteToSide` | RAM+2 | DOUBLE_EDGE pin round (2026-08-08), both orientations, restore-phase isolated |
 | Freshly allocated OAM **affine matrix** | needs TWO displays to reach hardware; removal is a plain OAM edit at ONE (dual-lag class: paint age−2, remove age−1) | MINIMIZE clones (2026-08-07); reused by TORMENT bubbles; independently re-proved by SPITE's target clone in both orientations (pointer-age allocation blank at 43, paint at 44, stale teardown display before clear; 2026-08-10) |

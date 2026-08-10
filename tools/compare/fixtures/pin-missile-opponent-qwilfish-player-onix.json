@@ -1,7 +1,10 @@
 {
   "move": "MOVE_PIN_MISSILE",
-  "status": "evidence-checkpoint",
+  "status": "exact",
   "orientation": "opponent-front",
+  "attacker": {"species":"QWILFISH","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":18},"animationCenter":{"x":176,"y":50},"battlePositionCenter":{"x":176,"y":40}}},
+  "target": {"species":"ONIX","geometry":{"side":"player","spriteCorner":{"x":40,"y":48},"animationCenter":{"x":72,"y":88},"battlePositionCenter":{"x":72,"y":80}}},
+  "fieldProfile": {"playerHp":110,"playerMaxHp":110,"opponentHp":140,"opponentMaxHp":140,"playerGender":"male","opponentGender":"male"},
   "scenario": "tools/battle-lab/mechanic-pin-missile-opponent-qwilfish-player-onix.json",
   "probe": "tools/compare/pinMissileProbe.py",
   "sourceWindow": {"startFrame": 90, "endFrame": 182, "frameCount": 93},
@@ -13,5 +16,5 @@
   "changeMapSha256": "d6ffb0e1f1264be19e4b5017ec1b377f1200f39314d7bb483e89d67922e75732",
   "sourceComponents": ["create_pin_missile_sprite", "gPinMissileSpriteTemplate", "AnimMissileArc", "AnimMissileArc_Step", "AnimTask_ShakeMon2"],
   "observedTopology": {"template": "gPinMissileSpriteTemplate", "hitsplat": "gBasicHitSplatSpriteTemplate", "callback": "AnimMissileArc_Step", "task": "AnimTask_ShakeMon2_Step"},
-  "residual": "No reducer, seam, or compositor promotion is claimed; coverage remains unchanged until the dense receipt is ported and production framebuffer equality is proven."
+  "acceptance": {"componentMatching":93,"framebufferMatching":93,"freshRuns":2}
 }

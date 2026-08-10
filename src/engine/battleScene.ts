@@ -923,6 +923,7 @@ import {
   sceneOnTwineedleView,
   sceneOnPoisonStingView,
   sceneOnSpikeCannonView,
+  sceneOnPinMissileView,
   sceneOnSonicBoomView,
   sceneOnSmokescreenView,
   sceneOnMudShotView,
@@ -1061,6 +1062,7 @@ import {
   type SceneOnTwineedleConfig,
   type SceneOnPoisonStingConfig,
   type SceneOnSpikeCannonConfig,
+  type SceneOnPinMissileConfig,
   type SceneOnSonicBoomConfig,
   type SceneOnSmokescreenConfig,
   type SceneOnMudShotConfig,
@@ -21442,6 +21444,172 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "OMASTAR used" : "Foe OMASTAR used",
       "SPIKE CANNON!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "PIN_MISSILE") {
+    const pinState =
+      state as SceneOnMovePresentationState<SceneOnPinMissileConfig>;
+    const view = sceneOnPinMissileView(pinState);
+    const displayed = sceneOnPinMissileView({
+      ...pinState,
+      age: pinState.age - 1,
+    });
+    const teardownDisplayed = sceneOnPinMissileView({
+      ...pinState,
+      age: pinState.age - 2,
+    });
+    const shakeDisplayed = sceneOnPinMissileView({
+      ...pinState,
+      age: pinState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "QWILFISH"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "QWILFISH"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged PIN_MISSILE pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const qwilfishSource = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).QWILFISH!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).QWILFISH!;
+    const qwilfish = playerToOpponent ? qwilfishSource : {
+      ...qwilfishSource,
+      tileset: subTileset(qwilfishSource.tileset, 0, 8),
+    };
+    const onixSource = playerToOpponent
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+    const onix = playerToOpponent ? {
+      ...onixSource,
+      tileset: subTileset(onixSource.tileset, 0, 8),
+    } : onixSource;
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const missileAlive = (sprite: typeof displayed.sprites[number]) =>
+      view.sprites.some((current) =>
+        current.kind === sprite.kind && current.oamSlot === sprite.oamSlot
+      );
+    const effects = displayed.sprites.slice().sort(
+      (left, right) => right.oamSlot - left.oamSlot,
+    );
+    const drawMissile = (sprite: typeof displayed.sprites[number]) => {
+      drawSpriteSheetAffineRotate(
+        fb,
+        twineedleArt.needle.tileset,
+        twineedleArt.needle.palette,
+        sprite.x + sprite.x2,
+        sprite.y + sprite.y2,
+        sprite.matrix.a,
+        sprite.matrix.b,
+        sprite.matrix.c,
+        sprite.matrix.d,
+        undefined,
+        false,
+      );
+    };
+    const targetIdleX2 = playerToOpponent && shakeDisplayed.age < 33 ? 1 : 0;
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetIdleX2 + shakeDisplayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + shakeDisplayed.targetOffset.y2,
+    );
+    const nonObjTarget2 = fb.slice();
+    drawSpriteSheet(
+      fb,
+      qwilfish.tileset,
+      qwilfish.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    for (const sprite of effects) {
+      if (sprite.kind !== "missile" || !missileAlive(sprite)) continue;
+      drawMissile(sprite);
+    }
+    // The initial invisible callback plus affine OAM allocation yields a
+    // missile-specific dual scanout at destruction: the departing OBJ remains
+    // visible from reducer age -2 while ordinary live movement uses age -1.
+    for (const sprite of teardownDisplayed.sprites) {
+      const wasPresent = displayed.sprites.some((prior) =>
+        prior.kind === sprite.kind && prior.oamSlot === sprite.oamSlot
+      );
+      if (sprite.kind !== "missile" || !wasPresent || missileAlive(sprite)) {
+        continue;
+      }
+      drawMissile(sprite);
+    }
+    for (const sprite of effects) {
+      if (sprite.kind !== "impact" || !view.alpha) continue;
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        nonObjTarget2,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        sprite.x,
+        sprite.y,
+        sprite.matrix.a,
+        sprite.matrix.b,
+        sprite.matrix.c,
+        sprite.matrix.d,
+        view.alpha.eva,
+        view.alpha.evb,
+        false,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "QWILFISH",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "QWILFISH" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "QWILFISH used" : "Foe QWILFISH used",
+      "PIN MISSILE!",
       99,
     );
     return;

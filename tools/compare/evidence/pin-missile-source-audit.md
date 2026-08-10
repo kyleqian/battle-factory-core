@@ -1,7 +1,7 @@
-# MOVE_PIN_MISSILE Scene-ON evidence checkpoint
+# MOVE_PIN_MISSILE Scene-ON source audit and exact acceptance
 
-This is a dense, source-pointer-bounded checkpoint for the animation lane. It
-does not promote coverage or claim a production compositor.
+This source-pointer-bounded audit underpins the exact animation-lane port and
+its production compositor.
 
 ## Source graph
 
@@ -45,18 +45,19 @@ The pointer-bounded source topology includes `gPinMissileSpriteTemplate`,
 software and hardware OAM/matrices, faded/unfaded/hardware palettes and tags,
 registers, audio players, immutable battle state, and raw RGB.
 
-Measured in both orientations (not generalized into the latch ledger yet):
-the first missile’s affine matrix is independently allocated and its first
-visible hardware state follows the source callback’s invisibility boundary;
-the affine missile removal is a plain OAM teardown. The three missile slots
-and reused hitsplat slots must be modeled from each orientation’s allocator
-order, and the `AnimMissileArc_Step` twice-advance must be ported from the
-source rather than replaced by a fitted curve.
+Measured in both orientations and recorded narrowly in the latch ledger: live
+`AnimMissileArc_Step` motion displays reducer age−1, while destruction retains
+one terminal matrix/OAM display from reducer age−2. Pin Missile's three short
+`AnimTask_ShakeMon2(target, 3, 0, 2, 1)` bursts display RAM+1. The reducer
+models each orientation's missile/hitsplat allocator order and ports the
+source callback's two arc advances rather than fitting the captured pixels.
+The tangent uses the integer GBA BIOS `ArcTan2`/`ArcTan2Neg` algorithm before
+`SetSpriteRotScale`, preserving the ROM's fixed-point truncation.
 
-## Remaining work
+## Exact acceptance
 
-`src/animation`, the Scene-ON typed seam, and the production draw case remain
-unchanged in this checkpoint. A later worker must port the Q8.8 arc plus BIOS
-angle/matrix behavior, prove both orientations twice fresh against the full
-receipt and framebuffer, and only then promote `MOVE_PIN_MISSILE` from the
-current 156 exact moves.
+`pinMissilePortable.ts` regenerates both fixtures twice and requires 93/93
+source-reducer, typed-seam, task/sprite, software/hardware OAM, affine matrix,
+palette/tag, register, audio, immutable-state, raw-RGB, and production
+framebuffer receipts in each orientation. It also locks the committed probe,
+aggregate raw-RGB, and normalized change-map digests and rejects any residual.

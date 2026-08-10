@@ -2455,6 +2455,33 @@
    ]
   },
   {
+   "move": "MOVE_PIN_MISSILE",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-211 QWILFISH versus set-156 ONIX Scene-ON parties pass the full 93-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 86-178 preserve evidence/raw-RGB/change-map e42138dc8dfa128eeca738a6f5ca3bcc515261a79b84aa0c1bd29d67ad5e3c98 / d56111747113854c8612d8904dbc5f1c585e3b229e96c785683a4463eeae01be / 627ffeb13b1f192534dff795c1b5daa60019e568b8747832051429dbd4e30f02; opponent-front frames 90-182 preserve 715d16f67269140f3b312e2c4a87e5baed2f9d35c1b910ddc5fb3b0ea7d167c1 / 888244d86c17e9870fd29d78a83a7a1aebfd06804eb527c52278f21c9e572499 / d6ffb0e1f1264be19e4b5017ec1b377f1200f39314d7bb483e89d67922e75732",
+    "the pure source-relative reducer ports InitAnimArcTranslation and TranslateAnimHorizontalArc Q8.8 accumulation and sine, the initial invisible callback, both advances used for the tangent, integer BIOS ArcTan2Neg and SetSpriteRotScale matrix behavior, opponent-side target-X inversion, all three wave amplitudes, affine allocation, and lifecycle/destruction",
+    "the move independently proves three animation-2 basic hitsplats, all missile/hitsplat allocator slots and painter order, three short AnimTask_ShakeMon2 bursts, target monbg/split priority, alpha/register/audio scheduling, and cleanup; Pin's maps measure live missile display at reducer age-1, a single terminal affine display from age-2, and its short ShakeMon2 schedule at RAM+1 rather than inheriting Spike Cannon or longer shake-task latches",
+    "the narrow typed Scene-ON seam exposes only resolved QWILFISH/ONIX presentation geometry and immutable field state; the compositor uses the established source-owned NEEDLE and IMPACT assets without changing damage, multi-hit RNG, outcomes, controller, turn, round, facility state, shared boundary lists, unsupported barriers, or sibling coverage",
+    "pinMissilePortable.ts regenerates both fixtures twice and requires 93/93 source/reducer, typed seam, tasks and logical sprites, target offsets, software and hardware OAM/matrices/palettes/tags/registers/audio, immutable state, per-frame and aggregate raw RGB receipts, committed change-map digests, and production framebuffer equality; exact mode has no residual"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-pin-missile-player-qwilfish-opponent-onix.json",
+    "tools/battle-lab/mechanic-pin-missile-opponent-qwilfish-player-onix.json",
+    "tools/compare/fixtures/pin-missile-player-qwilfish-opponent-onix.json",
+    "tools/compare/fixtures/pin-missile-opponent-qwilfish-player-onix.json",
+    "tools/compare/pinMissileProbe.py",
+    "tools/compare/pinMissilePortable.ts",
+    "tools/compare/evidence/pin-missile-source-audit.md",
+    "tools/compare/evidence/pin-missile-changemap-player.txt",
+    "tools/compare/evidence/pin-missile-changemap-opponent.txt",
+    "src/animation/pinMissile.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/pinMissile.test.ts",
+    "tests/animation/pinMissileEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_POISON_FANG",
    "status": "exact",
    "covered": [
@@ -3970,7 +3997,7 @@
     "source extraction byte-pins the literal NEEDLE sheet, palette, 16x16 affine OAM contract, invert-hitsplat template contract, and both legal set-154 BEEDRILL carrier sheets; IMPACT, ONIX, field chrome, and healthboxes remain shared assets",
     "the narrow shared compositor draws source-extracted BEEDRILL, opaque rotated NEEDLE sprites, alpha IMPACT sprites over target monbg, healthboxes/window/text, and prior-software display transfer; source subpriority places launch stingers behind player-back BEEDRILL but in front of opponent-front BEEDRILL without an age, coordinate, or pixel exception",
     "twineedlePortable.ts proves all 37/37 software/component/seam and shared-framebuffer frames, target offset receipts, registers, live side-relative audio events, prior-software-to-hardware OAM/matrix/palette transfer, raw RGB, and cleanup twice fresh in both orientations; independent outputs are byte-identical with player digest eb52b2a83a1822e43fdec0a330c252f3813bde5f6d3467d358331c7a12586ec1 and opponent digest b7022f7379ae961b84e045c5232d582069be245e5915e3f1499de8b82f2a5771",
-    "MOVE_PIN_MISSILE remains unsupported: source uses three distinct wave-amplitude gPinMissileSpriteTemplate arc translations, three animation-2 basic hitsplats, three short ShakeMon2 tasks, and separate JUMP_KICK/HORN_ATTACK audio timing; it does not call create_linear_stinger_sprite or create_handle_invert_hitsplat_sprite",
+    "MOVE_PIN_MISSILE is independently exact from its complete 93-frame bilateral Q8.8 arc, affine, allocator, short-ShakeMon2, hardware, and production-framebuffer evidence; its reducer remains separate from Twineedle's exact two-stinger body",
     "MOVE_SPIKE_CANNON is independently exact from complete 84-frame dense source, typed-seam, hardware, and shared-framebuffer evidence; its three-stinger timing and reducer remain separate from Twineedle's exact two-stinger body."
    ],
    "evidence": [

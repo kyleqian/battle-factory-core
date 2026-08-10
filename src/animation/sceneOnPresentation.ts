@@ -61,6 +61,10 @@ import {
   type SpikeCannonEffect,
 } from "./spikeCannon.ts";
 import {
+  pinMissileEffectAtAge,
+  type PinMissileEffect,
+} from "./pinMissile.ts";
+import {
   sonicBoomEffectAtAge,
   type SonicBoomEffect,
 } from "./sonicBoom.ts";
@@ -828,6 +832,7 @@ export interface SceneOnPresentationBattler {
     | "BEEDRILL"
     | "OMASTAR"
     | "OMANYTE"
+    | "QWILFISH"
     | "CHANSEY"
     | "CACNEA"
     | "PHANPY"
@@ -1671,6 +1676,14 @@ export interface SceneOnSpikeCannonConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Narrow Pin Missile presentation seam; hit count and damage stay outside. */
+export interface SceneOnPinMissileConfig {
+  readonly move: "PIN_MISSILE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSonicBoomConfig {
   readonly move: "SONIC_BOOM";
   readonly attacker: SceneOnPresentationBattler;
@@ -2498,6 +2511,7 @@ export type SceneOnMoveConfig =
   | SceneOnTwineedleConfig
   | SceneOnPoisonStingConfig
   | SceneOnSpikeCannonConfig
+  | SceneOnPinMissileConfig
   | SceneOnSonicBoomConfig
   | SceneOnSmokescreenConfig
   | SceneOnMudShotConfig
@@ -2886,6 +2900,12 @@ export interface SceneOnPoisonStingView extends PoisonStingEffect {
 }
 
 export interface SceneOnSpikeCannonView extends SpikeCannonEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnPinMissileView extends PinMissileEffect {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -5275,6 +5295,28 @@ export function sceneOnSpikeCannonView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...spikeCannonEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is PIN MISSILE's first source-script load display. */
+export function sceneOnPinMissileView(
+  state: SceneOnMovePresentationState<SceneOnPinMissileConfig>,
+): SceneOnPinMissileView {
+  if (state.config.move !== "PIN_MISSILE") {
+    throw new Error(
+      `expected PIN_MISSILE presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...pinMissileEffectAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
