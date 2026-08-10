@@ -5,6 +5,7 @@ import {
   reduceFactoryCalculateMonStatsParentTiming,
   reduceFactoryGetNatureTiming,
   reduceFactoryModifyStatByNatureTiming,
+  reduceFactorySignedDivisionTiming,
 } from "../src/engine/factoryConstructionClock.ts";
 
 type DirectCall = {
@@ -413,6 +414,80 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       .toThrow("stat must be a source u16");
     expect(() => reduceFactoryModifyStatByNatureTiming({ nature: 1, stat: 1, statIndex: 256 }))
       .toThrow("statIndex must be a source u8");
+  });
+
+  it("source-reduces all 72 direct signed-divide spans and isolates the one service residual", () => {
+    const sourceByCase: Record<string, number> = {};
+    const residuals: number[] = [];
+    const cycles: number[] = [];
+
+    for (const { value } of probes) {
+      let caseCycles = 0;
+      for (const call of value.directCalls.filter((row) => row.operation === "divide")) {
+        const timing = reduceFactorySignedDivisionTiming({
+          dividend: call.arguments.dividend!,
+          divisor: call.arguments.divisor!,
+        });
+        const measured = sourceCycles(
+          call.entryMasterCycles,
+          call.returnMasterCycles,
+          value.interruptPauses,
+        );
+        expect(timing).toMatchObject({
+          entryPc: 0x082e_7542,
+          unsignedCoreEntryPc: 0x082e_755c,
+          divisorZero: false,
+          overflow: false,
+          divisor: call.arguments.divisor,
+          dividend: call.arguments.dividend,
+          result: call.result,
+        });
+        expect(timing.cycles).toBeLessThanOrEqual(measured);
+        residuals.push(measured - timing.cycles);
+        cycles.push(timing.cycles);
+        caseCycles += timing.cycles;
+      }
+      sourceByCase[value.case] = caseCycles;
+    }
+
+    expect(cycles).toHaveLength(72);
+    expect(residuals.filter((value) => value === 0)).toHaveLength(71);
+    expect(residuals.filter((value) => value === 18)).toHaveLength(1);
+    expect(residuals.reduce((total, value) => total + value, 0)).toBe(18);
+    expect(sourceByCase).toEqual({ anchor: 11_252, liliana: 5_630, "factory-varied": 5_700 });
+    expect(cycles.reduce((total, value) => total + value, 0)).toBe(22_582);
+  });
+
+  it("follows signed wrapper, divisor-zero, and INT_MIN/-1 retail branches", () => {
+    const cases = [
+      { dividend: 5_750, divisor: 100, result: 57, resultBits: 57, cycles: 318 },
+      { dividend: -5_750, divisor: 100, result: -57, resultBits: 0xffff_ffc7, cycles: 310 },
+      { dividend: 5_750, divisor: -100, result: -57, resultBits: 0xffff_ffc7, cycles: 310 },
+      { dividend: -5_750, divisor: -100, result: 57, resultBits: 57, cycles: 310 },
+      { dividend: 0, divisor: 100, result: 0, resultBits: 0, cycles: 70 },
+      { dividend: 5_750, divisor: 0, result: 0, resultBits: 0, cycles: 40 },
+      {
+        dividend: -0x8000_0000,
+        divisor: -1,
+        result: -0x8000_0000,
+        resultBits: 0x8000_0000,
+        cycles: 336,
+      },
+    ];
+
+    for (const input of cases) {
+      expect(reduceFactorySignedDivisionTiming(input)).toMatchObject({
+        ...input,
+        entryPc: 0x082e_7542,
+        unsignedCoreEntryPc: 0x082e_755c,
+        divisorZero: input.divisor === 0,
+        overflow: input.dividend === -0x8000_0000 && input.divisor === -1,
+      });
+    }
+    expect(() => reduceFactorySignedDivisionTiming({ dividend: -0x8000_0001, divisor: 1 }))
+      .toThrow("dividend must be a source i32");
+    expect(() => reduceFactorySignedDivisionTiming({ dividend: 1, divisor: 0x8000_0000 }))
+      .toThrow("divisor must be a source i32");
   });
 
   it("source-reduces all twelve parent-only residuals and identifies the u8 level-up-HP branch", () => {

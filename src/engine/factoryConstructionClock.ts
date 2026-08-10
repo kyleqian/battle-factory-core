@@ -255,6 +255,37 @@ export interface FactoryModifyStatByNatureTiming {
   cycles: number;
 }
 
+export interface FactorySignedDivisionTimingInput {
+  /** Source signed i32 dividend passed in r0. */
+  dividend: number;
+  /** Source signed i32 divisor passed in r1. */
+  divisor: number;
+}
+
+export interface FactorySignedDivisionTiming {
+  dividend: number;
+  divisor: number;
+  /** mGBA's pipelined entry boundary for the retail `__divsi3` call. */
+  entryPc: number;
+  /** First instruction of the shared inline unsigned Loop1/2/3 core. */
+  unsignedCoreEntryPc: number;
+  dividendMagnitude: number;
+  divisorMagnitude: number;
+  signNegative: boolean;
+  divisorZero: boolean;
+  overflow: boolean;
+  /** Unsigned register result after the wrapper's final `negs`, as a u32. */
+  resultBits: number;
+  /** Same result interpreted as the source signed i32 return value. */
+  result: number;
+  unsignedCoreSequentialThumbHalfwords: number;
+  unsignedCorePipelineRefills: number;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  /** Source-owned master cycles; asynchronous IRQ/service is excluded. */
+  cycles: number;
+}
+
 const THUMB_SEQUENTIAL_CYCLES = 2;
 const THUMB_PIPELINE_REFILL_CYCLES = 6;
 const THUMB_TAKEN_CONTROL_CYCLES = THUMB_SEQUENTIAL_CYCLES + THUMB_PIPELINE_REFILL_CYCLES;
@@ -619,20 +650,24 @@ export function reduceFactoryCalculateMonStatsParentTiming(
   });
 }
 
-interface UnsignedDivisionBy100Timing {
+interface UnsignedDivisionCoreTiming {
   quotient: number;
   sequentialThumbHalfwords: number;
   pipelineRefills: number;
 }
 
 /**
- * Replay the retail `__udivsi3` implementation at `0x082e7b68` for its one
- * nonzero constant divisor. This is intentionally separate from
- * `reduceFactoryNatureAttemptTiming`'s `__umodsi3`: the two libgcc bodies
- * have different Loop3 result/correction paths, so sharing a synthetic
- * division formula would hide real executed control flow.
+ * Replay the shared inline unsigned Loop1/2/3 body used by retail
+ * `__udivsi3` (`0x082e7b72`) and by `__divsi3` after its sign wrapper
+ * (`0x082e755c`). The bodies share these instructions exactly, but their
+ * entry/setup/return boundaries remain separate below. This is not the
+ * distinct `__umodsi3` body used by the nature reducers: its Loop3 resets and
+ * rotates a different result register, so it is intentionally not shared.
  */
-function reduceUnsignedDivisionBy100Timing(dividend: number): UnsignedDivisionBy100Timing {
+function reduceUnsignedDivisionCoreTiming(
+  dividend: number,
+  divisor: number,
+): UnsignedDivisionCoreTiming {
   let sequentialThumbHalfwords = 0;
   let pipelineRefills = 0;
   const instruction = (count = 1): void => {
@@ -643,22 +678,16 @@ function reduceUnsignedDivisionBy100Timing(dividend: number): UnsignedDivisionBy
     if (taken) pipelineRefills += 1;
   };
 
-  let r0 = dividend >>> 0;
-  let r1 = 100;
-  instruction(); // cmp r1, #0
-  branch(false); // beq Ldiv0; divisor is the compiled constant 100
+  let r0 = requireU32(dividend, "unsigned dividend");
+  let r1 = requireU32(divisor, "unsigned divisor");
+  if (r1 === 0) throw new Error("unsigned divisor must be nonzero");
   let r3 = 1;
-  instruction();
   let r2 = 0;
-  instruction();
-  instruction(); // push {r4}
   instruction(); // cmp r0, r1
   const belowDivisor = r0 < r1;
   branch(belowDivisor); // bcc Lgot_result
   if (belowDivisor) {
     instruction(); // adds r0, r2, #0
-    instruction(); // pop {r4}
-    branch(true); // mov pc, lr
     return { quotient: r2, sequentialThumbHalfwords, pipelineRefills };
   }
 
@@ -772,9 +801,162 @@ function reduceUnsignedDivisionBy100Timing(dividend: number): UnsignedDivisionBy
   }
 
   instruction(); // adds r0, r2, #0
+  return { quotient: r2, sequentialThumbHalfwords, pipelineRefills };
+}
+
+interface UnsignedDivisionBy100Timing extends UnsignedDivisionCoreTiming {}
+
+/**
+ * Replay the complete retail `__udivsi3` boundary at `0x082e7b68` for its
+ * one nonzero constant divisor. Its setup and return remain distinct from
+ * `__divsi3`; only the exact Loop1/2/3 body is factored above.
+ */
+function reduceUnsignedDivisionBy100Timing(dividend: number): UnsignedDivisionBy100Timing {
+  let sequentialThumbHalfwords = 0;
+  let pipelineRefills = 0;
+  const instruction = (count = 1): void => {
+    sequentialThumbHalfwords += count;
+  };
+  const branch = (taken: boolean): void => {
+    instruction();
+    if (taken) pipelineRefills += 1;
+  };
+
+  instruction(); // cmp r1, #0
+  branch(false); // beq Ldiv0; divisor is the compiled constant 100
+  instruction(); // movs r3, #1
+  instruction(); // movs r2, #0
+  instruction(); // push {r4}
+  const core = reduceUnsignedDivisionCoreTiming(dividend, 100);
   instruction(); // pop {r4}
   branch(true); // mov pc, lr
-  return { quotient: r2, sequentialThumbHalfwords, pipelineRefills };
+  return {
+    quotient: core.quotient,
+    sequentialThumbHalfwords: sequentialThumbHalfwords + core.sequentialThumbHalfwords,
+    pipelineRefills: pipelineRefills + core.pipelineRefills,
+  };
+}
+
+/**
+ * Reduce one complete retail `__divsi3` call at ELF `0x082e7542`.
+ *
+ * `__divsi3` is not a call to the separate `__udivsi3` symbol: its wrapper
+ * records the sign in `ip`, negates each negative operand in place, then
+ * enters an inline copy of the exact `__udivsi3` Loop1/Loop2/Loop3 body at
+ * `0x082e755c`. The wrapper applies the result sign at `Lgot_result` and has
+ * a distinct `__div0` call/return path for a zero divisor. All branch choices
+ * below come only from the source signed-i32 ABI values; no mon, set,
+ * fixture, frame, tick, cursor, or observed-duration key is accepted.
+ */
+export function reduceFactorySignedDivisionTiming(
+  input: Readonly<FactorySignedDivisionTimingInput>,
+): FactorySignedDivisionTiming {
+  const dividend = requireSigned32(input.dividend, "dividend");
+  const divisor = requireSigned32(input.divisor, "divisor");
+  const dividendBits = dividend >>> 0;
+  const divisorBits = divisor >>> 0;
+  const dividendNegative = dividend < 0;
+  const divisorNegative = divisor < 0;
+  const signNegative = ((dividendBits ^ divisorBits) & 0x8000_0000) !== 0;
+  const divisorZero = divisor === 0;
+  const overflow = dividend === -0x8000_0000 && divisor === -1;
+  const dividendMagnitude = dividendNegative
+    ? (-dividendBits) >>> 0
+    : dividendBits;
+  const divisorMagnitude = divisorNegative
+    ? (-divisorBits) >>> 0
+    : divisorBits;
+
+  let sequentialThumbHalfwords = 0;
+  let pipelineRefills = 0;
+  const instruction = (count = 1): void => {
+    sequentialThumbHalfwords += count;
+  };
+  const branch = (taken: boolean): void => {
+    instruction();
+    if (taken) pipelineRefills += 1;
+  };
+  const call = (): void => {
+    instruction(2); // Thumb BL pair
+    pipelineRefills += 1;
+  };
+
+  instruction(); // cmp r1, #0
+  branch(divisorZero); // beq Ldiv0
+  if (divisorZero) {
+    instruction(); // push {lr}
+    call(); // BL __div0
+    instruction(); // __div0: mov pc, lr
+    pipelineRefills += 1;
+    instruction(); // movs r0, #0
+    branch(true); // pop {pc}
+    return Object.freeze({
+      dividend,
+      divisor,
+      entryPc: 0x082e_7542,
+      unsignedCoreEntryPc: 0x082e_755c,
+      dividendMagnitude,
+      divisorMagnitude,
+      signNegative,
+      divisorZero,
+      overflow,
+      resultBits: 0,
+      result: 0,
+      unsignedCoreSequentialThumbHalfwords: 0,
+      unsignedCorePipelineRefills: 0,
+      sequentialThumbHalfwords,
+      pipelineRefills,
+      cycles: sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+        + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES,
+    });
+  }
+
+  instruction(); // push {r4}
+  instruction(); // adds r4, r0, #0
+  instruction(); // eors r4, r1
+  instruction(); // mov ip, r4
+  instruction(); // movs r3, #1
+  instruction(); // movs r2, #0
+  instruction(); // cmp r1, #0
+  branch(!divisorNegative); // bpl Over1
+  if (divisorNegative) instruction(); // negs r1, r1
+  instruction(); // cmp r0, #0
+  branch(!dividendNegative); // bpl Over2
+  if (dividendNegative) instruction(); // negs r0, r0
+
+  const core = reduceUnsignedDivisionCoreTiming(dividendMagnitude, divisorMagnitude);
+  sequentialThumbHalfwords += core.sequentialThumbHalfwords;
+  pipelineRefills += core.pipelineRefills;
+  instruction(); // mov r4, ip
+  instruction(); // cmp r4, #0
+  branch(!signNegative); // bpl Over7
+  if (signNegative) instruction(); // negs r0, r0
+  instruction(); // pop {r4}
+  branch(true); // mov pc, lr
+
+  const resultBits = signNegative ? (-core.quotient) >>> 0 : core.quotient >>> 0;
+  const result = resultBits >= 0x8000_0000
+    ? resultBits - 0x1_0000_0000
+    : resultBits;
+  return Object.freeze({
+    dividend,
+    divisor,
+    entryPc: 0x082e_7542,
+    unsignedCoreEntryPc: 0x082e_755c,
+    dividendMagnitude,
+    divisorMagnitude,
+    signNegative,
+    divisorZero,
+    overflow,
+    resultBits,
+    result,
+    unsignedCoreSequentialThumbHalfwords: core.sequentialThumbHalfwords,
+    unsignedCorePipelineRefills: core.pipelineRefills,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    cycles: sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+      + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES,
+  });
 }
 
 /**
@@ -1405,6 +1587,13 @@ function requireU32(value: number, field: string): number {
     throw new Error(`${field} must be a source u32, got ${value}`);
   }
   return value >>> 0;
+}
+
+function requireSigned32(value: number, field: string): number {
+  if (!Number.isSafeInteger(value) || value < -0x8000_0000 || value > 0x7fff_ffff) {
+    throw new Error(`${field} must be a source i32, got ${value}`);
+  }
+  return value;
 }
 
 function requireNonnegativeInteger(value: number, field: string): number {
