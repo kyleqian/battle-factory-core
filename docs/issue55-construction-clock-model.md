@@ -140,9 +140,30 @@ separately instruction-traced **245-cycle `VCountIntr→m4aSoundVSync` IRQ**.
 No external service is folded into the reducer, and the earlier 278-call
 nature-attempt contract is unchanged.
 
+The standalone `reduceFactorySignedDivisionTiming` closes the **72** direct
+`__divsi3` calls, six per mon across all **12** v1 mon boundaries. It accepts
+only source signed-i32 dividend/divisor ABI values and follows the exact
+retail wrapper at `0x082E7542`: divisor-zero `__div0`, sign capture/absolute
+value branches, the inline unsigned core at `0x082E755C`, and final sign
+application. The core is factored only because its Loop1/Loop2/Loop3
+shift/subtract instructions are identical to the already-separated
+`__udivsi3` body; setup and return timing remain symbol-specific, and the
+different `__umodsi3` body is not reused.
+
+The three source totals are anchor/LILIANA/varied **11,252 / 5,630 / 5,700**
+(**22,582** total). Their timing histograms are respectively
+`194×1 + 258×2 + 318×16 + 320×10 + 322×7`,
+`258×2 + 318×5 + 320×9 + 322×2`, and
+`256×1 + 318×3 + 320×9 + 322×5`. All 72 calls contain zero complete VBlank
+pauses; raw spans are **71 exact + 1×(+18)** asynchronous service residual
+(anchor mon 3's `11300/100` call). The service residual is not folded into the
+source reducer. Retail branch tests additionally pin negative operands,
+zero-dividend/zero-divisor paths, and `INT_MIN / -1` wrapping to
+`0x80000000`.
+
 The parent reducer still deliberately excludes the other direct callee
 durations. Encrypted box-mon `%24` routes, growth/experience level lookup,
-signed divides, and writes still require their compiled
+and writes still require their compiled
 ROM/EWRAM timing models. Therefore the complete `calculate-mon-stats`
 operation is unresolved and the construction clock stays unwired.
 

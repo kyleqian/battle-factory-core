@@ -1141,7 +1141,21 @@ calls account for **59,900** source cycles (anchor/LILIANA/varied
 existing **278-call** nature-attempt contract is unchanged; fresh anchor hash
 remains `cde88e8f…`.
 
-Nested encrypted `%24` box-mon access, growth/experience, signed divides, and
+**Nested direct signed-division timing (2026-08-10, `602227bd`):**
+`reduceFactorySignedDivisionTiming` now closes all **72/72** v1 direct
+`__divsi3` calls (**6 per mon, 12 mons**) from only signed-i32 dividend/divisor
+ABI values. It audits the wrapper's divisor-zero `__div0`, sign/absolute-value
+branches, final sign, and inline unsigned Loop1/2/Loop3 core at
+`0x082E755C`, factoring only the exact core shared with the distinct
+`__udivsi3` body at `0x082E7B68`. Source totals are anchor/LILIANA/varied
+**11,252 / 5,630 / 5,700 = 22,582** cycles; all 72 calls contain no complete
+VBlank pause. Raw spans are **71 exact + one +18** asynchronous service
+residual (anchor mon 3 `11300/100`), which is not folded into the reducer.
+The red-first tests also pin negative operands, zero dividend/divisor, and
+`INT_MIN / -1` retail wraparound. This resolves **72/480** direct calls but
+does not claim the aggregate operation.
+
+Nested encrypted `%24` box-mon access, growth/experience, and
 writes remain unresolved, so the
 complete stats operation and live clock stay unwired. No identity/duration
 table or residual fit landed; #55 stays open. See the construction receipt's

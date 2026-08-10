@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1092 — [MAIN worker, 2026-08-10] **#55 direct signed-division timing reduced**
+
+- **State:** implementation/test commit `602227bd`; focused stats evidence
+  **11/11** is green after red-first verification. #55 remains open and the
+  construction clock remains unwired; smoke/typecheck/full suite/build are
+  the next verification gate.
+- **Did:** reduced all **72/72** direct `__divsi3` calls from source signed-i32
+  dividend/divisor ABI values and the compiled `0x082E7542` wrapper plus exact
+  inline unsigned core. Source totals anchor/LILIANA/varied are
+  **11,252/5,630/5,700 = 22,582** cycles; raw spans decompose **71×exact +
+  1×(+18 async service)**. Tests pin zero/sign/`INT_MIN/-1` branches.
+- **Next:** run `npm run test:smoke`, `npm run typecheck`, full `npm test`, and
+  `npm run build`; then record final counts in this entry. Do not wire the
+  aggregate stats operation or construction clock.
+- **Notes:** factor is limited to the exact Loop1/2/3 body shared with
+  `__udivsi3`; setup/return boundaries remain separate. No identity/duration
+  lookup, fixture mutation, excluded lane, canonical Battle-2, animation, or
+  unsupported-barrier change.
+
 ## 1091 — [MAIN worker, 2026-08-10] **#55 direct `GetNature` timing reduced**
 
 - **State:** implementation commit `59b13350`; focused stats/clock **25/25**,
@@ -37,21 +56,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   u16 product, ARM7 multiply width, and nested `__udivsi3`; no identity or
   duration lookup, fixture mutation, canonical Battle-2, animation, or
   unsupported-barrier change.
-
-## 1089 — [supervisor, 2026-08-10] **#55 m4a source-state boundary extended and reproduced**
-
-- **State:** squashed side fold `28f7a5c8`; focused union **15/15** and smoke
-  **375/375** pass. Final union typecheck/full suite/build follow after the next
-  bounded main increment.
-- **Did:** two fresh Scene-OFF runs per case reproduce all **113** audio
-  observations byte-for-byte: **113** equal captured-state keys and **0**
-  differing m4a costs. The v3 packet removes frame/tick/cursor/address identity
-  and adds full fixed structs, normalized graph links, blob digests, dispatch
-  targets, and audio I/O state.
-- **Next:** instruction-trace the remaining indirect MPlayMain callbacks and
-  malformed/dynamic sample targets before any cross-state audio reducer; keep
-  VBlank arbitration and the live construction clock unwired.
-- **Notes:** coverage remains explicitly incomplete with four residual
-  dereference classes; no production reducer, canonical Battle-2, animation,
-  or unsupported-barrier change. Side commits were squashed so transient mGBA
-  log blobs did not enter master history.

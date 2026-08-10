@@ -336,6 +336,41 @@ This resolves another **60/480** direct-call sites (**12.5%**) and **59,900 /
 divide, and VBlank/audio arbitration remain unresolved, so this does not wire
 or complete `CalculateMonStats`.
 
+### Direct signed-division component (2026-08-10)
+
+`reduceFactorySignedDivisionTiming` now reduces all **72/72** direct signed
+divisions in the v1 packets: six per mon across the anchor/LILIANA/varied
+**6/3/3** mon boundaries. The ABI is only a source signed i32 dividend and
+divisor. The reducer validates those widths, returns the retail signed result
+and u32 result bits, and has no mon, target, set, trainer, frame, tick, cursor,
+fixture, or observed-duration input.
+
+The pinned ELF body starts at the measured `0x082E7542` boundary. Its wrapper
+replays divisor-zero `__div0`, sign capture in `ip`, each source-sign
+`negs`, and final result-sign `negs`. For nonzero divisors it enters the
+inline unsigned core at `0x082E755C`; that core is factored with the exact
+Loop1/Loop2/Loop3 instruction sequence already used by the distinct
+`__udivsi3` boundary at `0x082E7B68`, while each symbol's setup and return
+remain separate. The core is the unsigned shift/subtract algorithm, not the
+different `__umodsi3` rotation/correction body.
+
+All 72 calls have divisor `100`. The source-cycle histograms are anchor
+`194×1 + 258×2 + 318×16 + 320×10 + 322×7 = 11,252`, LILIANA
+`258×2 + 318×5 + 320×9 + 322×2 = 5,630`, and varied
+`256×1 + 318×3 + 320×9 + 322×5 = 5,700`: **22,582** cycles total. Every
+direct call contains zero fully contained VBlank pauses. Raw spans decompose
+as **71×exact + 1×(+18)**; the sole residual is the anchor mon-3
+`11300/100` `sp-attack` call (reducer **318**, raw **336**) and is retained as
+asynchronous timing service, not folded into the reducer. Source tests also
+pin negative operands, zero dividend/divisor, and retail `INT_MIN / -1`
+wraparound (`0x80000000`).
+
+This closes **72/480** direct calls (**15%**) and **22,582 / 1,768,691 =
+1.277%** of the pause-subtracted direct-callee cycles. It is a bounded
+component only: encrypted Get/Set, level/growth, nature fetch, VBlank/audio,
+and the aggregate `CalculateMonStats` operation remain unresolved; the
+construction clock stays unwired.
+
 ### Construction-entry component (2026-08-10)
 
 `reduceFactoryConstructionEntryTiming` covers the complete
