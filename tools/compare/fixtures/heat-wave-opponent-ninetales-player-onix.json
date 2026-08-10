@@ -1,0 +1,16 @@
+{
+  "schema":"heat-wave-portable-evidence/v1",
+  "oracleProfile":"battle-scene-on",
+  "move":"HEAT_WAVE",
+  "orientation":"opponent-front",
+  "pair":"set 526 Ninetales (opponent-front) -> legal staged Onix (player-back)",
+  "scenario":"tools/battle-lab/mechanic-heat-wave-opponent-ninetales-player-onix.json",
+  "probe":"tools/compare/heatWaveProbe.py",
+  "denseWindow":{"startFrame":82,"endFrame":249,"frameCount":168},
+  "evidenceSha256":"71fc59d12b5971122802695cd5104be695b47b0f27ecd54a7ee537746c9e3097",
+  "secondFreshEvidenceSha256":"71fc59d12b5971122802695cd5104be695b47b0f27ecd54a7ee537746c9e3097",
+  "rawRgbSha256":"5050e7a3c99a44a4ddfdef57ed5442c50ebfbb4fe9aef0020b25cc9e05b92db0",
+  "changeMap":"tools/compare/evidence/heat-wave-changemap-opponent.txt",
+  "changeMapSha256":"840d4f8b10d9419160c28db4bbf7202bf38435d1eff9ccb802f9dd832cd44ded",
+  "acceptance":{"status":"evidence-only-unsupported","denseEvidenceFrames":168}
+}
