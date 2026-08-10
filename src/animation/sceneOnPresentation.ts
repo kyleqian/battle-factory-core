@@ -644,6 +644,7 @@ import {
   knockOffTargetOamOffsetAtAge,
   type KnockOffBodyState,
 } from "./knockOff.ts";
+import { batonPassAtAge, type BatonPassState } from "./batonPass.ts";
 import {
   shadowBallBackgroundBldy,
   shadowBallBackgroundIsGhost,
@@ -817,6 +818,7 @@ export interface SceneOnPresentationBattler {
     | "CHARMANDER"
     | "LEDYBA"
     | "WURMPLE"
+    | "AIPOM"
     | "WEEDLE"
      | "PRIMEAPE"
      | "MARSHTOMP"
@@ -1488,6 +1490,13 @@ export interface SceneOnLowKickConfig {
 /** Narrow Scene-ON seam; move resolution and critical-hit state stay external. */
 export interface SceneOnKarateChopConfig {
   readonly move: "KARATE_CHOP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnBatonPassConfig {
+  readonly move: "BATON_PASS";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -2387,6 +2396,7 @@ export type SceneOnMoveConfig =
   | SceneOnRollingKickConfig
   | SceneOnLowKickConfig
   | SceneOnKarateChopConfig
+  | SceneOnBatonPassConfig
   | SceneOnStompConfig
   | SceneOnViceGripConfig
   | SceneOnBiteConfig
@@ -2678,6 +2688,17 @@ export interface SceneOnKarateChopView extends KarateChopState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnBatonPassView extends BatonPassState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly displayedBgPaletteY: number;
+  readonly displayedBattlerPaletteY: number;
+  readonly displayedPokeball: BatonPassState["pokeball"];
+  readonly displayedAttackerMatrix: BatonPassState["attackerMatrix"];
+  readonly displayedAttackerInvisible: boolean;
 }
 
 export interface SceneOnStompView extends StompState {
@@ -4723,6 +4744,28 @@ export function sceneOnKarateChopView(
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
+  };
+}
+
+/** Baton Pass keeps software truth and independently lagged scanout state. */
+export function sceneOnBatonPassView(
+  state: SceneOnMovePresentationState<SceneOnBatonPassConfig>,
+): SceneOnBatonPassView {
+  if (state.config.move !== "BATON_PASS") {
+    throw new Error(`expected BATON_PASS presentation, got ${state.config.move}`);
+  }
+  const current = batonPassAtAge(state.age, state.config.attacker.geometry.animationCenter);
+  const displayed = batonPassAtAge(state.age - 1, state.config.attacker.geometry.animationCenter);
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...current,
+    displayedBgPaletteY: displayed.bgPaletteY,
+    displayedBattlerPaletteY: displayed.battlerPaletteY,
+    displayedPokeball: displayed.pokeball,
+    displayedAttackerMatrix: displayed.attackerMatrix,
+    displayedAttackerInvisible: displayed.attackerInvisible,
   };
 }
 

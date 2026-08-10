@@ -623,6 +623,7 @@ import shadowBallAsset from "../animation/assets/shadow-ball.json" with { type: 
 import encoreAsset from "../animation/assets/encore.json" with { type: "json" };
 import dragonClawAsset from "../animation/assets/dragon-claw.json" with { type: "json" };
 import singAsset from "../animation/assets/sing.json" with { type: "json" };
+import batonPassAsset from "../animation/assets/baton-pass.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -900,6 +901,7 @@ import {
   sceneOnRollingKickView,
   sceneOnLowKickView,
   sceneOnKarateChopView,
+  sceneOnBatonPassView,
   sceneOnStompView,
   sceneOnViceGripView,
   sceneOnBiteView,
@@ -996,6 +998,7 @@ import {
   sceneOnKnockOffView,
   type SceneOnMovePresentationState,
   type SceneOnKarateChopConfig,
+  type SceneOnBatonPassConfig,
   type SceneOnStompConfig,
   type SceneOnViceGripConfig,
   type SceneOnFirePunchConfig,
@@ -1388,6 +1391,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const aipomFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).AIPOM!;
 const crawdauntFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CRAWDAUNT!;
 const hitmontopFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HITMONTOP!;
 const swabluFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SWABLU!;
@@ -1890,6 +1894,7 @@ const battleAnimFlyBall = battleAnimFlyBallAsset as { tileset: Tileset; palette:
 const battleAnimSmallEmber = battleAnimSmallEmberAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimFirePlume = battleAnimFirePlumeAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimHandsAndFeet = battleAnimHandsAndFeetAsset as { tileset: Tileset; palette: RgbColor[] };
+const batonPassArt = batonPassAsset as { pokeball: { tileset: Tileset; palette: RgbColor[] } };
 const battleAnimIceCrystals = battleAnimIceCrystalsAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimIceCube = battleAnimIceCubeAsset as {
   palette: RgbColor[];
@@ -1916,6 +1921,7 @@ const dugtrioBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSp
 const charmeleonBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CHARMELEON!;
 const haunterBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HAUNTER!;
 const ivysaurBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).IVYSAUR!;
+const aipomBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).AIPOM!;
 const kadabraBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).KADABRA!;
 const grovyleBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GROVYLE!;
 const battleAnimGhostBg = battleAnimGhostBgAsset as {
@@ -24027,6 +24033,97 @@ export function renderSceneOnMovePresentation(
       "LOW KICK!",
       99,
     );
+    return;
+  }
+
+  if (state.config.move === "BATON_PASS") {
+    const batonState = state as SceneOnMovePresentationState<SceneOnBatonPassConfig>;
+    const view = sceneOnBatonPassView(batonState);
+    const playerToOpponent = view.attacker.species === "AIPOM"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "AIPOM"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(`unsupported staged BATON_PASS pair ${view.attacker.species}->${view.target.species}`);
+    }
+    const tint = { r: 255, g: 181, b: 247 };
+    const aipom = playerToOpponent
+      ? aipomBackSprite
+      : { ...aipomFrontSprite, tileset: subTileset(aipomFrontSprite.tileset, 0, 8) };
+    const onix = playerToOpponent
+      ? { ...onixFrontSprite, tileset: subTileset(onixFrontSprite.tileset, 0, 8) }
+      : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(battleBg.palette, tint, view.displayedBgPaletteY),
+    );
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const aipomPalette = blendPaletteToward(aipom.palette, tint, view.displayedBattlerPaletteY);
+    const drawAttacker = () => {
+      if (view.displayedAttackerInvisible) return;
+      const matrix = view.displayedAttackerMatrix;
+      if (matrix.a === 256 && matrix.d === 256) {
+        drawSpriteSheet(
+          fb,
+          aipom.tileset,
+          aipomPalette,
+          view.attacker.geometry.spriteCorner.x,
+          view.attacker.geometry.spriteCorner.y,
+        );
+      } else {
+        drawSpriteSheetAffineRotate(
+          fb,
+          aipom.tileset,
+          aipomPalette,
+          view.attacker.geometry.spriteCorner.x + 32,
+          view.attacker.geometry.spriteCorner.y + 32,
+          matrix.a,
+          0,
+          0,
+          matrix.d,
+        );
+      }
+    };
+    if (playerToOpponent) { drawTarget(); drawAttacker(); }
+    else { drawAttacker(); drawTarget(); }
+    if (view.displayedPokeball) {
+      drawSpriteSheet(
+        fb,
+        batonPassArt.pokeball.tileset,
+        batonPassArt.pokeball.palette,
+        view.displayedPokeball.x - 8,
+        view.displayedPokeball.y + view.displayedPokeball.y2 - 8,
+      );
+    }
+    const profile = batonState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "AIPOM", level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "AIPOM" : "ONIX", level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb, playerToOpponent ? "AIPOM used" : "Foe AIPOM used", "BATON PASS!", 99);
     return;
   }
 
