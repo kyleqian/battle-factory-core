@@ -216,6 +216,28 @@ function verify(path: string, runNumber: number): void {
       x2: sprite.x2, y2: sprite.y2, animNum: sprite.animNum, matrix: sprite.matrix,
     }));
     if (!same(actualSprites, expectedSprites)) failures.push(`age ${age}: source sprites`);
+    // Karate Chop independently confirms the freshly allocated affine
+    // IMPACT's dual-lag class: its first software age still has neutral,
+    // absent hardware; the following scanout carries both ObjBlend/affine
+    // OAM and matrix 372; software teardown then remains on hardware for one
+    // final scanout before both OAM and matrix clear.
+    const impactSoftware = probe.frames[22]!.sprites.find((sprite) =>
+      sprite.template === probe.templates.gBasicHitSplatSpriteTemplate);
+    if (!impactSoftware) failures.push("age 22: missing IMPACT software anchor");
+    else {
+      const impactHardware = oracle.hardwareOam.some((item) => same(item, [
+        impactSoftware.attr0, impactSoftware.attr1, impactSoftware.attr2,
+      ]));
+      const expectedImpactHardware = age >= 23 && age <= 32;
+      const expectedImpactMatrix = expectedImpactHardware
+        ? [372, 0, 0, 372]
+        : [256, 0, 0, 256];
+      if ((age >= 22 && age <= 33)
+        && (impactHardware !== expectedImpactHardware
+          || !same(oracle.hardwareMatrices[impactSoftware.matrixNum], expectedImpactMatrix))) {
+        failures.push(`age ${age}: affine IMPACT dual-lag scanout`);
+      }
+    }
     const shake = oracle.tasks.filter((task) => task.func === probe.taskFuncs.AnimTask_ShakeMon
       || task.func === probe.taskFuncs.AnimTask_ShakeMon_Step);
     if (expected.shakeTask === null ? shake.length !== 0 : shake.length !== 1
