@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { readFileSync, realpathSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { copyFileSync, mkdirSync, readFileSync, realpathSync } from "node:fs";
+import { basename, dirname, join, resolve } from "node:path";
 import { leafBladeAtAge } from "../../src/animation/leafBlade.ts";
 import {
   createSceneOnMovePresentation,
@@ -19,6 +19,8 @@ interface Fixture extends SceneOnLeafBladeConfig {
   readonly sourceWindow: { readonly startFrame: number; readonly endFrame: number; readonly frameCount: number };
   readonly evidenceSha256: string;
   readonly rawRgbSha256: string;
+  readonly changeMap: string;
+  readonly changeMapSha256: string;
   readonly lifecycleCounts: { readonly leafBlade: number; readonly crossImpact: number };
   readonly topology: Record<string, readonly string[]>;
 }
@@ -41,7 +43,10 @@ interface Frame {
   readonly soundTaskCount: number;
   readonly tasks: readonly { readonly func: { readonly symbol: string | null }; readonly data: readonly number[] }[];
   readonly sprites: readonly Sprite[];
+  readonly playerSprite: Sprite;
+  readonly opponentSprite: Sprite;
   readonly battlers: unknown;
+  readonly immutableState: unknown;
   readonly softwareOam: readonly string[];
   readonly hardwareOam: readonly string[];
   readonly hardwareMatrices: readonly (readonly number[])[];
@@ -78,6 +83,24 @@ const i16 = (raw: string, offset: number): number => {
 };
 const byte = (raw: string, offset: number): number => Number.parseInt(raw.slice(offset * 2, offset * 2 + 2), 16);
 
+function normalizedChangeMap(fixture: Fixture, probe: Probe, rgbDir: string, scratch: string): string {
+  const sourceRgb = join(scratch, "source-rgb");
+  mkdirSync(sourceRgb);
+  for (const frame of probe.frames) {
+    const name = `${String(frame.frame).padStart(5, "0")}.rgb`;
+    copyFileSync(join(rgbDir, name), join(sourceRgb, name));
+  }
+  const run = spawnSync(
+    "python3",
+    [join(root, "tools/compare/frame-changemap.py"), sourceRgb],
+    { cwd: root, encoding: "utf8" },
+  );
+  if (run.status !== 0) throw new Error(`${fixture.orientation}: change-map regeneration failed`);
+  const separator = run.stdout.indexOf(" — ");
+  if (separator === -1) throw new Error("Leaf Blade change-map header changed");
+  return `# ${basename(fixture.changeMap)} raw RGB888 — ${run.stdout.slice(separator + 3)}`;
+}
+
 function verify(path: string): void {
   const fixture = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
   const scratch = createScratchDir("pokebench-leaf-blade-");
@@ -105,12 +128,16 @@ function verify(path: string): void {
     }
   }
   const raw = rawHash.digest("hex");
-  if (fixture.schema !== "leaf-blade-portable-evidence/v1"
-    || probe.schema !== "leaf-blade-dense-evidence/v1"
+  const changeMap = normalizedChangeMap(fixture, probe, rgbDir, scratch);
+  const changeMapHash = createHash("sha256").update(changeMap).digest("hex");
+  if (fixture.schema !== "leaf-blade-portable-evidence/v2"
+    || probe.schema !== "leaf-blade-dense-evidence/v2"
     || !same(probe.sourceWindow, fixture.sourceWindow)
     || !same(probe.lifecycleCounts, fixture.lifecycleCounts)
     || !same(probe.topology, fixture.topology)
     || evidence !== fixture.evidenceSha256 || raw !== fixture.rawRgbSha256
+    || changeMapHash !== fixture.changeMapSha256
+    || changeMap !== readFileSync(resolve(root, fixture.changeMap), "utf8")
     || probe.frames.length !== fixture.sourceWindow.frameCount) {
     throw new Error(`${fixture.orientation}: immutable dense receipt changed`);
   }
@@ -128,6 +155,7 @@ function verify(path: string): void {
     fieldProfile: fixture.fieldProfile,
   });
   const immutableBattlers = probe.frames[0]!.battlers;
+  const immutableState = probe.frames[0]!.immutableState;
   const failures: string[] = [];
   let components = 0;
   let framebuffers = 0;
@@ -222,6 +250,9 @@ function verify(path: string): void {
       && actual.unfadedPalette.length === 512
       && actual.hardwarePalette.length === 512
       && same(actual.battlers, immutableBattlers)
+      && same(actual.immutableState, immutableState)
+      && same(actual.playerSprite, actual.sprites.find((sprite) => sprite.slot === actual.playerSprite.slot))
+      && same(actual.opponentSprite, actual.sprites.find((sprite) => sprite.slot === actual.opponentSprite.slot))
       && actual.se2.tracks.length === 3;
     const seamShape = seam.active === expected.active
       && same(seam.assetsLoaded, expected.assetsLoaded)
