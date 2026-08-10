@@ -8,8 +8,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ## 1088 — [MAIN worker, 2026-08-10] **#55 `CalculateMonStats` parent timing reduced**
 
 - **State:** exact parent-only reducer landed; focused stats/clock **13/13**,
-  smoke **375/375**, and typecheck are green. Full suite/build are pending;
-  #55 remains open.
+  smoke **375/375**, typecheck, full `npm test` **880 files / 8,422 passed /
+  1 skipped**, and production build are green. #55 remains open.
 - **Did:** all **12/12** receipts reduce exactly after excluding **480** direct
   callees: **10×1,083 + 2×1,081**. The split is the u8 `levelUpHP==0` branch:
   two extra halfwords minus one refill = **−2**. Source tests cover u8 wrap,
