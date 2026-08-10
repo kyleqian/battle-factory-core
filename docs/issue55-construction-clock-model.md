@@ -188,9 +188,29 @@ with full timing deliberately `null`. Thus the component resolves direct
 party-data writes without silently claiming the nested box-mon body. With the
 already-complete nature, nature-modifier, and signed-division components,
 **288/480** direct calls and **98,294 / 1,768,691 = 5.557%** direct-callee
-cycles are now source-reduced. The remaining 180 encrypted `GetMonData2`
-calls, 12 level lookups, box-mon writes, and VBlank/audio state keep the
-aggregate operation and construction clock unwired.
+cycles are source-reduced at this checkpoint.
+
+The full **180-call** `GetMonData2` census is now explicit: fields 57/58 are
+**24** direct party HP/max-HP reads; fields 26–31 are **72** encrypted EV
+reads; fields 39–44 are **72** encrypted IV reads; and field 11 is **12**
+encrypted species reads. `reduceFactoryGetMonDataTiming` derives the simple
+direct jump-table route from the signed field alone and instruction-counts its
+ROM dispatch plus EWRAM read at **80** cycles. All **24/24** applicable calls
+are exact, totaling anchor/LILIANA/varied **960/480/480 = 1,920**, with no
+contained pause or async residual.
+
+Source-general simple party selectors 55–58, 64, and 84–88 are complete.
+Deoxys-aware fields 59–63 expose only their exact **66**-cycle nested-entry
+and **26/44**-cycle return shells. Encrypted compare-default fields expose
+exact **34/12** entry/return shells around `GetBoxMonData2`; jump-table holes
+65–83 expose **66/12**. Each unresolved nested route reports `cycles: null`.
+No personality, duration, or receipt-identity lookup is admitted.
+
+Together the five completed families cover **312/480** direct calls and
+**100,214 / 1,768,691 = 5.666%** of direct-callee cycles. The remaining
+**156** encrypted `GetMonData2` calls, 12 level lookups, box-mon writes, and
+VBlank/audio state keep the aggregate operation and construction clock
+unwired.
 
 ## Non-final outer-loop reducer
 

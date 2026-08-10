@@ -1166,7 +1166,23 @@ mail-u8 at **72**, and field 65 no-op at **56** cycles. The delegated default
 `SetBoxMonData` route exposes only exact 30-cycle entry and 10-cycle return
 shells; its encrypted body remains unresolved.
 
-Nested encrypted `%24` box-mon reads/writes and growth/experience remain
+**Nested direct `GetMonData2` timing (2026-08-10, `9a90f094`):** the complete
+**180-call** v1 census is 24 direct party reads (fields 57/58), 72 encrypted EV
+reads (26–31), 72 encrypted IV reads (39–44), and 12 encrypted species reads
+(11). `reduceFactoryGetMonDataTiming` instruction-counts the source-general
+simple party jump-table arms from the signed field alone. All **24/24**
+receipt-used HP/max-HP calls are exact at **80** cycles, totaling
+anchor/LILIANA/varied **960/480/480 = 1,920**, with no contained pause or
+async residual. Fresh wrapped Scene-OFF packets for all three cases remain
+byte-identical (`cde88e8f…` / `d338edc6…` / `e0d10a1…`). Encrypted/default
+routes retain only exact wrapper shells (**34/12** cycles for the receipt's
+compare-default fields; **66/12** for jump-table holes) and `cycles: null`;
+Deoxys-stat routes likewise retain exact **66**-cycle entry and **26/44**
+return shells without claiming the nested body. Completed direct-call
+coverage is now **312/480**, **100,214 / 1,768,691 = 5.666%** of source
+callee cycles.
+
+The remaining **156** encrypted `%24` box-mon reads, encrypted writes, and growth/experience remain
 unresolved, so the
 complete stats operation and live clock stay unwired. No identity/duration
 table or residual fit landed; #55 stays open. See the construction receipt's

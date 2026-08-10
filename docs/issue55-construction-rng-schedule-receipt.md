@@ -422,6 +422,46 @@ alter the clock wiring. The four completed direct-call families now cover
 **288/480** sites and **98,294 / 1,768,691 = 5.557%** pause-subtracted direct
 callee cycles; the aggregate CalculateMonStats operation remains unresolved.
 
+### Direct `GetMonData2` party-read component (2026-08-10)
+
+The v1 packets' **180** direct `GetMonData2` calls decompose by the source
+field selector and compiled route as follows. Every row occurs once per each
+of the **12** recorded mons:
+
+| source fields | source targets | calls | compiled route |
+| --- | --- | ---: | --- |
+| 57, 58 | current HP, old max HP | 24 | jump table → direct party u16 read |
+| 26–31 | six EVs | 72 | range compare default → `GetBoxMonData2` |
+| 39–44 | six IVs | 72 | range compare default → `GetBoxMonData2` |
+| 11 | species | 12 | range compare default → `GetBoxMonData2` |
+
+`reduceFactoryGetMonDataTiming` accepts only the source signed-i32 field. At
+the pipelined `0x0806A51A` boundary, a simple direct party route executes 18
+Thumb halfwords, four pipeline refills, one 11-cycle ROM literal, one 11-cycle
+ROM jump-table word, and one 4-cycle EWRAM byte/halfword read:
+`18×2 + 4×6 + 2×(11−2) + (4−2) = 80` cycles. Thus all **24/24** receipt-used
+direct reads are exact with zero contained VBlank pauses and zero external
+service residual: anchor/LILIANA/varied **960/480/480 = 1,920** cycles. Fresh
+wrapped Battle Scene OFF packets for all three cases were byte-identical to
+the committed evidence at `cde88e8f…`, `d338edc6…`, and `e0d10a1…`.
+
+The same instruction reducer covers source-general simple party fields 55–58,
+64, and 84–88. The u32 status arm executes two fewer Thumb halfwords but its
+8-cycle EWRAM word read yields the same **80** total. Fields 59–63 first call
+`GetDeoxysStat`; they expose the exact **66**-cycle nested-entry shell and
+**26/44**-cycle override/party-fallback return shells, but full timing remains
+`null`. Default fields below 55 or above 88 expose the exact **34**-cycle
+entry and **12**-cycle return shells around `GetBoxMonData2`; jump-table holes
+65–83 expose **66/12**. The encrypted/default body remains unresolved: no
+personality route, duration table, or observed residual is adopted.
+
+The five completed direct-call families now cover **312/480** sites (**65%**)
+and **100,214 / 1,768,691 = 5.666%** of pause-subtracted direct-callee cycles.
+The unresolved **156** receipt reads are precisely the 13 encrypted fields
+listed above, not an undifferentiated 180-call remainder. Level/growth,
+encrypted reads/writes, and live VBlank/audio arbitration still prevent an
+aggregate `CalculateMonStats` cost or construction-clock wiring.
+
 ### Construction-entry component (2026-08-10)
 
 `reduceFactoryConstructionEntryTiming` covers the complete
