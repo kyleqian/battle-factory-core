@@ -7,9 +7,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1096 — [MAIN worker, 2026-08-10] **#55 shared encrypted accessor dependency bounded**
 
-- **State:** focused stats **19/19**, smoke **375/375**, typecheck, full `npm
-  test` **881 files / 8,438 passed / 1 skipped**, and production build are
-  green. #55 remains open, accessor totals are `null`, and the clock is unwired.
+- **State:** evidence `d53eb54b`, independent audit hardening `2594377b`, and
+  supervisor handoff `e8bf2f6b`; final union focused stats **19/19**, smoke
+  **375/375**, typecheck, full `npm test` **881 files / 8,438 passed / 1
+  skipped**, and production build are green. #55 remains open, accessor totals
+  are `null`, and the clock is unwired.
 - **Did:** bounded all **180** encrypted reads (**156** direct + **24** nested):
   species/EXP/EV/IV **24/12/72/72**. Tests enumerate all **24** personality
   permutations, checksum/bad-egg routes, exact field tails, fetch classes, and
