@@ -5,6 +5,108 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1072 — [MAIN worker, 2026-08-10 night] **Rank-4/5 ability families (opcode manipulation + Own Tempo guard) promoted: ability axis closed to 2 gaps — both axes now match**
+
+- **State:** tree is green: full suite **864 files / 8,347 passed / 1
+  skipped**, production build, `npm run typecheck` clean. `docs/gate6-coverage-manifest.md`
+  regenerates byte-idempotent and now reads **2 item join gaps / 2 ability
+  join gaps** (was **2 item / 9 ability** at entry 1071 — item axis
+  untouched except the already-shared Assist/Metronome exception rows, out
+  of scope for row content). Baseline checked live first, matching entry
+  1071's headline exactly: unsupported ability rows were `MOVE_CONFUSE_RAY`,
+  `MOVE_METRONOME`, `MOVE_SWEET_KISS`, `MOVE_SWAGGER`, `MOVE_FLATTER`,
+  `MOVE_ROLE_PLAY`, `MOVE_ASSIST`, `MOVE_SKILL_SWAP`, `MOVE_TEETER_DANCE`.
+- **Did:** consumed tonight's banked evidence (`docs/ability-manipulation-family-ground-truth.md`,
+  `docs/own-tempo-guard-family-ground-truth.md`, both fixture/receipt pairs,
+  both verify scripts) — no new oracle receipts authored this step; reran
+  both fresh verify scripts once each via `tools/run-mgba-probe.py` and
+  diffed against the committed receipts: byte-identical on every
+  initial/final/summary field (Role Play: Kadabra copies Ditto's Limber
+  @67/gLastUsedAbility set, party record untouched, PP 10→9, RNG 10=10 both
+  arms; Shedinja Wonder Guard control never changes the active ability;
+  Confuse Ray: Smeargle's Own Tempo blocks confusion, status2 stays 0,
+  "prevents confusion" @99, RNG 6 vs. Ditto/Limber control's 10, delta 4
+  attributed to the skipped accuracy roll + duration roll + a seed-dependent
+  self-hit pair). Rank 4 (`MOVE_ROLE_PLAY`/`MOVE_SKILL_SWAP`) mirrors Rank
+  3's per-move-opcode shape (no shared MOVEEND state): `ABILITY_MANIPULATION_DEFINITIONS`
+  adds `auditExactScriptBlock` statement audits for `BattleScript_EffectRolePlay`/
+  `EffectSkillSwap` plus ordered C guard-chain citations into
+  `Cmd_trycopyability`/`Cmd_tryswapabilities`. Rank 5 (the five Own Tempo
+  guard moves) reuses the immunity family's graph/program BFS route infra
+  (`onDamageRoutePath`), searching for a `jumpifability BS_TARGET,
+  ABILITY_OWN_TEMPO` statement instead of a MOVEEND handoff — the same
+  reachability-proof shape as King's Rock/Shell Bell/Immunity, applied to a
+  different target predicate. Both new selectors are exact finite
+  candidate counts with **zero exceptions** (2/2 and 5/5 promoted) —
+  candidate counts matched the worklist's own predictions exactly, unlike
+  every earlier rank. Respected both ground-truth corrections named in the
+  brief: Teeter Dance has no self-hit path (its own `jumpifbyteequal
+  gBattlerAttacker, gBattlerTarget` unconditionally skips the attacker's
+  slot before the Own Tempo check, confirmed by tracing the BFS's actual
+  found route); Swagger/Flatter's stat raise is unconditional and precedes
+  the guard (only confusion is gated, encoded in each row's
+  `runtimeGuardSignature`, not asserted as a single pass/fail). Also closed
+  the honest gap the brief flagged: the ability axis's `unsupported` rows
+  previously carried only a generic reason string with no `sourceException`
+  object (unlike the item axis's Tickle/Assist/Metronome precedent) — wired
+  `IMMUNITY_EXCEPTION_ROWS` into `abilityHook` the same way `itemSourceException`
+  already worked for the item axis, so `MOVE_ASSIST`/`MOVE_METRONOME` are now
+  explicit documented exception rows on **both** axes, not just item. Did
+  **not** invent a new "dynamic-dispatch" manifest category for this, since
+  the item axis's existing exception-row shape (still counted in the
+  `unsupported`/`gaps` headline, just annotated with `sourceException`)
+  already honestly models it and Tickle's own row uses the identical shape.
+  `tools/report/gate6-coverage-manifest.ts` adds parallel `abilityManipulationAudit`/
+  `abilityManipulationRow` and `ownTempoGuardAudit`/`ownTempoGuardRow`
+  checkpoints (King's Rock/Immunity's shape) plus category validation in
+  `sourceProvenFamilies`/`parameterizedHook`/`sourceProvenHookEvidence`
+  (dedicated evidence-emission blocks for both new category sets — added
+  deliberately rather than falling through to the generic absorbing-shaped
+  default, which would have fabricated evidence citations), and adds 27 new
+  receipt/doc/engine/test paths to `sourceInputs` (`requirePath`-verified).
+  `tests/abilityManipulationHookJoinBatch.test.ts` (Tier-1, `itemManipulationHookJoinBatch`
+  shape — per-opcode certificates) and `tests/ownTempoGuardHookJoinBatch.test.ts`
+  (Tier-1, per-guard certificates including the redirect-target pin
+  distinguishing Teeter Dance's own fail script) are new and green.
+  `tests/abilityManipulationOracleEvidence.test.ts` pins the fresh Role Play
+  receipt pair and cites (without duplicating) `tests/skillSwapOracleEvidence.test.ts`;
+  `tests/ownTempoGuardOracleEvidence.test.ts` pins the fresh Confuse Ray
+  receipt pair plus source citations for Swagger/Flatter/Teeter Dance's
+  guard placement — both new and green. Updated pinned counts in
+  `tests/level50MoveParameterization.test.ts` (445→452 ability categories,
+  291→298 source-proven, 9→2 unsupported; extended `expectedSourceProven`
+  with the two new category maps) and `tests/gate6CoverageManifest.test.ts`
+  (adds `ABILITY_MANIPULATION_PROOF_PATHS`/`OWN_TEMPO_GUARD_PROOF_PATHS`
+  category constants, dedicated per-category validation blocks, re-pins
+  `perMoveHookJoins.total` 11→4, `sourceProven`/`uniqueNonSoundproofProven`
+  arithmetic, and both markdown-regex headline assertions).
+- **Next:** the ability-axis and item-axis worklists (Ranks 1-5) are both
+  now at their honest final state: **2 item / 2 ability gaps**, both being
+  the identical `MOVE_ASSIST`/`MOVE_METRONOME` dynamic-dispatch pair
+  (`jumptocalledmove`/`metronome` end each script with no static moveend
+  node and no static `jumpifability`/opcode target of their own — the
+  invoked move's own row independently carries the real hook-join claim at
+  runtime, but no route certificate can be fabricated through the dynamic
+  dispatch itself). No further family-level promotion is possible on either
+  axis without a new engine capability (a runtime trace of the dynamically
+  selected move) — this is a legitimate stopping point for the Gate-6
+  hook-family worklist as scoped by `docs/gate6-family-worklist.md`. Future
+  work: either accept these 4 rows as a permanent documented exception, or
+  scope a new session specifically to prove dynamic-dispatch reachability
+  (would need a different evidence shape than every other row in this
+  census).
+- **Notes:** no engine, controller, round outcome, barrier pin, or canonical
+  window changed; `src/engine/battleScriptTrycopyabilityOpcode.ts`,
+  `battleScriptTryswapabilitiesOpcode.ts`, and
+  `battleScriptIngrainLeechSeedWrapOpcode.ts`'s `createJumpifabilityHandler`
+  were read, not edited (already faithful per both ground-truth docs' source
+  audits — confirmed live against `reference/pokeemerald/src/battle_script_commands.c`
+  for `Cmd_trycopyability`/`Cmd_tryswapabilities`/`Cmd_jumpifability` and
+  `reference/pokeemerald/data/battle_scripts_1.s` for every cited script).
+  Item axis untouched (out of scope beyond the brief's explicit
+  Assist/Metronome ability-side exception wiring). Moved entry 1069 to
+  `PROGRESS-archive.md` to keep the ledger at 3 live entries.
+
 ## 1071 — [MAIN worker, 2026-08-10 night] **Rank-3 item-manipulation family (Covet/Trick/Recycle/Knock Off) promoted: 4 → 2 item gaps**
 
 - **State:** tree is green: full suite **860 files / 8,332 passed / 1
@@ -154,59 +256,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   untouched (side-lane ownership, explicit brief exclusion). Moved entry
   1067 to `PROGRESS-archive.md` to keep the ledger at 3 live entries.
 
-## 1069 — [MAIN worker, 2026-08-10 night] **Rank-2 ability family (status-immunity cleanup) promoted: 106 → 9 ability gaps**
-
-- **State:** tree is green: full suite **856 files / 8,317 passed / 1
-  skipped**, production build, `npm run typecheck` clean. `docs/gate6-coverage-manifest.md`
-  regenerates byte-idempotent and now reads **118 item join gaps / 9 ability
-  join gaps** (was **118 item / 106 ability** at entry 1068 — item axis
-  untouched, out of scope). 9 remaining ability rows: Rank-4's Skill
-  Swap/Role Play, Rank-5's five Own Tempo guard moves, plus two new explicit
-  exceptions below.
-- **Did:** consumed the already-banked 2026-07-29 evidence
-  (`docs/immunity-abilities-ground-truth.md`,
-  `tools/battle-lab/mechanic-immunity-limber-skill-swap-off.json`,
-  `tools/probe/probe-immunity-limber-off.py`, both seed receipts) — no new
-  oracle receipts authored. `tools/extract/extract-level50-move-parameterization.ts`
-  adds a generic route-certificate walk (`immunityRouteEvidence`, reusing the
-  same graph/program BFS infra as Color Change/King's Rock) proving each
-  candidate's entry script reaches a `moveendall`/`moveendto`/`moveendfromto`
-  handoff whose `Cmd_moveend` state range includes state 4
-  (`MOVEEND_IMMUNITY_ABILITIES`), unlike Color Change/King's Rock this needs
-  no target `datahpupdate` since state 4 fires unconditionally for every
-  move reaching the normal moveend tail. Candidates **99** (selector: every
-  ability-unsupported row minus Rank-4's 2 + Rank-5's 5), promoted **97**,
-  two new exceptions — `MOVE_ASSIST`/`MOVE_METRONOME` end in a dynamic-dispatch
-  opcode (`jumptocalledmove`/`metronome`) with no static moveend node of
-  their own, a genuine finding the worklist's 99/99 prediction missed. Also
-  fixed a real latent bug in the shared `onDamageCallReturns` helper (used by
-  the graph-route BFS's `call`-edge validity check): it only checked a call
-  target's *own* last statement for `return`, missing targets like
-  `BattleScript_WeatherFormChanges` that fall through a loop label before
-  returning — now does a full reachable-subgraph search. This only relaxes a
-  false negative (strictly more permissive), verified by rerunning the full
-  suite including Color Change's/King's Rock's own batches unchanged.
-  `tools/report/gate6-coverage-manifest.ts` adds a parallel `immunityAudit`/
-  `immunityMoveEndRow` checkpoint (King's Rock's shape) plus category
-  validation in `sourceProvenFamilies`/`parameterizedHook`/
-  `sourceProvenHookEvidence`. `tests/statusImmunityHookJoinBatch.test.ts`
-  (Tier-1, `kingsRockHookJoinBatch` shape) and
-  `tests/statusImmunityOracleEvidence.test.ts` (pins both banked receipts
-  byte-precisely, `kingsRockOracleEvidence` shape) are new and green.
-  Reran `probe-immunity-limber-off.py` fresh once — reproduced the
-  610839776-seed receipt byte-identically. Updated pinned counts in
-  `tests/level50MoveParameterization.test.ts` (348→445 ability categories,
-  194→291 source-proven, 106→9 unsupported; `MOVE_WITHDRAW`/`MOVE_RAIN_DANCE`/
-  `MOVE_SUNNY_DAY`/`MOVE_PROTECT` flip from ability-unsupported to
-  immunity-family-proven) and `tests/gate6CoverageManifest.test.ts` (adds
-  `IMMUNITY_PROOF_PATHS`, six numeric re-pins).
-- **Next:** continue the ordered family-level Gate-6 worklist from the
-  verified **9 ability / 118 item** row-gap frontier. Ranks 4 (2 rows,
-  Skill Swap/Role Play) and 5 (5 rows, Own Tempo guards) remain on the
-  ability axis; Rank 1 (item, 191 rows) is in flight on the side lane.
-- **Notes:** no engine, controller, round outcome, or canonical window
-  changed; `src/engine/battleScriptMoveEndOpcode.ts` was read, not edited
-  (already audited faithful in `docs/immunity-abilities-ground-truth.md`).
-  Item-axis rows, Rank-1/3/4/5 families, and Shell Bell untouched (out of
-  scope). `docs/gate6-family-worklist.md` gets a one-line Rank-2 STATUS note
-  only, per side-lane ownership of the rest of that doc.
