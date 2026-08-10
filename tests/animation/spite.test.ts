@@ -4,6 +4,11 @@ import {
   SPITE_CLEANUP_AGE,
   SPITE_PULSE_FIRST_AGE,
   SPITE_PULSE_LAST_AGE,
+  SPITE_TASK_SOURCE_AGE_OFFSET,
+  spiteAttackerPaletteTint,
+  spiteBackgroundBldy,
+  spiteDisplayedAlpha,
+  spiteWaveShift,
   spiteAtAge,
 } from "../../src/animation/spite.ts";
 
@@ -36,8 +41,18 @@ describe("MOVE_SPITE source-relative reducer", () => {
     expect(spiteAtAge(5).alpha).toEqual({ eva: 0, evb: 16 });
     expect(spiteAtAge(6).alpha).toEqual({ eva: 0, evb: 16 });
     expect(spiteAtAge(7).alpha).toEqual({ eva: 0, evb: 15 });
-    expect(spiteAtAge(68).alpha).toEqual({ eva: 14, evb: 16 });
+    expect(spiteAtAge(68).alpha).toEqual({ eva: 14, evb: 2 });
     expect(spiteAtAge(69).alpha).toEqual({ eva: 14, evb: 2 });
     expect(spiteAtAge(132).alpha).toEqual({ eva: 0, evb: 16 });
+  });
+
+  it("pins pointer-to-task/display alignment from Spite's own maps", () => {
+    expect(SPITE_TASK_SOURCE_AGE_OFFSET).toBe(42);
+    expect([0, 2, 3, 18, 19, 22, 23, 38, 176, 179, 194, 215]
+      .map(spiteBackgroundBldy)).toEqual([0, 0, 1, 16, 16, 16, 15, 0, 0, 1, 16, 0]);
+    expect([47,48,52,56,60,69,70,74,78,82,91,92,148,158,170]
+      .map(spiteAttackerPaletteTint)).toEqual([0,2,4,6,8,8,6,4,2,0,0,2,8,6,0]);
+    expect(spiteDisplayedAlpha(50)).toEqual({ eva: 0, evb: 15 });
+    expect(spiteWaveShift(50, 10, 10)).toBe(1);
   });
 });

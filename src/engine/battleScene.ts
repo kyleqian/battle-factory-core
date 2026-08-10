@@ -886,6 +886,7 @@ import {
   sceneOnProtectView,
   sceneOnDisableView,
   sceneOnHazeView,
+  sceneOnSpiteView,
   sceneOnMirrorCoatView,
   sceneOnAromatherapyView,
   sceneOnSynthesisView,
@@ -1044,6 +1045,7 @@ import {
   type SceneOnProtectPresentationState,
   type SceneOnDisableConfig,
   type SceneOnHazePresentationState,
+  type SceneOnSpitePresentationState,
   type SceneOnMirrorCoatPresentationState,
   type SceneOnBiteConfig,
   type SceneOnHeadbuttConfig,
@@ -1076,6 +1078,16 @@ import {
   type SceneOnSubstituteConfig,
   type SceneOnCrabHammerConfig,
 } from "../animation/sceneOnPresentation.ts";
+import {
+  SPITE_CLONE_BLANK_POINTER_AGE,
+  SPITE_WAVE_FIRST_POINTER_AGE,
+  SPITE_WAVE_LAST_POINTER_AGE,
+  spiteAttackerPaletteTint,
+  spiteBackgroundBldy,
+  spiteBackgroundIsGhost,
+  spiteDisplayedAlpha,
+  spiteWaveShift,
+} from "../animation/spite.ts";
 import {
   superFangDisplayedAttackerOffsetAtAge,
   superFangDisplayedTargetOffsetAtAge,
@@ -12082,6 +12094,38 @@ function drawSpriteSheetBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette:
   }
 }
 
+/** Spite's monbg copy, sampled through the source scanline-HOFS wave. */
+function drawSpiteWaveMonBg(
+  fb: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  ox: number,
+  oy: number,
+  pointerAge: number,
+  eva: number,
+  evb: number,
+): void {
+  for (let sy = 0; sy < tileset.rows * 8; sy += 1) {
+    const screenY = oy + sy;
+    const shift = spiteWaveShift(pointerAge, screenY, oy);
+    for (let sx = 0; sx < tileset.columns * 8; sx += 1) {
+      const tile = tileset.tiles[
+        Math.floor(sy / 8) * tileset.columns + Math.floor(sx / 8)
+      ];
+      const index = tile?.[(sy % 8) * 8 + (sx % 8)] ?? 0;
+      const color = palette[index];
+      const x = ox + sx - shift;
+      if (index === 0 || !color || x < 0 || x >= 240
+          || screenY < 0 || screenY >= 160) continue;
+      const offset = (screenY * 240 + x) * 4;
+      fb[offset] = blendChannel(color.r, fb[offset]!, eva, evb);
+      fb[offset + 1] = blendChannel(color.g, fb[offset + 1]!, eva, evb);
+      fb[offset + 2] = blendChannel(color.b, fb[offset + 2]!, eva, evb);
+      fb[offset + 3] = 255;
+    }
+  }
+}
+
 /** VICE_GRIP's flipped ObjBlend CUT frames against the already-selected BG/OBJ target. */
 function drawSpriteSheetFlippedBlendedOverTarget(
   fb: Uint8Array,
@@ -21990,6 +22034,110 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? "CORSOLA used" : "Foe CORSOLA used",
       "MIRROR COAT!",
       64,
+    );
+    return;
+  }
+  if (state.config.move === "SPITE") {
+    const spiteState = state as SceneOnSpitePresentationState;
+    const view = sceneOnSpiteView(spiteState);
+    const playerToOpponent = view.attacker.species === "HAUNTER"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "HAUNTER"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(`unsupported staged SPITE pair ${view.attacker.species}->${view.target.species}`);
+    }
+    const age = spiteState.age;
+    const bldy = spiteBackgroundBldy(age);
+    const gpuDarken = (palette: readonly RgbColor[]) => palette.map((color) => {
+      const packed = mgbaDarkenColor(
+        color.r | (color.g << 8) | (color.b << 16), bldy,
+      );
+      return { r: packed & 0xff, g: (packed >>> 8) & 0xff, b: (packed >>> 16) & 0xff };
+    });
+    if (spiteBackgroundIsGhost(age)) {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimGhostBg.tileset,
+        tilemap: battleAnimGhostBg.tilemap,
+        subpalettes: [gpuDarken(battleAnimGhostBg.palette)],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(gpuDarken),
+      });
+    }
+    const haunterSource = playerToOpponent ? haunterBackSprite : haunterFrontSprite;
+    const haunter = playerToOpponent
+      ? haunterSource
+      : { ...haunterSource, tileset: subTileset(haunterSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    // Task_FadeToBg's BLDCNT selects the field BG/backdrop, not OBJ. The
+    // two battlers therefore retain their palette while the field darkens.
+    const attackerPalette = blendPaletteToward(
+      haunter.palette, { r: 255, g: 255, b: 255 },
+      spiteAttackerPaletteTint(age),
+    );
+    const targetPalette = onix.palette;
+    const drawAttacker = () => drawSpriteSheet(
+      fb, haunter.tileset, attackerPalette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const targetX = view.target.geometry.spriteCorner.x + onixIdle.x2;
+    const targetY = view.target.geometry.spriteCorner.y + onixIdle.y2;
+    const drawTarget = () => {
+      if (age === SPITE_CLONE_BLANK_POINTER_AGE) return;
+      drawSpriteSheet(fb, onix.tileset, targetPalette, targetX, targetY);
+      if (age < SPITE_WAVE_FIRST_POINTER_AGE || age > SPITE_WAVE_LAST_POINTER_AGE) return;
+      const alpha = spiteDisplayedAlpha(age);
+      drawSpiteWaveMonBg(
+        fb, onix.tileset,
+        blendPaletteToward(onix.palette, { r: 107, g: 0, b: 123 }, 10),
+        targetX, targetY, age, alpha.eva, alpha.evb,
+      );
+    };
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    if (opponentToPlayer && age === 0) {
+      drawSpriteSheet(
+        fb, battleAnimGhostBg.opponentShadow.tileset,
+        battleAnimGhostBg.opponentShadow.palette,
+        view.attacker.geometry.animationCenter.x - 16,
+        view.attacker.geometry.battlePositionCenter.y + 25,
+      );
+    }
+    const profile = spiteState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "HAUNTER", level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "HAUNTER" : "ONIX", level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb, playerToOpponent ? "HAUNTER used" : "Foe HAUNTER used", "SPITE!", 99,
     );
     return;
   }

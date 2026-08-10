@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_SPITE bilateral live-compositor checkpoint — 193/221 each, coverage unchanged (2026-08-10 worker)
+
+- **State:** Coverage remains **154/276 exact**, 0 partial, 0 staged, 122 unsupported. `MOVE_SPITE` and its shared ghost-background sibling `MOVE_NIGHT_SHADE` both remain unsupported; `ANIMATION_COVERAGE.json` is intentionally unchanged.
+- **Did:** Corrected the pointer/task alignment from Spite's own receipt (pointer age 43 is reducer age 1 after two synchronous Step1 calls), fixed retained alternating `BLDALPHA` task state, and added a narrow typed-seam compositor for the real ghost BG, bilateral HAUNTER/ONIX art, fade/restore, attacker palette cycle, affine target clone, copied-BG tint, source-phase scanline wave, target hide/reappearance, chrome, and cleanup. Added compact fixtures and a portable that regenerates and checks the complete reducer/seam/task/sprite/OAM/matrix/palette/tag/scanline/register/audio/state/RGB/framebuffer window twice fresh.
+- **Verified:** Both player-back **1000..1220** and opponent-front **1004..1224** reproduce their committed probe/raw/map digests twice fresh. Reducer, typed seam, hardware evidence, and immutable state pass **221/221** in each orientation; production framebuffer equality is **193/221** in each. The same 28 pointer ages (`51,53,57,59,63,65,69,73,75,79,85,89,95,105,119,129,135,139,145,149,151,155,159,161,165,167,171,173`) differ only on target pixels during the alternating alpha pulse.
+- **Next:** Resolve the remaining per-scanout `BLDALPHA` transition from the GPU register queue/audio workload rather than selecting a whole-frame coefficient. Exact mode intentionally fails until both orientations reach **221/221**; rerun BATON_PASS or GROWTH, HAZE, and ACID_ARMOR if that fix changes a shared latch/helper, then promote only Spite.
+- **Notes:** Spite independently re-proves the fresh-affine dual-lag class: clone allocation is blank at pointer age 43, first paints at 44, and teardown retains the stale hardware display before clearing. No capture lookup, absolute tick, gameplay outcome, RNG, turn/controller/facility state, shared boundary, unsupported barrier, or sibling coverage changed.
+
 ## MOVE_SPITE bilateral dense Scene-ON evidence checkpoint — coverage unchanged (2026-08-10 worker)
 
 - **State:** Coverage remains **154/276 exact**, 0 partial, 0 staged, 122 unsupported; `ANIMATION_COVERAGE.json` is intentionally unchanged. `MOVE_SPITE` is not promoted and `MOVE_NIGHT_SHADE` remains independently unsupported.

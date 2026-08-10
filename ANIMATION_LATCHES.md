@@ -47,7 +47,7 @@ cites the move whose ledger entry holds the full evidence.
 | `AnimTask_ShakeMon2` | RAM+2 | SLASH, LICK, TAKE_DOWN (2026-08-08) |
 | `AnimTask_TranslateMonElliptical(RespectSide)` (windUpLunge) | RAM+2 | COUNTER (RAM 217 → pixels 219); TAKE_DOWN windUpLunge (RAM 221 → pixels 223, confirmed by change map + hardware OAM) |
 | `AnimTask_RotateMonSpriteToSide` | RAM+2 | DOUBLE_EDGE pin round (2026-08-08), both orientations, restore-phase isolated |
-| Freshly allocated OAM **affine matrix** | needs TWO displays to reach hardware; removal is a plain OAM edit at ONE (dual-lag class: paint age−2, remove age−1) | MINIMIZE clones (2026-08-07); reused by TORMENT bubbles |
+| Freshly allocated OAM **affine matrix** | needs TWO displays to reach hardware; removal is a plain OAM edit at ONE (dual-lag class: paint age−2, remove age−1) | MINIMIZE clones (2026-08-07); reused by TORMENT bubbles; independently re-proved by SPITE's target clone in both orientations (pointer-age allocation blank at 43, paint at 44, stale teardown display before clear; 2026-08-10) |
 | Scale/wobble affine matrix on a live sprite | RAM+2 | GROWTH-derived, FUTURE_SIGHT (matrix age−2); TORMENT wobble |
 | Direct live-battler `SetSpriteRotScale` from a sprite callback, with `ResetSpriteRotScale` + invisible teardown | matrix RAM+1; invisible sprite omitted from hardware OAM at RAM+1 while its matrix transfers independently | BATON_PASS, both orientations (2026-08-09) |
 | OAM `objMode`/`affineMode` flags | RAM+1 — flips one tick before its own matrix reaches neutral | FUTURE_SIGHT rung 11 |

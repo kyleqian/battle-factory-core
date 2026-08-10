@@ -17,7 +17,11 @@ import {
   type SubstituteState,
 } from "./substitute.ts";
 import { hazeAtAge, type HazeState } from "./haze.ts";
-import { spiteAtAge, type SpiteState } from "./spite.ts";
+import {
+  SPITE_TASK_SOURCE_AGE_OFFSET,
+  spiteAtAge,
+  type SpiteState,
+} from "./spite.ts";
 import {
   headbuttAtAge,
   type HeadbuttState,
@@ -4432,7 +4436,7 @@ export function sceneOnSpiteView(
     age: state.age,
     attacker: state.config.attacker,
     target: state.config.target,
-    ...spiteAtAge(state.age),
+    ...spiteAtAge(state.age - SPITE_TASK_SOURCE_AGE_OFFSET),
   };
 }
 

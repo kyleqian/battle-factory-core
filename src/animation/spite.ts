@@ -16,6 +16,70 @@ export const SPITE_TEARDOWN_FIRST_AGE = 132;
 export const SPITE_CLEANUP_AGE = 134;
 export const SPITE_BODY_FRAME_COUNT = SPITE_CLEANUP_AGE + 1;
 
+/** Pointer-age alignment measured from the bilateral dense receipts. */
+export const SPITE_TASK_SOURCE_AGE_OFFSET = 42;
+export const SPITE_CLONE_BLANK_POINTER_AGE = 43;
+export const SPITE_WAVE_FIRST_POINTER_AGE = 50;
+export const SPITE_WAVE_LAST_POINTER_AGE = 173;
+
+const SPITE_FADE_BLDY: readonly number[] = [
+  0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+  16, 16, 16, 16, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3,
+  2, 1, 0,
+];
+
+/** Hardware BLDY seen by the source-relative compositor. */
+export function spiteBackgroundBldy(pointerAge: number): number {
+  return SPITE_FADE_BLDY[pointerAge]
+    ?? SPITE_FADE_BLDY[pointerAge - 176]
+    ?? 0;
+}
+
+export function spiteBackgroundIsGhost(pointerAge: number): boolean {
+  return pointerAge >= 19 && pointerAge <= 194;
+}
+
+/**
+ * `blend_color_cycle delay=2, num_blends=6, 0<->8`, including its measured
+ * OBJ transfer.  The first leg's first visible step is pointer age 48; each
+ * later leg has the source loop's extra two-display handoff.
+ */
+export function spiteAttackerPaletteTint(pointerAge: number): number {
+  const starts = [48, 70, 92, 114, 136, 158] as const;
+  let value = 0;
+  for (let leg = 0; leg < starts.length; leg++) {
+    const local = pointerAge - starts[leg]!;
+    if (local < 0) break;
+    const step = Math.min(4, Math.floor(local / 4) + 1) * 2;
+    value = leg % 2 === 0 ? step : 8 - step;
+  }
+  return value;
+}
+
+/**
+ * Whole-display BLDALPHA approximation from Spite's own map. The remaining
+ * alternating write/scanout split is deliberately tracked as partial evidence.
+ */
+export function spiteDisplayedAlpha(pointerAge: number): Readonly<{ eva: number; evb: number }> {
+  if (pointerAge >= SPITE_WAVE_FIRST_POINTER_AGE
+      && pointerAge <= SPITE_WAVE_LAST_POINTER_AGE) {
+    const sourceAge = 7 + 2 * Math.floor(
+      (pointerAge - SPITE_WAVE_FIRST_POINTER_AGE) / 2,
+    );
+    return spiteAtAge(sourceAge).alpha;
+  }
+  return spiteAtAge(pointerAge - SPITE_TASK_SOURCE_AGE_OFFSET - 1).alpha;
+}
+
+/** Source wave phase that has reached scanout for this pointer age. */
+export function spiteWaveShift(pointerAge: number, screenY: number, startLine: number): number {
+  if (pointerAge < SPITE_WAVE_FIRST_POINTER_AGE
+      || pointerAge > SPITE_WAVE_LAST_POINTER_AGE
+      || screenY < startLine || screenY >= startLine + 64) return 0;
+  const phase = pointerAge - 46 + (screenY - startLine);
+  return Math.trunc(GBA_SINE_TABLE_256[(phase * 2) & 0xff]! * 6 / 256);
+}
+
 export type SpiteTaskPhase =
   | "clone"
   | "palette"
@@ -59,6 +123,9 @@ function pulseAlpha(pulseIndex: number): Readonly<{ eva: number; evb: number }> 
   let evb = 16;
   if (pulseIndex % 2 === 0) {
     eva = cDivide(GBA_SINE_TABLE_256[pulseIndex & 0xff]!, 18);
+    if (pulseIndex > 1) {
+      evb = 16 - cDivide(GBA_SINE_TABLE_256[(pulseIndex - 1) & 0xff]!, 18);
+    }
   } else {
     evb = 16 - cDivide(GBA_SINE_TABLE_256[pulseIndex & 0xff]!, 18);
     // Recover the preceding even write, as the source task retains data[2].
