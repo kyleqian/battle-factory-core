@@ -40,21 +40,29 @@ describe("MOVE_FLAME_WHEEL legal bilateral staging", () => {
     ];
     for (const path of paths) {
       const fixture = JSON.parse(readFileSync(path, "utf8")) as {
+        schema: string;
         oracleProfile: string;
+        evidenceSchema: string;
         denseWindow: { startFrame: number; endFrame: number; frameCount: number };
         evidenceSha256: string;
         secondFreshEvidenceSha256: string;
         changeMap: string;
         changeMapSha256: string;
-        acceptance: { status: string };
+        acceptance: { status: string; componentMatching: number; framebufferMatching: number };
       };
+      expect(fixture.schema).toBe("flame-wheel-portable-evidence/v2");
       expect(fixture.oracleProfile).toBe("battle-scene-on");
+      expect(fixture.evidenceSchema).toBe("flame-wheel-dense-evidence/v2");
       expect(fixture.denseWindow.frameCount).toBe(170);
       expect(fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1).toBe(170);
       expect(fixture.secondFreshEvidenceSha256).toBe(fixture.evidenceSha256);
       expect(createHash("sha256").update(readFileSync(fixture.changeMap)).digest("hex"))
         .toBe(fixture.changeMapSha256);
-      expect(fixture.acceptance.status).toBe("unsupported");
+      expect(fixture.acceptance).toEqual({
+        status: "exact",
+        componentMatching: 170,
+        framebufferMatching: 170,
+      });
     }
   });
 });

@@ -1,5 +1,5 @@
 {
-  "schema": "flame-wheel-evidence-checkpoint/v1",
+  "schema": "flame-wheel-portable-evidence/v2",
   "oracleProfile": "battle-scene-on",
   "move": "FLAME_WHEEL",
   "orientation": "opponent-front",
@@ -11,11 +11,11 @@
   "attacker": {"species":"QUILAVA","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":16},"animationCenter":{"x":176,"y":48},"battlePositionCenter":{"x":176,"y":40}}},
   "target": {"species":"ONIX","geometry":{"side":"player","spriteCorner":{"x":40,"y":48},"animationCenter":{"x":72,"y":88},"battlePositionCenter":{"x":72,"y":80}}},
   "fieldProfile": {"playerHp":110,"playerMaxHp":110,"opponentHp":165,"opponentMaxHp":165,"playerGender":"male","opponentGender":"male"},
-  "evidenceSchema": "flame-wheel-dense-evidence/v1",
-  "evidenceSha256": "3af5d76cf68f2fe9d0a76a43dd63c25c075a4999fb1240a0690041750ce02e21",
-  "secondFreshEvidenceSha256": "3af5d76cf68f2fe9d0a76a43dd63c25c075a4999fb1240a0690041750ce02e21",
+  "evidenceSchema": "flame-wheel-dense-evidence/v2",
+  "evidenceSha256": "162a3d62335c571f78bfd5233b6b2c27140c838a6e59f57be17f3f2cc51fec83",
+  "secondFreshEvidenceSha256": "162a3d62335c571f78bfd5233b6b2c27140c838a6e59f57be17f3f2cc51fec83",
   "rawRgbSha256": "ca7f0d7a94912fa25a2c57d60d0b476605133e2e6fca9b930ce9a3efaced8525",
   "changeMap": "tools/compare/evidence/flame-wheel-changemap-opponent.txt",
   "changeMapSha256": "e5fd577c313e82559129748a83f0fae29136cff12669a543d9054db6abf1299f",
-  "acceptance": {"status": "unsupported", "reason": "dense source/hardware/raw-RGB evidence only; reducer, typed seam, and production framebuffer remain open"}
+  "acceptance": {"status": "exact", "componentMatching": 170, "framebufferMatching": 170}
 }

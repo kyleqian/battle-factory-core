@@ -185,7 +185,10 @@ def main() -> None:
     if not required <= set(topology["templates"]):
         raise RuntimeError(f"FLAME_WHEEL topology missing templates: {topology}")
     OUTPUT.write_text(json.dumps({
-        "schema": "flame-wheel-dense-evidence/v1", "moveId": MOVE_ID, "setup": setup,
+        # v2 deliberately adds the complete persistent sSpriteOrder snapshot
+        # to every dense frame. Keep the receipt boundary explicit so a new
+        # observability axis cannot silently invalidate an older evidence pin.
+        "schema": "flame-wheel-dense-evidence/v2", "moveId": MOVE_ID, "setup": setup,
         "sourceWindow": {"startFrame": rows[0]["frame"], "endFrame": rows[-1]["frame"],
                          "frameCount": len(rows)},
         "sourceSymbols": {MOVE_NAME: start, END_NAME: end}, "topology": topology,

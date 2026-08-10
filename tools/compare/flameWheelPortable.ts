@@ -1,6 +1,7 @@
+import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { readFileSync, realpathSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { readFileSync, readdirSync, realpathSync } from "node:fs";
+import { basename, dirname, join, resolve } from "node:path";
 import { flameWheelAtAge } from "../../src/animation/flameWheel.ts";
 import {
   createSceneOnMovePresentation, sceneOnFlameWheelView,
@@ -10,14 +11,24 @@ import { createInitialState, render, type EngineState } from "../../src/engine/c
 import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture {
+  readonly schema: "flame-wheel-portable-evidence/v2";
+  readonly oracleProfile: "battle-scene-on";
   readonly scenario: string; readonly probe: string;
-  readonly denseWindow: { readonly startFrame: number; readonly endFrame: number };
+  readonly denseWindow: { readonly startFrame: number; readonly endFrame: number; readonly frameCount: number };
   readonly appStage: { readonly presentationAge: number };
   readonly attacker: SceneOnPresentationBattler; readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: { readonly playerHp: number; readonly playerMaxHp: number; readonly opponentHp: number; readonly opponentMaxHp: number; readonly playerGender?: "male" | "female"; readonly opponentGender?: "male" | "female" };
+  readonly evidenceSchema: "flame-wheel-dense-evidence/v2";
+  readonly evidenceSha256: string;
+  readonly secondFreshEvidenceSha256: string;
+  readonly rawRgbSha256: string;
+  readonly changeMap: string;
+  readonly changeMapSha256: string;
+  readonly acceptance: { readonly status: "exact"; readonly componentMatching: number; readonly framebufferMatching: number };
 }
 interface Sprite { readonly slot: number; readonly attr: readonly number[]; readonly x: number; readonly y: number; readonly x2: number; readonly y2: number; readonly invisible: boolean; readonly animCmdIndex: number; readonly matrixNum: number; readonly matrix: readonly number[]; readonly template: { readonly symbol: string | null }; }
 interface Frame { readonly frame: number; readonly sprites: readonly Sprite[]; readonly playerSprite: Sprite; readonly opponentSprite: Sprite; readonly tasks: readonly { readonly func: { readonly symbol: string | null } }[]; readonly softwareOam: readonly string[]; readonly hardwareOam: readonly string[]; readonly spriteOrder: readonly number[]; readonly hardwareMatrices: readonly (readonly number[])[]; readonly fadedPalette: readonly number[]; readonly unfadedPalette: readonly number[]; readonly hardwarePalette: readonly number[]; readonly paletteTags: readonly number[]; readonly tileTags: readonly number[]; readonly registers: Readonly<Record<string, number>>; readonly backgroundPositions: Readonly<Record<string, number>>; readonly se1: { readonly status: number; readonly tracks: readonly { readonly panX: number }[] }; readonly se2: unknown; readonly immutableState: unknown; readonly battlers: unknown; readonly parties: unknown; }
+interface Probe { readonly schema: string; readonly sourceWindow: Fixture["denseWindow"]; readonly frames: readonly Frame[]; }
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
 const fixture = JSON.parse(readFileSync(resolve(process.argv[2]!), "utf8")) as Fixture;
@@ -27,7 +38,29 @@ const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
 const run = spawnSync("python3", [join(root, "tools/run-mgba-probe.py"), output, "--", join(vendor, "mgba-venv/bin/python"), resolve(root, fixture.probe), resolve(root, fixture.scenario), output, rgbDir], { cwd: root, encoding: "utf8" });
 if (run.stdout) process.stdout.write(run.stdout); if (run.stderr) process.stderr.write(run.stderr);
 if (run.status !== 0) process.exit(run.status ?? 1);
-const probe = JSON.parse(readFileSync(output, "utf8")) as { readonly frames: readonly Frame[] };
+const receipt = readFileSync(output);
+const probe = JSON.parse(receipt.toString("utf8")) as Probe;
+const raw = Buffer.concat(readdirSync(rgbDir).sort().map((file) => readFileSync(join(rgbDir, file))));
+const mapRun = spawnSync("python3", [join(root, "tools/compare/frame-changemap.py"), rgbDir], { cwd: root, encoding: "utf8" });
+if (mapRun.status !== 0) throw new Error(`${fixture.orientation}: change-map generation failed`);
+const separator = mapRun.stdout.indexOf(" — ");
+if (separator < 0) throw new Error(`${fixture.orientation}: change-map header changed`);
+const changeMap = `# ${basename(fixture.changeMap)} raw RGB888 — ${mapRun.stdout.slice(separator + 3)}`;
+const sha = (value: string | Buffer) => createHash("sha256").update(value).digest("hex");
+if (fixture.schema !== "flame-wheel-portable-evidence/v2"
+  || fixture.oracleProfile !== "battle-scene-on"
+  || probe.schema !== fixture.evidenceSchema
+  || JSON.stringify(probe.sourceWindow) !== JSON.stringify(fixture.denseWindow)
+  || probe.frames.length !== fixture.denseWindow.frameCount
+  || sha(receipt) !== fixture.evidenceSha256
+  || sha(receipt) !== fixture.secondFreshEvidenceSha256
+  || sha(raw) !== fixture.rawRgbSha256
+  || sha(changeMap) !== fixture.changeMapSha256
+  || changeMap !== readFileSync(resolve(root, fixture.changeMap), "utf8")
+  || fixture.acceptance.componentMatching !== fixture.denseWindow.frameCount
+  || fixture.acceptance.framebufferMatching !== fixture.denseWindow.frameCount) {
+  throw new Error(`${fixture.orientation}: stable source receipt/window drift`);
+}
 const frames = new Map(probe.frames.map((frame) => [frame.frame, frame]));
 const stage = createSceneOnMovePresentation({ move: "FLAME_WHEEL", attacker: fixture.attacker, target: fixture.target, fieldProfile: fixture.fieldProfile });
 const first = probe.frames[0]!; let components = 0; let framebuffers = 0;
