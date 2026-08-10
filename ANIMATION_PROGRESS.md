@@ -1,3 +1,11 @@
+# MOVE_FLAME_WHEEL exact — bilateral 170/170 source-relative promotion (2026-08-10 worker)
+
+- **State:** Coverage advances **159→160/276 exact**, 0 partial, 0 staged, **117→116 unsupported**. `MOVE_FLAME_WHEEL` alone moves; no animation-boundary or unsupported-barrier change.
+- **Did:** Added the pure 170-age reducer, narrow typed Scene-ON seam, and Quilava/Onix production compositor. The port covers all seven staggered fixed-point outward spirals, source-persistent sprite allocation/OAM ordering, attacker slide out/return, target ShakeMon and red BlendMonInAndOut, seven FireSpread sprites, monbg/split-BG priority, SMALL_EMBER tag, audio/register/palette lifecycles, prior-transfer display latches, and cleanup without gameplay state ownership or recorded-frame lookup.
+- **Verified:** Twice fresh, player-back oracle frames **78..247** and opponent-front **82..251** each pass **170/170 reducer/seam/component, task/sprite/software+hardware OAM/matrices, palettes/tags/registers/audio/immutable-state/raw-RGB, and production framebuffer**. After shared draw/order changes, bilateral controls pass twice fresh: BLAZE_KICK **78/78**, DRAGON_RAGE **150/150**, SUPER_FANG **200/200**, SUPERSONIC **51/51**. Focused Flame Wheel/evidence/boundary tests and typecheck pass.
+- **Next:** Supervisor selects the next independent move acceptance unit; do not transfer Flame Wheel acceptance to fire or split-BG siblings without their own complete dense proof.
+- **Notes:** No damage, burn, RNG, turn order, controller, round/facility state, absolute tick, per-age pixel/RGB table, capture lookup, unsupported-branch barrier, canonical import allowlist, or boundary list changed.
+
 # MOVE_FLAME_WHEEL bilateral dense evidence checkpoint — remains unsupported (2026-08-10 worker)
 
 - **State:** Coverage remains **159/276 exact**, 0 partial, 0 staged, **117 unsupported**. `MOVE_FLAME_WHEEL` is not promoted; `ANIMATION_COVERAGE.json`, the animation boundary, unsupported barrier, gameplay/controller state, and shared component implementations are unchanged.

@@ -1466,6 +1466,34 @@
    ]
   },
   {
+   "move": "MOVE_FLAME_WHEEL",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage real Factory set-181 QUILAVA with all active choices constrained to FLAME WHEEL against legal ONIX in both player-back and opponent-front orientations",
+    "the complete pointer-bounded 170-frame body through first inactive cleanup passes 170/170 reducer/seam/component, task/sprite and persistent software-OAM order, hardware OAM/matrices/palette, tags/registers/audio/immutable-state/raw-RGB, and production framebuffer axes twice fresh in both orientations: player-back frames 78-247 and opponent-front frames 82-251",
+    "the pure source-relative reducer ports all seven delayed fixed-point gFireSpiralOutward sprites, attacker slide out/return, target AnimTask_ShakeMon and AnimTask_BlendMonInAndOut, seven FireSpread sprites, persistent sSpriteOrder slot reuse, split-BG/monbg priority, SMALL_EMBER lifetime, panned audio, display latches, and cleanup",
+    "the narrow typed Scene-ON seam and Quilava/Onix compositor use generated species and SMALL_EMBER assets plus established field/chrome primitives; no capture/frame/RGB lookup, absolute battle tick, gameplay coupling, unsupported-branch barrier, or animation boundary changed",
+    "BLAZE_KICK remains bilateral 78/78, DRAGON_RAGE 150/150, SUPER_FANG 200/200, and SUPERSONIC 51/51 component plus framebuffer exact after the shared draw/helper changes, each rerun twice fresh"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-flame-wheel-player-quilava-opponent-onix.json",
+    "tools/battle-lab/mechanic-flame-wheel-opponent-quilava-player-onix.json",
+    "tools/compare/fixtures/flame-wheel-player-quilava-opponent-onix.json",
+    "tools/compare/fixtures/flame-wheel-opponent-quilava-player-onix.json",
+    "tools/compare/flameWheelSourceAudit.ts",
+    "tools/compare/flameWheelProbe.py",
+    "tools/compare/flameWheelEvidence.ts",
+    "tools/compare/flameWheelPortable.ts",
+    "tools/compare/evidence/flame-wheel-changemap-player.txt",
+    "tools/compare/evidence/flame-wheel-changemap-opponent.txt",
+    "src/animation/flameWheel.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/flameWheel.test.ts",
+    "tests/animation/flameWheelEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_FLY",
    "status": "exact",
    "covered": [
@@ -5006,7 +5034,7 @@
     "MOVE_GIGA_DRAIN",
     "MOVE_WILL_O_WISP"
    ],
-   "goal": "MOVE_SUPERSONIC independently proves its six-ring, side-relative translation/affine body and splitbgprio_foes seam in both orientations at 51/51 component/RAM and framebuffer frames, reproduced twice. ShakeMon2 and BIND remain exact controls. No sibling is promoted: METAL SOUND needs its distinct large metal-wave template and pan sequence; ABSORB needs eight sine drain orbs, hitsplat/shake, and green blend; MEGA DRAIN needs paired 16-orb stronger-green drain; DREAM EATER needs psychic background, target scale/shakes, and 24 drain orbs; FLAME WHEEL needs outward fire spiral, lunge/return, fire spread, and BlendMonInAndOut; GIGA DRAIN needs 24 orbs and its high-green blend; WILL-O-WISP needs wisp orb/fire templates, panning task, and both splitbgprio_all and splitbgprio_foes. Each remains unsupported pending independent complete dense evidence."
+   "goal": "MOVE_SUPERSONIC independently proves its six-ring, side-relative translation/affine body and splitbgprio_foes seam in both orientations at 51/51 component/RAM and framebuffer frames, reproduced twice. MOVE_FLAME_WHEEL independently proves its outward-fire-spiral, lunge/return, FireSpread, ShakeMon, and BlendMonInAndOut body at 170/170 complete bilateral frames twice fresh. ShakeMon2 and BIND remain exact controls. METAL SOUND, ABSORB, MEGA DRAIN, DREAM EATER, GIGA DRAIN, and WILL-O-WISP retain distinct complete bodies and remain unsupported pending independent dense evidence."
   },
   {
    "id": "sparkle-2-granting-stars",
