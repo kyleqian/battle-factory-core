@@ -237,12 +237,14 @@ describe("Factory construction source-operation clock", () => {
       operation.kind === "create-mon"
       || operation.kind === "ev-spread"
       || operation.kind === "calculate-mon-stats"
+      || operation.kind === "factory-post-mon"
     ));
     expect(downstream.map((operation) => [operation.kind, operation.candidatePersonality]))
       .toEqual([
         ["create-mon", second.value],
         ["ev-spread", second.value],
         ["calculate-mon-stats", second.value],
+        ["factory-post-mon", second.value],
       ]);
   });
 

@@ -84,8 +84,8 @@ export interface FactoryConstructionOperation {
   randomValue: number | null;
   /**
    * Candidate assembled exactly as `Random32()` does. Nature-attempt operations
-   * carry every candidate; downstream CreateMon/EV/stat operations carry the
-   * accepted personality because encrypted box-mon access is keyed by it.
+   * carry every candidate; downstream CreateMon/EV/stat/Factory-post operations
+   * carry the accepted personality because encrypted box-mon access is keyed by it.
    */
   candidatePersonality: number | null;
   candidateNature: number | null;
@@ -951,7 +951,15 @@ export function scheduleFactoryConstruction(
       null,
       acceptedPersonality,
     ));
-    clock.run(sourceOperation(mon, input.sourceFunction, "factory-post-mon", monIndex));
+    clock.run(sourceOperation(
+      mon,
+      input.sourceFunction,
+      "factory-post-mon",
+      monIndex,
+      null,
+      null,
+      acceptedPersonality,
+    ));
 
     mons.push(freezeMonResult({
       monIndex,

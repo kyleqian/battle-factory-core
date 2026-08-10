@@ -16,7 +16,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   pause (**36,217**, varied mon 1). Compiled `0x0806869C→0x08068D0C` audit
   proves each EV write traverses encrypted `SetBoxMonData` and 12 full-dividend
   `__umodsi3(personality,24)` calls; the clock now exposes the accepted
-  personality to CreateMon/EV/stat operation keys.
+  personality to CreateMon/EV/stat/Factory-post operation keys.
 - **Next:** port exact ROM-fetch/EWRAM timing for the audited decrypt/checksum/
   re-encrypt path, then classify any +18 residual; keep #55 open and the clock
   unwired until that reducer and live VBlank/audio arbitration are exact.

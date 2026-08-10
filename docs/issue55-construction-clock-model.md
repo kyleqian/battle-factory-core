@@ -15,7 +15,7 @@ models the source order:
 Each operation is passed to a cycle-cost callback keyed by source function,
 species/nature input, rejection attempt, and EV/stat work. Random operations
 now carry their returned u16, attempt operations carry every assembled
-candidate personality/nature/result, and CreateMon/EV/stat operations carry
+candidate personality/nature/result, and CreateMon/EV/stat/Factory-post operations carry
 the accepted personality required by encrypted box-mon substructure routing.
 When
 the accumulated cost crosses a configured VBlank period, the clock invokes
@@ -86,6 +86,7 @@ in `docs/issue55-construction-rng-schedule-receipt.md`. Its smallest newly
 proven operation input is the accepted personality: each selected EV bit takes
 `SetMonData -> SetBoxMonData`, whose decrypt/checksum/re-encrypt path repeatedly
 executes `GetSubstruct -> __umodsi3(personality, 24)`. The scheduler now exposes
-that source value on the downstream operation keys. Exact ROM-fetch/EWRAM
+that source value on the downstream operation keys, including the Factory
+friendship/held-item writes that re-enter `SetBoxMonData`. Exact ROM-fetch/EWRAM
 access timing is still unported, so no observed EV duration or +18 residual is
 adopted and the clock stays unwired.

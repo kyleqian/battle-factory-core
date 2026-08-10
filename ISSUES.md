@@ -1080,7 +1080,7 @@ takes `SetMonData→SetBoxMonData`, including decrypt, two checksum passes,
 re-encrypt, and **12** `GetSubstruct→__umodsi3(personality,24)` calls. Thus the
 smallest missing source input was the full accepted personality, not merely
 `evSpread`/`evStatCount` or personality modulo 24; it is now propagated to the
-clock's CreateMon/EV/stat operation keys and red-verified. Exact instruction-
+clock's CreateMon/EV/stat/Factory-post operation keys and red-verified. Exact instruction-
 fetch/EWRAM access timing was not completed, so no duration reducer or fitted
 constant landed, and no +18 service residual is claimed before it can be
 separated from that missing compiled timing. See the construction receipt's
