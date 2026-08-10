@@ -7,16 +7,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1090 — [MAIN worker, 2026-08-10] **#55 `ModifyStatByNature` direct-callee timing reduced**
 
-- **State:** standalone source reducer and docs are landed locally; focused
-  stats/clock **15/15**, smoke **375/375**, and typecheck pass. Final full
-  `npm test` and production build remain before handoff; #55 stays open.
+- **State:** committed as `76027187`; focused stats/clock **15/15**, smoke
+  **375/375**, typecheck, full `npm test`, and production build are green.
+  #55 remains open and the construction clock remains unwired.
 - **Did:** reduced all **60/60** receipt calls from nature/u16-stat/stat-index
   ABI inputs: **52×98**, raise **3×416 + 1×418**, lower **3×408 + 1×410** =
   **8,396** cycles. It resolves **60/480** direct calls (**12.5%**) but only
   **0.475%** of direct-callee time; fresh Scene-OFF anchor hash is `cde88e8f…`.
-- **Next:** run final full suite/build, commit green, then leave the complete
-  stats operation and live construction clock unwired pending Get/Set, level,
-  `%25` nature-fetch, signed-divide, and VBlank/audio timing.
+- **Next:** continue only with source-general Get/Set, level, `%25`
+  nature-fetch, signed-divide, and VBlank/audio timing; do not claim or wire
+  the complete stats operation before those nested budgets are exact.
 - **Notes:** source/ELF reduction includes the stat-index guard, ROM table,
   u16 product, ARM7 multiply width, and nested `__udivsi3`; no identity or
   duration lookup, fixture mutation, canonical Battle-2, animation, or
