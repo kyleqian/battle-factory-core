@@ -335,9 +335,9 @@ describe("Level-50 move parameterization manifest", () => {
     });
     expect(manifest.coverage.joins).toMatchObject({
       battleScriptGraphLabels: 300, battleScriptProgramLabels: 300, animationScripts: 300,
-      itemHookCategories: 182, abilityHookCategories: 445,
+      itemHookCategories: 296, abilityHookCategories: 445,
       itemHookUnsupportedCategories: null, abilityHookUnsupportedCategories: null,
-      itemHookUnsupportedRows: 118, abilityHookUnsupportedRows: 9, abilityHookSourceProvenRows: 291, itemHookSourceProvenRows: 182,
+      itemHookUnsupportedRows: 4, abilityHookUnsupportedRows: 9, abilityHookSourceProvenRows: 291, itemHookSourceProvenRows: 296,
     });
     expect(manifest.coverage.hookCatalogs).toMatchObject({
       item: {
@@ -913,9 +913,14 @@ describe("Level-50 move parameterization manifest", () => {
       expect(record.battleScript).toMatchObject({ entryScript: expect.stringMatching(/^BattleScript_/), graphLabel: record.battleScript.entryScript, programLabel: record.battleScript.entryScript });
       const kingsRockCandidate = source.flags.includes("FLAG_KINGS_ROCK_AFFECTED") && source.power !== 0;
       const shellBellCandidate = source.power !== 0 && record.move !== "MOVE_FUTURE_SIGHT";
+      const RANK3_ITEM_MANIPULATION_MOVES = ["MOVE_COVET", "MOVE_TRICK", "MOVE_RECYCLE", "MOVE_KNOCK_OFF"];
+      const itemMoveEndPromoted = !kingsRockCandidate && !shellBellCandidate
+        && !RANK3_ITEM_MANIPULATION_MOVES.includes(record.move)
+        && record.move !== "MOVE_ASSIST" && record.move !== "MOVE_METRONOME";
       const expectedItemCategories = [
         ...(kingsRockCandidate ? ["moveend-kings-rock"] : []),
         ...(shellBellCandidate ? ["moveend-shell-bell"] : []),
+        ...(itemMoveEndPromoted ? ["moveend-item-effects-all"] : []),
       ];
       expect(record.hooks.item).toMatchObject(expectedItemCategories.length > 0
         ? { status: "source-proven-family", supportedCategories: expectedItemCategories }
@@ -931,14 +936,14 @@ describe("Level-50 move parameterization manifest", () => {
       }
     }
     expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(9);
-    expect(manifest.moves.filter((record) => record.hooks.item.status === "unsupported")).toHaveLength(118);
+    expect(manifest.moves.filter((record) => record.hooks.item.status === "unsupported")).toHaveLength(4);
   });
 
-  it("keeps zero-power Volt/Water noncandidates item-unsupported while the Immunity family closes their ability axis", () => {
+  it("promotes zero-power Volt/Water noncandidates through the item-move-end family while the Immunity family closes their ability axis", () => {
     const move = (symbol: string) => manifest.moves.find((record) => record.move === symbol)!;
     for (const symbol of ["MOVE_WITHDRAW", "MOVE_RAIN_DANCE", "MOVE_SUNNY_DAY", "MOVE_PROTECT"]) {
       expect(move(symbol).hooks).toMatchObject({
-        item: { potentialCategories: null, status: "unsupported" },
+        item: { potentialCategories: null, status: "source-proven-family", supportedCategories: ["moveend-item-effects-all"] },
         ability: { potentialCategories: null, status: "source-proven-family", supportedCategories: ["moveend-immunity-abilities"] },
       });
     }

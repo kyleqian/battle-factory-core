@@ -24,6 +24,7 @@ const TRYEXPLOSION_DAMP_CATEGORY = "tryexplosion-damp";
 const KINGS_ROCK_CATEGORY = "moveend-kings-rock";
 const SHELL_BELL_CATEGORY = "moveend-shell-bell";
 const IMMUNITY_CATEGORY = "moveend-immunity-abilities";
+const ITEM_MOVE_END_CATEGORY = "moveend-item-effects-all";
 const SOUNDPROOF_ROSTER_MOVES = [
   "MOVE_ROAR", "MOVE_SING", "MOVE_SUPERSONIC", "MOVE_SCREECH", "MOVE_SNORE",
   "MOVE_UPROAR", "MOVE_METAL_SOUND", "MOVE_GRASS_WHISTLE", "MOVE_HYPER_VOICE",
@@ -181,6 +182,20 @@ const IMMUNITY_PROOF_PATHS = [
   "tools/probe/receipts/immunity-limber-off-seed-610839776.json",
   "tools/probe/receipts/immunity-limber-off-seed-324508639.json",
 ] as const;
+const ITEM_MOVE_END_PROOF_PATHS = [
+  "reference/pokeemerald/src/battle_util.c",
+  "reference/pokeemerald/src/battle_script_commands.c",
+  "reference/pokeemerald/include/constants/battle_script_commands.h",
+  "src/engine/battleScriptMoveEndOpcode.ts",
+  "tests/itemMoveEndHookJoinBatch.test.ts",
+  "tests/itemMoveEndOracleEvidence.test.ts",
+  "docs/item-move-end-family-ground-truth.md",
+  "tools/battle-lab/mechanic-item-move-end-paralysis-cheri-off.json",
+  "tools/battle-lab/mechanic-item-move-end-paralysis-control-off.json",
+  "tools/probe/verify-item-move-end-paralysis-off.py",
+  "tools/probe/receipts/item-move-end-paralysis-cheri-off.json",
+  "tools/probe/receipts/item-move-end-paralysis-control-off.json",
+] as const;
 
 const EXPLICIT_STATE_BEHAVIOR_ROWS = [
   [
@@ -264,6 +279,7 @@ function sourceProvenPathsFor(category: string): readonly string[] {
   if (category === KINGS_ROCK_CATEGORY) return KINGS_ROCK_PROOF_PATHS;
   if (category === SHELL_BELL_CATEGORY) return SHELL_BELL_PROOF_PATHS;
   if (category === IMMUNITY_CATEGORY) return IMMUNITY_PROOF_PATHS;
+  if (category === ITEM_MOVE_END_CATEGORY) return ITEM_MOVE_END_PROOF_PATHS;
   throw new Error(`unknown source-proven hook category ${category}`);
 }
 
@@ -722,9 +738,9 @@ describe("Gate-6 mechanics coverage manifest", () => {
       const axisSummary = record(perMoveHookJoins[axis]);
       expect(rows).toHaveLength(parameterizationData.moves.length);
       expect(axisSummary).toEqual({ rows: rows.length, unsupported: sourceUnsupported, gaps: sourceUnsupported });
-      expect(sourceUnsupported).toBe(axis === "item" ? 118 : 9);
+      expect(sourceUnsupported).toBe(axis === "item" ? 4 : 9);
     }
-    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 127, gaps: 127 });
+    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 13, gaps: 13 });
     expect(record(summary.kingsRockMoveEnd)).toEqual({
       candidates: 106,
       promotedRows: 105,
@@ -852,7 +868,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
       .filter((move) => !sourceSoundproof.includes(move)));
     expect(soundproofOnlyAbilityGaps - Number(record(perMoveHookJoins.ability).gaps)).toBe(uniqueNonSoundproofProven.size);
     expect(parameterizationData.moves.length + soundproofOnlyAbilityGaps).toBe(591);
-    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(127);
+    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(13);
     const sourceKingsRock = parameterizationData.moves
       .filter((move) => array(move.hooks.item.supportedCategories).map(String).includes(KINGS_ROCK_CATEGORY))
       .map((move) => move.move);
@@ -867,10 +883,17 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(sourceShellBell).toHaveLength(182);
     expect(sourceShellBell).not.toContain("MOVE_FUTURE_SIGHT");
     expect(sourceKingsRock.every((move) => sourceShellBell.includes(move))).toBe(true);
+    const sourceItemMoveEnd = parameterizationData.moves
+      .filter((move) => array(move.hooks.item.supportedCategories).map(String).includes(ITEM_MOVE_END_CATEGORY))
+      .map((move) => move.move);
+    expect(sourceItemMoveEnd).toHaveLength(114);
+    expect(sourceItemMoveEnd).not.toContain("MOVE_ASSIST");
+    expect(sourceItemMoveEnd).not.toContain("MOVE_METRONOME");
+    expect(sourceItemMoveEnd.some((move) => sourceShellBell.includes(move))).toBe(false);
     const sourceProvenItemRows = array(manifestHookJoinSections.item)
       .map(record)
       .filter((row) => row.status === SOURCE_PROVEN_FAMILY_STATUS);
-    expect(sourceProvenItemRows.map((row) => String(row.move)).sort()).toEqual([...sourceShellBell].sort());
+    expect(sourceProvenItemRows.map((row) => String(row.move)).sort()).toEqual([...sourceShellBell, ...sourceItemMoveEnd].sort());
     for (const row of sourceProvenItemRows) {
       const sourceMove = parameterizationData.moves.find((move) => move.move === row.move)!;
       assertSourceProvenFamilyContract(record(sourceMove.hooks.item), row);
@@ -1048,9 +1071,11 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(oracle.receiptGaps).toBe(0);
     expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*118 item join gaps\*\* and \*\*9 ability join gaps\*\*/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*4 item join gaps\*\* and \*\*9 ability join gaps\*\*/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/King's Rock checkpoint: \*\*106\*\* finite Level-50 flag selectors, \*\*105\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Shell Bell checkpoint: \*\*183\*\* finite Level-50 power != 0 candidates.*\*\*182\*\* promoted/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Item-move-end checkpoint: \*\*116\*\* finite Level-50 item-axis candidates.*\*\*114\*\* promoted to MOVEEND_ITEM_EFFECTS_ALL state 11/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/296 item rows are source-proven/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/291 ability rows are source-proven/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Immunity checkpoint: \*\*99\*\* finite Level-50 ability-axis candidates, \*\*97\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Synchronize checkpoint: \*\*30\*\* finite Level-50 candidates, \*\*30\*\* promoted/);

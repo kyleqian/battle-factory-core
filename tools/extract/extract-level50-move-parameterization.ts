@@ -3226,6 +3226,167 @@ if (immunitySourceProvenRows.length !== immunityCandidateRows.length - IMMUNITY_
   throw new Error("Immunity promotion accounting drifted from candidates minus exceptions");
 }
 
+const ITEM_MOVE_END_CATEGORY = "moveend-item-effects-all";
+const ITEM_MOVE_END_DISPATCHER_CALL = "ItemBattleEffects(ITEMEFFECT_MOVE_END, 0, FALSE)";
+const itemMoveEndCaseLine = sourceLine(battleScriptCommandsSource, "case MOVEEND_ITEM_EFFECTS_ALL:", "MOVEEND_ITEM_EFFECTS_ALL");
+const itemMoveEndStateLine = sourceLine(battleScriptConstantsSource, "#define MOVEEND_ITEM_EFFECTS_ALL", "MOVEEND_ITEM_EFFECTS_ALL");
+if (!battleScriptCommandsSource.includes("case MOVEEND_ITEM_EFFECTS_ALL: // item effects for all battlers\n            if (ItemBattleEffects(ITEMEFFECT_MOVE_END, 0, FALSE))")
+  || !battleScriptConstantsSource.includes("#define MOVEEND_ITEM_EFFECTS_ALL                  11")) {
+  throw new Error("Item MOVEEND state 11 dispatcher drifted");
+}
+
+// Same reasoning as immunityRouteHandoff (state 4): a handoff only qualifies
+// when the Cmd_moveend state range it enters actually includes state 11.
+function itemMoveEndRouteHandoff(statement: GraphStatement) {
+  if (statement.mnemonic === "moveendall") {
+    return {
+      kind: "moveendall",
+      label: "BattleScript_MoveEnd",
+      line: statement.line,
+      state: "MOVEEND_ITEM_EFFECTS_ALL",
+      stateValue: 11,
+      semantics: "Cmd_moveend starts at state 0 and executes state 11 before ending the full moveendall pass",
+    };
+  }
+  if (statement.mnemonic === "moveendto" && statement.operandTokens[0] === "MOVEEND_NEXT_TARGET") {
+    return {
+      kind: "moveendto-next-target",
+      label: "Cmd_moveend",
+      line: statement.line,
+      state: "MOVEEND_ITEM_EFFECTS_ALL",
+      stateValue: 11,
+      semantics: "Cmd_moveend endMode 2 starts at state 0 and runs through state 11 before the requested MOVEEND_NEXT_TARGET stop",
+    };
+  }
+  if (statement.mnemonic === "moveendfromto") {
+    const from = MOVEEND_STATE_VALUES.get(statement.operandTokens[0]!);
+    const to = MOVEEND_STATE_VALUES.get(statement.operandTokens[1]!);
+    if (from !== undefined && to !== undefined && from <= 11 && 11 < to) {
+      return {
+        kind: "moveendfromto",
+        label: "Cmd_moveend",
+        line: statement.line,
+        state: "MOVEEND_ITEM_EFFECTS_ALL",
+        stateValue: 11,
+        semantics: `Cmd_moveend is explicitly entered at ${statement.operandTokens[0]} and bounded before ${statement.operandTokens[1]}, a range that covers state 11`,
+      };
+    }
+    return null;
+  }
+  return null;
+}
+
+function itemMoveEndRouteEvidence(move: Move, entryScript: string) {
+  const path = onDamageRoutePath(
+    entryScript,
+    (statement) => itemMoveEndRouteHandoff(statement) !== null,
+    "a MOVEEND_ITEM_EFFECTS_ALL-capable moveend handoff",
+  );
+  const handoffPosition = path.positions.at(-1)!;
+  const handoff = itemMoveEndRouteHandoff(onDamageStatement(handoffPosition));
+  if (handoff === null) throw new Error(`${move.move} route handoff disappeared`);
+  const witness = onDamageRouteWitnessPath(path);
+  const familyEvidence = {
+    category: ITEM_MOVE_END_CATEGORY,
+    selector: {
+      path: BATTLE_SCRIPT_COMMANDS_PATH,
+      locator: "Cmd_moveend MOVEEND_ITEM_EFFECTS_ALL",
+      symbol: move.move,
+      guard: "reaches a moveendall/moveendto/moveendfromto handoff whose Cmd_moveend state range includes MOVEEND_ITEM_EFFECTS_ALL (state 11)",
+      derivedFrom: "moveend-item-effects-all candidate selector: every Level-50 item-axis row not already claimed by King's Rock or Shell Bell, excluding the four Rank-3 item-manipulation moves (MOVE_COVET, MOVE_TRICK, MOVE_RECYCLE, MOVE_KNOCK_OFF)",
+    },
+    entryPath: {
+      kind: handoff.kind,
+      source: { path: BATTLE_SCRIPT_SOURCE_PATH, entryLine: requireGraphLabel(entryScript).line },
+      declaredEntryScript: entryScript,
+      graph: witness.graph,
+      program: witness.program,
+      moveEnd: handoff,
+    },
+    dispatcher: {
+      path: BATTLE_SCRIPT_COMMANDS_PATH,
+      locator: "Cmd_moveend MOVEEND_ITEM_EFFECTS_ALL",
+      line: itemMoveEndCaseLine,
+      call: ITEM_MOVE_END_DISPATCHER_CALL,
+      statePath: BATTLE_SCRIPT_CONSTANTS_PATH,
+      stateLine: itemMoveEndStateLine,
+      state: "MOVEEND_ITEM_EFFECTS_ALL",
+      stateValue: 11,
+    },
+    familyVerification: {
+      scope: "One Thunder-Wave-staged Battle Scene OFF Pichu/Zubat Cheri Berry receipt (holder + itemless control) proves the shared status-cure-and-item-consume lifecycle at MOVEEND_ITEM_EFFECTS_ALL; all siblings are batch-checked against this exact selector, graph/program moveend route, and state-11 dispatcher. The receipt exercises HOLD_EFFECT_CURE_PAR (Cheri Berry) of the nine ItemBattleEffects(ITEMEFFECT_MOVE_END) arms; the per-move family claim proven here is only that the move's own script reaches Cmd_moveend's normal tail, which passes through state 11 unconditionally for every battler regardless of which of the nine arms (if any) actually fires -- the two claims are not conflated.",
+      implementation: "src/engine/battleScriptMoveEndOpcode.ts#MOVEEND_ITEM_EFFECTS_ALL",
+      batchTest: "tests/itemMoveEndHookJoinBatch.test.ts",
+      oracleReceipt: "docs/item-move-end-family-ground-truth.md",
+      oracleFixture: "tools/battle-lab/mechanic-item-move-end-paralysis-cheri-off.json",
+      oracleControlFixture: "tools/battle-lab/mechanic-item-move-end-paralysis-control-off.json",
+      oracleProbe: "tools/probe/verify-item-move-end-paralysis-off.py",
+      oracleReceiptFiles: [
+        "tools/probe/receipts/item-move-end-paralysis-cheri-off.json",
+        "tools/probe/receipts/item-move-end-paralysis-control-off.json",
+      ],
+      scopeBoundary: "The four Rank-3 direct item-manipulation moves (MOVE_COVET, MOVE_TRICK, MOVE_RECYCLE, MOVE_KNOCK_OFF) are not claimed by this family; MOVE_COVET and MOVE_KNOCK_OFF already carry separate Shell Bell evidence (power != 0) but are excluded from this family's own candidate population by selector, not merely by prior claim.",
+    },
+  };
+  return {
+    status: "source-proven" as const,
+    id: `item-move-end-route:${move.move}`,
+    move: move.move,
+    entryScript,
+    routeKind: handoff.kind,
+    executionInventory: executableMoveSymbols.has(move.move) ? "level50-executable" : "level50-roster-only",
+    familyEvidence,
+  };
+}
+
+const ITEM_MOVE_END_MANIPULATION_EXCLUSIONS = new Set(["MOVE_COVET", "MOVE_TRICK", "MOVE_RECYCLE", "MOVE_KNOCK_OFF"]);
+function itemAxisAlreadyClaimed(symbol: string): boolean {
+  if (kingsRockEvidenceByMove.get(symbol) !== undefined) return true;
+  if (shellBellEvidenceByMove.get(symbol) !== undefined) return true;
+  return false;
+}
+const itemMoveEndCandidateRows = rosterMoveSymbols
+  .map((symbol) => moveBySymbol.get(symbol)!)
+  .filter((move) => !itemAxisAlreadyClaimed(move.move))
+  .filter((move) => !ITEM_MOVE_END_MANIPULATION_EXCLUSIONS.has(move.move))
+  .map((move) => ({
+    move: move.move,
+    moveId: move.id,
+    effect: move.effect,
+    power: move.power,
+    entryScript: topologyByMove.get(move.move)!.entryScript,
+    executionInventory: executableMoveSymbols.has(move.move) ? "level50-executable" : "level50-roster-only",
+  }));
+if (itemMoveEndCandidateRows.length !== 116) {
+  throw new Error(`expected 116 Level-50 item-move-end-family candidates, got ${itemMoveEndCandidateRows.length}`);
+}
+// BattleScript_EffectAssist/Metronome end in a dynamic-dispatch opcode
+// (jumptocalledmove/metronome) with no static fallthrough tail of their own --
+// the same structural gap already found for the Immunity family (state 4),
+// which is not state-specific: neither script has any moveendall/moveendto/
+// moveendfromto node in its own static graph for state 11 either.
+const ITEM_MOVE_END_EXCEPTION_ROWS = [
+  {
+    id: "item-move-end-dynamic-dispatch:MOVE_ASSIST",
+    move: "MOVE_ASSIST",
+    reason: "BattleScript_EffectAssist ends in jumptocalledmove TRUE (battle_scripts_1.s:2375), a dynamic dispatch to whichever ally move assistattackselect chose at runtime; the static graph/program has no moveendall/moveendto/moveendfromto node of its own to certify a route through, even though the invoked move's own script independently reaches Cmd_moveend's normal tail.",
+  },
+  {
+    id: "item-move-end-dynamic-dispatch:MOVE_METRONOME",
+    move: "MOVE_METRONOME",
+    reason: "BattleScript_EffectMetronome ends in the metronome opcode (battle_scripts_1.s:1155), a dynamic dispatch to a randomly selected move; the static graph/program has no moveendall/moveendto/moveendfromto node of its own to certify a route through, even though the invoked move's own script independently reaches Cmd_moveend's normal tail.",
+  },
+];
+const itemMoveEndEvidenceByMove = new Map<string, ReturnType<typeof itemMoveEndRouteEvidence>>();
+for (const candidate of itemMoveEndCandidateRows) {
+  if (ITEM_MOVE_END_EXCEPTION_ROWS.some((exception) => exception.move === candidate.move)) continue;
+  itemMoveEndEvidenceByMove.set(candidate.move, itemMoveEndRouteEvidence(moveBySymbol.get(candidate.move)!, candidate.entryScript));
+}
+const itemMoveEndSourceProvenRows = [...itemMoveEndEvidenceByMove.keys()];
+if (itemMoveEndSourceProvenRows.length !== itemMoveEndCandidateRows.length - ITEM_MOVE_END_EXCEPTION_ROWS.length) {
+  throw new Error("Item-move-end promotion accounting drifted from candidates minus exceptions");
+}
+
 const records = rosterMoveSymbols.map((symbol) => {
   const move = moveBySymbol.get(symbol)!;
   const script = topologyByMove.get(symbol) ?? null;
@@ -3314,11 +3475,13 @@ const records = rosterMoveSymbols.map((symbol) => {
   if (kingsRockEvidence !== undefined) itemSourceProvenFamilies.push(kingsRockEvidence.familyEvidence);
   const shellBellEvidence = shellBellEvidenceByMove.get(symbol);
   if (shellBellEvidence !== undefined) itemSourceProvenFamilies.push(shellBellEvidence.familyEvidence);
+  const itemMoveEndEvidence = itemMoveEndEvidenceByMove.get(symbol);
+  if (itemMoveEndEvidence !== undefined) itemSourceProvenFamilies.push(itemMoveEndEvidence.familyEvidence);
   const itemSourceException = symbol === "MOVE_TICKLE"
     ? kingsRockExceptionRows[0]!
     : symbol === "MOVE_FUTURE_SIGHT"
       ? shellBellExceptionRows[0]!
-      : null;
+      : ITEM_MOVE_END_EXCEPTION_ROWS.find((exception) => exception.move === symbol) ?? null;
   const itemHook = itemSourceProvenFamilies.length === 0
     ? {
       potentialCategories: null,
@@ -3378,11 +3541,17 @@ const sourceProvenAbilityRecords = records.filter((record) => record.hooks.abili
 const sourceProvenItemRecords = records.filter((record) => record.hooks.item.status === SOUNDPROOF_STATUS);
 const kingsRockRosterRecords = sourceProvenItemRecords.filter((record) => record.hooks.item.supportedCategories.includes(KINGS_ROCK_CATEGORY));
 const shellBellRosterRecords = sourceProvenItemRecords.filter((record) => record.hooks.item.supportedCategories.includes(SHELL_BELL_CATEGORY));
-if (sourceProvenItemRecords.length !== 182
+const itemMoveEndRosterRecords = sourceProvenItemRecords.filter((record) => record.hooks.item.supportedCategories.includes(ITEM_MOVE_END_CATEGORY));
+if (sourceProvenItemRecords.length !== 182 + itemMoveEndSourceProvenRows.length
   || kingsRockRosterRecords.length !== 105
   || shellBellRosterRecords.length !== 182
   || !kingsRockRosterRecords.every((record) => record.hooks.item.supportedCategories.includes(SHELL_BELL_CATEGORY))) {
   throw new Error("King's Rock / Shell Bell source-proven item roster accounting drifted");
+}
+if (itemMoveEndRosterRecords.length !== itemMoveEndSourceProvenRows.length
+  || itemMoveEndRosterRecords.some((record) => !itemMoveEndSourceProvenRows.includes(record.move))
+  || itemMoveEndRosterRecords.some((record) => record.hooks.item.supportedCategories.includes(KINGS_ROCK_CATEGORY) || record.hooks.item.supportedCategories.includes(SHELL_BELL_CATEGORY))) {
+  throw new Error("Item-move-end source-proven roster accounting does not match the finite candidate census, or overlaps King's Rock/Shell Bell");
 }
 const soundproofRosterRecords = sourceProvenAbilityRecords.filter((record) => record.hooks.ability.supportedCategories.includes(SOUNDPROOF_CATEGORY));
 if (soundproofRosterRecords.length !== 9) {
@@ -3524,6 +3693,22 @@ const shellBellAudit = {
   promotions: {
     sourceProvenRows: shellBellSourceProvenRows,
     reason: "182 of 183 power != 0 candidates retarget the already-proven moveend-color-change graph/program route to MOVEEND_KINGSROCK_SHELLBELL state 12 (same unbroken Cmd_moveend do-while sweep, no recomputation). MOVE_FUTURE_SIGHT remains the sole source exception, excluded by its own battle_util.c:1816 IGNORE_SHELL_BELL poison rather than Color Change's state-3 moveendfromto skip.",
+  },
+};
+const itemMoveEndAudit = {
+  status: "source-proven-family",
+  scope: "Every Level-50 item-axis row not already claimed by King's Rock or Shell Bell is joined to ItemBattleEffects(ITEMEFFECT_MOVE_END)'s unconditional Cmd_moveend state-11 dispatch (the nine HOLD_EFFECT_CURE_*/HOLD_EFFECT_RESTORE_STATS arms), excluding the four Rank-3 direct item-manipulation moves.",
+  selector: "Level-50 roster moves whose item axis is otherwise unclaimed, minus MOVE_COVET/MOVE_TRICK/MOVE_RECYCLE/MOVE_KNOCK_OFF",
+  candidateCount: itemMoveEndCandidateRows.length,
+  sourceMoveCandidates: itemMoveEndCandidateRows,
+  sourceProvenRows: itemMoveEndSourceProvenRows,
+  sourceExceptionRows: ITEM_MOVE_END_EXCEPTION_ROWS,
+  blockers: [],
+  routeWitnesses: [...itemMoveEndEvidenceByMove.values()],
+  dispatcher: { path: BATTLE_SCRIPT_COMMANDS_PATH, line: itemMoveEndCaseLine, call: ITEM_MOVE_END_DISPATCHER_CALL, state: "MOVEEND_ITEM_EFFECTS_ALL", stateValue: 11 },
+  promotions: {
+    sourceProvenRows: itemMoveEndSourceProvenRows,
+    reason: `${itemMoveEndSourceProvenRows.length} of ${itemMoveEndCandidateRows.length} finite candidates have a source/program graph route from their entry script to a moveendall/moveendto/moveendfromto handoff whose Cmd_moveend state range includes state 11. MOVE_ASSIST and MOVE_METRONOME remain explicit dynamic-dispatch exceptions (the same structural gap as the Immunity family's state-4 search). The shared Pichu/Zubat Thunder-Wave/Cheri-Berry Battle Scene OFF receipt (holder + itemless control) and Tier-1 batch prove the common dispatcher semantics; no per-move oracle receipts are fabricated.`,
   },
 };
 const immunityAudit = {
@@ -3673,7 +3858,7 @@ const output = {
       ABILITY_CONSTANTS_PATH,
       "reference/pokeemerald/include/constants/pokemon.h",
     ],
-    note: `Catalog join plus an intentionally partial source dispatcher inventory. ${records.filter((record) => record.hooks.item.status === "unsupported").length} per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the ${kingsRockSourceProvenRows.length}-row King's Rock family, the ${shellBellSourceProvenRows.length}-row Shell Bell family, exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, ${synchronizeSourceProvenRows.length} Synchronize status candidates, the one-row Attract/Oblivious family, the two-row Explosion/Damp family, and the ${immunitySourceProvenRows.length}-row Immunity status-cure family carry graph/program/source-handoff evidence. King's Rock retains Tickle as one explicit zero-damage exception; Shell Bell retains Future Sight as a distinct IGNORE_SHELL_BELL exception; no per-move oracle receipts are fabricated.`,
+    note: `Catalog join plus an intentionally partial source dispatcher inventory. ${records.filter((record) => record.hooks.item.status === "unsupported").length} per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the ${kingsRockSourceProvenRows.length}-row King's Rock family, the ${shellBellSourceProvenRows.length}-row Shell Bell family, the ${itemMoveEndSourceProvenRows.length}-row item-move-end status-cure family, exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, ${synchronizeSourceProvenRows.length} Synchronize status candidates, the one-row Attract/Oblivious family, the two-row Explosion/Damp family, and the ${immunitySourceProvenRows.length}-row Immunity status-cure family carry graph/program/source-handoff evidence. King's Rock retains Tickle as one explicit zero-damage exception; Shell Bell retains Future Sight as a distinct IGNORE_SHELL_BELL exception; item-move-end retains Assist/Metronome as dynamic-dispatch exceptions; no per-move oracle receipts are fabricated.`,
   },
   coverage: {
     level50Roster: {
@@ -3708,9 +3893,10 @@ const output = {
         catalogedDispatcherCategories: ITEM_HOOK_CATALOG.length,
         kingsRock: kingsRockAudit,
         shellBell: shellBellAudit,
+        itemMoveEnd: itemMoveEndAudit,
         completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "The King's Rock flinch family is source-proven for 105 of 106 finite flag-selected rows with Tickle retained as the zero-damage exception, and the Shell Bell heal family is source-proven for 182 of 183 finite power != 0 rows with Future Sight retained as the IGNORE_SHELL_BELL exception. Choice Band, target Evasion-up accuracy, and other held-item dispatchers remain unsupported/null per move.",
+        reason: "The King's Rock flinch family is source-proven for 105 of 106 finite flag-selected rows with Tickle retained as the zero-damage exception, the Shell Bell heal family is source-proven for 182 of 183 finite power != 0 rows with Future Sight retained as the IGNORE_SHELL_BELL exception, and the item-move-end status-cure family is source-proven for the remaining not-already-claimed rows minus the four Rank-3 item-manipulation moves, with Assist/Metronome retained as dynamic-dispatch exceptions. Choice Band, target Evasion-up accuracy, and other held-item dispatchers remain unsupported/null per move.",
       },
       ability: {
         displayRows: Object.keys(abilityDisplay.abilities).length,
