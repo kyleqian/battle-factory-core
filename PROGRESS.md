@@ -7,9 +7,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1095 — [MAIN worker, 2026-08-10] **#55 direct level route bounded; complete callee not reducible yet**
 
-- **State:** evidence commit `b8bb8306`; focused stats **17/17**, smoke
-  **375/375**, and typecheck are green. Final full suite/build verification is
-  pending. #55 remains open and the construction clock remains unwired.
+- **State:** evidence `b8bb8306` plus docs `0a1ebd4d`; focused stats **17/17**,
+  smoke **375/375**, typecheck, full `npm test` **881 files / 8,436 passed /
+  1 skipped**, and production build are green. #55 remains open and the
+  construction clock remains unwired.
 - **Did:** audited all **12/12** `GetLevelFromMonExp` calls. Twice-fresh OFF
   packets pin personality/species/growth/EXP and exact post-accessor timing:
   **43 + 21 + 2,200 + 18 = 2,282** source cycles; **8 exact + 3×(+18
