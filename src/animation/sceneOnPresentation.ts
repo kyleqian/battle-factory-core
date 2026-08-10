@@ -23,6 +23,7 @@ import {
   spiteAtAge,
   type SpiteState,
 } from "./spite.ts";
+import { nightShadeAtAge, type NightShadeState } from "./nightShade.ts";
 import {
   headbuttAtAge,
   type HeadbuttState,
@@ -1393,6 +1394,19 @@ export interface SceneOnSpiteConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnNightShadeConfig {
+  readonly move: "NIGHT_SHADE";
+  readonly attacker: Readonly<{
+    species: "ARIADOS";
+    geometry: SceneOnBattlerGeometry;
+  }>;
+  readonly target: Readonly<{
+    species: "ONIX";
+    geometry: SceneOnBattlerGeometry;
+  }>;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnMirrorCoatConfig {
   readonly move: "MIRROR_COAT";
   readonly attacker: SceneOnPresentationBattler;
@@ -2448,6 +2462,7 @@ export type SceneOnMoveConfig =
   | SceneOnDisableConfig
   | SceneOnHazeConfig
   | SceneOnSpiteConfig
+  | SceneOnNightShadeConfig
   | SceneOnMirrorCoatConfig
   | SceneOnSynthesisConfig
   | SceneOnAromatherapyConfig
@@ -2622,6 +2637,8 @@ export type SceneOnHazePresentationState =
   SceneOnMovePresentationState<SceneOnHazeConfig>;
 export type SceneOnSpitePresentationState =
   SceneOnMovePresentationState<SceneOnSpiteConfig>;
+export type SceneOnNightShadePresentationState =
+  SceneOnMovePresentationState<SceneOnNightShadeConfig>;
 export type SceneOnMirrorCoatPresentationState =
   SceneOnMovePresentationState<SceneOnMirrorCoatConfig>;
 export type SceneOnSparkPresentationState =
@@ -4412,6 +4429,11 @@ export interface SceneOnSpiteView extends SpiteState {
   readonly displayedAlpha: Readonly<{ eva: number; evb: number }>;
 }
 
+export interface SceneOnNightShadeView extends NightShadeState {
+  readonly attacker: SceneOnNightShadeConfig["attacker"];
+  readonly target: SceneOnNightShadeConfig["target"];
+}
+
 /** `age` is relative to Move_HAZE's first in-bounds script pointer. */
 export function sceneOnHazeView(
   state: SceneOnMovePresentationState<SceneOnHazeConfig>,
@@ -4443,6 +4465,20 @@ export function sceneOnSpiteView(
       state.config.attacker.geometry.side,
     ),
     ...spiteAtAge(state.age - SPITE_TASK_SOURCE_AGE_OFFSET),
+  };
+}
+
+/** `age` is relative to Move_NIGHT_SHADE's first in-bounds pointer. */
+export function sceneOnNightShadeView(
+  state: SceneOnNightShadePresentationState,
+): SceneOnNightShadeView {
+  if (state.config.move !== "NIGHT_SHADE") {
+    throw new Error(`expected NIGHT_SHADE presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...nightShadeAtAge(state.age),
   };
 }
 

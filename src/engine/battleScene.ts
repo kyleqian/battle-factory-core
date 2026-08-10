@@ -887,6 +887,7 @@ import {
   sceneOnDisableView,
   sceneOnHazeView,
   sceneOnSpiteView,
+  sceneOnNightShadeView,
   sceneOnMirrorCoatView,
   sceneOnAromatherapyView,
   sceneOnSynthesisView,
@@ -1046,6 +1047,7 @@ import {
   type SceneOnDisableConfig,
   type SceneOnHazePresentationState,
   type SceneOnSpitePresentationState,
+  type SceneOnNightShadePresentationState,
   type SceneOnMirrorCoatPresentationState,
   type SceneOnBiteConfig,
   type SceneOnHeadbuttConfig,
@@ -1087,6 +1089,12 @@ import {
   spiteBackgroundIsGhost,
   spiteWaveShift,
 } from "../animation/spite.ts";
+import {
+  NIGHT_SHADE_CLONE_START_AGE,
+  NIGHT_SHADE_CLONE_DISPLAY_END_AGE,
+  nightShadeBackgroundBldy,
+  nightShadeBackgroundIsGhost,
+} from "../animation/nightShade.ts";
 import {
   superFangDisplayedAttackerOffsetAtAge,
   superFangDisplayedTargetOffsetAtAge,
@@ -1415,6 +1423,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const ariadosFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ARIADOS!;
 const poliwrathFrontSprite = opponentFrontSpritesAsset.POLIWRATH;
 const lickitungFrontSprite = opponentFrontSpritesAsset.LICKITUNG;
 const aipomFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).AIPOM!;
@@ -1956,6 +1965,7 @@ const arcanineBackSprite = (battleBackSpritesAsset as Record<string, BattleBackS
 const dugtrioBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DUGTRIO!;
 const charmeleonBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CHARMELEON!;
 const haunterBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HAUNTER!;
+const ariadosBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ARIADOS!;
 const ivysaurBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).IVYSAUR!;
 const aipomBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).AIPOM!;
 const kadabraBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).KADABRA!;
@@ -22033,6 +22043,111 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? "CORSOLA used" : "Foe CORSOLA used",
       "MIRROR COAT!",
       64,
+    );
+    return;
+  }
+  if (state.config.move === "NIGHT_SHADE") {
+    const nightState = state as SceneOnNightShadePresentationState;
+    const view = sceneOnNightShadeView(nightState);
+    const playerToOpponent = view.attacker.species === "ARIADOS"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "ARIADOS"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(`unsupported staged NIGHT_SHADE pair ${view.attacker.species}->${view.target.species}`);
+    }
+    const bldy = nightShadeBackgroundBldy(view.age);
+    const gpuDarken = (palette: readonly RgbColor[]) => palette.map((color) => {
+      const packed = mgbaDarkenColor(
+        color.r | (color.g << 8) | (color.b << 16), bldy,
+      );
+      return { r: packed & 0xff, g: (packed >>> 8) & 0xff, b: (packed >>> 16) & 0xff };
+    });
+    if (nightShadeBackgroundIsGhost(view.age)) {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimGhostBg.tileset,
+        tilemap: battleAnimGhostBg.tilemap,
+        subpalettes: [gpuDarken(battleAnimGhostBg.palette)],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(gpuDarken),
+      });
+    }
+    const attackerSource = playerToOpponent ? ariadosBackSprite : ariadosFrontSprite;
+    const attacker = playerToOpponent
+      ? attackerSource
+      : { ...attackerSource, tileset: subTileset(attackerSource.tileset, 0, 8) };
+    const targetSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const target = playerToOpponent
+      ? { ...targetSource, tileset: subTileset(targetSource.tileset, 0, 8) }
+      : targetSource;
+    const targetIdleX2 = playerToOpponent && view.age < 128
+      ? speciesFrontIdleRestOffset("ONIX")?.x2 ?? 0
+      : 0;
+    const targetPalette = blendPaletteToward(
+      target.palette, { r: 0, g: 0, b: 0 }, view.targetBlackCoeff,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb, target.tileset, targetPalette,
+      view.target.geometry.spriteCorner.x + targetIdleX2 + view.targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    const drawAttacker = () => {
+      drawSpriteSheet(
+        fb, attacker.tileset, attacker.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+      if (view.age === 183) {
+        drawSpriteSheetAffineStretch(
+          fb, attacker.tileset, attacker.palette,
+          view.attacker.geometry.spriteCorner.x,
+          view.attacker.geometry.spriteCorner.y,
+          view.cloneMatrix, view.cloneMatrix, 0,
+          { r: 0, g: 0, b: 0 }, 0, true,
+        );
+      }
+      if (view.age < NIGHT_SHADE_CLONE_START_AGE
+          || view.age > NIGHT_SHADE_CLONE_DISPLAY_END_AGE
+          || view.cloneAlpha.eva === 0) return;
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb, attacker.tileset, attacker.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+        view.cloneMatrix, view.cloneMatrix,
+        view.cloneAlpha.eva, view.cloneAlpha.evb,
+        true, "live",
+      );
+    };
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    const profile = nightState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "ARIADOS", level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "ARIADOS" : "ONIX", level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb, playerToOpponent ? "ARIADOS used" : "Foe ARIADOS used", "NIGHT SHADE!", 99,
     );
     return;
   }

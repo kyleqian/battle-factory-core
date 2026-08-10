@@ -3394,6 +3394,32 @@
    ]
   },
   {
+   "move": "MOVE_NIGHT_SHADE",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage lowest carrier set 160 FRONTIER_MON_ARIADOS against set 156 ONIX in both Scene-ON orientations, constraining only the active carrier move",
+    "twice-fresh byte-stable player-back frames 217-444 and opponent-front frames 218-445 each pass 228/228 pure reducer, typed seam, live task/software sprite, hardware OAM/matrix/palette/tag/register/audio/immutable-state, raw-RGB, and production-framebuffer acceptance",
+    "the source-relative compositor reuses the exact ghost background and ports attacker monbg/split priority, PSYBEAM and LEER audio receipts, the distinct AnimTask_NightShadeClone 85-hold alpha/affine body, target ShakeMon2, target black BlendColorCycle, restore, and cleanup",
+    "Night Shade independently measures initial direct clone setup at matrix RAM+1, later Step2 shrink/reset at matrix RAM+2, target ShakeMon2 at RAM+2, palette at RAM+1, and a one-frame queued BLDALPHA display; orientation shift is +1",
+    "committed probe/raw/change-map digests are player 6e829d73... / d49490af... / 0bf3f916... and opponent de630b2a... / e7832cfd... / 8af77a2a...; MOVE_SPITE remains an independent ghost-background/register control"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-night-shade-player-ariados-opponent-onix.json",
+    "tools/battle-lab/mechanic-night-shade-opponent-ariados-player-onix.json",
+    "tools/compare/fixtures/night-shade-player-ariados-opponent-onix.json",
+    "tools/compare/fixtures/night-shade-opponent-ariados-player-onix.json",
+    "tools/compare/nightShadeProbe.py",
+    "tools/compare/nightShadePortable.ts",
+    "tools/compare/evidence/night-shade-changemap-player.txt",
+    "tools/compare/evidence/night-shade-changemap-opponent.txt",
+    "src/animation/nightShade.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/nightShade.test.ts",
+    "tests/animation/nightShadeEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SPITE",
    "status": "exact",
    "covered": [

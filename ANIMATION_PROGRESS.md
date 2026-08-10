@@ -1,5 +1,12 @@
 # Animation coverage
 
+## MOVE_NIGHT_SHADE exact — bilateral 228/228 clone/ghost promotion (2026-08-10 worker)
+
+- **State:** Coverage advances **155→156/276 exact**, 0 partial, 0 staged, **121→120 unsupported**. `MOVE_NIGHT_SHADE` alone moves; no boundary or unsupported-branch pin changes.
+- **Did:** Added complete legal set-160 ARIADOS versus set-156 ONIX Scene-ON parties, pointer-bounded bilateral probes, raw-RGB receipts/change maps, a pure source-relative reducer, typed seam, and narrow compositor. The port reuses the exact ghost BG while independently covering Night Shade's PSYBEAM/LEER audio, monbg/split priority, 85-tick live-attacker clone, queued alpha, target ShakeMon2/black blend cycle, restore, and cleanup.
+- **Verified:** Twice fresh, player-back **217..444** and opponent-front **218..445** each pass **228/228 reducer/seam, task/software-sprite, hardware OAM/matrix/palette/tag/register/audio/state/raw-RGB, and production framebuffer**. Probe/raw/map digests are player `6e829d73…` / `d49490af…` / `0bf3f916…`, opponent `de630b2a…` / `e7832cfd…` / `8af77a2a…`. Spite and Lick controls remain exact. Focused tests, smoke, typecheck, the full suite (**878 files / 8,400 passed / 1 skipped**), build, coverage, and diff check are green.
+- **Next:** Supervisor selects the next independent move. Do not infer this task's split initial-versus-Step2 affine latch or audio/register schedule for another live-battler task.
+
 ## MOVE_SPITE exact — bilateral queued-BLDALPHA 221/221 promotion (2026-08-10 worker)
 
 - **State:** Coverage advances **154→155/276 exact**, 0 partial, 0 staged, **122→121 unsupported**. `MOVE_SPITE` alone moves; shared ghost-background sibling `MOVE_NIGHT_SHADE` remains unsupported.

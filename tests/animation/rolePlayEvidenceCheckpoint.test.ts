@@ -49,7 +49,7 @@ describe("MOVE_ROLE_PLAY dense evidence checkpoint", () => {
     expect(player).toMatchObject({ orientation: "player-back", sourceWindow: { startFrame: 70, endFrame: 216 }, attacker: { side: "player", animationCenter: { x: 72, y: 80 } }, target: { art: "back", personality: 1793700000, otId: 416049562 } });
     expect(opponent).toMatchObject({ orientation: "opponent-front", sourceWindow: { startFrame: 74, endFrame: 220 }, attacker: { side: "opponent", animationCenter: { x: 176, y: 42 } }, target: { art: "front", personality: 2349019075, otId: 416049562 } });
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact")).toHaveLength(155);
+    expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact")).toHaveLength(156);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_ROLE_PLAY")?.status).toBe("exact");
   });
 

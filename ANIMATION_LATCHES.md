@@ -51,6 +51,7 @@ cites the move whose ledger entry holds the full evidence.
 | `AnimTask_SpiteTargetShadow` alternating `BLDALPHA` writes | buffered after the VBlank transfer; scanout observes the preceding queued word. Derive with the GPU-register queue/audio-workload scheduler, not a paired-age coefficient | SPITE, both orientations (2026-08-10): distinct pointer-zero audio anchors, no active-channel VBlank overrun in either 221-frame window |
 | Scale/wobble affine matrix on a live sprite | RAM+2 | GROWTH-derived, FUTURE_SIGHT (matrix age−2); TORMENT wobble |
 | Direct live-battler `SetSpriteRotScale` from a sprite callback, with `ResetSpriteRotScale` + invisible teardown | matrix RAM+1; invisible sprite omitted from hardware OAM at RAM+1 while its matrix transfers independently | BATON_PASS, both orientations (2026-08-09) |
+| `AnimTask_NightShadeClone` direct live-battler setup followed by task-driven Step2 scale/reset | initial `SetSpriteRotScale(128)` matrix RAM+1; later Step2 `+8` shrink and reset matrix RAM+2; alpha task writes scan out one queued frame later | NIGHT_SHADE, both orientations (2026-08-10); its two phases are distinct and do not generalize BATON_PASS |
 | OAM `objMode`/`affineMode` flags | RAM+1 — flips one tick before its own matrix reaches neutral | FUTURE_SIGHT rung 11 |
 | Send-out intro (front) | one-display latch, alignment A = −1 (`max(0, frame − t_move − 1)`) | rung-3 FRONT dispatcher (2026-08-04) |
 | Send-out intro (back) | TWO displays behind the dense index | rung-3 BACK dispatcher (2026-08-04) |

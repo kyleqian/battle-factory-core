@@ -45,13 +45,13 @@ describe("MOVE_SPITE bilateral exact compositor acceptance", () => {
     expect(portable).toContain("if (failures.length && !checkpoint) throw");
   });
 
-  it("promotes only Spite and leaves its ghost-background sibling unsupported", () => {
+  it("keeps Spite exact after its ghost-background sibling is promoted independently", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact"))
-      .toHaveLength(155);
+      .toHaveLength(156);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SPITE"))
       .toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_NIGHT_SHADE"))
-      .toBeUndefined();
+      .toMatchObject({ status: "exact" });
   });
 });
