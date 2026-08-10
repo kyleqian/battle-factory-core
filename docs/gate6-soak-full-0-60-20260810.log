@@ -1,0 +1,67 @@
+
+> pokeemerald-factory-run@0.1.0 soak
+> node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy full --seeds 0:60
+
+seed    0  OK     b1 t20   12046f  2.2s  roundLost
+seed    1  OK     b1 t27   15510f  2.5s  roundLost
+seed    2  OK     b1 t21   20451f  2.7s  roundLost
+seed    3  OK     b3 t52   72345f  10.3s  roundLost
+seed    4  OK     b1 t20   21121f  2.5s  roundLost
+seed    5  OK     b1 t28   25645f  3.2s  roundLost
+seed    6  OK     b2 t88   84825f  11.9s  roundLost
+seed    7  OK     b2 t24   44291f  5.8s  roundLost
+seed    8  OK     b1 t23   12885f  2.2s  roundLost
+seed    9  OK     b1 t26   22013f  2.9s  roundLost
+seed   10  OK     b2 t15   32664f  4.6s  roundLost
+seed   11  OK     b1 t33   20203f  3.2s  roundLost
+seed   12  OK     b5 t20   93847f  13.1s  roundLost
+seed   13  OK     b5 t8   72341f  9.2s  roundLost
+seed   14  OK     b1 t20   20078f  2.4s  roundLost
+seed   15  OK     b1 t30   19799f  2.8s  roundLost
+seed   16  OK     b4 t37   91394f  12.6s  roundLost
+seed   17  OK     b2 t40   48723f  6.6s  roundLost
+seed   18  OK     b1 t22   12881f  1.9s  roundLost
+seed   19  OK     b3 t14   49602f  7.2s  roundLost
+seed   20  OK     b1 t21   21366f  2.7s  roundLost
+seed   21  OK     b3 t28   51464f  7.5s  roundLost
+seed   22  OK     b2 t32   39888f  5.7s  roundLost
+seed   23  OK     b2 t20   29562f  4.2s  roundLost
+seed   24  OK     b1 t21   11422f  1.7s  roundLost
+seed   25  OK     b2 t41   38081f  5.9s  roundLost
+seed   26  OK     b2 t16   40368f  5.4s  roundLost
+seed   27  OK     b2 t16   24829f  3.6s  roundLost
+seed   28  OK     b1 t33   16011f  2.5s  roundLost
+seed   29  OK     b2 t13   34647f  4.9s  roundLost
+seed   30  OK     b1 t22   16654f  2.6s  roundLost
+seed   31  OK     b2 t29   35801f  5.2s  roundLost
+seed   32  OK     b1 t20   19826f  2.5s  roundLost
+seed   33  OK     b2 t12   21937f  3.2s  roundLost
+seed   34  OK     b2 t25   31740f  4.7s  roundLost
+seed   35  OK     b2 t16   27366f  3.9s  roundLost
+seed   36  OK     b2 t44   53765f  8.1s  roundLost
+seed   37  OK     b2 t43   40287f  6.0s  roundLost
+seed   38  OK     b2 t16   25171f  3.7s  roundLost
+seed   39  OK     b1 t23   13664f  2.0s  roundLost
+seed   40  OK     b4 t13   49381f  6.9s  roundLost
+seed   41  OK     b1 t19   12812f  1.8s  roundLost
+seed   42  OK     b1 t22   14703f  2.3s  roundLost
+seed   43  OK     b3 t26   40689f  5.9s  roundLost
+seed   44  OK     b2 t35   42005f  6.2s  roundLost
+seed   45  OK     b1 t31   18726f  2.8s  roundLost
+seed   46  OK     b1 t39   24574f  3.6s  roundLost
+seed   47  OK     b2 t24   28410f  4.3s  roundLost
+seed   48  OK     b1 t27   14815f  2.2s  roundLost
+seed   49  OK     b1 t18   21064f  2.7s  roundLost
+seed   50  OK     b2 t13   28152f  4.0s  roundLost
+seed   51  OK     b1 t23   20364f  2.8s  roundLost
+seed   52  OK     b1 t26   13898f  2.1s  roundLost
+seed   53  OK     b3 t23   63548f  8.7s  roundLost
+seed   54  OK     b1 t24   22313f  2.7s  roundLost
+seed   55  OK     b2 t26   29442f  4.2s  roundLost
+seed   56  OK     b2 t24   34947f  4.7s  roundLost
+seed   57  OK     b2 t31   43166f  6.1s  roundLost
+seed   58  OK     b5 t13   73890f  10.3s  roundLost
+seed   59  OK     b1 t29   16078f  2.4s  roundLost
+
+=== soak summary: 60 seeds (policy full) in 281.9s ===
+OK 60  CRASH 0  HANG 0

@@ -1,3 +1,54 @@
+## 1067 — [MAIN worker, 2026-08-09 night] **Shell Bell source audit landed; census/receipt/promotion still open (honest partial)**
+
+- **State:** tree is green: full suite **852 files / 8,305 passed / 1
+  skipped**, production build, `npm run typecheck` clean. `docs/gate6-coverage-manifest.md`
+  is untouched and still reads **195 item join gaps / 106 ability join gaps**
+  (unchanged from entry 1066 — this step added a doc only, no census/manifest
+  edit, so there is no before/after delta to report yet).
+- **Did:** `docs/shell-bell-moveend-ground-truth.md` re-derives the
+  `HOLD_EFFECT_SHELL_BELL` arm of `ItemBattleEffects(ITEMEFFECT_KINGSROCK_SHELLBELL)`
+  (`battle_util.c:3787-3806`), the four `shellBellDmg` recording sites inside
+  `Cmd_datahpupdate` (`battle_script_commands.c:1870-1983`), and the two
+  explicit `IGNORE_SHELL_BELL` suppression sites (`Cmd_painsplitdmgcalc`
+  `battle_script_commands.c:8063`; delayed Future Sight/Doom Desire
+  `HandleWishPerishSongOnTurnEnd` `battle_util.c:1816`) — all with exact
+  file:line citations, no prose glosses. Confirmed
+  `src/engine/battleScriptMoveEndOpcode.ts:883-969`'s `HOLD_EFFECT_SHELL_BELL`
+  arm is a faithful line-for-line port of source (same eight ordered guards,
+  same `max(1, floor(shellBellDmg/holdEffectParam))` heal, same reset-to-0,
+  same `BattleScript_ItemHealHP_Ret` jump) — **no engine fix was needed**, so
+  this step stayed pure proof work. Derived the finite selector: Shell Bell's
+  is *not* a `moves.json` flag (unlike King's Rock's `FLAG_KINGS_ROCK_AFFECTED`)
+  — it's "does the move reach a successful `datahpupdate BS_TARGET`", the same
+  route property this run already source-proved for the Color Change ON_DAMAGE
+  family (`power != 0` selector, 183 candidates / 182 proven / 1 Future Sight
+  exception). The doc shows Shell Bell's own Future Sight exclusion reason
+  (`battle_util.c:1816` explicit poison) is **not** the same as Color Change's
+  (`moveendfromto` state-3 skip) — state 12 is inside Future Sight's delayed
+  `[11,14]` moveend range, so this is a genuinely distinct citation, not an
+  inferred analogy.
+- **Next:** the remaining three deliverables are real implementation work,
+  not proof-reading, and did not fit this session's cap: (1) wire
+  `coverage.hookCatalogs.item.shellBell` into
+  `tools/extract/extract-level50-move-parameterization.ts` by transforming the
+  already-computed `colorChangeRouteEvidenceByMove` witnesses (182 rows) into
+  Shell Bell witnesses retargeted at `MOVEEND_KINGSROCK_SHELLBELL`/state 12
+  (reuse the routes, don't recompute them — `kingsRockRouteEvidence` is the
+  shape to match); (2) a Battle Scene OFF receipt (three-party `mechanicLab`
+  fixture, Shell Bell holder vs. no-item control, run twice for byte-identity)
+  named like the King's Rock set (`tools/battle-lab/mechanic-shell-bell-heal-off.json`,
+  `tools/probe/probe-shell-bell-heal-off.py`,
+  `tools/probe/receipts/shell-bell-heal-off.json`); (3)
+  `tests/shellBellHookJoinBatch.test.ts` + `tests/shellBellOracleEvidence.test.ts`
+  and the matching `gate6-coverage-manifest.ts` promotion (its per-move
+  hook-join validator hard-couples any `hooks.item.status` change to family
+  evidence, so census and manifest wiring cannot be split — do both together).
+  Do not promote rows to `source-proven-family` without the real receipt.
+- **Notes:** no engine, controller, round outcome, barrier pin, generated
+  JSON, or canonical window changed. `docs/shell-bell-moveend-ground-truth.md`
+  is standalone and doesn't yet feed the manifest — the manifest's 195/106 gap
+  counts are exactly what they were at entry 1066.
+
 ## 1066 — [supervisor, 2026-08-09 night] **Orient fold: Karate Chop checkpoint + orphan printfromtable audit; union green**
 
 - **State:** master union is green: full suite **851 files / 8,302 passed / 1
