@@ -1070,6 +1070,21 @@ hardware-service cycles. The construction clock now exposes this structural
 operation, but remains unwired while the larger costs and async workload below
 are unresolved.
 
+**Non-final outer-loop timing (2026-08-10):**
+`reduceFactoryOuterLoopTiming` now covers all **9/9** committed
+post-mon-end→next-construction-entry spans across both compiled siblings.
+`FillFactoryFrontierTrainerParty` is **130** cycles for all four spans
+(`27×2 + 2×8 + 3×11 + 3×9`); `CreateFrontierFactorySelectableMons` is **261**
+source cycles for all five (`61×2 + 6×8 + 5×11 + 4×9`). Four selectable
+spans match directly and one is **261 + 18 = 279**, with the +18 independently
+classified as asynchronous timing service between ordinary shift
+instructions. All nine contain zero complete VBlank pauses. The selectable
+reducer models only source loop index, rental rank, and challenge-number clamp
+branches; loaded mon values do not alter timing and `sourceSetId` stays
+diagnostic. The clock emits a non-final `factory-outer-loop` operation, but
+remains unwired while CreateMon/EV/stat/Factory-post and live VBlank/audio
+arbitration remain unresolved.
+
 **EV-spread source-state checkpoint (2026-08-10):** the complete v2
 `CreateMon`-return to `CalculateMonStats`-entry boundary is now pinned for all
 **12/12** spans (anchor/LILIANA/varied **6/3/3**) after subtracting contained

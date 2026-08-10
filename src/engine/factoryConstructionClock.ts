@@ -52,6 +52,7 @@ export type FactoryConstructionOperationKind =
   | "ev-spread"
   | "calculate-mon-stats"
   | "factory-post-mon"
+  | "factory-outer-loop"
   | "source-return";
 
 export type FactoryConstructionHalf = "low" | "high";
@@ -131,8 +132,45 @@ export interface FactorySourceReturnTiming {
   cycles: number;
 }
 
+export type FactoryOuterLoopTimingInput =
+  | Readonly<{
+    sourceFunction: "CreateFrontierFactorySelectableMons";
+    /** Source loop index of the mon whose construction entry follows. */
+    nextMonIndex: number;
+    /** `GetNumPastRentalsRank` result read by the selectable-mon loop. */
+    selectableRentalRank: number;
+    /** Factory win-streak quotient read before the selectable-mon loop. */
+    selectableChallengeNum: number;
+  }>
+  | Readonly<{
+    sourceFunction: "FillFactoryFrontierTrainerParty";
+    /** Source loop index of the mon whose construction entry follows. */
+    nextMonIndex: number;
+  }>;
+
+export interface FactoryOuterLoopTiming {
+  sourceFunction: FactoryConstructionSourceFunction;
+  nextMonIndex: number;
+  /** First executed instruction after the preceding held-item write. */
+  startPc: number;
+  /** Compiled BL which enters the next mon's construction. */
+  nextCallerCallPc: number;
+  nextConstructionEntryPc: number;
+  sequentialRomFetches: number;
+  takenControlFlows: number;
+  romLiteralLoads: number;
+  romTableLoads: number;
+  elevatedRental: boolean | null;
+  fixedIvChallenge: number | null;
+  fixedIvClamped: boolean | null;
+  cycles: number;
+}
+
 const THUMB_SEQUENTIAL_CYCLES = 2;
 const THUMB_PIPELINE_REFILL_CYCLES = 6;
+const THUMB_TAKEN_CONTROL_CYCLES = THUMB_SEQUENTIAL_CYCLES + THUMB_PIPELINE_REFILL_CYCLES;
+const THUMB_ROM_LITERAL_LOAD_CYCLES = 11;
+const THUMB_ROM_TABLE_LOAD_CYCLES = 9;
 
 function rotateRight32(value: number, amount: number): number {
   const shift = amount & 31;
@@ -192,6 +230,112 @@ export function reduceFactoryConstructionEntryTiming(
     firstRandomPc: 0x0806_f5cc,
     sequentialThumbHalfwords,
     pipelineRefills,
+    cycles,
+  });
+}
+
+/**
+ * Reduce a non-final Factory loop tail through the next mon constructor entry.
+ *
+ * The boundary starts after the held-item `SetMonData` call and includes the
+ * loop test, non-final back edge, next record loads, argument setup, and BL to
+ * `CreateMonWithEVSpreadNatureOTID`. The selectable sibling additionally calls
+ * `GetFactoryMonFixedIV`; its two real source branches are represented by the
+ * rental rank and challenge number, rather than by a rental/set identity.
+ *
+ * The pinned ELF/mGBA timing is structural: ordinary prefetched Thumb work
+ * costs 2 cycles, taken control flow costs 8 including refill, PC-relative ROM
+ * literal reads cost 11, and data-table ROM reads cost 9. Stack/IWRAM accesses
+ * in these paths remain hidden by prefetch and stay in the ordinary 2-cycle
+ * class. Loaded mon values do not select a branch. Asynchronous hardware
+ * service is deliberately outside this reducer.
+ */
+export function reduceFactoryOuterLoopTiming(
+  input: FactoryOuterLoopTimingInput,
+): FactoryOuterLoopTiming {
+  const nextMonIndex = requireNonnegativeInteger(input.nextMonIndex, "nextMonIndex");
+  const maxNextMonIndex = input.sourceFunction === "CreateFrontierFactorySelectableMons" ? 5 : 2;
+  if (nextMonIndex < 1 || nextMonIndex > maxNextMonIndex) {
+    throw new Error(
+      `${input.sourceFunction} nextMonIndex must be in [1, ${maxNextMonIndex}], got ${nextMonIndex}`,
+    );
+  }
+
+  let sequentialRomFetches: number;
+  let takenControlFlows: number;
+  let romLiteralLoads: number;
+  let romTableLoads: number;
+  let startPc: number;
+  let nextCallerCallPc: number;
+  let elevatedRental: boolean | null = null;
+  let fixedIvChallenge: number | null = null;
+  let fixedIvClamped: boolean | null = null;
+
+  if (input.sourceFunction === "FillFactoryFrontierTrainerParty") {
+    // 0x0816376c -> 0x08163706 -> 0x08068634.
+    sequentialRomFetches = 27;
+    takenControlFlows = 2;
+    romLiteralLoads = 3;
+    romTableLoads = 3;
+    startPc = 0x0816_376c;
+    nextCallerCallPc = 0x0816_3706;
+  } else {
+    const selectableRentalRank = requireNonnegativeInteger(
+      input.selectableRentalRank,
+      "selectableRentalRank",
+    );
+    const selectableChallengeNum = requireNonnegativeInteger(
+      input.selectableChallengeNum,
+      "selectableChallengeNum",
+    );
+    if (selectableRentalRank > 5) {
+      throw new Error(`selectableRentalRank must be in [0, 5], got ${selectableRentalRank}`);
+    }
+    if (selectableChallengeNum > 0xff) {
+      throw new Error(`selectableChallengeNum must be a source u8, got ${selectableChallengeNum}`);
+    }
+
+    elevatedRental = nextMonIndex < selectableRentalRank;
+    fixedIvChallenge = (selectableChallengeNum + (elevatedRental ? 1 : 0)) & 0xff;
+    // Retail source uses `>` rather than `>=`; challenge 8 is the documented
+    // out-of-bounds row and therefore does not take the clamp body.
+    fixedIvClamped = fixedIvChallenge > 8;
+
+    // Anchor branch shape: rentalRank 0 and challenge 0.
+    sequentialRomFetches = 61;
+    takenControlFlows = 6;
+    romLiteralLoads = 5;
+    romTableLoads = 4;
+    if (elevatedRental) {
+      // Non-taken `bcs`, challenge+1 setup, then a taken join branch.
+      sequentialRomFetches += 5;
+    }
+    if (fixedIvClamped) {
+      // Replace GetFactoryMonFixedIV's taken `bls` with non-taken `bls` + mov.
+      sequentialRomFetches += 2;
+      takenControlFlows -= 1;
+    }
+    startPc = 0x0819_b612;
+    nextCallerCallPc = 0x0819_b5a4;
+  }
+
+  const cycles = sequentialRomFetches * THUMB_SEQUENTIAL_CYCLES
+    + takenControlFlows * THUMB_TAKEN_CONTROL_CYCLES
+    + romLiteralLoads * THUMB_ROM_LITERAL_LOAD_CYCLES
+    + romTableLoads * THUMB_ROM_TABLE_LOAD_CYCLES;
+  return Object.freeze({
+    sourceFunction: input.sourceFunction,
+    nextMonIndex,
+    startPc,
+    nextCallerCallPc,
+    nextConstructionEntryPc: 0x0806_8634,
+    sequentialRomFetches,
+    takenControlFlows,
+    romLiteralLoads,
+    romTableLoads,
+    elevatedRental,
+    fixedIvChallenge,
+    fixedIvClamped,
     cycles,
   });
 }
@@ -976,6 +1120,15 @@ export function scheduleFactoryConstruction(
       firstEventIndex,
       lastEventIndex: lastConstructionEventIndex,
     }));
+    const nextMon = input.mons[monIndex + 1];
+    if (nextMon !== undefined) {
+      clock.run(sourceOperation(
+        nextMon,
+        input.sourceFunction,
+        "factory-outer-loop",
+        monIndex + 1,
+      ));
+    }
   }
 
   clock.run(sourceOperation(null, input.sourceFunction, "source-return", null));

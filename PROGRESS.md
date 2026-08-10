@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1086 — [MAIN worker, 2026-08-10] **#55 non-final Factory outer-loop timing reduced**
+
+- **State:** source reducer and all **9/9** v2 outer-loop spans are green;
+  focused construction **16/16**, smoke **375/375**, typecheck, full `npm test`
+  **879 files / 8,417 passed / 1 skipped**, and production build pass.
+- **Did:** reduced the selectable sibling to **261** cycles (**5** spans) and
+  trainer-party sibling to **130** (**4** spans) from compiled Thumb/bus classes.
+  Eight match directly; anchor mon 3 is **261 + 18** async service. All nine
+  contain zero complete VBlank pauses. Added the non-final clock operation and
+  source-only selectable rental-rank/challenge branches.
+- **Next:** resume exact CreateMon/EV/stat/Factory-post and VBlank/audio
+  arbitration. Keep #55 open and the live clock unwired.
+- **Notes:** no identity/duration table, evidence mutation, live wiring,
+  canonical Battle-2, animation, or unsupported-barrier change.
+
 ## 1085 — [supervisor, 2026-08-10] **#55 m4a workload split into compiled source stages**
 
 - **State:** side commit `236e1fe4` is folded; focused receipt **2/2** and
@@ -41,22 +56,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no fitted duration/table, identity/tick/cursor lookup, evidence
   mutation, live wiring, canonical Battle-2 march, animation edit, or new
   unsupported barrier.
-
-## 1083 — [supervisor, 2026-08-10] **#55 VBlank variability isolated to audio; resume residual bounded**
-
-- **State:** side commit `6df4fc19` is folded; its focused receipt test is
-  **2/2** and artifact regeneration is byte-identical under supervisor rerun.
-  Final union gates follow after the next bounded main increment.
-- **Did:** added an opt-in source-state VBlank probe plus compact receipts for
-  **52/31/30** construction-epoch interrupts. Every measured VBlank-body stage
-  except `m4aSoundMain` is constant within each case; audio accounts for the
-  full body range (**23,920–52,083 / 24,732–47,917 / 24,391–41,682** cycles).
-  Return-to-resume is **41** cycles for **112/113** samples; the sole **59**-
-  cycle sample has no observed HBlank, VCount, Serial, Timer3, or shared dummy
-  ISR entry, so its +18 remains explicitly outside the reducer.
-- **Next:** use the new receipt to port complete dereferenced m4a state timing
-  and hardware resume arbitration, while continuing CreateMon/EV/stat/post
-  source budgets. Keep the live construction clock unwired.
-- **Notes:** raw fixtures are test-only and contain relative timings plus
-  source-visible state—no frame, RNG, trainer, set, battle, tick, cursor, or
-  construction identity. Existing v2 receipts stayed byte-identical.

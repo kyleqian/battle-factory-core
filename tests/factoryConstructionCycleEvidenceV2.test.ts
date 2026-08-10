@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   reduceFactoryConstructionEntryTiming,
   reduceFactoryNatureAttemptTiming,
+  reduceFactoryOuterLoopTiming,
   reduceFactorySourceReturnTiming,
 } from "../src/engine/factoryConstructionClock.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
@@ -285,6 +286,84 @@ describe("Factory construction v2 source/cycle receipt", () => {
       [0, 0, 0, 0, 0, 0],
       [0, 0, 0],
       [0, 0, 0],
+    ]);
+  });
+
+  it("replays all nine non-final Factory outer-loop tails from compiled source timing", () => {
+    const measuredByCase: number[][] = [];
+    const sourceCyclesByCase: number[][] = [];
+    const vblankPausesByCase: number[][] = [];
+    const asynchronousServiceByCase: number[][] = [];
+
+    for (const { value } of probes) {
+      const events = value.cycleEvidence.events;
+      const pauses = interruptPauses(events);
+      const measured: number[] = [];
+      const reduced: number[] = [];
+      const containedPauses: number[] = [];
+      const asynchronousService: number[] = [];
+
+      for (let monIndex = 0; monIndex + 1 < value.monBoundaries.length; monIndex += 1) {
+        const post = events.find((event) => (
+          event.kind === "factory-post-mon-end" && event.monIndex === monIndex
+        ))!;
+        const nextEntry = events.find((event) => (
+          event.kind === "construction-entry" && event.monIndex === monIndex + 1
+        ))!;
+        const contained = pauses.filter(([entry, resume]) => (
+          post.masterCycles <= entry && resume <= nextEntry.masterCycles
+        ));
+        const timing = value.sourceFunction === "CreateFrontierFactorySelectableMons"
+          ? reduceFactoryOuterLoopTiming({
+            sourceFunction: value.sourceFunction,
+            nextMonIndex: monIndex + 1,
+            selectableRentalRank: 0,
+            selectableChallengeNum: 0,
+          })
+          : reduceFactoryOuterLoopTiming({
+            sourceFunction: value.sourceFunction,
+            nextMonIndex: monIndex + 1,
+          });
+        const source = sourceCycles(post, nextEntry, contained);
+
+        expect(post.pc).toBe(`0x${(timing.startPc + 2).toString(16).padStart(8, "0")}`);
+        expect(nextEntry.returnPc).toBe(
+          `0x${(timing.nextCallerCallPc + 5).toString(16).padStart(8, "0")}`,
+        );
+        expect(nextEntry.pc).toBe(
+          `0x${(timing.nextConstructionEntryPc + 2).toString(16).padStart(8, "0")}`,
+        );
+        measured.push(source);
+        reduced.push(timing.cycles);
+        containedPauses.push(contained.reduce((sum, [entry, resume]) => sum + resume - entry, 0));
+        asynchronousService.push(source - timing.cycles);
+      }
+
+      measuredByCase.push(measured);
+      sourceCyclesByCase.push(reduced);
+      vblankPausesByCase.push(containedPauses);
+      asynchronousServiceByCase.push(asynchronousService);
+    }
+
+    expect(measuredByCase).toEqual([
+      [261, 261, 261, 279, 261],
+      [130, 130],
+      [130, 130],
+    ]);
+    expect(sourceCyclesByCase).toEqual([
+      [261, 261, 261, 261, 261],
+      [130, 130],
+      [130, 130],
+    ]);
+    expect(vblankPausesByCase).toEqual([
+      [0, 0, 0, 0, 0],
+      [0, 0],
+      [0, 0],
+    ]);
+    expect(asynchronousServiceByCase).toEqual([
+      [0, 0, 0, 18, 0],
+      [0, 0],
+      [0, 0],
     ]);
   });
 

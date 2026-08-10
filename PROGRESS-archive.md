@@ -1,3 +1,22 @@
+## 1083 — [supervisor, 2026-08-10] **#55 VBlank variability isolated to audio; resume residual bounded**
+
+- **State:** side commit `6df4fc19` is folded; its focused receipt test is
+  **2/2** and artifact regeneration is byte-identical under supervisor rerun.
+  Final union gates follow after the next bounded main increment.
+- **Did:** added an opt-in source-state VBlank probe plus compact receipts for
+  **52/31/30** construction-epoch interrupts. Every measured VBlank-body stage
+  except `m4aSoundMain` is constant within each case; audio accounts for the
+  full body range (**23,920–52,083 / 24,732–47,917 / 24,391–41,682** cycles).
+  Return-to-resume is **41** cycles for **112/113** samples; the sole **59**-
+  cycle sample has no observed HBlank, VCount, Serial, Timer3, or shared dummy
+  ISR entry, so its +18 remains explicitly outside the reducer.
+- **Next:** use the new receipt to port complete dereferenced m4a state timing
+  and hardware resume arbitration, while continuing CreateMon/EV/stat/post
+  source budgets. Keep the live construction clock unwired.
+- **Notes:** raw fixtures are test-only and contain relative timings plus
+  source-visible state—no frame, RNG, trainer, set, battle, tick, cursor, or
+  construction identity. Existing v2 receipts stayed byte-identical.
+
 ## 1079 — [MAIN worker, 2026-08-10] **#55 candidate-aware nature-check timing landed; async construction workload remains open**
 
 - **State:** candidate timing commits `79448547`/`a57d39b9`; focused construction **9/9**,

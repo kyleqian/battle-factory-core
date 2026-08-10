@@ -9,16 +9,20 @@ models the source order:
 1. `CreateMonWithEVSpreadNatureOTID` low/high `Random()` calls and its nature
    rejection loop;
 2. `CreateMon`, EV-spread writes, and `CalculateMonStats`;
-3. the Factory post-mon work (moves, friendship, held item); and
-4. the source-function return.
+3. the Factory post-mon work (moves, friendship, held item);
+4. the non-final source loop tail and next mon's argument loads; and
+5. the source-function return.
 
 Each operation is passed to a cycle-cost callback keyed by source function,
 species/nature input, rejection attempt, and EV/stat work. Random operations
 now carry their returned u16, attempt operations carry every assembled
 candidate personality/nature/result, and CreateMon/EV/stat/Factory-post operations carry
 the accepted personality required by encrypted box-mon substructure routing.
-When
-the accumulated cost crosses a configured VBlank period, the clock invokes
+The clock also emits `factory-outer-loop` with the next source loop index and
+next mon input. `reduceFactoryOuterLoopTiming` consumes only that index plus
+the selectable caller's rental-rank/challenge source state; loaded mon values
+do not alter this path's timing. When the accumulated cost crosses a configured
+VBlank period, the clock invokes
 the ambient callback once and emits a `VBlankIntr+0x87` event. No trainer id,
 battle number, absolute presentation tick, or recorded cursor is read by the
 model.
@@ -90,3 +94,21 @@ that source value on the downstream operation keys, including the Factory
 friendship/held-item writes that re-enter `SetBoxMonData`. Exact ROM-fetch/EWRAM
 access timing is still unported, so no observed EV duration or +18 residual is
 adopted and the clock stays unwired.
+
+## Non-final outer-loop reducer
+
+The complete nine-span outer-loop receipt is source-reduced. The trainer-party
+sibling is **130** cycles (`27×2 + 2×8 + 3×11 + 3×9`) for all four observations.
+The selectable sibling's anchor branch is **261** cycles
+(`61×2 + 6×8 + 5×11 + 4×9`) for all five source paths; four measure 261
+directly and one measures **261 + 18** asynchronous service. All nine contain
+zero complete VBlank pauses. The terms respectively count ordinary prefetched
+Thumb instructions, taken control flow, PC-relative ROM literal reads, and ROM
+facility-table reads in the pinned ELF.
+
+The selectable reducer additionally models the real `i < rentalRank` arm and
+`GetFactoryMonFixedIV`'s retail `challenge > 8` clamp from bounded source state.
+It has no trainer/set/battle/frame/tick/cursor/fixture input, and
+`sourceSetId` remains diagnostic only. This closes the outer-loop source budget
+but does not change the unresolved CreateMon/EV/stat/Factory-post or live
+VBlank/audio arbitration requirements, so the clock remains unwired.

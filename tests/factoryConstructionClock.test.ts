@@ -6,6 +6,7 @@ import {
   REQUIRED_FACTORY_CONSTRUCTION_CLOCK_EVIDENCE,
   reduceFactoryConstructionEntryTiming,
   reduceFactoryNatureAttemptTiming,
+  reduceFactoryOuterLoopTiming,
   reduceFactorySourceReturnTiming,
   scheduleFactoryConstruction,
   scheduleFactoryConstructionCleanStream,
@@ -331,6 +332,85 @@ describe("Factory construction source-operation clock", () => {
       },
     });
     expect(scheduled.end.cycle).toBe(32);
+  });
+
+  it("exposes and reduces the non-final outer loop with source branches only", () => {
+    expect(reduceFactoryOuterLoopTiming({
+      sourceFunction: "FillFactoryFrontierTrainerParty",
+      nextMonIndex: 1,
+    })).toMatchObject({
+      sequentialRomFetches: 27,
+      takenControlFlows: 2,
+      romLiteralLoads: 3,
+      romTableLoads: 3,
+      cycles: 130,
+    });
+    expect(reduceFactoryOuterLoopTiming({
+      sourceFunction: "CreateFrontierFactorySelectableMons",
+      nextMonIndex: 1,
+      selectableRentalRank: 0,
+      selectableChallengeNum: 0,
+    })).toMatchObject({
+      elevatedRental: false,
+      fixedIvChallenge: 0,
+      fixedIvClamped: false,
+      sequentialRomFetches: 61,
+      takenControlFlows: 6,
+      romLiteralLoads: 5,
+      romTableLoads: 4,
+      cycles: 261,
+    });
+    expect(reduceFactoryOuterLoopTiming({
+      sourceFunction: "CreateFrontierFactorySelectableMons",
+      nextMonIndex: 1,
+      selectableRentalRank: 2,
+      selectableChallengeNum: 0,
+    }).cycles).toBe(271);
+    expect(reduceFactoryOuterLoopTiming({
+      sourceFunction: "CreateFrontierFactorySelectableMons",
+      nextMonIndex: 1,
+      selectableRentalRank: 2,
+      selectableChallengeNum: 8,
+    }).cycles).toBe(267);
+    expect(reduceFactoryOuterLoopTiming({
+      sourceFunction: "CreateFrontierFactorySelectableMons",
+      nextMonIndex: 1,
+      selectableRentalRank: 0,
+      selectableChallengeNum: 9,
+    }).cycles).toBe(257);
+
+    const sourceFunction = "FillFactoryFrontierTrainerParty" as const;
+    const first = randomU32(0x1234_5678);
+    const second = randomU32(first.rngValue);
+    const operations: FactoryConstructionOperation[] = [];
+    const scheduled = scheduleFactoryConstructionCleanStream({
+      sourceFunction,
+      mons: [
+        mon(natureFromPersonality(first.value), sourceFunction),
+        mon(natureFromPersonality(second.value), sourceFunction),
+      ],
+      clock: {
+        start: { frame: 0, cycle: 0, rngValue: 0x1234_5678 },
+        cycleCost: (operation) => {
+          operations.push(operation);
+          return operation.kind === "factory-outer-loop"
+            ? reduceFactoryOuterLoopTiming({
+              sourceFunction,
+              nextMonIndex: operation.monIndex!,
+            }).cycles
+            : 0;
+        },
+      },
+    });
+    expect(operations.filter((operation) => operation.kind === "factory-outer-loop"))
+      .toMatchObject([{
+        sourceFunction,
+        monIndex: 1,
+        input: { speciesId: 1, sourceFunction },
+        attempt: null,
+        half: null,
+      }]);
+    expect(scheduled.end.cycle).toBe(130);
   });
 
   it("is idempotent for repeated source inputs and a pure operation-cost callback", () => {

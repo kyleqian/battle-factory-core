@@ -105,7 +105,7 @@ are evidence boundaries, not adopted reducer constants.
 | `CalculateMonStats` entry → return | 12 | 140,999–154,160 | unresolved |
 | stats return → construction return | 12 | 22 | exact sub-boundary; retained with the unresolved stats operation |
 | construction return → factory post-mon end | 12 | 127,759–140,592 | unresolved |
-| post-mon end → next construction entry | 9 | 130–279 | unresolved outer-loop path; one 261→279 span carries +18 service |
+| post-mon end → next construction entry | 9 | 130–279 | resolved outer-loop path below; one 261→279 span carries +18 service |
 | final post-mon end → source return | 3 | 32–40 | resolved below |
 
 `reduceFactorySourceReturnTiming` now covers the complete `source-return`
@@ -125,6 +125,41 @@ respectively 14 sequential Thumb instructions plus two pipeline refills, and
 13 sequential instructions plus one refill. All **3/3** applicable v2 spans
 match directly. This reducer selects only the compiled source function; it
 does not inspect trainer, set, mon, frame, cursor, or receipt identity.
+
+CreateMon, EV-spread, CalculateMonStats, factory-post-mon, and the live
+VBlank/audio/DMA workload remain unresolved, so the clock remains unwired.
+
+### Non-final outer-loop component (2026-08-10)
+
+`reduceFactoryOuterLoopTiming` covers every non-final
+`factory-post-mon-end → construction-entry` span. The boundary begins with the
+first loop-test instruction after the preceding held-item `SetMonData`, follows
+the non-final back edge and next-record loads, and ends at the next
+`CreateMonWithEVSpreadNatureOTID` entry:
+
+| source function | executed Thumb boundary | v2 spans | source decomposition | measured / residual service |
+| --- | --- | ---: | --- | --- |
+| `CreateFrontierFactorySelectableMons` | `0x0819B612 → 0x0819B5A4 → 0x08068634` | anchor 5 | `61×2 + 6×8 + 5×11 + 4×9 = 261` | `261 / 261 / 261 / 279 / 261`; residual `0 / 0 / 0 / 18 / 0` |
+| `FillFactoryFrontierTrainerParty` | `0x0816376C → 0x08163706 → 0x08068634` | LILIANA 2 + varied 2 | `27×2 + 2×8 + 3×11 + 3×9 = 130` | four `130`; four zero residuals |
+
+The four terms are ordinary prefetched Thumb work (**2** cycles), taken
+control flow including refill (**8**), PC-relative ROM literal loads (**11**),
+and ROM facility-table loads (**9**). Stack and IWRAM accesses remain hidden by
+prefetch in the ordinary class. A fresh instruction-step audit reproduced
+those classes at every executed instruction. It also placed the sole extra
+**18** cycles between `0x0819B528` and `0x0819B52A`, an ordinary shift pair,
+matching the already-classified asynchronous hardware-service stall rather
+than any source branch. None of the nine same-frame spans contains a complete
+VBlank entry-to-resume pause.
+
+The selectable path is branch-general rather than anchor-fitted. Its inputs are
+only the next source loop index, `GetNumPastRentalsRank` result, and challenge
+number: an elevated rental executes the compiled `challengeNum + 1` arm, and
+`GetFactoryMonFixedIV`'s retail `challenge > 8` clamp is modeled separately
+(challenge 8 intentionally remains the documented out-of-bounds row). Loaded
+set/species/nature/EV values do not branch or alter bus timing, and
+`sourceSetId` remains diagnostic only. The construction clock now emits a
+`factory-outer-loop` operation between non-final mons; no live caller is wired.
 
 CreateMon, EV-spread, CalculateMonStats, factory-post-mon, and the live
 VBlank/audio/DMA workload remain unresolved, so the clock remains unwired.
