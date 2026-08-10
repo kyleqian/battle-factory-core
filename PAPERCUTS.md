@@ -914,3 +914,18 @@ route should fail with an actionable ambiguity error when both routes exist.
   (see `tools/probe/verify-item-move-end-paralysis-off.py`).
 - **Real fix:** make the second constructor fail loudly, or document the
   one-core-per-process constraint in the probe harness README.
+
+## Bare `npx vitest run` of census-loading tests dies with a native OOM stack
+
+- **What:** `npm test` sets `NODE_OPTIONS=--max-old-space-size=8192` (added
+  2026-08-09 night when the census JSON grew), but a bare
+  `npx vitest run tests/<census-loading>.test.ts` still gets Node's 4 GB
+  default and crashes with a raw C++ stack trace — easy to misread as a
+  broken test, and in a piped compound the crash silently swallows output.
+- **Hits:** 1 (supervisor verification, 2026-08-10 ~00:45).
+- **Cost each:** ~5 min.
+- **Workaround:** prefix targeted runs with
+  `NODE_OPTIONS=--max-old-space-size=8192`.
+- **Real fix:** move test-only JSON out of the resolveJsonModule graph (the
+  known ~650 MB relief in AGENTS.md), or add a vitest config-level
+  heap guard.
