@@ -1155,8 +1155,19 @@ The red-first tests also pin negative operands, zero dividend/divisor, and
 `INT_MIN / -1` retail wraparound. This resolves **72/480** direct calls but
 does not claim the aggregate operation.
 
-Nested encrypted `%24` box-mon access, growth/experience, and
-writes remain unresolved, so the
+**Nested direct `SetMonData` timing (2026-08-10, `d877ab2b`, corrected by
+`8789ce5b`):** `reduceFactorySetMonDataTiming` source-reduces all **96/96**
+recorded direct party writes from the signed field ID and the compiled
+`0x0806ACAC` switch: level field 56 is **72** cycles and HP/stat fields 57–63
+are **78** cycles, totaling anchor/LILIANA/varied
+**3,708/1,854/1,854 = 7,416** source cycles with every raw span exact. General
+switch coverage additionally pins field 55 status-u32 at **86**, field 64
+mail-u8 at **72**, and field 65 no-op at **56** cycles. The delegated default
+`SetBoxMonData` route exposes only exact 30-cycle entry and 10-cycle return
+shells; its encrypted body remains unresolved.
+
+Nested encrypted `%24` box-mon reads/writes and growth/experience remain
+unresolved, so the
 complete stats operation and live clock stay unwired. No identity/duration
 table or residual fit landed; #55 stays open. See the construction receipt's
 stats section.

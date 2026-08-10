@@ -9,8 +9,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 - **State:** implementation `d877ab2b` plus audit correction `8789ce5b`;
   focused stats/clock **21/21**, smoke **375/375**, typecheck, full `npm
-  test`, and production build are green. #55 remains open and the construction
-  clock remains unwired.
+  test` **881 files / 8,432 passed / 1 skipped**, and production build are
+  green. #55 remains open and the construction clock remains unwired.
 - **Did:** source-reduced all **96/96** direct stats writes from only signed
   source field ID: per mon level **72** + seven HP/stat writes **7×78 = 618**;
   anchor/LILIANA/varied **3,708/1,854/1,854 = 7,416** cycles, all raw spans

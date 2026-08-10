@@ -861,8 +861,10 @@ started two full suites while the animation supervisor was also verifying.
 The Color Change side worker then repeated a committed-tree full suite after
 a two-line type-only follow-up and hit its cap during that redundant run.
 The #55 VBlank worker then repeated green build/typecheck gates after their
-yielded sessions hid completion status. Hits: 7; cost: about 45 minutes plus
-avoidable CPU contention. A
+yielded sessions hid completion status. The #55 SetMonData worker likewise
+needed about 3 minutes of extra polling after its terminal verification
+returned before Vitest exited. Hits: 8; cost: about 48 minutes plus avoidable
+CPU contention. A
 launcher/tool response that visually distinguishes “still running; wait on
 this handle” from completion would prevent this class of mistake.
 
