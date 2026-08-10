@@ -99,6 +99,12 @@ export interface FactoryConstructionClockStart {
   rngValue: number;
 }
 
+export interface FactoryAmbientRandomResult {
+  rngValue: number;
+  /** CPU cycles spent in the interrupt callback before source resumes. */
+  cycles?: number;
+}
+
 export interface FactoryConstructionClockOptions {
   start: FactoryConstructionClockStart;
   frameCycles?: number;
@@ -106,7 +112,8 @@ export interface FactoryConstructionClockOptions {
    * Called once per crossed VBlank. Returning the next raw gRngValue models
    * the `VBlankIntr` Random() callback. Omit it for the old clean stream.
    */
-  ambientRandom?: (rngValue: number, frame: number) => number;
+  ambientRandom?:
+    (rngValue: number, frame: number) => number | FactoryAmbientRandomResult;
   cycleCost?: FactoryConstructionCycleCost;
 }
 
@@ -308,11 +315,12 @@ class ConstructionClock {
   get cycle(): number { return this.cycleValue; }
   get rngValue(): number { return this.rngValueValue; }
 
-  private emitAmbient(): void {
-    if (this.ambientRandom === undefined) return;
+  private emitAmbient(): number {
+    if (this.ambientRandom === undefined) return 0;
     const preCursor = this.rngValueValue;
+    const result = this.ambientRandom(preCursor, this.frameValue);
     const postCursor = requireU32(
-      this.ambientRandom(preCursor, this.frameValue),
+      typeof result === "number" ? result : result.rngValue,
       "ambientRandom result",
     );
     this.rngValueValue = postCursor;
@@ -326,6 +334,9 @@ class ConstructionClock {
       attempt: null,
       half: null,
     }));
+    return typeof result === "number"
+      ? 0
+      : requireCycle(result.cycles ?? 0, "ambientRandom cycles");
   }
 
   advance(operation: FactoryConstructionOperation): void {
@@ -340,7 +351,7 @@ class ConstructionClock {
         remaining -= untilVBlank;
         this.cycleValue = 0;
         this.frameValue += 1;
-        this.emitAmbient();
+        remaining += this.emitAmbient();
       }
     }
   }
