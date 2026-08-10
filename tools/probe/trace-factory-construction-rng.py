@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import bisect
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -74,6 +75,12 @@ LILIANA_FIRST_FRAME = 11311
 LILIANA_LAST_FRAME = 11345
 
 ANCHOR_BOOTSTRAP_SHA256 = "9c89c74113f29e7d4595571c3aceb728417c4fe441b644ec0022fb498463f297"
+
+# The committed v1 receipt intentionally remains frame/cursor-only.  A fresh
+# probe can opt into mGBA master-cycle evidence for the construction-clock
+# follow-up without changing that receipt's byte contract:
+#   FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1 ... trace-factory-construction-rng.py
+CYCLE_EVIDENCE = os.environ.get("FACTORY_CONSTRUCTION_CYCLE_EVIDENCE") == "1"
 
 
 def symbols(elf: Path) -> list[tuple[int, str]]:
@@ -135,32 +142,45 @@ def advance_one_instrumented_frame(
             pre = read_u32(oracle, oracle.symbols["gRngValue"])
             lr = oracle.core.cpu.lr
             post = (pre * 1103515245 + 24691) & 0xFFFFFFFF
-            calls.append({
+            call = {
                 "frame": frame,
                 "caller": symbol_at(lr),
                 "lr": f"0x{lr:08x}",
                 "pre": pre,
                 "post": post,
                 "u16": (post >> 16) & 0xFFFF,
-            })
+            }
+            # mGBA's master-cycle clock is the source timing evidence needed
+            # by the follow-up TypeScript construction clock.  Keep it opt-in
+            # so the committed v1 receipt remains byte/schema-compatible.
+            if CYCLE_EVIDENCE:
+                call["globalCycles"] = int(oracle.core._native.timing.globalCycles)
+            calls.append(call)
         if pc == target_entry and epoch.get("entry") is None:
-            epoch["entry"] = {
+            entry = {
                 "frame": frame,
                 "returnPc": f"0x{oracle.core.cpu.lr:08x}",
                 "rngValue": read_u32(oracle, oracle.symbols["gRngValue"]),
                 "callStartIndex": len(calls),
             }
+            if CYCLE_EVIDENCE:
+                entry["globalCycles"] = int(oracle.core._native.timing.globalCycles)
+                entry["frameCycles"] = int(oracle.core.frame_cycles)
+            epoch["entry"] = entry
         pending = epoch.get("entry")
         if pending is not None and epoch.get("return") is None:
             lr = int(pending["returnPc"], 16)
             return_pcs = {lr, lr & ~1, (lr & ~1) + 2}
             if pc in return_pcs:
-                epoch["return"] = {
+                returned = {
                     "frame": frame,
                     "returnPc": f"0x{pc:08x}",
                     "rngValue": read_u32(oracle, oracle.symbols["gRngValue"]),
                     "callEndIndex": len(calls),
                 }
+                if CYCLE_EVIDENCE:
+                    returned["globalCycles"] = int(oracle.core._native.timing.globalCycles)
+                epoch["return"] = returned
         if oracle.core.frame_counter != start_counter:
             break
         oracle.core.step()
