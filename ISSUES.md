@@ -1175,9 +1175,9 @@ receipt-used HP/max-HP calls are exact at **80** cycles, totaling
 anchor/LILIANA/varied **960/480/480 = 1,920**, with no contained pause or
 async residual. Fresh wrapped Scene-OFF packets for all three cases remain
 byte-identical (`cde88e8f…` / `d338edc6…` / `e0d10a1…`). Encrypted/default
-routes retain only exact wrapper shells (**34/12** cycles for the receipt's
-compare-default fields; **66/12** for jump-table holes) and `cycles: null`;
-Deoxys-stat routes likewise retain exact **66**-cycle entry and **26/44**
+routes retain only exact wrapper shells (**36/12** cycles for the receipt's
+compare-default fields; **68/12** for jump-table holes) and `cycles: null`;
+Deoxys-stat routes likewise retain exact **68**-cycle entry and **26/42**
 return shells without claiming the nested body. Completed direct-call
 coverage is now **312/480**, **100,214 / 1,768,691 = 5.666%** of source
 callee cycles.

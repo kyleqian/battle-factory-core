@@ -293,22 +293,22 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       directPartyRead: false,
       delegatedToGetBoxMonData2: true,
       getBoxMonData2EntryPc: 0x0806_a676,
-      preDelegateCycles: 34,
+      preDelegateCycles: 36,
       returnShellCycles: 12,
       cycles: null,
     });
     expect(reduceFactoryGetMonDataTiming({ field: 65 })).toMatchObject({
       route: "table-default-to-get-box-mon-data",
-      preDelegateCycles: 66,
+      preDelegateCycles: 68,
       returnShellCycles: 12,
       cycles: null,
     });
     expect(reduceFactoryGetMonDataTiming({ field: 59 })).toMatchObject({
       route: "party-attack-via-get-deoxys-stat",
       getDeoxysStatEntryPc: 0x0806_8a12,
-      preDelegateCycles: 66,
+      preDelegateCycles: 68,
       overrideReturnShellCycles: 26,
-      partyFallbackReturnShellCycles: 44,
+      partyFallbackReturnShellCycles: 42,
       cycles: null,
     });
     expect(() => reduceFactoryGetMonDataTiming({ field: -0x8000_0001 }))

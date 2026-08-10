@@ -377,7 +377,7 @@ export type FactoryGetMonDataRoute =
  */
 export interface FactoryGetMonDataTiming {
   field: number;
-  /** mGBA's pipelined boundary after retail GetMonData2's opening push. */
+  /** mGBA's pipelined boundary while retail GetMonData2's opening push executes. */
   entryPc: number;
   route: FactoryGetMonDataRoute;
   directPartyRead: boolean;
@@ -390,7 +390,7 @@ export interface FactoryGetMonDataTiming {
   pipelineRefills: number;
   romLiteralLoads: number;
   romJumpTableLoads: number;
-  /** EWRAM load cost including its ordinary two-cycle instruction baseline. */
+  /** EWRAM load cost including its two-cycle instruction baseline. */
   ewramReadCycles: number | null;
   preDelegateCycles: number | null;
   returnShellCycles: number | null;
@@ -790,14 +790,14 @@ export function reduceFactoryGetMonDataTiming(
     partyOffset: number,
   ): FactoryGetMonDataTiming => {
     const status = valueWidth === 4;
-    const sequentialThumbHalfwords = status ? 16 : 18;
+    const sequentialThumbHalfwords = status ? 17 : 19;
     const pipelineRefills = 4;
     const romLiteralLoads = 1;
     const romJumpTableLoads = 1;
-    // A 32-bit EWRAM LDR takes eight cycles at this boundary; byte/halfword
-    // reads take four. The sequential instruction baseline already counted
-    // two of those cycles.
-    const ewramReadCycles = status ? 8 : 4;
+    // The 32-bit EWRAM LDR occupies six cycles on the 16-bit bus at this
+    // boundary; byte/halfword reads stay in the ordinary two-cycle class.
+    // The sequential instruction baseline already counts two cycles.
+    const ewramReadCycles = status ? 6 : 2;
     const cycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
       + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES
       + (romLiteralLoads + romJumpTableLoads) * (11 - THUMB_SEQUENTIAL_CYCLES)
@@ -859,15 +859,15 @@ export function reduceFactoryGetMonDataTiming(
       partyOffset: 0x5a + (field - 59) * 2,
       getBoxMonData2EntryPc: null,
       getDeoxysStatEntryPc,
-      sequentialThumbHalfwords: 15,
+      sequentialThumbHalfwords: 16,
       pipelineRefills: 3,
       romLiteralLoads: 1,
       romJumpTableLoads: 1,
       ewramReadCycles: null,
-      preDelegateCycles: 66,
+      preDelegateCycles: 68,
       returnShellCycles: null,
       overrideReturnShellCycles: 26,
-      partyFallbackReturnShellCycles: 44,
+      partyFallbackReturnShellCycles: 42,
       cycles: null,
       unresolved: "GetDeoxysStat nested timing/result is outside the direct party-field reducer",
     });
@@ -886,12 +886,12 @@ export function reduceFactoryGetMonDataTiming(
     partyOffset: null,
     getBoxMonData2EntryPc,
     getDeoxysStatEntryPc: null,
-    sequentialThumbHalfwords: compareDefault ? 14 : 18,
+    sequentialThumbHalfwords: compareDefault ? 15 : 19,
     pipelineRefills: compareDefault ? 3 : 4,
     romLiteralLoads: compareDefault ? 0 : 1,
     romJumpTableLoads: compareDefault ? 0 : 1,
     ewramReadCycles: null,
-    preDelegateCycles: compareDefault ? 34 : 66,
+    preDelegateCycles: compareDefault ? 36 : 68,
     returnShellCycles: 12,
     overrideReturnShellCycles: null,
     partyFallbackReturnShellCycles: null,

@@ -200,10 +200,10 @@ are exact, totaling anchor/LILIANA/varied **960/480/480 = 1,920**, with no
 contained pause or async residual.
 
 Source-general simple party selectors 55–58, 64, and 84–88 are complete.
-Deoxys-aware fields 59–63 expose only their exact **66**-cycle nested-entry
-and **26/44**-cycle return shells. Encrypted compare-default fields expose
-exact **34/12** entry/return shells around `GetBoxMonData2`; jump-table holes
-65–83 expose **66/12**. Each unresolved nested route reports `cycles: null`.
+Deoxys-aware fields 59–63 expose only their exact **68**-cycle nested-entry
+and **26/42**-cycle return shells. Encrypted compare-default fields expose
+exact **36/12** entry/return shells around `GetBoxMonData2`; jump-table holes
+65–83 expose **68/12**. Each unresolved nested route reports `cycles: null`.
 No personality, duration, or receipt-identity lookup is admitted.
 
 Together the five completed families cover **312/480** direct calls and
