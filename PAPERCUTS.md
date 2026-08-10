@@ -874,8 +874,13 @@ formatter-clean, or add a checked narrow-format helper.
 had no `appRoute`, so `npm run compare` replayed the generated route and
 wholesale-mismatched 0/43 frames before the trace declared its historical
 `canonical-recorded` owner. The metadata fix restored 43/43 and shrank the
-legacy allowlist. Hits: 1; cost: about 5 minutes. A compare trace with no
-route should fail with an actionable ambiguity error when both routes exist.
+legacy allowlist. A second worker found the older `battle1-swap-*` staged
+files also lack enough current route/stage metadata; generic compare replayed
+the default app from frame 0 and produced meaningless full-frame diffs before
+the worker restricted verification to runnable #73 windows. Hits: 2; cost:
+about 7 minutes total. A compare trace with no route should fail with an
+actionable ambiguity error when both routes exist, and a staged trace with no
+current app stage should be rejected before replay.
 
 ## `npm run soak -- --help` silently starts the default 0:50 sweep
 
