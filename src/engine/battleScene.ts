@@ -861,6 +861,7 @@ import {
   sceneOnEmberView,
   sceneOnFlamethrowerView,
   sceneOnBlazeKickView,
+  sceneOnFlameWheelView,
   sceneOnAerialAceView,
   sceneOnEndeavorView,
   sceneOnFeatherDanceView,
@@ -1435,6 +1436,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const quilavaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).QUILAVA!;
 const ariadosFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ARIADOS!;
 const poliwrathFrontSprite = opponentFrontSpritesAsset.POLIWRATH;
 const lickitungFrontSprite = opponentFrontSpritesAsset.LICKITUNG;
@@ -2617,6 +2619,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const quilavaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).QUILAVA!;
 const medichamBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MEDICHAM!;
 const poliwrathBackSprite = battleBackSpritesAsset.POLIWRATH;
 const lickitungBackSprite = battleBackSpritesAsset.LICKITUNG;
@@ -34367,6 +34370,88 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? "KADABRA used" : "Foe KADABRA used",
       "PSYCHIC!",
       99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FLAME_WHEEL") {
+    const view = sceneOnFlameWheelView(state);
+    // All participating callbacks/tasks write after the current OAM/palette
+    // transfer. The photographed state is therefore the prior source age.
+    const displayed = sceneOnFlameWheelView({ ...state, age: state.age - 1 });
+    const playerToOpponent = view.attacker.species === "QUILAVA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "QUILAVA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(`unsupported staged FLAME_WHEEL pair ${view.attacker.species}->${view.target.species}`);
+    }
+    const quilavaSource = playerToOpponent ? quilavaBackSprite : quilavaFrontSprite;
+    const quilava = playerToOpponent ? quilavaSource : {
+      ...quilavaSource,
+      tileset: subTileset(quilavaSource.tileset, 0, 8),
+    };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const red = { r: 255, g: 0, b: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const targetIdle = playerToOpponent && state.age < 120
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      displayed.targetRedCoefficient === 0
+        ? onix.palette
+        : blendPaletteToward(onix.palette, red, displayed.targetRedCoefficient),
+      view.target.geometry.spriteCorner.x + targetIdle.x2 + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2 + displayed.targetOffset.y2,
+    );
+    const drawAttacker = () => drawSpriteSheet(
+      fb, quilava.tileset, quilava.palette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+    );
+    const drawEffects = () => {
+      for (const sprite of displayed.sprites) {
+        drawSpriteSheet(
+          fb,
+          subTileset(battleAnimSmallEmber.tileset, sprite.sheetFrame * 4, 4),
+          battleAnimSmallEmber.palette,
+          sprite.centerX - 16,
+          sprite.centerY - 16,
+        );
+      }
+    };
+    // monbg moves the target to BG while the move-owned OBJ flames remain in
+    // front. The attacker stays in its side-relative OAM order.
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+      drawEffects();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawEffects();
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "QUILAVA", level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "QUILAVA" : "ONIX", level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb, playerToOpponent ? "QUILAVA used" : "Foe QUILAVA used", "FLAME WHEEL!", 99,
     );
     return;
   }

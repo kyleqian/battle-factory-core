@@ -49,6 +49,7 @@ def main() -> None:
     battler_ids = sy["gBattlerSpriteIds"]
     faded, unfaded = sy["gPlttBufferFaded"], nm["gPlttBufferUnfaded"]
     palette_tags, tile_tags = nm["sSpritePaletteTags"], nm["sSpriteTileRangeTags"]
+    sprite_order = nm["sSpriteOrder"]
     software_oam = nm["gMain"] + 0x38
     script_ptr, active_ptr = nm["sBattleAnimScriptPtr"], nm["gAnimScriptActive"]
     visual_count, sound_count = sy["gAnimVisualTaskCount"], sy["gAnimSoundTaskCount"]
@@ -143,6 +144,7 @@ def main() -> None:
                 "weatherTurns", "sideStatuses", "sideConditions")},
             "softwareOam": [raw(software_oam + i * 8, 8) for i in range(128)],
             "hardwareOam": [raw(0x07000000 + i * 8, 8) for i in range(128)],
+            "spriteOrder": [oracle.read_u8(sprite_order + i) for i in range(64)],
             "hardwareMatrices": [[s16(0x07000006 + i * 0x20 + j) for j in (0, 8, 16, 24)]
                                  for i in range(32)],
             "fadedPalette": [u16(faded + i * 2) for i in range(512)],

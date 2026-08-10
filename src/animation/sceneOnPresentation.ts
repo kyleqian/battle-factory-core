@@ -254,6 +254,7 @@ import {
   type BlazeKickOrderedSprite,
   type BlazeKickPaletteState,
 } from "./blazeKick.ts";
+import { flameWheelAtAge, type FlameWheelState } from "./flameWheel.ts";
 import {
   bindAnimationAtAge,
   type BindAnimationProfile,
@@ -768,6 +769,7 @@ export interface SceneOnPresentationBattler {
     | "KOFFING"
     | "MAGNETON"
     | "MAGBY"
+    | "QUILAVA"
     | "MAREEP"
     | "GROVYLE"
     | "SCEPTILE"
@@ -960,6 +962,13 @@ export interface SceneOnBlazeKickConfig {
   readonly animationProfile: Readonly<BlazeKickGeometry>;
   readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
   readonly animationAgeOffset?: number;
+}
+
+export interface SceneOnFlameWheelConfig {
+  readonly move: "FLAME_WHEEL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
 export interface SceneOnBindConfig {
@@ -2484,6 +2493,7 @@ export type SceneOnMoveConfig =
   | SceneOnDragonBreathConfig
   | SceneOnFlamethrowerConfig
   | SceneOnBlazeKickConfig
+  | SceneOnFlameWheelConfig
   | SceneOnBindConfig
   | SceneOnWrapConfig
   | SceneOnEmberConfig
@@ -3683,6 +3693,11 @@ export interface SceneOnBlazeKickView {
   readonly palette: BlazeKickPaletteState;
 }
 
+export interface SceneOnFlameWheelView extends FlameWheelState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnKnockOffView extends KnockOffBodyState {
   readonly age: number;
   readonly animationAge: number;
@@ -4205,6 +4220,24 @@ export function sceneOnBlazeKickView(
       state.config.animationProfile,
     ),
     palette: blazeKickPaletteAtAge(animationAge),
+  };
+}
+
+export function sceneOnFlameWheelView(
+  state: SceneOnMovePresentationState,
+): SceneOnFlameWheelView {
+  if (state.config.move !== "FLAME_WHEEL") {
+    throw new Error(`expected FLAME_WHEEL presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...flameWheelAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
   };
 }
 
