@@ -400,6 +400,81 @@ export interface FactoryGetMonDataTiming {
   unresolved: string | null;
 }
 
+export interface FactoryGetBoxMonDataDependencyInput {
+  /** One encrypted field used by CalculateMonStats or GetLevelFromMonExp. */
+  field: number;
+  /** BoxMon personality; the only input to GetSubstruct's modulo-24 route. */
+  personality: number;
+  /** Source checksum comparison result, never an observed duration key. */
+  checksumValid: boolean;
+  /** Bad-egg flag read only by MON_DATA_SPECIES's extraction tail. */
+  isBadEgg: boolean;
+}
+
+export type FactoryGetBoxMonDataFieldGroup =
+  | "species"
+  | "experience"
+  | "ev-byte"
+  | "iv-bitfield";
+
+export type FactoryGetBoxMonDataFetchClass =
+  | "ewram-u16-conditional"
+  | "ewram-u32"
+  | "ewram-u8"
+  | "ewram-u8-bitfield"
+  | "ewram-u16-bitfield"
+  | "ewram-u32-bitfield";
+
+/**
+ * Source/ELF dependency census for the encrypted GetBoxMonData2 subset used
+ * by CalculateMonStats. This deliberately exposes a partial exact shell and
+ * keeps the complete cost null: GetSubstruct's modulo helper and its 24-way
+ * compiled arm, ROM fetches, and EWRAM bus accesses have not yet been summed
+ * into one independently accepted total.
+ */
+export interface FactoryGetBoxMonDataDependency {
+  field: number;
+  personality: number;
+  personalityModulo24: number;
+  fieldGroup: FactoryGetBoxMonDataFieldGroup;
+  logicalSubstruct: 0 | 2 | 3;
+  logicalToPhysicalSlots: readonly number[];
+  /** Exact ELF entry selected by GetSubstruct's personality jump table. */
+  getSubstructModuloArmPc: number;
+  selectedPhysicalSlot: number;
+  secureStorageOffset: number;
+  tailEntryPc: number;
+  fetchClass: FactoryGetBoxMonDataFetchClass;
+  commonFetchClasses: readonly string[];
+  checksumRoute: "valid" | "invalid-marks-bad-egg";
+  speciesTailRoute: "not-applicable" | "species" | "bad-egg-species";
+  getSubstructCalls: 8;
+  decryptIterations: 12;
+  checksumHalfwordReads: 24;
+  encryptIterations: 12;
+  boundaries: Readonly<{
+    symbolEntryPc: number;
+    probeEntryPc: number;
+    firstGetSubstructCallPc: number;
+    decryptCallPc: number;
+    checksumCallPc: number;
+    dispatchPc: number;
+    commonTailPc: number;
+    encryptCallPc: number;
+    returnTailPc: number;
+    getSubstructSymbolEntryPc: number;
+    moduloCallPc: number;
+    moduloReturnPc: number;
+    getSubstructDispatchPc: number;
+    getSubstructReturnPc: number;
+    decryptLoopPc: number;
+    checksumLoopPc: number;
+    encryptLoopPc: number;
+  }>;
+  cycles: null;
+  unresolved: string;
+}
+
 const THUMB_SEQUENTIAL_CYCLES = 2;
 const THUMB_PIPELINE_REFILL_CYCLES = 6;
 const THUMB_TAKEN_CONTROL_CYCLES = THUMB_SEQUENTIAL_CYCLES + THUMB_PIPELINE_REFILL_CYCLES;
@@ -897,6 +972,132 @@ export function reduceFactoryGetMonDataTiming(
     partyFallbackReturnShellCycles: null,
     cycles: null,
     unresolved: "GetBoxMonData2 encrypted/default body timing is outside the direct party-field reducer",
+  });
+}
+
+const GET_SUBSTRUCT_LOGICAL_TO_PHYSICAL = Object.freeze([
+  [0, 1, 2, 3], [0, 1, 3, 2], [0, 2, 1, 3], [0, 3, 1, 2],
+  [0, 2, 3, 1], [0, 3, 2, 1], [1, 0, 2, 3], [1, 0, 3, 2],
+  [2, 0, 1, 3], [3, 0, 1, 2], [2, 0, 3, 1], [3, 0, 2, 1],
+  [1, 2, 0, 3], [1, 3, 0, 2], [2, 1, 0, 3], [3, 1, 0, 2],
+  [2, 3, 0, 1], [3, 2, 0, 1], [1, 2, 3, 0], [1, 3, 2, 0],
+  [2, 1, 3, 0], [3, 1, 2, 0], [2, 3, 1, 0], [3, 2, 1, 0],
+] as const);
+
+const GET_SUBSTRUCT_MODULO_ARM_PCS = Object.freeze([
+  0x0806_a2f8, 0x0806_a31c, 0x0806_a338, 0x0806_a34e,
+  0x0806_a364, 0x0806_a380, 0x0806_a396, 0x0806_a3ac,
+  0x0806_a3bc, 0x0806_a3da, 0x0806_a3f2, 0x0806_a402,
+  0x0806_a416, 0x0806_a428, 0x0806_a43a, 0x0806_a44c,
+  0x0806_a45e, 0x0806_a470, 0x0806_a482, 0x0806_a498,
+  0x0806_a4ac, 0x0806_a4ba, 0x0806_a4cc, 0x0806_a4e0,
+] as const);
+
+const GET_BOX_COMMON_FETCH_CLASSES = Object.freeze([
+  "rom-thumb-sequential",
+  "rom-literal-u32",
+  "rom-jump-table-u32",
+  "ewram-u8",
+  "ewram-u16",
+  "ewram-u32-on-16-bit-bus",
+] as const);
+
+const GET_BOX_COMMON_BOUNDARIES = Object.freeze({
+  symbolEntryPc: 0x0806_a674,
+  probeEntryPc: 0x0806_a676,
+  firstGetSubstructCallPc: 0x0806_a698,
+  decryptCallPc: 0x0806_a6c6,
+  checksumCallPc: 0x0806_a6cc,
+  dispatchPc: 0x0806_a6f2,
+  commonTailPc: 0x0806_ac8c,
+  encryptCallPc: 0x0806_ac94,
+  returnTailPc: 0x0806_ac98,
+  getSubstructSymbolEntryPc: 0x0806_a270,
+  moduloCallPc: 0x0806_a27e,
+  moduloReturnPc: 0x0806_a282,
+  getSubstructDispatchPc: 0x0806_a288,
+  getSubstructReturnPc: 0x0806_a510,
+  decryptLoopPc: 0x0806_a256,
+  checksumLoopPc: 0x0806_8cb2,
+  encryptLoopPc: 0x0806_a232,
+});
+
+/**
+ * Census the common encrypted accessor dependency without reducing its total.
+ *
+ * Pinned source: pokemon.c GetBoxMonData3, GetSubstruct, DecryptBoxMon,
+ * CalculateBoxMonChecksum, and EncryptBoxMon. Pinned ELF boundaries are
+ * exposed above so probes/tests can observe stable segments without retaining
+ * a BoxMon pointer or any decrypted secure bytes.
+ */
+export function censusFactoryGetBoxMonDataDependency(
+  input: Readonly<FactoryGetBoxMonDataDependencyInput>,
+): FactoryGetBoxMonDataDependency {
+  const field = requireSigned32(input.field, "field");
+  const personality = requireU32(input.personality, "personality");
+  if (typeof input.checksumValid !== "boolean") throw new Error("checksumValid must be boolean");
+  if (typeof input.isBadEgg !== "boolean") throw new Error("isBadEgg must be boolean");
+
+  let fieldGroup: FactoryGetBoxMonDataFieldGroup;
+  let logicalSubstruct: 0 | 2 | 3;
+  let tailEntryPc: number;
+  let fetchClass: FactoryGetBoxMonDataFetchClass;
+  if (field === 11) {
+    fieldGroup = "species";
+    logicalSubstruct = 0;
+    tailEntryPc = 0x0806_a95e;
+    fetchClass = "ewram-u16-conditional";
+  } else if (field === 25) {
+    fieldGroup = "experience";
+    logicalSubstruct = 0;
+    tailEntryPc = 0x0806_a97c;
+    fetchClass = "ewram-u32";
+  } else if (field >= 26 && field <= 31) {
+    fieldGroup = "ev-byte";
+    logicalSubstruct = 2;
+    tailEntryPc = 0x0806_a9a4 + (field - 26) * 4;
+    fetchClass = "ewram-u8";
+  } else if (field >= 39 && field <= 44) {
+    const tails = [0x0806_a9f6, 0x0806_a9fe, 0x0806_aa06, 0x0806_aa0e, 0x0806_aa16, 0x0806_aa1e];
+    const classes: FactoryGetBoxMonDataFetchClass[] = [
+      "ewram-u8-bitfield", "ewram-u16-bitfield", "ewram-u8-bitfield",
+      "ewram-u32-bitfield", "ewram-u16-bitfield", "ewram-u8-bitfield",
+    ];
+    fieldGroup = "iv-bitfield";
+    logicalSubstruct = 3;
+    tailEntryPc = tails[field - 39]!;
+    fetchClass = classes[field - 39]!;
+  } else {
+    throw new Error("field is outside the CalculateMonStats/GetLevelFromMonExp encrypted subset");
+  }
+
+  const personalityModulo24 = personality % 24;
+  const logicalToPhysicalSlots = GET_SUBSTRUCT_LOGICAL_TO_PHYSICAL[personalityModulo24]!;
+  const selectedPhysicalSlot = logicalToPhysicalSlots[logicalSubstruct]!;
+  return Object.freeze({
+    field,
+    personality,
+    personalityModulo24,
+    fieldGroup,
+    logicalSubstruct,
+    logicalToPhysicalSlots,
+    getSubstructModuloArmPc: GET_SUBSTRUCT_MODULO_ARM_PCS[personalityModulo24]!,
+    selectedPhysicalSlot,
+    secureStorageOffset: 0x20 + selectedPhysicalSlot * 12,
+    tailEntryPc,
+    fetchClass,
+    commonFetchClasses: GET_BOX_COMMON_FETCH_CLASSES,
+    checksumRoute: input.checksumValid ? "valid" : "invalid-marks-bad-egg",
+    speciesTailRoute: field !== 11
+      ? "not-applicable"
+      : input.isBadEgg || !input.checksumValid ? "bad-egg-species" : "species",
+    getSubstructCalls: 8,
+    decryptIterations: 12,
+    checksumHalfwordReads: 24,
+    encryptIterations: 12,
+    boundaries: GET_BOX_COMMON_BOUNDARIES,
+    cycles: null,
+    unresolved: "complete GetBoxMonData2 timing awaits instruction/fetch reduction of modulo-24 arms and shared encrypted memory loops",
   });
 }
 

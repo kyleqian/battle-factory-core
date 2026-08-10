@@ -1196,9 +1196,22 @@ decrypt/checksum/fetch model. Complete-call net totals are
 anchor/LILIANA/varied **123,879/61,954/61,089 = 246,922**. No duration table,
 identity branch, residual fit, aggregate stats claim, or clock wiring landed.
 
-The remaining **156** encrypted `%24` box-mon reads, the two encrypted
-accessors inside each of the 12 level calls, encrypted writes, and exact
-memory/fetch timing remain unresolved, so the
+**Shared encrypted accessor census (2026-08-10):** the **156** direct
+encrypted reads plus **24** level accessors are now bounded as one source-
+general dependency: species **24**, EXP **12**, EV-byte **72**, IV-bitfield
+**72**. The census derives all 24 `personality % 24` substruct permutations,
+their exact non-contiguous ELF jump-arm entries, the valid-vs-corrupt checksum
+route, exact field-tail PCs/fetch widths, and the
+common four-GetSubstruct + 12-word decrypt + four-GetSubstruct/24-halfword
+checksum + 12-word encrypt structure. The 12 observed mons cover nine modulo
+routes; Tier 1 enumerates all 24. Twice-fresh OFF packets remain byte-stable at
+the existing three hashes, so no pointer/decrypted-storage fixture was added.
+The partial shell stays `cycles: null`: modulo-arm instruction/fetch and
+EWRAM loop timing remain unresolved, with no duration/identity/residual fit.
+
+Exact timing for the censused **156** encrypted `%24` box-mon reads and two
+encrypted accessors inside each of the 12 level calls, plus encrypted writes
+and exact memory/fetch timing, remains unresolved, so the
 complete stats operation and live clock stay unwired. No identity/duration
 table or residual fit landed; #55 stays open. See the construction receipt's
 stats section.

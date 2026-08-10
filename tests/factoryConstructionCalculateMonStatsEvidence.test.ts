@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import expTablesData from "../src/data/gen/exp-tables.json" with { type: "json" };
 import {
   reduceFactoryCalculateMonStatsParentTiming,
+  censusFactoryGetBoxMonDataDependency,
   reduceFactoryGetNatureTiming,
   reduceFactoryGetMonDataTiming,
   reduceFactoryModifyStatByNatureTiming,
@@ -172,6 +173,126 @@ function afterPc(pc: string): string {
 }
 
 describe("Factory CalculateMonStats v1 source-call receipt", () => {
+  it("censuses the shared encrypted accessor route without claiming a total", () => {
+    const rows = probes.flatMap(({ value }) => value.mons.flatMap((mon) => {
+      const directFields = value.directCalls
+        .filter((call) => call.monIndex === mon.monIndex && call.operation === "get-mon-data")
+        .map((call) => call.arguments.field!)
+        .filter((field) => ![57, 58].includes(field));
+      return [...directFields, 11, 25].map((field) => (
+        censusFactoryGetBoxMonDataDependency({
+          field,
+          personality: mon.acceptedPersonality,
+          checksumValid: true,
+          isBadEgg: false,
+        })
+      ));
+    }));
+
+    expect(rows).toHaveLength(180);
+    expect(rows.filter((row) => row.fieldGroup === "species")).toHaveLength(24);
+    expect(rows.filter((row) => row.fieldGroup === "experience")).toHaveLength(12);
+    expect(rows.filter((row) => row.fieldGroup === "ev-byte")).toHaveLength(72);
+    expect(rows.filter((row) => row.fieldGroup === "iv-bitfield")).toHaveLength(72);
+    expect(new Set(rows.map((row) => row.personalityModulo24))).toEqual(
+      new Set([2, 3, 5, 6, 7, 10, 18, 19, 20]),
+    );
+    expect(rows.every((row) => row.getSubstructCalls === 8)).toBe(true);
+    expect(rows.every((row) => row.decryptIterations === 12)).toBe(true);
+    expect(rows.every((row) => row.checksumHalfwordReads === 24)).toBe(true);
+    expect(rows.every((row) => row.encryptIterations === 12)).toBe(true);
+    expect(rows.every((row) => row.cycles === null && row.unresolved !== null)).toBe(true);
+    expect(rows.every((row) => JSON.stringify(row.boundaries) === JSON.stringify({
+      symbolEntryPc: 0x0806_a674,
+      probeEntryPc: 0x0806_a676,
+      firstGetSubstructCallPc: 0x0806_a698,
+      decryptCallPc: 0x0806_a6c6,
+      checksumCallPc: 0x0806_a6cc,
+      dispatchPc: 0x0806_a6f2,
+      commonTailPc: 0x0806_ac8c,
+      encryptCallPc: 0x0806_ac94,
+      returnTailPc: 0x0806_ac98,
+      getSubstructSymbolEntryPc: 0x0806_a270,
+      moduloCallPc: 0x0806_a27e,
+      moduloReturnPc: 0x0806_a282,
+      getSubstructDispatchPc: 0x0806_a288,
+      getSubstructReturnPc: 0x0806_a510,
+      decryptLoopPc: 0x0806_a256,
+      checksumLoopPc: 0x0806_8cb2,
+      encryptLoopPc: 0x0806_a232,
+    }))).toBe(true);
+  });
+
+  it("derives all modulo-24 GetSubstruct layouts and receipt field extraction tails", () => {
+    const expectedLayouts = [
+      [0, 1, 2, 3], [0, 1, 3, 2], [0, 2, 1, 3], [0, 3, 1, 2],
+      [0, 2, 3, 1], [0, 3, 2, 1], [1, 0, 2, 3], [1, 0, 3, 2],
+      [2, 0, 1, 3], [3, 0, 1, 2], [2, 0, 3, 1], [3, 0, 2, 1],
+      [1, 2, 0, 3], [1, 3, 0, 2], [2, 1, 0, 3], [3, 1, 0, 2],
+      [2, 3, 0, 1], [3, 2, 0, 1], [1, 2, 3, 0], [1, 3, 2, 0],
+      [2, 1, 3, 0], [3, 1, 2, 0], [2, 3, 1, 0], [3, 2, 1, 0],
+    ];
+    const expectedArmPcs = [
+      0x0806_a2f8, 0x0806_a31c, 0x0806_a338, 0x0806_a34e,
+      0x0806_a364, 0x0806_a380, 0x0806_a396, 0x0806_a3ac,
+      0x0806_a3bc, 0x0806_a3da, 0x0806_a3f2, 0x0806_a402,
+      0x0806_a416, 0x0806_a428, 0x0806_a43a, 0x0806_a44c,
+      0x0806_a45e, 0x0806_a470, 0x0806_a482, 0x0806_a498,
+      0x0806_a4ac, 0x0806_a4ba, 0x0806_a4cc, 0x0806_a4e0,
+    ];
+    expect(expectedLayouts.map((_, personality) => (
+      censusFactoryGetBoxMonDataDependency({
+        field: 11,
+        personality,
+        checksumValid: true,
+        isBadEgg: false,
+      }).logicalToPhysicalSlots
+    ))).toEqual(expectedLayouts);
+    expect(expectedArmPcs.map((_, personality) => (
+      censusFactoryGetBoxMonDataDependency({
+        field: 11, personality, checksumValid: true, isBadEgg: false,
+      }).getSubstructModuloArmPc
+    ))).toEqual(expectedArmPcs);
+    expect(censusFactoryGetBoxMonDataDependency({
+      field: 11, personality: 0, checksumValid: true, isBadEgg: false,
+    }).commonFetchClasses).toEqual([
+      "rom-thumb-sequential", "rom-literal-u32", "rom-jump-table-u32",
+      "ewram-u8", "ewram-u16", "ewram-u32-on-16-bit-bus",
+    ]);
+
+    const expectedTails = new Map<number, [number, string, number]>([
+      [11, [0x0806_a95e, "ewram-u16-conditional", 0]],
+      [25, [0x0806_a97c, "ewram-u32", 0]],
+      [26, [0x0806_a9a4, "ewram-u8", 2]], [27, [0x0806_a9a8, "ewram-u8", 2]],
+      [28, [0x0806_a9ac, "ewram-u8", 2]], [29, [0x0806_a9b0, "ewram-u8", 2]],
+      [30, [0x0806_a9b4, "ewram-u8", 2]], [31, [0x0806_a9b8, "ewram-u8", 2]],
+      [39, [0x0806_a9f6, "ewram-u8-bitfield", 3]], [40, [0x0806_a9fe, "ewram-u16-bitfield", 3]],
+      [41, [0x0806_aa06, "ewram-u8-bitfield", 3]], [42, [0x0806_aa0e, "ewram-u32-bitfield", 3]],
+      [43, [0x0806_aa16, "ewram-u16-bitfield", 3]], [44, [0x0806_aa1e, "ewram-u8-bitfield", 3]],
+    ]);
+    for (const [field, [tailEntryPc, fetchClass, logicalSubstruct]] of expectedTails) {
+      expect(censusFactoryGetBoxMonDataDependency({
+        field,
+        personality: 23,
+        checksumValid: true,
+        isBadEgg: false,
+      })).toMatchObject({ tailEntryPc, fetchClass, logicalSubstruct });
+    }
+
+    expect(censusFactoryGetBoxMonDataDependency({
+      field: 11, personality: 0, checksumValid: false, isBadEgg: false,
+    })).toMatchObject({
+      checksumRoute: "invalid-marks-bad-egg",
+      speciesTailRoute: "bad-egg-species",
+      cycles: null,
+    });
+    expect(censusFactoryGetBoxMonDataDependency({
+      field: 11, personality: 0, checksumValid: true, isBadEgg: true,
+    }).speciesTailRoute).toBe("bad-egg-species");
+    expect(() => censusFactoryGetBoxMonDataDependency({
+      field: 24, personality: 0, checksumValid: true, isBadEgg: false,
+    })).toThrow("outside the CalculateMonStats/GetLevelFromMonExp encrypted subset");
+  });
   it("is three fresh, byte-stable Scene-OFF packets", () => {
     for (const { expected, bytes, value } of probes) {
       expect(createHash("sha256").update(bytes).digest("hex")).toBe(expected.hash);

@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1096 — [MAIN worker, 2026-08-10] **#55 shared encrypted accessor dependency bounded**
+
+- **State:** focused stats **19/19**, smoke **375/375**, typecheck, full `npm
+  test` **881 files / 8,438 passed / 1 skipped**, and production build are
+  green. #55 remains open, accessor totals are `null`, and the clock is unwired.
+- **Did:** bounded all **180** encrypted reads (**156** direct + **24** nested):
+  species/EXP/EV/IV **24/12/72/72**. Tests enumerate all **24** personality
+  permutations, checksum/bad-egg routes, exact field tails, fetch classes, and
+  common **8 GetSubstruct + 12 decrypt + 24 checksum + 12 encrypt** loops.
+- **Next:** reduce only independently source-proven modulo-arm and shared-loop
+  instruction/fetch segments; do not claim a complete accessor/stats total or
+  wire the construction clock until the remaining memory/service model closes.
+- **Notes:** twice-fresh OFF packets remain byte-identical at `92d3feb4…` /
+  `136efa4a…` / `ea323d9e…`; no fixture mutation, decrypted bytes/pointers,
+  duration/identity/residual fit, production recording import, barrier change,
+  canonical Battle-2, animation, aggregate stats, or clock wiring.
+
 ## 1095 — [MAIN worker, 2026-08-10] **#55 direct level route bounded; complete callee not reducible yet**
 
 - **State:** evidence `b8bb8306` plus docs `0a1ebd4d`; focused stats **17/17**,
@@ -44,23 +61,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   match committed hashes. Completed direct-call coverage is **312/480** and
   **100,214/1,768,691 = 5.666%** of source callee cycles. No duration/identity
   fit, fixture mutation, canonical Battle-2, animation, or barrier change.
-
-## 1093 — [MAIN worker, 2026-08-10] **#55 direct `SetMonData` party writes reduced**
-
-- **State:** implementation `d877ab2b` plus audit correction `8789ce5b`;
-  focused stats/clock **21/21**, smoke **375/375**, typecheck, full `npm
-  test` **881 files / 8,432 passed / 1 skipped**, and production build are
-  green. #55 remains open and the construction clock remains unwired.
-- **Did:** source-reduced all **96/96** direct stats writes from only signed
-  source field ID: per mon level **72** + seven HP/stat writes **7×78 = 618**;
-  anchor/LILIANA/varied **3,708/1,854/1,854 = 7,416** cycles, all raw spans
-  exact with zero residual. Tests pin u32/u8/u16/no-op/default switch arms.
-- **Next:** continue only with a bounded #55 source-general encrypted
-  `GetMonData2` or level/growth component (or VBlank/audio); do not wire the
-  aggregate stats operation or construction clock.
-- **Notes:** compiled `0x0806ACAC` dispatcher is instruction/fetch reduced,
-  not a 72/78 duration table; the general u32 status arm is independently
-  instruction-counted at 25 halfwords/86 cycles. Default `SetBoxMonData`
-  exposes only its exact 30-cycle entry and 10-cycle return shell. No
-  identity/duration lookup, fixture mutation, excluded lane, canonical
-  Battle-2, animation, or unsupported-barrier change.

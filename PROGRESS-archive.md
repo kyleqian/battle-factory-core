@@ -40295,3 +40295,22 @@ both verify scripts/census independently re-verified before this entry.)*
   `__udivsi3`; setup/return boundaries remain separate. No identity/duration
   lookup, fixture mutation, excluded lane, canonical Battle-2, animation, or
   unsupported-barrier change.
+## 1093 — [MAIN worker, 2026-08-10] **#55 direct `SetMonData` party writes reduced**
+
+- **State:** implementation `d877ab2b` plus audit correction `8789ce5b`;
+  focused stats/clock **21/21**, smoke **375/375**, typecheck, full `npm
+  test` **881 files / 8,432 passed / 1 skipped**, and production build are
+  green. #55 remains open and the construction clock remains unwired.
+- **Did:** source-reduced all **96/96** direct stats writes from only signed
+  source field ID: per mon level **72** + seven HP/stat writes **7×78 = 618**;
+  anchor/LILIANA/varied **3,708/1,854/1,854 = 7,416** cycles, all raw spans
+  exact with zero residual. Tests pin u32/u8/u16/no-op/default switch arms.
+- **Next:** continue only with a bounded #55 source-general encrypted
+  `GetMonData2` or level/growth component (or VBlank/audio); do not wire the
+  aggregate stats operation or construction clock.
+- **Notes:** compiled `0x0806ACAC` dispatcher is instruction/fetch reduced,
+  not a 72/78 duration table; the general u32 status arm is independently
+  instruction-counted at 25 halfwords/86 cycles. Default `SetBoxMonData`
+  exposes only its exact 30-cycle entry and 10-cycle return shell. No
+  identity/duration lookup, fixture mutation, excluded lane, canonical
+  Battle-2, animation, or unsupported-barrier change.

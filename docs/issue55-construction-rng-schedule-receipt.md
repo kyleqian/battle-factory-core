@@ -504,6 +504,47 @@ encrypted direct stats reads. Consequently no complete `GetLevelFromMonExp`
 reducer, keyed duration, identity branch, residual absorption, aggregate
 stats cost, or construction-clock wiring landed.
 
+### Shared encrypted `GetBoxMonData2` dependency census (2026-08-10)
+
+The **156** unresolved direct stats reads and the **24** species/EXP reads
+nested in `GetLevelFromMonExp` all take the same encrypted source route in
+`pokemon.c:3727-4080` / ELF `0x0806A674..0x0806ACAA`. The 180-call census is
+now explicit: species **24**, experience **12**, EV-byte **72**, and IV-
+bitfield **72**. Each invocation performs four initial `GetSubstruct` calls,
+a 12-word decrypt loop, a checksum containing four more `GetSubstruct` calls
+and 24 halfword reads, one field extraction tail, and a 12-word re-encrypt
+loop. Valid-checksum and corrupt-checksum/bad-egg branches are distinct source
+states; the committed Factory observations all take the valid route.
+
+`censusFactoryGetBoxMonDataDependency` accepts only field, personality,
+checksum validity, and the species-tail bad-egg flag. It source-derives all
+**24/24** `personality % 24` logical-to-physical substruct permutations and
+the selected secure offset without accepting a pointer or decrypted bytes.
+The twelve observed mons exercise modulo routes **2, 3, 5, 6, 7, 10, 18, 19,
+20**; Tier 1 independently enumerates all 24 source rows and their exact ELF
+jump-arm entries (`0x0806A2F8..0x0806A4E0`, explicitly non-contiguous).
+Extraction tails
+are pinned exactly: species `0x0806A95E`, EXP `0x0806A97C`, EVs
+`0x0806A9A4..0x0806A9B8`, and IVs
+`0x0806A9F6/9FE/AA06/AA0E/AA16/AA1E`. Their fetch classes remain explicit
+(EWRAM u8/u16/u32, conditional or bitfield) rather than collapsed into a
+recorded duration.
+
+Stable common boundaries are likewise exposed: GetBox entry/probe
+`0x0806A674/A676`, first GetSubstruct BL `A698`, decrypt/checksum BLs
+`A6C6/A6CC`, dispatcher `A6F2`, common/encrypt/return tails
+`AC8C/AC94/AC98`; GetSubstruct entry/modulo/dispatch/return
+`A270/A27E/A288/A510`; decrypt/checksum/encrypt loops
+`A256/068CB2/A232`. Twice-fresh wrapped Scene-OFF packets remain byte-identical
+to the committed scalar-only receipts at `92d3feb4…`, `136efa4a…`, and
+`ea323d9e…`; no new fixture or raw secure storage was required.
+
+The result deliberately reports `cycles: null`. Exact total timing still
+requires instruction/fetch reduction of `__umodsi3`, the personality-selected
+GetSubstruct arms, ROM dispatcher reads, EWRAM bus-width accesses, and both
+shared crypt/checksum loops. No duration/identity table, residual fit,
+aggregate stats cost, or construction-clock wiring is implied.
+
 ### Construction-entry component (2026-08-10)
 
 `reduceFactoryConstructionEntryTiming` covers the complete
