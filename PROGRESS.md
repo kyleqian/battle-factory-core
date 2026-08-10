@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1093 — [MAIN worker, 2026-08-10] **#55 direct `SetMonData` party writes reduced**
+
+- **State:** implementation `d877ab2b`; focused stats/clock **21/21**, smoke
+  **375/375**, typecheck, full `npm test`, and production build are green.
+  #55 remains open and the construction clock remains unwired.
+- **Did:** source-reduced all **96/96** direct stats writes from only signed
+  source field ID: per mon level **72** + seven HP/stat writes **7×78 = 618**;
+  anchor/LILIANA/varied **3,708/1,854/1,854 = 7,416** cycles, all raw spans
+  exact with zero residual. Tests pin u32/u8/u16/no-op/default switch arms.
+- **Next:** continue only with a bounded #55 source-general encrypted
+  `GetMonData2` or level/growth component (or VBlank/audio); do not wire the
+  aggregate stats operation or construction clock.
+- **Notes:** compiled `0x0806ACAC` dispatcher is instruction/fetch reduced,
+  not a 72/78 duration table; default `SetBoxMonData` exposes only its exact
+  30-cycle entry and 10-cycle return shell. No identity/duration lookup,
+  fixture mutation, excluded lane, canonical Battle-2, animation, or
+  unsupported-barrier change.
+
 ## 1092 — [MAIN worker, 2026-08-10] **#55 direct signed-division timing reduced**
 
 - **State:** implementation `602227bd` plus docs `7c2de833`; focused stats
@@ -39,20 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `%25` remains personality-dependent. Fresh Scene-OFF anchor is byte-identical
   (`cde88e8f…`); no identity/duration lookup, receipt mutation, excluded lane,
   canonical Battle-2, animation, or unsupported-barrier change.
-
-## 1090 — [MAIN worker, 2026-08-10] **#55 `ModifyStatByNature` direct-callee timing reduced**
-
-- **State:** committed as `76027187`; focused stats/clock **15/15**, smoke
-  **375/375**, typecheck, full `npm test`, and production build are green.
-  #55 remains open and the construction clock remains unwired.
-- **Did:** reduced all **60/60** receipt calls from nature/u16-stat/stat-index
-  ABI inputs: **52×98**, raise **3×416 + 1×418**, lower **3×408 + 1×410** =
-  **8,396** cycles. It resolves **60/480** direct calls (**12.5%**) but only
-  **0.475%** of direct-callee time; fresh Scene-OFF anchor hash is `cde88e8f…`.
-- **Next:** continue only with source-general Get/Set, level, `%25`
-  nature-fetch, signed-divide, and VBlank/audio timing; do not claim or wire
-  the complete stats operation before those nested budgets are exact.
-- **Notes:** source/ELF reduction includes the stat-index guard, ROM table,
-  u16 product, ARM7 multiply width, and nested `__udivsi3`; no identity or
-  duration lookup, fixture mutation, canonical Battle-2, animation, or
-  unsupported-barrier change.

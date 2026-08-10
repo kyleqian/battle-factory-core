@@ -1,3 +1,20 @@
+## 1090 — [MAIN worker, 2026-08-10] **#55 `ModifyStatByNature` direct-callee timing reduced**
+
+- **State:** committed as `76027187`; focused stats/clock **15/15**, smoke
+  **375/375**, typecheck, full `npm test`, and production build are green.
+  #55 remains open and the construction clock remains unwired.
+- **Did:** reduced all **60/60** receipt calls from nature/u16-stat/stat-index
+  ABI inputs: **52×98**, raise **3×416 + 1×418**, lower **3×408 + 1×410** =
+  **8,396** cycles. It resolves **60/480** direct calls (**12.5%**) but only
+  **0.475%** of direct-callee time; fresh Scene-OFF anchor hash is `cde88e8f…`.
+- **Next:** continue only with source-general Get/Set, level, `%25`
+  nature-fetch, signed-divide, and VBlank/audio timing; do not claim or wire
+  the complete stats operation before those nested budgets are exact.
+- **Notes:** source/ELF reduction includes the stat-index guard, ROM table,
+  u16 product, ARM7 multiply width, and nested `__udivsi3`; no identity or
+  duration lookup, fixture mutation, canonical Battle-2, animation, or
+  unsupported-barrier change.
+
 ## 1089 — [supervisor, 2026-08-10] **#55 m4a source-state boundary extended and reproduced**
 
 - **State:** squashed side fold `28f7a5c8`; focused union **15/15** and smoke
