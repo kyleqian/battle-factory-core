@@ -5,6 +5,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1066 — [supervisor, 2026-08-09 night] **Orient fold: Karate Chop checkpoint + orphan printfromtable audit; union green**
+
+- **State:** master union is green: full suite **851 files / 8,302 passed / 1
+  skipped**, production build, both oracle freshness checks PASS. The
+  animation supervisor is live concurrently (Codex Sol/high, same deadline)
+  and fast-forwarded `animation-main` onto the fold — benign convergence.
+- **Did:** folded `animation-main` (4 commits, Karate Chop source-complete
+  resume checkpoint `b67b45f6`..`9134da4a`, merge `96e3441c`; no coverage
+  claim — Karate Chop stays an evidence checkpoint). Swept orphaned branches
+  at orient and folded `worker/side-20260808-190940` (2026-08-08 Luna
+  printfromtable family audit: doc + generated JSON + extractor + pinned
+  test). Its scout-time pin (40 registered tables / 3 missing families) had
+  drifted: all three families landed 2026-08-09, so the pin now records **43
+  registered / 0 missing**, leaving the short `gStatUpStringIds` table (5 of
+  6 rows) as the one open remainder; doc carries a STATUS note.
+- **Next:** round 1 — main lane proves the **Shell Bell** family (bounded
+  successful-damage census, OFF oracle receipt, Tier-1 sibling batch,
+  manifest promotion); side lane authors the ranked **Gate-6 family
+  worklist** regrouping the remaining 106 ability / 194 item row gaps.
+- **Notes:** no engine, controller, round outcome, barrier pin, or canonical
+  window changed; the only test delta is the honest printfromtable re-pin.
+
 ## 1065 — [supervisor, 2026-08-09] **Damp family certified; final union green**
 
 - **State:** final master union is green: full suite **849 files / 8,296
@@ -54,28 +76,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   owner fix. No Damage/PP/HP/RNG, selector mutation, controller/facility
   state, animation, generated artifact, unsupported barrier, or canonical
   Battle-2 window changed.
-
-## 1063 — [supervisor, 2026-08-09] **Attract/Oblivious and Vice Grip folded; union green**
-
-- **State:** final master union is green: full suite **845 files / 8,282
-  passed / 1 skipped**, production build, OFF oracle info, and animation
-  coverage pass. Full-policy **0:60 = 60 OK / 0 CRASH / 0 HANG** and vanilla
-  **0:20 = 20 OK / 0 CRASH / 0 HANG**.
-- **Did:** accepted the one-row source-bounded Attract/Oblivious family
-  (`9c9a75f9`, merge `b36f2a75`): ability gaps move **107→106**, total hook
-  gaps **302→301**, item gaps remain **195**, ability source-proven rows become
-  **194**, and joined categories become **346**. A fresh supervisor OFF probe
-  reproduced Oblivious ability reveal **12**, target `status2=0`, and Attract
-  PP **15→14**; its Own Tempo control wrote `0x20000` with PP **15→14**.
-- **Did:** folded `animation-main` through exact Vice Grip (`4f56ec54`,
-  `469019b9`, `b686df3d`, `b26c90fd`; merge `a23250a5`). Both orientations are
-  **42/42** dense frames exact twice fresh; Level-50 animation coverage is now
-  **147/276 exact**.
-- **Next:** continue the ordered family-level Gate-6 worklist from the verified
-  **106 ability / 195 item** hook-gap frontier; Shell Bell still needs its own
-  bounded successful-damage census and must not be inferred from MOVEEND state
-  12 sharing.
-- **Notes:** the seven-win live proof remains **56,556 frames / 4,228 renders**
-  through all seven battle seams. No canonical Battle-2 window past tick
-  33331, battle/turn/absolute-tick renderer branch, unsupported-barrier pin,
-  round outcome, controller interface, or Scene-OFF logical state changed.

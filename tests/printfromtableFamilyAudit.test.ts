@@ -46,16 +46,15 @@ describe("Cmd_printfromtable family audit", () => {
     );
   });
 
-  it("pins the next production batch as three missing families plus one short table", () => {
+  // Scout-time (2026-08-08) this pinned 40 registered tables with three
+  // missing families; all three landed by 2026-08-09, leaving only the short
+  // stat-up table below.
+  it("pins the remaining production gap as the one short stat-up table", () => {
     const production = readFileSync("src/engine/battleScriptHitChainOpcode.ts", "utf8");
     const registered = [...production.matchAll(/^  (g\w+(?:StringIds|Table)): Object\.freeze\(/gm)].map((match) => match[1]);
     const source = audit.families.map((family) => family.pointer);
-    expect(registered).toHaveLength(40);
-    expect(source.filter((pointer) => !registered.includes(pointer))).toEqual([
-      "gBattlePalaceFlavorTextTable",
-      "gNoEscapeStringIds",
-      "gWeatherStartsStringIds",
-    ]);
+    expect(registered).toHaveLength(43);
+    expect(source.filter((pointer) => !registered.includes(pointer))).toEqual([]);
     const statUpStart = production.indexOf("gStatUpStringIds: Object.freeze([");
     const statUpEnd = production.indexOf("  ]),", statUpStart);
     expect(statUpStart).toBeGreaterThanOrEqual(0);

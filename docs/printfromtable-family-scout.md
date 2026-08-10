@@ -1,5 +1,12 @@
 # Cmd_printfromtable family scout
 
+> **STATUS (2026-08-09, supervisor):** frozen at scout time 2026-08-08. The
+> three then-missing families (`gBattlePalaceFlavorTextTable`,
+> `gNoEscapeStringIds`, `gWeatherStartsStringIds`) were registered by later
+> 2026-08-09 work before this branch merged; the only open remainder is the
+> short `gStatUpStringIds` table (5 of 6 rows). The pinned test tracks the
+> live state.
+
 This is a source-only handoff for the remaining `Cmd_printfromtable` B guard.
 The deterministic extractor is
 `tools/extract/extract-printfromtable-family-audit.ts`; its generated artifact
