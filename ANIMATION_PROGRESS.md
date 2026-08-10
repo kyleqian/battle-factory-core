@@ -1,5 +1,12 @@
 # Animation coverage
 
+## Supervisor wind-down — seven promotions plus Spite resume checkpoint (2026-08-10)
+
+- **State:** This session advanced Level-50 coverage **147→154/276 exact**, 0 partial, 0 staged, and **129→122 unsupported**. `KARATE_CHOP`, `BATON_PASS`, `MAGIC_COAT`, `PROTECT`, `ROLE_PLAY`, `DRILL_PECK`, and `SUBMISSION` are newly exact; Spite remains honestly unsupported.
+- **Did:** Independently verified every accepted worker chain, rejected and repaired one false-green Submission handoff, folded current `master`, and removed every worker branch/worktree. The final bounded round added Spite's source-complete reducer/typed seam plus legal bilateral set-179 Haunter stages and a pointer probe without claiming visual acceptance.
+- **Next:** Resume Spite by staging a real prior target move so `Cmd_tryspiteppreduce` reaches `Move_SPITE`; then bank bilateral dense change maps, measure clone/scanline/BG latches, and require full component/seam/hardware/raw-RGB/framebuffer equality before promotion.
+- **Notes:** Final coverage remains **154/276 exact** with no open animation deferral. **For the main program:** all production changes are presentation-only; no damage/status outcome, accuracy/critical/RNG, turn order, controller, round/facility state, canonical-recording allowlist, shared animation boundary, or unsupported-branch barrier changed.
+
 ## MOVE_SPITE source/reducer + legal staging checkpoint — coverage unchanged (2026-08-10 worker)
 
 - **State:** Coverage remains **154/276 exact**, 0 partial, 0 staged; `ANIMATION_COVERAGE.json` is intentionally unchanged. `MOVE_SPITE` is not promoted and `NIGHT_SHADE` remains unsupported.
@@ -7,13 +14,6 @@
 - **Verified:** Focused reducer/boundary tests **5/5**, typecheck, and both `bin/oracle --profile battle-scene-on lab` staging runs are green. The first Spite action has no prior target `gLastMoves`, so `Cmd_tryspiteppreduce` takes its failure route: `sBattleAnimScriptPtr` stayed out of `Move_SPITE` bounds and the staging receipt contains **0 visual-body frames** in both orientations. No component/seam/framebuffer promotion was claimed.
 - **Next:** Stage a real prior target move, then capture and measure a dense pointer-bounded Spite window through first inactive cleanup (including scanline/BG latches and change maps) before considering a compositor or promotion.
 - **Notes:** No gameplay, damage, RNG, turn, controller, facility, shared boundary, or absolute-tick rendering changes.
-
-## Supervisor wind-down — seven Level-50 promotions, final union green (2026-08-10)
-
-- **State:** This session advanced Level-50 coverage **147→154/276 exact**, 0 partial, 0 staged, and **129→122 unsupported**. `KARATE_CHOP`, `BATON_PASS`, `MAGIC_COAT`, `PROTECT`, `ROLE_PLAY`, `DRILL_PECK`, and `SUBMISSION` are newly exact.
-- **Did:** Independently verified each accepted worker chain against its bilateral twice-fresh Scene-ON receipt and named controls, merged only green commits, folded current `master`, and removed every animation worker branch/worktree. The first Submission handoff was rejected because its claimed green result conflicted with captured build/type/count-ratchet failures; bounded follow-ups repaired the ratchets, typed asset path, and duplicate seam field before merge.
-- **Next:** Select the next independent Level-50 acceptance unit from `npm run animation:coverage`; preserve per-move dense bilateral acceptance even when all source components are already exact-proven.
-- **Notes:** Final coverage is **154/276 exact** with no open animation deferral. **For the main program:** all production changes are presentation-only; no damage/status outcome, accuracy/critical/RNG, turn order, controller, round/facility state, canonical-recording allowlist, shared animation boundary, or unsupported-branch barrier changed.
 
 ## MOVE_SUBMISSION exact — bilateral 124/124 Scene-ON promotion (2026-08-10 worker)
 
