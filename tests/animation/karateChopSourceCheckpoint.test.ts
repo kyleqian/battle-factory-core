@@ -18,7 +18,7 @@ describe("MOVE_KARATE_CHOP bounded source checkpoint", () => {
   it("promotes only Karate Chop after the complete bilateral production proof", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact"))
-      .toHaveLength(148);
+      .toHaveLength(149);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_KARATE_CHOP"))
       .toMatchObject({ move: "MOVE_KARATE_CHOP", status: "exact" });
   });
