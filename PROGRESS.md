@@ -46,7 +46,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   family: 99 candidates, promoted 97→**95**. Item-move-end family: 116
   candidates, promoted 114→**112**. `routeBranch` success/failure-tail
   self-description was **not** landed this step (honest-stop clause,
-  session cap) — filed as `ISSUES.md` #82 with the full marker-set design
+  session cap) — filed as `ISSUES.md` #86 with the full marker-set design
   (`BattleScript_ButItFailed`, `orbyte ... MOVE_RESULT_FAILED`,
   `*Prevents*` redirects) and the counter-argument for why most
   failure-tail routes (Roar/Whirlwind/Substitute-shaped, reaching
@@ -81,7 +81,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   across both extractor and report now say "4 remaining gaps" /
   "Assist/Metronome/Mirror Move/Sleep Talk" consistently (no lingering
   "two gaps" or bare "Assist/Metronome" text on either axis).
-- **Next:** ISSUES #82 (`routeBranch` classifier) is the natural
+- **Next:** ISSUES #86 (`routeBranch` classifier) is the natural
   continuation — read-only sweep across all ~296 currently-promoted rows
   per axis for other failure-tail-only routes before deciding whether any
   need exception-row conversion. Otherwise the Gate-6 hook-family worklist

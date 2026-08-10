@@ -232,7 +232,7 @@ inert-insurance evidence above already cover in full. Disposition: no
 further check needed; the deferred item has nothing left to verify at the
 generated-route settle hooks.
 
-## #82 — Gate-6 manifest route certificates don't self-describe success vs. failure-tail reachability (`routeBranch` deferred)
+## #86 — Gate-6 manifest route certificates don't self-describe success vs. failure-tail reachability (`routeBranch` deferred)
 
 **Symptom:** every Gate-6 hook-family route certificate (King's Rock, Shell
 Bell, item-move-end, Immunity, Color Change, Contact, Synchronize, etc.) is
