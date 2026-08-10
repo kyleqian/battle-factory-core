@@ -7,7 +7,7 @@ describe("rolePlayAtAge", () => {
     expect(rolePlayAtAge(7, "player", { x: 72, y: 80 })).toMatchObject({ scriptOffset: 36, bgBlackCoefficient: 2, targetWhiteCoefficient: 0 });
     expect(rolePlayAtAge(8, "player", { x: 72, y: 80 })).toMatchObject({ bgBlackCoefficient: 2, targetWhiteCoefficient: 1 });
     expect(rolePlayAtAge(53, "player", { x: 72, y: 80 })).toMatchObject({ scriptOffset: 36, targetWhiteCoefficient: 16, sound: null });
-    expect(rolePlayAtAge(54, "player", { x: 72, y: 80 })).toMatchObject({ scriptOffset: 53, sound: "SE_M_TRI_ATTACK" });
+    expect(rolePlayAtAge(54, "player", { x: 72, y: 80 })).toMatchObject({ scriptOffset: 53, sound: "SE_M_TRI_ATTACK", soundPan: -64, delayedDetectWait: 29 });
     expect(rolePlayAtAge(94, "player", { x: 72, y: 80 })).toMatchObject({ scriptOffset: 75, attackerOnMonBg: false, blend: null });
     expect(rolePlayAtAge(145, "player", { x: 72, y: 80 })).toMatchObject({ active: true, scriptOffset: null, targetWhiteCoefficient: 0, visualTaskCount: 0 });
     expect(rolePlayAtAge(146, "player", { x: 72, y: 80 })).toMatchObject({ active: false, scriptOffset: null });
@@ -17,7 +17,8 @@ describe("rolePlayAtAge", () => {
     expect(rolePlayAtAge(54, "player", { x: 72, y: 80 }).silhouette).toMatchObject({ art: "back", x: 52, y: 80, affineMode: 1, matrix: { a: 256, d: 256 } });
     expect(rolePlayAtAge(54, "opponent", { x: 176, y: 42 }).silhouette).toMatchObject({ art: "front", x: 196, y: 42 });
     expect(rolePlayAtAge(83, "player", { x: 72, y: 80 })).toMatchObject({ blend: { eva: 9, evb: 7 }, sound: null });
-    expect(rolePlayAtAge(84, "player", { x: 72, y: 80 })).toMatchObject({ blend: { eva: 10, evb: 6 }, sound: "SE_M_DETECT" });
+    expect(rolePlayAtAge(83, "opponent", { x: 176, y: 42 })).toMatchObject({ delayedDetectWait: 0 });
+    expect(rolePlayAtAge(84, "opponent", { x: 176, y: 42 })).toMatchObject({ blend: { eva: 10, evb: 6 }, sound: "SE_M_DETECT", soundPan: 63, delayedDetectWait: null });
     expect(rolePlayAtAge(84, "player", { x: 72, y: 80 }).silhouette).toMatchObject({ affineMode: 3, matrix: { a: 240, d: 384 } });
     expect(rolePlayAtAge(91, "player", { x: 72, y: 80 }).silhouette).toMatchObject({ matrix: { a: 128, d: 1280 } });
     expect(rolePlayAtAge(92, "player", { x: 72, y: 80 })).toMatchObject({ silhouette: null, silhouetteResourceLoaded: false, visualTaskCount: 1 });

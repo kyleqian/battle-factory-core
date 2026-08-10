@@ -27,6 +27,8 @@ export interface RolePlayState {
   readonly blend: Readonly<{ eva: number; evb: number }> | null;
   readonly visualTaskCount: 0 | 1 | 2;
   readonly sound: "SE_M_TRI_ATTACK" | "SE_M_DETECT" | null;
+  readonly soundPan: -64 | 63 | null;
+  readonly delayedDetectWait: number | null;
 }
 
 function scriptOffset(age: number): RolePlayState["scriptOffset"] {
@@ -102,5 +104,9 @@ export function rolePlayAtAge(
     blend: alpha === null ? null : { eva: alpha, evb: 16 - alpha },
     visualTaskCount: visualTaskCount(age),
     sound: age === 54 ? "SE_M_TRI_ATTACK" : age === 84 ? "SE_M_DETECT" : null,
+    soundPan: age === 54 || age === 84
+      ? attackerSide === "player" ? -64 : 63
+      : null,
+    delayedDetectWait: age >= 54 && age <= 83 ? 83 - age : null,
   };
 }

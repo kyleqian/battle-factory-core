@@ -2782,6 +2782,37 @@
    ]
   },
   {
+   "move": "MOVE_ROLE_PLAY",
+   "status": "exact",
+   "covered": [
+    "the exact even source interval 0x082d4fae..0x082d500a and complete legal set-169 KADABRA/set-156 ONIX parties produce 147-frame pointer-bounded Scene-ON windows through first inactive cleanup in both orientations",
+    "twice-fresh player-back frames 70-216 pass 147/147 component, typed-seam, software/hardware, raw-RGB, and production-framebuffer checks with probe/raw/map digests 612259ab9f25f1968055ccdfe72244c65905efdbc9c7d58b87a6a3fde72a6fb0 / 58bdc5f4433b00ace18198cbe2989aa0a0791843de7e1bfd3a64b3f47e32f378 / 2e0cb80c3a9ed21b9d36ac06616b564df52102dd276ff911dbb4db2924972f69",
+    "twice-fresh opponent-front frames 74-220 pass 147/147 with probe/raw/map digests 5f34b6e43bdc98d6db842543549ee08c62a2d806ca19ac08dfb84c8d254bc93f / 137ab8f7a647e9c6ee366a022898d9bd6eabda768e85f6c8ae6b1ed52f9bd76b / f5b413acfad330e1484715a5b1d61b3e7efb292e7580580be9acbe7846fc6bb6",
+    "the pure source-age reducer ports attacker monbg, target white 0-to-16-to-0 and BG black 0-to-10-to-0 palettes, TRI_ATTACK plus delayed DETECT identity/pan/wait, the additional target-species sprite and resource lifetime, 0:16-to-10:6 alpha, nine affine-double callbacks, reset/free, blend teardown, and cleanup",
+    "the typed presentation seam receives only resolved KADABRA/ONIX geometry and immutable field values; the compositor uses deterministic existing source-extracted KADABRA and ONIX sheets, including the source-required back silhouette beside a player attacker and front silhouette beside an opponent attacker",
+    "software OAM and palette writes follow RAM+1 display transfer while the freshly allocated affine matrix follows the established two-display hardware lag; no new or contradictory latch class is introduced",
+    "MOVE_MEGA_PUNCH remains exact at 160/160 bilateral component/framebuffer frames twice fresh after Role Play; no shared helper changed, so no additional affine sibling control is required",
+    "ability copying, success/failure, damage, status, RNG, controller, turn order, round/facility state, boundary lists, unsupported barriers, and MOVE_REFRESH remain outside this presentation acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-role-play-player-kadabra-opponent-onix.json",
+    "tools/battle-lab/mechanic-role-play-opponent-kadabra-player-onix.json",
+    "tools/compare/fixtures/role-play-player-kadabra-opponent-onix.json",
+    "tools/compare/fixtures/role-play-opponent-kadabra-player-onix.json",
+    "tools/compare/evidence/role-play-changemap-player.txt",
+    "tools/compare/evidence/role-play-changemap-opponent.txt",
+    "tools/compare/rolePlayProbe.py",
+    "tools/compare/rolePlayPortable.ts",
+    "tools/compare/rolePlaySourceAudit.ts",
+    "src/animation/rolePlay.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/rolePlay.test.ts",
+    "tests/animation/rolePlayEvidenceCheckpoint.test.ts",
+    "tests/animation/rolePlaySourceCheckpoint.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_ROAR",
    "status": "exact",
    "covered": [

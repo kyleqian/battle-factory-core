@@ -650,6 +650,7 @@ import {
   type KnockOffBodyState,
 } from "./knockOff.ts";
 import { batonPassAtAge, type BatonPassState } from "./batonPass.ts";
+import { rolePlayAtAge, type RolePlayState } from "./rolePlay.ts";
 import {
   shadowBallBackgroundBldy,
   shadowBallBackgroundIsGhost,
@@ -1518,6 +1519,14 @@ export interface SceneOnKarateChopConfig {
 
 export interface SceneOnBatonPassConfig {
   readonly move: "BATON_PASS";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+/** Role Play receives presentation geometry and immutable healthbox fields only. */
+export interface SceneOnRolePlayConfig {
+  readonly move: "ROLE_PLAY";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -2420,6 +2429,7 @@ export type SceneOnMoveConfig =
   | SceneOnLowKickConfig
   | SceneOnKarateChopConfig
   | SceneOnBatonPassConfig
+  | SceneOnRolePlayConfig
   | SceneOnStompConfig
   | SceneOnViceGripConfig
   | SceneOnBiteConfig
@@ -2726,6 +2736,15 @@ export interface SceneOnBatonPassView extends BatonPassState {
   readonly displayedPokeball: BatonPassState["pokeball"];
   readonly displayedAttackerMatrix: BatonPassState["attackerMatrix"];
   readonly displayedAttackerInvisible: boolean;
+}
+
+export interface SceneOnRolePlayView extends RolePlayState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly displayedTargetWhiteCoefficient: number;
+  readonly displayedBgBlackCoefficient: number;
+  readonly displayedSilhouette: RolePlayState["silhouette"];
 }
 
 export interface SceneOnStompView extends StompState {
@@ -4837,6 +4856,28 @@ export function sceneOnBatonPassView(
     displayedPokeball: displayed.pokeball,
     displayedAttackerMatrix: displayed.attackerMatrix,
     displayedAttackerInvisible: displayed.attackerInvisible,
+  };
+}
+
+/** Role Play keeps source RAM truth separate from palette/OAM scanout latches. */
+export function sceneOnRolePlayView(
+  state: SceneOnMovePresentationState<SceneOnRolePlayConfig>,
+): SceneOnRolePlayView {
+  if (state.config.move !== "ROLE_PLAY") {
+    throw new Error(`expected ROLE_PLAY presentation, got ${state.config.move}`);
+  }
+  const center = state.config.attacker.geometry.battlePositionCenter;
+  const current = rolePlayAtAge(state.age, state.config.attacker.geometry.side, center);
+  const paletteDisplay = rolePlayAtAge(state.age - 1, state.config.attacker.geometry.side, center);
+  const oamDisplay = rolePlayAtAge(state.age - 2, state.config.attacker.geometry.side, center);
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...current,
+    displayedTargetWhiteCoefficient: paletteDisplay.targetWhiteCoefficient,
+    displayedBgBlackCoefficient: paletteDisplay.bgBlackCoefficient,
+    displayedSilhouette: oamDisplay.silhouette,
   };
 }
 

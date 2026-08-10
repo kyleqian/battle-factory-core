@@ -906,6 +906,7 @@ import {
   sceneOnLowKickView,
   sceneOnKarateChopView,
   sceneOnBatonPassView,
+  sceneOnRolePlayView,
   sceneOnStompView,
   sceneOnViceGripView,
   sceneOnBiteView,
@@ -1003,6 +1004,7 @@ import {
   type SceneOnMovePresentationState,
   type SceneOnKarateChopConfig,
   type SceneOnBatonPassConfig,
+  type SceneOnRolePlayConfig,
   type SceneOnStompConfig,
   type SceneOnViceGripConfig,
   type SceneOnFirePunchConfig,
@@ -24248,6 +24250,98 @@ export function renderSceneOnMovePresentation(
     }));
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(fb, playerToOpponent ? "AIPOM used" : "Foe AIPOM used", "BATON PASS!", 99);
+    return;
+  }
+
+  if (state.config.move === "ROLE_PLAY") {
+    const roleState = state as SceneOnMovePresentationState<SceneOnRolePlayConfig>;
+    const view = sceneOnRolePlayView(roleState);
+    const playerToOpponent = view.attacker.species === "KADABRA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "KADABRA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(`unsupported staged ROLE_PLAY pair ${view.attacker.species}->${view.target.species}`);
+    }
+    const black = { r: 0, g: 0, b: 0 };
+    const white = { r: 255, g: 255, b: 255 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(battleBg.palette, black, view.displayedBgBlackCoefficient),
+    );
+    const attackerSource = playerToOpponent
+      ? kadabraBackSprite
+      : { ...kadabraFrontSprite, tileset: subTileset(kadabraFrontSprite.tileset, 0, 8) };
+    const targetSource = playerToOpponent
+      ? { ...onixFrontSprite, tileset: subTileset(onixFrontSprite.tileset, 0, 8) }
+      : onixBackSprite;
+    const targetPalette = blendPaletteToward(
+      targetSource.palette,
+      white,
+      view.displayedTargetWhiteCoefficient,
+    );
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetSource.tileset,
+      targetPalette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerSource.tileset,
+      attackerSource.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (playerToOpponent) { drawTarget(); drawAttacker(); }
+    else { drawAttacker(); drawTarget(); }
+    if (view.displayedSilhouette && view.blend) {
+      const silhouette = view.displayedSilhouette;
+      const target2 = fb.slice();
+      const silhouettePalette = Array.from({ length: 16 }, () => white);
+      const silhouetteSource = playerToOpponent
+        ? onixBackSprite
+        : { ...onixFrontSprite, tileset: subTileset(onixFrontSprite.tileset, 0, 8) };
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        target2,
+        silhouetteSource.tileset,
+        silhouettePalette,
+        silhouette.x,
+        silhouette.y,
+        silhouette.matrix.a,
+        0,
+        0,
+        silhouette.matrix.d,
+        view.blend.eva,
+        view.blend.evb,
+        silhouette.affineMode === 3,
+      );
+    }
+    const profile = roleState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "KADABRA", level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "KADABRA" : "ONIX", level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb, playerToOpponent ? "KADABRA used" : "Foe KADABRA used", "ROLE PLAY!", 99);
     return;
   }
 

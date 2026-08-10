@@ -1,12 +1,12 @@
 # Animation coverage
 
-## MOVE_ROLE_PLAY dense bilateral evidence + pure reducer checkpoint — remains unsupported (2026-08-10 worker)
+## MOVE_ROLE_PLAY exact — bilateral 147/147 target-silhouette promotion (2026-08-10 worker)
 
-- **State:** Coverage remains **151/276 exact**, 0 partial, 0 staged, **125 unsupported**. Role Play still has no typed seam, production compositor, portable production-framebuffer proof, or promotion.
-- **Did:** Added a real-even-pointer-bounded Scene-ON probe for `0x082d4fae..0x082d500a`, complete 147-frame player-back **70..216** and opponent-front **74..220** windows through first inactive cleanup, byte-stable change maps/fixtures, and a pure source-age reducer. The probe records every task/sprite, additional-mon slot/geometry/OAM/matrix/resource state, software/hardware OAM/matrices/palettes, monbg visibility/reset, both palette programs, registers, both audio players, immutable battle state, and raw RGB.
-- **Verified:** Twice fresh per orientation, player probe/raw/map digests are `612259ab…` / `58bdc5f4…` / `2e0cb80c…`; opponent digests are `5f34b6e4…` / `137ab8f7…` / `f5b413ac…`. Both share ages 54..91 for the additional ONIX, 54..92 for the Role Play task, affine RAM ages 84..91, and first inactive age 146. Focused reducer/evidence/source/boundary tests and typecheck pass.
-- **Next:** Add the narrow typed Scene-ON seam and production compositor; build the portable verifier that checks all 147 component/hardware/raw-RGB/shared-framebuffer frames twice fresh in both orientations. Regenerate maps, then rerun MEGA_PUNCH and BATON_PASS bilateral twice fresh before promotion.
-- **Notes:** Dense evidence confirms the existing latch rows (plain OAM/palette RAM+1; fresh affine matrix hardware lag two); `ANIMATION_LATCHES.md` is unchanged. No ability outcome, damage/status/RNG, controller/facility state, engine file, boundary/barrier, sibling, or coverage count changed.
+- **State:** Coverage advances **151→152/276 exact**, 0 partial, 0 staged, **125→124 unsupported**. Role Play alone moves; boundary, barrier, and latch pins are unchanged.
+- **Did:** Added complete legal set-169 KADABRA/set-156 ONIX bilateral stages, a real-even-pointer-bounded Scene-ON probe for `0x082d4fae..0x082d500a`, 147-frame dense receipts/change maps, pure reducer, typed seam, portable verifier, and production compositor. The port covers monbg, target-white and BG-black ramps, TRI_ATTACK plus delayed DETECT audio, the target-species additional-mon resource/OAM/alpha/affine lifecycle, blend teardown, and cleanup.
+- **Verified:** Twice fresh, player-back frames **70..216** and opponent-front **74..220** each pass **147/147 component+hardware+raw-RGB+framebuffer**. Player probe/raw/map: `612259ab…` / `58bdc5f4…` / `2e0cb80c…`; opponent: `5f34b6e4…` / `137ab8f7…` / `f5b413ac…`. MEGA_PUNCH remains bilateral **160/160** twice fresh.
+- **Next:** Supervisor selects the next independent move; do not promote REFRESH or another sibling from shared commands.
+- **Notes:** The additional ONIX is back art at player x−20 and front art at opponent x+20; its affine matrix follows the established fresh-allocation two-display lag, so `ANIMATION_LATCHES.md` stays unchanged. No ability outcome, damage/status/RNG, controller/facility state, boundary/barrier, sibling, or absolute-tick branch changed.
 
 ## MOVE_ROLE_PLAY source + bilateral legal-staging checkpoint — remains unsupported (2026-08-10 worker)
 

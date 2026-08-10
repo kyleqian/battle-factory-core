@@ -58,9 +58,9 @@ describe("MOVE_ROLE_PLAY bounded source/staging checkpoint", () => {
     }
   });
 
-  it("leaves Role Play honestly unsupported until dense bilateral acceptance exists", () => {
+  it("promotes Role Play only with its independent dense bilateral acceptance", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact")).toHaveLength(151);
-    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_ROLE_PLAY")).toBeUndefined();
+    expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact")).toHaveLength(152);
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_ROLE_PLAY")?.status).toBe("exact");
   });
 });
