@@ -253,6 +253,16 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
         field: 11, personality, checksumValid: true, isBadEgg: false,
       }).getSubstructModuloArmPc
     ))).toEqual(expectedArmPcs);
+    for (let personality = 0; personality < expectedLayouts.length; personality += 1) {
+      for (const [field, logicalSubstruct] of [[11, 0], [25, 0], [26, 2], [39, 3]] as const) {
+        const dependency = censusFactoryGetBoxMonDataDependency({
+          field, personality, checksumValid: true, isBadEgg: false,
+        });
+        const selectedPhysicalSlot = expectedLayouts[personality]![logicalSubstruct]!;
+        expect(dependency.selectedPhysicalSlot).toBe(selectedPhysicalSlot);
+        expect(dependency.secureStorageOffset).toBe(0x20 + selectedPhysicalSlot * 12);
+      }
+    }
     expect(censusFactoryGetBoxMonDataDependency({
       field: 11, personality: 0, checksumValid: true, isBadEgg: false,
     }).commonFetchClasses).toEqual([
