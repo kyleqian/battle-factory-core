@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1091 — [MAIN worker, 2026-08-10] **#55 direct `GetNature` timing reduced**
+
+- **State:** implementation commit `59b13350`; focused stats/clock **25/25**,
+  smoke **375/375**, typecheck, full `npm test` **881 files / 8,428 passed /
+  1 skipped**, and production build are green. #55 remains open and the
+  construction clock remains unwired.
+- **Did:** reduced all **60/60** direct calls from accepted personality alone:
+  anchor/LILIANA/varied **29,875/14,830/15,195 = 59,900** source cycles. Raw
+  spans decompose as **57×exact + 2×(+18) + 1×(+245 VCount/audio IRQ)**.
+- **Next:** continue only with source-general encrypted Get/Set, level/growth,
+  signed-divide, and VBlank/audio timing; do not wire or claim complete stats.
+- **Notes:** fixed shell is **180** nested field-zero accessor + **42** wrapper;
+  `%25` remains personality-dependent. Fresh Scene-OFF anchor is byte-identical
+  (`cde88e8f…`); no identity/duration lookup, receipt mutation, excluded lane,
+  canonical Battle-2, animation, or unsupported-barrier change.
+
 ## 1090 — [MAIN worker, 2026-08-10] **#55 `ModifyStatByNature` direct-callee timing reduced**
 
 - **State:** committed as `76027187`; focused stats/clock **15/15**, smoke
@@ -39,18 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   dereference classes; no production reducer, canonical Battle-2, animation,
   or unsupported-barrier change. Side commits were squashed so transient mGBA
   log blobs did not enter master history.
-
-## 1088 — [MAIN worker, 2026-08-10] **#55 `CalculateMonStats` parent timing reduced**
-
-- **State:** exact parent-only reducer landed; focused stats/clock **13/13**,
-  smoke **375/375**, typecheck, full `npm test` **880 files / 8,422 passed /
-  1 skipped**, and production build are green. #55 remains open.
-- **Did:** all **12/12** receipts reduce exactly after excluding **480** direct
-  callees: **10×1,083 + 2×1,081**. The split is the u8 `levelUpHP==0` branch:
-  two extra halfwords minus one refill = **−2**. Source tests cover u8 wrap,
-  normal HP initialize/adjust/return, and Shedinja branches.
-- **Next:** port the nested Get/SetMonData, level/growth, divide, nature, and
-  nature-modification ROM/EWRAM timing; do not wire the complete stats cost or
-  live clock before those callees and VBlank/audio arbitration are exact.
-- **Notes:** commit `639f0a81`; no identity/duration lookup, fixture mutation,
-  live wiring, canonical Battle-2, animation, or unsupported-barrier change.

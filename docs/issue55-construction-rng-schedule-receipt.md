@@ -302,6 +302,40 @@ budget. It does not license a complete `CalculateMonStats` cost or live-clock
 wiring; the unresolved Get/Set, level, `%25` nature-fetch, signed-divide, and
 VBlank/audio work remain explicit.
 
+### `GetNature` direct-callee component (2026-08-10)
+
+`reduceFactoryGetNatureTiming` reduces the distinct direct-call boundary at
+`pokemon.c:5493-5496` / ELF `0x0806D070→0x0806D088` from the full accepted
+personality alone. This is not the construction loop's already-pinned
+`GetNatureFromPersonality+2` boundary. `GetNature` first takes the field-zero
+`GetMonData2→GetBoxMonData2` path, then executes
+`__umodsi3(personality, 25)` and returns its u8 result.
+
+The fixed field-zero accessor costs **180** cycles: **54** sequential Thumb
+halfwords, **9** pipeline refills, one PC-relative ROM literal, one ROM jump-
+table word, and one 32-bit EWRAM personality read. The `GetNature` wrapper
+outside its nested callees adds **42** cycles. The modulo path remains fully
+personality-dependent and reuses the existing instruction-exact nature-attempt
+reducer after subtracting only its named **66**-cycle accepted-call shell; the
+existing **278-call** rejection receipt and reducer contract are unchanged.
+
+All **60/60** calls yield the recorded nature exactly and account for **59,900**
+source cycles: anchor **29,875**, LILIANA **14,830**, varied **15,195**. Of the
+raw direct-call spans, **57** equal the reducer directly, **2** are reducer
+**+18**, and **1** is reducer **+245**, for **60,181** observed cycles total.
+A temporary fresh instruction trace placed the +245 entirely in a nested
+`VCountIntr→m4aSoundVSync` IRQ (**80** ISR/BIOS instructions) before resuming
+`__umodsi3`; the two +18 spans are the already-classified asynchronous timing-
+service class. Neither external cost is absorbed into the source reducer. A
+fresh wrapped anchor packet remained byte-identical at `cde88e8f…`.
+
+This resolves another **60/480** direct-call sites (**12.5%**) and **59,900 /
+1,768,691 = 3.386%** of pause-subtracted direct-callee cycles. Together with
+`ModifyStatByNature`, the two completed families cover **120/480** sites and
+**68,296** direct-callee cycles. Encrypted Get/Set, level/growth, direct signed
+divide, and VBlank/audio arbitration remain unresolved, so this does not wire
+or complete `CalculateMonStats`.
+
 ### Construction-entry component (2026-08-10)
 
 `reduceFactoryConstructionEntryTiming` covers the complete

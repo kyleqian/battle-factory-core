@@ -130,9 +130,19 @@ width, and nested `__udivsi3(..., 100)` loop. It accounts for **8,396**
 source cycles (**12.5%** of direct-call sites but **0.475%** of their
 pause-subtracted time); the detailed accounting is in the construction receipt.
 
+The standalone `reduceFactoryGetNatureTiming` closes the sibling **60** direct
+calls from full accepted personality only. Its exact fixed budget is **180**
+cycles for field-zero `GetMonData2→GetBoxMonData2` plus **42** wrapper cycles;
+the shared `__umodsi3(personality,25)` path supplies the dynamic remainder.
+The receipt accounts for **59,900** source cycles; **57** raw spans match
+directly, **2** have the known +18 asynchronous service, and **1** contains a
+separately instruction-traced **245-cycle `VCountIntr→m4aSoundVSync` IRQ**.
+No external service is folded into the reducer, and the earlier 278-call
+nature-attempt contract is unchanged.
+
 The parent reducer still deliberately excludes the other direct callee
 durations. Encrypted box-mon `%24` routes, growth/experience level lookup,
-`%25` nature fetch, signed divides, and writes still require their compiled
+signed divides, and writes still require their compiled
 ROM/EWRAM timing models. Therefore the complete `calculate-mon-stats`
 operation is unresolved and the construction clock stays unwired.
 

@@ -1129,8 +1129,20 @@ and nested `__udivsi3(...,100)` loops. All **60/60** committed calls are exact:
 partial reduction rather than a complete stats claim. A fresh Scene-OFF anchor
 repeat remained byte-identical (`cde88e8f…`).
 
-Nested encrypted `%24` box-mon access, `%25` nature fetch,
-growth/experience, signed divides, and writes remain unresolved, so the
+**Nested direct `GetNature` timing (2026-08-10):**
+`reduceFactoryGetNatureTiming` now reduces the complete
+`0x0806D070→0x0806D088` callee from accepted personality alone: **180** fixed
+cycles for field-zero `GetMonData2→GetBoxMonData2`, **42** wrapper cycles, and
+the exact personality-dependent `__umodsi3(personality,25)` path. All **60/60**
+calls account for **59,900** source cycles (anchor/LILIANA/varied
+**29,875/14,830/15,195**). Raw spans are **57×exact + 2×(+18 async service) +
+1×(+245 complete VCount/audio IRQ)**; a fresh instruction trace classified the
+245-cycle path, and neither external class is folded into the reducer. The
+existing **278-call** nature-attempt contract is unchanged; fresh anchor hash
+remains `cde88e8f…`.
+
+Nested encrypted `%24` box-mon access, growth/experience, signed divides, and
+writes remain unresolved, so the
 complete stats operation and live clock stay unwired. No identity/duration
 table or residual fit landed; #55 stays open. See the construction receipt's
 stats section.

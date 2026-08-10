@@ -1,3 +1,18 @@
+## 1088 — [MAIN worker, 2026-08-10] **#55 `CalculateMonStats` parent timing reduced**
+
+- **State:** exact parent-only reducer landed; focused stats/clock **13/13**,
+  smoke **375/375**, typecheck, full `npm test` **880 files / 8,422 passed /
+  1 skipped**, and production build are green. #55 remains open.
+- **Did:** all **12/12** receipts reduce exactly after excluding **480** direct
+  callees: **10×1,083 + 2×1,081**. The split is the u8 `levelUpHP==0` branch:
+  two extra halfwords minus one refill = **−2**. Source tests cover u8 wrap,
+  normal HP initialize/adjust/return, and Shedinja branches.
+- **Next:** port the nested Get/SetMonData, level/growth, divide, nature, and
+  nature-modification ROM/EWRAM timing; do not wire the complete stats cost or
+  live clock before those callees and VBlank/audio arbitration are exact.
+- **Notes:** commit `639f0a81`; no identity/duration lookup, fixture mutation,
+  live wiring, canonical Battle-2, animation, or unsupported-barrier change.
+
 ## 1087 — [MAIN worker, 2026-08-10] **#55 `CalculateMonStats` direct-call boundary narrowed**
 
 - **State:** bounded evidence checkpoint committed; all **12/12** complete
