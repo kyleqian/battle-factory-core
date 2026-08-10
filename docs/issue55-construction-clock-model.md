@@ -37,22 +37,29 @@ three personality boundaries. The clean stream deliberately omits the ambient
 callback and therefore remains the old source-state-only result; it is not
 claimed to reproduce later live personalities.
 
-## Exact-live boundary
+## V2 exact-cycle result
 
-The committed v1 receipt has frame numbers and LCG edges, but no initial
-master-cycle phase at the first construction call and no source-operation CPU
-cycle budget. It consequently cannot identify one source-general live clock:
-the same `FillFactoryFrontierTrainerParty` path has attempt vectors `[13, 7,
-36]` and `[59, 12, 30]`, with different frame gaps `[10, 12]` and `[11, 10]`.
-The scheduler accepts those missing facts as an explicit callback rather than
-fitting a per-receipt table. The focused test names the remaining evidence:
+The v2 probes now bank the formerly missing facts for anchor, LILIANA, and
+legal varied trainer 222: first-`Random()` master-cycle phase, phase relative
+to the preceding VBlank, every personality half and nature-check boundary,
+`CreateMon`, EV, final-stat, Factory-post, and source-return boundaries, plus
+VBlank entry, ambient `Random()`, handler return, and actual source resume.
+All three fresh probes reproduced twice byte-for-byte.
 
-- initial mGBA master-cycle phase at the first construction `Random()`;
-- cycle budget for each source construction phase; and
-- VBlank callback cycle cost/order at each crossed period.
+That evidence **refutes** one exact callback under the current
+`FactoryConstructionOperation` contract:
 
-For fresh probe work, `tools/probe/trace-factory-construction-rng.py` has an
-opt-in `FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1` mode that records mGBA
-`globalCycles` and `frameCycles` without changing the committed v1 receipt
-schema. That is the next source/cycle evidence needed before a main-lane live
-caller can claim personality-exact timing.
+- the low/high `Random()` boundaries are normally 80/88 master cycles, but
+  `GetNatureFromPersonality` rejection costs vary with the candidate
+  personality (anchor spans 755–909 source cycles). The compiled path calls
+  data-dependent division; the candidate personality/RNG value is not exposed
+  by `FactoryConstructionOperation`.
+- exact interrupt entry-to-resume costs vary with live VBlank audio/DMA work
+  (anchor 29,475–57,638; LILIANA 31,368–54,553 master cycles). Mon inputs and
+  source function do not encode that state.
+
+The next missing mechanism is therefore an instruction/source-derived clock
+that can consume the actual candidate personality, plus deterministic VBlank
+audio/DMA workload state and IRQ-entry latency. A species/attempt table would
+only memorize these receipts and is deliberately not landed. The isolated
+scheduler remains unwired.

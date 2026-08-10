@@ -60,3 +60,23 @@ Use `liliana` and `factory-varied` as the final argument for the other two
 cases. All six runs used here were byte-identical; the hashes are recorded in
 the fixture. The known mGBA teardown SIGSEGV is accepted only after the
 wrapper validates the newly written JSON.
+
+## V2 cycle receipt (2026-08-10)
+
+Set `FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1` in the wrapped probe command. The
+three direct generated outputs are committed under
+`tests/fixtures/factory-construction-cycle-v2/`; canonical JSON serialization,
+hashes, LCG replay, phase ordering, operation boundaries, interrupt ordering,
+and the cost-model refutation are pinned by
+`tests/factoryConstructionCycleEvidenceV2.test.ts`.
+
+| case | SHA-256 (both fresh runs) | first Random phase | cycles since prior VBlank |
+| --- | --- | ---: | ---: |
+| anchor | `631bd21408ba41e03c0e119dde3d83d94dda023cee93ebc3e470e6d94741cc2a` | 91,673 | 50,560 |
+| LILIANA | `ae1282b74f74de6a85b8772adfbcd83028fad09f8aa3e3ecd518aafeab17b443` | 257,104 | 215,990 |
+| legal varied trainer 222 | `3e10197a34f4ea7a08a23bead04ae5b6113c653304722167095612a9b0626987` | 248,986 | 207,872 |
+
+The v2 result is a precise refutation of the current operation-only cost
+callback, not a fitted production schedule. Candidate-personality-dependent
+division cost and live VBlank audio/DMA state are the two missing mechanisms;
+neither may be selected by trainer, set, battle, tick, or receipt cursor.

@@ -8,10 +8,11 @@
  * importing an oracle receipt or assigning cursors to a trainer, battle, or
  * absolute presentation tick.
  *
- * The cycle-cost callback is intentional.  The committed issue-55 v1 packet
- * records frames and LCG edges, but not the initial master-cycle phase or the
- * source-operation CPU-cycle budget.  A caller that has those source facts
- * can supply them here; until then the clean stream remains the only
+ * The cycle-cost callback is intentional.  The issue-55 v2 packet records
+ * exact source boundaries and interrupt timing, but refutes a callback keyed
+ * only by the fields below: the compiled nature check has candidate-dependent
+ * cost, and VBlank service has live audio/DMA-dependent cost.  Until those
+ * states have a source-derived clock model, the clean stream remains the only
  * source-state-only production contract.
  *
  * Source references:
@@ -35,9 +36,8 @@ export const GBA_VBLANK_CYCLES = 280_896;
  * per-trace cursor schedule.
  */
 export const REQUIRED_FACTORY_CONSTRUCTION_CLOCK_EVIDENCE = Object.freeze([
-  "initial master-cycle phase at the first construction Random() call",
-  "source-operation cycle budget for each CreateMonWithEVSpreadNatureOTID phase",
-  "VBlank/ambient callback cycle cost and ordering at a crossed period",
+  "candidate-personality-dependent GetNatureFromPersonality cycle accounting",
+  "deterministic VBlank audio/DMA workload state and interrupt-entry latency",
 ] as const);
 
 export type FactoryConstructionSourceFunction =

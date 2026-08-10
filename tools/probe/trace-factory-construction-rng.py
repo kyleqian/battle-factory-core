@@ -62,6 +62,16 @@ BOOTSTRAP_OFF = ORACLE_DIR / "bootstrap" / "factory-battle-scene-off.json"
 RANDOM_ENTRY_PC = 0x0806F5CE  # Random() entry, mGBA's pipelined Thumb PC
 SELECTABLE_ENTRY_PC = 0x0819B486  # CreateFrontierFactorySelectableMons + 2
 FILL_FACTORY_ENTRY_PC = 0x081635D6  # FillFactoryFrontierTrainerParty + 2
+CREATE_EV_ENTRY_PC = 0x08068636  # CreateMonWithEVSpreadNatureOTID + 2
+GET_NATURE_ENTRY_PC = 0x0806D08A  # GetNatureFromPersonality + 2
+CREATE_MON_ENTRY_PC = 0x08067B4E  # CreateMon + 2
+CREATE_MON_RESUME_PC = 0x0806869E  # instruction after CreateMon BL + pipeline
+CALCULATE_STATS_ENTRY_PC = 0x08068D0E  # CalculateMonStats + 2
+CALCULATE_STATS_RESUME_PC = 0x080686EC  # instruction after CalculateMonStats BL + pipeline
+VBLANK_ENTRY_PC = 0x0800073A  # VBlankIntr + 2
+VBLANK_EXIT_PC = 0x080007DC  # VBlankIntr's terminal bx + 2
+SELECTABLE_POST_END_PC = 0x0819B614  # after held-item SetMonData, before loop test
+FILL_FACTORY_POST_END_PC = 0x0816376E  # after held-item SetMonData, before loop test
 SRANDCOUNT_ADDR = 0x020249C0  # src/random.c:5, static EWRAM symbol
 SAVE_RENTALS_OFFSET = 0xE70  # include/global.h: SaveBlock2.frontier.rentalMons
 RENTAL_MON_STRIDE = 12
@@ -81,6 +91,23 @@ ANCHOR_BOOTSTRAP_SHA256 = "9c89c74113f29e7d4595571c3aceb728417c4fe441b644ec0022f
 # follow-up without changing that receipt's byte contract:
 #   FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1 ... trace-factory-construction-rng.py
 CYCLE_EVIDENCE = os.environ.get("FACTORY_CONSTRUCTION_CYCLE_EVIDENCE") == "1"
+
+
+def cycle_snapshot(oracle: EmeraldOracle, frame: int, pc: int, kind: str, **fields: Any) -> dict[str, Any]:
+    global_cycles = int(oracle.core._native.timing.globalCycles)
+    frame_cycles = int(oracle.core.frame_cycles)
+    cpu_cycles = int(oracle.core.cpu._native.cycles)
+    master_cycles = global_cycles + cpu_cycles
+    return {
+        "kind": kind,
+        "frame": frame,
+        "globalCycles": global_cycles,
+        "cpuCycles": cpu_cycles,
+        "masterCycles": master_cycles,
+        "cyclePhase": master_cycles % frame_cycles,
+        "pc": f"0x{pc:08x}",
+        **fields,
+    }
 
 
 def symbols(elf: Path) -> list[tuple[int, str]]:
@@ -138,6 +165,95 @@ def advance_one_instrumented_frame(
     steps = 0
     while True:
         pc = oracle.core.cpu.pc
+        if CYCLE_EVIDENCE:
+            cycle_events = epoch.setdefault("cycleEvents", [])
+            awaiting_resume = epoch.get("awaitingVBlankResume")
+            if awaiting_resume is not None and pc >= 0x08000800 and epoch.get("return") is None:
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "vblank-resume",
+                    interruptIndex=awaiting_resume,
+                    resumeFunction=symbol_at(pc - 2),
+                ))
+                epoch.pop("awaitingVBlankResume", None)
+            if pc == target_entry and epoch.get("entry") is None:
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "source-function-entry",
+                    sourceFunction=symbol_at(pc - 2),
+                ))
+            if pc == CREATE_EV_ENTRY_PC:
+                mon_index = sum(
+                    event["kind"] == "construction-entry"
+                    for event in cycle_events
+                )
+                epoch["currentMonIndex"] = mon_index
+                epoch["currentAttempt"] = 0
+                epoch["constructionReturnPc"] = oracle.core.cpu.lr
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "construction-entry",
+                    monIndex=mon_index,
+                    returnPc=f"0x{oracle.core.cpu.lr:08x}",
+                ))
+            elif pc == GET_NATURE_ENTRY_PC and epoch.get("entry") is not None:
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "personality-attempt-check",
+                    monIndex=epoch.get("currentMonIndex"),
+                    attempt=epoch.get("currentAttempt"),
+                ))
+                epoch["currentAttempt"] = int(epoch.get("currentAttempt", 0)) + 1
+            elif pc == CREATE_MON_ENTRY_PC and epoch.get("entry") is not None:
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "create-mon-entry",
+                    monIndex=epoch.get("currentMonIndex"),
+                ))
+            elif pc == CREATE_MON_RESUME_PC and epoch.get("entry") is not None:
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "create-mon-return",
+                    monIndex=epoch.get("currentMonIndex"),
+                ))
+            elif (
+                pc == CALCULATE_STATS_ENTRY_PC
+                and epoch.get("entry") is not None
+                and symbol_at(oracle.core.cpu.lr).startswith("CreateMonWithEVSpreadNatureOTID")
+            ):
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "calculate-mon-stats-entry",
+                    monIndex=epoch.get("currentMonIndex"),
+                ))
+            elif pc == CALCULATE_STATS_RESUME_PC and epoch.get("entry") is not None:
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "calculate-mon-stats-return",
+                    monIndex=epoch.get("currentMonIndex"),
+                ))
+            elif pc in {SELECTABLE_POST_END_PC, FILL_FACTORY_POST_END_PC} and epoch.get("entry") is not None:
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "factory-post-mon-end",
+                    monIndex=epoch.get("currentMonIndex"),
+                ))
+            elif pc == VBLANK_ENTRY_PC and epoch.get("return") is None:
+                interrupt_index = int(epoch.get("interruptCount", 0))
+                epoch["interruptCount"] = interrupt_index + 1
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "vblank-entry",
+                    interruptIndex=interrupt_index,
+                    interruptedMonIndex=epoch.get("currentMonIndex"),
+                ))
+            elif pc == VBLANK_EXIT_PC and epoch.get("return") is None:
+                interrupt_index = int(epoch.get("interruptCount", 1)) - 1
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "vblank-return",
+                    interruptIndex=interrupt_index,
+                    interruptedMonIndex=epoch.get("currentMonIndex"),
+                ))
+                epoch["awaitingVBlankResume"] = interrupt_index
+            construction_return_pc = epoch.get("constructionReturnPc")
+            if construction_return_pc is not None:
+                aligned_return = int(construction_return_pc) & ~1
+                if pc in {aligned_return, aligned_return + 2}:
+                    cycle_events.append(cycle_snapshot(
+                        oracle, frame, pc, "construction-return",
+                        monIndex=epoch.get("currentMonIndex"),
+                    ))
+                    epoch.pop("constructionReturnPc", None)
         if pc == RANDOM_ENTRY_PC:
             pre = read_u32(oracle, oracle.symbols["gRngValue"])
             lr = oracle.core.cpu.lr
@@ -154,7 +270,20 @@ def advance_one_instrumented_frame(
             # by the follow-up TypeScript construction clock.  Keep it opt-in
             # so the committed v1 receipt remains byte/schema-compatible.
             if CYCLE_EVIDENCE:
-                call["globalCycles"] = int(oracle.core._native.timing.globalCycles)
+                timing = cycle_snapshot(oracle, frame, pc, "random")
+                for field in ("globalCycles", "cpuCycles", "masterCycles", "cyclePhase"):
+                    call[field] = timing[field]
+                if epoch.get("entry") is not None and epoch.get("return") is None:
+                    kind = "ambient-random" if symbol_at(lr).startswith("VBlankIntr") else "personality-random"
+                    cycle_events.append(cycle_snapshot(
+                        oracle, frame, pc, kind,
+                        caller=symbol_at(lr),
+                        monIndex=None if kind == "ambient-random" else epoch.get("currentMonIndex"),
+                        attempt=None if kind == "ambient-random" else epoch.get("currentAttempt"),
+                        half=None if kind == "ambient-random" else (
+                            "low" if symbol_at(lr).endswith("+0x35") else "high"
+                        ),
+                    ))
             calls.append(call)
         if pc == target_entry and epoch.get("entry") is None:
             entry = {
@@ -164,8 +293,12 @@ def advance_one_instrumented_frame(
                 "callStartIndex": len(calls),
             }
             if CYCLE_EVIDENCE:
-                entry["globalCycles"] = int(oracle.core._native.timing.globalCycles)
+                timing = cycle_snapshot(oracle, frame, pc, "entry")
+                entry["globalCycles"] = timing["globalCycles"]
+                entry["cpuCycles"] = timing["cpuCycles"]
+                entry["masterCycles"] = timing["masterCycles"]
                 entry["frameCycles"] = int(oracle.core.frame_cycles)
+                entry["cyclePhase"] = timing["cyclePhase"]
             epoch["entry"] = entry
         pending = epoch.get("entry")
         if pending is not None and epoch.get("return") is None:
@@ -179,7 +312,15 @@ def advance_one_instrumented_frame(
                     "callEndIndex": len(calls),
                 }
                 if CYCLE_EVIDENCE:
-                    returned["globalCycles"] = int(oracle.core._native.timing.globalCycles)
+                    timing = cycle_snapshot(oracle, frame, pc, "return")
+                    returned["globalCycles"] = timing["globalCycles"]
+                    returned["cpuCycles"] = timing["cpuCycles"]
+                    returned["masterCycles"] = timing["masterCycles"]
+                    returned["cyclePhase"] = timing["cyclePhase"]
+                    cycle_events.append(cycle_snapshot(
+                        oracle, frame, pc, "source-function-return",
+                        sourceFunction=symbol_at(target_entry - 2),
+                    ))
                 epoch["return"] = returned
         if oracle.core.frame_counter != start_counter:
             break
@@ -342,7 +483,28 @@ def classify_and_summarize(
         "gapless": True,
     }
     if fast_rows is not None:
-        result["fastFrameEvidence"] = fast_rows
+        # The location-only fast pass is useful while developing a new case,
+        # but cycle-mode output is the compact reproducible receipt and does
+        # not duplicate hundreds of pre-epoch route frames.
+        if not CYCLE_EVIDENCE:
+            result["fastFrameEvidence"] = fast_rows
+    if CYCLE_EVIDENCE:
+        cycle_events = epoch.get("cycleEvents", [])
+        result["cycleEvidence"] = {
+            "frameCycles": int(oracle.core.frame_cycles),
+            "initialMasterCyclePhase": source_calls[0]["cyclePhase"],
+            "sourceEntryMasterCyclePhase": entry["cyclePhase"],
+            "cyclesSincePriorVBlank": (
+                source_calls[0]["masterCycles"]
+                - max(
+                    event["masterCycles"]
+                    for event in cycle_events
+                    if event["kind"] == "vblank-entry"
+                    and event["masterCycles"] <= source_calls[0]["masterCycles"]
+                )
+            ),
+            "events": cycle_events,
+        }
     return result
 
 

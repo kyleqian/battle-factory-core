@@ -170,11 +170,10 @@ describe("Factory construction source-operation clock", () => {
     }
   });
 
-  it("does not pretend the v1 receipts identify a live source-general clock", () => {
+  it("does not pretend the v2 receipts identify a live source-general callback", () => {
     expect(REQUIRED_FACTORY_CONSTRUCTION_CLOCK_EVIDENCE).toEqual([
-      "initial master-cycle phase at the first construction Random() call",
-      "source-operation cycle budget for each CreateMonWithEVSpreadNatureOTID phase",
-      "VBlank/ambient callback cycle cost and ordering at a crossed period",
+      "candidate-personality-dependent GetNatureFromPersonality cycle accounting",
+      "deterministic VBlank audio/DMA workload state and interrupt-entry latency",
     ]);
     for (const entry of receipt.cases) {
       expect(entry.epoch).not.toHaveProperty("cyclePhase");
