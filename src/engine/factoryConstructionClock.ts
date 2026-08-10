@@ -44,6 +44,7 @@ export type FactoryConstructionSourceFunction =
   | "FillFactoryFrontierTrainerParty";
 
 export type FactoryConstructionOperationKind =
+  | "construction-entry"
   | "personality-random"
   | "personality-attempt"
   | "create-mon"
@@ -99,6 +100,22 @@ export interface FactoryNatureAttemptTiming {
   cycles: number;
 }
 
+export interface FactoryConstructionEntryTiming {
+  sourceFunction: FactoryConstructionSourceFunction;
+  /** Compiled BL in the selected Factory source-function sibling. */
+  callerCallPc: number;
+  /** Entry of `CreateMonWithEVSpreadNatureOTID`. */
+  entryPc: number;
+  /** Entry of the first `Random` call used by `Random32`. */
+  firstRandomPc: number;
+  /** Sequential Thumb halfwords executed, including both halves of BL. */
+  sequentialThumbHalfwords: number;
+  /** Taken-control-flow pipeline refills after the measured entry boundary. */
+  pipelineRefills: number;
+  /** Source-owned master cycles between the two instruction boundaries. */
+  cycles: number;
+}
+
 export interface FactorySourceReturnTiming {
   sourceFunction: FactoryConstructionSourceFunction;
   /** First executed Thumb instruction after the final mon's held-item write. */
@@ -116,6 +133,62 @@ function rotateRight32(value: number, amount: number): number {
   const shift = amount & 31;
   if (shift === 0) return value >>> 0;
   return ((value >>> shift) | (value << (32 - shift))) >>> 0;
+}
+
+/**
+ * Reduce the common construction-entry path through the first Random call.
+ *
+ * The two applicable Factory callers prepare different source arguments and
+ * call from different sites (`battle_factory_screen.c:1765`, ROM 0x0819b5a4;
+ * `battle_tower.c:1870`, ROM 0x08163706), but both BL instructions enter the
+ * one `CreateMonWithEVSpreadNatureOTID` body (`pokemon.c:2562`, ROM
+ * 0x08068634). From that entry, the retail Thumb path is unconditional:
+ *
+ * - save five low and three high registers: push, three movs, push (5);
+ * - allocate locals, preserve mon, and load fixedIV/evSpread: 4 halfwords;
+ * - normalize/preserve species, level, nature, fixedIV, and evSpread: 14;
+ * - zero statCount: 1;
+ * - execute the two-halfword BL to Random at ROM 0x0806f5cc: 2.
+ *
+ * Thus 26 sequential halfwords cost 52 master cycles at retail WS0 timing,
+ * and the taken BL adds one six-cycle pipeline refill: 58 total. Argument
+ * values cannot select a branch before this boundary. The source-function
+ * input records which audited compiled caller reached the shared body; it
+ * does not select a fitted duration.
+ */
+export function reduceFactoryConstructionEntryTiming(
+  sourceFunction: FactoryConstructionSourceFunction,
+): FactoryConstructionEntryTiming {
+  let sequentialThumbHalfwords = 0;
+  let pipelineRefills = 0;
+  const instruction = (count = 1): void => {
+    sequentialThumbHalfwords += count;
+  };
+  const call = (): void => {
+    instruction(2);
+    pipelineRefills += 1;
+  };
+
+  instruction(5); // push, mov r7/sl, mov r6/r9, mov r5/r8, push
+  instruction(4); // sub sp, preserve mon, load fixedIV, load evSpread
+  instruction(14); // normalize and preserve the five scalar arguments
+  instruction(); // statCount = 0
+  call(); // BL Random32's first Random
+
+  const callerCallPc = sourceFunction === "CreateFrontierFactorySelectableMons"
+    ? 0x0819_b5a4
+    : 0x0816_3706;
+  const cycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+    + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES;
+  return Object.freeze({
+    sourceFunction,
+    callerCallPc,
+    entryPc: 0x0806_8634,
+    firstRandomPc: 0x0806_f5cc,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    cycles,
+  });
 }
 
 /**
@@ -821,6 +894,7 @@ export function scheduleFactoryConstruction(
     let attempt = 0;
     let personality = 0;
     let lastConstructionEventIndex = -1;
+    clock.run(sourceOperation(mon, input.sourceFunction, "construction-entry", monIndex));
     do {
       const low = clock.constructionRandom(input.sourceFunction, mon, monIndex, attempt, "low");
       const high = clock.constructionRandom(input.sourceFunction, mon, monIndex, attempt, "high");

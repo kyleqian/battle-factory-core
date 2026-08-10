@@ -99,7 +99,7 @@ are evidence boundaries, not adopted reducer constants.
 
 | boundary family | spans | net source-cycle range | disposition |
 | --- | ---: | ---: | --- |
-| construction entry → first `Random` | 12 | 58 | unresolved operation entry |
+| construction entry → first `Random` | 12 | 58 | resolved below |
 | `CreateMon` entry → return | 12 | 1,238,617–2,361,713 | unresolved |
 | `CreateMon` return → `CalculateMonStats` entry | 12 | 26,672–41,256 | unresolved EV-spread |
 | `CalculateMonStats` entry → return | 12 | 140,999–154,160 | unresolved |
@@ -125,6 +125,41 @@ respectively 14 sequential Thumb instructions plus two pipeline refills, and
 13 sequential instructions plus one refill. All **3/3** applicable v2 spans
 match directly. This reducer selects only the compiled source function; it
 does not inspect trainer, set, mon, frame, cursor, or receipt identity.
+
+CreateMon, EV-spread, CalculateMonStats, factory-post-mon, and the live
+VBlank/audio/DMA workload remain unresolved, so the clock remains unwired.
+
+### Construction-entry component (2026-08-10)
+
+`reduceFactoryConstructionEntryTiming` covers the complete
+`construction-entry` operation from the first instruction of
+`CreateMonWithEVSpreadNatureOTID` through entry to its first `Random` call.
+The applicable source callers prepare different arguments at distinct Thumb
+call sites, but both have converged on the same unconditional callee path by
+the measured boundary:
+
+| source function | compiled BL / callee entry / first `Random` | v2 spans | measured source cycles | VBlank pause / residual service |
+| --- | --- | ---: | ---: | ---: |
+| `CreateFrontierFactorySelectableMons` | `0x0819B5A4` / `0x08068634` / `0x0806F5CC` | anchor 6 | 58 each | 0 / 0 |
+| `FillFactoryFrontierTrainerParty` | `0x08163706` / `0x08068634` / `0x0806F5CC` | LILIANA 3 + varied 3 | 58 each | 0 / 0 |
+
+The source sites are `battle_factory_screen.c:1765`, `battle_tower.c:1870`,
+and `pokemon.c:2562-2570`. The instruction decomposition is: five halfwords
+to save five low and three high registers; four to allocate locals, preserve
+the mon pointer, and load the two stack arguments; fourteen to normalize and
+preserve species, level, nature, fixed IV, and EV spread; one to zero
+`statCount`; and the two-halfword `BL Random`. At retail WS0 timing this is
+**26 × 2 = 52** sequential master cycles plus one **6**-cycle taken-call
+pipeline refill, for **58** total. The receipt additionally pins each entry's
+saved LR to the relevant compiled caller (`BL + 5`, including the Thumb bit),
+so the equal total cannot mask different entry paths.
+
+All **12/12** applicable spans decompose directly after subtracting fully
+contained VBlank entry-to-resume pauses: case counts are **6/3/3**, every
+contained-pause sum is **0**, and every residual asynchronous-service count is
+**0**. The reducer accepts only the already-exposed source function, solely to
+retain the audited caller provenance; neither argument values nor runtime
+identity can branch before the first Random boundary.
 
 CreateMon, EV-spread, CalculateMonStats, factory-post-mon, and the live
 VBlank/audio/DMA workload remain unresolved, so the clock remains unwired.

@@ -1058,6 +1058,18 @@ spans decompose directly with zero contained VBlank pause and zero residual
 hardware-service cycles. Source cites and instruction accounting are in the
 v2 receipt; no live wiring or cursor adoption changed.
 
+**Construction-entry timing (2026-08-10):**
+`reduceFactoryConstructionEntryTiming` audits both compiled Factory call
+sites (`0x0819B5A4` selectable, `0x08163706` trainer-party) and reduces their
+shared `CreateMonWithEVSpreadNatureOTID` entry-to-first-`Random` path
+(`0x08068634→0x0806F5CC`). The unconditional prologue is **26** sequential
+Thumb halfwords (**52** cycles) plus one **6**-cycle BL pipeline refill:
+**58** source cycles. All **12/12** v2 spans match directly (anchor/LILIANA/
+varied **6/3/3**), with zero fully contained VBlank pause and zero residual
+hardware-service cycles. The construction clock now exposes this structural
+operation, but remains unwired while the larger costs and async workload below
+are unresolved.
+
 **Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
 threading now makes the first post-cycle pixel boundary observe this debt.
 The WIN YES fixture's real first callback cursor/outcomes are

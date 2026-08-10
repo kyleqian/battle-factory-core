@@ -4,6 +4,7 @@ import {
   factoryMonConstructionInputFromSet,
   GBA_VBLANK_CYCLES,
   REQUIRED_FACTORY_CONSTRUCTION_CLOCK_EVIDENCE,
+  reduceFactoryConstructionEntryTiming,
   reduceFactoryNatureAttemptTiming,
   reduceFactorySourceReturnTiming,
   scheduleFactoryConstruction,
@@ -243,6 +244,47 @@ describe("Factory construction source-operation clock", () => {
       expect(entry.sequence.some((event) => event.some((value) => value === "globalCycles"))).toBe(false);
     }
     expect(GBA_VBLANK_CYCLES).toBe(280_896);
+  });
+
+  it("reduces both Factory construction-entry callers to the shared 58-cycle prologue", () => {
+    expect(reduceFactoryConstructionEntryTiming("CreateFrontierFactorySelectableMons")).toEqual({
+      sourceFunction: "CreateFrontierFactorySelectableMons",
+      callerCallPc: 0x0819_b5a4,
+      entryPc: 0x0806_8634,
+      firstRandomPc: 0x0806_f5cc,
+      sequentialThumbHalfwords: 26,
+      pipelineRefills: 1,
+      cycles: 58,
+    });
+    expect(reduceFactoryConstructionEntryTiming("FillFactoryFrontierTrainerParty")).toEqual({
+      sourceFunction: "FillFactoryFrontierTrainerParty",
+      callerCallPc: 0x0816_3706,
+      entryPc: 0x0806_8634,
+      firstRandomPc: 0x0806_f5cc,
+      sequentialThumbHalfwords: 26,
+      pipelineRefills: 1,
+      cycles: 58,
+    });
+
+    const sourceFunction = "FillFactoryFrontierTrainerParty" as const;
+    const first = randomU32(0x1234_5678);
+    const operations: FactoryConstructionOperation[] = [];
+    const scheduled = scheduleFactoryConstructionCleanStream({
+      sourceFunction,
+      mons: [mon(natureFromPersonality(first.value), sourceFunction)],
+      clock: {
+        start: { frame: 0, cycle: 0, rngValue: 0x1234_5678 },
+        cycleCost: (operation) => {
+          operations.push(operation);
+          return operation.kind === "construction-entry"
+            ? reduceFactoryConstructionEntryTiming(operation.sourceFunction).cycles
+            : 0;
+        },
+      },
+    });
+    expect(operations.filter((operation) => operation.kind === "construction-entry"))
+      .toMatchObject([{ sourceFunction, monIndex: 0, attempt: null, half: null }]);
+    expect(scheduled.end.cycle).toBe(58);
   });
 
   it("reduces both compiled source-return siblings without mon or set identity", () => {

@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1082 — [MAIN worker, 2026-08-10] **#55 construction-entry timing landed across all 12 v2 spans**
+
+- **State:** source-general reducer and receipt pins are implemented; focused
+  construction **13/13** (including red verification), smoke **375/375**,
+  typecheck, full `npm test` **877 files / 8,410 passed / 1 skipped**,
+  production build, and diff check are green.
+- **Did:** reduced the shared entry-to-first-`Random` path to **58** source
+  cycles: **26** sequential Thumb halfwords / **52** cycles plus one **6**-cycle
+  BL refill. All anchor/LILIANA/varied spans (**6/3/3**) have **0** contained
+  VBlank pause and **0** residual service; both compiled caller siblings are
+  LR-pinned.
+- **Next:** continue #55 with CreateMon, EV-spread, CalculateMonStats,
+  factory-post/outer-loop timing, or deterministic VBlank/audio/DMA workload;
+  keep the construction clock unwired until every remaining piece is exact.
+- **Notes:** clock remains unwired; no identity/tick/cursor/fixture selection,
+  canonical Battle-2 march, evidence regeneration, animation edit, or new
+  unsupported barrier.
+
 ## 1081 — [MAIN worker, 2026-08-10] **#55 compiled source-return timing landed across all v2 cases**
 
 - **State:** `source-return` is resolved source-generally: committed v2
@@ -39,18 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** parameterization schema v5 and Gate-6 manifest v2 regenerate
   byte-for-byte. No production controller, animation, canonical Battle-2
   replay, unsupported barrier, or hook promotion changed.
-
-## 1079 — [MAIN worker, 2026-08-10] **#55 candidate-aware nature-check timing landed; async construction workload remains open**
-
-- **State:** candidate timing commits `79448547`/`a57d39b9`; focused construction **9/9**,
-  smoke **375/375**, typecheck, full `npm test` **877 files / 8,404 passed / 1
-  skipped**, production build, diff check, and fresh anchor v2 repeat are green.
-- **Did:** threaded Random u16/candidate personality+nature+acceptance through
-  the operation key and added a source/Thumb `__umodsi3` path reducer. All
-  **278** committed v2 nature boundaries decompose exactly: **267** direct,
-  **11** reducer +18 asynchronous service cycles (`5/2/4`). Clean-stream RNG
-  outcome remains unchanged; fresh anchor hash `631bd214…` matches.
-- **Next:** model remaining CreateMon/EV/stat/post/return source budgets and
-  deterministic VBlank/audio/DMA event workload before any live wiring.
-- **Notes:** no trainer/set/tick/cursor/fixture schedule, live-controller
-  wiring, swap-tail extension, canonical Battle-2 march, or animation edit.

@@ -1,3 +1,18 @@
+## 1079 — [MAIN worker, 2026-08-10] **#55 candidate-aware nature-check timing landed; async construction workload remains open**
+
+- **State:** candidate timing commits `79448547`/`a57d39b9`; focused construction **9/9**,
+  smoke **375/375**, typecheck, full `npm test` **877 files / 8,404 passed / 1
+  skipped**, production build, diff check, and fresh anchor v2 repeat are green.
+- **Did:** threaded Random u16/candidate personality+nature+acceptance through
+  the operation key and added a source/Thumb `__umodsi3` path reducer. All
+  **278** committed v2 nature boundaries decompose exactly: **267** direct,
+  **11** reducer +18 asynchronous service cycles (`5/2/4`). Clean-stream RNG
+  outcome remains unchanged; fresh anchor hash `631bd214…` matches.
+- **Next:** model remaining CreateMon/EV/stat/post/return source budgets and
+  deterministic VBlank/audio/DMA event workload before any live wiring.
+- **Notes:** no trainer/set/tick/cursor/fixture schedule, live-controller
+  wiring, swap-tail extension, canonical Battle-2 march, or animation edit.
+
 ## 1078 — [MAIN worker, 2026-08-10] **Generic swap-screen SpriteCB_Pokeball state landed; exact tail remains bounded by #55 construction-clock RNG**
 
 - **State:** all finish gates are green: smoke **375/375**, ball/swap focus

@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  reduceFactoryConstructionEntryTiming,
   reduceFactoryNatureAttemptTiming,
   reduceFactorySourceReturnTiming,
 } from "../src/engine/factoryConstructionClock.ts";
@@ -17,6 +18,7 @@ type CycleEvent = {
   attempt?: number | null;
   half?: "low" | "high" | null;
   interruptIndex?: number;
+  returnPc?: string;
 };
 
 type SequenceEvent = {
@@ -217,6 +219,70 @@ describe("Factory construction v2 source/cycle receipt", () => {
     expect(acceptedChecks).toBe(12);
     expect(rejectedChecks).toBe(266);
     expect(asynchronousStallsByCase).toEqual([5, 2, 4]);
+  });
+
+  it("replays all twelve construction-entry boundaries through the shared compiled prologue", () => {
+    const measuredByCase: number[][] = [];
+    const vblankPausesByCase: number[][] = [];
+    const externalCyclesByCase: number[][] = [];
+
+    for (const { value } of probes) {
+      const events = value.cycleEvidence.events;
+      const timing = reduceFactoryConstructionEntryTiming(value.sourceFunction);
+      const measured: number[] = [];
+      const vblankPauses: number[] = [];
+      const externalCycles: number[] = [];
+
+      for (const mon of value.monBoundaries) {
+        const entry = events.find((event) => (
+          event.kind === "construction-entry" && event.monIndex === mon.monIndex
+        ))!;
+        const firstRandom = events.find((event) => (
+          event.kind === "personality-random"
+          && event.monIndex === mon.monIndex
+          && event.attempt === 0
+          && event.half === "low"
+        ))!;
+        const pauses = interruptPauses(events).filter(([pauseEntry, resume]) => (
+          entry.masterCycles <= pauseEntry && resume <= firstRandom.masterCycles
+        ));
+        const source = sourceCycles(entry, firstRandom, pauses);
+
+        // mGBA's exposed pipelined PC is two bytes beyond the instruction at
+        // each boundary. Both Factory callers have already converged on the
+        // same CreateMonWithEVSpreadNatureOTID entry path here.
+        expect(entry.pc).toBe(`0x${(timing.entryPc + 2).toString(16).padStart(8, "0")}`);
+        expect(entry.returnPc).toBe(
+          `0x${(timing.callerCallPc + 5).toString(16).padStart(8, "0")}`,
+        );
+        expect(firstRandom.pc).toBe(`0x${(timing.firstRandomPc + 2).toString(16).padStart(8, "0")}`);
+        measured.push(source);
+        vblankPauses.push(pauses.reduce((sum, [pauseEntry, resume]) => (
+          sum + resume - pauseEntry
+        ), 0));
+        externalCycles.push(source - timing.cycles);
+      }
+
+      measuredByCase.push(measured);
+      vblankPausesByCase.push(vblankPauses);
+      externalCyclesByCase.push(externalCycles);
+    }
+
+    expect(measuredByCase).toEqual([
+      [58, 58, 58, 58, 58, 58],
+      [58, 58, 58],
+      [58, 58, 58],
+    ]);
+    expect(vblankPausesByCase).toEqual([
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0],
+    ]);
+    expect(externalCyclesByCase).toEqual([
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0],
+    ]);
   });
 
   it("replays every final source-return boundary from its compiled loop tail", () => {
