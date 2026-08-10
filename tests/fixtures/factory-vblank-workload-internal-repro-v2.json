@@ -1,0 +1,25 @@
+{
+  "schema": "factory-vblank-workload-internal-repro/v1",
+  "oracleProfile": "battle-scene-off",
+  "method": "Two independently fresh mGBA probe invocations per case through tools/run-mgba-probe.py; SHA-256 is over each compact JSON packet.",
+  "cases": [
+    {
+      "case": "anchor",
+      "firstFreshSha256": "2df81b1d722f61d6ba2c82b2741d88cf393f2e2fb325376284bd06dfbde538c0",
+      "secondFreshSha256": "2df81b1d722f61d6ba2c82b2741d88cf393f2e2fb325376284bd06dfbde538c0",
+      "byteIdentical": true
+    },
+    {
+      "case": "liliana",
+      "firstFreshSha256": "40033aac6cd07cf6a5a7dc467feba945a872c8216828da57ecf28af4704f7b3e",
+      "secondFreshSha256": "40033aac6cd07cf6a5a7dc467feba945a872c8216828da57ecf28af4704f7b3e",
+      "byteIdentical": true
+    },
+    {
+      "case": "factory-varied",
+      "firstFreshSha256": "dd6633f25c2160843c414d66562086e285ba5dd8f469cb4bc88fa006c12c8326",
+      "secondFreshSha256": "dd6633f25c2160843c414d66562086e285ba5dd8f469cb4bc88fa006c12c8326",
+      "byteIdentical": true
+    }
+  ]
+}

@@ -98,6 +98,17 @@ CYCLE_EVIDENCE = os.environ.get("FACTORY_CONSTRUCTION_CYCLE_EVIDENCE") == "1"
 #   FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1 \
 #   FACTORY_VBLANK_WORKLOAD_EVIDENCE=1 ... trace-factory-construction-rng.py
 VBLANK_WORKLOAD_EVIDENCE = os.environ.get("FACTORY_VBLANK_WORKLOAD_EVIDENCE") == "1"
+# Version two is deliberately a sibling observation packet.  The v1 workload
+# receipt has already been committed as a stable outer-VBlank contract, so the
+# m4a-only instruction boundaries and its extra state are opt-in rather than
+# appended to that contract.
+#
+#   FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1 \
+#   FACTORY_VBLANK_WORKLOAD_EVIDENCE=1 \
+#   FACTORY_VBLANK_WORKLOAD_INTERNAL_EVIDENCE=1 ...
+VBLANK_WORKLOAD_INTERNAL_EVIDENCE = (
+    os.environ.get("FACTORY_VBLANK_WORKLOAD_INTERNAL_EVIDENCE") == "1"
+)
 
 # VBlankIntr's direct call/return sites in the pinned ELF.  These are source
 # routines in main.c, not inferred from the construction fixture.  Capturing
@@ -117,6 +128,26 @@ VBLANK_STAGE_PCS = {
     0x080007BC: "ambient-random-call",
     0x080007C0: "ambient-random-return/update-wireless-call",
     0x080007C4: "update-wireless-return",
+}
+
+# m4aSoundMain's compiled source-owned boundaries.  The first seven locations
+# are ROM Thumb PCs (mGBA reports the executing instruction + 2); the latter
+# three are the same pinned SoundMainRAM instructions after m4aSoundInit copies
+# the routine to SoundMainRAM_Buffer in IWRAM.  They intentionally name only
+# source routines or loop heads in m4a.c/m4a_1.s, not fixture-specific paths.
+M4A_SOUND_MAIN_CALL_PC = 0x0800079A
+M4A_SOUND_MAIN_RETURN_PC = 0x0800079E
+M4A_INTERNAL_STAGE_PCS = {
+    0x082DF05E: "sound-main-entry",
+    0x082DFA5E: "mplay-main-entry",
+    0x082DFAAE: "mplay-track-command-pass",
+    0x082DFC02: "mplay-track-volume-pitch-pass",
+    0x082DF0A0: "sound-main-after-mplay",
+    0x082E0CAA: "cgb-sound-entry",
+    0x082DF0A6: "sound-main-after-cgb",
+    0x03001AAA: "sound-main-ram-entry",
+    0x03001B42: "sound-main-ram-channel-pass",
+    0x03001E4C: "sound-main-ram-epilogue",
 }
 
 # These are the non-VBlank source ISR entries.  If one ran between VBlank's
@@ -178,6 +209,44 @@ SOUND_INFO_CHANNELS = 0x50
 SOUND_CHANNEL_SIZE = 0x40
 MUSIC_PLAYER_INFO_SIZE = 0x40
 MUSIC_PLAYER_TRACK_SIZE = 0x50
+MUSIC_PLAYER_INFO_TRACKS = 0x2C
+MUSIC_PLAYER_INFO_TONE = 0x30
+MUSIC_PLAYER_INFO_NEXT_MAIN = 0x38
+MUSIC_PLAYER_INFO_NEXT_PLAYER = 0x3C
+MUSIC_PLAYER_INFO_TEMPO_D = 0x1C
+MUSIC_PLAYER_INFO_TEMPO_U = 0x1E
+MUSIC_PLAYER_INFO_TEMPO_I = 0x20
+MUSIC_PLAYER_INFO_TEMPO_C = 0x22
+MUSIC_PLAYER_INFO_FADE_OI = 0x24
+MUSIC_PLAYER_INFO_FADE_OC = 0x26
+MUSIC_PLAYER_INFO_FADE_OV = 0x28
+
+MUSIC_TRACK_TONE = 0x24
+MUSIC_TRACK_TIMER = 0x3A
+MUSIC_TRACK_COMMAND = 0x40
+MUSIC_TRACK_PATTERN_STACK = 0x44
+MUSIC_TRACK_CHANNELS = 0x20
+
+WAVE_DATA_TYPE = 0x00
+WAVE_DATA_STATUS = 0x02
+WAVE_DATA_FREQUENCY = 0x04
+WAVE_DATA_LOOP_START = 0x08
+WAVE_DATA_SIZE = 0x0C
+WAVE_DATA_BYTES = 0x10
+
+SOUND_CHANNEL_COUNT = 0x18
+SOUND_CHANNEL_FW = 0x1C
+SOUND_CHANNEL_FREQUENCY = 0x20
+SOUND_CHANNEL_WAVE = 0x24
+SOUND_CHANNEL_CURRENT = 0x28
+SOUND_CHANNEL_NEXT = 0x34
+
+CGB_CHANNEL_SIZE = 0x40
+CGB_CHANNEL_FREQUENCY = 0x20
+CGB_CHANNEL_WAVE = 0x24
+CGB_CHANNEL_CURRENT_WAVE = 0x28
+
+M4A_INPUT_PREFIX_BYTES = 8
 
 
 def pointer_symbol(value: int) -> str | None:
@@ -235,6 +304,227 @@ def snapshot_music_players(oracle: EmeraldOracle, head: int) -> list[dict[str, A
         })
         current = read_u32(oracle, current + 0x3C)
     return players
+
+
+def is_source_readable(address: int, size: int) -> bool:
+    """Keep optional command/wave capture bounded to source memory regions."""
+    if size < 0:
+        return False
+    end = address + size
+    return (
+        0x08000000 <= address and end <= 0x0A000000  # ROM / mapped ROM mirror
+        or 0x02000000 <= address and end <= 0x02040000  # EWRAM
+        or 0x03000000 <= address and end <= 0x03008000  # IWRAM
+    )
+
+
+def bounded_source_bytes(oracle: EmeraldOracle, address: int, length: int = M4A_INPUT_PREFIX_BYTES) -> list[int]:
+    """Return a capped input prefix without persisting a source pointer."""
+    if address == 0 or not is_source_readable(address, length):
+        return []
+    return [read_u8(oracle, address + index) for index in range(length)]
+
+
+def snapshot_wave_input(oracle: EmeraldOracle, wave: int, current_pointer: int = 0) -> dict[str, Any] | None:
+    """Capture only the header and bounded bytes the m4a mixers dereference."""
+    if wave == 0 or not is_source_readable(wave, WAVE_DATA_BYTES):
+        return None
+    data = wave + WAVE_DATA_BYTES
+    size = read_u32(oracle, wave + WAVE_DATA_SIZE)
+    current_offset: int | None = None
+    if current_pointer >= data and current_pointer - data <= max(size, M4A_INPUT_PREFIX_BYTES):
+        current_offset = current_pointer - data
+    return {
+        "type": read_u16(oracle, wave + WAVE_DATA_TYPE),
+        "status": read_u16(oracle, wave + WAVE_DATA_STATUS),
+        "frequency": read_u32(oracle, wave + WAVE_DATA_FREQUENCY),
+        "loopStart": read_u32(oracle, wave + WAVE_DATA_LOOP_START),
+        "size": size,
+        "dataPrefix": bounded_source_bytes(oracle, data),
+        "currentOffset": current_offset,
+        "currentPrefix": bounded_source_bytes(oracle, current_pointer),
+    }
+
+
+def snapshot_tone_input(oracle: EmeraldOracle, tone: int) -> dict[str, Any] | None:
+    """ToneData is the track-visible input to ply_voice and channel creation."""
+    if tone == 0 or not is_source_readable(tone, 12):
+        return None
+    return {
+        "type": read_u8(oracle, tone),
+        "key": read_u8(oracle, tone + 1),
+        "length": read_u8(oracle, tone + 2),
+        "panSweep": read_u8(oracle, tone + 3),
+        "wave": snapshot_wave_input(oracle, read_u32(oracle, tone + 4)),
+        "attack": read_u8(oracle, tone + 8),
+        "decay": read_u8(oracle, tone + 9),
+        "sustain": read_u8(oracle, tone + 10),
+        "release": read_u8(oracle, tone + 11),
+    }
+
+
+def source_channel_kind(address: int, cgb_channels: int) -> str:
+    """Identify a track chain member without retaining its RAM address."""
+    direct_start = SOUND_INFO_ADDR + SOUND_INFO_CHANNELS
+    direct_end = direct_start + 12 * SOUND_CHANNEL_SIZE
+    if direct_start <= address < direct_end and (address - direct_start) % SOUND_CHANNEL_SIZE == 0:
+        return "direct"
+    if cgb_channels and cgb_channels <= address < cgb_channels + 4 * CGB_CHANNEL_SIZE and (address - cgb_channels) % CGB_CHANNEL_SIZE == 0:
+        return "cgb"
+    return "other"
+
+
+def snapshot_track_chain(oracle: EmeraldOracle, first_channel: int, cgb_channels: int) -> list[str]:
+    """MPlayMain walks this source-linked channel list before each track pass."""
+    kinds: list[str] = []
+    current = first_channel
+    seen: set[int] = set()
+    while current and current not in seen and len(kinds) < 16:
+        seen.add(current)
+        kind = source_channel_kind(current, cgb_channels)
+        kinds.append(kind)
+        if kind == "other" or not is_source_readable(current + SOUND_CHANNEL_NEXT, 4):
+            break
+        current = read_u32(oracle, current + SOUND_CHANNEL_NEXT)
+    return kinds
+
+
+def snapshot_track_input(oracle: EmeraldOracle, track: int, player_tone: int, cgb_channels: int) -> dict[str, Any]:
+    """Bounded MPlayMain inputs for its command and volume/pitch track passes."""
+    command = read_u32(oracle, track + MUSIC_TRACK_COMMAND)
+    command_prefix = bounded_source_bytes(oracle, command)
+    pattern_prefixes = [
+        bounded_source_bytes(oracle, read_u32(oracle, track + MUSIC_TRACK_PATTERN_STACK + index * 4))
+        for index in range(3)
+    ]
+    next_voice: dict[str, Any] | None = None
+    # ply_voice consumes the byte after its 0xBD opcode as a ToneData table
+    # index.  Persist that dereferenced row only when this bounded next-command
+    # view proves the handler can enter it immediately.
+    if command_prefix[:1] == [0xBD] and len(command_prefix) >= 2 and player_tone:
+        voice_index = command_prefix[1]
+        next_voice = {
+            "index": voice_index,
+            "tone": snapshot_tone_input(oracle, player_tone + voice_index * 12),
+        }
+    return {
+        # Bytes 0x00-0x1f are the complete scalar control region read by the
+        # two MPlayMain track loops (flags through pseudoEchoLength).
+        "control": [read_u8(oracle, track + index) for index in range(0x20)],
+        "tone": snapshot_tone_input(oracle, track + MUSIC_TRACK_TONE),
+        "timer": read_u16(oracle, track + MUSIC_TRACK_TIMER),
+        "commandPrefix": command_prefix,
+        "patternPrefixes": pattern_prefixes,
+        "nextVoice": next_voice,
+        "linkedChannelKinds": snapshot_track_chain(
+            oracle, read_u32(oracle, track + MUSIC_TRACK_CHANNELS), cgb_channels
+        ),
+    }
+
+
+def snapshot_m4a_players(oracle: EmeraldOracle, head: int, cgb_channels: int) -> list[dict[str, Any]]:
+    """Follow the MPlayMainNext-linked source list with address-free rows."""
+    players: list[dict[str, Any]] = []
+    seen: set[int] = set()
+    current = head
+    while current and current not in seen and len(players) < 16:
+        seen.add(current)
+        track_count = min(read_u8(oracle, current + 8), 16)
+        tracks = read_u32(oracle, current + MUSIC_PLAYER_INFO_TRACKS)
+        player_tone = read_u32(oracle, current + MUSIC_PLAYER_INFO_TONE)
+        players.append({
+            "status": read_u32(oracle, current + 4),
+            "trackCount": track_count,
+            "command": read_u8(oracle, current + 10),
+            "clock": read_u32(oracle, current + 12),
+            "tempo": {
+                "d": read_u16(oracle, current + MUSIC_PLAYER_INFO_TEMPO_D),
+                "u": read_u16(oracle, current + MUSIC_PLAYER_INFO_TEMPO_U),
+                "i": read_u16(oracle, current + MUSIC_PLAYER_INFO_TEMPO_I),
+                "c": read_u16(oracle, current + MUSIC_PLAYER_INFO_TEMPO_C),
+            },
+            "fade": {
+                "i": read_u16(oracle, current + MUSIC_PLAYER_INFO_FADE_OI),
+                "c": read_u16(oracle, current + MUSIC_PLAYER_INFO_FADE_OC),
+                "v": read_u16(oracle, current + MUSIC_PLAYER_INFO_FADE_OV),
+            },
+            "mainRoutine": pointer_symbol(read_u32(oracle, current + MUSIC_PLAYER_INFO_NEXT_MAIN)),
+            "hasNextPlayer": read_u32(oracle, current + MUSIC_PLAYER_INFO_NEXT_PLAYER) != 0,
+            "tracks": [
+                snapshot_track_input(oracle, tracks + index * MUSIC_PLAYER_TRACK_SIZE, player_tone, cgb_channels)
+                for index in range(track_count)
+            ] if tracks else [],
+        })
+        current = read_u32(oracle, current + MUSIC_PLAYER_INFO_NEXT_PLAYER)
+    return players
+
+
+def snapshot_direct_channel_input(oracle: EmeraldOracle, channel: int) -> dict[str, Any]:
+    """SoundMainRAM's direct-sound envelope/mixer input for one fixed slot."""
+    wave = read_u32(oracle, channel + SOUND_CHANNEL_WAVE)
+    current = read_u32(oracle, channel + SOUND_CHANNEL_CURRENT)
+    return {
+        # Bytes 0x00-0x17 cover the scalar SoundChannel inputs consulted by the
+        # envelope and branch selection before the ARM mixer consumes count/fw.
+        "control": [read_u8(oracle, channel + index) for index in range(0x18)],
+        "count": read_u32(oracle, channel + SOUND_CHANNEL_COUNT),
+        "fw": read_u32(oracle, channel + SOUND_CHANNEL_FW),
+        "frequency": read_u32(oracle, channel + SOUND_CHANNEL_FREQUENCY),
+        "wave": snapshot_wave_input(oracle, wave, current),
+    }
+
+
+def snapshot_cgb_channel_input(oracle: EmeraldOracle, channel: int) -> dict[str, Any]:
+    """CgbSound's fixed four-channel branch inputs, without pointer identity."""
+    wave = read_u32(oracle, channel + CGB_CHANNEL_WAVE)
+    current_wave = read_u32(oracle, channel + CGB_CHANNEL_CURRENT_WAVE)
+    return {
+        # CgbSound's branch/control fields live in the first 0x20 bytes.
+        "control": [read_u8(oracle, channel + index) for index in range(0x20)],
+        "frequency": read_u32(oracle, channel + CGB_CHANNEL_FREQUENCY),
+        "wavePrefix": bounded_source_bytes(oracle, wave, M4A_INPUT_PREFIX_BYTES * 2),
+        "waveIsCurrent": wave != 0 and wave == current_wave,
+    }
+
+
+def snapshot_m4a_internal_state(oracle: EmeraldOracle) -> dict[str, Any]:
+    """State actually dereferenced by the compiled m4a routine graph.
+
+    This is intentionally an inventory, not a timing key: command and wave
+    reads are capped at eight bytes (sixteen for CGB wave RAM) and do not claim
+    to model unbounded command control flow or sample data beyond that window.
+    """
+    cgb_channels = read_u32(oracle, SOUND_INFO_ADDR + SOUND_INFO_CGB_CHANS)
+    music_head = read_u32(oracle, SOUND_INFO_ADDR + SOUND_INFO_MUSIC_PLAYER_HEAD)
+    return {
+        "soundInfo": {
+            "ident": read_u32(oracle, SOUND_INFO_ADDR),
+            "pcmDmaCounter": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_PCM_DMA_COUNTER),
+            "pcmDmaPeriod": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_PCM_DMA_PERIOD),
+            "pcmSamplesPerVBlank": read_u32(oracle, SOUND_INFO_ADDR + SOUND_INFO_PCM_SAMPLES_PER_VBLANK),
+            "reverb": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_REVERB),
+            "maxChans": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_MAX_CHANS),
+            "maxLines": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_MAX_LINES),
+            "frequency": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_FREQ),
+            "c15": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_C15),
+            "divFrequency": read_u32(oracle, SOUND_INFO_ADDR + 0x18),
+            "mplayMainRoutine": pointer_symbol(read_u32(oracle, SOUND_INFO_ADDR + 0x20)),
+            "cgbRoutine": pointer_symbol(read_u32(oracle, SOUND_INFO_ADDR + 0x28)),
+        },
+        "musicPlayers": snapshot_m4a_players(oracle, music_head, cgb_channels),
+        "directChannels": [
+            snapshot_direct_channel_input(oracle, SOUND_INFO_ADDR + SOUND_INFO_CHANNELS + index * SOUND_CHANNEL_SIZE)
+            for index in range(12)
+        ],
+        "cgbChannels": [
+            snapshot_cgb_channel_input(oracle, cgb_channels + index * CGB_CHANNEL_SIZE)
+            for index in range(4)
+        ] if cgb_channels else [],
+        "dma": {
+            "dma1Control": read_u32(oracle, 0x040000C4),
+            "dma2Control": read_u32(oracle, 0x040000D0),
+        },
+    }
 
 
 def snapshot_vblank_workload(oracle: EmeraldOracle) -> dict[str, Any]:
@@ -323,6 +613,27 @@ def append_vblank_stage(epoch: dict[str, Any], oracle: EmeraldOracle, frame: int
     workload = current_vblank_workload(epoch)
     if workload is not None:
         workload["stages"].append(cycle_snapshot(oracle, frame, pc, stage, **fields))
+
+
+def start_m4a_internal_observation(epoch: dict[str, Any], oracle: EmeraldOracle, frame: int, pc: int) -> None:
+    """Snapshot m4a state at its VBlank call boundary, not at epoch identity."""
+    workload = current_vblank_workload(epoch)
+    if workload is None or "audioInternal" in workload:
+        return
+    workload["audioInternal"] = {
+        "state": snapshot_m4a_internal_state(oracle),
+        "stages": [cycle_snapshot(oracle, frame, pc, "m4a-sound-main-call")],
+    }
+
+
+def append_m4a_internal_stage(epoch: dict[str, Any], oracle: EmeraldOracle, frame: int, pc: int, stage: str) -> None:
+    """Append only a pinned m4a routine or loop-head boundary."""
+    workload = current_vblank_workload(epoch)
+    if workload is None:
+        return
+    audio = workload.get("audioInternal")
+    if audio is not None:
+        audio["stages"].append(cycle_snapshot(oracle, frame, pc, stage))
 
 
 def cycle_snapshot(oracle: EmeraldOracle, frame: int, pc: int, kind: str, **fields: Any) -> dict[str, Any]:
@@ -427,6 +738,14 @@ def advance_one_instrumented_frame(
                             resumeFunction=symbol_at(pc - 2),
                         )
                 epoch.pop("awaitingVBlankResume", None)
+            if VBLANK_WORKLOAD_INTERNAL_EVIDENCE and pc == M4A_SOUND_MAIN_CALL_PC:
+                start_m4a_internal_observation(epoch, oracle, frame, pc)
+            if VBLANK_WORKLOAD_INTERNAL_EVIDENCE and pc in M4A_INTERNAL_STAGE_PCS:
+                append_m4a_internal_stage(
+                    epoch, oracle, frame, pc, M4A_INTERNAL_STAGE_PCS[pc]
+                )
+            if VBLANK_WORKLOAD_INTERNAL_EVIDENCE and pc == M4A_SOUND_MAIN_RETURN_PC:
+                append_m4a_internal_stage(epoch, oracle, frame, pc, "m4a-sound-main-return")
             if VBLANK_WORKLOAD_EVIDENCE and pc in VBLANK_STAGE_PCS:
                 append_vblank_stage(epoch, oracle, frame, pc, VBLANK_STAGE_PCS[pc])
             if pc == target_entry and epoch.get("entry") is None:
@@ -1029,18 +1348,80 @@ def compact_vblank_workload_receipt(result: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def compact_vblank_workload_internal_receipt(result: dict[str, Any]) -> dict[str, Any]:
+    """Write an address-free v2 sibling with the source-owned m4a stages.
+
+    The old v1 packet is intentionally not reused or rewritten.  This carries
+    the same relative VBlank shell plus the snapshot taken at m4aSoundMain's
+    call boundary and the compiled SoundMain/MPlayMain/CgbSound/SoundMainRAM
+    boundaries inside it.
+    """
+    raw = result["vblankWorkloadEvidence"]
+    interrupts: list[dict[str, Any]] = []
+    source_entry = result["entry"]["masterCycles"]
+    source_return = result["return"]["masterCycles"]
+    for workload in raw["interrupts"]:
+        returned = workload.get("return")
+        resumed = workload.get("resume")
+        audio = workload.get("audioInternal")
+        if returned is None or resumed is None or audio is None:
+            continue
+        entry_cycles = workload["entry"]["masterCycles"]
+        if entry_cycles < source_entry or entry_cycles > source_return:
+            continue
+        stages = []
+        for stage in workload["stages"]:
+            compact = {
+                "kind": stage["kind"],
+                "cyclesSinceVBlankEntry": stage["masterCycles"] - entry_cycles,
+            }
+            if "isr" in stage:
+                compact["isr"] = stage["isr"]
+            stages.append(compact)
+        audio_stages = [
+            {
+                "kind": stage["kind"],
+                "cyclesSinceVBlankEntry": stage["masterCycles"] - entry_cycles,
+            }
+            for stage in audio["stages"]
+        ]
+        interrupts.append({
+            "state": workload["state"],
+            "m4a": {
+                "state": audio["state"],
+                "stages": audio_stages,
+            },
+            "vblankEntryToReturnCycles": returned["masterCycles"] - entry_cycles,
+            "returnToResumeCycles": resumed["masterCycles"] - returned["masterCycles"],
+            "resumeFunction": resumed["resumeFunction"],
+            "stages": stages,
+        })
+    return {
+        "schema": "factory-vblank-workload-internal-probe/v2",
+        "case": result["case"],
+        "oracleProfile": result["oracleProfile"],
+        "sourceFunction": result["sourceFunction"],
+        "m4aInputPrefixBytes": M4A_INPUT_PREFIX_BYTES,
+        "interrupts": interrupts,
+    }
+
+
 def main() -> None:
     if OUTPUT.exists():
         raise SystemExit(f"refusing existing output path: {OUTPUT}")
     if VBLANK_WORKLOAD_EVIDENCE and not CYCLE_EVIDENCE:
         raise SystemExit("FACTORY_VBLANK_WORKLOAD_EVIDENCE=1 requires FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1")
+    if VBLANK_WORKLOAD_INTERNAL_EVIDENCE and not VBLANK_WORKLOAD_EVIDENCE:
+        raise SystemExit("FACTORY_VBLANK_WORKLOAD_INTERNAL_EVIDENCE=1 requires FACTORY_VBLANK_WORKLOAD_EVIDENCE=1")
     if CASE == "anchor":
         result = run_anchor()
     elif CASE == "liliana":
         result = run_liliana()
     else:
         result = run_factory_varied()
-    if VBLANK_WORKLOAD_EVIDENCE:
+    if VBLANK_WORKLOAD_INTERNAL_EVIDENCE:
+        result = compact_vblank_workload_internal_receipt(result)
+    elif VBLANK_WORKLOAD_EVIDENCE:
         result = compact_vblank_workload_receipt(result)
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps(result, indent=2) + "\n")
