@@ -7,9 +7,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1087 — [MAIN worker, 2026-08-10] **#55 `CalculateMonStats` direct-call boundary narrowed**
 
-- **State:** bounded evidence checkpoint; all **12/12** complete stats spans
-  and **480** direct calls are pinned. Construction focus **19/19** is green;
-  smoke, typecheck, full suite, and build are pending this checkpoint commit.
+- **State:** bounded evidence checkpoint committed; all **12/12** complete
+  stats spans and **480** direct calls are pinned. Construction focus **19/19**,
+  smoke **375/375**, typecheck, full `npm test` **880 files / 8,420 passed /
+  1 skipped**, and production build are green.
 - **Did:** added a byte-stable Scene-OFF sibling receipt for anchor/LILIANA/
   varied and audited `pokemon.c:2823` / the pinned ELF. Direct callees explain
   **139,916–153,077** of **140,999–154,160** source cycles after **7** complete
