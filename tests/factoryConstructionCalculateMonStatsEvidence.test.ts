@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { reduceFactoryCalculateMonStatsParentTiming } from "../src/engine/factoryConstructionClock.ts";
 
 type DirectCall = {
   monIndex: number;
@@ -202,5 +203,121 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
         expect(modifications.map((call) => call.arguments.statIndex)).toEqual([1, 2, 3, 4, 5]);
       }
     }
+  });
+
+  it("source-reduces all twelve parent-only residuals and identifies the u8 level-up-HP branch", () => {
+    const branches: Array<{ rawLevelUpHp: number; cycles: number }> = [];
+    for (const { expected, value } of probes) {
+      value.spans.forEach((span, spanIndex) => {
+        const rows = value.directCalls.filter((call) => call.monIndex === span.monIndex);
+        const result = (operation: string, target: string): number => {
+          const row = rows.find((call) => call.operation === operation && call.target === target);
+          if (row?.result === undefined) throw new Error(`missing ${operation}/${target} result`);
+          return row.result;
+        };
+        const oldMaxHp = result("get-mon-data", "old-max-hp");
+        const currentHp = result("get-mon-data", "current-hp");
+        const level = result("get-level-from-exp", "level");
+        const newMaxHp = result("divide", "max-hp") + level + 10;
+        const timing = reduceFactoryCalculateMonStatsParentTiming({
+          speciesId: result("get-mon-data", "species"),
+          oldMaxHp,
+          currentHp,
+          newMaxHp,
+        });
+
+        expect(timing.cycles).toBe(expected.interstitialCycles[spanIndex]);
+        expect(timing.currentHpPath).toBe("normal-adjust");
+        expect(timing.directCallCount).toBe(rows.length);
+        branches.push({ rawLevelUpHp: timing.rawLevelUpHp, cycles: timing.cycles });
+      });
+    }
+
+    expect(branches.filter((branch) => branch.rawLevelUpHp === 0)).toEqual([
+      { rawLevelUpHp: 0, cycles: 1_081 },
+      { rawLevelUpHp: 0, cycles: 1_081 },
+    ]);
+    expect(branches.filter((branch) => branch.rawLevelUpHp !== 0)).toHaveLength(10);
+    expect(new Set(branches.filter((branch) => branch.rawLevelUpHp !== 0).map((branch) => branch.cycles)))
+      .toEqual(new Set([1_083]));
+  });
+
+  it("follows the compiled level-up, Shedinja, and final-current-HP branch variants", () => {
+    expect(reduceFactoryCalculateMonStatsParentTiming({
+      speciesId: 1,
+      oldMaxHp: 100,
+      currentHp: 100,
+      newMaxHp: 101,
+    })).toMatchObject({
+      rawLevelUpHp: 1,
+      storedLevelUpHp: 1,
+      currentHpPath: "normal-adjust",
+      writesCurrentHp: true,
+      directCallCount: 40,
+      sequentialThumbHalfwords: 345,
+      pipelineRefills: 51,
+      romLiteralLoads: 5,
+      romTableLoads: 6,
+      cycles: 1_083,
+    });
+    expect(reduceFactoryCalculateMonStatsParentTiming({
+      speciesId: 1,
+      oldMaxHp: 100,
+      currentHp: 100,
+      newMaxHp: 100,
+    })).toMatchObject({
+      rawLevelUpHp: 0,
+      storedLevelUpHp: 1,
+      sequentialThumbHalfwords: 347,
+      pipelineRefills: 50,
+      cycles: 1_081,
+    });
+    // The source field is u8: a delta of 256 selects the same zero branch.
+    expect(reduceFactoryCalculateMonStatsParentTiming({
+      speciesId: 1,
+      oldMaxHp: 100,
+      currentHp: 0,
+      newMaxHp: 356,
+    })).toMatchObject({
+      rawLevelUpHp: 0,
+      currentHpPath: "return-without-write",
+      writesCurrentHp: false,
+      directCallCount: 39,
+      cycles: 1_061,
+    });
+    expect(reduceFactoryCalculateMonStatsParentTiming({
+      speciesId: 1,
+      oldMaxHp: 0,
+      currentHp: 0,
+      newMaxHp: 45,
+    })).toMatchObject({
+      currentHpPath: "normal-initialize",
+      writesCurrentHp: true,
+      directCallCount: 40,
+      cycles: 1_085,
+    });
+    expect(reduceFactoryCalculateMonStatsParentTiming({
+      speciesId: 303,
+      oldMaxHp: 1,
+      currentHp: 1,
+      newMaxHp: 1,
+    })).toMatchObject({
+      shedinja: true,
+      currentHpPath: "shedinja-set-one",
+      directCallCount: 39,
+      romTableLoads: 5,
+      cycles: 1_013,
+    });
+    expect(reduceFactoryCalculateMonStatsParentTiming({
+      speciesId: 303,
+      oldMaxHp: 1,
+      currentHp: 0,
+      newMaxHp: 1,
+    })).toMatchObject({
+      currentHpPath: "return-without-write",
+      writesCurrentHp: false,
+      directCallCount: 38,
+      cycles: 991,
+    });
   });
 });

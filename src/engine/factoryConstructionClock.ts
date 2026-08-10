@@ -166,6 +166,38 @@ export interface FactoryOuterLoopTiming {
   cycles: number;
 }
 
+export interface FactoryCalculateMonStatsParentTimingInput {
+  /** Source `MON_DATA_SPECIES` value read by CalculateMonStats. */
+  speciesId: number;
+  /** Source `MON_DATA_MAX_HP` value captured before recalculation. */
+  oldMaxHp: number;
+  /** Source `MON_DATA_HP` value captured before recalculation. */
+  currentHp: number;
+  /** Newly calculated max HP (or one for Shedinja). */
+  newMaxHp: number;
+}
+
+export interface FactoryCalculateMonStatsParentTiming {
+  speciesId: number;
+  oldMaxHp: number;
+  currentHp: number;
+  newMaxHp: number;
+  shedinja: boolean;
+  /** u8 assignment to `gBattleScripting.levelUpHP`, before its zero-to-one fix. */
+  rawLevelUpHp: number;
+  storedLevelUpHp: number;
+  currentHpPath: "shedinja-set-one" | "normal-initialize" | "normal-adjust" | "return-without-write";
+  writesCurrentHp: boolean;
+  /** Direct callees whose durations are deliberately excluded from `cycles`. */
+  directCallCount: number;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  romLiteralLoads: number;
+  romTableLoads: number;
+  /** Parent/interstitial cycles only; every direct callee remains excluded. */
+  cycles: number;
+}
+
 const THUMB_SEQUENTIAL_CYCLES = 2;
 const THUMB_PIPELINE_REFILL_CYCLES = 6;
 const THUMB_TAKEN_CONTROL_CYCLES = THUMB_SEQUENTIAL_CYCLES + THUMB_PIPELINE_REFILL_CYCLES;
@@ -336,6 +368,196 @@ export function reduceFactoryOuterLoopTiming(
     elevatedRental,
     fixedIvChallenge,
     fixedIvClamped,
+    cycles,
+  });
+}
+
+/**
+ * Reduce only CalculateMonStats' compiled parent/interstitial instructions.
+ *
+ * Every BL pipeline refill belongs to the parent, but the time spent inside
+ * each direct callee does not. The pinned retail ELF body is
+ * `pokemon.c:2823-2889`, ROM `0x08068d0c..0x08069002`. Its WS0 classes are
+ * the same ones independently established by the construction reducers:
+ * ordinary prefetched Thumb halfwords cost 2 cycles, a taken control flow
+ * adds a 6-cycle refill, PC-relative ROM literals cost 11 cycles total, and
+ * `gSpeciesInfo` ROM byte reads cost 9 cycles total. Stack/IWRAM/EWRAM data
+ * accesses in this body stay hidden by prefetch and remain in the ordinary
+ * class.
+ *
+ * The observed 1081/1083 split is source-visible: `levelUpHP` is a u8, so the
+ * branch at `0x08068e38` tests the truncated `(newMaxHp - oldMaxHp) & 0xff`.
+ * Zero falls through two extra halfwords but avoids one pipeline refill,
+ * costing 2 fewer cycles overall. Species and HP state also select the real
+ * Shedinja/final-HP branches; no mon, set, case, frame, cursor, or receipt
+ * identity is available here.
+ */
+export function reduceFactoryCalculateMonStatsParentTiming(
+  input: Readonly<FactoryCalculateMonStatsParentTimingInput>,
+): FactoryCalculateMonStatsParentTiming {
+  const speciesId = requireNonnegativeInteger(input.speciesId, "speciesId");
+  const oldMaxHp = requireNonnegativeInteger(input.oldMaxHp, "oldMaxHp");
+  const currentHp = requireNonnegativeInteger(input.currentHp, "currentHp");
+  const newMaxHp = requireNonnegativeInteger(input.newMaxHp, "newMaxHp");
+  for (const [field, value] of Object.entries({ speciesId, oldMaxHp, currentHp, newMaxHp })) {
+    if (value > 0xffff) throw new Error(`${field} must be a source u16, got ${value}`);
+  }
+
+  let sequentialThumbHalfwords = 0;
+  let pipelineRefills = 0;
+  let romLiteralLoads = 0;
+  let romTableLoads = 0;
+  let directCallCount = 0;
+  const instruction = (count = 1): void => {
+    sequentialThumbHalfwords += count;
+  };
+  const branch = (taken: boolean): void => {
+    instruction();
+    if (taken) pipelineRefills += 1;
+  };
+  const call = (): void => {
+    instruction(2);
+    pipelineRefills += 1;
+    directCallCount += 1;
+  };
+  const literalLoad = (): void => {
+    instruction();
+    romLiteralLoads += 1;
+  };
+  const tableLoad = (): void => {
+    instruction();
+    romTableLoads += 1;
+  };
+
+  // Prologue and the fifteen GetMonData2 calls.
+  instruction(9);
+  call();
+  for (let field = 1; field < 15; field += 1) {
+    instruction(4);
+    call();
+  }
+  instruction(3);
+  call(); // GetLevelFromMonExp
+  instruction(6);
+  call(); // SetMonData(MON_DATA_LEVEL)
+
+  const shedinja = speciesId === 303;
+  literalLoad();
+  instruction();
+  branch(!shedinja);
+  if (shedinja) {
+    instruction(3); // newMaxHP = 1; preserve species stride
+    branch(true);
+  } else {
+    literalLoad();
+    instruction(4);
+    tableLoad(); // gSpeciesInfo[species].baseHP
+    instruction(5);
+    branch(true); // hpEV is returned as a nonnegative source u8
+    instruction(5);
+    call(); // __divsi3 for max HP
+    instruction(3);
+  }
+
+  const rawLevelUpHp = (newMaxHp - oldMaxHp) & 0xff;
+  literalLoad();
+  instruction(8);
+  branch(rawLevelUpHp !== 0);
+  if (rawLevelUpHp === 0) instruction(2);
+  instruction(2);
+  call(); // SetMonData(MON_DATA_MAX_HP)
+
+  // Attack setup, then the five identical CALC_STAT call groups. Four groups
+  // end with a gSpeciesInfo load and arithmetic setup for the next stat.
+  literalLoad();
+  instruction(3);
+  tableLoad();
+  instruction(5);
+  branch(true); // every stat EV is a nonnegative source u8
+  instruction(5);
+  call(); // attack __divsi3
+  for (let statIndex = 0; statIndex < 5; statIndex += 1) {
+    instruction(3);
+    call(); // GetNature
+    instruction(5);
+    call(); // ModifyStatByNature
+    instruction(6);
+    call(); // SetMonData(stat)
+    if (statIndex < 4) {
+      tableLoad();
+      instruction(5);
+      branch(true); // next stat EV is nonnegative
+      instruction(5);
+      call(); // next stat __divsi3
+    }
+  }
+
+  literalLoad();
+  instruction();
+  branch(!shedinja);
+  let currentHpPath: FactoryCalculateMonStatsParentTiming["currentHpPath"];
+  let writesCurrentHp: boolean;
+  if (shedinja) {
+    instruction(2);
+    branch(currentHp !== 0);
+    if (currentHp === 0) {
+      instruction(2);
+      branch(oldMaxHp !== 0);
+    }
+    writesCurrentHp = currentHp !== 0 || oldMaxHp === 0;
+    if (writesCurrentHp) {
+      currentHpPath = "shedinja-set-one";
+      instruction();
+      branch(true);
+    } else {
+      currentHpPath = "return-without-write";
+    }
+  } else {
+    instruction(2);
+    branch(currentHp !== 0);
+    if (currentHp !== 0) {
+      currentHpPath = "normal-adjust";
+      writesCurrentHp = true;
+      instruction(4);
+    } else {
+      instruction(2);
+      branch(oldMaxHp !== 0);
+      writesCurrentHp = oldMaxHp === 0;
+      if (writesCurrentHp) {
+        currentHpPath = "normal-initialize";
+        instruction();
+        branch(true);
+      } else {
+        currentHpPath = "return-without-write";
+      }
+    }
+  }
+  if (writesCurrentHp) {
+    instruction(4);
+    call(); // SetMonData(MON_DATA_HP)
+  }
+  instruction(7);
+  branch(true); // bx to CreateMonWithEVSpreadNatureOTID
+
+  const cycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+    + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES
+    + romLiteralLoads * (THUMB_ROM_LITERAL_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES)
+    + romTableLoads * (THUMB_ROM_TABLE_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES);
+  return Object.freeze({
+    speciesId,
+    oldMaxHp,
+    currentHp,
+    newMaxHp,
+    shedinja,
+    rawLevelUpHp,
+    storedLevelUpHp: rawLevelUpHp === 0 ? 1 : rawLevelUpHp,
+    currentHpPath,
+    writesCurrentHp,
+    directCallCount,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    romLiteralLoads,
+    romTableLoads,
     cycles,
   });
 }
