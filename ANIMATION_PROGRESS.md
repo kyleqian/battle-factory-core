@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_DRILL_PECK bilateral dense Scene-ON evidence checkpoint — remains unsupported (2026-08-10 worker)
+
+- **State:** Coverage remains **152/276 exact**, 0 partial, 0 staged, **124 unsupported**. `ANIMATION_COVERAGE.json` is intentionally unchanged: Drill Peck has no reducer, typed seam, production compositor, or framebuffer acceptance.
+- **Did:** Pinned the complete even script interval `0x082cafc8..0x082cb020`, all six generated components, and lowest legal Level-50 carrier set **375 `FRONTIER_MON_FEAROW_1`**. Added complete legal challenge-3 FEAROW/ONIX three-mon parties in both orientations, constraining only the active Fearow slots to Drill Peck; a pointer-bounded Scene-ON probe captures source entry through first inactive cleanup, tasks/logical sprites, software/hardware OAM/matrices/palettes/tags, registers/audio, immutable battlers, raw RGB, and change maps.
+- **Verified:** Twice-fresh, byte-stable windows are player-back **74..164** and opponent-front **78..168**, **91/91** each. Probe/raw/map digests: player `3dfa1176…` / `8e4bab34…` / `2904db85…`; opponent `48356792…` / `ab2adf5f…` / `ada68549…`. The verifier independently pins the three Bow phases, eight flashing IMPACT splats, no Whirlwind line sprites despite its loaded tag, six-tick original-position slide, DrillPeckHitSplats/ShakeMon2/loop-audio lifecycles, tags/cleanup, side geometry, receipts, raw RGB, and no outcome mutation within the visual body. HEADBUTT remains bilateral **48/48** twice fresh for all Bow phases. Existing WHIRLWIND and SLAM portables currently stop before frame checks on their pre-existing evidence-digest pins (`55890fc6… != 173be414…`; `58aba5af… != 8f520d75…`), so neither sibling was rebased or promoted.
+- **Next:** Implement a pure source-relative Drill Peck reducer, narrow typed presentation seam, and compositor; require complete bilateral component + seam + hardware + raw-RGB + framebuffer equality twice fresh before promotion. Resolve the unrelated Whirlwind/SLAM receipt drift and rerun them alongside HEADBUTT after any shared draw-path change.
+- **Notes:** No damage, RNG, turn order, controller/round/facility state, canonical recording, shared animation boundary, unsupported barrier, sibling coverage, or absolute-tick/framebuffer fitting changed.
+
 ## MOVE_ROLE_PLAY exact — bilateral 147/147 target-silhouette promotion (2026-08-10 worker)
 
 - **State:** Coverage advances **151→152/276 exact**, 0 partial, 0 staged, **125→124 unsupported**. Role Play alone moves; boundary, barrier, and latch pins are unchanged.
