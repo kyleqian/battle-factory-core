@@ -21,6 +21,8 @@ substitutions:
 - **Yours:** `ANIMATION_PROGRESS.md` (your ledger — wind-down entries go
   here, not PROGRESS.md), `ANIMATION_COVERAGE.json`,
   `ANIMATION_PROGRESS-archive.md`, `ANIMATION_DEFERRED.md`,
+  `ANIMATION_LATCHES.md` (the display-latch/compositor reference — consult
+  at orient, keep current),
   `src/animation/**`, `tests/animation/**`, and the animation
   comparators/fixtures/scratch under `tools/compare/`. In `src/engine/` you
   may touch only `battleScene.ts` and `core.ts`, and only their animation
@@ -61,6 +63,23 @@ substitutions:
   both animation ledgers updated; a canonical window alone stays `partial`.
   Do not invent filler work just to occupy the session — wind down early
   instead.
+- **Pre-supply the latch facts.** Every brief points the worker at
+  `ANIMATION_LATCHES.md` and quotes the rows it expects to apply; the worker
+  verifies them against the move's own change maps (never inherits), and a
+  round that measures a new mechanism's latch appends the row in the same
+  commit as its coverage entry. A brief that pre-supplies mechanical facts
+  (script-pointer bounds, banked change maps, known latches) buys a whole
+  phase of the round — the ledger's measured spread is a 45-minute
+  zero-write round without them vs a 14-minute promotion round with them.
+- **Batch siblings when the components are already paid for.** When every
+  component a sibling needs is already exact-proven (check the track's
+  remaining moves against the coverage report — the 1-component SE/palette
+  tracks are the standing examples), one round may stage and promote
+  MULTIPLE siblings. The bar per move is unchanged: each gets its own dense
+  both-orientation twice-fresh evidence, coverage entry, and inventory-pin
+  move. This is the July batch pattern, and it is how the cheap tail of a
+  track should close — one-move-per-round is for moves that add components
+  or unresolved latches.
 - **Route** each brief to a tier deliberately — `SUPERVISOR.md`'s routing
   rubric applies here in full, and the launcher's Sol default is not a
   decision. In this lane it lands as: **Terra/max** for narrow source-
