@@ -335,13 +335,13 @@ describe("Level-50 move parameterization manifest", () => {
     });
     expect(manifest.coverage.joins).toMatchObject({
       battleScriptGraphLabels: 300, battleScriptProgramLabels: 300, animationScripts: 300,
-      itemHookCategories: 105, abilityHookCategories: 348,
+      itemHookCategories: 182, abilityHookCategories: 348,
       itemHookUnsupportedCategories: null, abilityHookUnsupportedCategories: null,
-      itemHookUnsupportedRows: 195, abilityHookUnsupportedRows: 106, abilityHookSourceProvenRows: 194, itemHookSourceProvenRows: 105,
+      itemHookUnsupportedRows: 118, abilityHookUnsupportedRows: 106, abilityHookSourceProvenRows: 194, itemHookSourceProvenRows: 182,
     });
     expect(manifest.coverage.hookCatalogs).toMatchObject({
       item: {
-        frontierHeldItemRows: 63, explicitHoldEffectRows: 70, catalogedDispatcherCategories: 3,
+        frontierHeldItemRows: 63, explicitHoldEffectRows: 70, catalogedDispatcherCategories: 4,
         completeness: "intentionally-partial", unsupportedCategories: null,
       },
       ability: {
@@ -353,7 +353,7 @@ describe("Level-50 move parameterization manifest", () => {
       },
     });
     expect(manifest.coverage.hookCatalogs.item.moveToHookDispatchers.map((hook) => hook.id)).toEqual([
-      "selection-choice-band", "accuracy-target-evasion-item", "moveend-kings-rock",
+      "selection-choice-band", "accuracy-target-evasion-item", "moveend-kings-rock", "moveend-shell-bell",
     ]);
     expect(manifest.coverage.hookCatalogs.ability.moveToHookDispatchers.map((hook) => hook.id)).toEqual([
       "moves-block-soundproof", "absorbing-volt-absorb", "absorbing-water-absorb", "absorbing-flash-fire",
@@ -374,6 +374,7 @@ describe("Level-50 move parameterization manifest", () => {
       "selection-choice-band": ["HOLD_EFFECT_CHOICE_BAND", "CheckMoveLimitations"],
       "accuracy-target-evasion-item": ["HOLD_EFFECT_EVASION_UP", "Cmd_accuracycheck"],
       "moveend-kings-rock": ["ITEMEFFECT_KINGSROCK_SHELLBELL", "FLAG_KINGS_ROCK_AFFECTED"],
+      "moveend-shell-bell": ["ITEMEFFECT_KINGSROCK_SHELLBELL", "HOLD_EFFECT_SHELL_BELL"],
       "moves-block-soundproof": ["ABILITYEFFECT_MOVES_BLOCK", "sSoundMovesTable", "ABILITY_SOUNDPROOF"],
       "absorbing-volt-absorb": ["ABILITYEFFECT_ABSORBING", "ABILITY_VOLT_ABSORB", "TYPE_ELECTRIC"],
       "absorbing-water-absorb": ["ABILITYEFFECT_ABSORBING", "ABILITY_WATER_ABSORB", "TYPE_WATER"],
@@ -901,8 +902,13 @@ describe("Level-50 move parameterization manifest", () => {
       expect(record.moveTable.type).toBe(source.type);
       expect(record.battleScript).toMatchObject({ entryScript: expect.stringMatching(/^BattleScript_/), graphLabel: record.battleScript.entryScript, programLabel: record.battleScript.entryScript });
       const kingsRockCandidate = source.flags.includes("FLAG_KINGS_ROCK_AFFECTED") && source.power !== 0;
-      expect(record.hooks.item).toMatchObject(kingsRockCandidate
-        ? { status: "source-proven-family", supportedCategories: ["moveend-kings-rock"] }
+      const shellBellCandidate = source.power !== 0 && record.move !== "MOVE_FUTURE_SIGHT";
+      const expectedItemCategories = [
+        ...(kingsRockCandidate ? ["moveend-kings-rock"] : []),
+        ...(shellBellCandidate ? ["moveend-shell-bell"] : []),
+      ];
+      expect(record.hooks.item).toMatchObject(expectedItemCategories.length > 0
+        ? { status: "source-proven-family", supportedCategories: expectedItemCategories }
         : { status: "unsupported", supportedCategories: [] });
       const expectedCategories = expectedSourceProven.get(record.move) ?? [];
       if (expectedCategories.length === 0) {
@@ -915,7 +921,7 @@ describe("Level-50 move parameterization manifest", () => {
       }
     }
     expect(manifest.moves.filter((record) => record.hooks.ability.status === "unsupported")).toHaveLength(106);
-    expect(manifest.moves.filter((record) => record.hooks.item.status === "unsupported")).toHaveLength(195);
+    expect(manifest.moves.filter((record) => record.hooks.item.status === "unsupported")).toHaveLength(118);
   });
 
   it("keeps zero-power Volt/Water noncandidates and Sunny Day's audited special flow unsupported", () => {

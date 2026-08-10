@@ -271,6 +271,8 @@ const SYNCHRONIZE_CATEGORY = "moveend-synchronize-status";
 const TRYINFATUATING_OBLIVIOUS_CATEGORY = "tryinfatuating-oblivious";
 const TRYEXPLOSION_DAMP_CATEGORY = "tryexplosion-damp";
 const KINGS_ROCK_CATEGORY = "moveend-kings-rock";
+const SHELL_BELL_CATEGORY = "moveend-shell-bell";
+const SHELL_BELL_SELECTOR_DERIVED_FROM = "moveend-shell-bell candidate selector reuses the moveend-color-change moves.json power != 0 population: the same successful target-datahpupdate route, read at a different MOVEEND state";
 const ABSORBING_CATEGORIES = new Set([
   "absorbing-volt-absorb",
   "absorbing-water-absorb",
@@ -513,6 +515,46 @@ for (const witness of kingsRockRouteWitnesses) {
     || family.runtimeGuardSignature?.holdEffect?.effect !== "HOLD_EFFECT_FLINCH"
     || family.familyVerification?.oracleReceiptFiles?.[0] !== "tools/probe/receipts/kings-rock-flinch-off.json") {
     throw new Error(`King's Rock family route/guard certificate is incomplete for ${String(witness.move)}`);
+  }
+}
+
+const shellBellAudit = parameterization.coverage?.hookCatalogs?.item?.shellBell as AnyRecord | undefined;
+const shellBellCandidates = shellBellAudit?.sourceMoveCandidates as AnyRecord[] | undefined;
+const shellBellSourceProvenRows = shellBellAudit?.sourceProvenRows as string[] | undefined;
+const shellBellExceptions = shellBellAudit?.sourceExceptionRows as AnyRecord[] | undefined;
+const shellBellBlockers = shellBellAudit?.blockers as AnyRecord[] | undefined;
+const shellBellRouteWitnesses = shellBellAudit?.routeWitnesses as AnyRecord[] | undefined;
+if (!shellBellAudit
+  || shellBellAudit.status !== SOURCE_PROVEN_FAMILY_STATUS
+  || shellBellAudit.candidateCount !== 183
+  || !Array.isArray(shellBellCandidates) || shellBellCandidates.length !== 183
+  || !Array.isArray(shellBellSourceProvenRows) || shellBellSourceProvenRows.length !== 182
+  || !Array.isArray(shellBellExceptions) || shellBellExceptions.length !== 1
+  || shellBellExceptions[0]?.move !== "MOVE_FUTURE_SIGHT"
+  || !Array.isArray(shellBellBlockers) || shellBellBlockers.length !== 0
+  || !Array.isArray(shellBellRouteWitnesses) || shellBellRouteWitnesses.length !== 182) {
+  throw new Error("Shell Bell family accounting is not the finite 183/182/1/0 contract");
+}
+if (!kingsRockSourceProvenRows!.every((move) => shellBellSourceProvenRows!.includes(move))) {
+  throw new Error("King's Rock's 105 promoted rows are not a full subset of Shell Bell's 182 promoted rows");
+}
+for (const witness of shellBellRouteWitnesses) {
+  const family = witness.familyEvidence as AnyRecord | undefined;
+  const graphRoute = family?.entryPath?.graph?.route as AnyRecord[] | undefined;
+  const programRoute = family?.entryPath?.program?.route as AnyRecord[] | undefined;
+  if (witness.status !== "source-proven"
+    || !shellBellSourceProvenRows.includes(witness.move)
+    || family?.category !== SHELL_BELL_CATEGORY
+    || !Array.isArray(graphRoute) || !Array.isArray(programRoute)
+    || JSON.stringify(graphRoute) !== JSON.stringify(programRoute)
+    || !graphRoute.some((statement) => statement.mnemonic === "datahpupdate" && JSON.stringify(statement.operands) === JSON.stringify(["BS_TARGET"]))
+    || family.entryPath?.moveEnd?.state !== "MOVEEND_KINGSROCK_SHELLBELL"
+    || family.entryPath?.moveEnd?.stateValue !== 12
+    || family.dispatcher?.stateValue !== 12
+    || family.runtimeGuardSignature?.orderedGuards?.[3] !== "gSpecialStatuses[gBattlerTarget].shellBellDmg != 0"
+    || family.runtimeGuardSignature?.holdEffect?.effect !== "HOLD_EFFECT_SHELL_BELL"
+    || family.familyVerification?.oracleReceiptFiles?.[0] !== "tools/probe/receipts/shell-bell-heal-off.json") {
+    throw new Error(`Shell Bell family route/guard certificate is incomplete for ${String(witness.move)}`);
   }
 }
 
@@ -783,6 +825,7 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
         && family.category !== TRYINFATUATING_OBLIVIOUS_CATEGORY
         && family.category !== TRYEXPLOSION_DAMP_CATEGORY
         && family.category !== KINGS_ROCK_CATEGORY
+        && family.category !== SHELL_BELL_CATEGORY
         && !ABSORBING_CATEGORIES.has(family.category))
       || !family.selector?.path
       || !family.entryPath?.source?.path
@@ -904,6 +947,19 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
         throw new Error("King's Rock family lacks its target-damage/state-12/guard witness");
       }
     }
+    if (family.category === SHELL_BELL_CATEGORY) {
+      const graphRoute = family.entryPath.graph.route as AnyRecord[] | undefined;
+      const programRoute = family.entryPath.program.route as AnyRecord[] | undefined;
+      if (family.selector?.guard !== "gBattleMoves[move].power != 0"
+        || !Array.isArray(graphRoute) || !Array.isArray(programRoute)
+        || JSON.stringify(graphRoute) !== JSON.stringify(programRoute)
+        || !graphRoute.some((statement) => statement.mnemonic === "datahpupdate" && JSON.stringify(statement.operands) === JSON.stringify(["BS_TARGET"]))
+        || family.entryPath.moveEnd?.stateValue !== 12
+        || family.runtimeGuardSignature?.holdEffect?.effect !== "HOLD_EFFECT_SHELL_BELL"
+        || family.familyVerification?.oracleReceipt !== "docs/shell-bell-moveend-ground-truth.md") {
+        throw new Error("Shell Bell family lacks its target-damage/state-12/guard witness");
+      }
+    }
   }
   return families as AnyRecord[];
 }
@@ -947,6 +1003,10 @@ function parameterizedHook(move: AnyRecord, axis: PerMoveHookJoinAxis): AnyRecor
     if (family.category === KINGS_ROCK_CATEGORY
       && (axis !== "item" || family.selector?.symbol !== move.move)) {
       throw new Error(`${move.move} King's Rock evidence lost its source selector identity`);
+    }
+    if (family.category === SHELL_BELL_CATEGORY
+      && (axis !== "item" || family.selector?.derivedFrom !== SHELL_BELL_SELECTOR_DERIVED_FROM)) {
+      throw new Error(`${move.move} Shell Bell evidence lost its selector derivation`);
     }
   }
   return hook;
@@ -1065,6 +1125,22 @@ function sourceProvenHookEvidence(hook: AnyRecord): Evidence[] {
         evidence("tools/battle-lab/mechanic-kings-rock-flinch-off.json", "parameterized-oracle-request"),
         evidence("tools/probe/probe-kings-rock-flinch-off.py", "oracle-probe"),
         evidence("tools/probe/receipts/kings-rock-flinch-off.json", "battle-scene-off-oracle-receipt"),
+      ];
+    }
+    if (proof.category === SHELL_BELL_CATEGORY) {
+      return [
+        ...base,
+        evidence("reference/pokeemerald/src/battle_util.c", "ordered-item-guards", "ITEMEFFECT_KINGSROCK_SHELLBELL/HOLD_EFFECT_SHELL_BELL"),
+        evidence("reference/pokeemerald/src/battle_script_commands.c", "datahpupdate-and-moveend-dispatcher", "MOVEEND_KINGSROCK_SHELLBELL"),
+        evidence("reference/pokeemerald/include/constants/battle_script_commands.h", "moveend-state-constant", "MOVEEND_KINGSROCK_SHELLBELL=12"),
+        evidence("src/engine/battleScriptMoveEndOpcode.ts", "existing-source-shaped-family-implementation", "MOVEEND_KINGSROCK_SHELLBELL"),
+        evidence("tests/shellBellHookJoinBatch.test.ts", "tier-1-182-row-sibling-batch"),
+        evidence("tests/shellBellOracleEvidence.test.ts", "battle-scene-off-family-receipt"),
+        evidence("docs/shell-bell-moveend-ground-truth.md", "family-ground-truth"),
+        evidence("tools/battle-lab/mechanic-shell-bell-heal-off.json", "parameterized-oracle-request"),
+        evidence("tools/battle-lab/mechanic-shell-bell-control-off.json", "paired-control-oracle-request"),
+        evidence("tools/probe/probe-shell-bell-heal-off.py", "oracle-probe"),
+        evidence("tools/probe/receipts/shell-bell-heal-off.json", "battle-scene-off-oracle-receipt"),
       ];
     }
     return [
@@ -1800,6 +1876,32 @@ const kingsRockMoveEndRow: Row = Object.freeze({
   notes: "All 105 damaging candidates are promoted through successful target datahpupdate to MOVEEND_KINGSROCK_SHELLBELL state 12. All 12 roster-only selectors remain enumerated; Tickle is the sole explicit zero-damage exception, and Shell Bell is not claimed.",
 });
 
+const shellBellMoveEndSummary = Object.freeze({
+  candidates: shellBellCandidates.length,
+  promotedRows: shellBellSourceProvenRows.length,
+  exceptions: shellBellExceptions.length,
+  blockers: shellBellBlockers.length,
+});
+const shellBellMoveEndRow: Row = Object.freeze({
+  id: "hook-family:moveend-shell-bell",
+  label: "Shell Bell Level-50 family checkpoint",
+  status: SOURCE_PROVEN_FAMILY_STATUS,
+  ...shellBellMoveEndSummary,
+  evidence: uniqueEvidence([
+    evidence(PARAMETERIZATION_PATH, "finite-candidate-route-guard-audit", "coverage.hookCatalogs.item.shellBell"),
+    evidence("reference/pokeemerald/src/battle_util.c", "ordered-runtime-guards", "ITEMEFFECT_KINGSROCK_SHELLBELL/HOLD_EFFECT_SHELL_BELL"),
+    evidence("reference/pokeemerald/include/constants/battle_script_commands.h", "moveend-state-constant", "MOVEEND_KINGSROCK_SHELLBELL=12"),
+    evidence("tests/shellBellHookJoinBatch.test.ts", "182-row-graph-program-batch"),
+    evidence("tests/shellBellOracleEvidence.test.ts", "battle-scene-off-family-receipt"),
+    evidence("docs/shell-bell-moveend-ground-truth.md", "family-ground-truth"),
+    evidence("tools/battle-lab/mechanic-shell-bell-heal-off.json", "direct-parameterized-oracle-fixture"),
+    evidence("tools/battle-lab/mechanic-shell-bell-control-off.json", "paired-control-oracle-fixture"),
+    evidence("tools/probe/probe-shell-bell-heal-off.py", "direct-parameterized-oracle-probe"),
+    evidence("tools/probe/receipts/shell-bell-heal-off.json", "direct-parameterized-oracle-receipt"),
+  ]),
+  notes: "All 182 power != 0 candidates retarget the already-proven moveend-color-change graph/program route to MOVEEND_KINGSROCK_SHELLBELL state 12 (same unbroken Cmd_moveend do-while sweep). MOVE_FUTURE_SIGHT is the sole exception via its own battle_util.c:1816 IGNORE_SHELL_BELL poison, distinct from Color Change's state-3 moveendfromto skip reason for the same move. King's Rock's 105 promoted rows are a full subset of these 182; King's Rock's HOLD_EFFECT_FLINCH arm is not claimed.",
+});
+
 const trainerRows: Row[] = (trainers.entries as AnyRecord[]).map((trainer) => Object.freeze({
   id: `trainer:${trainer.id}`,
   label: trainer.sourceId,
@@ -1973,6 +2075,13 @@ const sourceInputs = [
   "tools/battle-lab/mechanic-kings-rock-flinch-off.json",
   "tools/probe/probe-kings-rock-flinch-off.py",
   "tools/probe/receipts/kings-rock-flinch-off.json",
+  "docs/shell-bell-moveend-ground-truth.md",
+  "tests/shellBellHookJoinBatch.test.ts",
+  "tests/shellBellOracleEvidence.test.ts",
+  "tools/battle-lab/mechanic-shell-bell-heal-off.json",
+  "tools/battle-lab/mechanic-shell-bell-control-off.json",
+  "tools/probe/probe-shell-bell-heal-off.py",
+  "tools/probe/receipts/shell-bell-heal-off.json",
 ];
 for (const path of sourceInputs) requirePath(path);
 
@@ -2005,6 +2114,7 @@ const manifest: AnyRecord = {
     tryinfatuatingOblivious: tryinfatuatingObliviousSummary,
     tryexplosionDamp: tryexplosionDampSummary,
     kingsRockMoveEnd: kingsRockMoveEndSummary,
+    shellBellMoveEnd: shellBellMoveEndSummary,
     stateFamilies: { total: stateFamilyRows.length, tier1Covered: stateFamilyRows.filter((row) => row.status === "tier1-covered").length },
     hooks: {
       abilities: { total: abilityRows.length, oracleReceipted: abilityRows.filter((row) => row.status === "oracle-receipted-hook").length, zeroFactoryWidened: abilityRows.filter((row) => row.status === "zero-factory-carrier-widened-scope").length },
@@ -2022,6 +2132,7 @@ const manifest: AnyRecord = {
     tryinfatuatingOblivious: tryinfatuatingObliviousRow,
     tryexplosionDamp: tryexplosionDampRow,
     kingsRockMoveEnd: kingsRockMoveEndRow,
+    shellBellMoveEnd: shellBellMoveEndRow,
     stateFamilies: stateFamilyRows,
     hooks: { abilities: abilityRows, holdEffects: holdEffectRows },
     corpus: { trainers: trainerRows, level50Sets: level50Rows },
@@ -2061,6 +2172,7 @@ const markdown: string[] = [
   `- Attract/Oblivious checkpoint: **${manifest.summary.tryinfatuatingOblivious.candidates}** finite EFFECT_ATTRACT candidate, **${manifest.summary.tryinfatuatingOblivious.promotedRows}** promoted, **${manifest.summary.tryinfatuatingOblivious.exceptions}** exceptions, **${manifest.summary.tryinfatuatingOblivious.rosterOnlyCandidates}** roster-only candidates, and **${manifest.summary.tryinfatuatingOblivious.blockers}** active blockers.`,
   `- Explosion/Damp checkpoint: **${manifest.summary.tryexplosionDamp.candidates}** finite EFFECT_EXPLOSION candidates, **${manifest.summary.tryexplosionDamp.promotedRows}** promoted, **${manifest.summary.tryexplosionDamp.exceptions}** exceptions, **${manifest.summary.tryexplosionDamp.rosterOnlyCandidates}** roster-only candidates, **${manifest.summary.tryexplosionDamp.selectableSetOccurrences}** selectable occurrences / **${manifest.summary.tryexplosionDamp.fullLevel50CarrierRows}** full carrier rows, and **${manifest.summary.tryexplosionDamp.blockers}** active blockers.`,
   `- King's Rock checkpoint: **${manifest.summary.kingsRockMoveEnd.candidates}** finite Level-50 flag selectors, **${manifest.summary.kingsRockMoveEnd.promotedRows}** promoted, **${manifest.summary.kingsRockMoveEnd.exceptions}** explicit exception, **${manifest.summary.kingsRockMoveEnd.rosterOnlyCandidates}** roster-only candidates retained, and no Shell Bell overclaim.`,
+  `- Shell Bell checkpoint: **${manifest.summary.shellBellMoveEnd.candidates}** finite Level-50 power != 0 candidates (reused moveend-color-change population), **${manifest.summary.shellBellMoveEnd.promotedRows}** promoted by retargeting the already-proven route to state 12, **${manifest.summary.shellBellMoveEnd.exceptions}** explicit exception (Future Sight), and no King's Rock HOLD_EFFECT_FLINCH overclaim.`,
   `- State/status/volatile rows: **${manifest.summary.stateFamilies.tier1Covered}/${manifest.summary.stateFamilies.total}** have focused Tier-1 evidence; source-modeled rows remain listed separately.`,
   `- Hook universes: **${manifest.summary.hooks.abilities.total} abilities** and **${manifest.summary.hooks.holdEffects.total} hold effects**, including **${manifest.summary.hooks.abilities.zeroFactoryWidened + manifest.summary.hooks.holdEffects.zeroFactoryWidened}** legal widened-scope rows with zero Level-50 Factory carriers.`,
   `- Corpus: **${manifest.summary.corpus.ordinaryTrainers}/${trainers.count} ordinary trainers** and **${manifest.summary.corpus.level50Sets}/${LEVEL50_SET_COUNT} Level-50 sets** joined; the full set catalog contains ${manifest.summary.corpus.fullSetCatalog} rows including Open-only sets.`,
@@ -2175,6 +2287,16 @@ markdown.push(...table("King's Rock candidate and MOVEEND state-12 promotion", [
   (row) => evidenceText(row.evidence),
 ]));
 markdown.push(`${kingsRockMoveEndRow.notes}\n`);
+markdown.push("## Shell Bell item family checkpoint\n\n");
+markdown.push(...table("Shell Bell candidate and MOVEEND state-12 promotion", ["Status", "Candidates", "Promoted", "Exceptions", "Blockers", "Evidence"], [shellBellMoveEndRow], [
+  (row) => row.status,
+  (row) => String(row.candidates),
+  (row) => String(row.promotedRows),
+  (row) => String(row.exceptions),
+  (row) => String(row.blockers),
+  (row) => evidenceText(row.evidence),
+]));
+markdown.push(`${shellBellMoveEndRow.notes}\n`);
 markdown.push("## Status, volatile, and state families\n\n");
 markdown.push(...table("State rows", ["Family", "State symbol", "Status", "Evidence"], stateFamilyRows, [
   (row) => row.family,
