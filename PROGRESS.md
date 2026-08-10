@@ -5,6 +5,67 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1068 — [MAIN worker, 2026-08-09 night] **Shell Bell family complete: OFF receipt, census/manifest promotion, both sibling batches green**
+
+- **State:** tree is green: full suite **854 files / 8,312 passed / 1
+  skipped**, production build, `npm run typecheck` clean. `docs/gate6-coverage-manifest.md`
+  regenerates byte-idempotent and now reads **118 item join gaps / 106
+  ability join gaps** (was **195 item / 106 ability** at entry 1067 — Shell
+  Bell moves **77** previously-unsupported item rows to `source-proven-family`
+  and adds a second category to the **105** rows King's Rock already proved,
+  for **182** total item-axis source-proven rows; King's Rock's 105 stay a
+  full subset of Shell Bell's 182). `npm test`'s default heap now needs
+  `NODE_OPTIONS=--max-old-space-size=8192` (added to the `test` script,
+  matching the existing `build`/`typecheck` precedent) — the Shell Bell
+  census duplicates full graph/program route arrays for 182 more rows,
+  pushing `level50-move-parameterization.json` past Node's default heap
+  under plain `vitest run`; this was a real OOM on the unmodified command,
+  not a flake.
+- **Did (rung A):** `tools/battle-lab/mechanic-shell-bell-heal-off.json` /
+  `mechanic-shell-bell-control-off.json` stage a slower, defensively-built
+  Shuckle (Shell Bell holder, item 219) against a faster no-item Swellow,
+  both locked to 100%-accuracy Pound. Swellow's earlier action this same turn
+  damages Shuckle first (127→122 HP), satisfying `gBattlerAttacker !=
+  gBattlerTarget` / `hp != maxHP` / `hp != 0` on Shuckle's own qualifying hit
+  without needing a second turn (the staging trap named in the brief). Holder
+  arm heals `max(1, floor(7/8))=1` HP (122→123); no-item control arm's HP
+  never moves past the incoming Pound. Both arms consume byte-identical
+  action-RNG values/order/counts and spend exactly 1 PP each side.
+  `tools/probe/probe-shell-bell-heal-off.py` captures each arm through its
+  own `EmeraldOracle` instance (two instances cannot share one process —
+  observed native segfault) and merges the two raw ledgers in a pure-Python
+  pass; reproduced byte-identical across two independent fresh two-arm runs.
+  Committed alone first (`0d9c309c`).
+- **Did (rung B):** `tools/extract/extract-level50-move-parameterization.ts`
+  adds `shellBellRouteEvidence`, transforming (not recomputing)
+  `colorChangeRouteEvidenceByMove`'s 182 already-proven witnesses into Shell
+  Bell witnesses retargeted at `MOVEEND_KINGSROCK_SHELLBELL`/state 12, per
+  entry 1067's reuse recipe. Candidates **183** (power != 0, same population
+  as Color Change), promoted **182**, exception **1** (`MOVE_FUTURE_SIGHT`,
+  its own `battle_util.c:1816` `IGNORE_SHELL_BELL` reason — kept textually
+  distinct from Color Change's state-3 `moveendfromto` skip reason for the
+  same move, per entry 1067's finding). `hooks.item` is generalized from a
+  King's-Rock-only slot to an array of families (mirroring `hooks.ability`'s
+  existing shape), since King's Rock and Shell Bell now legitimately overlap
+  for 105 moves. `tools/report/gate6-coverage-manifest.ts` adds a parallel
+  `shellBellAudit`/`shellBellMoveEndRow` checkpoint (King's Rock's shape) plus
+  category validation in `sourceProvenFamilies`/`parameterizedHook`.
+  `tests/shellBellHookJoinBatch.test.ts` (Tier-1, `kingsRockHookJoinBatch`
+  shape) and `tests/shellBellOracleEvidence.test.ts` (pins the rung-A
+  receipt, `kingsRockOracleEvidence` shape) are new and green. Updated three
+  pinned counts in `tests/level50MoveParameterization.test.ts` and eleven in
+  `tests/gate6CoverageManifest.test.ts` that hard-coded the old 195/105
+  King's-Rock-only item state.
+- **Next:** continue the ordered family-level Gate-6 worklist from the
+  verified **106 ability / 118 item** row-gap frontier (side lane's
+  `docs/gate6-family-worklist.md` still cites the pre-Shell-Bell 195 number
+  in its own ranked list — out of scope for this step, side lane's to
+  refresh).
+- **Notes:** no engine, controller, round outcome, barrier pin, or canonical
+  window changed; `src/engine/battleScriptMoveEndOpcode.ts` was read, not
+  edited (already audited faithful at entry 1067). `docs/gate6-family-worklist.md`
+  intentionally untouched (side-lane ownership).
+
 ## 1067 — [MAIN worker, 2026-08-09 night] **Shell Bell source audit landed; census/receipt/promotion still open (honest partial)**
 
 - **State:** tree is green: full suite **852 files / 8,305 passed / 1
@@ -77,53 +138,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   worklist** regrouping the remaining 106 ability / 194 item row gaps.
 - **Notes:** no engine, controller, round outcome, barrier pin, or canonical
   window changed; the only test delta is the honest printfromtable re-pin.
-
-## 1065 — [supervisor, 2026-08-09] **Damp family certified; final union green**
-
-- **State:** final master union is green: full suite **849 files / 8,296
-  passed / 1 skipped**, production build, OFF oracle info, and animation
-  coverage pass. Full-policy **0:60 = 60 OK / 0 CRASH / 0 HANG** and vanilla
-  **0:20 = 20 OK / 0 CRASH / 0 HANG**.
-- **Did:** accepted attacker-held Damp's generic presentation-owner repair
-  (`196e0359`) and the source-bounded Explosion/Damp family (`da51e857`, merge
-  `41d59741`). The two exact candidates add ability categories **346→348**
-  while honestly leaving **106 ability / 195 item / 301 total** row gaps and
-  **194** ability source-proven rows unchanged because Color Change already
-  proved both rows.
-- **Did:** twice-fresh OFF evidence is byte-identical across no-Damp,
-  target-Damp, and attacker-Damp arms. Control spends PP **5→4**, self-KOs,
-  damages **95→44**, and owns exactly three RNG calls; either Damp holder
-  spends PP but preserves both HP values and action RNG while recording
-  ability **6** at the correct battler. Folded `animation-main` through the
-  bounded Poison Sting lower-carrier work (`b46f5f74`..`2628c57c`, merge
-  `d6f79306`) and Karate Chop source checkpoint (`008cf4f0`, merge
-  `4a2fcd59`), plus the animation-supervisor wind-down ledger (`87bc8a8c`,
-  merge `6bf8eca9`); animation coverage remains **147/276 exact**.
-- **Next:** continue the ordered family-level Gate-6 worklist from the verified
-  **106 ability / 195 item** row-gap frontier. Shell Bell still needs its own
-  bounded successful-damage census; Poison Sting and Karate Chop remain
-  evidence checkpoints until their animation acceptance contracts are met.
-- **Notes:** the seven-win live proof remains **56,556 frames / 4,228 renders**
-  through all seven battle seams. No canonical Battle-2 window past tick
-  33331, battle/turn/absolute-tick renderer branch, unsupported-barrier pin,
-  round outcome, controller interface, or Scene-OFF logical outcome changed.
-
-## 1064 — [MAIN worker, 2026-08-09] **Damp presentation owner snapshot fixed**
-
-- **State:** committed `196e0359` is green: focused **12/12**, smoke **8
-  files / 375 passed**, full suite **845 files / 8,283 passed / 1 skipped**,
-  production build, and Battle Scene OFF oracle info all pass.
-- **Did:** source `BattleScript_DampStopsExplosion` prints
-  `STRINGID_PKMNPREVENTSUSAGE` after `Cmd_tryexplosion` redirects
-  `gBattlerTarget` to its Damp holder. The full-turn message receipt now
-  freezes that target for this one id, and presentation resolves
-  `B_DEF_NAME_WITH_PREFIX` from it. Public-path tests pin target-held and
-  attacker-held Damp, ordinary defender naming, and unchanged unrelated
-  `STRINGID_USEDMOVE` event shape.
-- **Next:** return to the ordered family-level Gate-6 worklist from the
-  verified **106 ability / 195 item** hook-gap frontier; Shell Bell remains
-  separately scoped.
-- **Notes:** no oracle compare trace was needed for this source-backed text
-  owner fix. No Damage/PP/HP/RNG, selector mutation, controller/facility
-  state, animation, generated artifact, unsupported barrier, or canonical
-  Battle-2 window changed.

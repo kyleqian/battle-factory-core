@@ -8,7 +8,7 @@
     "build": "NODE_OPTIONS=--max-old-space-size=8192 tsc -b && vite build",
     "typecheck": "NODE_OPTIONS=--max-old-space-size=8192 tsc -b",
     "preview": "vite preview",
-    "test": "vitest run --no-watch --pool=forks --testTimeout=20000",
+    "test": "NODE_OPTIONS=--max-old-space-size=8192 vitest run --no-watch --pool=forks --testTimeout=20000",
     "test:smoke": "vitest run --no-watch --pool=forks --testTimeout=20000 tests/executableFrontierRatchet.test.ts tests/abilityItemParityCensus.test.ts tests/battleDecisionBoundary.test.ts tests/factoryBattleScriptFullTurnDecision.test.ts tests/roundController.test.ts tests/roundScenarioMatrix.test.ts tests/battleScene.test.ts tests/battleScriptRulesContext.test.ts",
     "soak": "node --experimental-strip-types tools/soak/randomRoundSoak.ts",
     "sweep-scratch": "node --experimental-strip-types tools/sweep-scratch-dirs.ts",

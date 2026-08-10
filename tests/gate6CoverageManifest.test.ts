@@ -22,6 +22,7 @@ const SYNCHRONIZE_CATEGORY = "moveend-synchronize-status";
 const TRYINFATUATING_OBLIVIOUS_CATEGORY = "tryinfatuating-oblivious";
 const TRYEXPLOSION_DAMP_CATEGORY = "tryexplosion-damp";
 const KINGS_ROCK_CATEGORY = "moveend-kings-rock";
+const SHELL_BELL_CATEGORY = "moveend-shell-bell";
 const SOUNDPROOF_ROSTER_MOVES = [
   "MOVE_ROAR", "MOVE_SING", "MOVE_SUPERSONIC", "MOVE_SCREECH", "MOVE_SNORE",
   "MOVE_UPROAR", "MOVE_METAL_SOUND", "MOVE_GRASS_WHISTLE", "MOVE_HYPER_VOICE",
@@ -150,6 +151,22 @@ const KINGS_ROCK_PROOF_PATHS = [
   "tools/probe/probe-kings-rock-flinch-off.py",
   "tools/probe/receipts/kings-rock-flinch-off.json",
 ] as const;
+const SHELL_BELL_PROOF_PATHS = [
+  "reference/pokeemerald/src/battle_util.c",
+  "reference/pokeemerald/src/battle_script_commands.c",
+  "reference/pokeemerald/include/constants/battle_script_commands.h",
+  "reference/pokeemerald/data/battle_scripts_1.s",
+  "src/data/gen/battle-script-graph.json",
+  "src/data/gen/battle-script-program.json",
+  "src/engine/battleScriptMoveEndOpcode.ts",
+  "tests/shellBellHookJoinBatch.test.ts",
+  "tests/shellBellOracleEvidence.test.ts",
+  "docs/shell-bell-moveend-ground-truth.md",
+  "tools/battle-lab/mechanic-shell-bell-heal-off.json",
+  "tools/battle-lab/mechanic-shell-bell-control-off.json",
+  "tools/probe/probe-shell-bell-heal-off.py",
+  "tools/probe/receipts/shell-bell-heal-off.json",
+] as const;
 
 const EXPLICIT_STATE_BEHAVIOR_ROWS = [
   [
@@ -231,6 +248,7 @@ function sourceProvenPathsFor(category: string): readonly string[] {
   if (category === TRYINFATUATING_OBLIVIOUS_CATEGORY) return TRYINFATUATING_OBLIVIOUS_PROOF_PATHS;
   if (category === TRYEXPLOSION_DAMP_CATEGORY) return TRYEXPLOSION_DAMP_PROOF_PATHS;
   if (category === KINGS_ROCK_CATEGORY) return KINGS_ROCK_PROOF_PATHS;
+  if (category === SHELL_BELL_CATEGORY) return SHELL_BELL_PROOF_PATHS;
   throw new Error(`unknown source-proven hook category ${category}`);
 }
 
@@ -447,6 +465,49 @@ function assertSourceProvenFamilyContract(
       expect(String(record(family.familyVerification).scopeBoundary)).toMatch(/TICKLE.*Shell Bell/);
       expect(String(record(family.runtimeGuardSignature).scopeBoundary)).toMatch(/HOLD_EFFECT_SHELL_BELL arm is not promoted/);
     }
+    if (family.category === SHELL_BELL_CATEGORY) {
+      const selector = record(family.selector);
+      const dataHpUpdate = record(entryPath.dataHpUpdate);
+      const moveEnd = record(entryPath.moveEnd);
+      const dispatcher = record(family.dispatcher);
+      const graphRoute = array(graph.route);
+      const programRoute = array(program.route);
+      expect(selector.guard).toBe("gBattleMoves[move].power != 0");
+      expect(String(selector.derivedFrom)).toContain("moveend-shell-bell candidate selector");
+      expect(graphRoute).toEqual(programRoute);
+      expect(graphRoute).toEqual(expect.arrayContaining([
+        expect.objectContaining({ mnemonic: "datahpupdate", operands: ["BS_TARGET"] }),
+      ]));
+      expect(dataHpUpdate).toMatchObject({ mnemonic: "datahpupdate", operands: ["BS_TARGET"] });
+      expect(moveEnd).toMatchObject({ state: "MOVEEND_KINGSROCK_SHELLBELL", stateValue: 12 });
+      expect(dispatcher).toMatchObject({
+        state: "MOVEEND_KINGSROCK_SHELLBELL",
+        stateValue: 12,
+        call: "ItemBattleEffects(ITEMEFFECT_KINGSROCK_SHELLBELL, 0, FALSE)",
+      });
+      expect(array(record(family.runtimeGuardSignature).orderedGuards)).toEqual([
+        "gBattleMoveDamage != 0",
+        "atkHoldEffect == HOLD_EFFECT_SHELL_BELL",
+        "!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)",
+        "gSpecialStatuses[gBattlerTarget].shellBellDmg != 0",
+        "gSpecialStatuses[gBattlerTarget].shellBellDmg != IGNORE_SHELL_BELL",
+        "gBattlerAttacker != gBattlerTarget",
+        "gBattleMons[gBattlerAttacker].hp != gBattleMons[gBattlerAttacker].maxHP",
+        "gBattleMons[gBattlerAttacker].hp != 0",
+      ]);
+      expect(record(record(family.runtimeGuardSignature).holdEffect)).toEqual({
+        item: "ITEM_SHELL_BELL",
+        effect: "HOLD_EFFECT_SHELL_BELL",
+        parameter: 8,
+      });
+      expect(record(family.familyVerification)).toMatchObject({
+        oracleReceipt: "docs/shell-bell-moveend-ground-truth.md",
+        oracleFixture: "tools/battle-lab/mechanic-shell-bell-heal-off.json",
+        oracleProbe: "tools/probe/probe-shell-bell-heal-off.py",
+      });
+      expect(String(record(family.familyVerification).scopeBoundary)).toMatch(/FUTURE_SIGHT.*IGNORE_SHELL_BELL/);
+      expect(String(record(family.runtimeGuardSignature).scopeBoundary)).toMatch(/HOLD_EFFECT_FLINCH.*is not promoted/);
+    }
     for (const path of sourceProvenPathsFor(String(family.category))) {
       if (!array(row.evidence).some((item) => record(item).path === path)) {
         throw new Error(`source-proven row lacks ${path} for ${String(family.category)}`);
@@ -646,9 +707,9 @@ describe("Gate-6 mechanics coverage manifest", () => {
       const axisSummary = record(perMoveHookJoins[axis]);
       expect(rows).toHaveLength(parameterizationData.moves.length);
       expect(axisSummary).toEqual({ rows: rows.length, unsupported: sourceUnsupported, gaps: sourceUnsupported });
-      expect(sourceUnsupported).toBe(axis === "item" ? 195 : 106);
+      expect(sourceUnsupported).toBe(axis === "item" ? 118 : 106);
     }
-    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 301, gaps: 301 });
+    expect(record(perMoveHookJoins.total)).toEqual({ rows: 600, unsupported: 224, gaps: 224 });
     expect(record(summary.kingsRockMoveEnd)).toEqual({
       candidates: 106,
       promotedRows: 105,
@@ -664,6 +725,20 @@ describe("Gate-6 mechanics coverage manifest", () => {
       blockers: 0,
       rosterOnlyCandidates: 12,
     });
+    expect(record(summary.shellBellMoveEnd)).toEqual({
+      candidates: 183,
+      promotedRows: 182,
+      exceptions: 1,
+      blockers: 0,
+    });
+    expect(record(sections.shellBellMoveEnd)).toMatchObject({
+      status: SOURCE_PROVEN_FAMILY_STATUS,
+      candidates: 183,
+      promotedRows: 182,
+      exceptions: 1,
+      blockers: 0,
+    });
+    expect(String(record(sections.shellBellMoveEnd).notes)).toMatch(/182 power != 0 candidates/);
     expect(synchronizeMoveEnd).toEqual({ candidates: 30, promotedRows: 30, exceptions: 0, blockers: 0 });
     expect(manifestSynchronizeMoveEnd).toMatchObject({
       status: SOURCE_PROVEN_FAMILY_STATUS,
@@ -758,7 +833,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
       .filter((move) => !sourceSoundproof.includes(move)));
     expect(soundproofOnlyAbilityGaps - Number(record(perMoveHookJoins.ability).gaps)).toBe(uniqueNonSoundproofProven.size);
     expect(parameterizationData.moves.length + soundproofOnlyAbilityGaps).toBe(591);
-    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(301);
+    expect(Number(record(perMoveHookJoins.total).gaps)).toBe(224);
     const sourceKingsRock = parameterizationData.moves
       .filter((move) => array(move.hooks.item.supportedCategories).map(String).includes(KINGS_ROCK_CATEGORY))
       .map((move) => move.move);
@@ -767,10 +842,20 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(parameterizationData.moves.filter((move) =>
       array(move.hooks.item.supportedCategories).map(String).includes(KINGS_ROCK_CATEGORY)
       && move.battleScript.executionInventory === "level50-roster-only")).toHaveLength(12);
+    const sourceShellBell = parameterizationData.moves
+      .filter((move) => array(move.hooks.item.supportedCategories).map(String).includes(SHELL_BELL_CATEGORY))
+      .map((move) => move.move);
+    expect(sourceShellBell).toHaveLength(182);
+    expect(sourceShellBell).not.toContain("MOVE_FUTURE_SIGHT");
+    expect(sourceKingsRock.every((move) => sourceShellBell.includes(move))).toBe(true);
     const sourceProvenItemRows = array(manifestHookJoinSections.item)
       .map(record)
       .filter((row) => row.status === SOURCE_PROVEN_FAMILY_STATUS);
-    expect(sourceProvenItemRows.map((row) => String(row.move)).sort()).toEqual([...sourceKingsRock].sort());
+    expect(sourceProvenItemRows.map((row) => String(row.move)).sort()).toEqual([...sourceShellBell].sort());
+    for (const row of sourceProvenItemRows) {
+      const sourceMove = parameterizationData.moves.find((move) => move.move === row.move)!;
+      assertSourceProvenFamilyContract(record(sourceMove.hooks.item), row);
+    }
     const sourceProvenRows = array(manifestHookJoinSections.ability)
       .map(record)
       .filter((row) => row.status === SOURCE_PROVEN_FAMILY_STATUS);
@@ -944,8 +1029,9 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(oracle.receiptGaps).toBe(0);
     expect(String(record(manifest.gate6).nextAcceptanceUnit)).toMatch(/^Per-move hook-join family:/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Gate 6 is OPEN/);
-    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*195 item join gaps\*\* and \*\*106 ability join gaps\*\*/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/\*\*118 item join gaps\*\* and \*\*106 ability join gaps\*\*/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/King's Rock checkpoint: \*\*106\*\* finite Level-50 flag selectors, \*\*105\*\* promoted/);
+    expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Shell Bell checkpoint: \*\*183\*\* finite Level-50 power != 0 candidates.*\*\*182\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/194 ability rows are source-proven/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Synchronize checkpoint: \*\*30\*\* finite Level-50 candidates, \*\*30\*\* promoted/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Attract\/Oblivious checkpoint: \*\*1\*\* finite EFFECT_ATTRACT candidate, \*\*1\*\* promoted, \*\*0\*\* exceptions, \*\*0\*\* roster-only candidates, and \*\*0\*\* active blockers/);

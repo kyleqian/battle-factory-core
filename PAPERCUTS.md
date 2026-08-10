@@ -901,3 +901,16 @@ route should fail with an actionable ambiguity error when both routes exist.
   `--log` paths explicitly.
 - **Real fix:** include the lane name and/or `$$` in the default log
   filename.
+
+## Two `EmeraldOracle` instances cannot coexist in one Python process
+
+- **What:** constructing a second `EmeraldOracle` in the same process
+  crashes silently before writing any output; `run-mgba-probe.py`'s
+  teardown tolerance hides the traceback. Multi-fixture verify scripts must
+  shell out one subprocess per fixture (the `run-mgba-probe.py` convention).
+- **Hits:** 1 (2026-08-09 night, Rank-1 receipt-pack worker).
+- **Cost each:** ~10 min.
+- **Workaround:** `--single <fixture> <out>` self-exec subprocess pattern
+  (see `tools/probe/verify-item-move-end-paralysis-off.py`).
+- **Real fix:** make the second constructor fail loudly, or document the
+  one-core-per-process constraint in the probe harness README.
