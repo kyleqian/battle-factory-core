@@ -72,6 +72,10 @@ for (const token of [
 ]) if (!effects.includes(token)) throw new Error(`Role Play silhouette source changed: ${token}`);
 
 for (const token of [
+  "#define TAG_MOVE_EFFECT_MON_1 55125",
+  ".tileTag = TAG_MOVE_EFFECT_MON_1",
+  ".paletteTag = TAG_MOVE_EFFECT_MON_1",
+  "{ gMiscBlank_Gfx, MON_PIC_SIZE, TAG_MOVE_EFFECT_MON_1, }",
   "u8 CreateAdditionalMonSpriteForMoveAnim",
   "GetMonSpritePalFromSpeciesAndPersonality(species, trainerId, personality)",
   "gMonFrontPicTable[species]",
@@ -163,5 +167,6 @@ console.log(
   + "(0x5c bytes), 13 commands, five graph components with sole new task "
   + "AnimTask_RolePlaySilhouette; set 169 FRONTIER_MON_KADABRA_1 is the sole "
   + "and lowest Level-50 carrier; stable target set 156 ONIX. Dense bilateral "
-  + "RAM/hardware/raw-RGB/framebuffer evidence and additional-mon latch proof remain required.",
+  + "RAM/hardware/raw-RGB/framebuffer evidence, shared additional-mon tile/palette "
+  + "TAG_MOVE_EFFECT_MON_1 resource proof, and OAM latch proof are supplied by rolePlayPortable.ts.",
 );

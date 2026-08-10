@@ -6,5 +6,5 @@
   "changeMap":"tools/compare/evidence/role-play-changemap-player.txt","changeMapSha256":"2e0cb80c3a9ed21b9d36ac06616b564df52102dd276ff911dbb4db2924972f69",
   "attacker":{"species":"KADABRA","side":"player","animationCenter":{"x":72,"y":80}},"target":{"species":"ONIX","side":"opponent","art":"back","personality":1793700000,"otId":416049562},
   "fieldProfile":{"playerHp":133,"playerMaxHp":133,"opponentHp":117,"opponentMaxHp":117,"playerGender":"male","opponentGender":"male"},
-  "acceptance":{"status":"exact","componentMatching":147,"framebufferMatching":147}
+  "acceptance":{"status":"exact","componentMatching":147,"typedSeamMatching":147,"oamHardwareMatching":147,"rawRgbMatching":147,"framebufferMatching":147}
 }
