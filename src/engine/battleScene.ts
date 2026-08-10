@@ -904,6 +904,7 @@ import {
   sceneOnSuperFangView,
   sceneOnMegaPunchView,
   sceneOnMegaKickView,
+  sceneOnHiJumpKickView,
   sceneOnRollingKickView,
   sceneOnLowKickView,
   sceneOnKarateChopView,
@@ -1419,6 +1420,7 @@ const ballDisplay = ballDisplayAsset as BallDisplayAsset;
 const downArrow = downArrowAsset as DownArrowAsset;
 const ballStatusBar = (battleHealthboxAsset as { ballStatusBar: BallStatusBarAsset }).ballStatusBar;
 const grovyleFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GROVYLE!;
+const medichamFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MEDICHAM!;
 const kabutoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).KABUTO!;
 const KABUTO_CORNER = { x: 144, y: 25 };
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
@@ -2601,6 +2603,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const medichamBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MEDICHAM!;
 const poliwrathBackSprite = battleBackSpritesAsset.POLIWRATH;
 const lickitungBackSprite = battleBackSpritesAsset.LICKITUNG;
 const hitmontopBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HITMONTOP!;
@@ -24629,6 +24632,124 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? `${attackerSpecies} used` : `Foe ${attackerSpecies} used`,
       moveName,
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "HI_JUMP_KICK") {
+    const view = sceneOnHiJumpKickView(state);
+    // HJK's gSlideMonTo* dummies, foot callback, basic hitsplat, and
+    // ShakeMonInPlace target writes all reach scanout one age after their
+    // source RAM row. This is this move's own bilateral latch: the dense
+    // window puts the first foot pixels at source age 36 for the age-35
+    // creation row, and the first target shake pulse at source age 53 for
+    // the age-52 task row.
+    const displayed = sceneOnHiJumpKickView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "MEDICHAM"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MEDICHAM"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged HI_JUMP_KICK pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attacker = playerToOpponent ? medichamBackSprite : medichamFrontSprite;
+    const target = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const black = { r: 0, g: 0, b: 0 };
+    const fieldPalette = view.alpha
+      ? blendPaletteBanksToward(battleBg.palette, black, 0)
+      : battleBg.palette;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      fieldPalette,
+    );
+    const targetX2 = displayed.targetX2;
+    const drawTarget = (): void => drawSpriteSheet(
+      fb,
+      target.tileset,
+      target.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    drawTarget();
+    // `monbg ANIM_DEF_PARTNER` makes this target copy the target-2 backdrop;
+    // the OBJ attacker and effect sprites are then composited over that copy.
+    const targetBackdrop = fb.slice();
+    drawSpriteSheet(
+      fb,
+      attacker.tileset,
+      attacker.palette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+    );
+    if (displayed.foot) {
+      const foot = displayed.foot;
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimHandsAndFeet.tileset, 4, 4),
+        battleAnimHandsAndFeet.palette,
+        foot.x + foot.x2 - 16,
+        foot.y + foot.y2 - 16,
+      );
+    }
+    if (displayed.hitsplat) {
+      const hitsplat = displayed.hitsplat;
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        targetBackdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        hitsplat.x,
+        hitsplat.y,
+        303,
+        0,
+        0,
+        303,
+        12,
+        8,
+        false,
+      );
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "MEDICHAM",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MEDICHAM" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MEDICHAM used" : "Foe MEDICHAM used",
+      "HI JUMP KICK!",
       99,
     );
     return;

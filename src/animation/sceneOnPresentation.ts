@@ -378,6 +378,10 @@ import {
   type MegaKickState,
 } from "./megaKick.ts";
 import {
+  hiJumpKickAtAge,
+  type HiJumpKickState,
+} from "./hiJumpKick.ts";
+import {
   rollingKickAtAge,
   type RollingKickState,
 } from "./rollingKick.ts";
@@ -1537,6 +1541,14 @@ export interface SceneOnMegaKickConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Narrow Scene-ON seam for the source-isolated Hi Jump Kick body. */
+export interface SceneOnHiJumpKickConfig {
+  readonly move: "HI_JUMP_KICK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnRollingKickConfig {
   readonly move: "ROLLING_KICK";
   readonly attacker: SceneOnPresentationBattler;
@@ -2492,6 +2504,7 @@ export type SceneOnMoveConfig =
   | SceneOnSuperFangConfig
   | SceneOnMegaPunchConfig
   | SceneOnMegaKickConfig
+  | SceneOnHiJumpKickConfig
   | SceneOnRollingKickConfig
   | SceneOnLowKickConfig
   | SceneOnKarateChopConfig
@@ -2778,6 +2791,12 @@ export interface SceneOnMegaPunchView extends MegaPunchState {
 }
 
 export interface SceneOnMegaKickView extends MegaKickState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnHiJumpKickView extends HiJumpKickState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4909,6 +4928,26 @@ export function sceneOnMegaKickView(
     target: state.config.target,
     ...megaKickAtAge(
       state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first pointer-bounded `Move_HI_JUMP_KICK` source row. */
+export function sceneOnHiJumpKickView(
+  state: SceneOnMovePresentationState<SceneOnHiJumpKickConfig>,
+): SceneOnHiJumpKickView {
+  if (state.config.move !== "HI_JUMP_KICK") {
+    throw new Error(`expected HI_JUMP_KICK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...hiJumpKickAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
