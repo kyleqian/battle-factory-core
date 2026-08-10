@@ -20,7 +20,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** twice-fresh OFF packets remain byte-identical at `92d3feb4…` /
   `136efa4a…` / `ea323d9e…`; no fixture mutation, decrypted bytes/pointers,
   duration/identity/residual fit, production recording import, barrier change,
-  canonical Battle-2, animation, aggregate stats, or clock wiring.
+  canonical Battle-2, animation, aggregate stats, or clock wiring. Independent
+  source/ELF audit passed and its 96-case slot/offset gap is pinned by
+  `2594377b`. The orient animation fold is recorded in archived entry 1077;
+  at 16:04 `animation-main` was 30 commits ahead with its separate supervisor
+  still active, so that later tail is intentionally left for the next orient.
+  `DEFERRED.md` has no open entries.
 
 ## 1095 — [MAIN worker, 2026-08-10] **#55 direct level route bounded; complete callee not reducible yet**
 
