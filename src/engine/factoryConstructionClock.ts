@@ -9,10 +9,10 @@
  * absolute presentation tick.
  *
  * The cycle-cost callback is intentional.  The issue-55 v2 packet records
- * exact source boundaries and interrupt timing, but refutes a callback keyed
- * only by the fields below: the compiled nature check has candidate-dependent
- * cost, and VBlank service has live audio/DMA-dependent cost.  Until those
- * states have a source-derived clock model, the clean stream remains the only
+ * exact source boundaries and interrupt timing. The compiled nature check's
+ * candidate-dependent cost is reduced below from its Thumb instruction path;
+ * VBlank service still has live audio/DMA-dependent cost. Until that remaining
+ * state has a source-derived clock model, the clean stream remains the only
  * source-state-only production contract.
  *
  * Source references:
@@ -36,8 +36,7 @@ export const GBA_VBLANK_CYCLES = 280_896;
  * per-trace cursor schedule.
  */
 export const REQUIRED_FACTORY_CONSTRUCTION_CLOCK_EVIDENCE = Object.freeze([
-  "candidate-personality-dependent GetNatureFromPersonality cycle accounting",
-  "deterministic VBlank audio/DMA workload state and interrupt-entry latency",
+  "deterministic VBlank/audio/DMA workload state and interrupt/event-entry latency",
 ] as const);
 
 export type FactoryConstructionSourceFunction =
@@ -79,6 +78,313 @@ export interface FactoryConstructionOperation {
   input: FactoryMonConstructionInput | null;
   attempt: number | null;
   half: FactoryConstructionHalf | null;
+  /** u16 returned by this half's Random() call. */
+  randomValue: number | null;
+  /** Candidate assembled exactly as `Random32()` does; attempt operations only. */
+  candidatePersonality: number | null;
+  candidateNature: number | null;
+  natureAccepted: boolean | null;
+}
+
+export interface FactoryNatureAttemptTiming {
+  personality: number;
+  targetNature: number;
+  candidateNature: number;
+  accepted: boolean;
+  /**
+   * Source-owned master cycles from `GetNatureFromPersonality+2` to the next
+   * low Random entry (wrong nature) or `CreateMon+2` (accepted nature).
+   * Asynchronous timer/DMA service is deliberately outside this reducer.
+   */
+  cycles: number;
+}
+
+const THUMB_SEQUENTIAL_CYCLES = 2;
+const THUMB_PIPELINE_REFILL_CYCLES = 6;
+
+function rotateRight32(value: number, amount: number): number {
+  const shift = amount & 31;
+  if (shift === 0) return value >>> 0;
+  return ((value >>> shift) | (value << (32 - shift))) >>> 0;
+}
+
+/**
+ * Reduce the exact retail Thumb path for one nature rejection check.
+ *
+ * The compiler emits `GetNatureFromPersonality -> __umodsi3(personality, 25)`
+ * (`pokemon.c:5498`, ROM 0x0806d088; libgcc ROM 0x082e7be0), then either the
+ * caller's `bne` back to `Random32()` or its accepted `CreateMon` setup
+ * (`pokemon.c:2562-2575`, ROM 0x08068676). Emerald configures WS0 as N=3,
+ * S=1 with prefetch (`main.c:98`), so mGBA charges two master cycles per
+ * sequential Thumb instruction, six more for a taken control-flow pipeline
+ * refill, and one internal cycle for register `ROR`. Stack accesses in this
+ * path are fully hidden by prefetch. This reducer follows those compiled
+ * branches; it contains no personality, trainer, set, frame, or receipt table.
+ * The v2 receipt has eleven +18-cycle asynchronous scheduler stalls inside
+ * these windows; those are live hardware workload, not instructions here.
+ */
+export function reduceFactoryNatureAttemptTiming(
+  candidatePersonality: number,
+  targetNature: number,
+): FactoryNatureAttemptTiming {
+  let r0 = requireU32(candidatePersonality, "candidatePersonality");
+  if (!Number.isInteger(targetNature) || targetNature < 0 || targetNature >= 25) {
+    throw new Error(`targetNature must be in [0, 24], got ${targetNature}`);
+  }
+
+  let cycles = 0;
+  const instruction = (count = 1): void => {
+    cycles += THUMB_SEQUENTIAL_CYCLES * count;
+  };
+  const branch = (taken = true): void => {
+    instruction();
+    if (taken) cycles += THUMB_PIPELINE_REFILL_CYCLES;
+  };
+  const call = (): void => {
+    // Thumb BL is a two-instruction pair; its second half writes PC.
+    instruction(2);
+    cycles += THUMB_PIPELINE_REFILL_CYCLES;
+  };
+  const returnBranch = (): void => branch();
+  const ror = (value: number, amount: number): number => {
+    instruction();
+    cycles += 1;
+    return rotateRight32(value, amount);
+  };
+
+  // GetNatureFromPersonality+2: movs r1, #25; BL __umodsi3.
+  instruction();
+  call();
+
+  let r1 = 25;
+  instruction(); // cmp r1, #0
+  branch(false); // divisor is a source constant and never zero
+  let r3 = 1;
+  instruction();
+  instruction(); // cmp r0, r1
+  const belowDivisor = r0 < r1;
+  branch(!belowDivisor);
+
+  if (belowDivisor) {
+    returnBranch();
+  } else {
+    instruction(); // push {r4}
+    let r4 = 1;
+    instruction();
+    r4 = (r4 << 28) >>> 0;
+    instruction();
+
+    // __umodsi3 Loop1: normalize four quotient bits at a time.
+    while (true) {
+      instruction();
+      const reachedLargeDivisor = r1 >= r4;
+      branch(reachedLargeDivisor);
+      if (reachedLargeDivisor) break;
+      instruction();
+      const reachedDividend = r1 >= r0;
+      branch(reachedDividend);
+      if (reachedDividend) break;
+      r1 = (r1 << 4) >>> 0;
+      r3 = (r3 << 4) >>> 0;
+      instruction(2);
+      branch();
+    }
+
+    r4 = (r4 << 3) >>> 0;
+    instruction();
+    // Loop2: normalize the remaining zero to three quotient bits.
+    while (true) {
+      instruction();
+      const reachedLargeDivisor = r1 >= r4;
+      branch(reachedLargeDivisor);
+      if (reachedLargeDivisor) break;
+      instruction();
+      const reachedDividend = r1 >= r0;
+      branch(reachedDividend);
+      if (reachedDividend) break;
+      r1 = (r1 << 1) >>> 0;
+      r3 = (r3 << 1) >>> 0;
+      instruction(2);
+      branch();
+    }
+
+    let ip = r3;
+    let r2 = 0;
+    while (true) {
+      // Loop3 resets r2 for each four-bit quotient group.
+      r2 = 0;
+      instruction();
+
+      instruction();
+      const below0 = r0 < r1;
+      branch(below0);
+      if (!below0) {
+        r0 = (r0 - r1) >>> 0;
+        instruction();
+      }
+
+      r4 = r1 >>> 1;
+      instruction();
+      instruction();
+      const below1 = r0 < r4;
+      branch(below1);
+      if (!below1) {
+        r0 = (r0 - r4) >>> 0;
+        instruction();
+        ip = r3;
+        instruction();
+        r4 = 1;
+        instruction();
+        r3 = ror(r3, r4);
+        r2 = (r2 | r3) >>> 0;
+        instruction();
+        r3 = ip;
+        instruction();
+      }
+
+      r4 = r1 >>> 2;
+      instruction();
+      instruction();
+      const below2 = r0 < r4;
+      branch(below2);
+      if (!below2) {
+        r0 = (r0 - r4) >>> 0;
+        instruction();
+        ip = r3;
+        instruction();
+        r4 = 2;
+        instruction();
+        r3 = ror(r3, r4);
+        r2 = (r2 | r3) >>> 0;
+        instruction();
+        r3 = ip;
+        instruction();
+      }
+
+      r4 = r1 >>> 3;
+      instruction();
+      instruction();
+      const below3 = r0 < r4;
+      branch(below3);
+      if (!below3) {
+        r0 = (r0 - r4) >>> 0;
+        instruction();
+        ip = r3;
+        instruction();
+        r4 = 3;
+        instruction();
+        r3 = ror(r3, r4);
+        r2 = (r2 | r3) >>> 0;
+        instruction();
+        r3 = ip;
+        instruction();
+      }
+
+      ip = r3;
+      instruction();
+      instruction();
+      const exactRemainder = r0 === 0;
+      branch(exactRemainder);
+      if (exactRemainder) break;
+      r3 >>>= 4;
+      instruction();
+      const quotientDone = r3 === 0;
+      branch(quotientDone);
+      if (quotientDone) break;
+      r1 >>>= 4;
+      instruction();
+      branch();
+    }
+
+    r4 = 14;
+    instruction();
+    r4 = (r4 << 28) >>> 0;
+    instruction();
+    r2 = (r2 & r4) >>> 0;
+    instruction();
+    const needsCorrection = r2 !== 0;
+    branch(needsCorrection);
+    if (needsCorrection) {
+      r3 = ip;
+      instruction();
+      r4 = 3;
+      instruction();
+      r3 = ror(r3, r4);
+      instruction();
+      const skipThird = (r2 & r3) === 0;
+      branch(skipThird);
+      if (!skipThird) {
+        r4 = r1 >>> 3;
+        r0 = (r0 + r4) >>> 0;
+        instruction(2);
+      }
+
+      r3 = ip;
+      instruction();
+      r4 = 2;
+      instruction();
+      r3 = ror(r3, r4);
+      instruction();
+      const skipSecond = (r2 & r3) === 0;
+      branch(skipSecond);
+      if (!skipSecond) {
+        r4 = r1 >>> 2;
+        r0 = (r0 + r4) >>> 0;
+        instruction(2);
+      }
+
+      r3 = ip;
+      instruction();
+      r4 = 1;
+      instruction();
+      r3 = ror(r3, r4);
+      instruction();
+      const skipFirst = (r2 & r3) === 0;
+      branch(skipFirst);
+      if (!skipFirst) {
+        r4 = r1 >>> 1;
+        r0 = (r0 + r4) >>> 0;
+        instruction(2);
+      }
+    }
+
+    instruction(); // pop {r4}
+    returnBranch();
+  }
+
+  // GetNatureFromPersonality's u8 conversion and return.
+  instruction(2);
+  instruction(); // pop {r1}
+  returnBranch();
+
+  const candidateNature = candidatePersonality % 25;
+  const accepted = candidateNature === targetNature;
+  // Caller u8 conversion, compare, and rejection branch.
+  instruction(3);
+  branch(!accepted);
+  if (accepted) {
+    // Accepted setup at 0x08068684 through the CreateMon entry boundary.
+    instruction();
+    instruction(3);
+    instruction();
+    instruction();
+    instruction();
+    instruction();
+    instruction(3);
+    call();
+  } else {
+    // BL Random plus its first literal load; receipt observes Random+2.
+    call();
+    instruction();
+  }
+
+  return Object.freeze({
+    personality: candidatePersonality >>> 0,
+    targetNature,
+    candidateNature,
+    accepted,
+    cycles,
+  });
 }
 
 /**
@@ -286,8 +592,23 @@ function sourceOperation(
   monIndex: number | null,
   attempt: number | null = null,
   half: FactoryConstructionHalf | null = null,
+  facts: Partial<Pick<
+    FactoryConstructionOperation,
+    "randomValue" | "candidatePersonality" | "candidateNature" | "natureAccepted"
+  >> = {},
 ): FactoryConstructionOperation {
-  return { kind, sourceFunction, monIndex, input, attempt, half };
+  return {
+    kind,
+    sourceFunction,
+    monIndex,
+    input,
+    attempt,
+    half,
+    randomValue: facts.randomValue ?? null,
+    candidatePersonality: facts.candidatePersonality ?? null,
+    candidateNature: facts.candidateNature ?? null,
+    natureAccepted: facts.natureAccepted ?? null,
+  };
 }
 
 class ConstructionClock {
@@ -385,6 +706,7 @@ class ConstructionClock {
       monIndex,
       attempt,
       half,
+      { randomValue: draw.value },
     ));
     return draw.value;
   }
@@ -443,6 +765,7 @@ export function scheduleFactoryConstruction(
       const low = clock.constructionRandom(input.sourceFunction, mon, monIndex, attempt, "low");
       const high = clock.constructionRandom(input.sourceFunction, mon, monIndex, attempt, "high");
       personality = (low | (high << 16)) >>> 0;
+      const candidateNature = natureFromPersonality(personality);
       lastConstructionEventIndex = clock.events.length - 1;
       clock.run(sourceOperation(
         mon,
@@ -450,8 +773,14 @@ export function scheduleFactoryConstruction(
         "personality-attempt",
         monIndex,
         attempt,
+        null,
+        {
+          candidatePersonality: personality,
+          candidateNature,
+          natureAccepted: candidateNature === mon.nature,
+        },
       ));
-      if (natureFromPersonality(personality) === mon.nature) break;
+      if (candidateNature === mon.nature) break;
       attempt += 1;
     } while (true);
 

@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { reduceFactoryNatureAttemptTiming } from "../src/engine/factoryConstructionClock.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
 
 type CycleEvent = {
@@ -165,24 +166,43 @@ describe("Factory construction v2 source/cycle receipt", () => {
     }
   });
 
-  it("refutes the current operation-only callback and names the two absent inputs", () => {
+  it("replays every nature-check boundary from candidate-aware compiled instruction timing", () => {
+    let acceptedChecks = 0;
+    let rejectedChecks = 0;
+    const asynchronousStallsByCase: number[] = [];
     for (const { value } of probes) {
       const events = value.cycleEvidence.events;
       const pauses = interruptPauses(events);
-      const attemptCosts: number[] = [];
+      const construction = value.sequence.filter((event) => event.tag === "construction");
+      let constructionIndex = 0;
+      let asynchronousStalls = 0;
       for (const mon of value.monBoundaries) {
         const monEvents = events.filter((event) => event.monIndex === mon.monIndex);
         const random = monEvents.filter((event) => event.kind === "personality-random");
         const checks = monEvents.filter((event) => event.kind === "personality-attempt-check");
         const create = monEvents.find((event) => event.kind === "create-mon-entry")!;
         checks.forEach((check, attempt) => {
+          const low = construction[constructionIndex++]!;
+          const high = construction[constructionIndex++]!;
+          const candidate = personality(low, high);
           const end = attempt + 1 < checks.length ? random[(attempt + 1) * 2]! : create;
-          attemptCosts.push(sourceCycles(check, end, pauses));
+          const expected = reduceFactoryNatureAttemptTiming(candidate, mon.targetNature);
+          expect(expected.candidateNature).toBe(candidate % 25);
+          expect(expected.accepted).toBe(attempt + 1 === checks.length);
+          const measuredCycles = sourceCycles(check, end, pauses);
+          const externalCycles = measuredCycles - expected.cycles;
+          // A fresh instruction trace attributes this sole residual to mGBA
+          // servicing an asynchronous hardware timing event between two
+          // ordinary Thumb instructions. It is part of the still-open live
+          // audio/timer/DMA clock, not GetNatureFromPersonality's path.
+          expect([0, 18]).toContain(externalCycles);
+          if (externalCycles !== 0) asynchronousStalls += 1;
+          if (expected.accepted) acceptedChecks += 1;
+          else rejectedChecks += 1;
         });
       }
-      // GetNatureFromPersonality compiles through data-dependent division.
-      // The candidate personality is not present on FactoryConstructionOperation.
-      expect(new Set(attemptCosts).size).toBeGreaterThan(30);
+      expect(constructionIndex).toBe(construction.length);
+      asynchronousStallsByCase.push(asynchronousStalls);
 
       const callbackCosts = interruptPauses(events)
         .filter(([entry]) => entry >= value.entry.masterCycles && entry <= value.return.masterCycles)
@@ -190,5 +210,8 @@ describe("Factory construction v2 source/cycle receipt", () => {
       // Interrupt service also depends on live audio/DMA state, not mon inputs.
       expect(new Set(callbackCosts).size).toBeGreaterThan(20);
     }
+    expect(acceptedChecks).toBe(12);
+    expect(rejectedChecks).toBe(266);
+    expect(asynchronousStallsByCase).toEqual([5, 2, 4]);
   });
 });

@@ -4,6 +4,7 @@ import {
   factoryMonConstructionInputFromSet,
   GBA_VBLANK_CYCLES,
   REQUIRED_FACTORY_CONSTRUCTION_CLOCK_EVIDENCE,
+  reduceFactoryNatureAttemptTiming,
   scheduleFactoryConstruction,
   scheduleFactoryConstructionCleanStream,
   vblankRandom,
@@ -170,10 +171,66 @@ describe("Factory construction source-operation clock", () => {
     }
   });
 
-  it("does not pretend the v2 receipts identify a live source-general callback", () => {
+  it("propagates each Random32 candidate and its accepted/wrong-nature branch to the cost key", () => {
+    const sourceFunction = "FillFactoryFrontierTrainerParty" as const;
+    const startCursor = 0x1234_5678;
+    const first = randomU32(startCursor);
+    const second = randomU32(first.rngValue);
+    expect(natureFromPersonality(first.value)).not.toBe(natureFromPersonality(second.value));
+    const operations: FactoryConstructionOperation[] = [];
+    const schedule = scheduleFactoryConstructionCleanStream({
+      sourceFunction,
+      mons: [mon(natureFromPersonality(second.value), sourceFunction)],
+      clock: {
+        start: { frame: 0, cycle: 0, rngValue: startCursor },
+        cycleCost: (operation) => {
+          operations.push(operation);
+          return operation.kind === "personality-attempt"
+            ? reduceFactoryNatureAttemptTiming(
+              operation.candidatePersonality!,
+              operation.input!.nature,
+            ).cycles
+            : 0;
+        },
+      },
+    });
+
+    const randoms = operations.filter((operation) => operation.kind === "personality-random");
+    expect(randoms.map((operation) => ({
+      attempt: operation.attempt,
+      half: operation.half,
+      randomValue: operation.randomValue,
+      candidatePersonality: operation.candidatePersonality,
+    }))).toEqual([
+      { attempt: 0, half: "low", randomValue: first.value & 0xffff, candidatePersonality: null },
+      { attempt: 0, half: "high", randomValue: first.value >>> 16, candidatePersonality: null },
+      { attempt: 1, half: "low", randomValue: second.value & 0xffff, candidatePersonality: null },
+      { attempt: 1, half: "high", randomValue: second.value >>> 16, candidatePersonality: null },
+    ]);
+    const attempts = operations.filter((operation) => operation.kind === "personality-attempt");
+    expect(attempts.map((operation) => ({
+      personality: operation.candidatePersonality,
+      candidateNature: operation.candidateNature,
+      accepted: operation.natureAccepted,
+    }))).toEqual([
+      {
+        personality: first.value,
+        candidateNature: natureFromPersonality(first.value),
+        accepted: false,
+      },
+      {
+        personality: second.value,
+        candidateNature: natureFromPersonality(second.value),
+        accepted: true,
+      },
+    ]);
+    expect(schedule.mons[0]!.personality).toBe(second.value);
+    expect(schedule.end.rngValue).toBe(second.rngValue);
+  });
+
+  it("keeps live exactness bounded by the unresolved VBlank workload only", () => {
     expect(REQUIRED_FACTORY_CONSTRUCTION_CLOCK_EVIDENCE).toEqual([
-      "candidate-personality-dependent GetNatureFromPersonality cycle accounting",
-      "deterministic VBlank audio/DMA workload state and interrupt-entry latency",
+      "deterministic VBlank/audio/DMA workload state and interrupt/event-entry latency",
     ]);
     for (const entry of receipt.cases) {
       expect(entry.epoch).not.toHaveProperty("cyclePhase");
