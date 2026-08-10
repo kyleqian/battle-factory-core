@@ -5,6 +5,82 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1071 — [MAIN worker, 2026-08-10 night] **Rank-3 item-manipulation family (Covet/Trick/Recycle/Knock Off) promoted: 4 → 2 item gaps**
+
+- **State:** tree is green: full suite **860 files / 8,332 passed / 1
+  skipped**, production build, `npm run typecheck` clean. `docs/gate6-coverage-manifest.md`
+  regenerates byte-idempotent and now reads **2 item join gaps / 9 ability
+  join gaps** (was **4 item / 9 ability** at entry 1070 — ability axis
+  untouched, out of scope). Baseline checked live first, matching entry
+  1070's headline exactly: unsupported item rows were `MOVE_METRONOME`,
+  `MOVE_TRICK`, `MOVE_ASSIST`, `MOVE_RECYCLE`.
+- **Did:** consumed tonight's banked evidence
+  (`docs/item-manipulation-family-ground-truth.md`, fresh Covet + Recycle
+  Battle Scene OFF fixture/receipt pairs, both verify scripts) — no new
+  oracle receipts authored this step; reran both fresh verify scripts once
+  each via `tools/run-mgba-probe.py` and diffed against the committed
+  receipts: byte-identical (Covet: attacker acquires Cheri Berry@332,
+  party-synced@191, defender loses it@191, control zero transitions, RNG
+  14=14 both arms; Recycle: restore@380 after same-turn cure-and-consume
+  [paralysis applied@111], itemless control no-ops, RNG 7 vs 10). Verified
+  the pre-existing 2026-07-28 Knock Off/Trick evidence
+  (`tests/familyBCluster4OracleEvidence.test.ts`,
+  `tests/trickOracleEvidence.test.ts` + fixtures) satisfies the family
+  receipt standard (schemaVersion-pinned deterministic requests, byte-hash
+  reproducibility, `runs: 2` byte-identical manifests) and cited it as-is —
+  no restaging. `tools/extract/extract-level50-move-parameterization.ts`
+  adds a **per-move** certificate shape (not a shared moveend state, unlike
+  every prior item family): four `auditExactScriptBlock` statement audits
+  (`BattleScript_EffectThief`/`EffectTrick`/`EffectRecycle`/`EffectKnockOff`)
+  plus ordered C guard-chain token citations into each move's own dedicated
+  opcode (`Cmd_seteffectwithchance`'s `MOVE_EFFECT_STEAL_ITEM`/
+  `MOVE_EFFECT_KNOCK_OFF` arms, `Cmd_tryswapitems`, `Cmd_tryrecycleitem`).
+  Selector is always the exact 4 Rank-3 moves (candidateCount 4,
+  promoted 4, 0 exceptions) — unlike Rank 1, membership doesn't depend on
+  prior-claim status. `MOVE_COVET`/`MOVE_KNOCK_OFF` were already
+  Shell-Bell-claimed (power != 0); this family adds a second, independent
+  category (`item-manipulation-steal`/`-knockoff`) to those two rows and
+  the first category (`item-manipulation-swap`/`-recycle`) to Trick/Recycle
+  — so only 2 of the 4 moved a row from `unsupported`, and item gaps land
+  at **2** (`MOVE_ASSIST`/`MOVE_METRONOME`, Rank 1's dynamic-dispatch
+  exceptions, not members of this family's selector), not the brief's
+  predicted 0. Honest per-row report, not forced: the item axis is *not*
+  fully closed. `tools/report/gate6-coverage-manifest.ts` adds a parallel
+  `itemManipulationAudit`/`itemManipulationRow` checkpoint plus category
+  validation in `sourceProvenFamilies`/`parameterizedHook`/
+  `sourceProvenHookEvidence` (generic evidence emission driven by each
+  witness's own `familyVerification` fields, since implementation/test
+  paths differ per move), and adds 24 new receipt/doc/test paths to
+  `sourceInputs` (`requirePath`-verified). `tests/itemManipulationHookJoinBatch.test.ts`
+  (Tier-1, asserts four distinct dispatchers — not one shared state) and
+  `tests/itemManipulationOracleEvidence.test.ts` (pins the fresh Covet +
+  Recycle receipts byte-precisely, references but does not duplicate the
+  pre-existing Trick/Knock Off test files) are new and green. Updated
+  pinned counts in `tests/level50MoveParameterization.test.ts` (296→298
+  item source-proven rows, 4→2 unsupported) and `tests/gate6CoverageManifest.test.ts`
+  (adds `ITEM_MANIPULATION_PROOF_PATHS`/category constants, a dedicated
+  per-category validation block, `sourceItemManipulation` set-membership
+  checks alongside `sourceKingsRock`/`sourceShellBell`/`sourceItemMoveEnd`,
+  and re-pins total hook-join gaps 13→11).
+- **Next:** continue the ordered family-level Gate-6 worklist from the
+  verified **2 item / 9 ability** row-gap frontier. Remaining item gaps:
+  `MOVE_ASSIST`, `MOVE_METRONOME` (both dynamic-dispatch, no static moveend
+  node — the same structural gap found twice already; likely needs its own
+  named exception category rather than a new family, if ever closed).
+  Remaining ability gaps: Rank 4 (2 rows, Skill Swap/Role Play — side lane
+  banked fresh evidence tonight, not yet wired into the manifest by main
+  lane) and Rank 5 (5 rows, Own Tempo guards).
+- **Notes:** no engine, controller, round outcome, barrier pin, or canonical
+  window changed; `src/engine/battleScriptHitChainOpcode.ts`,
+  `battleScriptTryswapitemsOpcode.ts`, `battleScriptTryrecycleitemOpcode.ts`
+  were read, not edited (already faithful per the ground-truth doc's source
+  audit). Rank-4/5 rows, their evidence packs
+  (`tools/battle-lab/mechanic-ability-manipulation-*`), and
+  `tools/battle-lab/mechanic-own-tempo-guard-*` untouched (side-lane
+  ownership, explicit brief exclusion). Moved entry 1068 to
+  `PROGRESS-archive.md` to keep the ledger at 3 live entries.
+
+
 ## 1070 — [MAIN worker, 2026-08-10 night] **Rank-1 item family (generic post-move status-cure/stat-restore) promoted: 118 → 4 item gaps**
 
 - **State:** tree is green: full suite **858 files / 8,324 passed / 1
@@ -134,64 +210,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Item-axis rows, Rank-1/3/4/5 families, and Shell Bell untouched (out of
   scope). `docs/gate6-family-worklist.md` gets a one-line Rank-2 STATUS note
   only, per side-lane ownership of the rest of that doc.
-
-## 1068 — [MAIN worker, 2026-08-09 night] **Shell Bell family complete: OFF receipt, census/manifest promotion, both sibling batches green**
-
-- **State:** tree is green: full suite **854 files / 8,312 passed / 1
-  skipped**, production build, `npm run typecheck` clean. `docs/gate6-coverage-manifest.md`
-  regenerates byte-idempotent and now reads **118 item join gaps / 106
-  ability join gaps** (was **195 item / 106 ability** at entry 1067 — Shell
-  Bell moves **77** previously-unsupported item rows to `source-proven-family`
-  and adds a second category to the **105** rows King's Rock already proved,
-  for **182** total item-axis source-proven rows; King's Rock's 105 stay a
-  full subset of Shell Bell's 182). `npm test`'s default heap now needs
-  `NODE_OPTIONS=--max-old-space-size=8192` (added to the `test` script,
-  matching the existing `build`/`typecheck` precedent) — the Shell Bell
-  census duplicates full graph/program route arrays for 182 more rows,
-  pushing `level50-move-parameterization.json` past Node's default heap
-  under plain `vitest run`; this was a real OOM on the unmodified command,
-  not a flake.
-- **Did (rung A):** `tools/battle-lab/mechanic-shell-bell-heal-off.json` /
-  `mechanic-shell-bell-control-off.json` stage a slower, defensively-built
-  Shuckle (Shell Bell holder, item 219) against a faster no-item Swellow,
-  both locked to 100%-accuracy Pound. Swellow's earlier action this same turn
-  damages Shuckle first (127→122 HP), satisfying `gBattlerAttacker !=
-  gBattlerTarget` / `hp != maxHP` / `hp != 0` on Shuckle's own qualifying hit
-  without needing a second turn (the staging trap named in the brief). Holder
-  arm heals `max(1, floor(7/8))=1` HP (122→123); no-item control arm's HP
-  never moves past the incoming Pound. Both arms consume byte-identical
-  action-RNG values/order/counts and spend exactly 1 PP each side.
-  `tools/probe/probe-shell-bell-heal-off.py` captures each arm through its
-  own `EmeraldOracle` instance (two instances cannot share one process —
-  observed native segfault) and merges the two raw ledgers in a pure-Python
-  pass; reproduced byte-identical across two independent fresh two-arm runs.
-  Committed alone first (`0d9c309c`).
-- **Did (rung B):** `tools/extract/extract-level50-move-parameterization.ts`
-  adds `shellBellRouteEvidence`, transforming (not recomputing)
-  `colorChangeRouteEvidenceByMove`'s 182 already-proven witnesses into Shell
-  Bell witnesses retargeted at `MOVEEND_KINGSROCK_SHELLBELL`/state 12, per
-  entry 1067's reuse recipe. Candidates **183** (power != 0, same population
-  as Color Change), promoted **182**, exception **1** (`MOVE_FUTURE_SIGHT`,
-  its own `battle_util.c:1816` `IGNORE_SHELL_BELL` reason — kept textually
-  distinct from Color Change's state-3 `moveendfromto` skip reason for the
-  same move, per entry 1067's finding). `hooks.item` is generalized from a
-  King's-Rock-only slot to an array of families (mirroring `hooks.ability`'s
-  existing shape), since King's Rock and Shell Bell now legitimately overlap
-  for 105 moves. `tools/report/gate6-coverage-manifest.ts` adds a parallel
-  `shellBellAudit`/`shellBellMoveEndRow` checkpoint (King's Rock's shape) plus
-  category validation in `sourceProvenFamilies`/`parameterizedHook`.
-  `tests/shellBellHookJoinBatch.test.ts` (Tier-1, `kingsRockHookJoinBatch`
-  shape) and `tests/shellBellOracleEvidence.test.ts` (pins the rung-A
-  receipt, `kingsRockOracleEvidence` shape) are new and green. Updated three
-  pinned counts in `tests/level50MoveParameterization.test.ts` and eleven in
-  `tests/gate6CoverageManifest.test.ts` that hard-coded the old 195/105
-  King's-Rock-only item state.
-- **Next:** continue the ordered family-level Gate-6 worklist from the
-  verified **106 ability / 118 item** row-gap frontier (side lane's
-  `docs/gate6-family-worklist.md` still cites the pre-Shell-Bell 195 number
-  in its own ranked list — out of scope for this step, side lane's to
-  refresh).
-- **Notes:** no engine, controller, round outcome, barrier pin, or canonical
-  window changed; `src/engine/battleScriptMoveEndOpcode.ts` was read, not
-  edited (already audited faithful at entry 1067, now in `PROGRESS-archive.md`).
-  `docs/gate6-family-worklist.md` intentionally untouched (side-lane ownership).
