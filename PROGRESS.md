@@ -117,24 +117,59 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   is standalone and doesn't yet feed the manifest — the manifest's 195/106 gap
   counts are exactly what they were at entry 1066.
 
-## 1066 — [supervisor, 2026-08-09 night] **Orient fold: Karate Chop checkpoint + orphan printfromtable audit; union green**
+## 1069 — [MAIN worker, 2026-08-10 night] **Rank-2 ability family (status-immunity cleanup) promoted: 106 → 9 ability gaps**
 
-- **State:** master union is green: full suite **851 files / 8,302 passed / 1
-  skipped**, production build, both oracle freshness checks PASS. The
-  animation supervisor is live concurrently (Codex Sol/high, same deadline)
-  and fast-forwarded `animation-main` onto the fold — benign convergence.
-- **Did:** folded `animation-main` (4 commits, Karate Chop source-complete
-  resume checkpoint `b67b45f6`..`9134da4a`, merge `96e3441c`; no coverage
-  claim — Karate Chop stays an evidence checkpoint). Swept orphaned branches
-  at orient and folded `worker/side-20260808-190940` (2026-08-08 Luna
-  printfromtable family audit: doc + generated JSON + extractor + pinned
-  test). Its scout-time pin (40 registered tables / 3 missing families) had
-  drifted: all three families landed 2026-08-09, so the pin now records **43
-  registered / 0 missing**, leaving the short `gStatUpStringIds` table (5 of
-  6 rows) as the one open remainder; doc carries a STATUS note.
-- **Next:** round 1 — main lane proves the **Shell Bell** family (bounded
-  successful-damage census, OFF oracle receipt, Tier-1 sibling batch,
-  manifest promotion); side lane authors the ranked **Gate-6 family
-  worklist** regrouping the remaining 106 ability / 194 item row gaps.
-- **Notes:** no engine, controller, round outcome, barrier pin, or canonical
-  window changed; the only test delta is the honest printfromtable re-pin.
+- **State:** tree is green: full suite **856 files / 8,317 passed / 1
+  skipped**, production build, `npm run typecheck` clean. `docs/gate6-coverage-manifest.md`
+  regenerates byte-idempotent and now reads **118 item join gaps / 9 ability
+  join gaps** (was **118 item / 106 ability** at entry 1068 — item axis
+  untouched, out of scope). 9 remaining ability rows: Rank-4's Skill
+  Swap/Role Play, Rank-5's five Own Tempo guard moves, plus two new explicit
+  exceptions below.
+- **Did:** consumed the already-banked 2026-07-29 evidence
+  (`docs/immunity-abilities-ground-truth.md`,
+  `tools/battle-lab/mechanic-immunity-limber-skill-swap-off.json`,
+  `tools/probe/probe-immunity-limber-off.py`, both seed receipts) — no new
+  oracle receipts authored. `tools/extract/extract-level50-move-parameterization.ts`
+  adds a generic route-certificate walk (`immunityRouteEvidence`, reusing the
+  same graph/program BFS infra as Color Change/King's Rock) proving each
+  candidate's entry script reaches a `moveendall`/`moveendto`/`moveendfromto`
+  handoff whose `Cmd_moveend` state range includes state 4
+  (`MOVEEND_IMMUNITY_ABILITIES`), unlike Color Change/King's Rock this needs
+  no target `datahpupdate` since state 4 fires unconditionally for every
+  move reaching the normal moveend tail. Candidates **99** (selector: every
+  ability-unsupported row minus Rank-4's 2 + Rank-5's 5), promoted **97**,
+  two new exceptions — `MOVE_ASSIST`/`MOVE_METRONOME` end in a dynamic-dispatch
+  opcode (`jumptocalledmove`/`metronome`) with no static moveend node of
+  their own, a genuine finding the worklist's 99/99 prediction missed. Also
+  fixed a real latent bug in the shared `onDamageCallReturns` helper (used by
+  the graph-route BFS's `call`-edge validity check): it only checked a call
+  target's *own* last statement for `return`, missing targets like
+  `BattleScript_WeatherFormChanges` that fall through a loop label before
+  returning — now does a full reachable-subgraph search. This only relaxes a
+  false negative (strictly more permissive), verified by rerunning the full
+  suite including Color Change's/King's Rock's own batches unchanged.
+  `tools/report/gate6-coverage-manifest.ts` adds a parallel `immunityAudit`/
+  `immunityMoveEndRow` checkpoint (King's Rock's shape) plus category
+  validation in `sourceProvenFamilies`/`parameterizedHook`/
+  `sourceProvenHookEvidence`. `tests/statusImmunityHookJoinBatch.test.ts`
+  (Tier-1, `kingsRockHookJoinBatch` shape) and
+  `tests/statusImmunityOracleEvidence.test.ts` (pins both banked receipts
+  byte-precisely, `kingsRockOracleEvidence` shape) are new and green.
+  Reran `probe-immunity-limber-off.py` fresh once — reproduced the
+  610839776-seed receipt byte-identically. Updated pinned counts in
+  `tests/level50MoveParameterization.test.ts` (348→445 ability categories,
+  194→291 source-proven, 106→9 unsupported; `MOVE_WITHDRAW`/`MOVE_RAIN_DANCE`/
+  `MOVE_SUNNY_DAY`/`MOVE_PROTECT` flip from ability-unsupported to
+  immunity-family-proven) and `tests/gate6CoverageManifest.test.ts` (adds
+  `IMMUNITY_PROOF_PATHS`, six numeric re-pins).
+- **Next:** continue the ordered family-level Gate-6 worklist from the
+  verified **9 ability / 118 item** row-gap frontier. Ranks 4 (2 rows,
+  Skill Swap/Role Play) and 5 (5 rows, Own Tempo guards) remain on the
+  ability axis; Rank 1 (item, 191 rows) is in flight on the side lane.
+- **Notes:** no engine, controller, round outcome, or canonical window
+  changed; `src/engine/battleScriptMoveEndOpcode.ts` was read, not edited
+  (already audited faithful in `docs/immunity-abilities-ground-truth.md`).
+  Item-axis rows, Rank-1/3/4/5 families, and Shell Bell untouched (out of
+  scope). `docs/gate6-family-worklist.md` gets a one-line Rank-2 STATUS note
+  only, per side-lane ownership of the rest of that doc.

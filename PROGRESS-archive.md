@@ -1,3 +1,25 @@
+## 1066 — [supervisor, 2026-08-09 night] **Orient fold: Karate Chop checkpoint + orphan printfromtable audit; union green**
+
+- **State:** master union is green: full suite **851 files / 8,302 passed / 1
+  skipped**, production build, both oracle freshness checks PASS. The
+  animation supervisor is live concurrently (Codex Sol/high, same deadline)
+  and fast-forwarded `animation-main` onto the fold — benign convergence.
+- **Did:** folded `animation-main` (4 commits, Karate Chop source-complete
+  resume checkpoint `b67b45f6`..`9134da4a`, merge `96e3441c`; no coverage
+  claim — Karate Chop stays an evidence checkpoint). Swept orphaned branches
+  at orient and folded `worker/side-20260808-190940` (2026-08-08 Luna
+  printfromtable family audit: doc + generated JSON + extractor + pinned
+  test). Its scout-time pin (40 registered tables / 3 missing families) had
+  drifted: all three families landed 2026-08-09, so the pin now records **43
+  registered / 0 missing**, leaving the short `gStatUpStringIds` table (5 of
+  6 rows) as the one open remainder; doc carries a STATUS note.
+- **Next:** round 1 — main lane proves the **Shell Bell** family (bounded
+  successful-damage census, OFF oracle receipt, Tier-1 sibling batch,
+  manifest promotion); side lane authors the ranked **Gate-6 family
+  worklist** regrouping the remaining 106 ability / 194 item row gaps.
+- **Notes:** no engine, controller, round outcome, barrier pin, or canonical
+  window changed; the only test delta is the honest printfromtable re-pin.
+
 ## 1065 — [supervisor, 2026-08-09] **Damp family certified; final union green**
 
 - **State:** final master union is green: full suite **849 files / 8,296
