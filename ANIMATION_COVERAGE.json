@@ -2510,6 +2510,36 @@
    ]
   },
   {
+   "move": "MOVE_PROTECT",
+   "status": "exact",
+   "covered": [
+    "source and generated inventory audits prove move id 182, the real even 0x082cb3b4..0x082cb3d1 / 0x1e-byte body behind odd nm symbol Move_PROTECT 0x082cb3b5, and challenge-0 set 119 FRONTIER_MON_HOUNDOUR as the lowest Level-50 carrier",
+    "complete legal three-Pokemon Scene-ON parties preserve set-156 ONIX and every bench while constraining only active HOUNDOUR to PROTECT; both complete first-in-bounds through first-inactive-cleanup windows pass twice fresh at 123/123 source/component, typed-seam, software/hardware OAM, palette/tag/register/audio, immutable battle-state, raw-RGB, and production-framebuffer frames",
+    "player-back frames 68-190 reproduce probe/raw/change-map e2769d1649763ff2c6732f51ac2e84833513b8918653d25381e47b911c2b78a6 / a1d645924121c1aaffea6fdae8d636bc05a6ade0d38c0f0cc92ff6d9b54fb3f6 / 7bea1a4bba4b42491f08397df4d97657f4d512ff1949a33c9d4f7f5d45633105; opponent-front frames 72-194 reproduce cc2bc15a937eef4e32948f3e99c24a1a49003c87bdb5f1ae48992939c7743721 / e483782163b2d05636347b75acebc62d68ed902a270223459502b9931bfd9080 / dcf82d6b347db6f66fa053320dcc00303096488238a0a9473c36d667e32c3a0d",
+    "the pure source-age reducer ports loadsprite/monbg/split/clear cadence, SE_M_REFLECT wait-and-pan timing, side-dependent priority/subpriority, 96/256 leftward drift, 90-tick duration, two-tick seven-color palette rotation, 16-to-6 fade/hold/6-to-16 teardown, attacker BG-copy visibility, OBJ blend registers, tag lifetime, and first inactive cleanup",
+    "deterministic Houndour front/back and protect.png extraction regenerates byte-for-byte; the typed seam and narrow compositor carry only resolved geometry, allocator slot, HP, and gender and own no Protect success flag, battle RNG, damage/status, turn, controller, round, or facility state",
+    "BARRIER remains bilateral 76/76 exact twice fresh as the closest existing 64x64 OBJ-blend, palette/register, monbg control; MOVE_DETECT remains independently exact and was not used to promote or alter sibling coverage",
+    "no new latch, animation-boundary list, unsupported barrier, canonical import, gameplay outcome, or absolute-tick/frame lookup changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-protect-player-houndour-opponent-onix.json",
+    "tools/battle-lab/mechanic-protect-opponent-houndour-player-onix.json",
+    "tools/compare/fixtures/protect-player-houndour-opponent-onix.json",
+    "tools/compare/fixtures/protect-opponent-houndour-player-onix.json",
+    "tools/compare/evidence/protect-changemap-player.txt",
+    "tools/compare/evidence/protect-changemap-opponent.txt",
+    "tools/compare/barrierProbe.py",
+    "tools/compare/protectPortable.ts",
+    "tools/compare/protectSourceAudit.ts",
+    "tools/compare/extractProtectAssets.ts",
+    "src/animation/assets/protect.json",
+    "src/animation/protect.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/protect.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_PSYCHIC",
    "status": "exact",
    "covered": [

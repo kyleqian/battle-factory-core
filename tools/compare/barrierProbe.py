@@ -10,11 +10,11 @@ from pathlib import Path
 
 if len(sys.argv) not in (4, 5):
     raise SystemExit(
-        "usage: barrierProbe.py <scenario> <output.json> <rgb-dir> [magic-coat]"
+        "usage: barrierProbe.py <scenario> <output.json> <rgb-dir> [magic-coat|protect]"
     )
 SCENARIO, OUTPUT, RGB_DIR = map(Path, sys.argv[1:4])
 MODE = sys.argv[4] if len(sys.argv) == 5 else "barrier"
-if MODE not in ("barrier", "magic-coat"):
+if MODE not in ("barrier", "magic-coat", "protect"):
     raise SystemExit(f"unsupported defensive-wall mode: {MODE}")
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle" / "emerald_core.py").is_file())
@@ -34,12 +34,15 @@ def main() -> None:
     symbol_rows = [(int(p[0], 16), p[2]) for line in nm.splitlines() if len(p := line.split()) == 3 and all(c in "0123456789abcdefABCDEF" for c in p[0])]
     names = {name: address for address, name in symbol_rows}
     reverse = {address: name for address, name in symbol_rows}
-    move_label, next_label = (
-        ("Move_BARRIER", "Move_BUBBLE")
-        if MODE == "barrier"
-        else ("Move_MAGIC_COAT", "Move_WATER_PULSE")
-    )
-    move_start, move_end = names[move_label], names[next_label]
+    move_label, next_label = {
+        "barrier": ("Move_BARRIER", "Move_BUBBLE"),
+        "magic-coat": ("Move_MAGIC_COAT", "Move_WATER_PULSE"),
+        "protect": ("Move_PROTECT", "Move_DETECT"),
+    }[MODE]
+    # Protect's data symbol is odd even though its script bytes start at the
+    # preceding aligned address. Pointer ownership follows the real interval.
+    move_start = names[move_label] & ~1 if MODE == "protect" else names[move_label]
+    move_end = names[next_label] & ~1 if MODE == "protect" else names[next_label]
     sprites, tasks, matrices = sy["gSprites"], sy["gTasks"], sy["gOamMatrices"]
     faded, unfaded = sy["gPlttBufferFaded"], sy["gPlttBufferUnfaded"]
     battler_ids = sy["gBattlerSpriteIds"]
@@ -47,11 +50,11 @@ def main() -> None:
     frames_wait = names["sAnimFramesToWait"]
     visual_count, sound_count = sy["gAnimVisualTaskCount"], sy["gAnimSoundTaskCount"]
     palette_tags = names["sSpritePaletteTags"]
-    wall = sy[
-        "gBarrierWallSpriteTemplate"
-        if MODE == "barrier"
-        else "gMagicCoatWallSpriteTemplate"
-    ]
+    wall = sy[{
+        "barrier": "gBarrierWallSpriteTemplate",
+        "magic-coat": "gMagicCoatWallSpriteTemplate",
+        "protect": "gProtectSpriteTemplate",
+    }[MODE]]
     se1, se1_tracks, songs = sy["gMPlayInfo_SE1"], sy["gMPlayTrack_SE1"], sy["gSongTable"]
 
     def u16(a: int) -> int: return oracle.read_u8(a) | oracle.read_u8(a + 1) << 8
@@ -98,7 +101,8 @@ def main() -> None:
             oracle.advance(segment.get("buttons",[])); frame+=1; capture(frame)
     if not finished or not any(r["wallSprites"] for r in rows):
         raise RuntimeError(f"complete {MODE} body not reached")
-    payload={"schema":f"{MODE}-dense-evidence/v1","setup":setup,"sourceBounds":{"start":move_start,"endExclusive":move_end},"templates":{"wall":wall},"songHeader":oracle.read_u32(songs+208*8),"frames":rows}
+    song_id = 207 if MODE == "protect" else 208
+    payload={"schema":f"{MODE}-dense-evidence/v1","setup":setup,"sourceBounds":{"start":move_start,"endExclusive":move_end},"templates":{"wall":wall},"songHeader":oracle.read_u32(songs+song_id*8),"frames":rows}
     OUTPUT.write_text(json.dumps(payload)+"\n")
     print(f"wrote {OUTPUT} ({len(rows)} source frames; {rows[0]['frame']}..{rows[-1]['frame']})")
 

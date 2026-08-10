@@ -555,6 +555,7 @@ import lightScreenAsset from "../animation/assets/light-screen.json" with { type
 import mirrorCoatAsset from "../animation/assets/mirror-coat.json" with { type: "json" };
 import barrierAsset from "../animation/assets/barrier.json" with { type: "json" };
 import magicCoatAsset from "../animation/assets/magic-coat.json" with { type: "json" };
+import protectAsset from "../animation/assets/protect.json" with { type: "json" };
 import hazeAsset from "../animation/assets/haze.json" with { type: "json" };
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import substituteAsset from "../animation/assets/substitute.json" with { type: "json" };
@@ -882,6 +883,7 @@ import {
   sceneOnLightScreenView,
   sceneOnBarrierView,
   sceneOnMagicCoatView,
+  sceneOnProtectView,
   sceneOnDisableView,
   sceneOnHazeView,
   sceneOnMirrorCoatView,
@@ -1035,6 +1037,7 @@ import {
   type SceneOnLightScreenPresentationState,
   type SceneOnBarrierPresentationState,
   type SceneOnMagicCoatPresentationState,
+  type SceneOnProtectPresentationState,
   type SceneOnDisableConfig,
   type SceneOnHazePresentationState,
   type SceneOnMirrorCoatPresentationState,
@@ -1464,6 +1467,11 @@ const magicCoatArt = magicCoatAsset as {
   spoinkBack: { tileset: Tileset; palette: RgbColor[] };
   spoinkFront: { tileset: Tileset; palette: RgbColor[] };
   orangeLightWall: { tileset: Tileset; palette: RgbColor[] };
+};
+const protectArt = protectAsset as {
+  houndourBack: { tileset: Tileset; palette: RgbColor[] };
+  houndourFront: { tileset: Tileset; palette: RgbColor[] };
+  protect: { tileset: Tileset; palette: RgbColor[] };
 };
 const hazeArt = hazeAsset as {
   fog: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
@@ -21919,6 +21927,98 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? "DROWZEE used" : "Foe DROWZEE used",
       "DISABLE!",
       99,
+    );
+    return;
+  }
+  if (state.config.move === "PROTECT") {
+    const protectState = state as SceneOnProtectPresentationState;
+    const view = sceneOnProtectView(protectState);
+    const displayed = sceneOnProtectView({ ...protectState, age: protectState.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "HOUNDOUR"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "HOUNDOUR"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged PROTECT pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const houndourSource = playerToOpponent
+      ? protectArt.houndourBack : protectArt.houndourFront;
+    const houndour = playerToOpponent
+      ? houndourSource
+      : { ...houndourSource, tileset: subTileset(houndourSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const opponent = playerToOpponent ? onix : houndour;
+    const player = playerToOpponent ? houndour : onix;
+    drawSpriteSheet(
+      fb, opponent.tileset, opponent.palette,
+      playerToOpponent
+        ? view.target.geometry.spriteCorner.x + onixIdle.x2
+        : view.attacker.geometry.spriteCorner.x,
+      playerToOpponent
+        ? view.target.geometry.spriteCorner.y + onixIdle.y2
+        : view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.sprite && view.sprite && view.sprite.alpha.eva > 0) {
+      const palette = protectArt.protect.palette.slice();
+      const rotating = palette.slice(1, 8);
+      const steps = displayed.sprite.paletteRotationSteps % 7;
+      palette.splice(1, 7, ...rotating.slice(steps), ...rotating.slice(0, steps));
+      drawSpriteSheetBlendedOverFb(
+        fb,
+        protectArt.protect.tileset,
+        palette,
+        displayed.sprite.x + displayed.sprite.x2 - 32,
+        displayed.sprite.y - 32,
+        view.sprite.alpha.eva,
+        view.sprite.alpha.evb,
+      );
+    }
+    drawSpriteSheet(
+      fb, player.tileset, player.palette,
+      playerToOpponent
+        ? view.attacker.geometry.spriteCorner.x
+        : view.target.geometry.spriteCorner.x,
+      playerToOpponent
+        ? view.attacker.geometry.spriteCorner.y
+        : view.target.geometry.spriteCorner.y,
+    );
+    const profile = protectState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "HOUNDOUR", level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "HOUNDOUR" : "ONIX", level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+        currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "HOUNDOUR used" : "Foe HOUNDOUR used",
+      "PROTECT!",
+      64,
     );
     return;
   }

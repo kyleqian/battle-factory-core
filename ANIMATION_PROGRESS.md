@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_PROTECT exact — bilateral 123/123 sliding OBJ-blend shield promotion (2026-08-10 worker)
+
+- **State:** Coverage advances **150→151/276 exact**, 0 partial, 0 staged, **126→125 unsupported**. Protect alone moves; boundary, unsupported-barrier, and latch pins are unchanged.
+- **Did:** Added complete legal set-119 HOUNDOUR/set-156 ONIX bilateral stages, a real-even-pointer-bounded Scene-ON probe, receipts/change maps, deterministic Houndour/PROTECT extraction, source audit, pure 123-age reducer, typed seam, portable verifier, and narrow compositor. The proof covers side priority, leftward Q8.8 drift, seven-color rotation, alpha lifecycle, attacker monbg/split/clear, audio, hardware transfers, and cleanup.
+- **Verified:** Twice fresh, player-back frames **68..190** and opponent-front **72..194** each pass **123/123 component+seam+hardware+raw-RGB+framebuffer**. Player probe/raw/map: `e2769d16…` / `a1d64592…` / `7bea1a4b…`; opponent: `cc2bc15a…` / `e4837821…` / `dcf82d6b…`. BARRIER stays bilateral **76/76** twice fresh as the isolated 64x64 OBJ-blend/palette/register/monbg control.
+- **Next:** Supervisor selects the next independent move; do not promote Detect or another sibling from shared components.
+- **Notes:** The ROM body is the even interval `0x082cb3b4..0x082cb3d1`; `nm` exposes odd `Move_PROTECT` `0x082cb3b5`. No Protect outcome, damage/status/RNG, turn/controller/round/facility state, canonical import, boundary widening, barrier, or absolute-tick branch changed.
+
 ## MOVE_MAGIC_COAT exact — bilateral 76/76 orange defensive-wall promotion (2026-08-10 worker)
 
 - **State:** Coverage advances **149→150/276 exact**, 0 partial, 0 staged, **127→126 unsupported**. Magic Coat alone moves; boundary, unsupported-barrier, and latch pins are unchanged.

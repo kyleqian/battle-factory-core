@@ -274,6 +274,7 @@ import {
   magicCoatAtAge,
   type BarrierState,
 } from "./barrier.ts";
+import { protectAtAge, type ProtectState } from "./protect.ts";
 import { disableAtAge, type DisableState } from "./disable.ts";
 import {
   brickBreakAtAge,
@@ -1345,6 +1346,14 @@ export interface SceneOnMagicCoatConfig {
   readonly allocatorProfile: Readonly<{ readonly wall: number }>;
 }
 
+export interface SceneOnProtectConfig {
+  readonly move: "PROTECT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly allocatorProfile: Readonly<{ readonly protect: number }>;
+}
+
 /** Typed Scene-ON seam for MOVE_DISABLE's target monbg/OBJ-blend task. */
 export interface SceneOnDisableConfig {
   readonly move: "DISABLE";
@@ -2388,6 +2397,7 @@ export type SceneOnMoveConfig =
   | SceneOnLightScreenConfig
   | SceneOnBarrierConfig
   | SceneOnMagicCoatConfig
+  | SceneOnProtectConfig
   | SceneOnDisableConfig
   | SceneOnHazeConfig
   | SceneOnMirrorCoatConfig
@@ -2555,6 +2565,8 @@ export type SceneOnBarrierPresentationState =
   SceneOnMovePresentationState<SceneOnBarrierConfig>;
 export type SceneOnMagicCoatPresentationState =
   SceneOnMovePresentationState<SceneOnMagicCoatConfig>;
+export type SceneOnProtectPresentationState =
+  SceneOnMovePresentationState<SceneOnProtectConfig>;
 export type SceneOnHazePresentationState =
   SceneOnMovePresentationState<SceneOnHazeConfig>;
 export type SceneOnMirrorCoatPresentationState =
@@ -4288,6 +4300,12 @@ export interface SceneOnBarrierView extends BarrierState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnProtectView extends ProtectState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 /** `age` is relative to Move_DISABLE's first in-bounds script pointer. */
 export function sceneOnDisableView(
   state: SceneOnMovePresentationState<SceneOnDisableConfig>,
@@ -4358,6 +4376,25 @@ export function sceneOnMagicCoatView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...magicCoatAtAge(
+      state.age,
+      state.config.attacker.geometry.battlePositionCenter,
+      state.config.attacker.geometry.side,
+    ),
+  };
+}
+
+/** `age` is relative to Move_PROTECT's first in-bounds script pointer. */
+export function sceneOnProtectView(
+  state: SceneOnMovePresentationState<SceneOnProtectConfig>,
+): SceneOnProtectView {
+  if (state.config.move !== "PROTECT") {
+    throw new Error(`expected PROTECT presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...protectAtAge(
       state.age,
       state.config.attacker.geometry.battlePositionCenter,
       state.config.attacker.geometry.side,
