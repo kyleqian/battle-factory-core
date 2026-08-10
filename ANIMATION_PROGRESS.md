@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_KARATE_CHOP reducer + typed Scene-ON seam checkpoint — coverage unchanged (2026-08-09 worker)
+
+- **State:** Coverage remains **147/276 exact**, 0 partial, 0 staged, **129 unsupported**. No production framebuffer compositor or exactness claim was added.
+- **Did:** Added the pure complete 49-age `Move_KARATE_CHOP` reducer and narrow typed presentation seam. Both committed bilateral fixtures now carry resolved Primeape/Onix geometry and compact source-contract arrays; Tier-1 pins every age's script offset, asset lifetime, monbg/alpha interval, directional hand translation, animation-2 IMPACT, exact `AnimTask_ShakeMon` tuple/offset, target-panned audio, seam equality, and inactive cleanup.
+- **Verified:** Focused Karate Chop/source/boundary/LOW_KICK tests **17/17**, smoke **375/375**, typecheck, full `npm test`, production build, coverage, and diff check pass. LOW_KICK remains twice-fresh bilateral **33/33 semantic + 33/33 framebuffer exact** with unchanged receipts.
+- **Next:** Implement the narrow source-relative `battleScene.ts` compositor and require twice-fresh **49/49 framebuffer equality in both orientations** before promotion. Rerun LOW_KICK plus a HANDS_AND_FEET/IMPACT control after that draw-path change.
+- **Notes:** No damage, critical/accuracy/RNG, turn order, controller/round/facility state, shared animation boundary, canonical import, unsupported barrier, or coverage entry changed.
+
 ## MOVE_KARATE_CHOP bilateral dense evidence checkpoint — coverage unchanged (2026-08-09 worker)
 
 - **State:** Coverage remains **147/276 exact**, 0 partial, 0 staged, **129 unsupported**. No reducer, typed seam, production compositor, framebuffer claim, boundary, gameplay, controller, or facility state changed.
