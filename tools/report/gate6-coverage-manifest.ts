@@ -273,6 +273,7 @@ const TRYEXPLOSION_DAMP_CATEGORY = "tryexplosion-damp";
 const KINGS_ROCK_CATEGORY = "moveend-kings-rock";
 const SHELL_BELL_CATEGORY = "moveend-shell-bell";
 const SHELL_BELL_SELECTOR_DERIVED_FROM = "moveend-shell-bell candidate selector reuses the moveend-color-change moves.json power != 0 population: the same successful target-datahpupdate route, read at a different MOVEEND state";
+const IMMUNITY_CATEGORY = "moveend-immunity-abilities";
 const ABSORBING_CATEGORIES = new Set([
   "absorbing-volt-absorb",
   "absorbing-water-absorb",
@@ -558,6 +559,42 @@ for (const witness of shellBellRouteWitnesses) {
   }
 }
 
+const immunityAudit = parameterization.coverage?.hookCatalogs?.ability?.immunity as AnyRecord | undefined;
+const immunityCandidates = immunityAudit?.sourceMoveCandidates as AnyRecord[] | undefined;
+const immunitySourceProvenRows = immunityAudit?.sourceProvenRows as string[] | undefined;
+const immunityExceptions = immunityAudit?.sourceExceptionRows as AnyRecord[] | undefined;
+const immunityBlockers = immunityAudit?.blockers as AnyRecord[] | undefined;
+const immunityRouteWitnesses = immunityAudit?.routeWitnesses as AnyRecord[] | undefined;
+if (!immunityAudit
+  || immunityAudit.status !== SOURCE_PROVEN_FAMILY_STATUS
+  || immunityAudit.candidateCount !== 99
+  || !Array.isArray(immunityCandidates) || immunityCandidates.length !== 99
+  || !Array.isArray(immunitySourceProvenRows) || immunitySourceProvenRows.length !== 97
+  || !Array.isArray(immunityExceptions) || immunityExceptions.length !== 2
+  || !immunityExceptions.some((exception) => exception.move === "MOVE_ASSIST")
+  || !immunityExceptions.some((exception) => exception.move === "MOVE_METRONOME")
+  || !Array.isArray(immunityBlockers) || immunityBlockers.length !== 0
+  || !Array.isArray(immunityRouteWitnesses) || immunityRouteWitnesses.length !== 97) {
+  throw new Error("Immunity family accounting is not the finite 99/97/2/0 contract");
+}
+for (const witness of immunityRouteWitnesses) {
+  const family = witness.familyEvidence as AnyRecord | undefined;
+  const graphRoute = family?.entryPath?.graph?.route as AnyRecord[] | undefined;
+  const programRoute = family?.entryPath?.program?.route as AnyRecord[] | undefined;
+  if (witness.status !== "source-proven"
+    || !immunitySourceProvenRows.includes(witness.move)
+    || family?.category !== IMMUNITY_CATEGORY
+    || !Array.isArray(graphRoute) || !Array.isArray(programRoute)
+    || JSON.stringify(graphRoute) !== JSON.stringify(programRoute)
+    || !graphRoute.some((statement) => ["moveendall", "moveendto", "moveendfromto"].includes(statement.mnemonic as string))
+    || family.entryPath?.moveEnd?.state !== "MOVEEND_IMMUNITY_ABILITIES"
+    || family.entryPath?.moveEnd?.stateValue !== 4
+    || family.dispatcher?.stateValue !== 4
+    || family.familyVerification?.oracleReceiptFiles?.[0] !== "tools/probe/receipts/immunity-limber-off-seed-610839776.json") {
+    throw new Error(`Immunity family route/guard certificate is incomplete for ${String(witness.move)}`);
+  }
+}
+
 const tryinfatuatingObliviousAudit = parameterization.coverage?.hookCatalogs?.ability?.tryinfatuatingOblivious as AnyRecord | undefined;
 const tryinfatuatingObliviousCandidates = tryinfatuatingObliviousAudit?.sourceMoveCandidates as AnyRecord[] | undefined;
 const tryinfatuatingObliviousSourceProvenRows = tryinfatuatingObliviousAudit?.sourceProvenRows as string[] | undefined;
@@ -826,6 +863,7 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
         && family.category !== TRYEXPLOSION_DAMP_CATEGORY
         && family.category !== KINGS_ROCK_CATEGORY
         && family.category !== SHELL_BELL_CATEGORY
+        && family.category !== IMMUNITY_CATEGORY
         && !ABSORBING_CATEGORIES.has(family.category))
       || !family.selector?.path
       || !family.entryPath?.source?.path
@@ -960,6 +998,19 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
         throw new Error("Shell Bell family lacks its target-damage/state-12/guard witness");
       }
     }
+    if (family.category === IMMUNITY_CATEGORY) {
+      const graphRoute = family.entryPath.graph.route as AnyRecord[] | undefined;
+      const programRoute = family.entryPath.program.route as AnyRecord[] | undefined;
+      if (!Array.isArray(graphRoute) || !Array.isArray(programRoute)
+        || JSON.stringify(graphRoute) !== JSON.stringify(programRoute)
+        || !graphRoute.some((statement) => ["moveendall", "moveendto", "moveendfromto"].includes(statement.mnemonic as string))
+        || family.entryPath.moveEnd?.state !== "MOVEEND_IMMUNITY_ABILITIES"
+        || family.entryPath.moveEnd?.stateValue !== 4
+        || family.dispatcher?.stateValue !== 4
+        || family.familyVerification?.oracleReceipt !== "docs/immunity-abilities-ground-truth.md") {
+        throw new Error("Immunity family lacks its moveend-handoff/state-4/guard witness");
+      }
+    }
   }
   return families as AnyRecord[];
 }
@@ -1007,6 +1058,10 @@ function parameterizedHook(move: AnyRecord, axis: PerMoveHookJoinAxis): AnyRecor
     if (family.category === SHELL_BELL_CATEGORY
       && (axis !== "item" || family.selector?.derivedFrom !== SHELL_BELL_SELECTOR_DERIVED_FROM)) {
       throw new Error(`${move.move} Shell Bell evidence lost its selector derivation`);
+    }
+    if (family.category === IMMUNITY_CATEGORY
+      && (axis !== "ability" || family.selector?.symbol !== move.move)) {
+      throw new Error(`${move.move} Immunity evidence lost its source selector identity`);
     }
   }
   return hook;
@@ -1141,6 +1196,22 @@ function sourceProvenHookEvidence(hook: AnyRecord): Evidence[] {
         evidence("tools/battle-lab/mechanic-shell-bell-control-off.json", "paired-control-oracle-request"),
         evidence("tools/probe/probe-shell-bell-heal-off.py", "oracle-probe"),
         evidence("tools/probe/receipts/shell-bell-heal-off.json", "battle-scene-off-oracle-receipt"),
+      ];
+    }
+    if (proof.category === IMMUNITY_CATEGORY) {
+      return [
+        ...base,
+        evidence("reference/pokeemerald/src/battle_util.c", "ordered-status-immunity-guards", "AbilityBattleEffects(ABILITYEFFECT_IMMUNITY)"),
+        evidence("reference/pokeemerald/src/battle_script_commands.c", "unconditional-moveend-dispatcher", "MOVEEND_IMMUNITY_ABILITIES"),
+        evidence("reference/pokeemerald/include/constants/battle_script_commands.h", "moveend-state-constant", "MOVEEND_IMMUNITY_ABILITIES=4"),
+        evidence("src/engine/battleScriptMoveEndOpcode.ts", "existing-source-shaped-family-implementation", "MOVEEND_IMMUNITY_ABILITIES"),
+        evidence("tests/statusImmunityHookJoinBatch.test.ts", "tier-1-97-row-sibling-batch"),
+        evidence("tests/statusImmunityOracleEvidence.test.ts", "battle-scene-off-family-receipt"),
+        evidence("docs/immunity-abilities-ground-truth.md", "family-ground-truth"),
+        evidence("tools/battle-lab/mechanic-immunity-limber-skill-swap-off.json", "parameterized-oracle-request"),
+        evidence("tools/probe/probe-immunity-limber-off.py", "oracle-probe"),
+        evidence("tools/probe/receipts/immunity-limber-off-seed-610839776.json", "battle-scene-off-oracle-receipt"),
+        evidence("tools/probe/receipts/immunity-limber-off-seed-324508639.json", "battle-scene-off-oracle-receipt"),
       ];
     }
     return [
@@ -1902,6 +1973,33 @@ const shellBellMoveEndRow: Row = Object.freeze({
   notes: "All 182 power != 0 candidates retarget the already-proven moveend-color-change graph/program route to MOVEEND_KINGSROCK_SHELLBELL state 12 (same unbroken Cmd_moveend do-while sweep). MOVE_FUTURE_SIGHT is the sole exception via its own battle_util.c:1816 IGNORE_SHELL_BELL poison, distinct from Color Change's state-3 moveendfromto skip reason for the same move. King's Rock's 105 promoted rows are a full subset of these 182; King's Rock's HOLD_EFFECT_FLINCH arm is not claimed.",
 });
 
+const immunityMoveEndSummary = Object.freeze({
+  candidates: immunityCandidates.length,
+  promotedRows: immunitySourceProvenRows.length,
+  exceptions: immunityExceptions.length,
+  blockers: immunityBlockers.length,
+  rosterOnlyCandidates: immunityCandidates.filter((candidate) => candidate.executionInventory === "level50-roster-only").length,
+});
+const immunityMoveEndRow: Row = Object.freeze({
+  id: "hook-family:moveend-immunity-abilities",
+  label: "Status-immunity ability Level-50 family checkpoint",
+  status: SOURCE_PROVEN_FAMILY_STATUS,
+  ...immunityMoveEndSummary,
+  evidence: uniqueEvidence([
+    evidence(PARAMETERIZATION_PATH, "finite-candidate-route-guard-audit", "coverage.hookCatalogs.ability.immunity"),
+    evidence("reference/pokeemerald/src/battle_util.c", "ordered-status-immunity-guards", "AbilityBattleEffects(ABILITYEFFECT_IMMUNITY)"),
+    evidence("reference/pokeemerald/include/constants/battle_script_commands.h", "moveend-state-constant", "MOVEEND_IMMUNITY_ABILITIES=4"),
+    evidence("tests/statusImmunityHookJoinBatch.test.ts", "97-row-graph-program-batch"),
+    evidence("tests/statusImmunityOracleEvidence.test.ts", "battle-scene-off-family-receipt"),
+    evidence("docs/immunity-abilities-ground-truth.md", "family-ground-truth"),
+    evidence("tools/battle-lab/mechanic-immunity-limber-skill-swap-off.json", "direct-parameterized-oracle-fixture"),
+    evidence("tools/probe/probe-immunity-limber-off.py", "direct-parameterized-oracle-probe"),
+    evidence("tools/probe/receipts/immunity-limber-off-seed-610839776.json", "direct-parameterized-oracle-receipt"),
+    evidence("tools/probe/receipts/immunity-limber-off-seed-324508639.json", "direct-parameterized-oracle-receipt"),
+  ]),
+  notes: "97 of 99 finite candidates (every ability-axis row not already claimed by Soundproof, Absorbing, ON_DAMAGE contact, Color Change, Synchronize, Attract/Oblivious, or Explosion/Damp, minus the Skill Swap/Role Play and five Own Tempo guard exclusions) are promoted through a graph/program route from their entry script to a moveendall/moveendto/moveendfromto handoff whose Cmd_moveend state range includes MOVEEND_IMMUNITY_ABILITIES (state 4). MOVE_ASSIST and MOVE_METRONOME remain explicit dynamic-dispatch exceptions (jumptocalledmove/metronome have no static moveend node of their own). The route certificate proves only that each move's own script reaches Cmd_moveend's normal tail; it does not claim the status was ever reachable while the cure ability was already active -- the shared receipt stages that via Skill Swap.",
+});
+
 const trainerRows: Row[] = (trainers.entries as AnyRecord[]).map((trainer) => Object.freeze({
   id: `trainer:${trainer.id}`,
   label: trainer.sourceId,
@@ -2115,6 +2213,7 @@ const manifest: AnyRecord = {
     tryexplosionDamp: tryexplosionDampSummary,
     kingsRockMoveEnd: kingsRockMoveEndSummary,
     shellBellMoveEnd: shellBellMoveEndSummary,
+    immunityMoveEnd: immunityMoveEndSummary,
     stateFamilies: { total: stateFamilyRows.length, tier1Covered: stateFamilyRows.filter((row) => row.status === "tier1-covered").length },
     hooks: {
       abilities: { total: abilityRows.length, oracleReceipted: abilityRows.filter((row) => row.status === "oracle-receipted-hook").length, zeroFactoryWidened: abilityRows.filter((row) => row.status === "zero-factory-carrier-widened-scope").length },
@@ -2133,6 +2232,7 @@ const manifest: AnyRecord = {
     tryexplosionDamp: tryexplosionDampRow,
     kingsRockMoveEnd: kingsRockMoveEndRow,
     shellBellMoveEnd: shellBellMoveEndRow,
+    immunityMoveEnd: immunityMoveEndRow,
     stateFamilies: stateFamilyRows,
     hooks: { abilities: abilityRows, holdEffects: holdEffectRows },
     corpus: { trainers: trainerRows, level50Sets: level50Rows },
@@ -2166,13 +2266,14 @@ const markdown: string[] = [
   "## Headline",
   "",
   `- Effects: **${manifest.summary.effects.staticExecutable}/${manifest.summary.effects.total} static-executable**; moves: **${manifest.summary.moves.staticExecutable}/${manifest.summary.moves.total}** static-executable (**${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}** Level-50 roster moves executable, **${manifest.summary.moves.level50RosterOnly}** roster-only).`,
-  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors, audited shared-absorbing routes, both ON_DAMAGE families, the 30-candidate Synchronize family, Attract's one-row Oblivious family, and the two Explosion/Damp categories, while every remaining gap retains its source-artifact locator and reason.`,
+  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors, audited shared-absorbing routes, both ON_DAMAGE families, the 30-candidate Synchronize family, Attract's one-row Oblivious family, the two Explosion/Damp categories, and the 97-row Immunity status-cure family, while every remaining gap retains its source-artifact locator and reason.`,
   `- ON_DAMAGE checkpoint: **${manifest.summary.onDamageMoveEnd.contactCandidates}** contact candidates and **${manifest.summary.onDamageMoveEnd.colorChangeCandidates}** Color Change candidates (${manifest.summary.onDamageMoveEnd.overlapCandidates} overlap) are source-enumerated across ${manifest.summary.onDamageMoveEnd.entryBlockShapes} entry-block shapes. **${manifest.summary.onDamageMoveEnd.contactPromotedRows}** contact rows and **${manifest.summary.onDamageMoveEnd.colorChangePromotedRows}** Color Change rows are promoted; **${manifest.summary.onDamageMoveEnd.contactExceptions}** contact exceptions and **${manifest.summary.onDamageMoveEnd.contactBlockers}** active contact blockers remain, while **${manifest.summary.onDamageMoveEnd.contactRetiredBlockers}** contact route/guard blockers and **${manifest.summary.onDamageMoveEnd.colorChangeRetiredBlockers}** Color Change blockers are retired.`,
   `- Synchronize checkpoint: **${manifest.summary.synchronizeMoveEnd.candidates}** finite Level-50 candidates, **${manifest.summary.synchronizeMoveEnd.promotedRows}** promoted, **${manifest.summary.synchronizeMoveEnd.exceptions}** route exceptions, and **${manifest.summary.synchronizeMoveEnd.blockers}** active blockers.`,
   `- Attract/Oblivious checkpoint: **${manifest.summary.tryinfatuatingOblivious.candidates}** finite EFFECT_ATTRACT candidate, **${manifest.summary.tryinfatuatingOblivious.promotedRows}** promoted, **${manifest.summary.tryinfatuatingOblivious.exceptions}** exceptions, **${manifest.summary.tryinfatuatingOblivious.rosterOnlyCandidates}** roster-only candidates, and **${manifest.summary.tryinfatuatingOblivious.blockers}** active blockers.`,
   `- Explosion/Damp checkpoint: **${manifest.summary.tryexplosionDamp.candidates}** finite EFFECT_EXPLOSION candidates, **${manifest.summary.tryexplosionDamp.promotedRows}** promoted, **${manifest.summary.tryexplosionDamp.exceptions}** exceptions, **${manifest.summary.tryexplosionDamp.rosterOnlyCandidates}** roster-only candidates, **${manifest.summary.tryexplosionDamp.selectableSetOccurrences}** selectable occurrences / **${manifest.summary.tryexplosionDamp.fullLevel50CarrierRows}** full carrier rows, and **${manifest.summary.tryexplosionDamp.blockers}** active blockers.`,
   `- King's Rock checkpoint: **${manifest.summary.kingsRockMoveEnd.candidates}** finite Level-50 flag selectors, **${manifest.summary.kingsRockMoveEnd.promotedRows}** promoted, **${manifest.summary.kingsRockMoveEnd.exceptions}** explicit exception, **${manifest.summary.kingsRockMoveEnd.rosterOnlyCandidates}** roster-only candidates retained, and no Shell Bell overclaim.`,
   `- Shell Bell checkpoint: **${manifest.summary.shellBellMoveEnd.candidates}** finite Level-50 power != 0 candidates (reused moveend-color-change population), **${manifest.summary.shellBellMoveEnd.promotedRows}** promoted by retargeting the already-proven route to state 12, **${manifest.summary.shellBellMoveEnd.exceptions}** explicit exception (Future Sight), and no King's Rock HOLD_EFFECT_FLINCH overclaim.`,
+  `- Immunity checkpoint: **${manifest.summary.immunityMoveEnd.candidates}** finite Level-50 ability-axis candidates, **${manifest.summary.immunityMoveEnd.promotedRows}** promoted to MOVEEND_IMMUNITY_ABILITIES state 4, **${manifest.summary.immunityMoveEnd.exceptions}** explicit dynamic-dispatch exceptions (Assist, Metronome), and **${manifest.summary.immunityMoveEnd.blockers}** active blockers.`,
   `- State/status/volatile rows: **${manifest.summary.stateFamilies.tier1Covered}/${manifest.summary.stateFamilies.total}** have focused Tier-1 evidence; source-modeled rows remain listed separately.`,
   `- Hook universes: **${manifest.summary.hooks.abilities.total} abilities** and **${manifest.summary.hooks.holdEffects.total} hold effects**, including **${manifest.summary.hooks.abilities.zeroFactoryWidened + manifest.summary.hooks.holdEffects.zeroFactoryWidened}** legal widened-scope rows with zero Level-50 Factory carriers.`,
   `- Corpus: **${manifest.summary.corpus.ordinaryTrainers}/${trainers.count} ordinary trainers** and **${manifest.summary.corpus.level50Sets}/${LEVEL50_SET_COUNT} Level-50 sets** joined; the full set catalog contains ${manifest.summary.corpus.fullSetCatalog} rows including Open-only sets.`,
@@ -2297,6 +2398,17 @@ markdown.push(...table("Shell Bell candidate and MOVEEND state-12 promotion", ["
   (row) => evidenceText(row.evidence),
 ]));
 markdown.push(`${shellBellMoveEndRow.notes}\n`);
+markdown.push("## Status-immunity ability family checkpoint\n\n");
+markdown.push(...table("Immunity candidate and MOVEEND state-4 promotion", ["Status", "Candidates", "Promoted", "Exceptions", "Roster-only", "Blockers", "Evidence"], [immunityMoveEndRow], [
+  (row) => row.status,
+  (row) => String(row.candidates),
+  (row) => String(row.promotedRows),
+  (row) => String(row.exceptions),
+  (row) => String(row.rosterOnlyCandidates),
+  (row) => String(row.blockers),
+  (row) => evidenceText(row.evidence),
+]));
+markdown.push(`${immunityMoveEndRow.notes}\n`);
 markdown.push("## Status, volatile, and state families\n\n");
 markdown.push(...table("State rows", ["Family", "State symbol", "Status", "Evidence"], stateFamilyRows, [
   (row) => row.family,
