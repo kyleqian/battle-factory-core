@@ -15,11 +15,11 @@ describe("MOVE_KARATE_CHOP bounded source checkpoint", () => {
     expect(output).toContain("Set 81 Mankey is below the Level-50 challenge range");
   });
 
-  it("keeps Karate Chop unsupported until the complete bilateral production proof exists", () => {
+  it("promotes only Karate Chop after the complete bilateral production proof", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact"))
-      .toHaveLength(147);
+      .toHaveLength(148);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_KARATE_CHOP"))
-      .toBeUndefined();
+      .toMatchObject({ move: "MOVE_KARATE_CHOP", status: "exact" });
   });
 });

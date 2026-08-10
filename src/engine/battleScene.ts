@@ -899,6 +899,7 @@ import {
   sceneOnMegaKickView,
   sceneOnRollingKickView,
   sceneOnLowKickView,
+  sceneOnKarateChopView,
   sceneOnStompView,
   sceneOnViceGripView,
   sceneOnBiteView,
@@ -994,6 +995,7 @@ import {
   sceneOnPsychicView,
   sceneOnKnockOffView,
   type SceneOnMovePresentationState,
+  type SceneOnKarateChopConfig,
   type SceneOnStompConfig,
   type SceneOnViceGripConfig,
   type SceneOnFirePunchConfig,
@@ -24023,6 +24025,121 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MACHOKE used" : "Foe MACHOKE used",
       "LOW KICK!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "KARATE_CHOP") {
+    const karateState = state as SceneOnMovePresentationState<SceneOnKarateChopConfig>;
+    const view = sceneOnKarateChopView(karateState);
+    // The hand callback, hitsplat OAM, affine matrix, and ShakeMon battler
+    // displacement all reach this move's hardware scanout from the preceding
+    // source age.  The target's ordinary front-idle x2 survives until the
+    // hit task replaces the copied monbg OBJ on that same handoff.
+    const displayed = sceneOnKarateChopView({
+      ...karateState,
+      age: karateState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "PRIMEAPE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "PRIMEAPE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged KARATE_CHOP pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const primeapeSource = playerToOpponent
+      ? bulkUpArt.primeapeBack
+      : {
+          ...bulkUpArt.primeapeFront,
+          tileset: subTileset(bulkUpArt.primeapeFront.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent && karateState.age <= 22
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const primeapeIdle = opponentToPlayer
+      ? (speciesFrontIdleRestOffset("PRIMEAPE") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      primeapeSource.tileset,
+      primeapeSource.palette,
+      view.attacker.geometry.spriteCorner.x + primeapeIdle.x2,
+      view.attacker.geometry.spriteCorner.y + primeapeIdle.y2,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2 + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    if (displayed.hand) {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimHandsAndFeet.tileset, 12, 4),
+        battleAnimHandsAndFeet.palette,
+        displayed.hand.x + displayed.hand.x2 - 16,
+        displayed.hand.y - 16,
+      );
+    }
+    if (displayed.hitsplat && view.alpha) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        displayed.hitsplat.x - 16,
+        displayed.hitsplat.y - 16,
+        displayed.hitsplat.matrix,
+        displayed.hitsplat.matrix,
+        view.alpha.eva,
+        view.alpha.evb,
+        false,
+        "live",
+      );
+    }
+    const profile = karateState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "PRIMEAPE",
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "PRIMEAPE" : "ONIX",
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "PRIMEAPE used" : "Foe PRIMEAPE used",
+      "KARATE CHOP!",
       99,
     );
     return;

@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_KARATE_CHOP exact — bilateral 49/49 HANDS_AND_FEET/IMPACT promotion (2026-08-09 worker)
+
+- **State:** Coverage advances **147→148/276 exact**, 0 partial, 0 staged, **129→128 unsupported**. Karate Chop alone moves; boundary and unsupported-barrier pins are unchanged.
+- **Did:** Finished the committed set-232 PRIMEAPE/ONIX reducer + typed seam with a narrow source-age compositor and portable proof. The move independently ports HANDS_AND_FEET animation 3, animation-2 affine IMPACT, target `AnimTask_ShakeMon`, monbg/12:8 alpha, audio, hardware transfer, and cleanup while reusing source-identical established art.
+- **Verified:** Twice fresh, player-back frames **77..125** and opponent-front **81..129** each pass **49/49 component/hardware/raw-RGB/framebuffer**; evidence/raw/map digests remain `757e70d9…`/`89c829e0…`/`4d1eb29b…` and `fb8697fb…`/`f7762e1e…`/`10e22bae…`. Regenerated maps are byte-identical. LOW_KICK stays bilateral **33/33** and MEGA_PUNCH **160/160**, twice fresh.
+- **Next:** Supervisor selects the next independent animation acceptance unit; do not promote Karate Chop siblings from shared HANDS_AND_FEET/IMPACT code.
+- **Notes:** Own bilateral maps confirm RAM+1 for hand OAM, IMPACT scanout, and ShakeMon displacement, consistent with `ANIMATION_LATCHES.md`; no latch edit. No gameplay/damage/critical/accuracy/RNG, turn/controller/round/facility state, canonical import, or absolute-tick branch changed.
+
 ## MOVE_KARATE_CHOP reducer + typed Scene-ON seam checkpoint — coverage unchanged (2026-08-09 worker)
 
 - **State:** Coverage remains **147/276 exact**, 0 partial, 0 staged, **129 unsupported**. No production framebuffer compositor or exactness claim was added.

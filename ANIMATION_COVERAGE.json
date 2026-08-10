@@ -1868,6 +1868,36 @@
    ]
   },
   {
+   "move": "MOVE_KARATE_CHOP",
+   "status": "exact",
+   "covered": [
+    "complete legal challenge-1 Level-50 set-232 FRONTIER_MON_PRIMEAPE_1 versus ONIX Scene-ON parties pass the pointer-bounded Move_KARATE_CHOP 0x082d20b3..0x082d2105 body through first inactive cleanup in both orientations twice fresh: player-back frames 77-125 and opponent-front frames 81-129 each pass 49/49 source/component, typed-seam, hardware, raw-RGB, and production shared-framebuffer checks",
+    "player-back evidence/raw/change-map digests are 757e70d97f3c2f8239def29cd10631872a65bd47f35eb306e9d97bd30a3d1c64 / 89c829e0abd01b065a9c9ac1133b4363df1fcf2127b644784565ded9de0f25c8 / 4d1eb29bba18c5d780841fb99db77198c36c59a2f85ff743c591b6bd1520e979; opponent-front digests are fb8697fbb6d098f4303f9502ddabaf52abd1ceee4ba8bc56a64b4747047a2ce3 / f7762e1e4072f6807c6392648e5590ad6a41b59ef5def77707991cfa7a7c9396 / 10e22bae0c4fb5c77a0daeba32e40dad25727165701849f7423b0611ec67e7bf",
+    "the pure source-relative reducer and narrow typed Scene-ON seam port HANDS_AND_FEET animation 3, its side-relative ten-callback linear travel, animation-2 affine ObjBlend IMPACT, target AnimTask_ShakeMon(4,0,6,1), monbg, 12:8 alpha, target-panned DOUBLE_TEAM and COMET_PUNCH audio, tagged resource lifetimes, waits, and first inactive cleanup",
+    "the compositor independently fits the move's own bilateral change maps: plain hand OAM, IMPACT OAM/matrix, and ShakeMon target displacement each scan out from the preceding source age; ONIX's opponent-front idle x2 survives through the hit handoff; the measured mechanisms agree with ANIMATION_LATCHES.md and require no new rule",
+    "the production draw path reuses source-identical PRIMEAPE front/back art from BULK_UP plus established HANDS_AND_FEET, IMPACT, ONIX, healthbox, window, and field assets; karateChopPortable.ts proves software sprites/tasks, hardware OAM/matrices/palettes, tags/registers/audio, immutable battle fields, raw RGB, byte-identical regenerated change maps, and every shared framebuffer",
+    "MOVE_LOW_KICK remains bilateral 33/33 component and framebuffer exact twice fresh, and MOVE_MEGA_PUNCH remains bilateral 160/160 twice fresh after the shared draw-path edit; neither sibling coverage changes",
+    "no damage, critical-hit/accuracy/RNG, turn order, controller/round/facility state, animation-boundary list, unsupported barrier, or canonical-recording allowlist changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-karate-chop-player-primeape-opponent-onix.json",
+    "tools/battle-lab/mechanic-karate-chop-opponent-primeape-player-onix.json",
+    "tools/compare/fixtures/karate-chop-player-primeape-opponent-onix.json",
+    "tools/compare/fixtures/karate-chop-opponent-primeape-player-onix.json",
+    "tools/compare/evidence/karate-chop-changemap-player.txt",
+    "tools/compare/evidence/karate-chop-changemap-opponent.txt",
+    "tools/compare/poisonFangProbe.py",
+    "tools/compare/karateChopPortable.ts",
+    "tools/compare/karateChopSourceAudit.ts",
+    "src/animation/karateChop.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/karateChop.test.ts",
+    "tests/animation/karateChopEvidence.test.ts",
+    "tests/animation/karateChopSourceCheckpoint.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_KNOCK_OFF",
    "status": "exact",
    "covered": [
