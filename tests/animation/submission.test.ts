@@ -3,6 +3,7 @@ import { submissionAtAge } from "../../src/animation/submission.ts";
 import {
   createSceneOnMovePresentation,
   sceneOnSubmissionView,
+  type SceneOnSubmissionConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 
 describe("MOVE_SUBMISSION source reducer", () => {
@@ -134,7 +135,7 @@ describe("MOVE_SUBMISSION source reducer", () => {
   });
 
   it("keeps literal task widths bilateral through the narrow relative seam", () => {
-    const playerToOpponent = createSceneOnMovePresentation({
+    const playerToOpponent = createSceneOnMovePresentation<SceneOnSubmissionConfig>({
       move: "SUBMISSION",
       attacker: {
         species: "POLIWRATH",

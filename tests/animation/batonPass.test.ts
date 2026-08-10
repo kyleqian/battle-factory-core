@@ -72,8 +72,8 @@ describe("MOVE_BATON_PASS source-relative presentation", () => {
     expect(aipom).toMatchObject({ level: 50, nature: 7, item: 217, moves: [226, 226, 226, 226], ppUps: [0, 0, 0, 0] });
   });
 
-  it("keeps Baton Pass exact after the Drill Peck promotion", () => {
-    expect(coverage.entries).toHaveLength(153);
+  it("keeps Baton Pass exact after the Submission promotion", () => {
+    expect(coverage.entries).toHaveLength(154);
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_BATON_PASS"))
       .toMatchObject([{ status: "exact" }]);
   });

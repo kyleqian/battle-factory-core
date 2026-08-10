@@ -786,6 +786,7 @@ export interface SceneOnPresentationBattler {
     | "MASQUERAIN"
     | "WAILMER"
     | "POLITOED"
+    | "POLIWRATH"
     | "EXEGGCUTE"
     | "CORSOLA"
     | "GLOOM"

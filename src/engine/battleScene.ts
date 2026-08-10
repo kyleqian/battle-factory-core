@@ -1404,8 +1404,8 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
-const poliwrathFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).POLIWRATH!;
-const lickitungFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LICKITUNG!;
+const poliwrathFrontSprite = opponentFrontSpritesAsset.POLIWRATH;
+const lickitungFrontSprite = opponentFrontSpritesAsset.LICKITUNG;
 const aipomFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).AIPOM!;
 const crawdauntFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CRAWDAUNT!;
 const hitmontopFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HITMONTOP!;
@@ -2578,8 +2578,8 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
-const poliwrathBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).POLIWRATH!;
-const lickitungBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LICKITUNG!;
+const poliwrathBackSprite = battleBackSpritesAsset.POLIWRATH;
+const lickitungBackSprite = battleBackSpritesAsset.LICKITUNG;
 const hitmontopBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HITMONTOP!;
 const swabluBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SWABLU!;
 const ponytaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PONYTA!;
@@ -18652,11 +18652,7 @@ export function renderSceneOnMovePresentation(
     // created before the second in the same script pass and reaches scanout
     // two displays after its first RAM write. These are Submission's own
     // bilateral latches, not a Steel Wing inheritance.
-    const displayedImpact = sceneOnSubmissionView({
-      ...submissionState,
-      age: submissionState.age - 1,
-    });
-    const displayedTargetTranslation = sceneOnSubmissionView({
+    const displayed = sceneOnSubmissionView({
       ...submissionState,
       age: submissionState.age - 1,
     });
@@ -18699,8 +18695,8 @@ export function renderSceneOnMovePresentation(
       fb,
       lickitung.tileset,
       lickitung.palette,
-      view.target.geometry.spriteCorner.x + displayedTargetTranslation.targetOffset.x2,
-      view.target.geometry.spriteCorner.y + displayedTargetTranslation.targetOffset.y2,
+      view.target.geometry.spriteCorner.x + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + displayed.targetOffset.y2,
     );
 
     // `monbg ANIM_DEF_PARTNER` puts the target into target-2 before the
@@ -18710,7 +18706,7 @@ export function renderSceneOnMovePresentation(
     drawTarget();
     const target2Backdrop = fb.slice();
     drawAttacker();
-    for (const impact of displayedImpact.impacts) {
+    for (const impact of displayed.impacts) {
       drawSpriteSheetAffineRotateBlendedOverFb(
         fb,
         target2Backdrop,
