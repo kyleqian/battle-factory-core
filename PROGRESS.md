@@ -24,10 +24,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   milestone (#71, #73, session-trace-driven pacing fixes) is the next
   headline, BEFORE S11 audio. ISSUES #86 is optional manifest-hardening
   filler.
-- **Notes:** wind-down follows: animation fold, final union suite/build,
-  soak gate rerun. No engine behavior, controller interface, round
-  outcome, barrier pin, or canonical window changed by the close-out
-  itself (docs/ledger edits only).
+- **Notes (wind-down complete, ~03:00):** folded `animation-main`
+  (Protect, Magic Coat, Role Play promoted exact tonight by the live
+  animation supervisor; merge `f913d88a`). Final union is green: full
+  suite **870 files / 8,379 passed / 1 skipped**, production build,
+  animation coverage. Soak gates on the union: vanilla 0:20 = **20 OK /
+  0 CRASH / 0 HANG**; full-policy 0:60 = **60 OK / 0 CRASH / 0 HANG**.
+  DEFERRED.md remains empty — every choice tonight was decidable from
+  the mission, roadmap, source, or receipts. The animation supervisor
+  may still be live; any post-fold commits on `animation-main` fold next
+  session. No engine behavior, controller interface, round outcome,
+  barrier pin, or canonical window changed by the close-out itself.
 
 ## 1073 — [MAIN worker, 2026-08-10 night] **Gate-6 surge-audit fixes: dynamic-dispatch exception class completed (2→4 gaps/axis), "undefined" locators fixed, count wording corrected**
 
