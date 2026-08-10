@@ -14,8 +14,10 @@ models the source order:
 
 Each operation is passed to a cycle-cost callback keyed by source function,
 species/nature input, rejection attempt, and EV/stat work. Random operations
-now carry their returned u16, and attempt operations carry the assembled
-candidate personality, candidate nature, and accepted/rejected result. When
+now carry their returned u16, attempt operations carry every assembled
+candidate personality/nature/result, and CreateMon/EV/stat operations carry
+the accepted personality required by encrypted box-mon substructure routing.
+When
 the accumulated cost crosses a configured VBlank period, the clock invokes
 the ambient callback once and emits a `VBlankIntr+0x87` event. No trainer id,
 battle number, absolute presentation tick, or recorded cursor is read by the
@@ -76,3 +78,14 @@ The focused tests pin candidate propagation, wrong/accepted branch timing,
 all 278 decompositions, clean-stream cursor identity, and the unresolved
 hardware-workload evidence string. A fresh wrapped anchor v2 probe reproduced
 the committed receipt byte-for-byte at SHA-256 `631bd21408ba41e03c0e119dde3d83d94dda023cee93ebc3e470e6d94741cc2a`.
+
+## EV-spread boundary checkpoint
+
+The complete `CreateMon`-return to `CalculateMonStats`-entry audit is recorded
+in `docs/issue55-construction-rng-schedule-receipt.md`. Its smallest newly
+proven operation input is the accepted personality: each selected EV bit takes
+`SetMonData -> SetBoxMonData`, whose decrypt/checksum/re-encrypt path repeatedly
+executes `GetSubstruct -> __umodsi3(personality, 24)`. The scheduler now exposes
+that source value on the downstream operation keys. Exact ROM-fetch/EWRAM
+access timing is still unported, so no observed EV duration or +18 residual is
+adopted and the clock stays unwired.

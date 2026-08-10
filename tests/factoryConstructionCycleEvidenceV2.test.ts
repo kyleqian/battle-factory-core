@@ -7,6 +7,7 @@ import {
   reduceFactorySourceReturnTiming,
 } from "../src/engine/factoryConstructionClock.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
+import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 
 type CycleEvent = {
   kind: string;
@@ -70,6 +71,8 @@ const probes = EXPECTED.map(([name]) => {
   const bytes = readFileSync(`${ROOT}/${name}.json`);
   return { name, bytes, value: JSON.parse(bytes.toString("utf8")) as ProbeCase };
 });
+const frontierMons = (frontierMonsData as { entries: Array<{ index: number; evSpread: number }> })
+  .entries;
 
 function personality(low: SequenceEvent, high: SequenceEvent): number {
   return (((high.post >>> 16) << 16) | (low.post >>> 16)) >>> 0;
@@ -282,6 +285,69 @@ describe("Factory construction v2 source/cycle receipt", () => {
       [0, 0, 0, 0, 0, 0],
       [0, 0, 0],
       [0, 0, 0],
+    ]);
+  });
+
+  it("pins all twelve complete EV-spread spans and the accepted-personality source boundary", () => {
+    const expectedSourceCycles = [
+      [40_410, 28_616, 26_672, 27_878, 28_148, 26_876],
+      [27_080, 27_524, 28_190],
+      [27_098, 38_673, 41_256],
+    ];
+    const expectedSpreads = [
+      [37, 17, 17, 17, 3, 17],
+      [5, 36, 17],
+      [6, 37, 37],
+    ];
+    const expectedContainedPauses = [
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 0],
+      [0, 36_217, 0],
+    ];
+
+    for (const [caseIndex, { value }] of probes.entries()) {
+      const events = value.cycleEvidence.events;
+      const pauses = interruptPauses(events);
+      const sourceCyclesByMon: number[] = [];
+      const containedPausesByMon: number[] = [];
+
+      for (const mon of value.monBoundaries) {
+        const returned = events.find((event) => (
+          event.kind === "create-mon-return" && event.monIndex === mon.monIndex
+        ))!;
+        const statsEntry = events.find((event) => (
+          event.kind === "calculate-mon-stats-entry" && event.monIndex === mon.monIndex
+        ))!;
+        const contained = pauses.filter(([entry, resume]) => (
+          returned.masterCycles <= entry && resume <= statsEntry.masterCycles
+        ));
+        sourceCyclesByMon.push(sourceCycles(returned, statsEntry, contained));
+        containedPausesByMon.push(contained.reduce((sum, [entry, resume]) => (
+          sum + resume - entry
+        ), 0));
+      }
+
+      expect(sourceCyclesByMon).toEqual(expectedSourceCycles[caseIndex]);
+      expect(containedPausesByMon).toEqual(expectedContainedPauses[caseIndex]);
+    }
+
+    // These source siblings cover two- and three-stat spreads at every bit
+    // position used by the receipt. Repeated spread 17 is deliberately not a
+    // duration key: SetBoxMonData calls GetSubstruct with the full accepted
+    // personality, whose compiled __umodsi3(personality, 24) route differs.
+    expect(probes.map(({ value }) => value.sourceSetIds.map((setId) => (
+      frontierMons[setId]!.evSpread
+    )))).toEqual(expectedSpreads);
+    expect([...new Set(expectedSpreads.flatMap((spreads) => (
+      spreads.flatMap((spread) => Array.from({ length: 6 }, (_, bit) => bit)
+        .filter((bit) => (spread & (1 << bit)) !== 0))
+    )))].sort()).toEqual([0, 1, 2, 4, 5]);
+    expect(probes.map(({ value }) => value.monBoundaries.map((mon) => (
+      mon.acceptedPersonality % 24
+    )))).toEqual([
+      [5, 19, 2, 2, 18, 20],
+      [7, 20, 10],
+      [6, 3, 18],
     ]);
   });
 

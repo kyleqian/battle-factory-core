@@ -36,6 +36,7 @@ export const GBA_VBLANK_CYCLES = 280_896;
  * per-trace cursor schedule.
  */
 export const REQUIRED_FACTORY_CONSTRUCTION_CLOCK_EVIDENCE = Object.freeze([
+  "exact ROM-fetch/EWRAM timing for CreateMon, EV/stat, and Factory post operations",
   "deterministic VBlank/audio/DMA workload state and interrupt/event-entry latency",
 ] as const);
 
@@ -81,7 +82,11 @@ export interface FactoryConstructionOperation {
   half: FactoryConstructionHalf | null;
   /** u16 returned by this half's Random() call. */
   randomValue: number | null;
-  /** Candidate assembled exactly as `Random32()` does; attempt operations only. */
+  /**
+   * Candidate assembled exactly as `Random32()` does. Nature-attempt operations
+   * carry every candidate; downstream CreateMon/EV/stat operations carry the
+   * accepted personality because encrypted box-mon access is keyed by it.
+   */
   candidatePersonality: number | null;
   candidateNature: number | null;
   natureAccepted: boolean | null;
@@ -918,9 +923,34 @@ export function scheduleFactoryConstruction(
       attempt += 1;
     } while (true);
 
-    clock.run(sourceOperation(mon, input.sourceFunction, "create-mon", monIndex));
-    clock.run(sourceOperation(mon, input.sourceFunction, "ev-spread", monIndex));
-    clock.run(sourceOperation(mon, input.sourceFunction, "calculate-mon-stats", monIndex));
+    const acceptedPersonality = { candidatePersonality: personality } as const;
+    clock.run(sourceOperation(
+      mon,
+      input.sourceFunction,
+      "create-mon",
+      monIndex,
+      null,
+      null,
+      acceptedPersonality,
+    ));
+    clock.run(sourceOperation(
+      mon,
+      input.sourceFunction,
+      "ev-spread",
+      monIndex,
+      null,
+      null,
+      acceptedPersonality,
+    ));
+    clock.run(sourceOperation(
+      mon,
+      input.sourceFunction,
+      "calculate-mon-stats",
+      monIndex,
+      null,
+      null,
+      acceptedPersonality,
+    ));
     clock.run(sourceOperation(mon, input.sourceFunction, "factory-post-mon", monIndex));
 
     mons.push(freezeMonResult({

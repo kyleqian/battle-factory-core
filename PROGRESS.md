@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1084 — [MAIN worker, 2026-08-10] **#55 EV-spread boundary audited; accepted personality exposed**
+
+- **State:** bounded evidence checkpoint landed; focused construction **25/25**
+  including red verification, smoke **375/375**, typecheck, full `npm test`
+  **878 files / 8,413 passed / 1 skipped**, production build, and diff check
+  are green.
+- **Did:** pinned all **12** complete CreateMon-return→stats-entry spans
+  (**6/3/3**, net **26,672–41,256**) and subtracted the sole contained VBlank
+  pause (**36,217**, varied mon 1). Compiled `0x0806869C→0x08068D0C` audit
+  proves each EV write traverses encrypted `SetBoxMonData` and 12 full-dividend
+  `__umodsi3(personality,24)` calls; the clock now exposes the accepted
+  personality to CreateMon/EV/stat operation keys.
+- **Next:** port exact ROM-fetch/EWRAM timing for the audited decrypt/checksum/
+  re-encrypt path, then classify any +18 residual; keep #55 open and the clock
+  unwired until that reducer and live VBlank/audio arbitration are exact.
+- **Notes:** no fitted duration/table, identity/tick/cursor lookup, evidence
+  mutation, live wiring, canonical Battle-2 march, animation edit, or new
+  unsupported barrier.
+
 ## 1083 — [supervisor, 2026-08-10] **#55 VBlank variability isolated to audio; resume residual bounded**
 
 - **State:** side commit `6df4fc19` is folded; its focused receipt test is
@@ -40,21 +59,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   keep the construction clock unwired until every remaining piece is exact.
 - **Notes:** clock remains unwired; no identity/tick/cursor/fixture selection,
   canonical Battle-2 march, evidence regeneration, animation edit, or new
-  unsupported barrier.
-
-## 1081 — [MAIN worker, 2026-08-10] **#55 compiled source-return timing landed across all v2 cases**
-
-- **State:** `source-return` is resolved source-generally: committed v2
-  decomposition **3/3**, focused construction **11/11**, and red verification
-  pass. Smoke **375/375**, typecheck, full `npm test` **877 files / 8,408
-  passed / 1 skipped**, production build, and diff check are green.
-- **Did:** added `reduceFactorySourceReturnTiming` for the exact pret/Thumb
-  final-loop and epilogue paths. Anchor is **40** source cycles; LILIANA and
-  varied are **32** each, with **0** contained VBlank pause and **0** residual
-  service cycles. Both source-function siblings are pinned.
-- **Next:** continue #55 with one bounded CreateMon/EV/CalculateMonStats/
-  factory-post source budget or the deterministic VBlank/audio/DMA workload;
-  keep the construction clock unwired until those remaining pieces are exact.
-- **Notes:** no trainer/set/mon/tick/cursor/receipt timing selection, canonical
-  Battle-2 march, live wiring, evidence regeneration, animation edit, or new
   unsupported barrier.

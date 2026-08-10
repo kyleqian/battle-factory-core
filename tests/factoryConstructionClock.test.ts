@@ -232,10 +232,23 @@ describe("Factory construction source-operation clock", () => {
       reduceFactoryNatureAttemptTiming(first.value, natureFromPersonality(second.value)).cycles
       + reduceFactoryNatureAttemptTiming(second.value, natureFromPersonality(second.value)).cycles,
     );
+
+    const downstream = operations.filter((operation) => (
+      operation.kind === "create-mon"
+      || operation.kind === "ev-spread"
+      || operation.kind === "calculate-mon-stats"
+    ));
+    expect(downstream.map((operation) => [operation.kind, operation.candidatePersonality]))
+      .toEqual([
+        ["create-mon", second.value],
+        ["ev-spread", second.value],
+        ["calculate-mon-stats", second.value],
+      ]);
   });
 
   it("keeps live exactness bounded by the unresolved VBlank workload only", () => {
     expect(REQUIRED_FACTORY_CONSTRUCTION_CLOCK_EVIDENCE).toEqual([
+      "exact ROM-fetch/EWRAM timing for CreateMon, EV/stat, and Factory post operations",
       "deterministic VBlank/audio/DMA workload state and interrupt/event-entry latency",
     ]);
     for (const entry of receipt.cases) {

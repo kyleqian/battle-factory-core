@@ -101,7 +101,7 @@ are evidence boundaries, not adopted reducer constants.
 | --- | ---: | ---: | --- |
 | construction entry → first `Random` | 12 | 58 | resolved below |
 | `CreateMon` entry → return | 12 | 1,238,617–2,361,713 | unresolved |
-| `CreateMon` return → `CalculateMonStats` entry | 12 | 26,672–41,256 | unresolved EV-spread |
+| `CreateMon` return → `CalculateMonStats` entry | 12 | 26,672–41,256 | bounded EV-spread audit below; accepted personality is now exposed, exact memory-access timing remains unresolved |
 | `CalculateMonStats` entry → return | 12 | 140,999–154,160 | unresolved |
 | stats return → construction return | 12 | 22 | exact sub-boundary; retained with the unresolved stats operation |
 | construction return → factory post-mon end | 12 | 127,759–140,592 | unresolved |
@@ -128,6 +128,54 @@ does not inspect trainer, set, mon, frame, cursor, or receipt identity.
 
 CreateMon, EV-spread, CalculateMonStats, factory-post-mon, and the live
 VBlank/audio/DMA workload remain unresolved, so the clock remains unwired.
+
+### EV-spread operation audit (2026-08-10)
+
+The complete measured operation starts at the first instruction after
+`CreateMon` returns and ends at entry to `CalculateMonStats`: pipelined probe
+PCs `0x0806869E → 0x08068D0E`, corresponding to executed boundaries
+`0x0806869C → 0x08068D0C`. The compiled source path is:
+
+- `pokemon.c:2577-2592`, `0x0806869C-0x080686E8`: six-bit population loop,
+  `MAX_TOTAL_EVS / statCount`, six branch-sensitive stat iterations, and the
+  final `CalculateMonStats` BL;
+- signed positive division `__divsi3`, `0x082E7540-0x082E75C6`;
+- each selected bit calls `SetMonData`, `0x0806ACAC-0x0806AD98`, which routes
+  EV fields through `SetBoxMonData`, `0x0806AD9C-0x0806B3F8`;
+- each `SetBoxMonData` performs four direct `GetSubstruct` calls, decrypts,
+  checks the checksum (four more `GetSubstruct` calls), writes the selected
+  EV byte, recomputes the checksum (another four calls), and re-encrypts.
+  The relevant callees are `GetSubstruct` `0x0806A270-0x0806A516`,
+  `DecryptBoxMon` `0x0806A24C-0x0806A26E`, `CalculateBoxMonChecksum`
+  `0x08068C78-0x08068D08`, and `EncryptBoxMon` `0x0806A228-0x0806A24A`.
+
+After subtracting every fully contained VBlank entry-to-resume pause, the 12
+source spans remain:
+
+| case | EV spreads | net source cycles | fully contained VBlank pauses |
+| --- | --- | --- | --- |
+| anchor (6) | `37,17,17,17,3,17` | `40,410 / 28,616 / 26,672 / 27,878 / 28,148 / 26,876` | six zeroes |
+| LILIANA (3) | `5,36,17` | `27,080 / 27,524 / 28,190` | three zeroes |
+| varied (3) | `6,37,37` | `27,098 / 38,673 / 41,256` | `0 / 36,217 / 0` cycles (one pause in mon 1) |
+
+These cover two-stat and three-stat paths and selected-bit siblings across
+five stat positions (all but Speed). They also refute an `evSpread`/`statCount`-only
+reducer: spread 17 alone occupies 26,672–28,616 cycles. The smallest missing
+source input was the **full accepted personality**. `SetBoxMonData` reads it
+for every `GetSubstruct -> __umodsi3(personality, 24)` call; the compiled
+division path depends on the full dividend, not only its remainder. The
+construction clock now propagates that accepted personality to its
+`create-mon`, `ev-spread`, and `calculate-mon-stats` operation keys, with a
+red-verified Tier-1 pin. OT ID participates only in fixed-path XOR encryption
+and does not select a branch here.
+
+This checkpoint does **not** publish a timing reducer. Exact instruction-fetch
+and EWRAM data-access timing across the decrypt/checksum/re-encrypt calls was
+not completed in the bounded step, so the observed values above remain
+receipt assertions rather than constants. Consequently no +18 asynchronous
+service residual can yet be separated honestly from the instruction path;
+none is silently absorbed. The sole fully contained VBlank pause is classified
+separately as shown above. The clock remains unwired.
 
 ### Construction-entry component (2026-08-10)
 
