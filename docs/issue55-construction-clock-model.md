@@ -95,6 +95,31 @@ friendship/held-item writes that re-enter `SetBoxMonData`. Exact ROM-fetch/EWRAM
 access timing is still unported, so no observed EV duration or +18 residual is
 adopted and the clock stays unwired.
 
+## `CalculateMonStats` direct-call checkpoint
+
+The existing scheduler already emits `calculate-mon-stats` after the EV write
+and passes the accepted personality; the focused scheduler test pins that
+operation order and propagation. It is still an unwired seam, not a live
+clock cost.
+
+New opt-in Battle Scene OFF receipts split all **12** complete stats
+entry-to-return spans into the compiled direct calls from `pokemon.c:2823`:
+**15** `GetMonData2`, **1** `GetLevelFromMonExp`, **8** `SetMonData`, **6**
+`__divsi3`, **5** `GetNature`, and **5** `ModifyStatByNature` per mon. The
+three byte-stable v1 packets therefore pin **480** direct calls, scalar ABI
+branch inputs/results, and their exact return PCs without recording a mon
+address, trainer, set, frame, cursor, or timing key.
+
+Removing the seven wholly contained VBlank pauses leaves total source spans
+of **140,999–154,160** cycles. Direct callees explain **139,916–153,077**;
+the unmodeled parent interstitial is only **1,081/1,083** cycles. That is a
+useful boundary, but not a reducer: the encrypted box-mon field routes have
+personality-dependent `% 24` routing, level calculation depends on
+growth/experience, nature is `% 25`, and the source has Shedinja and HP return
+branches not covered by the normal Factory cases. The next acceptable step is
+a compiled ROM/EWRAM cycle model plus source branch evidence—not a case
+duration or residual constant. The clock stays unwired.
+
 ## Non-final outer-loop reducer
 
 The complete nine-span outer-loop receipt is source-reduced. The trainer-party

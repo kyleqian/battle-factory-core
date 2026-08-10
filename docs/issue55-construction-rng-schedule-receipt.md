@@ -102,7 +102,7 @@ are evidence boundaries, not adopted reducer constants.
 | construction entry → first `Random` | 12 | 58 | resolved below |
 | `CreateMon` entry → return | 12 | 1,238,617–2,361,713 | unresolved |
 | `CreateMon` return → `CalculateMonStats` entry | 12 | 26,672–41,256 | bounded EV-spread audit below; accepted personality is now exposed, exact memory-access timing remains unresolved |
-| `CalculateMonStats` entry → return | 12 | 140,999–154,160 | unresolved |
+| `CalculateMonStats` entry → return | 12 | 140,999–154,160 | bounded direct-call audit below; no generic reducer yet |
 | stats return → construction return | 12 | 22 | exact sub-boundary; retained with the unresolved stats operation |
 | construction return → factory post-mon end | 12 | 127,759–140,592 | unresolved |
 | post-mon end → next construction entry | 9 | 130–279 | resolved outer-loop path below; one 261→279 span carries +18 service |
@@ -211,6 +211,47 @@ receipt assertions rather than constants. Consequently no +18 asynchronous
 service residual can yet be separated honestly from the instruction path;
 none is silently absorbed. The sole fully contained VBlank pause is classified
 separately as shown above. The clock remains unwired.
+
+### `CalculateMonStats` direct-call audit (2026-08-10)
+
+The already-pinned operation is now independently split at every direct call:
+executed boundaries `0x08068D0C → 0x080686EA` (mGBA pipelined PCs
+`0x08068D0E → 0x080686EC`). Three opt-in, Battle Scene OFF probe packets live
+beside—not inside—the frozen v2 receipt:
+`tests/fixtures/factory-calculate-mon-stats-v1/{anchor,liliana,factory-varied}.json`.
+Fresh wrapped repeats were byte-identical at SHA-256
+`cde88e8f…`, `d338edc…`, and `e0d10a1…`, respectively. They contain no party
+pointer, trainer/set id, frame, cursor, or duration lookup key: only scalar
+ABI inputs/results, accepted personality, direct-call PCs, and master cycles.
+
+`pokemon.c:2823-2889` / ELF `CalculateMonStats` at `0x08068D0C` makes exactly
+**40** direct calls on every observed normal Factory path: **15**
+`GetMonData2`, **1** `GetLevelFromMonExp`, **8** `SetMonData`, **6**
+`__divsi3`, **5** `GetNature`, and **5** `ModifyStatByNature`. Across all
+**12/12** operation spans this is **480** independently paired calls. The
+receipt pins each caller, callee, return PC, field id or arithmetic ABI values,
+the six divisor-100 divisions, five `personality % 25` nature values, and
+stat indexes 1–5. It therefore proves the operation scheduler's existing
+`calculate-mon-stats` emission receives the accepted personality it needs;
+the scheduler remains deliberately unwired.
+
+After subtracting the seven fully contained VBlank pauses, total source spans
+are **140,999–154,160** cycles. The direct callees account for
+**139,916–153,077** cycles; the caller interstitial is just **1,081** or
+**1,083** cycles in the committed cases. This is a decomposition, not an
+external-service classification: the small remainder still includes parent
+instructions, compiled branches, and any unmodeled bus timing.
+
+No exact reducer is licensed. The encrypted `GetMonData2` field routes and
+`SetMonData` paths use `GetSubstruct` layout calls that divide the full
+personality by 24; `GetLevelFromMonExp` branches by growth/experience; the five nature calls
+divide by 25; and `ModifyStatByNature` branches by nature/stat index. The
+source also has the `SPECIES_SHEDINJA`, HP/old-max-HP, and level-up-HP branches
+outside the twelve normal completion paths. The next exact requirement is a
+source-general compiled ROM/EWRAM cycle model for those nested data accesses,
+the direct-call callee paths, and all parent branches, followed by branch-case
+evidence. A case duration table, fixture identity, or observed residual is not
+an admissible substitute.
 
 ### Construction-entry component (2026-08-10)
 

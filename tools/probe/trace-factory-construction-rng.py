@@ -109,6 +109,64 @@ VBLANK_WORKLOAD_EVIDENCE = os.environ.get("FACTORY_VBLANK_WORKLOAD_EVIDENCE") ==
 VBLANK_WORKLOAD_INTERNAL_EVIDENCE = (
     os.environ.get("FACTORY_VBLANK_WORKLOAD_INTERNAL_EVIDENCE") == "1"
 )
+# This is a sibling of the frozen v2 construction receipt. It records each
+# direct source call made by CalculateMonStats, with scalar inputs/results but
+# never a party pointer, set id, trainer id, or timing lookup key. The call
+# sites are from the pinned CalculateMonStats ELF body and distinguish the
+# stat field / arithmetic branch an eventual source reducer must replay.
+#
+#   FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1 \
+#   FACTORY_CALCULATE_MON_STATS_EVIDENCE=1 ...
+CALCULATE_MON_STATS_EVIDENCE = (
+    os.environ.get("FACTORY_CALCULATE_MON_STATS_EVIDENCE") == "1"
+)
+
+# mGBA reports the executing Thumb instruction plus two bytes. Every entry
+# below is a direct BL in CalculateMonStats (pokemon.c:2823-2889); nested calls
+# made by these callees have an LR outside this table and are intentionally not
+# duplicated. This keeps the observation a bounded source-operation trace.
+CALCULATE_MON_STATS_DIRECT_CALLS: dict[int, tuple[str, str, int]] = {
+    0x08068D1E: ("get-mon-data", "old-max-hp", 0x0806A51A),
+    0x08068D2A: ("get-mon-data", "current-hp", 0x0806A51A),
+    0x08068D36: ("get-mon-data", "hp-iv", 0x0806A51A),
+    0x08068D42: ("get-mon-data", "hp-ev", 0x0806A51A),
+    0x08068D4E: ("get-mon-data", "attack-iv", 0x0806A51A),
+    0x08068D5A: ("get-mon-data", "attack-ev", 0x0806A51A),
+    0x08068D66: ("get-mon-data", "defense-iv", 0x0806A51A),
+    0x08068D72: ("get-mon-data", "defense-ev", 0x0806A51A),
+    0x08068D7E: ("get-mon-data", "speed-iv", 0x0806A51A),
+    0x08068D8A: ("get-mon-data", "speed-ev", 0x0806A51A),
+    0x08068D96: ("get-mon-data", "sp-attack-iv", 0x0806A51A),
+    0x08068DA2: ("get-mon-data", "sp-attack-ev", 0x0806A51A),
+    0x08068DAE: ("get-mon-data", "sp-defense-iv", 0x0806A51A),
+    0x08068DBA: ("get-mon-data", "sp-defense-ev", 0x0806A51A),
+    0x08068DC6: ("get-mon-data", "species", 0x0806A51A),
+    0x08068DD0: ("get-level-from-exp", "level", 0x08069056),
+    0x08068DE0: ("set-mon-data", "level", 0x0806ACAE),
+    0x08068E1C: ("divide", "max-hp", 0x082E7542),
+    0x08068E42: ("set-mon-data", "max-hp", 0x0806ACAE),
+    0x08068E68: ("divide", "attack", 0x082E7542),
+    0x08068E72: ("get-nature", "attack", 0x0806D072),
+    0x08068E80: ("modify-stat-by-nature", "attack", 0x0806D8D6),
+    0x08068E90: ("set-mon-data", "attack", 0x0806ACAE),
+    0x08068EAE: ("divide", "defense", 0x082E7542),
+    0x08068EB8: ("get-nature", "defense", 0x0806D072),
+    0x08068EC6: ("modify-stat-by-nature", "defense", 0x0806D8D6),
+    0x08068ED6: ("set-mon-data", "defense", 0x0806ACAE),
+    0x08068EF4: ("divide", "speed", 0x082E7542),
+    0x08068EFE: ("get-nature", "speed", 0x0806D072),
+    0x08068F0C: ("modify-stat-by-nature", "speed", 0x0806D8D6),
+    0x08068F1C: ("set-mon-data", "speed", 0x0806ACAE),
+    0x08068F3A: ("divide", "sp-attack", 0x082E7542),
+    0x08068F44: ("get-nature", "sp-attack", 0x0806D072),
+    0x08068F52: ("modify-stat-by-nature", "sp-attack", 0x0806D8D6),
+    0x08068F62: ("set-mon-data", "sp-attack", 0x0806ACAE),
+    0x08068F80: ("divide", "sp-defense", 0x082E7542),
+    0x08068F8A: ("get-nature", "sp-defense", 0x0806D072),
+    0x08068F98: ("modify-stat-by-nature", "sp-defense", 0x0806D8D6),
+    0x08068FA8: ("set-mon-data", "sp-defense", 0x0806ACAE),
+    0x08068FF0: ("set-mon-data", "current-hp", 0x0806ACAE),
+}
 
 # VBlankIntr's direct call/return sites in the pinned ELF.  These are source
 # routines in main.c, not inferred from the construction fixture.  Capturing
@@ -653,6 +711,80 @@ def cycle_snapshot(oracle: EmeraldOracle, frame: int, pc: int, kind: str, **fiel
     }
 
 
+def cpu_gpr(oracle: EmeraldOracle, index: int) -> int:
+    """Read a scalar argument/result without retaining a mon-memory address."""
+    return int(oracle.core.cpu.gprs[index])
+
+
+def calculate_mon_stats_call_arguments(operation: str, oracle: EmeraldOracle) -> dict[str, int]:
+    """Capture only branch-relevant scalar ABI arguments at a direct call."""
+    if operation in {"get-mon-data", "set-mon-data"}:
+        return {"field": cpu_gpr(oracle, 1)}
+    if operation == "divide":
+        return {"dividend": cpu_gpr(oracle, 0), "divisor": cpu_gpr(oracle, 1)}
+    if operation == "modify-stat-by-nature":
+        return {
+            "nature": cpu_gpr(oracle, 0),
+            "stat": cpu_gpr(oracle, 1),
+            "statIndex": cpu_gpr(oracle, 2),
+        }
+    return {}
+
+
+def observe_calculate_mon_stats_call(
+    epoch: dict[str, Any],
+    oracle: EmeraldOracle,
+    frame: int,
+    pc: int,
+) -> None:
+    """Pair each direct CalculateMonStats call at ELF-pinned instruction boundaries."""
+    if not CALCULATE_MON_STATS_EVIDENCE:
+        return
+
+    active = epoch.get("calculateMonStatsActiveCall")
+    if active is not None:
+        return_pc = int(active["returnPc"], 16)
+        if pc in {return_pc, return_pc + 2}:
+            completed = dict(active)
+            completed["returnMasterCycles"] = cycle_snapshot(
+                oracle, frame, pc, "calculate-mon-stats-direct-return",
+            )["masterCycles"]
+            completed["returnPcObserved"] = f"0x{pc:08x}"
+            if active["operation"] != "set-mon-data":
+                completed["result"] = cpu_gpr(oracle, 0)
+            epoch.setdefault("calculateMonStatsCalls", []).append(completed)
+            epoch.pop("calculateMonStatsActiveCall", None)
+
+    # CreateMon itself invokes CalculateMonStats before the outer Factory
+    # EV-spread boundary. This v1 receipt is deliberately scoped to the later
+    # CalculateMonStats call whose entry is already pinned in v2.
+    if epoch.get("calculateMonStatsActiveMonIndex") is None:
+        return
+
+    # Thumb BL stores the return address (+4, with the Thumb bit) in LR.
+    call_pc = (oracle.core.cpu.lr & ~1) - 4
+    descriptor = CALCULATE_MON_STATS_DIRECT_CALLS.get(call_pc)
+    if descriptor is None:
+        return
+    operation, target, expected_entry_pc = descriptor
+    if pc != expected_entry_pc:
+        return
+    if epoch.get("calculateMonStatsActiveCall") is not None:
+        raise RuntimeError("nested direct CalculateMonStats observation")
+    epoch["calculateMonStatsActiveCall"] = {
+        "monIndex": epoch.get("calculateMonStatsActiveMonIndex"),
+        "operation": operation,
+        "target": target,
+        "callPc": f"0x{call_pc:08x}",
+        "entryPc": f"0x{pc:08x}",
+        "returnPc": f"0x{(oracle.core.cpu.lr & ~1):08x}",
+        "entryMasterCycles": cycle_snapshot(
+            oracle, frame, pc, "calculate-mon-stats-direct-entry",
+        )["masterCycles"],
+        "arguments": calculate_mon_stats_call_arguments(operation, oracle),
+    }
+
+
 def symbols(elf: Path) -> list[tuple[int, str]]:
     output = subprocess.run(
         ["arm-none-eabi-nm", "--defined-only", "-n", str(elf)],
@@ -748,6 +880,7 @@ def advance_one_instrumented_frame(
                 append_m4a_internal_stage(epoch, oracle, frame, pc, "m4a-sound-main-return")
             if VBLANK_WORKLOAD_EVIDENCE and pc in VBLANK_STAGE_PCS:
                 append_vblank_stage(epoch, oracle, frame, pc, VBLANK_STAGE_PCS[pc])
+            observe_calculate_mon_stats_call(epoch, oracle, frame, pc)
             if pc == target_entry and epoch.get("entry") is None:
                 cycle_events.append(cycle_snapshot(
                     oracle, frame, pc, "source-function-entry",
@@ -792,7 +925,13 @@ def advance_one_instrumented_frame(
                     oracle, frame, pc, "calculate-mon-stats-entry",
                     monIndex=epoch.get("currentMonIndex"),
                 ))
+                if CALCULATE_MON_STATS_EVIDENCE:
+                    epoch["calculateMonStatsActiveMonIndex"] = epoch.get("currentMonIndex")
             elif pc == CALCULATE_STATS_RESUME_PC and epoch.get("entry") is not None:
+                if CALCULATE_MON_STATS_EVIDENCE:
+                    if epoch.get("calculateMonStatsActiveCall") is not None:
+                        raise RuntimeError("CalculateMonStats returned with an unfinished direct call")
+                    epoch.pop("calculateMonStatsActiveMonIndex", None)
                 cycle_events.append(cycle_snapshot(
                     oracle, frame, pc, "calculate-mon-stats-return",
                     monIndex=epoch.get("currentMonIndex"),
@@ -1092,6 +1231,13 @@ def classify_and_summarize(
                 )
             ),
             "events": cycle_events,
+        }
+    if CALCULATE_MON_STATS_EVIDENCE:
+        if epoch.get("calculateMonStatsActiveCall") is not None:
+            raise RuntimeError("CalculateMonStats evidence finished with an unfinished direct call")
+        result["calculateMonStatsEvidence"] = {
+            "schema": "factory-calculate-mon-stats-direct-calls/v1",
+            "calls": epoch.get("calculateMonStatsCalls", []),
         }
     if VBLANK_WORKLOAD_EVIDENCE:
         # This is a separate raw observation packet, intentionally not folded
@@ -1406,6 +1552,68 @@ def compact_vblank_workload_internal_receipt(result: dict[str, Any]) -> dict[str
     }
 
 
+def compact_calculate_mon_stats_receipt(result: dict[str, Any]) -> dict[str, Any]:
+    """Keep the sibling stats packet source-shaped and independent of v2's full RNG log."""
+    events = result["cycleEvidence"]["events"]
+    entries = {
+        int(event["monIndex"]): event
+        for event in events
+        if event["kind"] == "calculate-mon-stats-entry"
+    }
+    returns = {
+        int(event["monIndex"]): event
+        for event in events
+        if event["kind"] == "calculate-mon-stats-return"
+    }
+    spans = [
+        {
+            "monIndex": mon_index,
+            "entryMasterCycles": entries[mon_index]["masterCycles"],
+            "entryPc": entries[mon_index]["pc"],
+            "returnMasterCycles": returns[mon_index]["masterCycles"],
+            "returnPc": returns[mon_index]["pc"],
+        }
+        for mon_index in sorted(entries)
+    ]
+    first_entry = min(span["entryMasterCycles"] for span in spans)
+    final_return = max(span["returnMasterCycles"] for span in spans)
+    pause_parts: dict[int, dict[str, int]] = {}
+    for event in events:
+        interrupt_index = event.get("interruptIndex")
+        if interrupt_index is None:
+            continue
+        if event["kind"] == "vblank-entry":
+            pause_parts.setdefault(int(interrupt_index), {})["entryMasterCycles"] = event["masterCycles"]
+        elif event["kind"] == "vblank-resume":
+            pause_parts.setdefault(int(interrupt_index), {})["resumeMasterCycles"] = event["masterCycles"]
+    pauses = [
+        part
+        for _, part in sorted(pause_parts.items())
+        if "entryMasterCycles" in part
+        and "resumeMasterCycles" in part
+        and part["entryMasterCycles"] <= final_return
+        and part["resumeMasterCycles"] >= first_entry
+    ]
+    mons = [
+        {
+            "monIndex": mon["monIndex"],
+            "targetNature": mon["targetNature"],
+            "acceptedPersonality": mon["acceptedPersonality"],
+        }
+        for mon in result["monBoundaries"]
+    ]
+    return {
+        "schema": "factory-calculate-mon-stats-direct-calls/v1",
+        "case": result["case"],
+        "oracleProfile": result["oracleProfile"],
+        "sourceFunction": result["sourceFunction"],
+        "mons": mons,
+        "spans": spans,
+        "interruptPauses": pauses,
+        "directCalls": result["calculateMonStatsEvidence"]["calls"],
+    }
+
+
 def main() -> None:
     if OUTPUT.exists():
         raise SystemExit(f"refusing existing output path: {OUTPUT}")
@@ -1413,13 +1621,17 @@ def main() -> None:
         raise SystemExit("FACTORY_VBLANK_WORKLOAD_EVIDENCE=1 requires FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1")
     if VBLANK_WORKLOAD_INTERNAL_EVIDENCE and not VBLANK_WORKLOAD_EVIDENCE:
         raise SystemExit("FACTORY_VBLANK_WORKLOAD_INTERNAL_EVIDENCE=1 requires FACTORY_VBLANK_WORKLOAD_EVIDENCE=1")
+    if CALCULATE_MON_STATS_EVIDENCE and not CYCLE_EVIDENCE:
+        raise SystemExit("FACTORY_CALCULATE_MON_STATS_EVIDENCE=1 requires FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1")
     if CASE == "anchor":
         result = run_anchor()
     elif CASE == "liliana":
         result = run_liliana()
     else:
         result = run_factory_varied()
-    if VBLANK_WORKLOAD_INTERNAL_EVIDENCE:
+    if CALCULATE_MON_STATS_EVIDENCE:
+        result = compact_calculate_mon_stats_receipt(result)
+    elif VBLANK_WORKLOAD_INTERNAL_EVIDENCE:
         result = compact_vblank_workload_internal_receipt(result)
     elif VBLANK_WORKLOAD_EVIDENCE:
         result = compact_vblank_workload_receipt(result)
@@ -1428,6 +1640,9 @@ def main() -> None:
     print(
         (
             f"wrote {OUTPUT}: {result['case']} "
+            f"{len(result['directCalls'])} direct CalculateMonStats calls"
+            if CALCULATE_MON_STATS_EVIDENCE
+            else f"wrote {OUTPUT}: {result['case']} "
             f"{len(result['interrupts'])} VBlank workload observations"
             if VBLANK_WORKLOAD_EVIDENCE
             else f"wrote {OUTPUT}: {result['case']} "
