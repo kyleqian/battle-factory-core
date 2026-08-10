@@ -282,6 +282,34 @@
    ]
   },
   {
+   "move": "MOVE_BATON_PASS",
+   "status": "exact",
+   "covered": [
+    "complete legal challenge-0 Level-50 parties stage the lowest carrier, set-142 AIPOM, against ONIX in both orientations with three complete legal records per side and only the active AIPOM move slots constrained to BATON_PASS",
+    "the complete pointer-bounded Move_BATON_PASS..Move_PERISH_SONG source body plus first inactive cleanup passes 53/53 source reducer, typed seam, software sprite/task, hardware OAM/matrix/palette/tag/register/audio, immutable-state, raw-RGB, and production-framebuffer checks in both orientations twice fresh",
+    "the pure source-age reducer and narrow compositor port ANIM_TAG_POKEBALL, gBatonPassPokeballSpriteTemplate / AnimBatonPassPokeball, both fall-through affine phases, attacker reset/hide, geometry-dependent Pokeball ascent and teardown, and the existing blend_color_cycle command's exact alternating BG/battler palette transfer",
+    "player-back frames 69..121 reproduce evidence/raw/map receipts 6894725b4667f5be198af2bbb043f319194c9a7bf218fd24d6002d24778fee52 / 9a4824539e43ac80e53d53015ac571034a4d0a28ceb7a1b1311ebe6b11d878ec / 1b4209495639a0501aeca71bde7b132c659c42ae04f7a332417b3d13c908f184; opponent-front frames 73..125 reproduce 84a2ebae7906929927c359575fb767a254746728a2e0bfa50617d68a200e9feb / e6723a9529331264a80e493f928c6619307341b7d3cdfe58b2241daaadd2e3e5 / 8fe18196c98f80f68a744afec9266da98293104f226773146c08187dba2d7e68",
+    "deterministic extraction pins the literal Pokeball sheet and palette byte-for-byte while reusing source-identical existing AIPOM/ONIX art; MOVE_GROWTH remains bilateral 63/63 exact twice fresh after the shared live-affine/blend compositor change, and no sibling coverage is promoted"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-baton-pass-player-aipom-opponent-onix.json",
+    "tools/battle-lab/mechanic-baton-pass-opponent-aipom-player-onix.json",
+    "tools/compare/fixtures/baton-pass-player-aipom-opponent-onix.json",
+    "tools/compare/fixtures/baton-pass-opponent-aipom-player-onix.json",
+    "tools/compare/poisonFangProbe.py",
+    "tools/compare/batonPassPortable.ts",
+    "tools/compare/batonPassSourceAudit.ts",
+    "tools/compare/extractBatonPassAssets.ts",
+    "tools/compare/evidence/baton-pass-changemap-player.txt",
+    "tools/compare/evidence/baton-pass-changemap-opponent.txt",
+    "src/animation/assets/baton-pass.json",
+    "src/animation/batonPass.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/batonPass.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_BARRIER",
    "status": "exact",
    "covered": [

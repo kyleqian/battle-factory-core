@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_BATON_PASS exact — bilateral 53/53 Poké Ball/blend promotion (2026-08-09 worker)
+
+- **State:** Coverage advances **148→149/276 exact**, 0 partial, 0 staged, **128→127 unsupported**. Baton Pass alone moves; boundary and unsupported-barrier pins are unchanged.
+- **Did:** Added complete legal set-142 AIPOM/ONIX bilateral stages, a pointer-bounded Scene-ON probe, immutable receipts/change maps, pure 53-age reducer, typed seam, deterministic Poké Ball extraction, and a narrow compositor for `AnimBatonPassPokeball`, live attacker affine/hide/reset, and the already-exact `blend_color_cycle` command.
+- **Verified:** Twice fresh, player-back frames **69..121** and opponent-front **73..125** each pass **53/53 source+seam+software/hardware+raw-RGB+framebuffer**. Player evidence/raw/map: `6894725b…` / `9a482453…` / `1b420949…`; opponent: `84a2ebae…` / `e6723a95…` / `8fe18196…`; maps regenerate byte-identically. GROWTH stays bilateral **63/63** twice fresh.
+- **Next:** Supervisor selects the next independent acceptance unit. Do not promote a sibling from the shared blend command.
+- **Notes:** Baton Pass directly confirms plain Poké Ball OAM and palette transfer at RAM+1 and adds the distinct direct-callback live-battler matrix RAM+1/invisible-OAM-removal latch. No switching/stat transfer, RNG, turn/controller/round/facility state, canonical import, barrier, boundary widening, or absolute-tick branch changed.
+
 ## MOVE_KARATE_CHOP exact — bilateral 49/49 HANDS_AND_FEET/IMPACT promotion (2026-08-09 worker)
 
 - **State:** Coverage advances **147→148/276 exact**, 0 partial, 0 staged, **129→128 unsupported**. Karate Chop alone moves; boundary and unsupported-barrier pins are unchanged.

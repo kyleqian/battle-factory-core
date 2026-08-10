@@ -70,10 +70,10 @@ describe("MOVE_GLARE bilateral dense exact evidence", () => {
     expect(effects2).toContain(".callback = AnimEyeSparkle");
   });
 
-  it("keeps GLARE exact after the Karate Chop promotion at 148/148", () => {
-    expect(coverage.entries).toHaveLength(148);
+  it("keeps GLARE exact after the Baton Pass promotion at 149/149", () => {
+    expect(coverage.entries).toHaveLength(149);
     expect(coverage.entries.every((entry) => entry.status === "exact")).toBe(true);
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_GLARE")).toHaveLength(1);
-    expect(276 - coverage.entries.length).toBe(128);
+    expect(276 - coverage.entries.length).toBe(127);
   });
 });
