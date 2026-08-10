@@ -1,3 +1,11 @@
+# MOVE_PIN_MISSILE dense Scene-ON evidence checkpoint — coverage unchanged (2026-08-10 worker)
+
+- **State:** Coverage remains **156/276 exact**, 0 partial, 0 staged, 120 unsupported. `MOVE_PIN_MISSILE` is not promoted; no boundary, unsupported-barrier, gameplay, controller, or shared-state change.
+- **Did:** Added complete legal bilateral set-211 QWILFISH/ONIX `mechanicLab` stages, the source-pointer-bounded `create_pin_missile_sprite`/`gPinMissileSpriteTemplate`/`AnimMissileArc` dense probe, full sprite/task/OAM/matrix/palette/register/audio/state/raw-RGB capture, and normalized bilateral change maps. The successful `0xcafebabe` seed avoids the first seed's legitimate accuracy miss.
+- **Verified:** Fresh receipts and raw RGB are byte-stable twice per orientation: player-back source **86..178 (93)** and opponent-front **90..182 (93)**. Topology includes `gPinMissileSpriteTemplate`, `AnimMissileArc_Step`, `gBasicHitSplatSpriteTemplate`, and `AnimTask_ShakeMon2_Step`. Digests are player probe/raw/map `e42138dc…` / `d5611174…` / `627ffeb1…`, opponent `715d16f6…` / `888244d8…` / `d6ffb0e1…`.
+- **Residual:** No pure reducer, typed seam, or production compositor was landed in this bounded checkpoint. A later worker must port the Q8.8 double-advance arc and BIOS angle/matrix path, then prove full reducer/seam/production framebuffer equality in both orientations before changing coverage.
+- **Next:** Start from the committed fixtures, receipts metadata, source audit, and `tools/compare/evidence/pin-missile-changemap-{player,opponent}.txt`; do not infer the arc or allocator/painter latches from Spike Cannon.
+
 # Animation coverage
 
 ## MOVE_NIGHT_SHADE exact — bilateral 228/228 clone/ghost promotion (2026-08-10 worker)

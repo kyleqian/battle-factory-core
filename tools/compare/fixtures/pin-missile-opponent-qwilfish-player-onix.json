@@ -1,0 +1,17 @@
+{
+  "move": "MOVE_PIN_MISSILE",
+  "status": "evidence-checkpoint",
+  "orientation": "opponent-front",
+  "scenario": "tools/battle-lab/mechanic-pin-missile-opponent-qwilfish-player-onix.json",
+  "probe": "tools/compare/pinMissileProbe.py",
+  "sourceWindow": {"startFrame": 90, "endFrame": 182, "frameCount": 93},
+  "captureWindow": {"startFrame": 39, "endFrame": 504, "frameCount": 466},
+  "sourceBounds": {"start": "0x082c9b60", "endExclusive": "0x082c9c25"},
+  "probeJsonSha256": "715d16f67269140f3b312e2c4a87e5baed2f9d35c1b910ddc5fb3b0ea7d167c1",
+  "rawRgbSha256": "888244d86c17e9870fd29d78a83a7a1aebfd06804eb527c52278f21c9e572499",
+  "changeMap": "tools/compare/evidence/pin-missile-changemap-opponent.txt",
+  "changeMapSha256": "d6ffb0e1f1264be19e4b5017ec1b377f1200f39314d7bb483e89d67922e75732",
+  "sourceComponents": ["create_pin_missile_sprite", "gPinMissileSpriteTemplate", "AnimMissileArc", "AnimMissileArc_Step", "AnimTask_ShakeMon2"],
+  "observedTopology": {"template": "gPinMissileSpriteTemplate", "hitsplat": "gBasicHitSplatSpriteTemplate", "callback": "AnimMissileArc_Step", "task": "AnimTask_ShakeMon2_Step"},
+  "residual": "No reducer, seam, or compositor promotion is claimed; coverage remains unchanged until the dense receipt is ported and production framebuffer equality is proven."
+}
