@@ -1,7 +1,10 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { reduceFactoryCalculateMonStatsParentTiming } from "../src/engine/factoryConstructionClock.ts";
+import {
+  reduceFactoryCalculateMonStatsParentTiming,
+  reduceFactoryModifyStatByNatureTiming,
+} from "../src/engine/factoryConstructionClock.ts";
 
 type DirectCall = {
   monIndex: number;
@@ -203,6 +206,129 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
         expect(modifications.map((call) => call.arguments.statIndex)).toEqual([1, 2, 3, 4, 5]);
       }
     }
+  });
+
+  it("source-reduces every direct ModifyStatByNature span from its ABI inputs", () => {
+    const reductions: Array<{
+      natureModifier: -1 | 0 | 1 | null;
+      cycles: number;
+      result: number;
+    }> = [];
+
+    for (const { value } of probes) {
+      for (const call of value.directCalls.filter((row) => row.operation === "modify-stat-by-nature")) {
+        const timing = reduceFactoryModifyStatByNatureTiming({
+          nature: call.arguments.nature!,
+          stat: call.arguments.stat!,
+          statIndex: call.arguments.statIndex!,
+        });
+        expect(timing.entryPc).toBe(0x0806_d8d4);
+        expect(timing.result).toBe(call.result);
+        expect(timing.cycles).toBe(sourceCycles(
+          call.entryMasterCycles,
+          call.returnMasterCycles,
+          value.interruptPauses,
+        ));
+        reductions.push(timing);
+      }
+    }
+
+    expect(reductions).toHaveLength(60);
+    expect(reductions.filter((timing) => timing.natureModifier === 0)).toHaveLength(52);
+    expect(reductions.filter((timing) => timing.natureModifier === 1)).toHaveLength(4);
+    expect(reductions.filter((timing) => timing.natureModifier === -1)).toHaveLength(4);
+    expect(reductions.reduce((total, timing) => total + timing.cycles, 0)).toBe(8_396);
+    expect(new Set(reductions.map((timing) => timing.cycles))).toEqual(new Set([98, 408, 410, 416, 418]));
+  });
+
+  it("follows ModifyStatByNature's guard, table, u16-product, and multiply-width branches", () => {
+    expect(reduceFactoryModifyStatByNatureTiming({
+      nature: 1,
+      stat: 68,
+      statIndex: 1,
+    })).toMatchObject({
+      route: "raise",
+      natureModifier: 1,
+      multiplier: 110,
+      scaledStat: 7_480,
+      result: 74,
+      multiplyInternalCycles: 1,
+      cycles: 418,
+    });
+    expect(reduceFactoryModifyStatByNatureTiming({
+      nature: 1,
+      stat: 85,
+      statIndex: 2,
+    })).toMatchObject({
+      route: "lower",
+      natureModifier: -1,
+      multiplier: 90,
+      scaledStat: 7_650,
+      result: 76,
+      multiplyInternalCycles: 1,
+      cycles: 408,
+    });
+    expect(reduceFactoryModifyStatByNatureTiming({
+      nature: 0,
+      stat: 400,
+      statIndex: 1,
+    })).toMatchObject({
+      route: "neutral",
+      natureModifier: 0,
+      multiplier: null,
+      scaledStat: 400,
+      result: 400,
+      multiplyInternalCycles: 0,
+      cycles: 98,
+    });
+    expect(reduceFactoryModifyStatByNatureTiming({
+      nature: 1,
+      stat: 256,
+      statIndex: 1,
+    })).toMatchObject({
+      route: "raise",
+      natureModifier: 1,
+      multiplier: 110,
+      scaledStat: 28_160,
+      result: 281,
+      multiplyInternalCycles: 2,
+      cycles: 497,
+    });
+    expect(reduceFactoryModifyStatByNatureTiming({
+      nature: 1,
+      stat: 65_535,
+      statIndex: 1,
+    })).toMatchObject({
+      route: "raise",
+      multiplier: 110,
+      scaledStat: 65_426,
+      result: 654,
+      multiplyInternalCycles: 2,
+      cycles: 503,
+    });
+    for (const statIndex of [0, 6, 255]) {
+      expect(reduceFactoryModifyStatByNatureTiming({
+        nature: 24,
+        stat: 65535,
+        statIndex,
+      })).toMatchObject({
+        route: "unaffected-stat-index",
+        natureModifier: null,
+        multiplier: null,
+        scaledStat: 65535,
+        result: 65535,
+        multiplyInternalCycles: 0,
+        romLiteralLoads: 0,
+        romTableLoads: 0,
+        cycles: 48,
+      });
+    }
+    expect(() => reduceFactoryModifyStatByNatureTiming({ nature: 25, stat: 1, statIndex: 1 }))
+      .toThrow("nature must be a GetNature result in [0, 24]");
+    expect(() => reduceFactoryModifyStatByNatureTiming({ nature: 1, stat: 65_536, statIndex: 1 }))
+      .toThrow("stat must be a source u16");
+    expect(() => reduceFactoryModifyStatByNatureTiming({ nature: 1, stat: 1, statIndex: 256 }))
+      .toThrow("statIndex must be a source u8");
   });
 
   it("source-reduces all twelve parent-only residuals and identifies the u8 level-up-HP branch", () => {

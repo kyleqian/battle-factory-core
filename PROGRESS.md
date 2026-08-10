@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1090 — [MAIN worker, 2026-08-10] **#55 `ModifyStatByNature` direct-callee timing reduced**
+
+- **State:** standalone source reducer and docs are landed locally; focused
+  stats/clock **15/15**, smoke **375/375**, and typecheck pass. Final full
+  `npm test` and production build remain before handoff; #55 stays open.
+- **Did:** reduced all **60/60** receipt calls from nature/u16-stat/stat-index
+  ABI inputs: **52×98**, raise **3×416 + 1×418**, lower **3×408 + 1×410** =
+  **8,396** cycles. It resolves **60/480** direct calls (**12.5%**) but only
+  **0.475%** of direct-callee time; fresh Scene-OFF anchor hash is `cde88e8f…`.
+- **Next:** run final full suite/build, commit green, then leave the complete
+  stats operation and live construction clock unwired pending Get/Set, level,
+  `%25` nature-fetch, signed-divide, and VBlank/audio timing.
+- **Notes:** source/ELF reduction includes the stat-index guard, ROM table,
+  u16 product, ARM7 multiply width, and nested `__udivsi3`; no identity or
+  duration lookup, fixture mutation, canonical Battle-2, animation, or
+  unsupported-barrier change.
+
 ## 1089 — [supervisor, 2026-08-10] **#55 m4a source-state boundary extended and reproduced**
 
 - **State:** squashed side fold `28f7a5c8`; focused union **15/15** and smoke
@@ -37,20 +54,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   live clock before those callees and VBlank/audio arbitration are exact.
 - **Notes:** commit `639f0a81`; no identity/duration lookup, fixture mutation,
   live wiring, canonical Battle-2, animation, or unsupported-barrier change.
-
-## 1087 — [MAIN worker, 2026-08-10] **#55 `CalculateMonStats` direct-call boundary narrowed**
-
-- **State:** bounded evidence checkpoint committed; all **12/12** complete
-  stats spans and **480** direct calls are pinned. Construction focus **19/19**,
-  smoke **375/375**, typecheck, full `npm test` **880 files / 8,420 passed /
-  1 skipped**, and production build are green.
-- **Did:** added a byte-stable Scene-OFF sibling receipt for anchor/LILIANA/
-  varied and audited `pokemon.c:2823` / the pinned ELF. Direct callees explain
-  **139,916–153,077** of **140,999–154,160** source cycles after **7** complete
-  VBlank pauses; parent interstitial is **1,081/1,083**, not a fitted reducer.
-- **Next:** port source-general nested box-mon/level/nature/HP branch and
-  ROM/EWRAM timing, then collect branch-case evidence; keep #55 open and the
-  live clock unwired.
-- **Notes:** existing `calculate-mon-stats` emission and accepted-personality
-  propagation are tested; no identity/duration table, receipt mutation, live
-  wiring, canonical Battle-2, animation, or unsupported-barrier change.

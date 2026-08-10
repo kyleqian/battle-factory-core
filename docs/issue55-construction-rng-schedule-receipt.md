@@ -258,11 +258,49 @@ Shedinja's omitted max-HP divide and HP branches.
 
 This does **not** reduce the complete operation. The encrypted `GetMonData2`
 and `SetMonData` callees still use personality-dependent `%24` substruct
-routes; level lookup depends on growth/experience; nature uses `%25`; divides
-and nature modification retain their own compiled paths. Exact ROM/EWRAM
-timing for those nested direct callees remains the next requirement. A case
-duration table, fixture identity, or observed residual is not an admissible
-substitute, and the clock stays unwired.
+routes; level lookup depends on growth/experience; `GetNature` uses `%25`; and
+the six direct signed `__divsi3` calls retain their own compiled paths. Exact
+ROM/EWRAM timing for those remaining nested direct callees is still required.
+A case duration table, fixture identity, or observed residual is not an
+admissible substitute, and the clock stays unwired.
+
+### `ModifyStatByNature` direct-callee component (2026-08-10)
+
+`reduceFactoryModifyStatByNatureTiming` now exactly reduces the bounded
+direct callee at `pokemon.c:5878-5911` / ELF
+`0x0806D8D4→0x0806D932`. The reducer accepts only the source ABI values:
+valid `GetNature` output (**0–24**), source-u16 incoming stat, and source-u8
+stat index. It never receives mon memory, species, set/trainer, battle/frame/
+tick/cursor, receipt identity, or an observed duration.
+
+The compiled path first narrows all three arguments, skips the nature table
+for stat index **0** or **6–255**, then otherwise fetches the signed
+`gNatureStatTable[nature][statIndex - 1]` byte through one PC-relative ROM
+literal (**11** cycles total) and one ROM byte read (**9** total). Neutral rows
+return the input; raise/lower rows execute `stat * 110` or `stat * 90`, truncate
+the product to u16 exactly as the retail `retVal`, and replay the nested
+`__udivsi3(..., 100)` Loop1/2/3 path instruction-by-instruction. The reducer
+also models ARM7TDMI `muls` early termination from the zero-extended stat:
+one internal cycle through **255**, two from **256–65535**. Its branch tests
+cover the guard (**48** cycles), neutral return (**98**), both table signs,
+u16 product wrap, and the higher multiply-width route; the Factory receipt's
+actual stat values are all in the one-cycle multiply class.
+
+All **60/60** committed calls reduce exactly after the receipt's contained-
+interrupt subtraction (there are no contained VBlank pauses inside these
+short calls): **52** neutral calls at **98** cycles, **3×416 + 1×418** raise
+calls, and **3×408 + 1×410** lower calls. A fresh wrapped Scene-OFF anchor
+probe reproduced its packet byte-for-byte at
+`cde88e8f2a6ab3602793648120b9d687e42ad96c6d0ad6d554f74e032e82d603`, including
+the anchor's **28×98 + 416 + 410 = 3,570** nature-modification cycles.
+
+This resolves **60/480** direct-call sites (**12.5%**) and **8,396** of the
+combined **1,768,691** pause-subtracted direct-callee cycles across the 12
+stats spans (**0.475%**; **0.471%** of all **1,781,683** source cycles). The
+small percentage is expected: encrypted `GetMonData2` dominates the remaining
+budget. It does not license a complete `CalculateMonStats` cost or live-clock
+wiring; the unresolved Get/Set, level, `%25` nature-fetch, signed-divide, and
+VBlank/audio work remain explicit.
 
 ### Construction-entry component (2026-08-10)
 

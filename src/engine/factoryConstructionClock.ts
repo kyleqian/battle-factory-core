@@ -198,6 +198,45 @@ export interface FactoryCalculateMonStatsParentTiming {
   cycles: number;
 }
 
+/** `gNatureStatTable`'s signed byte values for one affected stat. */
+export type FactoryNatureStatModifier = -1 | 0 | 1;
+
+export interface FactoryModifyStatByNatureTimingInput {
+  /** Valid `GetNature` result passed in r0 by `CalculateMonStats`. */
+  nature: number;
+  /** Source u16 stat passed in r1. */
+  stat: number;
+  /** Source u8 stat index passed in r2 (1..5 are nature-affected). */
+  statIndex: number;
+}
+
+export interface FactoryModifyStatByNatureTiming {
+  nature: number;
+  stat: number;
+  statIndex: number;
+  /** First executed instruction; mGBA reports this boundary as `entryPc + 2`. */
+  entryPc: number;
+  /** Nested `__udivsi3` entry for a raise/lower route, otherwise null. */
+  divisionEntryPc: number | null;
+  route: "unaffected-stat-index" | "neutral" | "raise" | "lower";
+  /** Null when the compiled stat-index guard skips `gNatureStatTable`. */
+  natureModifier: FactoryNatureStatModifier | null;
+  /** 90 or 110 only when the compiled path executes the multiply/divide pair. */
+  multiplier: 90 | 110 | null;
+  /** u16 product immediately after the compiled `lsls`/`lsrs` truncation. */
+  scaledStat: number;
+  /** u16 value returned in r0. */
+  result: number;
+  /** ARM7TDMI multiply algorithm cycles, zero when no multiply executes. */
+  multiplyInternalCycles: 0 | 1 | 2;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  romLiteralLoads: number;
+  romTableLoads: number;
+  /** Complete direct-callee cost, including the nested `__udivsi3` route. */
+  cycles: number;
+}
+
 const THUMB_SEQUENTIAL_CYCLES = 2;
 const THUMB_PIPELINE_REFILL_CYCLES = 6;
 const THUMB_TAKEN_CONTROL_CYCLES = THUMB_SEQUENTIAL_CYCLES + THUMB_PIPELINE_REFILL_CYCLES;
@@ -554,6 +593,316 @@ export function reduceFactoryCalculateMonStatsParentTiming(
     currentHpPath,
     writesCurrentHp,
     directCallCount,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    romLiteralLoads,
+    romTableLoads,
+    cycles,
+  });
+}
+
+interface UnsignedDivisionBy100Timing {
+  quotient: number;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+}
+
+/**
+ * Replay the retail `__udivsi3` implementation at `0x082e7b68` for its one
+ * nonzero constant divisor. This is intentionally separate from
+ * `reduceFactoryNatureAttemptTiming`'s `__umodsi3`: the two libgcc bodies
+ * have different Loop3 result/correction paths, so sharing a synthetic
+ * division formula would hide real executed control flow.
+ */
+function reduceUnsignedDivisionBy100Timing(dividend: number): UnsignedDivisionBy100Timing {
+  let sequentialThumbHalfwords = 0;
+  let pipelineRefills = 0;
+  const instruction = (count = 1): void => {
+    sequentialThumbHalfwords += count;
+  };
+  const branch = (taken: boolean): void => {
+    instruction();
+    if (taken) pipelineRefills += 1;
+  };
+
+  let r0 = dividend >>> 0;
+  let r1 = 100;
+  instruction(); // cmp r1, #0
+  branch(false); // beq Ldiv0; divisor is the compiled constant 100
+  let r3 = 1;
+  instruction();
+  let r2 = 0;
+  instruction();
+  instruction(); // push {r4}
+  instruction(); // cmp r0, r1
+  const belowDivisor = r0 < r1;
+  branch(belowDivisor); // bcc Lgot_result
+  if (belowDivisor) {
+    instruction(); // adds r0, r2, #0
+    instruction(); // pop {r4}
+    branch(true); // mov pc, lr
+    return { quotient: r2, sequentialThumbHalfwords, pipelineRefills };
+  }
+
+  let r4 = 1;
+  instruction();
+  r4 = (r4 << 28) >>> 0;
+  instruction();
+
+  // `__udivsi3` Loop1: establish the first four-bit quotient group.
+  while (true) {
+    instruction();
+    const reachedLargeDivisor = r1 >= r4;
+    branch(reachedLargeDivisor);
+    if (reachedLargeDivisor) break;
+    instruction();
+    const reachedDividend = r1 >= r0;
+    branch(reachedDividend);
+    if (reachedDividend) break;
+    r1 = (r1 << 4) >>> 0;
+    instruction();
+    r3 = (r3 << 4) >>> 0;
+    instruction();
+    branch(true);
+  }
+
+  r4 = (r4 << 3) >>> 0;
+  instruction();
+  // `__udivsi3` Loop2: establish the remaining one to three quotient bits.
+  while (true) {
+    instruction();
+    const reachedLargeDivisor = r1 >= r4;
+    branch(reachedLargeDivisor);
+    if (reachedLargeDivisor) break;
+    instruction();
+    const reachedDividend = r1 >= r0;
+    branch(reachedDividend);
+    if (reachedDividend) break;
+    r1 = (r1 << 1) >>> 0;
+    instruction();
+    r3 = (r3 << 1) >>> 0;
+    instruction();
+    branch(true);
+  }
+
+  // `__udivsi3` Loop3: consume four quotient bits per iteration.
+  while (true) {
+    instruction();
+    const belowFirst = r0 < r1;
+    branch(belowFirst);
+    if (!belowFirst) {
+      r0 = (r0 - r1) >>> 0;
+      instruction();
+      r2 = (r2 | r3) >>> 0;
+      instruction();
+    }
+
+    r4 = r1 >>> 1;
+    instruction();
+    instruction(); // cmp r0, r4
+    const belowSecond = r0 < r4;
+    branch(belowSecond);
+    if (!belowSecond) {
+      r0 = (r0 - r4) >>> 0;
+      instruction();
+      r4 = r3 >>> 1;
+      instruction();
+      r2 = (r2 | r4) >>> 0;
+      instruction();
+    }
+
+    r4 = r1 >>> 2;
+    instruction();
+    instruction(); // cmp r0, r4
+    const belowThird = r0 < r4;
+    branch(belowThird);
+    if (!belowThird) {
+      r0 = (r0 - r4) >>> 0;
+      instruction();
+      r4 = r3 >>> 2;
+      instruction();
+      r2 = (r2 | r4) >>> 0;
+      instruction();
+    }
+
+    r4 = r1 >>> 3;
+    instruction();
+    instruction(); // cmp r0, r4
+    const belowFourth = r0 < r4;
+    branch(belowFourth);
+    if (!belowFourth) {
+      r0 = (r0 - r4) >>> 0;
+      instruction();
+      r4 = r3 >>> 3;
+      instruction();
+      r2 = (r2 | r4) >>> 0;
+      instruction();
+    }
+
+    instruction(); // cmp r0, #0
+    const remainderIsZero = r0 === 0;
+    branch(remainderIsZero);
+    if (remainderIsZero) break;
+    r3 >>>= 4;
+    instruction();
+    const quotientIsComplete = r3 === 0;
+    branch(quotientIsComplete);
+    if (quotientIsComplete) break;
+    r1 >>>= 4;
+    instruction();
+    branch(true);
+  }
+
+  instruction(); // adds r0, r2, #0
+  instruction(); // pop {r4}
+  branch(true); // mov pc, lr
+  return { quotient: r2, sequentialThumbHalfwords, pipelineRefills };
+}
+
+/**
+ * ARM7TDMI's `muls r0, r3` uses the zero-extended source stat in r3 as its
+ * early-termination operand. A source u16 is one internal cycle through 255
+ * and two thereafter; the normal 2-cycle Thumb class already includes the
+ * first internal cycle, so callers add only `m - 1` to the total.
+ */
+function multiplyInternalCyclesForSourceU16(stat: number): 1 | 2 {
+  return stat <= 0xff ? 1 : 2;
+}
+
+/**
+ * Reduce the complete direct `ModifyStatByNature` callee, including its
+ * nested unsigned divide when the stat's nature row is non-neutral.
+ *
+ * This follows `pokemon.c:5878-5911` and the pinned retail body at
+ * `0x0806d8d4..0x0806d932`: the u8 stat-index guard, the PC-relative
+ * `gNatureStatTable` lookup, its signed-byte three-way branch, the source
+ * u16 multiplication truncation, and libgcc's `__udivsi3` Loop1/2/3 path.
+ * It accepts only a real `GetNature` result (0..24), never a mon, set,
+ * trainer, battle/frame/tick/cursor, receipt id, or observed duration.
+ *
+ * The reducer is deliberately standalone. It does not wire the aggregate
+ * `CalculateMonStats` operation or construction clock: the sibling Get/Set,
+ * level, signed-divide, and nature-fetch callee budgets remain unresolved.
+ */
+export function reduceFactoryModifyStatByNatureTiming(
+  input: Readonly<FactoryModifyStatByNatureTimingInput>,
+): FactoryModifyStatByNatureTiming {
+  const nature = requireNonnegativeInteger(input.nature, "nature");
+  const stat = requireNonnegativeInteger(input.stat, "stat");
+  const statIndex = requireNonnegativeInteger(input.statIndex, "statIndex");
+  if (nature > 24) throw new Error(`nature must be a GetNature result in [0, 24], got ${nature}`);
+  if (stat > 0xffff) throw new Error(`stat must be a source u16, got ${stat}`);
+  if (statIndex > 0xff) throw new Error(`statIndex must be a source u8, got ${statIndex}`);
+
+  let sequentialThumbHalfwords = 0;
+  let pipelineRefills = 0;
+  let romLiteralLoads = 0;
+  let romTableLoads = 0;
+  let multiplyInternalCycles: 0 | 1 | 2 = 0;
+  const instruction = (count = 1): void => {
+    sequentialThumbHalfwords += count;
+  };
+  const branch = (taken: boolean): void => {
+    instruction();
+    if (taken) pipelineRefills += 1;
+  };
+  const literalLoad = (): void => {
+    instruction();
+    romLiteralLoads += 1;
+  };
+  const tableLoad = (): void => {
+    instruction();
+    romTableLoads += 1;
+  };
+
+  instruction(); // push {r4, r5, lr}
+  instruction(11); // u8/u16 normalizations through cmp (statIndex - 1), #4
+  const natureAffectedStat = statIndex >= 1 && statIndex <= 5;
+  branch(natureAffectedStat); // bls 0x0806d8f2
+
+  let route: FactoryModifyStatByNatureTiming["route"];
+  let natureModifier: FactoryNatureStatModifier | null = null;
+  let multiplier: FactoryModifyStatByNatureTiming["multiplier"] = null;
+  let scaledStat = stat;
+  let result = stat;
+  let divisionEntryPc: number | null = null;
+
+  if (!natureAffectedStat) {
+    route = "unaffected-stat-index";
+    instruction(); // adds r0, r3, #0
+    branch(true); // b 0x0806d92e
+  } else {
+    literalLoad(); // PC-relative gNatureStatTable address
+    instruction(5); // 5*nature + statIndex - 1 address arithmetic
+    tableLoad(); // signed `gNatureStatTable[nature][statIndex - 1]`
+    instruction(5); // sign extend and prepare {-1, +1} comparisons
+
+    const field = NATURE_STAT_FIELDS[statIndex - 1];
+    if (field === undefined) throw new Error(`missing nature stat field ${statIndex}`);
+    const natureRow = NATURES[nature];
+    if (natureRow === undefined || natureRow.index !== nature) {
+      throw new Error(`missing extracted nature row ${nature}`);
+    }
+    natureModifier = natureRow[field];
+    const lowered = natureModifier === -1;
+    branch(lowered); // beq -1
+    if (lowered) {
+      route = "lower";
+      multiplier = 90;
+      instruction(); // movs r0, #90
+    } else {
+      instruction(); // cmp r1, #1
+      const neutral = natureModifier !== 1;
+      branch(neutral); // bne default
+      if (neutral) {
+        route = "neutral";
+        instruction(); // adds r0, r3, #0
+      } else {
+        route = "raise";
+        multiplier = 110;
+        instruction(); // movs r0, #110
+        branch(true); // b 0x0806d91a
+      }
+    }
+
+    if (multiplier !== null) {
+      multiplyInternalCycles = multiplyInternalCyclesForSourceU16(stat);
+      instruction(); // muls r0, r3
+      scaledStat = (stat * multiplier) & 0xffff;
+      instruction(2); // u16 truncation after mul
+      instruction(); // movs r1, #100
+      const division = reduceUnsignedDivisionBy100Timing(scaledStat);
+      instruction(2); // BL __udivsi3
+      pipelineRefills += 1;
+      sequentialThumbHalfwords += division.sequentialThumbHalfwords;
+      pipelineRefills += division.pipelineRefills;
+      divisionEntryPc = 0x082e_7b68;
+      result = division.quotient & 0xffff;
+      instruction(2); // u16 return-value truncation
+      branch(true); // b 0x0806d92e
+    }
+  }
+
+  instruction(2); // pop {r4, r5}; pop {r1}
+  branch(true); // bx r1
+
+  const cycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+    + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES
+    + romLiteralLoads * (THUMB_ROM_LITERAL_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES)
+    + romTableLoads * (THUMB_ROM_TABLE_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES)
+    + Math.max(0, multiplyInternalCycles - 1);
+  return Object.freeze({
+    nature,
+    stat,
+    statIndex,
+    entryPc: 0x0806_d8d4,
+    divisionEntryPc,
+    route,
+    natureModifier,
+    multiplier,
+    scaledStat,
+    result,
+    multiplyInternalCycles,
     sequentialThumbHalfwords,
     pipelineRefills,
     romLiteralLoads,
@@ -978,7 +1327,17 @@ type FrontierMonRow = Readonly<{
   nature: string;
   evSpread: number;
 }>;
-type NatureRow = Readonly<{ index: number; name: string }>;
+const NATURE_STAT_FIELDS = ["attack", "defense", "speed", "spAttack", "spDefense"] as const;
+type NatureStatField = (typeof NATURE_STAT_FIELDS)[number];
+type NatureRow = Readonly<{
+  index: number;
+  name: string;
+  attack: FactoryNatureStatModifier;
+  defense: FactoryNatureStatModifier;
+  speed: FactoryNatureStatModifier;
+  spAttack: FactoryNatureStatModifier;
+  spDefense: FactoryNatureStatModifier;
+}>;
 type SpeciesRow = Readonly<{ id: number; name: string }>;
 
 const FRONTIER_MONS = (frontierMonsData as unknown as { entries: FrontierMonRow[] }).entries;

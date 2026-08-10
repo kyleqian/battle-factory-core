@@ -1115,11 +1115,25 @@ current-HP/new-max-HP state. The split is the u8 `levelUpHP` zero branch at
 net **−2**. Normal nonzero decomposition is
 `345×2 + 51×6 + 5×(11−2) + 6×(9−2) = 1,083`; zero is
 `347×2 + 50×6 + 5×(11−2) + 6×(9−2) = 1,081`. Source tests also pin Shedinja
-and all final-HP branches. This resolves only the parent slice: nested
-encrypted `%24` box-mon access, `%25` nature, growth/experience, divides, and
-writes remain unresolved, so the complete stats operation and live clock stay
-unwired. No identity/duration table or residual fit landed; #55 stays open.
-See the construction receipt's stats section.
+and all final-HP branches.
+
+**Nested `ModifyStatByNature` timing (2026-08-10):** the standalone
+`reduceFactoryModifyStatByNatureTiming` now walks `pokemon.c:5878-5911` /
+`0x0806D8D4→0x0806D932` using only real callee ABI state: valid nature,
+stat-index, and incoming u16 stat. It replays the stat-index guard, ROM
+nature-table byte, sign branch, u16 product, ARM7TDMI multiply-width class,
+and nested `__udivsi3(...,100)` loops. All **60/60** committed calls are exact:
+**52×98** neutral, raise **3×416 + 1×418**, lower **3×408 + 1×410**, totaling
+**8,396** source cycles. That is **60/480** direct calls (**12.5%**) but only
+**0.475%** of their **1,768,691** pause-subtracted cycles, so it is an honest
+partial reduction rather than a complete stats claim. A fresh Scene-OFF anchor
+repeat remained byte-identical (`cde88e8f…`).
+
+Nested encrypted `%24` box-mon access, `%25` nature fetch,
+growth/experience, signed divides, and writes remain unresolved, so the
+complete stats operation and live clock stay unwired. No identity/duration
+table or residual fit landed; #55 stays open. See the construction receipt's
+stats section.
 
 **VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
 probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all

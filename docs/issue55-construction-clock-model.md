@@ -122,11 +122,19 @@ at `0x08068E38` executes two extra halfwords and avoids one refill:
 **347/50/5/6 = 1,081**. The committed receipt covers **10/2** of those paths;
 source tests also cover normal HP initialization/early return and Shedinja.
 
-This reducer deliberately excludes every direct callee duration. Encrypted
-box-mon `%24` routes, growth/experience level lookup, `%25` nature, divides,
-nature modification, and writes still require their compiled ROM/EWRAM timing
-models. Therefore the complete `calculate-mon-stats` operation is unresolved
-and the construction clock stays unwired.
+The standalone `reduceFactoryModifyStatByNatureTiming` component now closes
+one bounded direct-callee family: all **60** `ModifyStatByNature` calls in the
+v1 receipt reduce from only nature/stat/stat-index ABI inputs, including the
+real signed nature-table branch, u16 product truncation, ARM7TDMI multiply
+width, and nested `__udivsi3(..., 100)` loop. It accounts for **8,396**
+source cycles (**12.5%** of direct-call sites but **0.475%** of their
+pause-subtracted time); the detailed accounting is in the construction receipt.
+
+The parent reducer still deliberately excludes the other direct callee
+durations. Encrypted box-mon `%24` routes, growth/experience level lookup,
+`%25` nature fetch, signed divides, and writes still require their compiled
+ROM/EWRAM timing models. Therefore the complete `calculate-mon-stats`
+operation is unresolved and the construction clock stays unwired.
 
 ## Non-final outer-loop reducer
 
