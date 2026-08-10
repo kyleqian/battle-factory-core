@@ -22,6 +22,10 @@ import {
   type HeadbuttState,
 } from "./headbutt.ts";
 import {
+  drillPeckAtAge,
+  type DrillPeckState,
+} from "./drillPeck.ts";
+import {
   bodySlamAtAge,
   type BodySlamState,
 } from "./bodySlam.ts";
@@ -832,7 +836,8 @@ export interface SceneOnPresentationBattler {
      | "GRAVELER"
      | "ROSELIA"
      | "YANMA"
-     | "SWABLU";
+     | "SWABLU"
+     | "FEAROW";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1557,6 +1562,13 @@ export interface SceneOnBiteConfig {
 
 export interface SceneOnHeadbuttConfig {
   readonly move: "HEADBUTT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnDrillPeckConfig {
+  readonly move: "DRILL_PECK";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -2434,6 +2446,7 @@ export type SceneOnMoveConfig =
   | SceneOnViceGripConfig
   | SceneOnBiteConfig
   | SceneOnHeadbuttConfig
+  | SceneOnDrillPeckConfig
   | SceneOnWhirlwindConfig
   | SceneOnBlockConfig
   | SceneOnBodySlamConfig
@@ -2766,6 +2779,12 @@ export interface SceneOnBiteView extends BiteEffect {
 }
 
 export interface SceneOnHeadbuttView extends HeadbuttState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnDrillPeckView extends DrillPeckState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3778,7 +3797,8 @@ export function createSceneOnMovePresentation<
     | SceneOnBarrierConfig
     | SceneOnHazeConfig
     | SceneOnBiteConfig
-    | SceneOnHeadbuttConfig | SceneOnBodySlamConfig | SceneOnSlamConfig
+    | SceneOnHeadbuttConfig | SceneOnDrillPeckConfig
+    | SceneOnBodySlamConfig | SceneOnSlamConfig
     | SceneOnSecretPowerConfig
     | SceneOnWhirlwindConfig | SceneOnBlockConfig
     | SceneOnIronDefenseConfig
@@ -4952,6 +4972,26 @@ export function sceneOnHeadbuttView(
     ...headbuttAtAge(
       state.age,
       state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Drill Peck's first display after its two source loads. */
+export function sceneOnDrillPeckView(
+  state: SceneOnMovePresentationState<SceneOnDrillPeckConfig>,
+): SceneOnDrillPeckView {
+  if (state.config.move !== "DRILL_PECK") {
+    throw new Error(`expected DRILL_PECK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...drillPeckAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
   };

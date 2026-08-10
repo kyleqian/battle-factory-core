@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_DRILL_PECK reducer + typed Scene-ON seam checkpoint — coverage unchanged (2026-08-10 worker)
+
+- **State:** Coverage remains **152/276 exact**, 0 partial, 0 staged, **124 unsupported**; `ANIMATION_COVERAGE.json` is unchanged and Drill Peck is not promoted without framebuffer proof.
+- **Did:** Added the source-relative `drillPeckAtAge` reducer and typed `sceneOnDrillPeckView` seam. It ports all three `gBowMonSpriteTemplate` phases, source-relative rotation/slide, eight flashing IMPACT splats, target ShakeMon2, loop-audio/resource lifetimes, the loaded-but-unused WHIRLWIND_LINES tag, and first inactive cleanup. FEAROW is now an accepted presentation species.
+- **Verified:** Hermetic tests pin all 91 ages and both attacker orientations, including bilateral geometry/matrix mirroring, splat positions/visibility, phase/task windows, audio, tags, and cleanup. Focused Drill Peck tests **3/3** and `npm run typecheck` pass.
+- **Next:** Add the narrow FEAROW/ONIX production compositor only if it can be proven against both complete dense windows; otherwise leave Drill Peck unsupported and record the exact framebuffer remainder. Rerun HEADBUTT and the named WHIRLWIND/SLAM controls after any draw-path change.
+- **Notes:** No coverage entry, damage/RNG/turn/controller/round/facility state, canonical recording, shared animation boundary, unsupported barrier, sibling coverage, or absolute-tick framebuffer branch changed.
+
 ## MOVE_DRILL_PECK bilateral dense Scene-ON evidence checkpoint — remains unsupported (2026-08-10 worker)
 
 - **State:** Coverage remains **152/276 exact**, 0 partial, 0 staged, **124 unsupported**. `ANIMATION_COVERAGE.json` is intentionally unchanged: Drill Peck has no reducer, typed seam, production compositor, or framebuffer acceptance.
