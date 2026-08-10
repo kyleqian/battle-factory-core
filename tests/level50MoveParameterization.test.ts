@@ -303,6 +303,63 @@ function assertAbsorbingRouteWitness(family: FamilyEvidence): void {
   }
 }
 
+type EmittedRouteCertificate = {
+  graph: { route: Array<{ label: string; line: number; mnemonic: string; operands: string[] }> };
+  program: { route: Array<{ label: string; line: number; mnemonic: string; operands: string[] }> };
+  routeBranch: "success" | "failure-tail";
+  routeBranchEvidence: {
+    markerClass: "none" | "BattleScript_ButItFailed" | "MOVE_RESULT_FAILED" | "*Prevents* redirect";
+    marker?: { label: string; line: number; mnemonic: string; operands: string[] };
+  };
+};
+
+function emittedRouteCertificates(value: unknown): EmittedRouteCertificate[] {
+  const certificates: EmittedRouteCertificate[] = [];
+  function walk(candidate: unknown): void {
+    if (Array.isArray(candidate)) {
+      for (const item of candidate) walk(item);
+      return;
+    }
+    if (candidate === null || typeof candidate !== "object") return;
+    const record = candidate as Record<string, unknown>;
+    const graph = record.graph as Record<string, unknown> | undefined;
+    const program = record.program as Record<string, unknown> | undefined;
+    if (Array.isArray(graph?.route) || Array.isArray(program?.route)) {
+      if (!Array.isArray(graph?.route) || !Array.isArray(program?.route)) {
+        throw new Error("route certificate lost graph/program parity");
+      }
+      certificates.push(record as unknown as EmittedRouteCertificate);
+    }
+    for (const child of Object.values(record)) walk(child);
+  }
+  walk(value);
+  return certificates;
+}
+
+function classifyRouteBranch(route: EmittedRouteCertificate["graph"]["route"]): EmittedRouteCertificate["routeBranchEvidence"] {
+  for (const statement of route) {
+    if (statement.label === "BattleScript_ButItFailed") {
+      return { markerClass: "BattleScript_ButItFailed", marker: statement };
+    }
+    if (statement.mnemonic === "orbyte"
+      && statement.operands.includes("gMoveResultFlags")
+      && statement.operands.includes("MOVE_RESULT_FAILED")) {
+      return { markerClass: "MOVE_RESULT_FAILED", marker: statement };
+    }
+    if (/(?:Prevents|Prevention|StopsExplosion)/.test(statement.label)) {
+      return { markerClass: "*Prevents* redirect", marker: statement };
+    }
+  }
+  return { markerClass: "none" };
+}
+
+function familyRoute(move: string, axis: "item" | "ability", category: string): any {
+  const record = (manifest.moves as any[]).find((candidate) => candidate.move === move);
+  const family = record?.hooks?.[axis]?.evidence?.families?.find((candidate: any) => candidate.category === category);
+  if (!family) throw new Error(`${move}.${axis} lacks ${category} evidence`);
+  return family.entryPath;
+}
+
 describe("Level-50 move parameterization manifest", () => {
   it("regenerates byte-for-byte into an isolated directory", () => {
     const outputDirectory = mkdtempSync(join(tmpdir(), "pokeemerald-factory-level50-move-parameterization-"));
@@ -313,7 +370,7 @@ describe("Level-50 move parameterization manifest", () => {
   });
 
   it("enumerates every non-NONE move used by the exact 0..849 Level-50 roster boundary", () => {
-    expect(manifest.schema).toBe("level50-move-parameterization/v4");
+    expect(manifest.schema).toBe("level50-move-parameterization/v5");
     expect(manifest.coverage.level50Roster).toEqual({
       frontierSetIds: { first: 0, last: 849, count: 850 }, moveCount: 300, moveTableEffectFamilyCount: 176,
     });
@@ -327,6 +384,78 @@ describe("Level-50 move parameterization manifest", () => {
       expect(record.frontierSets.ids).toEqual(expected.get(record.move));
       expect(record.frontierSets.count).toBe(record.frontierSets.ids.length);
     }
+  });
+
+  it("classifies every emitted route certificate deterministically and pins failure-tail policy plus dynamic-dispatch exclusions", () => {
+    const raw = data as unknown as any;
+    const audit = raw.coverage.routeBranches;
+    expect(audit).toMatchObject({
+      schema: "source-route-branch/v1",
+      emitted: {
+        routeCertificates: 2812,
+        success: 2664,
+        failureTail: 148,
+        failureMarkers: {
+          BattleScript_ButItFailed: 114,
+          MOVE_RESULT_FAILED: 20,
+          "*Prevents* redirect": 14,
+        },
+      },
+      promoted: {
+        routeCertificates: 845,
+        success: 772,
+        failureTail: 73,
+        failureTailByCategory: {
+          "moveend-item-effects-all": 41,
+          "moveend-immunity-abilities": 32,
+        },
+      },
+      failureTailPolicy: {
+        source: { path: "reference/pokeemerald/src/battle_script_commands.c", locator: "Cmd_moveend do/while state loop", line: 4210 },
+      },
+      dynamicDispatchSuccessArms: {
+        status: "source-audited",
+        promotedSuccessArmEscapes: [],
+        newExceptionRows: [],
+        exceptionRows: {
+          item: ["MOVE_ASSIST", "MOVE_METRONOME", "MOVE_MIRROR_MOVE", "MOVE_SLEEP_TALK"],
+          ability: ["MOVE_ASSIST", "MOVE_METRONOME", "MOVE_MIRROR_MOVE", "MOVE_SLEEP_TALK"],
+        },
+      },
+    });
+    expect(audit.classifier.markerClasses.map((marker: any) => marker.id)).toEqual([
+      "BattleScript_ButItFailed", "MOVE_RESULT_FAILED", "*Prevents* redirect",
+    ]);
+    expect(audit.dynamicDispatchSuccessArms.moves.map((row: any) => row.move)).toEqual([
+      "MOVE_ASSIST", "MOVE_METRONOME", "MOVE_MIRROR_MOVE", "MOVE_SLEEP_TALK",
+    ]);
+
+    const certificates = emittedRouteCertificates(raw);
+    expect(certificates).toHaveLength(audit.emitted.routeCertificates);
+    const counts = { success: 0, failureTail: 0 };
+    for (const certificate of certificates) {
+      const graph = classifyRouteBranch(certificate.graph.route);
+      const program = classifyRouteBranch(certificate.program.route);
+      expect(graph).toEqual(program);
+      expect(certificate.routeBranchEvidence).toEqual(graph);
+      expect(certificate.routeBranch).toBe(graph.markerClass === "none" ? "success" : "failure-tail");
+      if (certificate.routeBranch === "success") counts.success += 1;
+      else counts.failureTail += 1;
+    }
+    expect(counts).toEqual({ success: 2664, failureTail: 148 });
+
+    expect(familyRoute("MOVE_TACKLE", "ability", "moveend-color-change")).toMatchObject({
+      routeBranch: "success", routeBranchEvidence: { markerClass: "none" },
+    });
+    expect(familyRoute("MOVE_SAND_ATTACK", "item", "moveend-item-effects-all")).toMatchObject({
+      routeBranch: "failure-tail", routeBranchEvidence: { markerClass: "BattleScript_ButItFailed", marker: { label: "BattleScript_ButItFailed" } },
+    });
+    expect(familyRoute("MOVE_TICKLE", "item", "moveend-item-effects-all")).toMatchObject({
+      routeBranch: "failure-tail", routeBranchEvidence: { markerClass: "MOVE_RESULT_FAILED", marker: { mnemonic: "orbyte", operands: ["gMoveResultFlags", "MOVE_RESULT_FAILED"] } },
+    });
+    expect(familyRoute("MOVE_WHIRLWIND", "ability", "moveend-immunity-abilities")).toMatchObject({
+      routeBranch: "failure-tail", routeBranchEvidence: { markerClass: "*Prevents* redirect", marker: { label: "BattleScript_AbilityPreventsPhasingOut" } },
+    });
   });
 
   it("keeps roster move-table effects distinct from the narrower Battle Script executable-family denominator", () => {

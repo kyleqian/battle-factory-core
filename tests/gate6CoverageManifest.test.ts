@@ -315,6 +315,28 @@ function sourceProvenPathsFor(category: string): readonly string[] {
   throw new Error(`unknown source-proven hook category ${category}`);
 }
 
+function sourceRouteBranches(families: readonly JsonObject[]): JsonObject[] {
+  return families.flatMap((family) => {
+    const entryPath = record(family.entryPath);
+    const graph = record(entryPath.graph);
+    const program = record(entryPath.program);
+    const graphRoute = graph.route;
+    const programRoute = program.route;
+    if (graphRoute === undefined && programRoute === undefined) return [];
+    if (!Array.isArray(graphRoute) || !Array.isArray(programRoute)) {
+      throw new Error(`${String(family.category)} route certificate lost graph/program parity`);
+    }
+    const evidence = record(entryPath.routeBranchEvidence);
+    const result: JsonObject = {
+      category: family.category,
+      routeBranch: entryPath.routeBranch,
+      markerClass: evidence.markerClass,
+    };
+    if (evidence.marker !== undefined) result.marker = evidence.marker;
+    return [result];
+  });
+}
+
 function assertSourceProvenFamilyContract(
   sourceHook: JsonObject,
   row: JsonObject,
@@ -334,6 +356,9 @@ function assertSourceProvenFamilyContract(
   if (!String(row.notes).includes(`unrelated ${String(row.axis)} families`)) {
     throw new Error("source-proven row must retain the unrelated-family boundary");
   }
+  const expectedRouteBranches = sourceRouteBranches(families);
+  expect(array(row.routeBranches)).toEqual(expectedRouteBranches);
+  expect(String(row.notes)).toContain("route-branch evidence:");
   for (const family of families) {
     if (!categories.includes(String(family.category))) throw new Error("family evidence has an unclaimed category");
     const entryPath = record(family.entryPath);
@@ -669,6 +694,7 @@ function assertPerMoveHookJoinContract(manifest: JsonObject): void {
 }
 
 function assertManifestContract(manifest: JsonObject): void {
+  expect(manifest.schema).toBe("gate6-coverage-manifest/v2");
   const gate6 = record(manifest.gate6);
   expect(gate6.closed).toBe(false);
   expect(String(gate6.verdict)).toMatch(/open/i);
@@ -724,6 +750,45 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(readFileSync(join(outputDirectory, "gate6-coverage-manifest.md"), "utf8")).toBe(
       readFileSync(MARKDOWN_PATH, "utf8"),
     );
+  });
+
+  it("threads source route-branch evidence into every promoted hook row and retains the no-new-exception audit", () => {
+    const manifest = readManifest();
+    const summary = record(manifest.summary);
+    const sections = record(manifest.sections);
+    const routeBranches = record(summary.routeBranches);
+    expect(routeBranches).toEqual(parameterizationData.coverage.routeBranches);
+    expect(record(sections.routeBranches)).toEqual(routeBranches);
+    expect(record(routeBranches.emitted)).toMatchObject({ routeCertificates: 2812, success: 2664, failureTail: 148 });
+    expect(record(routeBranches.promoted)).toEqual({
+      routeCertificates: 845,
+      success: 772,
+      failureTail: 73,
+      failureTailByCategory: {
+        "moveend-item-effects-all": 41,
+        "moveend-immunity-abilities": 32,
+      },
+    });
+    const dynamic = record(routeBranches.dynamicDispatchSuccessArms);
+    expect(dynamic).toMatchObject({
+      status: "source-audited",
+      promotedSuccessArmEscapes: [],
+      newExceptionRows: [],
+      exceptionRows: {
+        item: ["MOVE_ASSIST", "MOVE_METRONOME", "MOVE_MIRROR_MOVE", "MOVE_SLEEP_TALK"],
+        ability: ["MOVE_ASSIST", "MOVE_METRONOME", "MOVE_MIRROR_MOVE", "MOVE_SLEEP_TALK"],
+      },
+    });
+    const allRows = PER_MOVE_HOOK_JOIN_AXES.flatMap((axis) => array(record(sections.perMoveHookJoins)[axis]).map(record));
+    const promotedBranches = allRows.flatMap((row) => array(row.routeBranches).map(record));
+    const dynamicMoves = array(dynamic.moves).map((move) => record(move).move);
+    expect(promotedBranches).toHaveLength(845);
+    expect(promotedBranches.filter((branch) => branch.routeBranch === "failure-tail")).toHaveLength(73);
+    expect(allRows.filter((row) => dynamicMoves.includes(row.move) && row.status === SOURCE_PROVEN_FAMILY_STATUS)).toEqual([]);
+    const markdown = readFileSync(MARKDOWN_PATH, "utf8");
+    expect(markdown).toContain("Route branch evidence");
+    expect(markdown).toContain("moveend-item-effects-all: failure-tail");
+    expect(markdown).toContain("Cmd_moveend state loop");
   });
 
   it("recomputes finite effect, roster, hook, and receipt counts from committed inputs", () => {
@@ -1030,6 +1095,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     const mixedRow = structuredClone(soundproofRow);
     mixedRow.categories = [...array(mixedRow.categories), ...absorbingCategories];
     mixedRow.evidence = [...array(mixedRow.evidence), ...array(absorbingRow.evidence)];
+    mixedRow.routeBranches = sourceRouteBranches(array(mixedEvidence.families).map(record));
 
     expect(mixedSourceHook.supportedCategories).toEqual([
       SOUNDPROOF_MOVES_BLOCK_CATEGORY,
