@@ -275,6 +275,13 @@ const SHELL_BELL_CATEGORY = "moveend-shell-bell";
 const SHELL_BELL_SELECTOR_DERIVED_FROM = "moveend-shell-bell candidate selector reuses the moveend-color-change moves.json power != 0 population: the same successful target-datahpupdate route, read at a different MOVEEND state";
 const IMMUNITY_CATEGORY = "moveend-immunity-abilities";
 const ITEM_MOVE_END_CATEGORY = "moveend-item-effects-all";
+const ITEM_MANIPULATION_STEAL_CATEGORY = "item-manipulation-steal";
+const ITEM_MANIPULATION_SWAP_CATEGORY = "item-manipulation-swap";
+const ITEM_MANIPULATION_RECYCLE_CATEGORY = "item-manipulation-recycle";
+const ITEM_MANIPULATION_KNOCKOFF_CATEGORY = "item-manipulation-knockoff";
+const ITEM_MANIPULATION_CATEGORIES = new Set([
+  ITEM_MANIPULATION_STEAL_CATEGORY, ITEM_MANIPULATION_SWAP_CATEGORY, ITEM_MANIPULATION_RECYCLE_CATEGORY, ITEM_MANIPULATION_KNOCKOFF_CATEGORY,
+]);
 const ABSORBING_CATEGORIES = new Set([
   "absorbing-volt-absorb",
   "absorbing-water-absorb",
@@ -597,6 +604,44 @@ for (const witness of itemMoveEndRouteWitnesses) {
   }
 }
 
+const itemManipulationAudit = parameterization.coverage?.hookCatalogs?.item?.itemManipulation as AnyRecord | undefined;
+const itemManipulationCandidates = itemManipulationAudit?.sourceMoveCandidates as AnyRecord[] | undefined;
+const itemManipulationSourceProvenRows = itemManipulationAudit?.sourceProvenRows as string[] | undefined;
+const itemManipulationExceptions = itemManipulationAudit?.sourceExceptionRows as AnyRecord[] | undefined;
+const itemManipulationBlockers = itemManipulationAudit?.blockers as AnyRecord[] | undefined;
+const itemManipulationRouteWitnesses = itemManipulationAudit?.routeWitnesses as AnyRecord[] | undefined;
+const ITEM_MANIPULATION_MOVE_CATEGORY: Record<string, string> = {
+  MOVE_COVET: ITEM_MANIPULATION_STEAL_CATEGORY,
+  MOVE_TRICK: ITEM_MANIPULATION_SWAP_CATEGORY,
+  MOVE_RECYCLE: ITEM_MANIPULATION_RECYCLE_CATEGORY,
+  MOVE_KNOCK_OFF: ITEM_MANIPULATION_KNOCKOFF_CATEGORY,
+};
+if (!itemManipulationAudit
+  || itemManipulationAudit.status !== SOURCE_PROVEN_FAMILY_STATUS
+  || itemManipulationAudit.candidateCount !== 4
+  || !Array.isArray(itemManipulationCandidates) || itemManipulationCandidates.length !== 4
+  || !Array.isArray(itemManipulationSourceProvenRows) || itemManipulationSourceProvenRows.length !== 4
+  || !Array.isArray(itemManipulationExceptions) || itemManipulationExceptions.length !== 0
+  || !Array.isArray(itemManipulationBlockers) || itemManipulationBlockers.length !== 0
+  || !Array.isArray(itemManipulationRouteWitnesses) || itemManipulationRouteWitnesses.length !== 4
+  || JSON.stringify(itemManipulationCandidates.map((candidate) => candidate.move))
+    !== JSON.stringify(["MOVE_COVET", "MOVE_TRICK", "MOVE_RECYCLE", "MOVE_KNOCK_OFF"])) {
+  throw new Error("Item-manipulation family accounting is not the finite 4/4/0/0 contract over the exact Rank-3 moves");
+}
+for (const witness of itemManipulationRouteWitnesses) {
+  const family = witness.familyEvidence as AnyRecord | undefined;
+  const expectedCategory = ITEM_MANIPULATION_MOVE_CATEGORY[witness.move as string];
+  if (witness.status !== "source-proven"
+    || !itemManipulationSourceProvenRows.includes(witness.move)
+    || family?.category !== expectedCategory
+    || !family.entryPath?.graph?.statements || !family.entryPath?.program?.statements
+    || JSON.stringify(family.entryPath.graph.statements) !== JSON.stringify(family.entryPath.program.statements)
+    || typeof family.dispatcher?.line !== "number"
+    || !family.familyVerification?.batchTest) {
+    throw new Error(`Item-manipulation family route/guard certificate is incomplete for ${String(witness.move)}`);
+  }
+}
+
 const immunityAudit = parameterization.coverage?.hookCatalogs?.ability?.immunity as AnyRecord | undefined;
 const immunityCandidates = immunityAudit?.sourceMoveCandidates as AnyRecord[] | undefined;
 const immunitySourceProvenRows = immunityAudit?.sourceProvenRows as string[] | undefined;
@@ -903,7 +948,8 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
         && family.category !== SHELL_BELL_CATEGORY
         && family.category !== ITEM_MOVE_END_CATEGORY
         && family.category !== IMMUNITY_CATEGORY
-        && !ABSORBING_CATEGORIES.has(family.category))
+        && !ABSORBING_CATEGORIES.has(family.category)
+        && !ITEM_MANIPULATION_CATEGORIES.has(family.category))
       || !family.selector?.path
       || !family.entryPath?.source?.path
       || !family.entryPath?.graph?.path
@@ -1063,6 +1109,18 @@ function sourceProvenFamilies(hook: AnyRecord): AnyRecord[] {
         throw new Error("Immunity family lacks its moveend-handoff/state-4/guard witness");
       }
     }
+    if (ITEM_MANIPULATION_CATEGORIES.has(family.category)) {
+      const graphStatements = family.entryPath.graph.statements as AnyRecord[] | undefined;
+      const programStatements = family.entryPath.program.statements as AnyRecord[] | undefined;
+      if (!Array.isArray(graphStatements) || !Array.isArray(programStatements)
+        || JSON.stringify(graphStatements) !== JSON.stringify(programStatements)
+        || typeof family.dispatcher?.line !== "number"
+        || !Array.isArray(family.runtimeGuardSignature?.orderedGuards) || family.runtimeGuardSignature.orderedGuards.length === 0
+        || !Array.isArray(family.runtimeGuardSignature?.sourceTokens) || family.runtimeGuardSignature.sourceTokens.length === 0
+        || family.familyVerification?.oracleReceipt !== "docs/item-manipulation-family-ground-truth.md") {
+        throw new Error(`Item-manipulation family (${String(family.category)}) lacks its own-opcode entry-script/guard witness`);
+      }
+    }
   }
   return families as AnyRecord[];
 }
@@ -1118,6 +1176,10 @@ function parameterizedHook(move: AnyRecord, axis: PerMoveHookJoinAxis): AnyRecor
     if (family.category === IMMUNITY_CATEGORY
       && (axis !== "ability" || family.selector?.symbol !== move.move)) {
       throw new Error(`${move.move} Immunity evidence lost its source selector identity`);
+    }
+    if (ITEM_MANIPULATION_CATEGORIES.has(family.category)
+      && (axis !== "item" || family.selector?.symbol !== move.move)) {
+      throw new Error(`${move.move} item-manipulation evidence lost its source selector identity`);
     }
   }
   return hook;
@@ -1286,6 +1348,34 @@ function sourceProvenHookEvidence(hook: AnyRecord): Evidence[] {
         evidence("tools/probe/receipts/immunity-limber-off-seed-610839776.json", "battle-scene-off-oracle-receipt"),
         evidence("tools/probe/receipts/immunity-limber-off-seed-324508639.json", "battle-scene-off-oracle-receipt"),
       ];
+    }
+    if (ITEM_MANIPULATION_CATEGORIES.has(proof.category)) {
+      const verification = proof.familyVerification as AnyRecord;
+      const implementation = String(verification.implementation);
+      const [implementationPath, implementationLocator] = implementation.split("#");
+      const entries: Evidence[] = [
+        ...base,
+        evidence("reference/pokeemerald/src/battle_script_commands.c", "ordered-per-opcode-guards", String(proof.dispatcher?.locator ?? "")),
+        evidence(implementationPath!, "source-shaped-family-implementation", implementationLocator),
+        evidence(String(verification.unitTest), "tier-1-opcode-unit-test"),
+        evidence(String(verification.batchTest), "tier-1-four-row-sibling-batch"),
+        evidence(String(verification.oracleEvidenceTest), "battle-scene-off-family-receipt"),
+        evidence(String(verification.oracleReceipt), "family-ground-truth"),
+      ];
+      for (const fixture of (verification.oracleFixtures as string[] | undefined) ?? []) {
+        entries.push(evidence(fixture, "parameterized-oracle-request"));
+      }
+      if (verification.oracleProbe) entries.push(evidence(String(verification.oracleProbe), "oracle-probe"));
+      for (const receiptFile of (verification.oracleReceiptFiles as string[] | undefined) ?? []) {
+        entries.push(evidence(receiptFile, "battle-scene-off-oracle-receipt"));
+      }
+      const preExisting = verification.preExistingEvidence as AnyRecord | undefined;
+      if (preExisting) {
+        if (preExisting.oracleReceipt) entries.push(evidence(String(preExisting.oracleReceipt), "pre-existing-family-ground-truth"));
+        if (preExisting.test) entries.push(evidence(String(preExisting.test), "pre-existing-battle-scene-off-family-receipt"));
+        if (preExisting.fixture) entries.push(evidence(String(preExisting.fixture), "pre-existing-battle-scene-off-oracle-receipt"));
+      }
+      return entries;
     }
     return [
       ...base,
@@ -2101,6 +2191,41 @@ const immunityMoveEndRow: Row = Object.freeze({
   notes: "97 of 99 finite candidates (every ability-axis row not already claimed by Soundproof, Absorbing, ON_DAMAGE contact, Color Change, Synchronize, Attract/Oblivious, or Explosion/Damp, minus the Skill Swap/Role Play and five Own Tempo guard exclusions) are promoted through a graph/program route from their entry script to a moveendall/moveendto/moveendfromto handoff whose Cmd_moveend state range includes MOVEEND_IMMUNITY_ABILITIES (state 4). MOVE_ASSIST and MOVE_METRONOME remain explicit dynamic-dispatch exceptions (jumptocalledmove/metronome have no static moveend node of their own). The route certificate proves only that each move's own script reaches Cmd_moveend's normal tail; it does not claim the status was ever reachable while the cure ability was already active -- the shared receipt stages that via Skill Swap.",
 });
 
+const itemManipulationSummary = Object.freeze({
+  candidates: itemManipulationCandidates.length,
+  promotedRows: itemManipulationSourceProvenRows.length,
+  exceptions: itemManipulationExceptions.length,
+  blockers: itemManipulationBlockers.length,
+});
+const itemManipulationRow: Row = Object.freeze({
+  id: "hook-family:item-manipulation-opcode",
+  label: "Direct item-manipulation opcode Level-50 family checkpoint",
+  status: SOURCE_PROVEN_FAMILY_STATUS,
+  ...itemManipulationSummary,
+  evidence: uniqueEvidence([
+    evidence(PARAMETERIZATION_PATH, "finite-candidate-route-guard-audit", "coverage.hookCatalogs.item.itemManipulation"),
+    evidence("reference/pokeemerald/src/battle_script_commands.c", "ordered-per-opcode-guards", "Cmd_seteffectwithchance MOVE_EFFECT_STEAL_ITEM/MOVE_EFFECT_KNOCK_OFF, Cmd_tryswapitems, Cmd_tryrecycleitem"),
+    evidence("tests/itemManipulationHookJoinBatch.test.ts", "four-row-graph-program-batch"),
+    evidence("tests/itemManipulationOracleEvidence.test.ts", "battle-scene-off-family-receipt"),
+    evidence("docs/item-manipulation-family-ground-truth.md", "family-ground-truth"),
+    evidence("tools/battle-lab/mechanic-item-manipulation-covet-steal-off.json", "direct-parameterized-oracle-fixture"),
+    evidence("tools/battle-lab/mechanic-item-manipulation-covet-control-off.json", "paired-control-oracle-fixture"),
+    evidence("tools/probe/verify-item-manipulation-covet-off.py", "direct-parameterized-oracle-probe"),
+    evidence("tools/probe/receipts/item-manipulation-covet-steal-off.json", "direct-parameterized-oracle-receipt"),
+    evidence("tools/probe/receipts/item-manipulation-covet-control-off.json", "direct-parameterized-oracle-receipt"),
+    evidence("tools/battle-lab/mechanic-item-manipulation-recycle-restore-off.json", "direct-parameterized-oracle-fixture"),
+    evidence("tools/battle-lab/mechanic-item-manipulation-recycle-control-off.json", "paired-control-oracle-fixture"),
+    evidence("tools/probe/verify-item-manipulation-recycle-off.py", "direct-parameterized-oracle-probe"),
+    evidence("tools/probe/receipts/item-manipulation-recycle-restore-off.json", "direct-parameterized-oracle-receipt"),
+    evidence("tools/probe/receipts/item-manipulation-recycle-control-off.json", "direct-parameterized-oracle-receipt"),
+    evidence("docs/family-b-cluster4-off-evidence.md", "pre-existing-family-ground-truth"),
+    evidence("tests/familyBCluster4OracleEvidence.test.ts", "pre-existing-battle-scene-off-family-receipt"),
+    evidence("docs/trick-off-evidence.md", "pre-existing-family-ground-truth"),
+    evidence("tests/trickOracleEvidence.test.ts", "pre-existing-battle-scene-off-family-receipt"),
+  ]),
+  notes: "All 4 finite Rank-3 candidates (MOVE_COVET, MOVE_TRICK, MOVE_RECYCLE, MOVE_KNOCK_OFF) are promoted, zero exceptions. Unlike every other item-axis family, there is no shared MOVEEND state: each row is certified by its own exact entry-script statement audit plus an ordered C guard-chain citation into its own dedicated opcode (Cmd_seteffectwithchance's MOVE_EFFECT_STEAL_ITEM/MOVE_EFFECT_KNOCK_OFF arms, Cmd_tryswapitems, Cmd_tryrecycleitem). Covet/Knock Off were already Shell-Bell-claimed (power != 0); this family adds a second, independent category to those two rows and the first category to Trick/Recycle. Trick and Knock Off reuse pre-existing 2026-07-28 oracle evidence (not restaged); Covet and Recycle get fresh Battle Scene OFF receipts authored this session. Assist/Metronome (item-move-end's dynamic-dispatch exceptions) are not members of this family's four-move selector and remain the item axis's only gaps.",
+});
+
 const trainerRows: Row[] = (trainers.entries as AnyRecord[]).map((trainer) => Object.freeze({
   id: `trainer:${trainer.id}`,
   label: trainer.sourceId,
@@ -2289,6 +2414,30 @@ const sourceInputs = [
   "tools/probe/verify-item-move-end-paralysis-off.py",
   "tools/probe/receipts/item-move-end-paralysis-cheri-off.json",
   "tools/probe/receipts/item-move-end-paralysis-control-off.json",
+  "docs/item-manipulation-family-ground-truth.md",
+  "tests/itemManipulationHookJoinBatch.test.ts",
+  "tests/itemManipulationOracleEvidence.test.ts",
+  "tools/battle-lab/mechanic-item-manipulation-covet-steal-off.json",
+  "tools/battle-lab/mechanic-item-manipulation-covet-control-off.json",
+  "tools/probe/verify-item-manipulation-covet-off.py",
+  "tools/probe/receipts/item-manipulation-covet-steal-off.json",
+  "tools/probe/receipts/item-manipulation-covet-control-off.json",
+  "tools/battle-lab/mechanic-item-manipulation-recycle-restore-off.json",
+  "tools/battle-lab/mechanic-item-manipulation-recycle-control-off.json",
+  "tools/probe/verify-item-manipulation-recycle-off.py",
+  "tools/probe/receipts/item-manipulation-recycle-restore-off.json",
+  "tools/probe/receipts/item-manipulation-recycle-control-off.json",
+  "docs/family-b-cluster4-off-evidence.md",
+  "tests/familyBCluster4OracleEvidence.test.ts",
+  "tests/fixtures/family-b-cluster4-off-evidence.json",
+  "docs/trick-off-evidence.md",
+  "tests/trickOracleEvidence.test.ts",
+  "tests/fixtures/trick-off-evidence.json",
+  "src/engine/battleScriptTryswapitemsOpcode.ts",
+  "tests/battleScriptTryswapitemsOpcode.test.ts",
+  "src/engine/battleScriptTryrecycleitemOpcode.ts",
+  "tests/battleScriptTryrecycleitemOpcode.test.ts",
+  "tests/battleScriptFamilyBCluster4Opcode.test.ts",
 ];
 for (const path of sourceInputs) requirePath(path);
 
@@ -2323,6 +2472,7 @@ const manifest: AnyRecord = {
     kingsRockMoveEnd: kingsRockMoveEndSummary,
     shellBellMoveEnd: shellBellMoveEndSummary,
     itemMoveEnd: itemMoveEndMoveEndSummary,
+    itemManipulation: itemManipulationSummary,
     immunityMoveEnd: immunityMoveEndSummary,
     stateFamilies: { total: stateFamilyRows.length, tier1Covered: stateFamilyRows.filter((row) => row.status === "tier1-covered").length },
     hooks: {
@@ -2343,6 +2493,7 @@ const manifest: AnyRecord = {
     kingsRockMoveEnd: kingsRockMoveEndRow,
     shellBellMoveEnd: shellBellMoveEndRow,
     itemMoveEnd: itemMoveEndMoveEndRow,
+    itemManipulation: itemManipulationRow,
     immunityMoveEnd: immunityMoveEndRow,
     stateFamilies: stateFamilyRows,
     hooks: { abilities: abilityRows, holdEffects: holdEffectRows },
@@ -2377,7 +2528,7 @@ const markdown: string[] = [
   "## Headline",
   "",
   `- Effects: **${manifest.summary.effects.staticExecutable}/${manifest.summary.effects.total} static-executable**; moves: **${manifest.summary.moves.staticExecutable}/${manifest.summary.moves.total}** static-executable (**${manifest.summary.moves.level50Executable}/${manifest.summary.moves.level50Roster}** Level-50 roster moves executable, **${manifest.summary.moves.level50RosterOnly}** roster-only).`,
-  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.item.rows - manifest.summary.perMoveHookJoins.item.gaps} item rows are source-proven for the King's Rock, Shell Bell, and 114-row item-move-end status-cure families, and ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors, audited shared-absorbing routes, both ON_DAMAGE families, the 30-candidate Synchronize family, Attract's one-row Oblivious family, the two Explosion/Damp categories, and the 97-row Immunity status-cure family, while every remaining gap retains its source-artifact locator and reason.`,
+  `- Per-move hook joins: **${manifest.summary.perMoveHookJoins.item.gaps} item join gaps** and **${manifest.summary.perMoveHookJoins.ability.gaps} ability join gaps** across ${manifest.summary.perMoveHookJoins.item.rows} Level-50 roster moves; ${manifest.summary.perMoveHookJoins.item.rows - manifest.summary.perMoveHookJoins.item.gaps} item rows are source-proven for the King's Rock, Shell Bell, 114-row item-move-end status-cure, and 4-row item-manipulation-opcode families, and ${manifest.summary.perMoveHookJoins.ability.rows - manifest.summary.perMoveHookJoins.ability.gaps} ability rows are source-proven for the nine Soundproof selectors, audited shared-absorbing routes, both ON_DAMAGE families, the 30-candidate Synchronize family, Attract's one-row Oblivious family, the two Explosion/Damp categories, and the 97-row Immunity status-cure family, while every remaining gap retains its source-artifact locator and reason.`,
   `- ON_DAMAGE checkpoint: **${manifest.summary.onDamageMoveEnd.contactCandidates}** contact candidates and **${manifest.summary.onDamageMoveEnd.colorChangeCandidates}** Color Change candidates (${manifest.summary.onDamageMoveEnd.overlapCandidates} overlap) are source-enumerated across ${manifest.summary.onDamageMoveEnd.entryBlockShapes} entry-block shapes. **${manifest.summary.onDamageMoveEnd.contactPromotedRows}** contact rows and **${manifest.summary.onDamageMoveEnd.colorChangePromotedRows}** Color Change rows are promoted; **${manifest.summary.onDamageMoveEnd.contactExceptions}** contact exceptions and **${manifest.summary.onDamageMoveEnd.contactBlockers}** active contact blockers remain, while **${manifest.summary.onDamageMoveEnd.contactRetiredBlockers}** contact route/guard blockers and **${manifest.summary.onDamageMoveEnd.colorChangeRetiredBlockers}** Color Change blockers are retired.`,
   `- Synchronize checkpoint: **${manifest.summary.synchronizeMoveEnd.candidates}** finite Level-50 candidates, **${manifest.summary.synchronizeMoveEnd.promotedRows}** promoted, **${manifest.summary.synchronizeMoveEnd.exceptions}** route exceptions, and **${manifest.summary.synchronizeMoveEnd.blockers}** active blockers.`,
   `- Attract/Oblivious checkpoint: **${manifest.summary.tryinfatuatingOblivious.candidates}** finite EFFECT_ATTRACT candidate, **${manifest.summary.tryinfatuatingOblivious.promotedRows}** promoted, **${manifest.summary.tryinfatuatingOblivious.exceptions}** exceptions, **${manifest.summary.tryinfatuatingOblivious.rosterOnlyCandidates}** roster-only candidates, and **${manifest.summary.tryinfatuatingOblivious.blockers}** active blockers.`,
@@ -2385,6 +2536,7 @@ const markdown: string[] = [
   `- King's Rock checkpoint: **${manifest.summary.kingsRockMoveEnd.candidates}** finite Level-50 flag selectors, **${manifest.summary.kingsRockMoveEnd.promotedRows}** promoted, **${manifest.summary.kingsRockMoveEnd.exceptions}** explicit exception, **${manifest.summary.kingsRockMoveEnd.rosterOnlyCandidates}** roster-only candidates retained, and no Shell Bell overclaim.`,
   `- Shell Bell checkpoint: **${manifest.summary.shellBellMoveEnd.candidates}** finite Level-50 power != 0 candidates (reused moveend-color-change population), **${manifest.summary.shellBellMoveEnd.promotedRows}** promoted by retargeting the already-proven route to state 12, **${manifest.summary.shellBellMoveEnd.exceptions}** explicit exception (Future Sight), and no King's Rock HOLD_EFFECT_FLINCH overclaim.`,
   `- Item-move-end checkpoint: **${manifest.summary.itemMoveEnd.candidates}** finite Level-50 item-axis candidates (not already claimed by King's Rock/Shell Bell, minus the four Rank-3 item-manipulation moves), **${manifest.summary.itemMoveEnd.promotedRows}** promoted to MOVEEND_ITEM_EFFECTS_ALL state 11, **${manifest.summary.itemMoveEnd.exceptions}** explicit dynamic-dispatch exceptions (Assist, Metronome), and **${manifest.summary.itemMoveEnd.blockers}** active blockers.`,
+  `- Item-manipulation checkpoint: **${manifest.summary.itemManipulation.candidates}** finite Rank-3 direct-opcode candidates (Covet, Trick, Recycle, Knock Off), **${manifest.summary.itemManipulation.promotedRows}** promoted via four independent own-opcode certificates (no shared MOVEEND state), **${manifest.summary.itemManipulation.exceptions}** exceptions, and **${manifest.summary.itemManipulation.blockers}** active blockers -- closes the item axis except for Assist/Metronome (item-move-end's dynamic-dispatch exceptions, not members of this family).`,
   `- Immunity checkpoint: **${manifest.summary.immunityMoveEnd.candidates}** finite Level-50 ability-axis candidates, **${manifest.summary.immunityMoveEnd.promotedRows}** promoted to MOVEEND_IMMUNITY_ABILITIES state 4, **${manifest.summary.immunityMoveEnd.exceptions}** explicit dynamic-dispatch exceptions (Assist, Metronome), and **${manifest.summary.immunityMoveEnd.blockers}** active blockers.`,
   `- State/status/volatile rows: **${manifest.summary.stateFamilies.tier1Covered}/${manifest.summary.stateFamilies.total}** have focused Tier-1 evidence; source-modeled rows remain listed separately.`,
   `- Hook universes: **${manifest.summary.hooks.abilities.total} abilities** and **${manifest.summary.hooks.holdEffects.total} hold effects**, including **${manifest.summary.hooks.abilities.zeroFactoryWidened + manifest.summary.hooks.holdEffects.zeroFactoryWidened}** legal widened-scope rows with zero Level-50 Factory carriers.`,
@@ -2521,6 +2673,16 @@ markdown.push(...table("Item-move-end candidate and MOVEEND state-11 promotion",
   (row) => evidenceText(row.evidence),
 ]));
 markdown.push(`${itemMoveEndMoveEndRow.notes}\n`);
+markdown.push("## Direct item-manipulation opcode family checkpoint\n\n");
+markdown.push(...table("Item-manipulation candidate and per-opcode promotion", ["Status", "Candidates", "Promoted", "Exceptions", "Blockers", "Evidence"], [itemManipulationRow], [
+  (row) => row.status,
+  (row) => String(row.candidates),
+  (row) => String(row.promotedRows),
+  (row) => String(row.exceptions),
+  (row) => String(row.blockers),
+  (row) => evidenceText(row.evidence),
+]));
+markdown.push(`${itemManipulationRow.notes}\n`);
 markdown.push("## Status-immunity ability family checkpoint\n\n");
 markdown.push(...table("Immunity candidate and MOVEEND state-4 promotion", ["Status", "Candidates", "Promoted", "Exceptions", "Roster-only", "Blockers", "Evidence"], [immunityMoveEndRow], [
   (row) => row.status,

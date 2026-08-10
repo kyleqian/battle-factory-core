@@ -3387,6 +3387,378 @@ if (itemMoveEndSourceProvenRows.length !== itemMoveEndCandidateRows.length - ITE
   throw new Error("Item-move-end promotion accounting drifted from candidates minus exceptions");
 }
 
+// Rank 3 -- the four moves whose entry script writes gBattleMons[].item
+// directly through a dedicated opcode instead of ItemBattleEffects. Unlike
+// every other item-axis family above, there is no shared MOVEEND state: each
+// row gets its own opcode certificate (exact entry-script statement audit +
+// ordered C guard-chain citation), per docs/item-manipulation-family-ground-truth.md.
+const ITEM_MANIPULATION_STEAL_CATEGORY = "item-manipulation-steal";
+const ITEM_MANIPULATION_SWAP_CATEGORY = "item-manipulation-swap";
+const ITEM_MANIPULATION_RECYCLE_CATEGORY = "item-manipulation-recycle";
+const ITEM_MANIPULATION_KNOCKOFF_CATEGORY = "item-manipulation-knockoff";
+
+const itemManipulationStealCaseLine = sourceLine(battleScriptCommandsSource, "case MOVE_EFFECT_STEAL_ITEM:", "MOVE_EFFECT_STEAL_ITEM");
+const itemManipulationKnockOffCaseLine = sourceLine(battleScriptCommandsSource, "case MOVE_EFFECT_KNOCK_OFF:", "MOVE_EFFECT_KNOCK_OFF");
+const itemManipulationTryswapitemsStart = battleScriptCommandsSource.indexOf("static void Cmd_tryswapitems(void)\n{");
+const itemManipulationTryrecycleitemStart = battleScriptCommandsSource.indexOf("static void Cmd_tryrecycleitem(void)\n{");
+if (itemManipulationTryswapitemsStart < 0 || itemManipulationTryrecycleitemStart < 0) {
+  throw new Error("unable to isolate Cmd_tryswapitems/Cmd_tryrecycleitem definitions");
+}
+const itemManipulationTryswapitemsLine = battleScriptCommandsSource.slice(0, itemManipulationTryswapitemsStart).split("\n").length;
+const itemManipulationTryrecycleitemLine = battleScriptCommandsSource.slice(0, itemManipulationTryrecycleitemStart).split("\n").length;
+
+const itemManipulationStealBody = battleScriptCommandsSource.slice(
+  battleScriptCommandsSource.indexOf("case MOVE_EFFECT_STEAL_ITEM:"),
+  battleScriptCommandsSource.indexOf("case MOVE_EFFECT_PREVENT_ESCAPE:"),
+);
+const itemManipulationKnockOffBody = battleScriptCommandsSource.slice(
+  battleScriptCommandsSource.indexOf("case MOVE_EFFECT_KNOCK_OFF:"),
+  battleScriptCommandsSource.indexOf("case MOVE_EFFECT_SP_ATK_TWO_DOWN:"),
+);
+const itemManipulationSwapBody = battleScriptCommandsSource.slice(
+  itemManipulationTryswapitemsStart,
+  battleScriptCommandsSource.indexOf("static void Cmd_trycopyability", itemManipulationTryswapitemsStart),
+);
+const itemManipulationRecycleBody = battleScriptCommandsSource.slice(
+  itemManipulationTryrecycleitemStart,
+  battleScriptCommandsSource.indexOf("static void Cmd_settypetoenvironment", itemManipulationTryrecycleitemStart),
+);
+if (itemManipulationStealBody.length === 0 || itemManipulationKnockOffBody.length === 0
+  || itemManipulationSwapBody.length === 0 || itemManipulationRecycleBody.length === 0) {
+  throw new Error("unable to isolate one of the four item-manipulation opcode bodies");
+}
+
+function citeOrderedTokens(body: string, tokens: readonly string[], name: string): void {
+  let cursor = 0;
+  for (const token of tokens) {
+    const next = body.indexOf(token, cursor);
+    if (next < 0) throw new Error(`${name} source lost ordered guard token: ${token}`);
+    cursor = next + token.length;
+  }
+}
+const ITEM_MANIPULATION_STEAL_GUARD_TOKENS = [
+  "BATTLE_TYPE_TRAINER_HILL",
+  "GetBattlerSide(gBattlerAttacker) == B_SIDE_OPPONENT",
+  "gWishFutureKnock.knockedOffMons[side] & gBitTable[gBattlerPartyIndexes[gBattlerAttacker]]",
+  "gBattleMons[gBattlerTarget].ability == ABILITY_STICKY_HOLD",
+  "BattleScript_NoItemSteal",
+  "gBattleMons[gBattlerAttacker].item != ITEM_NONE",
+  "gBattleMons[gBattlerTarget].item == ITEM_ENIGMA_BERRY",
+  "IS_ITEM_MAIL(gBattleMons[gBattlerTarget].item)",
+  "gBattleMons[gBattlerTarget].item == ITEM_NONE",
+  "gLastUsedItem = *changedItem = gBattleMons[gBattlerTarget].item;",
+  "gBattleMons[gBattlerTarget].item = ITEM_NONE;",
+  "REQUEST_HELDITEM_BATTLE",
+] as const;
+const ITEM_MANIPULATION_KNOCKOFF_GUARD_TOKENS = [
+  "gBattleMons[gEffectBattler].ability == ABILITY_STICKY_HOLD",
+  "gBattleMons[gEffectBattler].item == ITEM_NONE",
+  "gBattlescriptCurrInstr = BattleScript_StickyHoldActivates;",
+  "gLastUsedItem = gBattleMons[gEffectBattler].item;",
+  "gBattleMons[gEffectBattler].item = ITEM_NONE;",
+  "gWishFutureKnock.knockedOffMons[side] |= gBitTable[gBattlerPartyIndexes[gEffectBattler]];",
+  "gBattlescriptCurrInstr = BattleScript_KnockedOff;",
+] as const;
+const ITEM_MANIPULATION_SWAP_GUARD_TOKENS = [
+  "BATTLE_TYPE_TRAINER_HILL",
+  "GetBattlerSide(gBattlerAttacker) == B_SIDE_OPPONENT",
+  "gWishFutureKnock.knockedOffMons[sideAttacker] & gBitTable[gBattlerPartyIndexes[gBattlerAttacker]]",
+  "gWishFutureKnock.knockedOffMons[sideTarget] & gBitTable[gBattlerPartyIndexes[gBattlerTarget]]",
+  "gBattleMons[gBattlerAttacker].item == ITEM_NONE && gBattleMons[gBattlerTarget].item == ITEM_NONE",
+  "gBattleMons[gBattlerAttacker].item == ITEM_ENIGMA_BERRY",
+  "IS_ITEM_MAIL(gBattleMons[gBattlerAttacker].item)",
+  "gBattleMons[gBattlerTarget].ability == ABILITY_STICKY_HOLD",
+  "gBattlescriptCurrInstr = BattleScript_StickyHoldActivates;",
+  "newItemAtk = &gBattleStruct->changedItems[gBattlerAttacker];",
+  "gBattleMons[gBattlerAttacker].item = ITEM_NONE;",
+  "gBattleMons[gBattlerTarget].item = oldItemAtk;",
+  "REQUEST_HELDITEM_BATTLE",
+] as const;
+const ITEM_MANIPULATION_RECYCLE_GUARD_TOKENS = [
+  "usedHeldItem = &gBattleStruct->usedHeldItems[gActiveBattler];",
+  "*usedHeldItem != ITEM_NONE && gBattleMons[gActiveBattler].item == ITEM_NONE",
+  "gLastUsedItem = *usedHeldItem;",
+  "*usedHeldItem = ITEM_NONE;",
+  "gBattleMons[gActiveBattler].item = gLastUsedItem;",
+  "REQUEST_HELDITEM_BATTLE",
+] as const;
+citeOrderedTokens(itemManipulationStealBody, ITEM_MANIPULATION_STEAL_GUARD_TOKENS, "MOVE_EFFECT_STEAL_ITEM");
+citeOrderedTokens(itemManipulationKnockOffBody, ITEM_MANIPULATION_KNOCKOFF_GUARD_TOKENS, "MOVE_EFFECT_KNOCK_OFF");
+citeOrderedTokens(itemManipulationSwapBody, ITEM_MANIPULATION_SWAP_GUARD_TOKENS, "Cmd_tryswapitems");
+citeOrderedTokens(itemManipulationRecycleBody, ITEM_MANIPULATION_RECYCLE_GUARD_TOKENS, "Cmd_tryrecycleitem");
+
+const itemManipulationThiefAudit = auditExactScriptBlock("BattleScript_EffectThief", [
+  ["setmoveeffect", ["MOVE_EFFECT_STEAL_ITEM"]],
+  ["goto", ["BattleScript_EffectHit"]],
+]);
+const itemManipulationTrickAudit = auditExactScriptBlock("BattleScript_EffectTrick", [
+  ["attackcanceler", []],
+  ["attackstring", []],
+  ["ppreduce", []],
+  ["jumpifstatus2", ["BS_TARGET", "STATUS2_SUBSTITUTE", "BattleScript_ButItFailed"]],
+  ["accuracycheck", ["BattleScript_ButItFailed", "ACC_CURR_MOVE"]],
+  ["tryswapitems", ["BattleScript_ButItFailed"]],
+  ["attackanimation", []],
+  ["waitanimation", []],
+  ["printstring", ["STRINGID_PKMNSWITCHEDITEMS"]],
+  ["waitmessage", ["B_WAIT_TIME_LONG"]],
+  ["printfromtable", ["gItemSwapStringIds"]],
+  ["waitmessage", ["B_WAIT_TIME_LONG"]],
+  ["goto", ["BattleScript_MoveEnd"]],
+]);
+const itemManipulationRecycleEntryAudit = auditExactScriptBlock("BattleScript_EffectRecycle", [
+  ["attackcanceler", []],
+  ["attackstring", []],
+  ["ppreduce", []],
+  ["tryrecycleitem", ["BattleScript_ButItFailed"]],
+  ["attackanimation", []],
+  ["waitanimation", []],
+  ["printstring", ["STRINGID_XFOUNDONEY"]],
+  ["waitmessage", ["B_WAIT_TIME_LONG"]],
+  ["goto", ["BattleScript_MoveEnd"]],
+]);
+const itemManipulationKnockOffEntryAudit = auditExactScriptBlock("BattleScript_EffectKnockOff", [
+  ["setmoveeffect", ["MOVE_EFFECT_KNOCK_OFF"]],
+  ["goto", ["BattleScript_EffectHit"]],
+]);
+
+type ItemManipulationDefinition = {
+  move: string;
+  category: string;
+  entryKind: string;
+  audit: ReturnType<typeof auditExactScriptBlock>;
+  dispatcher: { locator: string; line: number; call: string };
+  runtimeGuardSignature: { orderedGuards: readonly string[]; sourceTokens: readonly string[] };
+  familyVerification: Record<string, unknown>;
+};
+const ITEM_MANIPULATION_DEFINITIONS: ItemManipulationDefinition[] = [
+  {
+    move: "MOVE_COVET",
+    category: ITEM_MANIPULATION_STEAL_CATEGORY,
+    entryKind: "setmoveeffect-steal-item-goto-effecthit",
+    audit: itemManipulationThiefAudit,
+    dispatcher: {
+      locator: "Cmd_seteffectwithchance case MOVE_EFFECT_STEAL_ITEM",
+      line: itemManipulationStealCaseLine,
+      call: "Cmd_seteffectwithchance() case MOVE_EFFECT_STEAL_ITEM, reached via BattleScript_EffectHit's shared seteffectwithchance opcode",
+    },
+    runtimeGuardSignature: {
+      orderedGuards: [
+        "gBattleTypeFlags & BATTLE_TYPE_TRAINER_HILL (no-op in-Factory guard)",
+        "attacker on B_SIDE_OPPONENT outside EREADER_TRAINER|FRONTIER|LINK|RECORDED_LINK|SECRET_BASE (dead in-Factory)",
+        "attacker-side knockedOffMons bit outside that same battle-type set (dead in-Factory)",
+        "target item != 0 && target ability == ABILITY_STICKY_HOLD -> BattleScript_NoItemSteal",
+        "attacker item != ITEM_NONE || target item == ITEM_ENIGMA_BERRY || IS_ITEM_MAIL(target item) || target item == ITEM_NONE -> no-op, no steal",
+        "else: steal executes -- gBattleStruct->changedItems[attacker] deferred, target item cleared immediately",
+      ],
+      sourceTokens: ITEM_MANIPULATION_STEAL_GUARD_TOKENS,
+    },
+    familyVerification: {
+      scope: "One complete-parties Linoone/Zubat Battle Scene OFF receipt pair (steal + occupied-attacker control) proves the steal/no-steal divergence and the deferred-attacker/immediate-target item-write timing split; the pre-existing family-b-cluster4 receipt separately proves the Sticky Hold arm.",
+      implementation: "src/engine/battleScriptHitChainOpcode.ts#MOVE_EFFECT_STEAL_ITEM (Cmd_seteffectwithchance case)",
+      unitTest: "tests/battleScriptFamilyBCluster4Opcode.test.ts",
+      batchTest: "tests/itemManipulationHookJoinBatch.test.ts",
+      oracleEvidenceTest: "tests/itemManipulationOracleEvidence.test.ts",
+      oracleReceipt: "docs/item-manipulation-family-ground-truth.md",
+      oracleFixtures: [
+        "tools/battle-lab/mechanic-item-manipulation-covet-steal-off.json",
+        "tools/battle-lab/mechanic-item-manipulation-covet-control-off.json",
+      ],
+      oracleProbe: "tools/probe/verify-item-manipulation-covet-off.py",
+      oracleReceiptFiles: [
+        "tools/probe/receipts/item-manipulation-covet-steal-off.json",
+        "tools/probe/receipts/item-manipulation-covet-control-off.json",
+      ],
+      preExistingEvidence: {
+        oracleReceipt: "docs/family-b-cluster4-off-evidence.md",
+        test: "tests/familyBCluster4OracleEvidence.test.ts",
+        fixture: "tests/fixtures/family-b-cluster4-off-evidence.json",
+        cases: ["covetSuccessAndOccupiedAttacker", "covetStickyHold"],
+      },
+    },
+  },
+  {
+    move: "MOVE_TRICK",
+    category: ITEM_MANIPULATION_SWAP_CATEGORY,
+    entryKind: "attackcanceler-attackstring-ppreduce-substitute-guard-accuracy-tryswapitems",
+    audit: itemManipulationTrickAudit,
+    dispatcher: {
+      locator: "Cmd_tryswapitems",
+      line: itemManipulationTryswapitemsLine,
+      call: "Cmd_tryswapitems()",
+    },
+    runtimeGuardSignature: {
+      orderedGuards: [
+        "BS_TARGET STATUS2_SUBSTITUTE -> BattleScript_ButItFailed (own-script guard, before tryswapitems)",
+        "ACC_CURR_MOVE accuracycheck -> BattleScript_ButItFailed (own-script guard, a real roll, before tryswapitems)",
+        "gBattleTypeFlags & BATTLE_TYPE_TRAINER_HILL (no-op in-Factory guard)",
+        "attacker on B_SIDE_OPPONENT outside LINK|EREADER_TRAINER|FRONTIER|SECRET_BASE|RECORDED_LINK (dead in-Factory)",
+        "either side's knockedOffMons bit outside that same battle-type set (dead in-Factory)",
+        "both sides itemless, or either side Enigma Berry/Mail -> no-op",
+        "target ability == ABILITY_STICKY_HOLD -> BattleScript_StickyHoldActivates",
+        "else: swap executes -- attacker's new item deferred via changedItems, target's new item immediate",
+      ],
+      sourceTokens: ITEM_MANIPULATION_SWAP_GUARD_TOKENS,
+    },
+    familyVerification: {
+      scope: "Pre-existing 2026-07-28 evidence (not restaged): a complete-parties FRONTIER_MON_FURRET_2/opponent unequal-item Battle Scene OFF receipt proves the swap's PP/controller-seam/settled-swap timeline; source citations pin every guard branch and the zero-local-RNG opcode shape.",
+      implementation: "src/engine/battleScriptTryswapitemsOpcode.ts",
+      unitTest: "tests/battleScriptTryswapitemsOpcode.test.ts",
+      batchTest: "tests/itemManipulationHookJoinBatch.test.ts",
+      oracleEvidenceTest: "tests/itemManipulationOracleEvidence.test.ts",
+      oracleReceipt: "docs/item-manipulation-family-ground-truth.md",
+      preExistingEvidence: {
+        oracleReceipt: "docs/trick-off-evidence.md",
+        test: "tests/trickOracleEvidence.test.ts",
+        fixture: "tests/fixtures/trick-off-evidence.json",
+        cases: ["complete-party unequal-item success receipt"],
+      },
+    },
+  },
+  {
+    move: "MOVE_RECYCLE",
+    category: ITEM_MANIPULATION_RECYCLE_CATEGORY,
+    entryKind: "attackcanceler-attackstring-ppreduce-tryrecycleitem",
+    audit: itemManipulationRecycleEntryAudit,
+    dispatcher: {
+      locator: "Cmd_tryrecycleitem",
+      line: itemManipulationTryrecycleitemLine,
+      call: "Cmd_tryrecycleitem()",
+    },
+    runtimeGuardSignature: {
+      orderedGuards: [
+        "usedHeldItems[attacker] != ITEM_NONE && attacker item == ITEM_NONE -> restore executes",
+        "else -> BattleScript_ButItFailed, no-op",
+        "restore: immediate, non-deferred gBattleMons[attacker].item assignment; usedHeldItems[attacker] reset to ITEM_NONE",
+      ],
+      sourceTokens: ITEM_MANIPULATION_RECYCLE_GUARD_TOKENS,
+    },
+    familyVerification: {
+      scope: "Fresh Battle Scene OFF receipt pair (restore + itemless control), reusing this session's own Rank-1 Cheri Berry paralysis-cure carrier pair as the consumed-item precondition (Cmd_removeitem's berry-cure tail populates usedHeldItems, Recycle's own precondition). The one move in this family with no prior oracle-level evidence.",
+      implementation: "src/engine/battleScriptTryrecycleitemOpcode.ts",
+      unitTest: "tests/battleScriptTryrecycleitemOpcode.test.ts",
+      batchTest: "tests/itemManipulationHookJoinBatch.test.ts",
+      oracleEvidenceTest: "tests/itemManipulationOracleEvidence.test.ts",
+      oracleReceipt: "docs/item-manipulation-family-ground-truth.md",
+      oracleFixtures: [
+        "tools/battle-lab/mechanic-item-manipulation-recycle-restore-off.json",
+        "tools/battle-lab/mechanic-item-manipulation-recycle-control-off.json",
+      ],
+      oracleProbe: "tools/probe/verify-item-manipulation-recycle-off.py",
+      oracleReceiptFiles: [
+        "tools/probe/receipts/item-manipulation-recycle-restore-off.json",
+        "tools/probe/receipts/item-manipulation-recycle-control-off.json",
+      ],
+    },
+  },
+  {
+    move: "MOVE_KNOCK_OFF",
+    category: ITEM_MANIPULATION_KNOCKOFF_CATEGORY,
+    entryKind: "setmoveeffect-knock-off-goto-effecthit",
+    audit: itemManipulationKnockOffEntryAudit,
+    dispatcher: {
+      locator: "Cmd_seteffectwithchance case MOVE_EFFECT_KNOCK_OFF",
+      line: itemManipulationKnockOffCaseLine,
+      call: "Cmd_seteffectwithchance() case MOVE_EFFECT_KNOCK_OFF, reached via BattleScript_EffectHit's shared seteffectwithchance opcode",
+    },
+    runtimeGuardSignature: {
+      orderedGuards: [
+        "effect battler ability == ABILITY_STICKY_HOLD -> itemless: silent no-op; holding: BattleScript_StickyHoldActivates",
+        "else, item != 0 -> knock off executes: immediate item clear, battle-scoped knockedOffMons bit set, no REQUEST_HELDITEM_BATTLE party-record sync",
+        "else (itemless, no Sticky Hold) -> silent no-op",
+      ],
+      sourceTokens: ITEM_MANIPULATION_KNOCKOFF_GUARD_TOKENS,
+    },
+    familyVerification: {
+      scope: "Pre-existing 2026-07-28 evidence (not restaged): the family-b-cluster4 receipt's knockOffRemovalAndNoItem case proves removal, PP, and the no-item no-op; this run's ground-truth doc additionally derives (party-record-vs-live-mirror question, answered from source) that Knock Off never emits REQUEST_HELDITEM_BATTLE -- the removal is battle-scoped via the knockedOffMons bit re-enforced at switch-in, not a party-record overwrite.",
+      implementation: "src/engine/battleScriptHitChainOpcode.ts#MOVE_EFFECT_KNOCK_OFF (Cmd_seteffectwithchance case)",
+      unitTest: "tests/battleScriptFamilyBCluster4Opcode.test.ts",
+      batchTest: "tests/itemManipulationHookJoinBatch.test.ts",
+      oracleEvidenceTest: "tests/itemManipulationOracleEvidence.test.ts",
+      oracleReceipt: "docs/item-manipulation-family-ground-truth.md",
+      preExistingEvidence: {
+        oracleReceipt: "docs/family-b-cluster4-off-evidence.md",
+        test: "tests/familyBCluster4OracleEvidence.test.ts",
+        fixture: "tests/fixtures/family-b-cluster4-off-evidence.json",
+        cases: ["knockOffRemovalAndNoItem"],
+      },
+    },
+  },
+];
+
+function buildItemManipulationEvidence(definition: ItemManipulationDefinition) {
+  const move = moveBySymbol.get(definition.move)!;
+  const familyEvidence = {
+    category: definition.category,
+    selector: {
+      path: MOVES_PATH,
+      locator: `moves:${definition.move}.effect`,
+      symbol: definition.move,
+      effect: move.effect,
+      guard: "exact Rank-3 selector membership (MOVE_COVET, MOVE_TRICK, MOVE_RECYCLE, MOVE_KNOCK_OFF)",
+      derivedFrom: "item-manipulation-opcode candidate selector: the four Level-50 roster moves whose entry script reads or writes gBattleMons[].item directly rather than through ItemBattleEffects",
+    },
+    entryPath: {
+      kind: definition.entryKind,
+      declaredEntryScript: definition.audit.label,
+      source: definition.audit.source,
+      graph: definition.audit.graph,
+      program: definition.audit.program,
+    },
+    dispatcher: {
+      path: BATTLE_SCRIPT_COMMANDS_PATH,
+      locator: definition.dispatcher.locator,
+      line: definition.dispatcher.line,
+      call: definition.dispatcher.call,
+    },
+    runtimeGuardSignature: definition.runtimeGuardSignature,
+    familyVerification: definition.familyVerification,
+  };
+  return {
+    status: "source-proven" as const,
+    id: `item-manipulation-opcode:${definition.move}`,
+    move: definition.move,
+    entryScript: definition.audit.label,
+    routeKind: definition.entryKind,
+    executionInventory: executableMoveSymbols.has(definition.move) ? "level50-executable" : "level50-roster-only",
+    familyEvidence,
+  };
+}
+
+const itemManipulationCandidateRows = ITEM_MANIPULATION_DEFINITIONS.map((definition) => {
+  const move = moveBySymbol.get(definition.move)!;
+  return {
+    move: move.move,
+    moveId: move.id,
+    effect: move.effect,
+    power: move.power,
+    entryScript: topologyByMove.get(move.move)!.entryScript,
+    executionInventory: executableMoveSymbols.has(move.move) ? "level50-executable" : "level50-roster-only",
+  };
+});
+if (itemManipulationCandidateRows.length !== 4
+  || JSON.stringify(itemManipulationCandidateRows.map((row) => row.move)) !== JSON.stringify(["MOVE_COVET", "MOVE_TRICK", "MOVE_RECYCLE", "MOVE_KNOCK_OFF"])) {
+  throw new Error("Item-manipulation selector must be exactly the four Rank-3 moves in order");
+}
+const itemManipulationEvidenceByMove = new Map<string, ReturnType<typeof buildItemManipulationEvidence>>();
+for (const definition of ITEM_MANIPULATION_DEFINITIONS) {
+  itemManipulationEvidenceByMove.set(definition.move, buildItemManipulationEvidence(definition));
+}
+const itemManipulationSourceProvenRows = [...itemManipulationEvidenceByMove.keys()];
+if (itemManipulationSourceProvenRows.length !== 4) {
+  throw new Error("Item-manipulation promotion must be all four rows, no exceptions");
+}
+const itemManipulationAudit = {
+  status: "source-proven-family" as const,
+  candidateCount: itemManipulationCandidateRows.length,
+  sourceMoveCandidates: itemManipulationCandidateRows,
+  sourceProvenRows: itemManipulationSourceProvenRows,
+  sourceExceptionRows: [] as unknown[],
+  blockers: [] as unknown[],
+  routeWitnesses: [...itemManipulationEvidenceByMove.values()],
+  note: "Four independent dedicated opcodes (Cmd_seteffectwithchance's MOVE_EFFECT_STEAL_ITEM/MOVE_EFFECT_KNOCK_OFF arms, Cmd_tryswapitems, Cmd_tryrecycleitem), each certified by its own exact entry-script statement audit and ordered C guard-chain citation -- unlike every other item-axis family in this catalog, there is no single shared MOVEEND state. MOVE_COVET/MOVE_KNOCK_OFF were already Shell-Bell-claimed (power != 0) before this family; this family adds a second, independent category to those two rows and the first category to MOVE_TRICK/MOVE_RECYCLE.",
+};
+
 const records = rosterMoveSymbols.map((symbol) => {
   const move = moveBySymbol.get(symbol)!;
   const script = topologyByMove.get(symbol) ?? null;
@@ -3477,6 +3849,8 @@ const records = rosterMoveSymbols.map((symbol) => {
   if (shellBellEvidence !== undefined) itemSourceProvenFamilies.push(shellBellEvidence.familyEvidence);
   const itemMoveEndEvidence = itemMoveEndEvidenceByMove.get(symbol);
   if (itemMoveEndEvidence !== undefined) itemSourceProvenFamilies.push(itemMoveEndEvidence.familyEvidence);
+  const itemManipulationEvidence = itemManipulationEvidenceByMove.get(symbol);
+  if (itemManipulationEvidence !== undefined) itemSourceProvenFamilies.push(itemManipulationEvidence.familyEvidence);
   const itemSourceException = symbol === "MOVE_TICKLE"
     ? kingsRockExceptionRows[0]!
     : symbol === "MOVE_FUTURE_SIGHT"
@@ -3542,7 +3916,15 @@ const sourceProvenItemRecords = records.filter((record) => record.hooks.item.sta
 const kingsRockRosterRecords = sourceProvenItemRecords.filter((record) => record.hooks.item.supportedCategories.includes(KINGS_ROCK_CATEGORY));
 const shellBellRosterRecords = sourceProvenItemRecords.filter((record) => record.hooks.item.supportedCategories.includes(SHELL_BELL_CATEGORY));
 const itemMoveEndRosterRecords = sourceProvenItemRecords.filter((record) => record.hooks.item.supportedCategories.includes(ITEM_MOVE_END_CATEGORY));
-if (sourceProvenItemRecords.length !== 182 + itemMoveEndSourceProvenRows.length
+const ITEM_MANIPULATION_CATEGORIES = new Set([
+  ITEM_MANIPULATION_STEAL_CATEGORY, ITEM_MANIPULATION_SWAP_CATEGORY, ITEM_MANIPULATION_RECYCLE_CATEGORY, ITEM_MANIPULATION_KNOCKOFF_CATEGORY,
+]);
+const itemManipulationRosterRecords = sourceProvenItemRecords.filter((record) =>
+  (record.hooks.item.supportedCategories as string[]).some((category) => ITEM_MANIPULATION_CATEGORIES.has(category)));
+// Covet/Knock Off were already Shell-Bell-claimed (power != 0) before this
+// family exists, so only Trick/Recycle are brand-new source-proven records;
+// the other two just gain a second, independent category.
+if (sourceProvenItemRecords.length !== 182 + itemMoveEndSourceProvenRows.length + 2
   || kingsRockRosterRecords.length !== 105
   || shellBellRosterRecords.length !== 182
   || !kingsRockRosterRecords.every((record) => record.hooks.item.supportedCategories.includes(SHELL_BELL_CATEGORY))) {
@@ -3552,6 +3934,14 @@ if (itemMoveEndRosterRecords.length !== itemMoveEndSourceProvenRows.length
   || itemMoveEndRosterRecords.some((record) => !itemMoveEndSourceProvenRows.includes(record.move))
   || itemMoveEndRosterRecords.some((record) => record.hooks.item.supportedCategories.includes(KINGS_ROCK_CATEGORY) || record.hooks.item.supportedCategories.includes(SHELL_BELL_CATEGORY))) {
   throw new Error("Item-move-end source-proven roster accounting does not match the finite candidate census, or overlaps King's Rock/Shell Bell");
+}
+if (itemManipulationRosterRecords.length !== 4
+  || JSON.stringify(itemManipulationRosterRecords.map((record) => record.move).sort())
+    !== JSON.stringify(["MOVE_COVET", "MOVE_KNOCK_OFF", "MOVE_RECYCLE", "MOVE_TRICK"])
+  || !itemManipulationRosterRecords.some((record) => record.move === "MOVE_COVET" && record.hooks.item.supportedCategories.includes(SHELL_BELL_CATEGORY))
+  || !itemManipulationRosterRecords.some((record) => record.move === "MOVE_KNOCK_OFF" && record.hooks.item.supportedCategories.includes(SHELL_BELL_CATEGORY))
+  || itemManipulationRosterRecords.some((record) => record.hooks.item.supportedCategories.includes(ITEM_MOVE_END_CATEGORY))) {
+  throw new Error("Item-manipulation source-proven roster accounting does not match the finite four-move census");
 }
 const soundproofRosterRecords = sourceProvenAbilityRecords.filter((record) => record.hooks.ability.supportedCategories.includes(SOUNDPROOF_CATEGORY));
 if (soundproofRosterRecords.length !== 9) {
@@ -3858,7 +4248,7 @@ const output = {
       ABILITY_CONSTANTS_PATH,
       "reference/pokeemerald/include/constants/pokemon.h",
     ],
-    note: `Catalog join plus an intentionally partial source dispatcher inventory. ${records.filter((record) => record.hooks.item.status === "unsupported").length} per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the ${kingsRockSourceProvenRows.length}-row King's Rock family, the ${shellBellSourceProvenRows.length}-row Shell Bell family, the ${itemMoveEndSourceProvenRows.length}-row item-move-end status-cure family, exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, ${synchronizeSourceProvenRows.length} Synchronize status candidates, the one-row Attract/Oblivious family, the two-row Explosion/Damp family, and the ${immunitySourceProvenRows.length}-row Immunity status-cure family carry graph/program/source-handoff evidence. King's Rock retains Tickle as one explicit zero-damage exception; Shell Bell retains Future Sight as a distinct IGNORE_SHELL_BELL exception; item-move-end retains Assist/Metronome as dynamic-dispatch exceptions; no per-move oracle receipts are fabricated.`,
+    note: `Catalog join plus an intentionally partial source dispatcher inventory. ${records.filter((record) => record.hooks.item.status === "unsupported").length} per-move item joins and ${records.filter((record) => record.hooks.ability.status === "unsupported").length} per-move ability joins remain unsupported; the ${kingsRockSourceProvenRows.length}-row King's Rock family, the ${shellBellSourceProvenRows.length}-row Shell Bell family, the ${itemMoveEndSourceProvenRows.length}-row item-move-end status-cure family, the 4-row item-manipulation-opcode family, exact nine Level-50 sSoundMovesTable selectors, source-proven absorbing candidates, ${contactSourceProvenRows.length} contact siblings, ${colorChangeSourceProvenRows.length} Color Change siblings, ${synchronizeSourceProvenRows.length} Synchronize status candidates, the one-row Attract/Oblivious family, the two-row Explosion/Damp family, and the ${immunitySourceProvenRows.length}-row Immunity status-cure family carry graph/program/source-handoff evidence. King's Rock retains Tickle as one explicit zero-damage exception; Shell Bell retains Future Sight as a distinct IGNORE_SHELL_BELL exception; item-move-end retains Assist/Metronome as dynamic-dispatch exceptions; item-manipulation has zero exceptions (all four Rank-3 rows promoted); no per-move oracle receipts are fabricated.`,
   },
   coverage: {
     level50Roster: {
@@ -3894,9 +4284,10 @@ const output = {
         kingsRock: kingsRockAudit,
         shellBell: shellBellAudit,
         itemMoveEnd: itemMoveEndAudit,
+        itemManipulation: itemManipulationAudit,
         completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "The King's Rock flinch family is source-proven for 105 of 106 finite flag-selected rows with Tickle retained as the zero-damage exception, the Shell Bell heal family is source-proven for 182 of 183 finite power != 0 rows with Future Sight retained as the IGNORE_SHELL_BELL exception, and the item-move-end status-cure family is source-proven for the remaining not-already-claimed rows minus the four Rank-3 item-manipulation moves, with Assist/Metronome retained as dynamic-dispatch exceptions. Choice Band, target Evasion-up accuracy, and other held-item dispatchers remain unsupported/null per move.",
+        reason: "The King's Rock flinch family is source-proven for 105 of 106 finite flag-selected rows with Tickle retained as the zero-damage exception, the Shell Bell heal family is source-proven for 182 of 183 finite power != 0 rows with Future Sight retained as the IGNORE_SHELL_BELL exception, the item-move-end status-cure family is source-proven for the remaining not-already-claimed rows minus the four Rank-3 item-manipulation moves (with Assist/Metronome retained as dynamic-dispatch exceptions), and the item-manipulation family is source-proven for all four Rank-3 rows (Covet, Trick, Recycle, Knock Off) via four independent dedicated-opcode certificates, closing the item axis except for Assist/Metronome. Choice Band, target Evasion-up accuracy, and other held-item dispatchers remain unsupported/null per move.",
       },
       ability: {
         displayRows: Object.keys(abilityDisplay.abilities).length,

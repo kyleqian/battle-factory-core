@@ -232,6 +232,23 @@ remainder needs a new ability family.
   none of which any promoted or Rank-1 family touches. Ranked above Rank 2
   under the novelty criterion despite closing fewer rows, and it fully
   closes the item axis, which is a clean milestone.
+- **STATUS (2026-08-10, main worker): promoted.** All 4 candidates promoted
+  (item join gaps 4 → 2, not 0 — `MOVE_ASSIST`/`MOVE_METRONOME` remain,
+  Rank 1's dynamic-dispatch exceptions, never members of this family's
+  selector; this section's "closes the item axis completely" prediction is
+  superseded). Each row gets its own opcode certificate (exact entry-script
+  statement audit + ordered C guard-chain citation into `Cmd_seteffectwithchance`'s
+  `MOVE_EFFECT_STEAL_ITEM`/`MOVE_EFFECT_KNOCK_OFF` arms, `Cmd_tryswapitems`,
+  `Cmd_tryrecycleitem`) — no shared MOVEEND state, unlike every other
+  item-axis family. Covet/Knock Off were already Shell-Bell-claimed (power
+  != 0); this family adds a second, independent category to those two rows
+  and the first category to Trick/Recycle. Evidence per `docs/item-manipulation-family-ground-truth.md`:
+  fresh Covet + Recycle Battle Scene OFF receipts (`tools/battle-lab/mechanic-item-manipulation-{covet,recycle}-*-off.json`,
+  `tools/probe/verify-item-manipulation-{covet,recycle}-off.py`, both rerun
+  live this step and reproduced byte-identically); pre-existing 2026-07-28
+  Trick/Knock Off evidence cited as-is (`tests/trickOracleEvidence.test.ts`,
+  `tests/familyBCluster4OracleEvidence.test.ts`). Tests:
+  `tests/itemManipulationHookJoinBatch.test.ts`, `tests/itemManipulationOracleEvidence.test.ts`.
 
 ### Rank 4 — Ability: direct ability-manipulation opcode family
 
