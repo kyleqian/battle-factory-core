@@ -67,7 +67,7 @@ Set `FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1` in the wrapped probe command. The
 three direct generated outputs are committed under
 `tests/fixtures/factory-construction-cycle-v2/`; canonical JSON serialization,
 hashes, LCG replay, phase ordering, operation boundaries, interrupt ordering,
-and the cost-model refutation are pinned by
+and the candidate timing decomposition are pinned by
 `tests/factoryConstructionCycleEvidenceV2.test.ts`.
 
 | case | SHA-256 (both fresh runs) | first Random phase | cycles since prior VBlank |
@@ -76,7 +76,15 @@ and the cost-model refutation are pinned by
 | LILIANA | `ae1282b74f74de6a85b8772adfbcd83028fad09f8aa3e3ecd518aafeab17b443` | 257,104 | 215,990 |
 | legal varied trainer 222 | `3e10197a34f4ea7a08a23bead04ae5b6113c653304722167095612a9b0626987` | 248,986 | 207,872 |
 
-The v2 result is a precise refutation of the current operation-only cost
-callback, not a fitted production schedule. Candidate-personality-dependent
-division cost and live VBlank audio/DMA state are the two missing mechanisms;
-neither may be selected by trainer, set, battle, tick, or receipt cursor.
+The v2 result first refuted the operation-only cost key. The candidate half is
+now resolved source-generally: the operation carries the actual Random32
+personality facts and `reduceFactoryNatureAttemptTiming` replays the compiled
+`__umodsi3` path. It explains 267/278 boundaries directly; the other 11 are
+each exactly +18 asynchronous hardware-service cycles (case counts `5/2/4`),
+so all 278 are pinned as instruction path plus external service. A fresh
+wrapped anchor run remained byte-identical at the hash above.
+
+This is still not a production construction schedule. Live VBlank/audio/DMA
+state, interrupt/event-entry latency, and the other construction operations'
+source budgets remain missing. None may be selected by trainer, set, battle,
+tick, or receipt cursor.

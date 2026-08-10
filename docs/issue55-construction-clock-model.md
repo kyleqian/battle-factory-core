@@ -13,10 +13,13 @@ models the source order:
 4. the source-function return.
 
 Each operation is passed to a cycle-cost callback keyed by source function,
-species/nature input, rejection attempt, and EV/stat work. When the accumulated
-cost crosses a configured VBlank period, the clock invokes the ambient callback
-once and emits a `VBlankIntr+0x87` event. No trainer id, battle number,
-absolute presentation tick, or recorded cursor is read by the model.
+species/nature input, rejection attempt, and EV/stat work. Random operations
+now carry their returned u16, and attempt operations carry the assembled
+candidate personality, candidate nature, and accepted/rejected result. When
+the accumulated cost crosses a configured VBlank period, the clock invokes
+the ambient callback once and emits a `VBlankIntr+0x87` event. No trainer id,
+battle number, absolute presentation tick, or recorded cursor is read by the
+model.
 
 ## What is pinned
 
@@ -46,20 +49,30 @@ to the preceding VBlank, every personality half and nature-check boundary,
 VBlank entry, ambient `Random()`, handler return, and actual source resume.
 All three fresh probes reproduced twice byte-for-byte.
 
-That evidence **refutes** one exact callback under the current
-`FactoryConstructionOperation` contract:
+The candidate-dependent part is now source-derived. The retail compiler emits
+`GetNatureFromPersonality -> __umodsi3(personality, 25)` followed by either
+the rejection `bne` or accepted `CreateMon` setup. The exported
+`reduceFactoryNatureAttemptTiming` walks that compiled control flow using
+Emerald's configured WS0 timing: 2 cycles per sequential Thumb instruction,
++6 for a taken pipeline refill, and +1 for register `ROR`. It contains no
+trainer, set, frame, cursor, or fixture branch.
 
-- the low/high `Random()` boundaries are normally 80/88 master cycles, but
-  `GetNatureFromPersonality` rejection costs vary with the candidate
-  personality (anchor spans 755–909 source cycles). The compiled path calls
-  data-dependent division; the candidate personality/RNG value is not exposed
-  by `FactoryConstructionOperation`.
-- exact interrupt entry-to-resume costs vary with live VBlank audio/DMA work
-  (anchor 29,475–57,638; LILIANA 31,368–54,553 master cycles). Mon inputs and
-  source function do not encode that state.
+Across all 278 nature-check boundaries in the three receipts, 267 measured
+windows equal the reducer directly. The remaining 11 (anchor/LILIANA/varied
+`5/2/4`) are each reducer +18 cycles. A fresh instruction-level anchor trace
+located the +18 at a global timing-service handoff between two ordinary
+2-cycle Thumb instructions; it is asynchronous hardware workload, not a
+division instruction. Thus every boundary decomposes exactly into the
+candidate instruction path plus either 0 or 18 external service cycles.
 
-The next missing mechanism is therefore an instruction/source-derived clock
-that can consume the actual candidate personality, plus deterministic VBlank
-audio/DMA workload state and IRQ-entry latency. A species/attempt table would
-only memorize these receipts and is deliberately not landed. The isolated
-scheduler remains unwired.
+Exact interrupt entry-to-resume costs still vary with live VBlank audio/DMA
+work (anchor 29,475–57,638; LILIANA 31,368–54,553 master cycles), and the +18
+in-path service stalls show the same hardware workload is not confined to the
+VBlank callback. Remaining construction operations also still need their own
+source-derived budgets. Those mechanisms are not encoded by mon inputs, so
+the isolated scheduler remains unwired.
+
+The focused tests pin candidate propagation, wrong/accepted branch timing,
+all 278 decompositions, clean-stream cursor identity, and the unresolved
+hardware-workload evidence string. A fresh wrapped anchor v2 probe reproduced
+the committed receipt byte-for-byte at SHA-256 `631bd21408ba41e03c0e119dde3d83d94dda023cee93ebc3e470e6d94741cc2a`.

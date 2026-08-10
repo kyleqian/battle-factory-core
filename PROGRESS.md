@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1079 — [MAIN worker, 2026-08-10] **#55 candidate-aware nature-check timing landed; async construction workload remains open**
+
+- **State:** candidate timing commit `79448547`; focused construction **9/9**,
+  smoke **375/375**, typecheck, full `npm test` **877 files / 8,404 passed / 1
+  skipped**, production build, diff check, and fresh anchor v2 repeat are green.
+- **Did:** threaded Random u16/candidate personality+nature+acceptance through
+  the operation key and added a source/Thumb `__umodsi3` path reducer. All
+  **278** committed v2 nature boundaries decompose exactly: **267** direct,
+  **11** reducer +18 asynchronous service cycles (`5/2/4`). Clean-stream RNG
+  outcome remains unchanged; fresh anchor hash `631bd214…` matches.
+- **Next:** model remaining CreateMon/EV/stat/post/return source budgets and
+  deterministic VBlank/audio/DMA event workload before any live wiring.
+- **Notes:** no trainer/set/tick/cursor/fixture schedule, live-controller
+  wiring, swap-tail extension, canonical Battle-2 march, or animation edit.
+
 ## 1078 — [MAIN worker, 2026-08-10] **Generic swap-screen SpriteCB_Pokeball state landed; exact tail remains bounded by #55 construction-clock RNG**
 
 - **State:** all finish gates are green: smoke **375/375**, ball/swap focus
@@ -50,34 +65,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   The present cost callback is refuted: nature-check cost depends on candidate
   personality, and IRQ cost depends on live audio/DMA state. No fitted table,
   controller wiring, or deferred user question was added.
-
-## 1076 — [supervisor, 2026-08-10 ~03:00] **Session wind-down: S10 closed, 9 workers + 1 audit, all folds green**
-
-- **State:** master `019c27f2` is green: full suite **872 files / 8,384
-  passed / 1 skipped**, production build clean. Soak gates (run at the
-  engine-identical prior fold): vanilla 0:20 = **20/20 OK**, full-policy
-  0:60 = **60/60 OK**. DEFERRED.md is empty — no open supervisor
-  questions.
-- **Did (session summary):** S10 CLOSED (entry 1074) — the entire Gate-6
-  family program ran start-to-finish in this one session: family worklist →
-  five receipt packs (side lane) → five wiring promotions (main lane,
-  serial) → soak artifact + Noland note → read-only opus audit (3 defects)
-  → same-session class fixes → gates 2/3/4/6 + stage ticked. Final
-  manifest: **296/300 source-proven rows per axis, 4 documented
-  dynamic-dispatch exceptions per axis**. Two animation folds landed
-  Protect/Magic Coat/Role Play exact plus Drill Peck dense evidence
-  (`f913d88a`, `019c27f2`); the animation supervisor session may still be
-  live — any later `animation-main` commits fold next session. A final
-  #73 probe round returned an honest mis-scope verdict (entry 1075): the
-  targeted residual closed 2026-08-04; the stale ISSUES paragraph that
-  produced the brief is now pruned.
-- **Next:** the playable-round polish milestone's real remaining substance
-  is #71 Slice D coordination (ON-profile per-tick send-out playback, with
-  the animation lane) and session-trace-driven pacing fixes (need user
-  play traces); then schedule S11 audio. ISSUES #86 (routeBranch
-  self-description sweep) is optional manifest-hardening filler.
-- **Notes:** new PAPERCUTS this session: same-second launcher JSONL
-  collision, one-EmeraldOracle-per-process, bare-npx-vitest OOM on
-  census-loading tests. ISSUES numbering: #82 was reused by a worker and
-  renumbered to #86 — check new numbers against git history at verify
-  time.

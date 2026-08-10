@@ -1082,10 +1082,10 @@ the wiring step is queued.
 scheduler with one raw RNG cursor, nature-rejection loops, injectable
 operation-cycle costs, VBlank ambient callbacks (including callback cycle
 cost), frame/event ledgers, and a separately named clean-stream mode. Its
-cost key exposes source function, species/nature/EV inputs, operation kind,
-attempt, and Random32 half; it cannot see trainer id, battle index, canonical
-tick, or a receipt schedule. Focused tests are **15/15** and preserve the
-three exact v1 receipt totals (**294/143/232 events**). An opt-in
+cost key initially exposed source function, species/nature/EV inputs,
+operation kind, attempt, and Random32 half; it cannot see trainer id, battle
+index, canonical tick, or a receipt schedule. Focused tests are **15/15** and
+preserve the three exact v1 receipt totals (**294/143/232 events**). An opt-in
 `FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1` probe path now records mGBA master
 cycles without changing v1 output. Live wiring remains open: a v2 receipt
 must bank initial phase, source-operation boundary costs, and ambient callback
@@ -1094,14 +1094,27 @@ cost/order before the generic controller can supply a truthful cost model.
 **V2 cycle result (2026-08-10, `3916972f`):** all three direct probe outputs
 now bank the missing source and IRQ boundaries and reproduce twice byte-for-
 byte (`anchor 631bd214…`, `LILIANA ae1282b7…`, `varied 3e10197a…`; focused
-**19/19**). The result refutes the current callback rather than completing it.
-Compiled nature-check cost varies with the candidate personality (anchor
-**755–909** source cycles), which `FactoryConstructionOperation` does not
-expose. VBlank entry-to-resume cost varies with live audio/DMA work (anchor
-**29,475–57,638**, LILIANA **31,368–54,553** master cycles), also absent from
-the model. Exact construction therefore needs candidate-aware instruction
-timing plus deterministic VBlank workload state. A trainer/set/tick/receipt
-table remains prohibited; the isolated scheduler stays unwired.
+**19/19**). The result identified two independent missing inputs: compiled
+nature-check cost varies with the candidate personality (anchor **755–909**
+source cycles), while VBlank entry-to-resume cost varies with live audio/DMA
+work (anchor **29,475–57,638**, LILIANA **31,368–54,553** master cycles). The
+candidate half is resolved immediately below; the hardware-workload half is
+still absent. A trainer/set/tick/receipt table remains prohibited; the
+isolated scheduler stays unwired.
+
+**Candidate-aware nature timing (2026-08-10, `79448547`):** the cost key now
+also exposes each returned Random u16 and the assembled candidate personality,
+nature, and accepted/rejected result. `reduceFactoryNatureAttemptTiming`
+replays the compiled `GetNatureFromPersonality -> __umodsi3(personality, 25)`
+Thumb path and its wrong/accepted caller tails from source/ARM timing, with no
+trainer/set/battle/tick/cursor/fixture lookup. Across all **278** nature-check
+boundaries in the three v2 receipts, **267** equal the reducer directly; the
+other **11** (case counts **5/2/4**) are each reducer +18 cycles. A fresh
+instruction trace placed that +18 at an asynchronous global timing-service
+handoff between ordinary Thumb instructions, so every boundary decomposes
+exactly into candidate path plus external hardware service. Candidate timing
+is therefore resolved; the async workload is not. A fresh wrapped anchor v2
+probe was byte-identical (`631bd214…`). Focused **9/9** and typecheck pass.
 
 **Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
 threading now makes the first post-cycle pixel boundary observe this debt.
@@ -1114,11 +1127,13 @@ v2 refutation above. No fitted cursor, per-frame schedule, or construction-
 clock wiring was landed. The canonical window therefore remains 248/248
 through 10177; its attempted 10214 extension is 277/285, ball 2 only.
 
-**Lead:** implement the deterministic construction-clock contract above only
-as a deliberate source/cycle-model slice. Per-mon cursors and per-frame fixture
-schedules are now evidence-refuted as production designs. Until then, keep the
-clean-stream contract and document personality-exactness as out of model when
-construction spans more than one frame. Supervisor decision 2026-07-30 (entry 758):
+**Lead:** continue only with source/cycle-model slices for the remaining
+CreateMon/EV/stat/post/return budgets and deterministic VBlank/audio/DMA
+workload plus interrupt/event-entry latency. Do not wire the clock until those
+are source-general. Per-mon cursors and per-frame fixture schedules are
+evidence-refuted as production designs. Until then, keep the clean-stream
+contract and document personality-exactness as out of model when construction
+spans more than one frame. Supervisor decision 2026-07-30 (entry 758):
 Gate-5 clause (a) is receipt-linked at the rules level (selection byte-exact
 from the probed cursor; construction proven via filtered ledger); this entry
 tracks the remaining stream-model boundary, not a Gate-5 blocker.
