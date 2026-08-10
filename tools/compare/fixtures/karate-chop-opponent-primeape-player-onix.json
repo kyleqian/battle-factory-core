@@ -21,5 +21,5 @@
   "rawRgbSha256": "f7762e1e4072f6807c6392648e5590ad6a41b59ef5def77707991cfa7a7c9396",
   "changeMap": "tools/compare/evidence/karate-chop-changemap-opponent.txt",
   "changeMapSha256": "10e22bae0c4fb5c77a0daeba32e40dad25727165701849f7423b0611ec67e7bf",
-  "acceptance": { "status": "unsupported", "evidenceMatching": 49, "framebufferMatching": 0 }
+  "acceptance": { "status": "exact", "componentMatching": 49, "framebufferMatching": 49 }
 }

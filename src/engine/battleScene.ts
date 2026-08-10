@@ -554,6 +554,8 @@ import brickBreakAsset from "../animation/assets/brick-break.json" with { type: 
 import lightScreenAsset from "../animation/assets/light-screen.json" with { type: "json" };
 import mirrorCoatAsset from "../animation/assets/mirror-coat.json" with { type: "json" };
 import barrierAsset from "../animation/assets/barrier.json" with { type: "json" };
+import magicCoatAsset from "../animation/assets/magic-coat.json" with { type: "json" };
+import protectAsset from "../animation/assets/protect.json" with { type: "json" };
 import hazeAsset from "../animation/assets/haze.json" with { type: "json" };
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import substituteAsset from "../animation/assets/substitute.json" with { type: "json" };
@@ -623,6 +625,7 @@ import shadowBallAsset from "../animation/assets/shadow-ball.json" with { type: 
 import encoreAsset from "../animation/assets/encore.json" with { type: "json" };
 import dragonClawAsset from "../animation/assets/dragon-claw.json" with { type: "json" };
 import singAsset from "../animation/assets/sing.json" with { type: "json" };
+import batonPassAsset from "../animation/assets/baton-pass.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -879,6 +882,8 @@ import {
   sceneOnBrickBreakView,
   sceneOnLightScreenView,
   sceneOnBarrierView,
+  sceneOnMagicCoatView,
+  sceneOnProtectView,
   sceneOnDisableView,
   sceneOnHazeView,
   sceneOnMirrorCoatView,
@@ -899,6 +904,9 @@ import {
   sceneOnMegaKickView,
   sceneOnRollingKickView,
   sceneOnLowKickView,
+  sceneOnKarateChopView,
+  sceneOnBatonPassView,
+  sceneOnRolePlayView,
   sceneOnStompView,
   sceneOnViceGripView,
   sceneOnBiteView,
@@ -994,6 +1002,9 @@ import {
   sceneOnPsychicView,
   sceneOnKnockOffView,
   type SceneOnMovePresentationState,
+  type SceneOnKarateChopConfig,
+  type SceneOnBatonPassConfig,
+  type SceneOnRolePlayConfig,
   type SceneOnStompConfig,
   type SceneOnViceGripConfig,
   type SceneOnFirePunchConfig,
@@ -1027,6 +1038,8 @@ import {
   type SceneOnBrickBreakPresentationState,
   type SceneOnLightScreenPresentationState,
   type SceneOnBarrierPresentationState,
+  type SceneOnMagicCoatPresentationState,
+  type SceneOnProtectPresentationState,
   type SceneOnDisableConfig,
   type SceneOnHazePresentationState,
   type SceneOnMirrorCoatPresentationState,
@@ -1386,6 +1399,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const aipomFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).AIPOM!;
 const crawdauntFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CRAWDAUNT!;
 const hitmontopFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HITMONTOP!;
 const swabluFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SWABLU!;
@@ -1450,6 +1464,16 @@ const barrierArt = barrierAsset as {
   drowzeeBack: { tileset: Tileset; palette: RgbColor[] };
   drowzeeFront: { tileset: Tileset; palette: RgbColor[] };
   grayLightWall: { tileset: Tileset; palette: RgbColor[] };
+};
+const magicCoatArt = magicCoatAsset as {
+  spoinkBack: { tileset: Tileset; palette: RgbColor[] };
+  spoinkFront: { tileset: Tileset; palette: RgbColor[] };
+  orangeLightWall: { tileset: Tileset; palette: RgbColor[] };
+};
+const protectArt = protectAsset as {
+  houndourBack: { tileset: Tileset; palette: RgbColor[] };
+  houndourFront: { tileset: Tileset; palette: RgbColor[] };
+  protect: { tileset: Tileset; palette: RgbColor[] };
 };
 const hazeArt = hazeAsset as {
   fog: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
@@ -1888,6 +1912,7 @@ const battleAnimFlyBall = battleAnimFlyBallAsset as { tileset: Tileset; palette:
 const battleAnimSmallEmber = battleAnimSmallEmberAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimFirePlume = battleAnimFirePlumeAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimHandsAndFeet = battleAnimHandsAndFeetAsset as { tileset: Tileset; palette: RgbColor[] };
+const batonPassArt = batonPassAsset as { pokeball: { tileset: Tileset; palette: RgbColor[] } };
 const battleAnimIceCrystals = battleAnimIceCrystalsAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimIceCube = battleAnimIceCubeAsset as {
   palette: RgbColor[];
@@ -1914,6 +1939,7 @@ const dugtrioBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSp
 const charmeleonBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CHARMELEON!;
 const haunterBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HAUNTER!;
 const ivysaurBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).IVYSAUR!;
+const aipomBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).AIPOM!;
 const kadabraBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).KADABRA!;
 const grovyleBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GROVYLE!;
 const battleAnimGhostBg = battleAnimGhostBgAsset as {
@@ -21906,33 +21932,30 @@ export function renderSceneOnMovePresentation(
     );
     return;
   }
-  if (state.config.move === "BARRIER") {
-    const barrierState = state as SceneOnBarrierPresentationState;
-    const view = sceneOnBarrierView(barrierState);
-    const displayed = sceneOnBarrierView({
-      ...barrierState, age: barrierState.age - 1,
-    });
+  if (state.config.move === "PROTECT") {
+    const protectState = state as SceneOnProtectPresentationState;
+    const view = sceneOnProtectView(protectState);
+    const displayed = sceneOnProtectView({ ...protectState, age: protectState.age - 1 });
     const playerToOpponent =
-      view.attacker.species === "DROWZEE"
+      view.attacker.species === "HOUNDOUR"
       && view.attacker.geometry.side === "player"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "DROWZEE"
+      view.attacker.species === "HOUNDOUR"
       && view.attacker.geometry.side === "opponent"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
-        `unsupported staged BARRIER pair `
-        + `${view.attacker.species}->${view.target.species}`,
+        `unsupported staged PROTECT pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const drowzeeSource = playerToOpponent
-      ? barrierArt.drowzeeBack : barrierArt.drowzeeFront;
-    const drowzee = playerToOpponent
-      ? drowzeeSource
-      : { ...drowzeeSource, tileset: subTileset(drowzeeSource.tileset, 0, 8) };
+    const houndourSource = playerToOpponent
+      ? protectArt.houndourBack : protectArt.houndourFront;
+    const houndour = playerToOpponent
+      ? houndourSource
+      : { ...houndourSource, tileset: subTileset(houndourSource.tileset, 0, 8) };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const onix = playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
@@ -21941,8 +21964,116 @@ export function renderSceneOnMovePresentation(
       ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
       : { x2: 0, y2: 0 };
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-    const opponent = playerToOpponent ? onix : drowzee;
-    const player = playerToOpponent ? drowzee : onix;
+    const opponent = playerToOpponent ? onix : houndour;
+    const player = playerToOpponent ? houndour : onix;
+    drawSpriteSheet(
+      fb, opponent.tileset, opponent.palette,
+      playerToOpponent
+        ? view.target.geometry.spriteCorner.x + onixIdle.x2
+        : view.attacker.geometry.spriteCorner.x,
+      playerToOpponent
+        ? view.target.geometry.spriteCorner.y + onixIdle.y2
+        : view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.sprite && view.sprite && view.sprite.alpha.eva > 0) {
+      const palette = protectArt.protect.palette.slice();
+      const rotating = palette.slice(1, 8);
+      const steps = displayed.sprite.paletteRotationSteps % 7;
+      palette.splice(1, 7, ...rotating.slice(steps), ...rotating.slice(0, steps));
+      drawSpriteSheetBlendedOverFb(
+        fb,
+        protectArt.protect.tileset,
+        palette,
+        displayed.sprite.x + displayed.sprite.x2 - 32,
+        displayed.sprite.y - 32,
+        view.sprite.alpha.eva,
+        view.sprite.alpha.evb,
+      );
+    }
+    drawSpriteSheet(
+      fb, player.tileset, player.palette,
+      playerToOpponent
+        ? view.attacker.geometry.spriteCorner.x
+        : view.target.geometry.spriteCorner.x,
+      playerToOpponent
+        ? view.attacker.geometry.spriteCorner.y
+        : view.target.geometry.spriteCorner.y,
+    );
+    const profile = protectState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "HOUNDOUR", level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "HOUNDOUR" : "ONIX", level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+        currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "HOUNDOUR used" : "Foe HOUNDOUR used",
+      "PROTECT!",
+      64,
+    );
+    return;
+  }
+  if (state.config.move === "BARRIER" || state.config.move === "MAGIC_COAT") {
+    const magic = state.config.move === "MAGIC_COAT";
+    const wallState = state as
+      | SceneOnBarrierPresentationState
+      | SceneOnMagicCoatPresentationState;
+    const view = magic
+      ? sceneOnMagicCoatView(wallState as SceneOnMagicCoatPresentationState)
+      : sceneOnBarrierView(wallState as SceneOnBarrierPresentationState);
+    const displayed = magic
+      ? sceneOnMagicCoatView({
+          ...(wallState as SceneOnMagicCoatPresentationState),
+          age: wallState.age - 1,
+        })
+      : sceneOnBarrierView({
+          ...(wallState as SceneOnBarrierPresentationState),
+          age: wallState.age - 1,
+        });
+    const attackerSpecies = magic ? "SPOINK" : "DROWZEE";
+    const playerToOpponent =
+      view.attacker.species === attackerSpecies
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === attackerSpecies
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ${magic ? "MAGIC_COAT" : "BARRIER"} pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = magic
+      ? (playerToOpponent ? magicCoatArt.spoinkBack : magicCoatArt.spoinkFront)
+      : (playerToOpponent ? barrierArt.drowzeeBack : barrierArt.drowzeeFront);
+    const attacker = playerToOpponent
+      ? attackerSource
+      : { ...attackerSource, tileset: subTileset(attackerSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const opponent = playerToOpponent ? onix : attacker;
+    const player = playerToOpponent ? attacker : onix;
     drawSpriteSheet(
       fb, opponent.tileset, opponent.palette,
       playerToOpponent
@@ -21953,7 +22084,8 @@ export function renderSceneOnMovePresentation(
         : view.attacker.geometry.spriteCorner.y,
     );
     if (displayed.wall && view.alpha && view.alpha.eva > 0) {
-      const palette = barrierArt.grayLightWall.palette.slice();
+      const wallArt = magic ? magicCoatArt.orangeLightWall : barrierArt.grayLightWall;
+      const palette = wallArt.palette.slice();
       const rotating = palette.slice(1, 9);
       for (let step = 0; step < displayed.wall.paletteRotationSteps; step++) {
         rotating.unshift(rotating.pop()!);
@@ -21961,7 +22093,7 @@ export function renderSceneOnMovePresentation(
       palette.splice(1, 8, ...rotating);
       drawSpriteSheetBlendedOverFb(
         fb,
-        barrierArt.grayLightWall.tileset,
+        wallArt.tileset,
         palette,
         displayed.wall.x - 32,
         displayed.wall.y - 32,
@@ -21981,7 +22113,7 @@ export function renderSceneOnMovePresentation(
     drawSendOutHealthbox(
       fb, 0,
       composeOpponentHealthbox(healthboxAssemblyAssets, {
-        name: playerToOpponent ? "ONIX" : "DROWZEE",
+        name: playerToOpponent ? "ONIX" : attackerSpecies,
         level: 50,
         gender: state.config.fieldProfile.opponentGender ?? "male",
         hpFraction: state.config.fieldProfile.opponentHp
@@ -21992,7 +22124,7 @@ export function renderSceneOnMovePresentation(
     drawComposedPlayerHealthbox(
       fb,
       composePlayerHealthbox(playerHealthboxAssets, {
-        name: playerToOpponent ? "DROWZEE" : "ONIX",
+        name: playerToOpponent ? attackerSpecies : "ONIX",
         level: 50,
         gender: state.config.fieldProfile.playerGender ?? "male",
         hpFraction: state.config.fieldProfile.playerHp
@@ -22005,8 +22137,10 @@ export function renderSceneOnMovePresentation(
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(
       fb,
-      playerToOpponent ? "DROWZEE used" : "Foe DROWZEE used",
-      "BARRIER!",
+      playerToOpponent
+        ? `${attackerSpecies} used`
+        : `Foe ${attackerSpecies} used`,
+      magic ? "MAGIC COAT!" : "BARRIER!",
       64,
     );
     return;
@@ -24023,6 +24157,304 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MACHOKE used" : "Foe MACHOKE used",
       "LOW KICK!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "BATON_PASS") {
+    const batonState = state as SceneOnMovePresentationState<SceneOnBatonPassConfig>;
+    const view = sceneOnBatonPassView(batonState);
+    const playerToOpponent = view.attacker.species === "AIPOM"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "AIPOM"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(`unsupported staged BATON_PASS pair ${view.attacker.species}->${view.target.species}`);
+    }
+    const tint = { r: 255, g: 181, b: 247 };
+    const aipom = playerToOpponent
+      ? aipomBackSprite
+      : { ...aipomFrontSprite, tileset: subTileset(aipomFrontSprite.tileset, 0, 8) };
+    const onix = playerToOpponent
+      ? { ...onixFrontSprite, tileset: subTileset(onixFrontSprite.tileset, 0, 8) }
+      : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(battleBg.palette, tint, view.displayedBgPaletteY),
+    );
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const aipomPalette = blendPaletteToward(aipom.palette, tint, view.displayedBattlerPaletteY);
+    const drawAttacker = () => {
+      if (view.displayedAttackerInvisible) return;
+      const matrix = view.displayedAttackerMatrix;
+      if (matrix.a === 256 && matrix.d === 256) {
+        drawSpriteSheet(
+          fb,
+          aipom.tileset,
+          aipomPalette,
+          view.attacker.geometry.spriteCorner.x,
+          view.attacker.geometry.spriteCorner.y,
+        );
+      } else {
+        drawSpriteSheetAffineRotate(
+          fb,
+          aipom.tileset,
+          aipomPalette,
+          view.attacker.geometry.spriteCorner.x + 32,
+          view.attacker.geometry.spriteCorner.y + 32,
+          matrix.a,
+          0,
+          0,
+          matrix.d,
+        );
+      }
+    };
+    if (playerToOpponent) { drawTarget(); drawAttacker(); }
+    else { drawAttacker(); drawTarget(); }
+    if (view.displayedPokeball) {
+      drawSpriteSheet(
+        fb,
+        batonPassArt.pokeball.tileset,
+        batonPassArt.pokeball.palette,
+        view.displayedPokeball.x - 8,
+        view.displayedPokeball.y + view.displayedPokeball.y2 - 8,
+      );
+    }
+    const profile = batonState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "AIPOM", level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "AIPOM" : "ONIX", level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb, playerToOpponent ? "AIPOM used" : "Foe AIPOM used", "BATON PASS!", 99);
+    return;
+  }
+
+  if (state.config.move === "ROLE_PLAY") {
+    const roleState = state as SceneOnMovePresentationState<SceneOnRolePlayConfig>;
+    const view = sceneOnRolePlayView(roleState);
+    const playerToOpponent = view.attacker.species === "KADABRA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "KADABRA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(`unsupported staged ROLE_PLAY pair ${view.attacker.species}->${view.target.species}`);
+    }
+    const black = { r: 0, g: 0, b: 0 };
+    const white = { r: 255, g: 255, b: 255 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(battleBg.palette, black, view.displayedBgBlackCoefficient),
+    );
+    const attackerSource = playerToOpponent
+      ? kadabraBackSprite
+      : { ...kadabraFrontSprite, tileset: subTileset(kadabraFrontSprite.tileset, 0, 8) };
+    const targetSource = playerToOpponent
+      ? { ...onixFrontSprite, tileset: subTileset(onixFrontSprite.tileset, 0, 8) }
+      : onixBackSprite;
+    const targetPalette = blendPaletteToward(
+      targetSource.palette,
+      white,
+      view.displayedTargetWhiteCoefficient,
+    );
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetSource.tileset,
+      targetPalette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerSource.tileset,
+      attackerSource.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (playerToOpponent) { drawTarget(); drawAttacker(); }
+    else { drawAttacker(); drawTarget(); }
+    if (view.displayedSilhouette && view.blend) {
+      const silhouette = view.displayedSilhouette;
+      const target2 = fb.slice();
+      const silhouettePalette = Array.from({ length: 16 }, () => white);
+      const silhouetteSource = playerToOpponent
+        ? onixBackSprite
+        : { ...onixFrontSprite, tileset: subTileset(onixFrontSprite.tileset, 0, 8) };
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        target2,
+        silhouetteSource.tileset,
+        silhouettePalette,
+        silhouette.x,
+        silhouette.y,
+        silhouette.matrix.a,
+        0,
+        0,
+        silhouette.matrix.d,
+        view.blend.eva,
+        view.blend.evb,
+        silhouette.affineMode === 3,
+      );
+    }
+    const profile = roleState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "KADABRA", level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "KADABRA" : "ONIX", level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb, playerToOpponent ? "KADABRA used" : "Foe KADABRA used", "ROLE PLAY!", 99);
+    return;
+  }
+
+  if (state.config.move === "KARATE_CHOP") {
+    const karateState = state as SceneOnMovePresentationState<SceneOnKarateChopConfig>;
+    const view = sceneOnKarateChopView(karateState);
+    // The hand callback, hitsplat OAM, affine matrix, and ShakeMon battler
+    // displacement all reach this move's hardware scanout from the preceding
+    // source age.  The target's ordinary front-idle x2 survives until the
+    // hit task replaces the copied monbg OBJ on that same handoff.
+    const displayed = sceneOnKarateChopView({
+      ...karateState,
+      age: karateState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "PRIMEAPE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "PRIMEAPE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged KARATE_CHOP pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const primeapeSource = playerToOpponent
+      ? bulkUpArt.primeapeBack
+      : {
+          ...bulkUpArt.primeapeFront,
+          tileset: subTileset(bulkUpArt.primeapeFront.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent && karateState.age <= 22
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const primeapeIdle = opponentToPlayer
+      ? (speciesFrontIdleRestOffset("PRIMEAPE") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      primeapeSource.tileset,
+      primeapeSource.palette,
+      view.attacker.geometry.spriteCorner.x + primeapeIdle.x2,
+      view.attacker.geometry.spriteCorner.y + primeapeIdle.y2,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2 + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    if (displayed.hand) {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimHandsAndFeet.tileset, 12, 4),
+        battleAnimHandsAndFeet.palette,
+        displayed.hand.x + displayed.hand.x2 - 16,
+        displayed.hand.y - 16,
+      );
+    }
+    if (displayed.hitsplat && view.alpha) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        displayed.hitsplat.x - 16,
+        displayed.hitsplat.y - 16,
+        displayed.hitsplat.matrix,
+        displayed.hitsplat.matrix,
+        view.alpha.eva,
+        view.alpha.evb,
+        false,
+        "live",
+      );
+    }
+    const profile = karateState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "PRIMEAPE",
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "PRIMEAPE" : "ONIX",
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "PRIMEAPE used" : "Foe PRIMEAPE used",
+      "KARATE CHOP!",
       99,
     );
     return;

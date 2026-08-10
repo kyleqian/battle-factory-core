@@ -269,7 +269,12 @@ import {
   reflectAtAge,
   type ReflectState,
 } from "./reflect.ts";
-import { barrierAtAge, type BarrierState } from "./barrier.ts";
+import {
+  barrierAtAge,
+  magicCoatAtAge,
+  type BarrierState,
+} from "./barrier.ts";
+import { protectAtAge, type ProtectState } from "./protect.ts";
 import { disableAtAge, type DisableState } from "./disable.ts";
 import {
   brickBreakAtAge,
@@ -644,6 +649,8 @@ import {
   knockOffTargetOamOffsetAtAge,
   type KnockOffBodyState,
 } from "./knockOff.ts";
+import { batonPassAtAge, type BatonPassState } from "./batonPass.ts";
+import { rolePlayAtAge, type RolePlayState } from "./rolePlay.ts";
 import {
   shadowBallBackgroundBldy,
   shadowBallBackgroundIsGhost,
@@ -817,6 +824,7 @@ export interface SceneOnPresentationBattler {
     | "CHARMANDER"
     | "LEDYBA"
     | "WURMPLE"
+    | "AIPOM"
     | "WEEDLE"
      | "PRIMEAPE"
      | "MARSHTOMP"
@@ -1331,6 +1339,22 @@ export interface SceneOnBarrierConfig {
   readonly allocatorProfile: Readonly<{ readonly wall: number }>;
 }
 
+export interface SceneOnMagicCoatConfig {
+  readonly move: "MAGIC_COAT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly allocatorProfile: Readonly<{ readonly wall: number }>;
+}
+
+export interface SceneOnProtectConfig {
+  readonly move: "PROTECT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly allocatorProfile: Readonly<{ readonly protect: number }>;
+}
+
 /** Typed Scene-ON seam for MOVE_DISABLE's target monbg/OBJ-blend task. */
 export interface SceneOnDisableConfig {
   readonly move: "DISABLE";
@@ -1488,6 +1512,21 @@ export interface SceneOnLowKickConfig {
 /** Narrow Scene-ON seam; move resolution and critical-hit state stay external. */
 export interface SceneOnKarateChopConfig {
   readonly move: "KARATE_CHOP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnBatonPassConfig {
+  readonly move: "BATON_PASS";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+/** Role Play receives presentation geometry and immutable healthbox fields only. */
+export interface SceneOnRolePlayConfig {
+  readonly move: "ROLE_PLAY";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -2366,6 +2405,8 @@ export type SceneOnMoveConfig =
   | SceneOnBrickBreakConfig
   | SceneOnLightScreenConfig
   | SceneOnBarrierConfig
+  | SceneOnMagicCoatConfig
+  | SceneOnProtectConfig
   | SceneOnDisableConfig
   | SceneOnHazeConfig
   | SceneOnMirrorCoatConfig
@@ -2387,6 +2428,8 @@ export type SceneOnMoveConfig =
   | SceneOnRollingKickConfig
   | SceneOnLowKickConfig
   | SceneOnKarateChopConfig
+  | SceneOnBatonPassConfig
+  | SceneOnRolePlayConfig
   | SceneOnStompConfig
   | SceneOnViceGripConfig
   | SceneOnBiteConfig
@@ -2530,6 +2573,10 @@ export type SceneOnLightScreenPresentationState =
   SceneOnMovePresentationState<SceneOnLightScreenConfig>;
 export type SceneOnBarrierPresentationState =
   SceneOnMovePresentationState<SceneOnBarrierConfig>;
+export type SceneOnMagicCoatPresentationState =
+  SceneOnMovePresentationState<SceneOnMagicCoatConfig>;
+export type SceneOnProtectPresentationState =
+  SceneOnMovePresentationState<SceneOnProtectConfig>;
 export type SceneOnHazePresentationState =
   SceneOnMovePresentationState<SceneOnHazeConfig>;
 export type SceneOnMirrorCoatPresentationState =
@@ -2678,6 +2725,26 @@ export interface SceneOnKarateChopView extends KarateChopState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnBatonPassView extends BatonPassState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly displayedBgPaletteY: number;
+  readonly displayedBattlerPaletteY: number;
+  readonly displayedPokeball: BatonPassState["pokeball"];
+  readonly displayedAttackerMatrix: BatonPassState["attackerMatrix"];
+  readonly displayedAttackerInvisible: boolean;
+}
+
+export interface SceneOnRolePlayView extends RolePlayState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly displayedTargetWhiteCoefficient: number;
+  readonly displayedBgBlackCoefficient: number;
+  readonly displayedSilhouette: RolePlayState["silhouette"];
 }
 
 export interface SceneOnStompView extends StompState {
@@ -4252,6 +4319,12 @@ export interface SceneOnBarrierView extends BarrierState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnProtectView extends ProtectState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 /** `age` is relative to Move_DISABLE's first in-bounds script pointer. */
 export function sceneOnDisableView(
   state: SceneOnMovePresentationState<SceneOnDisableConfig>,
@@ -4303,6 +4376,44 @@ export function sceneOnBarrierView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...barrierAtAge(
+      state.age,
+      state.config.attacker.geometry.battlePositionCenter,
+      state.config.attacker.geometry.side,
+    ),
+  };
+}
+
+/** `age` is relative to Move_MAGIC_COAT's first in-bounds script pointer. */
+export function sceneOnMagicCoatView(
+  state: SceneOnMovePresentationState<SceneOnMagicCoatConfig>,
+): SceneOnBarrierView {
+  if (state.config.move !== "MAGIC_COAT") {
+    throw new Error(`expected MAGIC_COAT presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...magicCoatAtAge(
+      state.age,
+      state.config.attacker.geometry.battlePositionCenter,
+      state.config.attacker.geometry.side,
+    ),
+  };
+}
+
+/** `age` is relative to Move_PROTECT's first in-bounds script pointer. */
+export function sceneOnProtectView(
+  state: SceneOnMovePresentationState<SceneOnProtectConfig>,
+): SceneOnProtectView {
+  if (state.config.move !== "PROTECT") {
+    throw new Error(`expected PROTECT presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...protectAtAge(
       state.age,
       state.config.attacker.geometry.battlePositionCenter,
       state.config.attacker.geometry.side,
@@ -4723,6 +4834,50 @@ export function sceneOnKarateChopView(
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
+  };
+}
+
+/** Baton Pass keeps software truth and independently lagged scanout state. */
+export function sceneOnBatonPassView(
+  state: SceneOnMovePresentationState<SceneOnBatonPassConfig>,
+): SceneOnBatonPassView {
+  if (state.config.move !== "BATON_PASS") {
+    throw new Error(`expected BATON_PASS presentation, got ${state.config.move}`);
+  }
+  const current = batonPassAtAge(state.age, state.config.attacker.geometry.animationCenter);
+  const displayed = batonPassAtAge(state.age - 1, state.config.attacker.geometry.animationCenter);
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...current,
+    displayedBgPaletteY: displayed.bgPaletteY,
+    displayedBattlerPaletteY: displayed.battlerPaletteY,
+    displayedPokeball: displayed.pokeball,
+    displayedAttackerMatrix: displayed.attackerMatrix,
+    displayedAttackerInvisible: displayed.attackerInvisible,
+  };
+}
+
+/** Role Play keeps source RAM truth separate from palette/OAM scanout latches. */
+export function sceneOnRolePlayView(
+  state: SceneOnMovePresentationState<SceneOnRolePlayConfig>,
+): SceneOnRolePlayView {
+  if (state.config.move !== "ROLE_PLAY") {
+    throw new Error(`expected ROLE_PLAY presentation, got ${state.config.move}`);
+  }
+  const center = state.config.attacker.geometry.battlePositionCenter;
+  const current = rolePlayAtAge(state.age, state.config.attacker.geometry.side, center);
+  const paletteDisplay = rolePlayAtAge(state.age - 1, state.config.attacker.geometry.side, center);
+  const oamDisplay = rolePlayAtAge(state.age - 2, state.config.attacker.geometry.side, center);
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...current,
+    displayedTargetWhiteCoefficient: paletteDisplay.targetWhiteCoefficient,
+    displayedBgBlackCoefficient: paletteDisplay.bgBlackCoefficient,
+    displayedSilhouette: oamDisplay.silhouette,
   };
 }
 

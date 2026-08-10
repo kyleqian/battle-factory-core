@@ -38,7 +38,7 @@ describe("MOVE_KARATE_CHOP bilateral Scene-ON evidence checkpoint", () => {
       evidenceSha256: expected.evidence,
       rawRgbSha256: expected.raw,
       changeMapSha256: expected.map,
-      acceptance: { status: "unsupported", evidenceMatching: 49, framebufferMatching: 0 },
+      acceptance: { status: "exact", componentMatching: 49, framebufferMatching: 49 },
     });
     expect(createHash("sha256").update(readFileSync(fixture.changeMap)).digest("hex")).toBe(expected.map);
     expect(scenario).toMatchObject({ profile: "battle-scene-on", level: 50, challengeNum: 1 });
@@ -58,5 +58,24 @@ describe("MOVE_KARATE_CHOP bilateral Scene-ON evidence checkpoint", () => {
       "hardwareMatrices", "hardwarePalette", "SE_M_DOUBLE_TEAM",
       "SE_M_COMET_PUNCH", "player", "opponent", "not script_active",
     ]) expect(probe).toContain(pin);
+  });
+
+  it("keeps the portable production proof and source-age compositor load-bearing", () => {
+    const portable = readFileSync("tools/compare/karateChopPortable.ts", "utf8");
+    for (const pin of [
+      "tools/run-mgba-probe.py", "frame-changemap.py", "karateChopAtAge",
+      "sceneOnKarateChopView", "priorHardwareMatches", "priorHardwarePaletteMatches",
+      "hardwareOam", "hardwareMatrices", "hardwarePalette", "target-pan audio",
+      "framebufferDiff(render(engine), rgb)", "fresh-run receipts",
+    ]) expect(portable).toContain(pin);
+    const scene = readFileSync("src/engine/battleScene.ts", "utf8");
+    const drawCase = scene.slice(
+      scene.indexOf('if (state.config.move === "KARATE_CHOP")'),
+      scene.indexOf('if (state.config.move === "STOMP")'),
+    );
+    expect(drawCase).toContain("age: karateState.age - 1");
+    expect(drawCase).toContain("subTileset(battleAnimHandsAndFeet.tileset, 12, 4)");
+    expect(drawCase).toContain("drawSpriteSheetAffineStretchBlendedOverFb");
+    expect(drawCase).not.toMatch(/sourceWindow|startFrame|absolute|sha256|\.rgb/);
   });
 });

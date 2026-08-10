@@ -1,0 +1,8 @@
+{
+  "schema":"baton-pass-portable-evidence/v1","oracleProfile":"battle-scene-on","move":"BATON_PASS","orientation":"player-back",
+  "scenario":"tools/battle-lab/mechanic-baton-pass-player-aipom-opponent-onix.json","probe":"tools/compare/poisonFangProbe.py","probeMoveId":226,
+  "attacker":{"species":"AIPOM","geometry":{"side":"player","spriteCorner":{"x":40,"y":57},"animationCenter":{"x":72,"y":97},"battlePositionCenter":{"x":72,"y":80}}},
+  "target":{"species":"ONIX","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":10},"animationCenter":{"x":176,"y":42},"battlePositionCenter":{"x":176,"y":40}}},
+  "fieldProfile":{"playerHp":148,"playerMaxHp":148,"opponentHp":117,"opponentMaxHp":117,"playerGender":"male","opponentGender":"male"},
+  "sourceWindow":{"startFrame":69,"endFrame":121,"frameCount":53},"evidenceSha256":"6894725b4667f5be198af2bbb043f319194c9a7bf218fd24d6002d24778fee52","rawRgbSha256":"9a4824539e43ac80e53d53015ac571034a4d0a28ceb7a1b1311ebe6b11d878ec","changeMap":"tools/compare/evidence/baton-pass-changemap-player.txt","changeMapSha256":"1b4209495639a0501aeca71bde7b132c659c42ae04f7a332417b3d13c908f184","acceptance":{"status":"exact","componentMatching":53,"framebufferMatching":53}
+}

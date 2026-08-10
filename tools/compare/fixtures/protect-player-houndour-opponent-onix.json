@@ -1,0 +1,14 @@
+{
+  "schema":"protect-portable-evidence/v1","oracleProfile":"battle-scene-on",
+  "scenario":"tools/battle-lab/mechanic-protect-player-houndour-opponent-onix.json","probe":"tools/compare/barrierProbe.py",
+  "move":"PROTECT","moveId":182,"orientation":"player-back",
+  "sourceWindow":{"startFrame":68,"endFrame":190,"frameCount":123,"spriteFrame":75},
+  "sourceBounds":{"start":"0x082cb3b4","endExclusive":"0x082cb3d2"},
+  "probeJsonSha256":"e2769d1649763ff2c6732f51ac2e84833513b8918653d25381e47b911c2b78a6",
+  "rawRgbSha256":"a1d645924121c1aaffea6fdae8d636bc05a6ade0d38c0f0cc92ff6d9b54fb3f6",
+  "changeMap":"tools/compare/evidence/protect-changemap-player.txt","changeMapSha256":"7bea1a4bba4b42491f08397df4d97657f4d512ff1949a33c9d4f7f5d45633105",
+  "attacker":{"species":"HOUNDOUR","geometry":{"side":"player","spriteCorner":{"x":40,"y":60},"animationCenter":{"x":72,"y":92},"battlePositionCenter":{"x":72,"y":80}}},
+  "target":{"species":"ONIX","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":10},"animationCenter":{"x":176,"y":42},"battlePositionCenter":{"x":176,"y":40}}},
+  "allocatorProfile":{"protect":3},
+  "fieldProfile":{"playerHp":138,"playerMaxHp":138,"opponentHp":117,"opponentMaxHp":117,"playerGender":"male","opponentGender":"male"}
+}

@@ -1,0 +1,32 @@
+{
+  "schema": "role-play-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_ROLE_PLAY",
+  "moveId": 272,
+  "playerBack": {
+    "scenario": "tools/battle-lab/mechanic-role-play-player-kadabra-opponent-onix.json",
+    "freshRuns": [
+      ["56ff647b377f9795b4d26afc9b7c1b1146da97c2e1afa6ca1e16b64ac8c2a59e", "12af0bae0afea2ef0edf3d73fe63b9be638da6668f9157ea49a581a536fddd90"],
+      ["56ff647b377f9795b4d26afc9b7c1b1146da97c2e1afa6ca1e16b64ac8c2a59e", "12af0bae0afea2ef0edf3d73fe63b9be638da6668f9157ea49a581a536fddd90"]
+    ],
+    "initial": {"kadabraAbility": 28, "onixAbility": 69},
+    "final": {"kadabraAbility": 69, "kadabraPp": [9, 10, 10, 10]},
+    "targetSpriteIdentity": {"species": 95, "personality": 1793700000, "otId": 416049562, "art": "back", "xOffset": -20}
+  },
+  "opponentFront": {
+    "scenario": "tools/battle-lab/mechanic-role-play-opponent-kadabra-player-onix.json",
+    "freshRuns": [
+      ["9862d52921314f1581c3f5b1e33644e76172def38624e969a5d668e6cb90138a", "9862d52921314f1581c3f5b1e33644e76172def38624e969a5d668e6cb90138a"],
+      ["9862d52921314f1581c3f5b1e33644e76172def38624e969a5d668e6cb90138a", "9862d52921314f1581c3f5b1e33644e76172def38624e969a5d668e6cb90138a"]
+    ],
+    "initial": {"kadabraAbility": 28, "onixAbility": 69},
+    "final": {"kadabraAbility": 69, "kadabraPp": [10, 10, 10, 9]},
+    "targetSpriteIdentity": {"species": 95, "personality": 2349019075, "otId": 416049562, "art": "front", "xOffset": 20}
+  },
+  "acceptance": {
+    "status": "unsupported",
+    "denseWindowCaptured": false,
+    "productionFramebufferCompared": false,
+    "note": "Endpoint hashes prove deterministic legal successful staging only. They do not prove any animation frame, hardware latch, raw-RGB window, or production compositor equality."
+  }
+}

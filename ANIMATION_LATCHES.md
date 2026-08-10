@@ -49,6 +49,7 @@ cites the move whose ledger entry holds the full evidence.
 | `AnimTask_RotateMonSpriteToSide` | RAM+2 | DOUBLE_EDGE pin round (2026-08-08), both orientations, restore-phase isolated |
 | Freshly allocated OAM **affine matrix** | needs TWO displays to reach hardware; removal is a plain OAM edit at ONE (dual-lag class: paint age−2, remove age−1) | MINIMIZE clones (2026-08-07); reused by TORMENT bubbles |
 | Scale/wobble affine matrix on a live sprite | RAM+2 | GROWTH-derived, FUTURE_SIGHT (matrix age−2); TORMENT wobble |
+| Direct live-battler `SetSpriteRotScale` from a sprite callback, with `ResetSpriteRotScale` + invisible teardown | matrix RAM+1; invisible sprite omitted from hardware OAM at RAM+1 while its matrix transfers independently | BATON_PASS, both orientations (2026-08-09) |
 | OAM `objMode`/`affineMode` flags | RAM+1 — flips one tick before its own matrix reaches neutral | FUTURE_SIGHT rung 11 |
 | Send-out intro (front) | one-display latch, alignment A = −1 (`max(0, frame − t_move − 1)`) | rung-3 FRONT dispatcher (2026-08-04) |
 | Send-out intro (back) | TWO displays behind the dense index | rung-3 BACK dispatcher (2026-08-04) |

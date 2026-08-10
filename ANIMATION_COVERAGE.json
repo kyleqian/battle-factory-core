@@ -282,6 +282,34 @@
    ]
   },
   {
+   "move": "MOVE_BATON_PASS",
+   "status": "exact",
+   "covered": [
+    "complete legal challenge-0 Level-50 parties stage the lowest carrier, set-142 AIPOM, against ONIX in both orientations with three complete legal records per side and only the active AIPOM move slots constrained to BATON_PASS",
+    "the complete pointer-bounded Move_BATON_PASS..Move_PERISH_SONG source body plus first inactive cleanup passes 53/53 source reducer, typed seam, software sprite/task, hardware OAM/matrix/palette/tag/register/audio, immutable-state, raw-RGB, and production-framebuffer checks in both orientations twice fresh",
+    "the pure source-age reducer and narrow compositor port ANIM_TAG_POKEBALL, gBatonPassPokeballSpriteTemplate / AnimBatonPassPokeball, both fall-through affine phases, attacker reset/hide, geometry-dependent Pokeball ascent and teardown, and the existing blend_color_cycle command's exact alternating BG/battler palette transfer",
+    "player-back frames 69..121 reproduce evidence/raw/map receipts 6894725b4667f5be198af2bbb043f319194c9a7bf218fd24d6002d24778fee52 / 9a4824539e43ac80e53d53015ac571034a4d0a28ceb7a1b1311ebe6b11d878ec / 1b4209495639a0501aeca71bde7b132c659c42ae04f7a332417b3d13c908f184; opponent-front frames 73..125 reproduce 84a2ebae7906929927c359575fb767a254746728a2e0bfa50617d68a200e9feb / e6723a9529331264a80e493f928c6619307341b7d3cdfe58b2241daaadd2e3e5 / 8fe18196c98f80f68a744afec9266da98293104f226773146c08187dba2d7e68",
+    "deterministic extraction pins the literal Pokeball sheet and palette byte-for-byte while reusing source-identical existing AIPOM/ONIX art; MOVE_GROWTH remains bilateral 63/63 exact twice fresh after the shared live-affine/blend compositor change, and no sibling coverage is promoted"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-baton-pass-player-aipom-opponent-onix.json",
+    "tools/battle-lab/mechanic-baton-pass-opponent-aipom-player-onix.json",
+    "tools/compare/fixtures/baton-pass-player-aipom-opponent-onix.json",
+    "tools/compare/fixtures/baton-pass-opponent-aipom-player-onix.json",
+    "tools/compare/poisonFangProbe.py",
+    "tools/compare/batonPassPortable.ts",
+    "tools/compare/batonPassSourceAudit.ts",
+    "tools/compare/extractBatonPassAssets.ts",
+    "tools/compare/evidence/baton-pass-changemap-player.txt",
+    "tools/compare/evidence/baton-pass-changemap-opponent.txt",
+    "src/animation/assets/baton-pass.json",
+    "src/animation/batonPass.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/batonPass.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_BARRIER",
    "status": "exact",
    "covered": [
@@ -1868,6 +1896,36 @@
    ]
   },
   {
+   "move": "MOVE_KARATE_CHOP",
+   "status": "exact",
+   "covered": [
+    "complete legal challenge-1 Level-50 set-232 FRONTIER_MON_PRIMEAPE_1 versus ONIX Scene-ON parties pass the pointer-bounded Move_KARATE_CHOP 0x082d20b3..0x082d2105 body through first inactive cleanup in both orientations twice fresh: player-back frames 77-125 and opponent-front frames 81-129 each pass 49/49 source/component, typed-seam, hardware, raw-RGB, and production shared-framebuffer checks",
+    "player-back evidence/raw/change-map digests are 757e70d97f3c2f8239def29cd10631872a65bd47f35eb306e9d97bd30a3d1c64 / 89c829e0abd01b065a9c9ac1133b4363df1fcf2127b644784565ded9de0f25c8 / 4d1eb29bba18c5d780841fb99db77198c36c59a2f85ff743c591b6bd1520e979; opponent-front digests are fb8697fbb6d098f4303f9502ddabaf52abd1ceee4ba8bc56a64b4747047a2ce3 / f7762e1e4072f6807c6392648e5590ad6a41b59ef5def77707991cfa7a7c9396 / 10e22bae0c4fb5c77a0daeba32e40dad25727165701849f7423b0611ec67e7bf",
+    "the pure source-relative reducer and narrow typed Scene-ON seam port HANDS_AND_FEET animation 3, its side-relative ten-callback linear travel, animation-2 affine ObjBlend IMPACT, target AnimTask_ShakeMon(4,0,6,1), monbg, 12:8 alpha, target-panned DOUBLE_TEAM and COMET_PUNCH audio, tagged resource lifetimes, waits, and first inactive cleanup",
+    "the compositor independently fits the move's own bilateral change maps: plain hand OAM and ShakeMon displacement scan out from the preceding source age; fresh affine IMPACT software age 22 remains absent with a neutral hardware matrix, scanout ages 23-32 carry ObjBlend/affine OAM plus matrix 372 including one stale teardown display, and age 33 clears both; ONIX's opponent-front idle x2 survives through the hit handoff. These measurements confirm ANIMATION_LATCHES.md's dual-lag allocation/removal class and require no new rule",
+    "the production draw path reuses source-identical PRIMEAPE front/back art from BULK_UP plus established HANDS_AND_FEET, IMPACT, ONIX, healthbox, window, and field assets; karateChopPortable.ts proves software sprites/tasks, hardware OAM/matrices/palettes, tags/registers/audio, immutable battle fields, raw RGB, byte-identical regenerated change maps, and every shared framebuffer",
+    "MOVE_LOW_KICK remains bilateral 33/33 component and framebuffer exact twice fresh, and MOVE_MEGA_PUNCH remains bilateral 160/160 twice fresh after the shared draw-path edit; neither sibling coverage changes",
+    "no damage, critical-hit/accuracy/RNG, turn order, controller/round/facility state, animation-boundary list, unsupported barrier, or canonical-recording allowlist changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-karate-chop-player-primeape-opponent-onix.json",
+    "tools/battle-lab/mechanic-karate-chop-opponent-primeape-player-onix.json",
+    "tools/compare/fixtures/karate-chop-player-primeape-opponent-onix.json",
+    "tools/compare/fixtures/karate-chop-opponent-primeape-player-onix.json",
+    "tools/compare/evidence/karate-chop-changemap-player.txt",
+    "tools/compare/evidence/karate-chop-changemap-opponent.txt",
+    "tools/compare/poisonFangProbe.py",
+    "tools/compare/karateChopPortable.ts",
+    "tools/compare/karateChopSourceAudit.ts",
+    "src/animation/karateChop.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/karateChop.test.ts",
+    "tests/animation/karateChopEvidence.test.ts",
+    "tests/animation/karateChopSourceCheckpoint.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_KNOCK_OFF",
    "status": "exact",
    "covered": [
@@ -1994,6 +2052,35 @@
     "src/animation/sceneOnPresentation.ts",
     "src/engine/battleScene.ts",
     "tests/animation/lowKick.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_MAGIC_COAT",
+   "status": "exact",
+   "covered": [
+    "source and generated Level-50 inventory audits prove move id 277 and challenge-0 set 121 FRONTIER_MON_SPOINK as the lowest legal carrier; the pointer interval is ROM-inclusive 0x082d6c5c through 0x082d6c79, represented by the odd Thumb/data symbol 0x082d6c5d and exclusive Move_WATER_PULSE symbol 0x082d6c7a",
+    "complete legal three-Pokemon mechanicLab parties preserve the real set-156 ONIX moves and constrain only the active SPOINK slots to MAGIC_COAT; the complete first-in-bounds through first-inactive cleanup windows pass twice fresh at 76/76 source/component, typed-seam, software/hardware OAM and matrices, palette/tag/register, attacker-panned SE_M_BARRIER, immutable battle state, raw RGB, and production framebuffer frames in both orientations",
+    "player-back frames 69-144 reproduce probe/raw/change-map c71bd1e2db4fc5833a5c1d7144d5b29a8cf6a5d54e4694b2da2b86801151a377 / 6b1734912efa3c045040b3919d464b1fb4159994ba8ad0669a6c30ee4c3cd0a9 / a2f6f128af566f88024893899b1956f622457da21b51a00f7715f816bca3a43c; opponent-front frames 73-148 reproduce 340502f8ee286c92a655359f17e9782e6496cb070f4f73b1690db802ce791acd / 378e362c97d254d04665a6f6079e9fee512d53bc0bcfcb61a8746ef39dce842b / dd3063a359eeeb2f498742ced8c79cf8717cca6a4f771c1371cfc6676640b254",
+    "the pure source-age reducer reuses only source-identical AnimDefensiveWall timing and geometry from BARRIER while preserving Magic Coat's independent ORANGE_LIGHT_WALL tag/palette, gMagicCoatWallSpriteTemplate, 40-pixel attacker-relative offset, no sparkle, waitplaysewithpan timing, setalpha/blendoff tail, opponent BG-copy/hide/reset lifecycle, and inactive age 75",
+    "deterministic Spoink front/back and orange-wall extraction regenerates byte-for-byte; the typed seam and narrow compositor carry resolved geometry, allocator slot, HP, and gender only and own no Magic Coat battle flag, bounce target, RNG, damage, status, turn, controller, round, or facility state",
+    "the strengthened shared defensive-wall verifier leaves BARRIER bilateral 76/76 exact twice fresh; the mandatory MIRROR_COAT control passes bilateral 75/75 twice fresh with unchanged raw RGB after a metadata-only full-probe receipt refresh; no sibling is promoted and no latch, boundary, barrier, or canonical-import pin changes"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-magic-coat-player-spoink-opponent-onix.json",
+    "tools/battle-lab/mechanic-magic-coat-opponent-spoink-player-onix.json",
+    "tools/compare/fixtures/magic-coat-player-spoink-opponent-onix.json",
+    "tools/compare/fixtures/magic-coat-opponent-spoink-player-onix.json",
+    "tools/compare/evidence/magic-coat-changemap-player.txt",
+    "tools/compare/evidence/magic-coat-changemap-opponent.txt",
+    "tools/compare/barrierProbe.py",
+    "tools/compare/barrierPortable.ts",
+    "tools/compare/magicCoatSourceAudit.ts",
+    "tools/compare/extractMagicCoatAssets.ts",
+    "src/animation/assets/magic-coat.json",
+    "src/animation/barrier.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/magicCoat.test.ts"
    ]
   },
   {
@@ -2153,7 +2240,7 @@
    "covered": [
     "the source/inventory/controller audit proves challenge-0 set 151 FRONTIER_MON_CORSOLA is the lowest legal Level-50 carrier (species 222, Mirror Coat 243, Impish, HP+Defense+SpDefense, Sitrus Berry) and finds one reachable animation body: nonzero opposing special damage reaches Move_MIRROR_COAT, while the failure route selects no move-animation body",
     "complete legal three-Pokemon Battle Scene ON parties constrain Exeggcute to real Confusion and Corsola to real Mirror Coat; Mirror Coat's source -5 priority populates gProtectStructs before Cmd_mirrorcoatdamagecalculator doubles 26 to 52 player-back and 31 to 62 opponent-front, without injecting transient damage or counter state",
-    "fresh dense probes cover first active gMirrorCoatWallSpriteTemplate creation through the first inactive cleanup twice reproducibly in both orientations: player-back frames 349-423 pass 75/75 source/component/hardware/raw-RGB/production-framebuffer checks with evidence 1ea5591d85dc0e4926b8e763584f405ed4ec72d43c676ad06fc551cedb44aa92 and raw RGB c8a70485e2d13ae522c31760ee7e6ecb24bb464eb567427855448389ab1128a7; opponent-front frames 355-429 pass 75/75 with evidence 3328d443c81b35a5305590705e7448d009aa0111a326b318c08b420a29939a7d and raw RGB 0fcba1ad43f479f613f84243bca184e10f4545e7e6566558327c081444b73b5b",
+    "fresh dense probes cover first active gMirrorCoatWallSpriteTemplate creation through the first inactive cleanup twice reproducibly in both orientations: player-back frames 349-423 pass 75/75 source/component/hardware/raw-RGB/production-framebuffer checks with evidence ebc190bd54157d237ac2784fa409db158037823d039497059c9e2d8042a47ced and raw RGB c8a70485e2d13ae522c31760ee7e6ecb24bb464eb567427855448389ab1128a7; opponent-front frames 355-429 pass 75/75 with evidence 5decc45188f5d85341e4186755197bf4c0848eaeb57d74aa77a5db67edaa2f6a and raw RGB 0fcba1ad43f479f613f84243bca184e10f4545e7e6566558327c081444b73b5b",
     "the reducer and typed seam reuse only source-identical AnimDefensiveWall and all six SpecialScreenSparkle/AnimWallSparkle lifecycles; Mirror Coat preserves RED_LIGHT_WALL/gMirrorCoatWallSpriteTemplate, wall-before-audio delay-10 plus immediate attacker-panned SE_M_REFLECT, no Light Screen sound task, palette rotation, opponent BG transfer/visibility, OAM/VBlank latches, blend/register tail, and complete cleanup",
     "source-derived Corsola front/back and shared wall tiles with the red palette regenerate byte-for-byte; the production compositor carries only resolved Corsola/Exeggcute geometry, allocator slots, HP, and gender, and owns no counter/damage calculation, accuracy, RNG, controller, turn order/advancement, or facility state",
     "MOVE_LIGHT_SCREEN independently batch-reruns 115/115 player-back and 119/119 opponent-front twice fresh with unchanged evidence/raw hashes and remains exact",
@@ -2423,6 +2510,36 @@
    ]
   },
   {
+   "move": "MOVE_PROTECT",
+   "status": "exact",
+   "covered": [
+    "source and generated inventory audits prove move id 182, the real even 0x082cb3b4..0x082cb3d1 / 0x1e-byte body behind odd nm symbol Move_PROTECT 0x082cb3b5, and challenge-0 set 119 FRONTIER_MON_HOUNDOUR as the lowest Level-50 carrier",
+    "complete legal three-Pokemon Scene-ON parties preserve set-156 ONIX and every bench while constraining only active HOUNDOUR to PROTECT; both complete first-in-bounds through first-inactive-cleanup windows pass twice fresh at 123/123 source/component, typed-seam, software/hardware OAM, palette/tag/register/audio, immutable battle-state, raw-RGB, and production-framebuffer frames",
+    "player-back frames 68-190 reproduce probe/raw/change-map e2769d1649763ff2c6732f51ac2e84833513b8918653d25381e47b911c2b78a6 / a1d645924121c1aaffea6fdae8d636bc05a6ade0d38c0f0cc92ff6d9b54fb3f6 / 7bea1a4bba4b42491f08397df4d97657f4d512ff1949a33c9d4f7f5d45633105; opponent-front frames 72-194 reproduce cc2bc15a937eef4e32948f3e99c24a1a49003c87bdb5f1ae48992939c7743721 / e483782163b2d05636347b75acebc62d68ed902a270223459502b9931bfd9080 / dcf82d6b347db6f66fa053320dcc00303096488238a0a9473c36d667e32c3a0d",
+    "the pure source-age reducer ports loadsprite/monbg/split/clear cadence, SE_M_REFLECT wait-and-pan timing, side-dependent priority/subpriority, 96/256 leftward drift, 90-tick duration, two-tick seven-color palette rotation, 16-to-6 fade/hold/6-to-16 teardown, attacker BG-copy visibility, OBJ blend registers, tag lifetime, and first inactive cleanup",
+    "deterministic Houndour front/back and protect.png extraction regenerates byte-for-byte; the typed seam and narrow compositor carry only resolved geometry, allocator slot, HP, and gender and own no Protect success flag, battle RNG, damage/status, turn, controller, round, or facility state",
+    "BARRIER remains bilateral 76/76 exact twice fresh as the closest existing 64x64 OBJ-blend, palette/register, monbg control; MOVE_DETECT remains independently exact and was not used to promote or alter sibling coverage",
+    "no new latch, animation-boundary list, unsupported barrier, canonical import, gameplay outcome, or absolute-tick/frame lookup changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-protect-player-houndour-opponent-onix.json",
+    "tools/battle-lab/mechanic-protect-opponent-houndour-player-onix.json",
+    "tools/compare/fixtures/protect-player-houndour-opponent-onix.json",
+    "tools/compare/fixtures/protect-opponent-houndour-player-onix.json",
+    "tools/compare/evidence/protect-changemap-player.txt",
+    "tools/compare/evidence/protect-changemap-opponent.txt",
+    "tools/compare/barrierProbe.py",
+    "tools/compare/protectPortable.ts",
+    "tools/compare/protectSourceAudit.ts",
+    "tools/compare/extractProtectAssets.ts",
+    "src/animation/assets/protect.json",
+    "src/animation/protect.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/protect.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_PSYCHIC",
    "status": "exact",
    "covered": [
@@ -2662,6 +2779,38 @@
     "tests/animation/blueOrbSourceAudit.test.ts",
     "tests/animation/reversalAssets.test.ts",
     "tests/animation/reversal.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_ROLE_PLAY",
+   "status": "exact",
+   "covered": [
+    "the exact even source interval 0x082d4fae..0x082d500a and complete legal set-169 KADABRA/set-156 ONIX parties produce 147-frame pointer-bounded Scene-ON windows through first inactive cleanup in both orientations",
+    "twice-fresh player-back frames 70-216 pass 147/147 component, typed-seam, OAM/hardware, raw-RGB, and production-framebuffer checks with probe/raw/map digests 612259ab9f25f1968055ccdfe72244c65905efdbc9c7d58b87a6a3fde72a6fb0 / 58bdc5f4433b00ace18198cbe2989aa0a0791843de7e1bfd3a64b3f47e32f378 / 2e0cb80c3a9ed21b9d36ac06616b564df52102dd276ff911dbb4db2924972f69",
+    "twice-fresh opponent-front frames 74-220 pass 147/147 component, typed-seam, OAM/hardware, raw-RGB, and production-framebuffer checks with probe/raw/map digests 5f34b6e43bdc98d6db842543549ee08c62a2d806ca19ac08dfb84c8d254bc93f / 137ab8f7a647e9c6ee366a022898d9bd6eabda768e85f6c8ae6b1ed52f9bd76b / f5b413acfad330e1484715a5b1d61b3e7efb292e7580580be9acbe7846fc6bb6",
+    "the pure source-age reducer ports attacker monbg, target white 0-to-16-to-0 and BG black 0-to-10-to-0 palettes, TRI_ATTACK plus delayed DETECT identity/pan/wait, the additional target-species sprite and resource lifetime, 0:16-to-10:6 alpha, nine affine-double callbacks, reset/free, blend teardown, and cleanup",
+    "the typed presentation seam receives only resolved KADABRA/ONIX geometry and immutable field values; the compositor uses deterministic existing source-extracted KADABRA and ONIX sheets, including the source-required back silhouette beside a player attacker and front silhouette beside an opponent attacker",
+    "the portable directly pins source attr0/attr1/attr2 in software OAM slot 9, software lifetime 54-92, scanout hardware lifetime 55-93, every-frame 128-entry OAM/matrix transfer, palette-tag slot 7 and tile-tag slot 6 lifetime 54-91, and the fresh affine matrix's two-display hardware lag; no new or contradictory latch class is introduced",
+    "MOVE_MEGA_PUNCH remains exact at 160/160 bilateral component/framebuffer frames twice fresh after Role Play; no shared helper changed, so no additional affine sibling control is required",
+    "ability copying, success/failure, damage, status, RNG, controller, turn order, round/facility state, boundary lists, unsupported barriers, and MOVE_REFRESH remain outside this presentation acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-role-play-player-kadabra-opponent-onix.json",
+    "tools/battle-lab/mechanic-role-play-opponent-kadabra-player-onix.json",
+    "tools/compare/fixtures/role-play-player-kadabra-opponent-onix.json",
+    "tools/compare/fixtures/role-play-opponent-kadabra-player-onix.json",
+    "tools/compare/evidence/role-play-changemap-player.txt",
+    "tools/compare/evidence/role-play-changemap-opponent.txt",
+    "tools/compare/rolePlayProbe.py",
+    "tools/compare/rolePlayPortable.ts",
+    "tools/compare/rolePlayOamEvidence.ts",
+    "tools/compare/rolePlaySourceAudit.ts",
+    "src/animation/rolePlay.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/rolePlay.test.ts",
+    "tests/animation/rolePlayEvidenceCheckpoint.test.ts",
+    "tests/animation/rolePlaySourceCheckpoint.test.ts"
    ]
   },
   {

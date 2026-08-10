@@ -1,0 +1,14 @@
+{
+  "schema":"magic-coat-portable-evidence/v1","oracleProfile":"battle-scene-on",
+  "scenario":"tools/battle-lab/mechanic-magic-coat-player-spoink-opponent-onix.json","probe":"tools/compare/barrierProbe.py",
+  "move":"MAGIC_COAT","moveId":277,"orientation":"player-back",
+  "sourceWindow":{"startFrame":69,"endFrame":144,"frameCount":76,"wallFrame":73},
+  "sourceBounds":{"start":"0x082d6c5d","endExclusive":"0x082d6c7a"},
+  "probeJsonSha256":"c71bd1e2db4fc5833a5c1d7144d5b29a8cf6a5d54e4694b2da2b86801151a377",
+  "rawRgbSha256":"6b1734912efa3c045040b3919d464b1fb4159994ba8ad0669a6c30ee4c3cd0a9",
+  "changeMap":"tools/compare/evidence/magic-coat-changemap-player.txt","changeMapSha256":"a2f6f128af566f88024893899b1956f622457da21b51a00f7715f816bca3a43c",
+  "attacker":{"species":"SPOINK","geometry":{"side":"player","spriteCorner":{"x":40,"y":59},"animationCenter":{"x":72,"y":91},"battlePositionCenter":{"x":72,"y":80}}},
+  "target":{"species":"ONIX","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":10},"animationCenter":{"x":176,"y":42},"battlePositionCenter":{"x":176,"y":40}}},
+  "allocatorProfile":{"wall":3},
+  "fieldProfile":{"playerHp":153,"playerMaxHp":153,"opponentHp":117,"opponentMaxHp":117,"playerGender":"male","opponentGender":"male"}
+}

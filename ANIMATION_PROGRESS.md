@@ -1,5 +1,53 @@
 # Animation coverage
 
+## MOVE_ROLE_PLAY exact — bilateral 147/147 target-silhouette promotion (2026-08-10 worker)
+
+- **State:** Coverage advances **151→152/276 exact**, 0 partial, 0 staged, **125→124 unsupported**. Role Play alone moves; boundary, barrier, and latch pins are unchanged.
+- **Did:** Added complete legal set-169 KADABRA/set-156 ONIX bilateral stages, a real-even-pointer-bounded Scene-ON probe for `0x082d4fae..0x082d500a`, 147-frame dense receipts/change maps, pure reducer, typed seam, portable verifier, and production compositor. The port covers monbg, target-white and BG-black ramps, TRI_ATTACK plus delayed DETECT audio, the target-species additional-mon resource/OAM/alpha/affine lifecycle, blend teardown, and cleanup. The portable receipt now directly verifies the additional ONIX's software OAM entry and scanout transfer/teardown, fresh matrix lag, and both resource tags.
+- **Verified:** Twice fresh, player-back frames **70..216** and opponent-front **74..220** each pass **147/147 component + typed-seam + OAM/hardware + raw-RGB + framebuffer**. Player probe/raw/map: `612259ab…` / `58bdc5f4…` / `2e0cb80c…`; opponent: `5f34b6e4…` / `137ab8f7…` / `f5b413ac…`. MEGA_PUNCH remains bilateral **160/160** twice fresh.
+- **Next:** Supervisor selects the next independent move; do not promote REFRESH or another sibling from shared commands.
+- **Notes:** The additional ONIX is back art at player x−20 and front art at opponent x+20; its affine matrix follows the established fresh-allocation two-display lag, so `ANIMATION_LATCHES.md` stays unchanged. No ability outcome, damage/status/RNG, controller/facility state, boundary/barrier, sibling, or absolute-tick branch changed.
+
+## MOVE_ROLE_PLAY source + bilateral legal-staging checkpoint — remains unsupported (2026-08-10 worker)
+
+- **State:** Coverage remains **151/276 exact**, 0 partial, 0 staged, **125 unsupported**. Role Play has no reducer, typed seam, compositor, dense hardware/raw-RGB evidence, or promotion.
+- **Did:** Pinned the exact even ROM interval `0x082d4fae..0x082d500a` (0x5c bytes), all 13 commands, the five-component generated graph, shared exact MEGA_PUNCH intersection, `AnimTask_RolePlaySilhouette` and additional-mon source lifecycles, success-route boundary, and sole/lowest Level-50 carrier set 169 KADABRA. Added complete legal bilateral set-169 KADABRA/set-156 ONIX Scene-ON parties; only active KADABRA is constrained to ROLE_PLAY and both benches plus ONIX's legal moves remain intact.
+- **Verified:** Both orientations run twice fresh with byte-stable endpoint hashes. KADABRA starts Synchronize (28) and finishes Rock Head (69), proving legal successful staging without giving presentation ownership of ability-copy semantics. The receipt pins source-derived target personality/OT identity, back/front art choice, and ±20 offset hypotheses but explicitly records that endpoint staging is not dense acceptance. Focused source/staging + animation-boundary tests pass.
+- **Next:** Build a pointer-bounded dense probe from first in-bounds script frame through first inactive cleanup; capture script/tasks, additional-mon software/hardware OAM/matrix/palette/resource lifetime, monbg, both palette tasks, registers/audio, immutable state, raw RGB, and change maps twice fresh per orientation. Then implement the pure reducer, typed seam, and compositor; rerun MEGA_PUNCH and, if an affine/additional-mon helper changes, MINIMIZE or BATON_PASS. Promote only after complete bilateral equality.
+- **Notes:** `ANIMATION_LATCHES.md` is unchanged: endpoint staging cannot establish the additional-mon sprite's display latch. No engine, boundary, gameplay/controller/facility state, canonical recording, unsupported barrier, REFRESH, sibling coverage, or absolute-tick branch changed.
+
+## MOVE_PROTECT exact — bilateral 123/123 sliding OBJ-blend shield promotion (2026-08-10 worker)
+
+- **State:** Coverage advances **150→151/276 exact**, 0 partial, 0 staged, **126→125 unsupported**. Protect alone moves; boundary, unsupported-barrier, and latch pins are unchanged.
+- **Did:** Added complete legal set-119 HOUNDOUR/set-156 ONIX bilateral stages, a real-even-pointer-bounded Scene-ON probe, receipts/change maps, deterministic Houndour/PROTECT extraction, source audit, pure 123-age reducer, typed seam, portable verifier, and narrow compositor. The proof covers side priority, leftward Q8.8 drift, seven-color rotation, alpha lifecycle, attacker monbg/split/clear, audio, hardware transfers, and cleanup.
+- **Verified:** Twice fresh, player-back frames **68..190** and opponent-front **72..194** each pass **123/123 component+seam+hardware+raw-RGB+framebuffer**. Player probe/raw/map: `e2769d16…` / `a1d64592…` / `7bea1a4b…`; opponent: `cc2bc15a…` / `e4837821…` / `dcf82d6b…`. BARRIER stays bilateral **76/76** twice fresh as the isolated 64x64 OBJ-blend/palette/register/monbg control.
+- **Next:** Supervisor selects the next independent move; do not promote Detect or another sibling from shared components.
+- **Notes:** The ROM body is the even interval `0x082cb3b4..0x082cb3d1`; `nm` exposes odd `Move_PROTECT` `0x082cb3b5`. No Protect outcome, damage/status/RNG, turn/controller/round/facility state, canonical import, boundary widening, barrier, or absolute-tick branch changed.
+
+## MOVE_MAGIC_COAT exact — bilateral 76/76 orange defensive-wall promotion (2026-08-10 worker)
+
+- **State:** Coverage advances **149→150/276 exact**, 0 partial, 0 staged, **127→126 unsupported**. Magic Coat alone moves; boundary, unsupported-barrier, and latch pins are unchanged.
+- **Did:** Added complete legal set-121 SPOINK/ONIX bilateral stages that preserve ONIX's real moves, a pointer-bounded dense Scene-ON probe, receipts/change maps, deterministic Spoink/orange-wall extraction, a pure parameterized defensive-wall reducer, typed seam, and narrow compositor. Magic Coat independently pins its orange tag/palette, 40px offset, BARRIER wait audio, no-sparkle body, BG-copy/hide/reset, alpha/palette rotation, hardware transfer, and cleanup.
+- **Verified:** Twice fresh, player-back frames **69..144** and opponent-front **73..148** each pass **76/76 component+seam+hardware+raw-RGB+framebuffer**. Player probe/raw/map: `c71bd1e2…` / `6b173491…` / `a2f6f128…`; opponent: `340502f8…` / `378e362c…` / `dd3063a3…`. BARRIER stays bilateral **76/76** twice fresh. Mandatory MIRROR_COAT stays bilateral **75/75** twice fresh with unchanged raw RGB; its full-probe receipt was refreshed to current stable metadata.
+- **Next:** Supervisor selects the next independent move; do not promote Protect or another defensive-wall sibling from shared code.
+- **Notes:** The ROM-inclusive body is `0x082d6c5c..0x082d6c79`; `nm` exposes the odd data symbol `0x082d6c5d` and exclusive `Move_WATER_PULSE` at `0x082d6c7a`. No new latch was observed. No gameplay flag/bounce target, damage/status/RNG, turn/controller/round/facility state, canonical import, boundary widening, barrier, or absolute-tick branch changed.
+
+## MOVE_BATON_PASS exact — bilateral 53/53 Poké Ball/blend promotion (2026-08-09 worker)
+
+- **State:** Coverage advances **148→149/276 exact**, 0 partial, 0 staged, **128→127 unsupported**. Baton Pass alone moves; boundary and unsupported-barrier pins are unchanged.
+- **Did:** Added complete legal set-142 AIPOM/ONIX bilateral stages, a pointer-bounded Scene-ON probe, immutable receipts/change maps, pure 53-age reducer, typed seam, deterministic Poké Ball extraction, and a narrow compositor for `AnimBatonPassPokeball`, live attacker affine/hide/reset, and the already-exact `blend_color_cycle` command.
+- **Verified:** Twice fresh, player-back frames **69..121** and opponent-front **73..125** each pass **53/53 source+seam+software/hardware+raw-RGB+framebuffer**. Player evidence/raw/map: `6894725b…` / `9a482453…` / `1b420949…`; opponent: `84a2ebae…` / `e6723a95…` / `8fe18196…`; maps regenerate byte-identically. GROWTH stays bilateral **63/63** twice fresh.
+- **Next:** Supervisor selects the next independent acceptance unit. Do not promote a sibling from the shared blend command.
+- **Notes:** Baton Pass directly confirms plain Poké Ball OAM and palette transfer at RAM+1 and adds the distinct direct-callback live-battler matrix RAM+1/invisible-OAM-removal latch. No switching/stat transfer, RNG, turn/controller/round/facility state, canonical import, barrier, boundary widening, or absolute-tick branch changed.
+
+## MOVE_KARATE_CHOP exact — bilateral 49/49 HANDS_AND_FEET/IMPACT promotion (2026-08-09 worker)
+
+- **State:** Coverage advances **147→148/276 exact**, 0 partial, 0 staged, **129→128 unsupported**. Karate Chop alone moves; boundary and unsupported-barrier pins are unchanged.
+- **Did:** Finished the committed set-232 PRIMEAPE/ONIX reducer + typed seam with a narrow source-age compositor and portable proof. The move independently ports HANDS_AND_FEET animation 3, animation-2 affine IMPACT, target `AnimTask_ShakeMon`, monbg/12:8 alpha, audio, hardware transfer, and cleanup while reusing source-identical established art.
+- **Verified:** Twice fresh, player-back frames **77..125** and opponent-front **81..129** each pass **49/49 component/hardware/raw-RGB/framebuffer**; evidence/raw/map digests remain `757e70d9…`/`89c829e0…`/`4d1eb29b…` and `fb8697fb…`/`f7762e1e…`/`10e22bae…`. Regenerated maps are byte-identical. LOW_KICK stays bilateral **33/33** and MEGA_PUNCH **160/160**, twice fresh.
+- **Next:** Supervisor selects the next independent animation acceptance unit; do not promote Karate Chop siblings from shared HANDS_AND_FEET/IMPACT code.
+- **Notes:** Own bilateral maps confirm RAM+1 for hand OAM and ShakeMon displacement; IMPACT independently confirms the dual-lag class (software spawn hidden/neutral, following affine scanout, one stale teardown display, then clear), consistent with `ANIMATION_LATCHES.md`; no latch edit. No gameplay/damage/critical/accuracy/RNG, turn/controller/round/facility state, canonical import, or absolute-tick branch changed.
+
 ## MOVE_KARATE_CHOP reducer + typed Scene-ON seam checkpoint — coverage unchanged (2026-08-09 worker)
 
 - **State:** Coverage remains **147/276 exact**, 0 partial, 0 staged, **129 unsupported**. No production framebuffer compositor or exactness claim was added.
