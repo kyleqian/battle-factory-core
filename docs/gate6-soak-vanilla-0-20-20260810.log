@@ -1,0 +1,27 @@
+
+> pokeemerald-factory-run@0.1.0 soak
+> node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy vanilla --seeds 0:20
+
+seed    0  OK     b1 t16    8581f  1.8s  roundLost
+seed    1  OK     b1 t16   16968f  2.5s  roundLost
+seed    2  OK     b1 t16    8583f  1.6s  roundLost
+seed    3  OK     b1 t16   16891f  2.4s  roundLost
+seed    4  OK     b1 t16    8575f  1.5s  roundLost
+seed    5  OK     b1 t16   16977f  2.4s  roundLost
+seed    6  OK     b1 t16    8618f  1.5s  roundLost
+seed    7  OK     b1 t16   16901f  2.5s  roundLost
+seed    8  OK     b1 t16   16872f  2.5s  roundLost
+seed    9  OK     b1 t16   16872f  2.8s  roundLost
+seed   10  OK     b1 t16    8547f  2.1s  roundLost
+seed   11  OK     b1 t16    8528f  1.9s  roundLost
+seed   12  OK     b1 t16    8517f  1.8s  roundLost
+seed   13  OK     b1 t16    8568f  1.8s  roundLost
+seed   14  OK     b1 t16    8629f  2.0s  roundLost
+seed   15  OK     b1 t16    8542f  2.0s  roundLost
+seed   16  OK     b1 t16    8511f  2.2s  roundLost
+seed   17  OK     b1 t16    8594f  1.9s  roundLost
+seed   18  OK     b1 t16    8638f  1.7s  roundLost
+seed   19  OK     b1 t16    8616f  2.0s  roundLost
+
+=== soak summary: 20 seeds (policy vanilla) in 41.1s ===
+OK 20  CRASH 0  HANG 0
