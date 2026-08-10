@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_SPITE source/reducer + legal staging checkpoint — coverage unchanged (2026-08-10 worker)
+
+- **State:** Coverage remains **154/276 exact**, 0 partial, 0 staged; `ANIMATION_COVERAGE.json` is intentionally unchanged. `MOVE_SPITE` is not promoted and `NIGHT_SHADE` remains unsupported.
+- **Did:** Added the pure source-age `AnimTask_SpiteTargetShadow` reducer and typed Scene-ON Spite seam in commit `ba89e509`. Added complete legal Level-50 three-mon parties in both orientations using lowest carrier set **179 / HAUNTER (species 93)**, with only the active carrier constrained to SPITE, plus a pointer-bounded Scene-ON staging probe for source/tasks/sprites/OAM/registers/raw RGB.
+- **Verified:** Focused reducer/boundary tests **5/5**, typecheck, and both `bin/oracle --profile battle-scene-on lab` staging runs are green. The first Spite action has no prior target `gLastMoves`, so `Cmd_tryspiteppreduce` takes its failure route: `sBattleAnimScriptPtr` stayed out of `Move_SPITE` bounds and the staging receipt contains **0 visual-body frames** in both orientations. No component/seam/framebuffer promotion was claimed.
+- **Next:** Stage a real prior target move, then capture and measure a dense pointer-bounded Spite window through first inactive cleanup (including scanline/BG latches and change maps) before considering a compositor or promotion.
+- **Notes:** No gameplay, damage, RNG, turn, controller, facility, shared boundary, or absolute-tick rendering changes.
+
 ## Supervisor wind-down — seven Level-50 promotions, final union green (2026-08-10)
 
 - **State:** This session advanced Level-50 coverage **147→154/276 exact**, 0 partial, 0 staged, and **129→122 unsupported**. `KARATE_CHOP`, `BATON_PASS`, `MAGIC_COAT`, `PROTECT`, `ROLE_PLAY`, `DRILL_PECK`, and `SUBMISSION` are newly exact.
