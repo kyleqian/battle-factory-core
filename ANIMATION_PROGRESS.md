@@ -1,5 +1,12 @@
 # Animation coverage
 
+## Supervisor wind-down — seven Level-50 promotions, final union green (2026-08-10)
+
+- **State:** This session advanced Level-50 coverage **147→154/276 exact**, 0 partial, 0 staged, and **129→122 unsupported**. `KARATE_CHOP`, `BATON_PASS`, `MAGIC_COAT`, `PROTECT`, `ROLE_PLAY`, `DRILL_PECK`, and `SUBMISSION` are newly exact.
+- **Did:** Independently verified each accepted worker chain against its bilateral twice-fresh Scene-ON receipt and named controls, merged only green commits, folded current `master`, and removed every animation worker branch/worktree. The first Submission handoff was rejected because its claimed green result conflicted with captured build/type/count-ratchet failures; bounded follow-ups repaired the ratchets, typed asset path, and duplicate seam field before merge.
+- **Next:** Select the next independent Level-50 acceptance unit from `npm run animation:coverage`; preserve per-move dense bilateral acceptance even when all source components are already exact-proven.
+- **Notes:** Final coverage is **154/276 exact** with no open animation deferral. **For the main program:** all production changes are presentation-only; no damage/status outcome, accuracy/critical/RNG, turn order, controller, round/facility state, canonical-recording allowlist, shared animation boundary, or unsupported-branch barrier changed.
+
 ## MOVE_SUBMISSION exact — bilateral 124/124 Scene-ON promotion (2026-08-10 worker)
 
 - **State:** Coverage advances **153→154/276 exact**, 0 partial, 0 staged, **123→122 unsupported**. Only Submission moved.
