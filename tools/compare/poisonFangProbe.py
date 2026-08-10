@@ -72,9 +72,12 @@ def main() -> None:
     faded, unfaded = oracle.symbols["gPlttBufferFaded"], oracle.symbols["gPlttBufferUnfaded"]
     se1_info, se1_tracks = oracle.symbols["gMPlayInfo_SE1"], oracle.symbols["gMPlayTrack_SE1"]
     song_table = oracle.symbols["gSongTable"]
-    nm = subprocess.run(["arm-none-eabi-nm", str(reference / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
+    nm = subprocess.run(["arm-none-eabi-nm", "-a", str(reference / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
     symbols = {line.split()[2]: int(line.split()[0], 16) | 1 for line in nm.splitlines() if len(line.split()) == 3}
+    raw_symbols = {line.split()[2]: int(line.split()[0], 16) for line in nm.splitlines() if len(line.split()) == 3}
     template_names = (
+        ("gKarateChopSpriteTemplate", "gBasicHitSplatSpriteTemplate")
+        if MOVE_ID == 2 else
         ("gSlidingKickSpriteTemplate", "gBasicHitSplatSpriteTemplate",
          "gSlideMonToOffsetSpriteTemplate",
          "gSlideMonToOriginalPosSpriteTemplate")
@@ -107,6 +110,11 @@ def main() -> None:
     visual_task_count = oracle.symbols["gAnimVisualTaskCount"]
     sound_task_count = oracle.symbols["gAnimSoundTaskCount"]
     anim_script_active = oracle.symbols["gAnimScriptActive"]
+    anim_script_ptr = raw_symbols["sBattleAnimScriptPtr"]
+    karate_bounds = {
+        "Move_KARATE_CHOP": raw_symbols["Move_KARATE_CHOP"],
+        "Move_CROSS_CHOP": raw_symbols["Move_CROSS_CHOP"],
+    } if MOVE_ID == 2 else None
     def u16(a: int) -> int: return oracle.read_u8(a) | (oracle.read_u8(a + 1) << 8)
     def s16(a: int) -> int:
         v = u16(a)
@@ -125,6 +133,9 @@ def main() -> None:
                 "x":s16(base+0x20),"y":s16(base+0x22),"x2":s16(base+0x24),"y2":s16(base+0x26),
                 "template":oracle.read_u32(base+0x14),"callback":oracle.read_u32(base+0x1c),
                 "subpriority":oracle.read_u8(base+0x43),"matrixNum":matrix_num,
+                **({"invisible":bool(oracle.read_u8(base+0x3e)&4),
+                     "animNum":oracle.read_u8(base+0x2a),
+                     "animCmdIndex":oracle.read_u8(base+0x2b)} if MOVE_ID == 2 else {}),
                 "matrix":{"a":s16(matrix),"b":s16(matrix+2),"c":s16(matrix+4),"d":s16(matrix+6)},
                 "hardwareMatrix":{"a":s16(hw_matrix),"b":s16(hw_matrix+8),"c":s16(hw_matrix+16),"d":s16(hw_matrix+24)},
                 "data":[s16(base+0x2e+i*2) for i in range(8)]}
@@ -139,9 +150,23 @@ def main() -> None:
                 result.append({"slot":slot,"func":func,"data":[s16(base+8+i*2) for i in range(16)]})
         return result
     rows = []
+    started = False
+    complete = False
     def capture(frame: int) -> None:
+        nonlocal started, complete
         snap = lab.snapshot()
-        if snap["engine"]["currentMove"] != MOVE_ID: return
+        script_ptr = oracle.read_u32(anim_script_ptr)
+        script_active = bool(oracle.read_u8(anim_script_active))
+        if MOVE_ID == 2:
+            in_source = karate_bounds["Move_KARATE_CHOP"] <= script_ptr < karate_bounds["Move_CROSS_CHOP"]
+            if not started:
+                if snap["engine"]["currentMove"] != MOVE_ID or not script_active or not in_source:
+                    return
+                started = True
+            if complete:
+                return
+        elif snap["engine"]["currentMove"] != MOVE_ID:
+            return
         active = []
         for slot in range(64):
             base = sprites + slot * 0x44
@@ -151,6 +176,8 @@ def main() -> None:
         rgb = oracle.screen_rgb()
         (RGB_DIR / f"{frame:05d}.rgb").write_bytes(rgb)
         rows.append({"frame":frame,"sha256":hashlib.sha256(rgb).hexdigest(),
+          **({"scriptPtr":script_ptr,
+              "scriptOffset":script_ptr-karate_bounds["Move_KARATE_CHOP"] if karate_bounds["Move_KARATE_CHOP"] <= script_ptr < karate_bounds["Move_CROSS_CHOP"] else None} if MOVE_ID == 2 else {}),
           "player":snap["battlers"]["player"],"opponent":snap["battlers"]["opponent"],
           "playerSprite":battler(0),"opponentSprite":battler(1),"sprites":active,
           "tasks":active_tasks(),"fadedPalette":[u16(faded+i*2) for i in range(512)],
@@ -164,19 +191,23 @@ def main() -> None:
                                for j in (0,8,16,24)] for i in range(32)],
           "visualTaskCount":oracle.read_u8(visual_task_count),
           "soundTaskCount":oracle.read_u8(sound_task_count),
-          "animScriptActive":bool(oracle.read_u8(anim_script_active)),
+          "animScriptActive":script_active,
           "se1":{"songHeader":oracle.read_u32(se1_info),"status":oracle.read_u32(se1_info+4),
                  "tracks":[{"flags":oracle.read_u8(se1_tracks+i*0x50),
                             "pan":s8(se1_tracks+i*0x50+0x14),
                             "panX":s8(se1_tracks+i*0x50+0x15)} for i in range(3)]},
           "dispcnt":u16(0x04000000),"bldcnt":u16(0x04000050),"bldalpha":u16(0x04000052),
           "bldy":u16(0x04000054)})
+        if MOVE_ID == 2 and not script_active:
+            complete = True
     frame = 0
     capture(frame)
     for segment in request["trace"]["segments"]:
         for _ in range(segment["frames"]):
             oracle.advance(segment.get("buttons", [])); frame += 1; capture(frame)
-    OUTPUT.write_text(json.dumps({"schema":"poison-fang-dense-evidence/v2","setup":setup,
+    if MOVE_ID == 2 and (not rows or not complete):
+        raise RuntimeError("Move_KARATE_CHOP entry through first inactive cleanup not captured")
+    result = {"schema":"karate-chop-dense-evidence/v1" if MOVE_ID == 2 else "poison-fang-dense-evidence/v2","setup":setup,
       "templates":templates,"taskFuncs":{name:symbols[name] for name in task_names},
       "songHeaders":{"SE_M_RAZOR_WIND2":oracle.read_u32(song_table+160*8),
                      "SE_M_DOUBLE_TEAM":oracle.read_u32(song_table+135*8),
@@ -187,6 +218,10 @@ def main() -> None:
                      "SE_M_SWAGGER2":oracle.read_u32(song_table+194*8),
                      "SE_M_TOXIC":oracle.read_u32(song_table+148*8),
                      "SE_M_MEGA_KICK":oracle.read_u32(song_table+140*8),
-                     "SE_M_VITAL_THROW2":oracle.read_u32(song_table+123*8)},"frames":rows}) + "\n")
+                     "SE_M_VITAL_THROW2":oracle.read_u32(song_table+123*8)},"frames":rows}
+    if MOVE_ID == 2:
+        result["scriptBounds"] = karate_bounds
+        result["songHeaders"]["SE_M_COMET_PUNCH"] = oracle.read_u32(song_table+139*8)
+    OUTPUT.write_text(json.dumps(result) + "\n")
     print(f"wrote {OUTPUT} ({len(rows)} frames; {rows[0]['frame'] if rows else '-'}..{rows[-1]['frame'] if rows else '-'})")
 main()

@@ -362,6 +362,10 @@ import {
   type LowKickState,
 } from "./lowKick.ts";
 import {
+  karateChopAtAge,
+  type KarateChopState,
+} from "./karateChop.ts";
+import {
   stompAtAge,
   type StompState,
 } from "./stomp.ts";
@@ -1481,6 +1485,14 @@ export interface SceneOnLowKickConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Narrow Scene-ON seam; move resolution and critical-hit state stay external. */
+export interface SceneOnKarateChopConfig {
+  readonly move: "KARATE_CHOP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 /** Narrow Scene-ON seam: only resolved presentation geometry and immutable HP. */
 export interface SceneOnStompConfig {
   readonly move: "STOMP";
@@ -2374,6 +2386,7 @@ export type SceneOnMoveConfig =
   | SceneOnMegaKickConfig
   | SceneOnRollingKickConfig
   | SceneOnLowKickConfig
+  | SceneOnKarateChopConfig
   | SceneOnStompConfig
   | SceneOnViceGripConfig
   | SceneOnBiteConfig
@@ -2656,6 +2669,12 @@ export interface SceneOnRollingKickView extends RollingKickState {
 }
 
 export interface SceneOnLowKickView extends LowKickState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnKarateChopView extends KarateChopState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4682,6 +4701,25 @@ export function sceneOnLowKickView(
     ...lowKickAtAge(
       state.age,
       state.config.attacker.geometry.side,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first pointer-bounded `Move_KARATE_CHOP` source display. */
+export function sceneOnKarateChopView(
+  state: SceneOnMovePresentationState<SceneOnKarateChopConfig>,
+): SceneOnKarateChopView {
+  if (state.config.move !== "KARATE_CHOP") {
+    throw new Error(`expected KARATE_CHOP presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...karateChopAtAge(
+      state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
