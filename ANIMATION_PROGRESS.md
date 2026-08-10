@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_SPITE bilateral dense Scene-ON evidence checkpoint — coverage unchanged (2026-08-10 worker)
+
+- **State:** Coverage remains **154/276 exact**, 0 partial, 0 staged, 122 unsupported; `ANIMATION_COVERAGE.json` is intentionally unchanged. `MOVE_SPITE` is not promoted and `MOVE_NIGHT_SHADE` remains independently unsupported.
+- **Did:** Extended both complete legal set-179 HAUNTER orientations with a real first turn in which the target set-156 ONIX uses TACKLE, followed by the normal controller selection of SPITE. Upgraded `spiteProbe.py` to pointer-bound dense source/task/clone, all live logical sprites, software+hardware OAM/matrices, palette buffers/tags, scanline state+both buffers, BG/GPU registers, audio, immutable battlers, and raw RGB through first inactive cleanup. Banked bilateral change maps.
+- **Verified:** Twice-fresh byte-stable windows are player-back **1000..1220 (221/221)** and opponent-front **1004..1224 (221/221)**. JSON receipts are identical per orientation; raw RGB concatenates are stable (`8dc2eee7…` player, `7f49cb0c…` opponent). Maps are deterministic and committed as `tools/compare/evidence/spite-changemap-{player,opponent}.txt` (digests `9ca49a5a…` / `1a89deb6…`). The maps directly show the existing palette RAM+1 transfer in both orientations. No new reusable latch is added: clone, scanline, copied-BG enable, alpha, target-hide, and teardown latches remain unproven and are reported honestly.
+- **Next:** Use this receipt and its own maps to measure each Spite display edge, then implement the narrow source-relative compositor/seam only if both orientations can pass complete hardware/OAM/palette/register/audio/raw-RGB and production framebuffer equality. Keep Night Shade unsupported unless its own independent evidence closes.
+- **Notes:** The 4-frame orientation shift is measured from Spite's own pointer windows, not inherited. No gameplay, damage, RNG, turn order, controller/facility state, shared boundary, unsupported barrier, canonical recording, sibling coverage, or absolute-tick framebuffer branch changed.
+
 ## Supervisor wind-down — seven promotions plus Spite resume checkpoint (2026-08-10)
 
 - **State:** This session advanced Level-50 coverage **147→154/276 exact**, 0 partial, 0 staged, and **129→122 unsupported**. `KARATE_CHOP`, `BATON_PASS`, `MAGIC_COAT`, `PROTECT`, `ROLE_PLAY`, `DRILL_PECK`, and `SUBMISSION` are newly exact; Spite remains honestly unsupported.
