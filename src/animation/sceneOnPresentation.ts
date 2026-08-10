@@ -5005,7 +5005,6 @@ export function sceneOnSubmissionView(
     throw new Error(`expected SUBMISSION presentation, got ${state.config.move}`);
   }
   return {
-    age: state.age,
     attacker: state.config.attacker,
     target: state.config.target,
     ...submissionAtAge(
