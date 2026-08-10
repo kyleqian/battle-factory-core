@@ -94,6 +94,11 @@ export function decodeSoftwareOam(raw: string): OamAttrs {
 export function decodeSoftwareMatrices(softwareOam: readonly string[]): readonly AffineMatrix[] {
   return Array.from({ length: 32 }, (_, matrixNum) => {
     const base = matrixNum * 4;
-    return [0, 1, 2, 3].map((index) => signed(decodeU16(softwareOam[base + index]!, 6))) as AffineMatrix;
+    return [
+      signed(decodeU16(softwareOam[base]!, 6)),
+      signed(decodeU16(softwareOam[base + 1]!, 6)),
+      signed(decodeU16(softwareOam[base + 2]!, 6)),
+      signed(decodeU16(softwareOam[base + 3]!, 6)),
+    ];
   });
 }
