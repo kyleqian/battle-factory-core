@@ -907,7 +907,14 @@ losses, and seventh-win completion. The final summary gate is **1351/1351**
 Tier-1 tests plus a green production build. Scene-ON move breadth remains an
 independent coverage lane and does not alter this bounded interface verdict.
 
-### [ ] S10 — Parameterized battle laboratory + complete Level-50 singles engine
+### [x] S10 — Parameterized battle laboratory + complete Level-50 singles engine
+
+**Stage closed 2026-08-10 (supervisor):** all six gates are checked; the
+family-level Gate-6 program completed 2026-08-09→10 (five families in one
+session plus the surge audit's same-session class fixes). Per the
+2026-08-09 user sequencing decision, the next milestone BEFORE S11 audio
+is the short "playable round" user-polish pass (#71, #73,
+session-trace-driven pacing fixes).
 
 **User scope decision (2026-07-23):** S8's finite controller gates prove the
 round/presentation architecture but do not complete the mission's arbitrary
@@ -1466,7 +1473,7 @@ S10 has six ordered completion gates:
    oracle dependency. Supervisor reran the focused joins/regeneration tests,
    the full **97-file / 1383-test** suite, and the production build.
 
-2. [ ] **Parameterized battle oracle:** extend the existing deterministic
+2. [x] **Parameterized battle oracle:** extend the existing deterministic
    stock-ROM mGBA service additively (the canonical `/v1/run` contract and its
    ON/OFF anchors remain unchanged) with a semantic battle-lab scenario
    contract. A request selects trainer ID, player/opponent Frontier set IDs,
@@ -1560,7 +1567,16 @@ S10 has six ordered completion gates:
    items, statuses, and trainer-AI decisions are all directly verifiable
    against the stock ROM today. Contract and examples:
    `../../oracle/BATTLE_LAB.md`; scenarios in `tools/battle-lab/`.
-3. [ ] **General battle kernel:** replace preset-damage/action fixtures as the
+
+   **Completion (2026-08-10, supervisor):** the semantic battle-lab
+   contract, `factoryLegal`, and the complete `mechanicLab`
+   `overrides.parties` pre-battle builder have been live acceptance
+   surfaces for weeks (2026-08-01 revision note above). The two recorded
+   remainders are dispositioned in `docs/gate2-noland-scope-note.md`
+   (2026-08-10): Noland/Frontier-Brain battles stay schema-rejected and
+   out of scope per the 2026-07-28 ruling, and the post-scouting-dialogue
+   first checkpoint stands as a documented contract bound, not a blocker.
+3. [x] **General battle kernel:** replace preset-damage/action fixtures as the
    production rules path with source-derived action selection, priority/speed
    ordering, accuracy, critical hits, damage, targeting, PP, move-script
    execution, end-turn ordering, fainting, victory/loss, and deterministic RNG
@@ -1581,7 +1597,16 @@ S10 has six ordered completion gates:
    every caller-owned input, carries RNG only inside the returned state, and
    reaches a next-decision or terminal boundary without a DOM, renderer,
    wall-clock, oracle, emulator, or mutable singleton.
-4. [ ] **Persistent mechanics:** implement all battle statuses and volatile
+   **Completion (2026-08-10, supervisor):** the source-derived kernel is
+   the production rules path (routing flip 2026-07-30, #53); the
+   executable-frontier census holds **214/214 effects and 355/355 moves
+   static-executable** with the ratchets pinned; every effect/hook family
+   carries family-level semantic proof per the 2026-08-09 user standard
+   (gate 6 note below); Tier-1 architecture tests pin shared-handler
+   siblings, replay immutability, and the deterministic headless
+   transition API. Named `unsupported-branch` barriers remain
+   ratchet-pinned and only shrink.
+4. [x] **Persistent mechanics:** implement all battle statuses and volatile
    effects, every stat stage, weather and side conditions, multi-turn effects,
    held-item hooks, ability hooks/immunities, and their switch/faint/end-turn
    lifecycles. This explicitly includes confusion, Leech Seed, Perish Song,
@@ -1589,6 +1614,14 @@ S10 has six ordered completion gates:
    recoil/drain, berries, Leftovers, Quick Claw, Choice Band, White Herb,
    Wonder Guard/Levitate/Intimidate/Pressure/contact abilities, and the other
    source-reachable Level-50 singles cases rather than only this named sample.
+   **Completion (2026-08-10, supervisor):** the ability/item parity census
+   closed **69/69 abilities + 42/42 hold effects (1096/1096, 850/850
+   weighted)** on 2026-07-29; statuses/volatiles/stages/weather/side
+   conditions ride the closed effect census with 55/55 state rows carrying
+   focused Tier-1 evidence; the per-move hook-join program (gate 6)
+   supplies the semantic receipts; the interaction matrix (28 axis-pair
+   rows, 6 kernel-proven + 22 oracle-receipted, 0 receipt gaps) covers the
+   cross-mechanic boundaries.
 5. [x] **Facility integration:** generate initial rentals and all seven real
    opponent parties through the source-exact range/retry/personality/IV/
    ability/item rules; run the native Factory AI; compute the attendant's
@@ -1631,7 +1664,7 @@ S10 has six ordered completion gates:
    (entry 755); battles-3-7 per-battle opponent receipts stay declined per
    the S8 reset policy; the P..B pre-battle fade for arbitrary trainers is
    #39-class ownership work, not a Gate-5 clause.
-6. [ ] **Breadth acceptance:** a committed mechanics coverage manifest has no
+6. [x] **Breadth acceptance:** a committed mechanics coverage manifest has no
    unsupported move/effect, status, volatile-effect, held-item, ability,
    trainer, or Level-50 Frontier-set entries. Every distinct effect/hook family
    has at least one deterministic parameterized-oracle semantic trace; table
@@ -1641,6 +1674,27 @@ S10 has six ordered completion gates:
    team. Multiple seeded legal Factory rounds run end-to-end, selected unique
    UI windows pass pixel compare under the appropriate scene profile, and
    `npm test`/`npm run build` are green.
+
+   **Completion (2026-08-10, supervisor):** the committed manifest
+   (`docs/gate6-coverage-manifest.md`, regeneration byte-idempotent)
+   reaches **296/300 source-proven per-move hook-join rows on each axis**
+   across ten proven families, each family carrying at least one
+   deterministic parameterized-oracle receipt (fresh 2026-08-09/10 packs:
+   Shell Bell, item-move-end Cheri cure, Covet, Recycle, Role Play,
+   Own-Tempo-blocked Confuse Ray; cited pre-existing receipts for King's
+   Rock, Knock Off/Trick, Skill Swap, immunity-cure) plus Tier-1 sibling
+   batch checks. The only remaining rows are the four dynamic-dispatch
+   moves (`MOVE_ASSIST`, `MOVE_METRONOME`, `MOVE_MIRROR_MOVE`,
+   `MOVE_SLEEP_TALK`) on both axes — explicit documented exception rows
+   (entry scripts jump into the runtime-chosen move's script; the invoked
+   move's own proven row carries the hook join), the Tickle-class
+   disposition under the 2026-08-09 family-granularity decision, hardened
+   by the 2026-08-10 read-only surge audit (3 defects found, all fixed
+   same-session as class fixes; ISSUES #86 records the remaining
+   route-certificate self-description enhancement as debt, not a gap).
+   Seeded rounds: `docs/gate6-seeded-rounds-artifact.md` (vanilla 0:20 =
+   20/20 OK, full 0:60 = 60/60 OK, 2026-08-10). Interaction matrix: 28/28
+   rows, 0 receipt gaps. `npm test` + `npm run build` green at every fold.
 
 The finite catalogs are exhaustively enumerable; their Cartesian product is
 not. Acceptance therefore enumerates every trainer/set/move/hook and proves

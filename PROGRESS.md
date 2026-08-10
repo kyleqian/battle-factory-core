@@ -5,6 +5,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1074 — [supervisor, 2026-08-10 ~02:40] **S10 CLOSED: gates 2/3/4/6 ticked; Gate-6 family program complete**
+
+- **State:** ROADMAP S10 and all six gates are checked (supervisor commit
+  after entry 1073's audit fixes). Final manifest state: **296/300
+  source-proven per-move hook-join rows on each axis** across ten families,
+  plus the four dynamic-dispatch exception rows (`ASSIST`/`METRONOME`/
+  `MIRROR_MOVE`/`SLEEP_TALK`, both axes). ISSUES #86 (renumbered from the
+  worker's reused #82) records the `routeBranch` self-description
+  enhancement as debt.
+- **Did:** one-session family-level Gate-6 execution per the 2026-08-09
+  user decision: worklist doc → five family receipt packs (side lane) →
+  five wiring promotions (main lane) → soak artifact (vanilla 20/20, full
+  60/60) + Noland scope note → read-only opus surge audit (8 seams: 5
+  clean certifications, 3 defects) → same-session class fixes. Gate ticks
+  carry dated completion notes citing every artifact.
+- **Next:** per the user sequencing decision, the "playable round" polish
+  milestone (#71, #73, session-trace-driven pacing fixes) is the next
+  headline, BEFORE S11 audio. ISSUES #86 is optional manifest-hardening
+  filler.
+- **Notes:** wind-down follows: animation fold, final union suite/build,
+  soak gate rerun. No engine behavior, controller interface, round
+  outcome, barrier pin, or canonical window changed by the close-out
+  itself (docs/ledger edits only).
+
 ## 1073 — [MAIN worker, 2026-08-10 night] **Gate-6 surge-audit fixes: dynamic-dispatch exception class completed (2→4 gaps/axis), "undefined" locators fixed, count wording corrected**
 
 - **State:** tree is green: full suite **864 files / 8,347 passed / 1
@@ -215,79 +239,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `reference/pokeemerald/data/battle_scripts_1.s` for every cited script).
   Item axis untouched (out of scope beyond the brief's explicit
   Assist/Metronome ability-side exception wiring). Moved entry 1069 to
-  `PROGRESS-archive.md` to keep the ledger at 3 live entries.
-
-## 1071 — [MAIN worker, 2026-08-10 night] **Rank-3 item-manipulation family (Covet/Trick/Recycle/Knock Off) promoted: 4 → 2 item gaps**
-
-- **State:** tree is green: full suite **860 files / 8,332 passed / 1
-  skipped**, production build, `npm run typecheck` clean. `docs/gate6-coverage-manifest.md`
-  regenerates byte-idempotent and now reads **2 item join gaps / 9 ability
-  join gaps** (was **4 item / 9 ability** at entry 1070 — ability axis
-  untouched, out of scope). Baseline checked live first, matching entry
-  1070's headline exactly: unsupported item rows were `MOVE_METRONOME`,
-  `MOVE_TRICK`, `MOVE_ASSIST`, `MOVE_RECYCLE`.
-- **Did:** consumed tonight's banked evidence
-  (`docs/item-manipulation-family-ground-truth.md`, fresh Covet + Recycle
-  Battle Scene OFF fixture/receipt pairs, both verify scripts) — no new
-  oracle receipts authored this step; reran both fresh verify scripts once
-  each via `tools/run-mgba-probe.py` and diffed against the committed
-  receipts: byte-identical (Covet: attacker acquires Cheri Berry@332,
-  party-synced@191, defender loses it@191, control zero transitions, RNG
-  14=14 both arms; Recycle: restore@380 after same-turn cure-and-consume
-  [paralysis applied@111], itemless control no-ops, RNG 7 vs 10). Verified
-  the pre-existing 2026-07-28 Knock Off/Trick evidence
-  (`tests/familyBCluster4OracleEvidence.test.ts`,
-  `tests/trickOracleEvidence.test.ts` + fixtures) satisfies the family
-  receipt standard (schemaVersion-pinned deterministic requests, byte-hash
-  reproducibility, `runs: 2` byte-identical manifests) and cited it as-is —
-  no restaging. `tools/extract/extract-level50-move-parameterization.ts`
-  adds a **per-move** certificate shape (not a shared moveend state, unlike
-  every prior item family): four `auditExactScriptBlock` statement audits
-  (`BattleScript_EffectThief`/`EffectTrick`/`EffectRecycle`/`EffectKnockOff`)
-  plus ordered C guard-chain token citations into each move's own dedicated
-  opcode (`Cmd_seteffectwithchance`'s `MOVE_EFFECT_STEAL_ITEM`/
-  `MOVE_EFFECT_KNOCK_OFF` arms, `Cmd_tryswapitems`, `Cmd_tryrecycleitem`).
-  Selector is always the exact 4 Rank-3 moves (candidateCount 4,
-  promoted 4, 0 exceptions) — unlike Rank 1, membership doesn't depend on
-  prior-claim status. `MOVE_COVET`/`MOVE_KNOCK_OFF` were already
-  Shell-Bell-claimed (power != 0); this family adds a second, independent
-  category (`item-manipulation-steal`/`-knockoff`) to those two rows and
-  the first category (`item-manipulation-swap`/`-recycle`) to Trick/Recycle
-  — so only 2 of the 4 moved a row from `unsupported`, and item gaps land
-  at **2** (`MOVE_ASSIST`/`MOVE_METRONOME`, Rank 1's dynamic-dispatch
-  exceptions, not members of this family's selector), not the brief's
-  predicted 0. Honest per-row report, not forced: the item axis is *not*
-  fully closed. `tools/report/gate6-coverage-manifest.ts` adds a parallel
-  `itemManipulationAudit`/`itemManipulationRow` checkpoint plus category
-  validation in `sourceProvenFamilies`/`parameterizedHook`/
-  `sourceProvenHookEvidence` (generic evidence emission driven by each
-  witness's own `familyVerification` fields, since implementation/test
-  paths differ per move), and adds 24 new receipt/doc/test paths to
-  `sourceInputs` (`requirePath`-verified). `tests/itemManipulationHookJoinBatch.test.ts`
-  (Tier-1, asserts four distinct dispatchers — not one shared state) and
-  `tests/itemManipulationOracleEvidence.test.ts` (pins the fresh Covet +
-  Recycle receipts byte-precisely, references but does not duplicate the
-  pre-existing Trick/Knock Off test files) are new and green. Updated
-  pinned counts in `tests/level50MoveParameterization.test.ts` (296→298
-  item source-proven rows, 4→2 unsupported) and `tests/gate6CoverageManifest.test.ts`
-  (adds `ITEM_MANIPULATION_PROOF_PATHS`/category constants, a dedicated
-  per-category validation block, `sourceItemManipulation` set-membership
-  checks alongside `sourceKingsRock`/`sourceShellBell`/`sourceItemMoveEnd`,
-  and re-pins total hook-join gaps 13→11).
-- **Next:** continue the ordered family-level Gate-6 worklist from the
-  verified **2 item / 9 ability** row-gap frontier. Remaining item gaps:
-  `MOVE_ASSIST`, `MOVE_METRONOME` (both dynamic-dispatch, no static moveend
-  node — the same structural gap found twice already; likely needs its own
-  named exception category rather than a new family, if ever closed).
-  Remaining ability gaps: Rank 4 (2 rows, Skill Swap/Role Play — side lane
-  banked fresh evidence tonight, not yet wired into the manifest by main
-  lane) and Rank 5 (5 rows, Own Tempo guards).
-- **Notes:** no engine, controller, round outcome, barrier pin, or canonical
-  window changed; `src/engine/battleScriptHitChainOpcode.ts`,
-  `battleScriptTryswapitemsOpcode.ts`, `battleScriptTryrecycleitemOpcode.ts`
-  were read, not edited (already faithful per the ground-truth doc's source
-  audit). Rank-4/5 rows, their evidence packs
-  (`tools/battle-lab/mechanic-ability-manipulation-*`), and
-  `tools/battle-lab/mechanic-own-tempo-guard-*` untouched (side-lane
-  ownership, explicit brief exclusion). Moved entry 1068 to
   `PROGRESS-archive.md` to keep the ledger at 3 live entries.
