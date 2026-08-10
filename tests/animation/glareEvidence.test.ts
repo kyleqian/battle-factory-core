@@ -70,10 +70,10 @@ describe("MOVE_GLARE bilateral dense exact evidence", () => {
     expect(effects2).toContain(".callback = AnimEyeSparkle");
   });
 
-  it("keeps GLARE exact after the Baton Pass promotion at 149/149", () => {
-    expect(coverage.entries).toHaveLength(149);
+  it("keeps GLARE exact after the Magic Coat promotion at 150/150", () => {
+    expect(coverage.entries).toHaveLength(150);
     expect(coverage.entries.every((entry) => entry.status === "exact")).toBe(true);
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_GLARE")).toHaveLength(1);
-    expect(276 - coverage.entries.length).toBe(127);
+    expect(276 - coverage.entries.length).toBe(126);
   });
 });

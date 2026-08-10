@@ -269,7 +269,11 @@ import {
   reflectAtAge,
   type ReflectState,
 } from "./reflect.ts";
-import { barrierAtAge, type BarrierState } from "./barrier.ts";
+import {
+  barrierAtAge,
+  magicCoatAtAge,
+  type BarrierState,
+} from "./barrier.ts";
 import { disableAtAge, type DisableState } from "./disable.ts";
 import {
   brickBreakAtAge,
@@ -1333,6 +1337,14 @@ export interface SceneOnBarrierConfig {
   readonly allocatorProfile: Readonly<{ readonly wall: number }>;
 }
 
+export interface SceneOnMagicCoatConfig {
+  readonly move: "MAGIC_COAT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly allocatorProfile: Readonly<{ readonly wall: number }>;
+}
+
 /** Typed Scene-ON seam for MOVE_DISABLE's target monbg/OBJ-blend task. */
 export interface SceneOnDisableConfig {
   readonly move: "DISABLE";
@@ -2375,6 +2387,7 @@ export type SceneOnMoveConfig =
   | SceneOnBrickBreakConfig
   | SceneOnLightScreenConfig
   | SceneOnBarrierConfig
+  | SceneOnMagicCoatConfig
   | SceneOnDisableConfig
   | SceneOnHazeConfig
   | SceneOnMirrorCoatConfig
@@ -2540,6 +2553,8 @@ export type SceneOnLightScreenPresentationState =
   SceneOnMovePresentationState<SceneOnLightScreenConfig>;
 export type SceneOnBarrierPresentationState =
   SceneOnMovePresentationState<SceneOnBarrierConfig>;
+export type SceneOnMagicCoatPresentationState =
+  SceneOnMovePresentationState<SceneOnMagicCoatConfig>;
 export type SceneOnHazePresentationState =
   SceneOnMovePresentationState<SceneOnHazeConfig>;
 export type SceneOnMirrorCoatPresentationState =
@@ -4324,6 +4339,25 @@ export function sceneOnBarrierView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...barrierAtAge(
+      state.age,
+      state.config.attacker.geometry.battlePositionCenter,
+      state.config.attacker.geometry.side,
+    ),
+  };
+}
+
+/** `age` is relative to Move_MAGIC_COAT's first in-bounds script pointer. */
+export function sceneOnMagicCoatView(
+  state: SceneOnMovePresentationState<SceneOnMagicCoatConfig>,
+): SceneOnBarrierView {
+  if (state.config.move !== "MAGIC_COAT") {
+    throw new Error(`expected MAGIC_COAT presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...magicCoatAtAge(
       state.age,
       state.config.attacker.geometry.battlePositionCenter,
       state.config.attacker.geometry.side,

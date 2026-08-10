@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pointer-bounded dense Scene-ON evidence for legal Move_BARRIER."""
+"""Pointer-bounded dense Scene-ON evidence for defensive-wall moves."""
 from __future__ import annotations
 
 import hashlib
@@ -8,9 +8,14 @@ import subprocess
 import sys
 from pathlib import Path
 
-if len(sys.argv) != 4:
-    raise SystemExit("usage: barrierProbe.py <scenario> <output.json> <rgb-dir>")
-SCENARIO, OUTPUT, RGB_DIR = map(Path, sys.argv[1:])
+if len(sys.argv) not in (4, 5):
+    raise SystemExit(
+        "usage: barrierProbe.py <scenario> <output.json> <rgb-dir> [magic-coat]"
+    )
+SCENARIO, OUTPUT, RGB_DIR = map(Path, sys.argv[1:4])
+MODE = sys.argv[4] if len(sys.argv) == 5 else "barrier"
+if MODE not in ("barrier", "magic-coat"):
+    raise SystemExit(f"unsupported defensive-wall mode: {MODE}")
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle" / "emerald_core.py").is_file())
 sys.path.insert(0, str(HARNESS / "oracle"))
@@ -29,7 +34,12 @@ def main() -> None:
     symbol_rows = [(int(p[0], 16), p[2]) for line in nm.splitlines() if len(p := line.split()) == 3 and all(c in "0123456789abcdefABCDEF" for c in p[0])]
     names = {name: address for address, name in symbol_rows}
     reverse = {address: name for address, name in symbol_rows}
-    move_start, move_end = names["Move_BARRIER"], names["Move_BUBBLE"]
+    move_label, next_label = (
+        ("Move_BARRIER", "Move_BUBBLE")
+        if MODE == "barrier"
+        else ("Move_MAGIC_COAT", "Move_WATER_PULSE")
+    )
+    move_start, move_end = names[move_label], names[next_label]
     sprites, tasks, matrices = sy["gSprites"], sy["gTasks"], sy["gOamMatrices"]
     faded, unfaded = sy["gPlttBufferFaded"], sy["gPlttBufferUnfaded"]
     battler_ids = sy["gBattlerSpriteIds"]
@@ -37,7 +47,11 @@ def main() -> None:
     frames_wait = names["sAnimFramesToWait"]
     visual_count, sound_count = sy["gAnimVisualTaskCount"], sy["gAnimSoundTaskCount"]
     palette_tags = names["sSpritePaletteTags"]
-    wall = sy["gBarrierWallSpriteTemplate"]
+    wall = sy[
+        "gBarrierWallSpriteTemplate"
+        if MODE == "barrier"
+        else "gMagicCoatWallSpriteTemplate"
+    ]
     se1, se1_tracks, songs = sy["gMPlayInfo_SE1"], sy["gMPlayTrack_SE1"], sy["gSongTable"]
 
     def u16(a: int) -> int: return oracle.read_u8(a) | oracle.read_u8(a + 1) << 8
@@ -82,8 +96,9 @@ def main() -> None:
     for segment in request["trace"]["segments"]:
         for _ in range(segment["frames"]):
             oracle.advance(segment.get("buttons",[])); frame+=1; capture(frame)
-    if not finished or not any(r["wallSprites"] for r in rows): raise RuntimeError("complete BARRIER body not reached")
-    payload={"schema":"barrier-dense-evidence/v1","setup":setup,"sourceBounds":{"start":move_start,"endExclusive":move_end},"templates":{"wall":wall},"songHeader":oracle.read_u32(songs+208*8),"frames":rows}
+    if not finished or not any(r["wallSprites"] for r in rows):
+        raise RuntimeError(f"complete {MODE} body not reached")
+    payload={"schema":f"{MODE}-dense-evidence/v1","setup":setup,"sourceBounds":{"start":move_start,"endExclusive":move_end},"templates":{"wall":wall},"songHeader":oracle.read_u32(songs+208*8),"frames":rows}
     OUTPUT.write_text(json.dumps(payload)+"\n")
     print(f"wrote {OUTPUT} ({len(rows)} source frames; {rows[0]['frame']}..{rows[-1]['frame']})")
 

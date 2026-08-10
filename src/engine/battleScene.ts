@@ -554,6 +554,7 @@ import brickBreakAsset from "../animation/assets/brick-break.json" with { type: 
 import lightScreenAsset from "../animation/assets/light-screen.json" with { type: "json" };
 import mirrorCoatAsset from "../animation/assets/mirror-coat.json" with { type: "json" };
 import barrierAsset from "../animation/assets/barrier.json" with { type: "json" };
+import magicCoatAsset from "../animation/assets/magic-coat.json" with { type: "json" };
 import hazeAsset from "../animation/assets/haze.json" with { type: "json" };
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import substituteAsset from "../animation/assets/substitute.json" with { type: "json" };
@@ -880,6 +881,7 @@ import {
   sceneOnBrickBreakView,
   sceneOnLightScreenView,
   sceneOnBarrierView,
+  sceneOnMagicCoatView,
   sceneOnDisableView,
   sceneOnHazeView,
   sceneOnMirrorCoatView,
@@ -1032,6 +1034,7 @@ import {
   type SceneOnBrickBreakPresentationState,
   type SceneOnLightScreenPresentationState,
   type SceneOnBarrierPresentationState,
+  type SceneOnMagicCoatPresentationState,
   type SceneOnDisableConfig,
   type SceneOnHazePresentationState,
   type SceneOnMirrorCoatPresentationState,
@@ -1456,6 +1459,11 @@ const barrierArt = barrierAsset as {
   drowzeeBack: { tileset: Tileset; palette: RgbColor[] };
   drowzeeFront: { tileset: Tileset; palette: RgbColor[] };
   grayLightWall: { tileset: Tileset; palette: RgbColor[] };
+};
+const magicCoatArt = magicCoatAsset as {
+  spoinkBack: { tileset: Tileset; palette: RgbColor[] };
+  spoinkFront: { tileset: Tileset; palette: RgbColor[] };
+  orangeLightWall: { tileset: Tileset; palette: RgbColor[] };
 };
 const hazeArt = hazeAsset as {
   fog: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
@@ -21914,33 +21922,46 @@ export function renderSceneOnMovePresentation(
     );
     return;
   }
-  if (state.config.move === "BARRIER") {
-    const barrierState = state as SceneOnBarrierPresentationState;
-    const view = sceneOnBarrierView(barrierState);
-    const displayed = sceneOnBarrierView({
-      ...barrierState, age: barrierState.age - 1,
-    });
+  if (state.config.move === "BARRIER" || state.config.move === "MAGIC_COAT") {
+    const magic = state.config.move === "MAGIC_COAT";
+    const wallState = state as
+      | SceneOnBarrierPresentationState
+      | SceneOnMagicCoatPresentationState;
+    const view = magic
+      ? sceneOnMagicCoatView(wallState as SceneOnMagicCoatPresentationState)
+      : sceneOnBarrierView(wallState as SceneOnBarrierPresentationState);
+    const displayed = magic
+      ? sceneOnMagicCoatView({
+          ...(wallState as SceneOnMagicCoatPresentationState),
+          age: wallState.age - 1,
+        })
+      : sceneOnBarrierView({
+          ...(wallState as SceneOnBarrierPresentationState),
+          age: wallState.age - 1,
+        });
+    const attackerSpecies = magic ? "SPOINK" : "DROWZEE";
     const playerToOpponent =
-      view.attacker.species === "DROWZEE"
+      view.attacker.species === attackerSpecies
       && view.attacker.geometry.side === "player"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "DROWZEE"
+      view.attacker.species === attackerSpecies
       && view.attacker.geometry.side === "opponent"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
-        `unsupported staged BARRIER pair `
+        `unsupported staged ${magic ? "MAGIC_COAT" : "BARRIER"} pair `
         + `${view.attacker.species}->${view.target.species}`,
       );
     }
-    const drowzeeSource = playerToOpponent
-      ? barrierArt.drowzeeBack : barrierArt.drowzeeFront;
-    const drowzee = playerToOpponent
-      ? drowzeeSource
-      : { ...drowzeeSource, tileset: subTileset(drowzeeSource.tileset, 0, 8) };
+    const attackerSource = magic
+      ? (playerToOpponent ? magicCoatArt.spoinkBack : magicCoatArt.spoinkFront)
+      : (playerToOpponent ? barrierArt.drowzeeBack : barrierArt.drowzeeFront);
+    const attacker = playerToOpponent
+      ? attackerSource
+      : { ...attackerSource, tileset: subTileset(attackerSource.tileset, 0, 8) };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const onix = playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
@@ -21949,8 +21970,8 @@ export function renderSceneOnMovePresentation(
       ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
       : { x2: 0, y2: 0 };
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-    const opponent = playerToOpponent ? onix : drowzee;
-    const player = playerToOpponent ? drowzee : onix;
+    const opponent = playerToOpponent ? onix : attacker;
+    const player = playerToOpponent ? attacker : onix;
     drawSpriteSheet(
       fb, opponent.tileset, opponent.palette,
       playerToOpponent
@@ -21961,7 +21982,8 @@ export function renderSceneOnMovePresentation(
         : view.attacker.geometry.spriteCorner.y,
     );
     if (displayed.wall && view.alpha && view.alpha.eva > 0) {
-      const palette = barrierArt.grayLightWall.palette.slice();
+      const wallArt = magic ? magicCoatArt.orangeLightWall : barrierArt.grayLightWall;
+      const palette = wallArt.palette.slice();
       const rotating = palette.slice(1, 9);
       for (let step = 0; step < displayed.wall.paletteRotationSteps; step++) {
         rotating.unshift(rotating.pop()!);
@@ -21969,7 +21991,7 @@ export function renderSceneOnMovePresentation(
       palette.splice(1, 8, ...rotating);
       drawSpriteSheetBlendedOverFb(
         fb,
-        barrierArt.grayLightWall.tileset,
+        wallArt.tileset,
         palette,
         displayed.wall.x - 32,
         displayed.wall.y - 32,
@@ -21989,7 +22011,7 @@ export function renderSceneOnMovePresentation(
     drawSendOutHealthbox(
       fb, 0,
       composeOpponentHealthbox(healthboxAssemblyAssets, {
-        name: playerToOpponent ? "ONIX" : "DROWZEE",
+        name: playerToOpponent ? "ONIX" : attackerSpecies,
         level: 50,
         gender: state.config.fieldProfile.opponentGender ?? "male",
         hpFraction: state.config.fieldProfile.opponentHp
@@ -22000,7 +22022,7 @@ export function renderSceneOnMovePresentation(
     drawComposedPlayerHealthbox(
       fb,
       composePlayerHealthbox(playerHealthboxAssets, {
-        name: playerToOpponent ? "DROWZEE" : "ONIX",
+        name: playerToOpponent ? attackerSpecies : "ONIX",
         level: 50,
         gender: state.config.fieldProfile.playerGender ?? "male",
         hpFraction: state.config.fieldProfile.playerHp
@@ -22013,8 +22035,10 @@ export function renderSceneOnMovePresentation(
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(
       fb,
-      playerToOpponent ? "DROWZEE used" : "Foe DROWZEE used",
-      "BARRIER!",
+      playerToOpponent
+        ? `${attackerSpecies} used`
+        : `Foe ${attackerSpecies} used`,
+      magic ? "MAGIC COAT!" : "BARRIER!",
       64,
     );
     return;

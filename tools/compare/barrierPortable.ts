@@ -6,12 +6,14 @@ import { realpathSync } from "node:fs";
 import {
   createSceneOnMovePresentation,
   sceneOnBarrierView,
+  sceneOnMagicCoatView,
   type SceneOnBarrierConfig,
+  type SceneOnMagicCoatConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 
-interface Fixture extends SceneOnBarrierConfig {
+type Fixture = (SceneOnBarrierConfig | SceneOnMagicCoatConfig) & {
   orientation: string;
   scenario: string;
   probe: string;
@@ -21,7 +23,7 @@ interface Fixture extends SceneOnBarrierConfig {
   rawRgbSha256: string;
   changeMap: string;
   changeMapSha256: string;
-}
+};
 interface Sprite {
   slot: number; x: number; y: number; attr: number[]; data: number[];
   invisible: boolean; callback: { symbol: string | null };
@@ -65,31 +67,34 @@ function diffFrame(app: Uint8ClampedArray, raw: Buffer): number {
 const fresh = new Map<string, { probe: string; raw: string; map: string }>();
 for (let runNumber = 1; runNumber <= 2; runNumber++) for (const path of args) {
   const fixture = JSON.parse(readFileSync(resolve(path!), "utf8")) as Fixture;
+  const magic = fixture.move === "MAGIC_COAT";
   const scratch = createScratchDir("pokebench-barrier-");
   const output = join(scratch, "probe.json");
   const rgb = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
-  const run = spawnSync("python3", [
+  const probeArgs = [
     join(root, "tools/run-mgba-probe.py"), output, "--",
     join(vendor, "mgba-venv/bin/python"), resolve(root, fixture.probe),
     resolve(root, fixture.scenario), output, rgb,
-  ], { cwd: root, encoding: "utf8" });
+  ];
+  if (magic) probeArgs.push("magic-coat");
+  const run = spawnSync("python3", probeArgs, { cwd: root, encoding: "utf8" });
   if (run.stdout) process.stdout.write(run.stdout);
   if (run.stderr) process.stderr.write(run.stderr);
   if (run.status !== 0) process.exit(run.status ?? 1);
   const bytes = readFileSync(output);
   const probe = JSON.parse(bytes.toString()) as Probe;
   const probeHash = createHash("sha256").update(bytes).digest("hex");
-  if (probe.schema !== "barrier-dense-evidence/v1" || probe.frames.length !== 76
+  if (probe.schema !== `${magic ? "magic-coat" : "barrier"}-dense-evidence/v1` || probe.frames.length !== 76
     || probe.frames[0]!.frame !== fixture.sourceWindow.startFrame
     || probe.frames.at(-1)!.frame !== fixture.sourceWindow.endFrame
     || probe.sourceBounds.start !== Number.parseInt(fixture.sourceBounds.start, 16)
     || probe.sourceBounds.endExclusive !== Number.parseInt(fixture.sourceBounds.endExclusive, 16)
     || probeHash !== fixture.probeJsonSha256) throw new Error(`${fixture.orientation}: probe receipt drift`);
-  const stage = createSceneOnMovePresentation<SceneOnBarrierConfig>({
-    move: "BARRIER", attacker: fixture.attacker, target: fixture.target,
+  const stage = createSceneOnMovePresentation({
+    move: fixture.move, attacker: fixture.attacker, target: fixture.target,
     allocatorProfile: fixture.allocatorProfile, fieldProfile: fixture.fieldProfile,
-  });
+  } as SceneOnBarrierConfig | SceneOnMagicCoatConfig);
   const initialBattle = stable(probe.frames[0]!.battle);
   const rawHash = createHash("sha256");
   const failures: string[] = [];
@@ -97,7 +102,9 @@ for (let runNumber = 1; runNumber <= 2; runNumber++) for (const path of args) {
   for (let i = 0; i < probe.frames.length; i++) {
     const row = probe.frames[i]!;
     const age = row.frame - fixture.sourceWindow.startFrame;
-    const view = sceneOnBarrierView({ ...stage, age });
+    const view = magic
+      ? sceneOnMagicCoatView({ ...stage, age } as ReturnType<typeof createSceneOnMovePresentation<SceneOnMagicCoatConfig>>)
+      : sceneOnBarrierView({ ...stage, age } as ReturnType<typeof createSceneOnMovePresentation<SceneOnBarrierConfig>>);
     const wall = row.wallSprites[0];
     const wallOk = view.wall === null ? wall === undefined : wall !== undefined
       && wall.slot === fixture.allocatorProfile.wall && wall.x === view.wall.x
@@ -112,7 +119,10 @@ for (let runNumber = 1; runNumber <= 2; runNumber++) for (const path of args) {
       && row.soundTaskCount === Number(view.soundTaskActive)
       && row.script.inBounds && same(stable(row.battle), initialBattle);
     if (componentOk) component++;
-    if (same(view, sceneOnBarrierView({ ...stage, age }))) seam++;
+    const repeated = magic
+      ? sceneOnMagicCoatView({ ...stage, age } as ReturnType<typeof createSceneOnMovePresentation<SceneOnMagicCoatConfig>>)
+      : sceneOnBarrierView({ ...stage, age } as ReturnType<typeof createSceneOnMovePresentation<SceneOnBarrierConfig>>);
+    if (same(view, repeated)) seam++;
     const prior = probe.frames[i - 1];
     const priorWall = prior?.wallSprites[0];
     const oam = !priorWall || priorWall.invisible
@@ -120,7 +130,7 @@ for (let runNumber = 1; runNumber <= 2; runNumber++) for (const path of args) {
     // loadspritegfx's first transfer is already visible when the wall is
     // created; callback palette rotations then use the ordinary +1 latch.
     const palette = !prior || age <= 4 || same(row.hardwarePalette, prior.fadedPalette);
-    const tag = !wall || row.paletteTags.includes(10169);
+    const tag = !wall || row.paletteTags.includes(magic ? 10170 : 10169);
     const shapes = row.hardwareOam.length === 128 && row.hardwareMatrices.length === 32
       && row.fadedPalette.length === 512 && row.unfadedPalette.length === 512
       && row.hardwarePalette.length === 512;
@@ -132,7 +142,7 @@ for (let runNumber = 1; runNumber <= 2; runNumber++) for (const path of args) {
     const raw = readFileSync(join(rgb, `${String(row.frame).padStart(5, "0")}.rgb`));
     rawHash.update(raw);
     if (createHash("sha256").update(raw).digest("hex") !== row.sha256) throw new Error("raw frame hash drift");
-    const engine: EngineState = { ...createInitialState(), rngMode: "frontierBattle", sceneOnPresentation: { ...stage, age } };
+    const engine: EngineState = { ...createInitialState(), rngMode: "frontierBattle", sceneOnPresentation: { ...stage, age } as EngineState["sceneOnPresentation"] };
     const diff = diffFrame(render(engine), raw);
     if (diff === 0) framebuffer++;
     if (!componentOk || !hardwareOk || diff !== 0) failures.push(`${row.frame}/age${age}: component=${componentOk} hardware=${hardwareOk} framebufferDiff=${diff}`);
@@ -140,7 +150,7 @@ for (let runNumber = 1; runNumber <= 2; runNumber++) for (const path of args) {
   const rawDigest = rawHash.digest("hex");
   const mapRun = spawnSync("python3", [join(root, "tools/compare/frame-changemap.py"), rgb], { encoding: "utf8" });
   if (mapRun.status !== 0) throw new Error(`${fixture.orientation}: change-map generation failed`);
-  const map = mapRun.stdout.replace(/^# .* —/, `# MOVE_BARRIER ${fixture.orientation} —`);
+  const map = mapRun.stdout.replace(/^# .* —/, `# MOVE_${magic ? "MAGIC_COAT" : "BARRIER"} ${fixture.orientation} —`);
   const mapHash = createHash("sha256").update(map).digest("hex");
   if (rawDigest !== fixture.rawRgbSha256 || mapHash !== fixture.changeMapSha256
     || map !== readFileSync(resolve(root, fixture.changeMap), "utf8")) throw new Error(`${fixture.orientation}: RGB/change-map drift`);

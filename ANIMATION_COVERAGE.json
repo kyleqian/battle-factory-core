@@ -2055,6 +2055,35 @@
    ]
   },
   {
+   "move": "MOVE_MAGIC_COAT",
+   "status": "exact",
+   "covered": [
+    "source and generated Level-50 inventory audits prove move id 277 and challenge-0 set 121 FRONTIER_MON_SPOINK as the lowest legal carrier; the pointer interval is ROM-inclusive 0x082d6c5c through 0x082d6c79, represented by the odd Thumb/data symbol 0x082d6c5d and exclusive Move_WATER_PULSE symbol 0x082d6c7a",
+    "complete legal three-Pokemon mechanicLab parties preserve the real set-156 ONIX moves and constrain only the active SPOINK slots to MAGIC_COAT; the complete first-in-bounds through first-inactive cleanup windows pass twice fresh at 76/76 source/component, typed-seam, software/hardware OAM and matrices, palette/tag/register, attacker-panned SE_M_BARRIER, immutable battle state, raw RGB, and production framebuffer frames in both orientations",
+    "player-back frames 69-144 reproduce probe/raw/change-map c71bd1e2db4fc5833a5c1d7144d5b29a8cf6a5d54e4694b2da2b86801151a377 / 6b1734912efa3c045040b3919d464b1fb4159994ba8ad0669a6c30ee4c3cd0a9 / a2f6f128af566f88024893899b1956f622457da21b51a00f7715f816bca3a43c; opponent-front frames 73-148 reproduce 340502f8ee286c92a655359f17e9782e6496cb070f4f73b1690db802ce791acd / 378e362c97d254d04665a6f6079e9fee512d53bc0bcfcb61a8746ef39dce842b / dd3063a359eeeb2f498742ced8c79cf8717cca6a4f771c1371cfc6676640b254",
+    "the pure source-age reducer reuses only source-identical AnimDefensiveWall timing and geometry from BARRIER while preserving Magic Coat's independent ORANGE_LIGHT_WALL tag/palette, gMagicCoatWallSpriteTemplate, 40-pixel attacker-relative offset, no sparkle, waitplaysewithpan timing, setalpha/blendoff tail, opponent BG-copy/hide/reset lifecycle, and inactive age 75",
+    "deterministic Spoink front/back and orange-wall extraction regenerates byte-for-byte; the typed seam and narrow compositor carry resolved geometry, allocator slot, HP, and gender only and own no Magic Coat battle flag, bounce target, RNG, damage, status, turn, controller, round, or facility state",
+    "the strengthened shared defensive-wall verifier leaves BARRIER bilateral 76/76 exact twice fresh; the mandatory MIRROR_COAT control passes bilateral 75/75 twice fresh with unchanged raw RGB after a metadata-only full-probe receipt refresh; no sibling is promoted and no latch, boundary, barrier, or canonical-import pin changes"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-magic-coat-player-spoink-opponent-onix.json",
+    "tools/battle-lab/mechanic-magic-coat-opponent-spoink-player-onix.json",
+    "tools/compare/fixtures/magic-coat-player-spoink-opponent-onix.json",
+    "tools/compare/fixtures/magic-coat-opponent-spoink-player-onix.json",
+    "tools/compare/evidence/magic-coat-changemap-player.txt",
+    "tools/compare/evidence/magic-coat-changemap-opponent.txt",
+    "tools/compare/barrierProbe.py",
+    "tools/compare/barrierPortable.ts",
+    "tools/compare/magicCoatSourceAudit.ts",
+    "tools/compare/extractMagicCoatAssets.ts",
+    "src/animation/assets/magic-coat.json",
+    "src/animation/barrier.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/magicCoat.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_MEGA_PUNCH",
    "status": "exact",
    "covered": [
@@ -2211,7 +2240,7 @@
    "covered": [
     "the source/inventory/controller audit proves challenge-0 set 151 FRONTIER_MON_CORSOLA is the lowest legal Level-50 carrier (species 222, Mirror Coat 243, Impish, HP+Defense+SpDefense, Sitrus Berry) and finds one reachable animation body: nonzero opposing special damage reaches Move_MIRROR_COAT, while the failure route selects no move-animation body",
     "complete legal three-Pokemon Battle Scene ON parties constrain Exeggcute to real Confusion and Corsola to real Mirror Coat; Mirror Coat's source -5 priority populates gProtectStructs before Cmd_mirrorcoatdamagecalculator doubles 26 to 52 player-back and 31 to 62 opponent-front, without injecting transient damage or counter state",
-    "fresh dense probes cover first active gMirrorCoatWallSpriteTemplate creation through the first inactive cleanup twice reproducibly in both orientations: player-back frames 349-423 pass 75/75 source/component/hardware/raw-RGB/production-framebuffer checks with evidence 1ea5591d85dc0e4926b8e763584f405ed4ec72d43c676ad06fc551cedb44aa92 and raw RGB c8a70485e2d13ae522c31760ee7e6ecb24bb464eb567427855448389ab1128a7; opponent-front frames 355-429 pass 75/75 with evidence 3328d443c81b35a5305590705e7448d009aa0111a326b318c08b420a29939a7d and raw RGB 0fcba1ad43f479f613f84243bca184e10f4545e7e6566558327c081444b73b5b",
+    "fresh dense probes cover first active gMirrorCoatWallSpriteTemplate creation through the first inactive cleanup twice reproducibly in both orientations: player-back frames 349-423 pass 75/75 source/component/hardware/raw-RGB/production-framebuffer checks with evidence ebc190bd54157d237ac2784fa409db158037823d039497059c9e2d8042a47ced and raw RGB c8a70485e2d13ae522c31760ee7e6ecb24bb464eb567427855448389ab1128a7; opponent-front frames 355-429 pass 75/75 with evidence 5decc45188f5d85341e4186755197bf4c0848eaeb57d74aa77a5db67edaa2f6a and raw RGB 0fcba1ad43f479f613f84243bca184e10f4545e7e6566558327c081444b73b5b",
     "the reducer and typed seam reuse only source-identical AnimDefensiveWall and all six SpecialScreenSparkle/AnimWallSparkle lifecycles; Mirror Coat preserves RED_LIGHT_WALL/gMirrorCoatWallSpriteTemplate, wall-before-audio delay-10 plus immediate attacker-panned SE_M_REFLECT, no Light Screen sound task, palette rotation, opponent BG transfer/visibility, OAM/VBlank latches, blend/register tail, and complete cleanup",
     "source-derived Corsola front/back and shared wall tiles with the red palette regenerate byte-for-byte; the production compositor carries only resolved Corsola/Exeggcute geometry, allocator slots, HP, and gender, and owns no counter/damage calculation, accuracy, RNG, controller, turn order/advancement, or facility state",
     "MOVE_LIGHT_SCREEN independently batch-reruns 115/115 player-back and 119/119 opponent-front twice fresh with unchanged evidence/raw hashes and remains exact",

@@ -33,7 +33,7 @@ describe("MOVE_MIRROR_COAT exact evidence", () => {
           specialDmg: 26, specialBattlerId: 1, resolvedDamage: 52,
         },
         evidence:
-          "1ea5591d85dc0e4926b8e763584f405ed4ec72d43c676ad06fc551cedb44aa92",
+          "ebc190bd54157d237ac2784fa409db158037823d039497059c9e2d8042a47ced",
         raw:
           "c8a70485e2d13ae522c31760ee7e6ecb24bb464eb567427855448389ab1128a7",
       },
@@ -46,7 +46,7 @@ describe("MOVE_MIRROR_COAT exact evidence", () => {
           specialDmg: 31, specialBattlerId: 0, resolvedDamage: 62,
         },
         evidence:
-          "3328d443c81b35a5305590705e7448d009aa0111a326b318c08b420a29939a7d",
+          "5decc45188f5d85341e4186755197bf4c0848eaeb57d74aa77a5db67edaa2f6a",
         raw:
           "0fcba1ad43f479f613f84243bca184e10f4545e7e6566558327c081444b73b5b",
       },

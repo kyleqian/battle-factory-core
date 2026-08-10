@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_MAGIC_COAT exact — bilateral 76/76 orange defensive-wall promotion (2026-08-10 worker)
+
+- **State:** Coverage advances **149→150/276 exact**, 0 partial, 0 staged, **127→126 unsupported**. Magic Coat alone moves; boundary, unsupported-barrier, and latch pins are unchanged.
+- **Did:** Added complete legal set-121 SPOINK/ONIX bilateral stages that preserve ONIX's real moves, a pointer-bounded dense Scene-ON probe, receipts/change maps, deterministic Spoink/orange-wall extraction, a pure parameterized defensive-wall reducer, typed seam, and narrow compositor. Magic Coat independently pins its orange tag/palette, 40px offset, BARRIER wait audio, no-sparkle body, BG-copy/hide/reset, alpha/palette rotation, hardware transfer, and cleanup.
+- **Verified:** Twice fresh, player-back frames **69..144** and opponent-front **73..148** each pass **76/76 component+seam+hardware+raw-RGB+framebuffer**. Player probe/raw/map: `c71bd1e2…` / `6b173491…` / `a2f6f128…`; opponent: `340502f8…` / `378e362c…` / `dd3063a3…`. BARRIER stays bilateral **76/76** twice fresh. Mandatory MIRROR_COAT stays bilateral **75/75** twice fresh with unchanged raw RGB; its full-probe receipt was refreshed to current stable metadata.
+- **Next:** Supervisor selects the next independent move; do not promote Protect or another defensive-wall sibling from shared code.
+- **Notes:** The ROM-inclusive body is `0x082d6c5c..0x082d6c79`; `nm` exposes the odd data symbol `0x082d6c5d` and exclusive `Move_WATER_PULSE` at `0x082d6c7a`. No new latch was observed. No gameplay flag/bounce target, damage/status/RNG, turn/controller/round/facility state, canonical import, boundary widening, barrier, or absolute-tick branch changed.
+
 ## MOVE_BATON_PASS exact — bilateral 53/53 Poké Ball/blend promotion (2026-08-09 worker)
 
 - **State:** Coverage advances **148→149/276 exact**, 0 partial, 0 staged, **128→127 unsupported**. Baton Pass alone moves; boundary and unsupported-barrier pins are unchanged.
