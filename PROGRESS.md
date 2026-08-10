@@ -5,24 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1077 — [supervisor, 2026-08-10 ~08:58] **Orient: latest animation work folded; union green; #55 construction clock is next**
+## 1077 — [supervisor, 2026-08-10 ~09:35] **#55 source-operation construction clock landed; exact cycle evidence is next**
 
-- **State:** `animation-main` was ahead by 12 commits. The fold fast-forwarded
-  `master` to `81f89ae6`, adding Drill Peck, Submission, and Spite animation
-  work. The union is green: full suite **875 files / 8,392 passed / 1
-  skipped**, production build clean, and both oracle services are current.
-- **Did:** read the S8 authoritative reset and enforced its stop on the old
-  canonical Battle-2 march. Re-oriented the playable seven-battle loop
-  against the remaining generic OFF-profile boundary instead: ISSUES #55's
-  source/cycle construction clock, which blocks personality-exact live next-
-  opponent generation and the swap-screen ambient RNG continuation.
-- **Next:** derive and land the smallest source-general deterministic clock
-  that reproduces the committed anchor/LILIANA/varied receipts, then wire it
-  into generic round opponent construction and extend the Battle Scene OFF
-  next-opponent presentation proof. Do not add trainer, battle-number, turn,
-  or absolute-tick branches.
-- **Notes:** DEFERRED.md remains empty. The animation supervisor owns any
-  later `animation-main` commits; re-check that branch at wind-down.
+- **State:** master `adac4aca` is green after the side-lane fold: smoke
+  **375/375**, construction-clock focus **15/15**, typecheck, and production
+  build pass. The worker's final full suite was **876 files / 8,395 passed /
+  1 skipped**. Both Battle Scene OFF/ON services are current.
+- **Did:** folded 12 pending animation commits first (Drill Peck, Submission,
+  Spite), then landed #55's source-operation construction scheduler, clean-
+  stream mode, injectable VBlank callback/cycle costs, optional mGBA master-
+  cycle probe, evidence boundary, and idempotence pins. The model contains no
+  trainer, battle, canonical-tick, or fixture schedule branch. Supervisor
+  verification caught and fixed one narrowed callback type before merge.
+- **Next:** use the opt-in probe to commit a v2 cycle receipt with initial
+  phase and source-operation boundary costs for anchor/LILIANA/varied. Only
+  then fit a source-general cost model, wire generic round construction, and
+  extend the OFF-profile next-opponent presentation proof.
+- **Notes:** the live wiring is deliberately not claimed: v1 receipts lack
+  the necessary per-operation cycle evidence and ambient callback cost.
+  DEFERRED.md remains empty. Re-check `animation-main` at wind-down.
 
 ## 1076 — [supervisor, 2026-08-10 ~03:00] **Session wind-down: S10 closed, 9 workers + 1 audit, all folds green**
 

@@ -1057,6 +1057,20 @@ Receipt §7 names the scaffold wiring fields (`winTerminalWindowStage`
 `rngValue`/`playerTrainerId`/`savedRentalRecords` + the per-mon schedule);
 the wiring step is queued.
 
+**Executable clock checkpoint (2026-08-10, `adac4aca`):**
+`src/engine/factoryConstructionClock.ts` now provides a source-operation
+scheduler with one raw RNG cursor, nature-rejection loops, injectable
+operation-cycle costs, VBlank ambient callbacks (including callback cycle
+cost), frame/event ledgers, and a separately named clean-stream mode. Its
+cost key exposes source function, species/nature/EV inputs, operation kind,
+attempt, and Random32 half; it cannot see trainer id, battle index, canonical
+tick, or a receipt schedule. Focused tests are **15/15** and preserve the
+three exact v1 receipt totals (**294/143/232 events**). An opt-in
+`FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1` probe path now records mGBA master
+cycles without changing v1 output. Live wiring remains open: a v2 receipt
+must bank initial phase, source-operation boundary costs, and ambient callback
+cost/order before the generic controller can supply a truthful cost model.
+
 **Lead:** implement the deterministic construction-clock contract above only
 as a deliberate source/cycle-model slice. Per-mon cursors and per-frame fixture
 schedules are now evidence-refuted as production designs. Until then, keep the

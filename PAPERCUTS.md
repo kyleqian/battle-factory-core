@@ -137,7 +137,7 @@ history.
   polling. Don't reach for a workaround (backgrounding, pkill, chunking) on
   the assumption the suite cannot fit — twice now that assumption, not the
   runtime, was the thing that cost the session time.
-- **Hits:** 9 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
+- **Hits:** 10 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
   contention from concurrent side/animation runs — auto-backgrounded; worker
   recovered by pid-polling, ~5 min lost. 2026-08-03: terminal-seam scout,
   ~6 min of foreground-poll waiting. 2026-08-04 R3: two workers same round —
@@ -156,7 +156,9 @@ history.
   reran the suite explicitly, ~14 min lost. 2026-08-08: the printfromtable
   worker lost two exit markers, leaving both suites alive, and started a third
   explicit-exit run; the supervisor killed only the two duplicates, ~8 min
-  lost and heavy cross-lane contention.)
+  lost and heavy cross-lane contention. 2026-08-10: the #55 side worker's
+  green full-suite summary was truncated, leading to redundant reporter and
+  redirected-log passes; ~5 min lost.)
 - **Possible durable fix:** teach the worker preamble (or the brief
   template) to pass an explicit long timeout for the final full-suite call
   (the tool accepts up to 10 min per call; the suite may soon exceed even
