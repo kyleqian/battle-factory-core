@@ -36,8 +36,8 @@ describe("MOVE_DRILL_PECK bilateral Scene-ON evidence checkpoint", () => {
       probeJsonSha256: expected.probe, rawRgbSha256: expected.raw,
       changeMapSha256: expected.map,
       acceptance: {
-        status: "evidence-only", completeDenseWindow: 91,
-        reducer: 0, typedSeam: 0, framebuffer: 0,
+        status: "exact", completeDenseWindow: 91,
+        reducer: 91, typedSeam: 91, framebuffer: 91,
       },
     });
     expect(createHash("sha256").update(readFileSync(fixture.changeMap)).digest("hex"))
@@ -75,14 +75,17 @@ describe("MOVE_DRILL_PECK bilateral Scene-ON evidence checkpoint", () => {
     ]) expect(probe).toContain(pin);
   });
 
-  it("keeps a twice-fresh Scene-ON verifier while honestly withholding promotion", () => {
+  it("keeps a twice-fresh exact Scene-ON verifier load-bearing", () => {
     const evidence = readFileSync("tools/compare/drillPeckEvidence.ts", "utf8");
     for (const pin of [
       "tools/run-mgba-probe.py", "frame-changemap.py", "runNumber <= 2",
       "startsAcrossWindow", "AnimTask_DrillPeckHitSplats", "AnimTask_ShakeMon2_Step",
       "Task_LoopAndPlaySE", "concatenated raw RGB", "battle outcome mutated",
-      "incomplete hardware receipt", "first inactive cleanup",
+      "incomplete hardware receipt", "display registers changed",
+      "first inactive cleanup", "production framebuffer", "typed seam",
     ]) expect(evidence).toContain(pin);
-    expect(evidence).not.toMatch(/render\(|sceneOnDrillPeck|framebufferDiff/);
+    expect(evidence).toMatch(/render\(/);
+    expect(evidence).toContain("sceneOnDrillPeckView");
+    expect(evidence).toContain("drillPeckAtAge");
   });
 });

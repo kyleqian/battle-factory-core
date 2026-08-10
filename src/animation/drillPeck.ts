@@ -15,6 +15,8 @@ export interface DrillPeckBowController {
 }
 
 export interface DrillPeckImpact {
+  readonly spawnAge: number;
+  readonly oamSlot: number;
   readonly x: number;
   readonly y: number;
   readonly animation: 3;
@@ -50,6 +52,9 @@ export interface DrillPeckState {
 const IDENTITY: DrillPeckMatrix = { a: 256, b: 0, c: 0, d: 256 };
 const IMPACT_MATRIX: DrillPeckMatrix = { a: 512, b: 0, c: 0, d: 512 };
 const SPLAT_SPAWNS = [28, 31, 35, 39, 43, 47, 51, 55] as const;
+// The normal sprite allocator reuses each completed splat's slot in source
+// order; equal-priority OBJ overlap follows this OAM order.
+const SPLAT_OAM_SLOTS = [4, 3, 5, 7, 4, 3, 5, 7] as const;
 
 function rotationMatrix(angle: number): DrillPeckMatrix {
   const index = angle >> 8 & 0xff;
@@ -95,12 +100,18 @@ function impactsAtAge(
     if (localAge < 0 || localAge > 12) return [];
     const angle = index * 32;
     return [{
+      spawnAge,
+      oamSlot: SPLAT_OAM_SLOTS[index]!,
       x: targetCenter.x + horizontalSign * signedSine(angle, -13),
       y: targetCenter.y + signedSine(angle + 64, -13),
       animation: 3 as const,
-      // AnimFlashingHitSplat_Step toggles visibility before incrementing
-      // data[0]. The first receipt is data[0]=1 and the last is 13.
-      invisible: (localAge + 1) % 2 === 1,
+      // The first allocation is already on its first callback receipt
+      // (`data[0]=1`); later task-created allocations are captured at their
+      // creation receipt (`data[0]=0`). Each callback toggles before the
+      // counter advances, and the final receipt is data[0]=13.
+      invisible: index === 0
+        ? (localAge + 1) % 2 === 1
+        : localAge % 2 === 1,
       matrix: IMPACT_MATRIX,
     }];
   });

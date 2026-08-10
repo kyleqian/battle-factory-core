@@ -950,6 +950,32 @@
    ]
   },
   {
+   "move": "MOVE_DRILL_PECK",
+   "status": "exact",
+   "covered": [
+    "complete legal challenge-3 Level-50 Fearow/Onix parties with all four Fearow choices constrained to DRILL PECK pass the full Battle Scene ON body through first inactive cleanup in both orientations twice fresh: player-back frames 74-164 and opponent-front frames 78-168, 91/91 each",
+    "the pure source-relative reducer and typed Scene-ON seam pin all three gBowMonSpriteTemplate phases, eight AnimTask_DrillPeckHitSplats IMPACT allocations with source OAM reuse/order and flashing receipts, target ShakeMon2, looped HORN_ATTACK audio, loaded-but-unused WHIRLWIND_LINES, six-tick return slide, side-relative rotation/translation, tags, and cleanup at all 91 ages bilaterally",
+    "the narrow production compositor uses source-derived FEAROW back/front and ONIX art plus established field/chrome assets; it ports the hardware OAM/matrix/palette/register/audio/state receipts, source SortSprites splat painter order, task-to-framebuffer latches, elevated Fearow shadow receipt, healthboxes, move text, and cleanup without owning damage, RNG, turn, controller, round, or facility state",
+    "drillPeckEvidence.ts reruns both committed probes through tools/run-mgba-probe.py twice fresh and proves 91/91 pointer/task/sprite/software-OAM/hardware-OAM/matrix/palette/register/audio/state/raw-RGB, reducer, typed-seam, and production shared-framebuffer frames in each orientation; probe and raw digests remain 3dfa1176.../8e4bab34... player and 48356792.../ab2adf5f... opponent",
+    "MOVE_HEADBUTT remains bilateral exact through its own complete dense acceptance; no shared animation boundary, unsupported barrier, canonical recording, sibling coverage, or gameplay state changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-drill-peck-player-fearow-opponent-onix.json",
+    "tools/battle-lab/mechanic-drill-peck-opponent-fearow-player-onix.json",
+    "tools/compare/fixtures/drill-peck-player-fearow-opponent-onix.json",
+    "tools/compare/fixtures/drill-peck-opponent-fearow-player-onix.json",
+    "tools/compare/drillPeckProbe.py",
+    "tools/compare/drillPeckEvidence.ts",
+    "tools/compare/evidence/drill-peck-changemap-player.txt",
+    "tools/compare/evidence/drill-peck-changemap-opponent.txt",
+    "src/animation/drillPeck.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/drillPeck.test.ts",
+    "tests/animation/drillPeckEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_DYNAMIC_PUNCH",
    "status": "exact",
    "covered": [
@@ -1684,8 +1710,7 @@
     "headbuttProbe.py records every currentMove=29 frame through tools/run-mgba-probe.py, and headbuttEvidence.ts proves the dense reducer/component, software callback/task, hardware battler OAM/matrix/palette/register, audio, raw-RGB, shared-framebuffer, and first-clear receipts twice fresh; independent outputs are byte-identical with player digest 28e574bdd25de356a9dea0d6866024c7f8c3ff23911929fbd68c8737861ec858 and opponent digest fcc0a0e8ca5eef91ce7d68f5ca0419f66fe5942f170536e48595619658de1281",
     "source extraction byte-pins ZIGZAGOON front/back and reuses the independently source-generated ANIM_TAG_IMPACT asset; the narrow compositor ports prior-software battler affine/OAM display, the source task-to-OAM latch for both simultaneous shakes, flashing IMPACT visibility, field chrome, both healthboxes, move text, and 48/48 shared-framebuffer equality twice fresh in both orientations",
     "MOVE_HORN_ATTACK remains unsupported because it adds ANIM_TAG_HORN_HIT and gHornHitSpriteTemplate and lacks independent complete dense acceptance",
-    "MOVE_HORN_DRILL remains unsupported because it adds drill BG/scroll, horn sprite, long dual shakes, and repeated impacts and lacks independent complete dense acceptance",
-    "MOVE_DRILL_PECK remains unsupported because it adds whirlwind assets, AnimTask_DrillPeckHitSplats, looped sound, and ShakeMon2 and lacks independent complete dense acceptance"
+    "MOVE_HORN_DRILL remains unsupported because it adds drill BG/scroll, horn sprite, long dual shakes, and repeated impacts and lacks independent complete dense acceptance"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-headbutt-player-zigzagoon-opponent-onix.json",
@@ -3978,8 +4003,7 @@
     "the source-relative typed reducer ports ANIM_TAG_WHIRLWIND_LINES load/lifetime, all six gWhirlwindLineSpriteTemplate callbacks and five-cell flip animation, target AnimTask_ShakeMon2, AnimTask_TranslateMonEllipticalRespectSide, AnimTask_SlideOffScreen, both side-relative sound programs, the source wait tail, and first inactive cleanup without forced-switch gameplay ownership",
     "source extraction regenerates Butterfree front/back and WHIRLWIND_LINES art byte-for-byte; the source audit pins all five assigned components and the legal carrier while hermetic tests pin both orientations, component schedules, side geometry, cleanup, and the narrow typed seam",
     "the production shared-framebuffer compositor reuses battle background, battler, healthbox, window, text, and enemy-shadow primitives; it ports prior-callback OAM display latches and side-relative SortSprites ordering without absolute ticks, fitted colors/coordinates, baked frames, or gameplay ownership",
-    "whirlwindEvidence.ts reruns both complete legal probes twice fresh and proves every reducer/seam/component frame plus software/hardware OAM and matrices, palette buffers/transfers and tags, registers, side-relative audio, unchanged battle state, raw RGB, and 83/83 production shared framebuffers",
-    "MOVE_DRILL_PECK remains unsupported: although it shares ANIM_TAG_WHIRLWIND_LINES, its independent body adds three gBowMonSpriteTemplate phases, AnimTask_DrillPeckHitSplats with repeated flashing IMPACT sprites, looped HORN_ATTACK sound, target ShakeMon2, slide restoration, damage/controller presentation, and lacks its own complete dense both-orientation acceptance"
+    "whirlwindEvidence.ts reruns both complete legal probes twice fresh and proves every reducer/seam/component frame plus software/hardware OAM and matrices, palette buffers/transfers and tags, registers, side-relative audio, unchanged battle state, raw RGB, and 83/83 production shared framebuffers"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-whirlwind-player-butterfree-opponent-onix.json",

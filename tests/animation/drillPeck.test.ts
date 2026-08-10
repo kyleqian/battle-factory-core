@@ -7,6 +7,21 @@ import {
 
 const PLAYER_TARGET = { x: 176, y: 42 } as const;
 const OPPONENT_TARGET = { x: 72, y: 88 } as const;
+const SPLAT_SPAWNS = [28, 31, 35, 39, 43, 47, 51, 55] as const;
+const SPLAT_OAM_SLOTS = [4, 3, 5, 7, 4, 3, 5, 7] as const;
+// AnimTask_DrillPeckHitSplats uses Sin/Cos at 32-degree source steps with a
+// -13 amplitude. These are the exact signed source receipts from the dense
+// probe, kept here as a relative contract rather than screen coordinates.
+const SPLAT_RELATIVE_POINTS = [
+  { x: 0, y: -13 },
+  { x: -10, y: -10 },
+  { x: -13, y: 0 },
+  { x: -10, y: 9 },
+  { x: 0, y: 13 },
+  { x: 9, y: 9 },
+  { x: 13, y: 0 },
+  { x: 9, y: -10 },
+] as const;
 
 function denseAges() {
   return Array.from({ length: 91 }, (_, age) => age);
@@ -28,8 +43,32 @@ function expectedPhase(age: number): number[] {
 }
 
 function expectedImpactCount(age: number): number {
-  return [28, 31, 35, 39, 43, 47, 51, 55]
+  return SPLAT_SPAWNS
     .filter((spawn) => age >= spawn && age <= spawn + 12).length;
+}
+
+function expectedImpacts(
+  age: number,
+  targetSide: "player" | "opponent",
+  targetCenter: Readonly<{ x: number; y: number }>,
+) {
+  const horizontalSign = targetSide === "player" ? -1 : 1;
+  return SPLAT_SPAWNS.flatMap((spawnAge, index) => {
+    const localAge = age - spawnAge;
+    if (localAge < 0 || localAge > 12) return [];
+    const point = SPLAT_RELATIVE_POINTS[index]!;
+    return [{
+      spawnAge,
+      oamSlot: SPLAT_OAM_SLOTS[index],
+      x: targetCenter.x + horizontalSign * point.x,
+      y: targetCenter.y + point.y,
+      animation: 3 as const,
+      invisible: index === 0
+        ? (localAge + 1) % 2 === 1
+        : localAge % 2 === 1,
+      matrix: { a: 512, b: 0, c: 0, d: 512 },
+    }];
+  });
 }
 
 describe("MOVE_DRILL_PECK source-relative reducer", () => {
@@ -44,6 +83,9 @@ describe("MOVE_DRILL_PECK source-relative reducer", () => {
     );
     expect(states.map((state) => state.impacts.length)).toEqual(
       denseAges().map(expectedImpactCount),
+    );
+    expect(states.map((state) => state.impacts)).toEqual(
+      denseAges().map((age) => expectedImpacts(age, "opponent", PLAYER_TARGET)),
     );
     expect(states.map((state) => [
       state.active,
@@ -111,7 +153,7 @@ describe("MOVE_DRILL_PECK source-relative reducer", () => {
         geometry: {
           side: "player",
           spriteCorner: { x: 40, y: 53 },
-          animationCenter: { x: 72, y: 93 },
+          animationCenter: { x: 72, y: 85 },
           battlePositionCenter: { x: 72, y: 80 },
         },
       },

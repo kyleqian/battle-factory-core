@@ -2,6 +2,12 @@ import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { readFileSync, readdirSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { drillPeckAtAge } from "../../src/animation/drillPeck.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnDrillPeckView,
+} from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture {
@@ -38,6 +44,12 @@ interface Sprite {
   readonly callback: Ident;
   readonly inUse: boolean;
   readonly data: readonly number[];
+  readonly x: number;
+  readonly y: number;
+  readonly x2: number;
+  readonly y2: number;
+  readonly invisible: boolean;
+  readonly matrix: readonly number[];
 }
 interface Task { readonly func: Ident; readonly data: readonly number[] }
 interface SoundPlayer { readonly songHeader: number; readonly status: number }
@@ -136,11 +148,12 @@ function verify(fixturePath: string, runNumber: number): void {
       && fixture.oracleProfile === "battle-scene-on"
       && fixture.move === "DRILL_PECK"
       && fixture.moveId === 65
-      && fixture.acceptance.status === "evidence-only"
-      && fixture.acceptance.reducer === 0
-      && fixture.acceptance.typedSeam === 0
-      && fixture.acceptance.framebuffer === 0,
-    `${fixture.orientation}: invalid honest evidence-only fixture`,
+      && fixture.acceptance.status === "exact"
+      && fixture.acceptance.completeDenseWindow === 91
+      && fixture.acceptance.reducer === 91
+      && fixture.acceptance.typedSeam === 91
+      && fixture.acceptance.framebuffer === 91,
+    `${fixture.orientation}: invalid exact acceptance fixture`,
   );
   const scratch = createScratchDir("pokebench-drill-peck-evidence-");
   const output = join(scratch, "probe.json");
@@ -184,6 +197,49 @@ function verify(fixturePath: string, runNumber: number): void {
     && frames.at(-1)?.frame === fixture.sourceWindow.endFrame,
   `${fixture.orientation}: source endpoints changed`);
 
+  const playerToOpponent = fixture.orientation === "player-back";
+  const stage = createSceneOnMovePresentation({
+    move: "DRILL_PECK",
+    attacker: {
+      species: "FEAROW",
+      geometry: playerToOpponent
+        ? {
+            side: "player", spriteCorner: { x: 40, y: 53 },
+            animationCenter: { x: 72, y: 85 },
+            battlePositionCenter: { x: 72, y: 80 },
+          }
+        : {
+            side: "opponent", spriteCorner: { x: 144, y: 2 },
+            animationCenter: { x: 176, y: 34 },
+            battlePositionCenter: { x: 176, y: 40 },
+          },
+    },
+    target: {
+      species: "ONIX",
+      geometry: playerToOpponent
+        ? {
+            side: "opponent", spriteCorner: { x: 144, y: 10 },
+            animationCenter: { x: 176, y: 42 },
+            battlePositionCenter: { x: 176, y: 40 },
+          }
+        : {
+            side: "player", spriteCorner: { x: 40, y: 48 },
+            animationCenter: { x: 72, y: 88 },
+            battlePositionCenter: { x: 72, y: 80 },
+          },
+    },
+    fieldProfile: {
+      playerHp: playerToOpponent ? 140 : 110,
+      playerMaxHp: playerToOpponent ? 140 : 110,
+      opponentHp: playerToOpponent ? 110 : 140,
+      opponentMaxHp: playerToOpponent ? 110 : 140,
+    },
+  });
+  let reducerMatched = 0;
+  let typedSeamMatched = 0;
+  let framebufferMatched = 0;
+  const framebufferErrors: string[] = [];
+
   const attacker = fixture.orientation === "player-back" ? 0 : 1;
   const target = attacker ^ 1;
   const sourceStart = probe.sourceBounds.start;
@@ -199,17 +255,91 @@ function verify(fixturePath: string, runNumber: number): void {
       && frame.hardwarePalette.length === 512 && frame.paletteTags.length === 16
       && frame.tileTags.length === 128 && Object.keys(frame.registers).length === 4,
     `${fixture.orientation}: incomplete hardware receipt at ${frame.frame}`);
-    assert(sha256(readFileSync(join(rgbDir, `${String(frame.frame).padStart(5, "0")}.rgb`))) === frame.sha256,
+    assert(JSON.stringify(frame.registers) === JSON.stringify({
+      dispcnt: 0xbf40, bldcnt: 0, bldalpha: 0, bldy: 0,
+    }), `${fixture.orientation}: display registers changed at ${frame.frame}`);
+    const raw = readFileSync(join(rgbDir, `${String(frame.frame).padStart(5, "0")}.rgb`));
+    assert(sha256(raw) === frame.sha256,
       `${fixture.orientation}: raw RGB mismatch at ${frame.frame}`);
     if (index + 1 < frames.length) {
       assert(frame.animScriptActive && frame.scriptOffset !== null
         && frame.scriptPtr >= sourceStart && frame.scriptPtr < sourceEnd,
-      `${fixture.orientation}: script left source body early at ${frame.frame}`);
+        `${fixture.orientation}: script left source body early at ${frame.frame}`);
     } else {
       assert(!frame.animScriptActive && frame.scriptOffset === null,
         `${fixture.orientation}: first inactive cleanup was not captured`);
     }
+
+    const age = index;
+    const expected = drillPeckAtAge(
+      age,
+      playerToOpponent ? "player" : "opponent",
+      playerToOpponent ? "opponent" : "player",
+      playerToOpponent ? { x: 176, y: 42 } : { x: 72, y: 88 },
+    );
+    const seam = sceneOnDrillPeckView({ ...stage, age });
+    const seamState = {
+      attackerSide: seam.attackerSide,
+      targetSide: seam.targetSide,
+      attackerOffset: seam.attackerOffset,
+      attackerMatrix: seam.attackerMatrix,
+      targetOffset: seam.targetOffset,
+      controllers: seam.controllers,
+      impacts: seam.impacts,
+      slideActive: seam.slideActive,
+      slideToOriginalCount: seam.slideToOriginalCount,
+      hitSplatTaskActive: seam.hitSplatTaskActive,
+      shakeTaskActive: seam.shakeTaskActive,
+      loopAudioActive: seam.loopAudioActive,
+      loadedTags: seam.loadedTags,
+      whirlwindLinesUsed: seam.whirlwindLinesUsed,
+      sound: seam.sound,
+      active: seam.active,
+    };
+    if (JSON.stringify(expected) === JSON.stringify(seamState)) {
+      reducerMatched += 1;
+      typedSeamMatched += 1;
+    }
+
+    const engine: EngineState = {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const app = render(engine);
+    let different = 0;
+    let minX = 240;
+    let minY = 160;
+    let maxX = -1;
+    let maxY = -1;
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      if (app[pixel * 4] === raw[pixel * 3]
+        && app[pixel * 4 + 1] === raw[pixel * 3 + 1]
+        && app[pixel * 4 + 2] === raw[pixel * 3 + 2]) continue;
+      different += 1;
+      const x = pixel % 240;
+      const y = Math.floor(pixel / 240);
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+    if (different === 0) framebufferMatched += 1;
+    else if (framebufferErrors.length < 20) {
+      framebufferErrors.push(
+        `frame ${frame.frame}/age ${age}: ${different}px `
+        + `bbox=${minX},${minY}..${maxX},${maxY}`,
+      );
+    }
   }
+
+  assert(reducerMatched === 91,
+    `${fixture.orientation}: reducer ${reducerMatched}/91`);
+  assert(typedSeamMatched === 91,
+    `${fixture.orientation}: typed seam ${typedSeamMatched}/91`);
+  assert(framebufferMatched === 91,
+    `${fixture.orientation}: production framebuffer ${framebufferMatched}/91`
+      + (framebufferErrors.length ? `\n${framebufferErrors.join("\n")}` : ""));
 
   const rawHash = createHash("sha256");
   for (const name of readdirSync(rgbDir).filter((name) => name.endsWith(".rgb")).sort()) {
@@ -268,7 +398,10 @@ function verify(fixturePath: string, runNumber: number): void {
     `${fixture.orientation}: committed change map digest changed`);
   console.log(
     `${fixture.orientation} run ${runNumber}: ${frames.length}/${frames.length} `
-    + `pointer/task/sprite/hardware/palette/audio/state/raw-RGB frames; `
+    + `pointer/task/sprite/hardware/palette/register/audio/state/raw-RGB `
+    + `frames; reducer ${reducerMatched}/${frames.length}; `
+    + `typed seam ${typedSeamMatched}/${frames.length}; `
+    + `framebuffer ${framebufferMatched}/${frames.length}; `
     + `probe ${evidenceDigest}; raw ${rawDigest}`,
   );
 }

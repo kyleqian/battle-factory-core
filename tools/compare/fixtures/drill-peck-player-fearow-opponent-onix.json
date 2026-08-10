@@ -14,5 +14,5 @@
   "changeMapSha256": "2904db856f8356627f7a97258dcc2f74d8ff867dbb2215b2949d0200c558baf5",
   "attacker": {"species": "FEAROW", "side": "player", "art": "back"},
   "target": {"species": "ONIX", "side": "opponent", "art": "front"},
-  "acceptance": {"status": "evidence-only", "completeDenseWindow": 91, "reducer": 0, "typedSeam": 0, "framebuffer": 0}
+  "acceptance": {"status": "exact", "completeDenseWindow": 91, "reducer": 91, "typedSeam": 91, "framebuffer": 91}
 }

@@ -1400,6 +1400,7 @@ const kabutoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentF
 const KABUTO_CORNER = { x: 144, y: 25 };
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
+const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
 const aipomFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).AIPOM!;
 const crawdauntFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CRAWDAUNT!;
@@ -1944,6 +1945,7 @@ const ivysaurBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSp
 const aipomBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).AIPOM!;
 const kadabraBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).KADABRA!;
 const grovyleBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GROVYLE!;
+const fearowBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).FEAROW!;
 const battleAnimGhostBg = battleAnimGhostBgAsset as {
   tileset: Tileset;
   palette: RgbColor[];
@@ -18770,6 +18772,155 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "ZIGZAGOON used" : "Foe ZIGZAGOON used",
       "HEADBUTT!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "DRILL_PECK") {
+    const drillPeckState =
+      state as SceneOnMovePresentationState<SceneOnDrillPeckConfig>;
+    const view = sceneOnDrillPeckView(drillPeckState);
+    // The hardware OAM transfer precedes the callbacks represented by the
+    // reducer. Drawing the preceding source-relative age preserves that
+    // latch for BowMon, ShakeMon2, the flashing splats, and the final slide.
+    const displayed = sceneOnDrillPeckView({
+      ...drillPeckState,
+      age: drillPeckState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "FEAROW"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "FEAROW"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged DRILL_PECK pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const fearow = playerToOpponent ? fearowBackSprite : fearowFrontSprite;
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent && displayed.age < 28
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // ShakeMon2 writes the target in source ages 27..62; battler OAM is
+    // built one age later and the framebuffer consumes that OAM one age
+    // later again. The shared source port makes this two-age scanout latch
+    // explicit instead of treating the software x2 receipt as pixels.
+    const targetShakeDisplayX2 = state.age >= 29
+      ? shakeMon2OffsetAtTick(4, 0, 18, 1, state.age - 29).x2
+      : 0;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    // The opponent Fearow's elevated shadow is still present in the first
+    // Scene-ON scanout while the source callback has already marked the
+    // shadow sprite invisible. It clears on the next source-relative age.
+    if (opponentToPlayer && state.age === 0) {
+      const shadowX = 176 - battleEnemyShadow.width / 2;
+      const shadowY = 40 + 29 - battleEnemyShadow.height / 2;
+      for (const pixel of battleEnemyShadow.mask) {
+        setPixel(
+          fb,
+          shadowX + pixel % battleEnemyShadow.width,
+          shadowY + Math.floor(pixel / battleEnemyShadow.width),
+          battleEnemyShadow.color,
+        );
+      }
+    }
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetIdle.x2 + targetShakeDisplayX2,
+      view.target.geometry.spriteCorner.y
+        + targetIdle.y2 + displayed.targetOffset.y2,
+    );
+    drawSpriteSheetAffineRotate(
+      fb,
+      fearow.tileset,
+      fearow.palette,
+      view.attacker.geometry.animationCenter.x
+        + displayed.attackerOffset.x2,
+      view.attacker.geometry.animationCenter.y
+        + displayed.attackerOffset.y2,
+      displayed.attackerMatrix.a,
+      displayed.attackerMatrix.b,
+      displayed.attackerMatrix.c,
+      displayed.attackerMatrix.d,
+      undefined,
+      true,
+    );
+    for (const impact of displayed.impacts.slice().sort(
+      (left, right) => left.y - right.y
+        || right.oamSlot - left.oamSlot,
+    )) {
+      // Later allocations have a visible software receipt before their first
+      // positioned OAM transfer; hold that creation age. The first allocation
+      // already begins with its source-invisible receipt.
+      if (impact.spawnAge !== 28 && displayed.age === impact.spawnAge) {
+        continue;
+      }
+      if (impact.invisible) continue;
+      drawSpriteSheetAffineRotate(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        impact.x,
+        impact.y,
+        impact.matrix.a,
+        impact.matrix.b,
+        impact.matrix.c,
+        impact.matrix.d,
+        undefined,
+        false,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "FEAROW",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "FEAROW" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "FEAROW used" : "Foe FEAROW used",
+      "DRILL PECK!",
       99,
     );
     return;

@@ -1,12 +1,12 @@
 # Animation coverage
 
-## MOVE_DRILL_PECK reducer + typed Scene-ON seam checkpoint — coverage unchanged (2026-08-10 worker)
+## MOVE_DRILL_PECK exact — bilateral 91/91 Scene-ON promotion (2026-08-10 worker)
 
-- **State:** Coverage remains **152/276 exact**, 0 partial, 0 staged, **124 unsupported**; `ANIMATION_COVERAGE.json` is unchanged and Drill Peck is not promoted without framebuffer proof.
-- **Did:** Added the source-relative `drillPeckAtAge` reducer and typed `sceneOnDrillPeckView` seam. It ports all three `gBowMonSpriteTemplate` phases, source-relative rotation/slide, eight flashing IMPACT splats, target ShakeMon2, loop-audio/resource lifetimes, the loaded-but-unused WHIRLWIND_LINES tag, and first inactive cleanup. FEAROW is now an accepted presentation species.
-- **Verified:** Hermetic tests pin all 91 ages and both attacker orientations, including bilateral geometry/matrix mirroring, splat positions/visibility, phase/task windows, audio, tags, and cleanup. Focused Drill Peck tests **3/3** and `npm run typecheck` pass.
-- **Next:** Add the narrow FEAROW/ONIX production compositor only if it can be proven against both complete dense windows; otherwise leave Drill Peck unsupported and record the exact framebuffer remainder. Rerun HEADBUTT and the named WHIRLWIND/SLAM controls after any draw-path change.
-- **Notes:** No coverage entry, damage/RNG/turn/controller/round/facility state, canonical recording, shared animation boundary, unsupported barrier, sibling coverage, or absolute-tick framebuffer branch changed.
+- **State:** Coverage advances **152→153/276 exact**, 0 partial, 0 staged, **124→123 unsupported**; only Drill Peck moved.
+- **Did:** Completed the pure source-relative `drillPeckAtAge` reducer, typed `sceneOnDrillPeckView` seam, and narrow FEAROW/ONIX compositor. The port covers all three Bow phases, eight flashing IMPACT splats with source slot reuse/order, target ShakeMon2, looped HORN_ATTACK, loaded-but-unused WHIRLWIND_LINES, six-tick return slide, side-relative matrices/translation, tags, elevated-Fearow shadow receipt, healthboxes, text, and cleanup.
+- **Verified:** `drillPeckEvidence.ts` ran both legal Scene-ON fixtures twice fresh: player-back **74..164** and opponent-front **78..168**, each **91/91** pointer/task/sprite/software+hardware OAM/matrix/palette/register/audio/state/raw-RGB, reducer, typed-seam, and production framebuffer frames. Stable digests remain player `3dfa1176…` / `8e4bab34…` / `2904db85…`, opponent `48356792…` / `ab2adf5f…` / `ada68549…`. Focused tests, smoke, typecheck, coverage, and diff check are green.
+- **Next:** Supervisor selects the next independent animation acceptance unit. HEADBUTT remains bilateral exact; WHIRLWIND/SLAM stale control receipt metadata remains untouched because no nonvisual-drift proof was needed for this step.
+- **Notes:** No damage/RNG/turn/controller/round/facility state, canonical recording, shared animation boundary, unsupported barrier, sibling coverage, or absolute-tick framebuffer branch changed.
 
 ## MOVE_DRILL_PECK bilateral dense Scene-ON evidence checkpoint — remains unsupported (2026-08-10 worker)
 
