@@ -286,11 +286,74 @@ export interface FactorySignedDivisionTiming {
   cycles: number;
 }
 
+/** Source ABI for `SetMonData(struct Pokemon *, s32 field, const void *)`. */
+export interface FactorySetMonDataTimingInput {
+  /** Compiled `s32 field` selector in r1. Data bytes do not select a path. */
+  field: number;
+}
+
+export type FactorySetMonDataRoute =
+  | "party-status-u32"
+  | "party-level-u8"
+  | "party-hp-u16"
+  | "party-max-hp-u16"
+  | "party-attack-u16"
+  | "party-defense-u16"
+  | "party-speed-u16"
+  | "party-sp-attack-u16"
+  | "party-sp-defense-u16"
+  | "party-mail-u8"
+  | "party-species-or-egg-noop"
+  | "delegates-to-set-box-mon-data";
+
+/**
+ * Complete timing for one direct `SetMonData` party-field path, or an honest
+ * shell description when the source switch delegates to `SetBoxMonData`.
+ */
+export interface FactorySetMonDataTiming {
+  field: number;
+  /** mGBA's pipelined entry boundary for retail `SetMonData`. */
+  entryPc: number;
+  route: FactorySetMonDataRoute;
+  /** True only for the direct status/level/HP/stat/mail stores. */
+  directPartyWrite: boolean;
+  /** True when the default arm calls the unresolved encrypted box-mon body. */
+  delegatedToSetBoxMonData: boolean;
+  /** Bytes assembled from `dataArg`; zero is the source's explicit no-op. */
+  valueWidth: 0 | 1 | 2 | 4 | null;
+  /** `struct Pokemon` byte offset for a direct store, otherwise null. */
+  partyOffset: number | null;
+  /** Pipelined callee entry for the default arm, otherwise null. */
+  setBoxMonDataEntryPc: number | null;
+  /** SetMonData's own executed Thumb halfwords, excluding any nested body. */
+  sequentialThumbHalfwords: number;
+  /** Taken branch / indirect jump / BL / return pipeline refills. */
+  pipelineRefills: number;
+  /** PC-relative dispatch-base load(s), each 11 master cycles total. */
+  romLiteralLoads: number;
+  /** Indexed ROM jump-table word load(s), each 11 master cycles total here. */
+  romJumpTableLoads: number;
+  /** Exact entry-to-SetBoxMonData boundary when delegation occurs. */
+  preDelegateCycles: number | null;
+  /** Exact post-SetBoxMonData return shell when delegation occurs. */
+  returnShellCycles: number | null;
+  /**
+   * Full source-owned direct-callee cost, null only when nested
+   * `SetBoxMonData` remains outside this bounded reducer.
+   */
+  cycles: number | null;
+  /** Null for exact direct/no-op paths; names the deliberately excluded gap. */
+  unresolved: string | null;
+}
+
 const THUMB_SEQUENTIAL_CYCLES = 2;
 const THUMB_PIPELINE_REFILL_CYCLES = 6;
 const THUMB_TAKEN_CONTROL_CYCLES = THUMB_SEQUENTIAL_CYCLES + THUMB_PIPELINE_REFILL_CYCLES;
 const THUMB_ROM_LITERAL_LOAD_CYCLES = 11;
 const THUMB_ROM_TABLE_LOAD_CYCLES = 9;
+// `SetMonData`'s indexed 32-bit ROM jump-table read is not the prefetchable
+// byte-table class above: the ELF/mGBA instruction audit charges 11 total.
+const THUMB_ROM_JUMP_TABLE_LOAD_CYCLES = 11;
 
 function rotateRight32(value: number, amount: number): number {
   const shift = amount & 31;
@@ -647,6 +710,200 @@ export function reduceFactoryCalculateMonStatsParentTiming(
     romLiteralLoads,
     romTableLoads,
     cycles,
+  });
+}
+
+/**
+ * Reduce the retail `SetMonData` direct-party-field switch at
+ * `pokemon.c:4105-4141` / ELF `0x0806acac..0x0806ad98`.
+ *
+ * The calculated-stats calls are all fields 56-63: level takes the u8 arm,
+ * and HP/max-HP/five stats take the seven structurally identical u16 arms.
+ * The field selector alone chooses a direct arm. The data bytes are copied
+ * straight through `ldrb`/`str{b,h}` instructions and never feed a compare,
+ * branch, address calculation beyond the fixed selected destination, or
+ * memory-width choice, so accepting a value would only create a spurious
+ * timing key.
+ *
+ * Direct paths have one common ROM dispatcher (11 Thumb halfwords): its
+ * PC-relative table-base LDR and indexed jump-table word LDR each cost 11
+ * master cycles in the instruction audit, and `mov pc, r0` refills the Thumb
+ * pipeline. The selected status/byte/halfword path returns through the same
+ * `pop; bx` tail. Thus the reducer counts instructions and ROM fetch classes,
+ * rather than adopting the observed 72/78 values as constants.
+ *
+ * Field values outside the unsigned `55..65` dispatch interval take the
+ * compiled `bhi` default arm and call `SetBoxMonData` at `0x0806ad9c`. Its
+ * encrypted/decrypt/checksum body is deliberately not claimed here; the
+ * returned shell timings make that boundary explicit without a duration key.
+ */
+export function reduceFactorySetMonDataTiming(
+  input: Readonly<FactorySetMonDataTimingInput>,
+): FactorySetMonDataTiming {
+  const field = requireSigned32(input.field, "field");
+  const entryPc = 0x0806_acae;
+  const isDirectDispatchField = field >= 55 && field <= 65;
+
+  if (!isDirectDispatchField) {
+    // `push`, r3 copy, selector setup/comparison, taken `bhi`, r0 restore,
+    // two-halfword BL, then after the nested return `pop; bx`.
+    const sequentialThumbHalfwords = 11;
+    const pipelineRefills = 3; // `bhi`, BL, bx
+    const preDelegateCycles = 30;
+    const returnShellCycles = 10;
+    return Object.freeze({
+      field,
+      entryPc,
+      route: "delegates-to-set-box-mon-data",
+      directPartyWrite: false,
+      delegatedToSetBoxMonData: true,
+      valueWidth: null,
+      partyOffset: null,
+      setBoxMonDataEntryPc: 0x0806_ad9e,
+      sequentialThumbHalfwords,
+      pipelineRefills,
+      romLiteralLoads: 0,
+      romJumpTableLoads: 0,
+      preDelegateCycles,
+      returnShellCycles,
+      cycles: null,
+      unresolved: "SetBoxMonData encrypted-body timing is outside the direct party-data reducer",
+    });
+  }
+
+  let route: FactorySetMonDataRoute;
+  let directPartyWrite: boolean;
+  let valueWidth: FactorySetMonDataTiming["valueWidth"];
+  let partyOffset: number | null;
+  let selectedPathHalfwords: number;
+  let pipelineRefills: number;
+
+  switch (field) {
+    case 55:
+      route = "party-status-u32";
+      directPartyWrite = true;
+      valueWidth = 4;
+      partyOffset = 80;
+      // Four byte reads, shifts/adds into r1, store, then branch to epilogue.
+      selectedPathHalfwords = 11;
+      pipelineRefills = 3; // indirect jump, case `b`, bx
+      break;
+    case 56:
+      route = "party-level-u8";
+      directPartyWrite = true;
+      valueWidth = 1;
+      partyOffset = 84;
+      // Byte read, destination setup, byte store, branch to epilogue.
+      selectedPathHalfwords = 5;
+      pipelineRefills = 3;
+      break;
+    case 57:
+      route = "party-hp-u16";
+      directPartyWrite = true;
+      valueWidth = 2;
+      partyOffset = 86;
+      selectedPathHalfwords = 8;
+      pipelineRefills = 3;
+      break;
+    case 58:
+      route = "party-max-hp-u16";
+      directPartyWrite = true;
+      valueWidth = 2;
+      partyOffset = 88;
+      selectedPathHalfwords = 8;
+      pipelineRefills = 3;
+      break;
+    case 59:
+      route = "party-attack-u16";
+      directPartyWrite = true;
+      valueWidth = 2;
+      partyOffset = 90;
+      selectedPathHalfwords = 8;
+      pipelineRefills = 3;
+      break;
+    case 60:
+      route = "party-defense-u16";
+      directPartyWrite = true;
+      valueWidth = 2;
+      partyOffset = 92;
+      selectedPathHalfwords = 8;
+      pipelineRefills = 3;
+      break;
+    case 61:
+      route = "party-speed-u16";
+      directPartyWrite = true;
+      valueWidth = 2;
+      partyOffset = 94;
+      selectedPathHalfwords = 8;
+      pipelineRefills = 3;
+      break;
+    case 62:
+      route = "party-sp-attack-u16";
+      directPartyWrite = true;
+      valueWidth = 2;
+      partyOffset = 96;
+      selectedPathHalfwords = 8;
+      pipelineRefills = 3;
+      break;
+    case 63:
+      route = "party-sp-defense-u16";
+      directPartyWrite = true;
+      valueWidth = 2;
+      partyOffset = 98;
+      selectedPathHalfwords = 8;
+      pipelineRefills = 3;
+      break;
+    case 64:
+      route = "party-mail-u8";
+      directPartyWrite = true;
+      valueWidth = 1;
+      partyOffset = 85;
+      selectedPathHalfwords = 5;
+      pipelineRefills = 3;
+      break;
+    case 65:
+      // Source case MON_DATA_SPECIES_OR_EGG intentionally falls through to
+      // `pop; bx` after the dispatcher; it neither reads dataArg nor writes.
+      route = "party-species-or-egg-noop";
+      directPartyWrite = false;
+      valueWidth = 0;
+      partyOffset = null;
+      selectedPathHalfwords = 0;
+      pipelineRefills = 2; // indirect jump directly to epilogue, then bx
+      break;
+    default:
+      // The interval guard above exhausts the compiled 11-entry jump table.
+      throw new Error(`unreachable direct SetMonData field ${field}`);
+  }
+
+  // Common dispatcher: push, selector arithmetic/guard, table-base literal,
+  // indexed pointer load, and `mov pc`; all direct routes then execute `pop;
+  // bx`. The selected path includes its own branch-to-epilogue if present.
+  const sequentialThumbHalfwords = 11 + selectedPathHalfwords + 2;
+  const romLiteralLoads = 1;
+  const romJumpTableLoads = 1;
+  const cycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+    + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES
+    + romLiteralLoads * (THUMB_ROM_LITERAL_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES)
+    + romJumpTableLoads * (THUMB_ROM_JUMP_TABLE_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES);
+
+  return Object.freeze({
+    field,
+    entryPc,
+    route,
+    directPartyWrite,
+    delegatedToSetBoxMonData: false,
+    valueWidth,
+    partyOffset,
+    setBoxMonDataEntryPc: null,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    romLiteralLoads,
+    romJumpTableLoads,
+    preDelegateCycles: null,
+    returnShellCycles: null,
+    cycles,
+    unresolved: null,
   });
 }
 

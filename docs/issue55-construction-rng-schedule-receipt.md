@@ -371,6 +371,57 @@ component only: encrypted Get/Set, level/growth, nature fetch, VBlank/audio,
 and the aggregate `CalculateMonStats` operation remain unresolved; the
 construction clock stays unwired.
 
+### Direct `SetMonData` party-write component (2026-08-10)
+
+`reduceFactorySetMonDataTiming` now exactly reduces the 8 direct
+`SetMonData` calls made by each normal `CalculateMonStats` body: **96/96**
+across the three v1 packets. Its sole input is the source ABI's signed `field`
+selector in r1. The pointer/data value is intentionally not accepted: the
+direct arms copy bytes to a fixed `struct Pokemon` offset, with no
+value-dependent compare, branch, width selection, or address calculation.
+No mon, target, case, set/trainer, frame/tick/cursor, fixture, or duration is
+used to select timing.
+
+The source is `pokemon.c:4105-4141`; the exact retail ELF body is
+`SetMonData` `0x0806ACAC..0x0806AD98`, measured at mGBA's pipelined entry
+`0x0806ACAE`. The compiled direct dispatch first executes 11 Thumb
+halfwords—the push, signed-selector `field - 55`, unsigned `bhi` guard,
+table-base literal, indexed table pointer load, and `mov pc, r0`. The source
+instruction audit sees both ROM word loads as **11** master cycles total (not
+the prefetchable 9-cycle byte-table class), and every `mov pc`/case branch/
+`bx` adds the normal 6-cycle pipeline refill. Party-data loads/stores remain
+within the ordinary 2-cycle instruction class at this boundary.
+
+| source selector(s) | compiled direct arm | write width / offset | Thumb halfwords / refills / ROM words | source cycles |
+| --- | --- | --- | ---: | ---: |
+| 55 | status | u32 / `0x50` | 24 / 3 / literal+table | 84 |
+| 56 | level | u8 / `0x54` | 18 / 3 / literal+table | 72 |
+| 57–63 | HP, max HP, ATK, DEF, SPEED, SPATK, SPDEF | u16 / `0x56..0x62` | 21 / 3 / literal+table | 78 |
+| 64 | mail | u8 / `0x55` | 18 / 3 / literal+table | 72 |
+| 65 | `MON_DATA_SPECIES_OR_EGG` | explicit no-op | 13 / 2 / literal+table | 56 |
+
+The receipt calls are exactly field 56 once and fields 57–63 seven times per
+mon, so their instruction derivations are `18×2 + 3×6 + 2×(11−2) = 72` and
+`21×2 + 3×6 + 2×(11−2) = 78`, respectively. All 96 are exact with zero
+contained VBlank pause and zero external-service residual:
+
+| case | calls | source cycles | exact / residual |
+| --- | ---: | ---: | --- |
+| anchor | 48 | 3,708 | 48 / 0 |
+| LILIANA | 24 | 1,854 | 24 / 0 |
+| legal varied | 24 | 1,854 | 24 / 0 |
+| total | 96 | **7,416** | **96 / 0** |
+
+For source fields below 55 or above 65, the same signed selector arithmetic
+takes the default `bhi` arm into `SetBoxMonData` at pipelined
+`0x0806AD9E`. The standalone result deliberately reports the exact
+pre-delegate **30** cycles and return-shell **10** cycles but leaves its full
+`cycles` null: the encrypted decrypt/checksum/re-encrypt body remains a
+separate unresolved component. This is not a fitted fallback and does not
+alter the clock wiring. The four completed direct-call families now cover
+**288/480** sites and **98,294 / 1,768,691 = 5.557%** pause-subtracted direct
+callee cycles; the aggregate CalculateMonStats operation remains unresolved.
+
 ### Construction-entry component (2026-08-10)
 
 `reduceFactoryConstructionEntryTiming` covers the complete

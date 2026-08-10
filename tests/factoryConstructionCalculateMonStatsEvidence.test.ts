@@ -5,6 +5,7 @@ import {
   reduceFactoryCalculateMonStatsParentTiming,
   reduceFactoryGetNatureTiming,
   reduceFactoryModifyStatByNatureTiming,
+  reduceFactorySetMonDataTiming,
   reduceFactorySignedDivisionTiming,
 } from "../src/engine/factoryConstructionClock.ts";
 
@@ -414,6 +415,128 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       .toThrow("stat must be a source u16");
     expect(() => reduceFactoryModifyStatByNatureTiming({ nature: 1, stat: 1, statIndex: 256 }))
       .toThrow("statIndex must be a source u8");
+  });
+
+  it("source-reduces all 96 direct SetMonData party-write spans from their field ids", () => {
+    const sourceByCase: Record<string, number> = {};
+    const residuals: number[] = [];
+    const reductions = [];
+
+    for (const { value } of probes) {
+      let caseCycles = 0;
+      for (const call of value.directCalls.filter((row) => row.operation === "set-mon-data")) {
+        const timing = reduceFactorySetMonDataTiming({ field: call.arguments.field! });
+        const measured = sourceCycles(
+          call.entryMasterCycles,
+          call.returnMasterCycles,
+          value.interruptPauses,
+        );
+        expect(timing).toMatchObject({
+          field: call.arguments.field,
+          entryPc: 0x0806_acae,
+          directPartyWrite: true,
+          delegatedToSetBoxMonData: false,
+          unresolved: null,
+        });
+        expect(timing.cycles).toBe(measured);
+        reductions.push(timing);
+        residuals.push(measured - (timing.cycles ?? 0));
+        caseCycles += timing.cycles ?? 0;
+      }
+      sourceByCase[value.case] = caseCycles;
+    }
+
+    expect(reductions).toHaveLength(96);
+    expect(residuals).toEqual(Array(96).fill(0));
+    expect(sourceByCase).toEqual({ anchor: 3_708, liliana: 1_854, "factory-varied": 1_854 });
+    expect(reductions.reduce((total, timing) => total + (timing.cycles ?? 0), 0)).toBe(7_416);
+  });
+
+  it("follows SetMonData's direct width/no-op and delegated-default switch branches", () => {
+    expect(reduceFactorySetMonDataTiming({ field: 55 })).toMatchObject({
+      route: "party-status-u32",
+      directPartyWrite: true,
+      valueWidth: 4,
+      partyOffset: 80,
+      sequentialThumbHalfwords: 24,
+      pipelineRefills: 3,
+      romLiteralLoads: 1,
+      romJumpTableLoads: 1,
+      cycles: 84,
+    });
+    expect(reduceFactorySetMonDataTiming({ field: 56 })).toMatchObject({
+      route: "party-level-u8",
+      directPartyWrite: true,
+      valueWidth: 1,
+      partyOffset: 84,
+      sequentialThumbHalfwords: 18,
+      pipelineRefills: 3,
+      romLiteralLoads: 1,
+      romJumpTableLoads: 1,
+      cycles: 72,
+    });
+    const halfwordArms = [
+      [57, "party-hp-u16", 86],
+      [58, "party-max-hp-u16", 88],
+      [59, "party-attack-u16", 90],
+      [60, "party-defense-u16", 92],
+      [61, "party-speed-u16", 94],
+      [62, "party-sp-attack-u16", 96],
+      [63, "party-sp-defense-u16", 98],
+    ] as const;
+    for (const [field, route, partyOffset] of halfwordArms) {
+      expect(reduceFactorySetMonDataTiming({ field })).toMatchObject({
+        route,
+        directPartyWrite: true,
+        valueWidth: 2,
+        partyOffset,
+        sequentialThumbHalfwords: 21,
+        pipelineRefills: 3,
+        romLiteralLoads: 1,
+        romJumpTableLoads: 1,
+        cycles: 78,
+      });
+    }
+    expect(reduceFactorySetMonDataTiming({ field: 64 })).toMatchObject({
+      route: "party-mail-u8",
+      directPartyWrite: true,
+      valueWidth: 1,
+      partyOffset: 85,
+      cycles: 72,
+    });
+    expect(reduceFactorySetMonDataTiming({ field: 65 })).toMatchObject({
+      route: "party-species-or-egg-noop",
+      directPartyWrite: false,
+      valueWidth: 0,
+      partyOffset: null,
+      sequentialThumbHalfwords: 13,
+      pipelineRefills: 2,
+      romLiteralLoads: 1,
+      romJumpTableLoads: 1,
+      cycles: 56,
+      unresolved: null,
+    });
+    for (const field of [-1, 54, 66, 0x7fff_ffff]) {
+      expect(reduceFactorySetMonDataTiming({ field })).toMatchObject({
+        route: "delegates-to-set-box-mon-data",
+        directPartyWrite: false,
+        delegatedToSetBoxMonData: true,
+        valueWidth: null,
+        partyOffset: null,
+        setBoxMonDataEntryPc: 0x0806_ad9e,
+        sequentialThumbHalfwords: 11,
+        pipelineRefills: 3,
+        romLiteralLoads: 0,
+        romJumpTableLoads: 0,
+        preDelegateCycles: 30,
+        returnShellCycles: 10,
+        cycles: null,
+      });
+    }
+    expect(() => reduceFactorySetMonDataTiming({ field: -0x8000_0001 }))
+      .toThrow("field must be a source i32");
+    expect(() => reduceFactorySetMonDataTiming({ field: 0x8000_0000 }))
+      .toThrow("field must be a source i32");
   });
 
   it("source-reduces all 72 direct signed-divide spans and isolates the one service residual", () => {

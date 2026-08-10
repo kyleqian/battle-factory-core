@@ -163,9 +163,34 @@ zero-dividend/zero-divisor paths, and `INT_MIN / -1` wrapping to
 
 The parent reducer still deliberately excludes the other direct callee
 durations. Encrypted box-mon `%24` routes, growth/experience level lookup,
-and writes still require their compiled
-ROM/EWRAM timing models. Therefore the complete `calculate-mon-stats`
-operation is unresolved and the construction clock stays unwired.
+and encrypted box-mon writes still require their compiled ROM/EWRAM timing
+models. Therefore the complete `calculate-mon-stats` operation is unresolved
+and the construction clock stays unwired.
+
+The direct-party subset of `SetMonData` is now separately exact. All **96**
+recorded stats calls use fields **56–63**: one byte-level write and seven
+halfword writes per mon. `reduceFactorySetMonDataTiming` accepts only the
+source `s32 field` selector, because the data argument is copied byte-for-byte
+without a value-dependent branch. The retail switch at `0x0806ACAC` has one
+11-halfword dispatcher, one 11-cycle PC-relative literal, one 11-cycle ROM
+jump-table word, and an indirect pipeline refill. Field 56 follows the 18
+halfword/3-refill byte-store path (**72** cycles); fields 57–63 follow the 21
+halfword/3-refill halfword-store path (**78** cycles). This accounts for
+anchor/LILIANA/varied **3,708 / 1,854 / 1,854 = 7,416** source cycles with
+**96/96** exact raw spans and no contained VBlank pause or external residual.
+
+The reducer also pins the source-general non-stats switch arms: status is a
+u32 direct store (**84** cycles), mail is the byte-store sibling (**72**), and
+`MON_DATA_SPECIES_OR_EGG` is the direct no-op (**56**). Fields outside the
+unsigned 55–65 dispatch range take `bhi` into encrypted `SetBoxMonData`; only
+the exact 30-cycle entry shell and 10-cycle return shell are exposed there,
+with full timing deliberately `null`. Thus the component resolves direct
+party-data writes without silently claiming the nested box-mon body. With the
+already-complete nature, nature-modifier, and signed-division components,
+**288/480** direct calls and **98,294 / 1,768,691 = 5.557%** direct-callee
+cycles are now source-reduced. The remaining 180 encrypted `GetMonData2`
+calls, 12 level lookups, box-mon writes, and VBlank/audio state keep the
+aggregate operation and construction clock unwired.
 
 ## Non-final outer-loop reducer
 
