@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "mode": "mechanicLab",
+  "profile": "battle-scene-on",
+  "level": 50,
+  "challengeNum": 1,
+  "battleNum": 0,
+  "trainerId": 100,
+  "playerSetIds": [262, 263, 266],
+  "opponentSetIds": [164, 163, 165],
+  "seed": 305419897,
+  "overrides": {
+    "parties": {
+      "player": [
+        {"species":62,"level":50,"nature":3,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":255,"attack":255,"defense":0,"speed":0,"spAttack":0,"spDefense":0},"moves":[66,66,66,66],"ppUps":[0,0,0,0],"item":207,"abilitySlot":0,"friendship":70,"gender":"male","shiny":false},
+        {"species":123,"level":50,"nature":7,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":255,"attack":255,"defense":0,"speed":0,"spAttack":0,"spDefense":0},"moves":[210,332,113,104],"ppUps":[0,0,0,0],"item":168,"abilitySlot":0,"friendship":70,"gender":"male","shiny":false},
+        {"species":91,"level":50,"nature":22,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":255,"attack":255,"defense":0,"speed":0,"spAttack":0,"spDefense":0},"moves":[62,131,48,182],"ppUps":[0,0,0,0],"item":212,"abilitySlot":0,"friendship":70,"gender":"female","shiny":false}
+      ],
+      "opponent": [
+        {"species":108,"level":50,"nature":24,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":255,"attack":255,"defense":0,"speed":0,"spAttack":0,"spDefense":0},"moves":[21,280,122,189],"ppUps":[0,0,0,0],"item":142,"abilitySlot":0,"friendship":70,"gender":"male","shiny":false},
+        {"species":322,"level":50,"nature":1,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":255,"attack":255,"defense":0,"speed":0,"spAttack":0,"spDefense":0},"moves":[185,109,282,252],"ppUps":[0,0,0,0],"item":206,"abilitySlot":0,"friendship":70,"gender":"male","shiny":false},
+        {"species":70,"level":50,"nature":17,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":255,"attack":255,"defense":0,"speed":0,"spAttack":0,"spDefense":0},"moves":[75,51,35,230],"ppUps":[0,0,0,0],"item":198,"abilitySlot":0,"friendship":70,"gender":"male","shiny":false}
+      ]
+    }
+  },
+  "trace": {"segments":[{"frames":2,"buttons":["A"]},{"frames":30,"buttons":[]},{"frames":2,"buttons":["A"]},{"frames":500,"buttons":[]}],"captureFrames":[0,534]}
+}

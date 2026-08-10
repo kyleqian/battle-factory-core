@@ -22,6 +22,10 @@ import {
   type HeadbuttState,
 } from "./headbutt.ts";
 import {
+  submissionAtAge,
+  type SubmissionState,
+} from "./submission.ts";
+import {
   drillPeckAtAge,
   type DrillPeckState,
 } from "./drillPeck.ts";
@@ -1567,6 +1571,14 @@ export interface SceneOnHeadbuttConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Narrow SUBMISSION seam; all battle resolution remains immutable input. */
+export interface SceneOnSubmissionConfig {
+  readonly move: "SUBMISSION";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnDrillPeckConfig {
   readonly move: "DRILL_PECK";
   readonly attacker: SceneOnPresentationBattler;
@@ -2446,6 +2458,7 @@ export type SceneOnMoveConfig =
   | SceneOnViceGripConfig
   | SceneOnBiteConfig
   | SceneOnHeadbuttConfig
+  | SceneOnSubmissionConfig
   | SceneOnDrillPeckConfig
   | SceneOnWhirlwindConfig
   | SceneOnBlockConfig
@@ -2779,6 +2792,12 @@ export interface SceneOnBiteView extends BiteEffect {
 }
 
 export interface SceneOnHeadbuttView extends HeadbuttState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSubmissionView extends SubmissionState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3797,7 +3816,7 @@ export function createSceneOnMovePresentation<
     | SceneOnBarrierConfig
     | SceneOnHazeConfig
     | SceneOnBiteConfig
-    | SceneOnHeadbuttConfig | SceneOnDrillPeckConfig
+    | SceneOnHeadbuttConfig | SceneOnSubmissionConfig | SceneOnDrillPeckConfig
     | SceneOnBodySlamConfig | SceneOnSlamConfig
     | SceneOnSecretPowerConfig
     | SceneOnWhirlwindConfig | SceneOnBlockConfig
@@ -4974,6 +4993,21 @@ export function sceneOnHeadbuttView(
       state.config.attacker.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
+  };
+}
+
+/** `age=0` is SUBMISSION's first pointer-bounded source frame. */
+export function sceneOnSubmissionView(
+  state: SceneOnMovePresentationState<SceneOnSubmissionConfig>,
+): SceneOnSubmissionView {
+  if (state.config.move !== "SUBMISSION") {
+    throw new Error(`expected SUBMISSION presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...submissionAtAge(state.age, state.config.target.geometry.animationCenter),
   };
 }
 
