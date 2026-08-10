@@ -118,6 +118,23 @@ remainder needs a new ability family.
   itself (a `MOVEEND_*` state proven via one representative plus sibling
   batch) is already validated by King's Rock/Synchronize, so staging risk
   is low even though the row count is the largest in the worklist.
+- **STATUS (2026-08-10, main worker): promoted.** 114 of 116 live candidates
+  promoted (item join gaps 118 → 4); the worklist's 191/stale-114 figures
+  above are both superseded by the live manifest baseline (Shell Bell's
+  2026-08-09 promotion already moved 77 rows out of `unsupported` before
+  this step ran). `MOVE_ASSIST`/`MOVE_METRONOME` are explicit
+  dynamic-dispatch exceptions (no static moveend node), the same structural
+  gap already found for Rank 2. Receipts (already banked, consumed as-is):
+  `docs/item-move-end-family-ground-truth.md`,
+  `tools/battle-lab/mechanic-item-move-end-paralysis-{cheri,control}-off.json`,
+  `tools/probe/verify-item-move-end-paralysis-off.py`,
+  `tools/probe/receipts/item-move-end-paralysis-{cheri,control}-off.json`
+  (rerun fresh this step, byte-identical). Tests:
+  `tests/itemMoveEndHookJoinBatch.test.ts`,
+  `tests/itemMoveEndOracleEvidence.test.ts`. Remaining 4 item gaps:
+  `MOVE_ASSIST`, `MOVE_METRONOME`, plus Rank 3's `MOVE_TRICK`/`MOVE_RECYCLE`
+  (Rank 3's `MOVE_COVET`/`MOVE_KNOCK_OFF` were already Shell-Bell-claimed by
+  their nonzero power before this step, not by this family).
 
 ### Rank 2 — Ability: generic post-move status-immunity cleanup family
 
