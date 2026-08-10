@@ -27,7 +27,7 @@ import {
   factorySwapAcceptPkmnButtonX,
   factorySwapAcceptSpeciesRenderCoeff,
   factorySwapAcceptYesNoVisual,
-  factorySwapBallTile,
+  factorySwapBallTiles,
   factorySwapCancelButtonX,
   factorySwapEnemyActionFadeY,
   factorySwapEnemyBallCycleVisuals,
@@ -59,6 +59,7 @@ import {
 } from "../src/engine/factorySwapPresentation.ts";
 import type { FactoryRentalParty } from "../src/engine/battleScenario.ts";
 import { factorySwapRoundDecision } from "../src/engine/factorySwap.ts";
+import { initialMovingBallAnimState } from "../src/engine/ballAnim.ts";
 import { INITIAL_POSTWIN_STATE } from "../src/engine/postwin.ts";
 import {
   advanceRoundController,
@@ -78,8 +79,11 @@ function advance(
   frames: number,
 ): FactorySwapPresentationState {
   let next = state;
+  let rngValue = 0;
   for (let i = 0; i < frames; i += 1) {
-    next = advanceFactorySwapPresentation(next);
+    const advanced = advanceFactorySwapPresentation(next, rngValue);
+    next = advanced.presentation;
+    rngValue = advanced.rngValue;
   }
   return next;
 }
@@ -191,6 +195,149 @@ describe("live Factory swap presentation adapter", () => {
       playerParty: CANONICAL_SWAP_PLAYER_PARTY,
       opponentParty: CANONICAL_SWAP_ENEMY_PARTY,
     })).toEqual(createCanonicalFactorySwapPresentation());
+  });
+
+  it("owns three independent callback states and consumes their first rolls in sprite order", () => {
+    let presentation = createCanonicalFactorySwapPresentation();
+    let rngValue = 0;
+    for (let elapsed = 1; elapsed <= 170; elapsed += 1) {
+      const advanced = advanceFactorySwapPresentation(presentation, rngValue);
+      presentation = advanced.presentation;
+      rngValue = advanced.rngValue;
+    }
+
+    // Fresh Swap_InitAllSprites balls enter moving anim 1 without rolling.
+    expect(rngValue >>> 0).toBe(0);
+    expect(presentation.ballAnims.map((anim) => anim.phase))
+      .toEqual(["resting", "resting", "resting"]);
+
+    const rolled = advanceFactorySwapPresentation(presentation, rngValue);
+    presentation = rolled.presentation;
+    rngValue = rolled.rngValue;
+    // From seed 0 the first anim-end callbacks roll success/failure/success.
+    expect(rngValue >>> 0).toBe(0x5271_3895);
+    expect(presentation.ballAnims.map((anim) => ({
+      phase: anim.phase,
+      pendingRest: anim.pendingRest,
+    }))).toEqual([
+      { phase: "moving", pendingRest: 32 },
+      { phase: "moving", pendingRest: 0 },
+      { phase: "moving", pendingRest: 32 },
+    ]);
+
+    const controllerBeforeCycle = structuredClone(presentation.controller);
+    for (let elapsed = 172; elapsed <= 172; elapsed += 1) {
+      const advanced = advanceFactorySwapPresentation(presentation, rngValue);
+      presentation = advanced.presentation;
+      rngValue = advanced.rngValue;
+    }
+    expect(factorySwapBallTiles(presentation)).toEqual([0, 16, 0]);
+    expect(presentation.ballAnims.map((anim) => anim.phase))
+      .toEqual(["moving", "moving", "moving"]);
+    expect(presentation.ballAnims.map((anim) => anim.pendingRest))
+      .toEqual([32, 0, 32]);
+
+    for (let elapsed = 173; elapsed <= 300; elapsed += 1) {
+      const advanced = advanceFactorySwapPresentation(presentation, rngValue);
+      presentation = advanced.presentation;
+      rngValue = advanced.rngValue;
+    }
+    // The two first-roll successes enter the source data[0]=32 rest after
+    // their complete moving cycles. The failed middle ball rerolls first;
+    // its next success owns the one-callback StartSpriteAnim(0) delay.
+    expect(presentation.ballAnims.map((anim) => ({
+      phase: anim.phase,
+      timer: anim.timer,
+      movingStartDelay: anim.movingStartDelay ?? false,
+    }))).toEqual([
+      { phase: "resting", timer: 34, movingStartDelay: false },
+      { phase: "moving", timer: 4, movingStartDelay: true },
+      { phase: "resting", timer: 34, movingStartDelay: false },
+    ]);
+    expect(presentation.controller.playerParty)
+      .toEqual(controllerBeforeCycle.playerParty);
+    expect(presentation.controller.enemyParty)
+      .toEqual(controllerBeforeCycle.enemyParty);
+    expect(presentation.controller.rentalMons)
+      .toEqual(controllerBeforeCycle.rentalMons);
+    expect(presentation.controller).toMatchObject({
+      phase: "playerPicker",
+      result: null,
+      scriptResult: null,
+      playerMonId: null,
+      enemyMonId: null,
+      mutationCommitted: false,
+    });
+    expect(factorySwapRoundDecision(presentation.controller)).toBeNull();
+  });
+
+  it("core advances ambient VBlank RNG before the three callback rolls without mutating the round", () => {
+    const round = pendingCanonicalRoundSwap();
+    let presentation = createPendingFactorySwapPresentation(round)!;
+    let callbackRng = 0;
+    for (let elapsed = 1; elapsed <= 170; elapsed += 1) {
+      const advanced = advanceFactorySwapPresentation(
+        presentation,
+        callbackRng,
+      );
+      presentation = advanced.presentation;
+      callbackRng = advanced.rngValue;
+    }
+    expect(callbackRng).toBe(0);
+
+    const controllerBefore = structuredClone(presentation.controller);
+    const recordsBefore = structuredClone(round.rules.playerRentalRecords);
+    const next = tick({
+      ...createInitialState(),
+      postwin: INITIAL_POSTWIN_STATE,
+      factorySwap: presentation,
+      roundController: round,
+      rngMode: "vblank",
+      rngValue: 0,
+    }, new Set());
+
+    // Step 1 is core's ambient VBlank call. Anim-end balls 0/1/2 consume
+    // steps 2/3/4 in order: failure, success, success.
+    expect(next.rngValue >>> 0).toBe(0x31b0_dde4);
+    expect(next.factorySwap!.ballAnims.map((anim) => anim.pendingRest))
+      .toEqual([0, 32, 32]);
+    expect(next.factorySwap!.controller).toEqual(controllerBefore);
+    expect(next.roundController).toBe(round);
+    expect(next.roundController!.rules.playerRentalRecords).toEqual(recordsBefore);
+  });
+
+  it("reconstructs all three callback states on the normal-summary return path", () => {
+    let presentation = createCanonicalFactorySwapPresentation();
+    let rngValue = 0;
+    for (let elapsed = 1; elapsed <= 172; elapsed += 1) {
+      const advanced = advanceFactorySwapPresentation(presentation, rngValue);
+      presentation = advanced.presentation;
+      rngValue = advanced.rngValue;
+    }
+    expect(factorySwapBallTiles(presentation)).toEqual([0, 16, 0]);
+
+    presentation = {
+      ...presentation,
+      controller: {
+        ...presentation.controller,
+        phase: "summaryReturn",
+        inputReady: false,
+      },
+      phaseElapsed: 39,
+      summaryReturnClock: 39,
+    };
+    const before = structuredClone(presentation.controller);
+    const reconstructed = advanceFactorySwapPresentation(
+      presentation,
+      rngValue,
+    );
+    expect(reconstructed.presentation.ballAnims).toEqual([
+      initialMovingBallAnimState(),
+      initialMovingBallAnimState(),
+      initialMovingBallAnimState(),
+    ]);
+    expect(reconstructed.presentation.controller).toEqual(before);
+    expect(reconstructed.rngValue).toBe(rngValue);
   });
 
   it("consumes a pending generated swapOffer and submits only at CopySwappedMonData", () => {
@@ -573,21 +720,26 @@ describe("live Factory swap presentation adapter", () => {
     expect(CATEGORY_BY_SPECIES.SLAKING).toBe("LAZY");
   });
 
-  it("pins the source moving-ball table to the relative entry epoch", () => {
-    expect(factorySwapBallTile(42)).toBe(0);
-    expect(factorySwapBallTile(43)).toBe(16);
-    expect(factorySwapBallTile(47)).toBe(0);
-    expect(factorySwapBallTile(51)).toBe(32);
-    expect(factorySwapBallTile(59)).toBe(16);
-    expect(factorySwapBallTile(67)).toBe(32);
-    expect(factorySwapBallTile(75)).toBe(0);
-    expect(factorySwapBallTile(190)).toBe(16);
-    expect(factorySwapBallTile(196)).toBe(32);
-    expect(factorySwapBallTile(203)).toBe(0);
-    // The restarted source command stream is in its long still command here;
-    // this used to incorrectly repeat the first four rocking commands.
-    expect(factorySwapBallTile(204)).toBe(0);
-    expect(factorySwapBallTile(212)).toBe(0);
+  it("pins the source moving-ball table to the three sprite-owned entry epochs", () => {
+    let state = createCanonicalFactorySwapPresentation();
+    let rngValue = 0;
+    const tilesAt = new Map<number, readonly number[]>();
+    for (let elapsed = 1; elapsed <= 212; elapsed += 1) {
+      const advanced = advanceFactorySwapPresentation(state, rngValue);
+      state = advanced.presentation;
+      rngValue = advanced.rngValue;
+      tilesAt.set(elapsed, factorySwapBallTiles(state));
+    }
+    for (const [elapsed, tile] of [
+      [42, 0], [43, 16], [47, 0], [51, 32], [59, 16], [67, 32],
+      [75, 0],
+    ] as const) {
+      expect(tilesAt.get(elapsed)).toEqual([tile, tile, tile]);
+    }
+    // Seed 0 produces success/failure/success in sprite order. Only the
+    // failed middle ball starts a new moving cycle at the first boundary.
+    expect(tilesAt.get(171)).toEqual([0, 0, 0]);
+    expect(tilesAt.get(172)).toEqual([0, 16, 0]);
     expect(factorySwapPlayerOptionBallTile(0)).toBe(0);
     expect(factorySwapPlayerOptionBallTile(6)).toBe(0);
     expect(factorySwapPlayerOptionBallTile(7)).toBe(16);

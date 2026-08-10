@@ -1,3 +1,17 @@
+## 1075 — [MAIN worker, 2026-08-10] **#73 slice-2 brief was stale; player-sprite residual already closed**
+
+- **State:** no engine change. Reconfirmed twice fresh:
+  `loss-terminal-window-off` **1943/1943**, `win-terminal-window-off`
+  **3590/3590**, `battle-command-generated-off` **128/128**; full suite/build
+  green.
+- **Did:** traced the brief's player-asset premise to a stale #73 paragraph;
+  the real `+1px x2` anchor defect had already been fixed with the existing
+  Brendan asset. Pruned the superseded paragraph rather than reopening it.
+- **Next:** the real remaining #73 work was the #55-adjacent swap-ball RNG
+  boundary after 10177 and the user-sequenced free-roam Lobby.
+- **Notes:** PAPERCUT — stale same-file issue text cost ~20 minutes to
+  disprove; see git history for the full forensic entry.
+
 ## 1074 — [supervisor, 2026-08-10 ~02:40] **S10 CLOSED: gates 2/3/4/6 ticked; Gate-6 family program complete**
 
 - **State:** ROADMAP S10 and all six gates are checked (supervisor commit

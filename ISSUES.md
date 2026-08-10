@@ -970,6 +970,26 @@ seam had masked:
   optional) is a user-directed feature sequenced behind the play-test fixes
   #76-#81.
 
+**2026-08-10 generic ball-callback checkpoint:** the unconditional shared
+`factorySwapBallTile` restart is removed. `FactorySwapPresentationState` now
+owns three `ballAnim.ts` reducer states; fresh `Swap_InitAllSprites` balls
+enter moving anim 1 without a roll, `animEnded` rolls are threaded through
+core after its ambient VBlank draw in sprite order, successful rolls preserve
+the source's one-callback `StartSpriteAnim(0)` delay, and normal-summary return
+reconstructs a fresh three-sprite epoch. Tier-1 pins independent states,
+ordered consumption, first success/failure/rest boundaries, immutable
+round/parties/controller outcome, and summary reconstruction. The committed
+YES endpoint stays **248/248 exact twice fresh** at 10177. A fresh mGBA RAM
+probe through the fixture's already-present 10214 tail found the remaining
+boundary precisely: at first `animEnded`, oracle ambient+callback cursors are
+`0xA77397C1 -> 0x33DA400A`, producing failure/success/failure and
+`data[0]=[0,32,0]`; the app's unresolved #55 stream reaches `0x8FF192D9`
+after ambient and produces failure/success/success. The honest dense extension
+is **277/285**, with all eight residual frames confined to ball 2's resulting
+tile transitions. Per the fallback contract, the canonical capture endpoint
+is unchanged; exact extension remains #55's prohibited/unwired construction-
+clock problem, not a presentation branch.
+
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
 **Wiring landed (2026-08-05, `67211ca2`):** the win-terminal scaffold
@@ -1082,6 +1102,17 @@ expose. VBlank entry-to-resume cost varies with live audio/DMA work (anchor
 the model. Exact construction therefore needs candidate-aware instruction
 timing plus deterministic VBlank workload state. A trainer/set/tick/receipt
 table remains prohibited; the isolated scheduler stays unwired.
+
+**Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
+threading now makes the first post-cycle pixel boundary observe this debt.
+The WIN YES fixture's real first callback cursor/outcomes are
+`0xA77397C1`, failure/success/failure; the current synthetic live stream is
+`0x8FF192D9`, failure/success/success. Publishing an adopted construction
+endpoint at GO ON was tested and rejected: it double-counts the 31 ambient
+VBlanks already interleaved within LILIANA's 32-frame C call, exactly the
+v2 refutation above. No fitted cursor, per-frame schedule, or construction-
+clock wiring was landed. The canonical window therefore remains 248/248
+through 10177; its attempted 10214 extension is 277/285, ball 2 only.
 
 **Lead:** implement the deterministic construction-clock contract above only
 as a deliberate source/cycle-model slice. Per-mon cursors and per-frame fixture

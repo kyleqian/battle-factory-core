@@ -88,6 +88,8 @@ interface BallAnimCore {
   cmdIndex: number;
   /** Rest ticks queued for when the in-progress moving cycle completes (0 = reroll immediately instead). */
   pendingRest: number;
+  /** Source success branch's StartSpriteAnim(0) defers moving anim 1 until the next callback. */
+  movingStartDelay?: boolean;
 }
 
 /** internalTile() display-lag history depth this file ever needs (see BallAnimState.tileHistory's doc): slot 0 pre-rest (2) + the ISSUES #9 reveal-stall bump (+1) = 3 max, so 2 history entries (index 0/1) cover every case with a spare. */
@@ -139,8 +141,27 @@ export function initialBallAnimState(): BallAnimState {
   return { phase: "settling", timer: SETTLE_TICKS, cmdIndex: 0, pendingRest: 0, displayTile: 0, tileHistory: [], hasRested: false };
 }
 
+/**
+ * Fresh selected-palette sprite created by Swap_InitAllSprites. Its still
+ * animation has not ended, so SpriteCB_Pokeball immediately selects moving
+ * anim 1 without a Random() roll; the first roll is at this cycle's end.
+ */
+export function initialMovingBallAnimState(): BallAnimState {
+  return {
+    phase: "moving",
+    timer: MOVING_CMDS[0]!.duration,
+    cmdIndex: 0,
+    pendingRest: 0,
+    displayTile: 0,
+    tileHistory: [],
+    hasRested: false,
+  };
+}
+
 function internalTile(state: BallAnimCore): number {
-  return state.phase === "moving" ? MOVING_CMDS[state.cmdIndex]!.tile : 0;
+  return state.phase === "moving" && !state.movingStartDelay
+    ? MOVING_CMDS[state.cmdIndex]!.tile
+    : 0;
 }
 
 /** Which pokeball.json animation-frame tile (0/16/32) this ball is currently showing. */
@@ -154,10 +175,19 @@ function rollRest(rngValue: number): { rngValue: number; pendingRest: number } {
   return { rngValue: nextRngValue, pendingRest: roll % 5 === 0 ? REST_TICKS : 0 };
 }
 
-function beginMoving(rngValue: number): { state: BallAnimCore; rngValue: number } {
+function beginMoving(
+  rngValue: number,
+  delaySuccessfulStart: boolean,
+): { state: BallAnimCore; rngValue: number } {
   const rolled = rollRest(rngValue);
   return {
-    state: { phase: "moving", timer: MOVING_CMDS[0]!.duration, cmdIndex: 0, pendingRest: rolled.pendingRest },
+    state: {
+      phase: "moving",
+      timer: MOVING_CMDS[0]!.duration,
+      cmdIndex: 0,
+      pendingRest: rolled.pendingRest,
+      movingStartDelay: delaySuccessfulStart && rolled.pendingRest > 0,
+    },
     rngValue: rolled.rngValue,
   };
 }
@@ -179,22 +209,33 @@ export function advanceBallAnim(
   rngValue: number,
   isSlot0: boolean,
   revealStallActive: boolean,
+  delaySuccessfulStart = false,
 ): { state: BallAnimState; rngValue: number } {
   const currentInternalTile = internalTile(state);
   const lag = (isSlot0 && !state.hasRested ? 2 : 1) + (revealStallActive ? 1 : 0);
   const displayTile = lag <= 1 ? currentInternalTile : (state.tileHistory[lag - 2] ?? 0);
-  const result = advanceBallAnimCore(state, rngValue);
+  const result = advanceBallAnimCore(state, rngValue, delaySuccessfulStart);
   const hasRested = state.hasRested || result.state.phase === "resting";
   const tileHistory = [currentInternalTile, ...state.tileHistory].slice(0, TILE_HISTORY_LENGTH);
   return { state: { ...result.state, displayTile, tileHistory, hasRested }, rngValue: result.rngValue };
 }
 
-function advanceBallAnimCore(state: BallAnimCore, rngValue: number): { state: BallAnimCore; rngValue: number } {
+function advanceBallAnimCore(
+  state: BallAnimCore,
+  rngValue: number,
+  delaySuccessfulStart: boolean,
+): { state: BallAnimCore; rngValue: number } {
   if (state.phase === "settling") {
     if (state.timer > 1) return { state: { ...state, timer: state.timer - 1 }, rngValue };
-    return beginMoving(rngValue);
+    return beginMoving(rngValue, delaySuccessfulStart);
   }
   if (state.phase === "moving") {
+    if (state.movingStartDelay) {
+      return {
+        state: { ...state, movingStartDelay: false },
+        rngValue,
+      };
+    }
     if (state.timer > 1) return { state: { ...state, timer: state.timer - 1 }, rngValue };
     const nextCmdIndex = state.cmdIndex + 1;
     if (nextCmdIndex < MOVING_CMDS.length) {
@@ -220,5 +261,5 @@ function advanceBallAnimCore(state: BallAnimCore, rngValue: number): { state: Ba
   }
   // resting
   if (state.timer > 1) return { state: { ...state, timer: state.timer - 1 }, rngValue };
-  return beginMoving(rngValue);
+  return beginMoving(rngValue, delaySuccessfulStart);
 }

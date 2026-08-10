@@ -5,6 +5,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1078 — [MAIN worker, 2026-08-10] **Generic swap-screen SpriteCB_Pokeball state landed; exact tail remains bounded by #55 construction-clock RNG**
+
+- **State:** all finish gates are green: smoke **375/375**, ball/swap focus
+  **60/60**, typecheck, full `npm test`, build, and runnable #73 regressions
+  **115/115 + 213/213 + 903/903 + 248/248 twice + 128/128**.
+- **Did:** removed the shared elapsed-based unconditional ball restart. The
+  generic swap presentation now owns three `ballAnim.ts` states, threads RNG
+  after core's ambient VBlank in sprite order, models fresh-moving/no-initial-
+  roll and the source success-start delay, renders actual per-ball tiles, and
+  reconstructs fresh callbacks after normal summary. Tier-1 pins independent
+  state/order, first success/failure/rest boundaries, immutable round/party/
+  controller outcome, and summary reconstruction. Updated the ability/item
+  census's exact recovered-site line pin **116→130** after imports shifted it;
+  no support/barrier set changed.
+- **Next:** #55 must first gain the already-specified candidate/audio-aware
+  construction clock before the dense YES fixture can truthfully extend from
+  10177 through 10214. Do not fit a cursor or wire the refuted v2 clock.
+- **Notes:** fresh mGBA probe: oracle first anim-end ambient/callback stream
+  `A77397C1→33DA400A`, rolls F/S/F, `data[0]=[0,32,0]`; app unresolved stream
+  `8FF192D9`, rolls F/S/S. Honest extension **277/285**, eight ball-2-only
+  frames; canonical endpoint remains **10177** per fallback.
+
 ## 1077 — [supervisor, 2026-08-10 ~10:00] **#55 v2 cycle evidence banked; fitted construction callback refuted**
 
 - **State:** master `3916972f` is green after two side folds: smoke **375/375**,
@@ -57,61 +79,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   census-loading tests. ISSUES numbering: #82 was reused by a worker and
   renumbered to #86 — check new numbers against git history at verify
   time.
-
-## 1075 — [MAIN worker, 2026-08-10] **#73 slice-2 assignment was mis-scoped: the player-sprite residual it targeted was already closed 2026-08-05; ISSUES.md's stale paragraph fixed so the next reader doesn't repeat this**
-
-- **State:** no engine/controller/asset change — this step is a verification
-  + docs correction. Confirmed live (oracle-backed, two fresh runs each):
-  `loss-terminal-window-off` **1943/1943**, `win-terminal-window-off`
-  **3590/3590**, `battle-command-generated-off` **128/128**, all
-  byte-stable across both runs. `npm test`/`npm run build` unchanged
-  (nothing to re-verify beyond the doc edit — run once at close per the
-  brief's acceptance bar; see Notes for the exact counts).
-- **Did:** the assigned step ("extract the oracle's REAL player object
-  graphic... post-terminal LOSS Lobby window is exact through pages 0-2
-  EXCEPT... the player sprite... oracle renders the bootstrapped save's
-  actual player character (red-brown hat + red shirt)... committed windows
-  350/350, 503/503, 128/128") described a state that predates a same-day
-  fix already recorded in `ISSUES.md` #73: the **2026-08-04 "LOSS slice-2
-  player-sprite residual CLOSED"** paragraph (immediately below the stale
-  one the brief quoted) found the real cause was a wrong `+1px x2` OAM
-  sub-pixel offset on the player object anchor, fixed it generically in
-  `factoryTerminalRender.ts`, and got 0 diff using the **existing**
-  extracted Brendan asset (`factory-lobby-terminal-npcs.json`) unmodified
-  — explicitly retracting the "different player asset" theory. Everything
-  from slice 3 (record prompt) through slice 5 (LOSS decline continuation,
-  WIN GO-ON scouting/commentary/swap-offer/swap-screen) closed in the five
-  sessions since, dated up to 2026-08-05 in `ISSUES.md`. Verified this is
-  really true right now, not just on paper: ran `npm run compare` twice
-  each on all three windows the brief named as the acceptance bar (see
-  State) — all exact and far past the "350/503" checkpoint the brief cited
-  as current. Per this run's protocol ("if blocked/mis-scoped, say why
-  instead of improvising a different plan"), did **not** invent replacement
-  work (e.g. the still-genuinely-open swap-screen ball-rocking RNG boundary
-  or the walkable free-roam lobby feature, both already correctly named as
-  open in `ISSUES.md` #73's tail and out of this step's charter either way).
-  Deleted the stale "Residual classes (documented, honest checkpoint)"
-  paragraph in `ISSUES.md` #73 (the one describing the red-brown-hat theory
-  and the 350/503 checkpoint) since it sat un-pruned right next to its own
-  retraction and is what produced this mis-scoped brief — replaced with a
-  short pointer to the real closure paragraph plus this session's
-  re-confirmation, per this run's "keep ISSUES.md pruned" mandate. Did not
-  touch the record-prompt/slice-3 text the brief asked to preserve as
-  "next territory," since that language was itself the stale part.
-- **Next:** #73's only genuinely open remainders (both already documented,
-  neither touched this step): the swap-screen ball-rocking restart's
-  per-ball `Random()%5` ambient RNG boundary (tracked under #55, one frame
-  past the current WIN swap-YES window's end at 10177), and the walkable
-  free-roam Lobby feature (deliberately sequenced by the user behind
-  play-test fixes #76-#81). Neither is slice-2/#73 core work. Suggest the
-  supervisor re-derive the next MAIN-lane increment from `ISSUES.md`'s
-  current tail rather than re-issuing #73 slice work.
-- **Notes:** PAPERCUT — a step brief quoted a real ISSUES.md paragraph that
-  was itself stale (superseded three paragraphs later, same file, same
-  date-order) and the numbers cited (350/350, 503/503) as "the current
-  committed baseline" were ~5x stale (actual 1943/3590 at time of
-  assignment); ~20 min spent confirming the premise before writing anything,
-  which is exactly the read-first discipline this docs fix is meant to save
-  the next worker/supervisor. Full verification run at close: `npm test`
-  and `npm run build`. Archived entry 1072 to `PROGRESS-archive.md` to keep
-  the ledger at 3 live entries.

@@ -31,9 +31,23 @@ import {
   type SpeciesNameFadeState,
 } from "./speciesNameFade.ts";
 import { bgFadeY, objFadeY } from "./paletteFade.ts";
+import {
+  advanceBallAnim,
+  ballAnimTile,
+  initialMovingBallAnimState,
+  type BallAnimState,
+} from "./ballAnim.ts";
+
+export type FactorySwapBallAnims = readonly [
+  BallAnimState,
+  BallAnimState,
+  BallAnimState,
+];
 
 export interface FactorySwapPresentationState {
   readonly controller: FactorySwapState;
+  /** SpriteCB_Pokeball state, in the three balls' gSprites/OAM order. */
+  readonly ballAnims: FactorySwapBallAnims;
   /** Relative to the accepted postwin offer-YES edge. */
   readonly elapsed: number;
   /** Relative to the input edge which entered controller.phase. */
@@ -237,6 +251,14 @@ const INITIAL_FACTORY_SWAP_SPECIES_FADE: SpeciesNameFadeState = {
   delay: 0,
   renderCoeff: 0,
 };
+
+function initialFactorySwapBallAnims(): FactorySwapBallAnims {
+  return [
+    initialMovingBallAnimState(),
+    initialMovingBallAnimState(),
+    initialMovingBallAnimState(),
+  ];
+}
 export const FACTORY_SWAP_PHASE_READY_DELAYS: Readonly<
   Partial<Record<FactorySwapPhase, number>>
 > = {
@@ -325,6 +347,7 @@ export function createFactorySwapPresentation(
   );
   return {
     controller,
+    ballAnims: initialFactorySwapBallAnims(),
     elapsed: 0,
     phaseElapsed: 0,
     selectedBallClock: null,
@@ -428,7 +451,7 @@ function readyDelay(state: FactorySwapPresentationState): number | null {
   return FACTORY_SWAP_PHASE_READY_DELAYS[state.controller.phase] ?? 0;
 }
 
-export function advanceFactorySwapPresentation(
+function advanceFactorySwapPresentationClocks(
   state: FactorySwapPresentationState,
 ): FactorySwapPresentationState {
   const elapsed = state.elapsed + 1;
@@ -753,6 +776,117 @@ export function advanceFactorySwapPresentation(
   return { ...advanced, controller };
 }
 
+export interface FactorySwapPresentationAdvance {
+  readonly presentation: FactorySwapPresentationState;
+  readonly rngValue: number;
+}
+
+/**
+ * Advances the generic swap-screen tasks and its three SpriteCB_Pokeball
+ * callbacks. The caller owns the ambient VBlank Random() call and passes its
+ * resulting cursor here; eligible selected-palette balls then consume their
+ * own Random()%5 draws in sprite/OAM index order (0, 1, 2).
+ *
+ * Swap_InitAllSprites creates the sprites earlier in CB2 init, but their first
+ * Swap_CB2 AnimateSprites pass is entry +43. Fresh sprites enter moving anim 1
+ * without rolling; their first three rolls land only when that cycle ends at
+ * +171. A summary return reconstructs every sprite and callback state.
+ */
+export function advanceFactorySwapPresentation(
+  state: FactorySwapPresentationState,
+  rngValue: number,
+): FactorySwapPresentationAdvance {
+  const clocked = advanceFactorySwapPresentationClocks(state);
+  // Several source-task handoffs return a deliberately rebuilt presentation
+  // object. Sprite state lives outside those task-local fields and survives
+  // unless the summary callback explicitly reconstructs it below.
+  let ballAnims: FactorySwapBallAnims = clocked.ballAnims ?? state.ballAnims;
+
+  // CB2_InitSwapScreen state 6 creates a fresh three-sprite epoch. The
+  // presentation's close-relative clock reaches that state at +40; its first
+  // AnimateSprites pass follows at +41, yielding the already-proven first
+  // visible moving tile on that same edge.
+  if (
+    clocked.controller.phase === "summaryReturn" &&
+    clocked.summaryReturnClock === 40
+  ) {
+    ballAnims = initialFactorySwapBallAnims();
+  }
+
+  const initialEpochActive =
+    clocked.elapsed >= 43 &&
+    !clocked.controller.playerSwitchCompleted &&
+    clocked.controller.phase !== "enemySwitch" &&
+    clocked.controller.phase !== "playerSwitch" &&
+    (
+      clocked.controller.phase !== "summaryFade" ||
+      clocked.phaseElapsed < 24
+    ) &&
+    clocked.controller.phase !== "summaryReturn";
+  const summaryReturnEpochActive =
+    clocked.controller.phase === "summaryReturn" &&
+    (clocked.summaryReturnClock ?? -1) >= 41;
+  const returnedSummaryEpochActive =
+    clocked.returnedFromSummary &&
+    clocked.controller.phase === "playerOptions";
+
+  // Enemy-side balls have the gray palette, whose callback never rolls.
+  // The existing source-relative slide-cycle reducer continues to own the
+  // palette-transition window; this callback state owns settled selected
+  // palettes and the reconstructed summary sibling path.
+  const selectedPalette = !(
+    clocked.controller.phase === "enemyPicker" ||
+    clocked.controller.phase === "enemySwitch" ||
+    clocked.controller.phase === "playerSwitch" ||
+    clocked.controller.phase === "acceptPrompt" ||
+    clocked.controller.phase === "acceptReturn" ||
+    clocked.controller.phase === "acceptExit" ||
+    clocked.controller.phase === "duplicateSpecies" ||
+    clocked.controller.phase === "duplicateReturn" ||
+    (
+      (clocked.controller.phase === "quitPrompt" ||
+        clocked.controller.phase === "quitReturn" ||
+        clocked.controller.phase === "quitExit") &&
+      clocked.controller.quitReturnPhase === "enemyPicker"
+    )
+  );
+
+  if (
+    selectedPalette &&
+    (initialEpochActive || summaryReturnEpochActive || returnedSummaryEpochActive)
+  ) {
+    const next = [...ballAnims] as [BallAnimState, BallAnimState, BallAnimState];
+    for (let i = 0; i < next.length; i += 1) {
+      const result = advanceBallAnim(
+        next[i]!,
+        rngValue,
+        false,
+        false,
+        true,
+      );
+      next[i] = result.state;
+      rngValue = result.rngValue;
+    }
+    ballAnims = next;
+  }
+
+  return {
+    presentation: { ...clocked, ballAnims },
+    rngValue,
+  };
+}
+
+/** Actual displayed tiles from each independent SpriteCB_Pokeball state. */
+export function factorySwapBallTiles(
+  state: FactorySwapPresentationState,
+): readonly [0 | 16 | 32, 0 | 16 | 32, 0 | 16 | 32] {
+  return state.ballAnims.map(ballAnimTile) as [
+    0 | 16 | 32,
+    0 | 16 | 32,
+    0 | 16 | 32,
+  ];
+}
+
 /** Direct OpenMonPic used by Swap_TaskCantHaveSameMons (no button teardown). */
 export function factorySwapDuplicateMonPicVisual(
   phaseElapsed: number,
@@ -912,39 +1046,6 @@ export function handleFactorySwapPresentationInput(
     summaryMaxMonIndex:
       controller.phase === "summaryFade" ? 2 : state.summaryMaxMonIndex,
   };
-}
-
-/** sAnim_Swap_Pokeball_Moving, relative to the entry adapter's sprite epoch. */
-export function factorySwapBallTile(elapsed: number): 0 | 16 | 32 {
-  const local = elapsed - 43;
-  if (local < 0) return 0;
-  const commands = [
-    [16, 4],
-    [0, 4],
-    [32, 4],
-    [0, 4],
-    [16, 4],
-    [0, 4],
-    [32, 4],
-    [0, 36],
-    [16, 8],
-    [0, 8],
-    [32, 8],
-    [0, 8],
-    [16, 8],
-    [0, 8],
-    [32, 8],
-    [0, 8],
-  ] as const;
-  // SpriteCB_Pokeball restarts the complete source animation after animEnded,
-  // including its long still command; it does not loop only the first four
-  // rocking commands.
-  let age = local <= 128 ? local : local - 129;
-  for (const [tile, duration] of commands) {
-    if (age < duration) return tile;
-    age -= duration;
-  }
-  return 0;
 }
 
 /** Selected-player ball epoch after A, before the option popup reveal. */
