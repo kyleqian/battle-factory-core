@@ -226,6 +226,10 @@ describe("Factory construction source-operation clock", () => {
     ]);
     expect(schedule.mons[0]!.personality).toBe(second.value);
     expect(schedule.end.rngValue).toBe(second.rngValue);
+    expect(schedule.end.cycle).toBe(
+      reduceFactoryNatureAttemptTiming(first.value, natureFromPersonality(second.value)).cycles
+      + reduceFactoryNatureAttemptTiming(second.value, natureFromPersonality(second.value)).cycles,
+    );
   });
 
   it("keeps live exactness bounded by the unresolved VBlank workload only", () => {
