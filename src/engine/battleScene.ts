@@ -1085,7 +1085,6 @@ import {
   spiteAttackerPaletteTint,
   spiteBackgroundBldy,
   spiteBackgroundIsGhost,
-  spiteDisplayedAlpha,
   spiteWaveShift,
 } from "../animation/spite.ts";
 import {
@@ -22101,7 +22100,7 @@ export function renderSceneOnMovePresentation(
       if (age === SPITE_CLONE_BLANK_POINTER_AGE) return;
       drawSpriteSheet(fb, onix.tileset, targetPalette, targetX, targetY);
       if (age < SPITE_WAVE_FIRST_POINTER_AGE || age > SPITE_WAVE_LAST_POINTER_AGE) return;
-      const alpha = spiteDisplayedAlpha(age);
+      const alpha = view.displayedAlpha;
       drawSpiteWaveMonBg(
         fb, onix.tileset,
         blendPaletteToward(onix.palette, { r: 107, g: 0, b: 123 }, 10),

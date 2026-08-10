@@ -1,4 +1,11 @@
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
+import {
+  applyAnimationDisplayIntervalWorkload,
+  createAnimationGpuRegisterState,
+  produceAnimationDisplayIntervalWorkload,
+  type AnimationGpuRegisterState,
+  type AnimationPcmDmaSchedule,
+} from "./gpuRegisterQueue.ts";
 
 /**
  * Source-relative timing for Move_SPITE's AnimTask_SpiteTargetShadow.
@@ -56,19 +63,61 @@ export function spiteAttackerPaletteTint(pointerAge: number): number {
   return value;
 }
 
-/**
- * Whole-display BLDALPHA approximation from Spite's own map. The remaining
- * alternating write/scanout split is deliberately tracked as partial evidence.
- */
-export function spiteDisplayedAlpha(pointerAge: number): Readonly<{ eva: number; evb: number }> {
-  if (pointerAge >= SPITE_WAVE_FIRST_POINTER_AGE
-      && pointerAge <= SPITE_WAVE_LAST_POINTER_AGE) {
-    const sourceAge = 7 + 2 * Math.floor(
-      (pointerAge - SPITE_WAVE_FIRST_POINTER_AGE) / 2,
-    );
-    return spiteAtAge(sourceAge).alpha;
+const BLDALPHA = 0x52;
+
+const SPITE_AUDIO_SCHEDULES: Readonly<Record<"player" | "opponent", AnimationPcmDmaSchedule>> = {
+  // Pointer-age-zero values measured independently in the two legal stages.
+  // Their active-channel mixes never overrun into VBlank during this window,
+  // so every task write queues after the transfer rather than changing the
+  // currently scanned display.
+  player: {
+    counterAtAnchor: 3, period: 7, cgbCounterAtAnchor: 2, cgbPeriod: 15,
+    mixerOverrunCgbPhases: [],
+  },
+  opponent: {
+    counterAtAnchor: 6, period: 7, cgbCounterAtAnchor: 13, cgbPeriod: 15,
+    mixerOverrunCgbPhases: [],
+  },
+};
+
+function spiteAlphaWrite(pointerAge: number): number | null {
+  const sourceAge = pointerAge - SPITE_TASK_SOURCE_AGE_OFFSET;
+  // Step1 installs alpha, every pulse callback rewrites its retained pair,
+  // and cleanup's blendoff writes zero. The enable-BG and palette teardown
+  // callbacks do not touch BLDALPHA.
+  if (sourceAge === 3
+      || (sourceAge >= SPITE_PULSE_FIRST_AGE && sourceAge <= SPITE_PULSE_LAST_AGE)
+      || sourceAge === SPITE_CLEANUP_AGE) {
+    const alpha = spiteAtAge(sourceAge).alpha;
+    return alpha.eva | (alpha.evb << 8);
   }
-  return spiteAtAge(pointerAge - SPITE_TASK_SOURCE_AGE_OFFSET - 1).alpha;
+  return null;
+}
+
+/** Hardware BLDALPHA sampled for this display after source queue transfer. */
+export function spiteDisplayedRegisterState(
+  pointerAge: number,
+  attackerSide: "player" | "opponent",
+): AnimationGpuRegisterState {
+  let state = createAnimationGpuRegisterState({ [BLDALPHA]: 0 });
+  for (let age = 0; age <= pointerAge; age++) {
+    const write = spiteAlphaWrite(age);
+    state = applyAnimationDisplayIntervalWorkload(state,
+      produceAnimationDisplayIntervalWorkload({
+        vblanksSinceAudioAnchor: age,
+        pcmDma: SPITE_AUDIO_SCHEDULES[attackerSide],
+        gpuWrites: write === null ? [] : [{ offset: BLDALPHA, value: write }],
+      }));
+  }
+  return state;
+}
+
+export function spiteDisplayedAlpha(
+  pointerAge: number,
+  attackerSide: "player" | "opponent" = "player",
+): Readonly<{ eva: number; evb: number }> {
+  const value = spiteDisplayedRegisterState(pointerAge, attackerSide).hardware[BLDALPHA] ?? 0;
+  return Object.freeze({ eva: value & 0x1f, evb: (value >>> 8) & 0x1f });
 }
 
 /** Source wave phase that has reached scanout for this pointer age. */

@@ -8,6 +8,7 @@ import {
   spiteAttackerPaletteTint,
   spiteBackgroundBldy,
   spiteDisplayedAlpha,
+  spiteDisplayedRegisterState,
   spiteWaveShift,
   spiteAtAge,
 } from "../../src/animation/spite.ts";
@@ -53,6 +54,14 @@ describe("MOVE_SPITE source-relative reducer", () => {
     expect([47,48,52,56,60,69,70,74,78,82,91,92,148,158,170]
       .map(spiteAttackerPaletteTint)).toEqual([0,2,4,6,8,8,6,4,2,0,0,2,8,6,0]);
     expect(spiteDisplayedAlpha(50)).toEqual({ eva: 0, evb: 15 });
+    expect(spiteDisplayedAlpha(51)).toEqual({ eva: 1, evb: 15 });
+    expect(spiteDisplayedAlpha(51, "opponent")).toEqual({ eva: 1, evb: 15 });
+    expect(spiteDisplayedRegisterState(45, "player")).toMatchObject({
+      buffered: { 82: 0x1000 }, hardware: { 82: 0 }, waitingOffsets: [82],
+    });
+    expect(spiteDisplayedRegisterState(46, "player")).toMatchObject({
+      buffered: { 82: 0x1000 }, hardware: { 82: 0x1000 }, waitingOffsets: [],
+    });
     expect(spiteWaveShift(50, 10, 10)).toBe(1);
   });
 });

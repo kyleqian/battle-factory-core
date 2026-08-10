@@ -7,7 +7,7 @@ const fixturePaths = [
   "tools/compare/fixtures/spite-opponent-haunter-player-onix.json",
 ] as const;
 
-describe("MOVE_SPITE bilateral compositor checkpoint", () => {
+describe("MOVE_SPITE bilateral exact compositor acceptance", () => {
   it("pins both complete Scene-ON receipts and their committed maps", () => {
     const fixtures = fixturePaths.map((path) => JSON.parse(readFileSync(path, "utf8")));
     expect(fixtures.map((fixture) => [
@@ -34,23 +34,24 @@ describe("MOVE_SPITE bilateral compositor checkpoint", () => {
     }
   });
 
-  it("keeps the complete twice-fresh verifier executable but explicitly partial", () => {
+  it("keeps the complete twice-fresh exact verifier executable and checkpoint diagnostics truthful", () => {
     const portable = readFileSync("tools/compare/spitePortable.ts", "utf8");
     expect(portable).toContain("runNumber <= 2");
     expect(portable).toContain("tools/run-mgba-probe.py");
     expect(portable).toContain("framebuffer ${framebuffer}/221");
+    expect(portable).toContain("registers ${registers}/221");
     expect(portable).toContain("checkpoint remains partial: ${failures.length}/221 acceptance failures");
     expect(portable).toContain("${221 - framebuffer}/221 framebuffer frames differ");
     expect(portable).toContain("if (failures.length && !checkpoint) throw");
   });
 
-  it("leaves Spite and its ghost-background sibling unsupported", () => {
+  it("promotes only Spite and leaves its ghost-background sibling unsupported", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact"))
-      .toHaveLength(154);
-    for (const move of ["MOVE_SPITE", "MOVE_NIGHT_SHADE"]) {
-      expect(coverage.entries.find((entry: { move: string }) => entry.move === move))
-        .toBeUndefined();
-    }
+      .toHaveLength(155);
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SPITE"))
+      .toMatchObject({ status: "exact" });
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_NIGHT_SHADE"))
+      .toBeUndefined();
   });
 });

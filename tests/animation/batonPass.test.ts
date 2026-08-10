@@ -73,7 +73,7 @@ describe("MOVE_BATON_PASS source-relative presentation", () => {
   });
 
   it("keeps Baton Pass exact after the Submission promotion", () => {
-    expect(coverage.entries).toHaveLength(154);
+    expect(coverage.entries).toHaveLength(155);
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_BATON_PASS"))
       .toMatchObject([{ status: "exact" }]);
   });

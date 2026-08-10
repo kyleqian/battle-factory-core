@@ -9,6 +9,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import {
   spiteBackgroundBldy,
+  spiteDisplayedRegisterState,
   spiteWaveShift,
 } from "../../src/animation/spite.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
@@ -104,7 +105,7 @@ for (let runNumber = 1; runNumber <= 2; runNumber++) for (const fixturePath of p
   });
   const initialBattle = stable((probe.frames[0]!.battle as { battlers: unknown }).battlers);
   const rawHash = createHash("sha256");
-  let reducer = 0, seam = 0, hardware = 0, framebuffer = 0;
+  let reducer = 0, seam = 0, registers = 0, hardware = 0, framebuffer = 0;
   const failures: string[] = [];
   for (let index = 0; index < probe.frames.length; index++) {
     const row = probe.frames[index]!;
@@ -117,9 +118,13 @@ for (let runNumber = 1; runNumber <= 2; runNumber++) for (const fixturePath of p
     const taskOk = spiteTasks.length === Number(age >= 43 && age <= 175)
       && Boolean(clone) === (age >= 43 && age <= 175)
       && (!spiteTasks[0] || spiteTasks[0].data[15] === expectedData15);
-    const alpha = view.alpha.eva | (view.alpha.evb << 8);
+    const displayedRegisters = spiteDisplayedRegisterState(
+      age,
+      fixture.attacker.geometry.side,
+    );
     const registerOk = row.registers.BLDY === spiteBackgroundBldy(age)
-      && row.registers.BLDALPHA === ((age >= 46 && age <= 176) ? alpha : 0);
+      && row.registers.BLDALPHA === (displayedRegisters.hardware[0x52] ?? 0);
+    if (registerOk) registers++;
     const expectedScanlineState = age >= 44 && age <= 173 ? 1 : age === 174 ? 3 : 0;
     const scanlineOk = row.scanlineBuffers.length === 2
       && row.scanlineBuffers.every((buffer) => buffer.length === 320)
@@ -170,7 +175,7 @@ for (let runNumber = 1; runNumber <= 2; runNumber++) for (const fixturePath of p
   const receipt = `${probeHash}/${rawDigest}/${mapHash}`;
   if (fresh.has(fixture.orientation) && fresh.get(fixture.orientation) !== receipt) throw new Error("fresh runs differ");
   fresh.set(fixture.orientation, receipt);
-  console.log(`${fixture.orientation} run ${runNumber}: reducer ${reducer}/221; seam ${seam}/221; hardware ${hardware}/221; framebuffer ${framebuffer}/221`);
+  console.log(`${fixture.orientation} run ${runNumber}: reducer ${reducer}/221; seam ${seam}/221; registers ${registers}/221; hardware ${hardware}/221; framebuffer ${framebuffer}/221`);
   if (failures.length && !checkpoint) throw new Error(failures.slice(0, 50).join("\n"));
   if (failures.length && checkpoint) {
     console.log(

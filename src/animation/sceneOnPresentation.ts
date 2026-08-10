@@ -19,6 +19,7 @@ import {
 import { hazeAtAge, type HazeState } from "./haze.ts";
 import {
   SPITE_TASK_SOURCE_AGE_OFFSET,
+  spiteDisplayedAlpha,
   spiteAtAge,
   type SpiteState,
 } from "./spite.ts";
@@ -4408,6 +4409,7 @@ export interface SceneOnSpiteView extends SpiteState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+  readonly displayedAlpha: Readonly<{ eva: number; evb: number }>;
 }
 
 /** `age` is relative to Move_HAZE's first in-bounds script pointer. */
@@ -4436,6 +4438,10 @@ export function sceneOnSpiteView(
     age: state.age,
     attacker: state.config.attacker,
     target: state.config.target,
+    displayedAlpha: spiteDisplayedAlpha(
+      state.age,
+      state.config.attacker.geometry.side,
+    ),
     ...spiteAtAge(state.age - SPITE_TASK_SOURCE_AGE_OFFSET),
   };
 }

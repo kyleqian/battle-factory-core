@@ -3394,6 +3394,34 @@
    ]
   },
   {
+   "move": "MOVE_SPITE",
+   "status": "exact",
+   "covered": [
+    "complete legal set-179 HAUNTER versus set-156 ONIX Scene-ON stages first establish a real target TACKLE, then exercise SPITE in both legal orientations over the pointer-bounded first in-bounds through first inactive cleanup window",
+    "twice-fresh byte-stable player-back frames 1000-1220 and opponent-front frames 1004-1224 each pass 221/221 pure reducer, typed seam, task/software-sprite, OAM/matrix/palette/tag/scanline/register/audio/immutable-state, raw-RGB, and production-framebuffer acceptance",
+    "the source-relative compositor ports the real ghost BG fade/restore, attacker palette cycle, freshly allocated affine target clone, copied-BG tint, scanline wave, alternating retained alpha pair, target hide/reappearance, chrome, and cleanup; Spite independently proves the fresh-affine dual-lag display class",
+    "BLDALPHA scanout is derived through the shared buffered GPU-register and audio-workload scheduler: both legal stages queue task writes after the VBlank transfer, so hardware observes the preceding buffered word; the former 28 pointer-age framebuffer residual is closed without a capture, frame, tick, coordinate, or RGB lookup",
+    "committed receipt/raw/change-map digests remain unchanged: player 819dd668... / 8dc2eee7... / 9ca49a5a... and opponent 7e3ec569... / 7f49cb0c... / 1a89deb6...",
+    "MOVE_NIGHT_SHADE remains unsupported because its shared ghost background does not waive an independent complete dense bilateral twice-fresh acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-spite-player-haunter-opponent-onix.json",
+    "tools/battle-lab/mechanic-spite-opponent-haunter-player-onix.json",
+    "tools/compare/fixtures/spite-player-haunter-opponent-onix.json",
+    "tools/compare/fixtures/spite-opponent-haunter-player-onix.json",
+    "tools/compare/spiteProbe.py",
+    "tools/compare/spiteRegisterQueueProbe.py",
+    "tools/compare/spitePortable.ts",
+    "tools/compare/evidence/spite-changemap-player.txt",
+    "tools/compare/evidence/spite-changemap-opponent.txt",
+    "src/animation/spite.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/spite.test.ts",
+    "tests/animation/spiteEvidenceCheckpoint.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_STEEL_WING",
    "status": "exact",
    "covered": [
