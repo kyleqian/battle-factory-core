@@ -7,9 +7,15 @@
   "scenario": "tools/battle-lab/mechanic-karate-chop-player-primeape-opponent-onix.json",
   "probe": "tools/compare/poisonFangProbe.py",
   "probeMoveId": 2,
-  "attacker": { "species": "PRIMEAPE", "side": "player", "center": { "x": 72, "y": 87 } },
-  "target": { "species": "ONIX", "side": "opponent", "center": { "x": 176, "y": 42 } },
-  "fieldProfile": { "playerHp": 147, "playerMaxHp": 147, "opponentHp": 117, "opponentMaxHp": 117 },
+  "attacker": { "species": "PRIMEAPE", "geometry": { "side": "player", "spriteCorner": { "x": 40, "y": 55 }, "animationCenter": { "x": 72, "y": 87 }, "battlePositionCenter": { "x": 72, "y": 80 } } },
+  "target": { "species": "ONIX", "geometry": { "side": "opponent", "spriteCorner": { "x": 144, "y": 10 }, "animationCenter": { "x": 176, "y": 42 }, "battlePositionCenter": { "x": 176, "y": 40 } } },
+  "fieldProfile": { "playerHp": 147, "playerMaxHp": 147, "opponentHp": 117, "opponentMaxHp": 117, "playerGender": "male", "opponentGender": "male" },
+  "componentContract": {
+    "scriptOffsets": [0,3,3,3,6,6,6,8,8,8,40,40,40,40,40,40,40,40,40,40,40,40,77,77,77,77,77,77,77,77,77,77,77,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81],
+    "handX2": [3,6,9,12,15,19,22,25,28,31,31],
+    "shakeRemaining": [5,5,4,4,3,3,2,2,1,1],
+    "targetX2": [0,0,4,4,0,0,4,4,0,0]
+  },
   "sourceWindow": { "startFrame": 77, "endFrame": 125, "frameCount": 49 },
   "evidenceSha256": "757e70d97f3c2f8239def29cd10631872a65bd47f35eb306e9d97bd30a3d1c64",
   "rawRgbSha256": "89c829e0abd01b065a9c9ac1133b4363df1fcf2127b644784565ded9de0f25c8",
