@@ -6,11 +6,11 @@ const manifest = data as unknown as Row;
 const audit = manifest.coverage.hookCatalogs.item.itemMoveEnd as Row;
 
 describe("Item post-move status-cure/stat-restore Level-50 hook-join family", () => {
-  it("enumerates all 116 selectors, promotes exactly 114, and leaves Assist/Metronome explicit", () => {
+  it("enumerates all 116 selectors, promotes exactly 112, and leaves Assist/Metronome/Mirror Move/Sleep Talk explicit", () => {
     expect(audit).toMatchObject({ status: "source-proven-family", candidateCount: 116, blockers: [] });
     expect(audit.sourceMoveCandidates).toHaveLength(116);
-    expect(audit.sourceProvenRows).toHaveLength(114);
-    expect(audit.routeWitnesses).toHaveLength(114);
+    expect(audit.sourceProvenRows).toHaveLength(112);
+    expect(audit.routeWitnesses).toHaveLength(112);
     expect(audit.sourceExceptionRows).toEqual([
       expect.objectContaining({
         id: "item-move-end-dynamic-dispatch:MOVE_ASSIST",
@@ -22,9 +22,21 @@ describe("Item post-move status-cure/stat-restore Level-50 hook-join family", ()
         move: "MOVE_METRONOME",
         reason: expect.stringMatching(/metronome opcode/),
       }),
+      expect.objectContaining({
+        id: "item-move-end-dynamic-dispatch:MOVE_MIRROR_MOVE",
+        move: "MOVE_MIRROR_MOVE",
+        reason: expect.stringMatching(/Cmd_trymirrormove/),
+      }),
+      expect.objectContaining({
+        id: "item-move-end-dynamic-dispatch:MOVE_SLEEP_TALK",
+        move: "MOVE_SLEEP_TALK",
+        reason: expect.stringMatching(/jumptocalledmove/),
+      }),
     ]);
     expect(audit.sourceProvenRows).not.toContain("MOVE_ASSIST");
     expect(audit.sourceProvenRows).not.toContain("MOVE_METRONOME");
+    expect(audit.sourceProvenRows).not.toContain("MOVE_MIRROR_MOVE");
+    expect(audit.sourceProvenRows).not.toContain("MOVE_SLEEP_TALK");
     expect(audit.sourceProvenRows).not.toContain("MOVE_COVET");
     expect(audit.sourceProvenRows).not.toContain("MOVE_TRICK");
     expect(audit.sourceProvenRows).not.toContain("MOVE_RECYCLE");

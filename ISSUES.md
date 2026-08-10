@@ -232,6 +232,73 @@ inert-insurance evidence above already cover in full. Disposition: no
 further check needed; the deferred item has nothing left to verify at the
 generated-route settle hooks.
 
+## #86 — Gate-6 manifest route certificates don't self-describe success vs. failure-tail reachability (`routeBranch` deferred)
+
+**Symptom:** every Gate-6 hook-family route certificate (King's Rock, Shell
+Bell, item-move-end, Immunity, Color Change, Contact, Synchronize, etc.) is
+emitted with a single BFS-found route from the move's entry script to a
+moveend handoff, but the manifest does not record *which kind* of route it
+found — an ordinary success path, or a route that only exists because the
+BFS happened to pass through a failure marker (`BattleScript_ButItFailed`,
+an `orbyte gMoveResultFlags, MOVE_RESULT_FAILED`, or a `*Prevents*` redirect
+script). The 2026-08-10 night Gate-6 surge audit that produced this run's
+Mirror Move/Sleep Talk dynamic-dispatch exception fix (see
+`docs/gate6-family-worklist.md`'s "STATUS (2026-08-10 night" note under
+Rank 5) found exactly this defect class by hand-tracing two rows; it is
+very likely not the only two rows where a family's route certificate is a
+failure-tail artifact rather than true success-path hook-join evidence.
+
+**Confirmed:** the class of failure markers a route can pass through, per
+the audit's own definition: `BattleScript_ButItFailed` (the shared
+ordinary-failure landing script most `Effect*` scripts fall through to),
+any `orbyte gMoveResultFlags, MOVE_RESULT_FAILED` write (the explicit
+failure-flag idiom, e.g. `BattleScript_EffectMirrorMove`'s own
+`ppreduce`/`orbyte`/`goto` tail), and any `*Prevents*`-named redirect script
+(e.g. `BattleScript_DampStopsExplosion`, `BattleScript_OwnTempoPrevents` —
+guard-redirect scripts that end a move's execution early without it taking
+effect). The audit additionally established the counter-argument that not
+every failure-tail route is worthless: for rows that reach `MoveEnd` via a
+C-level jump rather than the dynamic-dispatch pattern (audit hand-traced
+Roar/Whirlwind/Substitute), the certificate remains valid hook-join
+evidence regardless of branch, because `Cmd_moveend`'s state loop runs
+unconditionally after the move on **both** the success and failure
+branches — only the *dynamic-dispatch* rows (Assist/Metronome/Mirror
+Move/Sleep Talk) are actually broken by a failure-tail-only route, because
+their success arm bypasses the static graph entirely rather than merely
+taking a different in-script path to the same `Cmd_moveend` call.
+
+**The work:** add a `routeBranch: "success" | "failure-tail"` field to
+every emitted route certificate (mechanical classification: does the
+found route's statement list include a `goto`/`jumpifstatus`/etc. target
+whose label reaches one of the three marker shapes above before its
+terminal moveend node?), thread it into the manifest's evidence text per
+family, and audit every one of the ~296 currently-promoted rows per axis
+(not just the two this run found) for any other failure-tail-only route
+masquerading as a full success-path proof. Where a failure-tail route is
+found for a row that also has no dynamic-dispatch success-arm escape (the
+Roar/Whirlwind/Substitute shape above), the manifest should record the
+classification but the row's promotion stands — cite `Cmd_moveend`'s
+unconditional post-move state loop as the justification in the evidence
+text, once, rather than per-row. Where a failure-tail route is found for a
+row whose success arm *does* dynamically dispatch elsewhere (Mirror
+Move/Sleep Talk's own shape), it should already be caught by this run's
+exception-row fix, but the general sweep is still worth running to see if
+any other row shares that shape.
+
+**Not done this step:** the 50-minute worker cap that produced the
+exception-row fix above did not have room left to build and verify a
+full mechanical `routeBranch` classifier across every promoted family
+plus its manifest test assertions. Landing it half-done (e.g. only for
+one family, or without the failure-marker set fully derived from source
+for every family) risks a second incomplete-audit cycle just like the one
+that produced this issue — so it was deliberately deferred whole rather
+than partially landed. A future step should scope this as its own bounded
+unit: build the classifier, run it read-only across all ~2,000+ currently-
+emitted route certificates first to see how many (if any) beyond Mirror
+Move/Sleep Talk are failure-tail-only, *then* decide whether further rows
+need exception-row conversion before wiring the field into the schema and
+tests.
+
 ## #72 — [CLOSED 2026-08-04; retained as settled record] battleStringResolver completeness guard — FATAL-guard user decision + selection-dismiss timing facts for future option-(a) work
 
 **Original symptom** (2026-08-03, opponent MURKROW's TAUNT crash) and the
