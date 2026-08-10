@@ -491,7 +491,59 @@
       "entryPc": "0x08069056",
       "returnPc": "0x08068dd4",
       "entryMasterCycles": 1882882728,
-      "arguments": {},
+      "arguments": {
+        "personality": 1205102525,
+        "species": 95,
+        "experience": 125000,
+        "growthRate": 0
+      },
+      "boundaries": {
+        "speciesAccessorReturn": {
+          "kind": "get-level-species-accessor-return",
+          "frame": 6705,
+          "globalCycles": 1882940882,
+          "cpuCycles": 96,
+          "masterCycles": 1882940978,
+          "cyclePhase": 95090,
+          "pc": "0x08069062"
+        },
+        "experienceAccessorReturn": {
+          "kind": "get-level-experience-accessor-return",
+          "frame": 6705,
+          "globalCycles": 1882949730,
+          "cpuCycles": 306,
+          "masterCycles": 1882950036,
+          "cyclePhase": 104148,
+          "pc": "0x08069072"
+        },
+        "growthRateLoaded": {
+          "kind": "get-level-growth-rate-loaded",
+          "frame": 6705,
+          "globalCycles": 1882949730,
+          "cpuCycles": 349,
+          "masterCycles": 1882950079,
+          "cyclePhase": 104191,
+          "pc": "0x08069084"
+        },
+        "firstLevelCompare": {
+          "kind": "get-level-first-compare",
+          "frame": 6705,
+          "globalCycles": 1882949730,
+          "cpuCycles": 370,
+          "masterCycles": 1882950100,
+          "cyclePhase": 104212,
+          "pc": "0x08069090"
+        },
+        "loopExit": {
+          "kind": "get-level-loop-exit",
+          "frame": 6705,
+          "globalCycles": 1882952191,
+          "cpuCycles": 109,
+          "masterCycles": 1882952300,
+          "cyclePhase": 106412,
+          "pc": "0x080690ac"
+        }
+      },
       "returnMasterCycles": 1882952318,
       "returnPcObserved": "0x08068dd6",
       "result": 50
@@ -1087,7 +1139,59 @@
       "entryPc": "0x08069056",
       "returnPc": "0x08068dd4",
       "entryMasterCycles": 1885378457,
-      "arguments": {},
+      "arguments": {
+        "personality": 1534575931,
+        "species": 240,
+        "experience": 125000,
+        "growthRate": 0
+      },
+      "boundaries": {
+        "speciesAccessorReturn": {
+          "kind": "get-level-species-accessor-return",
+          "frame": 6713,
+          "globalCycles": 1885387855,
+          "cpuCycles": 124,
+          "masterCycles": 1885387979,
+          "cyclePhase": 14027,
+          "pc": "0x08069062"
+        },
+        "experienceAccessorReturn": {
+          "kind": "get-level-experience-accessor-return",
+          "frame": 6713,
+          "globalCycles": 1885397489,
+          "cpuCycles": 12,
+          "masterCycles": 1885397501,
+          "cyclePhase": 23549,
+          "pc": "0x08069072"
+        },
+        "growthRateLoaded": {
+          "kind": "get-level-growth-rate-loaded",
+          "frame": 6713,
+          "globalCycles": 1885397489,
+          "cpuCycles": 55,
+          "masterCycles": 1885397544,
+          "cyclePhase": 23592,
+          "pc": "0x08069084"
+        },
+        "firstLevelCompare": {
+          "kind": "get-level-first-compare",
+          "frame": 6713,
+          "globalCycles": 1885397489,
+          "cpuCycles": 76,
+          "masterCycles": 1885397565,
+          "cyclePhase": 23613,
+          "pc": "0x08069090"
+        },
+        "loopExit": {
+          "kind": "get-level-loop-exit",
+          "frame": 6713,
+          "globalCycles": 1885399040,
+          "cpuCycles": 725,
+          "masterCycles": 1885399765,
+          "cyclePhase": 25813,
+          "pc": "0x080690ac"
+        }
+      },
       "returnMasterCycles": 1885399783,
       "returnPcObserved": "0x08068dd6",
       "result": 50
@@ -1683,7 +1787,59 @@
       "entryPc": "0x08069056",
       "returnPc": "0x08068dd4",
       "entryMasterCycles": 1887899157,
-      "arguments": {},
+      "arguments": {
+        "personality": 1550278706,
+        "species": 153,
+        "experience": 117360,
+        "growthRate": 3
+      },
+      "boundaries": {
+        "speciesAccessorReturn": {
+          "kind": "get-level-species-accessor-return",
+          "frame": 6722,
+          "globalCycles": 1887907953,
+          "cpuCycles": 78,
+          "masterCycles": 1887908031,
+          "cyclePhase": 6015,
+          "pc": "0x08069062"
+        },
+        "experienceAccessorReturn": {
+          "kind": "get-level-experience-accessor-return",
+          "frame": 6722,
+          "globalCycles": 1887916729,
+          "cpuCycles": 158,
+          "masterCycles": 1887916887,
+          "cyclePhase": 14871,
+          "pc": "0x08069072"
+        },
+        "growthRateLoaded": {
+          "kind": "get-level-growth-rate-loaded",
+          "frame": 6722,
+          "globalCycles": 1887916729,
+          "cpuCycles": 201,
+          "masterCycles": 1887916930,
+          "cyclePhase": 14914,
+          "pc": "0x08069084"
+        },
+        "firstLevelCompare": {
+          "kind": "get-level-first-compare",
+          "frame": 6722,
+          "globalCycles": 1887916930,
+          "cpuCycles": 21,
+          "masterCycles": 1887916951,
+          "cyclePhase": 14935,
+          "pc": "0x08069090"
+        },
+        "loopExit": {
+          "kind": "get-level-loop-exit",
+          "frame": 6722,
+          "globalCycles": 1887919104,
+          "cpuCycles": 65,
+          "masterCycles": 1887919169,
+          "cyclePhase": 17153,
+          "pc": "0x080690ac"
+        }
+      },
       "returnMasterCycles": 1887919187,
       "returnPcObserved": "0x08068dd6",
       "result": 50
@@ -2279,7 +2435,59 @@
       "entryPc": "0x08069056",
       "returnPc": "0x08068dd4",
       "entryMasterCycles": 1890580073,
-      "arguments": {},
+      "arguments": {
+        "personality": 2653995674,
+        "species": 12,
+        "experience": 125000,
+        "growthRate": 0
+      },
+      "boundaries": {
+        "speciesAccessorReturn": {
+          "kind": "get-level-species-accessor-return",
+          "frame": 6732,
+          "globalCycles": 1890589361,
+          "cpuCycles": 12,
+          "masterCycles": 1890589373,
+          "cyclePhase": 159293,
+          "pc": "0x08069062"
+        },
+        "experienceAccessorReturn": {
+          "kind": "get-level-experience-accessor-return",
+          "frame": 6732,
+          "globalCycles": 1890597983,
+          "cpuCycles": 654,
+          "masterCycles": 1890598637,
+          "cyclePhase": 168557,
+          "pc": "0x08069072"
+        },
+        "growthRateLoaded": {
+          "kind": "get-level-growth-rate-loaded",
+          "frame": 6732,
+          "globalCycles": 1890597983,
+          "cpuCycles": 697,
+          "masterCycles": 1890598680,
+          "cyclePhase": 168600,
+          "pc": "0x08069084"
+        },
+        "firstLevelCompare": {
+          "kind": "get-level-first-compare",
+          "frame": 6732,
+          "globalCycles": 1890597983,
+          "cpuCycles": 718,
+          "masterCycles": 1890598701,
+          "cyclePhase": 168621,
+          "pc": "0x08069090"
+        },
+        "loopExit": {
+          "kind": "get-level-loop-exit",
+          "frame": 6732,
+          "globalCycles": 1890600457,
+          "cpuCycles": 444,
+          "masterCycles": 1890600901,
+          "cyclePhase": 170821,
+          "pc": "0x080690ac"
+        }
+      },
       "returnMasterCycles": 1890600919,
       "returnPcObserved": "0x08068dd6",
       "result": 50
@@ -2875,7 +3083,59 @@
       "entryPc": "0x08069056",
       "returnPc": "0x08068dd4",
       "entryMasterCycles": 1893199923,
-      "arguments": {},
+      "arguments": {
+        "personality": 1206438594,
+        "species": 93,
+        "experience": 117360,
+        "growthRate": 3
+      },
+      "boundaries": {
+        "speciesAccessorReturn": {
+          "kind": "get-level-species-accessor-return",
+          "frame": 6741,
+          "globalCycles": 1893209091,
+          "cpuCycles": 198,
+          "masterCycles": 1893209289,
+          "cyclePhase": 251145,
+          "pc": "0x08069062"
+        },
+        "experienceAccessorReturn": {
+          "kind": "get-level-experience-accessor-return",
+          "frame": 6741,
+          "globalCycles": 1893218643,
+          "cpuCycles": 12,
+          "masterCycles": 1893218655,
+          "cyclePhase": 260511,
+          "pc": "0x08069072"
+        },
+        "growthRateLoaded": {
+          "kind": "get-level-growth-rate-loaded",
+          "frame": 6741,
+          "globalCycles": 1893218643,
+          "cpuCycles": 55,
+          "masterCycles": 1893218698,
+          "cyclePhase": 260554,
+          "pc": "0x08069084"
+        },
+        "firstLevelCompare": {
+          "kind": "get-level-first-compare",
+          "frame": 6741,
+          "globalCycles": 1893218643,
+          "cpuCycles": 76,
+          "masterCycles": 1893218719,
+          "cyclePhase": 260575,
+          "pc": "0x08069090"
+        },
+        "loopExit": {
+          "kind": "get-level-loop-exit",
+          "frame": 6741,
+          "globalCycles": 1893220915,
+          "cpuCycles": 4,
+          "masterCycles": 1893220919,
+          "cyclePhase": 262775,
+          "pc": "0x080690ac"
+        }
+      },
       "returnMasterCycles": 1893220937,
       "returnPcObserved": "0x08068dd6",
       "result": 50
@@ -3471,7 +3731,59 @@
       "entryPc": "0x08069056",
       "returnPc": "0x08068dd4",
       "entryMasterCycles": 1895030311,
-      "arguments": {},
+      "arguments": {
+        "personality": 2355253556,
+        "species": 156,
+        "experience": 117360,
+        "growthRate": 3
+      },
+      "boundaries": {
+        "speciesAccessorReturn": {
+          "kind": "get-level-species-accessor-return",
+          "frame": 6748,
+          "globalCycles": 1895039121,
+          "cpuCycles": 132,
+          "masterCycles": 1895039253,
+          "cyclePhase": 114837,
+          "pc": "0x08069062"
+        },
+        "experienceAccessorReturn": {
+          "kind": "get-level-experience-accessor-return",
+          "frame": 6748,
+          "globalCycles": 1895047973,
+          "cpuCycles": 222,
+          "masterCycles": 1895048195,
+          "cyclePhase": 123779,
+          "pc": "0x08069072"
+        },
+        "growthRateLoaded": {
+          "kind": "get-level-growth-rate-loaded",
+          "frame": 6748,
+          "globalCycles": 1895048227,
+          "cpuCycles": 11,
+          "masterCycles": 1895048238,
+          "cyclePhase": 123822,
+          "pc": "0x08069084"
+        },
+        "firstLevelCompare": {
+          "kind": "get-level-first-compare",
+          "frame": 6748,
+          "globalCycles": 1895048227,
+          "cpuCycles": 32,
+          "masterCycles": 1895048259,
+          "cyclePhase": 123843,
+          "pc": "0x08069090"
+        },
+        "loopExit": {
+          "kind": "get-level-loop-exit",
+          "frame": 6748,
+          "globalCycles": 1895050438,
+          "cpuCycles": 21,
+          "masterCycles": 1895050459,
+          "cyclePhase": 126043,
+          "pc": "0x080690ac"
+        }
+      },
       "returnMasterCycles": 1895050477,
       "returnPcObserved": "0x08068dd6",
       "result": 50

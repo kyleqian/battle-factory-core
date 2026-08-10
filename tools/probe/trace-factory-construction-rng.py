@@ -728,6 +728,11 @@ def calculate_mon_stats_call_arguments(operation: str, oracle: EmeraldOracle) ->
             "stat": cpu_gpr(oracle, 1),
             "statIndex": cpu_gpr(oracle, 2),
         }
+    if operation == "get-level-from-exp":
+        # The outer ABI is a Pokemon pointer, but both encrypted accessors
+        # below route GetSubstruct through personality % 24. Preserve only the
+        # scalar source state needed to audit that compiled route.
+        return {"personality": read_u32(oracle, cpu_gpr(oracle, 0))}
     return {}
 
 
@@ -743,6 +748,46 @@ def observe_calculate_mon_stats_call(
 
     active = epoch.get("calculateMonStatsActiveCall")
     if active is not None:
+        if active["operation"] == "get-level-from-exp":
+            # GetLevelFromMonExp's source inputs are not ABI registers at its
+            # outer entry: both are returned by nested GetMonData2 calls. Keep
+            # only those scalar results and the compiled loop boundaries; do
+            # not retain the party pointer or decrypted box-mon storage.
+            if pc == 0x08069062:  # after GetMonData2(MON_DATA_SPECIES)
+                active["arguments"]["species"] = cpu_gpr(oracle, 0) & 0xFFFF
+                active.setdefault("boundaries", {})["speciesAccessorReturn"] = cycle_snapshot(
+                    oracle, frame, pc, "get-level-species-accessor-return",
+                )
+            elif pc == 0x08069072:  # after GetMonData2(MON_DATA_EXP)
+                active["arguments"]["experience"] = cpu_gpr(oracle, 0)
+                active.setdefault("boundaries", {})["experienceAccessorReturn"] = cycle_snapshot(
+                    oracle, frame, pc, "get-level-experience-accessor-return",
+                )
+            elif pc == 0x08069084:  # after gSpeciesInfo[species].growthRate load
+                active["arguments"]["growthRate"] = cpu_gpr(oracle, 0) & 0xFF
+                active.setdefault("boundaries", {})["growthRateLoaded"] = cycle_snapshot(
+                    oracle, frame, pc, "get-level-growth-rate-loaded",
+                )
+            elif pc == 0x08069090:  # first experience-table comparison
+                active.setdefault("boundaries", {})["firstLevelCompare"] = cycle_snapshot(
+                    oracle, frame, pc, "get-level-first-compare",
+                )
+            elif pc == 0x080690AC:  # common loop exit, before level - 1
+                active.setdefault("boundaries", {})["loopExit"] = cycle_snapshot(
+                    oracle, frame, pc, "get-level-loop-exit",
+                )
+            elif pc == 0x08000846:  # VCountIntr entry inside this callee
+                active.setdefault("asyncService", []).append(cycle_snapshot(
+                    oracle, frame, pc, "get-level-vcount-entry",
+                ))
+            elif pc == 0x082DFA12:  # m4aSoundVSync entry from VCountIntr
+                active.setdefault("asyncService", []).append(cycle_snapshot(
+                    oracle, frame, pc, "get-level-m4a-sound-vsync-entry",
+                ))
+            elif pc == 0x0800086E:  # VCountIntr terminal bx
+                active.setdefault("asyncService", []).append(cycle_snapshot(
+                    oracle, frame, pc, "get-level-vcount-return",
+                ))
         return_pc = int(active["returnPc"], 16)
         if pc in {return_pc, return_pc + 2}:
             completed = dict(active)

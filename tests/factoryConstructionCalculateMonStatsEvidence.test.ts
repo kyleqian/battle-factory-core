@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import expTablesData from "../src/data/gen/exp-tables.json" with { type: "json" };
 import {
   reduceFactoryCalculateMonStatsParentTiming,
   reduceFactoryGetNatureTiming,
@@ -22,6 +23,8 @@ type DirectCall = {
   returnPcObserved: string;
   arguments: Record<string, number>;
   result?: number;
+  boundaries?: Record<string, { masterCycles: number; pc: string }>;
+  asyncService?: Array<{ kind: string; masterCycles: number; pc: string }>;
 };
 
 type StatsReceipt = {
@@ -45,7 +48,7 @@ const ROOT = "tests/fixtures/factory-calculate-mon-stats-v1";
 const CASES = [
   {
     name: "anchor",
-    hash: "cde88e8f2a6ab3602793648120b9d687e42ad96c6d0ad6d554f74e032e82d603",
+    hash: "92d3feb4686cddfdaf7a6b14be3931514f2007f59052f0f4a64deb5bba287773",
     sourceCycles: [147_225, 154_160, 144_082, 150_824, 152_353, 145_526],
     directCycles: [146_142, 153_077, 142_999, 149_741, 151_270, 144_443],
     interstitialCycles: [1_083, 1_083, 1_083, 1_083, 1_083, 1_083],
@@ -53,7 +56,7 @@ const CASES = [
   },
   {
     name: "liliana",
-    hash: "d338edc6bfc4e57f505dcdb3886612f0fa6be64bd02ca9971ae79874eaf84750",
+    hash: "136efa4a46777d1e0665f0af3efd6a9ef3b694c68048d3ef46b9140532de5358",
     sourceCycles: [147_417, 148_749, 152_011],
     directCycles: [146_334, 147_668, 150_928],
     interstitialCycles: [1_083, 1_081, 1_083],
@@ -61,7 +64,7 @@ const CASES = [
   },
   {
     name: "factory-varied",
-    hash: "e0d10a1cb2d668ecac33282b8031e4fd1c9cbbc5cc180fad4c56cc561e7f15b3",
+    hash: "ea323d9e8e881da6730c78af8965a579258cfd528a6a903a6c0c2dc23b005ce6",
     sourceCycles: [147_488, 140_999, 150_849],
     directCycles: [146_407, 139_916, 149_766],
     interstitialCycles: [1_081, 1_083, 1_083],
@@ -120,6 +123,37 @@ const DIRECT_CALL_SHAPE = [
   ["set-mon-data", "sp-defense", "0x08068fa8", "0x0806acae", "0x08068fac", 63],
   ["set-mon-data", "current-hp", "0x08068ff0", "0x0806acae", "0x08068ff4", 57],
 ] as const;
+
+const GROWTH_RATE_NAMES = [
+  "GROWTH_MEDIUM_FAST",
+  "GROWTH_ERRATIC",
+  "GROWTH_FLUCTUATING",
+  "GROWTH_MEDIUM_SLOW",
+  "GROWTH_FAST",
+  "GROWTH_SLOW",
+] as const;
+
+function expectedLevelLoop(growthRate: number, experience: number): { level: number; cycles: number } {
+  const growthName = GROWTH_RATE_NAMES[growthRate];
+  if (growthName === undefined) throw new Error(`unknown growth rate ${growthRate}`);
+  const table = expTablesData.growthRates[growthName];
+  let level = 1;
+  let cycles = 4; // initial cmp + untaken/taken bhi
+  if (table[level]! > experience) return { level: 0, cycles: cycles + 6 };
+  cycles += 2; // preserve the gSpeciesInfo row for the loop
+  for (level = 2; ; level += 1) {
+    cycles += 6; // increment, MAX_LEVEL compare, and branch instruction
+    if (level > 100) {
+      cycles += 6; // taken MAX_LEVEL exit
+      break;
+    }
+    // Eight loop halfwords, plus the ROM-byte and ROM-word load premiums.
+    cycles += 8 * 2 + (9 - 2) + (11 - 2);
+    if (table[level]! > experience) break;
+    cycles += 6; // taken back edge
+  }
+  return { level: level - 1, cycles };
+}
 
 function sourceCycles(
   start: number,
@@ -210,6 +244,67 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
         expect(modifications.map((call) => call.arguments.statIndex)).toEqual([1, 2, 3, 4, 5]);
       }
     }
+  });
+
+  it("pins all twelve level source states and the exact post-accessor loop boundary", () => {
+    const residuals: number[] = [];
+    const sourceStates: Array<[number, number, number]> = [];
+    const services: string[][] = [];
+
+    for (const { value } of probes) {
+      for (const mon of value.mons) {
+        const call = value.directCalls.find((row) => (
+          row.monIndex === mon.monIndex && row.operation === "get-level-from-exp"
+        ));
+        if (call?.boundaries === undefined || call.result === undefined) {
+          throw new Error(`missing level evidence for ${value.case} mon ${mon.monIndex}`);
+        }
+        expect(call.arguments.personality).toBe(mon.acceptedPersonality);
+        const speciesCall = value.directCalls.find((row) => (
+          row.monIndex === mon.monIndex && row.operation === "get-mon-data" && row.target === "species"
+        ));
+        expect(call.arguments.species).toBe(speciesCall?.result);
+
+        const expected = expectedLevelLoop(call.arguments.growthRate!, call.arguments.experience!);
+        expect(call.result).toBe(expected.level);
+        expect(call.boundaries.speciesAccessorReturn.pc).toBe("0x08069062");
+        expect(call.boundaries.experienceAccessorReturn.pc).toBe("0x08069072");
+        expect(call.boundaries.growthRateLoaded.pc).toBe("0x08069084");
+        expect(call.boundaries.firstLevelCompare.pc).toBe("0x08069090");
+        expect(call.boundaries.loopExit.pc).toBe("0x080690ac");
+        expect(call.boundaries.growthRateLoaded.masterCycles
+          - call.boundaries.experienceAccessorReturn.masterCycles).toBe(43);
+        expect(call.boundaries.firstLevelCompare.masterCycles
+          - call.boundaries.growthRateLoaded.masterCycles).toBe(21);
+        expect(call.returnMasterCycles - call.boundaries.loopExit.masterCycles).toBe(18);
+
+        const measuredLoop = call.boundaries.loopExit.masterCycles
+          - call.boundaries.firstLevelCompare.masterCycles;
+        residuals.push(measuredLoop - expected.cycles);
+        sourceStates.push([
+          call.arguments.species!,
+          call.arguments.growthRate!,
+          call.arguments.experience!,
+        ]);
+        services.push((call.asyncService ?? []).map((row) => row.kind));
+      }
+    }
+
+    expect(sourceStates).toEqual([
+      [95, 0, 125_000], [240, 0, 125_000], [153, 3, 117_360],
+      [12, 0, 125_000], [93, 3, 117_360], [156, 3, 117_360],
+      [64, 3, 117_360], [313, 2, 142_500], [299, 3, 117_360],
+      [143, 5, 156_250], [131, 5, 156_250], [136, 0, 125_000],
+    ]);
+    expect(residuals.filter((cycles) => cycles === 0)).toHaveLength(8);
+    expect(residuals.filter((cycles) => cycles === 18)).toHaveLength(3);
+    expect(residuals.filter((cycles) => cycles === 308)).toHaveLength(1);
+    expect(services.filter((rows) => rows.length === 0)).toHaveLength(11);
+    expect(services.filter((rows) => rows.length !== 0)).toEqual([[
+      "get-level-vcount-entry",
+      "get-level-m4a-sound-vsync-entry",
+      "get-level-vcount-return",
+    ]]);
   });
 
   it("censuses all 180 GetMonData2 calls by source field and compiled route", () => {

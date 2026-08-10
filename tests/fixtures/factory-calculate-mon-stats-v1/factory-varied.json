@@ -355,7 +355,59 @@
       "entryPc": "0x08069056",
       "returnPc": "0x08068dd4",
       "entryMasterCycles": 2230908171,
-      "arguments": {},
+      "arguments": {
+        "personality": 2548902078,
+        "species": 143,
+        "experience": 156250,
+        "growthRate": 5
+      },
+      "boundaries": {
+        "speciesAccessorReturn": {
+          "kind": "get-level-species-accessor-return",
+          "frame": 974,
+          "globalCycles": 2230954071,
+          "cpuCycles": 162,
+          "masterCycles": 2230954233,
+          "cyclePhase": 78201,
+          "pc": "0x08069062"
+        },
+        "experienceAccessorReturn": {
+          "kind": "get-level-experience-accessor-return",
+          "frame": 974,
+          "globalCycles": 2230963201,
+          "cpuCycles": 36,
+          "masterCycles": 2230963237,
+          "cyclePhase": 87205,
+          "pc": "0x08069072"
+        },
+        "growthRateLoaded": {
+          "kind": "get-level-growth-rate-loaded",
+          "frame": 974,
+          "globalCycles": 2230963201,
+          "cpuCycles": 79,
+          "masterCycles": 2230963280,
+          "cyclePhase": 87248,
+          "pc": "0x08069084"
+        },
+        "firstLevelCompare": {
+          "kind": "get-level-first-compare",
+          "frame": 974,
+          "globalCycles": 2230963201,
+          "cpuCycles": 100,
+          "masterCycles": 2230963301,
+          "cyclePhase": 87269,
+          "pc": "0x08069090"
+        },
+        "loopExit": {
+          "kind": "get-level-loop-exit",
+          "frame": 974,
+          "globalCycles": 2230965249,
+          "cpuCycles": 252,
+          "masterCycles": 2230965501,
+          "cyclePhase": 89469,
+          "pc": "0x080690ac"
+        }
+      },
       "returnMasterCycles": 2230965519,
       "returnPcObserved": "0x08068dd6",
       "result": 50
@@ -951,7 +1003,59 @@
       "entryPc": "0x08069056",
       "returnPc": "0x08068dd4",
       "entryMasterCycles": 2233621479,
-      "arguments": {},
+      "arguments": {
+        "personality": 475276731,
+        "species": 131,
+        "experience": 156250,
+        "growthRate": 5
+      },
+      "boundaries": {
+        "speciesAccessorReturn": {
+          "kind": "get-level-species-accessor-return",
+          "frame": 983,
+          "globalCycles": 2233629907,
+          "cpuCycles": 222,
+          "masterCycles": 2233630129,
+          "cyclePhase": 226033,
+          "pc": "0x08069062"
+        },
+        "experienceAccessorReturn": {
+          "kind": "get-level-experience-accessor-return",
+          "frame": 983,
+          "globalCycles": 2233638527,
+          "cpuCycles": 234,
+          "masterCycles": 2233638761,
+          "cyclePhase": 234665,
+          "pc": "0x08069072"
+        },
+        "growthRateLoaded": {
+          "kind": "get-level-growth-rate-loaded",
+          "frame": 983,
+          "globalCycles": 2233638527,
+          "cpuCycles": 277,
+          "masterCycles": 2233638804,
+          "cyclePhase": 234708,
+          "pc": "0x08069084"
+        },
+        "firstLevelCompare": {
+          "kind": "get-level-first-compare",
+          "frame": 983,
+          "globalCycles": 2233638527,
+          "cpuCycles": 298,
+          "masterCycles": 2233638825,
+          "cyclePhase": 234729,
+          "pc": "0x08069090"
+        },
+        "loopExit": {
+          "kind": "get-level-loop-exit",
+          "frame": 983,
+          "globalCycles": 2233640995,
+          "cpuCycles": 48,
+          "masterCycles": 2233641043,
+          "cyclePhase": 236947,
+          "pc": "0x080690ac"
+        }
+      },
       "returnMasterCycles": 2233641061,
       "returnPcObserved": "0x08068dd6",
       "result": 50
@@ -1547,7 +1651,88 @@
       "entryPc": "0x08069056",
       "returnPc": "0x08068dd4",
       "entryMasterCycles": 2236223130,
-      "arguments": {},
+      "arguments": {
+        "personality": 2754857082,
+        "species": 136,
+        "experience": 125000,
+        "growthRate": 0
+      },
+      "boundaries": {
+        "speciesAccessorReturn": {
+          "kind": "get-level-species-accessor-return",
+          "frame": 992,
+          "globalCycles": 2236231892,
+          "cpuCycles": 502,
+          "masterCycles": 2236232394,
+          "cyclePhase": 19338,
+          "pc": "0x08069062"
+        },
+        "experienceAccessorReturn": {
+          "kind": "get-level-experience-accessor-return",
+          "frame": 992,
+          "globalCycles": 2236241564,
+          "cpuCycles": 58,
+          "masterCycles": 2236241622,
+          "cyclePhase": 28566,
+          "pc": "0x08069072"
+        },
+        "growthRateLoaded": {
+          "kind": "get-level-growth-rate-loaded",
+          "frame": 992,
+          "globalCycles": 2236241564,
+          "cpuCycles": 101,
+          "masterCycles": 2236241665,
+          "cyclePhase": 28609,
+          "pc": "0x08069084"
+        },
+        "firstLevelCompare": {
+          "kind": "get-level-first-compare",
+          "frame": 992,
+          "globalCycles": 2236241564,
+          "cpuCycles": 122,
+          "masterCycles": 2236241686,
+          "cyclePhase": 28630,
+          "pc": "0x08069090"
+        },
+        "loopExit": {
+          "kind": "get-level-loop-exit",
+          "frame": 992,
+          "globalCycles": 2236244072,
+          "cpuCycles": 122,
+          "masterCycles": 2236244194,
+          "cyclePhase": 31138,
+          "pc": "0x080690ac"
+        }
+      },
+      "asyncService": [
+        {
+          "kind": "get-level-vcount-entry",
+          "frame": 992,
+          "globalCycles": 2236241796,
+          "cpuCycles": 41,
+          "masterCycles": 2236241837,
+          "cyclePhase": 28781,
+          "pc": "0x08000846"
+        },
+        {
+          "kind": "get-level-m4a-sound-vsync-entry",
+          "frame": 992,
+          "globalCycles": 2236241837,
+          "cpuCycles": 35,
+          "masterCycles": 2236241872,
+          "cyclePhase": 28816,
+          "pc": "0x082dfa12"
+        },
+        {
+          "kind": "get-level-vcount-return",
+          "frame": 992,
+          "globalCycles": 2236241927,
+          "cpuCycles": 93,
+          "masterCycles": 2236242020,
+          "cyclePhase": 28964,
+          "pc": "0x0800086e"
+        }
+      ],
       "returnMasterCycles": 2236244212,
       "returnPcObserved": "0x08068dd6",
       "result": 50
