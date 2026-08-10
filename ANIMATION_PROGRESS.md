@@ -1,3 +1,10 @@
+# MOVE_LEAF_BLADE receipt-drift diagnosis — transport schema only (2026-08-10 worker)
+
+- **State:** Coverage remains **158/276 exact**, 0 partial, 0 staged, **118 unsupported**. The Leaf Blade compositor/framebuffer proof is still open; no move, boundary, barrier, or gameplay state changed.
+- **Did:** Root-caused the apparent Leaf Blade and exact CROSS_CHOP receipt drift to the oracle's 2026-07-30 additive `preCheckpointCaptures: []` member in `BattleLab.prepare()` (harness commit `8251953`). The four move probes now assert that the field is empty and omit this transport-only value from their original semantic receipt schema; no committed hash was rewritten.
+- **Verified:** Current ROM/ELF/map are `a9dec84d…` / `cd28ec67…` / `27c5f864…`; oracle profile is Scene-ON bootstrap v5. Deleting only that empty setup field from untouched fresh outputs reproduces all four old evidence hashes byte-for-byte. Twice-fresh Leaf Blade raw RGB remains exactly the committed player `6ba2d80f…` and opponent `b85563f6…` (the prior checkpoint's `37610724…` / `cfc0fabf…` were a different aggregation, not the portable raw-RGB receipt). Leaf Blade receipts return to committed `e3fea9bd…` / `ae787ec4…`; exact CROSS_CHOP returns to bilateral **88/88 source/component/framebuffer** with committed evidence/raw hashes twice fresh.
+- **Next:** Add Leaf Blade's move-owned OAM/transfer checks and compositor, measure its own display latches, and require bilateral twice-fresh **224/224 source/component/seam/hardware/state/raw-RGB/production-framebuffer** before promotion.
+
 # MOVE_LEAF_BLADE source reducer + typed seam checkpoint — remains unsupported (2026-08-10 worker)
 
 - **State:** Coverage remains **158/276 exact**, 0 partial, 0 staged, **118 unsupported**. `MOVE_LEAF_BLADE` is not promoted; `ANIMATION_COVERAGE.json`, the animation boundary, unsupported barrier, gameplay/controller state, and shared CROSS_IMPACT compositor are unchanged.

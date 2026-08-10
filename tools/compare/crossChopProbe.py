@@ -27,6 +27,13 @@ def main() -> None:
     oracle = EmeraldOracle(ref / "pokeemerald.gba", ref / "pokeemerald.map", HARNESS / "oracle" / "bootstrap" / "factory.json")
     lab = BattleLab(oracle, "battle-scene-on")
     setup = lab.prepare(request)
+    # Added by the oracle's opt-in pre-checkpoint capture API after this
+    # receipt was committed. This scenario requests no such captures: pin
+    # that fact, then retain the original move-evidence schema so unrelated
+    # transport growth cannot masquerade as gameplay or framebuffer drift.
+    if setup.get("preCheckpointCaptures") != []:
+        raise RuntimeError("Cross Chop unexpectedly requested pre-checkpoint captures")
+    setup.pop("preCheckpointCaptures")
     nm = subprocess.run(["arm-none-eabi-nm", "-a", str(ref / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
     pairs = [(int(p[0], 16), p[2]) for line in nm.splitlines() if len(p := line.split()) == 3 and all(c in "0123456789abcdefABCDEF" for c in p[0])]
     names = {name: address for address, name in pairs}
