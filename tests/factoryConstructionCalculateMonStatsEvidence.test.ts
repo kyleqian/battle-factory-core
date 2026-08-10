@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   reduceFactoryCalculateMonStatsParentTiming,
   reduceFactoryGetNatureTiming,
+  reduceFactoryGetMonDataTiming,
   reduceFactoryModifyStatByNatureTiming,
   reduceFactorySetMonDataTiming,
   reduceFactorySignedDivisionTiming,
@@ -209,6 +210,109 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
         expect(modifications.map((call) => call.arguments.statIndex)).toEqual([1, 2, 3, 4, 5]);
       }
     }
+  });
+
+  it("censuses all 180 GetMonData2 calls by source field and compiled route", () => {
+    const census = new Map<number, { count: number; route: string; target: string }>();
+
+    for (const { value } of probes) {
+      for (const call of value.directCalls.filter((row) => row.operation === "get-mon-data")) {
+        const field = call.arguments.field!;
+        const timing = reduceFactoryGetMonDataTiming({ field });
+        const current = census.get(field);
+        expect(current === undefined || current.target === call.target).toBe(true);
+        census.set(field, {
+          count: (current?.count ?? 0) + 1,
+          route: timing.route,
+          target: call.target,
+        });
+      }
+    }
+
+    expect([...census.entries()]).toEqual([
+      [58, { count: 12, route: "party-max-hp-u16", target: "old-max-hp" }],
+      [57, { count: 12, route: "party-hp-u16", target: "current-hp" }],
+      [39, { count: 12, route: "compare-default-to-get-box-mon-data", target: "hp-iv" }],
+      [26, { count: 12, route: "compare-default-to-get-box-mon-data", target: "hp-ev" }],
+      [40, { count: 12, route: "compare-default-to-get-box-mon-data", target: "attack-iv" }],
+      [27, { count: 12, route: "compare-default-to-get-box-mon-data", target: "attack-ev" }],
+      [41, { count: 12, route: "compare-default-to-get-box-mon-data", target: "defense-iv" }],
+      [28, { count: 12, route: "compare-default-to-get-box-mon-data", target: "defense-ev" }],
+      [42, { count: 12, route: "compare-default-to-get-box-mon-data", target: "speed-iv" }],
+      [29, { count: 12, route: "compare-default-to-get-box-mon-data", target: "speed-ev" }],
+      [43, { count: 12, route: "compare-default-to-get-box-mon-data", target: "sp-attack-iv" }],
+      [30, { count: 12, route: "compare-default-to-get-box-mon-data", target: "sp-attack-ev" }],
+      [44, { count: 12, route: "compare-default-to-get-box-mon-data", target: "sp-defense-iv" }],
+      [31, { count: 12, route: "compare-default-to-get-box-mon-data", target: "sp-defense-ev" }],
+      [11, { count: 12, route: "compare-default-to-get-box-mon-data", target: "species" }],
+    ]);
+    expect([...census.values()].reduce((sum, row) => sum + row.count, 0)).toBe(180);
+  });
+
+  it("source-reduces all 24 direct HP/max-HP reads without absorbing async work", () => {
+    const sourceByCase: Record<string, number> = {};
+
+    for (const { value } of probes) {
+      let caseCycles = 0;
+      const directRows = value.directCalls.filter((row) => (
+        row.operation === "get-mon-data" && [57, 58].includes(row.arguments.field!)
+      ));
+      expect(directRows).toHaveLength(value.mons.length * 2);
+      for (const call of directRows) {
+        const timing = reduceFactoryGetMonDataTiming({ field: call.arguments.field! });
+        const measured = sourceCycles(
+          call.entryMasterCycles,
+          call.returnMasterCycles,
+          value.interruptPauses,
+        );
+        expect(timing.cycles).toBe(80);
+        expect(measured).toBe(timing.cycles);
+        expect(call.result).toBeGreaterThan(0);
+        caseCycles += timing.cycles!;
+      }
+      sourceByCase[value.case] = caseCycles;
+    }
+
+    expect(sourceByCase).toEqual({ anchor: 960, liliana: 480, "factory-varied": 480 });
+  });
+
+  it("derives direct-party and unresolved nested GetMonData2 switch arms from the field", () => {
+    for (const field of [55, 56, 57, 58, 64, 84, 85, 86, 87, 88]) {
+      expect(reduceFactoryGetMonDataTiming({ field })).toMatchObject({
+        field,
+        directPartyRead: true,
+        delegatedToGetBoxMonData2: false,
+        valueWidth: field === 55 ? 4 : field === 56 || field === 64 ? 1 : 2,
+        cycles: 80,
+        unresolved: null,
+      });
+    }
+
+    expect(reduceFactoryGetMonDataTiming({ field: 11 })).toMatchObject({
+      route: "compare-default-to-get-box-mon-data",
+      directPartyRead: false,
+      delegatedToGetBoxMonData2: true,
+      getBoxMonData2EntryPc: 0x0806_a676,
+      preDelegateCycles: 34,
+      returnShellCycles: 12,
+      cycles: null,
+    });
+    expect(reduceFactoryGetMonDataTiming({ field: 65 })).toMatchObject({
+      route: "table-default-to-get-box-mon-data",
+      preDelegateCycles: 66,
+      returnShellCycles: 12,
+      cycles: null,
+    });
+    expect(reduceFactoryGetMonDataTiming({ field: 59 })).toMatchObject({
+      route: "party-attack-via-get-deoxys-stat",
+      getDeoxysStatEntryPc: 0x0806_8a12,
+      preDelegateCycles: 66,
+      overrideReturnShellCycles: 26,
+      partyFallbackReturnShellCycles: 44,
+      cycles: null,
+    });
+    expect(() => reduceFactoryGetMonDataTiming({ field: -0x8000_0001 }))
+      .toThrow("field must be a source i32");
   });
 
   it("source-reduces all 60 direct GetNature spans from the accepted personality", () => {

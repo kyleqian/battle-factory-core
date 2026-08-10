@@ -346,6 +346,60 @@ export interface FactorySetMonDataTiming {
   unresolved: string | null;
 }
 
+/** Source ABI for `GetMonData2(struct Pokemon *, s32 field)`. */
+export interface FactoryGetMonDataTimingInput {
+  /** Compiled signed field selector in r1; the mon identity is not a timing key. */
+  field: number;
+}
+
+export type FactoryGetMonDataRoute =
+  | "party-status-u32"
+  | "party-level-u8"
+  | "party-hp-u16"
+  | "party-max-hp-u16"
+  | "party-mail-u8"
+  | "party-attack2-u16"
+  | "party-defense2-u16"
+  | "party-speed2-u16"
+  | "party-sp-attack2-u16"
+  | "party-sp-defense2-u16"
+  | "party-attack-via-get-deoxys-stat"
+  | "party-defense-via-get-deoxys-stat"
+  | "party-speed-via-get-deoxys-stat"
+  | "party-sp-attack-via-get-deoxys-stat"
+  | "party-sp-defense-via-get-deoxys-stat"
+  | "compare-default-to-get-box-mon-data"
+  | "table-default-to-get-box-mon-data";
+
+/**
+ * Complete timing for simple direct party-field reads, or exact wrapper shells
+ * around a deliberately unresolved nested GetBoxMonData2/GetDeoxysStat body.
+ */
+export interface FactoryGetMonDataTiming {
+  field: number;
+  /** mGBA's pipelined boundary after retail GetMonData2's opening push. */
+  entryPc: number;
+  route: FactoryGetMonDataRoute;
+  directPartyRead: boolean;
+  delegatedToGetBoxMonData2: boolean;
+  valueWidth: 1 | 2 | 4 | null;
+  partyOffset: number | null;
+  getBoxMonData2EntryPc: number | null;
+  getDeoxysStatEntryPc: number | null;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  romLiteralLoads: number;
+  romJumpTableLoads: number;
+  /** EWRAM load cost including its ordinary two-cycle instruction baseline. */
+  ewramReadCycles: number | null;
+  preDelegateCycles: number | null;
+  returnShellCycles: number | null;
+  overrideReturnShellCycles: number | null;
+  partyFallbackReturnShellCycles: number | null;
+  cycles: number | null;
+  unresolved: string | null;
+}
+
 const THUMB_SEQUENTIAL_CYCLES = 2;
 const THUMB_PIPELINE_REFILL_CYCLES = 6;
 const THUMB_TAKEN_CONTROL_CYCLES = THUMB_SEQUENTIAL_CYCLES + THUMB_PIPELINE_REFILL_CYCLES;
@@ -710,6 +764,139 @@ export function reduceFactoryCalculateMonStatsParentTiming(
     romLiteralLoads,
     romTableLoads,
     cycles,
+  });
+}
+
+/**
+ * Reduce retail `GetMonData2` at `pokemon.c:3661-3711` / ELF
+ * `0x0806a518..0x0806a672` from the signed field selector alone.
+ *
+ * Simple party fields complete through a fixed jump-table arm and EWRAM read.
+ * Stat fields 59-63 retain their exact GetDeoxysStat entry/return shells, and
+ * default fields retain their exact GetBoxMonData2 shells; neither nested body
+ * is converted into an observed-duration table.
+ */
+export function reduceFactoryGetMonDataTiming(
+  input: Readonly<FactoryGetMonDataTimingInput>,
+): FactoryGetMonDataTiming {
+  const field = requireSigned32(input.field, "field");
+  const entryPc = 0x0806_a51a;
+  const getBoxMonData2EntryPc = 0x0806_a676;
+  const getDeoxysStatEntryPc = 0x0806_8a12;
+
+  const direct = (
+    route: FactoryGetMonDataRoute,
+    valueWidth: 1 | 2 | 4,
+    partyOffset: number,
+  ): FactoryGetMonDataTiming => {
+    const status = valueWidth === 4;
+    const sequentialThumbHalfwords = status ? 16 : 18;
+    const pipelineRefills = 4;
+    const romLiteralLoads = 1;
+    const romJumpTableLoads = 1;
+    // A 32-bit EWRAM LDR takes eight cycles at this boundary; byte/halfword
+    // reads take four. The sequential instruction baseline already counted
+    // two of those cycles.
+    const ewramReadCycles = status ? 8 : 4;
+    const cycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+      + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES
+      + (romLiteralLoads + romJumpTableLoads) * (11 - THUMB_SEQUENTIAL_CYCLES)
+      + (ewramReadCycles - THUMB_SEQUENTIAL_CYCLES);
+    return Object.freeze({
+      field,
+      entryPc,
+      route,
+      directPartyRead: true,
+      delegatedToGetBoxMonData2: false,
+      valueWidth,
+      partyOffset,
+      getBoxMonData2EntryPc: null,
+      getDeoxysStatEntryPc: null,
+      sequentialThumbHalfwords,
+      pipelineRefills,
+      romLiteralLoads,
+      romJumpTableLoads,
+      ewramReadCycles,
+      preDelegateCycles: null,
+      returnShellCycles: null,
+      overrideReturnShellCycles: null,
+      partyFallbackReturnShellCycles: null,
+      cycles,
+      unresolved: null,
+    });
+  };
+
+  switch (field) {
+    case 55: return direct("party-status-u32", 4, 0x50);
+    case 56: return direct("party-level-u8", 1, 0x54);
+    case 57: return direct("party-hp-u16", 2, 0x56);
+    case 58: return direct("party-max-hp-u16", 2, 0x58);
+    case 64: return direct("party-mail-u8", 1, 0x55);
+    case 84: return direct("party-attack2-u16", 2, 0x5a);
+    case 85: return direct("party-defense2-u16", 2, 0x5c);
+    case 86: return direct("party-speed2-u16", 2, 0x5e);
+    case 87: return direct("party-sp-attack2-u16", 2, 0x60);
+    case 88: return direct("party-sp-defense2-u16", 2, 0x62);
+    default:
+      break;
+  }
+
+  if (field >= 59 && field <= 63) {
+    const routes = [
+      "party-attack-via-get-deoxys-stat",
+      "party-defense-via-get-deoxys-stat",
+      "party-speed-via-get-deoxys-stat",
+      "party-sp-attack-via-get-deoxys-stat",
+      "party-sp-defense-via-get-deoxys-stat",
+    ] as const;
+    return Object.freeze({
+      field,
+      entryPc,
+      route: routes[field - 59],
+      directPartyRead: false,
+      delegatedToGetBoxMonData2: false,
+      valueWidth: 2,
+      partyOffset: 0x5a + (field - 59) * 2,
+      getBoxMonData2EntryPc: null,
+      getDeoxysStatEntryPc,
+      sequentialThumbHalfwords: 15,
+      pipelineRefills: 3,
+      romLiteralLoads: 1,
+      romJumpTableLoads: 1,
+      ewramReadCycles: null,
+      preDelegateCycles: 66,
+      returnShellCycles: null,
+      overrideReturnShellCycles: 26,
+      partyFallbackReturnShellCycles: 44,
+      cycles: null,
+      unresolved: "GetDeoxysStat nested timing/result is outside the direct party-field reducer",
+    });
+  }
+
+  const compareDefault = field < 55 || field > 88;
+  return Object.freeze({
+    field,
+    entryPc,
+    route: compareDefault
+      ? "compare-default-to-get-box-mon-data"
+      : "table-default-to-get-box-mon-data",
+    directPartyRead: false,
+    delegatedToGetBoxMonData2: true,
+    valueWidth: null,
+    partyOffset: null,
+    getBoxMonData2EntryPc,
+    getDeoxysStatEntryPc: null,
+    sequentialThumbHalfwords: compareDefault ? 14 : 18,
+    pipelineRefills: compareDefault ? 3 : 4,
+    romLiteralLoads: compareDefault ? 0 : 1,
+    romJumpTableLoads: compareDefault ? 0 : 1,
+    ewramReadCycles: null,
+    preDelegateCycles: compareDefault ? 34 : 66,
+    returnShellCycles: 12,
+    overrideReturnShellCycles: null,
+    partyFallbackReturnShellCycles: null,
+    cycles: null,
+    unresolved: "GetBoxMonData2 encrypted/default body timing is outside the direct party-field reducer",
   });
 }
 
