@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1079 — [MAIN worker, 2026-08-10] **#55 candidate-aware nature-check timing landed; async construction workload remains open**
 
-- **State:** candidate timing commit `79448547`; focused construction **9/9**,
+- **State:** candidate timing commits `79448547`/`a57d39b9`; focused construction **9/9**,
   smoke **375/375**, typecheck, full `npm test` **877 files / 8,404 passed / 1
   skipped**, production build, diff check, and fresh anchor v2 repeat are green.
 - **Did:** threaded Random u16/candidate personality+nature+acceptance through
