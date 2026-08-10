@@ -1071,6 +1071,18 @@ cycles without changing v1 output. Live wiring remains open: a v2 receipt
 must bank initial phase, source-operation boundary costs, and ambient callback
 cost/order before the generic controller can supply a truthful cost model.
 
+**V2 cycle result (2026-08-10, `3916972f`):** all three direct probe outputs
+now bank the missing source and IRQ boundaries and reproduce twice byte-for-
+byte (`anchor 631bd214…`, `LILIANA ae1282b7…`, `varied 3e10197a…`; focused
+**19/19**). The result refutes the current callback rather than completing it.
+Compiled nature-check cost varies with the candidate personality (anchor
+**755–909** source cycles), which `FactoryConstructionOperation` does not
+expose. VBlank entry-to-resume cost varies with live audio/DMA work (anchor
+**29,475–57,638**, LILIANA **31,368–54,553** master cycles), also absent from
+the model. Exact construction therefore needs candidate-aware instruction
+timing plus deterministic VBlank workload state. A trainer/set/tick/receipt
+table remains prohibited; the isolated scheduler stays unwired.
+
 **Lead:** implement the deterministic construction-clock contract above only
 as a deliberate source/cycle-model slice. Per-mon cursors and per-frame fixture
 schedules are now evidence-refuted as production designs. Until then, keep the

@@ -5,25 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1077 — [supervisor, 2026-08-10 ~09:35] **#55 source-operation construction clock landed; exact cycle evidence is next**
+## 1077 — [supervisor, 2026-08-10 ~10:00] **#55 v2 cycle evidence banked; fitted construction callback refuted**
 
-- **State:** master `adac4aca` is green after the side-lane fold: smoke
-  **375/375**, construction-clock focus **15/15**, typecheck, and production
-  build pass. The worker's final full suite was **876 files / 8,395 passed /
-  1 skipped**. Both Battle Scene OFF/ON services are current.
+- **State:** master `3916972f` is green after two side folds: smoke **375/375**,
+  construction-clock/v2 focus **19/19**, typecheck, and production build pass.
+  The v2 worker's full suite was **877 files / 8,400 passed / 1 skipped**.
 - **Did:** folded 12 pending animation commits first (Drill Peck, Submission,
   Spite), then landed #55's source-operation construction scheduler, clean-
   stream mode, injectable VBlank callback/cycle costs, optional mGBA master-
   cycle probe, evidence boundary, and idempotence pins. The model contains no
   trainer, battle, canonical-tick, or fixture schedule branch. Supervisor
   verification caught and fixed one narrowed callback type before merge.
-- **Next:** use the opt-in probe to commit a v2 cycle receipt with initial
-  phase and source-operation boundary costs for anchor/LILIANA/varied. Only
-  then fit a source-general cost model, wire generic round construction, and
-  extend the OFF-profile next-opponent presentation proof.
-- **Notes:** the live wiring is deliberately not claimed: v1 receipts lack
-  the necessary per-operation cycle evidence and ambient callback cost.
-  DEFERRED.md remains empty. Re-check `animation-main` at wind-down.
+- **Next:** leave personality-exact construction unwired until candidate-
+  aware instruction timing plus deterministic VBlank audio/DMA workload are
+  modeled. Continue the playable OFF-profile round seam at the independent
+  swap-screen ball callback boundary: replace the fake unconditional restart
+  after frame 10177 with source `Random()%5` state and extend the dense YES
+  fixture through its existing 10214 endpoint.
+- **Notes:** fresh v2 anchor/LILIANA/varied probes are twice byte-identical.
+  The present cost callback is refuted: nature-check cost depends on candidate
+  personality, and IRQ cost depends on live audio/DMA state. No fitted table,
+  controller wiring, or deferred user question was added.
 
 ## 1076 — [supervisor, 2026-08-10 ~03:00] **Session wind-down: S10 closed, 9 workers + 1 audit, all folds green**
 
