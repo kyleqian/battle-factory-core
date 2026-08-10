@@ -17,6 +17,7 @@ import {
   type SubstituteState,
 } from "./substitute.ts";
 import { hazeAtAge, type HazeState } from "./haze.ts";
+import { spiteAtAge, type SpiteState } from "./spite.ts";
 import {
   headbuttAtAge,
   type HeadbuttState,
@@ -1380,6 +1381,13 @@ export interface SceneOnHazeConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSpiteConfig {
+  readonly move: "SPITE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnMirrorCoatConfig {
   readonly move: "MIRROR_COAT";
   readonly attacker: SceneOnPresentationBattler;
@@ -2434,6 +2442,7 @@ export type SceneOnMoveConfig =
   | SceneOnProtectConfig
   | SceneOnDisableConfig
   | SceneOnHazeConfig
+  | SceneOnSpiteConfig
   | SceneOnMirrorCoatConfig
   | SceneOnSynthesisConfig
   | SceneOnAromatherapyConfig
@@ -2606,6 +2615,8 @@ export type SceneOnProtectPresentationState =
   SceneOnMovePresentationState<SceneOnProtectConfig>;
 export type SceneOnHazePresentationState =
   SceneOnMovePresentationState<SceneOnHazeConfig>;
+export type SceneOnSpitePresentationState =
+  SceneOnMovePresentationState<SceneOnSpiteConfig>;
 export type SceneOnMirrorCoatPresentationState =
   SceneOnMovePresentationState<SceneOnMirrorCoatConfig>;
 export type SceneOnSparkPresentationState =
@@ -4389,6 +4400,12 @@ export interface SceneOnHazeView extends HazeState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnSpiteView extends SpiteState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 /** `age` is relative to Move_HAZE's first in-bounds script pointer. */
 export function sceneOnHazeView(
   state: SceneOnMovePresentationState<SceneOnHazeConfig>,
@@ -4401,6 +4418,21 @@ export function sceneOnHazeView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...hazeAtAge(state.age),
+  };
+}
+
+/** `age=0` is AnimTask_SpiteTargetShadow's synchronous creation pass. */
+export function sceneOnSpiteView(
+  state: SceneOnSpitePresentationState,
+): SceneOnSpiteView {
+  if (state.config.move !== "SPITE") {
+    throw new Error(`expected SPITE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...spiteAtAge(state.age),
   };
 }
 
