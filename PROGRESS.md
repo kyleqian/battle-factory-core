@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1088 — [MAIN worker, 2026-08-10] **#55 `CalculateMonStats` parent timing reduced**
+
+- **State:** exact parent-only reducer landed; focused stats/clock **13/13**,
+  smoke **375/375**, and typecheck are green. Full suite/build are pending;
+  #55 remains open.
+- **Did:** all **12/12** receipts reduce exactly after excluding **480** direct
+  callees: **10×1,083 + 2×1,081**. The split is the u8 `levelUpHP==0` branch:
+  two extra halfwords minus one refill = **−2**. Source tests cover u8 wrap,
+  normal HP initialize/adjust/return, and Shedinja branches.
+- **Next:** port the nested Get/SetMonData, level/growth, divide, nature, and
+  nature-modification ROM/EWRAM timing; do not wire the complete stats cost or
+  live clock before those callees and VBlank/audio arbitration are exact.
+- **Notes:** commit `639f0a81`; no identity/duration lookup, fixture mutation,
+  live wiring, canonical Battle-2, animation, or unsupported-barrier change.
+
 ## 1087 — [MAIN worker, 2026-08-10] **#55 `CalculateMonStats` direct-call boundary narrowed**
 
 - **State:** bounded evidence checkpoint committed; all **12/12** complete
@@ -36,21 +51,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   arbitration. Keep #55 open and the live clock unwired.
 - **Notes:** no identity/duration table, evidence mutation, live wiring,
   canonical Battle-2, animation, or unsupported-barrier change.
-
-## 1085 — [supervisor, 2026-08-10] **#55 m4a workload split into compiled source stages**
-
-- **State:** side commit `236e1fe4` is folded; focused receipt **2/2** and
-  generated report are byte-identical under supervisor rerun. Final union
-  gates follow after the next bounded main increment.
-- **Did:** six fresh runs split all **113** `m4aSoundMain` observations into
-  `MPlayMain`, `CgbSound`, and copied-IWRAM `SoundMainRAM` channel passes. The
-  first five linked players are fixed at **55** cycles; player six, CGB sound,
-  and five direct-channel spans carry the variation. All **113** bounded,
-  address-free source-state keys are unique, so the receipt correctly makes
-  no equal-state timing claim.
-- **Next:** obtain repeated complete m4a source-state equivalence before a
-  reducer claim, or continue the independent ROM-fetch/EWRAM timing required
-  by CreateMon/EV/stat/post. Keep the live construction clock unwired.
-- **Notes:** v1 VBlank and v2 construction receipts are unchanged. Command and
-  wave prefixes remain explicitly bounded evidence, not complete audio state;
-  no runtime lookup, controller, animation, or canonical Battle-2 edit.

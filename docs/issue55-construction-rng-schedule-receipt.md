@@ -238,20 +238,31 @@ the scheduler remains deliberately unwired.
 After subtracting the seven fully contained VBlank pauses, total source spans
 are **140,999–154,160** cycles. The direct callees account for
 **139,916–153,077** cycles; the caller interstitial is just **1,081** or
-**1,083** cycles in the committed cases. This is a decomposition, not an
-external-service classification: the small remainder still includes parent
-instructions, compiled branches, and any unmodeled bus timing.
+**1,083** cycles in the committed cases. That parent slice is now exact:
+`reduceFactoryCalculateMonStatsParentTiming` walks the ELF branches using only
+species, old max HP, current HP, and newly calculated max HP. Its retail timing
+classes are ordinary prefetched Thumb halfwords (**2**), taken-flow refill
+(**+6**), PC-relative ROM literal (**11** total), and `gSpeciesInfo` ROM byte
+read (**9** total); stack/IWRAM/EWRAM accesses in this body remain hidden by
+prefetch in the ordinary class.
 
-No exact reducer is licensed. The encrypted `GetMonData2` field routes and
-`SetMonData` paths use `GetSubstruct` layout calls that divide the full
-personality by 24; `GetLevelFromMonExp` branches by growth/experience; the five nature calls
-divide by 25; and `ModifyStatByNature` branches by nature/stat index. The
-source also has the `SPECIES_SHEDINJA`, HP/old-max-HP, and level-up-HP branches
-outside the twelve normal completion paths. The next exact requirement is a
-source-general compiled ROM/EWRAM cycle model for those nested data accesses,
-the direct-call callee paths, and all parent branches, followed by branch-case
-evidence. A case duration table, fixture identity, or observed residual is not
-an admissible substitute.
+The precise split is the `gBattleScripting.levelUpHP` branch at
+`0x08068E38`. The field is u8, so it tests
+`(newMaxHp - oldMaxHp) & 0xff`: a nonzero value takes the branch and costs
+`345×2 + 51×6 + 5×(11−2) + 6×(9−2) = 1,083`; zero falls through two extra
+halfwords but avoids one refill and costs
+`347×2 + 50×6 + 5×(11−2) + 6×(9−2) = 1,081`. The receipt contains **10**
+nonzero and **2** zero cases, all exact. Source-derived tests additionally pin
+the u8 wrap-to-zero case, normal initialize/adjust/early-return paths, and
+Shedinja's omitted max-HP divide and HP branches.
+
+This does **not** reduce the complete operation. The encrypted `GetMonData2`
+and `SetMonData` callees still use personality-dependent `%24` substruct
+routes; level lookup depends on growth/experience; nature uses `%25`; divides
+and nature modification retain their own compiled paths. Exact ROM/EWRAM
+timing for those nested direct callees remains the next requirement. A case
+duration table, fixture identity, or observed residual is not an admissible
+substitute, and the clock stays unwired.
 
 ### Construction-entry component (2026-08-10)
 

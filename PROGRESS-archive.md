@@ -1,3 +1,21 @@
+## 1085 — [supervisor, 2026-08-10] **#55 m4a workload split into compiled source stages**
+
+- **State:** side commit `236e1fe4` is folded; focused receipt **2/2** and
+  generated report are byte-identical under supervisor rerun. Final union
+  gates follow after the next bounded main increment.
+- **Did:** six fresh runs split all **113** `m4aSoundMain` observations into
+  `MPlayMain`, `CgbSound`, and copied-IWRAM `SoundMainRAM` channel passes. The
+  first five linked players are fixed at **55** cycles; player six, CGB sound,
+  and five direct-channel spans carry the variation. All **113** bounded,
+  address-free source-state keys are unique, so the receipt correctly makes
+  no equal-state timing claim.
+- **Next:** obtain repeated complete m4a source-state equivalence before a
+  reducer claim, or continue the independent ROM-fetch/EWRAM timing required
+  by CreateMon/EV/stat/post. Keep the live construction clock unwired.
+- **Notes:** v1 VBlank and v2 construction receipts are unchanged. Command and
+  wave prefixes remain explicitly bounded evidence, not complete audio state;
+  no runtime lookup, controller, animation, or canonical Battle-2 edit.
+
 ## 1084 — [MAIN worker, 2026-08-10] **#55 EV-spread boundary audited; accepted personality exposed**
 
 - **State:** bounded evidence checkpoint landed; focused construction **25/25**

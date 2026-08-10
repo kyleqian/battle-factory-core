@@ -1101,19 +1101,25 @@ constant landed, and no +18 service residual is claimed before it can be
 separated from that missing compiled timing. See the construction receipt's
 EV-spread section. #55 stays open and the clock stays unwired.
 
-**`CalculateMonStats` direct-call checkpoint (2026-08-10):** a fresh,
+**`CalculateMonStats` parent/direct-call checkpoint (2026-08-10):** a fresh,
 byte-stable Battle Scene OFF sibling receipt now splits the same **12/12**
 entry→return spans (`0x08068D0C→0x080686EA`) into all **40** compiled direct
 calls per mon (**480** total): 15 `GetMonData2`, level lookup, 8 writes, 6
 divides, 5 nature reads, and 5 nature modifications. After seven fully
 contained VBlank pauses, source totals remain **140,999–154,160** cycles;
 direct callees account for **139,916–153,077** and parent interstitial is only
-**1,081/1,083**. Scalar ABI source inputs/results and call PCs are pinned, but
-the evidence does not license a reducer: nested encrypted `%24` box-mon
-access, `%25` nature, growth/experience, Shedinja, and HP branches still need
-a compiled ROM/EWRAM timing model and branch evidence. No identity/duration
-table, live wiring, or residual fit landed; #55 stays open. See the
-construction receipt's stats section.
+**1,081/1,083**. `reduceFactoryCalculateMonStatsParentTiming` now explains all
+12 exactly from compiled fetch classes and source-visible species/old-max-HP/
+current-HP/new-max-HP state. The split is the u8 `levelUpHP` zero branch at
+`0x08068E38`: zero executes two extra halfwords but avoids a six-cycle refill,
+net **−2**. Normal nonzero decomposition is
+`345×2 + 51×6 + 5×(11−2) + 6×(9−2) = 1,083`; zero is
+`347×2 + 50×6 + 5×(11−2) + 6×(9−2) = 1,081`. Source tests also pin Shedinja
+and all final-HP branches. This resolves only the parent slice: nested
+encrypted `%24` box-mon access, `%25` nature, growth/experience, divides, and
+writes remain unresolved, so the complete stats operation and live clock stay
+unwired. No identity/duration table or residual fit landed; #55 stays open.
+See the construction receipt's stats section.
 
 **VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
 probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all

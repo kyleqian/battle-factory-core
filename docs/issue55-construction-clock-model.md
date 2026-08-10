@@ -112,13 +112,21 @@ address, trainer, set, frame, cursor, or timing key.
 
 Removing the seven wholly contained VBlank pauses leaves total source spans
 of **140,999–154,160** cycles. Direct callees explain **139,916–153,077**;
-the unmodeled parent interstitial is only **1,081/1,083** cycles. That is a
-useful boundary, but not a reducer: the encrypted box-mon field routes have
-personality-dependent `% 24` routing, level calculation depends on
-growth/experience, nature is `% 25`, and the source has Shedinja and HP return
-branches not covered by the normal Factory cases. The next acceptable step is
-a compiled ROM/EWRAM cycle model plus source branch evidence—not a case
-duration or residual constant. The clock stays unwired.
+the parent interstitial is **1,081/1,083** cycles and is now reduced exactly by
+`reduceFactoryCalculateMonStatsParentTiming`. The input is only source-visible
+species/old-max-HP/current-HP/new-max-HP state. The normal nonzero path counts
+**345** sequential Thumb halfwords, **51** pipeline refills, **5** ROM literal
+loads, and **6** species-table reads for **1,083** cycles. When the u8
+`(newMaxHp-oldMaxHp)` assignment is zero (including wrap-to-zero), the branch
+at `0x08068E38` executes two extra halfwords and avoids one refill:
+**347/50/5/6 = 1,081**. The committed receipt covers **10/2** of those paths;
+source tests also cover normal HP initialization/early return and Shedinja.
+
+This reducer deliberately excludes every direct callee duration. Encrypted
+box-mon `%24` routes, growth/experience level lookup, `%25` nature, divides,
+nature modification, and writes still require their compiled ROM/EWRAM timing
+models. Therefore the complete `calculate-mon-stats` operation is unresolved
+and the construction clock stays unwired.
 
 ## Non-final outer-loop reducer
 

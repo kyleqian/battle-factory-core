@@ -310,6 +310,17 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
     });
     expect(reduceFactoryCalculateMonStatsParentTiming({
       speciesId: 303,
+      oldMaxHp: 0,
+      currentHp: 0,
+      newMaxHp: 1,
+    })).toMatchObject({
+      currentHpPath: "shedinja-set-one",
+      writesCurrentHp: true,
+      directCallCount: 39,
+      cycles: 1_015,
+    });
+    expect(reduceFactoryCalculateMonStatsParentTiming({
+      speciesId: 303,
       oldMaxHp: 1,
       currentHp: 0,
       newMaxHp: 1,
