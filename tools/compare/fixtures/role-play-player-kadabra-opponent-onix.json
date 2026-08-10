@@ -1,0 +1,10 @@
+{
+  "schema":"role-play-portable-evidence/v1","oracleProfile":"battle-scene-on","move":"ROLE_PLAY","moveId":272,"orientation":"player-back",
+  "scenario":"tools/battle-lab/mechanic-role-play-player-kadabra-opponent-onix.json","probe":"tools/compare/rolePlayProbe.py",
+  "sourceWindow":{"startFrame":70,"endFrame":216,"frameCount":147},"sourceBounds":{"start":"0x082d4fae","endExclusive":"0x082d500a"},
+  "probeJsonSha256":"612259ab9f25f1968055ccdfe72244c65905efdbc9c7d58b87a6a3fde72a6fb0","rawRgbSha256":"58bdc5f4433b00ace18198cbe2989aa0a0791843de7e1bfd3a64b3f47e32f378",
+  "changeMap":"tools/compare/evidence/role-play-changemap-player.txt","changeMapSha256":"2e0cb80c3a9ed21b9d36ac06616b564df52102dd276ff911dbb4db2924972f69",
+  "attacker":{"species":"KADABRA","side":"player","animationCenter":{"x":72,"y":80}},"target":{"species":"ONIX","side":"opponent","art":"back","personality":1793700000,"otId":416049562},
+  "fieldProfile":{"playerHp":133,"playerMaxHp":133,"opponentHp":117,"opponentMaxHp":117,"playerGender":"male","opponentGender":"male"},
+  "acceptance":{"status":"unsupported","componentMatching":0,"framebufferMatching":0,"note":"Dense byte-stable evidence and source reducer are banked; typed seam, compositor, hardware/framebuffer verifier, and exact promotion remain."}
+}

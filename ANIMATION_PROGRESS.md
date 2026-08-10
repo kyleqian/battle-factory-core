@@ -1,5 +1,13 @@
 # Animation coverage
 
+## MOVE_ROLE_PLAY dense bilateral evidence + pure reducer checkpoint — remains unsupported (2026-08-10 worker)
+
+- **State:** Coverage remains **151/276 exact**, 0 partial, 0 staged, **125 unsupported**. Role Play still has no typed seam, production compositor, portable production-framebuffer proof, or promotion.
+- **Did:** Added a real-even-pointer-bounded Scene-ON probe for `0x082d4fae..0x082d500a`, complete 147-frame player-back **70..216** and opponent-front **74..220** windows through first inactive cleanup, byte-stable change maps/fixtures, and a pure source-age reducer. The probe records every task/sprite, additional-mon slot/geometry/OAM/matrix/resource state, software/hardware OAM/matrices/palettes, monbg visibility/reset, both palette programs, registers, both audio players, immutable battle state, and raw RGB.
+- **Verified:** Twice fresh per orientation, player probe/raw/map digests are `612259ab…` / `58bdc5f4…` / `2e0cb80c…`; opponent digests are `5f34b6e4…` / `137ab8f7…` / `f5b413ac…`. Both share ages 54..91 for the additional ONIX, 54..92 for the Role Play task, affine RAM ages 84..91, and first inactive age 146. Focused reducer/evidence/source/boundary tests and typecheck pass.
+- **Next:** Add the narrow typed Scene-ON seam and production compositor; build the portable verifier that checks all 147 component/hardware/raw-RGB/shared-framebuffer frames twice fresh in both orientations. Regenerate maps, then rerun MEGA_PUNCH and BATON_PASS bilateral twice fresh before promotion.
+- **Notes:** Dense evidence confirms the existing latch rows (plain OAM/palette RAM+1; fresh affine matrix hardware lag two); `ANIMATION_LATCHES.md` is unchanged. No ability outcome, damage/status/RNG, controller/facility state, engine file, boundary/barrier, sibling, or coverage count changed.
+
 ## MOVE_ROLE_PLAY source + bilateral legal-staging checkpoint — remains unsupported (2026-08-10 worker)
 
 - **State:** Coverage remains **151/276 exact**, 0 partial, 0 staged, **125 unsupported**. Role Play has no reducer, typed seam, compositor, dense hardware/raw-RGB evidence, or promotion.
