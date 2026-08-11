@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1143 — [supervisor, 2026-08-11] **Post-ack checkpoint verified; final lane folds green**
+
+- **State:** `master` is green with the generic hold-clock fix, exact Metal
+  Sound through `7b303713`, and Rust M3d party construction through
+  `169c522b`. The 13384 display tail remains #56, not an accepted frame.
+- **Did:** independently reverified the diagnostic **69/70** with only the
+  known 18-pixel 13384 tail and focused **56/56**. Folded `animation-main`
+  and `rust-main` as merges `fcd928b1` and `325e27ab`.
+- **Next:** bypass #56 and prove a complete already-owned intro phase against
+  a noncanonical legal Factory trainer/round identity through the generic
+  controller and presentation seam. Do not resume the Battle-2 action march.
+- **Notes:** Cargo **62/62**, rebuilt WASM smoke, explicit RNG/rental/party
+  differential **440/440**, full `npm test` **951 files / 9,134 passed / 1
+  skipped**, build **645 modules**. Both lane branches are fully folded.
+
 ## 1142 — [MAIN worker, 2026-08-11] **Post-ack handoff bounded; display-tail blocker isolated**
 
 - **State:** the complete 13315–13384 acknowledgement-owned phase is
@@ -38,21 +53,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** union gates: Cargo **52/52**, rebuilt WASM ABI/RNG/alloc smoke,
   full `npm test` **950 files / 9,055 passed / 1 skipped**, build **645
   modules**. Both lane branches were fully folded; #55 remains null/unwired.
-
-## 1140 — [MAIN worker, 2026-08-11] **Generated status-summary/message assembly exact**
-
-- **State:** the generic post-slide presentation owns the complete concurrent
-  summary/message assembly through its source tick-1292 sprite boundary. S8
-  stays closed; canonical Battle 2 remains stopped at tick 33331.
-- **Did:** committed `win-go-on-battle2-status-summary-message-off`
-  **65/65 twice fresh** (11711–11775). Re-held reveal **154/154**, transition
-  **249/249**, send-out **238/238**, action-ready **3/3**, legacy assembly
-  **256/256**, and far-side LILIANA **115/115**.
-- **Next:** choose the next complete source-owned phase after 11775 and before
-  13385; do not promote a partial input hold, submit a Battle-2 action, or
-  resume the retired march.
-- **Notes:** source transition indexes 0/5, two trainer/battle identities, and
-  healthy/status/fainted summaries are render-pure and preserve transition
-  receipts, RNG, rules/controller, parties, and outcomes. Focused **79/79**;
-  smoke **375/375**, typecheck, full `npm test` **949 files / 9,052 passed / 1
-  skipped**, and build **643 modules** are green.
