@@ -47,6 +47,10 @@ impl GbaRng {
 
     /// Advances the LCG once and returns the new value's upper 16 bits,
     /// like Random().
+    // Mirrors `GbaRng.next()` in src/engine/rng.ts by name; this is a
+    // stateful stream-advance, not `Iterator::next`, so it doesn't adopt
+    // the trait's `Option<Item>` signature.
+    #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> u16 {
         self.value = advance_rng_value(self.value);
         (self.value >> 16) as u16
