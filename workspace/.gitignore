@@ -18,4 +18,5 @@ tsconfig.tsbuildinfo
 .env
 .DS_Store
 /core-rs/target/
+# Build output from core-rs/build-wasm.sh (the WASM artifact it copies out).
 /artifacts/
