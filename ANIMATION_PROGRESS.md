@@ -1,3 +1,11 @@
+# MOVE_LEER bilateral 70/70 dense evidence checkpoint — remains unsupported (2026-08-11 worker)
+
+- **State:** Coverage remains **170/276 Level-50 exact**, 0 partial, 0 staged, and 106 unsupported. `MOVE_LEER` is not promoted: its complete bilateral dense oracle windows reproduce twice fresh, but no LEER reducer, typed seam, compositor, normalized change maps, or production-framebuffer gate exists yet.
+- **Did:** Independently pinned exclusive `Move_LEER` **0x082d2d90..0x082d2de7** (`0x57` bytes), the nine-component LEER/ScaleMonAndRestore/ShakeMon2/monbg/splitbgprio/8:8-alpha graph plus audio, and sole Level-50 carrier set **201 `FRONTIER_MON_DRAGONAIR_1`**. Added complete legal bilateral Scene-ON parties, natural controller traces, a source contract audit, and a narrow LEER mode in the existing dense source/hardware probe.
+- **Verified:** Player-back frames **212..281** and opponent-front **75..144** each capture **70/70** source-relative frames through first inactive cleanup twice fresh with byte-identical JSON and raw RGB. Evidence/raw digests are player `e9e89adb…` / `7f2420c2…`, opponent `d0cf03af…` / `0087f64d…`; topology includes `gLeerSpriteTemplate`, `AnimTask_ScaleMonAndRestore_Step`, both `AnimTask_ShakeMon2_Step` instances, and monbg update/clear tasks.
+- **Next:** Port the pure 70-age LEER reducer and typed Scene-ON seam, preserving its five-cell eye sprite and source-equivalent scale/shake/monbg latches; bank bilateral normalized change maps and require component/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/immutable/raw-RGB/production-framebuffer equality twice fresh before promoting only LEER to 171/276.
+- **Notes:** `ANIMATION_COVERAGE.json` is intentionally unchanged. No defense-stage outcome, accuracy/RNG, controller/turn/round/facility state, engine boundary, unsupported barrier, canonical import, capture/hash lookup, RGB table, coordinate fit, or absolute-tick rendering changed.
+
 # MOVE_SWORDS_DANCE exact — bilateral 70/70 flash/blade promotion (2026-08-11 worker)
 
 - **State:** Level-50 coverage advances **169→170/276 exact**, 0 partial, 0 staged, and **107→106 unsupported**. Only `MOVE_SWORDS_DANCE` moved; no animation-boundary or unsupported-barrier widening.

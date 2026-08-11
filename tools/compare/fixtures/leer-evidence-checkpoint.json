@@ -1,0 +1,39 @@
+{
+  "schema": "leer-evidence-checkpoint/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "LEER",
+  "status": "unsupported",
+  "sourceSymbols": {
+    "Move_LEER": 137178512,
+    "Move_DREAM_EATER": 137178599
+  },
+  "topology": {
+    "tasks": [
+      "AnimTask_ScaleMonAndRestore_Step",
+      "AnimTask_ShakeMon2_Step",
+      "Task_ClearMonBg",
+      "Task_UpdateMonBg"
+    ],
+    "templates": ["gLeerSpriteTemplate", "gMultiuseSpriteTemplate"]
+  },
+  "orientations": [
+    {
+      "orientation": "player-back",
+      "scenario": "tools/battle-lab/mechanic-leer-player-dragonair-opponent-onix.json",
+      "startFrame": 212,
+      "endFrame": 281,
+      "frameCount": 70,
+      "evidenceSha256": "e9e89adb9d92abb63309308f78d77b0b2700c67c83b8f0922272c52e25601ecd",
+      "rawRgbSha256": "7f2420c28511ee57b8b9fae9b78a2c2503fbcaa6d26e4f9b8549d97ab6400a73"
+    },
+    {
+      "orientation": "opponent-front",
+      "scenario": "tools/battle-lab/mechanic-leer-opponent-dragonair-player-onix.json",
+      "startFrame": 75,
+      "endFrame": 144,
+      "frameCount": 70,
+      "evidenceSha256": "d0cf03af341d96aef901dc9a8710e3171f4983b16d5e38e9625a25ced19615c6",
+      "rawRgbSha256": "0087f64dca23cb75df9fb6c4691808625e852102eec1dfb580588fee46754f6f"
+    }
+  ]
+}
