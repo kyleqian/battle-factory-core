@@ -4519,6 +4519,40 @@
     "tests/animation/doubleSlap.test.ts",
     "tests/animation/doubleSlapEvidence.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_COMET_PUNCH",
+   "status": "exact",
+   "covered": [
+    "the real controller naturally selects four player-back and five opponent-front hits in complete legal sole-carrier set-159 FRONTIER_MON_LEDIAN versus ONIX Scene-ON parties; moveTurn 0..3 / 0..4 exercises both choosetwoturnanim branches without presentation ownership of hit count, accuracy, damage, RNG, or controller state",
+    "all nine complete pointer-bounded 37-frame invocations through first inactive cleanup pass reducer, typed seam, task/sprite topology, software and hardware OAM/matrices/palettes/tags/register/audio, immutable battle fields, raw RGB, normalized change maps, and production framebuffer equality twice fresh (148 player-back + 185 opponent-front = 333 dense frames per run)",
+    "the pure source-relative reducer and narrow LEDIAN/ONIX compositor port exclusive 0x082ca2c3..0x082ca33b: IMPACT then HANDS_AND_FEET load latches, basic hitsplat affine sprite, gFistFootSpriteTemplate, AnimTask_ShakeMon, target monbg, 12:8 alpha, SE_M_COMET_PUNCH, first opponent-side enemy-shadow display, and cleanup; each side's source-derived script-relative fist/hitsplat y origin remains explicit",
+    "Double Slap, Double Kick, and Mega Punch remain independent exact regression controls; shared IMPACT, fist, hitsplat, ShakeMon, monbg, and alpha components transfer no move acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-comet-punch-player-ledian-opponent-onix.json",
+    "tools/battle-lab/mechanic-comet-punch-opponent-ledian-player-onix.json",
+    "tools/compare/fixtures/comet-punch-natural-receipts.json",
+    "tools/compare/cometPunchSourceAudit.ts",
+    "tools/compare/cometPunchAssetAudit.ts",
+    "tools/compare/cometPunchProbe.py",
+    "tools/compare/cometPunchPortable.ts",
+    "tools/compare/evidence/comet-punch-player-hit-0.txt",
+    "tools/compare/evidence/comet-punch-player-hit-1.txt",
+    "tools/compare/evidence/comet-punch-player-hit-2.txt",
+    "tools/compare/evidence/comet-punch-player-hit-3.txt",
+    "tools/compare/evidence/comet-punch-opponent-hit-0.txt",
+    "tools/compare/evidence/comet-punch-opponent-hit-1.txt",
+    "tools/compare/evidence/comet-punch-opponent-hit-2.txt",
+    "tools/compare/evidence/comet-punch-opponent-hit-3.txt",
+    "tools/compare/evidence/comet-punch-opponent-hit-4.txt",
+    "src/animation/cometPunch.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/cometPunch.test.ts",
+    "tests/animation/cometPunchSource.test.ts",
+    "tests/animation/cometPunchEvidence.test.ts"
+   ]
   }
  ],
  "queue": [

@@ -1,0 +1,18 @@
+# tools/compare/evidence/comet-punch-opponent-hit-2.txt raw RGB888 — 37 frames, 240x160
+# frames absent from this table are byte-identical to the previous frame
+frame  changedPx  bbox(minx,miny-maxx,maxy)
+0  (first frame)
+1  200  160,65-191,72
+  static 2-10
+11  491  68,69-91,97
+  static 12
+13  1046  44,49-102,111
+  static 14
+15  1046  44,49-102,111
+  static 16
+17  1046  44,49-102,111
+  static 18
+19  1046  44,49-102,111
+20  366  68,78-91,97
+21  273  69,69-91,91
+  static 22-36

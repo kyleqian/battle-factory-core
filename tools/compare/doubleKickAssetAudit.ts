@@ -62,3 +62,8 @@ const impact = auditAsset("impact.png", "battle-anim-hitsplat.json", {
 console.log(
   `MOVE_DOUBLE_KICK deterministic asset audit exact: HANDS_AND_FEET ${hands}; IMPACT ${impact}`,
 );
+
+// Keep the package-level animation audit cumulative as exact moves add their
+// own source-derived asset contracts; this does not transfer acceptance.
+const comet = await import("./cometPunchAssetAudit.ts");
+void comet;
