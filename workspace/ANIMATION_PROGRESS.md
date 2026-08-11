@@ -2,9 +2,9 @@
 
 - **State:** Coverage advances **171→172/276 Level-50 exact**, 0 partial, 0 staged, and **105→104 unsupported**; only `MOVE_LEER` moves.
 - **Did:** Ported the source-relative nine-component LEER reducer, orientation-aware eye asset/OAM, typed seam, and Dragonair/Onix compositor. The measured latches are eye OAM RAM+1, live ScaleMonAndRestore affine matrix RAM+2, long target ShakeMon2 RAM+2, and monbg/register cleanup from the move's own maps.
-- **Verified:** Player-back **212..281** and opponent-front **75..144** each pass **70/70 source/component/seam and 70/70 production framebuffer**, twice fresh, with byte-stable probe/raw-RGB/change-map receipts. CONFUSION remains **140/140** twice in both orientations; SWORDS_DANCE portable remains **70/70** twice in both orientations and its source/evidence tests pass **5/5**.
-- **Next:** Run the final boundary ratchet, animation audit/coverage, typecheck, full `npm test`, build, and diff checks before handoff.
-- **Notes:** Commit `c3484859` contains the LEER implementation and strict verifier. **For the main program:** presentation-only; no damage, defense-stage outcome, RNG, controller, turn, round, facility, boundary, or unsupported-barrier changes; no per-frame/absolute-tick/capture/hash/RGB lookup or coordinate fit.
+- **Verified:** Player-back **212..281** and opponent-front **75..144** each pass **70/70 source/component/seam and 70/70 production framebuffer**, twice fresh, with byte-stable probe/raw-RGB/change-map receipts. CONFUSION remains **140/140** twice in both orientations; SWORDS_DANCE portable remains **70/70** twice in both orientations and its source/evidence tests pass **5/5**. Boundary ratchet, animation audit/coverage, typecheck, full `npm test` (**949 files / 8,691 passed / 1 skipped**), and production build (**646 modules**) are green.
+- **Next:** Supervisor merges this animation-only checkpoint; do not infer LEER's measured latch split for a sibling without sibling-owned dense evidence.
+- **Notes:** Commits `c3484859` (implementation/verifier), `61005d0a` (coverage/latch/progress/receipt promotion), and `87617d7e` (promotion count ratchets). **For the main program:** presentation-only; no damage, defense-stage outcome, RNG, controller, turn, round, facility, boundary, or unsupported-barrier changes; no per-frame/absolute-tick/capture/hash/RGB lookup or coordinate fit.
 
 # MOVE_METAL_SOUND exact — corrected ARON live-OAM latch closed (2026-08-11 worker)
 
