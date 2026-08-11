@@ -152,3 +152,49 @@ The next useful OFF receipt is one Timer 0 overflow window containing those
 fields plus the due event names/priorities and any Audio Sample, Video, IRQ,
 or DMA event co-due with it. Until that exists, keep the construction clock
 and its service cost unwired.
+
+## Fresh callback-entry runtime receipt (2026-08-11)
+
+That next observable now exists in
+`tests/fixtures/factory-timer0-scheduler-runtime-v1.json`. The opt-in
+`FACTORY_TIMER0_SCHEDULER_RUNTIME_EVIDENCE=1` mode extends the existing
+construction-RNG probe: during the anchor source epoch it temporarily wraps
+the installed mGBA timing callbacks, snapshots entry/exit state, immediately
+delegates, and preserves Video's alternating native callback. It keeps the
+first dual-FIFO refill in each of two runtime classes, then restores every
+callback. Two fresh wrapper paths produced byte-identical 30,976-byte JSON,
+SHA-256 `475f4731…`.
+
+The isolated refill enters Timer 0 at exact scheduler current time
+**1,880,434,111**, equal to its scheduled deadline, so `cyclesLate=0`. The
+contrast enters Video (priority **8**) and then Timer 0 (priority **32**) at
+the shared exact deadline/current time **1,880,414,047**, both with
+`cyclesLate=0`. Video leaves all four DMA `nextCount` values zero and
+`activeDMA=-1`; this co-due callback starts no DMA. At each Timer entry the
+remaining named queue is not due. No Audio Sample, IRQ, or pre-existing DMA
+callback runs before either selected Timer entry.
+
+Both entries have global audio enabled, `mixer=NULL`, and
+`externalMixing=false`. FIFO A/B each hold three queued words with
+`internalRemaining=3`, mapped to DMA1/DMA2. The receipt retains DMA0–3's exact
+control, enable, timing, count, `nextCount`, source/destination,
+next-source/destination, absolute `when`, and relative deadline. All four
+start with `nextCount=0`, `activeDMA=-1`, `performingDMA=0`, and an unblocked
+CPU. DMA1/2 are enabled custom four-word transfers from
+`0x030066D0→0x040000A0` and `0x03006D00→0x040000A4`; DMA0/3 remain explicit
+disabled state.
+
+Timer 0 requests A/DMA1 then B/DMA2 at `currentTime - cyclesLate`. Runtime DMA
+callback order is `1,1,1,1,2,1,2,2,2,2`; sentinel completion order is DMA1
+then DMA2. Both `nextCount` values are zero and `activeDMA=-1` at
+**entry + 18**. This distinguishes the independent `10 + 10 = 20` work sum
+from live makespan: DMA2's first word runs at +8 while DMA1's terminal +2
+deadline is pending. The observed 20-cycle instruction edge is the 2-cycle CPU
+instruction plus this 18-cycle blocked graph; 18 is not a Timer callback cost.
+
+The remaining boundary is explicit: these observations cover on-time fresh
+dual refills with no mixer, pre-existing work, competing DMA, Audio/IRQ co-due
+work, or Video-started DMA. They do not price zero/one-refill callbacks,
+nonzero `cyclesLate`, pending DMA, a present mixer, or Audio/IRQ/Video-started
+work. `serviceCostMasterCycles` remains `null`, and the construction clock
+remains unwired.

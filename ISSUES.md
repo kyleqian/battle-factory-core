@@ -1415,6 +1415,26 @@ co-due Video/Audio service, operation/accessor duration, or
 in `docs/issue55-mgba0105-timer0-direct-sound-audit.md` and
 `docs/issue55-construction-rng-schedule-receipt.md`.
 
+**Absolute Timer 0 callback-entry boundary (2026-08-11):** the existing mGBA
+probe now transparently wraps and delegates live timing callbacks during the
+anchor construction epoch. Two fresh OFF runs are byte-identical
+(`475f4731…`) and retain one isolated dual refill plus one exact Video-co-due
+contrast. Timer enters on time at absolute scheduler deadline/current
+**1,880,434,111** (isolated) and **1,880,414,047** (Video priority 8 first,
+then Timer priority 32), both `cyclesLate=0`. Audio is enabled, mixer absent,
+all DMA0–3 state is retained, all `nextCount=0`, and neither pre-existing nor
+Video-started DMA exists. Timer requests A/DMA1 then B/DMA2; callback order is
+`1,1,1,1,2,1,2,2,2,2`, completion order is 1→2, and both graphs finish at
+**entry +18** with `activeDMA=-1`. DMA2's first word overlaps DMA1's terminal
++2 deadline: 20 is summed per-channel work while 18 is live graph makespan.
+The original 20-cycle instruction edge is 2 CPU + 18 blocked scheduler cycles,
+not a Timer callback cost.
+
+#55 remains open beyond this bounded class: nonzero lateness, zero/one refill,
+a present mixer, pending/competing DMA, and Audio/IRQ or Video-started DMA are
+not observed. `serviceCostMasterCycles` remains `null`; the construction clock
+remains unwired. Full facts are in the scheduler audit.
+
 **VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
 probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all
 **52/31/30** construction-epoch interrupts. Within each case every measured

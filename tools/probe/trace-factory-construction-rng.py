@@ -143,6 +143,13 @@ TIMER0_CADENCE_EVIDENCE = (
 TIMER0_FIFO_EVIDENCE = (
     os.environ.get("FACTORY_TIMER0_FIFO_EVIDENCE") == "1"
 )
+# Callback-entry sibling receipt for the absolute mGBA scheduler boundary.
+# This wraps the existing native timing events only while the selected source
+# construction function is active, delegates every callback immediately, and
+# retains one plain dual refill plus one exact Video-co-due contrast.
+TIMER0_SCHEDULER_RUNTIME_EVIDENCE = (
+    os.environ.get("FACTORY_TIMER0_SCHEDULER_RUNTIME_EVIDENCE") == "1"
+)
 # Separate scalar/source-relative packet for the recurring +18-cycle residual
 # audit.  This decorates already-selected source boundaries only; it does not
 # retain a trainer/set/mon identity or turn the observation into a timing key.
@@ -1121,6 +1128,292 @@ def dma_destination_kind(address: int) -> str:
     return "other"
 
 
+def runtime_scheduler_time(timing: Any) -> dict[str, int]:
+    relative = int(timing.relativeCycles[0])
+    master = int(timing.masterCycles)
+    return {
+        "masterCycles": master,
+        "relativeCycles": relative,
+        "currentTime": (master + relative) & 0xFFFFFFFF,
+        "globalTime": int(timing.globalCycles) + relative,
+    }
+
+
+def snapshot_runtime_scheduler_hardware(oracle: EmeraldOracle, timing: Any) -> dict[str, Any]:
+    """Snapshot every field required by the Timer 0 scheduler handoff."""
+    gba = oracle.core._native
+    audio = gba.audio
+    now = runtime_scheduler_time(timing)
+
+    def fifo_state(fifo: Any) -> dict[str, int]:
+        write = int(fifo.fifoWrite)
+        read = int(fifo.fifoRead)
+        return {
+            "fifoWrite": write,
+            "fifoRead": read,
+            "fifoWordLevel": (write - read) & 7,
+            "internalRemaining": int(fifo.internalRemaining),
+            "dmaSource": int(fifo.dmaSource),
+        }
+
+    dma_rows = []
+    for channel in range(4):
+        dma = gba.memory.dma[channel]
+        control = int(dma.reg)
+        when = int(dma.when)
+        dma_rows.append({
+            "channel": channel,
+            "control": control,
+            "enabled": bool(control & 0x8000),
+            "timing": (control >> 12) & 3,
+            "count": int(dma.count),
+            "nextCount": int(dma.nextCount),
+            "source": int(dma.source),
+            "destination": int(dma.dest),
+            "nextSource": int(dma.nextSource),
+            "nextDestination": int(dma.nextDest),
+            "when": when,
+            "deadlineDelta": signed_timing_delta(when, now["currentTime"]),
+        })
+
+    queue = []
+    for event in snapshot_timing_queue(timing):
+        when = event["when"]
+        queue.append({
+            "name": event["name"],
+            "priority": event["priority"],
+            "when": when,
+            "deadlineDelta": None if when is None else signed_timing_delta(when, now["currentTime"]),
+            "due": False if when is None else signed_timing_delta(when, now["currentTime"]) <= 0,
+        })
+
+    mixer_present = audio.mixer != MGBA_FFI.NULL
+    mixer: dict[str, Any] = {
+        "present": mixer_present,
+        "externalMixing": bool(audio.externalMixing),
+    }
+    if mixer_present:
+        mixer["contextAddress"] = int(audio.mixer.contextAddress)
+
+    return {
+        "scheduler": now,
+        "audio": {
+            "enabled": bool(audio.enable),
+            "mixer": mixer,
+        },
+        "fifo": {"a": fifo_state(audio.chA), "b": fifo_state(audio.chB)},
+        "dma": dma_rows,
+        "activeDma": int(gba.memory.activeDMA),
+        "performingDma": int(gba.performingDMA),
+        "cpuBlocked": bool(gba.cpuBlocked),
+        "queue": queue,
+    }
+
+
+class Timer0SchedulerRuntimeCapture:
+    """Transparent callback wrappers for two source-epoch Timer 0 windows."""
+
+    def __init__(self, oracle: EmeraldOracle) -> None:
+        self.oracle = oracle
+        self.gba = oracle.core._native
+        self.originals: list[tuple[Any, Any]] = []
+        self.wrappers: list[Any] = []
+        self.event_indexes: dict[int, int] = {}
+        self.same_tick_history: list[dict[str, Any]] = []
+        self.recent_history: list[dict[str, Any]] = []
+        self.last_event_by_name: dict[str, dict[str, Any]] = {}
+        self.tick_master_cycles: int | None = None
+        self.windows: list[dict[str, Any]] = []
+        self.pending: dict[str, Any] | None = None
+        self.restored = False
+        self.installed_names: list[str] = []
+        self.dual_refill_scout: list[dict[str, Any]] = []
+        self._install()
+
+    def _install(self) -> None:
+        events: list[Any] = []
+        event = self.gba.timing.root
+        while event != MGBA_FFI.NULL and len(events) < TIMING_QUEUE_EVENT_LIMIT:
+            events.append(event)
+            event = event.next
+        events.extend([
+            MGBA_FFI.addressof(self.gba.timers[0], "event"),
+            MGBA_FFI.addressof(self.gba.memory, "dmaEvent"),
+            MGBA_FFI.addressof(self.gba, "irqEvent"),
+        ])
+        seen: set[int] = set()
+        for event in events:
+            address = int(MGBA_FFI.cast("uintptr_t", event))
+            if address in seen:
+                continue
+            seen.add(address)
+            original = event.callback
+            name = (
+                MGBA_FFI.string(event.name, TIMING_QUEUE_NAME_LIMIT).decode("ascii", "replace")
+                if event.name != MGBA_FFI.NULL else "<unnamed>"
+            )
+
+            @MGBA_FFI.callback("void(struct mTiming *, void *, uint32_t)")
+            def wrapper(timing: Any, context: Any, cycles_late: int, *,
+                        _event: Any = event, _name: str = name, _original: Any = original) -> None:
+                self._callback(_event, _name, _original, timing, context, int(cycles_late))
+
+            self.originals.append((event, original))
+            self.wrappers.append(wrapper)
+            self.event_indexes[address] = len(self.originals) - 1
+            self.installed_names.append(name)
+            event.callback = wrapper
+
+    def restore(self) -> None:
+        if self.restored:
+            return
+        for event, original in self.originals:
+            event.callback = original
+        self.restored = True
+
+    @staticmethod
+    def _dma_counts(state: dict[str, Any]) -> list[int]:
+        return [row["nextCount"] for row in state["dma"]]
+
+    def _event_record(self, event: Any, name: str, cycles_late: int,
+                      state: dict[str, Any]) -> dict[str, Any]:
+        scheduled_when = int(event.when)
+        return {
+            "name": name,
+            "priority": int(event.priority),
+            "scheduledWhen": scheduled_when,
+            "cyclesLate": cycles_late,
+            "schedulerCurrentTime": state["scheduler"]["currentTime"],
+            "dmaNextCounts": self._dma_counts(state),
+            "activeDma": state["activeDma"],
+        }
+
+    def _callback(self, event: Any, name: str, original: Any, timing: Any,
+                  context: Any, cycles_late: int) -> None:
+        entry = snapshot_runtime_scheduler_hardware(self.oracle, timing)
+        master_cycles = entry["scheduler"]["masterCycles"]
+        if self.tick_master_cycles != master_cycles:
+            self.tick_master_cycles = master_cycles
+            self.same_tick_history = []
+        record = self._event_record(event, name, cycles_late, entry)
+        preceding = [
+            prior for prior in self.recent_history
+            if (
+                prior["schedulerCurrentTime"] == record["schedulerCurrentTime"]
+                or prior["scheduledWhen"] == record["scheduledWhen"]
+            )
+        ]
+        exact_deadline_predecessors = [
+            prior for prior in self.last_event_by_name.values()
+            if prior["scheduledWhen"] == record["scheduledWhen"]
+        ]
+        for prior in exact_deadline_predecessors:
+            if prior not in preceding:
+                preceding.append(prior)
+        original(timing, context, cycles_late)
+        if name == "GBA Video" and not self.restored:
+            # Video alternates its event callback between _startHblank and
+            # _startHdraw. Preserve that native phase while keeping this
+            # transparent wrapper installed for the next occurrence.
+            address = int(MGBA_FFI.cast("uintptr_t", event))
+            index = self.event_indexes[address]
+            next_original = event.callback
+            self.originals[index] = (event, next_original)
+            event.callback = self.wrappers[index]
+        after = snapshot_runtime_scheduler_hardware(self.oracle, timing)
+        record["dmaNextCountsAfter"] = self._dma_counts(after)
+
+        if name == TIMER0_EVENT_NAME and self.pending is None:
+            before_counts = self._dma_counts(entry)
+            after_counts = self._dma_counts(after)
+            requested = [
+                channel for channel in range(4)
+                if before_counts[channel] == 0 and after_counts[channel] > 0
+            ]
+            exact_co_due = [
+                prior for prior in preceding
+                if prior["scheduledWhen"] == record["scheduledWhen"]
+            ]
+            kind = "video-co-due-dual-refill" if any(
+                prior["name"] == "GBA Video" for prior in exact_co_due
+            ) else "isolated-dual-refill"
+            if requested == [1, 2]:
+                prior_video = next(
+                    (prior for prior in reversed(self.recent_history) if prior["name"] == "GBA Video"),
+                    None,
+                )
+                self.dual_refill_scout.append({
+                    "timerWhen": record["scheduledWhen"],
+                    "timerCurrent": record["schedulerCurrentTime"],
+                    "priorNames": [prior["name"] for prior in preceding],
+                    "priorVideoWhen": None if prior_video is None else prior_video["scheduledWhen"],
+                    "priorVideoCurrent": None if prior_video is None else prior_video["schedulerCurrentTime"],
+                })
+            wanted = (
+                requested == [1, 2]
+                and kind not in {window["kind"] for window in self.windows}
+                and kind in {"isolated-dual-refill", "video-co-due-dual-refill"}
+            )
+            if wanted:
+                current_event = {
+                    key: record[key]
+                    for key in ("name", "priority", "scheduledWhen", "cyclesLate", "schedulerCurrentTime")
+                }
+                self.pending = {
+                    "kind": kind,
+                    "tickEntryCallbacksBeforeTimer0": preceding,
+                    "exactCoDueCallbacksBeforeTimer0": exact_co_due,
+                    "timer0CurrentEvent": current_event,
+                    "timer0Entry": entry,
+                    "timer0Exit": after,
+                    "requestOrder": [
+                        {"fifo": "a", "dmaChannel": 1},
+                        {"fifo": "b", "dmaChannel": 2},
+                    ],
+                    "dmaCallbacks": [],
+                    "completionOrder": [],
+                }
+
+        if self.pending is not None and name == "GBA DMA":
+            active = record["activeDma"]
+            callback = {
+                **record,
+                "activeNextCountAfter": (
+                    after["dma"][active]["nextCount"] if 0 <= active < 4 else None
+                ),
+            }
+            self.pending["dmaCallbacks"].append(callback)
+            if (
+                0 <= active < 4
+                and record["dmaNextCounts"][active] != 0
+                and after["dma"][active]["nextCount"] == 0
+            ):
+                self.pending["completionOrder"].append(active)
+            if after["dma"][1]["nextCount"] == 0 and after["dma"][2]["nextCount"] == 0:
+                self.pending["afterCompletion"] = after
+                self.windows.append(self.pending)
+                self.pending = None
+                if len(self.windows) == 2:
+                    self.restore()
+
+        self.same_tick_history.append(record)
+        self.recent_history.append(record)
+        self.recent_history = self.recent_history[-32:]
+        self.last_event_by_name[name] = record
+
+    def finish(self) -> list[dict[str, Any]]:
+        self.restore()
+        if self.pending is not None:
+            raise RuntimeError("Timer 0 runtime receipt ended during DMA service")
+        kinds = {window["kind"] for window in self.windows}
+        if kinds != {"isolated-dual-refill", "video-co-due-dual-refill"}:
+            raise RuntimeError(
+                f"Timer 0 runtime receipt missing required windows: {kinds}; "
+                f"installed={self.installed_names}; scout={self.dual_refill_scout[:12]}"
+            )
+        return sorted(self.windows, key=lambda window: window["kind"] != "isolated-dual-refill")
+
+
 def snapshot_timer0_fifo_state(oracle: EmeraldOracle, master_cycles: int) -> dict[str, Any]:
     """Capture the smallest safe mGBA state around one Timer 0 reschedule.
 
@@ -1671,6 +1964,11 @@ def advance_one_instrumented_frame(
             if EWRAM_ACCESS_EVIDENCE:
                 observe_ewram_access_boundary(epoch, oracle, frame, pc)
             if pc == target_entry and epoch.get("entry") is None:
+                if (
+                    TIMER0_SCHEDULER_RUNTIME_EVIDENCE
+                    and epoch.get("timer0SchedulerRuntimeCapture") is None
+                ):
+                    epoch["timer0SchedulerRuntimeCapture"] = Timer0SchedulerRuntimeCapture(oracle)
                 cycle_events.append(cycle_snapshot(
                     oracle, frame, pc, "source-function-entry",
                     sourceFunction=symbol_at(pc - 2),
@@ -2108,7 +2406,23 @@ def run_anchor() -> dict[str, Any]:
         RESIDUAL_18_INSTRUCTION_EVIDENCE
         or RESIDUAL_18_CLASSIFIER_EVIDENCE
         or TIMER0_FIFO_EVIDENCE
+        or TIMER0_SCHEDULER_RUNTIME_EVIDENCE
     ):
+        if TIMER0_SCHEDULER_RUNTIME_EVIDENCE:
+            capture = epoch.get("timer0SchedulerRuntimeCapture")
+            if capture is None:
+                raise RuntimeError("anchor: Timer 0 scheduler runtime hook was not armed")
+            return {
+                "schema": "factory-timer0-scheduler-runtime/v1",
+                "case": "anchor",
+                "oracleProfile": "battle-scene-off",
+                "sourceFunction": "CreateFrontierFactorySelectableMons",
+                "selection": (
+                    "first source-epoch dual FIFO refill observed in each of the isolated and "
+                    "exact-Video-co-due classes"
+                ),
+                "windows": capture.finish(),
+            }
         return {
             "case": "anchor",
             "sourceFunction": "CreateFrontierFactorySelectableMons",
@@ -3082,13 +3396,24 @@ def main() -> None:
         raise SystemExit(
             "FACTORY_TIMER0_FIFO_EVIDENCE=1 requires cycle and CalculateMonStats evidence"
         )
+    if TIMER0_SCHEDULER_RUNTIME_EVIDENCE and not CYCLE_EVIDENCE:
+        raise SystemExit(
+            "FACTORY_TIMER0_SCHEDULER_RUNTIME_EVIDENCE=1 requires "
+            "FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1"
+        )
+    if TIMER0_SCHEDULER_RUNTIME_EVIDENCE and CASE != "anchor":
+        raise SystemExit(
+            "FACTORY_TIMER0_SCHEDULER_RUNTIME_EVIDENCE=1 is bounded to the anchor case"
+        )
     if CASE == "anchor":
         result = run_anchor()
     elif CASE == "liliana":
         result = run_liliana()
     else:
         result = run_factory_varied()
-    if TIMER0_FIFO_EVIDENCE:
+    if TIMER0_SCHEDULER_RUNTIME_EVIDENCE:
+        message = f"wrote {OUTPUT}: {result['case']} {len(result['windows'])} Timer 0 scheduler windows"
+    elif TIMER0_FIFO_EVIDENCE:
         result = compact_timer0_fifo_classifier_receipt(result)
     elif TIMER0_CADENCE_EVIDENCE:
         result = compact_timer0_cadence_receipt(result)

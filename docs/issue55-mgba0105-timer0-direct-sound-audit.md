@@ -149,3 +149,15 @@ exported, and Timer callback overhead, non-isolated DMA work, absolute
 `cyclesLate` scheduling, co-due Video/Audio/IRQ arbitration, and live
 construction state remain outside this contract. `runFactoryConstructionClock`
 is still unwired.
+
+## Absolute runtime composition follow-up
+
+The fresh callback-entry receipt in the companion scheduler audit now
+distinguishes summed per-channel work from live scheduler makespan. Each fresh
+channel still advances its own deadline by 10 cycles, so the work sum remains
+20. In the shared DMA graph, DMA2 services its first word at +8 while DMA1's
+terminal +2 deadline is pending; both sentinels complete at Timer-entry +18.
+Thus the 20-cycle instruction edge is a 2-cycle CPU instruction plus 18 cycles
+of blocked DMA scheduling. This does not create an 18-cycle Timer callback
+constant, and the pure dispatcher's normalized `0/10/20` work sum is not an
+absolute completion clock.

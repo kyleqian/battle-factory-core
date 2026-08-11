@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1116 — [MAIN worker, 2026-08-11] **#55 absolute Timer 0 callback-entry receipt**
+
+- **State:** the fresh on-time dual-refill boundary is closed; #55 remains open
+  for late, zero/one-refill, mixer, pending/competing DMA, and Audio/IRQ or
+  Video-started-DMA classes. The clock stays unwired and service cost null.
+- **Did:** banked one isolated and one exact Video-co-due OFF receipt. Timer
+  entry is **1880434111 / 1880414047**, both `cyclesLate=0`; request and
+  completion are DMA1→DMA2. The live graph finishes at **entry+18** because
+  DMA2's first word overlaps DMA1's terminal tail, separating makespan 18 from
+  the independent `10+10` work sum.
+- **Next:** continue #55 only with one separately bounded missing runtime class
+  above; do not fit a service constant or wire `runFactoryConstructionClock`.
+- **Notes:** two fresh paths are byte-identical (`475f4731…`, 30,976 bytes).
+  Focused Timer0 **22/22**, smoke **375/375**, typecheck, full `npm test`
+  **907 files / 8,546 passed / 1 skipped**, and build (**631 modules**) are
+  green. No production, barrier, animation, or canonical Battle-2 change.
+
 ## 1115 — [MAIN worker, 2026-08-11] **#55 isolated-fresh Timer 0 DMA hardening**
 
 - **State:** the pure dispatcher is hardened; #55 remains open, the
@@ -38,25 +55,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `npm test` **905 files / 8,534 passed / 1 skipped**, and build (**631
   modules**) are green. No +18 constant, cadence cost, co-due service, live
   wiring, controller, presentation, animation, barrier, or recording import
-  changed.
-
-## 1113 — [supervisor, 2026-08-11] **#55 Timer 0 conditional refill cause united**
-
-- **State:** runtime receipt `039af5ed` and side source audit `de0270e7` are
-  folded through merge `d08303af`; #55 remains open and the construction
-  clock stays unwired. `serviceCostMasterCycles` remains `null`.
-- **Did:** retained OFF hardware state proves all **85/85** classified members
-  perform one dual-FIFO refill and all **171** retained non-refill crossings
-  do not. Pinned mGBA 0.10.5 source derives **10** scheduled cycles per fresh
-  IWRAM→FIFO DMA, **20** for A+B, and therefore the conditional **+18** over a
-  two-cycle clean edge without fitting a fixture constant.
-- **Next:** implement the smallest pure, source-general conditional FIFO
-  service dispatcher and compose it with the registered Timer 0 cadence. Do
-  not wire the live construction clock until phase/workload composition is
-  closed.
-- **Notes:** union focused **25/25** and smoke **375/375** are green. The main
-  evidence checkpoint also passed typecheck, full `npm test` **903 files /
-  8,524 passed / 1 skipped**, and build (**631 modules**); the side audit
-  independently passed its full suite/build. No production, controller,
-  presentation, animation, canonical Battle-2, barrier, or recording import
   changed.

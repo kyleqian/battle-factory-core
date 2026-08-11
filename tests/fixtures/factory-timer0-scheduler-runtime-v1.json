@@ -1,0 +1,1259 @@
+{
+  "schema": "factory-timer0-scheduler-runtime/v1",
+  "case": "anchor",
+  "oracleProfile": "battle-scene-off",
+  "sourceFunction": "CreateFrontierFactorySelectableMons",
+  "selection": "first source-epoch dual FIFO refill observed in each of the isolated and exact-Video-co-due classes",
+  "windows": [
+    {
+      "kind": "isolated-dual-refill",
+      "tickEntryCallbacksBeforeTimer0": [],
+      "exactCoDueCallbacksBeforeTimer0": [],
+      "timer0CurrentEvent": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "scheduledWhen": 1880434111,
+        "cyclesLate": 0,
+        "schedulerCurrentTime": 1880434111
+      },
+      "timer0Entry": {
+        "scheduler": {
+          "masterCycles": 1880434111,
+          "relativeCycles": 0,
+          "currentTime": 1880434111,
+          "globalTime": 1880434111
+        },
+        "audio": {
+          "enabled": true,
+          "mixer": {
+            "present": false,
+            "externalMixing": false
+          }
+        },
+        "fifo": {
+          "a": {
+            "fifoWrite": 4,
+            "fifoRead": 1,
+            "fifoWordLevel": 3,
+            "internalRemaining": 3,
+            "dmaSource": 1
+          },
+          "b": {
+            "fifoWrite": 4,
+            "fifoRead": 1,
+            "fifoWordLevel": 3,
+            "internalRemaining": 3,
+            "dmaSource": 2
+          }
+        },
+        "dma": [
+          {
+            "channel": 0,
+            "control": 96,
+            "enabled": false,
+            "timing": 0,
+            "count": 1,
+            "nextCount": 0,
+            "source": 33786922,
+            "destination": 67108884,
+            "nextSource": 33787040,
+            "nextDestination": 67108884,
+            "when": 264520389,
+            "deadlineDelta": -1615913722
+          },
+          {
+            "channel": 1,
+            "control": 46656,
+            "enabled": true,
+            "timing": 3,
+            "count": 4,
+            "nextCount": 0,
+            "source": 50357968,
+            "destination": 67109024,
+            "nextSource": 50358032,
+            "nextDestination": 67109024,
+            "when": 1880414057,
+            "deadlineDelta": -20054
+          },
+          {
+            "channel": 2,
+            "control": 46656,
+            "enabled": true,
+            "timing": 3,
+            "count": 4,
+            "nextCount": 0,
+            "source": 50359552,
+            "destination": 67109028,
+            "nextSource": 50359616,
+            "nextDestination": 67109028,
+            "when": 1880414065,
+            "deadlineDelta": -20046
+          },
+          {
+            "channel": 3,
+            "control": 0,
+            "enabled": false,
+            "timing": 0,
+            "count": 512,
+            "nextCount": 0,
+            "source": 33782548,
+            "destination": 83886080,
+            "nextSource": 33783572,
+            "nextDestination": 83887104,
+            "when": 1880363870,
+            "deadlineDelta": -70241
+          }
+        ],
+        "activeDma": -1,
+        "performingDma": 0,
+        "cpuBlocked": false,
+        "queue": [
+          {
+            "name": "GBA Video",
+            "priority": 8,
+            "when": 1880434207,
+            "deadlineDelta": 96,
+            "due": false
+          },
+          {
+            "name": "GBA Audio Sample",
+            "priority": 24,
+            "when": 1880434688,
+            "deadlineDelta": 577,
+            "due": false
+          },
+          {
+            "name": "GB Audio Frame Sequencer",
+            "priority": 16,
+            "when": 1880457216,
+            "deadlineDelta": 23105,
+            "due": false
+          }
+        ]
+      },
+      "timer0Exit": {
+        "scheduler": {
+          "masterCycles": 1880434111,
+          "relativeCycles": 0,
+          "currentTime": 1880434111,
+          "globalTime": 1880434111
+        },
+        "audio": {
+          "enabled": true,
+          "mixer": {
+            "present": false,
+            "externalMixing": false
+          }
+        },
+        "fifo": {
+          "a": {
+            "fifoWrite": 4,
+            "fifoRead": 1,
+            "fifoWordLevel": 3,
+            "internalRemaining": 2,
+            "dmaSource": 1
+          },
+          "b": {
+            "fifoWrite": 4,
+            "fifoRead": 1,
+            "fifoWordLevel": 3,
+            "internalRemaining": 2,
+            "dmaSource": 2
+          }
+        },
+        "dma": [
+          {
+            "channel": 0,
+            "control": 96,
+            "enabled": false,
+            "timing": 0,
+            "count": 1,
+            "nextCount": 0,
+            "source": 33786922,
+            "destination": 67108884,
+            "nextSource": 33787040,
+            "nextDestination": 67108884,
+            "when": 264520389,
+            "deadlineDelta": -1615913722
+          },
+          {
+            "channel": 1,
+            "control": 46656,
+            "enabled": true,
+            "timing": 3,
+            "count": 4,
+            "nextCount": 4,
+            "source": 50357968,
+            "destination": 67109024,
+            "nextSource": 50358032,
+            "nextDestination": 67109024,
+            "when": 1880434111,
+            "deadlineDelta": 0
+          },
+          {
+            "channel": 2,
+            "control": 46656,
+            "enabled": true,
+            "timing": 3,
+            "count": 4,
+            "nextCount": 4,
+            "source": 50359552,
+            "destination": 67109028,
+            "nextSource": 50359616,
+            "nextDestination": 67109028,
+            "when": 1880434111,
+            "deadlineDelta": 0
+          },
+          {
+            "channel": 3,
+            "control": 0,
+            "enabled": false,
+            "timing": 0,
+            "count": 512,
+            "nextCount": 0,
+            "source": 33782548,
+            "destination": 83886080,
+            "nextSource": 33783572,
+            "nextDestination": 83887104,
+            "when": 1880363870,
+            "deadlineDelta": -70241
+          }
+        ],
+        "activeDma": 1,
+        "performingDma": 0,
+        "cpuBlocked": false,
+        "queue": [
+          {
+            "name": "GBA DMA",
+            "priority": 64,
+            "when": 1880434111,
+            "deadlineDelta": 0,
+            "due": true
+          },
+          {
+            "name": "GBA Video",
+            "priority": 8,
+            "when": 1880434207,
+            "deadlineDelta": 96,
+            "due": false
+          },
+          {
+            "name": "GBA Audio Sample",
+            "priority": 24,
+            "when": 1880434688,
+            "deadlineDelta": 577,
+            "due": false
+          },
+          {
+            "name": "GBA Timer 0",
+            "priority": 32,
+            "when": 1880435365,
+            "deadlineDelta": 1254,
+            "due": false
+          },
+          {
+            "name": "GB Audio Frame Sequencer",
+            "priority": 16,
+            "when": 1880457216,
+            "deadlineDelta": 23105,
+            "due": false
+          }
+        ]
+      },
+      "requestOrder": [
+        {
+          "fifo": "a",
+          "dmaChannel": 1
+        },
+        {
+          "fifo": "b",
+          "dmaChannel": 2
+        }
+      ],
+      "dmaCallbacks": [
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880434111,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880434111,
+          "dmaNextCounts": [
+            0,
+            4,
+            4,
+            0
+          ],
+          "activeDma": 1,
+          "dmaNextCountsAfter": [
+            0,
+            3,
+            4,
+            0
+          ],
+          "activeNextCountAfter": 3
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880434113,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880434113,
+          "dmaNextCounts": [
+            0,
+            3,
+            4,
+            0
+          ],
+          "activeDma": 1,
+          "dmaNextCountsAfter": [
+            0,
+            2,
+            4,
+            0
+          ],
+          "activeNextCountAfter": 2
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880434115,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880434115,
+          "dmaNextCounts": [
+            0,
+            2,
+            4,
+            0
+          ],
+          "activeDma": 1,
+          "dmaNextCountsAfter": [
+            0,
+            1,
+            4,
+            0
+          ],
+          "activeNextCountAfter": 1
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880434117,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880434117,
+          "dmaNextCounts": [
+            0,
+            1,
+            4,
+            0
+          ],
+          "activeDma": 1,
+          "dmaNextCountsAfter": [
+            0,
+            -2147483648,
+            4,
+            0
+          ],
+          "activeNextCountAfter": -2147483648
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880434119,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880434119,
+          "dmaNextCounts": [
+            0,
+            -2147483648,
+            4,
+            0
+          ],
+          "activeDma": 2,
+          "dmaNextCountsAfter": [
+            0,
+            -2147483648,
+            3,
+            0
+          ],
+          "activeNextCountAfter": 3
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880434121,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880434121,
+          "dmaNextCounts": [
+            0,
+            -2147483648,
+            3,
+            0
+          ],
+          "activeDma": 1,
+          "dmaNextCountsAfter": [
+            0,
+            0,
+            3,
+            0
+          ],
+          "activeNextCountAfter": 0
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880434121,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880434121,
+          "dmaNextCounts": [
+            0,
+            0,
+            3,
+            0
+          ],
+          "activeDma": 2,
+          "dmaNextCountsAfter": [
+            0,
+            0,
+            2,
+            0
+          ],
+          "activeNextCountAfter": 2
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880434123,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880434123,
+          "dmaNextCounts": [
+            0,
+            0,
+            2,
+            0
+          ],
+          "activeDma": 2,
+          "dmaNextCountsAfter": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "activeNextCountAfter": 1
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880434125,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880434125,
+          "dmaNextCounts": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "activeDma": 2,
+          "dmaNextCountsAfter": [
+            0,
+            0,
+            -2147483648,
+            0
+          ],
+          "activeNextCountAfter": -2147483648
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880434129,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880434129,
+          "dmaNextCounts": [
+            0,
+            0,
+            -2147483648,
+            0
+          ],
+          "activeDma": 2,
+          "dmaNextCountsAfter": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "activeNextCountAfter": 0
+        }
+      ],
+      "completionOrder": [
+        1,
+        2
+      ],
+      "afterCompletion": {
+        "scheduler": {
+          "masterCycles": 1880434129,
+          "relativeCycles": 0,
+          "currentTime": 1880434129,
+          "globalTime": 1880434129
+        },
+        "audio": {
+          "enabled": true,
+          "mixer": {
+            "present": false,
+            "externalMixing": false
+          }
+        },
+        "fifo": {
+          "a": {
+            "fifoWrite": 0,
+            "fifoRead": 1,
+            "fifoWordLevel": 7,
+            "internalRemaining": 2,
+            "dmaSource": 1
+          },
+          "b": {
+            "fifoWrite": 0,
+            "fifoRead": 1,
+            "fifoWordLevel": 7,
+            "internalRemaining": 2,
+            "dmaSource": 2
+          }
+        },
+        "dma": [
+          {
+            "channel": 0,
+            "control": 96,
+            "enabled": false,
+            "timing": 0,
+            "count": 1,
+            "nextCount": 0,
+            "source": 33786922,
+            "destination": 67108884,
+            "nextSource": 33787040,
+            "nextDestination": 67108884,
+            "when": 264520389,
+            "deadlineDelta": -1615913740
+          },
+          {
+            "channel": 1,
+            "control": 46656,
+            "enabled": true,
+            "timing": 3,
+            "count": 4,
+            "nextCount": 0,
+            "source": 50357968,
+            "destination": 67109024,
+            "nextSource": 50358048,
+            "nextDestination": 67109024,
+            "when": 1880434121,
+            "deadlineDelta": -8
+          },
+          {
+            "channel": 2,
+            "control": 46656,
+            "enabled": true,
+            "timing": 3,
+            "count": 4,
+            "nextCount": 0,
+            "source": 50359552,
+            "destination": 67109028,
+            "nextSource": 50359632,
+            "nextDestination": 67109028,
+            "when": 1880434129,
+            "deadlineDelta": 0
+          },
+          {
+            "channel": 3,
+            "control": 0,
+            "enabled": false,
+            "timing": 0,
+            "count": 512,
+            "nextCount": 0,
+            "source": 33782548,
+            "destination": 83886080,
+            "nextSource": 33783572,
+            "nextDestination": 83887104,
+            "when": 1880363870,
+            "deadlineDelta": -70259
+          }
+        ],
+        "activeDma": -1,
+        "performingDma": 0,
+        "cpuBlocked": false,
+        "queue": [
+          {
+            "name": "GBA Video",
+            "priority": 8,
+            "when": 1880434207,
+            "deadlineDelta": 78,
+            "due": false
+          },
+          {
+            "name": "GBA Audio Sample",
+            "priority": 24,
+            "when": 1880434688,
+            "deadlineDelta": 559,
+            "due": false
+          },
+          {
+            "name": "GBA Timer 0",
+            "priority": 32,
+            "when": 1880435365,
+            "deadlineDelta": 1236,
+            "due": false
+          },
+          {
+            "name": "GB Audio Frame Sequencer",
+            "priority": 16,
+            "when": 1880457216,
+            "deadlineDelta": 23087,
+            "due": false
+          }
+        ]
+      }
+    },
+    {
+      "kind": "video-co-due-dual-refill",
+      "tickEntryCallbacksBeforeTimer0": [
+        {
+          "name": "GBA Video",
+          "priority": 8,
+          "scheduledWhen": 1880414047,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880414047,
+          "dmaNextCounts": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "activeDma": -1,
+          "dmaNextCountsAfter": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "exactCoDueCallbacksBeforeTimer0": [
+        {
+          "name": "GBA Video",
+          "priority": 8,
+          "scheduledWhen": 1880414047,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880414047,
+          "dmaNextCounts": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "activeDma": -1,
+          "dmaNextCountsAfter": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "timer0CurrentEvent": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "scheduledWhen": 1880414047,
+        "cyclesLate": 0,
+        "schedulerCurrentTime": 1880414047
+      },
+      "timer0Entry": {
+        "scheduler": {
+          "masterCycles": 1880414047,
+          "relativeCycles": 0,
+          "currentTime": 1880414047,
+          "globalTime": 1880414047
+        },
+        "audio": {
+          "enabled": true,
+          "mixer": {
+            "present": false,
+            "externalMixing": false
+          }
+        },
+        "fifo": {
+          "a": {
+            "fifoWrite": 0,
+            "fifoRead": 5,
+            "fifoWordLevel": 3,
+            "internalRemaining": 3,
+            "dmaSource": 1
+          },
+          "b": {
+            "fifoWrite": 0,
+            "fifoRead": 5,
+            "fifoWordLevel": 3,
+            "internalRemaining": 3,
+            "dmaSource": 2
+          }
+        },
+        "dma": [
+          {
+            "channel": 0,
+            "control": 96,
+            "enabled": false,
+            "timing": 0,
+            "count": 1,
+            "nextCount": 0,
+            "source": 33786922,
+            "destination": 67108884,
+            "nextSource": 33787040,
+            "nextDestination": 67108884,
+            "when": 264520389,
+            "deadlineDelta": -1615893658
+          },
+          {
+            "channel": 1,
+            "control": 46656,
+            "enabled": true,
+            "timing": 3,
+            "count": 4,
+            "nextCount": 0,
+            "source": 50357968,
+            "destination": 67109024,
+            "nextSource": 50358016,
+            "nextDestination": 67109024,
+            "when": 1880393994,
+            "deadlineDelta": -20053
+          },
+          {
+            "channel": 2,
+            "control": 46656,
+            "enabled": true,
+            "timing": 3,
+            "count": 4,
+            "nextCount": 0,
+            "source": 50359552,
+            "destination": 67109028,
+            "nextSource": 50359600,
+            "nextDestination": 67109028,
+            "when": 1880394002,
+            "deadlineDelta": -20045
+          },
+          {
+            "channel": 3,
+            "control": 0,
+            "enabled": false,
+            "timing": 0,
+            "count": 512,
+            "nextCount": 0,
+            "source": 33782548,
+            "destination": 83886080,
+            "nextSource": 33783572,
+            "nextDestination": 83887104,
+            "when": 1880363870,
+            "deadlineDelta": -50177
+          }
+        ],
+        "activeDma": -1,
+        "performingDma": 0,
+        "cpuBlocked": false,
+        "queue": [
+          {
+            "name": "GBA Audio Sample",
+            "priority": 24,
+            "when": 1880414208,
+            "deadlineDelta": 161,
+            "due": false
+          },
+          {
+            "name": "GBA Video",
+            "priority": 8,
+            "when": 1880414271,
+            "deadlineDelta": 224,
+            "due": false
+          },
+          {
+            "name": "GB Audio Frame Sequencer",
+            "priority": 16,
+            "when": 1880424448,
+            "deadlineDelta": 10401,
+            "due": false
+          }
+        ]
+      },
+      "timer0Exit": {
+        "scheduler": {
+          "masterCycles": 1880414047,
+          "relativeCycles": 0,
+          "currentTime": 1880414047,
+          "globalTime": 1880414047
+        },
+        "audio": {
+          "enabled": true,
+          "mixer": {
+            "present": false,
+            "externalMixing": false
+          }
+        },
+        "fifo": {
+          "a": {
+            "fifoWrite": 0,
+            "fifoRead": 5,
+            "fifoWordLevel": 3,
+            "internalRemaining": 2,
+            "dmaSource": 1
+          },
+          "b": {
+            "fifoWrite": 0,
+            "fifoRead": 5,
+            "fifoWordLevel": 3,
+            "internalRemaining": 2,
+            "dmaSource": 2
+          }
+        },
+        "dma": [
+          {
+            "channel": 0,
+            "control": 96,
+            "enabled": false,
+            "timing": 0,
+            "count": 1,
+            "nextCount": 0,
+            "source": 33786922,
+            "destination": 67108884,
+            "nextSource": 33787040,
+            "nextDestination": 67108884,
+            "when": 264520389,
+            "deadlineDelta": -1615893658
+          },
+          {
+            "channel": 1,
+            "control": 46656,
+            "enabled": true,
+            "timing": 3,
+            "count": 4,
+            "nextCount": 4,
+            "source": 50357968,
+            "destination": 67109024,
+            "nextSource": 50358016,
+            "nextDestination": 67109024,
+            "when": 1880414047,
+            "deadlineDelta": 0
+          },
+          {
+            "channel": 2,
+            "control": 46656,
+            "enabled": true,
+            "timing": 3,
+            "count": 4,
+            "nextCount": 4,
+            "source": 50359552,
+            "destination": 67109028,
+            "nextSource": 50359600,
+            "nextDestination": 67109028,
+            "when": 1880414047,
+            "deadlineDelta": 0
+          },
+          {
+            "channel": 3,
+            "control": 0,
+            "enabled": false,
+            "timing": 0,
+            "count": 512,
+            "nextCount": 0,
+            "source": 33782548,
+            "destination": 83886080,
+            "nextSource": 33783572,
+            "nextDestination": 83887104,
+            "when": 1880363870,
+            "deadlineDelta": -50177
+          }
+        ],
+        "activeDma": 1,
+        "performingDma": 0,
+        "cpuBlocked": false,
+        "queue": [
+          {
+            "name": "GBA DMA",
+            "priority": 64,
+            "when": 1880414047,
+            "deadlineDelta": 0,
+            "due": true
+          },
+          {
+            "name": "GBA Audio Sample",
+            "priority": 24,
+            "when": 1880414208,
+            "deadlineDelta": 161,
+            "due": false
+          },
+          {
+            "name": "GBA Video",
+            "priority": 8,
+            "when": 1880414271,
+            "deadlineDelta": 224,
+            "due": false
+          },
+          {
+            "name": "GBA Timer 0",
+            "priority": 32,
+            "when": 1880415301,
+            "deadlineDelta": 1254,
+            "due": false
+          },
+          {
+            "name": "GB Audio Frame Sequencer",
+            "priority": 16,
+            "when": 1880424448,
+            "deadlineDelta": 10401,
+            "due": false
+          }
+        ]
+      },
+      "requestOrder": [
+        {
+          "fifo": "a",
+          "dmaChannel": 1
+        },
+        {
+          "fifo": "b",
+          "dmaChannel": 2
+        }
+      ],
+      "dmaCallbacks": [
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880414047,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880414047,
+          "dmaNextCounts": [
+            0,
+            4,
+            4,
+            0
+          ],
+          "activeDma": 1,
+          "dmaNextCountsAfter": [
+            0,
+            3,
+            4,
+            0
+          ],
+          "activeNextCountAfter": 3
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880414049,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880414049,
+          "dmaNextCounts": [
+            0,
+            3,
+            4,
+            0
+          ],
+          "activeDma": 1,
+          "dmaNextCountsAfter": [
+            0,
+            2,
+            4,
+            0
+          ],
+          "activeNextCountAfter": 2
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880414051,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880414051,
+          "dmaNextCounts": [
+            0,
+            2,
+            4,
+            0
+          ],
+          "activeDma": 1,
+          "dmaNextCountsAfter": [
+            0,
+            1,
+            4,
+            0
+          ],
+          "activeNextCountAfter": 1
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880414053,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880414053,
+          "dmaNextCounts": [
+            0,
+            1,
+            4,
+            0
+          ],
+          "activeDma": 1,
+          "dmaNextCountsAfter": [
+            0,
+            -2147483648,
+            4,
+            0
+          ],
+          "activeNextCountAfter": -2147483648
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880414055,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880414055,
+          "dmaNextCounts": [
+            0,
+            -2147483648,
+            4,
+            0
+          ],
+          "activeDma": 2,
+          "dmaNextCountsAfter": [
+            0,
+            -2147483648,
+            3,
+            0
+          ],
+          "activeNextCountAfter": 3
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880414057,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880414057,
+          "dmaNextCounts": [
+            0,
+            -2147483648,
+            3,
+            0
+          ],
+          "activeDma": 1,
+          "dmaNextCountsAfter": [
+            0,
+            0,
+            3,
+            0
+          ],
+          "activeNextCountAfter": 0
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880414057,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880414057,
+          "dmaNextCounts": [
+            0,
+            0,
+            3,
+            0
+          ],
+          "activeDma": 2,
+          "dmaNextCountsAfter": [
+            0,
+            0,
+            2,
+            0
+          ],
+          "activeNextCountAfter": 2
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880414059,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880414059,
+          "dmaNextCounts": [
+            0,
+            0,
+            2,
+            0
+          ],
+          "activeDma": 2,
+          "dmaNextCountsAfter": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "activeNextCountAfter": 1
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880414061,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880414061,
+          "dmaNextCounts": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "activeDma": 2,
+          "dmaNextCountsAfter": [
+            0,
+            0,
+            -2147483648,
+            0
+          ],
+          "activeNextCountAfter": -2147483648
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "scheduledWhen": 1880414065,
+          "cyclesLate": 0,
+          "schedulerCurrentTime": 1880414065,
+          "dmaNextCounts": [
+            0,
+            0,
+            -2147483648,
+            0
+          ],
+          "activeDma": 2,
+          "dmaNextCountsAfter": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "activeNextCountAfter": 0
+        }
+      ],
+      "completionOrder": [
+        1,
+        2
+      ],
+      "afterCompletion": {
+        "scheduler": {
+          "masterCycles": 1880414065,
+          "relativeCycles": 0,
+          "currentTime": 1880414065,
+          "globalTime": 1880414065
+        },
+        "audio": {
+          "enabled": true,
+          "mixer": {
+            "present": false,
+            "externalMixing": false
+          }
+        },
+        "fifo": {
+          "a": {
+            "fifoWrite": 4,
+            "fifoRead": 5,
+            "fifoWordLevel": 7,
+            "internalRemaining": 2,
+            "dmaSource": 1
+          },
+          "b": {
+            "fifoWrite": 4,
+            "fifoRead": 5,
+            "fifoWordLevel": 7,
+            "internalRemaining": 2,
+            "dmaSource": 2
+          }
+        },
+        "dma": [
+          {
+            "channel": 0,
+            "control": 96,
+            "enabled": false,
+            "timing": 0,
+            "count": 1,
+            "nextCount": 0,
+            "source": 33786922,
+            "destination": 67108884,
+            "nextSource": 33787040,
+            "nextDestination": 67108884,
+            "when": 264520389,
+            "deadlineDelta": -1615893676
+          },
+          {
+            "channel": 1,
+            "control": 46656,
+            "enabled": true,
+            "timing": 3,
+            "count": 4,
+            "nextCount": 0,
+            "source": 50357968,
+            "destination": 67109024,
+            "nextSource": 50358032,
+            "nextDestination": 67109024,
+            "when": 1880414057,
+            "deadlineDelta": -8
+          },
+          {
+            "channel": 2,
+            "control": 46656,
+            "enabled": true,
+            "timing": 3,
+            "count": 4,
+            "nextCount": 0,
+            "source": 50359552,
+            "destination": 67109028,
+            "nextSource": 50359616,
+            "nextDestination": 67109028,
+            "when": 1880414065,
+            "deadlineDelta": 0
+          },
+          {
+            "channel": 3,
+            "control": 0,
+            "enabled": false,
+            "timing": 0,
+            "count": 512,
+            "nextCount": 0,
+            "source": 33782548,
+            "destination": 83886080,
+            "nextSource": 33783572,
+            "nextDestination": 83887104,
+            "when": 1880363870,
+            "deadlineDelta": -50195
+          }
+        ],
+        "activeDma": -1,
+        "performingDma": 0,
+        "cpuBlocked": false,
+        "queue": [
+          {
+            "name": "GBA Audio Sample",
+            "priority": 24,
+            "when": 1880414208,
+            "deadlineDelta": 143,
+            "due": false
+          },
+          {
+            "name": "GBA Video",
+            "priority": 8,
+            "when": 1880414271,
+            "deadlineDelta": 206,
+            "due": false
+          },
+          {
+            "name": "GBA Timer 0",
+            "priority": 32,
+            "when": 1880415301,
+            "deadlineDelta": 1236,
+            "due": false
+          },
+          {
+            "name": "GB Audio Frame Sequencer",
+            "priority": 16,
+            "when": 1880424448,
+            "deadlineDelta": 10383,
+            "due": false
+          }
+        ]
+      }
+    }
+  ]
+}

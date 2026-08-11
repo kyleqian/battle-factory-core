@@ -40630,3 +40630,23 @@ git; the current live ledger keeps the three load-bearing entries only.
   multiple crossings, and rejects unmodeled rates. No +18 cost, co-due
   collapse, RNG, presentation, controller, recording import, barrier, or
   canonical Battle-2 work.
+## 1113 — [supervisor, 2026-08-11] **#55 Timer 0 conditional refill cause united**
+
+- **State:** runtime receipt `039af5ed` and side source audit `de0270e7` are
+  folded through merge `d08303af`; #55 remains open and the construction
+  clock stays unwired. `serviceCostMasterCycles` remains `null`.
+- **Did:** retained OFF hardware state proves all **85/85** classified members
+  perform one dual-FIFO refill and all **171** retained non-refill crossings
+  do not. Pinned mGBA 0.10.5 source derives **10** scheduled cycles per fresh
+  IWRAM→FIFO DMA, **20** for A+B, and therefore the conditional **+18** over a
+  two-cycle clean edge without fitting a fixture constant.
+- **Next:** implement the smallest pure, source-general conditional FIFO
+  service dispatcher and compose it with the registered Timer 0 cadence. Do
+  not wire the live construction clock until phase/workload composition is
+  closed.
+- **Notes:** union focused **25/25** and smoke **375/375** are green. The main
+  evidence checkpoint also passed typecheck, full `npm test` **903 files /
+  8,524 passed / 1 skipped**, and build (**631 modules**); the side audit
+  independently passed its full suite/build. No production, controller,
+  presentation, animation, canonical Battle-2, barrier, or recording import
+  changed.
