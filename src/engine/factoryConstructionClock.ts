@@ -537,6 +537,62 @@ export interface FactoryFieldTailTiming {
   unresolved: null;
 }
 
+export type FactoryGetBoxMonDataOuterSegmentName =
+  | "accessor-prologue"
+  | "accessor-secure-setup-and-calls"
+  | "checksum-function-setup-and-calls"
+  | "checksum-function-return"
+  | "accessor-field-dispatch"
+  | "accessor-encrypt-and-return";
+
+/**
+ * One synchronous instruction/memory segment owned by the accessor shell.
+ * The interval is half-open. Nested function bodies are never included.
+ */
+export interface FactoryGetBoxMonDataOuterSegmentTiming {
+  name: FactoryGetBoxMonDataOuterSegmentName;
+  entryPc: number;
+  endPc: number;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  romLiteralLoads: number;
+  romJumpTableLoads: number;
+  ewramWordReads: number;
+  ewramDataAccessCycles: number;
+  ewramDataAccessPremiumCycles: number;
+  cycles: number;
+}
+
+/** Source ABI for the receipt-used encrypted GetBoxMonData2 field subset. */
+export interface FactoryGetBoxMonDataOuterShellTimingInput {
+  field: number;
+}
+
+/**
+ * Exact synchronous shell around the separately reduced nested components.
+ * This includes CalculateBoxMonChecksum's own setup/return instructions, but
+ * excludes its four GetSubstruct bodies and its already-exposed checksum loop.
+ */
+export interface FactoryGetBoxMonDataOuterShellTiming {
+  field: number;
+  fieldDispatchTargetPc: number;
+  segments: readonly FactoryGetBoxMonDataOuterSegmentTiming[];
+  mainAccessorCycles: number;
+  checksumFunctionShellCycles: number;
+  ewramWordReads: 8;
+  ewramDataAccessCycles: 32;
+  /** Extra elapsed cycles after instruction scheduling/prefetch overlap. */
+  ewramDataAccessPremiumCycles: 0;
+  excludedNestedCalls: Readonly<{
+    getSubstruct: 8;
+    decryptBoxMon: 1;
+    checksumLoop: 1;
+    encryptBoxMon: 1;
+  }>;
+  cycles: number;
+  unresolved: null;
+}
+
 /**
  * Fixed instruction/fetch census for DecryptBoxMon or EncryptBoxMon.
  *
@@ -634,8 +690,11 @@ export interface FactoryGetBoxMonDataDependency {
   tailDataBusCycles: number;
   /** Complete checksum-route plus selected-field tail instruction/data time. */
   tailCycles: number;
-  /** All independently closed nested components; still not an accessor total. */
+  /** All independently closed nested components, excluding their outer shell. */
   composedKnownCycles: number;
+  /** Exact synchronous accessor subtotal, excluding only async service and IRQ. */
+  outerShellTiming: FactoryGetBoxMonDataOuterShellTiming;
+  composedSynchronousKnownCycles: number;
   getSubstructCalls: 8;
   decryptIterations: 12;
   checksumHalfwordReads: 24;
@@ -1248,6 +1307,20 @@ const GET_BOX_COMMON_BOUNDARIES = Object.freeze({
   encryptLoopPc: 0x0806_a232,
 });
 
+function getFactoryGetBoxReceiptFieldTailPc(fieldValue: number): number {
+  const field = requireSigned32(fieldValue, "field");
+  if (field === 11) return 0x0806_a95e;
+  if (field === 25) return 0x0806_a97c;
+  if (field >= 26 && field <= 31) return 0x0806_a9a4 + (field - 26) * 4;
+  if (field >= 39 && field <= 44) {
+    return [
+      0x0806_a9f6, 0x0806_a9fe, 0x0806_aa06,
+      0x0806_aa0e, 0x0806_aa16, 0x0806_aa1e,
+    ][field - 39]!;
+  }
+  throw new Error("field is outside the CalculateMonStats/GetLevelFromMonExp encrypted subset");
+}
+
 /** Exact private result for the one libgcc symbol used by GetSubstruct. */
 interface GetSubstructModulo24Timing {
   remainder: number;
@@ -1650,6 +1723,99 @@ function sumFactoryEwramAccesses(
 }
 
 /**
+ * Reduce the complete synchronous instruction/memory shell around the nested
+ * encrypted-accessor components used by the construction receipts.
+ *
+ * `GetBoxMonData2` owns four GetSubstruct calls, DecryptBoxMon, the call to
+ * CalculateBoxMonChecksum, dispatch, EncryptBoxMon, and its return. The
+ * checksum function owns another four GetSubstruct calls around the already
+ * reduced 24-halfword-read loop. This reducer counts each caller BL/refill,
+ * personality read, prologue, dispatch, and epilogue exactly once while
+ * assigning zero cycles to all nested bodies listed in `excludedNestedCalls`.
+ */
+export function reduceFactoryGetBoxMonDataOuterShellTiming(
+  input: Readonly<FactoryGetBoxMonDataOuterShellTimingInput>,
+): FactoryGetBoxMonDataOuterShellTiming {
+  const field = requireSigned32(input.field, "field");
+  const fieldDispatchTargetPc = getFactoryGetBoxReceiptFieldTailPc(field);
+  const wordRead = reduceFactoryEwramAccessTiming({
+    access: "read", width: 4, address: 0x0200_0000,
+  });
+  const segment = (
+    name: FactoryGetBoxMonDataOuterSegmentName,
+    entryPc: number,
+    endPc: number,
+    sequentialThumbHalfwords: number,
+    pipelineRefills: number,
+    romLiteralLoads: number,
+    romJumpTableLoads: number,
+    ewramWordReads: number,
+  ): FactoryGetBoxMonDataOuterSegmentTiming => {
+    const ewramDataAccessCycles = ewramWordReads * wordRead.cycles;
+    // Unlike the tight crypt loops, every personality read is separated from
+    // the next EWRAM access by register setup and a taken BL. Targeted mGBA
+    // instruction boundaries are 2 cycles for all eight aligned reads, and
+    // the complete pause-subtracted accessor joins close only when the second
+    // 16-bit transfer overlaps the scheduled ROM/pipeline work. Preserve the
+    // four-cycle bus occupancy, but do not add a second, double-counted fetch
+    // premium to elapsed time in these outer segments.
+    const ewramDataAccessPremiumCycles = 0;
+    const cycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+      + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES
+      + romLiteralLoads * (THUMB_ROM_LITERAL_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES)
+      + romJumpTableLoads * (THUMB_ROM_JUMP_TABLE_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES)
+      + ewramDataAccessPremiumCycles;
+    return Object.freeze({
+      name,
+      entryPc,
+      endPc,
+      sequentialThumbHalfwords,
+      pipelineRefills,
+      romLiteralLoads,
+      romJumpTableLoads,
+      ewramWordReads,
+      ewramDataAccessCycles,
+      ewramDataAccessPremiumCycles,
+      cycles,
+    });
+  };
+
+  const segments = Object.freeze([
+    segment("accessor-prologue", 0x0806_a674, 0x0806_a694, 16, 0, 0, 0, 0),
+    segment("accessor-secure-setup-and-calls", 0x0806_a694, 0x0806_a6d0, 30, 6, 0, 0, 4),
+    segment("checksum-function-setup-and-calls", 0x0806_8c78, 0x0806_8cb0, 28, 4, 0, 0, 4),
+    segment("checksum-function-return", 0x0806_8cfe, 0x0806_8d0a, 6, 1, 0, 0, 0),
+    segment("accessor-field-dispatch", 0x0806_a6f2, 0x0806_a704, 8, 2, 1, 1, 0),
+    segment("accessor-encrypt-and-return", 0x0806_ac8c, 0x0806_acaa, 15, 2, 0, 0, 0),
+  ]);
+  const mainAccessorCycles = segments
+    .filter((row) => !row.name.startsWith("checksum-function-"))
+    .reduce((total, row) => total + row.cycles, 0);
+  const checksumFunctionShellCycles = segments
+    .filter((row) => row.name.startsWith("checksum-function-"))
+    .reduce((total, row) => total + row.cycles, 0);
+  const cycles = mainAccessorCycles + checksumFunctionShellCycles;
+  return Object.freeze({
+    field,
+    fieldDispatchTargetPc,
+    segments,
+    mainAccessorCycles,
+    checksumFunctionShellCycles,
+    ewramWordReads: 8,
+    ewramDataAccessCycles: 32,
+    ewramDataAccessPremiumCycles: 0,
+    excludedNestedCalls: Object.freeze({
+      getSubstruct: 8,
+      decryptBoxMon: 1,
+      checksumLoop: 1,
+      encryptBoxMon: 1,
+    }),
+    cycles,
+    unresolved: null,
+  });
+}
+
+/**
  * Reduce the fixed ROM instruction stream of one 12-word crypt loop.
  *
  * Both helpers have 5 prologue halfwords, 12 iterations × 10 halfwords, and
@@ -1864,27 +2030,26 @@ export function censusFactoryGetBoxMonDataDependency(
   if (field === 11) {
     fieldGroup = "species";
     logicalSubstruct = 0;
-    tailEntryPc = 0x0806_a95e;
+    tailEntryPc = getFactoryGetBoxReceiptFieldTailPc(field);
     fetchClass = "ewram-u16-conditional";
   } else if (field === 25) {
     fieldGroup = "experience";
     logicalSubstruct = 0;
-    tailEntryPc = 0x0806_a97c;
+    tailEntryPc = getFactoryGetBoxReceiptFieldTailPc(field);
     fetchClass = "ewram-u32";
   } else if (field >= 26 && field <= 31) {
     fieldGroup = "ev-byte";
     logicalSubstruct = 2;
-    tailEntryPc = 0x0806_a9a4 + (field - 26) * 4;
+    tailEntryPc = getFactoryGetBoxReceiptFieldTailPc(field);
     fetchClass = "ewram-u8";
   } else if (field >= 39 && field <= 44) {
-    const tails = [0x0806_a9f6, 0x0806_a9fe, 0x0806_aa06, 0x0806_aa0e, 0x0806_aa16, 0x0806_aa1e];
     const classes: FactoryGetBoxMonDataFetchClass[] = [
       "ewram-u8-bitfield", "ewram-u16-bitfield", "ewram-u8-bitfield",
       "ewram-u32-bitfield", "ewram-u16-bitfield", "ewram-u8-bitfield",
     ];
     fieldGroup = "iv-bitfield";
     logicalSubstruct = 3;
-    tailEntryPc = tails[field - 39]!;
+    tailEntryPc = getFactoryGetBoxReceiptFieldTailPc(field);
     fetchClass = classes[field - 39]!;
   } else {
     throw new Error("field is outside the CalculateMonStats/GetLevelFromMonExp encrypted subset");
@@ -1926,6 +2091,8 @@ export function censusFactoryGetBoxMonDataDependency(
     + checksumLoopTiming.cycles
     + encryptLoopTiming.cycles
     + tailCycles;
+  const outerShellTiming = reduceFactoryGetBoxMonDataOuterShellTiming({ field });
+  const composedSynchronousKnownCycles = composedKnownCycles + outerShellTiming.cycles;
   return Object.freeze({
     field,
     personality,
@@ -1959,13 +2126,15 @@ export function censusFactoryGetBoxMonDataDependency(
     tailDataBusCycles,
     tailCycles,
     composedKnownCycles,
+    outerShellTiming,
+    composedSynchronousKnownCycles,
     getSubstructCalls: 8,
     decryptIterations: 12,
     checksumHalfwordReads: 24,
     encryptIterations: 12,
     boundaries: GET_BOX_COMMON_BOUNDARIES,
     cycles: null,
-    unresolved: "complete GetBoxMonData2 timing still awaits outer prologue/setup/dispatch/common-return instruction and memory costs, async +18, and VBlank/IRQ costs",
+    unresolved: "complete GetBoxMonData2 timing still awaits async +18 service and VBlank/IRQ entry/body/return costs",
   });
 }
 

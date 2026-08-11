@@ -8,6 +8,7 @@ import {
   reduceFactoryDecryptBoxMonTiming,
   reduceFactoryEncryptBoxMonTiming,
   reduceFactoryEwramAccessTiming,
+  reduceFactoryGetBoxMonDataOuterShellTiming,
   reduceFactoryGetSubstructTiming,
   censusFactoryGetBoxMonDataDependency,
   reduceFactoryGetNatureTiming,
@@ -577,9 +578,12 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
     expect(rows.every((row) => row.sharedDataBusCycles === 528)).toBe(true);
     expect(rows.every((row) => row.sharedDataBusPremiumCycles === 240)).toBe(true);
     expect(rows.every((row) => row.tailCycles === row.checksumTailTiming.cycles + row.fieldTailTiming.cycles)).toBe(true);
+    expect(rows.every((row) => row.outerShellTiming.cycles === 314)).toBe(true);
     expect(rows.every((row) => row.composedKnownCycles === row.getSubstructCycles
       + row.decryptLoopTiming.cycles + row.checksumLoopTiming.cycles
       + row.encryptLoopTiming.cycles + row.tailCycles)).toBe(true);
+    expect(rows.every((row) => row.composedSynchronousKnownCycles
+      === row.composedKnownCycles + row.outerShellTiming.cycles)).toBe(true);
     expect(rows.every((row) => row.cycles === null && row.unresolved !== null)).toBe(true);
     expect(rows.every((row) => JSON.stringify(row.boundaries) === JSON.stringify({
       symbolEntryPc: 0x0806_a674,
@@ -622,11 +626,125 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       representative.getSubstructCycles + 1_174,
     );
     expect(representative.composedInstructionFetchCycles).toBe(7_998);
+    expect(representative.composedSynchronousKnownCycles)
+      .toBe(representative.composedKnownCycles + 314);
     expect(representative.cycles).toBeNull();
   });
 
-  it("checks the composed source subtotal against every OFF stats-accessor boundary without absorbing its remainder", () => {
+  it("source-reduces the synchronous GetBoxMonData2 and checksum-function shells without nested double counting", () => {
+    const timing = reduceFactoryGetBoxMonDataOuterShellTiming({ field: 42 });
+    expect(timing).toMatchObject({
+      field: 42,
+      fieldDispatchTargetPc: 0x0806_aa0e,
+      mainAccessorCycles: 216,
+      checksumFunctionShellCycles: 98,
+      cycles: 314,
+      excludedNestedCalls: {
+        getSubstruct: 8,
+        decryptBoxMon: 1,
+        checksumLoop: 1,
+        encryptBoxMon: 1,
+      },
+      unresolved: null,
+    });
+    expect(timing.segments).toEqual([
+      {
+        name: "accessor-prologue",
+        entryPc: 0x0806_a674,
+        endPc: 0x0806_a694,
+        sequentialThumbHalfwords: 16,
+        pipelineRefills: 0,
+        romLiteralLoads: 0,
+        romJumpTableLoads: 0,
+        ewramWordReads: 0,
+        ewramDataAccessCycles: 0,
+        ewramDataAccessPremiumCycles: 0,
+        cycles: 32,
+      },
+      {
+        name: "accessor-secure-setup-and-calls",
+        entryPc: 0x0806_a694,
+        endPc: 0x0806_a6d0,
+        sequentialThumbHalfwords: 30,
+        pipelineRefills: 6,
+        romLiteralLoads: 0,
+        romJumpTableLoads: 0,
+        ewramWordReads: 4,
+        ewramDataAccessCycles: 16,
+        ewramDataAccessPremiumCycles: 0,
+        cycles: 96,
+      },
+      {
+        name: "checksum-function-setup-and-calls",
+        entryPc: 0x0806_8c78,
+        endPc: 0x0806_8cb0,
+        sequentialThumbHalfwords: 28,
+        pipelineRefills: 4,
+        romLiteralLoads: 0,
+        romJumpTableLoads: 0,
+        ewramWordReads: 4,
+        ewramDataAccessCycles: 16,
+        ewramDataAccessPremiumCycles: 0,
+        cycles: 80,
+      },
+      {
+        name: "checksum-function-return",
+        entryPc: 0x0806_8cfe,
+        endPc: 0x0806_8d0a,
+        sequentialThumbHalfwords: 6,
+        pipelineRefills: 1,
+        romLiteralLoads: 0,
+        romJumpTableLoads: 0,
+        ewramWordReads: 0,
+        ewramDataAccessCycles: 0,
+        ewramDataAccessPremiumCycles: 0,
+        cycles: 18,
+      },
+      {
+        name: "accessor-field-dispatch",
+        entryPc: 0x0806_a6f2,
+        endPc: 0x0806_a704,
+        sequentialThumbHalfwords: 8,
+        pipelineRefills: 2,
+        romLiteralLoads: 1,
+        romJumpTableLoads: 1,
+        ewramWordReads: 0,
+        ewramDataAccessCycles: 0,
+        ewramDataAccessPremiumCycles: 0,
+        cycles: 46,
+      },
+      {
+        name: "accessor-encrypt-and-return",
+        entryPc: 0x0806_ac8c,
+        endPc: 0x0806_acaa,
+        sequentialThumbHalfwords: 15,
+        pipelineRefills: 2,
+        romLiteralLoads: 0,
+        romJumpTableLoads: 0,
+        ewramWordReads: 0,
+        ewramDataAccessCycles: 0,
+        ewramDataAccessPremiumCycles: 0,
+        cycles: 42,
+      },
+    ]);
+
+    expect(createHash("sha256").update(elfRomSlice(0x0806_a674, 0x20)).digest("hex"))
+      .toBe("79c2bd4cd471521c6d230c61a0a4259d9a6c78d87ef04ca143745de59127138c");
+    expect(createHash("sha256").update(elfRomSlice(0x0806_a694, 0x3c)).digest("hex"))
+      .toBe("53ef19600682b9a798c5125131f4c27c7e1e20c29f55f8ecd28d8b6c59368ebd");
+    expect(elfRomSlice(0x0806_a6f2, 0x12).toString("hex"))
+      .toBe("0098532800d9c8e280000149401800688746");
+    expect(createHash("sha256").update(elfRomSlice(0x0806_8c78, 0x38)).digest("hex"))
+      .toBe("0372c3d6c5bd15f4d2ed3393276fc6ba1c2f1d4c3d7f97cb70c71ac1dfaa8711");
+    expect(elfRomSlice(0x0806_8cfe, 0x0c).toString("hex"))
+      .toBe("301c08bc9846f0bc02bc0847");
+    expect(createHash("sha256").update(elfRomSlice(0x0806_ac8c, 0x1e)).digest("hex"))
+      .toBe("d10a689a48cba191db3ec99fe5b48559770ce5e27e23b43d0546465bb743ce95");
+  });
+
+  it("matches clean OFF stats-accessor boundaries and leaves every external class unabsorbed", () => {
     let checked = 0;
+    const residuals: number[] = [];
     for (const { value } of probes) {
       const personalities = new Map(value.mons.map((mon) => [mon.monIndex, mon.acceptedPersonality]));
       for (const call of value.directCalls.filter((row) => (
@@ -647,17 +765,20 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
           value.interruptPauses,
         );
         const knownSourceOnly = outer.preDelegateCycles
-          + dependency.composedInstructionFetchCycles
+          + dependency.composedSynchronousKnownCycles
           + outer.returnShellCycles;
-        // The strictly positive remainder is intentionally left unidentified:
-        // it includes GetBoxMonData2 EWRAM accesses, tails, and other still
-        // unmodelled work, rather than being fitted back into this subtotal.
-        expect(measured).toBeGreaterThan(knownSourceOnly);
+        residuals.push(measured - knownSourceOnly);
         expect(dependency.cycles).toBeNull();
         checked += 1;
       }
     }
     expect(checked).toBe(156);
+    expect([...new Map(residuals.map((cycles) => [
+      cycles, residuals.filter((value) => value === cycles).length,
+    ])).entries()].sort((left, right) => left[0] - right[0])).toEqual([
+      [-2, 5], [0, 72], [16, 7], [18, 60], [117, 5], [245, 6], [263, 1],
+    ]);
+    expect(residuals.filter((cycles) => cycles === 0)).toHaveLength(72);
   });
 
   it("derives all modulo-24 GetSubstruct layouts and receipt field extraction tails", () => {
@@ -787,6 +908,37 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
     expect(() => censusFactoryGetBoxMonDataDependency({
       field: 24, personality: 0, checksumValid: true, isBadEgg: false,
     })).toThrow("outside the CalculateMonStats/GetLevelFromMonExp encrypted subset");
+  });
+
+  it("covers every receipt field across all 24 personality routes and both checksum outcomes", () => {
+    const fields = [11, 25, 26, 27, 28, 29, 30, 31, 39, 40, 41, 42, 43, 44] as const;
+    const rows = Array.from({ length: 24 }, (_, personality) => fields.flatMap((field) => [
+      censusFactoryGetBoxMonDataDependency({
+        field, personality, checksumValid: true, isBadEgg: false,
+      }),
+      censusFactoryGetBoxMonDataDependency({
+        field, personality, checksumValid: false, isBadEgg: false,
+      }),
+    ])).flat();
+    expect(rows).toHaveLength(24 * fields.length * 2);
+    expect(new Set(rows.map((row) => row.personalityModulo24))).toEqual(new Set(
+      Array.from({ length: 24 }, (_, index) => index),
+    ));
+    expect(rows.filter((row) => row.checksumRoute === "valid")).toHaveLength(24 * fields.length);
+    expect(rows.filter((row) => row.checksumRoute === "invalid-marks-bad-egg"))
+      .toHaveLength(24 * fields.length);
+    expect(rows.filter((row) => row.speciesTailRoute === "species")).toHaveLength(24);
+    expect(rows.filter((row) => row.speciesTailRoute === "bad-egg-species")).toHaveLength(24);
+    expect(rows.every((row) => row.outerShellTiming.field === row.field)).toBe(true);
+    expect(rows.every((row) => row.outerShellTiming.excludedNestedCalls.getSubstruct === 8)).toBe(true);
+    expect(rows.every((row) => row.cycles === null)).toBe(true);
+
+    const preexistingBadEggRoutes = Array.from({ length: 24 }, (_, personality) => (
+      censusFactoryGetBoxMonDataDependency({
+        field: 11, personality, checksumValid: true, isBadEgg: true,
+      }).speciesTailRoute
+    ));
+    expect(preexistingBadEggRoutes).toEqual(Array(24).fill("bad-egg-species"));
   });
   it("is three fresh, byte-stable Scene-OFF packets", () => {
     for (const { expected, bytes, value } of probes) {
