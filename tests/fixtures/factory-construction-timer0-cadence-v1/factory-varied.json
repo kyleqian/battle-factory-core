@@ -1,0 +1,5879 @@
+{
+  "schema": "factory-construction-timer0-cadence/v1",
+  "case": "factory-varied",
+  "oracleProfile": "battle-scene-off",
+  "sourceFunction": "FillFactoryFrontierTrainerParty",
+  "frameCycles": 280896,
+  "constructionClockEntryPhase": 248066,
+  "firstDueRelativeMasterCycles": 1145,
+  "boundaries": [
+    {
+      "kind": "source-function-entry",
+      "pc": "0x081635d6",
+      "monIndex": null,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2228034163,
+      "cpuCycles": 79,
+      "masterCycles": 2228034242,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1145,
+        "due": false
+      }
+    },
+    {
+      "kind": "construction-entry",
+      "pc": "0x08068636",
+      "monIndex": 0,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2228034560,
+      "cpuCycles": 544,
+      "masterCycles": 2228035104,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 283,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 0,
+      "half": "low",
+      "globalCycles": 2228034560,
+      "cpuCycles": 602,
+      "masterCycles": 2228035162,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 225,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 0,
+      "half": "high",
+      "globalCycles": 2228035173,
+      "cpuCycles": 69,
+      "masterCycles": 2228035242,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 145,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 0,
+      "half": null,
+      "globalCycles": 2228035173,
+      "cpuCycles": 157,
+      "masterCycles": 2228035330,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 57,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 1,
+      "half": "low",
+      "globalCycles": 2228035584,
+      "cpuCycles": 552,
+      "masterCycles": 2228036136,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 505,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 1,
+      "half": "high",
+      "globalCycles": 2228035584,
+      "cpuCycles": 632,
+      "masterCycles": 2228036216,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 425,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 1,
+      "half": null,
+      "globalCycles": 2228035584,
+      "cpuCycles": 720,
+      "masterCycles": 2228036304,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 337,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 2,
+      "half": "low",
+      "globalCycles": 2228036641,
+      "cpuCycles": 456,
+      "masterCycles": 2228037097,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 798,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 2,
+      "half": "high",
+      "globalCycles": 2228036641,
+      "cpuCycles": 536,
+      "masterCycles": 2228037177,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 718,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 2,
+      "half": null,
+      "globalCycles": 2228036641,
+      "cpuCycles": 624,
+      "masterCycles": 2228037265,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 630,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 3,
+      "half": "low",
+      "globalCycles": 2228037895,
+      "cpuCycles": 187,
+      "masterCycles": 2228038082,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1067,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 3,
+      "half": "high",
+      "globalCycles": 2228037895,
+      "cpuCycles": 267,
+      "masterCycles": 2228038162,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 987,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 3,
+      "half": null,
+      "globalCycles": 2228037895,
+      "cpuCycles": 355,
+      "masterCycles": 2228038250,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 899,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 4,
+      "half": "low",
+      "globalCycles": 2228038868,
+      "cpuCycles": 174,
+      "masterCycles": 2228039042,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 107,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 4,
+      "half": "high",
+      "globalCycles": 2228039094,
+      "cpuCycles": 28,
+      "masterCycles": 2228039122,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 27,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 4,
+      "half": null,
+      "globalCycles": 2228039159,
+      "cpuCycles": 51,
+      "masterCycles": 2228039210,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1193,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 5,
+      "half": "low",
+      "globalCycles": 2228039680,
+      "cpuCycles": 385,
+      "masterCycles": 2228040065,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 338,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 5,
+      "half": "high",
+      "globalCycles": 2228040102,
+      "cpuCycles": 43,
+      "masterCycles": 2228040145,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 258,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 5,
+      "half": null,
+      "globalCycles": 2228040102,
+      "cpuCycles": 131,
+      "masterCycles": 2228040233,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 170,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 6,
+      "half": "low",
+      "globalCycles": 2228040705,
+      "cpuCycles": 170,
+      "masterCycles": 2228040875,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 782,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 6,
+      "half": "high",
+      "globalCycles": 2228040705,
+      "cpuCycles": 250,
+      "masterCycles": 2228040955,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 702,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 6,
+      "half": null,
+      "globalCycles": 2228040705,
+      "cpuCycles": 338,
+      "masterCycles": 2228041043,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 614,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 7,
+      "half": "low",
+      "globalCycles": 2228041728,
+      "cpuCycles": 146,
+      "masterCycles": 2228041874,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1037,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 7,
+      "half": "high",
+      "globalCycles": 2228041728,
+      "cpuCycles": 226,
+      "masterCycles": 2228041954,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 957,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 7,
+      "half": null,
+      "globalCycles": 2228041728,
+      "cpuCycles": 314,
+      "masterCycles": 2228042042,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 869,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 8,
+      "half": "low",
+      "globalCycles": 2228042784,
+      "cpuCycles": 89,
+      "masterCycles": 2228042873,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 38,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 8,
+      "half": "high",
+      "globalCycles": 2228042930,
+      "cpuCycles": 41,
+      "masterCycles": 2228042971,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1194,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 8,
+      "half": null,
+      "globalCycles": 2228042930,
+      "cpuCycles": 129,
+      "masterCycles": 2228043059,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1106,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 9,
+      "half": "low",
+      "globalCycles": 2228043791,
+      "cpuCycles": 98,
+      "masterCycles": 2228043889,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 276,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 9,
+      "half": "high",
+      "globalCycles": 2228043791,
+      "cpuCycles": 178,
+      "masterCycles": 2228043969,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 196,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 9,
+      "half": null,
+      "globalCycles": 2228044021,
+      "cpuCycles": 36,
+      "masterCycles": 2228044057,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 108,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 10,
+      "half": "low",
+      "globalCycles": 2228044805,
+      "cpuCycles": 111,
+      "masterCycles": 2228044916,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 503,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 10,
+      "half": "high",
+      "globalCycles": 2228044805,
+      "cpuCycles": 191,
+      "masterCycles": 2228044996,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 423,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 10,
+      "half": null,
+      "globalCycles": 2228045033,
+      "cpuCycles": 51,
+      "masterCycles": 2228045084,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 335,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 11,
+      "half": "low",
+      "globalCycles": 2228045825,
+      "cpuCycles": 94,
+      "masterCycles": 2228045919,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 754,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 11,
+      "half": "high",
+      "globalCycles": 2228045825,
+      "cpuCycles": 174,
+      "masterCycles": 2228045999,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 674,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 11,
+      "half": null,
+      "globalCycles": 2228045825,
+      "cpuCycles": 262,
+      "masterCycles": 2228046087,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 586,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 12,
+      "half": "low",
+      "globalCycles": 2228046848,
+      "cpuCycles": 70,
+      "masterCycles": 2228046918,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1009,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 12,
+      "half": "high",
+      "globalCycles": 2228046848,
+      "cpuCycles": 150,
+      "masterCycles": 2228046998,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 929,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 12,
+      "half": null,
+      "globalCycles": 2228046848,
+      "cpuCycles": 238,
+      "masterCycles": 2228047086,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 841,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 13,
+      "half": "low",
+      "globalCycles": 2228047872,
+      "cpuCycles": 34,
+      "masterCycles": 2228047906,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 21,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 13,
+      "half": "high",
+      "globalCycles": 2228047930,
+      "cpuCycles": 56,
+      "masterCycles": 2228047986,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1195,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 13,
+      "half": null,
+      "globalCycles": 2228047930,
+      "cpuCycles": 144,
+      "masterCycles": 2228048074,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1107,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 14,
+      "half": "low",
+      "globalCycles": 2228048902,
+      "cpuCycles": 10,
+      "masterCycles": 2228048912,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 269,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 14,
+      "half": "high",
+      "globalCycles": 2228048949,
+      "cpuCycles": 43,
+      "masterCycles": 2228048992,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 189,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 14,
+      "half": null,
+      "globalCycles": 2228048949,
+      "cpuCycles": 131,
+      "masterCycles": 2228049080,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 101,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 15,
+      "half": "low",
+      "globalCycles": 2228049182,
+      "cpuCycles": 730,
+      "masterCycles": 2228049912,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 523,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 15,
+      "half": "high",
+      "globalCycles": 2228049951,
+      "cpuCycles": 41,
+      "masterCycles": 2228049992,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 443,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 15,
+      "half": null,
+      "globalCycles": 2228049951,
+      "cpuCycles": 129,
+      "masterCycles": 2228050080,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 355,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 16,
+      "half": "low",
+      "globalCycles": 2228050946,
+      "cpuCycles": 10,
+      "masterCycles": 2228050956,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 733,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 16,
+      "half": "high",
+      "globalCycles": 2228050946,
+      "cpuCycles": 90,
+      "masterCycles": 2228051036,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 653,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 16,
+      "half": null,
+      "globalCycles": 2228050946,
+      "cpuCycles": 178,
+      "masterCycles": 2228051124,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 565,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 17,
+      "half": "low",
+      "globalCycles": 2228051689,
+      "cpuCycles": 242,
+      "masterCycles": 2228051931,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1012,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 17,
+      "half": "high",
+      "globalCycles": 2228051968,
+      "cpuCycles": 43,
+      "masterCycles": 2228052011,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 932,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 17,
+      "half": null,
+      "globalCycles": 2228051968,
+      "cpuCycles": 131,
+      "masterCycles": 2228052099,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 844,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 18,
+      "half": "low",
+      "globalCycles": 2228052640,
+      "cpuCycles": 273,
+      "masterCycles": 2228052913,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 30,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 18,
+      "half": "high",
+      "globalCycles": 2228052950,
+      "cpuCycles": 43,
+      "masterCycles": 2228052993,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1204,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 18,
+      "half": null,
+      "globalCycles": 2228052993,
+      "cpuCycles": 88,
+      "masterCycles": 2228053081,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1116,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 19,
+      "half": "low",
+      "globalCycles": 2228053872,
+      "cpuCycles": 54,
+      "masterCycles": 2228053926,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 271,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 19,
+      "half": "high",
+      "globalCycles": 2228053872,
+      "cpuCycles": 134,
+      "masterCycles": 2228054006,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 191,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 19,
+      "half": null,
+      "globalCycles": 2228054017,
+      "cpuCycles": 77,
+      "masterCycles": 2228054094,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 103,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 20,
+      "half": "low",
+      "globalCycles": 2228054198,
+      "cpuCycles": 632,
+      "masterCycles": 2228054830,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 621,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 20,
+      "half": "high",
+      "globalCycles": 2228054882,
+      "cpuCycles": 28,
+      "masterCycles": 2228054910,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 541,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 20,
+      "half": null,
+      "globalCycles": 2228054882,
+      "cpuCycles": 116,
+      "masterCycles": 2228054998,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 453,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 21,
+      "half": "low",
+      "globalCycles": 2228055451,
+      "cpuCycles": 396,
+      "masterCycles": 2228055847,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 858,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 21,
+      "half": "high",
+      "globalCycles": 2228055451,
+      "cpuCycles": 476,
+      "masterCycles": 2228055927,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 778,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 21,
+      "half": null,
+      "globalCycles": 2228055451,
+      "cpuCycles": 564,
+      "masterCycles": 2228056015,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 690,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 22,
+      "half": "low",
+      "globalCycles": 2228056706,
+      "cpuCycles": 141,
+      "masterCycles": 2228056847,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1112,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 22,
+      "half": "high",
+      "globalCycles": 2228056706,
+      "cpuCycles": 221,
+      "masterCycles": 2228056927,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1032,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 22,
+      "half": null,
+      "globalCycles": 2228056706,
+      "cpuCycles": 309,
+      "masterCycles": 2228057015,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 944,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 23,
+      "half": "low",
+      "globalCycles": 2228057567,
+      "cpuCycles": 304,
+      "masterCycles": 2228057871,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 88,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 23,
+      "half": "high",
+      "globalCycles": 2228057567,
+      "cpuCycles": 384,
+      "masterCycles": 2228057951,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 8,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 23,
+      "half": null,
+      "globalCycles": 2228057962,
+      "cpuCycles": 77,
+      "masterCycles": 2228058039,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1174,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 24,
+      "half": "low",
+      "globalCycles": 2228058800,
+      "cpuCycles": 34,
+      "masterCycles": 2228058834,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 379,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 24,
+      "half": "high",
+      "globalCycles": 2228058800,
+      "cpuCycles": 114,
+      "masterCycles": 2228058914,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 299,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 24,
+      "half": null,
+      "globalCycles": 2228058800,
+      "cpuCycles": 202,
+      "masterCycles": 2228059002,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 211,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 25,
+      "half": "low",
+      "globalCycles": 2228059812,
+      "cpuCycles": 10,
+      "masterCycles": 2228059822,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 645,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 25,
+      "half": "high",
+      "globalCycles": 2228059812,
+      "cpuCycles": 90,
+      "masterCycles": 2228059902,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 565,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 25,
+      "half": null,
+      "globalCycles": 2228059812,
+      "cpuCycles": 178,
+      "masterCycles": 2228059990,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 477,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 26,
+      "half": "low",
+      "globalCycles": 2228060467,
+      "cpuCycles": 396,
+      "masterCycles": 2228060863,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 858,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 26,
+      "half": "high",
+      "globalCycles": 2228060467,
+      "cpuCycles": 476,
+      "masterCycles": 2228060943,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 778,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 26,
+      "half": null,
+      "globalCycles": 2228060467,
+      "cpuCycles": 564,
+      "masterCycles": 2228061031,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 690,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 27,
+      "half": "low",
+      "globalCycles": 2228061721,
+      "cpuCycles": 126,
+      "masterCycles": 2228061847,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1128,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 27,
+      "half": "high",
+      "globalCycles": 2228061721,
+      "cpuCycles": 206,
+      "masterCycles": 2228061927,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1048,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 27,
+      "half": null,
+      "globalCycles": 2228061721,
+      "cpuCycles": 294,
+      "masterCycles": 2228062015,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 960,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 28,
+      "half": "low",
+      "globalCycles": 2228062498,
+      "cpuCycles": 337,
+      "masterCycles": 2228062835,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 140,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 28,
+      "half": "high",
+      "globalCycles": 2228062498,
+      "cpuCycles": 417,
+      "masterCycles": 2228062915,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 60,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 28,
+      "half": null,
+      "globalCycles": 2228062993,
+      "cpuCycles": 28,
+      "masterCycles": 2228063021,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1208,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 29,
+      "half": "low",
+      "globalCycles": 2228063728,
+      "cpuCycles": 149,
+      "masterCycles": 2228063877,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 352,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 29,
+      "half": "high",
+      "globalCycles": 2228063728,
+      "cpuCycles": 229,
+      "masterCycles": 2228063957,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 272,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 29,
+      "half": null,
+      "globalCycles": 2228063728,
+      "cpuCycles": 317,
+      "masterCycles": 2228064045,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 184,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 30,
+      "half": "low",
+      "globalCycles": 2228064735,
+      "cpuCycles": 128,
+      "masterCycles": 2228064863,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 620,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 30,
+      "half": "high",
+      "globalCycles": 2228064735,
+      "cpuCycles": 208,
+      "masterCycles": 2228064943,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 540,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 30,
+      "half": null,
+      "globalCycles": 2228064967,
+      "cpuCycles": 64,
+      "masterCycles": 2228065031,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 452,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 31,
+      "half": "low",
+      "globalCycles": 2228065483,
+      "cpuCycles": 379,
+      "masterCycles": 2228065862,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 875,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 31,
+      "half": "high",
+      "globalCycles": 2228065483,
+      "cpuCycles": 459,
+      "masterCycles": 2228065942,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 795,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 31,
+      "half": null,
+      "globalCycles": 2228065968,
+      "cpuCycles": 62,
+      "masterCycles": 2228066030,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 707,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 32,
+      "half": "low",
+      "globalCycles": 2228066743,
+      "cpuCycles": 24,
+      "masterCycles": 2228066767,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1224,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 32,
+      "half": "high",
+      "globalCycles": 2228066743,
+      "cpuCycles": 104,
+      "masterCycles": 2228066847,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1144,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 32,
+      "half": null,
+      "globalCycles": 2228066743,
+      "cpuCycles": 192,
+      "masterCycles": 2228066935,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1056,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 33,
+      "half": "low",
+      "globalCycles": 2228067425,
+      "cpuCycles": 337,
+      "masterCycles": 2228067762,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 229,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 33,
+      "half": "high",
+      "globalCycles": 2228067425,
+      "cpuCycles": 417,
+      "masterCycles": 2228067842,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 149,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 33,
+      "half": null,
+      "globalCycles": 2228067425,
+      "cpuCycles": 505,
+      "masterCycles": 2228067930,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 61,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 34,
+      "half": "low",
+      "globalCycles": 2228068661,
+      "cpuCycles": 146,
+      "masterCycles": 2228068807,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 438,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 34,
+      "half": "high",
+      "globalCycles": 2228068661,
+      "cpuCycles": 226,
+      "masterCycles": 2228068887,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 358,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 34,
+      "half": null,
+      "globalCycles": 2228068661,
+      "cpuCycles": 314,
+      "masterCycles": 2228068975,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 270,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 35,
+      "half": "low",
+      "globalCycles": 2228069669,
+      "cpuCycles": 123,
+      "masterCycles": 2228069792,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 707,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 35,
+      "half": "high",
+      "globalCycles": 2228069669,
+      "cpuCycles": 203,
+      "masterCycles": 2228069872,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 627,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 35,
+      "half": null,
+      "globalCycles": 2228069896,
+      "cpuCycles": 64,
+      "masterCycles": 2228069960,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 539,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 36,
+      "half": "low",
+      "globalCycles": 2228070500,
+      "cpuCycles": 316,
+      "masterCycles": 2228070816,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 937,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 36,
+      "half": "high",
+      "globalCycles": 2228070500,
+      "cpuCycles": 396,
+      "masterCycles": 2228070896,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 857,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 36,
+      "half": null,
+      "globalCycles": 2228070896,
+      "cpuCycles": 88,
+      "masterCycles": 2228070984,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 769,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 37,
+      "half": "low",
+      "globalCycles": 2228071754,
+      "cpuCycles": 83,
+      "masterCycles": 2228071837,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1170,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 37,
+      "half": "high",
+      "globalCycles": 2228071754,
+      "cpuCycles": 163,
+      "masterCycles": 2228071917,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1090,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 37,
+      "half": null,
+      "globalCycles": 2228071754,
+      "cpuCycles": 251,
+      "masterCycles": 2228072005,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1002,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 38,
+      "half": "low",
+      "globalCycles": 2228072450,
+      "cpuCycles": 380,
+      "masterCycles": 2228072830,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 177,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 38,
+      "half": "high",
+      "globalCycles": 2228072450,
+      "cpuCycles": 460,
+      "masterCycles": 2228072910,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 97,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 38,
+      "half": null,
+      "globalCycles": 2228072450,
+      "cpuCycles": 548,
+      "masterCycles": 2228072998,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 9,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 39,
+      "half": "low",
+      "globalCycles": 2228073583,
+      "cpuCycles": 257,
+      "masterCycles": 2228073840,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 421,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 39,
+      "half": "high",
+      "globalCycles": 2228073583,
+      "cpuCycles": 337,
+      "masterCycles": 2228073920,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 341,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 39,
+      "half": null,
+      "globalCycles": 2228073583,
+      "cpuCycles": 425,
+      "masterCycles": 2228074008,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 253,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 40,
+      "half": "low",
+      "globalCycles": 2228074815,
+      "cpuCycles": 36,
+      "masterCycles": 2228074851,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 664,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 40,
+      "half": "high",
+      "globalCycles": 2228074815,
+      "cpuCycles": 116,
+      "masterCycles": 2228074931,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 584,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 40,
+      "half": null,
+      "globalCycles": 2228074815,
+      "cpuCycles": 204,
+      "masterCycles": 2228075019,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 496,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 41,
+      "half": "low",
+      "globalCycles": 2228075826,
+      "cpuCycles": 24,
+      "masterCycles": 2228075850,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 919,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 41,
+      "half": "high",
+      "globalCycles": 2228075826,
+      "cpuCycles": 104,
+      "masterCycles": 2228075930,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 839,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 41,
+      "half": null,
+      "globalCycles": 2228075826,
+      "cpuCycles": 192,
+      "masterCycles": 2228076018,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 751,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 42,
+      "half": "low",
+      "globalCycles": 2228076769,
+      "cpuCycles": 56,
+      "masterCycles": 2228076825,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1198,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 42,
+      "half": "high",
+      "globalCycles": 2228076769,
+      "cpuCycles": 136,
+      "masterCycles": 2228076905,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1118,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 42,
+      "half": null,
+      "globalCycles": 2228076769,
+      "cpuCycles": 224,
+      "masterCycles": 2228076993,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1030,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 43,
+      "half": "low",
+      "globalCycles": 2228077569,
+      "cpuCycles": 251,
+      "masterCycles": 2228077820,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 203,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 43,
+      "half": "high",
+      "globalCycles": 2228077569,
+      "cpuCycles": 331,
+      "masterCycles": 2228077900,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 123,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 43,
+      "half": null,
+      "globalCycles": 2228077569,
+      "cpuCycles": 419,
+      "masterCycles": 2228077988,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 35,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 44,
+      "half": "low",
+      "globalCycles": 2228078593,
+      "cpuCycles": 253,
+      "masterCycles": 2228078846,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 431,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 44,
+      "half": "high",
+      "globalCycles": 2228078593,
+      "cpuCycles": 333,
+      "masterCycles": 2228078926,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 351,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 44,
+      "half": null,
+      "globalCycles": 2228078593,
+      "cpuCycles": 421,
+      "masterCycles": 2228079014,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 263,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 45,
+      "half": "low",
+      "globalCycles": 2228079743,
+      "cpuCycles": 91,
+      "masterCycles": 2228079834,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 697,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 45,
+      "half": "high",
+      "globalCycles": 2228079743,
+      "cpuCycles": 171,
+      "masterCycles": 2228079914,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 617,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 45,
+      "half": null,
+      "globalCycles": 2228079743,
+      "cpuCycles": 259,
+      "masterCycles": 2228080002,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 529,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 46,
+      "half": "low",
+      "globalCycles": 2228080752,
+      "cpuCycles": 70,
+      "masterCycles": 2228080822,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 963,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 46,
+      "half": "high",
+      "globalCycles": 2228080752,
+      "cpuCycles": 150,
+      "masterCycles": 2228080902,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 883,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 46,
+      "half": null,
+      "globalCycles": 2228080976,
+      "cpuCycles": 14,
+      "masterCycles": 2228080990,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 795,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 47,
+      "half": "low",
+      "globalCycles": 2228081786,
+      "cpuCycles": 10,
+      "masterCycles": 2228081796,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1243,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 47,
+      "half": "high",
+      "globalCycles": 2228081786,
+      "cpuCycles": 90,
+      "masterCycles": 2228081876,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1163,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 47,
+      "half": null,
+      "globalCycles": 2228081786,
+      "cpuCycles": 178,
+      "masterCycles": 2228081964,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1075,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 48,
+      "half": "low",
+      "globalCycles": 2228082688,
+      "cpuCycles": 92,
+      "masterCycles": 2228082780,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 259,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 48,
+      "half": "high",
+      "globalCycles": 2228082688,
+      "cpuCycles": 172,
+      "masterCycles": 2228082860,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 179,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 48,
+      "half": null,
+      "globalCycles": 2228082688,
+      "cpuCycles": 260,
+      "masterCycles": 2228082948,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 91,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 49,
+      "half": "low",
+      "globalCycles": 2228083712,
+      "cpuCycles": 142,
+      "masterCycles": 2228083854,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 439,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 49,
+      "half": "high",
+      "globalCycles": 2228083712,
+      "cpuCycles": 222,
+      "masterCycles": 2228083934,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 359,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 49,
+      "half": null,
+      "globalCycles": 2228083712,
+      "cpuCycles": 310,
+      "masterCycles": 2228084022,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 271,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 50,
+      "half": "low",
+      "globalCycles": 2228084738,
+      "cpuCycles": 122,
+      "masterCycles": 2228084860,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 687,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 50,
+      "half": "high",
+      "globalCycles": 2228084738,
+      "cpuCycles": 202,
+      "masterCycles": 2228084940,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 607,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 50,
+      "half": null,
+      "globalCycles": 2228084738,
+      "cpuCycles": 290,
+      "masterCycles": 2228085028,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 519,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 51,
+      "half": "low",
+      "globalCycles": 2228085904,
+      "cpuCycles": 8,
+      "masterCycles": 2228085912,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 889,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 51,
+      "half": "high",
+      "globalCycles": 2228085904,
+      "cpuCycles": 88,
+      "masterCycles": 2228085992,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 809,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 51,
+      "half": null,
+      "globalCycles": 2228085904,
+      "cpuCycles": 176,
+      "masterCycles": 2228086080,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 721,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 52,
+      "half": "low",
+      "globalCycles": 2228086911,
+      "cpuCycles": 24,
+      "masterCycles": 2228086935,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1120,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 52,
+      "half": "high",
+      "globalCycles": 2228086911,
+      "cpuCycles": 104,
+      "masterCycles": 2228087015,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1040,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 52,
+      "half": null,
+      "globalCycles": 2228086911,
+      "cpuCycles": 192,
+      "masterCycles": 2228087103,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 952,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 53,
+      "half": "low",
+      "globalCycles": 2228087814,
+      "cpuCycles": 123,
+      "masterCycles": 2228087937,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 118,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 53,
+      "half": "high",
+      "globalCycles": 2228087814,
+      "cpuCycles": 203,
+      "masterCycles": 2228088017,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 38,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 53,
+      "half": null,
+      "globalCycles": 2228088056,
+      "cpuCycles": 49,
+      "masterCycles": 2228088105,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1204,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 54,
+      "half": "low",
+      "globalCycles": 2228088833,
+      "cpuCycles": 110,
+      "masterCycles": 2228088943,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 366,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 54,
+      "half": "high",
+      "globalCycles": 2228088833,
+      "cpuCycles": 190,
+      "masterCycles": 2228089023,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 286,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 54,
+      "half": null,
+      "globalCycles": 2228088833,
+      "cpuCycles": 278,
+      "masterCycles": 2228089111,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 198,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 55,
+      "half": "low",
+      "globalCycles": 2228089862,
+      "cpuCycles": 72,
+      "masterCycles": 2228089934,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 629,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 55,
+      "half": "high",
+      "globalCycles": 2228089862,
+      "cpuCycles": 152,
+      "masterCycles": 2228090014,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 549,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 55,
+      "half": null,
+      "globalCycles": 2228089862,
+      "cpuCycles": 240,
+      "masterCycles": 2228090102,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 461,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 56,
+      "half": "low",
+      "globalCycles": 2228090880,
+      "cpuCycles": 50,
+      "masterCycles": 2228090930,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 887,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 56,
+      "half": "high",
+      "globalCycles": 2228090880,
+      "cpuCycles": 130,
+      "masterCycles": 2228091010,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 807,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 56,
+      "half": null,
+      "globalCycles": 2228090880,
+      "cpuCycles": 218,
+      "masterCycles": 2228091098,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 719,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 57,
+      "half": "low",
+      "globalCycles": 2228091904,
+      "cpuCycles": 46,
+      "masterCycles": 2228091950,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1121,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 57,
+      "half": "high",
+      "globalCycles": 2228091904,
+      "cpuCycles": 126,
+      "masterCycles": 2228092030,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1041,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 57,
+      "half": null,
+      "globalCycles": 2228092067,
+      "cpuCycles": 51,
+      "masterCycles": 2228092118,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 953,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 58,
+      "half": "low",
+      "globalCycles": 2228092928,
+      "cpuCycles": 58,
+      "masterCycles": 2228092986,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 85,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 0,
+      "attempt": 58,
+      "half": "high",
+      "globalCycles": 2228092928,
+      "cpuCycles": 138,
+      "masterCycles": 2228093066,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 5,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 0,
+      "attempt": 58,
+      "half": null,
+      "globalCycles": 2228093077,
+      "cpuCycles": 77,
+      "masterCycles": 2228093154,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1171,
+        "due": false
+      }
+    },
+    {
+      "kind": "create-mon-entry",
+      "pc": "0x08067b4e",
+      "monIndex": 0,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2228093953,
+      "cpuCycles": 60,
+      "masterCycles": 2228094013,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 312,
+        "due": false
+      }
+    },
+    {
+      "kind": "create-mon-return",
+      "pc": "0x0806869e",
+      "monIndex": 0,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2230763039,
+      "cpuCycles": 437,
+      "masterCycles": 2230763476,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 615,
+        "due": false
+      }
+    },
+    {
+      "kind": "calculate-mon-stats-entry",
+      "pc": "0x08068d0e",
+      "monIndex": 0,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2230790432,
+      "cpuCycles": 142,
+      "masterCycles": 2230790574,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1105,
+        "due": false
+      }
+    },
+    {
+      "kind": "calculate-mon-stats-return",
+      "pc": "0x080686ec",
+      "monIndex": 0,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2230974943,
+      "cpuCycles": 42,
+      "masterCycles": 2230974985,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1032,
+        "due": false
+      }
+    },
+    {
+      "kind": "construction-return",
+      "pc": "0x0816370c",
+      "monIndex": 0,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2230974943,
+      "cpuCycles": 64,
+      "masterCycles": 2230975007,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1010,
+        "due": false
+      }
+    },
+    {
+      "kind": "factory-post-mon-end",
+      "pc": "0x0816376e",
+      "monIndex": 0,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2231107999,
+      "cpuCycles": 8,
+      "masterCycles": 2231108007,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 934,
+        "due": false
+      }
+    },
+    {
+      "kind": "construction-entry",
+      "pc": "0x08068636",
+      "monIndex": 1,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2231107999,
+      "cpuCycles": 138,
+      "masterCycles": 2231108137,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 804,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 0,
+      "half": "low",
+      "globalCycles": 2231107999,
+      "cpuCycles": 196,
+      "masterCycles": 2231108195,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 746,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 0,
+      "half": "high",
+      "globalCycles": 2231107999,
+      "cpuCycles": 276,
+      "masterCycles": 2231108275,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 666,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 1,
+      "attempt": 0,
+      "half": null,
+      "globalCycles": 2231107999,
+      "cpuCycles": 364,
+      "masterCycles": 2231108363,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 578,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 1,
+      "half": "low",
+      "globalCycles": 2231109007,
+      "cpuCycles": 218,
+      "masterCycles": 2231109225,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 970,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 1,
+      "half": "high",
+      "globalCycles": 2231109236,
+      "cpuCycles": 69,
+      "masterCycles": 2231109305,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 890,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 1,
+      "attempt": 1,
+      "half": null,
+      "globalCycles": 2231109236,
+      "cpuCycles": 157,
+      "masterCycles": 2231109393,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 802,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 2,
+      "half": "low",
+      "globalCycles": 2231110200,
+      "cpuCycles": 38,
+      "masterCycles": 2231110238,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1211,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 2,
+      "half": "high",
+      "globalCycles": 2231110249,
+      "cpuCycles": 69,
+      "masterCycles": 2231110318,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1131,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 1,
+      "attempt": 2,
+      "half": null,
+      "globalCycles": 2231110249,
+      "cpuCycles": 157,
+      "masterCycles": 2231110406,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1043,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 3,
+      "half": "low",
+      "globalCycles": 2231110657,
+      "cpuCycles": 637,
+      "masterCycles": 2231111294,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 155,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 3,
+      "half": "high",
+      "globalCycles": 2231110657,
+      "cpuCycles": 717,
+      "masterCycles": 2231111374,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 75,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 1,
+      "attempt": 3,
+      "half": null,
+      "globalCycles": 2231111450,
+      "cpuCycles": 12,
+      "masterCycles": 2231111462,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1241,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 4,
+      "half": "low",
+      "globalCycles": 2231111695,
+      "cpuCycles": 608,
+      "masterCycles": 2231112303,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 400,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 4,
+      "half": "high",
+      "globalCycles": 2231111695,
+      "cpuCycles": 688,
+      "masterCycles": 2231112383,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 320,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 1,
+      "attempt": 4,
+      "half": null,
+      "globalCycles": 2231111695,
+      "cpuCycles": 776,
+      "masterCycles": 2231112471,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 232,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 5,
+      "half": "low",
+      "globalCycles": 2231112927,
+      "cpuCycles": 407,
+      "masterCycles": 2231113334,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 623,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 5,
+      "half": "high",
+      "globalCycles": 2231112927,
+      "cpuCycles": 487,
+      "masterCycles": 2231113414,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 543,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 1,
+      "attempt": 5,
+      "half": null,
+      "globalCycles": 2231112927,
+      "cpuCycles": 575,
+      "masterCycles": 2231113502,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 455,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 6,
+      "half": "low",
+      "globalCycles": 2231114159,
+      "cpuCycles": 160,
+      "masterCycles": 2231114319,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 892,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 6,
+      "half": "high",
+      "globalCycles": 2231114159,
+      "cpuCycles": 240,
+      "masterCycles": 2231114399,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 812,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 1,
+      "attempt": 6,
+      "half": null,
+      "globalCycles": 2231114159,
+      "cpuCycles": 328,
+      "masterCycles": 2231114487,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 724,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 7,
+      "half": "low",
+      "globalCycles": 2231115216,
+      "cpuCycles": 84,
+      "masterCycles": 2231115300,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1165,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 7,
+      "half": "high",
+      "globalCycles": 2231115216,
+      "cpuCycles": 164,
+      "masterCycles": 2231115380,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1085,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 1,
+      "attempt": 7,
+      "half": null,
+      "globalCycles": 2231115391,
+      "cpuCycles": 77,
+      "masterCycles": 2231115468,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 997,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 8,
+      "half": "low",
+      "globalCycles": 2231115781,
+      "cpuCycles": 519,
+      "masterCycles": 2231116300,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 165,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 8,
+      "half": "high",
+      "globalCycles": 2231115781,
+      "cpuCycles": 599,
+      "masterCycles": 2231116380,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 85,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 1,
+      "attempt": 8,
+      "half": null,
+      "globalCycles": 2231116404,
+      "cpuCycles": 64,
+      "masterCycles": 2231116468,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": -3,
+        "due": true
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 9,
+      "half": "low",
+      "globalCycles": 2231116800,
+      "cpuCycles": 449,
+      "masterCycles": 2231117249,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 470,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 9,
+      "half": "high",
+      "globalCycles": 2231116800,
+      "cpuCycles": 529,
+      "masterCycles": 2231117329,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 390,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 1,
+      "attempt": 9,
+      "half": null,
+      "globalCycles": 2231116800,
+      "cpuCycles": 617,
+      "masterCycles": 2231117417,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 302,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 10,
+      "half": "low",
+      "globalCycles": 2231117856,
+      "cpuCycles": 370,
+      "masterCycles": 2231118226,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 747,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 10,
+      "half": "high",
+      "globalCycles": 2231117856,
+      "cpuCycles": 450,
+      "masterCycles": 2231118306,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 667,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 1,
+      "attempt": 10,
+      "half": null,
+      "globalCycles": 2231117856,
+      "cpuCycles": 538,
+      "masterCycles": 2231118394,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 579,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 11,
+      "half": "low",
+      "globalCycles": 2231119087,
+      "cpuCycles": 127,
+      "masterCycles": 2231119214,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1013,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 1,
+      "attempt": 11,
+      "half": "high",
+      "globalCycles": 2231119087,
+      "cpuCycles": 207,
+      "masterCycles": 2231119294,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 933,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 1,
+      "attempt": 11,
+      "half": null,
+      "globalCycles": 2231119087,
+      "cpuCycles": 295,
+      "masterCycles": 2231119382,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 845,
+        "due": false
+      }
+    },
+    {
+      "kind": "create-mon-entry",
+      "pc": "0x08067b4e",
+      "monIndex": 1,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2231120228,
+      "cpuCycles": 14,
+      "masterCycles": 2231120242,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1239,
+        "due": false
+      }
+    },
+    {
+      "kind": "create-mon-return",
+      "pc": "0x0806869e",
+      "monIndex": 1,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2233434015,
+      "cpuCycles": 58,
+      "masterCycles": 2233434073,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1038,
+        "due": false
+      }
+    },
+    {
+      "kind": "calculate-mon-stats-entry",
+      "pc": "0x08068d0e",
+      "monIndex": 1,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2233508943,
+      "cpuCycles": 20,
+      "masterCycles": 2233508963,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 134,
+        "due": false
+      }
+    },
+    {
+      "kind": "calculate-mon-stats-return",
+      "pc": "0x080686ec",
+      "monIndex": 1,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2233649615,
+      "cpuCycles": 347,
+      "masterCycles": 2233649962,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 837,
+        "due": false
+      }
+    },
+    {
+      "kind": "construction-return",
+      "pc": "0x0816370c",
+      "monIndex": 1,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2233649615,
+      "cpuCycles": 369,
+      "masterCycles": 2233649984,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 815,
+        "due": false
+      }
+    },
+    {
+      "kind": "factory-post-mon-end",
+      "pc": "0x0816376e",
+      "monIndex": 1,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2233816329,
+      "cpuCycles": 360,
+      "masterCycles": 2233816689,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 892,
+        "due": false
+      }
+    },
+    {
+      "kind": "construction-entry",
+      "pc": "0x08068636",
+      "monIndex": 2,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2233816329,
+      "cpuCycles": 490,
+      "masterCycles": 2233816819,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 762,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 0,
+      "half": "low",
+      "globalCycles": 2233816329,
+      "cpuCycles": 548,
+      "masterCycles": 2233816877,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 704,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 0,
+      "half": "high",
+      "globalCycles": 2233816945,
+      "cpuCycles": 12,
+      "masterCycles": 2233816957,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 624,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 0,
+      "half": null,
+      "globalCycles": 2233816945,
+      "cpuCycles": 100,
+      "masterCycles": 2233817045,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 536,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 1,
+      "half": "low",
+      "globalCycles": 2233817585,
+      "cpuCycles": 294,
+      "masterCycles": 2233817879,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 956,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 1,
+      "half": "high",
+      "globalCycles": 2233817585,
+      "cpuCycles": 374,
+      "masterCycles": 2233817959,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 876,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 1,
+      "half": null,
+      "globalCycles": 2233817585,
+      "cpuCycles": 462,
+      "masterCycles": 2233818047,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 788,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 2,
+      "half": "low",
+      "globalCycles": 2233818837,
+      "cpuCycles": 24,
+      "masterCycles": 2233818861,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1228,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 2,
+      "half": "high",
+      "globalCycles": 2233818837,
+      "cpuCycles": 104,
+      "masterCycles": 2233818941,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1148,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 2,
+      "half": null,
+      "globalCycles": 2233818837,
+      "cpuCycles": 192,
+      "masterCycles": 2233819029,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1060,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 3,
+      "half": "low",
+      "globalCycles": 2233819631,
+      "cpuCycles": 211,
+      "masterCycles": 2233819842,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 247,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 3,
+      "half": "high",
+      "globalCycles": 2233819631,
+      "cpuCycles": 291,
+      "masterCycles": 2233819922,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 167,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 3,
+      "half": null,
+      "globalCycles": 2233819631,
+      "cpuCycles": 379,
+      "masterCycles": 2233820010,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 79,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 4,
+      "half": "low",
+      "globalCycles": 2233820643,
+      "cpuCycles": 159,
+      "masterCycles": 2233820802,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 541,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 4,
+      "half": "high",
+      "globalCycles": 2233820870,
+      "cpuCycles": 12,
+      "masterCycles": 2233820882,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 461,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 4,
+      "half": null,
+      "globalCycles": 2233820870,
+      "cpuCycles": 100,
+      "masterCycles": 2233820970,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 373,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 5,
+      "half": "low",
+      "globalCycles": 2233821362,
+      "cpuCycles": 446,
+      "masterCycles": 2233821808,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 789,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 5,
+      "half": "high",
+      "globalCycles": 2233821876,
+      "cpuCycles": 12,
+      "masterCycles": 2233821888,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 709,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 5,
+      "half": null,
+      "globalCycles": 2233821876,
+      "cpuCycles": 100,
+      "masterCycles": 2233821976,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 621,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 6,
+      "half": "low",
+      "globalCycles": 2233822602,
+      "cpuCycles": 197,
+      "masterCycles": 2233822799,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1052,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 6,
+      "half": "high",
+      "globalCycles": 2233822602,
+      "cpuCycles": 277,
+      "masterCycles": 2233822879,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 972,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 6,
+      "half": null,
+      "globalCycles": 2233822602,
+      "cpuCycles": 365,
+      "masterCycles": 2233822967,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 884,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 7,
+      "half": "low",
+      "globalCycles": 2233823329,
+      "cpuCycles": 470,
+      "masterCycles": 2233823799,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 52,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 7,
+      "half": "high",
+      "globalCycles": 2233823851,
+      "cpuCycles": 28,
+      "masterCycles": 2233823879,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1226,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 7,
+      "half": null,
+      "globalCycles": 2233823851,
+      "cpuCycles": 116,
+      "masterCycles": 2233823967,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1138,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 8,
+      "half": "low",
+      "globalCycles": 2233824560,
+      "cpuCycles": 270,
+      "masterCycles": 2233824830,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 275,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 8,
+      "half": "high",
+      "globalCycles": 2233824560,
+      "cpuCycles": 350,
+      "masterCycles": 2233824910,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 195,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 8,
+      "half": null,
+      "globalCycles": 2233824560,
+      "cpuCycles": 438,
+      "masterCycles": 2233824998,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 107,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 9,
+      "half": "low",
+      "globalCycles": 2233825792,
+      "cpuCycles": 32,
+      "masterCycles": 2233825824,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 535,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 9,
+      "half": "high",
+      "globalCycles": 2233825792,
+      "cpuCycles": 112,
+      "masterCycles": 2233825904,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 455,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 9,
+      "half": null,
+      "globalCycles": 2233825792,
+      "cpuCycles": 200,
+      "masterCycles": 2233825992,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 367,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 10,
+      "half": "low",
+      "globalCycles": 2233826360,
+      "cpuCycles": 439,
+      "masterCycles": 2233826799,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 814,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 10,
+      "half": "high",
+      "globalCycles": 2233826799,
+      "cpuCycles": 80,
+      "masterCycles": 2233826879,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 734,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 10,
+      "half": null,
+      "globalCycles": 2233826799,
+      "cpuCycles": 168,
+      "masterCycles": 2233826967,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 646,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 11,
+      "half": "low",
+      "globalCycles": 2233827616,
+      "cpuCycles": 174,
+      "masterCycles": 2233827790,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1077,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 11,
+      "half": "high",
+      "globalCycles": 2233827616,
+      "cpuCycles": 254,
+      "masterCycles": 2233827870,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 997,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 11,
+      "half": null,
+      "globalCycles": 2233827616,
+      "cpuCycles": 342,
+      "masterCycles": 2233827958,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 909,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 12,
+      "half": "low",
+      "globalCycles": 2233828354,
+      "cpuCycles": 427,
+      "masterCycles": 2233828781,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 86,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 12,
+      "half": "high",
+      "globalCycles": 2233828354,
+      "cpuCycles": 507,
+      "masterCycles": 2233828861,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 6,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 12,
+      "half": null,
+      "globalCycles": 2233828872,
+      "cpuCycles": 77,
+      "masterCycles": 2233828949,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1172,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 13,
+      "half": "low",
+      "globalCycles": 2233829488,
+      "cpuCycles": 286,
+      "masterCycles": 2233829774,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 347,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 13,
+      "half": "high",
+      "globalCycles": 2233829488,
+      "cpuCycles": 366,
+      "masterCycles": 2233829854,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 267,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 13,
+      "half": null,
+      "globalCycles": 2233829488,
+      "cpuCycles": 454,
+      "masterCycles": 2233829942,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 179,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 14,
+      "half": "low",
+      "globalCycles": 2233830719,
+      "cpuCycles": 64,
+      "masterCycles": 2233830783,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 592,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 14,
+      "half": "high",
+      "globalCycles": 2233830719,
+      "cpuCycles": 144,
+      "masterCycles": 2233830863,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 512,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 14,
+      "half": null,
+      "globalCycles": 2233830719,
+      "cpuCycles": 232,
+      "masterCycles": 2233830951,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 424,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 15,
+      "half": "low",
+      "globalCycles": 2233831727,
+      "cpuCycles": 24,
+      "masterCycles": 2233831751,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 878,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 15,
+      "half": "high",
+      "globalCycles": 2233831727,
+      "cpuCycles": 104,
+      "masterCycles": 2233831831,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 798,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 15,
+      "half": null,
+      "globalCycles": 2233831727,
+      "cpuCycles": 192,
+      "masterCycles": 2233831919,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 710,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 16,
+      "half": "low",
+      "globalCycles": 2233832631,
+      "cpuCycles": 134,
+      "masterCycles": 2233832765,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1118,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 16,
+      "half": "high",
+      "globalCycles": 2233832631,
+      "cpuCycles": 214,
+      "masterCycles": 2233832845,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1038,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 16,
+      "half": null,
+      "globalCycles": 2233832631,
+      "cpuCycles": 302,
+      "masterCycles": 2233832933,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 950,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 17,
+      "half": "low",
+      "globalCycles": 2233833472,
+      "cpuCycles": 305,
+      "masterCycles": 2233833777,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 106,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 17,
+      "half": "high",
+      "globalCycles": 2233833472,
+      "cpuCycles": 385,
+      "masterCycles": 2233833857,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 26,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 17,
+      "half": null,
+      "globalCycles": 2233833883,
+      "cpuCycles": 62,
+      "masterCycles": 2233833945,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1192,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 18,
+      "half": "low",
+      "globalCycles": 2233834501,
+      "cpuCycles": 299,
+      "masterCycles": 2233834800,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 337,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 18,
+      "half": "high",
+      "globalCycles": 2233834501,
+      "cpuCycles": 379,
+      "masterCycles": 2233834880,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 257,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 18,
+      "half": null,
+      "globalCycles": 2233834501,
+      "cpuCycles": 467,
+      "masterCycles": 2233834968,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 169,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 19,
+      "half": "low",
+      "globalCycles": 2233835647,
+      "cpuCycles": 117,
+      "masterCycles": 2233835764,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 627,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 19,
+      "half": "high",
+      "globalCycles": 2233835647,
+      "cpuCycles": 197,
+      "masterCycles": 2233835844,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 547,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 19,
+      "half": null,
+      "globalCycles": 2233835647,
+      "cpuCycles": 285,
+      "masterCycles": 2233835932,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 459,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 20,
+      "half": "low",
+      "globalCycles": 2233836656,
+      "cpuCycles": 97,
+      "masterCycles": 2233836753,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 892,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 20,
+      "half": "high",
+      "globalCycles": 2233836656,
+      "cpuCycles": 177,
+      "masterCycles": 2233836833,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 812,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 20,
+      "half": null,
+      "globalCycles": 2233836885,
+      "cpuCycles": 36,
+      "masterCycles": 2233836921,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 724,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 21,
+      "half": "low",
+      "globalCycles": 2233837647,
+      "cpuCycles": 84,
+      "masterCycles": 2233837731,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1168,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 21,
+      "half": "high",
+      "globalCycles": 2233837647,
+      "cpuCycles": 164,
+      "masterCycles": 2233837811,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1088,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 21,
+      "half": null,
+      "globalCycles": 2233837887,
+      "cpuCycles": 12,
+      "masterCycles": 2233837899,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1000,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 22,
+      "half": "low",
+      "globalCycles": 2233838592,
+      "cpuCycles": 137,
+      "masterCycles": 2233838729,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 170,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 22,
+      "half": "high",
+      "globalCycles": 2233838592,
+      "cpuCycles": 217,
+      "masterCycles": 2233838809,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 90,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 22,
+      "half": null,
+      "globalCycles": 2233838592,
+      "cpuCycles": 305,
+      "masterCycles": 2233838897,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 2,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 23,
+      "half": "low",
+      "globalCycles": 2233839617,
+      "cpuCycles": 84,
+      "masterCycles": 2233839701,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 452,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 23,
+      "half": "high",
+      "globalCycles": 2233839617,
+      "cpuCycles": 164,
+      "masterCycles": 2233839781,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 372,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 23,
+      "half": null,
+      "globalCycles": 2233839617,
+      "cpuCycles": 252,
+      "masterCycles": 2233839869,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 284,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 24,
+      "half": "low",
+      "globalCycles": 2233840641,
+      "cpuCycles": 74,
+      "masterCycles": 2233840715,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 692,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 24,
+      "half": "high",
+      "globalCycles": 2233840641,
+      "cpuCycles": 154,
+      "masterCycles": 2233840795,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 612,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 24,
+      "half": null,
+      "globalCycles": 2233840641,
+      "cpuCycles": 242,
+      "masterCycles": 2233840883,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 524,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 25,
+      "half": "low",
+      "globalCycles": 2233841665,
+      "cpuCycles": 68,
+      "masterCycles": 2233841733,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 928,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 25,
+      "half": "high",
+      "globalCycles": 2233841665,
+      "cpuCycles": 148,
+      "masterCycles": 2233841813,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 848,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 25,
+      "half": null,
+      "globalCycles": 2233841813,
+      "cpuCycles": 88,
+      "masterCycles": 2233841901,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 760,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 26,
+      "half": "low",
+      "globalCycles": 2233842691,
+      "cpuCycles": 24,
+      "masterCycles": 2233842715,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1200,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 26,
+      "half": "high",
+      "globalCycles": 2233842691,
+      "cpuCycles": 104,
+      "masterCycles": 2233842795,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1120,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 26,
+      "half": null,
+      "globalCycles": 2233842819,
+      "cpuCycles": 64,
+      "masterCycles": 2233842883,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 1032,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 27,
+      "half": "low",
+      "globalCycles": 2233843039,
+      "cpuCycles": 675,
+      "masterCycles": 2233843714,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 201,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 27,
+      "half": "high",
+      "globalCycles": 2233843714,
+      "cpuCycles": 80,
+      "masterCycles": 2233843794,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 121,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 27,
+      "half": null,
+      "globalCycles": 2233843714,
+      "cpuCycles": 168,
+      "masterCycles": 2233843882,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 33,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 28,
+      "half": "low",
+      "globalCycles": 2233844271,
+      "cpuCycles": 466,
+      "masterCycles": 2233844737,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 432,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 28,
+      "half": "high",
+      "globalCycles": 2233844737,
+      "cpuCycles": 80,
+      "masterCycles": 2233844817,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 352,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 28,
+      "half": null,
+      "globalCycles": 2233844737,
+      "cpuCycles": 168,
+      "masterCycles": 2233844905,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 264,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 29,
+      "half": "low",
+      "globalCycles": 2233845509,
+      "cpuCycles": 212,
+      "masterCycles": 2233845721,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 702,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-random",
+      "pc": "0x0806f5ce",
+      "monIndex": 2,
+      "attempt": 29,
+      "half": "high",
+      "globalCycles": 2233845760,
+      "cpuCycles": 41,
+      "masterCycles": 2233845801,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 622,
+        "due": false
+      }
+    },
+    {
+      "kind": "personality-attempt-check",
+      "pc": "0x0806d08a",
+      "monIndex": 2,
+      "attempt": 29,
+      "half": null,
+      "globalCycles": 2233845760,
+      "cpuCycles": 129,
+      "masterCycles": 2233845889,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 534,
+        "due": false
+      }
+    },
+    {
+      "kind": "create-mon-entry",
+      "pc": "0x08067b4e",
+      "monIndex": 2,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2233846515,
+      "cpuCycles": 226,
+      "masterCycles": 2233846741,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 936,
+        "due": false
+      }
+    },
+    {
+      "kind": "create-mon-return",
+      "pc": "0x0806869e",
+      "monIndex": 2,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2236060989,
+      "cpuCycles": 621,
+      "masterCycles": 2236061610,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 631,
+        "due": false
+      }
+    },
+    {
+      "kind": "calculate-mon-stats-entry",
+      "pc": "0x08068d0e",
+      "monIndex": 2,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2236102656,
+      "cpuCycles": 210,
+      "masterCycles": 2236102866,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 757,
+        "due": false
+      }
+    },
+    {
+      "kind": "calculate-mon-stats-return",
+      "pc": "0x080686ec",
+      "monIndex": 2,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2236253185,
+      "cpuCycles": 530,
+      "masterCycles": 2236253715,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 388,
+        "due": false
+      }
+    },
+    {
+      "kind": "construction-return",
+      "pc": "0x0816370c",
+      "monIndex": 2,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2236253185,
+      "cpuCycles": 552,
+      "masterCycles": 2236253737,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 366,
+        "due": false
+      }
+    },
+    {
+      "kind": "factory-post-mon-end",
+      "pc": "0x0816376e",
+      "monIndex": 2,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2236426545,
+      "cpuCycles": 462,
+      "masterCycles": 2236427007,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 148,
+        "due": false
+      }
+    },
+    {
+      "kind": "source-function-return",
+      "pc": "0x081635b4",
+      "monIndex": null,
+      "attempt": null,
+      "half": null,
+      "globalCycles": 2236426545,
+      "cpuCycles": 494,
+      "masterCycles": 2236427039,
+      "tm0cntL": 64282,
+      "tm0cntH": 128,
+      "event": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "whenDelta": 116,
+        "due": false
+      }
+    }
+  ]
+}
