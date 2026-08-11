@@ -121,6 +121,48 @@ Every receipt-used switch arm is also complete through the common tail at
 | 40/43 | `0x0806a9fe`, `0x0806aa16` | IV bitfield | u16 | 2 | 14 |
 | 42 | `0x0806aa0e` | IV bitfield | u32 | 4 | 16 |
 
+## Synchronous outer shell
+
+`reduceFactoryGetBoxMonDataOuterShellTiming` now closes every remaining
+synchronous instruction and memory segment around those nested components.
+It counts the caller BL/refill but assigns zero body cycles to each excluded
+nested call, so the eight already-complete GetSubstruct timings, crypt loops,
+and checksum loop cannot be counted twice.
+
+| segment | half-open ELF interval | halfwords | refills | complete |
+| --- | --- | ---: | ---: | ---: |
+| accessor prologue/encrypted guard | `0x0806a674..0x0806a694` | 16 | 0 | 32 |
+| four outer GetSubstruct call setup + decrypt/checksum calls | `0x0806a694..0x0806a6d0` | 30 | 6 | 96 |
+| checksum function setup + four GetSubstruct calls | `0x08068c78..0x08068cb0` | 28 | 4 | 80 |
+| checksum function return | `0x08068cfe..0x08068d0a` | 6 | 1 | 18 |
+| field jump-table dispatch | executed instructions in `0x0806a6f2..0x0806a704` | 8 | 2 | 46 |
+| encrypt call + common return | `0x0806ac8c..0x0806acaa` | 15 | 2 | 42 |
+
+The GetBoxMonData2-owned subtotal is **216** cycles; the checksum function's
+setup/return shell is **98**; together the outer synchronous shell is
+**314**. It excludes exactly eight GetSubstruct bodies, one decrypt body, the
+one checksum loop, and one encrypt body.
+
+The two call-setup segments contain eight aligned personality word reads.
+Their bus occupancy remains **32 cycles**, but it is not added a second time
+to elapsed instruction time: a fresh Scene-OFF mGBA boundary run through
+`tools/run-mgba-probe.py` observed a clean **2-cycle** instruction delta for
+all eight PCs (**614** samples per outer read and **1,590** per checksum read),
+and the reads are separated by register work plus taken BL refills rather than
+forming a tight data loop. This is distinct from the crypt loops, whose
+independent whole-component joins require their **240-cycle** word-bus
+premium. The frozen EWRAM packet was not mutated and no new production input
+was added.
+
+Tier 1 pins the source/ELF hashes and opcodes for every segment, all **14**
+receipt field dispatch targets, both checksum outcomes, normal/preexisting/
+checksum-created bad-egg species routes, and all **24** personality layouts.
+Across the **156** direct encrypted stats calls, the composed synchronous
+subtotal matches **72** clean pause-subtracted mGBA joins exactly. The full
+unabsorbed boundary histogram is `-2×5, 0×72, 16×7, 18×60, 117×5, 245×6,
+263×1`; the nonzero classes remain external boundary/service/interrupt
+evidence, not inputs or fitted costs.
+
 ## Receipt check and remainder
 
 The Tier-1 slice checks the committed OFF v2 packets, whose construction /
@@ -143,11 +185,10 @@ Each row now additionally exposes `sharedDataBusCycles` (**528**),
 `sharedDataBusPremiumCycles` (**240**), checksum/field-tail timings,
 `tailDataBusCycles`, `tailCycles`, and `composedKnownCycles`. The latter is the
 eight complete GetSubstruct calls plus **448 + 518 + 448** and the selected
-tails; it is still not an accessor duration.
+tails. `outerShellTiming` adds the exact **314** synchronous outer cycles, and
+`composedSynchronousKnownCycles` exposes their sum without changing the final
+accessor duration contract.
 
-The committed OFF v2 events expose interrupt/resume points rather than a clean
-GetBoxMonData2 entry/return interval. The positive outer remainder is not
-fitted or absorbed. Complete accessor `cycles` therefore remains null only
-for the outer prologue/setup/dispatch/common-return instruction and memory
-work, asynchronous +18 service, and VBlank/IRQ costs. The construction clock
-remains unwired.
+Complete accessor `cycles` remains null only for asynchronous +18 service and
+VBlank/IRQ entry/body/return costs. No residual class is fitted or absorbed,
+and the construction clock remains unwired.

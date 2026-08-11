@@ -1,3 +1,24 @@
+## 1100 — [supervisor, 2026-08-10] **#55 `%24` composition + compact CgbSound evidence folded**
+
+- **State:** main `d7820e25`/`83513d9b` plus squash-fold `d55da1ac`; #55
+  remains open and the construction clock is unwired. Union focused **26/26**,
+  smoke **375/375**, and production build are green; worker full suites were
+  main **892 files / 8,478 passed / 1 skipped** and side **893 / 8,477 / 1**.
+- **Did:** completed all **24×4** `GetSubstruct` `%24` routes and their exact
+  eight-call ROM-only subtotal while retaining accessor `cycles: null`.
+  Closed the finite CgbSound callback/table dereference class across **11**
+  paths and **113/113** twice-fresh equal-state/equal-cost joins; compacted
+  its evidence to **48,062 bytes** before squash integration.
+- **Next:** continue #55 only with independently proven EWRAM word/halfword
+  bus timing and field tails, or one remaining bounded MPlayMain/SoundMainRAM
+  dereference class. Do not fit a residual or wire aggregate stats/the clock.
+- **Notes:** orient folded **31 animation commits** through `11245f83` and the
+  resulting union passed full test/build before dispatch. S8's generic
+  round/controller reset remains enforced: no canonical Battle-2 work past
+  tick 33331, no recording import, barrier, presentation, or controller
+  change. `DEFERRED.md` has no open entry. `animation-main` is currently one
+  later Heat Wave evidence commit ahead under its separate supervisor.
+
 ## 1099 — [MAIN worker, 2026-08-10] **#55 `GetSubstruct` `%24` composition is exact and bounded**
 
 - **State:** implementation `d7820e25`; #55 remains open, accessor/stats

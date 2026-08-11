@@ -1257,11 +1257,23 @@ species, with exact PCs, widths, counts, bus totals, and complete component
 cycles. A fresh compact Scene-OFF sibling receipt pins the clean mGBA
 component joins without pointer/storage data or a production import.
 
-**Still open:** outer `GetBoxMonData2` prologue/setup/dispatch/common-return
-instruction and memory work, async +18 service, VBlank/IRQ work, and the live
-construction clock. Complete stats/accessor timing remains null and unwired;
-no identity/duration table or residual fit landed. Detailed accounting is in
-`docs/issue55-encrypted-accessor-timing-slice.md`.
+**Synchronous accessor outer-shell increment (2026-08-10, `8aa00042`):** an
+explicit typed reducer now closes the remaining `GetBoxMonData2` prologue,
+four-call setup, decrypt/checksum call bridges, field jump-table dispatch,
+encrypt/common return, plus CalculateBoxMonChecksum's own four-call setup and
+return shell. The source/ELF subtotal is **216 + 98 = 314** cycles and excludes
+all eight GetSubstruct bodies plus the already-exact decrypt/checksum/encrypt
+components, so composed timing has no nested double count. All **180** receipt
+rows and a **24×14×2** personality/field/checksum matrix retain input-derived
+routes. A fresh Scene-OFF mGBA boundary run pins all eight scattered aligned
+personality reads at clean two-cycle instruction joins; **72/156** direct
+encrypted stats boundaries equal the complete synchronous composition, while
+every other observed class remains an unabsorbed boundary/service/IRQ delta.
+
+**Still open:** async +18 service, VBlank/IRQ entry/body/return work, and the
+live construction clock. Complete stats/accessor timing remains null and
+unwired; no identity/duration table or residual fit landed. Detailed
+accounting is in `docs/issue55-encrypted-accessor-timing-slice.md`.
 
 **VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
 probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all
