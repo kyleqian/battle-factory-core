@@ -397,6 +397,7 @@ cleanup() {
 trap cleanup EXIT
 
 WT_PATH=""
+WT_WORK_DIR=""
 WT_BRANCH=""
 WT_BASE=""
 IS_WORKTREE=0
@@ -446,12 +447,17 @@ if [[ "$IS_WORKTREE" == "1" ]]; then
   fi
   echo "worktree: $WT_PATH · branch $WT_BRANCH · base ${WT_BASE:0:7}"
   git worktree add -b "$WT_BRANCH" "$WT_PATH" "$WT_BASE" >/dev/null
+  # The worktree checks out the WHOLE repo; this workspace lives at
+  # $REPO_SUBDIR inside it (workspace/ in the two-layer layout), so the
+  # worker runs from the worktree's copy of that subdirectory.
+  REPO_SUBDIR="$(git rev-parse --show-prefix)"
+  WT_WORK_DIR="${WT_PATH}/${REPO_SUBDIR%/}"
   # reference/ (ROM + pret source) is a gitignored on-disk prerequisite; the
   # worktree shares the main tree's copy — it's read-only reference material.
-  ln -s "$(pwd)/reference" "$WT_PATH/reference"
+  ln -s "$(pwd)/reference" "$WT_WORK_DIR/reference"
   WT_SETUP_LOG="/tmp/emerald-factory-$WT_ID-setup.log"
   echo "worktree: installing deps (npm + oracle; log: $WT_SETUP_LOG) ..."
-  if ! ( cd "$WT_PATH" \
+  if ! ( cd "$WT_WORK_DIR" \
       && npm install --no-audit --no-fund ) > "$WT_SETUP_LOG" 2>&1; then
     echo "run-subagent: worktree dependency install failed; see $WT_SETUP_LOG" >&2
     exit 1
@@ -573,7 +579,7 @@ else
 fi
 
 WORK_DIR="$(pwd)"
-if [[ "$IS_WORKTREE" == "1" ]]; then WORK_DIR="$WT_PATH"; fi
+if [[ "$IS_WORKTREE" == "1" ]]; then WORK_DIR="$WT_WORK_DIR"; fi
 
 if [[ "$PROVIDER" == "codex" || "$PROVIDER" == "deepseek" ]]; then
   ENFORCED_START_HEAD="$(git -C "$WORK_DIR" rev-parse HEAD)"

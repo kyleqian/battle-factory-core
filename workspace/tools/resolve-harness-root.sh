@@ -25,11 +25,15 @@ pokebench_resolve_harness_root() {
   common_dir="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
   if [[ -n "$common_dir" && -d "$common_dir" ]]; then
     primary_run="$(cd "$common_dir/.." && pwd)"
-    candidate="$(cd "$primary_run/.." && pwd)"
-    if [[ -x "$candidate/run-oracle.sh" ]]; then
-      printf '%s\n' "$candidate"
-      return 0
-    fi
+    # Two-layer layout: the primary checkout root IS the repo top that owns
+    # run-oracle.sh; older flat layouts kept it one level above the run.
+    for candidate in "$primary_run" "$primary_run/.."; do
+      candidate="$(cd "$candidate" 2>/dev/null && pwd)" || continue
+      if [[ -x "$candidate/run-oracle.sh" ]]; then
+        printf '%s\n' "$candidate"
+        return 0
+      fi
+    done
   fi
 
   echo "could not locate the pokeemerald-factory harness; set POKEBENCH_HARNESS_ROOT" >&2

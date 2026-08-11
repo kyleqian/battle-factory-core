@@ -243,8 +243,13 @@ if [[ "$LANE" != "ts" && "$PRINT_CONFIG" != "1" \
     fi
     echo "$LANE worktree created at $LANE_WT (branch ${LANE}-main)"
   fi
-  [[ -e "$LANE_WT/reference" ]] || ln -s "$(pwd)/reference" "$LANE_WT/reference"
-  cd "$LANE_WT"
+  # The worktree checks out the WHOLE repo; this workspace lives at
+  # $REPO_SUBDIR inside it (workspace/ in the two-layer layout), so the
+  # session runs from the worktree's copy of that subdirectory.
+  REPO_SUBDIR="$(git rev-parse --show-prefix)"
+  LANE_WT_WS="${LANE_WT}/${REPO_SUBDIR%/}"
+  [[ -e "$LANE_WT_WS/reference" ]] || ln -s "$(pwd)/reference" "$LANE_WT_WS/reference"
+  cd "$LANE_WT_WS"
   if [[ ! -d node_modules ]]; then
     echo "$LANE worktree: installing deps (one-time npm install) ..."
     npm install --no-audit --no-fund >"/tmp/emerald-factory-${LANE}-main-setup.log" 2>&1 \
