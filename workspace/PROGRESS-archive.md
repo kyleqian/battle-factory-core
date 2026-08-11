@@ -1,3 +1,22 @@
+## 1148 — [MAIN worker, 2026-08-11] **Battle-6 send-out blocked exactly at #55 gender identity**
+
+- **State:** `master` is green with the legal LUKAS acknowledgement/send-out
+  boundary sharply pinned but not promoted: intended app 462–511 is **8/50**
+  exact, with every remaining pixel solely WEEPINBELL's gender glyph. S8 is
+  closed; #56 and the retired Battle-2 march are untouched.
+- **Did:** derived the ROM's 1543–1544 held-A schedule and app NEW-key frame
+  390; twice-fresh dense probes isolate frames 470–511 to male-vs-female
+  healthbox pixels only. Generic round set 270 has personality `4074577324`
+  (male); stock ROM has `1547933549` (female), open #55's construction-clock
+  exposure. Tier 1 pins the exact boundary, receipt, purity, and immutability.
+- **Next:** resume only after #55's generic ambient-VBlank construction clock
+  can publish the ROM personality; rerun app 462–511 without a renderer or
+  fixture override. Do not submit an action or reinterpret frame 461/#56.
+- **Notes:** controls exact: LUKAS **154/154 + 65/65**; canonical **154/154,
+  65/65, 249/249, 238/238, 3/3, 256/256, 115/115**. Focused **4/4**, smoke
+  **375/375**, typecheck, full `npm test` **952 files / 9,138 passed / 1
+  skipped**, build **645 modules**. No barriers or production changes.
+
 ## 1146 — [MAIN worker, 2026-08-11] **Battle-6 LUKAS summary assembly exact**
 
 - **State:** `master` is green with the complete legal challenge-2 Battle-6
