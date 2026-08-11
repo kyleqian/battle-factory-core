@@ -1,0 +1,51 @@
+{
+  "schema": "guillotine-evidence-checkpoint/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "GUILLOTINE",
+  "status": "unsupported",
+  "sourceSymbols": { "Move_GUILLOTINE": 137148457, "Move_PAY_DAY": 137148597 },
+  "topology": {
+    "tasks": [
+      "AnimTask_BlendSpriteColor_Step2",
+      "AnimTask_ShakeMon2_Step",
+      "Task_ClearMonBg",
+      "Task_FadeToBg",
+      "Task_UpdateMonBg"
+    ],
+    "templates": [
+      "gBasicHitSplatSpriteTemplate",
+      "gComplexPaletteBlendSpriteTemplate",
+      "gGuillotineSpriteTemplate",
+      "gMultiuseSpriteTemplate"
+    ],
+    "callbacks": [
+      "AnimComplexPaletteBlend_Step1",
+      "AnimComplexPaletteBlend_Step2",
+      "AnimGuillotinePincer_Step1",
+      "AnimGuillotinePincer_Step2",
+      "AnimGuillotinePincer_Step3",
+      "DestroyAnimSprite",
+      "RunStoredCallbackWhenAffineAnimEnds"
+    ]
+  },
+  "orientations": [
+    {
+      "orientation": "player-back",
+      "scenario": "tools/battle-lab/mechanic-guillotine-player-gligar-opponent-onix.json",
+      "startFrame": 74,
+      "endFrame": 238,
+      "frameCount": 165,
+      "evidenceSha256": "49f55f7f94cbb4ecc2af8ea116687391a228343292defd7d972f094cb3cb0ac0",
+      "rawRgbSha256": "e52f5331d06764be107d236930e19b205e484ba33aaf35db887cac16cfe166ef"
+    },
+    {
+      "orientation": "opponent-front",
+      "scenario": "tools/battle-lab/mechanic-guillotine-opponent-gligar-player-onix.json",
+      "startFrame": 78,
+      "endFrame": 241,
+      "frameCount": 164,
+      "evidenceSha256": "59054f50992919d685713034d1a90a7db65861a956c3530c434fb4c96f1fcbb4",
+      "rawRgbSha256": "16d58dcb19351512baea7973e46f771d2f8e9847bd989b56276d953b814f3ed8"
+    }
+  ]
+}
