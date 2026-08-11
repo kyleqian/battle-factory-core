@@ -109,6 +109,21 @@ mod tests {
         assert_eq!(FIXED_IVS.len(), 8);
     }
 
+    #[test]
+    fn move_pp_has_355_rows() {
+        assert_eq!(gen_tables::MOVE_PP.len(), 355);
+    }
+
+    #[test]
+    fn species_has_376_rows() {
+        assert_eq!(gen_tables::SPECIES.len(), 376);
+    }
+
+    #[test]
+    fn nature_modifiers_has_25_rows() {
+        assert_eq!(gen_tables::NATURE_MODIFIERS.len(), 25);
+    }
+
     // --- row pins (cross-cited against tests/factoryRentalGeneration.test.ts
     // and src/data/gen/battle-frontier-mons.json) ---
 
@@ -127,6 +142,112 @@ mod tests {
             135
         );
         assert_eq!(row.nature, 24);
+    }
+
+    #[test]
+    fn frontier_mon_110_moves_match_source_json() {
+        // src/data/gen/battle-frontier-mons.json entries[110].moves:
+        //   ["MOVE_SLUDGE", "MOVE_ROCK_TOMB", "MOVE_ACID_ARMOR", "MOVE_MINIMIZE"]
+        // resolved via src/data/gen/moves.json .moves[].move -> .id:
+        //   MOVE_SLUDGE=124, MOVE_ROCK_TOMB=317, MOVE_ACID_ARMOR=151, MOVE_MINIMIZE=107.
+        // .evSpreadStats = ["F_EV_SPREAD_SP_DEFENSE", "F_EV_SPREAD_DEFENSE",
+        // "F_EV_SPREAD_HP"] -> bits 5, 2, 0 -> ev_flags 32 + 4 + 1 = 37.
+        let row = FRONTIER_MONS[110];
+        assert_eq!(row.moves, [124, 317, 151, 107]);
+        assert_eq!(row.ev_flags, 37);
+        assert_eq!(gen_tables::MOVE_PP[124], 20); // MOVE_SLUDGE
+        assert_eq!(gen_tables::MOVE_PP[317], 10); // MOVE_ROCK_TOMB
+        assert_eq!(gen_tables::MOVE_PP[151], 40); // MOVE_ACID_ARMOR
+        assert_eq!(gen_tables::MOVE_PP[107], 20); // MOVE_MINIMIZE
+    }
+
+    #[test]
+    fn held_item_kings_rock_has_nonzero_hold_effect() {
+        // src/data/gen/battle-frontier-held-items.json entries[1]:
+        //   { "itemTableId": 1, "item": "ITEM_KINGS_ROCK",
+        //     "holdEffect": "HOLD_EFFECT_FLINCH", "holdEffectParam": 10 }
+        // HOLD_EFFECT_FLINCH id 30 (src/data/gen/ability-item-hooks.json
+        // .universes.holdEffects).
+        assert_eq!(gen_tables::HELD_ITEM_HOLD_EFFECT_BY_TABLE_ID[1], 30);
+        assert_eq!(gen_tables::HELD_ITEM_HOLD_EFFECT_PARAM_BY_TABLE_ID[1], 10);
+    }
+
+    #[test]
+    fn species_row_grimer_matches_source_json() {
+        // src/data/gen/species-stats.json species id 88 (SPECIES_GRIMER):
+        //   baseHp:80, baseAttack:80, baseDefense:50, baseSpeed:25,
+        //   baseSpAttack:40, baseSpDefense:50, genderRatio:127,
+        //   abilities:["ABILITY_STENCH","ABILITY_STICKY_HOLD"] -> ids [1, 60]
+        //   (src/data/gen/ability-item-hooks.json .universes.abilities).
+        // exp_at_50: src/data/gen/exp-tables.json
+        //   .speciesGrowthRate.SPECIES_GRIMER === "GROWTH_MEDIUM_FAST",
+        //   .growthRates.GROWTH_MEDIUM_FAST[50] === 125000.
+        let row =
+            gen_tables::species_row(88).expect("SPECIES_GRIMER is referenced by a frontier set");
+        assert_eq!(row.base_hp, 80);
+        assert_eq!(row.base_attack, 80);
+        assert_eq!(row.base_defense, 50);
+        assert_eq!(row.base_speed, 25);
+        assert_eq!(row.base_sp_attack, 40);
+        assert_eq!(row.base_sp_defense, 50);
+        assert_eq!(row.gender_ratio, 127);
+        assert_eq!(row.abilities, [1, 60]);
+        assert_eq!(row.exp_at_50, 125_000);
+    }
+
+    #[test]
+    fn species_row_bulbasaur_matches_source_json() {
+        // src/data/gen/species-stats.json species id 1 (SPECIES_BULBASAUR):
+        //   baseHp:45, baseAttack:49, baseDefense:49, baseSpeed:45,
+        //   baseSpAttack:65, baseSpDefense:65, genderRatio:31,
+        //   abilities:["ABILITY_OVERGROW","ABILITY_NONE"] -> ids [65, 0].
+        // exp_at_50: .speciesGrowthRate.SPECIES_BULBASAUR ===
+        //   "GROWTH_MEDIUM_SLOW", .growthRates.GROWTH_MEDIUM_SLOW[50] === 117360.
+        let row =
+            gen_tables::species_row(1).expect("SPECIES_BULBASAUR is referenced by a frontier set");
+        assert_eq!(row.base_hp, 45);
+        assert_eq!(row.base_attack, 49);
+        assert_eq!(row.base_defense, 49);
+        assert_eq!(row.base_speed, 45);
+        assert_eq!(row.base_sp_attack, 65);
+        assert_eq!(row.base_sp_defense, 65);
+        assert_eq!(row.gender_ratio, 31);
+        assert_eq!(row.abilities, [65, 0]);
+        assert_eq!(row.exp_at_50, 117_360);
+    }
+
+    #[test]
+    fn nature_modifiers_quirky_is_neutral() {
+        // src/data/gen/natures.json entries[24] (NATURE_QUIRKY): all five
+        // modifiers 0.
+        let row = gen_tables::NATURE_MODIFIERS[24];
+        assert_eq!(
+            (
+                row.attack,
+                row.defense,
+                row.speed,
+                row.sp_attack,
+                row.sp_defense
+            ),
+            (0, 0, 0, 0, 0)
+        );
+    }
+
+    #[test]
+    fn nature_modifiers_lonely_boosts_attack_hinders_defense() {
+        // src/data/gen/natures.json entries[1] (NATURE_LONELY):
+        //   attack:1, defense:-1, speed:0, spAttack:0, spDefense:0.
+        let row = gen_tables::NATURE_MODIFIERS[1];
+        assert_eq!(
+            (
+                row.attack,
+                row.defense,
+                row.speed,
+                row.sp_attack,
+                row.sp_defense
+            ),
+            (1, -1, 0, 0, 0)
+        );
     }
 
     #[test]
