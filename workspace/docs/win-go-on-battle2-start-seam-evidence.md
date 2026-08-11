@@ -30,6 +30,7 @@ Each command below was run twice fresh after the final fixture and trace edits:
 | `win-go-on-battle2-transition-complete-off` | 11308–11556 | **249/249** | complete quote-dismiss through RNG-selected Frontier transition and black handoff/hold |
 | `win-go-on-battle2-room-dismiss-off` | 11308–11337 | **30/30** | LILIANA quote A edge, box close, and transition onset |
 | `win-go-on-battle2-transition-black-off` | 11514–11556 | **43/43** | transition's black handoff/hold |
+| `win-go-on-battle2-scene-assembly-reveal-off` | 11557–11710 | **154/154** | complete retained-black callback through BattleIntroSlide3 reveal/trainer convergence and first settled-scene plateau |
 | `win-go-on-battle2-start-off` | 13385–13622 | **238/238** | acknowledged generated intro through LILIANA/KADABRA and player/DUSCLOPS send-out completion |
 | `win-go-on-battle2-action-ready-off` | 13631–13633 | **3/3** | settled action menu with the ROM at `CONTROLLER_CHOOSEACTION` |
 
@@ -37,6 +38,47 @@ The oracle semantic state at 13631–13633 has `playerControllerCommand = 18`
 (`CONTROLLER_CHOOSEACTION`), `controllerExecFlags = 1`, active DUSCLOPS
 147/147, and active opposing KADABRA 133/133. Thus the final dense window is
 the real input-ready command boundary, not an endpoint inferred from pixels.
+
+## Generated scene-assembly reveal closure
+
+The first dynamic residual after the exact transition handoff is now closed
+as one complete source-owned phase. Frame **11557** is the retained-black
+display callback; the BattleIntroSlide3 vertical reveal begins at **11558**,
+reaches a fully open window at **11602**, and its BG1/BG3 scanline shift,
+alpha blend, and trainer slides converge onto the first settled-scene
+plateau at **11710**. The committed dense trace captures every frame
+11557–11710 (**154 captures**) and passed **154/154 twice fresh**.
+
+The boundary is lifecycle-derived, not pixel-fitted. `Task_FrontierLogoWave`
+destroys its transition task only after `BeginNormalPaletteFade` completes
+(`battle_transition.c:4341-4390`). `Task_BattleStart` observes
+`IsBattleTransitionDone()` and installs `CB2_InitBattle` on the following
+callback (`battle_setup.c:356-374`); `CB2_InitBattleInternal` then clears VRAM,
+sets the one-line `WIN0V`, and installs the source BattleIntroSlide3 state
+(`battle_main.c:588-680`). The selected transition receipt therefore owns one
+retained-black display callback before the shared intro clock becomes visible.
+Before the fix, an RGB frame cross-correlation proved that every generated
+app frame **11557–11709** equaled the oracle's following frame
+**11558–11710** (153/153), identifying one uniform lifecycle callback rather
+than independent coordinate/color errors. Retaining that callback on the
+immutable intro owner made the same source compositor exact without changing
+its geometry or assets.
+
+`FactoryBattleStartIntroState.sceneAssemblyDisplayLag` is selected solely from
+the immutable Frontier transition receipt (LOGO_WAVE = one displayed callback;
+the established circle seam = zero) and is carried through the whole source
+clock. Trainer art/text, player and opponent parties, active slots, and all six
+party-status icons still come only from the frozen
+`FactoryBattleStartPresentationCommand`. Tier-1 coverage renders trainer/index
+identities 0 and 5 with healthy/status/fainted rows, repeats each render, and
+asserts no change to intro state, RNG, round rules/controller, rental parties,
+or outcomes.
+
+This acceptance claims only the complete reveal/trainer-convergence phase
+through 11710. A diagnostic continuation through 11812 is also exact
+(102/102), but it ends mid status-summary/message assembly and is deliberately
+not promoted as a second complete-window claim. The rest of 11711–13384
+remains outside this bounded step.
 
 ## Tier-1 controller proof
 
@@ -91,6 +133,7 @@ Reproduction:
 npm run compare -- win-go-on-battle2-transition-complete-off --summary
 npm run compare -- win-go-on-battle2-room-dismiss-off --summary
 npm run compare -- win-go-on-battle2-transition-black-off --summary
+npm run compare -- win-go-on-battle2-scene-assembly-reveal-off --summary
 npm run compare -- win-go-on-battle2-start-off --summary
 npm run compare -- win-go-on-battle2-action-ready-off --summary
 npm run compare -- win-go-on-swap-offer-no-liliana-far-side-off --summary

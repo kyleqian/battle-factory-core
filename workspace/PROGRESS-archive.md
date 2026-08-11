@@ -41018,3 +41018,19 @@ git; the current live ledger keeps the three load-bearing entries only.
   **4/4**, wasm32 artifact builds. Both oracles now serve from the new repo
   top (:8014 OFF / :8012 ON). TS stays canonical while the rust lane ports;
   the animation lane continues in TS by user decision.
+## 1135 — [supervisor, 2026-08-11] **Animation tail folded; generic transition seam next**
+
+- **State:** `master` includes `animation-main` through `5123b455`; `rust-main`
+  had no unmatched commit. The union is green and both oracle profiles are
+  fresh. S8 remains closed; the canonical Battle-2 march stays stopped at
+  tick 33331.
+- **Did:** folded the Metal Sound evidence tail (`a95c8e49`) and independently
+  verified the union: `npm test` **947 files / 8,683 passed / 1 skipped** and
+  production build **642 modules**. Restarted both stale post-fold oracle
+  processes; freshness and OFF `bin/oracle info` pass.
+- **Next:** implement and densely prove the generic RNG-selected Frontier
+  transition owner beginning at the staged nonzero-index residual frame 11338.
+  Stop at the already-proven generated intro/command boundary; do not resume a
+  canonical Battle-2 action or change battle logic/RNG.
+- **Notes:** #55's separate construction-clock remainder stays null/unwired.
+  No material decision is deferred.
