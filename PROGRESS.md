@@ -9,20 +9,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 - **State:** implementation `8aa00042`; #55 remains open,
   `GetBoxMonData2.cycles` stays `null`, and the construction clock stays
-  unwired. Focused **27/27**, smoke **375/375**, typecheck, and production
-  build are green; final full-suite verification is pending.
+  unwired. Focused **27/27**, smoke **375/375**, typecheck, full `npm test`
+  **894 files / 8,488 passed / 1 skipped**, and production build are green.
 - **Did:** source/ELF-reduced the complete synchronous outer shell at
   **314 cycles**: GetBoxMonData2 **216** plus checksum-function setup/return
   **98**. The typed composition excludes all eight GetSubstruct bodies and
   crypt/checksum/crypt components, covers every receipt field/checksum/bad-egg
   route across all 24 layouts, and matches **72/156** clean OFF direct joins.
-- **Next:** run the explicit-timeout full suite and final build, then stop.
-  Future #55 work is only async +18 and VBlank/IRQ entry/body/return closure;
-  do not fit residuals or wire the clock.
+- **Next:** continue #55 only with independently closed async +18 service and
+  VBlank/IRQ entry/body/return costs; do not fit residuals, wire aggregate
+  stats/the clock, or resume canonical Battle 2.
 - **Notes:** fresh wrapper-validated Scene-OFF mGBA boundaries give 2-cycle
   clean joins for all eight scattered personality reads; the frozen packet was
-  not mutated. No fixture/production import, barrier, controller,
-  presentation, animation, or canonical Battle-2 change.
+  not mutated. Final full suite used an explicit 10-minute foreground timeout.
+  No fixture/production import, barrier, controller, presentation, animation,
+  or canonical Battle-2 change.
 
 ## 1102 — [MAIN worker, 2026-08-10] **#55 encrypted EWRAM loops and receipt field tails closed**
 
