@@ -1,0 +1,287 @@
+{
+  "schema": "factory-timer0-irq-video-dma3-reachability-audit/v1",
+  "release": {
+    "pokeemerald": "repository-pinned pret/pokeemerald",
+    "mgbaVersion": "0.10.5",
+    "mgbaArchiveSha256": "91d6fbd32abcbdf030d58d3f562de25ebbc9d56040d513ff8e5c19bee9dacf14",
+    "oracleProfile": "battle-scene-off"
+  },
+  "auditedAnchors": {
+    "pokeemerald/src/m4a.c": [
+      "REG_TM0CNT_H = 0;",
+      "REG_TM0CNT_L = -(280896 / soundInfo->pcmSamplesPerVBlank);",
+      "REG_TM0CNT_H = TIMER_ENABLE | TIMER_1CLK;",
+      "REG_DMA1CNT_H = DMA_ENABLE | DMA_START_SPECIAL | DMA_32BIT | DMA_REPEAT;",
+      "REG_DMA2CNT_H = DMA_ENABLE | DMA_START_SPECIAL | DMA_32BIT | DMA_REPEAT;"
+    ],
+    "pokeemerald/src/main.c": [
+      "if (gMain.vblankCallback)",
+      "gMain.vblankCallback();",
+      "ProcessDma3Requests();",
+      "m4aSoundMain();"
+    ],
+    "pokeemerald/src/dma3_manager.c": [
+      "void ProcessDma3Requests(void)",
+      "if (bytesTransferred > 40 * 1024)",
+      "if (*(u8 *)REG_ADDR_VCOUNT > 224)",
+      "Dma3CopyLarge32_",
+      "Dma3FillLarge32_",
+      "s16 RequestDma3Copy",
+      "s16 RequestDma3Fill"
+    ],
+    "pokeemerald/src/battle_factory_screen.c": [
+      "static void VBlankCB_SelectScreen(void)",
+      "LoadOam();",
+      "ProcessSpriteCopyRequests();",
+      "TransferPlttBuffer();"
+    ],
+    "pokeemerald/src/overworld.c": [
+      "static void VBlankCB_Field(void)",
+      "ScanlineEffect_InitHBlankDmaTransfer();"
+    ],
+    "pokeemerald/src/scanline_effect.c": [
+      "void ScanlineEffect_InitHBlankDmaTransfer(void)",
+      "if (gScanlineEffect.state == 0)",
+      "DmaSet(0, gScanlineEffect.dmaSrcBuffers[gScanlineEffect.srcBuffer], gScanlineEffect.dmaDest, gScanlineEffect.dmaControl);"
+    ],
+    "pokeemerald/src/battle_transition.c": [
+      "#define B_TRANS_DMA_FLAGS",
+      "DMA_START_HBLANK",
+      "DmaSet(0, gScanlineEffectRegBuffers[1], &REG_BG0HOFS, B_TRANS_DMA_FLAGS);"
+    ],
+    "pokeemerald/include/gba/io_reg.h": [
+      "#define DMA_START_NOW     0x0000",
+      "#define DMA_START_VBLANK  0x1000",
+      "#define DMA_START_HBLANK  0x2000",
+      "#define DMA_START_SPECIAL 0x3000",
+      "#define TIMER_INTR_ENABLE 0x40",
+      "#define TIMER_ENABLE      0x80"
+    ],
+    "pokeemerald/include/gba/macro.h": [
+      "dmaRegs[2] = (vu32)(control);",
+      "DMA_START_NOW | DMA_##bit##BIT | DMA_SRC_INC | DMA_DEST_INC",
+      "#define DmaCopyLarge32(dmaNum, src, dest, size, block)"
+    ],
+    "pokeemerald/include/scanline_effect.h": [
+      "SCANLINE_EFFECT_DMACNT_16BIT",
+      "DMA_START_HBLANK",
+      "SCANLINE_EFFECT_DMACNT_32BIT"
+    ],
+    "mgba/src/gba/timer.c": [
+      "if (GBATimerFlagsIsDoIrq(timer->flags))",
+      "GBARaiseIRQ(gba, GBA_IRQ_TIMER0 + timerId, cyclesLate);",
+      "GBATimerFlagsTestFillDoIrq(currentTimer->flags, control & 0x0040);"
+    ],
+    "mgba/src/gba/gba.c": [
+      "#define GBA_IRQ_DELAY 7",
+      "gba->irqEvent.name = \"GBA IRQ Event\";",
+      "gba->irqEvent.priority = 0;",
+      "if (gba->memory.io[REG_IE >> 1] & gba->memory.io[REG_IF >> 1])",
+      "mTimingSchedule(&gba->timing, &gba->irqEvent, GBA_IRQ_DELAY - cyclesLate);",
+      "while (gba->cpuBlocked && !gba->earlyExit);"
+    ],
+    "mgba/src/gba/dma.c": [
+      "case GBA_DMA_TIMING_NOW:",
+      "info->when = mTimingCurrentTime(&gba->timing) + 3;",
+      "info->nextCount = info->count;",
+      "case GBA_DMA_TIMING_HBLANK:",
+      "case GBA_DMA_TIMING_VBLANK:",
+      "// Handled implicitly",
+      "void GBADMARunHblank",
+      "void GBADMARunVblank",
+      "GBADMARegisterGetTiming(dma->reg) == GBA_DMA_TIMING_HBLANK && !dma->nextCount",
+      "GBADMARegisterGetTiming(dma->reg) == GBA_DMA_TIMING_VBLANK && !dma->nextCount"
+    ],
+    "mgba/src/gba/video.c": [
+      "GBADMARunVblank(video->p, -cyclesLate);",
+      "GBADMARunHblank(video->p, -cyclesLate);"
+    ]
+  },
+  "sourceFacts": {
+    "timer0Irq": {
+      "mp2kTimer0Control": "SampleFreqSet writes TIMER_ENABLE | TIMER_1CLK, excluding TIMER_INTR_ENABLE",
+      "timerInterruptMask": "TIMER_INTR_ENABLE is 0x40 while TIMER_ENABLE is 0x80",
+      "mgbaOverflowGate": "GBATimerUpdate calls GBARaiseIRQ only when the control-derived DoIrq flag is true",
+      "mgbaIrqEventGate": "GBATestIRQ schedules priority-0 GBA IRQ Event only when IE intersects IF; its requested delay is 7 minus cyclesLate"
+    },
+    "videoDma": {
+      "videoHooks": "mGBA Video invokes GBADMARunVblank at VBlank and GBADMARunHblank during visible HBlank",
+      "startGate": "each hook starts only an enabled matching VBlank/HBlank DMA with nextCount == 0, then gives it a deadline and nextCount",
+      "mp2kRoutes": "MP2K configures DMA1/DMA2 as special FIFO DMA, not VBlank or HBlank DMA",
+      "sourceGeneralCaveat": "Scanline and battle-transition source can configure DMA0 HBlank, so Video-started DMA remains source-reachable outside this construction epoch"
+    },
+    "immediateDma3": {
+      "producer": "RequestDma3Copy/Fill queues a CPU-side request; VBlankIntr calls ProcessDma3Requests after its optional VBlank callback",
+      "execution": "the queue manager invokes Dma3CopyLarge/Dma3FillLarge, whose macro writes DMA3 with DMA_START_NOW",
+      "mgbaScheduling": "a newly enabled NOW DMA receives current scheduler time plus 3 and nextCount=count; it is not a Video-started HBlank/VBlank DMA",
+      "sourceGeneralCaveat": "No source rule drains a NOW DMA before every unrelated Timer 0 deadline; pending immediate DMA3 remains a source-general scheduler class"
+    }
+  },
+  "constructionCensus": {
+    "timer0Crossings": {
+      "cases": {
+        "anchor": {
+          "crossings": 126
+        },
+        "liliana": {
+          "crossings": 57
+        },
+        "factory-varied": {
+          "crossings": 73
+        }
+      },
+      "total": 256,
+      "timer0ControlValues": [
+        128
+      ],
+      "timer0IrqEnableBitSet": 0,
+      "inactiveSchedulerState": {
+        "activeDmaNonIdle": 0,
+        "cpuBlocked": 0,
+        "performingDmaNonzero": 0
+      },
+      "observedDmaChannels": [
+        1,
+        2
+      ],
+      "observedDmaTimingCounts": {
+        "3": 512
+      },
+      "observedDmaPendingCount": 0,
+      "crossedEventCounts": {
+        "GBA Audio Sample": 3,
+        "GBA Timer 0": 256,
+        "GBA Video": 20
+      },
+      "coDueEventCounts": {
+        "GBA Audio Sample": 3,
+        "GBA Video": 20
+      },
+      "queueSnapshots": 512,
+      "queuedIrqEventOccurrences": 0,
+      "captureBoundary": "The all-crossing packet records CPU state and DMA1/DMA2 FIFO state only; it is not an all-channel DMA register census."
+    },
+    "vblankEntryObservations": {
+      "cases": {
+        "anchor": {
+          "entries": 52
+        },
+        "liliana": {
+          "entries": 31
+        },
+        "factory-varied": {
+          "entries": 30
+        }
+      },
+      "total": 113,
+      "callbackCounts": {
+        "VBlankCB_Field": 61,
+        "VBlankCB_SelectScreen": 52
+      },
+      "hblankCallbackNonNull": 0,
+      "scanlineDmaControlNonzero": 0,
+      "dma3Locked": 0,
+      "dma3QueuedBytesNonzero": 0,
+      "dma3QueuedRequestsNonempty": 0,
+      "captureBoundary": "These are VBlank-entry snapshots before the callback and ProcessDma3Requests; they do not observe every later instruction in that interrupt."
+    },
+    "exactAllChannelRuntimeWindows": {
+      "windows": [
+        {
+          "kind": "isolated-dual-refill",
+          "channels": [
+            {
+              "channel": 0,
+              "enabled": false,
+              "timing": 0,
+              "nextCount": 0
+            },
+            {
+              "channel": 1,
+              "enabled": true,
+              "timing": 3,
+              "nextCount": 0
+            },
+            {
+              "channel": 2,
+              "enabled": true,
+              "timing": 3,
+              "nextCount": 0
+            },
+            {
+              "channel": 3,
+              "enabled": false,
+              "timing": 0,
+              "nextCount": 0
+            }
+          ],
+          "activeDma": -1,
+          "performingDma": 0,
+          "cpuBlocked": false
+        },
+        {
+          "kind": "video-co-due-dual-refill",
+          "channels": [
+            {
+              "channel": 0,
+              "enabled": false,
+              "timing": 0,
+              "nextCount": 0
+            },
+            {
+              "channel": 1,
+              "enabled": true,
+              "timing": 3,
+              "nextCount": 0
+            },
+            {
+              "channel": 2,
+              "enabled": true,
+              "timing": 3,
+              "nextCount": 0
+            },
+            {
+              "channel": 3,
+              "enabled": false,
+              "timing": 0,
+              "nextCount": 0
+            }
+          ],
+          "activeDma": -1,
+          "performingDma": 0,
+          "cpuBlocked": false
+        }
+      ],
+      "videoCoDueCallbacks": [
+        {
+          "name": "GBA Video",
+          "priority": 8,
+          "activeDma": -1,
+          "dmaNextCountsBefore": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "dmaNextCountsAfter": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    }
+  },
+  "constructionReachability": {
+    "timer0Irq": "excluded for the audited post-boot MP2K Timer 0 path: the source write omits 0x40 and all 256 recorded controls are 0x80; this does not exclude IRQs from other devices or a later Timer 0 reconfiguration",
+    "videoStartedDma": "excluded in the exact full-state Video-co-due window: Video leaves all four nextCount values zero and the Timer entry observes timings 0,3,3,0; the finite 113 VBlank entries also have zero scanline DMA control, but the 256-crossing packet is not an all-channel DMA census",
+    "immediateDma3": "absent in the two exact all-channel Timer entries (DMA3 disabled, timing 0, nextCount 0) and no VBlank-entry queue is pending in 113 observations; source-general immediate DMA3 can still overlap a Timer edge after other CPU work arms it"
+  },
+  "explicitBoundary": [
+    "No Timer 0 service cost, completion timestamp, or construction-clock behavior is derived here.",
+    "The Timer 0 IRQ conclusion concerns MP2K's normal Timer 0 control write; it does not erase IRQ delivery from VBlank, serial, Timer 3, DMA completion, or externally changed IE/IF/control state.",
+    "Video can start matching HBlank/VBlank transfers in mGBA, and Emerald has source paths that configure them; the exclusion is scoped to the recorded ordinary Factory construction epoch and exact full-state window.",
+    "ProcessDma3Requests is CPU-triggered immediate work inside VBlankIntr, not work created by mGBA's Video callback. Empty queue snapshots are finite entry observations, not a proof about every later VBlank instruction."
+  ]
+}
