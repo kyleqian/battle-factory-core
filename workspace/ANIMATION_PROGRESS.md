@@ -1,3 +1,11 @@
+# Supervisor wind-down — MOVE_METAL_SOUND bilateral dense evidence checkpoint (2026-08-11)
+
+- **State:** Coverage remains **170/276 Level-50 exact**, 0 partial, 0 staged, and 106 unsupported. `MOVE_METAL_SOUND` remains unsupported; no production framebuffer claim was made.
+- **Did:** Folded current `master`, established a green baseline, and merged complete legal bilateral ARON/ONIX Scene-ON scenarios, a Metal-Sound-specific pointer-bounded probe, compact receipts, normalized change maps, a focused evidence test, and the move-owned display-latch row. The probe covers the source pointer, tasks/sprites, software+hardware OAM/matrices, palettes/tags/registers/audio, immutable battle state, and raw RGB through first inactive cleanup.
+- **Verified:** Player-back **76..161 = 86/86** and opponent-front **80..164 = 85/85** reproduce twice fresh and byte-stably. Probe/raw/map digests are player `b368c1aa…` / `54ad351b…` / `72913fba…`, opponent `6ce39502…` / `39a6fab9…` / `9b6d338a…`; supervisor fresh runs independently reproduce both probe hashes. The maps measure a **+4** orientation shift, wave affine dual-lag, wave/plain OAM RAM+1, the exact `ShakeMon2(ANIM_ATTACKER,2,0,8,1)` creation anchor, palette RAM+1, and side-relative BG/audio. Supersonic remains bilaterally **51/51 component + framebuffer ×2** exact. Final focused/full-suite/build gates are green.
+- **Next:** Port Metal Sound's source-relative reducer and typed Scene-ON seam, then independently gate its compositor and production framebuffer twice fresh before promotion.
+- **Notes:** No gameplay/stat outcome, RNG/controller/facility state, engine boundary, unsupported barrier, canonical capture import, or production renderer changed. **For the main program:** this checkpoint is animation-only dev-time evidence plus a latch reference; no production seam changed.
+
 # MOVE_METAL_SOUND authoritative source checkpoint — remains unsupported (2026-08-11 worker)
 
 - **State:** Coverage remains **170/276 Level-50 exact**, 0 partial, 0 staged, and 106 unsupported. `MOVE_METAL_SOUND` is not promoted.

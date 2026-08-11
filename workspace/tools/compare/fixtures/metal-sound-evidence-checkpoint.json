@@ -1,0 +1,111 @@
+{
+  "schema": "metal-sound-evidence-checkpoint/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "METAL_SOUND",
+  "status": "unsupported",
+  "sourceBounds": {
+    "start": "0x082d59b7",
+    "endExclusive": "0x082d5a07",
+    "bytes": "0x50"
+  },
+  "carrier": "set 122 FRONTIER_MON_ARON / SPECIES_ARON / MOVE_METAL_SOUND",
+  "probe": "tools/compare/metalSoundProbe.py",
+  "topology": {
+    "tasks": [
+      "AnimTask_ShakeMon2_Step",
+      "Task_ClearMonBg",
+      "Task_PanFromInitialToTarget",
+      "Task_UpdateMonBg"
+    ],
+    "templates": [
+      "gMetalSoundSpriteTemplate",
+      "gMultiuseSpriteTemplate",
+      "gSpriteTemplate_EnemyShadow",
+      "sHealthbarSpriteTemplates",
+      "sHealthboxOpponentSpriteTemplates",
+      "sHealthboxPlayerSpriteTemplates"
+    ],
+    "callbacks": [
+      "AnimTranslateLinear_WithFollowup",
+      "DestroyAnimSprite",
+      "SpriteCB_HealthBar",
+      "SpriteCB_HealthBoxOther",
+      "SpriteCB_SetInvisible",
+      "SpriteCallbackDummy"
+    ]
+  },
+  "orientations": [
+    {
+      "orientation": "player-back",
+      "scenario": "tools/battle-lab/mechanic-metal-sound-player-aron-opponent-onix.json",
+      "sourceWindow": {"startFrame": 76, "endFrame": 161, "frameCount": 86},
+      "probeJsonSha256": "b368c1aa7583d80f34b713047f3b02a0e3d40c6373f4ebd3bdca7a0b35b6e5d7",
+      "rawRgbSha256": "54ad351bf0b9bde4a4a451ec337acb8747ebf4fb247178eeba2ab9809d3568ef",
+      "changeMap": "tools/compare/evidence/metal-sound-changemap-player.txt",
+      "changeMapSha256": "72913fba51f2fb38d5a9f6b3da25cdda3584ee9095cf84fdfbf86e274876be30",
+      "freshRuns": 2,
+      "byteStable": true,
+      "pointerBound": {"firstInBoundsFrame": 76, "lastActiveFrame": 160, "firstInactiveCleanupFrame": 161},
+      "bgLayer": "BG1",
+      "waveLifecycle": {"spawnAges": [7, 11, 15, 19], "lastActiveAge": 49, "cleanupAge": 50, "lastRgbChangeAge": 51, "oamSlots": [3, 4, 5, 7], "matrixSlots": [0, 3, 4, 5]},
+      "latchChecks": {
+        "plainWaveOam": "RAM+1 visible motion",
+        "freshAffineMatrix": "paint age-2 from allocation and remove age-1; dual-lag class",
+        "shakeMon2": "exact (ANIM_ATTACKER,2,0,8,1) creation-anchor uses task tick age+1",
+        "palettes": "faded/unfaded RAM+1; hardware palette follows the next display",
+        "audio": "four SE_M_SCREECH panse calls; sound-task/audio rows captured"
+      }
+    },
+    {
+      "orientation": "opponent-front",
+      "scenario": "tools/battle-lab/mechanic-metal-sound-opponent-aron-player-onix.json",
+      "sourceWindow": {"startFrame": 80, "endFrame": 164, "frameCount": 85},
+      "probeJsonSha256": "6ce3950259143c31bca0107740e3c15dd352ef9c03d0f6d159c2036f949051ea",
+      "rawRgbSha256": "39a6fab99980d84a6caac761e243f6f9f52c627c8589ff8b41d0a0f8890862e6",
+      "changeMap": "tools/compare/evidence/metal-sound-changemap-opponent.txt",
+      "changeMapSha256": "9b6d338a6c28cb6659babf519063587a91d90c90d7246e45e7d4820687c66c27",
+      "freshRuns": 2,
+      "byteStable": true,
+      "pointerBound": {"firstInBoundsFrame": 80, "lastActiveFrame": 163, "firstInactiveCleanupFrame": 164},
+      "bgLayer": "BG2",
+      "waveLifecycle": {"spawnAges": [7, 11, 15, 19], "lastActiveAge": 49, "cleanupAge": 50, "lastRgbChangeAge": 51, "oamSlots": [3, 4, 5, 7], "matrixSlots": [0, 3, 4, 5]},
+      "latchChecks": {
+        "plainWaveOam": "RAM+1 visible motion",
+        "freshAffineMatrix": "paint age-2 from allocation and remove age-1; dual-lag class",
+        "shakeMon2": "exact (ANIM_ATTACKER,2,0,8,1) creation-anchor uses task tick age+1",
+        "palettes": "faded/unfaded RAM+1; hardware palette follows the next display",
+        "audio": "four SE_M_SCREECH panse calls; sound-task/audio rows captured"
+      }
+    }
+  ],
+  "orientationShift": {"opponentFrontMinusPlayerBack": 4, "measured": true},
+  "evidenceScope": {
+    "sourcePointer": true,
+    "logicalTasks": true,
+    "logicalSprites": true,
+    "softwareAndHardwareOam": true,
+    "softwareAndHardwareMatrices": true,
+    "palettesAndTags": true,
+    "bgAndGpuRegisters": true,
+    "audio": true,
+    "immutableBattleState": true,
+    "rawRgb": true,
+    "productionFramebuffer": "not attempted; Metal Sound remains unsupported"
+  },
+  "control": {
+    "move": "SUPERSONIC",
+    "status": "exact",
+    "fixtures": [
+      "tools/compare/fixtures/supersonic-player-loudred-opponent-onix.json",
+      "tools/compare/fixtures/supersonic-opponent-loudred-player-onix.json"
+    ],
+    "portableRuns": {
+      "player-back": {"freshRuns": 2, "frameCount": 51, "componentMatches": [51, 51], "framebufferMatches": [51, 51]},
+      "opponent-front": {"freshRuns": 2, "frameCount": 51, "componentMatches": [51, 51], "framebufferMatches": [51, 51]}
+    }
+  },
+  "promotion": {
+    "status": "deferred",
+    "reason": "Evidence checkpoint only; no Metal Sound reducer, typed seam, compositor, or production framebuffer gate was claimed."
+  }
+}
