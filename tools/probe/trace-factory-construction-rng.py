@@ -133,6 +133,16 @@ EWRAM_ACCESS_EVIDENCE = (
 TIMER0_CADENCE_EVIDENCE = (
     os.environ.get("FACTORY_TIMER0_CADENCE_EVIDENCE") == "1"
 )
+# Compact all-crossing Timer 0 evidence.  This is intentionally separate from
+# the cadence receipt and the +18 classifier: it observes every Timer 0 event
+# reschedule inside the retained source-function epochs, not only rows already
+# joined to a residual.  It never changes the v1/v2 packets.
+#
+#   FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1 \
+#   FACTORY_TIMER0_FIFO_EVIDENCE=1 ... trace-factory-construction-rng.py
+TIMER0_FIFO_EVIDENCE = (
+    os.environ.get("FACTORY_TIMER0_FIFO_EVIDENCE") == "1"
+)
 # Separate scalar/source-relative packet for the recurring +18-cycle residual
 # audit.  This decorates already-selected source boundaries only; it does not
 # retain a trainer/set/mon identity or turn the observation into a timing key.
@@ -918,6 +928,8 @@ TIMING_QUEUE_NAME_LIMIT = 64
 TIMER0_CNT_L_ADDR = 0x04000100
 TIMER0_CNT_H_ADDR = 0x04000102
 TIMER0_EVENT_NAME = "GBA Timer 0"
+FIFO_A_ADDR = 0x040000A0
+FIFO_B_ADDR = 0x040000A4
 
 
 def signed_timing_delta(when: int, master_cycles: int) -> int:
@@ -1004,7 +1016,7 @@ def classifier_direct_component(operation: str, arguments: dict[str, int]) -> st
 def observe_classifier_epoch_boundary(
     epoch: dict[str, Any], oracle: EmeraldOracle, pc: int,
 ) -> None:
-    if not RESIDUAL_18_CLASSIFIER_EVIDENCE:
+    if not (RESIDUAL_18_CLASSIFIER_EVIDENCE or TIMER0_FIFO_EVIDENCE):
         return
     if epoch.get("entry") is None or epoch.get("return") is not None:
         return
@@ -1099,6 +1111,96 @@ def snapshot_timer0_cadence(
     }
 
 
+def dma_destination_kind(address: int) -> str:
+    if address == FIFO_A_ADDR:
+        return "fifo-a"
+    if address == FIFO_B_ADDR:
+        return "fifo-b"
+    if address == 0:
+        return "none"
+    return "other"
+
+
+def snapshot_timer0_fifo_state(oracle: EmeraldOracle, master_cycles: int) -> dict[str, Any]:
+    """Capture the smallest safe mGBA state around one Timer 0 reschedule.
+
+    The raw event ``when`` and mGBA internal ``lastEvent`` are retained only
+    transiently for crossing detection; the compact receipt removes them,
+    along with all absolute time and address identity. FIFO indices and
+    ``internalRemaining`` are the direct-sound state needed to tell a sample
+    consumption from a DMA refill; DMA1/2 controls/counters and normalized
+    destinations expose which channel actually changed.
+    """
+    gba = oracle.core._native
+    cpu = oracle.core.cpu._native
+    timer = gba.timers[0]
+    timer_event = timer.event
+    audio = gba.audio
+
+    def fifo_state(fifo: Any) -> dict[str, int]:
+        write = int(fifo.fifoWrite)
+        read = int(fifo.fifoRead)
+        return {
+            "fifoWrite": write,
+            "fifoRead": read,
+            "fifoWordLevel": (write - read) & 7,
+            "internalRemaining": int(fifo.internalRemaining),
+            "dmaSource": int(fifo.dmaSource),
+        }
+
+    dma_rows: list[dict[str, Any]] = []
+    for channel in (
+        1,
+        2,
+    ):
+        internal = gba.memory.dma[channel]
+        control = int(internal.reg)
+        destination = int(internal.dest)
+        dma_rows.append({
+            "channel": channel,
+            "control": control,
+            "enabled": bool(control & 0x8000),
+            "repeat": bool(control & 0x0200),
+            "width": 32 if control & 0x0400 else 16,
+            "timing": (control >> 12) & 3,
+            "destControl": (control >> 5) & 3,
+            "sourceControl": (control >> 7) & 3,
+            "internalCount": int(internal.count),
+            "internalNextCount": int(internal.nextCount),
+            "internalWhenDelta": (
+                signed_timing_delta(int(internal.when), master_cycles)
+                if int(internal.when) != 0 else None
+            ),
+            "destinationKind": dma_destination_kind(destination),
+        })
+
+    return {
+        "masterCycles": master_cycles,
+        "timerEventWhenRaw": int(timer_event.when),
+        "timer0": {
+            "tm0cntL": read_u16(oracle, TIMER0_CNT_L_ADDR),
+            "tm0cntH": read_u16(oracle, TIMER0_CNT_H_ADDR),
+            "reload": int(timer.reload),
+            "lastEvent": int(timer.lastEvent),
+            "flags": int(timer.flags),
+            "eventWhenDelta": signed_timing_delta(int(timer_event.when), master_cycles),
+            "eventDue": signed_timing_delta(int(timer_event.when), master_cycles) <= 0,
+        },
+        "fifo": {
+            "a": fifo_state(audio.chA),
+            "b": fifo_state(audio.chB),
+        },
+        "dma": dma_rows,
+        "cpu": {
+            "nextEventDistance": int(cpu.nextEvent) - int(cpu.cycles),
+            "prefetchEnabled": bool(gba.memory.prefetch),
+            "performingDma": int(gba.performingDMA),
+            "cpuBlocked": bool(gba.cpuBlocked),
+            "activeDma": int(gba.memory.activeDMA),
+        },
+    }
+
+
 def observe_residual_instruction_trace(
     epoch: dict[str, Any], oracle: EmeraldOracle, pc: int,
 ) -> None:
@@ -1111,6 +1213,10 @@ def observe_residual_instruction_trace(
         pending_queue = classifier.pop("queueAfterPending", False)
         queue_needed = candidate_pc or pending_queue
         queue_before = snapshot_timing_queue(timing) if queue_needed else []
+        hardware_before = (
+            snapshot_timer0_fifo_state(oracle, master_cycles)
+            if TIMER0_FIFO_EVIDENCE and queue_needed else None
+        )
         if candidate_pc:
             classifier["queueAfterPending"] = True
         current = {
@@ -1121,9 +1227,22 @@ def observe_residual_instruction_trace(
             "timingMasterCycles": int(timing.masterCycles),
             "nextEvent": int(cpu.nextEvent),
             "eventQueue": queue_before,
+            "timer0FifoState": hardware_before,
         }
         previous = classifier.pop("lastBoundary", None)
         if previous is not None:
+            # A selected trace can terminate on the instruction immediately
+            # after a candidate edge.  Re-take the after state at that stop
+            # boundary so the crossing still has a complete before/after pair.
+            if (
+                TIMER0_FIFO_EVIDENCE
+                and previous.get("timer0FifoState") is not None
+                and current.get("timer0FifoState") is None
+            ):
+                current["timer0FifoState"] = snapshot_timer0_fifo_state(
+                    oracle, master_cycles
+                )
+                current["eventQueue"] = snapshot_timing_queue(timing)
             key = (previous["instructionPc"], current["instructionPc"])
             edge = {
                 "instructionPc": key[0],
@@ -1132,6 +1251,8 @@ def observe_residual_instruction_trace(
                 "eventDistance": int(previous["nextEvent"]) - int(previous["cpuCycles"]),
                 "queueBefore": classifier_queue(previous),
                 "queueAfter": classifier_queue(current),
+                "timer0FifoBefore": previous.get("timer0FifoState"),
+                "timer0FifoAfter": current.get("timer0FifoState"),
             }
             edges = classifier.setdefault("edges", {})
             prior = edges.get(key)
@@ -1319,7 +1440,7 @@ def observe_calculate_mon_stats_call(
                 active.setdefault("boundaries", {})["firstLevelCompare"] = cycle_snapshot(
                     oracle, frame, pc, "get-level-first-compare",
                 )
-                if RESIDUAL_18_CLASSIFIER_EVIDENCE:
+                if RESIDUAL_18_CLASSIFIER_EVIDENCE or TIMER0_FIFO_EVIDENCE:
                     classifier_maybe_start_trace(
                         epoch,
                         case=CASE,
@@ -1391,7 +1512,7 @@ def observe_calculate_mon_stats_call(
         "entryMasterCycles": entry_snapshot["masterCycles"],
         "arguments": calculate_mon_stats_call_arguments(operation, oracle),
     }
-    if RESIDUAL_18_CLASSIFIER_EVIDENCE:
+    if RESIDUAL_18_CLASSIFIER_EVIDENCE or TIMER0_FIFO_EVIDENCE:
         arguments = epoch["calculateMonStatsActiveCall"]["arguments"]
         component = classifier_direct_component(operation, arguments)
         if component is not None and component != "level-loop":
@@ -1541,7 +1662,11 @@ def advance_one_instrumented_frame(
                 append_vblank_stage(epoch, oracle, frame, pc, VBLANK_STAGE_PCS[pc])
             observe_classifier_epoch_boundary(epoch, oracle, pc)
             observe_calculate_mon_stats_call(epoch, oracle, frame, pc)
-            if RESIDUAL_18_INSTRUCTION_EVIDENCE or RESIDUAL_18_CLASSIFIER_EVIDENCE:
+            if (
+                RESIDUAL_18_INSTRUCTION_EVIDENCE
+                or RESIDUAL_18_CLASSIFIER_EVIDENCE
+                or TIMER0_FIFO_EVIDENCE
+            ):
                 observe_residual_instruction_trace(epoch, oracle, pc)
             if EWRAM_ACCESS_EVIDENCE:
                 observe_ewram_access_boundary(epoch, oracle, frame, pc)
@@ -1917,7 +2042,7 @@ def classify_and_summarize(
         if epoch.get("residualInstructionTraceActive") is not None:
             raise RuntimeError("residual instruction evidence finished mid-trace")
         result["residualInstructionTraces"] = epoch.get("residualInstructionTraces", [])
-    if RESIDUAL_18_CLASSIFIER_EVIDENCE:
+    if RESIDUAL_18_CLASSIFIER_EVIDENCE or TIMER0_FIFO_EVIDENCE:
         if epoch.get("residualClassifierTraceActive") is not None:
             raise RuntimeError("residual classifier evidence finished mid-trace")
         result["residualClassifierTraces"] = epoch.get("residualClassifierTraces", [])
@@ -1979,7 +2104,11 @@ def run_anchor() -> dict[str, Any]:
         EmeraldOracle._run_bootstrap = original
     if oracle.canonical_screen_sha256 != ANCHOR_BOOTSTRAP_SHA256:
         raise RuntimeError(f"anchor canonical screen changed: {oracle.canonical_screen_sha256}")
-    if RESIDUAL_18_INSTRUCTION_EVIDENCE or RESIDUAL_18_CLASSIFIER_EVIDENCE:
+    if (
+        RESIDUAL_18_INSTRUCTION_EVIDENCE
+        or RESIDUAL_18_CLASSIFIER_EVIDENCE
+        or TIMER0_FIFO_EVIDENCE
+    ):
         return {
             "case": "anchor",
             "sourceFunction": "CreateFrontierFactorySelectableMons",
@@ -2042,7 +2171,11 @@ def run_fixed_fixture(raw: dict[str, Any], first_frame: int, last_frame: int) ->
 def run_liliana() -> dict[str, Any]:
     raw = load_fixture("scratch-win-go-on-swap-offer-no-guide-dismiss-probe.json")
     oracle, _, epoch, calls = run_fixed_fixture(raw, LILIANA_FIRST_FRAME, LILIANA_LAST_FRAME)
-    if RESIDUAL_18_INSTRUCTION_EVIDENCE or RESIDUAL_18_CLASSIFIER_EVIDENCE:
+    if (
+        RESIDUAL_18_INSTRUCTION_EVIDENCE
+        or RESIDUAL_18_CLASSIFIER_EVIDENCE
+        or TIMER0_FIFO_EVIDENCE
+    ):
         return {
             "case": "liliana",
             "sourceFunction": "FillFactoryFrontierTrainerParty",
@@ -2128,7 +2261,11 @@ def run_factory_varied() -> dict[str, Any]:
 
     oracle2.advance = targeted_advance  # type: ignore[method-assign]
     stage_request(oracle2, raw)
-    if RESIDUAL_18_INSTRUCTION_EVIDENCE or RESIDUAL_18_CLASSIFIER_EVIDENCE:
+    if (
+        RESIDUAL_18_INSTRUCTION_EVIDENCE
+        or RESIDUAL_18_CLASSIFIER_EVIDENCE
+        or TIMER0_FIFO_EVIDENCE
+    ):
         return {
             "case": "factory-varied",
             "sourceFunction": "FillFactoryFrontierTrainerParty",
@@ -2641,6 +2778,180 @@ def compact_residual_classifier_receipt(result: dict[str, Any]) -> dict[str, Any
     }
 
 
+def compact_timer0_fifo_state(state: dict[str, Any]) -> dict[str, Any]:
+    compact: dict[str, Any] = {
+        "timer0": {
+            key: state["timer0"][key]
+            for key in ("tm0cntL", "tm0cntH", "reload", "flags", "eventWhenDelta", "eventDue")
+        },
+        "deepStateAvailable": "fifo" in state and "dma" in state,
+        "cpu": state.get("cpu"),
+    }
+    if "fifo" not in state or "dma" not in state:
+        return compact
+    compact.update({
+        "fifo": state["fifo"],
+        "dma": [
+            {
+                key: row[key]
+                for key in (
+                    "channel", "control", "enabled", "repeat", "width", "timing",
+                    "destControl", "sourceControl", "internalCount",
+                    "internalNextCount", "internalWhenDelta", "destinationKind",
+                )
+            }
+            for row in state["dma"]
+        ],
+    })
+    return compact
+
+
+def timer0_fifo_transition_from_states(
+    before: dict[str, Any] | None, after: dict[str, Any] | None,
+) -> tuple[str, list[str], list[str], list[str], list[int]]:
+    if before is None or after is None or "fifo" not in before or "fifo" not in after:
+        return "state-unavailable", [], [], [], []
+    before_fifo = before["fifo"]
+    after_fifo = after["fifo"]
+    write_changed = [
+        name for name in ("a", "b")
+        if before_fifo[name]["fifoWrite"] != after_fifo[name]["fifoWrite"]
+    ]
+    read_changed = [
+        name for name in ("a", "b")
+        if before_fifo[name]["fifoRead"] != after_fifo[name]["fifoRead"]
+    ]
+    remaining_changed = [
+        name for name in ("a", "b")
+        if before_fifo[name]["internalRemaining"] != after_fifo[name]["internalRemaining"]
+    ]
+    changed_dma = [
+        before_row["channel"]
+        for before_row, after_row in zip(before["dma"], after["dma"])
+        if before_row != after_row
+    ]
+    if write_changed:
+        transition = "fifo-write-pointer-changed"
+    elif changed_dma:
+        transition = "dma-state-changed-without-fifo-write"
+    elif remaining_changed or read_changed:
+        transition = "fifo-consumption-state-changed"
+    else:
+        transition = "no-observed-fifo-dma-mutation"
+    return transition, write_changed, read_changed, remaining_changed, changed_dma
+
+
+def compact_timer0_fifo_classifier_receipt(result: dict[str, Any]) -> dict[str, Any]:
+    """Classify every Timer 0 crossing in the existing source-order traces.
+
+    The classifier deliberately reuses the already-censused member/control
+    selectors.  It adds deep mGBA state only at the bounded queue observation
+    edges, so it cannot turn a whole frame or a fixture identity into a timing
+    key.
+    """
+    raw = result.get("residualClassifierTraces", [])
+    if not raw:
+        raise RuntimeError(f"{result['case']}: Timer 0 FIFO classifier produced no traces")
+    profiles = [
+        {"trace": trace, "edges": classifier_trace_edges(trace)}
+        for trace in raw
+    ]
+    clean_minima: dict[tuple[str, str, str, str], int] = {}
+    clean_samples: dict[tuple[str, str, str, str], int] = {}
+    for item in profiles:
+        trace = item["trace"]
+        if trace["label"] != "control":
+            continue
+        for key, edge in item["edges"].items():
+            if int(edge["instructionPc"], 16) not in RESIDUAL_18_CLASSIFIER_QUEUE_INSTRUCTION_PCS:
+                continue
+            group_key = (trace["component"], trace["returnClass"], key[0], key[1])
+            clean_samples[group_key] = clean_samples.get(group_key, 0) + 1
+            previous = clean_minima.get(group_key)
+            if previous is None or edge["cycles"] < previous:
+                clean_minima[group_key] = edge["cycles"]
+
+    crossings: list[dict[str, Any]] = []
+    for item in profiles:
+        trace = item["trace"]
+        for key, edge in item["edges"].items():
+            before_state = edge.get("timer0FifoBefore")
+            after_state = edge.get("timer0FifoAfter")
+            raw_rescheduled = (
+                before_state is not None
+                and after_state is not None
+                and before_state.get("timerEventWhenRaw") != after_state.get("timerEventWhenRaw")
+            )
+            crossed_events = classifier_crossed_event_names(edge)
+            if not raw_rescheduled and TIMER0_EVENT_NAME not in crossed_events:
+                continue
+            group_key = (trace["component"], trace["returnClass"], key[0], key[1])
+            clean_cycles = clean_minima.get(group_key)
+            transition, write_changed, read_changed, remaining_changed, changed_dma = (
+                timer0_fifo_transition_from_states(before_state, after_state)
+            )
+            crossings.append({
+                "label": trace["label"],
+                "component": trace["component"],
+                "ordinal": trace["ordinal"],
+                "returnClass": trace["returnClass"],
+                "instructionPc": edge["instructionPc"],
+                "nextInstructionPc": edge["nextInstructionPc"],
+                "observedEdgeCycles": edge["cycles"],
+                "cleanMinimumEdgeCycles": clean_cycles,
+                "residualDeltaClass": (
+                    None if clean_cycles is None else edge["cycles"] - clean_cycles
+                ),
+                "fifoTransition": transition,
+                "fifoRefillObserved": transition == "fifo-write-pointer-changed",
+                "fifoWriteChanged": write_changed,
+                "fifoReadChanged": read_changed,
+                "fifoRemainingChanged": remaining_changed,
+                "dmaChannelsChanged": changed_dma,
+                "crossedEventNames": crossed_events,
+                "coDueEventNames": [
+                    name for name in crossed_events if name != TIMER0_EVENT_NAME
+                ],
+                "before": None if before_state is None else {
+                    **compact_timer0_fifo_state(before_state),
+                    "queue": edge["queueBefore"],
+                },
+                "after": None if after_state is None else {
+                    **compact_timer0_fifo_state(after_state),
+                    "queue": edge["queueAfter"],
+                },
+            })
+    crossings.sort(key=lambda row: (
+        row["component"], row["ordinal"], row["instructionPc"], row["nextInstructionPc"],
+    ))
+    for index, row in enumerate(crossings):
+        row["crossingOrdinal"] = index
+    clean_edge_baselines = [
+        {
+            "component": key[0],
+            "returnClass": key[1],
+            "instructionPc": key[2],
+            "nextInstructionPc": key[3],
+            "cleanMinimumEdgeCycles": cycles,
+            "sampleCount": clean_samples[key],
+        }
+        for key, cycles in sorted(clean_minima.items())
+    ]
+    return {
+        "schema": "factory-construction-timer0-fifo-crossings/v1",
+        "case": result["case"],
+        "oracleProfile": result["oracleProfile"],
+        "sourceFunction": result["sourceFunction"],
+        "observation": "selected-source-order-timer0-crossing-edges",
+        "selectedTraceCount": len(raw),
+        "memberTraceCount": sum(trace["label"] == "member" for trace in raw),
+        "cleanControlTraceCount": sum(trace["label"] == "control" for trace in raw),
+        "cleanEdgeBaselines": clean_edge_baselines,
+        "crossingCount": len(crossings),
+        "crossings": crossings,
+    }
+
+
 def compact_ewram_access_receipt(result: dict[str, Any]) -> dict[str, Any]:
     """Keep clean minima and scalar/source-relative alignment classes only."""
     grouped: dict[tuple[str, int], list[dict[str, Any]]] = {}
@@ -2767,13 +3078,19 @@ def main() -> None:
         raise SystemExit(
             "FACTORY_TIMER0_CADENCE_EVIDENCE=1 requires FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1"
         )
+    if TIMER0_FIFO_EVIDENCE and not (CYCLE_EVIDENCE and CALCULATE_MON_STATS_EVIDENCE):
+        raise SystemExit(
+            "FACTORY_TIMER0_FIFO_EVIDENCE=1 requires cycle and CalculateMonStats evidence"
+        )
     if CASE == "anchor":
         result = run_anchor()
     elif CASE == "liliana":
         result = run_liliana()
     else:
         result = run_factory_varied()
-    if TIMER0_CADENCE_EVIDENCE:
+    if TIMER0_FIFO_EVIDENCE:
+        result = compact_timer0_fifo_classifier_receipt(result)
+    elif TIMER0_CADENCE_EVIDENCE:
         result = compact_timer0_cadence_receipt(result)
     elif RESIDUAL_18_CLASSIFIER_EVIDENCE:
         result = compact_residual_classifier_receipt(result)
@@ -2791,7 +3108,9 @@ def main() -> None:
         result = compact_vblank_workload_receipt(result)
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps(result, indent=2) + "\n")
-    if TIMER0_CADENCE_EVIDENCE:
+    if TIMER0_FIFO_EVIDENCE:
+        message = f"wrote {OUTPUT}: {result['case']} {result['crossingCount']} Timer 0 FIFO crossings"
+    elif TIMER0_CADENCE_EVIDENCE:
         message = f"wrote {OUTPUT}: {result['case']} {len(result['boundaries'])} Timer 0 boundaries"
     elif RESIDUAL_18_CLASSIFIER_EVIDENCE:
         message = (

@@ -129,6 +129,79 @@ does not inspect trainer, set, mon, frame, cursor, or receipt identity.
 CreateMon, EV-spread, CalculateMonStats, factory-post-mon, and the live
 VBlank/audio/DMA workload remain unresolved, so the clock remains unwired.
 
+## Timer 0 FIFO/DMA conditional-refill census (2026-08-11)
+
+The new opt-in `FACTORY_TIMER0_FIFO_EVIDENCE=1` mode extends the existing
+classifier's retained source-order edges. It does not walk a whole epoch or
+turn an absolute tick into a lookup key: it captures the mGBA Timer 0,
+Direct Sound FIFO A/B, DMA1/2, relative named queue, and CPU instruction-edge
+state only at those already-selected member/control boundaries. The compact
+receipt is committed under
+`tests/fixtures/factory-construction-timer0-fifo-v1/` and contains no absolute
+master-cycle, raw event-`when`, pointer, frame, RNG, or party fields.
+
+| case | retained crossings | selected/member/control traces | SHA-256 |
+| --- | ---: | --- | --- |
+| anchor | 126 | 270 / 41 / 229 | `fec13d6140e667f4389eb29e1a659dc0c807f3b3393b2ce9bf85953a01c31c01` |
+| LILIANA | 57 | 127 / 19 / 108 | `aa21be0d7b6379a4a0ca0caaca8297dc0f27a9c789f8184b3e61c3bc5e464aff` |
+| legal varied | 73 | 176 / 25 / 151 | `0228b67250968d4a02f71bc1ad7670642918be9a6d25e8a166c6aa96a90666cf` |
+
+All three cases were repeated from fresh wrapper paths; all six JSON bytes
+are identical. Across the **256** retained crossings, every pair has complete
+deep state. Timer 0 is `TM0CNT_L=0xFB1A`, `TM0CNT_H=0x0080`, and due in the
+before queue snapshot but not the after snapshot. Both Direct Sound DMA
+channels are present in every pair with control `0xB640`: enabled, repeating,
+32-bit, special timing, fixed FIFO destination (`DMA1→FIFO A`, `DMA2→FIFO B`),
+and the expected source controls. Both channels change state at each sampled
+crossing, so the receipt does not mistake a queue crossing for an invariant
+callback duration.
+
+The finite census is:
+
+- **85** rows change both FIFO write pointers, with no read-pointer change;
+  every one is a member row, exactly one per previously censused +18 member.
+  FIFO `internalRemaining` is `3→2` for both A and B, and their DMA sources
+  remain `1` and `2`.
+- **171** rows change DMA state without a FIFO write: **129** clean controls
+  and **42** member rows. These are the non-refill Timer 0 crossings, with
+  observed edge classes `2×143`, `3×2`, `4×1`, `6×2`, `8×22`, and `11×1`.
+- The 85 refill rows have observed edge classes `20×75`, `24×2`, `26×7`,
+  and `29×1`. Their co-due classes are **66** none, **16** `GBA Video`,
+  **2** `GBA Audio Sample`, and **1** `GBA Video+GBA Audio Sample`.
+
+Cross-epoch clean-edge joining gives a finite residual result: **83/85**
+refills are exactly `+18` master cycles over the source-relative clean edge;
+the remaining two are deliberately unmatched, not fitted. They are the
+encrypted-accessor paths `anchor ordinal 25`,
+`0x082e7c94→0x0806a282` / `0x0806a51a→0x08068dca`, and `LILIANA ordinal 21`,
+`0x082e7c90→0x082e7c92` / `0x0806a51a→0x08068d9a`. The per-case local field
+has 77 `+18` and 8 null joins because some clean classes are absent in that
+epoch; the union of all three clean-control baseline sets closes the 83/85
+result. The exact correlation makes the observed +18 class conditional on a
+Direct Sound FIFO refill/DMA write, not an invariant Timer 0 callback cost.
+
+This closes the requested hardware classification at the retained boundaries,
+but not a source-general pure service-dispatch contract: FIFO refill timing
+still depends on the dereferenced audio/DMA state and the co-due queue class.
+Accordingly production is unchanged: `serviceCostMasterCycles` remains
+`null`, `runFactoryConstructionClock` is not wired, and no accessor/operation
+`cycles` field is populated. The smallest next observable is a safe,
+source-general reduction of the refill dispatch from these FIFO/DMA state
+classes, not an `18` constant.
+
+Reproduce a case with a fresh output path using:
+
+```sh
+FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1 \
+FACTORY_CALCULATE_MON_STATS_EVIDENCE=1 \
+FACTORY_TIMER0_FIFO_EVIDENCE=1 \
+  python3 tools/run-mgba-probe.py /tmp/fresh.json -- \
+  python3 tools/probe/trace-factory-construction-rng.py /tmp/fresh.json anchor
+```
+
+Use `liliana` or `factory-varied` for the other cases. The wrapper validates
+the compact JSON before accepting the known mGBA teardown SIGSEGV.
+
 ## Instruction-level +18 queue-observable checkpoint (2026-08-10)
 
 The existing construction probe now has a separate opt-in

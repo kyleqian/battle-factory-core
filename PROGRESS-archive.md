@@ -40543,3 +40543,24 @@ git; the current live ledger keeps the three load-bearing entries only.
   fitting a reducer or wiring the clock.
 - **1104:** censused the source components and refuted a fixed compiled segment;
   accessor histogram remained `0×77/+18×67/+117×5/+245×6/+263×1`.
+
+## 1109 — [MAIN worker, 2026-08-10] **#55 all-85 instruction/event classifier banked**
+
+- **State:** evidence and Tier-1 receipt committed at `6884b7e7`; #55 remains
+  open, production clock wiring and all `cycles` contracts stay untouched.
+- **Did:** fresh wrapper-mediated Battle Scene OFF runs for anchor/LILIANA/
+  varied, each repeated from a fresh path, produced byte-identical compact
+  packets. The classifier joins exactly **85** members and **488** explicit
+  residual-zero controls. Every member crosses **`GBA Timer 0`**; cost classes
+  are **66** plain, **16** +Video, **2** +Audio, **1** +Video+Audio. Cross-epoch
+  clean-edge matching is +18 for **83/85**; two same-return-class path gaps
+  retain exact PCs and relative queues with null controls rather than a fit.
+  Frozen v2 hashes remain pinned. Focused receipt+census **8/8**, smoke
+  **375/375**, typecheck, full `npm test` **899 files / 8,508 passed / 1
+  skipped**, and `npm run build` all pass.
+- **Next:** source-derive Timer 0 reload/service registration and decide the
+  scheduler contract from this evidence. Keep production wiring, cost fitting,
+  and co-due assumptions out until that source audit is complete.
+- **Notes:** updated construction schedule receipt and ISSUES #55. No
+  production, controller, presentation, animation, canonical-recording, or
+  unsupported-branch changes.

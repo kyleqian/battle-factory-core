@@ -5,6 +5,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1112 — [MAIN worker, 2026-08-11] **#55 Timer 0 conditional FIFO/DMA refill census**
+
+- **State:** #55 remains open; production construction-clock wiring and every
+  unresolved `cycles` field remain untouched. `serviceCostMasterCycles` stays
+  `null`.
+- **Did:** added opt-in `FACTORY_TIMER0_FIFO_EVIDENCE=1` compact evidence,
+  fresh OFF receipts for anchor/LILIANA/legal varied, and the Tier-1 receipt
+  test. The three packets are **126/57/73 = 256** retained crossings: **85**
+  FIFO write/refill rows and **171** DMA-only rows. Every refill has A/B write
+  pointer change and `internalRemaining 3→2`; cross-epoch clean joins are
+  **83/85 exact +18**, with two named null path exceptions. All six fresh
+  outputs are byte-identical; focused Timer0 suite is **16/16**.
+- **Next:** source-reduce the conditional Direct Sound FIFO refill dispatcher
+  and register that pure service seam. Do not wire the construction clock or
+  fit 18.
+- **Notes:** docs and `ISSUES.md` now record observed edge/service classes,
+  FIFO thresholds, DMA1/2 controls, co-due Video/Audio classes, and exact
+  hashes. Focused Timer0 **21/21**, smoke **375/375**, typecheck, full
+  `npm test` **903 files / 8,524 passed / 1 skipped**, and build (**631
+  modules**) are green. No production, animation, canonical Battle-2,
+  barrier, or recording import changed.
+
 ## 1111 — [MAIN worker, 2026-08-10] **#55 Timer 0 phase receipt and pure cadence registration**
 
 - **State:** #55 remains open; the live construction clock and every currently
@@ -48,24 +70,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** stale dual oracles were restarted before evidence work. The side
   worktree/branch is removed. No controller, presentation, barrier,
   recording-import, canonical Battle-2, or gameplay-outcome change landed.
-
-## 1109 — [MAIN worker, 2026-08-10] **#55 all-85 instruction/event classifier banked**
-
-- **State:** evidence and Tier-1 receipt committed at `6884b7e7`; #55 remains
-  open, production clock wiring and all `cycles` contracts stay untouched.
-- **Did:** fresh wrapper-mediated Battle Scene OFF runs for anchor/LILIANA/
-  varied, each repeated from a fresh path, produced byte-identical compact
-  packets. The classifier joins exactly **85** members and **488** explicit
-  residual-zero controls. Every member crosses **`GBA Timer 0`**; cost classes
-  are **66** plain, **16** +Video, **2** +Audio, **1** +Video+Audio. Cross-epoch
-  clean-edge matching is +18 for **83/85**; two same-return-class path gaps
-  retain exact PCs and relative queues with null controls rather than a fit.
-  Frozen v2 hashes remain pinned. Focused receipt+census **8/8**, smoke
-  **375/375**, typecheck, full `npm test` **899 files / 8,508 passed / 1
-  skipped**, and `npm run build` all pass.
-- **Next:** source-derive Timer 0 reload/service registration and decide the
-  scheduler contract from this evidence. Keep production wiring, cost fitting,
-  and co-due assumptions out until that source audit is complete.
-- **Notes:** updated construction schedule receipt and ISSUES #55. No
-  production, controller, presentation, animation, canonical-recording, or
-  unsupported-branch changes.

@@ -1354,6 +1354,51 @@ loudly. This remains deliberately unwired: no `runFactoryConstructionClock`
 change, no accessor/operation `cycles` population, no 18-cycle cost, and no
 co-due Video/Audio collapse.
 
+**Timer 0 FIFO/DMA conditional-refill census (2026-08-11):** the new opt-in
+`FACTORY_TIMER0_FIFO_EVIDENCE=1` packet extends the retained source-order
+classifier edges across anchor, LILIANA, and legal varied Scene-OFF epochs. It
+does not walk a whole epoch or add a timing lookup key; it captures the
+smallest mGBA Timer 0, Direct Sound FIFO A/B, DMA1/2, relative queue, and
+instruction-edge state at those selected member/control boundaries. The fresh
+packet hashes are anchor `fec13d61…`, LILIANA `aa21be0d…`, and varied
+`0228b672…`; each case was repeated from a fresh path and all six outputs were
+byte-identical. Counts are **126/57/73 = 256** Timer 0 crossings from
+**270/127/176** selected traces (**41/19/25** members and **229/108/151**
+controls).
+
+The finite hardware census is **85** FIFO-write transitions and **171** DMA
+state transitions without a FIFO write (**129** controls + **42** member
+rows). Every one of the 85 write rows is exactly one of the previously
+censused +18 members: both FIFO write pointers change, neither read pointer
+changes, `internalRemaining` is **3→2** for A and B, and the DMA sources stay
+`1`/`2`. Both DMA channels are present in every before/after pair with
+`0xB640` enabled/repeating 32-bit special-timing FIFO control, fixed
+destinations `DMA1→FIFO A` and `DMA2→FIFO B`. Non-refill rows have observed
+edge classes `2×143`, `3×2`, `4×1`, `6×2`, `8×22`, `11×1`; refill rows are
+`20×75`, `24×2`, `26×7`, `29×1`. Refill co-due classes are **66** none,
+**16** Video, **2** Audio Sample, and **1** Video+Audio Sample.
+
+Joining all three clean-control baseline sets yields **83/85 exact +18**
+refill deltas. The two unmatched paths remain null rather than fitted:
+anchor encrypted-accessor ordinal 25 (`0x082e7c94→0x0806a282`, return
+`0x0806a51a→0x08068dca`) and LILIANA ordinal 21
+(`0x082e7c90→0x0806a282`, return `0x0806a51a→0x08068d9a`).
+The local per-epoch join is 77 `+18` / 8 null,
+because six clean classes are supplied by another epoch. This correlation
+classifies the observed +18 as conditional on a Direct Sound FIFO refill/DMA
+write, not as an invariant Timer 0 callback cost.
+
+This closes the requested classification at retained boundaries but not a
+source-general pure service-dispatch contract: the refill still depends on
+dereferenced audio/DMA state and co-due queue class. Production remains
+unchanged — `serviceCostMasterCycles: null`, no `runFactoryConstructionClock`
+wiring, and no accessor/operation `cycles` population. The smallest next
+observable is a safe source-general reduction of the refill dispatch, not an
+`18` constant. Receipt and reproduction details are in
+`docs/issue55-construction-rng-schedule-receipt.md` under “Timer 0 FIFO/DMA
+conditional-refill census”; the Tier-1 pin is
+`tests/factoryTimer0FifoEvidence.test.ts`.
+
 **VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
 probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all
 **52/31/30** construction-epoch interrupts. Within each case every measured
