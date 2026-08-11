@@ -874,10 +874,21 @@ yielded sessions hid completion status. The #55 SetMonData worker likewise
 needed about 3 minutes of extra polling after its terminal verification
 returned before Vitest exited. The encrypted-accessor worker and supervisor
 then each saw a command return before its child verification exited, costing
-about 3 more minutes of polling/rechecks. Hits: 10; cost: about 51 minutes plus
-avoidable CPU contention. A
+about 3 more minutes of polling/rechecks. Two final #55 workers then collided
+with another full-suite process and needed retained-session polling plus
+compact-output reruns. Hits: 12; cost: about 57 minutes plus avoidable CPU
+contention. A
 launcher/tool response that visually distinguishes “still running; wait on
 this handle” from completion would prevent this class of mistake.
+
+## Incremental typecheck can miss a new test-only union error
+
+2026-08-11, #55 SetBoxMonData reducer: the ordinary incremental typecheck was
+green, but the production build's project pass found a new test fixture union
+access without an `in` guard. A forced typecheck reproduced it and the guard
+fixed it. Cost: about 3 minutes. Finish workers that add new test files with a
+forced project typecheck, or make the standard script invalidate new test
+inputs reliably. Hits: 1.
 
 ## Broad formatter passes make legacy semantic patches hard to recover
 

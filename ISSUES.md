@@ -1546,6 +1546,23 @@ and license no duration reducer. Two dereference classes remain: the unbounded
 command/pattern source window and malformed/dynamic `SoundMainRAM` sample
 targets. See `docs/issue55-m4a-mplay-callback-receipt-v2.md`.
 
+**SoundMainRAM pre-call target audit (2026-08-11, `38476663`):** a hermetic
+source/ELF extractor inventories **13** target-producing branches and **4**
+read/range rules. Across the committed v3 cases, **565** selected-channel
+snapshots / **113** VBlank observations map to **5** pinned WaveData assets;
+every retained pre-call target has a complete payload, valid current/count
+relation, and the required linear-path guard bytes. This closes the static
+pre-`MPlayMain` target-content inventory without a new oracle run.
+
+It does **not** close the actual mixer-entry target class: v3 snapshots before
+six `MPlayMain` calls, whose `ply_note` and dynamic `ply_xwave` paths may
+replace channel targets before `SoundMainRAM`. The exact next observable is an
+address-free `soundMainRamEntryTargets` descriptor at
+`sound-main-ram-entry`, including current relation, complete sample region,
+bus/storage role, alignment, and physical payload length. No duration reducer
+or production clock wiring is licensed. Full evidence:
+`docs/issue55-m4a-soundmainram-target-audit-v1.md`.
+
 **Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
 threading now makes the first post-cycle pixel boundary observe this debt.
 The WIN YES fixture's real first callback cursor/outcomes are

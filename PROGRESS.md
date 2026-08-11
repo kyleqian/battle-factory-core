@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1124 — [supervisor, 2026-08-11] **#55 SetBox + m4a target audit folded**
+
+- **State:** synchronous construction EV writes and the pre-`MPlayMain`
+  SoundMainRAM target inventory are united; #55 remains open and the live
+  construction clock stays null/unwired.
+- **Did:** source-reduced all **27** committed encrypted EV writes across
+  fields 26–31, including valid/invalid checksum paths. Folded side commit
+  `38476663`: **13** pointer-producing branches and **4** read/range rules
+  cover **565** selected-channel snapshots / **113** VBlank observations and
+  **5** pinned WaveData assets without a new oracle run.
+- **Next:** capture an address-free `soundMainRamEntryTargets` descriptor at
+  the actual `sound-main-ram-entry`, after all six `MPlayMain` calls, before
+  claiming mixer-entry target closure. Continue other #55 work only as
+  separately source-proven clock components; do not aggregate or wire yet.
+- **Notes:** orient folded animation-main through `77e3d325`; later animation
+  commits remain owned by the active animation supervisor. Combined focused
+  SetBox/DMA/m4a union **29/29** is green; each lane independently passed
+  smoke, typecheck, full `npm test`, and build. Final union gates follow below.
+
 ## 1123 — [MAIN worker, 2026-08-11] **#55 encrypted construction writes reduced**
 
 - **State:** the synchronous SetMonData→SetBoxMonData EV-write component is
@@ -39,22 +58,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   full `npm test` **916 files / 8,598 passed / 1 skipped** (**77.82s**), and
   build (**631 modules**, **6.32s**) are green. No generator/controller,
   presentation, animation, barrier, recording, or side-owned audit changed.
-
-## 1121 — [MAIN worker, 2026-08-11] **#55 varied adjacent runtime rows closed**
-
-- **State:** both legal-varied adjacent rows are closed twice fresh; #55 stays
-  open for the broader construction clock, which remains unwired.
-- **Did:** generalized the LILIANA selector across encrypted-accessor,
-  get-nature, and nature-attempt components. Fresh OFF scouts pin get-nature
-  ordinal 12's repeated division occurrence **4** and nature-attempt ordinal
-  63's occurrence **0**. Get-nature packets are byte-identical `21ea4158…`:
-  Timer late 5, DMA1, Audio late 4 at D+1. Nature-attempt is `d32aa8d8…`:
-  Video then Timer late 6 at D, DMA1, Audio late 5 at D+1. Both complete +18.
-- **Next:** this bounded adjacent-row step is complete. Continue #55 only with
-  a separately source-proven construction-clock/workload slice; do not fit a
-  cost or wire the clock from these three observations.
-- **Notes:** captures finished in **12.3/11.6s + 12.5/12.0s**; focused
-  selector/runtime **18/18**, smoke **375/375**, typecheck, full `npm test`
-  **916 files / 8,594 passed / 1 skipped**, and build (**631 modules**) are
-  green. No service cost, clock, controller, presentation, animation, barrier,
-  recording, or side-owned adjacent-audit artifact changed.
