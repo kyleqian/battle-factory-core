@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1139 — [supervisor, 2026-08-11] **Scene reveal verified; Rust M3 folded**
+
+- **State:** `master` is green with the generic LOGO_WAVE→BattleIntroSlide3
+  reveal and `rust-main` through `420eb58d`. S8 remains closed; canonical
+  Battle 2 remains stopped at tick 33331.
+- **Did:** independently reverified the new generated reveal **154/154** and
+  focused **33/33**. Folded Rust M3 rental generation, its ABI/decoder, and
+  full TS↔WASM rental differential matrix.
+- **Next:** take one complete source-owned status-summary/message phase after
+  11710 and before the exact generated send-out at 13385. Diagnostic
+  11711–11812 is already **102/102** but ends mid-phase; do not promote it
+  without the real source boundary or submit a Battle-2 action.
+- **Notes:** union gates: Cargo **28/28**, WASM RNG+rental differential
+  **363/363**, full `npm test` **949 files / 9,051 passed / 1 skipped**, build
+  **643 modules**. #55 remains null/unwired; no material decision is deferred.
+
 ## 1138 — [MAIN worker, 2026-08-11] **Generated BattleIntroSlide3 reveal exact**
 
 - **State:** implementation `5bb791b6` owns LOGO_WAVE's source-relative
@@ -38,21 +54,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** union gates: WASM differential **73/73**, Cargo **9/9**, full
   `npm test` **948 files / 8,759 passed / 1 skipped**, production build **643
   modules**. #55 remains null/unwired; no material decision is deferred.
-
-## 1136 — [MAIN worker, 2026-08-11] **Generic RNG-selected Frontier transition exact**
-
-- **State:** implementation `422e4e29` owns the live Factory transition draw
-  and renders its source-selected LOGO_WAVE; the tree is fully green. S8
-  remains closed and Battle 2 stays stopped at tick 33331.
-- **Did:** committed dense `win-go-on-battle2-transition-complete-off`
-  **249/249** twice fresh (11308–11556). Re-held room-dismiss **30/30**,
-  black **43/43**, generated intro **238/238**, action-ready **3/3**, far-side
-  LILIANA **115/115**, and shared `battle2-transition` **249/249**. Focused
-  **72/72**, smoke **375/375**, typecheck, full `npm test` **947 files / 8,686
-  passed / 1 skipped**, and production build are green.
-- **Next:** continue only with the remaining generated scene-assembly/status-
-  summary seam before the exact generated send-out; do not submit a Battle-2
-  action or resume the retired canonical march.
-- **Notes:** selection is one source `Random()%12` call stored as immutable
-  presentation state; rendering is RNG-pure and no trainer/battle/turn/tick
-  production key was added. #55 and its construction clock are untouched.
