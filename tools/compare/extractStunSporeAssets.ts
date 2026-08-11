@@ -21,7 +21,7 @@ mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify({
   source: {
     carrier:
-      "FRONTIER_MON_PARASECT_2 set 282; SPECIES_HOPPIP 187; MOVE_STUN_SPORE 78; Scene-ON",
+      "FRONTIER_MON_GLOOM_1 set 167 is the lowest Level-50 carrier; staged Scene-ON evidence uses legal SPECIES_HOPPIP 187; MOVE_STUN_SPORE 78",
     powder:
       "graphics/battle_anims/sprites/poison_powder.png; ANIM_TAG_STUN_SPORE",
     palette:
