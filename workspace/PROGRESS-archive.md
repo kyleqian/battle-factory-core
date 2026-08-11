@@ -13,6 +13,25 @@
   full `npm test` **950 files / 9,055 passed / 1 skipped**, build **645
   modules**. Both lane branches were fully folded; #55 remains null/unwired.
 
+## 1142 — [MAIN worker, 2026-08-11] **Post-ack handoff bounded; display-tail blocker isolated**
+
+- **State:** the complete 13315–13384 acknowledgement-owned phase is
+  **69/70 twice fresh**, not accepted. S8 stays closed; canonical Battle 2
+  remains stopped at tick 33331.
+- **Did:** fixed the unbounded-hold clock leaking into the player-summary
+  fade; typed the A-visible and handoff+32 destroy boundaries. Fresh OFF RAM/
+  OAM evidence pins 13384's sole 18-pixel residual to the settled #56
+  task-destroy/pending-OAM display latch, with no safe generic discriminator.
+- **Next:** close frame 13384 only if a source-derived display-latch receipt
+  becomes available; otherwise retain this evidence checkpoint. Do not
+  promote 13315–13383 alone or submit a Battle-2 action.
+- **Notes:** two trainers, transition indexes 0/5, healthy/status/fainted rows,
+  new-key semantics, render purity, and unchanged receipts/RNG/rules/parties/
+  outcomes are pinned. Controls held twice: **65/65, 154/154, 249/249,
+  238/238, 3/3, 256/256, 115/115**. Focused **56/56**, smoke **375/375**,
+  typecheck, full `npm test` **950 files / 9,055 passed / 1 skipped**, and
+  build **645 modules** are green.
+
 ## 1140 — [MAIN worker, 2026-08-11] **Generated status-summary/message assembly exact**
 
 - **State:** the generic post-slide presentation owns the complete concurrent

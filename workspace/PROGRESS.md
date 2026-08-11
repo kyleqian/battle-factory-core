@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1145 — [supervisor, 2026-08-11] **Battle-6 intro generalization verified**
+
+- **State:** `master` is green with a legal noncanonical Battle-6 LUKAS reveal
+  driven through five ordinary round-controller wins/declines. S8 remains
+  closed; the retired Battle-2 march and #56 tail remain untouched.
+- **Did:** reviewed the data-only stage/fixture and independently reverified
+  the complete reveal **154/154** plus focused controller/purity **81/81**.
+  LUKAS uses transition index 3 and sets `267/268/269` vs `270/341/284`.
+- **Next:** extend the same legal Battle-6 proof through the complete
+  status-summary/message assembly, preserving the canonical controls and
+  avoiding post-ack frame 13384.
+- **Notes:** worker gates: controls **154, 65, 249, 238, 3, 256, 115** exact;
+  smoke **375/375**, typecheck, full `npm test` **952 files / 9,136 passed / 1
+  skipped**, build **645 modules**. No lane branch is ahead.
+
 ## 1144 — [MAIN worker, 2026-08-11] **Later-round generated intro reveal exact**
 
 - **State:** the generic round-controller/presentation seam is exact for legal
@@ -33,22 +48,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** Cargo **62/62**, rebuilt WASM smoke, explicit RNG/rental/party
   differential **440/440**, full `npm test` **951 files / 9,134 passed / 1
   skipped**, build **645 modules**. Both lane branches are fully folded.
-
-## 1142 — [MAIN worker, 2026-08-11] **Post-ack handoff bounded; display-tail blocker isolated**
-
-- **State:** the complete 13315–13384 acknowledgement-owned phase is
-  **69/70 twice fresh**, not accepted. S8 stays closed; canonical Battle 2
-  remains stopped at tick 33331.
-- **Did:** fixed the unbounded-hold clock leaking into the player-summary
-  fade; typed the A-visible and handoff+32 destroy boundaries. Fresh OFF RAM/
-  OAM evidence pins 13384's sole 18-pixel residual to the settled #56
-  task-destroy/pending-OAM display latch, with no safe generic discriminator.
-- **Next:** close frame 13384 only if a source-derived display-latch receipt
-  becomes available; otherwise retain this evidence checkpoint. Do not
-  promote 13315–13383 alone or submit a Battle-2 action.
-- **Notes:** two trainers, transition indexes 0/5, healthy/status/fainted rows,
-  new-key semantics, render purity, and unchanged receipts/RNG/rules/parties/
-  outcomes are pinned. Controls held twice: **65/65, 154/154, 249/249,
-  238/238, 3/3, 256/256, 115/115**. Focused **56/56**, smoke **375/375**,
-  typecheck, full `npm test` **950 files / 9,055 passed / 1 skipped**, and
-  build **645 modules** are green.
