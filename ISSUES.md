@@ -1285,12 +1285,24 @@ and relevant audio I/O state. Two fresh Scene-OFF runs per case are byte-
 identical: all **113** captured keys repeat with **0** unequal m4a costs. The
 packet contains no frame, tick, RNG cursor, address, construction identity, or
 absolute-cycle lookup. This remains an evidence boundary, not a reducer:
-`coverage.complete` is false for four residual dereference classes covering
+The v3 packet's `coverage.complete` is false for four residual dereference classes covering
 handler-dependent/unbounded MPlayMain command and callback reads, transitive
 CgbSound callback reads, and malformed/dynamic SoundMainRAM sample targets.
 The next admissible audio step is a complete instruction-traced indirect-read
 contract or controlled repeated cross-state equivalence—not a state-duration
 table. See `docs/issue55-m4a-source-state-receipt-v3.md`.
+
+**CgbSound callback/read closure (2026-08-10, `d55da1ac`):** a direct-emitted
+compact v2 packet closes one of those four classes source-generally: all
+**11** `CgbOscOff`/`MidiKeyToCgbFreq` paths plus complete fixed table sizes and
+digests are mechanically pinned. Two fresh Scene-OFF runs per case reproduce
+**52/31/30 = 113** exact v3-state-digest/m4a-cost joins with **0** unequal
+costs. The committed evidence is **48,062 bytes** total; the provisional
+~26 MB duplicated state packets were squash-excluded from master history.
+This licenses no duration reducer. Three dereference classes remain explicit:
+two `MPlayMain` handler/callback read classes and malformed/dynamic
+`SoundMainRAM` sample targets. See
+`docs/issue55-m4a-cgb-callback-receipt-v2.md`.
 
 **Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
 threading now makes the first post-cycle pixel boundary observe this debt.

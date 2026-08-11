@@ -40377,3 +40377,34 @@ both verify scripts/census independently re-verified before this entry.)*
   match committed hashes. Completed direct-call coverage is **312/480** and
   **100,214/1,768,691 = 5.666%** of source callee cycles. No duration/identity
   fit, fixture mutation, canonical Battle-2, animation, or barrier change.
+## 1097 — [solo session, 2026-08-10] **User priority decisions recorded: #55 grind authorized; #71 stays faithful; S11 out of scope for now**
+
+- **State:** docs-only commit; no engine, test, or fixture change. Full
+  decision text lives in ROADMAP's S10 block ("User decisions 2026-08-10")
+  plus dated notes on ISSUES #55/#71 and the S11 stage heading.
+- **Did:** relayed the S10-close report to the user and took five decisions:
+  (1) **#55 construction clock: grind it out** — user-authorized to
+  completion, opinion check-in expected after a few more sessions;
+  (2) **#71: no intro-animation divergence** — user was offered a
+  browser-only divergence and chose faithful Scene-OFF behavior (no intros),
+  so #71's remainder is internal cleanup at filler priority;
+  (3) **#39 stays deferred** until the above are done; (4) **pacing polish
+  is user-driven** — the user plays on their own time, recorder traces are
+  the input, no pacing slices until traces exist; (5) **S11 audio out of
+  scope for now** — entry kept in the roadmap, nothing schedules it;
+  (6) **Noland back IN scope** (same-day follow-up) — source fact-check
+  showed he is NOT an invariant (`FillFactoryBrainParty` RNG-draws his
+  rentals live, excludes the player's rentalMons, `challengeNum + 2` IVs),
+  so deep-sequence testing under #55 reaches him at battles 21/42; rides
+  with the #55 program; Gate-2 tick not reopened
+  (`docs/gate2-noland-scope-note.md` addendum).
+- **Next:** main lane continues #55 per its own bounded Next lines. Fold
+  `animation-main` at the next orient (it was 30 commits ahead at entry
+  1096's 16:04 check). When user play traces arrive, they become the
+  pacing-fix worklist.
+- **Notes:** the #71 decision followed a fact-check the user requested:
+  both sides DO animate in the real game, but only under Battle Scene ON;
+  the OFF profile's no-intro behavior is proven faithful (ISSUES #71
+  Slice-D record). Difficulty-tier question also answered from source:
+  challenge scaling is deterministic (`factoryOpponentGeneration.ts:263`,
+  `challengeNum = floor(streak/7)`) and independent of #55's timing model.
