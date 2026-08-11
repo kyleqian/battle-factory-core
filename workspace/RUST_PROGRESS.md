@@ -5,14 +5,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R2 — [supervised session, 2026-08-11] **M1+M2+M3 landed: ABI, adapter, rental-generation differential green**
+## R2 — [supervised session, 2026-08-11] **M1→M3d landed: ABI, adapter, rental generation AND mon construction differential-green**
 
-- **State:** **M1, M2, and M3 (rental generation) are DONE and folded
-  into rust-main.** master merged in at session start; every fold
-  gate-verified by the supervisor. Cargo 28/28, fmt+clippy clean (gates
-  on as of M1), wasm artifact 40,034 B, parity specs 363/363 both
-  default and POKEBENCH_ENGINE=wasm, full npm test 949 files / 9,046
-  passed / 1 pre-existing skip (worker-run on identical fold content).
+- **State:** **M1, M2, and the FULL M3 vertical slice (rental generation
+  + mon construction, M3a–M3d) are DONE and folded into rust-main.**
+  master merged in at session start; six worker folds, every one
+  gate-verified by the supervisor before merging. Wind-down union gates,
+  supervisor-run on rust-main: cargo **62/62** + fmt/clippy clean, wasm
+  artifact 62,344 B, parity specs **440/440** (77 party-member + 290
+  rental + 73 rng) in BOTH default and POKEBENCH_ENGINE=wasm modes, full
+  npm test **950 files / 9,123 passed / 1 pre-existing skip**
+  (tests/animation/hypnosisEvidence), soak **vanilla 20/20 OK** and
+  **full 60/60 OK**. No file under src/ or tools/ was modified all
+  session; tests/ gained exactly the three lane-created parity files.
   **M3c (mon-construction data groundwork) is also folded:** codegen
   extended additively (FRONTIER_MONS moves+ev_flags, MOVE_PP 355,
   held-item hold effects, SPECIES 376 rows with base
@@ -22,8 +27,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   moves/ev-mask) against the JSON independently. SPECIES is deliberately
   scoped to the 376 frontier-referenced species (25 SPECIES_OLD_UNOWN_*
   rows lack exp entries; check verified: 0 referenced species missing).
-  M3d (createFactoryCorpusPartyMember port + boundary + parity)
-  dispatched as the session's last port step.
+  - **M3d:** `create_factory_corpus_party_member`/`_party` ported
+    (ability-slot taken from the instance per the TS spec — NOT
+    `ability_slot_for_personality`, which is the generation-time
+    derivation); `fw_create_factory_party_member` 91-byte documented
+    boundary; decoder + `tests/factoryPartyMemberParity.test.ts` — full
+    882-set sweep, 72-config variation block, error parity, party
+    triple.
   - **M3a:** `core-rs/tools/gen-data.mjs` codegen → checked-in
     `gen_tables.rs` (882 frontier mons, 63 held items, 411
     species-second-ability, 25 natures, round policy), deterministic +
@@ -78,17 +88,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   length-prefixed LE byte buffers via `fw_alloc(len) -> ptr` /
   `fw_free(ptr, len)`; every layout is documented in factory-wasm doc
   comments and mirrored by the TS-side decoder next to the adapter.
-- **Next:** M3c is data groundwork only (codegen extensions: frontier-mon
-  moves/EV masks, move PP, held-item hold effects, species base
-  stats/gender/exp@50, nature modifiers; plus stats/gender/shiny/EV
-  helper ports). The step after (M3d, next session unless time remains):
-  port `createFactoryCorpusPartyMember`, add its boundary + parity file.
-  The #55 construction clock (`factoryConstructionClock.ts`) stays
-  unported — open TS-lane work; the current single-cursor contract is
-  the spec.
-- **Notes:** clippy/fmt gates turn on with this step per
-  RUST_SUPERVISOR.md. TS lane's open #55 construction-clock work noted for
-  M3 sequencing (no porting what it wires into until TS closes it).
+- **Next:** M4 expansion, port by family with the harness deciding
+  done-ness. The natural candidates (opponent selection in
+  `factoryRoundBattleOrchestrator.ts`, anything near
+  `factoryConstructionClock.ts`) are ALL #55-adjacent modules the TS
+  lane has open — per the sequencing rule they stay unported until TS
+  closes and wires the clock. Conflict-free M4 openers to scout next
+  session: `factoryDraftStateAdapter`/draft-screen state, swap-flow
+  policy (`factory-round-policy.json` roundFlow), or the battle-kernel
+  leaf families (type chart, damage stages) after checking ISSUES.md
+  afresh. Keep following the M2/M3 pattern: codegen-data step, then
+  port+boundary+parity step.
+- **Notes:** clippy/fmt gates are ON as of M1. Session ops findings:
+  (1) the shared OFF oracle at :8014 was killed mid-session by a
+  process-group sweep (its log ended mid-line at "listening"); restart
+  recipe that survives: spawn `run-oracle.sh --profile battle-scene-off`
+  via `python3 subprocess.Popen(..., start_new_session=True)` — plain
+  nohup+disown from a tool shell did NOT survive. Rust-lane workers
+  never query the oracle; it is only a run-subagent launch precondition.
+  (2) A failed launch leaves a dead worker worktree + branch — remove
+  exactly that timestamped pair before relaunching. (3) TS quirk
+  discovered by the M3b port, worth knowing when reading parity output:
+  challengeNum 7 + better-range fixed IV deliberately throws in TS
+  (documented retail-OOB boundary, factoryRentalGeneration.ts:184); the
+  parity matrix compares errors symmetrically there.
 
 ---
 

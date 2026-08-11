@@ -56,6 +56,17 @@ Current exports:
   export in `crates/factory-wasm/src/lib.rs` — read that comment before
   touching the decoder. `core-rs/adapter/factoryEngine.ts`'s
   `decodeRentalGeneration` mirrors it field-for-field.
+- `fw_create_factory_party_member(set_id, personality, fixed_iv,
+  ability_slot, ot_id) -> ptr` — runs
+  `factory_core::mon_construction::create_factory_corpus_party_member` and
+  returns an `fw_alloc`'d buffer in the same total-length/status-byte
+  convention: either a length-prefixed utf8 error message or the fixed-width
+  91-byte member payload (numeric/enum fields only — names are resolved
+  decoder-side). `ability_slot` must be 0 or 1 (see the export's caller
+  contract). The exact byte layout is documented in the doc comment directly
+  over the export in `crates/factory-wasm/src/lib.rs`;
+  `core-rs/adapter/factoryEngine.ts`'s `decodeFactoryPartyMember` mirrors it
+  field-for-field.
 
 Build the artifact with `./build-wasm.sh` (from `core-rs/`, or any cwd —
 it resolves its own directory). It writes
@@ -129,6 +140,28 @@ NODE_OPTIONS=--max-old-space-size=8192 npx vitest run tests/factoryRentalParity.
 POKEBENCH_ENGINE=wasm NODE_OPTIONS=--max-old-space-size=8192 npx vitest run tests/factoryRentalParity.test.ts --no-watch --pool=forks
 ```
 
+`core-rs/adapter/factoryEngine.ts` extends the same `FactoryEngine` with
+`createFactoryCorpusPartyMember` / `createFactoryCorpusParty`:
+`decodeFactoryPartyMember` turns an `fw_create_factory_party_member` buffer
+into exactly `createFactoryCorpusPartyMember`'s `FactoryCorpusPartyMemberState`
+shape (`src/engine/factoryCorpusParty.ts`) — `speciesName`/`abilityName`/
+`natureName`/`itemName`/`holdEffectName` resolved from the same JSONs the TS
+engine reads (`species-stats.json`, `ability-item-hooks.json`,
+`natures.json`, `battle-frontier-held-items.json`), `gender` from the wasm
+export's 3-value byte convention. `tests/factoryPartyMemberParity.test.ts`
+runs both engines over the full 882-set Frontier corpus (one `it()` sweeping
+every set id, with a per-set personality searched deterministically until
+its derived nature matches the set's declared nature — at most 25 steps),
+a 72-config variation block (`fixedIv` x `abilitySlot` x `otId` on 6 sets
+spanning both branches of the ability-slot rule), 3 error-parity cases (set
+id range, nature/personality mismatch, fixed-IV range) asserting identical
+thrown messages on both engines, and one `createFactoryCorpusParty` triple:
+
+```sh
+NODE_OPTIONS=--max-old-space-size=8192 npx vitest run tests/factoryPartyMemberParity.test.ts --no-watch --pool=forks
+POKEBENCH_ENGINE=wasm NODE_OPTIONS=--max-old-space-size=8192 npx vitest run tests/factoryPartyMemberParity.test.ts --no-watch --pool=forks
+```
+
 ## Data tables
 
 `crates/factory-core/src/gen_tables.rs` is **generated, never hand-edited**.
@@ -172,12 +205,19 @@ Tables:
 `src/engine/factoryRentalGeneration.ts` / `src/engine/opponentGen.ts` that
 consume those tables, plus row pins for the tables above; its
 `#[cfg(test)]` pins cite the TS fixture or JSON row each expected value
-came from. `crates/factory-core/src/stats.rs`, `gender.rs`, and
-`mon_construction.rs` hold the mon-construction path's pure helpers ported
-from `src/engine/stats.ts`, `src/engine/monGender.ts`, and
-`src/engine/factoryCorpusParty.ts` respectively (stat formulas, gender
-resolution, shininess, and EV-spread derivation) — groundwork for a future
-port of `createFactoryCorpusPartyMember` itself, which is not yet ported.
+came from. `crates/factory-core/src/stats.rs` and `gender.rs` hold the stat
+formulas and gender resolution ported from `src/engine/stats.ts` and
+`src/engine/monGender.ts`. `crates/factory-core/src/mon_construction.rs`
+holds `is_shiny` / `derive_evs` plus `create_factory_corpus_party_member` /
+`create_factory_corpus_party` themselves — the full port of
+`src/engine/factoryCorpusParty.ts`'s `createFactoryCorpusPartyMember` /
+`createFactoryCorpusParty`, combining those two helpers with `gen_tables`,
+`gender`, `rental_data::nature_from_personality`, and `stats`. Its
+`PartyMemberError` enum covers the three real caller-reachable throws (set
+id range, nature/personality mismatch, fixed-IV range); every other TS throw
+in that function is impossible against the generated `gen_tables` (species/
+move/item/ability lookups always resolve) and uses `.expect()` instead,
+mirroring `rental_generation.rs`'s `GenerationError` doc comment.
 
 ## Ground rules
 
