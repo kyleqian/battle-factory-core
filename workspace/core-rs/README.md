@@ -46,6 +46,16 @@ Current exports:
 - `fw_alloc(len: u32) -> ptr` / `fw_free(ptr, len: u32)` — caller-allocated
   buffers in linear memory; see the doc comments in
   `crates/factory-wasm/src/lib.rs` for the exact safety contract.
+- `fw_generate_initial_rentals(rng_value, factory_win_streak, rents_count,
+  player_trainer_id, has_construction_rng, construction_rng_value) -> ptr`
+  — runs `factory_core::rental_generation::generate_initial_factory_rentals`
+  and returns an `fw_alloc`'d buffer: a `u32` total length, a status byte,
+  then either a length-prefixed utf8 error message or the fixed-width
+  challenge/rentals/ledger payload. The exact byte layout (every field's
+  offset and width) is documented in the doc comment directly over the
+  export in `crates/factory-wasm/src/lib.rs` — read that comment before
+  touching the decoder. `core-rs/adapter/factoryEngine.ts`'s
+  `decodeRentalGeneration` mirrors it field-for-field.
 
 Build the artifact with `./build-wasm.sh` (from `core-rs/`, or any cwd —
 it resolves its own directory). It writes
@@ -97,6 +107,26 @@ NODE_OPTIONS=--max-old-space-size=8192 npx vitest run tests/rngEngineParity.test
 
 # Opt into wasm explicitly — fails loudly if the artifact is missing:
 POKEBENCH_ENGINE=wasm NODE_OPTIONS=--max-old-space-size=8192 npx vitest run tests/rngEngineParity.test.ts --no-watch --pool=forks
+```
+
+`core-rs/adapter/factoryEngine.ts` follows the same pattern one level up:
+`decodeRentalGeneration` turns an `fw_generate_initial_rentals` buffer into
+exactly the TS spec engine's `FactoryInitialRentalGenerationResult` shape
+(species names resolved from `species_id` via `src/data/gen/species-stats.json`,
+ledger entries' phase-dependent fields present-or-absent exactly as the TS
+engine produces them), and `wasmFactoryEngine()` wraps it as a
+`FactoryEngine`. `tests/factoryRentalParity.test.ts` runs both engines over
+a 288-config matrix (16 seeds x 3 `factoryWinStreak` values x 3
+`rentsCount` values x 2 `constructionRngValue` values) and asserts full
+`toEqual` on the result — including the complete `drawLedger` — or, for the
+configs that are genuine TS-engine error states (challenge 7 with a
+better-range slot; see `GenerationError::FixedIvUndefined`'s doc comment in
+`crates/factory-core/src/rental_generation.rs`), asserts both engines throw
+the same message:
+
+```sh
+NODE_OPTIONS=--max-old-space-size=8192 npx vitest run tests/factoryRentalParity.test.ts --no-watch --pool=forks
+POKEBENCH_ENGINE=wasm NODE_OPTIONS=--max-old-space-size=8192 npx vitest run tests/factoryRentalParity.test.ts --no-watch --pool=forks
 ```
 
 ## Data tables
