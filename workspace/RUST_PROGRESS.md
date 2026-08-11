@@ -98,7 +98,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   policy (`factory-round-policy.json` roundFlow), or the battle-kernel
   leaf families (type chart, damage stages) after checking ISSUES.md
   afresh. Keep following the M2/M3 pattern: codegen-data step, then
-  port+boundary+parity step.
+  port+boundary+parity step. **Resolved by user decision 2026-08-11
+  (recorded by the planning session): open M4 with the battle-kernel
+  leaf family — see the M4 bullet in RUST_SUPERVISOR.md and
+  `docs/rust-m4-battle-kernel-scout.md`.**
 - **Notes:** clippy/fmt gates are ON as of M1. Session ops findings:
   (1) the shared OFF oracle at :8014 was killed mid-session by a
   process-group sweep (its log ended mid-line at "listening"); restart

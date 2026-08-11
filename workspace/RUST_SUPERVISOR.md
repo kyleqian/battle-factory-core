@@ -65,6 +65,12 @@ canonical and this lane must never make the TS side worse.
   wires into until the TS side closes cost composition and wires it first
   — no porting moving targets. Same for any module a TS lane has open
   work on (check ISSUES.md and PROGRESS.md at orient).
+  **M4 opener (user decision 2026-08-11): the battle-kernel leaf family**
+  — `src/engine/damageCalc.ts` + `turnOrder.ts` + `turnRng.ts`
+  (`stats.ts`/`monGender.ts` are already ported, M3c). Module inventory,
+  fresh conflict check, census pointers, and a suggested step split are
+  in `docs/rust-m4-battle-kernel-scout.md`; re-verify the conflict check
+  at orient.
 
 ## Verification gates (every session)
 
