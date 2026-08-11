@@ -1315,6 +1315,25 @@ crossings from the source-derivable Timer 0 reload — still no fit, clock
 stays unwired. Full detail: construction schedule receipt, "queue identity
 BANKED" section.
 
+**All-85 Timer 0 classifier (2026-08-10):** the new opt-in
+`FACTORY_RESIDUAL_18_CLASSIFIER_EVIDENCE=1` packet and Tier-1 receipt join all
+**85** known +18 members to exactly **488** residual-zero controls across
+anchor, LILIANA, and legal varied Scene-OFF construction epochs. Every member
+has one minimal instruction increment whose crossed event is **`GBA Timer 0`**;
+the observed service classes are **66** plain m4a-sample Timer 0, **16** with
+co-due Video, **2** with co-due Audio Sample, and **1** with both. Cross-epoch
+clean-edge matching measures +18 for **83/85**. Two encrypted-accessor paths
+have no identical clean edge in their same return class and are deliberately
+left with null local controls, not filled by a fitted constant: anchor
+`0x082e7c94→0x0806a282` (`0x0806a51a→0x08068dca`) and LILIANA
+`0x082e7c90→0x082e7c92` (`0x0806a51a→0x08068d9a`). Both still cross only a due
+Timer 0 with retained relative queue before/after evidence. Three fresh
+wrapper-mediated OFF cases were each rerun from a fresh path; all six compact
+JSON outputs were byte-identical. Receipt and exact exception queue distances:
+`docs/issue55-construction-rng-schedule-receipt.md` §"Instruction/event
+classification". The source-derived scheduler/cost registration is the next
+step; production clock wiring remains out of this evidence commit.
+
 **VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
 probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all
 **52/31/30** construction-epoch interrupts. Within each case every measured

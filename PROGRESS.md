@@ -5,30 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1108 — [solo session, 2026-08-10 ~23:30] **#55 instruction-queue observable UNBLOCKED: +18 identity = due `GBA Timer 0` event crossing**
+## 1109 — [MAIN worker, 2026-08-10] **#55 all-85 instruction/event classifier banked**
 
-- **State:** probe edit + docs only; no engine, reducer, or fixture change.
-  #55 remains open, `cycles` stay `null`, clock stays unwired. Frozen-
-  evidence insurance passed: the standard v2 anchor packet regenerated with
-  the edited probe still hashes to the committed `631bd214…`.
-- **Did:** refuted the compiled-shim premise (the vendored ffi declares
-  `mTiming`/`mTimingEvent` fully) and proved the exit-139 was the known
-  teardown crash, not a queue-access fault (it reproduces with zero walks;
-  20,500 guarded walks ran fault-free and savestate-inert). Landed
-  `snapshot_timing_queue()` (NULL/link/name capped, no pointer tokens) and
-  filled the packet's `eventQueue` field. Banked the instruction packet
-  twice-fresh byte-identical (`2e3b089c…`, 162,353 B, wrapper exit 0): the
-  single matched +18 edge (`0x082e7572→0x082e7574`, clean 2 vs member 20)
-  crosses a due **`GBA Timer 0`** (m4a sample timer) at queue head; the
-  clean control's matched edge crosses none.
-- **Next:** measure the Timer 0 service-cost class across all 85 census
-  joins with this packet mode; then model crossings from the
-  source-derivable Timer 0 reload. No fit, no clock wiring until that
-  closes honestly.
-- **Notes:** receipt updated (schedule receipt "queue identity BANKED"
-  section) + ISSUES #55 checkpoint paragraph. Validation scripts in session
-  scratchpad only. Suite untouched by this change (Python probe only); full
-  suite + both soak gates were verified green at entry 1107 tonight.
+- **State:** evidence and Tier-1 receipt committed at `6884b7e7`; #55 remains
+  open, production clock wiring and all `cycles` contracts stay untouched.
+- **Did:** fresh wrapper-mediated Battle Scene OFF runs for anchor/LILIANA/
+  varied, each repeated from a fresh path, produced byte-identical compact
+  packets. The classifier joins exactly **85** members and **488** explicit
+  residual-zero controls. Every member crosses **`GBA Timer 0`**; cost classes
+  are **66** plain, **16** +Video, **2** +Audio, **1** +Video+Audio. Cross-epoch
+  clean-edge matching is +18 for **83/85**; two same-return-class path gaps
+  retain exact PCs and relative queues with null controls rather than a fit.
+  Frozen v2 hashes remain pinned. Focused receipt+census **8/8**, smoke
+  **375/375**.
+- **Next:** source-derive Timer 0 reload/service registration and decide the
+  scheduler contract from this evidence. Keep production wiring, cost fitting,
+  and co-due assumptions out until that source audit is complete.
+- **Notes:** updated construction schedule receipt and ISSUES #55. No
+  production, controller, presentation, animation, canonical-recording, or
+  unsupported-branch changes.
 
 ## 1107 — [solo session, 2026-08-10 ~21:40] **Independent audit of the evening #55 sessions: all green; skipped soak gates re-run and restated in SUPERVISOR.md**
 
