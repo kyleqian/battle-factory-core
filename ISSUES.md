@@ -1589,6 +1589,29 @@ and mutable-route provenance classes are both complete for all **565** selected
 slots. No duration reducer, service cost, or clock wiring is licensed. See
 `docs/issue55-m4a-mixer-entry-provenance-v2.md`.
 
+**MPlayMain command/pattern read-bound closure (2026-08-11):** a hermetic v1
+contract reuses the byte-identical v3 fixtures and pinned ROM/ELF without an
+oracle run. Of **1,130** sixth-player track snapshots, **1,017** are active;
+**917** have `wait>0` and cannot read command bytes in the single possible
+tempo pass, while all **100/100** wait-zero candidates replay to a bounded
+wait/fine outcome with **0** incomplete, **90** distinct read sets, and maxima
+of **5 commands / 11 byte reads**. Current commands, active pattern returns,
+and every encoded GOTO/PATT/REPT destination normalize to one of nine
+`mus_b_factory_N` roles with checked offsets, lengths, and digests. Malformed
+stacks, recursive control, unknown commands/selectors, unavailable bounds, and
+MEMACC without bounded mutable state fail closed.
+
+This closes the formerly unbounded dereference class as a complete safety/read
+superset, but isolates one exact selector defect in v3: its
+`PLAYER_POINTER_FIELDS` zeroes MusicPlayerInfo bytes `0x20..0x23`
+(`tempoI`/`tempoC`) while leaving the actual `memAccArea` pointer at
+`0x18..0x1b` in `scalarBytes`. The live source invariant and retained
+`tempoD=144`/`tempoU=256` prove at most one pass, so replaying every wait-zero
+candidate covers all reads; v3 cannot choose zero versus one pass for a cost
+reducer. Do not alter the preserved v3 receipt or infer that selector. No
+duration or clock wiring is licensed. Evidence:
+`docs/issue55-m4a-command-read-contract-v1.md`.
+
 **Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
 threading now makes the first post-cycle pixel boundary observe this debt.
 The WIN YES fixture's real first callback cursor/outcomes are

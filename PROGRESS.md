@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1127 — [bounded MAIN worker, 2026-08-11] **#55 MPlay read bounds closed; selector isolated**
+
+- **State:** the remaining v3 MPlayMain command/pattern dereferences are fully
+  bounded for all committed states; exact zero/one-pass selection remains
+  unavailable, #55 stays open, and the construction clock remains unwired.
+- **Did:** source-replayed **1,130** track snapshots: **1,017 active**, **917
+  wait>0**, and all **100/100** wait-zero candidates complete with **0**
+  incomplete, **90** read sets, max **5 commands / 11 byte reads**. All
+  pointers normalize to 9 symbol-relative song roles and fail closed.
+- **Next:** repair/capture a versioned player scalar selector only if exact
+  per-call MPlay execution is needed for a duration reducer; do not alter v3
+  or infer the erased `tempoI/tempoC` values.
+- **Notes:** evidence hash `a158fff7…`; all three prior v3 fixture hashes are
+  preserved. No oracle run, duration, cost, clock/controller, presentation,
+  animation, barrier, or canonical recording change. Focused **4/4** and
+  forced typecheck are green; final smoke/full/build gates follow.
+
 ## 1126 — [bounded MAIN worker, 2026-08-11] **#55 mixer-entry provenance closed**
 
 - **State:** actual mixer-entry target safety and provenance are complete for
@@ -38,24 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   focused prior/v3/entry audit **8/8**, smoke **375/375**, forced typecheck,
   full `npm test` **919 files / 8,610 passed / 1 skipped** (**72.37s**), and
   build (**631 modules**, Vite **6.34s**) are green. OFF oracle is healthy.
-
-## 1124 — [supervisor, 2026-08-11] **#55 SetBox + m4a target audit folded**
-
-- **State:** synchronous construction EV writes and the pre-`MPlayMain`
-  SoundMainRAM target inventory are united; #55 remains open and the live
-  construction clock stays null/unwired.
-- **Did:** source-reduced all **27** committed encrypted EV writes across
-  fields 26–31, including valid/invalid checksum paths. Folded side commit
-  `38476663`: **13** pointer-producing branches and **4** read/range rules
-  cover **565** selected-channel snapshots / **113** VBlank observations and
-  **5** pinned WaveData assets without a new oracle run.
-- **Next:** capture an address-free `soundMainRamEntryTargets` descriptor at
-  the actual `sound-main-ram-entry`, after all six `MPlayMain` calls, before
-  claiming mixer-entry target closure. Continue other #55 work only as
-  separately source-proven clock components; do not aggregate or wire yet.
-- **Notes:** orient folded animation-main through `77e3d325`; later animation
-  commits remain owned by the active animation supervisor. Combined focused
-  SetBox/DMA/m4a union **29/29** is green. Final union: `npm test` **918 files /
-  8,607 passed / 1 skipped** (**110.25s**), build **631 modules** (**6.58s**),
-  vanilla soak **20/20** (**34.3s**) and full-policy soak **60/60**
-  (**294.3s**), both with **0 crash / 0 hang**. OFF oracle is healthy.

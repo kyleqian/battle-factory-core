@@ -1,0 +1,1500 @@
+{
+  "schema": "factory-m4a-command-read-contract-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceStateReference": {
+    "packetSchema": "factory-m4a-source-state-probe/v3",
+    "fileSha256": {
+      "anchor": "a3c7fb2baeee2cf253481086d77f9262ee8842c9595d4ff2e4a5cd2776d3fbc3",
+      "liliana": "24717d4e2861bc74948d23470de25e97d69b2a553962d25f303a6a48d75268d6",
+      "factory-varied": "54426be9e6af1a9d4bd945ef2276a9a0b58da9c2bfd185ec988029fa4f9f67c1"
+    }
+  },
+  "compiledSource": {
+    "song": "mus_b_factory",
+    "songDigest": "a7604ce8717b84ffab084bb8f8c02c63c770c37af31eac6ce03e7af8cf812ba0",
+    "sourceRegions": [
+      {
+        "role": "battle-factory-bgm-track-1",
+        "symbol": "mus_b_factory_1",
+        "offsetBounds": {
+          "min": 0,
+          "maxExclusive": 316
+        },
+        "length": 316,
+        "sha256": "9f8987d902a676b0fbbe69dcf56176a5c0022a33a169086b01ac8eeb0058bcba"
+      },
+      {
+        "role": "battle-factory-bgm-track-2",
+        "symbol": "mus_b_factory_2",
+        "offsetBounds": {
+          "min": 0,
+          "maxExclusive": 910
+        },
+        "length": 910,
+        "sha256": "c5ebc1c379bb753270ad42334d5bafd9f9cf2979589f68f3cf6b156686e1df23"
+      },
+      {
+        "role": "battle-factory-bgm-track-3",
+        "symbol": "mus_b_factory_3",
+        "offsetBounds": {
+          "min": 0,
+          "maxExclusive": 933
+        },
+        "length": 933,
+        "sha256": "6b67d2fde5bc3fbb0cacfc809d7fa95fb33ea754e9c0bc0b372b65ff1dc86c97"
+      },
+      {
+        "role": "battle-factory-bgm-track-4",
+        "symbol": "mus_b_factory_4",
+        "offsetBounds": {
+          "min": 0,
+          "maxExclusive": 117
+        },
+        "length": 117,
+        "sha256": "07b7df8fd945bf1512ca872fd47b0a0e1bb54e15adaa50a4868cc7ffd68d0277"
+      },
+      {
+        "role": "battle-factory-bgm-track-5",
+        "symbol": "mus_b_factory_5",
+        "offsetBounds": {
+          "min": 0,
+          "maxExclusive": 1576
+        },
+        "length": 1576,
+        "sha256": "3ff3e78f9d19baa1b8244b83c055fa4baa81585aaab25a093c8df52fd2f3b74c"
+      },
+      {
+        "role": "battle-factory-bgm-track-6",
+        "symbol": "mus_b_factory_6",
+        "offsetBounds": {
+          "min": 0,
+          "maxExclusive": 1634
+        },
+        "length": 1634,
+        "sha256": "21355ad5ddbcbf188bf0c8cdf57a00d3981559922ab411530c2be276a9e130f3"
+      },
+      {
+        "role": "battle-factory-bgm-track-7",
+        "symbol": "mus_b_factory_7",
+        "offsetBounds": {
+          "min": 0,
+          "maxExclusive": 1328
+        },
+        "length": 1328,
+        "sha256": "8fbb1f5f8dfc5fa637a273599187e0a3c6b635125d315a863db6379d1be36d49"
+      },
+      {
+        "role": "battle-factory-bgm-track-8",
+        "symbol": "mus_b_factory_8",
+        "offsetBounds": {
+          "min": 0,
+          "maxExclusive": 647
+        },
+        "length": 647,
+        "sha256": "3ccf97cf6cc6b04577b377a01ac1cac931a6233bffc9ab89096641b983300c13"
+      },
+      {
+        "role": "battle-factory-bgm-track-9",
+        "symbol": "mus_b_factory_9",
+        "offsetBounds": {
+          "min": 0,
+          "maxExclusive": 347
+        },
+        "length": 347,
+        "sha256": "ea1618454fe78010e58f8426a773706847be9a6abfa728e5859eeed89dd887e1"
+      }
+    ],
+    "controlFlow": [
+      {
+        "symbol": "MPlayMain",
+        "bytes": 616,
+        "sha256": "6332b748c3f7c5acb089174e703b84e1b15c3accfc208c8bbe75dab053051689"
+      },
+      {
+        "symbol": "ply_endtie",
+        "bytes": 64,
+        "sha256": "3e069790b65fccbf8336f5eea85d29e3fbc9fc91a2d6dcd363df78663584ad9d"
+      },
+      {
+        "symbol": "ply_goto",
+        "bytes": 32,
+        "sha256": "b4c137a9f8b801e7515565fbc485668d66b21ef58290b1d063fc3714543789df"
+      },
+      {
+        "symbol": "ply_memacc",
+        "bytes": 344,
+        "sha256": "ec778b68b0f58cb8349363d99205dc47fa855d5af8cc4581ec783d437adb90df"
+      },
+      {
+        "symbol": "ply_note",
+        "bytes": 516,
+        "sha256": "00679d21a5acf624391ec1891952d6e132a2137677fb7c7056953f41438e19f0"
+      },
+      {
+        "symbol": "ply_patt",
+        "bytes": 26,
+        "sha256": "fe24bd249877601e9cbeb96dd62edb2b1e5d24a3abe6dc020b2136b80fa40856"
+      },
+      {
+        "symbol": "ply_pend",
+        "bytes": 20,
+        "sha256": "ef262893b794449af48fcfa195da908bfb53beaa56c74bcf0b4da5ca3747a84b"
+      },
+      {
+        "symbol": "ply_rept",
+        "bytes": 46,
+        "sha256": "669e321a01141436b68e67958aa0c618c515d34ba30f63ffc995233e9608ff3b"
+      },
+      {
+        "symbol": "ply_xcmd",
+        "bytes": 32,
+        "sha256": "09f3ef273e60018dce55311de78994f56993244ae7aea9ea84d57d5c6412898e"
+      },
+      {
+        "symbol": "ply_xwait",
+        "bytes": 70,
+        "sha256": "f6d9880bdab0f74bebcf849dc0f508e226072f1f52d59a31ee93fbe920e2f41e"
+      }
+    ],
+    "sourceDigests": {
+      "reference/pokeemerald/src/m4a_1.s": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c",
+      "reference/pokeemerald/src/m4a.c": "e924928bbe9fea4a10cfb9b202eb770746e03cd3849bbfd03479f55e01d2e2f4"
+    }
+  },
+  "contract": {
+    "revision": "mplay-command-read/v1",
+    "conservativeTempoPasses": 1,
+    "failClosed": [
+      "malformed pattern state",
+      "recursive control",
+      "unknown command or XCMD selector",
+      "MEMACC without bounded memAccArea",
+      "unavailable command/pattern/source bounds"
+    ]
+  },
+  "coverage": {
+    "observations": 113,
+    "caseCounts": {
+      "anchor": 52,
+      "liliana": 31,
+      "factory-varied": 30
+    },
+    "trackSnapshots": 1130,
+    "activeTracks": 1017,
+    "waitingTracks": 917,
+    "candidateTracks": 100,
+    "tracedCandidates": 100,
+    "incompleteCandidates": 0,
+    "distinctReadSets": 90,
+    "maxCommandCount": 5,
+    "maxReadCount": 11
+  },
+  "selectorBoundary": {
+    "complete": false,
+    "reason": "v3 PLAYER_POINTER_FIELDS incorrectly zeroes MusicPlayerInfo bytes 0x20..0x23 (tempoI and tempoC), while failing to normalize memAccArea at 0x18..0x1b; the exact zero-pass/one-pass selector cannot be reconstructed from v3",
+    "safeSuperset": "valid live tempo state and tempoD=144/tempoU=256 imply at most one pass; replaying all wait==0 tracks as one pass covers every possible command/pattern dereference"
+  },
+  "candidateReads": [
+    {
+      "sourceStateDigest": "8a9cf2f590e9c2b49c12b525d2745da5e769378abc50c0d8f2cf6cbffd25b15c",
+      "trackIndex": 0,
+      "command": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 142
+      },
+      "outcome": "wait",
+      "commandCount": 3,
+      "readCount": 6,
+      "uniqueReadCount": 5,
+      "readSetDigest": "a6a23a0c54ec8445a59b34a82eae07d2bda4b5726c6f0ce75e2b0bb7ffd365ac"
+    },
+    {
+      "sourceStateDigest": "8a9cf2f590e9c2b49c12b525d2745da5e769378abc50c0d8f2cf6cbffd25b15c",
+      "trackIndex": 1,
+      "command": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 648
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "2faf75cb49976c8c42b7e233ce75beea1c0c7fe4f7fbc9cf63e479b04638906d"
+    },
+    {
+      "sourceStateDigest": "8a9cf2f590e9c2b49c12b525d2745da5e769378abc50c0d8f2cf6cbffd25b15c",
+      "trackIndex": 2,
+      "command": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 713
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 3,
+      "readSetDigest": "8a7a410ecca24cbd2b053c603c3d02ed2fbc699bfce45757b9f5a2686de32476"
+    },
+    {
+      "sourceStateDigest": "8a9cf2f590e9c2b49c12b525d2745da5e769378abc50c0d8f2cf6cbffd25b15c",
+      "trackIndex": 3,
+      "command": {
+        "role": "battle-factory-bgm-track-4",
+        "offset": 62
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 3,
+      "readSetDigest": "838dce84169e1deeae782e36b74e76ff710167168a9e15d3da16d74e2296485c"
+    },
+    {
+      "sourceStateDigest": "8a9cf2f590e9c2b49c12b525d2745da5e769378abc50c0d8f2cf6cbffd25b15c",
+      "trackIndex": 5,
+      "command": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1370
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "1f9845bf3f40f868bdc94155b8ce650917c20c6399b4550c0ed8c3db4ffb0de9"
+    },
+    {
+      "sourceStateDigest": "8a9cf2f590e9c2b49c12b525d2745da5e769378abc50c0d8f2cf6cbffd25b15c",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 1028
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "af80678157a40c1d3c6430404a86197eca8e76109ca8e60142b3230800cbd3e7"
+    },
+    {
+      "sourceStateDigest": "bdae7bcc3277dec315f1fbed191bcaa63a4c4f59a9d61736fc579345e2414bd4",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1422
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "89fb9b16e3f3dc39d72698d555dc0d5e07e46f93d7cf946421a36ef1c032271c"
+    },
+    {
+      "sourceStateDigest": "0c6175ca663144388d7459a968f09b606dfb425af534e088879482a0018deddf",
+      "trackIndex": 1,
+      "command": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 650
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "1eeff3f6d8f951c821e61847b326640f2c569560f902ea9d6a659e899680a5d0"
+    },
+    {
+      "sourceStateDigest": "0c6175ca663144388d7459a968f09b606dfb425af534e088879482a0018deddf",
+      "trackIndex": 2,
+      "command": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 716
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 3,
+      "readSetDigest": "2a7763e6409f41e48faea97c78e88467934817b4c6e9415200e9826762039da3"
+    },
+    {
+      "sourceStateDigest": "eb175b21ede38444fddd6937fcaea596fbdb3ede05a11d5f567e55a5801831f2",
+      "trackIndex": 1,
+      "command": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 652
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "03f49afdf7f7efd5c53b755dd98215d01ccb7fe7dfb8acef04615c0ca9fa5c2e"
+    },
+    {
+      "sourceStateDigest": "eb175b21ede38444fddd6937fcaea596fbdb3ede05a11d5f567e55a5801831f2",
+      "trackIndex": 2,
+      "command": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 719
+      },
+      "outcome": "wait",
+      "commandCount": 3,
+      "readCount": 6,
+      "uniqueReadCount": 5,
+      "readSetDigest": "c78c83c3c3ba84e873765c2e9d6f0febcdf7f5be47c9cbcceec46db1615a41f2"
+    },
+    {
+      "sourceStateDigest": "508aee1599040f138a3ed60c42ef66c85d55eef5b04100cec341515d09295cf3",
+      "trackIndex": 0,
+      "command": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 147
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "36e6ef1f74b8ef080b6fbde52820532ec0843ea47896b36b5ba89a1dc07d9005"
+    },
+    {
+      "sourceStateDigest": "508aee1599040f138a3ed60c42ef66c85d55eef5b04100cec341515d09295cf3",
+      "trackIndex": 3,
+      "command": {
+        "role": "battle-factory-bgm-track-4",
+        "offset": 65
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "6ff423d5e6e1a305eb23da7d821704ef1f471d5983f0e2ecca7e618f42f93ac7"
+    },
+    {
+      "sourceStateDigest": "508aee1599040f138a3ed60c42ef66c85d55eef5b04100cec341515d09295cf3",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1425
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "05de47aba189132e7884c5bbb914ed8197b837e0c61e60bb07cdf86908e5157e"
+    },
+    {
+      "sourceStateDigest": "508aee1599040f138a3ed60c42ef66c85d55eef5b04100cec341515d09295cf3",
+      "trackIndex": 5,
+      "command": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1372
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "e19e3c22d6e90dc3f02c4a0160c91b4b58e317da25ec7ecb1c7363b4e5d2eb42"
+    },
+    {
+      "sourceStateDigest": "255c03651d8a4cbf9f2443d33ba4845705669990fab93275ecbcb7542902a626",
+      "trackIndex": 1,
+      "command": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 654
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "8125af491e035e1f6e2167e74ff15b6efff87c3d747f36d0816317eaf7d86f09"
+    },
+    {
+      "sourceStateDigest": "255c03651d8a4cbf9f2443d33ba4845705669990fab93275ecbcb7542902a626",
+      "trackIndex": 2,
+      "command": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 724
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "9121d075fe03cc34284fcda036cde810819506a2c5f58f75da5e50e1b6a9cfba"
+    },
+    {
+      "sourceStateDigest": "0d2bcfd6fd30cbc317c4cd782452a5cf7aa9de795b1916f0f5d05ea2111eaf84",
+      "trackIndex": 0,
+      "command": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 149
+      },
+      "outcome": "wait",
+      "commandCount": 4,
+      "readCount": 8,
+      "uniqueReadCount": 7,
+      "readSetDigest": "79ba75ff314431134d588150d53b67161ac25a30ee784829499a28996a2eb580"
+    },
+    {
+      "sourceStateDigest": "0d2bcfd6fd30cbc317c4cd782452a5cf7aa9de795b1916f0f5d05ea2111eaf84",
+      "trackIndex": 1,
+      "command": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 656
+      },
+      "outcome": "wait",
+      "commandCount": 4,
+      "readCount": 8,
+      "uniqueReadCount": 7,
+      "readSetDigest": "71c33495a19d35fb6b90cb7ff9a3a319ed2c6beb3d1016d6b7a05f42d30ec56c"
+    },
+    {
+      "sourceStateDigest": "0d2bcfd6fd30cbc317c4cd782452a5cf7aa9de795b1916f0f5d05ea2111eaf84",
+      "trackIndex": 2,
+      "command": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 726
+      },
+      "outcome": "wait",
+      "commandCount": 4,
+      "readCount": 7,
+      "uniqueReadCount": 7,
+      "readSetDigest": "354aa2e257e65633b4031581985bf0fbfd578d9ee1b7c19a05f7e133dc0476a3"
+    },
+    {
+      "sourceStateDigest": "0d2bcfd6fd30cbc317c4cd782452a5cf7aa9de795b1916f0f5d05ea2111eaf84",
+      "trackIndex": 3,
+      "command": {
+        "role": "battle-factory-bgm-track-4",
+        "offset": 67
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 3,
+      "readSetDigest": "e25b313b1284898cb436d56b7cc66bf5af3ae6858ff837b4ae9341fbd03bf375"
+    },
+    {
+      "sourceStateDigest": "0d2bcfd6fd30cbc317c4cd782452a5cf7aa9de795b1916f0f5d05ea2111eaf84",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1428
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 3,
+      "readSetDigest": "a93ec4881c0d4b49dd95ca96f208e81c067200dff89cb5fdef243c518a6bbc8a"
+    },
+    {
+      "sourceStateDigest": "0d2bcfd6fd30cbc317c4cd782452a5cf7aa9de795b1916f0f5d05ea2111eaf84",
+      "trackIndex": 5,
+      "command": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1374
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "244c6db47917bfdb0cd0077d2544565f5280f2e0dcca50e53ae7d5e8c714b5aa"
+    },
+    {
+      "sourceStateDigest": "0d2bcfd6fd30cbc317c4cd782452a5cf7aa9de795b1916f0f5d05ea2111eaf84",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 1030
+      },
+      "outcome": "wait",
+      "commandCount": 4,
+      "readCount": 11,
+      "uniqueReadCount": 10,
+      "readSetDigest": "ae96df9eb761a4f5fdc70aa744da0faaf15cee62a3049d0624be396351453e72"
+    },
+    {
+      "sourceStateDigest": "0d2bcfd6fd30cbc317c4cd782452a5cf7aa9de795b1916f0f5d05ea2111eaf84",
+      "trackIndex": 7,
+      "command": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 481
+      },
+      "outcome": "wait",
+      "commandCount": 1,
+      "readCount": 1,
+      "uniqueReadCount": 1,
+      "readSetDigest": "c1a75d59711aaf0b27437629697132b7b26ee97cc24c4bcd6f86a090206a22ec"
+    },
+    {
+      "sourceStateDigest": "0d2bcfd6fd30cbc317c4cd782452a5cf7aa9de795b1916f0f5d05ea2111eaf84",
+      "trackIndex": 8,
+      "command": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 303
+      },
+      "outcome": "wait",
+      "commandCount": 1,
+      "readCount": 1,
+      "uniqueReadCount": 1,
+      "readSetDigest": "a0d4bfce8e4e69872e2a6b0e3d9b4f41d3c06fd2b87202184a8e71c5fa46e1d0"
+    },
+    {
+      "sourceStateDigest": "efd66e8983ead21baf57cc16d0ac553583c3267c6bf39ea2b14b6fbdd98e32f2",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1431
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 4,
+      "readSetDigest": "8f68a6a0e723a0eaed49e0c6b0d2957efd0de302c0ba5090869ef7a2f537e93f"
+    },
+    {
+      "sourceStateDigest": "59b1018599edb4f9bff79a13a5e6d16d07908dd316b4acb17c1a45cfe0e445b9",
+      "trackIndex": 1,
+      "command": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 663
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 3,
+      "readSetDigest": "368b7ad1934a26f03d68f7abf0dd0d67630d6e0636093279a14ced49810104e5"
+    },
+    {
+      "sourceStateDigest": "7e74daf0955c7a3e6dcc506148a45c20fad9ce02b8a34638524623454d0ee74c",
+      "trackIndex": 1,
+      "command": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 666
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 3,
+      "readSetDigest": "f5d3bab514896d272e1a7fa37f86ac411281b76a818724e4f7615af0d344126a"
+    },
+    {
+      "sourceStateDigest": "e5bf9a67aa79e9f6031f3a3bd2ab50a9020bab5b9364ccb34678e0344b74e7a8",
+      "trackIndex": 0,
+      "command": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 156
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "20f142a4b0334d27110eb7ba9ba3ad23fe38a2b11a4916ed8b02c0026b40fd5e"
+    },
+    {
+      "sourceStateDigest": "e5bf9a67aa79e9f6031f3a3bd2ab50a9020bab5b9364ccb34678e0344b74e7a8",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1435
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "8df0a97a64fce616996497a5b9c59c5d108daada3836d08954210443affe8b03"
+    },
+    {
+      "sourceStateDigest": "e5bf9a67aa79e9f6031f3a3bd2ab50a9020bab5b9364ccb34678e0344b74e7a8",
+      "trackIndex": 5,
+      "command": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1376
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "97b4b00aab86c4de86a885025326dd5dd644ce7c1eba7ef673fe986c04393bef"
+    },
+    {
+      "sourceStateDigest": "64cbb386f803abc25d47dfe99cbf6d4e594dab3900df4f0869518c4971d98c5b",
+      "trackIndex": 0,
+      "command": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 158
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "ee73350ace493e6e7fa2cf05e0300f425588d91c42dca0648efd327351ac09c6"
+    },
+    {
+      "sourceStateDigest": "64cbb386f803abc25d47dfe99cbf6d4e594dab3900df4f0869518c4971d98c5b",
+      "trackIndex": 1,
+      "command": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 669
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 4,
+      "readSetDigest": "cba62f94f44e677da0a8653c23a66d75f7d2850bfa9e8e883311a94069b96d54"
+    },
+    {
+      "sourceStateDigest": "64cbb386f803abc25d47dfe99cbf6d4e594dab3900df4f0869518c4971d98c5b",
+      "trackIndex": 2,
+      "command": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 733
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 4,
+      "readSetDigest": "868f824ce91d91adb5b983a1ddb7a51bcfd55749d2fc4a881bbfb836e0ef369f"
+    },
+    {
+      "sourceStateDigest": "64cbb386f803abc25d47dfe99cbf6d4e594dab3900df4f0869518c4971d98c5b",
+      "trackIndex": 3,
+      "command": {
+        "role": "battle-factory-bgm-track-4",
+        "offset": 70
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 3,
+      "readSetDigest": "354ef72e91078a1e242a91dc4e656e7d47d9e52c4938338aefbf1790f7d90f4d"
+    },
+    {
+      "sourceStateDigest": "64cbb386f803abc25d47dfe99cbf6d4e594dab3900df4f0869518c4971d98c5b",
+      "trackIndex": 5,
+      "command": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1378
+      },
+      "outcome": "wait",
+      "commandCount": 3,
+      "readCount": 6,
+      "uniqueReadCount": 5,
+      "readSetDigest": "07b68dab5c997ae79f880be51ec060e1c11e0d52e7a3c86f211b5cf46dcc0345"
+    },
+    {
+      "sourceStateDigest": "64cbb386f803abc25d47dfe99cbf6d4e594dab3900df4f0869518c4971d98c5b",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 1024
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "9407e09a612051b6fd6776694db6fbb04b3d0676cb6ef7509d5df14824e88a2c"
+    },
+    {
+      "sourceStateDigest": "04e627717fe727b96245a2f4ee30034752d39838a4fe1e4f04c3238087c5f97f",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 287
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "9035e42f5ddbecb85b4a3fc215fa01819dc9e31a47e9a70f427fc97edc89a6d0"
+    },
+    {
+      "sourceStateDigest": "2c3a7b829e16e25266da89f3371b2ac1683f86bffea9e8c7af808113cfe2d668",
+      "trackIndex": 1,
+      "command": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 168
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "827e87ee469363ee6012fc71862f776e3af9b9c9611cd20c6ece3ad766a0a156"
+    },
+    {
+      "sourceStateDigest": "2c3a7b829e16e25266da89f3371b2ac1683f86bffea9e8c7af808113cfe2d668",
+      "trackIndex": 2,
+      "command": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 419
+      },
+      "outcome": "wait",
+      "commandCount": 3,
+      "readCount": 6,
+      "uniqueReadCount": 5,
+      "readSetDigest": "096e23696399b27a04336dc5039d30d3e211574bafaef89e2e3ec762b3f2bbd0"
+    },
+    {
+      "sourceStateDigest": "2c3a7b829e16e25266da89f3371b2ac1683f86bffea9e8c7af808113cfe2d668",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1057
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "605b9afd46245db58941f8c1dc6a1ffb9b316a27d68fe21557ebc45f60bc034e"
+    },
+    {
+      "sourceStateDigest": "2c3a7b829e16e25266da89f3371b2ac1683f86bffea9e8c7af808113cfe2d668",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 290
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "20d3da90da433b6422e9c25710d40c03daa129609926c70d4f2c03039e26443b"
+    },
+    {
+      "sourceStateDigest": "254105d0e300044129ce403e43cd0c3e9ef937dc5966e03678aeffd5b4b98e28",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 293
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "667307b497f96f92be7c2dec8766baf9a5ba2372e5ae13d5ef9359b0419406e3"
+    },
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "trackIndex": 1,
+      "command": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 170
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "5f07984ed03c3c643854f890ee0f1515610d0108296172758ce21d2531f7ab5a"
+    },
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "trackIndex": 2,
+      "command": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 424
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "7c6568f7a54eb91f179121f9b11b3dd4ddd18939d562a87a7e33bde6bcaf691f"
+    },
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1059
+      },
+      "outcome": "wait",
+      "commandCount": 3,
+      "readCount": 7,
+      "uniqueReadCount": 6,
+      "readSetDigest": "761150c31f58534f12e4d1cfdca440da6deab7567787dc819386a76633959cc7"
+    },
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "trackIndex": 5,
+      "command": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1017
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "74cd78b4adca98eb9e2fe57cc711ae065ef42e6886ba66ffaf230113cbe17f80"
+    },
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 296
+      },
+      "outcome": "wait",
+      "commandCount": 3,
+      "readCount": 9,
+      "uniqueReadCount": 7,
+      "readSetDigest": "823056626dfddb634cbf9a293a35cd463429733fc6a8b9be0f8ae85335a98a79"
+    },
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "trackIndex": 7,
+      "command": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 106
+      },
+      "outcome": "wait",
+      "commandCount": 3,
+      "readCount": 7,
+      "uniqueReadCount": 6,
+      "readSetDigest": "5d72bdf05d88726a3086896e6b3b899ecba4a094f1ab5419c6d75fcf0d75bfbd"
+    },
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "trackIndex": 8,
+      "command": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 250
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 3,
+      "readSetDigest": "564eca64712ff31b3d04bb000587f55513e4fa9d3a4ab13fe9efed1de40ad439"
+    },
+    {
+      "sourceStateDigest": "574a5e1547725c9685e4a84569319902188d205a7f3b1c6f3c20c9f25ad33d20",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1065
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 3,
+      "readSetDigest": "688fd8caf3f099ef72c31bdb4a614f2ecaceb7181e6b1695755afc92c8231394"
+    },
+    {
+      "sourceStateDigest": "6a88a5d761ef2e24daf4c73eb5da29c8413d1066dc261a4878e57a022db33f1a",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1065
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 3,
+      "readSetDigest": "688fd8caf3f099ef72c31bdb4a614f2ecaceb7181e6b1695755afc92c8231394"
+    },
+    {
+      "sourceStateDigest": "de8497c08457a8bfcd785ac38eb994e6c6ad6146a46e135b95fc9329bffb8f2d",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1068
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "330c4bb04ee99a227c48d45b0cf631bf924eac556d759bb80abd9dcdceb8b801"
+    },
+    {
+      "sourceStateDigest": "9ce9f1322ace6ba5c929dc98388f903fcbaf24804136deebc9fecef49ffe828e",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1070
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "5c43a180fa92cb2610625f77e169cb9f37d9b0c2ded44e90cf36ce10eae7fe47"
+    },
+    {
+      "sourceStateDigest": "9ce9f1322ace6ba5c929dc98388f903fcbaf24804136deebc9fecef49ffe828e",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 303
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "293eb4f02eeb9b4d0b882677e65221fe631b368381899b870f78f03496c83b10"
+    },
+    {
+      "sourceStateDigest": "0dbdc79bf393698e16fffbb04256067e2193fb6ae71827d5b9451d22dc471808",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1072
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "c61647394559fd648e1a5ec323dc75ef0c8d638cfc911a98c95acd1fc5eae80f"
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1074
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "3bc56d4137e1e4bf59d6e5136d8559b6ea5d0a55394320e14a28ea5c16abaa18"
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 306
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "d0871f7df3b1434a01181b74c61ddafd77604c03f52df0cabbe91c817baa2ecb"
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "trackIndex": 7,
+      "command": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 112
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "4f4178d0cf3a977f66511224719d970637574eb83313628d10d3baee17963017"
+    },
+    {
+      "sourceStateDigest": "d4eafd4be04ffbc4a1a5d9a999c46951cf37e4d3455f53d73961e2c4d863c0b4",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1076
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "7653512d9f2f72ab35b936a6cb0d4e69eb04c5ae0b0a095912dce20f3ae3f531"
+    },
+    {
+      "sourceStateDigest": "e7fe29bbc43e4e61a49403e7dbb44933dfef2649e6bdcc987b7c658b5e947809",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1078
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "34d3e8855ed2c500578cf5201d4052b96aa424feea05f58d625f5413a621d61d"
+    },
+    {
+      "sourceStateDigest": "bd882d6563c02bafe1fae4a9f015355c5eeb5b630ba4e706f8bd0e9020149cb9",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1080
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "99388640284c40615adebd9925c59d5c872743c4c2afaee9c7fcfc97244035fb"
+    },
+    {
+      "sourceStateDigest": "bd882d6563c02bafe1fae4a9f015355c5eeb5b630ba4e706f8bd0e9020149cb9",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 309
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "95da55ceb6b652e607d31b5e237b47d5d6d68b901ff658108dcf662da4d283a5"
+    },
+    {
+      "sourceStateDigest": "22c5d662c36c4bd2b6ba595410f8ba4c148d1bfb6bffaadb74fb52c7517dacd8",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1082
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "c61057ba811699be20484e4483488c0d3da1c8aee05b04639245fa6667b87029"
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "trackIndex": 1,
+      "command": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 172
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "01c086002a6a312ba12f1822e7254a9ba90d743015df3d7be9eca513518ccde3"
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "trackIndex": 2,
+      "command": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 426
+      },
+      "outcome": "wait",
+      "commandCount": 3,
+      "readCount": 6,
+      "uniqueReadCount": 5,
+      "readSetDigest": "14f76497adc7fe0943f3d3a49e8b43da2a0bafe31290f6a19a241d934de48044"
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1084
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "3818fd2cbfde0de2ecc8142acc5c3d4981a7a55db535fd8f85bf93de1d9f703b"
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "trackIndex": 5,
+      "command": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1019
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "4d512bef78709a13408e6693dba858ac52f2dbd60cc5996c9fe761da98fa8e64"
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 312
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "e0a7bd2ac98618c9b211024d45c383257621a441ed18b5a37d519e314c504e49"
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "trackIndex": 8,
+      "command": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 253
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "dcba118b2fae64409a06257421a4af2df92d0c0ec2c44982fa7f9216d756d65c"
+    },
+    {
+      "sourceStateDigest": "6854eca211190cad143f165b2c43e6011d7fbba5c910cad932e679c0a933452a",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 315
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "cb2d49814a02218d823c5d78db2a0d4e8d5559df90ea8403def192614e9edacf"
+    },
+    {
+      "sourceStateDigest": "a9d6df7eb2b963a9c115133f199adfc0b4da9f9dd60e07135c303e6d0e4842b1",
+      "trackIndex": 1,
+      "command": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 174
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "2b7ab3572a36d1ebf038323b34aa68e2930e07f018afbfd40206b639b2f4563f"
+    },
+    {
+      "sourceStateDigest": "a9d6df7eb2b963a9c115133f199adfc0b4da9f9dd60e07135c303e6d0e4842b1",
+      "trackIndex": 2,
+      "command": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 431
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "0b7ba259f8a4f60c5e09846b575d158295e5f5d075a9cfc8d9255853bf6189d3"
+    },
+    {
+      "sourceStateDigest": "a9d6df7eb2b963a9c115133f199adfc0b4da9f9dd60e07135c303e6d0e4842b1",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 318
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "7708ac85055af2c0507a529194e3997e10285d282fd686730aca565780b4eede"
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 335
+      },
+      "outcome": "wait",
+      "commandCount": 3,
+      "readCount": 6,
+      "uniqueReadCount": 5,
+      "readSetDigest": "44b83dbb25cd53a0d4f2049330d8d6f01f30fca21b0c17c6a40172fe5a0395a0"
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 284
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "0b6872dc656a7f1d2561b6867cc93185e1e65c3f3215fc9618fbb799c91c12bd"
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "trackIndex": 8,
+      "command": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 51
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 4,
+      "readSetDigest": "74cd6c08c8aa1769873c8441e9cb591de77843351aac17d5d139a5f85bfa6c20"
+    },
+    {
+      "sourceStateDigest": "be6e35509daf720d28d012b068c1ac2dccbbf4d4fe31e87947e4bbf0cad05656",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 287
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "9035e42f5ddbecb85b4a3fc215fa01819dc9e31a47e9a70f427fc97edc89a6d0"
+    },
+    {
+      "sourceStateDigest": "e2f1fb2e5c957630aaa452a47df79e68afbc0147822327b019f8c05d369561fc",
+      "trackIndex": 1,
+      "command": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 232
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "a9e936036520503b3968e013cd6e9d7d996c5e7d603fd23e25fdc6ec207fbd6c"
+    },
+    {
+      "sourceStateDigest": "e2f1fb2e5c957630aaa452a47df79e68afbc0147822327b019f8c05d369561fc",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 340
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "dbf850b0561b2cfe3ad9640950f75a4a166baca9c9615fd158105b900017f70d"
+    },
+    {
+      "sourceStateDigest": "e2f1fb2e5c957630aaa452a47df79e68afbc0147822327b019f8c05d369561fc",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 290
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "20d3da90da433b6422e9c25710d40c03daa129609926c70d4f2c03039e26443b"
+    },
+    {
+      "sourceStateDigest": "630ba6390a518e9bb2b9d5f66c0a4f8134fb6d0758755dd5e45fab99df4dfd7e",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 293
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "667307b497f96f92be7c2dec8766baf9a5ba2372e5ae13d5ef9359b0419406e3"
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "trackIndex": 1,
+      "command": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 234
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "24fe24ffd67f5fbd3e78319725c26dd6b3aaf8640558987531f7c2272b5cba36"
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "trackIndex": 4,
+      "command": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 342
+      },
+      "outcome": "wait",
+      "commandCount": 5,
+      "readCount": 10,
+      "uniqueReadCount": 9,
+      "readSetDigest": "4d4b872c175691da0fa5df440280727243925156d0a8cacc777c16fcc9750b7e"
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 296
+      },
+      "outcome": "wait",
+      "commandCount": 3,
+      "readCount": 9,
+      "uniqueReadCount": 7,
+      "readSetDigest": "823056626dfddb634cbf9a293a35cd463429733fc6a8b9be0f8ae85335a98a79"
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "trackIndex": 7,
+      "command": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 69
+      },
+      "outcome": "wait",
+      "commandCount": 3,
+      "readCount": 7,
+      "uniqueReadCount": 6,
+      "readSetDigest": "82039cd2bc1fef83e5b8bf7239c7165fadf15274793294ce7bfba8412d41834f"
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "trackIndex": 8,
+      "command": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 55
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 3,
+      "readSetDigest": "05b5f301fece75e5e7dfb64e21927e9ab46ca0084685ab35da9a8420774fbcc8"
+    },
+    {
+      "sourceStateDigest": "3159277d5f556ef6113a34474482746e76d02159d7e1215677a0b082a6646ece",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 303
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "293eb4f02eeb9b4d0b882677e65221fe631b368381899b870f78f03496c83b10"
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 306
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "d0871f7df3b1434a01181b74c61ddafd77604c03f52df0cabbe91c817baa2ecb"
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "trackIndex": 7,
+      "command": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 75
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "0a1387013c0e3319c1cc9e3107083fb48454e46ac886a76987c7891a2ba6c9b2"
+    },
+    {
+      "sourceStateDigest": "aed1a0ca751cdc3c7d1747b4146f917b4f59335dc6c9fea5a527d31caaea6e77",
+      "trackIndex": 5,
+      "command": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 339
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 4,
+      "readSetDigest": "f333a1f1769e9e5f0aecaf14c199a787087cb1ea5fd83cf3fe6cdba03013c3c1"
+    },
+    {
+      "sourceStateDigest": "bee08cb380bc0841a92edaeb11e2aa4071e253d29a0c08910de9d21c90535af3",
+      "trackIndex": 5,
+      "command": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 343
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "8bbaf63fbc4d4b7e9c1b1aa7aa9ca8fcaf6708caa7939b62a37481133c048736"
+    },
+    {
+      "sourceStateDigest": "bee08cb380bc0841a92edaeb11e2aa4071e253d29a0c08910de9d21c90535af3",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 309
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "95da55ceb6b652e607d31b5e237b47d5d6d68b901ff658108dcf662da4d283a5"
+    },
+    {
+      "sourceStateDigest": "148dde7ef3a312dd26ae03e5b3f3352ebcd92859df77841a8fbb5b9dd442d3f1",
+      "trackIndex": 5,
+      "command": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 345
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "6915ce6a24ae1afb2ecf62d39fccdfb5dee0a2b6ace76d6423f5a747300c047b"
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "trackIndex": 1,
+      "command": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 236
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 2,
+      "readSetDigest": "4933b16dbec4f16a7f1c01de5733908ee28c9189bdec3e0f02ba26a24737bd1f"
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "trackIndex": 5,
+      "command": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 347
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 4,
+      "uniqueReadCount": 3,
+      "readSetDigest": "e66f5567beffeca2f1cc645bc72742902e03e91b202fa94faf7b0c0e911cbc3f"
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 312
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "e0a7bd2ac98618c9b211024d45c383257621a441ed18b5a37d519e314c504e49"
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "trackIndex": 8,
+      "command": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 58
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 3,
+      "uniqueReadCount": 2,
+      "readSetDigest": "d91c28ae503d161001fbce5d0596ce5ed80e35da809bf17ffc094afb013f2d99"
+    },
+    {
+      "sourceStateDigest": "e45d7989cd5133f64e109597b535ff57fb383ecf768fb8eda745f57918d0bbbb",
+      "trackIndex": 6,
+      "command": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 315
+      },
+      "outcome": "wait",
+      "commandCount": 2,
+      "readCount": 5,
+      "uniqueReadCount": 3,
+      "readSetDigest": "cb2d49814a02218d823c5d78db2a0d4e8d5559df90ea8403def192614e9edacf"
+    }
+  ],
+  "verdict": "The observed sixth-MPlayMain command/pattern dereference class is bounded address-free for every v3 state. Exact per-call pass selection remains unavailable because v3 erased tempoI/tempoC; no duration or clock reducer is licensed."
+}
