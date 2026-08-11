@@ -40854,6 +40854,7 @@ git; the current live ledger keeps the three load-bearing entries only.
   focused prior/v3/entry audit **8/8**, smoke **375/375**, forced typecheck,
   full `npm test` **919 files / 8,610 passed / 1 skipped** (**72.37s**), and
   build (**631 modules**, Vite **6.34s**) are green. OFF oracle is healthy.
+
 ## 1126 — [bounded MAIN worker, 2026-08-11] **#55 mixer-entry provenance closed**
 
 - **State:** actual mixer-entry target safety and provenance are complete for
@@ -40870,3 +40871,21 @@ git; the current live ledger keeps the three load-bearing entries only.
   **0-replacement** receipt. Focused prior/v2 audit **6/6**, smoke **375/375**,
   forced typecheck, full `npm test` **920 files / 8,613 passed / 1 skipped**
   (**90.92s**), and build (**631 modules**, Vite **7.89s**) are green.
+
+## 1127 — [bounded MAIN worker, 2026-08-11] **#55 MPlay read bounds closed; selector isolated**
+
+- **State:** the remaining v3 MPlayMain command/pattern dereferences are fully
+  bounded for all committed states; exact zero/one-pass selection remains
+  unavailable, #55 stays open, and the construction clock remains unwired.
+- **Did:** source-replayed **1,130** track snapshots: **1,017 active**, **917
+  wait>0**, and all **100/100** wait-zero candidates complete with **0**
+  incomplete, **90** read sets, max **5 commands / 11 byte reads**. All
+  pointers normalize to 9 symbol-relative song roles and fail closed.
+- **Next:** repair/capture a versioned player scalar selector only if exact
+  per-call MPlay execution is needed for a duration reducer; do not alter v3
+  or infer the erased `tempoI/tempoC` values.
+- **Notes:** evidence hash `a158fff7…`; all three prior v3 fixture hashes are
+  preserved. No oracle run, duration, cost, clock/controller, presentation,
+  animation, barrier, or canonical recording change. Focused **4/4**, smoke,
+  forced typecheck, full `npm test` **921 files / 8,617 passed / 1 skipped**
+  (**84.06s**), and build (**631 modules**, Vite **6.36s**) are green.

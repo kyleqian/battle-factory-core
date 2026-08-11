@@ -891,10 +891,25 @@ returned before Vitest exited. The encrypted-accessor worker and supervisor
 then each saw a command return before its child verification exited, costing
 about 3 more minutes of polling/rechecks. Two final #55 workers then collided
 with another full-suite process and needed retained-session polling plus
-compact-output reruns. Hits: 12; cost: about 57 minutes plus avoidable CPU
+compact-output reruns. The sixth-MPlay selector worker later reran a green full
+suite solely because the yielded handle hid its terminal summary. Hits: 13;
+cost: about 60 minutes plus avoidable CPU
 contention. A
 launcher/tool response that visually distinguishes “still running; wait on
 this handle” from completion would prevent this class of mistake.
+
+## Probe wrapper rejects byte-complete signal-10 teardown
+
+- **What:** the second legal-varied selector capture wrote valid, complete JSON
+  byte-identical to its first capture, then exited by signal 10. The mandated
+  `run-mgba-probe.py` wrapper correctly rejected the unknown process status
+  because it special-cases only the known teardown SIGSEGV, forcing a separate
+  JSON/hash validation before the evidence could be retained.
+- **Hits:** 1.
+- **Cost each:** ~1 min.
+- **Workaround:** keep the conservative rejection, but report when a rejected
+  process nevertheless produced parseable output so the caller can validate
+  and classify a new teardown signature explicitly.
 
 ## Incremental typecheck can miss a new test-only union error
 

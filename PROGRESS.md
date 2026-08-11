@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1130 — [supervisor, 2026-08-11] **#55 exact MPlay selector folded; wind-down green**
+
+- **State:** master is green through `54712feb`. The sixth-player execution
+  selector, command-read bounds, callback routes, and actual mixer-entry target
+  safety are now complete; #55 remains open for source-proven cost composition
+  and its construction clock stays null/unwired.
+- **Did:** independently regenerated the additive selector/v3/read-contract
+  union at **8/8** after the worker joined all **113/113** frozen state/cost
+  rows and classified **108 one-pass / 5 zero-pass** calls. No frozen hash or
+  production module changed.
+- **Next:** source-reduce exact per-call MPlay execution from the banked
+  selector and bounded command reads. Do not fit a duration, assign a service
+  cost, or wire `runFactoryConstructionClock` until composition closes.
+- **Notes:** final worker gates: `npm test` **922 files / 8,619 passed / 1
+  skipped** (**84.03s**) and build **631 modules** (Vite **6.23s**). The
+  engine-identical final soaks remain vanilla **20/20** (**32.2s**) and
+  full-policy **60/60** (**278.9s**), both **0 crash / 0 hang**. Orient folded
+  animation-main through `77e3d325`; later animation work remains with its
+  active supervisor. OFF oracle is healthy; no material decision was deferred.
+
 ## 1129 — [bounded MAIN worker, 2026-08-11] **#55 sixth-player selector closed**
 
 - **State:** the exact v3 zero/one-pass selector defect is repaired by an
@@ -41,21 +61,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   build **631 modules** (Vite **6.29s**), vanilla soak **20/20** (**32.2s**),
   and full-policy soak **60/60** (**278.9s**) are green with **0 crash / 0
   hang**. OFF oracle is healthy; no material decision was deferred.
-
-## 1127 — [bounded MAIN worker, 2026-08-11] **#55 MPlay read bounds closed; selector isolated**
-
-- **State:** the remaining v3 MPlayMain command/pattern dereferences are fully
-  bounded for all committed states; exact zero/one-pass selection remains
-  unavailable, #55 stays open, and the construction clock remains unwired.
-- **Did:** source-replayed **1,130** track snapshots: **1,017 active**, **917
-  wait>0**, and all **100/100** wait-zero candidates complete with **0**
-  incomplete, **90** read sets, max **5 commands / 11 byte reads**. All
-  pointers normalize to 9 symbol-relative song roles and fail closed.
-- **Next:** repair/capture a versioned player scalar selector only if exact
-  per-call MPlay execution is needed for a duration reducer; do not alter v3
-  or infer the erased `tempoI/tempoC` values.
-- **Notes:** evidence hash `a158fff7…`; all three prior v3 fixture hashes are
-  preserved. No oracle run, duration, cost, clock/controller, presentation,
-  animation, barrier, or canonical recording change. Focused **4/4**, smoke,
-  forced typecheck, full `npm test` **921 files / 8,617 passed / 1 skipped**
-  (**84.06s**), and build (**631 modules**, Vite **6.36s**) are green.
