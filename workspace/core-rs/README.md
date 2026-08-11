@@ -29,6 +29,76 @@ cargo build -p factory-wasm --target wasm32-unknown-unknown --release
 propagate PATH in some non-interactive/sandboxed shells — prefer the
 explicit PATH form in scripts.
 
+## Boundary (ABI v1)
+
+`factory-wasm` exposes a hand-rolled C ABI, zero dependencies (decision
+recorded in `../RUST_PROGRESS.md` R2). Every export is prefixed `fw_`,
+scalars cross as `u32`, and structured data (future milestones) crosses
+as caller-allocated length-prefixed little-endian byte buffers via
+`fw_alloc`/`fw_free`.
+
+Current exports:
+
+- `fw_abi_version() -> u32` — the ABI version this build implements (1).
+- `fw_rng_advance(rng_value: u32) -> u32` — one Gen-3 LCG step.
+- `fw_rng_output(rng_value: u32) -> u32` — `Random()`'s u16 output for an
+  already-advanced `rng_value` (upper 16 bits).
+- `fw_alloc(len: u32) -> ptr` / `fw_free(ptr, len: u32)` — caller-allocated
+  buffers in linear memory; see the doc comments in
+  `crates/factory-wasm/src/lib.rs` for the exact safety contract.
+
+Build the artifact with `./build-wasm.sh` (from `core-rs/`, or any cwd —
+it resolves its own directory). It writes
+`<workspace-root>/artifacts/wasm/factory_wasm.wasm` (gitignored) and
+prints the byte size and sha256.
+
+Smoke-test the boundary end to end (ABI version, RNG passthrough against
+the TS-pinned stream, alloc/free roundtrip) via the hand-written Node ESM
+loader in `adapter/`:
+
+```sh
+node --experimental-strip-types adapter/smoke.mts   # from core-rs/
+# or: node --experimental-strip-types core-rs/adapter/smoke.mts   # from the workspace root
+```
+
+## Differential harness
+
+`adapter/rngEngine.ts` wraps both the TS spec engine (`../src/engine/rng.ts`
++ `../src/engine/opponentGen.ts`) and the factory-wasm boundary behind one
+`RngEngine` interface, so `../tests/rngEngineParity.test.ts` can run
+identical logic against each and assert they agree — not just that either
+one individually looks right.
+
+Engine selection is the `POKEBENCH_ENGINE` env var (read by
+`defaultEngineId()`):
+
+- unset or `ts` — the TS engine only. This is the default; the parity
+  file's TS-side assertions always run and never require the wasm
+  artifact.
+- `wasm` — opts into the factory-wasm engine. **If the artifact is
+  missing, this is a hard failure** (an error naming `build-wasm.sh`), not
+  a skip — asking for wasm and silently not getting it would hide a real
+  gap.
+- Any other value throws.
+
+Independent of that opt-in, the parity file also probes whether the wasm
+artifact exists at all (same path resolution `loadFactoryWasm.ts` uses).
+If it's simply absent (e.g. an untouched worktree that hasn't run
+`build-wasm.sh`) and `POKEBENCH_ENGINE` wasn't set to `wasm`, the
+wasm-dependent suites are skipped via `describe.skipIf` and the file stays
+green — only the TS half runs.
+
+```sh
+./core-rs/build-wasm.sh
+
+# TS engine only (default) — wasm half runs iff the artifact already exists,
+# skips (green) otherwise:
+NODE_OPTIONS=--max-old-space-size=8192 npx vitest run tests/rngEngineParity.test.ts --no-watch --pool=forks
+
+# Opt into wasm explicitly — fails loudly if the artifact is missing:
+POKEBENCH_ENGINE=wasm NODE_OPTIONS=--max-old-space-size=8192 npx vitest run tests/rngEngineParity.test.ts --no-watch --pool=forks
+```
+
 ## Ground rules
 
 - **The vitest suite is the spec gate.** A module counts as ported when
