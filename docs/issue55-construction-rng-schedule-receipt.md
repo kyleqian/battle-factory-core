@@ -129,6 +129,33 @@ does not inspect trainer, set, mon, frame, cursor, or receipt identity.
 CreateMon, EV-spread, CalculateMonStats, factory-post-mon, and the live
 VBlank/audio/DMA workload remain unresolved, so the clock remains unwired.
 
+## Instruction-level +18 queue-observable checkpoint (2026-08-10)
+
+The existing construction probe now has a separate opt-in
+`FACTORY_RESIDUAL_18_INSTRUCTION_EVIDENCE=1` path. It selects the anchor's
+source-reduced `__divsi3(9300, 100)` clean control and nearby
+`__divsi3(11300, 100)` +18 member: both are mon-3 calls through the same
+`0x082e7542` entry / `0x08068f3e` return and both have a 318-cycle compiled
+source budget. The hook records each retired instruction boundary, its local
+cycle delta, and CPU `nextEvent` distance. It does not alter the v1/v2
+construction or residual packets.
+
+The intended semantic queue observation could not be banked in this bounded
+step. Two fresh Battle Scene OFF attempts to dereference libmgba-py's exposed
+`mTiming.root` during that selected window terminated with SIGSEGV (exit 139)
+before writing JSON; `tools/run-mgba-probe.py` rejected both outputs. Walking
+`mTimingEvent.next` and reading the root event's name were tested separately
+and both fail the same wrapper contract. The landed hook therefore leaves
+`eventQueue` empty rather than retaining an unsafe pointer token or pretending
+endpoint distance identifies an event.
+
+This is narrowing evidence, not a timing result: the next missing observable
+is a safe libmgba API/shim that snapshots the due timing-event callback name
+and queue position before/after one `core.step()`. Until that exists, the
+instruction packet cannot expose the responsible event identity, no fresh
+receipt is committed, +18 remains external, and both cycle contracts remain
+null/unwired.
+
 ## Recurring +18 source-boundary census (2026-08-10)
 
 The opt-in sibling mode `FACTORY_RESIDUAL_18_EVIDENCE=1` replays all three

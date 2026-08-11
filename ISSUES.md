@@ -1289,6 +1289,16 @@ separate execution-context overlap from non-IRQ asynchronous service. No +18
 reducer landed; the accessor histogram stays
 **0×77/+18×67/+117×5/+245×6/+263×1** and both cycle contracts stay null.
 
+**Instruction-queue observable checkpoint (2026-08-10):** the existing probe
+now has a bounded opt-in instruction trace selecting the anchor's matched
+318-cycle `__divsi3(9300,100)` clean control and `__divsi3(11300,100)` +18
+member. Two fresh OFF attempts to read libmgba-py's `mTiming.root` event/name
+inside that window exited 139 before JSON; the required wrapper rejected both.
+The hook retains no pointer token and leaves its semantic queue field empty.
+The exact next missing observable is a safe libmgba API/shim for the due event's
+callback name and queue position around one `core.step()`; no +18 timing or
+clock wiring is inferred. See the construction schedule receipt.
+
 **VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
 probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all
 **52/31/30** construction-epoch interrupts. Within each case every measured

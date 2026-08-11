@@ -132,6 +132,22 @@ EWRAM_ACCESS_EVIDENCE = (
 RESIDUAL_18_EVIDENCE = (
     os.environ.get("FACTORY_RESIDUAL_18_EVIDENCE") == "1"
 )
+# Instruction-granular sibling of the endpoint census.  It deliberately
+# selects one source-reduced +18 signed-division observation and a nearby
+# zero-residual control with the same compiled entry/return path.  The packet
+# records mGBA's named timing-event queue before every retired instruction so
+# an asynchronous increment can be attributed to an event, rather than to an
+# endpoint nextEvent distance.
+RESIDUAL_18_INSTRUCTION_EVIDENCE = (
+    os.environ.get("FACTORY_RESIDUAL_18_INSTRUCTION_EVIDENCE") == "1"
+)
+
+RESIDUAL_18_DIVIDE_TRACE_SELECTORS = {
+    # Both calls are in anchor mon 3 and reduce to 318 source cycles.  The
+    # first is a clean sibling; the second is the census's sole divide +18.
+    (3, 9300, 100): ("signed-divide-clean", 0),
+    (3, 11300, 100): ("signed-divide-plus18", 18),
+}
 
 # mGBA exposes executing Thumb PC + 2. `nextPc` is the immediately following
 # instruction boundary, so the delta is the selected data instruction alone.
@@ -802,6 +818,34 @@ def snapshot_residual_execution_state(oracle: EmeraldOracle) -> dict[str, Any]:
     }
 
 
+def observe_residual_instruction_trace(
+    epoch: dict[str, Any], oracle: EmeraldOracle, pc: int,
+) -> None:
+    active = epoch.get("residualInstructionTraceActive")
+    if active is None:
+        return
+    timing = oracle.core._native.timing
+    cpu = oracle.core.cpu._native
+    master_cycles = int(timing.globalCycles) + int(cpu.cycles)
+    active["boundaries"].append({
+        "observedPc": f"0x{pc:08x}",
+        "instructionPc": f"0x{pc - 2:08x}",
+        "masterCycles": master_cycles,
+        "cpuCycles": int(cpu.cycles),
+        "timingMasterCycles": int(timing.masterCycles),
+        "nextEvent": int(cpu.nextEvent),
+        # mTiming's opaque queue root is not dereferenced here: the vendored
+        # libmgba ABI does not expose a safe queue iterator.  The instruction
+        # packet still pins the exact increment edge and CPU scheduler
+        # distance; its receipt names semantic event identity as the next
+        # missing observable if these do not discriminate.
+        "eventQueue": [],
+    })
+    if pc in {active["returnPc"], active["returnPc"] + 2}:
+        epoch.setdefault("residualInstructionTraces", []).append(active)
+        epoch.pop("residualInstructionTraceActive", None)
+
+
 def observe_ewram_access_boundary(
     epoch: dict[str, Any], oracle: EmeraldOracle, frame: int, pc: int
 ) -> None:
@@ -994,6 +1038,28 @@ def observe_calculate_mon_stats_call(
         "entryMasterCycles": entry_snapshot["masterCycles"],
         "arguments": calculate_mon_stats_call_arguments(operation, oracle),
     }
+    if RESIDUAL_18_INSTRUCTION_EVIDENCE and operation == "divide":
+        arguments = epoch["calculateMonStatsActiveCall"]["arguments"]
+        selector = (
+            int(epoch.get("calculateMonStatsActiveMonIndex")),
+            arguments["dividend"],
+            arguments["divisor"],
+        )
+        selected = RESIDUAL_18_DIVIDE_TRACE_SELECTORS.get(selector)
+        if selected is not None:
+            if epoch.get("residualInstructionTraceActive") is not None:
+                raise RuntimeError("overlapping residual instruction trace")
+            label, residual_cycles = selected
+            epoch["residualInstructionTraceActive"] = {
+                "label": label,
+                "component": "signed-divide",
+                "entryPc": f"0x{pc:08x}",
+                "returnPc": int(oracle.core.cpu.lr & ~1),
+                "arguments": arguments,
+                "sourceCycles": 318,
+                "residualCycles": residual_cycles,
+                "boundaries": [],
+            }
     if RESIDUAL_18_EVIDENCE:
         epoch["calculateMonStatsActiveCall"]["entryCyclePhase"] = entry_snapshot["cyclePhase"]
         epoch["calculateMonStatsActiveCall"]["entryExecutionState"] = entry_snapshot["executionState"]
@@ -1095,6 +1161,8 @@ def advance_one_instrumented_frame(
             if VBLANK_WORKLOAD_EVIDENCE and pc in VBLANK_STAGE_PCS:
                 append_vblank_stage(epoch, oracle, frame, pc, VBLANK_STAGE_PCS[pc])
             observe_calculate_mon_stats_call(epoch, oracle, frame, pc)
+            if RESIDUAL_18_INSTRUCTION_EVIDENCE:
+                observe_residual_instruction_trace(epoch, oracle, pc)
             if EWRAM_ACCESS_EVIDENCE:
                 observe_ewram_access_boundary(epoch, oracle, frame, pc)
             if pc == target_entry and epoch.get("entry") is None:
@@ -1134,7 +1202,7 @@ def advance_one_instrumented_frame(
                 ))
             elif (
                 pc == CALCULATE_STATS_ENTRY_PC
-                and epoch.get("entry") is not None
+                and (epoch.get("entry") is not None or RESIDUAL_18_INSTRUCTION_EVIDENCE)
                 and symbol_at(oracle.core.cpu.lr).startswith("CreateMonWithEVSpreadNatureOTID")
             ):
                 cycle_events.append(cycle_snapshot(
@@ -1142,6 +1210,11 @@ def advance_one_instrumented_frame(
                     monIndex=epoch.get("currentMonIndex"),
                 ))
                 if CALCULATE_MON_STATS_EVIDENCE:
+                    if RESIDUAL_18_INSTRUCTION_EVIDENCE and epoch.get("entry") is None:
+                        # The bounded sibling starts directly on anchor mon 3's
+                        # two-frame stats window; no construction identity is
+                        # retained in its output.
+                        epoch["currentMonIndex"] = 3
                     epoch["calculateMonStatsActiveMonIndex"] = epoch.get("currentMonIndex")
             elif pc == CALCULATE_STATS_RESUME_PC and epoch.get("entry") is not None:
                 if CALCULATE_MON_STATS_EVIDENCE:
@@ -1460,6 +1533,10 @@ def classify_and_summarize(
             raise RuntimeError("EWRAM evidence finished with an unpaired instruction")
         result["ewramAccessEvidence"] = epoch.get("ewramAccessBoundaries", [])
         result["ewramComponentEvidence"] = epoch.get("ewramComponentBoundaries", [])
+    if RESIDUAL_18_INSTRUCTION_EVIDENCE:
+        if epoch.get("residualInstructionTraceActive") is not None:
+            raise RuntimeError("residual instruction evidence finished mid-trace")
+        result["residualInstructionTraces"] = epoch.get("residualInstructionTraces", [])
     if VBLANK_WORKLOAD_EVIDENCE:
         # This is a separate raw observation packet, intentionally not folded
         # into cycleEvidence's frozen v2 contract.  The report filters it to
@@ -1518,6 +1595,13 @@ def run_anchor() -> dict[str, Any]:
         EmeraldOracle._run_bootstrap = original
     if oracle.canonical_screen_sha256 != ANCHOR_BOOTSTRAP_SHA256:
         raise RuntimeError(f"anchor canonical screen changed: {oracle.canonical_screen_sha256}")
+    if RESIDUAL_18_INSTRUCTION_EVIDENCE:
+        return {
+            "case": "anchor",
+            "sourceFunction": "CreateFrontierFactorySelectableMons",
+            "oracleProfile": "battle-scene-off",
+            "residualInstructionTraces": epoch.get("residualInstructionTraces", []),
+        }
     set_ids = rental_or_temp_ids(oracle, "rentalMons", 6)
     result = classify_and_summarize(
         case="anchor",
@@ -1894,6 +1978,68 @@ def compact_residual_18_receipt(result: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def compact_residual_instruction_receipt(result: dict[str, Any]) -> dict[str, Any]:
+    """Normalize two matched instruction traces to their source entry."""
+    traces = result.get("residualInstructionTraces", [])
+    if len(traces) != len(RESIDUAL_18_DIVIDE_TRACE_SELECTORS):
+        raise RuntimeError(f"expected two residual instruction traces, got {len(traces)}")
+    compact = []
+    for trace in traces:
+        boundaries = trace["boundaries"]
+        entry_cycles = boundaries[0]["masterCycles"]
+        instructions = []
+        for before, after in zip(boundaries, boundaries[1:]):
+            instructions.append({
+                "instructionPc": before["instructionPc"],
+                "nextInstructionPc": after["instructionPc"],
+                "cyclesSinceEntry": before["masterCycles"] - entry_cycles,
+                "cycles": after["masterCycles"] - before["masterCycles"],
+                "cpuCyclesUntilNextEvent": before["nextEvent"] - before["cpuCycles"],
+                "eventQueue": before["eventQueue"],
+            })
+        compact.append({
+            "label": trace["label"],
+            "component": trace["component"],
+            "entryPc": trace["entryPc"],
+            "returnPc": f"0x{trace['returnPc']:08x}",
+            "arguments": trace["arguments"],
+            "sourceCycles": trace["sourceCycles"],
+            "residualCycles": trace["residualCycles"],
+            "observedCycles": boundaries[-1]["masterCycles"] - entry_cycles,
+            "instructions": instructions,
+        })
+    by_label = {trace["label"]: trace for trace in compact}
+    clean = by_label["signed-divide-clean"]
+    member = by_label["signed-divide-plus18"]
+    clean_by_edge = {
+        (row["instructionPc"], row["nextInstructionPc"], row["cyclesSinceEntry"]): row
+        for row in clean["instructions"]
+    }
+    increments = []
+    for row in member["instructions"]:
+        matched = clean_by_edge.get(
+            (row["instructionPc"], row["nextInstructionPc"], row["cyclesSinceEntry"])
+        )
+        if matched is not None and row["cycles"] != matched["cycles"]:
+            increments.append({
+                "instructionPc": row["instructionPc"],
+                "nextInstructionPc": row["nextInstructionPc"],
+                "cleanCycles": matched["cycles"],
+                "memberCycles": row["cycles"],
+                "incrementCycles": row["cycles"] - matched["cycles"],
+                "memberQueueBefore": row["eventQueue"],
+                "cleanQueueBefore": matched["eventQueue"],
+            })
+    return {
+        "schema": "factory-construction-residual-instruction-events/v1",
+        "case": result["case"],
+        "oracleProfile": result["oracleProfile"],
+        "sourceFunction": result["sourceFunction"],
+        "traces": compact,
+        "matchedIncrements": increments,
+    }
+
+
 def compact_ewram_access_receipt(result: dict[str, Any]) -> dict[str, Any]:
     """Keep clean minima and scalar/source-relative alignment classes only."""
     grouped: dict[tuple[str, int], list[dict[str, Any]]] = {}
@@ -1951,13 +2097,19 @@ def main() -> None:
         raise SystemExit(
             "FACTORY_RESIDUAL_18_EVIDENCE=1 requires cycle and CalculateMonStats evidence"
         )
+    if RESIDUAL_18_INSTRUCTION_EVIDENCE and not (CYCLE_EVIDENCE and CALCULATE_MON_STATS_EVIDENCE):
+        raise SystemExit(
+            "FACTORY_RESIDUAL_18_INSTRUCTION_EVIDENCE=1 requires cycle and CalculateMonStats evidence"
+        )
     if CASE == "anchor":
         result = run_anchor()
     elif CASE == "liliana":
         result = run_liliana()
     else:
         result = run_factory_varied()
-    if RESIDUAL_18_EVIDENCE:
+    if RESIDUAL_18_INSTRUCTION_EVIDENCE:
+        result = compact_residual_instruction_receipt(result)
+    elif RESIDUAL_18_EVIDENCE:
         result = compact_residual_18_receipt(result)
     elif EWRAM_ACCESS_EVIDENCE:
         result = compact_ewram_access_receipt(result)
@@ -1972,6 +2124,9 @@ def main() -> None:
     print(
         (
             f"wrote {OUTPUT}: {result['case']} "
+            f"{len(result['traces'])} instruction-level residual traces"
+            if RESIDUAL_18_INSTRUCTION_EVIDENCE
+            else f"wrote {OUTPUT}: {result['case']} "
             f"{len(result['sourceBoundaries'])} residual-audit source boundaries"
             if RESIDUAL_18_EVIDENCE
             else f"wrote {OUTPUT}: {result['case']} "

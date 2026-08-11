@@ -1,3 +1,18 @@
+## 1103 — [MAIN worker, 2026-08-10] **#55 synchronous GetBoxMonData outer shell closed**
+
+- **State:** implementation `8aa00042`, supervisor-corrected by `ca1c73d9`;
+  #55 remains open, `GetBoxMonData2.cycles` stays `null`, and the construction
+  clock stays unwired. Focused **27/27**, smoke **375/375**, typecheck,
+  supervisor full `npm test` **894 files / 8,488 passed / 1 skipped**, and
+  production build are green.
+- **Did:** source/ELF-reduced the complete synchronous outer shell at **314
+  cycles**: GetBoxMonData2 **216** plus checksum setup/return **98**, matching
+  **77/156** clean OFF joins while leaving every residual external.
+- **Next:** continue #55 only with independently closed async +18 service and
+  VBlank/IRQ costs; do not fit residuals or wire the clock.
+- **Notes:** frozen packets were not mutated; no production/controller/
+  presentation/animation or canonical Battle-2 change.
+
 ## 1102 — [MAIN worker, 2026-08-10] **#55 encrypted EWRAM loops and receipt field tails closed**
 
 - **State:** implementation `54368a1e` corrected/pinned by `fd4c79c1` and

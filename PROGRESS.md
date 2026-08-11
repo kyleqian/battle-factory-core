@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1106 — [MAIN worker, 2026-08-10] **#55 instruction queue observable blocked safely**
+
+- **State:** #55 remains open; no fresh instruction packet was admissible,
+  dependency `cycles` stay `null`, and the construction clock stays unwired.
+- **Did:** added a bounded opt-in trace for the matched 318-cycle anchor
+  `__divsi3(9300,100)` clean / `__divsi3(11300,100)` +18 pair. Two fresh OFF
+  wrapper runs proved libmgba-py's live `mTiming.root` event/name access exits
+  139 before JSON, so the hook retains no pointer token and claims no event.
+- **Next:** expose a safe libmgba API/shim for due callback name and queue
+  position around one `core.step()`, then bank the small instruction packet.
+- **Notes:** focused census **3/3**, full `npm test` **895 files / 8,491 passed
+  / 1 skipped**, and supervisor production build are green. No reducer, clock
+  wiring, barrier, production/controller/presentation change, recording
+  import, cycle fit, or canonical Battle-2 work.
+
 ## 1105 — [supervisor, 2026-08-10] **#55 residual census verified; no speculative clock fit**
 
 - **State:** #55 remains open; dependency `cycles` stay `null` and the live
@@ -40,26 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** accessor histogram remains **0×77/+18×67/+117×5/+245×6/+263×1**;
   EXP/IV u32 tails and the isolated level-loop composition are preserved. No
   production reducer, barrier, controller, presentation, or recording import.
-
-## 1103 — [MAIN worker, 2026-08-10] **#55 synchronous GetBoxMonData outer shell closed**
-
-- **State:** implementation `8aa00042`, supervisor-corrected by `ca1c73d9`;
-  #55 remains open,
-  `GetBoxMonData2.cycles` stays `null`, and the construction clock stays
-  unwired. Focused **27/27**, smoke **375/375**, typecheck, supervisor full
-  `npm test` **894 files / 8,488 passed / 1 skipped**, and production build
-  are green.
-- **Did:** source/ELF-reduced the complete synchronous outer shell at
-  **314 cycles**: GetBoxMonData2 **216** plus checksum-function setup/return
-  **98**. The typed composition excludes all eight GetSubstruct bodies and
-  crypt/checksum/crypt components, covers every receipt field/checksum/bad-egg
-  route across all 24 layouts, and matches **77/156** clean OFF direct joins;
-  the remaining histogram is **+18×67 / +117×5 / +245×6 / +263×1**.
-- **Next:** continue #55 only with independently closed async +18 service and
-  VBlank/IRQ entry/body/return costs; do not fit residuals, wire aggregate
-  stats/the clock, or resume canonical Battle 2.
-- **Notes:** fresh wrapper-validated Scene-OFF mGBA boundaries give 2-cycle
-  clean joins for all eight scattered personality reads; the frozen packet was
-  not mutated. Final full suite used an explicit 10-minute foreground timeout.
-  No fixture/production import, barrier, controller, presentation, animation,
-  or canonical Battle-2 change.
