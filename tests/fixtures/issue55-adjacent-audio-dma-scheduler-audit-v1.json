@@ -1,0 +1,460 @@
+{
+  "schema": "issue55-adjacent-audio-dma-scheduler-audit/v1",
+  "scope": "mGBA 0.10.5 source mechanics plus the three committed Battle Scene OFF Timer 0=D, Audio Sample=D+1 rows and existing on-time isolated/Video dual-refill runtime receipt; no selected-row callback trace or duration claim",
+  "release": {
+    "url": "https://github.com/mgba-emu/mgba/archive/refs/tags/0.10.5.tar.gz",
+    "sha256": "91d6fbd32abcbdf030d58d3f562de25ebbc9d56040d513ff8e5c19bee9dacf14",
+    "archiveRoot": "mgba-0.10.5",
+    "oracleProfile": "battle-scene-off"
+  },
+  "source": {
+    "files": [
+      {
+        "path": "src/core/timing.c",
+        "sha256": "f1290a60ea28cce32ef54c383397b2e2beff852dc02f8d44a69ef78ca7989d51"
+      },
+      {
+        "path": "src/gba/gba.c",
+        "sha256": "92b0fd214bfa563a1694921661c4413ffd96871cd6162cd762542fb5c2a2c098"
+      },
+      {
+        "path": "src/gba/timer.c",
+        "sha256": "318054f31c767090b907fe2a32f65f878a702e339468c727a54c6f2b865b83f2"
+      },
+      {
+        "path": "src/gba/audio.c",
+        "sha256": "32f8067d09c80b3e77bedc16d52f16a3b4ee7ba099a6cd24e8d5cc8579729a7c"
+      },
+      {
+        "path": "src/gba/dma.c",
+        "sha256": "83f1ff180942907d274208284d3d5d9148bbcb9e60ab51302bf59933d1ccdb41"
+      },
+      {
+        "path": "include/mgba/internal/gba/memory.h",
+        "sha256": "bc959b786218da4ce1a8215be66fb907aa25d32bd7c76a0493b9def4f9992ad6"
+      },
+      {
+        "path": "src/gba/memory.c",
+        "sha256": "3cb9a1595e36f11cd712407c559064dda781ab85cce7e5e3e3b9883b1f2ba19a"
+      }
+    ],
+    "anchors": [
+      {
+        "id": "timing-insert",
+        "file": "src/core/timing.c",
+        "lines": "36-59"
+      },
+      {
+        "id": "timing-due-dispatch",
+        "file": "src/core/timing.c",
+        "lines": "96-117"
+      },
+      {
+        "id": "timer0-callback",
+        "file": "src/gba/timer.c",
+        "lines": "13-43"
+      },
+      {
+        "id": "timer0-corrected-reschedule",
+        "file": "src/gba/timer.c",
+        "lines": "86-114"
+      },
+      {
+        "id": "audio-fifo-request",
+        "file": "src/gba/audio.c",
+        "lines": "327-374"
+      },
+      {
+        "id": "audio-sample-corrected-reschedule",
+        "file": "src/gba/audio.c",
+        "lines": "439-482"
+      },
+      {
+        "id": "dma-event-registration",
+        "file": "src/gba/dma.c",
+        "lines": "19-24"
+      },
+      {
+        "id": "dma-custom-schedule",
+        "file": "src/gba/dma.c",
+        "lines": "112-137"
+      },
+      {
+        "id": "dma-event-and-selection",
+        "file": "src/gba/dma.c",
+        "lines": "185-241"
+      },
+      {
+        "id": "dma-per-word-service",
+        "file": "src/gba/dma.c",
+        "lines": "243-334"
+      },
+      {
+        "id": "cpu-blocked-event-loop",
+        "file": "src/gba/gba.c",
+        "lines": "293-339"
+      },
+      {
+        "id": "memory-regions",
+        "file": "include/mgba/internal/gba/memory.h",
+        "lines": "23-49"
+      },
+      {
+        "id": "default-waitstates",
+        "file": "src/gba/memory.c",
+        "lines": "35-75"
+      }
+    ]
+  },
+  "inputReceipts": [
+    {
+      "path": "tests/fixtures/factory-construction-timer0-fifo-v1/liliana.json",
+      "sha256": "aa21be0d7b6379a4a0ca0caaca8297dc0f27a9c789f8184b3e61c3bc5e464aff"
+    },
+    {
+      "path": "tests/fixtures/factory-construction-timer0-fifo-v1/factory-varied.json",
+      "sha256": "0228b67250968d4a02f71bc1ad7670642918be9a6d25e8a166c6aa96a90666cf"
+    },
+    {
+      "path": "tests/fixtures/factory-timer0-scheduler-runtime-v1.json",
+      "sha256": "475f47317b032f6914fceb6d25d625a2dce73fdcbb9f29aed5af982799b1b2c1"
+    }
+  ],
+  "dPlusOneSourceMechanics": {
+    "eventPriorities": {
+      "GBA Audio Sample": 24,
+      "GBA Timer 0": 32,
+      "GBA DMA": 64
+    },
+    "rootOrdering": "mTimingSchedule orders absolute deadlines first; lower numeric priority breaks only an equal-deadline tie, and equal priorities preserve insertion order.",
+    "correctedDeadlines": {
+      "timer0": "At Timer 0 original deadline D, GBATimerUpdateRegister uses currentTime minus cyclesLate, so its next normal overflow is D + 1254 rather than callback-arrival time plus 1254.",
+      "fifoDma": "For each routed FIFO passing its occupancy/custom-DMA gate, GBAAudioSampleFIFO stores dma.when = currentTime minus cyclesLate = D and dma.nextCount = 4 before GBADMASchedule.",
+      "audioSample": "At Audio Sample original deadline D + 1, _sample mixes at currentTime minus cyclesLate = D + 1 and schedules only its next sample event at D + 1025."
+    },
+    "immediateQueueRule": "If Timer 0 at D enqueues FIFO DMA and Audio Sample remains due at D + 1, the generated GBA DMA root has deadline D and is before Audio Sample by deadline despite DMA priority 64. This is conditional on Timer FIFO gates producing work.",
+    "fifoRequestOrder": "Timer 0 calls FIFO A then FIFO B; Emerald committed paired route maps those calls to DMA1 then DMA2.",
+    "dmaArbitration": {
+      "selection": "GBADMAUpdate scans DMA0 through DMA3 and replaces its choice only for a strictly earlier deadline; equal newly requested DMA1/DMA2 deadlines therefore choose DMA1.",
+      "firstEventCorrection": "When a fresh DMA event enters _dmaEvent, nextCount == count resets that selected dma.when to mTimingCurrentTime before its first word is serviced.",
+      "cpuBlocking": "GBADMAService sets gba.cpuBlocked, and GBAProcessEvents continues timing ticks while that flag remains set; CPU instruction execution is held at the next event until DMA work clears.",
+      "perWord": "Each word adds base 2 plus first-word non-sequential or later-word sequential source/destination waitstates to selected deadline, transfers one word, decrements nextCount, updates next source/destination, and reruns GBADMAUpdate.",
+      "overdueCoalescing": "After a word, every enabled pending DMA whose deadline is earlier than new selected deadline is moved forward to that deadline before arbitration resumes.",
+      "completion": "Final word stores completion marker in nextCount and adds terminal +2 when either endpoint is below REGION_CART0; later DMA event clears nextCount to zero, applies repeat/IRQ rules, and reruns selection.",
+      "pinnedIwrToIoFourWordDeadlineWork": {
+        "wordServiceMasterCycles": [
+          2,
+          2,
+          2,
+          2
+        ],
+        "terminalCompletionMasterCycles": 2,
+        "perChannelScheduledDeadlineWork": 10,
+        "twoChannelWorkSum": 20
+      }
+    },
+    "narrowZeroLateDPlusOneTransition": "With Timer 0 on time at D, only fresh DMA1/DMA2 work, and no other roots, first DMA1 word moves and coalesces both DMA deadlines to D + 2; Audio Sample at D + 1 then precedes next DMA root. It is source-only conditional transition, not a LILIANA execution trace.",
+    "audioInterleavingBoundary": "Source defines queue comparisons, corrected deadlines, and DMA state transitions, but does not turn compact selected-row before/after snapshots into callback-entry log. It cannot establish which LILIANA callbacks ran between Timer 0 entry and final aggregate edge, their host/mixer outcomes, or selected-row elapsed scheduler span."
+  },
+  "committedAdjacentRows": [
+    {
+      "case": "liliana",
+      "component": "encrypted-accessor",
+      "ordinal": 23,
+      "observedEdgeCycles": 20,
+      "crossedEventNames": [
+        "GBA Timer 0",
+        "GBA Audio Sample"
+      ],
+      "coDueEventNames": [
+        "GBA Audio Sample"
+      ],
+      "preInstructionDueRootsByDeadlineThenPriority": [
+        "GBA Timer 0",
+        "GBA Audio Sample"
+      ],
+      "timer0": {
+        "priority": 32,
+        "whenDelta": -1
+      },
+      "audioSample": {
+        "priority": 24,
+        "whenDelta": 0,
+        "deadlineMinusTimer0": 1
+      },
+      "video": {
+        "priority": 8,
+        "due": false,
+        "whenDelta": 175
+      },
+      "pairedFifoDmaBoundary": {
+        "fifoWordLevels": [
+          3,
+          3
+        ],
+        "fifoWordLevelsAfter": [
+          7,
+          7
+        ],
+        "internalRemaining": [
+          3,
+          3
+        ],
+        "internalRemainingAfter": [
+          2,
+          2
+        ],
+        "dmaNextCountsBefore": [
+          0,
+          0
+        ],
+        "dmaNextCountsAfter": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "case": "factory-varied",
+      "component": "get-nature",
+      "ordinal": 12,
+      "observedEdgeCycles": 20,
+      "crossedEventNames": [
+        "GBA Timer 0",
+        "GBA Audio Sample"
+      ],
+      "coDueEventNames": [
+        "GBA Audio Sample"
+      ],
+      "preInstructionDueRootsByDeadlineThenPriority": [
+        "GBA Timer 0",
+        "GBA Audio Sample"
+      ],
+      "timer0": {
+        "priority": 32,
+        "whenDelta": -5
+      },
+      "audioSample": {
+        "priority": 24,
+        "whenDelta": -4,
+        "deadlineMinusTimer0": 1
+      },
+      "video": {
+        "priority": 8,
+        "due": false,
+        "whenDelta": 43
+      },
+      "pairedFifoDmaBoundary": {
+        "fifoWordLevels": [
+          3,
+          3
+        ],
+        "fifoWordLevelsAfter": [
+          7,
+          7
+        ],
+        "internalRemaining": [
+          3,
+          3
+        ],
+        "internalRemainingAfter": [
+          2,
+          2
+        ],
+        "dmaNextCountsBefore": [
+          0,
+          0
+        ],
+        "dmaNextCountsAfter": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "case": "factory-varied",
+      "component": "nature-attempt",
+      "ordinal": 63,
+      "observedEdgeCycles": 20,
+      "crossedEventNames": [
+        "GBA Video",
+        "GBA Timer 0",
+        "GBA Audio Sample"
+      ],
+      "coDueEventNames": [
+        "GBA Video",
+        "GBA Audio Sample"
+      ],
+      "preInstructionDueRootsByDeadlineThenPriority": [
+        "GBA Video",
+        "GBA Timer 0",
+        "GBA Audio Sample"
+      ],
+      "timer0": {
+        "priority": 32,
+        "whenDelta": -6
+      },
+      "audioSample": {
+        "priority": 24,
+        "whenDelta": -5,
+        "deadlineMinusTimer0": 1
+      },
+      "video": {
+        "priority": 8,
+        "due": true,
+        "whenDelta": -6
+      },
+      "pairedFifoDmaBoundary": {
+        "fifoWordLevels": [
+          3,
+          3
+        ],
+        "fifoWordLevelsAfter": [
+          7,
+          7
+        ],
+        "internalRemaining": [
+          3,
+          3
+        ],
+        "internalRemainingAfter": [
+          2,
+          2
+        ],
+        "dmaNextCountsBefore": [
+          0,
+          0
+        ],
+        "dmaNextCountsAfter": [
+          0,
+          0
+        ]
+      }
+    }
+  ],
+  "priorRuntimeReceipt": {
+    "windows": [
+      {
+        "kind": "isolated-dual-refill",
+        "timer0OnTime": true,
+        "exactCoDueCallbacksBeforeTimer0": [],
+        "audioDueBeforeTimer0": false,
+        "freshDualEntry": {
+          "fifoWordLevels": [
+            3,
+            3
+          ],
+          "internalRemaining": [
+            3,
+            3
+          ],
+          "dmaNextCounts": [
+            0,
+            0
+          ],
+          "activeDma": -1,
+          "cpuBlocked": false
+        },
+        "requestOrder": [
+          {
+            "fifo": "a",
+            "dmaChannel": 1
+          },
+          {
+            "fifo": "b",
+            "dmaChannel": 2
+          }
+        ],
+        "dmaActiveOrder": [
+          1,
+          1,
+          1,
+          1,
+          2,
+          1,
+          2,
+          2,
+          2,
+          2
+        ],
+        "completionOrder": [
+          1,
+          2
+        ],
+        "completionAfterTimerEntryCycles": 18
+      },
+      {
+        "kind": "video-co-due-dual-refill",
+        "timer0OnTime": true,
+        "exactCoDueCallbacksBeforeTimer0": [
+          {
+            "name": "GBA Video",
+            "priority": 8
+          }
+        ],
+        "audioDueBeforeTimer0": false,
+        "freshDualEntry": {
+          "fifoWordLevels": [
+            3,
+            3
+          ],
+          "internalRemaining": [
+            3,
+            3
+          ],
+          "dmaNextCounts": [
+            0,
+            0
+          ],
+          "activeDma": -1,
+          "cpuBlocked": false
+        },
+        "requestOrder": [
+          {
+            "fifo": "a",
+            "dmaChannel": 1
+          },
+          {
+            "fifo": "b",
+            "dmaChannel": 2
+          }
+        ],
+        "dmaActiveOrder": [
+          1,
+          1,
+          1,
+          1,
+          2,
+          1,
+          2,
+          2,
+          2,
+          2
+        ],
+        "completionOrder": [
+          1,
+          2
+        ],
+        "completionAfterTimerEntryCycles": 18
+      }
+    ],
+    "applicabilityBoundary": "Two committed windows prove fresh on-time dual DMA graph and 18-master-cycle makespan with no Audio Sample due before Timer 0; one has exact prior Video callback. They do not observe Audio Sample at D + 1 and do not supply a LILIANA Audio/DMA order or duration."
+  },
+  "smallestRequiredRuntimeObservation": {
+    "target": "LILIANA encrypted-accessor ordinal 23, repeated twice fresh",
+    "captureInterval": "from Timer 0 callback entry through first Audio Sample callback after it and until both DMA1/DMA2 nextCount values are zero",
+    "callbackEntryFields": [
+      "event name, priority, relative scheduled deadline, scheduler current time, and cyclesLate",
+      "activeDMA, cpuBlocked, and DMA1/DMA2 nextCount plus relative deadlines",
+      "FIFO A/B word level and internalRemaining at Timer 0 entry and after interval"
+    ],
+    "acceptance": "Two packets must agree on contiguous Timer 0 / GBA DMA / GBA Audio Sample callback-entry sequence and scheduler span from Timer 0 entry to both DMA completions; only then may selected row receive interleaving or duration statement.",
+    "prohibitedInference": "Do not borrow isolated/Video 18-cycle makespan, synthesize LILIANA order from aggregate FIFO endpoints, or wire construction-clock cost."
+  },
+  "explicitBoundary": [
+    "Three committed rows are adjacent deadlines: Audio Sample is exactly one master cycle after Timer 0, not equal-deadline priority observation.",
+    "LILIANA row records only 20-cycle instruction-edge endpoints; it is not a runtime callback trace.",
+    "Source-only zero-late D/D+1 transition is conditional and deliberately not named as LILIANA runtime order.",
+    "This receipt contains no absolute selected-row scheduler timestamp, no pixel lookup, no production import, and no construction-clock behavior."
+  ]
+}
