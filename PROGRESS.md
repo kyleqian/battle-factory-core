@@ -11,19 +11,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   null operation/accessor `cycles` field remain untouched. Timer 0 service cost
   is explicitly `null`.
 - **Did:** committed the bounded OFF-profile receipt/probe and pure API in
-  `1f81c164`, `eec4ed0b`, `c8df1178`, and `c397c27b`. Fresh anchor/LILIANA/
-  varied packets are byte-identical (407/191/326 source-boundary rows):
-  `TM0CNT_L=0xFB1A`, `TM0CNT_H=0x0080`, queue name `GBA Timer 0`, priority 32,
-  and due-time deltas recur by exact 1,254 master-cycle multiples. Entry due
-  distances are 276/403/1,145, so phase is not source-general and remains an
-  explicit seed/unknown. Focused receipt+cadence tests are **17/17** green.
-- **Next:** update the Issue #55 docs/ledger, run smoke/typecheck/full test/build,
-  and commit the final green checkpoint. Do not wire `runFactoryConstructionClock`
-  or populate any `cycles` accessor.
-- **Notes:** cadence accepts only source-derived m4a reload rates, requires an
-  explicit due seed on enable, preserves late phase/multiple crossings, and
-  rejects unmodeled rates. No +18 cost, co-due collapse, RNG, presentation,
-  controller, recording import, barrier, or canonical Battle-2 work.
+  `1f81c164`, `eec4ed0b`, `c8df1178`, and `c397c27b`; docs/ledger are in
+  `c8a638c2`. Fresh anchor/LILIANA/varied packets are byte-identical
+  (407/191/326 source-boundary rows): `TM0CNT_L=0xFB1A`, `TM0CNT_H=0x0080`,
+  queue name `GBA Timer 0`, priority 32, and due-time deltas recur by exact
+  1,254 master-cycle multiples. Entry due distances are 276/403/1,145, so
+  phase is not source-general and remains an explicit seed/unknown.
+- **Next:** the step is complete. Future #55 work must close the remaining
+  source-general audio/IRQ/service evidence before any live wiring; do not wire
+  `runFactoryConstructionClock` or populate any `cycles` accessor from this
+  checkpoint.
+- **Notes:** focused receipt+cadence **17/17**, smoke **375/375**, typecheck,
+  full `npm test` **902 files / 8,520 passed / 1 skipped**, and `npm run build`
+  (**631 modules**) are green. Cadence accepts only source-derived m4a reload
+  rates, requires an explicit due seed on enable, preserves late phase and
+  multiple crossings, and rejects unmodeled rates. No +18 cost, co-due
+  collapse, RNG, presentation, controller, recording import, barrier, or
+  canonical Battle-2 work.
 
 ## 1110 — [supervisor, 2026-08-10] **#55 Timer 0 identity and recurrence evidence united**
 
