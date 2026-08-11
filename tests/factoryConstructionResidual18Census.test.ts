@@ -275,8 +275,11 @@ describe("Issue #55 recurring +18 source-boundary census", () => {
 
   it("reproduces every +18 member across all six already-exposed source components", () => {
     const members = rows.filter((row) => row.residualCycles === 18);
-    expect(Object.fromEntries([...Map.groupBy(members, (row) => row.component)]
-      .map(([component, values]) => [component, values.length]))).toEqual({
+    const componentCounts = members.reduce<Record<string, number>>((counts, row) => {
+      counts[row.component] = (counts[row.component] ?? 0) + 1;
+      return counts;
+    }, {});
+    expect(componentCounts).toEqual({
       "nature-attempt": 11,
       "outer-factory-loop": 1,
       "encrypted-accessor": 67,

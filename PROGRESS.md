@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1105 — [supervisor, 2026-08-10] **#55 residual census verified; no speculative clock fit**
+
+- **State:** #55 remains open; dependency `cycles` stay `null` and the live
+  construction clock stays unwired. Supervisor verification passed focused
+  **3/3**, full `npm test` **895 files / 8,491 passed / 1 skipped**, and the
+  production build after replacing a test-only unsupported `Map.groupBy` use.
+- **Did:** verified the three compact OFF packets reproduce all **85** known
+  +18 joins against **488** clean controls across six source components. The
+  boundary-visible DMA/IRQ/prefetch state is identical, so the evidence does
+  not justify an async-service reducer or constant. Orient folded **31**
+  animation commits through `11245f83`; that union passed full test/build.
+- **Next:** instrument the exact instruction-to-instruction increment and
+  timing-event queue identity for #55. Do not fit +18, wire the clock, or
+  resume the retired canonical Battle-2 march.
+- **Notes:** `animation-main` is now **10 commits** ahead under its separate
+  supervisor and is intentionally left for the next orient fold. No
+  controller, presentation, barrier, recording import, or production reducer
+  changed; `DEFERRED.md` has no open entry.
+
 ## 1104 — [MAIN worker, 2026-08-10] **#55 recurring +18 class censused; reducer not proven**
 
 - **State:** evidence commit `87553c2a`; #55 remains open, accessor/dependency
@@ -44,24 +63,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   not mutated. Final full suite used an explicit 10-minute foreground timeout.
   No fixture/production import, barrier, controller, presentation, animation,
   or canonical Battle-2 change.
-
-## 1102 — [MAIN worker, 2026-08-10] **#55 encrypted EWRAM loops and receipt field tails closed**
-
-- **State:** implementation `54368a1e` corrected/pinned by `fd4c79c1` and
-  supervisor-reconciled in this entry; #55
-  remains open, `GetBoxMonData2.cycles` stays `null`, and the construction
-  clock stays unwired. Focused **25/25**, smoke **375/375**, typecheck, full
-  `npm test` **894 files / 8,486 passed / 1 skipped**, and production build
-  are green.
-- **Did:** context-composed aligned EWRAM u8/u16/u32 timing now closes decrypt /
-  checksum / encrypt at **448 / 518 / 448** cycles and **528** total bus cycles.
-  All **180** dependency rows expose checksum-valid/invalid and species/EXP/
-  EV/IV tail widths, counts, exact PCs, bus totals, and component cycles.
-- **Next:** continue #55 only with independently source-reduced outer
-  `GetBoxMonData2` prologue/setup/dispatch/common-return instruction and
-  memory work, or async/IRQ state; do not fit residuals or wire the clock.
-- **Notes:** twice-fresh compact Scene-OFF instruction/component receipt is
-  byte-identical at `bff98549…`; misaligned u16/u32 behavior is rejected, not
-  claimed. Supervisor reconciliation passed focused **25/25**, smoke
-  **375/375**, typecheck, and build. No fixture import into production,
-  barrier, controller, presentation, animation, or canonical Battle-2 change.
