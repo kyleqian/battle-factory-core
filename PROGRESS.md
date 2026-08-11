@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1118 — [MAIN worker, 2026-08-11] **#55 Audio-co-due row-selection checkpoint**
+
+- **State:** the three natural Audio-co-due dual-refill rows are exactly
+  identified; no new runtime packet is claimed, #55 stays open, and the clock
+  and dispatcher remain unchanged.
+- **Did:** pinned LILIANA encrypted-accessor 23 (Audio), varied get-nature 12
+  (Audio), and varied nature-attempt 63 (Video+Audio), including exact return
+  classes and instruction edges; anchor has none.
+- **Next:** retain LILIANA's selected callback window twice fresh, then the two
+  varied windows through the same wrapper. Do not fit cost or wire the clock.
+- **Notes:** the bounded wrapper attempt did not finish a validated JSON packet
+  in cap, so its probe edits were discarded. Focused Timer0 **40/40**, smoke
+  **375/375**, typecheck, full `npm test` **909 files / 8,558 passed / 1
+  skipped**, and build (**631 modules**) are green.
+
 ## 1117 — [MAIN worker, 2026-08-11] **#55 dual-refill deadline-work contract correction**
 
 - **State:** the pure Timer 0 dispatcher now distinguishes work from elapsed
@@ -36,20 +51,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Focused Timer0 **22/22**, smoke **375/375**, typecheck, full `npm test`
   **907 files / 8,546 passed / 1 skipped**, and build (**631 modules**) are
   green. No production, barrier, animation, or canonical Battle-2 change.
-
-## 1115 — [MAIN worker, 2026-08-11] **#55 isolated-fresh Timer 0 DMA hardening**
-
-- **State:** the pure dispatcher is hardened; #55 remains open, the
-  construction clock remains unwired, and
-  `serviceCostMasterCycles` remains `null`.
-- **Did:** modeled mGBA's global audio-enable gate; required `nextCountWords`
-  zero for both represented DMA channels plus explicit no-preexisting,
-  no-competing, and no-Video-started-DMA ownership. Renamed the **0/10/20**
-  output as relative isolated-fresh progression, preserving A/DMA1→B/DMA2.
-- **Next:** resume #55 only with a separately bounded full workload/scheduler
-  composition step; absolute deadlines, `cyclesLate`, co-due arbitration, and
-  live construction-clock wiring remain deliberately out of model.
-- **Notes:** focused **9/9**, smoke **375/375**, typecheck, full `npm test`
-  **906 files / 8,542 passed / 1 skipped**, and build (**631 modules**) are
-  green. No +18 constant, cadence cost, co-due arithmetic, live wiring,
-  controller, presentation, animation, barrier, or recording import changed.

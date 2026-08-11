@@ -227,6 +227,26 @@ describe("Issue #55 Timer 0 conditional FIFO refill receipt", () => {
     });
   });
 
+  it("pins the three naturally observed Audio-co-due runtime candidates by canonical census row", () => {
+    const audioRows = packets.flatMap(({ name, value }) => value.crossings
+      .filter((row) => row.label === "member" && row.fifoRefillObserved
+        && row.coDueEventNames.includes("GBA Audio Sample"))
+      .map((row) => ({ case: name, component: row.component, ordinal: row.ordinal,
+        returnClass: row.returnClass, edge: `${row.instructionPc}->${row.nextInstructionPc}`,
+        coDue: row.coDueEventNames })));
+    expect(audioRows).toEqual([
+      { case: "liliana", component: "encrypted-accessor", ordinal: 23,
+        returnClass: "0x0806a51a->0x08068db2", edge: "0x082e7c3e->0x082e7c40",
+        coDue: ["GBA Audio Sample"] },
+      { case: "factory-varied", component: "get-nature", ordinal: 12,
+        returnClass: "0x0806d072->0x08068f02", edge: "0x082e7bf2->0x082e7bf4",
+        coDue: ["GBA Audio Sample"] },
+      { case: "factory-varied", component: "nature-attempt", ordinal: 63,
+        returnClass: "0x0806d08a->0x0806f5ce", edge: "0x082e7c10->0x082e7c12",
+        coDue: ["GBA Video", "GBA Audio Sample"] },
+    ]);
+  });
+
   it("keeps clean controls and closes the cross-epoch residual join without fitting 18", () => {
     const cleanEdges = new Map<string, number>();
     for (const { value } of packets) {

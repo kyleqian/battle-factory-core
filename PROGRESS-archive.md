@@ -40668,3 +40668,19 @@ git; the current live ledger keeps the three load-bearing entries only.
   independently passed its full suite/build. No production, controller,
   presentation, animation, canonical Battle-2, barrier, or recording import
   changed.
+## 1115 — [MAIN worker, 2026-08-11] **#55 isolated-fresh Timer 0 DMA hardening**
+
+- **State:** the pure dispatcher is hardened; #55 remains open, the
+  construction clock remains unwired, and
+  `serviceCostMasterCycles` remains `null`.
+- **Did:** modeled mGBA's global audio-enable gate; required `nextCountWords`
+  zero for both represented DMA channels plus explicit no-preexisting,
+  no-competing, and no-Video-started-DMA ownership. Renamed the **0/10/20**
+  output as relative isolated-fresh progression, preserving A/DMA1→B/DMA2.
+- **Next:** resume #55 only with a separately bounded full workload/scheduler
+  composition step; absolute deadlines, `cyclesLate`, co-due arbitration, and
+  live construction-clock wiring remain deliberately out of model.
+- **Notes:** focused **9/9**, smoke **375/375**, typecheck, full `npm test`
+  **906 files / 8,542 passed / 1 skipped**, and build (**631 modules**) are
+  green. No +18 constant, cadence cost, co-due arithmetic, live wiring,
+  controller, presentation, animation, barrier, or recording import changed.

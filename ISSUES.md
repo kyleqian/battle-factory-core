@@ -1438,6 +1438,15 @@ a present mixer, pending/competing DMA, and Audio/IRQ or Video-started DMA are
 not observed. `serviceCostMasterCycles` remains `null`; the construction clock
 remains unwired. Full facts are in the scheduler audit.
 
+**Audio-co-due row selection checkpoint (2026-08-11):** the finite OFF
+receipt's natural candidates are LILIANA encrypted-accessor 23 (Audio only),
+legal-varied get-nature 12 (Audio only), and legal-varied nature-attempt 63
+(Video+Audio); exact return classes and instruction edges are Tier-1 pinned.
+No anchor row qualifies. The bounded edge-selected wrapper attempt did not
+produce a validated packet in cap, so no runtime claim or probe change landed.
+Next is LILIANA twice fresh, then both varied rows through the same wrapper;
+dispatcher/service cost/clock remain untouched.
+
 **VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
 probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all
 **52/31/30** construction-epoch interrupts. Within each case every measured

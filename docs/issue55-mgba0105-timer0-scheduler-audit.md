@@ -206,3 +206,22 @@ work, or Video-started DMA. They do not price zero/one-refill callbacks,
 nonzero `cyclesLate`, pending DMA, a present mixer, or Audio/IRQ/Video-started
 work. `serviceCostMasterCycles` remains `null`, and the construction clock
 remains unwired.
+
+## Audio-co-due census-row selection checkpoint (2026-08-11)
+
+The finite OFF FIFO receipt contains exactly three refill crossings with a
+co-due Audio Sample callback. Their smallest edges are now pinned in Tier 1:
+
+| epoch | component / ordinal | return class | exact edge | co-due roots |
+| --- | --- | --- | --- | --- |
+| LILIANA | encrypted-accessor 23 | `0x0806a51a→0x08068db2` | `0x082e7c3e→0x082e7c40` | Audio Sample |
+| legal varied | get-nature 12 | `0x0806d072→0x08068f02` | `0x082e7bf2→0x082e7bf4` | Audio Sample |
+| legal varied | nature-attempt 63 | `0x0806d08a→0x0806f5ce` | `0x082e7c10→0x082e7c12` | Video + Audio Sample |
+
+No anchor refill row is Audio-co-due. A bounded attempt to arm the existing
+callback wrapper only at the first selected LILIANA edge did not complete a
+wrapper-validated JSON packet within this worker cap; no probe change or
+runtime receipt is claimed or committed. Next, retain LILIANA Audio-only twice
+fresh, then the two legal-varied rows with the same edge-selected mechanism.
+Until then the Audio/Video+Audio graphs remain unobserved, with no dispatcher,
+service-cost, or construction-clock change licensed.
