@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1114 — [MAIN worker, 2026-08-11] **#55 pure conditional Direct Sound dispatcher**
+
+- **State:** implementation `649e993d` is committed; #55 remains open and the
+  live construction clock stays unwired. `serviceCostMasterCycles` remains
+  `null`.
+- **Did:** registered the semantic Timer 0 FIFO A/B dispatcher and composed it
+  with cadence using explicit state per crossing. It returns source-derived
+  A/DMA1→B/DMA2 requests and scheduled progression **0/10/20**, preserves
+  phase across repeated crossings, and rejects unmodeled state.
+- **Next:** finish foreground full-suite/build verification, then leave #55 to
+  a separately bounded live phase/workload and VBlank/IRQ composition step.
+- **Notes:** focused Timer 0 **20/20**, smoke **375/375**, and typecheck are
+  green. No +18 constant, cadence cost, co-due service, live wiring,
+  controller, presentation, animation, barrier, or recording import changed.
+
 ## 1113 — [supervisor, 2026-08-11] **#55 Timer 0 conditional refill cause united**
 
 - **State:** runtime receipt `039af5ed` and side source audit `de0270e7` are
@@ -47,27 +62,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `npm test` **903 files / 8,524 passed / 1 skipped**, and build (**631
   modules**) are green. No production, animation, canonical Battle-2,
   barrier, or recording import changed.
-
-## 1111 — [MAIN worker, 2026-08-10] **#55 Timer 0 phase receipt and pure cadence registration**
-
-- **State:** #55 remains open; the live construction clock and every currently
-  null operation/accessor `cycles` field remain untouched. Timer 0 service cost
-  is explicitly `null`.
-- **Did:** committed the bounded OFF-profile receipt/probe and pure API in
-  `1f81c164`, `eec4ed0b`, `c8df1178`, and `c397c27b`; docs/ledger are in
-  `c8a638c2`. Fresh anchor/LILIANA/varied packets are byte-identical
-  (407/191/326 source-boundary rows): `TM0CNT_L=0xFB1A`, `TM0CNT_H=0x0080`,
-  queue name `GBA Timer 0`, priority 32, and due-time deltas recur by exact
-  1,254 master-cycle multiples. Entry due distances are 276/403/1,145, so
-  phase is not source-general and remains an explicit seed/unknown.
-- **Next:** the step is complete. Future #55 work must close the remaining
-  source-general audio/IRQ/service evidence before any live wiring; do not wire
-  `runFactoryConstructionClock` or populate any `cycles` accessor from this
-  checkpoint.
-- **Notes:** focused receipt+cadence **17/17**, smoke **375/375**, typecheck,
-  full `npm test` **902 files / 8,520 passed / 1 skipped**, and `npm run build`
-  (**631 modules**) are green. Cadence accepts only source-derived m4a reload
-  rates, requires an explicit due seed on enable, preserves late phase and
-  multiple crossings, and rejects unmodeled rates. No +18 cost, co-due
-  collapse, RNG, presentation, controller, recording import, barrier, or
-  canonical Battle-2 work.

@@ -112,11 +112,26 @@ control, the difference is exactly `20 - 2 = 18`. This closes the arithmetic
 for that branch; **18 is a conditional difference, not a Timer 0 service-cost
 constant**.
 
-What remains open is attribution of each observed construction edge to that
-branch. The current residual receipt records `GBA Timer 0`, its due state, and
-the 20-versus-2 window, but not FIFO A/B read/write/internal state or DMA1/2
-register state. FIFO A/B can instead enqueue zero, one, or two requests, and
-pre-existing DMA state, `cyclesLate`, queue ties with audio/video/IRQ work, and
-DMA serialization can change the timing window. Keep
-`serviceCostMasterCycles: null` in the production cadence record until a fresh
-runtime receipt captures those fields and closes the attribution.
+## Pure dispatch registration
+
+`dispatchFactoryTimer0DirectSound` now implements only the source-closed
+conditional branch above. Its input is semantic source state: the modular
+queued-word threshold, Timer/output routing, DMA source mapping, custom-timing
+and enable eligibility, and the audited fresh four-word IWRAM-to-FIFO mode.
+It samples A before B and returns requested channel order plus serialized
+scheduled progression **0**, **10**, or **20** master cycles. Invalid FIFO
+levels, channel mappings, regions, modes, or counts are rejected rather than
+generalized beyond the audit.
+
+`dispatchFactoryTimer0CadenceWithDirectSound` composes this reducer with the
+existing cadence registration. Every crossed period requires its own explicit
+Direct Sound state, including repeated late crossings, while recurrence stays
+anchored to the original due phase. It does not synthesize state evolution
+between crossings. Tier-1 coverage is in
+`tests/factoryTimer0DirectSoundDispatch.test.ts`.
+
+This closes the pure conditional FIFO service dispatcher, not the construction
+clock. `serviceCostMasterCycles` remains `null`: no fitted 18-cycle constant is
+exported, and Timer callback overhead, pre-existing DMA work, `cyclesLate`,
+co-due Video/Audio/IRQ arbitration, and live construction state remain outside
+this contract. `runFactoryConstructionClock` is still unwired.

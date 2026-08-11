@@ -1388,16 +1388,24 @@ because six clean classes are supplied by another epoch. This correlation
 classifies the observed +18 as conditional on a Direct Sound FIFO refill/DMA
 write, not as an invariant Timer 0 callback cost.
 
-This closes the requested classification at retained boundaries but not a
-source-general pure service-dispatch contract: the refill still depends on
-dereferenced audio/DMA state and co-due queue class. Production remains
-unchanged — `serviceCostMasterCycles: null`, no `runFactoryConstructionClock`
-wiring, and no accessor/operation `cycles` population. The smallest next
-observable is a safe source-general reduction of the refill dispatch, not an
-`18` constant. Receipt and reproduction details are in
-`docs/issue55-construction-rng-schedule-receipt.md` under “Timer 0 FIFO/DMA
-conditional-refill census”; the Tier-1 pin is
-`tests/factoryTimer0FifoEvidence.test.ts`.
+**Pure Timer 0 Direct Sound dispatch (2026-08-11, `649e993d`):** the smallest
+source-general conditional service reducer is now registered alongside the
+pure cadence. Semantic per-crossing inputs cover the FIFO queued-word
+threshold, Timer/output routing, DMA source/custom-timing/enabled eligibility,
+and only fresh four-word IWRAM-to-FIFO work. Outputs retain A/DMA1 before
+B/DMA2 and scheduled progression **0/10/20**; invalid FIFO levels, mappings,
+regions, modes, counts, and per-crossing state-list lengths fail loudly.
+Multiple late crossings require one explicit state each and preserve cadence
+phase. Tier-1 covers zero/one/two refills, the exact threshold, order, repeated
+crossings, immutability, and validation.
+
+This closes the pure conditional dispatcher only. #55 remains open for live
+construction-clock phase/workload composition and complete VBlank/IRQ/audio
+arbitration. `serviceCostMasterCycles` stays `null`; no fitted 18 constant,
+co-due Video/Audio service, operation/accessor duration, or
+`runFactoryConstructionClock` wiring landed. Source/runtime evidence remains
+in `docs/issue55-mgba0105-timer0-direct-sound-audit.md` and
+`docs/issue55-construction-rng-schedule-receipt.md`.
 
 **VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
 probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all
