@@ -5,15 +5,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R2 — [supervised session, 2026-08-11] **M1 decision: hand-rolled C ABI (in progress)**
+## R2 — [supervised session, 2026-08-11] **M1+M2+M3 landed: ABI, adapter, rental-generation differential green**
 
-- **State:** **M1 and M2 are DONE and folded into rust-main; M3 (rental
-  generation) in flight.** master merged in at session start; every fold
-  gate-verified by the supervisor. Cargo 9/9, fmt+clippy clean (gates on
-  as of M1), wasm artifact 20,306 B (sha c7d82fe3…), differential spec
-  73/73 both default and POKEBENCH_ENGINE=wasm, full npm test 948 files /
-  8,756 passed / 1 pre-existing skip (worker-run on identical fold
-  content).
+- **State:** **M1, M2, and M3 (rental generation) are DONE and folded
+  into rust-main.** master merged in at session start; every fold
+  gate-verified by the supervisor. Cargo 28/28, fmt+clippy clean (gates
+  on as of M1), wasm artifact 40,034 B, parity specs 363/363 both
+  default and POKEBENCH_ENGINE=wasm, full npm test 949 files / 9,046
+  passed / 1 pre-existing skip (worker-run on identical fold content).
+  M3c (mon-construction data groundwork) dispatched as a bonus step.
+  - **M3a:** `core-rs/tools/gen-data.mjs` codegen → checked-in
+    `gen_tables.rs` (882 frontier mons, 63 held items, 411
+    species-second-ability, 25 natures, round policy), deterministic +
+    idempotent (supervisor re-sampled rows 0/400/777/881 against the
+    JSON independently); helper ports in `rental_data.rs` with
+    TS-pinned tests. Worker added `core-rs/rustfmt.toml`
+    (struct_lit_width=80) to keep generated rows one-line.
+  - **M3b:** `rental_generation.rs` — faithful port incl. the
+    curr_species stateful-retry quirk; `fw_generate_initial_rentals`
+    LE-buffer boundary (layout doc'd in factory-wasm);
+    `core-rs/adapter/factoryEngine.ts` decoder;
+    `tests/factoryRentalParity.test.ts` with the FULL 288-config matrix
+    (16 seeds × 3 winStreaks × 3 rentsCounts × 2 construction cursors)
+    deep-equal on complete results including the draw ledger, plus
+    challenge-8 error parity and the seed-0 fixture anchor. **Port
+    finding:** TS deliberately throws on challengeNum 7 + better-range
+    fixed IV (the documented retail-OOB non-portability boundary,
+    factoryRentalGeneration.ts:184); the port mirrors the error and the
+    matrix compares errors symmetrically.
   - **M1 (fold fe40ab19):** fw_ ABI v1 surface (fw_abi_version/
     fw_rng_advance/fw_rng_output/fw_alloc/fw_free), `core-rs/build-wasm.sh`
     → `artifacts/wasm/factory_wasm.wasm` (gitignored), hand-written typed
@@ -49,15 +68,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   length-prefixed LE byte buffers via `fw_alloc(len) -> ptr` /
   `fw_free(ptr, len)`; every layout is documented in factory-wasm doc
   comments and mirrored by the TS-side decoder next to the adapter.
-- **Next:** M3 in two worker steps: (a) generated data tables
-  (`core-rs/tools/gen-data.mjs` → checked-in `gen_tables.rs`; frontier
-  mons/held items/species second-ability/natures/round policy) + helper
-  ports with TS-pinned tests; (b) `generateInitialFactoryRentals` port +
-  `fw_generate_initial_rentals` LE-buffer boundary +
-  `tests/factoryRentalParity.test.ts` differential matrix. The #55
-  construction clock (`factoryConstructionClock.ts`) is explicitly NOT
-  ported — open TS-lane work; the current single-cursor contract is the
-  spec.
+- **Next:** M3c is data groundwork only (codegen extensions: frontier-mon
+  moves/EV masks, move PP, held-item hold effects, species base
+  stats/gender/exp@50, nature modifiers; plus stats/gender/shiny/EV
+  helper ports). The step after (M3d, next session unless time remains):
+  port `createFactoryCorpusPartyMember`, add its boundary + parity file.
+  The #55 construction clock (`factoryConstructionClock.ts`) stays
+  unported — open TS-lane work; the current single-cursor contract is
+  the spec.
 - **Notes:** clippy/fmt gates turn on with this step per
   RUST_SUPERVISOR.md. TS lane's open #55 construction-clock work noted for
   M3 sequencing (no porting what it wires into until TS closes it).

@@ -15,6 +15,22 @@ export interface FactoryWasmExports {
   fw_rng_output(rng_value: number): number;
   fw_alloc(len: number): number;
   fw_free(ptr: number, len: number): void;
+  /**
+   * Runs the initial-rental generator and returns an `fw_alloc`'d buffer
+   * pointer; see the doc comment over the Rust export
+   * (`crates/factory-wasm/src/lib.rs`) for the exact layout, and
+   * `adapter/factoryEngine.ts` for the decoder. `has_construction_rng` is a
+   * 0/1 flag gating `construction_rng_value` (no native `Option` on the
+   * WASM ABI).
+   */
+  fw_generate_initial_rentals(
+    rng_value: number,
+    factory_win_streak: number,
+    rents_count: number,
+    player_trainer_id: number,
+    has_construction_rng: number,
+    construction_rng_value: number,
+  ): number;
   memory: WebAssembly.Memory;
 }
 
