@@ -7,6 +7,7 @@ import {
   reduceFactoryChecksumLoopTiming,
   reduceFactoryDecryptBoxMonTiming,
   reduceFactoryEncryptBoxMonTiming,
+  reduceFactoryEwramAccessTiming,
   reduceFactoryGetSubstructTiming,
   censusFactoryGetBoxMonDataDependency,
   reduceFactoryGetNatureTiming,
@@ -416,8 +417,10 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       sequentialThumbHalfwords: 128,
       pipelineRefills: 12,
       instructionFetchCycles: 328,
-      dataAccessCycles: null,
-      cycles: null,
+      dataAccessCycles: 360,
+      dataAccessPremiumCycles: 240,
+      cycles: 568,
+      unresolved: null,
     });
     expect(reduceFactoryEncryptBoxMonTiming()).toMatchObject({
       kind: "encrypt",
@@ -430,8 +433,10 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       sequentialThumbHalfwords: 128,
       pipelineRefills: 12,
       instructionFetchCycles: 328,
-      dataAccessCycles: null,
-      cycles: null,
+      dataAccessCycles: 360,
+      dataAccessPremiumCycles: 240,
+      cycles: 568,
+      unresolved: null,
     });
     expect(reduceFactoryChecksumLoopTiming()).toMatchObject({
       entryPc: 0x0806_8c78,
@@ -444,8 +449,10 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       sequentialThumbHalfwords: 199,
       pipelineRefills: 20,
       instructionFetchCycles: 518,
-      ewramHalfwordReadCycles: null,
-      cycles: null,
+      ewramHalfwordReadCycles: 48,
+      ewramReadPremiumCycles: 0,
+      cycles: 518,
+      unresolved: null,
     });
 
     const v2 = ["anchor", "liliana", "factory-varied"].map((name) => (
@@ -467,6 +474,29 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
     expect(resumed.some((name) => name.startsWith("EncryptBoxMon+"))).toBe(true);
     expect(resumed.some((name) => name.startsWith("CalculateBoxMonChecksum+"))).toBe(true);
     expect(resumed.some((name) => name.startsWith("GetSubstruct+"))).toBe(true);
+  });
+
+  it("reduces every aligned EWRAM access width used by the encrypted route and rejects unproved misalignment", () => {
+    expect(reduceFactoryEwramAccessTiming({ access: "read", width: 1, address: 0x0200_0023 })).toEqual({
+      region: "ewram", access: "read", width: 1, address: 0x0200_0023,
+      alignment: 1, transfers: 1, busWidth: 2, cycles: 2,
+      instructionBaselineCycles: 2, busPremiumCycles: 0, unresolved: null,
+    });
+    expect(reduceFactoryEwramAccessTiming({ access: "read", width: 2, address: 0x0200_0024 })).toMatchObject({
+      alignment: 2, transfers: 1, cycles: 2, busPremiumCycles: 0, unresolved: null,
+    });
+    expect(reduceFactoryEwramAccessTiming({ access: "read", width: 4, address: 0x0200_0024 })).toMatchObject({
+      alignment: 4, transfers: 2, cycles: 6, busPremiumCycles: 4, unresolved: null,
+    });
+    expect(reduceFactoryEwramAccessTiming({ access: "write", width: 4, address: 0x0203_fffc })).toMatchObject({
+      access: "write", alignment: 4, transfers: 2, cycles: 6, busPremiumCycles: 4,
+    });
+    expect(() => reduceFactoryEwramAccessTiming({ access: "read", width: 2, address: 0x0200_0023 }))
+      .toThrow("misaligned EWRAM halfword behavior is not claimed");
+    expect(() => reduceFactoryEwramAccessTiming({ access: "read", width: 4, address: 0x0200_0022 }))
+      .toThrow("misaligned EWRAM word behavior is not claimed");
+    expect(() => reduceFactoryEwramAccessTiming({ access: "read", width: 1, address: 0x0300_0000 }))
+      .toThrow("address must be in retail EWRAM");
   });
 
   it("censuses the shared encrypted accessor route without claiming a total", () => {
@@ -507,6 +537,15 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
     expect(rows.every((row) => row.decryptLoopTiming.instructionFetchCycles === 328)).toBe(true);
     expect(rows.every((row) => row.checksumLoopTiming.instructionFetchCycles === 518)).toBe(true);
     expect(rows.every((row) => row.encryptLoopTiming.instructionFetchCycles === 328)).toBe(true);
+    expect(rows.every((row) => row.decryptLoopTiming.cycles === 568)).toBe(true);
+    expect(rows.every((row) => row.checksumLoopTiming.cycles === 518)).toBe(true);
+    expect(rows.every((row) => row.encryptLoopTiming.cycles === 568)).toBe(true);
+    expect(rows.every((row) => row.sharedDataBusCycles === 768)).toBe(true);
+    expect(rows.every((row) => row.sharedDataBusPremiumCycles === 480)).toBe(true);
+    expect(rows.every((row) => row.tailCycles === row.checksumTailTiming.cycles + row.fieldTailTiming.cycles)).toBe(true);
+    expect(rows.every((row) => row.composedKnownCycles === row.getSubstructCycles
+      + row.decryptLoopTiming.cycles + row.checksumLoopTiming.cycles
+      + row.encryptLoopTiming.cycles + row.tailCycles)).toBe(true);
     expect(rows.every((row) => row.cycles === null && row.unresolved !== null)).toBe(true);
     expect(rows.every((row) => JSON.stringify(row.boundaries) === JSON.stringify({
       symbolEntryPc: 0x0806_a674,
@@ -645,12 +684,33 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       [43, [0x0806_aa16, "ewram-u16-bitfield", 3]], [44, [0x0806_aa1e, "ewram-u8-bitfield", 3]],
     ]);
     for (const [field, [tailEntryPc, fetchClass, logicalSubstruct]] of expectedTails) {
-      expect(censusFactoryGetBoxMonDataDependency({
+      const row = censusFactoryGetBoxMonDataDependency({
         field,
         personality: 23,
         checksumValid: true,
         isBadEgg: false,
-      })).toMatchObject({ tailEntryPc, fetchClass, logicalSubstruct });
+      });
+      expect(row).toMatchObject({ tailEntryPc, fetchClass, logicalSubstruct });
+      expect(row.fieldTailTiming).toMatchObject({ entryPc: tailEntryPc, commonTailPc: 0x0806_ac8c });
+    }
+
+    const expectedFieldTails = new Map<number, [string, number, number, number, number]>([
+      [11, ["species", 11, 2, 4, 34]],
+      [25, ["experience", 3, 1, 6, 16]],
+      [26, ["ev-byte", 2, 1, 2, 10]], [27, ["ev-byte", 2, 1, 2, 10]],
+      [28, ["ev-byte", 2, 1, 2, 10]], [29, ["ev-byte", 2, 1, 2, 10]],
+      [30, ["ev-byte", 2, 1, 2, 10]], [31, ["ev-byte", 2, 1, 2, 10]],
+      [39, ["iv-bitfield", 4, 1, 2, 14]], [40, ["iv-bitfield", 4, 1, 2, 14]],
+      [41, ["iv-bitfield", 4, 1, 2, 14]], [42, ["iv-bitfield", 4, 1, 6, 18]],
+      [43, ["iv-bitfield", 4, 1, 2, 14]], [44, ["iv-bitfield", 4, 1, 2, 14]],
+    ]);
+    for (const [field, [route, halfwords, refills, busCycles, cycles]] of expectedFieldTails) {
+      expect(censusFactoryGetBoxMonDataDependency({
+        field, personality: 0xffff_ffff, checksumValid: true, isBadEgg: false,
+      }).fieldTailTiming).toMatchObject({
+        route, sequentialThumbHalfwords: halfwords, pipelineRefills: refills,
+        dataAccessCycles: busCycles, cycles, unresolved: null,
+      });
     }
 
     expect(censusFactoryGetBoxMonDataDependency({
@@ -658,11 +718,38 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
     })).toMatchObject({
       checksumRoute: "invalid-marks-bad-egg",
       speciesTailRoute: "bad-egg-species",
+      checksumTailTiming: {
+        route: "invalid-marks-bad-egg", entryPc: 0x0806_a6d0, dispatchPc: 0x0806_a6f2,
+        sequentialThumbHalfwords: 17, pipelineRefills: 0,
+        halfwordReads: 1, byteReads: 2, byteWrites: 2,
+        dataAccessCycles: 10, cycles: 34, unresolved: null,
+      },
+      fieldTailTiming: {
+        route: "bad-egg-species", entryPc: 0x0806_a95e, commonTailPc: 0x0806_ac8c,
+        sequentialThumbHalfwords: 9, pipelineRefills: 1,
+        byteReads: 1, halfwordReads: 0, wordReads: 0,
+        dataAccessCycles: 2, cycles: 24, unresolved: null,
+      },
       cycles: null,
     });
-    expect(censusFactoryGetBoxMonDataDependency({
+    const preexistingBadEgg = censusFactoryGetBoxMonDataDependency({
       field: 11, personality: 0, checksumValid: true, isBadEgg: true,
-    }).speciesTailRoute).toBe("bad-egg-species");
+    });
+    expect(preexistingBadEgg.speciesTailRoute).toBe("bad-egg-species");
+    expect(preexistingBadEgg.checksumTailTiming).toMatchObject({
+      route: "valid", sequentialThumbHalfwords: 6, pipelineRefills: 1,
+      halfwordReads: 1, dataAccessCycles: 2, cycles: 18,
+    });
+    expect(preexistingBadEgg.fieldTailTiming).toMatchObject({
+      route: "bad-egg-species", sequentialThumbHalfwords: 9,
+      pipelineRefills: 1, dataAccessCycles: 2, cycles: 24,
+    });
+    expect(censusFactoryGetBoxMonDataDependency({
+      field: 26, personality: 1, checksumValid: false, isBadEgg: false,
+    })).toMatchObject({
+      checksumTailTiming: { route: "invalid-marks-bad-egg", cycles: 34 },
+      fieldTailTiming: { route: "ev-byte", cycles: 10 },
+    });
     expect(() => censusFactoryGetBoxMonDataDependency({
       field: 24, personality: 0, checksumValid: true, isBadEgg: false,
     })).toThrow("outside the CalculateMonStats/GetLevelFromMonExp encrypted subset");

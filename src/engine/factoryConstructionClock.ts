@@ -476,13 +476,75 @@ export interface FactoryGetSubstructTiming {
 
 export type FactoryEncryptedWordLoopKind = "decrypt" | "encrypt";
 
+export type FactoryEwramAccessKind = "read" | "write";
+export type FactoryEwramAccessWidth = 1 | 2 | 4;
+
+/**
+ * One aligned retail EWRAM data access on the GBA's 16-bit external bus.
+ * Misaligned ARM7TDMI load rotation/alignment behavior is deliberately not
+ * claimed by this slice because none of the pinned BoxPokemon accesses uses it.
+ */
+export interface FactoryEwramAccessTiming {
+  region: "ewram";
+  access: FactoryEwramAccessKind;
+  width: FactoryEwramAccessWidth;
+  address: number;
+  alignment: FactoryEwramAccessWidth;
+  transfers: 1 | 2;
+  busWidth: 2;
+  cycles: 2 | 6;
+  instructionBaselineCycles: 2;
+  busPremiumCycles: 0 | 4;
+  unresolved: null;
+}
+
+export interface FactoryChecksumTailTiming {
+  route: "valid" | "invalid-marks-bad-egg";
+  entryPc: 0x0806_a6d0;
+  dispatchPc: 0x0806_a6f2;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  halfwordReads: 1;
+  byteReads: number;
+  byteWrites: number;
+  dataAccessCycles: number;
+  dataAccessPremiumCycles: number;
+  instructionFetchCycles: number;
+  cycles: number;
+  unresolved: null;
+}
+
+export type FactoryFieldTailRoute =
+  | "species"
+  | "bad-egg-species"
+  | "experience"
+  | "ev-byte"
+  | "iv-bitfield";
+
+export interface FactoryFieldTailTiming {
+  route: FactoryFieldTailRoute;
+  entryPc: number;
+  commonTailPc: 0x0806_ac8c;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  byteReads: number;
+  halfwordReads: number;
+  wordReads: number;
+  dataAccessCycles: number;
+  dataAccessPremiumCycles: number;
+  instructionFetchCycles: number;
+  cycles: number;
+  unresolved: null;
+}
+
 /**
  * Fixed instruction/fetch census for DecryptBoxMon or EncryptBoxMon.
  *
  * The loops are source-general and always execute 12 word iterations.  The
- * instruction stream is exact; the five 32-bit EWRAM accesses per iteration
- * are reported separately because their bus timing is not yet closed by the
- * committed receipts.
+ * instruction stream and five aligned 32-bit EWRAM accesses per iteration are
+ * exact. Data-access totals include each load/store's two-cycle instruction
+ * baseline; `dataAccessPremiumCycles` is the part added to the instruction
+ * subtotal when composing complete component cycles.
  */
 export interface FactoryEncryptedWordLoopTiming {
   kind: FactoryEncryptedWordLoopKind;
@@ -495,14 +557,15 @@ export interface FactoryEncryptedWordLoopTiming {
   sequentialThumbHalfwords: number;
   pipelineRefills: number;
   instructionFetchCycles: number;
-  dataAccessCycles: null;
-  cycles: null;
-  unresolved: string;
+  dataAccessCycles: number;
+  dataAccessPremiumCycles: number;
+  cycles: number;
+  unresolved: null;
 }
 
 /**
  * Fixed instruction/fetch census for the four six-halfword checksum loops.
- * The 24 EWRAM halfword reads are intentionally separate from the ROM
+ * The 24 aligned EWRAM halfword reads are reported separately from ROM
  * instruction accounting; no observed pause or asynchronous service is folded
  * into this component.
  */
@@ -517,9 +580,10 @@ export interface FactoryChecksumLoopTiming {
   sequentialThumbHalfwords: number;
   pipelineRefills: number;
   instructionFetchCycles: number;
-  ewramHalfwordReadCycles: null;
-  cycles: null;
-  unresolved: string;
+  ewramHalfwordReadCycles: number;
+  ewramReadPremiumCycles: number;
+  cycles: number;
+  unresolved: null;
 }
 
 /**
@@ -560,6 +624,18 @@ export interface FactoryGetBoxMonDataDependency {
   sharedInstructionFetchCycles: number;
   /** Shared crypt/checksum fetch work plus the eight complete GetSubstruct calls. */
   composedInstructionFetchCycles: number;
+  /** Complete bus occupancy of the two crypt loops and checksum read loop. */
+  sharedDataBusCycles: number;
+  /** Part of shared bus occupancy not already in the instruction baseline. */
+  sharedDataBusPremiumCycles: number;
+  checksumTailTiming: FactoryChecksumTailTiming;
+  fieldTailTiming: FactoryFieldTailTiming;
+  /** Checksum-route plus selected-field data bus occupancy. */
+  tailDataBusCycles: number;
+  /** Complete checksum-route plus selected-field tail instruction/data time. */
+  tailCycles: number;
+  /** All independently closed nested components; still not an accessor total. */
+  composedKnownCycles: number;
   getSubstructCalls: 8;
   decryptIterations: 12;
   checksumHalfwordReads: 24;
@@ -1513,6 +1589,66 @@ export function reduceFactoryGetSubstructTiming(
 }
 
 /**
+ * Reduce one aligned retail ARM7TDMI EWRAM load/store.
+ *
+ * Pinned `BoxPokemon` storage is naturally word-aligned. On the retail GBA's
+ * 16-bit EWRAM bus, aligned byte/halfword instructions take two master cycles;
+ * an aligned word instruction performs two bus transfers and takes six. The
+ * instruction census already charges two cycles for the load/store itself, so
+ * callers add only `busPremiumCycles` when composing a component total.
+ *
+ * This reducer intentionally rejects rather than invents misaligned semantics.
+ * No receipt-used crypt/checksum/field access is misaligned.
+ */
+export function reduceFactoryEwramAccessTiming(
+  input: Readonly<{
+    access: FactoryEwramAccessKind;
+    width: FactoryEwramAccessWidth;
+    address: number;
+  }>,
+): FactoryEwramAccessTiming {
+  const address = requireU32(input.address, "address");
+  if (input.access !== "read" && input.access !== "write") {
+    throw new Error("access must be read or write");
+  }
+  if (input.width !== 1 && input.width !== 2 && input.width !== 4) {
+    throw new Error("width must be 1, 2, or 4 bytes");
+  }
+  if (address < 0x0200_0000 || address + input.width > 0x0204_0000) {
+    throw new Error("address must be in retail EWRAM");
+  }
+  if (input.width === 2 && (address & 1) !== 0) {
+    throw new Error("misaligned EWRAM halfword behavior is not claimed");
+  }
+  if (input.width === 4 && (address & 3) !== 0) {
+    throw new Error("misaligned EWRAM word behavior is not claimed");
+  }
+  const word = input.width === 4;
+  return Object.freeze({
+    region: "ewram",
+    access: input.access,
+    width: input.width,
+    address,
+    alignment: input.width,
+    transfers: word ? 2 : 1,
+    busWidth: 2,
+    cycles: word ? 6 : 2,
+    instructionBaselineCycles: 2,
+    busPremiumCycles: word ? 4 : 0,
+    unresolved: null,
+  } as const);
+}
+
+function sumFactoryEwramAccesses(
+  accesses: readonly FactoryEwramAccessTiming[],
+): Readonly<{ cycles: number; premiumCycles: number }> {
+  return Object.freeze({
+    cycles: accesses.reduce((total, access) => total + access.cycles, 0),
+    premiumCycles: accesses.reduce((total, access) => total + access.busPremiumCycles, 0),
+  });
+}
+
+/**
  * Reduce the fixed ROM instruction stream of one 12-word crypt loop.
  *
  * Both helpers have 5 prologue halfwords, 12 iterations × 10 halfwords, and
@@ -1528,6 +1664,17 @@ export function reduceFactoryEncryptedWordLoopTiming(
   const returnPc = kind === "decrypt" ? 0x0806_a26e : 0x0806_a24a;
   const sequentialThumbHalfwords = 5 + 12 * 10 + 3;
   const pipelineRefills = 11 + 1;
+  const representativeRead = reduceFactoryEwramAccessTiming({
+    access: "read", width: 4, address: 0x0200_0020,
+  });
+  const representativeWrite = reduceFactoryEwramAccessTiming({
+    access: "write", width: 4, address: 0x0200_0020,
+  });
+  const dataAccessCycles = 36 * representativeRead.cycles + 24 * representativeWrite.cycles;
+  const dataAccessPremiumCycles = 36 * representativeRead.busPremiumCycles
+    + 24 * representativeWrite.busPremiumCycles;
+  const instructionFetchCycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+    + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES;
   return Object.freeze({
     kind,
     entryPc,
@@ -1538,11 +1685,11 @@ export function reduceFactoryEncryptedWordLoopTiming(
     ewramWordWrites: 24,
     sequentialThumbHalfwords,
     pipelineRefills,
-    instructionFetchCycles: sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
-      + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES,
-    dataAccessCycles: null,
-    cycles: null,
-    unresolved: "12×(3 EWRAM word reads + 2 EWRAM word writes) require the unresolved encrypted bus-access model",
+    instructionFetchCycles,
+    dataAccessCycles,
+    dataAccessPremiumCycles,
+    cycles: instructionFetchCycles + dataAccessPremiumCycles,
+    unresolved: null,
   });
 }
 
@@ -1562,6 +1709,13 @@ export function reduceFactoryEncryptBoxMonTiming(): FactoryEncryptedWordLoopTimi
 export function reduceFactoryChecksumLoopTiming(): FactoryChecksumLoopTiming {
   const sequentialThumbHalfwords = 4 * 6 * 8 + 7;
   const pipelineRefills = 4 * 5;
+  const representativeRead = reduceFactoryEwramAccessTiming({
+    access: "read", width: 2, address: 0x0200_0020,
+  });
+  const ewramHalfwordReadCycles = 24 * representativeRead.cycles;
+  const ewramReadPremiumCycles = 24 * representativeRead.busPremiumCycles;
+  const instructionFetchCycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+    + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES;
   return Object.freeze({
     entryPc: 0x0806_8c78,
     firstLoopSetupPc: 0x0806_8cb0,
@@ -1572,16 +1726,117 @@ export function reduceFactoryChecksumLoopTiming(): FactoryChecksumLoopTiming {
     checksumHalfwordReads: 24,
     sequentialThumbHalfwords,
     pipelineRefills,
-    instructionFetchCycles: sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
-      + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES,
-    ewramHalfwordReadCycles: null,
-    cycles: null,
-    unresolved: "24 decrypted EWRAM halfword reads remain outside the source/fetch segment",
+    instructionFetchCycles,
+    ewramHalfwordReadCycles,
+    ewramReadPremiumCycles,
+    cycles: instructionFetchCycles + ewramReadPremiumCycles,
+    unresolved: null,
   });
 }
 
 export function reduceFactoryCalculateBoxMonChecksumTiming(): FactoryChecksumLoopTiming {
   return reduceFactoryChecksumLoopTiming();
+}
+
+function reduceFactoryChecksumTailTiming(checksumValid: boolean): FactoryChecksumTailTiming {
+  const accesses: FactoryEwramAccessTiming[] = [
+    reduceFactoryEwramAccessTiming({ access: "read", width: 2, address: 0x0200_001c }),
+  ];
+  if (!checksumValid) {
+    accesses.push(
+      reduceFactoryEwramAccessTiming({ access: "read", width: 1, address: 0x0200_0013 }),
+      reduceFactoryEwramAccessTiming({ access: "write", width: 1, address: 0x0200_0013 }),
+      // The physical substruct-3 slot varies, but every 12-byte slot's +7 byte
+      // has the same width/alignment/bus class.
+      reduceFactoryEwramAccessTiming({ access: "read", width: 1, address: 0x0200_0027 }),
+      reduceFactoryEwramAccessTiming({ access: "write", width: 1, address: 0x0200_0027 }),
+    );
+  }
+  const route = checksumValid ? "valid" : "invalid-marks-bad-egg";
+  const sequentialThumbHalfwords = checksumValid ? 6 : 17;
+  const pipelineRefills = checksumValid ? 1 : 0;
+  const data = sumFactoryEwramAccesses(accesses);
+  const instructionFetchCycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+    + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES;
+  return Object.freeze({
+    route,
+    entryPc: 0x0806_a6d0,
+    dispatchPc: 0x0806_a6f2,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    halfwordReads: 1,
+    byteReads: checksumValid ? 0 : 2,
+    byteWrites: checksumValid ? 0 : 2,
+    dataAccessCycles: data.cycles,
+    dataAccessPremiumCycles: data.premiumCycles,
+    instructionFetchCycles,
+    cycles: instructionFetchCycles + data.premiumCycles,
+    unresolved: null,
+  });
+}
+
+function reduceFactoryFieldTailTiming(input: Readonly<{
+  field: number;
+  tailEntryPc: number;
+  secureStorageOffset: number;
+  badEggSpecies: boolean;
+}>): FactoryFieldTailTiming {
+  let route: FactoryFieldTailRoute;
+  let sequentialThumbHalfwords: number;
+  let pipelineRefills = 1;
+  const accesses: FactoryEwramAccessTiming[] = [];
+  const read = (width: FactoryEwramAccessWidth, relativeAddress: number): void => {
+    accesses.push(reduceFactoryEwramAccessTiming({
+      access: "read", width, address: 0x0200_0000 + relativeAddress,
+    }));
+  };
+
+  if (input.field === 11) {
+    read(1, 0x13); // BoxPokemon::isBadEgg bit container.
+    if (input.badEggSpecies) {
+      route = "bad-egg-species";
+      sequentialThumbHalfwords = 9;
+    } else {
+      route = "species";
+      sequentialThumbHalfwords = 11;
+      pipelineRefills = 2;
+      read(2, input.secureStorageOffset);
+    }
+  } else if (input.field === 25) {
+    route = "experience";
+    sequentialThumbHalfwords = 3;
+    read(4, input.secureStorageOffset + 4);
+  } else if (input.field >= 26 && input.field <= 31) {
+    route = "ev-byte";
+    sequentialThumbHalfwords = 2;
+    read(1, input.secureStorageOffset + input.field - 26);
+  } else {
+    route = "iv-bitfield";
+    sequentialThumbHalfwords = 4;
+    const ivWidths: readonly FactoryEwramAccessWidth[] = [1, 2, 1, 4, 2, 1];
+    const ivOffsets = [4, 4, 5, 4, 6, 7] as const;
+    const index = input.field - 39;
+    read(ivWidths[index]!, input.secureStorageOffset + ivOffsets[index]!);
+  }
+
+  const data = sumFactoryEwramAccesses(accesses);
+  const instructionFetchCycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+    + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES;
+  return Object.freeze({
+    route,
+    entryPc: input.tailEntryPc,
+    commonTailPc: 0x0806_ac8c,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    byteReads: accesses.filter((access) => access.access === "read" && access.width === 1).length,
+    halfwordReads: accesses.filter((access) => access.access === "read" && access.width === 2).length,
+    wordReads: accesses.filter((access) => access.access === "read" && access.width === 4).length,
+    dataAccessCycles: data.cycles,
+    dataAccessPremiumCycles: data.premiumCycles,
+    instructionFetchCycles,
+    cycles: instructionFetchCycles + data.premiumCycles,
+    unresolved: null,
+  });
 }
 
 /**
@@ -1642,8 +1897,33 @@ export function censusFactoryGetBoxMonDataDependency(
   const personalityModulo24 = selectedSubstructTiming.personalityModulo24;
   const logicalToPhysicalSlots = selectedSubstructTiming.logicalToPhysicalSlots;
   const selectedPhysicalSlot = selectedSubstructTiming.selectedPhysicalSlot;
+  const secureStorageOffset = 0x20 + selectedPhysicalSlot * 12;
   const getSubstructCycles = getSubstructTimings.reduce((total, timing) => total + timing.cycles, 0);
   const sharedInstructionFetchCycles = 328 + 518 + 328;
+  const decryptLoopTiming = reduceFactoryDecryptBoxMonTiming();
+  const checksumLoopTiming = reduceFactoryChecksumLoopTiming();
+  const encryptLoopTiming = reduceFactoryEncryptBoxMonTiming();
+  const checksumTailTiming = reduceFactoryChecksumTailTiming(input.checksumValid);
+  const badEggSpecies = field === 11 && (input.isBadEgg || !input.checksumValid);
+  const fieldTailTiming = reduceFactoryFieldTailTiming({
+    field,
+    tailEntryPc,
+    secureStorageOffset,
+    badEggSpecies,
+  });
+  const sharedDataBusCycles = decryptLoopTiming.dataAccessCycles
+    + checksumLoopTiming.ewramHalfwordReadCycles
+    + encryptLoopTiming.dataAccessCycles;
+  const sharedDataBusPremiumCycles = decryptLoopTiming.dataAccessPremiumCycles
+    + checksumLoopTiming.ewramReadPremiumCycles
+    + encryptLoopTiming.dataAccessPremiumCycles;
+  const tailDataBusCycles = checksumTailTiming.dataAccessCycles + fieldTailTiming.dataAccessCycles;
+  const tailCycles = checksumTailTiming.cycles + fieldTailTiming.cycles;
+  const composedKnownCycles = getSubstructCycles
+    + decryptLoopTiming.cycles
+    + checksumLoopTiming.cycles
+    + encryptLoopTiming.cycles
+    + tailCycles;
   return Object.freeze({
     field,
     personality,
@@ -1653,7 +1933,7 @@ export function censusFactoryGetBoxMonDataDependency(
     logicalToPhysicalSlots,
     getSubstructModuloArmPc: GET_SUBSTRUCT_MODULO_ARM_PCS[personalityModulo24]!,
     selectedPhysicalSlot,
-    secureStorageOffset: 0x20 + selectedPhysicalSlot * 12,
+    secureStorageOffset,
     tailEntryPc,
     fetchClass,
     commonFetchClasses: GET_BOX_COMMON_FETCH_CLASSES,
@@ -1665,18 +1945,25 @@ export function censusFactoryGetBoxMonDataDependency(
     getSubstructTypes: GET_BOX_MON_DATA_GET_SUBSTRUCT_TYPES,
     getSubstructTimings,
     getSubstructCycles,
-    decryptLoopTiming: reduceFactoryDecryptBoxMonTiming(),
-    checksumLoopTiming: reduceFactoryChecksumLoopTiming(),
-    encryptLoopTiming: reduceFactoryEncryptBoxMonTiming(),
+    decryptLoopTiming,
+    checksumLoopTiming,
+    encryptLoopTiming,
     sharedInstructionFetchCycles,
     composedInstructionFetchCycles: sharedInstructionFetchCycles + getSubstructCycles,
+    sharedDataBusCycles,
+    sharedDataBusPremiumCycles,
+    checksumTailTiming,
+    fieldTailTiming,
+    tailDataBusCycles,
+    tailCycles,
+    composedKnownCycles,
     getSubstructCalls: 8,
     decryptIterations: 12,
     checksumHalfwordReads: 24,
     encryptIterations: 12,
     boundaries: GET_BOX_COMMON_BOUNDARIES,
     cycles: null,
-    unresolved: "complete GetBoxMonData2 timing still awaits EWRAM word/halfword access, field-tail, async +18, and VBlank/IRQ costs",
+    unresolved: "complete GetBoxMonData2 timing still awaits outer prologue/setup/dispatch/common-return instruction and memory costs, async +18, and VBlank/IRQ costs",
   });
 }
 
