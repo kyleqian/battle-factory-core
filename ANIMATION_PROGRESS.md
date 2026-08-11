@@ -1,3 +1,11 @@
+# MOVE_STUN_SPORE exact — bilateral 194/194 promotion (2026-08-10 worker)
+
+- **State:** Level-50 coverage advances **163→164/276 exact**, 0 partial, 0 staged, and **113→112 unsupported**. Only `MOVE_STUN_SPORE` moved; `MOVE_SLEEP_POWDER` and `MOVE_POISON_POWDER` remain independent unsupported moves.
+- **Did:** Added the pure source-relative 194-age powder reducer, narrow typed Scene-ON seam, deterministic STUN_SPORE asset extraction, HOPPIP/ONIX production compositor, source audit, legal bilateral three-mon stages, and committed raw-RGB change maps. The source interval is `Move_STUN_SPORE` `0x082c954d..0x082c967b` (`0x12e` bytes); graph is `gStunSporeParticleSpriteTemplate -> AnimMovePowderParticle_Step` with `gPowderParticlesAnimCmds`; lowest Factory Level-50 carrier is Gloom set 167, while dense evidence uses legal Hoppip 187.
+- **Verified:** Player-back frames **380..573** and opponent-front **385..578** pass **194/194** reducer/seam/component, software+hardware OAM/matrix/palette/tag/register/audio, immutable state, raw RGB, change map, and shared production framebuffer twice fresh. Stable receipts: player evidence/raw/map `e1842c7c…` / `0adc53f2…` / `b97cb47f…`; opponent `3b7c9ad5…` / `b7dbe084…` / `e3ebc54f…`.
+- **Next:** Supervisor selects the next independent acceptance unit. Do not promote Sleep Powder or Poison Powder from the shared callback shape.
+- **Notes:** Measured powder callback OAM position is RAM+1 while the current source-age animation cell is displayed; `loadspritegfx` latches at the first window frame. No damage/status outcome, RNG, turn, controller, round/facility state, boundary list, unsupported barrier, canonical recording import, absolute-tick branch, or per-frame framebuffer lookup changed.
+
 # MOVE_THRASH exact — bilateral 103/103 promotion (2026-08-10 worker)
 
 - **State:** Level-50 coverage advances **162→163/276 exact**, 0 partial, 0 staged, and **114→113 unsupported**. Only `MOVE_THRASH` is promoted; `MOVE_DOUBLE_KICK` remains independently unsupported.

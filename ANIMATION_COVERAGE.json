@@ -3641,6 +3641,35 @@
    ]
   },
   {
+   "move": "MOVE_STUN_SPORE",
+   "status": "exact",
+   "covered": [
+    "the source audit bounds Move_STUN_SPORE at 0x082c954d..0x082c967b (0x12e bytes) and pins the two-component graph asset:ANIM_TAG_STUN_SPORE plus visualCommand:create_stun_spore_particle_sprite, with gStunSporeParticleSpriteTemplate -> AnimMovePowderParticle_Step and gPowderParticlesAnimCmds; the lowest Factory Level-50 carrier is FRONTIER_MON_GLOOM_1 set 167 (SPECIES_GLOOM 44), while dense Scene-ON evidence stages the complete legal SPECIES_HOPPIP 187 carrier",
+    "complete legal Level-50 three-mon Scene-ON parties pass the entire pointer-bounded powder body through first inactive cleanup twice fresh in both orientations: player-back HOPPIP -> ONIX frames 380-573 and opponent-front HOPPIP -> ONIX frames 385-578, each 194/194 source/component, typed-seam, software+hardware OAM/matrix, palette/tag/register/audio, immutable-state, raw-RGB, change-map, and production-framebuffer frames",
+    "the pure source-relative reducer ports the 194-age script offsets, loadspritegfx and looped SE_M_POISON_POWDER, all fifteen source-created particle lifecycles, AnimMovePowderParticle_Step fixed-point velocity/sine callback data, animation cells, side-inverted wave sign, first inactive cleanup, and persistent source OAM sort/draw order without damage, status, RNG, turn, controller, round, or facility state",
+    "the narrow Scene-ON seam and compositor reuse deterministic source-extracted STUN_SPORE powder art, HOPPIP/ONIX geometry, field chrome, healthboxes, and text; the measured move-owned latches are loadspritegfx at the first window frame, callback/OAM position at RAM+1 with the current source animation cell, and static battlers before powder in the shared production painter",
+    "the committed receipts pin player evidence/raw-RGB/change-map e1842c7c7dc6ac3f37d0ccb97f53ec272e3f1f946d7bf8b0659520c5afa47e68 / 0adc53f2890301a822c5e7661ec325e851a9a3a3a571be30a805d84751b3e38f / b97cb47f20fe6033dffa130140419b098a2b3dc09f2a9f68327dc4addfba169c and opponent evidence/raw-RGB/change-map 3b7c9ad524337c496e5e2dccc4fc0385a2ad5640e48c4b22bacedef02d503205 / b7dbe0847205266086d5e4ab6da26d50fb77260d92503b2e355c3b5ed5a6ef3b / e3ebc54f51986502fa81fa1ac54c26af7bd739fc7e2fc30b912540b89a685ba6; MOVE_SLEEP_POWDER and MOVE_POISON_POWDER remain independent unsupported acceptance units despite similar callback shapes, and no animation boundary or unsupported barrier widened"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-stun-spore-player-hoppip-opponent-onix.json",
+    "tools/battle-lab/mechanic-stun-spore-opponent-hoppip-player-onix.json",
+    "tools/compare/fixtures/stun-spore-player-hoppip-opponent-onix.json",
+    "tools/compare/fixtures/stun-spore-opponent-hoppip-player-onix.json",
+    "tools/compare/evidence/stun-spore-changemap-player.txt",
+    "tools/compare/evidence/stun-spore-changemap-opponent.txt",
+    "tools/compare/sporeProbe.py",
+    "tools/compare/sporePortable.ts",
+    "tools/compare/stunSporeSourceAudit.ts",
+    "tools/compare/extractStunSporeAssets.ts",
+    "src/animation/assets/stunSpore.json",
+    "src/animation/stunSpore.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/stunSpore.test.ts",
+    "tests/animation/stunSporeEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SUBMISSION",
    "status": "exact",
    "covered": [
