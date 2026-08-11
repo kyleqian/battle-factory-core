@@ -14,5 +14,5 @@
   "rawRgbSha256": "5f2f8646478bc84380c3ea4f3d4e7f60a07d0bef0950cdfd50e1322829a609e7",
   "changeMap": "tools/compare/evidence/metal-sound-changemap-opponent.txt",
   "changeMapSha256": "23f552d7c7740d3add1330d0fc77d99aac5ea4d28ac40949b2c63bd5fa933e54",
-  "expected": {"componentMatches":85,"framebufferMatches":77}
+  "expected": {"componentMatches":85,"framebufferMatches":85}
 }

@@ -61,3 +61,28 @@ export function shakeMon2OffsetAtTick(
   const sequence = shakeMon2Sequence(xOffset, yOffset, numTimes, frameDelay);
   return sequence[tick] ?? { x2: 0, y2: 0 };
 }
+
+/**
+ * Live-battler OAM scanout for the common `AnimTask_ShakeMon2` scheduling
+ * path. The task's initial positive write is consumed by `BuildOamBuffer`
+ * before the source row can observe the task's immediately advanced state;
+ * the framebuffer then consumes that software OAM one display later.
+ * Consequently display `creationAge + 1` shows sequence tick zero and each
+ * later display advances through the same source-derived sequence.
+ */
+export function shakeMon2DisplayedOffsetAtAge(
+  xOffset: number,
+  yOffset: number,
+  numTimes: number,
+  frameDelay: number,
+  displayAge: number,
+  creationAge: number,
+): ShakeMon2Offset {
+  return shakeMon2OffsetAtTick(
+    xOffset,
+    yOffset,
+    numTimes,
+    frameDelay,
+    displayAge - creationAge - 1,
+  );
+}

@@ -129,8 +129,8 @@ if (
   || legalCarriers[1]?.label !== "FRONTIER_MON_MAGNETON_2"
   || JSON.stringify(supersonicComponents?.componentIds.filter((id: string) => expectedComponents.includes(id))) !== JSON.stringify(sharedWithSupersonic)
   || supersonicCoverage?.status !== "exact"
-  || metalCoverage !== undefined
-  || coverage.entries.length !== 170
+  || metalCoverage?.status !== "exact"
+  || coverage.entries.length !== 171
 ) {
   throw new Error("MOVE_METAL_SOUND source/carrier/component/control contract changed");
 }
@@ -144,6 +144,6 @@ console.log(JSON.stringify({
     move: "MOVE_SUPERSONIC",
     status: "exact",
     sharedComponents: sharedWithSupersonic,
-    independence: "Metal Sound remains unsupported; its 32x64 metal-wave/panse/def-partner body is not inherited from Supersonic.",
+    independence: "Metal Sound is independently exact; its 32x64 metal-wave/panse/def-partner body is not inherited from Supersonic.",
   },
 }));

@@ -53,7 +53,7 @@ describe("MOVE_METAL_SOUND bilateral Scene-ON evidence checkpoint", () => {
       schema: "metal-sound-evidence-checkpoint/v1",
       oracleProfile: "battle-scene-on",
       move: "METAL_SOUND",
-      status: "unsupported",
+      status: "exact",
       sourceBounds: {
         start: "0x082d59b7",
         endExclusive: "0x082d5a07",
@@ -97,10 +97,13 @@ describe("MOVE_METAL_SOUND bilateral Scene-ON evidence checkpoint", () => {
       expect(entry.latchChecks).toMatchObject({
         plainWaveOam: "RAM+1 visible motion",
         freshAffineMatrix: expect.stringContaining("reducer age-1"),
-        shakeMon2: expect.stringContaining("eight displayed"),
+        shakeMon2: expect.stringContaining("positive creation write"),
         palettes: expect.stringContaining("RAM+1"),
       });
     }
+    expect(receipt.evidenceScope.productionFramebuffer).toContain("86/86");
+    expect(receipt.evidenceScope.productionFramebuffer).toContain("85/85");
+    expect(receipt.promotion.status).toBe("exact");
   });
 
   it("keeps the bilateral exact Supersonic control receipts", () => {

@@ -54,12 +54,20 @@ interface ProbeFrame {
     readonly matrix: readonly number[];
   }[];
   readonly battlers: {
-    readonly player: { readonly x2: number; readonly y2: number };
-    readonly opponent: { readonly x2: number; readonly y2: number };
+    readonly player: {
+      readonly x2: number;
+      readonly y2: number;
+      readonly attr: readonly number[];
+    };
+    readonly opponent: {
+      readonly x2: number;
+      readonly y2: number;
+      readonly attr: readonly number[];
+    };
   };
   readonly tasks?: readonly unknown[];
   readonly softwareOam?: readonly unknown[];
-  readonly hardwareOam?: readonly unknown[];
+  readonly hardwareOam?: readonly string[];
   readonly softwareMatrices?: readonly unknown[];
   readonly hardwareMatrices?: readonly unknown[];
   readonly fadedPalette?: readonly unknown[];
@@ -104,6 +112,24 @@ const stage = createSceneOnMovePresentation({
 });
 const waveKey = (wave: { readonly x: number; readonly y: number; readonly xScale: number; readonly yScale: number }): string =>
   [wave.x, wave.y, wave.xScale, wave.yScale].join(":");
+const oamWord = (raw: string, word: number): number => {
+  const offset = word * 4;
+  return Number.parseInt(raw.slice(offset + 2, offset + 4) + raw.slice(offset, offset + 2), 16);
+};
+const hardwareBattlerOffset = (
+  frame: ProbeFrame,
+  battler: ProbeFrame["battlers"]["player"],
+  corner: Readonly<{ x: number; y: number }>,
+): Readonly<{ x2: number; y2: number }> => {
+  const matches = frame.hardwareOam?.filter((raw) => oamWord(raw, 2) === battler.attr[2]);
+  if (matches?.length !== 1) {
+    throw new Error(`expected one hardware battler OAM row, got ${matches?.length ?? 0}`);
+  }
+  return {
+    x2: (oamWord(matches[0]!, 1) & 0x1ff) - corner.x,
+    y2: (oamWord(matches[0]!, 0) & 0xff) - corner.y,
+  };
+};
 let componentMatches = 0;
 let framebufferMatches = 0;
 let seamMatches = 0;
@@ -131,15 +157,23 @@ for (let frame = start; frame <= end; frame += 1) {
     xScale: wave.xScale, yScale: wave.yScale,
   }));
   const actualAttacker = oracle.battlers[attackerKey];
+  const displayedAttacker = hardwareBattlerOffset(
+    oracle,
+    actualAttacker,
+    fixture.attacker.geometry.spriteCorner,
+  );
   const componentsMatch =
     JSON.stringify(actualWaves.map(waveKey).sort()) === JSON.stringify(predictedWaves.map(waveKey).sort())
     && view.attackerOffset.x2 === actualAttacker.x2
-    && view.attackerOffset.y2 === actualAttacker.y2;
+    && view.attackerOffset.y2 === actualAttacker.y2
+    && view.displayedAttackerOffset.x2 === displayedAttacker.x2
+    && view.displayedAttackerOffset.y2 === displayedAttacker.y2;
   if (componentsMatch) componentMatches += 1;
   else if (failures.length < 8) failures.push(
     `component frame ${frame}: predicted=${JSON.stringify(predictedWaves.map(waveKey).sort())}`
     + ` actual=${JSON.stringify(actualWaves.map(waveKey).sort())}`
-    + ` shake=${view.attackerOffset.x2},${view.attackerOffset.y2}/${actualAttacker.x2},${actualAttacker.y2}`,
+    + ` shake=${view.attackerOffset.x2},${view.attackerOffset.y2}/${actualAttacker.x2},${actualAttacker.y2}`
+    + ` displayed=${view.displayedAttackerOffset.x2},${view.displayedAttackerOffset.y2}/${displayedAttacker.x2},${displayedAttacker.y2}`,
   );
 
   const engine: EngineState = {

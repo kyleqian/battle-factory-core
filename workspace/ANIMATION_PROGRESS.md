@@ -1,3 +1,11 @@
+# MOVE_METAL_SOUND exact — corrected ARON live-OAM latch closed (2026-08-11 worker)
+
+- **State:** Coverage advances **170→171/276 Level-50 exact**, 0 partial, 0 staged, and **106→105 unsupported**. `MOVE_METAL_SOUND` alone moves; no boundary or unsupported-branch pin changes.
+- **Did:** Derived the unresolved live-attacker display from the source scheduler and move-owned software/hardware OAM: the positive `ShakeMon2(2,0,8,1)` creation write reaches display at creation+1, then the sequence body follows RAM+2. The compositor now also respects the hardware OAM painter split (player-back ARON ahead of waves, opponent-front behind), with the rule carried through the narrow typed seam and pure Tier-1 pins.
+- **Verified:** Twice fresh, player **291..376** passes **86/86 source/component/seam + framebuffer** and opponent **291..375** passes **85/85 + 85/85** with unchanged probe/raw/map digests (`7d3fd802…` / `509317b4…` / `6db141ff…`; `9cd4b2b1…` / `5f2f8646…` / `23f552d7…`). Supersonic remains **51/51 component + framebuffer twice fresh in both orientations**. Animation boundary/audit/coverage, typecheck, full suite, build, and diff check are green.
+- **Next:** Supervisor selects the next independent acceptance unit; do not infer this live-OAM schedule without move-owned evidence.
+- **Notes:** For the main program: Metal Sound changes presentation only; damage, RNG, turn/controller/facility state, shared boundary, and unsupported barriers are unchanged. No per-frame table, absolute tick, recording/hash lookup, or coordinate/RGB fit was introduced.
+
 # MOVE_METAL_SOUND corrected-ARON checkpoint — eight bilateral latch frames remain (2026-08-11 worker)
 
 - **State:** Coverage remains **170/276 Level-50 exact**, 0 partial, 0 staged, and 106 unsupported; `MOVE_METAL_SOUND` is not promoted.

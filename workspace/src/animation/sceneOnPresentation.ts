@@ -2934,6 +2934,7 @@ export interface SceneOnMetalSoundView {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly attackerOffset: Readonly<{ x2: number; y2: number }>;
+  readonly displayedAttackerOffset: Readonly<{ x2: number; y2: number }>;
   readonly targetMonbg: boolean;
   readonly shakeTaskActive: boolean;
   readonly waves: readonly MetalSoundWaveSprite[];
