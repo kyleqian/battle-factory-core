@@ -127,6 +127,12 @@ CALCULATE_MON_STATS_EVIDENCE = (
 EWRAM_ACCESS_EVIDENCE = (
     os.environ.get("FACTORY_EWRAM_ACCESS_EVIDENCE") == "1"
 )
+# Bounded Timer 0 cadence receipt.  This decorates the already selected source
+# boundaries only; it does not walk every retired instruction and it retains
+# no absolute queue pointer or fixture-specific timing key.
+TIMER0_CADENCE_EVIDENCE = (
+    os.environ.get("FACTORY_TIMER0_CADENCE_EVIDENCE") == "1"
+)
 # Separate scalar/source-relative packet for the recurring +18-cycle residual
 # audit.  This decorates already-selected source boundaries only; it does not
 # retain a trainer/set/mon identity or turn the observation into a timing key.
@@ -843,6 +849,8 @@ def cycle_snapshot(oracle: EmeraldOracle, frame: int, pc: int, kind: str, **fiel
         "pc": f"0x{pc:08x}",
         **fields,
     }
+    if TIMER0_CADENCE_EVIDENCE:
+        snapshot["timer0"] = snapshot_timer0_cadence(oracle, global_cycles, cpu_cycles, master_cycles)
     if RESIDUAL_18_EVIDENCE:
         snapshot["executionState"] = snapshot_residual_execution_state(oracle)
     return snapshot
@@ -906,6 +914,16 @@ def snapshot_residual_execution_state(oracle: EmeraldOracle) -> dict[str, Any]:
 
 TIMING_QUEUE_EVENT_LIMIT = 32
 TIMING_QUEUE_NAME_LIMIT = 64
+
+TIMER0_CNT_L_ADDR = 0x04000100
+TIMER0_CNT_H_ADDR = 0x04000102
+TIMER0_EVENT_NAME = "GBA Timer 0"
+
+
+def signed_timing_delta(when: int, master_cycles: int) -> int:
+    """Return an mTiming absolute due time relative to global+CPU cycles."""
+    delta = (int(when) - (master_cycles & 0xFFFFFFFF)) & 0xFFFFFFFF
+    return delta - 0x1_0000_0000 if delta & 0x8000_0000 else delta
 
 
 def classifier_return_class(entry_pc: int, stop_pc: int) -> str:
@@ -1051,6 +1069,34 @@ def snapshot_timing_queue(timing) -> list[dict[str, Any]]:
     if evt != MGBA_FFI.NULL:
         events.append({"name": "<truncated>", "when": None, "priority": None})
     return events
+
+
+def snapshot_timer0_cadence(
+    oracle: EmeraldOracle, global_cycles: int, cpu_cycles: int, master_cycles: int,
+) -> dict[str, Any]:
+    """Capture source registers and only Timer 0's relative queue position."""
+    timer_event = next(
+        (event for event in snapshot_timing_queue(oracle.core._native.timing)
+         if event["name"] == TIMER0_EVENT_NAME),
+        None,
+    )
+    event: dict[str, Any] | None = None
+    if timer_event is not None and timer_event["when"] is not None:
+        when_delta = signed_timing_delta(timer_event["when"], master_cycles)
+        event = {
+            "name": TIMER0_EVENT_NAME,
+            "priority": timer_event["priority"],
+            "whenDelta": when_delta,
+            "due": when_delta <= 0,
+        }
+    return {
+        "tm0cntL": read_u16(oracle, TIMER0_CNT_L_ADDR),
+        "tm0cntH": read_u16(oracle, TIMER0_CNT_H_ADDR),
+        "globalCycles": global_cycles,
+        "cpuCycles": cpu_cycles,
+        "masterCycles": master_cycles,
+        "event": event,
+    }
 
 
 def observe_residual_instruction_trace(
@@ -2635,6 +2681,63 @@ def compact_ewram_access_receipt(result: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+TIMER0_SOURCE_BOUNDARY_KINDS = {
+    "source-function-entry",
+    "construction-entry",
+    "personality-attempt-check",
+    "personality-random",
+    "create-mon-entry",
+    "create-mon-return",
+    "calculate-mon-stats-entry",
+    "calculate-mon-stats-return",
+    "factory-post-mon-end",
+    "construction-return",
+    "source-function-return",
+}
+
+
+def compact_timer0_cadence_receipt(result: dict[str, Any]) -> dict[str, Any]:
+    """Keep Timer 0 registers and relative due phase at source boundaries."""
+    events = result.get("cycleEvidence", {}).get("events", [])
+    boundaries: list[dict[str, Any]] = []
+    for event in events:
+        if event["kind"] not in TIMER0_SOURCE_BOUNDARY_KINDS:
+            continue
+        timer0 = event.get("timer0")
+        if timer0 is None:
+            raise RuntimeError(f"{result['case']}: missing Timer 0 snapshot at {event['kind']}")
+        boundaries.append({
+            "kind": event["kind"],
+            "pc": event["pc"],
+            "monIndex": event.get("monIndex"),
+            "attempt": event.get("attempt"),
+            "half": event.get("half"),
+            "globalCycles": event["globalCycles"],
+            "cpuCycles": event["cpuCycles"],
+            "masterCycles": event["masterCycles"],
+            "tm0cntL": timer0["tm0cntL"],
+            "tm0cntH": timer0["tm0cntH"],
+            "event": timer0["event"],
+        })
+    if not boundaries:
+        raise RuntimeError(f"{result['case']}: Timer 0 receipt captured no source boundaries")
+    first = next(
+        (row for row in boundaries if row["kind"] == "source-function-entry"),
+        boundaries[0],
+    )
+    first_event = first["event"]
+    return {
+        "schema": "factory-construction-timer0-cadence/v1",
+        "case": result["case"],
+        "oracleProfile": result["oracleProfile"],
+        "sourceFunction": result["sourceFunction"],
+        "frameCycles": result["cycleEvidence"]["frameCycles"],
+        "constructionClockEntryPhase": first["masterCycles"] % result["cycleEvidence"]["frameCycles"],
+        "firstDueRelativeMasterCycles": None if first_event is None else first_event["whenDelta"],
+        "boundaries": boundaries,
+    }
+
+
 def main() -> None:
     if OUTPUT.exists():
         raise SystemExit(f"refusing existing output path: {OUTPUT}")
@@ -2660,13 +2763,19 @@ def main() -> None:
         raise SystemExit(
             "FACTORY_RESIDUAL_18_CLASSIFIER_EVIDENCE=1 requires cycle and CalculateMonStats evidence"
         )
+    if TIMER0_CADENCE_EVIDENCE and not CYCLE_EVIDENCE:
+        raise SystemExit(
+            "FACTORY_TIMER0_CADENCE_EVIDENCE=1 requires FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1"
+        )
     if CASE == "anchor":
         result = run_anchor()
     elif CASE == "liliana":
         result = run_liliana()
     else:
         result = run_factory_varied()
-    if RESIDUAL_18_CLASSIFIER_EVIDENCE:
+    if TIMER0_CADENCE_EVIDENCE:
+        result = compact_timer0_cadence_receipt(result)
+    elif RESIDUAL_18_CLASSIFIER_EVIDENCE:
         result = compact_residual_classifier_receipt(result)
     elif RESIDUAL_18_INSTRUCTION_EVIDENCE:
         result = compact_residual_instruction_receipt(result)
@@ -2682,33 +2791,30 @@ def main() -> None:
         result = compact_vblank_workload_receipt(result)
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps(result, indent=2) + "\n")
-    print(
-        (
-            f"wrote {OUTPUT}: {result['case']} "
-            f"{len(result['members'])} members + "
+    if TIMER0_CADENCE_EVIDENCE:
+        message = f"wrote {OUTPUT}: {result['case']} {len(result['boundaries'])} Timer 0 boundaries"
+    elif RESIDUAL_18_CLASSIFIER_EVIDENCE:
+        message = (
+            f"wrote {OUTPUT}: {result['case']} {len(result['members'])} members + "
             f"{len(result['cleanControls'])} clean controls"
-            if RESIDUAL_18_CLASSIFIER_EVIDENCE
-            else f"wrote {OUTPUT}: {result['case']} "
-            f"{len(result['traces'])} instruction-level residual traces"
-            if RESIDUAL_18_INSTRUCTION_EVIDENCE
-            else f"wrote {OUTPUT}: {result['case']} "
-            f"{len(result['sourceBoundaries'])} residual-audit source boundaries"
-            if RESIDUAL_18_EVIDENCE
-            else f"wrote {OUTPUT}: {result['case']} "
-            f"{len(result['rows'])} compact EWRAM boundaries"
-            if EWRAM_ACCESS_EVIDENCE
-            else f"wrote {OUTPUT}: {result['case']} "
-            f"{len(result['directCalls'])} direct CalculateMonStats calls"
-            if CALCULATE_MON_STATS_EVIDENCE
-            else f"wrote {OUTPUT}: {result['case']} "
-            f"{len(result['interrupts'])} VBlank workload observations"
-            if VBLANK_WORKLOAD_EVIDENCE
-            else f"wrote {OUTPUT}: {result['case']} "
+        )
+    elif RESIDUAL_18_INSTRUCTION_EVIDENCE:
+        message = f"wrote {OUTPUT}: {result['case']} {len(result['traces'])} instruction-level residual traces"
+    elif RESIDUAL_18_EVIDENCE:
+        message = f"wrote {OUTPUT}: {result['case']} {len(result['sourceBoundaries'])} residual-audit source boundaries"
+    elif EWRAM_ACCESS_EVIDENCE:
+        message = f"wrote {OUTPUT}: {result['case']} {len(result['rows'])} compact EWRAM boundaries"
+    elif CALCULATE_MON_STATS_EVIDENCE:
+        message = f"wrote {OUTPUT}: {result['case']} {len(result['directCalls'])} direct CalculateMonStats calls"
+    elif VBLANK_WORKLOAD_EVIDENCE:
+        message = f"wrote {OUTPUT}: {result['case']} {len(result['interrupts'])} VBlank workload observations"
+    else:
+        message = (
+            f"wrote {OUTPUT}: {result['case']} "
             f"{result['totals']['construction']} construction + "
             f"{result['totals']['ambient']} ambient draws"
-        ),
-        flush=True,
-    )
+        )
+    print(message, flush=True)
 
 
 if __name__ == "__main__":
