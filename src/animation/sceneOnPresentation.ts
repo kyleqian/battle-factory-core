@@ -598,6 +598,11 @@ import {
   type DoubleSlapState,
 } from "./doubleSlap.ts";
 import {
+  cometPunchAtAge,
+  type CometPunchMoveTurn,
+  type CometPunchState,
+} from "./cometPunch.ts";
+import {
   crabHammerAtAge,
   type CrabHammerState,
 } from "./crabHammer.ts";
@@ -2518,6 +2523,15 @@ export interface SceneOnDoubleSlapConfig {
   readonly moveTurn: DoubleSlapMoveTurn;
 }
 
+/** The real multi-hit controller supplies moveTurn; this seam only selects its visual branch. */
+export interface SceneOnCometPunchConfig {
+  readonly move: "COMET_PUNCH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly moveTurn: CometPunchMoveTurn;
+}
+
 /** Typed staging seam only; a later draw case supplies the live target idle x2. */
 export interface SceneOnCrabHammerConfig {
   readonly move: "CRABHAMMER";
@@ -2736,6 +2750,7 @@ export type SceneOnMoveConfig =
   | SceneOnDoubleKickConfig
   | SceneOnTripleKickConfig
   | SceneOnDoubleSlapConfig
+  | SceneOnCometPunchConfig
   | SceneOnCrabHammerConfig
   | SceneOnDoubleEdgeConfig
   | SceneOnToxicConfig
@@ -3447,6 +3462,12 @@ export interface SceneOnDoubleSlapView extends DoubleSlapState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnCometPunchView extends CometPunchState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnCrabHammerView extends CrabHammerState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -4118,6 +4139,7 @@ export function createSceneOnMovePresentation<
   | SceneOnDoubleKickConfig
   | SceneOnTripleKickConfig
   | SceneOnDoubleSlapConfig
+  | SceneOnCometPunchConfig
   | SceneOnCrabHammerConfig
   | SceneOnDoubleEdgeConfig
   | SceneOnWrapConfig,
@@ -6981,6 +7003,23 @@ export function sceneOnDoubleSlapView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...doubleSlapAtAge(state.age, state.config.moveTurn, {
+      attackerSide: state.config.attacker.geometry.side,
+      targetCenter: state.config.target.geometry.animationCenter,
+    }),
+  };
+}
+
+export function sceneOnCometPunchView(
+  state: SceneOnMovePresentationState,
+): SceneOnCometPunchView {
+  if (state.config.move !== "COMET_PUNCH") {
+    throw new Error(`expected COMET_PUNCH presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...cometPunchAtAge(state.age, state.config.moveTurn, {
       attackerSide: state.config.attacker.geometry.side,
       targetCenter: state.config.target.geometry.animationCenter,
     }),

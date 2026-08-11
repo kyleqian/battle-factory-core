@@ -1016,6 +1016,7 @@ import {
   sceneOnDoubleKickView,
   sceneOnTripleKickView,
   sceneOnDoubleSlapView,
+  sceneOnCometPunchView,
   sceneOnThrashView,
   sceneOnThrashDisplayedTargetOffset,
   sceneOnCrabHammerView,
@@ -1466,6 +1467,7 @@ const aipomFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFr
 const crawdauntFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CRAWDAUNT!;
 const hitmontopFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HITMONTOP!;
 const poliwhirlFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).POLIWHIRL!;
+const ledianFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LEDIAN!;
 const swabluFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SWABLU!;
 const ponytaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PONYTA!;
 const ledybaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LEDYBA!;
@@ -2664,6 +2666,7 @@ const poliwrathBackSprite = battleBackSpritesAsset.POLIWRATH;
 const lickitungBackSprite = battleBackSpritesAsset.LICKITUNG;
 const hitmontopBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HITMONTOP!;
 const poliwhirlBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).POLIWHIRL!;
+const ledianBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LEDIAN!;
 const swabluBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SWABLU!;
 const ponytaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PONYTA!;
 const ledybaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LEDYBA!;
@@ -39525,6 +39528,112 @@ export function renderSceneOnMovePresentation(
       "COUNTER!",
       99,
     );
+    return;
+  }
+
+  if (state.config.move === "COMET_PUNCH") {
+    const view = sceneOnCometPunchView(state);
+    const displayed = sceneOnCometPunchView({ ...state, age: state.age - 1 });
+    const playerToOpponent = view.attacker.species === "LEDIAN"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "LEDIAN"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged COMET_PUNCH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const ledian = playerToOpponent ? ledianBackSprite : ledianFrontSprite;
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // Comet Punch's own complete bilateral maps pin the ordinary fist and
+    // ShakeMon at RAM+1. The freshly allocated affine hitsplat's matrix is
+    // verified separately by the portable before it is painted here. Later
+    // controller-owned hits begin after the prior ShakeMon zero overwrite.
+    const targetX2 = state.age - 1 < 10
+      ? (view.moveTurn === 0 ? targetIdle.x2 : 0)
+      : displayed.targetX2;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const effectBackdrop = fb.slice();
+    drawSpriteSheet(
+      fb,
+      ledian.tileset,
+      ledian.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.hitsplat) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        effectBackdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        displayed.hitsplat.x,
+        displayed.hitsplat.y,
+        displayed.hitsplat.matrix,
+        0,
+        0,
+        displayed.hitsplat.matrix,
+        12,
+        8,
+        false,
+      );
+    }
+    if (displayed.fist) {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimHandsAndFeet.tileset, displayed.fist.animation * 4, 4),
+        battleAnimHandsAndFeet.palette,
+        displayed.fist.x - 16,
+        displayed.fist.y - 16,
+      );
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "LEDIAN",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LEDIAN" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    if (view.moveTurn === 0) {
+      drawMessageTextLines(
+        fb,
+        playerToOpponent ? "LEDIAN used" : "Foe LEDIAN used",
+        "COMET PUNCH!",
+        99,
+      );
+    }
     return;
   }
 
